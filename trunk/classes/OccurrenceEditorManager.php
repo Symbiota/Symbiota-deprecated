@@ -17,6 +17,7 @@ class OccurrenceEditorManager {
 	private $crowdSourceMode = 0;
 	private $exsiccatiMode = 0;
 	private $symbUid;
+	protected $errorStr = '';
 
 
 	public function __construct(){
@@ -1471,6 +1472,11 @@ class OccurrenceEditorManager {
 		return $isEditor;
 	}
 
+	//Setters and getters
+	public function getErrorStr(){
+		return $this->errorStr;	
+	}
+	
 	//Misc functions
 	private function encodeStrTargeted($inStr,$inCharset,$outCharset){
 		if($inCharset == $outCharset) return $inStr;

@@ -13,6 +13,7 @@ class TPEditorManager {
  	protected $submittedTid;
  	protected $submittedSciName;
 	protected $taxonCon;
+	protected $errorStr = '';
 	
  	public function __construct(){
  		$this->taxonCon = MySQLiConnectionFactory::getCon("write");
@@ -265,6 +266,11 @@ class TPEditorManager {
  		return $this->language = $this->taxonCon->real_escape_string($lang);
  	}
  	
+ 	public function getErrorStr(){
+ 		return $this->errorStr;
+ 	}
+ 	
+ 	//Misc functions
  	protected function cleanInArray($arr){
  		$newArray = Array();
  		foreach($arr as $key => $value){

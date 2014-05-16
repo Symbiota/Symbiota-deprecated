@@ -1,5 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once("ImageShared.php");
 
 class ImageDetailManager {
 	
@@ -187,58 +188,16 @@ class ImageDetailManager {
 	}
 
 	public function deleteImage($imgIdDel, $removeImg){
-		$status = '';
-		$imageRootPath = $GLOBALS["imageRootPath"];
-		if(substr($imageRootPath,-1) != "/") $imageRootPath .= "/";
-		$imageRootUrl = $GLOBALS["imageRootUrl"];
-		if(substr($imageRootUrl,-1) != "/") $imageRootUrl .= "/";
-		
-		$imgUrl = ""; $imgThumbnailUrl = ""; $imgOriginalUrl = ""; $tid = 0;
-		$sqlQuery = "SELECT ti.url, ti.thumbnailurl, ti.originalurl, ti.tid FROM images ti WHERE (ti.imgid = ".$imgIdDel.')';
-		$result = $this->conn->Query($sqlQuery);
-		if($row = $result->fetch_object()){
-			$imgUrl = $row->url;
-			$imgThumbnailUrl = $row->thumbnailurl;
-			$imgOriginalUrl = $row->originalurl;
-			$tid = $row->tid;
+		$retStr = '';
+		$imgManager = new ImageShared();
+		if($imgManager->deleteImage($imgIdDel, $removeImg)){
+			$retStr = $imgManager->getTid();
 		}
-		$result->close();
-				
-		$sql = "DELETE FROM images WHERE (imgid = ".$imgIdDel.')';
-		//echo $sql;
-		if($this->conn->query($sql)){
-			if($removeImg){
-				//Remove images only if there are no other references to the image
-				$sql = "SELECT imgid FROM images WHERE (url = '".$imgUrl."')";
-				$rs = $this->conn->query($sql);
-				if(!$rs->num_rows){
-					//Delete image from server
-					$imgDelPath = str_replace($imageRootUrl,$imageRootPath,$imgUrl);
-					if(file_exists($imgDelPath)){
-						if(!unlink($imgDelPath)){
-							$status = 'ERROR: Deleted records from database successfully but FAILED to delete image from server. The Image will have to be deleted manually. ';
-							$status .= '<br/>PATH: '.$imgDelPath;
-							$status .= '<br/>Return to <a href="../taxa/admin/tpeditor.php?tid='.$tid.'&tabindex=1">Taxon Editor</a>';
-						}
-					}
-					$imgTnDelPath = str_replace($imageRootUrl,$imageRootPath,$imgThumbnailUrl);
-					if(file_exists($imgTnDelPath)){
-						unlink($imgTnDelPath);
-					}
-					$imgOriginalDelPath = str_replace($imageRootUrl,$imageRootPath,$imgOriginalUrl);
-					if(file_exists($imgOriginalDelPath)){
-						unlink($imgOriginalDelPath);
-					}
-				}
-			}
+		$errArr = $imgManager->getErrArr();
+		if($errArr){
+			$retStr .= 'ERROR: ('.implode('; ',$errArr).')';
 		}
-		else{
-			$status = 'ERROR: Unable to delete image record: '.$this->conn->error;
-			//echo 'SQL: '.$sql;
-		}
-		if(!$status) $status = $tid;
-		
-		return $status;
+		return $retStr;
 	}
 
 	public function parentImageEmpty($url,$tid){

@@ -4,8 +4,17 @@ class ImageShared{
 	private $conn;
 	private $sourceGdImg;
 
-	private $imageRootPath = "";
-	private $imageRootUrl = "";
+	private $imageRootPath = '';
+	private $imageRootUrl = '';
+	
+	private $sourcePath = '';
+	private $targetPath = '';
+	private $urlBase = '';
+	private $imgName = '';
+	private $imgExt = '';
+	
+	private $sourceWidth = 0;
+	private $sourceHeight = 0;
 
 	private $tnPixWidth = 200;
 	private $webPixWidth = 1600;
@@ -13,6 +22,25 @@ class ImageShared{
 	private $webFileSizeLimit = 300000;
 	private $jpgCompression= 80;
 
+	private $mapLargeImg = true;
+	
+	//Image metadata
+	private $caption;
+	private $photographer;
+	private $photographerUid;
+	private $sourceUrl;
+	private $copyright;
+	private $owner;
+	private $locality;
+	private $occid;
+	private $tid;
+	private $notes;
+	private $sortSeq;
+	
+	private $activeImgId = 0;
+	
+    private $errArr = array();
+	
     // No implementation in Symbiota
     public $documentGuid;  // Guid for transfer document containing image record.
     public $documentDate;  // Creation date for transfer document containing image record.       
@@ -41,24 +69,92 @@ class ImageShared{
 		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
 		if(!($this->conn === null)) $this->conn->close();
  	}
+ 	
+ 	public function reset(){
+ 		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
+ 		$this->sourceGdImg = null;
+ 	}
 
-	public function loadImage($subPath = ''){
-		$imgPath = '';
-		//filepath is given if linking to an external image (no download)
-		if(array_key_exists("filepath",$_REQUEST)) $imgPath = $_REQUEST["filepath"];
-		if(!$imgPath){
-			//Image is to be downloaded
-			$userFile = basename($_FILES['userfile']['name']);
-			$fileName = $this->getFileName($userFile);
-			$downloadPath = $this->getDownloadPath($fileName,$subPath); 
-			if(move_uploaded_file($_FILES['userfile']['tmp_name'], $downloadPath)){
-				$imgPath = $downloadPath;
+	public function uploadImage(){
+		if($this->targetPath){
+			if(file_exists($this->targetPath)){
+				$imgFile = basename($_FILES['imgfile']['name']);
+				$fileName = $this->cleanFileName($imgFile,$this->targetPath);
+				if(move_uploaded_file($_FILES['imgfile']['tmp_name'], $this->targetPath.$fileName.$this->imgExt)){
+					$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
+					$this->imgName = $fileName;
+					return true;
+				}
+				else{
+					$this->errArr[] = 'ERROR: unable to move image to target ('.$this->targetPath.$fileName.$this->imgExt.')';
+				}
+			}
+			else{
+				$this->errArr[] = 'ERROR: Target path does not exist in uploadImage method ('.$this->targetPath.')';
+				//trigger_error('Path does not exist in uploadImage method',E_USER_ERROR);
 			}
 		}
-		return $imgPath;
+		else{
+			$this->errArr[] = 'ERROR: Path NULL in uploadImage method';
+			//trigger_error('Path NULL in uploadImage method',E_USER_ERROR);
+		}
+		return false;
 	}
 
-	private function getFileName($fName){
+	public function copyImageFromUrl($sourceUri){
+		//Returns full path
+		if(!$sourceUri){
+			$this->errArr[] = 'ERROR: Image source uri NULL in copyImageFromUrl method';
+			//trigger_error('Image source uri NULL in copyImageFromUrl method',E_USER_ERROR);
+			return false;
+		}
+		if(!$this->urlExists($sourceUri)){
+			$this->errArr[] = 'ERROR: Image source file ('.$sourceUri.') does not exist in copyImageFromUrl method';
+			//trigger_error('Image source file ('.$sourceUri.') does not exist in copyImageFromUrl method',E_USER_ERROR);
+			return false;
+		}
+		if(!$this->targetPath){
+			$this->errArr[] = 'ERROR: Image target url NULL in copyImageFromUrl method';
+			//trigger_error('Image target url NULL in copyImageFromUrl method',E_USER_ERROR);
+			return false;
+		}
+		if(!file_exists($this->targetPath)){
+			$this->errArr[] = 'ERROR: Image target file ('.$this->targetPath.') does not exist in copyImageFromUrl method';
+			//trigger_error('Image target file ('.$this->targetPath.') does not exist in copyImageFromUrl method',E_USER_ERROR);
+			return false;
+		}
+		//Clean and copy file
+		$fileName = $this->cleanFileName($sourceUri);
+		if(copy($sourceUri, $this->targetPath.$fileName.$this->imgExt)){
+			$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
+			$this->imgName = $fileName;
+			return true;
+		}
+		$this->errArr[] = 'ERROR: Unable to copy image to target ('.$this->targetPath.$fileName.$this->imgExt.')';
+		return false;
+	}
+
+	public function parseUrl($url){
+		if($GLOBALS['imageDomain'] && substr($url,0,1) == '/'){
+			$url = $GLOBALS['imageDomain'].$url;
+    	}
+		$this->sourcePath = $url;
+    	$this->imgName = $this->cleanFileName($url);
+	}
+
+	public function cleanFileName($fName){
+		if(strtolower(substr($fName,0,7)) == 'http://' || strtolower(substr($fName,0,8)) == 'https://'){
+			//Image is URL that will be imported
+			if($pos = strrpos($fName,'/')){
+				$fName = substr($fName,$pos+1);
+			}
+		}
+		//Parse extension
+		if($p = strrpos($fName,".")){
+			$this->imgExt = substr($fName,$p);
+			$fName = substr($fName,0,$p);
+		}
+
 		$fName = str_replace(" ","_",$fName);
 		$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
 		$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
@@ -68,134 +164,379 @@ class ImageShared{
 		$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
 		$fName = preg_replace("/[^a-zA-Z0-9\-_\.]/", "", $fName);
 		if(strlen($fName) > 30) {
-			$fName = substr($fName,0,25).substr($fName,strrpos($fName,"."));
+			$fName = substr($fName,0,30);
 		}
- 		return $fName;
+		
+		/*
+		if($targetPath){
+			//Check and see if file already exists, if so, rename filename until it has a unique name
+			$tempFileName = $fName;
+			$cnt = 0;
+			while(file_exists($targetPath.$tempFileName.$ext)){
+				$tempFileName = $fName.'_'.$cnt;
+				$cnt++;
+			}
+			if($cnt) $fName = $tempFileName;
+		}
+		*/
+		$fName .= '_'.time();
+		//Returns file name without extension
+		return $fName;
  	}
  	
-	private function getDownloadPath($fileName,$subPath){
+	public function setTargetPath($subPath = ''){
 		$path = $this->imageRootPath;
-		if(!$path) trigger_error('Path empty in getDownloadPath method',E_USER_ERROR);
-		if($subPath) $path .= $subPath."/";
- 		if(!file_exists($path)){
- 			if(mkdir($path, 0775)){
- 				trigger_error('Unable to create directory: '.$path,E_USER_ERROR);
- 			}
- 		}
- 		//Check and see if file already exists, if so, rename filename until it has a unique name
- 		$tempFileName = $fileName;
- 		$cnt = 0;
- 		while(file_exists($path.$tempFileName)){
- 			$tempFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fileName);
- 			$cnt++;
- 		}
- 		$fileName = str_ireplace(".jpg","_temp.jpg",$tempFileName);
- 		return $path.$fileName;
- 	}
-
-	public function uploadImage($imgPath,$tid=0){
-		global $paramsArr;
-
-		if(!$imgPath) trigger_error('Image path null in uploadImage method',E_USER_ERROR);
-		
-		if(strpos($imgPath,$this->imageRootPath) === 0){
-			//Image to be uploaded to local server
-			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
+		$url = $this->imageRootUrl;
+		if(!$path){
+			$this->errArr[] = 'Path empty in setTargetPath method';
+			trigger_error('Path empty in setTargetPath method',E_USER_ERROR);
+			return false;
+		}
+		//if(!$url){
+			//$this->errArr[] = 'URL empty in setTargetPath method';
+			//trigger_error('URL empty in setTargetPath method',E_USER_ERROR);
+			//return false;
+		//}
+		if($subPath){
+			if(substr($subPath,-1) != "/") $subPath .= "/";  
 		}
 		else{
-			//Image exists on remote server (e.g. url passed to ) 
-			$imgUrl = $imgPath;
+			$subPath = 'misc/';
+		}
+		$subPath .= date('Ym').'/';
+		$path .= $subPath;
+		$url .= $subPath;
+		if(!file_exists($path)){
+			if(!mkdir( $path, 0, true )){
+				$this->errArr[] = 'Unable to create directory: '.$path;
+				//trigger_error('Unable to create directory: '.$path,E_USER_ERROR);
+				return false;
+			}
+		}
+		$this->targetPath = $path;
+		$this->urlBase = $url;
+		return true;
+	}
+	
+	public function processImage($tid=0){
+		global $paramsArr;
+
+		if(!$this->imgName){
+			$this->errArr[] = 'Image file name null in processImage fucntion';
+			//trigger_error('Image file name null in processImage function',E_USER_ERROR);
+			return false;
+		}
+		$imgPath = $this->targetPath.$this->imgName.$this->imgExt;
+
+		//Create thumbnail
+		$imgTnUrl = '';
+		if($this->createNewImage('_tn',$this->tnPixWidth,70)){
+			$imgTnUrl = $this->imgName.'_tn.jpg';
 		}
 
-		$imgTnUrl = $this->createImageThumbnail($imgUrl);
+		//Get image dimensions
+		list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+		//Get image file size
+		$fileSize = 0;
+		if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://') { 
+			$x = array_change_key_case(get_headers($this->sourcePath, 1),CASE_LOWER); 
+			if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) { 
+				$fileSize = $x['content-length'][1]; 
+			}
+ 			else { 
+ 				$fileSize = $x['content-length']; 
+ 			}
+		} 
+		else { 
+			$fileSize = @filesize($this->sourcePath);
+		}
 
-		$imgWebUrl = $imgUrl;
+		//Create large image
 		$imgLgUrl = "";
-		if(strpos($imgUrl,"http://") === false || strpos($imgUrl,$this->imageRootUrl) !== false){
-			//Is an imported image, thus resize and place
-			list($width, $height) = getimagesize($imgPath?$imgPath:$imgUrl);
-			$fileSize = filesize($imgPath?$imgPath:$imgUrl);
-			//Create large image
-			$createlargeimg = (array_key_exists('createlargeimg',$_REQUEST)&&$_REQUEST['createlargeimg']==1?true:false);
-			if($createlargeimg && ($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit)){
-				$lgWebUrlTemp = str_ireplace("_temp.jpg","_lg.jpg",$imgPath); 
-				if($width < ($this->lgPixWidth*1.2)){
-					if(copy($imgPath,$lgWebUrlTemp)){
-						$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
-					}
+		if($this->mapLargeImg){
+			if($this->sourceWidth > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
+				//Source image is wide enough can serve as large image, or it's too large to serve as basic web image
+				if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://') {
+					$imgLgUrl = $this->sourcePath;
 				}
 				else{
-					if($this->createNewImage($imgPath,$lgWebUrlTemp,$this->lgPixWidth)){
-						$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
+					if($this->sourceWidth < ($this->lgPixWidth*1.2)){
+						//Image width is small enough to serve as large image 
+						if(copy($this->sourcePath,$this->targetPath.$this->imgName.'_lg'.$this->imgExt)){
+							$imgLgUrl = $this->imgName.'_lg'.$this->imgExt;
+						}
+					}
+					else{
+						if($this->createNewImage('_lg',$this->lgPixWidth)){
+							$imgLgUrl = $this->imgName.'_lg.jpg';
+						}
 					}
 				}
 			}
+		}
 
-			//Create web url
-			$imgTargetPath = str_ireplace("_temp.jpg",".jpg",$imgPath);
-			if($width < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
-				rename($imgPath,$imgTargetPath);
+		//Create web url
+		$imgWebUrl = '';
+		if($this->sourceWidth < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
+			//Image width and file size is small enough to serve as web image
+			if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
+				if(copy($this->sourcePath, $this->targetPath.$this->imgName.$this->imgExt)){
+					$imgWebUrl = $this->imgName.$this->imgExt;
+				}
 			}
 			else{
-				$newWidth = ($width<($this->webPixWidth*1.2)?$width:$this->webPixWidth);
-				$this->createNewImage($imgPath,$imgTargetPath,$newWidth);
+				$imgWebUrl = $this->imgName.$this->imgExt;
 			}
-			$imgWebUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$imgTargetPath);
-			if(file_exists($imgPath)) unlink($imgPath);
 		}
-		$status = '';
+		else{
+			//Image width or file size is too large
+			$newWidth = ($this->sourceWidth<($this->webPixWidth*1.2)?$this->sourceWidth:$this->webPixWidth);
+			$this->createNewImage('',$newWidth);
+			$imgWebUrl = $this->imgName.'.jpg';
+		}
+
+		$status = true;
 		if($imgWebUrl){
 			$status = $this->databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid);
 		}
 		return $status;
 	}
-	
-	public function databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid){
-		global $paramsArr;
-		if($imgWebUrl){
-			$caption = $this->cleanInStr($_REQUEST["caption"]);
-			$photographer = (array_key_exists("photographer",$_REQUEST)?$this->cleanInStr($_REQUEST["photographer"]):"");
-			$photographerUid = $_REQUEST["photographeruid"];
-			$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
-			$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
-			$owner = $this->cleanInStr($_REQUEST["owner"]);
-			$locality = (array_key_exists("locality",$_REQUEST)?$this->cleanInStr($_REQUEST["locality"]):"");
-			$occId = $_REQUEST["occid"];
-			$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanInStr($_REQUEST["notes"]):"");
-			$sortSequence = $_REQUEST["sortsequence"];
-	
-			//If central images are on remote server and new ones stored locally, then we need to use full domain
-		    //e.g. this portal is sister portal to central portal
-	    	if($GLOBALS['imageDomain']){
-	    		if(substr($imgWebUrl,0,1) == '/'){
-		    		$imgWebUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgWebUrl;
-	    		}
-	    		if($imgTnUrl && substr($imgTnUrl,0,1) == '/'){
-		    		$imgTnUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgTnUrl;
-	    		}
-	    		if($imgLgUrl && substr($imgLgUrl,0,1) == '/'){
-		    		$imgLgUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgLgUrl;
-	    		}
-	    	}
-	    	//Load record
-			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
-				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence) '.
-				'VALUES ('.($tid?$tid:'NULL').',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
-				($photographer?'"'.$this->cleanInStr($photographer).'"':'NULL').','.
-				($photographerUid?$photographerUid:'NULL').',"'.
-				$this->cleanInStr($caption).'","'.$this->cleanInStr($owner).'","'.
-				$sourceUrl.'","'.$this->cleanInStr($copyRight).'","'.
-				$this->cleanInStr($locality).'",'.
-				($occId?$occId:'NULL').',"'.$this->cleanInStr($notes).'","'.
-				$paramsArr['un'].'",'.($sortSequence?$this->cleanInStr($sortSequence):'50').')';
-			//echo $sql;
-			$status = "";
-			if(!$this->conn->query($sql)){
-				$status = "loadImageData: ".$this->conn->error."<br/>SQL: ".$sql;
+
+	public function createNewImage($subExt, $targetWidth, $qualityRating = 0){
+		global $useImageMagick;
+		$status = false;
+		if($this->sourcePath && $this->urlExists($this->sourcePath)){
+			if(!$qualityRating) $qualityRating = $this->jpgCompression;
+			
+	        if($useImageMagick) {
+				// Use ImageMagick to resize images 
+				$status = $this->createNewImageImagick($subExt,$targetWidth,$qualityRating);
+			} 
+			elseif(extension_loaded('gd') && function_exists('gd_info')) {
+				// GD is installed and working 
+				$status = $this->createNewImageGD($subExt,$targetWidth,$qualityRating);
+			}
+			else{
+				// Neither ImageMagick nor GD are installed 
+				$this->errArr[] = 'ERROR: No appropriate image handler for image conversions';
 			}
 		}
 		return $status;
-	} 
+	}
+	
+	private function createNewImageImagick($subExt,$newWidth,$qualityRating = 0){
+		$targetPath = $this->targetPath.$this->imgName.$subExt.$this->imgExt;
+		$ct;
+		if($newWidth < 300){
+			$ct = system('convert '.$this->sourcePath.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
+		}
+		else{
+			$ct = system('convert '.$this->sourcePath.' -resize '.$newWidth.'x'.($newWidth*1.5).($qualityRating?' -quality '.$qualityRating:'').' '.$targetPath, $retval);
+		}
+		if(file_exists($targetPath)){
+			return true;
+		}
+		return false;
+	}
+
+	private function createNewImageGD($subExt, $newWidth, $qualityRating = 0){
+		$status = false;
+		ini_set('memory_limit','512M');
+
+		if(!$this->sourceWidth || !$this->sourceHeight){
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+		}
+		$newHeight = round($this->sourceHeight*($newWidth/$this->sourceWidth));
+		//if($newHeight > $newWidth*1.2){
+			//$newHeight = $newWidth;
+			//$newWidth = round($this->sourceWidth*($newWidth/$this->sourceHeight));
+		//}
+
+		if(!$this->sourceGdImg){
+			if($this->imgExt == '.gif'){
+		   		$this->sourceGdImg = imagecreatefromgif($this->sourcePath);
+			}
+			elseif($this->imgExt == '.png'){
+		   		$this->sourceGdImg = imagecreatefrompng($this->sourcePath);
+			}
+			else{
+				//JPG assumed
+		   		$this->sourceGdImg = imagecreatefromjpeg($this->sourcePath);
+			}
+		}
+		
+		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+		imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$this->sourceWidth,$this->sourceHeight);
+
+		//Irrelavent of import image, output JPG 
+		$targetPath = $this->targetPath.$this->imgName.$subExt.'.jpg';
+		if($qualityRating){
+			$status = imagejpeg($tmpImg, $targetPath, $qualityRating);
+		}
+		else{
+			$status = imagejpeg($tmpImg, $targetPath);
+		}
+			
+		if(!$status){
+			$this->errArr[] = 'ERROR: failed to create images in target path ('.$targetPath.')';
+		}
+
+		imagedestroy($tmpImg);
+		return $status;
+	}
+	
+	public function databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid){
+		global $paramsArr;
+		$status = true;
+		if($imgWebUrl){
+			$urlBase = $this->getUrlBase();
+			if(strtolower(substr($imgWebUrl,0,7)) != 'http://' && strtolower(substr($imgWebUrl,0,8)) != 'https://'){ 
+				$imgWebUrl = $urlBase.$imgWebUrl;
+			}
+			if($imgTnUrl && strtolower(substr($imgTnUrl,0,7)) != 'http://' && strtolower(substr($imgTnUrl,0,8)) != 'https://'){
+				$imgTnUrl = $urlBase.$imgTnUrl;
+			}
+			if($imgLgUrl && strtolower(substr($imgLgUrl,0,7)) != 'http://' && strtolower(substr($imgLgUrl,0,8)) != 'https://'){
+				$imgLgUrl = $urlBase.$imgLgUrl;
+			}
+			
+			//If is an occurrence image, get tid from occurrence  
+			if(!$tid && $this->occid){
+				$sql1 = 'SELECT tidinterpreted FROM omoccurrences WHERE tidinterpreted IS NOT NULL AND occid = '.$this->occid;
+				$rs1 = $this->conn->query($sql1);
+				if($r1 = $rs1->fetch_object()){
+					$tid = $r1->tidinterpreted;
+				}
+				$rs1->free();
+			}
+			
+			//Load record
+			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
+				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence) '.
+				'VALUES ('.($tid?$tid:'NULL').',"'.$imgWebUrl.'",'.
+				($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
+				($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
+				($this->photographer?'"'.$this->photographer.'"':'NULL').','.
+				($this->photographerUid?$this->photographerUid:'NULL').','.
+				($this->caption?'"'.$this->caption.'"':'NULL').','.
+				($this->owner?'"'.$this->owner.'"':'NULL').','.
+				($this->sourceUrl?'"'.$this->sourceUrl.'"':'NULL').','.
+				($this->copyright?'"'.$this->copyright.'"':'NULL').','.
+				($this->locality?'"'.$this->locality.'"':'NULL').','.
+				($this->occid?$this->occid:'NULL').','.
+				($this->notes?'"'.$this->notes.'"':'NULL').',"'.
+				$this->cleanInStr($paramsArr['un']).'",'.
+				($this->sortSeq?$this->sortSeq:'50').')';
+			//echo $sql; exit;
+			if($this->conn->query($sql)){
+				//Create and insert Symbiota GUID for image(UUID)
+				$guid = UuidFactory::getUuidV4();
+				$this->activeImgId = $this->conn->insert_id;
+				if(!$this->conn->query('INSERT INTO guidimages(guid,imgid) VALUES("'.$guid.'",'.$this->activeImgId.')')) {
+					$this->errArr[] = ' (Warning: Symbiota GUID mapping failed)';
+				}
+			}
+			else{
+				$this->errArr[] = 'ERROR loading data: '.$this->conn->error;
+				$status = false;
+			}
+		}
+		return $status;
+	}
+	
+	public function deleteImage($imgIdDel, $removeImg){
+		$imgUrl = ""; $imgThumbnailUrl = ""; $imgOriginalUrl = ""; $occid = 0;
+		$sqlQuery = "SELECT * FROM images WHERE (imgid = ".$imgIdDel.')';
+		$rs = $this->conn->query($sqlQuery);
+		if($r = $rs->fetch_object()){
+			$imgUrl = $r->url;
+			$imgThumbnailUrl = $r->thumbnailurl;
+			$imgOriginalUrl = $r->originalurl;
+			$this->tid = $r->tid;
+			$occid = $r->occid;
+			//Archive image 
+			$imgArr = array();
+			$imgObj = '';
+			foreach($r as $k => $v){
+				if($v) $imgArr[$k] = $v;
+				$imgObj .= '"'.$k.'":"'.$this->cleanInStr($v).'",';
+			}
+			$imgObj = json_encode($imgArr);
+			$sqlArchive = 'UPDATE guidimages '.
+			"SET archivestatus = 1, archiveobj = '{".trim($imgObj,',')."}' ".
+			'WHERE (imgid = '.$imgIdDel.')';
+			$this->conn->query($sqlArchive);
+		}
+		$rs->close();
+
+		if($occid){
+			//Remove any OCR text blocks linked to the image
+			$this->conn->query('DELETE FROM specprocessorrawlabels WHERE (imgid = '.$imgIdDel.')');
+		}
+		//Remove image tags
+		$this->conn->query('DELETE FROM imagetag WHERE (imgid = '.$imgIdDel.')');
+				
+		$sql = "DELETE FROM images WHERE (imgid = ".$imgIdDel.')';
+		//echo $sql;
+		if($this->conn->query($sql)){
+			if($removeImg){
+				//Search url with and without local domain name  
+				$imgUrl2 = '';
+				$domain = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
+				$domain .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
+				if(stripos($imgUrl,$domain) === 0){
+					$imgUrl2 = $imgUrl;
+					$imgUrl = substr($imgUrl,strlen($domain));
+				}
+				elseif(stripos($imgUrl,$this->imageRootUrl) === 0){
+					$imgUrl2 = $domain.$imgUrl;
+				}
+				
+				//Remove images only if there are no other references to the image
+				$sql = 'SELECT imgid FROM images WHERE (url = "'.$imgUrl.'") ';
+				if($imgUrl2) $sql .= 'OR (url = "'.$imgUrl2.'")';
+				$rs = $this->conn->query($sql);
+				if($rs->num_rows){
+					$this->errArr[] = 'WARNING: Deleted records from database successfully but FAILED to delete image from server because it is being referenced by another record.';
+				}
+				else{
+					//Delete image from server
+					$imgDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
+					if(!unlink($imgDelPath)){
+						$this->errArr[] = 'WARNING: Deleted records from database successfully but FAILED to delete image from server (path: '.$imgDelPath.')';
+						//$status .= '<br/>Return to <a href="../taxa/admin/tpeditor.php?tid='.$tid.'&tabindex=1">Taxon Editor</a>';
+					}
+					
+					//Delete thumbnail image
+					if($imgThumbnailUrl){
+						if(stripos($imgThumbnailUrl,$domain) === 0){
+							$imgThumbnailUrl = substr($imgThumbnailUrl,strlen($domain));
+						}				
+						$imgTnDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgThumbnailUrl);
+						if(file_exists($imgTnDelPath)) unlink($imgTnDelPath);
+					}
+					
+					//Delete large version of image
+					if($imgOriginalUrl){
+						if(stripos($imgOriginalUrl,$domain) === 0){
+							$imgOriginalUrl = substr($imgOriginalUrl,strlen($domain));
+						}				
+						$imgOriginalDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgOriginalUrl);
+						if(file_exists($imgOriginalDelPath)) unlink($imgOriginalDelPath);
+					}
+				}
+			}
+		}
+		else{
+			$this->errArr[] = 'ERROR: Unable to delete image record: '.$this->conn->error;
+			return false;
+			//echo 'SQL: '.$sql;
+		}
+		return true;
+	}
 
     /**
      * Insert a record into the image table.
@@ -212,14 +553,18 @@ class ImageShared{
 		    //If central images are on remote server and new ones stored locally, then we need to use full domain
 		    //e.g. this portal is sister portal to central portal
 	    	if($GLOBALS['imageDomain']){
+				$urlPrefix = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				$urlPrefix .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 	    		if(substr($imgWebUrl,0,1) == '/'){
-		    		$imgWebUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgWebUrl;
+		    		$imgWebUrl = $urlPrefix.$imgWebUrl;
 	    		}
 	    		if(substr($imgTnUrl,0,1) == '/'){
-		    		$imgTnUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgTnUrl;
+		    		$imgTnUrl = $urlPrefix.$imgTnUrl;
 	    		}
 	    		if(substr($imgLgUrl,0,1) == '/'){
-		    		$imgLgUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgLgUrl;
+		    		$imgLgUrl = $urlPrefix.$imgLgUrl;
 	    		}
 	    	}
         	$statement->bind_param("issssisssssississ",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy);
@@ -231,11 +576,10 @@ class ImageShared{
            }
            $statement->close();
         } else {
-            $this->error = mysqli_error($this->conn);
+            $status = mysqli_error($this->conn);
             // Likely case for error conditions if schema changes affect field names
             // or if updates to field list produce incorrect sql.
-            $status = $this->error;
-            echo $status;
+            $this->errArr[] = $status;
         }
 		if($status!=""){
 			$status = "loadImageData: $status<br/>SQL: ".$sql;
@@ -258,14 +602,18 @@ class ImageShared{
 		    //If central images are on remote server and new ones stored locally, then we need to use full domain
 		    //e.g. this portal is sister portal to central portal
         	if($GLOBALS['imageDomain']){
-	    		if(substr($imgWebUrl,0,1) == '/'){
-		    		$imgWebUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgWebUrl;
+				$urlPrefix = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				$urlPrefix .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+        		if(substr($imgWebUrl,0,1) == '/'){
+		    		$imgWebUrl = $urlPrefix.$imgWebUrl;
 	    		}
 	    		if(substr($imgTnUrl,0,1) == '/'){
-		    		$imgTnUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgTnUrl;
+		    		$imgTnUrl = $urlPrefix.$imgTnUrl;
 	    		}
 	    		if(substr($imgLgUrl,0,1) == '/'){
-		    		$imgLgUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgLgUrl;
+		    		$imgLgUrl = $urlPrefix.$imgLgUrl;
 	    		}
 	    	}
         	
@@ -278,11 +626,10 @@ class ImageShared{
            }
            $statement->close();
         } else {
-            $this->error = mysqli_error($this->conn);
+            $status = mysqli_error($this->conn);
             // Likely case for error conditions if schema changes affect field names
             // or if updates to field list produce incorrect sql.
-            $status = $this->error;
-            echo $status;
+            $this->errArr[] = $status;
         }
         if($status!=""){
             $status = "loadImageData: $status<br/>SQL: ".$sql;
@@ -311,125 +658,52 @@ class ImageShared{
         }
         return $result;
     }
-
-	public function createImageThumbnail($imgUrl){
-		$newThumbnailUrl = "";
-		if($imgUrl){
-			$imgPath = "";
-			$newFullPath = "";
-			if(strpos($imgUrl,"http://") === 0 && strpos($imgUrl,$this->imageRootUrl) === false){
-				//External image being mapped to portal, 
-				$imgPath = $imgUrl;
-				//Set path fragment
-				$pathFrag = 'thumbnails/';
-				if(!is_dir($this->imageRootPath.$pathFrag)){
-					if(!mkdir($this->imageRootPath.$pathFrag, 0775)) return false;
-				}
-				$ydStr = date('Ym').'/';
-				if(!file_exists($this->imageRootPath.$pathFrag.$ydStr)){
-		 			mkdir($this->imageRootPath.$pathFrag.$ydStr, 0775);
-		 		}
-				if(file_exists($this->imageRootPath.$pathFrag.$ydStr)) $pathFrag .= $ydStr;
-		 		//Get file name and set full path
-				$fileName = str_ireplace(".jpg","_tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
-				$newFullPath = $this->imageRootPath.$pathFrag.$fileName;
-				//While file already exists of that name, change name
-				$cnt = 1;
-				$fileNameBase = str_ireplace("_tn.jpg","",$fileName);
-				while(file_exists($newFullPath)){
-					$fileName = $fileNameBase."_tn".$cnt.".jpg";
-					$newFullPath = $this->imageRootPath.$pathFrag.$fileName;
-					$cnt++; 
-				}
-				$newThumbnailUrl = $this->imageRootUrl.$pathFrag.$fileName;
-			}
-			elseif(strpos($imgUrl,$this->imageRootUrl) === 0){
-				//Is internally stored image
-				$imgPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
-				$newThumbnailUrl = str_ireplace("_temp.jpg","_tn.jpg",$imgUrl);
-				$newFullPath = str_replace($this->imageRootUrl,$this->imageRootPath,$newThumbnailUrl);
-			}
-			if(!$newThumbnailUrl) return false;
-			if(!$this->createNewImage($imgPath,$newFullPath,$this->tnPixWidth,70)){
-				return false;
-			}
-		}
-		return $newThumbnailUrl;
-	}
-
-	public function createNewImage($sourcePath, $targetPath, $targetWidth, $qualityRating = 0){
-		global $useImageMagick;
-		$status = false;
-		
-		if(!$qualityRating) $qualityRating = $this->jpgCompression;
-		
-		list($sourceWidth, $sourceHeight) = getimagesize($sourcePath);
-        $newWidth = $targetWidth;
-        $newHeight = round($sourceHeight*($targetWidth/$sourceWidth));
-        if($newHeight > $targetWidth*1.2){
-        	$newHeight = $targetWidth;
-        	$newWidth = round($sourceWidth*($targetWidth/$sourceHeight));
-        }
-		
-        if($useImageMagick) {
-			// Use ImageMagick to resize images 
-			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$qualityRating);
-		} 
-		elseif(extension_loaded('gd') && function_exists('gd_info')) {
-			// GD is installed and working 
-			$status = $this->createNewImageGD($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$qualityRating);
-		}
-		else{
-			// Neither ImageMagick nor GD are installed 
-			$this->errArr[] = 'No appropriate image handler for image conversions';
-		}
-		return $status;
-	}
 	
-	private function createNewImageImagick($sourceImg,$targetPath,$newWidth,$qualityRating = 0){
-		$status = false;
-		$ct;
-		if($newWidth < 300){
-			$ct = system('convert '.$sourceImg.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
-		}
-		else{
-			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($qualityRating?' -quality '.$qualityRating:'').' '.$targetPath, $retval);
-		}
-		if(file_exists($targetPath)){
-			$status = true;
-		}
+    public function insertImageTags($reqArr){
+    	$status = true;
+    	if($this->activeImgId){
+			// Find any tags providing classification of the image and insert them
+			$kArr = $this->getImageTagValues();
+			foreach($kArr as $key => $description) { 
+				if(array_key_exists("ch_$key",$reqArr)) {
+					$sql = "INSERT INTO imagetag (imgid,keyvalue) VALUES (?,?) ";
+					$stmt = $this->conn->stmt_init();
+					$stmt->prepare($sql);
+					if($stmt){ 
+						$stmt->bind_param('is',$this->activeImgId,$key);
+						if(!$stmt->execute()){ 
+							$status = false;
+							$this->errArr[] = " (Warning: Failed to add image tag [$key] for $this->activeImgId.  " . $stmt->error;
+						} 
+						$stmt->close();
+					}
+				} 
+			}
+    	}
 		return $status;
 	}
-
-	private function createNewImageGD($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight, $qualityRating = 0){
-		$status = false;
-		
-	   	if(!$this->sourceGdImg){
-	   		$this->sourceGdImg = imagecreatefromjpeg($sourcePath);
-	   	}
-		
-		ini_set('memory_limit','512M');
-		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
-		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
-		imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
-
-		if($qualityRating){
-			$status = imagejpeg($tmpImg, $targetPath, $qualityRating);
-		}
-		else{
-			$status = imagejpeg($tmpImg, $targetPath);
-		}
-		
-		if(!$status){
-			if($this->logErrFH) fwrite($this->logErrFH, "\tError: Unable to resize and write file: ".$targetPath."\n");
-			echo "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetPath</li>\n";
-		}
-		
-		imagedestroy($tmpImg);
-		return $status;
-	}
-	
-	//Getter and setter
+    
+	private function getImageTagValues($lang='en') { 
+       $returnArr = Array();
+       switch ($lang) { 
+          case 'en':
+          default: 
+           $sql = "select tagkey, description_en from imagetagkey order by sortorder";
+       } 
+       $stmt = $this->conn->stmt_init();
+       $stmt->prepare($sql);
+       if ($stmt) { 
+          $stmt->bind_result($key,$desc);
+          $stmt->execute();
+          while ($stmt->fetch()) { 
+             $returnArr[$key]=$desc;
+          } 
+          $stmt->close(); 
+       }
+       return $returnArr;
+    } 
+    
+    //Getter and setter
 	public function getImageRootPath(){
 		return $this->imageRootPath;
 	}
@@ -437,22 +711,108 @@ class ImageShared{
 	public function getImageRootUrl(){
 		return $this->imageRootUrl;
 	}
+	
+	public function getSourcePath(){
+		return $this->sourcePath;
+	}
 
-	//Misc functions
-	private function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
+	public function getUrlBase(){
+		$urlBase = $this->urlBase;
+		//If central images are on remote server and new ones stored locally, then we need to use full domain
+	    //e.g. this portal is sister portal to central portal
+	 	if($GLOBALS['imageDomain']){
+			$urlPrefix = "http://";
+			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+			$urlPrefix .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+			$urlBase = $urlPrefix.$urlBase;
+    	}
+		return $urlBase;
+	}
+
+	public function getImgName(){
+		return $this->imgName;
 	}
 	
+	public function getTnPixWidth(){
+		return $this->tnPixWidth;
+	}
+	
+	public function getWebPixWidth(){
+		return $this->webPixWidth;
+	}
+	
+	public function getLgPixWidth(){
+		return $this->lgPixWidth;
+	}
+	
+	public function getWebFileSizeLimit(){
+		return $this->webFileSizeLimit;
+	}
+	
+	public function setMapLargeImg($t){
+		$this->mapLargeImg = $t;
+	}
+	
+	public function setCaption($v){
+		$this->caption = $this->cleanInStr($v);
+	}
+
+	public function setPhotographer($v){
+		$this->photographer = $this->cleanInStr($v);
+	}
+
+	public function setPhotographerUid($v){
+		if(is_numeric($v)){
+			$this->photographerUid = $v;
+		}
+	}
+
+	public function setSourceUrl($v){
+		$this->sourceUrl = $this->cleanInStr($v);
+	}
+
+	public function setCopyright($v){
+		$this->copyright = $this->cleanInStr($v);
+	}
+
+	public function setOwner($v){
+		$this->owner = $this->cleanInStr($v);
+	}
+	
+	public function setLocality($v){
+		$this->locality = $this->cleanInStr($v);
+	}
+	
+	public function setOccid($v){
+		if(is_numeric($v)){
+			$this->occid = $v;
+		}
+	}
+	
+	public function getTid(){
+		return $this->tid;
+	}
+	
+	public function setNotes($v){
+		$this->notes = $this->cleanInStr($v);
+	}
+	
+	public function setSortSeq($v){
+		if(is_numeric($v)){
+			$this->sortSeq = $v;
+		}
+	}
+	
+	public function getErrArr(){
+		return $this->errArr;
+	}
+	
+	//Misc functions
 	private function urlExists($url) {
 		$exists = false;
-		if(!strstr($url, "http://")){
-	        $url = "http://".$url;
-	    }
 	    if(file_exists($url)){
-			$exists = true;
+			return true;
 	    }
 
 	    if(!$exists){
@@ -472,9 +832,16 @@ class ImageShared{
 	     
 		//One more  check
 	    if(!$exists){
-	    	$exists = (@fopen($url,"r")==true);
+	    	$exists = (@fclose(@fopen($url,"r")));
 	    }
 	    return $exists;
 	}	
+
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
 }
 ?>

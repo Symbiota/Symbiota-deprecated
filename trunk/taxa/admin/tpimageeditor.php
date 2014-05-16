@@ -118,14 +118,14 @@ if($tid){
 									Select an image file located on your computer that you want to upload:
 								</div>
 						    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-								<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
+								<input type='hidden' name='MAX_FILE_SIZE' value='3000000' />
 								<div>
-									<input name='userfile' type='file' size='70'/>
+									<input name='imgfile' type='file' size='70'/>
 								</div>
 								<div style="margin-left:10px;">
-									<input type="checkbox" name="createlargeimg" value="1" /> Create a large version of image, when applicable
+									<input type="checkbox" name="createlargeimg" value="1" /> Keep a large version of image, when applicable
 								</div>
-								<div style="margin-left:10px;">Note: upload image size can not be greater than 1MB</div>
+								<div style="margin-left:10px;">Note: upload image size can not be greater than 2MB</div>
 								<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
 									Link to External Image
 								</div>
@@ -137,6 +137,9 @@ if($tid){
 								<div>
 									<b>URL:</b> 
 									<input type='text' name='filepath' size='70'/>
+								</div>
+								<div style="margin-left:10px;">
+									<input type="checkbox" name="importurl" value="1" /> Import image to local server
 								</div>
 								<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
 									Upload Local Image

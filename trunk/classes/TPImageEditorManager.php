@@ -95,10 +95,49 @@ class TPImageEditorManager extends TPEditorManager{
 		return $status;
 	}
 	
-	public function loadImageData(){
+	public function loadImage($postArr){
+		$status = true;
 		$imgManager = new ImageShared();
-		$imgPath = $imgManager->loadImage($this->family);
-		$imgManager->uploadImage($imgPath,$this->tid);
+		
+		$imgPath = $postArr["filepath"];
+
+		$imgManager->setCaption($postArr['caption']);
+		$imgManager->setPhotographer($postArr['photographer']);
+		$imgManager->setPhotographerUid($postArr['photographeruid']);
+		$imgManager->setSourceUrl($postArr['sourceurl']);
+		$imgManager->setCopyright($postArr['copyright']);
+		$imgManager->setOwner($postArr['owner']);
+		$imgManager->setLocality($postArr['locality']);
+		$imgManager->setOccid($postArr['occid']);
+		$imgManager->setNotes($postArr['notes']);
+		$imgManager->setSortSeq($postArr['sortsequence']);
+
+		$imgManager->setTargetPath($this->family);
+		if($imgPath){
+			$imgManager->setMapLargeImg(true);
+			$importUrl = (array_key_exists('importurl',$postArr) && $postArr['importurl']==1?true:false);
+			if($importUrl){
+				$imgManager->copyImageFromUrl($imgPath);
+			}
+			else{
+				$imgManager->parseUrl($imgPath);
+			}
+		}
+		else{
+			if(array_key_exists('createlargeimg',$postArr) && $postArr['createlargeimg']==1){
+				$imgManager->setMapLargeImg(true);
+			}
+			else{
+				$imgManager->setMapLargeImg(false);
+			}
+			if(!$imgManager->uploadImage()){
+				echo implode('; ',$imgManager->getErrArr());
+			}
+		}
+		if(!$imgManager->processImage($this->tid)){
+			$this->errorStr = implode('; ',$imgManager->getErrArr());
+		}
+		return $status;
 	}
 }
 ?>

@@ -1,36 +1,19 @@
 <?php
+include_once("ImageShared.php");
+
 class OccurrenceEditorImages extends OccurrenceEditorManager {
 
 	private $photographerArr = Array();
 	private $imageRootPath = "";
 	private $imageRootUrl = "";
 
-	private $tnPixWidth = 200;
-	private $webPixWidth = 1200;
-	private $lgPixWidth = 3168;
-	private $webFileSizeLimit = 300000;
-	
-	private $targetPath;
-	private $targetUrl;
-	private $fileName;
-	private $sourceImg;
-	
-	
 	public function __construct(){
  		parent::__construct();
 	}
 
 	public function __destruct(){
  		parent::__destruct();
- 		if($this->sourceImg){
- 			try{
- 				imagedestroy($this->sourceImg);
- 			}
- 			catch(Exception $e){
- 			}
- 		}
 	}
-
 
     /**
      * Takes parameters from a form submission and modifies an existing image record
@@ -164,61 +147,11 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	}
 
 	public function deleteImage($imgIdDel, $removeImg){
-		$imgUrl = ""; $imgThumbnailUrl = ""; $imgOriginalUrl = "";
-		$status = "Image deleted successfully";
-		$occid = 0;
-		$sqlQuery = 'SELECT * FROM images WHERE (imgid = '.$imgIdDel.')';
-		$result = $this->conn->query($sqlQuery);
-		if($r = $result->fetch_assoc()){
-			$imgUrl = $r['url'];
-			$imgThumbnailUrl = $r['thumbnailurl'];
-			$imgOriginalUrl = $r['originalurl'];
-			//Archive image 
-			$imgArr = array();
-			foreach($r as $k => $v){
-				if($v) $imgArr[$k] = $this->encodeStr($v);
-			}
-			$imgObj = json_encode($imgArr);
-			$sqlArchive = 'UPDATE guidimages '.
-			'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($imgObj).'" '.
-			'WHERE (imgid = '.$imgIdDel.')';
-			$this->conn->query($sqlArchive);
-		}
-		$result->close();
-		
-		//Remove any OCR text blocks linked to the image
-		$sqlOcr = 'DELETE FROM specprocessorrawlabels WHERE (imgid = '.$imgIdDel.')';
-		$this->conn->query($sqlOcr);
-		
-		$sql = "DELETE FROM images WHERE (imgid = ".$imgIdDel.')';
-		//echo $sql;
-		if($this->conn->query($sql)){
-			if($removeImg){
-				//Remove images from server only if there are no other references to the image
-				$sql = "SELECT imgid FROM images WHERE (url = '".$imgUrl."')";
-				$rs = $this->conn->query($sql);
-				if(!$rs->num_rows){
-					$this->setRootpaths();
-					//Delete image from server 
-					$imgDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
-					if(file_exists($imgDelPath)){
-						if(!unlink($imgDelPath)){
-							$status = "Deleted image record from database successfully but FAILED to delete image from server. The Image will have to be deleted manually.";
-						}
-					}
-					$imgTnDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgThumbnailUrl);
-					if(file_exists($imgTnDelPath)){
-						unlink($imgTnDelPath);
-					}
-					$imgOriginalDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgOriginalUrl);
-					if(file_exists($imgOriginalDelPath)){
-						unlink($imgOriginalDelPath);
-					}
-				}
-			}
-		}
-		else{
-			$status = "deleteImage: ".$this->conn->error."\nSQL: ".$sql;
+		$status = true; 
+		$imgManager = new ImageShared();
+		if(!$imgManager->deleteImage($imgIdDel, $removeImg)){
+			$this->errorStr = implode('',$imgManager->getErrArr());
+			$status = false;
 		}
 		return $status;
 	}
@@ -239,279 +172,67 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	}
 	
 	public function addImage($postArr){
-		$status = '';
-		//Set download paths and variables
-		set_time_limit(120);
-		ini_set("max_input_time",120);
-		ini_set('memory_limit','512M');
-		$this->setRootPaths();
-		$this->setTargetPaths();
-		if(array_key_exists('imgWebWidth',$GLOBALS)) $this->webPixWidth = $GLOBALS['imgWebWidth'];
-		if(array_key_exists('imgTnWidth',$GLOBALS)) $this->tnPixWidth = $GLOBALS['imgTnWidth'];
-		if(array_key_exists('imgLgWidth',$GLOBALS)) $this->lgPixWidth = $GLOBALS['imgLgWidth'];
-		if(array_key_exists('imgFileSizeLimit',$GLOBALS)) $this->webFileSizeLimit = $GLOBALS['imgFileSizeLimit'];
+		$status = true;
+		$imgManager = new ImageShared();
 		
-		$copyToServer = 0;
-		if(array_key_exists('copytoserver',$postArr)) $copyToServer = $postArr['copytoserver'];
-		$sourceImgUri = '';
-		$lgUrl = '';
-		$sourceIsUpload = true;
-		if(array_key_exists("imgurl",$postArr) && $postArr['imgurl']){
-			//Source image is a URI supplied by user
-			$sourceImgUri = $postArr['imgurl'];
-			$lgUrl = $postArr["lgurl"];
-			$this->setFileName(basename($sourceImgUri));
-			$sourceIsUpload = false;
+		//Set target path
+		$subTargetPath = $this->collMap['institutioncode'];
+		if($this->collMap['collectioncode']) $subTargetPath .= '_'.$this->collMap['collectioncode'];
+		$imgManager->setTargetPath($subTargetPath);
+		
+		//Import large image or not
+		if(array_key_exists('nolgimage',$postArr) && $postArr['nolgimage']==1){
+			$imgManager->setMapLargeImg(false);
 		}
 		else{
-			//Source image is an image upload
-			if(!$this->loadImage()) return;
-			$sourceImgUri = $this->targetPath.$this->fileName;
-		}
-
-		//Create local thumbnail no matter what, this way size is guaranteed to be correct 
-		$tnUrl = '';
-		$newTnName = str_ireplace("_temp.jpg","_tn.jpg",$this->fileName);
-		if($this->createNewImage($sourceImgUri,$this->targetPath.$newTnName,$this->tnPixWidth,70)){
-			$tnUrl = $this->targetUrl.$newTnName;
-		}
-
-		list($width, $height) = getimagesize($sourceImgUri);
-
-		//Establish web version
-		$webUrl = $sourceImgUri;
-		$newWebName = str_ireplace("_temp.jpg",".jpg",$this->fileName);
-		if($width > ($this->webPixWidth*1.2)){
-			//image is too big, thus let's refactor
-			$newWidth = ($width<($this->webPixWidth*1.1)?$width:$this->webPixWidth);
-			if($this->createNewImage($sourceImgUri,$this->targetPath.$newWebName,$newWidth,70)){
-				$webUrl = $this->targetUrl.$newWebName;
-			}
-		}
-		elseif($sourceIsUpload || $copyToServer){
-			if(copy($sourceImgUri,$this->targetPath.$newWebName)){
-				$webUrl = $this->targetUrl.$newWebName;
-				//test file size
-				$fileSize = filesize($this->targetPath.$newWebName);
-				if($fileSize && $fileSize > $this->webFileSizeLimit){
-					$newWidth = ($width<($this->webPixWidth*1.1)?$width:$this->webPixWidth);
-					if($this->createNewImage($sourceImgUri,$this->targetPath.$newWebName,$newWidth,70)){
-						$webUrl = $this->targetUrl.$newWebName;
-					}
-				}
-			}
+			$imgManager->setMapLargeImg(true);
 		}
 		
-		//Create large
-		if(!array_key_exists('nolgimage',$postArr)){
-			if(!$sourceIsUpload){
-				//Source is URI
-				//If large URI was supplied, all is set
-				if(!$lgUrl && $width > ($this->webPixWidth*1.2)){
-					//Lg URI was not supplied but source is big enough to serve as lg version
-					$lgUrl = $sourceImgUri;
-					$lgWidth = $width;
-					$lgHeight = $height;
+		//Set image metadata variables
+		$imgManager->setCaption($postArr['caption']);
+		if(array_key_exists('photographeruid',$postArr)) $imgManager->setPhotographerUid($postArr['photographeruid']);
+		if(array_key_exists('photographer',$postArr)) $imgManager->setPhotographer($postArr['photographer']);
+		if(array_key_exists('sourceurl',$postArr)) $imgManager->setSourceUrl($postArr['sourceurl']);
+		$imgManager->setCopyright($postArr['copyright']);
+		if(array_key_exists("notes",$postArr)) $imgManager->setNotes($postArr['notes']);
+
+		$sourceImgUri = $postArr['imgurl'];
+		if($sourceImgUri){
+			//Source image is a URI supplied by user
+			if(array_key_exists('copytoserver',$postArr) && $postArr['copytoserver']){
+				if(!$imgManager->copyImageFromUrl($sourceImgUri)){
+					$status = false;
 				}
 			}
-			if($sourceIsUpload || $copyToServer){
-				$lgSource = $sourceImgUri;
-				if($lgUrl){
-					$lgSource = $lgUrl;
-					$this->sourceImg = null;
-				}
-				//Test size
-				$lgWidth = 0;
-				$lgHeight = 0;
-				if(!$lgWidth || !$lgWidth){
-					list($lgWidth, $lgHeight) = getimagesize($lgSource);
-				}
-				$newLgName = str_ireplace("_temp.jpg","_lg.jpg",$this->fileName);
-				if($lgWidth > ($this->lgPixWidth*1.2)){
-					//Image is too large, thus let's resize and cop
-					if($this->createNewImage($lgSource,$this->targetPath.$newLgName,$this->lgPixWidth)){
-						$lgUrl = $this->targetUrl.$newLgName;
-					}
-				}
-				elseif($lgWidth < ($this->webPixWidth*1.2)){
-					//Image is too small, thus abort
-					$lgUrl = '';
-				}
-				else{
-					//Image is just right so let's copy as is
-					if(copy($lgSource,$this->targetPath.$newLgName)){
-						$lgUrl = $this->targetUrl.$newLgName;
-					}
-				}
+			else{
+				$imgManager->parseUrl($sourceImgUri);
 			}
 		}
-
-		if($sourceIsUpload) unlink($sourceImgUri);
+		else{
+			//Image is a file upload
+			if(!$imgManager->uploadImage()){
+				$status = false;
+			}
+		}
+		$imgManager->setOccid($this->occid);
+		$imgManager->processImage();
 		
-		//Load to database
-		if($webUrl) $status = $this->databaseImage($webUrl,$tnUrl,$lgUrl);
-
+		//Load tags
+		$status = $imgManager->insertImageTags($postArr);
+		
+		//Get errors and warnings
+		if($imgManager->getErrArr()) {
+			$this->errorStr = implode('; ',$imgManager->getErrArr());
+		}
 		return $status;
 	}
 	
-	private function loadImage(){
-		$imgFile = basename($_FILES['imgfile']['name']);
-		$this->setFileName($imgFile);
-		if(move_uploaded_file($_FILES['imgfile']['tmp_name'], $this->targetPath.$this->fileName)){
-			return true;
-		}
-		return false;
-	}
-
-	private function databaseImage($webUrl,$tnUrl,$lgUrl){
-		global $paramsArr;
-		if(!$webUrl) return 'ERROR: web url is null ';
-		$status = 'Image added successfully!';
-		$occId = $_REQUEST["occid"];
-		$owner = $_REQUEST["institutioncode"];
-		$caption = $this->cleanInStr($_REQUEST["caption"]);
-		$photographerUid = (array_key_exists('photographeruid',$_REQUEST)?$_REQUEST["photographeruid"]:'');
-		$photographer = (array_key_exists('photographer',$_REQUEST)?$this->cleanInStr($_REQUEST["photographer"]):'');
-		$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
-		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
-		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanInStr($_REQUEST["notes"]):"");
-
-		//If central images are on remote server and new ones stored locally, then we need to use full domain
-	    //e.g. this portal is sister portal to central portal
-    	if($GLOBALS['imageDomain']){
-    		if(substr($webUrl,0,1) == '/'){
-	    		$webUrl = 'http://'.$_SERVER['HTTP_HOST'].$webUrl;
-    		}
-    		if($tnUrl && substr($tnUrl,0,1) == '/'){
-	    		$tnUrl = 'http://'.$_SERVER['HTTP_HOST'].$tnUrl;
-    		}
-    		if($lgUrl && substr($lgUrl,0,1) == '/'){
-	    		$lgUrl = 'http://'.$_SERVER['HTTP_HOST'].$lgUrl;
-    		}
-    	}
-
-		$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
-			'owner, sourceurl, copyright, occid, username, notes) '.
-			'VALUES ('.($_REQUEST['tid']?$_REQUEST['tid']:'NULL').',"'.$webUrl.'",'.
-			($tnUrl?'"'.$tnUrl.'"':'NULL').','.
-			($lgUrl?'"'.$lgUrl.'"':'NULL').','.
-			($photographer?'"'.$photographer.'"':'NULL').','.
-			($photographerUid?$photographerUid:'NULL').','.
-			($caption?'"'.$caption.'"':'NULL').','.
-			($owner?'"'.$owner.'"':'NULL').','.
-			($sourceUrl?'"'.$sourceUrl.'"':'NULL').','.
-			($copyRight?'"'.$copyRight.'"':'NULL').','.
-			($occId?$occId:'NULL').','.
-			(isset($paramsArr['un'])?'"'.$paramsArr['un'].'"':'NULL').','.
-			($notes?'"'.$notes.'"':'NULL').')';
-		//echo $sql;
-		if($this->conn->query($sql)){
-			//Create and insert Symbiota GUID for image(UUID)
-			$guid = UuidFactory::getUuidV4();
-			$imgId = $this->conn->insert_id;
-			if($this->conn->query('INSERT INTO guidimages(guid,imgid) VALUES("'.$guid.'",'.$imgId.')')) {
-                // Find any tags providing classification of the image and insert them
-                $kArr = $this->getImageTagValues();
-                foreach($kArr as $key => $description) { 
-                   if (array_key_exists("ch_$key",$_REQUEST)) {
-                      $sql = "INSERT into imagetag (imgid,keyvalue) values (?,?) ";
-                      $stmt = $this->conn->stmt_init();
-                      $stmt->prepare($sql);
-                      if ($stmt) { 
-                         $stmt->bind_param('is',$imgId,$key);
-                         if (!$stmt->execute()) { 
-				            $status .= " (Warning: Failed to add image tag [$key] for $imgId.  " . $stmt->error;
-                         } 
-                         $stmt->close();
-                      }
-                   } 
-                }
-            } else { 
-				$status .= ' (Warning: Symbiota GUID mapping failed)';
-			}
-		}
-		else{
-			$status = "ERROR Loading Image Data: ".$this->conn->error."<br/>SQL: ".$sql;
-		}
-		return $status;
-	}
-
-	private function createNewImage($sourceImg,$targetPath,$targetWidth,$qualityRating = 0){
-        $successStatus = false;
-		list($sourceWidth, $sourceHeight) = getimagesize($sourceImg);
-        $newWidth = $targetWidth;
-        $newHeight = round($sourceHeight*($targetWidth/$sourceWidth));
-        if($newHeight > $newWidth*2){
-        	$newHeight = $targetWidth;
-        	$newWidth = round($sourceWidth*($targetWidth/$sourceHeight));
-        }
-
-        if(!$this->sourceImg){
-        	$this->sourceImg = imagecreatefromjpeg($sourceImg);
-        }
-
-    	$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
-
-		imagecopyresampled($tmpImg,$this->sourceImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
-
-        if($qualityRating){
-        	$successStatus = imagejpeg($tmpImg, $targetPath, $qualityRating);
-        }
-        else{
-        	$successStatus = imagejpeg($tmpImg, $targetPath);
-        }
-
-        imagedestroy($tmpImg);
-	    return $successStatus;
-	}
-
-	private function setFileName($fName){
-		if($fName){
-			$fName = str_replace(" ","_",$fName);
-			$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
-			$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
-			$fName = str_replace(array(chr(239),chr(240),chr(241),chr(261)),"i",$fName);
-			$fName = str_replace(array(chr(247),chr(248),chr(249),chr(262)),"o",$fName);
-			$fName = str_replace(array(chr(250),chr(251),chr(263)),"u",$fName);
-			$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
-			$fName = preg_replace("/[^a-zA-Z0-9\-_\.]/", "", $fName);
-			if(strlen($fName) > 30) {
-				$fName = substr($fName,0,25).substr($fName,strrpos($fName,"."));
-			}
-	 		//Check and see if file already exists, if so, rename filename until it has a unique name
-	 		$tempFileName = $fName;
-	 		$cnt = 0;
-			while(file_exists($this->targetPath.$tempFileName)){
-	 			$tempFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fName);
-	 			$cnt++;
-	 		}
-			
-			$this->fileName = str_ireplace(".jpg","_temp.jpg",$tempFileName);
-		}
- 	}
- 	
 	private function setRootPaths(){
 		$this->imageRootPath = $GLOBALS["imageRootPath"];
 		if(substr($this->imageRootPath,-1) != "/") $this->imageRootPath .= "/";  
 		$this->imageRootUrl = $GLOBALS["imageRootUrl"];
 		if(substr($this->imageRootUrl,-1) != "/") $this->imageRootUrl .= "/";
 	}
-
- 	private function setTargetPaths(){
- 		if(!file_exists($this->imageRootPath.$_REQUEST["institutioncode"])){
- 			mkdir($this->imageRootPath.$_REQUEST["institutioncode"], 0775);
- 		}
-		$path = $this->imageRootPath.$_REQUEST["institutioncode"]."/";
-		$url = $this->imageRootUrl.$_REQUEST["institutioncode"]."/";
-		$yearMonthStr = date('Ym');
- 		if(!file_exists($path.$yearMonthStr)){
- 			mkdir($path.$yearMonthStr, 0775);
- 		}
-		$path = $path.$yearMonthStr."/";
-		$this->targetPath = $path;
-		$url = $url.$yearMonthStr."/";
-		$this->targetUrl = $url;
- 	}
 
 	public function getPhotographerArr(){
 		if(!$this->photographerArr){
