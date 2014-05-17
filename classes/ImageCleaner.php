@@ -33,30 +33,26 @@ class ImageCleaner{
 
 	public function buildThumbnailImages($collid = 0){
 		$imgManager = new ImageShared();
-		$imgManager->setTargetPath();
+		$imgManager->setTargetPath('thumbnails');
 		
 		$sql = 'SELECT ti.imgid, ti.url, ti.originalurl '.
 			'FROM images ti ';
 		if($collid) $sql .= 'INNER JOIN omoccurrences o ON ti.occid = o.occid ';
 		$sql .= 'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") ';
 		if($collid) $sql .= 'AND (o.collid = '.$collid.') ';
-		$sql .= 'LIMIT 100';
-		//echo $sql;
+		//$sql .= 'LIMIT 100';
+		//echo $sql; exit;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			$statusStr = 'ERROR';
+			$statusStr = '';
 			$webIsEmpty = false;
 			$imgId = $row->imgid;
 			if($this->verbose) echo '<li>Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">'.$imgId.'</a>... ';
 			$imgUrl = trim($row->url);
-			$url = trim($row->url);
 			if((!$imgUrl || $imgUrl == 'empty') && $row->originalurl){
 				$imgUrl = trim($row->originalurl);
 				$webIsEmpty = true;
 			}
-			if($GLOBALS['imageDomain'] && substr($imgUrl,0,1) == '/'){
-				$imgUrl = $GLOBALS['imageDomain'].$imgUrl;
-	    	}
 			$imgManager->parseUrl($imgUrl);
 
 			//Create thumbnail 
@@ -65,16 +61,16 @@ class ImageCleaner{
 				$imgTnUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_tn.jpg';
 			}
 
-			if(file_exists($imgTnUrl)){
+			if($this->urlExists($imgTnUrl)){
 				$webFullUrl = '';
 				$lgFullUrl = '';
 				//If web image is too large, transfer to large image and create new web image
 				$fileSize = 0;
 				if(!$webIsEmpty && !$row->originalurl){
-					$fileSize = $this->getFileSize($imgUrl);
-					list($sourceWidth, $sourceHeight) = getimagesize($imgUrl);
+					$fileSize = $this->getFileSize($imgManager->getSourcePath());
+					list($sourceWidth, $sourceHeight) = getimagesize($imgManager->getSourcePath());
 					if($fileSize > $imgManager->getWebFileSizeLimit() || $sourceWidth > ($imgManager->getWebPixWidth()*1.2)){
-						$lgFullUrl = $imgUrl;
+						$lgFullUrl = $imgManager->getSourcePath();
 						$webIsEmpty = true;
 					}
 				}
@@ -92,7 +88,7 @@ class ImageCleaner{
 					$sql .= ',originalurl = "'.$lgFullUrl.'" ';
 				}
 				$sql .= "WHERE ti.imgid = ".$imgId;
-				//echo $sql;
+				//echo $sql; 
 				if($this->conn->query($sql)){
 					if($this->verbose) $statusStr = 'Done!';
 				}
@@ -137,5 +133,33 @@ class ImageCleaner{
 		}
 		return $fileSize;
 	}
+
+	private function urlExists($url) {
+		$exists = false;
+	    if(file_exists($url)){
+			return true;
+	    }
+
+	    if(!$exists){
+		    // Version 4.x supported
+		    $handle   = curl_init($url);
+		    if (false === $handle){
+				$exists = false;
+		    }
+		    curl_setopt($handle, CURLOPT_HEADER, false);
+		    curl_setopt($handle, CURLOPT_FAILONERROR, true);  // this works
+		    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
+		    curl_setopt($handle, CURLOPT_NOBODY, true);
+		    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
+		    $exists = curl_exec($handle);
+		    curl_close($handle);
+	    }
+	     
+		//One more  check
+	    if(!$exists){
+	    	$exists = (@fclose(@fopen($url,"r")));
+	    }
+	    return $exists;
+	}	
 }
 ?>
