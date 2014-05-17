@@ -33,7 +33,7 @@ $imageArr = $occManager->getImageMap();
 							<input name='imgfile' type='file' size='70'/>
 						</div>
 						<div style="float:right;text-decoration:underline;font-weight:bold;">
-							<a href="#" onclick="toggle('targetdiv');return false;">Link to External Image</a>
+							<a href="#" onclick="toggle('targetdiv');return false;">Enter URL</a>
 						</div>
 					</div>
 					<div class="targetdiv" style="display:none;">
