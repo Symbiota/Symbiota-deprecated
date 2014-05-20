@@ -38,31 +38,21 @@ function openMappingPolyAid() {
     if(mapWindow.opener == null) mapWindow.opener = self;
 }
 
-function checkEditForm(f){
-    var errorText = "";
+function verifyEditProfileForm(f){
     if(f.firstname.value.replace(/\s/g, "") == "" ){
-        errorText += "\nFirst Name";
+        window.alert("First Name field must have a value ");
+        return false;
     };
     if(f.lastname.value.replace(/\s/g, "") == "" ){
-        errorText += "\nLast Name";
-    };
-    if(f.state.value.replace(/\s/g, "") == "" ){
-        errorText += "\nState";
-    };
-    if(f.country.value.replace(/\s/g, "") == "" ){
-        errorText += "\nCountry";
+        window.alert("Last Name field must have a value ");
+        return false;
     };
     if(f.email.value.replace(/\s/g, "") == "" ){
-        errorText += "\nEmail";
+        window.alert("Email field must have a value ");
+        return false;
     };
 
-    if(errorText == ""){
-        return true;
-    }
-    else{
-        window.alert("The following fields must be filled out:\n " + errorText);
-        return false;
-    }
+    return true;
 }
 
 function checkPwdForm(f){

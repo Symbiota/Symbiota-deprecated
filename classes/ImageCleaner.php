@@ -97,7 +97,7 @@ class ImageCleaner{
 				}
 			}
 			else{
-				if($this->verbose) $statusStr = 'ERROR: failed to create thumbnail';
+				if($this->verbose) $statusStr = 'ERROR: unable to open image';
 			}
 			if($this->verbose) echo $statusStr.'</li>';
 			$imgManager->reset();
