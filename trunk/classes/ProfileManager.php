@@ -262,10 +262,26 @@ class ProfileManager{
 		return $newPassword;
 	}
 	
-	public function register($person){
+	public function register($postArr){
 		$returnStr = "";
 		$userNew = true;
-
+		
+		$person = new Person();
+		$person->setPassword($postArr['pwd']);
+		$person->setUserName($postArr['username']);
+		$person->setFirstName($postArr['firstname']);
+		$person->setLastName($postArr['lastname']);
+		$person->setTitle($postArr['title']);
+		$person->setInstitution($postArr['institution']);
+		$person->setCity($postArr['city']);
+		$person->setState($postArr['state']);
+		$person->setZip($postArr['zip']);
+		$person->setCountry($postArr['country']);
+		$person->setEmail($postArr['email']);
+		$person->setUrl($postArr['url']);
+		$person->setBiography($postArr['biography']);
+		$person->setIsPublic(isset($postArr['ispublic'])?1:0);
+		
 		//Test to see if user already exists
 		if($person->getEmail()){
 			$sql = 'SELECT u.uid FROM users u WHERE (u.email = "'.$person->getEmail().'") AND (u.lastname = "'.$person->getLastName().'")';

@@ -1,7 +1,6 @@
 <?php 
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
-include_once($serverRoot.'/classes/Person.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $userId = $_REQUEST["userid"];
@@ -23,7 +22,8 @@ $person = $pHandler->getPerson();
 			echo '<div>'.$person->getFirstName().' '.$person->getLastName().'</div>';
 			if($person->getTitle()) echo '<div>'.$person->getTitle().'</div>';
 			if($person->getInstitution()) echo '<div>'.$person->getInstitution().'</div>';
-			echo '<div>'.$person->getCity().', '.$person->getState().' '.$person->getZip().'</div>';
+			$cityStateStr = trim($person->getCity().', '.$person->getState().' '.$person->getZip(),' ,');
+			if($cityStateStr) echo '<div>'.$cityStateStr.'</div>';
 			if($person->getCountry()) echo '<div>'.$person->getCountry().'</div>';
 			if($person->getEmail()) echo '<div>'.$person->getEmail().'</div>';
 			if($person->getUrl()) echo '<div><a href="'.$person->getUrl().'">'.$person->getUrl().'</a></div>';
@@ -36,7 +36,7 @@ $person = $pHandler->getPerson();
 		</div>	
 	</div>
 	<div id="profileeditdiv" style="display:none;margin:15px;">
-		<form id="editprofileform" name="editprofile" action="viewprofile.php" method="post" onsubmit="return checkEditForm(this);">
+		<form id="editprofileform" name="editprofile" action="viewprofile.php" method="post" onsubmit="return verifyEditProfileForm(this);">
 			<fieldset>
 				<legend><b>Edit User Profile</b></legend>
 				<table cellspacing='1' style="width:100%;">

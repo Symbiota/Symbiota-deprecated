@@ -40,7 +40,9 @@ $fpEnabled = 0;				//Enable Filtered-Push modules
 //Misc variables
 $googleMapKey = '';					//Needed for Google Map; get from Google 
 $mappingBoundaries = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
-$googleAnalyticsKey = '';			//Needed for setting up Google Analytics 
+$googleAnalyticsKey = '';			//Needed for setting up Google Analytics
+$RECAPTCHA_PUBLIC_KEY = '';	
+$RECAPTCHA_PRIVATE_KEY = '';
 $dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $displayCommonNames = 1;
 $activateExsiccati = 0;
