@@ -57,18 +57,18 @@ if($chars){
 ?>
 
 <!DOCTYPE html>
+<html>
 <head>
 	<title><?php echo $defaultTitle; ?> Web-Key: <?php echo preg_replace('/\<[^\>]+\>/','',$dataManager->getClName()); ?></title>
-	<link rel='stylesheet' href='../css/main.css' type='text/css' />
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
 	<meta name="keywords" content="interactive key,plants identification,<?php echo $dataManager->getClName(); ?>" />
 	<script type="text/javascript">
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript" src="../js/symb/ident.key.js"></script>
 </head>
- 
 <body>
-
 	<?php 
 	$displayLeftMenu = (isset($ident_keyMenu)?$ident_keyMenu:true);
 	include($serverRoot.'/header.php');

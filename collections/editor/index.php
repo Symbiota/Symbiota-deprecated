@@ -5,7 +5,8 @@ header("Content-Type: text/html; charset=".$charset);
 <html>
 	<head>
 		<title>No Access</title>
-		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
+		<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
 	</head>
 	<body>
 		<?php

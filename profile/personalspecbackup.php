@@ -24,7 +24,8 @@ if($isAdmin
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title>Personal Specimen Backup</title>
-    <link rel="stylesheet" href="../css/main.css" type="text/css">
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
 <!-- This is inner text! -->

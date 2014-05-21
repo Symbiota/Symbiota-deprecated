@@ -23,7 +23,8 @@ if($isEditable){
 <html>
 <head>
 	<title>Observation Image Batch Loader</title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<meta http-equiv="Content-Type" content="text/html; charset="<?php echo $charset;?>>
 	<script type="text/javascript">
 	

@@ -1,7 +1,4 @@
 <?php
-/*
- * Created on Jul 20, 2006
- */
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyEditorManager.php');
 header("Cache-control: private; Content-Type: text/html; charset=".$charset);
@@ -28,72 +25,71 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 }
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html >
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
- <head>
-  <title><?php echo $defaultTitle; ?> Identification Character Editor</title>
-  <link rel="stylesheet" href="../../css/main.css" type="text/css" />
-<script language="javascript">
+<html>
+<head>
+	<title><?php echo $defaultTitle; ?> Identification Character Editor</title>
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
+	<script language="javascript">
 
-	var dataChanged = false;
-	
-	window.onbeforeunload = verifyClose;
-	
-	function verifyClose() { 
-		if (dataChanged == true) { 
-			return "You will lose any unsaved data if you don't first submit your changes!"; 
-		} 
-	}
-	
-	function toggle(target){
-		var divObjs = document.getElementsByTagName("div");
-	  	for (i = 0; i < divObjs.length; i++) {
-	  		var obj = divObjs[i];
-	  		if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
+		var dataChanged = false;
+		
+		window.onbeforeunload = verifyClose;
+		
+		function verifyClose() { 
+			if (dataChanged == true) { 
+				return "You will lose any unsaved data if you don't first submit your changes!"; 
+			} 
+		}
+		
+		function toggle(target){
+			var divObjs = document.getElementsByTagName("div");
+		  	for (i = 0; i < divObjs.length; i++) {
+		  		var obj = divObjs[i];
+		  		if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
+						if(obj.style.display=="none"){
+							obj.style.display="inline";
+						}
+				 	else {
+				 		obj.style.display="none";
+				 	}
+				}
+			}
+			var spanObjs = document.getElementsByTagName("span");
+			for (i = 0; i < spanObjs.length; i++) {
+				var obj = spanObjs[i];
+				if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
 					if(obj.style.display=="none"){
 						obj.style.display="inline";
 					}
-			 	else {
-			 		obj.style.display="none";
-			 	}
-			}
-		}
-		var spanObjs = document.getElementsByTagName("span");
-		for (i = 0; i < spanObjs.length; i++) {
-			var obj = spanObjs[i];
-			if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
-				if(obj.style.display=="none"){
-					obj.style.display="inline";
-				}
-				else {
-					obj.style.display="none";
+					else {
+						obj.style.display="none";
+					}
 				}
 			}
 		}
-	}
-	
-	function showSearch(){
-		document.getElementById("searchDiv").style.display="block";
-		document.getElementById("searchDisplay").style.display="none";
-	}
-	
-	function openPopup(urlStr,windowName){
-		var wWidth = 900;
-		if(document.getElementById('maintable').offsetWidth){
-			wWidth = document.getElementById('maintable').offsetWidth*1.05;
+		
+		function showSearch(){
+			document.getElementById("searchDiv").style.display="block";
+			document.getElementById("searchDisplay").style.display="none";
 		}
-		else if(document.body.offsetWidth){
-			wWidth = document.body.offsetWidth*0.9;
+		
+		function openPopup(urlStr,windowName){
+			var wWidth = 900;
+			if(document.getElementById('maintable').offsetWidth){
+				wWidth = document.getElementById('maintable').offsetWidth*1.05;
+			}
+			else if(document.body.offsetWidth){
+				wWidth = document.body.offsetWidth*0.9;
+			}
+			newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			if (newWindow.opener == null) newWindow.opener = self;
 		}
-		newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
-		if (newWindow.opener == null) newWindow.opener = self;
-	}
-</script>
- </head>
- <body>
- 
+	</script>
+</head>
+<body>
 <?php
 	$displayLeftMenu = (isset($ident_tools_editorMenu)?$ident_tools_editorMenu:"true");
 	include($serverRoot.'/header.php');

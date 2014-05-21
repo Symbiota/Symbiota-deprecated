@@ -1,8 +1,4 @@
 <?php
-/*
- * 17 DEC 2010
- * By E.E. Gilbert
- */
 	include_once('../../config/symbini.php');
 	include_once($serverRoot.'/classes/InventoryDynSqlManager.php');
 	header("Content-Type: text/html; charset=".$charset);
@@ -41,7 +37,8 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<title><?php echo $defaultTitle; ?> Flora Linkage Builder </title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script language=javascript>
 		function updateSql(){
 			country = document.getElementById("countryinput").value;

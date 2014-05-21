@@ -53,7 +53,8 @@ $descr = Array();
 	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<meta name='keywords' content='<?php echo $spDisplay; ?>' />
-	<link type="text/css" href="../css/main.css" rel="stylesheet" />
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/speciesprofile.css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
@@ -351,7 +352,7 @@ if($taxonManager->getSciName() != "unknown"){
 
 		<tr>
 			<td colspan="2">
-				<div class='fieldset' style="padding:10px 2px 10px 2px;">
+				<fieldset style="padding:10px 2px 10px 2px;">
 					<div class='legend'>Species
 					<?php 
 					if($clValue){
@@ -434,7 +435,7 @@ if($taxonManager->getSciName() != "unknown"){
 					?>
 						<div style='clear:both;'><hr></div>
 					</div>
-				</div>
+				</fieldset>
 			</td>
 		</tr>
 			<?php 

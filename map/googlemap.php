@@ -39,7 +39,8 @@ $sharedMapManager->setTaxaArr($tArr);
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title><?php echo $defaultTitle; ?> - Google Map</title>
-	<link rel="stylesheet" href="../css/main.css" type="text/css" />
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script src="http://www.google.com/jsapi"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>

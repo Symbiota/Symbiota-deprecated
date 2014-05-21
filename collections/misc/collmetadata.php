@@ -50,6 +50,7 @@ $collData = $collManager->getCollectionData(1);
 <html>
 <head>
 	<title><?php echo $defaultTitle." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>

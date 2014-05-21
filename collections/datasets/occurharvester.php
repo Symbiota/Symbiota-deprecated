@@ -36,7 +36,8 @@ else{
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 		<title><?php echo $defaultTitle; ?> - Occurrence Harvester</title>
-	    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
+		<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	    <link href="../../css/main.css" type="text/css" rel="stylesheet" />
 		<script language="javascript" type="text/javascript">
 			function validateDownloadForm(f){
 				

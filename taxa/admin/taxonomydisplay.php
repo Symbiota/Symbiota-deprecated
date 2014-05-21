@@ -23,7 +23,8 @@ if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 <head>
 	<title><?php echo $defaultTitle." Taxonomy Display: ".$taxonDisplayObj->getTargetStr(); ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>

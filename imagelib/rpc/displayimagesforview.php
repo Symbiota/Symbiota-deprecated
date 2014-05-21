@@ -75,10 +75,10 @@ include_once($serverRoot.'/classes/PhotographerManager.php');
                         <div class="tnimg">
                         	<?php 
 							if($imgArr['occid']){
-								echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');">';
+								echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');return false;">';
 							}
 							else{
-								echo '<a href="#" onclick="openImagePopup('.$imgId.')">';
+								echo '<a href="#" onclick="openImagePopup('.$imgId.');return false;">';
 							}
 							echo '<img src="'.$imgUrl.'" />';
 							echo '</a>';
@@ -89,14 +89,14 @@ include_once($serverRoot.'/classes/PhotographerManager.php');
                             $sciname = $imgArr['sciname'];
                             if($sciname){
                             	if(strpos($imgArr['sciname'],' ')) $sciname = '<i>'.$sciname.'</i>';
-                            	if($imgArr['tid']) echo '<a href="#" onclick="openTaxonPopup('.$imgArr['tid'].')" >';
+                            	if($imgArr['tid']) echo '<a href="#" onclick="openTaxonPopup('.$imgArr['tid'].');return false;" >';
                             	echo $sciname;
                             	if($imgArr['tid']) echo '</a>';
                             	echo '<br />';
                             }
                             if($imgArr['stateprovince']) echo $imgArr['stateprovince'] . "<br />";
                             if($imgArr['catalognumber']){
-	                            echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');">';
+	                            echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');return false;">';
 	                            echo $imgArr['instcode'] . ": " . $imgArr['catalognumber'];
 	                            echo '</a>';
                             }

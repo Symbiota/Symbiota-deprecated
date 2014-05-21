@@ -45,7 +45,8 @@ if($addAttrs || $removeAttrs){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Character Mass Updater</title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script language="JavaScript">
 	
 		var addStr = ";";

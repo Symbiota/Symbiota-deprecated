@@ -76,7 +76,8 @@ else{
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Login</title>
-	<link href="../css/main.css" rel="stylesheet" type="text/css"/>
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function init(){
 			if(!navigator.cookieEnabled){
@@ -93,6 +94,7 @@ else{
 			document.forms["loginform"].submit();
 		}
 	</script>
+	<script src="../js/symb/shared.js" type="text/javascript"></script>
 </head>
 <body onload="init()">
 
@@ -166,12 +168,14 @@ if(isset($profile_indexCrumbs)){
 			<div style="font-weight:bold;margin-top:5px">
 				Can't Remember Login Name?
 			</div>
-			<div style="color:blue;cursor:pointer;" onclick="document.getElementById('emaildiv').style.display = 'block'">
-				Retrieve Login
-			</div>
-			<div class="fieldset" id="emaildiv" style="display:none;margin:5px;">
-				<div>Your Email? <input type="text" name="emailaddr" /></div>
-				<div><input type="submit" name="action" value="Retrieve Login"/></div>
+			<div>
+				<a href="#" onclick="toggle('emaildiv')">Retrieve Login</a>
+				<div id="emaildiv" style="display:none;margin:10px 0px 10px 40px;">
+					<fieldset style="padding:10px;">
+						<div>Your Email: <input type="text" name="emailaddr" /></div>
+						<div><input type="submit" name="action" value="Retrieve Login"/></div>
+					</fieldset>
+				</div>
 			</div>
 		</div>
 	</form>

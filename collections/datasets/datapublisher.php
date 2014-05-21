@@ -45,7 +45,8 @@ if($collId){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title>Darwin Core Archiver Publisher</title>
-    <link rel="stylesheet" href="../../css/main.css" type="text/css">
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+    <link href="../../css/main.css" type="text/css" rel="stylesheet">
 	<style type="text/css">
 		.nowrap { white-space: nowrap; }
 	</style>

@@ -21,7 +21,8 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Species Checklist Loader</title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 	
 	function validateUploadForm(thisForm){

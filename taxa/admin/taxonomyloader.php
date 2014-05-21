@@ -30,7 +30,8 @@ if($submitAction == 'loadnewtaxon' && $editable){
 <head>
 	<title><?php echo $defaultTitle; ?> Taxon Loader: </title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
-	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>

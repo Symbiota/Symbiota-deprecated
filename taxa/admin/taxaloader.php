@@ -50,7 +50,8 @@ if($editable){
 <head>
 	<title><?php echo $defaultTitle; ?> Taxa Loader</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function toggle(target){
 			var tDiv = document.getElementById(target);

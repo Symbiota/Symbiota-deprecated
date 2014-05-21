@@ -133,7 +133,8 @@ else{
 		    white-space: nowrap;
 		}
     </style>
-    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+    <link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?cacherefresh=<?php echo time(); ?>"></script>

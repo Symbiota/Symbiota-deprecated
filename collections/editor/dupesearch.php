@@ -50,7 +50,8 @@ if(!$IS_ADMIN){
 <html>
 	<head>
 		<title><?php echo $defaultTitle; ?> - Duplicate Record Search</title>
-	    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
+		<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	    <link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	    <style type="text/css">
 			table.styledtable td { white-space: nowrap; }
 	    </style>

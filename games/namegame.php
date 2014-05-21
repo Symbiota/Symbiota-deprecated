@@ -25,8 +25,9 @@ $imgloc = "../images/games/namegame/";
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Name Game</title>
-	<link rel="stylesheet" href="../css/main.css" type="text/css" />
-	<link rel="stylesheet" href="../css/namegamestyle.css" type="text/css" />
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
+	<link href="../css/namegamestyle.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>

@@ -7,7 +7,8 @@
 <html>
 	<head>
 		<title><?php echo $defaultTitle; ?> Data Usage Guidelines</title>
-		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
+		<link href="../css/base.css" type="text/css" rel="stylesheet" />
+		<link href="../css/main.css" type="text/css" rel="stylesheet" />
 	</head>
 	<body>
 		<?php

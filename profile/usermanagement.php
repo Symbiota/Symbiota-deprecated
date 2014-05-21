@@ -34,7 +34,8 @@ if($isAdmin){
 <html>
 <head>
     <title><?php echo $defaultTitle; ?> User Management</title>
-    <link rel="stylesheet" href="../css/main.css" type="text/css" />
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
 </head>
 
 <body>

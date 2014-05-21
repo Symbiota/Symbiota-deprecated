@@ -36,6 +36,7 @@ if($isEditor && $formSubmit){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Exsiccati Batch Transfer</title>
+    <link href="../../css/base.css" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function verifyExsTableForm(f){

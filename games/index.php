@@ -12,7 +12,8 @@ $clArr = $gameManager->getChecklistArr($pid);
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Games</title>
-	<link rel="stylesheet" href="../css/main.css" type="text/css" />
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>

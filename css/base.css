@@ -1,5 +1,7 @@
 body{
 	margin:	8px;
+	margin-left: auto;
+	margin-right: auto;
 	background-color: #FFFFFF;
 	color: #000000;
 	font-family: Arial, Helvetica, sans-serif;
@@ -9,55 +11,29 @@ body{
 /*Main table framework*/
 #maintable{
 	border-spacing: 0px;
-	width:		850px; 
-	height:		400px;
+	height:		500px;
 }
 
 #maintable td{
  	vertical-align: top;
 }
 
-td.header{
-	padding:		0px;	
-	font-size: 	11px;
-	font-weight: 	bold;
-}
-
-td.header a{
-	color: black;
-}
-
-td.header a:hover{
-	color: #990000;
-}
-
 td.middleleft{
-	padding:		0px;
 	width:		160px;
-	height:		100%;
-	width:		161px;
-	background-color:	#CCCC99;
 }
 
 td.middleleftnomenu{
-	padding:	0px;	
 	width:	20px;	
 }
 
 td.middlecenter{
-	padding:	0px;	
- 	width:	790px;
  	height:	350px;		
 }
 
 td.middleright{
 	width:	15px;
-	padding:	0px;	
 }
 
-td.footer{
-	padding:	0px;	
-}
 
 /*Left menu components*/
 div.menuheader{
@@ -67,12 +43,12 @@ div.menuheader{
 }
 
 div.menuheader a{
-	color: black;
+	color: 	#000000;
     text-decoration: none;
 }
 
 div.menuheader a:hover {
-	color: white;
+	color: #C0C0C0;
     text-decoration: underline;
 }
 
@@ -83,12 +59,12 @@ div.menusubheader{
 }
 
 div.menusubheader a{
-	color: black;
+	color: #000000;
     text-decoration: none;
 }
 
 div.menusubheader a:hover {
-	color: white;
+	color: #C0C0C0;
     text-decoration: underline;
 }
 
@@ -99,72 +75,39 @@ div.menuitem {
 }
 
 div.menuitem a {
-	color: #669999;
+	color: #000000;
     text-decoration: none;	
 }
 
 div.menuitem a:hover {
-	color: white;
+	color: #C0C0C0;
     text-decoration: underline;
 }
 
 
-/*Central div in the middle center table div */
+/*Central div and general components */
 #innertext{
 	margin:	15px;	
 	font-size: 12px;
 }
 
-#innertext div{
-	font: inherit;
-}
-
-#innertext a{
-	font-family: Arial, Helvetica, sans-serif;
-	color: 		#2C405E;
-    text-decoration: none;	
-}
-
-#innertext a:hover{
-	color: black;
-    text-decoration: underline;
-}
-
-
-/* /checklists/ folder pages */
-#checklisteditform div{
+form div {
 	margin-top:	2px;
 }
 
-#checklisteditform span{
-	font-weight:	bold;
-}
 
-#addspeciesform div{
-	margin-top:	2px;
-}
-
-#cloptiondiv{
-	margin:		5px;
-	width:		250px;
-	text-align:	left;
-	float:		right;
-}
-
-#taxonfilterdiv{
-	padding:			5px;
-	background-color:	#FFFFCC;
-	border:				1px solid;
-}
-
-#taxonfilterdiv{
-	 margin:	3px;
+/* Image thumbnails   */
+div.tndiv{
+	float: left;
+	text-align: center;
+	width: 170px;
+	height: 200px;
 }
 
 div.tnimg{
-	width:		200px;
-	height:		200px;
-	border:		1px solid black;
+	width:	160px;
+	height:	160px;
+	border:	1px solid gray;
 	overflow:	hidden;
 }
 
@@ -176,60 +119,10 @@ div.tnimg a{
 }
 
 div.tnimg img{
-	height: 100%;
+	width: 100%;
 }	
 
-
-/* /collections/ folder pages */
-#omlisttable{
-	 width:	610px;
-}
-
-#omlisttable img{
-    border: medium double #990000;
-}
-
-/*Download buttons on the search display pages*/
-div.button {
-	background-color:	#FFFFD7;
-	padding:			3px;
-	border:				1px outset #A0A0A0;
-}
-
-div.button img {
-	border:	0px;	
-}
-
-div.button:hover {
-	border:	1px inset #A0A0A0;
-}
-
-
-/*Misc general items*/
-table{
-	border:	0px;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
-}
-
-h1{
-	color: #990000;
-	font-size: 18px;
-}
-
-h2{
-	color: black;
-	font-size: 16px;
-}
-
-h3{
-	color: black;
-	font-size: 14px;
-}
-
-hr{
-	color: #BDD3D1;
-}
+/* styled table */
 
 table.styledtable{
 	width:				100%; 
@@ -257,41 +150,63 @@ table.styledtable tr.alt td {
 /*  navpath styles */
 div.navpath {
 	color: #000000;
-	font-family: Arial, Helvetica, sans-serif;
 	font-size: 11px;
 }
 
 div.navpath a {
 	font-size: 11px;
 	color: #000000;
-	font-family: Arial, Helvetica, sans-serif;
 }
 
 div.navpath a:hover {
-	color: #990000;
-	font-family: Arial, Helvetica, sans-serif;
+	color: #C0C0C0;
 	font-size: 11px;
 }
 
-/*Fieldset-like divs */
-div.fieldset {
-	position:	relative;
-	margin-top:	15px;
-	border:		1px solid #75736E;
-	padding: 	15px 10px 10px 10px;
+/*Download buttons on the search display pages*/
+div.button {
+	background-color:	#FFFFD7;
+	padding:			3px;
+	border:				1px outset #A0A0A0;
 }
 
-div.legend {
-	padding-left: 	5px;
-	padding-right: 	5px;
-	font-weight: 	bold;
-	font-size:		110%;
-	background: 	#FFF;
-	position:		absolute;
-	top:			-10px;
-	left:			15px;
+div.button img {
+	border:	0px;	
 }
 
+div.button:hover {
+	border:	1px inset #A0A0A0;
+}
+
+/* misc page specific items */
+#cloptiondiv{
+	margin:		5px;
+	width:		250px;
+	text-align:	left;
+	float:		right;
+}
+
+#taxonfilterdiv{
+	padding:			5px;
+	background-color:	#FFFFCC;
+	border:				1px solid;
+}
+
+#taxonfilterdiv{
+	 margin:	3px;
+}
+
+
+/* /collections/ folder pages */
+#omlisttable{
+	 width:	610px;
+}
+
+#omlisttable img{
+    border: medium double #990000;
+}
+
+/* misc */
 div.genericpopup{
 	position:				absolute;
 	display:				none;

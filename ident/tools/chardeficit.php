@@ -1,10 +1,4 @@
 <?php
-/*
- * Created on Jul 9, 2006
- * By E.E. Gilbert
- */
-
-//set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyCharDeficitManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -25,13 +19,13 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 }
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html >
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
+<html>
 <head>
 	<title><?php echo $defaultTitle; ?> Character Deficit Finder</title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function openPopup(urlStr,windowName){
 			var wWidth = 900;

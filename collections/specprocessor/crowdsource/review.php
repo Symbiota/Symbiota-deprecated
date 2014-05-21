@@ -33,8 +33,8 @@ $projArr = $csManager->getProjectDetails();
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Crowdsourcing Reviewer</title>
-    <link type="text/css" href="../../../css/main.css" rel="stylesheet" />
-	<link type="text/css" href="../../../css/base.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" type="text/css" />
+    <link href="../../../css/main.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript">
 		function selectAll(cbObj){
 			var cbStatus = cbObj.checked;
