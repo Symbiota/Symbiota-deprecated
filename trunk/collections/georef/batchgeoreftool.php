@@ -69,11 +69,12 @@ header("Content-Type: text/html; charset=".$charset);
 <html>
 	<head>
 		<title>Georeferencing Tools</title>
-		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
+		<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
 		<link type="text/css" href="<?php echo $clientRoot; ?>/css/jquery-ui.css" rel="Stylesheet" />
 		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
 		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/jquery-ui.js"></script>
-		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/symb/collections.georef.batchgeoreftool.js?cacherefresh=<?php echo time(); ?>"></script>
+		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=201405"></script>
 	</head>
 	<body>
 		<?php

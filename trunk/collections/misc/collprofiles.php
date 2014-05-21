@@ -40,6 +40,7 @@ if($symbUid){
 <html>
 <head>
 	<title><?php echo $defaultTitle." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData["collectionname"]:""); ?>" />
 	<script language=javascript>

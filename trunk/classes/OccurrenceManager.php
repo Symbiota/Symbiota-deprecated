@@ -229,7 +229,7 @@ class OccurrenceManager{
 			$stateAr = explode(";",$this->searchTermsArr["state"]);
 			$tempArr = Array();
 			foreach($stateAr as $value){
-				$tempArr[] = "(o.StateProvince LIKE '".trim($value)."%')";
+				$tempArr[] = "(o.StateProvince = '".trim($value)."')";
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(" OR ",$stateAr);
@@ -238,6 +238,7 @@ class OccurrenceManager{
 			$countyArr = explode(";",$this->searchTermsArr["county"]);
 			$tempArr = Array();
 			foreach($countyArr as $value){
+				$value = trim(str_ireplace(' county',' ',$value));
 				$tempArr[] = "(o.county LIKE '".trim($value)."%')";
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";

@@ -40,7 +40,8 @@ $duManager->readUploadParameters();
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Specimen Upload Profile Manager</title>
-	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script language=javascript>
 		function checkUploadListForm(f){
 			if(f.uspid.length == null){

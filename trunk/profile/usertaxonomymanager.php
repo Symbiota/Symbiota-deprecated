@@ -38,7 +38,8 @@ $editorArr = $utManager->getTaxonomyEditors();
 <html>
 <head>
 	<title>Taxonomic Interest User permissions</title>
-	<link rel="stylesheet" href="../css/main.css" type="text/css" />
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>

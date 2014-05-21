@@ -13,8 +13,9 @@ $collManager->reset();
 <html>
 <head>
     <title><?php echo $defaultTitle; ?> Collection Search Parameters</title>
-    <link type="text/css" href="../css/main.css" rel="stylesheet" />
-	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
+	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?var=1303"></script>

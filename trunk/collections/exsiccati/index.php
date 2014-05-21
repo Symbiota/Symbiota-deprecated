@@ -67,6 +67,7 @@ if($isEditor && $formSubmit){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Exsiccati</title>
+    <link href="../../css/base.css" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript" src="../../js/symb/shared.js?ver=130926"></script>
 	<script type="text/javascript">

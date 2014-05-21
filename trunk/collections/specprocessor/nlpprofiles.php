@@ -42,7 +42,8 @@ if($isEditor){
 <html>
 	<head>
 		<title>Specimen NLP Profile Manager</title>
-		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
+		<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
 		<script language="javascript">
 			function toggle(target){
 				divObj = document.getElementById(target);

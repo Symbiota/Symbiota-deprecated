@@ -45,7 +45,8 @@ $status = "";
 <html>
 	<head>
 		<title><?php echo $defaultTitle; ?> Taxonomic Name Cleaner</title>
-		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
+		<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+		<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 		<script language="javascript">
 			function toggle(divName){
 				divObj = document.getElementById(divName);

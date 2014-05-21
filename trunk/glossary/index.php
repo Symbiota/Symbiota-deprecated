@@ -7,7 +7,8 @@ header("Content-Type: text/html; charset=".$charset);
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Glossary</title>
-	<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
+	<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
+	<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 	</script>
 </head>

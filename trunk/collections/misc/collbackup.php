@@ -15,7 +15,8 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collid,$us
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>" />
 	<title>Occurrences download</title>
-    <link rel="stylesheet" href="../../css/main.css" type="text/css">
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
     <script language="javascript">
     	function submitBuForm(f){
 			f.formsubmit.disabled = true;

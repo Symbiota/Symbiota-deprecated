@@ -19,7 +19,8 @@ $statusStr = '';
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Crowdsourcing Score Board</title>
-    <link type="text/css" href="../../../css/main.css" rel="stylesheet" />
+    <link href="../../../css/base.css" rel="stylesheet" type="text/css" />
+    <link href="../../../css/main.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript">
 
 	</script>

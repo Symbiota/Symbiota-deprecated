@@ -51,7 +51,8 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title>GEOLocate Tool</title>
-	<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
+	<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
+	<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
 	<style>
 		iframe {
 			width: 1020px;

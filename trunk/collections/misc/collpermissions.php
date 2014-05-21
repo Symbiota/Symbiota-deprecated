@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/PermissionsManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -59,7 +58,8 @@ if($collData) $collName = $collData['collectionname'];
 <html>
 <head>
 	<title><?php echo $collName; ?> Collection Permissions</title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script language=javascript>
 		function verifyAddRights(f){
 			if(f.uid.value == ""){

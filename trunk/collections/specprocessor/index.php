@@ -74,7 +74,8 @@ if($isEditor){
 <html>
 	<head>
 		<title>Specimen Processor Control Panel</title>
-		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
+		<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
 		<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 		<script type="text/javascript" src="../../js/jquery.js"></script>
 		<script type="text/javascript" src="../../js/jquery-ui.js"></script>

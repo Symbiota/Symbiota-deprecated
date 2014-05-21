@@ -101,6 +101,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<meta name="description" content="<?php echo 'Occurrence author: '.$occArr['recordedby'].','.$occArr['recordnumber']; ?>" />
 	<meta name="keywords" content="<?php echo $occArr['guid']; ?>">
+	<link href="../../css/base.css" type="text/css" rel="stylesheet">
 	<link href="../../css/main.css" type="text/css" rel="stylesheet">
 	<link href="../../css/jquery-ui.css?ver=20130906" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js?ver=20130906" type="text/javascript"></script>

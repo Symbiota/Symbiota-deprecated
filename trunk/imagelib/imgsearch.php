@@ -17,7 +17,8 @@ $imageExplorer = new ImageExplorer();
 <html>
 <head>
     <title><?php echo $defaultTitle; ?> Image Search</title>
-    <link rel="stylesheet" href="../css/main.css?ver=131016" type="text/css"/>
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="../js/jquery.js"></script>
     <script type="text/javascript" src="../js/jquery-ui.js"></script>
     <script type="text/javascript" src="../js/underscore-1.4.3.js"></script>

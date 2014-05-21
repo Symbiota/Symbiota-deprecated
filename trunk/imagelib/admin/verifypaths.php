@@ -12,12 +12,11 @@ $verifyPathsObj = new VerifyPaths();
 ?>
 <html>
 <head>
-<title><?php echo $defaultTitle; ?> Verify Image Paths</title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<title><?php echo $defaultTitle; ?> Verify Image Paths</title>
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 </head>
-
 <body>
-
 	<?php
 	$displayLeftMenu = (isset($imagelib_misc_verifypathsMenu)?$imagelib_misc_verifypathsMenu:"true");
 	include($serverRoot.'/header.php');

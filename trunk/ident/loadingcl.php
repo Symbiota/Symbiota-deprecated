@@ -1,11 +1,4 @@
 <?php
-/*
- * Created on Jun 11, 2006
- * By E.E. Gilbert
- */
-
-//error_reporting(E_ERROR);
-//set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
 include_once('../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
 Header("Cache-Control: must-revalidate");
@@ -41,12 +34,13 @@ Header($ExpStr);
  ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title>Symbiota: loading key</title>
-	  <link rel="stylesheet" href="../css/main.css" type="text/css" />
-		<meta http-equiv="Refresh" content="0; url=<?php echo $url; ?>" />
-  </head>
-  <body>
+<head>
+	<title>Symbiota: loading key</title>
+	<link href="../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css" type="text/css" rel="stylesheet" />
+	<meta http-equiv="Refresh" content="0; url=<?php echo $url; ?>" />
+</head>
+<body>
 	<?php
 	$displayLeftMenu = (isset($ident_loadingclMenu)?$ident_loadingclMenu:"true");
 	include($serverRoot.'/header.php');

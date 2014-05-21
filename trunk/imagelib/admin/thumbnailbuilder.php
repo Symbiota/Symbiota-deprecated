@@ -10,9 +10,9 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 <html>
 <head>
 <title><?php echo $defaultTitle; ?> Thumbnail Builder</title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 </head>
-
 <body>
 
 	<?php

@@ -17,7 +17,8 @@ $occManager = new OccurrenceEditorImages();
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Search Page</title>
-    <link rel="stylesheet" href="../../css/main.css" type="text/css">
+	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
+    <link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 	    function updateParentForm(occId) {
 	        opener.document.getElementById("<?php echo $targetId;?>").value = occId;
