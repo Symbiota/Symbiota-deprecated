@@ -146,11 +146,11 @@ if($isEditor){
 				$imageProcessor->setLgFileSizeLimit($specManager->getLgMaxFileSize());
 				$imageProcessor->setJpgQuality($specManager->getJpgQuality());
 				$imageProcessor->setUseImageMagick($specManager->getUseImageMagick());
-				$imageProcessor->setWebImg($_REQUEST['webimg']);
-				$imageProcessor->setTnImg($_REQUEST['tnimg']);
-				$imageProcessor->setLgImg($_REQUEST['lgimg']);
-				$imageProcessor->setCreateNewRec($_REQUEST['createnewrec']);
-				$imageProcessor->setImgExists($_REQUEST['imgexists']);
+				$imageProcessor->setWebImg($_POST['webimg']);
+				$imageProcessor->setTnImg($_POST['tnimg']);
+				$imageProcessor->setLgImg($_POST['lgimg']);
+				$imageProcessor->setCreateNewRec($_POST['createnewrec']);
+				$imageProcessor->setImgExists($_POST['imgexists']);
 				$imageProcessor->setKeepOrig(0);
 				
 				//Run process

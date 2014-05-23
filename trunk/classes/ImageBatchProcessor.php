@@ -519,6 +519,7 @@ class ImageBatchProcessor {
 					}
 				}
 				$targetFileName = $fileName;
+				$databaseImage = true;
 				if($this->webImg == 1 || $this->webImg == 2){
 					//Check to see if image already exists at target, if so, delete or rename target
 					if(file_exists($targetPath.$targetFileName)){
@@ -537,6 +538,7 @@ class ImageBatchProcessor {
 							if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg")){
 								unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg");
 							}
+							$databaseImage = false;
 						}
 						elseif($this->imgExists == 1){
 							//Rename image before saving
@@ -712,18 +714,20 @@ class ImageBatchProcessor {
 						$this->sourceImagickImg = null;
 					}
 					//Database urls and metadata for images
-					if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$webUrlFrag,$tnUrlFrag,$lgUrlFrag)){
-						//Final cleaning stage
-						if(file_exists($sourcePath.$fileName)){ 
-							if($this->keepOrig){
-								if(file_exists($this->targetPathBase.$this->targetPathFrag.$this->origPathFrag)){
-									rename($sourcePath.$fileName,$this->targetPathBase.$this->targetPathFrag.$this->origPathFrag.$fileName.".orig");
+					if($databaseImage){
+						if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$webUrlFrag,$tnUrlFrag,$lgUrlFrag)){
+							//Final cleaning stage
+							if(file_exists($sourcePath.$fileName)){ 
+								if($this->keepOrig){
+									if(file_exists($this->targetPathBase.$this->targetPathFrag.$this->origPathFrag)){
+										rename($sourcePath.$fileName,$this->targetPathBase.$this->targetPathFrag.$this->origPathFrag.$fileName.".orig");
+									}
+								} else {
+									unlink($sourcePath.$fileName);
 								}
-							} else {
-								unlink($sourcePath.$fileName);
 							}
+							$this->logOrEcho("\tImage processed successfully (".date('Y-m-d h:i:s A').")!");
 						}
-						$this->logOrEcho("\tImage processed successfully (".date('Y-m-d h:i:s A').")!");
 					}
 				}
 				else{
