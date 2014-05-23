@@ -22,7 +22,8 @@ if(!$spprId && $action != 'addmode'){
 	//If there is one image loading profile, and only one, linked to the collection, pull that up as the default project 
 	$specProjects = $specManager->getProjects();
 	if(count($specProjects) == 1){
-		$spprId = array_shift(array_keys($specProjects));
+		$arrayKeys = array_keys($specProjects);
+		$spprId = array_shift($arrayKeys);
 		$specManager->setSpprId($spprId);
 	}
 }
@@ -302,26 +303,26 @@ if($spprId) $specManager->setProjVariables();
 										</td>
 									</tr>
 									<tr>
-										<td>
+										<td colspan="2">
 											<b>Thumbnail:</b>
-										</td>
-										<td> 
-											<input name="tnimg" type="radio" value="1" CHECKED /> Create new thumbnail from source image<br/>
-											<input name="tnimg" type="radio" value="2" /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
-											<input name="tnimg" type="radio" value="3" /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
-											<input name="tnimg" type="radio" value="4" /> Exclude thumbnail <br/>
+											<div style="margin:5px 15px;">
+												<input name="tnimg" type="radio" value="1" CHECKED /> Create new thumbnail from source image<br/>
+												<input name="tnimg" type="radio" value="2" /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
+												<input name="tnimg" type="radio" value="3" /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
+												<input name="tnimg" type="radio" value="4" /> Exclude thumbnail <br/>
+											</div>
 										</td>
 									</tr>
 									<tr>
-										<td>
+										<td colspan="2">
 											<b>Large Image:</b>
-										</td>
-										<td> 
-											<input name="lgimg" type="radio" value="1" CHECKED /> Import source image as large version<br/>
-											<input name="lgimg" type="radio" value="2" /> Map to source image as large version<br/>
-											<input name="lgimg" type="radio" value="3" /> Import large version from source location (source name with _lg.jpg suffix)<br/>
-											<input name="lgimg" type="radio" value="4" /> Map to large version at source location (source name with _lg.jpg suffix)<br/>
-											<input name="lgimg" type="radio" value="5" /> Exclude large version<br/>
+											<div style="margin:5px 15px;">
+												<input name="lgimg" type="radio" value="1" CHECKED /> Import source image as large version<br/>
+												<input name="lgimg" type="radio" value="2" /> Map to source image as large version<br/>
+												<input name="lgimg" type="radio" value="3" /> Import large version from source location (source name with _lg.jpg suffix)<br/>
+												<input name="lgimg" type="radio" value="4" /> Map to large version at source location (source name with _lg.jpg suffix)<br/>
+												<input name="lgimg" type="radio" value="5" /> Exclude large version<br/>
+											</div>
 										</td>
 									</tr>
 									<tr>
@@ -377,60 +378,60 @@ if($spprId) $specManager->setProjVariables();
 										<legend><b>Project Variables</b></legend>
 										<table>
 											<tr>
-												<td>
+												<td colspan="2">
 													<b>Web Image:</b>
-												</td>
-												<td> 
-													<input name="webimg" type="radio" value="1" CHECKED /> Evaluate and import source image<br/>
-													<input name="webimg" type="radio" value="2" /> Import source image as is without resizing<br/>
-													<input name="webimg" type="radio" value="3" /> Map to source image without importing<br/>
+													<div style="margin:5px 15px"> 
+														<input name="webimg" type="radio" value="1" CHECKED /> Evaluate and import source image<br/>
+														<input name="webimg" type="radio" value="2" /> Import source image as is without resizing<br/>
+														<input name="webimg" type="radio" value="3" /> Map to source image without importing<br/>
+													</div>
 												</td>
 											</tr>
 											<tr>
-												<td>
+												<td colspan="2">
 													<b>Thumbnail:</b>
-												</td>
-												<td> 
-													<input name="tnimg" type="radio" value="1" <?php echo ($specManager->getTnImg() == 1?'CHECKED':'') ?> /> Create new from source image<br/>
-													<input name="tnimg" type="radio" value="2" <?php echo ($specManager->getTnImg() == 2?'CHECKED':'') ?> /> Import existing source thumbnail (source name with _tn.jpg suffix)<br/>
-													<input name="tnimg" type="radio" value="3" <?php echo ($specManager->getTnImg() == 3?'CHECKED':'') ?> /> Map to existing source thumbnail (source name with _tn.jpg suffix)<br/>
-													<input name="tnimg" type="radio" value="0" <?php echo (!$specManager->getTnImg()?'CHECKED':'') ?> /> Exclude thumbnail <br/>
+													<div style="margin:5px 15px"> 
+														<input name="tnimg" type="radio" value="1" <?php echo ($specManager->getTnImg() == 1?'CHECKED':'') ?> /> Create new from source image<br/>
+														<input name="tnimg" type="radio" value="2" <?php echo ($specManager->getTnImg() == 2?'CHECKED':'') ?> /> Import existing source thumbnail (source name with _tn.jpg suffix)<br/>
+														<input name="tnimg" type="radio" value="3" <?php echo ($specManager->getTnImg() == 3?'CHECKED':'') ?> /> Map to existing source thumbnail (source name with _tn.jpg suffix)<br/>
+														<input name="tnimg" type="radio" value="0" <?php echo (!$specManager->getTnImg()?'CHECKED':'') ?> /> Exclude thumbnail <br/>
+													</div>
 												</td>
 											</tr>
 											<tr>
-												<td>
+												<td colspan="2">
 													<b>Large Image:</b>
-												</td>
-												<td> 
-													<input name="lgimg" type="radio" value="1" <?php echo ($specManager->getLgImg() == 1?'CHECKED':'') ?> /> Import source image as large version<br/>
-													<input name="lgimg" type="radio" value="2" <?php echo ($specManager->getLgImg() == 2?'CHECKED':'') ?> /> Map to source image as large version<br/>
-													<input name="lgimg" type="radio" value="3" <?php echo ($specManager->getLgImg() == 3?'CHECKED':'') ?> /> Import existing large version (source name with _lg.jpg suffix)<br/>
-													<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg() == 4?'CHECKED':'') ?> /> Map to exiting large version (source name with _lg.jpg suffix)<br/>
-													<input name="lgimg" type="radio" value="0" <?php echo (!$specManager->getLgImg()?'CHECKED':'') ?> /> Exclude large version<br/>
+													<div style="margin:5px 15px"> 
+														<input name="lgimg" type="radio" value="1" <?php echo ($specManager->getLgImg() == 1?'CHECKED':'') ?> /> Import source image as large version<br/>
+														<input name="lgimg" type="radio" value="2" <?php echo ($specManager->getLgImg() == 2?'CHECKED':'') ?> /> Map to source image as large version<br/>
+														<input name="lgimg" type="radio" value="3" <?php echo ($specManager->getLgImg() == 3?'CHECKED':'') ?> /> Import existing large version (source name with _lg.jpg suffix)<br/>
+														<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg() == 4?'CHECKED':'') ?> /> Map to exiting large version (source name with _lg.jpg suffix)<br/>
+														<input name="lgimg" type="radio" value="0" <?php echo (!$specManager->getLgImg()?'CHECKED':'') ?> /> Exclude large version<br/>
+													</div>
 												</td>
 											</tr>
 											<tr>
-												<td title="Unable to match primary identifer with an existing database record">
+												<td colspan="2" title="Unable to match primary identifer with an existing database record">
 													<b>Missing record:</b> 
-												</td>
-												<td>
-													<input type="radio" name="createnewrec" value="0" /> 
-													Skip image import and go to next<br/>
-													<input type="radio" name="createnewrec" value="1" CHECKED /> 
-													Create empty record and link image
+													<div style="margin:5px 15px"> 
+														<input type="radio" name="createnewrec" value="0" /> 
+														Skip image import and go to next<br/>
+														<input type="radio" name="createnewrec" value="1" CHECKED /> 
+														Create empty record and link image
+													</div>
 												</td>
 											</tr>
 											<tr>
-												<td title="Image with exact same name already exists">
-													<b>Image already exists:</b> 
-												</td>
-												<td>
-													<input type="radio" name="imgexists" value="0" CHECKED /> 
-													Skip import<br/>
-													<input type="radio" name="imgexists" value="1" /> 
-													Rename image and save both<br/>
-													<input type="radio" name="imgexists" value="2" /> 
-													Copy over existing image
+												<td colspan="2" title="Image with exact same name already exists">
+													<b>Image already exists:</b>
+													<div style="margin:5px 15px"> 
+														<input type="radio" name="imgexists" value="0" CHECKED /> 
+														Skip import<br/>
+														<input type="radio" name="imgexists" value="1" /> 
+														Rename image and save both<br/>
+														<input type="radio" name="imgexists" value="2" /> 
+														Copy over existing image
+													</div>
 												</td>
 											</tr>
 											<tr>
