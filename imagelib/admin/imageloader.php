@@ -1,29 +1,28 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ImageShared.php');
+include_once($serverRoot.'/classes/ImageImport.php');
 
-$action = array_key_exists("formsubmit",$_POST)?$_POST["formsubmit"]:"";
+$action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 $ulFileName = array_key_exists("ulfilename",$_POST)?$_POST["ulfilename"]:"";
 
 $isEditor = false;
-if($isAdmin){
+if($IS_ADMIN){
 	$isEditor = true;
 }
 
-$uploadManager = new ImageShared();
+$importManager = new ImageImport();
 
-$fieldMap = Array();
+$fieldMap = Array();			//array(sourceField => symbIndex)
 if($isEditor){
-	if($ulFileName){
-		$uploadManager->setFileName($ulFileName);
+	if($action){
+		$importManager->setUploadFile($ulFileName);
 	}
-	
-	if(array_key_exists("sf",$_REQUEST)){
+	if(array_key_exists("sf",$_POST)){
 		//Grab field mapping, if mapping form was submitted
- 		$targetFields = $_REQUEST["tf"];
- 		$sourceFields = $_REQUEST["sf"];
+ 		$targetFields = $_POST["tf"];
+ 		$sourceFields = $_POST["sf"];
 		for($x = 0;$x<count($targetFields);$x++){
-			if($targetFields[$x] && $sourceFields[$x]) $fieldMap[$sourceFields[$x]] = $targetFields[$x];
+			if($targetFields[$x] !== "" && $sourceFields[$x]) $fieldMap[$sourceFields[$x]] = $targetFields[$x];
 		}
 	}
 }
@@ -36,7 +35,9 @@ if($isEditor){
 	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
-		
+		function verifyUploadForm(f){
+			return true;
+		}
 	</script>
 </head>
 <body>
@@ -47,10 +48,10 @@ include($serverRoot.'/header.php');
 ?>
 <div class="navpath">
 	<b><a href="../../index.php">Homepage</a></b> &gt;&gt; 
-	<b>Image Loader</b>
+	<b>Image Importer</b>
 </div>
 
-<h1>Image Loader</h1>
+<h1>Image Importer</h1>
 <div  id="innertext">
 	<div style="margin-bottom:30px;">
 		
@@ -60,24 +61,25 @@ include($serverRoot.'/header.php');
 			<fieldset style="width:90%;">
 				<legend style="font-weight:bold;font-size:120%;">Image Upload Form</legend>
 				<div style="margin:10px;">
-					Flat structured, CSV (comma delimited) text files can be uploaded here. 
-					Scientific name is the only required field below genus rank. 
-					However, family, author, and rankid (as defined in taxonunits table) are always advised. 
-					For upper level taxa, parents and rankids need to be included in order to build the taxonomic hierarchy.
-					Large data files can be compressed as a ZIP file before import. 
-					If the file upload step fails without displaying an error message, it is possible that the 
-					file size excedes the file upload limits set within your PHP installation (see your php configuraton file).
+					This tool is designed to aid collection managers in batch importing image files 
+					that are defined within a comma delimited text file (CSV). The only two required fields are 
+					the image url. If scientific name is null, script will attempt to extract taxon name from image file name. 
+					The image urls must represent the full path to the image, or consist of the file names with base path 
+					defined within the ingestion form.  
+					Other optional fields include: photographer, caption, locality, sourceUrl, anatomy, 
+					notes, collection identifier, owner, copyright, sortSequence.   
+					Internal fields can include photographerUid, occid, or tid. 
 				</div>
-				<input type="hidden" name="ulfilename" value="<?php echo $loaderManager->getFileName();?>" />
+				<input type="hidden" name="ulfilename" value="<?php echo $importManager->getUploadFileName();?>" />
 				<?php 
-				if(!$loaderManager->getFileName()){ 
+				if(!$importManager->getUploadFileName()){ 
 					?>
 					<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 					<div>
-						<div class="overrideopt">
+						<div>
 							<b>Upload File:</b>
 							<div style="margin:10px;">
-								<input id="genuploadfile" name="uploadfile" type="file" size="40" />
+								<input name="uploadfile" type="file" size="40" />
 							</div>
 						</div>
 						<div style="margin:10px;">
@@ -99,10 +101,9 @@ include($serverRoot.'/header.php');
 								</th>
 							</tr>
 							<?php
-							$sArr = $loaderManager->getSourceArr();
-							$tArr = $loaderManager->getTargetArr();
-							asort($tArr);
-							foreach($sArr as $sField){
+							$sArr = $importManager->getSourceArr();
+							$tArr = $importManager->getTargetArr();
+							foreach($sArr as $sKey => $sField){
 								?>
 								<tr>
 									<td style='padding:2px;'>
@@ -110,31 +111,34 @@ include($serverRoot.'/header.php');
 										<input type="hidden" name="sf[]" value="<?php echo $sField; ?>" />
 									</td>
 									<td>
-										<select name="tf[]" style="background:<?php echo (array_key_exists($sField,$fieldMap)?"":"yellow");?>">
-											<option value="">Field Unmapped</option>
-											<option value="">-------------------------</option>
+										<select name="tf[]" style="background:<?php echo (array_key_exists(strtolower($sField),$fieldMap)?'':'yellow');?>">
+											<option value="">Select Target</option>
 											<?php 
-											$mappedTarget = (array_key_exists($sField,$fieldMap)?$fieldMap[$sField]:"");
-											$selStr = "";
-											if($mappedTarget=="unmapped") $selStr = "SELECTED";
-											echo "<option value='unmapped' ".$selStr.">Leave Field Unmapped</option>";
-											if($selStr){
-												$selStr = 0;
+											$sField = strtolower($sField);
+											//Check to see if field is mapped
+											$symbIndex = '';
+											if(array_key_exists($sField,$fieldMap)){
+												//Field is mapped
+												$symbIndex = $fieldMap[$sField];
 											}
-											foreach($tArr as $k => $tField){
-												if($selStr !== 0 && $tField == "scinameinput" && (strtolower($sField == "sciname") || strtolower($sField) == "scientific name")){
-													$selStr = "SELECTED";
+											if($symbIndex === ''){
+												$transStr = $importManager->getTranslation($sField);
+												if($transStr) $sField = $transStr;
+											}
+											$selStr = "";
+											echo "<option value='unmapped' ".($symbIndex=="unmapped"?'SELECTED':'').">Leave Field Unmapped</option>";
+											echo '<option value="">-------------------------</option>';
+											foreach($tArr as $tKey => $tField){
+												if($selStr !== 0){
+													if($symbIndex === '' && $sField == strtolower($tField)){
+														$selStr = "SELECTED";
+													}
+													elseif(is_numeric($symbIndex) && $symbIndex == $tKey){
+														$selStr = "SELECTED";
+													}
 												}
-												elseif($selStr !== 0 && $mappedTarget && $mappedTarget == $tField){
-													$selStr = "SELECTED";
-												}
-												elseif($selStr !== 0 && $tField==$sField && $tField != "sciname"){
-													$selStr = "SELECTED";
-												}
-												echo '<option value="'.$k.'" '.($selStr?$selStr:'').'>'.$tField."</option>\n";
-												if($selStr){
-													$selStr = 0;
-												}
+												echo '<option value="'.$tKey.'" '.($selStr?$selStr:'').'>'.$tField."</option>\n";
+												if($selStr) $selStr = 0;
 											}
 											?>
 										</select>
@@ -145,14 +149,23 @@ include($serverRoot.'/header.php');
 							?>
 						</table>
 						<div>
-							* Fields in yellow have not yet been verified
+							* Fields in yellow are not yet mapped or verified
 						</div>
 						<div style="margin:10px;">
-							<input type="submit" name="action" value="Verify Mapping" />
-							<input type="submit" name="action" value="Upload Images" />
+							<input type="submit" name="action" value="Verify Mapping" /><br/>
+							<fieldset>
+								<legend>Large Image</legend>
+								<input name="lgimg" type="radio" value="0" SELECTED /> Leave blank<br/>
+								<input name="lgimg" type="radio" value="1" /> Map to remote images<br/>
+								<input name="lgimg" type="radio" value="2" /> Import to local storage
+							</fieldset>
+							Base Path: <input name="basepath" type="text" value="" /><br/>
+							<input name="action" type="submit" value="Upload Images" />
 						</div>
 					</div>
-				<?php } ?>
+					<?php 
+				} 
+				?>
 			</fieldset>
 		</form>
 	</div>
@@ -160,6 +173,5 @@ include($serverRoot.'/header.php');
 <?php  
 include($serverRoot.'/footer.php');
 ?>
-
 </body>
 </html>

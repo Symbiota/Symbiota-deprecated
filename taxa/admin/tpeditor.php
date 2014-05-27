@@ -184,7 +184,7 @@ if($editable && $action){
 				echo "<div id='family' style='margin-left:20px;margin-top:0.25em;'><b>Family:</b> ".$tEditor->getFamily()."</div>\n";
 				
 				if($statusStr){
-					echo "<h3 style='color:red;'>Error: $statusStr<h3>";
+					echo '<h3 style="color:'.(stripos($statusStr,'error') !== false?'red':'green') .';">'.$statusStr.'<h3>';
 				}
 				?>
 				<div id="tabs" style="margin:10px;">
