@@ -97,7 +97,7 @@ class ImageCleaner{
 				}
 			}
 			else{
-				if($this->verbose) $statusStr = 'ERROR: unable to open image';
+				if($this->verbose) $statusStr = 'ERROR: unable to create thumbnail image';
 			}
 			if($this->verbose) echo $statusStr.'</li>';
 			$imgManager->reset();
@@ -136,7 +136,24 @@ class ImageCleaner{
 
 	private function urlExists($url) {
 		$exists = false;
-	    if(file_exists($url)){
+		$localUrl = '';
+		if(substr($url,0,1) == '/'){
+			if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
+				$url = $GLOBALS['imageDomain'].$url;
+			}
+			elseif($GLOBALS['imageRootUrl'] && strpos($url,$GLOBALS['imageRootUrl']) === 0){
+				$localUrl = str_replace($GLOBALS['imageRootUrl'],$GLOBALS['imageRootPath'],$url);
+			}
+			else{
+				$urlPrefix = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				$urlPrefix .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+				$url = $urlPrefix.$url;
+			}
+		}
+		
+	    if(file_exists($url) || ($localUrl && file_exists($localUrl))){
 			return true;
 	    }
 
