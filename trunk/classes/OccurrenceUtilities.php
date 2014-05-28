@@ -443,7 +443,13 @@ class OccurrenceUtilities {
 		return $retArr;
 	}
 	
+	//Associated species parser
 	public function buildAssociatedTaxaIndex($collid = 0){
+		set_time_limit(900);
+		echo '<ul>';
+		echo '<li>Starting to parse associated species text blocks </li>';
+		ob_flush();
+		flush();
 		$sql = 'SELECT o.occid, o.associatedtaxa '.
 			'FROM omoccurrences o LEFT JOIN omoccurassoctaxa a ON o.occid = a.occid '.
 			'WHERE o.associatedtaxa IS NOT NULL AND a.occid IS NULL ';
@@ -453,50 +459,112 @@ class OccurrenceUtilities {
 		//$sql .= ' AND o.tidinterpreted = 4058 ';
 		//$sql .= ' LIMIT 100';
 		$rs = $this->conn->query($sql);
+		echo '<li>Parsing new associated species text blocks (target count: '.$rs->num_rows.')... ';
+		ob_flush();
+		flush();
 		while($r = $rs->fetch_object()){
 			$assocArr = $this->parseAssocSpecies($r->associatedtaxa,$r->occid);
 		}
 		$rs->free();
+		echo 'Done!</li>';
+		
 		//Populate tid field using taxa table
+		echo '<li>Populate tid field using taxa table... ';
+		ob_flush();
+		flush();
 		$sql2 = 'UPDATE omoccurassoctaxa a INNER JOIN taxa t ON a.verbatimstr = t.sciname '.
 			'SET a.tid = t.tid '.
 			'WHERE a.tid IS NULL';
 		if(!$this->conn->query($sql2)){
-			echo 'Unable to populate tid field using taxa table<br/>';
-			echo $sql2;
+			echo '<li style="margin-left:10px;">Unable to populate tid field using taxa table: '.$this->conn->error.'</li>';
+			echo '<li style="margin-left:10px;">'.$sql2.'</li>';
 		}
+		echo 'Done!</li>';
+
 		//Populate tid field using taxavernaculars table
+		echo '<li>Populate tid field using taxavernaculars table... ';
+		ob_flush();
+		flush();
 		$sql3 = 'UPDATE omoccurassoctaxa a INNER JOIN taxavernaculars v ON a.verbatimstr = v.vernacularname '.
 			'SET a.tid = v.tid '.
 			'WHERE a.tid IS NULL ';
 		if(!$this->conn->query($sql3)){
-			echo 'Unable to populate tid field using taxavernaculars table<br/>';
-			echo $sql3;
+			echo '<li style="margin-left:10px;">Unable to populate tid field using taxavernaculars table: '.$this->conn->error.'</li>';
+			echo '<li style="margin-left:10px;">'.$sql3.'</li>';
 		}
+		echo 'Done!</li>';
+		
 		//Populate tid field by linking back to omoccurassoctaxa table
 		//This assumes that tids are correct; in future verificationscore field can be used to select only those that have been verified
+		echo '<li>Populate tid field by linking back to omoccurassoctaxa table... ';
+		ob_flush();
+		flush();
 		$sql4 = 'UPDATE omoccurassoctaxa a INNER JOIN omoccurassoctaxa a2 ON a.verbatimstr = a2.verbatimstr '.
 			'SET a.tid = a2.tid '.
 			'WHERE a.tid IS NULL AND a2.tid IS NOT NULL ';
 		if(!$this->conn->query($sql4)){
-			echo 'Unable to populate tid field relinking back to omoccurassoctaxa table<br/>';
-			echo $sql4;
+			echo '<li style="margin-left:10px;">Unable to populate tid field relinking back to omoccurassoctaxa table: '.$this->conn->error.'</li>';
+			echo '<li style="margin-left:10px;">'.$sql4.'</li>';
 		}
-		echo '<b>DONE!</b>';
+		echo 'Done!</li>';
+		
+		//Lets get the harder ones
+		echo '<li>Mining database for the more difficult matches... ';
+		ob_flush();
+		flush();
+		$sql5 = 'SELECT DISTINCT verbatimstr '.
+			'FROM omoccurassoctaxa '.
+			'WHERE tid IS NULL ';
+		$rs5 = $this->conn->query($sql5);
+		while($r5 = $rs5->fetch_object()){
+			$verbStr = $r5->verbatimstr;
+			$tid = $this->mineAssocSpeciesMatch($verbStr);
+			if($tid){
+				$sql5b = 'UPDATE omoccurassoctaxa '.
+					'SET tid = '.$tid.' '.
+					'WHERE tid IS NULL AND verbatimstr = "'.$verbStr.'"';
+				if(!$this->conn->query($sql5b)){
+					echo '<li style="margin-left:10px;">Unable to populate NULL tid field: '.$this->conn->error.'</li>';
+					echo '<li style="margin-left:10px;">'.$sql5b.'</li>';
+				}
+			}
+		}
+		$rs5->free();
+		echo 'Done!</li>';
+		
+		echo '<li>DONE!</li>';
+		echo '</ul>';
+		ob_flush();
+		flush();
 	}
 	
 	public function parseAssocSpecies($assocSpeciesStr,$occid){
 		$parseArr = array();
 		if($assocSpeciesStr){
 			//Separate associated species
-			$assocSpeciesStr = str_replace(array('&','and',';'),',',$assocSpeciesStr);
+			$assocSpeciesStr = str_replace(array('&',' and ',';'),',',$assocSpeciesStr);
 			$assocArr = explode(',',$assocSpeciesStr);
 			//Add to return array
 			foreach($assocArr as $v){
-				$vStr = trim($v,'. ');
+				$vStr = trim($v,'."-()[]:#\' ');
 				if(substr($vStr,-3) == ' sp') $vStr = substr($vStr,0,strlen($vStr)-3);
+				if(substr($vStr,-4) == ' spp') $vStr = substr($vStr,0,strlen($vStr)-4);
 				$vStr = preg_replace('/\s\s+/', ' ',$vStr);
 				if($vStr){
+					//If genus is abbreviated (e.g. P. ponderosa), try to get genus from previous entry 
+					if(preg_match('/^([A-Z]{1})\.{0,1}\s{1}([a-z]*)$/',$vStr,$m)){
+						//Iterate through parseArr in reverse until match is found
+						$cnt = 0;
+						for($i = (count($parseArr)-1); $i >= 0; $i--){
+							if(preg_match('/^('.$m[1].'{1}[a-z]+)\s+/',$vStr,$m2)){
+								$vStr = $m2[1].' '.$m[2];
+								//Possible code to add: verify that name is in taxa tables  
+								break;
+							}
+							if($cnt > 3) break;
+							$cnt++;
+						}
+					}
 					$parseArr[] = $vStr;
 				}
 			}
@@ -506,15 +574,43 @@ class OccurrenceUtilities {
 	}
 
 	private function databaseAssocSpecies($assocArr, $occid){
-		$sql = 'INSERT INTO omoccurassoctaxa(occid, verbatimstr) VALUES';
-		foreach($assocArr as $aStr){
-			$sql .= '('.$occid.',"'.$this->conn->real_escape_string($aStr).'"), ';
+		if($assocArr){
+			$sql = 'INSERT INTO omoccurassoctaxa(occid, verbatimstr) VALUES';
+			foreach($assocArr as $aStr){
+				$sql .= '('.$occid.',"'.$this->conn->real_escape_string($aStr).'"), ';
+			}
+			$sql = trim($sql,', ');
+			//echo $sql; exit;
+			if(!$this->conn->query($sql)){
+				echo '<li style="margin-left:10px;">ERROR: unable to database assocaited values: '.$this->conn->error.'</li>';
+				echo '<li style="margin-left:10px;">SQL: '.$sql.'</li>';
+			}
 		}
-		$sql = trim($sql,', ');
-		//echo $sql; exit;
-		if(!$this->conn->query($sql)){
-			echo 'ERROR: unable to data assocaited values<br/> SQL: '.$sql.'<br/>';
+	}
+	
+	private function mineAssocSpeciesMatch($verbStr){
+		$retTid = 0;
+		//Pattern: P. ponderosa
+		if(preg_match('/^([A-Z]{1})\.{0,1}\s{1}([a-z]*)$/',$verbStr,$m)){
+			$sql = 'SELECT tid, sciname '.
+				'FROM taxa '. 
+				'WHERE unitname1 LIKE "'.$m[1].'%" AND unitname2 = "'.$m[2].'" AND rankid = 220';
+			//echo $sql.'; '.$verbStr;
+			$rs = $this->conn->query($sql);
+			if($rs->num_rows == 1){
+				if($r = $rs->fetch_object()){
+					$retTid = $r->tid;
+				}
+			}
+			$rs->free();
 		}
+		//Add code that uses Levenshtein distance matching on taxa table
+		
+		
+		//Add code that uses Levenshtein distance matching on taxavernaculars table
+
+		
+		return $retTid;
 	}
 }
 ?>
