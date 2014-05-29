@@ -75,6 +75,32 @@ class ImageShared{
  	public function reset(){
  		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
  		$this->sourceGdImg = null;
+ 		
+ 		$this->sourcePath = '';
+		$this->imgName = '';
+		$this->imgExt = '';
+	
+		$this->sourceWidth = 0;
+		$this->sourceHeight = 0;
+
+		//Image metadata
+		$this->caption = '';
+		$this->photographer = '';
+		$this->photographerUid = '';
+		$this->sourceUrl = '';
+		$this->copyright = '';
+		$this->owner = '';
+		$this->locality = '';
+		$this->occid = '';
+		$this->tid = '';
+		$this->notes = '';
+		$this->sortSeq = '';
+	
+		$this->activeImgId = 0;
+	
+		unset($this->errArr);
+		$this->errArr = array();
+ 		
  	}
 
 	public function uploadImage(){
@@ -85,6 +111,7 @@ class ImageShared{
 				if(move_uploaded_file($_FILES['imgfile']['tmp_name'], $this->targetPath.$fileName.$this->imgExt)){
 					$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
 					$this->imgName = $fileName;
+					$this->testOrientation();
 					return true;
 				}
 				else{
@@ -130,6 +157,7 @@ class ImageShared{
 		if(copy($sourceUri, $this->targetPath.$fileName.$this->imgExt)){
 			$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
 			$this->imgName = $fileName;
+			$this->testOrientation();
 			return true;
 		}
 		$this->errArr[] = 'ERROR: Unable to copy image to target ('.$this->targetPath.$fileName.$this->imgExt.')';
@@ -142,6 +170,7 @@ class ImageShared{
     	}
 		$this->sourcePath = $url;
     	$this->imgName = $this->cleanFileName($url);
+		$this->testOrientation();
 	}
 
 	public function cleanFileName($fName){
@@ -157,14 +186,17 @@ class ImageShared{
 			$fName = substr($fName,0,$p);
 		}
 
+		$fName = str_replace("%20","_",$fName);
+		$fName = str_replace("%23","_",$fName);
 		$fName = str_replace(" ","_",$fName);
+		$fName = str_replace("__","_",$fName);
 		$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
 		$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
 		$fName = str_replace(array(chr(239),chr(240),chr(241),chr(261)),"i",$fName);
 		$fName = str_replace(array(chr(247),chr(248),chr(249),chr(262)),"o",$fName);
 		$fName = str_replace(array(chr(250),chr(251),chr(263)),"u",$fName);
 		$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
-		$fName = preg_replace("/[^a-zA-Z0-9\-_\.]/", "", $fName);
+		$fName = preg_replace("/[^a-zA-Z0-9\-_]/", "", $fName);
 		if(strlen($fName) > 30) {
 			$fName = substr($fName,0,30);
 		}
@@ -292,8 +324,8 @@ class ImageShared{
 		}
 		else{
 			//Image width or file size is too large
-			$newWidth = ($this->sourceWidth<($this->webPixWidth*1.2)?$this->sourceWidth:$this->webPixWidth);
-			$this->createNewImage('',$newWidth);
+			//$newWidth = ($this->sourceWidth<($this->webPixWidth*1.2)?$this->sourceWidth:$this->webPixWidth);
+			$this->createNewImage('',$this->sourceWidth);
 			$imgWebUrl = $this->imgName.'.jpg';
 		}
 
@@ -349,10 +381,10 @@ class ImageShared{
 			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
 		}
 		$newHeight = round($this->sourceHeight*($newWidth/$this->sourceWidth));
-		//if($newHeight > $newWidth*1.2){
-			//$newHeight = $newWidth;
-			//$newWidth = round($this->sourceWidth*($newWidth/$this->sourceHeight));
-		//}
+		if($newWidth > $this->sourceWidth){
+			$newWidth = $this->sourceWidth;
+			$newHeight = $this->sourceHeight;
+		}
 
 		if(!$this->sourceGdImg){
 			if($this->imgExt == '.gif'){
@@ -811,6 +843,64 @@ class ImageShared{
 	}
 	
 	//Misc functions
+	private function testOrientation(){
+		if($this->sourcePath){
+			$exif = exif_read_data($this->sourcePath);
+			$ort = '';
+			if(isset($exif['Orientation'])) $ort = $exif['Orientation'];
+			elseif(isset($exif['IFD0']['Orientation'])) $ort = $exif['IFD0']['Orientation'];
+			elseif(isset($exif['COMPUTED']['Orientation'])) $ort = $exif['COMPUTED']['Orientation'];
+			
+			if($ort && $ort > 1){
+				if(!$this->sourceGdImg){
+					if($this->imgExt == '.gif'){
+				   		$this->sourceGdImg = imagecreatefromgif($this->sourcePath);
+					}
+					elseif($this->imgExt == '.png'){
+				   		$this->sourceGdImg = imagecreatefrompng($this->sourcePath);
+					}
+					else{
+						//JPG assumed
+				   		$this->sourceGdImg = imagecreatefromjpeg($this->sourcePath);
+					}
+				}
+				if($this->sourceGdImg){
+					switch($ort){
+						case 2: // horizontal flip
+							//$image->flipImage($public,1);
+						break;
+			
+						case 3: // 180 rotate left
+							$this->sourceGdImg = imagerotate($this->sourceGdImg,180,0); 
+						break;
+			
+						case 4: // vertical flip
+							//$image->flipImage($public,2);
+						break;
+			
+						case 5: // vertical flip + 90 rotate right
+							//$image->flipImage($public, 2);
+							//$image->rotateImage($public, -90);
+						break;
+			
+						case 6: // 90 rotate right
+							$this->sourceGdImg = imagerotate($this->sourceGdImg,-90,0); 
+						break;
+			
+						case 7: // horizontal flip + 90 rotate right
+							//$image->flipImage($public,1);
+							//$image->rotateImage($public, -90);
+						break;
+			
+						case 8:    // 90 rotate left
+							$this->sourceGdImg = imagerotate($this->sourceGdImg,90,0); 
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	private function urlExists($url) {
 		$exists = false;
 	    if(file_exists($url)){
