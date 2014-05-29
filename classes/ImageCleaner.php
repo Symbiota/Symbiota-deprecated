@@ -33,7 +33,7 @@ class ImageCleaner{
 
 	public function buildThumbnailImages($collid = 0){
 		$imgManager = new ImageShared();
-		$imgManager->setTargetPath('thumbnails');
+		$imgManager->setTargetPath('misc');
 		
 		$sql = 'SELECT ti.imgid, ti.url, ti.originalurl '.
 			'FROM images ti ';
