@@ -137,7 +137,7 @@ class ImageShared{
 			//trigger_error('Image source uri NULL in copyImageFromUrl method',E_USER_ERROR);
 			return false;
 		}
-		if(!$this->urlExists($sourceUri)){
+		if(!$this->uriExists($sourceUri)){
 			$this->errArr[] = 'ERROR: Image source file ('.$sourceUri.') does not exist in copyImageFromUrl method';
 			//trigger_error('Image source file ('.$sourceUri.') does not exist in copyImageFromUrl method',E_USER_ERROR);
 			return false;
@@ -200,20 +200,19 @@ class ImageShared{
 		if(strlen($fName) > 30) {
 			$fName = substr($fName,0,30);
 		}
-		
-		/*
-		if($targetPath){
+		$fName .= '_'.time();
+		//Test to see if target images exist (can happen batch loading images with similar names)
+		if($this->targetPath){
 			//Check and see if file already exists, if so, rename filename until it has a unique name
 			$tempFileName = $fName;
 			$cnt = 0;
-			while(file_exists($targetPath.$tempFileName.$ext)){
+			while(file_exists($this->targetPath.$tempFileName.'_tn.jpg')){
 				$tempFileName = $fName.'_'.$cnt;
 				$cnt++;
 			}
 			if($cnt) $fName = $tempFileName;
 		}
-		*/
-		$fName .= '_'.time();
+		
 		//Returns file name without extension
 		return $fName;
  	}
@@ -341,7 +340,7 @@ class ImageShared{
 	public function createNewImage($subExt, $targetWidth, $qualityRating = 0){
 		global $useImageMagick;
 		$status = false;
-		if($this->sourcePath && $this->urlExists($this->sourcePath)){
+		if($this->sourcePath && $this->uriExists($this->sourcePath)){
 			if(!$qualityRating) $qualityRating = $this->jpgCompression;
 			
 	        if($useImageMagick) {
@@ -905,7 +904,7 @@ class ImageShared{
 		}
 	}
 
-	private function urlExists($url) {
+	private function uriExists($url) {
 		$exists = false;
 	    if(file_exists($url)){
 			return true;

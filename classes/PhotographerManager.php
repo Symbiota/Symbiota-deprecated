@@ -98,10 +98,10 @@ class PhotographerManager{
 			$limitNum = $this->conn->real_escape_string($lNum);
 		}
 		if($uid){
-			$sql = 'SELECT i.imgid, i.thumbnailurl, i.url, t.sciname, t.tid '.
-				'FROM images i INNER JOIN taxa t ON i.tid = t.tid '.
+			$sql = 'SELECT i.imgid, i.thumbnailurl, i.url, IFNULL(t.sciname,"undefined") AS sciname, t.tid '.
+				'FROM images i LEFT JOIN taxa t ON i.tid = t.tid '.
 				'WHERE (i.photographeruid = '.$uid.') '.
-				'ORDER BY t.sciname '.
+				'ORDER BY sciname '.
 				'LIMIT '.$limitStart.', '.$lNum;
 		}
 		else{
