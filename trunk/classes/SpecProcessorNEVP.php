@@ -435,7 +435,10 @@ class OCCURRENCE {
                            // Preconstructed derivative JPG file
                            $imgWebUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?resize=1250&format=jpeg";
                            $imgTnUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?thumbnail=225,225";
-                           $imgLgUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?rotate=guess&format=jpeg,quality,100";
+                           // Because this is a JPEG, no need to request ?rotate=guess&format=jpeg,quality,100
+                           // and the folks at iPlant are requesting that this request be made without the 
+                           // un-needed transformation parameters.
+                           $imgLgUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID";
                         } 
                      }
                   }
