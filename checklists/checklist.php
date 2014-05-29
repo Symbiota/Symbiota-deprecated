@@ -481,7 +481,7 @@ if($clValue || $dynClid){
 								</div>
 								<div>
 									<?php 
-									if(!$printMode) echo '<a href="'.$spUrl.'">'; 
+									if(!$printMode) echo '<a href="'.$spUrl.'" target="_blank">'; 
 									echo '<b>'.$sppArr['sciname'].'</b>';
 									if(!$printMode) echo '</a>';
 									if(array_key_exists('vern',$sppArr)){

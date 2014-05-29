@@ -269,7 +269,9 @@ class ImageShared{
 		}
 
 		//Get image dimensions
-		list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+		if(!$this->sourceWidth || !$this->sourceHeight){
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+		}
 		//Get image file size
 		$fileSize = 0;
 		if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://') { 
@@ -896,6 +898,8 @@ class ImageShared{
 							$this->sourceGdImg = imagerotate($this->sourceGdImg,90,0); 
 						break;
 					}
+					$this->sourceWidth = imagesx($this->sourceGdImg);
+					$this->sourceHeight = imagesy($this->sourceGdImg);
 				}
 			}
 		}
