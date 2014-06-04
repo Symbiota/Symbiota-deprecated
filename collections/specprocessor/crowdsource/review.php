@@ -254,7 +254,7 @@ $projArr = $csManager->getProjectDetails();
 								<div>
 									<?php
 									if($collid){
-										echo '<input name="action" type="submit" value="Submit Reveiws" />';
+										echo '<input name="action" type="submit" value="Submit Reviews" />';
 									}
 									?>
 								</div>

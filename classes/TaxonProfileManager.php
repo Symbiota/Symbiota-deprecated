@@ -204,48 +204,25 @@ class TaxonProfileManager {
 		$this->sppArray = Array();
 		$sql = '';
 		if($this->clid){
-			/*$sql = "SELECT DISTINCT if(t.rankid=220,t.tid,ts.parenttid) AS tid, ".
-				"CONCAT_WS(' ',t.unitind1,t.unitname1,t.unitind2,t.unitname2) AS sciname, t.securitystatus ".
-				"FROM (taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tid) ".
-				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.tid ".
-				"WHERE (ctl.clid = ".$this->clid.") AND (ts.taxauthid = 1) AND ".
-				"((ts.hierarchystr LIKE '%,".$this->tid.",%') OR (ts.hierarchystr LIKE '%,".$this->tid."'))"; */
-			$sql = 'SELECT t.sciname, t.tid, t.securitystatus '. 
-				'FROM taxa t INNER JOIN (SELECT DISTINCT CONCAT_WS(" ",t.unitind1,t.unitname1,t.unitind2,t.unitname2) AS sciname '.
-				'FROM (taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tid) '.
-				'INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.tid '. 
-				'WHERE (ctl.clid = '.$this->clid.') AND (ts.taxauthid = 1) '.
-				'AND ((ts.hierarchystr LIKE "%,'.$this->tid.',%") OR (ts.hierarchystr LIKE "%,'.$this->tid.'"))) intab ON t.sciname = intab.sciname';
+			$sql = 'SELECT t.tid, t.sciname, t.securitystatus '. 
+				'FROM taxa t INNER JOIN taxaenumtree te ON t.tid = te.tid '.
+				'INNER JOIN fmchklsttaxalink ctl ON ctl.TID = t.tid '. 
+				'WHERE (ctl.clid = '.$this->clid.')AND t.rankid = 220 AND (te.taxauthid = 1) AND (te.parenttid = '.$this->tid.')';
 		}
 		elseif($this->pid){
-			/*$sql = "SELECT DISTINCT if(t.rankid=220,t.tid,ts.parenttid) AS tid, ".
-				"CONCAT_WS(' ',t.unitind1,t.unitname1,t.unitind2,t.unitname2) AS sciname, t.securitystatus ".
-				"FROM (((taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tid) ".
-				"INNER JOIN taxstatus ts2 ON t.Tid = ts2.tidaccepted) ".
-				"INNER JOIN fmchklsttaxalink ctl ON ts.Tid = ctl.TID) ".
-				"INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid ".
-				"WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (cpl.pid = ".$this->pid.") AND ".
-				"((ts.hierarchystr LIKE '%,".$this->tid.",%') OR (ts.hierarchystr LIKE '%,".$this->tid."'))";*/
-			$sql = 'SELECT DISTINCT t.sciname, t.tid, t.securitystatus '.
-				'FROM taxa t INNER JOIN (SELECT CONCAT_WS(" ",t.unitind1,t.unitname1,t.unitind2,t.unitname2) AS sciname '.
-				'FROM (((taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tid) '.
-				'INNER JOIN taxstatus ts2 ON t.Tid = ts2.tidaccepted) '.
-				'INNER JOIN fmchklsttaxalink ctl ON ts.Tid = ctl.TID) '.
-				'INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid '.
-				'WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (cpl.pid = '.$this->pid.') AND '.
-				'((ts.hierarchystr LIKE "%,'.$this->tid.',%") OR (ts.hierarchystr LIKE "%,'.$this->tid.'"))'.
-				') intab ON t.sciname = intab.sciname';
+			$sql = 'SELECT DISTINCT t.tid, t.sciname, t.securitystatus '. 
+				'FROM taxa t INNER JOIN taxaenumtree te ON t.tid = te.tid '.
+				'INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
+				'INNER JOIN fmchklsttaxalink ctl ON ts.Tid = ctl.TID '. 
+				'INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid '. 
+				'WHERE (ts.taxauthid = 1) AND (te.taxauthid = 1) AND (cpl.pid = '.$this->pid.') '.
+				'AND (te.parenttid = '.$this->tid.') AND (t.rankid = 220)';
 		}
 		else{
-			/*$sql = "SELECT DISTINCT if(t.rankid=220,t.tid,ts.parenttid) AS tid, ".
-				"CONCAT_WS(' ',t.unitind1,t.unitname1,t.unitind2,t.unitname2) AS sciname, t.securitystatus ".
-				"FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.Tid ".
-				"WHERE (ts.taxauthid = 1) AND (ts.Tid = ts.TidAccepted) AND ".
-				"((ts.hierarchystr LIKE '%,".$this->tid.",%') OR (ts.hierarchystr LIKE '%,".$this->tid."'))";*/
 			$sql = 'SELECT DISTINCT t.sciname, t.tid, t.securitystatus '.
-				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.TidAccepted '.
-				'WHERE (ts.taxauthid = 1) AND (t.rankid = 220) AND '.
-				'((ts.hierarchystr LIKE "%,'.$this->tid.',%") OR (ts.hierarchystr LIKE "%,'.$this->tid.'"))';
+				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tidaccepted '. 
+				'INNER JOIN taxaenumtree te ON ts.tid = te.tid '.
+				'WHERE (te.taxauthid = 1) AND (ts.taxauthid = 1) AND (t.rankid = 220) AND (te.parenttid = '.$this->tid.')';
 		}
 		//echo $sql;
 		
@@ -261,10 +238,10 @@ class TaxonProfileManager {
 		
 		//If no tids exist because there are no species in default project, grab all species from that taxon
 		if(!$tids){
-			$sql = "SELECT DISTINCT t.tid, t.sciname, t.securitystatus ".
-				"FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.TidAccepted ".
-				"WHERE (ts.taxauthid = 1) AND (t.rankid = 220) AND ".
-				"((ts.hierarchystr LIKE '%,".$this->tid.",%') OR (ts.hierarchystr LIKE '%,".$this->tid."'))";
+			$sql = 'SELECT DISTINCT t.sciname, t.tid, t.securitystatus '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tidaccepted '. 
+				'INNER JOIN taxaenumtree te ON ts.tid = te.tid '.
+				'WHERE (te.taxauthid = 1) AND (ts.taxauthid = 1) AND (t.rankid = 220) AND (te.parenttid = '.$this->tid.')';
 			//echo $sql;
 			
 			$result = $this->con->query($sql);
@@ -420,8 +397,10 @@ class TaxonProfileManager {
 	private function setTaxaImages(){
 		$this->imageArr = array();
 		$tidArr = Array($this->tid);
-		$sql1 = 'SELECT DISTINCT tid FROM taxstatus '.
-			'WHERE taxauthid = 1 AND tid = tidaccepted AND ((hierarchystr LIKE "%,'.$this->tid.',%") OR (hierarchystr LIKE "%,'.$this->tid.'"))';
+		$sql1 = 'SELECT DISTINCT ts.tid '. 
+			'FROM taxstatus ts INNER JOIN taxaenumtree tn ON ts.tid = tn.tid '.
+			'WHERE tn.taxauthid = 1 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
+			'AND tn.parenttid = '.$this->tid;
 		$rs1 = $this->con->query($sql1);
 		while($r1 = $rs1->fetch_object()){
 			$tidArr[] = $r1->tid;
@@ -515,29 +494,17 @@ class TaxonProfileManager {
 		$links = Array();
 		//Get hierarchy string
 		if($this->tid){
-			$hierStr = '';
-			$sqlHier = 'SELECT ts.hierarchystr FROM taxstatus ts '.
-				'WHERE ts.taxauthid = 1 AND (ts.tid = '.$this->tid.')';
-			//echo $sqlHier;
-			$resultHier = $this->con->query($sqlHier);
-			while($rowHier = $resultHier->fetch_object()){
-				$hierStr = $rowHier->hierarchystr;
-			}
-			$resultHier->free();
-	
 			//Get links
-			if($hierStr){
-				$sql = 'SELECT tl.tlid, tl.url, tl.icon, tl.title, tl.owner, tl.notes, tl.sortsequence '.
-					'FROM taxalinks tl '.
-					'WHERE (tl.tid IN('.$this->tid.','.$hierStr.')) '.
-					'ORDER BY tl.sortsequence, tl.title';
-				//echo $sql;
-				$result = $this->con->query($sql);
-				while($r = $result->fetch_object()){
-					$links[] = array('title'=>$r->title,'url'=>$r->url,'icon'=>$r->icon,'notes'=>$r->notes,'sortseq'=>$r->sortsequence);
-				}
-				$result->free();
+			$sql = 'SELECT DISTINCT tl.tlid, tl.url, tl.icon, tl.title, tl.owner, tl.notes, tl.sortsequence '.
+				'FROM taxalinks tl INNER JOIN taxaenumtree tn ON tl.tid = tn.parenttid '.
+				'WHERE (tn.tid  = '.$this->tid.') OR (tl.tid = '.$this->tid.') '.
+				'ORDER BY tl.sortsequence, tl.title';
+			//echo $sql;
+			$result = $this->con->query($sql);
+			while($r = $result->fetch_object()){
+				$links[] = array('title'=>$r->title,'url'=>$r->url,'icon'=>$r->icon,'notes'=>$r->notes,'sortseq'=>$r->sortsequence);
 			}
+			$result->free();
 		}
 		return $links;
 	}
@@ -667,7 +634,7 @@ class TaxonProfileManager {
 					$descriptions[$tdbId]["source"] = $row->source;
 					$descriptions[$tdbId]["url"] = $row->sourceurl;
 				}
-				$header = $row->displayheader?"<b>".$row->heading."</b>: ":"";
+				$header = $row->displayheader && $row->heading?"<b>".$row->heading."</b>: ":"";
 				$descriptions[$tdbId]["desc"][$row->tdsid] = $header.$row->statement;
 			}
 			$result->close();

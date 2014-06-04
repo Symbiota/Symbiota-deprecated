@@ -1,6 +1,6 @@
 <?php
-
 include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/TaxonomyMaintenance.php');
 
 class TaxonomyDisplayManager{
 
@@ -21,73 +21,103 @@ class TaxonomyDisplayManager{
 	}
  	
 	public function getTaxa(){
-		//Get target taxa (we don't want children and parents of not accepted taxa, so we'll get those later) 
-		$hArray = Array();
-		$hierarchyArr = Array();
+		//Temporary code: check to make sure taxaenumtree is populated
+		//This code can be removed somewhere down the line
+		$sqlTest = 'SELECT tid FROM taxaenumtree LIMIT 1';
+		$rsTest = $this->conn->query($sqlTest);
+		if(!$rsTest->num_rows){
+			echo '<div style="color:red;margin:30px;">';
+			echo 'NOTICE: Building new taxonomic hierarchy table (taxaenumtree).<br/>';
+			echo 'This may take a few minutes, but only needs to be done once.<br/>';
+			echo 'Do not terminate this process early.';
+			echo '</div>';
+			ob_flush();
+			flush();
+			$taxMainObj = new TaxonomyMaintenance();
+			$taxMainObj->buildHierarchyEnumTree();
+		}
+		$rsTest->free();
+		
+		//Get target taxa (we don't want children and parents of non-accepted taxa, so we'll get those later) 
 		$taxaParentIndex = Array();
 		if($this->targetStr){
-			$sql = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid, ts.tidaccepted, ts.hierarchystr '.
+			$sql1 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid, ts.tidaccepted '.
 				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
 				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted '.
 				'LEFT JOIN taxa t1 ON ts1.tid = t1.tid '.
 				'WHERE (ts.taxauthid = 1 OR ts.taxauthid IS NULL) AND (ts1.taxauthid = 1 OR ts1.taxauthid IS NULL) ';
 			if(is_numeric($this->targetStr)){
-				$sql .= 'AND (t.tid IN('.implode(',',$this->targetStr).') OR (ts1.tid = '.$this->targetStr.'))';
+				$sql1 .= 'AND (t.tid IN('.implode(',',$this->targetStr).') OR (ts1.tid = '.$this->targetStr.'))';
 			}
 			elseif(strpos($this->targetStr," ")){
-				$sql .= 'AND ((t.sciname LIKE "'.$this->targetStr.'%") OR (t1.sciname LIKE "'.$this->targetStr.'%"))';
+				$sql1 .= 'AND ((t.sciname LIKE "'.$this->targetStr.'%") OR (t1.sciname LIKE "'.$this->targetStr.'%"))';
 			}
 			else{
-				$sql .= 'AND ((t.sciname = "'.$this->targetStr.'") OR (t1.sciname = "'.$this->targetStr.'"))';
+				$sql1 .= 'AND ((t.sciname = "'.$this->targetStr.'") OR (t1.sciname = "'.$this->targetStr.'"))';
 			}
-			//echo "<div>".$sql."</div>";
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				$tid = $row->tid;
-				$parentTid = $row->parenttid;
-				if($tid == $row->tidaccepted || !$row->tidaccepted){
-					$this->taxaArr[$tid]["sciname"] = $row->sciname;
-					$this->taxaArr[$tid]["author"] = $row->author; 
+			//echo "<div>".$sql1."</div>";
+			$rs1 = $this->conn->query($sql1);
+			while($row1 = $rs1->fetch_object()){
+				$tid = $row1->tid;
+				$parentTid = $row1->parenttid;
+				if($tid == $row1->tidaccepted || !$row1->tidaccepted){
+					$this->taxaArr[$tid]["sciname"] = $row1->sciname;
+					$this->taxaArr[$tid]["author"] = $row1->author; 
 					$this->taxaArr[$tid]["parenttid"] = $parentTid; 
-					$this->taxaArr[$tid]["rankid"] = $row->rankid;
-					$this->indentMap[$row->rankid] = 0;
-					$this->searchTaxonRank = $row->rankid;
+					$this->taxaArr[$tid]["rankid"] = $row1->rankid;
+					$this->indentMap[$row1->rankid] = 0;
+					$this->searchTaxonRank = $row1->rankid;
 					$taxaParentIndex[$tid] = ($parentTid?$parentTid:0);
-					if($row->hierarchystr) $hArray = array_merge($hArray,explode(",",$row->hierarchystr));
 				}
 				else{
-					$this->taxaArr[$row->tidaccepted]["synonyms"][$tid] = $row->sciname;
+					$this->taxaArr[$row1->tidaccepted]["synonyms"][$tid] = $row1->sciname;
 				}
 			}
-			$rs->close();
+			$rs1->free();
 		}
-		
+
+		$hierarchyArr = Array();
 		if($this->taxaArr){
 			//Get parents and children, but only accepted children
-			$sql = "SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid ".
-				"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-				"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND (";
-			//Add sql fragments that will grab the children taxa
-			$innerSql = "";
-			foreach($this->taxaArr as $t => $tArr){
-				$innerSql .= "OR (ts.hierarchystr LIKE '%,".$t.",%') OR (ts.hierarchystr LIKE '%,".$t."') ";
-			}
-			if($hArray) $innerSql .= "OR (t.tid IN(".implode(",",array_unique($hArray)).")) ";
-			$sql .= substr($innerSql,3).") ";
-			if($this->searchTaxonRank < 140) $sql .= "AND rankid <= 140 ";
-			//echo $sql."<br>";
-			$result = $this->conn->query($sql);
-			while($row = $result->fetch_object()){
-				$tid = $row->tid;
-				$parentTid = $row->parenttid;
-				$this->taxaArr[$tid]["sciname"] = $row->sciname;
-				$this->taxaArr[$tid]["author"] = $row->author; 
-				$this->taxaArr[$tid]["rankid"] = $row->rankid;
-				$this->indentMap[$row->rankid] = 0;
+			$tidStr = implode(',',array_keys($this->taxaArr));
+			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '. 
+				'INNER JOIN taxaenumtree te ON t.tid = te.tid '.
+				'WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND (te.taxauthid = 1) '.
+				'AND ((te.parenttid IN('.$tidStr.')) OR (t.tid IN('.$tidStr.'))) ';
+			if($this->searchTaxonRank < 140) $sql2 .= "AND t.rankid <= 140 ";
+			//echo $sql2."<br>";
+			$rs2 = $this->conn->query($sql2);
+			while($row2 = $rs2->fetch_object()){
+				$tid = $row2->tid;
+				$parentTid = $row2->parenttid;
+				$this->taxaArr[$tid]["sciname"] = $row2->sciname;
+				$this->taxaArr[$tid]["author"] = $row2->author; 
+				$this->taxaArr[$tid]["rankid"] = $row2->rankid;
+				$this->indentMap[$row2->rankid] = 0;
 				$this->taxaArr[$tid]["parenttid"] = $parentTid; 
 				if($parentTid) $taxaParentIndex[$tid] = $parentTid;
 			}
-			$result->close();
+			$rs2->free();
+			
+			//Get parent taxa
+			$sql3 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid '.
+				'FROM taxa t INNER JOIN taxaenumtree te ON t.tid = te.parenttid '. 
+				'INNER JOIN taxstatus ts ON t.tid = ts.tid '. 
+				'WHERE (te.taxauthid = 1) AND (ts.taxauthid = 1) AND (te.tid IN('.$tidStr.')) ';
+			//echo $sql3."<br>";
+			$rs3 = $this->conn->query($sql3);
+			while($row3 = $rs3->fetch_object()){
+				$tid = $row3->tid;
+				$parentTid = $row3->parenttid;
+				$this->taxaArr[$tid]["sciname"] = $row3->sciname;
+				$this->taxaArr[$tid]["author"] = $row3->author; 
+				$this->taxaArr[$tid]["rankid"] = $row3->rankid;
+				$this->indentMap[$row3->rankid] = 0;
+				$this->taxaArr[$tid]["parenttid"] = $parentTid; 
+				if($parentTid) $taxaParentIndex[$tid] = $parentTid;
+			}
+			$rs3->free();
 			
 			//Get synonyms for all accepted taxa
 			$synTidStr = implode(",",array_keys($this->taxaArr));
@@ -98,7 +128,7 @@ class TaxonomyDisplayManager{
 			while($row = $rsSyns->fetch_object()){
 				$this->taxaArr[$row->tidaccepted]["synonyms"][$row->tid] = $row->sciname;
 			}
-			$rsSyns->close();
+			$rsSyns->free();
 
 			//Grab parentTids that are not indexed in $taxaParentIndex. This would be due to a parent mismatch or a missing hierarchystr
 			$orphanTaxa = array_unique(array_diff($taxaParentIndex,array_keys($taxaParentIndex)));
@@ -117,7 +147,7 @@ class TaxonomyDisplayManager{
 					$this->taxaArr[$tid]["rankid"] = $row->rankid;
 					$this->indentMap[$row->rankid] = 0;
 				}
-				$rsOrphan->close();
+				$rsOrphan->free();
 			}
 			
 			//Set $indentMap to correct values
@@ -168,7 +198,7 @@ class TaxonomyDisplayManager{
 				else{
 					$sciName = "<br/>Problematic Rooting (".$key.")";
 				}
-				echo "<div style='margin-left:".$indent.";'>";
+				echo "<div style='margin-left:".$indent."px;'>";
 				echo "<a href='taxonomyeditor.php?target=".$key."'>".$sciName."</a>";
 				if($this->searchTaxonRank < 140 && $taxonRankId == 140){
 					echo '<a href="taxonomydisplay.php?target='.$sciName.'">';
@@ -181,7 +211,7 @@ class TaxonomyDisplayManager{
 					asort($synNameArr);
 					foreach($synNameArr as $synTid => $synName){
 						$synName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$synName);
-						echo "<div style='margin-left:".($indent+20).";'>";
+						echo "<div style='margin-left:".($indent+20)."px;'>";
 						echo "[<a href='taxonomyeditor.php?target=".$synTid."'><i>".$synName."</i></a>]";
 						echo "</div>";
 					}

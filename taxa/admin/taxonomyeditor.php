@@ -2,6 +2,8 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
+header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 if(!$SYMB_UID){
 	header('Location: '.$clientRoot.'/profile/index.php?refurl=../taxa/admin/taxonomyeditor.php?target='.$target);
@@ -459,11 +461,11 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							}
 							?>
 						</div>
-						<div id="SynonymDiv">
+						<div id="SynonymDiv" style="clear:both;padding-top:15px;">
 							<?php 
 							if($taxonEditorObj->getIsAccepted() <> 0){	//Is Accepted
-							?>
-								<h3>Synonyms:</h3>
+								?>
+								<div style="font-size:110%;"><u><b>Synonyms</b></u></div>
 								<div style="float:right;cursor:pointer;" onclick="toggleById('tonotaccepted');">
 									<img style='border:0px;width:15px;' src='../../images/edit.png'/>
 								</div>
@@ -578,7 +580,18 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							</form>
 						</div>
 						<?php 
-							$taxonEditorObj->echoHierarchy();
+						if($hierarchyArr = $taxonEditorObj->getHierarchyArr()){
+							$indent = 0;
+							foreach($hierarchyArr as $hierTid => $hierSciname){
+								echo '<div style="margin-left:'.$indent.'px;">';
+								echo '<a href="taxonomyeditor.php?target='.$hierTid.'">'.$hierSciname.'</a>';
+								echo "</div>\n";
+								$indent += 10;
+							}
+						}
+						else{
+							echo "<div style='margin:10px;'>Empty</div>";
+						}
 						?>
 					</fieldset>
 				</div>
