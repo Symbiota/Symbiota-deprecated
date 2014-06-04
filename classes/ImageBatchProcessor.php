@@ -105,10 +105,6 @@ class ImageBatchProcessor {
 	function __destruct(){
 		//Close connection or MD output file
 		if($this->dbMetadata){
-			if($this->collProcessedArr){
-				//Update Statistics
-				$this->updateCollectionStats();
-			}
 			if(!($this->conn === false)) $this->conn->close();
 		}
 		else{
@@ -264,6 +260,11 @@ class ImageBatchProcessor {
 			}
 			$this->logOrEcho('Done uploading '.$sourcePathFrag.' ('.date('Y-m-d h:i:s A').')');
 		}
+		if($this->collProcessedArr){
+			//Update Statistics
+			$this->updateCollectionStats();
+		}
+		
 		$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
 		if($this->logMode == 1){
 			echo '</ul>';
@@ -519,7 +520,6 @@ class ImageBatchProcessor {
 					}
 				}
 				$targetFileName = $fileName;
-				$databaseImage = true;
 				if($this->webImg == 1 || $this->webImg == 2){
 					//Check to see if image already exists at target, if so, delete or rename target
 					if(file_exists($targetPath.$targetFileName)){
@@ -538,7 +538,6 @@ class ImageBatchProcessor {
 							if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg")){
 								unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg");
 							}
-							$databaseImage = false;
 						}
 						elseif($this->imgExists == 1){
 							//Rename image before saving
@@ -714,21 +713,18 @@ class ImageBatchProcessor {
 						$this->sourceImagickImg = null;
 					}
 					//Database urls and metadata for images
-					if($databaseImage){
-						if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$webUrlFrag,$tnUrlFrag,$lgUrlFrag)){
-							//Final cleaning stage
-							if(file_exists($sourcePath.$fileName)){ 
-								if($this->keepOrig){
-									if(file_exists($this->targetPathBase.$this->targetPathFrag.$this->origPathFrag)){
-										rename($sourcePath.$fileName,$this->targetPathBase.$this->targetPathFrag.$this->origPathFrag.$fileName.".orig");
-									}
-								} else {
-									unlink($sourcePath.$fileName);
-								}
+					$this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$webUrlFrag,$tnUrlFrag,$lgUrlFrag);
+					//Final cleaning stage
+					if(file_exists($sourcePath.$fileName)){ 
+						if($this->keepOrig){
+							if(file_exists($this->targetPathBase.$this->targetPathFrag.$this->origPathFrag)){
+								rename($sourcePath.$fileName,$this->targetPathBase.$this->targetPathFrag.$this->origPathFrag.$fileName.".orig");
 							}
-							$this->logOrEcho("\tImage processed successfully (".date('Y-m-d h:i:s A').")!");
+						} else {
+							unlink($sourcePath.$fileName);
 						}
 					}
+					$this->logOrEcho("\tImage processed successfully (".date('Y-m-d h:i:s A').")!");
 				}
 				else{
 					$this->logOrEcho("File skipped (".$sourcePathFrag.$fileName."), unable to obtain dimentions of original image");
@@ -890,22 +886,23 @@ class ImageBatchProcessor {
 			}
 			$rs->free();
 			$sql = '';
-			if($imgId && $exTnUrl <> $tnUrl && $exLgUrl <> $oUrl){
-				
-				$sql = 'UPDATE images SET url = "'.$webUrl.'", ';
-				if($tnUrl){
-					$sql .= 'thumbnailurl = "'.$tnUrl.'",';
+			if($imgId){
+				if($exTnUrl <> $tnUrl || $exLgUrl <> $oUrl){
+					$sql = 'UPDATE images SET url = "'.$webUrl.'", ';
+					if($tnUrl){
+						$sql .= 'thumbnailurl = "'.$tnUrl.'",';
+					}
+					else{
+						$sql .= 'thumbnailurl = NULL,';
+					}
+					if($oUrl){
+						$sql .= 'originalurl = "'.$oUrl.'" ';
+					}
+					else{
+						$sql .= 'originalurl = NULL ';
+					}
+					$sql .= 'WHERE imgid = '.$imgId;
 				}
-				else{
-					$sql .= 'thumbnailurl = NULL,';
-				}
-				if($oUrl){
-					$sql .= 'originalurl = "'.$oUrl.'" ';
-				}
-				else{
-					$sql .= 'originalurl = NULL ';
-				}
-				$sql .= 'WHERE imgid = '.$imgId;
 			}
 			else{
 				$sql1 = 'INSERT images(occid,url';
@@ -922,18 +919,20 @@ class ImageBatchProcessor {
 				$sql2 .= ',"specimen","'.$this->collArr[$this->activeCollid]['collname'].'")';
 				$sql = $sql1.$sql2;
 			}
-			if($this->conn->query($sql)){
-				$this->dataLoaded = 1;
-			}
-			else{
-				$status = false;
-				$this->logOrEcho("\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql);
-			}
-			if($imgId){
-				$this->logOrEcho("\tWARNING: Existing image record replaced; occid: $occId ");
-			}
-			else{
-				$this->logOrEcho("\tSUCCESS: Image record loaded into database");
+			if($sql){
+				if($this->conn->query($sql)){
+					$this->dataLoaded = 1;
+				}
+				else{
+					$status = false;
+					$this->logOrEcho("\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql);
+				}
+				if($imgId){
+					$this->logOrEcho("\tWARNING: Existing image record replaced; occid: $occId ");
+				}
+				else{
+					$this->logOrEcho("\tSUCCESS: Image record loaded into database");
+				}
 			}
 		}
 		else{
