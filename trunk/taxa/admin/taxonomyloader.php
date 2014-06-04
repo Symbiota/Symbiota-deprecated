@@ -7,7 +7,6 @@ header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
-$submitAction = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 $status = "";
 
 $loaderObj = new TaxonomyEditorManager();
@@ -17,15 +16,17 @@ if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 	$editable = true;
 }
  
-if($submitAction == 'loadnewtaxon' && $editable){
-	$status = $loaderObj->loadNewName($_REQUEST);
-	if(is_int($status)){
-	 	header("Location: taxonomyeditor.php?target=".$status);
+if($editable){
+	if(array_key_exists('sciname',$_POST)){
+		$status = $loaderObj->loadNewName($_POST);
+		if(is_int($status)){
+		 	header("Location: taxonomyeditor.php?target=".$status);
+		}
 	}
 }
  
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Taxon Loader: </title>
@@ -51,13 +52,13 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
+		if($status){
+			echo "<div style='color:red;font-size:120%;'>".$status."</div>";
+		}
 		if($editable){
-			if($status){
-				echo "<div style='color:red;font-size:120%;'>".$status."</div>";
-			}
-		?>
+			?>
 		
-			<form id="loaderform" action="taxonomyloader.php" method="get">
+			<form id="loaderform" action="taxonomyloader.php" method="post" onsubmit="return verifyLoadForm(this)">
 				<fieldset>
 					<legend>New Taxon</legend>
 					<div>
@@ -156,8 +157,7 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 						</fieldset>
 					</div>
 					<div style="clear:both;">
-						<input type="hidden" name="submitaction" value="loadnewtaxon" />
-						<input type="button" name="taxonsubmit" value="Submit New Name" onclick="submitLoadForm(this.form)" />
+						<input type="submit" name="submitaction" value="Submit New Name" />
 					</div>
 				</fieldset>
 			</form>

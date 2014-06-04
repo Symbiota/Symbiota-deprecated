@@ -1,64 +1,57 @@
 $(document).ready(function() {
 	$("#uppertaxonomy").autocomplete({ source: "rpc/getuppertaxonsuggest.php" },{ minLength: 3, autoFocus: true });
 
-	$("#ctnafacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
+	$("#acceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
 });
 
-function submitLoadForm(f){
-	var submitForm = true;
-	var errorStr = "";
+function verifyLoadForm(f){
+	if(f.sciname.value == ""){
+		alert("Scientific Name field required.");
+		return false;
+	}
+	if(f.unitname1.value == ""){
+		alert("Unit Name 1 (genus or uninomial) field required.");
+		return false;
+	}
 	var rankId = f.rankid.value;
-	if(f.sciname.value == "") errorStr += ", Scientific Name"; 
-	if(f.unitname1.value == "") errorStr += ", Unit Name 1 (genus or uninomial)"; 
-	if(rankId == 0 || rankId == "") errorStr += ", Taxon Rank"; 
-	if(f.parenttid.value == "" && rankId != "10") errorStr += ", Parent Taxon"; 
-	if(errorStr != ""){
-		alert("Following Fields Required: "+errorStr.substring(2));
-		submitForm = false;
+	if(rankId == 0 || rankId == ""){
+		alert("Taxon rank field required.");
+		return false;
+	}
+	if(f.parenttid.value == "" && rankId != "10"){
+		alert("Parent Taxon rank field required.");
+		return false;
 	}
 
-	if(submitForm){
-		if(rankId > 140){
-			if(f.uppertaxonomy.value == "") errorStr += "Upper Taxonomy \n"; 
-			if(errorStr != ""){
-				submitForm = confirm("Following fields are recommended. Are you sure you want to leave them blank?\n"+errorStr);
-			}
-		}
-	}
-	if(submitForm){
+	var accStatusObj = f.acceptstatus;
+	if(accStatusObj[0].checked == false){
 		var accStr = f.acceptedstr.value;
 		if(accStr){
-			tXmlHttp=GetXmlHttpObject();
-			if(tXmlHttp==null){
-		  		alert ("Your browser does not support AJAX!");
-		  		return;
-		  	}
-			var url="rpc/gettid.php";
-			url=url+"?sciname="+accStr;
-			tXmlHttp.onreadystatechange=function(){
-				if(tXmlHttp.readyState==4 && tXmlHttp.status==200){
-					var accTid = tXmlHttp.responseText;
-					if(accTid){
-						f.tidaccepted.value = accTid;
-						f.submit();
-					}
-					else{
-						alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
-					}
+			$.ajax({
+				type: "POST",
+				url: "rpc/gettid.php",
+				data: { sciname: accStr }
+			}).done(function( msg ) {
+				if(msg){
+					f.tidaccepted.value = msg;
+					f.submit();
 				}
-			};
-			tXmlHttp.open("POST",url,true);
-			tXmlHttp.send(null);
+				else{
+					alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
+				}
+			});
 		}
 		else{
-			f.submit();
+			alert("ERROR: Enter accepted name");
 		}
+		return false;
 	}
+	return true;
 }
 
 function parseName(f){
-
-	var sciName = trim(f.sciname.value);
+	var sciName = f.sciname.value;
+	sciName = sciName.replace(/^\s+|\s+$/g,"");
 	checkScinameExistance(sciName);
 	f.reset();
 	f.sciname.value = sciName;
@@ -138,34 +131,30 @@ function setParent(f){
 	}
 }			
 
-function checkScinameExistance(sciname){
-	if (sciname.length == 0){
-  		return;
-  	}
-	cseXmlHttp=GetXmlHttpObject();
-	if (cseXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url="rpc/gettid.php";
-	url=url+"?sciname="+sciname;
-	cseXmlHttp.onreadystatechange=function(){
-		if(cseXmlHttp.readyState==4 && cseXmlHttp.status==200){
-			var responseStr = cseXmlHttp.responseText;
-			if(responseStr != ""){
+function checkScinameExistance(scinameTest){
+	if(scinameTest){
+		$.ajax({
+			type: "POST",
+			url: "rpc/gettid.php",
+			data: { sciname: scinameTest }
+		}).done(function( msg ) {
+			if(msg){
 				var sciName = document.getElementById("sciname").value;
-				alert("INSERT FAILED: "+sciName+" ("+responseStr+")"+" already exists in database.");
+				alert("INSERT FAILED: "+sciName+" ("+msg+")"+" already exists in database.");
 				return false;
 			}
-			return true;
-		}
-	};
-	cseXmlHttp.open("POST",url,true);
-	cseXmlHttp.send(null);
+			else{
+				return true;
+			}
+		});
+	}
+	else{
+		return false;
+	}
 } 
 
 function acceptanceChanged(f){
-	accStatusObj = f.acceptstatus;
+	var accStatusObj = f.acceptstatus;
 	if(accStatusObj[0].checked){
 		document.getElementById("accdiv").style.display = "none";
 	}
@@ -176,77 +165,44 @@ function acceptanceChanged(f){
 
 function setUpperTaxonomy(f){
 	var genusStr = f.unitname1.value; 
-	if (genusStr.length == 0){
-  		return;
-  	}
-	sutXmlHttp=GetXmlHttpObject();
-	if (sutXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url="rpc/getuppertaxonomy.php";
-	url=url+"?sciname="+genusStr;
-	sutXmlHttp.onreadystatechange=function(){
-		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
-			var responseStr = sutXmlHttp.responseText; 
-			if(responseStr){
-				f.uppertaxonomy.value = responseStr;
+	if(genusStr){
+		$.ajax({
+			type: "POST",
+			url: "rpc/getuppertaxonomy.php",
+			data: { sciname: genusStr }
+		}).done(function( msg ) {
+			if(msg){
+				f.uppertaxonomy.value = msg;
+				return true;
 			}
-		}
-	};
-	sutXmlHttp.open("POST",url,true);
-	sutXmlHttp.send(null);
+		});
+	}
+	else{
+		return false;
+	}
 }
 
 function checkParentExistance(f){
-	parentStr = f.parentname.value;
-	if (parentStr.length == 0){
-  		return;
-  	}
-	var cpeXmlHttp=GetXmlHttpObject();
-	if(cpeXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url="rpc/gettid.php";
-	url=url+"?sciname="+parentStr;
-	cpeXmlHttp.onreadystatechange=function(){
-		if(cpeXmlHttp.readyState==4 && cpeXmlHttp.status==200){
-			var parentTid = cpeXmlHttp.responseText;
-			if(parentTid){
-				f.parenttid.value = parentTid;
+	var parentStr = f.parentname.value;
+	if(parentStr){
+		$.ajax({
+			type: "POST",
+			url: "rpc/gettid.php",
+			data: { sciname: parentStr }
+		}).done(function( msg ) {
+			if(msg){
+				f.parenttid.value = msg;
 			}
 			else{
-				alert("Parent does not exist. Please first add parent to system. This can be done by clicking on 'Add Parent' button to the right of parent name.");
-				document.getElementById("addparentspan").style.display = "inline";
-				document.getElementById("addparentanchor").href = "taxonomyloader.php?target="+f.parentname.value;
+				alert("Parent does not exist. Please first add parent to system.");
+				//document.getElementById("addparentspan").style.display = "inline";
+				//document.getElementById("addparentanchor").href = "taxonomyloader.php?target="+f.parentname.value;
 				return false;
 			}
 			return true;
-		}
-	};
-	cpeXmlHttp.open("POST",url,true);
-	cpeXmlHttp.send(null);
-}
-
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
-}
-
-function trim(stringToTrim) {
-	return stringToTrim.replace(/^\s+|\s+$/g,"");
+		});
+	}
+	else{
+		return false;
+	}
 }

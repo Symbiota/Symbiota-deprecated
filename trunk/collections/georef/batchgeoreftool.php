@@ -173,7 +173,7 @@ header("Content-Type: text/html; charset=".$charset);
 										</div>
 										<div style="margin-top:5px;">
 											<input name="qdisplayall" type="checkbox" value="1" <?php echo ($qDisplayAll?'checked':''); ?> /> 
-											Display all speciemsn inclulding previously georeferenced
+											Including previously georeferenced records 
 										</div>
 									</div>
 									<div style="padding:2px;clear:both;">

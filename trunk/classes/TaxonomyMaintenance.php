@@ -14,11 +14,12 @@ class TaxonomyMaintenance{
 	}
 	
 	public function buildHierarchyEnumTree($taxAuthId = 1){
-		set_time_limit(500);
+		set_time_limit(600);
 		$sql = 'SELECT tid, hierarchystr '.
 			'FROM taxstatus '.
 			'WHERE tid NOT IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = '.$taxAuthId.') '.
 			'AND taxauthid = '.$taxAuthId.' AND hierarchystr IS NOT NULL AND hierarchystr <> tid';
+		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$tid = $r->tid;

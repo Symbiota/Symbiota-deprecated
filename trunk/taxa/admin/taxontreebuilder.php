@@ -5,6 +5,6 @@ include_once($serverRoot.'/classes/TaxonomyMaintenance.php');
 $treeBuilder = new TaxonomyMaintenance();
 
 //$treeBuilder->buildHierarchyEnumTree();
-$treeBuilder->buildHierarchyNestedTree();
+//$treeBuilder->buildHierarchyNestedTree();
 
 ?>
