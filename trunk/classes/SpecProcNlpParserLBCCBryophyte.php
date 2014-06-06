@@ -727,26 +727,29 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			"ravine", "Aesculus", "cypress(?:es)?", "Empetrum", "Taxodium", "sparse(?:ly)?", "chaparra[l1|I!]", "temperate", "hemlocks?",
 			"Myrica", "[l1|I!]odgepo[l1|I!]e", "Cornus", "trunks?", "myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture",
 			"stump", "palmetto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter", "scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine",
-			"grave[l1|I!](?:[l1|I!]y)?", "duff", "seepage", "submerged", "graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry",
-			"regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?", "terraces?", "thicket", "moraines?", "heath(?:er)?",
+			"grave[l1|I!](?! r(?:oa)?d)(?:[l1|I!]y)?", "duff", "seepage", "submerged", "graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry",
+			"regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?", "terraces?", "thickets?", "moraines?", "heath(?:er)?",
 			"metamorphic", "vegetation", "quarry", "mats?", "depression", "pebbles?", "Ombrotrophic", "rivulets?", "hummock[sy]?", "stand",
-			"chert", "humus", "marsh", "abundant(?:[l1|I!]y)?", "ecotone", "fen", "pools?");
+			"chert", "humus", "marsh", "abundant(?:[l1|I!]y)?", "ecotone", "fen", "pools?", "cultivated", "twigs?", "Agropyron");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
 		//return $result/count(explode(" ", $pHab));
 	}
 
-	protected function containsVerbatimAttribute($pAtt) {
+	protected function containsVerbatimAttribute($pAtt, $additionalTerms=array()) {
+		//additional terms can be added to analyze those strings that have already been discovered to contain verbatimAttributes
 		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
 			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))", "thall(?:us|i)", "strain", "peristome", "lea(?:ves|f)(?! ?litter)", "cells?",
 			"squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s|ing)?", "crust(?:ose)?", "corticolous", "saxicolous",
 			"terricolous", "Synoicous", "chemotype", "terpene", "isidi(?:a(?:te)?|um)", "TLC", "monoicous", "dioicous", "sporangi(?:a|um)",
 			"parietin", "anthraquinone", "pigment(?:s|ed)?", "ostiole", "epiphyt(?:e|ic)", "sorali(?:a|um)", "spor(?:ophyt)?es?", "ovate",
 			"antheridi(?:a|um)", "archegoni(?:a|um)", "androeci(?:a|um)", "gynoeci(?:a|um)", "Autoicous", "Paroicous", "Heteroicous",
-			"cladautoicous", "Gametangi(?:a|um)", "paraphyses(?! ?branched\\/)", "pruinose", "short[- ]leaved");
+			"cladautoicous", "Gametangi(?:a|um)", "paraphyses(?! ?branched\\/)", "pruinose", "short[- ]leaved", "scabrous",
+			"aggregated", "dendrit(?:e|ic)");
 		//foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
 		foreach($vaWords as $vaWord) if(preg_match("/\\b".$vaWord."\\b/i", $pAtt)) return true;
+		foreach($additionalTerms as $additionalTerm) if(preg_match("/\\b".$additionalTerm."\\b/i", $pAtt)) return true;
 		return false;
 	}
 
