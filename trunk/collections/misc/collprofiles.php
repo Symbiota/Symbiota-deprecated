@@ -130,7 +130,7 @@ if($symbUid){
 							if($collData['colltype'] == 'Preserved Specimens'){ 
 								?>
 								<li>
-									<a href="../datasets/index.php?collid=<?php echo $collid; ?>">
+									<a href="../datasets/labelmanager.php?collid=<?php echo $collid; ?>">
 										Print Labels
 									</a>
 								</li>

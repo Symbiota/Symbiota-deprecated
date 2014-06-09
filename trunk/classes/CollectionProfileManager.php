@@ -461,29 +461,47 @@ class CollectionProfileManager {
 		$state = $this->cleanInStr($s);
 		$sql = '';
 		if($country){
+			$sql = 'SELECT o.stateprovince as termstr, Count(*) AS cnt '. 
+				'FROM omoccurrences o '. 
+				'WHERE (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.country = "'.$country.'") '.
+				'GROUP BY o.StateProvince, o.country';
+			/*
 			$sql = 'SELECT trim(o.stateprovince) as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.StateProvince, o.country '.
 				'HAVING (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.StateProvince <> "") '.
 				'AND (o.country = "'.$country.'") '.
 				'ORDER BY trim(o.StateProvince)';
+				*/
 		}
 		elseif($state){
+			$sql = 'SELECT o.county as termstr, Count(*) AS cnt '. 
+				'FROM omoccurrences o '.
+				'WHERE (o.CollID = '.$this->collid.') AND (o.county IS NOT NULL) AND (o.stateprovince = "'.$state.'") '.
+				'GROUP BY o.StateProvince, o.county';
+			/*
 			$sql = 'SELECT trim(o.county) as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.StateProvince, o.county '.
 				'HAVING (o.CollID = '.$this->collid.') AND (o.county IS NOT NULL) AND (o.county <> "") '.
 				'AND (o.stateprovince = "'.$state.'") '.
 				'ORDER BY trim(o.county)';
+				*/
 		}
 		else{
+			$sql = 'SELECT o.country as termstr, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'WHERE (o.CollID = '.$this->collid.') AND (o.Country IS NOT NULL) '.
+				'GROUP BY o.Country ';
+			/*
 			$sql = 'SELECT trim(o.country) as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.Country '.
 				'HAVING (o.CollID = '.$this->collid.') AND o.Country IS NOT NULL AND o.Country <> "" '.
 				'ORDER BY trim(o.Country)';
+				*/
 		}
-		//echo $sql;
+		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$t = $row->termstr;
@@ -495,6 +513,7 @@ class CollectionProfileManager {
 			}
 		}
 		$rs->close();
+		ksort($returnArr);
 		return $returnArr;
 	}
 	
