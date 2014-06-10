@@ -103,7 +103,9 @@ class GamesManager {
 				$previous = json_decode(file_get_contents('../../temp/ootd/previous.json'), true);
 				unlink('../../temp/ootd/previous.json');
 			}
-			unlink('../../temp/ootd/info.json');
+			if(file_exists('../../temp/ootd/info.json')){
+				unlink('../../temp/ootd/info.json');
+			}
 			if(file_exists('../../temp/ootd/plant300_1.jpg')){
 				unlink('../../temp/ootd/plant300_1.jpg');
 			}
