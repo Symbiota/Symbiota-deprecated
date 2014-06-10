@@ -8,6 +8,8 @@ header("Content-Type: text/html; charset=".$charset);
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
 $mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
+$gridSize = array_key_exists('gridSizeSetting',$_REQUEST)?$_REQUEST['gridSizeSetting']:10;
+$minClusterSize = array_key_exists('minClusterSetting',$_REQUEST)?$_REQUEST['minClusterSetting']:10;
 
 $sharedMapManager = new MappingShared();
 
@@ -168,9 +170,14 @@ $sharedMapManager->setTaxaArr($tArr);
 				}
 				?>
 				//set style options for marker clusters (these are the default styles)
-				mcOptions<?php echo $spCnt; ?> = {styles: [{
-					color: "<?php echo $iconColor; ?>"
-				}]}
+				mcOptions<?php echo $spCnt; ?> = {
+					styles: [{
+						color: "<?php echo $iconColor; ?>"
+					}],
+					maxZoom: 13,
+					gridSize: <?php echo $gridSize; ?>,
+					minimumClusterSize: <?php echo $minClusterSize; ?>
+				}
 				
 				//Initialize clusterer with options
 				var markerCluster<?php echo $spCnt; ?> = new MarkerClusterer(map, markers, mcOptions<?php echo $spCnt; ?>);
