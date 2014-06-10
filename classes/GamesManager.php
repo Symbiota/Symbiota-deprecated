@@ -32,7 +32,7 @@ class GamesManager {
 			$this->clName = $row->name;
 			$this->clid = $row->clid;
 		}
-		$rs->close();
+		$rs->free();
 	}
 	
 	public function setDynChecklist($dynClid){
@@ -46,7 +46,7 @@ class GamesManager {
 			$this->clName = $row->name;
 			$this->dynClid = $row->dynclid;
 		}
-		$rs->close();
+		$rs->free();
 	}
 	
 	public function getClid(){
@@ -77,7 +77,7 @@ class GamesManager {
 		while($row = $rs->fetch_object()){
 			$retArr[$row->clid] = $row->name;
 		}
-		$rs->close();
+		$rs->free();
 		return $retArr;
 	}
 	
@@ -127,11 +127,10 @@ class GamesManager {
 			$ootdInfo['lastDate'] = $currentDate;
 			
 			$tidArr = Array();
-			$sql = 'SELECT l.TID, COUNT(l.TID) AS cnt '.
-				'FROM (fmchecklists AS f LEFT JOIN fmchklsttaxalink AS l ON f.CLID = l.CLID) '.
-				'LEFT JOIN images AS i ON l.TID = i.tid '.
-				'WHERE i.imagetype = "field image" AND f.CLID = '.$clid.' '.
-				'GROUP BY l.TID ';
+			$sql = 'SELECT l.TID, COUNT(i.imgid) AS cnt '. 
+				'FROM fmchklsttaxalink l INNER JOIN images AS i ON l.TID = i.tid '.
+				'WHERE i.imagetype = "field image" AND l.CLID = '.$clid.' '. 
+				'GROUP BY l.TID';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
@@ -139,7 +138,7 @@ class GamesManager {
 					$tidArr[] = $row->TID;
 				}
 			}
-			$rs->close();
+			$rs->free();
 			$k = array_rand($tidArr);
 			$randTaxa = $tidArr[$k];
 			$previous[] = $randTaxa;
@@ -149,7 +148,7 @@ class GamesManager {
 			$ootdInfo['clid'] = $clid;
 			
 			$sql2 = 'SELECT t.TID, t.SciName, t.UnitName1, s.family '.
-				'FROM taxa AS t LEFT JOIN taxstatus AS s ON t.TID = s.tid '.
+				'FROM taxa AS t INNER JOIN taxstatus AS s ON t.TID = s.tid '.
 				'WHERE s.taxauthid = 1 AND t.TID = '.$randTaxa.' ';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql2);
@@ -159,7 +158,7 @@ class GamesManager {
 				$ootdInfo['genus'] = $row->UnitName1;
 				$ootdInfo['family'] = $row->family;
 			}
-			$rs->close();
+			$rs->free();
 			
 			$files = Array();
 			$sql3 = 'SELECT i.url '.
@@ -171,11 +170,23 @@ class GamesManager {
 			$repcnt = 1;
 			$rs = $this->conn->query($sql3);
 			while(($row = $rs->fetch_object()) && ($cnt < 6)){
-				if (substr($row->url, 0, 4) === 'http'){
-					$file = $row->url;
+				$file = '';
+				if (substr($row->url, 0, 1) == '/'){
+					//If imageDomain variable is set within symbini file, image  
+					if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
+						$file = $GLOBALS['imageDomain'].$row->url;
+					}
+					else{
+						//Use local domain 
+						$domain = "http://";
+						if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
+						$domain .= $_SERVER["SERVER_NAME"];
+						if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
+						$file = $domain.$row->url;
+					}
 				}
 				else{
-					$file = 'http://swbiodiversity.org'.$row->url;
+					$file = $row->url;
 				}
 				$newfile = '../../temp/ootd/plant300_'.$cnt.'.jpg';
 				if(fopen($file, "r")){
@@ -184,7 +195,7 @@ class GamesManager {
 					$cnt++;
 				}
 			}
-			$rs->close();
+			$rs->free();
 			$ootdInfo['images'] = $files;
 			
 			if(array_diff($tidArr,$previous)){

@@ -157,7 +157,7 @@ if($submitAction){
 						<i><?php echo $gameInfo['sciname']; ?></i>
 					</div>
 					<div style="margin-top:30px;font-size:16px;" >
-						<a href = "#" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here to learn more about this plant-</a>
+						<a href = "#" onClick="window.open('../../taxa/index.php?taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here to learn more about this plant-</a>
 					</div>
 				</div>
 			</div>
@@ -177,7 +177,7 @@ if($submitAction){
 						<?php echo $_POST['family_answer']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = ".">Click Here to try again!</a>
+						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
@@ -201,7 +201,7 @@ if($submitAction){
 						<?php echo $gameInfo['family']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = ".">Click Here to try again!</a>
+						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
@@ -225,7 +225,7 @@ if($submitAction){
 						<?php echo $gameInfo['sciname']; ?>, but the family is not <?php echo $_POST['family_answer']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = ".">Click Here to try again!</a>
+						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
@@ -249,7 +249,7 @@ if($submitAction){
 						<?php echo $gameInfo['genus']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = ".">Click Here to try again!</a>
+						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
@@ -273,7 +273,7 @@ if($submitAction){
 						is <?php echo $gameInfo['family']; ?>, and the genus is <?php echo $gameInfo['genus']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = ".">Click Here to try again!</a>
+						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
