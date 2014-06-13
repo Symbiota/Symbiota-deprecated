@@ -3,9 +3,10 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/ImageCleaner.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$imgManager = new ImageCleaner();
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
+$collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:"";
 
+$imgManager = new ImageCleaner();
 ?>
 <html>
 <head>
@@ -14,7 +15,6 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
-
 	<?php
 	$displayLeftMenu = (isset($imagelib_misc_buildthumbnailsMenu)?$imagelib_misc_buildthumbnailsMenu:"true");
 	include($serverRoot.'/header.php');
@@ -32,7 +32,7 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 			<fieldset>
 				<legend><b>Thumbnail Builder</b></legend>
 				<div style="margin:10px;">
-					<b>Images w/o thumbnails:</b> <?php echo $imgManager->getMissingTnCount(); ?>
+					<b>Images w/o thumbnails:</b> <?php echo $imgManager->getMissingTnCount($collid); ?>
 				</div>
 				<div style="margin:10px;">
 					This function will build thumbnail images for all image records that have NULL values for the thumbnail field.
@@ -42,7 +42,7 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 					if($action == "Build Thumbnails"){
 						echo '<div style="font-weight:bold;">Working on internal and external thumbnail images</div>';
 						echo '<ol>';
-						$imgManager->buildThumbnailImages(); 
+						$imgManager->buildThumbnailImages($collid); 
 						echo '</ol>';
 						echo '<div style="font-weight:bold;">Finished!</div>';
 					}
@@ -50,6 +50,7 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 				</div>
 				<div style="margin:10px;">
 					<form name="tnbuilderform" action="thumbnailbuilder.php" method="post">
+						<input type="hidden" name="collid" value="<?php echo $collid; ?>">
 						<input type="submit" name="action" value="Build Thumbnails">
 					</form>
 				</div>
@@ -59,6 +60,5 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 	<?php 
 	include($serverRoot.'/footer.php');
 	?>
-
 </body>
 </html>
