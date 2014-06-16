@@ -106,20 +106,20 @@ class GamesManager {
 			if(file_exists('../../temp/ootd/info.json')){
 				unlink('../../temp/ootd/info.json');
 			}
-			if(file_exists('../../temp/ootd/plant300_1.jpg')){
-				unlink('../../temp/ootd/plant300_1.jpg');
+			if(file_exists('../../temp/ootd/organism300_1.jpg')){
+				unlink('../../temp/ootd/organism300_1.jpg');
 			}
-			if(file_exists('../../temp/ootd/plant300_2.jpg')){
-				unlink('../../temp/ootd/plant300_2.jpg');
+			if(file_exists('../../temp/ootd/organism300_2.jpg')){
+				unlink('../../temp/ootd/organism300_2.jpg');
 			}
-			if(file_exists('../../temp/ootd/plant300_3.jpg')){
-				unlink('../../temp/ootd/plant300_3.jpg');
+			if(file_exists('../../temp/ootd/organism300_3.jpg')){
+				unlink('../../temp/ootd/organism300_3.jpg');
 			}
-			if(file_exists('../../temp/ootd/plant300_4.jpg')){
-				unlink('../../temp/ootd/plant300_4.jpg');
+			if(file_exists('../../temp/ootd/organism300_4.jpg')){
+				unlink('../../temp/ootd/organism300_4.jpg');
 			}
-			if(file_exists('../../temp/ootd/plant300_5.jpg')){
-				unlink('../../temp/ootd/plant300_5.jpg');
+			if(file_exists('../../temp/ootd/organism300_5.jpg')){
+				unlink('../../temp/ootd/organism300_5.jpg');
 			}
 			
 			//Create new files
@@ -188,7 +188,7 @@ class GamesManager {
 				else{
 					$file = $row->url;
 				}
-				$newfile = '../../temp/ootd/plant300_'.$cnt.'.jpg';
+				$newfile = '../../temp/ootd/organism300_'.$cnt.'.jpg';
 				if(fopen($file, "r")){
 					copy($file, $newfile);
 					$files[] = $newfile;

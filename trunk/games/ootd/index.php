@@ -97,8 +97,8 @@ if($submitAction){
 					<br /><br />
 					<div class = "dailypicture" align = "center">
 						<div>
-							<div style="vertical-align:middle;height:350px">
-								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/plant300_1.jpg" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
+							<div style="vertical-align:middle;">
+								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/organism300_1.jpg" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
 							</div><br />
 							<a href="javascript:chgImg(-1)">Previous</a> &nbsp;|&nbsp;
 							<a href="javascript:chgImg(1)">Next</a>
