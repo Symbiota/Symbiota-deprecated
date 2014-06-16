@@ -18,7 +18,7 @@ $ootdGameType = "plant";
 		<?php echo $ootdGameTitle; ?>
 	</div>
 	<a href="<?php echo $clientRoot; ?>/games/ootd/index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">
-		<img src="<?php echo $clientRoot; ?>/temp/ootd/plant300_1.jpg" style="width:250px;border:0px;" />
+		<img src="<?php echo $clientRoot; ?>/temp/ootd/organism300_1.jpg" style="width:250px;border:0px;" />
 	</a><br/>
 	<b>What is this <?php echo $ootdGameType; ?>?</b><br/>
 	<a href="<?php echo $clientRoot; ?>/games/ootd/index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">
