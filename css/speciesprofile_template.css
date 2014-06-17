@@ -105,13 +105,13 @@ div.imgthumb div.photographer{
 div.mapthumb{
   margin: 2px;
   border: 0px;
-  width: 145px;
+  width: 165px;
   float: right;
   text-align: center;
 }
 
 div.mapthumb img{
-  width: 130px;
+  width: 165px;
   margin: 0px;
   border: 1px dotted black;
 }

@@ -674,12 +674,14 @@ class ProfileManager{
 
 	private function setUserRights(){
 		//Get Admin Rights 
-		$sql = 'SELECT up.pname FROM userpermissions up WHERE (up.uid = '.$this->uid.')';
+		$sql = 'SELECT role, tablepk FROM userroles WHERE (uid = '.$this->uid.')';
+		//$sql = 'SELECT up.pname FROM userpermissions up WHERE (up.uid = '.$this->uid.')';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$pTok = explode('-',$r->pname);
-			$this->userRights[$pTok[0]][] = (isset($pTok[1])?$pTok[1]:'');
+			//$pTok = explode('-',$r->pname);
+			//$this->userRights[$pTok[0]][] = (isset($pTok[1])?$pTok[1]:'');
+			$this->userRights[$r->role][] = ($r->tablepk);
 		}
 	}
 	

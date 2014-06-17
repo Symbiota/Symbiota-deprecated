@@ -26,7 +26,6 @@ class TaxonProfileManager {
 	private $parentName;
 	private $pid;
 	private $projName;
-	private $googleUrl;
 	
 	private $vernaculars;				// An array of vernaculars of above language. Array(vernacularName) --Display order is controlled by SQL
 	private $synonyms;					// An array of synonyms. Array(synonymName) --Display order is controlled by SQL
@@ -39,14 +38,12 @@ class TaxonProfileManager {
 	private $con; 
 
  	public function __construct(){
-		global $defaultLang,$googleMapKey;
+		global $defaultLang;
  		$this->con = MySQLiConnectionFactory::getCon("readonly");
  		//Default settings
  		$this->taxAuthId = 1;			//0 = do not resolve taxonomy (no thesaurus); 1 = default taxonomy; > 1 = other taxonomies
 		//$this->projName = "Arizona";
 		$this->language = $defaultLang;
-		$this->googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain&sensor=false';
-		if($googleMapKey) $this->googleUrl .= '&key='.$googleMapKey;
  	}
 
  	public function __destruct(){
@@ -285,16 +282,18 @@ class TaxonProfileManager {
 		
 		//Get Maps, if rank is genus level or higher
 		if($this->rankId > 140){
-			foreach($tids as $tid){
-				if($mapArr = $this->getMapUrl($tid)){
-					foreach($mapArr as $sn => $url){
-						$this->sppArray[$sn]["map"] = $url;
-					}
+			foreach($this->sppArray as $sn => $snArr){
+				$tid = $snArr['tid'];
+				if($mapArr = $this->getMapArr($tid)){
+					$this->sppArray[$sn]["map"] = array_shift($mapArr);
+				}
+				else{
+					$this->sppArray[$sn]["map"] = $this->getGoogleStaticMap($tid);
 				}
 			}
 		}
 	}
- 	
+ 
 	public function getSppArray(){
 		return $this->sppArray;
 	}
@@ -509,33 +508,13 @@ class TaxonProfileManager {
 		return $links;
 	}
 
-	public function getMapUrl($tidObj = 0){
-		global $occurrenceModIsActive,$isAdmin,$userRights;
-		$urlArr = Array();
- 		$tidStr = '';
- 		if($tidObj){
-	 		if(is_array($tidObj)){
-	 			$tidStr = implode(",",$tidObj);
-	 		}
-	 		elseif(is_numeric($tidObj)){
-	 			$tidStr = $tidObj;
-	 		}
- 		}
- 		else{
+	public function getMapArr($tidStr = 0){
+		$maps = Array();
+ 		if(!$tidStr){
 			$tidArr = Array($this->tid,$this->submittedTid);
 			if($this->synonyms) $tidArr = array_merge($tidArr,array_keys($this->synonyms));
 			$tidStr = implode(",",$tidArr);
  		}
-		
- 		$urlArr = $this->getTaxaMap($tidStr);
- 		if(!$urlArr && $occurrenceModIsActive && $this->displayLocality){
-			return $this->getGoogleStaticMap($tidStr);
-		}
-		return $urlArr;
-	}
-	
- 	private function getTaxaMap($tidStr){
-		$maps = Array();
 		if($tidStr){
 			$sql = 'SELECT tm.url, t.sciname '.
 				'FROM taxamaps tm INNER JOIN taxa t ON tm.tid = t.tid '.
@@ -547,15 +526,21 @@ class TaxonProfileManager {
 				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
 					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 				}
-				$maps[$row->sciname] = $imgUrl;
+				$maps[] = $imgUrl;
 			}
 			$result->close();
 		}
 		return $maps;
  	}
  	
- 	private function getGoogleStaticMap($tidStr){
- 		global $mappingBoundaries;
+ 	public function getGoogleStaticMap($tidStr = 0){
+		global $mappingBoundaries;
+		
+		if(!$tidStr){
+			$tidArr = Array($this->tid,$this->submittedTid);
+			if($this->synonyms) $tidArr = array_merge($tidArr,array_keys($this->synonyms));
+			$tidStr = implode(",",$tidArr);
+		}
  		
  		$mapArr = Array();
  		$minLat = 90;
@@ -572,8 +557,8 @@ class TaxonProfileManager {
 			$sql .= "AND (gi.DecimalLatitude BETWEEN ".$latlonArr[2]." AND ".$latlonArr[0].") ".
 				"AND (gi.DecimalLongitude BETWEEN ".$latlonArr[3]." AND ".$latlonArr[1].") ";
 		}
-		$sql .= "LIMIT 50";
-		//echo "<div>".$sql."</div>";
+		$sql .= "ORDER BY RAND() LIMIT 50";
+		//echo "<div>".$sql."</div>"; exit;
 		$result = $this->con->query($sql);
  		$sciName = "";
 		while($row = $result->fetch_object()){
@@ -586,7 +571,7 @@ class TaxonProfileManager {
 			if($long > $maxLong) $maxLong = $long;
  			$mapArr[] = $lat.",".$long;
 		}
-		$result->close();
+		$result->free();
 		if(!$mapArr && $latlonArr){
 			$result = $this->con->query($sqlBase."LIMIT 50");
 			while($row = $result->fetch_object()){
@@ -599,19 +584,21 @@ class TaxonProfileManager {
 				if($long > $maxLong) $maxLong = $long;
 	 			$mapArr[] = $lat.",".$long;
 			}
-			$result->close();
+			$result->free();
 		}
 		if(!$mapArr) return 0;
 		$latDist = $maxLat - $minLat;
 		$longDist = $maxLong - $minLong;
-		$googleUrlLocal = $this->googleUrl;
+		
+		$googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain&sensor=false';
+		if(array_key_exists('googleMapKey',$GLOBALS)) $googleUrl .= '&key='.$GLOBALS['googleMapKey'];
 		if($latDist < 3 || $longDist < 3) {
-			$googleUrlLocal .= "&zoom=6";
+			$googleUrl .= "&zoom=6";
 		}
 		$coordStr = implode("|",$mapArr);
 		if(!$coordStr) return ""; 
-		$googleUrlLocal .= "&markers=".$coordStr;
- 		return Array($sciName => $googleUrlLocal);
+		$googleUrl .= "&markers=".$coordStr;
+ 		return $googleUrl;
  	}
 
 	public function getDescriptions(){

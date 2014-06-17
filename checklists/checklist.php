@@ -258,7 +258,7 @@ if($clValue || $dynClid){
 					?>
 					<!-- Option box -->
 					<div id="cloptiondiv">
-						<form name='optionform' action='checklist.php' method='post' target="_blank">
+						<form name="optionform" action="checklist.php" method="post">
 							<fieldset>
 							    <legend><b>Options</b></legend>
 								<!-- Taxon Filter option -->
