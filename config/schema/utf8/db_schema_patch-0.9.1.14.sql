@@ -165,7 +165,7 @@ CREATE TABLE `imagekeywords` (
     REFERENCES `users` (`uid`)
     ON DELETE SET NULL
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `imageprojects` (
   `imgprojid` INT NOT NULL AUTO_INCREMENT,
@@ -178,7 +178,7 @@ CREATE TABLE `imageprojects` (
   `sortsequence` INT NULL DEFAULT 50,
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
   PRIMARY KEY (`imgprojid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `imageprojectlink` (
   `imgid` INT UNSIGNED NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE `imageprojectlink` (
     REFERENCES `imageprojects` (`imgprojid`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 # Add multi-language support
@@ -208,7 +208,7 @@ CREATE  TABLE `adminlanguages` (
   `notes` VARCHAR(45) NULL ,
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,
   PRIMARY KEY (`langid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `adminlanguages` 
 ADD UNIQUE INDEX `index_langname_unique` (`langname` ASC) ;
@@ -359,7 +359,7 @@ CREATE  TABLE `omoccurassococcurrences` (
   INDEX `omossococcur_occid_idx` (`occid` ASC),
   INDEX `omossococcur_occidassoc_idx` (`occidassociate` ASC), 
   PRIMARY KEY (`aoid`) 
-)  ENGINE=InnoDB DEFAULT CHARSET=latin1; 
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 INSERT INTO omoccurassococcurrences(occid,occidassociate,relationship,identifier,resourceurl,notes) 
   SELECT occid,occidassociate,relationship,identifier,resourceurl,notes FROM omassociatedoccurrences;
@@ -390,7 +390,7 @@ CREATE TABLE `omoccurassoctaxa` (
     REFERENCES `taxa` (`TID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE  TABLE `salixwordstats` (
   `swsid` INT NOT NULL AUTO_INCREMENT ,
@@ -417,7 +417,7 @@ CREATE  TABLE `salixwordstats` (
     REFERENCES `omcollections` (`CollID` )
     ON DELETE CASCADE
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 ALTER TABLE `omcollectors`
@@ -460,7 +460,7 @@ CREATE TABLE `userroles` (
     REFERENCES `users` (`uid`)
     ON DELETE SET NULL
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT IGNORE INTO userroles(uid,role)
 SELECT uid, pname FROM userpermissions 
@@ -513,7 +513,7 @@ CREATE TABLE `fmprojectcategories` (
     REFERENCES `fmprojects` (`pid`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 #Checklist
@@ -559,7 +559,7 @@ CREATE TABLE `referencetype` (
   `initialTimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
   PRIMARY KEY (`ReferenceTypeId`),
   UNIQUE INDEX `ReferenceType_UNIQUE` (`ReferenceType` ASC)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO referencetype(ReferenceType,Year,Title,SecondaryTitle,PlacePublished,Publisher,Volume,NumberVolumes,Number,Pages,Section,TertiaryTitle,Edition,Date,TypeWork,ShortTitle,AlternativeTitle,Isbn_Issn,Figures)
 VALUES("Generic","Year","Title","SecondaryTitle","PlacePublished","Publisher","Volume","NumberVolumes","Number","Pages","Section","TertiaryTitle","Edition","Date","TypeWork","ShortTitle","AlternativeTitle","Isbn_Issn","Figures"),
@@ -655,7 +655,7 @@ CREATE TABLE `referencecollectionlink` (
     REFERENCES `omcollections` (`CollID`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 #admin pages
@@ -678,7 +678,7 @@ CREATE TABLE `omcollpublications` (
     REFERENCES `omcollections` (`CollID`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 #remove dotmapper table (deprecated)
@@ -729,7 +729,7 @@ CREATE TABLE `media` (
     REFERENCES `users` (`uid`)
     ON DELETE SET NULL
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 #Taxon Profile Publications
@@ -756,7 +756,7 @@ CREATE TABLE `taxaprofilepubs` (
     REFERENCES `users` (`uid`)
     ON DELETE SET NULL
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `taxaprofilepubimagelink` (
   `imgid` INT UNSIGNED NOT NULL,
@@ -777,7 +777,7 @@ CREATE TABLE `taxaprofilepubimagelink` (
     REFERENCES `taxaprofilepubs` (`tppid`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `taxaprofilepubdesclink` (
   `tdbid` INT UNSIGNED NOT NULL,
@@ -798,7 +798,7 @@ CREATE TABLE `taxaprofilepubdesclink` (
     REFERENCES `taxaprofilepubs` (`tppid`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `taxaprofilepubmaplink` (
   `mid` INT UNSIGNED NOT NULL,
@@ -819,4 +819,4 @@ CREATE TABLE `taxaprofilepubmaplink` (
     REFERENCES `taxaprofilepubs` (`tppid`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
