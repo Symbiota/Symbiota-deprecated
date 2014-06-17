@@ -172,7 +172,22 @@ if($isEditor){
 								echo '<option '.($lProj==$projStr?'SELECTED':'').'>'.$projStr.'</option>'."\n";
 							} 
 							?>
-						</select> 
+						</select><br/>
+						<!-- 
+						Dataset Projects: 
+						<select name="datasetproject" >
+							<option value=""></option>
+							<option value="">-------------------------</option>
+							<?php 
+							$datasetProj = '';
+							if(array_key_exists('datasetproject',$_REQUEST)) $datasetProj = $_REQUEST['datasetproject'];
+							$dProjArr = $datasetManager->getDatasetProjects($collId);
+							foreach($dProjArr as $dsid => $dsProjStr){
+								echo '<option id="'.$dsid.'" '.($datasetProj==$dsProjStr?'SELECTED':'').'>'.$dsProjStr.'</option>'."\n";
+							}
+							?>
+						</select>
+						-->
 					</div>
 					<div>
 						<span style="margin-left:20px;">

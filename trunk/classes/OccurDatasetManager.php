@@ -6,6 +6,7 @@ class OccurDatasetManager {
 
 	private $conn;
 	private $symbUid;
+	private $collArr = array();
 	private $isAdmin = 0;
 
 	private $errorArr = array();
@@ -499,10 +500,10 @@ class OccurDatasetManager {
 				while($r = $rs->fetch_object()){
 					$occId = $r->occid;
 					$retArr[$occId]['q'] = $r->q;
-					$retArr[$occId]['c'] = $this->cleanOutStr($r->collector);
-					//$retArr[$occId]['f'] = $this->cleanOutStr($r->family);
-					$retArr[$occId]['s'] = $this->cleanOutStr($r->sciname);
-					$retArr[$occId]['l'] = $this->cleanOutStr($r->locality);
+					$retArr[$occId]['c'] = $r->collector;
+					//$retArr[$occId]['f'] = $r->family;
+					$retArr[$occId]['s'] = $r->sciname;
+					$retArr[$occId]['l'] = $r->locality;
 				}
 				$rs->close();
 			}
@@ -560,29 +561,46 @@ class OccurDatasetManager {
 		return $retArr;
 	}
 
-	public function getLabelProjects($collId){
+	public function getLabelProjects($collid){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT labelproject, observeruid FROM omoccurrences '.
-			'WHERE labelproject IS NOT NULL AND collid = '.$collId.' ';
-		if(!$this->isAdmin){
-			$sql .= 'AND observeruid = '.$this->symbUid.' ';
+		if($collid){
+			if(!$this->collArr) $this->setCollMetadata($collid);
+			$sql = 'SELECT DISTINCT labelproject, observeruid '.
+				'FROM omoccurrences '.
+				'WHERE labelproject IS NOT NULL AND collid = '.$collid.' ';
+			if($this->collArr['colltype'] == 'General Observations') $sql .= 'AND observeruid = '.$this->symbUid.' ';
+			$sql .= 'ORDER BY labelproject';
+			$rs = $this->conn->query($sql);
+			$altArr = array();
+			while($r = $rs->fetch_object()){
+				if($this->symbUid == $r->observeruid){
+					$retArr[] = $r->labelproject;
+				}
+				else{
+					$altArr[] = $r->labelproject;
+				}
+			}
+			$rs->free();
+			if($altArr){
+				if($retArr) $retArr[] = '------------------';
+				$retArr = array_merge($retArr,$altArr);
+			}
 		}
-		$sql .= 'ORDER BY labelproject';
+		return $retArr;
+	}
+
+	public function getDatasetProjects($collId){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT ds.datasetid, ds.name '.
+			'FROM omoccurdatasets ds INNER JOIN userroles r ON ds.datasetid = r.tablepk '.
+			'INNER JOIN omoccurdatasetlink dl ON ds.datasetid = dl.datasetid '.
+			'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
+			'WHERE (r.tablename = "omoccurdatasets") AND (o.collid = '.$collId.') ';
 		$rs = $this->conn->query($sql);
-		$altArr = array();
 		while($r = $rs->fetch_object()){
-			if($this->symbUid == $r->observeruid){
-				$retArr[] = $this->cleanOutStr($r->labelproject);
-			}
-			else{
-				$altArr[] = $this->cleanOutStr($r->labelproject);
-			}
+			$retArr[$r->datasetid] = $r->name;
 		}
-		$rs->close();
-		if($altArr){
-			if($retArr) $retArr[] = '------------------';
-			$retArr = array_merge($retArr,$altArr);
-		}
+		$rs->free();
 		return $retArr;
 	}
 
@@ -630,15 +648,25 @@ class OccurDatasetManager {
 	//General setters and getters
 	public function getCollName($collId){
 		$collName = '';
+		if($collId){
+			if(!$this->collArr) $this->setCollMetadata($collId);
+			$collName = $this->collArr['collname'].' ('.$this->collArr['instcode'].($this->collArr['collcode']?':'.$this->collArr['collcode']:'').')';
+		}
+		return $collName;
+	}
+
+	private function setCollMetadata($collId){
 		$sql = 'SELECT institutioncode, collectioncode, collectionname, colltype '.
 			'FROM omcollections WHERE collid = '.$collId;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$collName = $r->collectionname.' ('.$r->institutioncode.($r->collectioncode?':'.$r->collectioncode:'').')';
+				$this->collArr['instcode'] = $r->institutioncode;
+				$this->collArr['collcode'] = $r->collectioncode;
+				$this->collArr['collname'] = $r->collectionname;
+				$this->collArr['colltype'] = $r->colltype;
 			}
 			$rs->free();
 		}
-		return $collName;
 	}
 
 	public function setSymbUid($uid){
