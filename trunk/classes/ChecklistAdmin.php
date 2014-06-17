@@ -70,23 +70,35 @@ class ChecklistAdmin {
 	public function deleteChecklist($delClid){
 		global $symbUid;
 		$statusStr = true;
-		$sql = 'SELECT uid FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'") AND uid <> '.$symbUid;
-		$rs = $this->conn->query($sql);
-		if($rs->num_rows == 0){
-			$sql = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$delClid.')';
-			$this->conn->query($sql);
-			$sql = "DELETE FROM fmchecklists WHERE (clid = ".$delClid.')';
-			if($this->conn->query($sql)){
-				$sql = 'DELETE FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'")';
+		//Delete userpermissions reference once patch is submitted
+		//$sql = 'SELECT uid FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'") AND uid <> '.$symbUid;
+		//$rs = $this->conn->query($sql);
+		//if($rs->num_rows == 0){
+			$sql2 = 'SELECT uid FROM userroles '.
+				'WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$delClid.'") AND uid <> '.$symbUid;
+			$rs2 = $this->conn->query($sql2);
+			if($rs2->num_rows == 0){
+				$sql = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$delClid.')';
 				$this->conn->query($sql);
+				$sql = "DELETE FROM fmchecklists WHERE (clid = ".$delClid.')';
+				if($this->conn->query($sql)){
+					//Delete userpermissions reference once patch is submitted
+					//$sql = 'DELETE FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'")';
+					//$this->conn->query($sql);
+					$sql3 = 'DELETE FROM userroles WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$delClid.'")';
+					$this->conn->query($sql3);
+				}
+				else{
+					$statusStr = 'Checklist Deletion failed ('.$this->conn->error.'). Please contact data administrator.';
+				}
 			}
 			else{
-				$statusStr = 'Checklist Deletion failed ('.$this->conn->error.'). Please contact data administrator.';
+				$statusStr = 'Checklist cannot be deleted until all editors are removed. Remove editors and then try again.';
 			}
-		}
-		else{
-			$statusStr = 'Checklist cannot be deleted until all editors are removed. Remove editors and then try again.';
-		}
+		//}
+		//else{
+		//	$statusStr = 'Checklist cannot be deleted until all editors are removed. Remove editors and then try again.';
+		//}
 		return $statusStr;
 	}
 
@@ -255,6 +267,21 @@ class ChecklistAdmin {
 	public function getEditors(){
 		$editorArr = array();
 		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as uname '.
+			'FROM userroles ur INNER JOIN users u ON ur.uid = u.uid '.
+			'WHERE (ur.role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$this->clid.') '.
+			'ORDER BY u.lastname,u.firstname';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$uName = $r->uname;
+				if(strlen($uName) > 60) $uName = substr($uName,0,60);
+				$editorArr[$r->uid] = $r->uname;
+			}
+			$rs->free();
+		}
+		
+		//Remove once userroles table is full integrated
+		/* 
+		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as uname '.
 			'FROM userpermissions up INNER JOIN users u ON up.uid = u.uid '.
 			'WHERE up.pname = "ClAdmin-'.$this->clid.'" ORDER BY u.lastname,u.firstname';
 		if($rs = $this->conn->query($sql)){
@@ -265,26 +292,41 @@ class ChecklistAdmin {
 			}
 			$rs->free();
 		}
+		*/
 		return $editorArr;
 	}
 
 	public function addEditor($u){
 		$statusStr = '';
+		$sql = 'INSERT INTO userroles(uid,role,tablename,tablepk) '.
+			'VALUES('.$u.',"ClAdmin","fmchecklists",'.$this->clid.')';
+		if(!$this->conn->query($sql)){
+			$statusStr = 'ERROR: unable to add editor; SQL: '.$this->conn->error;
+		}
+		/*
 		$sql = 'INSERT INTO userpermissions(uid,pname) '.
 			'VALUES('.$u.',"ClAdmin-'.$this->clid.'")';
 		if(!$this->conn->query($sql)){
 			$statusStr = 'ERROR: unable to add editor; SQL: '.$this->conn->error;
 		}
+		*/
 		return $statusStr;
 	}
 
 	public function deleteEditor($u){
 		$statusStr = '';
+		$sql = 'DELETE FROM userroles '.
+			'WHERE (uid = '.$u.') AND (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$this->clid.') ';
+		if(!$this->conn->query($sql)){
+			$statusStr = 'ERROR: unable to remove editor; SQL: '.$this->conn->error;
+		}
+		/*
 		$sql = 'DELETE FROM userpermissions '.
 			'WHERE uid = '.$u.' AND pname = "ClAdmin-'.$this->clid.'"';
 		if(!$this->conn->query($sql)){
 			$statusStr = 'ERROR: unable to remove editor; SQL: '.$this->conn->error;
 		}
+		*/
 		return $statusStr;
 	}
 

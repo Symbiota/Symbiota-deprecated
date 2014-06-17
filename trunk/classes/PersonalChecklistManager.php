@@ -19,15 +19,19 @@ class PersonalChecklistManager{
 		//Get project and checklist IDs from userpermissions
 		$clStr = '';
 		$projStr = '';
-		$sql = 'SELECT pname FROM userpermissions '.
-			'WHERE (uid = '.$uid.') AND (pname LIKE "ClAdmin-%" OR pname LIKE "ProjAdmin-%") ';
+		$sql = 'SELECT role,tablepk FROM userroles '.
+			'WHERE (uid = '.$uid.') AND (role = "ClAdmin" OR role = "ProjAdmin") ';
+		//$sql = 'SELECT pname FROM userpermissions '.
+		//	'WHERE (uid = '.$uid.') AND (pname LIKE "ClAdmin-%" OR pname LIKE "ProjAdmin-%") ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$pArr = explode('-',$r->pname);
-			if(count($pArr) == 2){
-				if($pArr[0] == 'ClAdmin') $clStr .= ','.$pArr[1];
-				if($pArr[0] == 'ProjAdmin') $projStr .= ','.$pArr[1];
-			}
+			if($r->role == 'ClAdmin') $clStr .= ','.$r->tablepk;
+			if($r->role == 'ProjAdmin') $projStr .= ','.$r->tablepk;
+			//$pArr = explode('-',$r->pname);
+			//if(count($pArr) == 2){
+			//	if($pArr[0] == 'ClAdmin') $clStr .= ','.$pArr[1];
+			//	if($pArr[0] == 'ProjAdmin') $projStr .= ','.$pArr[1];
+			//}
 		}
 		if($clStr){
 			//Get checklists
@@ -73,7 +77,8 @@ class PersonalChecklistManager{
 		if($this->conn->query($sql)){
 			$newClId = $this->conn->insert_id;
 			//Set permissions to allow creater to be an editor
-		 	$this->conn->query("INSERT INTO userpermissions (uid, pname) VALUES(".$GLOBALS["symbUid"].",'ClAdmin-".$newClId."') ");
+		 	$this->conn->query('INSERT INTO userroles (uid, role, tablename, tablepk) VALUES('.$GLOBALS["symbUid"].',"ClAdmin","fmchecklists",'.$newClId.') ');
+		 	//$this->conn->query("INSERT INTO userpermissions (uid, pname) VALUES(".$GLOBALS["symbUid"].",'ClAdmin-".$newClId."') ");
 		 	$newPManager = new ProfileManager();
 		 	$newPManager->authenticate($GLOBALS["paramsArr"]["un"]);
 		}

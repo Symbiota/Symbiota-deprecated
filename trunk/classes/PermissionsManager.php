@@ -66,10 +66,25 @@ class PermissionsManager{
 	public function getUserPermissions($uid){
 		$perArr = Array();
 		if(is_numeric($uid)){
-			$sql = 'SELECT up.pname, up.assignedby, up.initialtimestamp '.
-				'FROM userpermissions up WHERE (up.uid = '.$this->conn->real_escape_string($uid).')';
+			$sql = 'SELECT r.role, r.tablepk, CONCAT_WS(", ",u.lastname,u.firstname) AS assignedby, r.initialtimestamp '.
+				'FROM userroles r LEFT JOIN users u ON r.uidassignedby = u.uid '.
+				'WHERE (r.uid = '.$uid.') ';
+			//$sql = 'SELECT up.pname, up.assignedby, up.initialtimestamp '.
+			//	'FROM userpermissions up WHERE (up.uid = '.$this->conn->real_escape_string($uid).')';
+			//echo $sql;
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
+				$assignedBy = 'assigned by: '.($row->assignedby?$row->assignedby.' ('.$row->initialtimestamp.')':'unknown');
+				if($row->tablepk){
+					$perArr[$row->role][$row->tablepk]['aby'] = $assignedBy;
+				}
+				else{
+					//RareSppAdmin, RareSppReader, KeyEditor, TaxonProfile, Taxonomy
+					$perArr[$row->role]['aby'] = $assignedBy;
+					$perArr[$row->role]['role'] = $row->role;
+				}
+				
+				/*
 				$pName = $row->pname;
 				$assignedBy = 'assigned by: '.($row->assignedby?$row->assignedby.' ('.$row->initialtimestamp.')':'unknown');
 				if(strpos($pName,"CollAdmin-") !== false){
@@ -96,88 +111,112 @@ class PermissionsManager{
 					//RareSppAdmin, RareSppReader, KeyEditor, TaxonProfile, Taxonomy
 					$perArr[$pName] = '<span title="'.$assignedBy.'">'.$pName.'</span>';
 				}
+				*/
 			}
 			$result->free();
 			
 			//If there are collections, get names
 			if(array_key_exists("CollAdmin",$perArr)){
 				$sql = "SELECT c.collid, c.collectionname FROM omcollections c ".
-					"WHERE (c.collid IN(".implode(",",array_keys($perArr["CollAdmin"]))."))";
+					"WHERE (c.collid IN(".implode(",",array_keys($perArr["CollAdmin"])).")) ".
+					"ORDER BY c.collectionname";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$cName = '<span title="'.$perArr["CollAdmin"][$row->collid].'">'.$row->collectionname.'</span>';
-					$perArr["CollAdmin"][$row->collid] = $cName;
+					$perArr["CollAdmin"][$row->collid]['name'] = $row->collectionname;
 				}
+				uasort($perArr["CollAdmin"], array($this,'sortByName'));
 				$result->free();
 			}
 			if(array_key_exists("CollEditor",$perArr)){
 				$sql = "SELECT c.collid, c.collectionname FROM omcollections c ".
-					"WHERE (c.collid IN(".implode(",",array_keys($perArr["CollEditor"]))."))";
+					"WHERE (c.collid IN(".implode(",",array_keys($perArr["CollEditor"])).")) ".
+					"ORDER BY c.collectionname";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$cName = '<span title="'.$perArr["CollEditor"][$row->collid].'">'.$row->collectionname.'</span>';
-					$perArr["CollEditor"][$row->collid] = $cName;
+					$perArr["CollEditor"][$row->collid]['name'] = $row->collectionname;
 				}
+				uasort($perArr["CollEditor"], array($this,'sortByName'));
 				$result->free();
 			}
 			if(array_key_exists("RareSppReader",$perArr)){
 				$sql = "SELECT c.collid, c.collectionname FROM omcollections c ".
-					"WHERE (c.collid IN(".implode(",",array_keys($perArr["RareSppReader"]))."))";
+					"WHERE (c.collid IN(".implode(",",array_keys($perArr["RareSppReader"]))."))".
+					"ORDER BY c.collectionname";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$cName = '<span title="'.$perArr["RareSppReader"][$row->collid].'">'.$row->collectionname.'</span>';
-					$perArr["RareSppReader"][$row->collid] = $cName;
+					$perArr["RareSppReader"][$row->collid]['name'] = $row->collectionname;
 				}
+				uasort($perArr["RareSppReader"], array($this,'sortByName'));
 				$result->free();
 			}
 	
 			//If there are checklist, fetch names
 			if(array_key_exists("ClAdmin",$perArr)){
 				$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ".
-					"WHERE (cl.clid IN(".implode(",",array_keys($perArr["ClAdmin"]))."))";
+					"WHERE (cl.clid IN(".implode(",",array_keys($perArr["ClAdmin"]))."))".
+					"ORDER BY cl.name";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$clName = '<span title="'.$perArr["ClAdmin"][$row->clid].'">'.$row->name.'</span>';
-					$perArr["ClAdmin"][$row->clid] = $clName;
+					$perArr["ClAdmin"][$row->clid]['name'] = $row->name;
 				}
+				uasort($perArr["ClAdmin"], array($this,'sortByName'));
 				$result->free();
 			}
-
+			
 			//If there are project admins, fetch project names
 			if(array_key_exists("ProjAdmin",$perArr)){
 				$sql = "SELECT pid, projname FROM fmprojects ".
-					"WHERE (pid IN(".implode(",",array_keys($perArr["ProjAdmin"]))."))";
+					"WHERE (pid IN(".implode(",",array_keys($perArr["ProjAdmin"])).")) ".
+					"ORDER BY projname";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$pName = '<span title="'.$perArr["ProjAdmin"][$row->pid].'">'.$row->projname.'</span>';
-					$perArr["ProjAdmin"][$row->pid] = $pName;
+					$perArr["ProjAdmin"][$row->pid]['name'] = $row->projname;
 				}
+				uasort($perArr["ProjAdmin"], array($this,'sortByName'));
 				$result->free();
 			}
 		}
 		return $perArr;
 	}
 
-	public function deletePermission($id, $delStr){
+	public function deletePermission($id, $role, $tablePk, $secondaryVariable = ''){
 		$statusStr = '';
 		if(is_numeric($id)){
-			$sql = 'DELETE FROM userpermissions '.
-				'WHERE (uid = '.$id.') AND (pname = "'.$this->cleanInStr($delStr).'")';
+			$sql = 'DELETE FROM userroles '.
+				'WHERE (uid = '.$id.') AND (role = "'.$role.'") '.
+				'AND (tablepk '.($tablePk?' = '.$tablePk:' IS NULL').') ';
+			if($secondaryVariable){
+				$sql .= 'AND (secondaryVariable = "'.$secondaryVariable.'") ';
+			}
+			//$sql = 'DELETE FROM userpermissions '.
+			//	'WHERE (uid = '.$id.') AND (pname = "'.$this->cleanInStr($delStr).'")';
+			//echo $sql;
 			$this->conn->query($sql);
 		}
 		return $statusStr;
 	}
 	
-	public function addPermission($uid, $pname){
-		global $paramsArr;
+	public function addPermission($uid,$role,$tablePk,$secondaryVariable = ''){
+		global $SYMB_UID;
 		$statusStr = '';
 		if(is_numeric($uid)){
-			$sql = 'INSERT INTO userpermissions(uid,pname,assignedby) '.
-				'VALUES('.$uid.',"'.$pname.'","'.$paramsArr['un'].'")';
-			//echo $sql;
-			if(!$this->conn->query($sql)){
-				$statusStr = 'ERROR adding user permission: '.$this->conn->error;
+			$sql = 'SELECT uid,role,tablepk,secondaryVariable,uidassignedby '.
+				'FROM userroles WHERE (uid = '.$uid.') AND (role = "'.$role.'") ';
+			if($tablePk) $sql .= 'AND (tablepk = '.$tablePk.') '; 
+			if($secondaryVariable) $sql .= 'AND (secondaryVariable = '.$secondaryVariable.') ';
+			$rs = $this->conn->query($sql);
+			if(!$rs->num_rows){
+				$sql1 = 'INSERT INTO userroles(uid,role,tablepk,secondaryVariable,uidassignedby) '.
+					'VALUES('.$uid.',"'.$role.'",'.($tablePk?$tablePk:'NULL').','.
+					($secondaryVariable?'"'.$secondaryVariable.'"':'NULL').','.$SYMB_UID.')';
+				//$sql = 'INSERT INTO userpermissions(uid,pname,assignedby,secondaryVariable) '.
+				//	'VALUES('.$uid.',"'.$pname.'","'.$paramsArr['un'].'")';
+				//echo $sql;
+				if(!$this->conn->query($sql1)){
+					$statusStr = 'ERROR adding user permission: '.$this->conn->error;
+				}
 			}
+			$rs->free();
 		}
 		return $statusStr;
 	}
@@ -185,10 +224,21 @@ class PermissionsManager{
 	public function getTaxonEditorArr($collid, $limitByColl = 0){
 		//grab the current permissions
 		$pArr = array();
-		$sql2 = 'SELECT uid, pname FROM userpermissions WHERE pname LIKE "CollTaxon-'.$collid.':%" ';
+		$sql2 = 'SELECT uid, role, tablepk, secondaryvariable '. 
+			'FROM userroles WHERE role = ("CollTaxon") AND (tablepk = '.$collid.') ';
+		//$sql2 = 'SELECT uid, pname FROM userpermissions WHERE pname LIKE "CollTaxon-'.$collid.':%" ';
 		//echo $sql2;
 		$rs2 = $this->conn->query($sql2);
 		while($r2 = $rs2->fetch_object()){
+			if(($r2->role == 'CollTaxon') && ($r2->tablepk = $collid) && ($r2->secondaryvariable = 'all')){
+				$pArr[$r2->uid]['all'] = 1;
+			}
+			else{
+				$pArr[$r2->uid]['utid'][] = $r2->secondaryvariable;
+				//$utId = substr($r2->pname,strrpos($r2->pname,':')+1);
+				//$pArr[$r2->uid]['utid'][] = $utId;
+			}
+			/*
 			if($r2->pname == 'CollTaxon-'.$collid.':all'){
 				$pArr[$r2->uid]['all'] = 1;
 			}
@@ -196,6 +246,7 @@ class PermissionsManager{
 				$utId = substr($r2->pname,strrpos($r2->pname,':')+1);
 				$pArr[$r2->uid]['utid'][] = $utId;
 			}
+			*/
 		}
 		$rs2->free();
 		//Get editors
@@ -269,19 +320,35 @@ class PermissionsManager{
 	public function getCollectionEditors($collid){
 		$returnArr = Array();
 		if($collid){
+			$sql = 'SELECT ur.uid, ur.role, ur.tablepk, CONCAT_WS(", ",u.lastname,u.firstname) AS uname, '.
+				'CONCAT_WS(", ",u2.lastname,u2.firstname) AS assignedby, ur.initialtimestamp '.
+				'FROM userroles ur INNER JOIN users u ON ur.uid = u.uid '.
+				'LEFT JOIN users u2 ON ur.uidassignedby = u2.uid '.
+				'WHERE (ur.role = "CollAdmin" AND ur.tablepk = '.$collid.') OR (ur.role = "CollEditor" AND ur.tablepk = '.$collid.') '. 
+				'OR (ur.role = "RareSppReader" AND ur.tablepk = '.$collid.') '.
+				'ORDER BY u.lastname,u.firstname';
+			/*
 			$sql = 'SELECT up.uid, up.pname, CONCAT_WS(", ",u.lastname,u.firstname) AS uname, up.assignedby, up.initialtimestamp '.
 				'FROM userpermissions up INNER JOIN users u ON up.uid = u.uid '.
 				'WHERE up.pname = "CollAdmin-'.$collid.'" OR up.pname = "CollEditor-'.$collid.'" '. 
 				'OR up.pname = "RareSppReader-'.$collid.'" '.
 				'ORDER BY u.lastname,u.firstname';
+			*/
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
+				$pGroup = 'rarespp';
+				if($r->role == 'CollAdmin') $pGroup = 'admin';
+				elseif($r->role == 'CollEditor') $pGroup = 'editor';
+				$outStr = '<span title="assigned by: '.($r->assignedby?$r->assignedby.' ('.$r->initialtimestamp.')':'unknown').'">'.$this->cleanOutStr($r->uname).'</span>';
+				$returnArr[$pGroup][$r->uid] = $outStr;
+				/*
 				$pGroup = 'rarespp';
 				if(substr($r->pname,0,9) == 'CollAdmin') $pGroup = 'admin';
 				elseif(substr($r->pname,0,10) == 'CollEditor') $pGroup = 'editor';
 				$outStr = '<span title="assigned by: '.($r->assignedby?$r->assignedby.' ('.$r->initialtimestamp.')':'unknown').'">'.$this->cleanOutStr($r->uname).'</span>';
 				$returnArr[$pGroup][$r->uid] = $outStr;
+				*/
 			}
 			$rs->free();
 		}
@@ -325,7 +392,7 @@ class PermissionsManager{
 	public function getChecklistArr($clKeys){
 		$returnArr = Array();
 		$sql = 'SELECT cl.clid, cl.name FROM fmchecklists cl ';
-		if($clKeys) $sql .= 'WHERE (cl.access <> "private") AND (cl.clid NOT IN('.implode(',',$clKeys).')) ';
+		if($clKeys) $sql .= 'WHERE (cl.access != "private") AND (cl.clid NOT IN('.implode(',',$clKeys).')) ';
 		$sql .= 'ORDER BY cl.name';
 		//echo $sql;
 		$result = $this->conn->query($sql);
@@ -337,6 +404,10 @@ class PermissionsManager{
 	}
 
 	//Misc fucntions
+	private function sortByName($a, $b) {
+		return strcmp($a["name"], $b["name"]);
+	}
+
 	private function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);

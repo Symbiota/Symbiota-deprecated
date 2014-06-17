@@ -17,22 +17,32 @@ if($SYMB_UID){
 
 if($isEditor){
 	if(array_key_exists('deladmin',$_GET)){
-		$permManager->deletePermission($_GET['deladmin'],'CollAdmin-'.$collId);
+		$permManager->deletePermission($_GET['deladmin'],'CollAdmin',$collId);
 	}
 	elseif(array_key_exists('deleditor',$_GET)){
-		$permManager->deletePermission($_GET['deleditor'],'CollEditor-'.$collId);
+		$permManager->deletePermission($_GET['deleditor'],'CollEditor',$collId);
 	}
 	elseif(array_key_exists('delrare',$_GET)){
-		$permManager->deletePermission($_GET['delrare'],'RareSppReader-'.$collId);
+		$permManager->deletePermission($_GET['delrare'],'RareSppReader',$collId);
 	}
 	elseif(array_key_exists('delidenteditor',$_GET)){
-		$permManager->deletePermission($_GET['delidenteditor'],'CollTaxon-'.$collId.':'.$_GET['utid']);
+		$permManager->deletePermission($_GET['delidenteditor'],'CollTaxon',$collId,$_GET['utid']);
 		if(is_numeric($_GET['utid'])){
-			$permManager->deletePermission($_GET['delidenteditor'],'CollTaxon-'.$collId.':all');
+			$permManager->deletePermission($_GET['delidenteditor'],'CollTaxon',$collId,'all');
 		}
 	}
 	elseif($action == 'Add Permissions for User'){
 		$rightType = $_POST['righttype'];
+		if($rightType == 'admin'){
+			$permManager->addPermission($_POST['uid'],"CollAdmin",$collId);
+		}
+		elseif($rightType == 'editor'){
+			$permManager->addPermission($_POST['uid'],"CollAdmin",$collId);
+		}
+		elseif($rightType == 'rare'){
+			$permManager->addPermission($_POST['uid'],"RareSppReader",$collId);
+		}
+		/*
 		$userRight = '';
 		if($rightType == 'admin'){
 			$userRight = 'CollAdmin-'.$collId;
@@ -44,11 +54,13 @@ if($isEditor){
 			$userRight = 'RareSppReader-'.$collId;
 		}
 		$permManager->addPermission($_POST['uid'],$userRight);
+		*/
 	}
 	elseif($action == 'Add Identification Editor'){
 		$identEditor = $_POST['identeditor'];
 		$pTokens = explode(':',$identEditor);
-		$permManager->addPermission($pTokens[0],'CollTaxon-'.$collId.':'.$pTokens[1]);
+		$permManager->addPermission($pTokens[0],'CollTaxon',$collId,$pTokens[1]);
+		//$permManager->addPermission($pTokens[0],'CollTaxon-'.$collId.':'.$pTokens[1]);
 	}
 }
 $collData = current($permManager->getCollectionMetadata($collId));

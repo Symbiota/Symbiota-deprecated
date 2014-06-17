@@ -221,35 +221,37 @@ if($taxonManager->getSciName() != "unknown"){
 		</tr>
 		<tr>
 			<td colspan="2">
-		<?php 
-		//Bottom Section - Pics and Map
-		//Display next 4 pics along bottom to left of map
-		$moreImages = $taxonManager->echoImages(1,4);
-		
-		//Map
-		$mapSrc = $taxonManager->getMapUrl();
-		if($mapSrc){
-			$gUrl = ""; $iUrl = ""; 
-			if($displayLocality){
-				$gUrl = "javascript:var popupReference=window.open('../map/googlemap.php?maptype=taxa&taxon=".$taxonManager->getSciName()."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
-			}
-			$url = array_shift($mapSrc);
-			if(strpos($url,"maps.google.com")){
-				if($gUrl) $aUrl = $gUrl;
-			}
-			else{
-				$aUrl = $url;
-				if($gUrl) $iUrl = $gUrl;
-			}
-			echo "<div class='mapthumb'>";
-			if($aUrl) echo "<a href=\"".$iUrl."\">";
-			echo "<img src='".$url."' title='".$spDisplay." dot map' alt='".$spDisplay." dot map'/>";
-			if($aUrl) echo "</a>";
-			if($iUrl) echo "<br /><a href=\"".$iUrl."\">Open Interactive Map</a>";
-			echo "</div>";
-		}
-		?>
-		
+				<?php 
+				//Bottom Section - Pics and Map
+				//Display next 4 pics along bottom to left of map
+				$moreImages = $taxonManager->echoImages(1,4);
+				
+				//Map
+				$url = ''; $aUrl = ''; $gAnchor = '';
+				if($occurrenceModIsActive && $displayLocality){
+					$gAnchor = "openMapPopup('".$taxonManager->getTid()."',".($taxonManager->getClid()?$taxonManager->getClid():0).")";
+				}
+				if($mapSrc = $taxonManager->getMapArr()){
+					$url = array_shift($mapSrc);
+					$aUrl = $url;
+				}
+				elseif($gAnchor){
+					$url = $taxonManager->getGoogleStaticMap();
+				}
+				if($url){
+					echo '<div class="mapthumb">';
+					if($aUrl){
+						echo '<a href="'.$aUrl.'">';
+					}
+					elseif($gAnchor){
+						echo '<a href="#" onclick="'.$gAnchor.';return false">';
+					}
+					echo '<img src="'.$url.'" title="'.$spDisplay.' dot map" alt="'.$spDisplay.' dot map" />';
+					if($aUrl || $gAnchor) echo '</a>';
+					if($gAnchor) echo '<br /><a href="#" onclick="'.$gAnchor.';return false">Open Interactive Map</a>';
+					echo '</div>';
+				}
+				?>
 			</td>
 		</tr>
 		<tr>
@@ -404,27 +406,15 @@ if($taxonManager->getSciName() != "unknown"){
 								echo "<div class='spptext'>Image<br/>Not Available</div>";
 							}
 							echo "</div>\n";
-							
-							if(array_key_exists("map",$subArr) && $mapUrl = $subArr["map"]){
-								$gUrl = ""; $iUrl = "";
-								if($taxonManager->getSecurityStatus() == 1 || $isAdmin){
-									$gUrl = "javascript:var popupReference=window.open('../map/googlemap.php?maptype=taxa&taxon=".$subArr["tid"]."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
-								}
-								$aUrl = "";
-								if(strpos($mapUrl,"maps.google.com")){
-									if($gUrl) $aUrl = $gUrl;
-								}
-								else{
-									$aUrl = $mapUrl;
-									if($gUrl) $iUrl = $gUrl;
-								}
+
+							//Display thumbnail map
+							if(array_key_exists("map",$subArr) && $subArr["map"]){
 								echo "<div class='sppmap'>";
-								if($aUrl) echo "<a href=\"".$iUrl."\">";
-								echo "<img src='".$mapUrl."' title='".$spDisplay." dot map' alt='".$spDisplay." dot map'/>";
-								if($aUrl) echo "</a>";
-								if($iUrl) echo "<br /><a href=\"".$iUrl."\">Open Interactive Map</a>";
+								echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
+								echo "<img src='".$subArr["map"]."' title='".$spDisplay." dot map' alt='".$spDisplay." dot map'/>";
+								echo '</a>';
 								echo "</div>";
-							}
+							}							
 							elseif($taxonManager->getRankId()>140){
 								echo "<div class='sppmap'><div class='spptext'>Map<br />not<br />Available</div></div>\n";
 							}
@@ -538,8 +528,6 @@ else{
 </table>
 <?php 
 include($serverRoot.'/footer.php');
-
 ?>
 </body>
 </html>
-

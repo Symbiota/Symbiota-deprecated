@@ -107,8 +107,10 @@ class OccurrenceCrowdSource {
 		if($this->collid){
 			//Users to exclude because they are not volunteers 
 			$editorUidArr = array();
-			$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
-				'WHERE (pname = "CollAdmin-'.$this->collid.'" OR pname = "CollEditor-'.$this->collid.'" OR pname = "SuperAdmin")';
+			$sql1 = 'SELECT DISTINCT uid FROM userroles '.
+				'WHERE ((role = "CollAdmin" OR role = "CollEditor") AND tablepk = '.$this->collid.') OR (role = "SuperAdmin")';
+			//$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
+			//	'WHERE (pname = "CollAdmin-'.$this->collid.'" OR pname = "CollEditor-'.$this->collid.'" OR pname = "SuperAdmin")';
 			$rs1 = $this->conn->query($sql1);
 			while($r1 = $rs1->fetch_object()){
 				$editorUidArr[] = $r1->uid;
@@ -151,8 +153,10 @@ class OccurrenceCrowdSource {
 		$retArr = array();
 		//Users to exclude because they are not volunteers 
 		$excludeUidArr = array();
-		$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
-			'WHERE (pname LIKE "CollAdmin-%" OR pname LIKE "CollEditor-%" OR pname = "SuperAdmin")';
+		$sql1 = 'SELECT DISTINCT uid FROM userroles '.
+			'WHERE (role = "CollAdmin") OR (role = "CollEditor") OR (role = "SuperAdmin")';
+		//$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
+		//	'WHERE (pname LIKE "CollAdmin-%" OR pname LIKE "CollEditor-%" OR pname = "SuperAdmin")';
 		$rs1 = $this->conn->query($sql1);
 		while($r1 = $rs1->fetch_object()){
 			$excludeUidArr[] = $r1->uid;

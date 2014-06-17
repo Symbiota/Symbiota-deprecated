@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecDatasetManager.php');
+include_once($serverRoot.'/classes/OccurDatasetManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = $_POST["collid"];
@@ -19,8 +19,7 @@ $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
 $exportDoc = ($action == 'Export to DOC'?1:0);
 
-$labelManager = new SpecDatasetManager();
-$labelManager->setCollId($collId);
+$labelManager = new OccurDatasetManager();
 
 $isEditor = 0;
 if($symbUid){

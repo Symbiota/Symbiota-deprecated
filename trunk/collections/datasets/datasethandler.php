@@ -1,14 +1,13 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecDatasetManager.php');
+include_once($serverRoot.'/classes/OccurDatasetManager.php');
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); 
 	
 $collId = $_REQUEST["collid"];
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 
-$datasetManager = new SpecDatasetManager();
-$datasetManager->setCollId($collId);
+$datasetManager = new OccurDatasetManager();
 
 if($action == "Print Labels"){
 	$hPrefix = $_POST['lhprefix'];

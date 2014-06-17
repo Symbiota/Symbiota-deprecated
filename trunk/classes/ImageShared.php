@@ -111,7 +111,7 @@ class ImageShared{
 				if(move_uploaded_file($_FILES['imgfile']['tmp_name'], $this->targetPath.$fileName.$this->imgExt)){
 					$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
 					$this->imgName = $fileName;
-					$this->testOrientation();
+					//$this->testOrientation();
 					return true;
 				}
 				else{
@@ -157,7 +157,7 @@ class ImageShared{
 		if(copy($sourceUri, $this->targetPath.$fileName.$this->imgExt)){
 			$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
 			$this->imgName = $fileName;
-			$this->testOrientation();
+			//$this->testOrientation();
 			return true;
 		}
 		$this->errArr[] = 'ERROR: Unable to copy image to target ('.$this->targetPath.$fileName.$this->imgExt.')';
@@ -170,7 +170,7 @@ class ImageShared{
     	}
 		$this->sourcePath = $url;
     	$this->imgName = $this->cleanFileName($url);
-		$this->testOrientation();
+		//$this->testOrientation();
 	}
 
 	public function cleanFileName($fName){

@@ -247,7 +247,7 @@ else{
 				if($qryStr){
 					?>
 					<div style="float:right;margin-top:10px;" title="Go to Label Printing Module">
-						<a href="../datasets/index.php?collid=<?php echo $collId.$qryStr; ?>">
+						<a href="../datasets/labelmanager.php?collid=<?php echo $collId.$qryStr; ?>">
 							<img src="../../images/list.png" style="width:15px;" />
 						</a>
 					</div>

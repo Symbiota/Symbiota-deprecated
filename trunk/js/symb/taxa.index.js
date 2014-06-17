@@ -91,20 +91,9 @@ function expandExtraImages(){
 	document.getElementById("imgextra").style.display = "block";
 }
 
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
+function openMapPopup(taxonVar,clid){
+	var popupMap = window.open('../map/googlemap.php?maptype=taxa&taxon='+taxonVar+'&clid='+clid,'gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');
+    if (popupMap.opener == null) popupMap.opener = self;
+    popupMap.focus();
 }
+
