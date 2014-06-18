@@ -153,14 +153,14 @@ CREATE TABLE `imagekeywords` (
   `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
   PRIMARY KEY (`imgkeywordid`),
   INDEX `FK_imagekeywords_imgid_idx` (`imgid` ASC),
-  INDEX `KF_imagekeyword_uid_idx` (`uidassignedby` ASC),
+  INDEX `FK_imagekeyword_uid_idx` (`uidassignedby` ASC),
   INDEX `INDEX_imagekeyword` (`keyword` ASC),
   CONSTRAINT `FK_imagekeywords_imgid`
     FOREIGN KEY (`imgid`)
     REFERENCES `images` (`imgid`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  CONSTRAINT `KF_imagekeyword_uid`
+  CONSTRAINT `FK_imagekeyword_uid`
     FOREIGN KEY (`uidassignedby`)
     REFERENCES `users` (`uid`)
     ON DELETE SET NULL
