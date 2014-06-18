@@ -835,7 +835,7 @@ class ImageBatchProcessor {
 		$occId = 0;
 		//Check to see if record with pk already exists
 		$sql = 'SELECT occid FROM omoccurrences '.
-			'WHERE (catalognumber IN("'.$specPk.'"'.(is_numeric($specPk)?',"'.trim($specPk,'0 ').'"':'').')) '.
+			'WHERE (catalognumber IN("'.$specPk.'"'.(is_numeric($specPk)?',"'.ltrim($specPk,'0 ').'"':'').')) '.
 			'AND (collid = '.$this->activeCollid.')';
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
@@ -1173,7 +1173,7 @@ class ImageBatchProcessor {
 							$sql = 'SELECT occid'.(!array_key_exists('occurrenceremarks',$recMap)?',occurrenceremarks':'').
 								($activeFields?','.implode(',',$activeFields):'').' '.
 								'FROM omoccurrences '.
-								'WHERE collid = '.$this->activeCollid.' AND (catalognumber IN("'.$catNum.'"'.(is_numeric($catNum)?',"'.trim($catNum,"0 ").'"':'').')) ';
+								'WHERE collid = '.$this->activeCollid.' AND (catalognumber IN("'.$catNum.'"'.(is_numeric($catNum)?',"'.ltrim($catNum,"0 ").'"':'').')) ';
 							//echo $sql;
 							$rs = $this->conn->query($sql);
 							if($r = $rs->fetch_assoc()){
@@ -1194,7 +1194,7 @@ class ImageBatchProcessor {
 												}
 												else{
 													//Not numeric, thus load into occRemarks 
-													$occRemarkArr[$activeField] = $activeValue;
+													//$occRemarkArr[$activeField] = $activeValue;
 												}
 											}
 											elseif($type == 'date'){
@@ -1210,7 +1210,7 @@ class ImageBatchProcessor {
 														}
 													}
 													else{
-														$occRemarkArr[$activeField] = $activeValue;
+														//$occRemarkArr[$activeField] = $activeValue;
 													}
 												}
 											}
@@ -1224,7 +1224,7 @@ class ImageBatchProcessor {
 										}
 										elseif($activeValue != $r[$activeField]){
 											//Target field is not empty and values not equal, thus add value into occurrenceRemarks
-											$occRemarkArr[$activeField] = $activeValue;
+											//$occRemarkArr[$activeField] = $activeValue;
 										}
 									}
 									$updateFrag = '';

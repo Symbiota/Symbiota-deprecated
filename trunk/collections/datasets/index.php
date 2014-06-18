@@ -233,7 +233,7 @@ elseif($action == 'Export Selected Occurrences'){
 			echo $collections_datasets_indexCrumbs;
 		}
 		else{
-			echo '<a href="../../profile/viewprofile.php&tabindex=1">My Profile</a> &gt;&gt; ';
+			echo '<a href="../../profile/viewprofile.php?tabindex=1">My Profile</a> &gt;&gt; ';
 		}
 		?>
 		<a href="index.php">
@@ -294,10 +294,10 @@ elseif($action == 'Export Selected Occurrences'){
 								<?php 
 								echo $dsArr['name'].' (#'.$dsid.')';
 								?>
-								<a href="index.php?submitaction=edit&datasetid=<?php echo $dsid; ?>" title="Manage and edit dataset">
+								<a href="index.php?mode=edit&datasetid=<?php echo $dsid; ?>" title="Manage and edit dataset">
 									<img src="../../images/edit.png" style="width:13px;" />
 								</a>&nbsp;&nbsp;
-								<a href="index.php?submitaction=list&datasetid=<?php echo $dsid; ?>" title="List occurrences">
+								<a href="index.php?datasetid=<?php echo $dsid; ?>" title="List occurrences">
 									<img src="../../images/list.png" style="width:13px;" />
 								</a>&nbsp;&nbsp;
 							</div>
