@@ -145,7 +145,7 @@ class ImageExplorer{
 
 		//Set tag
 		if(isset($searchCriteria['tags']) && $searchCriteria['tags']){
-			$sqlWhere .= 'AND it.tagvalue IN("'.implode('","',$this->cleanInArray($searchCriteria['tags'])).'") ';
+			$sqlWhere .= 'AND it.keyvalue IN("'.implode('","',$this->cleanInArray($searchCriteria['tags'])).'") ';
 		}
 		else{
 			/* If no tags, then limit to sort value less than 500, 
