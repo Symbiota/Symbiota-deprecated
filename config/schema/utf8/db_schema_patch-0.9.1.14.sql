@@ -204,7 +204,7 @@ CREATE  TABLE `adminlanguages` (
   `langid` INT NOT NULL AUTO_INCREMENT ,
   `langname` VARCHAR(45) NOT NULL ,
   `iso639_1` VARCHAR(2) NULL ,
-  `iso639_2` VARCHAR(3) NULL ,
+  `iso639_2` VARCHAR(10) NULL ,
   `notes` VARCHAR(45) NULL ,
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,
   PRIMARY KEY (`langid`)

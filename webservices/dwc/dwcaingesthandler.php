@@ -45,7 +45,7 @@ elseif($uploadType == $DWCAUPLOAD){
 	$duManager = new SpecUploadDwca();
 	$duManager->setIncludeIdentificationHistory($importIdent);
 	$duManager->setIncludeImages($importImage);
-	if($filePath) $duManager->setDigirPath($filePath); 
+	if($filePath) $duManager->setPath($filePath); 
 }
 else{
 	exit('ERROR: illegal upload type = '.$uploadType.' (should be 3 = File Upload, 6 = DWCA upload)');
