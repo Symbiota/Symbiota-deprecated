@@ -63,7 +63,7 @@ class SpecUploadDigir extends SpecUploadBase {
 		}
 		
 		do{
-			$url = (stripos($this->server,"http://")!==false?"":"http://").$this->server.$this->digirPath."?doc=".urlencode("<request ".
+			$url = (stripos($this->server,"http://")!==false?"":"http://").$this->server.$this->path."?doc=".urlencode("<request ".
 				"xmlns='http://digir.net/schema/protocol/2003/1.0' ".
 				"xmlns:xsd='http://www.w3.org/2001/XMLSchema' ".
 				"xmlns:darwin='http://digir.net/schema/conceptual/darwin/2003/1.0' ".
@@ -73,7 +73,7 @@ class SpecUploadDigir extends SpecUploadBase {
 				"<version>1.0</version>".
 				"<sendTime>".date(DATE_ISO8601)."</sendTime>".
 				"<source>".$_SERVER['SERVER_ADDR']."</source>".
-				"<destination resource='".$this->digirCode."'>".$this->server."</destination>".
+				"<destination resource='".$this->code."'>".$this->server."</destination>".
 				"<type>search</type>".
 				"</header><search><filter>");
 			$url .= urlencode($qStr);

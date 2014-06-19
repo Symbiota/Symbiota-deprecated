@@ -591,7 +591,7 @@ class TaxonProfileManager {
 		$longDist = $maxLong - $minLong;
 		
 		$googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain&sensor=false';
-		if(array_key_exists('googleMapKey',$GLOBALS)) $googleUrl .= '&key='.$GLOBALS['googleMapKey'];
+		if(array_key_exists('googleMapKey',$GLOBALS) && $GLOBALS['googleMapKey']) $googleUrl .= '&key='.$GLOBALS['googleMapKey'];
 		if($latDist < 3 || $longDist < 3) {
 			$googleUrl .= "&zoom=6";
 		}

@@ -128,8 +128,8 @@ class SpecUploadBase extends SpecUpload{
 //			if($this->uploadType == $this->DWCAUPLOAD){
 //				$this->fieldMap['dbpk']['field'] = 'id';
 //			}
-//			elseif($this->uploadType == $this->DIGIRUPLOAD && $this->digirPKField){
-//				$this->fieldMap['dbpk']['field'] = $recMap[$this->digirPKField];
+//			elseif($this->uploadType == $this->DIGIRUPLOAD && $this->pKField){
+//				$this->fieldMap['dbpk']['field'] = $recMap[$this->pKField];
 //			}
 //		}
 		
@@ -1381,8 +1381,8 @@ class SpecUploadBase extends SpecUpload{
 			}
 
 			//If a DiGIR load, set dbpk value
-			if($this->digirPKField && array_key_exists($this->digirPKField,$recMap) && !array_key_exists('dbpk',$recMap)){
-				$recMap['dbpk'] = $recMap[$this->digirPKField];
+			if($this->pKField && array_key_exists($this->pKField,$recMap) && !array_key_exists('dbpk',$recMap)){
+				$recMap['dbpk'] = $recMap[$this->pKField];
 			}
 			
 			//Do some cleaning on the dbpk; remove leading and trailing whitespaces and convert multiple spaces to a single space

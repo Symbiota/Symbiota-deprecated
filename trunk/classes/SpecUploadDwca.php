@@ -22,9 +22,9 @@ class SpecUploadDwca extends SpecUploadBase{
 		mkdir($this->uploadTargetPath.$localFolder);
 		$fullPath = $this->uploadTargetPath.$localFolder.'/dwca.zip';
 		
-		if($this->digirPath){
+		if($this->path){
 			//DWCA path is stored in the upload profile definition 
-			if(copy($this->digirPath,$fullPath)){
+			if(copy($this->path,$fullPath)){
 				$this->baseFolderName = $localFolder;
 			}
 			else{

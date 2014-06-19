@@ -259,15 +259,15 @@ $duManager->readUploadParameters();
 							</div>
 							<div id="pathDiv" style="display:none">
 								<b>Path:</b> 
-								<input name="path" type="text" size="50" value="<?php echo $duManager->getDigirPath(); ?>" style="width:400px;" />
+								<input name="path" type="text" size="50" value="<?php echo $duManager->getPath(); ?>" style="width:400px;" />
 							</div>
 							<div id="codeDiv" style="display:none">
-								<b>DiGIR Code:</b> 
-								<input name="code" type="text" value="<?php echo $duManager->getDigirCode(); ?>" />
+								<b>Code:</b> 
+								<input name="code" type="text" value="<?php echo $duManager->getCode(); ?>" />
 							</div>
 							<div id="pkfieldDiv" style="display:none">
-								<b>DiGIR Primary Key Field:</b> 
-								<input name="pkfield" type="text" value="<?php echo $duManager->getDigirPKField(); ?>" />
+								<b>Primary Key Field:</b> 
+								<input name="pkfield" type="text" value="<?php echo $duManager->getPKField(); ?>" />
 							</div>
 							<div id="usernameDiv" style="display:none">
 								<b>Username:</b> 

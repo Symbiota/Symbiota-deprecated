@@ -14,9 +14,9 @@ class SpecUpload{
 	protected $port;
 	protected $username;
 	protected $password;
-	protected $digirCode;
-	protected $digirPath;
-	protected $digirPKField;
+	protected $code;
+	protected $path;
+	protected $pKField;
 	protected $schemaName;
 	protected $queryStr;
 	protected $storedProcedure;
@@ -147,7 +147,7 @@ class SpecUpload{
     public function readUploadParameters(){
     	if($this->uspid){
 			$sql = 'SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, '.
-	    		'usp.digircode, usp.digirpath, usp.digirpkfield, usp.querystr, usp.cleanupsp, cs.uploaddate, usp.uploadtype '.
+	    		'usp.code, usp.path, usp.pkfield, usp.querystr, usp.cleanupsp, cs.uploaddate, usp.uploadtype '.
 				'FROM uploadspecparameters usp LEFT JOIN omcollectionstats cs ON usp.collid = cs.collid '.
 	    		'WHERE (usp.uspid = '.$this->uspid.')';
 			//echo $sql;
@@ -160,9 +160,9 @@ class SpecUpload{
 	    		$this->username = $row->Username;
 	    		$this->password = $row->Password;
 	    		$this->schemaName = $row->SchemaName;
-	    		$this->digirCode = $row->digircode;
-	    		if(!$this->digirPath) $this->digirPath = $row->digirpath;
-	    		$this->digirPKField = strtolower($row->digirpkfield);
+	    		$this->code = $row->code;
+	    		if(!$this->path) $this->path = $row->path;
+	    		$this->pKField = strtolower($row->pkfield);
 	    		$this->queryStr = $row->querystr;
 	    		$this->storedProcedure = $row->cleanupsp;
 	    		$this->lastUploadDate = $row->uploaddate;
@@ -181,9 +181,9 @@ class SpecUpload{
 			', username = '.($_REQUEST['username']?'"'.$_REQUEST['username'].'"':'NULL').
 			', password = '.($_REQUEST['password']?'"'.$_REQUEST['password'].'"':'NULL').
 			', schemaname = '.($_REQUEST['schemaname']?'"'.$_REQUEST['schemaname'].'"':'NULL').
-			', digircode = '.($_REQUEST['code']?'"'.$_REQUEST['code'].'"':'NULL').
-			', digirpath = '.($_REQUEST['path']?'"'.$_REQUEST['path'].'"':'NULL').
-			', digirpkfield = '.($_REQUEST['pkfield']?'"'.$_REQUEST['pkfield'].'"':'NULL').
+			', code = '.($_REQUEST['code']?'"'.$_REQUEST['code'].'"':'NULL').
+			', path = '.($_REQUEST['path']?'"'.$_REQUEST['path'].'"':'NULL').
+			', pkfield = '.($_REQUEST['pkfield']?'"'.$_REQUEST['pkfield'].'"':'NULL').
 			', querystr = '.($_REQUEST['querystr']?'"'.$this->cleanInStr($_REQUEST['querystr']).'"':'NULL').
 			', cleanupsp = '.($_REQUEST['cleanupsp']?'"'.$_REQUEST['cleanupsp'].'"':'NULL').' '.
 			'WHERE (uspid = '.$this->uspid.')';
@@ -195,8 +195,8 @@ class SpecUpload{
 	}
 
     public function addUploadProfile(){
-		$sql = 'INSERT INTO uploadspecparameters(collid, uploadtype, title, platform, server, port, digircode, digirpath, '.
-			'digirpkfield, username, password, schemaname, cleanupsp, querystr) VALUES ('.
+		$sql = 'INSERT INTO uploadspecparameters(collid, uploadtype, title, platform, server, port, code, path, '.
+			'pkfield, username, password, schemaname, cleanupsp, querystr) VALUES ('.
 			$this->collId.','.$_REQUEST['uploadtype'].',"'.$this->cleanInStr($_REQUEST['title']).'","'.$_REQUEST['platform'].'","'.
 			$_REQUEST['server'].'",'.($_REQUEST['port']?$_REQUEST['port']:'NULL').',"'.$_REQUEST['code'].
 			'","'.$_REQUEST['path'].'","'.$_REQUEST['pkfield'].'","'.$_REQUEST['username'].
@@ -242,20 +242,20 @@ class SpecUpload{
 		return $this->password;
 	}
 	
-	public function getDigirCode(){
-		return $this->digirCode;
+	public function getCode(){
+		return $this->code;
 	}
 	
-	public function getDigirPath(){
-		return $this->digirPath;
+	public function getPath(){
+		return $this->path;
 	}
 
-	public function setDigirPath($p){
-		$this->digirPath = $p;
+	public function setPath($p){
+		$this->path = $p;
 	}
 
-	public function getDigirPKField(){
-		return $this->digirPKField;
+	public function getPKField(){
+		return $this->pKField;
 	}
 
 	public function getSchemaName(){
