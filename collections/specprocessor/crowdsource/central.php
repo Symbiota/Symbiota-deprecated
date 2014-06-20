@@ -9,7 +9,9 @@ $csManager = new OccurrenceCrowdSource();
 
 $pArr = array();
 if($symbUid){
-	if(array_key_exists("CollAdmin",$userRights)) $pArr = $userRights['CollAdmin'];
+	if(array_key_exists("CollAdmin",$userRights)){
+		$pArr = $userRights['CollAdmin'];
+	}
 }
 
 $statusStr = '';
@@ -68,9 +70,9 @@ $statusStr = '';
 					?>
 					<b>Specimens processed:</b> <?php echo $userStats['totalcnt']; ?><br/>
 					<b>Pending points:</b> <?php echo $userStats['ppoints']; ?>
-					<?php if($userStats['ppoints']) echo '(<a href="review.php?rstatus=5&uid='.$SYMB_UID.'">review records</a>)'; ?> <br/>
+					<?php if($userStats['ppoints']) echo '(<a href="review.php?rstatus=5&uid='.$SYMB_UID.'">view records</a>)'; ?> <br/>
 					<b>Approved points:</b> <?php echo $userStats['apoints']; ?> 
-					<?php if($userStats['apoints']) echo '(<a href="review.php?rstatus=10&uid='.$SYMB_UID.'">review records</a>)'; ?> <br/>
+					<?php if($userStats['apoints']) echo '(<a href="review.php?rstatus=10&uid='.$SYMB_UID.'">view records</a>)'; ?> <br/>
 					<b>Total Possible Score:</b> <?php echo $userStats['ppoints']+$userStats['apoints']; ?><br/>
 					<?php
 				}
@@ -84,7 +86,18 @@ $statusStr = '';
 				?>
 			</fieldset>
 		</div>
-		
+		<?php 
+		if(isset($userRights['CollAdmin']) || isset($userRights['CollEditor'])){
+			?>
+			<div style="clear:both;margin:30px;">
+				<b>Note:</b> You have been identified as an official editor for one or more collections. 
+				Your points will not be counted in the Top Score table for specimens
+				that belong to collection to which you have edit rights.  
+				Top scores are posted only for specimens entered as a volunteer user. 
+			</div>
+			<?php 
+		}
+		?>		
 		<div style="margin:20px;clear:both;">
 			<h2>User Stats by Collections</h2>
 			<table class="styledtable">
