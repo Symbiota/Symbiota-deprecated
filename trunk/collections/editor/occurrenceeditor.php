@@ -390,7 +390,7 @@ else{
 
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=140310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=140310"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=140620"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=140310"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=140310"></script>
 </head>

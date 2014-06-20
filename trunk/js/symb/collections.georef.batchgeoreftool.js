@@ -129,10 +129,10 @@ function geoLocateLocality(){
 	var selObj = document.getElementById("locallist");
 	if(selObj.selectedIndex > -1){
 		var f = document.queryform;
-		var locality = selObj.options[selObj.selectedIndex].text;
-		var country = f.qcountry.value;
-		var state = f.qstate.value;;
-		var county = f.qcounty.value;
+		var locality = encodeURIComponent(selObj.options[selObj.selectedIndex].text);
+		var country = encodeURIComponent(f.qcountry.value);
+		var state = encodeURIComponent(f.qstate.value);
+		var county = encodeURIComponent(f.qcounty.value);
 		geolocWindow=open("geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
 		if(geolocWindow.opener == null) geolocWindow.opener = self;
 	}

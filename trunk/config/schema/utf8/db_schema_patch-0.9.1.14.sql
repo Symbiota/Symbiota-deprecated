@@ -2,29 +2,15 @@
 INSERT INTO schemaversion (versionnumber) values ('0.9.1.14');
 
 #GUID adjustments
-ALTER TABLE `guidoccurrences` DROP FOREIGN KEY `FK_guidoccurrences_occid` ;
 ALTER TABLE `guidoccurrences` 
-  ADD CONSTRAINT `FK_guidoccurrences_occid`
-  FOREIGN KEY (`occid` )
-  REFERENCES `omoccurrences` (`occid` )
-  ON DELETE NO ACTION
-  ON UPDATE CASCADE;
+  DROP FOREIGN KEY `FK_guidoccurrences_occid` ;
 
-ALTER TABLE `guidoccurdeterminations` DROP FOREIGN KEY `FK_guidoccurdet_detid` ;
 ALTER TABLE `guidoccurdeterminations` 
-  ADD CONSTRAINT `FK_guidoccurdet_detid`
-  FOREIGN KEY (`detid` )
-  REFERENCES `omoccurdeterminations` (`detid` )
-  ON DELETE NO ACTION
-  ON UPDATE CASCADE;
+  DROP FOREIGN KEY `FK_guidoccurdet_detid` ;
 
-ALTER TABLE `guidimages` DROP FOREIGN KEY `FK_guidimages_imgid` ;
 ALTER TABLE `guidimages` 
-  ADD CONSTRAINT `FK_guidimages_imgid`
-  FOREIGN KEY (`imgid` )
-  REFERENCES `images` (`imgid` )
-  ON DELETE NO ACTION
-  ON UPDATE CASCADE;
+  DROP FOREIGN KEY `FK_guidimages_imgid` ;
+
 
 #Maintain source GUIDs from source databases for snapshot collection (e.g. Specify)
 ALTER TABLE `omoccurdeterminations`
@@ -203,7 +189,7 @@ CREATE TABLE `imageprojectlink` (
 CREATE  TABLE `adminlanguages` (
   `langid` INT NOT NULL AUTO_INCREMENT ,
   `langname` VARCHAR(45) NOT NULL ,
-  `iso639_1` VARCHAR(2) NULL ,
+  `iso639_1` VARCHAR(10) NULL ,
   `iso639_2` VARCHAR(10) NULL ,
   `notes` VARCHAR(45) NULL ,
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,
@@ -211,7 +197,7 @@ CREATE  TABLE `adminlanguages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `adminlanguages` 
-ADD UNIQUE INDEX `index_langname_unique` (`langname` ASC) ;
+  ADD UNIQUE INDEX `index_langname_unique` (`langname` ASC) ;
 
 INSERT IGNORE INTO `adminlanguages`(langid,langname,iso639_1) 
 VALUES ('1', 'English', 'en'), ('2', 'German', 'de'), ('3', 'French', 'fr'), ('4', 'Dutch', 'nl'), ('5', 'Italian', 'it'), ('6', 'Spanish', 'es'), ('7', 'Polish', 'pl'), ('8', 'Russian', 'ru'), ('9', 'Japanese', 'ja'), ('10', 'Portuguese', 'pt'), ('11', 'Swedish', 'sv'), ('12', 'Chinese', 'zh'), ('13', 'Catalan', 'ca'), ('14', 'Ukrainian', 'uk'), ('15', 'Norwegian (Bokmål)', 'no'), ('16', 'Finnish', 'fi'), ('17', 'Vietnamese', 'vi'), ('18', 'Czech', 'cs'), ('19', 'Hungarian', 'hu'), ('20', 'Korean', 'ko'), ('21', 'Indonesian', 'id'), ('22', 'Turkish', 'tr'), ('23', 'Romanian', 'ro'), ('24', 'Persian', 'fa'), ('25', 'Arabic', 'ar'), ('26', 'Danish', 'da'), ('27', 'Esperanto', 'eo'), ('28', 'Serbian', 'sr'), ('29', 'Lithuanian', 'lt'), ('30', 'Slovak', 'sk'), ('31', 'Malay', 'ms'), ('32', 'Hebrew', 'he'), ('33', 'Bulgarian', 'bg'), ('34', 'Slovenian', 'sl'), ('35', 'Volapük', 'vo'), ('36', 'Kazakh', 'kk'), ('37', 'Waray-Waray', 'war'), ('38', 'Basque', 'eu'), ('39', 'Croatian', 'hr'), ('40', 'Hindi', 'hi'), ('41', 'Estonian', 'et'), ('42', 'Azerbaijani', 'az'), ('43', 'Galician', 'gl'), ('44', 'Simple English', 'simple'), ('45', 'Norwegian (Nynorsk)', 'nn'), ('46', 'Thai', 'th'), ('47', 'Newar / Nepal Bhasa', 'new'), ('48', 'Greek', 'el'), ('49', 'Aromanian', 'roa-rup'), ('50', 'Latin', 'la'), ('51', 'Occitan', 'oc'), ('52', 'Tagalog', 'tl'), ('53', 'Haitian', 'ht'), ('54', 'Macedonian', 'mk'), ('55', 'Georgian', 'ka'), ('56', 'Serbo-Croatian', 'sh'), ('57', 'Telugu', 'te'), ('58', 'Piedmontese', 'pms'), ('59', 'Cebuano', 'ceb'), ('60', 'Tamil', 'ta'), ('61', 'Belarusian (Taraškievica)', 'be-x-old'), ('62', 'Breton', 'br'), ('63', 'Latvian', 'lv'), ('64', 'Javanese', 'jv'), ('65', 'Albanian', 'sq'), ('66', 'Belarusian', 'be'), ('67', 'Marathi', 'mr'), ('68', 'Welsh', 'cy'), ('69', 'Luxembourgish', 'lb'), ('70', 'Icelandic', 'is'), ('71', 'Bosnian', 'bs'), ('72', 'Yoruba', 'yo'), ('73', 'Malagasy', 'mg'), ('74', 'Aragonese', 'an'), ('75', 'Bishnupriya Manipuri', 'bpy'), ('76', 'Lombard', 'lmo'), ('77', 'West Frisian', 'fy'), ('78', 'Bengali', 'bn'), ('79', 'Ido', 'io'), ('80', 'Swahili', 'sw'), ('81', 'Gujarati', 'gu'), ('82', 'Malayalam', 'ml'), ('83', 'Western Panjabi', 'pnb'), ('84', 'Afrikaans', 'af'), ('85', 'Low Saxon', 'nds'), ('86', 'Sicilian', 'scn'), ('87', 'Urdu', 'ur'), ('88', 'Kurdish', 'ku'), ('89', 'Cantonese', 'zh-yue'), ('90', 'Armenian', 'hy'), ('91', 'Quechua', 'qu'), ('92', 'Sundanese', 'su'), ('93', 'Nepali', 'ne'), ('94', 'Zazaki', 'diq'), ('95', 'Asturian', 'ast'), ('96', 'Tatar', 'tt'), ('97', 'Neapolitan', 'nap'), ('98', 'Irish', 'ga'), ('99', 'Chuvash', 'cv'), ('100', 'Samogitian', 'bat-smg'), ('101', 'Walloon', 'wa'), ('102', 'Amharic', 'am'), ('103', 'Kannada', 'kn'), ('104', 'Alemannic', 'als'), ('105', 'Buginese', 'bug'), ('106', 'Burmese', 'my'), ('107', 'Interlingua', 'ia');

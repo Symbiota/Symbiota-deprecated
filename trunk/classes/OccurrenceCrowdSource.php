@@ -165,6 +165,7 @@ class OccurrenceCrowdSource {
 		//Get users
 		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as user, sum(q.points) AS toppoints '.
 			'FROM omcrowdsourcequeue q INNER JOIN users u ON q.uidprocessor = u.uid '.
+			'WHERE q.reviewstatus = 10 AND q.points is not null '.
 			'GROUP BY firstname,u.lastname '.
 			'ORDER BY sum(q.points) DESC ';
 		$rs = $this->conn->query($sql);
@@ -200,7 +201,7 @@ class OccurrenceCrowdSource {
 			$retArr[$r->collid]['name'] = $r->collectionname.' ('.$r->collcode.')';
 			$retArr[$r->collid]['cnt'][$r->reviewstatus] = $r->cnt;
 			$retArr[$r->collid]['points'][$r->reviewstatus] = $r->points;
-			if($r->reviewstatus==10){
+			if($r->reviewstatus >= 10){
 				$aPoints += $r->points;
 			}
 			elseif($r->reviewstatus==5){

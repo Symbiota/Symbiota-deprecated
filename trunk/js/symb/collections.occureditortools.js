@@ -52,13 +52,13 @@ function openMappingAid() {
 
 function geoLocateLocality(){
 	var f = document.fullform;
-	var country = f.country.value;
-	var state = f.stateprovince.value;
+	var country = encodeURIComponent(f.country.value);
+	var state = encodeURIComponent(f.stateprovince.value);
 	if(!state) state = "unknown";
-	var county = f.county.value;
+	var county = encodeURIComponent(f.county.value);
 	if(!county) county = "unknown";
-	var locality = f.locality.value;
-	if(f.verbatimcoordinates.value) locality = locality + "; " + f.verbatimcoordinates.value;
+	var locality = encodeURIComponent(f.locality.value);
+	if(f.verbatimcoordinates.value) locality = locality + "; " + encodeURIComponent(f.verbatimcoordinates.value);
 	
 	if(!country){
 		alert("Country is blank and it is a required field for GeoLocate");
