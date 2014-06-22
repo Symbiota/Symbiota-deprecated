@@ -207,8 +207,8 @@ class OccurrenceManager{
 								$sqlWhereTaxa .= "OR (o.sciname = '".$sciName."') ";
 							}
 							else{
-			                    $sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
-			                }
+								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
+							}
 						}
 					}
 				}
@@ -254,15 +254,15 @@ class OccurrenceManager{
 			$this->localSearchArr[] = implode(" OR ",$localArr);
 		}
 		if(array_key_exists("elevlow",$this->searchTermsArr) || array_key_exists("elevhigh",$this->searchTermsArr)){
-            $elevlow = 0;
-            $elevhigh = 30000;
-            if (array_key_exists("elevlow",$this->searchTermsArr))  { $elevlow = $this->searchTermsArr["elevlow"]; } 
-            if (array_key_exists("elevhigh",$this->searchTermsArr))  { $elevhigh = $this->searchTermsArr["elevhigh"]; } 
+			$elevlow = 0;
+			$elevhigh = 30000;
+			if (array_key_exists("elevlow",$this->searchTermsArr))  { $elevlow = $this->searchTermsArr["elevlow"]; } 
+			if (array_key_exists("elevhigh",$this->searchTermsArr))  { $elevhigh = $this->searchTermsArr["elevhigh"]; } 
 			$tempArr = Array();
 			$sqlWhere .= "AND ( " .
-                         "      ( minimumElevationInMeters >= $elevlow AND maximumElevationInMeters <= $elevhigh ) OR " .
-                         "      ( maximumElevationInMeters is null AND minimumElevationInMeters >= $elevlow AND minimumElevationInMeters <= $elevhigh ) ".
-                         "    ) ";
+						 "	  ( minimumElevationInMeters >= $elevlow AND maximumElevationInMeters <= $elevhigh ) OR " .
+						 "	  ( maximumElevationInMeters is null AND minimumElevationInMeters >= $elevlow AND minimumElevationInMeters <= $elevhigh ) ".
+						 "	) ";
 		}
 		if(array_key_exists("llbound",$this->searchTermsArr)){
 			$llboundArr = explode(";",$this->searchTermsArr["llbound"]);
@@ -513,11 +513,11 @@ class OccurrenceManager{
 		return $retDate;
 	}
 
-    protected function setSciNamesByVerns(){
-        $sql = "SELECT DISTINCT v.VernacularName, t.tid, t.sciname, ts.family, t.rankid ".
-            "FROM (taxstatus ts INNER JOIN taxavernaculars v ON ts.TID = v.TID) ".
-            "INNER JOIN taxa t ON t.TID = ts.tidaccepted ";
-    	$whereStr = "";
+	protected function setSciNamesByVerns(){
+		$sql = "SELECT DISTINCT v.VernacularName, t.tid, t.sciname, ts.family, t.rankid ".
+			"FROM (taxstatus ts INNER JOIN taxavernaculars v ON ts.TID = v.TID) ".
+			"INNER JOIN taxa t ON t.TID = ts.tidaccepted ";
+		$whereStr = "";
 		foreach($this->taxaArr as $key => $value){
 			$whereStr .= "OR v.VernacularName = '".$key."' ";
 		}
@@ -542,32 +542,32 @@ class OccurrenceManager{
 			$this->taxaArr["no records"]["scinames"][] = "no records";
 		}
 		$result->close();
-    }
-    
-    protected function setSynonyms(){
-    	foreach($this->taxaArr as $key => $value){
-    		if(array_key_exists("scinames",$value) && !in_array("no records",$value["scinames"])){
-    			$this->taxaArr = $value["scinames"];
-    			foreach($this->taxaArr as $sciname){
-	        		$sql = "call ReturnSynonyms('".$sciname."',1)";
-	        		$result = $this->conn->query($sql);
-	        		while($row = $result->fetch_object()){
-	        			$this->taxaArr[$key]["synonyms"][] = $row->sciname;
-	        		}
-        			$result->close();
-    			}
-    		}
-    		else{
-    			$sql = "call ReturnSynonyms('".$key."',1)";
-    			$result = $this->conn->query($sql);
-        		while($row = $result->fetch_object()){
-        			$this->taxaArr[$key]["synonyms"][] = $row->sciname;
-        		}
-        		$result->close();
-        		$this->conn->next_result();
-    		}
-    	}
-    }
+	}
+	
+	protected function setSynonyms(){
+		foreach($this->taxaArr as $key => $value){
+			if(array_key_exists("scinames",$value) && !in_array("no records",$value["scinames"])){
+				$this->taxaArr = $value["scinames"];
+				foreach($this->taxaArr as $sciname){
+					$sql = "call ReturnSynonyms('".$sciname."',1)";
+					$result = $this->conn->query($sql);
+					while($row = $result->fetch_object()){
+						$this->taxaArr[$key]["synonyms"][] = $row->sciname;
+					}
+					$result->close();
+				}
+			}
+			else{
+				$sql = "call ReturnSynonyms('".$key."',1)";
+				$result = $this->conn->query($sql);
+				while($row = $result->fetch_object()){
+					$this->taxaArr[$key]["synonyms"][] = $row->sciname;
+				}
+				$result->close();
+				$this->conn->next_result();
+			}
+		}
+	}
 	
 	public function getFullCollectionList($catId = ""){
 		$retArr = array();
@@ -580,7 +580,8 @@ class OccurrenceManager{
 			if(isset($cArr[1])) $catIdStr = $cArr[1];
 		}
 		//Set collections
-		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, cat.catagory '.
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, '.
+			'cat.catagory, cat.icon AS caticon, cat.acronym '.
 			'FROM omcollections c LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
 			'LEFT JOIN omcollcatagories cat ON ccl.ccpk = cat.ccpk '.
 			'ORDER BY ccl.sortsequence, cat.catagory, c.sortseq, c.CollectionName ';
@@ -591,8 +592,9 @@ class OccurrenceManager{
 			if($r->ccpk){
 				if(!isset($retArr[$collType]['cat'][$r->ccpk]['name'])){
 					$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->catagory;
+					$retArr[$collType]['cat'][$r->ccpk]['icon'] = $r->caticon;
+					$retArr[$collType]['cat'][$r->ccpk]['acronym'] = $r->acronym;
 					//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['isselected'] = 1;
-					//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['icon'] = $r->icon;
 				}
 				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["instcode"] = $r->institutioncode;
 				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collcode"] = $r->collectioncode;
@@ -624,126 +626,138 @@ class OccurrenceManager{
 	public function outputFullCollArr($occArr,$defaultCatid = 0){
 		$collCnt = 0;
 		if(isset($occArr['cat'])){
-			$catArr = $occArr['cat'];
+			$categoryArr = $occArr['cat'];
 			?>
-			<div style="float:right;margin-top:80px;">
-	        	<input type="image" src='../images/next.jpg'
-	                onmouseover="this.src = '../images/next_rollover.jpg';" 
-	                onmouseout="this.src = '../images/next.jpg';"
-	                title="Click button to advance to the next step" />
-	    	</div>
-			<table>
-			<?php 
-			foreach($catArr as $catid => $catArr){
-				$name = $catArr["name"];
-				unset($catArr["name"]);
-				$idStr = $this->collArrIndex.'-'.$catid;
-				?>
-				<tr>
-					<td>
-						<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
-							<img id="plus-<?php echo $idStr; ?>" src="../images/plus.gif" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus.gif" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
-						</a>
-					</td>
-					<td>
-						<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked /> 
-					</td>
-					<td>
-			    		<span style='text-decoration:none;color:black;font-size:130%;font-weight:bold;'>
-				    		<a href = 'misc/collprofiles.php?catid=<?php echo $catid; ?>'><?php echo $name; ?></a>
-				    	</span>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="3">
-						<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px 0px;">
-							<table style="margin-left:15px;">
-						    	<?php 
-								foreach($catArr as $collid => $collName2){
-						    		?>
-						    		<tr>
-										<td>
-											<?php 
-											if($collName2["icon"]){
-												$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"]; 
-												?>
-												<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-													<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
-												</a>
-										    	<?php
-											}
-										    ?>
-										</td>
-										<td style="padding:6px">
-								    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" checked /> 
-										</td>
-										<td style="padding:6px">
-								    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-								    			<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
-								    		</a>
-								    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-								    			more info
-								    		</a>
-										</td>
-									</tr>
-						    		<?php 
-					    			$collCnt++; 
-						    	}
-						    	?>
-						    </table>
-						</div>
-					</td>
-				</tr>
+			<div style="float:right;margin-top:20px;">
+				<input type="image" src='../images/next.jpg'
+					onmouseover="this.src = '../images/next_rollover.jpg';" 
+					onmouseout="this.src = '../images/next.jpg';"
+					title="Click button to advance to the next step" />
+			</div>
+			<table style="float:left;width:80%;">
 				<?php 
-			}
-			?>
+				foreach($categoryArr as $catid => $catArr){
+					$name = $catArr['name'];
+					if($catArr['acronym']) $name .= ' ('.$catArr['acronym'].')';
+					$catIcon = $catArr['icon'];
+					unset($catArr['name']);
+					unset($catArr['acronym']);
+					unset($catArr['icon']);
+					$idStr = $this->collArrIndex.'-'.$catid;
+					?>
+					<tr>
+						<td style="width:35px;">
+							<?php 
+							if($catIcon){
+								$catIcon = (substr($catIcon,0,6)=='images'?'../':'').$catIcon; 
+								echo '<img src="'.$catIcon.'" style="border:0px;width:30px;height:30px;" />';
+							}
+							?>
+						</td>
+						<td style="padding:6px;width:25px;">
+							<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked /> 
+						</td>
+						<td style="padding:9px 5px;width:10px;">
+							<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
+								<img id="plus-<?php echo $idStr; ?>" src="../images/plus.gif" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus.gif" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
+							</a>
+						</td>
+						<td style="padding-top:8px;">
+							<a class="categorytitle" href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
+								<?php echo $name; ?>
+							</a>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4">
+							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin-left:15px;padding:10px 20px;border:inset">
+								<table>
+									<?php 
+									foreach($catArr as $collid => $collName2){
+										?>
+										<tr>
+											<td style="width:40px;">
+												<?php 
+												if($collName2["icon"]){
+													$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"]; 
+													?>
+													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+														<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
+													</a>
+													<?php
+												}
+												?>
+											</td>
+											<td style="padding:6px;width:25px;">
+												<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" checked /> 
+											</td>
+											<td style="padding:6px">
+												<a class="collectiontitle" href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+													<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
+												</a>
+												<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+													more info
+												</a>
+											</td>
+										</tr>
+										<?php 
+										$collCnt++; 
+									}
+									?>
+								</table>
+							</div>
+						</td>
+					</tr>
+					<?php 
+				}
+				?>
 			</table>
 			<?php 
 		}
 		if(isset($occArr['coll'])){
 			$collArr = $occArr['coll'];
 			?>
-		    <div style="float:right;margin-top:80px;">
-	        	<input type="image" src='../images/next.jpg'
-	                onmouseover="this.src = '../images/next_rollover.jpg';" 
-	                onmouseout="this.src = '../images/next.jpg';"
-	                title="Click button to advance to the next step" />
-	    	</div>
-			<table>
-			<?php 
-			foreach($collArr as $collid => $cArr){
-				?>
-				<tr>
-					<td>
-						<?php 
-						if($cArr["icon"]){
-							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
+			<table style="float:left;width:80%;">
+				<?php 
+				foreach($collArr as $collid => $cArr){
+					?>
+					<tr>
+						<td>
+							<?php 
+							if($cArr["icon"]){
+								$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
+								?>
+								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+									<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
+								</a>
+								<?php
+							}
 							?>
-							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-								<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
+							&nbsp;
+						</td>
+						<td style="padding:6px;">
+							<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" checked /> 
+						</td>
+						<td style="padding:6px">
+							<a class="collectiontitle" href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+								<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
 							</a>
-					    	<?php
-						}
-					    ?>
-					    &nbsp;
-					</td>
-					<td style="padding:6px;">
-			    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" checked /> 
-					</td>
-					<td style="padding:6px">
-			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-			    			<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
-			    		</a>
-			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-			    			more info
-			    		</a>
-				    </td>
-				</tr>
-				<?php
-				$collCnt++;
-			}
-			?>
+							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+								more info
+							</a>
+						</td>
+					</tr>
+					<?php
+					$collCnt++;
+				}
+				?>
 			</table>
+			<div style="float:right;margin-top:<?php echo count($collArr)*15; ?>px;">
+				<input type="image" src='../images/next.jpg'
+					onmouseover="this.src = '../images/next_rollover.jpg';" 
+					onmouseout="this.src = '../images/next.jpg';"
+					title="Click button to advance to the next step" />
+			</div>
 			<?php 
 		}
 		$this->collArrIndex++;
