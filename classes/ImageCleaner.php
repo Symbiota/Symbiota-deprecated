@@ -53,56 +53,63 @@ class ImageCleaner{
 				$imgUrl = trim($row->originalurl);
 				$webIsEmpty = true;
 			}
-			$imgManager->parseUrl($imgUrl);
-
-			//Create thumbnail 
-			$imgTnUrl = '';
-			if($imgManager->createNewImage('_tn',$imgManager->getTnPixWidth(),70)){
-				$imgTnUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_tn.jpg';
-			}
-
-			if($this->urlExists($imgTnUrl)){
-				$webFullUrl = '';
-				$lgFullUrl = '';
-				//If web image is too large, transfer to large image and create new web image
-				$fileSize = 0;
-				if(!$webIsEmpty && !$row->originalurl){
-					$fileSize = $this->getFileSize($imgManager->getSourcePath());
-					list($sourceWidth, $sourceHeight) = getimagesize($imgManager->getSourcePath());
-					if($fileSize > $imgManager->getWebFileSizeLimit() || $sourceWidth > ($imgManager->getWebPixWidth()*1.2)){
-						$lgFullUrl = $imgManager->getSourcePath();
-						$webIsEmpty = true;
-					}
-				}
-				if($webIsEmpty){
-					if($imgManager->createNewImage('_web',$imgManager->getWebPixWidth())){
-						$webFullUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_web.jpg';
-					}
-				}
-
-				$sql = 'UPDATE images ti SET ti.thumbnailurl = "'.$imgTnUrl.'" ';
-				if($webFullUrl){
-					$sql .= ',url = "'.$webFullUrl.'" ';
-				}
-				if($lgFullUrl){
-					$sql .= ',originalurl = "'.$lgFullUrl.'" ';
-				}
-				$sql .= "WHERE ti.imgid = ".$imgId;
-				//echo $sql; 
-				if($this->conn->query($sql)){
-					if($this->verbose) $statusStr = 'Done!';
+			if($imgManager->parseUrl($imgUrl)){
+				//Create thumbnail
+				$imgTnUrl = '';
+				if($imgManager->createNewImage('_tn',$imgManager->getTnPixWidth(),70)){
+					$imgTnUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_tn.jpg';
 				}
 				else{
-					if($this->verbose) $statusStr = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
+					if($this->verbose) $statusStr = 'ERROR building thumbnail: '.implode('; ',$imgManager->getErrArr());
 				}
+				
+				if($imgTnUrl && $imgManager->uriExists($imgTnUrl)){
+					$webFullUrl = '';
+					$lgFullUrl = '';
+					//If web image is too large, transfer to large image and create new web image
+					if(!$webIsEmpty && !$row->originalurl){
+						$fileSize = $imgManager->getSourceFileSize();
+						list($sourceWidth, $sourceHeight) = getimagesize($imgManager->getSourcePath());
+						if($fileSize > $imgManager->getWebFileSizeLimit() || $sourceWidth > ($imgManager->getWebPixWidth()*1.2)){
+							$lgFullUrl = $imgManager->getSourcePath();
+							$webIsEmpty = true;
+						}
+					}
+					if($webIsEmpty){
+						if($imgManager->createNewImage('_web',$imgManager->getWebPixWidth())){
+							$webFullUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_web.jpg';
+						}
+					}
+	
+					$sql = 'UPDATE images ti SET ti.thumbnailurl = "'.$imgTnUrl.'" ';
+					if($webFullUrl){
+						$sql .= ',url = "'.$webFullUrl.'" ';
+					}
+					if($lgFullUrl){
+						$sql .= ',originalurl = "'.$lgFullUrl.'" ';
+					}
+					$sql .= "WHERE ti.imgid = ".$imgId;
+					//echo $sql; 
+					if($this->conn->query($sql)){
+						if($this->verbose) $statusStr = 'Done!';
+					}
+					else{
+						if($this->verbose) $statusStr = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
+					}
+				}
+				else{
+					if($this->verbose) $statusStr = 'ERROR: unable to create thumbnail image';
+				}
+				$imgManager->reset();
 			}
 			else{
-				if($this->verbose) $statusStr = 'ERROR: unable to create thumbnail image';
+				if($this->verbose){
+					$statusStr = 'ERROR: unable to parse source image ('.$imgUrl.')';
+				}
 			}
-			if($this->verbose) echo $statusStr.'</li>';
-			$imgManager->reset();
 			ob_flush();
 			flush();
+			if($this->verbose) echo $statusStr.'</li>';
 		}
 		$result->free();
 	}
@@ -110,73 +117,5 @@ class ImageCleaner{
 	public function setVerbose($verb){
 		$this->verbose = $verb;
 	}
-	
-	private function getFileSize($remoteFile){
-		$fileSize = 0;
-		if(strtolower(substr($remoteFile,0,7)) == 'http://' || strtolower(substr($remoteFile,0,8)) == 'https://'){
-			$ch = curl_init($remoteFile);
-			curl_setopt($ch, CURLOPT_NOBODY, true);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_HEADER, true);
-			$data = curl_exec($ch);
-			curl_close($ch);
-			if($data === false) {
-				return 0;
-			}
-			
-			if(preg_match('/Content-Length: (\d+)/', $data, $matches)) {
-			  $fileSize = (int)$matches[1];
-			}
-		}
-		else{
-			$fileSize = filesize($remoteFile);
-		}
-		return $fileSize;
-	}
-
-	private function urlExists($url) {
-		$exists = false;
-		$localUrl = '';
-		if(substr($url,0,1) == '/'){
-			if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
-				$url = $GLOBALS['imageDomain'].$url;
-			}
-			elseif($GLOBALS['imageRootUrl'] && strpos($url,$GLOBALS['imageRootUrl']) === 0){
-				$localUrl = str_replace($GLOBALS['imageRootUrl'],$GLOBALS['imageRootPath'],$url);
-			}
-			else{
-				$urlPrefix = "http://";
-				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
-				$urlPrefix .= $_SERVER["SERVER_NAME"];
-				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
-				$url = $urlPrefix.$url;
-			}
-		}
-		
-	    if(file_exists($url) || ($localUrl && file_exists($localUrl))){
-			return true;
-	    }
-
-	    if(!$exists){
-		    // Version 4.x supported
-		    $handle   = curl_init($url);
-		    if (false === $handle){
-				$exists = false;
-		    }
-		    curl_setopt($handle, CURLOPT_HEADER, false);
-		    curl_setopt($handle, CURLOPT_FAILONERROR, true);  // this works
-		    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
-		    curl_setopt($handle, CURLOPT_NOBODY, true);
-		    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
-		    $exists = curl_exec($handle);
-		    curl_close($handle);
-	    }
-	     
-		//One more  check
-	    if(!$exists){
-	    	$exists = (@fclose(@fopen($url,"r")));
-	    }
-	    return $exists;
-	}	
 }
 ?>

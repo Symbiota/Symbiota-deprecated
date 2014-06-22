@@ -495,7 +495,7 @@ class TaxonProfileManager {
 		if($this->tid){
 			//Get links
 			$sql = 'SELECT DISTINCT tl.tlid, tl.url, tl.icon, tl.title, tl.owner, tl.notes, tl.sortsequence '.
-				'FROM taxalinks tl INNER JOIN taxaenumtree tn ON tl.tid = tn.parenttid '.
+				'FROM taxalinks tl LEFT JOIN taxaenumtree tn ON tl.tid = tn.parenttid '.
 				'WHERE (tn.tid  = '.$this->tid.') OR (tl.tid = '.$this->tid.') '.
 				'ORDER BY tl.sortsequence, tl.title';
 			//echo $sql;

@@ -165,12 +165,20 @@ class ImageShared{
 	}
 
 	public function parseUrl($url){
-		if($GLOBALS['imageDomain'] && substr($url,0,1) == '/'){
-			$url = $GLOBALS['imageDomain'].$url;
-    	}
-		$this->sourcePath = $url;
-    	$this->imgName = $this->cleanFileName($url);
-		//$this->testOrientation();
+		$status = false;
+		if($this->uriExists($url)){
+			if($GLOBALS['imageDomain'] && substr($url,0,1) == '/'){
+				$url = $GLOBALS['imageDomain'].$url;
+	    	}
+			$this->sourcePath = $url;
+	    	$this->imgName = $this->cleanFileName($url);
+			//$this->testOrientation();
+			$status = true;
+		}
+		else{
+			$this->errArr[] = 'ERROR: image url does not exist ('.$url.')';
+		}
+		return $status;
 	}
 
 	public function cleanFileName($fName){
@@ -272,19 +280,7 @@ class ImageShared{
 			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
 		}
 		//Get image file size
-		$fileSize = 0;
-		if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://') { 
-			$x = array_change_key_case(get_headers($this->sourcePath, 1),CASE_LOWER); 
-			if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) { 
-				$fileSize = $x['content-length'][1]; 
-			}
- 			else { 
- 				$fileSize = $x['content-length']; 
- 			}
-		} 
-		else { 
-			$fileSize = @filesize($this->sourcePath);
-		}
+		$fileSize = $this->getSourceFileSize();
 
 		//Create large image
 		$imgLgUrl = "";
@@ -381,43 +377,47 @@ class ImageShared{
 		if(!$this->sourceWidth || !$this->sourceHeight){
 			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
 		}
-		$newHeight = round($this->sourceHeight*($newWidth/$this->sourceWidth));
-		if($newWidth > $this->sourceWidth){
-			$newWidth = $this->sourceWidth;
-			$newHeight = $this->sourceHeight;
-		}
-
-		if(!$this->sourceGdImg){
-			if($this->imgExt == '.gif'){
-		   		$this->sourceGdImg = imagecreatefromgif($this->sourcePath);
+		if($this->sourceWidth){
+			$newHeight = round($this->sourceHeight*($newWidth/$this->sourceWidth));
+			if($newWidth > $this->sourceWidth){
+				$newWidth = $this->sourceWidth;
+				$newHeight = $this->sourceHeight;
 			}
-			elseif($this->imgExt == '.png'){
-		   		$this->sourceGdImg = imagecreatefrompng($this->sourcePath);
+			if(!$this->sourceGdImg){
+				if($this->imgExt == '.gif'){
+			   		$this->sourceGdImg = imagecreatefromgif($this->sourcePath);
+				}
+				elseif($this->imgExt == '.png'){
+			   		$this->sourceGdImg = imagecreatefrompng($this->sourcePath);
+				}
+				else{
+					//JPG assumed
+			   		$this->sourceGdImg = imagecreatefromjpeg($this->sourcePath);
+				}
+			}
+			
+			$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+			//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+			imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$this->sourceWidth,$this->sourceHeight);
+	
+			//Irrelavent of import image, output JPG 
+			$targetPath = $this->targetPath.$this->imgName.$subExt.'.jpg';
+			if($qualityRating){
+				$status = imagejpeg($tmpImg, $targetPath, $qualityRating);
 			}
 			else{
-				//JPG assumed
-		   		$this->sourceGdImg = imagecreatefromjpeg($this->sourcePath);
+				$status = imagejpeg($tmpImg, $targetPath);
 			}
-		}
-		
-		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
-		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
-		imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$this->sourceWidth,$this->sourceHeight);
-
-		//Irrelavent of import image, output JPG 
-		$targetPath = $this->targetPath.$this->imgName.$subExt.'.jpg';
-		if($qualityRating){
-			$status = imagejpeg($tmpImg, $targetPath, $qualityRating);
+				
+			if(!$status){
+				$this->errArr[] = 'ERROR: failed to create images in target path ('.$targetPath.')';
+			}
+	
+			imagedestroy($tmpImg);
 		}
 		else{
-			$status = imagejpeg($tmpImg, $targetPath);
+			$this->errArr[] = 'ERROR: unable to get source image width ('.$this->sourcePath.')';
 		}
-			
-		if(!$status){
-			$this->errArr[] = 'ERROR: failed to create images in target path ('.$targetPath.')';
-		}
-
-		imagedestroy($tmpImg);
 		return $status;
 	}
 	
@@ -903,13 +903,65 @@ class ImageShared{
 			}
 		}
 	}
+	
+	public function getSourceFileSize(){
+		$fileSize = 0;
+		if($this->sourcePath){
+			if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
+				$x = array_change_key_case(get_headers($this->sourcePath, 1),CASE_LOWER); 
+				if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) { 
+					$fileSize = $x['content-length'][1]; 
+				}
+	 			else { 
+	 				$fileSize = $x['content-length']; 
+	 			}
+	 			/*
+				$ch = curl_init($this->sourcePath);
+				curl_setopt($ch, CURLOPT_NOBODY, true);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch, CURLOPT_HEADER, true);
+				$data = curl_exec($ch);
+				curl_close($ch);
+				if($data === false) {
+					return 0;
+				}
+				if(preg_match('/Content-Length: (\d+)/', $data, $matches)) {
+				  $fileSize = (int)$matches[1];
+				}
+				*/
+			}
+			else{
+				$fileSize = filesize($this->sourcePath);
+			}
+		}
+		return $fileSize;
+	}
 
-	private function uriExists($url) {
+	public function uriExists($url) {
 		$exists = false;
-	    if(file_exists($url)){
+		$localUrl = '';
+		if(substr($url,0,1) == '/'){
+			if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
+				$url = $GLOBALS['imageDomain'].$url;
+			}
+			elseif($GLOBALS['imageRootUrl'] && strpos($url,$GLOBALS['imageRootUrl']) === 0){
+				$localUrl = str_replace($GLOBALS['imageRootUrl'],$GLOBALS['imageRootPath'],$url);
+			}
+			else{
+				$urlPrefix = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				$urlPrefix .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+				$url = $urlPrefix.$url;
+			}
+		}
+		
+		//First simple check
+		if(file_exists($url) || ($localUrl && file_exists($localUrl))){
 			return true;
 	    }
 
+	    //Second check
 	    if(!$exists){
 		    // Version 4.x supported
 		    $handle   = curl_init($url);
@@ -925,10 +977,14 @@ class ImageShared{
 		    curl_close($handle);
 	    }
 	     
-		//One more  check
+	    //One last check
 	    if(!$exists){
 	    	$exists = (@fclose(@fopen($url,"r")));
 	    }
+	    
+	    //Test to see if file is an image 
+	    if(!@exif_imagetype($url)) $exists = false;
+
 	    return $exists;
 	}	
 
