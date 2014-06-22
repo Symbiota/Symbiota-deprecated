@@ -4,19 +4,21 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/EOLManager.php');
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-  
+
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../taxa/admin/eolmapper.php?'.$_SERVER['QUERY_STRING']);
+
 $submitAction = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $statusStr = array_key_exists('status',$_REQUEST)?$_REQUEST['status']:'';
 
-$editable = false;
-if($isAdmin){
-	$editable = true;
+$isEditor = false;
+if($IS_ADMIN){
+	$isEditor = true;
 }
 
 $eolManager = new EOLManager();
  
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<!DOCTYPE HTML >
 <html>
 <head>
 	<title><?php echo $defaultTitle." EOL Manager: "; ?></title>
@@ -52,35 +54,37 @@ if(isset($taxa_admin_eoladminCrumbs)){
 			<hr/>
 			<?php 
 		}
-		if($submitAction){
+		if($isEditor){
+			if($submitAction){
+				?>
+				<hr/>
+				<div style="margin:15px;">
+					<?php
+					if($submitAction == 'Map Taxa'){
+						$makePrimary = 0;
+						$restart = 0;
+						if(array_key_exists('makeprimary',$_POST) && $_POST['makeprimary']){
+							$makePrimary = 1;
+						}
+						if(array_key_exists('restart',$_POST) && $_POST['restart']){
+							$restart = 1;
+						}
+						$eolManager->mapTaxa($makePrimary,$_POST['tidstart'],$restart);
+					}
+					elseif($submitAction == 'Map Images'){
+						$restart = 0;
+						if(array_key_exists('restart',$_POST) && $_POST['restart']){
+							$restart = 1;
+						}
+						$eolManager->mapImagesForTaxa($_POST['startindex'],$restart);
+					}
+					?>
+				</div>
+				<hr/>
+				<?php 
+			}
 			?>
-			<hr/>
 			<div style="margin:15px;">
-				<?php
-				if($submitAction == 'Map Taxa'){
-					$makePrimary = 0;
-					if(array_key_exists('makeprimary',$_POST) && $_POST['makeprimary']){
-						$makePrimary = 1;
-					}
-					$eolManager->mapTaxa($makePrimary);
-				}
-				elseif($submitAction == 'Map Images'){
-					$startIndex = 0;
-					if(array_key_exists('startindex',$_POST) && $_POST['startindex']){
-						$startIndex = $_POST['startindex'];
-					}
-					$eolManager->mapImagesForTaxa($startIndex);
-				}
-				?>
-			</div>
-			<hr/>
-			<?php 
-		}
-		?>
-		<div style="margin:15px;">
-			<?php 
-			if($editable){
-				?>
 				<fieldset style="padding:15px;">
 					<legend><b>Taxa Mapping</b></legend>
 					<div>
@@ -94,6 +98,8 @@ if(isset($taxa_admin_eoladminCrumbs)){
 							<form name="taxamappingform" action="eolmapper.php" method="post">
 								<input type="submit" name="submitaction" value="Map Taxa" />
 								<div style="margin:15px;">
+									TID Start Index: <input type="text" name="tidstart" value="" /><br />
+									<input type="checkbox" name="restart" value="1" CHECKED /> Restart where left off within the last week<br />
 									<input type="checkbox" name="makeprimary" value="1" CHECKED /> Make EOL primary link (sort order = 1)
 								</div>
 							</form>
@@ -113,26 +119,19 @@ if(isset($taxa_admin_eoladminCrumbs)){
 						<div style="margin:10px;">
 							<form name="imagemappingform" action="eolmapper.php" method="post">
 								TID Start Index: <input type="text" name="startindex" value="" /><br/>
+								<input type="checkbox" name="restart" value="1" CHECKED /> Restart where left off within the last week<br />
 								<input type="submit" name="submitaction" value="Map Images" />
 							</form>
 						</div>
 					</div>
 				</fieldset>
-				<?php 
-			}
-			elseif(!$symbUid){
-				?>
-				Please <a href="../../profile/index.php?refurl=../taxa/admin/eolmapper.php">login</a> 
-				to acess the EOL Mapper Module
-				<?php 
-			}
-			else{
-				?>
-				You need Super Administrator permissions to use the EOL Mapper Module
-				<?php 
-			}
-			?>
-		</div>
+			</div>
+			<?php 
+		}
+		else{
+			echo '<div>You need to be a portal administrator to use this module</div>';
+		}
+		?>
 	</div>
 	<?php 
 	include($serverRoot.'/footer.php');

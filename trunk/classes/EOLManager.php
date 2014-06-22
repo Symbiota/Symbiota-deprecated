@@ -1,9 +1,11 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
- 
+include_once($serverRoot.'/classes/ImageShared.php');
+
 class EOLManager {
 
 	private $conn;
+	private $imgManager = null;
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -28,36 +30,40 @@ class EOLManager {
 		return $tidCnt;
 	}
 	
-	public function mapTaxa($makePrimaryLink = 1){
+	public function mapTaxa($makePrimaryLink,$tidStart,$restart){
 		$successCnt = 0;
 		set_time_limit(6000);
 		//Get last tid mapped within the lasat week, this will be used to start maping that may have been stopped early
 		$startingTid = 0;
-		$sql = 'SELECT tid FROM taxalinks '.
-			'WHERE owner = "EOL" AND initialtimestamp > "'.date('Y-m-d',time()-(7 * 24 * 60 * 60)).'" '.
-			'ORDER BY initialtimestamp DESC LIMIT 1';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			//$startingTid = $r->tid;
+		if($restart){
+			$sql1 = 'SELECT tid FROM taxalinks '.
+				'WHERE owner = "EOL" AND initialtimestamp > "'.date('Y-m-d',time()-(7 * 24 * 60 * 60)).'" '.
+				'ORDER BY initialtimestamp DESC LIMIT 1';
+			$rs1 = $this->conn->query($sql1);
+			if($r1 = $rs1->fetch_object()){
+				$startingTid = $r1->tid;
+			}
+			$rs1->free();
 		}
-		$rs->free();
+		if($tidStart && $tidStart > $startingTid) $startingTid = $tidStart;
 		//Start mapping taxa
 		$sql = 'SELECT t.tid, t.sciname '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
-			'AND t.tid NOT IN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) '.
-			'AND t.tid > '.$startingTid.' ORDER BY t.tid';
+			'AND t.tid NOT IN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) ';
+		if($startingTid) $sql .= 'AND t.tid > '.$startingTid.' ';
+		$sql .= 'ORDER BY t.tid';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
 		echo '<div style="font-weight:">';
 		echo 'Mapping EOL identifiers for '.$recCnt.' taxa ';
-		if($startingTid) echo '(starting tid: '.$startingTid;
+		if($startingTid) echo '(starting tid: '.$startingTid.')';
 		echo '</div>'."\n";
 		echo "<ul>\n";
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
-			$sciName = $this->cleanOutStr($r->sciname);
+			$sciName = $r->sciname;
 			$sciName = str_replace(array(' subsp. ',' ssp. ',' var. ',' f. '),' ',$sciName);
 			if($this->queryEolIdentifier($tid, $sciName, $makePrimaryLink)){
 				$successCnt++;
@@ -101,6 +107,9 @@ class EOLManager {
 				echo '<li>No results returned for '.$sciName.' (tid: '.$tid.")</li>\n";
 			}
 		}
+		else{
+			echo '<li>ERROR attempting to open url: '.$url.'</li>';
+		}
 		ob_flush();
 		flush();
 		sleep(2);
@@ -113,7 +122,8 @@ class EOLManager {
 			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
 			'WHERE t.rankid >= 220 AND l.owner = "EOL" '.
 			'AND t.tid NOT IN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
-			'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL))';
+			'WHERE ts1.taxauthid = 1)';
+			//'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL))';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$tidCnt = $r->tidcnt;
@@ -122,9 +132,9 @@ class EOLManager {
 		return $tidCnt;
 	}
 	
-	public function mapImagesForTaxa($startIndex = 0){
-		if(!is_numeric($startIndex)) return;
-		if(!$startIndex){
+	public function mapImagesForTaxa($startIndex,$restart){
+		if(!is_numeric($startIndex)) $startIndex = 0;
+		if($restart){
 			//Get tid last image mapped as the start index
 			$sql = 'SELECT tid '.
 				'FROM images '.
@@ -132,24 +142,27 @@ class EOLManager {
 				'ORDER BY initialtimestamp DESC LIMIT 1';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
-				$startingTid = $r->tid;
+				if($r->tid > $startIndex) $startIndex = $r->tid;
 			}
 			$rs->free();
 		}
-		
+
 		$successCnt = 0;
 		set_time_limit(6000);
 		$sql = 'SELECT t.tid, t.sciname, l.sourceidentifier '.
 			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
 			'WHERE t.rankid >= 220 AND l.owner = "EOL" '.
 			'AND t.tid NOT IN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
-			'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL))';
+			'WHERE ts1.taxauthid = 1) ';
+			//'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL)) ';
 		if($startIndex) $sql .= 'AND t.tid >= '.$startIndex.' '; 
 		$sql .= 'ORDER BY t.tid';
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
 		echo '<div style="font-weight:">Mapping images for '.$recCnt.' taxa</div>'."\n";
+		if($startIndex) echo '(starting tid: '.$startIndex.')';
 		echo "<ul>\n";
+		$this->imgManager = new ImageShared();
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
 			echo '<li>Mapping images for '.$this->cleanOutStr($r->sciname).' (tid: '.$tid.'; EOL:'.$this->cleanOutStr($r->sourceidentifier).")</li>\n";
@@ -177,14 +190,12 @@ class EOLManager {
 			$retArr = json_decode($content, true);
 			if(is_array($retArr) && array_key_exists('dataObjects',$retArr)){
 				$dataObjArr = $retArr['dataObjects'];
-				$imageFound = 0;
 				foreach($dataObjArr as $objArr){
 					if(array_key_exists('mimeType',$objArr) && $objArr['mimeType'] == 'image/jpeg'){
-						$imageFound = 1;
 						$resourceArr = array(); 
-						$locStr = '';
-						if(array_key_exists('mediaURL',$objArr)) $resourceArr['url'] = $objArr['mediaURL'];
-						if(!array_key_exists('url',$resourceArr)) $resourceArr['url'] = $objArr['eolMediaURL'];
+						$imageUrl = '';
+						if(array_key_exists('mediaURL',$objArr)) $imageUrl = $objArr['mediaURL'];
+						if(!array_key_exists('url',$resourceArr)) $imageUrl = $objArr['eolMediaURL'];
 						//if(array_key_exists('eolThumbnailURL',$objArr)) $resourceArr['urltn'] = $objArr['eolThumbnailURL'];
 
 						if(array_key_exists('agents',$objArr)){
@@ -201,31 +212,15 @@ class EOLManager {
 						if(array_key_exists('rightsHolder',$objArr)) $resourceArr['owner'] = $this->cleanInStr($objArr['rightsHolder']);
 						if(array_key_exists('source',$objArr)) $resourceArr['source'] = $this->cleanInStr($objArr['source']);
 						if(array_key_exists('license',$objArr)) $resourceArr['license'] = $this->cleanInStr($objArr['license']);
+						$locStr = '';
 						if(array_key_exists('location',$objArr)) $locStr = $this->cleanInStr($objArr['location']);
 						if(array_key_exists('latitude',$objArr) && array_key_exists('longitude',$objArr)){
 							$locStr .= ' ('.$this->cleanInStr($objArr['latitude']).', '.$this->cleanInStr($objArr['longitude']).')';
 						}
-						$sourceStr = (array_key_exists('source',$resourceArr)?trim($resourceArr['source']):'');
-						if($resourceArr && !in_array('MBG',$resourceArr) && !stripos($sourceStr,'tropicos')){
-							$sql = 'INSERT INTO images(tid,url,thumbnailurl,photographer,caption,owner,sourceurl,copyright,locality,notes,imagetype,sortsequence) '.
-							'VALUES('.$tid.',"'.$resourceArr['url'].'",'.
-							(array_key_exists('urltn',$resourceArr)?'"'.$resourceArr['urltn'].'"':'NULL').','.
-							(array_key_exists('photographer',$resourceArr)?'"'.$resourceArr['photographer'].'"':'NULL').','.
-							(array_key_exists('title',$resourceArr)?'"'.$resourceArr['title'].'"':'NULL').','.
-							(array_key_exists('owner',$resourceArr)?'"'.$resourceArr['owner'].'"':'NULL').','.
-							($sourceStr?'"'.$sourceStr.'"':'NULL').','.
-							(array_key_exists('license',$resourceArr)?'"'.$resourceArr['license'].'"':'NULL').','.
-							($locStr?'"'.$locStr.'"':'NULL').','.
-							(array_key_exists('notes',$resourceArr)?'"'.$resourceArr['notes'].'"':'NULL').
-							',"field image",40)';
-							if($this->conn->query($sql)){
-								echo '<li>Image mapped successfully</li>'."\n";
-								$retStatus = 1;
-							}
-							else{
-								echo '<li style="color:red;">ERROR: unable to map image: '.$sql."</li>\n";
-							}
-						}
+						$resourceArr['locality'] = $locStr;
+						$resourceArr['source'] = (array_key_exists('source',$resourceArr)?trim($resourceArr['source']):'');
+						//Load image
+						$this->loadImage($tid,$imageUrl,$resourceArr);
 					}
 				}
 				echo '<li>No images found</li>';
@@ -234,13 +229,75 @@ class EOLManager {
 				echo '<li>Scientific name not registered with EOL</li>'."\n";
 			}
 		}
+		else{
+			echo '<li>ERROR attempting to open url: '.$url.'</li>';
+		}
 		ob_flush();
 		flush();
-		sleep(2);
+		sleep(1);
 		return $retStatus;
 	}
 
-	protected function encodeString($inStr){
+	private function loadImage($tid,$imageUrl,$resourceArr){
+		if($tid && $imageUrl && $resourceArr){
+			if(!in_array('MBG',$resourceArr) && !stripos($resourceArr['source'],'tropicos')){
+				//Create image derivatives
+				$this->imgManager->setTargetPath('eol');
+				if($this->imgManager->parseUrl($imageUrl)){
+					$webFullUrl = ''; $imgTnUrl = ''; $lgFullUrl = '';
+					//Start with building thumbnail
+					if($this->imgManager->createNewImage('_tn',$this->imgManager->getTnPixWidth())){
+						$imgTnUrl = $this->imgManager->getUrlBase().$this->imgManager->getImgName().'_tn.jpg';
+						//Build web image 
+						//If web image is too large, transfer to large image and create new web image
+						$fileSize = $this->imgManager->getSourceFileSize();
+						list($sourceWidth, $sourceHeight) = getimagesize($this->imgManager->getSourcePath());
+						if($fileSize > $this->imgManager->getWebFileSizeLimit() || $sourceWidth > ($this->imgManager->getWebPixWidth()*1.2)){
+							$lgFullUrl = $imageUrl;
+							//Create web image
+							if($this->imgManager->createNewImage('_web',$this->imgManager->getWebPixWidth())){
+								$webFullUrl = $this->imgManager->getUrlBase().$this->imgManager->getImgName().'_web.jpg';
+							}
+						}
+						else{
+							//Use image source image as the web image and leave original image null
+							$webFullUrl = $imageUrl;
+						}
+					}
+					else{
+						if($this->verbose) $statusStr = 'ERROR: unable to create thumbnail image';
+					}
+	
+					//Load image
+					if($webFullUrl && $lgFullUrl){
+						if(!$webFullUrl) $webFullUrl = 'empty';
+						$sql = 'INSERT INTO images(tid,url,thumbnailurl,originalurl,photographer,caption,owner,sourceurl,copyright,locality,notes,imagetype,sortsequence) '.
+						'VALUES('.$tid.',"'.$webFullUrl.'","'.$imgTnUrl.'","'.$lgFullUrl.'",'.
+						(isset($resourceArr['photographer'])?'"'.$resourceArr['photographer'].'"':'NULL').','.
+						(isset($resourceArr['title'])?'"'.$resourceArr['title'].'"':'NULL').','.
+						(isset($resourceArr['owner'])?'"'.$resourceArr['owner'].'"':'NULL').','.
+						(isset($resourceArr['source'])?'"'.$resourceArr['source'].'"':'NULL').','.
+						(isset($resourceArr['license'])?'"'.$resourceArr['license'].'"':'NULL').','.
+						(isset($resourceArr['locality'])?'"'.$resourceArr['locality'].'"':'NULL').','.
+						(isset($resourceArr['notes'])?'"'.$resourceArr['notes'].'"':'NULL').
+						',"field image",40)';
+						if($this->conn->query($sql)){
+							echo '<li style="margin-left:10px;">Image mapped successfully</li>'."\n";
+							ob_flush();
+							flush();
+							$retStatus = 1;
+						}
+						else{
+							echo '<li style="color:red;">ERROR: unable to map image: '.$sql."</li>\n";
+						}
+					}
+				}
+				$this->imgManager->reset();
+			}
+		}
+	}
+	
+	private function encodeString($inStr){
 		global $charset;
  		$retStr = trim($inStr);
  		if($retStr){
