@@ -11,8 +11,8 @@ $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
 $mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
 $taxonAuthorityId = array_key_exists('taxonfilter',$_REQUEST)?$_REQUEST['taxonfilter']:1;
-$gridSize = array_key_exists('gridSizeSetting',$_REQUEST)?$_REQUEST['gridSizeSetting']:60;
-$minClusterSize = array_key_exists('minClusterSetting',$_REQUEST)?$_REQUEST['minClusterSetting']:10;
+$gridSize = array_key_exists('gridSizeSetting',$_REQUEST)?$_REQUEST['gridSizeSetting']:10;
+$minClusterSize = array_key_exists('minClusterSetting',$_REQUEST)?$_REQUEST['minClusterSetting']:50;
 $clusterOff = array_key_exists('clusterSwitch',$_REQUEST)?$_REQUEST['clusterSwitch']:0;
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 //$mapSymbology = array_key_exists("mapsymbology",$_REQUEST)?$_REQUEST["mapsymbology"]:"coll";
@@ -745,7 +745,7 @@ if($coordArr && !is_numeric($coordArr)){
 		google.maps.event.addDomListener(window, 'load', getCoords);
 	</script>
 </head> 
-<body>
+<body style='width:100%;height:100%;'>
 	<div data-role="page" id="page1">
 		<div role="main" class="ui-content">
 			<a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars">Open</a>
@@ -827,11 +827,11 @@ if($coordArr && !is_numeric($coordArr)){
 									<div id="taxonSearch0">
 										<div id="taxa_autocomplete" >
 											<select data-role="none" id="taxontype" name="type">
-												<option id='familysciname' value='1' <?php if(!array_key_exists("taxontype",$_REQUEST) || $_REQUEST["taxontype"] == "1") echo "SELECTED"; ?> >Family or Scientific Name</option>
-												<option id='family' value='2' <?php if(array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "2") echo "SELECTED"; ?> >Family only</option>
-												<option id='sciname' value='3' <?php if(array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
-												<option id='classorder' value='4' <?php if(array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "4") echo "SELECTED"; ?> >Class / Order</option>
-												<option id='commonname' value='5' <?php if(array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "5") echo "SELECTED"; ?> >Common Name</option>
+												<option id='familysciname' value='1' <?php if(array_key_exists("type",$_REQUEST) && $_REQUEST["type"] == "1") echo "SELECTED"; ?> >Family or Scientific Name</option>
+												<option id='family' value='2' <?php if(array_key_exists("type",$_REQUEST) && $_REQUEST["type"] == "2") echo "SELECTED"; ?> >Family only</option>
+												<option id='sciname' value='3' <?php if(array_key_exists("type",$_REQUEST) && $_REQUEST["type"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
+												<option id='classorder' value='4' <?php if(array_key_exists("type",$_REQUEST) && $_REQUEST["type"] == "4") echo "SELECTED"; ?> >Class / Order</option>
+												<option id='commonname' value='5' <?php if(array_key_exists("type",$_REQUEST) && $_REQUEST["type"] == "5") echo "SELECTED"; ?> >Common Name</option>
 											</select><br />
 											Taxa: <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="<?php if(array_key_exists("taxa",$_REQUEST)) echo $_REQUEST["taxa"]; ?>" title="Separate multiple taxa w/ commas" />
 										</div>
