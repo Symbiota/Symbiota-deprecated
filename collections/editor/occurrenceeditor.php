@@ -167,12 +167,29 @@ if($symbUid){
 					$occManager->setOccId(0);
 				}
 			}
+			elseif($action == 'Transfer Record'){
+				$transferCollid = $_POST['transfercollid'];
+				if($transferCollid){
+					if($occManager->transferOccurrence($occId,$transferCollid)){
+						if(!isset($_POST['remainoncoll']) || !$_POST['remainoncoll']){
+							$occManager->setCollId($transferCollid);
+							$collId = $transferCollid;
+							$collMap = $occManager->getCollMap();
+						}
+					}
+					else{
+						$statusStr = $occManager->getErrorStr();
+					}
+				}
+			}
 			elseif($action == "Submit Image Edits"){
 				$statusStr = $occManager->editImage($_POST);
+				$tabTarget = 2;
 			}
 			elseif($action == "Submit New Image"){
 				if($occManager->addImage($_POST)){
 					$statusStr = 'Image added successfully';
+					$tabTarget = 2;
 				}
 				else{
 					$statusStr = $occManager->getErrorStr();
@@ -182,6 +199,7 @@ if($symbUid){
 				$removeImg = (array_key_exists("removeimg",$_POST)?$_POST["removeimg"]:0);
 				if($occManager->deleteImage($_POST["imgid"], $removeImg)){
 					$statusStr = 'Image deleted successfully';
+					$tabTarget = 2;
 				}
 				else{
 					$statusStr = $occManager->getErrorStr();
@@ -559,8 +577,14 @@ else{
 													style="margin:0px 20px 0px 20px;">Genetic Links</a>
 											</li>
 											<li id="adminTab">
+												<a href="includes/admintab.php?<?php echo $anchorVars; ?>"
+													style="margin:0px 20px 0px 20px;">Admin</a>
+											</li>
+											<!-- 
+											<li id="adminTab">
 												<a href="#admindiv" style="margin:0px 20px 0px 20px;">Admin</a>
 											</li>
+											 -->
 											<?php
 										}
 									}
@@ -1205,116 +1229,6 @@ else{
 										<div style="clear:both;">&nbsp;</div>
 									</form>
 								</div>
-								<?php
-								if($occId && ($isEditor == 1 || $isEditor == 2)){
-									?>
-									<div id="admindiv">
-										<fieldset style="padding:15px;margin:10px 0px;">
-											<legend><b>Edit History</b></legend>
-											<?php
-											$editArr = $occManager->getEditArr();
-											foreach($editArr as $k => $eArr){
-												?>
-												<div>
-													<b>Editor:</b> <?php echo $eArr['editor']; ?>
-													<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
-												</div>
-												<?php
-												unset($eArr['editor']);
-												unset($eArr['ts']);
-												foreach($eArr as $vArr){
-													echo '<div style="margin:10px 15px;">';
-													echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
-													echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
-													echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
-													$reviewStr = 'OPEN';
-													if($vArr['reviewstatus'] == 2){
-														$reviewStr = 'PENDING';
-													}
-													elseif($vArr['reviewstatus'] == 3){
-														$reviewStr = 'CLOSED';
-													}
-													echo 'Edit '.($vArr['appliedstatus']?'applied':'not applied').'; status '.$reviewStr;
-													echo '</div>';
-												}
-												echo '<div style="margin:5px 0px;">&nbsp;</div>';
-											}
-											if(!$editArr) echo '<div style="margin:10px">No previous edits recorded</div>';
-											?>
-										</fieldset>
-										<fieldset style="padding:15px;margin:10px 0px;">
-											<legend><b>Delete Occurrence Record</b></legend>
-											<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
-												<div style="margin:15px">
-													Record first needs to be evaluated before it can be deleted from the system.
-													The evaluation ensures that the deletion of this record will not interfer with
-													the integrity of other linked data. Note that all determination and
-													comments for this occurrence will be automatically deleted. Links to images, checklist vouchers,
-													and surveys will have to be individually addressed before can be deleted.
-													<div style="margin:15px;display:block;">
-														<input name="verifydelete" type="button" value="Evaluate record for deletion" onclick="verifyDeletion(this.form);" />
-													</div>
-													<div id="delverimgdiv" style="margin:15px;">
-														<b>Image Links: </b>
-														<span id="delverimgspan" style="color:orange;display:none;">checking image links...</span>
-														<div id="delimgfailspan" style="display:none;style:0px 10px 10px 10px;">
-															<span style="color:red;">Warning:</span>
-															One or more images are linked to this occurrence.
-															Before this specimen can be deleted, images have to be deleted or disassociated
-															with this occurrence record. Continuing will remove associations to
-															the occurrence record being deleted but leave image in system linked only to the scientific name.
-														</div>
-														<div id="delimgappdiv" style="display:none;">
-															<span style="color:green;">Approved for deletion.</span>
-															No images are directly associated with this occurrence record.
-														</div>
-													</div>
-													<div id="delvervoucherdiv" style="margin:15px;">
-														<b>Checklist Voucher Links: </b>
-														<span id="delvervouspan" style="color:orange;display:none;">checking checklist links...</span>
-														<div id="delvouappdiv" style="display:none;">
-															<span style="color:green;">Approved for deletion.</span>
-															No checklists have been linked to this occurrence record.
-														</div>
-														<div id="delvoulistdiv" style="display:none;style:0px 10px 10px 10px;">
-															<span style="color:red;">Warning:</span>
-															This occurrence serves as an occurrence voucher for the following species checklists.
-															Deleting this occurrence will remove these association.
-															You may want to first verify this action with the checklist administrators.
-															<ul id="voucherlist">
-															</ul>
-														</div>
-													</div>
-													<div id="delversurveydiv" style="margin:15px;">
-														<b>Survey Voucher Links: </b>
-														<span id="delversurspan" style="color:orange;display:none;">checking survey links...</span>
-														<div id="delsurappdiv" style="display:none;">
-															<span style="color:green;">Approved for deletion.</span>
-															No survey projects have been linked to this occurrence record.
-														</div>
-														<div id="delsurlistdiv" style="display:none;style:0px 10px 10px 10px;">
-															<span style="color:red;">Warning:</span>
-															This occurrence serves as an occurrence voucher for the following survey projects.
-															Deleting this occurrence will remove these association.
-															You may want to first verify this action with the project administrators.
-															<ul id="surveylist">
-															</ul>
-														</div>
-													</div>
-													<div id="delapprovediv" style="margin:15px;display:none;">
-														<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
-														<input name="occindex" type="hidden" value="<?php echo $occIndex; ?>" />
-														<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-														<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
-														<input name="submitaction" type="submit" value="Delete Occurrence" />
-													</div>
-												</div>
-											</form>
-										</fieldset>
-									</div>
-									<?php
-								}
-								?>
 							</div>
 						</td>
 						<td id="imgtd" style="display:none;width:430px;" valign="top">

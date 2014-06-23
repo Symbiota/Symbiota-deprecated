@@ -18,7 +18,7 @@ $imageRootUrl = '';				//URL path to images
 $imageRootPath = '';			//Writable path to images, especially needed for downloading images
 
 //Pixel witdth of web images
-$imgWebWidth = 1600;
+$imgWebWidth = 1400;
 $imgTnWidth = 200;
 $imgLgWidth = 3200;
 $imgFileSizeLimit = 300000;		//Files above this size limit and still within pixel width limits will still be resaved w/ some compression  

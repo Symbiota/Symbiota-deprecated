@@ -17,7 +17,7 @@ if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
 $status = "";
 if($isEditor){
 	if($action == "Submit Image Edits"){
-		$status = $imgManager->editImage();
+		$status = $imgManager->editImage($_POST);
 		if(is_numeric($status)) header( 'Location: ../taxa/admin/tpeditor.php?tid='.$status.'&tabindex=1' );
 	}
 	elseif($action == "Transfer Image"){
@@ -71,8 +71,7 @@ if($isEditor){
 			<hr/>
 			<?php 
 		} 
-		$imgArr = $imgManager->getImageMetadata($imgId); 
-		if($imgArr){
+		if($imgArr = $imgManager->getImageMetadata($imgId)){
 			?>
 			<table>
 				<?php 
@@ -102,24 +101,28 @@ if($isEditor){
 									</div>
 									<div id="iepor" style="margin-top:2px;display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">
 										<b>Photographer (override):</b> 
-										<input name="photographer" type="text" value="<?php echo $imgArr["photographer"];?>" style="width:250px;" maxlength="100">
+										<input name="photographer" type="text" value="<?php echo $imgArr["photographer"];?>" style="width:250px;" maxlength="100" />
 										* Will override above selection
 									</div>
 									<div style="margin-top:2px;">
 										<b>Manager:</b> 
-										<input name="owner" type="text" value="<?php echo $imgArr["owner"];?>" style="width:250px;" maxlength="100">
+										<input name="owner" type="text" value="<?php echo $imgArr["owner"];?>" style="width:250px;" maxlength="100" />
 									</div>
 									<div style="margin-top:2px;">
 										<b>Source URL:</b> 
-										<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"];?>" style="width:450px;" maxlength="250">
+										<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"];?>" style="width:450px;" maxlength="250" />
 									</div>
 									<div style="margin-top:2px;">
 										<b>Copyright:</b> 
-										<input name="copyright" type="text" value="<?php echo $imgArr["copyright"];?>" style="width:450px;" maxlength="250">
+										<input name="copyright" type="text" value="<?php echo $imgArr["copyright"];?>" style="width:450px;" maxlength="250" />
+									</div>
+									<div style="margin-top:2px;">
+										<b>Rights:</b> 
+										<input name="rights" type="text" value="<?php echo $imgArr["rights"];?>" style="width:450px;" maxlength="250" />
 									</div>
 									<div style="margin-top:2px;">
 										<b>Locality:</b> 
-										<input name="locality" type="text" value="<?php echo $imgArr["locality"];?>" style="width:550px;" maxlength="250">
+										<input name="locality" type="text" value="<?php echo $imgArr["locality"];?>" style="width:550px;" maxlength="250" />
 									</div>
 									<div style="margin-top:2px;">
 										<b>Occurrence Record #:</b> 
@@ -167,37 +170,6 @@ if($isEditor){
 										<input name="oldoriginalurl" type="hidden" value="<?php echo $imgArr["originalurl"];?>" />
 										<?php } ?>
 									</div>
-									<!-- 
-										<?php 
-										if($imgArr["rankid"] > 220 && $imgManager->parentImageEmpty($imgArr["url"],$imgArr["tid"])){ 
-											?>
-											<div style="padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;">
-												<input type="checkbox" name="addtoparent" value="1" /> 
-												Add Image to Species Rank 
-												<div style="margin-left:10px;">
-													* If scientific name is a subspecies or variety, click this option if you also want image to be displays at the species level
-												</div>
-											</div>
-											<?php 
-										}
-										elseif($imgArr["rankid"] == 220 && $cArr = $imgManager->getChildrenArr($imgArr["tid"])){ 
-											?>
-											<div style="padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;">
-												Add Image to a Child Taxon 
-												<select name="addtotid">
-													<option value="0">Child Taxon</option>
-													<option value="0">-----------------------</option>
-													<?php 
-														foreach($cArr as $t => $sn){
-															?><option value="<?php echo $t;?>"><?php echo $sn;?></option><?php 
-														}
-													?>
-												</select> 
-											</div>
-											<?php 
-										} 
-										?>
-									 -->
 									<input name="imgid" type="hidden" value="<?php echo $imgId; ?>" />
 									<div style="margin-top:2px;">
 										<input type="submit" name="submitaction" id="editsubmit" value="Submit Image Edits" />
@@ -305,19 +277,23 @@ if($isEditor){
 							if($imgArr["sourceurl"]) echo '<div><b>Image Source:</b> <a href="'.$imgArr["sourceurl"].'">'.$imgArr["sourceurl"].'</a></div>';
 							if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
 							if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
-							echo "<div>";
+							if($imgArr["rights"]){
+								echo '<div><b>Rights:</b> '.$imgArr["rights"].'</div>';
+							}
 							if($imgArr["copyright"]){
+								echo "<div>";
+								echo '<b>Copyright:</b> ';
 								if(stripos($imgArr["copyright"],"http") === 0){
-									echo '<a href="'.$imgArr["copyright"].'">Copyright Details</a>';
+									echo '<a href="'.$imgArr["copyright"].'">'.$imgArr["copyright"].'</a>';
 								}
 								else{
 									echo $imgArr["copyright"];
 								}
+								echo "</div>";
 							}
 							else{
-								echo '<a href="../misc/usagepolicy.php#images">Copyright Details</a>';
+								echo '<div><a href="../misc/usagepolicy.php#images">Copyright Details</a></div>';
 							}
-							echo "</div>";
 							if($imgArr["occid"]) echo '<div><a href="../collections/individual/index.php?occid='.$imgArr['occid'].'">Display Specimen Details</a></div>';
 							echo '<div><a href="'.$imgUrl.'">Open Medium Sized Image</a></div>';
 							if($origUrl) echo '<div><a href="'.$origUrl.'">Open Large Image</a></div>';

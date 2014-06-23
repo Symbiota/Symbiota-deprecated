@@ -23,7 +23,7 @@ class ImageDetailManager {
 		if($this->imgId){
 			$sql = "SELECT i.imgid, i.tid, i.url, i.thumbnailurl, i.originalurl, i.photographeruid, i.photographer, ".
 				"IFNULL(i.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ".
-				"i.caption, i.owner, i.sourceurl, i.copyright, i.locality, i.notes, i.occid, i.sortsequence, i.username, ".
+				"i.caption, i.owner, i.sourceurl, i.copyright, i.rights, i.locality, i.notes, i.occid, i.sortsequence, i.username, ".
 				"t.sciname, t.author, t.rankid ".
 				"FROM images i LEFT JOIN taxa t ON i.tid = t.tid ".
 				"LEFT JOIN users u ON i.photographeruid = u.uid ".
@@ -45,6 +45,7 @@ class ImageDetailManager {
 				$retArr["owner"] = $this->cleanOutStr($row->owner);
 				$retArr["sourceurl"] = $this->cleanOutStr($row->sourceurl);
 				$retArr["copyright"] = $this->cleanOutStr($row->copyright);
+				$retArr["rights"] = $this->cleanOutStr($row->rights);
 				$retArr["locality"] = $this->cleanOutStr($row->locality);
 				$retArr["notes"] = $this->cleanOutStr($row->notes);
 				$retArr["sortsequence"] = $row->sortsequence;
@@ -56,17 +57,17 @@ class ImageDetailManager {
 		return $retArr;
 	}
 
-	public function editImage(){
+	public function editImage($postArr){
 		$status = "";
 		$searchStr = $GLOBALS["imageRootUrl"];
 		if(substr($searchStr,-1) != "/") $searchStr .= "/";
 		$replaceStr = $GLOBALS["imageRootPath"];
 		if(substr($replaceStr,-1) != "/") $replaceStr .= "/";
-	 	$url = $_REQUEST["url"];
-	 	$tnUrl = $_REQUEST["thumbnailurl"];
-	 	$origUrl = $_REQUEST["originalurl"];
-	 	if(array_key_exists("renameweburl",$_REQUEST)){
-	 		$oldUrl = $_REQUEST["oldurl"];
+	 	$url = $postArr["url"];
+	 	$tnUrl = $postArr["thumbnailurl"];
+	 	$origUrl = $postArr["originalurl"];
+	 	if(array_key_exists("renameweburl",$postArr)){
+	 		$oldUrl = $postArr["oldurl"];
 	 		$oldName = str_replace($searchStr,$replaceStr,$oldUrl);
  			$newWebName = str_replace($searchStr,$replaceStr,$url);
 	 		if($url != $oldUrl){
@@ -85,8 +86,8 @@ class ImageDetailManager {
 	 			}
 	 		}
 		}
-		if(array_key_exists("renametnurl",$_REQUEST)){
-	 		$oldTnUrl = $_REQUEST["oldthumbnailurl"];
+		if(array_key_exists("renametnurl",$postArr)){
+	 		$oldTnUrl = $postArr["oldthumbnailurl"];
 	 		$oldName = str_replace($searchStr,$replaceStr,$oldTnUrl);
 	 		$newName = str_replace($searchStr,$replaceStr,$tnUrl);
 	 		if($tnUrl != $oldTnUrl){
@@ -105,8 +106,8 @@ class ImageDetailManager {
 	 			}
 	 		}
 		}
-		if(array_key_exists("renameorigurl",$_REQUEST)){
-	 		$oldOrigUrl = $_REQUEST["oldoriginalurl"];
+		if(array_key_exists("renameorigurl",$postArr)){
+	 		$oldOrigUrl = $postArr["oldoriginalurl"];
 	 		$oldName = str_replace($searchStr,$replaceStr,$oldOrigUrl);
 	 		$newName = str_replace($searchStr,$replaceStr,$origUrl);
 	 		if($origUrl != $oldOrigUrl){
@@ -125,45 +126,28 @@ class ImageDetailManager {
 	 			}
 	 		}
 		}
-	 	$caption = $this->cleanInStr($_REQUEST["caption"]);
-		$photographer = $this->cleanInStr($_REQUEST["photographer"]);
-		$photographerUid = $_REQUEST["photographeruid"];
-		$owner = $this->cleanInStr($_REQUEST["owner"]);
-		$locality = $this->cleanInStr($_REQUEST["locality"]);
-		$occId = $_REQUEST["occid"];
-		$notes = $this->cleanInStr($_REQUEST["notes"]);
-		$sourceUrl = $this->cleanInStr($_REQUEST["sourceurl"]);
-		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
-		$sortSequence = (array_key_exists("sortsequence",$_REQUEST)?$_REQUEST["sortsequence"]:0);
-		//$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
-		//if(array_key_exists("addtotid",$_REQUEST)){
-		//	$addToTid = $_REQUEST["addtotid"];
-		//}
+	 	$caption = $this->cleanInStr($postArr["caption"]);
+		$photographer = $this->cleanInStr($postArr["photographer"]);
+		$photographerUid = $postArr["photographeruid"];
+		$owner = $this->cleanInStr($postArr["owner"]);
+		$locality = $this->cleanInStr($postArr["locality"]);
+		$occId = $postArr["occid"];
+		$notes = $this->cleanInStr($postArr["notes"]);
+		$sourceUrl = $this->cleanInStr($postArr["sourceurl"]);
+		$copyRight = $this->cleanInStr($postArr["copyright"]);
+		$rights = $this->cleanInStr($postArr["rights"]);
+		$sortSequence = (array_key_exists("sortsequence",$postArr)?$postArr["sortsequence"]:0);
 		
-		$sql = 'UPDATE images SET caption = "'.$caption.'", url = "'.$url.'", thumbnailurl = "'.$tnUrl.'", '.
-			'originalurl = "'.$origUrl.'", photographer = '.($photographer?'"'.$photographer.'"':"NULL").', '.
-			'photographeruid = '.($photographerUid?$photographerUid:'NULL').', owner = "'.$owner.'", sourceurl = "'.$sourceUrl.'", '.
-			'copyright = "'.$copyRight.'", locality = "'.$locality.'", occid = '.($occId?$occId:'NULL').', '.
-			'notes = "'.$notes.'", sortsequence = '.$sortSequence.' '.
-			'WHERE (imgid = '.$this->imgId.')';
+		$sql = 'UPDATE images '.
+			'SET caption = '.($caption?'"'.$caption.'"':'NULL').', url = "'.$url.'", thumbnailurl = '.($tnUrl?'"'.$tnUrl.'"':'NULL').','.
+			'originalurl = '.($origUrl?'"'.$origUrl.'"':'NULL').', photographer = '.($photographer?'"'.$photographer.'"':"NULL").','.
+			'photographeruid = '.($photographerUid?$photographerUid:'NULL').', owner = '.($owner?'"'.$owner.'"':'NULL').
+			', sourceurl = '.($sourceUrl?'"'.$sourceUrl.'"':'NULL').',copyright = '.($copyRight?'"'.$copyRight.'"':'NULL').
+			',rights = '.($rights?'"'.$rights.'"':'NULL').', locality = '.($locality?'"'.$locality.'"':'NULL').', occid = '.($occId?$occId:'NULL').', '.
+			'notes = '.($notes?'"'.$notes.'"':'NULL').($sortSequence?', sortsequence = '.$sortSequence:'').
+			' WHERE (imgid = '.$this->imgId.')';
 		//echo $sql;
-		if($this->conn->query($sql)){
-			/*
-			if($addToTid){
-				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
-					"owner, sourceurl, copyright, locality, occid, notes) ".
-					"VALUES (".$addToTid.",\"".$url."\",\"".$tnUrl."\",\"".$origUrl."\",".
-					($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".$caption."\",\"".
-					$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".($occId?$occId:"NULL").",\"".$notes."\")";
-				//echo $sql;
-				if(!$this->conn->query($sql)){
-					$status = "unable to upload image for related taxon";
-					//$status = "Error:editImage:loading the parent data: ".$this->conn->error."<br/>SQL: ".$sql;
-				}
-			}
-			*/
-		}
-		else{
+		if(!$this->conn->query($sql)){
 			$status = "Error:editImage: ".$this->conn->error."\nSQL: ".$sql;
 		}
 		return $status;
@@ -198,29 +182,6 @@ class ImageDetailManager {
 			$retStr .= 'ERROR: ('.implode('; ',$errArr).')';
 		}
 		return $retStr;
-	}
-
-	public function parentImageEmpty($url,$tid){
-		$sql = 'SELECT i.imgid '.
-			'FROM taxa t INNER JOIN images i ON t.parenttid = i.tid '.
-			'WHERE (t.tid = '.$tid.') AND (i.url = "'.$url.'")';
-		$result = $this->conn->query($sql);
-		if($result && $result->num_rows > 0) return false;
-		return true;
-	}
-
-	public function getChildrenArr($tid){
-		$childrenArr = Array();
-		$sql = "SELECT t.Tid, t.SciName, t.Author ".
-			"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-			"WHERE ts.taxauthid = 1 AND (ts.ParentTid = ".$tid.") ORDER BY t.SciName";
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$childrenArr[$row->Tid]["sciname"] = $row->SciName;
-			$childrenArr[$row->Tid]["author"] = $row->Author;
-		}
-		$result->close();
-		return $childrenArr;
 	}
 
 	public function echoPhotographerSelect($userId = 0){
