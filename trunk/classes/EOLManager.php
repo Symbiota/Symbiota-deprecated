@@ -32,8 +32,9 @@ class EOLManager {
 	
 	public function mapTaxa($makePrimaryLink,$tidStart,$restart){
 		$successCnt = 0;
-		set_time_limit(6000);
-		//Get last tid mapped within the lasat week, this will be used to start maping that may have been stopped early
+		set_time_limit(36000);
+
+		if(!is_numeric($tidStart)) $tidStart = 0;
 		$startingTid = 0;
 		if($restart){
 			$sql1 = 'SELECT tid FROM taxalinks '.
@@ -76,7 +77,7 @@ class EOLManager {
 	
 	private function queryEolIdentifier($tid, $sciName, $makePrimaryLink){
 		global $eolKey;
-		$retStatus = 0;
+		$retStatus = false;
 		$url = 'http://eol.org/api/search/1.0/'.urlencode($sciName).'.json';
 		if(isset($eolKey) && $eolKey) $url .= '?key='.$eolKey;
 		if($fh = fopen($url, 'r')){
@@ -96,19 +97,19 @@ class EOLManager {
 						'VALUES('.$tid.',"'.$link.'","'.$this->cleanInStr($identifier).'","EOL","Encyclopedia of Life", '.($makePrimaryLink?1:50).') ';
 					if($this->conn->query($sql)){
 						echo '<li>Identifier mapped successfully</li>'."\n";
-						$retStatus = 1;
+						$retStatus = true;
 					}
 					else{
-						echo '<li style="color:red;">ERROR: unable to read identifier for '.$sciName.' (tid: '.$tid.")</li>\n";
+						echo '<li style="margin:10px;color:red;">ERROR: unable to read identifier for '.$sciName.' (tid: '.$tid.")</li>\n";
 					}
 				}
 			}
 			else{
-				echo '<li>No results returned for '.$sciName.' (tid: '.$tid.")</li>\n";
+				echo '<li style="margin:10px;">No results returned for '.$sciName.' (tid: '.$tid.")</li>\n";
 			}
 		}
 		else{
-			echo '<li>ERROR attempting to open url: '.$url.'</li>';
+			echo '<li style="color:red;">ERROR attempting to open url: '.$url.'</li>';
 		}
 		ob_flush();
 		flush();
@@ -132,8 +133,10 @@ class EOLManager {
 		return $tidCnt;
 	}
 	
-	public function mapImagesForTaxa($startIndex,$restart){
-		if(!is_numeric($startIndex)) $startIndex = 0;
+	public function mapImagesForTaxa($tidStart,$restart){
+		set_time_limit(36000);
+		if(!is_numeric($tidStart)) $tidStart = 0;
+		$startingTid = 0;
 		if($restart){
 			//Get tid last image mapped as the start index
 			$sql = 'SELECT tid '.
@@ -142,30 +145,30 @@ class EOLManager {
 				'ORDER BY initialtimestamp DESC LIMIT 1';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
-				if($r->tid > $startIndex) $startIndex = $r->tid;
+				$startingTid = $r->tid;
 			}
 			$rs->free();
 		}
-
+		if($tidStart && $tidStart > $startingTid) $startingTid = $tidStart;
+		
 		$successCnt = 0;
-		set_time_limit(6000);
 		$sql = 'SELECT t.tid, t.sciname, l.sourceidentifier '.
 			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
 			'WHERE t.rankid >= 220 AND l.owner = "EOL" '.
 			'AND t.tid NOT IN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
 			'WHERE ts1.taxauthid = 1) ';
 			//'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL)) ';
-		if($startIndex) $sql .= 'AND t.tid >= '.$startIndex.' '; 
+		if($startingTid) $sql .= 'AND t.tid >= '.$startingTid.' '; 
 		$sql .= 'ORDER BY t.tid';
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
 		echo '<div style="font-weight:">Mapping images for '.$recCnt.' taxa</div>'."\n";
-		if($startIndex) echo '(starting tid: '.$startIndex.')';
+		if($startingTid) echo '(starting tid: '.$startingTid.')';
 		echo "<ul>\n";
 		$this->imgManager = new ImageShared();
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
-			echo '<li>Mapping images for '.$this->cleanOutStr($r->sciname).' (tid: '.$tid.'; EOL:'.$this->cleanOutStr($r->sourceidentifier).")</li>\n";
+			echo '<li>Mapping images for '.$this->cleanOutStr($r->sciname).' (tid: <a href="../index.php?taxon='.$tid.'" target="_blank">'.$tid.'</a>; EOL:'.$this->cleanOutStr($r->sourceidentifier).")</li>\n";
 			if($this->mapEolImages($tid, $this->cleanOutStr($r->sourceidentifier))){
 				$successCnt++;
 			}
@@ -177,7 +180,7 @@ class EOLManager {
 
 	private function mapEolImages($tid, $identifier){
 		global $eolKey;
-		$retStatus = 0;
+		$retStatus = false;
 		$url = 'http://eol.org/api/pages/1.0/'.$identifier.'.json?images=15&vetted=2&details=1 ';
 		//echo $url;
 		if(isset($eolKey) && $eolKey) $url .= '&key='.$eolKey;
@@ -190,47 +193,65 @@ class EOLManager {
 			$retArr = json_decode($content, true);
 			if(is_array($retArr) && array_key_exists('dataObjects',$retArr)){
 				$dataObjArr = $retArr['dataObjects'];
+				$imgCnt = 0;
 				foreach($dataObjArr as $objArr){
 					if(array_key_exists('mimeType',$objArr) && $objArr['mimeType'] == 'image/jpeg'){
 						$resourceArr = array(); 
 						$imageUrl = '';
-						if(array_key_exists('mediaURL',$objArr)) $imageUrl = $objArr['mediaURL'];
-						if(!array_key_exists('url',$resourceArr)) $imageUrl = $objArr['eolMediaURL'];
+						if(array_key_exists('mediaURL',$objArr)){
+							$imageUrl = $objArr['mediaURL'];
+						}
+						elseif(isset($objArr['eolMediaURL'])){
+							$imageUrl = $objArr['eolMediaURL'];
+						}
 						//if(array_key_exists('eolThumbnailURL',$objArr)) $resourceArr['urltn'] = $objArr['eolThumbnailURL'];
 
 						if(array_key_exists('agents',$objArr)){
+							$agentArr = array();
+							$agentCnt = 0;
 							foreach($objArr['agents'] as $agentObj){
-								if($agentObj['full_name']) $resourceArr['photographer'] = $this->cleanInStr($agentObj['full_name']);
-								if($agentObj['role'] == 'photographer') break; 
+								if($agentObj['full_name']){
+									if($agentCnt < 2) $agentArr[] = $this->cleanInStr($agentObj['full_name']);
+									if($agentObj['role'] == 'photographer'){
+										$resourceArr['photographer'] = $this->cleanInStr($agentObj['full_name']);
+										unset($agentArr);
+										break; 
+									}
+									$agentCnt++;
+								}
 							}
+							if(isset($agentArr) && $agentArr) $resourceArr['photographer'] = implode('; ',array_unique($agentArr));
 						}
-						if(array_key_exists('description',$objArr)) $resourceArr['notes'] = $this->cleanInStr($objArr['description']);
 						$noteStr = 'Harvest via EOL on '.date('Y-m-d');
-						if(array_key_exists('rights',$objArr)) $noteStr .= '; '.$this->cleanInStr($objArr['rights']);  
+						if(array_key_exists('description',$objArr)) $noteStr .= '; '.$this->cleanInStr($objArr['description']);
 						$resourceArr['notes'] = $noteStr;
 						if(array_key_exists('title',$objArr)) $resourceArr['title'] = $this->cleanInStr($objArr['title']);
+						if(array_key_exists('rights',$objArr)) $resourceArr['copyright'] = $this->cleanInStr($objArr['rights']);  
 						if(array_key_exists('rightsHolder',$objArr)) $resourceArr['owner'] = $this->cleanInStr($objArr['rightsHolder']);
+						if(array_key_exists('license',$objArr)) $resourceArr['rights'] = $this->cleanInStr($objArr['license']);
 						if(array_key_exists('source',$objArr)) $resourceArr['source'] = $this->cleanInStr($objArr['source']);
-						if(array_key_exists('license',$objArr)) $resourceArr['license'] = $this->cleanInStr($objArr['license']);
 						$locStr = '';
 						if(array_key_exists('location',$objArr)) $locStr = $this->cleanInStr($objArr['location']);
 						if(array_key_exists('latitude',$objArr) && array_key_exists('longitude',$objArr)){
 							$locStr .= ' ('.$this->cleanInStr($objArr['latitude']).', '.$this->cleanInStr($objArr['longitude']).')';
 						}
 						$resourceArr['locality'] = $locStr;
-						$resourceArr['source'] = (array_key_exists('source',$resourceArr)?trim($resourceArr['source']):'');
 						//Load image
-						$this->loadImage($tid,$imageUrl,$resourceArr);
+						if($this->loadImage($tid,$imageUrl,$resourceArr)){
+							$imgCnt++;
+							$retStatus = true;
+						}
+						if($imgCnt > 10) break;
 					}
 				}
-				echo '<li>No images found</li>';
+				echo '<li style="margin-left:10px;">'.$imgCnt.' images mapped</li>';
 			}
 			else{
 				echo '<li>Scientific name not registered with EOL</li>'."\n";
 			}
 		}
 		else{
-			echo '<li>ERROR attempting to open url: '.$url.'</li>';
+			echo '<li style="color:red;">ERROR attempting to open url: '.$url.'</li>';
 		}
 		ob_flush();
 		flush();
@@ -239,6 +260,7 @@ class EOLManager {
 	}
 
 	private function loadImage($tid,$imageUrl,$resourceArr){
+		$status = false;
 		if($tid && $imageUrl && $resourceArr){
 			if(!in_array('MBG',$resourceArr) && !stripos($resourceArr['source'],'tropicos')){
 				//Create image derivatives
@@ -265,19 +287,22 @@ class EOLManager {
 						}
 					}
 					else{
-						if($this->verbose) $statusStr = 'ERROR: unable to create thumbnail image';
+						echo '<li style="color:red;">ERROR: unable to create thumbnail image</li>';
 					}
 	
 					//Load image
-					if($webFullUrl && $lgFullUrl){
+					if($webFullUrl || $lgFullUrl){
 						if(!$webFullUrl) $webFullUrl = 'empty';
-						$sql = 'INSERT INTO images(tid,url,thumbnailurl,originalurl,photographer,caption,owner,sourceurl,copyright,locality,notes,imagetype,sortsequence) '.
-						'VALUES('.$tid.',"'.$webFullUrl.'","'.$imgTnUrl.'","'.$lgFullUrl.'",'.
+						$sql = 'INSERT INTO images(tid,url,thumbnailurl,originalurl,photographer,caption,owner,sourceurl,copyright,rights,locality,notes,imagetype,sortsequence) '.
+						'VALUES('.$tid.',"'.$webFullUrl.'",'.
+						($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
+						($lgFullUrl?'"'.$lgFullUrl.'"':'NULL').','.
 						(isset($resourceArr['photographer'])?'"'.$resourceArr['photographer'].'"':'NULL').','.
 						(isset($resourceArr['title'])?'"'.$resourceArr['title'].'"':'NULL').','.
 						(isset($resourceArr['owner'])?'"'.$resourceArr['owner'].'"':'NULL').','.
 						(isset($resourceArr['source'])?'"'.$resourceArr['source'].'"':'NULL').','.
-						(isset($resourceArr['license'])?'"'.$resourceArr['license'].'"':'NULL').','.
+						(isset($resourceArr['copyright'])?'"'.$resourceArr['copyright'].'"':'NULL').','.
+						(isset($resourceArr['rights'])?'"'.$resourceArr['rights'].'"':'NULL').','.
 						(isset($resourceArr['locality'])?'"'.$resourceArr['locality'].'"':'NULL').','.
 						(isset($resourceArr['notes'])?'"'.$resourceArr['notes'].'"':'NULL').
 						',"field image",40)';
@@ -285,16 +310,17 @@ class EOLManager {
 							echo '<li style="margin-left:10px;">Image mapped successfully</li>'."\n";
 							ob_flush();
 							flush();
-							$retStatus = 1;
+							$status = true;
 						}
 						else{
-							echo '<li style="color:red;">ERROR: unable to map image: '.$sql."</li>\n";
+							echo '<li style="color:red;">ERROR: unable to map image: '.$this->conn->error."</li>\n";
 						}
 					}
 				}
 				$this->imgManager->reset();
 			}
 		}
+		return $status;
 	}
 	
 	private function encodeString($inStr){
@@ -337,4 +363,32 @@ class EOLManager {
 		return $newStr;
 	}
 }
+/*
+{"identifier":8757321,"scientificName":"Ruellia humboldtiana","richness_score":13.8777,"synonyms":[],"vernacularNames":[],"references":[],
+"taxonConcepts":[
+	{"identifier":57260591,"scientificName":"Ruellia humboldtiana","nameAccordingTo":"NCBI Taxonomy","canonicalForm":"Ruellia humboldtiana","sourceIdentfier":"440967","taxonRank":"Species"},
+	{"identifier":50904234,"scientificName":"Ruellia humboldtiana","nameAccordingTo":"NCBI Taxonomy","canonicalForm":"Ruellia humboldtiana","sourceIdentfier":"440967","taxonRank":"Species"},
+	{"identifier":43634016,"scientificName":"Ruellia thyrsacanthoides Lindau","nameAccordingTo":"GBIF Nub Taxonomy","canonicalForm":"Ruellia thyrsacanthoides","sourceIdentfier":"5576320","taxonRank":"Species"},
+	{"identifier":43633623,"scientificName":"Ruellia humboldtiana Lindau","nameAccordingTo":"GBIF Nub Taxonomy","canonicalForm":"Ruellia humboldtiana","sourceIdentfier":"5574379","taxonRank":"Species"}
+],
+"dataObjects":[
+	{"identifier":"ffa6fdde4fa94cb8d61c188e68a02b10","dataObjectVersionID":28418333,"dataType":"http://purl.org/dc/dcmitype/StillImage","dataSubtype":"","vettedStatus":"Trusted","dataRating":2.5,"mimeType":"image/jpeg","title":"Ruellia_humboldtiana.jpg","license":"http://creativecommons.org/licenses/by-nc/3.0/",
+	"source":"http://neotropical-pollination.myspecies.info/file/306",
+	"mediaURL":"http://neotropical-pollination.myspecies.info/sites/neotropical-pollination.myspecies.info/files/Ruellia_humboldtiana.jpg",
+	"eolMediaURL":"http://media.eol.org/content/2014/03/07/17/97311_orig.jpg","eolThumbnailURL":"http://media.eol.org/content/2014/03/07/17/97311_98_68.jpg",
+	"agents":[{"full_name":"Nathan Muchhala","homepage":"","role":null},{"full_name":"Neotropical Pollination","homepage":"","role":"provider"}],"references":[]},
+	
+	{"identifier":"d76ef0ab43c0a9eaf2f5a4926e5c30a7","dataObjectVersionID":28418374,"dataType":"http://purl.org/dc/dcmitype/StillImage","dataSubtype":"","vettedStatus":"Trusted","dataRating":2.5,"mimeType":"image/jpeg","title":"Ruellia_humboldtiana_extrafloralnectaries.jpg","license":"http://creativecommons.org/licenses/by-nc/3.0/",
+	"source":"http://neotropical-pollination.myspecies.info/file/307",
+	"mediaURL":"http://neotropical-pollination.myspecies.info/sites/neotropical-pollination.myspecies.info/files/Ruellia_humboldtiana_extrafloralnectaries.jpg",
+	"eolMediaURL":"http://media.eol.org/content/2014/03/07/17/30534_orig.jpg","eolThumbnailURL":"http://media.eol.org/content/2014/03/07/17/30534_98_68.jpg",
+	"agents":[{"full_name":"Nathan Muchhala","homepage":"","role":null},{"full_name":"Neotropical Pollination","homepage":"","role":"provider"}],"references":[]},
+
+	{"identifier":"be3616ee97538284cd2da8630d12dd9a","dataObjectVersionID":28418395,"dataType":"http://purl.org/dc/dcmitype/StillImage","dataSubtype":"","vettedStatus":"Trusted","dataRating":2.5,"mimeType":"image/jpeg","title":"Ruellia_humboldtiana_fullofnectar.jpg","license":"http://creativecommons.org/licenses/by-nc/3.0/",
+	"source":"http://neotropical-pollination.myspecies.info/file/308",
+	"mediaURL":"http://neotropical-pollination.myspecies.info/sites/neotropical-pollination.myspecies.info/files/Ruellia_humboldtiana_fullofnectar.jpg",
+	"eolMediaURL":"http://media.eol.org/content/2014/03/07/17/81882_orig.jpg","eolThumbnailURL":"http://media.eol.org/content/2014/03/07/17/81882_98_68.jpg",
+	"agents":[{"full_name":"Nathan Muchhala","homepage":"","role":null},{"full_name":"Neotropical Pollination","homepage":"","role":"provider"}],"references":[]}
+]}
+*/
 ?>

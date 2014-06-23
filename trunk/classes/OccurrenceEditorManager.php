@@ -53,6 +53,10 @@ class OccurrenceEditorManager {
 
 	public function setCollId($id){
 		if($id && is_numeric($id)){
+			if($id != $this->collId){
+				unset($this->collMap);
+				$this->collMap = array();
+			}
 			$this->collId = $this->cleanInStr($id);
 		}
 	}
@@ -996,6 +1000,18 @@ class OccurrenceEditorManager {
 		}
 		return $status;
 	}
+	
+	public function transferOccurrence($targetOccid,$transferCollid){
+		$status = true;
+		if(is_numeric($targetOccid) && is_numeric($transferCollid)){
+			$sql = 'UPDATE omoccurrences SET collid = '.$transferCollid.' WHERE occid = '.$targetOccid;
+			if(!$this->conn->query($sql)){
+				$this->errorStr = 'ERROR trying to delete occurrence record: '.$this->conn->error;
+				$status = false;
+			}
+		}
+		return $status;
+	}
 
 	private function setLoanData(){
 		$sql = 'SELECT l.loanid, l.datedue, i.institutioncode '.
@@ -1155,7 +1171,7 @@ class OccurrenceEditorManager {
 		return $retArr;
 	}
 
-	//Genetic links
+	//Genetic link functions
 	public function getGeneticArr(){
 		$retArr = array();
 		if($this->occid){
@@ -1215,7 +1231,7 @@ class OccurrenceEditorManager {
 		return 'Genetic resource added successfully!';
 	}
 
-	//Label OCR processing methods
+	//OCR label processing methods
 	public function getRawTextFragments(){
 		$retArr = array();
 		if($this->occid){
@@ -1339,7 +1355,7 @@ class OccurrenceEditorManager {
 		return $retArr;
 	}
 
-	//Edit locking functions (seesion variables)
+	//Edit locking functions (session variables)
 	public function getLock(){
 		$isLocked = false;
 		//Check lock
@@ -1476,7 +1492,24 @@ class OccurrenceEditorManager {
 	public function getErrorStr(){
 		return $this->errorStr;	
 	}
-	
+
+	public function getCollectionList(){
+		$retArr = array();
+		if(isset($GLOBALS['USER_RIGHTS']['CollAdmin'])){
+			$collArr = $GLOBALS['USER_RIGHTS']['CollAdmin'];
+			if($collArr){
+				$sql = 'SELECT collid, collectionname FROM omcollections WHERE collid IN('.implode(',',$collArr).')';
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$retArr[$r->collid] = $r->collectionname;
+				}
+				$rs->free();
+			}
+		}
+		asort($retArr);
+		return $retArr;
+	}
+
 	//Misc functions
 	private function encodeStrTargeted($inStr,$inCharset,$outCharset){
 		if($inCharset == $outCharset) return $inStr;
