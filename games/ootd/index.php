@@ -5,6 +5,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0;
 $submitAction = array_key_exists("submitaction",$_POST)?$_POST["submitaction"]:'';
+$oodID = array_key_exists("oodid",$_REQUEST)?$_REQUEST["oodid"]:1;
 $ootdGameChecklist = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0;
 $ootdGameTitle = array_key_exists("title",$_REQUEST)?$_REQUEST["title"]:0;
 $ootdGameType = array_key_exists("type",$_REQUEST)?$_REQUEST["type"]:0;
@@ -12,7 +13,7 @@ $ootdGameType = array_key_exists("type",$_REQUEST)?$_REQUEST["type"]:0;
 $gameManager = new GamesManager();
 $clArr = $gameManager->getChecklistArr($pid);
 
-$gameInfo = $gameManager->setOOTD($ootdGameChecklist);
+$gameInfo = $gameManager->setOOTD($oodID,$ootdGameChecklist);
 $imageArr = $gameInfo['images'];
 
 if($submitAction){
@@ -98,7 +99,7 @@ if($submitAction){
 					<div class = "dailypicture" align = "center">
 						<div>
 							<div style="vertical-align:middle;">
-								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/organism300_1.jpg" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
+								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
 							</div><br />
 							<a href="javascript:chgImg(-1)">Previous</a> &nbsp;|&nbsp;
 							<a href="javascript:chgImg(1)">Next</a>
@@ -125,6 +126,7 @@ if($submitAction){
 									</div>
 								</div>
 								<div>
+									<input name="oodid" type="hidden" value="<?php echo $oodID; ?>" />
 									<input name="cl" type="hidden" value="<?php echo $ootdGameChecklist; ?>" /> 
 									<input name="title" type="hidden" value="<?php echo $ootdGameTitle; ?>" /> 
 									<input name="type" type="hidden" value="<?php echo $ootdGameType; ?>" /> 
@@ -177,11 +179,11 @@ if($submitAction){
 						<?php echo $_POST['family_answer']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>">Click Here to try again!</a>
+						<a href = "index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
-						<a href = "index.php?submitaction=giveup&cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
+						<a href = "index.php?submitaction=giveup?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
 					</div>
 				</div>
 			</div>
@@ -201,11 +203,11 @@ if($submitAction){
 						<?php echo $gameInfo['family']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
+						<a href = "index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
-						<a href = "index.php?submitaction=giveup&cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
+						<a href = "index.php?submitaction=giveup?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
 					</div>
 				</div>
 			</div>
@@ -225,11 +227,11 @@ if($submitAction){
 						<?php echo $gameInfo['sciname']; ?>, but the family is not <?php echo $_POST['family_answer']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
+						<a href = "index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
-						<a href = "index.php?submitaction=giveup&cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
+						<a href = "index.php?submitaction=giveup?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
 					</div>
 				</div>
 			</div>
@@ -249,11 +251,11 @@ if($submitAction){
 						<?php echo $gameInfo['genus']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
+						<a href = "index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
-						<a href = "index.php?submitaction=giveup&cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
+						<a href = "index.php?submitaction=giveup?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
 					</div>
 				</div>
 			</div>
@@ -273,11 +275,11 @@ if($submitAction){
 						is <?php echo $gameInfo['family']; ?>, and the genus is <?php echo $gameInfo['genus']; ?>.
 					</div>
 					<div style="margin-top:40px;font-size:16px;" >
-						<a href = "index.php?cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
+						<a href = "index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">Click Here to try again!</a>
 						<br /><br />
 						OR
 						<br /><br />
-						<a href = "index.php?submitaction=giveup&cl=<?php echo $ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
+						<a href = "index.php?submitaction=giveup?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here reveal what the plant was-</a>
 					</div>
 				</div>
 			</div>
