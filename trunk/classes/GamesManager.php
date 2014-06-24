@@ -81,11 +81,11 @@ class GamesManager {
 		return $retArr;
 	}
 	
-	public function setOOTD($clid){
+	public function setOOTD($oodID,$clid){
 		$currentDate = date("Y-m-d");
 		$replace = 0;
-		if(file_exists('../../temp/ootd/info.json')){
-			$oldArr = json_decode(file_get_contents('../../temp/ootd/info.json'), true);
+		if(file_exists('../../temp/ootd/'.$oodID.'_info.json')){
+			$oldArr = json_decode(file_get_contents('../../temp/ootd/'.$oodID.'_info.json'), true);
 			$lastDate = $oldArr['lastDate'];
 			$lastCLID = $oldArr['clid'];
 			if(($currentDate > $lastDate) || ($clid != $lastCLID)){
@@ -99,27 +99,27 @@ class GamesManager {
 		if($replace == 1){
 			//Delete old files
 			$previous = Array();
-			if(file_exists('../../temp/ootd/previous.json')){
-				$previous = json_decode(file_get_contents('../../temp/ootd/previous.json'), true);
-				unlink('../../temp/ootd/previous.json');
+			if(file_exists('../../temp/ootd/'.$oodID.'_previous.json')){
+				$previous = json_decode(file_get_contents('../../temp/ootd/'.$oodID.'_previous.json'), true);
+				unlink('../../temp/ootd/'.$oodID.'_previous.json');
 			}
-			if(file_exists('../../temp/ootd/info.json')){
-				unlink('../../temp/ootd/info.json');
+			if(file_exists('../../temp/ootd/'.$oodID.'_info.json')){
+				unlink('../../temp/ootd/'.$oodID.'_info.json');
 			}
-			if(file_exists('../../temp/ootd/organism300_1.jpg')){
-				unlink('../../temp/ootd/organism300_1.jpg');
+			if(file_exists('../../temp/ootd/'.$oodID.'_organism300_1.jpg')){
+				unlink('../../temp/ootd/'.$oodID.'_organism300_1.jpg');
 			}
-			if(file_exists('../../temp/ootd/organism300_2.jpg')){
-				unlink('../../temp/ootd/organism300_2.jpg');
+			if(file_exists('../../temp/ootd/'.$oodID.'_organism300_2.jpg')){
+				unlink('../../temp/ootd/'.$oodID.'_organism300_2.jpg');
 			}
-			if(file_exists('../../temp/ootd/organism300_3.jpg')){
-				unlink('../../temp/ootd/organism300_3.jpg');
+			if(file_exists('../../temp/ootd/'.$oodID.'_organism300_3.jpg')){
+				unlink('../../temp/ootd/'.$oodID.'_organism300_3.jpg');
 			}
-			if(file_exists('../../temp/ootd/organism300_4.jpg')){
-				unlink('../../temp/ootd/organism300_4.jpg');
+			if(file_exists('../../temp/ootd/'.$oodID.'_organism300_4.jpg')){
+				unlink('../../temp/ootd/'.$oodID.'_organism300_4.jpg');
 			}
-			if(file_exists('../../temp/ootd/organism300_5.jpg')){
-				unlink('../../temp/ootd/organism300_5.jpg');
+			if(file_exists('../../temp/ootd/'.$oodID.'_organism300_5.jpg')){
+				unlink('../../temp/ootd/'.$oodID.'_organism300_5.jpg');
 			}
 			
 			//Create new files
@@ -150,7 +150,7 @@ class GamesManager {
 			$sql2 = 'SELECT t.TID, t.SciName, t.UnitName1, s.family '.
 				'FROM taxa AS t INNER JOIN taxstatus AS s ON t.TID = s.tid '.
 				'WHERE s.taxauthid = 1 AND t.TID = '.$randTaxa.' ';
-			//echo '<div>'.$sql.'</div>';
+			//echo '<div>'.$sql2.'</div>';
 			$rs = $this->conn->query($sql2);
 			while($row = $rs->fetch_object()){
 				$ootdInfo['tid'] = $row->TID;
@@ -188,7 +188,7 @@ class GamesManager {
 				else{
 					$file = $row->url;
 				}
-				$newfile = '../../temp/ootd/organism300_'.$cnt.'.jpg';
+				$newfile = '../../temp/ootd/'.$oodID.'_organism300_'.$cnt.'.jpg';
 				if(fopen($file, "r")){
 					copy($file, $newfile);
 					$files[] = $newfile;
@@ -199,25 +199,25 @@ class GamesManager {
 			$ootdInfo['images'] = $files;
 			
 			if(array_diff($tidArr,$previous)){
-				$fp = fopen('../../temp/ootd/previous.json', 'w');
+				$fp = fopen('../../temp/ootd/'.$oodID.'_previous.json', 'w');
 				fwrite($fp, json_encode($previous));
 				fclose($fp);
 			}
-			$fp = fopen('../../temp/ootd/info.json', 'w');
+			$fp = fopen('../../temp/ootd/'.$oodID.'_info.json', 'w');
 			fwrite($fp, json_encode($ootdInfo));
 			fclose($fp);
 		}
 		
 		
 		
-		$infoArr = json_decode(file_get_contents('../../temp/ootd/info.json'), true);
+		$infoArr = json_decode(file_get_contents('../../temp/ootd/'.$oodID.'_info.json'), true);
 		//echo json_encode($infoArr);
 		return $infoArr;
 	}
 	
-	public function getAnswer(){
+	/*public function getAnswer(){
 		$answer = json_decode(file_get_contents('../../temp/ootd/info.json'), true);
 		return $answer;
-	}
+	}*/
 }
 ?>
