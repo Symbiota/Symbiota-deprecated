@@ -37,7 +37,7 @@ if($isEditor){
 			$permManager->addPermission($_POST['uid'],"CollAdmin",$collId);
 		}
 		elseif($rightType == 'editor'){
-			$permManager->addPermission($_POST['uid'],"CollAdmin",$collId);
+			$permManager->addPermission($_POST['uid'],"CollEditor",$collId);
 		}
 		elseif($rightType == 'rare'){
 			$permManager->addPermission($_POST['uid'],"RareSppReader",$collId);
