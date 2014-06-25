@@ -19,8 +19,7 @@ class OccurrenceDuplicateManager {
 		$retArr = array();
 		if($this->collId){
 			//Grab clusters
-			$sqlPrefix = 'SELECT DISTINCT d.duplicateid, d.projIdentifier AS title, d.projDescription AS description, d.notes ';
-			//$sqlPrefix = 'SELECT DISTINCT d.duplicateid, d.title, d.description, d.notes ';
+			$sqlPrefix = 'SELECT DISTINCT d.duplicateid, d.title, d.description, d.notes ';
 			$sqlSuffix = '';
 			if($limitToConflicts){
 				$sqlSuffix = 'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl1 ON d.duplicateid = dl1.duplicateid '.
@@ -148,8 +147,7 @@ class OccurrenceDuplicateManager {
 							if($mArr) $dupId = key($mArr);
 							if(!$dupId){
 								//Create a new dupliate project
-								$sqlI1 = 'INSERT INTO omoccurduplicates(projIdentifier,exactdupe) VALUES("'.$this->cleanInStr($dupIdStr).'",1)';
-								//$sqlI1 = 'INSERT INTO omoccurduplicates(title,dupetype) VALUES("'.$dupIdStr.'",1)';
+								$sqlI1 = 'INSERT INTO omoccurduplicates(title,dupetype) VALUES("'.$this->cleanInStr($dupIdStr).'",1)';
 								if($this->conn->query($sqlI1)){
 									$dupId = $this->conn->insert_id;
 									if($verbose) echo '<li style="margin-left:10px;">New duplicate project created: #'.$dupId.'</li>';
@@ -196,8 +194,8 @@ class OccurrenceDuplicateManager {
 	
 	public function editDuplicateCluster($dupId, $title, $description, $notes){
 		$statusStr = 'SUCCESS: duplicate cluster edited';
-		$sql = 'UPDATE omoccurduplicates SET projIdentifier = '.($title?'"'.$this->cleanInStr($title).'"':'NULL').', '.
-			'projdescription = '.($description?'"'.$this->cleanInStr($description).'"':'NULL').', '.
+		$sql = 'UPDATE omoccurduplicates SET title = '.($title?'"'.$this->cleanInStr($title).'"':'NULL').', '.
+			'description = '.($description?'"'.$this->cleanInStr($description).'"':'NULL').', '.
 			'notes = '.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').' '.
 			'WHERE (duplicateid = '.$dupId.')';
 		//echo $sql;
