@@ -1,3 +1,6 @@
+/* Modify styles within this file to override styles within base.css file 
+ * 
+ **/
 body{
 	width: 850px;
 }
@@ -89,12 +92,10 @@ div.menuitem {
 
 div.menuitem a {
 	color: #669999;
-    text-decoration: none;	
 }
 
 div.menuitem a:hover {
 	color: 	#00008B;
-    text-decoration: underline;
 }
 
 /*Central div in the middle center table div */
@@ -109,6 +110,22 @@ div.menuitem a:hover {
 
 }
 
+/* Image thumbnails   */
+div.tndiv{
+
+}
+
+div.tnimg{
+
+}
+
+div.tnimg a{
+
+}
+
+div.tnimg img{
+
+}	
 
 /*Misc general items*/
 table{

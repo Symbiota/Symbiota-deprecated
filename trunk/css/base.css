@@ -1,7 +1,12 @@
+/* Do not modify styles within this file
+ * Instead, modify styles within the main.css file to override the default styles within this file 
+ * 
+ **/
 body{
 	margin:	8px;
 	margin-left: auto;
 	margin-right: auto;
+	width:		900px; 
 	background-color: #FFFFFF;
 	color: #000000;
 	font-family: Arial, Helvetica, sans-serif;
@@ -11,6 +16,7 @@ body{
 /*Main table framework*/
 #maintable{
 	border-spacing: 0px;
+	width:		900px; 
 	height:		500px;
 }
 
@@ -44,28 +50,24 @@ div.menuheader{
 
 div.menuheader a{
 	color: 	#000000;
-    text-decoration: none;
 }
 
 div.menuheader a:hover {
-	color: #C0C0C0;
-    text-decoration: underline;
+	color: 	#000000;
 }
 
 div.menusubheader{
 	font-size: 14px;
 	font-weight: bold;
-	margin: 10px 0px 0px 0px;
+	margin: 5px 0px 0px 5px;
 }
 
 div.menusubheader a{
 	color: #000000;
-    text-decoration: none;
 }
 
 div.menusubheader a:hover {
-	color: #C0C0C0;
-    text-decoration: underline;
+	color: #000000;
 }
 
 div.menuitem {
@@ -76,19 +78,17 @@ div.menuitem {
 
 div.menuitem a {
 	color: #000000;
-    text-decoration: none;	
 }
 
 div.menuitem a:hover {
 	color: #C0C0C0;
-    text-decoration: underline;
 }
 
 
 /*Central div and general components */
 #innertext{
 	margin:	15px;	
-	font-size: 12px;
+	font-size: 14px;
 }
 
 form div {
@@ -198,6 +198,21 @@ div.button:hover {
 
 
 /* /collections/ folder pages */
+.categorytitle a{ 
+	font-weight: bold; 
+	color:		black; 
+	font-size:	110%; 
+}
+
+.collectiontitle a{
+	font-weight: bold;
+	color: 		 #000000;
+}
+
+.collectiontitle a:hover{
+	color: 	#000000;
+}
+
 #omlisttable{
 	 width:	610px;
 }
