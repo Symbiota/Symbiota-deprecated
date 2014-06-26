@@ -149,15 +149,12 @@ class OccurrenceManager{
 			//Build sql
 			foreach($this->taxaArr as $key => $valueArray){
 				if($this->taxaSearchType == 4){
+					//Class, order, or other higher rank
 					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
-						//$sqlWhereTaxa .= "OR (o.tidinterpreted IN(SELECT tid FROM taxstatus WHERE taxauthid = 1 AND hierarchystr LIKE '%,".$r1->tid.",%')) ";
-						
-						//$sql2 = "SELECT DISTINCT ts.family FROM taxstatus ts ".
-						//	"WHERE ts.taxauthid = 1 AND (ts.hierarchystr LIKE '%,".$r1->tid.",%') AND ts.family IS NOT NULL AND ts.family <> '' ";
-						$sql2 = 'SELECT DISTINCT t.sciname FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
-							'WHERE ts.taxauthid = 1 AND t.rankid = 140 AND (ts.hierarchystr LIKE "%,'.$r1->tid.',%" OR ts.parenttid = '.$r1->tid.') ';
-						$sqlWhereTaxa .= "OR (o.family IN(".$sql2.")) ";
+						//$sql2 = 'SELECT DISTINCT t.sciname FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
+						//	'WHERE ts.taxauthid = 1 AND t.rankid = 140 AND (ts.hierarchystr LIKE "%,'.$r1->tid.',%" OR ts.parenttid = '.$r1->tid.') ';
+						$sqlWhereTaxa = 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
 					}
 				}
 				else{
@@ -168,12 +165,17 @@ class OccurrenceManager{
 						}
 						if(array_key_exists("tid",$valueArray)){
 							$tidArr = $valueArray['tid'];
+							/*
 							$hSqlStr = '';
 							foreach($tidArr as $tid){
 								$hSqlStr .= 'OR (ts.hierarchystr LIKE "%,'.$tid.',%") ';
 							}
 							$sql = 'SELECT DISTINCT ts.family FROM taxstatus ts '.
 								'WHERE ts.taxauthid = 1 AND ('.substr($hSqlStr,3).')';
+							*/
+							$sql = 'SELECT DISTINCT t.sciname '.
+								'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+								'WHERE t.rankid = 140 AND e.taxauthid = 1 AND e.parenttid IN('.implode(',',$tidArr).')';
 							$rs = $this->conn->query($sql);
 							while($r = $rs->fetch_object()){
 								$famArr[] = $r->family;
@@ -188,6 +190,7 @@ class OccurrenceManager{
 								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
 							}
 						}
+						echo $sqlWhereTaxa; exit;
 					}
 					else{
 						if($this->taxaSearchType == 2 || ($this->taxaSearchType == 1 && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){
@@ -199,6 +202,17 @@ class OccurrenceManager{
 					}
 					if(array_key_exists("synonyms",$valueArray)){
 						$synArr = $valueArray["synonyms"];
+						if($synArr){
+							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 5){
+								foreach($synArr as $synTid => $sciName){ 
+									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
+										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
+									}
+								}
+							}
+							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',array_keys($synArr)).')) ';
+						}
+						/*
 						foreach($synArr as $sciName){ 
 							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 5){
 								$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
@@ -210,6 +224,7 @@ class OccurrenceManager{
 								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
 							}
 						}
+						*/
 					}
 				}
 			}
@@ -546,6 +561,19 @@ class OccurrenceManager{
 	
 	protected function setSynonyms(){
 		foreach($this->taxaArr as $key => $value){
+			if(array_key_exists("scinames",$value)){
+				if(!in_array("no records",$value["scinames"])){
+					$synArr = $this->getSynonyms($value["scinames"]);
+					if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
+				}
+			}
+			else{
+				$synArr = $this->getSynonyms($key);
+				if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
+			}
+		}
+		/*
+		foreach($this->taxaArr as $key => $value){
 			if(array_key_exists("scinames",$value) && !in_array("no records",$value["scinames"])){
 				$this->taxaArr = $value["scinames"];
 				foreach($this->taxaArr as $sciname){
@@ -567,6 +595,7 @@ class OccurrenceManager{
 				$this->conn->next_result();
 			}
 		}
+		*/
 	}
 	
 	public function getFullCollectionList($catId = ""){
@@ -646,7 +675,7 @@ class OccurrenceManager{
 					$idStr = $this->collArrIndex.'-'.$catid;
 					?>
 					<tr>
-						<td style="width:35px;">
+						<td style="<?php echo ($catIcon?'width:40px':''); ?>">
 							<?php 
 							if($catIcon){
 								$catIcon = (substr($catIcon,0,6)=='images'?'../':'').$catIcon; 
@@ -663,14 +692,16 @@ class OccurrenceManager{
 							</a>
 						</td>
 						<td style="padding-top:8px;">
-							<a class="categorytitle" href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
-								<?php echo $name; ?>
-							</a>
+							<div class="categorytitle">
+								<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
+									<?php echo $name; ?>
+								</a>
+							</div>
 						</td>
 					</tr>
 					<tr>
 						<td colspan="4">
-							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin-left:15px;padding:10px 20px;border:inset">
+							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px;padding:10px 20px;border:inset">
 								<table>
 									<?php 
 									foreach($catArr as $collid => $collName2){
@@ -681,9 +712,7 @@ class OccurrenceManager{
 												if($collName2["icon"]){
 													$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"]; 
 													?>
-													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-														<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
-													</a>
+													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'><img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" /></a>
 													<?php
 												}
 												?>
@@ -692,12 +721,14 @@ class OccurrenceManager{
 												<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" checked /> 
 											</td>
 											<td style="padding:6px">
-												<a class="collectiontitle" href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-													<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
-												</a>
-												<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-													more info
-												</a>
+												<div class="collectiontitle">
+													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+														<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
+													</a>
+													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+														more info
+													</a>
+												</div>
 											</td>
 										</tr>
 										<?php 
@@ -722,29 +753,29 @@ class OccurrenceManager{
 				foreach($collArr as $collid => $cArr){
 					?>
 					<tr>
-						<td>
+						<td style="<?php ($cArr["icon"]?'width:35px':''); ?>">
 							<?php 
 							if($cArr["icon"]){
 								$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
 								?>
-								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-									<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
-								</a>
+								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'><img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" /></a>
 								<?php
 							}
 							?>
 							&nbsp;
 						</td>
-						<td style="padding:6px;">
+						<td style="padding:6px;width:25px;">
 							<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" checked /> 
 						</td>
 						<td style="padding:6px">
-							<a class="collectiontitle" href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-								<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
-							</a>
-							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-								more info
-							</a>
+							<div class="collectiontitle">
+								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+									<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
+								</a>
+								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+									more info
+								</a>
+							</div>
 						</td>
 					</tr>
 					<?php
@@ -1194,6 +1225,79 @@ class OccurrenceManager{
 		elseif($searchFieldsActivated){
 			if($this->useCookies) setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'));
 		}
+	}
+	
+	//Misc return functions
+	private function getSynonyms($searchTarget,$taxAuthId = 1){
+		$synArr = array();
+		$targetTidArr = array();
+		$searchStr = '';
+		if(is_array($searchTarget)){
+			if(is_numeric(current($searchTarget))){
+				$targetTidArr = $searchTarget;
+			}
+			else{
+				$searchStr = implode('","',$searchTarget);
+			}
+		}
+		else{
+			if(is_numeric($searchTarget)){
+				$targetTidArr[] = $searchTarget;
+			}
+			else{
+				$searchStr = $searchTarget;
+			}
+		}
+		if($searchStr){
+			//Input is a string, thus get tids
+			$sql1 = 'SELECT tid FROM taxa WHERE sciname IN("'.$searchStr.'")';
+			$rs1 = $this->conn->query($sql1);
+			while($r1 = $rs1->fetch_object()){
+				$targetTidArr[] = $r1->tid;
+			}
+			$rs1->free();
+		}
+
+		if($targetTidArr){
+			//Get acceptd names
+			$accArr = array();
+			$rankId = 0;
+			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.rankid '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.TidAccepted '.
+				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tid IN('.implode(',',$targetTidArr).')) ';
+			$rs2 = $this->conn->query($sql2);
+			while($r2 = $rs2->fetch_object()){
+				$accArr[] = $r2->tid;
+				$rankId = $r2->rankid;
+				//Put in synonym array if not target
+				if(!in_array($r2->tid,$targetTidArr)) $synArr[$r2->tid] = $r2->sciname;
+			}
+			$rs2->free();
+	
+			//Get synonym that are different than target
+			$sql3 = 'SELECT DISTINCT t.tid, t.sciname '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tidaccepted IN('.implode('',$accArr).')) ';
+			$rs3 = $this->conn->query($sql3);
+			while($r3 = $rs3->fetch_object()){
+				if(!in_array($r3->tid,$targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
+			}
+			$rs3->free();
+	
+			//If rank is 220, get synonyms of accepted children
+			if($rankId == 220){
+				$sql4 = 'SELECT DISTINCT t.tid, t.sciname '.
+					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+					'WHERE (ts.parenttid IN('.implode('',$accArr).')) AND (ts.taxauthid = '.$taxAuthId.') '.
+					'AND (ts.TidAccepted = ts.tid)';
+				$rs4 = $this->conn->query($sql4);
+				while($r4 = $rs4->fetch_object()){
+					$synArr[$r4->tid] = $r4->sciname;
+				}
+				$rs4->free();
+			}
+		}
+		return $synArr;
 	}
 	
 	public function getUseCookies(){

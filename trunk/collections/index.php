@@ -24,10 +24,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		<link href="../css/base.css" type="text/css" rel="stylesheet" />
 		<link href="../css/main.css" type="text/css" rel="stylesheet" />
 		<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
-		<style type="text/css">
-			.categorytitle{ font-weight:bold; text-decoration:none; color:black; font-size:120%; }	
-			.collectiontitle{ font-weight:bold; text-decoration:none; color:black; font-size:110%; }	
-		</style>
 		<script src="../js/jquery.js" type="text/javascript"></script>
 		<script src="../js/jquery-ui.js" type="text/javascript"></script>
 		<script src="../js/symb/collections.index.js" type="text/javascript"></script>

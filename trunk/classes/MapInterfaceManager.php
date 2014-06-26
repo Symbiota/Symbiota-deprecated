@@ -169,6 +169,18 @@ class MapInterfaceManager{
 					}
 					if(array_key_exists("synonyms",$valueArray)){
 						$synArr = $valueArray["synonyms"];
+						if($synArr){
+							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 5){
+								foreach($synArr as $synTid => $sciName){ 
+									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
+										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
+									}
+								}
+							}
+							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',array_keys($synArr)).')) ';
+						}
+						/*
+						$synArr = $valueArray["synonyms"];
 						foreach($synArr as $sciName){ 
 							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 5){
 								$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
@@ -180,6 +192,7 @@ class MapInterfaceManager{
 			                    $sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
 			                }
 						}
+						*/
 					}
 				}
 			}
@@ -411,7 +424,7 @@ class MapInterfaceManager{
 			//Make the sql valid, but return nothing
 			$retStr = 'WHERE o.collid = -1 ';
 		}
-		//echo $retStr;
+		//echo $retStr; exit;
 		return $retStr; 
 	}
 	
@@ -447,28 +460,18 @@ class MapInterfaceManager{
     }
     
     protected function setSynonyms(){
-    	foreach($this->taxaArr as $key => $value){
-    		if(array_key_exists("scinames",$value) && !in_array("no records",$value["scinames"])){
-    			$this->taxaArr = $value["scinames"];
-    			foreach($this->taxaArr as $sciname){
-	        		$sql = "call ReturnSynonyms('".$sciname."',1)";
-	        		$result = $this->conn->query($sql);
-	        		while($row = $result->fetch_object()){
-	        			$this->taxaArr[$key]["synonyms"][] = $row->sciname;
-	        		}
-        			$result->close();
-    			}
-    		}
-    		else{
-    			$sql = "call ReturnSynonyms('".$key."',1)";
-    			$result = $this->conn->query($sql);
-        		while($row = $result->fetch_object()){
-        			$this->taxaArr[$key]["synonyms"][] = $row->sciname;
-        		}
-        		$result->close();
-        		$this->conn->next_result();
-    		}
-    	}
+		foreach($this->taxaArr as $key => $value){
+			if(array_key_exists("scinames",$value)){
+				if(!in_array("no records",$value["scinames"])){
+					$synArr = $this->getSynonyms($value["scinames"]);
+					if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
+				}
+			}
+			else{
+				$synArr = $this->getSynonyms($key);
+				if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
+			}
+		}
     }
 	
 	public function getFullCollectionList($catId = ""){
@@ -1597,6 +1600,76 @@ class MapInterfaceManager{
 	public function getChecklistTaxaCnt(){
 		return $this->checklistTaxaCnt;
 	}
+
+	private function getSynonyms($searchTarget,$taxAuthId = 1){
+		$synArr = array();
+		$targetTidArr = array();
+		$searchStr = '';
+		if(is_array($searchTarget)){
+			if(is_numeric(current($searchTarget))){
+				$targetTidArr = $searchTarget;
+			}
+			else{
+				$searchStr = implode('","',$searchTarget);
+			}
+		}
+		else{
+			if(is_numeric($searchTarget)){
+				$targetTidArr[] = $searchTarget;
+			}
+			else{
+				$searchStr = $searchTarget;
+			}
+		}
+		if($searchStr){
+			//Input is a string, thus get tids
+			$sql1 = 'SELECT tid FROM taxa WHERE sciname IN("'.$searchStr.'")';
+			$rs1 = $this->conn->query($sql1);
+			while($r1 = $rs1->fetch_object()){
+				$targetTidArr[] = $r1->tid;
+			}
+			$rs1->free();
+		}
+		if($targetTidArr){
+			//Get acceptd names
+			$accArr = array();
+			$rankId = 0;
+			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.rankid '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.TidAccepted '.
+				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tid IN('.implode(',',$targetTidArr).')) ';
+			$rs2 = $this->conn->query($sql2);
+			while($r2 = $rs2->fetch_object()){
+				$accArr[] = $r2->tid;
+				$rankId = $r2->rankid;
+				//Put in synonym array if not target
+				if(!in_array($r2->tid,$targetTidArr)) $synArr[$r2->tid] = $r2->sciname;
+			}
+			$rs2->free();
 	
+			//Get synonym that are different than target
+			$sql3 = 'SELECT DISTINCT t.tid, t.sciname '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tidaccepted IN('.implode('',$accArr).')) ';
+			$rs3 = $this->conn->query($sql3);
+			while($r3 = $rs3->fetch_object()){
+				if(!in_array($r3->tid,$targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
+			}
+			$rs3->free();
+	
+			//If rank is 220, get synonyms of accepted children
+			if($rankId == 220){
+				$sql4 = 'SELECT DISTINCT t.tid, t.sciname '.
+					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+					'WHERE (ts.parenttid IN('.implode('',$accArr).')) AND (ts.taxauthid = '.$taxAuthId.') '.
+					'AND (ts.TidAccepted = ts.tid)';
+				$rs4 = $this->conn->query($sql4);
+				while($r4 = $rs4->fetch_object()){
+					$synArr[$r4->tid] = $r4->sciname;
+				}
+				$rs4->free();
+			}
+		}
+		return $synArr;
+	}
 }
 ?>

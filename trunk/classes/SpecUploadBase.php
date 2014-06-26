@@ -1693,6 +1693,8 @@ class SpecUploadBase extends SpecUpload{
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
 				}
 			}
+			//$line = iconv('macintosh', 'UTF-8', $line);
+			//mb_detect_encoding($buffer, 'windows-1251, macroman, UTF-8');
  		}
 		return $retStr;
 	}

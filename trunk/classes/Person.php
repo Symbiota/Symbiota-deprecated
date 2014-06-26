@@ -25,7 +25,7 @@ class Person{
 	private $isPublic = 0;
 	private $password;
 	private $loginArr = Array();
-	private $userTaxonomy = array();		// = array($catagory => array($utid => array($fieldTitle => $fieldValue))); e.g. array("OccurrenceEditor" => array(24 => array("sciname" => "Asteraceae", "geographicScope" => "Maine")))
+	private $userTaxonomy = array();		// = array($category => array($utid => array($fieldTitle => $fieldValue))); e.g. array("OccurrenceEditor" => array(24 => array("sciname" => "Asteraceae", "geographicScope" => "Maine")))
 	private $isTaxonomyEditor = false;
 	
 	public  function __construct(){
@@ -171,9 +171,9 @@ class Person{
 		}
 	}
 
-	public function addUserTaxonomy( $catagory, $id, $utKey, $utValue){
-		$this->userTaxonomy[$catagory][$id][$utKey] = $utValue;
-		if($catagory == 'OccurrenceEditor'){
+	public function addUserTaxonomy( $category, $id, $utKey, $utValue){
+		$this->userTaxonomy[$category][$id][$utKey] = $utValue;
+		if($category == 'OccurrenceEditor'){
 			$this->isTaxonomyEditor = true;
 		}
 	}

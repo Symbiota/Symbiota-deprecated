@@ -224,20 +224,20 @@ class CollectionProfileManager {
 				return $status;
 			}
 			
-			//Modify collection catagory, if needed
+			//Modify collection category, if needed
 			if(isset($_POST['ccpk']) && $_POST['ccpk']){
 				$rs = $conn->query('SELECT ccpk FROM omcollcatlink WHERE collid = '.$this->collid);
 				if($r = $rs->fetch_object()){
 					if($r->ccpk <> $_POST['ccpk']){
 						if(!$conn->query('UPDATE omcollcatlink SET ccpk = '.$_POST['ccpk'].' WHERE ccpk = '.$r->ccpk.' AND collid = '.$this->collid)){
-							$status = 'ERROR updating collection catagory link: '.$conn->error;
+							$status = 'ERROR updating collection category link: '.$conn->error;
 							return $status;
 						}
 					}
 				}
 				else{
 					if(!$conn->query('INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$this->collid.')')){
-						$status = 'ERROR inserting collection catagory link(1): '.$conn->error;
+						$status = 'ERROR inserting collection category link(1): '.$conn->error;
 						return $status;
 					}
 				}
@@ -299,11 +299,11 @@ class CollectionProfileManager {
 			$sql = 'INSERT INTO omcollectionstats(collid,recordcnt,uploadedby) '.
 				'VALUES('.$cid.',0,"'.$symbUid.'")';
 			$conn->query($sql);
-			//Add collection to catagory
+			//Add collection to category
 			if(isset($_POST['ccpk']) && $_POST['ccpk']){
 				$sql = 'INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$cid.')';
 				if(!$conn->query($sql)){
-					$status = 'ERROR inserting collection catagory link(2): '.$conn->error.'; SQL: '.$sql;
+					$status = 'ERROR inserting collection category link(2): '.$conn->error.'; SQL: '.$sql;
 					return $status;
 				}
 			}
@@ -529,7 +529,7 @@ class CollectionProfileManager {
 		return $retArr;
 	}
 	
-	public function getCatagoryArr(){
+	public function getCategoryArr(){
 		$retArr = array();
 		$sql = 'SELECT ccpk, catagory '.
 			'FROM omcollcatagories '.
