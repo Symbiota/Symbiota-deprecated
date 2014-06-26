@@ -296,20 +296,20 @@ $collData = $collManager->getCollectionData(1);
 								</td>
 							</tr>
 							<?php 
-							$collCatArr = $collManager->getCatagoryArr();
+							$collCatArr = $collManager->getCategoryArr();
 							if($collCatArr){
 								?>
 								<tr>
 									<td>
-										Catagory:
+										Category:
 									</td>
 									<td>
 										<select name="ccpk">
-											<option value="">No Catagory</option>
+											<option value="">No Category</option>
 											<option value="">-------------------------------------------</option>
 											<?php 
-											foreach($collCatArr as $ccpk => $catagory){
-												echo '<option value="'.$ccpk.'" '.($collid && $ccpk==$collData['ccpk']?'SELECTED':'').'>'.$catagory.'</option>';
+											foreach($collCatArr as $ccpk => $category){
+												echo '<option value="'.$ccpk.'" '.($collid && $ccpk==$collData['ccpk']?'SELECTED':'').'>'.$category.'</option>';
 											}
 											?>
 										</select>
