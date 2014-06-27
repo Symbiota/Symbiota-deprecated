@@ -4091,7 +4091,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	private function processCollectorQueryResult($r2, $lName, $fName, $mName) {//echo "\nInput to processCollectorQueryResult:\nlName: ".$lName."\nfName: ".$fName."\nmName: ".$mName,"\n";
 		$firstName = $r2->firstName;
-		$middleInitial = $r2->middleInitial;
+		$middleInitial = $r2->middleName;
 		if(strlen($fName) == 1 && strlen($firstName) > 1) $firstName = substr($firstName, 0, 1);
 		if(strlen($mName) == 1 && strlen($middleInitial) > 1) $middleInitial = substr($middleInitial, 0, 1);
 		if(STRLEN($firstName) > 0 && strcmp($firstName, $fName) == 0) {
@@ -4118,7 +4118,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	private function getCollectorFromDatabase($name, $string) {
 		if(strlen($name) > 2) {//echo "\nInput to getCollectorFromDatabase, Name: ".$name.", String: ".$string."\n";
-			$sql = "SELECT c.recordedById, c.familyName, c.firstName, c.middleInitial ".
+			$sql = "SELECT c.recordedById, c.familyName, c.firstName, c.middleName ".
 				"FROM omcollectors c ".
 				"WHERE c.familyName = '".str_replace(array("\"", "'"), "", $name)."'";// AND c.recordedById != 8024";
 
