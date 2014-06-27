@@ -98,7 +98,10 @@ if($symbUid){
 			<?php 
 		}
 		if($collid){
-			echo '<h1>'.$collData['collectionname'].(array_key_exists('institutioncode',$collData)?' ('.$collData['institutioncode'].')':'').'</h1>';
+			$codeStr = ' ('.$collData['institutioncode'];
+			if($collData['collectioncode']) $codeStr .= '-'.$collData['collectioncode'];
+			$codeStr .= ')';
+			echo '<h1>'.$collData['collectionname'].$codeStr.'</h1>';
 			if($editCode > 0){
 				?>
 				<div id="controlpanel" style="clear:both;display:<?php echo ($eMode?'block':'none'); ?>;">
