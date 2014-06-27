@@ -62,6 +62,8 @@ class CollectionProfileManager {
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$returnArr['institutioncode'] = $row->institutioncode;
+				$returnArr['collectioncode'] = $row->CollectionCode;
+				$returnArr['collectionname'] = $row->CollectionName;
 				$returnArr['iid'] = $row->iid;
 				$returnArr['institutionname'] = $row->InstitutionName;
 				$returnArr['address2'] = $row->Address1;
@@ -71,8 +73,6 @@ class CollectionProfileManager {
 				$returnArr['postalcode'] = $row->PostalCode;
 				$returnArr['country'] = $row->Country;
 				$returnArr['phone'] = $row->Phone;
-				$returnArr['collectioncode'] = $row->CollectionCode;
-				$returnArr['collectionname'] = $row->CollectionName;
 				$returnArr['fulldescription'] = $row->FullDescription;
 				$returnArr['homepage'] = $row->Homepage;
 				$returnArr['individualurl'] = $row->individualurl;

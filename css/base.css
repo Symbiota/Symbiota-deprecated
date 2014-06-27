@@ -22,6 +22,10 @@ body{
 
 #maintable td{
  	vertical-align: top;
+	font-size: 12px;
+}
+
+td.header{
 }
 
 td.middleleft{
@@ -88,11 +92,28 @@ div.menuitem a:hover {
 /*Central div and general components */
 #innertext{
 	margin:	15px;	
-	font-size: 14px;
+}
+
+#innertext a{
+
+}
+
+#innertext a:hover{
+
 }
 
 form div {
 	margin-top:	2px;
+}
+
+a{
+	color: 		#2C405E;
+    text-decoration: none;	
+}
+
+a:hover{
+	color: black;
+    text-decoration: underline;
 }
 
 

@@ -723,7 +723,12 @@ class OccurrenceManager{
 											<td style="padding:6px">
 												<div class="collectiontitle">
 													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-														<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
+														<?php
+														$codeStr = ' ('.$collName2['instcode'];
+														if($collName2['collcode']) $codeStr .= '-'.$collName2['collcode'];
+														$codeStr .= ')';
+														echo $collName2["collname"].$codeStr; 
+														?>
 													</a>
 													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
 														more info
@@ -770,7 +775,12 @@ class OccurrenceManager{
 						<td style="padding:6px">
 							<div class="collectiontitle">
 								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-									<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
+									<?php 
+									$codeStr = ' ('.$cArr['instcode'];
+									if($cArr['collcode']) $codeStr .= '-'.$cArr['collcode'];
+									$codeStr .= ')';
+									echo $cArr["collname"].$codeStr; 
+									?>
 								</a>
 								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
 									more info
