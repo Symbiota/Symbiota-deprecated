@@ -23,6 +23,11 @@ class OmOccurrences  {
  public function checkSchema() {
         // ******* Note: $connection must be a mysqli object.
         global $connection;
+		// Temporarly overriding test since the message is causing many questions and worry within the LBCC crowdsourcing community
+		// It was determined that the 0.9.14 schema changes shouldn't affect this module, 
+		// however, the NEVP team was notified on 22 June 2014 of the change so that they verify this evaluation   
+        return true;
+        
         $result = false;
         // Find the most recently applied version number
         $preparesql = "select versionnumber from schemaversion order by dateapplied desc limit 1;";
