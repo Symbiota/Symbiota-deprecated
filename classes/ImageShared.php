@@ -107,7 +107,7 @@ class ImageShared{
 		if($this->targetPath){
 			if(file_exists($this->targetPath)){
 				$imgFile = basename($_FILES['imgfile']['name']);
-				$fileName = $this->cleanFileName($imgFile,$this->targetPath);
+				$fileName = $this->cleanFileName($imgFile);
 				if(move_uploaded_file($_FILES['imgfile']['tmp_name'], $this->targetPath.$fileName.$this->imgExt)){
 					$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
 					$this->imgName = $fileName;
@@ -181,9 +181,14 @@ class ImageShared{
 		return $status;
 	}
 
-	public function cleanFileName($fName){
-		if(strtolower(substr($fName,0,7)) == 'http://' || strtolower(substr($fName,0,8)) == 'https://'){
-			//Image is URL that will be imported
+	public function cleanFileName($fPath){
+		$fName = $fPath;
+		$imgInfo = null;
+		if(strtolower(substr($fPath,0,7)) == 'http://' || strtolower(substr($fPath,0,8)) == 'https://'){
+			//Image is URL 
+			$imgInfo = getimagesize($fPath);
+			list($this->sourceWidth, $this->sourceHeight) = $imgInfo;
+		
 			if($pos = strrpos($fName,'/')){
 				$fName = substr($fName,$pos+1);
 			}
@@ -192,6 +197,18 @@ class ImageShared{
 		if($p = strrpos($fName,".")){
 			$this->imgExt = strtolower(substr($fName,$p));
 			$fName = substr($fName,0,$p);
+		}
+		
+		if(!$this->imgExt && $imgInfo){
+			if($imgInfo[2] == IMAGETYPE_GIF){
+				$this->imgExt = 'gif';
+			}
+			elseif($imgInfo[2] == IMAGETYPE_PNG){
+				$this->imgExt = 'png';
+			}
+			elseif($imgInfo[2] == IMAGETYPE_JPEG){
+				$this->imgExt = 'jpg';
+			}
 		}
 
 		$fName = str_replace("%20","_",$fName);
@@ -205,6 +222,8 @@ class ImageShared{
 		$fName = str_replace(array(chr(250),chr(251),chr(263)),"u",$fName);
 		$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
 		$fName = preg_replace("/[^a-zA-Z0-9\-_]/", "", $fName);
+		$fName = trim($fName,' _-');
+		
 		if(strlen($fName) > 30) {
 			$fName = substr($fName,0,30);
 		}
@@ -769,6 +788,10 @@ class ImageShared{
 		return $this->imgName;
 	}
 	
+	public function getImgExt(){
+		return $this->imgExt;
+	}
+	
 	public function getTnPixWidth(){
 		return $this->tnPixWidth;
 	}
@@ -805,6 +828,10 @@ class ImageShared{
 
 	public function setSourceUrl($v){
 		$this->sourceUrl = $this->cleanInStr($v);
+	}
+
+	public function getTargetPath(){
+		return $this->targetPath;
 	}
 
 	public function setCopyright($v){

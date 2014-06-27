@@ -67,17 +67,24 @@ class ImageCleaner{
 					$webFullUrl = '';
 					$lgFullUrl = '';
 					//If web image is too large, transfer to large image and create new web image
+					list($sourceWidth, $sourceHeight) = getimagesize($imgManager->getSourcePath());
 					if(!$webIsEmpty && !$row->originalurl){
 						$fileSize = $imgManager->getSourceFileSize();
-						list($sourceWidth, $sourceHeight) = getimagesize($imgManager->getSourcePath());
 						if($fileSize > $imgManager->getWebFileSizeLimit() || $sourceWidth > ($imgManager->getWebPixWidth()*1.2)){
 							$lgFullUrl = $imgManager->getSourcePath();
 							$webIsEmpty = true;
 						}
 					}
 					if($webIsEmpty){
-						if($imgManager->createNewImage('_web',$imgManager->getWebPixWidth())){
-							$webFullUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_web.jpg';
+						if($sourceWidth && $sourceWidth < $imgManager->getWebPixWidth()){
+							if(copy($imgManager->getSourcePath(),$imgManager->getTargetPath().$imgManager->getImgName().'_web.'.$imgManager->getImgExt())){
+								$webFullUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_web.'.$imgManager->getImgExt();
+							}
+						}
+						if(!$webFullUrl){
+							if($imgManager->createNewImage('_web',$imgManager->getWebPixWidth())){
+								$webFullUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_web.jpg';
+							}
 						}
 					}
 	
