@@ -88,7 +88,42 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 		
 		if($clid && $isEditor){
 			$dynSql = $clManager->getDynamicSql();
+			$country = ''; $state = ''; $county = ''; $locality = ''; $taxon = ''; 
+			$latn = ''; $lats = ''; $lnge = ''; $lngw = '';
+			$collid = ''; $recordedBy = ''; $culStatus = 0; 
 			if($dynSql){
+				if(preg_match('/country = "(.+)"/',$dynSql,$m)){
+					$country = $m[1];
+				}
+				if(preg_match('/stateprovince = "(.+)"/',$dynSql,$m)){
+					$state = $m[1];
+				}
+				if(preg_match('/county LIKE "([^\)]+)%"/',$dynSql,$m)){
+					$county = trim($m[1],' %');
+				}
+				if(preg_match('/locality LIKE "%([^\)]+)%"/',$dynSql,$m)){
+					$locality = trim($m[1],' %');
+				}
+				if(preg_match('/parenttid = (\d+)\)/',$dynSql,$m)){
+					$taxon = $clManager->getSciname($m[1]);
+				} 
+				if(preg_match('/decimallatitude BETWEEN ([-\.\d]+) AND ([-\.\d]+)\D+/',$dynSql,$m)){
+					$lats = $m[1];
+					$latn = $m[2];
+				} 
+				if(preg_match('/decimallongitude BETWEEN ([-\.\d]+) AND ([-\.\d]+)\D+/',$dynSql,$m)){
+					$lngw = $m[1];
+					$lnge = $m[2];
+				} 
+				if(preg_match('/collid = (\d+)\D/',$dynSql,$m)){
+					$collid = $m[1];
+				}
+				if(preg_match('/recordedby LIKE "%([^\)]+)%"\)/',$dynSql,$m)){
+					$recordedBy = trim($m[1],' %');
+				}
+				if(preg_match('/cultivationStatus/',$dynSql)){
+					$culStatus = 1;
+				}
 				?>
 				<div style="margin:10px 0px;">
 					<b>Search statement:</b> <?php echo $dynSql; ?>
@@ -124,57 +159,78 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 								<td>
 									<div style="margin:2px;">
 										<b>Country:</b>
-										<input type="text" name="country" onchange="" />
+										<input type="text" name="country" value="<?php echo $country; ?>" />
 									</div>
 									<div style="margin:2px;">
 										<b>State:</b>
-										<input type="text" name="state" onchange="" />
+										<input type="text" name="state" value="<?php echo $state; ?>" />
 									</div>
 									<div style="margin:2px;">
 										<b>County:</b>
-										<input type="text" name="county" onchange="" />
+										<input type="text" name="county" value="<?php echo $county; ?>" />
 									</div>
 									<div style="margin:2px;">
 										<b>Locality:</b>
-										<input type="text" name="locality" onchange="" />
+										<input type="text" name="locality" value="<?php echo $locality; ?>" />
 									</div>
 									<div style="margin:2px;">
 										<b>Family or Genus:</b>
-										<input type="text" name="taxon" onchange="" />
-									</div>
-									<div style="margin:20px;">
-										<input type="submit" name="submitaction" value="Create SQL Fragment" />
-										<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
-										<input type='hidden' name='pid' value='<?php echo $pid; ?>' />
+										<input type="text" name="taxon" value="<?php echo $taxon; ?>" />
 									</div>
 								</td>
 								<td style="padding-left:20px;">
 									<div style="float:left;">
 										<div>
 											<b>Lat North:</b>
-											<input id="upperlat" type="text" name="latnorth" style="width:70px;" onchange="" title="Latitude North" /> 
+											<input id="upperlat" type="text" name="latnorth" style="width:70px;" value="<?php echo $latn; ?>" title="Latitude North" /> 
 											<a href="#" onclick="openPopup('../collections/mapboundingbox.php','boundingbox')"><img src="../images/world40.gif" width="15px" title="Find Coordinate" /></a>
 										</div>
 										<div>
 											<b>Lat South:</b>
-											<input id="bottomlat" type="text" name="latsouth" style="width:70px;" onchange="" title="Latitude South" />
+											<input id="bottomlat" type="text" name="latsouth" style="width:70px;" value="<?php echo $lats; ?>" title="Latitude South" />
 										</div>
 										<div>
 											<b>Long East:</b>
-											<input id="rightlong" type="text" name="lngeast" style="width:70px;" onchange="" title="Longitude East" />
+											<input id="rightlong" type="text" name="lngeast" style="width:70px;" value="<?php echo $lnge; ?>" title="Longitude East" />
 										</div>
 										<div>
 											<b>Long West:</b>
-											<input id="leftlong" type="text" name="lngwest" style="width:70px;" onchange="" title="Longitude West" />
+											<input id="leftlong" type="text" name="lngwest" style="width:70px;" value="<?php echo $lngw; ?>" title="Longitude West" />
 										</div>
 										<div>
 											<input type="checkbox" name="latlngor" value="1" />
 											Include Lat/Long as an "OR" condition
 										</div>
 										<div style="margin:3px;">
-											<input name="excludecult" value="1" type="checkbox" /> 
+											<input name="excludecult" value="1" type="checkbox" <?php if ($culStatus) echo 'CHECKED'; ?> /> 
 											Exclude cultivated species
 										</div>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div>
+										<b>Collecion:</b> 
+										<select name="collid">
+											<option value="">Target Specific Collection</option>
+											<option value="">-------------------------------------</option>
+											<?php 
+											$collList = $clManager->getCollectionList();
+											foreach($collList as $id => $name){
+												echo '<option value="'.$id.'" '.($collid==$id?'SELECTED':'').'>'.$name.'</option>';
+											}
+											?>
+										</select>
+									</div>
+									<div>
+										<b>Collector:</b>  
+										<input name="recordedby" type="text" value="<?php echo $recordedBy; ?>" style="width:250px" />
+									</div>
+									<div style="margin:10px;">
+										<input type="submit" name="submitaction" value="Create SQL Fragment" />
+										<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
+										<input type='hidden' name='pid' value='<?php echo $pid; ?>' />
 									</div>
 								</td>
 							</tr>
