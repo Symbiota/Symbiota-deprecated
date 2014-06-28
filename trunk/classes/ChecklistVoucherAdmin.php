@@ -15,7 +15,7 @@ class ChecklistVoucherAdmin {
 	function __destruct(){
  		if(!($this->conn === false)) $this->conn->close();
 	}
-	
+
 	public function setClid($clid){
 		if(is_numeric($clid)){
 			$this->clid = $clid;
@@ -40,44 +40,63 @@ class ChecklistVoucherAdmin {
 		return $this->sqlFrag;
 	}
 	
-	public function saveSql($sqlFragArr){
+	public function saveSql($postArr){
 		$statusStr = false;
 		$sqlFrag = "";
-		if($sqlFragArr['country']){
-			$sqlFrag = 'AND (o.country = "'.$this->cleanInStr($sqlFragArr['country']).'") ';
+		if($postArr['country']){
+			$sqlFrag = 'AND (o.country = "'.$this->cleanInStr($postArr['country']).'") ';
 		}
-		if($sqlFragArr['state']){
-			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($sqlFragArr['state']).'") ';
+		if($postArr['state']){
+			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($postArr['state']).'") ';
 		}
-		if($sqlFragArr['county']){
-			$sqlFrag .= 'AND (o.county LIKE "'.$this->cleanInStr($sqlFragArr['county']).'%") ';
+		if($postArr['county']){
+			$sqlFrag .= 'AND (o.county LIKE "'.$this->cleanInStr($postArr['county']).'%") ';
 		}
-		if($sqlFragArr['locality']){
-			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanInStr($sqlFragArr['locality']).'%") ';
+		if($postArr['locality']){
+			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanInStr($postArr['locality']).'%") ';
 		}
-		if($sqlFragArr['taxon']){
-			$tStr = $this->cleanInStr($sqlFragArr['taxon']);
+		//taxonomy
+		if($postArr['taxon']){
+			$tStr = $this->cleanInStr($postArr['taxon']);
+			$tidPar = $this->getTid($tStr);
+			if($tidPar){
+				$sqlFrag .= 'AND (o.tidinterpreted IN (SELECT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid = '.$tidPar.')) ';
+			}
+			/*
 			if(strpos($tStr,'aceae') || strpos($tStr,'idae')){
 				$sqlFrag .= 'AND (o.family LIKE "'.$tStr.'") '; 
 			}
 			else{
 				$sqlFrag .= 'AND (o.sciname LIKE "'.$tStr.'%") ';
 			}
-			
+			*/
 		}
+		//Latitude and longitude
 		$llStr = '';
-		if($sqlFragArr['latnorth'] && $sqlFragArr['latsouth'] && is_numeric($sqlFragArr['latnorth']) && is_numeric($sqlFragArr['latsouth'])){
-			$llStr .= 'AND (o.decimallatitude BETWEEN '.$sqlFragArr['latsouth'].' AND '.$sqlFragArr['latnorth'].') ';
+		if($postArr['latnorth'] && $postArr['latsouth'] && is_numeric($postArr['latnorth']) && is_numeric($postArr['latsouth'])){
+			$llStr .= 'AND (o.decimallatitude BETWEEN '.$postArr['latsouth'].' AND '.$postArr['latnorth'].') ';
 		}
-		if($sqlFragArr['lngwest'] && $sqlFragArr['lngeast'] && is_numeric($sqlFragArr['lngwest']) && is_numeric($sqlFragArr['lngeast'])){
-			$llStr .= 'AND (o.decimallongitude BETWEEN '.$sqlFragArr['lngwest'].
-			' AND '.$sqlFragArr['lngeast'].') ';
+		if($postArr['lngwest'] && $postArr['lngeast'] && is_numeric($postArr['lngwest']) && is_numeric($postArr['lngeast'])){
+			$llStr .= 'AND (o.decimallongitude BETWEEN '.$postArr['lngwest'].
+			' AND '.$postArr['lngeast'].') ';
 		}
-		if(array_key_exists('latlngor',$sqlFragArr)) $llStr = 'OR ('.trim(substr($llStr,3)).')';
+		if(array_key_exists('latlngor',$postArr)) $llStr = 'OR ('.trim(substr($llStr,3)).')';
 		$sqlFrag .= $llStr;
-		if(isset($sqlFragArr['excludecult']) && $sqlFragArr['excludecult']){
+		//Exclude taxonomy
+		if(isset($postArr['excludecult']) && $postArr['excludecult']){
 			$sqlFrag .= 'AND (o.cultivationStatus = 0 OR o.cultivationStatus IS NULL) ';
 		}
+		//Limit by collection
+		if($postArr['collid'] && is_numeric($postArr['collid'])){
+			$sqlFrag .= 'AND (o.collid = '.$postArr['collid'].') ';
+		}
+
+		//Limit by collector
+		if($postArr['recordedby']){
+			$sqlFrag .= 'AND (o.recordedby LIKE "%'.$this->cleanInStr($postArr['recordedby']).'%") ';
+		}
+
+		//Save SQL fragment
 		if($sqlFrag){
 			$sqlFrag = trim(substr($sqlFrag,3));
 			$sql = "UPDATE fmchecklists c SET c.dynamicsql = '".$sqlFrag."' WHERE (c.clid = ".$this->clid.')';
@@ -86,7 +105,7 @@ class ChecklistVoucherAdmin {
 				$this->sqlFrag = $sqlFrag;
 			}
 			else{
-				$statusStr = 'ERROR: unable to create or modify search statement ('.$this->error.')';
+				$statusStr = 'ERROR: unable to create or modify search statement ('.$this->conn->error.')';
 			}
 		}
 		return $statusStr;
@@ -98,7 +117,7 @@ class ChecklistVoucherAdmin {
 			$this->sqlFrag = '';
 		}
 		else{
-			$statusStr = 'ERROR: '.$this->conn->query->error;
+			$statusStr = 'ERROR: '.$this->conn->error;
 		}
 		return $statusStr;
 	}
@@ -555,6 +574,41 @@ class ChecklistVoucherAdmin {
 	}
 
 	//Misc fucntions
+	public function getCollectionList(){
+		$retArr = array();
+		$sql = 'SELECT collid, collectionname FROM omcollections ORDER BY collectionname'; 
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->collid] = $r->collectionname;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function getSciname($tid){
+		$retStr = '';
+		if(is_numeric($tid)){
+			$sql = 'SELECT sciname FROM taxa WHERE tid = '.$tid; 
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$retStr = $r->sciname;
+			}
+			$rs->free();
+		}
+		return $retStr;
+	}
+	
+	private function getTid($sciname){
+		$tidRet = 0;
+		$sql = 'SELECT tid FROM taxa WHERE sciname = ("'.$sciname.'")';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$tidRet = $r->tid;
+		}
+		$rs->free();
+		return $tidRet;
+	}
+	
 	private function arrayToCsv( $arrIn, $delimiter = ',', $enclosure = '"', $encloseAll = false) {
 		$delimiterEsc = preg_quote($delimiter, '/');
 		$enclosureEsc = preg_quote($enclosure, '/');

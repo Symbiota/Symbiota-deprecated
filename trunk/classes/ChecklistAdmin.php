@@ -74,19 +74,20 @@ class ChecklistAdmin {
 		//$sql = 'SELECT uid FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'") AND uid <> '.$symbUid;
 		//$rs = $this->conn->query($sql);
 		//if($rs->num_rows == 0){
-			$sql2 = 'SELECT uid FROM userroles '.
+			$sql1 = 'SELECT uid FROM userroles '.
 				'WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$delClid.'") AND uid <> '.$symbUid;
-			$rs2 = $this->conn->query($sql2);
-			if($rs2->num_rows == 0){
-				$sql = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$delClid.')';
-				$this->conn->query($sql);
-				$sql = "DELETE FROM fmchecklists WHERE (clid = ".$delClid.')';
-				if($this->conn->query($sql)){
+			$rs1 = $this->conn->query($sql1);
+			if($rs1->num_rows == 0){
+				$sql2 = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$delClid.')';
+				echo $sql2;
+				$this->conn->query($sql2);
+				$sql3 = "DELETE FROM fmchecklists WHERE (clid = ".$delClid.')';
+				if($this->conn->query($sql3)){
 					//Delete userpermissions reference once patch is submitted
 					//$sql = 'DELETE FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'")';
 					//$this->conn->query($sql);
-					$sql3 = 'DELETE FROM userroles WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$delClid.'")';
-					$this->conn->query($sql3);
+					$sql4 = 'DELETE FROM userroles WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$delClid.'")';
+					$this->conn->query($sql4);
 				}
 				else{
 					$statusStr = 'Checklist Deletion failed ('.$this->conn->error.'). Please contact data administrator.';
@@ -95,6 +96,7 @@ class ChecklistAdmin {
 			else{
 				$statusStr = 'Checklist cannot be deleted until all editors are removed. Remove editors and then try again.';
 			}
+			$rs1->free();
 		//}
 		//else{
 		//	$statusStr = 'Checklist cannot be deleted until all editors are removed. Remove editors and then try again.';
