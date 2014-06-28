@@ -239,7 +239,7 @@ class ImageExplorer{
 			}
 		}
 		
-		$sqlStr .= 'ORDER BY i.sortsequence ';
+		//$sqlStr .= 'ORDER BY i.sortsequence ';
 		//Set start and limit
 		$start = (isset($searchCriteria['start'])?$searchCriteria['start']:0);
 		$limit = (isset($searchCriteria['limit'])?$searchCriteria['limit']:50);
@@ -333,7 +333,13 @@ class ImageExplorer{
 
 	public function getCollections(){
 		$retArr = array();
-		$sql = 'SELECT collid, CONCAT_WS("-",institutioncode, collectioncode) as instcode FROM omcollections ';
+		/*
+		$sql = 'SELECT DISTINCT c.collid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode '.
+			'FROM omcollections c ';
+		*/
+		$sql = 'SELECT DISTINCT c.collid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode '.
+			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+			'INNER JOIN images i ON o.occid = i.occid ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
             $retArr[] = (object)array(

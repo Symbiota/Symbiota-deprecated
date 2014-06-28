@@ -77,11 +77,16 @@ class ChecklistVoucherAdmin {
 			$llStr .= 'AND (o.decimallatitude BETWEEN '.$postArr['latsouth'].' AND '.$postArr['latnorth'].') ';
 		}
 		if($postArr['lngwest'] && $postArr['lngeast'] && is_numeric($postArr['lngwest']) && is_numeric($postArr['lngeast'])){
-			$llStr .= 'AND (o.decimallongitude BETWEEN '.$postArr['lngwest'].
-			' AND '.$postArr['lngeast'].') ';
+			$llStr .= 'AND (o.decimallongitude BETWEEN '.$postArr['lngwest'].' AND '.$postArr['lngeast'].') ';
 		}
-		if(array_key_exists('latlngor',$postArr)) $llStr = 'OR ('.trim(substr($llStr,3)).')';
-		$sqlFrag .= $llStr;
+		if($llStr){
+			if(array_key_exists('latlngor',$postArr)) $llStr = 'OR ('.trim(substr($llStr,3)).') ';
+			$sqlFrag .= $llStr;
+		}
+		//Use occurrences only with decimallatitude
+		if(!$llStr && isset($postArr['onlycoord']) && $postArr['onlycoord']){
+			$sqlFrag .= 'AND (o.decimallatitude IS NOT NULL) ';
+		}
 		//Exclude taxonomy
 		if(isset($postArr['excludecult']) && $postArr['excludecult']){
 			$sqlFrag .= 'AND (o.cultivationStatus = 0 OR o.cultivationStatus IS NULL) ';
