@@ -88,9 +88,10 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 		
 		if($clid && $isEditor){
 			$dynSql = $clManager->getDynamicSql();
-			$country = ''; $state = ''; $county = ''; $locality = ''; $taxon = ''; 
+			$country = ''; $state = ''; $county = ''; $locality = ''; $taxon = '';
+			$collid = ''; $recordedBy = '';  
 			$latn = ''; $lats = ''; $lnge = ''; $lngw = '';
-			$collid = ''; $recordedBy = ''; $culStatus = 0; 
+			$latLngOr = 0; $culStatus = 0; $onlyCoord = 0;
 			if($dynSql){
 				if(preg_match('/country = "(.+)"/',$dynSql,$m)){
 					$country = $m[1];
@@ -121,8 +122,14 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 				if(preg_match('/recordedby LIKE "%([^\)]+)%"\)/',$dynSql,$m)){
 					$recordedBy = trim($m[1],' %');
 				}
+				if(preg_match('/ OR \(\(o.decimallatitude/',$dynSql) || preg_match('/ OR \(\(o.decimallongitude/',$dynSql)){
+					$latLngOr = 1;
+				}
 				if(preg_match('/cultivationStatus/',$dynSql)){
 					$culStatus = 1;
+				}
+				if(preg_match('/decimallatitude/',$dynSql)){
+					$onlyCoord = 1;
 				}
 				?>
 				<div style="margin:10px 0px;">
@@ -177,6 +184,23 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 										<b>Family or Genus:</b>
 										<input type="text" name="taxon" value="<?php echo $taxon; ?>" />
 									</div>
+									<div>
+										<b>Collecion:</b> 
+										<select name="collid" style="width:275px;">
+											<option value="">Target Specific Collection</option>
+											<option value="">-------------------------------------</option>
+											<?php 
+											$collList = $clManager->getCollectionList();
+											foreach($collList as $id => $name){
+												echo '<option value="'.$id.'" '.($collid==$id?'SELECTED':'').'>'.$name.'</option>';
+											}
+											?>
+										</select>
+									</div>
+									<div>
+										<b>Collector:</b>  
+										<input name="recordedby" type="text" value="<?php echo $recordedBy; ?>" style="width:250px" />
+									</div>
 								</td>
 								<td style="padding-left:20px;">
 									<div style="float:left;">
@@ -198,10 +222,14 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 											<input id="leftlong" type="text" name="lngwest" style="width:70px;" value="<?php echo $lngw; ?>" title="Longitude West" />
 										</div>
 										<div>
-											<input type="checkbox" name="latlngor" value="1" />
-											Include Lat/Long as an "OR" condition
+											<input type="checkbox" name="latlngor" value="1" <?php if ($latLngOr) echo 'CHECKED'; ?> />
+											Include Lat/Long and locality as an "OR" condition
 										</div>
-										<div style="margin:3px;">
+										<div>
+											<input name="onlycoord" value="1" type="checkbox" <?php if ($onlyCoord) echo 'CHECKED'; ?> /> 
+											Only include occurrences with coordinates
+										</div>
+										<div>
 											<input name="excludecult" value="1" type="checkbox" <?php if ($culStatus) echo 'CHECKED'; ?> /> 
 											Exclude cultivated species
 										</div>
@@ -210,23 +238,6 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 							</tr>
 							<tr>
 								<td colspan="2">
-									<div>
-										<b>Collecion:</b> 
-										<select name="collid">
-											<option value="">Target Specific Collection</option>
-											<option value="">-------------------------------------</option>
-											<?php 
-											$collList = $clManager->getCollectionList();
-											foreach($collList as $id => $name){
-												echo '<option value="'.$id.'" '.($collid==$id?'SELECTED':'').'>'.$name.'</option>';
-											}
-											?>
-										</select>
-									</div>
-									<div>
-										<b>Collector:</b>  
-										<input name="recordedby" type="text" value="<?php echo $recordedBy; ?>" style="width:250px" />
-									</div>
 									<div style="margin:10px;">
 										<input type="submit" name="submitaction" value="Create SQL Fragment" />
 										<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
