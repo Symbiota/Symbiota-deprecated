@@ -197,10 +197,18 @@ function addSpecimen(f,splist){
 					document.getElementById("addspecerr3").style.display = "none";
 					setTimeout(function () { 
 						document.getElementById("addspecerr1").style.display = "none";
-						}, 5000);
+						}, 750);
 					//alert("ERROR: Specimen record not found in database.");
 				}
 				else if(responseCode == "1"){
+					document.getElementById("addspecsuccess").style.display = "block";
+					document.getElementById("addspecerr1").style.display = "none";
+					document.getElementById("addspecerr2").style.display = "none";
+					document.getElementById("addspecerr3").style.display = "none";
+					setTimeout(function () { 
+						document.getElementById("addspecsuccess").style.display = "none";
+						}, 750);
+					//alert("SUCCESS: Specimen record added to loan.");
 					if(splist == 0){
 						document.getElementById("speclistdiv").style.display = "block";
 						document.getElementById("nospecdiv").style.display = "none";
@@ -213,7 +221,7 @@ function addSpecimen(f,splist){
 					document.getElementById("addspecerr3").style.display = "none";
 					setTimeout(function () { 
 						document.getElementById("addspecerr2").style.display = "none";
-						}, 5000);
+						}, 750);
 					//alert("ERROR: More than one specimen with that catalog number.");
 				}
 				else if(responseCode == "3"){
@@ -223,7 +231,7 @@ function addSpecimen(f,splist){
 					document.getElementById("addspecerr3").style.display = "block";
 					setTimeout(function () { 
 						document.getElementById("addspecerr3").style.display = "none";
-						}, 5000);
+						}, 750);
 					//alert("ERROR: More than one specimen with that catalog number.");
 				}
 				else{
