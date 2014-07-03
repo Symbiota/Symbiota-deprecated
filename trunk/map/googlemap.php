@@ -9,7 +9,7 @@ $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
 $mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
 $gridSize = array_key_exists('gridSizeSetting',$_REQUEST)?$_REQUEST['gridSizeSetting']:10;
-$minClusterSize = array_key_exists('minClusterSetting',$_REQUEST)?$_REQUEST['minClusterSetting']:10;
+$minClusterSize = array_key_exists('minClusterSetting',$_REQUEST)?$_REQUEST['minClusterSetting']:50;
 
 $sharedMapManager = new MappingShared();
 
@@ -47,6 +47,8 @@ $sharedMapManager->setTaxaArr($tArr);
 	<script src="http://www.google.com/jsapi"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
 	<script type="text/javascript" src="../js/symb/markerclusterer.js?ver=260913"></script>
+	<script type="text/javascript" src="../js/symb/oms.min.js"></script>
+	<script type="text/javascript" src="../js/symb/keydragzoom.js"></script>
 	<script type="text/javascript">
 		var map = null;
 		var markerClusterer = null;
@@ -78,6 +80,32 @@ $sharedMapManager->setTaxaArr($tArr);
 
 	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
 			
+			oms = new OverlappingMarkerSpiderfier(map);
+			
+			map.enableKeyDragZoom({
+				visualEnabled: true,
+				visualPosition: google.maps.ControlPosition.LEFT,
+				visualPositionOffset: new google.maps.Size(35, 0),
+				visualPositionIndex: null,
+				visualSprite: "../images/dragzoom_btn.png",
+				visualSize: new google.maps.Size(20, 20),
+				visualTips: {
+					off: "Turn on",
+					on: "Turn off"
+				}
+			});
+			
+			oms.addListener('click', function(marker, event) {
+				closeAllInfoWins();
+				occid = marker.occid;
+				clid = marker.clid;
+				openIndPU(occid,clid);
+			});
+			
+			oms.addListener('spiderfy', function(markers) {
+				closeAllInfoWins();
+			});
+			
            <?php 
 			$coordExist = false;
 			$iconKeys = Array(); 
@@ -99,10 +127,10 @@ $sharedMapManager->setTaxaArr($tArr);
 					$iconKeys[] = $iconKey;
 				}
 				unset($valueArr["color"]);
-				foreach($valueArr as $latLng => $dataArr){
+				foreach($valueArr as $occId => $spArr){
 					$coordExist = true;
 					//Find max/min point values
-					$llArr = explode(',',$latLng);
+					$llArr = explode(',',$spArr['latLngStr']);
 					if($llArr[0] < $minLat) $minLat = $llArr[0];
 					if($llArr[0] > $maxLat) $maxLat = $llArr[0];
 					if($llArr[1] < $minLng) $minLng = $llArr[1];
@@ -110,41 +138,43 @@ $sharedMapManager->setTaxaArr($tArr);
 					//Create marker
 					$spStr = '';
 					$functionStr = '';
-					$titleStr = $latLng;
-					foreach($dataArr as $occId => $spArr){
-						$displayStr = '';      
-						if(is_numeric($spArr['catalognumber'])){
-							$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['catalognumber'];
-						}
-						elseif((!$spArr['catalognumber']) && ($spArr['othercatalognumbers'])){
-							$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['othercatalognumbers'];
-						}
-						elseif((!$spArr['catalognumber']) && (!$spArr['othercatalognumbers'])){
-							$displayStr = $spArr['institutioncode'].($spArr['collectioncode']?'-'.$spArr['collectioncode']:'').($spArr['identifier']?'-'.$spArr['identifier']:'');
-						}
-						else{
-							$displayStr = $spArr['catalognumber'];
-						}
-						if($spArr['collid'] == $genObs){
-							$displayStr = "General Observation";
-							?>
-							var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
-							<?php
-						}
-						else{
-							?>
-							var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
-							<?php
-						}
-						if(count($dataArr) == 1){
-							$functionStr = $occId.",".($clid?$clid:'0');
-						}
-						else{
-							$spStr .= "<a href='#' onclick='openIndPU(".$occId.",".($clid?$clid:'0').")'>".$displayStr."</a><br/>";
-						}
+					$titleStr = $spArr['latLngStr'];
+					$type = '';
+					$displayStr = '';      
+					if(is_numeric($spArr['catalognumber'])){
+						$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['catalognumber'];
 					}
-					echo 'var m'.$markerCnt.' = getMarker('.$latLng.',"'.$displayStr.'",markerIcon);',"\n";
-					if($functionStr){
+					elseif((!$spArr['catalognumber']) && ($spArr['othercatalognumbers'])){
+						$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['othercatalognumbers'];
+					}
+					elseif((!$spArr['catalognumber']) && (!$spArr['othercatalognumbers'])){
+						$displayStr = $spArr['institutioncode'].($spArr['collectioncode']?'-'.$spArr['collectioncode']:'').($spArr['identifier']?'-'.$spArr['identifier']:'');
+					}
+					else{
+						$displayStr = $spArr['catalognumber'];
+					}
+					if($spArr['collid'] == $genObs){
+						$displayStr = "General Observation";
+						$type = 'obs';
+						?>
+						var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
+						<?php
+					}
+					else{
+						$type = 'spec';
+						?>
+						var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
+						<?php
+					}
+					/*if(count($dataArr) == 1){
+						$functionStr = $occId.",".($clid?$clid:'0');
+					}
+					else{
+						$spStr .= "<a href='#' onclick='openIndPU(".$occId.",".($clid?$clid:'0').")'>".$displayStr."</a><br/>";
+					}*/
+					echo 'var m'.$markerCnt.' = getMarker('.$spArr['latLngStr'].',"'.$displayStr.'",markerIcon,"'.$type.'","'.($spArr['tidinterpreted']?$spArr['tidinterpreted']:0).'",'.$occId.','.($clid?$clid:'0').');',"\n";
+					echo 'oms.addMarker(m'.$markerCnt.');',"\n";
+					/*if($functionStr){
 						?>
 						google.maps.event.addListener(
 							m<?php echo $markerCnt; ?>, 
@@ -165,7 +195,7 @@ $sharedMapManager->setTaxaArr($tArr);
 							iWin.open(map,m<?php echo $markerCnt; ?>);
 						});
 						<?php
-					}
+					}*/
 					$markerCnt++;
 				}
 				?>
@@ -216,12 +246,15 @@ $sharedMapManager->setTaxaArr($tArr);
 			}
 		}
 
-		function getMarker(newLat, newLng, newTitle, newIcon){
+		function getMarker(newLat, newLng, newTitle, newIcon, type, tid, occid, clid){
             var m = new google.maps.Marker({
-                position: new google.maps.LatLng(newLat, newLng),
-                map: map,
-                title: newTitle,
-                icon: newIcon
+				position: new google.maps.LatLng(newLat, newLng),
+				title: newTitle,
+				icon: newIcon,
+				customInfo: type,
+				taxatid: tid,
+				occid: occid,
+				clid: clid
 			});
 			markers.push(m);
 			return m;

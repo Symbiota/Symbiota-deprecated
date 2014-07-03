@@ -30,7 +30,7 @@ $lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3]
 	
 	    	map = new google.maps.Map(document.getElementById("map"), dmOptions);
 
-			placeRectangle(latCenter, lngCenter);
+			//placeRectangle(latCenter, lngCenter);
 
 			google.maps.event.addListener(map, 'click', function(event) {
 				if(rectangle) rectangle.setMap(null);
