@@ -45,8 +45,9 @@ class MappingShared{
 		global $userRights, $mappingBoundaries;
 		$coordArr = Array();
 		$sql = '';
-		$sql = 'SELECT o.occid, IFNULL(IFNULL(IFNULL(o.occurrenceid,o.catalognumber),CONCAT(o.recordedby," ",o.recordnumber)),o.occid) AS identifier, '.
-			'o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode ';
+		$sql = 'SELECT o.occid, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") AS identifier, '.
+			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, '.
+			'c.CollectionName ';
 		if($includeDescr){
 			$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
 		}
@@ -112,18 +113,20 @@ class MappingShared{
 				}
 			}
 			if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["collid"] = $row->collid;
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["identifier"] = $row->identifier;
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["institutioncode"] = $row->institutioncode;
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["collectioncode"] = $row->collectioncode;
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["catalognumber"] = $row->catalognumber;
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["othercatalognumbers"] = $row->othercatalognumbers;
+			$coordArr[$taxaMapper[$sciName]][$occId]["collid"] = $row->collid;
+			$coordArr[$taxaMapper[$sciName]][$occId]["latLngStr"] = $latLngStr;
+			$coordArr[$taxaMapper[$sciName]][$occId]["identifier"] = $row->identifier;
+			$coordArr[$taxaMapper[$sciName]][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
+			$coordArr[$taxaMapper[$sciName]][$occId]["institutioncode"] = $row->institutioncode;
+			$coordArr[$taxaMapper[$sciName]][$occId]["collectioncode"] = $row->collectioncode;
+			$coordArr[$taxaMapper[$sciName]][$occId]["catalognumber"] = $row->catalognumber;
+			$coordArr[$taxaMapper[$sciName]][$occId]["othercatalognumbers"] = $row->othercatalognumbers;
 			if($includeDescr){
-				$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["descr"] = $row->descr;
+				$coordArr[$taxaMapper[$sciName]][$occId]["descr"] = $row->descr;
 			}
 			if($this->fieldArr){
 				foreach($this->fieldArr as $k => $v){
-					$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId][$v] = $this->xmlentities($row->$v);
+					$coordArr[$taxaMapper[$sciName]][$occId][$v] = $this->xmlentities($row->$v);
 				}
 			}
 		}
