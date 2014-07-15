@@ -456,14 +456,14 @@ class OCCURRENCE {
                      if ($imgid=="") { 
                         // add this image record
    	                    $isaveresult = $imageHandler->databaseImageRecord($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
-                        if ($isaveresult===TRUE) { 
+                        if ($isaveresult=="") { 
                            $result->imageinsertcount++;
                         } else { 
                            $result->imagefailurecount++;
                         }
                      } else {  
    	                    $isaveresult = $imageHandler->updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
-                        if ($isaveresult===TRUE) { 
+                        if ($isaveresult=="") { 
                            $result->imageupdatecount++;
                         } else { 
                            $result->imagefailurecount++;
