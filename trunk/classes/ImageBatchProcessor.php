@@ -77,6 +77,14 @@ class ImageBatchProcessor {
 	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 
+    /**  Track the list of xml files that have been processed to avoid
+     *   processing the same file more than once when collArr is configured
+     *   to contain more than one record for the same path (for image 
+     *   uploads from an institution with more than one collection code).
+     */
+    private $processedFiles = Array();  
+ 
+
 	function __construct(){
 		ini_set('memory_limit','1024M');
 		ini_set('auto_detect_line_endings', true);
@@ -299,8 +307,16 @@ class ImageBatchProcessor {
 									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
 								}
 								elseif($fileExt==".xml") {
+                                    // The loop through collArr can result in same file being processed more than
+                                    // once if the same pathFrag is associated with more than one collection.
+                                    if (!in_array("$pathFrag$fileName",$this->processedFiles)) { 
 									$this->processXMLFile($fileName,$pathFrag);
+                                         $this->processedFiles[] = "$pathFrag$fileName";
+                                         // TODO: It would seem that adding the collection to collProcessedArr 
+                                         // should accomplish what processedFiles[] is being added above to
+                                         // do, need to investigate further and perhaps use it as a fix.
 									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+								}
 								}
 								elseif($fileExt==".ds_store" || strtolower($fileName)=='thumbs.db'){
 									unlink($this->sourcePathBase.$pathFrag.$fileName);
