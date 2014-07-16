@@ -1,54 +1,4 @@
-DROP PROCEDURE updateSymbiotaSchema;
-
-DELIMITER |
-
-CREATE PROCEDURE updateSymbiotaSchema ()
-
-BEGIN
-  DECLARE requiredVersion varchar(20);  -- version needed for update to fire
-  DECLARE currentVersion varchar(20);   -- version present in schema
-  DECLARE newVersion varchar(20);       -- version this update will apply
-  DECLARE okToUpdate boolean DEFAULT FALSE;
-  DECLARE done boolean DEFAULT FALSE;
-  DECLARE curVersion CURSOR for select versionnumber from schemaversion order by dateapplied desc limit 1;
-  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-
-  --  (1)  Change the version numbers ****************************
-  --  Previous version must be this version for the update to fire
-  SET requiredVersion = '0.9.1.13';
-  SET newVersion = '0.9.1.14';
-  --  ************************************************************
-
-  OPEN curVersion;
-  
-  verLoop: LOOP
-     FETCH curVersion into currentVersion;
-     IF done THEN
-        LEAVE verLoop;
-     END IF;
-     IF currentVersion = requiredVersion THEN 
-        SET okToUpdate = TRUE;
-     END IF;
-  END LOOP;
-
-IF okToUpdate THEN 
-
-START TRANSACTION;
-
-INSERT INTO schemaversion (versionnumber) values (newVersion);
-
--- (2) ******** Schema Changes to be applied in this update *********************
-
-#GUID adjustments
-ALTER TABLE `guidoccurrences` 
-  DROP FOREIGN KEY `FK_guidoccurrences_occid` ;
-
-ALTER TABLE `guidoccurdeterminations` 
-  DROP FOREIGN KEY `FK_guidoccurdet_detid` ;
-
-ALTER TABLE `guidimages` 
-  DROP FOREIGN KEY `FK_guidimages_imgid` ;
-
+INSERT INTO schemaversion (versionnumber) values ("0.9.1.14");
 
 #Maintain source GUIDs from source databases for snapshot collection (e.g. Specify)
 ALTER TABLE `omoccurdeterminations`
@@ -58,12 +8,17 @@ ALTER TABLE `images`
 
 
 ALTER TABLE `omoccurdeterminations` 
-  DROP INDEX `Index_unique` ,
+  DROP INDEX `Index_unique` ;
+
+ALTER TABLE `omoccurdeterminations` 
   ADD UNIQUE INDEX `Index_unique` (`occid` ASC, `dateIdentified` ASC, `identifiedBy` ASC, `sciname` ASC);
+
 
 #Collection adjustments
 ALTER TABLE `omcollections` 
-  DROP INDEX `Index_inst`, 
+  DROP INDEX `Index_inst`;
+
+ALTER TABLE `omcollections` 
   ADD UNIQUE INDEX `Index_inst` (`InstitutionCode` ASC, `CollectionCode` ASC) ;
 
 ALTER TABLE `omcollections`
@@ -243,11 +198,14 @@ VALUES ('1', 'English', 'en'), ('2', 'German', 'de'), ('3', 'French', 'fr'), ('4
 
 #changes for the Identification Key module
 #Will need to make changes to code to remap to langid, then we can delete language column for KM tables at next schema update
-ALTER TABLE `kmcharacters` CHANGE COLUMN `hid` `hid` INT(10) UNSIGNED NULL;
+ALTER TABLE `kmcharacters`
+  CHANGE COLUMN `hid` `hid` INT(10) UNSIGNED NULL;
+
 UPDATE kmcharacters SET hid = NULL WHERE hid = 0;
 
 ALTER TABLE `kmcharacters` 
-  ADD CONSTRAINT `FK_charheading` FOREIGN KEY (`hid` )  REFERENCES `kmcharheading` (`hid` )  ON DELETE RESTRICT  ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_charheading` FOREIGN KEY (`hid` )
+   REFERENCES `kmcharheading` (`hid` )  ON DELETE RESTRICT  ON UPDATE CASCADE,
   ADD INDEX `FK_charheading_idx` (`hid` ASC) ;
 
 DROP TABLE `kmcharheadinglink`;
@@ -255,6 +213,7 @@ DROP TABLE `kmcharheadinglink`;
 ALTER TABLE `kmcharheading`
   ADD COLUMN `langid` INT NULL  AFTER `language`, 
   ADD UNIQUE INDEX `unique_kmcharheading` (`headingname` ASC, `langid` ASC) ;
+
 UPDATE `kmcharheading` h INNER JOIN `adminlanguages` a ON h.language = a.langname
   SET h.langid = a.langid 
   WHERE h.langid IS NULL;
@@ -309,17 +268,6 @@ ALTER TABLE `kmcsimages`
 
 ALTER TABLE `kmcsimages`
   CHANGE COLUMN `url` `url` VARCHAR(255) NOT NULL;
-
-
-ALTER TABLE `omoccurrences` 
-  ADD COLUMN `minimumDepthInMeters` INT NULL AFTER `verbatimElevation`,
-  ADD COLUMN `maximumDepthInMeters` INT NULL AFTER `minimumDepthInMeters`,
-  ADD COLUMN `verbatimDepth` VARCHAR(50) NULL AFTER `maximumDepthInMeters`,
-  ADD COLUMN `storageLocation` VARCHAR(100) NULL AFTER `disposition`;
-
-ALTER TABLE `omoccurrences` 
-  ADD INDEX `Index_occurrences_cult` (`cultivationStatus` ASC), 
-  ADD INDEX `Index_occurrences_typestatus` (`typeStatus` ASC) ;
 
 ALTER TABLE `omoccuridentifiers` 
   ADD INDEX `Index_value` (`identifiervalue` ASC) ;
@@ -845,21 +793,25 @@ CREATE TABLE `taxaprofilepubmaplink` (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---  ******* End of Schema Changes to be applied in this update 
 
-COMMIT;
+#GUID adjustments
+ALTER TABLE `guidoccurrences` 
+  DROP FOREIGN KEY `FK_guidoccurrences_occid` ;
 
---  if in MySQL/MARIADB 5.2+ where SIGNAL is supported, can return an error condition
---  ELSE
-   -- SIGNAL SQLSTATE VALUE '99999'
-   --   SET MESSAGE_TEXT = 'Prerequisite schema version not found ' ;
-END IF; 
+ALTER TABLE `guidoccurdeterminations` 
+  DROP FOREIGN KEY `FK_guidoccurdet_detid` ;
 
-END|
+ALTER TABLE `guidimages` 
+  DROP FOREIGN KEY `FK_guidimages_imgid` ;
 
-DELIMITER ;
 
-CALL updateSymbiotaSchema();
+ALTER TABLE `omoccurrences` 
+  ADD COLUMN `minimumDepthInMeters` INT NULL AFTER `verbatimElevation`,
+  ADD COLUMN `maximumDepthInMeters` INT NULL AFTER `minimumDepthInMeters`,
+  ADD COLUMN `verbatimDepth` VARCHAR(50) NULL AFTER `maximumDepthInMeters`,
+  ADD COLUMN `storageLocation` VARCHAR(100) NULL AFTER `disposition`;
 
-DROP PROCEDURE updateSymbiotaSchema;
+ALTER TABLE `omoccurrences` 
+  ADD INDEX `Index_occurrences_cult` (`cultivationStatus` ASC), 
+  ADD INDEX `Index_occurrences_typestatus` (`typeStatus` ASC) ;
 

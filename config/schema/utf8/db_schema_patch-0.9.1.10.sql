@@ -98,9 +98,6 @@ CREATE  TABLE `omexsiccatiocclink` (
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8; 
 
 
-ALTER TABLE `kmcharheading`
-  CHANGE COLUMN `hid` `hid` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT  ; 
-
 CREATE  TABLE `fmcltaxacomments` ( 
   `cltaxacommentsid` INT NOT NULL AUTO_INCREMENT , 
   `clid` INT UNSIGNED NOT NULL , 
@@ -159,3 +156,10 @@ ALTER TABLE `omoccurrences`
 
 
 
+#More adjustments to character heading table for ideentification keys
+ALTER TABLE `kmcharheadinglink` 
+  DROP FOREIGN KEY `FK_charheadinglink_hid`,
+  DROP FOREIGN KEY `FK_charheadinglink_cid`;
+
+ALTER TABLE `kmcharheading`
+  CHANGE COLUMN `hid` `hid` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT  ; 

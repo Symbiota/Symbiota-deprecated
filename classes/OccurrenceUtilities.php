@@ -56,21 +56,13 @@ class OccurrenceUtilities {
 				$m = OccurrenceUtilities::$monthNames[$mStr];
 			}
 		}
-		elseif(preg_match('/^(\d{1,2})-(\D{3,})-(\d{2,4})/',$dateStr,$match)){
-			//Format: dd-mmm-yyyy
-			$d = $match[1];
-			$mStr = $match[2];
-			$y = $match[3];
-			$mStr = strtolower(substr($mStr,0,3));
-			$m = OccurrenceUtilities::$monthNames[$mStr];
-		}
 		elseif(preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/',$dateStr,$match)){
 			//Format: mm/dd/yyyy, m/d/yy
 			$m = $match[1];
 			$d = $match[2];
 			$y = $match[3];
 		}
-		elseif(preg_match('/^(\D{3,})\.*\s{0,1}(\d{1,2}),{0,1}\s{0,1}(\d{2,4})/',$dateStr,$match)){
+		elseif(preg_match('/^(\D{3,})\.*\s{0,1}(\d{1,2})[,\s]+([1,2]{1}[0,5-9]{1}\d{2})$/',$dateStr,$match)){
 			//Format: mmm dd, yyyy
 			$mStr = $match[1];
 			$d = $match[2];
@@ -84,7 +76,7 @@ class OccurrenceUtilities {
 			$d = $match[2];
 			$y = $match[3];
 		}
-		elseif(preg_match('/^(\D{3,})\.*\s([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
+		elseif(preg_match('/^(\D{3,})\.*\s+([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
 			//Format: mmm yyyy
 			$mStr = strtolower(substr($match[1],0,3));
 			if(array_key_exists($mStr,OccurrenceUtilities::$monthNames)){

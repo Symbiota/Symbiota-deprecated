@@ -285,6 +285,8 @@ class UuidFactory {
 	}
 
 	public static function getUuidV4() {
+		/*
+		 * Following function is only psuedo randum  
 		return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
 
 			// 32 bits for "time_low"
@@ -305,6 +307,29 @@ class UuidFactory {
 			// 48 bits for "node"
 			mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
 		);
+		*/
+		$data = null;
+		if(function_exists('openssl_random_pseudo_bytes')){
+			$data = openssl_random_pseudo_bytes(16);
+		}
+		if(!$data && file_exists('/dev/urandom')){
+			$data = file_get_contents('/dev/urandom', NULL, NULL, 0, 16);
+		}
+		if(!$data && file_exists('/dev/random')){
+			$data = file_get_contents('/dev/random', NULL, NULL, 0, 16);
+		}
+		if(!$data){
+			echo 'option3 ';
+			for($cnt = 0; $cnt < 16; $cnt ++) {
+				$data .= chr ( mt_rand ( 0, 255 ) );
+			}
+		}
+		if(!$data) return '';
+
+		$data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
+		$data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+
+		return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 	}
 
 	public static function getUuidV5($namespace, $name) {
