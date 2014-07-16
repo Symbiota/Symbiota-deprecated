@@ -117,7 +117,7 @@ ImageExplorer.prototype.init = function(containerId) {
     controlsHtml += "        <\/tr>";
     controlsHtml += "    <\/table>";
     controlsHtml += "<\/div>";
-    controlsHtml += "<div style=\"margin: 20px 0px 60px 0px\">"
+    controlsHtml += "<div style=\"margin: 20px 0px 40px 0px\">"
     controlsHtml += "    <span><em>Try searching for: taxon, owner, country, state, photographer or tag.</em></span>";
     controlsHtml += "    <div id=\"searchbox\"></div>";
     controlsHtml += "</div>";
@@ -129,7 +129,7 @@ ImageExplorer.prototype.init = function(containerId) {
     controlsHtml += "</div>";
     controlsHtml += "<hr />";
     controlsHtml += "<div id=\"images\"><\/div>";
-    controlsHtml += "<div id=\"pagination_bottom\" style=\"float:left; width:800px; margin-top:40px\">";
+    controlsHtml += "<div id=\"pagination_bottom\" style=\"clear:both;margin-top:40px\">";
     controlsHtml += "<hr />";
     controlsHtml += "    <div style=\"float:right;\">";
     controlsHtml += "        <span id=\"previousPage_bottom\"><a href=\"#\"><< Previous Page</a></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span id=\"nextPage_bottom\"><a href=\"#\">Next Page >></a></span>";

@@ -208,7 +208,7 @@ echo "</div>";
 ?>
 <!-- This is inner text! -->
 <div id="innertext">
-    <div style="margin:20px 0px 20px 0px;">
+    <div style="margin:20px 0px 10px 0px;">
         <div style="font-weight:bold;">
             <div id="imagesearch"></div>
         </div>

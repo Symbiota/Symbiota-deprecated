@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurDatasetManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/datasets/labelmanager.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/datasets/index.php?'.$_SERVER['QUERY_STRING']);
 
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $mode = array_key_exists('mode',$_REQUEST)?$_REQUEST['mode']:'';

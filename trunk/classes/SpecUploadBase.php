@@ -726,7 +726,6 @@ class SpecUploadBase extends SpecUpload{
 	
 	protected function transferOccurrences(){
 		//Clean and Transfer records from uploadspectemp to specimens
-		
 		$this->outputMsg('<li style="font-weight:bold;">Updating existing occurrence records... ');
 		ob_flush();
 		flush();
@@ -804,13 +803,14 @@ class SpecUploadBase extends SpecUpload{
 		}
 		else{
 			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
+			$this->outputMsg($sql);
 		}
 
 		$this->outputMsg('<li style="font-weight:bold;">Linking to newly inserted occurrences in prep for loading determiantion history and associatedmedia... ');
 		ob_flush();
 		flush();
 		//Update occid by matching dbpk 
-		$sqlOcc1 = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.dbpk = o.dbpk AND u.collid = o.collid '.
+		$sqlOcc1 = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
 			'SET u.occid = o.occid '.
 			'WHERE (u.occid IS NULL AND u.collid = '.$this->collId.')';
 		if(!$this->conn->query($sqlOcc1)){
@@ -823,6 +823,9 @@ class SpecUploadBase extends SpecUpload{
 		if(!$this->conn->query($sqlOcc2)){
 			$this->outputMsg('<div>ERROR updating occid (2nd step) after occurrence insert: '.$this->conn->error.'</div>');
 		}
+		//Setup and add datasets and link datasets to current user
+		
+		
 		$this->outputMsg('Done!</li> ');
 		ob_flush();
 		flush();
@@ -944,8 +947,11 @@ class SpecUploadBase extends SpecUpload{
 		}
 		
 		//Remove records from occurrence temp table
-		$sql = 'DELETE FROM uploadspectemp WHERE collid = '.$this->collId;
+		$sql = 'DELETE FROM uploadspectemp WHERE collid = '.$this->collId.' OR initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY)';
 		$this->conn->query($sql);
+		
+		//Optimize table to reset indexes
+		$this->conn->query('OPTIMIZE TABLE uploadspectemp');
 		
 		//Update collection stats
 		$sql = 'UPDATE omcollectionstats SET uploaddate = NOW() WHERE collid = '.$this->collId;

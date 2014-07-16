@@ -149,7 +149,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	        </li>
 	        <li>
 	        	<a href="#speclist">
-	        		<span>Specimens</span>
+	        		<span>Occurrence Records</span>
 	        	</a>
 	        </li>
 	        <li>
