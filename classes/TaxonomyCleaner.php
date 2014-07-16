@@ -1,12 +1,8 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
   
-class TaxonomyCleaner{
+class TaxonomyCleaner extends Manager{
 
-	protected $conn;
-	protected $logFH;
-	protected $silent = 0;
-	
 	private $taxAuthId = 1;
 	private $testValidity = 1;
 	private $testTaxonomy = 1;
@@ -14,19 +10,32 @@ class TaxonomyCleaner{
 	private $verificationMode = 0;		//0 = default to internal taxonomy, 1 = adopt target taxonomy
 	
 	public function __construct(){
- 		$this->conn = MySQLiConnectionFactory::getCon('write');
+		parent::__construct(null,'write');
 		set_time_limit(500);
 		$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/taxonomyVerification_".date('Y-m-d').".log";
-		$this->logFH = fopen($logFile, 'a');
+		$this->setLogFH($logFile);
 		$this->logOrEcho("Taxa Verification process starts (".date('Y-m-d h:i:s A').")");
 		$this->logOrEcho("-----------------------------------------------------\n");
 	}
 
 	function __destruct(){
-		if($this->conn) $this->conn->close();
-		if($this->logFH){
-			fclose($this->logFH);
+		parent::__destruct();
+	}
+
+	public function getVerificationCounts(){
+		$retArr;
+		$sql = 'SELECT IFNULL(t.verificationStatus,0) as verificationStatus, COUNT(t.tid) AS cnt '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND (t.verificationStatus IS NULL OR t.verificationStatus = 0) '.
+			'GROUP BY t.verificationStatus';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->verificationStatus] = $r->cnt;
+			}
+			$rs->close();
 		}
+		ksort($retArr);
+		return $retArr;
 	}
 
 	public function verifyTaxa($verSource){
@@ -82,52 +91,6 @@ class TaxonomyCleaner{
 			$this->logOrEcho($sql);
 		}
 		$this->logOrEcho("Finishing remaining taxa verification");
-	}
-	
-	private function getTaxonObjSpecies2000($sciName, $resultIndex = 0){
-		$resultArr = Array();
-		$urlTemplate = "http://www.catalogueoflife.org/annual-checklist/webservice?format=php&response=full&name=";
-		$url = $urlTemplate.str_replace(" ","%20",$sciName);
-		if($fh = fopen($url, 'r')){
-			$content = "";
-			while($line = fread($fh, 1024)){
-				$content .= trim($line);
-			}
-			fclose($fh);
-			//Process return
-			$retArr = unserialize($content);
-			$numResults = $retArr['number_of_results_returned'];
-			if($numResults){
-				if($resultIndex && $resultIndex < $numResults){
-					$resultArr = $retArr['results'][$resultIndex];
-				}
-				else{
-					$resultArr = array_shift($retArr['results']);
-				}
-			}
-		}
-		return $resultArr;
-	}
-
-	private function getTaxonObjTropicos($sciName){
-		$urlTemplate = "";
-		$url = $urlTemplate.str_replace(" ","%20",$sciName);
-		if($fp = fopen($url, 'r')){
-			echo "<div>Reading page for ".$sciName." </div>\n";
-			$content = "";
-			while($line = fread($fp, 1024)){
-				$content .= trim($line);
-			}
-			$regExp = "\<A HREF='florataxon\.aspx\?flora_id=\d+&taxon_id=(\d+)'\s+TITLE='Accepted Name' \>\<b\>".$sciName."\<\/b\>\<\/A\>";
-			if($fnaCap = preg_match_all("/".$regExp."/sU", $content, $matches)){
-				echo $matches[1][0];
-
-			
-			}
-		}
-		ob_flush();
-		flush();
-		sleep(5);
 	}
 	
 	private function verifyTaxonObj($externalTaxonObj,$internalTaxonObj, $tidCurrentAccepted){
@@ -261,10 +224,214 @@ class TaxonomyCleaner{
 			}
 		}
 		else{
-			//Test taxon does not exists, thus lets load it 
-			$retTid = $this->loadNewTaxon($testObj,$anchorTid);
+			//Test taxon does not exists, thus lets load it
+			//Prepare taxon for loading
+			$parsedArr = $this->parseSciName($testObj['name']);
+			if(!array_key_exists('rank',$newTaxon)){
+				//Grab taxon object from EOL or Species2000
+				
+				//Parent is also needed
+			}
+			$this->loadNewTaxon($parsedArr);
 		}
 		return $retTid;
+	}
+
+	//Taxonomy API methods 
+	private function getTaxonObjEOL($sciName, $resultIndex = 0){
+		$taxonArr = Array();
+		//Ping EOL
+		$pingUrl = 'http://eol.org/api/ping/1.0.json';
+		if($fh = fopen($pingUrl, 'r')){
+			$content = "";
+			while($line = fread($fh, 1024)){
+				$content .= trim($line);
+			}
+			fclose($fh);
+			//Ping result
+			$pingArr = json_decode($content);
+			if(isset($pingArr['response']['message']) && $pingArr['response']['message'] == 'Success'){
+				//Get ID
+				$idUrl = 'http://eol.org/api/search/1.0.json?q='.str_replace(" ","%20",$sciName).'&page=1&exact=true';
+				if($fh = fopen($idUrl, 'r')){
+					$content = "";
+					while($line = fread($fh, 1024)){
+						$content .= trim($line);
+					}
+					fclose($fh);
+					//Process return
+					$idArr = json_decode($content);
+					if($idArr['totalResults']){
+						$idList = $idArr['results'];
+						$firstElem = array_shift($idList);
+						$id = $idList[0]['id'];
+						if($id){
+							//Get taxonomy
+							$taxonUrl = 'http://eol.org/api/hierarchy_entries/1.0/'.$id.'.json?common_names=true&synonyms=true';
+							if($fh = fopen($taxonUrl, 'r')){
+								$content = "";
+								while($line = fread($fh, 1024)){
+									$content .= trim($line);
+								}
+								fclose($fh);
+								
+								//Process return
+								$eolArr = json_decode($content);
+								$scientificName = $eolArr['scientificName'];
+								$nameAccordingTo = $eolArr['nameAccordingTo'];
+								//Process EOL array
+								$taxonArr = array('sciname' => $sciName);
+								//Set rankID
+								$sqlRank = 'SELECT rankid FROM taxonunits WHERE rankname = "'.$eolArr['taxonRank'].'"';
+								$rsRank = $this->conn->query($sqlRank);
+								if($rRank = $rsRank->fetch_object()){
+									$taxonArr['rankid'] = $rRank->rankid;
+								}
+								else{
+									$this->logOrEcho("Unable to determine rankid for: ".$eolArr['taxonRank']);
+									$taxonArr['rankid'] = 0;
+								}
+								$rsRank->free();
+								//Parse scientific name
+								$taxonArr = $this->parseSciName($scientificName,$taxonArr['rankid']);
+								
+								//Add vernaculars
+								$vernacularNames = $eolArr['vernacularNames'];
+								foreach($vernacularNames as $vernArr){
+									if($vernArr['language'] == 'en') $taxonArr['author'] = $vernArr['vernacularName']; 
+								}
+								//Process ancestors
+								$parentID = $eolArr['parentNameUsageID'];
+								$ancestors = $eolArr['ancestors'];
+								foreach($ancestors as $ancKey => $ancArr){
+									$taxonArr['parents'][$ancArr['parentNameUsageID']][$ancKey] = $ancArr['taxonID'];
+								}
+								//Add synonyms
+								//$synonyms = $eolArr['synonyms'];
+								//Dont' deal with synonyms, as of yet
+							}
+							//Add taxon to table
+							if($taxonArr) $this->loadNewTaxon($taxonArr);
+						}
+						else{
+							$this->logOrEcho("Unable to get taxon object for: ".$sciName);
+						}
+					}
+				}
+				else{
+					$this->logOrEcho("Unable to get ID for: ".$sciName);
+				}
+			}
+			else{
+				$this->logOrEcho("EOL web service not available");
+			}
+		}
+		return $taxonArr;
+	}
+
+	private function getTaxonObjSpecies2000($sciName, $resultIndex = 0){
+		$resultArr = Array();
+		$urlTemplate = "http://www.catalogueoflife.org/annual-checklist/webservice?format=php&response=full&name=";
+		$url = $urlTemplate.str_replace(" ","%20",$sciName);
+		if($fh = fopen($url, 'r')){
+			$content = "";
+			while($line = fread($fh, 1024)){
+				$content .= trim($line);
+			}
+			fclose($fh);
+			//Process return
+			$retArr = unserialize($content);
+			$numResults = $retArr['number_of_results_returned'];
+			if($numResults){
+				if($resultIndex && $resultIndex < $numResults){
+					$resultArr = $retArr['results'][$resultIndex];
+				}
+				else{
+					$resultArr = array_shift($retArr['results']);
+				}
+			}
+		}
+		return $resultArr;
+	}
+
+	private function getTaxonObjTropicos($sciName){
+		$urlTemplate = "";
+		$url = $urlTemplate.str_replace(" ","%20",$sciName);
+		if($fp = fopen($url, 'r')){
+			echo "<div>Reading page for ".$sciName." </div>\n";
+			$content = "";
+			while($line = fread($fp, 1024)){
+				$content .= trim($line);
+			}
+			$regExp = "\<A HREF='florataxon\.aspx\?flora_id=\d+&taxon_id=(\d+)'\s+TITLE='Accepted Name' \>\<b\>".$sciName."\<\/b\>\<\/A\>";
+			if($fnaCap = preg_match_all("/".$regExp."/sU", $content, $matches)){
+				echo $matches[1][0];
+
+			
+			}
+		}
+		ob_flush();
+		flush();
+		sleep(5);
+	}
+
+	//Database functions
+	private function loadNewTaxon($newTaxon,$anchorTid = 0){
+		$status = false;
+		if(!array_key_exists('rank',$newTaxon) || !$newTaxon['rankid']){
+			$this->errorMessage = 'ERROR loading taxon: rankid unknown ('.$newTaxon['sciname'].')';
+			return false;
+		}
+		if(!array_key_exists('parents',$newTaxon) || !$newTaxon['parents']){
+			$this->errorMessage = 'ERROR loading taxon: parent unknown ('.$newTaxon['sciname'].')';
+			return false;
+		}
+		
+		if(!$parentName){
+			$classArr = Array();
+			if(array_key_exists('classification',$newTaxon)){
+				$classArr = $newTaxon['classification'];
+			}
+			if(!$classArr){
+				//grab name object and classification from Species2000
+			}
+			if($classArr){
+				$parArr = array_pop($classArr);
+				$parentName = $parArr['name'];
+			}
+		}
+		//Load taxon
+		$sqlParent = 'SELECT tid FROM taxa WHERE (sciname = "'.$parentName.'")';
+		$rs = $this->conn->query($sqlParent);
+		$parTid = $rs->tid;
+		if(!$parTid){
+			$parTid = $loadNewTaxon(Array('name' => $parentName));
+		}
+		if($parTid){
+			if($r = $rs->fetch_object()){
+				//We now have everything, now let's load
+				$sciName = trim($newTaxon['genus'].' '.$newTaxon['species'].' '.$newTaxon['infraspecies_marker'].' '.$newTaxon['infraspecies']);
+				$sqlInsert = 'INSERT INTO taxa(sciname, unitname1, unitname2, unitind3, unitname3, author, rankid) '.
+					'VALUES("'.$sciName.'","'.$newTaxon['genus'].'","'.$newTaxon['species'].'","'.$newTaxon['infraspecies_marker'].'","'.
+					$newTaxon['infraspecies'].'","'.$newTaxon['author'].'",'.$rankId.')';
+				if($this->conn->query($sqlInsert)){
+					$tid = $this->conn->insert_id;
+					if(!$anchorTid){
+						$anchorTid = $tid;
+					}
+					$sqlInsert2 = 'INSERT INTO taxstatus(tid,tidaccepted,taxauthid,parenttid) '.
+						'VALUES('.$tid.','.$anchorTid.','.$this->taxAuthId.','.$r->tid.')';
+					if($this->conn->query($sqlInsert2)){
+						//Add common names
+						
+						
+					}
+				}
+				
+			}
+		}
+		$rs->close();
+		return $tid;
 	}
 
 	private function updateDependentData($tid, $tidNew){
@@ -343,82 +510,86 @@ class TaxonomyCleaner{
 			$this->conn->query($sqlAdd3);
 		}
 	}
-	
-	private function loadNewTaxon($newTaxon,$anchorTid = 0){
-		//Add taxon
-		if(!array_key_exists('rank',$newTaxon)){
-			//Grab taxon object from Species2000
-			
-		}
-		if(array_key_exists('rank',$newTaxon)){
-			$tid = 0;
-			$rankId = 0;
-			$parentName = '';
-			if($newTaxon['rank'] == 'Species'){
-				$rankId = 220;
-				$parentName = $newTaxon['genus'];
+
+	//Misc Functions 
+	private function parseSciName($scientificName, $taxonRank = 0){
+		//Converts scinetific name with author embedded into separate fields
+		$retArr = array();
+		$sciNameArr = explode(' ',$scientificName);
+		if(count($sciNameArr)){
+			$retArr = array('unitname1'=>'','unitname2'=>'','unitind3'=>'','unitname3'=>'');
+			if(strtolower($sciNameArr[0]) == 'x'){
+				//Genus level hybrid
+				$retArr['unitind1'] = array_shift($sciNameArr);
 			}
-			elseif($newTaxon['rank'] == 'Infraspecies'){
-				if($newTaxon['infraspecies_marker'] == 'ssp.'){
-					$rankId = 230;
-				}
-				if($newTaxon['infraspecies_marker'] == 'var.'){
-					$rankId = 240;
-				}
-				if($newTaxon['infraspecies_marker'] == 'f.'){
-					$rankId = 260;
-				}
-				$parentName = trim($newTaxon['genus'].' '.$newTaxon['species']);
-			}
-			if($rankId){
-				if(!$parentName){
-					$classArr = Array();
-					if(array_key_exists('classification',$newTaxon)){
-						$classArr = $newTaxon['classification'];
+			//Genus or base name for higher ranked taxon
+			$retArr['unitname1'] = ucfirst(strtolower(array_shift($sciNameArr)));
+			if(count($sciNameArr)){
+				if(!$taxonRank || $taxonRank >= 220){
+					if(strtolower($sciNameArr[0]) == 'x'){
+						//Species level hybrid
+						$retArr['unitind2'] = array_shift($sciNameArr);
+						$retArr['unitname2'] = strtolower(array_shift($sciNameArr));
 					}
-					if(!$classArr){
-						//grab name object and classification from Species2000
+					elseif((strpos($sciNameArr[0],'.') !== false) || (strpos($sciNameArr[0],'(') !== false)){
+						//It is assumed that Author has been reached, thus stop process
+						$retArr['author'] = implode(' ',$sciNameArr);
+						if(!$taxonRank){
+							if(strpos($scientificName,'aceae') || strpos($scientificName,'aceae')) $retArr['rankid'] = 140;
+							else $retArr['rankid'] = 180;
+						}
+						return $retArr;
 					}
-					if($classArr){
-						$parArr = array_pop($classArr);
-						$parentName = $parArr['name'];
+					else{
+						//Specific Epithet
+						$retArr['unitname2'] = strtolower(array_shift($sciNameArr));
 					}
-				}
-				if($parentName){
-					$sqlParent = 'SELECT tid FROM taxa WHERE (sciname = "'.$parentName.'")';
-					$rs = $this->conn->query($sqlParent);
-					$parTid = $rs->tid;
-					if(!$parTid){
-						$parTid = $loadNewTaxon(Array('name' => $parentName));
-					}
-					if($parTid){
-						if($r = $rs->fetch_object()){
-							//We now have everything, now let's load
-							$sciName = trim($newTaxon['genus'].' '.$newTaxon['species'].' '.$newTaxon['infraspecies_marker'].' '.$newTaxon['infraspecies']);
-							$sqlInsert = 'INSERT INTO taxa(sciname, unitname1, unitname2, unitind3, unitname3, author, rankid) '.
-								'VALUES("'.$sciName.'","'.$newTaxon['genus'].'","'.$newTaxon['species'].'","'.$newTaxon['infraspecies_marker'].'","'.
-								$newTaxon['infraspecies'].'","'.$newTaxon['author'].'",'.$rankId.')';
-							if($this->conn->query($sqlInsert)){
-								$tid = $this->conn->insert_id;
-								if(!$anchorTid){
-									$anchorTid = $tid;
+					//Process infraspecific and author strings
+					if($sciNameArr){
+						//Assume rest is author; if that is not true, author value will be replace in following loop
+						$retArr['author'] = implode(' ',$sciNameArr);
+						if(preg_match('\s{1}/ssp\.\s{1}|\s{1}/subsp\.\s{1}|\s{1}/var\.\s{1}|\s{1}/f\.\s{1}|\s{1}/fo\.\s{1}|\s{1}/forma\.\s{1}/',$scientificName)){
+							//Taxon designator is present
+							//cycles through the final terms to extract the last infraspecific data
+							while($sciStr = array_shift($sciNameArr)){
+								if($sciStr == 'f.' || $sciStr == 'fo.' || $sciStr == 'forma'){
+									if($sciNameArr){
+										$retArr['unitind3'] = 'f.';
+										$retArr['unitname3'] = array_shift($sciNameArr);
+										$retArr['author'] = implode(' ',$sciNameArr);
+										if(!$taxonRank) $retArr['rankid'] = 260;
+									}
 								}
-								$sqlInsert2 = 'INSERT INTO taxstatus(tid,tidaccepted,taxauthid,parenttid) '.
-									'VALUES('.$tid.','.$anchorTid.','.$this->taxAuthId.','.$r->tid.')';
-								if($this->conn->query($sqlInsert2)){
-									//Add common names
-									
-									
+								elseif($sciStr == 'var.'){
+									if($sciNameArr){
+										$retArr['unitind3'] = 'var.';
+										$retArr['unitname3'] = array_shift($sciNameArr);
+										$retArr['author'] = implode(' ',$sciNameArr);
+										if(!$taxonRank) $retArr['rankid'] = 240;
+									}
+								}
+								elseif($sciStr == 'ssp.' || $sciStr == 'subsp.'){
+									if($sciNameArr){
+										$retArr['unitind3'] = 'ssp.';
+										$retArr['unitname3'] = array_shift($sciNameArr);
+										$retArr['author'] = implode(' ',$sciNameArr);
+										if(!$taxonRank) $retArr['rankid'] = 230;
+									}
 								}
 							}
-							
+						}
+						elseif($taxonRank > 220){
+							//Taxon designor is not present, but is an infraspecific taxon; probably in animalia kingdom  
+							$retArr['unitname3'] = array_shift($sciNameArr);
+							$retArr['author'] = implode(' ',$sciNameArr);
+							if(!$taxonRank) $retArr['rankid'] = 230;
 						}
 					}
-					$rs->close();
+					if(!$taxonRank) $retArr['rankid'] = 220;
 				}
 			}
 		}
-		return $tid;
+		return $retArr;
 	}
 
 	private function getHierarchy($tid){
@@ -461,46 +632,9 @@ class TaxonomyCleaner{
 		return $retArr;
 	}
 
-	//Misc counts
-	public function getVerificationCounts(){
-		$retArr;
-		$sql = 'SELECT IFNULL(t.verificationStatus,0) as verificationStatus, COUNT(t.tid) AS cnt '.
-			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND (t.verificationStatus IS NULL OR t.verificationStatus = 0) '.
-			'GROUP BY t.verificationStatus';
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$retArr[$r->verificationStatus] = $r->cnt;
-			}
-			$rs->close();
-		}
-		ksort($retArr);
-		return $retArr;
-	}
-	
-	//Basic setters and getters
+	//Setters and getters
 	public function setTaxAuthId($id){
 		if(is_numeric($id)) $this->taxAuthId = $id;
-	}
-	
-	public function setSilent($c){
-		$this->silent = $c;
-	}
-
-	public function getSilent(){
-		return $this->silent;
-	}
-
-	//Misc functions
-	private function logOrEcho($str,$indexLevel=0){
-		if(!$this->silent){
-			if($this->logFH){
-				fwrite($this->logFH,$str);
-			} 
-			echo '<li style="'.($indexLevel?'Margin:'.($indexLevel*5).'px':'').'">'.$str.'</li>';
-			ob_flush();
-			flush();
-		}
 	}
 }
 ?>

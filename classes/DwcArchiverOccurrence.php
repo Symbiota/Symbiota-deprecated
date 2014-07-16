@@ -250,8 +250,6 @@ class DwcArchiverOccurrence{
 			$occurFieldArr['recordEnteredBy'] = 'o.recordEnteredBy';
 			$occurTermArr['duplicateQuantity'] = 'http://symbiota.org/terms/duplicateQuantity';
 			$occurFieldArr['duplicateQuantity'] = 'o.duplicateQuantity';
-			$occurTermArr['labelProject'] = 'http://symbiota.org/terms/labelProject';
-			$occurFieldArr['labelProject'] = 'o.labelProject';
 			$occurTermArr['dateEntered'] = 'http://symbiota.org/terms/dateEntered';
 			$occurFieldArr['dateEntered'] = 'o.dateEntered';
 		}

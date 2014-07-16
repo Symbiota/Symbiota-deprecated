@@ -55,8 +55,9 @@ $descr = Array();
 	<meta name='keywords' content='<?php echo $spDisplay; ?>' />
 	<link href="../css/base.css" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../css/speciesprofile.css" rel="stylesheet" />
-	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
+	<link href="../css/speciesprofilebase.css" type="text/css" rel="stylesheet" />
+	<link href="../css/speciesprofile.css" type="text/css" rel="stylesheet" />
+	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">

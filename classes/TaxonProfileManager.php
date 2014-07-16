@@ -460,7 +460,7 @@ class TaxonProfileManager {
 					$imgUrl = $imgThumbnail;
 				}
 			}
-			echo '<a href="'.$imgAnchor.'">';
+			echo '<div class="tptnimg"><a href="'.$imgAnchor.'">';
 			$titleStr = $imgObj['caption'];
 			if($imgObj['sciname'] != $this->sciName) $titleStr .= ' (linked from '.$imgObj['sciname'].')';
 			echo '<img src="'.$imgUrl.'" title="'.$titleStr.'" alt="'.$spDisplay.' image" />';
@@ -472,7 +472,7 @@ class TaxonProfileManager {
 				//echo '<img class="delayedimg" src="" delayedsrc="'.$imgUrl.'" />';
 			}		
 			*/	
-			echo '</a>';
+			echo '</a></div>';
 			echo '<div class="photographer">';
 			if($imgObj['photographer']){
 				echo $imgObj['photographer'].'&nbsp;&nbsp;';
