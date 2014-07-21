@@ -14,11 +14,12 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	}
 
 	protected function parse($rawStr) {
-		$rawStr = trim($this->fixString(str_replace("\t", " ", $rawStr)));
+		$rawStr = trim($this->convertBadChars(str_replace("\t", " ", $s)));
 		//If OCR source is from tesseract (utf-8 is default), convert to a latin1 character set
-		//if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-		//	$rawStr = utf8_decode($rawStr);
-		//}
+		if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+			$rawStr = utf8_decode($rawStr);
+		}
+		$rawStr = trim($this->fixString($rawStr));
 		if(strlen($rawStr) > 0 && !$this->isMostlyGarbage2($rawStr, 0.50)) {
 			$results = array();
 			$labelInfo = $this->getLabelInfo($rawStr, $this->collId);
@@ -29,6 +30,11 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$otherCatalogNumbers = '';
 				$identifiedBy = '';
 				$associatedCollectors = '';
+				$rawStr_for_Collector = $rawStr;
+				if(array_key_exists('rawstr', $labelInfo)) {
+					$rawStr_for_Collector = $labelInfo['rawstr'];
+					unset($labelInfo['rawstr']);
+				}
 				if(array_key_exists('recordedBy', $labelInfo)) $recordedBy = $labelInfo['recordedBy'];
 				if(array_key_exists('recordedById', $labelInfo)) $recordedById = $labelInfo['recordedById'];
 				if(array_key_exists('recordNumber', $labelInfo)) $recordNumber = $labelInfo['recordNumber'];
@@ -37,7 +43,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				if(array_key_exists('identifiedBy', $labelInfo)) $identifiedBy = $labelInfo['identifiedBy'];
 				//echo "\nline 36, recordedBy: ".$recordedBy."\nrecordNumber: ".$recordNumber."\nidentifiedBy: ".$identifiedBy."\notherCatalogNumbers: ".$otherCatalogNumbers."\n";
 				if(strlen($recordedBy) == 0) {
-					$collectorInfo = $this->getCollector($rawStr);
+					$collectorInfo = $this->getCollector($rawStr_for_Collector);
 					if($collectorInfo && count($collectorInfo) > 0) {
 						if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 						if(strlen($recordedBy) == 0) {
@@ -110,12 +116,12 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				if($cntLongLength > 0) {
 					$latLong = $latLongs[$cntLongLength-1];
 					if(array_key_exists('latitude', $latLong)) {
-						$lat = $latLong['latitude'];
-						$results['decimalLatitude'] = round($this->getDigitalLatLong($lat), 5);
+						$lat = $this->getDigitalLatLong($latLong['latitude']);
+						if($lat != null) $results['decimalLatitude'] = round($lat, 5);
 					}
 					if(array_key_exists('longitude', $latLong)) {
-						$long = $latLong['longitude'];
-						$results['decimalLongitude'] = round($this->getDigitalLatLong($long), 5);
+						$long = $this->getDigitalLatLong($latLong['longitude']);
+						if($long != null) $results['decimalLongitude'] = round($long, 5);
 					}
 				}
 				if(array_key_exists('ometid', $labelInfo)) {
@@ -415,7 +421,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			),
 			$str
 		);
-		//echo "\nline 14049, str\n".$str."\n";
+		//echo "\nline 13569, str\n".$str."\n";
 		$acceptableSmallWords = "(?:road|pine|park|tree|fork|cove|camp|fire|bay|[lb]og|soil|sand|oaks?|base|area|lane|farm|bark|twig|mat|Ilex)";
 		$recordedBy = '';
 		$recordNumber = '';
@@ -472,6 +478,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		if(strlen($scientificName) <= 3) $scientificName = $this->getScientificName($str);
 		if(strlen($scientificName) > 3) $foundSciName = true;
 		if(strlen($associatedTaxa) <= 3) $associatedTaxa = $this->getAssociatedTaxa($str);
+		//echo "\nline 13626, str\n".$str."\n";
 		if(strlen($recordedBy) == 0 || strlen($identifiedBy) == 0) {
 			$collectorInfo = $this->getCollector($str);
 			if($collectorInfo != null) {
@@ -483,7 +490,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					if($ometid) $tempRecordNumber = $this->replaceMistakenNumbers($collectorInfo['collectorNum']);
 					else if(strlen($recordNumber) == 0) {
 						$recordNumber = $collectorInfo['collectorNum'];
-						if(strlen($recordNumber) > 2) $str = preg_replace("/".preg_quote($recordNumber, '/')."/i", "", $str);
+						if(strlen($recordNumber) > 2) $str = preg_replace("/(?:\\bNo[,.:]?|#)? ?".preg_quote($recordNumber, '/')."/i", "", $str);
 					}
 				}
 				if(strlen($identifiedBy) == 0 && array_key_exists('identifiedBy', $collectorInfo)) {
@@ -541,7 +548,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					if((strlen($county) > 0 || strlen($country) > 0 || strlen($stateProvince) > 0) && array_key_exists('endOfFile', $info)) $str = $info['endOfFile'];
 				}
 			}
-		}//echo "\nline 13918, str:\n".$str."\n";
+		}//echo "\nline 13696, str:\n".$str."\n";
 		if(strlen($county) == 0 || strlen($country) == 0 || strlen($stateProvince) == 0) {
 			$countyMatches = $this->findCounty($str, $stateProvince);
 			if($countyMatches != null) {//$i=0;foreach($countyMatches as $countyMatche) echo "\ncountyMatches[".$i++."] = ".$countyMatche."\n";
@@ -952,7 +959,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$line = ltrim($this->removeAuthority($line, $scientificName), " .,:;");
 					$foundSciName = true;
 				}
-			}//echo "\nline 14081, line: ".$line."\ncountPotentialLocalityWords(line): ".$this->countPotentialLocalityWords($line)."\ncountPotentialHabitatWords(line): ".$this->countPotentialHabitatWords($line)."\n";
+			}//echo "\nline 14106, recordNumber: ".$recordNumber."\nline: ".$line."\ncountPotentialLocalityWords(line): ".$this->countPotentialLocalityWords($line)."\ncountPotentialHabitatWords(line): ".$this->countPotentialHabitatWords($line)."\n";
 			if($ometid) {
 				if(strlen($exsNumber) == 0) {
 					if(preg_match("/^No\\.:?(.*)/", $line, $mats)) {
@@ -983,6 +990,14 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						if($spacePos !== FALSE) $temp = substr($temp, 0, $spacePos);
 						if($this->containsNumber($temp)) $recordNumber = $temp;
 					}
+				} else if(preg_match("/^# ?(.*)/", $line, $mats)) {
+					$temp = trim($mats[1]);
+					if(strlen($temp) == 0) $lookingForRecordNumber = true;
+					else {
+						$spacePos = strpos($temp, " ");
+						if($spacePos !== FALSE) $temp = substr($temp, 0, $spacePos);
+						if($this->containsNumber($temp)) $recordNumber = $temp;
+					}
 				} else if($lookingForRecordNumber) {
 					$lookingForRecordNumber = false;
 					$spacePos = strpos($line, " ");
@@ -995,34 +1010,36 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				}
 			}
 			$foundGeoRef = false;
-			if(preg_match("/\\b[QO0G]uad\\.?[ \\/](?:M|H|IX|[Jfli1!|]{2})[ae]p[;:., ]{1,3}(.{2,})/i", $line, $mat)) {
-				$georeferenceRemarks = "Quad Map: ".$mat[1];
+			if(preg_match("/(.*)\\b[QO0G]uad\\.?[ \\/](?:M|H|IX|[Jfli1!|]{2})[ae]p[;:., ]{1,3}(.{2,})/i", $line, $mat)) {
+				$georeferenceRemarks = "Quad Map: ".$mat[2];
+				$line = trim($mat[1]);
 				$foundGeoRef = true;
-			} else if(preg_match("/\\b(?:M|H|IX|[Jfli1!|]{2})ap ?\/ ?[QO0G]ua[ad][;:., ]{1,3}(.{2,})/i", $line, $mats)) {
-				$georeferenceRemarks = "Quad Map: ".trim($mats[1]);
+			} else if(preg_match("/(.*)\\b(?:M|H|IX|[Jfli1!|]{2})ap ?\/ ?[QO0G]ua[ad][;:., ]{1,3}(.{2,})/i", $line, $mats)) {
+				$georeferenceRemarks = "Quad Map: ".trim($mats[2]);
+				$line = trim($mats[1]);
 				$foundGeoRef = true;
-			}//echo "\nline 14625, georeferenceRemarks: ".$georeferenceRemarks."\n";
+			}//echo "\nline 14166, line: ".$line."\ngeoreferenceRemarks: ".$georeferenceRemarks."\n";
 			if($foundGeoRef) {
 				if(preg_match("/^(.+\([A-Z])(.{0,6}\))(.*)$/i", $georeferenceRemarks, $mats)) {
 					$georeferenceRemarks = $mats[1].$this->replaceMistakenNumbers($mats[2]);
-					$line = trim($mats[3]);
+					if(count($mats) > 3) $line = trim($line." ".trim($mats[3]));
 				}
 				if(preg_match("/^(.{3,})[0ODGQ]uad\\.?(.*)/i", $georeferenceRemarks, $mat)) {
 					$georeferenceRemarks = trim($mat[1]);
-					$line = trim($mat[2]);
+					if(count($mats) > 2) $line = trim($line." ".trim($mats[2]));
 				}
 				if(preg_match("/(.+) ((?:Date|Elev(?:ation)?|Co(?:ounty|[li1!|]{2}ect(?:[0o]rs?|ed)))?[;:,. ].*)/i", $georeferenceRemarks, $mat)) {
 					$georeferenceRemarks = trim($mat[1]);
-					$line = trim($mat[2]);
+					if(count($mats) > 2) $line = trim($line." ".trim($mats[2]));
 				} else if(preg_match("/(.+)(".$possibleNumbers."{1,2}[ -]".$possibleMonths."[ -]".$possibleNumbers."{4}.*)/i", $georeferenceRemarks, $mat)) {
 					$georeferenceRemarks = trim($mat[1]);
-					$line = trim($mat[2]);
+					if(count($mats) > 2) $line = trim($line." ".trim($mats[2]));
 				} else if(preg_match("/(.+) (".$possibleMonths."[ -]".$possibleNumbers."{1,2}.*)/i", $georeferenceRemarks, $mat)) {
 					$georeferenceRemarks = trim($mat[1]);
-					$line = trim($mat[2]);
+					if(count($mats) > 2) $line = trim($line." ".trim($mats[2]));
 				} else if(preg_match("/(.+), (.+)/i", $georeferenceRemarks, $mat)) {
 					$georeferenceRemarks = trim($mat[1]);
-					$line = trim($mat[2]);
+					if(count($mats) > 2) $line = trim($line." ".trim($mats[2]));
 				}
 			} else if(preg_match("/^(.*?)(([A-Za-z]+\\.?(?: [A-Za-z]+\\.?)? ?\(.+\)) ?[QO0G]ua[ad](?:r?\\b|rangle))(.*)/i", $line, $mats)) {//foreach($mats as $k => $v) echo "\nline 14648, ".$k.": ".$v."\n";
 				$locality = trim(str_ireplace(trim($mats[2]), "", $locality));
@@ -1040,7 +1057,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$locality = trim(str_ireplace(trim($mats[2]), "", $locality));
 				$georeferenceRemarks = "Quad Map: ".trim($mats[3]);
 				$line = trim(trim($mats[1]).", ".ltrim($mats[4], " :;,."));
-			}//echo "\nline 14169, line: ".$line."\ncountPotentialLocalityWords(line): ".$this->countPotentialLocalityWords($line)."\ncontainsVerbatimAttribute(line): ".$this->containsVerbatimAttribute($line)."\n";
+			}//echo "\nline 14203, line: ".$line."\ncountPotentialLocalityWords(line): ".$this->countPotentialLocalityWords($line)."\ncontainsVerbatimAttribute(line): ".$this->containsVerbatimAttribute($line)."\n";
 			if($this->containsVerbatimAttribute($line)) {
 				$pos = strpos($line, ";;;");
 				$rest = "";
@@ -1802,7 +1819,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'dateIdentified' => $dateIdentified,
 			'otherCatalogNumbers' => trim($otherCatalogNumbers, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
-			'associatedCollectors' => trim($associatedCollectors, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
+			'associatedCollectors' => trim($associatedCollectors, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'rawstr' => trim($str)
 		);
 	}
 
@@ -2606,7 +2624,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						}
 					}
 				}
-				if(preg_match("/^\\w{3,24}\\s\\w{3,24}\\s\([a-zA-Z01üé&. ]{1,14}\\.?\\s?\)\\s?(?:[A-Z]\\.\\s){0,2}[a-zA-Z01ü&. ]{2,19}\\.?$/", $name)) {
+				if(preg_match("/^\\w{3,24}\\s\\w{3,24}\\s\([a-zA-Z01üéö?&. ]{1,14}\\.?\\s?\)\\s?(?:[A-Z]\\.\\s){0,2}[a-zA-Z01üö?&. ]{2,19}\\.?$/", $name)) {
 					//echo "\nline 1006, match\n";
 					return true;
 				}
@@ -2640,9 +2658,18 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		if(array_key_exists('year', $date)) {
 			$result = $date['year'];
 			if(array_key_exists('month', $date)) {
-				$result .= "-".$date['month'];
-				if(array_key_exists('day', $date)) $result .= "-".$date['day'];
-				else $result .= "-00";
+				$month = $date['month'];
+				if(is_numeric($month)) {
+					if($month > 12) return "";
+				}
+				$result .= "-".$month;
+				if(array_key_exists('day', $date)) {
+					$day = trim($date['day']);
+					if(is_numeric($day)) {
+						if($day > 31) return "";
+					}
+					$result .= "-".$day;
+				} else $result .= "-00";
 			} else $result .= "-00-00";
 			return $result;
 		}
@@ -2729,7 +2756,12 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$direction = $mats[1];
 			if(count($mats) > 3) {
 				$digMins = $mats[3]/60;
-				if(count($mats) > 4) $digSecs = $mats[4]/3600;
+				if($digMins > 1) return null;
+				if(count($mats) > 4) {
+					$digSecs = $mats[4];
+					if($digSecs > 60) return null;
+					else $digSecs = $mats[4]/3600;
+				}
 			}
 		} else {
 			$degPos = strpos($latlong, "°");
@@ -2739,10 +2771,12 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$secPos = strpos($latlong, "\"");
 					if($secPos !== FALSE) {
 						$secs = trim(substr($latlong, $minPos+1, $secPos-$minPos-1));
+						if($secs > 60) return null;
 						$digSecs = $secs/3600;
 						$direction = trim(substr($latlong, $secPos+1));
 					} else $direction = trim(substr($latlong, $minPos+1));
 					$mins = trim(substr($latlong, $degPos+1, $minPos-$degPos-1));
+					if($mins > 60) return null;
 					$digMins = $mins/60;
 				} else $direction = trim(substr($latlong, $degPos+1));
 				$degs = trim(substr($latlong, 0, $degPos));
@@ -2830,7 +2864,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"/ F(?i)alls/", "/\\bcounty\\b/i", "/\\bdistrict\\b/i", "/\\bjunction\\b/i", "/\\sC(?i)anyon\\b/", "/ C(?i)reek\\b/",
 			"/ L(?i)oop\\b/", "/\\bservice\\b/", "/\\sstation\\b/", "/\\btown\\b/", "/\\bC(?i)oast\\b/", "/\\bS(?i)hore\\b/", "/\\bproperty\\b/i",
 			"/\\bpeninsula\\b/i", "/\\bentrance\\b/i", "/\\bL(?i)akes?\\b/", "/\\sW(?i)ilderness\\b/", "/\\sR(?i)ange\\b/", "/\\bPass\\b/",
-			"/\\b(?:N(?i)ationa[l1|I!]|(?-i)S(?i)t(?:\\.|ate)|(?-i)N(?i)at[l1|I!]?\\.)\\s(?-i)F(?i)orest\\b/", "/\\bvicinit(?:y|ate)\\b/i",
+			"/\\b(?:N(?i)ationa[l1|I!]|(?-i)S(?i)t(?:\\.|ate)|(?-i)N(?i)at[l1|I!]?\\.)\\s(?-i)F(?i)orest\\b/", "/\\bvic(?:\\.|init(?:y|ate))\\b/i",
 			"/\\sP(?i)eak\\b/", "/\\sS(?i)prings\\b/", "/\\bU\\. ?S\\. ?\\d{1,2}\\b/", "/\\bcamino\\b/", "/[A-Za-z]{3,} G(?i)ulch\\b/",
 			"/\\b(?:N(?i)ationa[l1|I!]|(?-i)S(?i)t(?:\\.|ate)|(?-i)N(?i)at[l1|I!]?\\.|(?-i)P(?i)rov[l1|I!]nc[l1|I!]a[l1|I!])\\s(?-i)P(?i)ark\\b/i",
 			"/\\bdrive\\b/i", "/[A-Za-z]{3,} R(?i)eserv(?:e|oir)\\b/", "/[A-Za-z]{3,} B(?i)utte\\b/", "/[A-Za-z]{3,} V(?i)alley\\b/",
@@ -2840,9 +2874,10 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"/[A-Za-z] M(?:ts[,.]{0,2}|(?i)ountains?)\\b/", "/\\b(?:Conference|Visitors|Environmenta[l1|I!]) Center\\b/i", "/\\sR(?i)idge\\b/",
 			"/\\b(?i:N(?:orth(?:east|west)?)?|S(?:outh(?:east|west)?)?|E(?:ast)?|W(?:est)?|[NE]?NE|[NW]?NW|[SE]?SE|[SW]?SW) (?:of|from) (?-i)[A-Z]/i",
 			"/\\b[A-Za-z]{3,}v[l1|I!]{3}e\\b/i", "/\\b[A-Z][A-Za-z]{2,}t[o0]wn\\b/i", "/~ ?\\d+[ -]/", "/ Gruppe\\b/", "/ A(?i)rea\\b/", "/ quarry/i",
-			"/ T(?i)rail/", "/ B(?i)ay\\b/", "/[A-Za-z] A(?i)rboretum\\b/", "/ R(?i)iver\\b/", "/[A-Za-z]{3,} L(?i)ane\\b/", "/\\bVicinity\\b/i",
+			"/ T(?i)rail/", "/ B(?i)ay\\b/", "/[A-Za-z] A(?i)rboretum\\b/", "/ R(?i)iver\\b/", "/[A-Za-z]{3,} L(?i)ane\\b/",
 			"/[A-Za-z]{3,} R(?i)ock\\b/", "/[A-Za-z]{3,} K(?i)eys?\\b/", "/[A-Za-z]{3,} S(?i)ound\\b/", "/\\bstate [1-9]{1,3}[,.; ]/i",
-			"/\\bprovince\\b/i", "/\\b(?:University|Co[l1|I!]{2}ege) (?:[A-Za-z]+ ){0,4}Campus\\b/", "/[A-Za-z]{3,} P(?i)eaks?/", "/F(?i)[ij]ord/");
+			"/\\bprovince\\b/i", "/\\b(?:University|Co[l1|I!]{2}ege) (?:[A-Za-z]+ ){0,4}Campus\\b/", "/[A-Za-z]{3,} P(?i)eaks?/",
+			"/F(?i)[ij]ord/");
 		$result = 0;
 		foreach($lWords as $lWord) if(preg_match($lWord, $pLoc)) {/*echo "\nlocality matched: ".$lWord."\n";*/$result++;}
 		if(preg_match("/\\b(?:N(?:[EW]|orth(?:east|west)?)?|S(?:[EW]|outh(?:east|west)?)?|E(?:ast)?|W(?:est)?)\\s[o0QD]f\\s.+/i", $pLoc)) $result++;
@@ -2871,7 +2906,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry", "regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?",
 			"terraces?", "thickets?", "moraines?", "heath(?:er)?", "metamorphic", "vegetation", "quarry", "mats?", "depression", "ecotone", "fen",
 			"Ombrotrophic", "rivulets?", "trunks?", "hummock[sy]?", "acer", "stand", "chert", "humus", "marsh", "abundant(?:[l1|I!]y)?",
-			"pebbles?", "imbedded", "pools?", "twigs?", "cu[l1|I!]tivated", "Agropyron");
+			"pebbles?", "imbedded", "pools?", "twigs?", "cu[l1|I!]tivated", "Agropyron", "barrens?");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
@@ -3562,7 +3597,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$isIdentifier = true;
 				}
 				if(count($collMatches) > 2) $nextLine = trim($collMatches[2]);
-			} else if(preg_match("/(?<!Date )\\bC[o0D](?:[l1|!i]{2}|U)[ec]{2}t[ec]d[:,;. *](?!\\s?(?:(?:on|during|at|in|near|from|along)\\s(?:the\\s)?)|with suppo)(.+)(?:\\n(.+))?/i", $str, $collMatches)) {
+			} else if(preg_match("/(?<!Date )\\bC[o0D](?:[l1|!i]{2}|U)[ec]{2}t[ec]d[:,;. *](?!\\s?(?:(?:on|during|at|in|near|from|along|under)\\s(?:the\\s)?)|with suppo)(.+)(?:\\n(.+))?/i", $str, $collMatches)) {
 				$collector = trim($collMatches[1]);
 				$collPatternStr = "/\\bC[o0D](?:[l1|!I]{2}|U)[ec]{2}t[ec]d[:,;. *](?:\\s?(?:and|&)\\s(?:det(?:[;:,.=]|ermined)|[l1|!i]dent[l1|!i]f[l1|!i]ed)(?:\\sb[vyg])?)[:,;. *]{1,3}(.+)(?:\\n(.+))?/i";
 				if(preg_match($collPatternStr, trim($collMatches[0]), $collMatches2)) {
@@ -3739,7 +3774,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 				}
 			}
-			if(strlen($collector) > 1) {//echo "\nline 2205, collector = ".$collector."\ncollectorNum: ".$collectorNum."\nnextLine: ".$nextLine."\n";
+			if(strlen($collector) > 1) {//echo "\nline 2456, collector = ".$collector."\ncollectorNum: ".$collectorNum."\nnextLine: ".$nextLine."\n";
 				$collector = trim($collector);
 				if(strlen($collector) <= 3 && strcasecmp(substr($collector, 0, 2), "No") == 0) $collector = "";
 				$collector = trim(preg_replace("/\\s{2,}/m", " ", $collector));
@@ -3818,7 +3853,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						$collector  = trim($cMats[1]);
 						$collectorNum = $temp;
 					}
-				}//echo "\n2284, collector = ".$collector."\ncollectorNum: ".$collectorNum."\nnextLine: ".$nextLine."\n";
+				}//echo "\n2535, collector = ".$collector."\ncollectorNum: ".$collectorNum."\nnextLine: ".$nextLine."\n";
 				if(preg_match("/(.+) (?:elev(?:ation|[,.;:])|A[1!|Il]t[,.;:]?) [0-9OQ!|lI,]{1,5} ?(?:m(?:[,.;:]|eters)?|f(?:ee)?t[,.;:]?)/i", $collector, $mats)) $collector = trim($mats[1]);
 				if(preg_match("/(.*?)\\s(?:[NW][o0Q][.ou]|#)(.*)/i", $collector, $cMats)) {
 					$collector = trim($cMats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-");
@@ -3898,7 +3933,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							}
 						}
 					}
-				}//echo "\nline 2364, collector = ".$collector."\ncollectorNum: ".$collectorNum."\nnextLine: ".$nextLine."\n";
+				}//echo "\nline 2615, collector = ".$collector."\ncollectorNum: ".$collectorNum."\nnextLine: ".$nextLine."\n";
 				if(strlen($nextLine) > 0 && (strlen($collector) == 0 || strlen($collectorNum) == 0)) {
 					if(preg_match("/(.*?)\\b(?:N[o0Q][.o]|#)(.*)/i", $nextLine, $cMats)) {//$i=0;foreach($cMats as $cMat) echo "\n11513, cMats[".$i++."] = ".$cMat."\n";
 						$collector .= " ".trim($cMats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-");
@@ -3962,16 +3997,16 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					if(preg_match("/(.*)Elev(?:\\.|ation)?/i", $collectorNum, $mats)) $collectorNum = trim($mats[1]);
 					else if(preg_match("/(.+)\\s\\d{1,5}\\s?(?:m|rn|ft)\\.?/i", $collectorNum, $mats)) $collectorNum = trim($mats[1]);
 					if(!$this->containsNumber($collectorNum)) $collectorNum = "";
-				}//echo "\nline 2428, collector: ".$collector.", collectorNum: ".$collectorNum."\n";
+				}//echo "\nline 2679, collector: ".$collector.", collectorNum: ".$collectorNum."\n";
 				//$namePat = "/\\b([A-Z]\\.?\\s?[A-Z]\\.?\\s[a-zA-Z]{2,}\\s|[A-Z][a-zA-Z]+[A-Z](?:\\.|[a-zA-Z]{2,})?\\s[A-Z][a-zA-Z]{2,}).*/";
-				$namePat = "/\\b([A-Z]\\.?\\s?[A-Z]\\.?\\s[a-zA-Z]{2,}\\s).*/";
+				$namePat = "/^([A-Z]\\.?\\s?[A-Z]\\.?\\s[a-zA-Z]{2,}\\s).*/";
 				if(preg_match($namePat, $collector, $nMats)) $collector = trim($nMats[1]);
 				if(preg_match("/(?:[A-Za-z]+\\s)?by\\s(.*)/i", $collector, $mats)) {
 					$collector = trim($mats[1]);
 					if(preg_match("/(.+)\\s[A-Za-z ,.]+\\sby\\s.*/i", $collector, $mats2)) {
 						if(count($mats2) > 1) $collector = trim($mats2[1]);
 					}
-				}//echo "\nline 2426, collector: ".$collector.", collectorNum: ".$collectorNum."\n";
+				}//echo "\nline 2688, collector: ".$collector.", collectorNum: ".$collectorNum."\n";
 				if(strlen($collector) > 0) {
 					if($isIdentifier) $identifiedBy = $collector;
 					if(strlen($collectorNum) > 2) {
@@ -4011,11 +4046,19 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							'otherCatalogNumbers' => $otherCatalogNumbers,
 							'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-")
 						);
-					} else if(preg_match("/(.+)(?: and |&)(.+)/i", $collector, $mats)) {
+					} else if(preg_match("/^((?:[^ ]+ ){1,2}[^ ]+)(?: and | ?&)(.+)/i", $collector, $mats)) {
 						return array
 						(
 							'collectorName' => trim($mats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
 							'associatedCollectors' => trim($mats[2], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+							'collectorNum' => trim($collectorNum, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+							'otherCatalogNumbers' => $otherCatalogNumbers,
+							'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-")
+						);
+					} else if(preg_match("/^((?:[^ ]+ ){1,2}[^ ]+)[,;:] (?:[^ ]+ ){2,}/i", $collector, $mats)) {
+						return array
+						(
+							'collectorName' => trim($mats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
 							'collectorNum' => trim($collectorNum, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
 							'otherCatalogNumbers' => $otherCatalogNumbers,
 							'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-")
@@ -4205,20 +4248,16 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	protected function getLocality($s) {
 		//echo "\nInput to getLocality: ".$s."\n";
-		$locationPatStr = "/\\n(?:L|(?:\|_))[o0]c(?:a[1!lI]{2}ty|ati[o0]n|\\.)[:;,)]? (?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i";
+		$locationPatStr = "/\\n(?:L|(?:\|_))[o0]ca(?:[1!lI]{2}ty|[1!lI]e|ti[o0]n|\\.)[:;,)]? (?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i";
 		if(preg_match($locationPatStr, $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2170, locationMatches[".$i++."] = ".$locationMatche."\n";
 			$location = trim($locationMatches[1]);
 			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
 			return $location;
-		} if(preg_match("/\\bL[o0]c(?:a[1!lI]{2}ty|ati[o0]n|\\.)[:;,)] (?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2174, locationMatches[".$i++."] = ".$locationMatche."\n";
+		} if(preg_match("/\\bL[o0]ca(?:[1!lI]{2}ty|[1!lI]e|ti[o0]n|\\.)[:;,)] (?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2174, locationMatches[".$i++."] = ".$locationMatche."\n";
 			$location = trim($locationMatches[1]);
 			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
 			return $location;
-		} else if(preg_match("/\\bC[o0][il1!|]{2}[ec]{2}t[il1!|][o0]n\\sS[il1!|]te[:;,.]\\s(.+)/i", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2126, locationMatches[".$i++."] = ".$locationMatche."\n";
-			$location = trim($locationMatches[1]);
-			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
-			return $location;
-		} else if(preg_match("/\\n(S(?i)[il1!|]te[:;.]\\s.+)(?:(?:\\n|\\r\\n)((?s).+))?/", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2130, locationMatches[".$i++."] = ".$locationMatche."\n";
+		} else if(preg_match("/\\b(?:C[o0][il1!|]{2}[ec]{2}t[il1!|][o0]n )?S[il1!|]te[:;,.]\\s(.+)/i", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2126, locationMatches[".$i++."] = ".$locationMatche."\n";
 			$location = trim($locationMatches[1]);
 			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
 			return $location;
@@ -4533,7 +4572,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			//feet or meters, followed by label
 			$elevPatStr = "/(.*)\\s(\(?([l|I!1]".$possibleNumbers."[,.]".$possibleNumbers."{3}|[SZl|I!&1-9^][,.]".$possibleNumbers."{3}|".
 				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|[IO0-9])".
-				"\\s{0,2}(ft[,.; \n]| [it]t[,.; \n*]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet),? ?".
+				"\\s{0,2}(ft[,.; \n]| [it]t[,.; \n*]|(?:m|rn)(?:[.; \n]|eter[5s]?)|Feet),? ?".
 				"(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:[,. ]|itude))\)?[,.;: ]{0,2})(.*+)/is";
 			if(preg_match($elevPatStr, $string, $elevMatches)) {
 				//$i=0;
@@ -4650,7 +4689,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[4]));
 			}
 			//just numbers, feet or meters
-			$elevPatStr = "/(.*)\\s(\(?((?:1\\d,\\d{3}|[1-9^],\\d{3}|1\\d{4}|[1-9]\\d{1,3}+|\\d)".
+			$elevPatStr = "/(.*)\\s(\(?((?:1\\d,\\d{3}|[1-9^],\\d{3}|1\\d{4}|[1-9]\\d{1,3}+|\\d )".
 				" {0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet))\)?[,.;: ]{0,2})".
 				"(?!(?:N(?:orth)? |S(?:outh)? |E(?:ast)? |W(?:est)? |[NE]?NE |[NW]?NW |[SE]?SE |[SW]?SW )?(?:of|from|above|be(?:low|neath|side))\\b)(.*+)/is";
 			if(preg_match($elevPatStr, $string, $elevMatches)) {
@@ -5592,8 +5631,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	}
 
 	private function getLatLongs($str) {//echo "\nInput to getLatLongs:\n".$str."\n";
-		$results = array();
 		if($str) {
+			$results = array();
 			$latLongPatStr = "/(.*?)\\b((?:\\d{1,3}+(?:\\.\\d{1,7})?) ?°\\s?(?:(?:\\d{1,3}(?:\\.\\d{1,3})?)?\\s?\'".
 				"(?:\\s|\\n|\\r\\n)?(?:\\d{1,3}(?:\\.\\d{1,3})? ?\")?)?+\\s??(?:N(?:[,.]|orth)?|S(?:[,.]|outh)?))[,.;]?(?:\\s|\\n|\\r\\n)?".
 				"(?:L(?:ong|at)(?:\\.|itude)?[:,]?(?:\\s|\\n|\\r\\n)?)?((?:\\d{1,3}+(?:\\.\\d{1,7})?) ?°".
@@ -5601,97 +5640,159 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				"\\s?(?:E(?:[,.]|ast)?|W(?:[,.]|est)?))/is";
 			if(preg_match($latLongPatStr, $str, $latLongMatches)) {//$i=0;foreach($latLongMatches as $latLongMatch) echo "\nlatLongMatches[".$i++."] = ".$latLongMatch."\n";
 				array_push($results, array("latitude" => trim($latLongMatches[2], " ,.;\r\n"), "longitude" => trim($latLongMatches[3], " ,.;\r\n")));
-				$results = array_merge_recursive($results, $this->getLatLongs($latLongMatches[1]));
-			} else {
-				$latLongPatStr = "/(.*?)\\b((?:\\d{1,3}+(?:\\.\\d{1,7})?) ?°\\s?(?:(?:\\d{1,3}(?:\\.\\d{1,3})?)?\\s?\'".
-					"(?:\\s|\\n|\\r\\n)?(?:\\d{1,3}(?:\\.\\d{1,3})? ?\")?)?+\\s??(?:E(?:[,.]|ast)?|W(?:[,.]|est)?))[,.;]?(?:\\s|\\n|\\r\\n)?".
-					"(?:L(?:ong|at)(?:\\.|itude)?[:,]?(?:\\s|\\n|\\r\\n)?)?((?:\\d{1,3}+(?:\\.\\d{1,7})?) ?°".
-					"(?:\\s|\\n|\\r\\n)?(?:(?:\\d{1,3}(?:\\.\\d{1,3})?)? ?\'(?:\\s|\\n|\\r\\n)?(?:\\d{1,3}(?:\\.\\d{1,3})? ?\")?)?+".
-					"\\s?(?:N(?:[,.]|orth)?|S(?:[,.]|outh)?))/is";
-				if(preg_match($latLongPatStr, $str, $latLongMatches)) {//$i=0;foreach($latLongMatches as $latLongMatch) echo "\nlatLongMatches[".$i++."] = ".$latLongMatch."\n";
-					array_push($results, array("longitude" => trim($latLongMatches[2], " ,.;\r\n"), "latitude" => trim($latLongMatches[3], " ,.;\r\n")));
-					$results = array_merge_recursive($results, $this->getLatLongs($latLongMatches[1]));
-				} else {
-					$latLongPatStr = "/(.*?)\\b([NS] ?\\d{1,2}+ ?°\\s?(?:(?:\\d{1,2})\\s?\'\\s?(?:\\d{1,2} ?\")?)?+),?\\s?".
-						"([EW] ?\\d{1,3}+ ?°\\s?(?:\\d{1,2} ?\'\\s?(?:\\d{1,2} ?\")?)?+)/is";
-					if(preg_match($latLongPatStr, $str, $latLongMatches)) {//$i=0;foreach($latLongMatches as $latLongMatch) echo "\nlatLongMatches[".$i++."] = ".$latLongMatch."\n";
-						array_push($results, array("latitude" => trim($latLongMatches[2], " ,.;\r\n"), "longitude" => trim($latLongMatches[3], " ,.;\n\r")));
-						$results = array_merge_recursive($results, $this->getLatLongs($latLongMatches[1]));
-					}
-				}
+				$temp = $this->getLatLongs($latLongMatches[1]);
+				if($temp != null && count($temp) > 0) return array_merge_recursive($results, $this->getLatLongs($latLongMatches[1]));
+				else return $results;
+			}
+			//getLongLats
+			$latLongPatStr = "/(.*?)\\b((?:\\d{1,3}+(?:\\.\\d{1,7})?) ?°\\s?(?:(?:\\d{1,3}(?:\\.\\d{1,3})?)?\\s?\'".
+				"(?:\\s|\\n|\\r\\n)?(?:\\d{1,3}(?:\\.\\d{1,3})? ?\")?)?+\\s??(?:E(?:[,.]|ast)?|W(?:[,.]|est)?))[,.;]?(?:\\s|\\n|\\r\\n)?".
+				"(?:L(?:ong|at)(?:\\.|itude)?[:,]?(?:\\s|\\n|\\r\\n)?)?((?:\\d{1,3}+(?:\\.\\d{1,7})?) ?°".
+				"(?:\\s|\\n|\\r\\n)?(?:(?:\\d{1,3}(?:\\.\\d{1,3})?)? ?\'(?:\\s|\\n|\\r\\n)?(?:\\d{1,3}(?:\\.\\d{1,3})? ?\")?)?+".
+				"\\s?(?:N(?:[,.]|orth)?|S(?:[,.]|outh)?))/is";
+			if(preg_match($latLongPatStr, $str, $latLongMatches)) {//$i=0;foreach($latLongMatches as $latLongMatch) echo "\nlatLongMatches[".$i++."] = ".$latLongMatch."\n";
+				array_push($results, array("longitude" => trim($latLongMatches[2], " ,.;\r\n"), "latitude" => trim($latLongMatches[3], " ,.;\r\n")));
+				$temp = $this->getLatLongs($latLongMatches[1]);
+				if($temp != null && count($temp) > 0) return array_merge_recursive($results, $this->getLatLongs($latLongMatches[1]));
+				else return $results;
+			}
+			//get latLongs with direction preceding coordinates
+			$latLongPatStr = "/(.*?)\\b([NS] ?\\d{1,2}+ ?°\\s?(?:(?:\\d{1,2})\\s?\'\\s?(?:\\d{1,2} ?\")?)?+),?\\s?".
+				"([EW] ?\\d{1,3}+ ?°\\s?(?:\\d{1,2} ?\'\\s?(?:\\d{1,2} ?\")?)?+)/is";
+			if(preg_match($latLongPatStr, $str, $latLongMatches)) {//$i=0;foreach($latLongMatches as $latLongMatch) echo "\nlatLongMatches[".$i++."] = ".$latLongMatch."\n";
+				array_push($results, array("latitude" => trim($latLongMatches[2], " ,.;\r\n"), "longitude" => trim($latLongMatches[3], " ,.;\n\r")));
+				$temp = $this->getLatLongs($latLongMatches[1]);
+				if($temp != null && count($temp) > 0) return array_merge_recursive($results, $this->getLatLongs($latLongMatches[1]));
+				else return $results;
 			}
 		}
-		return $results;
 	}
 
-	private function fixLatLongs($str) {
+	private function fixLatLongs($str) {//echo "\nInput to fixLatLongs:\n".$str."\n";
 		if($str) {
 			$possibleNumbers = "[OQSZl|I!&0-9]";
 			//first find patterns with degree signs and minutes signs and seconds signs and no non-integer values
-			$latLongPatStr = "/(?:(?(?=(?s:.*)\\b(?:".$possibleNumbers."{1,3}+)\\s?[°*?c](?:\\s|\\n|\\r\\n)?".
-				"(?:".$possibleNumbers."{1,3})\\s?['*?](?:\\s|\\n|\\r\\n)?".
-				"(?:(?:".$possibleNumbers."{1,3})\\s?\")?\\s?(?:N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
+			$latLongPatStr = "/^(?:(?(?=(?s:.*)\(?\\b(?:".$possibleNumbers."{1,2}+)\\s?[°*?c](?:\\s|\\n|\\r\\n)?".
+				"(?:".$possibleNumbers."{1,2})\\s?['*?](?:\\s|\\n|\\r\\n)?".
+				"(?:(?:".$possibleNumbers."{1,2})\\s?\")?\\s?(?:N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
 				"(?:\\s|\\n|\\r\\n)?(?:L(?:ong|at)(?:[\\._]|(?:itude))?)?:?,?\\s{0,2}(?:\\s|\\n|\\r\\n)".
-				"(?:".$possibleNumbers."{1,3})\\s?[°*?c](?:\\s|\\n|\\r\\n)?".
-				"(?:".$possibleNumbers."{1,3})\\s?['*?](?:\\s|\\n|\\r\\n)?".
-				"(?:(?:".$possibleNumbers."{1,3})\\s?\")?\\s?(?:E(?:ast)?|(?:W|VV)(?:est)?)\\b(?s:.*)))".
+				"(?:".$possibleNumbers."{1,3})\\s?[°*?c'](?:\\s|\\n|\\r\\n)?".
+				"(?:".$possibleNumbers."{1,2})\\s?['*?](?:\\s|\\n|\\r\\n)?".
+				"(?:(?:".$possibleNumbers."{1,2})\\s?\")?\\s?(?:E(?:ast)?|(?:W|VV)(?:est)?)\\b[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?(?s:.*)))".
 
-				"((?s).*)\\b(".$possibleNumbers."{1,3}+)\\s?[°*?c](?:\\s|\\n|\\r\\n)?".
-				"(?:(".$possibleNumbers."{1,3})\\s?['*?](?:\\s|\\n|\\r\\n)?".
-				"(".$possibleNumbers."{1,3})\\s?\")?\\s?(N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
+				"((?s).*)\(?\\b(".$possibleNumbers."{1,2}+)\\s?[°*?c](?:\\s|\\n|\\r\\n)?".
+				"(".$possibleNumbers."{1,2})\\s?['*?](?:\\s|\\n|\\r\\n)?".
+				"(?:(".$possibleNumbers."{1,2})\\s?\")?\\s?(N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
 				"(?:\\s|\\n|\\r\\n)?(?:L(?:ong|at)(?:[\\._]|(?:itude))?)?:?,?\\s{0,2}(?:\\s|\\n|\\r\\n)".
-				"(".$possibleNumbers."{1,3})\\s?[°*?](?:\\s|\\n|\\r\\n)?".
-				"(".$possibleNumbers."{1,3})\\s?['*?](?:\\s|\\n|\\r\\n)?".
-				"(?:(".$possibleNumbers."{1,3})\\s?\")?\\s?(E(?:ast)?|(?:W|VV)(?:est)?)\\b((?s).*)|".
+				"(".$possibleNumbers."{1,3})\\s?[°*?c'](?:\\s|\\n|\\r\\n)?".
+				"(".$possibleNumbers."{1,2})\\s?['*?](?:\\s|\\n|\\r\\n)?".
+				"(?:(".$possibleNumbers."{1,2})\\s?\")?\\s?(E(?:ast)?|(?:W|VV)(?:est)?)\\b[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?((?s).*)|".
 
 			//if not found find patterns with no degree signs or minutes signs or seconds signs and no non-integer values
-				"(?:(?(?=(?s:.*)\\b(?:".$possibleNumbers."{1,3}+)\\s(?:\\s|\\n|\\r\\n)?".
-				"(?:(?:".$possibleNumbers."{1,3})\\s(?:\\s|\\n|\\r\\n)?".
-				"(?:(?:".$possibleNumbers."{1,3})))\\s?(?:N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
+				"(?:(?(?=(?s:.*)\(?\\b(?:".$possibleNumbers."{1,2}+)\\s(?:\\s|\\n|\\r\\n)?".
+				"(?:(?:".$possibleNumbers."{1,2})\\s(?:\\s|\\n|\\r\\n)?".
+				"(?:(?:".$possibleNumbers."{1,2})))\\s?(?:N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
 				"(?:\\s|\\n|\\r\\n)?(?:L(?:ong|at)(?:[._]|(?:itude))?):?,?\\s{0,2}(?:\\s|\\n|\\r\\n)".
 				"(?:".$possibleNumbers."{1,3})\\s(?:\\s|\\n|\\r\\n)?".
-				"(?:(?:".$possibleNumbers."{1,3})\\s(?:\\s|\\n|\\r\\n)?".
-				"(?:".$possibleNumbers."{1,3}))\\s?(?:E(?:ast)?|(?:W|VV)(?:est)?)\\b(?s:.*)))".
+				"(?:(?:".$possibleNumbers."{1,2})\\s(?:\\s|\\n|\\r\\n)?".
+				"(?:".$possibleNumbers."{1,2}))\\s?(?:E(?:ast)?|(?:W|VV)(?:est)?)\\b[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?(?s:.*)))".
 
-				"((?s).*)\\b(".$possibleNumbers."{1,3}+)\\s(?:\\s|\\n|\\r\\n)?".
-				"(?:(".$possibleNumbers."{1,3})\\s(?:\\s|\\n|\\r\\n)?".
-				"(".$possibleNumbers."{1,3}))\\s?(N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
+				"((?s).*)\(?\\b(".$possibleNumbers."{1,2}+)\\s(?:\\s|\\n|\\r\\n)?".
+				"(?:(".$possibleNumbers."{1,2})\\s(?:\\s|\\n|\\r\\n)?".
+				"(".$possibleNumbers."{1,2}))\\s?(N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
 				"(?:\\s|\\n|\\r\\n)?(?:L(?:ong|at)(?:[._]|(?:itude))?):?,?\\s{0,2}(?:\\s|\\n|\\r\\n)".
 				"(".$possibleNumbers."{1,3})\\s(?:\\s|\\n|\\r\\n)?".
-				"(?:(".$possibleNumbers."{1,3})\\s(?:\\s|\\n|\\r\\n)?".
-				"(".$possibleNumbers."{1,3}))\\s?(E(?:ast)?|(?:W|VV)(?:est)?)\\b((?s).*)|".
+				"(?:(".$possibleNumbers."{1,2})\\s(?:\\s|\\n|\\r\\n)?".
+				"(".$possibleNumbers."{1,2}))\\s?(E(?:ast)?|(?:W|VV)(?:est)?)\\b[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?((?s).*)|".
 
 			//if not found look for patterns with possible single quotes as sign for seconds with possible space only in degrees
-				"(?:(?(?=(?s:.*)\\b(?:(?:".$possibleNumbers."{1,3}+(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\*|\?|\\s|(?:deg(?:[\\._]|rees)?))".
-				"\\s?'?(?:(?:".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\?|\*(?:min(?:[\\._]|utes)?)))".
-				"\\s?(?:(?:".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|(?:sec(?:[\\._]|onds)?)))?\\s?".
+				"(?:(?(?=(?s:.*)\(?\\b(?:(?:".$possibleNumbers."{1,2}+(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\*|\?|\\s|deg(?:[\\._]|rees)?)".
+				"\\s?'?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\?|\*min(?:[\\._]|utes)?))".
+				"\\s?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[\\._]|onds)?))?\\s?".
 				"(?:N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
 				"(?:\\s|\\n|\\r\\n)(?:L(?:ong|at)(?:[._]|itude)?:?,?\\s{0,2}(?:\\s|\\n|\\r\\n))?".
-				"(?:".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\?|\*|\\s|(?:deg(?:[\\._]|rees)?))".
-				"\\s?'?(?:(?:".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\?|\*|(?:min(?:[\\._]|utes)?)))".
-				"\\s?(?:(?:".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|(?:sec(?:[\\._]|onds)?)))?".
-				"\\s?(?:E(?:ast)?|(?:W|VV)(?:est)?))\\b(?:(?s).*)))".
+				"(?:".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\?|\*|\\s|deg(?:[\\._]|rees)?)".
+				"\\s?'?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\?|\*|min(?:[\\._]|utes)?))".
+				"\\s?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[\\._]|onds)?))?".
+				"\\s?(?:E(?:ast)?|(?:W|VV)(?:est)?))\\b[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?(?:(?s).*)))".
 
-				"((?s).*)\\b(?:(".$possibleNumbers."{1,3}+(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\?|\*|\\s|(?:deg(?:[\\._]|rees)?))".
-				"\\s?'?(?:(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\*|\?|(?:min(?:[\\._]|utes)?)))".
-				"\\s?(?:(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|(?:sec(?:[\\._]|onds)?)))?\\s?".
+				"((?s).*)\(?\\b(?:(".$possibleNumbers."{1,2}+(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\?|\*|\\s|deg(?:[\\._]|rees)?)".
+				"\\s?'?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\*|\?|min(?:[\\._]|utes)?))".
+				"\\s?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[\\._]|onds)?))?\\s?".
 				"(N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
 				"(?:\\s|\\n|\\r\\n)(?:L(?:ong|at)(?:[._]|itude)?:?,?\\s{0,2}(?:\\s|\\n|\\r\\n))?".
-				"(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\*|\?|\\s|(?:deg(?:[._]|rees)?))".
-				"\\s?'?(?:(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\*|\?|(?:min(?:[._]|utes)?)))".
-				"\\s?(?:(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|(?:sec(?:[._]|onds)?)))?".
-				"\\s?(E(?:ast)?|(?:W|VV)(?:est)?))\\b((?s).*)|".
+				"(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\*|\?|\\s|deg(?:[._]|rees)?)".
+				"\\s?'?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\*|\?|min(?:[._]|utes)?))".
+				"\\s?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[._]|onds)?))?".
+				"\\s?(E(?:ast)?|(?:W|VV)(?:est)?))\\b[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?((?s).*)|".
 
 			//if not found look for patterns with possible double quotes or spaces as sign for degrees or minutes
-				"((?s).*)\\b(?:(".$possibleNumbers."{1,3}+(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:\"|°|c|\*|\?|\\s|(?:deg(?:[._]|rees)?))".
-				"\\s?'?(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\*|\?|\\s|(?:min(?:[._]|utes)?))".
-				"\\s?(?:(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|(?:sec(?:[._]|onds)?)))?\\s?".
+				"(?:(?(?=(?s:.*)\(?\\b(?:(?:".$possibleNumbers."{1,2}+(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:\"|°|c|\*|\?|\\s|deg(?:[._]|rees)?)".
+				"\\s?'?(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\*|\?|\\s|min(?:[._]|utes)?)".
+				"\\s?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[._]|onds)?))?\\s?".
+				"(?:N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
+				"(?:\\s|\\n|\\r\\n)(?:L(?:ong|at)(?:[._]|itude)?:?,?\\s{0,2}(?:\\s|\\n|\\r\\n))?".
+				"(?:".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:\"|°|c|\?|\*|\\s|deg(?:[._]|rees)?)".
+				"\\s?'?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\?|\*|\\s|min(?:[._]|utes)?))".
+				"\\s?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[._]|onds)?))?".
+				"\\s?(?:E(?:ast)?|(?:W|VV)(?:est)?))\\b[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?(?:(?s).*)))".
+
+				"((?s).*)\(?\\b(?:(".$possibleNumbers."{1,2}+(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:\"|°|c|\*|\?|\\s|deg(?:[._]|rees)?)".
+				"\\s?'?(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\*|\?|\\s|min(?:[._]|utes)?)".
+				"\\s?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[._]|onds)?))?\\s?".
 				"(N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}".
 				"(?:\\s|\\n|\\r\\n)(?:L(?:ong|at)(?:[._]|itude)?:?,?\\s{0,2}(?:\\s|\\n|\\r\\n))?".
-				"(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:\"|°|c|\?|\*|\\s|(?:deg(?:[._]|rees)?))".
-				"\\s?'?(?:(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\?|\*|\\s|(?:min(?:[._]|utes)?)))".
-				"\\s?(?:(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|(?:sec(?:[._]|onds)?)))?".
-				"\\s?(E(?:ast)?|(?:W|VV)(?:est)?))\\b((?s).*))))/i";
+				"(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:\"|°|c|\?|\*|\\s|deg(?:[._]|rees)?)".
+				"\\s?'?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:'|\?|\*|\\s|min(?:[._]|utes)?))".
+				"\\s?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[._]|onds)?))?".
+				"\\s?(E(?:ast)?|(?:W|VV)(?:est)?))\\b[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?((?s).*)|".
+
+			//if not found look for patterns with missing direction(s)
+				"(?:(?(?=(?s:.*?)\(?\\b(?:(?:ca\\.? )?+(?:Lat(?:[._]|itude)?:?,?\\s{0,2})?+".
+				"(?:".$possibleNumbers."{1,2}+(?:[._]".$possibleNumbers."{1,7})?) ?(?:°|c|\*|\?|deg(?:[._]|rees)?)".
+				"\\s?(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?) ?(?:'|\*|\?|min(?:[._]|utes)?)".
+				"\\s?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[._]|onds)?))?\\s?".
+				"(?:N(?:orth)?\\b|S(?:outh)?\\b)?[;:,._ -]{1,2}\\s{0,2}(?:L(?:ong|at)(?:[._]|itude)?:?,?\\s{0,2})?".
+				"(?:".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\?|\*|deg(?:[._]|rees)?)".
+				"\\s?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?) ?(?:'|\?|\*|min(?:[._]|utes)?))".
+				"\\s?(?:(?:".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?) ?(?:\"|\?|sec(?:[._]|onds)?))?".
+				"\\s?(?:E(?:ast)?\\b|(?:W|VV)(?:est)?)?\\b)[;:,._ -]{1,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?(?:(?s).*)))".
+
+				"((?s).*?)\(?\\b(?:(?:ca\\.? )?+(?:Lat(?:[._]|itude)?:?,?\\s{0,2})?+".
+				"(".$possibleNumbers."{1,2}+(?:[._]".$possibleNumbers."{1,7})?) ?(?:°|c|\*|\?|deg(?:[._]|rees)?)".
+				"\\s?(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?) ?(?:'|\*|\?|min(?:[._]|utes)?)".
+				"\\s?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?)\\s?(?:\"|'|\?|sec(?:[._]|onds)?))?\\s?".
+				"(N(?:orth)?\\b|S(?:outh)?\\b)?[;:,._ -]{1,2}\\s{0,2}(?:L(?:ong|at)(?:[._]|itude)?:?,?\\s{0,2})?".
+				"(".$possibleNumbers."{1,3}(?:[._]".$possibleNumbers."{1,7})?)\\s?(?:°|c|\?|\*|deg(?:[._]|rees)?)".
+				"\\s?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?) ?(?:'|\?|\*|min(?:[._]|utes)?))".
+				"\\s?(?:(".$possibleNumbers."{1,2}(?:[._]".$possibleNumbers."{1,3})?) ?(?:\"|\?|sec(?:[._]|onds)?))?".
+				"\\s?(E(?:ast)?\\b|(?:W|VV)(?:est)?\\b)?)[;:,._ -]{1,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?((?s).*)|".
+
+			//if not found look for patterns with 1s instead of minutes signs
+				"(?:(?(?=(?s:.*?)\(?\\b(?:(?:ca\\.? )?+(?:Lat(?:[._]|itude)?:?,?\\s{0,2})?+".
+				"(?:\\d{1,2}) ?(?:°|c|\*|\?|deg(?:[._]|rees)?| )\\s?(?:\\d{2})(?:[1lI!|]|'|\*|\?|\\s|min(?:[._]|utes)?) ?".
+				"(?:(?:\\d{1,2})\\s?(?:\"|\?|sec(?:[._]|onds)?))\\s?".
+				"(?:N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}(?:L(?:ong|at)(?:[._]|itude)?:?,?\\s{0,2})?".
+				"(?:(?:1\\d{2}|\\d{1,2})) ?(?:°|c|\?|\*|deg(?:[._]|rees)?| )\\s?(?:\\d{2})(?:[1lI!|]|'|\*|\?| |min(?:[._]|utes)?) {0,2}".
+				"(?:(?:\\d{1,2}) ?(?:\"|\?|sec(?:[._]|onds)?))?".
+				"\\s?(?:E(?:ast)?\\b|(?:W|VV)(?:est)?\\b)?)[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?(?:(?s).*)))".
+
+				"((?s).*?)\(?\\b(?:(?:ca\\.? )?+(?:Lat(?:[._]|itude)?:?,?\\s{0,2})?+".
+				"(\\d{1,2}) ?(?:°|c|\*|\?|deg(?:[._]|rees)?| )\\s?(\\d{2})(?:[1lI!|]|'|\*|\?|\\s|min(?:[._]|utes)?) ?".
+				"(?:(\\d{1,2})\\s?(?:\"|\?|sec(?:[._]|onds)?))?\\s?".
+				"(N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}(?:L(?:ong|at)(?:[._]|itude)?:?,?\\s{0,2})?".
+				"((?:1\\d{2}|\\d{1,2}))\\s?(?:°|c|\?|\*|deg(?:[._]|rees)?| )\\s?(\\d{2})(?:[1lI!|]|'|\*|\?| |min(?:[._]|utes)?) {0,2}".
+				"(?:(\\d{1,2}) ?(?:\"|\?|sec(?:[._]|onds)?))?".
+				"\\s?(E(?:ast)?\\b|(?:W|VV)(?:est)?\\b)?)[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?((?s).*)|".
+
+			//if not found look for patterns with As instead of 4s signs at beginning of minutes or seconds or Hs for 11s for minutes or seconds
+				"((?s).*?)\(?\\b(?:(?:ca\\.? )?+(?:Lat(?:[._]|itude)?:?,?\\s{0,2})?+".
+				"(\\d{1,2}) ?(?:°|c|\*|\?|deg(?:[._]|rees)?| )\\s?((?-i)\\d{1,2}+|A\\d|H)(?i)(?:'|\*|\?|\\s|min(?:[._]|utes)?) ?".
+				"(?:(?-i)(\\d{1,2}+|A\\d|H)(?i)\\s?(?:\"|\?|sec(?:[._]|onds)?))?\\s?".
+				"(N(?:orth)?|S(?:outh)?)\\b[,.]?\\s{0,2}(?:L(?:ong|at)(?:[._]|itude)?:?,?\\s{0,2})?".
+				"((?:1\\d{2}|\\d{1,2}))\\s?(?:°|c|\?|\*|deg(?:[._]|rees)?| )\\s?((?-i)\\d{1,2}+|A\\d|H)(?:'|\*|\?|\\s|min(?:[._]|utes)?) {0,2}".
+				"(?:((?-i)\\d{1,2}+|A\\d|H)(?i) ?(?:\"|\?|sec(?:[._]|onds)?))?".
+				"\\s?(E(?:ast)?\\b|(?:W|VV)(?:est)?\\b)?)[;:,._]{0,2}\\s?(?:Long(?:[._]|itude)?:?,?\\s{0,2})?\)?((?s).*)))))))$/i";
 
 			if(preg_match($latLongPatStr, $str, $latLongMatches)) {
 				//$i=0;
@@ -5715,85 +5816,204 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 					$longitude .= str_replace("VV", "W", strtoupper(substr(trim($latLongMatches[9]), 0, 1)));
 					//echo "\nstrlen(latitude) > 0\n\n";
-					return $this->fixLatLongs($latLongMatches[1]).$latitude.", ".$longitude.$latLongMatches[10];
-				} else {
-					$latitude = trim($latLongMatches[12]);
-					if($latitude != null && strlen($latitude) > 0) {
-						$latitude = str_replace("_", ".", $this->replaceMistakenNumbers($latitude))."°";
-						$next = trim($latLongMatches[13]);
-						if($next != null && strlen($next) > 0) {
-							$latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
-							$next = trim($latLongMatches[14]);
-							if($next != null && strlen($next) > 0) $latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
-						}
-						$latitude .= strtoupper(substr(trim($latLongMatches[15]), 0, 1));
-						$longitude = str_replace("_", ".", $this->replaceMistakenNumbers(trim($latLongMatches[16])))."°";
-						$next = trim($latLongMatches[17]);
-						if($next != null && strlen($next) > 0) {
-							$longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
-							$next = trim($latLongMatches[18]);
-							if($next != null && strlen($next) > 0) $longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
-						}
-						$longitude .= str_replace("VV", "W", strtoupper(substr(trim($latLongMatches[19]), 0, 1)));
-						//echo "\nstrlen(latitude) > 0\n\n";
-						return $this->fixLatLongs($latLongMatches[11]).$latitude.", ".$longitude.$latLongMatches[20];
-					} else {
-						$latitude = trim($latLongMatches[22]);
-						if($latitude != null && strlen($latitude) > 0) {
-							$latitude = str_replace("_", ".", $this->replaceMistakenNumbers($latitude))."°";
-							$next = trim($latLongMatches[23]);
-							if($next != null && strlen($next) > 0) {
-								$latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
-								$next = trim($latLongMatches[24]);
-								if($next != null && strlen($next) > 0) $latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
-							}
-							$latitude .= strtoupper(substr(trim($latLongMatches[25]), 0, 1));
-							$longitude = str_replace("_", ".", $this->replaceMistakenNumbers(trim($latLongMatches[26])))."°";
-							$next = trim($latLongMatches[27]);
-							if($next != null && strlen($next) > 0) {
-								$longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
-								$next = trim($latLongMatches[28]);
-								if($next != null && strlen($next) > 0) $longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
-							}
-							$longitude .= str_replace("VV", "W", strtoupper(substr(trim($latLongMatches[29]), 0, 1)));
-							return $this->fixLatLongs($latLongMatches[21]).$latitude.", ".$longitude.$latLongMatches[30];
-						} else {
-							$latitude = trim($latLongMatches[32]);
-							if($latitude != null && strlen($latitude) > 0) {
-								$latitude = str_replace("_", ".", $this->replaceMistakenNumbers($latitude))."°";
-								$next = trim($latLongMatches[33]);
-								if($next != null && strlen($next) > 0) {
-									$latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
-									$next = trim($latLongMatches[34]);
-									if($next != null && strlen($next) > 0) $latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
-								}
-								$latitude .= strtoupper(substr(trim($latLongMatches[35]), 0, 1));
-								$longitude = str_replace("_", ".", $this->replaceMistakenNumbers(trim($latLongMatches[36])))."°";
-								$next = trim($latLongMatches[37]);
-								if($next != null && strlen($next) > 0) {
-									$longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
-									$next = trim($latLongMatches[38]);
-									if($next != null && strlen($next) > 0) $longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
-								}
-								$longitude .= str_replace("VV", "W", strtoupper(substr(trim($latLongMatches[39]), 0, 1)));
-								return $this->fixLatLongs($latLongMatches[31]).$latitude.", ".$longitude.$latLongMatches[40];
-							}
-						}
+					$rest = $latLongMatches[10];
+					if(strlen($rest) > 0) {
+						$firstChar = substr($rest, 0, 1);
+						if($firstChar == "\n") $rest = "\n".trim($rest);
+						else $rest = " ".trim($rest);
 					}
+					return $this->fixLatLongs($latLongMatches[1]).$latitude.", ".$longitude.$rest;
+				}
+				$latitude = trim($latLongMatches[12]);
+				if($latitude != null && strlen($latitude) > 0) {
+					$latitude = str_replace("_", ".", $this->replaceMistakenNumbers($latitude))."°";
+					$next = trim($latLongMatches[13]);
+					if($next != null && strlen($next) > 0) {
+						$latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
+						$next = trim($latLongMatches[14]);
+						if($next != null && strlen($next) > 0) $latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
+					}
+					$latitude .= strtoupper(substr(trim($latLongMatches[15]), 0, 1));
+					$longitude = str_replace("_", ".", $this->replaceMistakenNumbers(trim($latLongMatches[16])))."°";
+					$next = trim($latLongMatches[17]);
+					if($next != null && strlen($next) > 0) {
+						$longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
+						$next = trim($latLongMatches[18]);
+						if($next != null && strlen($next) > 0) $longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
+					}
+					$longitude .= str_replace("VV", "W", strtoupper(substr(trim($latLongMatches[19]), 0, 1)));
+					//echo "\nstrlen(latitude) > 0\n\n";
+					$rest = $latLongMatches[20];
+					if(strlen($rest) > 0) {
+						$firstChar = substr($rest, 0, 1);
+						if($firstChar == "\n") $rest = "\n".trim($rest);
+						else $rest = " ".trim($rest);
+					}
+					return $this->fixLatLongs($latLongMatches[11]).$latitude.", ".$longitude.$rest;
+				}
+				$latitude = trim($latLongMatches[22]);
+				if($latitude != null && strlen($latitude) > 0) {
+					$latitude = str_replace("_", ".", $this->replaceMistakenNumbers($latitude))."°";
+					$next = trim($latLongMatches[23]);
+					if($next != null && strlen($next) > 0) {
+						$latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
+						$next = trim($latLongMatches[24]);
+						if($next != null && strlen($next) > 0) $latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
+					}
+					$latitude .= strtoupper(substr(trim($latLongMatches[25]), 0, 1));
+					$longitude = str_replace("_", ".", $this->replaceMistakenNumbers(trim($latLongMatches[26])))."°";
+					$next = trim($latLongMatches[27]);
+					if($next != null && strlen($next) > 0) {
+						$longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
+						$next = trim($latLongMatches[28]);
+						if($next != null && strlen($next) > 0) $longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
+					}
+					$longitude .= str_replace("VV", "W", strtoupper(substr(trim($latLongMatches[29]), 0, 1)));
+					$rest = $latLongMatches[30];
+					if(strlen($rest) > 0) {
+						$firstChar = substr($rest, 0, 1);
+						if($firstChar == "\n") $rest = "\n".trim($rest);
+						else $rest = " ".trim($rest);
+					}
+					return $this->fixLatLongs($latLongMatches[21]).$latitude.", ".$longitude.$rest;
+				}
+				$latitude = trim($latLongMatches[32]);
+				if($latitude != null && strlen($latitude) > 0) {
+					$latitude = str_replace("_", ".", $this->replaceMistakenNumbers($latitude))."°";
+					$next = trim($latLongMatches[33]);
+					if($next != null && strlen($next) > 0) {
+						$latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
+						$next = trim($latLongMatches[34]);
+						if($next != null && strlen($next) > 0) $latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
+					}
+					$latitude .= strtoupper(substr(trim($latLongMatches[35]), 0, 1));
+					$longitude = str_replace("_", ".", $this->replaceMistakenNumbers(trim($latLongMatches[36])))."°";
+					$next = trim($latLongMatches[37]);
+					if($next != null && strlen($next) > 0) {
+						$longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
+						$next = trim($latLongMatches[38]);
+						if($next != null && strlen($next) > 0) $longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
+					}
+					$longitude .= str_replace("VV", "W", strtoupper(substr(trim($latLongMatches[39]), 0, 1)));
+					$rest = $latLongMatches[40];
+					if(strlen($rest) > 0) {
+						$firstChar = substr($rest, 0, 1);
+						if($firstChar == "\n") $rest = "\n".trim($rest);
+						else $rest = " ".trim($rest);
+					}
+					return $this->fixLatLongs($latLongMatches[31]).$latitude.", ".$longitude.$rest;
+				}
+				$latitude = trim($latLongMatches[42]);
+				$latDir = trim($latLongMatches[45]);
+				if(strlen($latDir) == 0) $latDir = "N";
+				if($latitude != null && strlen($latitude) > 0) {
+					$latitude = str_replace("_", ".", $this->replaceMistakenNumbers($latitude))."°";
+					$next = trim($latLongMatches[43]);
+					if($next != null && strlen($next) > 0) {
+						$latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
+						$next = trim($latLongMatches[44]);
+						if($next != null && strlen($next) > 0) $latitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
+					}
+					$latitude .= strtoupper(substr($latDir, 0, 1));
+					$longitude = str_replace("_", ".", $this->replaceMistakenNumbers(trim($latLongMatches[46])))."°";
+					$longDir = trim($latLongMatches[49]);
+					if(strlen($longDir) == 0) $longDir = "W";
+					$next = trim($latLongMatches[47]);
+					if($next != null && strlen($next) > 0) {
+						$longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."'";
+						$next = trim($latLongMatches[48]);
+						if($next != null && strlen($next) > 0) $longitude .= str_replace("_", ".", $this->replaceMistakenNumbers($next))."\"";
+					}
+					$longitude .= str_replace("VV", "W", strtoupper(substr($longDir, 0, 1)));
+					$rest = $latLongMatches[50];
+					if(strlen($rest) > 0) {
+						$firstChar = substr($rest, 0, 1);
+						if($firstChar == "\n") $rest = "\n".trim($rest);
+						else $rest = " ".trim($rest);
+					}
+					return $this->fixLatLongs($latLongMatches[41]).$latitude.", ".$longitude.$rest;
+				}
+				$latitude = trim($latLongMatches[52]);
+				$latDir = trim($latLongMatches[55]);
+				if(strlen($latDir) == 0) $latDir = "N";
+				if($latitude != null && strlen($latitude) > 0) {
+					$latitude = $latitude."°";
+					$next = trim($latLongMatches[53]);
+					if($next != null && strlen($next) > 0) {
+						$latitude .= $next."'";
+						$next = trim($latLongMatches[54]);
+						if($next != null && strlen($next) > 0) $latitude .= $next."\"";
+					}
+					$latitude .= strtoupper(substr($latDir, 0, 1));
+					$longitude = trim($latLongMatches[56])."°";
+					$longDir = trim($latLongMatches[59]);
+					if(strlen($longDir) == 0) $longDir = "W";
+					$next = trim($latLongMatches[57]);
+					if($next != null && strlen($next) > 0) {
+						$longitude .= $next."'";
+						$next = trim($latLongMatches[58]);
+						if($next != null && strlen($next) > 0) $longitude .= $next."\"";
+					}
+					$longitude .= str_replace("VV", "W", strtoupper(substr($longDir, 0, 1)));
+					$rest = $latLongMatches[60];
+					if(strlen($rest) > 0) {
+						$firstChar = substr($rest, 0, 1);
+						if($firstChar == "\n") $rest = "\n".trim($rest);
+						else $rest = " ".trim($rest);
+					}
+					return $this->fixLatLongs($latLongMatches[51]).$latitude.", ".$longitude.$rest;
+				}
+				$latitude = trim($latLongMatches[62]);
+				$latDir = trim($latLongMatches[65]);
+				if(strlen($latDir) == 0) $latDir = "N";
+				if($latitude != null && strlen($latitude) > 0) {
+					$latitude = $latitude."°";
+					$next = trim($latLongMatches[63]);
+					if($next != null && strlen($next) > 0) {
+						$latitude .= str_replace(array("A", "H"), array("4", "11"), $next)."'";
+						$next = trim($latLongMatches[64]);
+						if($next != null && strlen($next) > 0) $latitude .= str_replace(array("A", "H"), array("4", "11"), $next)."\"";
+					}
+					$latitude .= strtoupper(substr($latDir, 0, 1));
+					$longitude = trim($latLongMatches[66])."°";
+					$longDir = trim($latLongMatches[69]);
+					if(strlen($longDir) == 0) $longDir = "W";
+					$next = trim($latLongMatches[67]);
+					if($next != null && strlen($next) > 0) {
+						$longitude .= str_replace(array("A", "H"), array("4", "11"), $next)."'";
+						$next = trim($latLongMatches[68]);
+						if($next != null && strlen($next) > 0) $longitude .= str_replace(array("A", "H"), array("4", "11"), $next)."\"";
+					}
+					$longitude .= str_replace("VV", "W", strtoupper(substr($longDir, 0, 1)));
+					$rest = $latLongMatches[70];
+					if(strlen($rest) > 0) {
+						$firstChar = substr($rest, 0, 1);
+						if($firstChar == "\n") $rest = "\n".trim($rest);
+						else $rest = " ".trim($rest);
+					}
+					return $this->fixLatLongs($latLongMatches[61]).$latitude.", ".$longitude.$rest;
 				}
 			}
 		}
 		return $str;
 	}
 
-	private function fixString($str) {
+	private function convertBadChars($str) {
 		if($str) {
-			$catNo = $this->catalogNumber;
-			$needles = array("â€”", "Â«", "Ã±", "â€¢", "Ã“", "Â»", "Ã¢", "Ã¨", "Ã¬", "Ã¹", "ÃŸ", "Ã ", "Ã¶", "Ãº", "Ã¡", "Ã¤", "Ã¼", "Ã³", "Ã­", "(FÂ£e)", "(F6e)", "/\\_", "/\\", "/'\\_", "/'\\", "/°\\", "AÂ£", " ", " V/", "Â¥", "Miill.", "&gt;", "&lt;", "—", "ï»¿", "&amp;", "&apos;", "&quot;", "\/V", " VV_", " VV.", "\/\/_", "\/\/", "\X/", "\\'X/", chr(157), chr(226).chr(128).chr(156), "Ã©", "/\ch.", "/\.", "/-\\", "X/", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
-			$replacements = array("-", ".", "ñ", ".", "O", ".", "a", "e", "i", "u", "B", "a", "o", "u", "a", "a", "ü", "o", "i", "(Fée)", "(Fée)", "A.", "A", "A.", "A", "A", "AK", " ", " W ", "W", "Müll.", ">", "<", "-", "", "&", "'", "\"", "W", " W.", " W.", "W.", "W", "W", "W", "", "\"", "é", "Ach.", "A.", "A","W","W", "W", "W", "'", "'", "'", "'", "'", "'", "'", "\"", "\"", "\"", "\"", "\"", "\"", "\"", "°", "°", "°");
+			$str = preg_replace(array("/([A-Z])â€ž/", "/([a-z])â€ž/", "/â€ž/"), array("\${1}.", "\${1},", ""), $str);
+
+			$needles = array("Â©", "â‚¬", "â€™", "Â®", "â€”", "Â«", "Ã±", "â€¢", "Ã“", "Â»", "Ã¢", "Ã¨", "Ã¬", "Ã¹", "ÃŸ", "Ã ", "Ã¶", "Ãº", "Ã¡", "Ã¤", "Ã¼", "Ã³", "Ã­", "(FÂ£e)", "(F6e)", "/\\_", "/\\", "/'\\_", "/'\\", "/°\\", "AÂ£", " ", " V/", "Â¥", "Miill.", "&gt;", "&lt;", "—", "ï»¿", "&amp;", "&apos;", "&quot;", "\/V", " VV_", " VV.", "\/\/_", "\/\/", "\X/", "\\'X/", chr(157), chr(226).chr(128).chr(156), "Ã©", "/\ch.", "/\.", "/-\\", "X/", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "º");
+			$replacements = array("e", "C", "'", chr(194).chr(176), "-", ".", "n", ".", "O", ".", "a", "e", "i", "u", "B", "a", "o", "u", "a", "a", "u", "o", "i", "(Fee)", "(Fee)", "A.", "A", "A.", "A", "A", "AK", " ", " W ", "W", "Mull.", ">", "<", "-", "", "&", "'", "\"", "W", " W.", " W.", "W.", "W", "W", "W", "", "\"", "e", "Ach.", "A.", "A","W","W", "W", "W", "'", "'", "'", "'", "'", "'", "'", "\"", "\"", "\"", "\"", "\"", "\"", "\"", chr(194).chr(176));
+			return str_replace($needles, $replacements, $str);
+		}
+		return "";
+	}
+
+	private function fixString($str) {//mb_internal_encoding("UTF-8");
+		if($str) {//echo "\nInput to fixString: ".$str."\n";
 			$pat = "/\\A[^\w(]+(.*)/s";
-			if(preg_match($pat, $str, $patMatches)) $str = trim($patMatches[1]);
-			$str = str_replace($needles, $replacements, $str);
+			if(preg_match($pat, $str, $patMatches)) $str = trim($patMatches[1]);//return $str;
+			$catNo = $this->catalogNumber;
 			if($catNo) {
 				$str = str_replace("NY0".$catNo, "", $str);
 				$str = str_replace("NYO".$catNo, "", $str);
@@ -5815,9 +6035,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$str = preg_replace
 			(
 				array("/Rama.{1,2}ina /i", "/([A-Za-z]{4,14}+)'(of)\\s(\\w+)/i", "/\\s\)M[u][1!|l|]{2}\\.?\\s?Arg[.,]?/i", "/\(Ach\\.?\)\\sM[\\w01]{2,4}\\.?\\sArg\\.?/i", "/M[Uui][A-Za-z][l1!|I]\\.?\\sArg\\.?/", "/M[Uui][il1!| ]{2,5}\\.?\\sArg\\.?/", "/M[ul10|!\']{3,5}\\.?\\sArg\\.?/", "/U-[S5]-A.{0,2}/", "/\\.{3,}/", "/Lichens of(\\w+)/i", "/\\bQu\\wrcus\\b/i", "/\\bVVYOMING\\b/i", "/\) Â.{0,2}ch\\./", "/\(Â.{0,2}ch\\.\)/"),
-				array("Ramalina ", "\${1} \${2} \${3}", ") Müll. Arg.", "(Ach.) Müll. Arg.", "Müll. Arg.", "Müll. Arg.", "Müll. Arg.", "USA", " ", "Lichens of \${1}", "Quercus", "Wyoming", ")Ach.", "(Ach.)"), $str, -1, $count
+				array("Ramalina ", "\${1} \${2} \${3}", ") Mull. Arg.", "(Ach.) Mull. Arg.", "Mull. Arg.", "Mull. Arg.", "Mull. Arg.", "USA", " ", "Lichens of \${1}", "Quercus", "Wyoming", ")Ach.", "(Ach.)"), $str, -1, $count
 			);
-			//$str = str_replace("Miill.", "Müll.", $str);
+			//$str = str_replace("Miill.", "Mull.", $str);
 			//if($count > 0) echo "Replaced It\n\n";//remove barcodes (strings of ~s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long), one-character lines, and latitudes and longitudes with double quotes instead of degree signs
 			$false_num_class = "[OSZl|I!\d]";//the regex class that represents numbers and characters that numbers are commonly replaced with
 			$pattern =
@@ -5841,9 +6061,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			//$replacement = array(" ", "\${1} Co., \${2}", "LICHENS OF LEWIS AND CLARK CAVERNS STATE PARK", "", "", "", "", "", "", "", "\${1}\${2}\$3 \${4}".chr(176));
 			$str = preg_replace($pattern, $replacement, $str, -1);
 			$str = str_replace("Â°", chr(176), $str);
-			$str = $this->replaceMissingDegreeSignsInLatLongs($str);
-			$str = $this->fixLatLongs($str);
-			$str = $this->fixDates($str);
+			//$str = $this->replaceMissingDegreeSignsInLatLongs($str);
+			$str = $this->fixLatLongs($this->replaceMissingDegreeSignsInLatLongs($str));
+			$str = $this->fixDates($str);//return $str;
 			$sArray = explode("\n", $str);
 			$sResult = "";
 			foreach($sArray as $s) $sResult .= trim($s, " \0\x0B!\\~@$%^?*_")."\n";
@@ -6051,40 +6271,73 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 //fix latLongs in the form "34Ol7'N, ll7O56'W".  It won't necessarily fix latLongs containing Os misplaced with 0s.  But will fix others
 	private function replaceMissingDegreeSignsInLatLongs($str) {//echo "\nInput to replaceMissingDegreeSignsInLatLongs:\n".$str."\n";
-		if($str) {
-			$badLatLongPatStr = "/(.*)\\b((?(?=°)(?:[SZl|IO!\d]{2,3})|(?:[SZl|I!\d]{2,3})))([0OQ°])((?(?<=°)(?:[SZl|IO!\d]{2,3})|(?:[SZl|I!\d]{2,3}))\\s?'\\s?)".
-				"([OQSZl|I!\d]{1,3} ?\")? ?([NS])'?(\\.?\\s?Lat(?:\\.|[i1!|]tude)?)?[;:]?,?(?:\\s|\\n|\\r\\n)".
-				"((?(?=°)(?:[SZl|IO!\d]{2,3})|(?:[SZl|I!\d]{2,3})))([0OQ°])((?(?<=°)(?:[SZl|IO!\d]{2,3})|(?:[SZl|I!\d]{2,3})) ?'\\s?)\\s?".
-				"([OQSZl|I!\d]{1,3} ?[\"\'])? ?((?:E|W|VV))\\b(.*)/is";
+		if($str) {//COLO-B-0006949, COLO-B-0001119, COLO-B-0000147
+			//$badLatLongPatStr = "/(.*)\\b([SZl|IO!\d]{2})[0oOQ°]((?(?<=°)(?:[SZl|IO!\d]{2,3})|(?:[SZl|I!\d][SZl|I!O\d]{1,2}))) ?' ?".
+			//	"(?:([OQSZl|I!\d]{1,2}) ?\")? ?(N(?i:orth)?|S(?:outh)?)'?[.,;]{0,2}(?: ?L(?:at|ong)(?:\\.|[i1!|]tude)?(?-i))?[;:]?,?(?:\\s|\\n|\\r\\n)".
+			//	"((?(?=°)[1I!l|]?[SZl|IO!\d]{2}|(?:[SZl|I!O\d]{2}|[1I!l|][SZl|IO!\d][SZl|I!\d])))[0oOQ°] ?".
+			//	"([SZl|I!\d][SZl|IO!\d]{1,2}) ?' ?(?:([OQSZl|I!\d]{1,2}|H)? ?[\"\'])? ?((?i)E(?:ast)?|(?:W|VV)(?:est)?)(?-i)\\b[.,;]{0,2}(.*)/s";
+			$badLatLongPatStr = "/(.*)\\b([SZl|IO!\d]{2})[0oOQ°]((?(?<=°)(?: ?[SZl|IO!\d]{2,3})|(?:[SZl|I!\d][SZl|I!O\d]{1,2}))) ?' ?".
+				"(?:([OQSZl|I!\d]{1,2}) ?\")? ?(N(?i:orth)?|S(?:outh)?)'?[.,;]{0,2}(?: ?L(?:at|ong)(?:\\.|[i1!|]tude)?(?-i))?[;:]?,?(?:\\s|\\n|\\r\\n)".
+				"((?(?=°)[1I!l|]?[SZl|IO!\d]{2} ?|(?:[SZl|I!O\d]{2}|[1I!l|][SZl|IO!\d][SZl|I!\d])))[0oOQ°] ?".
+				"([SZl|I!\d][SZl|IO!\d]{1,2}) ?' ?(?:([OQSZl|I!\d]{1,2}|H)? ?[\"\'])? ?((?i)E(?:ast)?|(?:W|VV)(?:est)?)(?-i)\\b[.,;]{0,2}(.*)/s";
 			if(preg_match($badLatLongPatStr, $str, $latLongMatchesBad)) {//$i=0;foreach($latLongMatchesBad as $latLongMatchesBa) echo "\nlatLongMatchesBad[".$i++."] = ".$latLongMatchesBa."\n";
+				$latSeconds = $latLongMatchesBad[4];
+				if(strlen($latSeconds) > 0) {
+					$latSeconds = str_replace
+					(
+						array("S", "Z", "l", "|", "I", "!", "'"),
+						array("5", "2", "1", "1", "1", "1", "\""),
+						$latSeconds
+					)."\"";
+				}
+				$longSeconds = $latLongMatchesBad[8];
+				if(strlen($longSeconds) > 0) {
+					$longSeconds = str_replace
+					(
+						array("H", "S", "Z", "l", "|", "I", "!", "'"),
+						array("11", "5", "2", "1", "1", "1", "1", "\""),
+						$longSeconds
+					)."\"";
+				}
 				$str = $this->replaceMissingDegreeSignsInLatLongs($latLongMatchesBad[1]).
-					str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[2]).
-					str_ireplace(array("O", "Q", "0", " "), "°", $latLongMatchesBad[3]).
-					str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[4]).
-					str_ireplace(array("S", "Z", "l", "|", "I", "!", "'"), array("5", "2", "1", "1", "1", "1", "\""), $latLongMatchesBad[5]).
-					$latLongMatchesBad[6].str_ireplace(array("|", "!", "'"), array("i", "i", "\""), $latLongMatchesBad[7]).", ".
-					str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[8]).
-					str_ireplace(array("O", "Q", "0", " "), "°",$latLongMatchesBad[9]).
-					str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[10]).
-					str_ireplace(array("S", "Z", "l", "|", "I", "!", "'"), array("5", "2", "1", "1", "1", "1", "\""), $latLongMatchesBad[11]).
-					str_ireplace("VV", "W", $latLongMatchesBad[12]).$latLongMatchesBad[13];
+					str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[2])."°".
+					str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[3])."'".
+					$latSeconds.$latLongMatchesBad[5].", ".
+					str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[6])."°".
+					str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[7])."'".
+					$longSeconds.str_ireplace("VV", "W", $latLongMatchesBad[9]).$latLongMatchesBad[10];
 			} else {
-				$badLatLongPatStr = "/(.*)\\b((?(?=°)(?:[SZl|IO!\d]{2,3})|(?:[SZl|I!\d]{2,3})))([0OQ° ])((?(?<=°)(?:[SZl|IO!\d]{2,3})|(?:[SZl|I!\d]{2,3}))\\s?'\\s?)".
-					"([OQSZl|I!\d]{1,3} ?\")? ?(E|W|VV)'?(\\.?\\s?Long(?:\\.|[i1!|]tude)?)?[;:]?,?(?:\\s|\\n|\\r\\n)".
-					"((?(?=°)(?:[SZl|IO!\d]{2,3})|(?:[SZl|I!\d]{2,3})))([0OQ° ])((?(?<=°)(?:[SZl|IO!\d]{2,3})|(?:[SZl|I!\d]{2,3})) ?'\\s?)\\s?".
-					"([OQSZl|I!\d]{1,3} ?[\"\'])? ?([NS])\\b(.*)/is";
+				$badLatLongPatStr = "/(.*)\\b((?(?=°)(?:[1I!l|][SZl|IO!\d]{2})|(?:[1I!l|][SZl|I!O\d][SZl|I!\d]|[SZl|I!O\d][SZl|I!\d])))[0oOQ° ]".
+					"((?:[SZl|IO!\d]{2}))\\s?'\\s?(?:([OQSZl|I!\d]{1,2}|H)? ?[\"\'])? ?(E|W|VV)'?[.,;]{0,2}".
+					"(?i: ?L(?:at|ong)(?:\\.|[i1!|]tude)?(?-i))?[;:]?,?(?:\\s|\\n|\\r\\n)".
+					"((?(?=°)(?:[SZl|IO!\d]{2})|(?:[SZl|I!\d]{2})))[0oOQ° ]([SZl|IO!\d]{2}) ?'\\s?".
+					"(?:([OQSZl|I!\d]{1,2}|H)? ?[\"\'])? ?([NS])\\b[.,;]{0,2}(.*)/s";
 				if(preg_match($badLatLongPatStr, $str, $latLongMatchesBad)) {//$i=0;foreach($latLongMatchesBad as $latLongMatchesBa) echo "\nlatLongMatchesBad[".$i++."] = ".$latLongMatchesBa."\n";
+					$longSeconds = $latLongMatchesBad[4];
+					if(strlen($longSeconds) > 0) {
+						$longSeconds = str_replace
+						(
+							array("H", "S", "Z", "l", "|", "I", "!", "'"),
+							array("11", "5", "2", "1", "1", "1", "1", "\""),
+							$longSeconds
+						)."\"";
+					}
+					$latSeconds = $latLongMatchesBad[8];
+					if(strlen($latSeconds) > 0) {
+						$latSeconds = str_replace
+						(
+							array("H", "S", "Z", "l", "|", "I", "!", "'"),
+							array("11", "5", "2", "1", "1", "1", "1", "\""),
+							$latSeconds
+						)."\"";
+					}
 					$str = $this->replaceMissingDegreeSignsInLatLongs($latLongMatchesBad[1]).
-						str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[2]).
-						str_ireplace(array("O", "Q", "0", " "), "°", $latLongMatchesBad[3]).
-						str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[4]).
-						str_ireplace(array("S", "Z", "l", "|", "I", "!", "'"), array("5", "2", "1", "1", "1", "1", "\""), $latLongMatchesBad[5]).
-						$latLongMatchesBad[6].str_ireplace(array("|", "!", "'"), array("i", "i", "\""), $latLongMatchesBad[7]).", ".
-						str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[8]).
-						str_ireplace(array("O", "Q", "0", " "), "°",$latLongMatchesBad[9]).
-						str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[10]).
-						str_ireplace(array("S", "Z", "l", "|", "I", "!", "'"), array("5", "2", "1", "1", "1", "1", "\""), $latLongMatchesBad[11]).
-						str_ireplace("VV", "W", $latLongMatchesBad[12]).$latLongMatchesBad[13];
+						str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[2])."°".
+						str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[3])."'".
+						$longSeconds.str_ireplace("VV", "W", $latLongMatchesBad[5]).", ".
+						str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[6])."°".
+						str_ireplace(array("S", "Z", "l", "|", "I", "!", "O"), array("5", "2", "1", "1", "1", "1", "0"), $latLongMatchesBad[7])."'".
+						$latSeconds.$latLongMatchesBad[9].$latLongMatchesBad[10];
 				}
 			}
 		}

@@ -32,6 +32,8 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			else if($this->isCanadianLiverwortsLabel($str)) return $this->doCanadianLiverwortsLabel($str);
 			else if($this->isMusciAmericaeSeptentrionalisLabel($str)) return $this->doMusciAmericaeSeptentrionalisLabel($str);
 			else if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
+			else if($this->isBryophytaCanadensisLabel($str)) return $this->doBryophytaCanadensisLabel($str);
+			else if($this->isHepaticaeAmericanaeLabel($str)) return $this->doHepaticaeAmericanaeLabel($str);
 			else return $this->doGenericLabel($str);
 		}
 		return array();
@@ -705,6 +707,52 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		return $this->doGenericLabel($s, "347");
 	}
 
+	private function isHepaticaeAmericanaeLabel($s) {
+		$pat = "/.*\\bHEPAT[Il1!|][CG].. AMER[Il1!|][CG]AN.?/i";
+		if(preg_match($pat, $s)) return true;
+		else if(preg_match("/.*\\bHEP%AME.*Prepared % Underwood and [0OQ]. F. [CG]ook./i", $s)) return true;
+		else return false;
+	}
+
+	private function isBryophytaCanadensisLabel($s) {
+		$pat = "/.*\\bBRY[0OQ]PHYTA [CG]ANADEN[S5][il1!|].?/i";
+		if(preg_match($pat, $s)) return true;
+		else if(preg_match("/.*\\b[CG]ANADEN.*Distributed b[vy] The University of British Co[il1!|]umbia.*Edited by W.B. Schofield/i", $s)) return true;
+		else return false;
+	}
+
+	private function doHepaticaeAmericanaeLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/\\s?HEPAT[Il1!|][CG].. AMER[Il1!|][CG]AN..?/i",
+				"/.?Prepared ...? .?\\. M\\. Underwood and [0OQ]\\. F\\. Cook.?/i"
+			),
+			array(
+				"",
+				""
+			),
+			$s
+		));//echo "\ns:\n".$s."\n";
+		return $this->doGenericLabel($s, "353");
+	}
+
+	private function doBryophytaCanadensisLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/\\s?BRY[0OQ]PHYTA [CG]ANADEN[S5][il1!|]..?/i",
+				"/.?Distributed b[vy] The University of British Co[il1!|]umbia.*Edited by W.B. Schofield/i"
+			),
+			array(
+				"",
+				""
+			),
+			$s
+		));
+		return $this->doGenericLabel($s, "352");
+	}
+
 	private function isReliquiaeFlowersianaeLabel($s) {
 		$pat = "/.*Re[1Il!|]{2}[qgO]u[1Il!|]a[ec]\\s?F[1Il!|][O0Q]wers[1Il!|]ana.*/is";
 		//$pat = "/.*RELIQUIAE\\sFLOWERSIANA.*/is";
@@ -730,7 +778,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			"grave[l1|I!](?! r(?:oa)?d)(?:[l1|I!]y)?", "duff", "seepage", "submerged", "graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry",
 			"regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?", "terraces?", "thickets?", "moraines?", "heath(?:er)?",
 			"metamorphic", "vegetation", "quarry", "mats?", "depression", "pebbles?", "Ombrotrophic", "rivulets?", "hummock[sy]?", "stand",
-			"chert", "humus", "marsh", "abundant(?:[l1|I!]y)?", "ecotone", "fen", "pools?", "cultivated", "twigs?", "Agropyron");
+			"chert", "humus", "marsh", "abundant(?:[l1|I!]y)?", "ecotone", "fen", "pools?", "cultivated", "twigs?", "Agropyron", "barrens?");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
