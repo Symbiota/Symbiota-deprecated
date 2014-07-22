@@ -7,20 +7,7 @@ ALTER TABLE `images`
   ADD COLUMN `sourceIdentifier` VARCHAR(45) NULL  AFTER `username` ;
 
 
-ALTER TABLE `omoccurdeterminations` 
-  DROP INDEX `Index_unique` ;
-
-ALTER TABLE `omoccurdeterminations` 
-  ADD UNIQUE INDEX `Index_unique` (`occid` ASC, `dateIdentified` ASC, `identifiedBy` ASC, `sciname` ASC);
-
-
 #Collection adjustments
-ALTER TABLE `omcollections` 
-  DROP INDEX `Index_inst`;
-
-ALTER TABLE `omcollections` 
-  ADD UNIQUE INDEX `Index_inst` (`InstitutionCode` ASC, `CollectionCode` ASC) ;
-
 ALTER TABLE `omcollections`
   ADD COLUMN `collectionId` VARCHAR(100) NULL  AFTER `CollectionName`,
   ADD COLUMN `datasetName` VARCHAR(100) NULL  AFTER `collectionId` ;
@@ -67,9 +54,6 @@ ALTER TABLE `uploadtaxa`
   DROP INDEX `sciname_index` ,
   ADD INDEX `sciname_index` (`SciName` ASC),
   ADD INDEX `scinameinput_index` (`scinameinput` ASC);
-
-ALTER TABLE `taxa`
-  DROP FOREIGN KEY `FK_taxa_taxonunit` ;
 
 
 ALTER TABLE `taxstatus`
@@ -812,4 +796,20 @@ ALTER TABLE `omoccurrences`
 ALTER TABLE `omoccurrences` 
   ADD INDEX `Index_occurrences_cult` (`cultivationStatus` ASC), 
   ADD INDEX `Index_occurrences_typestatus` (`typeStatus` ASC) ;
+
+
+#determination index adjustments
+ALTER TABLE `omoccurdeterminations` 
+DROP INDEX `Index_unique` ,
+ADD UNIQUE INDEX `Index_unique` (`occid` ASC, `dateIdentified` ASC, `identifiedBy` ASC, `sciname` ASC);
+
+#Collection index adjustments
+ALTER TABLE `omcollections` 
+DROP INDEX `Index_inst` ,
+ADD UNIQUE INDEX `Index_inst` (`InstitutionCode` ASC, `CollectionCode` ASC);
+
+
+#Taxa table index adjustments
+ALTER TABLE `taxa`
+  DROP FOREIGN KEY `FK_taxa_taxonunit` ;
 
