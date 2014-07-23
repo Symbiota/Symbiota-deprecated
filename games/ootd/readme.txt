@@ -6,15 +6,25 @@ The first time you add block to a page, click on "Click here to test your knowle
 link to activate game and establish images for the first time. 
 
 <?php
+//---------------------------GAME SETTINGS---------------------------------------
 //If more than one game will be active, assign unique numerical ids for each game.
 //If only one game will be active, leave set to 1. 
 $oodID = 1; 
+
 //Enter checklist id (clid) of the checklist you wish to use 
 $ootdGameChecklist = 1;
+
 //Change to modify title
 $ootdGameTitle = "Organism of the Day "; 
+
 //Replace "plant" with the type of organism, eg: plant, animal, insect, fungi, etc.
+//This setting will appear in "Name that ______"
 $ootdGameType = "plant"; 
+//---------------------------DO NOT CHANGE BELOW HERE-----------------------------
+
+include_once($serverRoot.'/classes/GamesManager.php');
+$gameManager = new GamesManager();
+$gameInfo = $gameManager->setOOTD($oodID,$ootdGameChecklist);
 ?>
 <div style="float:right;margin-right:10px;width:290px;text-align:center;">
 	<div style="font-size:130%;font-weight:bold;">
