@@ -9,41 +9,51 @@
 			Search Collections
 		</a>
 	</div>
-    <div class="menuitem">
-    	<a href="<?php echo $clientRoot; ?>/projects/index.php">
-    		Flora Projects
-    	</a>
-    </div>
-    <div class="menuitem">
-    	<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=1">
-    		Blabla Flora
-    	</a>
-    </div>
-    <div class="menuitem">
-    	<a href="<?php echo $clientRoot; ?>/checklists/index.php">
-    		Species Lists
-    	</a>
-    </div>
-    <div class="menuitem">
-    	<a href="<?php echo $clientRoot; ?>/ident/index.php">
-    		Identification Keys
-    	</a>
-    </div>
-    <div class="menuitem">
-    	<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist">
-    		Dynamic Checklist
-    	</a>
-    </div>
-    <div class="menuitem">
-    	<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key">
-    		Dynamic Key
-    	</a>
-    </div>
-    <div class="menuitem">
-    	<a href="<?php echo $clientRoot; ?>/imagelib/index.php">
-    		Image Library
-    	</a>
-    </div>
+	<div class="menuitem">
+		<a href="<?php echo $clientRoot; ?>/collections/mapinterface.php">
+			Map Search
+		</a>
+	</div>
+	<div class="menuitem">
+		<a href="<?php echo $clientRoot; ?>/projects/index.php">
+			Flora Projects
+		</a>
+	</div>
+	<div class="menuitem">
+		<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=1">
+			Blabla Flora
+		</a>
+	</div>
+	<div class="menuitem">
+		<a href="<?php echo $clientRoot; ?>/checklists/index.php">
+			Species Lists
+		</a>
+	</div>
+	<div class="menuitem">
+		<a href="<?php echo $clientRoot; ?>/ident/index.php">
+			Identification Keys
+		</a>
+	</div>
+	<div class="menuitem">
+		<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist">
+			Dynamic Checklist
+		</a>
+	</div>
+	<div class="menuitem">
+		<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key">
+			Dynamic Key
+		</a>
+	</div>
+	<div class="menuitem">
+		<a href="<?php echo $clientRoot; ?>/imagelib/index.php">
+			Image Library
+		</a>
+	</div>
+	<div class="menuitem">
+		<a href="<?php echo $clientRoot; ?>/imagelib/imgsearch.php">
+			Search Images
+		</a>
+	</div>
 	<div>
 		<hr/>
 	</div>
