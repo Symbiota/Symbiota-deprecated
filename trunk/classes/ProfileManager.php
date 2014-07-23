@@ -266,11 +266,15 @@ class ProfileManager{
 		$returnStr = "";
 		$userNew = true;
 		
+		$firstName = $postArr['firstname'];
+		$lastName = $postArr['lastname'];
+		if($firstName == $lastName && strlen($lastName) == 8) return ''; 
+		
 		$person = new Person();
 		$person->setPassword($postArr['pwd']);
 		$person->setUserName($postArr['username']);
-		$person->setFirstName($postArr['firstname']);
-		$person->setLastName($postArr['lastname']);
+		$person->setFirstName($firstName);
+		$person->setLastName($lastName);
 		$person->setTitle($postArr['title']);
 		$person->setInstitution($postArr['institution']);
 		$person->setCity($postArr['city']);
