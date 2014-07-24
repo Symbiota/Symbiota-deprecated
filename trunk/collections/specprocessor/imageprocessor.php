@@ -306,10 +306,10 @@ if($spprId) $specManager->setProjVariables();
 										<td colspan="2">
 											<b>Thumbnail:</b>
 											<div style="margin:5px 15px;">
-												<input name="tnimg" type="radio" value="1" CHECKED /> Create new thumbnail from source image<br/>
-												<input name="tnimg" type="radio" value="2" /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
-												<input name="tnimg" type="radio" value="3" /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
-												<input name="tnimg" type="radio" value="4" /> Exclude thumbnail <br/>
+												<input name="tnimg" type="radio" value="1" <?php echo ($specManager->getTnImg()==1?'CHECKED':''); ?> /> Create new thumbnail from source image<br/>
+												<input name="tnimg" type="radio" value="2" <?php echo ($specManager->getTnImg()==2?'CHECKED':''); ?> /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
+												<input name="tnimg" type="radio" value="3" <?php echo ($specManager->getTnImg()==3?'CHECKED':''); ?> /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
+												<input name="tnimg" type="radio" value="0" <?php echo (!$specManager->getTnImg()?'CHECKED':''); ?> /> Exclude thumbnail <br/>
 											</div>
 										</td>
 									</tr>
@@ -317,11 +317,11 @@ if($spprId) $specManager->setProjVariables();
 										<td colspan="2">
 											<b>Large Image:</b>
 											<div style="margin:5px 15px;">
-												<input name="lgimg" type="radio" value="1" CHECKED /> Import source image as large version<br/>
-												<input name="lgimg" type="radio" value="2" /> Map to source image as large version<br/>
-												<input name="lgimg" type="radio" value="3" /> Import large version from source location (source name with _lg.jpg suffix)<br/>
-												<input name="lgimg" type="radio" value="4" /> Map to large version at source location (source name with _lg.jpg suffix)<br/>
-												<input name="lgimg" type="radio" value="5" /> Exclude large version<br/>
+												<input name="lgimg" type="radio" value="1" <?php echo ($specManager->getLgImg()==1?'CHECKED':''); ?> /> Import source image as large version<br/>
+												<input name="lgimg" type="radio" value="2" <?php echo ($specManager->getLgImg()==2?'CHECKED':''); ?> /> Map to source image as large version<br/>
+												<input name="lgimg" type="radio" value="3" <?php echo ($specManager->getLgImg()==3?'CHECKED':''); ?> /> Import large version from source location (source name with _lg.jpg suffix)<br/>
+												<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg()==4?'CHECKED':''); ?> /> Map to large version at source location (source name with _lg.jpg suffix)<br/>
+												<input name="lgimg" type="radio" value="0" <?php echo (!$specManager->getLgImg()?'CHECKED':''); ?> /> Exclude large version<br/>
 											</div>
 										</td>
 									</tr>
@@ -405,7 +405,7 @@ if($spprId) $specManager->setProjVariables();
 														<input name="lgimg" type="radio" value="1" <?php echo ($specManager->getLgImg() == 1?'CHECKED':'') ?> /> Import source image as large version<br/>
 														<input name="lgimg" type="radio" value="2" <?php echo ($specManager->getLgImg() == 2?'CHECKED':'') ?> /> Map to source image as large version<br/>
 														<input name="lgimg" type="radio" value="3" <?php echo ($specManager->getLgImg() == 3?'CHECKED':'') ?> /> Import existing large version (source name with _lg.jpg suffix)<br/>
-														<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg() == 4?'CHECKED':'') ?> /> Map to exiting large version (source name with _lg.jpg suffix)<br/>
+														<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg() == 4?'CHECKED':'') ?> /> Map to existing large version (source name with _lg.jpg suffix)<br/>
 														<input name="lgimg" type="radio" value="0" <?php echo (!$specManager->getLgImg()?'CHECKED':'') ?> /> Exclude large version<br/>
 													</div>
 												</td>
@@ -447,7 +447,7 @@ if($spprId) $specManager->setProjVariables();
 													<b>Target folder:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->getTargetPath();?><br/>
+													<?php echo ($specManager->getTargetPath()?$specManager->getTargetPath():$imageRootPath);?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -455,7 +455,7 @@ if($spprId) $specManager->setProjVariables();
 													<b>URL prefix:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->getImgUrlBase();?><br/>
+													<?php echo ($specManager->getImgUrlBase()?$specManager->getImgUrlBase():$imageRootUrl);?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -463,7 +463,7 @@ if($spprId) $specManager->setProjVariables();
 													<b>Web image width:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->getWebPixWidth();?><br/>
+													<?php echo ($specManager->getWebPixWidth()?$specManager->getWebPixWidth():$imgWebWidth);?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -471,7 +471,7 @@ if($spprId) $specManager->setProjVariables();
 													<b>Thumbnail width:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->getTnPixWidth();?><br/>
+													<?php echo ($specManager->getTnPixWidth()?$specManager->getTnPixWidth():$imgTnWidth);?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -479,7 +479,7 @@ if($spprId) $specManager->setProjVariables();
 													<b>Large image width:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->getLgPixWidth();?><br/>
+													<?php echo ($specManager->getLgPixWidth()?$specManager->getLgPixWidth():$imgLgWidth);?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -487,7 +487,7 @@ if($spprId) $specManager->setProjVariables();
 													<b>JPG quality (1-100): </b> 
 												</td>
 												<td> 
-													<?php echo $specManager->getJpgQuality();?><br/>
+													<?php echo ($specManager->getJpgQuality()?$specManager->getJpgQuality():80);?><br/>
 												</td>
 											</tr>
 											<tr>

@@ -48,9 +48,9 @@ class ImageBatchProcessor {
 	private $symbiotaClassPath = null;
 	private $serverRoot;
 	
-	private $webPixWidth = 1200;
-	private $tnPixWidth = 130;
-	private $lgPixWidth = 2400;
+	private $webPixWidth = '';
+	private $tnPixWidth = '';
+	private $lgPixWidth = '';
 	private $webFileSizeLimit = 300000;
 	private $lgFileSizeLimit = 3000000;
 	private $jpgQuality= 80;
@@ -104,9 +104,9 @@ class ImageBatchProcessor {
 		}
 		//Use deaults located within symbini, if they are available
 		//Will be replaced by values within configuration file, if they are set 
-		if(isset($GLOBALS['imgWebWidth']) && $GLOBALS['imgWebWidth']) $this->imgWebWidth = $GLOBALS['imgWebWidth'];
+		if(isset($GLOBALS['imgWebWidth']) && $GLOBALS['imgWebWidth']) $this->webPixWidth = $GLOBALS['imgWebWidth'];
 		if(isset($GLOBALS['imgTnWidth']) && $GLOBALS['imgTnWidth']) $this->tnPixWidth = $GLOBALS['imgTnWidth'];
-		if(isset($GLOBALS['imgLgWidth']) && $GLOBALS['imgLgWidth']) $this->imgWebWidth = $GLOBALS['imgLgWidth'];
+		if(isset($GLOBALS['imgLgWidth']) && $GLOBALS['imgLgWidth']) $this->lgPixWidth = $GLOBALS['imgLgWidth'];
 		if(isset($GLOBALS['imgFileSizeLimit']) && $GLOBALS['imgFileSizeLimit']) $this->webFileSizeLimit = $GLOBALS['imgFileSizeLimit'];
 	}
 
@@ -171,6 +171,7 @@ class ImageBatchProcessor {
 			$this->logOrEcho('ABORT: sourcePathBase does not exist ('.$this->sourcePathBase.')');
 			exit();
 		}
+		//Set target base path
 		if(!$this->targetPathBase){
 			//Assume that portal's default image root path is what needs to be used  
 			$this->targetPathBase = $GLOBALS['imageRootPath'];
@@ -179,6 +180,11 @@ class ImageBatchProcessor {
 			//Assume that we should use the portal's default image root path   
 			$this->targetPathBase = $GLOBALS['imageRootPath'];
 		}
+		if($this->targetPathBase && substr($this->targetPathBase,-1) != '/' && substr($this->targetPathBase,-1) != "\\"){
+			$this->targetPathBase .= '/';
+		}
+		
+		//Set image base URL
 		if(!$this->imgUrlBase){
 			//Assume that we should use the portal's default image url prefix 
 			$this->imgUrlBase = $GLOBALS['imageRootUrl'];
@@ -191,7 +197,10 @@ class ImageBatchProcessor {
 			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 			$this->imgUrlBase = $urlPrefix.$this->imgUrlBase;
 		}
-		
+		if($this->imgUrlBase && substr($this->imgUrlBase,-1) != '/' && substr($this->imgUrlBase,-1) != "\\"){
+			$this->imgUrlBase .= '/';
+		}
+
 		//Lets start processing folder
 		if($this->logMode == 1){
 			echo '<ul>';
@@ -289,7 +298,7 @@ class ImageBatchProcessor {
 					if($fileName != "." && $fileName != ".." && $fileName != ".svn"){
 						if(is_file($this->sourcePathBase.$pathFrag.$fileName)){
 							if(!stripos($fileName,'_tn.jpg') && !stripos($fileName,'_lg.jpg')){
-								$this->logOrEcho("Processing File: ".$fileName);
+								$this->logOrEcho("Processing File (".date('Y-m-d h:i:s A')."): ".$fileName);
 								$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
 								if($fileExt == ".jpg"){
 									if($this->processImageFile($fileName,$pathFrag)){
@@ -297,7 +306,7 @@ class ImageBatchProcessor {
 									}
 								}
 								elseif($fileExt == ".tif"){
-									$this->logOrEcho("\tERROR: File skipped, TIFFs image files are not a supported: ".$fileName);
+									$this->logOrEcho("ERROR: File skipped, TIFFs image files are not a supported: ".$fileName,1);
 									//Do something, like convert to jpg???
 									//but for now do nothing
 								}
@@ -322,7 +331,7 @@ class ImageBatchProcessor {
 									unlink($this->sourcePathBase.$pathFrag.$fileName);
 								}
 								else{
-									$this->logOrEcho("\tERROR: File skipped, not a supported image file: ".$fileName);
+									$this->logOrEcho("ERROR: File skipped, not a supported image file: ".$fileName,1);
 								}
 							}
 						}
@@ -335,11 +344,11 @@ class ImageBatchProcessor {
 				if($dirFH) closedir($dirFH);
 			}
 			else{
-				$this->logOrEcho("\tERROR: unable to access source directory: ".$this->sourcePathBase.$pathFrag);
+				$this->logOrEcho("ERROR: unable to access source directory: ".$this->sourcePathBase.$pathFrag,1);
 			}
 		}
 		else{
-			$this->logOrEcho("\tSource path does not exist: ".$this->sourcePathBase.$pathFrag);
+			$this->logOrEcho("Source path does not exist: ".$this->sourcePathBase.$pathFrag,1);
 			//exit("ABORT: Source path does not exist: ".$this->sourcePathBase.$pathFrag);
 		}
 	}
@@ -353,56 +362,49 @@ class ImageBatchProcessor {
 		if($codeArr[1] == '200'){
 			$dom = new DOMDocument();
 			$dom->loadHTMLFile($this->sourcePathBase.$pathFrag);
-			$trNodes= $dom->getElementsByTagName('tr');
-			foreach( $trNodes as $trNode ) {
-				$imgNodes = $trNode->getElementsByTagName('img');
-				if($imgNodes->length){
-					$fileType = trim($imgNodes->item(0)->getAttribute('alt'),'[] ');
-					if($fileType){
-						$aNodes = $trNode->getElementsByTagName('a');
-						if($aNodes){
-							$fileName = $aNodes->item(0)->nodeValue;
-							if($fileType == 'IMG'){
-								if(!stripos($fileName,'_tn.jpg') && !stripos($fileName,'_lg.jpg')){
-									$this->logOrEcho("Processing File: ".$fileName);
-									$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
-									if($fileExt == ".jpg"){
-										if($this->processImageFile($fileName,$pathFrag)){
-											if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
-										}
-									}
-									elseif($fileExt == ".tif"){
-										$this->logOrEcho("\tERROR: File skipped, TIFFs image files are not a supported: ".$fileName);
-										//Do something, like convert to jpg???
-										//but for now do nothing
-									}
-									elseif(($fileExt == ".csv" || $fileExt == ".txt" || $fileExt == ".tab" || $fileExt == ".dat")){
-										//Is skeletal file. Process and append data to database records
-										$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
-										if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
-									}
-									elseif($fileExt==".xml") {
-										$this->processXMLFile($fileName,$pathFrag);
-										if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
-									}
-									else{
-										$this->logOrEcho("\tERROR: File skipped, not a supported image file: ".$fileName);
-									}
+			$aNodes= $dom->getElementsByTagName('a');
+			$skipAnchors = array('Name','Last modified','Size','Description');
+			foreach( $aNodes as $aNode ) {
+				//$fileName = $aNode->getAttribute('href');
+				$fileName = $aNode->nodeValue;
+				if(!in_array($fileName,$skipAnchors)){
+					$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')+1));
+					if($fileExt == 'jpg' || $fileExt == 'jpeg'){
+						if(!stripos($fileName,'_tn.jpg') && !stripos($fileName,'_lg.jpg')){
+							$this->logOrEcho("Processing File (".date('Y-m-d h:i:s A')."): ".$fileName);
+							if($fileExt == "jpg"){
+								if($this->processImageFile($fileName,$pathFrag)){
+									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
 								}
 							}
-							elseif($fileType == 'DIR'){
-								if($fileName != 'Parent Directory'){
-									echo 'New dir path: '.$this->sourcePathBase.$pathFrag.$fileName.'<br/>';
-									//$this->processHtml($this->sourcePathBase.$pathFrag.$nodeVal);
-								}
+							elseif($fileExt == "tif"){
+								$this->logOrEcho("ERROR: File skipped, TIFFs image files are not a supported: ".$fileName,1);
+								//Do something, like convert to jpg???
+								//but for now do nothing
+							}
+							elseif(($fileExt == "csv" || $fileExt == "txt" || $fileExt == "tab" || $fileExt == "dat")){
+								//Is skeletal file. Process and append data to database records
+								$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
+								if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+							}
+							elseif($fileExt=="xml") {
+								$this->processXMLFile($fileName,$pathFrag);
+								if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+							}
+							else{
+								$this->logOrEcho("ERROR: File skipped, not a supported image file: ".$fileName,1);
 							}
 						}
+					}
+					elseif(stripos($fileName,'Parent Dir') === false){
+						echo 'New dir path: '.$this->sourcePathBase.$pathFrag.$fileName.'<br/>';
+						$this->processHtml($pathFrag.$fileName."/");
 					}
 				}
 			}
 		}
 		else{
-			$this->logOrEcho("\tSource directory skipped (code ".$codeArr[0].") : ".$this->sourcePathBase.$pathFrag);
+			$this->logOrEcho("Source directory skipped (code ".$codeArr[0].") : ".$this->sourcePathBase.$pathFrag,1);
 			//exit("ABORT: Source path does not exist: ".$this->sourcePathBase.$pathFrag);
 		}
 	}
@@ -431,7 +433,7 @@ class ImageBatchProcessor {
 						$isLapi = $xml->setSchema($lapischema);
 					} 
 					else { 
-						$this->logOrEcho("\tERROR: Can't find $lapischema");
+						$this->logOrEcho("ERROR: Can't find $lapischema",1);
 					}
 					// $this->logOrEcho($fileName." valid lapi xml:" . $xml->isValid() . " [" . $isLapi .  "]");
 					if ($xml->isValid() && $isLapi) {
@@ -442,12 +444,12 @@ class ImageBatchProcessor {
 							$result = $processor->process($this->sourcePathBase.$pathFrag.$fileName);
 							$foundSchema = $result->couldparse;
 							if (!$foundSchema || $result->failurecount>0) {
-								$this->logOrEcho("\tERROR: Errors processing $fileName: $result->errors.");
+								$this->logOrEcho("ERROR: Errors processing $fileName: $result->errors.",1);
 							}
 						} 
 						else { 
 							// fail gracefully if this instalation isn't configured with this parser.
-							$this->logOrEcho("\tERROR: SpecProcessorGPI.php not available.");
+							$this->logOrEcho("ERROR: SpecProcessorGPI.php not available.",1);
 						}
 					}
 				}
@@ -468,19 +470,19 @@ class ImageBatchProcessor {
 							$result = $processor->process($this->sourcePathBase.$pathFrag.$fileName);
 							$foundSchema = $result->couldparse;
 							if (!$foundSchema || $result->failurecount>0) {
-								$this->logOrEcho("\tERROR: Errors processing $fileName: $result->errors.");
+								$this->logOrEcho("ERROR: Errors processing $fileName: $result->errors.",1);
 							}
 						}
 						else { 
 							// fail gracefully if this instalation isn't configured with this parser.
-							$this->logOrEcho("\tERROR: SpecProcessorNEVP.php not available.");
+							$this->logOrEcho("ERROR: SpecProcessorNEVP.php not available.",1);
 						}
 					}
 				}
 				if ($foundSchema>0) { 
 					$this->logOrEcho("Proccessed $pathFrag$fileName, records: $result->recordcount, success: $result->successcount, failures: $result->failurecount, inserts: $result->insertcount, updates: $result->updatecount.");
 					if ($result->imagefailurecount>0) {
-						$this->logOrEcho("\tERROR: not moving (".$fileName."), image failure count " . $result->imagefailurecount . " greater than zero.");
+						$this->logOrEcho("ERROR: not moving (".$fileName."), image failure count " . $result->imagefailurecount . " greater than zero.",1);
 					}
 					else {
 						if($this->keepOrig){
@@ -490,28 +492,28 @@ class ImageBatchProcessor {
 								mkdir($this->targetPathBase.$this->targetPathFrag.'orig_xml');
 							}
 							if(!rename($oldFile,$this->targetPathBase.$this->targetPathFrag.'orig_xml/'.$newFileName)){
-								$this->logOrEcho("\tERROR: unable to move (".$fileName.") ");
+								$this->logOrEcho("ERROR: unable to move (".$fileName.") ",1);
 							}
 						 } 
 						 else {
 							if(!unlink($oldFile)){
-								$this->logOrEcho("\tERROR: unable to delete file (".$fileName.") ");
+								$this->logOrEcho("ERROR: unable to delete file (".$fileName.") ",1);
 							}
 						}
 					}
 				} 
 				else { 
-					$this->logOrEcho("\tERROR: Unable to match ".$pathFrag.$fileName." to a known schema.");
+					$this->logOrEcho("ERROR: Unable to match ".$pathFrag.$fileName." to a known schema.",1);
 				}
 			} 
 			else { 
-				$this->logOrEcho("\tERROR: XMLReader couldn't read ".$pathFrag.$fileName);
+				$this->logOrEcho("ERROR: XMLReader couldn't read ".$pathFrag.$fileName,1);
 			}
 		}
 	}
 
 	private function processImageFile($fileName,$sourcePathFrag = ''){
-		$this->logOrEcho("Processing image (".date('Y-m-d h:i:s A')."): ".$fileName);
+		//$this->logOrEcho("Processing image (".date('Y-m-d h:i:s A')."): ".$fileName);
 		//ob_flush();
 		flush();
 		//Grab Primary Key from filename
@@ -565,7 +567,7 @@ class ImageBatchProcessor {
 						}
 						else{
 							// skip import of image ($this->imgExists === 0)
-							$this->logOrEcho("NOTICE: image import skipped because image file already exists ");
+							$this->logOrEcho("NOTICE: image import skipped because image file already exists ",1);
 							return false;
 						}
 					}
@@ -584,7 +586,7 @@ class ImageBatchProcessor {
 						}
 						$rs->free();
 						if($recExists){
-							$this->logOrEcho("NOTICE: image import skipped because image file already exists ");
+							$this->logOrEcho("NOTICE: image import skipped because image file already exists ",1);
 							return false;
 						}
 					}
@@ -607,9 +609,9 @@ class ImageBatchProcessor {
 						$fileSize = @filesize($sourcePath.$fileName);
 					} 
 					
-					$this->logOrEcho("\tLoading image (".date('Y-m-d h:i:s A').")");
+					//$this->logOrEcho("Loading image (".date('Y-m-d h:i:s A').")",1);
 					//ob_flush();
-					flush();
+					//flush();
 					
 					//Create web image
 					$webUrlFrag = '';
@@ -619,11 +621,13 @@ class ImageBatchProcessor {
 							if(($width > $this->webPixWidth  || $fileSize > $this->webFileSizeLimit)){
 								if($this->createNewImage($sourcePath.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height)){
 									$webUrlFrag = $this->imgUrlBase.$targetFrag.$targetFileName;
+									$this->logOrEcho("Web image created from source image (".date('Y-m-d h:i:s A').") ",1);
 								}
 							}
 							else{
 								if(copy($sourcePath.$fileName,$targetPath.$targetFileName)){
 									$webUrlFrag = $this->imgUrlBase.$targetFrag.$targetFileName;
+									$this->logOrEcho("Source image imported as web image (".date('Y-m-d h:i:s A').") ",1);
 								}
 							}
 						}
@@ -631,19 +635,18 @@ class ImageBatchProcessor {
 							// 2 = import source and use as is
 							if(copy($sourcePath.$fileName,$targetPath.$targetFileName)){
 								$webUrlFrag = $this->imgUrlBase.$targetFrag.$targetFileName;
+								$this->logOrEcho("Source image imported as web image (".date('Y-m-d h:i:s A').") ",1);
 							}
 						}
 						elseif($this->webImg == 3){
 							// 3 = map to source as the web image
 							$webImgCreated = true;
 							$webUrlFrag = $sourcePath.$fileName;
+							$this->logOrEcho("Source used as web image (".date('Y-m-d h:i:s A').") ",1);
 						}
 					}
-					if($webUrlFrag){
-						$this->logOrEcho("\tWeb image copied to target folder (".date('Y-m-d h:i:s A').") ");
-					}
-					else{
-						$this->logOrEcho("\tFailed to create web image ");
+					if(!$webUrlFrag){
+						$this->logOrEcho("Failed to create web image ",1);
 					}
 					//Create Large Image
 					$lgUrlFrag = "";
@@ -658,12 +661,17 @@ class ImageBatchProcessor {
 									//Image is too width or file size is too big, thus let's resize and import
 									if($this->createNewImage($sourcePath.$fileName,$targetPath.$lgTargetFileName,$this->lgPixWidth,round($this->lgPixWidth*$height/$width),$width,$height)){
 										$lgUrlFrag = $this->imgUrlBase.$targetFrag.$lgTargetFileName;
+										$this->logOrEcho("Resized source as large derivative (".date('Y-m-d h:i:s A').") ",1);
 									}
 								}
 								else{
 									//Source can serve as large version, thus just import as is
 									if(copy($sourcePath.$fileName,$targetPath.$lgTargetFileName)){
 										$lgUrlFrag = $this->imgUrlBase.$targetFrag.$lgTargetFileName;
+										$this->logOrEcho("Imported source as large derivative (".date('Y-m-d h:i:s A').") ",1);
+									}
+									else{
+										$this->logOrEcho("WARNING: unable to import large derivative (".$sourcePath.$lgSourceFileName.") ",1);
 									}
 								}
 							}
@@ -671,22 +679,31 @@ class ImageBatchProcessor {
 						elseif($this->lgImg == 2){
 							// 2 = map to source
 							$lgUrlFrag = $sourcePath.$fileName;
+							$this->logOrEcho("Used source as large derivative (".date('Y-m-d h:i:s A').") ",1);
 						}
 						elseif($this->lgImg == 3){
 							// 3 = import large version (_lg.jpg), if it exists
 							$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
-							if(file_exists($sourcePath.$lgSourceFileName)){
+							if($this->uriExists($sourcePath.$lgSourceFileName)){
 								if(copy($sourcePath.$lgSourceFileName,$targetPath.$lgTargetFileName)){
 									if(substr($sourcePath,0,4) != 'http') unlink($sourcePath.$lgSourceFileName);
 									$lgUrlFrag = $this->imgUrlBase.$targetFrag.$lgTargetFileName;
+									$this->logOrEcho("Imported large derivative of source for large version(".date('Y-m-d h:i:s A').") ",1);
 								}
+							}
+							else{
+								$this->logOrEcho("WARNING: unable to import large derivative (".$sourcePath.$lgSourceFileName.") ",1);
 							}
 						}
 						elseif($this->lgImg == 4){
 							// 4 = map to large version (_lg.jpg), if it exist
 							$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
-							if(file_exists($sourcePath.$lgSourceFileName)){
+							if($this->uriExists($sourcePath.$lgSourceFileName)){
 								$lgUrlFrag = $sourcePath.$lgSourceFileName;
+								$this->logOrEcho("Large version mapped to large derivative of source (".date('Y-m-d h:i:s A').") ",1);
+							}
+							else{
+								$this->logOrEcho("WARNING: unable to map to large derivative (".$sourcePath.$lgSourceFileName.") ",1);
 							}
 						}
 					}
@@ -700,21 +717,24 @@ class ImageBatchProcessor {
 							// 1 = create from source, 0 = exclude
 							if($this->createNewImage($sourcePath.$fileName,$targetPath.$tnTargetFileName,$this->tnPixWidth,round($this->tnPixWidth*$height/$width),$width,$height)){
 								$tnUrlFrag = $this->imgUrlBase.$targetFrag.$tnTargetFileName;
+								$this->logOrEcho("Created thumbnail from source (".date('Y-m-d h:i:s A').") ",1);
 							}
 						}
 						elseif($this->tnImg == 2){
 							// 2 = import source (source name with _tn.jpg suffix)
 							$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
-							if(file_exists($sourcePath.$tnFileName)){
+							if($this->uriExists($sourcePath.$tnFileName)){
 								rename($sourcePath.$tnFileName,$targetPath.$tnTargetFileName);
 							}
 							$tnUrlFrag = $this->imgUrlBase.$targetFrag.$tnTargetFileName;
+							$this->logOrEcho("Imported source as thumbnail (".date('Y-m-d h:i:s A').") ",1);
 						}
 						elseif($this->tnImg == 3){
 							// 3 = map to source (source name with _tn.jpg suffix)
 							$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
-							if(file_exists($sourcePath.$tnFileName)){
+							if($this->uriExists($sourcePath.$tnFileName)){
 								$tnUrlFrag = $sourcePath.$tnFileName;
+								$this->logOrEcho("Thumbnail is map of source thumbnail (".date('Y-m-d h:i:s A').") ",1);
 							}
 						}
 					}
@@ -740,7 +760,7 @@ class ImageBatchProcessor {
 							unlink($sourcePath.$fileName);
 						}
 					}
-					$this->logOrEcho("\tImage processed successfully (".date('Y-m-d h:i:s A').")!");
+					$this->logOrEcho("Image processed successfully (".date('Y-m-d h:i:s A').")!",1);
 				}
 				else{
 					$this->logOrEcho("File skipped (".$sourcePathFrag.$fileName."), unable to obtain dimentions of original image");
@@ -769,7 +789,7 @@ class ImageBatchProcessor {
 		}
 		else{
 			// Neither ImageMagick nor GD are installed
-			$this->logOrEcho("\tFATAL ERROR: No appropriate image handler for image conversions");
+			$this->logOrEcho("FATAL ERROR: No appropriate image handler for image conversions",1);
 			exit("ABORT: No appropriate image handler for image conversions");
 		}
 		return $status;
@@ -800,7 +820,10 @@ class ImageBatchProcessor {
 		if(!$this->sourceGdImg){
 			$this->sourceGdImg = imagecreatefromjpeg($sourcePathBase);
 		}
-
+		if(!$newWidth || !$newHeight){
+			$this->logOrEcho("ERROR: Unable to create image because new width or height is not set (w:".$newWidth.' h:'.$newHeight.')');
+			return $status;
+		}
 		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 		imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
@@ -813,7 +836,7 @@ class ImageBatchProcessor {
 		}
 		
 		if(!$status){
-			$this->logOrEcho("\tERROR: Unable to resize and write file: ".$targetPath);
+			$this->logOrEcho("ERROR: Unable to resize and write file: ".$targetPath,1);
 		}
 		
 		imagedestroy($tmpImg);
@@ -864,11 +887,11 @@ class ImageBatchProcessor {
 				'VALUES('.$this->activeCollid.',"'.$specPk.'","unprocessed")';
 			if($this->conn->query($sql2)){
 				$occId = $this->conn->insert_id;
-				$this->logOrEcho("\tSpecimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") ");
+				$this->logOrEcho("Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") ",1);
 			} 
 		}
 		if(!$occId){
-			$this->logOrEcho("\tERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") ");
+			$this->logOrEcho("ERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") ",1);
 		}
 		return $occId;
 	}
@@ -887,7 +910,7 @@ class ImageBatchProcessor {
 	private function databaseImage($occId,$webUrl,$tnUrl,$oUrl){
 		$status = true;
 		if($occId && is_numeric($occId)){
-			$this->logOrEcho("\tPreparing to load record into database");
+			$this->logOrEcho("Preparing to load record into database",1);
 			//Check to see if image url already exists for that occid
 			$imgId = 0;$exTnUrl = '';$exLgUrl = '';
 			$sql = 'SELECT imgid, url, thumbnailurl, originalurl '.
@@ -941,13 +964,13 @@ class ImageBatchProcessor {
 				}
 				else{
 					$status = false;
-					$this->logOrEcho("\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql);
+					$this->logOrEcho("ERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql,1);
 				}
 				if($imgId){
-					$this->logOrEcho("\tWARNING: Existing image record replaced; occid: $occId ");
+					$this->logOrEcho("WARNING: Existing image record replaced; occid: $occId ",1);
 				}
 				else{
-					$this->logOrEcho("\tSUCCESS: Image record loaded into database");
+					$this->logOrEcho("SUCCESS: Image record loaded into database",1);
 				}
 			}
 		}
@@ -969,7 +992,7 @@ class ImageBatchProcessor {
 	}
 	
 	private function processSkeletalFile($filePath){
-		$this->logOrEcho("\tPreparing to load Skeletal file into database");
+		$this->logOrEcho("Preparing to load Skeletal file into database",1);
 		$fh = fopen($filePath,'r');
 		$hArr = array();
 		if($fh){
@@ -1003,12 +1026,12 @@ class ImageBatchProcessor {
 					$delimiter = "csv";
 				}
 				else{
-					$this->logOrEcho("\tERROR: Unable to identify delimiter for metadata file ");
+					$this->logOrEcho("ERROR: Unable to identify delimiter for metadata file ",1);
 					return false;
 				}
 			}
 			else{
-				$this->logOrEcho("\tERROR: Skeletal file skipped: unable to determine file type ");
+				$this->logOrEcho("ERROR: Skeletal file skipped: unable to determine file type ",1);
 				return false;
 			}
 			if($hArr){
@@ -1261,7 +1284,7 @@ class ImageBatchProcessor {
 										}
 										else{
 											$this->logOrEcho("ERROR: Unable to update existing record with new skeletal record ");
-											$this->logOrEcho("\tSQL : $sqlUpdate ");
+											$this->logOrEcho("SQL : $sqlUpdate ",1);
 										}
 									}
 								}
@@ -1316,10 +1339,8 @@ class ImageBatchProcessor {
 										$occid = $this->conn->insert_id;
 									}
 									else{
-										if($this->logFH){
-											$this->logOrEcho("ERROR: Unable to load new skeletal record ");
-											$this->logOrEcho("\tSQL : $sqlIns ");
-										}
+										$this->logOrEcho('ERROR trying to load new skeletal record: '.$this->conn->error);
+										//$this->logOrEcho("SQL : $sqlIns ",1);
 									}
 								}
 							}
@@ -1328,10 +1349,8 @@ class ImageBatchProcessor {
 							if(isset($recMap['omenid']) && $occid){
 								$sqlExs ='INSERT INTO omexsiccatiocclink(omenid,occid) VALUES('.$recMap['omenid'].','.$occid.')';
 								if(!$this->conn->query($sqlExs)){
-									if($this->logFH){
-										$this->logOrEcho("ERROR: Unable to link record to exsiccati (".$recMap['omenid'].'-'.$occid.") ");
-										$this->logOrEcho("\tSQL : $sqlExs ");
-									}
+									$this->logOrEcho('ERROR linking record to exsiccati ('.$recMap['omenid'].'-'.$occid.'): '.$this->conn->error);
+									//$this->logOrEcho('SQL : '.$sqlExs,1);
 								}
 							}
 						}
@@ -1339,11 +1358,11 @@ class ImageBatchProcessor {
 					}
 				}
 				else{
-					$this->logOrEcho("\tERROR: Failed to locate catalognumber MD within file (".$filePath."),  ");
+					$this->logOrEcho("ERROR: Failed to locate catalognumber MD within file (".$filePath."),  ",1);
 					return false;
 				}
 			}
-			$this->logOrEcho("\tSkeletal file loaded ");
+			$this->logOrEcho("Skeletal file loaded ",1);
 			fclose($fh);
 			if($this->keepOrig){
 				$fileName = substr($filePath,strrpos($filePath,'/')).'.orig_'.time();
@@ -1351,11 +1370,11 @@ class ImageBatchProcessor {
 					mkdir($this->targetPathBase.$this->targetPathFrag.'orig_skeletal');
 				}
 				if(!rename($filePath,$this->targetPathBase.$this->targetPathFrag.'orig_skeletal'.$fileName)){
-					$this->logOrEcho("\tERROR: unable to move (".$filePath.") ");
+					$this->logOrEcho("ERROR: unable to move (".$filePath.") ",1);
 				}
 			} else {
 				if(!unlink($filePath)){
-					$this->logOrEcho("\tERROR: unable to delete file (".$filePath.") ");
+					$this->logOrEcho("ERROR: unable to delete file (".$filePath.") ",1);
 				}
 			}
 		}
@@ -1533,7 +1552,7 @@ class ImageBatchProcessor {
 	}
 	
 	public function setSourcePathBase($p){
-		if(substr($p,-1) != '/' && substr($p,-1) != "\\") $p .= '/';
+		if($p && substr($p,-1) != '/' && substr($p,-1) != "\\") $p .= '/';
 		$this->sourcePathBase = $p;
 	}
 
@@ -1542,7 +1561,7 @@ class ImageBatchProcessor {
 	}
 
 	public function setTargetPathBase($p){
-		if(substr($p,-1) != '/' && substr($p,-1) != "\\") $p .= '/';
+		if($p && substr($p,-1) != '/' && substr($p,-1) != "\\") $p .= '/';
 		$this->targetPathBase = $p;
 	}
 
@@ -1551,7 +1570,7 @@ class ImageBatchProcessor {
 	}
 
 	public function setImgUrlBase($u){
-		if(substr($u,-1) != '/') $u .= '/';
+		if($u && substr($u,-1) != '/') $u .= '/';
 		$this->imgUrlBase = $u;
 	}
 
@@ -1825,6 +1844,57 @@ class ImageBatchProcessor {
 		return $sciNameStr;
 	}
 	
+	private function uriExists($url) {
+		$exists = false;
+		$localUrl = '';
+		if(substr($url,0,1) == '/'){
+			if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
+				$url = $GLOBALS['imageDomain'].$url;
+			}
+			elseif($GLOBALS['imageRootUrl'] && strpos($url,$GLOBALS['imageRootUrl']) === 0){
+				$localUrl = str_replace($GLOBALS['imageRootUrl'],$GLOBALS['imageRootPath'],$url);
+			}
+			else{
+				$urlPrefix = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				$urlPrefix .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+				$url = $urlPrefix.$url;
+			}
+		}
+		
+		//First simple check
+		if(file_exists($url) || ($localUrl && file_exists($localUrl))){
+			return true;
+	    }
+
+	    //Second check
+	    if(!$exists){
+		    // Version 4.x supported
+		    $handle   = curl_init($url);
+		    if (false === $handle){
+				$exists = false;
+		    }
+		    curl_setopt($handle, CURLOPT_HEADER, false);
+		    curl_setopt($handle, CURLOPT_FAILONERROR, true);  // this works
+		    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
+		    curl_setopt($handle, CURLOPT_NOBODY, true);
+		    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
+		    $exists = curl_exec($handle);
+		    curl_close($handle);
+	    }
+	     
+	    //One last check
+	    if(!$exists){
+	    	$exists = (@fclose(@fopen($url,"r")));
+	    }
+	    
+	    //Test to see if file is an image 
+	    if(!@exif_imagetype($url)) $exists = false;
+
+	    return $exists;
+	}	
+	
 	private function encodeString($inStr){
 		global $charset;
 		$retStr = trim($inStr);
@@ -1861,14 +1931,15 @@ class ImageBatchProcessor {
 		return $retStr;
 	}
 
-	private function logOrEcho($str){
+	private function logOrEcho($str,$indent = 0){
 		if($this->logMode == 2){
 			if($this->logFH){
+				if($indent) $str = '\t'.$str;
 				fwrite($this->logFH,$str."\n");
 			}
 		}
 		elseif($this->logMode == 1){
-			echo '<li>'.$str."</li>\n";
+			echo '<li '.($indent?'style="margin-left:'.($indent*15).'px"':'').'>'.$str."</li>\n";
 		}
 	}
 }

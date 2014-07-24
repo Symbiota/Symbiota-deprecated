@@ -559,9 +559,11 @@ class ImageShared{
 				else{
 					//Delete image from server
 					$imgDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
-					if(!unlink($imgDelPath)){
-						$this->errArr[] = 'WARNING: Deleted records from database successfully but FAILED to delete image from server (path: '.$imgDelPath.')';
-						//$status .= '<br/>Return to <a href="../taxa/admin/tpeditor.php?tid='.$tid.'&tabindex=1">Taxon Editor</a>';
+					if(substr($imgDelPath,0,4) != 'http'){
+						if(!unlink($imgDelPath)){
+							$this->errArr[] = 'WARNING: Deleted records from database successfully but FAILED to delete image from server (path: '.$imgDelPath.')';
+							//$status .= '<br/>Return to <a href="../taxa/admin/tpeditor.php?tid='.$tid.'&tabindex=1">Taxon Editor</a>';
+						}
 					}
 					
 					//Delete thumbnail image
@@ -570,7 +572,7 @@ class ImageShared{
 							$imgThumbnailUrl = substr($imgThumbnailUrl,strlen($domain));
 						}				
 						$imgTnDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgThumbnailUrl);
-						if(file_exists($imgTnDelPath)) unlink($imgTnDelPath);
+						if(file_exists($imgTnDelPath) && substr($imgTnDelPath,0,4) != 'http') unlink($imgTnDelPath);
 					}
 					
 					//Delete large version of image
@@ -579,7 +581,7 @@ class ImageShared{
 							$imgOriginalUrl = substr($imgOriginalUrl,strlen($domain));
 						}				
 						$imgOriginalDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgOriginalUrl);
-						if(file_exists($imgOriginalDelPath)) unlink($imgOriginalDelPath);
+						if(file_exists($imgOriginalDelPath) && substr($imgOriginalDelPath,0,4) != 'http') unlink($imgOriginalDelPath);
 					}
 				}
 			}

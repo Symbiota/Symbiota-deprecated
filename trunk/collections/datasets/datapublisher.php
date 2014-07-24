@@ -29,15 +29,20 @@ if($action){
 	$dwcaManager->setTargetPath($serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'collections/datasets/dwc/');
 }
 
-$editable = 0;
+$isEditor = 0;
 if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])){
-	$editable = 1;
+	$isEditor = 1;
 }
 
 $collArr = array();
 if($collId){
 	$dwcaManager->setCollArr($collId);
 	$collArr = $dwcaManager->getCollArr();
+}
+if($isEditor){
+	if(array_key_exists('colliddel',$_POST)){
+		$dwcaManager->deleteArchive($_POST['colliddel']);
+	}
 }
 ?>
 <!DOCTYPE html>
@@ -273,9 +278,6 @@ include($serverRoot."/header.php");
 				$dwcaManager->setVerbose(1);
 				$dwcaManager->batchCreateDwca($_POST['coll']);
 				echo '</ul>';
-			}
-			elseif(array_key_exists('colliddel',$_POST)){
-				$dwcaManager->deleteArchive($_POST['colliddel']);
 			}
 			?>
 			<div id="dwcaadmindiv" style="margin:10px;display:<?php echo ($emode?'block':'none'); ?>;" >
