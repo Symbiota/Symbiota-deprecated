@@ -266,7 +266,7 @@ class ChecklistManager {
 					$this->taxaList[$row2->tid]["url"] = $row2->url;
 					$this->taxaList[$row2->tid]["tnurl"] = $row2->thumbnailurl;
 				}
-				$rs->free();
+				$rs2->free();
 			}
 		}
 	}

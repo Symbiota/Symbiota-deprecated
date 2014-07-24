@@ -139,12 +139,12 @@ if($isEditor){
 				$imageProcessor->setTargetPathBase($specManager->getTargetPath());
 				$imageProcessor->setImgUrlBase($specManager->getImgUrlBase());
 				$imageProcessor->setServerRoot($serverRoot);
-				$imageProcessor->setWebPixWidth($specManager->getWebPixWidth());
-				$imageProcessor->setTnPixWidth($specManager->getTnPixWidth());
-				$imageProcessor->setLgPixWidth($specManager->getLgPixWidth());
-				$imageProcessor->setWebFileSizeLimit($specManager->getWebMaxFileSize());
-				$imageProcessor->setLgFileSizeLimit($specManager->getLgMaxFileSize());
-				$imageProcessor->setJpgQuality($specManager->getJpgQuality());
+				if($specManager->getWebPixWidth()) $imageProcessor->setWebPixWidth($specManager->getWebPixWidth());
+				if($specManager->getTnPixWidth()) $imageProcessor->setTnPixWidth($specManager->getTnPixWidth());
+				if($specManager->getLgPixWidth()) $imageProcessor->setLgPixWidth($specManager->getLgPixWidth());
+				if($specManager->getWebMaxFileSize()) $imageProcessor->setWebFileSizeLimit($specManager->getWebMaxFileSize());
+				if($specManager->getLgMaxFileSize()) $imageProcessor->setLgFileSizeLimit($specManager->getLgMaxFileSize());
+				if($specManager->getJpgQuality()) $imageProcessor->setJpgQuality($specManager->getJpgQuality());
 				$imageProcessor->setUseImageMagick($specManager->getUseImageMagick());
 				$imageProcessor->setWebImg($_POST['webimg']);
 				$imageProcessor->setTnImg($_POST['tnimg']);

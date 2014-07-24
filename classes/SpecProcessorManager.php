@@ -18,11 +18,11 @@ class SpecProcessorManager {
 	protected $sourcePath;
 	protected $targetPath;
 	protected $imgUrlBase;
-	protected $webPixWidth = 1200;
-	protected $tnPixWidth = 130;
-	protected $lgPixWidth = 2400;
+	protected $webPixWidth = '';
+	protected $tnPixWidth = '';
+	protected $lgPixWidth = '';
 	protected $jpgQuality = 80;
-	protected $webMaxFileSize = 400000;
+	protected $webMaxFileSize = 300000;
 	protected $lgMaxFileSize = 3000000;
 	protected $webImg = 1;
 	protected $tnImg = 1;
@@ -121,16 +121,22 @@ class SpecProcessorManager {
 		if($editArr['spprid']){
 			$sql = 'UPDATE specprocessorprojects '.
 				'SET title = "'.$this->cleanInStr($editArr['title']).'", '.
-				'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).
-				'", sourcepath = "'.$this->cleanInStr($editArr['sourcepath']).
-				'", targetpath = "'.$this->cleanInStr($editArr['targetpath']).'", imgurl = "'.$editArr['imgurl'].
-				'", webpixwidth = '.$editArr['webpixwidth'].', tnpixwidth = '.$editArr['tnpixwidth'].', lgpixwidth = '.$editArr['lgpixwidth'].
-				', jpgcompression = '.$editArr['jpgquality'].
-				', createtnimg = '.$editArr['tnimg'].
-				', createlgimg = '.$editArr['lgimg'].' '.
+				'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).'",'.
+				'sourcepath = "'.$this->cleanInStr($editArr['sourcepath']).'",'.
+				'targetpath = '.($editArr['targetpath']?'"'.$this->cleanInStr($editArr['targetpath']).'"':'NULL').','.
+				'imgurl = '.($editArr['imgurl']?'"'.$editArr['imgurl'].'"':'NULL').','.
+				'webpixwidth = '.($editArr['webpixwidth']?$editArr['webpixwidth']:'NULL').','.
+				'tnpixwidth = '.($editArr['tnpixwidth']?$editArr['tnpixwidth']:'NULL').','.
+				'lgpixwidth = '.($editArr['lgpixwidth']?$editArr['lgpixwidth']:'NULL').','.
+				'jpgcompression = '.($editArr['jpgquality']?$editArr['jpgquality']:'NULL').','.
+				'createtnimg = '.$editArr['tnimg'].','.
+				'createlgimg = '.$editArr['lgimg'].' '.
 				'WHERE (spprid = '.$editArr['spprid'].')';
 			//echo 'SQL: '.$sql;
-			$this->conn->query($sql);
+			if(!$this->conn->query($sql)){
+				echo 'ERROR saving project: '.$this->conn->error;
+				//echo '<br/>SQL: '.$sql;
+			}
 		}
 	}
 
@@ -168,11 +174,8 @@ class SpecProcessorManager {
 				$this->coordY1 = $row->coordy1;
 				$this->coordY2 = $row->coordy2;
 				$this->sourcePath = $row->sourcepath;
-				if(substr($this->sourcePath,-1) != '/' && substr($this->sourcePath,-1) != '\\') $this->sourcePath .= '/'; 
 				$this->targetPath = $row->targetpath;
-				if(substr($this->targetPath,-1) != '/' && substr($this->targetPath,-1) != '\\') $this->targetPath .= '/'; 
 				$this->imgUrlBase = $row->imgurl;
-				if(substr($this->imgUrlBase,-1) != '/') $this->imgUrlBase .= '/'; 
 				if($row->webpixwidth) $this->webPixWidth = $row->webpixwidth;
 				if($row->tnpixwidth) $this->tnPixWidth = $row->tnpixwidth;
 				if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
@@ -181,6 +184,12 @@ class SpecProcessorManager {
 				$this->lgImg = $row->createlgimg;
 			}
 			$rs->close();
+			
+			//if(!$this->targetPath) $this->targetPath = $GLOBALS['imageRootPath'];
+			//if(!$this->imgUrlBase) $this->imgUrlBase = $GLOBALS['imageRootUrl'];
+			if($this->sourcePath && substr($this->sourcePath,-1) != '/' && substr($this->sourcePath,-1) != '\\') $this->sourcePath .= '/'; 
+			if($this->targetPath && substr($this->targetPath,-1) != '/' && substr($this->targetPath,-1) != '\\') $this->targetPath .= '/'; 
+			if($this->imgUrlBase && substr($this->imgUrlBase,-1) != '/') $this->imgUrlBase .= '/'; 
 		}
 	}
 	
