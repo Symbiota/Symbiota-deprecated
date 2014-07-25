@@ -410,14 +410,15 @@ Array.prototype.contains = function ( needle ) {
 }
 
 function changeKeyColor(v,markers){
+	var newMarkerColor = '#'+v;
 	if (markers) {
 		for (i in markers) {
 			if(markers[i].customInfo=='obs'){
-				var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:v,fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
+				var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:newMarkerColor,fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
 				markers[i].setIcon(markerIcon);
 			}
 			if(markers[i].customInfo=='spec'){
-				var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:v,fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
+				var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:newMarkerColor,fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
 				markers[i].setIcon(markerIcon);
 			}
 		}
