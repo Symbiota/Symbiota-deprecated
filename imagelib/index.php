@@ -1,6 +1,6 @@
 <?php 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ImageProfileManager.php');
+include_once($serverRoot.'/classes/ImageLibraryManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $taxon = array_key_exists("taxon",$_REQUEST)?trim($_REQUEST["taxon"]):"";

@@ -188,32 +188,6 @@ class ChecklistAdmin {
 		return $statusStr;
 	}
 
-	//Species editing functions (called from checklist.php)
-	public function echoSpeciesAddList(){
-		$sql = "SELECT DISTINCT t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-			"WHERE ts.taxauthid = 1 ";
-		if($this->taxonFilter){
-			$sql .= "AND t.rankid > 140 AND ((ts.family = '".$this->taxonFilter."') OR (t.sciname LIKE '".$this->taxonFilter."%')) ";
-		}
-		else{
-			$sql .= "AND (t.rankid = 140 OR t.rankid = 180) ";
-		}
-		$sql .= "ORDER BY t.sciname";
-		//echo $sql;
-		$result = $this->clCon->query($sql);
-		if($result){
-			while($row = $result->fetch_object()){
-				if($this->taxonFilter){
-					echo "<option value='".$row->tid."'>".$this->cleanOutStr($row->sciname)."</option>\n";
-				}
-				else{
-					echo "<option>".$this->cleanOutStr($row->sciname)."</option>\n";
-				}
-		   	}
-		   	$result->free();
-		}
-	}
-
 	public function addNewSpecies($dataArr){
 		if(!$this->clid) return 'ERROR adding species: checklist identifier not set';
 		$insertStatus = false;
