@@ -541,6 +541,7 @@ if($coordArr && !is_numeric($coordArr)){
 						foreach($grpCntArr as $gCnt){
 							?>
 							if (markers<?php echo $gCnt; ?>) {
+								var newMarkerColor = '#'+newColor;
 								for (i in markers<?php echo $gCnt; ?>) {
 									if(markers<?php echo $gCnt; ?>[i].taxatid == <?php echo $tId; ?>){
 										<?php
@@ -551,11 +552,11 @@ if($coordArr && !is_numeric($coordArr)){
 										}
 										?>
 										if(markers<?php echo $gCnt; ?>[i].customInfo=='obs'){
-											var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:newColor,fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
+											var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:newMarkerColor,fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
 											markers<?php echo $gCnt; ?>[i].setIcon(markerIcon);
 										}
 										if(markers<?php echo $gCnt; ?>[i].customInfo=='spec'){
-											var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:newColor,fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
+											var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:newMarkerColor,fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
 											markers<?php echo $gCnt; ?>[i].setIcon(markerIcon);
 										}
 										newMarkers<?php echo $tId; ?>.push(markers<?php echo $gCnt; ?>[i]);
