@@ -421,7 +421,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			),
 			$str
 		);
-		//echo "\nline 13569, str\n".$str."\n";
+		//echo "\nline 15223, str\n".$str."\n";
 		$acceptableSmallWords = "(?:road|pine|park|tree|fork|cove|camp|fire|bay|[lb]og|soil|sand|oaks?|base|area|lane|farm|bark|twig|mat|Ilex)";
 		$recordedBy = '';
 		$recordNumber = '';
@@ -541,14 +541,14 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$matches = $this->getTaxonOfHeaderInfo($str);
 			if($matches != null) {
 				$info = $this->processTaxonOfHeaderInfo($matches);
-				if($info) {//foreach($info as $k => $v) echo "\nline 13911, ".$k.": ".$v."\n";
+				if($info) {//foreach($info as $k => $v) echo "\nline 15343, ".$k.": ".$v."\n";
 					if(array_key_exists('county', $info) && strlen($county) == 0) $county = $info['county'];
 					if(array_key_exists('country', $info) && strlen($country) == 0) $country = $info['country'];
 					if(array_key_exists('stateProvince', $info) && strlen($stateProvince) == 0) $stateProvince = $info['stateProvince'];
 					if((strlen($county) > 0 || strlen($country) > 0 || strlen($stateProvince) > 0) && array_key_exists('endOfFile', $info)) $str = $info['endOfFile'];
 				}
 			}
-		}//echo "\nline 13696, str:\n".$str."\n";
+		}//echo "\nline 14999, str:\n".$str."\n";
 		if(strlen($county) == 0 || strlen($country) == 0 || strlen($stateProvince) == 0) {
 			$countyMatches = $this->findCounty($str, $stateProvince);
 			if($countyMatches != null) {//$i=0;foreach($countyMatches as $countyMatche) echo "\ncountyMatches[".$i++."] = ".$countyMatche."\n";
@@ -563,7 +563,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						$stateProvince = $sp[0];
 						$country = $sp[1];
 					}
-				}
+				}//echo "\nline 15388, habitat: ".$habitat."\nlocality: ".$locality."\nsubstrate: ".$substrate."\nscientificName: ".$scientificName."\ncounty: ".$county."\nstateProvince: ".$stateProvince."\ncountry: ".$country."\n";
 				if(strlen($county) > 0 && (strlen($stateProvince) == 0 || strlen($country) == 0)) {
 					$polInfo = $this->getPolticalInfoFromCounty($county);
 					if($polInfo != null ) {
@@ -584,25 +584,25 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 				}
 			}//echo "\nline 14273, habitat: ".$habitat."\nlocality: ".$locality."\nsubstrate: ".$substrate."\nscientificName: ".$scientificName."\ncounty: ".$county."\nstateProvince: ".$stateProvince."\ncountry: ".$country."\n";
-		}
+		}//$stateProvince = "QUEBEC";$country = "Canada";
 		$lines = explode("\n", $str);
-		foreach($lines as $line) {//echo "\nline 13615, line: ".$line."\n";
+		foreach($lines as $line) {//echo "\nline 15388, line: ".$line."\ncounty: ".$county."\nstateProvince: ".$stateProvince."\n";
 			$line = trim($line, " ,");
-			if(preg_match("/^((?:[A-Za-z]{1,12}[,.]? )?[A-Za-z]{2,})[,.] (?:U[,.]?S[,.]?A[,.]?|United States)(.+)/i", $line, $mats)) {
+			if(preg_match("/^((?:[A-Za-z]{1,12}[,.]? )?[A-Za-z]{2,})[,.] (?:U[,.]? ?S[,.]? ?A[,.]?|United States)(.*)$/i", $line, $mats)) {
 				$match = trim($mats[1]);
 				if($this->isUSState($match)) {
 					$stateProvince = $match;
 					$line = rtrim(ltrim($mats[2], " .,:;"));
 				}
 				$country = "United States";
-			} else if(preg_match("/^(.+?)((?:[A-Za-z]{1,12}[,.]? )?[A-Za-z]{2,})[,.] (?:U[,.]?S[,.]?A[,.]?|United States)$/i", $line, $mats)) {
+			} else if(preg_match("/^(.+?)((?:[A-Za-z]{1,12}[,.]? )?[A-Za-z]{2,})[,.] (?:U[,.]? ?S[,.]? ?A[,.]?|United States)$/i", $line, $mats)) {
 				$match = trim($mats[2]);
 				if($this->isUSState($match)) {
 					$stateProvince = $match;
 					$line = trim($mats[1]);
 				}
 				$country = "United States";
-			} else if(preg_match("/^(?:U[,.]?S[,.]?A[,.]?|United States)[,.:; ]{1,3}((?:[A-Za-z]{1,12}[,.]? )?[A-Za-z]{2,})[,.] (.+)/i", $line, $mats)) {
+			} else if(preg_match("/^(?:U[,.]? ?S[,.]? ?A[,.]? ?|United States)[,.:; ]{1,3}((?:[A-Za-z]{1,12}[,.]? )?[A-Za-z]{2,})[,.] (.+)/i", $line, $mats)) {
 				$match = trim($mats[1]);
 				if($this->isUSState($match)) {
 					$stateProvince = $match;
@@ -620,24 +620,28 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						$line = rtrim(ltrim($mats[2], " .,:;"));
 					}
 				}
-			}//echo "\nline 13771, line: ".$line."\ncounty: ".$county."\nstateProvince: ".$stateProvince."\n";
+			}//echo "\nline 15422, line: ".$line."\ncounty: ".$county."\nstateProvince: ".$stateProvince."\n";
 			if(strlen($stateProvince) > 1) {
 				$pat;
 				if(strlen($county) > 1) {
 					if(preg_match("/^Loca(?:tion|l(?:e|ity))[.,:;]? (.*)$/i", $line, $mats)) $line = trim($mats[1]);
 					$temp_county = preg_quote($county, "/");
+					if(strcasecmp($temp_county, "Miami Dade") == 0) $temp_county = "Dade";
 					if(stripos($temp_county, "Saint ") !== FALSE) $temp_county = str_ireplace("Saint ", "S(?:ain)?t\\.? ", $temp_county);
 					if(stripos($temp_county, "Sainte ") !== FALSE) $temp_county = str_ireplace("Sainte ", "S(?:ain)?te?\\.? ", $temp_county);
 					$pat = "/^".$temp_county." (?:C[O0]UNT[V?Yi]|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT|Co\\b\\.?)(?! (?:PARK|FOREST|P?RESERVE))[;:.,]?(?: ".preg_quote($stateProvince, "/").")?(.*?)$/i";
 					if(preg_match($pat, $line, $mats)) {/*echo "\nline 13776, matched\n";*/$line = trim($mats[1], " ,;:");}
-					else if(preg_match("/^(?:(?:STATE [O0]F |ESTADO (?:DE )?)?".preg_quote($stateProvince, "/")."[.,:;] )?".$temp_county." (?:C[O0]UNT[V?Yi]|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|C[O0]\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) {/*echo "\nline 13777, matched\n";*/$line = trim($mats[1], " ,;:");}
+					else if(preg_match("/^(?:(?:(?:STATE|PROVINCE) (?:[O0]F )?|ESTAD[O0] (?:DE )?)?".preg_quote($stateProvince, "/")."[.,:;] )?".$temp_county." (?:C[O0]UNT[V?Yi]|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|C[O0]\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) {/*echo "\nline 13777, matched\n";*/$line = trim($mats[1], " ,;:");}
+					else if(preg_match("/^(?:(?:(?:STATE|PROVINCE) (?:[O0]F )?|ESTAD[O0] (?:DE )?)?".preg_quote($stateProvince, "/")."[.,:;]?) (?:C[O0]UNT[V?Yi]|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|C[O0]\\b\\.?)?[;:.,]? ".$temp_county."[;:.,]? (?:Dist(?:rict|\\.)[;:.,]? ?)?(.*?)$/i", $line, $mats)) {/*echo "\nline 13777, matched\n";*/$line = trim($mats[1], " ,;:");}
 					else if(preg_match("/^(?:U\\.?S\\.?A\\.?,? ".preg_quote($stateProvince, "/")."[.,:;*] )?".$temp_county." (?:C[O0](\\.|UNT[V?Yi])|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|C[O0]\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) {/*echo "\nline 13778, matched\n";*/$line = trim($mats[1], " ,;:");}
 					else if(preg_match("/^(?:United States(?: [O0]. America)?, ".preg_quote($stateProvince, "/")."[.,:;] )?".$temp_county." (?:C[O0](\\.|UNT[V?Yi])|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|C[O0]\\b\\.?)?[;:.,]? (.+)/i", $line, $mats)) {/*echo "\nline 13779, matched\n";*/$line = trim($mats[1], " ,;:");}
+					//else if(preg_match("/^(?:Canada[.,] ".preg_quote($stateProvince, "/")."[.,:;] )?".$temp_county." (?:C[O0](\\.|UNT[V?Yi])|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|C[O0]\\b\\.?)?[;:.,]? (.+?)$/i", $line, $mats)) {/*echo "\nline 13779, matched\n";*/$line = trim($mats[1], " ,;:");}
+					else if(preg_match("/^(?:Canada[.,] ".preg_quote($stateProvince, "/")."[.,:;] )?".$temp_county." (?:C[O0]UNT[V?Yi]|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|C[O0]\\b\\.?)?[;:.,]? (.+?)$/i", $line, $mats)) {/*echo "\nline 13779, matched\n";*/$line = trim($mats[1], " ,;:");}
 					else if(preg_match("/^(?:C[O0]UNT[V?Yi]|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT)[;:.,*]? ".$temp_county."[;:.,]?\\s?(.*)/i", $line, $mats)) {/*echo "\nline 13780, matched\n";*/$line = trim($mats[1], " ,;:");}
 					else if(preg_match("/^.{0,6}".preg_quote($stateProvince, "/")."[;:.,]{0,2} ".$temp_county." (?:C[O0]UNT[V?Yi]|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT|C[O0]\\b\\.?)[;:.,]?(.*)/i", $line, $mats)) {/*echo "\nline 13781, matched\n";*/$line = trim($mats[1], " ,;:");}
 					else if(preg_match("/^.{0,6}".preg_quote($stateProvince, "/")."[;:.,]{1,2} (?!(?:River|Mountains?|Mts?\\.?|FALLS|SPRINGS?|[A-Za-z]+(?: [A-Za-z]+) (?:STATE|NATIONAL|NAT.?L\\b\\.?|PROVINCIAL|COUNT[V?Yi]) (?:PARK|FOREST|P?RESERVE)))(.+)/i", $line, $mats)) {/*echo "\nline 13782, matched\n";*/$line = trim($mats[1], " ,;:");}
 					else if(preg_match("/^(.+)\\b".preg_quote($temp_county, "/")." (?:C[O0](?:[,.]|UNT[V?Yi])|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT)[;:.,]?(?: ".preg_quote($stateProvince, '/').")?.?$/i", $line, $mats)) {/*echo "\nline 13783, matched\n";*/$line = trim($mats[1], " ,;:");}
-					else if(preg_match("/^.{0,6}".$temp_county."[;:.,]? (?!(?:River|Mountains?|Mts?\\.?|FALLS|SPRINGS?|(?:[A-Za-z]+(?: [A-Za-z]+) )?(?:STATE|NATIONAL|NAT.?L\\b\\.?|PROVINCIAL|COUNT[V?Yi]) (?:PARK|FOREST|P?RESERVE)))(?:C[O0](?:[,.]|UNT[V?Yi])|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT)[;:.,]?(.+)/i", $line, $mats)) {/*echo "\nline 13784, matched\n";*/$line = trim($mats[1], " ,;:");}
+					else if(preg_match("/^.{0,6}".$temp_county."[;:.,]? (?!(?:River|Mountains?|Mts?\\.?|FALLS|SPRINGS?|(?:[A-Za-z]+(?: [A-Za-z]+) )?(?:STATE|NATIONAL|NAT.?L\\b\\.?|PROVINCIAL|COUNT[V?Yi]) (?:PARK|FOREST|P?RESERVE)))(?:C[O0](?:[,.]|UNT[V?Yi])|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|D[I1!||]ST(?:\\.|R[I1!||]CT))[;:.,]?(.+)/i", $line, $mats)) {/*echo "\nline 13784, matched\n";*/$line = trim($mats[1], " ,;:");}
 					$pat = "/^(.*?)(?: UNIVERSITY\\b|\\bC[O0]LL(?:\\.|ected by)|\\bHERBARIUM\\b|\\bDET(?:\\.|ermined)|\\bIdentified\\b|\\bNew\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden\\b|\\bDate\\b|\\b[O|!lI0-9]{1,2}[- ](?:".$possibleMonths.")[- ][O|!lI0-9]{2,4}+| ?\\b(?:".$possibleMonths.")(?:[- ][O|!lI0-9]{1,2})?[, -][O|!lI0-9]{2,4}+)(.*)$/i";
 				} else {
 					if(preg_match("/^.{0,3}(?: ".preg_quote($stateProvince, "/").")(.*?)$/i", $line, $mats)) $line = trim($mats[1], " ,;:");
@@ -655,6 +659,12 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						else if(count($mats) > 2) $line = trim($mats[2], " ,;:");
 					}
 				}
+			} else if(strlen($county) > 1) {
+				$temp_county = preg_quote($county, "/");
+				if(stripos($temp_county, "Saint ") !== FALSE) $temp_county = str_ireplace("Saint ", "S(?:ain)?t\\.? ", $temp_county);
+				if(stripos($temp_county, "Sainte ") !== FALSE) $temp_county = str_ireplace("Sainte ", "S(?:ain)?te?\\.? ", $temp_county);
+				$pat = "/^".$temp_county." (?:C[O0]UNT[V?Yi]|PAR(?:\\.|[I1!||]SH)|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT|Co\\b\\.?)(?! (?:PARK|FOREST|P?RESERVE))[;:.,]?(.*?)$/i";
+				if(preg_match($pat, $line, $mats)) {/*echo "\nline 13776, matched\n";*/$line = trim($mats[1], " ,;:");}
 			} else if(preg_match("/^(U\\.?[S5]\\.?[S5]\\.?R\\.?) (.*)$/", $line, $mats)) {
 				$country = str_replace("5", "S", $mats[1]);
 				$line = trim($mats[2]);
@@ -811,7 +821,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						else $line = trim($mats[2], " ,;:");
 					}
 				}
-			}//echo "\nline 13958, line: ".$line."\nlocality: ".$locality."\nhabitat: ".$habitat."\n";
+			}//echo "\nline 15622, line: ".$line."\nlocality: ".$locality."\nhabitat: ".$habitat."\n";
 			$firstPart = "";
 			$secondPart = "";
 			//the following is intended to remove LatLongs or LongLats -- even malformed ones
@@ -1057,7 +1067,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$locality = trim(str_ireplace(trim($mats[2]), "", $locality));
 				$georeferenceRemarks = "Quad Map: ".trim($mats[3]);
 				$line = trim(trim($mats[1]).", ".ltrim($mats[4], " :;,."));
-			}//echo "\nline 14203, line: ".$line."\ncountPotentialLocalityWords(line): ".$this->countPotentialLocalityWords($line)."\ncontainsVerbatimAttribute(line): ".$this->containsVerbatimAttribute($line)."\n";
+			}//echo "\nline 15867, line: ".$line."\ncountPotentialLocalityWords(line): ".$this->countPotentialLocalityWords($line)."\ncontainsVerbatimAttribute(line): ".$this->containsVerbatimAttribute($line)."\n";
 			if($this->containsVerbatimAttribute($line)) {
 				$pos = strpos($line, ";;;");
 				$rest = "";
@@ -1465,7 +1475,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					} else $substrate = $this->mergeFields($substrate, $line);
 				} else break;
 			} else if($this->countPotentialLocalityWords($line) > 0) {// && !preg_match("/^(?:L|(?:\|_))[o0]ca(?:[1!l]ity|ti[o0]n|\\.)[:;]?/i", $line))
-				$localityAnalysis = $this->analyzeLocalityLine($line, $acceptableSmallWords);//foreach($localityAnalysis as $k => $v) echo "\nline 15081, ".$k.": ".$v."\n";
+				if(preg_match("/^(?:L|(?:\|_))[o0]ca(?:[1!l]ity|ti[o0]n|\\.)[:;.]?$/i", $line)) $line = "";
+				else if(preg_match("/^(?:L|(?:\|_))[o0]ca(?:[1!l]ity|ti[o0]n|\\.)[:;.](.*)/i", $line, $mats)) $line = trim($mats[1]);
+				$localityAnalysis = $this->analyzeLocalityLine($line, $acceptableSmallWords);//foreach($localityAnalysis as $k => $v) echo "\nline 16279, ".$k.": ".$v."\n";
 				if(array_key_exists('locality', $localityAnalysis)) $locality = $this->mergeFields($locality, $localityAnalysis['locality']);
 				if(array_key_exists('habitat', $localityAnalysis)) $habitat = $this->mergeFields($habitat, $localityAnalysis['habitat']);
 				if(array_key_exists('substrate', $localityAnalysis)) $substrate = $this->mergeFields($substrate, $localityAnalysis['substrate']);
@@ -1507,7 +1519,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					} else $habitat = $this->mergeFields($habitat, str_replace(";;;", ";", $line), " ");
 				} else $habitat = $this->mergeFields($habitat, $line, " ");
 			}
-		}//echo "\nline 14644, locality: ".$locality."\nsubstrate: ".$substrate."\nhabitat: ".$habitat."\nverbatimAttributes: ".$verbatimAttributes."\nassociatedTaxa: ".$associatedTaxa."\n";
+		}//echo "\nline 16321, locality: ".$locality."\nsubstrate: ".$substrate."\nhabitat: ".$habitat."\nverbatimAttributes: ".$verbatimAttributes."\nassociatedTaxa: ".$associatedTaxa."\n";
 		$locality = str_replace
 		(
 			array("\r\n", "\n", "\r"),
@@ -1923,8 +1935,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		$statePatStr = "/((?s).*)?((?:[EP][L1!|]ANT[5S]|(?:ASC[O0D]MYC[EC]T[EC]S[5S])|(?:FL[O0D]RA)|(?:F(?:U|(?:LI))N[EGC][Il!1.,])|".
 			"(?:.{1,2}[I|!l][ECU](?:H|(?:I-?I)|TI)EN'?[5S]|FL[O0D]RA)|(?:CRYPT[O0DQU]GAM[5S])|".
 			"(?:BRY[O0DQU](?:(?:FL[O0D]RA)|(?:PHYT(?:A|[EC][5S]))))|(?:M[O0][5S]{2}E[5S])|".
-			"(?:MU[5S][CG][l1|I!])|(?:HEPAT[L1!|]CA.)|(?:P[L1!|]ANT[5S])|(?:[5S]PHAGNA))".
-			"(?:\\r\\n|\\n|\\r|\\s)?[DOU0][EFPKI1][RFPN]?)(.*)(?:\\r\\n|\\n|\\r)((?s).*)/i";
+			"(?:MU[5S][CG][l1|I!])|(?:HEPAT[l1!|I]CA.)|(?:P[l1!|]ANT[5S])|(?:[5S]PHAGNA))".
+			"(?:\\r\\n|\\n|\\r|\\s)?[DOU0][EFPKI1][RFPN]?)[;:]?(.*)(?:\\r\\n|\\n|\\r)((?s).*)/i";
 		if(preg_match($statePatStr, $str, $matches)) {
 			$first = $matches[1];
 			if(preg_match($statePatStr, $first, $matches2)) {
@@ -1944,7 +1956,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		$endOfFile = trim($matches[2]);
 		$workingEndOfFile = $endOfFile;
 		$sLen = strlen($endOfLine);
-		//echo "\nline 376, startOfFile: ".$startOfFile."\n\tendOfLine: ".$endOfLine."\n\tendOfFile: ".$endOfFile."\n";
+		//echo "\nline 688, startOfFile: ".$startOfFile."\n\tendOfLine: ".$endOfLine."\n\tendOfFile: ".$endOfFile."\n";
 		//if there is nothing after the "Taxons of", get it from the beginning of the next line
 		if($sLen == 0) {
 			$eolPos = strpos($endOfFile, "\n");
@@ -1970,13 +1982,13 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			}
 		//if there is an isolated character at the end of the line, remove it
 		} else if($sLen > 2 && substr($endOfLine, $sLen-2, 1) == " ") $endOfLine = trim(substr($endOfLine, 0, $sLen-1));
-		//echo "\nline 402, startOfFile: ".$startOfFile."\n\nendOfLine: ".$endOfLine."\n\nendOfFile: ".$endOfFile."\n\nworkingEndOfFile: ".$workingEndOfFile."\n\n";
+		//echo "\nline 716, startOfFile: ".$startOfFile."\n\nendOfLine: ".$endOfLine."\n\nendOfFile: ".$endOfFile."\n\nworkingEndOfFile: ".$workingEndOfFile."\n\n";
 		$commaPos = strpos($endOfLine, ',');
 		if($commaPos !== FALSE) {
 			$firstPart = trim(substr($endOfLine, 0, $commaPos));
 			$secondPart = trim(substr($endOfLine, $commaPos+1));
 			$sp = $this->getStateOrProvince($firstPart);
-			if(count($sp) > 0) {//$i=0;foreach($sp as $p) echo "line 408, sp[".$i++."] = ".$p."\n";
+			if(count($sp) > 0) {//$i=0;foreach($sp as $p) echo "line 720, sp[".$i++."] = ".$p."\n";
 				$state_province = $sp[0];
 				$country = $sp[1];
 				if(preg_match("/.*[., ]?\\b".$state_province."\\b[., ]?.*/i", $firstPart)) {
@@ -2010,6 +2022,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				if(strlen($firstPart) > 3) {
 					$countyMatches = $this->findCounty($firstPart, $state_province);
 					if($countyMatches != null) {
+						$tsp = trim($countyMatches[4]);
+						if(strlen($tsp) > 0) $state_province = $tsp;
 						return array
 						(
 							'country' => $sp[1],
@@ -2022,6 +2036,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				if(strlen($secondPart) > 3) {
 					$countyMatches = $this->findCounty($secondPart, $state_province);
 					if($countyMatches != null) {
+						$tsp = trim($countyMatches[4]);
+						if(strlen($tsp) > 0) $state_province = $tsp;
 						return array
 						(
 							'country' => $sp[1],
@@ -2033,6 +2049,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				}
 				$countyMatches = $this->findCounty($endOfFile, $state_province);
 				if($countyMatches != null) {
+					$tsp = trim($countyMatches[4]);
+					if(strlen($tsp) > 0) $state_province = $tsp;
 					return array
 					(
 						'country' => $sp[1],
@@ -2055,6 +2073,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$state_province = $sp[0];
 					$countyMatches = $this->findCounty($firstPart, $state_province);
 					if($countyMatches != null) {
+						$tsp = trim($countyMatches[4]);
+						if(strlen($tsp) > 0) $state_province = $tsp;
 						return array
 						(
 							'country' => $sp[1],
@@ -2065,6 +2085,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 					$countyMatches = $this->findCounty($endOfFile, $state_province);
 					if($countyMatches != null) {
+						$tsp = trim($countyMatches[4]);
+						if(strlen($tsp) > 0) $state_province = $tsp;
 						return array
 						(
 							'country' => $sp[1],
@@ -2125,10 +2147,10 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			}
 		} else {//endOfLine has no comma
 			$ps = $this->getStateOrProvince(trim($endOfLine));
-			if(count($ps) > 0) {//$i=0;foreach($ps as $p) echo "line 553, ps[".$i++."] = ".$p."\n";
+			if(count($ps) > 0) {
 				$state_province = $ps[0];
 				$l = strlen($state_province);
-				if($l > 0) {
+				if($l > 0) {//echo "\nline 884, state_province: ".$state_province."\n";
 					$pos = stripos($endOfLine, $state_province);
 					if($pos !== FALSE) {
 						if($pos < 3) {
@@ -2137,6 +2159,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						} else {
 							$countyMatches = $this->findCounty($endOfLine, $state_province);
 							if($countyMatches != null) {
+								$tsp = trim($countyMatches[4]);
+								if(strlen($tsp) > 0) $state_province = $tsp;
 								$temp = trim($countyMatches[3]);
 								if(strlen($temp) > 3) $endOfFile = trim($temp."\n".$endOfFile);
 								return array
@@ -2150,7 +2174,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						}
 					}
 					$countyMatches = $this->findCounty($endOfFile, $state_province);
-					if($countyMatches != null) {
+					if($countyMatches != null) {//$i=0;foreach($countyMatches as $countyMatche) echo "\nline 908, countyMatches[".$i++."] = ".$countyMatche."\n";
+						$tsp = trim($countyMatches[4]);
+						if(strlen($tsp) > 0) $state_province = $tsp;
 						$temp = trim($countyMatches[3]);
 						if(strlen($temp) > 3) $endOfFile = trim($temp."\n".$endOfFile);
 						return array
@@ -2173,7 +2199,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			}
 			if(preg_match("/(.*)\\s(?:C[o0](?:\\.|unty)|Par[il!|]sh|B[o0]r[o0]ugh|Dist(?:\\.|rict))/i", $endOfLine, $cMatches)) {
 				$countyMatches = $this->findCounty($endOfLine, $state_province);
-				if($countyMatches != null) {
+				if($countyMatches != null) {//$i=0;foreach($countyMatches as $countyMatche) echo "\nline 933, countyMatches[".$i++."] = ".$countyMatche."\n";
 					$temp = trim($countyMatches[3]);
 					if(strlen($temp) > 3) $endOfFile = trim($temp."\n".$endOfFile);
 					return array
@@ -2188,7 +2214,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$country = $this->getCountry($endOfLine);
 				if($country) {
 					$countyMatches = $this->findCounty($endOfFile, $state_province);
-					if($countyMatches != null) {
+					if($countyMatches != null) {//$i=0;foreach($countyMatches as $countyMatche) echo "\nline 948, countyMatches[".$i++."] = ".$countyMatche."\n";
 						return array
 						(
 							'country' => $country,
@@ -2209,7 +2235,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			}
 		}
 		$countyMatches = $this->findCounty($endOfFile, $state_province);
-		if($countyMatches != null) {
+		if($countyMatches != null) {//$i=0;foreach($countyMatches as $countyMatche) echo "\nline 969, countyMatches[".$i++."] = ".$countyMatche."\n";
 			return array
 			(
 				'country' => trim($countyMatches[2]),
@@ -2861,7 +2887,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		$lWords = array("/road(?:side|way)?\\b/i", "/\\bHighway\\b/i", "/\\bhwa?y\\b/i", "/ A(?i):rea\\b/", "/path\\b/i", "/\\br(?:ou)?te\\b/i",
 			"/\\sCity\\b/i", "/\\bLoca(?:t(?:ed|ion)|lity)\\b/i", "/\\bmi(?:les?)?\\b/i", "/ L(?i)odge\\b/", "/ T(?i)rail\\b/", "/ A(?i)rboretum\\b/",
 			"/\\bkm\\b/i", "/\\binternational\\b/i", "/ P(?i)arks?\\b/", "/ I(?i)sl(?:e|ands?)/", "/\\bcamp(?:grounds?)?\\b/i",
-			"/ F(?i)alls/", "/\\bcounty\\b/i", "/\\bdistrict\\b/i", "/\\bjunction\\b/i", "/\\sC(?i)anyon\\b/", "/ C(?i)reek\\b/",
+			"/ F(?i)alls/", "/\\bcounty\\b/i", "/\\bdistrict\\b/i", "/\\bjunction\\b/i", "/\\sC(?i)anyon\\b/", "/ C(?i)reek\\b/", "/\\bM(?i)ont\\b(?!(?:\\.|\)))/",
 			"/ L(?i)oop\\b/", "/\\bservice\\b/", "/\\sstation\\b/", "/\\btown\\b/", "/\\bC(?i)oast\\b/", "/\\bS(?i)hore\\b/", "/\\bproperty\\b/i",
 			"/\\bpeninsula\\b/i", "/\\bentrance\\b/i", "/\\bL(?i)akes?\\b/", "/\\sW(?i)ilderness\\b/", "/\\sR(?i)ange\\b/", "/\\bPass\\b/",
 			"/\\b(?:N(?i)ationa[l1|I!]|(?-i)S(?i)t(?:\\.|ate)|(?-i)N(?i)at[l1|I!]?\\.)\\s(?-i)F(?i)orest\\b/", "/\\bvic(?:\\.|init(?:y|ate))\\b/i",
@@ -2874,7 +2900,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"/[A-Za-z] M(?:ts[,.]{0,2}|(?i)ountains?)\\b/", "/\\b(?:Conference|Visitors|Environmenta[l1|I!]) Center\\b/i", "/\\sR(?i)idge\\b/",
 			"/\\b(?i:N(?:orth(?:east|west)?)?|S(?:outh(?:east|west)?)?|E(?:ast)?|W(?:est)?|[NE]?NE|[NW]?NW|[SE]?SE|[SW]?SW) (?:of|from) (?-i)[A-Z]/i",
 			"/\\b[A-Za-z]{3,}v[l1|I!]{3}e\\b/i", "/\\b[A-Z][A-Za-z]{2,}t[o0]wn\\b/i", "/~ ?\\d+[ -]/", "/ Gruppe\\b/", "/ A(?i)rea\\b/", "/ quarry/i",
-			"/ T(?i)rail/", "/ B(?i)ay\\b/", "/[A-Za-z] A(?i)rboretum\\b/", "/ R(?i)iver\\b/", "/[A-Za-z]{3,} L(?i)ane\\b/",
+			"/ T(?i)rail/", "/ B(?i)ay\\b/", "/[A-Za-z] A(?i)rboretum\\b/", "/ R(?i)iver\\b/", "/[A-Za-z]{3,} L(?i)ane\\b/", "/ L(?i)ac\\b/",
 			"/[A-Za-z]{3,} R(?i)ock\\b/", "/[A-Za-z]{3,} K(?i)eys?\\b/", "/[A-Za-z]{3,} S(?i)ound\\b/", "/\\bstate [1-9]{1,3}[,.; ]/i",
 			"/\\bprovince\\b/i", "/\\b(?:University|Co[l1|I!]{2}ege) (?:[A-Za-z]+ ){0,4}Campus\\b/", "/[A-Za-z]{3,} P(?i)eaks?/",
 			"/F(?i)[ij]ord/");
@@ -4723,7 +4749,6 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	}
 
 	protected function findTokenAtEnd($string, $token) {//echo "\nInput to findTokenAtEnd, string: ".$string.", token: ".$token."\n";
-		//if(strcasecmp($token, "Park") == 0) return '';
 		$spacePos = strrpos($string, " ");
 		$endpart = "";
 		if($spacePos !== FALSE) {
@@ -4751,25 +4776,22 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return '';
 	}
 
-	protected function getCounty($c, $state_province="") {
+	private function doCountyQuery($c, $state_province="") {
 		if($c) {
-			if(strlen($c) > 2) {
+			if(strlen($c) > 2 && !is_integer($c)) {
 				$result = array();
 				$c = trim($c, " \t\n\r\0\x0B,.:;!()\"\'\\~@#$%^&*_-");
 				$containsAmpersand = false;
-				$mats1 = "";
-				$mats2 = "";
+				$hasStateProvince = strlen($state_province) > 0;
 				if(preg_match("/(.+)&(.+)/", $c, $mats)) {
-					$mats1 = $mats[1];
-					$mats2 = $mats[2];
-					$c = trim($mats1)." and ".trim($mats2);
+					$c = trim($mats[1])." and ".trim($mats[2]);
 					$containsAmpersand = true;
 				}
 				$sql = "select lk1.countyName, lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
 					"(lkupstateprovince lk2 inner join lkupcountry lk3 on lk2.countryid = lk3.countryid) ".
 					"on lk1.stateid = lk2.stateid ".
 					"where lk1.countyName = '".str_replace(array("\"", "'"), "", $c)."'";
-				if(strlen($state_province) > 0) $sql .= " AND lk2.stateName = '".$state_province."'";
+				if($hasStateProvince) $sql .= " AND lk2.stateName = '".$state_province."'";
 				if($rs = $this->conn->query($sql)) {
 					$num_rows = $rs->num_rows;
 					if($num_rows > 0) {
@@ -4782,81 +4804,41 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							}
 							return $result;
 						}
-					} else {
-						$c = ucwords
-						(
-							strtolower
-							(
-								str_replace
-								(
-									array('1', '!', '|', '5', '2', '0', '[', ']', '(', ')', '"', '\'', '-'),
-									array('l', 'l', 'l', 'S', 'Z', 'O', '', '', '', '', '', '', ' '),
-									$c
-								)
-							)
-						);
-						$c = preg_replace("/\\bSt\\.? /", "Saint ", $c);
-						$sql = "select lk1.countyName, lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
-							"(lkupstateprovince lk2 inner join lkupcountry lk3 on lk2.countryid = lk3.countryid) ".
-							"on lk1.stateid = lk2.stateid ".
-							"where lk1.countyName = '".$c."'";
-						if(strlen($state_province) > 0) $sql .= " AND lk2.stateName = '".$state_province."'";
-						if($r2s = $this->conn->query($sql)) {
-							$num_rows = $r2s->num_rows;
-							if($num_rows > 0) {
-								if($r2 = $r2s->fetch_object()) {
-									$c = $r2->countyName;
-									if($containsAmpersand) $c = str_ireplace(" and ", " & ", $c);
-									array_push($result, array('county' => $c, 'stateProvince' => $r2->stateName, 'country' => $r2->countryName));
-									while($r2 = $r2s->fetch_object()) {
-										array_push($result, array('county' => $c, 'stateProvince' => $r2->stateName, 'country' => $r2->countryName));
-									}
-									return $result;
-								}
-							} else if(stripos($c, "berg") !== FALSE) {
-								$c = str_ireplace("berg", "burg", $c);
-								$sql = "select lk1.countyName, lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
-									"(lkupstateprovince lk2 inner join lkupcountry lk3 on lk2.countryid = lk3.countryid) ".
-									"on lk1.stateid = lk2.stateid ".
-									"where lk1.countyName = '".$c."'";
-								if(strlen($state_province) > 0) $sql .= " AND lk2.stateName = '".$state_province."'";
-								if($r3s = $this->conn->query($sql)) {
-									if($r3 = $r3s->fetch_object()) {
-										$c = $r3->countyName;
-										if($containsAmpersand) $c = str_ireplace(" and ", " & ", $c);
-										while($r3 = $r3s->fetch_object()) {
-											array_push($result, array('county' => $c, 'stateProvince' => $r3->stateName, 'country' => $r3->countryName));
-										}
-										return $result;
-									}
-								}
-							} else if(stripos($c, "burg") !== FALSE) {
-								$c = str_ireplace("burg", "berg", $c);
-								$sql = "select lk1.countyName, lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
-									"(lkupstateprovince lk2 inner join lkupcountry lk3 on lk2.countryid = lk3.countryid) ".
-									"on lk1.stateid = lk2.stateid ".
-									"where lk1.countyName = '".$c."'";
-								if(strlen($state_province) > 0) $sql .= " AND lk2.stateName = '".$state_province."'";
-								if($r3s = $this->conn->query($sql)) {
-									if($r3 = $r3s->fetch_object()) {
-										$c = $r3->countyName;
-										if($containsAmpersand) $c = str_ireplace(" and ", " & ", $c);
-										array_push($result, array('county' => $c, 'stateProvince' => $r3->stateName, 'country' => $r3->countryName));
-										while($r3 = $r3s->fetch_object()) {
-											array_push($result, array('county' => $c, 'stateProvince' => $r3->stateName, 'country' => $r3->countryName));
-										}
-										return $result;
-									}
-								}
-							}
-						}
 					}
 				}
 			}
 		}
 	}
 
-	private function processCountyMatches($firstPart, $lastPart) {//echo "\nLine 2574, Input to processCountyMatches, firstPart: ".$firstPart."\nlastPart: ".$lastPart."\n";
+	protected function getCounty($c, $state_province="") {//echo "\nline 3491, input to getCounty: ".$c."\nstate_province: ".$state_province."\n";
+		$countyQueryResult = $this->doCountyQuery($c, $state_province);
+		if($countyQueryResult) return $countyQueryResult;
+		$c = ucwords
+		(
+			strtolower
+			(
+				str_replace
+				(
+					array('1', '!', '|', '5', '2', '0', '[', ']', '(', ')', '"', '\'', '-'),
+					array('l', 'l', 'l', 'S', 'Z', 'O', '', '', '', '', '', '', ' '),
+					$c
+				)
+			)
+		);
+		$c = preg_replace("/\\bSt\\.? /", "Saint ", $c);
+		$countyQueryResult = $this->doCountyQuery($c, $state_province);
+		if($countyQueryResult) return $countyQueryResult;
+		if(stripos($c, "berg") !== FALSE) {
+			$countyQueryResult = $this->doCountyQuery(str_ireplace("berg", "burg", $c), $state_province);
+			if($countyQueryResult) return $countyQueryResult;
+		}
+		if(stripos($c, "burg") !== FALSE) {
+			$countyQueryResult = $this->doCountyQuery(str_ireplace("burg", "berg", $c), $state_province);
+			if($countyQueryResult) return $countyQueryResult;
+		}
+	}
+
+	private function processCountyMatches($firstPart, $lastPart, $state_province="") {//echo "\nLine 3297, Input to processCountyMatches, firstPart: ".$firstPart."\nlastPart: ".$lastPart."\nstate_province: ".$state_province."\n";
 		$countyArray = null;
 		$possibleState = "";
 		$county = "";
@@ -4873,37 +4855,40 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$num = 0;
 			$i=0;
 			foreach($prevLines as $prevLine) {
-				if($i++ < 2) {
-					if($countyArray == null || count($countyArray) == 0) {
-						$countyArray = $this->processCountyString($prevLine, $nextWord);
-						if($countyArray != null && count($countyArray) > 0) {
-							if(count($countyArray) == 1)  return array_pop($countyArray);
-							else {
-								foreach($countyArray as $vs) {//foreach($vs as $k => $v) echo "\nline 3004, ".$k.": ".$v."\n";
-									if(array_key_exists('stateProvince', $vs)) {
-										$possibleStateProvince = $vs['stateProvince'];
-										if(preg_match("/\\b".preg_quote($possibleStateProvince, '/')."\\b/i", $prevLine)) return $vs;
-										else {
-											$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $prevLine." ".$nextWord), $vs['county'], $possibleStateProvince);
-											if($temp) return $vs;
+				if($i < 2) {
+					if(strlen($prevLine) > 1) {
+						$i++;
+						if($countyArray == null || count($countyArray) == 0) {
+							$countyArray = $this->processCountyString($prevLine, $nextWord, $state_province, false);
+							if($countyArray != null && count($countyArray) > 0) {
+								if(count($countyArray) == 1) return array_pop($countyArray);
+								else {
+									foreach($countyArray as $vs) {
+										if(array_key_exists('stateProvince', $vs)) {
+											$possibleStateProvince = $vs['stateProvince'];
+											if(preg_match("/\\b".preg_quote($possibleStateProvince, '/')."\\b/i", $prevLine)) return $vs;
+											else {
+												$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $prevLine." ".$nextWord), $vs['county'], $possibleStateProvince);
+												if($temp) return $vs;
+											}
 										}
 									}
 								}
 							}
-						}
-					} else {
-						foreach($countyArray as $vs) {
-							if(array_key_exists('stateProvince', $vs)) {
-								if(stripos($prevLine, $vs['stateProvince']) !== FALSE) return $vs;
-								else {
-									$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $prevLine." ".$nextWord), $vs['county'], $vs['stateProvince']);
-									if($temp) return $vs;
+						} else {
+							foreach($countyArray as $vs) {
+								if(array_key_exists('stateProvince', $vs)) {
+									if(stripos($prevLine, $vs['stateProvince']) !== FALSE) return $vs;
+									else {
+										$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $prevLine." ".$nextWord), $vs['county'], $vs['stateProvince']);
+										if($temp) return $vs;
+									}
 								}
 							}
 						}
 					}
 				} else if($countyArray != null && count($countyArray) > 0) {
-					foreach($countyArray as $vs) {//foreach($vs as $k => $v) echo "\nline 788, ".$k.": ".$v."\n";
+					foreach($countyArray as $vs) {//foreach($vs as $k => $v) echo "\nline 3636, ".$k.": ".$v."\n";
 						if(array_key_exists('stateProvince', $vs)) {
 							if(stripos($prevLine, $vs['stateProvince']) !== FALSE) return $vs;
 							else {
@@ -4916,16 +4901,28 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			}
 			if($countyArray != null && count($countyArray) > 0) {
 				$county = $countyArray[0]['county'];
-				if(strcasecmp($county, "Park") != 0 && strcasecmp($county, "Lane") != 0) return array('county' => $county);//park and lane are so common in the labels it should not be returned unless its state is found
+				if(strcasecmp($county, "Park") != 0
+					&& strcasecmp($county, "Lane") != 0
+					&& strcasecmp($county, "Lake") != 0
+					&& strcasecmp($county, "Woods"
+					&& strcasecmp($county, "Creek"
+					&& strcasecmp($county, "Canyon") != 0
+					&& strcasecmp($county, "Boulder") != 0) != 0) != 0) return array('county' => $county);//park, lake and lane are so common in the labels it should not be returned unless its state is found
 			}
 		} else {
 			if(strlen($firstPart) > 0) {
-				$countyArray = $this->processCountyString($firstPart, $nextWord);
+				$countyArray = $this->processCountyString($firstPart, $nextWord, $state_province, false);
 				if($countyArray != null && count($countyArray) > 0) {
 					if(count($countyArray) == 1) return $countyArray[0];
 					else {
 						$county = $countyArray[0]['county'];
-						if(strcasecmp($county, "Park") != 0 && strcasecmp($county, "Lane") != 0) return array('county' => $county);//park and lane are so common in the labels it should not be returned unless its state is found
+						if(strcasecmp($county, "Park") != 0
+							&& strcasecmp($county, "Lane") != 0
+							&& strcasecmp($county, "Lake") != 0
+							&& strcasecmp($county, "Woods"
+							&& strcasecmp($county, "Creek"
+							&& strcasecmp($county, "Canyon") != 0
+							&& strcasecmp($county, "Boulder") != 0) != 0) != 0) return array('county' => $county);//park and lane are so common in the labels it should not be returned unless its state is found
 					}
 				}
 			}
@@ -4938,33 +4935,39 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$num=0;
 					$prevLine = "";
 					foreach($nextLines as $nextLine) {
-						if($i++ == 0) {
-							$countyArray = $this->processCountyString($nextLine);
-							if($countyArray != null && count($countyArray) > 0) {
-								if(count($countyArray) == 1) return $countyArray[0];
-								else {
-									foreach($countyArray as $vs) {
-										$county = $vs['county'];
-										if(array_key_exists('stateProvince', $vs)) {
-											if(stripos($nextLine, $vs['stateProvince']) !== FALSE) return $vs;
-											else {
-												$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $nextLine), $vs['county'], $vs['stateProvince']);
+						if($i == 0) {
+							if(strlen($nextLine) > 2) {
+								$countyArray = $this->processCountyString($nextLine, "", $state_province, true);
+								if($countyArray != null && count($countyArray) > 0) {
+									if(count($countyArray) == 1) return $countyArray[0];
+									else {
+										foreach($countyArray as $vs) {
+											$county = $vs['county'];
+											if(array_key_exists('stateProvince', $vs)) {
+												$sp = $vs['stateProvince'];
+												if(strcasecmp($state_province, $sp) == 0)  return $vs;
+												if(stripos($nextLine, $sp) !== FALSE) return $vs;
+												$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $nextLine), $county, $sp);
 												if($temp) return $vs;
 											}
 										}
 									}
 								}
+								$i++;
 							}
 						} else if($countyArray != null && count($countyArray) > 0) {//found a county on the first line
-							foreach($countyArray as $vs) {
-								$county = $vs['county'];
-								if(array_key_exists('stateProvince', $vs)) {
-									if(strpos($prevLine, $vs['stateProvince']) !== FALSE) {
-										$possibleState = $vs['stateProvince'];
-										$possibleCountry = $vs['country'];
-										$num++;
+							$county = $countyArray[0]['county'];
+							if(strlen($prevLine) > 2) {
+								foreach($countyArray as $vs) {
+									if(array_key_exists('stateProvince', $vs)) {
+										if(stripos($prevLine, $vs['stateProvince']) !== FALSE) {
+											$possibleState = $vs['stateProvince'];
+											$possibleCountry = $vs['country'];
+											$num++;
+										}
 									}
 								}
+								break;
 							}
 						}
 						$prevLine = $nextLine;
@@ -4973,16 +4976,34 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						if($num == 1) return array('county' => $county, 'stateProvince' => $possibleState, 'country' => $possibleCountry);
 						else {
 							$county = $countyArray[0]['county'];
-							if(strcasecmp($county, "Park") != 0) return array('county' => $county);//park is so common in the labels it should not be returned unless its state is found
+							if(strcasecmp($county, "Park") != 0
+								&& strcasecmp($county, "Lane") != 0
+								&& strcasecmp($county, "Lake") != 0
+								&& strcasecmp($county, "Woods") != 0
+								&& strcasecmp($county, "Creek") != 0
+								&& strcasecmp($county, "Canyon") != 0
+								&& strcasecmp($county, "Boulder") != 0) {//these are so common in the labels they should not be returned unless its state is found
+								if(strlen($state_province) > 0) return array('county' => $county, 'stateProvince' => $state_province);
+								return array('county' => $county);
+							}
 						}
 					}
 				} else {
-					$countyArray = $this->processCountyString($lastPart);
+					$countyArray = $this->processCountyString($lastPart, "", $state_province, true);
 					if($countyArray != null && count($countyArray) > 0) {
 						if(count($countyArray) == 1) return $countyArray[0];
 						else {
 							$county = $countyArray[0]['county'];
-							if(strcasecmp($county, "Park") != 0) return array('county' => $county);//park is so common in the labels it should not be returned unless its state is found
+							if(strcasecmp($county, "Park") != 0
+								&& strcasecmp($county, "Lane") != 0
+								&& strcasecmp($county, "Lake") != 0
+								&& strcasecmp($county, "Woods") != 0
+								&& strcasecmp($county, "Creek") != 0
+								&& strcasecmp($county, "Canyon") != 0
+								&& strcasecmp($county, "Boulder") != 0) {
+								if(strlen($state_province) > 0) return array('county' => $county, 'stateProvince' => $state_province);
+								return array('county' => $county);
+							}
 						}
 					}
 				}
@@ -5079,21 +5100,26 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		}
 	}
 
-	protected function processCArray($cArray, $s, $nextWord = null) {//echo "\nLine 1531, Input to processCArray: ".$s.", nextWord: ".$nextWord."\n";
+	protected function processCArray($cArray, $s, $nextWord = null, $state_province="") {//echo "\nLine 3231, Input to processCArray: ".$s.", nextWord: ".$nextWord."\n";
 		if($cArray) {//echo "\nLine 1532, cArray is not null\n";
 			$num = 0;
 			foreach($cArray as $vs) {
 				$county = $vs['county'];
-				if(stripos($s, $vs['stateProvince']) !== FALSE) {
-					$possibleState = $vs['stateProvince'];
+				$sp = $vs['stateProvince'];
+				if(strcasecmp($sp, $state_province) == 0) {
+					$possibleState = $sp;
 					$possibleCountry = $vs['country'];
 					$num++;
-				} else if($nextWord != null && stripos($nextWord, $vs['stateProvince']) !== FALSE) {
-					$possibleState = $vs['stateProvince'];
+				} else if($nextWord != null && stripos($nextWord, $sp) !== FALSE) {
+					$possibleState = $sp;
+					$possibleCountry = $vs['country'];
+					$num++;
+				} else if(stripos($s, $sp) !== FALSE) {
+					$possibleState = $sp;
 					$possibleCountry = $vs['country'];
 					$num++;
 				}
-			}//echo "\nLine 1545, num: ".$num."\n";
+			}//echo "\nLine 1041, num: ".$num."\n";
 			if($num == 1) {
 				$results = array();
 				array_push($results, array('county' => $county, 'stateProvince' => $possibleState, 'country' => $possibleCountry));
@@ -5102,30 +5128,87 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		}
 	}
 
-	private function processCountyString($cString, $nextWord = null) {//echo "\nInput to processCountyString, cString: ".$cString."\nnextWord: ".$nextWord."\n";
+	private function getThreeWordPhrasesFromEnd($string, $forward=true) {
+		$words = array();
+		$string = preg_replace("/\\s{2,}/", " ", $string);
+		if($forward) $words = explode(" ", $string);
+		else $words = array_reverse(explode(" ", $string));
+		$totalWordCount = count($words);
+		if($totalWordCount == 1) return array($string);
+		if($totalWordCount == 2) {
+			if($forward) return array($words[0]." ".$words[1], $words[0], $words[1]);
+			return array($words[1]." ".$words[0], $words[0], $words[1]);
+		}
+		$result = array();
+		$prevWord = "";
+		$wordBeforePrevWord = "";
+		$index = 0;
+		foreach($words as $word) {
+			if(strlen($prevWord) > 0) {
+				if(strlen($wordBeforePrevWord) > 0) {
+					if($forward) array_unshift($result, $wordBeforePrevWord." ".$prevWord." ".$word, $wordBeforePrevWord." ".$prevWord, $wordBeforePrevWord);
+					else array_unshift($result, $word." ".$prevWord." ".$wordBeforePrevWord, $prevWord." ".$wordBeforePrevWord, $wordBeforePrevWord);
+					break;
+				}
+			}
+			if($index++ > 2) break;
+			$wordBeforePrevWord = $prevWord;
+			$prevWord = $word;
+		}
+		return $result;
+	}
+
+	private function processCountyString($cString, $nextWord = null, $state_province="", $sense=true) {//echo "\nInput to processCountyString, cString: ".$cString."\nnextWord: ".$nextWord."\nstate_province: ".$state_province."\n";
 		$cString = trim($cString, " \t\n\r\0\x0B,:;.!\"\'\\~@#$%^&*_-");
 		if(strlen($cString) > 0) {
-			if($nextWord != null) {
+			if((preg_match("/\\bSTATE\\b/i", $cString) || preg_match("/\\bPROVINCE\\b/i", $cString)) && $nextWord) {
 				$nextWord = trim($nextWord, " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-");
-				$pos = strrpos($cString, ",");
-				if($pos !== FALSE) $temp = substr($cString, $pos);
-				else {
-					$pos = strrpos($cString, ";");
-					if($pos !== FALSE) $temp = substr($cString, $pos);
-					else $temp = $cString;
-					$statePos = stripos($temp, "State");
-					if($statePos !== FALSE) {
-						$cArray = $this->getCounty($nextWord);
-						if($cArray != null) {
-							return $this->processCArray($cArray, $cString, $nextWord);
-						}
+				$threeWordPhrases = $this->getThreeWordPhrasesFromEnd($nextWord, true);
+				foreach($threeWordPhrases as $threeWordPhrase) {//echo "\nline 3896, threeWordPhrase: ".$threeWordPhrase."\n";
+					$cArray = $this->getCounty($threeWordPhrase, $state_province);
+					if($cArray != null && count($cArray) > 0) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
+				}
+			} else {
+				//if($sense) echo "\nline 3908, sense: true\n";
+				//else echo "\nline 3909, sense: false\n";
+				if(preg_match("/^(.{2,})[,.] (?:U\\.?S\\.?A\\.?|United States|Canada|Mexico)[,.]?(.*)/i", $cString, $mats)) {
+					$sp = $this->getStateOrProvince(trim($mats[1]));
+					if($sp) $state_province = $sp[0];
+				}
+				$threeWordPhrases = $this->getThreeWordPhrasesFromEnd($cString, $sense);
+				foreach($threeWordPhrases as $threeWordPhrase) {//echo "\nline 3629, threeWordPhrase: ".$threeWordPhrase."\n";
+					$cArray = $this->getCounty($threeWordPhrase, $state_province);
+					if($cArray != null && count($cArray) > 0) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
+				}
+			}
+			if($nextWord) {
+				if(!preg_match("/\\bSTATE\\b/i", $cString) && !preg_match("/\\bPROVINCE\\b/i", $cString)) {
+					$nextWord = trim($nextWord, " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-");
+					$threeWordPhrases = $this->getThreeWordPhrasesFromEnd($nextWord, true);
+					foreach($threeWordPhrases as $threeWordPhrase) {//echo "\nline 3913, threeWordPhrase: ".$threeWordPhrase."\n";
+						$cArray = $this->getCounty($threeWordPhrase, $state_province);
+						if($cArray != null && count($cArray) > 0) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 					}
+				}
+				$pos = strrpos($nextWord, ",");
+				$temp = "";
+				if($pos !== FALSE) $temp = substr($nextWord, $pos);
+				else {
+					$pos = strrpos($nextWord, ";");
+					if($pos !== FALSE) $temp = substr($nextWord, $pos);
+					else $temp = $nextWord;
+				}
+				$statePos = stripos($temp, "State");
+				if($statePos !== FALSE) $temp = trim(substr($temp, 0, $statePos));
+				$cArray = $this->getCounty($temp, $state_province);
+				if($cArray != null) {
+					return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 				}
 			}
 			if(substr_count($cString, " ") < 3) {//if a string contains more than 2 spaces (3 words) there is no point in going to the database with it
-				$cArray = $this->getCounty($cString);
+				$cArray = $this->getCounty($cString, $state_province);
 				if($cArray != null) {
-					return $this->processCArray($cArray, $cString, $nextWord);
+					return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 				}
 			}
 			$commaPos = strrpos($cString, ",");
@@ -5137,19 +5220,38 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$afterComma = trim(substr($cString, $commaPos+1));
 				$beforeComma = trim(substr($cString, 0, $commaPos));
 				if(substr_count($afterComma, " ") < 3) {
-					$cArray = $this->getCounty($afterComma);
-					if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord);
+					$cArray = $this->getCounty($afterComma, $state_province);
+					if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 					else {
 						$colonPos = strpos($afterComma, ":");
 						if($colonPos !== FALSE) {
 							$afterColon = trim(substr($afterComma, $colonPos+1));
 							$beforeColon = trim(substr($afterComma, 0, $colonPos));
 							if(substr_count($afterColon, " ") < 3) {
-								$cArray = $this->getCounty($afterColon);
-								if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord);
+								$cArray = $this->getCounty($afterColon, $state_province);
+								if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 								else if(substr_count($beforeColon, " ") < 3) {
-									$cArray = $this->getCounty($beforeColon);
-									if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord);
+									$cArray = $this->getCounty($beforeColon, $state_province);
+									if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
+								}
+							}
+						}
+					}
+				}
+				if(substr_count($beforeComma, " ") < 3) {
+					$cArray = $this->getCounty($beforeComma, $state_province);
+					if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
+					else {
+						$colonPos = strpos($beforeComma, ":");
+						if($colonPos !== FALSE) {
+							$afterColon = trim(substr($beforeComma, $colonPos+1));
+							$beforeColon = trim(substr($beforeComma, 0, $colonPos));
+							if(substr_count($afterColon, " ") < 3) {
+								$cArray = $this->getCounty($afterColon, $state_province);
+								if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
+								else if(substr_count($beforeColon, " ") < 3) {
+									$cArray = $this->getCounty($beforeColon, $state_province);
+									if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 								}
 							}
 						}
@@ -5161,11 +5263,11 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$afterColon = trim(substr($cString, $colonPos+1));
 				$beforeColon = trim(substr($cString, 0, $colonPos));
 				if(substr_count($afterColon, " ") < 3) {
-					$cArray = $this->getCounty($afterColon);
-					if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord);
+					$cArray = $this->getCounty($afterColon, $state_province);
+					if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 					else if(substr_count($beforeColon, " ") < 3) {
-						$cArray = $this->getCounty($beforeColon);
-						if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord);
+						$cArray = $this->getCounty($beforeColon, $state_province);
+						if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 					}
 				}
 			}
@@ -5174,87 +5276,22 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$afterDot = trim(substr($cString, $dotPos+1));
 				$beforeDot = trim(substr($cString, 0, $dotPos));
 				if(substr_count($afterDot, " ") < 3) {
-					$cArray = $this->getCounty($afterDot);
-					if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord);
+					$cArray = $this->getCounty($afterDot, $state_province);
+					if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 					else {
 						$spacePos = strrpos($beforeDot, " ");//it might be a county with a name like St. Johns
 						if($spacePos !== FALSE) {
 							$afterSpace = trim(substr($beforeDot, $spacePos+1));
-							$cArray = $this->getCounty($afterSpace);
-							if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord);
+							$cArray = $this->getCounty($afterSpace, $state_province);
+							if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord, $state_province);
 						}
-					}
-				}
-			}
-			$spacePos = strpos($cString, " ");
-			if($spacePos !== FALSE) {
-				$cArray = null;
-				$words = array_reverse(explode(" ", $cString));
-				$totalWordCount = count($words);
-				if($totalWordCount == 2) {//total word count won't be one since cString has been trimmed and spacePos !== FALSE
-					$lastWord = trim($words[0]);
-					$wordBefore = trim($words[1]);
-					$cArray = $this->getCounty(trim($wordBefore." ".$lastWord));
-					if($cArray == null) {
-						$cArray = $this->getCounty($lastWord);
-						if($cArray == null) $cArray = $this->getCounty($wordBefore);
-					}
-					if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord);
-				} else {//to avoid false matches with individual words that are part of a multiword county, find the matches for multiple words first
-					$wordCount = 0;
-					$prevWord = "";
-					$wordBeforePrevWord = "";
-					foreach($words as $word) {
-						if($wordCount > 1) {//echo "\nline 3377, word: ".$word.", prevWord: ".$prevWord.", wordBeforePrevWord: ".$wordBeforePrevWord."\n";
-							if(strlen($prevWord) > 0) {
-								if(strlen($wordBeforePrevWord) > 0) {
-									$temp = trim($word." ".$prevWord." ".$wordBeforePrevWord);
-									$cArray = $this->getCounty($temp);
-									if($cArray == null) {
-										$temp = trim($prevWord." ".$wordBeforePrevWord);
-										$cArray = $this->getCounty($temp);
-										if($cArray == null) {
-											$cArray = $this->getCounty($wordBeforePrevWord);
-											if($cArray == null) $cArray = $this->getCounty($prevWord);
-										}
-									}
-								} else {
-									$temp = trim($word." ".$prevWord);
-									$cArray = $this->getCounty($temp);
-								}
-							} else if(strlen($wordBeforePrevWord) > 0) {
-								$temp = trim($word." ".$wordBeforePrevWord);
-								$cArray = $this->getCounty($temp);
-							}
-							if($cArray == null) $cArray = $this->getCounty($word);
-							if($cArray != null) return $this->processCArray($cArray, $cString, $nextWord);
-						}
-						$wordBeforePrevWord = $prevWord;
-						$prevWord = $word;
-						if($wordCount < 2) $wordCount++;
-						else break;
-					}
-				}
-			} else {
-				$cArray = $this->getCounty(trim($cString));
-				if($cArray != null && count($cArray) > 0) {
-					if(count($cArray) == 1) return $cArray;
-					else {
-						foreach($cArray as $vs) {
-							if($nextWord != null && stripos($nextWord, $vs['stateProvince']) !== FALSE) {
-								$results = array();
-								array_push($results, array('county' => $vs['county'], 'stateProvince' => $vs['stateProvince'], 'country' => $vs['country']));
-								return $results;
-							}
-						}
-						return $cArray;//return the whole result set since can't determine which is correct
 					}
 				}
 			}
 		}
 	}
 
-	private function getCountyMatches($c) {//echo "\nLine 3140, Input to getCountyMatches: ".$c."\n";
+	private function getCountyMatches($c) {//echo "\nLine 3994, Input to getCountyMatches: ".$c."\n";
 	//this function has the side-effect of removing double quotes
 		if($c) {
 			$tempC = str_replace("\"", "\\\"", $c);
@@ -5285,6 +5322,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$countyPatStr = "/(.*)\\n(?:C[o0q][.,]?)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))[:;,]? (.*)/is";
 			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array(str_replace("\\\"", "\"", $countyMatches[1]), str_replace("\\\"", "\"", $countyMatches[2]));
 
+			$countyPatStr = "/(.*)(?<! of )(?:C[o0q]un[tf][yv?i]|Par(?:\\.|[il!|]sh)|B[o0]r[o0]ugh)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))[:;] (.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array(str_replace("\\\"", "\"", $countyMatches[1]), str_replace("\\\"", "\"", $countyMatches[2]));
+
 			$countyPatStr = "/(.*)(?<! of )(?:C[o0q]un[tf][yv?i]|Par(?:\\.|[il!|]sh)|B[o0]r[o0]ugh)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line))) (.*)/is";
 			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array(str_replace("\\\"", "\"", $countyMatches[1]), str_replace("\\\"", "\"", $countyMatches[2]));
 
@@ -5293,17 +5333,15 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		}
 	}
 
-	protected function findCounty($c, $state_province="") {//echo "\nLine 3002, Input to findCounty: ".$c."\nstate_province: ".$state_province."\n";
-		$firstPart = "";
-		$lastPart = "";
-		$state = "";
-		$county = "";
-		$country = "";
+	protected function findCounty($c, $state_province="") {//echo "\nLine 3660, Input to findCounty: ".$c."\nstate_province: ".$state_province."\n";
 		$c = str_ireplace(" Dade Co", " Miami Dade Co", $c);
 		$cm = $this->getCountyMatches($c);
-		if($cm != null) {//$i=0;foreach($cm as $m) echo "\nLine 3421, cm[".$i++."] = ".$m."\n";
-			$firstPart = trim($cm[0]);
-			$lastPart = trim($cm[1]);
+		if($cm != null) {//$i=0;foreach($cm as $m) echo "\nLine 3789, cm[".$i++."] = ".$m."\n";
+			$firstPart = ltrim(rtrim($cm[0], " \t\n\r\0\x0B,:;.\"\'\\~@#$%^&*_-"));
+			$lastPart = rtrim(ltrim($cm[1], " \t\n\r\0\x0B,:;.\"\'\\~@#$%^&*_-"));
+			$state = "";
+			$county = "";
+			$country = "";
 			if(strlen($state_province) > 0) {
 				$counties = $this->getCounties($state_province);
 				if(count($counties) > 0) {
@@ -5313,17 +5351,14 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 				}
 			}
-			$cs = $this->processCountyMatches($firstPart, $lastPart);
+			$cs = $this->processCountyMatches($firstPart, $lastPart, $state_province);
 			if($cs != null) {
 				$county = $cs['county'];
 				if(array_key_exists('stateProvince', $cs)) {
 					$sp = $cs['stateProvince'];
 					if(strlen($sp) > 0) $state = $sp;
 				}
-				if(array_key_exists('country', $cs)) {
-					$t = $cs['country'];
-					if(strlen($t) > 0) $country = $t;
-				}
+				if(array_key_exists('country', $cs)) $country = $cs['country'];
 			}
 			if(strlen($county) == 0 && strlen($firstPart) > 0) {
 				if(strlen($state_province) > 0) {
@@ -5341,7 +5376,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					if($cm != null) {
 						$firstPart = trim($cm[0]);
 						$lastPart = trim($cm[1])." ".$lastPart;
-						$cs = $this->processCountyMatches($firstPart, $lastPart);
+						$cs = $this->processCountyMatches($firstPart, $lastPart, $state_province);
 						if($cs != null) {
 							$county = $cs['county'];
 							if(array_key_exists('stateProvince', $cs)) $state = $cs['stateProvince'];
@@ -5428,10 +5463,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						);
 					}
 				}
-				if(strlen($state_province) > 0) {
-					$state = $state_province;
-					if($this->isUSState($state_province)) $country = "U.S.A.";
-				}
+				if(strlen($state) > 0) {
+					if(strlen($country) == 0 && $this->isUSState($state)) $country = "U.S.A.";
+				} else $state = $state_province;
 				$county = ucwords
 				(
 					strtolower
@@ -6038,16 +6072,17 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				array("Ramalina ", "\${1} \${2} \${3}", ") Mull. Arg.", "(Ach.) Mull. Arg.", "Mull. Arg.", "Mull. Arg.", "Mull. Arg.", "USA", " ", "Lichens of \${1}", "Quercus", "Wyoming", ")Ach.", "(Ach.)"), $str, -1, $count
 			);
 			//$str = str_replace("Miill.", "Mull.", $str);
-			//if($count > 0) echo "Replaced It\n\n";//remove barcodes (strings of ~s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long), one-character lines, and latitudes and longitudes with double quotes instead of degree signs
 			$false_num_class = "[OSZl|I!\d]";//the regex class that represents numbers and characters that numbers are commonly replaced with
 			$pattern =
 				array(
+				"/LASALLE PARISH/i",
+				"/WEESTER COUNTY/i",
 				"/ +([:;])([A-Za-z])/",
 				"/ +([,.])([A-HJKLMNPRT-Ya-kmnp-y])/",
 				"/ +([,:;.]\\W)/",
 				"/[_-]{3,}/",
 				"/([A-Za-z])Co\\., ([A-Z])/",
-				"/^LEWIS\\sAND\\sCLARK\\s?CAVERNS\\s?STATE\\sPARK/m",
+				"/^LEWIS\\sAND\\sCLARK\\s?CAVERNS\\s?STATE\\sPARK/im",
 				"/(?:THE )?L[O0]U[|!1Il]S[|!1Il]ANA STATE UN[|!1Il]VERS[|!1Il]TY(?:\\r\\n| )(?:L[|!1Il][CG]HEN )?HERBAR[|!1Il]UM/is",
 				"/(?:THE )?(?:MYC[O0]L[O0]G[|!1Il]CAL )?HERBAR[|!1Il]UM [ODQ0]F(?:\\r\\n| )L[O0]U[|!1Il]S[|!1Il]ANA STATE UN[|!1Il]VERS[|!1Il]TY/is",
 				"/With the Cooperation of (?:Mr\\. )?Charles [DP]eering/is",
@@ -6057,11 +6092,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				"/^.{1,2}$/m", //one-character lines (Tesseract must generate a 2-char end of line)
 				"/(lat|long)(\.|,|:|.:|itude)(:|,)?\s?(".$false_num_class."{1,3}(?:\.".$false_num_class."{1,7})?)\"/i" //the beginning of lat-long repair
 				);
-			$replacement = array("\${1} \${2}", "\${1} \${2}", "\${1}", " ", "\${1} Co., \${2}", "LICHENS OF LEWIS AND CLARK CAVERNS STATE PARK", "", "", "", "", "", "", "", "\${1}\${2}\$3 \${4}".chr(176));
-			//$replacement = array(" ", "\${1} Co., \${2}", "LICHENS OF LEWIS AND CLARK CAVERNS STATE PARK", "", "", "", "", "", "", "", "\${1}\${2}\$3 \${4}".chr(176));
+			$replacement = array("La Salle Parish", "Webster County", "\${1} \${2}", "\${1} \${2}", "\${1}", " ", "\${1} Co., \${2}", "LICHENS OF LEWIS AND CLARK CAVERNS STATE PARK", "", "", "", "", "", "", "", "\${1}\${2}\$3 \${4}".chr(176));
 			$str = preg_replace($pattern, $replacement, $str, -1);
 			$str = str_replace("Â°", chr(176), $str);
-			//$str = $this->replaceMissingDegreeSignsInLatLongs($str);
 			$str = $this->fixLatLongs($this->replaceMissingDegreeSignsInLatLongs($str));
 			$str = $this->fixDates($str);//return $str;
 			$sArray = explode("\n", $str);
@@ -6395,139 +6428,112 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			(
 				'Mexico'=>array
 				(
-					'Aguascalientes'=>'/^(?:Aguascal[il!|1][ec]nt[ec]s|AG\\.?)$/i',
-					'Baja California'=>'/^(?:Baja\\sCal[il!|1]forn[il!|1]a)$/i',
-					'Baja California Sur'=>'/^(?:Baja Cal[il!|1]forn[il!|1]a Sur|B\\.?[S5]\\.?)$/i',
-					'Campeche'=>'/^(?:Camp[ec]{2}h[ec]|CM\\.?)$/i',
-					'Chiapas'=>'/^(?:Ch[il!|1]apas|CS\\.?)$/i',
-					'Chihuahua'=>'/^(?:Ch[il!|1]huahua|CH\\.?)$/i',
-					'Coahuila'=>'/^(?:Coahu[il!|1]{2}a)$/i',
-					'Colima'=>'/^(?:Co[il!|1]{2}ma|CL\\.?)$/i',
-					'Durango'=>'/^(?:Durang[o0uq]|DG\\.?)$/i',
-					'Guanajuato'=>'/^(?:Guanajuat[o0uq]|GT\\.?)$/i',
-					'Guerrero'=>'/^(?:Gu[ec]rr[ec]r[o0uq]|DG\\.?)$/i',
-					'Hidalgo'=>'/^(?:H[il!|1]dalg[o0uq]|HG\\.?)$/i',
-					'Jalisco'=>'/^(?:Ja[il!|1]{2}sc[o0uq]|JA\\.?)$/i',
-					'México'=>'/^(?:Méxic[o0uq])$/i',
-					'Michoacán'=>'/^(?:M[il!|1]ch[o0uq]acán|M[il!|1]ch[o0uq]acan)$/i',
-					'Morelos'=>'/^(?:Morelo[o0uq]s)$/i',
-					'Nayarit'=>'/^(?:Nayar[il!|1]t|NA\\.?)$/i',
-					'Nuevo León'=>'/^(?:Nu[ec]v[o0uq]\\sL[ec]ón|Nu[ec]v[o0uq] L[ec][o0uq]n|N\\.?L\\.?)$/i',
-					'Oaxaca'=>'/^(?:[o0uq]axaca|[o0uq]A\\.?)$/i',
-					'Puebla'=>'/^(?:Pu[ec]bla|PB\\.?)$/i',
-					'Querétaro'=>'/^(?:Qu[ec]rétar[o0uq]|Qu[ec]r[ec]tar[o0uq])$/i',
-					'Quintana Roo'=>'/^(?:Qu[il!|1]ntana\\sR[o0uq]{2}|QR\\.?)$/i',
-					'San Luis Potosí'=>'/^(?:San\\sLu[il!|1]s\\sPotosí|San Lu[il!|1]s Potos[il!|1]|S\\.?L\\.?)$/i',
-					'Sinaloa'=>'/^(?:S[il!|1]nal[o0uq]a|SI\\.?)$/i',
-					'Tabasco'=>'/^(?:Tabas[ec][o0uq]|TB\\.?)$/i',
-					'Tamaulipas'=>'/^(?:Tamaul[il!|1]pa[s5]|TM\\.?)$/i',
-					'Tlaxcala'=>'/^(?:T[il!|1]ax[ec]ala|TL\\.?)$/i',
-					'Veracruz'=>'/^(?:V[ec]ra[ec]ruz|VE\\.?)$/i',
-					'Yucatán'=>'/^(?:Yu[ec]atán|Yu[ec]atan|YU\\.?)$/i',
-					'Zacatecas'=>'/^(?:Za[ec]at[ec]{2}as|ZA\\.?)$/i'
+					'Aguascalientes'=>'/\\b(?i:Aguascal[il!|1][ec]nt[ec]s|(?-i)AG\\.?$)/',
+					'Baja California'=>'/\\bBaja\\sCal[il!|1]forn[il!|1]a\\b/i',
+					'Baja California Sur'=>'/\\b(?i:Baja Cal[il!|1]forn[il!|1]a Sur|(?-i)B\\.?[S5]\\.?$)/',
+					'Campeche'=>'/\\b(?i:Camp[ec]{2}h[ec]|(?-i)CM\\.?$)/',
+					'Chiapas'=>'/\\b(?i:Ch[il!|1]apas|(?-i)CS\\.?$)/',
+					'Chihuahua'=>'/\\b(?i:Ch[il!|1]huahua|(?-i)CH\\.?$)/',
+					'Coahuila'=>'/\\bCoahu[il!|1]{2}a\\b/i',
+					'Colima'=>'/\\b(?i:Co[il!|1]{2}ma|(?-i)CL\\.?$)/',
+					'Durango'=>'/\\b(?i:Durang[o0uq]|(?-i)DG\\.?$)/',
+					'Guanajuato'=>'/\\b(?i:Guanajuat[o0uq]|(?-i)GT\\.?$)/',
+					'Guerrero'=>'/\\b(?i:Gu[ec]rr[ec]r[o0uq]|(?-i)DG\\.?$)/',
+					'Hidalgo'=>'/\\b(?i:H[il!|1]dalg[o0uq]|(?-i)HG\\b\\.?$)/',
+					'Jalisco'=>'/\\b(?i:Ja[il!|1]{2}sc[o0uq]|(?-i)JA\\.?$)/',
+					'México'=>'/\\b(?<!New )M[ée]xic[o0uq]\\b/i',
+					'Michoacán'=>'/\\bM[il!|1]ch[o0uq]ac[áa]n\\b/i',
+					'Morelos'=>'/\\bMorelo[o0uq]s\\b/i',
+					'Nayarit'=>'/\\b(?i:Nayar[il!|1]t|(?-i)NA\\.?$)/',
+					'Nuevo León'=>'/\\b(?i:Nu[ec]v[o0uq]\\sL[ec]ón|Nu[ec]v[o0uq] L[ec][o0uq]n|(?-i)N\\.?L\\.?$)/',
+					'Oaxaca'=>'/\\b(?:[o0uq]axaca|[o0uq]A\\b\\.?)/i',
+					'Puebla'=>'/\\b(?i:Pu[ec]bla|(?-i)PB\\.?$)/',
+					'Querétaro'=>'/\\bQu[ec]r[ecé]tar[o0uq]\\b/i',
+					'Quintana Roo'=>'/\\b(?i:Qu[il!|1]ntana\\sR[o0uq]{2}|(?-i)QR\\.?$)/',
+					'San Luis Potosí'=>'/\\b(?i:San Lu[il!|1]s Potos[il!|1í]|(?-i)S\\.?L\\.?$)/',
+					'Sinaloa'=>'/\\b(?i:S[il!|1]nal[o0uq]a|(?-i)SI\\.?$)/',
+					'Tabasco'=>'/\\b(?i:Tabas[ec][o0uq]|(?-i)TB\\.?$)/',
+					'Tamaulipas'=>'/\\b(?i:Tamaul[il!|1]pa[s5]|(?-i)TM\\.?$)/',
+					'Tlaxcala'=>'/\\b(?i:T[il!|1]ax[ec]ala|(?-i)TL\\.?$)/',
+					'Veracruz'=>'/\\b(?i:V[ec]ra[ec]ruz|(?-i)VE\\.?$)/',
+					'Yucatán'=>'/\\b(?i:Yu[ec]atán|Yu[ec]atan|(?-i)YU\\.?$)/',
+					'Zacatecas'=>'/\\b(?i:Za[ec]at[ec]{2}as|(?-i)ZA\\.?$)/'
 				),
 				'USA'=>array
 				(
-					'Alabama'=>'/^(?:A[il!|1]abama|A[il!|1]\\.?|A[il!|1]a\\.?)$/i',
-					'Alaska'=>'/^(?:A[il!|1]aska|AK\\.?)$/i',
-					'Arizona'=>'/^(?:Ar[il!|1][z2][o0]na|AZ\\.?|Ariz\\.?)$/i',
-					'Arkansas'=>'/^(?:Arkan[s5]a[s5]|AR\\.?|Ark\\.?)$/i',
-					'California'=>'/^(?:C(?i)a[il!|1]{2}f[o0uq]rn[il!|1]a|Cal[il!|1]f\\.?|(?-i)C(?i)A\\.)$/',
-					'Colorado'=>'/^(?:C(?i)[o0uq][il!|1][o0uq]rad[o0uq]|C[o0uq][il!|1][o0]\\.?|(?-i)C(?i)[o0uq]\\.)$/',
-					'Connecticut'=>'/^(?:C[o0uq]nn[ec]{2}t[il!|1]cut|CT\\.?|C[o0uq]nn\\.?)$/i',
-					'Delaware'=>'/^(?:D[ec]lawar[ec]|DE\\.?|Del\\.?)$/i',
-					'DC'=>'/^(?:D[il!|1][s5]tr[il!|1]ct [o0uq]f C[o0uq][il!|1]umb[il!|1]a|D\\.?C\\.?)$/i',
-					'Florida'=>'/^(?:F[il!|1][o0uq]r[il!|1]da|F[il!|1]\\.?|F[il!|1]a\\.?)$/i',
-					'Georgia'=>'/^(?:G[ec][o0uq]rg[il!|1]a|GA\\.?)$/i',
-					'Hawaii'=>'/^(?:Hawa[il!|1]{2}|H[il!|1]\\.?)$/i',
-					'Idaho'=>'/^(?:[il!|1]dah[o0uq]|[il!|1]D\\.?)$/i',
-					'Illinois'=>'/^(?:[il!|1]{4}n[o0uq][il!|1]s|[il!|1]{3}?\\.)$/i',
-					'Indiana'=>'/^(?:[il!|1]nd[il!|1]ana|[il!|1]N\\.|[il!|1]nd\\.?)$/i',
-					'Iowa'=>'/^(?:[il!|1][o0uq]wa|IA\\.)$/i',
-					'Kansas'=>'/^(?:Kansas|KS\\.?|Kans\\.?)$/i',
-					'Kentucky'=>'/^(?:K[ec]ntucky|KY\\.?)$/i',
-					'Louisiana'=>'/^(?:[il!|1][o0uq]u[il!|1]s[il!|1]ana|LA\\.?)$/i',
-					'Maine'=>'/^(?:Ma[il!|1]ne|ME\\.?)$/i',
-					'Maryland'=>'/^(?:Mary[il!|1]and|MD\\.?)$/i',
-					'Massachusetts'=>'/^(?:Ma[s5]{2}achu[s5][ec]tt[s5]|MA\\.?|Ma[s5]{2}\\.?)$/i',
-					'Michigan'=>'/^(?:M(?i)[il!|1][ec]h[il!|1]gan|M[il!|1][ec]h\\.?|(?-i)M(?i)[il!|1]\\.?)$/',
-					'Minnesota'=>'/^(?:M[il!|1]nn[ec]s[o0uq]ta|MN\\.?|M[il!|1]nn\\.?)$/i',
-					'Mississippi'=>'/^(?:M[il!|1][s5]{2}[il!|1][s5]{2}[il!|1]pp[il!|1]|M[s5]\\.?|M[il!|1][s5]{2}\\.?)$/i',
-					'Missouri'=>'/^(?:M[il!|1][s5]{2}[o0uq]ur[il!|1]|M[o0uq]\\.?)$/i',
-					'Montana'=>'/^(?:M(?i)[o0uq]ntana|M[o0uq]nt\\.?|(?-i)M(?i)T\\.?)$/',
-					'Nebraska'=>'/^(?:N[ec]braska|N[ec]\\.?|N[ec]br\\.?)$/i',
-					'Nevada'=>'/^(?:N[ec]vada|NV\\.?|N[ec]v\\.?)$/i',
-					'New Hampshire'=>'/^(?:N[ec]w\\sHampsh[il!|1]r[ec]|N\\.?H\\.?)$/i',
-					'New Jersey'=>'/^(?:N[ec]w\\sJ[ec]rs[ec]y|N\\.?J\\.?)$/i',
-					'New Mexico'=>'/^(?:N[ec]w\\sM[ec]x[il!|1][ec][o0uq]|NM\\.?|N\\.? M[ec]x\\.?)$/i',
-					'New York'=>'/^(?:N[ec]w\\sY[o0uq]rk|N\\.?Y\\.?)$/i',
-					'North Carolina'=>'/^(?:N[o0uq]rth\\sCar[o0uq][il!|1]{2}na|N\\.?C\\.?)$/i',
-					'North Dakota'=>'/^(?:N[o0uq]rth\\sDak[o0uq]ta|N\\.?D\\.?|N\\.? Dak\\.?)$/i',
-					'Ohio'=>'/^(?:[o0uq]h[il!|1][o0uq]|[o0uq]H\\.?)$/i',
-					'Oklahoma'=>'/^(?:[o0uq]k[il!|1]ah[o0uq]ma|[o0uq]K\\.|[o0uq]k[il!|1]a\\.?)$/i',
-					'Oregon'=>'/^(?:[o0uq]r[ec]g[o0uq]n|[o0uq]R\\.|[o0uq]r[ec]g\\.?)$/i',
-					'Pennsylvania'=>'/^(?:P[ec]nnsy[il!|1]van[il!|1]a|PA\\.?)$/i',
-					'Puerto Rico'=>'/^(?:Puert[o0] R[il!|1]c[o0]|PR\\.?)$/i',
-					'Rhode Island'=>'/^(?:Rh[o0uq]de\\s[il!|1]s[il!|1]and|R\\.?I\\.?)$/i',
-					'South Carolina'=>'/^(?:S[o0uq]uth\\sCar[o0uq][il!|1]{2}na|S\\.?C\\.?)$/i',
-					'South Dakota'=>'/^(?:S[o0uq]uth\\sDak[o0uq]ta|S\\.?D\\.?|S\\.?\\sDak\\.?)$/i',
-					'Tennessee'=>'/^(?:T[ec]nn[ec]ss[ec]{2}|TN\\.?|T[ec]nn\\.?)$/i',
-					'Texas'=>'/^(?:T[ec]xas|TX\\.?|T[ec]x\\.?)$/i',
-					'Utah'=>'/^(?:Utah|UT\\.?)$/i',
-					'Vermont'=>'/^(?:V[ec]rm[o0uq]nt|VT\\.?)$/i',
-					'Virginia'=>'/^(?:V[il!|1]rg[il!|1]n[il!|1]a|VA\\.?)$/i',
-					'Washington'=>'/^(?:Wash[il!|1]ngt[o0uq]n|WA\\.?|Wash\\.?)$/i',
-					'West Virginia'=>'/^(?:West V[il!|1]rg[il!|1]n[il!|1]a|W\\.? Va?\\.?)$/i',
-					'Wisconsin'=>'/^(?:W[il!|1]s[ec][o0uq]ns[il!|1]n|W[il!|1]s?\\.?)$/i',
-					'Wyoming'=>'/^(?:W[gy][o0uq]m[il!|1]n[gy]|W[gy][o0uq]?\\.?)$/i'
+					'Alabama'=>'/(?i)(?<!University of )(?-i)\\b(?i:A[il!|1]abama|A[il!|1]a\\b\\.?|(?-i)AL\\.?$)/',
+					'Alaska'=>'/(?i)(?<!University of )(?-i)\\b(?i:A[il!|1]aska|(?-i)AK\\.?$)/',
+					'Arizona'=>'/(?i)(?<!University of )(?-i)\\b(?i:Ar[il!|1][z2][o0]na|Ariz\\b\\.?|(?-i)AZ\\.?$)/',
+					'Arkansas'=>'/(?i)(?<!University of )(?-i)\\b(?i:Arkan[s5]a[s5]|Ark\\b\\.?|(?-i)AR\\.?$)/',
+					'California'=>'/(?i)(?<!University of )(?-i)\\b(?:C(?i)a[il!|1]{2}f[o0uq]rn[il!|1]a|Cal[il!|1]f\\b\\.?|(?-i)C(?i)A\\.$)/',
+					'Colorado'=>'/(?i)(?<!University of )(?-i)\\b(?:C(?i)[o0uq][il!|1][o0uq]rad[o0uq]|C[o0uq][il!|1][o0]$)/',
+					'Connecticut'=>'/(?i)(?<!University of )(?-i)\\b(?i:C[o0uq]nn[ec]{2}t[il!|1]cut|C[o0uq]nn\\b\\.?|(?-i)CT\\.?$)/',
+					'Delaware'=>'/(?i)(?<!University of )(?-i)\\b(?i:D[ec]lawar[ec](?! Mountains)|Del\\b\\.?|(?-i)DE\\b\\.$)/',
+					'DC'=>'/\\b(?i:D[il!|1][s5]tr[il!|1]ct [o0uq]f C[o0uq][il!|1]umb[il!|1]a|(?-i)D\\.?C\\.?$)/',
+					'Florida'=>'/(?i)(?<!University of )(?-i)\\b(?i:F[il!|1][o0uq]r[il!|1]da|F[il!|1]a\\b\\.?|(?-i)F[Ll1|!]\\.?$)/',
+					'Georgia'=>'/(?i)(?<!University of )(?-i)\\b(?i:G[ec][o0uq]rg[il!|1]a|(?-i)G[Aa]\\.?$)/',
+					'Hawaii'=>'/(?i)(?<!University of )(?-i)\\b(?i:Hawa[il!|1]{2}|(?-i)H[il!|1I]\\.?$)/',
+					'Idaho'=>'/(?i)(?<!University of )(?-i)\\b(?i:[il!|1]dah[o0uq]|(?-i)[Il!|1]D\\.?$)/',
+					'Illinois'=>'/(?i)(?<!University of )(?-i)\\b(?i:[il!|1]{4}n[o0Q][il!|1]s|(?-i)[Il!|1]{3}?\\.$)/',
+					'Indiana'=>'/(?i)(?<!University of )(?-i)\\b(?i:[il!|1]nd[il!|1]ana|[il!|1]nd\\b\\.?|(?-i)[Il!|1]N\\b\\.$)/',
+					'Iowa'=>'/(?i)(?<!University of )(?-i)\\b(?i:[il!|1][o0uq]wa|(?-i)I[Aa]\\.$)/',
+					'Kansas'=>'/(?i)(?<!University of )(?-i)\\b(?i:Kansas|Kans\\b\\.?|(?-i)KS\\.?$)/',
+					'Kentucky'=>'/(?i)(?<!University of )(?-i)\\b(?i:K[ec]ntucky|(?-i)KY\\.?$)/',
+					'Louisiana'=>'/(?i)(?<!University of )(?-i)\\b(?i:[il!|1][o0uq]u[il!|1]s[il!|1]ana|(?-i)L[Aa]\\.?$)/',
+					'Maine'=>'/(?i)(?<!University of )(?-i)\\b(?i:Ma[il!|1]ne|(?-i)M[Ee]\\b\\.?)/',
+					'Maryland'=>'/(?i)(?<!University of )(?-i)\\b(?i:Mary[il!|1]and|(?-i)MD\\b\\.?)/',
+					'Massachusetts'=>'/(?i)(?<!University of )(?-i)\\b(?i:Ma[s5]{2}achu[s5][ec]tt[s5]|Ma[s5]{2}\\b\\.?|(?-i)M[Aa]\\.?$)/',
+					'Michigan'=>'/(?i)(?<!University of )(?-i)\\b(?:M(?i)[il!|1][ec]h[il!|1]gan|M[il!|1][ec]h\\b\\.?|(?-i)M(?i)[il!|1]\\.?$)/',
+					'Minnesota'=>'/(?i)(?<!University of )(?-i)\\b(?i:M[il!|1]nn[ec]s[o0uq]ta|M[il!|1]nn\\b\\.?|(?-i)M[Nn]\\.?$)/',
+					'Mississippi'=>'/(?i)(?<!University of )(?-i)\\b(?i:M[il!|1][s5]{2}[il!|1][s5]{2}[il!|1]pp[il!|1]|M[il!|1][s5]{2}\\b\\.?|(?-i)M[Ss5]\\.?$)/',
+					'Missouri'=>'/(?i)(?<!University of )(?-i)\\b(?i:M[il!|1][s5]{2}[o0uq]ur[il!|1]|(?-i)M[Oo0Q]\\.?$)/',
+					'Montana'=>'/(?i)(?<!University of )(?-i)\\b(?:M(?i)[o0uq]ntana|M[o0uq]nt\\b\\.?|(?-i)M(?i)T\\.?$)/',
+					'Nebraska'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[ec]braska|N[ec]br\\b\\.?|(?-i)N[eE]\\.?$)/',
+					'Nevada'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[ec]vada|N[ec]v\\b\\.?|(?-i)NV:|NV\\.?$)/',
+					'New Hampshire'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[ec]w\\sHampsh[il!|1]r[ec]|(?-i)N\\.?H\\.?$)/',
+					'New Jersey'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[ec]w\\sJ[ec]rs[ec]y|(?-i)N\\.?J\\.?$)/',
+					'New Mexico'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[ec]w\\sM[ec]x[il!|1][ec][o0uq]|N\\.? M[ec]x\\b\\.?|(?-i)NM:|NM\\.?$)/',
+					'New York'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[ec]w\\sY[o0uq]rk|(?-i)N\\.?Y\\.?$)/',
+					'North Carolina'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[o0uq]rth\\sCar[o0uq][il!|1]{2}na|(?-i)N\\.?C\\.?$)/',
+					'North Dakota'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[o0uq]rth\\sDak[o0uq]ta|N\\.? Dak\\b\\.?|(?-i)N\\.?D\\.?$)/',
+					'Ohio'=>'/(?i)(?<!University of )(?-i)\\b(?i:[o0uq]h[il!|1][o0uq]|(?-i)[O0Q]H\\b\\.?)/',
+					'Oklahoma'=>'/(?i)(?<!University of )(?-i)\\b(?i:[o0uq]k[il!|1]ah[o0uq]ma|[o0uq]k[il!|1]a\\b\\.?|(?-i)[O0Q][Kk]\\.$)/',
+					'Oregon'=>'/(?i)(?<!University of )(?-i)\\b(?i:[o0uq]r[ec]g[o0uq]n|[o0uq]r[ec]g\\b\\.?|(?-i)[O0Q][Rr]\\.$)/',
+					'Pennsylvania'=>'/(?i)(?<!University of )(?-i)\\b(?i:P[ec]nnsy[il!|1]van[il!|1]a|(?-i)P[Aa]\\.?$)/',
+					'Puerto Rico'=>'/(?i)(?<!University of )(?-i)\\b(?i:Puert[o0] R[il!|1]c[o0]|(?-i)P\\.?R\\.?$)/',
+					'Rhode Island'=>'/(?i)(?<!University of )(?-i)\\b(?i:Rh[o0uq]de\\s[il!|1]s[il!|1]and|(?-i)R\\.?[Ii1|]\\.?$)/',
+					'South Carolina'=>'/(?i)(?<!University of )(?-i)\\b(?i:S[o0uq]uth\\sCar[o0uq][il!|1]{2}na|(?-i)S\\.?C\\.?$)/',
+					'South Dakota'=>'/(?i)(?<!University of )(?-i)\\b(?i:S[o0uq]uth\\sDak[o0uq]ta|S\\.?\\sDak\\b\\.?|(?-i)S\\.?D\\.?$)/',
+					'Tennessee'=>'/(?i)(?<!University of )(?-i)\\b(?i:T[ec]nn[ec]ss[ec]{2}|T[ec]nn\\b\\.?|(?-i)TN\\.?$)/',
+					'Texas'=>'/(?i)(?<!University of )(?-i)\\b(?i:T[ec]xas|T[ec]x\\b\\.?|(?-i)TX:|TX\\.?$)/',
+					'Utah'=>'/(?i)(?<!University of )(?-i)\\b(?i:Utah|(?-i)UT:|UT\\.?$)/',
+					'Vermont'=>'/(?i)(?<!University of )(?-i)\\b(?i:V[ec]rm[o0uq]nt|(?-i)VT\\.?$)/',
+					'Virginia'=>'/(?i)(?<!\\bWest )(?<!University of )(?-i)\\b(?i:V[il!|1]rg[il!|1]n[il!|1]a|(?-i)VA\\.?$)/',
+					'Washington'=>'/(?i)(?<!University of )(?-i)\\b(?i:Wash[il!|1]ngt[o0uq]n|Wash\\b\\.?|(?-i)WA\\.?$)/',
+					'West Virginia'=>'/(?i)(?<!University of )(?-i)\\b(?i:West V[il!|1]rg[il!|1]n[il!|1]a|(?-i)W\\.? ?V[aA]?\\.?$)/',
+					'Wisconsin'=>'/(?i)(?<!University of )(?-i)\\b(?i:W[il!|1]s[ec][o0uq]ns[il!|1]n|(?-i)W[il!|1I][sS]?\\.?$)/',
+					'Wyoming'=>'/(?i)(?<!University of )(?-i)\\b(?i:W[gy][o0uq]m[il!|1]n[gy]|(?-i)W[gyY][oO0Q]?\\.?$)/'
 				),
 				'Canada'=>array
 				(
-					'Ontario'=>'/^(?:[o0uq]ntari[o0uq]|[o0uq]nt\\.?|[o0uq]N\\.)$/i',
-					'Quebec'=>'/^(?:[o0uq]u[ec]b[ec]{2}|[o0uq][ec]\\.?)$/i',
-					'Nova Scotia'=>'/^(?:N[o0uq]va\\s[S5]c[o0uq]t[il!|1]a|N\\.?[S5]\\.?)$/i',
-					'New Brunswick'=>'/^(?:N[ec]w\\sBrunsw[il!|1][ec]k|N\\.?B\\.?)$/i',
-					'Manitoba'=>'/^(?:Man[il!|1]t[o0uq]ba|MB\\.?)$/i',
-					'British Columbia'=>'/^(?:Br[il!|1]t[il!|1][S5]h\\sC[o0uq]lumb[il!|1]a|B\\.?C\\.?)$/i',
-					'Prince Edward Island'=>'/^(?:Pr[il!|1]n[ec]{2}\\s[ec]dward\\s[il!|1]sland|P\\.?E\\.?I\\.?|P\\.?E\\.?)$/i',
-					'Saskatchewan'=>'/^(?:[S5]a[S5]kat[ec]h[ec]wan|[S5]a[S5]k\\.?|[S5]K\\.?)$/i',
-					'Alberta'=>'/^(?:A[il!|1]b[ec]rta|A[il!|1]b\\.?|AB\\.?)$/i',
-					'Northwest Territories'=>'/^(?:N[o0uq]rthw[ec]st T[ec]rr[il!|1]t[o0uq]r[il!|1]es|N\\.?W\\.?T\\.?)$/i',
-					'Yukon'=>'/^(?:Yuk[o0uq]n|YT\\.?)$/i',
-					'Nunavut'=>'/^(?:Nunavut|NU\\.?)$/i',
-					'Newfoundland and Labrador'=>'/^(?:N[ec]wf[o0uq]undland and Labrad[o0uq]r|N[ec]wf[o0uq]undland|Labrad[o0uq]r|N\\.?L\\.?)$/i'
+					'Ontario'=>'/(?i)(?<!University of )(?-i)\\b(?i:[o0uq]ntari[o0uq]|[o0uq]nt\\b\\.?|(?-i)[O0Q]N\\.$)/',
+					'Quebec'=>'/(?i)(?<!University of )(?-i)\\b(?i:[o0uq]u[ec]b[ec]{2}|(?-i)[O0Q][Cc]\\.$)/',
+					'Nova Scotia'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[o0uq]va\\s[S5]c[o0uq]t[il!|1]a|(?-i)N\\.?[S5]\\.?$)/',
+					'New Brunswick'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[ec]w\\sBrunsw[il!|1][ec]k|(?-i)N\\.?B\\.?$)/',
+					'Manitoba'=>'/(?i)(?<!University of )(?-i)\\b(?i:Man[il!|1]t[o0uq]ba|(?-i)MB\\.?$)/',
+					'British Columbia'=>'/(?i)(?<!University of )(?-i)\\b(?i:Br[il!|1]t[il!|1][S5]h\\sC[o0uq]lumb[il!|1]a|(?-i)B\\.?C\\.?$)/',
+					'Prince Edward Island'=>'/(?i)(?<!University of )(?-i)\\b(?i:Pr[il!|1]n[ec]{2}\\s[ec]dward\\s[il!|1]sland|(?-i)P\\.?E\\.?I\\b\\.?|P\\.?E\\.?$)/',
+					'Saskatchewan'=>'/(?i)(?<!University of )(?-i)\\b(?i:[S5]a[S5]kat[ec]h[ec]wan|[S5]a[S5]k\\b\\.?|(?-i)[S5]K\\b\\.?)/',
+					'Alberta'=>'/(?i)(?<!University of )(?-i)\\b(?i:A[il!|1]b[ec]rta|A[il!|1]b\\.?|(?-i)AB\\.?$)/',
+					'Northwest Territories'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[o0uq]rthw[ec]st T[ec]rr[il!|1]t[o0uq]r[il!|1]es|(?-i)N\\.?W\\.?T\\.?$)/',
+					'Yukon'=>'/(?i)(?<!University of )(?-i)\\b(?i:Yuk[o0uq]n|(?-i)YT\\.?$)/',
+					'Nunavut'=>'/(?i)(?<!University of )(?-i)\\b(?i:Nunavut|(?-i)NU\\.?$)/',
+					'Newfoundland and Labrador'=>'/(?i)(?<!University of )(?-i)\\b(?i:N[ec]wf[o0uq]undland and Labrad[o0uq]r|N[ec]wf[o0uq]undland|Labrad[o0uq]r|(?-i)N\\.?L\\.?$)/'
 				)
 			);
 
 			foreach($countries as $country=>$divisions) {
-				foreach($divisions as $name=>$pat) if(preg_match($pat, $d)) return array($name, $country);
-			}
-			$tDivisions = explode(" ", $d);
-			$prevDivision = "";
-			$beforePrevDivision = "";
-			$i=0;
-			foreach($tDivisions as $tDivision) {
-				$tDivision = trim($tDivision, " ;:,");
-				if(strlen($tDivision) > 3) $tDivision = trim($tDivision, ".");
-				foreach($countries as $country=>$divisions) {
-					foreach($divisions as $name=>$pat) {
-						if(strlen($prevDivision) > 0 && $i < 3) {
-							$t2Division = $prevDivision." ".$tDivision;
-							if(strlen($beforePrevDivision) > 0) {
-								$t3Division = $beforePrevDivision." ".$t2Division;
-								//echo "\nt3Division: ".$t3Division."\nPattern: ".$pat."\n";
-								if(preg_match($pat, $t3Division)) return array($name, $country);
-							}
-							//echo "\nt2Division: ".$t2Division."\nPattern: ".$pat."\n";
-							if(preg_match($pat, $t2Division)) return array($name, $country);
-						}
-						//echo "\ntDivision: ".$tDivision."\nPattern: ".$pat."\n";
-						if(preg_match($pat, $tDivision)) return array($name, $country);
-					}
-				}
-				$i++;
-				$beforePrevDivision = $prevDivision;
-				$prevDivision = $tDivision;
+				foreach($divisions as $name=>$pat) if(preg_match($pat, $d)) {/*echo "\nreturnin line 5336, name: ".$name."\npat: ".$pat."\n";*/return array($name, $country);}
 			}
 		}
 		return array();
