@@ -34,6 +34,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			else if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
 			else if($this->isBryophytaCanadensisLabel($str)) return $this->doBryophytaCanadensisLabel($str);
 			else if($this->isHepaticaeAmericanaeLabel($str)) return $this->doHepaticaeAmericanaeLabel($str);
+			else if($this->isMossesOfNorthAmericaLabel($str)) return $this->doMossesOfNorthAmericaLabel($str);
 			else return $this->doGenericLabel($str);
 		}
 		return array();
@@ -707,6 +708,16 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		return $this->doGenericLabel($s, "347");
 	}
 
+	private function isMossesOfNorthAmericaLabel($s) {
+		$pat = "/.*\\bM[0OQ][S5]{2}[ec][S5] [0OQ]f N[0OQ]rth Americ.*\\bCRUM/is";
+		if(preg_match($pat, $s)) return true;
+		if(preg_match("/.*\\bM[0OQ][S5]{2}[ec][S5] [0OQ]f N[0OQ]rth Americ.*\\bANDER[S5][0OQ]N/is", $s)) return true;
+		if(preg_match("/N[0OQ]rth Americ.*\\bH[0OQ]WARD.*CRUM.*ANDER[S5][0OQ]N./is", $s)) return true;
+		if(preg_match("/N[0OQ]rth Americ.*\\bH[0OQ]WARD A[,.] CRUM./is", $s)) return true;
+		if(preg_match("/N[0OQ]rth Americ.*\\bLewis E[,.] ANDER[S5][0OQ]N./is", $s)) return true;
+		return false;
+	}
+
 	private function isHepaticaeAmericanaeLabel($s) {
 		$pat = "/.*\\bHEPAT[Il1!|][CG].. AMER[Il1!|][CG]AN.?/i";
 		if(preg_match($pat, $s)) return true;
@@ -719,6 +730,22 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		if(preg_match($pat, $s)) return true;
 		else if(preg_match("/.*\\b[CG]ANADEN.*Distributed b[vy] The University of British Co[il1!|]umbia.*Edited by W.B. Schofield/i", $s)) return true;
 		else return false;
+	}
+
+	private function doMossesOfNorthAmericaLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.*\\bM[0OQ][S5]{2}[ec][S5] [0OQ]f N[0OQ]rth Americ.*/i",
+				"/.*\\bH[0OQ]WARD.*CRUM.*ANDER[S5][0OQ]N.*/i"
+			),
+			array(
+				"",
+				""
+			),
+			$s
+		));//echo "\ns:\n".$s."\n";
+		return $this->doGenericLabel($s, "112");
 	}
 
 	private function doHepaticaeAmericanaeLabel($s) {
@@ -765,7 +792,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		$pHab = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab));
 		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "aspens?", "juniper(?:u?s)?", "p[l1|I!]ant(?! (?:sciences?|biology|exploration))",
 			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "(?<!(?:National) )forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix",
-			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "(?<!\()boulders?(?!\))", "Granit(?:e|ic)", "limestone", "sandstone",
+			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "(?<!\()(?<!Colorado )boulders?(?!(?:\)| Colorado))", "Granit(?:e|ic)", "limestone", "sandstone",
 			"sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous",
 			"expos(?:ure|ed)", "aspect", "facing", "pinus", "habitat", "degrees?", "conifer(?:(?:ou)?s)?", "spruces?", "maples?", "substrate",
 			"th[uv]ja", "shad(?:y|ed?)", "(?:[a-z]{2,})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?",
