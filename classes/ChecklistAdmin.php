@@ -70,37 +70,36 @@ class ChecklistAdmin {
 	public function deleteChecklist($delClid){
 		global $symbUid;
 		$statusStr = true;
-		//Delete userpermissions reference once patch is submitted
-		//$sql = 'SELECT uid FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'") AND uid <> '.$symbUid;
-		//$rs = $this->conn->query($sql);
-		//if($rs->num_rows == 0){
-			$sql1 = 'SELECT uid FROM userroles '.
-				'WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$delClid.'") AND uid <> '.$symbUid;
-			$rs1 = $this->conn->query($sql1);
-			if($rs1->num_rows == 0){
-				$sql2 = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$delClid.')';
-				echo $sql2;
-				$this->conn->query($sql2);
-				$sql3 = "DELETE FROM fmchecklists WHERE (clid = ".$delClid.')';
+		$sql1 = 'SELECT uid FROM userroles '.
+			'WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = "'.$delClid.'") AND uid <> '.$GLOBALS['SYMB_UID'];
+		$rs1 = $this->conn->query($sql1);
+		if($rs1->num_rows == 0){
+			$sql2 = "DELETE FROM fmvouchers WHERE (clid = ".$delClid.')';
+			if($this->conn->query($sql2)){
+				$sql3 = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$delClid.')';
 				if($this->conn->query($sql3)){
-					//Delete userpermissions reference once patch is submitted
-					//$sql = 'DELETE FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'")';
-					//$this->conn->query($sql);
-					$sql4 = 'DELETE FROM userroles WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$delClid.'")';
-					$this->conn->query($sql4);
+					$sql4 = "DELETE FROM fmchecklists WHERE (clid = ".$delClid.')';
+					if($this->conn->query($sql4)){
+						//Delete userpermissions reference once patch is submitted
+						$sql5 = 'DELETE FROM userroles WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = "'.$delClid.'")';
+						$this->conn->query($sql5);
+					}
+					else{
+						$statusStr = 'ERROR attempting to delete checklist: '.$this->conn->error;
+					}
 				}
 				else{
-					$statusStr = 'Checklist Deletion failed ('.$this->conn->error.'). Please contact data administrator.';
+					$statusStr = 'ERROR attempting to delete checklist taxa links: '.$this->conn->error;
 				}
 			}
 			else{
-				$statusStr = 'Checklist cannot be deleted until all editors are removed. Remove editors and then try again.';
+				$statusStr = 'ERROR attempting to delete checklist vouchers: '.$this->conn->error;
 			}
-			$rs1->free();
-		//}
-		//else{
-		//	$statusStr = 'Checklist cannot be deleted until all editors are removed. Remove editors and then try again.';
-		//}
+		}
+		else{
+			$statusStr = 'Checklist cannot be deleted until all editors are removed. Remove editors and then try again.';
+		}
+		$rs1->free();
 		return $statusStr;
 	}
 

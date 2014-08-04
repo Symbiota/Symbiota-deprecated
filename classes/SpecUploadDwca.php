@@ -29,6 +29,7 @@ class SpecUploadDwca extends SpecUploadBase{
 			}
 			else{
 				$this->outputMsg('<li>ERROR: unable to upload file (path: '.$fullPath.') </li>');
+				$this->errorStr = 'ERROR: unable to upload file (path: '.$fullPath.')';
 			}
 		}
 		elseif(array_key_exists('ulfnoverride',$_POST) && $_POST['ulfnoverride']){
@@ -37,16 +38,34 @@ class SpecUploadDwca extends SpecUploadBase{
 				$this->baseFolderName = $localFolder;
 			}
 			else{
-				$this->outputMsg('<li>ERROR moving file, are you sure that path is correct? (path: '.$_POST["ulfnoverride"].') </li>');
+				$this->outputMsg('<li>ERROR moving locally placed file, are you sure that path is correct? (path: '.$_POST["ulfnoverride"].') </li>');
+				$this->errorStr = 'ERROR moving locally placed file, are you sure that path is correct?';
 			}
 		}
 		elseif(array_key_exists("uploadfile",$_FILES)){
-			//File is read for upload via the browser
-			if(move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath)){
-				$this->baseFolderName = $localFolder;
+			//File is delivered as a POST stream, probably from browser
+			if(is_uploaded_file($_FILES['uploadfile']['tmp_name'])){
+				if(move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath)){
+					$this->baseFolderName = $localFolder;
+				}
+				else{
+					$msg = 'unknown';
+					$err = $_FILES['userfile']['error'];
+					if($err == 1) $msg = 'uploaded file exceeds the upload_max_filesize directive in php.ini';
+					elseif($err == 2) $msg = 'uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
+					elseif($err == 3) $msg = 'uploaded file was only partially uploaded';
+					elseif($err == 4) $msg = 'no file was uploaded';
+					elseif($err == 5) $msg = 'unknown error 5';
+					elseif($err == 6) $msg = 'missing a temporary folder';
+					elseif($err == 7) $msg = 'failed to write file to disk';
+					elseif($err == 8) $msg = 'a PHP extension stopped the file upload';
+					$this->outputMsg('<li>ERROR uploading file (target: '.$fullPath.'): '.$msg.' </li>');
+					$this->errorStr = 'ERROR uploading file: '.$msg;
+				}
 			}
 			else{
-				$this->outputMsg('<li>ERROR uploading file (target: '.$fullPath.') </li>');
+				$this->outputMsg('<li>ERROR: Possible file upload attack ('.$_FILES['userfile']['tmp_name'].') </li>');
+				$this->errorStr = 'ERROR: Possible file upload attack ('.$_FILES['userfile']['tmp_name'].')';
 			}
 		}
 		
@@ -109,6 +128,7 @@ class SpecUploadDwca extends SpecUploadBase{
 							}
 							else{
 								$this->outputMsg('ERROR: Unable to obtain the occurrence file name from meta.xml');
+								$this->errorStr = 'ERROR: Unable to obtain the occurrence file name from meta.xml';
 							}
 							//Get the rest of the core attributes
 							$this->metaArr['occur']['encoding'] = $coreElement->getAttribute('encoding');
@@ -131,7 +151,8 @@ class SpecUploadDwca extends SpecUploadBase{
 					}
 				}
 				else{
-					$this->outputMsg('ERROR: Unable to core element in meta.xml');
+					$this->outputMsg('ERROR: Unable to access core element in meta.xml');
+					$this->errorStr = 'ERROR: Unable to access core element in meta.xml';
 					return false;
 				}
 				if($this->metaArr){
@@ -160,7 +181,7 @@ class SpecUploadDwca extends SpecUploadBase{
 									$this->metaArr[$tagName]['name'] = $locElements->item(0)->nodeValue;
 								}
 								else{
-									$this->outputMsg('ERROR: Unable to obtain the '.$tagName.' file name from meta.xml');
+									$this->outputMsg('WARNING: Unable to obtain the '.$tagName.' file name from meta.xml');
 								}
 								//Get the rest of the core attributes
 								$this->metaArr[$tagName]['encoding'] = $extensionElement->getAttribute('encoding');
@@ -184,11 +205,13 @@ class SpecUploadDwca extends SpecUploadBase{
 				}
 				else{
 					$this->outputMsg('ERROR: Unable to obtain core element from meta.xml');
+					$this->errorStr = 'ERROR: Unable to obtain core element from meta.xml';
 					return false;
 				}
 			}
 			else{
 				$this->outputMsg('ERROR: Malformed DWCA, unable to locate meta.xml');
+				$this->errorStr = 'ERROR: Malformed DWCA, unable to locate meta.xml';
 				return false;
 			}
 		}
@@ -342,7 +365,10 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 		else{
 			$this->outputMsg("<li>ERROR: unable to locate occurrence upload file</li>");
+			$this->errorStr = 'ERROR: unable to locate occurrence upload file';
+			return false;
 		}
+		return true;
 	}
 	
 	private function getRecordArr($fHandler){
