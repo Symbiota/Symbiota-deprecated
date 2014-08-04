@@ -57,9 +57,16 @@ $duManager->setVerboseMode(2);
 
 $duManager->loadFieldMap(true);
 $ulPath = $duManager->uploadFile();
+if(!$ulPath){
+	exit('ERROR uploading file: '.$this->getErrorStr());
+}
 
-$duManager->analyzeUpload();
-$duManager->uploadData(false);
+if(!$duManager->analyzeUpload()){
+	exit('ERROR analyzing upload file: '.$this->getErrorStr());
+}
+if(!$duManager->uploadData(false)){
+	exit('ERROR uploading file: '.$this->getErrorStr());
+}
 $transferCnt = $duManager->getTransferCount();
 $duManager->finalTransfer();
 

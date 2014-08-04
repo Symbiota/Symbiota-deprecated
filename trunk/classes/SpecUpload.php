@@ -26,6 +26,7 @@ class SpecUpload{
 
 	protected $verboseMode = 1;	// 0 = silent, 1 = echo, 2 = log
 	private $logFH;
+	protected $errorStr;
 
 	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6;
 	
@@ -272,6 +273,10 @@ class SpecUpload{
 	
 	public function getUploadType(){
 		return $this->uploadType;
+	}
+	
+	public function getErrorStr(){
+		return $this->errorStr;
 	}
 	
 	public function setVerboseMode($vMode){
