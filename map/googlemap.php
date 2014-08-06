@@ -25,6 +25,7 @@ if($mapType == 'taxa'){
 	$taxaMapManager->getTaxaMap();
 	$mapWhere = $taxaMapManager->getTaxaSqlWhere();
 	$tArr = $taxaMapManager->getTaxaArr();
+	$sharedMapManager->setTaxaArr($tArr);
 }
 elseif($mapType == 'occquery'){
 	$occurMapManager = new OccurrenceMapManager();
@@ -166,36 +167,8 @@ $sharedMapManager->setTaxaArr($tArr);
 						var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
 						<?php
 					}
-					/*if(count($dataArr) == 1){
-						$functionStr = $occId.",".($clid?$clid:'0');
-					}
-					else{
-						$spStr .= "<a href='#' onclick='openIndPU(".$occId.",".($clid?$clid:'0').")'>".$displayStr."</a><br/>";
-					}*/
 					echo 'var m'.$markerCnt.' = getMarker('.$spArr['latLngStr'].',"'.$displayStr.'",markerIcon,"'.$type.'","'.($spArr['tidinterpreted']?$spArr['tidinterpreted']:0).'",'.$occId.','.($clid?$clid:'0').');',"\n";
 					echo 'oms.addMarker(m'.$markerCnt.');',"\n";
-					/*if($functionStr){
-						?>
-						google.maps.event.addListener(
-							m<?php echo $markerCnt; ?>, 
-							'click', 
-							function(){ 
-								closeAllInfoWins();
-								openIndPU(<?php echo $functionStr; ?>); 
-							}
-						);
-						<?php
-					}
-					elseif($spStr){
-						?>
-						google.maps.event.addListener(m<?php echo $markerCnt; ?>, 'click', function(){
-							closeAllInfoWins();
-							var iWin = new google.maps.InfoWindow({ content: "<div><b>Specimens at this point:</b></div><?php echo $spStr; ?>" });
-							infoWins.push( iWin );
-							iWin.open(map,m<?php echo $markerCnt; ?>);
-						});
-						<?php
-					}*/
 					$markerCnt++;
 				}
 				?>

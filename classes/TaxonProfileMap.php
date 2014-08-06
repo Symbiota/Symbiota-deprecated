@@ -44,6 +44,7 @@ class TaxonProfileMap {
 				$this->taxArr = $this->taxArr + $this->getChildren(array($this->tid));
 				//Seed $synMap with accepted names
 				$taxaKeys = array_keys($this->taxArr);
+				//Add synonyms to $synMap
 				$this->synMap = array_combine($taxaKeys,$taxaKeys);
 				//Add synonyms to $synMap
 				$this->setTaxaSynonyms($taxaKeys);
@@ -72,12 +73,13 @@ class TaxonProfileMap {
 
 	private function setTaxaSynonyms($inArray){
 		if($inArray){
-			$sql = 'SELECT tid, tidaccepted FROM taxstatus '.
-				'WHERE taxauthid = 1 AND tidaccepted IN('.implode('',$inArray).') AND (tid <> tidaccepted)';
+			$sql = 'SELECT s.tid, s.tidaccepted, t.SciName FROM taxa t LEFT JOIN taxstatus s on t.TID = s.tid '.
+				'WHERE s.taxauthid = 1 AND s.tidaccepted IN('.implode(',',$inArray).') AND (s.tid <> s.tidaccepted)';
 			//echo '<div>SQL: '.$sql.'</div>';
 	        $rs = $this->conn->query($sql);
 	        while($r = $rs->fetch_object()){
 	        	$this->synMap[$r->tid] = $r->tidaccepted;
+				$this->taxArr[$r->tid] = $r->SciName;
 	        }
 			$rs->close();
 		}
