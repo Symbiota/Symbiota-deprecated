@@ -35,6 +35,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			else if($this->isBryophytaCanadensisLabel($str)) return $this->doBryophytaCanadensisLabel($str);
 			else if($this->isHepaticaeAmericanaeLabel($str)) return $this->doHepaticaeAmericanaeLabel($str);
 			else if($this->isMossesOfNorthAmericaLabel($str)) return $this->doMossesOfNorthAmericaLabel($str);
+			else if($this->isMusciAcrocarpiBorealiAmericaniLabel($str)) return $this->doMusciAcrocarpiBorealiAmericaniLabel($str);
 			else return $this->doGenericLabel($str);
 		}
 		return array();
@@ -780,6 +781,34 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		return $this->doGenericLabel($s, "352");
 	}
 
+	private function isMusciAcrocarpiBorealiAmericaniLabel($s) {
+		if(preg_match("/.*Mus[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea.*[ -]Am[ce]r[1Il!|][ce]an.*/is", $s)) return true;
+		if(preg_match("/.*s[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea[1Il!|]{2}[ -]Am[ce]r[1Il!|][ce]an.*/is", $s)) return true;
+		if(preg_match("/.*A[ce]r[o0][ce]arp[1Il!|] Di[s5]tribut[ce]d.*H[o0].{1,2}[z2]ing[ce]r.*/is", $s)) return true;
+		return false;
+	}
+
+	private function doMusciAcrocarpiBorealiAmericaniLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.*Mus[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea.*[ -]Am[ce]r[1Il!|][ce]an.*/i",
+				"/.*s[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea[1Il!|]{2}[ -]Am[ce]r[1Il!|][ce]an.*/i",
+				"/.*Di[s5]tribut[ce]d.*H[o0].{1,2}[z2]ing[ce]r.*/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 6236, s:\n".$s."\n";
+		if(preg_match("/.*\\bet E.r[o0]pa[ce].*/i", $s)) return $this->doGenericLabel(trim(preg_replace("/.*\\bet E.rop[ce]a[ce].*/i", "", $s)), "123");
+		else return $this->doGenericLabel($s, "122");
+	}
+
 	private function isReliquiaeFlowersianaeLabel($s) {
 		$pat = "/.*Re[1Il!|]{2}[qgO]u[1Il!|]a[ec]\\s?F[1Il!|][O0Q]wers[1Il!|]ana.*/is";
 		//$pat = "/.*RELIQUIAE\\sFLOWERSIANA.*/is";
@@ -793,7 +822,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "aspens?", "juniper(?:u?s)?", "p[l1|I!]ant(?! (?:sciences?|biology|exploration))",
 			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "(?<!(?:National) )forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix",
 			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "(?<!\()(?<!Colorado )boulders?(?!(?:\)| Colorado))", "Granit(?:e|ic)", "limestone", "sandstone",
-			"sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous",
+			"sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous", "climax",
 			"expos(?:ure|ed)", "aspect", "facing", "pinus", "habitat", "degrees?", "conifer(?:(?:ou)?s)?", "spruces?", "maples?", "substrate",
 			"th[uv]ja", "shad(?:y|ed?)", "(?:[a-z]{2,})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?",
 			"Liriodendron", "Juglans", "A[l1|I!]nus", "f[l1|I!][0o]{2}d ?p[l1|I!]ain", "gneiss", "crust", "(?:sage|brush|sagebrush)", "pocosin",
