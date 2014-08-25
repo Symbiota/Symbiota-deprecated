@@ -302,7 +302,7 @@ $specList = $loanManager->getSpecList($loanId);
 				</table>
 			</form>
 		</div>	
-		<div id="nospecdiv" style="font-weight:bold;font-size:120%;<?php echo ($specList?'display:none;':''); ?>">There are no specimens registered for this loan.</div>';
+		<div id="nospecdiv" style="font-weight:bold;font-size:120%;<?php echo ($specList?'display:none;':''); ?>">There are no specimens registered for this loan.</div>
 	</div>
 	<div id="outloandeldiv">
 		<form name="deloutloanform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this loan?')">

@@ -8,6 +8,7 @@ class OccurDatasetManager {
 	private $symbUid;
 	private $collArr = array();
 	private $isAdmin = 0;
+	private $newDatasetId = 0;
 
 	private $errorArr = array();
 
@@ -96,11 +97,15 @@ class OccurDatasetManager {
 	}
 
 	public function createDataset($name,$notes,$uid){
+		$newId = '';
 		$sql = 'INSERT INTO omoccurdatasets (name,notes,uid) '.
 			'VALUES("'.$this->cleanInStr($name).'","'.$this->cleanInStr($notes).'",'.$uid.') ';
 		if(!$this->conn->query($sql)){
 			$this->errorArr[] = 'ERROR creating new dataset: '.$this->conn->error;
 			return false;
+		}
+		else{
+			$this->newDatasetId = $this->conn->insert_id;
 		}
 		return true;
 	}
@@ -142,7 +147,7 @@ class OccurDatasetManager {
 		return true;
 	}
 
-	public function cloneDatasets($targetArr){
+	public function cloneDatasets($targetArr,$uid){
 		$status = true;
 		$sql = 'SELECT datasetid, name, notes, sortsequence FROM omoccurdatasets '.
 			'WHERE datasetid IN('.implode(',',$targetArr).')';
@@ -153,10 +158,10 @@ class OccurDatasetManager {
 			$newNameTemp = $newName;
 			$cnt = 1;
 			do{
-				$sql1 = 'SELECT datasetid FROM omoccurdatasets WHERE name = "'.$newNameTemp.'" AND uid = '.$this->symbUid;
+				$sql1 = 'SELECT datasetid FROM omoccurdatasets WHERE name = "'.$newNameTemp.'" AND uid = '.$uid;
 				$nameExists = false;
 				$rs1 = $this->conn->query($sql1);
-				while($r1->fetch_object()){
+				while($rs1->fetch_object()){
 					$newNameTemp = $newName.' '.$cnt;
 					$nameExists = true;
 					$cnt++;
@@ -165,13 +170,13 @@ class OccurDatasetManager {
 			}while($nameExists);
 			$newName = $newNameTemp;
 			//Add to database
-			$sql2 = 'INSERT INTO omoccurdatasets(name, notes, sortsequence) '.
-				'VALUES("'.$r->name.'","'.$r->notes.'",'.$r->sortsequence.')';
+			$sql2 = 'INSERT INTO omoccurdatasets(name, notes, sortsequence, uid) '.
+				'VALUES("'.$newName.'","'.$r->notes.'",'.($r->sortsequence?$r->sortsequence:'""').','.$uid.')';
 			if($this->conn->query($sql2)){
-				$newId = $this->conn->insert_id;
+				$this->newDatasetId = $this->conn->insert_id;
 				//Duplicate all records wtihin new dataset
 				$sql3 = 'INSERT INTO omoccurdatasetlink(occid, datasetid, notes) '.
-					'SELECT occid, '.$newId.' as dsid, notes WHERE omoccurdatasetlink = '.$r->datasetid;
+					'SELECT occid, '.$this->newDatasetId.', notes FROM omoccurdatasetlink WHERE datasetid = '.$r->datasetid;
 				if(!$this->conn->query($sql3)){
 					$this->errorArr[] = 'ERROR: Unable to clone dataset links into new datasets: '.$this->conn->error;
 					$status = false;
@@ -201,6 +206,14 @@ class OccurDatasetManager {
 		//Delete datasets
 		$sql2 = 'DELETE FROM omoccurdatasets WHERE datasetid = '.$dsid;
 		if(!$this->conn->query($sql2)){
+			$this->errorArr[] = 'ERROR: Unable to delete target datasets: '.$this->conn->error;
+			return false;
+		}
+		return true;
+		
+		//Delete dataset records
+		$sql3 = 'DELETE FROM omoccurdatasetlink WHERE datasetid = '.$dsid;
+		if(!$this->conn->query($sql3)){
 			$this->errorArr[] = 'ERROR: Unable to delete target datasets: '.$this->conn->error;
 			return false;
 		}
@@ -298,10 +311,25 @@ class OccurDatasetManager {
 		$status = true;
 		if($datasetId && $occArr){
 			$sql = 'DELETE FROM omoccurdatasetlink '.
-				'WHERE (datasetid = '.$datasetId.') && (occid IN('.implode(',',$occArr).'))';
+				'WHERE (datasetid = '.$datasetId.') AND (occid IN('.implode(',',$occArr).'))';
 			if(!$this->conn->query($sql)){
 				$this->errorArr[] = 'ERROR deleting selected occurrences: '.$this->conn->error;
 				return false;
+			}
+		}
+		return $status;
+	}
+	
+	public function addSelectedOccurrences($datasetId, $occArr){
+		$status = true;
+		if($datasetId && $occArr){
+			foreach($occArr as $v){
+				$sql = 'INSERT INTO omoccurdatasetlink (occid,datasetid) '.
+					'VALUES("'.$v.'",'.$datasetId.') ';
+				if(!$this->conn->query($sql)){
+					$this->errorArr[] = 'ERROR adding selected occurrences: '.$this->conn->error;
+					return false;
+				}
 			}
 		}
 		return $status;
@@ -679,6 +707,10 @@ class OccurDatasetManager {
 	
 	public function getErrorArr(){
 		return $this->errorArr;
+	}
+	
+	public function getDsId(){
+		return $this->newDatasetId;
 	}
 
 	//Misc functions
