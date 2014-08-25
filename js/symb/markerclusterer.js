@@ -302,7 +302,12 @@ ClusterIcon.prototype.show = function () {
         "width: " + this.width_ + "px;" +
         "line-height:" + this.height_ + "px;" +
         "'>" + this.sums_.text + "</div>";*/
-    this.div_.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" style="height:'+div_size+'px;width:'+div_size+'px;" ><g><circle cx="'+circle_r+'" cy="'+circle_r+'" r="'+circle_r+'" fill-opacity="0.8" fill="#'+this.color_+'"></circle><text x="'+text_x+'%" y="'+text_y+'%">'+this.sums_.text+'</text></g></svg>';
+    if (this.sums_.selected == true) {
+		this.div_.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" style="height:'+div_size+'px;width:'+div_size+'px;" ><g><circle cx="'+circle_r+'" cy="'+circle_r+'" r="'+circle_r+'" fill-opacity="0.8" fill="#'+this.color_+'" stroke="#10D8E6" stroke-width="3px"></circle><text x="'+text_x+'%" y="'+text_y+'%">'+this.sums_.text+'</text></g></svg>';
+	}
+	else{
+		this.div_.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" style="height:'+div_size+'px;width:'+div_size+'px;" ><g><circle cx="'+circle_r+'" cy="'+circle_r+'" r="'+circle_r+'" fill-opacity="0.8" fill="#'+this.color_+'"></circle><text x="'+text_x+'%" y="'+text_y+'%">'+this.sums_.text+'</text></g></svg>';
+	}
 	//alert(this.div_.innerHTML);
 	if (typeof this.sums_.title === "undefined" || this.sums_.title === "") {
       this.div_.title = this.cluster_.getMarkerClusterer().getTitle();
@@ -709,7 +714,7 @@ function MarkerClusterer(map, opt_markers, opt_options) {
   // look for it at the last possible moment. If it doesn't exist now then
   // there is no point going ahead :)
   this.extend(MarkerClusterer, google.maps.OverlayView);
-
+  
   opt_markers = opt_markers || [];
   opt_options = opt_options || {};
 
@@ -1621,10 +1626,18 @@ MarkerClusterer.CALCULATOR = function (markers, numStyles) {
     dv = parseInt(dv / 10, 10);
     index++;
   }
+  
+  var selectedCluster = false;
+  for (i in markers) {
+	if(markers[i].selected == true){
+		selectedCluster = true;
+	}
+  }
 
   index = Math.min(index, numStyles);
   return {
     text: count,
+	selected: selectedCluster,
     index: index,
     title: title
   };

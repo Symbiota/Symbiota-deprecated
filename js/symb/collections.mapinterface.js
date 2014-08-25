@@ -1,16 +1,3 @@
-/**
-* key: input for LOOK(1)
-* cont: function(res) for return of suggest results
-*/ 
-
-/*$(function() {
-	$( "#accordion" ).accordion({
-		collapsible: true,
-		heightStyle: "fill",
-		active: 1
-	});
-});*/
-
 $(window).resize(function(){
 	$("#accordion").accordion("refresh");
 });
@@ -26,6 +13,11 @@ $(document).ready(function() {
 		}
 	});
 	$('#tabs2').tabs({
+		beforeLoad: function( event, ui ) {
+			$(ui.panel).html("<p>Loading...</p>");
+		}
+	});
+	$('#tabs3').tabs({
 		beforeLoad: function( event, ui ) {
 			$(ui.panel).html("<p>Loading...</p>");
 		}
@@ -48,7 +40,7 @@ $(document).ready(function() {
 		})
 		.autocomplete({
 			source: function( request, response ) {
-				$.getJSON( "rpc/taxalist.php", {
+				$.getJSON( "../rpc/taxalist.php", {
 					term: extractLast( request.term ), t: function() { return document.mapsearchform.taxontype.value; }
 				}, response );
 			},
@@ -74,6 +66,50 @@ $(document).ready(function() {
 				return false;
 			}
 		},{});
+		
+	/*$( "#checklistname" )
+		// don't navigate away from the field on tab when selecting an item
+		.bind( "keydown", function( event ) {
+			if ( event.keyCode === $.ui.keyCode.TAB &&
+					$( this ).data( "autocomplete" ).menu.active ) {
+				event.preventDefault();
+			}
+		})
+		.autocomplete({
+			source: function( request, response ) {
+				$.getJSON( "rpc/checklistlist.php", {
+					term: extractLast( request.term )
+				}, response );
+			},
+			appendTo: "#checklist_autocomplete",
+			search: function() {
+				// custom minLength
+				var term = extractLast( this.value );
+				if ( term.length < 4 ) {
+					return false;
+				}
+			},
+			focus: function() {
+				// prevent value inserted on focus
+				return false;
+			},
+			select: function( event, ui ) {
+				var terms = split( this.value );
+				// remove the current input
+				terms.pop();
+				// add the selected item
+				terms.push( ui.item.label );
+				document.getElementById('clid').value = ui.item.value;
+				this.value = terms;
+				return false;
+			},
+			change: function (event, ui) {
+				if (!ui.item) {
+					this.value = '';
+					document.getElementById('clid').value = '';
+				}
+			}
+		},{});*/
 });
 
 function GetXmlHttpObject(){
@@ -266,7 +302,6 @@ function setSelection(shape) {
 	var selectedShapeType = shape.type;
 	selectedShape = shape;
 	selectedShape.setEditable(true);
-	//selectColor(shape.get('fillColor') || shape.get('strokeColor'));
 	if (selectedShapeType == 'circle') {
 		getCircleCoords(shape);
 	}
@@ -353,7 +388,7 @@ function openIndPU(occId,clid){
 	}
 	catch(err){
 	}
-	newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+	newWindow = window.open('../individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	setTimeout(function () { newWindow.focus(); }, 0.5);
 }
@@ -393,7 +428,6 @@ function closeOccidInfoBox(){
 
 function generateRandColor(){
 	var hexColor = '';
-	//hexColor = Math.floor((Math.abs(Math.random()*16777215))%16777215).toString(16);
 	var x = Math.round(0xffffff * Math.random()).toString(16);
 	var y = (6-x.length);
 	var z = '000000';
@@ -414,13 +448,124 @@ function changeKeyColor(v,markers){
 	if (markers) {
 		for (i in markers) {
 			if(markers[i].customInfo=='obs'){
-				var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:newMarkerColor,fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
+				if(markers[i].selected==true){
+					var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:newMarkerColor,fillOpacity:1,scale:1,strokeColor:"#10D8E6",strokeWeight:2};
+				}
+				else{
+					var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:newMarkerColor,fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
+				}
+				markers[i].color = v;
 				markers[i].setIcon(markerIcon);
 			}
 			if(markers[i].customInfo=='spec'){
-				var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:newMarkerColor,fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
+				if(markers[i].selected==true){
+					var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:newMarkerColor,fillOpacity:1,scale:7,strokeColor:"#10D8E6",strokeWeight:2};
+				}
+				else{
+					var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:newMarkerColor,fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
+				}
+				markers[i].color = v;
 				markers[i].setIcon(markerIcon);
 			}
+		}
+	}
+}
+
+function selectMarker(marker){
+	var markerColor = '#'+marker.color;
+	if(marker.customInfo=='obs'){
+		var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:markerColor,fillOpacity:1,scale:1,strokeColor:"#10D8E6",strokeWeight:2};
+		marker.setIcon(markerIcon);
+	}
+	if(marker.customInfo=='spec'){
+		var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:markerColor,fillOpacity:1,scale:7,strokeColor:"#10D8E6",strokeWeight:2};
+		marker.setIcon(markerIcon);
+	}
+	marker.selected = true;
+}
+
+function selectDsMarker(marker){
+	var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:"#ffffff",fillOpacity:1,scale:5,strokeColor:"#10D8E6",strokeWeight:2};
+	marker.setIcon(markerIcon);
+	marker.selected = true;
+}
+
+function deselectMarker(marker){
+	var markerColor = '#'+marker.color;
+	if(marker.customInfo=='obs'){
+		var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:markerColor,fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
+		marker.setIcon(markerIcon);
+	}
+	if(marker.customInfo=='spec'){
+		var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:markerColor,fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
+		marker.setIcon(markerIcon);
+	}
+	marker.selected = false;
+}
+
+function deselectDsMarker(marker){
+	var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:"#ffffff",fillOpacity:1,scale:5,strokeColor:"#000000",strokeWeight:2};
+	marker.setIcon(markerIcon);
+	marker.selected = false;
+}
+
+function findSelections(c){
+	if(c.checked == true){
+		var activeTab = $('#tabs2').tabs("option","active");
+		if(activeTab==1){
+			if($('.occcheck:checked').length==$('.occcheck').length){
+				document.getElementById("selectallcheck").checked = true;
+			}
+		}
+		var selectedbox = document.getElementById("selectedpoints");
+		selectedbox.value = c.value;
+		google.maps.event.trigger(selectedbox, 'change');
+	}
+	else if(c.checked == false){
+		var activeTab = $('#tabs2').tabs("option","active");
+		if(activeTab==1){
+			document.getElementById("selectallcheck").checked = false;
+		}
+		removeSelectionRecord(c.value);
+		var deselectedbox = document.getElementById("deselectedpoints");
+		deselectedbox.value = c.value;
+		google.maps.event.trigger(deselectedbox, 'change');
+	}
+}
+
+function findDsSelections(c){
+	if(c.checked == true){
+		var activeTab = $('#tabs3').tabs("option","active");
+		if(activeTab==1){
+			if($('.dsocccheck:checked').length==$('.dsocccheck').length){
+				document.getElementById("dsselectallcheck").checked = true;
+			}
+		}
+		var selectedbox = document.getElementById("selecteddspoints");
+		selectedbox.value = c.value;
+		google.maps.event.trigger(selectedbox, 'change');
+	}
+	else if(c.checked == false){
+		var activeTab = $('#tabs3').tabs("option","active");
+		if(activeTab==1){
+			document.getElementById("dsselectallcheck").checked = false;
+		}
+		var deselectedbox = document.getElementById("deselecteddspoints");
+		deselectedbox.value = c.value;
+		google.maps.event.trigger(deselectedbox, 'change');
+	}
+}
+
+function adjustSelectionsTab(){
+	if(selections.length > 0){
+		document.getElementById("selectionstab").style.display = "block";
+		updateSelections();
+	}
+	else{
+		document.getElementById("selectionstab").style.display = "none";
+		var activeTab = $('#tabs2').tabs("option","active");
+		if(activeTab==3){
+			$('#tabs2').tabs({active:0});
 		}
 	}
 }
@@ -458,7 +603,7 @@ function addRefPoint(){
 			if(lng > 0) addPoint = window.confirm("Longitude is positive, which will put the marker in the eastern hemisphere (e.g. Asia).\nIs this what you want?");
 			if(!addPoint) lng = -1*lng;
 
-			var iconImg = new google.maps.MarkerImage( '../images/google/arrow.png' );
+			var iconImg = new google.maps.MarkerImage( '../../images/google/arrow.png' );
 
 			var m = new google.maps.Marker({
 				position: new google.maps.LatLng(lat,lng),
@@ -534,7 +679,12 @@ function selectAll(cb){
 	}
 	var f = cb.form;
 	for(var i=0;i<f.length;i++){
-		if(f.elements[i].name == "db[]" || f.elements[i].name == "cat[]" || f.elements[i].name == "occid[]") f.elements[i].checked = boxesChecked;
+		if(f.elements[i].name == "db[]" || f.elements[i].name == "cat[]" || f.elements[i].name == "occid[]"){ 
+			f.elements[i].checked = boxesChecked;
+		}
+		if(f.elements[i].name == "occid[]"){
+			f.elements[i].onchange();
+		}
 	}
 }
 
@@ -634,16 +784,62 @@ function shiftKeyBox(tid){
 	var colorBoxName = "taxaColor"+tid;
 	var newKeyToAdd = document.getElementById(keyDivName).innerHTML;
 	document.getElementById(colorBoxName).color.hidePicker();
-	//document.getElementById(keyDivName).innerHTML = '';
 	document.getElementById("symbologykeysbox").innerHTML = currentkeys+newKeyToAdd;
 }
 
 function openIndPopup(occid){
-	openPopup('individual/index.php?occid=' + occid);
+	openPopup('../individual/index.php?occid=' + occid);
+}
+
+function openGarminDownloader(type){
+	if(type=="query"){
+		var jsonSelections = JSON.stringify(selections);
+	}
+	if(type=="dataset"){
+		if(dsselections.length!=0){
+			var jsonSelections = JSON.stringify(dsselections);
+		}
+		else{
+			alert("Please select records from the dataset to send to the GPS unit.");
+			return;
+		}
+	}
+	var url = 'garmin.php?selections='+jsonSelections;
+	newWindow = window.open(url,'popup','scrollbars=1,toolbar=1,resizable=1,width=420,height=350,left=20,top=20');
+	if (newWindow.opener == null) newWindow.opener = self;
+	return false;
 }
 
 function openEditorPopup(occid){
 	openPopup('editor/occurrenceeditor.php?occid=' + occid);
+}
+
+function openLogin(){
+	if(starr){
+		loginstarr = starr.replace(/"/g, "'");
+		window.location='../../profile/index.php?refurl=../collections/map/mapinterface.php?starr='+loginstarr;
+	}
+	else{
+		window.location='../../profile/index.php?refurl=../collections/map/mapinterface.php';
+	}
+}
+
+function prepSelectionKml(f){
+	if(f.kmltype.value=='dsselectionquery'){
+		if(dsselections.length!=0){
+			var jsonSelections = JSON.stringify(dsselections);
+		}
+		else{
+			alert("Please select records from the dataset to create KML file.");
+			return;
+		}
+	}
+	else{
+		var jsonSelections = JSON.stringify(selections);
+	}
+	f.selectionskml.value = jsonSelections;
+	f.starrkml.value = starr;
+	f.submit();
 }
 
 function openPopup(urlStr){
@@ -653,26 +849,28 @@ function openPopup(urlStr){
 	return false;
 }
 
-function refreshClustering(){
+function setClustering(){
 	var gridSizeSett = document.getElementById("gridsize").value;
 	var minClusterSett = document.getElementById("minclustersize").value;
-	if(document.getElementById("clusteroff").checked){
-		var clstrSwitch = 1;
+	if(document.getElementById("clusteroff").checked==true){
+		var clstrSwitch = "y";
 	}
 	else{
-		var clstrSwitch = 0;
+		var clstrSwitch = "n";
 	}
-	var searchForm = document.getElementById("mapsearchform");
 	document.getElementById("gridSizeSetting").value = gridSizeSett;
 	document.getElementById("minClusterSetting").value = minClusterSett;
 	document.getElementById("clusterSwitch").value = clstrSwitch;
+}
+
+function refreshClustering(){
+	var searchForm = document.getElementById("mapsearchform");
 	submitMapForm(searchForm);
 }
 
 function changeTaxonomy(starr,f){
 	var taxonFilter = document.getElementById("taxonfilter").value;
 	document.getElementById("maptaxalist").innerHTML = "<p>Loading...</p>";
-	//alert(taxonFilter);
 	var sutXmlHttp=GetXmlHttpObject();
 	if (sutXmlHttp==null){
 		alert ("Your browser does not support AJAX!");
@@ -698,7 +896,8 @@ function changeRecordPage(starr,page){
 		alert ("Your browser does not support AJAX!");
 		return;
 	}
-	var url="rpc/changemaprecordpage.php?starr="+starr+"&page="+page;
+	var selectionsArr = JSON.stringify(selections);
+	var url="rpc/changemaprecordpage.php?starr="+starr+"&selected="+selectionsArr+"&page="+page;
 	
 	sutXmlHttp.onreadystatechange=function(){
 		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
@@ -706,7 +905,7 @@ function changeRecordPage(starr,page){
 			document.getElementById("queryrecords").innerHTML = newMapRecordList;
 			var _img = document.getElementById('edit_img');
 			var newImg = new Image;
-			newImg.src = '../images/edit.png';
+			newImg.src = '../../images/edit.png';
 			newImg.onload = function() {
 				_img.src = this.src;
 			}
@@ -714,4 +913,467 @@ function changeRecordPage(starr,page){
 	};
 	sutXmlHttp.open("POST",url,true);
 	sutXmlHttp.send(null);
+}
+
+function removeSelectionRecord(sel){
+	var selDivId = "sel"+sel;
+	if(document.getElementById(selDivId)){
+		var selDiv = document.getElementById(selDivId);
+		selDiv.parentNode.removeChild(selDiv);
+	}
+}
+
+function findUncheckedSelections(c){
+	if(c.checked == false){
+		var occid = c.value;
+		var chbox = 'ch'+occid;
+		removeSelectionRecord(occid);
+		if(document.getElementById(chbox)){
+			document.getElementById(chbox).checked = false;
+		}
+		var deselectedbox = document.getElementById("deselectedpoints");
+		deselectedbox.value = occid;
+		google.maps.event.trigger(deselectedbox, 'change');
+		adjustSelectionsTab();
+	}
+}
+
+function updateSelections(){
+	var selectionList = '';
+	var trfragment = '';
+	selectionList += document.getElementById("selectiontbody").innerHTML;
+	for (i = 0; i < selections.length; i++) {
+		var seloccid = selections[i];
+		var divid = "sel"+seloccid;
+		var trid = "tr"+seloccid;
+		if(!document.getElementById(divid)){
+			if(document.getElementById(trid)){
+				var catid = "cat"+seloccid;
+				var labelid = "label"+seloccid;
+				var eid = "e"+seloccid;
+				var sid = "s"+seloccid;
+				var selcat = document.getElementById(catid).innerHTML;
+				var sellabel = document.getElementById(labelid).innerHTML;
+				var sele = document.getElementById(eid).innerHTML;
+				var sels = document.getElementById(sid).innerHTML;
+				trfragment = '';
+				trfragment += '<tr id="sel'+seloccid+'" >';
+				trfragment += '<td>';
+				trfragment += '<input type="checkbox" id="selch'+seloccid+'" name="occid[]" value="'+seloccid+'" onchange="findUncheckedSelections(this);" checked />';
+				trfragment += '</td>';
+				trfragment += '<td id="selcat'+seloccid+'"  style="width:200px;" >'+selcat+'</td>';
+				trfragment += '<td id="sellabel'+seloccid+'"  style="width:200px;" >';
+				trfragment += sellabel;
+				trfragment += '</td>';
+				trfragment += '<td id="sele'+seloccid+'"  style="width:200px;" >'+sele+'</td>';
+				trfragment += '<td id="sels'+seloccid+'"  style="width:200px;" >'+sels+'</td>';
+				trfragment += '</tr>';
+				selectionList += trfragment;
+			}
+			else{
+				var sutXmlHttp=GetXmlHttpObject();
+				if (sutXmlHttp==null){
+					alert ("Your browser does not support AJAX!");
+					return;
+				}
+				var url="rpc/updateselections.php?selected="+seloccid;
+				
+				sutXmlHttp.onreadystatechange=function(){
+					if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+						selectionList += sutXmlHttp.responseText;
+					}
+				};
+				sutXmlHttp.open("POST",url,false);
+				sutXmlHttp.send(null);
+			}
+		}
+	}
+	document.getElementById("selectiontbody").innerHTML = selectionList;
+}
+
+function loadRecordsetList(uid,selset){
+	var recordsetlisthtml = '';
+	var recordsets = '';
+	var sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+		alert ("Your browser does not support AJAX!");
+		return;
+	}
+	
+	var url="rpc/maprecordsetmanager.php?uid="+uid+"&action=loadlist&selset="+selset;
+	
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			recordsets = sutXmlHttp.responseText;
+		}
+	};
+	sutXmlHttp.open("POST",url,false);
+	sutXmlHttp.send(null);
+	
+	if(recordsets){
+		recordsetlisthtml += '<div id="adddiv" style="border:1px black solid;margin-top:10px;margin-bottom:8px;padding:5px;display:none;">';
+	}
+	else{
+		recordsetlisthtml += '<div id="adddiv" style="border:1px black solid;margin-top:10px;margin-bottom:8px;padding:5px;display:block;">';
+	}
+	recordsetlisthtml += '<legend><b>Create New Dataset</b></legend><br />';
+	recordsetlisthtml += '<form name="datasetadminform" action="#" method="post">';
+	recordsetlisthtml += '<div>Name<br /><input data-role="none" name="name" id="newdsname" type="text" style="width:250px" /></div>';
+	recordsetlisthtml += '<div>Notes<br /><input data-role="none" name="notes" id="newdsnotes" type="text" style="width:90%;" /></div>';
+	var onclickhandler = "createDataset("+uid+");"
+	recordsetlisthtml += '<div><input data-role="none" name="submitaction" type="button" onclick="'+onclickhandler+'" value="Create New Dataset" /></div></form></div>';
+	var toggle = "toggle('adddiv')";
+	recordsetlisthtml += '<div style="width:100%;"><div style="float:right;margin:10px;" title="Create New Dataset" onclick="'+toggle+'">';
+	recordsetlisthtml += '<img src="../../images/add.png" style="width:14px;" /></div></div>';
+	if(recordsets){
+		recordsetlisthtml += '<div id="nodsdiv" style="font-weight:bold;font-size:120%;display:none;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
+	}
+	else{
+		recordsetlisthtml += '<div id="nodsdiv" style="font-weight:bold;font-size:120%;display:block;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
+	}
+	if(recordsets){
+		recordsetlisthtml += '<div id="dsdiv" style="font-weight:bold;font-size:120%;display:block;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
+	}
+	else{
+		recordsetlisthtml += '<div id="dsdiv" style="font-weight:bold;font-size:120%;display:none;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
+	}
+	if(recordsets){
+		recordsetlisthtml += '<div id="dsmanagementdiv" style="display:none;"><hr />';
+		recordsetlisthtml += '<div style="height:25px;margin-top:-5px;">';
+		recordsetlisthtml += '<div style="float:left;"><button data-role="none" id="" onclick="clearDataset();" >Remove Dataset</button></div>';
+		recordsetlisthtml += '<div style="float:right;"><button data-role="none" id="" onclick="cloneDataset();" >Duplicate Dataset</button></div>';
+		recordsetlisthtml += '</div>';
+		recordsetlisthtml += '<div id="dsdeletediv" style="height:25px;margin-top:-5px;display:none;">';
+		recordsetlisthtml += '<div style="float:left;"><button data-role="none" onclick="deleteDataset();" >Delete Dataset</button></div>';
+		recordsetlisthtml += '</div>';
+		recordsetlisthtml += '</div>';
+		recordsetlisthtml += '<div><hr></div><div id="datasetlist" style="margin-top:8px;">'+recordsets+'</div>';
+	}
+	document.getElementById("recordsetselect").innerHTML = recordsetlisthtml;
+}
+
+function loadRecordset(dsid,role){
+	clearDatasetPts();
+	selectedds = dsid;
+	selecteddsrole = role;
+	var sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+		alert ("Your browser does not support AJAX!");
+		return;
+	}
+	
+	var url="rpc/maprecordsetmanager.php?dsid="+dsid+"&action=loadrecords";
+	
+	var records = '';
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			records = sutXmlHttp.responseText;
+		}
+	};
+	sutXmlHttp.open("POST",url,false);
+	sutXmlHttp.send(null);
+	
+	document.getElementById("dsmanagementdiv").style.display = "block";
+	if(role=="DatasetAdmin"){
+		document.getElementById("dsdeletediv").style.display = "block";
+	}
+	else{
+		document.getElementById("dsdeletediv").style.display = "none";
+	}
+	if(role=="DatasetAdmin" || role=="DatasetEditor"){
+		if(document.getElementById("dsaddrecbut")){
+			document.getElementById("dsaddrecbut").style.display = "block";
+		}
+		document.getElementById("dsdeleterecbut").style.display = "block";
+	}
+	else{
+		if(document.getElementById("dsaddrecbut")){
+			document.getElementById("dsaddrecbut").style.display = "none";
+		}
+		document.getElementById("dsdeleterecbut").style.display = "none";
+	}
+	if(records!='null'){
+		var recordsArr = JSON.parse(records)
+		var recAmt = recordsArr.length;
+		dsmarkers = [];
+		dsoccids = [];
+		var tbody = ''
+		var recCnt = 0;
+		if(!coords){
+			var selectZoomBounds = new google.maps.LatLngBounds();
+		}
+		for(var i in recordsArr){
+			var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:"#ffffff",fillOpacity:1,scale:5,strokeColor:"#000000",strokeWeight:2};
+			var mar = getMarker(recordsArr[i]['lat'],recordsArr[i]['long'],"","",markerIcon,"","",recordsArr[i]['occid'],0);
+			dsoms.addMarker(mar);
+			mar.setMap(map);
+			dsmarkers.push(mar);
+			dsoccids.push(recordsArr[i]['occid']);
+			if(!coords){
+				selectZoomBounds.extend(new google.maps.LatLng(recordsArr[i]['lat'],recordsArr[i]['long']));
+			}
+			var trfragment = '';
+			trfragment += '<tr id="ds'+recordsArr[i]['occid']+'" >';
+			trfragment += '<td><input data-role="none" type="checkbox" class="dsocccheck" id="dsch'+recordsArr[i]['occid']+'" name="occid[]" value="'+recordsArr[i]['occid']+'" onchange="findDsSelections(this);" /></td>';
+			if(recordsArr[i]['catnum']){
+				trfragment += '<td>'+recordsArr[i]['catnum']+'</td>';
+			}
+			else{
+				trfragment += '<td></td>';
+			}
+			trfragment += '<td><a href="#" onclick="openIndPopup('+recordsArr[i]['occid']+'); return false;">';
+			trfragment += recordsArr[i]['coll']+'</a></td>';
+			if(recordsArr[i]['eventdate']){
+				trfragment += '<td>'+recordsArr[i]['eventdate']+'</td>';
+			}
+			else{
+				trfragment += '<td></td>';
+			}
+			trfragment += '<td>'+recordsArr[i]['sciname']+'</td>';
+			trfragment += '</tr>';
+			tbody += trfragment;
+			recCnt++;
+		}
+		var rccntdiv = '<b>Count: '+recCnt+' records</b>';
+		document.getElementById("recordsetcntdiv").innerHTML = rccntdiv;
+		document.getElementById("recordstbody").innerHTML = tbody;
+		document.getElementById("recordsetlisttab").style.display = "block";
+		if(!coords){
+			map.fitBounds(selectZoomBounds);
+			map.panToBounds(selectZoomBounds);
+		}
+	}
+	else{
+		var activeTab = $('#tabs3').tabs("option","active");
+		if(activeTab==1){
+			$('#tabs3').tabs({active:0});
+		}
+		alert("There are currently no records in the dataset you selected.");
+	}
+}
+
+function clearDataset(){
+	clearDatasetPts();
+	selectedds = '';
+	selecteddsrole = '';
+	document.getElementById("dsmanagementdiv").style.display = "none";
+	document.getElementById("dsdeletediv").style.display = "none";
+	if(document.getElementById("dsaddrecbut")){
+		document.getElementById("dsaddrecbut").style.display = "none";
+	}
+	document.getElementById("dsdeleterecbut").style.display = "none";
+	var ele = document.getElementsByName("dsid");
+	for(var i=0;i<ele.length;i++){
+		ele[i].checked = false;
+	}
+}
+
+function clearDatasetPts(){
+	if(dsmarkers.length!=0){
+		for(var i = 0; i < dsmarkers.length; i++){
+			dsmarkers[i].setMap(null);
+		}
+	}
+	document.getElementById("recordsetcntdiv").innerHTML = '';
+	document.getElementById("recordstbody").innerHTML = '';
+	document.getElementById("recordsetlisttab").style.display = "none";
+}
+
+function addSelectedToDs(){
+	var selectionstoadd = [];
+	for (var i=0; i < selections.length; i++) {
+		//alert(selections[i]);
+		if(dsoccids.indexOf(selections[i]) < 0){
+			selectionstoadd.push(selections[i]);
+		}
+	}
+	var jsonSelections = JSON.stringify(selectionstoadd);
+	var sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+		alert ("Your browser does not support AJAX!");
+		return;
+	}
+	
+	var url="rpc/maprecordsetmanager.php?dsid="+selectedds+"&action=addrecords&selections="+jsonSelections;
+	
+	var records = '';
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			records = sutXmlHttp.responseText;
+		}
+	};
+	sutXmlHttp.open("POST",url,false);
+	sutXmlHttp.send(null);
+	loadRecordset(selectedds,selecteddsrole);
+}
+
+function cloneDataset(){
+	var sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+		alert ("Your browser does not support AJAX!");
+		return;
+	}
+	
+	var url="rpc/maprecordsetmanager.php?dsid="+selectedds+"&uid="+uid+"&action=clonedataset";
+	
+	var newDsid = '';
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			newDsid = sutXmlHttp.responseText;
+		}
+	};
+	sutXmlHttp.open("POST",url,false);
+	sutXmlHttp.send(null);
+	clearDataset();
+	loadRecordsetList(uid,newDsid);
+	loadRecordset(newDsid,"DatasetAdmin");
+}
+
+function deleteDataset(){
+	var sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+		alert ("Your browser does not support AJAX!");
+		return;
+	}
+	
+	var url="rpc/maprecordsetmanager.php?dsid="+selectedds+"&action=deletedataset";
+	
+	var records = '';
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			records = sutXmlHttp.responseText;
+		}
+	};
+	sutXmlHttp.open("POST",url,false);
+	sutXmlHttp.send(null);
+	clearDataset();
+	selectedds = '';
+	selecteddsrole = '';
+	loadRecordsetList(uid,"");
+}
+
+function deleteSelectedFromDs(){
+	if(dsselections.length!=0){
+		var jsonSelections = JSON.stringify(dsselections);
+		var sutXmlHttp=GetXmlHttpObject();
+		if (sutXmlHttp==null){
+			alert ("Your browser does not support AJAX!");
+			return;
+		}
+		
+		var url="rpc/maprecordsetmanager.php?dsid="+selectedds+"&action=deleterecords&selections="+jsonSelections;
+		
+		var records = '';
+		sutXmlHttp.onreadystatechange=function(){
+			if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+				records = sutXmlHttp.responseText;
+			}
+		};
+		sutXmlHttp.open("POST",url,false);
+		sutXmlHttp.send(null);
+		dsselections.length = 0;
+		if(document.getElementById("dsselectallcheck").checked==true){
+			document.getElementById("dsselectallcheck").checked = false;
+			clearDatasetPts();
+			var activeTab = $('#tabs3').tabs("option","active");
+			if(activeTab==1){
+				$('#tabs3').tabs({active:0});
+			}
+		}
+		else{
+			loadRecordset(selectedds,selecteddsrole);
+		}
+	}
+	else{
+		alert("Please select the records from the dataset which you would like to delete.");
+		return;
+	}
+}
+
+function zoomToDsSelections(){
+	if(dsselections.length!=0){
+		var selectZoomBounds = new google.maps.LatLngBounds();
+		for (var i=0; i < dsselections.length; i++) {
+			occid = Number(dsselections[i]);
+			if (dsmarkers) {
+				for (j in dsmarkers) {
+					if(dsmarkers[j].occid==occid){
+						var markerPos = dsmarkers[j].getPosition();
+						selectZoomBounds.extend(markerPos);
+					}
+				}
+			}
+		}
+		map.fitBounds(selectZoomBounds);
+		map.panToBounds(selectZoomBounds);
+	}
+	else{
+		alert("Please select records from the dataset in order to zoom.");
+		return;
+	}
+}
+
+function createDataset(uid){
+	clearDataset();
+	var newname = document.getElementById("newdsname").value;
+	var newnotes = document.getElementById("newdsnotes").value;
+	var sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+		alert ("Your browser does not support AJAX!");
+		return;
+	}
+	
+	var url="rpc/maprecordsetmanager.php?uid="+uid+"&action=createset&newname="+newname+"&newnotes"+newnotes;
+	
+	var newDsid = '';
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			newDsid = sutXmlHttp.responseText;
+		}
+	};
+	sutXmlHttp.open("POST",url,false);
+	sutXmlHttp.send(null);
+	loadRecordsetList(uid,newDsid);
+	loadRecordset(newDsid,"DatasetAdmin");
+}
+
+function openCsvOptions(type){
+	document.getElementById("typecsv").value = type;
+	if(type=='dsselectionquery'){
+		if(dsselections.length!=0){
+			var jsonSelections = JSON.stringify(dsselections);
+		}
+		else{
+			alert("Please select records from the dataset to create CSV file.");
+			return;
+		}
+	}
+	else{
+		var jsonSelections = JSON.stringify(selections);
+	}
+	document.getElementById("selectionscsv").value = jsonSelections;
+	document.getElementById("starrcsv").value = starr;
+	var urlStr = 'csvoptions.php?dltype=specimen';
+	var wWidth = 720;
+	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600');
+	if (newWindow.opener == null) newWindow.opener = self;
+	return false;
+}
+
+function prepCsvControlForm(f){
+	opener.document.getElementById("schemacsv").value = f.schema.value;
+	if(f.identifications.checked==true){
+		opener.document.getElementById("identificationscsv").value = 1;
+	}
+	if(f.images.checked==true){
+		opener.document.getElementById("imagescsv").value = 1;
+	}
+	opener.document.getElementById("formatcsv").value = f.format.value;
+	opener.document.getElementById("csetcsv").value = f.cset.value;
+	if(f.zip.checked==true){
+		opener.document.getElementById("zipcsv").value = 1;
+	}
+	opener.document.getElementById("csvcontrolform").submit();
+	self.close();
+	return false;
 }
