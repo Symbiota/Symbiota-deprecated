@@ -1275,11 +1275,11 @@ class SpecUploadBase extends SpecUpload{
 				$vCoord .= $recMap['latdeg'].'d ';
 				if(isset($recMap['latmin']) && $recMap['latmin']) $vCoord .= $recMap['latmin'].'m '; 
 				if(isset($recMap['latsec']) && $recMap['latsec']) $vCoord .= $recMap['latsec'].'s ';
-				$vCoord .= $recMap['latns'].'; ';
+				if(isset($recMap['latns'])) $vCoord .= $recMap['latns'].'; ';
 				$vCoord .= $recMap['lngdeg'].'d ';
 				if(isset($recMap['lngmin']) && $recMap['lngmin']) $vCoord .= $recMap['lngmin'].'m '; 
 				if(isset($recMap['lngsec']) && $recMap['lngsec']) $vCoord .= $recMap['lngsec'].'s ';
-				$vCoord .= $recMap['lngew'];
+				if(isset($recMap['latew'])) $vCoord .= $recMap['lngew'];
 				$recMap['verbatimcoordinates'] = $vCoord;
 			}
 			//Transfer TRS to verbatim coords

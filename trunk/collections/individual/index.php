@@ -422,6 +422,20 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 							} 
 							?>
 						</div>
+						<?php 
+						if(isset($occArr['exs'])){
+							?>
+							<div style="clear:both;">
+								<b>Exsiccati series:</b> 
+								<?php 
+								echo '<a href="../exsiccati/index.php?omenid='.$occArr['exs']['omenid'].'">';
+								echo $occArr['exs']['title'].'&nbsp;#'.$occArr['exs']['exsnumber'];
+								echo '</a>';
+								?>
+							</div>
+							<?php 
+						}
+						?>
 						<div style="clear:both;">
 							<b>Collector:</b> 
 							<?php 

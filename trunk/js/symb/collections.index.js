@@ -54,7 +54,7 @@ function selectAll(cb){
 	}
 }
 
-function uncheckAll(f){
+function uncheckAll(){
 	document.getElementById('dballcb').checked = false;
 	document.getElementById('dballspeccb').checked = false;
 	document.getElementById('dballobscb').checked = false;
@@ -64,6 +64,7 @@ function selectAllCat(cb,target){
 	var boxesChecked = true;
 	if(!cb.checked){
 		boxesChecked = false;
+		uncheckAll();
 	}
 	var inputObjs = document.getElementsByTagName("input");
   	for (i = 0; i < inputObjs.length; i++) {

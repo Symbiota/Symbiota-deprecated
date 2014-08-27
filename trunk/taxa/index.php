@@ -28,6 +28,15 @@ if($taxonValue) {
 $spDisplay = $taxonManager->getDisplayName();
 $taxonRank = $taxonManager->getRankId();
 $links = $taxonManager->getTaxaLinks();
+if($links){
+	foreach($links as $linkKey => $linkUrl){
+		if($linkUrl['title'] == 'REDIRECT'){
+			$locUrl = str_replace('--SCINAME--',urlencode($taxonManager->getSciName()),$linkUrl['url']);
+			header('Location: '.$locUrl);
+			exit;
+		}
+	}
+}
 
 $displayLocality = 0;
 $isEditor = false;
@@ -47,7 +56,7 @@ $descr = Array();
 
 ?>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
