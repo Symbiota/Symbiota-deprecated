@@ -123,6 +123,7 @@ class OccurrenceIndividualManager extends Manager{
 				$this->setImages();
 				$this->setDeterminations();
 				$this->setLoan();
+				$this->setExsiccati();
 				$result->free();
 			}
 		}
@@ -199,6 +200,25 @@ class OccurrenceIndividualManager extends Manager{
 		}
 		else{
 			trigger_error('Unable to set loan info; '.$this->conn->error,E_USER_WARNING);
+		}
+	}
+
+	private function setExsiccati(){
+		$sql = 'SELECT t.title, t.editor, n.omenid, n.exsnumber '.
+			'FROM omexsiccatititles t INNER JOIN omexsiccatinumbers n ON t.ometid = n.ometid '.
+			'INNER JOIN omexsiccatiocclink l ON n.omenid = l.omenid '.
+			'WHERE (l.occid = '.$this->occid.')';
+		$rs = $this->conn->query($sql);
+		if($rs){
+			while($r = $rs->fetch_object()){
+				$this->occArr['exs']['title'] = $r->title;
+				$this->occArr['exs']['omenid'] = $r->omenid;
+				$this->occArr['exs']['exsnumber'] = $r->exsnumber;
+			}
+			$rs->free();
+		}
+		else{
+			trigger_error('Unable to set exsiccati info; '.$this->conn->error,E_USER_WARNING);
 		}
 	}
 

@@ -684,7 +684,7 @@ class OccurrenceManager{
 							?>
 						</td>
 						<td style="padding:6px;width:25px;">
-							<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked /> 
+							<input id="cat-<?php echo $idStr; ?>-Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked /> 
 						</td>
 						<td style="padding:9px 5px;width:10px;">
 							<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
@@ -718,7 +718,7 @@ class OccurrenceManager{
 												?>
 											</td>
 											<td style="padding:6px;width:25px;">
-												<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" checked /> 
+												<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat-<?php echo $idStr; ?>-Input')" checked /> 
 											</td>
 											<td style="padding:6px">
 												<div class="collectiontitle">
@@ -770,7 +770,7 @@ class OccurrenceManager{
 							&nbsp;
 						</td>
 						<td style="padding:6px;width:25px;">
-							<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" checked /> 
+							<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll()" checked /> 
 						</td>
 						<td style="padding:6px">
 							<div class="collectiontitle">
