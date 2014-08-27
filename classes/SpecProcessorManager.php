@@ -146,8 +146,11 @@ class SpecProcessorManager {
 			'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
 			$this->cleanInStr($addArr['speckeypattern']).'","'.
 			$this->cleanInStr($addArr['sourcepath']).'","'.$this->cleanInStr($addArr['targetpath']).'","'.
-			$addArr['imgurl'].'",'.$addArr['webpixwidth'].','.
-			$addArr['tnpixwidth'].','.$addArr['lgpixwidth'].','.$addArr['jpgquality'].','.
+			$addArr['imgurl'].'",'.
+			($addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
+			($addArr['tnpixwidth']?$addArr['tnpixwidth']:'NULL').','.
+			($addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
+			($addArr['jpgquality']?$addArr['jpgquality']:'NULL').','.
 			$addArr['tnimg'].','.$addArr['lgimg'].')';
 		$this->conn->query($sql);
 	}

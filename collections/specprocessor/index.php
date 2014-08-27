@@ -29,7 +29,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$u
 $statusStr = "";
 if($isEditor){
 	if($action == 'Add New Image Project'){
-		$specManager->addProject($_REQUEST);
+		$specManager->addProject($_POST);
 	}
 	elseif($action == 'Save Image Project'){
 		$specManager->editProject($_REQUEST);
