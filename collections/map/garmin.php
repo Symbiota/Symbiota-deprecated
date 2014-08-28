@@ -132,7 +132,7 @@ $fileName = time();
 				_intializeController: function() {
 					try {
 						this.garminController = new Garmin.DeviceControl();
-						this.garminController.unlock( ["http://pinkava.asu.edu/symbiota/mapsearch/map_search_interface","ac00bf2ce7c56484b9aabb72ee2ef4ff"] );
+						this.garminController.unlock( ["http://swbiodiversity.org","e2d4e034ebdad5cf81a705e68714c122"] );
 						this.garminController.register(this);
 					} catch (e) {
 						setRealStatus(e);

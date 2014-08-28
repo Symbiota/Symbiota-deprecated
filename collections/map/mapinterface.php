@@ -140,6 +140,13 @@ if($coordArr && !is_numeric($coordArr)){
 	<style type="text/css">
 		#tabs1 a,#tabs2 a,#tabs3 a{
 			outline-color: transparent;
+			font-size: 12px;
+			font-weight: normal;
+		}
+		#tabs1 a,#tabs2 a,#tabs3 a{
+			outline-color: transparent;
+			font-size: 12px;
+			font-weight: normal;
 		}
 	</style>
 	<script type="text/javascript" src="../../js/jquery.js"></script>
@@ -1631,7 +1638,7 @@ if($coordArr && !is_numeric($coordArr)){
 							else{
 								?>
 								<div style="border:1px black solid;margin:15px;padding:5px;width:300px;" >
-									<b>Please <a href="#" onclick='openLogin();'>login</a> to access dataset tools.</b>
+									Please <a href="#" onclick='openLogin();'>login</a> to access dataset tools.
 								</div>
 								<?php
 							}
@@ -1639,7 +1646,7 @@ if($coordArr && !is_numeric($coordArr)){
 						</div>
 					</div>
 				</div>
-				<a href="#demo-links" style="position:absolute;bottom:0;right:0;margin-right:0px;margin-bottom:0px;padding-top:3px;padding-bottom:3px;z-index:10;" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true">Close</a>
+				<a href="#demo-links" style="position:absolute;top:0;right:0;margin-right:0px;margin-bottom:0px;margin-top:1px;padding-top:3px;padding-bottom:3px;padding-left:20px;z-index:10;height:20px;" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true"></a>
 			</div><!-- /content wrapper for padding -->
 		</div><!-- /defaultpanel -->
 	</div>

@@ -1026,25 +1026,25 @@ function loadRecordsetList(uid,selset){
 	recordsetlisthtml += '<div style="width:100%;"><div style="float:right;margin:10px;" title="Create New Dataset" onclick="'+toggle+'">';
 	recordsetlisthtml += '<img src="../../images/add.png" style="width:14px;" /></div></div>';
 	if(recordsets){
-		recordsetlisthtml += '<div id="nodsdiv" style="font-weight:bold;font-size:120%;display:none;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
+		recordsetlisthtml += '<div id="nodsdiv" style="display:none;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
 	}
 	else{
-		recordsetlisthtml += '<div id="nodsdiv" style="font-weight:bold;font-size:120%;display:block;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
+		recordsetlisthtml += '<div id="nodsdiv" style="display:block;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
 	}
 	if(recordsets){
-		recordsetlisthtml += '<div id="dsdiv" style="font-weight:bold;font-size:120%;display:block;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
+		recordsetlisthtml += '<div id="dsdiv" style="display:block;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
 	}
 	else{
-		recordsetlisthtml += '<div id="dsdiv" style="font-weight:bold;font-size:120%;display:none;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
+		recordsetlisthtml += '<div id="dsdiv" style="display:none;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
 	}
 	if(recordsets){
 		recordsetlisthtml += '<div id="dsmanagementdiv" style="display:none;"><hr />';
 		recordsetlisthtml += '<div style="height:25px;margin-top:-5px;">';
 		recordsetlisthtml += '<div style="float:left;"><button data-role="none" id="" onclick="clearDataset();" >Remove Dataset</button></div>';
-		recordsetlisthtml += '<div style="float:right;"><button data-role="none" id="" onclick="cloneDataset();" >Duplicate Dataset</button></div>';
-		recordsetlisthtml += '</div>';
 		recordsetlisthtml += '<div id="dsdeletediv" style="height:25px;margin-top:-5px;display:none;">';
-		recordsetlisthtml += '<div style="float:left;"><button data-role="none" onclick="deleteDataset();" >Delete Dataset</button></div>';
+		recordsetlisthtml += '<div style="float:right;"><button data-role="none" onclick="deleteDataset();" >Delete Dataset</button></div>';
+		recordsetlisthtml += '</div>';
+		//recordsetlisthtml += '<div style="float:right;"><button data-role="none" id="" onclick="cloneDataset();" >Duplicate Dataset</button></div>';
 		recordsetlisthtml += '</div>';
 		recordsetlisthtml += '</div>';
 		recordsetlisthtml += '<div><hr></div><div id="datasetlist" style="margin-top:8px;">'+recordsets+'</div>';
