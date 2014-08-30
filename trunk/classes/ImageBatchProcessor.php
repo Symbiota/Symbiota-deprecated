@@ -398,7 +398,8 @@ class ImageBatchProcessor {
 					}
 					elseif(stripos($fileName,'Parent Dir') === false){
 						echo 'New dir path: '.$this->sourcePathBase.$pathFrag.$fileName.'<br/>';
-						$this->processHtml($pathFrag.$fileName."/");
+						if(substr($fileName,-1) != '/') $fileName .= '/';
+						$this->processHtml($pathFrag.$fileName);
 					}
 				}
 			}
