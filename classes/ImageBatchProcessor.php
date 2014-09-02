@@ -919,46 +919,48 @@ class ImageBatchProcessor {
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				if($r->url == $webUrl){
-					$imgId = $r->imgid;
-					$exTnUrl = $r->thumbnailurl;
-					$exLgUrl = $r->originalurl;
+					//exact match, thus delete record so that image can be reset
+					$this->conn->query('DELETE FROM images WHERE imgid = '.$r->imgid);
+				}
+				elseif($this->imgExists == 2 && basename($r->url) == basename($webUrl)){
+					//Copy-over-image is set to true and basenames equal, thus delete image PLUS delete old images 
+					$this->conn->query('DELETE FROM images WHERE imgid = '.$r->imgid);
+					//Remove images
+					if(substr($r->url,0,1) == '/'){
+						$wFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->url);
+						if(file_exists($wFile)){
+							unlink($wFile);
+						}
+					}
+					if($tnUrl != $r->thumbnailurl && substr($r->thumbnailurl,0,1) == '/'){
+						$tnFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->thumbnailurl);
+						if(file_exists($tnFile)){
+							unlink($tnFile);
+						}
+					} 
+					if($oUrl != $r->originalurl && substr($r->originalurl,0,1) == '/'){
+						$oFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->originalurl);
+						if(file_exists($oFile)){
+							unlink($oFile);
+						}
+					} 
 				}
 			}
 			$rs->free();
-			$sql = '';
-			if($imgId){
-				if($exTnUrl <> $tnUrl || $exLgUrl <> $oUrl){
-					$sql = 'UPDATE images SET url = "'.$webUrl.'", ';
-					if($tnUrl){
-						$sql .= 'thumbnailurl = "'.$tnUrl.'",';
-					}
-					else{
-						$sql .= 'thumbnailurl = NULL,';
-					}
-					if($oUrl){
-						$sql .= 'originalurl = "'.$oUrl.'" ';
-					}
-					else{
-						$sql .= 'originalurl = NULL ';
-					}
-					$sql .= 'WHERE imgid = '.$imgId;
-				}
+
+			$sql1 = 'INSERT images(occid,url';
+			$sql2 = 'VALUES ('.$occId.',"'.$webUrl.'"';
+			if($tnUrl){
+				$sql1 .= ',thumbnailurl';
+				$sql2 .= ',"'.$tnUrl.'"';
 			}
-			else{
-				$sql1 = 'INSERT images(occid,url';
-				$sql2 = 'VALUES ('.$occId.',"'.$webUrl.'"';
-				if($tnUrl){
-					$sql1 .= ',thumbnailurl';
-					$sql2 .= ',"'.$tnUrl.'"';
-				}
-				if($oUrl){
-					$sql1 .= ',originalurl';
-					$sql2 .= ',"'.$oUrl.'"';
-				}
-				$sql1 .= ',imagetype,owner) ';
-				$sql2 .= ',"specimen","'.$this->collArr[$this->activeCollid]['collname'].'")';
-				$sql = $sql1.$sql2;
+			if($oUrl){
+				$sql1 .= ',originalurl';
+				$sql2 .= ',"'.$oUrl.'"';
 			}
+			$sql1 .= ',imagetype,owner) ';
+			$sql2 .= ',"specimen","'.$this->collArr[$this->activeCollid]['collname'].'")';
+			$sql = $sql1.$sql2;
 			if($sql){
 				if($this->conn->query($sql)){
 					$this->dataLoaded = 1;
@@ -983,7 +985,7 @@ class ImageBatchProcessor {
 		flush();
 		return $status;
 	}
-
+	
 	private function writeMetadataToFile($specPk,$webUrl,$tnUrl,$oUrl){
 		$status = true;
 		if($this->mdOutputFH){
