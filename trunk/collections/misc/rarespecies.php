@@ -152,7 +152,7 @@ if($editable){
 					<legend><b>Add Species to List</b></legend>
 					<div style="margin:3px;">
 						Scientific Name:
-						<input type="text" id="speciestoadd" name="speciestoadd" />
+						<input type="text" id="speciestoadd" name="speciestoadd" style="width:300px" />
 						<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 					</div>
 					<div style="margin:3px;">
