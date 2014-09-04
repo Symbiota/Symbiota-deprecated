@@ -1,10 +1,10 @@
 <?php
+include_once($serverRoot.'/classes/SpecProcNlpLbcc.php');
 
-class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon {
+class SpecProcNlpLbccLichen extends SpecProcNlpLbcc {
 
-	function __construct($collid=null, $catalogNumber="") {
-		$this->collId = $collid;
-		parent::__construct($catalogNumber);
+	function __construct() {
+		parent::__construct();
 	}
 
 	protected function getLabelInfo($str) {
