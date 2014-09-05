@@ -1,12 +1,15 @@
 <?php
-class SpecProcNlpProfiles extends SpecProcNlp{
+class SpecProcNlpProfiles{
 
+	private $conn;
+	private $collid;
+	
 	function __construct() {
- 		parent::__construct();
+		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
 
-	public function __destruct(){
- 		parent::__destruct();
+	function __destruct(){
+		if(!($this->conn === false)) $this->conn->close();
 	}
 
 	public function getProfileArr($spNlpId=0){

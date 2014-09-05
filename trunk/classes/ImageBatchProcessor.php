@@ -619,16 +619,16 @@ class ImageBatchProcessor {
 					if($this->webImg){
 						if($this->webImg == 1){
 							// 1 = evaluate source and import
-							if(($width > $this->webPixWidth  || $fileSize > $this->webFileSizeLimit)){
-								if($this->createNewImage($sourcePath.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height)){
-									$webUrlFrag = $this->imgUrlBase.$targetFrag.$targetFileName;
-									$this->logOrEcho("Web image created from source image (".date('Y-m-d h:i:s A').") ",1);
-								}
-							}
-							else{
+							if($fileSize < $this->webFileSizeLimit && $width < ($this->webPixWidth*2)){
 								if(copy($sourcePath.$fileName,$targetPath.$targetFileName)){
 									$webUrlFrag = $this->imgUrlBase.$targetFrag.$targetFileName;
 									$this->logOrEcho("Source image imported as web image (".date('Y-m-d h:i:s A').") ",1);
+								}
+							}
+							else{
+								if($this->createNewImage($sourcePath.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height)){
+									$webUrlFrag = $this->imgUrlBase.$targetFrag.$targetFileName;
+									$this->logOrEcho("Web image created from source image (".date('Y-m-d h:i:s A').") ",1);
 								}
 							}
 						}

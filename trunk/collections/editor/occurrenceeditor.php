@@ -115,17 +115,17 @@ if($symbUid){
 	}
 	if($isEditor == 1 || $isEditor == 2 || $crowdSourceMode){
 		if($action == 'Save OCR'){
-			$statusStr = $occManager->insertTextFragment($_REQUEST['imgid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
+			$statusStr = $occManager->insertTextFragment($_POST['imgid'],$_POST['rawtext'],$_POST['rawnotes'],$_POST['rawsource']);
 			if(is_numeric($statusStr)){
 				$newPrlid = $statusStr;
 				$statusStr = '';
 			}
 		}
 		elseif($action == 'Save OCR Edits'){
-			$statusStr = $occManager->saveTextFragment($_REQUEST['editprlid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
+			$statusStr = $occManager->saveTextFragment($_POST['editprlid'],$_POST['rawtext'],$_POST['rawnotes'],$_POST['rawsource']);
 		}
 		elseif($action == 'Delete OCR'){
-			$statusStr = $occManager->deleteTextFragment($_REQUEST['delprlid']);
+			$statusStr = $occManager->deleteTextFragment($_POST['delprlid']);
 		}
 	}
 	if($isEditor){
@@ -332,7 +332,12 @@ if($symbUid){
 		foreach($specImgArr as $imgId => $i2){
 			$iUrl = $i2['url'];
 			if($imgUrlPrefix && substr($iUrl,0,4) != 'http') $iUrl = $imgUrlPrefix.$iUrl;
-			$imgArr[$imgId] = $iUrl;
+			$imgArr['web'][$imgId] = $iUrl;
+			if($i2['origurl']){
+				$lgUrl = $i2['origurl'];
+				if($imgUrlPrefix && substr($lgUrl,0,4) != 'http') $lgUrl = $imgUrlPrefix.$lgUrl;
+				$imgArr['lg'][$imgId] = $lgUrl;
+			}
 		}
 		$fragArr = $occManager->getRawTextFragments();
 	}
@@ -387,11 +392,10 @@ else{
 			echo 'var csDefault = "'.$charset.'";';
 		}
 		if($imgArr){
-			?>
-			var activeImageArr = new Array("<?php echo implode('","',$imgArr); ?>");
-			var activeImageKeys = new Array(<?php echo '"'.implode('","',array_keys($imgArr)).'"'; ?>);
-			var activeImageIndex = 0;
-			<?php
+			echo 'var activeImageArr = new Array("'.implode('","',$imgArr['web']).'");'."\n";
+			if(isset($imgArr['lg'])) echo 'var activeImageLgArr = new Array("'.implode('","',$imgArr['lg']).'");'."\n";
+			echo 'var activeImageKeys = new Array("'.implode('","',array_keys($imgArr['web'])).'");'."\n";
+			echo 'var activeImageIndex = 0;';
 		}
 		?>
         function requestImage(){
@@ -407,10 +411,10 @@ else{
 
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=140310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=140620"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=140310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=140310"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=140905"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=140905"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=140905"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=140905"></script>
 </head>
 <body>
 	<!-- inner text -->

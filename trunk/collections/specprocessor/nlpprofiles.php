@@ -1,15 +1,14 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcNlp.php');
+include_once($serverRoot.'/classes/SpecProcNlpProfiles.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spNlpId = array_key_exists('spnlpid',$_REQUEST)?$_REQUEST['spnlpid']:0;
 
-$nlpManager = new SpecProcNlp();
-
-$nlpManager->setCollId($collId);
+$nlpManager = new SpecProcNlpProfiles();
+//$nlpManager->setCollId($collId);
 
 $isEditor = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){

@@ -53,6 +53,10 @@ function initImageTool(imgId){
 	}
 }
 
+function changeImgRes(resType){
+	
+}
+
 function ocrImage(ocrButton,imgidVar,imgCnt){
 	ocrButton.disabled = true;
 	document.getElementById("workingcircle-"+imgCnt).style.display = "inline";
@@ -83,7 +87,7 @@ function ocrImage(ocrButton,imgidVar,imgCnt){
 		var rawStr = msg;
 		document.getElementById("tfeditdiv-"+imgCnt).style.display = "none";
 		document.getElementById("tfadddiv-"+imgCnt).style.display = "block";
-		var addform = document.getElementById("imgaddform-"+imgCnt);
+		var addform = document.getElementById("ocraddform-"+imgCnt);
 		addform.rawtext.innerText = rawStr;
 		addform.rawtext.textContent = rawStr;
 		document.getElementById("workingcircle-"+imgCnt).style.display = "none";
@@ -98,13 +102,12 @@ function nlpLbcc(nlpButton,prlid){
 	var rawOcr = f.rawtext.innerText;
 	if(!rawOcr) rawOcr = f.rawtext.textContent;
 	var cnumber = f.cnumber.value;
-	var iUrl = f.iurl.value;
 	var collid = f.collid.value;
 
 	$.ajax({
 		type: "POST",
 		url: "rpc/nlplbcc.php",
-		data: { rawocr: rawOcr, iurl: iUrl, collid: collid, catalognumber: cnumber }
+		data: { rawocr: rawOcr, collid: collid, catnum: cnumber }
 	}).done(function( msg ) {
 		pushDwcArrToForm(msg);
 	});
@@ -119,22 +122,13 @@ function nlpSalix(nlpButton,prlid){
 	var f = nlpButton.form;
 	var rawOcr = f.rawtext.innerText;
 	if(!rawOcr) rawOcr = f.rawtext.textContent;
-	var targetDataset = '';
-	if(salixPath.indexOf("?t=") > 0){
-		targetDataset = salixPath.substring(salixPath.indexOf("?t=")+3);
-		if(targetDataset.indexOf("&") > 0) targetDataset = salixPath.substring(0,targetDataset.indexOf("&"));
-		salixPath = salixPath.substring(0,salixPath.indexOf("?t="));
-	}
 	
 	$.ajax({
 		type: "POST",
-		url: salixPath,
-		crossDomain: true,
-		data: { textinput: rawOcr, t: targetDataset }
+		url: "rpc/nlpsalix.php",
+		data: { rawocr: rawOcr }
 	}).done(function( msg ) {
 		pushDwcArrToForm(msg);
-	}).error(function(  ) {
-		alert('Problem accessing SALIX webservices; notify an administrator');
 	});
 
 	nlpButton.disabled = false;
@@ -170,7 +164,7 @@ function pushDwcArrToForm(msg){
 			//alert(err);
 		}
 	}
-	if(scinameTransferred) verifyFullformSciName();
+	if(scinameTransferred) verifyFullFormSciName();
 	if(verbatimElevTransferred) parseVerbatimElevation(f);
 	//if(fieldsTransfer == "") fieldsTransfer = "none";
 	//if(fieldsSkip == "") fieldsSkip = "none";

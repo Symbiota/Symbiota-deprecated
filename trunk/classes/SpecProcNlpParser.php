@@ -1,6 +1,12 @@
 <?php
-class SpecProcNlpParser extends SpecProcNlp{
+/*
+ * This class is only conceptional and has not been developed much
+ * A lot of work would be needed before it could be used  
+ */
 
+class SpecProcNlpParser{
+
+	private $conn;
 	private $dcArr = array();
 	private $tokenArr = array();
 	private $fragMatches = array();
@@ -11,11 +17,12 @@ class SpecProcNlpParser extends SpecProcNlp{
 	private $occDupes = array();
 
 	function __construct() {
- 		parent::__construct();
+		$this->conn = MySQLiConnectionFactory::getCon("write");
+		set_time_limit(7200);
 	}
 
-	public function __destruct(){
- 		parent::__destruct();
+	function __destruct(){
+		if(!($this->conn === false)) $this->conn->close();
 	}
 
 	//Parsing functions
