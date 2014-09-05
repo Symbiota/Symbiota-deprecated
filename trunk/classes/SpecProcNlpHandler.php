@@ -67,65 +67,60 @@ class SpecProcNlpHandler {
 		if(is_numeric($prlid)){
 			$recArr = $this->getRawOcr($prlid);
 			if($recArr) {
-				if($this->parserTag == 'salix'){
-					$dwcArr = $this->parseSalix($recArr);
-				}
-				else{
-					$dwcArr = $this->parseLbcc($recArr);
-				}
-				//A little cleaning and unification
-				$dwcArr = array_change_key_case($dwcArr);
-				if(array_key_exists('scientificname',$dwcArr) && !array_key_exists('sciname',$dwcArr)){
-					$dwcArr['sciname'] = $dwcArr['scientificname'];
-					unset($dwcArr['scientificname']);
-				}
-				//Convert to UTF-8
-				foreach($dwcArr as $k => $v){
-					if($v){
-						//If is a latin character set, convert to UTF-8
-						if(mb_detect_encoding($v,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
-							$dwcArr[$k] = utf8_encode($v);
-							//$dwcArr[$k] = iconv("ISO-8859-1//TRANSLIT","UTF-8",$v);
-						}
-					}
-					else{
-						unset($dwcArr[$k]);
-					}
-				}
+				$dwcArr = $this->parse($recArr['rawocr'],$recArr['collid'],$recArr['catnum']);
 			}
 		}
-		return json_encode($dwcArr);
+		return $dwcArr;
 	}
 
-	private function parseLbcc($recArr){
+	public function parse($rawOcr, $collid = 0, $catNum = '' ){
+		$dwcArr = array();
+		if($rawOcr) {
+			if($this->parserTag == 'salix'){
+				$dwcArr = $this->parseSalix($rawOcr);
+			}
+			else{
+				$dwcArr = $this->parseLbcc($rawOcr, $collid, $catNum);
+			}
+			//A little cleaning and unification
+			$dwcArr = array_change_key_case($dwcArr);
+			if(array_key_exists('scientificname',$dwcArr) && !array_key_exists('sciname',$dwcArr)){
+				$dwcArr['sciname'] = $dwcArr['scientificname'];
+				unset($dwcArr['scientificname']);
+			}
+		}
+		return $dwcArr;
+	}
+
+	private function parseLbcc($rawOcr,$collid,$catNum){
 		//Parse and return
-		$rawStr = $recArr['rawstr'];
-		$collId = $recArr['collid'];
-		$catNum = $recArr['catnum'];
-		if($rawStr) {
+		if($rawOcr) {
 			$handler;
-			if($this->parseTag == 'lbccBryophyte') $handler = new SpecProcNlpLbccBryophyte();
-			elseif($this->parseTag == 'lbcclichen') $handler = new SpecProcNlpLbccLichen();
+			if($this->parserTag == 'lbccBryophyte') $handler = new SpecProcNlpLbccBryophyte();
+			elseif($this->parserTag == 'lbccLichen') $handler = new SpecProcNlpLbccLichen();
 			else $handler = new SpecProcNlpLbcc();
 			if($handler) {
-				$handler->setCollId($collId);
+				$handler->setCollId($collid);
 				$handler->setCatalogNumber($catNum);
-				return $handler->parse($rawStr);
+				return $handler->parse($rawOcr);
 			}
 		}
 		return;
 	}
 
-	private function parseSalix($recArr){
+	private function parseSalix($rawOcr){
 		//Parse and return
-		$parser = new SpecProcNlpSalix();
-		return $parser->parse($recArr['rawocr']);
+		if($rawOcr) {
+			$parser = new SpecProcNlpSalix();
+			return $parser->parse($rawOcr);
+		}
+		return;
 	}
 
 	private function getRawOcr($prlid){
 		$retArr = array();
 		//Get raw OCR string
-		$sql = 'SELECT r.rawstr AS rawstr, o.collid AS collid, o.catalogNumber AS catalogNumber, IFNULL(i.originalurl,i.url) AS url '.
+		$sql = 'SELECT r.rawstr, o.collid, o.catalogNumber '.
 			'FROM omoccurrences o '.
 			'INNER JOIN images i ON o.occid = i.occid '.
 			'INNER JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
@@ -133,9 +128,8 @@ class SpecProcNlpHandler {
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
-			$retArr['rawstr'] = $r->rawstr;
+			$retArr['rawocr'] = $r->rawstr;
 			$retArr['collid'] = $r->collid;
-			$retArr['url'] = $r->url;
 			$retArr['catnum'] = $r->catalogNumber;
 		}
 		$rs->free();
@@ -146,8 +140,8 @@ class SpecProcNlpHandler {
 		$this->setCollectionMetadata($collTarget);
 		$collArr = explode(',',$collTarget);
 		$totalCnt = 0;
-		foreach($collArr as $collId){
-			$this->setCollId($collId);
+		foreach($collArr as $collid){
+			$this->setCollId($collid);
 			$sql = 'SELECT r.prlid, r.rawstr, r.source, o.occid, o.collid, o.catalognumber, IFNULL(i.originalurl,i.url) AS url '.
 				'FROM specprocessorrawlabels r LEFT JOIN images i ON r.imgid = i.imgid '.
 				'INNER JOIN omoccurrences o ON IFNULL(i.occid,r.occid) = o.occid '.
@@ -159,19 +153,19 @@ class SpecProcNlpHandler {
 			$cnt = 0;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$rawStr = $r->rawstr;
+				$rawOcr = $r->rawstr;
 				$ocrSource = $r->source;
 				$url = $r->url;
 				$prlid = $r->prlid;
 				$occid = $r->occid;
-				$collId = $r->collid;
-				$catalogNumber = $r->catalognumber;
+				$collid = $r->collid;
+				$catNumb = $r->catalognumber;
 
 				//Process string and load results into $dwcArr
 				//Exceptions must be caught in try/catch blocks
 				$dwcArr = array();
 				try{
-					$dwcArr = $this->parseTextBlock($rawStr, $collId, $url, $catalogNumber);
+					$dwcArr = $this->parse($rawOcr, $collid, $catNumb);
 				}
 				catch(Exception $e){
 					$eStr = 'ERROR: '.$e->getMessage();
@@ -182,14 +176,14 @@ class SpecProcNlpHandler {
 
 				if($this->printMode == 1){
 					//Output to report file
-					$this->printResult($rawStr,$dwcArr);
+					$this->printResult($rawOcr,$dwcArr);
 				}
 				elseif($this->printMode == 2){
 					$dwcArr['occid'] = $occid;
 					$dwcArr['prlid'] = $prlid;
 					$dwcArr['ocrsource'] = $ocrSource;
 					$dwcArr['imageurl'] = $url;
-					if(!array_key_exists('catalogNumber', $dwcArr)) $dwcArr['catalogNumber'] = $catalogNumber;
+					if(!array_key_exists('catalogNumber', $dwcArr)) $dwcArr['catalogNumber'] = $catNumb;
 					//Output to csv file
 					$this->printCsv($dwcArr,$totalCnt);
 				}
@@ -199,12 +193,48 @@ class SpecProcNlpHandler {
 				}
 				$cnt++;
 			}
-			$this->totalStats['collmeta'][$collId]['cnt'] = $cnt;
+			$this->totalStats['collmeta'][$collid]['cnt'] = $cnt;
 			$totalCnt += $cnt;
 		}
 		$this->totalStats['collmeta']['totalcnt'] = $totalCnt;
 	}
 	
+	private function getRawOcr($prlid){
+		$retArr = array();
+		//Get raw OCR string
+		$sql = 'SELECT r.rawstr, o.collid, o.catalogNumber '.
+			'FROM omoccurrences o '.
+			'INNER JOIN images i ON o.occid = i.occid '.
+			'INNER JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
+			'WHERE (r.prlid = '.$prlid.')';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$retArr['rawocr'] = $r->rawstr;
+			$retArr['collid'] = $r->collid;
+			$retArr['catnum'] = $r->catalogNumber;
+		}
+		$rs->free();
+		return $retArr;
+	}
+	
+	public function convertDwcArrToJson($dwcArr){
+		//Convert to UTF-8, json_encode call requires UTF-8
+		foreach($dwcArr as $k => $v){
+			if($v){
+				//If is a latin character set, convert to UTF-8
+				if(mb_detect_encoding($v,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+					$dwcArr[$k] = utf8_encode($v);
+					//$dwcArr[$k] = iconv("ISO-8859-1//TRANSLIT","UTF-8",$v);
+				}
+			}
+			else{
+				unset($dwcArr[$k]);
+			}
+		}
+		return json_encode($dwcArr);
+	}
+
 	/*
 	 * @param 	Array of parsed term/values.
 	 * 			Key: DwC term; Value: Output text
