@@ -1,18 +1,27 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
-include_once($serverRoot.'/classes/SpecProcNlp.php');
+include_once($serverRoot.'/classes/SpecProcNlpBryophyte.php');
+include_once($serverRoot.'/classes/SpecProcNlpLichen.php');
+include_once($serverRoot.'/classes/SpecProcNlpSalix.php');
 header("Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST['collid'];
+$parserTarget = $_REQUEST['parser'];
 $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 
 $procManager = new SpecProcessorManager();
 $procManager->setCollId($collid);
 
-$nlpManager = new SpecProcNlp();
-$nlpManager->setCollId($collid);
+$nlpManager = null;
+if($parserTarget == 'lbcc'){
+	$nlpManager = new SpecProcNlpLbcc();
+}
+else{
+	$nlpManager = new SpecProcNlpSalix();
+}
+//$nlpManager->setCollId($collid);
 
 $isEditor = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){

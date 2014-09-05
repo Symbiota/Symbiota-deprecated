@@ -12,13 +12,13 @@ $occManager = new OccurrenceEditorImages();
 $occActionManager = new OccurrenceActionManager();
 
 $occManager->setOccId($occId); 
-$imageArr = $occManager->getImageMap();
+$specImgArr = $occManager->getImageMap();
 ?>
 <div id="imagediv" style="width:795px;">
 	<div style="float:right;cursor:pointer;" onclick="toggle('addimgdiv');" title="Add a New Image">
 		<img style="border:0px;width:12px;" src="../../images/add.png" />
 	</div>
-	<div id="addimgdiv" style="display:<?php echo ($imageArr?'none':''); ?>;">
+	<div id="addimgdiv" style="display:<?php echo ($specImgArr?'none':''); ?>;">
 		<form name="imgnewform" action="occurrenceeditor.php" method="post" enctype="multipart/form-data" onsubmit="return verifyImgAddForm(this);">
 			<fieldset style="padding:15px">
 				<legend><b>Add a New Image</b></legend>
@@ -122,11 +122,11 @@ $imageArr = $occManager->getImageMap();
 	</div>
 	<div style="clear:both;margin:15px;">
 		<?php
-		if($imageArr){
+		if($specImgArr){
 			?>
 			<table>
 				<?php 
-				foreach($imageArr as $imgId => $imgArr){
+				foreach($specImgArr as $imgId => $imgArr){
 					?>
 					<tr>
 						<td style="width:300px;text-align:center;padding:20px;">

@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcNlp.php');
+include_once($serverRoot.'/classes/SpecProcNlpLbccLichen.php');
+include_once($serverRoot.'/classes/SpecProcNlpLbccBryophyte.php');
 
 $collTarget = array_key_exists("colltarget",$_REQUEST)?$_REQUEST["colltarget"]:42;
 //$processingStatus = array_key_exists("processingstatus",$_REQUEST)?$_REQUEST["processingstatus"]:'';
@@ -11,19 +12,15 @@ $parserTarget = strtolower($parserTarget);
 
 $nlpHandler = null;
 if($parserTarget == 'lbcc'){
-	$nlpHandler = new SpecProcNlpParserLBCC($printMode);
+	//$nlpHandler = new SpecProcNlpLbcc();
 }
 elseif($parserTarget == 'salix'){
-	$nlpHandler = new SpecProcNlpParserSALIX($printMode);
-}
-else{
-	$nlpHandler = new SpecProcNlpParser($printMode);
+	//$nlpHandler = new SpecProcNlpSalix();
 }
 
-$nlpHandler->setPrintMode($printMode);
-$nlpHandler->setLogErrors(true);
-$nlpHandler->batchProcess($collTarget,$ocrSource);
-
-
-
+if($nlpHandler){
+	//$nlpHandler->setPrintMode($printMode);
+	//$nlpHandler->setLogErrors(true);
+	//$nlpHandler->batchProcess($collTarget,$ocrSource);
+}
 ?>

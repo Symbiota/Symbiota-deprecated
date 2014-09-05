@@ -14,7 +14,7 @@ class SpecProcNlpLbcc {
 		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	protected function parse($rawStr) {
+	public function parse($rawStr) {
 		$rawStr = trim($this->convertBadChars(str_replace("\t", " ", $rawStr)));
 		//If OCR source is from tesseract (utf-8 is default), convert to a latin1 character set
 		if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){

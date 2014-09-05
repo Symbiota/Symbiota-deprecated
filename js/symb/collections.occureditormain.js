@@ -89,24 +89,7 @@ $(document).ready(function() {
 			fieldChanged('family');
 			fieldChanged('localitysecurity');
 			if($( "#ffsciname" ).val()){
-				$.ajax({
-					type: "POST",
-					url: "rpc/verifysciname.php",
-					dataType: "json",
-					data: { term: $( "#ffsciname" ).val() }
-				}).done(function( data ) {
-					if(data){
-						$( "#tidinterpreted" ).val(data.tid);
-						$( 'input[name=family]' ).val(data.family);
-						$( 'input[name=scientificnameauthorship]' ).val(data.author);
-						if(data.status == 1){ 
-							$( 'input[name=localitysecurity]' ).prop('checked', true);
-						}
-					}
-					else{
-						alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
-					}
-				});
+				verifyFullFormSciName();
 			}
 			else{
 				$( "#tidinterpreted" ).val("");
@@ -178,6 +161,27 @@ function toggleStyle(){
 }
 
 //Field changed and verification functions
+function verifyFullFormSciName(){
+	$.ajax({
+		type: "POST",
+		url: "rpc/verifysciname.php",
+		dataType: "json",
+		data: { term: $( "#ffsciname" ).val() }
+	}).done(function( data ) {
+		if(data){
+			$( "#tidinterpreted" ).val(data.tid);
+			$( 'input[name=family]' ).val(data.family);
+			$( 'input[name=scientificnameauthorship]' ).val(data.author);
+			if(data.status == 1){ 
+				$( 'input[name=localitysecurity]' ).prop('checked', true);
+			}
+		}
+		else{
+			alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
+		}
+	});
+}
+
 function fieldChanged(fieldName){
 	try{
 		document.fullform.editedfields.value = document.fullform.editedfields.value + fieldName + ";";

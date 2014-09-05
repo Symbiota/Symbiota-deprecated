@@ -1249,12 +1249,14 @@ class OccurrenceEditorManager {
 		return $retArr;
 	}
 
-	public function insertTextFragment($imgId,$rawFrag,$notes){
+	public function insertTextFragment($imgId,$rawFrag,$notes,$source){
 		if($imgId && $rawFrag){
 			$statusStr = '';
 			//$rawFrag = preg_replace('/[^(\x20-\x7F)]*/','', $rawFrag);
-			$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
-				'VALUES ('.$imgId.',"'.$this->cleanRawFragment($rawFrag).'","'.$this->cleanInStr($notes).'")';
+			$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes,source) '.
+				'VALUES ('.$imgId.',"'.$this->cleanRawFragment($rawFrag).'",'.
+				($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.
+				($source?'"'.$this->cleanInStr($source).'"':'NULL').')';
 			//echo $sql;
 			if($this->conn->query($sql)){
 				$statusStr = $this->conn->insert_id;
@@ -1267,11 +1269,14 @@ class OccurrenceEditorManager {
 		}
 	}
 
-	public function saveTextFragment($prlId, $rawFrag,$notes){
+	public function saveTextFragment($prlId,$rawFrag,$notes,$source){
 		if($prlId && $rawFrag){
 			$statusStr = '';
 			//$rawFrag = preg_replace('/[^(\x20-\x7F)]*/','', $rawFrag);
-			$sql = 'UPDATE specprocessorrawlabels SET rawstr = "'.$this->cleanRawFragment($rawFrag).'", notes = "'.$this->cleanInStr($notes).'" '.
+			$sql = 'UPDATE specprocessorrawlabels '.
+				'SET rawstr = "'.$this->cleanRawFragment($rawFrag).'", '.
+				'notes = '.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').', '.
+				'source = '.($source?'"'.$this->cleanInStr($source).'"':'NULL').' '.
 				'WHERE (prlid = '.$prlId.')';
 			//echo $sql;
 			if(!$this->conn->query($sql)){

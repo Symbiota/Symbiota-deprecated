@@ -1,5 +1,4 @@
 <?php
-include_once($serverRoot.'/classes/SpecProcNlp.php');
 include_once($serverRoot.'/classes/SalixUtilities.php');
 
 /* This class extends the SpecProcNlp class and thus inherits all public and protected variables and functions 
@@ -7,25 +6,46 @@ include_once($serverRoot.'/classes/SalixUtilities.php');
  */ 
 
 
-class SpecProcNlpSalix extends SpecProcNlp{
+class SpecProcNlpSalix{
 
+	private $conn;
 	private $wordFreqArr = array();
 	
 	function __construct() {
-		parent::__construct();
+		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		set_time_limit(7200);
 	}
 
 	function __destruct(){
-		parent::__destruct();
+		if(!($this->conn === false)) $this->conn->close();
 	}
 
 	//Parsing functions
-	public function parse($rawStr) {
+	public function parse($rawOcr) {
 		$dwcArr = array();
 		//Add the SALIX parsing code here and/or in following functions of a private scope
+
 		
 		
+		$dwcArr['country'] = 'call worked';
 		return $dwcArr;
+	}
+
+	private function getRawOcr($prlid){
+		$retStr = '';
+		if(is_numeric($prlid)){
+			//Get raw OCR string
+			$sql = 'SELECT rawstr '.
+				'FROM specprocessorrawlabels '.
+				'WHERE (prlid = '.$prlid.')';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$retStr = $r->rawstr;
+			}
+			$rs->free();
+		}
+		return $retStr;
 	}
 
 	private function getWordFreq(){
