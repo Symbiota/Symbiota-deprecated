@@ -103,17 +103,17 @@ class SalixUtilities {
 			$remCnt = (isset($subArr['remcnt'])?$subArr['remcnt']:0);
 			$cnt = $locCnt + $habCnt + $subCnt + $attCnt + $remCnt;
 			if($cnt){
-				$locPer = round($locCnt/$cnt,2);
-				$habPer = round($habCnt/$cnt,2);
-				$subPer = round($subCnt/$cnt,2);
-				$attPer = round($attCnt/$cnt,2);
-				$remPer = round($remCnt/$cnt,2);
+				$locPer = round($locCnt/$cnt,2)*100;
+				$habPer = round($habCnt/$cnt,2)*100;
+				$subPer = round($subCnt/$cnt,2)*100;
+				$attPer = round($attCnt/$cnt,2)*100;
+				$remPer = round($remCnt/$cnt,2)*100;
 				$sql = 'INSERT IGNORE INTO salixwordstats(collid,firstword,secondword,locality,localityFreq,habitat,habitatFreq,substrate,substrateFreq,verbatimAttributes,verbatimAttributesFreq,occurrenceRemarks,occurrenceRemarksFreq,totalcount) '.
 					'VALUES('.$collid.',"'.$this->cleanInStr($firstWord).'",'.($secondWord?'"'.$this->cleanInStr($secondWord).'"':'NULL').','.
 					$locCnt.','.$locPer.','.$habCnt.','.$habPer.','.$subCnt.','.$subPer.','.$attCnt.','.$attPer.','.$remCnt.','.$remPer.','.$cnt.')';
 				if(!$this->conn->query($sql)){
 					echo 'ERROR loading word: '.$this->conn->error;
-					echo $sql;
+					//echo $sql;
 					exit;
 				}
 			}
@@ -147,18 +147,20 @@ class SalixUtilities {
 		if($collTarget) $sqlColl .= 'AND collid IN('.$collTarget.')';
 		$rsColl = $this->conn->query($sqlColl);
 		while($rColl = $rsColl->fetch_object()){
-			$this->echoStr('Starting to build word stats for: '.$r->collname);
+			$this->echoStr('Starting to build word stats for: '.$rColl->collname);
 			ob_flush();
 			flush();
-			$this->buildWordStats($r->collid,$reset);
+			$this->buildWordStats($rColl->collid,$reset);
+			$this->echoStr('Finished building word stats for: '.$rColl->collname);
 		}
 		$rsColl->free();
-		
 	}
 
-	private function echoStr($str){
+	private function echoStr($str, $indent = 0){
 		if($this->verbose){
-			echo '<li>'.$str."</li>\n";
+			echo '<li'.($indent?' style="margin-left:"'.$indent.'px':'').'>'.$str."</li>\n";
+			ob_flush();
+			flush();
 		}
 	}
 	
