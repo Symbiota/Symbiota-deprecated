@@ -50,7 +50,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				}
 				else{
 					$msg = 'unknown';
-					$err = $_FILES['userfile']['error'];
+					$err = $_FILES['uploadfile']['error'];
 					if($err == 1) $msg = 'uploaded file exceeds the upload_max_filesize directive in php.ini';
 					elseif($err == 2) $msg = 'uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
 					elseif($err == 3) $msg = 'uploaded file was only partially uploaded';
@@ -64,8 +64,8 @@ class SpecUploadDwca extends SpecUploadBase{
 				}
 			}
 			else{
-				$this->outputMsg('<li>ERROR: Possible file upload attack ('.$_FILES['userfile']['tmp_name'].') </li>');
-				$this->errorStr = 'ERROR: Possible file upload attack ('.$_FILES['userfile']['tmp_name'].')';
+				$this->outputMsg('<li>ERROR: Possible file upload attack ('.$_FILES['uploadfile']['tmp_name'].') </li>');
+				$this->errorStr = 'ERROR: Possible file upload attack ('.$_FILES['uploadfile']['tmp_name'].')';
 			}
 		}
 		
