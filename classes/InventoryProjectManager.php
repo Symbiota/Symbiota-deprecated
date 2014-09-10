@@ -29,7 +29,7 @@ class InventoryProjectManager {
 				$this->projId = $proj;
 			}
 			else{
-				$sql = "SELECT p.pid FROM fmprojects p WHERE (p.projname = '".$proj."')";
+				$sql = "SELECT pid FROM fmprojects WHERE (projname = '".$proj."')";
 				$rs = $this->con->query($sql);
 				if($row = $rs->fetch_object()){
 					$this->projId = $row->pid;
@@ -41,9 +41,10 @@ class InventoryProjectManager {
 
 	public function getProjectList(){
 		$returnArr = Array();
-		$sql = "SELECT p.pid, p.projname, p.managers, p.fulldescription ".
-			"FROM fmprojects p WHERE p.ispublic = 1 ".
-			"ORDER BY p.SortSequence, p.projname";
+		$sql = 'SELECT pid, projname, managers, fulldescription '.
+			'FROM fmprojects '.
+			'WHERE ispublic = 1 '.
+			'ORDER BY projname';
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
 			$projId = $row->pid;
@@ -58,11 +59,10 @@ class InventoryProjectManager {
 	public function getProjectData(){
 		$returnArr = Array();
 		if($this->projId){
-			$sql = 'SELECT p.pid, p.projname, p.managers, p.fulldescription, p.notes, '.
-				'p.occurrencesearch, p.ispublic, p.sortsequence '.
-				'FROM fmprojects p '.
-				'WHERE (p.pid = '.$this->projId.') '.
-				'ORDER BY p.SortSequence, p.projname';
+			$sql = 'SELECT pid, projname, managers, fulldescription, notes, '.
+				'occurrencesearch, ispublic, sortsequence '.
+				'FROM fmprojects '.
+				'WHERE (pid = '.$this->projId.') ';
 			//echo $sql;
 			$rs = $this->con->query($sql);
 			if($row = $rs->fetch_object()){

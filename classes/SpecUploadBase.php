@@ -361,6 +361,7 @@ class SpecUploadBase extends SpecUpload{
 	}
 
  	public function analyzeUpload(){
+ 		return true;
  	}
 
  	public function uploadData($finalTransfer){

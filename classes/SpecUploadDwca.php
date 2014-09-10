@@ -44,28 +44,22 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 		elseif(array_key_exists("uploadfile",$_FILES)){
 			//File is delivered as a POST stream, probably from browser
-			if(is_uploaded_file($_FILES['uploadfile']['tmp_name'])){
-				if(move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath)){
-					$this->baseFolderName = $localFolder;
-				}
-				else{
-					$msg = 'unknown';
-					$err = $_FILES['uploadfile']['error'];
-					if($err == 1) $msg = 'uploaded file exceeds the upload_max_filesize directive in php.ini';
-					elseif($err == 2) $msg = 'uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
-					elseif($err == 3) $msg = 'uploaded file was only partially uploaded';
-					elseif($err == 4) $msg = 'no file was uploaded';
-					elseif($err == 5) $msg = 'unknown error 5';
-					elseif($err == 6) $msg = 'missing a temporary folder';
-					elseif($err == 7) $msg = 'failed to write file to disk';
-					elseif($err == 8) $msg = 'a PHP extension stopped the file upload';
-					$this->outputMsg('<li>ERROR uploading file (target: '.$fullPath.'): '.$msg.' </li>');
-					$this->errorStr = 'ERROR uploading file: '.$msg;
-				}
+			if(move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath)){
+				$this->baseFolderName = $localFolder;
 			}
 			else{
-				$this->outputMsg('<li>ERROR: Possible file upload attack ('.$_FILES['uploadfile']['tmp_name'].') </li>');
-				$this->errorStr = 'ERROR: Possible file upload attack ('.$_FILES['uploadfile']['tmp_name'].')';
+				$msg = 'unknown';
+				$err = $_FILES['uploadfile']['error'];
+				if($err == 1) $msg = 'uploaded file exceeds the upload_max_filesize directive in php.ini';
+				elseif($err == 2) $msg = 'uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
+				elseif($err == 3) $msg = 'uploaded file was only partially uploaded';
+				elseif($err == 4) $msg = 'no file was uploaded';
+				elseif($err == 5) $msg = 'unknown error 5';
+				elseif($err == 6) $msg = 'missing a temporary folder';
+				elseif($err == 7) $msg = 'failed to write file to disk';
+				elseif($err == 8) $msg = 'a PHP extension stopped the file upload';
+				$this->outputMsg('<li>ERROR uploading file (target: '.$fullPath.'): '.$msg.' </li>');
+				$this->errorStr = 'ERROR uploading file: '.$msg;
 			}
 		}
 		
@@ -99,7 +93,36 @@ class SpecUploadDwca extends SpecUploadBase{
 		$targetPath = $this->uploadTargetPath.$this->baseFolderName;
 		$zip->open($targetPath.'/dwca.zip');
 		$zip->extractTo($targetPath);
+		if(!file_exists($targetPath.'/meta.xml')){
+			$path = $this->locateBaseFolder($targetPath);
+			if($path) $this->baseFolderName .= '/'.$path;
+		}
 		$zip->close();
+	}
+	
+	private function locateBaseFolder($baseDir, $pathFrag = ''){
+		$retPath = '';
+		if($pathFrag && file_exists($baseDir.$pathFrag.'/meta.xml')){
+			$retPath = $pathFrag;
+		}
+		else{
+			if($handle = opendir($baseDir.$pathFrag)) {
+				while (false !== ($item = readdir($handle))) {
+					if($item && $item != '.' && $item != '..'){
+						$newPath = $pathFrag.'/'.$item;
+						if(is_dir($baseDir.$newPath)){
+							$path = $this->locateBaseFolder($baseDir, $newPath);
+							if($path){
+								$retPath = $path;
+								break; 
+							}
+						}
+					}
+				}
+			}
+			closedir($handle);
+		}
+		return $retPath;
 	}
 	
 	private function readMetaFile(){

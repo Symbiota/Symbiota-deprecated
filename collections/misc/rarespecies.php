@@ -137,12 +137,12 @@ if($editable){
 	}
 	?>
 	<h1>Rare, Threatened, Sensitive Species</h1>
-	<div style='margin-left:10px;'>The following species have a protective status within <?php echo $defaultTitle; ?>.  
-	Sensitive population numbers and a threatened status are the typical cause for this though some 
-	species that are cherished by collectors (Orchids and Cacti) or wild harvesters will also occur 
-	on this list. In some cases, whole families have a blanket protection. Specific locality 
-	information is withheld from lists and maps within the search engine for the following species.</div>
-		
+	<div style='margin-left:10px;'>
+		Species in the list below have protective status with specific locality 
+		details below county withheld. 
+		Rare, threatened, or sensitive status are the typical causes for protection though 
+		species that are cherished by collectors or wild harvesters may also appear on the list.
+	</div>
 <?php
 	if($editable){
 		?>
