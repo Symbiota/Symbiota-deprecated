@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/InventoryProjectManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -51,7 +50,7 @@ if($isEditable && $projSubmit){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Species Lists</title>
+	<title><?php echo $defaultTitle; ?>: Inventory Projects</title>
 	<link href="../css/base.css" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
@@ -169,9 +168,7 @@ if($isEditable && $projSubmit){
 		}
 	</script>
 </head>
-
 <body>
-
 	<?php
 	$displayLeftMenu = (isset($projects_indexMenu)?$projects_indexMenu:"true");
 	include($serverRoot.'/header.php');
@@ -179,7 +176,7 @@ if($isEditable && $projSubmit){
 		?>
 		<div class="navpath">
 			<?php echo $projects_indexCrumbs;?>
-			<b><?php echo $defaultTitle; ?> Project</b> 
+			<b>Inventory Projects</b> 
 		</div>
 		<?php 
 	}
@@ -211,15 +208,17 @@ if($isEditable && $projSubmit){
 		if($projArr){
 			?>
 			<h1><?php echo $projArr["projname"]; ?></h1>
-			<div style='margin:10px;'>
-				<b>Project Managers:</b> 
-				<?php echo $projArr["managers"];?>
-			</div>
-			<div style='margin:10px;'>
-				<?php echo $projArr["fulldescription"];?>
-			</div>
-			<div style='margin:10px;'>
-				<?php echo $projArr["notes"]; ?>
+			<div style='margin: 10px;'>
+				<div>
+					<b>Project Managers:</b> 
+					<?php echo $projArr["managers"];?>
+				</div>
+				<div style='margin-top:10px;'>
+					<?php echo $projArr["fulldescription"];?>
+				</div>
+				<div style='margin-top:10px;'>
+					<?php echo $projArr["notes"]; ?>
+				</div>
 			</div>
 			<?php 
 		}
@@ -478,12 +477,16 @@ if($isEditable && $projSubmit){
 		}
 	}
 	else{
-		echo "<h1>".$defaultTitle." Projects</h1>"; 
+		echo '<h1>'.$defaultTitle.' Projects</h1>'; 
 		$projectArr = $projManager->getProjectList();
 		foreach($projectArr as $pid => $projList){
-			echo "<h2><a href='index.php?proj=".$pid."'>".$projList["projname"]."</a></h2>\n";
-			if($projList["managers"]) echo "<div><b>Managers:</b> ".$projList["managers"]."</div>\n";
-			echo "<div style='margin:10px;'>".$projList["descr"]."</div>\n";
+			?>
+			<h2><a href="index.php?proj=<?php echo $pid; ?>"><?php echo $projList["projname"]; ?></a></h2>
+			<div style="margin:0px 0px 30px 15px;">
+				<div><b>Managers:</b> <?php echo ($projList["managers"]?$projList["managers"]:'Not defined'); ?></div>
+				<div style='margin-top:10px;'><?php echo $projList["descr"]; ?></div>
+			</div>
+			<?php 
 		}
 	}
 	?>

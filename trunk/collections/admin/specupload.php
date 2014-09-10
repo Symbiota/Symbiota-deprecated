@@ -5,6 +5,7 @@ include_once($serverRoot.'/classes/SpecUploadDirect.php');
 include_once($serverRoot.'/classes/SpecUploadDigir.php');
 include_once($serverRoot.'/classes/SpecUploadFile.php');
 include_once($serverRoot.'/classes/SpecUploadDwca.php');
+
 header("Content-Type: text/html; charset=".$charset);
 if(!$symbUid) header('Location: ../../profile/index.php?refurl=../collections/admin/specuploadmanagement.php?'.$_SERVER['QUERY_STRING']);
 
@@ -427,8 +428,8 @@ $duManager->loadFieldMap();
 						}
 					}
 					else{
-						if($duManager->getErrorArr()){
-							echo '<div style="font-weight:bold;">'.implode('<br/>',$duManager->getErrorArr()).'</div>';
+						if($duManager->getErrorStr()){
+							echo '<div style="font-weight:bold;">'.implode('<br/>',$duManager->getErrorStr()).'</div>';
 						}
 						else{
 							echo '<div style="font-weight:bold;">Unknown error analyzing upload</div>';
@@ -518,7 +519,7 @@ $duManager->loadFieldMap();
 				or you have tried to upload a file that is too large. 
 				You may want to breaking the upload file into smaller files or compressing the file into a zip archive (.zip extension). 
 				You may want to contact portal administrator to request assistance in uploading the file (hint to admin: increaing PHP upload limits may help,  
-				upload_max_filesize = <?php echo ini_get("upload_max_filesize").'; post_max_size = '.ini_get("post_max_size"); ?>) 
+				current upload_max_filesize = <?php echo ini_get("upload_max_filesize").'; post_max_size = '.ini_get("post_max_size"); ?>) 
 				Use the back arrows to get back to the file upload page.
 			</div>
 			<?php 
