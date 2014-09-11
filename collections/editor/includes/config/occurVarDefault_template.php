@@ -17,7 +17,6 @@
 //Uncomment to turn duplicate specimen search function on/off (on by default)
 //define('DUPESEARCH',false);
 
-//$ACTIVATEEXSICCATI = false;
 //$ACTIVATEASSOCTAXAAID = false;
 
 //FieldLabel text: uncomment variables and value to modify field labels 

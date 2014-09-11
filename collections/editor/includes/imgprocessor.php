@@ -2,14 +2,15 @@
 	<fieldset style="height:95%;background-color:white;">
 		<legend><b>Label Processing</b></legend>
 		<div style="margin-top:-10px;height:15px;">
-			<div id="imgreslg" style="float:right;border-style:outset;padding:0px 3px;margin:0px 3px;"><a href="#" onclick="changeImgRes('lg')">lg</a></div>
-			<div id="imgresmed" style="float:right;border-style:inset;padding:0px 3px;margin:0px 3px;"><a href="#" onclick="changeImgRes('med')">med</a></div>
+			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgreslg" name="resradio" type="radio" onchange="changeImgRes('lg')" />High Res.</div>
+			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgresmed" name="resradio"  type="radio" checked onchange="changeImgRes('med')" />Med Res.</div>
 		</div>
 		<div id="labelprocessingdiv" style="clear:both;">
 			<?php
 			$imgCnt = 1;
-			$activeImgArr = $imgArr['web'];
-			foreach($activeImgArr as $imgId => $iUrl){
+			foreach($imgArr as $imgCnt => $iArr){
+				$iUrl = $iArr['web'];
+				$imgId = $iArr['imgid'];
 				?>
 				<div id="labeldiv-<?php echo $imgCnt; ?>" style="display:<?php echo ($imgCnt==1?'block':'none'); ?>;">
 					<div>
@@ -30,8 +31,8 @@
 						<div style="float:right;margin-right:20px;font-weight:bold;">
 							Image <?php echo $imgCnt; ?> of
 							<?php
-							echo count($activeImgArr);
-							if(count($activeImgArr)>1){
+							echo count($imgArr);
+							if(count($imgArr)>1){
 								echo '<a href="#" onclick="return nextLabelProcessingImage('.($imgCnt+1).');">=&gt;&gt;</a>';
 							}
 							?>

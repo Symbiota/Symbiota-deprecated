@@ -142,7 +142,9 @@ $(document).ready(function() {
 	
 	//Remember image popout status 
 	var imgTd = getCookie("symbimgtd");
-	if(imgTd == "open" || csMode == 1) toggleImageTdOn();
+	if(imgTd != "close") toggleImageTdOn();
+	//if(imgTd == "open" || csMode == 1) toggleImageTdOn();
+	initImgRes();
 	//Remember Auto Processing Status
 	var apstatus = getCookie("autopstatus");
 	if(getCookie("autopstatus")) document.fullform.autoprocessingstatus.value = apstatus;
@@ -1069,10 +1071,11 @@ function verifyImgDelForm(f){
 
 //Misc
 function dwcDoc(dcTag){
-    dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");
-    if(dwcWindow.opener == null) dwcWindow.opener = self;
-    dwcWindow.focus();
-    return false;
+	dwcWindow=open("http://symbiota.org/docs/symbiota-occurrence-data-fields-2/#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");
+	//dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");
+	if(dwcWindow.opener == null) dwcWindow.opener = self;
+	dwcWindow.focus();
+	return false;
 }
 
 function openOccurrenceSearch(target) {
