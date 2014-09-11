@@ -1,6 +1,3 @@
-var imageCnt = 1;
-var ocrFragCnt = 1;
-
 function toggleImageTdOn(){
 	var imgSpan = document.getElementById("imgProcOnSpan");
 	if(imgSpan){
@@ -53,8 +50,51 @@ function initImageTool(imgId){
 	}
 }
 
+function initImgRes(){
+	var imgObj = document.getElementById("activeimg-"+activeImgIndex);
+	if(imgLgArr[activeImgIndex]){
+		var imgRes = getCookie("symbimgres");
+		if(imgRes == 'lg'){
+			changeImgRes('lg');
+		}
+	}
+	else{
+		imgObj.src = imgArr[activeImgIndex];
+		document.getElementById("imgresmed").checked = true;
+		var imgResLgRadio = document.getElementById("imgreslg");
+		imgResLgRadio.disabled = true;
+		imgResLgRadio.title = "Large resolution image not available";
+	}
+	if(imgArr[activeImgIndex]){
+		//Do nothing
+	}
+	else{
+		if(imgLgArr[activeImgIndex]){
+			imgObj.src = imgLgArr[activeImgIndex];
+			document.getElementById("imgreslg").checked = true;
+			var imgResMedRadio = document.getElementById("imgresmed");
+			imgResMedRadio.disabled = true;
+			imgResMedRadio.title = "Medium resolution image not available";
+		}
+	}
+}
+
 function changeImgRes(resType){
-	
+	var imgObj = document.getElementById("activeimg-"+activeImgIndex);
+	if(resType == 'lg'){
+        document.cookie = "symbimgres=lg";
+    	if(imgLgArr[activeImgIndex]){
+    		imgObj.src = imgLgArr[activeImgIndex];
+    		document.getElementById("imgreslg").checked = true;
+    	}
+	}
+	else{
+        document.cookie = "symbimgres=med";
+    	if(imgArr[activeImgIndex]){
+    		imgObj.src = imgArr[activeImgIndex];
+    		document.getElementById("imgresmed").checked = true;
+    	}
+	}
 }
 
 function ocrImage(ocrButton,imgidVar,imgCnt){
@@ -181,7 +221,7 @@ function nextLabelProcessingImage(imgCnt){
 	imgObj.style.display = "block";
 	
 	initImageTool("activeimg-"+imgCnt);
-	imageCnt = imgCnt;
+	activeImgIndex = imgCnt;
 	
 	return false;
 }
@@ -191,6 +231,6 @@ function nextRawText(imgCnt,fragCnt){
 	var fragObj = document.getElementById("tfdiv-"+imgCnt+"-"+fragCnt);
 	if(!fragObj) fragObj = document.getElementById("tfdiv-"+imgCnt+"-1");
 	fragObj.style.display = "block";
-	ocrFragCnt = fragCnt;
+	ocrFragIndex = fragCnt;
 	return false;
 }

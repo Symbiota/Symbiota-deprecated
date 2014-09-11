@@ -3,8 +3,8 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+//header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+//header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
 $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
@@ -81,7 +81,7 @@ if($symbUid){
 			include('includes/config/crowdSourceVar.php');
 		}
 	}
-	if(isset($ACTIVATEEXSICCATI) && $ACTIVATEEXSICCATI) $occManager->setExsiccatiMode(true);
+	if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI) $occManager->setExsiccatiMode(true);
 
 	if($isAdmin || ($collId && array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 		$isEditor = 1;
@@ -329,22 +329,25 @@ if($symbUid){
 	$specImgArr = $occManager->getImageMap();
 	if($specImgArr){
 		$imgUrlPrefix = (isset($imageDomain)?$imageDomain:'');
+		$imgCnt = 1;
 		foreach($specImgArr as $imgId => $i2){
 			$iUrl = $i2['url'];
 			if($imgUrlPrefix && substr($iUrl,0,4) != 'http') $iUrl = $imgUrlPrefix.$iUrl;
-			$imgArr['web'][$imgId] = $iUrl;
+			$imgArr[$imgCnt]['imgid'] = $imgId;
+			$imgArr[$imgCnt]['web'] = $iUrl;
 			if($i2['origurl']){
 				$lgUrl = $i2['origurl'];
 				if($imgUrlPrefix && substr($lgUrl,0,4) != 'http') $lgUrl = $imgUrlPrefix.$lgUrl;
-				$imgArr['lg'][$imgId] = $lgUrl;
+				$imgArr[$imgCnt]['lg'] = $lgUrl;
 			}
+			$imgCnt++;
 		}
 		$fragArr = $occManager->getRawTextFragments();
 	}
 
 	$isLocked = false;
 	if($occId) $isLocked = $occManager->getLock();
-
+	
 }
 else{
 	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrenceeditor.php?'.$_SERVER['QUERY_STRING']);
@@ -386,19 +389,28 @@ else{
 		var csMode = "<?php echo $crowdSourceMode; ?>";
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
 		var tabTarget = <?php echo $tabTarget; ?>;
+		var activeImgIndex = 1;
+		var ocrFragIndex = 1;
 		<?php
 		if(isset($SALIX_PATH) && $SALIX_PATH){
-			echo 'var salixPath = "'.$SALIX_PATH.'";';
-			echo 'var csDefault = "'.$charset.'";';
-		}
-		if($imgArr){
-			echo 'var activeImageArr = new Array("'.implode('","',$imgArr['web']).'");'."\n";
-			if(isset($imgArr['lg'])) echo 'var activeImageLgArr = new Array("'.implode('","',$imgArr['lg']).'");'."\n";
-			echo 'var activeImageKeys = new Array("'.implode('","',array_keys($imgArr['web'])).'");'."\n";
-			echo 'var activeImageIndex = 0;';
+			?>
+			var salixPath = "<?php echo $SALIX_PATH; ?>";
+			var csDefault = "<?php echo $charset; ?>";
+			<?php 
 		}
 		?>
-        function requestImage(){
+		var imgArr = [];
+		var imgLgArr = [];
+		<?php
+		if($imgArr){
+			foreach($imgArr as $iCnt => $iArr){
+				echo 'imgArr['.$iCnt.'] = "'.$iArr['web'].'";'."\n";
+				if(isset($iArr['lg'])) echo 'imgLgArr['.$iCnt.'] = "'.$iArr['lg'].'";'."\n";
+			}
+		}
+		?>
+
+		function requestImage(){
             $.ajax({
                 type: "POST",
                 url: 'rpc/makeactionrequest.php',
@@ -411,9 +423,9 @@ else{
 
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=140905"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=140911"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=140905"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=140905"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=140911"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=140905"></script>
 </head>
 <body>
@@ -717,7 +729,7 @@ else{
 												</div>
 											</div>
 											<?php
-											if(isset($ACTIVATEEXSICCATI) && $ACTIVATEEXSICCATI){
+											if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI){
 												?>
 												<div id="exsDiv">
 													<div id="ometidDiv">

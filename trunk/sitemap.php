@@ -397,7 +397,7 @@ $smManager = new SiteMapManager();
 					</ul>
 
 					<?php 
-					if(isset($activateExsiccati) && $activateExsiccati){
+					if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI){
 						?>
 						<h3>Exsiccati</h3>
 						<div style="margin:10px;">

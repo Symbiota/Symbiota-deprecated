@@ -45,7 +45,7 @@ $RECAPTCHA_PUBLIC_KEY = '';
 $RECAPTCHA_PRIVATE_KEY = '';
 $dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $displayCommonNames = 1;
-$activateExsiccati = 0;
+$ACTIVATE_EXSICCATI = 1;
 
 $rightsTerms = array(
 	'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
