@@ -43,6 +43,7 @@ $smManager = new SiteMapManager();
 			<ul>
 				<li><a href="collections/index.php">Search Engine</a> - search Collections</li>
 				<li><a href="collections/misc/collprofiles.php">Collections</a> - list of collection participating in project</li>
+				<li><a href="collections/exsiccati/index.php">Exsiccati Index</a></li>
 				<li><a href="collections/datasets/datapublisher.php">Darwin Core Archives</a> - published datasets of selected collections</li>
 				<?php 
 				if(file_exists('webservices/dwc/rss.xml')){

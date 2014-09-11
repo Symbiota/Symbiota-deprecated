@@ -422,20 +422,6 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 							} 
 							?>
 						</div>
-						<?php 
-						if(isset($occArr['exs'])){
-							?>
-							<div style="clear:both;">
-								<b>Exsiccati series:</b> 
-								<?php 
-								echo '<a href="../exsiccati/index.php?omenid='.$occArr['exs']['omenid'].'">';
-								echo $occArr['exs']['title'].'&nbsp;#'.$occArr['exs']['exsnumber'];
-								echo '</a>';
-								?>
-							</div>
-							<?php 
-						}
-						?>
 						<div style="clear:both;">
 							<b>Collector:</b> 
 							<?php 
@@ -617,6 +603,18 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 							</div>
 							<?php 
 						}
+						if(isset($occArr['exs'])){
+							?>
+							<div style="clear:both;">
+								<b>Exsiccati series:</b> 
+								<?php 
+								echo '<a href="../exsiccati/index.php?omenid='.$occArr['exs']['omenid'].'">';
+								echo $occArr['exs']['title'].'&nbsp;#'.$occArr['exs']['exsnumber'];
+								echo '</a>';
+								?>
+							</div>
+							<?php 
+						}
 						?>
 						<div style="clear:both;padding:10px;">
 							<?php 
@@ -629,10 +627,10 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 									foreach($iArr as $imgId => $imgArr){
 										?>
 										<div style='float:left;text-align:center;padding:5px;'>
-											<a href='<?php echo $imgArr['url']; ?>'>
+											<a href='<?php echo $imgArr['url']; ?>' target="_blank">
 												<img border=1 width='150' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
 											</a>
-											<?php if($imgArr['lgurl']) echo '<br/><a href="'.$imgArr['lgurl'].'">Large Version</a>'; ?>
+											<?php if($imgArr['lgurl']) echo '<br/><a href="'.$imgArr['lgurl'].'" target="_blank">Large Version</a>'; ?>
 										</div>
 										<?php 
 									}
