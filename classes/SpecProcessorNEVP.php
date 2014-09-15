@@ -444,6 +444,11 @@ class OCCURRENCE {
                         }
                      }
                   }
+                  // Workaround to handle new case of only a JPEG being provided by some insitutions
+                  if ($sourceUrl==null && $imgLgUrl!=null) { 
+                      // a jpeg was provided, but not a DNG, use the large version of the jpeg as the source.
+                      $sourceUrl = $imgLgUrl;
+                  }
                   if ($sourceUrl!=null && $imgWebUrl!=null) { 
                      // found something to save.
                      $result->imagecount++;
