@@ -266,8 +266,8 @@ class SpecUploadDwca extends SpecUploadBase{
 				if(isset($this->metaArr['occur']['fieldsEnclosedBy']) && $this->metaArr['occur']['fieldsEnclosedBy']){
 					$this->enclosure = $this->metaArr['occur']['fieldsEnclosedBy'];
 				}
-				if(isset($this->metaArr['occur']['encloding']) && $this->metaArr['occur']['encloding']){
-					$this->encoding = strtolower(str_replace('-','',$this->metaArr['occur']['encloding']));
+				if(isset($this->metaArr['occur']['encoding']) && $this->metaArr['occur']['encoding']){
+					$this->encoding = strtolower(str_replace('-','',$this->metaArr['occur']['encoding']));
 				}
 
 				$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['occur']['name'];
@@ -326,8 +326,8 @@ class SpecUploadDwca extends SpecUploadBase{
 						if(isset($this->metaArr['ident']['fieldsEnclosedBy']) && $this->metaArr['ident']['fieldsEnclosedBy']){
 							$this->enclosure = $this->metaArr['ident']['fieldsEnclosedBy'];
 						}
-						if(isset($this->metaArr['ident']['encloding']) && $this->metaArr['ident']['encloding']){
-							$this->encoding = strtolower(str_replace('-','',$this->metaArr['ident']['encloding']));
+						if(isset($this->metaArr['ident']['encoding']) && $this->metaArr['ident']['encoding']){
+							$this->encoding = strtolower(str_replace('-','',$this->metaArr['ident']['encoding']));
 						}
 		
 						$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['ident']['name'];

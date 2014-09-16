@@ -1571,6 +1571,9 @@ class SpecUploadBase extends SpecUpload{
 						if($size && strlen($valueStr) > $size){
 							$valueStr = substr($valueStr,0,$size);
 						}
+						if(substr($valueStr,-1) == "\\"){
+							$valueStr = rtrim($valueStr,"\\");
+						}
 						if($valueStr){
 							$sqlValues .= ',"'.$valueStr.'"';
 						}
