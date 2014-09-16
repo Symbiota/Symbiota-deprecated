@@ -23,7 +23,11 @@ class SpecUploadDwca extends SpecUploadBase{
 		$fullPath = $this->uploadTargetPath.$localFolder.'/dwca.zip';
 		
 		if($this->path){
-			//DWCA path is stored in the upload profile definition 
+			//DWCA path is stored in the upload profile definition
+			//If they incorrectly mapped to the IPT instance, adjust to point to the Archive file 
+			if(strpos($this->path,'/resource.do')){
+				$this->path = str_replace('/resource.do','/archive.do',$this->path);
+			} 
 			if(copy($this->path,$fullPath)){
 				$this->baseFolderName = $localFolder;
 			}
@@ -64,7 +68,9 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 		
 		if($this->baseFolderName){
-			$this->unpackArchive();
+			if(!$this->unpackArchive()){
+				$this->baseFolderName = '';
+			}
 		}
 		return $this->baseFolderName;
 	}
@@ -89,15 +95,25 @@ class SpecUploadDwca extends SpecUploadBase{
 
 	private function unpackArchive(){
 		//Extract archive
+		$status = true;
 		$zip = new ZipArchive;
 		$targetPath = $this->uploadTargetPath.$this->baseFolderName;
 		$zip->open($targetPath.'/dwca.zip');
-		$zip->extractTo($targetPath);
-		if(!file_exists($targetPath.'/meta.xml')){
-			$path = $this->locateBaseFolder($targetPath);
-			if($path) $this->baseFolderName .= '/'.$path;
+		if($zip->extractTo($targetPath)){
+			if(!file_exists($targetPath.'/meta.xml')){
+				$path = $this->locateBaseFolder($targetPath);
+				if($path) $this->baseFolderName .= '/'.$path;
+			}
+		}
+		else{
+			$err = $zip->getStatusString();
+			if(!$err) $err = 'target path is likely not a valid zip file';
+			$this->outputMsg('<li>ERROR unpacking archive file: '.$err.'</li>');
+			$this->errorStr = 'ERROR unpacking archive file: '.$err;
+			$status = false;
 		}
 		$zip->close();
+		return $status;
 	}
 	
 	private function locateBaseFolder($baseDir, $pathFrag = ''){
