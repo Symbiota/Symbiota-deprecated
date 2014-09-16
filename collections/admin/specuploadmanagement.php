@@ -22,6 +22,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 if($isEditor){
 	if($action == "Save Edits"){
 		$statusStr = $duManager->editUploadProfile();
+		$action = "";
 	}
 	elseif($action == "Create Profile"){
 		$statusStr = $duManager->addUploadProfile();
@@ -306,18 +307,6 @@ $duManager->readUploadParameters();
 								?>
 							</div>
 						</form>
-						<?php 
-						if($uspid){
-							?>
-							<form name="inituploadform" action="specupload.php" method="post">
-								<input type="submit" name="action" value="Initialize Upload..." />
-								<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
-								<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-								<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-							</form>
-							<?php
-						}
-						?>
 					</fieldset>
 				</div>
 				<?php 
