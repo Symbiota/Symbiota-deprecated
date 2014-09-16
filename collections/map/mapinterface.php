@@ -1234,7 +1234,7 @@ if($coordArr && !is_numeric($coordArr)){
 												<option id='familysciname' value='1' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "1") echo "SELECTED"; ?> >Family or Scientific Name</option>
 												<option id='family' value='2' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "2") echo "SELECTED"; ?> >Family only</option>
 												<option id='sciname' value='3' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
-												<option id='classorder' value='4' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "4") echo "SELECTED"; ?> >Class / Order</option>
+												<option id='highertaxon' value='4' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "4") echo "SELECTED"; ?> >Higher Taxonomy</option>
 												<option id='commonname' value='5' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "5") echo "SELECTED"; ?> >Common Name</option>
 											</select><br />
 											Taxa: <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="<?php if(array_key_exists("taxa",$previousCriteria)) echo $previousCriteria["taxa"]; ?>" title="Separate multiple taxa w/ commas" />
