@@ -166,6 +166,7 @@ class ImageShared{
 
 	public function parseUrl($url){
 		$status = false;
+		$url = str_replace(' ','%20',$url);
 		if($this->uriExists($url)){
 			if($GLOBALS['imageDomain'] && substr($url,0,1) == '/'){
 				$url = $GLOBALS['imageDomain'].$url;

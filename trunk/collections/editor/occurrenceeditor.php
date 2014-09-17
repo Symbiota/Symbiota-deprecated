@@ -388,7 +388,7 @@ else{
 		var collId = "<?php echo $collId; ?>";
 		var csMode = "<?php echo $crowdSourceMode; ?>";
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
-		var tabTarget = <?php echo $tabTarget; ?>;
+		var tabTarget = <?php echo (is_numeric($tabTarget)?$tabTarget:'0'); ?>;
 		var activeImgIndex = 1;
 		var ocrFragIndex = 1;
 		<?php

@@ -104,9 +104,6 @@ class ImageCleaner{
 						if($this->verbose) $statusStr = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
 					}
 				}
-				else{
-					if($this->verbose) $statusStr = 'ERROR: unable to create thumbnail image';
-				}
 				$imgManager->reset();
 			}
 			else{
