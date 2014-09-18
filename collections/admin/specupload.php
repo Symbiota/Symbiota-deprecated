@@ -81,7 +81,11 @@ if(array_key_exists("sf",$_POST)){
  		$sourceFields = $_POST["sf"];
  		$fieldMap = Array();
 		for($x = 0;$x<count($targetFields);$x++){
-			if($targetFields[$x]) $fieldMap[$targetFields[$x]]["field"] = $sourceFields[$x];
+			if($targetFields[$x]){
+				$tField = $targetFields[$x];
+				if($tField == 'unmapped') $tField .= '-'.$x;
+				$fieldMap[$tField]["field"] = $sourceFields[$x];
+			}
 		}
 		//Set Source PK
 		if($dbpk) $fieldMap["dbpk"]["field"] = $dbpk;
