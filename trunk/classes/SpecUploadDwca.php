@@ -140,7 +140,7 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 		return $retPath;
 	}
-	
+
 	private function readMetaFile(){
 		//Read meta.xml file
 		if(!$this->metaArr){
@@ -186,6 +186,32 @@ class SpecUploadDwca extends SpecUploadBase{
 							}
 							//Set id
 							$this->metaArr['occur']['fields'][0] = 'id';
+							//Test meta.xml field list against occurrence file
+							if($this->metaArr['occur']['ignoreHeaderLines'] == 1){
+								//Set delimiter  
+								if($this->metaArr['occur']['fieldsTerminatedBy']){
+									if($this->metaArr['occur']['fieldsTerminatedBy'] == '\t'){
+										$this->delimiter = "\t";
+									}
+									else{
+										$this->delimiter = $this->metaArr['occur']['fieldsTerminatedBy'];
+									}
+									//Read occurrence header and compare
+									$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['occur']['name'];
+			 						$fh = fopen($fullPath,'rb') or die("Can't open occurrence file");
+									$headerArr = $this->getRecordArr($fh);
+									foreach($headerArr as $k => $v){
+										if(strtolower($v) != strtolower($this->metaArr['occur']['fields'][$k])){
+											$msg = '<div style="margin-left:25px;">';
+											$msg .= 'WARNING: meta.xml field order out of sync w/ '.$this->metaArr['occur']['name'].'; remapping: field #'.($k+1).' => '.$v;
+											$msg .= '</div>';
+											$this->outputMsg($msg);
+											$this->errorStr = $msg;
+											$this->metaArr['occur']['fields'][$k] = $v;
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -287,11 +313,11 @@ class SpecUploadDwca extends SpecUploadBase{
 				}
 
 				$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['occur']['name'];
-		 		$fh = fopen($fullPath,'rb') or die("Can't open occurrence file");
+		 		$fh = fopen($fullPath,'r') or die("Can't open occurrence file");
 				
 		 		if($this->metaArr['occur']['ignoreHeaderLines'] == '1'){
 		 			//Advance one record to go past header
-		 			$this->getRecordArr($fh);
+					$this->getRecordArr($fh);
 		 		}
 				
 				//Grab data
@@ -306,7 +332,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				while($recordArr = $this->getRecordArr($fh)){
 					$recMap = Array();
 					foreach($this->fieldMap as $symbField => $sMap){
-						if($symbField != 'unmapped'){
+						if(substr($symbField,0,8) != 'unmapped'){
 							$indexArr = array_keys($this->sourceArr,$sMap['field']);
 							$index = array_shift($indexArr);
 							if(array_key_exists($index,$recordArr)){
@@ -326,60 +352,72 @@ class SpecUploadDwca extends SpecUploadBase{
 				
 				//Upload identification history
 				if($this->includeIdentificationHistory){
-					if(isset($this->metaArr['ident']['fields'])){
-						$this->outputMsg('<li style="font-weight:bold;">Starting to upload identification history records</li>');
-						if(isset($this->metaArr['ident']['fieldsTerminatedBy']) && $this->metaArr['ident']['fieldsTerminatedBy']){
-							if($this->metaArr['ident']['fieldsTerminatedBy'] == '\t'){
-								$this->delimiter = "\t";
-							}
-							else{
-								$this->delimiter = $this->metaArr['ident']['fieldsTerminatedBy'];
-							}
-						}
-						else{
-							$this->delimiter = '';
-						}
-						if(isset($this->metaArr['ident']['fieldsEnclosedBy']) && $this->metaArr['ident']['fieldsEnclosedBy']){
-							$this->enclosure = $this->metaArr['ident']['fieldsEnclosedBy'];
-						}
-						if(isset($this->metaArr['ident']['encoding']) && $this->metaArr['ident']['encoding']){
-							$this->encoding = strtolower(str_replace('-','',$this->metaArr['ident']['encoding']));
-						}
-		
-						$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['ident']['name'];
-				 		$fh = fopen($fullPath,'rb') or die("Can't open identification history file");
-						
-				 		if($this->metaArr['ident']['ignoreHeaderLines'] == '1'){
-				 			//Advance one record to go past header
-				 			$this->getRecordArr($fh);
-				 		}
-						
-						//Grab data
-						$cset = strtolower(str_replace('-','',$charset)); 
-						//Set identification source array
-						$this->identSourceArr = array();
-						foreach($this->metaArr['ident']['fields'] as $k => $v){
-							$this->identSourceArr[$k] = strtolower($v);
-						}
-						while($recordArr = $this->getRecordArr($fh)){
-							$recMap = Array();
-							foreach($this->identFieldMap as $symbField => $iMap){
-								if($symbField != 'unmapped'){
-									$indexArr = array_keys($this->identSourceArr,$iMap['field']);
-									$index = array_shift($indexArr);
-									if(array_key_exists($index,$recordArr)){
-										$valueStr = $recordArr[$index];
-										if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
-										$recMap[$symbField] = $valueStr;
-									}
+					$fullPathIdent = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['ident']['name'];
+					if(file_exists($fullPathIdent)){
+						if(isset($this->metaArr['ident']['fields'])){
+							$this->outputMsg('<li style="font-weight:bold;">Starting to upload identification history records</li>');
+							if(isset($this->metaArr['ident']['fieldsTerminatedBy']) && $this->metaArr['ident']['fieldsTerminatedBy']){
+								if($this->metaArr['ident']['fieldsTerminatedBy'] == '\t'){
+									$this->delimiter = "\t";
+								}
+								else{
+									$this->delimiter = $this->metaArr['ident']['fieldsTerminatedBy'];
 								}
 							}
-							$this->loadIdentificationRecord($recMap);
-							unset($recMap);
+							else{
+								$this->delimiter = '';
+							}
+							if(isset($this->metaArr['ident']['fieldsEnclosedBy']) && $this->metaArr['ident']['fieldsEnclosedBy']){
+								$this->enclosure = $this->metaArr['ident']['fieldsEnclosedBy'];
+							}
+							if(isset($this->metaArr['ident']['encoding']) && $this->metaArr['ident']['encoding']){
+								$this->encoding = strtolower(str_replace('-','',$this->metaArr['ident']['encoding']));
+							}
+	
+					 		$fh = fopen($fullPathIdent,'r') or die("Can't open identification history file");
+							
+					 		if($this->metaArr['ident']['ignoreHeaderLines'] == '1'){
+					 			//Advance one record to go past header
+					 			$this->getRecordArr($fh);
+					 		}
+							
+							//Grab data
+							$cset = strtolower(str_replace('-','',$charset)); 
+							//Set identification source array
+							$this->identSourceArr = array();
+							foreach($this->metaArr['ident']['fields'] as $k => $v){
+								$this->identSourceArr[$k] = strtolower($v);
+							}
+							while($recordArr = $this->getRecordArr($fh)){
+								$recMap = Array();
+								foreach($this->identFieldMap as $symbField => $iMap){
+									if(substr($symbField,0,8) != 'unmapped'){
+										$indexArr = array_keys($this->identSourceArr,$iMap['field']);
+										$index = array_shift($indexArr);
+										if(array_key_exists($index,$recordArr)){
+											$valueStr = $recordArr[$index];
+											if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
+											$recMap[$symbField] = $valueStr;
+										}
+									}
+								}
+								$this->loadIdentificationRecord($recMap);
+								unset($recMap);
+							}
+							fclose($fh);
+							
+							$this->outputMsg('<li style="font-weight:bold;">Identification history upload complete ('.$this->identTransferCount.' records)!</li>');
 						}
-						fclose($fh);
-						
-						$this->outputMsg('<li style="font-weight:bold;">Identification history upload complete ('.$this->identTransferCount.' records)!</li>');
+						else{
+							$errMsg = 'ERROR: field not defined within identification history file ('.$fullPathIdent.')';
+							$this->outputMsg($errMsg);
+							$this->errorStr = $errMsg;
+						}
+					}
+					else{
+						$errMsg = 'ERROR: unable to locate identification history file within archive ';
+						$this->outputMsg($errMsg);
+						$this->errorStr = $errMsg;
 					}
 				}
 				
@@ -409,7 +447,7 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 		return true;
 	}
-	
+
 	private function getRecordArr($fHandler){
 		$recordArr = Array();
 		if($this->delimiter){

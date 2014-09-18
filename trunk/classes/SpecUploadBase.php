@@ -258,7 +258,7 @@ class SpecUploadBase extends SpecUpload{
 			echo "<td>\n";
 			echo "<select name='".$prefix."tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
 			echo "<option value=''>Select Target Field</option>\n";
-			echo "<option value='unmapped'".(isset($sourceSymbArr[$fieldName]) && $sourceSymbArr[$fieldName]=='unmapped'?"SELECTED":"").">Leave Field Unmapped</option>\n";
+			echo "<option value='unmapped'".(isset($sourceSymbArr[$fieldName]) && substr($sourceSymbArr[$fieldName],0,8)=='unmapped'?"SELECTED":"").">Leave Field Unmapped</option>\n";
 			echo "<option value=''>-------------------------</option>\n";
 			if(array_key_exists($fieldName,$sourceSymbArr)){
 				//Source Field is mapped to Symbiota Field
@@ -1494,7 +1494,7 @@ class SpecUploadBase extends SpecUpload{
 		$sqlFields = '';
 		$sqlValues = '';
 		foreach($recMap as $symbField => $valueStr){
-			if($symbField != 'unmapped'){
+			if(substr($symbField,0,8) != 'unmapped'){
 				$sqlFields .= ','.$symbField;
 				$valueStr = $this->encodeString($valueStr);
 				$valueStr = $this->cleanInStr($valueStr);
