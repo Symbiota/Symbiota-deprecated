@@ -46,7 +46,7 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 	}
 
 	private function isFontinalaceaeExsiccataeLabel($s) {
-		$pat = "/.*F[O0Q]NT[1Il!|]NA[1Il!|]A[CGOQ]EAE EXS[1Il!|][CGOQ]{2}AT.*/is";
+		$pat = "/.*F[O0Q]NT[1Il!|]N ?A[1Il!|]A[CGOQ]EAE EXS[1Il!|][CGOQ]{2}AT.*/is";
 		if(preg_match($pat, $s)) return true;
 		else return false;
 	}
@@ -55,7 +55,7 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$pattern =
 			array
 			(
-				"/.?F[O0Q]NT[1Il!|]NA[1Il!|]A[CGOQ]EAE EXS[1Il!|][CGOQ]{2}AT.{0,3}/i",
+				"/.?F[O0Q]NT[1Il!|]N ?A[1Il!|]A[CGOQ]EAE EXS[1Il!|][CGOQ]{2}AT.{0,3}/i",
 				"/Ed[1Il!|]t[ce]d b[yv] Bru[ce]{2} A[1Il!|]{2}[ce]n/i",
 				"/D[1Il!|]str[1Il!|]but[ce]d b[yv] M[1Il!|][s5]{2}our[1Il!|] B[o0]tan[1Il!|]ca[1Il!|] [CGOQ]ard[ce]n/i"
 			);
@@ -70,8 +70,8 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 	}
 
 	private function isFryeMossExsiccatiLabel($s) {
-		$pat = "/.*Frye. M.[S5$]{2} Exs[1Il!|][CG]{2}at[1Il!|].*/is";
-		if(preg_match($pat, $s)) return true;
+		if(preg_match("/.*Fr[yv]e. M.[S5$]{2} Exs[1Il!|][CG]{2}at[1Il!|].*/is", $s)) return true;
+		if(preg_match("/.*ye. M[O0][S5]{2} EX[S5]I[CG]{2}AT[1Il!|].*/is", $s)) return true;
 		else return false;
 	}
 
@@ -79,19 +79,16 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$pattern =
 			array
 			(
-				"/.?Frye. M.[S5$]{2} Exs[1Il!|][CG]{2}at[1Il!|]/i"
+				"/.?Fr[yv]e. M.[S5$]{2} Exs[1Il!|][CG]{2}at[1Il!|].?/i",
+				"/[^\n]{1,5}ye. MO[S5]{2} EX[S5]I[CG]{2}AT[1Il!|].?/i"
 			);
-		$replacement =
-			array
-			(
-				""
-			);
+		$replacement = "";
 		return $this->doGenericLabel(str_replace("\n\n", "\n", trim(preg_replace($pattern, $replacement, $s, -1))), "109");
 	}
 
 	private function isHepaticaeEuropeaeExsiccatiaeLabel($s) {
 		if(preg_match("/.*H[ce]patica[ce] [ce]ur[o0]pa[ce]a[ce] [ce]xsi[ce]{2}ata?.*/is", $s)) return true;
-		else if(preg_match("/[S5][ce]hiffn[ce]r. H[ce]pat[1Il!|]ca[ce] [ce]ur[o0]pa[ce]a[ce] [ce].*/is", $s)) return true;
+		else if(preg_match("/[S5][ce]hiffn[ce]r. H[ce]pat[1Il!|]ca[ce] [ce][un]r[o0]pa[ce]a[ce] [ce].*/is", $s)) return true;
 		else return false;
 	}
 
@@ -99,19 +96,21 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$pattern =
 			array
 			(
-				"/(?:[VW][.,] )?[S5][ce]hiffn[ce]r. H[ce]patica[ce] [ce]ur[o0]pa[ce]a[ce] [ce]xsi[ce]{2}ata?.?/i",
+				"/.*H[ce]patica[ce] [ce]ur[o0]pa[ce]a[ce] [ce]xsi[ce]{2}ata?.*/i",
+				"/(?:[VW][.,] )?[S5][ce]hiffn[ce]r. H[ce]patica[ce] [ce][un]r[o0]pa[ce]a[ce] [ce]xsi[ce]{2}ata?.?/i"
 			);
 		$replacement =
 			array
 			(
+				"",
 				""
 			);
 		return $this->doGenericLabel(str_replace("\n\n", "\n", trim(preg_replace($pattern, $replacement, $s, -1))), "64");
 	}
 
 	private function isBryophytaTerraNovLabradorLabel($s) {
-		if(preg_match("/.*BRY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TERRAE.*Bra[s5]{2}ard.*/is", $s)) return true;
-		else if(preg_match("/.*A EX[S5][1Il!|][CG]{2}ATA TERRAE-NOVAE.{1,6}LABRAD[0O]R[1Il!|][CG]AE Ed[1Il!|]t[ce]d b[yv] [CG]uy R. Bra[s5]{2}ard.*/is", $s)) return true;
+		if(preg_match("/.*[B8R]RY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TE ?[KRP].?[RP]AE.*Bra[s5]{2}ard.*/is", $s)) return true;
+		else if(preg_match("/.*A EX[S5][1Il!|][CG]{2}ATA TER.?RAE-N[0O]VAE.{1,6}LABRAD[0O]R[1Il!|][CG]AE Ed[1Il!|]t[ce]d b[yv] [CG]uy R. Bra[s5]{2}ard.*/is", $s)) return true;
 		else return false;
 	}
 
@@ -119,12 +118,12 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$s = trim(preg_replace
 		(
 			array(
-				"/BRY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TERRAE.+Bra[s5]{2}ard/i",
-				"/BRY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TERRAE-NOVAE.{1,6}LABRAD[0O]R[1Il!|][CG]AE\\sEd[1Il!|]t[ce]d b[yv] Guy R. Bra[s5]{2}ard/is",
-				"/BRY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TERRAE-NOVAE.{1,6}LABRAD[0O]R[1Il!|][CG]AE/i",
+				"/[B8R]RY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TE ?[KRP].?[RP]AE.+Bra[s5]{2}ard/i",
+				"/[B8R]RY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TE[KRP].?[RP]AE-N[0O]VAE.{1,6}LABRAD[0O]R[1Il!|][CG]AE\\sEd[1Il!|]t[ce]d b[yv] Guy R. Bra[s5]{2}ard/is",
+				"/[B8R]RY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TER.?[RP]AE-N[0O]VAE.{1,6}LABRAD[0O]R[1Il!|][CG]AE/i",
 				"/Ed[1Il!|]t[ce]d b[yv] Guy R. Bra[s5]{2}ard/i",
 				"/\\bCanada[,.] (Newf[0o]und[1Il!|]and|Labrad[0o]r)[:;]/i",
-				"/Distributed by Memorial University of Newfoundland/i",
+				"/Distributed b[yv] Memorial University of Newfoundland/i",
 				"/\\n{2,}/"
 			),
 			array(
@@ -268,10 +267,10 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 	}
 
 	private function isMacounCanadianMossesLabel($s) {
-		if(preg_match("/.*[CG]anad[1Il!|]an M[0O][S5]{2}e[S5].*Mac[0O]un.*/is", $s)) return true;
-		if(preg_match("/.*Ma[ce][0O]un[:;] Can. M[0O][S5]{2}e[S5].*/is", $s)) return true;
-		return false;
-	}
+			if(preg_match("/.*[CG]anad[1Il!|]an M[0O][S5]{2}e[S5].*Mac[0O]un.*/is", $s)) return true;
+			if(preg_match("/.*Ma[ce][0O]un[:;] Can. M[0O][S5]{2}e[S5].*/is", $s)) return true;
+			return false;
+		}
 
 	private function doMacounCanadianMossesLabel($s) {
 		$s = trim(preg_replace
@@ -291,12 +290,12 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 				"\n"
 			),
 			$s
-		));
+		));//echo "\nline 4941, s:\n".$s."\n";
 		return $this->doGenericLabel($s, "351", array('country' => "Canada", 'recordedBy' => "John Macoun", 'identifiedBy' => "Dr. N. C. Kindberg"));
 	}
 
 	private function isNorthAmericanMusciPleurocarpiLabel($s) {
-		if(preg_match("/.*N[0o]rth ?Amer[1Il!|]can ?Mus[ce][1Il!|] ?P[1Il!|][ce]ur[0o][ce]arp[1Il!|].*/is", $s)) return true;
+		if(preg_match("/.*N[0o]rth ?Amer[1Il!|]can ?Mus[ce][1Il!|] ?P[1Il!|][ce]ur.{1,2}[ce]arp[1Il!|].*/is", $s)) return true;
 		if(preg_match("/.*P[1Il!|][ce]ur[0o][ce]arp[1Il!|].*[1Il!|][S5]{2}UED ?BY ?A[,.] ?J[,.] GR[0O]UT[,.] ?PH[,.].*/is", $s)) return true;
 		return false;
 	}
@@ -307,7 +306,7 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$s = trim(preg_replace
 		(
 			array(
-				"/.*N[0o]rth ?Amer[1Il!|]can ?Mus[ce][1Il!|] ?P[1Il!|][ce]ur[0o][ce]arp[1Il!|].*/i",
+				"/.*N[0o]rth ?Amer[1Il!|]can ?Mus[ce][1Il!|] ?P[1Il!|][ce]ur.{1,2}[ce]arp[1Il!|].*/i",
 				"/.*[1Il!|][S5]{2}UED ?BY ?A[,.] ?J[,.] GR[0O]UT[,.] ?PH[,.].*/i",
 				"/\\n{2,}/"
 			),
@@ -369,8 +368,9 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 	}
 
 	private function isSphagnaBorealiAmericanaExsiccataLabel($s) {
+		if(preg_match("/.*[S5]?PHA[CG]NA B[0OQ]REA(?:M|L[1Il!|])-AMER[1Il!|][CG]ANA EX[S5][1Il!|][CG]{2}ATA.*/is", $s)) return true;
 		if(preg_match("/.*[S5]PHA[CG]N.{2}B ?[0OQ][RB]E ?A[1Il!|]{1,2}.{1,3}ME ?R[1Il!|] ?[CGO] ?AN.{1,3}EX[S5][1Il!|][CG]{2}AT.*/is", $s)) return true;
-		if(preg_match("/.*[S5]PHA[CG]NA ?BO.*[1Il!|]{1,2} AMER[1Il!|][CG]AN.{1,3}EX[S5][1Il!|][CG]{2}AT.*/i", $s)) return true;
+		if(preg_match("/.*[S5]?PHA[CG]NA ?BO.*[1Il!|]{1,2} AMER[1Il!|][CG]AN.{1,3}EX[S5][1Il!|][CG]{2}AT.*/i", $s)) return true;
 		if(preg_match("/.*[S5]PHA[CG]NA B[0OQ][RB]EA[1Il!|]{1,2}-AMER[1Il!|][CG].{3,6}EX[S5][1Il!|][CG]{2}AT.*/i", $s)) return true;
 		if(preg_match("/.*[S5]PHA[CG]NA.{1,3}O ?R.{1,3}[1Il!|]{1,2}-AM.R[1Il!|][CG]AN.{2,4}EX[S5][1Il!|][CG]{2}ATA.*/i", $s)) return true;
 		return false;
@@ -380,8 +380,9 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$s = trim(preg_replace
 		(
 			array(
+				"/.?[S5]?PHA[CG]NA B[0OQ]REA(?:M|L[1Il!|])-AMER[1Il!|][CG]ANA EX[S5][1Il!|][CG]{2}ATA.?/i",
 				"/.?[S5]PHA[CG]N.{2}B ?[0OQ][RB]E ?A[1Il!|]{1,2}.{1,3}ME ?R[1Il!|] ?[CGO] ?AN.{1,3}EX[S5][1Il!|][CG]{2}AT.{1,3}/i",
-				"/.?[S5]PHA[CG]NA ?BO.*[1Il!|]{1,2} AMER[1Il!|][CG]AN.{1,3}EX[S5][1Il!|][CG]{2}AT.{1,3}/i",
+				"/.?[S5]?PHA[CG]NA ?BO.*[1Il!|]{1,2} AMER[1Il!|][CG]AN.{1,3}EX[S5][1Il!|][CG]{2}AT.{1,3}/i",
 				"/.?[S5]PHA[CG]NA B[0OQ][RB]EA[1Il!|]{1,2}-AMER[1Il!|][CG].{3,6}EX[S5][1Il!|][CG]{2}AT.{1,3}/i",
 				"/.?[S5]PHA[CG]NA.{1,3}O ?R.{1,3}[1Il!|]{1,2}-AM.R[1Il!|][CG]AN.{2,4}EX[S5][1Il!|][CG]{2}ATA.{0,2}/i",
 				"/[CG]urav[ec]runt D[,.] ?[CG][,.] ?Eat[0o]n ?[ec]t ?E[,.] ?Fax[0o]n[,.]?/i",
@@ -391,6 +392,7 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 				"/\\n{2,}/"
 			),
 			array(
+				"",
 				"",
 				"",
 				"",
@@ -526,7 +528,7 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$s = trim(preg_replace
 		(
 			array(
-				"/[^\n]{0,2}(?:W[,.].{1,4}[CG]ULA[,.] )?.{1,2}r[yv]pt[0o][gyj]a.{1,2}a[ec] [CG][ec].man ?[1Il!|]a.{1,2}[,.] A.{1,2}[s5]t[rx][1Il!|]a[ec] [ec]. ?(?:H|[1Il!|]{2})[ec][1Il!|]v[ec]t[1Il!|]a[ec] [ec]x[s5][1Il!|][ec]{2}at.[^\n]{1,3}+/i",
+				"/[^\n]{0,2}(?:[WV][,.].{1,4}[CG]ULA[,.] )?.{1,2}r[yv]pt[0o][gyj]a.{1,2}a[ec] [CG][ec].man ?[1Il!|]a.{1,2}[,.] A.{1,2}[s5]t[rx][1Il!|]a[ec] [ec]. ?(?:H|[1Il!|]{2})[ec][1Il!|]v[ec]t[1Il!|]a[ec] [ec]x[s5][1Il!|][ec]{2}at.[^\n]{1,3}+/i",
 				"/\\n{2,}/"
 			),
 			array(
@@ -688,16 +690,17 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 	}
 
 	private function isMossesOfTheInteriorHighlandsExsiccataeLabel($s) {
-		if(preg_match("/.*[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|]gh[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at.*/is", $s)) return true;
-		else return false;
+		if(preg_match("/.*[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|].h[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at.*/is", $s)) return true;
+		if(preg_match("/.*M[0O][s5]{2}[ec][s5] ?[0O]. ?.8 ?Ex[s5]i[ec]{2}at.*Ed[1Il!|]t[ec]d b[yv] Pau[1Il!|] Red.[ec]a(?:m|rn)[,.] Bru[ec]{2} A[1Il!|]{2}[ec]n & R[0o]b[ec]rt.{1,3}ag[1Il!| ]{1,4}/is", $s)) return true;
+		return false;
 	}
 
 	private function doMossesOfTheInteriorHighlandsExsiccataeLabel($s) {
 		$s = trim(preg_replace
 		(
 			array(
-				"/[^\n]{1,2}[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|]gh[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at[^\n]{2,3}+/i",
-				//"/[^\n]?M[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|]gh[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at[^\n]{2,3}+/i",
+				"/[^\n]{1,2}[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|].h[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at[^\n]{2,3}+/i",
+				//"/[^\n]?M[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|].h[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at[^\n]{2,3}+/i",
 				"/Ed[1Il!|]t[ec]d b[yv] Pau[1Il!|] Red.[ec]a(?:m|rn)[,.] Bru[ec]{2} A[1Il!|]{2}[ec]n & R[0o]b[ec]rt.{1,3}ag[1Il!| ]{1,4}+/i",
 				"/[^\n]?D[1Il!|][s5]tr[1Il!|]but[ec]d ?b[yv] ?M[1Il!|][s5]{2}[0o]ur[1Il!|] ?B[0o]tan[1Il!|][ec]a[1Il!|] ?[CG]ard[ec].*/is",
 				"/\\n{2,}/"
@@ -786,7 +789,7 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 	}
 
 	private function isMusciAcrocarpiBorealiAmericaniLabel($s) {
-		if(preg_match("/.*Mus[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea.*[ -]Am[ce]r[1Il!|][ce]an.*/is", $s)) return true;
+		if(preg_match("/.*Mus[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea.*[ -]Am[ce]r[1Il!|][ce]a.*/is", $s)) return true;
 		if(preg_match("/.*s[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea[1Il!|]{2}[ -]Am[ce]r[1Il!|][ce]an.*/is", $s)) return true;
 		if(preg_match("/.*A[ce]r[o0][ce]arp[1Il!|] Di[s5]tribut[ce]d.*H[o0].{1,2}[z2]ing[ce]r.*/is", $s)) return true;
 		return false;
@@ -796,7 +799,7 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$s = trim(preg_replace
 		(
 			array(
-				"/.*Mus[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea.*[ -]Am[ce]r[1Il!|][ce]an.*/i",
+				"/.*Mus[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea.*[ -]Am[ce]r[1Il!|][ce]a.*/i",
 				"/.*s[ce][1Il!|] ?A[ce]r[o0][ce]arp[1Il!|] ?B[o0]rea[1Il!|]{2}[ -]Am[ce]r[1Il!|][ce]an.*/i",
 				"/.*Di[s5]tribut[ce]d.*H[o0].{1,2}[z2]ing[ce]r.*/i",
 				"/\\n{2,}/"
@@ -908,7 +911,6 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 
 	private function isReliquiaeFlowersianaeLabel($s) {
 		$pat = "/.*Re[1Il!|]{2}[qgO]u[1Il!|]a[ec]\\s?F[1Il!|][O0Q]wers[1Il!|]ana.*/is";
-		//$pat = "/.*RELIQUIAE\\sFLOWERSIANA.*/is";
 		if(preg_match($pat, $s)) return true;
 		else return false;
 	}
@@ -916,22 +918,24 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 	protected function countPotentialHabitatWords($pHab) {//echo "\ninput to countPotentialHabitatWords: ".$pHab."\n";
 		//$pHab = preg_quote(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab), '/');
 		$pHab = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab));
-		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "aspens?", "juniper(?:u?s)?", "p[l1|I!]ant(?! (?:sciences?|biology|exploration))",
+		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "aspens?", "juniper(?:u?s)?", "p[l1|I!]ant(?! (?:sciences?|bio[l1|I!]ogy|exp[l1|I!]oration))",
 			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "(?<!(?:National) )forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix",
-			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "(?<!\()(?<!Colorado )boulders?(?!(?:\)| Colorado))", "Granit(?:e|ic)", "limestone", "sandstone",
-			"sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous", "climax",
-			"expos(?:ure|ed)", "aspect", "facing", "pinus", "habitat", "degrees?", "conifer(?:(?:ou)?s)?", "spruces?", "maples?", "substrate",
-			"th[uv]ja", "shad(?:y|ed?)", "(?:[a-z]{2,})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?",
-			"Liriodendron", "Juglans", "A[l1|I!]nus", "f[l1|I!][0o]{2}d ?p[l1|I!]ain", "gneiss", "crust", "(?:sage|brush|sagebrush)", "pocosin",
-			"bog", "swamp", "branches", "acer", "imbedded", "Picea", "savanna", "Magno[l1|I!]ia", "Rhododendron", "[l1|I!]{2}ex", "Carpinus",
-			"ta[l1|I!]us", "Nyssa", "bottom(?:[l1|I!]ands?)?", "w[l1|I!]{3}[0o]ws?", "riperian", "Fraxinus", "Betu[l1|I!]a", "Persea", "Carya",
-			"ravine", "Aesculus", "cypress(?:es)?", "Empetrum", "Taxodium", "sparse(?:ly)?", "chaparra[l1|I!]", "temperate", "hemlocks?",
+			"a[l1|I!]ders?", "tundra","abies", "ca[l1|I!]careous", "outcrops?", "(?<!\()(?<!Co[l1|I!]orado )bou[l1|I!]ders?(?!(?:\)| Co[l1|I!]orado))",
+			"Granit(?:e|ic)", "[l1|I!]imestone", "sandstone", "sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?",
+			"(?:white)?bark", "open", "deciduous", "c[l1|I!]imax", "expos(?:ure|ed)", "aspect", "facing", "pinus", "habitat", "degrees?",
+			"conifer(?:(?:ou)?s)?", "spruces?", "map[l1|I!]es?", "substrate", "th[uv]ja", "shad(?:y|ed?)", "(?:[a-z]{2,})?berry",
+			"box e[l1|I!]ders?", "dry", "damp", "moist", "wet", "firs?", "basa[l1|I!]t(?:ic)?", "Carex", "Liriodendron", "Jug[l1|I!]ans",
+			"A[l1|I!]nus", "f[l1|I!][0o]{2}d ?p[l1|I!]ain", "gneiss", "crust", "(?:sage|brush|sagebrush)", "pocosin", "bog", "swamp",
+			"branches", "acer", "imbedded", "Picea", "savanna", "Magno[l1|I!]ia", "Rhododendron", "[l1|I!]{2}ex", "Carpinus","ta[l1|I!]us",
+			"Nyssa", "bottom(?:[l1|I!]ands?)?", "w[l1|I!]{3}[0o]ws?", "riperian", "Fraxinus", "Betu[l1|I!]a", "Persea", "Carya", "ravine",
+			"Aesculus", "cypress(?:es)?", "Empetrum", "Taxodium", "sparse(?:[l1|I!]y)?", "chaparra[l1|I!]", "temperate", "hemlocks?",
 			"Myrica", "[l1|I!]odgepo[l1|I!]e", "Cornus", "trunks?", "myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture",
-			"stump", "palmetto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter", "scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine",
+			"stump", "pa[l1|I!]metto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter", "scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine",
 			"grave[l1|I!](?! r(?:oa)?d)(?:[l1|I!]y)?", "duff", "seepage", "submerged", "graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry",
-			"regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?", "terraces?", "thickets?", "moraines?", "heath(?:er)?",
-			"metamorphic", "vegetation", "quarry", "mats?", "depression", "pebbles?", "Ombrotrophic", "rivulets?", "hummock[sy]?", "stand",
-			"chert", "humus", "marsh", "abundant(?:[l1|I!]y)?", "ecotone", "fen", "pools?", "cultivated", "twigs?", "Agropyron", "barrens?");
+			"regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:[l1|I!]ine)?", "terraces?", "thickets?", "moraines?", "heath(?:er)?",
+			"metamorphic", "vegetation", "quarry", "mats?", "depression", "pebbles?", "Ombrotrophic", "rivu[l1|I!]ets?", "hummock[sy]?", "stand",
+			"chert", "humus", "marsh", "abundant(?:[l1|I!]y)?", "ecotone", "fen", "poo[l1|I!]s?", "cu[l1|I!]tivat[ec]d", "twigs?", "Agropyron",
+			"barrens?", "prairie");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
@@ -940,11 +944,11 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 
 	protected function containsVerbatimAttribute($pAtt, $additionalTerms=array()) {
 		//additional terms can be added to analyze those strings that have already been discovered to contain verbatimAttributes
-		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
-			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))", "thall(?:us|i)", "strain", "peristome", "lea(?:ves|f)(?! ?litter)", "cells?",
-			"squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s|ing)?", "crust(?:ose)?", "corticolous", "saxicolous",
+		$vaWords = array("atranorin", "fatty acids?", "cortex", "areo[l1|I!]ate", "medu[l1|I!]{2}ae?", "podeti(?:a|um)(?! ?\\/)",
+			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|co[l1|I!]or))", "tha[l1|I!]{2}(?:us|i)", "strain", "peristome", "lea(?:ves|f)(?! ?[l1|I!]itter)", "cells?",
+			"squamu[l1|I!](?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s|ing)?", "crust(?:ose)?", "corticolous", "saxicolous",
 			"terricolous", "Synoicous", "chemotype", "terpene", "isidi(?:a(?:te)?|um)", "TLC", "monoicous", "dioicous", "sporangi(?:a|um)",
-			"parietin", "anthraquinone", "pigment(?:s|ed)?", "ostiole", "epiphyt(?:e|ic)", "sorali(?:a|um)", "spor(?:ophyt)?es?", "ovate",
+			"parietin", "anthraquinone", "pigment(?:s|ed)?", "ostio[l1|I!]e", "epiphyt(?:e|ic)", "sora[l1|I!]i(?:a|um)", "spor(?:ophyt)?es?", "ovate",
 			"antheridi(?:a|um)", "archegoni(?:a|um)", "androeci(?:a|um)", "gynoeci(?:a|um)", "Autoicous", "Paroicous", "Heteroicous",
 			"cladautoicous", "Gametangi(?:a|um)", "paraphyses(?! ?branched\\/)", "pruinose", "short[- ]leaved", "scabrous",
 			"aggregated", "dendrit(?:e|ic)");
