@@ -136,20 +136,32 @@ class OccurrenceUtilities {
 	 * OUTPUT: Array containing parsed values 
 	 *         Keys: unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier 
 	 */
-	public static function parseScientificName($inStr){
+	public static function parseScientificName($inStr, $rankId = 0){
+		
 		//Converts scinetific name with author embedded into separate fields
 		$retArr = array('unitname1'=>'','unitname2'=>'','unitind3'=>'','unitname3'=>'');
 		//Remove underscores, common in NPS data
 		$inStr = preg_replace('/_+/',' ',$inStr);
-		if(stripos($inStr,'cf. ') !== false){
+		//Replace misc 
+		$inStr = str_replace(array('?','*'),'',$inStr);
+		
+		if(stripos($inStr,'cf. ') !== false || stripos($inStr,'c.f. ') !== false || stripos($inStr,' cf ') !== false){
 			$retArr['identificationqualifier'] = 'cf. ';
-			$inStr = str_ireplace('cf. ','',$inStr);
+			$inStr = str_ireplace(array(' cf ','c.f. ','cf. '),' ',$inStr);
 		}
-		elseif(stripos($inStr,'aff. ') !== false){
+		elseif(stripos($inStr,'aff. ') !== false || stripos($inStr,' aff ') !== false){
 			$retArr['identificationqualifier'] = 'aff. ';
-			$inStr = str_ireplace('aff. ','',$inStr);
+			$inStr = str_ireplace(array(' aff ','aff. '),' ',$inStr);
 		}
-		//Remove extra species
+		if(stripos($inStr,' spp.')){
+			$rankId = 180;
+			$inStr = str_ireplace(' spp.','',$inStr);
+		}
+		if(stripos($inStr,' sp.')){
+			$rankId = 180;
+			$inStr = str_ireplace(' sp.','',$inStr);
+		}
+		//Remove extra spaces
 		$inStr = preg_replace('/\s\s+/',' ',$inStr);
 		
 		$sciNameArr = explode(' ',$inStr);
@@ -179,44 +191,46 @@ class OccurrenceUtilities {
 		if(isset($sciNameArr) && $sciNameArr){
 			//Assume rest is author; if that is not true, author value will be replace in following loop
 			$retArr['author'] = implode(' ',$sciNameArr);
-			//cycles through the final terms to extract the last infraspecific data
-			while($sciStr = array_shift($sciNameArr)){
-				if($sciStr == 'f.' || $sciStr == 'fo.' || $sciStr == 'fo' || $sciStr == 'forma'){
-					if($sciNameArr){
-						$retArr['unitind3'] = 'f.';
-						$retArr['unitname3'] = array_shift($sciNameArr);
-						$retArr['author'] = implode(' ',$sciNameArr);
+			if(!$rankId || $rankId > 220){
+				//cycles through the final terms to extract the last infraspecific data
+				while($sciStr = array_shift($sciNameArr)){
+					if($sciStr == 'f.' || $sciStr == 'fo.' || $sciStr == 'fo' || $sciStr == 'forma'){
+						if($sciNameArr){
+							$retArr['unitind3'] = 'f.';
+							$retArr['unitname3'] = array_shift($sciNameArr);
+							$retArr['author'] = implode(' ',$sciNameArr);
+						}
+					}
+					elseif($sciStr == 'var.' || $sciStr == 'var'){
+						if($sciNameArr){
+							$retArr['unitind3'] = 'var.';
+							$retArr['unitname3'] = array_shift($sciNameArr);
+							$retArr['author'] = implode(' ',$sciNameArr);
+						}
+					}
+					elseif($sciStr == 'ssp.' || $sciStr == 'ssp' || $sciStr == 'subsp.' || $sciStr == 'subsp'){
+						if($sciNameArr){
+							$retArr['unitind3'] = 'ssp.';
+							$retArr['unitname3'] = array_shift($sciNameArr);
+							$retArr['author'] = implode(' ',$sciNameArr);
+						}
 					}
 				}
-				elseif($sciStr == 'var.' || $sciStr == 'var'){
-					if($sciNameArr){
-						$retArr['unitind3'] = 'var.';
-						$retArr['unitname3'] = array_shift($sciNameArr);
-						$retArr['author'] = implode(' ',$sciNameArr);
+				//Double check to see if infraSpecificEpithet is still embedded in author due initial lack of taxonRank indicator
+				if(!array_key_exists('unitname3',$retArr)){
+					if(preg_match('/\s+([a-z]{4,})([\sA-Z]*.*)/',$retArr['author'],$m) || preg_match('/^([a-z]{4,})([\sA-Z]*.*)/',$retArr['author'],$m)){
+						$sql = 'SELECT unitind3 FROM taxa '.
+							'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$m[1].'" '.
+							'ORDER BY unitind3 DESC';
+						$con = MySQLiConnectionFactory::getCon('readonly');
+						$rs = $con->query($sql);
+						if($r = $rs->fetch_object()){
+							$retArr['unitname3'] = $m[1];
+							$retArr['unitind3'] = $r->unitind3;
+							$retArr['author'] = $m[2];
+						}
+						$rs->close();
 					}
-				}
-				elseif($sciStr == 'ssp.' || $sciStr == 'ssp' || $sciStr == 'subsp.' || $sciStr == 'subsp'){
-					if($sciNameArr){
-						$retArr['unitind3'] = 'ssp.';
-						$retArr['unitname3'] = array_shift($sciNameArr);
-						$retArr['author'] = implode(' ',$sciNameArr);
-					}
-				}
-			}
-			//Double check to see if infraSpecificEpithet is still embedded in author due initial lack of taxonRank indicator
-			if(!array_key_exists('unitname3',$retArr)){
-				if(preg_match('/\s+([a-z]{4,})([\sA-Z]*.*)/',$retArr['author'],$m) || preg_match('/^([a-z]{4,})([\sA-Z]*.*)/',$retArr['author'],$m)){
-					$sql = 'SELECT unitind3 FROM taxa '.
-						'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$m[1].'" '.
-						'ORDER BY unitind3 DESC';
-					$con = MySQLiConnectionFactory::getCon('readonly');
-					$rs = $con->query($sql);
-					if($r = $rs->fetch_object()){
-						$retArr['unitname3'] = $m[1];
-						$retArr['unitind3'] = $r->unitind3;
-						$retArr['author'] = $m[2];
-					}
-					$rs->close();
 				}
 			}
 		}
@@ -228,6 +242,32 @@ class OccurrenceUtilities {
 			$retArr['unitname2'] = $retArr['unitind2'].' '.$retArr['unitname2'];
 			unset($retArr['unitind2']); 
 		}
+		//Build sciname, without author
+		$retArr['sciname'] = trim($retArr['unitname1'].' '.$retArr['unitname2'].''.$retArr['unitind3'].' '.$retArr['unitname3']);
+		if($rankId && is_numeric($rankId)){
+			$retArr['rankid'] = $rankId;
+		}
+		else{
+			if($retArr['unitname3']){
+				if($retArr['unitind3'] == 'ssp.' || !$retArr['unitind3']){
+					$retArr['rankid'] = 230;
+				}
+				elseif($retArr['unitind3'] == 'var.'){
+					$retArr['rankid'] = 240;
+				}
+				elseif($retArr['unitind3'] == 'f.'){
+					$retArr['rankid'] = 260;
+				}
+			}
+			elseif($retArr['unitname2']){
+				$retArr['rankid'] = 220;
+			} 
+			elseif($retArr['unitname1']){
+				if(substr($retArr['unitname1'],-5) == 'aceae' || substr($retArr['unitname1'],-4) == 'idae'){
+					$retArr['rankid'] = 140;
+				}
+			}
+		} 
 		return $retArr;
 	}
 
