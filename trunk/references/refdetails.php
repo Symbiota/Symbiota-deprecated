@@ -1,0 +1,476 @@
+<?php
+include_once('../config/symbini.php');
+include_once($serverRoot.'/classes/ReferenceManager.php');
+
+$refId = array_key_exists('refid',$_REQUEST)?$_REQUEST['refid']:0;
+$formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
+
+$refManager = new ReferenceManager();
+$refArr = '';
+
+$statusStr = '';
+if($formSubmit){
+	if($formSubmit == 'Create Reference'){
+		$statusStr = $refManager->createReference($_POST);
+		$refId = $refManager->getRefId();
+	}
+	elseif($formSubmit == 'Edit Reference'){
+		$statusStr = $refManager->editReference($_POST);
+	}
+}
+
+if($refId){
+	$refArr = $refManager->getRefArr($refId);
+	$authArr = $refManager->getRefAuthArr($refId);
+	$fieldArr = $refManager->getRefTypeFieldArr($refArr["ReferenceTypeId"]);
+	$refChecklistArr = $refManager->getRefChecklistArr($refId);
+	$refCollArr = $refManager->getRefCollArr($refId);
+	$refOccArr = $refManager->getRefOccArr($refId);
+	$refTaxaArr = $refManager->getRefTaxaArr($refId);
+}
+else{
+	header("Location: index.php");
+}
+
+header("Content-Type: text/html; charset=".$charset);
+?>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+	<title><?php echo $defaultTitle; ?> Reference Management</title>
+    <link href="../css/base.css" rel="stylesheet" type="text/css" />
+    <link href="../css/main.css" rel="stylesheet" type="text/css" />
+	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
+	<style type="text/css">
+		#tabs a{
+			outline-color: transparent;
+			font-size: 12px;
+			font-weight: normal;
+		}
+	</style>
+	<script type="text/javascript" src="../js/jquery.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui.js"></script>
+	<script type="text/javascript" src="../js/symb/references.index.js"></script>
+	<script type="text/javascript">
+		var refid = <?php echo $refId; ?>;
+	</script>
+</head>
+<body>
+	<?php
+	$displayLeftMenu = (isset($reference_indexMenu)?$reference_indexMenu:false);
+	include($serverRoot."/header.php");
+	if(isset($reference_indexCrumbs)){
+		if($reference_indexCrumbs){
+			?>
+			<div class='navpath'>
+				<a href='../index.php'>Home</a> &gt;&gt; 
+				<?php echo $reference_indexCrumbs; ?>
+				<a href='index.php'> <b>Reference Management</b></a>
+			</div>
+			<?php 
+		}
+	}
+	else{
+		?>
+		<div class='navpath'>
+			<a href='../index.php'>Home</a> &gt;&gt; 
+			<a href='index.php'> <b>Reference Management</b></a>
+		</div>
+		<?php 
+	}
+	?>
+	<!-- This is inner text! -->
+	<div id="innertext">
+		<?php 
+		if($symbUid){
+			if($statusStr){
+				?>
+				<hr/>
+				<div style="margin:15px;color:red;">
+					<?php echo $statusStr; ?>
+				</div>
+				<?php 
+			}
+			?>
+			<div id="tabs" style="margin:0px;">
+				<ul>
+					<li><a href="#refdetaildiv">Reference Details</a></li>
+					<li><a href="#reflinksdiv">Links</a></li>
+					<li><a href="#refadmindiv">Admin</a></li>
+				</ul>
+				
+				<div id="refdetaildiv" style="">
+					<div style="width:300px;float:right;">
+						<form name='authorform' id='authorform' action='index.php' method='post'>
+							<fieldset>
+								<legend><b>Authors</b></legend>
+								<div>
+									<div>
+										<b>Add Author By Last Name: </b>
+									</div>
+									<div>
+										<input type="text" name="addauthorsearch" id="addauthorsearch" style="width:200px;" value="" size="20" />
+										<input id="refauthorid" name="refauthorid" type="hidden" value="" />
+									</div>
+								</div>
+								<hr />
+								<div id="authorlistdiv">
+									<?php
+									if($authArr){
+										echo '<ul>';
+										foreach($authArr as $k => $v){
+											echo '<li>';
+											echo $v;
+											echo ' <input type="image" style="margin-left:5px;" src="../images/del.gif" onclick="deleteRefAuthor('.$k.');" title="Delete author">';
+											echo '</li>';
+										}
+										echo '</ul>';
+									}
+									else{
+										echo '<div><b>There are currently no authors connected with this reference.</b></div>';
+									}
+									?>
+								</div>
+							</fieldset>
+						</form>	
+					</div>
+					<div id="refdetails" style="overflow:auto;">
+						<form name="referenceeditform" id="referenceeditform" action="refdetails.php" method="post" onsubmit="return verifyEditRefForm(this.form);">
+							<div style="padding-top:6px;float:left;">
+								<div>
+									<b>Reference Type: </b>
+								</div>
+								<div>
+									<select name="ReferenceTypeId" id="ReferenceTypeId" style="width:200px;" onchange="verifyRefTypeChange();">
+										<option value="">Select Reference Type</option>
+										<option value="">-------------------------------</option>
+										<?php 
+										$typeArr = $refManager->getRefTypeArr();
+										foreach($typeArr as $k => $v){
+											echo '<option value="'.$k.'" '.($refArr['ReferenceTypeId']==$k?'SELECTED':'').'>'.$v.'</option>';
+										}
+										?>
+									</select>
+								</div>
+							</div>
+							<?php
+							if($fieldArr['Title']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['Title']; ?>: </b>
+									</div>
+									<div>
+										<textarea name="title" id="title" rows="10" style="width:380px;height:40px;resize:vertical;" ><?php echo $refArr['title']; ?></textarea>
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['SecondaryTitle']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['SecondaryTitle']; ?>: </b>
+									</div>
+									<div>
+										<textarea name="secondarytitle" id="secondarytitle" rows="10" style="width:380px;height:40px;resize:vertical;" ><?php echo $refArr['secondarytitle']; ?></textarea>
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['ShortTitle']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['ShortTitle']; ?>: </b>
+									</div>
+									<div>
+										<textarea name="shorttitle" id="shorttitle" rows="10" style="width:380px;height:40px;resize:vertical;" ><?php echo $refArr['shorttitle']; ?></textarea>
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['Date']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['Date']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="pubdate" id="pubdate" tabindex="100" maxlength="32" style="width:150px;" value="<?php echo $refArr['pubdate']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['Volume']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['Volume']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="volume" id="volume" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $refArr['volume']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['NumberVolumes']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['NumberVolumes']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="numbervolumnes" id="numbervolumnes" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $refArr['numbervolumnes']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['Edition']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['Edition']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="edition" id="edition" tabindex="100" maxlength="32" style="width:150px;" value="<?php echo $refArr['edition']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['Number']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['Number']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="number" id="number" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $refArr['number']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['Section']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['Section']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="section" id="section" tabindex="100" maxlength="32" style="width:150px;" value="<?php echo $refArr['section']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['Pages']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['Pages']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="pages" id="pages" tabindex="100" maxlength="32" style="width:200px;" value="<?php echo $refArr['pages']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['Publisher']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['Publisher']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="publisher" id="publisher" tabindex="100" maxlength="32" style="width:300px;" value="<?php echo $refArr['publisher']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['PlacePublished']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['PlacePublished']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="placeofpublication" id="placeofpublication" tabindex="100" maxlength="32" style="width:300px;" value="<?php echo $refArr['placeofpublication']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							if($fieldArr['ISBN_ISSN']){
+								?>
+								<div style="clear:both;padding-top:6px;float:left;">
+									<div>
+										<b><?php echo $fieldArr['ISBN_ISSN']; ?>: </b>
+									</div>
+									<div>
+										<input type="text" name="isbn_issn" id="isbn_issn" tabindex="100" maxlength="32" style="width:300px;" value="<?php echo $refArr['isbn_issn']; ?>" onchange="" title="" />
+									</div>
+								</div>
+								<?php
+							}
+							?>
+							<div style="clear:both;padding-top:6px;float:left;">
+								<div>
+									<b>Library Number: </b>
+								</div>
+								<div>
+									<input type="text" name="libraryNumber" id="libraryNumber" tabindex="100" maxlength="32" style="width:250px;" value="<?php echo $refArr['libraryNumber']; ?>" onchange="" title="" />
+								</div>
+							</div>
+							<div style="clear:both;padding-top:6px;float:left;">
+								<div>
+									<b>GUID: </b>
+								</div>
+								<div>
+									<input type="text" name="guid" id="guid" tabindex="100" maxlength="32" style="width:350px;" value="<?php echo $refArr['guid']; ?>" onchange="" title="" />
+								</div>
+							</div>
+							<div style="clear:both;padding-top:6px;float:left;">
+								<div>
+									<b>URL: </b>
+								</div>
+								<div>
+									<textarea name="url" id="url" rows="10" style="width:380px;height:40px;resize:vertical;" ><?php echo $refArr['url']; ?></textarea>
+								</div>
+							</div>
+							<div style="clear:both;padding-top:6px;float:left;">
+								<div>
+									<b>Notes: </b>
+								</div>
+								<div>
+									<textarea name="notes" id="notes" rows="10" style="width:380px;height:40px;resize:vertical;" ><?php echo $refArr['notes']; ?></textarea>
+								</div>
+							</div>
+							<div style="clear:both;padding-top:8px;float:left;">
+								<input name="refid" type="hidden" value="<?php echo $refId; ?>" />
+								<div id="dynamicInput"></div>
+								<button name="formsubmit" type="submit" value="Edit Reference">Save Edits</button>
+							</div>
+						</form>
+					</div>
+				</div>
+				
+				<div id="reflinksdiv" style="">
+					<div style="width:600px;">
+						<?php
+						if($refChecklistArr || $refCollArr || $refOccArr || $refTaxaArr){
+							echo '<h2>Reference Links:</h2>';
+							
+							echo '<b>Checklist links:</b>';
+							echo '<div id="referencechecklistlink">';
+							if($refChecklistArr){
+								echo '<ul>';
+								foreach($refChecklistArr as $k => $v){
+									$onClick = "deleteRefLink('referencechecklistlink','clid','checklists',".$k.");";
+									echo '<li>';
+									echo $v;
+									echo ' <input type="image" style="margin-left:5px;" src="../images/del.gif" onclick="'.$onClick.'" title="Delete link">';
+									echo '</li>';
+								}
+								echo '</ul>';
+							}
+							else{
+								echo 'There are no checklists linked with this reference';
+							}
+							echo '</div><br />';
+							
+							echo '<b>Collection links:</b>';
+							echo '<div id="referencecollectionlink">';
+							if($refCollArr){
+								echo '<ul>';
+								foreach($refCollArr as $k => $v){
+									$onClick = "deleteRefLink('referencecollectionlink','collid','collections',".$k.");";
+									echo '<li>';
+									echo $v;
+									echo ' <input type="image" style="margin-left:5px;" src="../images/del.gif" onclick="'.$onClick.'" title="Delete link">';
+									echo '</li>';
+								}
+								echo '</ul>';
+							}
+							else{
+								echo 'There are no collections linked with this reference';
+							}
+							echo '</div><br />';
+							
+							echo '<b>Occurrence links:</b>';
+							echo '<div id="referenceoccurlink">';
+							if($refOccArr){
+								echo '<ul>';
+								foreach($refOccArr as $k => $v){
+									$onClick = "deleteRefLink('referenceoccurlink','occid','occurrences',".$k.");";
+									echo '<li>';
+									echo $v;
+									echo ' <input type="image" style="margin-left:5px;" src="../images/del.gif" onclick="'.$onClick.'" title="Delete link">';
+									echo '</li>';
+								}
+								echo '</ul>';
+							}
+							else{
+								echo 'There are no occurrences linked with this reference';
+							}
+							echo '</div><br />';
+							
+							echo '<b>Taxa links:</b>';
+							echo '<div id="referencetaxalink">';
+							if($refTaxaArr){
+								echo '<ul>';
+								foreach($refTaxaArr as $k => $v){
+									$onClick = "deleteRefLink('referencetaxalink','tid','taxa',".$k.");";
+									echo '<li>';
+									echo $v;
+									echo ' <input type="image" style="margin-left:5px;" src="../images/del.gif" onclick="'.$onClick.'" title="Delete link">';
+									echo '</li>';
+								}
+								echo '</ul>';
+							}
+							else{
+								echo 'There are no taxa linked with this reference';
+							}
+							echo '</div>';
+						}
+						else{
+							echo '<h2>There are no records linked with this reference</h2>';
+						}
+						?>
+					</div>
+				</div>
+				
+				<div id="refadmindiv" style="">
+					<form name="delrefform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this reference?')">
+						<fieldset style="width:350px;margin:20px;padding:20px;">
+							<legend><b>Delete Reference</b></legend>
+							<?php 
+							if($refChecklistArr || $refCollArr || $refOccArr || $refTaxaArr){
+								echo '<div style="font-weight:bold;margin-bottom:15px;">';
+								echo 'Reference cannot be deleted until all linked records are removed';
+								echo '</div>';
+							}
+							?>
+							<input name="formsubmit" type="submit" value="Delete Reference" <?php if($refChecklistArr || $refCollArr || $refOccArr || $refTaxaArr) echo 'DISABLED'; ?> />
+							<input name="refid" type="hidden" value="<?php echo $refId; ?>" />
+						</fieldset>
+					</form>
+				</div>
+			</div>
+			<?php 
+		}
+		else{
+			if(!$symbUid){
+				echo 'Please <a href="../profile/index.php?refurl=../references/index.php">login</a>';
+			}
+			else{
+				echo '<h2>ERROR: unknown error, please contact system administrator</h2>';
+			}
+		}
+		?>
+	</div>
+	<?php
+	include($serverRoot."/footer.php");
+	?>
+</body>
+</html>
