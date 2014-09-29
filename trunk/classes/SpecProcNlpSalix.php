@@ -428,7 +428,6 @@ class SpecProcNlpSalix{
 //******************************************************************
 //******************* Lat/Long Functions ***************************
 //******************************************************************
-
 	
 	//******************************************************************
 	private function GetLatLong()
@@ -446,7 +445,6 @@ class SpecProcNlpSalix{
 			}
 
 		asort($RankArray);
-		//$this->printr($RankArray,"L/LRA");
 		end($RankArray); //Select the last (highest) element in the scores array
 		if(current($RankArray) > 1)
 			$L=key($RankArray);
@@ -460,121 +458,34 @@ class SpecProcNlpSalix{
 		$Preg['deg'] = "[0-9\.]+[°\*] ?";
 		$Preg['min'] = "[0-9\.]+[\'’`, ]*";
 		$Preg['sec'] = "(?:[0-9\.]+\")*";
-
-		$PregTest = "((".$Preg['dir']."[ ]".$Preg['deg'].")(.*".$Preg['dir']."))";    //."[ ]".$Preg['deg']."))";
-		//echo "Pregtest=$PregTest<br>";
-		//echo $OneLine."<br>";
-		if(preg_match($PregTest, $OneLine,$match) == 1)
-			{ //Formatted with direction first
-			$DirFirst=true;
-			//echo "DirFirst is true<br>";
-			//print_r($match);
-			//echo"<br>";
-			}
-		else
-			$DirFirst = false;
-		$Found=false;
-		if($DirFirst)
-			{
-			$BasePreg = $Preg['dir'].$Preg['deg'].$Preg['min'].$Preg['sec'];
-			//$FullPreg = "((".$BasePreg.".+)(".$BasePreg."))";
-			$Found = $this->PregLatLong($BasePreg,$OneLine,$L);
-			//if($Found)
-			//	echo "Found Seconds<br>";
-			if(!$Found)
-				{
-				$BasePreg = $Preg['dir'].$Preg['deg'].$Preg['min'];
-				$Found = $this->PregLatLong($BasePreg,$OneLine,$L);
-				}
-			}
-		if(!$Found)
-			{
-			$BasePreg = $Preg['deg'].$Preg['min'].$Preg['sec'].$Preg['dir'];
-			 //preg_match("({$Preg['deg']}{$Preg['min']}{$Preg['sec']}{$Preg['dir']})",$OneLine,$match);
-			 //echo "BasePreg: ";
-			//print_r($match);
-			//echo "<br>";
-			//echo $BasePreg."<br>";
-			$Found = $this->PregLatLong($BasePreg,$OneLine,$L);
-			}
-		//$this->Results['verbatimCoordinates'] = $this->PruneLine($L,$Start,$End);
+		
+		if($this->PregLatLong($Preg['dir'].$Preg['deg'].$Preg['min'].$Preg['sec'],$L))
+			return;
+		if($this->PregLatLong($Preg['dir'].$Preg['deg'].$Preg['min'],$L))
+			return;
+		if($this->PregLatLong($Preg['deg'].$Preg['min'].$Preg['sec'].$Preg['dir']))
+			return;
 		}
 
 	//**********************************************
-	private function PregLatLong($BasePreg,$OneLine,$L)
+	private function PregLatLong($Preg,$L)
 		{
-		$Preg = "((".$BasePreg.")(".$BasePreg."))";
+		$OneLine = $this->LabelLines[$L];
 		$match=array();
-		$MainMatch=array();
-		$Found = preg_match($Preg,$OneLine,$MainMatch);
-		if(count($MainMatch)>2)
+		$Found = preg_match_all("((".$Preg."))", $OneLine,$match);
+		if($Found > 1)
 			{
-			$this->AddToResults('verbatimCoordinates',$MainMatch[0],$L);
-			$this->LabelLines[$L] = str_replace($MainMatch[0],"",$this->LabelLines[$L]);
-			for($N = 1;$N<3;$N++)
-				{
-				$TempString = $MainMatch[$N];
-				preg_match("([NSEW])",$TempString,$match);
-				if(count($match) == 0)
-					continue;
-				//print_r($match);
-				$Dir = $match[0];
-				preg_match("([0-9\.]+ ?[°\*])",$TempString,$D);
-				if(count($match) == 0)
-					continue;
-				$Deg = $D[0];
-				//echo "Deg=$Deg<br>";
-				if($Deg > 180)
-					continue;
-				$TempString = str_replace($Deg,"",$TempString);
-				$Min = preg_match("([[0-9\.]+)",$TempString,$M);
-				if(count($match) == 0)
-					continue;
-				$Min = $M[0];
-				//echo "Min=$Min<br>";
-				if($Min > 60)
-					continue;
-				$Deg = $Deg + $Min/60;
-				if(strpos($TempString,"\"") > 0)
-					{
-					$TempString = str_replace($Min,"",$TempString);
-					$Sec = preg_match("([[0-9\.]+)",$TempString,$S);
-					if(count($match) == 0)
-						continue;
-					$Sec = $S[0];
-					//echo "Sec=$Sec<br>";
-					$Deg = $Deg + $Sec/3600;
-					}
-				//echo "Dir=$Dir<br>";
-				$this->ReturnLatLong($Dir,$Deg);
-				$this->Assigned['decimalLatitude'] = $L;
-				}
+			$OU = new OccurrenceUtilities;
+			$LL = $OU->parseVerbatimCoordinates($match[0][0]." ".$match[0][1]);
+			$this->AddToResults('verbatimCoordinates',$match[0][0]." ".$match[0][1],$L);
+			$this->AddToResults('decimalLatitude',$LL['lat'],$L);
+			$this->AddToResults('decimalLongitude',$LL['lng'],$L);
 			return true;
 			}
 		return false;
-		
 		}
 		
 		
-	//******************************************************************
-	private function ReturnLatLong($Dir, $Deg)
-		{
-		switch($Dir)
-			{
-			case "N":
-				$this->Results['decimalLatitude'] = sprintf("%.4f",$Deg);
-				break;
-			case "S":
-				$this->Results['decimalLatitude'] = sprintf("%.4f",-$Deg);
-				break;
-			case "E":
-				$this->Results['decimalLongitude'] = sprintf("%.4f",$Deg);
-				break;
-			case "W":
-				$this->Results['decimalLongitude'] = sprintf("%.4f",-$Deg);
-				break;
-			}
-		}
 
 //******************************************************************
 //******************* Elevation Functions ***************************
@@ -617,17 +528,13 @@ class SpecProcNlpSalix{
 			if($Value < 5)
 				break;
 			$TempString = $this->LabelLines[$L];
-			//echo "Testing $TempString<br>";
 			$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*([0-9,]+)([\s]*)(f(ee)?t\b|m(eter)?s?\b))",$TempString,$match);
-			//echo "Found = $Found<br>";
 			if($Found === 1) //Embedded in a line, like "Found at elevation 2342 feet"
 				{
-				//echo "Found<br>";
 				$ScoreArray[$match[0]] = $Value+10;
 				}
 			if($Found !== 1)
 				{
-				//echo "Not found<br>";
 				$Found = preg_match("((ca\.?\s)?([0-9,]+)([ ]*)(f(ee)?t\b|m(eter)?s?\b)[\S]*[\s]*([a|A]lt|[e|E]lev)[ation]?[\S]*)",$TempString,$match);
 				if($Found === 1)  //Same as above but with Elevation/Altitude following
 					{
@@ -760,7 +667,7 @@ class SpecProcNlpSalix{
 		{
 		$Score = 0;
 		$PregNotNames = "(\b(municip|herbarium|agua|province|university|mun|county|botanical|garden)\b)i";  //Known to be confused with names
-		$Score -= 5*(preg_match($PregNotNames,$Name));
+		$Score -= 5*(preg_match_all($PregNotNames,$Name));
 		//echo "$Name, Score = $Score<br>";
 		$query = "SELECT recordedBy FROM omoccurrences where recordedBy LIKE '$Name' LIMIT 1";
 		$result = $this->conn->query($query);
