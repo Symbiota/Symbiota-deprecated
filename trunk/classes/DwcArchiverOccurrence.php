@@ -1601,10 +1601,10 @@ class DwcArchiverOccurrence{
 
 	public function getCollectionList(){
 		$retArr = array();
-		$sql = 'SELECT collid, collectionname, CONCAT_WS("-",institutioncode,collectioncode) as instcode '.
-			'FROM omcollections '.
-			'WHERE colltype = "Preserved Specimens" '.
-			'ORDER BY collectionname ';
+		$sql = 'SELECT c.collid, c.collectionname, CONCAT_WS("-",c.institutioncode,c.collectioncode) as instcode '.
+			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
+			'WHERE c.colltype = "Preserved Specimens" AND s.recordcnt > 0 '.
+			'ORDER BY c.collectionname ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->collid] = $r->collectionname.' ('.$r->instcode.')';
