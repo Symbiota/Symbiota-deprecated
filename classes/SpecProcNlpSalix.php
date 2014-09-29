@@ -255,6 +255,7 @@ class SpecProcNlpSalix{
 	private function LevenshteinCheck($SciName, $result, &$CloseSci)
 		{//Use levenshtein comparison to find closest match in the set of scinames and return the score
 		// Return the closest scientific name too (called by address as CloseSci)
+		//This is not used to correct OCR errors, but rather to improve detection of the scientific name which may contain errors
 		$Best=100;
 		while($OneSci = $result->fetch_assoc())
 			{
@@ -348,13 +349,10 @@ class SpecProcNlpSalix{
 			$Found = preg_match($Preg,$this->LabelLines[$L],$match);
 			if($Found ===1)
 				{
-				//echo "Found With<br>";
 				$TempString = str_replace($match[1],"",$match[0]);
-				//echo "TempString = $TempString<br>";
 				}
 			else if($this->CheckStartWords($L,'associatedTaxa'))
 				{
-				//$this->printr($match, "AssTaxa match");
 				$this->RemoveStartWords($L,'associatedTaxa');
 				$TempString = $this->LabelLines[$L];
 				$Found=true;
@@ -362,7 +360,8 @@ class SpecProcNlpSalix{
 			if($Found)
 				{
 				$this->AddToResults("associatedTaxa", $TempString,$L);
-				$this->LabelLines[$L] = "--";
+				$this->LabelLines[$L] = str_replace($TempString,"",$this->LabelLines[$L]);
+				$this->LabelLines[$L] = str_ireplace("with","",$this->LabelLines[$L]);
 				
 				while(++$L < count($this->LabelLines)-1)
 					{//Found the starting point for associated taxa.  Check subsequent lines.
@@ -378,6 +377,7 @@ class SpecProcNlpSalix{
 						if($StatScore > 50)
 							return;//Should mark the end of any list of associated species
 						$this->AddToResults('associatedTaxa',$this->LabelLines[$L],$L);
+
 						$this->LabelLines[$L] = "";
 						}
 					}
@@ -392,7 +392,6 @@ class SpecProcNlpSalix{
 		{//This technique is used extensively throughout.  Each line is scored for probability of containing a given field
 		//Then the array of lines is sorted by score and then reversed so the line of maximum probability is first, etc.
 		//The routine then starts with the most probable line, continuing until the field is found, or probability is below a minimum.
-		//$RankArray = array();
 		$RankArray = array_fill(0,count($this->LabelLines),0);
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{//Score the line
@@ -400,7 +399,6 @@ class SpecProcNlpSalix{
 				$RankArray[$L] = -10; //Not likely if the line is only one word long.
 			if($this->Assigned['sciname'] == $L)
 				$RankArray[$L] -=100;
-			//$RankArray[$L]=0;
 			if($this->CheckStartWords($L,"associatedTaxa") && !$this->Assigned['associatedCollectors'] != $L)
 				$RankArray[$L] = 100;
 			if($this->Assigned['sciname'] == $L || $this->Assigned['associatedCollectors'] == $L)
@@ -418,16 +416,15 @@ class SpecProcNlpSalix{
 			}
 		asort($RankArray);//Sort the array of scores...
 		$RankArray = array_reverse($RankArray, true);//Then reverse order to bring most probable to the first position
-		//$this->printr($RankArray,"RankArray");
 		return $RankArray;
 		}	
 
 		
 		
 		
-//******************************************************************
-//******************* Lat/Long Functions ***************************
-//******************************************************************
+//************************************************************************************************************************************
+//******************* Lat/Long Functions *********************************************************************************************
+//************************************************************************************************************************************
 	
 	//******************************************************************
 	private function GetLatLong()
@@ -465,6 +462,8 @@ class SpecProcNlpSalix{
 			return;
 		if($this->PregLatLong($Preg['deg'].$Preg['min'].$Preg['sec'].$Preg['dir']))
 			return;
+		if($this->PregLatLong($Preg['deg'].$Preg['min'].$Preg['dir']))
+			return;
 		}
 
 	//**********************************************
@@ -487,35 +486,34 @@ class SpecProcNlpSalix{
 		
 		
 
-//******************************************************************
-//******************* Elevation Functions ***************************
-//******************************************************************
+//************************************************************************************************************************************
+//******************* Elevation Functions ********************************************************************************************
+//************************************************************************************************************************************
 		
 	//******************************************************************
 	private function GetElevation()
 		{//Determine which lines are most probable to have a Elevation.  
 		//NOTE:  Still doesn't capture maximum elevation.
-		$PregWords = $this->MakePregWords(array("elevation","elev","m.","m","ft.","ft","feet","meters","altitude","alt","ca"));
-		$PregWords = str_replace(")","|[\d,]{4,6})",$PregWords);
+		$PregWords = "(\b(elevation|elev|m.|m|ft.|ft|feet|meters|altitude|alt|ca)\b|[\d,]{3,5})";
 		$RankArray = array();
 		$Start = 0;$End=0;
 		for($L=0;$L<count($this->LabelArray);$L++)
 			{
 			$RankArray[$L] = 0;
-			$match=array();
 			if($this->CheckStartWords($L, 'minimumElevationInMeters'))
 				$RankArray[$L]+=100;
 
-			//Rule out some possible confusing lines
+			//Adjust for some possible confusing lines
 			if($this->CheckStartWords($L, 'recordedBy'))
-				$RankArray[$L]-=100;
+				$RankArray[$L]-=100;//elevation won't be here
 			if($this->CheckStartWords($L, 'locality'))
-				$RankArray[$L]+=10;
+				$RankArray[$L]+=10;//Often in this line
 			if($this->CheckStartWords($L, 'habitat'))
-				$RankArray[$L]+=10;
+				$RankArray[$L]+=5;//Sometimes in this line
 
 			//Look for the PregWords and adjust rank.
-			$RankArray[$L] += 5*preg_match_all($PregWords, $this->LabelLines[$L],$match);
+			$Found = 5*preg_match_all($PregWords, $this->LabelLines[$L]);
+			$RankArray[$L] += $Found;
 			if(preg_match("([0-9,]{3,6})",$this->LabelLines[$L]) != 1)
 				$RankArray[$L] -= 100;  //There must be an appropriate numeric entry somewhere for elevation
 			}
@@ -571,8 +569,8 @@ class SpecProcNlpSalix{
 			return;
 		asort($ScoreArray);
 		end($ScoreArray); //Select the last (highest) element in the scores array
-		
 		$TempString = key($ScoreArray);//Should be the best line.
+
 		$L = array_search($TempString,$this->LabelLines);
 		$this->AddToResults('verbatimElevation', $TempString,$L);
 		$Found = false;
@@ -604,9 +602,9 @@ class SpecProcNlpSalix{
 		}
 
 		
-//******************************************************************
-//*********** Name Finding Routines ********************************
-//******************************************************************
+//************************************************************************************************************************************
+//*********** Name Finding Routines **************************************************************************************************
+//************************************************************************************************************************************
 
 	private function GetName($Field)
 		{//Ranks lines for probability, then looks for name pattern
@@ -744,9 +742,9 @@ class SpecProcNlpSalix{
 
 		
 	
-//******************************************************************
-//*********** Event Date Routines ********************************
-//******************************************************************
+//**********************************************************************************************************************************
+//*********** Event Date Routines **************************************************************************************************
+//**********************************************************************************************************************************
 	
 	//******************************************************************
 	private function GetEventDate($EventField, $Field)
@@ -854,9 +852,9 @@ class SpecProcNlpSalix{
 		return;
 		}
 
-//******************************************************************
-//***************** RecordNumber Functions *************************
-//******************************************************************
+//************************************************************************************************************************************
+//***************** RecordNumber Functions *******************************************************************************************
+//************************************************************************************************************************************
 	
 	
 //******************************************************************
@@ -901,17 +899,16 @@ class SpecProcNlpSalix{
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{ //If certain words appear, then much more likely state is there.
 			$RankArray[$L] = 10-$L;
-			$Found = preg_match("(([A-Za-z]{2,20}aceae|ACEAE)\s+(OF|of)\s+(.*))",$this->LabelLines[$L],$match);
-			//$Found = preg_match("(([A-Za-z]{2,20}aceae|ACEAE))",$this->LabelLines[$L],$match);
+			$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(.*))i",$this->LabelLines[$L],$match);
 			if($Found !== 1)
-				$Found = preg_match("((PLANTS|Plants)(\sOF|of\s)(.*))",$this->LabelLines[$L],$match);
+				$Found = preg_match("((plants|flora|lichens)(\sof\s)(.*))i",$this->LabelLines[$L],$match);
 
 			if($Found ===1)
 				{
 				$RankArray[$L] += 5;
 				$PlantsOf = trim($match[3]);
 				}
-			$Found = preg_match("((ium|IUM|sity|SITY|arden|ARDEN)(\sOF|of\s)(.*))",$this->LabelLines[$L],$match);
+			$Found = preg_match("((herbarium|university|garden|botanical)(\sof\s)(.*))i",$this->LabelLines[$L],$match);
 			if($Found ===1)
 				$RankArray[$L] -= 10;//Looks like institution name;
 
@@ -964,7 +961,6 @@ class SpecProcNlpSalix{
 			}
 		
 		return;
-		//$this->printr($RankArray,"Countries");
 		
 		foreach($RankArray as $L=>$Value)
 			{//First look for the country at the beginning of the lines, a common place to find it
@@ -1101,10 +1097,6 @@ class SpecProcNlpSalix{
 			$this->AddToResults('county',$CountyArray[0],0);
 			}
 		}
-
-
-
-
 	
 	//******************************************************************
 	function GetStateProvince($Country, $FLine)
@@ -1207,6 +1199,7 @@ class SpecProcNlpSalix{
 		$Max = array();
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{
+			//echo "$L is {$this->LabelLines[$L]}<br>";
 			$Skip=false;
 			foreach(array("recordedBy","family","identifiedBy","associatedCollectors","sciname","infraspecificEpithet") as $F)
 				{
@@ -1324,9 +1317,9 @@ class SpecProcNlpSalix{
 		
 	
 		
-//******************************************************************
-//******************* Misc Functions ***************************
-//******************************************************************
+//************************************************************************************************************************************
+//******************* Misc Functions *************************************************************************************************
+//************************************************************************************************************************************
 		
 	//******************************************************************
 	private function AddToResults($Field, $String, $L)
