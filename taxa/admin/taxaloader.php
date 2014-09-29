@@ -125,7 +125,7 @@ if($editable){
 <div style="margin:30px;">
 	<div style="margin-bottom:30px;">
 		This page allows a Taxonomic Administrator to batch upload taxonomic data files. 
-		See <a href="http://symbiota.org/tiki/tiki-index.php?page=Taxonomy+Batch+Loading">Symbiota Documentation</a> 
+		See <a href="http://symbiota.org/docs/loading-taxonomic-data/">Symbiota Documentation</a> 
 		pages for more details on the Taxonomic Thesaurus layout.
 	</div> 
 	<?php 

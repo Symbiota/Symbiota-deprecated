@@ -199,7 +199,7 @@ if($isEditor){
 								map the new image derivative to records in the the database. Images can be loaded for already existing 
 								specimen records, or loaded to create a skeletal specimen record for further digitization within the portal.  
 								For more information, see the
-								<b><a href="http://symbiota.org/tiki/tiki-index.php?page=Batch+Loading+Specimen+Images">Batch Image Loading</a></b> section 
+								<b><a href="http://symbiota.org/docs/batch-loading-specimen-images-2/">Batch Image Loading</a></b> section 
 								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   
 							</div>
 
@@ -208,7 +208,7 @@ if($isEditor){
 								The crowdsourcing module can be used to make unprocessed records accessible for data entry by 
 								general users who typically do not have explicit editing writes for a particular collection. 
 								For more information, see the
-								<b><a href="http://symbiota.org/tiki/tiki-index.php?page=Crowdsourcing">Crowdsource</a></b> section 
+								<b><a href="http://symbiota.org/docs/crowdsourcing-within-symbiota-2/">Crowdsource</a></b> section 
 								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   
 							</div>
 
