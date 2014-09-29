@@ -24,9 +24,12 @@ class CollectionProfileManager {
 
 	public function getCollectionList(){
 		$returnArr = Array();
-		$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, ".
-			"c.fulldescription, c.homepage, c.contact, c.email, c.icon, c.collectionguid ".
-			"FROM omcollections c ORDER BY c.SortSeq,c.CollectionName";
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, '.
+			'c.fulldescription, c.homepage, c.contact, c.email, c.icon, c.collectionguid '.
+			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
+			'WHERE s.recordcnt > 0 '.
+			'ORDER BY c.SortSeq,c.CollectionName';
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->collid]['institutioncode'] = $row->institutioncode;
