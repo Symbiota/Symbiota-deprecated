@@ -68,8 +68,40 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 		<?php 
 			if($editable){ 
 				if($action == "Upload Checklist"){
-					echo "<div style='margin:10px;'>";
-					$clLoaderManager->uploadCsvList($hasHeader,$thesId);
+					?>
+					<div style='margin:10px;'>
+						<ul>
+							<li>Uploading checklist file...</li>
+							<?php 
+							$cnt = $clLoaderManager->uploadCsvList($hasHeader,$thesId);
+							$errorArr = $clLoaderManager->getErrorArr();
+							$probCnt = count($clLoaderManager->getProblemTaxa());
+							?>
+							<li>Taxa successfully loaded: <?php echo $cnt; ?></li>
+							<li>Problematic Taxa: <?php echo $probCnt; ?> (see below)</li>
+							<li>General errors: <?php echo count($errorArr); ?></li>
+						</ul>
+						<?php 
+						if($probCnt){
+							echo '<fieldset>';
+							echo '<legend>Problematic Taxa Resolution</legend>';
+							$clLoaderManager->resolveProblemTaxa();
+							echo '</fieldset>';
+						}
+						//General errors 
+						if($errorArr){
+							echo '<fieldset>';
+							echo '<legend>General Errors</legend>';
+							echo '<ol style="margin-left:15px;">';
+								foreach($errorArr as $errStr){
+									echo '<li>'.$errStr.'</li>';
+								}
+							echo "</ol>";
+							echo '</fieldset>';
+						}
+						?>
+					</div>
+					<?php 
 				}
 				?>
 				<form enctype="multipart/form-data" action="checklistloader.php" method="post" onsubmit="return validateUploadForm(this);">

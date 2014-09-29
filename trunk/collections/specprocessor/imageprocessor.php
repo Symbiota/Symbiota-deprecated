@@ -148,7 +148,7 @@ if($spprId) $specManager->setProjVariables();
 				Contact portal manager for helping in setting up a batch image uploading workflow. 
 				Once an upload profile has been established, the collection manager can use this form to manually trigger image processing.
 				For more information, see the Symbiota documentation for 
-				<b><a href="http://symbiota.org/tiki/tiki-index.php?page=Batch+Loading+Specimen+Images">recommended practices</a></b> for batch 
+				<b><a href="http://symbiota.org/docs/batch-loading-specimen-images-2/">recommended practices</a></b> for batch 
 				loading images thorugh Symbiota.   
 			</div>
 			<?php 

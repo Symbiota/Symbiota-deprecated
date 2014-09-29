@@ -1,58 +1,31 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
- 
+include_once($serverRoot.'/classes/TaxonomyUtilites.php');
+
 class ChecklistLoaderManager {
 
 	private $conn;
 	private $clid;
-	private $clName;
-	private $clAuthors;
+	private $problemTaxa = array();
+	private $errorArr = array();
+	private $errorStr = '';
 	
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
-	
+
 	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
-	}
-	
-	public function setClid($c){
-		$c = $this->conn->real_escape_string($c);
-		if($c && is_numeric($c)){
-			$this->clid = $c;
-			$sql = "SELECT c.name, c.authors FROM fmchecklists c WHERE c.clid = ".$c;
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				$this->clName = $this->cleanOutStr($row->name);
-				$this->clAuthors = $this->cleanOutStr($row->authors);
-			}
-		}
-	}
-
-	public function getClName(){
-		return $this->clName;
-	}
-
-	public function getClAuthors(){
-		return $this->clAuthors;
-	}
-
-	public function getThesauri(){
-		$retArr = Array();
-		$sql = "SELECT taxauthid, name FROM taxauthority WHERE isactive = 1";
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$retArr[$row->taxauthid] = $this->cleanOutStr($row->name);
-		}
-		return $retArr;
 	}
 
 	public function uploadCsvList($hasHeader, $thesId){
 		set_time_limit(120);
 		ini_set("max_input_time",120);
-  		ini_set('auto_detect_line_endings', true);
+		ini_set('auto_detect_line_endings', true);
+		$successCnt = 0;
+
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'r') or die("Can't open file. File may be too large. Try uploading file in sections.");
-		
+
 		$headerArr = Array();
 		if($hasHeader){
 			$headerData = fgetcsv($fh);
@@ -68,118 +41,31 @@ class ChecklistLoaderManager {
 		}
 		
 		if(array_key_exists("sciname",$headerArr)){
-			echo "<ul>";
-			echo "<li>Beginning process to load checklist</li>";
-			echo "<li>File uploaded and now reading file...</li>";
-			echo "<ol>";
-			$successCnt = 0;
-			$failCnt = 0;
 			while($valueArr = fgetcsv($fh)){
-				$statusStr = "";
 				$tid = 0;
 				$rankId = 0;
 				$sciName = ""; $family = "";
-				$sciNameStr = trim($valueArr[$headerArr["sciname"]]);
+				$sciNameStr = $this->cleanInStr($valueArr[$headerArr["sciname"]]);
 				$noteStr = '';
 				if($sciNameStr){
-					//Do some minor cleaning
-					$sciNameStr = str_replace(array('?','*'),'',$sciNameStr);
-					$sciNameStr = preg_replace('/\s\s+/',' ',$sciNameStr);
-					if(stripos($sciNameStr,' cf ') || strpos($sciNameStr,' c.f. ') || stripos($sciNameStr,' cf. ')){
-						$sciNameStr = str_replace(array(' cf ',' c.f. ',' cf. '),' ',$sciNameStr);
-						$noteStr = 'cf';
-					}
-					elseif(stripos($sciNameStr,' aff ') || stripos($sciNameStr,' aff. ')){
-						$sciNameStr = str_replace(array(' aff ',' aff. '),' ',$sciNameStr);
-						$noteStr = 'aff';
-					}
-					$sciNameStr = str_replace(' sp.','',$sciNameStr);
-					//Check is name is in taxa table and grab tid if it is
+					$sciNameArr = TaxonomyUtilites::parseSciName($sciNameArr);
+					//Check name is in taxa table and grab tid if it is
 					$sql = "";
-					if($thesId){
+					if($thesId && is_numeric($thesId)){
 						$sql = 'SELECT t2.tid, ts.family, t2.rankid '.
 							'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
 							'INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid '.
-							'WHERE (ts.taxauthid = '.$thesId.') AND (t.sciname = "'.$sciNameStr.'")';
+							'WHERE (ts.taxauthid = '.$thesId.') ';
 					}
 					else{
 						$sql = 'SELECT t.tid, ts.family, t.rankid '.
 							'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-							'WHERE ts.taxauthid = 1 AND (t.sciname = "'.$sciNameStr.'")';
+							'WHERE ts.taxauthid = 1 ';
 					}
+					$cleanSciName = $this->encodeString($sciNameArr['sciname']);
+					$sql .= 'AND (t.sciname IN("'.$sciNameStr.'"'.($cleanSciName?',"'.$cleanSciName.'"':'').'))';
 					$rs = $this->conn->query($sql);
 					if($rs){
-						if($row = $rs->fetch_object()){
-							$tid = $row->tid;
-							$family = $this->cleanOutStr($row->family);
-							$rankId = $row->rankid;
-						}
-						$rs->close();
-					}
-		
-					if(!$tid){
-						//$sciNameStr not in database, thus try parsing out author  
-						$unitInd1 = ""; $unitName1 = "";
-						$unitInd2 = ""; $unitName2 = "";
-						$unitInd3 = ""; $unitName3 = "";
-						$sciNameArr = explode(" ",$sciNameStr);
-						if(count($sciNameArr)){
-							if(strtolower($sciNameArr[0]) == "x"){
-								$unitInd1 = array_shift($sciNameArr);
-							}
-							$unitName1 = array_shift($sciNameArr);
-							if(count($sciNameArr)){
-								if(strtolower($sciNameArr[0]) == "x"){
-									$unitInd2 = array_shift($sciNameArr);
-								}
-								elseif((strpos($sciNameArr[0],".") !== false) || ord($sciNameArr[0]) < 97 || ord($sciNameArr[0]) > 122){
-									unset($sciNameArr);
-								}
-								else{
-									$unitName2 = array_shift($sciNameArr);
-								}
-							}
-						}
-						while(isset($sciNameArr) && $sciStr = array_shift($sciNameArr)){
-							if($sciStr == "f." || $sciStr == "fo." || $sciStr == "fo" || $sciStr == "forma"){
-								if($sciNameArr){
-									$unitInd3 = 'f.';
-									$unitName3 = array_shift($sciNameArr);
-								}
-							}
-							elseif($sciStr == "var." || $sciStr == "var"){
-								if($sciNameArr){
-									$unitInd3 = 'var.';
-									$unitName3 = array_shift($sciNameArr);
-								}
-							}
-							elseif($sciStr == "ssp." || $sciStr == "ssp" || $sciStr == "subsp." || $sciStr == "subsp"){
-								if($sciNameArr){
-									$unitInd3 = 'ssp.';
-									$unitName3 = array_shift($sciNameArr);
-								}
-							}
-						}
-						$sciName = $this->encodeString(trim(trim($unitInd1." ".$unitName1)." ".trim($unitInd2." ".$unitName2)." ".trim($unitInd3." ".$unitName3)));
-						$sql = '';
-						if($thesId){
-							$sql = "SELECT t2.tid, ts.family, t2.rankid ".
-								"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-								"INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid WHERE (ts.taxauthid = ".$thesId.") AND ";
-						}
-						else{
-							$sql = "SELECT t.tid, ts.family, t.rankid ".
-								"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-								"WHERE ts.taxauthid = 1 AND ";
-						}
-						if($unitInd3 == 'ssp.'){
-							$sql .= '((t.sciname = "'.$sciName.'") OR (t.sciname = "'.str_replace('ssp.','subsp.',$sciName).'"))';
-						}
-						else{
-							$sql .= '(t.sciname = "'.$sciName.'")';
-						}
-						//echo $sql;
-						$rs = $this->conn->query($sql);
 						if($row = $rs->fetch_object()){
 							$tid = $row->tid;
 							$family = $this->cleanOutStr($row->family);
@@ -219,42 +105,126 @@ class ChecklistLoaderManager {
 								$successCnt++;
 							}
 							else{
-								$failCnt++;
-								$statusStr = $sciNameStr." (TID = $tid) failed to load<br />Error msg: ".$this->conn->error;
+								$this->errorArr[] = $sciNameStr." (TID = $tid) failed to load<br />Error msg: ".$this->conn->error;
 								//echo $sql."<br />";
 							}
 						}
 						else{
-							$statusStr = $sciNameStr." failed to load (taxon must be of genus, species, or infraspecific ranking)";
-							$failCnt++;
+							$this->errorArr[] = $sciNameStr." failed to load (taxon must be of genus, species, or infraspecific ranking)";
 						}
 					}
 					else{
-						$statusStr = $sciNameStr." failed to load (misspelled or not yet in taxonomic thesaurus)";
-						$failCnt++;
+						$this->problemTaxa[] = $cleanSciName;
+						//$statusStr = $sciNameStr." failed to load (misspelled or not yet in taxonomic thesaurus)";
+						//$failCnt++;
 					}
 				}
-				if($statusStr) echo "<li><span style='color:red;'>ERROR:</span> ".$statusStr."</li>";
 			}
-			echo "</ol>";
 			fclose($fh);
-			echo "<li>Finished loading checklist</li>";
-			echo "<li>".$successCnt." names loaded successfully</li>";
-			echo "<li>".$failCnt." failed to load</li>";
-			echo "</ul>";
 		}
 		else{
-			echo "<div style='color:red;'>ERROR: unable to located sciname field</div>";
+			$this->errorArr[] = '<div style="color:red;">ERROR: unable to locate sciname field</div>';
+		}
+		return $successCnt;
+	}
+	
+	public function resolveProblemTaxa(){
+		if($this->problemTaxa){
+			$taxUtil = new TaxonomyUtilities();
+			echo '<table class="styledtable">';
+			echo '<tr><th>Cnt</th><th>Name</th><th>Actions</th></tr>';
+			$cnt = 1;
+			foreach($this->problemTaxa as $nameStr){
+				echo '<tr>';
+				echo '<td>'.$cnt.'</td>';
+				echo '<td>'.$nameStr.'</td>';
+				echo '<td>';
+				//Check taxonomic thesaurus to see if it should be added to thesaurus
+				if($taxaArr = $taxUtil->getEolTaxonArr($nameStr)){
+					if($tid = $taxUtil->loadNewTaxon($taxaArr)){
+						$this->addTaxonToChecklist($tid);
+						
+						echo '<div>';
+							
+						echo '</div>';
+					}
+					else{
+						echo '<div>';
+							
+						echo '</div>';
+					}
+				}
+				else{
+					//Check database for close matches
+					echo '<div>';
+					
+					echo '</div>';
+				}
+				echo '</td>';
+				echo '</tr>';
+				flush();
+				ob_flush();
+				$cnt++;
+			}
+			echo '</table>';
+		}
+	}
+	
+	private function addTaxonToChecklist($tid){
+		$status = true;
+		$sql = 'INSERT INTO fmchklsttaxalink(clid,tid) '.
+			'VALUES('.$this->clid.','.$tid.')';
+		if(!$this->conn->query($sql)){
+			$this->errorStr = 'ERROR adding new taxon to checklist: '.$this->conn->error;
+			$status = false;
+		}
+		return $status;
+	}
+
+	//Setters and getters
+	public function setClid($c){
+		if($c && is_numeric($c)){
+			$this->clid = $c;
 		}
 	}
 
-	private function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
+	public function getProblemTaxa(){
+		return $this->problemTaxa;
 	}
-	
+
+	public function getErrorArr(){
+		return $this->errorArr;
+	}
+
+	public function getErrorStr(){
+		return $this->errorStr;
+	}
+
+	public function getChecklistMetadata(){
+		$retArr = array();
+		if($this->clid){
+			$sql = 'SELECT c.name, c.authors FROM fmchecklists c '.
+				'WHERE c.clid = '.$this->clid;
+			$rs = $this->conn->query($sql);
+			if($row = $rs->fetch_object()){
+				$retArr['name'] = $row->name;
+				$retArr['authors'] = $row->authors;
+			}
+		}
+		return $retArr;
+	}
+
+	public function getThesauri(){
+		$retArr = Array();
+		$sql = "SELECT taxauthid, name FROM taxauthority WHERE isactive = 1";
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$retArr[$row->taxauthid] = $row->name;
+		}
+		return $retArr;
+	}
+
+	//Misc functions
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);

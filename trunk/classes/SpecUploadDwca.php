@@ -198,7 +198,7 @@ class SpecUploadDwca extends SpecUploadBase{
 									}
 									//Read occurrence header and compare
 									$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['occur']['name'];
-			 						$fh = fopen($fullPath,'rb') or die("Can't open occurrence file");
+			 						$fh = fopen($fullPath,'r') or die("Can't open occurrence file");
 									$headerArr = $this->getRecordArr($fh);
 									foreach($headerArr as $k => $v){
 										if(strtolower($v) != strtolower($this->metaArr['occur']['fields'][$k])){
@@ -264,6 +264,33 @@ class SpecUploadDwca extends SpecUploadBase{
 									}
 								}
 								$this->metaArr[$tagName]['fields'][0] = 'coreid';
+
+								//Test meta.xml field list against extension file
+								if($this->metaArr[$tagName]['ignoreHeaderLines'] == 1){
+									//Set delimiter  
+									if($this->metaArr[$tagName]['fieldsTerminatedBy']){
+										if($this->metaArr[$tagName]['fieldsTerminatedBy'] == '\t'){
+											$this->delimiter = "\t";
+										}
+										else{
+											$this->delimiter = $this->metaArr[$tagName]['fieldsTerminatedBy'];
+										}
+										//Read extension file header and compare
+										$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr[$tagName]['name'];
+				 						$fh = fopen($fullPath,'r') or die("Can't open $tagName extension file");
+										$headerArr = $this->getRecordArr($fh);
+										foreach($headerArr as $k => $v){
+											if(strtolower($v) != strtolower($this->metaArr[$tagName]['fields'][$k])){
+												$msg = '<div style="margin-left:25px;">';
+												$msg .= 'WARNING: meta.xml field order out of sync w/ '.$this->metaArr[$tagName]['name'].'; remapping: field #'.($k+1).' => '.$v;
+												$msg .= '</div>';
+												$this->outputMsg($msg);
+												$this->errorStr = $msg;
+												$this->metaArr[$tagName]['fields'][$k] = $v;
+											}
+										}
+									}
+								}
 							}
 						}					
 					}				

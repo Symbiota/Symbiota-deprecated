@@ -217,7 +217,7 @@ $smManager = new SiteMapManager();
 					<h3>Images</h3>
 					<div style="margin:10px;">
 						See the Symbiota documentation on 
-						<a href="http://symbiota.org/tiki/tiki-index.php?page=Image+Submission">Image Submission</a> 
+						<a href="http://symbiota.org/docs/image-submission-2/">Image Submission</a> 
 						for an overview of how images are managed within a Symbiota data portal. Field images without 
 						detailed locality information can be uploaded using the Taxon Species Profile page.
 						Specimen images are loaded through the Specimen Editing page or through a batch upload process 
@@ -450,9 +450,9 @@ $smManager = new SiteMapManager();
 						Data management for observation projects is handled in a similar manner to what is described in the Collections paragraph above.
 						One difference is the General Observation project. This project serves two central purposes: 
 						1) Allows registered users to submit a image voucherd field observation. 
-						2) Allows collectors to enter their own collection data for label printing and to make it available for transfer 
-						to collections obtaining the physical specimens through donations or exchange.
-						Visit the <a href="http://symbiota.org/tiki/tiki-index.php?page=Specimen+Label+Printing" target="_blank">Symbiota Documentation</a> for more information on specimen processing capabilites.  
+						2) Allows collectors to enter their own collection data for label printing and to make the data available 
+						to the collections obtaining the physical specimens through donations or exchange.
+						Visit the <a href="http://symbiota.org/docs/specimen-data-management/" target="_blank">Symbiota Documentation</a> for more information on specimen processing capabilites. 
 						Note that observation projects are not activated on all Symbiota data portals. 
 					</div>
 					<div style="margin:10px;">

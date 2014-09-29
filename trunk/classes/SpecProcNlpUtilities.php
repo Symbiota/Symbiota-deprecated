@@ -243,7 +243,7 @@ class SpecProcNlpUtilities {
 	}
 
 	//Misc functions
-	protected function encodeString($inStr){
+	public static function encodeString($inStr){
  		global $charset;
  		$retStr = $inStr;
  		if($inStr){
@@ -263,7 +263,7 @@ class SpecProcNlpUtilities {
 		return $retStr;
 	}
 
-	protected function cleanInStr($str){
+	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = $this->conn->real_escape_string($newStr);
