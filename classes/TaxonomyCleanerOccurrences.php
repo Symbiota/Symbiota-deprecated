@@ -22,7 +22,7 @@ class TaxonomyCleanerOccurrences extends TaxonomyCleaner{
 		$this->conn->query($sql);
 	}
 
-	public function verifyCollectionNames($collId){
+	public function verifyCollectionTaxa($collId){
 		//Grab list of taxa, check each one, add valid taxa to taxonomic thesaurus, return number added and number problematic remaining
 		$numGood = 0;
 		$numBad = 0;
