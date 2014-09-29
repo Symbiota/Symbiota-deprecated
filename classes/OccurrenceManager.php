@@ -611,30 +611,36 @@ class OccurrenceManager{
 		//Set collections
 		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, '.
 			'cat.catagory, cat.icon AS caticon, cat.acronym '.
-			'FROM omcollections c LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
+			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
+			'LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
 			'LEFT JOIN omcollcatagories cat ON ccl.ccpk = cat.ccpk '.
+			'WHERE s.recordcnt > 0 '.
 			'ORDER BY ccl.sortsequence, cat.catagory, c.sortseq, c.CollectionName ';
 		//echo "<div>SQL: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($r = $result->fetch_object()){
-			$collType = (stripos($r->colltype, "observation") !== false?'obs':'spec');
-			if($r->ccpk){
-				if(!isset($retArr[$collType]['cat'][$r->ccpk]['name'])){
-					$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->catagory;
-					$retArr[$collType]['cat'][$r->ccpk]['icon'] = $r->caticon;
-					$retArr[$collType]['cat'][$r->ccpk]['acronym'] = $r->acronym;
-					//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['isselected'] = 1;
+			$collType = '';
+			if(stripos($r->colltype, "observation") !== false) $collType = 'obs';
+			if(stripos($r->colltype, "specimen")) $collType = 'spec';
+			if($collType){
+				if($r->ccpk){
+					if(!isset($retArr[$collType]['cat'][$r->ccpk]['name'])){
+						$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->catagory;
+						$retArr[$collType]['cat'][$r->ccpk]['icon'] = $r->caticon;
+						$retArr[$collType]['cat'][$r->ccpk]['acronym'] = $r->acronym;
+						//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['isselected'] = 1;
+					}
+					$retArr[$collType]['cat'][$r->ccpk][$r->collid]["instcode"] = $r->institutioncode;
+					$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collcode"] = $r->collectioncode;
+					$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collname"] = $r->collectionname;
+					$retArr[$collType]['cat'][$r->ccpk][$r->collid]["icon"] = $r->icon;
 				}
-				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["instcode"] = $r->institutioncode;
-				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collcode"] = $r->collectioncode;
-				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collname"] = $r->collectionname;
-				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["icon"] = $r->icon;
-			}
-			else{
-				$retArr[$collType]['coll'][$r->collid]["instcode"] = $r->institutioncode;
-				$retArr[$collType]['coll'][$r->collid]["collcode"] = $r->collectioncode;
-				$retArr[$collType]['coll'][$r->collid]["collname"] = $r->collectionname;
-				$retArr[$collType]['coll'][$r->collid]["icon"] = $r->icon;
+				else{
+					$retArr[$collType]['coll'][$r->collid]["instcode"] = $r->institutioncode;
+					$retArr[$collType]['coll'][$r->collid]["collcode"] = $r->collectioncode;
+					$retArr[$collType]['coll'][$r->collid]["collname"] = $r->collectionname;
+					$retArr[$collType]['coll'][$r->collid]["icon"] = $r->icon;
+				}
 			}
 		}
 		$result->close();

@@ -184,20 +184,20 @@ function pushDwcArrToForm(msg){
 	var verbatimElevTransferred = false;
 	for(var k in dwcArr){
 		try{
-			var symbk = k.toLowerCase();
-			if(symbk == "scientificname") symbk = "sciname";
-			var elem = f.elements[symbk];
-			var inVal = dwcArr[k];
-			if(inVal && elem && elem.value == "" && elem.disabled == false && elem.type != "hidden"){
-				if(symbk == "sciname") scinameTransferred = true;
-				if(symbk == "verbatimelevation") verbatimElevTransferred = true;
-				elem.value = dwcArr[k];
-				elem.style.backgroundColor = "lightgreen";
-				//fieldsTransfer = fieldsTransfer + ", " + k;
-				fieldChanged(symbk);
-			}
-			else{
-				//fieldsSkip = fieldsSkip + ", " + k;
+			if(k != 'family' && k != scientificnameauthorship){
+				var elem = f.elements[k];
+				var inVal = dwcArr[k];
+				if(inVal && elem && elem.value == "" && elem.disabled == false && elem.type != "hidden"){
+					if(k == "sciname") scinameTransferred = true;
+					if(k == "verbatimelevation") verbatimElevTransferred = true;
+					elem.value = inVal;
+					elem.style.backgroundColor = "lightgreen";
+					//fieldsTransfer = fieldsTransfer + ", " + k;
+					fieldChanged(k);
+				}
+				else{
+					//fieldsSkip = fieldsSkip + ", " + k;
+				}
 			}
 		}
 		catch(err){
