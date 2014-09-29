@@ -1,6 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/TaxonomyMaintenance.php');
+include_once($serverRoot.'/classes/TaxonomyUtilities.php');
 
 class TaxonomyDisplayManager{
 
@@ -33,7 +33,7 @@ class TaxonomyDisplayManager{
 			echo '</div>';
 			ob_flush();
 			flush();
-			$taxMainObj = new TaxonomyMaintenance();
+			$taxMainObj = new TaxonomyUtilities();
 			$taxMainObj->buildHierarchyEnumTree();
 		}
 		$rsTest->free();
