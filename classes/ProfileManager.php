@@ -268,7 +268,7 @@ class ProfileManager{
 		
 		$firstName = $postArr['firstname'];
 		$lastName = $postArr['lastname'];
-		if($firstName == $lastName && strlen($lastName) == 8) return ''; 
+		if($firstName == $lastName && $postArr['biography']) return ''; 
 		
 		$person = new Person();
 		$person->setPassword($postArr['pwd']);
