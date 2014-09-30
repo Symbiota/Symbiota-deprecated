@@ -139,6 +139,22 @@ function submitBatchUpdate(f){
 	return false;
 }
 
+function customSelectChanged(targetSelect){
+	var sourceObj = document.queryform.q_customfield1;
+	var targetObj = document.queryform.q_customtype1;
+	if(targetSelect == 2){
+		sourceObj = document.queryform.q_customfield2;
+		targetObj = document.queryform.q_customtype2;
+	}
+	else if(targetSelect == 3){
+		sourceObj = document.queryform.q_customfield3;
+		targetObj = document.queryform.q_customtype3;
+	}
+	if(sourceObj.value == "ocrFragment"){
+		targetObj.value = "LIKE";
+	}
+}
+
 function toggleCustomDiv2(){
 	var f = document.queryform;
 	f.q_customfield2.options[0].selected = true;

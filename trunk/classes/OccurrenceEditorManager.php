@@ -440,47 +440,45 @@ class OccurrenceEditorManager {
 			$ct = (array_key_exists('ct'.$x,$this->qryArr)?$this->qryArr['ct'.$x]:'');
 			$cv = (array_key_exists('cv'.$x,$this->qryArr)?$this->qryArr['cv'.$x]:'');
 			if($cf){
-				if($cf == 'ocrFragment' && !strpos($sqlWhere,'rawstr') && $cv){
+				if($cf == 'ocrFragment' && !strpos($sqlWhere,'rawstr')){
 					//Used when OCR frag comes from custom field search within basic query form
-					if(strpos($cv,'%') !== false){
-						$sqlWhere .= 'AND (ocr.rawstr LIKE "'.$cv.'") ';
-					}
-					else{
-						$sqlWhere .= 'AND (ocr.rawstr LIKE "%'.$cv.'%") ';
-					}
+					$cf = 'ocr.rawstr';
 				}
-				elseif($ct=='NULL'){
-					$sqlWhere .= 'AND (o.'.$cf.' IS NULL) ';
+				else{
+					$cf = 'o.'.$cf;
+				}
+				if($ct=='NULL'){
+					$sqlWhere .= 'AND ('.$cf.' IS NULL) ';
 				}
 				elseif($ct=='NOTNULL'){
-					$sqlWhere .= 'AND (o.'.$cf.' IS NOT NULL) ';
+					$sqlWhere .= 'AND ('.$cf.' IS NOT NULL) ';
 				}
 				elseif($ct=='GREATER' && $cv){
 					if(!is_numeric($cv)) $cv = '"'.$cv.'"';
-					$sqlWhere .= 'AND (o.'.$cf.' > '.$cv.') ';
+					$sqlWhere .= 'AND ('.$cf.' > '.$cv.') ';
 				}
 				elseif($ct=='LESS' && $cv){
 					if(!is_numeric($cv)) $cv = '"'.$cv.'"';
-					$sqlWhere .= 'AND (o.'.$cf.' < '.$cv.') ';
+					$sqlWhere .= 'AND ('.$cf.' < '.$cv.') ';
 				}
 				elseif($ct=='LIKE' && $cv){
 					if(strpos($cv,'%') !== false){
-						$sqlWhere .= 'AND (o.'.$cf.' LIKE "'.$cv.'") ';
+						$sqlWhere .= 'AND ('.$cf.' LIKE "'.$cv.'") ';
 					}
 					else{
-						$sqlWhere .= 'AND (o.'.$cf.' LIKE "%'.$cv.'%") ';
+						$sqlWhere .= 'AND ('.$cf.' LIKE "%'.$cv.'%") ';
 					}
 				}
 				elseif($ct=='STARTS' && $cv){
 					if(strpos($cv,'%') !== false){
-						$sqlWhere .= 'AND (o.'.$cf.' LIKE "'.$cv.'") ';
+						$sqlWhere .= 'AND ('.$cf.' LIKE "'.$cv.'") ';
 					}
 					else{
-						$sqlWhere .= 'AND (o.'.$cf.' LIKE "'.$cv.'%") ';
+						$sqlWhere .= 'AND ('.$cf.' LIKE "'.$cv.'%") ';
 					}
 				}
 				elseif($cv){
-					$sqlWhere .= 'AND (o.'.$cf.' = "'.$cv.'") ';
+					$sqlWhere .= 'AND ('.$cf.' = "'.$cv.'") ';
 				}
 			}
 		}
@@ -498,18 +496,18 @@ class OccurrenceEditorManager {
 	public function getQueryRecordCount($reset = 0){
 		global $clientRoot;
 		if(!$reset && array_key_exists('rc',$this->qryArr)) return $this->qryArr['rc'];
-		$sqlWhere = $this->sqlWhere;
 		$recCnt = false;
-		if($sqlWhere){
-			if($obPos = strpos($sqlWhere,' ORDER BY')){
-				$sqlWhere = substr($sqlWhere,0,$obPos);
-			}
-			if($obPos = strpos($sqlWhere,' LIMIT ')){
-				$sqlWhere = substr($sqlWhere,0,$obPos);
-			}
+		if($this->sqlWhere){
 			$sql = 'SELECT COUNT(DISTINCT o.occid) AS reccnt FROM omoccurrences o ';
-			if(strpos($sqlWhere,'ocr.rawstr') !== false){
-				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+			$this->addTableJoins($sql);
+			/*
+			if(strpos($sqlWhere,'ocr.rawstr')){
+				if(strpos($sqlWhere,'ocr.rawstr IS NULL')){
+					$sql .= 'LEFT JOIN images i ON o.occid = i.occid LEFT JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+				}
+				else{
+					$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+				}
 			}
 			elseif(array_key_exists('io',$this->qryArr)){
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
@@ -520,8 +518,16 @@ class OccurrenceEditorManager {
 			if($this->crowdSourceMode){
 				$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
 			}
+			*/
+			$sqlWhere = $this->sqlWhere;
+			if($obPos = strpos($sqlWhere,' ORDER BY')){
+				$sqlWhere = substr($sqlWhere,0,$obPos);
+			}
+			if($obPos = strpos($sqlWhere,' LIMIT ')){
+				$sqlWhere = substr($sqlWhere,0,$obPos);
+			}
 			$sql .= $sqlWhere;
-			//echo '<div>'.$sql.'</div>';
+			//echo '<div>'.$sql.'</div>'; exit;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$recCnt = $r->reccnt;
@@ -550,8 +556,15 @@ class OccurrenceEditorManager {
 			if(strpos($this->sqlWhere,'recordedby')){
 				$sql .= 'use index(Index_collector) ';
 			}
-			if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
-				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+			$this->addTableJoins($sql);
+			/*
+			if(strpos($this->sqlWhere,'ocr.rawstr')){
+				if(strpos($this->sqlWhere,'ocr.rawstr IS NULL')){
+					$sql .= 'LEFT JOIN images i ON o.occid = i.occid LEFT JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+				}
+				else{
+					$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+				}
 			}
 			elseif(array_key_exists('io',$this->qryArr)){
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
@@ -562,6 +575,7 @@ class OccurrenceEditorManager {
 			if($this->crowdSourceMode){
 				$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
 			}
+			*/
 			$sql .= $this->sqlWhere;
 		}
 		if($sql){
@@ -581,6 +595,26 @@ class OccurrenceEditorManager {
 				$this->setLoanData();
 				if($this->exsiccatiMode) $this->setExsiccati();
 			}
+		}
+	}
+	
+	private function addTableJoins(&$sql){
+		if(strpos($this->sqlWhere,'ocr.rawstr')){
+			if(strpos($this->sqlWhere,'ocr.rawstr IS NULL')){
+				$sql .= 'LEFT JOIN images i ON o.occid = i.occid LEFT JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+			}
+			else{
+				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+			}
+		}
+		elseif(array_key_exists('io',$this->qryArr)){
+			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+		}
+		elseif(array_key_exists('woi',$this->qryArr)){
+			$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
+		}
+		if($this->crowdSourceMode){
+			$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
 		}
 	}
 
@@ -1083,16 +1117,7 @@ class OccurrenceEditorManager {
 		$nv = $this->cleanInStr($newValue);
 		if($fn && ($ov || $nv)){
 			$sql = 'UPDATE omoccurrences o2 INNER JOIN (SELECT o.occid FROM omoccurrences o ';
-			//Add raw string fragment if present, yet unlikely
-			if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
-				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
-			}
-			elseif(array_key_exists('io',$this->qryArr)){
-				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
-			}
-			elseif(array_key_exists('woi',$this->qryArr)){
-				$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
-			}
+			$this->addTableJoins($sql);
 			//Strip ORDER BY and/or LIMIT fragments
 			if(strpos($this->sqlWhere,'ORDER BY')){
 				$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
@@ -1124,16 +1149,7 @@ class OccurrenceEditorManager {
 		$fn = $this->cleanInStr($fieldName);
 		$ov = $this->cleanInStr($oldValue);
 		$sql = 'SELECT COUNT(o.occid) AS retcnt FROM omoccurrences o ';
-		//Add raw string fragment if present, yet unlikely
-		if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
-			$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
-		}
-		elseif(array_key_exists('io',$this->qryArr)){
-			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
-		}
-		elseif(array_key_exists('woi',$this->qryArr)){
-			$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
-		}
+		$this->addTableJoins($sql);
 		//Strip ORDER BY and/or LIMIT fragments
 		if(strpos($this->sqlWhere,'ORDER BY')){
 			$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));

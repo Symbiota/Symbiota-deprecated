@@ -163,7 +163,7 @@ else{
 			?>
 			<div style="margin:2px 0px;">
 				Custom Field 1: 
-				<select name="q_customfield1">
+				<select name="q_customfield1" onchange="customSelectChanged(1)">
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
 					<?php 
@@ -188,7 +188,7 @@ else{
 			</div>
 			<div id="customdiv2" style="margin:2px 0px;display:<?php echo ($qCustomValue2||$qCustomType2=='NULL'||$qCustomType2=='NOTNULL'?'block':'none');?>;">
 				Custom Field 2: 
-				<select name="q_customfield2">
+				<select name="q_customfield2" onchange="customSelectChanged(2)">
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
 					<?php 
@@ -213,7 +213,7 @@ else{
 			</div>
 			<div id="customdiv3" style="margin:2px 0px;display:<?php echo ($qCustomValue3||$qCustomType3=='NULL'||$qCustomType3=='NOTNULL'?'block':'none');?>;">
 				Custom Field 3: 
-				<select name="q_customfield3">
+				<select name="q_customfield3" onchange="customSelectChanged(3)">
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
 					<?php 
