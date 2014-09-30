@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 include_once('../../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcNlpUtilities.php');
 include_once($serverRoot.'/classes/SpecProcNlpSalix.php');
