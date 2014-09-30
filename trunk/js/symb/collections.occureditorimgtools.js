@@ -149,7 +149,7 @@ function nlpLbcc(nlpButton,prlid){
 		url: "rpc/nlplbcc.php",
 		data: { rawocr: rawOcr, collid: collid, catnum: cnumber }
 	}).done(function( msg ) {
-		pushDwcArrToForm(msg);
+		pushDwcArrToForm(msg,"lightgreen");
 	});
 
 	nlpButton.disabled = false;
@@ -168,14 +168,14 @@ function nlpSalix(nlpButton,prlid){
 		url: "rpc/nlpsalix.php",
 		data: { rawocr: rawOcr }
 	}).done(function( msg ) {
-		pushDwcArrToForm(msg);
+		pushDwcArrToForm(msg,"lightgreen");
 	});
 
 	nlpButton.disabled = false;
 	document.getElementById("workingcircle_salix-"+prlid).style.display = "none";
 }
 
-function pushDwcArrToForm(msg){
+function pushDwcArrToForm(msg,bgColor){
 	var dwcArr = $.parseJSON(msg);
 	var f = document.fullform;
 	//var fieldsTransfer = "";
@@ -184,14 +184,14 @@ function pushDwcArrToForm(msg){
 	var verbatimElevTransferred = false;
 	for(var k in dwcArr){
 		try{
-			if(k != 'family' && k != scientificnameauthorship){
+			if(k != 'family' && k != 'scientificnameauthorship'){
 				var elem = f.elements[k];
 				var inVal = dwcArr[k];
 				if(inVal && elem && elem.value == "" && elem.disabled == false && elem.type != "hidden"){
 					if(k == "sciname") scinameTransferred = true;
 					if(k == "verbatimelevation") verbatimElevTransferred = true;
 					elem.value = inVal;
-					elem.style.backgroundColor = "lightgreen";
+					elem.style.backgroundColor = bgColor;
 					//fieldsTransfer = fieldsTransfer + ", " + k;
 					fieldChanged(k);
 				}
