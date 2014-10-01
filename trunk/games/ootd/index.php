@@ -94,8 +94,6 @@ if($submitAction){
 			<div id="">
 				<div style="z-index:1;" >
 					<!--Plant of the Day body here-->
-					<h2><?php echo (isset($ootdGameTitle)?$ootdGameTitle:'Organism of the Day'); ?></h2>
-					<br /><br />
 					<div class = "dailypicture" align = "center">
 						<div>
 							<div style="vertical-align:middle;">
