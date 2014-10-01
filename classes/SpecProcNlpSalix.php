@@ -17,7 +17,7 @@ class SpecProcNlpSalix{
 			//The return array
 	private $Assigned = array();
 			//Indicates to what line a field has been assigned.
-	private $PregMonths ="(\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|deciembre)\b)";
+	private $PregMonths ="(\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|deciembre)\b)";
 	private $LabelLines=array();
 	//private $Array=array();
 	private $PregStart = array();
@@ -179,6 +179,7 @@ class SpecProcNlpSalix{
 	//**********************************************
 	private function FindFamilyName()
 		{//First look for "....aceae of" something
+		$PotentialFamily = "";
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{
 			$Found = preg_match("((\b[A-Za-z]{2,20}(aceae|ACEAE))\s(OF|of)\s(.*))",$this->LabelLines[$L],$match);
@@ -194,7 +195,26 @@ class SpecProcNlpSalix{
 					return;
 					}
 				}
+			else if($PotentialFamily == "")
+				{
+				$Found = preg_match("((\b[A-Za-z]{2,20}(aceae|ACEAE))\b)",$this->LabelLines[$L],$match);
+				if($Found === 1)
+					{ //If not found as "...aceae of...", then use the first "...acea..." found.
+					//$this->printr($match,"ACEAE match:");
+					$query = "SELECT family from taxstatus WHERE family LIKE '{$match[1]}' LIMIT 1";
+					$result = $this->conn->query($query);
+					if($result->num_rows > 0)
+						{
+						$PotentialFamily = mb_convert_case($match[1],MB_CASE_TITLE);
+						}
+					}
+				}
 			}
+			if($PotentialFamily != "")
+				{
+				$this->Family = $PotentialFamily;
+				$this->AddToResults('family',$PotentialFamily,$L);
+				}
 		}
 		
 		
@@ -216,7 +236,7 @@ class SpecProcNlpSalix{
 		}
 
 	//**********************************************
-	private function ScoreSciName($First, $Second)
+	private function ScoreSciName($First, $Second, $IgnoreFamily=false)
 		{ //Find the closest match in the omoccurrences table, and return a score.  Higher is better.
 		//Start by checking the full name (Genus species).  Slowly reduce the number of pieces to check.
 		$Score=0;
@@ -252,13 +272,13 @@ class SpecProcNlpSalix{
 			if($result->num_rows >0) //Found matches to Gen...
 				$Score = $this->LevenshteinCheck("$First $Second",$result,$CloseSci);
 			}
-		if($this->Family != "")
+		if(!$IgnoreFamily && $this->Family != "")
 			{//If we are already sure about the family, then check if the selected sciname is actually in that family.
 			//$query = ("SELECT sciname from omoccurrences where family LIKE '{$this->Family}' AND sciname LIKE '$CloseSci' LIMIT 1");
 			$query = "SELECT ts.family, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid WHERE t.sciname LIKE '$CloseSci' AND ts.family like '{$this->Family}' LIMIT 1";
 			//echo $query."<br>";
 			$result = $this->conn->query($query);
-			//echo $result->num_rows." records (Yes Family:) ";
+			//echo $result->num_rows." records for $CloseSci in {$this->Family}<br> ";
 			if($result->num_rows == 0)
 				{
 				//echo "Deduct 20 for not in family {$this->Family}<br>";
@@ -300,14 +320,20 @@ class SpecProcNlpSalix{
 		
 		$SciName = $Genus." ".$Species;
 		$this->AddToResults('sciname',$SciName,$L);
-		$query = "SELECT ts.family FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid WHERE t.sciname LIKE '$SciName' LIMIT 1";
-		$result = $this->conn->query($query);
-		if($result->num_rows == 1)
+		if($this->Family == "")
 			{
-			$OneLine = $result->fetch_assoc();
-			$this->Family = $OneLine['family'];
-			$this->AddToResults('family',$this->Family, -1);
+			$query = "SELECT ts.family FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid WHERE t.sciname LIKE '$SciName' LIMIT 1";
+			$result = $this->conn->query($query);
+			if($result->num_rows == 1)
+				{
+				$OneLine = $result->fetch_assoc();
+				$this->Family = $OneLine['family'];
+				$this->AddToResults('family',$this->Family, -1);
+				}
 			}
+		else if($this->Results['family'] == "")
+			$this->AddToResults('family',$this->Family, -1);
+
 		
 		if(!$this->GetInfraSpecificEpithet($SciName,$Species,$L))
 			{
@@ -366,14 +392,38 @@ class SpecProcNlpSalix{
 			$Preg = "(\b(WITH|With|with)[:-]*\s([A-Z][a-z]{3,20}\b).*)";//Must be case sensitive test
 			$Found = preg_match($Preg,$this->LabelLines[$L],$match);
 			if($Found ===1)
-				{
+				{//Apparent sciname following the word "With"
 				$TempString = str_replace($match[1],"",$match[0]);
 				}
 			else if($this->CheckStartWords($L,'associatedTaxa'))
-				{
+				{//Line starts with an associatedTaxa start word
 				$this->RemoveStartWords($L,'associatedTaxa');
 				$TempString = $this->LabelLines[$L];
 				$Found=true;
+				}
+			else 
+				{//Still the most likely line, but none of the above worked.  Just look for a series of scinames on the same line.
+				$Score = 0;
+				$Found = preg_match_all("(([A-Z][a-z]{3,20}) ([a-z]{4,20}))",$this->LabelLines[$L], $match);
+				$Limit = min($Found,4);
+				for($S=0;$S<$Limit;$S++)
+					{
+					$OneScore = $this->ScoreSciName($match[1][$S],$match[2][$S],true);
+					$Score += $OneScore;
+					}
+				$Score /= $Limit;
+				if($Score < 8)
+					$Found = false;
+				else
+					{
+					$TempString = $this->LabelLines[$L];
+					if($L > 0 && stripos($this->LabelLines[$L-1],"with") > 0)
+						{
+						preg_match("((\b(WITH|With|with)[:-]*)(.{5,}))",$this->LabelLines[$L-1],$match);
+						if(count($match) > 0)
+							$TempString = $match[3].", ".$TempString;
+						}
+					}
 				}
 			if($Found)
 				{
@@ -429,8 +479,11 @@ class SpecProcNlpSalix{
 					$RankArray[$L] += 20;
 				}
 			$Found = preg_match("([w|W]ith [A-Z][a-z]{4,20})",$this->LabelLines[$L]); //With followed by a potential sciname is a strong indicator
-			if($Found === 1 && $this->Assigned['associatedCollectors'] != $L)
+			if($Found === 1 && $this->Assigned['associatedCollectors'] != $L)	
+				{
+				//echo "Found WITH in {$this->LabelLines[$L]}<br>";
 				$RankArray[$L]+= 10;
+				}
 			$RankArray[$L] += preg_match_all("(([A-Z][a-z]{3,20}) ([a-z]{4,20}))",$this->LabelLines[$L],$match); //Add a point for each potential sciname
 			}
 		asort($RankArray);//Sort the array of scores...
@@ -458,38 +511,53 @@ class SpecProcNlpSalix{
 			if(preg_match_all("(\b[NSEW]\b)",$this->LabelLines[$L],$match) == 2)
 				$RankArray[$L] = 5;
 			$RankArray[$L] += preg_match_all("([0-9]{2,3}+[°\*\"\' ])",$this->LabelLines[$L],$match);
-			$RankArray[$L] += preg_match_all("([0-9]{2,3}+[°\*\"\' ])",$this->LabelLines[$L],$match);
+			if(strpos($this->LabelLines[$L],"°") > 0)
+				$RankArray[$L] += 5; //A degree symbol pretty much clinches it for Lat/Long
+			//$RankArray[$L] += preg_match_all("([0-9]{2,3}+[°\*\"\' ])",$this->LabelLines[$L],$match);
 			}
-
+		
+		
 		asort($RankArray);
+		//$this->printr($RankArray,"LL Rank");
 		end($RankArray); //Select the last (highest) element in the scores array
 		if(current($RankArray) > 1)
 			$L=key($RankArray);
 		else
 			return;
-
-		$OneLine = $this->LabelLines[$L];
-
+		
+		if(strpos($this->LabelLines[$L],"°") > 0 && $RankArray[$L] < 10)//Found degree symbol, but rank is a little low.  Maybe it's split over two lines
+			{
+			if($L > 0 && strpos($this->LabelLines[$L-1],"°") > 0)
+				$OneLine = $this->LabelLines[$L-1]." ".$this->LabelLines[$L];
+			else if($L < count($this->LabelLines)-1 && strpos($this->LabelLines[$L+1],"°") > 0)
+				$OneLine = $this->LabelLines[$L]." ".$this->LabelLines[$L+1];
+			else
+				$OneLine = $this->LabelLines[$L];
+			}
+		else
+			$OneLine = $this->LabelLines[$L];
+		//echo "OneLine = $OneLine<br>";
 		$Preg = array();
 		$Preg['dir'] = "[NSEW][\., ]*";
 		$Preg['deg'] = "[0-9\.]+[°\*] ?";
 		$Preg['min'] = "[0-9\.]+[\'’`, ]*";
 		$Preg['sec'] = "(?:[0-9\.]+\")*";
 		
-		if($this->PregLatLong($Preg['dir'].$Preg['deg'].$Preg['min'].$Preg['sec'],$L))
+		if($this->PregLatLong($Preg['dir'].$Preg['deg'].$Preg['min'].$Preg['sec'],$L,$OneLine))
 			return;
-		if($this->PregLatLong($Preg['dir'].$Preg['deg'].$Preg['min'],$L))
+		if($this->PregLatLong($Preg['dir'].$Preg['deg'].$Preg['min'],$L,$OneLine))
 			return;
-		if($this->PregLatLong($Preg['deg'].$Preg['min'].$Preg['sec'].$Preg['dir']))
+		if($this->PregLatLong($Preg['deg'].$Preg['min'].$Preg['sec'].$Preg['dir'],$L,$OneLine))
 			return;
-		if($this->PregLatLong($Preg['deg'].$Preg['min'].$Preg['dir']))
+		if($this->PregLatLong($Preg['deg'].$Preg['min'].$Preg['dir'],$L,$OneLine))
 			return;
 		}
 
 	//**********************************************
-	private function PregLatLong($Preg,$L)
+	private function PregLatLong($Preg,$L,$OneLine="")
 		{
-		$OneLine = $this->LabelLines[$L];
+		if($OneLine == "")
+			$OneLine = $this->LabelLines[$L];
 		$match=array();
 		$Found = preg_match_all("((".$Preg."))", $OneLine,$match);
 		if($Found > 1)
@@ -499,6 +567,15 @@ class SpecProcNlpSalix{
 			$this->AddToResults('verbatimCoordinates',$match[0][0]." ".$match[0][1],$L);
 			$this->AddToResults('decimalLatitude',$LL['lat'],$L);
 			$this->AddToResults('decimalLongitude',$LL['lng'],$L);
+			for($Line=$L-1;$Line < $L+2;$Line++)
+				{
+				if($L < 0)
+					continue;
+				if($L >= count($this->LabelLines))
+					continue;
+				$this->LabelLines[$Line] = str_replace($match[0][0],"",$this->LabelLines[$Line]);
+				$this->LabelLines[$Line] = str_replace($match[0][1],"",$this->LabelLines[$Line]);
+				}
 			return true;
 			}
 		return false;
@@ -791,6 +868,7 @@ class SpecProcNlpSalix{
 		$RankArray = $this->RankForDate($EventField, $Field);
 		foreach($RankArray as $L => $Value)
 			{
+			//echo "Checking {$this->LabelLines[$L]}<br>";
 			if($this->DateFromOneLine($Field,$L))
 				return;
 			}
@@ -873,6 +951,11 @@ class SpecProcNlpSalix{
 		$TempString = ($this->LabelLines[$L]);
 		$Preg = "((\b[0-9]{1,4}\b)\s*{$this->PregMonths}\s*(\b[0-9]{1,4}\b))i";
 		$Found = preg_match($Preg,$TempString,$match);
+		if($Found !== 1)
+			{//Format April 21, 1929
+			$Preg = "({$this->PregMonths}\s*(\b[0-9]{1,4}\b),?\s*(\b[0-9]{1,4}\b)\s*)i";
+			$Found = preg_match($Preg,$TempString,$match);
+			}
 		if($Found)
 			{
 			$OU = new OccurrenceUtilities;
@@ -1091,7 +1174,7 @@ class SpecProcNlpSalix{
 		{
 		global $Label;
 		$match=array();
-		$Found = preg_match("((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*(\bCounty\b))",$Label,$match);
+		$Found = preg_match("((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*(\b(County|Co)\b))",$Label,$match);
 		if($Found ===1)
 			{
 			$County = trim($match[1]." ".$match[2]);
