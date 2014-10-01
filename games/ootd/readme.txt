@@ -2,8 +2,6 @@ Copy code below into the site's home page (index.php) or any other page of inter
 Modify variable values to target taxa from ta a specific checklist.
 The target checklist can be a state or regional list, 
 or even a private list that created specifically for feature.
-The first time you add block to a page, click on "Click here to test your knowledge" 
-link to activate game and establish images for the first time. 
 
 <?php
 //---------------------------GAME SETTINGS---------------------------------------
