@@ -126,7 +126,6 @@ class SpecProcNlpSalix{
 	private function GetScientificName()
 		{
 		$this->FindFamilyName();
-		//echo "Family = $this->Family<br>";
 		$match=array();
 		$ScoreArray = array();
 		$MaxLine = 0;
@@ -144,16 +143,22 @@ class SpecProcNlpSalix{
 				if($Found ===1) //Looks like scientific name, though not near the beginning of the line
 					$Score = $this->ScoreSciName($match[1], $match[2]);
 				}
-			//if(preg_match("(\([A-Z][a-z\.])",$this->LabelLines[$L]) === 1)
+			if(preg_match("(\([A-Z][a-z\.])",$this->LabelLines[$L]) === 1)
 				$Score += 5; //Could be the author
+			if($Found === 0)
+				{
+				$Found = preg_match("((\b[A-Z][a-z]{3,20}))", $this->LabelLines[$L],$match);
+				if($Found ===1)
+					$Score = $this->ScoreSciName($match[1]," ");
+				}
 			if($Found ===1)
 				{
 				if($this->Family != "")
 					{
-					$PosDeduction = abs($L-$this->Assigned['family']);
+					$PosDeduction = abs($L-$this->Assigned['family']); //Reduce the score if far from the family name
 					}
 				else
-					$PosDeduction = $L-3;
+					$PosDeduction = $L-3;//Or reduce the score if far from line 3.
 				if($PosDeduction > 3)
 					$PosDeduction = 3;
 				$Score -= $PosDeduction;
@@ -274,7 +279,7 @@ class SpecProcNlpSalix{
 			}
 		if(!$IgnoreFamily && $this->Family != "")
 			{//If we are already sure about the family, then check if the selected sciname is actually in that family.
-			//$query = ("SELECT sciname from omoccurrences where family LIKE '{$this->Family}' AND sciname LIKE '$CloseSci' LIMIT 1");
+			
 			$query = "SELECT ts.family, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid WHERE t.sciname LIKE '$CloseSci' AND ts.family like '{$this->Family}' LIMIT 1";
 			//echo $query."<br>";
 			$result = $this->conn->query($query);
@@ -316,7 +321,16 @@ class SpecProcNlpSalix{
 		$NameArray = explode(" ",$SciName);
 		$Genus = $NameArray[0];
 		$Author="";
-		$Species = $NameArray[1];
+		if(count($NameArray) > 1)
+			{
+			$Species = $NameArray[1];
+			$SciName = $Genus." ".$Species;
+			}
+		else
+			{
+			$Species = "";
+			$SciName = $Genus;
+			}
 		
 		$SciName = $Genus." ".$Species;
 		$this->AddToResults('sciname',$SciName,$L);
@@ -405,13 +419,16 @@ class SpecProcNlpSalix{
 				{//Still the most likely line, but none of the above worked.  Just look for a series of scinames on the same line.
 				$Score = 0;
 				$Found = preg_match_all("(([A-Z][a-z]{3,20}) ([a-z]{4,20}))",$this->LabelLines[$L], $match);
-				$Limit = min($Found,4);
-				for($S=0;$S<$Limit;$S++)
+				if($Found > 0)
 					{
-					$OneScore = $this->ScoreSciName($match[1][$S],$match[2][$S],true);
-					$Score += $OneScore;
+					$Limit = min($Found,4);
+					for($S=0;$S<$Limit;$S++)
+						{
+						$OneScore = $this->ScoreSciName($match[1][$S],$match[2][$S],true);
+						$Score += $OneScore;
+						}
+					$Score /= $Limit;
 					}
-				$Score /= $Limit;
 				if($Score < 8)
 					$Found = false;
 				else
@@ -441,8 +458,9 @@ class SpecProcNlpSalix{
 						$Found = preg_match("(\A([A-Z]\.\s[a-z]{3,20})(\Z|,))",$this->LabelLines[$L],$match); //Line starting with  "Genus" on the line.  May need to tighten this up by 
 					if($Found ===1)
 						{//First make sure this line scores low for WordStats
-						$StatScore = $this->SingleWordStats($match[0]);
-						//echo "StatScore: $StatScore: {$match[0]}<br>";
+						$this->ScoreOneLine($L,$Field,$StatScore);
+						
+						//echo "StatScore: $StatScore: {$this->LabelLines[$L]}<br>";
 						if($StatScore > 50)
 							return;//Should mark the end of any list of associated species
 						$this->AddToResults('associatedTaxa',$this->LabelLines[$L],$L);
@@ -562,21 +580,27 @@ class SpecProcNlpSalix{
 		$Found = preg_match_all("((".$Preg."))", $OneLine,$match);
 		if($Found > 1)
 			{
+			//$this->printr($match,"LL Match");
+			//echo $match[0][0]." ".$match[0][1]."<br>";
 			$OU = new OccurrenceUtilities;
 			$LL = $OU->parseVerbatimCoordinates($match[0][0]." ".$match[0][1]);
-			$this->AddToResults('verbatimCoordinates',$match[0][0]." ".$match[0][1],$L);
-			$this->AddToResults('decimalLatitude',$LL['lat'],$L);
-			$this->AddToResults('decimalLongitude',$LL['lng'],$L);
-			for($Line=$L-1;$Line < $L+2;$Line++)
+			if(count($LL) > 0)
 				{
-				if($L < 0)
-					continue;
-				if($L >= count($this->LabelLines))
-					continue;
-				$this->LabelLines[$Line] = str_replace($match[0][0],"",$this->LabelLines[$Line]);
-				$this->LabelLines[$Line] = str_replace($match[0][1],"",$this->LabelLines[$Line]);
+				//$this->printr($LL,"LL-");
+				$this->AddToResults('verbatimCoordinates',$match[0][0]." ".$match[0][1],$L);
+				$this->AddToResults('decimalLatitude',$LL['lat'],$L);
+				$this->AddToResults('decimalLongitude',$LL['lng'],$L);
+				for($Line=$L-1;$Line < $L+2;$Line++)
+					{
+					if($L < 0)
+						continue;
+					if($L >= count($this->LabelLines))
+						continue;
+					$this->LabelLines[$Line] = str_replace($match[0][0],"",$this->LabelLines[$Line]);
+					$this->LabelLines[$Line] = str_replace($match[0][1],"",$this->LabelLines[$Line]);
+					}
+				return true;
 				}
-			return true;
 			}
 		return false;
 		}
@@ -1011,6 +1035,7 @@ class SpecProcNlpSalix{
 	//**********************************************
 	function GetCountryState()
 		{
+		global $Label;
 		//Assumes that the Country and state are already in the omoccurrences table
 		$RankArray = array();
 		$match=array();
@@ -1079,33 +1104,83 @@ class SpecProcNlpSalix{
 					}
 				}
 			}
-		
-		return;
+		$Preg = "(\b([a-z]{3,20})\s+(\bcounty\b))i";
+		$Found = preg_match($Preg,$Label,$match);
+		if($Found === 1)
+			{//Found the word "County" on the label.  Might be enough to determine state and country.
+			//$this->printr($match,"County Match");
+			$query = "SELECT stateId,countyName FROM lkupcounty where countyName LIKE '{$match[1]}'";
+			$result = $this->conn->query($query);
+			if($result->num_rows > 0)
+				{ // Might need to see if there are multiple returns.  Same county name could be in several countries.
+				$OneLine=$result->fetch_assoc();
+				$this->AddToResults('county',$OneLine['countyName'],$L); //First add the county, and remove the text from the line.
+				$M=trim($match[0]);
+				$LArray = preg_grep("($M)",$this->LabelLines);
+				$L = key($LArray);
+				$this->LabelLines[$L] = trim(str_replace($M,"",$this->LabelLines[$L])," \t:;,.");
+				if($result->num_rows  == 1)
+					{//One state with this county name.  So select the state and it's country
+					$query = "SELECT countryId,stateName FROM lkupstateprovince where stateId LIKE '{$OneLine['stateId']}' LIMIT 1";
+					$result = $this->conn->query($query);
+					$OneState = $result->fetch_assoc();
+					$this->AddToResults('stateProvince',$OneState['stateName'],$L);
+					}
+				else
+					{//More than one state with this county name.  Need to check.
+					$result->data_seek(0);
+					while($OneLine = $result->fetch_assoc())
+						{ //One at a time, do I see this state's name in the label?
+						$query = "SELECT countryId,stateName FROM lkupstateprovince where stateId LIKE '{$OneLine['stateId']}' LIMIT 1";
+						$Stateresult=$this->conn->query($query);
+						$OneState = $Stateresult->fetch_assoc();
+						if(stripos($Label,$OneState['stateName']) > 0)
+							{//Found this state's name on label.  Good enough.
+							$this->AddToResults('stateProvince',$OneState['stateName'],$L);
+							break;
+							}
+						}
+					}
+				if($this->Results['stateProvince'] != "")
+					{//State was found.  Look for country.
+					$query = "SELECT countryName FROM lkupcountry where countryId LIKE '{$OneState['countryId']}' LIMIT 1";
+					$result = $this->conn->query($query);
+					if($result->num_rows > 0)
+						{
+						$OneCountry=$result->fetch_assoc();
+						$this->AddToResults('country',$OneCountry['countryName'],$L);
+						}
+					}
+				}
+			return;
+			}
 		
 		foreach($RankArray as $L=>$Value)
 			{//First look for the country at the beginning of the lines, a common place to find it
 			if($Value < 1)
 				continue;
-			if($this->CheckOneCountry('country',$L,$this->LabelArray[$L][0],$this->LabelArray[$L][1]))
-				{//If found country, look next for a member state.
-				$this->GetStateProvince($Results['country'],$L);
-				return; //Found country and maybe state, so return.
-				}
+			if(count($this->LabelArray[$L]) > 1)
+				if($this->CheckOneCountry('country',$L,$this->LabelArray[$L][0],$this->LabelArray[$L][1]))
+					{//If found country, look next for a member state.
+					$this->GetStateProvince($Results['country'],$L);
+					return; //Found country and maybe state, so return.
+					}
 			}
 		foreach($RankArray as $L=>$Value)
 			{//Next look for state at beginning of lines
 			if($Value < 1)
 				continue;
-			if($this->CheckOneCountry('stateProvince',$L,$this->LabelArray[$L][0],$this->LabelArray[$L][1]))
-				{
-				return;
-				}
+			if(count($this->LabelArray[$L]) > 1)
+				if($this->CheckOneCountry('stateProvince',$L,$this->LabelArray[$L][0],$this->LabelArray[$L][1]))
+					{
+					return;
+					}
 			}
 		foreach($RankArray as $L=>$Value)
-			{//Look for country deeper into lines.  Slower, so we checked the first line first.
+			{//Look for country deeper into lines.  Slower, so we checked the first word first above.
 			if($Value < 1)
 				continue;
-			for($W=0;$W<count($this->LabelArray[$L])-1;$W++)
+			for($W=0;$W<count($this->LabelArraylArray[$L])-1;$W++)
 				{
 				if($this->CheckOneCountry('country',$L,$this->LabelArray[$L][$W],$this->LabelArray[$L][$W+1]))
 					{
@@ -1116,7 +1191,7 @@ class SpecProcNlpSalix{
 			}
 		foreach($RankArray as $L=>$Value)
 			{//We didn't find a country, so look for state deeper into lines
-			echo "Note when this found, looking for country.  Here, Value=$Value<br>";
+			//echo "Note when this found, looking for country.  Here, Value=$Value<br>";
 			if(count($this->LabelArray[$L])<2 || $Value < 1)
 				continue;
 			for($W=0;$W<count($this->LabelArray[$L])-1;$W++)
@@ -1146,13 +1221,14 @@ class SpecProcNlpSalix{
 			
 		if($Word2 != "" && ctype_alpha($Word2))
 			{//Look for two word countries/states
-			$query = "Select country,stateProvince from omoccurrences where $Field LIKE '$Word1 $Word2' $queryEnd LIMIT 5";
+			$query = "Select country,stateProvince from omoccurrences where $Field LIKE '$Word1 $Word2' $queryEnd";
+			echo $query."<br>";
 			$result = $this->conn->query($query);
 			$Num = $result->num_rows;
 			}
 		if($Num <5)//If valid country, there should be more than 5 hits in the whole database...
 			{//Look for one-word countries/states
-			$query = "Select country,stateProvince from omoccurrences where $Field LIKE '$Word1' $queryEnd LIMIT 5";
+			$query = "Select country,stateProvince from omoccurrences where $Field LIKE '$Word1' $queryEnd";
 			$result = $this->conn->query($query);
 			$Num = $result->num_rows;
 			}
@@ -1188,29 +1264,45 @@ class SpecProcNlpSalix{
 				}
 			if($result->num_rows > 0)
 				{
+				$M = trim($match[0]);
 				$this->AddToResults('county',$County,0);
+				$Preg = "($M)";
+				$LArray = preg_grep($Preg,$this->LabelLines);
+				if(count($LArray) > 0)
+					{
+					$L = key($LArray);
+					$this->LabelLines[$L] = trim(str_replace($M,"",$this->LabelLines[$L])," \t:;,.");
+					}
 				return;
 				}
 			}
 		//Didn't find it from the word "County".  Search the full label for a county that is in the given country/state.
-		
-		$query = "SELECT DISTINCT county FROM omoccurrences WHERE country LIKE '$Country' AND stateProvince LIKE '$State'";
-		$result = $this->conn->query($query);
-		$CountyArray = array();
-		if($result->num_rows > 1)
+		$query = "SELECT stateid FROM lkupstateprovince WHERE stateName LIKE '$State'";
+		$Stateresult = $this->conn->query($query);
+		if($Stateresult->num_rows > 0)
 			{
-			while($Cty = $result->fetch_assoc())
+			$CountyArray = array();
+			while($OneLine = $Stateresult->fetch_assoc())
 				{
-				if(stripos($Label,$Cty['county'])!==false)
+				$query = "SELECT countyname FROM lkupcounty WHERE stateid LIKE '{$OneLine['stateid']}'";
+				$Countyresult = $this->conn->query($query);
+				if($Countyresult->num_rows > 1)
 					{
-					$CountyArray[] = $Cty['county'];
-					if(strpos($Cty['county']," ") !== false)
-						break;
+					while($Cty = $Countyresult->fetch_assoc())
+						{
+						if(stripos($Label,$Cty['countyname'])!==false)
+							{
+							$CountyArray[] = $Cty['countyname'];
+							if(strpos($Cty['countyname']," ") !== false)
+								break;
+							}
+						}
 					}
 				}
 			}
 		if(count($CountyArray) > 0)
-			{//Sort results so the longest is first.  
+			{//Sort results so the longest is first. 
+			
 			$lengths = array_map('strlen', $CountyArray);
 			array_multisort($lengths,SORT_DESC,$CountyArray);
 			$CountyArray = array_values($CountyArray);
@@ -1321,7 +1413,7 @@ class SpecProcNlpSalix{
 			{
 			$Skip=false;
 			foreach(array("recordedBy","family","identifiedBy","associatedCollectors","sciname","infraspecificEpithet") as $F)
-				{
+				{//Don't bother scoring if this line has start words or has already been assigned.
 				if($this->CheckStartWords($L, $F))
 					$Skip=true;
 				if($this->Assigned[$F] == $L)
@@ -1333,20 +1425,54 @@ class SpecProcNlpSalix{
 				}
 			if($Skip)
 				continue;
-			$Found = preg_match_all("(\b\w{2,20}\b)",$this->LabelLines[$L],$match);
-			if($Found == 0)
-				continue;
-			else
-				$WordsArray = $match[0];
-			$ScoreArray  = array_fill_keys($Fields,0);
-			foreach($Fields as $F)
+			$this->ScoreOneLine($L, $Field, $Score);// Field and Score are called by reference.
+			if($Score > 50)
 				{
-				if($this->CheckStartWords($L,$F))
-					$ScoreArray[$F] += 1000;
+				$this->RemoveStartWords($L,$Field);
+				if($this->Results[$Field] != "")
+					$this->Results[$Field] .= ", ".trim($this->LabelLines[$L]); //Append
+				else
+					$this->Results[$Field] = trim($this->LabelLines[$L]);
 				}
-			for($W=0;$W<count($WordsArray);$W++)
+			}
+		return;			
+		}
+
+	private function ScoreOneLine($L, &$Field, &$Score)
+		{
+		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
+		$match=array();
+		$ScoreArray  = array_fill_keys($Fields,0);
+		$Found = preg_match_all("(\b\w{2,20}\b)",$this->LabelLines[$L],$match);
+		if($Found == 0)
+			return;
+		else
+			$WordsArray = $match[0];
+		//$ScoreArray  = array_fill_keys($Fields,0);
+		foreach($Fields as $F)
+			{
+			if($this->CheckStartWords($L,$F))
+				$ScoreArray[$F] += 1000;
+			}
+		for($W=0;$W<count($WordsArray);$W++)
+			{
+			$query = "Select * from salixwordstats where firstword like '{$WordsArray[$W]}' AND secondword IS NULL LIMIT 3";
+			$result = $this->conn->query($query);
+			$num1 = $result->num_rows;
+			if($num1 > 0)
 				{
-				$query = "Select * from salixwordstats where firstword like '{$WordsArray[$W]}' AND secondword IS NULL LIMIT 3";
+				while($Values = $result->fetch_assoc())
+					{
+					$Factor = 1;
+					if($Values['totalcount'] < 10) //Reduce impact if only seen few times
+						$Factor = ($Values['totalcount'])/10;
+					foreach($Fields as $F)
+						$ScoreArray[$F] += $Factor * $Values[$F.'Freq'];
+					}
+				}
+			if($W < count($WordsArray)-1)
+				{
+				$query = "SELECT * from salixwordstats where firstword like '{$WordsArray[$W]}' AND secondword LIKE '{$WordsArray[$W+1]}' LIMIT 3";
 				$result = $this->conn->query($query);
 				$num1 = $result->num_rows;
 				if($num1 > 0)
@@ -1357,42 +1483,20 @@ class SpecProcNlpSalix{
 						if($Values['totalcount'] < 10) //Reduce impact if only seen few times
 							$Factor = ($Values['totalcount'])/10;
 						foreach($Fields as $F)
-							$ScoreArray[$F] += $Factor * $Values[$F.'Freq'];
-						}
-					}
-				if($W < count($WordsArray)-1)
-					{
-					$query = "SELECT * from salixwordstats where firstword like '{$WordsArray[$W]}' AND secondword LIKE '{$WordsArray[$W+1]}' LIMIT 3";
-					$result = $this->conn->query($query);
-					$num1 = $result->num_rows;
-					if($num1 > 0)
-						{
-						while($Values = $result->fetch_assoc())
-							{
-							$Factor = 1;
-							if($Values['totalcount'] < 10) //Reduce impact if only seen few times
-								$Factor = ($Values['totalcount'])/10;
-							foreach($Fields as $F)
-								$ScoreArray[$F] += $Factor*3*$Values[$F.'Freq'];
+							$ScoreArray[$F] += $Factor*3*$Values[$F.'Freq'];
 							}
-						}
 					}
-				}
-			asort($ScoreArray);
-			end($ScoreArray); //Select the last (highest) element in the scores array
-			$MaxF = key($ScoreArray); //Maximum field
-			$Max = $ScoreArray[$MaxF];
-			if($Max/count($WordsArray) > 50)
-				{
-				$this->RemoveStartWords($L,$MaxF);
-				if($this->Results[$MaxF] != "")
-					$this->Results[$MaxF] .= ", ".trim($this->LabelLines[$L]); //Append
-				else
-					$this->Results[$MaxF] = trim($this->LabelLines[$L]);
 				}
 			}
+		asort($ScoreArray);
+		end($ScoreArray); //Select the last (highest) element in the scores array
+		$Field = key($ScoreArray); //Maximum field
+		$Score = $ScoreArray[$Field]/count($WordsArray);
+		//echo "Single $Score, $Field, {$this->LabelLines[$L]}<br>";
 		}
-
+		
+		
+		
 	//**********************************************
 	private function SingleWordStats($Words, $Field="All")
 		{//Used mainly for non-word stats fields to adjust their probability.
