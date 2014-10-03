@@ -1180,7 +1180,7 @@ class SpecProcNlpSalix{
 			{//Look for country deeper into lines.  Slower, so we checked the first word first above.
 			if($Value < 1)
 				continue;
-			for($W=0;$W<count($this->LabelArraylArray[$L])-1;$W++)
+			for($W=0;$W<count($this->LabelArray[$L])-1;$W++)
 				{
 				if($this->CheckOneCountry('country',$L,$this->LabelArray[$L][$W],$this->LabelArray[$L][$W+1]))
 					{
