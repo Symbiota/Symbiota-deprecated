@@ -13,6 +13,5 @@ if($rawOcr){
 	$dwcArr = $nlpManager->parse($rawOcr);
 	$dwcArr = SpecProcNlpUtilities::cleanDwcArr($dwcArr);
 }
-
 echo json_encode($dwcArr);
 ?>
