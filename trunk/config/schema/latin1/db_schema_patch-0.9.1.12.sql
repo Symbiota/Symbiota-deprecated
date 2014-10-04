@@ -356,7 +356,6 @@ CREATE  TABLE `referenceauthors` (
   `modifieduid` INT UNSIGNED NULL , 
   `modifiedtimestamp` DATETIME NULL , 
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp , 
-  `referenceauthorscol` VARCHAR(45) NULL , 
   PRIMARY KEY (`refauthorid`) , 
   INDEX `INDEX_refauthlastname` (`lastname` ASC)
 ) ENGINE = InnoDB DEFAULT CHARSET=latin1;

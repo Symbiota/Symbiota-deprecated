@@ -562,8 +562,7 @@ else{
 										$person = $pHandler->getPerson();
 										$userEmail = ($person?$person->getEmail():'');
 
-										$anchorVars = 'occid='.$occId.'&occindex='.$occIndex.'&csmode='.$crowdSourceMode;
-
+										$anchorVars = 'occid='.$occId.'&occindex='.$occIndex.'&csmode='.$crowdSourceMode.'&collid='.$collId;
 										$detVars = 'identby='.urlencode($occArr['identifiedby']).'&dateident='.urlencode($occArr['dateidentified']).
 											'&sciname='.urlencode($occArr['sciname']).'&em='.$isEditor.
 											'&annotatorname='.urlencode($userDisplayName).'&annotatoremail='.urlencode($userEmail).

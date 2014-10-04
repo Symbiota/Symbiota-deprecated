@@ -463,18 +463,21 @@ class OccurrenceIndividualManager extends Manager{
 		global $userRights;
 		if(!array_key_exists("ClAdmin",$userRights)) return null;
 		$returnArr = Array();
-		$sql = 'SELECT name, clid '.
-			'FROM fmchecklists WHERE clid IN('.implode(",",array_diff($userRights["ClAdmin"],$clidExcludeArr)).') '.
-			'ORDER BY Name';
-		//echo $sql;
-		if($result = $this->conn->query($sql)){
-			while($row = $result->fetch_object()){
-				$returnArr[$row->clid] = $row->name;
+		$targetArr = array_diff($userRights["ClAdmin"],$clidExcludeArr);
+		if($targetArr){
+			$sql = 'SELECT name, clid '.
+				'FROM fmchecklists WHERE clid IN('.implode(",",$targetArr).') '.
+				'ORDER BY Name';
+			//echo $sql;
+			if($result = $this->conn->query($sql)){
+				while($row = $result->fetch_object()){
+					$returnArr[$row->clid] = $row->name;
+				}
+				$result->free();
 			}
-			$result->free();
-		}
-		else{
-			trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
+			else{
+				trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
+			}
 		}
 		return $returnArr;
 	}

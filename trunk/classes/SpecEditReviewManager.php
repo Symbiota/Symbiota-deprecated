@@ -37,7 +37,7 @@ class SpecEditReviewManager {
 		return $collName;
 	}
 
-	public function getEditArr($aStatus, $rStatus, $eUid, $pageNumber = 0, $limitNumber = 100){
+	public function getEditArr($aStatus, $rStatus, $eUid, $queryOccid, $pageNumber = 0, $limitNumber = 100){
 		if(!$this->collId) return;
 		$retArr = Array();
 		//Build SQL WHERE fragment
@@ -46,18 +46,13 @@ class SpecEditReviewManager {
 			'WHERE (o.collid = '.$this->collId.') ';
 		if($aStatus === '0' || $aStatus == 1) $sqlBase .= 'AND e.appliedstatus = '.$aStatus.' ';
 		if($rStatus){
-			if($rStatus == '0-2'){
-				$sqlBase .= 'AND (e.reviewstatus IN(0,1,2)) ';
-			}
-			elseif($rStatus == '0-1'){
-				$sqlBase .= 'AND (e.reviewstatus IN(0,1)) ';
-			}
-			else{
-				$sqlBase .= 'AND (e.reviewstatus = '.$rStatus.') ';
-			}
+			$sqlBase .= 'AND (e.reviewstatus IN('.$rStatus.')) ';
 		}
 		if($eUid && is_numeric($eUid)){
 			$sqlBase .= 'AND (e.uid = '.$eUid.') ';
+		}
+		if($queryOccid && is_numeric($queryOccid)){
+			$sqlBase .= 'AND (e.occid = '.$queryOccid.') ';
 		}
 		//Grab full return count
 		$rsCnt = $this->conn->query('SELECT COUNT(e.ocedid) AS fullcnt '.$sqlBase);
@@ -223,27 +218,6 @@ class SpecEditReviewManager {
 	
 	public function getRecCnt(){
 		return $this->recCnt;
-	}
-
-	public function getCollectionList(){
-		global $isAdmin, $userRights;
-		$returnArr = Array();
-		if($isAdmin || array_key_exists("CollAdmin",$userRights)){
-			$sql = 'SELECT DISTINCT c.collid, c.collectionname '.
-				'FROM omcollections c '.
-				'WHERE colltype LIKE "%specimens%" ';
-			if(array_key_exists('CollAdmin',$userRights)){
-				$sql .= 'AND (c.collid IN('.implode(',',$userRights['CollAdmin']).')) ';
-			}
-			$sql .= 'ORDER BY c.collectionname';
-			//echo $sql;
-			$result = $this->conn->query($sql);
-			while($row = $result->fetch_object()){
-				$returnArr[$row->collid] = $row->collectionname;
-			}
-			$result->close();
-		}
-		return $returnArr;
 	}
 
 	public function getEditorList(){
