@@ -37,7 +37,11 @@ class SpecProcNlpSalix{
 	public function parse($Label) {
 		$dwcArr = array();
 		//Add the SALIX parsing code here and/or in following functions of a private scope
-
+		if(mb_detect_encoding($Label,'UTF-8,ISO-8859-1') == "UTF-8")
+			{
+			$Label = utf8_decode($Label);
+			//$ocrStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$ocrStr);
+			}
 		//Set the keys for a couple of arrays to the names of the return fields
 		$this->Results = array_fill_keys($this->ResultKeys,'');
 		$this->Assigned = array_fill_keys($this->ResultKeys,-1);
