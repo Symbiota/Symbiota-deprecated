@@ -89,6 +89,13 @@ class OccurrenceEditorManager {
 		if(!$this->collId) $this->collId = $this->collMap['collid'];
 		return $this->collMap;
 	}
+	
+	public function getCollId(){
+		if(!$this->collId){
+			$this->getCollMap();
+		}
+		return $this->collId;
+	}
 
 	public function setSymbUid($id){
 		$this->symbUid = $id;

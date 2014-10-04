@@ -3,44 +3,55 @@ include_once('../../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$occId = $_GET['occid'];
+$occid = $_GET['occid'];
 $occIndex = $_GET['occindex'];
+$collId = $_GET['collid'];
 
 $occManager = new OccurrenceEditorManager();
-$occManager->setOccId($occId); 
+$occManager->setOccId($occid); 
 ?>
 <div id="admindiv">
 	<fieldset style="padding:15px;margin:10px 0px;">
 		<legend><b>Edit History</b></legend>
 		<?php
-		$editArr = $occManager->getEditArr();
-		foreach($editArr as $k => $eArr){
-			?>
-			<div>
-				<b>Editor:</b> <?php echo $eArr['editor']; ?>
-				<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
-			</div>
-			<?php
-			unset($eArr['editor']);
-			unset($eArr['ts']);
-			foreach($eArr as $vArr){
-				echo '<div style="margin:10px 15px;">';
-				echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
-				echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
-				echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
-				$reviewStr = 'OPEN';
-				if($vArr['reviewstatus'] == 2){
-					$reviewStr = 'PENDING';
-				}
-				elseif($vArr['reviewstatus'] == 3){
-					$reviewStr = 'CLOSED';
-				}
-				echo 'Edit '.($vArr['appliedstatus']?'applied':'not applied').'; status '.$reviewStr;
-				echo '</div>';
+		if($editArr = $occManager->getEditArr()){
+			if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
+				?>
+				<div style="float:right;" title="Manage Edit History">
+					<a href="../editor/editreviewer.php?collid=<?php echo $collId.'&occid='.$occid; ?>" target="_blank"><img src="../../../images/edit.png" style="border:0px;width:14px;" /></a>
+				</div>
+				<?php
 			}
-			echo '<div style="margin:5px 0px;">&nbsp;</div>';
+			foreach($editArr as $k => $eArr){
+				?>
+				<div>
+					<b>Editor:</b> <?php echo $eArr['editor']; ?>
+					<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
+				</div>
+				<?php
+				unset($eArr['editor']);
+				unset($eArr['ts']);
+				foreach($eArr as $vArr){
+					echo '<div style="margin:10px 15px;">';
+					echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+					echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
+					echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+					$reviewStr = 'OPEN';
+					if($vArr['reviewstatus'] == 2){
+						$reviewStr = 'PENDING';
+					}
+					elseif($vArr['reviewstatus'] == 3){
+						$reviewStr = 'CLOSED';
+					}
+					echo 'Edit '.($vArr['appliedstatus']?'applied':'not applied').'; status '.$reviewStr;
+					echo '</div>';
+				}
+				echo '<div style="margin:5px 0px;">&nbsp;</div>';
+			}
 		}
-		if(!$editArr) echo '<div style="margin:10px">No previous edits recorded</div>';
+		else{
+			echo '<div style="margin:10px">No previous edits recorded</div>';
+		}
 		?>
 	</fieldset>
 	<?php 
@@ -64,7 +75,7 @@ $occManager->setOccId($occId);
 				</div>
 				<div style="margin:10px;">
 					<input name="occindex" type="hidden" value="<?php echo $occIndex; ?>" />
-					<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
+					<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 					<input name="submitaction" type="submit" value="Transfer Record" />
 				</div>
 			</form>
@@ -132,7 +143,7 @@ $occManager->setOccId($occId);
 					</div>
 				</div>
 				<div id="delapprovediv" style="margin:15px;display:none;">
-					<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
+					<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 					<input name="occindex" type="hidden" value="<?php echo $occIndex; ?>" />
 					<input name="submitaction" type="submit" value="Delete Occurrence" />
 				</div>

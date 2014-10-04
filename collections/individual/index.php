@@ -34,10 +34,10 @@ $isEditor = false;
 
 if($SYMB_UID){
 	//Check editing status
-	if($IS_ADMIN || (array_key_exists('CollAdmin',$userRights) && in_array($collId,$userRights['CollAdmin']))){
+	if($IS_ADMIN || (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin']))){
 		$isEditor = true;
 	}
-	elseif((array_key_exists('CollEditor',$userRights) && in_array($collId,$userRights['CollEditor']))){
+	elseif((array_key_exists('CollEditor',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollEditor']))){
 		$isEditor = true;
 	}
 	elseif($occArr['observeruid'] == $SYMB_UID){
@@ -48,10 +48,10 @@ if($SYMB_UID){
 	}
 	
 	//Check locality security
-	if($isEditor || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+	if($isEditor || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
 		$displayLocality = true;
 	}
-	elseif(array_key_exists("RareSppReader",$userRights) && in_array($collId,$userRights["RareSppReader"])){
+	elseif(array_key_exists("RareSppReader",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["RareSppReader"])){
 		$displayLocality = true;
 	}
 	
@@ -863,6 +863,14 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 					<div id="edittab">
 						<div style="padding:15px;">
 							<?php 
+							if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
+								?>
+								<div style="float:right;" title="Manage Edits">
+									<a href="../editor/editreviewer.php?collid=<?php echo $collId.'&occid='.$occid; ?>"><img src="../../images/edit.png" style="border:0px;width:14px;" /></a>
+								</div>
+								<?php
+							}
+							echo '<div style="margin-bottom:10px"><b>Edits are only viewable by collection administrators and editors</b></div>';
 							foreach($editArr as $k => $eArr){
 								?>
 								<div>
@@ -884,7 +892,8 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 									elseif($vArr['reviewstatus'] == 3){
 										$reviewStr = 'CLOSED';
 									}
-									echo 'Edit '.($vArr['appliedstatus']?'applied':'not applied').'; status '.$reviewStr;
+									echo '<b>Applied Status:</b> '.($vArr['appliedstatus']?'applied':'not applied').'; ';
+									echo '<b>Reveiw Status:</b> '.$reviewStr;
 									echo '</div>';
 								}
 								echo '<div style="margin:15px 0px;"><hr/></div>';

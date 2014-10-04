@@ -2,13 +2,14 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecEditReviewManager.php');
 
-$collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$collId = $_REQUEST['collid'];
 $submitStr = array_key_exists('submitstr',$_REQUEST)?$_REQUEST['submitstr']:'';
 $mode = array_key_exists('mode',$_REQUEST)?$_REQUEST['mode']:'';
 $download = array_key_exists('download',$_REQUEST)?$_REQUEST['download']:'';
 $faStatus = array_key_exists('fastatus',$_REQUEST)?$_REQUEST['fastatus']:'';
-$frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:'1';
+$frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:'1,2';
 $editorUid = array_key_exists('editor',$_REQUEST)?$_REQUEST['editor']:'';
+$queryOccid = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:'';
 $pageNum = array_key_exists('pagenum',$_REQUEST)?$_REQUEST['pagenum']:'0';
 $limitCnt = array_key_exists('limitcnt',$_REQUEST)?$_REQUEST['limitcnt']:'1000';
 
@@ -42,7 +43,6 @@ if($mode == 'export'){
 	$reviewManager->exportCsvFile();
 }
 
-$editArr = $reviewManager->getEditArr($faStatus, $frStatus, $editorUid, $pageNum, $limitCnt);
 $recCnt = $reviewManager->getRecCnt();
 $subCnt = $limitCnt*($pageNum + 1);
 if($recCnt < ($pageNum+1)*$limitCnt) $subCnt = $recCnt - ($pageNum)*$limitCnt;  
@@ -153,8 +153,8 @@ header("Content-Type: text/html; charset=".$charset);
 										Review Status: 
 										<select name="frstatus">
 											<option value="0">All Records</option>
-											<option value="0-2" <?php echo (!$frStatus||$frStatus=='0-2'?'SELECTED':''); ?>>Open/Pending</option>
-											<option value="0-1" <?php echo ($frStatus=='0-1'?'SELECTED':''); ?>>Open Only</option>
+											<option value="1,2" <?php echo ($frStatus=='1,2'?'SELECTED':''); ?>>Open/Pending</option>
+											<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>>Open Only</option>
 											<option value="2" <?php echo ($frStatus=='2'?'SELECTED':''); ?>>Pending Only</option>
 											<option value="3" <?php echo ($frStatus=='3'?'SELECTED':''); ?>>Closed</option>
 										</select>
@@ -215,7 +215,7 @@ header("Content-Type: text/html; charset=".$charset);
 										<th>Timestamp</th>
 									</tr>
 									<?php 
-									$editArr = $reviewManager->getEditArr($faStatus, $frStatus, $editorUid, $pageNum, $limitCnt);
+									$editArr = $reviewManager->getEditArr($faStatus, $frStatus, $editorUid, $queryOccid, $pageNum, $limitCnt);
 									if($editArr){
 										$recCnt = 0;
 										foreach($editArr as $occid => $edits){
@@ -231,8 +231,11 @@ header("Content-Type: text/html; charset=".$charset);
 														<?php 
 														if($mode != 'printmode'){ 
 															?>
-															<a href="javascript:var puRef=window.open('../individual/index.php?occid=<?php echo $occid."','indspec".$occid; ?>','toolbar=1,scrollbars=1,width=870,height=600,left=300,top=20');">
+															<a href="editreviewer.php?occid=<?php echo $occid.'&collid='.$collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&editor='.$editorUid.'&pagenum='.$pageNum.'&limitcnt='.$limitCnt; ?>">
 																<?php echo $occid; ?>
+															</a>
+															<a href="javascript:var puRef=window.open('../individual/index.php?occid=<?php echo $occid."','indspec".$occid; ?>','toolbar=1,scrollbars=1,width=870,height=600,left=300,top=20');">
+																<img src="../../images/info.png" style="border:0px;width:14px" />
 															</a>
 															<?php 
 														}
@@ -336,6 +339,7 @@ header("Content-Type: text/html; charset=".$charset);
 														<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 														<input name="fastatus" type="hidden" value="<?php echo $faStatus; ?>" />
 														<input name="frstatus" type="hidden" value="<?php echo $frStatus; ?>" />
+														<input name="occid" type="hidden" value="<?php echo $queryOccid; ?>" />
 														<input name="download" type="hidden" value="" />
 													</div>
 													<div style="clear:both;margin:20px 0px;">
@@ -390,30 +394,7 @@ header("Content-Type: text/html; charset=".$charset);
 				<?php 
 			}
 			else{
-				if($collList = $reviewManager->getCollectionList()){
-					?>
-					<div style="clear:both;">
-						<form name="collidform" action="editreviewer.php" method="post" onsubmit="return validateCollidForm(this);">
-							<fieldset>
-								<legend><b>Collection Projects</b></legend>
-								<div style="margin:15px;">
-									<?php 
-									foreach($collList as $cId => $cName){
-										echo '<input type="radio" name="collid" value="'.$cId.'" /> '.$cName.'<br/>';
-									}
-									?>
-								</div>
-								<div style="margin:15px;">
-									<input type="submit" name="action" value="Select Collection for Review" />
-								</div>
-							</fieldset>
-						</form>
-					</div>
-					<?php
-				}
-				else{
-					echo '<div>There are no Collection Project for which you have authority to review</div>';						
-				} 
+				echo '<div>Collection Project has not been defined</div>';						
 			}
 			?>
 		</div>

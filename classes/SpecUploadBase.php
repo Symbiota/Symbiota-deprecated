@@ -24,6 +24,7 @@ class SpecUploadBase extends SpecUpload{
 	protected $imageSymbFields = Array();
 
 	private $translationMap = array('accession'=>'catalognumber','accessionid'=>'catalognumber','accessionnumber'=>'catalognumber',
+		'scientificname'=>'sciname','species'=>'specificepithet',
 		'collector'=>'recordedby','primarycollector'=>'recordedby','collectornumber'=>'recordnumber',
 		'collectionnumber'=>'recordnumber','datecollected'=>'eventdate','date'=>'eventdate','collectiondate'=>'eventdate',
 		'cf' => 'identificationqualifier','detby'=>'identifiedby','determinor'=>'identifiedby','determinationdate'=>'dateidentified',
