@@ -162,7 +162,6 @@ function nlpSalix(nlpButton,prlid){
 	var f = nlpButton.form;
 	var rawOcr = f.rawtext.innerText;
 	if(!rawOcr) rawOcr = f.rawtext.textContent;
-	
 	$.ajax({
 		type: "POST",
 		url: "rpc/nlpsalix.php",

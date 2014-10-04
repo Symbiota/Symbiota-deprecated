@@ -15,26 +15,51 @@ class SpecProcNlpDupes {
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function buildFragments(){
+	public function batchBuildFragments(){
+		$this->echoStr('Starting batch process');
 		$sql = 'SELECT r.prlid, r.rawstr '.
 			'FROM specprocessorrawlabels r LEFT JOIN specprococrfrag f ON r.prlid = f.prlid '.
 			'WHERE f.prlid IS NULL';
 		$rs = $this->conn->query($sql);
+		$cnt = 1;
 		if($r = $rs->fetch_object()){
-			$prlid = $r->prlid;
-			$rawOcr = $r->rawstr;
-			
+			if($this->processFragment($r->rawstr,$r->prlid)){
+				$this->echoStr('Processed #'.$cnt,1);
+			}
+			$cnt++;
 		}
 		$rs->free();
+		$this->echoStr('Batch process finished');
 	}
 	
-	private function cleanOcrStr(&$ocrStr){
-		$ocrStr = str_replace('.', ' ',$ocrStr);
-		$ocrStr = preg_replace('/\s\s+/',' ',$ocrStr);
-		$ocrStr = preg_replace('/[^a-z,0-9]/','',$ocrStr);
-		if(){
-			
+	private function processFragment($rawOcr,$prlid){
+		$status = false;
+		//Clean string
+		$rawOcr = str_replace('.', ' ',$rawOcr);
+		$rawOcr = preg_replace('/\s\s+/',' ',$rawOcr);
+		$rawOcr = trim(preg_replace('/[^a-z,0-9]/','',$rawOcr));
+		if(strlen($ocrStr) > 10){
+			//Load into database
+			$framArr = preg_split("/\s/", $rawOcr);
+			$previousWord = '';
+			$cnt = 0;
+			foreach($framArr as $w){
+				if($previousWord){
+					$keyTerm = $previousWord.$w;
+					$sql = 'INSERT INTO(prlid,firstword,secondword,keyterm,wordorder) '.
+						'VALUES('.$prlid.',"'.$previousWord.'","'.$w.'","'.$keyTerm.'",'.$cnt.')';
+					if($this->conn->query($sql)){
+						$status = true;
+						$cnt++;
+					}
+					else{
+						$this->echoStr('ERROR loading terms: '.$this->conn->error, $indent = 1);
+					}
+				}
+				$previousWord = $w;
+			}
 		}
+		return $status;
 	}
 	
 	private function getKeyTerm($w){
