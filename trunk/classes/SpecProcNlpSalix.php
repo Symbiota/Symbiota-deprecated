@@ -407,7 +407,6 @@ class SpecProcNlpSalix{
 		{
 		$RankArray = $this->RankAssociatedTaxa();
 		$match=array();
-		//$this->printr($RankArray,"AT Rank");
 		foreach($RankArray as $L=>$Value)
 			{
 			if($Value < 1)
@@ -452,25 +451,35 @@ class SpecProcNlpSalix{
 					}
 				}
 			if($Found)
-				{
+				{//Found the start of the associated species list.  Check subsequent lines for more.
 				$this->AddToResults("associatedTaxa", $TempString,$L);
 				$this->LabelLines[$L] = str_replace($TempString,"",$this->LabelLines[$L]);
 				$this->LabelLines[$L] = str_ireplace("with","",$this->LabelLines[$L]);
 				
-				//Found the start of the associated species list.  Check subsequent lines for more.
 				while(++$L < count($this->LabelLines)-1)
 					{
 					$Found = preg_match("(\A([A-Z][a-z]{3,20}) ([a-z]{4,20})(,|\Z))",$this->LabelLines[$L],$match); //Line starting with "Genus species"
 					if($Found !==1)
 						$Found = preg_match("(\A([A-Z][a-z]{3,20})(\Z|,))",$this->LabelLines[$L],$match); //Line starting with  "Genus" on the line.  May need to tighten this up by checking subsequent lines or the rest of this line 
 					if($Found !==1)
-						$Found = preg_match("(\A([A-Z]\.\s[a-z]{3,20})(\Z|,))",$this->LabelLines[$L],$match); //Line starting with  "Genus" on the line.  May need to tighten this up by 
+						$Found = preg_match("(\A([A-Z]\.\s[a-z]{3,20})(\Z|,))",$this->LabelLines[$L],$match); //Line starting with  "Genus" on the line.  May need to tighten this up
+					//$this->printr($match,"AT Match");
 					if($Found ===1)
 						{//First make sure this line scores low for WordStats
+						if(strpos($match[1], ". ") == 1 && $this->Results['associatedTaxa'] != "")
+							{//Abbreviated Genus.  See if the previous genus starts with the same letter.  If so, expand this one.
+							$LastArray = explode(";", $this->Results['associatedTaxa']);
+							$Last = trim(array_pop($LastArray));
+							if(substr($Last,0,1) == substr($match[1],0,1))
+								{
+								$Genus = explode(" ",$Last)[0];
+								$match[2] = substr($match[1],3);
+								$match[1] = $Genus;//str_replace(substr($match[1],0,2),$Genus, $match[1]);
+								$this->LabelLines[$L] = str_replace($match[0],$Genus." ".$match[2].",", $this->LabelLines[$L]);
+								}
+							}
 						$this->ScoreOneLine($L,$Field,$StatScore);
-						
-						//echo "StatScore: $StatScore: {$this->LabelLines[$L]}<br>";
-						if($StatScore > 50)
+						if($StatScore > 70 && $this->ScoreSciName($match[1],$match[2],true) < 6)
 							return;//Should mark the end of any list of associated species
 						$this->AddToResults('associatedTaxa',$this->LabelLines[$L],$L);
 
@@ -509,7 +518,7 @@ class SpecProcNlpSalix{
 			if($Found === 1 && $this->Assigned['associatedCollectors'] != $L)	
 				{
 				//echo "Found WITH in {$this->LabelLines[$L]}<br>";
-				$RankArray[$L]+= 10;
+				$RankArray[$L]+= 15;
 				}
 			$RankArray[$L] += preg_match_all("(([A-Z][a-z]{3,20}) ([a-z]{4,20}))",$this->LabelLines[$L],$match); //Add a point for each potential sciname
 			}
@@ -1006,7 +1015,7 @@ class SpecProcNlpSalix{
 		}
 
 //************************************************************************************************************************************
-//***************** RecordNumber Functions *******************************************************************************************
+//***************** RecordNumber Function *******************************************************************************************
 //************************************************************************************************************************************
 	
 	
@@ -1017,15 +1026,20 @@ class SpecProcNlpSalix{
 		if($this->Assigned['recordedBy'] == "")
 			return; //No collector, can't have collection number
 		$L = $this->Assigned["recordedBy"];//Find the collectors line
+		//echo "Line = $L, {$this->LabelLines[$L]}<br>";
 		if($L < 0)
 			return;
 		//Date will have already been removed from the line, so any number remaining is likely the collection number.
 		$WordArray = preg_split("( )",$this->LabelLines[$L],-1,PREG_SPLIT_DELIM_CAPTURE);
+		//$this->printr($WordArray,"Word Array");
 		for($W=0;$W<count($WordArray);$W++)
 			{//Check words one at a time for a match to typical collection number format.
 			$Word= trim($WordArray[$W]);
-			$PM=preg_match('([^0-9a-zA-Z]+)',$Word);
-			if($Word != "" && !ctype_alpha($Word) && $PM===0)
+			
+			//$PM=preg_match('([^0-9a-zA-Z]+)',$Word);
+			$PM=preg_match('([0-9a-zA-Z-]+)',$Word);
+			//echo "PM = $PM<br>";
+			if($Word != "" && !ctype_alpha($Word) && $PM!==0)
 				{//Consists of digits, optional letters, and an optional hyphen.
 				//echo $this->LabelLines[$L]."<br>";
 				$Num = $Word;
@@ -1071,15 +1085,22 @@ class SpecProcNlpSalix{
 				$PlantsOfLine = $L;
 				//$this->printr($match,"PlantsOfMatch");
 				}
-			$Preg = "(\b([a-z]{3,20})\s+(\bcounty\b))i";
+			$Preg = "(\b([a-z]{2,20})\s+(\bcounty\b))i";
 			$Found = preg_match($Preg,$this->LabelLines[$L],$match);
 			if($Found === 1)
 				{//Found the word "County" on the label.  Might be enough to determine state and country.
+				
 				$query = "SELECT stateId,countyName FROM lkupcounty where countyName LIKE '{$match[1]}'";
 				$result = $this->conn->query($query);
+				if($result->num_rows == 0)
+					{//Single word not a county name.  Look for two word county
+					$Preg = "(\b([a-z]{2,20}\s+\b[a-z]{2,20})\s+(\bcounty\b))i";
+					$Found = preg_match($Preg,$this->LabelLines[$L],$match);
+					$query = "SELECT stateId,countyName FROM lkupcounty where countyName LIKE '{$match[1]}'";
+					$result = $this->conn->query($query);
+					}
 				if($result->num_rows > 0)
 					{ 
-					//$this->printr($match,"Match");
 					$OneLine=$result->fetch_assoc();
 					$this->AddToResults('county',$OneLine['countyName'],$L); //First add the county, and remove the text from the line.
 					$CountyName = $OneLine['countyName'];
@@ -1185,7 +1206,7 @@ class SpecProcNlpSalix{
 		{
 		//$StateResult is a mysql result from a query.  Has one or more potential states
 		//echo "Getting state from list<br>";
-
+		global $Label;
 		$OneState = $StateResult->fetch_assoc();
 		//$this->printr($OneState,"OneState");
 		$this->AddToResults('stateProvince', $OneState['statename'],$L);
@@ -1207,7 +1228,7 @@ class SpecProcNlpSalix{
 				$CountryResult = $this->conn->query($query);
 				$CountryArray[] = $CountryResult->fetch_assoc()['countryname'];
 				}
-			$this->printr($CountryArray,"State Array");
+			//$this->printr($CountryArray,"State Array");
 			foreach($CountryArray as $Country)
 				{//Look for each country name on the label.
 				if(preg_match("(\b$Country\b)i", $Label))
@@ -1509,7 +1530,7 @@ class SpecProcNlpSalix{
 						if($Values['totalcount'] < 10) //Reduce impact if only seen few times
 							$Factor = ($Values['totalcount'])/10;
 						foreach($Fields as $F)
-							$ScoreArray[$F] += $Factor*3*$Values[$F.'Freq'];
+							$ScoreArray[$F] += $Factor*5*$Values[$F.'Freq'];
 							}
 					}
 				}
