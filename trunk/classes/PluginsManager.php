@@ -51,6 +51,21 @@ class PluginsManager {
 			$sinceDate = date('Y-m-d', strtotime($currentDate. ' - '.$numDays.' days'));
 			
 			//Delete old files
+			if($clId){
+				$previous = Array();
+				if(file_exists($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json')){
+					$previous = json_decode(file_get_contents($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json'), true);
+					unlink($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json');
+					if($clId != $lastCLID){
+						$previous = Array();
+					}
+				}
+			}
+			else{
+				if(file_exists($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json')){
+					unlink($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json');
+				}
+			}
 			if(file_exists($serverRoot.'/temp/slideshow/'.$ssId.'_info.json')){
 				unlink($serverRoot.'/temp/slideshow/'.$ssId.'_info.json');
 			}
@@ -70,7 +85,7 @@ class PluginsManager {
 			$ssIdInfo['imagetype'] = $imageType;
 			
 			$files = Array();
-			$limit = $numSlides * 5;
+			$limit = $numSlides * 3;
 			$sql = 'SELECT i.imgid, i.tid, i.occid, i.url, i.photographer, i.`owner`, t.SciName, o.sciname AS occsciname, '.
 				'CONCAT_WS(" ",u.firstname,u.lastname) AS photographerName, '.
 				'CONCAT_WS("; ",o.sciname, o.catalognumber, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")")) AS identifier '.
@@ -78,62 +93,118 @@ class PluginsManager {
 				'LEFT JOIN omoccurrences AS o ON i.occid = o.occid) '.
 				'LEFT JOIN taxa AS t ON i.tid = t.tid) ';
 			if($clId){
-				$sql .= 'LEFT JOIN fmvouchers AS v ON i.occid = v.occid ';
+				$sql .= 'LEFT JOIN fmchklsttaxalink AS v ON t.tid = v.TID ';
+				$sql .= 'WHERE v.CLID = '.$clId.' ';
 			}
-			$sql .= 'WHERE i.InitialTimeStamp < "'.$sinceDate.'" ';
-			if($clId){
-				$sql .= 'AND v.CLID = '.$clId.' ';
+			else{
+				$sql .= 'WHERE i.InitialTimeStamp < "'.$sinceDate.'" AND i.tid IS NOT NULL ';
 			}
-			if($imageType == 'field' || $imageType == 'specimen'){
-				$sql .= 'AND i.imagetype LIKE "%'.$imageType.'%" ';
+			if(!$clId && $imageType == 'specimen'){
+				$sql .= 'AND i.occid IS NOT NULL ';
+			}
+			if(!$clId && $imageType == 'field'){
+				$sql .= 'AND ISNULL(i.occid) ';
 			}
 			$sql .= 'ORDER BY i.sortsequence ';
-			$sql .= 'LIMIT '.$limit.' ';
+			//if(!$clId){
+				$sql .= 'LIMIT '.$limit.' ';
+			//}
 			//echo '<div>'.$sql.'</div>';
 			$cnt = 1;
+			$imgIdArr = Array();
 			$rs = $this->conn->query($sql);
 			while(($row = $rs->fetch_object()) && ($cnt < ($numSlides + 1))){
 				$file = '';
 				$imgId = $row->imgid;
-				if (substr($row->url, 0, 1) == '/'){
-					//If imageDomain variable is set within symbini file, image  
-					if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
-						$file = $GLOBALS['imageDomain'].$row->url;
-					}
-					else{
-						//Use local domain 
-						$domain = "http://";
-						if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
-						$domain .= $_SERVER["SERVER_NAME"];
-						if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
-						$file = $domain.$row->url;
+				if($clId){
+					if(!in_array($imgId, $previous)){
+						if (substr($row->url, 0, 1) == '/'){
+							//If imageDomain variable is set within symbini file, image  
+							if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
+								$file = $GLOBALS['imageDomain'].$row->url;
+							}
+							else{
+								//Use local domain 
+								$domain = "http://";
+								if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
+								$domain .= $_SERVER["SERVER_NAME"];
+								if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
+								$file = $domain.$row->url;
+							}
+						}
+						else{
+							$file = $row->url;
+						}
+						if(fopen($file, "r")){
+							$size = getimagesize($file);
+							$width = $size[0];
+							$height = $size[1];
+							$files[$imgId]['url'] = $file;
+							$files[$imgId]['width'] = $width;
+							$files[$imgId]['height'] = $height;
+							$files[$imgId]['imgid'] = $row->imgid;
+							$files[$imgId]['tid'] = $row->tid;
+							$files[$imgId]['occid'] = $row->occid;
+							$files[$imgId]['photographer'] = $row->photographer;
+							$files[$imgId]['owner'] = $row->owner;
+							$files[$imgId]['SciName'] = $row->SciName;
+							$files[$imgId]['occsciname'] = $row->occsciname;
+							$files[$imgId]['photographerName'] = $row->photographerName;
+							$files[$imgId]['identifier'] = $row->identifier;
+							$imgIdArr[] = $row->imgid;
+							$cnt++;
+						}
 					}
 				}
 				else{
-					$file = $row->url;
-				}
-				if(getimagesize($file)){
-					$size = getimagesize($file);
-					$width = $size[0];
-					$height = $size[1];
-					$files[$imgId]['url'] = $file;
-					$files[$imgId]['width'] = $width;
-					$files[$imgId]['height'] = $height;
-					$files[$imgId]['imgid'] = $row->imgid;
-					$files[$imgId]['tid'] = $row->tid;
-					$files[$imgId]['occid'] = $row->occid;
-					$files[$imgId]['photographer'] = $row->photographer;
-					$files[$imgId]['owner'] = $row->owner;
-					$files[$imgId]['SciName'] = $row->SciName;
-					$files[$imgId]['occsciname'] = $row->occsciname;
-					$files[$imgId]['photographerName'] = $row->photographerName;
-					$files[$imgId]['identifier'] = $row->identifier;
-					$cnt++;
+					if (substr($row->url, 0, 1) == '/'){
+						//If imageDomain variable is set within symbini file, image  
+						if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
+							$file = $GLOBALS['imageDomain'].$row->url;
+						}
+						else{
+							//Use local domain 
+							$domain = "http://";
+							if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
+							$domain .= $_SERVER["SERVER_NAME"];
+							if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
+							$file = $domain.$row->url;
+						}
+					}
+					else{
+						$file = $row->url;
+					}
+					if(fopen($file, "r")){
+						$size = getimagesize($file);
+						$width = $size[0];
+						$height = $size[1];
+						$files[$imgId]['url'] = $file;
+						$files[$imgId]['width'] = $width;
+						$files[$imgId]['height'] = $height;
+						$files[$imgId]['imgid'] = $row->imgid;
+						$files[$imgId]['tid'] = $row->tid;
+						$files[$imgId]['occid'] = $row->occid;
+						$files[$imgId]['photographer'] = $row->photographer;
+						$files[$imgId]['owner'] = $row->owner;
+						$files[$imgId]['SciName'] = $row->SciName;
+						$files[$imgId]['occsciname'] = $row->occsciname;
+						$files[$imgId]['photographerName'] = $row->photographerName;
+						$files[$imgId]['identifier'] = $row->identifier;
+						$cnt++;
+					}
 				}
 			}
 			$rs->free();
 			$ssIdInfo['files'] = $files;
+			$previous[] = $imgIdArr;
 			
+			if($clId){
+				if(array_diff($imgIdArr,$previous)){
+					$fp = fopen($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json', 'w');
+					fwrite($fp, json_encode($previous));
+					fclose($fp);
+				}
+			}
 			$fp = fopen($serverRoot.'/temp/slideshow/'.$ssId.'_info.json', 'w');
 			fwrite($fp, json_encode($ssIdInfo));
 			fclose($fp);
