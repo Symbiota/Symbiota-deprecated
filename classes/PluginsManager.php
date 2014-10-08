@@ -106,9 +106,9 @@ class PluginsManager {
 				$sql .= 'AND ISNULL(i.occid) ';
 			}
 			$sql .= 'ORDER BY i.sortsequence ';
-			//if(!$clId){
+			if(!$clId){
 				$sql .= 'LIMIT '.$limit.' ';
-			//}
+			}
 			//echo '<div>'.$sql.'</div>';
 			$cnt = 1;
 			$imgIdArr = Array();
@@ -224,6 +224,13 @@ class PluginsManager {
 		$html .= '<div class="container">';
 		$html .= '<div id="slides">';
 		foreach($imageArr as $igmAr => $imgIdArr){ 
+			$imgSize = '';
+			if($imgIdArr["width"] > $imgIdArr["height"]){
+				$imgSize = 'height:'.$imageHeight.'px;';
+			}
+			else{
+				$imgSize = 'width:'.$width.'px;';
+			}
 			$linkUrl = '';
 			if($imgIdArr["occid"]){
 				$linkUrl = $clientRoot.'/collections/individual/index.php?occid='.$imgIdArr["occid"].'&clid=0';
@@ -235,7 +242,7 @@ class PluginsManager {
 			$html .= '<div style="width:'.$width.'px;height:'.$imageHeight.'px;position:relative;">';
 			$html .= '<div style="width:'.$width.'px;max-height:'.$imageHeight.'px;overflow:hidden;">';
 			$html .= '<a href="'.$linkUrl.'" target="_blank">';
-			$html .= '<img src="'.$imgIdArr["url"].'" style="width:'.$width.'px;" alt="'.($imgIdArr["occsciname"]?$imgIdArr["occsciname"]:$imgIdArr["SciName"]).'">';
+			$html .= '<img src="'.$imgIdArr["url"].'" style="'.$imgSize.'" alt="'.($imgIdArr["occsciname"]?$imgIdArr["occsciname"]:$imgIdArr["SciName"]).'">';
 			$html .= '</a>';
 			$html .= '</div>';
 			$html .= '<div style="position:absolute;bottom:0;background-color:rgba(255,255,255,0.8);"><b>';

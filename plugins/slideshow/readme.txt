@@ -11,8 +11,6 @@ $ssId = 1;
 $numSlides = 10;
 
 //Enter width of slideshow window (in pixels, minimum 275, maximum 800)
-//Note landscape images will have white space at the base of slideshow, 
-//wider windows will decrease this space
 $width = 300;
 
 //Enter amount of days between image refreshes of images
@@ -30,6 +28,7 @@ $numDays = 30;
 
 //---------------------------DO NOT CHANGE BELOW HERE-----------------------------
 
+ini_set('max_execution_time', 120);
 include_once($serverRoot.'/classes/PluginsManager.php');
 $pluginManager = new PluginsManager();
 $slideshow = $pluginManager->createSlidewhow($ssId,$numSlides,$width,$numDays,$imageType,$clId,$dayInterval);
