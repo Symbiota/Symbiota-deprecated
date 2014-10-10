@@ -34,8 +34,12 @@ if($tid){
 								<?php 
 								$imgCnt = 0;
 								foreach($images as $imgArr){
-									$webUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"]; 
-									$tnUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["thumbnailurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["thumbnailurl"];
+									$webUrl = $imgArr["url"]; 
+									$tnUrl = $imgArr["thumbnailurl"];
+									if($GLOBALS["imageDomain"]){
+										if(substr($imgArr["url"],0,1)=="/") $webUrl = $GLOBALS["imageDomain"].$imgArr["url"];
+										if(substr($imgArr["thumbnailurl"],0,1)=="/") $tnUrl = $GLOBALS["imageDomain"].$imgArr["thumbnailurl"];
+									}
 									if(!$tnUrl) $tnUrl = $webUrl;
 									?>
 									<td align='center' valign='bottom'>
@@ -218,8 +222,12 @@ if($tid){
 							<tr><td>
 								<div style="margin:20px;float:left;text-align:center;">
 									<?php 
-									$webUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"]; 
-									$tnUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["thumbnailurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["thumbnailurl"];
+									$webUrl = $imgArr["url"]; 
+									$tnUrl = $imgArr["thumbnailurl"];
+									if($GLOBALS['imageDomain']){
+										if(substr($imgArr["url"],0,1) == "/") $webUrl = $GLOBALS["imageDomain"].$imgArr["url"]; 
+										if(substr($imgArr["thumbnailurl"],0,1) == "/") $tnUrl = $GLOBALS["imageDomain"].$imgArr["thumbnailurl"];
+									}
 									if(!$tnUrl) $tnUrl = $webUrl;
 									?>
 									<a href="../../imagelib/imgdetails.php?imgid=<?php echo $imgArr['imgid']; ?>">

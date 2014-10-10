@@ -72,12 +72,24 @@ class ObservationSubmitManager {
 				if($row = $result->fetch_object()){
 					$tid = $row->tid;
 					if($row->securitystatus > 0) $localitySecurity = $row->securitystatus;
+					if(!$localitySecurity){
+						//Check to see if species is rare or sensitive within a state
+						$sql = 'SELECT cl.tid '.
+							'FROM fmchecklists c INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid '. 
+							'WHERE c.type = "rarespp" AND c.locality = "'.$occArr['stateprovince'].'" AND cl.tid = '.$tid;
+						$rs = $this->conn->query($sql);
+						if($rs->num_rows){
+							$localitySecurity = 1;
+						}
+					}
 				}
 				else{
 					//Abort process
 					$this->errArr[] = 'ERROR: scientific name failed, contact admin to add name to thesaurus';
 					return;
 				}
+				
+				
 				//Get PK for that collection
 				//$dbpk = 1;
 				//$rs = $this->conn->query('SELECT MAX(dbpk+1) as maxpk FROM omoccurrences o WHERE o.collid = '.$collId);

@@ -447,10 +447,10 @@ class TaxonProfileManager {
 			$imgUrl = $imgObj["url"];
 			$imgAnchor = '../imagelib/imgdetails.php?imgid='.$imgId;
 			$imgThumbnail = $imgObj["thumbnailurl"];
-			if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
+			if(array_key_exists("imageDomain",$GLOBALS)){
 				//Images with relative paths are on another server
-				$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-				$imgThumbnail = $GLOBALS["imageDomain"].$imgThumbnail;
+				if(substr($imgUrl,0,1)=="/") $imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+				if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["imageDomain"].$imgThumbnail;
 			}
 			if($imgObj['occid']){
 				$imgAnchor = '../collections/individual/index.php?occid='.$imgObj['occid'];

@@ -104,7 +104,7 @@ if($taxonManager->getSciName() != "unknown"){
 				</span> 
 				<?php echo $taxonManager->getAuthor(); ?>
 				<?php 
-				$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
+				$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClid()."&proj=".$projValue."&taxauthid=".$taxAuthId;
 				echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
 			 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
 			 	if(($taxonManager->getTid() != $taxonManager->getSubmittedTid()) && $taxAuthId){
@@ -284,7 +284,7 @@ if($taxonManager->getSciName() != "unknown"){
 				$displayName = $spDisplay;
 				if($taxonRank == 180) $displayName = '<i>'.$displayName.'</i> spp. ';
 				if($taxonRank > 140){
-					$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
+					$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClid()."&proj=".$projValue."&taxauthid=".$taxAuthId;
 					$displayName .= ' <a href="'.$parentLink.'">';
 					$displayName .= '<img border="0" height="10px" src="../images/toparent.jpg" title="Go to Parent" />';
 					$displayName .= '</a>';
@@ -365,16 +365,16 @@ if($taxonManager->getSciName() != "unknown"){
 		<tr>
 			<td colspan="2">
 				<fieldset style="padding:10px 2px 10px 2px;">
-					<div class='legend'>Species
+					<legend>
 					<?php 
 					if($clValue){
-						echo " within ".$taxonManager->getClName()."&nbsp;&nbsp;";
+						echo "Species within <b>".$taxonManager->getClName()."</b>&nbsp;&nbsp;";
 						if($taxonManager->getParentClid()){
-							echo "<a href='index.php?taxon=$taxonValue&cl=".$taxonManager->getParentClid()."&taxauthid=".$taxAuthId."' title='Go to ".$taxonManager->getParentName()." checklist'><img style='border:0px;width:12px;height:12px;' src='../images/toparent.jpg'/></a>";
+							echo "<a href='index.php?taxon=$taxonValue&cl=".$taxonManager->getParentClid()."&taxauthid=".$taxAuthId."' title='Go to ".$taxonManager->getParentName()." checklist'><img style='border:0px;width:10px;' src='../images/toparent.jpg'/></a>";
 						}
 					}
 					?>
-					</div>
+					</legend>
 					<div>
 					<?php 
 					if($sppArr = $taxonManager->getSppArray()){
@@ -460,7 +460,7 @@ if($taxonManager->getSciName() != "unknown"){
 
 	if($taxonRank > 140){
 		$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&taxauthid=".$taxAuthId;
-		if($clValue) $parentLink .= "&cl=".$taxonManager->getClName();
+		if($clValue) $parentLink .= "&cl=".$taxonManager->getClid();
 		if($projValue) $parentLink .= "&proj=".$projValue;
 		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='".$parentLink."'>View Parent Taxon</a>";
 	}
