@@ -997,7 +997,6 @@ class TaxaLoaderManager{
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
-				echo ' => '.$retStr.'<br/>';
 			}
 			elseif(strtolower($charset) == "iso-8859-1"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){

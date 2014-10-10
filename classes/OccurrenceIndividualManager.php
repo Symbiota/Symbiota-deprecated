@@ -143,10 +143,10 @@ class OccurrenceIndividualManager extends Manager{
 				$url = $row->url;
 				$tnUrl = $row->thumbnailurl;
 				$lgUrl = $row->originalurl;
-				if($imageDomain && substr($url,0,1)=="/"){
-					$url = $imageDomain.$url;
-					if($lgUrl) $lgUrl = $imageDomain.$lgUrl;
-					if($tnUrl) $tnUrl = $imageDomain.$tnUrl;
+				if($imageDomain){
+					if(substr($url,0,1)=="/") $url = $imageDomain.$url;
+					if($lgUrl && substr($lgUrl,0,1)=="/") $lgUrl = $imageDomain.$lgUrl;
+					if($tnUrl && substr($tnUrl,0,1)=="/") $tnUrl = $imageDomain.$tnUrl;
 				}
 				$this->occArr['imgs'][$imgId]['url'] = $url;
 				$this->occArr['imgs'][$imgId]['tnurl'] = $tnUrl;
