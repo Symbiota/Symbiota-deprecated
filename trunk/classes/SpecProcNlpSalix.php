@@ -22,6 +22,8 @@ class SpecProcNlpSalix{
 	//private $Array=array();
 	private $PregStart = array();
 	private $Family = "";
+	private $LichenFamilies =  array();
+
 
 	
 	function __construct() {
@@ -47,7 +49,8 @@ class SpecProcNlpSalix{
 		$this->Assigned = array_fill_keys($this->ResultKeys,-1);
 		$this->PregStart = array_fill_keys($this->ResultKeys,'');
 		$this->InitStartWords();//Initialize the array of start words, which are hard coded in the function.
-
+		$this->GetLichenNames(); //Get list of Lichen families to help find substrates
+		
 		//****************************************************************
 		// Do some preformatting on the input label text
 		//****************************************************************
@@ -63,6 +66,7 @@ class SpecProcNlpSalix{
 
 		//Remove double spaces
 		$Label = str_replace("  "," ",$Label);
+		$Label = str_replace("\t"," ",$Label);
 		//Remove (?) <>.  Perhaps should leave in...?  Would comment ever say e.g. "Found > 500 m. elevation"? "Collected < 100 meters from stream"?
 		$Label = str_replace("<","",$Label);
 		$Label = str_replace(">","",$Label);
@@ -144,8 +148,12 @@ class SpecProcNlpSalix{
 			$Score=0;
 
 			$Found = preg_match("((\A[A-Z][a-z]{3,20}) ([a-z]{4,20}\b))", $this->LabelLines[$L],$match);
+			//$this->printr($match,"SciName Match");
 			if($Found === 1)//Looks like a sciname and is at the beginning of the line.
+				{
 				$Score += 2 + $this->ScoreSciName($match[1],$match[2]);
+				//echo "Score = $Score<br>";
+				}
 			else
 				{
 				$Found = preg_match("((\b[A-Z][a-z]{3,20}) ([a-z]{4,20}\b))", $this->LabelLines[$L],$match);
@@ -415,6 +423,8 @@ class SpecProcNlpSalix{
 			$Found = preg_match($Preg,$this->LabelLines[$L],$match);
 			if($Found ===1)
 				{//Apparent sciname following the word "With"
+				$this->RemoveStartWords($L,'associatedTaxa');
+				$TempString = $match[0];
 				$TempString = str_replace($match[1],"",$match[0]);
 				}
 			else if($this->CheckStartWords($L,'associatedTaxa'))
@@ -453,6 +463,7 @@ class SpecProcNlpSalix{
 			if($Found)
 				{//Found the start of the associated species list.  Check subsequent lines for more.
 				$this->AddToResults("associatedTaxa", $TempString,$L);
+				$this->RemoveStartWords($L,'associatedTaxa');
 				$this->LabelLines[$L] = str_replace($TempString,"",$this->LabelLines[$L]);
 				$this->LabelLines[$L] = str_ireplace("with","",$this->LabelLines[$L]);
 				
@@ -482,6 +493,7 @@ class SpecProcNlpSalix{
 						if($StatScore > 70 && $this->ScoreSciName($match[1],$match[2],true) < 6)
 							return;//Should mark the end of any list of associated species
 						$this->AddToResults('associatedTaxa',$this->LabelLines[$L],$L);
+						$this->RemoveStartWords($L,'associatedTaxa');
 
 						$this->LabelLines[$L] = "";
 						}
@@ -661,12 +673,13 @@ class SpecProcNlpSalix{
 		asort($RankArray);
 		$RankArray = array_reverse($RankArray, true);
 		$ScoreArray = array();
+		//$this->printr($RankArray,"Elev Rank");
 		foreach($RankArray as $L=>$Value)
 			{//Now iterate through the lines from most to least likely, cutting off if value gets below 3.
 			if($Value < 5)
 				break;
 			$TempString = $this->LabelLines[$L];
-			$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*([0-9,]+)([\s]*)(f(ee)?t\b|m(eter)?s?\b))",$TempString,$match);
+			$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*([0-9,]+)([\s]*)(f(ee)?t\b|m(eter)?s?\b|\'))",$TempString,$match);
 			if($Found === 1) //Embedded in a line, like "Found at elevation 2342 feet"
 				{
 				$ScoreArray[$match[0]] = $Value+10;
@@ -681,7 +694,7 @@ class SpecProcNlpSalix{
 				}
 			if($Found !== 1)
 				{ 
-				$Found = preg_match("(\A(ca\.?\s)?([0-9,]+)([ ]*)(f(ee)?t\b|m(eter)?s?\b))",$TempString,$match);
+				$Found = preg_match("(\A(ca\.?\s)?([0-9,]+)([ ]*)(f(ee)?t\b|m(eter)?s?\b|\'))",$TempString,$match);
 				if($Found === 1) //Found at beginning of the line, but without "Elevation" or "Altitude" indicator.  Just feet and meters.
 					{
 					$Score =$Value+2;
@@ -692,7 +705,7 @@ class SpecProcNlpSalix{
 				}
 			if($Found !== 1)
 				{//Least certain, just a number followed by feet or meters in middle of a line.  Could be height, distance, etc.
-				$Found = preg_match("((ca\.?\s)?\b([0-9,]+)([ ]*)(f(ee)?t\b|m(eter)?s?\b))",$TempString,$match);
+				$Found = preg_match("((ca\.?\s)?\b([0-9,]+)(\s?)(f(ee)?t\b|m(eter)?s?\b|\'))",$TempString,$match);
 				if($Found === 1)
 					{
 					$Score =$Value;
@@ -708,6 +721,7 @@ class SpecProcNlpSalix{
 		if(count($ScoreArray) == 0)
 			return;
 		asort($ScoreArray);
+		//$this->printr($ScoreArray,"Elev Score Array");
 		end($ScoreArray); //Select the last (highest) element in the scores array
 		$TempString = key($ScoreArray);//Should be the best line.
 
@@ -786,9 +800,9 @@ class SpecProcNlpSalix{
 				{
 				$Name = $match[0][$N];
 				if($this->ConfirmRecordedBy($Name) < 0)
-					break;
-					
+					continue;
 				$this->AddToResults($Field,$match[0][$N],$L);
+				$this->RemoveStartWords($L,$Field);
 				$this->LabelLines[$L] = trim(str_replace($match[0][$N],"",$this->LabelLines[$L]));
 				
 				}
@@ -835,6 +849,8 @@ class SpecProcNlpSalix{
 				$RankArray[$L]-=100;
 				continue;
 				}
+			if($this->CheckStartWords($L,$Field))
+				$RankArray[$L] += 100;
 			foreach($ConflictFields as $F)
 				{
 				if($this->CheckStartWords($L, $F))
@@ -910,12 +926,24 @@ class SpecProcNlpSalix{
 		$FoundLine=0;
 		$ReturnDate = array('Year'=>0,'Month'=>$m,'Day'=>0);
 		$RankArray = $this->RankForDate($EventField, $Field);
+		//$this->printr($RankArray,"Date Rank");
 		foreach($RankArray as $L => $Value)
 			{
-			//echo "Checking {$this->LabelLines[$L]}<br>";
+			if($Value < 0)
+				break;
 			if($this->DateFromOneLine($Field,$L))
 				return;
 			}
+		//Didn't find in standard format.  Try "July 1992"
+		foreach($RankArray as $L => $Value)
+			{
+			if($Value < 0)
+				break;
+				
+			if($this->DateFromOneLine($Field,$L,true))
+				return;
+			}
+		
 		return;
 		}
 
@@ -989,11 +1017,14 @@ class SpecProcNlpSalix{
 		}
 
 	//**********************************************
-	private function DateFromOneLine($Field, $L)
-		{
+	private function DateFromOneLine($Field, $L,$Partial=false)
+		{//Assumes standard format, d/m/y or m,d,y
 		$match=array();
 		$TempString = ($this->LabelLines[$L]);
-		$Preg = "((\b[0-9]{1,4}\b)\s*{$this->PregMonths}\s*(\b[0-9]{1,4}\b))i";
+		if($Partial)
+			$Preg = "(\b{$this->PregMonths}\s*(\b[0-9]{1,4}\b))i";
+		else
+			$Preg = "((\b[0-9]{1,4}\b)\s*{$this->PregMonths}\s*(\b[0-9]{1,4}\b))i";
 		$Found = preg_match($Preg,$TempString,$match);
 		if($Found !== 1)
 			{//Format April 21, 1929
@@ -1022,31 +1053,35 @@ class SpecProcNlpSalix{
 //******************************************************************
 	private function GetRecordNumber()
 		{
+		$match=array();
 		//Assume on the same line as recordedBy.  If no recordBy, then return empty.
 		if($this->Assigned['recordedBy'] == "")
 			return; //No collector, can't have collection number
 		$L = $this->Assigned["recordedBy"];//Find the collectors line
-		//echo "Line = $L, {$this->LabelLines[$L]}<br>";
+		//echo "<br><br>Line = $L, {$this->LabelLines[$L]}<br>";
 		if($L < 0)
 			return;
 		//Date will have already been removed from the line, so any number remaining is likely the collection number.
 		$WordArray = preg_split("( )",$this->LabelLines[$L],-1,PREG_SPLIT_DELIM_CAPTURE);
-		//$this->printr($WordArray,"Word Array");
+		//$this->printr($WordArray,"Number Words");
 		for($W=0;$W<count($WordArray);$W++)
 			{//Check words one at a time for a match to typical collection number format.
 			$Word= trim($WordArray[$W]);
+			//echo "Word = $Word<br>";
 			
-			//$PM=preg_match('([^0-9a-zA-Z]+)',$Word);
-			$PM=preg_match('([0-9a-zA-Z-]+)',$Word);
-			//echo "PM = $PM<br>";
+			$PM=preg_match('([#0-9a-zA-Z-]+)',$Word,$match);
+			//$this->printr($match,"Match");
 			if($Word != "" && !ctype_alpha($Word) && $PM!==0)
 				{//Consists of digits, optional letters, and an optional hyphen.
-				//echo $this->LabelLines[$L]."<br>";
-				$Num = $Word;
-				$Start = strpos($this->LabelLines[$L],$Word);
-				$End = $Start+strlen($Word);
-				$this->AddToResults('recordNumber', $Num,$L);
-				//$this->PruneLine($L,$Start, $End);
+				$Match = $match[0];
+				if(strpos($Word,"#") !== false && preg_match("([0-9])",$Word) === 0)
+					{
+					if($W < count($WordArray)-1 && preg_match("([0-9])", $WordArray[$W+1]) === 1)
+						{
+						$Match .= " ".$WordArray[$W+1];
+						}
+					}
+				$this->AddToResults('recordNumber', $Match,$L);
 				return;
 				}
 			}
@@ -1090,22 +1125,32 @@ class SpecProcNlpSalix{
 			if($Found === 1)
 				{//Found the word "County" on the label.  Might be enough to determine state and country.
 				
-				$query = "SELECT stateId,countyName FROM lkupcounty where countyName LIKE '{$match[1]}'";
+				$query = "SELECT c.stateId,c.countyName,s.statename,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[1]}'";
 				$result = $this->conn->query($query);
 				if($result->num_rows == 0)
 					{//Single word not a county name.  Look for two word county
 					$Preg = "(\b([a-z]{2,20}\s+\b[a-z]{2,20})\s+(\bcounty\b))i";
 					$Found = preg_match($Preg,$this->LabelLines[$L],$match);
-					$query = "SELECT stateId,countyName FROM lkupcounty where countyName LIKE '{$match[1]}'";
+					$query = "SELECT c.stateId,c.countyName,s.statename,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[1]}'";
 					$result = $this->conn->query($query);
 					}
 				if($result->num_rows > 0)
 					{ 
 					$OneLine=$result->fetch_assoc();
+					//$this->printr($OneLine,"OneLine");
 					$this->AddToResults('county',$OneLine['countyName'],$L); //First add the county, and remove the text from the line.
 					$CountyName = $OneLine['countyName'];
 					$this->LabelLines[$L] = str_replace($match[0],"",$this->LabelLines[$L]);
 					$this->LabelLines[$L] = trim($this->LabelLines[$L]," :.\t,;-");
+					if($result->num_rows == 1)
+						{
+						$this->AddToResults('stateProvince',$OneLine['statename'],$PlantsOfLine);
+						$query = "SELECT countryname from lkupcountry where countryId = {$OneLine['countryId']} LIMIT 1";
+						$CountryResult = $this->conn->query($query);
+						
+						$this->AddToResults('country',$CountryResult->fetch_assoc()['countryname'],-1);
+						return;
+						}
 					//Not sure if state and/or country on the same line.  Don't adjust RankArray.
 					}
 				}
@@ -1517,6 +1562,14 @@ class SpecProcNlpSalix{
 						$ScoreArray[$F] += $Factor * $Values[$F.'Freq'];
 					}
 				}
+			//$this->printr($this->LichenFamilies,"Lichens");
+			if(strtolower($WordsArray[$W]) == "on")
+				{
+				if(array_search($this->Family,$this->LichenFamilies)!==false)
+					{
+					$ScoreArray['substrate'] += 1000;
+					}
+				}
 			if($W < count($WordsArray)-1)
 				{
 				$query = "SELECT * from salixwordstats where firstword like '{$WordsArray[$W]}' AND secondword LIKE '{$WordsArray[$W+1]}' LIMIT 3";
@@ -1536,6 +1589,8 @@ class SpecProcNlpSalix{
 				}
 			}
 		asort($ScoreArray);
+		//echo "{$this->LabelLines[$L]}:  ";
+		//$this->printr($ScoreArray,"Stats  Score");
 		end($ScoreArray); //Select the last (highest) element in the scores array
 		$Field = key($ScoreArray); //Maximum field
 		$Score = $ScoreArray[$Field]/count($WordsArray);
@@ -1627,7 +1682,7 @@ class SpecProcNlpSalix{
 		$this->PregStart['country'] = "(^(country)\b)i";
 		$this->PregStart['stateProvince'] = "(^(state|province)\b)i";
 		$this->PregStart['minimumElevationInMeters'] = "(^(elevation|elev|altitude|alt)\b)i";
-		$this->PregStart['associatedTaxa'] = "(^(associated taxa|associated with|associated plants|associated spp|associated species|associated|other spp)\b)i";
+		$this->PregStart['associatedTaxa'] = "(^(growing|associated taxa|associated with|associated plants|associated spp|associated species|associated|other spp)\b)i";
 		$this->PregStart['infraspecificEpithet'] = "(^(ssp|variety|subsp)\b)i";
 		$this->PregStart['occurrenceRemarks'] = "(^(notes)\b)i";
 		$this->PregStart['ignore'] = "(^(synonym)\b)i";
@@ -1702,6 +1757,12 @@ class SpecProcNlpSalix{
 		return $retStr;
 	}
 
+	private function GetLichenNames()
+		{
+		$this->LichenFamilies = array("Acarosporaceae","Adelococcaceae","Agyriaceae","Anamylopsoraceae","Anziaceae","Arctomiaceae","Arthoniaceae","Arthopyreniaceae","Arthrorhaphidaceae","Aspidotheliaceae","Atheliaceae","Baeomycetaceae","Biatorellaceae","Bionectriaceae","Brigantiaeaceae","Caliciaceae","Candelariaceae","Capnodiaceae","Catillariaceae","Cetradoniaceae","Chionosphaeraceae","Chrysothricaceae","Cladoniaceae","Clavulinaceae","Coccocarpiaceae","Coccotremataceae","Coenogoniaceae","Collemataceae","Coniocybaceae","Coniophoraceae","Crocyniaceae","Dacampiaceae","Dactylosporaceae","Didymosphaeriaceae","Epigloeaceae","Fuscideaceae","Gloeoheppiaceae","Gomphillaceae","Graphidaceae","Gyalectaceae","Gypsoplacaceae","Haematommataceae","Helotiaceae","Heppiaceae","Herpotrichiellaceae","Hyaloscyphaceae","Hygrophoraceae","Hymeneliaceae","Hyponectriaceae","Icmadophilaceae","Lahmiaceae","Lecanoraceae","Lecideaceae","Lepidostromataceae","Letrouitiaceae","Lichenotheliaceae","Lichinaceae","Lobariaceae","Loxosporaceae","Mastodiaceae","Megalariaceae","Megalosporaceae","Megasporaceae","Melanommataceae","Melaspileaceae","Microascaceae","Microcaliciaceae","Microthyriaceae","Monoblastiaceae","Mycoblastaceae","Mycocaliciaceae","Mycosphaerellaceae","Mytilinidiaceae","Myxotrichaceae","Naetrocymbaceae","Nectriaceae","Nephromataceae","Niessliaceae","Nitschkiaceae","Obryzaceae","Odontotremataceae","Ophioparmaceae","Pannariaceae","Parmeliaceae","Parmulariaceae","Peltigeraceae","Peltulaceae","Pertusariaceae","Phlyctidaceae","Phyllachoraceae","Physciaceae","Pilocarpaceae","Placynthiaceae","Platygloeaceae","Pleomassariaceae","Pleosporaceae","Porinaceae","Porpidiaceae","Protothelenellaceae","Pseudoperisporiaceae","Psoraceae","Pucciniaceae","Pyrenotrichaceae","Pyrenulaceae","Ramalinaceae","Requienellaceae","Rhizocarpaceae","Roccellaceae","Schaereriaceae","Solorinellaceae","Sphaerophoraceae","Sphinctrinaceae","Stereocaulaceae","Stictidaceae","Strigulaceae","Syzygosporaceae","Teloschistaceae","Thelenellaceae","Thelocarpaceae","Thelotremataceae","Tremellaceae","Tricholomataceae","Trypetheliaceae","Umbilicariaceae","Verrucariaceae","Vezdaeaceae","Xanthopyreniaceae");
+		}
+	
+	
 	//**********************************************
 	private function getWordFreq(){
 		$sql = 'SELECT firstword, secondword, locality, localityfreq, habitat, habitatFreq, substrate, substrateFreq, '.
