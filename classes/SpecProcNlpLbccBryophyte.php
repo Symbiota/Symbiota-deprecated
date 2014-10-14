@@ -691,7 +691,8 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 
 	private function isMossesOfTheInteriorHighlandsExsiccataeLabel($s) {
 		if(preg_match("/.*[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|].h[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at.*/is", $s)) return true;
-		if(preg_match("/.*M[0O][s5]{2}[ec][s5] ?[0O]. ?.8 ?Ex[s5]i[ec]{2}at.*Ed[1Il!|]t[ec]d b[yv] Pau[1Il!|] Red.[ec]a(?:m|rn)[,.] Bru[ec]{2} A[1Il!|]{2}[ec]n & R[0o]b[ec]rt.{1,3}ag[1Il!| ]{1,4}/is", $s)) return true;
+		if(preg_match("/.*M[0O][s5]{2}[ec][s5] ?[0O]F th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|].h[1Il!|]and[s5].*/is", $s)) return true;
+		if(preg_match("/.*M[0O][s5]{2}[ec][s5] ?[0O]. ?.8 ?Ex[s5]i[ec]{2}at.*Ed[1Il!|]t[ec]d b[yv] Pau[1Il!|] (?:L[,.]? )?Red.[ec]a(?:m|rn)[,.] Bru[ec]{2} A[1Il!|]{2}[ec]n & R[0o]b[ec]rt.{1,3}ag[1Il!| ]{1,4}/is", $s)) return true;
 		return false;
 	}
 
@@ -699,13 +700,14 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$s = trim(preg_replace
 		(
 			array(
-				"/[^\n]{1,2}[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|].h[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at[^\n]{2,3}+/i",
-				//"/[^\n]?M[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|].h[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at[^\n]{2,3}+/i",
-				"/Ed[1Il!|]t[ec]d b[yv] Pau[1Il!|] Red.[ec]a(?:m|rn)[,.] Bru[ec]{2} A[1Il!|]{2}[ec]n & R[0o]b[ec]rt.{1,3}ag[1Il!| ]{1,4}+/i",
+				"/.{1,2}[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|].h[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at.{1,3}+/i",
+				"/.?M[0O][s5]{2}[ec][s5] ?[0O]F th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|].h[1Il!|]and[s5].{0,3}+/i",
+				"/Ed[1Il!|]t[ec]d b[yv] Pau[1Il!|] (?:L[,.]? )?Red.[ec]a(?:m|rn)[,.] Bru[ec]{2} A[1Il!|]{2}[ec]n & R[0o]b[ec]rt.{1,3}ag[1Il!| ]{1,4}+/i",
 				"/[^\n]?D[1Il!|][s5]tr[1Il!|]but[ec]d ?b[yv] ?M[1Il!|][s5]{2}[0o]ur[1Il!|] ?B[0o]tan[1Il!|][ec]a[1Il!|] ?[CG]ard[ec].*/is",
 				"/\\n{2,}/"
 			),
 			array(
+				"",
 				"",
 				"",
 				"",
@@ -935,7 +937,7 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 			"regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:[l1|I!]ine)?", "terraces?", "thickets?", "moraines?", "heath(?:er)?",
 			"metamorphic", "vegetation", "quarry", "mats?", "depression", "pebbles?", "Ombrotrophic", "rivu[l1|I!]ets?", "hummock[sy]?", "stand",
 			"chert", "humus", "marsh", "abundant(?:[l1|I!]y)?", "ecotone", "fen", "poo[l1|I!]s?", "cu[l1|I!]tivat[ec]d", "twigs?", "Agropyron",
-			"barrens?", "prairie");
+			"barrens?", "prairie", "crevices?");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
