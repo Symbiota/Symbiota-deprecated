@@ -1,6 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/TaxonomyUtilites.php');
+include_once($serverRoot.'/classes/TaxonomyUtilities.php');
 
 class ChecklistLoaderManager {
 
@@ -48,7 +48,7 @@ class ChecklistLoaderManager {
 				$sciNameStr = $this->cleanInStr($valueArr[$headerArr["sciname"]]);
 				$noteStr = '';
 				if($sciNameStr){
-					$sciNameArr = TaxonomyUtilites::parseSciName($sciNameArr);
+					$sciNameArr = TaxonomyUtilities::parseSciName($sciNameArr);
 					//Check name is in taxa table and grab tid if it is
 					$sql = "";
 					if($thesId && is_numeric($thesId)){

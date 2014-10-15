@@ -72,9 +72,11 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 		if($_POST["notes"]) $dataArr["notes"] = $_POST["notes"];
 		if($_POST["source"]) $dataArr["source"] = $_POST["source"];
 		if($_POST["internalnotes"]) $dataArr["internalnotes"] = $_POST["internalnotes"];
+		$setRareSpp = false;
+		if($_POST["cltype"] == 'rarespp') $setRareSpp = true;
 		$clAdmin = new ChecklistAdmin();
 		$clAdmin->setClid($clid);
-		$statusStr = $clAdmin->addNewSpecies($dataArr);
+		$statusStr = $clAdmin->addNewSpecies($dataArr,$setRareSpp);
 	}
 }
 $clArray = Array();
@@ -205,6 +207,11 @@ if($clValue || $dynClid){
 			}
 			//Do not show certain fields if Dynamic Checklist ($dynClid)
 			if($clValue){
+				if($clArray['type'] == 'rarespp'){
+					echo '<div style="clear:both;">';
+					echo '<b>Sensitive species checklist for:</b> '.$clArray["locality"];
+					echo '</div>';
+				}
 				?>
 				<div style="clear:both;">
 					<span style="font-weight:bold;">
@@ -368,6 +375,7 @@ if($clValue || $dynClid){
 										</div>
 										<div>
 											<input type="hidden" name="cl" value="<?php echo $clid; ?>" />
+											<input type="hidden" name="cltype" value="<?php echo $clArray['type']; ?>" />
 											<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
 											<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
 											<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />

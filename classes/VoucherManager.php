@@ -49,7 +49,8 @@ class VoucherManager {
 	public function getChecklistData(){
  		$checklistData = Array();
  		if(!$this->tid || !$this->clid) return $checklistData; 
-		$sql = "SELECT t.SciName, cllink.Habitat, cllink.Abundance, cllink.Notes, cllink.internalnotes, cllink.source, cllink.familyoverride, cl.Name ".
+		$sql = "SELECT t.SciName, cllink.Habitat, cllink.Abundance, cllink.Notes, cllink.internalnotes, cllink.source, cllink.familyoverride, ".
+			"cl.Name, cl.type, cl.locality ".
 			"FROM (fmchecklists cl INNER JOIN fmchklsttaxalink cllink ON cl.CLID = cllink.CLID) ".
 			"INNER JOIN taxa t ON cllink.TID = t.TID ".
 			"WHERE ((cllink.TID = ".$this->tid.") AND (cllink.CLID = ".$this->clid."))";
@@ -61,6 +62,8 @@ class VoucherManager {
 			$checklistData["internalnotes"] = $this->cleanOutStr($row->internalnotes);
 			$checklistData["source"] = $this->cleanOutStr($row->source);
 			$checklistData["familyoverride"] = $this->cleanOutStr($row->familyoverride);
+			$checklistData["cltype"] = $row->type;
+			$checklistData["locality"] = $row->locality;
 			if(!$this->clName) $this->clName = $this->cleanOutStr($row->Name);
 			if(!$this->taxonName) $this->taxonName = $this->cleanOutStr($row->SciName);
 		}
@@ -69,7 +72,7 @@ class VoucherManager {
 	}
 
 	public function editClData($eArr){
-		$retStr = 'SUCCESS editing checklist details';
+		$retStr = '';
 		$innerSql = "";
 		foreach($eArr as $k => $v){
 			$valStr = trim($v);
@@ -83,7 +86,8 @@ class VoucherManager {
 		return $retStr;
 	}
 
-	public function renameTaxon($newTaxon){
+	public function renameTaxon($newTaxon,$rareLocality = ''){
+		$statusStr = '';
 		$nTaxon = $this->conn->real_escape_string($newTaxon);
 		if(is_numeric($nTaxon)){
 			$sql = 'UPDATE fmchklsttaxalink SET TID = '.$nTaxon.' '.
@@ -105,13 +109,17 @@ class VoucherManager {
 					$nativeTarget = $this->cleanInStr($row->Nativity);
 				
 					//Move all vouchers to new name
-					$sqlVouch = "UPDATE fmvouchers SET TID = ".$nTaxon." ".
+					$sqlVouch = "UPDATE IGNORE fmvouchers SET TID = ".$nTaxon." ".
 						"WHERE (TID = ".$this->tid.") AND (CLID = ".$this->clid.')';
-					$this->conn->query($sqlVouch);
+					if(!$this->conn->query($sqlVouch)){
+						$statusStr = "ERROR transferring vouchers during taxon transfer: ".$this->conn->error;
+					}
 					//Delete all Vouchers that didn't transfer because they were already linked to target name
 					$sqlVouchDel = 'DELETE FROM fmvouchers v '.
-						'WHERE (v.CLID = '.$this->clid.") AND (v.TID = ".$this->tid.')';
-					$this->conn->query($sqlVouchDel);
+						'WHERE (v.CLID = '.$this->clid.') AND (v.TID = '.$this->tid.')';
+					if(!$this->conn->query($sqlVouchDel)){
+						$statusStr = "ERROR removing vouchers during taxon transfer: ".$this->conn->error;
+					}
 					
 					//Merge chklsttaxalink data
 					//Harvest source (unwanted) chklsttaxalink data
@@ -139,28 +147,60 @@ class VoucherManager {
 						'", internalnotes = "'.$this->cleanInStr($internalNotesStr).'", source = "'.
 						$this->cleanInStr($sourceStr).'", Nativity = "'.$this->cleanInStr($nativeStr).'" '.
 						'WHERE (TID = '.$nTaxon.') AND (CLID = '.$this->clid.')';
-					$this->conn->query($sqlCl);
-					//Delete unwanted taxon
-					$sqlDel = 'DELETE FROM fmchklsttaxalink WHERE (CLID = '.$this->clid.') AND (TID = '.$this->tid.')';
-					if($this->conn->query($sqlDel)){
-						$this->tid = $nTaxon;
-						$this->taxonName = '';
+					if($this->conn->query($sqlCl)){
+						//Delete unwanted taxon
+						$sqlDel = 'DELETE FROM fmchklsttaxalink WHERE (CLID = '.$this->clid.') AND (TID = '.$this->tid.')';
+						if($this->conn->query($sqlDel)){
+							$this->tid = $nTaxon;
+							$this->taxonName = '';
+						}
+						else{
+							$statusStr = "ERROR removing taxon during taxon transfer: ".$this->conn->error;
+						}
+					}
+					else{
+						$statusStr = "ERROR updating new taxon during taxon transfer: ".$this->conn->error;
 					}
 				}
 				$rsTarget->close();
 			}
+			if($rareLocality){
+				$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+					'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+					'SET o.localitysecurity = 1 '.
+					'WHERE o.localitysecurity = NULL AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+					'AND o.stateprovince = "'.$rareLocality.'" AND ts2.tid = '.$this->tid;
+				if(!$this->conn->query($sqlRare)){
+					$statusStr = "ERROR resetting locality security during taxon transfer: ".$this->conn->error;
+				}
+			}
 		}
+		return $statusStr;
 	}
 	
-	public function deleteTaxon(){
+	public function deleteTaxon($rareLocality = ''){
+		$statusStr = '';
 		//Delete vouchers
 		$vSql = "DELETE v.* FROM fmvouchers v WHERE (v.tid = ".$this->tid.") AND (v.clid = ".$this->clid.')';
 		$this->conn->query($vSql);
 		//Delete checklist record 
 		$sql = 'DELETE ctl.* FROM fmchklsttaxalink ctl WHERE (ctl.tid = '.$this->tid.') AND (ctl.clid = '.$this->clid.')';
-		if(!$this->conn->query($sql)){
-			return "ERROR - Unable to delete taxon from checklist: ".$this->conn->error;
+		if($this->conn->query($sql)){
+			if($rareLocality){
+				$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+					'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+					'SET o.localitysecurity = NULL '.
+					'WHERE o.localitysecurity = 1 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+					'AND o.stateprovince = "'.$rareLocality.'" AND ts2.tid = '.$this->tid;
+				if(!$this->conn->query($sqlRare)){
+					$statusStr = "ERROR resetting locality security during taxon delete: ".$this->conn->error;
+				}
+			}
 		}
+		else{
+			$statusStr = "ERROR deleting taxon from checklist: ".$this->conn->error;
+		}
+		return $statusStr;
 	}
 
 	public function getVoucherData(){
@@ -185,7 +225,7 @@ class VoucherManager {
 	}
 	
 	public function editVoucher($occid, $notes, $editorNotes){
-		$statusStr = 'SUCCESS editing voucher ';
+		$statusStr = '';
 		if($this->tid && $this->clid && is_numeric($occid)){
 			$sql = 'UPDATE fmvouchers SET '.
 				'notes = '.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').
@@ -255,7 +295,7 @@ class VoucherManager {
 	}
 
 	public function removeVoucher($delOid){
-		$statusStr = 'SUCCESS deleting voucher ';
+		$statusStr = '';
 		if(is_numeric($delOid)){
 			$sqlDel = 'DELETE FROM fmvouchers WHERE occid = '.$delOid.' AND (TID = '.$this->tid.') AND (CLID = '.$this->clid.')';
 			if(!$this->conn->query($sqlDel)){

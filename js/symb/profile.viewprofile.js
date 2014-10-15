@@ -106,5 +106,11 @@ function verifyClAddForm(f){
 		alert("The Point Radius field must contain only a numeric value");
 		return false;
 	}
+	if(f.ncltype){ 
+		if(f.ncltype.value == "rarespp" && f.ncllocality.value == ""){
+			alert("Rare species checklists must have a state value entered into the locality field");
+			return false;
+		}
+	}
 	return true;
 }

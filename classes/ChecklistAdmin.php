@@ -187,14 +187,13 @@ class ChecklistAdmin {
 		return $statusStr;
 	}
 
-	public function addNewSpecies($dataArr){
+	public function addNewSpecies($dataArr,$setRareSpp = false){
 		if(!$this->clid) return 'ERROR adding species: checklist identifier not set';
 		$insertStatus = false;
 		$colSql = '';
 		$valueSql = '';
 		foreach($dataArr as $k =>$v){
 			$colSql .= ','.$k;
-			
 			if($v){
 				if(is_numeric($v)){
 					$valueSql .= ','.$v;
@@ -209,7 +208,21 @@ class ChecklistAdmin {
 		}
 		$sql = 'INSERT INTO fmchklsttaxalink (clid'.$colSql.') '.
 			'VALUES ('.$this->clid.$valueSql.')';
-		if(!$this->conn->query($sql)){
+		if($this->conn->query($sql)){
+			if($setRareSpp){
+				$clMeta = $this->getMetaData();
+				$state = $clMeta['locality'];
+				if($state && $dataArr['tid']){
+					$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+						'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+						'SET o.localitysecurity = 1 '.
+						'WHERE o.localitysecurity = NULL AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+						'AND o.stateprovince = "'.$state.'" AND ts2.tid = '.$dataArr['tid'];
+					$this->conn->query($sqlRare);
+				}
+			}
+		}
+		else{
 			$insertStatus = 'ERROR: unable to add species ('.$this->conn->error;
 		}
 		return $insertStatus;

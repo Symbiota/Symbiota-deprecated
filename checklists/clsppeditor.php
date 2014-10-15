@@ -20,7 +20,9 @@ $vManager->setTid($tid);
 $vManager->setClid($clid);
 
 if($action == "Rename Taxon"){
-	$vManager->renameTaxon($_POST["renametid"]);
+	$locality = '';
+	if($_POST['cltype'] == 'rarespp') $locality = $_POST['locality'];
+	$vManager->renameTaxon($_POST["renametid"],$locality);
 	$action = "close";
 }
 elseif($action == "Submit Checklist Edits"){
@@ -35,7 +37,9 @@ elseif($action == "Submit Checklist Edits"){
 	$action = "close";
 }
 elseif($action == "Delete Taxon From Checklist"){
-	$status = $vManager->deleteTaxon();
+	$locality = '';
+	if($_POST['cltype'] == 'rarespp') $locality = $_POST['locality'];
+	$status = $vManager->deleteTaxon($locality);
 	$action = "close";
 }
 elseif($action == "Submit Voucher Edits"){
@@ -251,6 +255,8 @@ $clArray = $vManager->getChecklistData();
 						    	<legend><b>Delete</b></legend>
 								<input type='hidden' name='tid' value="<?php echo $vManager->getTid();?>" />
 								<input type='hidden' name='clid' value="<?php echo $vManager->getClid();?>" />
+								<input type='hidden' name='cltype' value="<?php echo $clArray['cltype'];?>" />
+								<input type='hidden' name='locality' value="<?php echo $clArray['locality'];?>" />
 								<input type="submit" name="action" value="Delete Taxon From Checklist" />
 							</fieldset>
 						</form>

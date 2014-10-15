@@ -352,7 +352,7 @@ class ChecklistManager {
 							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") as notes '.
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
 							'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
-							'AND o.localitysecurity = 0 ';
+							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					else{
 						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '. 
@@ -360,7 +360,7 @@ class ChecklistManager {
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
 							'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
 							'WHERE v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
-							'AND o.localitysecurity = 0 ';
+							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					if($abbreviated){
 						$sql2 .= 'LIMIT 50'; 

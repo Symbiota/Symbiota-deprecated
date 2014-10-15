@@ -405,6 +405,7 @@ class PermissionsManager{
 
 	//Misc fucntions
 	private function sortByName($a, $b) {
+		//if(!isset($a["name"]) || !isset($b["name"])) return 0;
 		return strcmp($a["name"], $b["name"]);
 	}
 

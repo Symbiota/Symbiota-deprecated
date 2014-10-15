@@ -208,27 +208,40 @@ $voucherProjects = $clManager->getVoucherProjects();
 						<fieldset style="margin:15px;padding:10px;">
 							<legend><b>Edit Checklist Details</b></legend>
 							<div>
-								Checklist Name<br/>
+								<b>Checklist Name</b><br/>
 								<input type="text" name="eclname" style="width:95%" value="<?php echo $clManager->getClName();?>" />
 							</div>
 							<div>
-								Authors<br/>
+								<b>Authors</b><br/>
 								<input type="text" name="eclauthors" style="width:95%" value="<?php echo $clArray["authors"]; ?>" />
 							</div>
+							<?php 
+							if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
+								?>
+								<div>
+									<b>Checklist Type</b><br/>
+									<select name="ecltype">
+										<option value="static">General Checklist</option>
+										<option value="rarespp" <?php echo ($clArray["type"]=='rarespp'?'SELECTED':'') ?>>Rare, threatened, protected species list</option>
+									</select>
+								</div>
+								<?php
+							}
+							?>
 							<div>
-								Locality<br/>
+								<b>Locality</b><br/>
 								<input type="text" name="ecllocality" style="width:95%" value="<?php echo $clArray["locality"]; ?>" />
 							</div> 
 							<div>
-								Publication<br/>
+								<b>Publication</b><br/>
 								<input type="text" name="eclpublication" style="width:95%" value="<?php echo str_replace('"',"&quot;",$clArray["publication"]); ?>" />
 							</div>
 							<div>
-								Abstract<br/>
+								<b>Abstract</b><br/>
 								<textarea name="eclabstract" style="width:95%" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
 							</div>
 							<div>
-								Parent Checklist<br/>
+								<b>Parent Checklist</b><br/>
 								<select name="eclparentclid">
 									<option value="">Select a Parent checklist</option>
 									<option value="">----------------------------------</option>
@@ -241,20 +254,20 @@ $voucherProjects = $clManager->getVoucherProjects();
 								</select>
 							</div>
 							<div>
-								Notes:<br/>
+								<b>Notes</b><br/>
 								<input type="text" name="eclnotes" style="width:95%" value="<?php echo $clArray["notes"]; ?>" />
 							</div>
 							<div style="float:left;">
 								<div style="float:left;">
-									Latitude Centroid<br/>
+									<b>Latitude Centroid</b><br/>
 									<input id="latdec" type="text" name="ecllatcentroid" style="width:110px;" value="<?php echo $clArray["latcentroid"]; ?>" />
 								</div>
 								<div style="float:left;margin-left:5px;">
-									Longitude Centroid<br/>
+									<b>Longitude Centroid</b><br/>
 									<input id="lngdec" type="text" name="ecllongcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
 								</div>
 								<div style="float:left;margin-left:5px;">
-									Point Radius (meters)<br/>
+									<b>Point Radius (meters)</b><br/>
 									<input type="text" name="eclpointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
 								</div>
 								<div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
@@ -290,7 +303,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 								</fieldset>
 							</div>
 							<div style="clear:both;">
-								Access:<br/>
+								<b>Access</b><br/>
 								<select name="eclaccess">
 									<option value="private">Private</option>
 									<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public</option>
