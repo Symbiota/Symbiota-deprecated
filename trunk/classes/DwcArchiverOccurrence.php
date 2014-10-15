@@ -12,8 +12,10 @@ class DwcArchiverOccurrence{
 	private $conditionSql;
  	private $conditionArr = array();
 	private $condAllowArr;
+	private $upperTaxonomy = array();
 
 	private $targetPath;
+	private $serverDomain;
 	
 	private $logFH;
 	private $verbose = 0;
@@ -90,6 +92,14 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['catalogNumber'] = 'o.catalogNumber';
 		$occurTermArr['otherCatalogNumbers'] = 'http://rs.tdwg.org/dwc/terms/otherCatalogNumbers';
 		$occurFieldArr['otherCatalogNumbers'] = 'o.otherCatalogNumbers';
+		$occurTermArr['kingdom'] = 'http://rs.tdwg.org/dwc/terms/kingdom';
+		$occurFieldArr['kingdom'] = '';
+		$occurTermArr['phylum'] = 'http://rs.tdwg.org/dwc/terms/phylum';
+		$occurFieldArr['phylum'] = '';
+		$occurTermArr['class'] = 'http://rs.tdwg.org/dwc/terms/class';
+		$occurFieldArr['class'] = '';
+		$occurTermArr['order'] = 'http://rs.tdwg.org/dwc/terms/order';
+		$occurFieldArr['order'] = '';
 		$occurTermArr['family'] = 'http://rs.tdwg.org/dwc/terms/family';
 		$occurFieldArr['family'] = 'o.family';
 		$occurTermArr['scientificName'] = 'http://rs.tdwg.org/dwc/terms/scientificName';
@@ -284,7 +294,12 @@ class DwcArchiverOccurrence{
 		if($fieldArr && $this->conditionSql){
 			$sqlFrag = '';
 			foreach($fieldArr as $fieldName => $colName){
-				$sqlFrag .= ', '.$colName;
+				if($colName){
+					$sqlFrag .= ', '.$colName;
+				}
+				else{
+					$sqlFrag .= ', "" AS t_'.$fieldName;
+				}
 			}
 			$sql = 'SELECT '.trim($sqlFrag,', ').
 				' FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
@@ -467,6 +482,10 @@ class DwcArchiverOccurrence{
 			}
 			$this->targetPath = $tPath;
 		}
+	}
+	
+	public function setServerDomain($domain){
+		$this->serverDomain = $domain;
 	}
 
 	private function resetCollArr($collTarget){
@@ -799,12 +818,17 @@ class DwcArchiverOccurrence{
 	private function getEmlArr(){
 		global $clientRoot, $defaultTitle, $adminEmail;
 		
-		$urlPathPrefix = "http://";
-		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
-		$urlPathPrefix .= $_SERVER["SERVER_NAME"];
-		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
-		$localDomain = $urlPathPrefix;
-		$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+		if(!$this->serverDomain){
+			$this->serverDomain = "http://";
+			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
+			$this->serverDomain .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+		}
+		$urlPathPrefix = '';
+		if($this->serverDomain){
+			$urlPathPrefix = $this->serverDomain.$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+		}
+		$localDomain = $this->serverDomain;
 		
 		$emlArr = array();
 		if(count($this->collArr) == 1){
@@ -1171,14 +1195,22 @@ class DwcArchiverOccurrence{
 			$rs1->free();
 			if($collidStr) $this->setCollArr(trim($collidStr,','));
 		}
+
+		//Populate Upper Taxonomic data
+		$this->setUpperTaxonomy();
 		
 		//echo $sql; exit;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			$urlPathPrefix = "http://";
-			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
-			$urlPathPrefix .= $_SERVER["SERVER_NAME"];
-			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
-			$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+			if(!$this->serverDomain){
+				$this->serverDomain = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
+				$this->serverDomain .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+			}
+			$urlPathPrefix = '';
+			if($this->serverDomain){
+				$urlPathPrefix = $this->serverDomain.$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+			}
 			
 			$hasRecords = false;
 			while($r = $rs->fetch_assoc()){
@@ -1190,7 +1222,7 @@ class DwcArchiverOccurrence{
 					}
 				}
 				
-				$r['references'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
+				if($urlPathPrefix) $r['t_references'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
 				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
 				//Add collection GUID based on management type
 				$managementType = $this->collArr[$r['collid']]['managementtype'];
@@ -1215,7 +1247,23 @@ class DwcArchiverOccurrence{
 				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
 					unset($r['collid']);
 				}
-				
+				//Add upper taxonomic data
+				if($r['family']){
+					$famStr = strtolower($r['family']);
+					if(isset($this->upperTaxonomy[$famStr]['o'])){
+						$r['t_order'] = $this->upperTaxonomy[$famStr]['o'];
+					}
+					if(isset($this->upperTaxonomy[$famStr]['c'])){
+						$r['t_class'] = $this->upperTaxonomy[$famStr]['c'];
+					}
+					if(isset($this->upperTaxonomy[$famStr]['p'])){
+						$r['t_phylum'] = $this->upperTaxonomy[$famStr]['p'];
+					}
+					if(isset($this->upperTaxonomy[$famStr]['k'])){
+						$r['t_kingdom'] = $this->upperTaxonomy[$famStr]['k'];
+					}
+				} 
+				//print_r($r); exit;
 				$this->encodeArr($r);
 				$this->addcslashesArr($r);
 				$this->writeOutRecord($fh,$r);
@@ -1289,18 +1337,26 @@ class DwcArchiverOccurrence{
 		//Output records
 		$sql = $this->getSqlImages();
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			$urlPathPrefix = "http://";
-			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
-			$urlPathPrefix .= $_SERVER["SERVER_NAME"];
-			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
+			
+			if(!$this->serverDomain){
+				$this->serverDomain = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
+				$this->serverDomain .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+			}
+			$urlPathPrefix = '';
+			if($this->serverDomain){
+				$urlPathPrefix = $this->serverDomain.$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+			}
+			
 			$localDomain = '';
 			if(isset($imageDomain) && $imageDomain){
 				$localDomain = $imageDomain;
 			}
 			else{
-				$localDomain = $urlPathPrefix;
+				$localDomain = $this->serverDomain;
 			}
-			$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+
 			while($r = $rs->fetch_assoc()){
 				if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $localDomain.$r['accessURI'];
 				if($this->schemaType != 'backup'){
@@ -1380,7 +1436,7 @@ class DwcArchiverOccurrence{
 	//DWCA publishing and RSS related functions 
 	public function batchCreateDwca($collIdArr){
 		global $serverRoot;
-
+		$status = false;
 		$this->logOrEcho("Starting batch process (".date('Y-m-d h:i:s A').")\n");
 		$this->logOrEcho("\n-----------------------------------------------------\n\n");
 		
@@ -1390,12 +1446,14 @@ class DwcArchiverOccurrence{
 			$this->resetCollArr($id);
 			if($this->createDwcArchive()){
 				$successArr[] = $id;
+				$status = true;
 			}
 		}
 		//Reset $this->collArr with all the collections ran successfully and then rebuild the RSS feed 
 		$this->resetCollArr(implode(',',$successArr));
 		$this->writeRssFile();
 		$this->logOrEcho("Batch process finished! (".date('Y-m-d h:i:s A').") \n");
+		return $status;
 	}
 	
 	public function writeRssFile(){
@@ -1421,12 +1479,19 @@ class DwcArchiverOccurrence{
 		$titleElem = $newDoc->createElement('title');
 		$titleElem->appendChild($newDoc->createTextNode($defaultTitle.' Darwin Core Archive rss feed'));
 		$channelElem->appendChild($titleElem);
-		$urlPathPrefix = "http://";
-		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
-		$urlPathPrefix .= $_SERVER["SERVER_NAME"];
-		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
-		$localDomain = $urlPathPrefix;
-		$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+		
+		if(!$this->serverDomain){
+			$this->serverDomain = "http://";
+			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
+			$this->serverDomain .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+		}
+		$urlPathPrefix = '';
+		if($this->serverDomain){
+			$urlPathPrefix = $this->serverDomain.$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+		}
+		$localDomain = $this->serverDomain;
+		
 		$linkElem = $newDoc->createElement('link');
 		$linkElem->appendChild($newDoc->createTextNode($urlPathPrefix));
 		$channelElem->appendChild($linkElem);
@@ -1583,6 +1648,51 @@ class DwcArchiverOccurrence{
 		}
 		$this->aasort($retArr, 'description');
 		return $retArr;
+	}
+
+	private function setUpperTaxonomy(){
+		if(!$this->upperTaxonomy){
+			$upperTaxonomy = '';
+			$sqlOrder = 'SELECT t.sciname AS family, t2.sciname AS taxonorder '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '. 
+				'WHERE t.rankid = 140 AND t2.rankid = 100';
+			$rsOrder = $this->conn->query($sqlOrder);
+			while($rowOrder = $rsOrder->fetch_object()){
+				$this->upperTaxonomy[strtolower($rowOrder->family)]['o'] = $rowOrder->taxonorder;
+			}
+			$rsOrder->free();
+			
+			$sqlClass = 'SELECT t.sciname AS family, t2.sciname AS taxonclass '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+				'WHERE t.rankid = 140 AND t2.rankid = 60';
+			$rsClass = $this->conn->query($sqlClass);
+			while($rowClass = $rsClass->fetch_object()){
+				$this->upperTaxonomy[strtolower($rowClass->family)]['c'] = $rowClass->taxonclass;
+			}
+			$rsClass->free();
+			
+			$sqlPhylum = 'SELECT t.sciname AS family, t2.sciname AS taxonphylum '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+				'WHERE t.rankid = 140 AND t2.rankid = 30';
+			$rsPhylum = $this->conn->query($sqlPhylum);
+			while($rowPhylum = $rsPhylum->fetch_object()){
+				$this->upperTaxonomy[strtolower($rowPhylum->family)]['p'] = $rowPhylum->taxonphylum;
+			}
+			$rsPhylum->free();
+			
+			$sqlKing = 'SELECT t.sciname AS family, t2.sciname AS kingdom '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+				'WHERE t.rankid = 140 AND t2.rankid = 10';
+			$rsKing = $this->conn->query($sqlKing);
+			while($rowKing = $rsKing->fetch_object()){
+				$this->upperTaxonomy[strtolower($rowKing->family)]['k'] = $rowKing->kingdom;
+			}
+			$rsKing->free();
+		}
 	}
 
 	private function aasort(&$array, $key){
