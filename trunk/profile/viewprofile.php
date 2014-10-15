@@ -11,7 +11,6 @@ $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 
 $isSelf = 0;
 $isEditor = 0;
-$isEditor = 0;
 if(isset($SYMB_UID) && $SYMB_UID){
 	if(!$userId){
 		$userId = $SYMB_UID;
@@ -35,10 +34,10 @@ $person = null;
 if($isEditor){
 	// ******************************  editing a profile  ************************************//
 	if($action == "Submit Edits"){
-	    $firstname = $_REQUEST["firstname"];
-	    $lastname = $_REQUEST["lastname"];
-	    $email = $_REQUEST["email"];
-	    
+		$firstname = $_REQUEST["firstname"];
+		$lastname = $_REQUEST["lastname"];
+		$email = $_REQUEST["email"];
+		
 		$title = array_key_exists("title",$_REQUEST)?$_REQUEST["title"]:"";
 		$institution = array_key_exists("institution",$_REQUEST)?$_REQUEST["institution"]:"";
 		$city = array_key_exists("city",$_REQUEST)?$_REQUEST["city"]:"";
@@ -52,60 +51,60 @@ if($isEditor){
 		$newPerson = new Person();
 		$newPerson->setUid($userId);
 		$newPerson->setFirstName($firstname);
-	    $newPerson->setLastName($lastname);
-	    $newPerson->setTitle($title);
-	    $newPerson->setInstitution($institution);
-	    $newPerson->setCity($city);
-	    $newPerson->setState($state);
-	    $newPerson->setZip($zip);
-	    $newPerson->setCountry($country);
-	    $newPerson->setEmail($email);
-	    $newPerson->setUrl($url);
-	    $newPerson->setBiography($biography);
-	    $newPerson->setIsPublic($isPublic);
-	    
-	    if(!$pHandler->updateProfile($newPerson)){
-	        $statusStr = "Profile update failed!";
-	    }
+		$newPerson->setLastName($lastname);
+		$newPerson->setTitle($title);
+		$newPerson->setInstitution($institution);
+		$newPerson->setCity($city);
+		$newPerson->setState($state);
+		$newPerson->setZip($zip);
+		$newPerson->setCountry($country);
+		$newPerson->setEmail($email);
+		$newPerson->setUrl($url);
+		$newPerson->setBiography($biography);
+		$newPerson->setIsPublic($isPublic);
+		
+		if(!$pHandler->updateProfile($newPerson)){
+			$statusStr = "Profile update failed!";
+		}
 		$person = $pHandler->getPerson();
-	    if($person->getIsTaxonomyEditor()) $tabIndex = 3;
+		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
 		else $tabIndex = 2;
 	}
 	elseif($action == "Change Password"){
-	    $newPwd = $_REQUEST["newpwd"];
+		$newPwd = $_REQUEST["newpwd"];
 		$updateStatus = false;
-	    if($isSelf){
-		    $oldPwd = $_REQUEST["oldpwd"];
-		    $updateStatus = $pHandler->changePassword($newPwd, $oldPwd, $isSelf);
-	    }
-	    else{
-	    	$updateStatus = $pHandler->changePassword($newPwd);
-	    }
-	    if($updateStatus){
-		    $statusStr = "<span color='green'>Password update successful!</span>";
-	    }
-	    else{
-	    	$statusStr = "Password update failed! Are you sure you typed the old password correctly?";
-	    }
+		if($isSelf){
+			$oldPwd = $_REQUEST["oldpwd"];
+			$updateStatus = $pHandler->changePassword($newPwd, $oldPwd, $isSelf);
+		}
+		else{
+			$updateStatus = $pHandler->changePassword($newPwd);
+		}
+		if($updateStatus){
+			$statusStr = "<span color='green'>Password update successful!</span>";
+		}
+		else{
+			$statusStr = "Password update failed! Are you sure you typed the old password correctly?";
+		}
 		$person = $pHandler->getPerson();
-	    if($person->getIsTaxonomyEditor()) $tabIndex = 3;
+		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
 		else $tabIndex = 2;
 	}
 	elseif($action == "Create Login"){
-	    $newLogin = $_REQUEST["newlogin"];
+		$newLogin = $_REQUEST["newlogin"];
 		$newPwd = $_REQUEST["newloginpwd"];
-	    $statusStr = $pHandler->createNewLogin($userId, $newLogin, $newPwd);
+		$statusStr = $pHandler->createNewLogin($userId, $newLogin, $newPwd);
 		$person = $pHandler->getPerson();
-	    if($person->getIsTaxonomyEditor()) $tabIndex = 3;
+		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
 		else $tabIndex = 2;
 	}
 	elseif($action == "Delete Profile"){
-	    if($pHandler->deleteProfile($userId, $isSelf)){
-	    	header("Location: ../index.php");
-	    }
-	    else{
-		    $statusStr = "Profile deletion failed! Please contact the system administrator";
-	    }
+		if($pHandler->deleteProfile($userId, $isSelf)){
+			header("Location: ../index.php");
+		}
+		else{
+			$statusStr = "Profile deletion failed! Please contact the system administrator";
+		}
 	}
 	elseif($action == "Create Checklist"){
 		$newClArr = Array();
@@ -165,45 +164,45 @@ if(isset($profile_viewprofileCrumbs)){
 	<?php 
 	if($isEditor){
 		if($statusStr){
-		    echo "<div style='color:#FF0000;margin:10px 0px 10px 10px;'>".$statusStr."</div>";
+			echo "<div style='color:#FF0000;margin:10px 0px 10px 10px;'>".$statusStr."</div>";
 		}
 		?>
 		<div id="tabs" style="margin:10px;">
 			<ul>
-			    <?php
-			    if($floraModIsActive){ 
-			    	?>
-			        <li><a href="#checklistdiv">Species Checklists</a></li>
-			        <?php
-			    } 
-			    ?>
-		        <li><a href="personalspecmenu.php">Specimen Management</a></li>
-		        <?php
-		        if ($person->getIsTaxonomyEditor()) { 
-		            echo '<li><a href="specimenstoid.php?userid='.$userId.'&action='.$action.'">IDs Needed</a></li>';
-		        }
-                if ($person->getIsTaxonomyEditor()) {
-                    echo '<li><a href="imagesforid.php">Images for ID</a></li>';
-                }
-                if( $fpEnabled) {
-                    $userTaxonomy = $person->getUserTaxonomy();
+				<?php
+				if($floraModIsActive){ 
+					?>
+					<li><a href="#checklistdiv">Species Checklists</a></li>
+					<?php
+				} 
+				?>
+				<li><a href="personalspecmenu.php">Specimen Management</a></li>
+				<?php
+				if ($person->getIsTaxonomyEditor()) { 
+					echo '<li><a href="specimenstoid.php?userid='.$userId.'&action='.$action.'">IDs Needed</a></li>';
+				}
+				if ($person->getIsTaxonomyEditor()) {
+					echo '<li><a href="imagesforid.php">Images for ID</a></li>';
+				}
+				if( $fpEnabled) {
+					$userTaxonomy = $person->getUserTaxonomy();
 
-                    foreach ($userTaxonomy as $cat => $taxonArr) {
-                        foreach ($taxonArr as $tid => $taxon) {
-                            $sciName = $taxon['sciname'];
-                        }
-                    }
+					foreach ($userTaxonomy as $cat => $taxonArr) {
+						foreach ($taxonArr as $tid => $taxon) {
+							$sciName = $taxon['sciname'];
+						}
+					}
 
-                    if ($person->getIsHasTaxonInterest()) {
-                        echo '<li><a href="taxoninterests.php?scientificName='.$sciName.'">Taxon Interests</a></li>';
-                    }
-                }
-                ?>
-		        <li><a href="userprofile.php?userid=<?php echo $userId; ?>">User Profile</a></li>
-		    </ul>
-		    <?php
-		    if($floraModIsActive){ 
-		    	?>
+					if ($person->getIsHasTaxonInterest()) {
+						echo '<li><a href="taxoninterests.php?scientificName='.$sciName.'">Taxon Interests</a></li>';
+					}
+				}
+				?>
+				<li><a href="userprofile.php?userid=<?php echo $userId; ?>">User Profile</a></li>
+			</ul>
+			<?php
+			if($floraModIsActive){
+				?>
 				<div id="checklistdiv" style="padding:25px;">
 					<div style="font-weight:bold;font:bold 14pt;">
 						Checklists assigned to your account
@@ -221,6 +220,17 @@ if(isset($profile_viewprofileCrumbs)){
 									<b>Authors</b><br/>
 									<input name="nclauthors" type="text" maxlength="250" style="width:90%;" />
 								</div>
+								<?php 
+								if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
+									echo '<div style="margin:3px;">';
+									echo '<b>Checklist Type</b><br/>';
+									echo '<select name="ncltype">';
+									echo '<option value="static">General Checklist</option>';
+									echo '<option value="rarespp">Rare, threatened, protected species list</option>';
+									echo '</select>';
+									echo '</div>';
+								}
+								?>
 								<div style="margin:3px;">
 									<b>Locality</b><br/>
 									<input name="ncllocality" type="text" maxlength="500" style="width:90%;" />
@@ -272,9 +282,9 @@ if(isset($profile_viewprofileCrumbs)){
 									</fieldset>
 								</div>
 								<div style="clear:both;margin:3px;">
-									<b>Parent Checklist:</b><br/> 
+									<b>Parent Checklist:</b><br/>
 									<select name="nclparentclid">
-										<option value="">Select a Parent checklist</option>
+										<option value="">None Selected</option>
 										<option value="">----------------------------------</option>
 										<?php $pClManager->echoParentSelect(); ?>
 									</select>
@@ -359,7 +369,7 @@ if(isset($profile_viewprofileCrumbs)){
 					?>
 				</div>
 				<?php 
-		    }
+			}
 			?>
 		</div>
 		<?php 

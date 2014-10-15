@@ -72,7 +72,8 @@ class PersonalChecklistManager{
 			}
 		}
 		$sql = "INSERT INTO fmchecklists (".substr($sqlInsert,1).") VALUES (".substr($sqlValues,1).")";
-		//echo $sql;
+		//echo $sql; exit;
+		
 		$newClId = 0;
 		if($this->conn->query($sql)){
 			$newClId = $this->conn->insert_id;
@@ -86,7 +87,16 @@ class PersonalChecklistManager{
 	}
 
 	public function echoParentSelect(){
-		$sql = "SELECT c.clid, c.name FROM fmchecklists c ORDER BY c.name";
+		$sql = 'SELECT clid, name '.
+			'FROM fmchecklists '.
+			'WHERE access = "public" ';
+		$clArr = array();
+		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin'])) $clArr = $GLOBALS['USER_RIGHTS']['ClAdmin'];
+		if($clArr){
+			$sql .= 'OR clid IN('.implode(',',$clArr).') ';
+		}
+		$sql .= 'ORDER BY name';
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			echo "<option value='".$row->clid."'>".$row->name."</option>";
