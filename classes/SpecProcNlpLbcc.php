@@ -15,11 +15,11 @@ class SpecProcNlpLbcc {
 	}
 
 	public function parse($rawStr) {
-		$rawStr = trim($this->convertBadChars(str_replace("\t", " ", $rawStr)));
+		$rawStr = trim($this->convertBadChars(str_replace("\t", " ", $rawStr)));//return array('associatedCollectors' => $rawStr);
 		//If OCR source is from tesseract (utf-8 is default), convert to a latin1 character set
-		if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-			$rawStr = utf8_decode($rawStr);
-		}
+		//if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+		//	$rawStr = utf8_decode($rawStr);
+		//}
 		$rawStr = trim($this->fixString($rawStr));
 		if(strlen($rawStr) > 0 && !$this->isMostlyGarbage2($rawStr, 0.50)) {
 			$results = array();
@@ -6877,11 +6877,20 @@ class SpecProcNlpLbcc {
 	}
 
 	private function convertBadChars($str) {//echo "\nInput to convertBadChars: ".$str."\n";
-		if($str) {//return $str;
+		if($str) {
+			if(mb_ereg(chr(195).chr(131).chr(194).chr(175), $str)) echo "\nit matches\n";
 			if(mb_ereg(chr(195).chr(162).chr(226).chr(130).chr(172).chr(194).chr(157), $str))
 				$str = mb_ereg_replace(chr(195).chr(162).chr(226).chr(130).chr(172).chr(194).chr(157), "\"", $str);
 			if(mb_ereg(chr(195).chr(162).chr(226).chr(130).chr(172).chr(226).chr(132).chr(162), $str))
 				$str = mb_ereg_replace(chr(195).chr(162).chr(226).chr(130).chr(172).chr(226).chr(132).chr(162), "'", $str);
+			if(mb_ereg(chr(195).chr(131).chr(194).chr(171), $str))
+				$str = mb_ereg_replace(chr(195).chr(131).chr(194).chr(171), "e", $str);
+			if(mb_ereg(chr(195).chr(131).chr(194).chr(175), $str))
+				$str = mb_ereg_replace(chr(195).chr(131).chr(194).chr(175), "i", $str);
+			if(mb_ereg(chr(195).chr(131).chr(226).chr(185), $str))
+				$str = mb_ereg_replace(chr(195).chr(131).chr(226).chr(185), "E", $str);
+			if(mb_ereg(chr(195).chr(131).chr(226).chr(176), $str))
+				$str = mb_ereg_replace(chr(195).chr(131).chr(226).chr(176), "E", $str);
 			$str = preg_replace(array("/([A-Z])".chr(226).chr(128).chr(158)."/", "/([a-z])".chr(226).chr(128).chr(158)."/"), array("\${1}.", "\${1},"), $str);
 			$needles = array(
 				chr(226).chr(128).chr(158),
@@ -6910,6 +6919,7 @@ class SpecProcNlpLbcc {
 				chr(195).chr(188),
 				chr(195).chr(179),
 				chr(195).chr(173),
+				chr(195).chr(175),
 				"(FÂ£e)", "(F6e)", "/\\_", "/\\", "/'\\_", "/'\\", "/°\\",
 				chr(65).chr(194).chr(163),
 				chr(160), " V/",
@@ -6956,6 +6966,7 @@ class SpecProcNlpLbcc {
 				"a",
 				"u",
 				"o",
+				"i",
 				"i",
 				"(Fee)", "(Fee)", "A.", "A", "A.", "A", "A",
 				"AK",
@@ -7028,6 +7039,7 @@ class SpecProcNlpLbcc {
 				array(
 				"/(?:THE )?L[O0]U[|!1Il]S[|!1Il]ANA STATE UN[|!1Il]VERS[|!1Il]TY(?:\\n| )(?:L[|!1Il][CG]HEN )?HERBAR[|!1Il]UM/is",
 				"/(?:THE )?(?:MYC[O0]L[O0]G[|!1Il]CAL )?HERBAR[|!1Il]UM [ODQ0]F(?:\\n| )L[O0]U[|!1Il]S[|!1Il]ANA STATE UN[|!1Il]VERS[|!1Il]TY/is",
+				"/H[ec]rbarium [o0]. th[ec] Univ[ec]rsity of C[o0][|!1Il][o0]rad[o0]\\sB[o0]u[|!1Il]d[ec]r/is",
 				"/.{1,2}niversity.{3,21}Herbarium(?: ?\(.{1,4}\))?/i",
 				"/.{1,2}niversity.{3,21}(?: ?\(.{2,4}\))/i",
 				"/\\n\\.([1-9]\\d?\\b[^°]*)/",
@@ -7064,6 +7076,7 @@ class SpecProcNlpLbcc {
 				);
 			$replacement =
 				array(
+					"",
 					"",
 					"",
 					"",

@@ -7,7 +7,7 @@ class SpecProcNlpLbccLichen extends SpecProcNlpLbcc {
 		parent::__construct();
 	}
 
-	protected function getLabelInfo($str) {
+	protected function getLabelInfo($str) {//return array('associatedCollectors' => $str);
 		if($str) {
 			$pat = "/(.*)HERBAR[1Il!|]UM\\s?[O0Q]F\\s?THE UN[1Il!|]VER[S5][1Il!|]TY\\s?[O0Q]F\\s?M[1Il!|]CH[1Il!|]GAN?+(.*)/is";
 			if(preg_match($pat, $str, $matches)) {
@@ -47,6 +47,7 @@ class SpecProcNlpLbccLichen extends SpecProcNlpLbcc {
 			else if($this->isCalicialesExsiccataeLabel($str)) return $this->doCalicialesExsiccataeLabel($str);
 			else if($this->isLichenesAmericaniExsiccatiLabel($str)) return $this->doLichenesAmericaniExsiccatiLabel($str);
 			else if($this->isCanadianLichensLabel($str)) return $this->doCanadianLichensLabel($str);
+			else if($this->isLichenesRarioresExsiccatiLabel($str)) return $this->doLichenesRarioresExsiccatiLabel($str);
 			else if($this->isKienerMemorialLabel($str)) return $this->doKienerMemorialLabel($str);
 			else if($this->isMultipleChoiceLabel($str)) return array();
 			else if($this->collId == 42 && $this->isLichensOfLabel($str)) return $this->doMTLichensOfLabel($str);
@@ -167,6 +168,84 @@ class SpecProcNlpLbccLichen extends SpecProcNlpLbcc {
 	private function isLichenesRarioresEtCriticiExsiccatiLabel($s) {
 		if(preg_match("/.*(?:[1Il!|]{2}|U)CHENE[S5] RAR[1Il!|][O0Q]RE[S5] ET CR[1Il!|]T[1Il!|]C[1Il!|] Exs[1Il!|]ccat.*/is", $s)) return true;
 		else return false;
+	}
+
+	private function isLichenesRarioresExsiccatiLabel($s) {
+		if(preg_match("/.*(?:[1Il!|]{2}|U)[CG]HENE[S5] RAR[1Il!|][O0QC]RE[S5]\\sExs[1Il!|][ceg]{2}at.*/is", $s)) return true;
+		else return false;
+	}
+
+	private function doLichenesRarioresExsiccatiLabel($s) {
+		if(preg_match("/\\bV.{0,2}zda\\b[.,;:]/i", $s)) return $this->doVezdaLichenesRarioresExsiccatiLabel($s);
+		else return $this->doZahlbrucknerLichenesRarioresExsiccatiLabel($s);
+	}
+
+	private function doVezdaLichenesRarioresExsiccatiLabel($s) {
+		$s = preg_replace(
+			array(
+				"/(?:A. ?V.{0,2}ZDA[.,;:] ?)?(?:[1Il!|]{2}|U)[CG]HENE[S5] RAR[1Il!|][O0QC]RE[S5]\\sExs[1Il!|][ceg]{2}at[1Il!|]?[E .]{0,2}+/is"
+			),
+			array(
+				""
+			),
+			$s);
+		return $this->doGenericLabel(str_replace("\n\n", "\n", $s), "340");
+	}
+
+	private function doZahlbrucknerLichenesRarioresExsiccatiLabel($s) {//only interested in finding the Farlow labels that are labeled as such at the top
+		$s = preg_replace(
+			array(
+				"/(?:A. ?ZAHLBRUC ?KNER(?:-K. RED[1Il!|]NGER)?[.,;:] ?)?(?:[1Il!|]{2}|U)[CG]HENE[S5] RAR[1Il!|][O0QC]RE[S5]\\sExs[1Il!|][ceg]{2}at[1Il!|]?[E .]{0,2}+/is",
+				"/Nr?\\.? (\\d{1,3})\\.\\n/",
+				"/\\n[A-Z][^1-9]{0,3}(\\d{1,3})\\.?\\n/",
+			),
+			array(
+				"",
+				"No. \${1}. ",
+				"\nNo. \${1}. "
+			),
+			$s);
+		$s = str_replace("\n\n", "\n", $s);
+		//echo "\nline 6355, s:\n".$s."\n";
+		$exsNumber = "";
+		$scientificName = "";
+		$infraspecificEpithet = "";
+		$taxonRank = "";
+		$verbatimAttributes = "";
+		$associatedTaxa = "";
+		$taxonRemarks = "";
+		$substrate = "";
+		$lines = explode("\n", $s);
+		foreach($lines as $line) {
+			$line = trim($line);
+			$psn = $this->processSciName($line);
+			if($psn != null) {//foreach($psn as $k => $v) echo "\nline 14403, ".$k.": ".$v."\n";
+				if(array_key_exists('scientificName', $psn)) $scientificName = $psn['scientificName'];
+				if(array_key_exists('infraspecificEpithet', $psn)) {
+					$infraspecificEpithet = $psn['infraspecificEpithet'];
+					if(array_key_exists('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
+				}
+				if(array_key_exists('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
+				if(array_key_exists('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
+				if(array_key_exists('recordNumber', $psn)) $exsNumber = $psn['recordNumber'];
+				if(array_key_exists('taxonRemarks', $psn)) $taxonRemarks = $psn['taxonRemarks'];
+				if(array_key_exists('substrate', $psn)) $substrate = $psn['substrate'];
+			}
+		}
+		$ometid = "100";
+		if($exsNumber > 288) $ometid = "352";
+		$fields = array
+			(
+				'scientificName' => $scientificName,
+				'infraspecificEpithet' => $infraspecificEpithet,
+				'taxonRank' => $taxonRank,
+				'verbatimAttributes' => $verbatimAttributes,
+				'associatedTaxa' => $associatedTaxa,
+				'taxonRemarks' => $taxonRemarks,
+				'substrate' => $substrate,
+				'exsNumber' => $exsNumber
+			);
+		return $this->doGenericLabel($s, $ometid, $fields);
 	}
 
 	private function isBorealiAmericaniLabel($s) {
