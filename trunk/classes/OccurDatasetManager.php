@@ -553,7 +553,7 @@ class OccurDatasetManager {
 			if(!$speciesAuthors){
 				$sql1 .= 'AND t.unitname2 = t.unitname3 ';
 			}
-			//if()
+			//echo $sql1; exit;
 			if($rs1 = $this->conn->query($sql1)){
 				while($row1 = $rs1->fetch_object()){
 					$authorArr[$row1->occid] = $row1->author;
@@ -634,14 +634,21 @@ class OccurDatasetManager {
 
 	//General functions
 	public function exportCsvFile($postArr, $speciesAuthors){
+		global $charset;
 		$occidArr = $postArr['occid'];
 		if($occidArr){
-	    	$fileName = 'labeloutput_'.time().".csv";
-			header ('Content-Type: text/csv');
-			header ('Content-Disposition: attachment; filename="'.$fileName.'"'); 
-			
 			$labelArr = $this->getLabelArray($occidArr, $speciesAuthors);
 			if($labelArr){
+				$fileName = 'labeloutput_'.time().".csv";
+				header('Content-Description: Symbiota Label Output File');
+				header ('Content-Type: text/csv');
+				header ('Content-Disposition: attachment; filename="'.$fileName.'"'); 
+				header('Content-Transfer-Encoding: '.strtoupper($charset));
+				header('Expires: 0');
+				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+				header('Pragma: public');
+				
+				$fh = fopen('php://output','w');
 				$headerArr = array("occid","catalogNumber","family","scientificName","genus","specificEpithet",
 					"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","taxonRemarks","identifiedBy",
 					"dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
@@ -651,21 +658,20 @@ class OccurDatasetManager {
 		 			"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
 			 		"geodeticDatum","coordinateUncertaintyInMeters","verbatimCoordinates",
 		 			"minimumElevationInMeters","maximumElevationInMeters","verbatimElevation","disposition");
-
+				fputcsv($fh,$headerArr);
+				//change header value to lower case
 				$headerLcArr = array();
 				foreach($headerArr as $k => $v){
-					$headerLcArr[$k] = strtolower($v);
+					$headerLcArr[strtolower($v)] = $k;
 				}
+				//Output records
 				foreach($labelArr as $occid => $occArr){
 					$dupCnt = $postArr['q-'.$occid];
 					for($i = 0;$i < $dupCnt;$i++){
-						foreach($headerLcArr as $k => $colName){
-							if($k) echo ',';
-							echo '"'.str_replace('"','""',$occArr[$colName]).'"';
-						}
-						echo "\n";
+						fputcsv($fh,array_intersect_key($occArr,$headerLcArr));
 					}
 				}
+				fclose($fh);
 			}
 			else{
 				echo "Recordset is empty.\n";
