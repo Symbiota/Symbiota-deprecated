@@ -115,17 +115,35 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					}
 				}
 
-				//Check to see if taxon has a locality security protection (rare, threatened, or sensitive species)
-				$sStatus = 0;
-				$sqlSs = 'SELECT securitystatus FROM taxa WHERE (sciname = "'.$sciname.'")';
-				$rsSs = $this->conn->query($sqlSs);
-				if($rSs = $rsSs->fetch_object()){
-					if($rSs->securitystatus == 1) $sStatus = 1;
-				}
-				$rsSs->free();
-				
 				$tidToAdd = $detArr['tidtoadd'];
 				if($tidToAdd && !is_numeric($tidToAdd)) $tidToAdd = 0;
+				
+				//Check to see if taxon has a locality security protection (rare, threatened, or sensitive species)
+				$sStatus = 0;
+				if($tidToAdd){
+					$sqlSs = 'SELECT securitystatus FROM taxa WHERE (tid = '.$tidToAdd.')';
+					$rsSs = $this->conn->query($sqlSs);
+					if($rSs = $rsSs->fetch_object()){
+						if($rSs->securitystatus == 1) $sStatus = 1;
+					}
+					$rsSs->free();
+					if(!$sStatus){
+						$sql2 = 'SELECT c.clid '.
+							'FROM fmchecklists c INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid '.
+							'INNER JOIN taxstatus ts1 ON cl.tid = ts1.tid '.
+							'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+							'INNER JOIN omoccurrences o ON c.locality = o.stateprovince '.
+							'WHERE c.type = "rarespp" AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+							'AND (ts2.tid = '.$tidToAdd.') AND (o.occid = '.$this->occid.')';
+						//echo $sql; exit;
+						$rsSs2 = $this->conn->query($sql2);
+						if($rsSs2->num_rows){
+							$sStatus = 1;
+						}
+						$rsSs2->free();
+					}
+				}
+				
 				//Load new determination into omoccurrences table
 				$sqlNewDet = 'UPDATE omoccurrences '.
 					'SET identifiedBy = "'.$this->cleanInStr($detArr['identifiedby']).'", dateIdentified = "'.$this->cleanInStr($detArr['dateidentified']).'",'.
@@ -285,7 +303,22 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			if($r->securitystatus == 1) $sStatus = 1;
 		}
 		$rs->free();
-
+		if(!$sStatus && $tid){
+			$sql2 = 'SELECT c.clid '.
+				'FROM fmchecklists c INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid '.
+				'INNER JOIN taxstatus ts1 ON cl.tid = ts1.tid '.
+				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+				'INNER JOIN omoccurrences o ON c.locality = o.stateprovince '.
+				'WHERE c.type = "rarespp" AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+				'AND (ts2.tid = '.$tid.') AND (o.occid = '.$this->occid.')';
+			//echo $sql; exit;
+			$rsSs2 = $this->conn->query($sql2);
+			if($rsSs2->num_rows){
+				$sStatus = 1;
+			}
+			$rsSs2->free();
+		}
+		
 		$sqlNewDet = 'UPDATE omoccurrences o INNER JOIN omoccurdeterminations d ON o.occid = d.occid '.
 			'SET o.identifiedBy = d.identifiedBy, o.dateIdentified = d.dateIdentified,o.family = '.($family?'"'.$family.'"':'NULL').','.
 			'o.sciname = d.sciname,o.genus = NULL,o.specificEpithet = NULL,o.taxonRank = NULL,o.infraspecificepithet = NULL,o.scientificname = NULL,'.

@@ -274,7 +274,7 @@ class ObservationSubmitManager {
 		    	}
 				
 				$caption = $this->cleanInStr($occArr['caption'.$imgCnt]);
-				$notes = $this->cleanInStr($occArr["notes"].$imgCnt);
+				$notes = $this->cleanInStr($occArr['notes'.$imgCnt]);
 				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, imagetype, caption, occid, notes, sortsequence) '.
 					'VALUES ('.$tid.',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').
 					','.$occArr['phuid'].',"Observation",'.($caption?'"'.$this->cleanInStr($caption).'"':'NULL').','.$occId.','.
@@ -340,13 +340,13 @@ class ObservationSubmitManager {
 		if($imgUrl){
 			$imgPath = "";
 			$newThumbnailPath = "";
+ 			$extStr = substr($imgUrl,strrpos($imgUrl,'.'));
 			if(strpos($imgUrl,"http://") === 0 && strpos($imgUrl,$this->imageRootUrl) === false){
 				$imgPath = $imgUrl;
 				if(!is_dir($this->imageRootPath."misc_thumbnails/")){
 					if(!mkdir($this->imageRootPath."misc_thumbnails/", 0775)) return "";
 				}
 				$fileName = "";
- 				$extStr = substr($imgUrl,strrpos($imgUrl,'.'));
 				if(stripos($imgUrl,"_temp".$extStr)){
 					$fileName = str_ireplace("_temp".$extStr,"_tn".$extStr,substr($imgUrl,strrpos($imgUrl,"/")));
 				}
