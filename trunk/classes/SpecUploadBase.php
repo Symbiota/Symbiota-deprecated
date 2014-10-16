@@ -626,11 +626,11 @@ class SpecUploadBase extends SpecUpload{
 			'WHERE sciname IS NULL AND Genus IS NOT NULL AND collid = '.$this->collId;
 		$this->conn->query($sql);
 		$this->outputMsg('Done!</li> ');
-		
+
+		/*
 		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Linking to taxonomic thesaurus...');
 		ob_flush();
 		flush();
-
 		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.sciname = t.sciname '.
 			'SET u.TidInterpreted = t.tid WHERE u.TidInterpreted IS NULL AND collid = '.$this->collId;
 		$this->conn->query($sql);
@@ -656,6 +656,7 @@ class SpecUploadBase extends SpecUpload{
 			'WHERE (u.scientificNameAuthorship = "" OR u.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL AND collid = '.$this->collId;
 		$this->conn->query($sql);
 		$this->outputMsg('Done!</li> ');
+		*/
 
 		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Cleaning country and state/province fields ...');
 		ob_flush();
@@ -808,6 +809,7 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg($sql);
 		}
 
+		//Link all newly intersted records back to uploadspectemp in prep for loading determiantion history and associatedmedia
 		$this->outputMsg('<li style="font-weight:bold;">Linking to newly inserted occurrences in prep for loading determiantion history and associatedmedia... ');
 		ob_flush();
 		flush();
@@ -825,6 +827,43 @@ class SpecUploadBase extends SpecUpload{
 		if(!$this->conn->query($sqlOcc2)){
 			$this->outputMsg('<div>ERROR updating occid (2nd step) after occurrence insert: '.$this->conn->error.'</div>');
 		}
+		
+		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table  
+		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Linking to taxonomic thesaurus...');
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
+			'SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL AND o.collid = '.$this->collId;
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+			'SET o.LocalitySecurity = t.SecurityStatus '.
+			'WHERE (t.SecurityStatus > 0) AND (o.LocalitySecurity IS NULL)';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
+			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
+			'SET o.localitysecurity = 1 '.
+			'WHERE (o.localitysecurity = NULL OR o.localitysecurity = 0) AND c.type = "rarespp" '.
+			'AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND o.collid ='.$this->collId;
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+			'SET o.family = ts.family '.
+			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "") AND o.collid = '.$this->collId;
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+			'SET o.scientificNameAuthorship = t.author '.
+			'WHERE (o.scientificNameAuthorship = "" OR o.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL AND o.collid = '.$this->collId;
+		$this->conn->query($sql);
+		$this->outputMsg('Done!</li> ');
+		
+		
+		
+		
 		//Setup and add datasets and link datasets to current user
 		
 		

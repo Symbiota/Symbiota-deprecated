@@ -52,29 +52,31 @@ function initImageTool(imgId){
 
 function initImgRes(){
 	var imgObj = document.getElementById("activeimg-"+activeImgIndex);
-	if(imgLgArr[activeImgIndex]){
-		var imgRes = getCookie("symbimgres");
-		if(imgRes == 'lg'){
-			changeImgRes('lg');
-		}
-	}
-	else{
-		imgObj.src = imgArr[activeImgIndex];
-		document.getElementById("imgresmed").checked = true;
-		var imgResLgRadio = document.getElementById("imgreslg");
-		imgResLgRadio.disabled = true;
-		imgResLgRadio.title = "Large resolution image not available";
-	}
-	if(imgArr[activeImgIndex]){
-		//Do nothing
-	}
-	else{
+	if(imgObj){
 		if(imgLgArr[activeImgIndex]){
-			imgObj.src = imgLgArr[activeImgIndex];
-			document.getElementById("imgreslg").checked = true;
-			var imgResMedRadio = document.getElementById("imgresmed");
-			imgResMedRadio.disabled = true;
-			imgResMedRadio.title = "Medium resolution image not available";
+			var imgRes = getCookie("symbimgres");
+			if(imgRes == 'lg'){
+				changeImgRes('lg');
+			}
+		}
+		else{
+			imgObj.src = imgArr[activeImgIndex];
+			document.getElementById("imgresmed").checked = true;
+			var imgResLgRadio = document.getElementById("imgreslg");
+			imgResLgRadio.disabled = true;
+			imgResLgRadio.title = "Large resolution image not available";
+		}
+		if(imgArr[activeImgIndex]){
+			//Do nothing
+		}
+		else{
+			if(imgLgArr[activeImgIndex]){
+				imgObj.src = imgLgArr[activeImgIndex];
+				document.getElementById("imgreslg").checked = true;
+				var imgResMedRadio = document.getElementById("imgresmed");
+				imgResMedRadio.disabled = true;
+				imgResMedRadio.title = "Medium resolution image not available";
+			}
 		}
 	}
 }

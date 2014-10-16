@@ -423,10 +423,10 @@ else{
 
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=140911"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=140905"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=140911"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=140905"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=141014"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=141014"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=141014"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141014"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -821,7 +821,7 @@ else{
 												<div id="stateProvinceDiv">
 													<?php echo (defined('STATEPROVINCELABEL')?STATEPROVINCELABEL:'State/Province'); ?>
 													<br/>
-													<input type="text" id="ffstate" name="stateprovince" tabindex="42" value="<?php echo array_key_exists('stateprovince',$occArr)?$occArr['stateprovince']:''; ?>" onchange="fieldChanged('stateprovince');" />
+													<input type="text" id="ffstate" name="stateprovince" tabindex="42" value="<?php echo array_key_exists('stateprovince',$occArr)?$occArr['stateprovince']:''; ?>" onchange="stateProvinceChanged(this.value)" />
 												</div>
 												<div id="countyDiv">
 													<?php echo (defined('COUNTYLABEL')?COUNTYLABEL:'County'); ?>

@@ -1,6 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceUtilites.php');
+include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 
 class TaxonomyUtilities{
 

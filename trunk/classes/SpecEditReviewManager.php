@@ -225,14 +225,14 @@ class SpecEditReviewManager {
 		$sql = 'SELECT DISTINCT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS username '.
 			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 			'INNER JOIN users u ON e.uid = u.uid '.
-			'WHERE (o.collid = '.$this->collId.') '.
-			'ORDER BY u.lastname,u.firstname';
+			'WHERE (o.collid = '.$this->collId.') ';
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$retArr[$row->uid] = $row->username;
 		}
 		$result->close();
+		asort($retArr);
 		return $retArr;
 	}
 }

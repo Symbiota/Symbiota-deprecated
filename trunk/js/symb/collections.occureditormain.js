@@ -102,38 +102,35 @@ $(document).ready(function() {
 
 	//Misc fields with lookups
 	$("#ffcountry").autocomplete({ 
-			source: countryArr,
-			minLength: 1,
-			autoFocus: true,
-			change: function(event, ui) {
-				fieldChanged('country');
-			}
-		} 
-	);
+		source: countryArr,
+		minLength: 1,
+		autoFocus: true,
+		change: function(event, ui){
+			fieldChanged("country");
+		}
+	});
 
 	$("#ffstate").autocomplete({
-			source: function( request, response ) {
-				$.getJSON( "rpc/lookupState.php", { term: request.term, "country": document.fullform.country.value }, response );
-			},
-			minLength: 2,
-			autoFocus: true,
-			change: function(event, ui) {
-				fieldChanged('stateprovince');
-			}		
+		source: function( request, response ) {
+			$.getJSON( "rpc/lookupState.php", { term: request.term, "country": document.fullform.country.value }, response );
+		},
+		minLength: 2,
+		autoFocus: true,
+		change: function(event, ui){
+			fieldChanged("stateprovince");
 		}
-	);
+	});
 
 	$("#ffcounty").autocomplete({ 
-			source: function( request, response ) {
-				$.getJSON( "rpc/lookupCounty.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
-			},
-			minLength: 2,
-			autoFocus: true,
-			change: function(event, ui) {
-				fieldChanged('county');
-			}		
+		source: function( request, response ) {
+			$.getJSON( "rpc/lookupCounty.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
+		},
+		minLength: 2,
+		autoFocus: true,
+		change: function(event, ui){
+			fieldChanged("county");
 		}
-	);
+	});
 
 	$("#catalognumber").keydown(function(evt){
 		var evt  = (evt) ? evt : ((event) ? event : null);
@@ -177,9 +174,30 @@ function verifyFullFormSciName(){
 			if(data.status == 1){ 
 				$( 'input[name=localitysecurity]' ).prop('checked', true);
 			}
+			else{
+				if(data.tid){
+					var stateVal = $( 'input[name=stateprovince]' ).val();
+					if(stateVal != ""){
+						localitySecurityCheck(data.tid,stateVal);
+					}
+				}
+			}
 		}
 		else{
 			alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
+		}
+	});
+}
+
+function localitySecurityCheck(tidVal,stateVal){
+	$.ajax({
+		type: "POST",
+		url: "rpc/localitysecuritycheck.php",
+		dataType: "json",
+		data: { tid: tidVal, state: stateVal }
+	}).done(function( data ) {
+		if(data == "1"){
+			$( 'input[name=localitysecurity]' ).prop('checked', true);
 		}
 	});
 }
@@ -196,6 +214,14 @@ function fieldChanged(fieldName){
 function recordNumberChanged(){
 	fieldChanged('recordnumber');
 	autoDupeSearch();
+}
+
+function stateProvinceChanged(stateVal){ 
+	fieldChanged('stateprovince');
+	var tidVal = $( "#tidinterpreted" ).val();
+	if(tidVal != "" && stateVal != ""){
+		localitySecurityCheck(tidVal,stateVal);
+	}
 }
 
 function decimalLatitudeChanged(f){

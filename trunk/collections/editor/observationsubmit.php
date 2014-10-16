@@ -1,5 +1,5 @@
 <?php
-error_reporting(0);
+//TODO: add code to automatically select hide locality details when taxon/state match name on list
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/ObservationSubmitManager.php');
 header("Content-Type: text/html; charset=".$charset);
