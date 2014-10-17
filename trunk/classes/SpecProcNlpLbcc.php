@@ -6878,7 +6878,6 @@ class SpecProcNlpLbcc {
 
 	private function convertBadChars($str) {//echo "\nInput to convertBadChars: ".$str."\n";
 		if($str) {
-			if(mb_ereg(chr(195).chr(131).chr(194).chr(175), $str)) echo "\nit matches\n";
 			if(mb_ereg(chr(195).chr(162).chr(226).chr(130).chr(172).chr(194).chr(157), $str))
 				$str = mb_ereg_replace(chr(195).chr(162).chr(226).chr(130).chr(172).chr(194).chr(157), "\"", $str);
 			if(mb_ereg(chr(195).chr(162).chr(226).chr(130).chr(172).chr(226).chr(132).chr(162), $str))
