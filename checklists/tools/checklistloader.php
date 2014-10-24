@@ -11,7 +11,8 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 
 $clLoaderManager = new ChecklistLoaderManager();
 $clLoaderManager->setClid($clid);
- 
+$clMeta = $clLoaderManager->getChecklistMetadata();
+
 $editable = false;
 if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
 	$editable = true;
@@ -24,21 +25,19 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
-	
-	function validateUploadForm(thisForm){
-		var testStr = document.getElementById("uploadfile").value;
-		if(testStr == ""){
-			alert("Please select a file to upload");
-			return false;
+		function validateUploadForm(thisForm){
+			var testStr = document.getElementById("uploadfile").value;
+			if(testStr == ""){
+				alert("Please select a file to upload");
+				return false;
+			}
+			testStr = testStr.toLowerCase();
+			if(testStr.indexOf(".csv") == -1 && testStr.indexOf(".CSV") == -1){
+				alert("Document "+document.getElementById("uploadfile").value+" must be a CSV file (with a .csv extension)");
+				return false;
+			}
+			return true;
 		}
-		testStr = testStr.toLowerCase();
-		if(testStr.indexOf(".csv") == -1 && testStr.indexOf(".CSV") == -1){
-			alert("Document "+document.getElementById("uploadfile").value+" must be a CSV file (with a .csv extension)");
-			return false;
-		}
-		return true;
-	}
-	
 	</script>
 </head>
 
@@ -59,11 +58,11 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 	<div id="innertext">
 		<h1>
 			<a href="<?php echo $clientRoot."/checklists/checklist.php?cl=".$clid; ?>">
-				<?php echo $clLoaderManager->getClName(); ?>
+				<?php echo $clMeta['name']; ?>
 			</a>
 		</h1>
 		<div style="margin:10px;">
-			<b>Authors:</b> <?php echo $clLoaderManager->getClAuthors(); ?>
+			<b>Authors:</b> <?php echo $clMeta['authors']; ?>
 		</div>
 		<?php 
 			if($editable){ 
