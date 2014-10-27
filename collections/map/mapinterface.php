@@ -143,11 +143,6 @@ if($coordArr && !is_numeric($coordArr)){
 			font-size: 12px;
 			font-weight: normal;
 		}
-		#tabs1 a,#tabs2 a,#tabs3 a{
-			outline-color: transparent;
-			font-size: 12px;
-			font-weight: normal;
-		}
 	</style>
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
@@ -1177,7 +1172,7 @@ if($coordArr && !is_numeric($coordArr)){
 											<h1 style="margin:0px 0px 8px 0px;font-size:15px;">Collections to be Searched</h1>
 										</div>
 										<?php 
-										if($specArr && $obsArr){
+										if($specArr || $obsArr){
 											?>
 											<div id="specobsdiv">
 												<div style="margin:0px 0px 10px 20px;">
@@ -1185,9 +1180,13 @@ if($coordArr && !is_numeric($coordArr)){
 													Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 												</div>
 												<?php 
-												$mapManager->outputFullMapCollArr($dbArr,$specArr); 
+												if($specArr){
+													$mapManager->outputFullMapCollArr($dbArr,$specArr);
+												}
 												if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; 
-												$mapManager->outputFullMapCollArr($dbArr,$obsArr);
+												if($obsArr){
+													$mapManager->outputFullMapCollArr($dbArr,$obsArr);
+												}
 												?>
 												<div style="clear:both;">&nbsp;</div>
 											</div>
@@ -1646,7 +1645,7 @@ if($coordArr && !is_numeric($coordArr)){
 						</div>
 					</div>
 				</div>
-				<a href="#demo-links" style="position:absolute;top:0;right:0;margin-right:0px;margin-bottom:0px;margin-top:1px;padding-top:3px;padding-bottom:3px;padding-left:20px;z-index:10;height:20px;" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true"></a>
+				<a href="#" style="position:absolute;top:0;right:0;margin-right:0px;margin-bottom:0px;margin-top:1px;padding-top:3px;padding-bottom:3px;padding-left:20px;z-index:10;height:20px;" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true"></a>
 			</div><!-- /content wrapper for padding -->
 		</div><!-- /defaultpanel -->
 	</div>
