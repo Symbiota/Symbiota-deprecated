@@ -560,10 +560,10 @@ if($coordArr && !is_numeric($coordArr)){
 			
 			<?php
 			if($coordExist==true){
-				$minLng = -180;
-				$minLat = -60;
-				$maxLng = 180;
-				$maxLat = 60;
+				$minLng = 180;
+				$minLat = 90;
+				$maxLng = -180;
+				$maxLat = -90;
 				$tIdArr = array();
 				foreach($coordArr as $sciName => $valueArr){
 					?>
@@ -1110,16 +1110,16 @@ if($coordArr && !is_numeric($coordArr)){
 					}
 				);
 				<?php
-				if(($minLat <= -60) && ($maxLat >= 60)){
+				$latDiff = $maxLat - $minLat;
+				if($latDiff >= 100){
 					$minLat = -60;
 					$maxLat = 60;
 				}
 				?>
-				var swLatLng = new google.maps.LatLng(<?php echo $maxLat.','.$minLng; ?>);
-				var neLatLng = new google.maps.LatLng(<?php echo $minLat.','.$maxLng; ?>);
+				var swLatLng = new google.maps.LatLng(<?php echo $minLat.','.$minLng; ?>);
+				var neLatLng = new google.maps.LatLng(<?php echo $maxLat.','.$maxLng; ?>);
 				var llBounds = new google.maps.LatLngBounds(swLatLng, neLatLng);
 				map.fitBounds(llBounds);
-				//map.panToBounds(llBounds);
 				<?php
 			}
 			?>
@@ -1155,7 +1155,7 @@ if($coordArr && !is_numeric($coordArr)){
 		<div role="main" class="ui-content" style="height:400px;">
 			<a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars">Open</a>
 			<br />
-			<a href="../../index.php" style="position:absolute;top:40;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" >Home</a>
+			<a href="#" onclick="window.location='../../index.php';" style="position:absolute;top:40;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" >Home</a>
 		</div>
 		<!-- defaultpanel -->
 		<div data-role="panel" data-dismissible="false" class="overflow: hidden;" style="width:380px;" id="defaultpanel" data-position="left" data-display="overlay" >
