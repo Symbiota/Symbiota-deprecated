@@ -130,7 +130,7 @@ class GamesManager {
 			$tidArr = Array();
 			$sql = 'SELECT l.TID, COUNT(i.imgid) AS cnt '. 
 				'FROM fmchklsttaxalink l INNER JOIN images AS i ON l.TID = i.tid '.
-				'WHERE i.imagetype = "field image" AND l.CLID = '.$clid.' '. 
+				'WHERE i.tid IS NOT NULL AND l.CLID = '.$clid.' '. 
 				'GROUP BY l.TID';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
@@ -216,10 +216,5 @@ class GamesManager {
 		//echo json_encode($infoArr);
 		return $infoArr;
 	}
-	
-	/*public function getAnswer(){
-		$answer = json_decode(file_get_contents('../../temp/ootd/info.json'), true);
-		return $answer;
-	}*/
 }
 ?>
