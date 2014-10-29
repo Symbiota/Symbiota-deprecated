@@ -6,6 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
 header('Expires: 0'); // Proxies.
+ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
@@ -76,7 +77,7 @@ if($previousCriteria){
 	$gridSize = $previousCriteria['gridSizeSetting'];
 	$minClusterSize = $previousCriteria['minClusterSetting'];
 	$clusterOff = $previousCriteria['clusterSwitch'];
-	$recLimit = $previousCriteria['recordlimit'];
+	$recLimit = (($previousCriteria['recordlimit']&&is_numeric($previousCriteria['recordlimit']))?$previousCriteria['recordlimit']:5000);
 }
 
 $dbArr = Array();
@@ -154,6 +155,10 @@ if($coordArr && !is_numeric($coordArr)){
 	<script type="text/javascript" src="../../js/jscolor/jscolor.js"></script>
 	<script type="text/javascript">
 		$(function() {
+			var winHeight = $(window).height();
+			winHeight = winHeight + "px";
+			document.getElementById('mapinterface').style.height = winHeight;
+			
 			$("#accordion").accordion({
 				collapsible: true,
 				heightStyle: "fill"
@@ -555,10 +560,10 @@ if($coordArr && !is_numeric($coordArr)){
 			
 			<?php
 			if($coordExist==true){
-				$minLng = 180;
-				$minLat = 90;
-				$maxLng = -180;
-				$maxLat = -90;
+				$minLng = -180;
+				$minLat = -60;
+				$maxLng = 180;
+				$maxLat = 60;
 				$tIdArr = array();
 				foreach($coordArr as $sciName => $valueArr){
 					?>
@@ -1104,11 +1109,17 @@ if($coordArr && !is_numeric($coordArr)){
 						map.panToBounds(selectZoomBounds);
 					}
 				);
-				
-				var swLatLng = new google.maps.LatLng(<?php echo $minLat.','.$minLng; ?>);
-				var neLatLng = new google.maps.LatLng(<?php echo $maxLat.','.$maxLng; ?>);
+				<?php
+				if(($minLat <= -60) && ($maxLat >= 60)){
+					$minLat = -60;
+					$maxLat = 60;
+				}
+				?>
+				var swLatLng = new google.maps.LatLng(<?php echo $maxLat.','.$minLng; ?>);
+				var neLatLng = new google.maps.LatLng(<?php echo $minLat.','.$maxLng; ?>);
 				var llBounds = new google.maps.LatLngBounds(swLatLng, neLatLng);
 				map.fitBounds(llBounds);
+				//map.panToBounds(llBounds);
 				<?php
 			}
 			?>
@@ -1130,7 +1141,7 @@ if($coordArr && !is_numeric($coordArr)){
 			
 			if($stArr && $coordExist==false && is_numeric($coordArr)){
 				?>
-				alert("Your search produced <?php echo $coordArr; ?> results, which exceeds the record limit. Please try refining your search, or increase the record limit. Please note though, that increasing the record limit can cause delays in the page loading, or your browser to crash and can be no higher than 50000.");
+				checkHighResult(<?php echo $coordArr; ?>);
 				<?php
 			}
 			?>
@@ -1139,16 +1150,18 @@ if($coordArr && !is_numeric($coordArr)){
 		google.maps.event.addDomListener(window, 'load', getCoords);
 	</script>
 </head> 
-<body style='width:100%;height:100%;'>
+<body style='width:100%;'>
 	<div data-role="page" id="page1">
-		<div role="main" class="ui-content">
+		<div role="main" class="ui-content" style="height:400px;">
 			<a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars">Open</a>
+			<br />
+			<a href="../../index.php" style="position:absolute;top:40;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" >Home</a>
 		</div>
 		<!-- defaultpanel -->
 		<div data-role="panel" data-dismissible="false" class="overflow: hidden;" style="width:380px;" id="defaultpanel" data-position="left" data-display="overlay" >
 			<div class="panel-content">
 				<div id="mapinterface">
-					<div id="accordion" style="height:680px;" >
+					<div id="accordion" style="" >
 						<?php //echo "MySQL Version: ".$mysqlVersion; ?>
 						<?php //echo $spatial?"yes":"no"; ?>
 						<?php //echo "Request: ".json_encode($_REQUEST); ?>
@@ -1158,6 +1171,7 @@ if($coordArr && !is_numeric($coordArr)){
 						<?php //echo "clusteringOff: ".$clusterOff; ?>
 						<?php //echo "coordArr: ".$coordArr; ?>
 						<?php //echo "tIdArr: ".json_encode($tIdArr); ?>
+						<?php //echo "minLat:".$minLat."maxLat:".$maxLat."minLng:".$minLng."maxLng:".$maxLng; ?>
 						<h3>Search Criteria and Options</h3>
 						<div id="tabs1" style="width:379px;padding:0px;">
 							<form name="mapsearchform" id="mapsearchform" data-ajax="false" action="mapinterface.php" method="get" onsubmit="return verifyCollForm(this);return checkForm();">
@@ -1199,7 +1213,7 @@ if($coordArr && !is_numeric($coordArr)){
 									<div style="height:25px;">
 										<div style="float:left;">
 											Record Limit:
-											<input data-role="none" type="text" id="recordlimit" style="width:75px;" name="recordlimit" value="<?php echo ($recLimit?$recLimit:""); ?>" title="Maximum record amount returned from search." onchange="checkRecordLimit(this.form);" />
+											<input data-role="none" type="text" id="recordlimit" style="width:75px;" name="recordlimit" value="<?php echo ($recLimit?$recLimit:""); ?>" title="Maximum record amount returned from search." onchange="return checkRecordLimit(this.form);" />
 										</div>
 										<div style="float:right;">
 											<input type="hidden" name="maptype" value="occquery" />
@@ -1644,7 +1658,7 @@ if($coordArr && !is_numeric($coordArr)){
 							?>
 						</div>
 					</div>
-				</div>
+				</div><!-- <a href="../../index.php" style="position:absolute;top:0;right:0;margin-right:38px;margin-bottom:0px;margin-top:1px;padding-top:3px;padding-bottom:3px;z-index:10;" data-role="button" data-inline="true" >Home</a> -->
 				<a href="#" style="position:absolute;top:0;right:0;margin-right:0px;margin-bottom:0px;margin-top:1px;padding-top:3px;padding-bottom:3px;padding-left:20px;z-index:10;height:20px;" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true"></a>
 			</div><!-- /content wrapper for padding -->
 		</div><!-- /defaultpanel -->

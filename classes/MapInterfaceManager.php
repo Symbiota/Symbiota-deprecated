@@ -831,7 +831,7 @@ class MapInterfaceManager{
 		global $userRights, $mappingBoundaries;
 		$coordArr = Array();
 		$sql = '';
-		$sql = 'SELECT o.occid, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") AS identifier, '.
+		$sql = 'SELECT o.occid, CONCAT_WS("",CONCAT(o.recordedby," "),"(",IFNULL(o.recordnumber,"s.n."),")") AS identifier, '.
 			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, '.
 			'c.CollectionName ';
 		if($includeDescr){
@@ -916,7 +916,7 @@ class MapInterfaceManager{
 		$seloccids = $match[1];
 		$coordArr = Array();
 		$sql = '';
-		$sql = 'SELECT o.occid, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") AS identifier, '.
+		$sql = 'SELECT o.occid, CONCAT_WS("",CONCAT(o.recordedby," "),"(",IFNULL(o.recordnumber,"s.n."),")") AS identifier, '.
 			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, '.
 			'c.CollectionName ';
 		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
