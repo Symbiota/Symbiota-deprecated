@@ -1,4 +1,7 @@
 $(window).resize(function(){
+	var winHeight = $(window).height();
+	winHeight = winHeight + "px";
+	document.getElementById('mapinterface').style.height = winHeight;
 	$("#accordion").accordion("refresh");
 });
 
@@ -257,13 +260,41 @@ function reSymbolizeMap(type) {
 
 function checkRecordLimit(f) {
 	var recordLimit = document.getElementById("recordlimit").value;
-	if (recordLimit > 50000) {
-		alert("Record limit cannot exceed 50000.");
-		document.getElementById("recordlimit").value = 5000;
-		return;
+	if(!isNaN(recordLimit) && recordLimit > 0){
+		if (recordLimit > 50000) {
+			alert("Record limit cannot exceed 50000.");
+			document.getElementById("recordlimit").value = 5000;
+			return;
+		}
+		if (recordLimit <= 50000) {
+			if(recordLimit > 5000){
+				if(confirm('Increasing the record limit can cause delays in loading the map, or for your browser to crash.')){
+					return true;
+				}
+				else{
+					document.getElementById("recordlimit").value = 5000;
+				}
+			}
+		}
 	}
-	if (recordLimit <= 50000) {
-		return confirm('Increasing the record limit can cause delays in loading the map, or for your browser to crash.');
+	else{
+		document.getElementById("recordlimit").value = 5000;
+		alert("Record Limit must be set to a whole number greater than zero.");
+	}
+}
+
+function checkHighResult(result) {
+	if (result <= 50000) {
+		if(confirm("Your search produced "+result+" results which exceeds the Record Limit set in the Search Criteria. Would you like to resubmit the search form with a higher Record Limit to accommodate all of the results? Please note that increasing the record limit can cause delays in the map loading.")){
+			document.getElementById("recordlimit").value = result;
+			refreshClustering();
+		}
+		else{
+			return;
+		}
+	}
+	else{
+		alert("Your search produced "+result+" results which exceeds the maximum of 50000, please refine your search more.");
 	}
 }
 
@@ -903,12 +934,6 @@ function changeRecordPage(starr,page){
 		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
 			var newMapRecordList = JSON.parse(sutXmlHttp.responseText);
 			document.getElementById("queryrecords").innerHTML = newMapRecordList;
-			var _img = document.getElementById('edit_img');
-			var newImg = new Image;
-			newImg.src = '../../images/edit.png';
-			newImg.onload = function() {
-				_img.src = this.src;
-			}
 		}
 	};
 	sutXmlHttp.open("POST",url,true);
