@@ -903,6 +903,9 @@ class OccurrenceEditorManager {
 			//echo "<div>".$sql."</div>";
 			if($this->conn->query($sql)){
 				$this->occid = $this->conn->insert_id;
+				//Update collection stats
+				$this->conn->query('UPDATE omcollectionstats SET recordcnt = recordcnt + 1 WHERE collid = '.$this->collId);
+				
 				//Create and insert Symbiota GUID (UUID)
 				$guid = UuidFactory::getUuidV4();
 				if(!$this->conn->query('INSERT INTO guidoccurrences(guid,occid) VALUES("'.$guid.'",'.$this->occid.')')){
@@ -1033,6 +1036,8 @@ class OccurrenceEditorManager {
 			//Associated records will be deleted from: omexsiccatiocclink, omoccurdeterminations, fmvouchers
 			$sqlDel = 'DELETE FROM omoccurrences WHERE (occid = '.$delOccid.')';
 			if($this->conn->query($sqlDel)){
+				//Update collection stats
+				$this->conn->query('UPDATE omcollectionstats SET recordcnt = recordcnt - 1 WHERE collid = '.$this->collId);
 				$status = 'SUCCESS: Occurrence Record Deleted!';
 			}
 			else{

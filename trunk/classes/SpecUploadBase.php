@@ -526,138 +526,6 @@ class SpecUploadBase extends SpecUpload{
 		$this->conn->query($sql);
 		$this->outputMsg('Done!</li> ');
 
-		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Cleaning taxonomy...');
-		ob_flush();
-		flush();
-
-		$taxonRank = 'subsp.';
-		$sql = 'SELECT distinct unitind3 FROM taxa '.
-			'WHERE unitind3 = "ssp." OR unitind3 = "subsp."';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$taxonRank = $r->unitind3;
-		}
-		$rs->close();
-		
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = replace(sciname," '.($taxonRank=='subsp.'?'ssp.':'subsp.').' "," '.$taxonRank.' ") '.
-			'WHERE sciname like "% '.($taxonRank=='subsp.'?'ssp.':'subsp.').' %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp SET sciname = replace(sciname," var "," var. ") WHERE sciname like "% var %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = replace(sciname," cf. "," "), identificationQualifier = CONCAT_WS("; ","cf.",identificationQualifier), tidinterpreted = null '.
-			'WHERE sciname like "% cf. %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = replace(sciname," cf "," "), identificationQualifier = CONCAT_WS("; ","cf.",identificationQualifier), tidinterpreted = null '.
-			'WHERE sciname like "% cf %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = REPLACE(sciname," aff. "," "), identificationQualifier = CONCAT_WS("; ","aff.",identificationQualifier), tidinterpreted = null '.
-			'WHERE sciname like "% aff. %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = REPLACE(sciname," aff "," "), identificationQualifier = CONCAT_WS("; ","aff.",identificationQualifier), tidinterpreted = null '.
-			'WHERE sciname like "% aff %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = trim(sciname), tidinterpreted = null '.
-			'WHERE sciname like "% " OR sciname like " %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = replace(sciname,"   "," ") '.
-			'WHERE sciname like "%   %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = replace(sciname,"  "," ") '.
-			'WHERE sciname like "%  %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = replace(sciname," sp.","") '.
-			'WHERE sciname like "% sp." AND collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE uploadspectemp '.
-			'SET sciname = replace(sciname," sp","") '.
-			'WHERE sciname like "% sp" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE uploadspectemp '.
-			'SET specificepithet = NULL '.
-			'WHERE specificepithet = "sp." OR specificepithet = "sp" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp SET taxonrank = "f." '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% f. %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp SET taxonrank = "f." '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% forma %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp SET taxonrank = "var." '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% var. %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% ssp. %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% subsp. %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% ssp %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% subsp %" AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp SET sciname = trim(CONCAT_WS(" ",Genus,SpecificEpithet,taxonrank,InfraSpecificEpithet)) '.
-			'WHERE sciname IS NULL AND Genus IS NOT NULL AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-
-		/*
-		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Linking to taxonomic thesaurus...');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.sciname = t.sciname '.
-			'SET u.TidInterpreted = t.tid WHERE u.TidInterpreted IS NULL AND collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE taxa t INNER JOIN uploadspectemp u ON t.tid = u.tidinterpreted '.
-			'SET u.LocalitySecurity = t.SecurityStatus '.
-			'WHERE u.collid = '.$this->collId.' AND (t.SecurityStatus > 0) AND (u.LocalitySecurity = 0 OR u.LocalitySecurity IS NULL)';
-		$this->conn->query($sql);
-		
-		$sql = 'UPDATE uploadspectemp u INNER JOIN taxstatus ts ON u.tidinterpreted = ts.tid '.
-			'SET u.family = ts.family '.
-			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "") AND collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.genus = t.unitname1 '.
-			'INNER JOIN taxstatus ts on t.tid = ts.tid '.
-			'SET u.family = ts.family '.
-			'WHERE t.rankid = 180 and ts.taxauthid = 1 AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "") AND collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.tidinterpreted = t.tid '.
-			'SET u.scientificNameAuthorship = t.author '.
-			'WHERE (u.scientificNameAuthorship = "" OR u.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-		*/
-
 		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Cleaning country and state/province fields ...');
 		ob_flush();
 		flush();
@@ -1386,8 +1254,32 @@ class SpecUploadBase extends SpecUpload{
 				
 			}
 
+			if(array_key_exists("specificepithet",$recMap)){
+				if($recMap["specificepithet"] == 'sp.' || $recMap["specificepithet"] == 'sp') $recMap["specificepithet"] = '';
+			}
+			if(array_key_exists("taxonrank",$recMap)){
+				$tr = strtolower($recMap["taxonrank"]);
+				if($tr == 'species' || !$recMap["specificepithet"]) $recMap["taxonrank"] = '';
+				if($tr == 'subspecies') $recMap["taxonrank"] = 'subsp.';
+				if($tr == 'variety') $recMap["taxonrank"] = 'var.';
+				if($tr == 'forma') $recMap["taxonrank"] = 'f.';
+			}
+		
 			//Populate sciname if null
-			if(!array_key_exists('sciname',$recMap) || !$recMap['sciname']){
+			if(array_key_exists('sciname',$recMap) && $recMap['sciname']){
+				if(substr($recMap['sciname'],-4) == ' sp.') $recMap['sciname'] = substr($recMap['sciname'],0,-4);
+				if(substr($recMap['sciname'],-3) == ' sp') $recMap['sciname'] = substr($recMap['sciname'],0,-3);
+				
+				$recMap['sciname'] = str_replace(array(' ssp. ',' ssp '),' subsp. ',$recMap['sciname']);
+				$recMap['sciname'] = str_replace(' var ',' var. ',$recMap['sciname']);
+				
+				$pattern = '/\b(cf\.|cf|aff\.|aff)\s{1}/';
+				if(preg_match($pattern,$recMap['sciname'],$m)){
+					$recMap['identificationqualifier'] = $m[1];
+					$recMap['sciname'] = preg_replace($pattern,'',$recMap['sciname']);
+				} 
+			}
+			else{
 				if(array_key_exists("genus",$recMap)){
 					//Build sciname from individual units supplied by source
 					$sciName = $recMap["genus"];
