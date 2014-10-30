@@ -1,12 +1,12 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceHarvester.php');
+include_once($serverRoot.'/classes/OccurrenceSupport.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:'';
 $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 
-$harvManager = new OccurrenceHarvester();
+$harvManager = new OccurrenceSupport();
 
 $isEditor = 0;
 $collList = array();

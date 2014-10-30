@@ -488,6 +488,7 @@ $collData = $collManager->getCollectionData(1);
 										<select name="managementtype">
 											<option>Snapshot</option>
 											<option <?php echo ($collid && $collData["managementtype"]=='Live Data'?'SELECTED':''); ?>>Live Data</option>
+											<option <?php echo ($collid && $collData["managementtype"]=='Aggregate'?'SELECTED':''); ?>>Aggregate</option>
 										</select>
 										<a id="managementinfo" href="#" onclick="return false" title="More information about Management Type">
 											<img src="../../images/info.png" style="width:15px;" />
@@ -554,10 +555,10 @@ $collData = $collManager->getCollectionData(1);
 										//New collection 
 										?>
 										<input type="text" name="collectionguid" value="" style="width:90%;" />
-										<a id="collectionguidinfo2" href="#" onclick="return false" title="More information">
+										<a id="collectionguidinfo" href="#" onclick="return false" title="More information">
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
-										<div id="collectionguidinfo2dialog">
+										<div id="collectionguidinfodialog">
 											Global Unique Identifier for this collection. 
 											If your collection already has a GUID (e.g. previously assigned by a  
 											collection management application such as Specify), that identifier should be entered here.

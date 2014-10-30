@@ -95,9 +95,9 @@ BEGIN
          WHERE u.collid = targetCollId AND (t.SecurityStatus > 0) AND (u.LocalitySecurity = 0 OR u.LocalitySecurity IS NULL);
 
          #standardize some of the fields
-         UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," subsp. "," ssp. ") WHERE s.sciname like "% subsp. %";
+         UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," ssp. "," subsp. ") WHERE s.sciname like "% ssp. %";
          UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," var "," var. ") WHERE s.sciname like "% var %";
-         UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," ssp "," ssp. ") WHERE s.sciname like "% ssp %";
+         UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," subsp "," subsp. ") WHERE s.sciname like "% subsp %";
          UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," cf. "," ") WHERE s.sciname like "% cf. %";
          UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," cf "," ") WHERE s.sciname like "% cf %";
          UPDATE uploadspectemp s SET s.sciname = REPLACE(s.sciname," aff. "," "), tidinterpreted = null WHERE sciname like "% aff. %";

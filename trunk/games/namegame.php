@@ -353,10 +353,10 @@ $imgloc = "../images/games/namegame/";
 			chosenWord=mainList[currentNum][0].toLowerCase(); // chosen word
 			RealName=chosenWord;
 		
-			/////////////////////////TAKE OUT THE VAR. or SSP. BECUASE IT'S TOO LONG///////////////////////////
+			/////////////////////////TAKE OUT THE VAR. or SUBSP. BECUASE IT'S TOO LONG///////////////////////////
 			tempWord=chosenWord;
 			varpos=tempWord.indexOf(" var.");
-			ssppos=tempWord.indexOf(" ssp.");
+			ssppos=tempWord.indexOf(" subsp.");
 			secondWord='';
 			if (varpos != -1){
 				subWord=tempWord.substring(0, varpos);
@@ -369,7 +369,7 @@ $imgloc = "../images/games/namegame/";
 				subWord=tempWord.substring(0, ssppos);
 				secondWord=tempWord.substring(ssppos);
 				secondWord=secondWord.toUpperCase();
-				//alert("Removing ' ssp.'. First part is '"+subWord+"' and second part is '"+secondWord+"'.");
+				//alert("Removing ' subsp.'. First part is '"+subWord+"' and second part is '"+secondWord+"'.");
 				chosenWord=subWord;
 			}
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////

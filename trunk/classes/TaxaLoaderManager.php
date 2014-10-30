@@ -157,14 +157,15 @@ class TaxaLoaderManager{
 
 	public function cleanUpload(){
 		
-		$sspStr = 'ssp.';$inSspStr = 'subsp.';
+		$sspStr = 'subsp.';
+		$inSspStr = 'ssp.';
 		$sql = 'SELECT unitind3 FROM taxa WHERE rankid = 230 AND unitind3 LIKE "s%" LIMIT 1';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$sspStr = $r->unitind3;
 		}
 		$rs->close();
-		if($sspStr == 'subsp.') $inSspStr = 'ssp.';
+		if($sspStr == 'ssp.') $inSspStr = 'subsp.';
 		
 		echo '<li>Starting data cleaning... ';
 		echo '<li style="margin-left:10px;">Cleaning AcceptedStr... ';

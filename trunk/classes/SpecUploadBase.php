@@ -9,8 +9,8 @@ class SpecUploadBase extends SpecUpload{
 	protected $transferCount = 0;
 	protected $identTransferCount = 0;
 	protected $imageTransferCount = 0;
-	protected $includeIdentificationHistory = true;
-	protected $includeImages = true;
+	protected $includeIdentificationHistory = false;
+	protected $includeImages = false;
 	protected $uploadTargetPath;
 
 	protected $sourceArr = Array();
@@ -393,12 +393,12 @@ class SpecUploadBase extends SpecUpload{
 
 	protected function cleanUpload(){
 		//Run custom cleaning Stored Procedure, if one exists
-		$this->outputMsg('<li style="font-weight:bold;">Record upload complete ('.$this->getTransferCount().' occurrences)</li>');
+		$this->outputMsg('<li style="font-weight:bold;">Record upload complete for '.$this->getTransferCount().' occurrences ('.date('Y-m-d h:i:s A').')</li>');
 		$this->outputMsg('<li style="font-weight:bold;">Starting custom cleaning scripts...</li>');
 		ob_flush();
 		flush();
 
-		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
+		if($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate'){
 			//If collection is a snapshot, map upload to existing records. These records will be updated rather than appended
 			$this->outputMsg('<li style="font-weight:bold;">Linking existing record in preparation for updating (matching DBPKs)... ');
 			ob_flush();
@@ -429,7 +429,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->recordCleaningStage1();
 		$this->recordCleaningStage2();
 		
-		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
+		if($this->collMetadataArr["managementtype"] == 'Snapshot'){
 			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid, o.dbpk = u.dbpk '.
@@ -455,7 +455,7 @@ class SpecUploadBase extends SpecUpload{
 	private function recordCleaningStage1(){
 		$this->outputMsg('<li style="font-weight:bold;">Starting Stage 1 cleaning</li>');
 		
-		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
+		if($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate'){
 			$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Remove NULL dbpk values... ');
 			ob_flush();
 			flush();
@@ -530,7 +530,7 @@ class SpecUploadBase extends SpecUpload{
 		ob_flush();
 		flush();
 
-		$taxonRank = 'ssp.';
+		$taxonRank = 'subsp.';
 		$sql = 'SELECT distinct unitind3 FROM taxa '.
 			'WHERE unitind3 = "ssp." OR unitind3 = "subsp."';
 		$rs = $this->conn->query($sql);
@@ -724,7 +724,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->transferIdentificationHistory();
 		//$this->transferImages();
 		$this->finalCleanup();
-		$this->outputMsg('<li style="font-weight:bold;">Upload Procedure Complete!</li>');
+		$this->outputMsg('<li style="font-weight:bold;">Upload Procedure Complete ('.date('Y-m-d h:i:s A').')!</li>');
 	} 
 	
 	protected function transferOccurrences(){
@@ -835,21 +835,28 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL AND o.collid = '.$this->collId;
 		$this->conn->query($sql);
-
+		$this->outputMsg('Done!</li> ');
+		
+		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Protecting sensitive species...');
+		ob_flush();
+		flush();
 		$sql = 'UPDATE taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
 			'SET o.LocalitySecurity = t.SecurityStatus '.
 			'WHERE (t.SecurityStatus > 0) AND (o.LocalitySecurity IS NULL)';
 		$this->conn->query($sql);
-
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
 			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
 			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
 			'SET o.localitysecurity = 1 '.
-			'WHERE (o.localitysecurity = NULL OR o.localitysecurity = 0) AND c.type = "rarespp" '.
+			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND c.type = "rarespp" '.
 			'AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND o.collid ='.$this->collId;
 		$this->conn->query($sql);
+		$this->outputMsg('Done!</li> ');
 		
+		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Populating NULL families and authors...');
+		ob_flush();
+		flush();
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 			'SET o.family = ts.family '.
 			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "") AND o.collid = '.$this->collId;
@@ -867,11 +874,10 @@ class SpecUploadBase extends SpecUpload{
 		//Setup and add datasets and link datasets to current user
 		
 		
-		$this->outputMsg('Done!</li> ');
 		ob_flush();
 		flush();
 	}
-	
+
 	protected function transferIdentificationHistory(){
 		$this->outputMsg('<li style="font-weight:bold;">Tranferring and activating Determination History... ');
 		ob_flush();

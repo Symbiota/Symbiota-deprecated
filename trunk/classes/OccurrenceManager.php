@@ -321,16 +321,14 @@ class OccurrenceManager{
 					$term2 = trim(substr($v,$p+3));
 					if(is_numeric($term1) && is_numeric($term2)){
 						$rnIsNum = true;
-						$rnWhere = 'OR (o.recordnumber BETWEEN '.$term1.' AND '.$term2.')';
+						$rnWhere .= 'OR (o.recordnumber BETWEEN '.$term1.' AND '.$term2.')';
 					}
 					else{
-						$catTerm = 'o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
-						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.recordnumber) = '.strlen($term2); 
-						$rnWhere = 'OR ('.$catTerm.')';
+						if(strlen($term2) > strlen($term1)) $term1 = str_pad($term1,strlen($term2),"0",STR_PAD_LEFT);
+						$catTerm = '(o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'")';
+						$catTerm .= ' AND (length(o.recordnumber) <= '.strlen($term2).')';
+						$rnWhere .= 'OR ('.$catTerm.')';
 					}
-				}
-				elseif(is_numeric($v)){
-					$rnWhere .= 'OR (o.recordNumber = '.$v.') ';
 				}
 				else{
 					$rnWhere .= 'OR (o.recordNumber = "'.$v.'") ';

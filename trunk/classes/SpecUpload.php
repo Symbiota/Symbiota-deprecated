@@ -290,7 +290,7 @@ class SpecUpload{
 					if(substr($serverRoot,-1) != '/' && substr($serverRoot,-1) != '\\') $logPath .= '/';
 					$logPath .= "temp/logs/dataupload_".date('Ymd').".log";
 					$this->logFH = fopen($logPath, 'a');
-					$this->outputMsg("\nDateTime: ".date('Y-m-d h:i:s A'));
+					$this->outputMsg("Start time: ".date('Y-m-d h:i:s A'));
 				}
 			}
 		}

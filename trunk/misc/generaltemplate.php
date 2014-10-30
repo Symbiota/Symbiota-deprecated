@@ -41,7 +41,7 @@ if($SYMB_UID){
 	}
 }
 
-if($sEditor){
+if($isEditor){
 	if($formSubmit == 'Save Data'){
 		$classManager->saveData($_POST);
 	}

@@ -212,6 +212,13 @@ class SpecUploadDwca extends SpecUploadBase{
 									}
 								}
 							}
+							$outputStr = 'DWCA details: encoding = '.$this->metaArr['occur']['encoding'].'; ';
+							$outputStr .= 'fieldsTerminatedBy: '.$this->metaArr['occur']['fieldsTerminatedBy'].'; ';
+							$outputStr .= 'linesTerminatedBy: '.$this->metaArr['occur']['linesTerminatedBy'].'; ';
+							$outputStr .= 'fieldsEnclosedBy: '.$this->metaArr['occur']['fieldsEnclosedBy'].'; ';
+							$outputStr .= 'ignoreHeaderLines: '.$this->metaArr['occur']['ignoreHeaderLines'].'; ';
+							$outputStr .= 'rowType: '.$this->metaArr['occur']['rowType'];
+							$this->outputMsg($outputStr);
 						}
 					}
 				}
@@ -347,15 +354,18 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->getRecordArr($fh);
 		 		}
 				
-				//Grab data
 				$cset = strtolower(str_replace('-','',$charset)); 
 				//Set source array 
 				$this->sourceArr = array();
 				foreach($this->metaArr['occur']['fields'] as $k => $v){
 					$this->sourceArr[$k] = strtolower($v);
 				}
-		 		$this->transferCount = 0;
+				//Grab data
+				$this->transferCount = 0;
 		 		if(!array_key_exists('dbpk',$this->fieldMap)) $this->fieldMap['dbpk']['field'] = 'id';
+		 		$collName = $this->collMetadataArr["name"].' ('.$this->collMetadataArr["institutioncode"];
+				if($this->collMetadataArr["collectioncode"]) $collName = $this->collMetadataArr["collectioncode"]; 
+				$this->outputMsg('Uploading data for: '.$collName);
 				while($recordArr = $this->getRecordArr($fh)){
 					$recMap = Array();
 					foreach($this->fieldMap as $symbField => $sMap){
@@ -379,8 +389,9 @@ class SpecUploadDwca extends SpecUploadBase{
 				
 				//Upload identification history
 				if($this->includeIdentificationHistory){
-					$fullPathIdent = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['ident']['name'];
-					if(file_exists($fullPathIdent)){
+					$fullPathIdent = '';
+					if($this->metaArr['ident']['name']) $fullPathIdent = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['ident']['name'];
+					if($fullPathIdent && file_exists($fullPathIdent)){
 						if(isset($this->metaArr['ident']['fields'])){
 							$this->outputMsg('<li style="font-weight:bold;">Starting to upload identification history records</li>');
 							if(isset($this->metaArr['ident']['fieldsTerminatedBy']) && $this->metaArr['ident']['fieldsTerminatedBy']){
