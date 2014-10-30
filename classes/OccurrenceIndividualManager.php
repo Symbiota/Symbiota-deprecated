@@ -322,7 +322,7 @@ class OccurrenceIndividualManager extends Manager{
 			//Set Review status to supress
  			$con = MySQLiConnectionFactory::getCon("write");
 			if(!$con->query('UPDATE omoccurcomments SET reviewstatus = 0 WHERE comid = '.$repComId)){
-				$this->errorMessage = 'ERROR changing comment status to needing review, Err msg: '.$this->conn->error;
+				$this->errorMessage = 'ERROR changing comment status to needing review, Err msg: '.$con->error;
 				$status = false;
 			}
 			$con->close();
