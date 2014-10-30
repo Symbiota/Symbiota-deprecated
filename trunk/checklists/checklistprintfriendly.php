@@ -92,7 +92,7 @@
 					<div style="margin:3px;">
 						<b>Total Taxa:</b> 
 						<?php echo $clManager->getTaxaCount(); ?>
-						(including ssp. and var.)
+						(including subsp. and var.)
 					</div>
 					<?php 
 					$prevfam = ''; 
