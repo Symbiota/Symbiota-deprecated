@@ -477,7 +477,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 				<div style="margin:3px;">
 					<b>Total Taxa:</b> 
 					<?php echo $clManager->getTaxaCount(); ?>
-					(including ssp. and var.)
+					(including subsp. and var.)
 				</div>
 				<?php 
 				$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());

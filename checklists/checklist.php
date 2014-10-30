@@ -388,7 +388,7 @@ if($clValue || $dynClid){
 											<hr />
 										</div>
 										<div style="text-align:center;">
-											<a href="tools/checklistloader.php?clid=<?php echo $clid;?>">Batch Upload Spreadsheet</a>
+											<a href="tools/checklistloader.php?clid=<?php echo $clid.'&pid='.$pid;?>">Batch Upload Spreadsheet</a>
 										</div>
 									</fieldset>
 								</form>
@@ -428,7 +428,7 @@ if($clValue || $dynClid){
 					<div style="margin:3px;">
 						<b>Total Taxa:</b> 
 						<?php echo $clManager->getTaxaCount(); ?>
-						(including ssp. and var.)
+						(including subsp. and var.)
 					</div>
 					<?php 
 					$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());

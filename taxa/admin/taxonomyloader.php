@@ -108,7 +108,7 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Unit Name 3:</div>
-						<input type='text' id='unitind3' name='unitind3' style='width:40px;border:inset;' title='Rank: e.g. ssp., var., f.'/>
+						<input type='text' id='unitind3' name='unitind3' style='width:40px;border:inset;' title='Rank: e.g. subsp., var., f.'/>
 						<input type='text' id='unitname3' name='unitname3' style='width:200px;border:inset;' title='infrasp. epithet'/>
 					</div>
 					<div style="clear:both;">

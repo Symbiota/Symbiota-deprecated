@@ -19,8 +19,8 @@ class ChecklistLoaderManager {
 	}
 
 	public function uploadCsvList($hasHeader, $thesId){
-		set_time_limit(120);
-		ini_set("max_input_time",120);
+		set_time_limit(300);
+		ini_set("max_input_time",300);
 		ini_set('auto_detect_line_endings', true);
 		$successCnt = 0;
 
@@ -41,6 +41,9 @@ class ChecklistLoaderManager {
 		}
 		
 		if(array_key_exists("sciname",$headerArr)){
+			$cnt = 0;
+			ob_flush();
+			flush();
 			while($valueArr = fgetcsv($fh)){
 				$tid = 0;
 				$rankId = 0;
@@ -48,7 +51,7 @@ class ChecklistLoaderManager {
 				$sciNameStr = $this->cleanInStr($valueArr[$headerArr["sciname"]]);
 				$noteStr = '';
 				if($sciNameStr){
-					$sciNameArr = TaxonomyUtilities::parseSciName($sciNameArr);
+					$sciNameArr = TaxonomyUtilities::parseSciName($sciNameStr);
 					//Check name is in taxa table and grab tid if it is
 					$sql = "";
 					if($thesId && is_numeric($thesId)){
@@ -68,7 +71,7 @@ class ChecklistLoaderManager {
 					if($rs){
 						if($row = $rs->fetch_object()){
 							$tid = $row->tid;
-							$family = $this->cleanOutStr($row->family);
+							$family = $row->family;
 							$rankId = $row->rankid;
 						}
 						$rs->close();
@@ -118,12 +121,18 @@ class ChecklistLoaderManager {
 						//$statusStr = $sciNameStr." failed to load (misspelled or not yet in taxonomic thesaurus)";
 						//$failCnt++;
 					}
+					$cnt++;
+					if($cnt%500 == 0) {
+						echo '<li style="margin-left:10px;">'.$cnt.' taxa loaded</li>';
+						ob_flush();
+						flush();
+					}
 				}
 			}
 			fclose($fh);
 		}
 		else{
-			$this->errorArr[] = '<div style="color:red;">ERROR: unable to locate sciname field</div>';
+			$this->errorStr = 'ERROR: unable to locate scientific name column';
 		}
 		return $successCnt;
 	}
@@ -140,6 +149,7 @@ class ChecklistLoaderManager {
 				echo '<td>'.$nameStr.'</td>';
 				echo '<td>';
 				//Check taxonomic thesaurus to see if it should be added to thesaurus
+				/*
 				if($taxaArr = $taxUtil->getEolTaxonArr($nameStr)){
 					if($tid = $taxUtil->loadNewTaxon($taxaArr)){
 						$this->addTaxonToChecklist($tid);
@@ -160,6 +170,7 @@ class ChecklistLoaderManager {
 					
 					echo '</div>';
 				}
+				*/
 				echo '</td>';
 				echo '</tr>';
 				flush();

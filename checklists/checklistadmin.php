@@ -2,8 +2,7 @@
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ChecklistAdmin.php');
 header("Content-Type: text/html; charset=".$charset);
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+if(!$SYMB_UID) header('Location: ../profile/index.php?refurl=../checklists/checklistadmin.php?'.$_SERVER['QUERY_STRING']);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
@@ -396,13 +395,6 @@ $voucherProjects = $clManager->getVoucherProjects();
 		else{
 			if(!$clid){
 				echo '<div><span style="font-weight:bold;font-size:110%;">Error:</span> Checklist identifier not set</div>';
-			}
-			elseif(!$symbUid){
-				?>
-				<div style="margin:30px;font-weight:bold;font-size:120%;">
-					Please <a href="../profile/index.php?refurl=<?php echo $clientRoot.'/checklists/checklistadmin.php?clid='.$clid.'&pid='.$pid; ?>">login</a>
-				</div>
-				<?php 
 			}
 			else{
 				echo '<div><span style="font-weight:bold;font-size:110%;">Error:</span> You do not have administrative permission for this checklist</div>';
