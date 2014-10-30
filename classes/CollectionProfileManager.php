@@ -291,7 +291,7 @@ class CollectionProfileManager {
 			($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
 			($accessRights?'"'.$accessRights.'"':'NULL').','.
 			($icon?'"'.$icon.'"':'NULL').','.
-			($managementType?'"'.$managementType.'"':'snapshot').','.
+			($managementType?'"'.$managementType.'"':'Snapshot').','.
 			($collType?'"'.$collType.'"':'Preserved Specimens').',"'.
 			$guid.'",'.($indUrl?'"'.$indUrl.'"':'NULL').','.
 			($sortSeq?$sortSeq:'NULL').') ';

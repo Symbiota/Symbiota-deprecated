@@ -441,7 +441,8 @@ $duManager->loadFieldMap();
 					}
 				}
 				elseif($uploadType == $DIRECTUPLOAD || ($uploadType == $FILEUPLOAD && $ulPath)){
-					$isSnapshot = ($duManager->getCollInfo("managementtype") == 'Snapshot'?true:false);
+					$isSnapshot = true;
+					if($duManager->getCollInfo("managementtype") == 'Live Data') $isSnapshot = false;
 					$duManager->analyzeUpload();
 					?>
 					<form name="initform" action="specupload.php" method="post" onsubmit="">

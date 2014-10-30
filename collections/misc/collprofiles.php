@@ -194,20 +194,24 @@ if($symbUid){
 									</li>
 									<?php 
 								}
+								if($collData['managementtype'] != 'Aggregate'){ 
+									?>
+									<li>
+										<a href="../specprocessor/index.php?collid=<?php echo $collid; ?>">
+											Processing Toolbox
+										</a>
+									</li>
+									<li>
+										<a href="../datasets/datapublisher.php?collid=<?php echo $collid; ?>">
+											Darwin Core Archive Publishing 
+										</a>
+									</li>
+									<?php
+								} 
 								?>
-								<li>
-									<a href="../specprocessor/index.php?collid=<?php echo $collid; ?>">
-										Processing Toolbox
-									</a>
-								</li>
 								<li>
 									<a href="../editor/editreviewer.php?collid=<?php echo $collid; ?>">
 										Review/Verify General Specimen Edits 
-									</a>
-								</li>
-								<li>
-									<a href="../datasets/datapublisher.php?collid=<?php echo $collid; ?>">
-										Darwin Core Archive Publishing 
 									</a>
 								</li>
 								<li>
@@ -254,13 +258,26 @@ if($symbUid){
 				}
 				?>
 				<div style="margin-top:5px;"> 
+					<b>Collection Type: </b> 
+					<?php 
+					if($collData['colltype']){
+						echo $collData['colltype'];
+					}
+					?>
+				</div>
+				<div style="margin-top:5px;"> 
 					<b>Management: </b> 
 					<?php 
-					if(stripos($collData['managementtype'],'live') !== false){
+					if($collData['managementtype'] == 'Live Data'){
 						echo 'Live Data managed directly within data portal';
 					}
 					else{
-						echo 'Data snapshot of central database ';
+						if($collData['managementtype'] == 'Aggregate'){
+							echo 'Data harvested from a data aggregator';
+						}
+						else{
+							echo 'Data snapshot of local collection database ';
+						}
 						echo '<div style="margin-top:5px;"><b>Last Update:</b> '.$collData['uploaddate'].'</div>';
 					}
 					?>

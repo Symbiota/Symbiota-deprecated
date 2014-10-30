@@ -21,9 +21,9 @@ IF defaultParent = 0 THEN
 END IF;
 
 #Do some cleaning in AcceptedStr column
-UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," subsp. "," ssp. ") WHERE AcceptedStr like "% subsp. %";
+UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," ssp. "," subsp. ") WHERE AcceptedStr like "% ssp. %";
 UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," var "," var. ") WHERE AcceptedStr like "% var %";
-UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," ssp "," ssp. ") WHERE AcceptedStr like "% ssp %";
+UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," subsp "," subsp. ") WHERE AcceptedStr like "% subsp %";
 UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," sp.","") WHERE AcceptedStr like "% sp.";
 UPDATE uploadtaxa SET AcceptedStr = trim(AcceptedStr) WHERE AcceptedStr like "% " OR AcceptedStr like " %";
 UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr,"  "," ") WHERE AcceptedStr like "%  %";
@@ -40,9 +40,9 @@ FROM uploadtaxa u LEFT JOIN uploadtaxa ul2 ON u.AcceptedStr = ul2.scinameinput
 WHERE u.AcceptedStr IS NOT NULL AND ul2.scinameinput IS NULL;
 
 #Do some cleaning
-UPDATE uploadtaxa SET sciname = replace(sciname," subsp. "," ssp. ") WHERE sciname like "% subsp. %";
+UPDATE uploadtaxa SET sciname = replace(sciname," ssp. "," subsp. ") WHERE sciname like "% ssp. %";
 UPDATE uploadtaxa SET sciname = replace(sciname," var "," var. ") WHERE sciname like "% var %";
-UPDATE uploadtaxa SET sciname = replace(sciname," ssp "," ssp. ") WHERE sciname like "% ssp %";
+UPDATE uploadtaxa SET sciname = replace(sciname," subsp "," subsp. ") WHERE sciname like "% subsp %";
 UPDATE uploadtaxa SET sciname = replace(sciname," cf. "," ") WHERE sciname like "% cf. %";
 UPDATE uploadtaxa SET sciname = replace(sciname," cf "," ") WHERE sciname like "% cf %";
 UPDATE uploadtaxa SET sciname = REPLACE(sciname," aff. "," ") WHERE sciname like "% aff. %";
@@ -52,9 +52,9 @@ UPDATE uploadtaxa SET sciname = replace(sciname," sp","") WHERE sciname like "% 
 UPDATE uploadtaxa SET sciname = trim(sciname) WHERE sciname like "% " OR sciname like " %";
 UPDATE uploadtaxa SET sciname = replace(sciname,"  "," ") WHERE sciname like "%  %";
 
-UPDATE uploadtaxa SET scinameinput = replace(scinameinput," subsp. "," ssp. ") WHERE scinameinput like "% subsp. %";
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput," ssp. "," subsp. ") WHERE scinameinput like "% ssp. %";
 UPDATE uploadtaxa SET scinameinput = replace(scinameinput," var "," var. ") WHERE scinameinput like "% var %";
-UPDATE uploadtaxa SET scinameinput = replace(scinameinput," ssp "," ssp. ") WHERE scinameinput like "% ssp %";
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput," subsp "," subsp. ") WHERE scinameinput like "% subsp %";
 UPDATE uploadtaxa SET scinameinput = replace(scinameinput," cf. "," ") WHERE scinameinput like "% cf. %";
 UPDATE uploadtaxa SET scinameinput = replace(scinameinput," cf "," ") WHERE scinameinput like "% cf %";
 UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," aff. "," ") WHERE scinameinput like "% aff. %";
@@ -100,13 +100,13 @@ WHERE unitind3 IS NULL AND scinameinput LIKE "% var. %"
 AND (rankid IS NULL OR rankid = 240);
 
 UPDATE uploadtaxa
-SET unitind3 = "ssp.", rankid = 230
+SET unitind3 = "subsp.", rankid = 230
 WHERE unitind3 IS NULL AND (scinameinput LIKE "% subsp. %" OR scinameinput LIKE "% ssp. %")
 AND (rankid IS NULL OR rankid = 230);
 
 UPDATE uploadtaxa
-SET sciname = replace(sciname," subsp. "," ssp. ")
-WHERE sciname LIKE "% subsp. %";
+SET sciname = replace(sciname," ssp. "," subsp. ")
+WHERE sciname LIKE "% ssp. %";
 
 UPDATE uploadtaxa
 SET unitname3 = TRIM(SUBSTRING(scinameinput,LENGTH(CONCAT_WS(" ",unitind1, unitname1, unitind2, unitname2, unitind3))+2,
