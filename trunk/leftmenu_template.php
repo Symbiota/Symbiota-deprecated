@@ -25,16 +25,6 @@
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/checklists/index.php">
-			Species Lists
-		</a>
-	</div>
-	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/ident/index.php">
-			Identification Keys
-		</a>
-	</div>
-	<div class="menuitem">
 		<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist">
 			Dynamic Checklist
 		</a>

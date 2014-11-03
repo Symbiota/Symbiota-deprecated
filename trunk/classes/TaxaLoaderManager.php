@@ -8,6 +8,7 @@ class TaxaLoaderManager{
 	protected $uploadFileName;
 	protected $uploadTargetPath;
 	protected $taxAuthId = 1;
+	protected $errorStr = '';
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -715,7 +716,7 @@ class TaxaLoaderManager{
 			}
 			echo 'Done!</li>';
 
-			echo '<li>Creating taxonomic hierarchy... ';
+			echo '<li>Create parent and accepted links... ';
 			ob_flush();
 			flush();
 			$sql = 'INSERT IGNORE INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UpperTaxonomy, UnacceptabilityReason ) '.
@@ -829,44 +830,38 @@ class TaxaLoaderManager{
 	}
 
 	protected function buildHierarchy(){
-		$sqlHier = 'SELECT ts.tid FROM taxstatus ts WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.hierarchystr IS NULL)';
-		//echo $sqlHier;
-		$resultHier = $this->conn->query($sqlHier);
-		while($rowHier = $resultHier->fetch_object()){
-			$tid = $rowHier->tid;
-			$parentArr = Array();
-			$targetTid = $tid;
-			$parCnt = 0;
+		set_time_limit(600);
+		$status = true;
+		//Seed taxaenumtree table
+		$sql = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
+			'SELECT DISTINCT ts.tid, ts.parenttid, ts.taxauthid '. 
+			'FROM taxstatus ts '. 
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND ts.tid NOT IN(SELECT tid FROM taxaenumtree WHERE taxauthid = '.$this->taxAuthId.')';
+		//echo $sql;
+		if($this->conn->query($sql)){
+			//Continue building taxaenumtree  
+			$sql2 = 'SELECT DISTINCT e.tid, ts.parenttid, ts.taxauthid '. 
+				'FROM taxaenumtree e INNER JOIN taxstatus ts ON e.parenttid = ts.tid AND e.taxauthid = ts.taxauthid '.
+				'LEFT JOIN taxaenumtree e2 ON e.tid = e2.tid AND ts.parenttid = e2.parenttid AND e.taxauthid = e2.taxauthid '.
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND e2.tid IS NULL';
+			//echo $sql;
+			$cnt = 0;
+			$targetCnt = 0;
 			do{
-				$sqlParents = 'SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts '.
-					'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND ts.tid = '. $targetTid;
-				$targetTid = 0;
-				//echo "<div>".$sqlParents."</div>";
-				$resultParent = $this->conn->query($sqlParents);
-				if($rowParent = $resultParent->fetch_object()){
-					$parentTid = $rowParent->parenttid;
-					if($parentTid) {
-						$parentArr[$parentTid] = $parentTid;
-					}
-					$targetTid = $parentTid;
+				if(!$this->conn->query('INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.$sql2)){
+					$status = false;
+					$this->errorStr = 'ERROR building taxaenumtree: '.$this->conn->error;
 				}
-				$resultParent->close();
-				$parCnt++;
-				if($parCnt > 35) break;
-			}while($targetTid);
-			
-			//Add hierarchy string to taxstatus table
-			if($parentArr){
-				$sqlInsert = 'UPDATE taxstatus ts SET ts.hierarchystr = "'.implode(',',array_reverse($parentArr)).'" '.
-					'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND ts.tid = '.$tid;
-				//echo "<div>".$sqlInsert."</div>";
-				if(!$this->conn->query($sqlInsert)){
-					echo 'ERROR: '.$this->conn->error.'... ';
-				}
-			}
-			unset($parentArr);
+				$rs = $this->conn->query($sql2);
+				$targetCnt = $rs->num_rows;
+				$cnt++;
+			}while($status && $targetCnt && $cnt < 30);
 		}
-		$resultHier->close();
+		else{
+			$status = false;
+			$this->errorStr = 'ERROR seeding taxaenumtree: '.$this->conn->error;
+		}
+		return $status;
 	}
 	
 	protected function setUploadTargetPath(){
@@ -993,7 +988,7 @@ class TaxaLoaderManager{
 		
 		if($inStr){
 			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
-				echo $inStr.': '.mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true);
+				//echo $inStr.': '.mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true);
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
