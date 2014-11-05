@@ -102,7 +102,7 @@ class SpecUploadDwca extends SpecUploadBase{
 		if($zip->extractTo($targetPath)){
 			if(!file_exists($targetPath.'/meta.xml')){
 				$path = $this->locateBaseFolder($targetPath);
-				if($path) $this->baseFolderName .= '/'.$path;
+				if($path) $this->baseFolderName .= $path;
 			}
 		}
 		else{
@@ -212,13 +212,15 @@ class SpecUploadDwca extends SpecUploadBase{
 									}
 								}
 							}
-							$outputStr = 'DWCA details: encoding = '.$this->metaArr['occur']['encoding'].'; ';
-							$outputStr .= 'fieldsTerminatedBy: '.$this->metaArr['occur']['fieldsTerminatedBy'].'; ';
-							$outputStr .= 'linesTerminatedBy: '.$this->metaArr['occur']['linesTerminatedBy'].'; ';
-							$outputStr .= 'fieldsEnclosedBy: '.$this->metaArr['occur']['fieldsEnclosedBy'].'; ';
-							$outputStr .= 'ignoreHeaderLines: '.$this->metaArr['occur']['ignoreHeaderLines'].'; ';
-							$outputStr .= 'rowType: '.$this->metaArr['occur']['rowType'];
-							$this->outputMsg($outputStr);
+							if($this->verboseMode == 2){
+								$outputStr = 'DWCA details: encoding = '.$this->metaArr['occur']['encoding'].'; ';
+								$outputStr .= 'fieldsTerminatedBy: '.$this->metaArr['occur']['fieldsTerminatedBy'].'; ';
+								$outputStr .= 'linesTerminatedBy: '.$this->metaArr['occur']['linesTerminatedBy'].'; ';
+								$outputStr .= 'fieldsEnclosedBy: '.$this->metaArr['occur']['fieldsEnclosedBy'].'; ';
+								$outputStr .= 'ignoreHeaderLines: '.$this->metaArr['occur']['ignoreHeaderLines'].'; ';
+								$outputStr .= 'rowType: '.$this->metaArr['occur']['rowType'];
+								$this->outputMsg($outputStr);
+							}
 						}
 					}
 				}
