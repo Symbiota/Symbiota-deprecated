@@ -247,19 +247,20 @@ class OccurrenceUtilities {
 						}
 					}
 					//Double check to see if infraSpecificEpithet is still embedded in author due initial lack of taxonRank indicator
-					if(!array_key_exists('unitname3',$retArr)){
-						if(preg_match('/\s+([a-z]{4,})([\sA-Z]*.*)/',$retArr['author'],$m) || preg_match('/^([a-z]{4,})([\sA-Z]*.*)/',$retArr['author'],$m)){
+					if(!$retArr['unitname3'] && $retArr['author']){
+						$arr = explode(' ',$retArr['author']);
+						$firstWord = array_shift($arr);
+						if($firstWord){
 							$sql = 'SELECT unitind3 FROM taxa '.
-								'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$m[1].'" '.
-								'ORDER BY unitind3 DESC';
+								'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$firstWord.'" ';
 							$con = MySQLiConnectionFactory::getCon('readonly');
 							$rs = $con->query($sql);
 							if($r = $rs->fetch_object()){
-								$retArr['unitname3'] = $m[1];
 								$retArr['unitind3'] = $r->unitind3;
-								$retArr['author'] = $m[2];
+								$retArr['unitname3'] = $firstWord;
+								$retArr['author'] = implode(' ',$arr);
 							}
-							$rs->close();
+							$rs->free();
 							$con->close();
 						}
 					}
@@ -375,16 +376,16 @@ class OccurrenceUtilities {
 		$lngDeg = 'null';$lngMin = 0;$lngSec = 0;$lngEW = 'W';
 		//Grab lat deg and min
 		if(!$target || $target == 'LL'){
-			if(preg_match('/([NSns]{0,1})(-{0,1}\d{1,2}\.{1}\d+)\D{0,1}\s{0,1}([NSns]{0,1})\D{0,1}\s*([EWew]{0,1})(-{0,1}\d{1,3}\.{1}\d+)\D{0,1}\s{0,1}([EWew]{0,1})\D*/',$inStr,$m)){
+			if(preg_match('/([\sNSns]{0,1})(-?\d{1,2}\.{1}\d+)\D{0,1}\s{0,1}([NSns]{0,1})\D{0,1}([\sEWew]{1})(-?\d{1,4}\.{1}\d+)\D{0,1}\s{0,1}([EWew]{0,1})\D*/',$inStr,$m)){
 				//Decimal degree format
 				$retArr['lat'] = $m[2];
 				$retArr['lng'] = $m[5];
 				$latDir = $m[3];
-				if(!$latDir && $m[1]) $latDir = $m[1];
-				if($retArr['lat'] > 0 && $latDir && ($latDir = 'S' || $latDir = 's')) $retArr['lat'] = -1*$retArr['lat'];
+				if(!$latDir && $m[1]) $latDir = trim($m[1]);
+				if($retArr['lat'] > 0 && $latDir && ($latDir == 'S' || $latDir == 's')) $retArr['lat'] = -1*$retArr['lat'];
 				$lngDir = $m[6];
-				if(!$lngDir && $m[4]) $lngDir = $m[4];
-				if($retArr['lng'] > 0 && $latDir && ($lngDir = 'W' || $lngDir = 'w')) $retArr['lng'] = -1*$retArr['lng'];
+				if(!$lngDir && $m[4]) $lngDir = trim($m[4]);
+				if($retArr['lng'] > 0 && $latDir && ($lngDir == 'W' || $lngDir == 'w')) $retArr['lng'] = -1*$retArr['lng'];
 			}
 			elseif(preg_match('/(\d{1,2})\D{1,3}\s{0,2}(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*)/i',$inStr,$m)){
 				//DMS format
