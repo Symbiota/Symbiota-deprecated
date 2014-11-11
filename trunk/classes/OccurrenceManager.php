@@ -152,8 +152,6 @@ class OccurrenceManager{
 					//Class, order, or other higher rank
 					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
-						//$sql2 = 'SELECT DISTINCT t.sciname FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
-						//	'WHERE ts.taxauthid = 1 AND t.rankid = 140 AND (ts.hierarchystr LIKE "%,'.$r1->tid.',%" OR ts.parenttid = '.$r1->tid.') ';
 						$sqlWhereTaxa = 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
 					}
 				}
@@ -165,14 +163,6 @@ class OccurrenceManager{
 						}
 						if(array_key_exists("tid",$valueArray)){
 							$tidArr = $valueArray['tid'];
-							/*
-							$hSqlStr = '';
-							foreach($tidArr as $tid){
-								$hSqlStr .= 'OR (ts.hierarchystr LIKE "%,'.$tid.',%") ';
-							}
-							$sql = 'SELECT DISTINCT ts.family FROM taxstatus ts '.
-								'WHERE ts.taxauthid = 1 AND ('.substr($hSqlStr,3).')';
-							*/
 							$sql = 'SELECT DISTINCT t.sciname '.
 								'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
 								'WHERE t.rankid = 140 AND e.taxauthid = 1 AND e.parenttid IN('.implode(',',$tidArr).')';
@@ -190,7 +180,7 @@ class OccurrenceManager{
 								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
 							}
 						}
-						echo $sqlWhereTaxa; exit;
+						//echo $sqlWhereTaxa; exit;
 					}
 					else{
 						if($this->taxaSearchType == 2 || ($this->taxaSearchType == 1 && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){

@@ -25,13 +25,16 @@ class TPImageEditorManager extends TPEditorManager{
 	public function getImages(){
 		$imageArr = Array();
 		$tidArr = Array($this->tid);
-		$sql1 = 'SELECT DISTINCT tid FROM taxstatus '.
-			'WHERE taxauthid = 1 AND tid = tidaccepted AND ((hierarchystr LIKE "%,'.$this->tid.',%") OR (hierarchystr LIKE "%,'.$this->tid.'"))';
-		$rs1 = $this->taxonCon->query($sql1);
-		while($r1 = $rs1->fetch_object()){
-			$tidArr[] = $r1->tid;
+		if($this->rankId == 220){
+			$sql1 = 'SELECT DISTINCT tid '.
+				'FROM taxstatus '.
+				'WHERE (taxauthid = 1) AND (tid = tidaccepted) AND (parenttid = '.$this->tid.')';
+			$rs1 = $this->taxonCon->query($sql1);
+			while($r1 = $rs1->fetch_object()){
+				$tidArr[] = $r1->tid;
+			}
+			$rs1->free();
 		}
-		$rs1->close();
 		
 		$tidStr = implode(",",$tidArr);
 		$this->imageArr = Array();
@@ -43,7 +46,7 @@ class TPImageEditorManager extends TPEditorManager{
 			'INNER JOIN taxa t ON ti.tid = t.tid '.
 			'WHERE ts.taxauthid = 1 AND (ts.tidaccepted IN('.$tidStr.')) AND ti.SortSequence < 500 '.
 			'ORDER BY ti.sortsequence'; 
-		//echo $sql;
+		//echo $sql; exit;
 		$result = $this->taxonCon->query($sql);
 		$imgCnt = 0;
 		while($row = $result->fetch_object()){

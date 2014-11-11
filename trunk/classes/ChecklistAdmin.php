@@ -286,18 +286,20 @@ class ChecklistAdmin {
 
 	public function addEditor($u){
 		$statusStr = '';
-		$sql = 'INSERT INTO userroles(uid,role,tablename,tablepk) '.
-			'VALUES('.$u.',"ClAdmin","fmchecklists",'.$this->clid.')';
-		if(!$this->conn->query($sql)){
-			$statusStr = 'ERROR: unable to add editor; SQL: '.$this->conn->error;
+		if(is_numeric($u) && $this->clid){
+			$sql = 'INSERT INTO userroles(uid,role,tablename,tablepk) '.
+				'VALUES('.$u.',"ClAdmin","fmchecklists",'.$this->clid.')';
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR: unable to add editor; SQL: '.$this->conn->error;
+			}
+			/*
+			$sql = 'INSERT INTO userpermissions(uid,pname) '.
+				'VALUES('.$u.',"ClAdmin-'.$this->clid.'")';
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR: unable to add editor; SQL: '.$this->conn->error;
+			}
+			*/
 		}
-		/*
-		$sql = 'INSERT INTO userpermissions(uid,pname) '.
-			'VALUES('.$u.',"ClAdmin-'.$this->clid.'")';
-		if(!$this->conn->query($sql)){
-			$statusStr = 'ERROR: unable to add editor; SQL: '.$this->conn->error;
-		}
-		*/
 		return $statusStr;
 	}
 

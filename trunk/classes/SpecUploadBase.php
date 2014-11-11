@@ -1353,7 +1353,9 @@ class SpecUploadBase extends SpecUpload{
 			$sql = "INSERT INTO uploadspectemp(collid".$sqlFragments['fieldstr'].") ".
 				"VALUES(".$this->collId.$sqlFragments['valuestr'].")";
 			//echo "<div>SQL: ".$sql."</div>";
-			
+			//$this->conn->query('SET autocommit=0');
+			//$this->conn->query('SET unique_checks=0');
+			//$this->conn->query('SET foreign_key_checks=0');
 			if($this->conn->query($sql)){
 				$this->transferCount++;
 				if($this->transferCount%1000 == 0) $this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Running count: '.$this->transferCount.'</li>');
@@ -1368,6 +1370,9 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg("<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>");
 				$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
 			}
+			//$this->conn->query('COMMIT');
+			//$this->conn->query('SET unique_checks=1');
+			//$this->conn->query('SET foreign_key_checks=1');
 		}
 	}
 

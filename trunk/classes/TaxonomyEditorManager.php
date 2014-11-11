@@ -24,7 +24,6 @@ class TaxonomyEditorManager{
 	private $parentNameFull;
 	private $source;
 	private $notes;
-	private $hierarchyStr;
 	private $hierarchyArr;
 	private $securityStatus;
 	private $isAccepted = -1;			// 1 = accepted, 0 = not accepted, -1 = not assigned, -2 in conflict
@@ -61,9 +60,8 @@ class TaxonomyEditorManager{
 			$this->source = $r->source;
 			$this->notes = $r->notes;
 			$this->securityStatus = $r->securitystatus;
-			
-			
-			$sqlTs = "SELECT ts.parenttid, ts.hierarchystr, ts.tidaccepted, ts.unacceptabilityreason, ".
+
+			$sqlTs = "SELECT ts.parenttid, ts.tidaccepted, ts.unacceptabilityreason, ".
 				"ts.uppertaxonomy, ts.family, t.sciname, t.author, t.notes, ts.sortsequence ".
 				"FROM taxstatus ts INNER JOIN taxa t ON ts.tidaccepted = t.tid ".
 				"WHERE (ts.taxauthid = ".$this->taxAuthId.") AND (ts.tid = ".$this->tid.')';
@@ -73,7 +71,6 @@ class TaxonomyEditorManager{
 				$this->parentTid = $row->parenttid;
 				$this->upperTaxon = $row->uppertaxonomy;
 				$this->family = $row->family;
-				$this->hierarchyStr = $row->hierarchystr;
 				
 				//Deal with TaxaStatus table stuff
 				do{
@@ -103,7 +100,7 @@ class TaxonomyEditorManager{
 			}
 			else{
 				//Name has become unlinked to taxstatus table, thus we need to remap
-				$sqlPar = 'SELECT t.tid, ts.hierarchystr, ts.uppertaxonomy, ts.family '.
+				$sqlPar = 'SELECT t.tid, ts.uppertaxonomy, ts.family '.
 					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 					'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ';
 				if($this->rankId > 220){
@@ -120,16 +117,14 @@ class TaxonomyEditorManager{
 				}
 				$rsPar = $this->conn->query($sqlPar);
 				if($rPar = $rsPar->fetch_object()){
-					$sqlIns = 'INSERT INTO taxstatus(tid, tidaccepted, taxauthid, parenttid, uppertaxonomy, family, hierarchystr) '.
+					$sqlIns = 'INSERT INTO taxstatus(tid, tidaccepted, taxauthid, parenttid, uppertaxonomy, family) '.
 						'VALUES('.$this->tid.','.$this->tid.','.$this->taxAuthId.','.$rPar->tid.','.
 						($rPar->uppertaxonomy?'"'.$rPar->uppertaxonomy.'"':'NULL').','.
-						($rPar->family?'"'.$rPar->family.'"':'NULL').','.
-						($rPar->hierarchystr?'"'.$rPar->hierarchystr.'"':'NULL').')';
+						($rPar->family?'"'.$rPar->family.'"':'NULL').')';
 					if($this->conn->query($sqlIns)){
 						$this->parentTid = $rPar->tid;
 						$this->upperTaxon = $rPar->uppertaxonomy;
 						$this->family = $rPar->family;
-						$this->hierarchyStr = $rPar->hierarchystr;
 						$this->isAccepted = 1;
 					}
 				}
@@ -279,30 +274,29 @@ class TaxonomyEditorManager{
 	}
 	
 	public function submitAddAcceptedLink($tid, $tidAcc, $deleteOther = true){
-		$upperTax = "";$family = "";$parentTid = 0;$hierarchyStr = "";
+		$upperTax = "";$family = "";$parentTid = 0;
 		$statusStr = '';
 		$tid = $tid;
 		if(is_numeric($tid)){
-			$sqlFam = 'SELECT ts.uppertaxonomy, ts.family, ts.parenttid, ts.hierarchystr '.
+			$sqlFam = 'SELECT ts.uppertaxonomy, ts.family, ts.parenttid '.
 				'FROM taxstatus ts WHERE (ts.tid = '.$tid.') AND (ts.taxauthid = '.$this->taxAuthId.')';
 			$rs = $this->conn->query($sqlFam);
 			if($row = $rs->fetch_object()){
 				$upperTax = $row->uppertaxonomy;
 				$family = $row->family;
 				$parentTid = $row->parenttid;
-				$hierarchyStr = $row->hierarchystr;
 			}
-			$rs->close();
+			$rs->free();
 			
 			if($deleteOther){
 				$sqlDel = "DELETE FROM taxstatus WHERE (tid = ".$tid.") AND (taxauthid = ".$this->taxAuthId.')';
 				$this->conn->query($sqlDel);
 			}
-			$sql = "INSERT INTO taxstatus (tid,tidaccepted,taxauthid,uppertaxonomy,family,parenttid,hierarchystr) ".
+			$sql = "INSERT INTO taxstatus (tid,tidaccepted,taxauthid,uppertaxonomy,family,parenttid) ".
 				"VALUES (".$tid.", ".$tidAcc.", ".$this->taxAuthId.",".
 				($upperTax?"\"".$upperTax."\"":"NULL").",".
 				($family?"\"".$family."\"":"NULL").",".
-				$parentTid.",'".$hierarchyStr."') ";
+				$parentTid.") ";
 			//echo $sql;
 			if(!$this->conn->query($sql)){
 				$statusStr = 'ERROR editing taxon: '.$this->conn->error;
@@ -487,21 +481,7 @@ class TaxonomyEditorManager{
 				$sql3b = $sql3.'VALUES('.$tid.','.$pid.','.$this->taxAuthId.')';
 				$this->conn->query($sql3b);
 			}
-
-			//Old code temporary needed, can be removed once taxaenumtree is fully implimented
-			//Add hierarchy string to taxa table
-			//First, reset hierarchy for all children
-			if($trueHierarchyStr && $this->hierarchyStr){
-				$sqlUpdate = 'UPDATE taxstatus SET hierarchystr = REPLACE(hierarchystr,"'.$this->hierarchyStr.'","'.$trueHierarchyStr.'") '.
-					'WHERE (taxauthid = '.$this->taxAuthId.') AND (hierarchystr LIKE "'.$this->hierarchyStr.','.$tid.'%")';
-				$this->conn->query($sqlUpdate);
-			}
-			//Reset hierarchy for target taxon
-			$sqlUpdate = 'UPDATE taxstatus SET hierarchystr = "'.$trueHierarchyStr.'" '.
-				'WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$tid.')';
-			$this->conn->query($sqlUpdate);
 		}
-
 
 		if($this->rankId > 140){
 			//Update family in taxstatus table
@@ -518,9 +498,10 @@ class TaxonomyEditorManager{
 			if($rFam2 = $rsFam2->fetch_object()){
 				if($newFam <> $rFam2->family){
 					//reset family of target and all it's children
-					$sql = 'UPDATE taxstatus SET family = '.($newFam?'"'.$this->cleanInStr($newFam).'"':'Not assigned').' '.
-						'WHERE (taxauthid = '.$this->taxAuthId.') AND '.
-						'((tid = '.$tid.') OR (hierarchystr LIKE "%,'.$tid.'") OR (hierarchystr LIKE "%,'.$tid.',%" ))';
+					$sql = 'UPDATE taxstatus ts INNER JOIN taxaenumtree e ON ts.tid = e.tid '.
+						'SET ts.family = '.($newFam?'"'.$this->cleanInStr($newFam).'"':'Not assigned').' '.
+						'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (e.taxauthid = '.$this->taxAuthId.') AND '.
+						'((ts.tid = '.$tid.') OR (e.parenttid = '.$tid.'))';
 					//echo $sql;
 					$this->conn->query($sql);
 				}
@@ -566,7 +547,7 @@ class TaxonomyEditorManager{
 			",".($dataArr["source"]?"\"".$this->cleanInStr($dataArr["source"])."\"":"NULL").",".
 			($dataArr["notes"]?"\"".$this->cleanInStr($dataArr["notes"])."\"":"NULL").
 			",".$this->cleanInStr($dataArr["securitystatus"]).")";
-		echo "sqlTaxa: ".$sqlTaxa;
+		//echo "sqlTaxa: ".$sqlTaxa;
 		if($this->conn->query($sqlTaxa)){
 			$tid = $this->conn->insert_id;
 		 	//Load accepteance status into taxstatus table
@@ -586,11 +567,11 @@ class TaxonomyEditorManager{
 				}
 				
 				//Load new record into taxstatus table
-				$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
+				$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason) ".
 					"VALUES (".$tid.",".$tidAccepted.",".$this->taxAuthId.",".($family?"\"".$this->cleanInStr($family)."\"":"NULL").",".
 					($dataArr["uppertaxonomy"]?"\"".$this->cleanInStr($dataArr["uppertaxonomy"])."\"":"NULL").
 					",".($parTid?$parTid:"NULL").",\"".
-					$this->cleanInStr($dataArr["unacceptabilityreason"])."\",\"".$hierarchy."\") ";
+					$this->cleanInStr($dataArr["unacceptabilityreason"])."\") ";
 				//echo "sqlTaxStatus: ".$sqlTaxStatus;
 				if(!$this->conn->query($sqlTaxStatus)){
 					return "ERROR: Taxon loaded into taxa, but failed to load taxstatus: sql = ".$sqlTaxa;
@@ -871,13 +852,12 @@ class TaxonomyEditorManager{
 
 		//Get taxon status details so if taxa removal fails, we can still initiate old name
 		$taxStatusArr = array();
-		$sqlTS = 'SELECT tidaccepted, parenttid, hierarchystr, uppertaxonomy, family, unacceptabilityreason, notes, sortsequence '.
+		$sqlTS = 'SELECT tidaccepted, parenttid, uppertaxonomy, family, unacceptabilityreason, notes, sortsequence '.
 			'FROM taxstatus WHERE tid = '.$this->tid;
 		$rs = $this->conn->query($sqlTS);
 		if($r = $rs->fetch_object()){
 			$taxStatusArr[0]['tidaccepted'] = $r->tidaccepted;
 			$taxStatusArr[0]['parenttid'] = $r->parenttid;
-			$taxStatusArr[0]['hierarchystr'] = $r->hierarchystr;
 			$taxStatusArr[0]['uppertaxonomy'] = $r->uppertaxonomy;
 			$taxStatusArr[0]['family'] = $r->family;
 			$taxStatusArr[0]['unacceptabilityreason'] = $r->unacceptabilityreason;
@@ -895,8 +875,8 @@ class TaxonomyEditorManager{
 			if(!$this->conn->query($sql)){
 				$statusStrFinal = 'ERROR attempting to delete taxon: '.$this->conn->error.'<br/>';
 				//Reinstate taxstatus record
-				$tsNewSql = 'INSERT INTO taxstatus(tid,taxauthid,tidaccepted, parenttid, hierarchystr, uppertaxonomy, family, unacceptabilityreason, notes, sortsequence) '.
-					'VALUES('.$this->tid.','.$this->taxAuthId.','.$taxStatusArr[0]['tidaccepted'].','.$taxStatusArr[0]['parenttid'].',"'.$taxStatusArr[0]['hierarchystr'].'","'.
+				$tsNewSql = 'INSERT INTO taxstatus(tid,taxauthid,tidaccepted, parenttid, uppertaxonomy, family, unacceptabilityreason, notes, sortsequence) '.
+					'VALUES('.$this->tid.','.$this->taxAuthId.','.$taxStatusArr[0]['tidaccepted'].','.$taxStatusArr[0]['parenttid'].',"'.
 					$taxStatusArr[0]['uppertaxonomy'].'","'.$taxStatusArr[0]['family'].'","'.$taxStatusArr[0]['unacceptabilityreason'].'","'.
 					$taxStatusArr[0]['unacceptabilityreason'].'",'.$taxStatusArr[0]['sortsequence'].')';
 				$this->conn->query($tsNewSql);
@@ -1012,9 +992,6 @@ class TaxonomyEditorManager{
 		$sql = 'SELECT t.tid, t.sciname FROM taxa t ';
 		if($this->hierarchyArr){
 			$sql .= 'WHERE (t.tid IN('.implode(',',$this->hierarchyArr).')) ';
-		}
-		elseif($this->hierarchyStr){
-			$sql .= 'WHERE (t.tid IN('.$this->hierarchyStr.')) ';
 		}
 		else{
 			return $retArr;

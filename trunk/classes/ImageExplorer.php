@@ -272,9 +272,12 @@ class ImageExplorer{
 	//Outer query gets all synonyms for input tid and their children
 	//Return should be all children and their synonyms 
 	private function getChildSql($inTid){
+		$sqlInner = 'SELECT DISTINCT ts.tid '.
+			'FROM taxstatus ts INNER JOIN taxaenumtree e ON ts.tid = e.tid '.
+			'WHERE ts.taxauthid = 1 AND e.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
+			'AND (e.parenttid = '.$inTid.' OR ts.parenttid = '.$inTid.') ';
 		$sql = 'SELECT DISTINCT tid FROM taxstatus '. 
-			'WHERE (taxauthid = 1) AND (tidaccepted = '.$inTid.' OR tidaccepted IN(SELECT tid FROM taxstatus '. 
-			'WHERE taxauthid = 1 AND tid = tidaccepted AND (hierarchystr LIKE "%,'.$inTid.',%" OR parenttid = "'.$inTid.'")))';
+			'WHERE (taxauthid = 1) AND (tidaccepted = '.$inTid.' OR tidaccepted IN('.$sqlInner.'))';
 		return $sql;
 	}
 	
@@ -282,9 +285,10 @@ class ImageExplorer{
 		//Grab all accepted children
 		$childArr = array();
 		foreach($inTidArr as $tid){
-			$sql = 'SELECT tid FROM taxstatus '.
-				'WHERE taxauthid = 1 AND tid = tidaccepted '.
-				'AND (hierarchystr LIKE "%,'.$tid.',%" OR parenttid = '.$tid.') ';
+			$sql = 'SELECT DISTINCT ts.tid '.
+				'FROM taxstatus ts INNER JOIN taxaenumtree e ON ts.tid = e.tid '.
+				'WHERE ts.taxauthid = 1 AND e.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
+				'AND (e.parenttid = '.$tid.' OR ts.parenttid = '.$tid.') ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$childArr[] = $r->tid;
