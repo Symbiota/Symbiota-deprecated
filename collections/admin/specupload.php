@@ -178,6 +178,63 @@ $duManager->loadFieldMap();
 			return true;
 		}
 
+		function verifyMappingForm(f){
+			var sfArr = [];
+			var idSfArr = [];
+			var imSfArr = [];
+			var tfArr = [];
+			var idTfArr = [];
+			var imTfArr = [];
+			for(var i=0;i<f.length;i++){
+				var obj = f.elements[i];
+				if(obj.name == "sf[]"){
+					if(sfArr.indexOf(obj.value) > 0){
+						alert("ERROR: Source field names must be unique (duplicate field: "+obj.value+")");
+						return false;
+					}
+					sfArr[sfArr.length] = obj.value;
+				}
+				else if(obj.name == "ID-sf[]"){
+					if(idSfArr.indexOf(obj.value) > 0){
+						alert("ERROR: Source field names must be unique (Identification: "+obj.value+")");
+						return false;
+					}
+					idSfArr[idSfArr.length] = obj.value;
+				}
+				else if(obj.name == "IM-sf[]"){
+					if(imSfArr.indexOf(obj.value) > 0){
+						alert("ERROR: Source field names must be unique (Image: "+obj.value+")");
+						return false;
+					}
+					imSfArr[imSfArr.length] = obj.value;
+				}
+				else if(obj.value != "" && obj.value != "unmapped"){
+					if(obj.name == "tf[]"){
+						if(tfArr.indexOf(obj.value) > 0){
+							alert("ERROR: Can't map to the same target field more than once ("+obj.value+")");
+							return false;
+						}
+						tfArr[tfArr.length] = obj.value;
+					}
+					else if(obj.name == "ID-tf[]"){
+						if(idTfArr.indexOf(obj.value) > 0){
+							alert("ERROR: Can't map to the same target field more than once (Identification: "+obj.value+")");
+							return false;
+						}
+						idTfArr[idTfArr.length] = obj.value;
+					}
+					else if(obj.name == "IM-tf[]"){
+						if(imTfArr.indexOf(obj.value) > 0){
+							alert("ERROR: Can't map to the same target field more than once (Images: "+obj.value+")");
+							return false;
+						}
+						imTfArr[imTfArr.length] = obj.value;
+					}
+				}
+			}
+			return true;
+		}
+
 		function pkChanged(selObj){
 			document.getElementById('pkdiv').style.display='block';
 			document.getElementById('mdiv').style.display='none';
@@ -333,7 +390,7 @@ $duManager->loadFieldMap();
 						$metaArr = $duManager->getMetaArr();
 						if(isset($metaArr['occur'])){
 							?>
-							<form name="initform" action="specupload.php" method="post" onsubmit="">
+							<form name="dwcauploadform" action="specupload.php" method="post" onsubmit="">
 								<fieldset style="width:95%;">
 									<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?></legend>
 									<div style="margin:10px;">
@@ -445,7 +502,7 @@ $duManager->loadFieldMap();
 					if($duManager->getCollInfo("managementtype") == 'Live Data') $isSnapshot = false;
 					$duManager->analyzeUpload();
 					?>
-					<form name="initform" action="specupload.php" method="post" onsubmit="">
+					<form name="filemappingform" action="specupload.php" method="post" onsubmit="return verifyMappingForm(this)">
 						<fieldset style="width:95%;">
 							<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?></legend>
 							<?php 
