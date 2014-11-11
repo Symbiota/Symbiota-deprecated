@@ -38,31 +38,41 @@ class KeyEditorManager{
 			$this->taxonName = $t;
 		}
 		if($this->taxonName){
-			$sql = "SELECT t.TID, ts.Family, ts.ParentTID, ts.hierarchystr, t.RankId FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
+			$sql = "SELECT t.TID, ts.Family, ts.ParentTID, t.RankId FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 				"WHERE ts.taxauthid = 1 AND (t.SciName = '".$this->taxonName."')";
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$this->tid = $row->TID;
 				$this->family = $row->Family;
 				$this->parentTid = $row->ParentTID;
-				$this->hierarchy = $row->hierarchystr;
 				$this->rankId = $row->RankId;
 		    }
-		}elseif($this->tid){
-			$sql = "SELECT t.SciName, ts.Family, ts.ParentTID, ts.hierarchystr, t.RankId ".
+			$result->free();
+		}
+		elseif($this->tid){
+			$sql = "SELECT t.SciName, ts.Family, ts.ParentTID, t.RankId ".
 				"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid WHERE ts.taxauthid = 1 AND (t.TID = ".$this->tid.')';
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$this->taxonName = $row->SciName;
 				$this->family = $row->Family;
 				$this->parentTid = $row->ParentTID;
-				$this->hierarchy = $row->hierarchystr;
 				$this->rankId = $row->RankId;
 		    }
+			$result->free();
 		}
-		$result->close();
+		//Set parent hierarchy
+		 
+		$hStr = '';
+		$sql = 'SELECT parenttid FROM taxaenumtree WHERE taxauthid = 1 AND (tid = '.$this->tid.')';
+		$rs = $this->con->query($sql);
+		while($r = $rs->fetch_object()){
+			$hStr .= ','.$r->parenttid;
+	    }
+		$rs->free();
+		$this->hierarchy = trim($hStr,',');
 	}
-	
+
 	function getTaxonName(){
 		return $this->taxonName;
 	}

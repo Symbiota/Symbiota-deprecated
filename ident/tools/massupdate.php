@@ -187,8 +187,8 @@ include($serverRoot.'/header.php');
 				 			<option value="">--------------------------</option>
 					  		<?php 
 					  		$selectList = $muManager->getTaxaQueryList();
-				  			foreach($selectList as $value){
-				  				echo "<option ".($value==$taxonFilter?"SELECTED":"").">$value</option>\n";
+				  			foreach($selectList as $tid => $scinameValue){
+				  				echo '<option value="'.$tid.'" '.($tid==$taxonFilter?"SELECTED":"").'">'.$scinameValue."</option>\n";
 				  			}
 					  		?>
 						</select>
@@ -240,40 +240,44 @@ include($serverRoot.'/header.php');
 		 		$count = 0;
 		 		//Array(familyName => Array(SciName => Array("TID" => TIDvalue,"csArray" => Array(csValues => Inheritance))))
 		 		$tList = $muManager->getTaxaList();
+		 		$csArr = array();
+				if(isset($tList['cs'])){
+					$csArr = $tList['cs'];
+					unset($tList['cs']);
+				}
 				ksort($tList);
-		 		foreach($tList as $fam => $sciNameArr){
+				foreach($tList as $fam => $sciNameArr){
 					//Show Family first
-		 			if(array_key_exists($fam,$sciNameArr)){
-		  				$famArr = $sciNameArr[$fam];
-		  				?>
+					if(isset($sciNameArr[$fam])){
+						$famTid = $sciNameArr[$fam];
+						unset($sciNameArr[$fam]);
+						?>
 						<tr>
 							<td>
 								<span style='font-weight:bold;'>
-									<a href="massupdate.php?clf=<?php echo $clFilter.'&tf='.$fam.'&cid='.$cidValue.'&proj='.$projValue.'&lang='.$langValue; ?>">
-										<?php echo $fam; ?>
+									<a href="massupdate.php?clf=<?php echo $clFilter.'&tf='.$famTid.'&cid='.$cidValue.'&proj='.$projValue.'&lang='.$langValue; ?>">
+										<b><?php echo $fam; ?></b>
 									</a>
-									<a href='editor.php?taxon=<?php echo $fam; ?>&action=Get+Character+Info' target='_blank'>
+									<a href='editor.php?taxon=<?php echo $famTid; ?>&action=Get+Character+Info' target='_blank'>
 										<img src="../../images/edit.png" />
 									</a>
 								</span>
 							</td>
 							<?php 
-							$t = $famArr["TID"];
-							$csValues = $famArr["csArray"];
 							foreach($sList as $cs => $csName){
 								$isSelected = false;
 								$isInherited = false;
-								if(array_key_exists($cs,$csValues)){
+								if(isset($csArr[$famTid][$cs])){
 									$isSelected = true;
-									if($csValues[$cs]) $isInherited = true;
+									if($csArr[$famTid][$cs]) $isInherited = true;
 								}
 								if($isSelected && !$isInherited){
 									//State is true and not inherited for this taxon
-									$jsStr = "removeAttr('".$t."-".$cs."');";
+									$jsStr = "removeAttr('".$famTid."-".$cs."');";
 								}
 								else{
 									//State is false for this taxon or it is inherited
-									$jsStr = "addAttr('".$t."-".$cs."');";	
+									$jsStr = "addAttr('".$famTid."-".$cs."');";	
 								}
 								echo "<td align='center' width='15'>";
 								echo '<input type="checkbox" name="csDisplay" onclick="'.$jsStr.'" '.($isSelected && !$isInherited?'CHECKED':'').' title="'.$csName.'"/>'.($isInherited?'(I)':'');
@@ -282,76 +286,72 @@ include($serverRoot.'/header.php');
 							?>
 						</tr>
 						<?php 
-						unset($sciNameArr[$fam]);
-		 			}
-
-					//Go through taxa names and list
-					ksort($sciNameArr);
-					//$cnt = 1;
-					foreach($sciNameArr as $sciName => $sciArr){
-						$display = $sciArr["display"];
-						$trClassStr = '';
-						/*
-						if(strpos($display,'10px')){
-							if($cnt % 2) $trClassStr = 'class="alt"';
-							$cnt++;
-						}
-						else{
-							$cnt = 1;
-						}
-						*/
-						$t = $sciArr["TID"];
-						?>
-						<tr <?php echo $trClassStr; ?>>
-							<td>
-								<?php echo $display; ?> 
-								<a href='editor.php?taxon=<?php echo $sciName; ?>&action=Get+Character+Info' target='_blank'>
-									<img src="../../images/edit.png" />
-								</a>
-							</td>
-							<?php 
-							$csValues = $sciArr["csArray"];
-							foreach($sList as $cs => $csName){
-								$isSelected = false;
-								$isInherited = false;
-								if(array_key_exists($cs,$csValues)){
-									$isSelected = true;
-									if($csValues[$cs]) $isInherited = true;
-								}
-								if($isSelected && !$isInherited){
-									//State is true and not inherited for this taxon
-									$jsStr = "removeAttr('".$t."-".$cs."');";
-								}
-								else{
-									//State is false for this taxon or it is inherited
-									$jsStr = "addAttr('".$t."-".$cs."');";
-								}
-								?>
-								<td width='10' align='center' style="white-space:nowrap;">
-									<?php 
-									echo '<input type="checkbox" name="csDisplay" onclick="'.$jsStr.'" '.($isSelected && !$isInherited?'CHECKED':'').' title="'.$csName.'" />';
-									if($isInherited) echo $inheritStr;
-									?>
+	
+						//Go through taxa names and list
+						ksort($sciNameArr);
+						//$cnt = 1;
+						foreach($sciNameArr as $sciName => $tid){
+							$trClassStr = '';
+							/*
+							if(strpos($display,'10px')){
+								if($cnt % 2) $trClassStr = 'class="alt"';
+								$cnt++;
+							}
+							else{
+								$cnt = 1;
+							}
+							*/
+							?>
+							<tr <?php echo $trClassStr; ?>>
+								<td>
+									<span style="margin-left:<?php echo (strpos($sciName,' ')?'20px':'10px;font-weight:bold;'); ?>;"><i><?php echo $sciName; ?></i></span> 
+									<a href='editor.php?taxon=<?php echo $tid; ?>&action=Get+Character+Info' target='_blank'>
+										<img src="../../images/edit.png" />
+									</a>
 								</td>
 								<?php 
-							}
-							?>
-						</tr>
-						<?php 
-						//Occationally show column names and submit button
-						$count++;
-						if($count%13 == 0){
-							?>
-							<tr>
-								<td align='right' colspan='<?php echo (count($sList)+1); ?>'>
-									<input type='submit' name='action' value='Save Changes' onclick='submitAttrs();' />
-								</td>
+								foreach($sList as $cs => $csName){
+									$isSelected = false;
+									$isInherited = false;
+									if(isset($csArr[$tid][$cs])){
+										$isSelected = true;
+										if($csArr[$tid][$cs]) $isInherited = true;
+									}
+									if($isSelected && !$isInherited){
+										//State is true and not inherited for this taxon
+										$jsStr = "removeAttr('".$tid."-".$cs."');";
+									}
+									else{
+										//State is false for this taxon or it is inherited
+										$jsStr = "addAttr('".$tid."-".$cs."');";
+									}
+									?>
+									<td width='10' align='center' style="white-space:nowrap;">
+										<?php 
+										echo '<input type="checkbox" name="csDisplay" onclick="'.$jsStr.'" '.($isSelected && !$isInherited?'CHECKED':'').' title="'.$csName.'" />';
+										if($isInherited) echo $inheritStr;
+										?>
+									</td>
+									<?php 
+								}
+								?>
 							</tr>
 							<?php 
-		 					echo $headerStr;
+							//Occationally show column names and submit button
+							$count++;
+							if($count%13 == 0){
+								?>
+								<tr>
+									<td align='right' colspan='<?php echo (count($sList)+1); ?>'>
+										<input type='submit' name='action' value='Save Changes' onclick='submitAttrs();' />
+									</td>
+								</tr>
+								<?php 
+			 					echo $headerStr;
+							}
 						}
 					}
-		 		}
+				}
 				?>
 				<tr>
 					<td align='right' colspan='<?php echo (count($sList)+1); ?>'>

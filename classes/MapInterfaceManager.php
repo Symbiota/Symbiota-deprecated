@@ -118,11 +118,10 @@ class MapInterfaceManager{
 			//Build sql
 			foreach($this->taxaArr as $key => $valueArray){
 				if($this->taxaSearchType == 4){
+					//Class, order, or other higher rank
 					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
-						$sql2 = 'SELECT DISTINCT t.sciname FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
-							'WHERE ts.taxauthid = 1 AND (ts.hierarchystr LIKE "%,'.$r1->tid.',%") AND t.rankid = 140';
-						$sqlWhereTaxa .= "OR (o.family IN(".$sql2.")) ";
+						$sqlWhereTaxa = 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
 					}
 				}
 				else{
@@ -133,12 +132,9 @@ class MapInterfaceManager{
 						}
 						if(array_key_exists("tid",$valueArray)){
 							$tidArr = $valueArray['tid'];
-							$hSqlStr = '';
-							foreach($tidArr as $tid){
-								$hSqlStr .= 'OR (ts.hierarchystr LIKE "%,'.$tid.',%") ';
-							}
-							$sql = 'SELECT DISTINCT ts.family FROM taxstatus ts '.
-								'WHERE ts.taxauthid = 1 AND ('.substr($hSqlStr,3).')';
+							$sql = 'SELECT DISTINCT t.sciname '.
+								'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+								'WHERE t.rankid = 140 AND e.taxauthid = 1 AND e.parenttid IN('.implode(',',$tidArr).')';
 							$rs = $this->conn->query($sql);
 							while($r = $rs->fetch_object()){
 								$famArr[] = $r->family;
@@ -842,7 +838,7 @@ class MapInterfaceManager{
 				$sql .= ", o.".$v." ";
 			}
 		}
-		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
+		$sql .= "FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
 		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		if((array_key_exists("surveyid",$this->searchTermsArr))) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 		if((array_key_exists("polycoords",$this->searchTermsArr))) $sql .= "INNER JOIN omoccurpoints p ON o.occid = p.occid ";
@@ -919,7 +915,7 @@ class MapInterfaceManager{
 		$sql = 'SELECT o.occid, CONCAT_WS("",CONCAT(o.recordedby," "),"(",IFNULL(o.recordnumber,"s.n."),")") AS identifier, '.
 			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, '.
 			'c.CollectionName ';
-		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
+		$sql .= "FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
 		$sql .= 'WHERE o.occid IN('.$seloccids.') ';
 		$collMapper = Array();
 		$collMapper["undefined"] = "undefined";

@@ -56,7 +56,7 @@ class MappingShared{
 				$sql .= ", o.".$v." ";
 			}
 		}
-		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
+		$sql .= "FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
 		if(($this->searchTerms == 1) && (array_key_exists("clid",$this->searchTermsArr))) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 		$sql .= $mapWhere;
 		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";

@@ -41,12 +41,16 @@ class DynamicChecklistManager {
 				'SELECT DISTINCT '.$dynPk.' AS dynpk, IF(t.rankid=220,t.tid,ts2.parenttid) as tid '.
 				'FROM ((omoccurgeoindex o INNER JOIN taxstatus ts ON o.tid = ts.tid) '.
 				'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tid) '.
-				'INNER JOIN taxa t ON ts2.tid = t.tid '.
-				'WHERE (t.rankid >= 220) AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) '.
+				'INNER JOIN taxa t ON ts2.tid = t.tid ';
+			if($tidFilter){
+				$sql .= 'INNER JOIN taxaenumtree e ON ts2.tid = e.tid '; 
+			}
+			$sql .= 'WHERE (t.rankid >= 220) AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) '.
 				'AND (o.DecimalLatitude BETWEEN '.$lat1.' AND '.$lat2.') AND (o.DecimalLongitude BETWEEN '.$lng1.' AND '.$lng2.') ';
 			if($tidFilter){
-				$sql .= 'AND (ts2.hierarchystr LIKE CONCAT("%,",'.$tidFilter.',",%")) ';
+				$sql .= 'and e.parentTid = '.$tidFilter;
 			}
+			echo $sql; Exit;
 			$this->conn->query($sql);
 		}
 

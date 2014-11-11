@@ -542,15 +542,15 @@ class OccurrenceIndividualManager extends Manager{
 			$sql = '';
 			if($this->occArr['tidinterpreted']){
 				$occTidArr[] = $this->occArr['tidinterpreted'];
-				$sql = 'SELECT hierarchystr, parenttid '.
-					'FROM taxstatus '.
-					'WHERE taxauthid = 1 AND (tid = '.$this->occArr['tidinterpreted'].')';
+				$sql = 'SELECT parenttid '.
+					'FROM taxaenumtree '.
+					'WHERE (taxauthid = 1) AND (tid = '.$this->occArr['tidinterpreted'].')';
 			}
 			elseif($this->occArr['sciname'] || $this->occArr['family']){
 				//Get all relevant tids within the taxonomy hierarchy
-				$sql = 'SELECT DISTINCT ts.hierarchystr, ts.parenttid '.
-					'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
-					'WHERE ts.taxauthid = 1 ';
+				$sql = 'SELECT e.parenttid '.
+					'FROM taxaenumtree e INNER JOIN taxa t ON e.tid = t.tid '.
+					'WHERE (e.taxauthid = 1) ';
 				if($this->occArr['sciname']){
 					//Try to isolate genus
 					$taxon = $this->occArr['sciname'];
@@ -568,7 +568,6 @@ class OccurrenceIndividualManager extends Manager{
 				$rs2 = $this->conn->query($sql);
 				while($r2 = $rs2->fetch_object()){
 					$occTidArr[] = $r2->parenttid;
-					$occTidArr = array_merge($occTidArr,explode(',',$r2->hierarchystr));
 				}
 				$rs2->free();
 			}

@@ -609,10 +609,10 @@ class ProfileManager{
 						'FROM omoccurrences o INNER JOIN omoccurverification v ON o.occid = v.occid '.
 						'INNER JOIN omcollections c ON o.collid = c.collid '.
 						'INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
-						'INNER JOIN taxstatus ts ON t.tid = ts.tid ';
+						'INNER JOIN taxaenumtree e ON t.tid = e.tid ';
 					if($withImgOnly) $sql .= 'INNER JOIN images i ON o.occid = i.occid ';
-					$sql .= 'WHERE v.category = "identification" AND v.ranking < 6 AND ts.taxauthid = 1 '.
-						'AND (ts.hierarchystr LIKE "%,'.$tid.',%" OR ts.parenttid = '.$tid.' OR ts.tid = '.$tid.') '.
+					$sql .= 'WHERE v.category = "identification" AND v.ranking < 6 AND e.taxauthid = 1 '.
+						'AND (e.parenttid = '.$tid.' OR t.tid = '.$tid.') '.
 						'ORDER BY o.sciname,t.sciname,o.catalognumber ';
 					//echo '<div>'.$sql.'</div>';
 					$rs = $this->conn->query($sql);

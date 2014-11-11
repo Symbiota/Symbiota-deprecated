@@ -219,7 +219,7 @@ class SpecUploadDwca extends SpecUploadBase{
 								$outputStr .= 'fieldsEnclosedBy: '.$this->metaArr['occur']['fieldsEnclosedBy'].'; ';
 								$outputStr .= 'ignoreHeaderLines: '.$this->metaArr['occur']['ignoreHeaderLines'].'; ';
 								$outputStr .= 'rowType: '.$this->metaArr['occur']['rowType'];
-								$this->outputMsg($outputStr);
+								//$this->outputMsg($outputStr);
 							}
 						}
 					}
@@ -476,7 +476,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				
 				//Delete upload file 
 				if(file_exists($this->uploadTargetPath.$this->baseFolderName)){
-					//unlink($this->uploadTargetPath.$this->baseFolderName);
+					unlink($this->uploadTargetPath.$this->baseFolderName);
 				}
 			}
 		}
