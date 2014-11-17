@@ -1,12 +1,10 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/SpecProcessorAbbyy.php');
 
 class SpecProcessorManager {
 
 	protected $conn;
 	protected $collid = 0;
-	protected $spprid = 0;
 	protected $title;
 	protected $collectionName;
 	protected $managementType;
@@ -82,39 +80,6 @@ class SpecProcessorManager {
 		}
 	}
 
-	//OCR and NLP scripts
-	//Not yet implimented and may not be. OCR is not a great method for obtaining primary identifier for specimen record.
-	//Functions not needed for standalone scripts
-	protected function ocrImage(){
-		$labelBlock = '';
-		//Process image to aid OCR
-			//Convert to TIF
-			//contrast, brightness, B/W ???
-		
-		$output = array();
-		exec('tesseract', $output);
-		
-		//Obtain text from tesseract output file
-
-		
-		return $labelBlock;
-	}
-
-	protected function loadRawFragment($imgId,$labelBlock){
-		//load raw label record
-		$status = true;
-		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr) VALUES('.$imgId.',"'.$this->cleanInStr($labelBlock).'")';
-		if(!$this->conn->query($sql)){
-			if($this->logErrFH){
-				fwrite($this->logErrFH, "\tERROR: Unable to load Raw Text Fragment into database specprocessorrawlabels: ");
-				fwrite($this->logErrFH, $this->conn->error." \n");
-				fwrite($this->logErrFH, "\tSQL: $sql \n");
-			}
-			$status = false;
-		}
-		return $status;
-	}
-
 	//Project Functions (create, edit, delete, etc)
 	//Functions not needed for standalone scripts
 	public function editProject($editArr){
@@ -123,14 +88,14 @@ class SpecProcessorManager {
 				'SET title = "'.$this->cleanInStr($editArr['title']).'", '.
 				'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).'",'.
 				'sourcepath = "'.$this->cleanInStr($editArr['sourcepath']).'",'.
-				'targetpath = '.($editArr['targetpath']?'"'.$this->cleanInStr($editArr['targetpath']).'"':'NULL').','.
-				'imgurl = '.($editArr['imgurl']?'"'.$editArr['imgurl'].'"':'NULL').','.
-				'webpixwidth = '.($editArr['webpixwidth']?$editArr['webpixwidth']:'NULL').','.
-				'tnpixwidth = '.($editArr['tnpixwidth']?$editArr['tnpixwidth']:'NULL').','.
-				'lgpixwidth = '.($editArr['lgpixwidth']?$editArr['lgpixwidth']:'NULL').','.
-				'jpgcompression = '.($editArr['jpgquality']?$editArr['jpgquality']:'NULL').','.
-				'createtnimg = '.$editArr['tnimg'].','.
-				'createlgimg = '.$editArr['lgimg'].' '.
+				'targetpath = '.(isset($editArr['targetpath'])&&$editArr['targetpath']?'"'.$this->cleanInStr($editArr['targetpath']).'"':'NULL').','.
+				'imgurl = '.(isset($editArr['imgurl'])&&$editArr['imgurl']?'"'.$editArr['imgurl'].'"':'NULL').','.
+				'webpixwidth = '.(isset($editArr['webpixwidth'])&&$editArr['webpixwidth']?$editArr['webpixwidth']:'NULL').','.
+				'tnpixwidth = '.(isset($editArr['tnpixwidth'])&&$editArr['tnpixwidth']?$editArr['tnpixwidth']:'NULL').','.
+				'lgpixwidth = '.(isset($editArr['lgpixwidth'])&&$editArr['lgpixwidth']?$editArr['lgpixwidth']:'NULL').','.
+				'jpgcompression = '.(isset($editArr['jpgquality'])&&$editArr['jpgquality']?$editArr['jpgquality']:'NULL').','.
+				'createtnimg = '.(isset($editArr['tnimg'])&&$editArr['tnimg']?$editArr['tnimg']:'NULL').','.
+				'createlgimg = '.(isset($editArr['lgimg'])&&$editArr['lgimg']?$editArr['lgimg']:'NULL').' '.
 				'WHERE (spprid = '.$editArr['spprid'].')';
 			//echo 'SQL: '.$sql;
 			if(!$this->conn->query($sql)){
@@ -141,18 +106,27 @@ class SpecProcessorManager {
 	}
 
 	public function addProject($addArr){
+		if($addArr['title'] = 'OCR Harvest'){
+			$this->conn->query('DELETE FROM specprocessorprojects WHERE (title = "OCR Harvest") AND (collid = '.$this->collid.')');
+		}
 		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
 			'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 			'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
 			$this->cleanInStr($addArr['speckeypattern']).'","'.
-			$this->cleanInStr($addArr['sourcepath']).'","'.$this->cleanInStr($addArr['targetpath']).'","'.
-			$addArr['imgurl'].'",'.
-			($addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
-			($addArr['tnpixwidth']?$addArr['tnpixwidth']:'NULL').','.
-			($addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
-			($addArr['jpgquality']?$addArr['jpgquality']:'NULL').','.
-			$addArr['tnimg'].','.$addArr['lgimg'].')';
-		$this->conn->query($sql);
+			$this->cleanInStr($addArr['sourcepath']).'",'.
+			(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
+			(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
+			(isset($addArr['webpixwidth'])&&$addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
+			(isset($addArr['tnpixwidth'])&&$addArr['tnpixwidth']?$addArr['tnpixwidth']:'NULL').','.
+			(isset($addArr['lgpixwidth'])&&$addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
+			(isset($addArr['jpgquality'])&&$addArr['jpgquality']?$addArr['jpgquality']:'NULL').','.
+			(isset($addArr['tnimg'])&&$addArr['tnimg']?$addArr['tnimg']:'NULL').','.
+			(isset($addArr['lgimg'])&&$addArr['lgimg']?$addArr['lgimg']:'NULL').')';
+		//echo $sql;
+		if(!$this->conn->query($sql)){
+			echo 'ERROR saving project: '.$this->conn->error;
+			//echo '<br/>SQL: '.$sql;
+		}
 	}
 
 	public function deleteProject($spprid){
@@ -160,40 +134,43 @@ class SpecProcessorManager {
 		$this->conn->query($sql);
 	}
 
-	public function setProjVariables(){
-		if($this->spprid){
-			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
-				'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
-				'FROM specprocessorprojects p '.
-				'WHERE (p.spprid = '.$this->spprid.')';
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				if(!$this->collid) $this->setCollId($row->collid); 
-				$this->title = $row->title;
-				$this->specKeyPattern = $row->speckeypattern;
-				$this->coordX1 = $row->coordx1;
-				$this->coordX2 = $row->coordx2;
-				$this->coordY1 = $row->coordy1;
-				$this->coordY2 = $row->coordy2;
-				$this->sourcePath = $row->sourcepath;
-				$this->targetPath = $row->targetpath;
-				$this->imgUrlBase = $row->imgurl;
-				if($row->webpixwidth) $this->webPixWidth = $row->webpixwidth;
-				if($row->tnpixwidth) $this->tnPixWidth = $row->tnpixwidth;
-				if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
-				if($row->jpgcompression) $this->jpgQuality = $row->jpgcompression;
-				$this->tnImg = $row->createtnimg;
-				$this->lgImg = $row->createlgimg;
-			}
-			$rs->close();
-			
-			//if(!$this->targetPath) $this->targetPath = $GLOBALS['imageRootPath'];
-			//if(!$this->imgUrlBase) $this->imgUrlBase = $GLOBALS['imageRootUrl'];
-			if($this->sourcePath && substr($this->sourcePath,-1) != '/' && substr($this->sourcePath,-1) != '\\') $this->sourcePath .= '/'; 
-			if($this->targetPath && substr($this->targetPath,-1) != '/' && substr($this->targetPath,-1) != '\\') $this->targetPath .= '/'; 
-			if($this->imgUrlBase && substr($this->imgUrlBase,-1) != '/') $this->imgUrlBase .= '/'; 
+	public function setProjVariables($crit){
+		$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
+			'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
+			'FROM specprocessorprojects p ';
+		if(is_numeric($crit)){
+			$sql .= 'WHERE (p.spprid = '.$crit.')';
 		}
+		elseif($crit == 'OCR Harvest'){
+			$sql .= 'WHERE (p.title = "OCR Harvest")';
+		}
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		if($row = $rs->fetch_object()){
+			if(!$this->collid) $this->setCollId($row->collid); 
+			$this->title = $row->title;
+			$this->specKeyPattern = $row->speckeypattern;
+			$this->coordX1 = $row->coordx1;
+			$this->coordX2 = $row->coordx2;
+			$this->coordY1 = $row->coordy1;
+			$this->coordY2 = $row->coordy2;
+			$this->sourcePath = $row->sourcepath;
+			$this->targetPath = $row->targetpath;
+			$this->imgUrlBase = $row->imgurl;
+			if($row->webpixwidth) $this->webPixWidth = $row->webpixwidth;
+			if($row->tnpixwidth) $this->tnPixWidth = $row->tnpixwidth;
+			if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
+			if($row->jpgcompression) $this->jpgQuality = $row->jpgcompression;
+			$this->tnImg = $row->createtnimg;
+			$this->lgImg = $row->createlgimg;
+		}
+		$rs->close();
+		
+		//if(!$this->targetPath) $this->targetPath = $GLOBALS['imageRootPath'];
+		//if(!$this->imgUrlBase) $this->imgUrlBase = $GLOBALS['imageRootUrl'];
+		if($this->sourcePath && substr($this->sourcePath,-1) != '/' && substr($this->sourcePath,-1) != '\\') $this->sourcePath .= '/'; 
+		if($this->targetPath && substr($this->targetPath,-1) != '/' && substr($this->targetPath,-1) != '\\') $this->targetPath .= '/'; 
+		if($this->imgUrlBase && substr($this->imgUrlBase,-1) != '/') $this->imgUrlBase .= '/'; 
 	}
 	
 	public function getProjects(){
@@ -201,12 +178,12 @@ class SpecProcessorManager {
 		if($this->collid){
 			$sql = 'SELECT spprid, title '.
 				'FROM specprocessorprojects '.
-				'WHERE (collid = '.$this->collid.')';
+				'WHERE (collid = '.$this->collid.') AND title != "OCR Harvest"';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$projArr[$row->spprid] = $row->title;
 			}
-			$rs->close();
+			$rs->free();
 		}
 		return $projArr;
 	}
@@ -286,9 +263,9 @@ class SpecProcessorManager {
 	}
 	
 	public function getSpecNoImageCount(){
+		//Count specimens without images
 		$cnt = 0;
 		if($this->collid){
-			//Count specimens without images
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM omoccurrences o LEFT JOIN images i ON o.occid = i.occid '.
 				'WHERE o.collid = '.$this->collid.' AND i.imgid IS NULL ';
@@ -302,9 +279,9 @@ class SpecProcessorManager {
 	}
 
 	public function getUnprocSpecNoImage(){
+		//Count unprocessed specimens without images (e.g. generated from skeletal file)
 		$cnt = 0;
 		if($this->collid){
-			//Count unprocessed specimens without images
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM omoccurrences o LEFT JOIN images i ON o.occid = i.occid '.
 				'WHERE (o.collid = '.$this->collid.') AND (i.imgid IS NULL) AND (o.processingstatus = "unprocessed") ';
@@ -318,9 +295,9 @@ class SpecProcessorManager {
 	}
 
 	public function getSpecNoSkel(){
+		//Count unprocessed specimens without skeletal data
 		$cnt = 0;
 		if($this->collid){
-			//Count specimens without skeletal data
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM omoccurrences o '.
 				'WHERE (o.collid = '.$this->collid.') AND (o.processingstatus = "unprocessed") '.
@@ -334,14 +311,22 @@ class SpecProcessorManager {
 		return $cnt;
 	}
 
-	public function getSpecNoOcr(){
+	//OCR related counts
+	public function getSpecWithImage($procStatus = ''){
+		//Count of specimens with images but no OCR
 		$cnt = 0;
 		if($this->collid){
-			//Count specimens with images but without OCR
-			$sql = 'SELECT count(o.occid) AS cnt '.
+			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-				'INNER JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
-				'WHERE o.collid = '.$this->collid.' AND r.imgid IS NULL ';
+				'WHERE (o.collid = '.$this->collid.') ';
+			if($procStatus){
+				if($procStatus == 'null'){
+					$sql .= 'AND processingstatus IS NULL';
+				}
+				else{
+					$sql .= 'AND processingstatus = "'.$this->cleanInStr($procStatus).'"';
+				}
+			}
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$cnt = $r->cnt;
@@ -351,6 +336,49 @@ class SpecProcessorManager {
 		return $cnt;
 	}
 
+	public function getSpecNoOcr($procStatus = ''){
+		//Count of specimens with images but no OCR
+		$cnt = 0;
+		if($this->collid){
+			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'LEFT JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
+				'WHERE o.collid = '.$this->collid.' AND r.imgid IS NULL ';
+			if($procStatus){
+				if($procStatus == 'null'){
+					$sql .= 'AND processingstatus IS NULL';
+				}
+				else{
+					$sql .= 'AND processingstatus = "'.$this->cleanInStr($procStatus).'"';
+				}
+			}
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$cnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $cnt;
+	}
+
+ 	public function getProcessingStatusList(){
+		$retArr = array();
+		if($this->collid){
+			$sql = 'SELECT DISTINCT o.processingstatus '.
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'WHERE o.collid = '.$this->collid;
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				if($r->processingstatus) $retArr[] = $r->processingstatus;
+			}
+			$rs->free();
+			sort($retArr);
+		}
+		return $retArr;
+ 	}
+
+ 	//Misc status
 	public function downloadReportData($target){
 		$fileName = 'SymbSpecNoImages_'.time().'.csv';
 		header ('Content-Type: text/csv; charset='.$GLOBALS['charset']);
@@ -422,12 +450,6 @@ class SpecProcessorManager {
 	}
 	
 	//Set and Get functions
-	public function setSpprId($id) {
-		if($id && is_numeric($id)){
-			$this->spprid = $id;
-		}
-	}
-
 	public function setTitle($t){
 		$this->title = $t;
 	}
@@ -600,7 +622,7 @@ class SpecProcessorManager {
  	public function getUseImageMagick(){
  		return $this->processUsingImageMagick;
  	}
-
+ 	
  	//Misc functions
 	protected function cleanInStr($str){
 		$newStr = trim($str);

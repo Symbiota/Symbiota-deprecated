@@ -65,7 +65,8 @@ $collData = $collManager->getCollectionData(1);
 				dialogStr = dialogArr[i]+"info";
 				$( "#"+dialogStr+"dialog" ).dialog({
 					autoOpen: false,
-					modal: true
+					modal: true,
+					position: { my: "left top", at: "right bottom", of: "#"+dialogStr }
 				});
 
 				$( "#"+dialogStr ).click(function() {

@@ -15,78 +15,35 @@ class SpecProcessorOcr{
 	private $cropW = 1;
 	private $cropH = 1;
 
-	private $logPath;
+	private $specKeyPattern;
+	private $ocrSource;
+	
 	//If silent is set, script will produce no non-fatal output.
-	private $silent = 1;
-
+	private $verbose = 0;			//0 = silent, 1 = logFile, 2 = echo, 3 = both
+	private $logFH;
+	private $errorStr;
+	
 	function __construct() {
 		$this->setTempPath();
-		$this->setlogPath();
+		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
 
 	function __destruct(){
-		//unlink($this->imgUrlLocal);
-	}
-
-	public function batchOcrUnprocessed($inCollArr = 0,$getBest = 0){
-		//OCR all images with a status of "unprocessed" and change to "unprocessed/OCR"
-		//Triggered automaticly (crontab) on a nightly basis
-		ini_set('memory_limit','512M');
-		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$collArr = array();
-		if($inCollArr && is_array($inCollArr) && count($inCollArr) > 0){
-			$collArr = $inCollArr;
-		}
-		else{
-			$sql = 'SELECT DISTINCT collid '.
-				'FROM omoccurrences o INNER JOIN images i ON i.occid = o.occid '.
-				'LEFT JOIN specprocessorrawlabels rl ON i.imgid = rl.imgid '.
-				'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL ';
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$collArr[] = $r->collid;
-			}
-			$rs->free();
-		}
-		if(!$this->silent) $this->logMsg("Starting batch processing\n");
-		foreach($collArr as $cid){
-			if($cid && is_numeric($cid)){
-				if(!$this->silent) $this->logMsg("\tProcessing collid".$cid."\n");
-				$sql = 'SELECT i.imgid, IFNULL(i.originalurl, i.url) AS url, o.sciName '.
-					'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-					'LEFT JOIN specprocessorrawlabels rl ON i.imgid = rl.imgid '.
-					'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL '.
-					'AND (o.collid = '.$cid.') ';
-				//Limit for debugging purposes only
-				//$sql .= 'LIMIT 30 ';
-				if($rs = $this->conn->query($sql)){
-					$recCnt = 0;
-					while($r = $rs->fetch_object()){
-						$rawStr = '';
-						$rawStr = $this->ocrImageByUrl($r->url,$getBest,$r->sciName);
-						if(!$this->silent) $this->logMsg("\tImage ".$r->imgid." processed (".date("Y-m-d H:i:s").")\n");
-						$this->databaseRawStr($r->imgid,$rawStr);
-						$recCnt++;
-					}
-		 			$rs->free();
-				}
-			}
-		}
+		if($this->logFH) fclose($this->logFH);
  		if(!($this->conn === false)) $this->conn->close();
+		//unlink($this->imgUrlLocal);
 	}
 
 	public function ocrImageById($imgid,$getBest = 0,$sciName=''){
 		$rawStr = '';
-		$con = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT url, originalurl FROM images WHERE imgid = '.$imgid;
-		if($rs = $con->query($sql)){
+		if($rs = $this->conn->query($sql)){
 			if($r = $rs->fetch_object()){
 				$imgUrl = ($r->originalurl?$r->originalurl:$r->url);
 				$rawStr = $this->ocrImageByUrl($imgUrl, $getBest, $sciName);
 			}
 			$rs->free();
 		}
-		$con->close();
 		return $rawStr;
 	}
 	
@@ -101,7 +58,6 @@ class SpecProcessorOcr{
 				else{
 					$rawStr = $this->ocrImage();
 				}
-				//$rawStr = $this->cleanRawStr($rawStr);
 				if(!$rawStr) {
 					//Check for and remove problematic boarder
 					if($this->imageTrimBorder()){
@@ -111,67 +67,330 @@ class SpecProcessorOcr{
 						else{
 							$rawStr = $this->ocrImage();
 						}
-						//$rawStr = $this->cleanRawStr($rawStr);
 					}
 					if(!$rawStr) $rawStr = 'Failed OCR return';
 				}
+				$rawStr = $this->cleanRawStr($rawStr);
 				//Cleanup, remove image
 				unlink($this->imgUrlLocal);
 			}
 			else{
-				//Unable to create image
-				$this->logMsg('\tERROR: Unable to load image, URL: '.$imgUrl."\n");
+				$err = 'ERROR: Unable to load image, URL: '.$imgUrl;
+				$this->logMsg($err,1);
+				$rawStr = 'ERROR';
 			}
 		}
 		else{
-			$this->logMsg('\tERROR: Empty URL'."\n");
+			$err = 'ERROR: Empty URL';
+			$this->logMsg($err,1);
+			$rawStr = 'ERROR';
 		}
 		return $rawStr;
 	}
 
-	private function getBestOCR($sciName = ''){
-		//Base run
-		$rawStr_base = $this->ocrImage();
-		$score_base = $this->scoreOCR($rawStr_base, $sciName);
-		$urlTemp = str_replace('.jpg','_f1.jpg',$this->imgUrlLocal);
-		copy($this->imgUrlLocal,$urlTemp);
-		$this->filterImage($urlTemp);
-		$rawStr_treated = $this->ocrImage($urlTemp);
-		$score_treated = $this->scoreOCR($rawStr_treated, $sciName);
-		unlink($urlTemp);
-		if($score_treated > $score_base) {
-			if(!$this->silent) $this->logMsg("\t\tBest Score applied \n");
-			return $rawStr_treated;
-		} else {
-			return $rawStr_base;
+	private function ocrImage($url = ""){
+		global $tesseractPath;
+		$retStr = '';
+		if(!$url) $url = $this->imgUrlLocal;
+		if($url){
+			//OCR image, result text is output to $outputFile
+			$output = array();
+			$outputFile = substr($url,0,strlen($url)-4);
+			if(isset($tesseractPath) && $tesseractPath){
+				if(substr($tesseractPath,0,2) == 'C:'){
+					//Full path to tesseract with quotes needed for Windows
+					exec('"'.$tesseractPath.'" '.$url.' '.$outputFile,$output);
+				}
+				else{
+					exec($tesseractPath.' '.$url.' '.$outputFile,$output);
+				}
+			}
+			else{
+				//If path is not set in the $symbini.php file, we assume a typial linux install
+				exec('/usr/local/bin/tesseract '.$url.' '.$outputFile,$output);
+			}
+
+			//Obtain text from tesseract output file
+			if(file_exists($outputFile.'.txt')){
+				if($fh = fopen($outputFile.'.txt', 'r')){
+					while (!feof($fh)) {
+						$retStr .= $this->encodeString(fread($fh, 8192));
+						//$retStr .= fread($fh, 8192);
+					}
+					fclose($fh);
+				}
+				unlink($outputFile.'.txt');
+			}
+			else{
+				$this->logMsg("ERROR: Unable to locate output file",1);
+			}
+		}
+		return $retStr;//$this->cleanRawStr($retStr);
+	}
+
+	private function databaseRawStr($imgId,$rawStr,$notes,$source){
+		if(is_numeric($imgId) && $rawStr){
+			$score = '';
+			if($rawStr == 'Failed OCR return') $score = 0; 
+			$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes,source,score) '.
+				'VALUE ('.$imgId.',"'.$this->cleanInStr($rawStr).'",'.
+				($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.
+				($source?'"'.$this->cleanInStr($source).'"':'NULL').','.
+				($score?'"'.$this->cleanInStr($score).'"':'NULL').')';
+			//echo 'SQL: '.$sql."\n";
+			if($this->conn->query($sql)){
+				return true;
+			}
+			else{
+				$this->logMsg("ERROR: Unable to load fragment into database: ".$this->conn->error,1);
+				$this->logMsg("SQL: ".$sql,2);
+				return false;
+			}
 		}
 	}
 
-	private function filterImage($url=''){
+	private function loadImage($imgUrl){
 		$status = false;
-		if(!$url) $url = $this->imgUrlLocal;
-		if($img = imagecreatefromjpeg($url)){
-			imagefilter($img,IMG_FILTER_GRAYSCALE);
-			imagefilter($img,IMG_FILTER_BRIGHTNESS,10);
-			imagefilter($img,IMG_FILTER_CONTRAST,1);
-			$sharpenMatrix = array
-			(
-				array(-1.2, -1, -1.2),
-				array(-1, 20, -1),
-				array(-1.2, -1, -1.2)
-			);
-			// calculate the sharpen divisor
-			$divisor = array_sum(array_map("array_sum", $sharpenMatrix));
-			$offset = 0;
-			// apply the matrix
-			imageconvolution($img, $sharpenMatrix, $divisor, $offset);
-			imagegammacorrect($img, 6, 1.0);
-			$status = imagejpeg($img,$url);
-			imagedestroy($img);
+		if($imgUrl){
+			if(substr($imgUrl,0,1)=="/"){
+				if(array_key_exists("imageDomain",$GLOBALS) && $GLOBALS["imageDomain"]){
+					//If there is an image domain name is set in symbini.php and url is relative,
+					//then it's assumed that image is located on another server, thus add domain to url
+					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+				}
+				else{
+					$urlDomain = "http://";
+					if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) 
+						$urlDomain = "https://";
+					$urlDomain .= $_SERVER["SERVER_NAME"];
+					if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlDomain .= ':'.$_SERVER["SERVER_PORT"];
+					$imgUrl = $urlDomain.$imgUrl;
+				}
+			}
+			//Set temp folder path and file names
+			$ts = time();
+			$this->imgUrlLocal = $this->tempPath.$ts.'_img.jpg';
+
+			//Copy image to temp folder
+			$status = copy($imgUrl,$this->imgUrlLocal);
 		}
 		return $status;
 	}
 
+	public function batchOcrUnprocessed($inCollStr,$procStatus = 'unprocessed',$limit = 0,$getBest = 0){
+		//OCR all images with a status of "unprocessed" and change to "unprocessed/OCR"
+		//Triggered automaticly (crontab) on a nightly basis
+		if($inCollStr) {
+			set_time_limit(600);
+			ini_set('memory_limit','512M');
+			
+			//Get collection list
+			$sql = 'SELECT DISTINCT collid, CONCAT_WS("-",institutioncode,collectioncode) AS instcode '.
+				'FROM omcollections '.
+				'WHERE collid IN('.$inCollStr.') ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$collArr[$r->collid] = $r->instcode;
+			}
+			$rs->free();
+			
+			//Batch OCR
+			foreach($collArr as $collid => $instCode){
+				$this->logMsg('Starting batch processing for '.$instCode);
+				$sql = 'SELECT i.imgid, IFNULL(i.originalurl, i.url) AS url, o.sciName, i.occid '.
+					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+					'LEFT JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
+					'WHERE (o.collid = '.$collid.') AND r.prlid IS NULL ';
+				if($procStatus) $sql .= 'AND o.processingstatus = "unprocessed" ';
+				if($limit) $sql .= 'LIMIT '.$limit;
+				if($rs = $this->conn->query($sql)){
+					$recCnt = 1;
+					while($r = $rs->fetch_object()){
+						$rawStr = $this->ocrImageByUrl($r->url,$getBest,$r->sciName);
+						if($rawStr != 'ERROR'){
+							$this->logMsg('#'.$recCnt.': image <a href="../editor/occurrenceeditor.php?occid='.$r->occid.'" target="_blank">'.$r->imgid.'</a> processed ('.date("Y-m-d H:i:s").')');
+							$notes = '';
+							$source = 'Tesseract: '.date('Y-m-d');
+							$this->databaseRawStr($r->imgid,$rawStr,$notes,$source);
+						}
+						ob_flush();
+						flush();
+						$recCnt++;
+					}
+		 			$rs->free();
+				}
+			}
+		}
+	}
+
+	public function harvestOcrText($postArr){
+		$status = true;
+		set_time_limit(3600);
+		$sourcePath = $postArr['sourcepath'];
+		$this->specKeyPattern = $postArr['speckeypattern'];
+		$this->ocrSource = $postArr['ocrsource'];
+		if(!$this->specKeyPattern){
+			$this->errorStr = 'ERROR: Specimen catalog number pattern missing';
+			$this->logMsg($this->errorStr,1);
+			return false;
+		}
+		elseif(!$sourcePath){
+			$this->errorStr = 'ERROR: OCR source path is missing';
+			$this->logMsg($this->errorStr,1);
+			return false;
+		}
+		if(substr($sourcePath,0,4) == 'http'){
+			//http protocol, thus test for a valid page
+			$headerArr = get_headers($sourcePath);
+			if(!$headerArr){
+				$this->errorStr = 'ERROR: sourcePathBase returned bad headers ('.$sourcePath.')';
+				$this->logMsg($this->errorStr,1);
+				return false;
+			} 
+			preg_match('/http.+\s{1}(\d{3})\s{1}/i',$headerArr[0],$codeArr);
+			if($codeArr[1] == '403'){ 
+				$this->errorStr = 'ERROR: sourcePathBase returned Forbidden ('.$sourcePath.')';
+				$this->logMsg($this->errorStr,1);
+				return false;
+			}
+			if($codeArr[1] == '404'){ 
+				$this->errorStr = 'ERROR: sourcePathBase returned a page Not Found error ('.$sourcePath.')';
+				$this->logMsg($this->errorStr,1);
+				return false;
+			}
+			if($codeArr[1] != '200'){ 
+				$this->errorStr = 'ERROR: sourcePathBase returned error code '.$codeArr[1].' ('.$sourcePath.')';
+				$this->logMsg($this->errorStr,1);
+				return false;
+			}
+		}
+		elseif(!file_exists($sourcePath)){
+			$this->errorStr = 'ERROR: sourcePathBase does not exist ('.$sourcePath.')';
+			$this->logMsg($this->errorStr,1);
+			return false;
+		}
+		//Initiate processing
+		$this->logMsg('Starting image processing: '.$sourcePath);
+		if(substr($sourcePath,-1) != '/') $sourcePath .= '/';
+		if(substr($sourcePath,0,4) == 'http'){
+			//http protocol, thus test for a valid page
+			$this->processOcrHtml($sourcePath);
+		}
+		else{
+			$this->processOcrFolder($sourcePath);
+		}
+		$this->logMsg('Done uploading '.$sourcePath.' ('.date('Y-m-d h:i:s A').')');
+		
+		
+		return $status;
+	}
+	
+	private function processOcrHtml($sourcePath){
+		$dom = new DOMDocument();
+		$dom->loadHTMLFile($sourcePath);
+		$aNodes= $dom->getElementsByTagName('a');
+		$skipAnchors = array('Name','Last modified','Size','Description');
+		foreach( $aNodes as $aNode ) {
+			$fileName = $aNode->nodeValue;
+			if(!in_array($fileName,$skipAnchors)){
+				$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')+1));
+				if($fileExt){
+					$this->logMsg("Processing OCR File (".date('Y-m-d h:i:s A')."): ".$fileName);
+					if($fileExt == "txt"){
+						$this->processOcrFile($fileName,$sourcePath);
+					}
+					else{
+						$this->logMsg("ERROR: File skipped, not a supported OCR file with .txt extension: ".$sourcePath.$fileName,1);
+					}
+				}
+				elseif(stripos($fileName,'Parent Dir') === false){
+					$this->logMsg('New dir path: '.$sourcePath.$fileName);
+					$this->processOcrHtml($sourcePath.$fileName.'/');
+				}
+			}
+		}
+	}
+
+	private function processOcrFolder($sourcePath){
+		//$this->logOrEcho("Processing: ".$sourcePath.$pathFrag);
+		//Read directory and loop through OCR files
+		if($dirFH = opendir($sourcePath)){
+			while($fileName = readdir($dirFH)){
+				if($fileName != "." && $fileName != ".." && $fileName != ".svn"){
+					if(is_file($sourcePath.$fileName)){
+						$this->logMsg("Processing OCR File (".date('Y-m-d h:i:s A')."): ".$fileName);
+						$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
+						if($fileExt == ".txt"){
+							$this->processOcrFile($fileName,$sourcePath);
+						}
+						else{
+							$this->logMsg("ERROR: File skipped, not a supported OCR text file (.txt): ".$fileName,1);
+						}
+					}
+					elseif(is_dir($sourcePath.$fileName)){
+						$this->processOcrFolder($sourcePath.$fileName."/");
+					}
+				}
+			}
+			if($dirFH) closedir($dirFH);
+		}
+		else{
+			$this->logMsg("ERROR: unable to access source directory: ".$sourcePath,1);
+		}
+	}
+
+	private function processOcrFile($fileName,$sourcePath){
+		$ocrCnt = 0;
+		//$this->logMsg('Starting OCR text processing... ',1);
+		if($rawTextFH = fopen($sourcePath.$fileName, 'r')){
+			$rawStr = fread($rawTextFH, filesize($sourcePath.$fileName));
+			fclose($rawTextFH);
+			//Grab specimen primary key (e.g. catalog number 
+			$catNumber = ''; 
+			if(preg_match($this->specKeyPattern,$fileName,$matchArr)){
+				if(array_key_exists(1,$matchArr) && $matchArr[1]){
+					$catNumber = $matchArr[1];
+				}
+			}
+			if($catNumber){
+				//Grab image primary key (imgid)
+				$imgArr = array();
+				$sql = 'SELECT i.imgid, i.url '.
+					'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+					'WHERE (o.catalognumber = "'.$this->cleanInStr($catNumber).'")';
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$imgArr[$r->imgid] = $r->url;
+				}
+				$rs->free();
+				if($imgArr){
+					$imgId = key($imgArr);
+					if(count($imgArr) > 1){
+						$fileBaseName = basename($sourcePath.$fileName, ".php");
+						foreach($imgArr as $k => $v){
+							if(stripos($v,'/'.$fileBaseName.'.')) $imgId = $k;
+						} 
+					}
+					//Process and database OCR string
+					if($this->databaseRawStr($imgId,$rawStr,'',$this->ocrSource.': '.date('Y-m-d'))){
+						unlink($sourcePath.$fileName);
+						$ocrCnt++;
+					}
+				}
+				else{
+					$this->logMsg('ERROR: unable locate specimen image (catalog #: '.$catNumber.')',1);
+				}
+			}
+			else{
+				$this->logMsg('ERROR: unable to extract catalog number ('.$fileName.' using '.$this->specKeyPattern.')',1);
+			}
+		}
+		else{
+			$this->logMsg('ERROR: unable to read rawOcr file: '.$fileName,1);
+		}
+	}
+
+	//Image manipulations and adjustments
 	private function cropImage(){
 		$status = false;
 		if($this->cropX || $this->cropY || $this->cropW < 1 || $this->cropH < 1){
@@ -291,116 +510,103 @@ class SpecProcessorOcr{
 		return false;
 	}
 
-	private function ocrImage($url = ""){
-		global $tesseractPath;
-		$retStr = '';
+	//Roberts scoring and treatment functions
+	private function getBestOCR($sciName = ''){
+		//Base run
+		$rawStr_base = $this->ocrImage();
+		$score_base = $this->scoreOCR($rawStr_base, $sciName);
+		$urlTemp = str_replace('.jpg','_f1.jpg',$this->imgUrlLocal);
+		copy($this->imgUrlLocal,$urlTemp);
+		$this->filterImage($urlTemp);
+		$rawStr_treated = $this->ocrImage($urlTemp);
+		$score_treated = $this->scoreOCR($rawStr_treated, $sciName);
+		unlink($urlTemp);
+		if($score_treated > $score_base) {
+			$this->logMsg('Best Score applied',1);
+			return $rawStr_treated;
+		} else {
+			return $rawStr_base;
+		}
+	}
+
+	private function filterImage($url=''){
+		$status = false;
 		if(!$url) $url = $this->imgUrlLocal;
-		if($url){
-			//OCR image, result text is output to $outputFile
-			$output = array();
-			$outputFile = substr($url,0,strlen($url)-4);
-			if(isset($tesseractPath) && $tesseractPath){
-				if(substr($tesseractPath,0,2) == 'C:'){
-					//Full path to tesseract with quotes needed for Windows
-					exec('"'.$tesseractPath.'" '.$url.' '.$outputFile,$output);
-				}
-				else{
-					exec($tesseractPath.' '.$url.' '.$outputFile,$output);
-				}
-			}
-			else{
-				//If path is not set in the $symbini.php file, we assume a typial linux install
-				exec('/usr/local/bin/tesseract '.$url.' '.$outputFile,$output);
-			}
+		if($img = imagecreatefromjpeg($url)){
+			imagefilter($img,IMG_FILTER_GRAYSCALE);
+			imagefilter($img,IMG_FILTER_BRIGHTNESS,10);
+			imagefilter($img,IMG_FILTER_CONTRAST,1);
+			$sharpenMatrix = array
+			(
+				array(-1.2, -1, -1.2),
+				array(-1, 20, -1),
+				array(-1.2, -1, -1.2)
+			);
+			// calculate the sharpen divisor
+			$divisor = array_sum(array_map("array_sum", $sharpenMatrix));
+			$offset = 0;
+			// apply the matrix
+			imageconvolution($img, $sharpenMatrix, $divisor, $offset);
+			imagegammacorrect($img, 6, 1.0);
+			$status = imagejpeg($img,$url);
+			imagedestroy($img);
+		}
+		return $status;
+	}
 
-			//Obtain text from tesseract output file
-			if(file_exists($outputFile.'.txt')){
-				if($fh = fopen($outputFile.'.txt', 'r')){
-					while (!feof($fh)) {
-						$retStr .= $this->encodeString(fread($fh, 8192));
-						//$retStr .= fread($fh, 8192);
+	private function scoreOCR($rawStr, $sciName = '') {
+		$sLength = strlen($rawStr);
+		if($sLength > 12) {
+			$numWords = 0;
+			$numBadLinesIncremented = false;
+			$numBadLines = 1;
+			$lines = explode("\n", $rawStr);
+			foreach($lines as $line) {
+				$line = trim($line);
+				if(strlen($line) > 2) {
+					$words = explode(" ", $line);
+					foreach($words as $word) {
+						if(strlen($word) > 2)
+						{
+							$goodChars = 0;
+							$badChars = 0;
+							foreach (count_chars($word, 1) as $i => $let) {
+								if(($i > 47 && $i < 60) || ($i > 64 && $i < 91) || ($i > 96 && $i < 123) || $i == 176) {
+									$goodChars++;
+								}
+								else if(($i < 44 || $i > 59) && !($i == 32 || $i == 35 || $i == 34 || $i == 39 || $i == 38 || $i == 40 || $i == 41 || $i == 61)) {
+									$badChars++;
+								}
+							}
+							if($goodChars > 3*$badChars) $numWords++;
+						}
 					}
-					fclose($fh);
-				}
-				unlink($outputFile.'.txt');
-			}
-			else{
-				$this->logMsg("\tERROR: Unable to locate output file\n");
-			}
-		}
-		return $retStr;//$this->cleanRawStr($retStr);
-	}
-
-	private function databaseRawStr($imgId,$rawStr){
-		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
-			'VALUE ('.$imgId.',"'.$this->cleanInStr($rawStr).'","batch Tesseract OCR - '.date('Y-m-d').'")';
-		//echo 'SQL: '.$sql."\n";
-		if($this->conn->query($sql)){
-			return true;
-		}
-		else{
-			$this->logMsg("\tERROR: Unable to load fragment into database: ".$this->conn->error."\n");
-			$this->logMsg("\t\tSQL: ".$sql."\n");
-		}
-	}
-
-	private function loadImage($imgUrl){
-		if($imgUrl){
-			if(substr($imgUrl,0,1)=="/"){
-				if(array_key_exists("imageDomain",$GLOBALS) && $GLOBALS["imageDomain"]){
-					//If there is an image domain name is set in symbini.php and url is relative,
-					//then it's assumed that image is located on another server, thus add domain to url
-					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-				}
-				else{
-					$urlDomain = "http://";
-					if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) 
-						$urlDomain = "https://";
-					$urlDomain .= $_SERVER["SERVER_NAME"];
-					if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlDomain .= ':'.$_SERVER["SERVER_PORT"];
-					$imgUrl = $urlDomain.$imgUrl;
+				} else {
+					if($numBadLines == 1) {
+						if($numBadLinesIncremented) $numBadLines++;
+						else $numBadLinesIncremented = true;
+					} else $numBadLines++;
 				}
 			}
-			//Set temp folder path and file names
-			$ts = time();
-			$this->imgUrlLocal = $this->tempPath.$ts.'_img.jpg';
-
-			//Copy image to temp folder
-			return copy($imgUrl,$this->imgUrlLocal);
-		}
-		return false;
-	}
-
-	private function setTempPath(){
-		$tempPath = 0;
-		if(array_key_exists('tempDirRoot',$GLOBALS)){
-			$tempPath = $GLOBALS['tempDirRoot'];
-		}
-		else{
-			$tempPath = ini_get('upload_tmp_dir');
-		}
-		if(!$tempPath){
-			$tempPath = $GLOBALS['serverRoot'];
-			if(substr($tempPath,-1) != '/') $tempPath .= '/';
-			$tempPath .= 'temp/';
-		}
-		if(substr($tempPath,-1) != '/') $tempPath .= '/';
-		if(file_exists($tempPath.'symbocr/') || mkdir($tempPath.'symbocr/')){
-			$tempPath .= 'symbocr/';
-		}
-
-		$this->tempPath = $tempPath;
-	}
-
-	private function setlogPath(){
-		$this->logPath = $this->tempPath.'log_'.date('Ymd').'.log';
-	}
-
-	private function logMsg($msg) {
-		if($fh = fopen($this->logPath, 'a')) {
-			fwrite($fh, $msg);
-			fclose($fh);
-		}
+			$numGoodChars = 0;
+			$numBadChars = 1;
+			$numBadIncremented = false;
+			foreach (count_chars($rawStr, 1) as $i => $val) {
+				if(($i > 47 && $i < 60) || ($i > 64 && $i < 91) || ($i > 96 && $i < 123) || $i == 176) {
+					$numGoodChars += $val;
+				}
+				else if(($i < 44 || $i > 59) && !($i == 32 || $i == 35 || $i == 34 || $i == 39 || $i == 38 || $i == 40 || $i == 41 || $i == 61)) {
+					if($numBadChars == 1) {
+						if($numBadIncremented) $numBadChars += $val;
+						else {
+							$numBadIncremented = true;
+							$numBadChars += ($val-1);
+						}
+					} else $numBadChars += $val;
+				}
+			}
+			return (($numWords*$numGoodChars)/($sLength*$numBadChars*$numBadLines)) + $this->findSciName($rawStr,$sciName);
+		} else return 0;
 	}
 
 	private function findSciName($rawStr,$sciName) {
@@ -472,131 +678,7 @@ class SpecProcessorOcr{
 		return $result;
 	}
 
-	private function scoreOCR($rawStr, $sciName = '') {
-		$sLength = strlen($rawStr);
-		if($sLength > 12) {
-			$numWords = 0;
-			$numBadLinesIncremented = false;
-			$numBadLines = 1;
-			$lines = explode("\n", $rawStr);
-			foreach($lines as $line) {
-				$line = trim($line);
-				if(strlen($line) > 2) {
-					$words = explode(" ", $line);
-					foreach($words as $word) {
-						if(strlen($word) > 2)
-						{
-							$goodChars = 0;
-							$badChars = 0;
-							foreach (count_chars($word, 1) as $i => $let) {
-								if(($i > 47 && $i < 60) || ($i > 64 && $i < 91) || ($i > 96 && $i < 123) || $i == 176) {
-									$goodChars++;
-								}
-								else if(($i < 44 || $i > 59) && !($i == 32 || $i == 35 || $i == 34 || $i == 39 || $i == 38 || $i == 40 || $i == 41 || $i == 61)) {
-									$badChars++;
-								}
-							}
-							if($goodChars > 3*$badChars) $numWords++;
-						}
-					}
-				} else {
-					if($numBadLines == 1) {
-						if($numBadLinesIncremented) $numBadLines++;
-						else $numBadLinesIncremented = true;
-					} else $numBadLines++;
-				}
-			}
-			$numGoodChars = 0;
-			$numBadChars = 1;
-			$numBadIncremented = false;
-			foreach (count_chars($rawStr, 1) as $i => $val) {
-				if(($i > 47 && $i < 60) || ($i > 64 && $i < 91) || ($i > 96 && $i < 123) || $i == 176) {
-					$numGoodChars += $val;
-				}
-				else if(($i < 44 || $i > 59) && !($i == 32 || $i == 35 || $i == 34 || $i == 39 || $i == 38 || $i == 40 || $i == 41 || $i == 61)) {
-					if($numBadChars == 1) {
-						if($numBadIncremented) $numBadChars += $val;
-						else {
-							$numBadIncremented = true;
-							$numBadChars += ($val-1);
-						}
-					} else $numBadChars += $val;
-				}
-			}
-			return (($numWords*$numGoodChars)/($sLength*$numBadChars*$numBadLines)) + $this->findSciName($rawStr,$sciName);
-		} else return 0;
-	}
-
-	private function cleanRawStr($inStr){
-		$outStr = trim($inStr);
-
-		//replace commonly misinterpreted characters
-		$needles = array(chr(226).chr(128).chr(156), "Ã©", "/\.", "/-\\", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
-		$replacements = array("\"", "e", "A.", "A","W", "W", "W", "'", "'", "'", "'", "'", "'", "'", "\"", "\"", "\"", "\"", "\"", "\"", "\"", "°", "°", "°");
-		$outStr = str_replace($needles, $replacements, $outStr);
-
-		$false_num_class = "[OSZl|I!\d]";//the regex class that represents numbers and characters that numbers are commonly replaced with
-		//remove barcodes (strings of ~s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long), one-character lines, and latitudes and longitudes with double quotes instead of degree signs
-		$pattern =
-			array(
-				"/[\|!Il\"'1U~()@\[\]{}H\/\\\]{6,}/", //strings of ~s, 's, "s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long (from barcodes)
-				"/^.{1,2}$/m", //one-character lines (Tesseract must generate a 2-char end of line)
-				"/(lat|long)(\.|,|:|.:|itude)(:|,)?\s?(".$false_num_class."{1,3}(\.".$false_num_class."{1,7})?)\"/i" //the beginning of lat-long repair
-			);
-		$replacement = array("", "", "\${1}\${2}\$3 \${4}".chr(176));
-		$outStr = preg_replace($pattern, $replacement, $outStr, -1);
-		$outStr = str_replace("Â°", chr(176), $outStr);
-
-		//replace Is, ls and |s in latitudes and longitudes with ones
-		//replace Os in latitudes and longitudes with zeroes, Ss with 5s and Zs with 2s
-		//latitudes and longitudes can be of the types: ddd.ddddddd°, ddd° ddd.ddd' or ddd° ddd' ddd.ddd"
-		$preg_replace_callback_pattern =
-			array(
-				"/".$false_num_class."{1,3}(\.".$false_num_class."{1,7})\s?".chr(176)."\s?[NSEW(\\\V)(\\\W)]/",
-				"/".$false_num_class."{1,3}".chr(176)."\s?".$false_num_class."{1,3}(\.".$false_num_class."{1,3})?\s?'\s?[NSEW(\\\V)(\\\W)]/",
-				"/".$false_num_class."{1,3}".chr(176)."\s?".$false_num_class."{1,3}\s?'\s?(".$false_num_class."{1,3}(\.".$false_num_class."{1,3})?\"\s?)?[NSEW(\\\V)(\\\W)]/"
-			);
-		$outStr = preg_replace_callback($preg_replace_callback_pattern, create_function('$matches','return str_replace(array("l","|","!","I","O","S","Z"), array("1","1","1","1","0","5","2"), $matches[0]);'), $outStr);
-		//replace \V and \W in longitudes and latitudes with W
-		$outStr = preg_replace("/(\d\s?[".chr(176)."'\"])\s?\\\[VW]/", "\${1}W", $outStr, -1);
-		//add degree signs to latitudes and longitudes that lack them
-		$outStr = preg_replace("/(\d{1,3})\s{1,2}(\d{1,3}'\s?)(\d{1,3}\"\s?)?([NSEW])/", "\${1}".chr(176)." $2$3$4", $outStr, -1);
-		//replace Zs and zs with 2s, Is, !s, |s and ls with 1s and Os and os with 0s in dates of type Mon(th) DD, YYYY
-		$outStr = preg_replace_callback(
-			"/(((?i)January|Jan\.?|February|Feb\.?|March|Mar\.?|April|Apr\.?|May|June|Jun\.?|July|Jul\.?|August|Aug\.?|September|Sept?\.?|October|Oct\.?|November|Nov\.?|December|Dec\.?)\s)(([\dOIl|!ozZS]{1,2}),?\s)([\dOI|!lozZS]{4})/",
-			create_function('$matches','return $matches[1].str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[3]).str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[5]);'),
-			$outStr
-		);
-		//replace Zs with 2s, Is with 1s and Os with 0s in dates of type DD-Mon(th)-YYYY or DDMon(th)YYYY or DD Mon(th) YYYY
-		$outStr = preg_replace_callback(
-			"/([\dOIl!|ozZS]{1,2}[-\s]?)(((?i)January|Jan\.?|February|Feb\.?|March|Mar\.?|April|Apr\.?|May|June|Jun\.?|July|Jul\.?|August|Aug\.?|September|Sept?\.?|October|Oct\.?|November|Nov\.?|December|Dec\.?)[-\s]?)([\dOIl|!ozZS]{4})/i",
-			create_function('$matches','return str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[1]).$matches[2].str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[4]);'),
-			$outStr
-		);
-		return trim($outStr);
-		//return trim($inStr)." trimmed";
-	}
-
-	private function encodeString($inStr){
- 		global $charset;
- 		$retStr = $inStr;
-		if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
-			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
-				//$retStr = utf8_encode($inStr);
-				//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
-				$retStr = mb_convert_encoding($inStr,"UTF-8");
-			}
-		}
-		elseif(strtolower($charset) == "iso-8859-1"){
-			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-				//$retStr = utf8_decode($inStr);
-				//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
-				$retStr = mb_convert_encoding($inStr,"ISO-8859-1");
-			}
-		}
-		return $retStr;
-	}
-
+	//General setters and getters
 	public function setCropX($x){
 		$this->cropX = $x;
 	}
@@ -610,21 +692,139 @@ class SpecProcessorOcr{
 		$this->cropH = $h;
 	}
 
-	public function setSilent($s){
-		$this->silent = $s;
+	public function getErrorStr(){
+		return $this->errorStr;
+	}
+
+	public function setVerbose($s){
+		$this->verbose = $s;
+		if($this->verbose == 1 || $this->verbose == 3){
+			if($this->tempPath){
+				$logPath = $this->tempPath.'log_'.date('Ymd').'.log';
+				$this->logFH = fopen($logPath, 'a');
+			}
+		}
+	}
+
+	private function setTempPath(){
+		$tempPath = 0;
+		if(array_key_exists('tempDirRoot',$GLOBALS)){
+			$tempPath = $GLOBALS['tempDirRoot'];
+		}
+		else{
+			$tempPath = ini_get('upload_tmp_dir');
+		}
+		if(!$tempPath){
+			$tempPath = $GLOBALS['serverRoot'];
+			if(substr($tempPath,-1) != '/') $tempPath .= '/';
+			$tempPath .= 'temp/';
+		}
+		if(substr($tempPath,-1) != '/') $tempPath .= '/';
+		if(file_exists($tempPath.'symbocr/') || mkdir($tempPath.'symbocr/')){
+			$tempPath .= 'symbocr/';
+		}
+
+		$this->tempPath = $tempPath;
 	}
 
 	/*public function addFilterVariable($k,$v){
 		$this->filterArr[0][$k] = $v;
 	}*/
-	
+
+	//Misc functions
+	private function logMsg($msg,$indent = 0) {
+		if($this->verbose == 1 || $this->verbose == 3){
+			if($this->logFH){
+				$msg .= "\n";
+				if($indent) $msg = "\t".$msg;
+				fwrite($this->logFH, $msg);
+			}
+		}
+		elseif($this->verbose > 1 ){
+			echo '<li style="margin-left:'.($indent*15).'px">'.$msg.'</li>';
+		}
+	}
+
+	private function cleanRawStr($inStr){
+		$retStr = $this->encodeString($inStr);
+
+		//replace commonly misinterpreted characters
+		$replacements = array("/\." => "A.", "/-\\" => "A", "\X/" => "W", "\Y/" => "W", "`\â€˜i/" => "W", chr(96) => "'", chr(145) => "'", chr(146) => "'", 
+			"’" => "'", "“" => '"', "”" => '"', "”" => '"', chr(147) => '"', chr(148) => '"', chr(152) => '"', chr(239) => "°");
+		$retStr = str_replace(array_keys($replacements), $replacements, $retStr);
+
+		//replace Is, ls and |s in latitudes and longitudes with ones
+		//replace Os in latitudes and longitudes with zeroes, Ss with 5s and Zs with 2s
+		//latitudes and longitudes can be of the types: ddd.ddddddd°, ddd° ddd.ddd' or ddd° ddd' ddd.ddd"
+		$false_num_class = "[OSZl|I!\d]";//the regex class that represents numbers and characters that numbers are commonly replaced with
+		$preg_replace_callback_pattern =
+			array(
+				"/".$false_num_class."{1,3}(\.".$false_num_class."{1,7})\s?".chr(176)."\s?[NSEW(\\\V)(\\\W)]/",
+				"/".$false_num_class."{1,3}".chr(176)."\s?".$false_num_class."{1,3}(\.".$false_num_class."{1,3})?\s?'\s?[NSEW(\\\V)(\\\W)]/",
+				"/".$false_num_class."{1,3}".chr(176)."\s?".$false_num_class."{1,3}\s?'\s?(".$false_num_class."{1,3}(\.".$false_num_class."{1,3})?\"\s?)?[NSEW(\\\V)(\\\W)]/"
+			);
+		$retStr = preg_replace_callback($preg_replace_callback_pattern, create_function('$matches','return str_replace(array("l","|","!","I","O","S","Z"), array("1","1","1","1","0","5","2"), $matches[0]);'), $retStr);
+		//replace \V and \W in longitudes and latitudes with W
+		$retStr = preg_replace("/(\d\s?[".chr(176)."'\"])\s?\\\[VW]/", "\${1}W", $retStr, -1);
+		//replace Zs and zs with 2s, Is, !s, |s and ls with 1s and Os and os with 0s in dates of type Mon(th) DD, YYYY
+		$retStr = preg_replace_callback(
+			"/(((?i)January|Jan\.?|February|Feb\.?|March|Mar\.?|April|Apr\.?|May|June|Jun\.?|July|Jul\.?|August|Aug\.?|September|Sept?\.?|October|Oct\.?|November|Nov\.?|December|Dec\.?)\s)(([\dOIl|!ozZS]{1,2}),?\s)([\dOI|!lozZS]{4})/",
+			create_function('$matches','return $matches[1].str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[3]).str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[5]);'),
+			$retStr
+		);
+		//replace Zs with 2s, Is with 1s and Os with 0s in dates of type DD-Mon(th)-YYYY or DDMon(th)YYYY or DD Mon(th) YYYY
+		$retStr = preg_replace_callback(
+			"/([\dOIl!|ozZS]{1,2}[-\s]?)(((?i)January|Jan\.?|February|Feb\.?|March|Mar\.?|April|Apr\.?|May|June|Jun\.?|July|Jul\.?|August|Aug\.?|September|Sept?\.?|October|Oct\.?|November|Nov\.?|December|Dec\.?)[-\s]?)([\dOIl|!ozZS]{4})/i",
+			create_function('$matches','return str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[1]).$matches[2].str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[4]);'),
+			$retStr
+		);
+		return $retStr;
+	}
+
+	private function encodeString($inStr){
+		global $charset;
+		$retStr = $inStr;
+		//Get rid of curly (smart) quotes
+		$search = array("’", "‘", "`", "”", "“"); 
+		$replace = array("'", "'", "'", '"', '"'); 
+		$inStr= str_replace($search, $replace, $inStr);
+		//Get rid of UTF-8 curly smart quotes and dashes 
+		$badwordchars=array("\xe2\x80\x98", // left single quote
+							"\xe2\x80\x99", // right single quote
+							"\xe2\x80\x9c", // left double quote
+							"\xe2\x80\x9d", // right double quote
+							"\xe2\x80\x94", // em dash
+							"\xe2\x80\xa6" // elipses
+		);
+		$fixedwordchars=array("'", "'", '"', '"', '-', '...');
+		$inStr = str_replace($badwordchars, $fixedwordchars, $inStr);
+		
+		if($inStr){
+			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+					$retStr = utf8_encode($inStr);
+					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+				}
+			}
+			elseif(strtolower($charset) == "iso-8859-1"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+					$retStr = utf8_decode($inStr);
+					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				}
+			}
+			//$line = iconv('macintosh', 'UTF-8', $line);
+			//mb_detect_encoding($buffer, 'windows-1251, macroman, UTF-8');
+ 		}
+		return $retStr;
+	}
+
 	private function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
 		//$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
-	
+
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);

@@ -371,7 +371,7 @@ class ImageBatchProcessor {
 				$fileName = $aNode->nodeValue;
 				if(!in_array($fileName,$skipAnchors)){
 					$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')+1));
-					if($fileExt == 'jpg' || $fileExt == 'jpeg'){
+					if($fileExt){
 						if(!stripos($fileName,'_tn.jpg') && !stripos($fileName,'_lg.jpg')){
 							$this->logOrEcho("Processing File (".date('Y-m-d h:i:s A')."): ".$fileName);
 							if($fileExt == "jpg"){

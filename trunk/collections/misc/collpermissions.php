@@ -10,7 +10,7 @@ $permManager = new PermissionsManager();
 
 $isEditor = 0;		 
 if($SYMB_UID){
-	if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
 }
@@ -63,13 +63,13 @@ if($isEditor){
 		//$permManager->addPermission($pTokens[0],'CollTaxon-'.$collId.':'.$pTokens[1]);
 	}
 }
-$collData = current($permManager->getCollectionMetadata($collId));
-$collName = '';
-if($collData) $collName = $collData['collectionname'];
+$collMetadata = current($permManager->getCollectionMetadata($collId));
+$isGenObs = 0;
+if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 ?>
 <html>
 <head>
-	<title><?php echo $collName; ?> Collection Permissions</title>
+	<title><?php echo $collMetadata['collectionname']; ?> Collection Permissions</title>
 	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
 	<script language=javascript>
@@ -96,7 +96,7 @@ if($collData) $collName = $collData['collectionname'];
 			echo "<div class='navpath'>";
 			echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
 			echo $collections_misc_collpermissionsCrumbs;
-			echo " <b>".($collName?$collName:"Collection Profiles")."</b>";
+			echo " <b>".($collMetadata['collectionname']?$collMetadata['collectionname']:"Collection Profiles")."</b>";
 			echo "</div>";
 		}
 	}
@@ -105,7 +105,7 @@ if($collData) $collName = $collData['collectionname'];
 		<div class='navpath'>
 			<a href='../../index.php'>Home</a> &gt;&gt; 
 			<a href='collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Collection Management</a> &gt;&gt; 
-			<b><?php echo $collName.' Permissions'; ?></b>
+			<b><?php echo $collMetadata['collectionname'].' Permissions'; ?></b>
 		</div>
 		<?php 
 	}
@@ -116,36 +116,40 @@ if($collData) $collName = $collData['collectionname'];
 		<?php
 		if($isEditor){
 			$collPerms = $permManager->getCollectionEditors($collId);
-			?>
-			<fieldset style="margin:15px;padding:15px;">
-				<legend><b>Administrators</b></legend>
-				<?php 
-				if(array_key_exists('admin',$collPerms)){
-					?>
-					<ul>
+			if(!$isGenObs){
+				?>
+				<fieldset style="margin:15px;padding:15px;">
+					<legend><b>Administrators</b></legend>
 					<?php 
-					$adminArr = $collPerms['admin'];
-					foreach($adminArr as $uid => $uName){
+					if(array_key_exists('admin',$collPerms)){
 						?>
-						<li>
-							<?php echo $uName; ?> 
-							<a href="collpermissions.php?collid=<?php echo $collId.'&deladmin='.$uid; ?>" onclick="return confirm('Are you sure you want to remove administrative rights for this user?');" title="Delete permissions for this user">
-								<img src="../../images/drop.png" style="width:12px;" />
-							</a>
-						</li>
+						<ul>
+						<?php 
+						$adminArr = $collPerms['admin'];
+						foreach($adminArr as $uid => $uName){
+							?>
+							<li>
+								<?php echo $uName; ?> 
+								<a href="collpermissions.php?collid=<?php echo $collId.'&deladmin='.$uid; ?>" onclick="return confirm('Are you sure you want to remove administrative rights for this user?');" title="Delete permissions for this user">
+									<img src="../../images/drop.png" style="width:12px;" />
+								</a>
+							</li>
+							<?php 
+						}
+						?>
+						</ul>
 						<?php 
 					}
+					else{
+						echo '<div style="font-weight:bold;">';
+						echo 'There are no administrative permissions (excluding Super Admins)';
+						echo '</div>';
+					}
 					?>
-					</ul>
-					<?php 
-				}
-				else{
-					echo '<div style="font-weight:bold;">';
-					echo 'There are no administrative permissions (excluding Super Admins)';
-					echo '</div>';
-				}
-				?>
-			</fieldset>
+				</fieldset>
+				<?php
+			}
+			?>
 			<fieldset style="margin:15px;padding:15px;">
 				<legend><b>Editors</b></legend>
 				<?php 
@@ -178,45 +182,52 @@ if($collData) $collName = $collData['collectionname'];
 					*Administrators automatically inherit editing rights
 				</div>
 			</fieldset>
-			<fieldset style="margin:15px;padding:15px;">
-				<legend><b>Rare Species Readers</b></legend>
-				<?php 
-				if(array_key_exists('rarespp',$collPerms)){
-					?>
-					<ul>
+			<?php 
+			if(!$isGenObs){
+				?>
+				<fieldset style="margin:15px;padding:15px;">
+					<legend><b>Rare Species Readers</b></legend>
 					<?php 
-					$rareArr = $collPerms['rarespp'];
-					foreach($rareArr as $uid => $uName){
+					if(array_key_exists('rarespp',$collPerms)){
 						?>
-						<li>
-							<?php echo $uName; ?> 
-							<a href="collpermissions.php?collid=<?php echo $collId.'&delrare='.$uid; ?>" onclick="return confirm('Are you sure you want to remove user rights to view locality details for rare species?');" title="Delete permissions for this user">
-								<img src="../../images/drop.png" style="width:12px;" />
-							</a>
-						</li>
+						<ul>
+						<?php 
+						$rareArr = $collPerms['rarespp'];
+						foreach($rareArr as $uid => $uName){
+							?>
+							<li>
+								<?php echo $uName; ?> 
+								<a href="collpermissions.php?collid=<?php echo $collId.'&delrare='.$uid; ?>" onclick="return confirm('Are you sure you want to remove user rights to view locality details for rare species?');" title="Delete permissions for this user">
+									<img src="../../images/drop.png" style="width:12px;" />
+								</a>
+							</li>
+							<?php 
+						}
+						?>
+						</ul>
 						<?php 
 					}
+					else{
+						echo '<div style="font-weight:bold;">';
+						echo 'There are no Sensitive Species Reader permissions';
+						echo '</div>';
+					}
 					?>
-					</ul>
-					<?php 
-				}
-				else{
-					echo '<div style="font-weight:bold;">';
-					echo 'There are no Sensitive Species Reader permissions';
-					echo '</div>';
-				}
-				?>
-				<div style="margin:10px">
-					*Administrators and editors automatically inherit protected species viewing rights
-				</div>
-			</fieldset>
+					<div style="margin:10px">
+						*Administrators and editors automatically inherit protected species viewing rights
+					</div>
+				</fieldset>
+				<?php
+			} 
+			?>
 			<fieldset style="margin:15px;padding:15px;">
 				<legend><b>Add a User</b></legend>
 				<form name="addrights" action="collpermissions.php" method="post" onsubmit="return verifyAddRights(this)">
 					<div>
-						User: 
+						<b>User:</b><br/> 
 						<select name="uid">
 							<option value="">Select User</option>
+							<option value="">-----------------------------------</option>
 							<?php 
 							$userArr = $permManager->getUsers();
 							foreach($userArr as $uid => $uName){
@@ -226,11 +237,22 @@ if($collData) $collName = $collData['collectionname'];
 						</select> 
 					</div>
 					<div style="margin:5px 0px 5px 0px;">
+					<?php 
+					if($isGenObs){
+						?>
+						<input name="righttype" type="hidden" value="editor" />
+						<?php 
+					}
+					else{
+						?>
 						<input name="righttype" type="radio" value="admin" /> Administrator <br/> 
 						<input name="righttype" type="radio" value="editor" /> Editor <br/>
 						<input name="righttype" type="radio" value="rare" /> Rare Species Reader<br/>
+						<?php 
+					}
+					?>
 					</div>
-					<div>
+					<div style="margin:15px;">
 						<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 						<input name="action" type="submit" value="Add Permissions for User" />
 					</div> 

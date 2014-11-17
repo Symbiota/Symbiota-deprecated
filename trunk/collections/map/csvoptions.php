@@ -24,7 +24,8 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 				dialogStr = dialogArr[i]+"info";
 				$( "#"+dialogStr+"dialog" ).dialog({
 					autoOpen: false,
-					modal: true
+					modal: true,
+					position: { my: "left top", at: "center", of: "#"+dialogStr }
 				});
 	
 				$( "#"+dialogStr ).click(function() {

@@ -1018,7 +1018,7 @@ class SpecUploadBase extends SpecUpload{
 					$dateStr = OccurrenceUtilities::formatDate($recMap['eventdate']);
 					if($dateStr){
 						//if(strpos('-00',$dateStr)) $this->outputMsg($recMap['eventdate'].' => '.$dateStr."<br/>"); 
-						if(strpos('-00',$dateStr) && (!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate'])){
+						if($recMap['eventdate'] != $dateStr && (!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate'])){
 							$recMap['verbatimeventdate'] = $recMap['eventdate'];
 						}
 						$recMap['eventdate'] = $dateStr;
