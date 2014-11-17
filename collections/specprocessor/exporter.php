@@ -57,7 +57,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					dialogStr = dialogArr[i]+"info";
 					$( "#"+dialogStr+"dialog" ).dialog({
 						autoOpen: false,
-						modal: true
+						modal: true,
+						position: { my: "left top", at: "right bottom", of: "#"+dialogStr }
 					});
 	
 					$( "#"+dialogStr ).click(function() {

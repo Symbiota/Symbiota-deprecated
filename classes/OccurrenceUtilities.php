@@ -6,6 +6,7 @@ class OccurrenceUtilities {
 
 	private $conn;
 	
+	static $monthRoman = array('I'=>'01','II'=>'02','III'=>'03','IV'=>'04','V'=>'05','VI'=>'06','VII'=>'07','VIII'=>'08','IX'=>'09','X'=>'10','XI'=>'11','XII'=>'12');
 	static $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 
@@ -35,6 +36,7 @@ class OccurrenceUtilities {
 		if(preg_match('/\d{2}:\d{2}:\d{2}/',$dateStr,$match)){
 			$t = $match[0];
 		}
+		//Parse
 		if(preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})/',$dateStr,$match)){
 			//Format: yyyy-m-d or yyyy-mm-dd
 			$y = $match[1];
@@ -45,6 +47,15 @@ class OccurrenceUtilities {
 			//Format: yyyy-m or yyyy-mm
 			$y = $match[1];
 			$m = $match[2];
+		}
+		elseif(preg_match('/^(\d{1,2}).{1}([IVX]{1,4}).{1}(\d{2,4})/',$dateStr,$match)){
+			//Roman numerial format: dd.IV.yyyy, dd.IV.yy, dd-IV-yyyy, dd-IV-yy
+			$d = $match[1];
+			$mStr = $match[2];
+			$y = $match[3];
+			if(array_key_exists($mStr,OccurrenceUtilities::$monthRoman)){
+				$m = OccurrenceUtilities::$monthRoman[$mStr];
+			}
 		}
 		elseif(preg_match('/^(\d{1,2})[\s\/-]{1}(\D{3,})\.*[\s\/-]{1}(\d{2,4})/',$dateStr,$match)){
 			//Format: dd mmm yyyy, d mmm yy, dd-mmm-yyyy, dd-mmm-yy

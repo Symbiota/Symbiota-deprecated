@@ -3,6 +3,8 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
+
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
@@ -10,7 +12,6 @@ $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
 $specManager = new SpecProcessorManager();
 
 $specManager->setCollId($collId);
-$specManager->setSpprId($spprId);
 
 $editable = false;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
@@ -24,10 +25,9 @@ if(!$spprId && $action != 'addmode'){
 	if(count($specProjects) == 1){
 		$arrayKeys = array_keys($specProjects);
 		$spprId = array_shift($arrayKeys);
-		$specManager->setSpprId($spprId);
 	}
 }
-if($spprId) $specManager->setProjVariables();
+if($spprId) $specManager->setProjVariables($spprId);
 
 ?>
 <html>
@@ -47,7 +47,8 @@ if($spprId) $specManager->setProjVariables();
 					dialogStr = dialogArr[i]+"info";
 					$( "#"+dialogStr+"dialog" ).dialog({
 						autoOpen: false,
-						modal: true
+						modal: true,
+						position: { my: "left top", at: "right bottom", of: "#"+dialogStr }
 					});
 	
 					$( "#"+dialogStr ).click(function() {
@@ -365,7 +366,7 @@ if($spprId) $specManager->setProjVariables();
 					if($spprId){
 						?>
 						<div id="imgprocessdiv">
-							<form name="imgprocessform" action="index.php" method="post">
+							<form name="imgprocessform" action="processor.php" method="post">
 								<fieldset>
 									<legend><b>Image Processor</b></legend>
 									<div style="float:right;margin:10px;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Open Editor">
@@ -539,13 +540,6 @@ if($spprId) $specManager->setProjVariables();
 				else{
 					echo '<div>ERROR: collection identifier not defined. Contact administrator</div>';
 				}
-			}
-			else{
-				?>
-				<div style='font-weight:bold;'>
-					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/specprocessor/index.php'>login</a>!
-				</div>
-				<?php 
 			}
 			?>
 		</div>

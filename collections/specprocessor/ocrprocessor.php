@@ -1,59 +1,232 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcessorOcr.php');
+include_once($serverRoot.'/classes/SpecProcessorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
+$collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$spprid = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
+$procStatus = array_key_exists('procstatus',$_REQUEST)?$_REQUEST['procstatus']:'unprocessed';
+
+$procManager = new SpecProcessorManager();
+$procManager->setCollId($collid);
+$procManager->setProjVariables('OCR Harvest');
 ?>
+<script>
+	$(function() {
+		var dialogArr = new Array("speckeypattern","sourcepath","ocrsource");
+		var dialogStr = "";
+		for(i=0;i<dialogArr.length;i++){
+			dialogStr = dialogArr[i]+"info";
+			$( "#"+dialogStr+"dialog" ).dialog({
+				autoOpen: false,
+				modal: true,
+				position: { my: "left top", at: "right bottom", of: "#"+dialogStr }
+			});
+	
+			$( "#"+dialogStr ).click(function() {
+				$( "#"+this.id+"dialog" ).dialog( "open" );
+			});
+		}
+	
+	});
+	
+	function validateStatQueryForm(f){
+		if(f.pscrit.value == ""){
+			alert("Please select a processing status");
+			return false;
+		}
+		return true;
+	}
+
+	function validateOcrTessForm(f){
+		if(f.procstatus.value == ""){
+			alert("Please select a processing status");
+			return false;
+		}
+		return true;
+	}
+	
+	function validateOcrUploadForm(f){
+		if(f.speckeypattern.value == ""){
+			alert("Please enter a pattern matching string for extracting the catalog number");
+			return false;
+		}
+		if(f.sourcepath.value == ""){
+			alert("Please enter the path to the OCR source files");
+			return false;
+		}
+		return true;
+	}
+</script>
 <div style="margin:15px;">
 	<?php 
-	
+	$cntTotal = $procManager->getSpecWithImage();
+	$cntUnproc = $procManager->getSpecWithImage($procStatus);
+	$cntUnprocNoOcr = $procManager->getSpecNoOcr($procStatus);
+	if($procStatus == 'null') $procStatus = 'No Status';
 	?>
-	<h2>Work in progress</h2>
 	<fieldset style="padding:20px;">
-		<legend><b>Statistics</b></legend> 
-		<ul>
-			<li>Total "unprocessed" specimens:</li> 
-			<li>Number with OCR fragments:</li>
-			<li>Number without OCR fragments:</li>
-			
-		</ul>
+		<legend><b>Specimen Image Statistics</b></legend>
+		
+		<div><b>Total specimens with images:</b> <?php echo $cntTotal; ?></div> 
+		<div><b>&quot;<?php echo $procStatus; ?>&quot; specimens with images:</b> <?php echo $cntUnproc; ?></div> 
+		<div style="margin-left:15px;">with OCR: <?php echo ($cntUnproc-$cntUnprocNoOcr); ?></div>
+		<div style="margin-left:15px;">without OCR: <?php echo $cntUnprocNoOcr; ?> </div>
+		
+		<div style="margin:15px">
+			<b>Custom Query: </b><br/>
+			<form name="statqueryform" action="index.php" method="post" onsubmit="return validateStatQueryForm(this)">
+				<select name="procstatus">
+					<option value="">Select Processing Status</option>
+					<option value="">-----------------------------------</option>
+					<option value="null">No Status</option>
+					<?php 
+					$psList = $procManager->getProcessingStatusList();
+					foreach($psList as $psVal){
+						echo '<option value="'.$psVal.'">'.$psVal.'</option>';
+					}
+					?>
+				</select>
+				<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+				<input name="tabindex" type="hidden" value="3" />
+				<input name="submitaction" type="submit" value="Reset Statistics" />
+			</form>
+		</div>
 	</fieldset>
 
-
-
-	<!-- 
-	<div style="">
-		<form name="abbyyloaderform" action="index.php" enctype="multipart/form-data" method="post" onsubmit="return validateAbbyyForm(this);">
-			<fieldset>
-				<legend><b>ABBYY OCR File Loader</b></legend>
-				<input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
-				<div style="font-weight:bold;margin:10px;">
-					File: 
-					<input id="abbyyfile" name="abbyyfile" type="file" size="45" />
+	<fieldset style="padding:20px;margin-top:20px;">
+		<legend><b>Batch OCR Images using the Tesseract OCR Engine</b></legend>
+		<?php
+		if(isset($tesseractPath) && $tesseractPath){ 
+			?>
+			<form name="batchTessform" action="processor.php" method="post" onsubmit="return validateBatchTessForm(this)">
+				<div style="padding:3px;">
+					<b>Processing Status:</b> 
+					<select name="procstatus">
+						<option value="unprocessed">unprocessed</option>
+						<option value="">-----------------------------------</option>
+						<option value="null">No Status</option>
+						<?php 
+						$psList = $procManager->getProcessingStatusList();
+						foreach($psList as $psVal){
+							if($psVal != 'unprocessed'){
+								echo '<option value="'.$psVal.'">'.$psVal.'</option>';
+							}
+						}
+						?>
+					</select><br/>
 				</div>
-				<div style="margin:10px;">
-					<input type="hidden" name="spprid" value="<?php echo $spprId; ?>" />
-					<input type="hidden" name="collid" value="<?php echo $collId; ?>" >
-					<input name="tabindex" type="hidden" value="2" />
-					<input type="submit" name="action" value="Upload ABBYY File" />
+				<div style="padding:3px;">
+					<b>Number of records to process:</b> 
+					<input name="batchlimit" type="text" value="100" style="width:60px" />
 				</div>
-			</fieldset>
+				<div style="padding:15px;">
+					<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+					<input name="tabindex" type="hidden" value="3" />
+					<input name="submitaction" type="submit" value="Run Batch OCR" />
+				</div>
+				<div style="margin:15px">
+					Note: This feature is dependent on the proper installation of the Tesseract OCR Engine on the hosting server
+				</div>
+			</form>
+			<?php
+		}
+		else{
+			echo '<div style="margin:25px"><b>';
+			echo 'The Tesseract OCR engine does not appear to be installed or the tesseractPath variable is not set within the Symbiota configuration file. ';
+			echo 'Contact your system administrator to resolve these issues. ';
+			echo '</b></div>'; 
+		} 
+		?>
+	</fieldset>
+
+	<fieldset style="padding:20px;margin-top:20px;">
+		<legend><b>OCR Batch Processing</b></legend>
+		<form name="ocruploadform" action="processor.php" method="post" onsubmit="return validateOcrUploadForm(this);">
+			<div style="float:right;margin:10px;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Close Editor">
+				<img src="../../images/edit.png" style="border:0px" />
+			</div>
+			<div style="margin:15px">
+				This inteface will process and load into the database OCR text files. 
+				ABBYY FineReader (Corporate Edition) includes the ABBYY HotFolder tool that can batch process multiple specimen label images
+				to produce separate text file containing label text. 
+				However, this tool will upload OCR text obtained by other processes.   
+				OCR text is linked directly to the specimen image.  
+			</div>
+			<div style="margin:15px">
+				<b>Requirements:</b>
+				<ul>
+					<li>OCR files must be in a text format with a .txt extension. Use the &quot;Create a separate document for each file&quot; and &quot;Save as: Text (*.txt)&quot; HotFolder settings.</li>
+					<li>Files must be named using the Catalog Number</li>
+					<li>If there are more than one image linked to a specimen, the full file name will be used to identify which image to link the OCR</li>
+					<li>Source image must have been previously loaded into database</li>
+				</ul> 
+			</div>
+			<div style="margin:15px">
+				<table>
+					<tr>
+						<td>
+							<b>Regular Expression:</b>
+						</td>
+						<td>
+							<input name="speckeypattern" type="text" style="width:300px;" value="<?php echo $procManager->getSpecKeyPattern(); ?>" />
+							<a id="speckeypatterninfo" href="#" onclick="return false" title="More Information">
+								<img src="../../images/info.png" style="width:15px;" />
+							</a>
+							<div id="speckeypatterninfodialog">
+								Regular expression (PHP version) needed to extract the unique identifier from source text.
+								For example, regular expression /^(WIS-L-\d{7})\D*/ will extract catalog number WIS-L-0001234 
+								from image file named WIS-L-0001234_a.jpg. For more information on creating regular expressions,
+								Google &quot;Regular Expression PHP Tutorial&quot;. It is recommended to have the portal manager
+								help with the initial setup of batch processing.  
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<b>Path to OCR Text files:</b> 
+						</td>
+						<td> 
+							<input name="sourcepath" type="text" style="width:400px;" value="<?php echo $procManager->getSourcePath(); ?>" />
+							<a id="sourcepathinfo" href="#" onclick="return false" title="More Information">
+								<img src="../../images/info.png" style="width:15px;" />
+							</a>
+							<div id="sourcepathinfodialog">
+								File path or URL to folder containing the OCR text files.
+								If a URL (e.g. http://) is supplied, the web server needs to be configured to list 
+								all files within the directory, or the html output needs to list all images in anchor tags.
+								Scripts will attempt to crawl through all child directories.
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<b>OCR Source:</b> 
+						</td>
+						<td> 
+							<input name="ocrsource" type="text" value="" />
+							<a id="ocrsourceinfo" href="#" onclick="return false" title="More Information">
+								<img src="../../images/info.png" style="width:15px;" />
+							</a>
+							<div id="ocrsourceinfodialog">
+								Short string describing OCR Source (e.g. ABBYY, Tesseract, etc)
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<input name="title" type="hidden" value="OCR Harvest" />
+							<input name="spprid" type="hidden" value="<?php echo $spprid; ?>" />
+							<input name="collid" type="hidden" value="<?php echo $collid; ?>" /> 
+							<input name="tabindex" type="hidden" value="3" />
+							<div style="margin:25px">
+								<input name="submitaction" type="submit" value="Save OCR Processing Profile" />
+								<input name="submitaction" type="submit" value="Initiate OCR Processing" />
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
 		</form>
-	</div>
-	 -->
+	</fieldset>
 </div>
-
-<?php
-$tempDirRoot = $SERVER['PHP_SELF'];
-$tesseractPath = 'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe';
-include_once('dbconnection.php');
-include_once('SpecProcessorOcr.php');
-
-$ocrManager = new SpecProcessorOcr();
-
-$collArr = array(28);
-//$collArr = array(2,22,28,31,32);
-$ocrManager->batchOcrUnprocessed($collArr,1);
-
-?>

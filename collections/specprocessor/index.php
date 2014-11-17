@@ -3,6 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
 include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
 include_once($serverRoot.'/classes/ImageBatchProcessor.php');
+include_once($serverRoot.'/classes/SpecProcessorOcr.php');
 
 header("Content-Type: text/html; charset=".$charset);
 
@@ -11,15 +12,15 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/s
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
-//NLP variables
+//NLP and OCR variables
 $spNlpId = array_key_exists('spnlpid',$_REQUEST)?$_REQUEST['spnlpid']:0;
+$procStatus = array_key_exists('procstatus',$_REQUEST)?$_REQUEST['procstatus']:'unprocessed';
 
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 
 $specManager = new SpecProcessorManager();
 
 $specManager->setCollId($collid);
-$specManager->setSpprId($spprId);
 
 $isEditor = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
@@ -32,10 +33,10 @@ if($isEditor){
 		$specManager->addProject($_POST);
 	}
 	elseif($action == 'Save Image Project'){
-		$specManager->editProject($_REQUEST);
+		$specManager->editProject($_POST);
 	}
 	elseif($action == 'Delete Image Project'){
-		$specManager->deleteProject($_REQUEST['sppriddel']);
+		$specManager->deleteProject($_POST['sppriddel']);
 	}
 	elseif($action == 'Add to Queue'){
 		$csManager = new OccurrenceCrowdSource();
@@ -57,18 +58,6 @@ if($isEditor){
 		$csManager->setCollid($collid);
 		$statusStr = $csManager->editProject($omcsid,$_POST['instr'],$_POST['url']);
 	}
-	elseif($action == 'dlnoimg'){
-		$specManager->downloadReportData($action);
-		exit;
-	}
-	elseif($action == 'unprocnoimg'){
-		$specManager->downloadReportData($action);
-		exit;
-	}
-	elseif($action == 'noskel'){
-		$specManager->downloadReportData($action);
-		exit;
-	}
 }
 ?>
 <html>
@@ -80,7 +69,7 @@ if($isEditor){
 		<script type="text/javascript" src="../../js/jquery.js"></script>
 		<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 		<script type="text/javascript" src="../../js/symb/shared.js?ver=131106"></script>
-		<script language=javascript>
+		<script>
 			$(document).ready(function() {
 				$('#tabs').tabs({
 					select: function(event, ui) {
@@ -120,43 +109,6 @@ if($isEditor){
 		<div id="innertext">
 			<h2><?php echo $specManager->getCollectionName(); ?></h2>
 			<?php
-			$specManager->setProjVariables(); 
-			if($action == 'Upload ABBYY File'){
-				$statusArr = $specManager->loadLabelFile();
-				if($statusArr){
-					$statusStr = '<ul><li>'.implode('</li><li>',$statusArr).'</li></ul>';
-				}
-			}
-			elseif($action == 'Process Images'){
-				echo '<div style="padding:15px;">'."\n";
-				$imageProcessor = new ImageBatchProcessor();
-
-				$imageProcessor->setLogMode(1);
-				$imageProcessor->initProcessor();
-				$imageProcessor->setCollArr(array($collid => array('pmterm' => $specManager->getSpecKeyPattern())));
-				$imageProcessor->setDbMetadata(1);
-				$imageProcessor->setSourcePathBase($specManager->getSourcePath());
-				$imageProcessor->setTargetPathBase($specManager->getTargetPath());
-				$imageProcessor->setImgUrlBase($specManager->getImgUrlBase());
-				$imageProcessor->setServerRoot($serverRoot);
-				if($specManager->getWebPixWidth()) $imageProcessor->setWebPixWidth($specManager->getWebPixWidth());
-				if($specManager->getTnPixWidth()) $imageProcessor->setTnPixWidth($specManager->getTnPixWidth());
-				if($specManager->getLgPixWidth()) $imageProcessor->setLgPixWidth($specManager->getLgPixWidth());
-				if($specManager->getWebMaxFileSize()) $imageProcessor->setWebFileSizeLimit($specManager->getWebMaxFileSize());
-				if($specManager->getLgMaxFileSize()) $imageProcessor->setLgFileSizeLimit($specManager->getLgMaxFileSize());
-				if($specManager->getJpgQuality()) $imageProcessor->setJpgQuality($specManager->getJpgQuality());
-				$imageProcessor->setUseImageMagick($specManager->getUseImageMagick());
-				$imageProcessor->setWebImg($_POST['webimg']);
-				$imageProcessor->setTnImg($_POST['tnimg']);
-				$imageProcessor->setLgImg($_POST['lgimg']);
-				$imageProcessor->setCreateNewRec($_POST['createnewrec']);
-				$imageProcessor->setImgExists($_POST['imgexists']);
-				$imageProcessor->setKeepOrig(0);
-				
-				//Run process
-				$imageProcessor->batchLoadImages();
-				echo '</div>'."\n";
-			}
 			if($statusStr){ 
 				?>
 				<div style='margin:20px 0px 20px 0px;'>
@@ -175,10 +127,10 @@ if($isEditor){
 				        <li><a href="#introdiv">Introduction</a></li>
 				        <li><a href="imageprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId.'&submitaction='.$action; ?>">Image Loading</a></li>
 				        <li><a href="crowdsource/controlpanel.php?collid=<?php echo $collid; ?>">Crowdsourcing Module</a></li>
+				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&procstatus='.$procStatus.'&spprid='.$spprId; ?>">OCR</a></li>
 				        <!-- 
-				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId; ?>">Optical Character Recognition</a></li>
-				         -->
 				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">NLP</a></li>
+				         -->
 				        <li><a href="reports.php?collid=<?php echo $collid.'&menu='.(isset($_REQUEST['menu'])?$_REQUEST['menu']:''); ?>">Reports</a></li>
 				        <li><a href="exporter.php?collid=<?php echo $collid; ?>">Exporter</a></li>
 				    </ul>
@@ -196,9 +148,12 @@ if($isEditor){
 							<div style="margin:15px">
 								The batch image loading module is designed to batch process specimen images that are deposited in a 
 								drop folder. This module will produce web-ready images for a group of specimen images and 
-								map the new image derivative to records in the the database. Images can be loaded for already existing 
-								specimen records, or loaded to create a skeletal specimen record for further digitization within the portal.  
-								For more information, see the
+								map the new image derivative to specimen records. Images can be linked to already existing 
+								specimen records, or linked to a newly created skeletal specimen record for further digitization within the portal.
+								Field data from skeletal data files (.csv, .tab, .dat) placed in the image folders will  
+								augment new records by adding content to empty fields only. 
+								The column names of skeletal files must match Symbiota field names (e.g. Darwin Core) with catalogNumber as a 
+								required field. For more information, see the
 								<b><a href="http://symbiota.org/docs/batch-loading-specimen-images-2/">Batch Image Loading</a></b> section 
 								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   
 							</div>
@@ -212,20 +167,17 @@ if($isEditor){
 								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   
 							</div>
 
-							<!--  
 							<h2>Optical Character Resolution (OCR)</h2>
-							<div style="margin:15px">Description to be added </div>
+							<div style="margin:15px">
+								The OCR module gives collection managers the ability to batch OCR specimen images using the Tesseract OCR 
+								engine or process and upload text files containing OCR obtained from other OCR software.   
+							</div>
 
+							<!--  
 							<h2>Natural Language Processing (NLP)</h2>
 							<div style="margin:15px 0px 40px 15px">Description to be added </div>
 							-->
-							
-							
-							
-							
-							
-							
-							
+
 						</div>
 					</div>
 				</div>
