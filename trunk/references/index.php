@@ -11,7 +11,10 @@ $refExist = false;
 
 $statusStr = '';
 if($formSubmit){
-	if($formSubmit == 'search references'){
+	if($formSubmit == 'Delete Reference'){
+		$statusStr = $refManager->deleteReference($refId);
+	}
+	if($formSubmit == 'Search References'){
 		$refArr = $refManager->getRefList($_POST['searchtitlekeyword'],$_POST['searchauthor']);
 		foreach($refArr as $refName => $valueArr){
 			if($valueArr["title"]){
@@ -19,8 +22,13 @@ if($formSubmit){
 			}
 		}
 	}
-	if($formSubmit == 'Delete Reference'){
-		$statusStr = $refManager->deleteReference($refId);
+}
+if(!$formSubmit || $formSubmit != 'Search References'){
+	$refArr = $refManager->getRefList('','');
+	foreach($refArr as $refName => $valueArr){
+		if($valueArr["title"]){
+			$refExist = true;
+		}
 	}
 }
 
@@ -77,86 +85,97 @@ header("Content-Type: text/html; charset=".$charset);
 				<?php 
 			}
 			?>
-			<div style="margin:0px;">
-				<div id="findrefdiv" style="min-height:200px;">
-					<div style="float:right;margin:10px;">
-						<a href="#" onclick="toggle('newreferencediv');">
-							<img src="../images/add.png" alt="Create New Reference" />
-						</a>
-					</div>
-					<div id="newreferencediv" style="display:none;">
-						<form name="newreferenceform" action="refdetails.php" method="post" onsubmit="return verifyNewRefForm(this.form);">
-							<fieldset>
-								<legend><b>New Reference</b></legend>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="">
-										<b>Title: </b>
-									</div>
-									<div style="margin-left:35px;margin-top:-14px;">
-										<textarea name="newreftitle" id="newreftitle" rows="10" style="width:380px;height:40px;resize:vertical;" ></textarea>
-									</div>
-								</div>
-								<div style="clear:both;padding-top:6px;float:left;">
-									<span>
-										<b>Reference Type: </b><select name="newreftype" id="newreftype" style="width:400px;">
-											<option value="">Select Reference Type</option>
-											<option value="">------------------------------------------</option>
-											<?php 
-											$typeArr = $refManager->getRefTypeArr();
-											foreach($typeArr as $k => $v){
-												echo '<option value="'.$k.'">'.$v.'</option>';
-											}
-											?>
-										</select>
-									</span>
-								</div>
-								<div style="clear:both;padding-top:8px;float:right;">
-									<button name="formsubmit" type="submit" value="Create Reference">Create Reference</button>
-								</div>
-							</fieldset>
-						</form>
-					</div>
-					<div id="searchreferencediv" style="">
-						<form name="searchrefform" action="index.php" method="post" onsubmit="return verifySearchRefForm(this.form);">
-							<fieldset>
-								<legend><b>Search References</b></legend>
-								<div style="padding-top:4px;float:left;">
-									<span>
-										<b>Title Keyword: </b><input type="text" autocomplete="off" name="searchtitlekeyword" id="searchtitlekeyword" style="width:250px;" value="<?php echo ($formSubmit == 'search references'?$_POST['searchtitlekeyword']:''); ?>" />
-									</span>
-								</div>
-								<div style="clear:both;padding-top:15px;float:left;">
-									<span>
-										<b>Author's Last Name: </b><input type="text" name="searchauthor" id="searchauthor" style="width:250px;" value="<?php echo ($formSubmit == 'search references'?$_POST['searchauthor']:''); ?>" />
-									</span>
-								</div>
-								<div style="clear:both;padding-top:8px;float:right;">
-									<button name="formsubmit" type="submit" value="search references">Search References</button>
-								</div>
-							</fieldset>
-						</form>
-					</div>
-					<?php
-					if($_POST){
-						if($refExist){
-							echo '<div style="margin-top:10px;"><hr />';
-							echo '<ul>';
-							foreach($refArr as $refId => $recArr){
-								echo '<li>';
-								echo '<a href="refdetails.php?refid='.$refId.'"><b>'.$recArr["title"].'</b></a>';
-								echo ($recArr["secondarytitle"]?', '.$recArr["secondarytitle"].'.':'.');
-								echo ($recArr["pubdate"]?$recArr["pubdate"].'.':'');
-								echo ($recArr["authline"]?$recArr["authline"].'.':'');
-								echo '</li>';
-							}
-							echo '</ul></div>';
-						}
-						else{
-							echo '<div style="margin-top:10px;"><hr /><div style="font-weight:bold;font-size:120%;">There were no references matching your criteria.</div></div>';
-						}
-					}
-					?>
+			<div id="" style="float:right;width:240px;">
+				<form name="filterrefform" action="index.php" method="post">
+					<fieldset style="background-color:#FFD700;">
+					    <legend><b>Filter List</b></legend>
+				    	<div>
+							<div>
+								<b>Title Keyword:</b> 
+								<input type="text" autocomplete="off" name="searchtitlekeyword" id="searchtitlekeyword" size="25" value="<?php echo ($formSubmit == 'Search References'?$_POST['searchtitlekeyword']:''); ?>" />
+							</div>
+							<div>
+								<b>Author's Last Name:</b> 
+								<input type="text" name="searchauthor" id="searchauthor" size="25" value="<?php echo ($formSubmit == 'Search References'?$_POST['searchauthor']:''); ?>" />
+							</div>
+							<div style="padding-top:8px;float:right;">
+								<button name="formsubmit" type="submit" value="Search References">Filter List</button>
+							</div>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+			<div id="reflistdiv" style="min-height:200px;">
+				<div style="float:right;margin:10px;">
+					<a href="#" onclick="toggle('newreferencediv');">
+						<img src="../images/add.png" alt="Create New Reference" />
+					</a>
 				</div>
+				<div id="newreferencediv" style="display:none;">
+					<form name="newreferenceform" action="refdetails.php" method="post" onsubmit="return verifyNewRefForm(this.form);">
+						<fieldset>
+							<legend><b>Add New Reference</b></legend>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="">
+									<b>Title: </b>
+								</div>
+								<div style="margin-left:35px;margin-top:-14px;">
+									<textarea name="newreftitle" id="newreftitle" rows="10" style="width:380px;height:40px;resize:vertical;" ></textarea>
+								</div>
+							</div>
+							<div style="clear:both;padding-top:6px;float:left;">
+								<span>
+									<b>Reference Type: </b><select name="newreftype" id="newreftype" style="width:400px;">
+										<option value="">Select Reference Type</option>
+										<option value="">------------------------------------------</option>
+										<?php 
+										$typeArr = $refManager->getRefTypeArr();
+										foreach($typeArr as $k => $v){
+											echo '<option value="'.$k.'">'.$v.'</option>';
+										}
+										?>
+									</select>
+								</span>
+							</div>
+							<div style="clear:both;padding-top:8px;float:right;">
+								<input name="ispublished" type="hidden" value="1" />
+								<button name="formsubmit" type="submit" value="Create Reference">Create Reference</button>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<?php
+				if($refExist){
+					echo '<div style="font-weight:bold;font-size:120%;">References</div>';
+					echo '<div><ul>';
+					foreach($refArr as $refId => $recArr){
+						echo '<li>';
+						echo '<a href="refdetails.php?refid='.$refId.'"><b>'.$recArr["title"].'</b></a>';
+						if($recArr["ReferenceTypeId"] == 27){
+							echo ' series.';
+						}
+						if($recArr["tertiarytitle"] != $recArr["title"]){
+							echo ($recArr["tertiarytitle"]?', '.$recArr["tertiarytitle"]:'');
+						}
+						echo ($recArr["volume"]?' Vol. '.$recArr["volume"].'.':'');
+						echo ($recArr["number"]?' No. '.$recArr["number"].'.':'');
+						if(($recArr["tertiarytitle"] != $recArr["secondarytitle"]) && ($recArr["title"] != $recArr["secondarytitle"])){
+							echo ($recArr["secondarytitle"]?', '.$recArr["secondarytitle"].'.':'.');
+						}
+						echo ($recArr["edition"]?' '.$recArr["edition"].' Ed.':'');
+						echo ($recArr["pubdate"]?' '.$recArr["pubdate"].'.':'');
+						echo ($recArr["authline"]?' '.$recArr["authline"]:'');
+						echo '</li>';
+					}
+					echo '</ul></div>';
+				}
+				elseif(($formSubmit && $formSubmit == 'Search References') && !$refExist){
+					echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There were no references matching your criteria.</div></div>';
+				}
+				else{
+					echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are currently no references in the database.</div></div>';
+				}
+				?>
 			</div>
 			<?php 
 		}

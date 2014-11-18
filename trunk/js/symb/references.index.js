@@ -61,7 +61,148 @@ $(document).ready(function() {
 				}
 			}
 		},{});
+		
+	if(parentChild){
+		var url = '';
+		if(document.getElementById("ReferenceTypeId").value == 2 || document.getElementById("ReferenceTypeId").value == 4 || document.getElementById("ReferenceTypeId").value == 7 || document.getElementById("ReferenceTypeId").value == 8){
+			url = 'rpc/parenttitlelist.php';
+		}
+		if(document.getElementById("ReferenceTypeId").value == 3 || document.getElementById("ReferenceTypeId").value == 6){
+			url = 'rpc/seriestitlelist.php';
+		}
+		$( "#secondarytitle" )
+			// don't navigate away from the field on tab when selecting an item
+			.bind( "keydown", function( event ) {
+				if ( event.keyCode === $.ui.keyCode.TAB &&
+						$( this ).data( "autocomplete" ).menu.active ) {
+					event.preventDefault();
+				}
+			})
+			.autocomplete({
+				source: function( request, response ) {
+					$.getJSON( url, {
+						term: extractLast( request.term ), t: function() { return document.referenceeditform.secondarytitle.value; }
+					}, response );
+				},
+				search: function() {
+					// custom minLength
+					var term = extractLast( this.value );
+					if ( term.length < 3 ) {
+						return false;
+					}
+				},
+				focus: function() {
+					// prevent value inserted on focus
+					return false;
+				},
+				select: function( event, ui ) {
+					var terms = split( this.value );
+					// remove the current input
+					terms.pop();
+					// add the selected item
+					terms.push( ui.item.label );
+					getParentInfo(ui.item.value);
+					return false;
+				}
+			},{});
+	}
+	
+	if(document.getElementById("ReferenceTypeId").value == 4){
+		$( "#tertiarytitle" )
+			// don't navigate away from the field on tab when selecting an item
+			.bind( "keydown", function( event ) {
+				if ( event.keyCode === $.ui.keyCode.TAB &&
+						$( this ).data( "autocomplete" ).menu.active ) {
+					event.preventDefault();
+				}
+			})
+			.autocomplete({
+				source: function( request, response ) {
+					$.getJSON( "rpc/seriestitlelist.php", {
+						term: extractLast( request.term ), t: function() { return document.referenceeditform.tertiarytitle.value; }
+					}, response );
+				},
+				search: function() {
+					// custom minLength
+					var term = extractLast( this.value );
+					if ( term.length < 3 ) {
+						return false;
+					}
+				},
+				focus: function() {
+					// prevent value inserted on focus
+					return false;
+				},
+				select: function( event, ui ) {
+					var terms = split( this.value );
+					// remove the current input
+					terms.pop();
+					// add the selected item
+					terms.push( ui.item.label );
+					getParentInfo(ui.item.value);
+					return false;
+				}
+			},{});
+	}
 });
+
+function getParentInfo(refid){
+	var sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+		alert ("Your browser does not support AJAX!");
+		return;
+	}
+	var refType = document.getElementById("ReferenceTypeId").value;
+	
+	var url="rpc/parentdetails.php?refid="+refid+"&reftype="+refType;
+	
+	var parentArr = [];
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			parentArr = JSON.parse(sutXmlHttp.responseText);
+		}
+	};
+	sutXmlHttp.open("POST",url,false);
+	sutXmlHttp.send(null);
+	document.getElementById("parentRefId").value = parentArr['parentRefId'];
+	document.getElementById("parentRefId2").value = parentArr['parentRefId2'];
+	if(document.getElementById("secondarytitle")){
+		document.getElementById("secondarytitle").value = parentArr['secondarytitle'];
+	}
+	if(document.getElementById("tertiarytitle")){
+		document.getElementById("tertiarytitle").value = parentArr['tertiarytitle'];
+	}
+	if(document.getElementById("shorttitle")){
+		document.getElementById("shorttitle").value = parentArr['shorttitle'];
+	}
+	if(document.getElementById("alternativetitle")){
+		document.getElementById("alternativetitle").value = parentArr['alternativetitle'];
+	}
+	if(document.getElementById("pubdate")){
+		document.getElementById("pubdate").value = parentArr['pubdate'];
+	}
+	if(document.getElementById("edition")){
+		document.getElementById("edition").value = parentArr['edition'];
+	}
+	if(document.getElementById("volume")){
+		document.getElementById("volume").value = parentArr['volume'];
+	}
+	if(document.getElementById("number")){
+		document.getElementById("number").value = parentArr['number'];
+	}
+	if(document.getElementById("placeofpublication")){
+		document.getElementById("placeofpublication").value = parentArr['placeofpublication'];
+	}
+	if(document.getElementById("publisher")){
+		document.getElementById("publisher").value = parentArr['publisher'];
+	}
+	if(document.getElementById("isbn_issn")){
+		document.getElementById("isbn_issn").value = parentArr['isbn_issn'];
+	}
+	if(document.getElementById("numbervolumnes")){
+		document.getElementById("numbervolumnes").value = parentArr['numbervolumnes'];
+	}
+}
 
 function addAuthorToRef(){
 	var refauthid = document.getElementById('refauthorid').value;
@@ -133,7 +274,7 @@ function deleteRefLink(table,field,type,id){
 }
 
 function openNewAuthorWindow(){
-	var urlStr = 'authoreditor.php?refid='+refid;
+	var urlStr = 'authoreditor.php?refid='+refid+'&addauth=1';
 	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width=470,height=300');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
@@ -143,6 +284,10 @@ function processNewAuthor(f){
 	var firstName = f.firstname.value;
 	var middleName = f.middlename.value;
 	var lastName = f.lastname.value;
+	if(firstName == "" || lastName == ""){
+		alert("Please enter the first and last name of the author.");
+		return false;
+	}
 	var sutXmlHttp=GetXmlHttpObject();
 	if (sutXmlHttp==null){
 		alert ("Your browser does not support AJAX!");
@@ -216,6 +361,14 @@ function verifyNewRefForm(f){
 	return true;
 }
 
+function verifyNewAuthForm(f){
+	if(document.getElementById("firstname").value == "" || document.getElementById("lastname").value == ""){
+		alert("Please enter the first and last name of the author.");
+		return false;
+	}
+	return true;
+}
+
 function verifyEditRefForm(f){
 	if(document.getElementById("title")){
 		if(document.getElementById("title").value == ""){
@@ -226,6 +379,42 @@ function verifyEditRefForm(f){
 	if(document.getElementById("ReferenceTypeId").selectedIndex < 2){
 		alert("Please select the type of reference.");
 		return false;
+	}
+	if(document.getElementById("ReferenceTypeId").value == 4){
+		if(document.getElementById("secondarytitle").value == '' && document.getElementById("tertiarytitle").value == ''){
+			alert("Please enter either a book title or book series title.");
+			return false;
+		}
+		if(document.getElementById("tertiarytitle").value != '' && document.getElementById("volume").value == '' && document.getElementById("number").value == ''){
+			alert("Please enter either the volume or number in the series.");
+			return false;
+		}
+	}
+	if(document.getElementById("ReferenceTypeId").value == 2 || document.getElementById("ReferenceTypeId").value == 7){
+		if(document.getElementById("secondarytitle").value == ''){
+			alert("Please enter a periodical title.");
+			return false;
+		}
+		if(document.getElementById("volume").value == '' && document.getElementById("number").value == ''){
+			alert("Please enter a volume or number for the periodical.");
+			return false;
+		}
+	}
+	if(document.getElementById("ReferenceTypeId").value == 8){
+		if(document.getElementById("secondarytitle").value == ''){
+			alert("Please enter a periodical title.");
+			return false;
+		}
+		if(document.getElementById("edition").value == '' || document.getElementById("pubdate").value == ''){
+			alert("Please enter the date or edition for the periodical.");
+			return false;
+		}
+	}
+	if(document.getElementById("ReferenceTypeId").value == 3 || document.getElementById("ReferenceTypeId").value == 6){
+		if(document.getElementById("secondarytitle").value != '' && document.getElementById("volume").value == '' && document.getElementById("number").value == ''){
+			alert("Please enter either the volume or number in the series.");
+			return false;
+		}
 	}
 	return true;
 }
@@ -239,14 +428,13 @@ function verifyRefTypeChange(){
 	}
 }
 
-function verifySearchRefForm(f){
-	var titleKeyword = document.getElementById("searchtitlekeyword").value;
-	var authorKeyword = document.getElementById("searchauthor").value;
-	if(!titleKeyword && !authorKeyword){
-		alert("Please enter either a title keyword or an author's last name to search references.");
-		return false;
+function updateIspublished(f){
+	if(document.getElementById("ispublishedcheck").checked==true){
+		document.getElementById("ispublished").value = "1";
 	}
-	return true;
+	else{
+		document.getElementById("ispublished").value = "0";
+	}
 }
 
 function GetXmlHttpObject(){
@@ -265,113 +453,4 @@ function GetXmlHttpObject(){
 		}
 	}
 	return xmlHttp;
-}
-
-function verifyDate(eventDateInput){
-	//test date and return mysqlformat
-	var dateStr = eventDateInput.value;
-	if(dateStr == "") return true;
-
-	var dateArr = parseDate(dateStr);
-	if(dateArr['y'] == 0){
-		alert("Unable to interpret Date. Please use the following formats: yyyy-mm-dd, mm/dd/yyyy, or dd mmm yyyy");
-		return false;
-	}
-	else{
-		//Check to see if date is in the future 
-		try{
-			var testDate = new Date(dateArr['y'],dateArr['m']-1,dateArr['d']);
-			var today = new Date();
-			if(testDate > today){
-				alert("The date you entered has not happened yet. Please revise.");
-				return false;
-			}
-		}
-		catch(e){
-		}
-
-		//Check to see if day is valid
-		if(dateArr['d'] > 28){
-			if(dateArr['d'] > 31 
-				|| (dateArr['d'] == 30 && dateArr['m'] == 2) 
-				|| (dateArr['d'] == 31 && (dateArr['m'] == 4 || dateArr['m'] == 6 || dateArr['m'] == 9 || dateArr['m'] == 11))){
-				alert("The Day (" + dateArr['d'] + ") is invalid for that month");
-				return false;
-			}
-		}
-
-		//Enter date into date fields
-		var mStr = dateArr['m'];
-		if(mStr.length == 1){
-			mStr = "0" + mStr;
-		}
-		var dStr = dateArr['d'];
-		if(dStr.length == 1){
-			dStr = "0" + dStr;
-		}
-		eventDateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
-	}
-	return true;
-}
-
-function parseDate(dateStr){
-	var y = 0;
-	var m = 0;
-	var d = 0;
-	try{
-		var validformat1 = /^\d{4}-\d{1,2}-\d{1,2}$/ //Format: yyyy-mm-dd
-		var validformat2 = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/ //Format: mm/dd/yyyy
-		var validformat3 = /^\d{1,2} \D+ \d{2,4}$/ //Format: dd mmm yyyy
-		if(validformat1.test(dateStr)){
-			var dateTokens = dateStr.split("-");
-			y = dateTokens[0];
-			m = dateTokens[1];
-			d = dateTokens[2];
-		}
-		else if(validformat2.test(dateStr)){
-			var dateTokens = dateStr.split("/");
-			m = dateTokens[0];
-			d = dateTokens[1];
-			y = dateTokens[2];
-			if(y.length == 2){
-				if(y < 20){
-					y = "20" + y;
-				}
-				else{
-					y = "19" + y;
-				}
-			}
-		}
-		else if(validformat3.test(dateStr)){
-			var dateTokens = dateStr.split(" ");
-			d = dateTokens[0];
-			mText = dateTokens[1];
-			y = dateTokens[2];
-			if(y.length == 2){
-				if(y < 15){
-					y = "20" + y;
-				}
-				else{
-					y = "19" + y;
-				}
-			}
-			mText = mText.substring(0,3);
-			mText = mText.toLowerCase();
-			var mNames = new Array("jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec");
-			m = mNames.indexOf(mText)+1;
-		}
-		else if(dateObj instanceof Date && dateObj != "Invalid Date"){
-			var dateObj = new Date(dateStr);
-			y = dateObj.getFullYear();
-			m = dateObj.getMonth() + 1;
-			d = dateObj.getDate();
-		}
-	}
-	catch(ex){
-	}
-	var retArr = new Array();
-	retArr["y"] = y.toString();
-	retArr["m"] = m.toString();
-	retArr["d"] = d.toString();
-	return retArr;
 }
