@@ -50,7 +50,7 @@ class DynamicChecklistManager {
 			if($tidFilter){
 				$sql .= 'and e.parentTid = '.$tidFilter;
 			}
-			echo $sql; Exit;
+			//echo $sql; Exit;
 			$this->conn->query($sql);
 		}
 
