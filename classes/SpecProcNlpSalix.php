@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 include_once($serverRoot.'/classes/SalixUtilities.php');
 include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 
@@ -56,11 +56,6 @@ class SpecProcNlpSalix
 			return $this->Results;
 		$dwcArr = array();
 		//Add the SALIX parsing code here and/or in following functions of a private scope
-		if(mb_detect_encoding($Label,'UTF-8,ISO-8859-1') == "UTF-8")
-			{
-			$Label = utf8_decode($Label);
-			//$ocrStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$ocrStr);
-			}
 		//Set the keys for a few arrays to the names of the return fields
 		$this->Results = array_fill_keys($this->ResultKeys,'');
 		$this->Assigned = array_fill_keys($this->ResultKeys,-1);
@@ -70,6 +65,14 @@ class SpecProcNlpSalix
 		//****************************************************************
 		// Do some preformatting on the input label text
 		//****************************************************************
+
+
+		setlocale(LC_ALL,"en_US");
+		$Label = str_replace("â€™","'",$Label);
+		if(mb_detect_encoding($Label,'UTF-8') == "UTF-8")
+			{
+			$Label = iconv("UTF-8","ISO-8859-1//TRANSLIT",$Label);
+			}
 		
 		//A few replacements to format the label making it easier to parse
 		
@@ -87,12 +90,15 @@ class SpecProcNlpSalix
 		$Label = str_replace("<","",$Label);
 		$Label = str_replace(">","",$Label);
 		$Label = str_replace("^"," ",$Label);
-
+		$Label = str_replace("â€™","'",$Label);
+		$Label = str_replace("Â°;","Â°",$Label);
+		//echo "$Label<br>";
+		
 		//Separate at semicolons
 		$Label = str_replace(";","\r\n",$Label);
 		
 		//Separate lines at a few start words
-		foreach(array("County:","Collected by:","Collector:","Date:","Det.","Altitude:","Altitude about") as $SplitPoint)
+		foreach(array("Collected by:","Collector:","Date:","Det.","Altitude:","Altitude about","Determined by","Determiner") as $SplitPoint)
 			{
 			$Label = str_ireplace("$SplitPoint","\r\n$SplitPoint",$Label);
 			}
@@ -138,7 +144,6 @@ class SpecProcNlpSalix
 			$this->StatScore[$L] = $OneStat;
 			}
 		
-		//$this->printr($this->StatScore,"Stats");
 		//*************************************************************
 		//Here's where the individual fields get called and hopefully filled
 		
@@ -617,13 +622,14 @@ class SpecProcNlpSalix
 			$Phrase = $WordsArray[0][$w][0]." ".$WordsArray[0][$w+1][0]; //Two word phrase
 			$Score = $this->SingleWordStats($Phrase);//Get word stats score for these two words
 			
+			//New way to score, just add 10 for valid names.
 			$SciScore = 0;
 			$query = "SELECT sciname FrOM taxa WHERE sciname LIKE '$Phrase' LIMIT 1";
 			$result = $this->conn->query($query);
 			if($result->num_rows == 1)
 				$SciScore += 10;
 			
-			
+			//Old way.  Very slow, but maybe a little more refined...?
 			//$SciScore = $this->ScoreSciName($WordsArray[0][$w][0], $WordsArray[0][$w+1][0], true);//Is it a scientific name?
 			if($SciScore > 8)//It's a sciname
 				$FScore = 0;
@@ -692,11 +698,12 @@ class SpecProcNlpSalix
 		$match=array();
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{
+			//echo "$L, {$this->LabelLines[$L]}<br>";
 			$RankArray[$L] = 0;
 			if(preg_match_all("(\b[NSEW]\b)",$this->LabelLines[$L],$match) == 2)
 				$RankArray[$L] = 5;
-			$RankArray[$L] += preg_match_all("([0-9]{2,3}+[°\*\"\' ])",$this->LabelLines[$L],$match);
-			if(strpos($this->LabelLines[$L],"°") > 0)
+			$RankArray[$L] += preg_match_all("([0-9]{2,3}+[\?Â°\*\"\' ])",$this->LabelLines[$L],$match);
+			if(strpos($this->LabelLines[$L],"Â°") > 0)
 				$RankArray[$L] += 5; //A degree symbol pretty much clinches it for Lat/Long, though they often get mis-OCR'd
 			}
 		asort($RankArray);
@@ -707,11 +714,11 @@ class SpecProcNlpSalix
 		else
 			return;
 		//echo "{$RankArray[$L]}<br>";
-		if(strpos($this->LabelLines[$L],"°") > 0 && $RankArray[$L] < 10)//Found degree symbol, but rank is a little low.  Maybe it's split over two lines
+		if(strpos($this->LabelLines[$L],"Â°") > 0 && $RankArray[$L] < 10)//Found degree symbol, but rank is a little low.  Maybe it's split over two lines
 			{
-			if($L > 0 && strpos($this->LabelLines[$L-1],"°") > 0)
+			if($L > 0 && strpos($this->LabelLines[$L-1],"Â°") > 0)
 				$OneLine = $this->LabelLines[$L-1]." ".$this->LabelLines[$L];
-			else if($L < count($this->LabelLines)-1 && strpos($this->LabelLines[$L+1],"°") > 0)
+			else if($L < count($this->LabelLines)-1 && strpos($this->LabelLines[$L+1],"Â°") > 0)
 				$OneLine = $this->LabelLines[$L]." ".$this->LabelLines[$L+1];
 			else
 				$OneLine = $this->LabelLines[$L];
@@ -722,8 +729,8 @@ class SpecProcNlpSalix
 		//Put together the modules to build a Lat/Long in several formats
 		$Preg = array();
 		$Preg['dir'] = "[NSEW][\., ]*";
-		$Preg['deg'] = "[0-9\.]+[°\*] ?";
-		$Preg['min'] = "[0-9\.]+[\'’`, ]*";
+		$Preg['deg'] = "[0-9\.]+[Â°\*] ?";
+		$Preg['min'] = "[0-9\.]+[\', ]*";
 		$Preg['sec'] = "(?:[0-9\.]+\")*";
 		
 		if($this->PregLatLong($Preg['dir'].$Preg['deg'].$Preg['min'].$Preg['sec'],$L,$OneLine))
@@ -744,13 +751,20 @@ class SpecProcNlpSalix
 			$OneLine = $this->LabelLines[$L];
 		$match=array();
 		$Found = preg_match_all("((".$Preg."))", $OneLine,$match);
+		
 		if($Found > 1)
 			{
+			//echo "Found<br>";
+			//$this->Results['occurrenceRemarks'] .= $Preg;
+			$VerbLatLong = ($match[0][0]." ".$match[0][1]);
 			$OU = new OccurrenceUtilities;
-			$LL = $OU->parseVerbatimCoordinates($match[0][0]." ".$match[0][1]);
+			$LL = $OU->parseVerbatimCoordinates($VerbLatLong);
+			$this->Results['substrate'] = $VerbLatLong;
 			if(count($LL) > 0)
 				{
-				$this->AddToResults('verbatimCoordinates',$match[0][0]." ".$match[0][1],$L);
+				//$this->printr($LL,"LL");
+				
+				$this->AddToResults('verbatimCoordinates',$VerbLatLong,$L);
 				$this->AddToResults('decimalLatitude',$LL['lat'],$L);
 				$this->AddToResults('decimalLongitude',$LL['lng'],$L);
 				for($Line=$L-1;$Line < $L+2;$Line++)
@@ -1337,7 +1351,14 @@ class SpecProcNlpSalix
 		
 		//Go through and rank the lines, looking for "Plants Of" and "County" at the same time.
 		for($L=0;$L<count($this->LabelLines);$L++)
-			{ //If certain words appear, then much more likely state is there.  
+			{ //If certain words appear, then much more likely state is there. 
+
+			/*Alternative to using reg exp:
+			$C = array_search("county",array_map('strtolower',$this->LabelArray[$L])); 
+			if($C !== false)
+				echo "Found Line $L: {$this->LabelArray[$L][$C]} in {$this->LabelLines[$L]}<br>";
+			*/
+			
 			$RankArray[$L] = 10-$L;
 			$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(.*))i",$this->LabelLines[$L],$match);
 			if($Found !== 1)
@@ -1353,7 +1374,6 @@ class SpecProcNlpSalix
 			$Found = preg_match($Preg,$this->LabelLines[$L],$match);
 			if($Found === 0)
 				{
-				
 				$Preg = "((\bcounty\b):*\s+\b([a-z]{2,20}))i";
 				$Found = preg_match($Preg,$this->LabelLines[$L],$match);
 				}
@@ -1361,6 +1381,7 @@ class SpecProcNlpSalix
 			if($Found === 1)
 				{//Found the word "County" on the label.  Might be enough to determine state and country.
 				//echo "Found word County<br>";
+				//$this->printr($match,"County match");
 				$query = "SELECT c.stateId,c.countyName,s.statename,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[1]}'";
 				$result = $this->conn->query($query);
 				if($result->num_rows == 0)
@@ -1787,6 +1808,7 @@ class SpecProcNlpSalix
 	private function ScoreOneLine($L, &$Field, &$Score)
 		{ //Score a line for wordstats
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
+		$ExcludeWords = array('verbatimAttributes'=>array("herbarium","institute","university","botanical"),'habitat'=>array("herbarium","university"));
 		$StartField = "";
 		foreach($Fields as $F)
 			{
@@ -1798,6 +1820,19 @@ class SpecProcNlpSalix
 				}
 			}
 		$this->ScoreString($this->LabelLines[$L],$Field, $Score);
+		if(isset($ExcludeWords[$Field]))
+			{
+			foreach($ExcludeWords[$Field] as $Ex)
+				{
+				//echo "Checking for $Ex in {$this->LabelLines[$L]}<br>";
+				if(stristr($this->LabelLines[$L],$Ex) !== false)
+					{
+					//echo "Found $Ex<br>";
+					//echo "Score = $Score<br>";
+					$Score -= 1000;
+					}
+				}
+			}
 		return;
 		}
 		
