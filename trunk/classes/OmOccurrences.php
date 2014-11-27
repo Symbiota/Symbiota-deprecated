@@ -824,17 +824,23 @@ CREATE TABLE `omoccurrences` (
        // ******* Note: $connection must be a mysqli object.
        global $connection;
        $returnvalue = null;
-       if ($institutionCode==null) { 
-           $sql = 'select collid from omcollections where collectioncode = ? ';
+       if ($institutionCode==null || strlen($institutionCode)==0) { 
            if($collectionCode != NULL) {
            	   // if only collection code is supplied, try several possible mappings for 
+               // the collection code (in omcollections as collection code, in omcollections
+               // as institution code (plausible for zoological collections or botanical 
+               // collections where AppleCore is not being followed), or in omoccurrences 
+               // (where one omcollection record is at the institution level and omoccurrences
+               // records contain several different collectioncodes for one collid)).
            	   $found = false;
+               $sql = 'select collid from omcollections where collectioncode = ? ';
                if ($statement = $connection->prepare($sql)) {
                    $statement->bind_param("s", $collectionCode);
                    $statement->execute();
                    $statement->bind_result($returnvalue);
+                   $statement->store_result();
                    $statement->fetch();
-                   if ($returnvalue) { $found = true; } 
+               	   if ($statement->num_rows == 1) { $found = true; }
                    $statement->close();
                }
                if (!$found) { 
@@ -843,35 +849,101 @@ CREATE TABLE `omoccurrences` (
                        $statement->bind_param("s", $collectionCode);
                        $statement->execute();
                        $statement->bind_result($returnvalue);
+                       $statement->store_result();
                        $statement->fetch();
-                       if ($returnvalue) { $found = true; } 
+               		   if ($statement->num_rows == 1) { $found = true; }
                        $statement->close();
                    }
                }
                if (!$found) {
-               	$sql = 'select distinct collid from omoccurrences where collectioncode = ? ';
-               	if ($statement = $connection->prepare($sql)) {
+               	 $sql = 'select distinct collid from omoccurrences where collectioncode = ? ';
+               	 if ($statement = $connection->prepare($sql)) {
                		$statement->bind_param("s", $collectionCode);
                		$statement->execute();
                		$statement->bind_result($returnvalue);
+                    $statement->store_result();
                		$statement->fetch();
-               		if ($returnvalue) { $found = true; }
+               		if ($statement->num_rows == 1) { $found = true; }
                		$statement->close();
-               	}
+               	 }
+               }               
+               if (!$found) {
+               	 $sql = 'select distinct collid from omcollections where collectioncode = ? and institutioncode is null ';
+               	 if ($statement = $connection->prepare($sql)) {
+               		$statement->bind_param("s", $collectionCode);
+               		$statement->execute();
+               		$statement->bind_result($returnvalue);
+                    $statement->store_result();
+               		$statement->fetch();
+               		if ($statement->num_rows == 1) { $found = true; }
+               		$statement->close();
+               	 }
                }               
            }
        } else { 
-       	   // If instituion code was provided, assume that the Symbiota instance is holding 
-       	   // correct values for both dwc:collectionCode and dwc:institutionCode in omcollections.
-           $sql = 'select collid from omcollections where institutioncode = ? and collectioncode = ? ';
-           if($collectionCode != NULL) {
-               if ($statement = $connection->prepare($sql)) {
-                   $statement->bind_param("ss", $institutionCode, $collectionCode);
-                   $statement->execute();
-                   $statement->bind_result($returnvalue);
-                   $statement->fetch();
-                   $statement->close();
-               }
+           $found = false;
+           if ($collectionCode==null || strlen($collectionCode)==0) { 
+              // possible case for zoological collections, no collection code in use, just institution code.
+              $sql = 'select collid from omcollections where institutioncode = ? and collectioncode is null ';
+              if($collectionCode != NULL) {
+                  if ($statement = $connection->prepare($sql)) {
+                      $statement->bind_param("s", $institutionCode);
+                      $statement->execute();
+                      $statement->bind_result($returnvalue);
+                      $statement->store_result();
+                      $statement->fetch();
+                  	   if ($statement->num_rows == 1) { $found = true; }
+                      $statement->close();
+                  }
+              }
+           } 
+           if (!$found) { 
+          	   // If instituion code was provided, most likely case is that the Symbiota instance is holding 
+          	   // correct values for both dwc:collectionCode and dwc:institutionCode in omcollections.
+              $sql = 'select collid from omcollections where institutioncode = ? and collectioncode = ? ';
+              if($collectionCode != NULL) {
+                  if ($statement = $connection->prepare($sql)) {
+                      $statement->bind_param("ss", $institutionCode, $collectionCode);
+                      $statement->execute();
+                      $statement->bind_result($returnvalue);
+                      $statement->store_result();
+                      $statement->fetch();
+                  	   if ($statement->num_rows == 1) { $found = true; }
+                      $statement->close();
+                  }
+              }
+           }
+           if (!$found) { 
+       	      // Failover case, the Symbiota instance is holding dwc:institutionCode in omcollections,
+              // but has more that one collectioncode in omoccurrences for that collid.
+              $sql = 'select distinct c.collid from omcollections c left join omoccurrences o on c.collid = o.collid where c.institutioncode = ? and o.collectioncode = ? ';
+              if($collectionCode != NULL) {
+                 if ($statement = $connection->prepare($sql)) {
+                    $statement->bind_param("ss", $institutionCode, $collectionCode);
+                    $statement->execute();
+                    $statement->bind_result($returnvalue);
+                    $statement->store_result();
+                    $statement->fetch();
+               	    if ($statement->num_rows == 1) { $found = true; }
+                    $statement->close();
+                 }
+              }
+           }
+           if (!$found) { 
+       	      // Failover case, the Symbiota instance is holding dwc:institutionCode and
+              // dwc:collectioncode in omoccurrences.
+              $sql = 'select distinct collid from omoccurrences where institutioncode = ? and collectioncode = ? ';
+              if($collectionCode != NULL) {
+                 if ($statement = $connection->prepare($sql)) {
+                    $statement->bind_param("ss", $institutionCode, $collectionCode);
+                    $statement->execute();
+                    $statement->bind_result($returnvalue);
+                    $statement->store_result();
+                    $statement->fetch();
+               	    if ($statement->num_rows == 1) { $found = true; }
+                    $statement->close();
+                 }
+              }
            }
        }
        return $returnvalue;
