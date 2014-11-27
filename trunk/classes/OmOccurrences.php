@@ -834,7 +834,7 @@ CREATE TABLE `omoccurrences` (
                    $statement->execute();
                    $statement->bind_result($returnvalue);
                    $statement->fetch();
-                   if  ($statement->num_rows==1) { $found = true; } 
+                   if ($returnvalue) { $found = true; } 
                    $statement->close();
                }
                if (!$found) { 
@@ -844,7 +844,7 @@ CREATE TABLE `omoccurrences` (
                        $statement->execute();
                        $statement->bind_result($returnvalue);
                        $statement->fetch();
-                       if  ($statement->num_rows==1) { $found = true; } 
+                       if ($returnvalue) { $found = true; } 
                        $statement->close();
                    }
                }
@@ -855,9 +855,7 @@ CREATE TABLE `omoccurrences` (
                		$statement->execute();
                		$statement->bind_result($returnvalue);
                		$statement->fetch();
-               		if  ($statement->num_rows==1) {
-               			$found = true;
-               		}
+               		if ($returnvalue) { $found = true; }
                		$statement->close();
                	}
                }               
