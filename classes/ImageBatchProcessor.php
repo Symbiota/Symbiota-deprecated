@@ -128,7 +128,7 @@ class ImageBatchProcessor {
 			//Create log File
 			if(!file_exists($this->logPath)){
 				if(!mkdir($this->logPath,0,true)){
-					$echo("Warning: unable to create log file: ".$this->logPath);
+					echo("Warning: unable to create log file: ".$this->logPath);
 				}
 			}
 			if(file_exists($this->logPath)){
@@ -482,25 +482,26 @@ class ImageBatchProcessor {
 						}
 					}
 				}
+				$xml->close();
 				if ($foundSchema>0) { 
 					$this->logOrEcho("Proccessed $pathFrag$fileName, records: $result->recordcount, success: $result->successcount, failures: $result->failurecount, inserts: $result->insertcount, updates: $result->updatecount.");
 					if ($result->imagefailurecount>0) {
 						$this->logOrEcho("ERROR: not moving (".$fileName."), image failure count " . $result->imagefailurecount . " greater than zero.",1);
 					}
 					else {
+						$oldFile = $this->sourcePathBase.$pathFrag.$fileName;
 						if($this->keepOrig){
-							$oldFile = $this->sourcePathBase.$pathFrag.$fileName;
 							$newFileName = substr($pathFrag,strrpos($pathFrag,'/')).'orig_'.time().'.'.$fileName;
 							if(!file_exists($this->targetPathBase.$this->targetPathFrag.'orig_xml')){
 								mkdir($this->targetPathBase.$this->targetPathFrag.'orig_xml');
 							}
 							if(!rename($oldFile,$this->targetPathBase.$this->targetPathFrag.'orig_xml/'.$newFileName)){
-								$this->logOrEcho("ERROR: unable to move (".$fileName.") ",1);
+								$this->logOrEcho("ERROR: unable to move (".$oldFile." =>".$newFileName.") ",1);
 							}
 						 } 
 						 else {
 							if(!unlink($oldFile)){
-								$this->logOrEcho("ERROR: unable to delete file (".$fileName.") ",1);
+								$this->logOrEcho("ERROR: unable to delete file (".$oldFile.") ",1);
 							}
 						}
 					}
@@ -1377,7 +1378,8 @@ class ImageBatchProcessor {
 				if(!rename($filePath,$this->targetPathBase.$this->targetPathFrag.'orig_skeletal'.$fileName)){
 					$this->logOrEcho("ERROR: unable to move (".$filePath.") ",1);
 				}
-			} else {
+			} 
+			else{
 				if(!unlink($filePath)){
 					$this->logOrEcho("ERROR: unable to delete file (".$filePath.") ",1);
 				}
