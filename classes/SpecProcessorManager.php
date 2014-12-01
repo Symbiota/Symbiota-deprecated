@@ -106,7 +106,7 @@ class SpecProcessorManager {
 	}
 
 	public function addProject($addArr){
-		if($addArr['title'] = 'OCR Harvest'){
+		if($addArr['title'] == 'OCR Harvest'){
 			$this->conn->query('DELETE FROM specprocessorprojects WHERE (title = "OCR Harvest") AND (collid = '.$this->collid.')');
 		}
 		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
