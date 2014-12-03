@@ -383,6 +383,8 @@ class DwcArchiverOccurrence{
 
 	private function initImageArr(){
 		$imgFieldArr['coreid'] = 'o.occid';
+		$imgTermArr['identifier'] = '"http://purl.org/dc/terms/identifier';
+		$imgFieldArr['identifier'] = 'IFNULL(i.originalurl,i.url) as identifier';
 		$imgTermArr['accessURI'] = 'http://rs.tdwg.org/ac/terms/accessURI';
 		$imgFieldArr['accessURI'] = 'IFNULL(i.originalurl,i.url) as accessURI';
 		if($this->schemaType == 'backup'){
@@ -1358,6 +1360,7 @@ class DwcArchiverOccurrence{
 			}
 
 			while($r = $rs->fetch_assoc()){
+				if(substr($r['identifier'],0,1) == '/') $r['identifier'] = $localDomain.$r['identifier'];
 				if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $localDomain.$r['accessURI'];
 				if($this->schemaType != 'backup'){
 					if(stripos($r['rights'],'http://creativecommons.org') === 0){

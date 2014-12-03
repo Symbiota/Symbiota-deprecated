@@ -27,7 +27,7 @@ $imgFileSizeLimit = 300000;		//Files above this size limit and still within pixe
 //$useImageMagick = 0;		//1 = ImageMagick resize images, given that it's installed (faster, less memory intensive)
 $tesseractPath = ''; 			//Needed for OCR function in the occurrence editor page
 $NLP_LBCC_ACTIVATED = 0;
-//$SALIX_PATH = 'http://symbiota2.acis.ufl.edu/symbiota/dlafferty/salixhandler.php';
+$NLP_SALIX_ACTIVATED = 0;
 
 //Module activations
 $occurrenceModIsActive = 1;
