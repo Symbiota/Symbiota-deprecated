@@ -174,9 +174,9 @@ if($spprId) $specManager->setProjVariables($spprId);
 									</tr>
 									<tr>
 										<td>
-											<b>Regular Expression:</b>
+											<b>Regular Expression:</b> 
 										</td>
-										<td style="padding-top:13px;"> 
+										<td>
 											<input name="speckeypattern" type="text" style="width:300px;" value="<?php echo $specManager->getSpecKeyPattern(); ?>" />
 											<a id="speckeypatterninfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:15px;" />
