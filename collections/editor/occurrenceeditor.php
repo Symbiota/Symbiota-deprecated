@@ -387,18 +387,7 @@ else{
 	<script type="text/javascript">
 		var collId = "<?php echo $collId; ?>";
 		var csMode = "<?php echo $crowdSourceMode; ?>";
-		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
 		var tabTarget = <?php echo (is_numeric($tabTarget)?$tabTarget:'0'); ?>;
-		var activeImgIndex = 1;
-		var ocrFragIndex = 1;
-		<?php
-		if(isset($SALIX_PATH) && $SALIX_PATH){
-			?>
-			var salixPath = "<?php echo $SALIX_PATH; ?>";
-			var csDefault = "<?php echo $charset; ?>";
-			<?php 
-		}
-		?>
 		var imgArr = [];
 		var imgLgArr = [];
 		<?php
@@ -423,10 +412,10 @@ else{
 
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=141014"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=141014"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=141014"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141014"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=141202"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=141202"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=141202"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141202"></script>
 </head>
 <body>
 	<!-- inner text -->

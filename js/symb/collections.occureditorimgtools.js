@@ -1,3 +1,14 @@
+var activeImgIndex = 1;
+var ocrFragIndex = 1;
+
+$(document).ready(function() {
+	//Remember image popout status 
+	var imgTd = getCookie("symbimgtd");
+	if(imgTd != "close") toggleImageTdOn();
+	//if(imgTd == "open" || csMode == 1) toggleImageTdOn();
+	initImgRes();
+});
+
 function toggleImageTdOn(){
 	var imgSpan = document.getElementById("imgProcOnSpan");
 	if(imgSpan){
@@ -132,6 +143,15 @@ function ocrImage(ocrButton,imgidVar,imgCnt){
 		var addform = document.getElementById("ocraddform-"+imgCnt);
 		addform.rawtext.innerText = rawStr;
 		addform.rawtext.textContent = rawStr;
+		//Add OCR source with date
+		var today = new Date();
+		var dd = today.getDate();
+		var mm = today.getMonth()+1; //January is 0!
+		var yyyy = today.getFullYear();
+		if(dd<10) dd='0'+dd;
+		if(mm<10) mm='0'+mm;
+		addform.rawsource.value = "Tesseract: "+yyyy+"-"+mm+"-"+dd;
+		
 		document.getElementById("workingcircle-"+imgCnt).style.display = "none";
 		ocrButton.disabled = false;
 	});
