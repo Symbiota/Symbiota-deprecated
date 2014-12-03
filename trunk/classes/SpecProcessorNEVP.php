@@ -417,33 +417,35 @@ class OCCURRENCE {
                   $sourceUrl = null;
                   $imgWebUrl = null;
                   $mediaguid = $media->guid;
-                  foreach($media->accesspoints as $accesspoint) {  
-                     if (strlen($accesspoint->accessURI)>0) { 
-                        $irodsPath = str_replace('/','\/',$accesspoint->accessURI);
-                        $irodsPath = preg_replace('/^file:/','irods:',$irodsPath);
-                        $imageresult = getiPlantID($accesspoint->accessURI,$irodsPath);
-                        if ($imageresult->statusok===FALSE) { 
-                           echo "Error: " . $imageresult->error . "\n";
-                           $result->imagefailurecount++;
-                        } else { 
-                           if ($debug) { echo "[$accesspoint->format]"; } 
-                           $iPlantID = $imageresult->resource_uniq;
-                           if ($accesspoint->format=="dng") { 
-                              // Original dng file
-                              $sourceUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID";
-                           } 
-                           if ($accesspoint->format=="jpg") { 
-                              // Preconstructed derivative JPG file
-                              $imgWebUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?resize=1250&format=jpeg";
-                              $imgTnUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?thumbnail=225,225";
-                              // Because this is a JPEG, no need to request ?rotate=guess&format=jpeg,quality,100
-                              // and the folks at iPlant are requesting that this request be made without the 
-                              // un-needed transformation parameters.
-                              $imgLgUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID";
-                           } 
-                        }
-                     }
-                  }
+                  if (is_array($media->accesspoints))  { 
+                     foreach($media->accesspoints as $accesspoint) {  
+                        if (strlen($accesspoint->accessURI)>0) { 
+                           $irodsPath = str_replace('/','\/',$accesspoint->accessURI);
+                           $irodsPath = preg_replace('/^file:/','irods:',$irodsPath);
+                           $imageresult = getiPlantID($accesspoint->accessURI,$irodsPath);
+                           if ($imageresult->statusok===FALSE) { 
+                              echo "Error: " . $imageresult->error . "\n";
+                              $result->imagefailurecount++;
+                           } else { 
+                              if ($debug) { echo "[$accesspoint->format]"; } 
+                              $iPlantID = $imageresult->resource_uniq;
+                              if ($accesspoint->format=="dng") { 
+                                 // Original dng file
+                                 $sourceUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID";
+                              } 
+                              if ($accesspoint->format=="jpg") { 
+                                 // Preconstructed derivative JPG file
+                                 $imgWebUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?resize=1250&format=jpeg";
+                                 $imgTnUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?thumbnail=225,225";
+                                 // Because this is a JPEG, no need to request ?rotate=guess&format=jpeg,quality,100
+                                 // and the folks at iPlant are requesting that this request be made without the 
+                                 // un-needed transformation parameters.
+                                 $imgLgUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID";
+                              } 
+                           }
+                        } // end if accesspoint has accessURL
+                     } // end for each accesspoint
+                  } // end isarray
                   // Workaround to handle new case of only a JPEG being provided by some insitutions
                   if ($sourceUrl==null && $imgLgUrl!=null) { 
                       // a jpeg was provided, but not a DNG, use the large version of the jpeg as the source.
