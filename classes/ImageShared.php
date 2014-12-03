@@ -103,12 +103,12 @@ class ImageShared{
  		
  	}
 
-	public function uploadImage(){
+	public function uploadImage($imgFile = 'imgfile'){
 		if($this->targetPath){
 			if(file_exists($this->targetPath)){
-				$imgFile = basename($_FILES['imgfile']['name']);
-				$fileName = $this->cleanFileName($imgFile);
-				if(move_uploaded_file($_FILES['imgfile']['tmp_name'], $this->targetPath.$fileName.$this->imgExt)){
+				$imgFileName = basename($_FILES[$imgFile]['name']);
+				$fileName = $this->cleanFileName($imgFileName);
+				if(move_uploaded_file($_FILES[$imgFile]['tmp_name'], $this->targetPath.$fileName.$this->imgExt)){
 					$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
 					$this->imgName = $fileName;
 					//$this->testOrientation();
@@ -761,6 +761,10 @@ class ImageShared{
     } 
     
     //Getter and setter
+    public function getActiveImgId(){
+    	return $this->activeImgId;
+    }
+    
 	public function getImageRootPath(){
 		return $this->imageRootPath;
 	}
