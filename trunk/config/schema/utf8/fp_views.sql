@@ -1,7 +1,7 @@
 --  Index definitions to support OAI/PMH harvesting of occurrences and taxa
 
-create index idx_omocclastmodified on omoccurrences.datelastmodified;
-create index idx_taxacreated on taxa.initialtimestamp;
+create index idx_omocclastmodified on omoccurrences(datelastmodified);
+create index idx_taxacreated on taxa(initialtimestamp);
 --  TODO: Need to add date last modified to taxa.
 
 --  View definitions to support OAI/PMH harvesting of occurrences and taxa from Symbiota.
