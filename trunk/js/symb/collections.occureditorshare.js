@@ -99,8 +99,6 @@ function submitBatchUpdate(f){
 	var fieldName = f.bufieldname.options[f.bufieldname.selectedIndex].value;
 	var oldValue = f.buoldvalue.value;
 	var newValue = f.bunewvalue.value;
-	var collId = f.collid.value;
-	var ouid = f.ouid.value;
 	var buMatch = 0;
 	if(f.bumatch[1].checked) buMatch = 1;
 	if(!fieldName){
@@ -115,28 +113,22 @@ function submitBatchUpdate(f){
 		alert("The values within current and new fields cannot be equal to one another");
 		return false;
 	}
-	xmlHttp = GetXmlHttpObject();
-	if(xmlHttp==null){
-		alert ("Your browser does not support AJAX!");
-		return;
-	}
-	var url = "rpc/batchupdateverify.php?collid="+collId+"&fieldname="+fieldName+"&oldvalue="+oldValue+"&bumatch="+buMatch+"&ouid="+ouid;
-	xmlHttp.onreadystatechange=function(){
-		if(xmlHttp.readyState==4 && xmlHttp.status==200){
-			var retCnt = xmlHttp.responseText;
-			if(retCnt != ''){
-				if(confirm("You are about to update "+retCnt+" records.\nNote that you won't be able to undo this Replace operation!\nDo you want to continue?")){
-					f.submit();
-				}
-			}
-			else{
-				alert("ERROR: unable to batch update");
+
+	$.ajax({
+		type: "POST",
+		url: "rpc/batchupdateverify.php",
+		dataType: "json",
+		data: { collid: f.collid.value, fieldname: fieldName, oldvalue: oldValue, bumatch: buMatch, ouid: f.ouid.value }
+	}).done(function( retCnt ) {
+		if(retCnt){
+			if(confirm("You are about to update "+retCnt+" records.\nNote that you won't be able to undo this Replace operation!\nDo you want to continue?")){
+				f.submit();
 			}
 		}
-	};
-	xmlHttp.open("POST",url,true);
-	xmlHttp.send(null);
-	return false;
+		else{
+			alert("ERROR: unable to batch update");
+		}
+	});
 }
 
 function customSelectChanged(targetSelect){
@@ -209,35 +201,4 @@ function toggleSearch(){
 function toggleBatchUpdate(){
 	document.getElementById("querydiv").style.display = "none";
 	toggle("batchupdatediv");
-}
-
-function getCookie(cName){
-	var i,x,y;
-	var cookieArr = document.cookie.split(";");
-	for(i=0;i<cookieArr.length;i++){
-		x=cookieArr[i].substr(0,cookieArr[i].indexOf("="));
-		y=cookieArr[i].substr(cookieArr[i].indexOf("=")+1);
-		x=x.replace(/^\s+|\s+$/g,"");
-		if (x==cName){
-			return unescape(y);
-		}
-	}
-}
-
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
 }

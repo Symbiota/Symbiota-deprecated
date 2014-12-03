@@ -1,3 +1,5 @@
+var catalogNumberIsDupe = false;
+
 function openAssocSppAid(){
 	var assocWindow = open("assocsppaid.php","assocaid","resizable=0,width=550,height=200,left=20,top=20");
 	if(assocWindow != null){

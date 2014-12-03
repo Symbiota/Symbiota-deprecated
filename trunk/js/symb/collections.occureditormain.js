@@ -2,7 +2,6 @@ var pauseSubmit = false;
 var imgAssocCleared = false;
 var voucherAssocCleared = false;
 var surveyAssocCleared = false;
-var catalogNumberIsDupe = false;
 var abortFormVerification = false;
 
 $(document).ready(function() {
@@ -101,9 +100,11 @@ $(document).ready(function() {
 	});
 
 	//Misc fields with lookups
-	$("#ffcountry").autocomplete({ 
-		source: countryArr,
-		minLength: 1,
+	$("#ffcountry").autocomplete({
+		source: function( request, response ) {
+			$.getJSON( "rpc/lookupCountry.php", { term: request.term }, response );
+		},
+		minLength: 2,
 		autoFocus: true,
 		change: function(event, ui){
 			fieldChanged("country");
@@ -137,11 +138,6 @@ $(document).ready(function() {
 		if ((evt.keyCode == 13)) { return false; }
 	});
 	
-	//Remember image popout status 
-	var imgTd = getCookie("symbimgtd");
-	if(imgTd != "close") toggleImageTdOn();
-	//if(imgTd == "open" || csMode == 1) toggleImageTdOn();
-	initImgRes();
 	//Remember Auto Processing Status
 	var apstatus = getCookie("autopstatus");
 	if(getCookie("autopstatus")) document.fullform.autoprocessingstatus.value = apstatus;
@@ -178,7 +174,7 @@ function verifyFullFormSciName(){
 				if(data.tid){
 					var stateVal = $( 'input[name=stateprovince]' ).val();
 					if(stateVal != ""){
-						localitySecurityCheck(data.tid,stateVal);
+						localitySecurityCheck($( "#fullform" ));
 					}
 				}
 			}
@@ -189,17 +185,21 @@ function verifyFullFormSciName(){
 	});
 }
 
-function localitySecurityCheck(tidVal,stateVal){
-	$.ajax({
-		type: "POST",
-		url: "rpc/localitysecuritycheck.php",
-		dataType: "json",
-		data: { tid: tidVal, state: stateVal }
-	}).done(function( data ) {
-		if(data == "1"){
-			$( 'input[name=localitysecurity]' ).prop('checked', true);
-		}
-	});
+function localitySecurityCheck(f){
+	var tidIn = f.tidinterpreted.value;
+	var stateIn = f.stateprovince.value;
+	if(tidIn != "" && stateIn != ""){
+		$.ajax({
+			type: "POST",
+			url: "rpc/localitysecuritycheck.php",
+			dataType: "json",
+			data: { tid: tidIn, state: stateIn }
+		}).done(function( data ) {
+			if(data == "1"){
+				$( 'input[name=localitysecurity]' ).prop('checked', true);
+			}
+		});
+	}
 }
 
 function fieldChanged(fieldName){
@@ -220,7 +220,7 @@ function stateProvinceChanged(stateVal){
 	fieldChanged('stateprovince');
 	var tidVal = $( "#tidinterpreted" ).val();
 	if(tidVal != "" && stateVal != ""){
-		localitySecurityCheck(tidVal,stateVal);
+		localitySecurityCheck("#fullform");
 	}
 }
 
@@ -692,89 +692,71 @@ function verifyDeletion(f){
 	verifyAssocSurveys(occId);
 }
 
-function verifyAssocImages(occid){
-	var iXmlHttp = GetXmlHttpObject();
-	if(iXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url = "rpc/getassocimgcnt.php?occid=" + occid;
-	iXmlHttp.onreadystatechange=function(){
-		if(iXmlHttp.readyState==4 && iXmlHttp.status==200){
-			var imgCnt = iXmlHttp.responseText;
-			document.getElementById("delverimgspan").style.display = "none";
-			if(imgCnt > 0){
-				document.getElementById("delimgfailspan").style.display = "block";
-			}
-			else{
-				document.getElementById("delimgappdiv").style.display = "block";
-			}
-			imgAssocCleared = true;
-			displayDeleteSubmit();
+function verifyAssocImages(occidIn){
+	$.ajax({
+		type: "POST",
+		url: "rpc/getassocimgcnt.php",
+		dataType: "json",
+		data: { occid: occidIn }
+	}).done(function( imgCnt ) {
+		document.getElementById("delverimgspan").style.display = "none";
+		if(imgCnt > 0){
+			document.getElementById("delimgfailspan").style.display = "block";
 		}
-	};
-	iXmlHttp.open("POST",url,true);
-	iXmlHttp.send(null);
+		else{
+			document.getElementById("delimgappdiv").style.display = "block";
+		}
+		imgAssocCleared = true;
+		displayDeleteSubmit();
+	});
 }
 
-function verifyAssocVouchers(occid){
-	var vXmlHttp = GetXmlHttpObject();
-	if(vXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url = "rpc/getassocvouchers.php?occid=" + occid;
-	vXmlHttp.onreadystatechange=function(){
-		if(vXmlHttp.readyState==4 && vXmlHttp.status==200){
-			var vList = eval("("+vXmlHttp.responseText+")");;
-			document.getElementById("delvervouspan").style.display = "none";
-			if(vList != ''){
-				document.getElementById("delvoulistdiv").style.display = "block";
-				var strOut = "";
-				for(var key in vList){
-					strOut = strOut + "<li><a href='../../checklists/checklist.php?cl="+key+"' target='_blank'>"+vList[key]+"</a></li>";
-				}
-				document.getElementById("voucherlist").innerHTML = strOut;
+function verifyAssocVouchers(occidIn){
+	$.ajax({
+		type: "POST",
+		url: "rpc/getassocvouchers.php",
+		dataType: "json",
+		data: { occid: occidIn }
+	}).done(function( vList ) {
+		document.getElementById("delvervouspan").style.display = "none";
+		if(vList != ''){
+			document.getElementById("delvoulistdiv").style.display = "block";
+			var strOut = "";
+			for(var key in vList){
+				strOut = strOut + "<li><a href='../../checklists/checklist.php?cl="+key+"' target='_blank'>"+vList[key]+"</a></li>";
 			}
-			else{
-				document.getElementById("delvouappdiv").style.display = "block";
-			}
-			voucherAssocCleared = true;
-			displayDeleteSubmit();
+			document.getElementById("voucherlist").innerHTML = strOut;
 		}
-	};
-	vXmlHttp.open("POST",url,true);
-	vXmlHttp.send(null);
+		else{
+			document.getElementById("delvouappdiv").style.display = "block";
+		}
+		voucherAssocCleared = true;
+		displayDeleteSubmit();
+	});
 }
 
-function verifyAssocSurveys(occid){
-	var sXmlHttp = GetXmlHttpObject();
-	if(sXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url = "rpc/getassocsurveys.php?occid=" + occid;
-	sXmlHttp.onreadystatechange=function(){
-		if(sXmlHttp.readyState==4 && sXmlHttp.status==200){
-			var sList = eval("("+sXmlHttp.responseText+")");;
-			document.getElementById("delversurspan").style.display = "none";
-			if(sList != ''){
-				document.getElementById("delsurlistdiv").style.display = "block";
-				var strOut = "";
-				for(var key in sList){
-					strOut = strOut + "<li><a href='../../checklists/survey.php?surveyid="+key+"' target='_blank'>"+sList[key]+"</a></li>";
-				}
-				document.getElementById("surveylist").innerHTML = strOut;
+function verifyAssocSurveys(occidIn){
+	$.ajax({
+		type: "POST",
+		url: "rpc/getassocsurveys.php",
+		dataType: "json",
+		data: { occid: occidIn }
+	}).done(function( sList ) {
+		document.getElementById("delversurspan").style.display = "none";
+		if(sList != ''){
+			document.getElementById("delsurlistdiv").style.display = "block";
+			var strOut = "";
+			for(var key in sList){
+				strOut = strOut + "<li><a href='../../checklists/survey.php?surveyid="+key+"' target='_blank'>"+sList[key]+"</a></li>";
 			}
-			else{
-				document.getElementById("delsurappdiv").style.display = "block";
-			}
-			surveyAssocCleared = true;
-			displayDeleteSubmit();
+			document.getElementById("surveylist").innerHTML = strOut;
 		}
-	};
-	sXmlHttp.open("POST",url,true);
-	sXmlHttp.send(null);
+		else{
+			document.getElementById("delsurappdiv").style.display = "block";
+		}
+		surveyAssocCleared = true;
+		displayDeleteSubmit();
+	});
 }
 
 function displayDeleteSubmit(){
@@ -1159,4 +1141,17 @@ function isNumeric(sText){
       	}
    	}
 	return isNumber;
+}
+
+function getCookie(cName){
+	var i,x,y;
+	var cookieArr = document.cookie.split(";");
+	for(i=0;i<cookieArr.length;i++){
+		x=cookieArr[i].substr(0,cookieArr[i].indexOf("="));
+		y=cookieArr[i].substr(cookieArr[i].indexOf("=")+1);
+		x=x.replace(/^\s+|\s+$/g,"");
+		if (x==cName){
+			return unescape(y);
+		}
+	}
 }

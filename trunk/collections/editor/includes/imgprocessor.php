@@ -112,7 +112,7 @@
 												<input type="hidden" name="iurl" value="<?php echo $iUrl; ?>" />
 												<input type="hidden" id="cnumber" name="cnumber" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" />
 												<?php
-												if(isset($SALIX_PATH)){
+												if(isset($NLP_SALIX_ACTIVATED) && $NLP_SALIX_ACTIVATED){
 													echo '<input name="salixocr" type="button" value="SALIX Parser" onclick="nlpSalix(this,'.$prlid.')" />';
 													echo '<img id="workingcircle_salix-'.$prlid.'" src="../../images/workingcircle.gif" style="display:none;" />';
 												}

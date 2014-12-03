@@ -264,7 +264,7 @@ class OccurrenceUtilities {
 						if(preg_match('/^[a-z]{2,}$/',$firstWord)){
 							$sql = 'SELECT unitind3 FROM taxa '.
 								'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$firstWord.'" ';
-							echo $sql.'<br/>';
+							//echo $sql.'<br/>';
 							$con = MySQLiConnectionFactory::getCon('readonly');
 							$rs = $con->query($sql);
 							if($r = $rs->fetch_object()){

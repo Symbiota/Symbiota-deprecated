@@ -1,4 +1,5 @@
 <?php
+include_once('OccurrenceEditorManager.php');
 include_once("ImageShared.php");
 
 class OccurrenceEditorImages extends OccurrenceEditorManager {
@@ -6,6 +7,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	private $photographerArr = Array();
 	private $imageRootPath = "";
 	private $imageRootUrl = "";
+	private $activeImgId = 0;
 
 	public function __construct(){
  		parent::__construct();
@@ -19,6 +21,30 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
      * Takes parameters from a form submission and modifies an existing image record
      * in the database.
      */
+	public function addImageOccurrence($postArr){
+		$status = false;
+		//Load occurrence record
+		$occid = $this->addOccurrence($postArr);
+		if($occid){
+			$status = true;
+			$this->occid = $occid;
+			//Load images
+			if($this->addImage($postArr)){
+				if($this->activeImgId){
+					//Load OCR
+					if($postArr['ocrblock']){
+						$sql = 'INSERT INTO specprocessorrawlabels(imgid, rawstr) '.
+							'VALUES('.$this->activeImgId.',"'.$this->cleanInStr($postArr['ocrblock']).'")';
+						if(!$this->conn->query($sql)){
+							$this->errorStr = 'Error loading OCR text block: '.$this->conn->error;
+						}
+					}
+				}
+			}
+		}
+		return $status;
+	}
+
 	public function editImage(){
 		$this->setRootpaths();
 		$status = "Image editted successfully!";
@@ -189,11 +215,11 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		}
 		
 		//Set image metadata variables
-		$imgManager->setCaption($postArr['caption']);
+		if(array_key_exists('caption',$postArr)) $imgManager->setCaption($postArr['caption']);
 		if(array_key_exists('photographeruid',$postArr)) $imgManager->setPhotographerUid($postArr['photographeruid']);
 		if(array_key_exists('photographer',$postArr)) $imgManager->setPhotographer($postArr['photographer']);
 		if(array_key_exists('sourceurl',$postArr)) $imgManager->setSourceUrl($postArr['sourceurl']);
-		$imgManager->setCopyright($postArr['copyright']);
+		if(array_key_exists('copyright',$postArr)) $imgManager->setCopyright($postArr['copyright']);
 		if(array_key_exists("notes",$postArr)) $imgManager->setNotes($postArr['notes']);
 
 		$sourceImgUri = $postArr['imgurl'];
@@ -215,7 +241,9 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 			}
 		}
 		$imgManager->setOccid($this->occid);
-		$imgManager->processImage();
+		if($imgManager->processImage()){
+			$this->activeImgId = $imgManager->getActiveImgId();
+		}
 		
 		//Load tags
 		$status = $imgManager->insertImageTags($postArr);
@@ -248,42 +276,42 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	}
 
 	//Used in imgremapaid.php
- 	public function getOccurrenceList($collId, $identifier, $collector, $collNumber){
- 		$returnArr = Array();
- 		if(!$identifier && !$collector && !$collNumber) return $returnArr;
- 		$sql = '';
- 		if($collId){
- 			$sql .= 'AND (o.collid = '.$collId.') ';
- 		}
- 		if($identifier){
- 			if(strpos($identifier,'%') !== false){
+	public function getOccurrenceList($collId, $identifier, $collector, $collNumber){
+		$returnArr = Array();
+		if(!$identifier && !$collector && !$collNumber) return $returnArr;
+		$sql = '';
+		if($collId){
+			$sql .= 'AND (o.collid = '.$collId.') ';
+		}
+		if($identifier){
+			if(strpos($identifier,'%') !== false){
 	 			$sql .= 'AND (OR (o.catalognumber LIKE "'.$identifier.'") OR (o.othercatalognumber LIKE "'.$identifier.'"))';
- 			}
- 			else{
+			}
+			else{
 	 			$sql .= 'AND ((o.catalognumber = "'.$identifier.'") OR (o.othercatalognumber = "'.$identifier.'"))';
- 			}
- 		}
- 		if($collector){
- 			$sql .= 'AND (o.recordedby LIKE "%'.$collector.'%") ';
- 		}
- 		if($collNumber){
- 			$sql .= 'AND (o.recordnumber LIKE "%'.$collNumber.'%") ';
- 		}
- 		$sql = 'SELECT o.occid, o.recordedby, o.recordnumber, o.sciname, '.
- 			'CONCAT_WS("; ",o.stateprovince, o.county, o.locality) AS locality '.
- 			'FROM omoccurrences o WHERE '.substr($sql,4);
- 		//echo $sql;
- 		$rs = $this->conn->query($sql);
- 		while($row = $rs->fetch_object()){
- 			$occId = $row->occid;
- 			$returnArr[$occId]['sciname'] = $this->cleanOutStr($row->sciname);
- 			$returnArr[$occId]['recordedby'] = $this->cleanOutStr($row->recordedby);
- 			$returnArr[$occId]['recordnumber'] = $this->cleanOutStr($row->recordnumber);
- 			$returnArr[$occId]['locality'] = $this->cleanOutStr($row->locality);
- 		}
- 		$rs->close();
- 		return $returnArr;
- 	}
+			}
+		}
+		if($collector){
+			$sql .= 'AND (o.recordedby LIKE "%'.$collector.'%") ';
+		}
+		if($collNumber){
+			$sql .= 'AND (o.recordnumber LIKE "%'.$collNumber.'%") ';
+		}
+		$sql = 'SELECT o.occid, o.recordedby, o.recordnumber, o.sciname, '.
+			'CONCAT_WS("; ",o.stateprovince, o.county, o.locality) AS locality '.
+			'FROM omoccurrences o WHERE '.substr($sql,4);
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$occId = $row->occid;
+			$returnArr[$occId]['sciname'] = $this->cleanOutStr($row->sciname);
+			$returnArr[$occId]['recordedby'] = $this->cleanOutStr($row->recordedby);
+			$returnArr[$occId]['recordnumber'] = $this->cleanOutStr($row->recordnumber);
+			$returnArr[$occId]['locality'] = $this->cleanOutStr($row->locality);
+		}
+		$rs->close();
+		return $returnArr;
+	}
 
     /**
      * Obtain an array of the keys used for tagging images by content type.
