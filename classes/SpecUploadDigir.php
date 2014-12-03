@@ -47,9 +47,6 @@ class SpecUploadDigir extends SpecUploadBase {
 			$this->transferOccurrences();
 			$this->finalCleanup();
 		}
-		else{
-			$this->finalizeUpload();
-		}
  	}
 
 	private function submitReq(){

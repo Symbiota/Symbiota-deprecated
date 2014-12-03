@@ -116,9 +116,6 @@ class SpecUploadFile extends SpecUploadBase{
 				$this->transferOccurrences();
 				$this->finalCleanup();
 			}
-			else{
-				$this->finalizeUpload();
-			}
 		}
 		else{
 			echo "<li>File Upload FAILED: unable to locate file</li>";

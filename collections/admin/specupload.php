@@ -13,10 +13,11 @@ $collId = $_REQUEST["collid"];
 $uploadType = $_REQUEST["uploadtype"];
 $uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
-$autoMap = array_key_exists("automap",$_POST)?$_POST["automap"]:false;
+$autoMap = array_key_exists("automap",$_POST)?true:false;
 $ulPath = array_key_exists("ulpath",$_REQUEST)?$_REQUEST["ulpath"]:"";
-$importIdent = array_key_exists("importident",$_REQUEST)?$_REQUEST['importident']:false;
-$importImage = array_key_exists("importimage",$_REQUEST)?$_REQUEST['importimage']:false;
+$importIdent = array_key_exists("importident",$_REQUEST)?true:false;
+$importImage = array_key_exists("importimage",$_REQUEST)?true:false;
+$matchCatNum = array_key_exists("matchcatnum",$_REQUEST)?true:false;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:0;
 $recStart = array_key_exists("recstart",$_REQUEST)?$_REQUEST["recstart"]:0;
@@ -53,6 +54,7 @@ elseif($uploadType == $DWCAUPLOAD){
 
 $duManager->setCollId($collId);
 $duManager->setUspid($uspid);
+$duManager->setMatchCatalogNumber($matchCatNum);
 
 if($action == 'Automap Fields'){
 	$autoMap = true;
@@ -69,6 +71,9 @@ if($isEditor){
  	}
 }
 $duManager->readUploadParameters();
+
+$isLiveData = false;
+if($duManager->getCollInfo("managementtype") == 'Live Data') $isLiveData = true;
 
 //Grab field mapping, if mapping form was submitted
 if(array_key_exists("sf",$_POST)){
@@ -287,28 +292,63 @@ $duManager->loadFieldMap();
 			//Upload records
 	 		echo "<div style='font-weight:bold;font-size:120%'>Upload Status:</div>";
 	 		echo "<ul style='margin:10px;font-weight:bold;'>";
-	 		echo "<li style='font-weight:bold;'>Starting occurrence record upload</li>";
 	 		$duManager->uploadData($finalTransfer);
 			echo "</ul>";
 			if($duManager->getTransferCount() && !$finalTransfer){
 				?>
-				<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
-	 				<fieldset>
-	 					<legend><b>Final transfer</b></legend>
+ 				<fieldset style="margin:15px;">
+ 					<legend><b>Final transfer</b></legend>
+ 					<div style="margin:5px;">
+ 						<?php 
+ 						$reportArr = $duManager->getTransferReport();
+						echo '<div>Occurrences pending transfer: '.$reportArr['occur'].'</div>';
+						echo '<div style="margin-left:15px;">';
+						echo '<div>Records to be updated: '.$reportArr['update'].'</div>';
+						echo '<div>New records: '.$reportArr['new'].'</div>';
+						if(isset($reportArr['matchappend']) && $reportArr['matchappend']){
+							echo '<div>Records matching on catalog number that will be appended : '.$reportArr['matchappend'].'</div>';
+							echo '<div style="margin-left:15px;color:orange;">WARNING: This will result in records with duplicate catalog numbers</div>';
+						}
+						if(isset($reportArr['sync']) && $reportArr['sync']){
+							echo '<div>Records that will be syncronized with central database: '.$reportArr['sync'].'</div>';
+							echo '<div style="margin-left:15px;">These are typically records that have been originally processed within the portal, exported and integrated into local management database, and are not be reimported and synchronized with the portal records by matching on catalog number.</div>';
+							echo '<div style="margin-left:15px;color:orange;">WARNING: Incoming records will replace portal records with matching catalog numbers. Make sure incoming records are the most up-to-date.</div>';
+						}
+						if(isset($reportArr['exist']) && $reportArr['exist']){
+							echo '<div>Records in portal not matching with incoming records: '.$reportArr['exist'].'</div>';
+							echo '<div style="margin-left:15px;">Note: If you are doing a full data refresh, these may be records that were deleted within your local database but not within the portal.</div>';
+						}
+						if(isset($reportArr['nulldbpk']) && $reportArr['nulldbpk']){
+							echo '<div style="color:red;">Records that will be removed due to NULL Primary Identifier: '.$reportArr['nulldbpk'].'</div>';
+						}
+						if(isset($reportArr['dupdbpk']) && $reportArr['dupdbpk']){
+							echo '<div style="color:red;">Records that will be removed due to DUPLICATE Primary Identifier: '.$reportArr['dupdbpk'].'</div>';
+						}
+						echo '</div>';
+						//Extensions
+						if($uploadType == $DWCAUPLOAD){
+							if(isset($reportArr['ident'])){
+								echo '<div>Identification histories pending transfer: '.$reportArr['ident'].'</div>';
+							}
+							if(isset($reportArr['image'])){
+								echo '<div>Images pending transfer: '.$reportArr['image'].'</div>';
+							}
+						}
+						
+						?>
+					</div>
+ 					<div style="margin:25px;font-weight:bold;"> 
+						<a href="uploadviewer.php?collid=<?php echo $collId;?>" target="_blank">Click to Review Records</a>  
+					</div>
+					<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
 	 					<input type="hidden" name="collid" value="<?php echo $collId;?>" /> 
 	 					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
 	 					<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
-	 					<div style="font-weight:bold;margin:5px;"> 
-	 						Number of specimen records uploaded to temporary table (uploadspectemp): <?php echo $duManager->getTransferCount();?>
+						<div style="margin:5px;"> 
+							<input type="submit" name="action" value="Transfer Records to Central Specimen Table" />
 						</div>
-	 					<div style="margin:5px;"> 
-	 						If upload number sounds correct, transfer to central specimen table using this form.  
-						</div>
-	 					<div style="margin:5px;"> 
-	 						<input type="submit" name="action" value="Transfer Records to Central Specimen Table" />
-						</div>
-	 				</fieldset>			
-	 			</form>
+		 			</form>
+				</fieldset>			
 				<?php
 			}
 	 	}
@@ -331,6 +371,14 @@ $duManager->loadFieldMap();
 							Record Limit: 
 							<input type="text" name="reclimit" size="5" value="<?php echo $duManager->getSearchLimit(); ?>" />
 						</div>
+						<?php 
+						if($isLiveData){
+							echo '<div style="margin:10px 0px;">';
+							echo '<input name="matchcatnum" type="checkbox" value="1" checked /> ';
+							echo 'Match on Catalog Number (Note: matching records will be replaced with incoming records)';
+							echo '</div>';
+						}
+						?>
 						<div style="margin:10px;">
 							<input type="submit" name="action" value="Start Upload" />
 							<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
@@ -473,6 +521,14 @@ $duManager->loadFieldMap();
 												?>
 											</div>
 											<div>
+												<?php 
+												if($isLiveData){
+													echo '<div style="margin:10px 0px;">';
+													echo '<input name="matchcatnum" type="checkbox" value="1" checked /> ';
+													echo 'Match on Catalog Number (Note: matching records will be replaced with incoming records)';
+													echo '</div>';
+												}
+												?>
 												<div style="margin:10px;">
 													<input type="submit" name="action" value="Start Upload" />
 													<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
@@ -490,7 +546,7 @@ $duManager->loadFieldMap();
 					}
 					else{
 						if($duManager->getErrorStr()){
-							echo '<div style="font-weight:bold;">'.implode('<br/>',$duManager->getErrorStr()).'</div>';
+							echo '<div style="font-weight:bold;">'.$duManager->getErrorStr().'</div>';
 						}
 						else{
 							echo '<div style="font-weight:bold;">Unknown error analyzing upload</div>';
@@ -498,15 +554,13 @@ $duManager->loadFieldMap();
 					}
 				}
 				elseif($uploadType == $DIRECTUPLOAD || ($uploadType == $FILEUPLOAD && $ulPath)){
-					$isSnapshot = true;
-					if($duManager->getCollInfo("managementtype") == 'Live Data') $isSnapshot = false;
 					$duManager->analyzeUpload();
 					?>
 					<form name="filemappingform" action="specupload.php" method="post" onsubmit="return verifyMappingForm(this)">
 						<fieldset style="width:95%;">
 							<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?></legend>
 							<?php 
-							if($isSnapshot){
+							if(!$isLiveData){
 								//Primary key field is required and must be mapped 
 								?>
 								<div style="margin:20px;">
@@ -531,7 +585,7 @@ $duManager->loadFieldMap();
 								</div>
 								<?php 
 							}
-							if(($dbpk && in_array($dbpk,$dbpkOptions)) || !$isSnapshot){
+							if(($dbpk && in_array($dbpk,$dbpkOptions)) || $isLiveData){
 								?>
 								<div id="mdiv">
 									<?php $duManager->echoFieldMapTable($autoMap,'spec'); ?>
@@ -551,6 +605,14 @@ $duManager->loadFieldMap();
 									</div>
 									<hr />
 									<div id="uldiv">
+										<?php 
+										if($isLiveData){
+											echo '<div style="margin:10px 0px;">';
+											echo '<input name="matchcatnum" type="checkbox" value="1" checked /> ';
+											echo 'Match on Catalog Number (Note: matching records will be replaced with incoming records)';
+											echo '</div>';
+										}
+										?>
 										<div style="margin:10px;">
 											<input type="submit" name="action" value="Start Upload" />
 										</div>

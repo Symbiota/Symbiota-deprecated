@@ -145,6 +145,46 @@ class SpecUpload{
 		return false;
 	}
 
+	//Upload Review
+	public function getUploadMap($start, $limit){
+		$retArr = Array();
+		if($limit){
+			$occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
+				'scientificnameauthorship', 'taxonremarks', 'identifiedby', 'dateidentified', 'identificationreferences',
+				'identificationremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
+				'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
+				'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
+				'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
+				'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
+				'country', 'stateprovince', 'county', 'municipality', 'locality', 'localitysecurity', 'localitysecurityreason',
+				'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 'footprintwkt',
+				'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
+				'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
+				'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
+				'labelproject','basisofrecord','ownerinstitutioncode', 'processingstatus', 'recordenteredby');
+			$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp WHERE collid = '.$this->collId;
+			//echo "<div>".$sql."</div>"; exit;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_assoc()){
+				$retArr[] = array_change_key_case($row);
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function getUploadCount(){
+		$cnt = 0;
+		if($this->collId){
+			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE collid = '.$this->collId;
+			$rs = $this->conn->query($sql);
+			$rs->num_rows;
+			$rs->free();
+		}
+		return $cnt;
+	}
+
+	//Profile management
     public function readUploadParameters(){
     	if($this->uspid){
 			$sql = 'SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, '.
@@ -219,6 +259,7 @@ class SpecUpload{
 		return "SUCCESS: Upload Profile Deleted";
 	}
 
+	//Setter and getters
 	public function getTitle(){
 		return $this->title;
 	}
