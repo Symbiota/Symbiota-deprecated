@@ -42,8 +42,8 @@ foreach($classes as $class => $file) {
       case "OmOccurrences":
        $t = new OmOccurrences();
        break;
-      case "OmOccurrDeterminations":
-       $t = new OmOccurrDeterminations();
+      case "OmOccurDeterminations":
+       $t = new OmOccurDeterminations();
        break;
       case "ImageShared":
        $t = new ImageShared();
