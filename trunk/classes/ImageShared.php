@@ -38,6 +38,11 @@ class ImageShared{
 	private $tid;
 	private $notes;
 	private $sortSeq;
+
+    // 0.9.1.14 additions
+    private $sourceIdentifier;
+    private $rights;
+    private $accessrights;
 	
 	private $activeImgId = 0;
 	
@@ -65,8 +70,36 @@ class ImageShared{
 		if(array_key_exists('imgFileSizeLimit',$GLOBALS)){
 			$this->webFileSizeLimit = $GLOBALS['imgFileSizeLimit'];
 		}
+
  	}
  	
+    public function checkSchema() {
+        $result = false;
+
+        /*****  Warning: Do not override this check in order to supress error messages.
+         *****  If this warning is encountered, this class must be updated, or code that
+         *****  invokes it may fail in unpredictable ways. */
+
+        // This class is tightly bound to table images.  If no change was made to that
+        // table in a schema update, then the supported schema version may simply be added.
+        // If, however, changes were made to the table, they must be reflected in this class.
+
+        //$supportedVersions[] = '0.9.1.13';         
+        $supportedVersions[] = '0.9.1.14';         
+         
+        // Find the most recently applied version number
+        $preparesql = "select versionnumber from schemaversion order by dateapplied desc limit 1;";
+        if ($statement = $this->conn->prepare($preparesql)) {
+            $statement->execute();
+            $statement->bind_result($versionnumber);
+            $statement->fetch();
+            if (in_array($versionnumber,$supportedVersions)) {
+               $result = true;
+            } 
+       }
+       return $result;
+    }
+
  	public function __destruct(){
 		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
 		if(!($this->conn === null)) $this->conn->close();
@@ -466,9 +499,10 @@ class ImageShared{
 				$rs1->free();
 			}
 			
-			//Load record
+			//Save currently loaded record
 			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
-				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence) '.
+				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, sourceIdentifier, ' .
+                ' rights, accessrights) '.
 				'VALUES ('.($tid?$tid:'NULL').',"'.$imgWebUrl.'",'.
 				($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
 				($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
@@ -482,7 +516,10 @@ class ImageShared{
 				($this->occid?$this->occid:'NULL').','.
 				($this->notes?'"'.$this->notes.'"':'NULL').',"'.
 				$this->cleanInStr($paramsArr['un']).'",'.
-				($this->sortSeq?$this->sortSeq:'50').')';
+				($this->sortSeq?$this->sortSeq:'50').','.
+				($this->sourceIdentifier?'"'.$this->sourceIdentifier.'"':'NULL').','.
+				($this->rights?'"'.$this->rights.'"':'NULL').','.
+				($this->accessrights?'"'.$this->accessrights.'"':'NULL').')';
 			//echo $sql; exit;
 			if($this->conn->query($sql)){
 				//Create and insert Symbiota GUID for image(UUID)
@@ -601,11 +638,12 @@ class ImageShared{
      *
      * @return an empty string on success, otherwise a string containing an error message.
      */
-	public function databaseImageRecord($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$phototrapher,$photographerUid,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortSequence,$imagetype,$anatomy){
+	public function databaseImageRecord($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$phototrapher,$photographerUid,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortSequence,$imagetype,$anatomy,$sourceIdentifier,$rights,$accessrights){
 		$status = "";
 		$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
-			'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, imagetype, anatomy) '.
-			'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+			'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, imagetype, anatomy, '.
+            'sourceIdentifier, rights, accessrights ) '.
+			'VALUES (?,?,?,?,?,?,? ,?,?,?,?,?,?,?,?,?,? ,?,?,?)';
         if ($statement = $this->conn->prepare($sql)) {
 		    //If central images are on remote server and new ones stored locally, then we need to use full domain
 		    //e.g. this portal is sister portal to central portal
@@ -624,7 +662,7 @@ class ImageShared{
 		    		$imgLgUrl = $urlPrefix.$imgLgUrl;
 	    		}
 	    	}
-        	$statement->bind_param("issssisssssississ",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy);
+        	$statement->bind_param("issssisssssississsss",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy, $sourceIdentifier, $rights, $accessrights);
 
            $statement->execute();
            $rows = $statement->affected_rows;
@@ -650,10 +688,11 @@ class ImageShared{
      *
      * @return an empty string on success, otherwise a string containing an error message.
      */
-    public function updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$phototrapher,$photographerUid,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortSequence,$imagetype,$anatomy){
+    public function updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$phototrapher,$photographerUid,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortSequence,$imagetype,$anatomy, $sourceIdentifier, $rights, $accessrights){
         $status = "";
         $sql = 'update images set tid=?, url=?, thumbnailurl=?, originalurl=?, photographer=?, photographeruid=?, caption=?, '.
-            'owner=?, sourceurl=?, copyright=?, locality=?, occid=?, notes=?, username=?, sortsequence=?, imagetype=?, anatomy=? '.
+            'owner=?, sourceurl=?, copyright=?, locality=?, occid=?, notes=?, username=?, sortsequence=?, imagetype=?, anatomy=?, '.
+            'sourceIdentifier=?, rights=?, accessrights=? '.
             'where imgid = ? ';
         if ($statement = $this->conn->prepare($sql)) {
 		    //If central images are on remote server and new ones stored locally, then we need to use full domain
@@ -674,7 +713,7 @@ class ImageShared{
 	    		}
 	    	}
         	
-        	$statement->bind_param("issssisssssississi",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy,$imgid);
+        	$statement->bind_param("issssisssssississsssi",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy, $sourceIdentifier, $rights, $accessrights, $imgid);
 
            $statement->execute();
            $rows = $statement->affected_rows;
@@ -877,6 +916,30 @@ class ImageShared{
 		return $this->errArr;
 	}
 	
+    // sourceIdentifier
+	public function getsourceIdentifier(){
+		return $this->sourceIdentifier;
+	}
+	public function setsourceIdentifier($value){
+		$this->sourceIdentifier = $this->cleanInStr($value);
+	}
+
+    // rights
+	public function getrights(){
+		return $this->rights;
+	}
+	public function setrights($value){
+		$this->rights = $this->cleanInStr($value);
+	}
+
+    // accessrights
+	public function getaccessrights(){
+		return $this->accessrights;
+	}
+	public function setaccessrights($value){
+		$this->accessrights = $this->cleanInStr($value);
+	}
+
 	//Misc functions
 	private function testOrientation(){
 		if($this->sourcePath){

@@ -39,10 +39,24 @@ include_once("$serverRoot/classes/ImageShared.php");
 
 define ("DEFAULT_NEVP_COUNTRY","United States of America");
 
-// Check to see if OmOccurrences matches current schema version.
+// Check to see if included classes match the current schema version.
+$uptodate = true;
 $testOcc = new OmOccurrences();
 if (!$testOcc->checkSchema()) { 
-   echo "[Warning: classes/OmOccurrences.php does not match the Symbiota schema version.]\n";
+   echo "[Warning: classes/OmOccurrences.php does not support the Symbiota schema version.]\n";
+   $uptodate = false;
+}
+$testOccDet = new OmOccurDeterminations();
+if (!$testOccDet->checkSchema()) { 
+   echo "[Warning: classes/OmOccurDeterminations.php does not support the Symbiota schema version.]\n";
+   $uptodate = false;
+}
+$testImg = new ImageShared();
+if (!$testImg->checkSchema()) { 
+   echo "[Warning: classes/ImageShared.php does not support the Symbiota schema version.]\n";
+   $uptodate = false;
+}
+if (!$uptodate) { 
    echo "[Warning: Ingest of data may fail.  Contact a Symbiota developer.]\n";
 }
 
@@ -416,6 +430,8 @@ class OCCURRENCE {
                foreach($this->associatedmedia as $media) {
                   $sourceUrl = null;
                   $imgWebUrl = null;
+                  $sourceID = null;
+                  $imgWebID = null;
                   $mediaguid = $media->guid;
                   if (is_array($media->accesspoints))  { 
                      foreach($media->accesspoints as $accesspoint) {  
@@ -432,10 +448,12 @@ class OCCURRENCE {
                               if ($accesspoint->format=="dng") { 
                                  // Original dng file
                                  $sourceUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID";
+                                 $sourceID = $iPlantID;
                               } 
                               if ($accesspoint->format=="jpg") { 
                                  // Preconstructed derivative JPG file
                                  $imgWebUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?resize=1250&format=jpeg";
+                                 $imgWebID = $iPlantID;
                                  $imgTnUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?thumbnail=225,225";
                                  // Because this is a JPEG, no need to request ?rotate=guess&format=jpeg,quality,100
                                  // and the folks at iPlant are requesting that this request be made without the 
@@ -464,14 +482,14 @@ class OCCURRENCE {
                      $imgid = $imageHandler->getImgIDForSourceURL($sourceUrl); 
                      if ($imgid=="") { 
                         // add this image record
-   	                    $isaveresult = $imageHandler->databaseImageRecord($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
+   	                    $isaveresult = $imageHandler->databaseImageRecord($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","",$sourceID,$copyright,"");
                         if ($isaveresult=="") { 
                            $result->imageinsertcount++;
                         } else { 
                            $result->imagefailurecount++;
                         }
                      } else {  
-   	                    $isaveresult = $imageHandler->updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
+   	                    $isaveresult = $imageHandler->updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","",$sourceID,$copyright,"");
                         if ($isaveresult=="") { 
                            $result->imageupdatecount++;
                         } else { 

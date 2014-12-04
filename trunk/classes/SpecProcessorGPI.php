@@ -30,10 +30,19 @@
 include_once("$serverRoot/classes/OmOccurrences.php");
 include_once("$serverRoot/classes/OmOccurDeterminations.php");
 
-// Check to see if OmOccurrences matches current schema version.
+// Check to see if included classes match the current schema version.
+$uptodate = true;
 $testOcc = new OmOccurrences();
 if (!$testOcc->checkSchema()) { 
-   echo "[Warning: classes/OmOccurrences.php does not match the Symbiota schema version.]\n";
+   echo "[Warning: classes/OmOccurrences.php does not support the Symbiota schema version.]\n";
+   $uptodate = false;
+}
+$testOccDet = new OmOccurDeterminations();
+if (!$testOccDet->checkSchema()) { 
+   echo "[Warning: classes/OmOccurDeterminations.php does not support the Symbiota schema version.]\n";
+   $uptodate = false;
+}
+if (!$uptodate) { 
    echo "[Warning: Ingest of data may fail.  Contact a Symbiota developer.]\n";
 }
 
