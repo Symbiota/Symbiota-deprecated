@@ -162,7 +162,8 @@ class SpecUpload{
 				'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
 				'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
 				'labelproject','basisofrecord','ownerinstitutioncode', 'processingstatus', 'recordenteredby');
-			$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp WHERE collid = '.$this->collId;
+			$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp '.
+				'WHERE collid = '.$this->collId.' LIMIT 1000';
 			//echo "<div>".$sql."</div>"; exit;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_assoc()){

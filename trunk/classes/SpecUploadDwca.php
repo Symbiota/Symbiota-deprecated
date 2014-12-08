@@ -185,7 +185,7 @@ class SpecUploadDwca extends SpecUploadBase{
 									$this->metaArr['occur']['fields'][$fieldElement->getAttribute('index')] = $term;
 								}
 							}
-							if($coreId === 0 && !isset($this->metaArr['occur']['fields'][0])){
+							if($coreId === '0' && !isset($this->metaArr['occur']['fields'][0])){
 								//Set id
 								$this->metaArr['occur']['fields'][0] = 'id';
 							}
@@ -391,9 +391,11 @@ class SpecUploadDwca extends SpecUploadBase{
 								$indexArr = array_keys($this->sourceArr,$sMap['field']);
 								$index = array_shift($indexArr);
 								if(array_key_exists($index,$recordArr)){
-									$valueStr = $recordArr[$index];
-									if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
-									$recMap[$symbField] = $valueStr;
+									$valueStr = trim($recordArr[$index]);
+									if($valueStr){
+										if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
+										$recMap[$symbField] = $valueStr;
+									}
 								}
 							}
 						}
@@ -513,8 +515,10 @@ class SpecUploadDwca extends SpecUploadBase{
 		 			//Advance one record to go past header
 		 			$this->getRecordArr($fh);
 		 		}
-				$cset = strtolower(str_replace('-','',$charset)); 
-		 		
+				$cset = strtolower(str_replace('-','',$charset));
+
+				$fieldMap['dbpk']['field'] = 'coreid';
+				
 				//Load data
 				while($recordArr = $this->getRecordArr($fh)){
 					$recMap = Array();
@@ -523,9 +527,11 @@ class SpecUploadDwca extends SpecUploadBase{
 							$indexArr = array_keys($sourceArr,$iMap['field']);
 							$index = array_shift($indexArr);
 							if(array_key_exists($index,$recordArr)){
-								$valueStr = $recordArr[$index];
-								if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
-								$recMap[$symbField] = $valueStr;
+								$valueStr = trim($recordArr[$index]);
+								if($valueStr){
+									if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
+									$recMap[$symbField] = $valueStr;
+								}
 							}
 						}
 					}
@@ -533,7 +539,7 @@ class SpecUploadDwca extends SpecUploadBase{
 						$this->loadIdentificationRecord($recMap);
 					}
 					elseif($targetStr == 'image'){
-						//$this->loadImageRecord($recMap);
+						$this->loadImageRecord($recMap);
 					}
 					unset($recMap);
 				}

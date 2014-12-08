@@ -36,7 +36,7 @@ class SpecUploadBase extends SpecUpload{
 		'plantdescription'=>'verbatimattributes','description'=>'verbatimattributes','field:habitat'=>'habitat');
 	private $identTranslationMap = array('scientificname'=>'sciname','detby'=>'identifiedby','determinor'=>'identifiedby',
 		'determinationdate'=>'dateidentified','notes'=>'identificationremarks','cf' => 'identificationqualifier');
-	private $imageTranslationMap = array('accessuri'=>'url');
+	private $imageTranslationMap = array('accessuri'=>'originalurl','identifier'=>'originalurl','creator'=>'owner');
 
 	function __construct() {
 		parent::__construct();
@@ -94,11 +94,12 @@ class SpecUploadBase extends SpecUpload{
 		}
 
 		//Get uploadspectemp metadata
+		$skipOccurFields = array('dbpk','initialtimestamp','occid','collid','tidinterpreted');
 		$sql = "SHOW COLUMNS FROM uploadspectemp";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$field = strtolower($row->Field);
-			if($field != "dbpk" && $field != "initialtimestamp" && $field != "occid" && $field != "collid" && $field != "tidinterpreted"){
+			if(!in_array($field,$skipOccurFields)){
 				if($autoBuildFieldMap){
 					$this->fieldMap[$field]["field"] = $field;
 				}
@@ -139,12 +140,12 @@ class SpecUploadBase extends SpecUpload{
 		
 		if($this->uploadType == $this->FILEUPLOAD || $this->uploadType == $this->DWCAUPLOAD || $this->uploadType == $this->DIRECTUPLOAD){
 			//Get identification metadata
-			$skipFieldArr = array('detid','occid','tidinterpreted','idbyid','appliedstatus','iscurrent','sortsequence','sourceidentifier','initialtimestamp');
+			$skipDetFields = array('detid','occid','tidinterpreted','idbyid','appliedstatus','iscurrent','sortsequence','sourceidentifier','initialtimestamp');
 
 			$rs = $this->conn->query('SHOW COLUMNS FROM omoccurdeterminations');
 			while($r = $rs->fetch_object()){
 				$field = strtolower($r->Field);
-				if(!in_array($field,$skipFieldArr)){
+				if(!in_array($field,$skipDetFields)){
 					if($autoBuildFieldMap){
 						$this->identFieldMap[$field]["field"] = $field;
 					}
@@ -180,10 +181,11 @@ class SpecUploadBase extends SpecUpload{
 			//$this->identFieldMap['coreid']['type'] = 'string';
 
 			//Get image metadata
-			$rs = $this->conn->query('SHOW COLUMNS FROM images');
+			$skipImageFields = array('tid','photographeruid','imagetype','occid','dbpk','collid','username','sortsequence','initialtimestamp');
+			$rs = $this->conn->query('SHOW COLUMNS FROM uploadimagetemp');
 			while($r = $rs->fetch_object()){
 				$field = strtolower($r->Field);
-				if($field != "imgid" && $field != "initialtimestamp" && $field != "occid" && $field != "tid" && $field != "photographeruid"){
+				if(!in_array($field,$skipImageFields)){
 					if($autoBuildFieldMap){
 						$this->imageFieldMap[$field]["field"] = $field;
 					}
@@ -248,46 +250,48 @@ class SpecUploadBase extends SpecUpload{
 		sort($symbFields);
 		$autoMapArr = Array();
 		foreach($sourceArr as $fieldName){
-			$diplayFieldName = $fieldName;
-			$fieldName = strtolower($fieldName);
-			$isAutoMapped = false;
-			$tranlatedFieldName = str_replace(array('_',' ','.'),'',$fieldName);
-			if($autoMap){
-				if(array_key_exists($tranlatedFieldName,$translationMap)) $tranlatedFieldName = strtolower($translationMap[$tranlatedFieldName]);
-				if(in_array($tranlatedFieldName,$symbFields)){
-					$isAutoMapped = true;
-					$autoMapArr[$tranlatedFieldName] = $fieldName;
+			if($fieldName != 'coreid'){
+				$diplayFieldName = $fieldName;
+				$fieldName = strtolower($fieldName);
+				$isAutoMapped = false;
+				$tranlatedFieldName = str_replace(array('_',' ','.'),'',$fieldName);
+				if($autoMap){
+					if(array_key_exists($tranlatedFieldName,$translationMap)) $tranlatedFieldName = strtolower($translationMap[$tranlatedFieldName]);
+					if(in_array($tranlatedFieldName,$symbFields)){
+						$isAutoMapped = true;
+						$autoMapArr[$tranlatedFieldName] = $fieldName;
+					}
 				}
-			}
-			echo "<tr>\n";
-			echo "<td style='padding:2px;'>";
-			echo $diplayFieldName;
-			echo "<input type='hidden' name='".$prefix."sf[]' value='".$fieldName."' />";
-			echo "</td>\n";
-			echo "<td>\n";
-			echo "<select name='".$prefix."tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
-			echo "<option value=''>Select Target Field</option>\n";
-			echo "<option value='unmapped'".(isset($sourceSymbArr[$fieldName]) && substr($sourceSymbArr[$fieldName],0,8)=='unmapped'?"SELECTED":"").">Leave Field Unmapped</option>\n";
-			echo "<option value=''>-------------------------</option>\n";
-			if(array_key_exists($fieldName,$sourceSymbArr)){
-				//Source Field is mapped to Symbiota Field
-				foreach($symbFields as $sField){
-					echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
+				echo "<tr>\n";
+				echo "<td style='padding:2px;'>";
+				echo $diplayFieldName;
+				echo "<input type='hidden' name='".$prefix."sf[]' value='".$fieldName."' />";
+				echo "</td>\n";
+				echo "<td>\n";
+				echo "<select name='".$prefix."tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
+				echo "<option value=''>Select Target Field</option>\n";
+				echo "<option value='unmapped'".(isset($sourceSymbArr[$fieldName]) && substr($sourceSymbArr[$fieldName],0,8)=='unmapped'?"SELECTED":"").">Leave Field Unmapped</option>\n";
+				echo "<option value=''>-------------------------</option>\n";
+				if(array_key_exists($fieldName,$sourceSymbArr)){
+					//Source Field is mapped to Symbiota Field
+					foreach($symbFields as $sField){
+						echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
+					}
 				}
-			}
-			elseif($isAutoMapped){
-				//Source Field = Symbiota Field
-				foreach($symbFields as $sField){
-					echo "<option ".($tranlatedFieldName==$sField?"SELECTED":"").">".$sField."</option>\n";
+				elseif($isAutoMapped){
+					//Source Field = Symbiota Field
+					foreach($symbFields as $sField){
+						echo "<option ".($tranlatedFieldName==$sField?"SELECTED":"").">".$sField."</option>\n";
+					}
 				}
-			}
-			else{
-				foreach($symbFields as $sField){
-					echo "<option>".$sField."</option>\n";
+				else{
+					foreach($symbFields as $sField){
+						echo "<option>".$sField."</option>\n";
+					}
 				}
+				echo "</select></td>\n";
+				echo "</tr>\n";
 			}
-			echo "</select></td>\n";
-			echo "</tr>\n";
 		}
 		echo '</table>';
 
@@ -631,7 +635,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->transferOccurrences();
 		$this->transferAssociatedMedia();
 		$this->transferIdentificationHistory();
-		//$this->transferImages();
+		$this->transferImages();
 		$this->finalCleanup();
 		$this->outputMsg('<li style="">Upload Procedure Complete ('.date('Y-m-d h:i:s A').')!</li>');
 	} 
@@ -771,49 +775,6 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg('<div>ERROR updating occid (2nd step) after occurrence insert: '.$this->conn->error.'</div>');
 		}
 		
-		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table  
-		$this->outputMsg('<li style="margin-left:10px;">Linking to taxonomic thesaurus...');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
-			'SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL AND o.collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-		
-		$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'SET o.LocalitySecurity = t.SecurityStatus '.
-			'WHERE (t.SecurityStatus > 0) AND (o.LocalitySecurity IS NULL)';
-		$this->conn->query($sql);
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
-			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
-			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
-			'SET o.localitysecurity = 1 '.
-			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND c.type = "rarespp" '.
-			'AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND o.collid ='.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-		
-		$this->outputMsg('<li style="margin-left:10px;">Populating NULL families and authors...');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
-			'SET o.family = ts.family '.
-			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "") AND o.collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
-			'SET o.scientificNameAuthorship = t.author '.
-			'WHERE (o.scientificNameAuthorship = "" OR o.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL AND o.collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-		
-		
-		
-		
 		//Setup and add datasets and link datasets to current user
 		
 		
@@ -841,27 +802,85 @@ class SpecUploadBase extends SpecUpload{
 			'FROM uploadspectemp u '.
 			'WHERE u.occid IS NOT NULL AND u.collid = '.$this->collId.' AND u.basisofrecord = "determinationHistory"';
 		if($this->conn->query($sql)){
+			//Delete all determinations
+			$sqlDel = 'DELETE * '.
+				'FROM uploadspectemp '.
+				'WHERE (collid = '.$this->collId.') AND (basisofrecord = "determinationHistory")';
+			$this->conn->query($sqlDel);
 			$this->outputMsg('Done!</li> ');
 		}
 		else{
 			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
 		}
 	}
-	
+
+	private function transferAssociatedMedia(){
+		//Check to see if we have any images to process
+		$sql = 'SELECT associatedmedia, tidinterpreted, occid '.
+			'FROM uploadspectemp '.
+			'WHERE associatedmedia IS NOT NULL AND occid IS NOT NULL AND collid = '.$this->collId;
+		$rs = $this->conn->query($sql);
+		if($rs->num_rows){
+			$this->outputMsg('<li>Preparing associatedMedia for image transfer... ');
+			ob_flush();
+			flush();
+			while($r = $rs->fetch_object()){
+				$mediaFile = trim(str_replace(';',',',$r->associatedmedia),', ');
+				$mediaArr = explode(',',$mediaFile);
+				foreach($mediaArr as $mediaUrl){
+					$mediaUrl = trim($mediaUrl);
+					if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
+						if($this->urlExists($mediaUrl)){
+							$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url) '.
+								'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty")';
+							if(!$this->conn->query($sqlInsert)){
+								$this->outputMsg('<div style="margin-left:10px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</div>');
+								$this->outputMsg('<div style="margin-left:10px;">SQL: '.$sqlInsert.'</div>');
+							}
+						}
+						else{
+							echo 'Bad url: '.$mediaUrl.'<br/>';
+						}
+					}
+				}
+			}
+			$this->outputMsg('Done!</li> ');
+			ob_flush();
+			flush();
+		}
+	}
+
 	protected function transferImages(){
-		//$this->outputMsg('<li>Tranferring images... ');
+		$this->outputMsg('<li>Tranferring images... ');
 		ob_flush();
 		flush();
-		$sql = '';
-		//if($this->conn->query($sql)){
-		//	$this->outputMsg('Done!</li> ');
-		//}
-		//else{
-		//	$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
-		//}
-	}
-	
-	private function transferAssociatedMedia(){
+		//Update occid for all images
+		$sql = 'UPDATE uploadimagetemp ui INNER JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk =u.dbpk '.
+			'SET ui.occid = u.occid '.
+			'WHERE (ui.occid IS NULL) AND (u.occid IS NOT NULL) AND (ui.collid = '.$this->collId.')';
+		if(!$this->conn->query($sql)){
+			$this->outputMsg('WARNING updating occids within uploadimagetemp: '.$this->conn->error.'</li> ');
+		}
+
+		//Remove images that failed to link to an occurrence record
+		if(!$this->conn->query('DELETE FROM uploadimagetemp WHERE (occid IS NULL) AND (ui.collid = '.$this->collId.')')){
+			$this->outputMsg('WARNING deleting uploadimagetemp records with NULL occid: '.$this->conn->error.'</li> ');
+		}
+
+		//Grab existing image data to make sure link wasn't previously loaded
+		$existingImages = array();
+		$sqlTest = 'SELECT i.occid, i.imgid, i.url, i.originalurl '.
+			'FROM images i INNER JOIN uploadspectemp u ON i.occid = u.occid '.
+			'WHERE associatedmedia IS NOT NULL AND u.collid = '.$this->collId;
+		//echo $sqlTest;
+		$rsTest = $this->conn->query($sqlTest);
+		while($rowTest = $rsTest->fetch_object()){
+			$existingImages[$rowTest->occid][$rowTest->imgid]['url'] = $rowTest->url;
+			$existingImages[$rowTest->occid][$rowTest->imgid]['orig'] = $rowTest->originalurl;
+		}
+		$rsTest->free();
+
+
 		//Grab image data to make sure link wasn't previously loaded
 		$existingImages = array();
 		$sqlTest = 'SELECT i.occid, i.imgid, i.url, i.originalurl '.
@@ -903,7 +922,7 @@ class SpecUploadBase extends SpecUpload{
 						}
 						if($loadImage){
 							$sqlInsert = 'INSERT INTO images(occid,tid,originalurl,url) '.
-								'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","")';
+								'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty")';
 							if($this->conn->query($sqlInsert)){
 								$this->imageTransferCount++;
 							}
@@ -918,17 +937,66 @@ class SpecUploadBase extends SpecUpload{
 					}
 				}
 			}
-			//Load images
 		}
 		$this->outputMsg('Done! ('.$this->imageTransferCount.' images)</li> ');
 		ob_flush();
 		flush();
+		
+		
+		
+		
+		//if($this->conn->query($sql)){
+			$this->outputMsg('Done!</li> ');
+		//}
+		//else{
+		//	$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
+		//}
 	}
-
+	
 	protected function finalCleanup(){
 		$this->outputMsg('<li>Transfer process complete</li>');
 		$this->outputMsg('<li>House cleaning</li>');
 
+		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table  
+		$this->outputMsg('<li style="margin-left:10px;">Establish links to taxonomic thesaurus...');
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
+			'SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL AND o.collid = '.$this->collId;
+		$this->conn->query($sql);
+		$this->outputMsg('Done!</li> ');
+		
+		$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...');
+		ob_flush();
+		flush();
+		$sql = 'UPDATE taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+			'SET o.LocalitySecurity = t.SecurityStatus '.
+			'WHERE (t.SecurityStatus > 0) AND (o.LocalitySecurity IS NULL)';
+		$this->conn->query($sql);
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
+			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
+			'SET o.localitysecurity = 1 '.
+			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND c.type = "rarespp" '.
+			'AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND o.collid ='.$this->collId;
+		$this->conn->query($sql);
+		$this->outputMsg('Done!</li> ');
+		
+		$this->outputMsg('<li style="margin-left:10px;">Populating NULL families and authors...');
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+			'SET o.family = ts.family '.
+			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "") AND o.collid = '.$this->collId;
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+			'SET o.scientificNameAuthorship = t.author '.
+			'WHERE (o.scientificNameAuthorship = "" OR o.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL AND o.collid = '.$this->collId;
+		$this->conn->query($sql);
+		$this->outputMsg('Done!</li> ');
+		
 		$this->outputMsg('<li style="margin-left:10px;">Updating georeference indexing... ');
 		ob_flush();
 		flush();
@@ -1419,15 +1487,15 @@ class SpecUploadBase extends SpecUpload{
 			}
 			
 			$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
-			$sql = "INSERT INTO uploadspectemp(collid".$sqlFragments['fieldstr'].") ".
-				"VALUES(".$this->collId.$sqlFragments['valuestr'].")";
+			$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].',dateentered) '.
+				'VALUES('.$this->collId.$sqlFragments['valuestr'].','.date('Y-m-d H:i:s').')';
 			//echo "<div>SQL: ".$sql."</div>";
-			//$this->conn->query('SET autocommit=0');
-			//$this->conn->query('SET unique_checks=0');
-			//$this->conn->query('SET foreign_key_checks=0');
+			$this->conn->query('SET autocommit=0');
+			$this->conn->query('SET unique_checks=0');
+			$this->conn->query('SET foreign_key_checks=0');
 			if($this->conn->query($sql)){
 				$this->transferCount++;
-				if($this->transferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Running count: '.$this->transferCount.'</li>');
+				if($this->transferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->transferCount.'</li>');
 				ob_flush();
 				flush();
 				//$this->outputMsg("<li>");
@@ -1439,9 +1507,9 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg("<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>");
 				$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
 			}
-			//$this->conn->query('COMMIT');
-			//$this->conn->query('SET unique_checks=1');
-			//$this->conn->query('SET foreign_key_checks=1');
+			$this->conn->query('COMMIT');
+			$this->conn->query('SET unique_checks=1');
+			$this->conn->query('SET foreign_key_checks=1');
 		}
 	}
 
@@ -1449,10 +1517,6 @@ class SpecUploadBase extends SpecUpload{
 		if($recMap){
 			//Import record only if required fields have data (coreId and a scientificName) 
 			if(isset($recMap['coreid']) && $recMap['coreid'] && (isset($recMap['sciname']) || isset($recMap['genus']))){
-				//Trim all field values
-				foreach($recMap as $k => $v){
-					$recMap[$k] = trim($v);
-				}
 	
 				//Do some cleaning 
 				//Populate sciname if null
@@ -1491,7 +1555,7 @@ class SpecUploadBase extends SpecUpload{
 					
 					if($this->conn->query($sql)){
 						$this->identTransferCount++;
-						if($this->identTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Running count: '.$this->identTransferCount.'</li>');
+						if($this->identTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->identTransferCount.'</li>');
 						ob_flush();
 						flush();
 					}
@@ -1508,14 +1572,25 @@ class SpecUploadBase extends SpecUpload{
 	protected function loadImageRecord($recMap){
 		if($recMap){
 			//Import record only if required fields have data 
-			if(isset($recMap['coreid']) && $recMap['coreid'] && $recMap['identifier']){
-				//Trim all field values
-				foreach($recMap as $k => $v){
-					$recMap[$k] = trim($v);
-				}
-				
-				print_r($recMap); exit;
+			if(isset($recMap['dbpk']) && (isset($recMap['originalurl']) || isset($recMap['url']))){
+				if(!isset($recMap['url'])) $recMap['url'] = 'empty';
 
+				$sqlFragments = $this->getSqlFragments($recMap,$this->imageFieldMap);
+				$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
+					'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
+				//echo "<div>SQL: ".$sql."</div>"; exit;
+				
+				if($this->conn->query($sql)){
+					$this->imageTransferCount++;
+					if($this->imageTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->imageTransferCount.'</li>');
+					ob_flush();
+					flush();
+				}
+				else{
+					$this->outputMsg("<li>FAILED adding image record #".$this->imageTransferCount."</li>");
+					$this->outputMsg("<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>");
+					$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
+				}
 			}
 		}
 	}

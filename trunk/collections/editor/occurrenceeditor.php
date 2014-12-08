@@ -1146,14 +1146,17 @@ else{
 											</div>
 											<div id="pkDiv">
 												<hr/>
-												<div style="float:left;" title="Internal occurrence record Primary Key">
+												<div style="float:left;" title="Internal occurrence record Primary Key (occid)">
 													<?php if($occId) echo 'Primary Key: '.$occId; ?>
 												</div>
 												<div style="float:left;margin-left:90px;">
 													<?php if(array_key_exists('datelastmodified',$occArr)) echo 'Date Last Modified: '.$occArr['datelastmodified']; ?>
 												</div>
 												<div style="float:left;margin-left:90px;">
-													<?php if(array_key_exists('recordenteredby',$occArr)) echo 'Entered By: '.$occArr['recordenteredby']; ?>
+													<?php 
+													if(array_key_exists('recordenteredby',$occArr)) echo 'Entered By: '.$occArr['recordenteredby'];
+													if(isset($occArr['dateentered'])) echo ' on '.$occArr['dateentered']; 
+													?>
 												</div>
 											</div>
 										</fieldset>
@@ -1165,7 +1168,7 @@ else{
 										<div style="padding:10px;">
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-											<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
+											<input type="hidden" name="recordenteredby" value="<?php echo $paramsArr['un']; ?>" />
 											<input type="hidden" name="observeruid" value="<?php echo $symbUid; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<?php

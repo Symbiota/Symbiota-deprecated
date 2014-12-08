@@ -75,12 +75,12 @@ class OccurrenceIndividualManager extends Manager{
 			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, '.
 			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, '.
 			'DATE_FORMAT(eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
-			'verbatimeventdate, country, stateprovince, county, locality, '.
+			'verbatimeventdate, country, stateprovince, county, municipality, locality, '.
 			'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, localitysecurity, localitysecurityreason, '.
 			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
 			'georeferenceremarks, verbatimattributes, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
-			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, municipality '.
+			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, recordenteredby, dateentered, datelastmodified '.
 			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
 		if($this->occid){
 			$sql .= 'WHERE (o.occid = '.$this->occid.')';

@@ -256,17 +256,19 @@ class DwcArchiverOccurrence{
 			$occurFieldArr['observeruID'] = 'o.observeruid';
 			$occurTermArr['processingStatus'] = 'http://symbiota.org/terms/processingStatus';
 			$occurFieldArr['processingStatus'] = 'o.processingstatus';
-			$occurTermArr['recordEnteredBy'] = 'http://symbiota.org/terms/recordEnteredBy';
-			$occurFieldArr['recordEnteredBy'] = 'o.recordEnteredBy';
 			$occurTermArr['duplicateQuantity'] = 'http://symbiota.org/terms/duplicateQuantity';
 			$occurFieldArr['duplicateQuantity'] = 'o.duplicateQuantity';
+			$occurTermArr['recordEnteredBy'] = 'http://symbiota.org/terms/recordEnteredBy';
+			$occurFieldArr['recordEnteredBy'] = 'o.recordEnteredBy';
 			$occurTermArr['dateEntered'] = 'http://symbiota.org/terms/dateEntered';
 			$occurFieldArr['dateEntered'] = 'o.dateEntered';
+			$occurTermArr['dateLastModified'] = 'http://rs.tdwg.org/dwc/terms/dateLastModified';
+			$occurFieldArr['dateLastModified'] = 'o.datelastmodified';
 		}
 		$occurTermArr['modified'] = 'http://purl.org/dc/terms/modified';
 		$occurFieldArr['modified'] = 'IFNULL(o.modified,o.datelastmodified) AS modified';
 		if($this->schemaType == 'dwc'){
-			//If not DWC, don't output right becasue that data is already in the eml file
+			//If not DWC, don't output rights becasue that data is already in the eml file
 	 		$occurTermArr['rights'] = 'http://rs.tdwg.org/dwc/terms/rights';
 	 		$occurFieldArr['rights'] = 'c.rights';
 			$occurTermArr['rightsHolder'] = 'http://rs.tdwg.org/dwc/terms/rightsHolder';

@@ -447,20 +447,17 @@ xmlwriter_end_attribute($xml_resource);
 				'scientificNameAuthorship');
 		}
 		elseif($this->schemaType == 'georef'){
+			$this->headerArr = array("institutionCode","collectionCode","catalogNumber","occurrenceId","decimalLatitude","decimalLongitude",
+		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates","georeferencedBy",
+				"georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
+				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
+				"modified","symbiotaId","recordId");
 			if($this->extended){
-				$this->headerArr = array("institutionCode","collectionCode","catalogNumber","occurrenceId","decimalLatitude","decimalLongitude",
-			 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
-					"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
-					"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-					"localitySecurity","localitySecurityReason","modified",
-					"processingstatus","collId","sourcePrimaryKey","symbiotaId","recordId");
-			}
-			else{
-				$this->headerArr = array("institutionCode","collectionCode","catalogNumber","occurrenceId","decimalLatitude","decimalLongitude",
-			 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
-					"georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
-					"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-					"modified","symbiotaId","recordId");
+				$this->headerArr[] = 'localitySecurity';
+				$this->headerArr[] = 'localitySecurityReason';
+				$this->headerArr[] = 'processingstatus';
+				$this->headerArr[] = 'collId';
+				$this->headerArr[] = 'sourcePrimaryKey';
 			}
 		}
 	}

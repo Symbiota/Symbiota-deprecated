@@ -65,3 +65,4 @@ $collArr = array(
 	1 => array('sourcePathFrag' => 'abc/lichens', 'pmterm' => '/^ABC(\d{8})\D*/'),
 	2 => array('sourcePathFrag' => 'def/vasc/', 'pmterm' => '/^DEF(\d{8})\D*/')
 );
+?>

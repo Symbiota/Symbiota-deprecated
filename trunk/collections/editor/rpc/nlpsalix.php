@@ -1,4 +1,5 @@
 <?php
+//error_reporting(E_ALL);
 error_reporting(0);
 include_once('../../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcNlpUtilities.php');
@@ -28,8 +29,11 @@ if($rawOcr){
 
 	$dwcArr = $nlpManager->parse($rawOcr);
 	if($debug){
-		$fh = fopen($serverRoot.'/temp/ocrdebug.txt','w');
-		fwrite($fh,$rawOcr."\n\n\n");
+		$fh = fopen($serverRoot.'/temp/logs/ocrdebug.txt','w');
+		fwrite($fh,'Raw OCR:');
+		fwrite($fh,$rawOcr);
+		fwrite($fh,"\n\n\n------------------------------------------------------------------\n\n\n");
+		fwrite($fh,'Parsed data:');
 		foreach($dwcArr as $k => $v){
 			fwrite($fh,$k.': '.$v."\n");
 		}
