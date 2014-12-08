@@ -93,7 +93,6 @@ if($displayLocality && is_numeric($occArr['decimallatitude']) && is_numeric($occ
 $dupeArr = array();
 $dupeArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
-$editArr = ($isEditor?$indManager->getEditArr():null);
 ?>
 <!DOCTYPE html >
 <html>
@@ -234,7 +233,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 					<li><a href="#commenttab"><span><?php echo ($commentArr?count($commentArr).' ':''); ?>Comments</span></a></li> 
 					<li><a href="other.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collId.'&obsuid='.$occArr['observeruid']; ?>"><span>Related Resources</span></a></li>
 					<?php 
-					if($editArr){
+					if($isEditor){
 						?>
 						<li><a href="#edittab"><span>Edit History</span></a></li> 
 						<?php 
@@ -858,7 +857,8 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 				
 				</div>
 				<?php 
-				if($editArr){
+				if($isEditor){
+					$editArr = $indManager->getEditArr();
 					?>
 					<div id="edittab">
 						<div style="padding:15px;">
@@ -870,34 +870,45 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 								</div>
 								<?php
 							}
-							echo '<div style="margin-bottom:10px"><b>Edits are only viewable by collection administrators and editors</b></div>';
-							foreach($editArr as $k => $eArr){
-								?>
-								<div>
-									<b>Editor:</b> <?php echo $eArr['editor']; ?>
-									<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
-								</div>
-								<?php 
-								unset($eArr['editor']);
-								unset($eArr['ts']);
-								foreach($eArr as $vArr){
-									echo '<div style="margin:15px;">';
-									echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
-									echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
-									echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
-									$reviewStr = 'OPEN';
-									if($vArr['reviewstatus'] == 2){
-										$reviewStr = 'PENDING';
+							echo '<div style="margin:15px;">';
+							echo '<b>Entered By:</b> '.($occArr['recordenteredby']?$occArr['recordenteredby']:'not recorded').'<br/>';
+							echo '<b>Date entered:</b> '.($occArr['dateentered']?$occArr['dateentered']:'not recorded').'<br/>';
+							echo '<b>Date modified:</b> '.($occArr['datelastmodified']?$occArr['datelastmodified']:'not recorded').'<br/>';
+							if($occArr['modified'] && $occArr['modified'] != $occArr['datelastmodified']) echo '<b>Source date modified:</b> '.$occArr['modified'];
+							echo '</div>';
+							if($editArr){
+								foreach($editArr as $k => $eArr){
+									?>
+									<div>
+										<b>Editor:</b> <?php echo $eArr['editor']; ?>
+										<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
+									</div>
+									<?php 
+									unset($eArr['editor']);
+									unset($eArr['ts']);
+									foreach($eArr as $vArr){
+										echo '<div style="margin:15px;">';
+										echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+										echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
+										echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+										$reviewStr = 'OPEN';
+										if($vArr['reviewstatus'] == 2){
+											$reviewStr = 'PENDING';
+										}
+										elseif($vArr['reviewstatus'] == 3){
+											$reviewStr = 'CLOSED';
+										}
+										echo '<b>Applied Status:</b> '.($vArr['appliedstatus']?'applied':'not applied').'; ';
+										echo '<b>Reveiw Status:</b> '.$reviewStr;
+										echo '</div>';
 									}
-									elseif($vArr['reviewstatus'] == 3){
-										$reviewStr = 'CLOSED';
-									}
-									echo '<b>Applied Status:</b> '.($vArr['appliedstatus']?'applied':'not applied').'; ';
-									echo '<b>Reveiw Status:</b> '.$reviewStr;
-									echo '</div>';
+									echo '<div style="margin:15px 0px;"><hr/></div>';
 								}
-								echo '<div style="margin:15px 0px;"><hr/></div>';
 							}
+							else{
+								echo '<div style="margin:25px 15px;"><b>Record has not been edited</b></div>';
+							}
+							echo '<div style="margin:15px">Note: Edits are only viewable by collection administrators and editors</div>';
 							?>
 						</div>
 					</div>

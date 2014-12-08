@@ -497,7 +497,7 @@ $duManager->loadFieldMap();
 												
 											</div>
 											<div>
-												<input name="importimage" value="1" type="checkbox" <?php echo (isset($metaArr['image'])&&false?'checked':'disabled') ?> /> 
+												<input name="importimage" value="1" type="checkbox" <?php echo (isset($metaArr['image'])?'checked':'disabled') ?> /> 
 												Import Images 
 												<?php 
 												if(isset($metaArr['image'])){
