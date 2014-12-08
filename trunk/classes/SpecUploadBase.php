@@ -731,7 +731,7 @@ class SpecUploadBase extends SpecUpload{
 			'decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, '.
 			'coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, '.
 			'georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, '.
-			'verbatimElevation, previousIdentifications, disposition, modified, language, recordEnteredBy, labelProject, duplicateQuantity ) '.
+			'verbatimElevation, previousIdentifications, disposition, modified, language, recordEnteredBy, labelProject, duplicateQuantity, dateentered ) '.
 			'SELECT u.collid, u.dbpk, u.basisOfRecord, u.catalogNumber, u.otherCatalogNumbers, u.occurrenceid, '.
 			'u.ownerInstitutionCode, u.institutionID, u.collectionID, u.institutionCode, u.collectionCode, '.
 			'u.family, u.scientificName, u.sciname, u.tidinterpreted, u.genus, u.specificEpithet, u.datasetID, u.taxonRank, u.infraspecificEpithet, '.
@@ -745,7 +745,8 @@ class SpecUploadBase extends SpecUpload{
 			'u.decimalLatitude, u.decimalLongitude, u.geodeticDatum, u.coordinateUncertaintyInMeters, u.footprintWKT, '.
 			'u.coordinatePrecision, u.locationRemarks, u.verbatimCoordinates, u.verbatimCoordinateSystem, u.georeferencedBy, u.georeferenceProtocol, '.
 			'u.georeferenceSources, u.georeferenceVerificationStatus, u.georeferenceRemarks, u.minimumElevationInMeters, u.maximumElevationInMeters, '.
-			'u.verbatimElevation, u.previousIdentifications, u.disposition, u.modified, u.language, u.recordEnteredBy, u.labelProject, u.duplicateQuantity '.
+			'u.verbatimElevation, u.previousIdentifications, u.disposition, u.modified, u.language, u.recordEnteredBy, u.labelProject, '.
+			'u.duplicateQuantity, "'.date('Y-m-d H:i:s').'" '.
 			'FROM uploadspectemp u '.
 			'WHERE u.occid IS NULL AND u.collid = '.$this->collId.' AND (u.basisofrecord IS NULL OR u.basisofrecord != "determinationHistory")';
 		if($this->conn->query($sql)){
@@ -1487,8 +1488,8 @@ class SpecUploadBase extends SpecUpload{
 			}
 			
 			$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
-			$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].',dateentered) '.
-				'VALUES('.$this->collId.$sqlFragments['valuestr'].',"'.date('Y-m-d H:i:s').'")';
+			$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].') '.
+				'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
 			//echo "<div>SQL: ".$sql."</div>";
 			$this->conn->query('SET autocommit=0');
 			$this->conn->query('SET unique_checks=0');
