@@ -1488,7 +1488,7 @@ class SpecUploadBase extends SpecUpload{
 			
 			$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
 			$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].',dateentered) '.
-				'VALUES('.$this->collId.$sqlFragments['valuestr'].','.date('Y-m-d H:i:s').')';
+				'VALUES('.$this->collId.$sqlFragments['valuestr'].',"'.date('Y-m-d H:i:s').'")';
 			//echo "<div>SQL: ".$sql."</div>";
 			$this->conn->query('SET autocommit=0');
 			$this->conn->query('SET unique_checks=0');
