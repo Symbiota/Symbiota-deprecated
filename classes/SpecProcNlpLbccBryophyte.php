@@ -38,6 +38,7 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 			else if($this->isMossesOfNorthAmericaLabel($str)) return $this->doMossesOfNorthAmericaLabel($str);
 			else if($this->isMusciAcrocarpiBorealiAmericaniLabel($str)) return $this->doMusciAcrocarpiBorealiAmericaniLabel($str);
 			else if($this->isMusciEuropaeiExsiccatiLabel($str)) return $this->doMusciEuropaeiExsiccatiLabel($str);
+			else if($this->isGreatFallsHongBCLabel($str)) return $this->doGreatFallsHongBCLabel($str);
 			else if($this->isCanadianMusciLabel($str)) return $this->doCanadianMusciLabel($str);
 			else if($this->isMusciSelectiEtCriticiLabel($str)) return $this->doMusciSelectiEtCriticiLabel($str);
 			else return $this->doGenericLabel($str);
@@ -890,6 +891,114 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		return $this->doGenericLabel($s, "167");
 	}
 
+	private function isGreatFallsHongBCLabel($s) {
+		if(preg_match("/.*HERBAR[1Il!|]UM ?- ?[CG][0OQ]LLE[CG]E [0OQ]F [CG]REA[IT] FALL[S5].*/is", $s)) return true;
+		if(preg_match("/.*b\\. ?c\\..*[CG][0OQ]LLE[CG]E [0OQ]F [CG]REA[IT] FALL[S5].*/is", $s)) return true;
+		if(preg_match("/.*[CG][0OQ]LLE[CG]E [0OQ]F [CG]REA[IT] FALL[S5].*W\\. ?Hon[a-z].*/is", $s)) return true;
+		return false;
+	}
+
+	private function doGreatFallsHongBCLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/(?:HERBAR[1Il!|]UM\\s?)?-\\s?[CG][0OQ]LLEGE [0OQ]F [CG]REA[IT] FALL[S5]/is",
+				"/Garibaldi Prov\\./",
+				"/Prov\\. Pk\\./",
+				"/Nat\\. Pk\\./",
+				"/\\bQCI\\b/",
+				"/\\b([A-Z][a-z]+)\\sI\\./s",
+				"/\\b([A-Z][a-z]+)\\sL\\./s",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"Garibaldi Provincial Park",
+				"Provincial Park",
+				"National Park",
+				"Queen Charlotte Islands",
+				"\${1} Island",
+				"\${1} Lake",
+				"\n"
+			),
+			$s
+		));//echo "\nline 7302, s:\n".$s."\n";
+		$recordedBy = "";
+		$recordNumber = "";
+		$substrate = "";
+		$verbatimEventDate = "";
+		$country = "";
+		$stateProvince = "";
+		$dPat = "/^(.*)((?:[0OQ]?+[!lI2ZS1-9]|[1!Il][OQ!lI2Z12])\/(?:[0OQ]?+[!lI2ZS1-9]|[1!Il2Z][OQ!lI2ZS0-9]|3[0OQ!|Il1])\/(?:(?:[1!Il|][89]|2[0OQ!|Il1])[OQ!lI2ZS0-9]{2}|[0OQ][!lI2ZS1-9]|[OQ!lI2ZS0-9]{2}+))(.*)$/s";
+		if(preg_match($dPat, $s, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 7305, mats[".$i++."] = ".$mat."\n";
+			$verbatimEventDate = $this->convertSlashedDates($this->replaceMistakenNumbers($mats[2]));
+			$s = trim($mats[1])." ".trim($mats[3]);
+		}
+		if(preg_match("/^(.*)FLORA OF\\sB. ?C.{1,2}(?:.? Cana\\wa)?(.*)$/is", $s, $mats)) {
+			$country = "Canada";
+			$stateProvince = "British Columbia";
+			$s = trim(trim($mats[1])." ".trim($mats[2]));
+		}
+		if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?(?:d|\(3)\\. ?w(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+			$substrate = "decaying wood";
+			$recordNumber = trim($mats[2])."-".trim($mats[3]);
+			$s = trim($mats[1])."\n".trim($mats[4]);
+		} else if(preg_match("/^(.*?)\\b([A-Za-z]+ on )?d\\. ?w\\.\\n(.*)$/is", $s, $mats)) {
+			$substrate = trim(trim($mats[2])." decaying wood");
+			$s = trim($mats[1])."\n".trim($mats[3]);
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?s\\.? on r(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+			$substrate = "soil on rock";
+			$recordNumber = trim($mats[2])."-".trim($mats[3]);
+			$s = trim($mats[1])."\n".trim($mats[4]);
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?s(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+			$substrate = "soil";
+			$recordNumber = trim($mats[2])."-".trim($mats[3]);
+			$s = trim($mats[1])."\n".trim($mats[4]);
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?r(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+			$substrate = "rock";
+			$recordNumber = trim($mats[2])."-".trim($mats[3]);
+			$s = trim($mats[1])."\n".trim($mats[4]);
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?b(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+			$substrate = "bark";
+			$recordNumber = trim($mats[2])."-".trim($mats[3]);
+			$s = trim($mats[1])."\n".trim($mats[4]);
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?c(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+			$substrate = "clay";
+			$recordNumber = trim($mats[2])."-".trim($mats[3]);
+			$s = trim($mats[1])."\n".trim($mats[4]);
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?w\\. ?s(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+			$substrate = "wet soil";
+			$recordNumber = trim($mats[2])."-".trim($mats[3]);
+			$s = trim($mats[1])."\n".trim($mats[4]);
+		}
+		if(preg_match("/^(.*)\\b[HK]ong (\\d+)[-余(\\d+)\\b(.*)$/is", $s, $mats)) {
+			$recordedBy = "Hong, Won Shic";
+			$recordNumber = trim($mats[2])."-".trim($mats[3]);
+			$s = trim($mats[1])."\n".trim($mats[4]);
+		} else if(preg_match("/^(.*)(\\d+)[-余(\\d+)\\b(?:by\\s)?W\\. ?(?:S\\. ?)?Hon.?\\b(.*)$/is", $s, $mats)) {
+			$recordedBy = "Hong, Won Shic";
+			$recordNumber = trim($mats[2])."-".trim($mats[3]);
+			$s = trim($mats[1])."\n".trim($mats[4]);
+		}
+		if(preg_match("/^(.*)\\b(?:by\\s)?W\\. ?(?:S\\. ?)?Hon.?\\s*$/is", $s, $mats)) {
+			$recordedBy = "Hong, Won Shic";
+			$s = trim($mats[1]);
+		} else if(preg_match("/^(.*)\\b(?:by\\s)?W\\. ?(?:S\\. ?)?Hon.?\\sCINC/is", $s, $mats)) {
+			$recordedBy = "Hong, Won Shic";
+			$s = trim($mats[1]);
+		}
+		$fields = array
+			(
+				'country' => $country,
+				'stateProvince' => $stateProvince,
+				'recordNumber' => $recordNumber,
+				'verbatimEventDate' => $verbatimEventDate,
+				'substrate' => $substrate,
+				'recordedBy' => $recordedBy
+			);
+		return $this->doGenericLabel($s, null, $fields);
+	}
+
 	private function isCanadianMusciLabel($s) {
 		if(preg_match("/.*[CG]anad[1Il!|]an Mu[S5][ce].*/is", $s)) return true;
 		return false;
@@ -922,7 +1031,8 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		$pHab = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab));
 		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "aspens?", "juniper(?:u?s)?", "p[l1|I!]ant(?! (?:sciences?|bio[l1|I!]ogy|exp[l1|I!]oration))",
 			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "(?<!(?:National) )forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix",
-			"a[l1|I!]ders?", "tundra","abies", "ca[l1|I!]careous", "outcrops?", "(?<!\()(?<!Co[l1|I!]orado )bou[l1|I!]ders?(?!(?:\)| Co[l1|I!]orado))",
+			"a[l1|I!]ders?", "tundra","abies", "ca[l1|I!]careous", "outcrops?", "slop(?:ed|ing)", "boulders",
+			"(?<!\()(?<!Co[l1|I!]orado )(?<!City of )(?<![NS]\\.[EW]\\. of )(?<!(?:North|South) of )(?<!(?:East|West) of )Bou[l1|I!]der(?!(?:\)| Co[l1|I!]orado| Creek| Canyon))",
 			"Granit(?:e|ic)", "[l1|I!]imestone", "sandstone", "sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?",
 			"(?:white)?bark", "open", "deciduous", "c[l1|I!]imax", "expos(?:ure|ed)", "aspect", "facing", "pinus", "habitat", "degrees?",
 			"conifer(?:(?:ou)?s)?", "spruces?", "map[l1|I!]es?", "substrate", "th[uv]ja", "shad(?:y|ed?)", "(?:[a-z]{2,})?berry",
@@ -933,11 +1043,11 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 			"Aesculus", "cypress(?:es)?", "Empetrum", "Taxodium", "sparse(?:[l1|I!]y)?", "chaparra[l1|I!]", "temperate", "hemlocks?",
 			"Myrica", "[l1|I!]odgepo[l1|I!]e", "Cornus", "trunks?", "myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture",
 			"stump", "pa[l1|I!]metto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter", "scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine",
-			"grave[l1|I!](?! r(?:oa)?d)(?:[l1|I!]y)?", "duff", "seepage", "submerged", "graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry",
+			"grave[l1|I!](?! r(?:oa)?d)(?:[l1|I!]y)?", "duff", "seep(?:ing|age)?", "submerged", "graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry",
 			"regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:[l1|I!]ine)?", "terraces?", "thickets?", "moraines?", "heath(?:er)?",
 			"metamorphic", "vegetation", "quarry", "mats?", "depression", "pebbles?", "Ombrotrophic", "rivu[l1|I!]ets?", "hummock[sy]?", "stand",
 			"chert", "humus", "marsh", "abundant(?:[l1|I!]y)?", "ecotone", "fen", "poo[l1|I!]s?", "cu[l1|I!]tivat[ec]d", "twigs?", "Agropyron",
-			"barrens?", "prairie", "crevices?");
+			"barrens?", "prairie", "crevices?", "shal[e|y]", "dominated by", "Tortula", "Homalothecium", "Orthotrichum", "[l1]oam");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
