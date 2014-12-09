@@ -946,27 +946,27 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 		} else if(preg_match("/^(.*?)\\b([A-Za-z]+ on )?d\\. ?w\\.\\n(.*)$/is", $s, $mats)) {
 			$substrate = trim(trim($mats[2])." decaying wood");
 			$s = trim($mats[1])."\n".trim($mats[3]);
-		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?s\\.? on r(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?s(?:\\.|oil)? on r(?:\\.|ock|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "soil on rock";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?s(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?s(?:\\.|oil|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "soil";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?r(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?r(?:\\.|ock|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "rock";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?b(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?b(?:\\.|ark|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "bark";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?c(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?c(?:\\.|lay|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "clay";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?w\\. ?s(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-余(\\d+) ?w(?:\\.|et) ?s(?:\\.|oil|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "wet soil";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
