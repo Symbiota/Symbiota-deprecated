@@ -115,13 +115,13 @@ class OccurrenceEditorManager {
 			$this->qryArr = $overrideQry;
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
-		elseif(array_key_exists('q_identifier',$_REQUEST)){
-			if($_REQUEST['q_identifier']) $this->qryArr['id'] = trim($_REQUEST['q_identifier']);
+		elseif(array_key_exists('q_catalognumber',$_REQUEST)){
+			if($_REQUEST['q_catalognumber']) $this->qryArr['cn'] = trim($_REQUEST['q_catalognumber']);
 			if(array_key_exists('q_othercatalognumbers',$_REQUEST) && $_REQUEST['q_othercatalognumbers']) $this->qryArr['ocn'] = trim($_REQUEST['q_othercatalognumbers']);
 			if(array_key_exists('q_recordedby',$_REQUEST) && $_REQUEST['q_recordedby']) $this->qryArr['rb'] = trim($_REQUEST['q_recordedby']);
 			if(array_key_exists('q_recordnumber',$_REQUEST) && $_REQUEST['q_recordnumber']) $this->qryArr['rn'] = trim($_REQUEST['q_recordnumber']);
 			if(array_key_exists('q_eventdate',$_REQUEST) && $_REQUEST['q_eventdate']) $this->qryArr['ed'] = trim($_REQUEST['q_eventdate']);
-			if(array_key_exists('q_enteredby',$_REQUEST) && $_REQUEST['q_enteredby']) $this->qryArr['eb'] = trim($_REQUEST['q_enteredby']);
+			if(array_key_exists('q_recordenteredby',$_REQUEST) && $_REQUEST['q_recordenteredby']) $this->qryArr['eb'] = trim($_REQUEST['q_recordenteredby']);
 			if(array_key_exists('q_observeruid',$_REQUEST) && $_REQUEST['q_observeruid']) $this->qryArr['ouid'] = $_REQUEST['q_observeruid'];
 			if(array_key_exists('q_processingstatus',$_REQUEST) && $_REQUEST['q_processingstatus']) $this->qryArr['ps'] = trim($_REQUEST['q_processingstatus']);
 			if(array_key_exists('q_datelastmodified',$_REQUEST) && $_REQUEST['q_datelastmodified']) $this->qryArr['dm'] = trim($_REQUEST['q_datelastmodified']);
@@ -133,6 +133,8 @@ class OccurrenceEditorManager {
 				if(array_key_exists('q_customtype'.$x,$_REQUEST) && $_REQUEST['q_customtype'.$x]) $this->qryArr['ct'.$x] = $_REQUEST['q_customtype'.$x];
 				if(array_key_exists('q_customvalue'.$x,$_REQUEST) && $_REQUEST['q_customvalue'.$x]) $this->qryArr['cv'.$x] = trim($_REQUEST['q_customvalue'.$x]);
 			}
+			if(array_key_exists('orderby',$_REQUEST)) $this->qryArr['orderby'] = trim($_REQUEST['orderby']);
+			if(array_key_exists('orderbydir',$_REQUEST)) $this->qryArr['orderbydir'] = trim($_REQUEST['orderbydir']);
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 		elseif(isset($_COOKIE["editorquery"])){
@@ -146,13 +148,13 @@ class OccurrenceEditorManager {
 
 	public function setSqlWhere($occIndex=0, $recLimit = 1){
 		$sqlWhere = '';
-		$sqlOrderBy = '';
-        if ($this->qryArr==null) {
-            // supress warnings on array_key_exists(key,null) calls below
-            $this->qryArr=array();
-        }
-		if(array_key_exists('id',$this->qryArr)){
-			$idTerm = $this->qryArr['id'];
+		if ($this->qryArr==null) {
+			// supress warnings on array_key_exists(key,null) calls below
+			$this->qryArr=array();
+		}
+		$catNumIsNum = false;
+		if(array_key_exists('cn',$this->qryArr)){
+			$idTerm = $this->qryArr['cn'];
 			if(strtolower($idTerm) == 'is null'){
 				$sqlWhere .= 'AND (o.catalognumber IS NULL) ';
 			}
@@ -165,7 +167,6 @@ class OccurrenceEditorManager {
 				$iArr = explode(',',$idTerm);
 				$iBetweenFrag = array();
 				$iInFrag = array();
-				$searchIsNum = false;
 				foreach($iArr as $v){
 					$v = trim($v);
 					if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$v)){
@@ -176,7 +177,7 @@ class OccurrenceEditorManager {
 						$term1 = trim(substr($v,0,$p));
 						$term2 = trim(substr($v,$p+3));
 						if(is_numeric($term1) && is_numeric($term2)){
-							$searchIsNum = true;
+							$catNumIsNum = true;
 							if($isOccid){
 								$iBetweenFrag[] = '(o.occid BETWEEN '.$term1.' AND '.$term2.')';
 							}
@@ -195,7 +196,7 @@ class OccurrenceEditorManager {
 						if(is_numeric($vStr)){
 							if($iInFrag){
 								//Only tag as numeric if there are more than one term (if not, it doesn't match what the sort order is)
-								$ocnIsNum = true;
+								$catNumIsNum = true;
 							}
 							if(substr($vStr,0,1) == '0'){
 								//Add value with left padded zeros removed
@@ -234,23 +235,15 @@ class OccurrenceEditorManager {
 					}
 				}
 				$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
-				if(!$isOccid){
-					if($searchIsNum){
-						$sqlOrderBy .= ',(o.catalogNumber+1)';
-					}
-					else{
-						$sqlOrderBy .= ',o.catalogNumber';
-					}
-				}
 			}
 		}
 		//otherCatalogNumbers
+		$otherCatNumIsNum = false;
 		if(array_key_exists('ocn',$this->qryArr)){
 			if(strtolower($this->qryArr['ocn']) == 'is null'){
 				$sqlWhere .= 'AND (o.othercatalognumbers IS NULL) ';
 			}
 			else{
-				$ocnIsNum = false;
 				$ocnArr = explode(',',$this->qryArr['ocn']);
 				$ocnBetweenFrag = array();
 				$ocnInFrag = array();
@@ -267,7 +260,7 @@ class OccurrenceEditorManager {
 						$term1 = trim(substr($v,0,$p));
 						$term2 = trim(substr($v,$p+3));
 						if(is_numeric($term1) && is_numeric($term2)){
-							$ocnIsNum = true;
+							$otherCatNumIsNum = true;
 							$ocnBetweenFrag[] = '(o.othercatalognumbers BETWEEN '.$term1.' AND '.$term2.')';
 						}
 						else{
@@ -279,7 +272,7 @@ class OccurrenceEditorManager {
 					else{
 						$ocnInFrag[] = $v;
 						if(is_numeric($v)){
-							$ocnIsNum = true;
+							$otherCatNumIsNum = true;
 							if(substr($v,0,1) == '0'){
 								//Add value with left padded zeros removed
 								$ocnInFrag[] = ltrim($vStr,0);
@@ -303,12 +296,10 @@ class OccurrenceEditorManager {
 						}
 					}
 				}
-				$sqlOrderBy .= ',(o.othercatalognumbers'.($ocnIsNum?'+1':'').')';
 				$sqlWhere .= 'AND ('.substr($ocnWhere,3).') ';
 			}
 		}
 		//recordNumber: collector's number
-		$rnIsNum = false;
 		if(array_key_exists('rn',$this->qryArr)){
 			if(strtolower($this->qryArr['rn']) == 'is null'){
 				$sqlWhere .= 'AND (o.recordnumber IS NULL) ';
@@ -327,7 +318,6 @@ class OccurrenceEditorManager {
 						$term1 = trim(substr($v,0,$p));
 						$term2 = trim(substr($v,$p+3));
 						if(is_numeric($term1) && is_numeric($term2)){
-							$rnIsNum = true;
 							$rnBetweenFrag[] = '(o.recordnumber BETWEEN '.$term1.' AND '.$term2.')';
 						}
 						else{
@@ -369,7 +359,6 @@ class OccurrenceEditorManager {
 			}
 			else{
 				$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
-				$sqlOrderBy .= ',(o.recordnumber+1)';
 			}
 		}
 		//eventDate: collection date
@@ -392,7 +381,6 @@ class OccurrenceEditorManager {
 				else{
 					$sqlWhere .= 'AND (o.eventdate = "'.$edv.'") ';
 				}
-				$sqlOrderBy .= ',o.eventdate';
 			}
 		}
 		if(array_key_exists('eb',$this->qryArr)){
@@ -400,28 +388,43 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND (o.recordEnteredBy IS NULL) ';
 			}
 			else{
-				$sqlWhere .= 'AND (o.recordEnteredBy LIKE "'.$this->qryArr['eb'].'%") ';
+				$sqlWhere .= 'AND (o.recordEnteredBy = "'.$this->qryArr['eb'].'") ';
 			}
 		}
 		if(array_key_exists('ouid',$this->qryArr)){
 			$sqlWhere .= 'AND (o.observeruid = '.$this->qryArr['ouid'].') ';
 		}
-		if(array_key_exists('dm',$this->qryArr)){
-			$dmv = trim($this->qryArr['dm']);
-			if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$dmv)){
+		if(array_key_exists('de',$this->qryArr)){
+			$de = trim($this->qryArr['de']);
+			if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$de)){
 				//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
-				$dmv = str_ireplace(array('>',' and ','<'),array('',' - ',''),$dmv);
+				$de = str_ireplace(array('>',' and ','<'),array('',' - ',''),$de);
 			}
-			if($p = strpos($dmv,' - ')){
-				$sqlWhere .= 'AND (DATE(o.datelastmodified) BETWEEN "'.trim(substr($dmv,0,$p)).'" AND "'.trim(substr($dmv,$p+3)).'") ';
+			if($p = strpos($de,' - ')){
+				$sqlWhere .= 'AND (DATE(o.dateentered) BETWEEN "'.trim(substr($de,0,$p)).'" AND "'.trim(substr($de,$p+3)).'") ';
 			}
-			elseif(substr($dmv,0,1) == '<' || substr($dmv,0,1) == '>'){
-				$sqlWhere .= 'AND (o.datelastmodified '.substr($dmv,0,1).' "'.trim(substr($dmv,1)).'") ';
+			elseif(substr($de,0,1) == '<' || substr($de,0,1) == '>'){
+				$sqlWhere .= 'AND (o.dateentered '.substr($de,0,1).' "'.trim(substr($de,1)).'") ';
 			}
 			else{
-				$sqlWhere .= 'AND (DATE(o.datelastmodified) = "'.$dmv.'") ';
+				$sqlWhere .= 'AND (DATE(o.dateentered) = "'.$de.'") ';
 			}
-			$sqlOrderBy .= ',o.datelastmodified';
+		}
+		if(array_key_exists('dm',$this->qryArr)){
+			$dm = trim($this->qryArr['dm']);
+			if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$dm)){
+				//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
+				$dm = str_ireplace(array('>',' and ','<'),array('',' - ',''),$dm);
+			}
+			if($p = strpos($dm,' - ')){
+				$sqlWhere .= 'AND (DATE(o.datelastmodified) BETWEEN "'.trim(substr($dm,0,$p)).'" AND "'.trim(substr($dm,$p+3)).'") ';
+			}
+			elseif(substr($dm,0,1) == '<' || substr($dm,0,1) == '>'){
+				$sqlWhere .= 'AND (o.datelastmodified '.substr($dm,0,1).' "'.trim(substr($dm,1)).'") ';
+			}
+			else{
+				$sqlWhere .= 'AND (DATE(o.datelastmodified) = "'.$dm.'") ';
+			}
 		}
 		//Processing status
 		if(array_key_exists('ps',$this->qryArr)){
@@ -494,9 +497,37 @@ class OccurrenceEditorManager {
 		}
 		if($this->collId) $sqlWhere .= 'AND (o.collid = '.$this->collId.') ';
 		if($sqlWhere) $sqlWhere = 'WHERE '.substr($sqlWhere,4);
-		if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
+
+		if(isset($this->qryArr['orderby'])){
+			$sqlOrderBy = '';
+			$orderBy = $this->qryArr['orderby'];
+			if($orderBy == "catalognumber"){
+				if($catNumIsNum){
+					$sqlOrderBy = 'catalogNumber+1';
+				}
+				else{
+					$sqlOrderBy = 'catalogNumber';
+				}
+			}
+			if($orderBy == "othercatalognumbers"){
+				if($otherCatNumIsNum){
+					$sqlOrderBy = 'othercatalognumbers+1';
+				}
+				else{
+					$sqlOrderBy = 'othercatalognumbers';
+				}
+			}
+			elseif($orderBy == "recordnumber"){
+				$sqlOrderBy = 'recordnumber+1';
+			}
+			else{
+				$sqlOrderBy = $orderBy;
+			}
+			if($sqlOrderBy) $sqlWhere .= 'ORDER BY (o.'.$sqlOrderBy.') '.$this->qryArr['orderbydir'].' ';
+		}
+		
 		$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').$recLimit;
-		//echo $sqlWhere;
+		//echo $sqlWhere; exit;
 		$this->sqlWhere = $sqlWhere;
 	}
 
@@ -560,9 +591,11 @@ class OccurrenceEditorManager {
 			$sql .= 'WHERE (o.occid = '.$this->occid.')';
 		}
 		elseif($this->sqlWhere){
+			/*
 			if(strpos($this->sqlWhere,'recordedby')){
 				$sql .= 'use index(Index_collector) ';
 			}
+			*/
 			$this->addTableJoins($sql);
 			/*
 			if(strpos($this->sqlWhere,'ocr.rawstr')){
@@ -1165,10 +1198,10 @@ class OccurrenceEditorManager {
 					$retArr[$r->idoccurgenetic]['notes'] = $r->notes;
 				}
 				$result->free();
-	        }
-	        else{
-	        	trigger_error('Unable to get genetic data; '.$this->conn->error,E_USER_WARNING);
-	        }
+			}
+			else{
+				trigger_error('Unable to get genetic data; '.$this->conn->error,E_USER_WARNING);
+			}
 		}
 		return $retArr;
 	}
@@ -1330,10 +1363,10 @@ class OccurrenceEditorManager {
 				$cnt++;
 			}
 			$result->free();
-        }
-        else{
-        	trigger_error('Unable to get edits; '.$this->conn->error,E_USER_WARNING);
-        }
+		}
+		else{
+			trigger_error('Unable to get edits; '.$this->conn->error,E_USER_WARNING);
+		}
 		return $retArr;
 	}
 

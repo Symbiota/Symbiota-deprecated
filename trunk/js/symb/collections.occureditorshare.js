@@ -27,10 +27,18 @@ function submitQueryTable(f){
 	return true;
 }
 
+function setOrderBy(formObject){
+	if(formObject.value != ""){
+		var inputName = formObject.name;
+		inputName.substring(2)
+		if(formObject.form.orderby.value == "") formObject.form.orderby.value = inputName.substring(2);
+	}
+}
+
 function verifyQueryForm(f){
 	//if(f.q_identifier.value == "" && f.q_othercatalognumbers.value == ""  
 	//	&& f.q_recordedby.value == "" && f.q_recordnumber.value == "" && f.q_eventdate.value == ""
-	//	&& f.q_enteredby.value == "" && f.q_processingstatus.value == "" && f.q_datelastmodified.value == "" 
+	//	&& f.q_recordenteredby.value == "" && f.q_processingstatus.value == "" && f.q_datelastmodified.value == "" 
 	//	&& (f.q_customfield1.selectedIndex == 0 && (f.q_customvalue1.value == "" || f.q_customtype1.selectedIndex != 1)) 
 	//	&& ((f.q_observeruid.type == "hidden" && f.q_observeruid.value == "") || (f.q_observeruid.type == "checkbox" && f.q_observeruid.checked == false))){
 	//	alert("Query form is empty! Please enter a value to query by.");
@@ -75,12 +83,13 @@ function verifyQueryForm(f){
 }
 
 function resetQueryForm(f){
-	f.q_identifier.value = "";
+	f.q_catalognumber.value = "";
 	f.q_othercatalognumbers.value = "";
 	f.q_recordedby.value = "";
 	f.q_recordnumber.value = "";
 	f.q_eventdate.value = "";
-	f.q_enteredby.value = "";
+	f.q_recordenteredby.value = "";
+	f.q_dateentered.value = "";
 	f.q_datelastmodified.value = "";
 	f.q_processingstatus.value = "";
 	f.q_customfield1.options[0].selected = true;
@@ -93,6 +102,9 @@ function resetQueryForm(f){
 	f.q_customtype3.options[0].selected = true;
 	f.q_customvalue3.value = "";
 	f.q_imgonly.checked = false;
+	f.q_withoutimg.checked = false;
+	f.orderby.value = "";
+	f.orderbydir.value = "ASC";
 }
 
 function submitBatchUpdate(f){
