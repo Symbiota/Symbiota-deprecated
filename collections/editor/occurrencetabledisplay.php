@@ -296,8 +296,9 @@ else{
 						}							
 						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td>';
-						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'&collid='.$collId.'" target="_blank">';
-						echo $id;
+						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'&collid='.$collId.'" title="open in same window">'.$id.'</a> ';
+						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'&collid='.$collId.'" target="_blank" title="open in new window">';
+						echo '<img src="../../images/newwin.jpg" style="width:10px;" />';
 						echo '</a>';
 						echo '</td>'."\n";
 						foreach($headerMap as $k => $v){

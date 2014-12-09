@@ -315,8 +315,11 @@ $duManager->loadFieldMap();
 							echo '<div style="margin-left:15px;color:orange;">WARNING: Incoming records will replace portal records with matching catalog numbers. Make sure incoming records are the most up-to-date.</div>';
 						}
 						if(isset($reportArr['exist']) && $reportArr['exist']){
-							echo '<div>Records in portal not matching with incoming records: '.$reportArr['exist'].'</div>';
-							echo '<div style="margin-left:15px;">Note: If you are doing a full data refresh, these may be records that were deleted within your local database but not within the portal.</div>';
+							echo '<div>Previous loaded records not matching incoming records: '.$reportArr['exist'].'</div>';
+							echo '<div style="margin-left:15px;">';
+							echo 'Note: If you are doing a partical upload, this is expected. ';
+							echo 'If you are doing a full data refresh, these may be records that were deleted within your local database but not within the portal.';
+							echo '</div>';
 						}
 						if(isset($reportArr['nulldbpk']) && $reportArr['nulldbpk']){
 							echo '<div style="color:red;">Records that will be removed due to NULL Primary Identifier: '.$reportArr['nulldbpk'].'</div>';

@@ -412,10 +412,10 @@ else{
 
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=141202"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=141208"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=141202"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=141202"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141202"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141208"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -429,7 +429,7 @@ else{
 				if($isEditor == 1 || $isEditor == 2 || $crowdSourceMode){
 					?>
 					<div id="querySymbolDiv">
-						<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:16px;" /></a>
+						<a href="#" title="Search / Filter" onclick="toggleQueryForm();"><img src="../../images/find.png" style="width:16px;" /></a>
 					</div>
 					<?php
 				}
@@ -1147,15 +1147,17 @@ else{
 											<div id="pkDiv">
 												<hr/>
 												<div style="float:left;" title="Internal occurrence record Primary Key (occid)">
-													<?php if($occId) echo 'Primary Key: '.$occId; ?>
+													<?php if($occId) echo 'Key: '.$occId; ?>
 												</div>
-												<div style="float:left;margin-left:90px;">
-													<?php if(array_key_exists('datelastmodified',$occArr)) echo 'Date Last Modified: '.$occArr['datelastmodified']; ?>
+												<div style="float:left;margin-left:50px;">
+													<?php if(array_key_exists('datelastmodified',$occArr)) echo 'Modified: '.$occArr['datelastmodified']; ?>
 												</div>
-												<div style="float:left;margin-left:90px;">
+												<div style="float:left;margin-left:50px;">
 													<?php 
-													if(array_key_exists('recordenteredby',$occArr)) echo 'Entered By: '.$occArr['recordenteredby'];
-													if(isset($occArr['dateentered'])) echo ' on '.$occArr['dateentered']; 
+													if(array_key_exists('recordenteredby',$occArr)){
+														echo 'Entered by: '.($occArr['recordenteredby']?$occArr['recordenteredby']:'not recorded');
+													}
+													if(isset($occArr['dateentered']) && $occArr['dateentered']) echo ' ['.$occArr['dateentered'].']'; 
 													?>
 												</div>
 											</div>
@@ -1168,7 +1170,6 @@ else{
 										<div style="padding:10px;">
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-											<input type="hidden" name="recordenteredby" value="<?php echo $paramsArr['un']; ?>" />
 											<input type="hidden" name="observeruid" value="<?php echo $symbUid; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<?php
@@ -1217,6 +1218,7 @@ else{
 											else{
 												?>
 												<div id="addButtonDiv">
+													<input type="hidden" name="recordenteredby" value="<?php echo $paramsArr['un']; ?>" />
 													<input type="button" name="submitaddbutton" value="Add Record" onclick="this.disabled=true;this.form.submit();" style="width:150px;font-weight:bold;margin:10px;" />
 													<input type="hidden" name="submitaction" value="Add Record" />
 													<input type="hidden" name="qrycnt" value="<?php echo $qryCnt?$qryCnt:''; ?>" />

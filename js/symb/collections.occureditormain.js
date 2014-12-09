@@ -155,6 +155,12 @@ function toggleStyle(){
 	}
 }
 
+function toggleQueryForm(){
+	toggle("querydiv");
+	var statusDiv = document.getElementById('statusdiv');
+	if(statusDiv) statusDiv.style.display = 'none';
+}
+
 //Field changed and verification functions
 function verifyFullFormSciName(){
 	$.ajax({
