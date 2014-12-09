@@ -2,7 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/InstitutionManager.php');
 
-$collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
+$collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $iid = array_key_exists("iid",$_REQUEST)?$_REQUEST["iid"]:0;
 $eMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0;
 $instCodeDefault = array_key_exists("instcode",$_REQUEST)?$_REQUEST["instcode"]:'';
@@ -12,7 +12,7 @@ $instManager = new InstitutionManager();
 
 $isEditable = 0;
 $statusStr = '';
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
 	$isEditable = 1;
 }
 if($isEditable){
@@ -41,8 +41,8 @@ if($isEditable){
 if($iid){
 	$instManager->setInstitutionId($iid);
 }
-elseif($collId){
-	$instManager->setCollectionId($collId);
+elseif($collid){
+	$instManager->setCollectionId($collid);
 	if(!$iid) $iid = $instManager->getInstitutionId();
 }
 ?>
@@ -93,8 +93,8 @@ include($serverRoot.'/header.php');
 	if(isset($collections_admin_institutioneditor)){
 		echo $collections_admin_institutioneditor; 
 	}
-	elseif($collId){
-		echo '<a href="../misc/collprofiles.php?collid='.$collId.'&emode=1">Collection Management</a> &gt;&gt;';
+	elseif($collid){
+		echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management</a> &gt;&gt;';
 	}
 	?>
 	<b>Institution Editor</b> 
@@ -114,7 +114,7 @@ include($serverRoot.'/header.php');
 	}
 	
 	if($iid){
-		$instArr = array_shift($instManager->getInstitutionData());
+		$instArr = $instManager->getInstitutionData($iid);
 		if($instArr){
 			?>
 			<div style="float:right;">

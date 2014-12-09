@@ -230,7 +230,7 @@ $collData = $collManager->getCollectionData(1);
 									if($collid && $collData["iid"]){ 
 										?>
 										<span>
-											<a href="../admin/institutioneditor.php?iid=<?php echo $collData["iid"]; ?>" target="_blank" title="Edit institution currently linked to this collection">
+											<a href="../admin/institutioneditor.php?emode=1&iid=<?php echo $collData["iid"]; ?>" target="_blank" title="Edit institution currently linked to this collection">
 												<img src="../../images/edit.png" style="width:15px;" />
 											</a>
 										</span>

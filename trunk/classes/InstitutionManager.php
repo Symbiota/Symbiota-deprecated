@@ -16,12 +16,12 @@ class InstitutionManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function getInstitutionData(){
+	public function getInstitutionData($iid){
 		$returnArr = Array();
 		$sql = 'SELECT iid, institutioncode, institutionname, institutionname2, address1, address2, city, '.
 			'stateprovince, postalcode, country, phone, contact, email, url, notes '.
 			'FROM institutions ';
-		if($this->iid) $sql .= 'WHERE iid = '.$this->iid.' '; 
+		if($iid) $sql .= 'WHERE iid = '.$iid.' '; 
 		$sql .= 'ORDER BY institutionname,institutioncode';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -29,7 +29,12 @@ class InstitutionManager {
 			$returnArr[$row['iid']] = $this->cleanOutArr($row);
 		}
 		$rs->close();
-		return $returnArr;
+		if($iid){
+			return $returnArr[$iid];
+		}
+		else{
+			return $returnArr;
+		}
 	}
 
 	public function submitInstitutionEdits($postData){
@@ -51,7 +56,7 @@ class InstitutionManager {
 				'url = '.($postData['url']?'"'.$this->cleanInStr($postData['url']).'"':'NULL').','.
 				'notes = '.($postData['notes']?'"'.$this->cleanInStr($postData['notes']).'"':'NULL').' '.
 				'WHERE iid = '.$postData['iid'];
-			//echo "<div>$sql</div>";
+			//echo "<div>$sql</div>"; exit;
 			if(!$this->conn->query($sql)){
 				$statusStr = 'ERROR: unable edit institution -> '.$this->conn->error;
 			}
