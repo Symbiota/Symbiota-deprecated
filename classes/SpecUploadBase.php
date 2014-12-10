@@ -423,16 +423,14 @@ class SpecUploadBase extends SpecUpload{
 		}
 		
 		if($this->storedProcedure){
-			try{
-				if($this->conn->query('CALL '.$this->storedProcedure)){
-					$this->outputMsg('<li style="margin-left:10px;">');
-					$this->outputMsg('Stored procedure executed: '.$this->storedProcedure);
-					$this->outputMsg('</li>');
-				}
+			$this->outputMsg('<li style="margin-left:10px;">');
+			if($this->conn->query('CALL '.$this->storedProcedure)){
+				$this->outputMsg('Stored procedure executed: '.$this->storedProcedure);
 			}
-			catch(Exception $e){
-				$this->outputMsg('<li style="color:red;margin-left:10px;">ERROR: Record cleaning via custom stroed procedure failed ('.$this->storedProcedure.')</li>');
+			else{
+				$this->outputMsg('<span style="color:red;">ERROR: Stored Procedure failed ('.$this->storedProcedure.'): '.$this->conn->error.'</span>');
 			}
+			$this->outputMsg('</li>');
 			ob_flush();
 			flush();
 		}
@@ -1491,9 +1489,6 @@ class SpecUploadBase extends SpecUpload{
 			$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].') '.
 				'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
 			//echo "<div>SQL: ".$sql."</div>";
-			$this->conn->query('SET autocommit=0');
-			$this->conn->query('SET unique_checks=0');
-			$this->conn->query('SET foreign_key_checks=0');
 			if($this->conn->query($sql)){
 				$this->transferCount++;
 				if($this->transferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->transferCount.'</li>');
@@ -1508,9 +1503,6 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg("<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>");
 				$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
 			}
-			$this->conn->query('COMMIT');
-			$this->conn->query('SET unique_checks=1');
-			$this->conn->query('SET foreign_key_checks=1');
 		}
 	}
 

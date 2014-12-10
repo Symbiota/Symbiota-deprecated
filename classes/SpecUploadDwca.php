@@ -384,6 +384,9 @@ class SpecUploadDwca extends SpecUploadBase{
 					if($this->collMetadataArr["collectioncode"]) $collName .= '-'.$this->collMetadataArr["collectioncode"];
 					$collName .= ')'; 
 					$this->outputMsg('<li>Uploading data for: '.$collName.'</li>');
+					$this->conn->query('SET autocommit=0');
+					$this->conn->query('SET unique_checks=0');
+					$this->conn->query('SET foreign_key_checks=0');
 					while($recordArr = $this->getRecordArr($fh)){
 						$recMap = Array();
 						foreach($this->fieldMap as $symbField => $sMap){
@@ -403,7 +406,11 @@ class SpecUploadDwca extends SpecUploadBase{
 						unset($recMap);
 					}
 					fclose($fh);
-	
+					$this->conn->query('COMMIT');
+					$this->conn->query('SET autocommit=1');
+					$this->conn->query('SET unique_checks=1');
+					$this->conn->query('SET foreign_key_checks=1');
+					
 					//Do some cleanup
 					$this->cleanUpload();
 					
