@@ -294,7 +294,7 @@ function openFirstRecSet(){
 	var selObj = document.getElementById("locallist");
 	if(selObj.selectedIndex > -1){
 		var occidStr = selObj.options[selObj.selectedIndex].value;
-		occWindow=open("../editor/occurrenceeditor.php?collid="+collId+"&q_identifier=occid"+occidStr+"&occindex=0","occsearch","resizable=1,scrollbars=1,toolbar=1,width=950,height=700,left=20,top=20");
+		occWindow=open("../editor/occurrenceeditor.php?collid="+collId+"&q_catalognumber=occid"+occidStr+"&occindex=0","occsearch","resizable=1,scrollbars=1,toolbar=1,width=950,height=700,left=20,top=20");
 		if(occWindow.opener == null) occWindow.opener = self;
 	}
 	else{

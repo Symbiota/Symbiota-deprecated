@@ -30,7 +30,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 	</div>
 	<?php 
 	if($isEditor){
-		$urlBase = '&csmode=0&occindex=0&occid=&q_processingstatus=&q_recordedby=&q_recordnumber=&q_eventdate=&q_identifier=&q_othercatalognumbers='.
+		$urlBase = '&csmode=0&occindex=0&occid=&q_processingstatus=&q_recordedby=&q_recordnumber=&q_eventdate=&q_catalognumber=&q_othercatalognumbers='.
 			'&q_observeruid=&q_datelastmodified=&q_imgonly=&q_withoutimg=&q_customfield1=&q_customtype1=EQUALS&q_customvalue1='.
 			'&q_customfield2=&q_customtype2=EQUALS&q_customvalue2=&q_customfield3=&q_customtype3=&q_customvalue3=';
 		$eUrl = '../editor/occurrenceeditor.php?collid='.$collid; 
