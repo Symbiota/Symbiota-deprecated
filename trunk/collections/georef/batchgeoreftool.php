@@ -74,7 +74,7 @@ header("Content-Type: text/html; charset=".$charset);
 		<link type="text/css" href="<?php echo $clientRoot; ?>/css/jquery-ui.css" rel="Stylesheet" />
 		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
 		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/jquery-ui.js"></script>
-		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=140620"></script>
+		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=141210"></script>
 	</head>
 	<body>
 		<?php
