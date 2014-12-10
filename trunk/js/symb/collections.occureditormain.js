@@ -6,14 +6,9 @@ var abortFormVerification = false;
 
 $(document).ready(function() {
 
-	if(navigator.appName == "Microsoft Internet Explorer"){
-		alert("You are using Internet Explorer as your web browser. We recommend that you use Firefox or Google Chrome since these browsers are generally more reliable for editing specimen records.");
-	}
-	else{
-		if(/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){
-			var ffversion=new Number(RegExp.$1);
-			if(ffversion < 7 ) alert("You are using an older version of Firefox. For best results, we recommend that you update your browser.");
-		}
+	if(/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){
+		var ffversion=new Number(RegExp.$1);
+		if(ffversion < 7 ) alert("You are using an older version of Firefox. For best results, we recommend that you update your browser.");
 	}
 
 	$("#occedittabs").tabs({
