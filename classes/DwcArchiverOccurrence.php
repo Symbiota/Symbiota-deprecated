@@ -646,7 +646,8 @@ class DwcArchiverOccurrence{
                 $occurrenceid = "urn:uuid:$occurrenceid";
              }
              $returnvalue .= "<$occurrenceid>\n";
-             $separator = "";
+             $returnvalue .= "  a <dwc:Occurrence> ";
+             $separator = " ; \n ";
              foreach($dwcArray as $key => $value) { 
                 if (strlen($value)>0) { 
                   switch ($key) {
@@ -657,27 +658,23 @@ class DwcArchiverOccurrence{
                       break;
                     case "modified":
                          $returnvalue .= "$separator   dcterms:$key \"$value\"";
-                         $separator = " ; \n";
                       break;
                     case "day":
                     case "month":
                     case "year":
                          if ($value!="0") { 
                            $returnvalue .= "$separator   dwc:$key  \"$value\"";
-                           $separator = " ; \n";
                          }
                       break;
                     case "eventDate":
                          if ($value!="0000-00-00") { 
                            $returnvalue .= "$separator   dwc:$key  \"$value\"";
-                           $separator = " ; \n";
                          }
                       break;
                     default: 
                         if (isset($occurTermArr[$key])) { 
                            $ns = RdfUtility::namespaceAbbrev($occurTermArr[$key]);
                            $returnvalue .= $separator . "   " . $ns . " \"$value\"";
-                           $separator = " ; \n";
                         }
                   }
                 }
