@@ -134,8 +134,8 @@ class RdfUtility {
        $result = str_replace("http://rs.tdwg.org/dwc/terms/","dwc:",$result);
        $result = str_replace("http://xmlns.com/foaf/0.1/","foaf:",$result);
        $result = str_replace("http://rs.tdwg.org/dwc/iri/","dwciri:",$result);
-       $result = str_replace("http://purl.org/dc/elements/1.1/","dc",$result);
-       $result = str_replace("http://purl.org/dc/terms/","dcterms",$result);
+       $result = str_replace("http://purl.org/dc/elements/1.1/","dc:",$result);
+       $result = str_replace("http://purl.org/dc/terms/","dcterms:",$result);
        return $result;
    } 
 

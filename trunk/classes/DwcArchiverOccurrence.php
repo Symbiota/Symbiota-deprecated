@@ -635,6 +635,7 @@ class DwcArchiverOccurrence{
        $returnvalue .= "@prefix dwciri: <http://rs.tdwg.org/dwc/iri/> .\n";
        $returnvalue .= "@prefix dc: <http://purl.org/dc/elements/1.1/> . \n";
        $returnvalue .= "@prefix dcterms: <http://purl.org/dc/terms/> . \n";
+       $returnvalue .= "@prefix dcmitype: <http://purl.org/dc/dcmitype/> . \n";
 	   $this->applyConditions();
        $this->schemaType='dwc';
        $arr = $this->getDwcArray();
@@ -648,7 +649,7 @@ class DwcArchiverOccurrence{
                 $occurrenceid = "urn:uuid:$occurrenceid";
              }
              $returnvalue .= "<$occurrenceid>\n";
-             $returnvalue .= "  a <dwc:Occurrence> ";
+             $returnvalue .= "    a dwc:Occurrence ";
              $separator = " ; \n ";
              foreach($dwcArray as $key => $value) { 
                 if (strlen($value)>0) { 
@@ -660,13 +661,19 @@ class DwcArchiverOccurrence{
                       break;
                     case "collectionID":
                          if (stripos("urn:lsid:biocol.org",$value)==0) { 
-                           $lsid = "http://biocol.org/urn:$value";
-                           $dwcguide223 .= "<http://biocol.org/urn:$value>\n";
+                           $lsid = "http://biocol.org/$value";
+                           $dwcguide223 .= "<http://biocol.org/$value>\n";
                            $dwcguide223 .= "    owl:sameAs <$value> .\n";
                          } else { 
                            $lsid = $value;
                          }
-                         $returnvalue .= "$separator   dwciri:$key \"$value\"";
+                         $returnvalue .= "$separator   dwciri:inCollection <$lsid>";
+                      break;
+                    case "basisOfRecord": 
+                          if (preg_match("/(PreservedSpecimen|FossilSpecimen)/",$value)==1) { 
+                             $returnvalue .= "$separator   a dcmitype:PhysicalObject";
+                          }
+                          $returnvalue .= "$separator   dwc:$key  \"$value\"";
                       break;
                     case "modified":
                          $returnvalue .= "$separator   dcterms:$key \"$value\"";
@@ -719,6 +726,7 @@ class DwcArchiverOccurrence{
        $returnvalue .= "   xmlns:dwciri=\"http://rs.tdwg.org/dwc/iri/\" \n";
        $returnvalue .= "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\" \n";
        $returnvalue .= "   xmlns:dcterms=\"http://purl.org/dc/terms/\" \n";
+       $returnvalue .= "   xmlns:dcmitype=\"http://purl.org/dc/dcmitype/\" \n";
        $returnvalue .= "> \n";
 	   $this->applyConditions();
        $this->schemaType='dwc';
@@ -732,7 +740,8 @@ class DwcArchiverOccurrence{
              if (UuidFactory::is_valid($occurrenceid)) { 
                 $occurrenceid = "urn:uuid:$occurrenceid";
              }
-             $returnvalue .= "<dwc:Occurrence rdf:about=\"$occurrenceid\">\n";
+             $returnvalue .= "<rdf:Description rdf:about=\"$occurrenceid\">\n";
+             $returnvalue .= "  <rdf:type rdf:resource=\"http://rs.tdwg.org/dwc/terms/Occurrence\" />\n";
              foreach($dwcArray as $key => $value) { 
                 $value = htmlentities($value);
                 $value = str_replace("&copy;","(C)",$value);  // workaround, need to fix &copy; rendering
@@ -745,40 +754,46 @@ class DwcArchiverOccurrence{
                       break;
                     case "collectionID":
                          if (stripos("urn:lsid:biocol.org",$value)==0) { 
-                           $lsid = "http://biocol.org/urn:$value";
-                           $dwcguide223 .= "<rdf:Description rdf:about=\"http://biocol.org/urn:$value\">\n";
+                           $lsid = "http://biocol.org/$value";
+                           $dwcguide223 .= "<rdf:Description rdf:about=\"http://biocol.org/$value\">\n";
                            $dwcguide223 .= "    <owl:sameAs rdf:resource=\"$value\" />\n";
                            $dwcguide223 .= "</rdf:Description>\n";
                          } else { 
                            $lsid = $value;
                          }
-                         $returnvalue .= "<dwciri:$key>$lsid</dwciri:$key>\n";
+                         $returnvalue .= "  <dwciri:inCollection rdf:resource=\"$lsid\" />\n";
+                      break;
+                    case "basisOfRecord": 
+                          if (preg_match("/(PreservedSpecimen|FossilSpecimen)/",$value)==1) { 
+                             $returnvalue .= "  <rdf:type rdf:resource=\"http://purl.org/dc/dcmitype/PhysicalObject\" />\n";
+                          }
+                          $returnvalue .= "  <dwc:$key>$value</dwc:$key>\n";
                       break;
                     case "modified":
-                         $returnvalue .= "<dcterms:$key>$value</dcterms:$key>\n";
+                         $returnvalue .= "  <dcterms:$key>$value</dcterms:$key>\n";
                       break;
                     case "day":
                     case "month":
                     case "year":
                          if ($value!="0") { 
-                           $returnvalue .= "<dwc:$key>$value</dwc:$key>\n";
+                            $returnvalue .= "  <dwc:$key>$value</dwc:$key>\n";
                          }
                       break;
                     case "eventDate":
                          if ($value!="0000-00-00") { 
-                           $returnvalue .= "<dwc:$key>$value</dwc:$key>\n";
+                           $returnvalue .= "  <dwc:$key>$value</dwc:$key>\n";
                          }
                       break;
                     default: 
-                        if (isset($occurTermArr[$key])) { 
-                           $ns = RdfUtility::namespaceAbbrev($occurTermArr[$key]);
-                           $returnvalue .= "<$ns>$value</$ns>\n";
-                        }
+                         if (isset($occurTermArr[$key])) { 
+                            $ns = RdfUtility::namespaceAbbrev($occurTermArr[$key]);
+                            $returnvalue .= "  <$ns>$value</$ns>\n";
+                         }
                   }
                 }
              }
          
-             $returnvalue .= "</dwc:Occurrence>\n";
+             $returnvalue .= "</rdf:Description>\n";
           }
        }
        if ($dwcguide223!="") { 
