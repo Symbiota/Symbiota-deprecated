@@ -718,7 +718,7 @@ class DwcArchiverOccurrence{
              if (UuidFactory::is_valid($occurrenceid)) { 
                 $occurrenceid = "urn:uuid:$occurrenceid";
              }
-             $returnvalue .= "<dwc:occurrenceId rdf:about=\"$occurrenceid\">\n";
+             $returnvalue .= "<dwc:Occurrence rdf:about=\"$occurrenceid\">\n";
              foreach($dwcArray as $key => $value) { 
                 $value = htmlentities($value);
                 $value = str_replace("&copy;","(C)",$value);  // workaround, need to fix &copy; rendering
