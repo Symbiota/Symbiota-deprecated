@@ -1,9 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceIndividualManager.php');
-header("Content-Type: text/html; charset=".$charset);
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+include_once($serverRoot.'/classes/RdfUtility.php');
 
 $occid = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
 $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
@@ -32,6 +31,32 @@ $statusStr = '';
 $displayLocality = false;
 $isEditor = false;
 
+//  If other than HTML was requested, return just that content.
+$done=FALSE;
+$accept = RdfUtility::parseHTTPAcceptHeader($_SERVER['HTTP_ACCEPT']);
+while (!$done && list($key, $mediarange) = each($accept)) {
+    if ($mediarange=='text/turtle') {
+       Header("Content-Type: text/turtle; charset=".$charset);
+       $dwcManager = new DwcArchiverOccurrence();
+       $dwcManager->setCustomWhereSql(" o.occid = $occid ");
+       echo $dwcManager->getAsTurtle();
+       $done = TRUE;
+    }
+    if ($mediarange=='application/rdf+xml') {
+       Header("Content-Type: application/rdf+xml; charset=".$charset);
+       $dwcManager = new DwcArchiverOccurrence();
+       $dwcManager->setCustomWhereSql(" o.occid = $occid ");
+       echo $dwcManager->getAsRdfXml();
+       $done = TRUE;
+    }
+}
+if ($done) {
+  die;
+}
+
+header("Content-Type: text/html; charset=".$charset);
+header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 if($SYMB_UID){
 	//Check editing status
 	if($IS_ADMIN || (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin']))){

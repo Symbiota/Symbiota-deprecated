@@ -620,6 +620,248 @@ class DwcArchiverOccurrence{
 		}
 	}
 
+    /** 
+     * Render the records as RDF in a turtle serialization following the TDWG
+     *  DarwinCore RDF Guide.
+     *
+     * @return strin containing turtle serialization of selected dwc records.
+     */
+    public function getAsTurtle() { 
+       $returnvalue  = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n";
+       $returnvalue .= "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n";
+       $returnvalue .= "@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n";
+       $returnvalue .= "@prefix dwc: <http://rs.tdwg.org/dwc/terms/> .\n";
+       $returnvalue .= "@prefix dwciri: <http://rs.tdwg.org/dwc/iri/> .\n";
+       $returnvalue .= "@prefix dc: <http://purl.org/dc/elements/1.1/> . \n";
+       $returnvalue .= "@prefix dcterms: <http://purl.org/dc/terms/> . \n";
+	   $this->applyConditions();
+       $this->schemaType='dwc';
+       $arr = $this->getDwcArray();
+	   $occurTermArr = $this->occurrenceFieldArr['terms'];
+       foreach ($arr as $rownum => $dwcArray)  {
+          if ($debug) { print_r($dwcArray);  } 
+          if (isset($dwcArray['occurrenceID'])) { 
+             $occurrenceid = $dwcArray['occurrenceID'];
+             if (UuidFactory::is_valid($occurrenceid)) { 
+                $occurrenceid = "urn:uuid:$occurrenceid";
+             }
+             $returnvalue .= "<$occurrenceid>\n";
+             $separator = "";
+             foreach($dwcArray as $key => $value) { 
+                if (strlen($value)>0) { 
+                  switch ($key) {
+                    case "recordId": 
+                    case "occurrenceID": 
+                    case "verbatimScientificName":
+                         // skip
+                      break;
+                    case "modified":
+                         $returnvalue .= "$separator   dcterms:$key \"$value\"";
+                         $separator = " ; \n";
+                      break;
+                    case "day":
+                    case "month":
+                    case "year":
+                         if ($value!="0") { 
+                           $returnvalue .= "$separator   dwc:$key  \"$value\"";
+                           $separator = " ; \n";
+                         }
+                      break;
+                    case "eventDate":
+                         if ($value!="0000-00-00") { 
+                           $returnvalue .= "$separator   dwc:$key  \"$value\"";
+                           $separator = " ; \n";
+                         }
+                      break;
+                    default: 
+                        if (isset($occurTermArr[$key])) { 
+                           $ns = RdfUtility::namespaceAbbrev($occurTermArr[$key]);
+                           $returnvalue .= $separator . "   " . $ns . " \"$value\"";
+                           $separator = " ; \n";
+                        }
+                  }
+                }
+             }
+         
+             $returnvalue .= ".\n";
+          }
+       }
+       return $returnvalue;
+    }
+
+    /** 
+     * Render the records as RDF in a rdf/xml serialization following the TDWG
+     *  DarwinCore RDF Guide.
+     *
+     * @return strin containing rdf/xml serialization of selected dwc records.
+     */
+    public function getAsRdfXml() { 
+       // TODO: refactor to use DOMDocument as elsewhere in this class instead of handcrafted xml
+       $returnvalue  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+       $returnvalue .= "<rdf:RDF \n";  
+       $returnvalue .= "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" \n";
+       $returnvalue .= "   xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\" \n";
+       $returnvalue .= "   xmlns:foaf=\"http://xmlns.com/foaf/0.1/\" \n";
+       $returnvalue .= "   xmlns:dwc=\"http://rs.tdwg.org/dwc/terms/\" \n";
+       $returnvalue .= "   xmlns:dwciri=\"http://rs.tdwg.org/dwc/iri/\" \n";
+       $returnvalue .= "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\" \n";
+       $returnvalue .= "   xmlns:dcterms=\"http://purl.org/dc/terms/\" \n";
+       $returnvalue .= "> \n";
+	   $this->applyConditions();
+       $this->schemaType='dwc';
+       $arr = $this->getDwcArray();
+	   $occurTermArr = $this->occurrenceFieldArr['terms'];
+       foreach ($arr as $rownum => $dwcArray)  {
+          if ($debug) { print_r($dwcArray);  } 
+          if (isset($dwcArray['occurrenceID'])) { 
+             $occurrenceid = $dwcArray['occurrenceID'];
+             if (UuidFactory::is_valid($occurrenceid)) { 
+                $occurrenceid = "urn:uuid:$occurrenceid";
+             }
+             $returnvalue .= "<dwc:occurrenceId rdf:about=\"$occurrenceid\">\n";
+             foreach($dwcArray as $key => $value) { 
+                $value = htmlentities($value);
+                $value = str_replace("&copy;","(C)",$value);  // workaround, need to fix &copy; rendering
+                if (strlen($value)>0) { 
+                  switch ($key) {
+                    case "recordId": 
+                    case "occurrenceID": 
+                    case "verbatimScientificName":
+                         // skip
+                      break;
+                    case "modified":
+                         $returnvalue .= "<dcterms:$key>$value</dcterms:$key>\n";
+                      break;
+                    case "day":
+                    case "month":
+                    case "year":
+                         if ($value!="0") { 
+                           $returnvalue .= "<dwc:$key>$value</dwc:$key>\n";
+                         }
+                      break;
+                    case "eventDate":
+                         if ($value!="0000-00-00") { 
+                           $returnvalue .= "<dwc:$key>$value</dwc:$key>\n";
+                         }
+                      break;
+                    default: 
+                        if (isset($occurTermArr[$key])) { 
+                           $ns = RdfUtility::namespaceAbbrev($occurTermArr[$key]);
+                           $returnvalue .= "<$ns>$value</$ns>\n";
+                        }
+                  }
+                }
+             }
+         
+             $returnvalue .= "</dwc:occurrenceId>\n";
+          }
+       }
+       $returnvalue .= "</rdf:RDF>\n";
+       return $returnvalue;
+    }
+
+    public function getDwcArray() { 
+		global $clientRoot;
+		$result = Array();
+		if(!$this->occurrenceFieldArr){
+			$this->initOccurrenceArr();
+		}
+		
+		$sql = $this->getSqlOccurrences();
+		if(!$sql) return false;
+		$fieldArr = $this->occurrenceFieldArr['fields'];
+		if($this->schemaType == 'dwc'){
+			unset($fieldArr['localitySecurity']);
+		}
+		if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+			unset($fieldArr['collId']);
+		}
+		if(!$this->collArr){
+			//Collection array not previously primed by source  
+			$sql1 = 'SELECT DISTINCT o.collid FROM omoccurrences o ';
+			if($this->conditionSql){
+				if(stripos($this->conditionSql,'v.clid')){
+					$sql1 .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+				}
+				$sql1 .= $this->conditionSql;
+			}
+			$rs1 = $this->conn->query($sql1);
+			$collidStr = '';
+			while($r1 = $rs1->fetch_object()){
+				$collidStr .= ','.$r1->collid;
+			}
+			$rs1->free();
+			if($collidStr) $this->setCollArr(trim($collidStr,','));
+		}
+
+		//Populate Upper Taxonomic data
+		$this->setUpperTaxonomy();
+		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+			
+			$hasRecords = false;
+			while($r = $rs->fetch_assoc()){
+				$hasRecords = true;
+				//Protect sensitive records
+				if($this->redactLocalities 
+                   && $r["localitySecurity"] == 1 
+                   && !in_array($r['collid'],$this->rareReaderArr)
+                ){
+					foreach($this->securityArr as $v){
+						if(array_key_exists($v,$r) && $r[$v]) $r[$v] = '[Redacted]';
+					}
+				}
+				
+				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
+				//Add collection GUID based on management type
+				$managementType = $this->collArr[$r['collid']]['managementtype'];
+				if($managementType && $managementType == 'Live Data'){
+					if(array_key_exists('collectionID',$r) && !$r['collectionID']){
+						$guid = $this->collArr[$r['collid']]['collectionguid'];
+						if(strlen($guid) == 36) $guid = 'urn:uuid:'.$guid;
+						$r['collectionID'] = $guid;
+					}
+				}
+				//Set occurrence GUID based on GUID target
+				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
+				if($guidTarget == 'catalogNumber'){
+					$r['occurrenceID'] = $r['catalogNumber'];
+				}
+				elseif($guidTarget == 'symbiotaUUID'){
+					$r['occurrenceID'] = $r['recordId'];
+				}
+				if($this->schemaType == 'dwc'){
+					unset($r['localitySecurity']);
+				}
+				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+					unset($r['collid']);
+				}
+				//Add upper taxonomic data
+				if($r['family']){
+					$famStr = strtolower($r['family']);
+					if(isset($this->upperTaxonomy[$famStr]['o'])){
+						$r['t_order'] = $this->upperTaxonomy[$famStr]['o'];
+					}
+					if(isset($this->upperTaxonomy[$famStr]['c'])){
+						$r['t_class'] = $this->upperTaxonomy[$famStr]['c'];
+					}
+					if(isset($this->upperTaxonomy[$famStr]['p'])){
+						$r['t_phylum'] = $this->upperTaxonomy[$famStr]['p'];
+					}
+					if(isset($this->upperTaxonomy[$famStr]['k'])){
+						$r['t_kingdom'] = $this->upperTaxonomy[$famStr]['k'];
+					}
+				}
+                $result[] = $r; 
+			}
+			$rs->free();
+		}
+		else{
+			$this->logOrEcho("ERROR creating occurrence file: ".$this->conn->error."\n");
+			$this->logOrEcho("\tSQL: ".$sql."\n");
+		}
+		return $result;
+    }
+
 	public function createDwcArchive($fileNameSeed = ''){
 		$status = false;
 		if(!$fileNameSeed){
