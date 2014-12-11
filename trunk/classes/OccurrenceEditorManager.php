@@ -125,6 +125,7 @@ class OccurrenceEditorManager {
 			if(array_key_exists('q_observeruid',$_REQUEST) && $_REQUEST['q_observeruid']) $this->qryArr['ouid'] = $_REQUEST['q_observeruid'];
 			if(array_key_exists('q_processingstatus',$_REQUEST) && $_REQUEST['q_processingstatus']) $this->qryArr['ps'] = trim($_REQUEST['q_processingstatus']);
 			if(array_key_exists('q_datelastmodified',$_REQUEST) && $_REQUEST['q_datelastmodified']) $this->qryArr['dm'] = trim($_REQUEST['q_datelastmodified']);
+			if(array_key_exists('q_dateentered',$_REQUEST) && $_REQUEST['q_dateentered']) $this->qryArr['de'] = trim($_REQUEST['q_dateentered']);
 			if(array_key_exists('q_ocrfrag',$_REQUEST) && $_REQUEST['q_ocrfrag']) $this->qryArr['ocr'] = trim($_REQUEST['q_ocrfrag']);
 			if(array_key_exists('q_imgonly',$_REQUEST) && $_REQUEST['q_imgonly']) $this->qryArr['io'] = 1;
 			if(array_key_exists('q_withoutimg',$_REQUEST) && $_REQUEST['q_withoutimg']) $this->qryArr['woi'] = 1;
@@ -372,6 +373,7 @@ class OccurrenceEditorManager {
 					//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
 					$edv = str_ireplace(array('>',' and ','<'),array('',' - ',''),$edv);
 				}
+				$edv = str_replace(' to ',' - ',$edv);
 				if($p = strpos($edv,' - ')){
 					$sqlWhere .= 'AND (o.eventdate BETWEEN "'.trim(substr($edv,0,$p)).'" AND "'.trim(substr($edv,$p+3)).'") ';
 				}
@@ -400,6 +402,7 @@ class OccurrenceEditorManager {
 				//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
 				$de = str_ireplace(array('>',' and ','<'),array('',' - ',''),$de);
 			}
+			$de = str_replace(' to ',' - ',$de);
 			if($p = strpos($de,' - ')){
 				$sqlWhere .= 'AND (DATE(o.dateentered) BETWEEN "'.trim(substr($de,0,$p)).'" AND "'.trim(substr($de,$p+3)).'") ';
 			}
@@ -416,6 +419,7 @@ class OccurrenceEditorManager {
 				//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
 				$dm = str_ireplace(array('>',' and ','<'),array('',' - ',''),$dm);
 			}
+			$dm = str_replace(' to ',' - ',$dm);
 			if($p = strpos($dm,' - ')){
 				$sqlWhere .= 'AND (DATE(o.datelastmodified) BETWEEN "'.trim(substr($dm,0,$p)).'" AND "'.trim(substr($dm,$p+3)).'") ';
 			}

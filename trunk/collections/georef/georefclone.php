@@ -70,7 +70,7 @@ if($coorArr && count($coorArr) == 4){
 					if($occArr['err']) $outStr .= ' (+-'.$occArr['err'].'m) ';
 					if($occArr['georefby']) $outStr .= '<br/>Georeferenced by: '.$occArr['georefby'];
 					$outStr .= '<br/>'.$occArr['cnt'].' matching records<br/> ';
-					$outStr .= "<a href='#' onclick='cloneCoord(".$occArr['lat'].",".$occArr['lng'].",".($occArr['err']?$occArr['err']:'0').")' title='Clone Coordinates'><b>Use Coordiantes</b></a>";
+					$outStr .= "<a href='#' onclick='cloneCoord(".$occArr['lat'].",".$occArr['lng'].",".$occArr['err'].")' title='Clone Coordinates'><b>Use Coordinates</b></a>";
 					$outStr .= '</div>';
 					?>
 					var m<?php echo $id; ?> = new google.maps.Marker({
@@ -102,10 +102,10 @@ if($coorArr && count($coorArr) == 4){
 					if(err == 0) err = "";
 					opener.document.getElementById("decimallatitude").value = lat;
 					opener.document.getElementById("decimallongitude").value = lng;
-					opener.document.getElementById("geodeticdatum").value = err;
+					opener.document.getElementById("coordinateuncertaintyinmeters").value = err;
 					opener.document.getElementById("decimallatitude").onchange();
 					opener.document.getElementById("decimallongitude").onchange();
-					opener.document.getElementById("geodeticdatum").onchange();
+					opener.document.getElementById("coordinateuncertaintyinmeters").onchange();
 				}
 				catch(myErr){
 				}

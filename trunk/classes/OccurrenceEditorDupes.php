@@ -211,7 +211,7 @@ class OccurrenceEditorDupes {
 	private function rankOcr($occArr){
 		//Number of fields with match 
 		//recordNumber, verbatimEventDate, associatedCollectors, 
-		//stateProvince, county, locality, verbatimCoordiantes, verbatimElevation, 
+		//stateProvince, county, locality, verbatimCoordinates, verbatimElevation, 
 		//habitat, substrate, verbatimAttributes, occurrenceRemarks
 		
 		return $occArr;
