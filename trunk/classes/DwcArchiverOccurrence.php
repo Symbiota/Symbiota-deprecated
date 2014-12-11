@@ -269,11 +269,11 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['modified'] = 'IFNULL(o.modified,o.datelastmodified) AS modified';
 		if($this->schemaType == 'dwc'){
 			//If not DWC, don't output rights becasue that data is already in the eml file
-	 		$occurTermArr['rights'] = 'http://rs.tdwg.org/dwc/terms/rights';
+	 		$occurTermArr['rights'] = 'http://purl.org/dc/elements/1.1/rights';
 	 		$occurFieldArr['rights'] = 'c.rights';
-			$occurTermArr['rightsHolder'] = 'http://rs.tdwg.org/dwc/terms/rightsHolder';
+			$occurTermArr['rightsHolder'] = 'http://purl.org/dc/terms/rightsHolder';
 			$occurFieldArr['rightsHolder'] = 'c.rightsHolder';
-			$occurTermArr['accessRights'] = 'http://rs.tdwg.org/dwc/terms/accessRights';
+			$occurTermArr['accessRights'] = 'http://purl.org/dc/terms/accessRights';
 			$occurFieldArr['accessRights'] = 'c.accessRights';
 		}
 		else{
