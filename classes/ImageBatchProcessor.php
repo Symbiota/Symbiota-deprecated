@@ -916,37 +916,49 @@ class ImageBatchProcessor {
 		if($occId && is_numeric($occId)){
 			$this->logOrEcho("Preparing to load record into database",1);
 			//Check to see if image url already exists for that occid
-			$imgId = 0;$exTnUrl = '';$exLgUrl = '';
+			$imgId = 0;
 			$sql = 'SELECT imgid, url, thumbnailurl, originalurl '.
 				'FROM images WHERE (occid = '.$occId.') ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				if($r->url == $webUrl){
-					//exact match, thus delete record so that image can be reset
-					$this->conn->query('DELETE FROM images WHERE imgid = '.$r->imgid);
+				if(strcasecmp($r->url,$webUrl) == 0){
+					//exact match, thus reset record data with current image urls (thumbnail or original image might be in different locality) 
+					if(!$this->conn->query('DELETE FROM specprocessorrawlabels WHERE imgid = '.$r->imgid)){
+						$this->logOrEcho('ERROR deleting OCR for image record #'.$r->imgid.' (equal URLs): '.$this->conn->error,1);
+					}
+					if(!$this->conn->query('DELETE FROM images WHERE imgid = '.$r->imgid)){
+						$this->logOrEcho('ERROR deleting image record #'.$r->imgid.' (equal URLs): '.$this->conn->error,1);
+					}
 				}
-				elseif($this->imgExists == 2 && basename($r->url) == basename($webUrl)){
+				elseif($this->imgExists == 2 && strcasecmp(basename($r->url),basename($webUrl)) == 0){
 					//Copy-over-image is set to true and basenames equal, thus delete image PLUS delete old images 
-					$this->conn->query('DELETE FROM images WHERE imgid = '.$r->imgid);
-					//Remove images
-					if(substr($r->url,0,1) == '/'){
-						$wFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->url);
-						if(file_exists($wFile)){
-							unlink($wFile);
+					if(!$this->conn->query('DELETE FROM specprocessorrawlabels WHERE imgid = '.$r->imgid)){
+						$this->logOrEcho('ERROR deleting OCR for image record #'.$r->imgid.' (equal basename): '.$this->conn->error,1);
+					}
+					if($this->conn->query('DELETE FROM images WHERE imgid = '.$r->imgid)){
+						//Remove images
+						if(substr($r->url,0,1) == '/'){
+							$wFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->url);
+							if(file_exists($wFile)){
+								unlink($wFile);
+							}
+						}
+						if($tnUrl != $r->thumbnailurl && substr($r->thumbnailurl,0,1) == '/'){
+							$tnFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->thumbnailurl);
+							if(file_exists($tnFile)){
+								unlink($tnFile);
+							}
+						} 
+						if($oUrl != $r->originalurl && substr($r->originalurl,0,1) == '/'){
+							$oFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->originalurl);
+							if(file_exists($oFile)){
+								unlink($oFile);
+							}
 						}
 					}
-					if($tnUrl != $r->thumbnailurl && substr($r->thumbnailurl,0,1) == '/'){
-						$tnFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->thumbnailurl);
-						if(file_exists($tnFile)){
-							unlink($tnFile);
-						}
-					} 
-					if($oUrl != $r->originalurl && substr($r->originalurl,0,1) == '/'){
-						$oFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->originalurl);
-						if(file_exists($oFile)){
-							unlink($oFile);
-						}
-					} 
+					else{
+						$this->logOrEcho('ERROR: Unable to delete image record #'.$r->imgid.' (equal basename): '.$this->conn->error,1);
+					}
 				}
 			}
 			$rs->free();
