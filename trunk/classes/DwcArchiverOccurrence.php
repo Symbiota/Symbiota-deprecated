@@ -712,27 +712,28 @@ class DwcArchiverOccurrence{
      * Render the records as RDF in a rdf/xml serialization following the TDWG
      *  DarwinCore RDF Guide.
      *
-     * @return strin containing rdf/xml serialization of selected dwc records.
+     * @return string containing rdf/xml serialization of selected dwc records.
      */
     public function getAsRdfXml() { 
-       // TODO: refactor to use DOMDocument as elsewhere in this class instead of handcrafted xml
-       $returnvalue  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-       $returnvalue .= "<rdf:RDF \n";  
-       $returnvalue .= "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" \n";
-       $returnvalue .= "   xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\" \n";
-       $returnvalue .= "   xmlns:owl=\"http://www.w3.org/2002/07/owl#\" \n";
-       $returnvalue .= "   xmlns:foaf=\"http://xmlns.com/foaf/0.1/\" \n";
-       $returnvalue .= "   xmlns:dwc=\"http://rs.tdwg.org/dwc/terms/\" \n";
-       $returnvalue .= "   xmlns:dwciri=\"http://rs.tdwg.org/dwc/iri/\" \n";
-       $returnvalue .= "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\" \n";
-       $returnvalue .= "   xmlns:dcterms=\"http://purl.org/dc/terms/\" \n";
-       $returnvalue .= "   xmlns:dcmitype=\"http://purl.org/dc/dcmitype/\" \n";
-       $returnvalue .= "> \n";
+	   $newDoc = new DOMDocument('1.0',$this->charSetOut);
+       $newDoc->formatOutput = true;
+
+       $rootElem = $newDoc->createElement('rdf:RDF');
+       $rootElem->setAttribute('xmlns:rdf','http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+       $rootElem->setAttribute('xmlns:rdfs','http://www.w3.org/2000/01/rdf-schema#');
+       $rootElem->setAttribute('xmlns:owl','http://www.w3.org/2002/07/owl#');
+       $rootElem->setAttribute('xmlns:foaf','http://xmlns.com/foaf/0.1/');
+       $rootElem->setAttribute('xmlns:dwc','http://rs.tdwg.org/dwc/terms/');
+       $rootElem->setAttribute('xmlns:dwciri','http://rs.tdwg.org/dwc/iri/');
+       $rootElem->setAttribute('xmlns:dc','http://purl.org/dc/elements/1.1/');
+       $rootElem->setAttribute('xmlns:dcterms','http://purl.org/dc/terms/');
+       $rootElem->setAttribute('xmlns:dcmitype','http://purl.org/dc/dcmitype/');
+       $newDoc->appendChild($rootElem);
+
 	   $this->applyConditions();
        $this->schemaType='dwc';
        $arr = $this->getDwcArray();
 	   $occurTermArr = $this->occurrenceFieldArr['terms'];
-       $dwcguide223 = "";
        foreach ($arr as $rownum => $dwcArray)  {
           if ($debug) { print_r($dwcArray);  } 
           if (isset($dwcArray['occurrenceID'])) { 
@@ -740,12 +741,16 @@ class DwcArchiverOccurrence{
              if (UuidFactory::is_valid($occurrenceid)) { 
                 $occurrenceid = "urn:uuid:$occurrenceid";
              }
-             $returnvalue .= "<rdf:Description rdf:about=\"$occurrenceid\">\n";
-             $returnvalue .= "  <rdf:type rdf:resource=\"http://rs.tdwg.org/dwc/terms/Occurrence\" />\n";
+             $occElem = $newDoc->createElement('dwc:Occurrence');
+             $occElem->setAttribute("rdf:about","$occurrenceid");
+             $sameAsElem = null;
              foreach($dwcArray as $key => $value) { 
-                $value = htmlentities($value);
-                $value = str_replace("&copy;","(C)",$value);  // workaround, need to fix &copy; rendering
+                $flags = ENT_NOQUOTES | ENT_XML1 | ENT_DISALLOWED; 
+                $value = htmlentities($value,$flags,$this->charSetOut);
+                // TODO: Figure out how to use mb_encode_numericentity() here.
+                $value = str_replace("&copy;","&#169;",$value);  // workaround, need to fix &copy; rendering
                 if (strlen($value)>0) { 
+                  $elem = null;
                   switch ($key) {
                     case "recordId": 
                     case "occurrenceID": 
@@ -755,51 +760,62 @@ class DwcArchiverOccurrence{
                     case "collectionID":
                          if (stripos("urn:lsid:biocol.org",$value)==0) { 
                            $lsid = "http://biocol.org/$value";
-                           $dwcguide223 .= "<rdf:Description rdf:about=\"http://biocol.org/$value\">\n";
-                           $dwcguide223 .= "    <owl:sameAs rdf:resource=\"$value\" />\n";
-                           $dwcguide223 .= "</rdf:Description>\n";
+                           $sameAsElem = $newDoc->createElement("rdf:Description");
+                           $sameAsElem->setAttribute("rdf:about","http://biocol.org/$value");
+                           $sameAsElemC = $newDoc->createElement("owl:sameAs");
+                           $sameAsElemC->setAttribute("rdf:resource","$value");
+                           $sameAsElem->appendChild($sameAsElemC);
                          } else { 
                            $lsid = $value;
                          }
-                         $returnvalue .= "  <dwciri:inCollection rdf:resource=\"$lsid\" />\n";
+                         $elem = $newDoc->createElement("dwciri:inCollection");
+                         $elem->setAttribute("rdf:resource","$lsid");
                       break;
                     case "basisOfRecord": 
                           if (preg_match("/(PreservedSpecimen|FossilSpecimen)/",$value)==1) { 
-                             $returnvalue .= "  <rdf:type rdf:resource=\"http://purl.org/dc/dcmitype/PhysicalObject\" />\n";
+                             $elem = $newDoc->createElement("rdf:type");
+                             $elem->setAttribute("rdf:resource","http://purl.org/dc/dcmitype/PhysicalObject");
                           }
-                          $returnvalue .= "  <dwc:$key>$value</dwc:$key>\n";
+                          $elem = $newDoc->createElement("dwc:$key",$value);
                       break;
                     case "modified":
-                         $returnvalue .= "  <dcterms:$key>$value</dcterms:$key>\n";
+                          $elem = $newDoc->createElement("dcterms:$key",$value);
                       break;
                     case "day":
                     case "month":
                     case "year":
                          if ($value!="0") { 
-                            $returnvalue .= "  <dwc:$key>$value</dwc:$key>\n";
+                            $elem = $newDoc->createElement("dwc:$key",$value);
                          }
                       break;
                     case "eventDate":
                          if ($value!="0000-00-00") { 
-                           $returnvalue .= "  <dwc:$key>$value</dwc:$key>\n";
+                           $value = str_replace("-00","",$value);
+                           $elem = $newDoc->createElement("dwc:$key",$value);
                          }
                       break;
                     default: 
                          if (isset($occurTermArr[$key])) { 
                             $ns = RdfUtility::namespaceAbbrev($occurTermArr[$key]);
-                            $returnvalue .= "  <$ns>$value</$ns>\n";
+                            $elem = $newDoc->createElement($ns,$value);
                          }
+                  }
+                  if ($elem!=null) { 
+                     $occElem->appendChild($elem);
                   }
                 }
              }
-         
-             $returnvalue .= "</rdf:Description>\n";
+             $node = $newDoc->importNode($occElem);
+             $newDoc->documentElement->appendChild($node);
+             if ($sameAsElem!=null) { 
+                $node = $newDoc->importNode($sameAsElem);
+                $newDoc->documentElement->appendChild($node);
+             }
+             // For many matching rows this is a point where partial serialization could occur
+             // to prevent creation of a large DOM model in memmory.
           }
        }
-       if ($dwcguide223!="") { 
-          $returnvalue .= $dwcguide223;
-       }
-       $returnvalue .= "</rdf:RDF>\n";
+       $returnvalue = $newDoc->saveXML();
        return $returnvalue;
     }
 
