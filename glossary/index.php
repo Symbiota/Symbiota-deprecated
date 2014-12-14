@@ -12,7 +12,7 @@ $termList = '';
 $statusStr = '';
 if($formSubmit){
 	if($formSubmit == 'Search Terms'){
-		$termList = $glosManager->getTermList($_POST['searchkeyword'],$_POST['searchlanguage']);
+		$termList = $glosManager->getTermList($_POST['searchtermkeyword'],$_POST['searchdefkeyword'],$_POST['searchlanguage']);
 	}
 	if($formSubmit == 'Delete Term'){
 		$statusStr = $glosManager->deleteTerm($glossId);
@@ -20,7 +20,7 @@ if($formSubmit){
 	}
 }
 if(!$formSubmit || $formSubmit != 'Search Terms'){
-	$termList = $glosManager->getTermList('','');
+	$termList = $glosManager->getTermList('','','');
 }
 ?>
 
@@ -78,12 +78,25 @@ if(!$formSubmit || $formSubmit != 'Search Terms'){
 					<legend><b>Filter List</b></legend>
 					<div>
 						<div>
-							<b>Keyword:</b> 
-							<input type="text" autocomplete="off" name="searchkeyword" id="searchkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchkeyword']:''); ?>" />
+							<b>Term Keyword:</b> 
+							<input type="text" autocomplete="off" name="searchtermkeyword" id="searchtermkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchtermkeyword']:''); ?>" />
 						</div>
-						<div>
-							<b>Language:</b> 
-							<input type="text" autocomplete="off" name="searchlanguage" id="searchlanguage" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchlanguage']:''); ?>" />
+						<div style="margin-top:8px;">
+							<b>Definition Keyword:</b> 
+							<input type="text" autocomplete="off" name="searchdefkeyword" id="searchdefkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchdefkeyword']:''); ?>" />
+						</div>
+						<div style="margin-top:8px;">
+							<b>Language:</b><br />
+							<select name="searchlanguage" id="searchlanguage" style="margin-top:2px;" onchange="">
+								<option value="">Select Language</option>
+								<option value="">----------------</option>
+								<?php 
+								$langArr = $glosManager->getLanguageArr();
+								foreach($langArr as $k => $v){
+									echo '<option value="'.$k.'" '.(($formSubmit == 'Search Terms' && $k==$_POST['searchlanguage'])?'SELECTED':'').'>'.$k.'</option>';
+								}
+								?>
+							</select>
 						</div>
 						<div style="padding-top:8px;float:right;">
 							<button name="formsubmit" type="submit" value="Search Terms">Filter List</button>
@@ -137,20 +150,12 @@ if(!$formSubmit || $formSubmit != 'Search Terms'){
 				</div>
 				<?php
 			}
-			else{
-				echo '<div style="margin-bottom:10px;">Please <a href="../profile/index.php?refurl=../glossary/index.php">login</a> to add or edit glossary terms.</div>';
-			}
 			if($termList){
 				echo '<div style="font-weight:bold;font-size:120%;">Terms</div>';
 				echo '<div><ul>';
 				foreach($termList as $termId => $terArr){
 					echo '<li>';
-					if($symbUid){
-						echo '<a href="termdetails.php?glossid='.$termId.'"><b>'.$terArr["term"].'</b></a>';
-					}
-					else{
-						echo '<a href="#" onclick="openTermPopup('.$termId.'); return false;"><b>'.$terArr["term"].'</b></a>';
-					}
+					echo '<a href="#" onclick="openTermPopup('.$termId.'); return false;"><b>'.$terArr["term"].'</b></a>';
 					echo '</li>';
 				}
 				echo '</ul></div>';

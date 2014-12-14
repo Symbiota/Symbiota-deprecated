@@ -52,47 +52,10 @@ $(document).ready(function() {
 			},
 			change: function (event, ui) {
 				if (!ui.item) {
-					alert("The language you entered is not currently in the database, please make sure you spelled it correctly.");
+					alert("The language you entered is not currently in the database, you can enter it as a new language but please make sure you spelled it correctly.");
 				}
 			}
 		},{});
-		
-	$( "#searchlanguage" )
-		// don't navigate away from the field on tab when selecting an item
-		.bind( "keydown", function( event ) {
-			if ( event.keyCode === $.ui.keyCode.TAB &&
-					$( this ).data( "autocomplete" ).menu.active ) {
-				event.preventDefault();
-			}
-		})
-		.autocomplete({
-			source: function( request, response ) {
-				$.getJSON( "rpc/languagelist.php", {
-					term: extractLast( request.term ), t: function() { return document.filtertermform.searchlanguage.value; }
-				}, response );
-			},
-			search: function() {
-				// custom minLength
-				var term = extractLast( this.value );
-				if ( term.length < 3 ) {
-					return false;
-				}
-			},
-			focus: function() {
-				// prevent value inserted on focus
-				return false;
-			},
-			select: function( event, ui ) {
-				var terms = split( this.value );
-				// remove the current input
-				terms.pop();
-				// add the selected item
-				terms.push( ui.item.label );
-				this.value = terms;
-				return false;
-			}
-		},{});
-	
 });
 
 function verifyNewTermForm(f){
@@ -121,7 +84,7 @@ function verifyImageEditForm(f){
 }
 
 function verifyNewTerm(f){
-	var term = f.term.value;
+	/*var term = f.term.value;
 	if(term){
 		var sutXmlHttp=GetXmlHttpObject();
 		if (sutXmlHttp==null){
@@ -144,7 +107,7 @@ function verifyNewTerm(f){
 			f.term.value = '';
 			alert("Term already exists in database, please select it from the list below to edit.");
 		}
-	}
+	}*/
 }
 
 function openTermPopup(glossid){
