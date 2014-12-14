@@ -660,6 +660,7 @@ class DwcArchiverOccurrence{
                          // skip
                       break;
                     case "collectionID":
+                         // RDF Guide Section 2.3.3 owl:sameAs for urn:lsid and resolvable IRI.
                          if (stripos("urn:lsid:biocol.org",$value)==0) { 
                            $lsid = "http://biocol.org/$value";
                            $dwcguide223 .= "<http://biocol.org/$value>\n";
@@ -678,6 +679,22 @@ class DwcArchiverOccurrence{
                     case "modified":
                          $returnvalue .= "$separator   dcterms:$key \"$value\"";
                       break;
+                    case "rights":
+                          // RDF Guide Section 3.3 dcterms:licence for IRI, xmpRights:UsageTerms for literal
+                          if (stripos("http://creativecommons.org/licenses/",$value)==0) { 
+                             $returnvalue .= "$separator   dcterms:license <$value>";
+                          } else { 
+                             $returnvalue .= "$separator   dc:$key \"$value\"";
+                          }
+                      break;
+                    case "rightsHolder":
+                          // RDF Guide Section 3.3  dcterms:rightsHolder for IRI, xmpRights:Owner for literal
+                          if (stripos("http://",$value)==0 || stripos("urn:",$value)==0) { 
+                             $returnvalue .= "$separator   dcterms:rightsHolder <$value>";
+                          } else { 
+                             $returnvalue .= "$separator   xmpRights:Owner \"$value\"";
+                          }
+                      break;
                     case "day":
                     case "month":
                     case "year":
@@ -686,7 +703,8 @@ class DwcArchiverOccurrence{
                          }
                       break;
                     case "eventDate":
-                         if ($value!="0000-00-00") { 
+                         if ($value!="0000-00-00" && strlen($value)>0) { 
+                           $value = str_replace("-00","",$value);
                            $returnvalue .= "$separator   dwc:$key  \"$value\"";
                          }
                       break;
@@ -758,6 +776,7 @@ class DwcArchiverOccurrence{
                          // skip
                       break;
                     case "collectionID":
+                         // RDF Guide Section 2.3.3 owl:sameAs for urn:lsid and resolvable IRI.
                          if (stripos("urn:lsid:biocol.org",$value)==0) { 
                            $lsid = "http://biocol.org/$value";
                            $sameAsElem = $newDoc->createElement("rdf:Description");
@@ -778,6 +797,24 @@ class DwcArchiverOccurrence{
                           }
                           $elem = $newDoc->createElement("dwc:$key",$value);
                       break;
+                    case "rights":
+                          // RDF Guide Section 3.3 dcterms:licence for IRI, xmpRights:UsageTerms for literal
+                          if (stripos("http://creativecommons.org/licenses/",$value)==0) { 
+                             $elem = $newDoc->createElement("dcterms:license");
+                             $elem->setAttribute("rdf:resource","$value");
+                          } else { 
+                             $elem = $newDoc->createElement("xmpRights:UsageTerms",$value);
+                          }
+                      break;
+                    case "rightsHolder":
+                          // RDF Guide Section 3.3  dcterms:rightsHolder for IRI, xmpRights:Owner for literal
+                          if (stripos("http://",$value)==0 || stripos("urn:",$value)==0) { 
+                             $elem = $newDoc->createElement("dcterms:rightsHolder");
+                             $elem->setAttribute("rdf:resource","$value");
+                          } else { 
+                             $elem = $newDoc->createElement("xmpRights:Owner",$value);
+                          }
+                      break;
                     case "modified":
                           $elem = $newDoc->createElement("dcterms:$key",$value);
                       break;
@@ -789,7 +826,7 @@ class DwcArchiverOccurrence{
                          }
                       break;
                     case "eventDate":
-                         if ($value!="0000-00-00") { 
+                         if ($value!="0000-00-00" || strlen($value)>0) { 
                            $value = str_replace("-00","",$value);
                            $elem = $newDoc->createElement("dwc:$key",$value);
                          }
