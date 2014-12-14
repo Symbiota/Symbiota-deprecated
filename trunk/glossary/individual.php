@@ -44,6 +44,17 @@ else{
 	<div id="innertext">
 		<fieldset>
 			<div id="terminfo" style="width:600px;padding:10px;">
+				<?php
+				if($SYMB_UID){
+					?>
+					<div style="float:right;cursor:pointer;" onclick="" title="Edit Term Data">
+						<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $glossId;?>'); return false;">
+							<img style="border:0px;width:12px;" src="../images/edit.png" />
+						</a>
+					</div>
+					<?php
+				}
+				?>
 				<div style="float:left;">
 					<span style="font-size:18px;font-weight:bold;vertical-align:60%;">
 						<?php echo $termArr['term']; ?>
@@ -83,7 +94,7 @@ else{
 										<div style='clear:both;width:550px;margin:5px;'>
 											<div style='float:left;padding:5px;'>
 												<a href='<?php echo $imgArr['url']; ?>' target="_blank">
-													<img border=1 width='150' src='<?php echo $imgArr['url']; ?>' title='<?php echo $imgArr['structures']; ?>'/>
+													<img border=1 width='150' src='<?php echo ($imgArr['thumbnailurl']?$imgArr['thumbnailurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['structures']; ?>'/>
 												</a>
 											</div>
 											<div style='float:right;width:375px;padding:5px;'>
@@ -119,27 +130,16 @@ else{
 						}
 						?>
 					</div>
-					<div style="margin:5px 0px 5px 0px;">
-						<a href="../misc/usagepolicy.php" target="_blank">General Data Usage Policy</a>
-					</div>
 					
-					<div style="margin-bottom:10px;">
-						<?php 
-						if($SYMB_UID){
-							?>
-							Do you see an error? If so, errors can be fixed using the  
-							<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $glossId;?>'); return false;">
-								Glossary Editor.
-							</a>
-							<?php
-						}
-						else{
-							?>
-							See an error? <a href="#" onclick="leaveTermPopup('../profile/index.php?refurl=../glossary/termdetails.php?glossid=<?php echo $glossId; ?>'); return false;">Login</a> to edit data
-							<?php
-						}
+					<?php
+					if(!$SYMB_UID){
 						?>
-					</div>
+						<div style="margin-bottom:10px;margin-top:8px;">
+							See an error? <a href="#" onclick="leaveTermPopup('../profile/index.php?refurl=../glossary/termdetails.php?glossid=<?php echo $glossId; ?>'); return false;">Login</a> to edit data
+						</div>
+						<?php
+					}
+					?>
 				</div>
 			</div>
 		</fieldset>

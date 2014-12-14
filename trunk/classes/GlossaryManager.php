@@ -5,11 +5,28 @@ class GlossaryManager{
 
 	private $conn;
 	private $glossId = 0;
+	private $sourceGdImg;
+	
 	private $imageRootPath = '';
 	private $imageRootUrl = '';
+	
 	private $sourcePath = '';
 	private $targetPath = '';
+	private $urlBase = '';
+	private $imgName = '';
 	private $imgExt = '';
+	
+	private $sourceWidth = 0;
+	private $sourceHeight = 0;
+
+	private $tnPixWidth = 200;
+	private $webPixWidth = 1600;
+	private $lgPixWidth = 3168;
+	private $webFileSizeLimit = 300000;
+	private $jpgCompression= 80;
+
+	private $mapLargeImg = false;
+	
 	private $targetUrl;
 	private $fileName;
 	
@@ -19,22 +36,39 @@ class GlossaryManager{
 		if(substr($this->imageRootPath,-1) != "/") $this->imageRootPath .= "/";  
 		$this->imageRootUrl = $GLOBALS["imageRootUrl"];
 		if(substr($this->imageRootUrl,-1) != "/") $this->imageRootUrl .= "/";
+		if(array_key_exists('imgTnWidth',$GLOBALS)){
+			$this->tnPixWidth = $GLOBALS['imgTnWidth'];
+		}
+		if(array_key_exists('imgWebWidth',$GLOBALS)){
+			$this->webPixWidth = $GLOBALS['imgWebWidth'];
+		}
+		if(array_key_exists('imgFileSizeLimit',$GLOBALS)){
+			$this->webFileSizeLimit = $GLOBALS['imgFileSizeLimit'];
+		}
  	}
  	
  	public function __destruct(){
 		if($this->conn) $this->conn->close();
 	}
 	
-	public function getTermList($keyword,$language){
+	public function getTermList($termkeyword,$defkeyword,$language){
 		$retArr = array();
 		$sql = 'SELECT g.glossid, g.term '.
 			'FROM glossary AS g ';
-		if($keyword || $language){
+		if($termkeyword || $defkeyword || $language){
 			$sql .= 'WHERE ';
-			if($keyword){
-				$sql .= 'g.term LIKE "%'.$keyword.'%" OR g.definition LIKE "%'.$keyword.'%" ';
+			if($termkeyword || $defkeyword){
+				if($termkeyword){
+					$sql .= 'g.term LIKE "%'.$termkeyword.'%" ';
+				}
+				if($termkeyword && $defkeyword){
+					$sql .= 'OR ';
+				}
+				if($defkeyword){
+					$sql .= 'g.definition LIKE "%'.$defkeyword.'%" ';
+				}
 			}
-			if($keyword && $language){
+			if(($termkeyword || $defkeyword) && $language){
 				$sql .= 'AND ';
 			} 
 			if($language){
@@ -91,7 +125,7 @@ class GlossaryManager{
 	
 	public function getImgArr($glossId){
 		$retArr = array();
-		$sql = 'SELECT g.glimgid, g.glossid, g.url, g.structures, g.notes '.
+		$sql = 'SELECT g.glimgid, g.glossid, g.url, g.thumbnailurl, g.structures, g.notes '.
 			'FROM glossaryimages AS g '.
 			'WHERE g.glossid = '.$glossId;
 		//echo $sql;
@@ -100,6 +134,7 @@ class GlossaryManager{
 				$retArr[$r->glimgid]['glimgid'] = $r->glimgid;
 				$retArr[$r->glimgid]['glossid'] = $r->glossid;
 				$retArr[$r->glimgid]['url'] = $r->url;
+				$retArr[$r->glimgid]['thumbnailurl'] = $r->thumbnailurl;
 				$retArr[$r->glimgid]['structures'] = $r->structures;
 				$retArr[$r->glimgid]['notes'] = $r->notes;
 			}
@@ -138,23 +173,6 @@ class GlossaryManager{
 		$oldUrl = $pArr["oldurl"];
 		unset($pArr['oldurl']);
 		if(is_numeric($glimgId)){
-			if(array_key_exists("renameweburl",$pArr)){
-				$oldName = str_replace($this->imageRootUrl,$this->imageRootPath,$oldUrl);
-				$newWebName = str_replace($this->imageRootUrl,$this->imageRootPath,$pArr['url']);
-				if($pArr['url'] != $oldUrl){
-					if(file_exists($newWebName)){
-						$status = 'ERROR: unable to modify image URL because a file already exists with that name; ';
-						$pArr['url'] = $oldUrl;
-					}
-					else{
-						if(!rename($oldName,$newWebName)){
-							$pArr['url'] = $oldUrl;
-							$status .= "Web URL rename FAILED (possible write permissions issue); ";
-						}
-					}
-				}
-				unset($pArr['renameweburl']);
-			}
 			$sql = '';
 			foreach($pArr as $k => $v){
 				if($k != 'formsubmit' && $k != 'glossid' && $k != 'glimgid'){
@@ -191,11 +209,13 @@ class GlossaryManager{
 	
 	public function deleteImage($imgIdDel,$removeImg){
 		$imgUrl = "";
+		$imgTnUrl = "";
 		$status = "Image deleted successfully";
-		$sqlQuery = 'SELECT url FROM glossaryimages WHERE (glimgid = '.$imgIdDel.')';
+		$sqlQuery = 'SELECT url, thumbnailurl FROM glossaryimages WHERE (glimgid = '.$imgIdDel.')';
 		$result = $this->conn->query($sqlQuery);
 		if($row = $result->fetch_object()){
 			$imgUrl = $row->url;
+			$imgTnUrl = $row->thumbnailurl;
 		}
 		$result->close();
 				
@@ -203,16 +223,40 @@ class GlossaryManager{
 		//echo $sql;
 		if($this->conn->query($sql)){
 			if($removeImg){
+				$imgUrl2 = '';
+				$domain = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
+				$domain .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
+				if(stripos($imgUrl,$domain) === 0){
+					$imgUrl2 = $imgUrl;
+					$imgUrl = substr($imgUrl,strlen($domain));
+				}
+				elseif(stripos($imgUrl,$this->imageRootUrl) === 0){
+					$imgUrl2 = $domain.$imgUrl;
+				}
+				
 				//Remove images only if there are no other references to the image
-				$sql = "SELECT glimgid FROM glossaryimages WHERE (url = '".$imgUrl."')";
+				$sql = "SELECT glimgid FROM glossaryimages WHERE (url = '".$imgUrl."') ";
+				if($imgUrl2) $sql .= 'OR (url = "'.$imgUrl2.'")';
 				$rs = $this->conn->query($sql);
 				if(!$rs->num_rows){
-					//Delete image from server 
+					//Delete image from server
 					$imgDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
-					if(file_exists($imgDelPath)){
+					if(substr($imgDelPath,0,4) != 'http'){
 						if(!unlink($imgDelPath)){
-							$status = "Deleted image record from database successfully but FAILED to delete image from server. The Image will have to be deleted manually.";
+							$this->errArr[] = 'WARNING: Deleted records from database successfully but FAILED to delete image from server (path: '.$imgDelPath.')';
+							//$status .= '<br/>Return to <a href="../taxa/admin/tpeditor.php?tid='.$tid.'&tabindex=1">Taxon Editor</a>';
 						}
+					}
+					
+					//Delete thumbnail image
+					if($imgTnUrl){
+						if(stripos($imgTnUrl,$domain) === 0){
+							$imgTnUrl = substr($imgTnUrl,strlen($domain));
+						}				
+						$imgTnDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgTnUrl);
+						if(file_exists($imgTnDelPath) && substr($imgTnDelPath,0,4) != 'http') unlink($imgTnDelPath);
 					}
 				}
 			}
@@ -231,27 +275,87 @@ class GlossaryManager{
 		$this->setTargetPath();
 		
 		if($_REQUEST["imgurl"]){
-			if(array_key_exists('copytoserver',$_REQUEST)){
-				if(!$this->copyImageFromUrl($_REQUEST["imgurl"])) return;
-				$sourceImgUri = $this->targetUrl.$this->fileName;
-				$webUrl = $sourceImgUri;
-			}
-			else{
-				$webUrl = $_REQUEST["imgurl"];
-			}
+			if(!$this->copyImageFromUrl($_REQUEST["imgurl"])) return;
 		}
 		else{
 			if(!$this->loadImage()) return;
-			$sourceImgUri = $this->targetUrl.$this->fileName;
-			
-			//list($width, $height) = getimagesize($sourceImgUri);
-			
-			$webUrl = $sourceImgUri;
 		}
 		
-		//Load to database
-		if($webUrl) $status = $this->databaseImage($webUrl);
+		$status = $this->processImage();
 		
+		return $status;
+	}
+	
+	public function processImage(){
+		global $paramsArr;
+
+		if(!$this->imgName){
+			//trigger_error('Image file name null in processImage function',E_USER_ERROR);
+			return false;
+		}
+		$imgPath = $this->targetPath.$this->imgName.$this->imgExt;
+
+		//Create thumbnail
+		$imgTnUrl = '';
+		if($this->createNewImage('_tn',$this->tnPixWidth,70)){
+			$imgTnUrl = $this->imgName.'_tn.jpg';
+		}
+
+		//Get image dimensions
+		if(!$this->sourceWidth || !$this->sourceHeight){
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+		}
+		//Get image file size
+		$fileSize = $this->getSourceFileSize();
+
+		//Create large image
+		$imgLgUrl = "";
+		if($this->mapLargeImg){
+			if($this->sourceWidth > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
+				//Source image is wide enough can serve as large image, or it's too large to serve as basic web image
+				if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://') {
+					$imgLgUrl = $this->sourcePath;
+				}
+				else{
+					if($this->sourceWidth < ($this->lgPixWidth*1.2)){
+						//Image width is small enough to serve as large image 
+						if(copy($this->sourcePath,$this->targetPath.$this->imgName.'_lg'.$this->imgExt)){
+							$imgLgUrl = $this->imgName.'_lg'.$this->imgExt;
+						}
+					}
+					else{
+						if($this->createNewImage('_lg',$this->lgPixWidth)){
+							$imgLgUrl = $this->imgName.'_lg.jpg';
+						}
+					}
+				}
+			}
+		}
+
+		//Create web url
+		$imgWebUrl = '';
+		if($this->sourceWidth < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
+			//Image width and file size is small enough to serve as web image
+			if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
+				if(copy($this->sourcePath, $this->targetPath.$this->imgName.$this->imgExt)){
+					$imgWebUrl = $this->imgName.$this->imgExt;
+				}
+			}
+			else{
+				$imgWebUrl = $this->imgName.$this->imgExt;
+			}
+		}
+		else{
+			//Image width or file size is too large
+			//$newWidth = ($this->sourceWidth<($this->webPixWidth*1.2)?$this->sourceWidth:$this->webPixWidth);
+			$this->createNewImage('',$this->sourceWidth);
+			$imgWebUrl = $this->imgName.'.jpg';
+		}
+
+		$status = true;
+		if($imgWebUrl){
+			$status = $this->databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl);
+		}
 		return $status;
 	}
 	
@@ -281,7 +385,7 @@ class GlossaryManager{
 		$fileName = $this->cleanFileName($sourceUri);
 		if(copy($sourceUri, $this->targetPath.$fileName.$this->imgExt)){
 			$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
-			$this->setFileName($fileName.$this->imgExt);
+			$this->imgName = $fileName;
 			//$this->testOrientation();
 			return true;
 		}
@@ -353,19 +457,29 @@ class GlossaryManager{
 	
 	private function loadImage(){
 		$imgFile = basename($_FILES['imgfile']['name']);
-		$this->setFileName($imgFile);
-		if(move_uploaded_file($_FILES['imgfile']['tmp_name'], $this->targetPath.$this->fileName)){
+		$fileName = $this->cleanFileName($imgFile);
+		if(move_uploaded_file($_FILES['imgfile']['tmp_name'], $this->targetPath.$fileName.$this->imgExt)){
+			$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
+			$this->imgName = $fileName;
+			//$this->testOrientation();
 			return true;
 		}
 		return false;
 	}
 
-	private function databaseImage($webUrl){
+	private function databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl){
 		global $SYMB_UID;
-		if(!$webUrl) return 'ERROR: web url is null ';
+		if(!$imgWebUrl) return 'ERROR: web url is null ';
+		$urlBase = $this->getUrlBase();
+		if(strtolower(substr($imgWebUrl,0,7)) != 'http://' && strtolower(substr($imgWebUrl,0,8)) != 'https://'){ 
+			$imgWebUrl = $urlBase.$imgWebUrl;
+		}
+		if($imgTnUrl && strtolower(substr($imgTnUrl,0,7)) != 'http://' && strtolower(substr($imgTnUrl,0,8)) != 'https://'){
+			$imgTnUrl = $urlBase.$imgTnUrl;
+		}
 		$status = 'File added successfully!';
-		$sql = 'INSERT INTO glossaryimages(glossid,url,structures,notes,uid) '.
-			'VALUES('.$_REQUEST["glossid"].',"'.$webUrl.'","'.$this->cleanInStr($_REQUEST["structures"]).'","'.$this->cleanInStr($_REQUEST["notes"]).'",'.$SYMB_UID.') ';
+		$sql = 'INSERT INTO glossaryimages(glossid,url,thumbnailurl,structures,notes,uid) '.
+			'VALUES('.$_REQUEST["glossid"].',"'.$imgWebUrl.'","'.$imgTnUrl.'","'.$this->cleanInStr($_REQUEST["structures"]).'","'.$this->cleanInStr($_REQUEST["notes"]).'",'.$SYMB_UID.') ';
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			$status = "ERROR Loading Data: ".$this->conn->error."<br/>SQL: ".$sql;
@@ -425,6 +539,127 @@ class GlossaryManager{
 		
 	    return $exists;
 	}
+	
+	public function createNewImage($subExt, $targetWidth, $qualityRating = 0){
+		global $useImageMagick;
+		$status = false;
+		if($this->sourcePath && $this->uriExists($this->sourcePath)){
+			if(!$qualityRating) $qualityRating = $this->jpgCompression;
+			
+	        if($useImageMagick) {
+				// Use ImageMagick to resize images 
+				$status = $this->createNewImageImagick($subExt,$targetWidth,$qualityRating);
+			} 
+			elseif(extension_loaded('gd') && function_exists('gd_info')) {
+				// GD is installed and working 
+				$status = $this->createNewImageGD($subExt,$targetWidth,$qualityRating);
+			}
+			else{
+				// Neither ImageMagick nor GD are installed 
+				$this->errArr[] = 'ERROR: No appropriate image handler for image conversions';
+			}
+		}
+		return $status;
+	}
+	
+	private function createNewImageImagick($subExt,$newWidth,$qualityRating = 0){
+		$targetPath = $this->targetPath.$this->imgName.$subExt.$this->imgExt;
+		$ct;
+		if($newWidth < 300){
+			$ct = system('convert '.$this->sourcePath.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
+		}
+		else{
+			$ct = system('convert '.$this->sourcePath.' -resize '.$newWidth.'x'.($newWidth*1.5).($qualityRating?' -quality '.$qualityRating:'').' '.$targetPath, $retval);
+		}
+		if(file_exists($targetPath)){
+			return true;
+		}
+		return false;
+	}
+
+	private function createNewImageGD($subExt, $newWidth, $qualityRating = 0){
+		$status = false;
+		ini_set('memory_limit','512M');
+
+		if(!$this->sourceWidth || !$this->sourceHeight){
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+		}
+		if($this->sourceWidth){
+			$newHeight = round($this->sourceHeight*($newWidth/$this->sourceWidth));
+			if($newWidth > $this->sourceWidth){
+				$newWidth = $this->sourceWidth;
+				$newHeight = $this->sourceHeight;
+			}
+			if(!$this->sourceGdImg){
+				if($this->imgExt == '.gif'){
+			   		$this->sourceGdImg = imagecreatefromgif($this->sourcePath);
+				}
+				elseif($this->imgExt == '.png'){
+			   		$this->sourceGdImg = imagecreatefrompng($this->sourcePath);
+				}
+				else{
+					//JPG assumed
+			   		$this->sourceGdImg = imagecreatefromjpeg($this->sourcePath);
+				}
+			}
+			
+			$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+			//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+			imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$this->sourceWidth,$this->sourceHeight);
+	
+			//Irrelavent of import image, output JPG 
+			$targetPath = $this->targetPath.$this->imgName.$subExt.'.jpg';
+			if($qualityRating){
+				$status = imagejpeg($tmpImg, $targetPath, $qualityRating);
+			}
+			else{
+				$status = imagejpeg($tmpImg, $targetPath);
+			}
+				
+			if(!$status){
+				$this->errArr[] = 'ERROR: failed to create images in target path ('.$targetPath.')';
+			}
+	
+			imagedestroy($tmpImg);
+		}
+		else{
+			$this->errArr[] = 'ERROR: unable to get source image width ('.$this->sourcePath.')';
+		}
+		return $status;
+	}
+	
+	public function getUrlBase(){
+		$urlBase = $this->urlBase;
+		//If central images are on remote server and new ones stored locally, then we need to use full domain
+	    //e.g. this portal is sister portal to central portal
+	 	if($GLOBALS['imageDomain']){
+			$urlPrefix = "http://";
+			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+			$urlPrefix .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+			$urlBase = $urlPrefix.$urlBase;
+    	}
+		return $urlBase;
+	}
+	
+	public function getSourceFileSize(){
+		$fileSize = 0;
+		if($this->sourcePath){
+			if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
+				$x = array_change_key_case(get_headers($this->sourcePath, 1),CASE_LOWER); 
+				if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) { 
+					$fileSize = $x['content-length'][1]; 
+				}
+	 			else { 
+	 				$fileSize = $x['content-length']; 
+	 			}
+	 		}
+			else{
+				$fileSize = filesize($this->sourcePath);
+			}
+		}
+		return $fileSize;
+	}
 
 	private function setFileName($fName){
 		$this->fileName = $fName;
@@ -443,7 +678,20 @@ class GlossaryManager{
 		$url = $this->imageRootUrl."glossimg/".$folderName."/";
 		
 		$this->targetPath = $path;
-		$this->targetUrl = $url;
+		$this->urlBase = $url;
+	}
+	
+	public function getLanguageArr(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT `language` '. 
+			'FROM glossary '.
+			'ORDER BY `language` ';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->language] = $r->language;
+			}
+		}
+		return $retArr;
 	}
 	
 	public function getTermId(){

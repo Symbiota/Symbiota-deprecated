@@ -27,8 +27,7 @@ if($formSubmit){
 		$statusStr = $glosManager->editImageData($_POST);
 	}
 	elseif($formSubmit == 'Delete Image'){
-		$removeImg = array_key_exists('removeimg',$_POST)?$_POST['removeimg']:false;
-		$statusStr = $glosManager->deleteImage($glimgId,$removeImg);
+		$statusStr = $glosManager->deleteImage($glimgId,1);
 	}
 }
 
@@ -178,20 +177,17 @@ else{
 											</div>
 										</div>
 										<div class="targetdiv" style="display:none;">
+											<div style="float:right;text-decoration:underline;font-weight:bold;">
+												<a href="#" onclick="toggle('targetdiv');return false;">
+													Upload Local Image
+												</a>
+											</div>
 											<div style="margin-bottom:10px;">
 												Enter a URL to an image already located on a web server. 
 											</div>
 											<div>
 												<b>Image URL:</b><br/> 
 												<input type='text' name='imgurl' id='imgurl' size='70'/>
-											</div>
-											<div style="float:right;text-decoration:underline;font-weight:bold;">
-												<a href="#" onclick="toggle('targetdiv');return false;">
-													Upload Local Image
-												</a>
-											</div>
-											<div>
-												<input type="checkbox" name="copytoserver" value="1" /> Copy image to server
 											</div>
 										</div>
 									</div>
@@ -235,11 +231,9 @@ else{
 											<td style="width:300px;text-align:center;padding:20px;">
 												<?php
 												$imgUrl = $imgArr["url"];
-												$local = false;
 												if(array_key_exists("imageDomain",$GLOBALS)){
 													if(substr($imgUrl,0,1)=="/"){
 														$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-														$local = true;
 													}
 												}			
 												$displayUrl = $imgUrl;
@@ -302,41 +296,15 @@ else{
 																	<textarea name="notes" id="notes" rows="10" style="width:380px;height:70px;resize:vertical;" ><?php echo $imgArr["notes"]; ?></textarea>
 																</div>
 															</div>
-															<div>
-																<b>URL: </b><br/>
-																<input name="url" id="editurl" type="text" value="<?php echo $imgArr["url"]; ?>" style="width:90%;" />
-																<?php if($local){ ?>
-																	<div style="margin-left:10px;">
-																		<input type="checkbox" name="renameweburl" value="1" />
-																		Rename web image file on server to match above edit
-																	</div>
-																	<input name='oldurl' id='oldurl' type='hidden' value='<?php echo $imgArr["url"];?>' />
-																<?php } ?>
-															</div>
-															<div style="clear:both;padding-top:8px;float:right;">
-																<input type="hidden" name="glossid" value="<?php echo $glossId; ?>" />
-																<input type="hidden" name="glimgid" value="<?php echo $imgId; ?>" />
-																<input type="submit" name="formsubmit" value="Save Image Edits" />
-															</div>
-														</fieldset>
-													</form>
-													<form name="img<?php echo $imgId; ?>delform" action="termdetails.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this image?');">
-														<fieldset style="padding:15px">
-															<legend><b>Delete Image</b></legend>
-															<input type="hidden" name="glossid" value="<?php echo $glossId; ?>" />
-															<input type="hidden" name="glimgid" value="<?php echo $imgId; ?>" />
-															<?php
-															if($local){
-																?>
-																<input name="removeimg" type="checkbox" value="1" checked /> Remove image from server 
-																<div style="margin-left:20px;">
-																	(Note: leaving unchecked removes image from database w/o removing from server)
+															<div style="clear:both;">
+																<div style="padding-top:8px;float:left;">
+																	<input type="submit" name="formsubmit" onclick="return confirm('Are you sure you want to permanently delete this image?');" value="Delete Image" />
 																</div>
-																<?php
-															}
-															?>
-															<div style="clear:both;padding-top:8px;float:<?php echo ($local?'right':'left'); ?>;">
-																<input type="submit" name="formsubmit" value="Delete Image" />
+																<div style="padding-top:8px;float:right;">
+																	<input type="hidden" name="glossid" value="<?php echo $glossId; ?>" />
+																	<input type="hidden" name="glimgid" value="<?php echo $imgId; ?>" />
+																	<input type="submit" name="formsubmit" value="Save Image Edits" />
+																</div>
 															</div>
 														</fieldset>
 													</form>
@@ -382,7 +350,7 @@ else{
 		}
 		else{
 			if(!$symbUid){
-				echo 'Please <a href="../profile/index.php?refurl=../glossary/termdetails.php?glossid='.$glossId.'">login</a>';
+				header("Location: ../profile/index.php?refurl=../glossary/termdetails.php?glossid=".$glossId);
 			}
 			else{
 				echo '<h2>ERROR: unknown error, please contact system administrator</h2>';
