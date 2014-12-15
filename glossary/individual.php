@@ -39,11 +39,11 @@ else{
 	<script type="text/javascript" src="../js/symb/glossary.index.js"></script>
 </head>
 
-<body style="width:600px;">
+<body style="width:600px;margin:20px;">
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<fieldset>
-			<div id="terminfo" style="width:600px;padding:10px;">
+		<fieldset style="background-color:#FFFFFF;">
+			<div id="terminfo" style="width:580px;padding:10px;">
 				<?php
 				if($SYMB_UID){
 					?>
@@ -61,7 +61,7 @@ else{
 					</span>
 				</div>
 				<div style="clear:both;">
-					<div style='width:600px;' >
+					<div style='width:580px;' >
 						<div style='width:400px;margin-top:8px;' >
 							<b>Definition:</b> 
 							<?php echo $termArr['definition']; ?>
