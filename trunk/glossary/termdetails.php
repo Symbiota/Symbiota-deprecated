@@ -106,42 +106,42 @@ else{
 					<div id="termdetails" style="overflow:auto;">
 						<form name="termeditform" id="termeditform" action="termdetails.php" method="post" onsubmit="return verifyNewTermForm(this.form);">
 							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="">
+								<div style="float:left;">
 									<b>Term: </b>
 								</div>
-								<div style="margin-left:40px;margin-top:-14px;">
+								<div style="float:left;margin-left:10px;">
 									<input type="text" name="term" id="term" maxlength="45" style="width:200px;" value="<?php echo $termArr['term']; ?>" onchange="" title="" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="">
+								<div style="float:left;">
 									<b>Definition: </b>
 								</div>
-								<div style="margin-left:70px;margin-top:-14px;">
+								<div style="float:left;margin-left:10px;">
 									<textarea name="definition" id="definition" rows="10" style="width:380px;height:70px;resize:vertical;" ><?php echo $termArr['definition']; ?></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="">
+								<div style="float:left;">
 									<b>Language: </b>
 								</div>
-								<div style="margin-left:70px;margin-top:-14px;">
+								<div style="float:left;margin-left:10px;">
 									<input type="text" name="language" id="language" maxlength="45" style="width:200px;" value="<?php echo $termArr['language']; ?>" onchange="" title="" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="">
+								<div style="float:left;">
 									<b>Source: </b>
 								</div>
-								<div style="margin-left:70px;margin-top:-14px;">
+								<div style="float:left;margin-left:10px;">
 									<input type="text" name="source" id="source" maxlength="45" style="width:200px;" value="<?php echo $termArr['source']; ?>" onchange="" title="" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="">
+								<div style="float:left;">
 									<b>Notes: </b>
 								</div>
-								<div style="margin-left:70px;margin-top:-14px;">
+								<div style="float:left;margin-left:10px;">
 									<textarea name="notes" id="notes" rows="10" style="width:380px;height:40px;resize:vertical;" ><?php echo $termArr['notes']; ?></textarea>
 								</div>
 							</div>
@@ -191,19 +191,19 @@ else{
 											</div>
 										</div>
 									</div>
-									<div style="clear:both;margin:20px 0px 5px 10px;">
-										<div style="">
+									<div style="clear:both;padding-top:4px;float:left;">
+										<div style="float:left;">
 											<b>Structures:</b>
 										</div>
-										<div style="margin-left:70px;margin-top:-14px;">
+										<div style="float:left;margin-left:10px;">
 											<textarea name="structures" id="structures" rows="10" style="width:380px;height:50px;resize:vertical;" ></textarea>
 										</div>
 									</div>
-									<div style="clear:both;margin:20px 0px 5px 10px;">
-										<div style="">
+									<div style="clear:both;padding-top:4px;float:left;">
+										<div style="float:left;">
 											<b>Notes:</b> 
 										</div>
-										<div style="margin-left:45px;margin-top:-14px;">
+										<div style="float:left;margin-left:10px;">
 											<textarea name="notes" id="notes" rows="10" style="width:380px;height:70px;resize:vertical;" ></textarea>
 										</div>
 									</div>

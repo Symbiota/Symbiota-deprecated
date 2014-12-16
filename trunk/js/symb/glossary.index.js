@@ -112,7 +112,7 @@ function verifyNewTerm(f){
 
 function openTermPopup(glossid){
 	var urlStr = 'individual.php?glossid='+glossid;
-	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width=710,height=400,left=20,top=20');
+	newWindow = window.open(urlStr,'popup','toolbar=1,resizable=1,width=650,height=450,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }

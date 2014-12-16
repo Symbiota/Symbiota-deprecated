@@ -39,11 +39,11 @@ else{
 	<script type="text/javascript" src="../js/symb/glossary.index.js"></script>
 </head>
 
-<body style="width:600px;margin:20px;">
+<body style="overflow-x:hidden;overflow-y:hidden;width:450px;margin:20px;">
 	<!-- This is inner text! -->
-	<div id="innertext">
-		<fieldset style="background-color:#FFFFFF;">
-			<div id="terminfo" style="width:580px;padding:10px;">
+	<div id="innertext" >
+		<fieldset style="background-color:#FFFFFF;width:450px;">
+			<div id="terminfo" style="width:450px;padding:10px;">
 				<?php
 				if($SYMB_UID){
 					?>
