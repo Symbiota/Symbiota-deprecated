@@ -20,7 +20,7 @@ if($formSubmit){
 	}
 }
 if(!$formSubmit || $formSubmit != 'Search Terms'){
-	$termList = $glosManager->getTermList('','','');
+	$termList = $glosManager->getTermList('','',$defaultLang);
 }
 ?>
 
@@ -93,7 +93,12 @@ if(!$formSubmit || $formSubmit != 'Search Terms'){
 								<?php 
 								$langArr = $glosManager->getLanguageArr();
 								foreach($langArr as $k => $v){
-									echo '<option value="'.$k.'" '.(($formSubmit == 'Search Terms' && $k==$_POST['searchlanguage'])?'SELECTED':'').'>'.$k.'</option>';
+									if($formSubmit == 'Search Terms'){
+										echo '<option value="'.$k.'" '.($k==$_POST['searchlanguage']?'SELECTED':'').'>'.$k.'</option>';
+									}
+									else{
+										echo '<option value="'.$k.'" '.($k==$defaultLang?'SELECTED':'').'>'.$k.'</option>';
+									}
 								}
 								?>
 							</select>
