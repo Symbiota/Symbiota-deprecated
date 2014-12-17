@@ -115,7 +115,9 @@ class OccurrenceEditorManager {
 			$this->qryArr = $overrideQry;
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
-		elseif(array_key_exists('q_catalognumber',$_REQUEST)){
+		elseif(array_key_exists('q_catalognumber',$_REQUEST) || array_key_exists('q_identifier',$_REQUEST)){
+			//Need to keep q_identifier in code until LBCC croudsourcing Drupal site is no longer active 
+			if(array_key_exists('q_identifier',$_REQUEST) && $_REQUEST['q_identifier']) $this->qryArr['cn'] = trim($_REQUEST['q_identifier']);
 			if($_REQUEST['q_catalognumber']) $this->qryArr['cn'] = trim($_REQUEST['q_catalognumber']);
 			if(array_key_exists('q_othercatalognumbers',$_REQUEST) && $_REQUEST['q_othercatalognumbers']) $this->qryArr['ocn'] = trim($_REQUEST['q_othercatalognumbers']);
 			if(array_key_exists('q_recordedby',$_REQUEST) && $_REQUEST['q_recordedby']) $this->qryArr['rb'] = trim($_REQUEST['q_recordedby']);
