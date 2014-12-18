@@ -94,7 +94,7 @@ class PluginsManager {
 				'LEFT JOIN taxa AS t ON i.tid = t.tid) ';
 			if($clId){
 				$sql .= 'LEFT JOIN fmchklsttaxalink AS v ON t.tid = v.TID ';
-				$sql .= 'WHERE v.CLID = '.$clId.' ';
+				$sql .= 'WHERE v.CLID IN('.$clId.') ';
 			}
 			else{
 				$sql .= 'WHERE i.InitialTimeStamp < "'.$sinceDate.'" AND i.tid IS NOT NULL ';
@@ -196,14 +196,12 @@ class PluginsManager {
 			}
 			$rs->free();
 			$ssIdInfo['files'] = $files;
-			$previous[] = $imgIdArr;
+			$previous = array_merge($previous,$imgIdArr);
 			
 			if($clId){
-				if(array_diff($imgIdArr,$previous)){
-					$fp = fopen($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json', 'w');
-					fwrite($fp, json_encode($previous));
-					fclose($fp);
-				}
+				$fp = fopen($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json', 'w');
+				fwrite($fp, json_encode($previous));
+				fclose($fp);
 			}
 			$fp = fopen($serverRoot.'/temp/slideshow/'.$ssId.'_info.json', 'w');
 			fwrite($fp, json_encode($ssIdInfo));

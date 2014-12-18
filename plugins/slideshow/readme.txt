@@ -18,7 +18,8 @@ $dayInterval = 7;
 
 //Enter checklist id, if you wish for images to be pulled from a checklist,
 //leave as 0 if you do not wish for images to come from a checklist
-$clId = 0;
+//if you would like to use more than one checklist, separate their ids with a comma ex. "1,2,3,4"
+$clId = "0";
 
 //Enter field, specimen, or both to specify whether to use only field or specimen images, or both
 $imageType = "field";
