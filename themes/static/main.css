@@ -1,0 +1,146 @@
+/* Modify styles within this file to override styles within base.css file 
+ * 
+ **/
+body{
+	width: 850px;
+}
+
+/*Main table framework*/
+#maintable{
+	border-spacing: 0px;
+	width:		850px;
+}
+
+#maintable td{
+
+}
+
+td.header{
+
+}
+
+td.header a{
+
+}
+
+td.header a:hover{
+
+}
+
+td.middleleft{
+}
+
+td.middleleftnomenu{
+}
+
+td.middlecenter{
+}
+
+td.middleright{
+}
+
+td.footer{
+}
+
+/*Left menu components*/
+div.menu {
+	background-color:   white;
+	margin:				15px;
+	border:   			1px solid #CCCCFF;
+	padding-bottom:   	25px;
+	overflow:   		hidden;
+	width:   			150px;
+	border-radius:		0.5em 0.5em 1.5em 0.5em;
+	-moz-border-radius:	0.5em 0.5em 1.5em 0.5em;
+	-khtml-border-radius: 0.5em 0.5em 1.5em 0.5em;
+}
+
+div.menuheader{
+	background-color:   #C0C0C0;
+	font-family:   		Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size:   		13px;
+	color:   			white;
+	overflow:   		hidden;
+	text-align:   		center;
+	padding:   			3px;
+	margin:			   	0px; 
+}
+
+div.menuheader a{
+
+}
+
+div.menuheader a:hover {
+
+}
+
+div.menusubheader{
+
+}
+
+div.menusubheader a{
+
+}
+
+div.menusubheader a:hover {
+
+}
+
+div.menuitem {
+
+}
+
+div.menuitem a {
+	color: #669999;
+}
+
+div.menuitem a:hover {
+	color: 	#00008B;
+}
+
+/*Central div in the middle center table div */
+#innertext{
+
+}
+
+#innertext a{
+
+}
+#innertext a:hover{
+
+}
+
+/* Image thumbnails   */
+div.tndiv{
+
+}
+
+div.tnimg{
+
+}
+
+div.tnimg a{
+
+}
+
+div.tnimg img{
+
+}	
+
+/*Misc general items*/
+table{
+
+}
+
+h1{
+
+}
+
+h2{
+
+}
+
+h3{
+
+}
+
