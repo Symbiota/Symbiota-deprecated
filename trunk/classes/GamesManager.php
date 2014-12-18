@@ -130,7 +130,7 @@ class GamesManager {
 			$tidArr = Array();
 			$sql = 'SELECT l.TID, COUNT(i.imgid) AS cnt '. 
 				'FROM fmchklsttaxalink l INNER JOIN images AS i ON l.TID = i.tid '.
-				'WHERE i.tid IS NOT NULL AND ISNULL(i.occid) AND l.CLID = '.$clid.' '. 
+				'WHERE i.tid IS NOT NULL AND ISNULL(i.occid) AND l.CLID IN('.$clid.') '. 
 				'GROUP BY l.TID';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);

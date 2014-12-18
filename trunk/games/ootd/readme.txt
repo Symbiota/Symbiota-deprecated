@@ -9,8 +9,9 @@ or even a private list that created specifically for feature.
 //If only one game will be active, leave set to 1. 
 $oodID = 1; 
 
-//Enter checklist id (clid) of the checklist you wish to use 
-$ootdGameChecklist = 1;
+//Enter checklist id (clid) of the checklist you wish to use, if you would like to use more than one checklist,
+//separate their ids with a comma ex. "1,2,3,4"
+$ootdGameChecklist = "1";
 
 //Change to modify title
 $ootdGameTitle = "Organism of the Day "; 
