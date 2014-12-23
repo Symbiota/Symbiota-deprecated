@@ -692,10 +692,10 @@ class SpecUploadBase extends SpecUpload{
 			if($this->includeImages) $reportArr['image'] = $this->getImageTransferCount();
 		}
 
-		//Number of new records
+		//Number of new specimen records
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM uploadspectemp '.
-			'WHERE (occid IS NULL) AND (collid = '.$this->collId.')';
+			'WHERE (occid IS NULL) AND (collid = '.$this->collId.') AND (basisofrecord != "determinationHistory")';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$reportArr['new'] = $r->cnt;
@@ -705,7 +705,7 @@ class SpecUploadBase extends SpecUpload{
 		//Number of matching records that will be updated
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM uploadspectemp '.
-			'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
+			'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.') AND (basisofrecord != "determinationHistory")';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$reportArr['update'] = $r->cnt;
@@ -716,7 +716,8 @@ class SpecUploadBase extends SpecUpload{
 			//Records that can be matched on on Catalog Number, but will be appended 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL)';
+				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
+				'AND (o.catalogNumber IS NOT NULL) AND (u.basisofrecord != "determinationHistory")';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['matchappend'] = $r->cnt;
@@ -728,14 +729,15 @@ class SpecUploadBase extends SpecUpload{
 			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL)';
+				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
+				'AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) AND (u.basisofrecord != "determinationHistory")';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['sync'] = $r->cnt;
 			}
 			$rs->free();
 
-			//Records in already in portal that don't match with an incoming record 
+			//Records already in portal that don't match with an incoming record 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM omoccurrences o LEFT JOIN uploadspectemp u  ON (o.occid = u.occid) '.
 				'WHERE (o.collid = '.$this->collId.') AND (u.occid IS NULL)';
@@ -748,7 +750,8 @@ class SpecUploadBase extends SpecUpload{
 
 		if($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate'){
 			//Look for null dbpk
-			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collId;
+			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp '.
+				'WHERE (dbpk IS NULL) AND (collid = '.$this->collId.') AND (basisofrecord != "determinationHistory")';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['nulldbpk'] = $r->cnt;

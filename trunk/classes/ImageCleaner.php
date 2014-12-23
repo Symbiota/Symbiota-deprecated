@@ -6,6 +6,7 @@ class ImageCleaner{
 	
 	private $conn;
 	private $verbose = 1;
+	private $errorStr;
 
 	function __construct() {
 		set_time_limit(2000);
@@ -44,7 +45,7 @@ class ImageCleaner{
 		//echo $sql; exit;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			$statusStr = '';
+			$status = true;
 			$webIsEmpty = false;
 			$imgId = $row->imgid;
 			if($this->verbose) echo '<li>Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">'.$imgId.'</a>... ';
@@ -60,10 +61,11 @@ class ImageCleaner{
 					$imgTnUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_tn.jpg';
 				}
 				else{
-					if($this->verbose) $statusStr = 'ERROR building thumbnail: '.implode('; ',$imgManager->getErrArr());
+					$this->errorStr = 'ERROR building thumbnail: '.implode('; ',$imgManager->getErrArr());
+					$status = false;
 				}
 				
-				if($imgTnUrl && $imgManager->uriExists($imgTnUrl)){
+				if($status && $imgTnUrl && $imgManager->uriExists($imgTnUrl)){
 					$webFullUrl = '';
 					$lgFullUrl = '';
 					//If web image is too large, transfer to large image and create new web image
@@ -97,29 +99,37 @@ class ImageCleaner{
 					}
 					$sql .= "WHERE ti.imgid = ".$imgId;
 					//echo $sql; 
-					if($this->conn->query($sql)){
-						if($this->verbose) $statusStr = 'Done!';
-					}
-					else{
-						if($this->verbose) $statusStr = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
+					if(!$this->conn->query($sql)){
+						$status = false;
+						$this->errorStr = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
 					}
 				}
 				$imgManager->reset();
 			}
 			else{
-				if($this->verbose){
-					$statusStr = 'ERROR: unable to parse source image ('.$imgUrl.')';
-				}
+				$status = false;
+				$this->errorStr = 'ERROR: unable to parse source image ('.$imgUrl.')';
 			}
 			ob_flush();
 			flush();
-			if($this->verbose) echo $statusStr.'</li>';
+			if($this->verbose){
+				if($status){
+					echo 'Done!</li>';
+				}
+				else{
+					echo $this->errorStr.'</li>';
+				}
+			}
 		}
 		$result->free();
 	}
 
 	public function setVerbose($verb){
 		$this->verbose = $verb;
+	}
+	
+	public function getErrorStr(){
+		return $this->errorStr;
 	}
 }
 ?>
