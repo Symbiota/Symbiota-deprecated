@@ -310,7 +310,7 @@ class SpecUploadDwca extends SpecUploadBase{
 								}
 							}
 						}					
-					}				
+					}
 				}
 				else{
 					$this->errorStr = 'ERROR: Unable to obtain core element from meta.xml';
@@ -331,13 +331,10 @@ class SpecUploadDwca extends SpecUploadBase{
 		global $charset;
 		$fullPath = $this->uploadTargetPath.$this->baseFolderName;
 		if(file_exists($fullPath)){
-			set_time_limit(7200);
-		 	ini_set("max_input_time",240);
 
 			//First, delete all records in uploadspectemp table associated with this collection
-			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
-			$this->conn->query($sqlDel);
-
+			$this->prepUploadData();
+						
 			if($this->readMetaFile() && isset($this->metaArr['occur']['fields'])){
 				$fullPath .= $this->extensionFolderName;
 				//Set parsing variables
@@ -410,32 +407,35 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->conn->query('SET autocommit=1');
 					$this->conn->query('SET unique_checks=1');
 					$this->conn->query('SET foreign_key_checks=1');
-					
-					//Do some cleanup
-					$this->cleanUpload();
+					$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->getTransferCount().' records loaded</li>');
+					ob_flush();
+					flush();
 					
 					//Upload identification history
 					if($this->includeIdentificationHistory){
-						$this->outputMsg('<li>Loading identification history extension... ');
+						$this->outputMsg('<li>Loading identification history extension... </li>');
 						//Set source array
 						foreach($this->metaArr['ident']['fields'] as $k => $v){
 							$this->identSourceArr[$k] = strtolower($v);
 						}
 						$this->uploadExtension('ident',$this->identFieldMap,$this->identSourceArr);
-						$this->outputMsg('Complete: '.$this->identTransferCount.' records loaded</li>');
+						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->identTransferCount.' records loaded</li>');
 					}
 					
 					//Upload images
 					if($this->includeImages){
-						$this->outputMsg('<li>Loading image extension... ');
+						$this->outputMsg('<li>Loading image extension... </li>');
 						//Set source array
 						foreach($this->metaArr['image']['fields'] as $k => $v){
 							$this->imageSourceArr[$k] = strtolower($v);
 						}
 						$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
-						$this->outputMsg('Complete: '.$this->imageTransferCount.' records loaded</li>');
+						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
 					}
-	
+					
+					//Do some cleanup
+					$this->cleanUpload();
+
 					if($finalTransfer){
 						$this->finalTransfer();
 					}
@@ -516,7 +516,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				}
 				$coreId = $this->metaArr[$targetStr]['coreid'];
 				
-		 		$fh = fopen($fullPathExt,'r') or die("Can't open identification history file");
+		 		$fh = fopen($fullPathExt,'r') or die("Can't open extension file");
 				
 		 		if($this->metaArr[$targetStr]['ignoreHeaderLines'] == '1'){
 		 			//Advance one record to go past header
@@ -525,7 +525,6 @@ class SpecUploadDwca extends SpecUploadBase{
 				$cset = strtolower(str_replace('-','',$charset));
 
 				$fieldMap['dbpk']['field'] = 'coreid';
-				
 				//Load data
 				while($recordArr = $this->getRecordArr($fh)){
 					$recMap = Array();

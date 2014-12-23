@@ -79,8 +79,7 @@ class SpecUploadFile extends SpecUploadBase{
 		 	ini_set("max_input_time",240);
 	
 			//First, delete all records in uploadspectemp table associated with this collection
-			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
-			$this->conn->query($sqlDel);
+			$this->prepUploadData();
 			
 			$fullPath = $this->uploadTargetPath.$this->ulFileName;
 	 		$fh = fopen($fullPath,'rb') or die("Can't open file");
@@ -112,6 +111,7 @@ class SpecUploadFile extends SpecUploadBase{
 			if(file_exists($fullPath)) unlink($fullPath);
 			
 			$this->cleanUpload();
+
 			if($finalTransfer){
 				$this->transferOccurrences();
 				$this->finalCleanup();

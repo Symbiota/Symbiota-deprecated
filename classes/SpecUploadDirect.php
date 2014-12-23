@@ -44,8 +44,7 @@ class SpecUploadDirect extends SpecUploadBase {
 		$sourceConn = $this->getSourceConnection();
 		if($sourceConn){
 			//Delete all records in uploadspectemp table
-			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
-			$this->conn->query($sqlDel);
+			$this->prepUploadData();
 			
 			echo "<li style='font-weight:bold;'>Connected to Source Database</li>";
 			set_time_limit(800);
