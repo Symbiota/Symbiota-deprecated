@@ -49,7 +49,7 @@ class SalixUtilities {
 			while($r = $rs->fetch_object()){
 				$this->countWords($statsArr, $r->f);
 				if($recCnt%($this->limit/10) == 0){
-					$this->echoStr('Count: '.$recCnt,1);
+					$this->echoStr('Record count: '.$recCnt,1);
 					ob_flush();
 					flush();
 				}
@@ -104,6 +104,9 @@ class SalixUtilities {
 	}
 
 	private function loadStats($inArr,$fieldName){
+		$this->conn->query('SET autocommit=0');
+		$this->conn->query('SET unique_checks=0');
+		$this->conn->query('SET foreign_key_checks=0');
 		foreach($inArr as $fWord => $subArr){
 			$firstWord = $this->cleanInStr($fWord);
 			foreach($subArr as $sWord => $cnt){
@@ -136,8 +139,12 @@ class SalixUtilities {
 				$rs->free();
 			}
 		}
+		$this->conn->query('COMMIT');
+		$this->conn->query('SET autocommit=1');
+		$this->conn->query('SET unique_checks=1');
+		$this->conn->query('SET foreign_key_checks=1');
 	}
-	
+
 	private function computeFrequencies(){
 		$this->echoStr('Updating stats... '.$this->conn->error);
 		$sql = 'UPDATE salixwordstats '.
