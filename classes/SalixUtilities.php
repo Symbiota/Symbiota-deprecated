@@ -4,6 +4,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 class SalixUtilities {
 
 	private $conn;
+	private	$fieldArr = array('locality', 'habitat', 'substrate', 'verbatimAttributes', 'occurrenceRemarks');
+	private $limit = 100000;
 	private $verbose = 1;
 	private $recCnt = 0;
 
@@ -31,124 +33,141 @@ class SalixUtilities {
 			flush();
 		}
 		//Build word stats
-		$limit = 50000;
 		$statsArr = array();
-		$fieldArr = array('l' => 'locality', 'h' => 'habitat', 's' => 'substrate', 'v' => 'verbatimAttributes', 'o' => 'occurrenceRemarks');
 		$totalCnt = 0;
-		$previousWordCnt = 0;
-		foreach($fieldArr as $k => $field){
+		foreach($this->fieldArr as $field){
 			$this->echoStr('Starting to collect Words for <b>'.$field.'</b>');
 			ob_flush();
 			flush();
 			$recCnt = 0;
-			$sql = 'SELECT distinct '.$field.' AS f '.
+			$sql = 'SELECT DISTINCT '.$field.' AS f '.
 				'FROM omoccurrences '.
 				'WHERE '.$field.' IS NOT NULL '.
-				'LIMIT '.$limit;
+				'ORDER BY random '.
+				'LIMIT '.$this->limit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$this->countWords($statsArr, $k, $r->f);
-				if($recCnt%($limit/10) == 0){
+				$this->countWords($statsArr, $r->f);
+				if($recCnt%($this->limit/10) == 0){
 					$this->echoStr('Count: '.$recCnt,1);
+					ob_flush();
+					flush();
+				}
+				if($recCnt && $recCnt%(20000) == 0){
+					$this->echoStr('Loading...',1);
+					ob_flush();
+					flush();
+					$this->loadStats($statsArr,$field);
+					unset($statsArr);
+					$statsArr = array();
+					$this->echoStr(' done, continuing to harvest',2);
 					ob_flush();
 					flush();
 				}
 				$recCnt++;
 			}
 			$rs->free();
+			$this->loadStats($statsArr,$field);
 			$this->echoStr('End record cnt: '.$recCnt,1);
-			$this->echoStr('Word cnt: '.(count($statsArr) - $previousWordCnt),1);
-			$previousWordCnt = count($statsArr);
+			$this->echoStr('Loading final data for '.$field,1);
 			ob_flush();
 			flush();
+			unset($statsArr);
+			$statsArr = array();
 		}
-		//Load stats into table
-		$this->echoStr('Final word cnt: '.count($statsArr));
-		$this->echoStr('Loading data');
-		$this->loadStats($statsArr);
-		$this->echoStr('Done!');
+		$this->computeFrequencies();
+		$this->echoStr('Harvesting word stats complete');
 		if($this->verbose) echo '</ul>';
 	}
 
-	private function countWords(&$statsArr, $tag, $inStr){
-		$inStr = str_replace(';',',',$inStr);
-		$fragmentArr = explode(',',$inStr);
-		foreach($fragmentArr as $str){
-			$wordArr = explode(' ',$str);
-			$prevWord = '';
-			foreach($wordArr as $word){
-				$cleanWord = $this->cleanWord($word);
-				if($cleanWord){
-					if(strlen($cleanWord) > 2){
-						$firstCnt = 0;
-						if(isset($statsArr[$cleanWord][$tag])) $firstCnt = $statsArr[$cleanWord][$tag];
-						$statsArr[$cleanWord][$tag] = ++$firstCnt;
-					}
-					if($prevWord){
-						$secondCnt = 0;
-						if(isset($statsArr[$prevWord][$cleanWord][$tag])) $secondCnt = $statsArr[$prevWord][$cleanWord][$tag];
-						$statsArr[$prevWord][$cleanWord][$tag] = ++$secondCnt;
-					}
+	private function countWords(&$statsArr, $inStr){
+		$inStr = str_replace(array(';',','),' ',$inStr);
+		$inStr = preg_replace('/\s\s+/', ' ',$inStr);
+		$wordArr = explode(' ',$inStr);
+		$prevWord = '';
+		foreach($wordArr as $word){
+			$cleanWord = $this->cleanWord($word);
+			if($cleanWord){
+				if(strlen($cleanWord) > 2){
+					$firstCnt = 0;
+					if(isset($statsArr[$cleanWord])) $firstCnt = $statsArr[$cleanWord][''];
+					$statsArr[$cleanWord][''] = ++$firstCnt;
 				}
-				$prevWord = $cleanWord;
+				if($prevWord){
+					$secondCnt = 0;
+					if(isset($statsArr[$prevWord][$cleanWord])) $secondCnt = $statsArr[$prevWord][$cleanWord];
+					$statsArr[$prevWord][$cleanWord] = ++$secondCnt;
+				}
 			}
+			$prevWord = $cleanWord;
 		}
 	}
 
-	private function loadStats($inArr,$firstWordIn = ''){
-		$firstWord = ''; $secondWord = '';
-		if($firstWordIn) $firstWord = $this->cleanInStr($firstWordIn);
-		foreach($inArr as $word => $subArr){
-			if($firstWordIn){
-				$secondWord = $this->cleanInStr($word);
-			}
-			else{
-				$firstWord = $this->cleanInStr($word);
-			}
-			if(strlen($firstWord) < 46 && strlen($secondWord) < 46){
-				$locCnt = (isset($subArr['l'])?$subArr['l']:0);
-				$habCnt = (isset($subArr['h'])?$subArr['h']:0);
-				$subCnt = (isset($subArr['s'])?$subArr['s']:0);
-				$attCnt = (isset($subArr['v'])?$subArr['v']:0);
-				$remCnt = (isset($subArr['o'])?$subArr['o']:0);
-				$cnt = $locCnt + $habCnt + $subCnt + $attCnt + $remCnt;
-				if($cnt){
-					$locPer = round($locCnt/$cnt,2)*100;
-					$habPer = round($habCnt/$cnt,2)*100;
-					$subPer = round($subCnt/$cnt,2)*100;
-					$attPer = round($attCnt/$cnt,2)*100;
-					$remPer = round($remCnt/$cnt,2)*100;
-					$sql = 'INSERT INTO salixwordstats(firstword,secondword,locality,localityFreq,habitat,habitatFreq,substrate,substrateFreq,verbatimAttributes,verbatimAttributesFreq,occurrenceRemarks,occurrenceRemarksFreq,totalcount) '.
-						'VALUES("'.$firstWord.'",'.($secondWord?'"'.$secondWord.'"':'NULL').','.
-						$locCnt.','.$locPer.','.$habCnt.','.$habPer.','.$subCnt.','.$subPer.','.$attCnt.','.$attPer.','.$remCnt.','.$remPer.','.$cnt.')';
-					if($this->conn->query($sql)){
-						if($this->recCnt%10000 == 0){
-							$this->echoStr('Count: '.$this->recCnt,1);
-							ob_flush();
-							flush();
-						}
-						$this->recCnt++;
-					}
-					else{
-						//$this->echoStr('ERROR loading word ('.$firstWord.' - '.$secondWord.'): '.$this->conn->error);
-						//echo $sql;
+	private function loadStats($inArr,$fieldName){
+		foreach($inArr as $fWord => $subArr){
+			$firstWord = $this->cleanInStr($fWord);
+			foreach($subArr as $sWord => $cnt){
+				$secondWord = $this->cleanInStr($sWord);
+				$sql = 'SELECT '.$fieldName.' AS cnt FROM salixwordstats '.
+					'WHERE firstword = "'.$firstWord.'" AND secondword '.($secondWord?'= "'.$secondWord.'"':'IS NULL');
+				$rs = $this->conn->query($sql);
+				if($r = $rs->fetch_object()){
+					$newCnt = $r->cnt + $cnt;
+					$sql1 = 'UPDATE salixwordstats '.
+						'SET '.$fieldName.' = '.$newCnt.' '.
+						'WHERE firstword = "'.$firstWord.'" AND secondword '.($secondWord?'= "'.$secondWord.'"':'IS NULL');
+					if(!$this->conn->query($sql1)){
+						$this->echoStr('ERROR updating record: '.$this->conn->error,1);
+						echo $sql1.'<br/>';
+						ob_flush();
+						flush();
 					}
 				}
-				unset($subArr['l']);
-				unset($subArr['h']);
-				unset($subArr['s']);
-				unset($subArr['v']);
-				unset($subArr['o']);
-				if(!$secondWord) $this->loadStats($subArr,$firstWord);
+				else{
+					$sql2 = 'INSERT INTO salixwordstats(firstword,secondword,'.$fieldName.') '.
+						'VALUES("'.$firstWord.'",'.($secondWord?'"'.$secondWord.'"':'NULL').','.$cnt.')';
+					if(!$this->conn->query($sql2)){
+						$this->echoStr('ERROR inserting record: '.$this->conn->error,1);
+						echo $sql2.'<br/>';
+						ob_flush();
+						flush();
+					}
+				}
+				$rs->free();
 			}
 		}
 	}
 	
+	private function computeFrequencies(){
+		$this->echoStr('Updating stats... '.$this->conn->error);
+		$sql = 'UPDATE salixwordstats '.
+			'SET totalcount = (locality + habitat + substrate + verbatimAttributes + occurrenceRemarks)';
+		if(!$this->conn->query($sql)){
+			$this->echoStr('ERROR updating totalcount value: '.$this->conn->error,1);
+			echo $sql.'<br/>';
+			ob_flush();
+			flush();
+		}
+		//Update field frequencies
+		foreach($this->fieldArr as $field){
+			$sql1 = 'UPDATE salixwordstats '.
+				'SET '.$field.'freq = ('.$field.' * 100 / totalcount)';
+			if(!$this->conn->query($sql1)){
+				$this->echoStr('ERROR updating '.$field.' frequency: '.$this->conn->error,1);
+				echo $sql1.'<br/>';
+				ob_flush();
+				flush();
+			}
+		}
+		$this->echoStr('Done!'.$this->conn->error,1);
+	}
+	
 	public function cleanWord($w){
-		if(preg_match('/\d+/',$w)) return '';
-		$w = trim($w,' ,;().');
-		if(strlen($w) < 2) return '';
-		return strtolower($w);
+		$w = strtolower(trim($w));
+		$w = trim($w,'-');
+		if(preg_match('/[^\-a-z]+/',$w)) return '';
+		if(strlen($w) > 45) return '';
+		return $w;
 	}
 	
 	//Setters and getters
