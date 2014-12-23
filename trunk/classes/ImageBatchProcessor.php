@@ -878,7 +878,7 @@ class ImageBatchProcessor {
 		$occId = 0;
 		//Check to see if record with pk already exists
 		$sql = 'SELECT occid FROM omoccurrences '.
-			'WHERE (catalognumber IN("'.$specPk.'"'.(is_numeric($specPk)?',"'.ltrim($specPk,'0 ').'"':'').')) '.
+			'WHERE (catalognumber IN("'.$specPk.'"'.(substr($specPk,0,1)=='0'?',"'.ltrim($specPk,'0 ').'"':'').')) '.
 			'AND (collid = '.$this->activeCollid.')';
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
@@ -1230,7 +1230,7 @@ class ImageBatchProcessor {
 							$sql = 'SELECT occid'.(!array_key_exists('occurrenceremarks',$recMap)?',occurrenceremarks':'').
 								($activeFields?','.implode(',',$activeFields):'').' '.
 								'FROM omoccurrences '.
-								'WHERE collid = '.$this->activeCollid.' AND (catalognumber IN("'.$catNum.'"'.(is_numeric($catNum)?',"'.ltrim($catNum,"0 ").'"':'').')) ';
+								'WHERE collid = '.$this->activeCollid.' AND (catalognumber IN("'.$catNum.'"'.(substr($catNum,0,1)=='0'?',"'.ltrim($catNum,"0 ").'"':'').')) ';
 							//echo $sql;
 							$rs = $this->conn->query($sql);
 							if($r = $rs->fetch_assoc()){

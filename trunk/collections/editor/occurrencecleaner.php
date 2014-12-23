@@ -8,6 +8,7 @@ $obsUid = array_key_exists('obsuid',$_REQUEST)?$_REQUEST['obsuid']:'';
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $function = array_key_exists('fn',$_REQUEST)?$_REQUEST['fn']:'';
 $start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
+$limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:200;
 
 if(!$symbUid){
 	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrencecleaner.php?'.$_SERVER['QUERY_STRING']);
@@ -30,7 +31,6 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 	$cleanManager->setObsUid($obsUid);
 }
 
-$limit = 200;
 if($action == 'listdupscatalog') $limit = 500;
 
 $dupArr = array();

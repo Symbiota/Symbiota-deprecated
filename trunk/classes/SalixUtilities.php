@@ -43,7 +43,7 @@ class SalixUtilities {
 			$sql = 'SELECT DISTINCT '.$field.' AS f '.
 				'FROM omoccurrences '.
 				'WHERE '.$field.' IS NOT NULL '.
-				'ORDER BY random '.
+				'ORDER BY rand() '.
 				'LIMIT '.$this->limit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){

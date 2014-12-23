@@ -102,7 +102,11 @@ if(array_key_exists("sf",$_POST)){
 	 		$sourceIdFields = $_POST["ID-sf"];
 	 		$fieldIdMap = Array();
 			for($x = 0;$x<count($targetIdFields);$x++){
-				if($targetIdFields[$x]) $fieldIdMap[$targetIdFields[$x]]["field"] = $sourceIdFields[$x];
+				if($targetIdFields[$x]){
+					$tIdField = $targetIdFields[$x];
+					if($tIdField == 'unmapped') $tIdField .= '-'.$x;
+					$fieldIdMap[$tIdField]["field"] = $sourceIdFields[$x];
+				}
 			}
  			$duManager->setIdentFieldMap($fieldIdMap);
 		}
@@ -112,7 +116,11 @@ if(array_key_exists("sf",$_POST)){
 	 		$sourceImFields = $_POST["IM-sf"];
 	 		$fieldImMap = Array();
 			for($x = 0;$x<count($targetImFields);$x++){
-				if($targetImFields[$x]) $fieldImMap[$targetImFields[$x]]["field"] = $sourceImFields[$x];
+				if($targetImFields[$x]){
+					$tImField = $targetImFields[$x];
+					if($tImField == 'unmapped') $tImField .= '-'.$x;
+					$fieldImMap[$tImField]["field"] = $sourceImFields[$x];
+				}
 			}
  			$duManager->setImageFieldMap($fieldImMap);
 		}
@@ -193,47 +201,55 @@ $duManager->loadFieldMap();
 			for(var i=0;i<f.length;i++){
 				var obj = f.elements[i];
 				if(obj.name == "sf[]"){
-					if(sfArr.indexOf(obj.value) > 0){
+					if(sfArr.indexOf(obj.value) > -1){
 						alert("ERROR: Source field names must be unique (duplicate field: "+obj.value+")");
 						return false;
 					}
 					sfArr[sfArr.length] = obj.value;
 				}
 				else if(obj.name == "ID-sf[]"){
-					if(idSfArr.indexOf(obj.value) > 0){
-						alert("ERROR: Source field names must be unique (Identification: "+obj.value+")");
-						return false;
+					if(f.importident.value == "1"){
+						if(idSfArr.indexOf(obj.value) > -1){
+							alert("ERROR: Source field names must be unique (Identification: "+obj.value+")");
+							return false;
+						}
+						idSfArr[idSfArr.length] = obj.value;
 					}
-					idSfArr[idSfArr.length] = obj.value;
 				}
 				else if(obj.name == "IM-sf[]"){
-					if(imSfArr.indexOf(obj.value) > 0){
-						alert("ERROR: Source field names must be unique (Image: "+obj.value+")");
-						return false;
+					if(f.importimage.value == "1"){
+						if(imSfArr.indexOf(obj.value) > -1){
+							alert("ERROR: Source field names must be unique (Image: "+obj.value+")");
+							return false;
+						}
+						imSfArr[imSfArr.length] = obj.value;
 					}
-					imSfArr[imSfArr.length] = obj.value;
 				}
 				else if(obj.value != "" && obj.value != "unmapped"){
 					if(obj.name == "tf[]"){
-						if(tfArr.indexOf(obj.value) > 0){
+						if(tfArr.indexOf(obj.value) > -1){
 							alert("ERROR: Can't map to the same target field more than once ("+obj.value+")");
 							return false;
 						}
 						tfArr[tfArr.length] = obj.value;
 					}
 					else if(obj.name == "ID-tf[]"){
-						if(idTfArr.indexOf(obj.value) > 0){
-							alert("ERROR: Can't map to the same target field more than once (Identification: "+obj.value+")");
-							return false;
+						if(f.importident.value == "1"){
+							if(idTfArr.indexOf(obj.value) > -1){
+								alert("ERROR: Can't map to the same target field more than once (Identification: "+obj.value+")");
+								return false;
+							}
+							idTfArr[idTfArr.length] = obj.value;
 						}
-						idTfArr[idTfArr.length] = obj.value;
 					}
 					else if(obj.name == "IM-tf[]"){
-						if(imTfArr.indexOf(obj.value) > 0){
-							alert("ERROR: Can't map to the same target field more than once (Images: "+obj.value+")");
-							return false;
+						if(f.importimage.value == "1"){
+							if(imTfArr.indexOf(obj.value) > -1){
+								alert("ERROR: Can't map to the same target field more than once (Images: "+obj.value+")");
+								return false;
+							}
+							imTfArr[imTfArr.length] = obj.value;
 						}
-						imTfArr[imTfArr.length] = obj.value;
 					}
 				}
 			}
@@ -341,7 +357,7 @@ $duManager->loadFieldMap();
 						?>
 					</div>
  					<div style="margin:25px;font-weight:bold;"> 
-						<a href="uploadviewer.php?collid=<?php echo $collId;?>" target="_blank">Click to Review Records</a>  
+						<a href="uploadviewer.php?collid=<?php echo $collId;?>" target="_blank">Click to review specimen records</a>  
 					</div>
 					<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
 	 					<input type="hidden" name="collid" value="<?php echo $collId;?>" /> 
@@ -441,7 +457,7 @@ $duManager->loadFieldMap();
 						$metaArr = $duManager->getMetaArr();
 						if(isset($metaArr['occur'])){
 							?>
-							<form name="dwcauploadform" action="specupload.php" method="post" onsubmit="">
+							<form name="dwcauploadform" action="specupload.php" method="post" onsubmit="return verifyMappingForm(this)">
 								<fieldset style="width:95%;">
 									<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?></legend>
 									<div style="margin:10px;">
@@ -526,7 +542,7 @@ $duManager->loadFieldMap();
 											<div>
 												<?php 
 												if($isLiveData){
-													echo '<div style="margin:10px 0px;">';
+													echo '<div style="margin:30px 0px 10px 0px;">';
 													echo '<input name="matchcatnum" type="checkbox" value="1" checked /> ';
 													echo 'Match on Catalog Number (Note: matching records will be replaced with incoming records)';
 													echo '</div>';

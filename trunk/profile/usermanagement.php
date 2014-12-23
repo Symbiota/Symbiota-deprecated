@@ -327,9 +327,11 @@ if($isAdmin){
 												$clList = $userPermissions["ClAdmin"];
 												asort($clList);
 												foreach($clList as $k => $v){
+													$name = '&lt;resource deleted&gt;';
+													if(isset($v['name'])) $name = $v['name'];
 													echo '<li>';
 													echo '<a href="../checklists/checklist.php?cl='.$k.'">';
-													echo '<span title="'.$v['aby'].'">'.$v['name'].'</span>';
+													echo '<span title="'.$v['aby'].'">'.$name.'</span>';
 													echo '</a>';
 													echo "<a href='usermanagement.php?delrole=ClAdmin&tablepk=$k&userid=$userId'>";
 													echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";

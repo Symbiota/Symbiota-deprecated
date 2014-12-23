@@ -332,18 +332,18 @@ class SpecUpload{
 					if(substr($serverRoot,-1) != '/' && substr($serverRoot,-1) != '\\') $logPath .= '/';
 					$logPath .= "temp/logs/dataupload_".date('Ymd').".log";
 					$this->logFH = fopen($logPath, 'a');
-					$this->outputMsg("Start time: ".date('Y-m-d h:i:s A'));
+					fwrite($this->logFH,"Start time: ".date('Y-m-d h:i:s A')."\n");
 				}
 			}
 		}
 	}
 
-	protected function outputMsg($str){
+	protected function outputMsg($str, $indent = 0){
 		if($this->verboseMode == 1){
 			echo $str;
 		}
 		elseif($this->verboseMode == 2){
-			if($this->logFH) fwrite($this->logFH,strip_tags($str)."\n");
+			if($this->logFH) fwrite($this->logFH,($indent?str_repeat("\t",$indent):'').strip_tags($str)."\n");
 		}
 	}
 	
