@@ -200,10 +200,22 @@ class ImageShared{
 	public function parseUrl($url){
 		$status = false;
 		$url = str_replace(' ','%20',$url);
-		if($this->uriExists($url)){
-			if($GLOBALS['imageDomain'] && substr($url,0,1) == '/'){
+		//If image is relative, add proper domain
+		if(substr($url,0,1) == '/'){
+			if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
 				$url = $GLOBALS['imageDomain'].$url;
-	    	}
+			}
+			else{
+				//Use local domain
+				$urlPrefix = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				$urlPrefix .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+				$url = $urlPrefix.$url;
+			}
+		}
+
+		if($this->uriExists($url)){
 			$this->sourcePath = $url;
 	    	$this->imgName = $this->cleanFileName($url);
 			//$this->testOrientation();
