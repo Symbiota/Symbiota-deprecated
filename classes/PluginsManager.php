@@ -224,7 +224,8 @@ class PluginsManager {
 		foreach($imageArr as $igmAr => $imgIdArr){ 
 			$imgSize = '';
 			if($imgIdArr["width"] > $imgIdArr["height"]){
-				$imgSize = 'height:'.$imageHeight.'px;';
+				$offSet = (($imgIdArr["width"]/$imgIdArr["height"])*$imageHeight)/2;
+				$imgSize = 'height:'.$imageHeight.'px;position:absolute;left:50%;margin-left:-'.$offSet.'px;';
 			}
 			else{
 				$imgSize = 'width:'.$width.'px;';
@@ -243,7 +244,7 @@ class PluginsManager {
 			$html .= '<img src="'.$imgIdArr["url"].'" style="'.$imgSize.'" alt="'.($imgIdArr["occsciname"]?$imgIdArr["occsciname"]:$imgIdArr["SciName"]).'">';
 			$html .= '</a>';
 			$html .= '</div>';
-			$html .= '<div style="position:absolute;bottom:0;background-color:rgba(255,255,255,0.8);"><b>';
+			$html .= '<div style="position:absolute;bottom:0;font-size:12px;background-color:rgba(255,255,255,0.8);"><b>';
 			if($imgIdArr["SciName"] || $imgIdArr["identifier"]){
 				$html .= '<a href="'.$linkUrl.'" target="_blank">';
 				$html .= ($imgIdArr["identifier"]?$imgIdArr["identifier"]:$imgIdArr["SciName"]);
