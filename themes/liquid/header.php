@@ -1,0 +1,105 @@
+<table id="maintable" cellspacing="0">
+	<tr>
+		<td class="header" colspan="3">
+			<!-- <div style="height:110px;background-image:url(<?php //echo $clientRoot; ?>/images/layout/defaultheader.jpg);background-repeat:no-repeat;position:relative;"> -->
+			<div style="clear:both;">
+				<div style="clear:both;">
+					<img style="" src="<?php echo $clientRoot; ?>/images/layout/defaultheader.jpg" />
+				</div>
+			</div>
+			<div style="clear:both;height:24px;">
+				<div style="clear:both;float:right;color:#000000;margin-top:10px;"
+					<?php
+					if($userDisplayName){
+					?>
+						<span style="">
+							Welcome <?php echo $userDisplayName; ?>!
+						</span>
+						<span style="margin-left:5px;">
+							<a href="<?php echo $clientRoot; ?>/profile/viewprofile.php">My Profile</a>
+						</span>
+						<span style="margin-left:5px;">
+							<a href="<?php echo $clientRoot; ?>/profile/index.php?submit=logout">Logout</a>
+						</span>
+					<?php
+					}
+					else{
+					?>
+						<span style="">
+							<a href="<?php echo $clientRoot."/profile/index.php?refurl=".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">
+								Log In
+							</a>
+						</span>
+						<span style="margin-left:5px;">
+							<a href="<?php echo $clientRoot; ?>/profile/newprofile.php">
+								New Account
+							</a>
+						</span>
+					<?php
+					}
+					?>
+					<span style="margin-left:5px;margin-right:5px;">
+						<a href='<?php echo $clientRoot; ?>/sitemap.php'>Sitemap</a>
+					</span>
+					
+				</div>
+				<div style="height:32px;">
+					<ul id="hor_dropdown">
+						<li>
+							<a href="<?php echo $clientRoot; ?>/index.php" >Home</a>
+						</li>
+						<li>
+							<a href="<?php echo $clientRoot; ?>/collections/index.php" >Search Collections</a>
+						</li>
+						<li>
+							<a href="<?php echo $clientRoot; ?>/collections/map/mapinterface.php" target="_blank">Map Search</a>
+						</li>
+						<li>
+							<a href="<?php echo $clientRoot; ?>/imagelib/imgsearch.php" >Image Search</a>
+						</li>
+						<li>
+							<a href="<?php echo $clientRoot; ?>/imagelib/index.php" >Browse Images</a>
+						</li>
+						<li>
+							<a href="<?php echo $clientRoot; ?>/projects/index.php?" >Inventories</a>
+							<!-- <ul>
+								<li>
+									<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=1" >Project 1</a>
+								</li>
+								<li>
+									<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=2" >Project 2</a>
+								</li>
+								<li>
+									<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=3" >Project 3</a>
+								</li>
+								<li>
+									<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=4" >Project 4</a>
+								</li>
+							</ul> -->
+						</li>
+						<li>
+							<a href="#" >Interactive Tools</a>
+							<!-- <ul>
+								<li>
+									<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist&tid=1" >Dynamic Checklist 1</a>
+								</li>
+								<li>
+									<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist&tid=2" >Dynamic Checklist 2</a>
+								</li>
+								<li>
+									<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist&tid=3" >Dynamic Checklist 3</a>
+								</li>
+								<li>
+									<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist&tid=4" >Dynamic Checklist 4</a>
+								</li>
+							</ul> -->
+						</li>
+					</ul>
+				</div>
+			</div>
+		</td>
+	</tr>
+    <tr>
+		<td class='middlecenter'  colspan="3">
+
+		

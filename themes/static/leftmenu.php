@@ -10,7 +10,7 @@
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/collections/map/mapinterface.php">
+		<a href="<?php echo $clientRoot; ?>/collections/map/mapinterface.php" target="_blank">
 			Map Search
 		</a>
 	</div>
