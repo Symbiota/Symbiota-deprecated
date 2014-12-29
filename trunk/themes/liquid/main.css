@@ -1,0 +1,240 @@
+/* Modify styles within this file to override styles within base.css file 
+ * 
+ **/
+body{
+	width: 80%;
+	min-width:950px;
+	margin-top:0px;
+}
+
+/*Main table framework*/
+#maintable{
+	width: 100%;
+	background-color:#FFFFFF;
+	border:1px solid #333333;
+}
+
+#maintable td{
+
+}
+
+td.header{
+	color:#FFFFFF;
+	background-color:#026B6E;
+	text-align:left;
+	padding:0px;
+}
+
+td.header a{
+
+}
+
+td.header a:hover{
+
+}
+
+td.middleleft{
+}
+
+td.middleleftnomenu{
+}
+
+td.middlecenter{
+	padding:10px;
+	padding-top:15px;
+}
+
+td.middleright{
+}
+
+td.footer{
+}
+
+/*Left menu components*/
+div.menu {
+	background-color:   white;
+	margin:				15px;
+	border:   			1px solid #CCCCFF;
+	padding-bottom:   	25px;
+	overflow:   		hidden;
+	width:   			150px;
+	border-radius:		0.5em 0.5em 1.5em 0.5em;
+	-moz-border-radius:	0.5em 0.5em 1.5em 0.5em;
+	-khtml-border-radius: 0.5em 0.5em 1.5em 0.5em;
+}
+
+div.menuheader{
+	background-color:   #C0C0C0;
+	font-family:   		Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size:   		13px;
+	color:   			white;
+	overflow:   		hidden;
+	text-align:   		center;
+	padding:   			3px;
+	margin:			   	0px; 
+}
+
+div.menuheader a{
+
+}
+
+div.menuheader a:hover {
+
+}
+
+div.menusubheader{
+
+}
+
+div.menusubheader a{
+
+}
+
+div.menusubheader a:hover {
+
+}
+
+div.menuitem {
+
+}
+
+div.menuitem a {
+	color: #669999;
+}
+
+div.menuitem a:hover {
+	color: 	#00008B;
+}
+
+/*Central div in the middle center table div */
+#innertext{
+	width:90%;
+	min-height:400px;
+	margin-top:8px;
+	margin-left:auto;
+	margin-right:auto;
+	margin-bottom:0px;
+}
+
+#innertext a{
+
+}
+#innertext a:hover{
+
+}
+
+/* Image thumbnails   */
+div.tndiv{
+
+}
+
+div.tnimg{
+
+}
+
+div.tnimg a{
+
+}
+
+div.tnimg img{
+
+}	
+
+/*Misc general items*/
+table{
+
+}
+
+h1{
+
+}
+
+h2{
+
+}
+
+h3{
+
+}
+
+ul#hor_dropdown{
+	width:auto;
+	margin:0;
+	padding:10px;
+	list-style:none;
+	background-image:url(images/menu_pri_background.jpg);
+	background-repeat:repeat-x;
+	background-position:bottom;
+	background-color:#FFFFFF;
+	text-align:left;
+	white-space:nowrap;
+}
+ul#hor_dropdown li{		
+	padding:0;
+	margin:0;
+	display:inline;
+}
+ul#hor_dropdown li a{
+	color:#000000;
+	text-decoration:none;
+	padding:10px;
+	background-image: url(images/menu-item_divider.jpg);
+    background-repeat: no-repeat;
+    background-position: right bottom;
+}
+ul#hor_dropdown li a.selected{
+	color:#C5EAB8;
+	background-color:#37533A;
+	text-decoration:none;
+	padding:10px;
+	background-image:none;
+}
+ul#hor_dropdown li a.selected:hover{
+	color:#C5EAB8;
+	background-color:#37533A;
+	padding:10px;
+	background-image:none;
+}
+ul#hor_dropdown li a.home_selected{
+	color:#999999;
+	padding:10px;
+	background-image:none;
+}
+ul#hor_dropdown li a:hover{
+	background-color:#999999;
+	color:#FFFFFF;
+	padding:10px;
+	background-image:none;
+}
+/* Submenu */
+ul#hor_dropdown ul {
+	position:absolute;
+	left:-9999px;
+	top:-9999px;
+	list-style-type:none;
+	background-image:url(images/menu_pri_background.jpg);
+	background-repeat:repeat-x;
+	background-position:bottom;
+	background-color:#FFFFFF;
+	z-index:1000;
+}
+ul#hor_dropdown li:hover { position:relative; }
+ul#hor_dropdown li:hover ul {
+	left:0px;
+	top:22px;
+	padding:0px;
+	z-index:1000;
+}
+
+ul#hor_dropdown li:hover ul li a {
+	padding:5px;
+	display:block;
+	text-indent:8px;
+	padding-right:8px;
+	background-image:url(images/menu_pri_background.jpg);
+	background-repeat:repeat-x;
+	background-position:bottom;
+	background-color:#FFFFFF;
+	z-index:1000;
+}
+ul#hor_dropdown li:hover ul li a:hover { background:#999999; }
