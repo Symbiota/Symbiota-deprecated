@@ -7,6 +7,7 @@ Design layout files:
 	/leftmenu.php
 	/footer.php
 	/index.php
-	/css/main.css		
+	/css/main.css	
+	/css/jquery-ui.css
 	/css/speciesprofile.css
 
