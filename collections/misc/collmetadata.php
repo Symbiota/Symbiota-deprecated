@@ -7,6 +7,7 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/m
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
+
 $statusStr = '';
 
 $collManager = new CollectionProfileManager();
@@ -27,14 +28,14 @@ elseif($collid){
 
 if($isEditor){
 	if($action == 'Save Edits'){
-		$statusStr = $collManager->submitCollEdits();
+		$statusStr = $collManager->submitCollEdits($_POST);
 		if($statusStr == true){
 			header('Location: collprofiles.php?collid='.$collid);
 		}
 	}
 	elseif($action == "Create New Collection"){
 		if($IS_ADMIN){
-			$newCollid = $collManager->submitCollAdd();
+			$newCollid = $collManager->submitCollAdd($_POST);
 			if(is_numeric($newCollid)){
 				$statusStr = 'New collection added successfully! <br/>Click <a href="../admin/specuploadmanagement.php?collid='.$newCollid.'&action=addprofile">here</a> to upload specimen records for this new collection.';
 				header('Location: collprofiles.php?collid='.$newCollid);
@@ -44,8 +45,18 @@ if($isEditor){
 			}
 		}
 	}
+	elseif($action == 'Link Address'){
+		if(!$collManager->linkAddress($_POST['iid'])){
+			$statusStr = $collManager->getErrorStr();
+		}
+	}
+	elseif(array_key_exists('removeiid',$_GET)){
+		if(!$collManager->removeAddress($_GET['removeiid'])){
+			$statusStr = $collManager->getErrorStr();
+		}
+	}
 }
-$collData = $collManager->getCollectionData(1);
+$collData = $collManager->getCollectionData(true);
 ?>
 <html>
 <head>
@@ -108,6 +119,14 @@ $collData = $collManager->getCollectionData(1);
 			return true;
 		}
 
+		function verifyAddAddressForm(f){
+			if(f.iid.value == ""){
+				alert("Select an institution to be linked");
+				return false;
+			}
+			return true;
+		}
+
 		function isNumeric(sText){
 		   	var ValidChars = "0123456789-.";
 		   	var IsNumber = true;
@@ -167,9 +186,9 @@ $collData = $collManager->getCollectionData(1);
 			}
 			?>
 			<div id="colledit">
-				<form id="colleditform" name="colleditform" action="collmetadata.php" method="post" onsubmit="return verifyCollEditForm(this)">
-					<fieldset style="background-color:#FFF380;">
-						<legend><b><?php echo ($collid?'Edit':'Add New'); ?> Collection Information</b></legend>
+				<fieldset style="background-color:#FFF380;">
+					<legend><b><?php echo ($collid?'Edit':'Add New'); ?> Collection Information</b></legend>
+					<form id="colleditform" name="colleditform" action="collmetadata.php" method="post" onsubmit="return verifyCollEditForm(this)">
 						<table style="width:100%;">
 							<tr>
 								<td>
@@ -207,41 +226,6 @@ $collData = $collManager->getCollectionData(1);
 								</td>
 								<td>
 									<input type="text" name="collectionname" value="<?php echo ($collid?$collData["collectionname"]:'');?>" style="width:95%;" title="Required field" />
-								</td>
-							</tr>
-							<tr>
-								<td>
-									Mailing Address: 
-								</td>
-								<td>
-									<?php 
-									$instArr = $collManager->getInstitutionArr();
-									?>
-									<select name="iid" style="width:450px;">
-										<option value="">Select Institution</option>
-										<option value="">-----------------------</option>
-										<?php 
-										foreach($instArr as $iid => $name){
-											echo '<option value="'.$iid.'" '.($collid && $collData["iid"] == $iid?'SELECTED':'').'>'.$name.'</option>';
-										}
-										?>
-									</select>
-									<?php
-									if($collid && $collData["iid"]){ 
-										?>
-										<span>
-											<a href="../admin/institutioneditor.php?emode=1&iid=<?php echo $collData["iid"]; ?>" target="_blank" title="Edit institution currently linked to this collection">
-												<img src="../../images/edit.png" style="width:15px;" />
-											</a>
-										</span>
-										<?php 
-									}
-									?>
-									<span>
-										<a href="../admin/institutioneditor.php?emode=1&instcode=<?php echo ($collid?$collData["collectioncode"]:''); ?>" target="_blank" title="Add a New Institution">
-											<img src="../../images/add.png" style="width:15px;" />
-										</a>
-									</span>
 								</td>
 							</tr>
 							<tr>
@@ -606,8 +590,77 @@ $collData = $collManager->getCollectionData(1);
 								</td>
 							</tr>
 						</table>
-					</fieldset>
-				</form>
+					</form>
+				</fieldset>
+			</div>
+			<div>
+				<fieldset style="background-color:#FFF380;">
+					<legend><b>Mailing Address</b></legend>
+					<?php
+					$instArr = $collManager->getAddresses();
+					if($instArr){
+						//Edit or remove address
+						$cnt = 0;
+						foreach($instArr as $iid => $iArr){
+							?>
+							<div style="margin:25px;">
+								<?php 
+								echo '<div>';
+								echo $iArr['institutionname'].($iArr['institutioncode']?' ('.$iArr['institutioncode'].')':'');
+								?>
+								<a href="../admin/institutioneditor.php?emode=1&targetcollid=<?php echo $collid.'&iid='.$iid; ?>" title="Edit institution address">
+									<img src="../../images/edit.png" style="width:14px;" />
+								</a>
+								<a href="collmetadata.php?collid=<?php echo $collid.'&removeiid='.$iid; ?>" title="Unlink institution address">
+									<img src="../../images/drop.png" style="width:14px;" />
+								</a>
+								<?php 
+								echo '</div>';
+								if($iArr['address1']) echo '<div>'.$iArr['address1'].'</div>';
+								if($iArr['address2']) echo '<div>'.$iArr['address2'].'</div>';
+								if($iArr['city'] || $iArr['stateprovince']) echo '<div>'.$iArr['city'].', '.$iArr['stateprovince'].' '.$iArr['postalcode'].'</div>';
+								if($iArr['country']) echo '<div>'.$iArr['country'].'</div>';
+								if($iArr['phone']) echo '<div>'.$iArr['phone'].'</div>';
+								if($iArr['contact']) echo '<div>'.$iArr['contact'].'</div>';
+								if($iArr['email']) echo '<div>'.$iArr['email'].'</div>';
+								if($iArr['url']) echo '<div><a href="'.$iArr['url'].'">'.$iArr['url'].'</a></div>';
+								if($iArr['notes']) echo '<div>'.$iArr['notes'].'</div>';
+								?>
+							</div>
+							<?php 
+							if($cnt) echo '<hr/>';
+							$cnt++;
+						}
+					}
+					else{
+						//Link new institution
+						?>
+						<div style="margin:40px;"><b>No addesses linked</b></div>
+						<div style="margin:20px;">
+							<form name="addaddressform" action="collmetadata.php" method="post" onsubmit="return verifyAddAddressForm(this)">
+								<select name="iid" style="width:425px;">
+									<option value="">Select Institution Address</option>
+									<option value="">------------------------------------</option>
+									<?php 
+									$addrArr = $collManager->getInstitutionArr();
+									foreach($addrArr as $iid => $name){
+										echo '<option value="'.$iid.'">'.$name.'</option>';
+									}
+									?>
+								</select>
+								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+								<input name="action" type="submit" value="Link Address" />
+							</form>
+							<div style="margin:15px;">
+								<a href="../admin/institutioneditor.php?emode=1&targetcollid=<?php echo $collid; ?>" title="Add a new address not on the list">
+									<b>Add an institution not on list</b>
+								</a>
+							</div>
+						</div>
+						<?php 
+					}
+					?>
+				</fieldset>
 			</div>
 			<?php
 		}

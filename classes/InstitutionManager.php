@@ -6,7 +6,8 @@ class InstitutionManager {
 
 	private $conn;
 	private $iid;
-	private $collId;
+	private $collid;
+	private $errorStr;
 	
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -16,29 +17,25 @@ class InstitutionManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function getInstitutionData($iid){
-		$returnArr = Array();
-		$sql = 'SELECT iid, institutioncode, institutionname, institutionname2, address1, address2, city, '.
-			'stateprovince, postalcode, country, phone, contact, email, url, notes '.
-			'FROM institutions ';
-		if($iid) $sql .= 'WHERE iid = '.$iid.' '; 
-		$sql .= 'ORDER BY institutionname,institutioncode';
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_assoc()){
-			$returnArr[$row['iid']] = $this->cleanOutArr($row);
+	public function getInstitutionData(){
+		$retArr = Array();
+		if($this->iid){
+			$sql = 'SELECT iid, institutioncode, institutionname, institutionname2, address1, address2, city, '.
+				'stateprovince, postalcode, country, phone, contact, email, url, notes '.
+				'FROM institutions '.
+				'WHERE iid = '.$this->iid;
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_assoc()){
+				$retArr = $this->cleanOutArr($row);
+			}
+			$rs->free();
 		}
-		$rs->close();
-		if($iid){
-			return $returnArr[$iid];
-		}
-		else{
-			return $returnArr;
-		}
+		return $retArr;
 	}
 
 	public function submitInstitutionEdits($postData){
-		$statusStr = '';
+		$status = true;
 		if($postData['institutioncode'] && $postData['institutionname']){
 			$sql = 'UPDATE institutions SET '.
 				'institutioncode = "'.$this->cleanInStr($postData['institutioncode']).'",'.
@@ -58,14 +55,15 @@ class InstitutionManager {
 				'WHERE iid = '.$postData['iid'];
 			//echo "<div>$sql</div>"; exit;
 			if(!$this->conn->query($sql)){
-				$statusStr = 'ERROR: unable edit institution -> '.$this->conn->error;
+				$status = false;
+				$this->errorStr = 'ERROR editing institution: '.$this->conn->error;
 			}
 		}
-		return $statusStr;
+		return $status;
 	}
 
 	public function submitInstitutionAdd($postData){
-		$newIid = 0;
+		$newIID = 0;
 		$sql = 'INSERT INTO institutions (institutioncode, institutionname, institutionname2, address1, address2, city, '.
 			'stateprovince, postalcode, country, phone, contact, email, url, notes) '.
 			'VALUES ("'.$postData['institutioncode'].'","'.
@@ -82,32 +80,38 @@ class InstitutionManager {
 			($postData['email']?'"'.$this->cleanInStr($postData['email']).'"':'NULL').','.
 			($postData['url']?'"'.$postData['url'].'"':'NULL').','.
 			($postData['notes']?'"'.$this->cleanInStr($postData['notes']).'"':'NULL').') ';
-		//echo "<div>$sql</div>";
+		//echo "<div>$sql</div>"; exit;
 		if($this->conn->query($sql)){
-			$newIid = $this->conn->insert_id;
+			$newIID = $this->conn->insert_id;
+			if($newIID && $postData['targetcollid']){
+				$sql2 = 'UPDATE omcollections SET iid = '.$newIID.' WHERE (iid IS NULL) AND (collid = '.$postData['targetcollid'].')';
+				$this->conn->query($sql2);
+			}
 		}
 		else{
-			$newIid = 'ERROR: unable to create institution: '.$this->conn->error;
+			$this->errorStr = 'ERROR creating institution: '.$this->conn->error;
 		}
-		return $newIid;
+		return $newIID;
 	}
 
 	public function deleteInstitution($delIid){
-		$status = '';
+		$status = true;
 		//Check to see if record is linked to collections
 		$sql = 'SELECT collid, CONCAT_WS(" ",CollectionName,CONCAT(InstitutionCode,IFNULL(CONCAT(":",CollectionCode),""))) AS name '.
 			'FROM omcollections WHERE iid = '.$delIid.' ORDER BY CollectionName,InstitutionCode,CollectionCode';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
-			$status = '<div style="font-weight:bold;">ERROR: Unable to delete due to links to following collections</div>';
-			$status .= '<ul>';
+			$status = false;
+			$this->errorStr = 'ERROR deleting institution: Following collections need to be unlinked to institution before deletion is allowed';
+			$this->errorStr .= '<ul style="margin-left:20px">';
 			while($r = $rs->fetch_object()){
-				$status .= '<li>'.$r->name.'</li>';
+				$this->errorStr .= '<li>'.$r->name.'</li>';
 			}
-			$status .= '</ul><br/>';
+			$this->errorStr .= '</ul><br/>';
 		}
-		$rs->close();
+		$rs->free();
+		if(!$status) return false;
 		
 		//Check outgoing and incoming loans
 		$sql = 'SELECT loanid '.
@@ -115,36 +119,47 @@ class InstitutionManager {
 			'WHERE iidOwner = '.$delIid.' OR iidBorrower = '.$delIid;
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
-			$status .= '<div style="font-weight:bold;">ERROR: Unable to delete due to links to '.$rs->num_rows.' loan records</div>';
+			$status = false;
+			$this->errorStr = 'ERROR deleting institution: Institution is linked to '.$rs->num_rows.' loan records';
 		}
-		$rs->close();
+		$rs->free();
 
-		if(!$status){
+		if($status){
 			//If record is not linked to other data, OK to delete
 			$sql = 'DELETE FROM institutions WHERE iid = '.$delIid;
-			//echo $sql;
-			if($this->conn->query($sql)){
-				$status = 1;
+			//echo $sql; exit;
+			if(!$this->conn->query($sql)){
+				$status = false;
+				$this->errorStr = 'ERROR deleting institution: '.$this->conn->error;
 			}
 		}
 		return $status;
 	}
 	
-	public function setCollectionId($collId){
-		if(is_numeric($collId)){
-			$this->collId = $collId;
-			//Set iid
-			$sql ='SELECT iid '.
-				'FROM omcollections '.
-				'WHERE collid = '.$collId;
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				$this->iid = $row->iid;
-			}
-			$rs->close();
+	public function removeCollection($collid){
+		$status = true;
+		$sql = 'UPDATE omcollections SET iid = NULL WHERE collid = '.$collid;
+		//echo $sql; exit;
+		if(!$this->conn->query($sql)){
+			$status = false;
+			$this->errorStr = 'ERROR removing collection from institution: '.$this->conn->error;
 		}
+		return $status;
 	}
-
+	
+	public function addCollection($collid,$iid){
+		$status = true;
+		if(is_numeric($collid) && is_numeric($iid)){
+			$sql = 'UPDATE omcollections SET iid = '.$iid.' WHERE collid = '.$collid;
+			//echo $sql; exit;
+			if(!$this->conn->query($sql)){
+				$status = false;
+				$this->errorStr = 'ERROR adding collection to institution: '.$this->conn->error;
+			}
+		}
+		return $status;
+	}
+	
 	public function setInstitutionId($id){
 		if(is_numeric($id)){
 			$this->iid = $id;
@@ -154,7 +169,47 @@ class InstitutionManager {
 	public function getInstitutionId(){
 		return $this->iid;
 	}
-	
+
+	public function getErrorStr(){
+		return $this->errorStr;
+	} 
+
+	public function getInstitutionList(){
+		$retArr = Array();
+		$sql = 'SELECT i.iid, c.collid, i.institutioncode, i.institutionname, i.institutionname2, i.address1, i.address2, i.city, '.
+			'i.stateprovince, i.postalcode, i.country, i.phone, i.contact, i.email, i.url, i.notes '.
+			'FROM institutions i LEFT JOIN omcollections c ON i.iid = c.iid '.
+			'ORDER BY i.institutionname, i.institutioncode';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			if(isset($retArr[$r->iid])){
+				$collStr = $retArr[$r->iid]['collid'].','.$r->collid;
+				$retArr[$r->iid]['collid'] = $collStr;
+			}
+			else{
+				$retArr[$r->iid] = $this->cleanOutArr($r);
+			}
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function getCollectionList(){
+		$retArr = Array();
+		$sql = 'SELECT collid, iid, CONCAT(collectionname, " (", CONCAT_WS("-",institutioncode, collectioncode),")") AS collname '.
+			'FROM omcollections '.
+			'ORDER BY collectionname,institutioncode';
+		//echo $sql; exit;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->collid]['name'] = $r->collname;
+			$retArr[$r->collid]['iid'] = $r->iid;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
 	private function cleanOutArr($inArr){
 		$outArr = array();
 		foreach($inArr as $k => $v){
