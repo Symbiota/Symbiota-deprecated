@@ -338,20 +338,27 @@ if($symbUid){
 					</div>
  					<?php 
  				}
- 				if($collData["institutionname"]){ 
- 					?>
-					<div style="float:left;font-weight:bold;margin-top:5px;">Address:&nbsp;</div>
-					<div style="float:left;margin-top:5px;">
-						<?php 
-						echo "<div>".$collData["institutionname"].($collData["institutioncode"]?" (".$collData["institutioncode"].")":"")."</div>";
-						if($collData["address1"]) echo "<div>".$collData["address1"]."</div>";
-						if($collData["address2"]) echo "<div>".$collData["address2"]."</div>";
-						if($collData["city"]) echo "<div>".$collData["city"].", ".$collData["stateprovince"]."&nbsp;&nbsp;&nbsp;".$collData["postalcode"]."</div>";
-						if($collData["country"]) echo "<div>".$collData["country"]."</div>";
-						if($collData["phone"]) echo "<div>".$collData["phone"]."</div>";
-						?>
-					</div>
-					<?php 
+ 				$addrArresses = $collManager->getAddresses();
+ 				if($addrArresses){
+ 					foreach($addrArresses as $iid => $addrArr){
+	 					?>
+						<div style="float:left;font-weight:bold;margin-top:5px;">Address:&nbsp;</div>
+						<div style="float:left;margin-top:5px;">
+							<?php 
+							echo "<div>".$addrArr["institutionname"];
+							if($editCode > 1) echo ' <a href="../admin/institutioneditor.php?emode=1&targetcollid='.$collid.'&iid='.$iid.'" title="Edit institution information"><img src="../../images/edit.png" style="width:13px;" /></a>';
+							echo '</div>';
+							if($addrArr["address1"]) echo "<div>".$addrArr["address1"]."</div>";
+							if($addrArr["address2"]) echo "<div>".$addrArr["address2"]."</div>";
+							if($addrArr["city"]) echo "<div>".$addrArr["city"].", ".$addrArr["stateprovince"]."&nbsp;&nbsp;&nbsp;".$addrArr["postalcode"]."</div>";
+							if($addrArr["country"]) echo "<div>".$addrArr["country"]."</div>";
+							if($addrArr["phone"]) echo "<div>".$addrArr["phone"]."</div>";
+							if($addrArr["url"]) echo '<div><a href="'.$addrArr['url'].'">'.$addrArr['url'].'</a></div>';
+							if($addrArr["notes"]) echo "<div>".$addrArr["notes"]."</div>";
+							?>
+						</div>
+						<?php
+ 					}
  				} 
  				?>
 				<div style="clear:both;margin-top:5px;">

@@ -7,6 +7,7 @@ class CollectionProfileManager {
 
 	private $conn;
 	private $collid;
+	private $errorStr;
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -22,34 +23,10 @@ class CollectionProfileManager {
 		}
 	}
 
-	public function getCollectionList(){
-		$returnArr = Array();
-		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, '.
-			'c.fulldescription, c.homepage, c.contact, c.email, c.icon, c.collectionguid '.
-			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
-			'WHERE s.recordcnt > 0 '.
-			'ORDER BY c.SortSeq,c.CollectionName';
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->collid]['institutioncode'] = $row->institutioncode;
-			$returnArr[$row->collid]['collectioncode'] = $row->collectioncode;
-			$returnArr[$row->collid]['collectionname'] = $row->collectionname;
-			$returnArr[$row->collid]['fulldescription'] = $row->fulldescription;
-			$returnArr[$row->collid]['homepage'] = $row->homepage;
-			$returnArr[$row->collid]['contact'] = $row->contact;
-			$returnArr[$row->collid]['email'] = $row->email;
-			$returnArr[$row->collid]['icon'] = $row->icon;
-			$returnArr[$row->collid]['guid'] = $row->collectionguid;
-		}
-		$rs->close();
-		return $returnArr;
-	}
-
 	public function getCollectionData($filterForForm = 0){
 		$returnArr = Array();
 		if($this->collid){
-			$sql = "SELECT c.institutioncode, i.iid, i.InstitutionName, ".
+			$sql = "SELECT c.institutioncode, i.InstitutionName, ".
 				"i.Address1, i.Address2, i.City, i.StateProvince, i.PostalCode, i.Country, i.Phone, ".
 				"c.collid, c.CollectionCode, c.CollectionName, ".
 				"c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, ".
@@ -67,7 +44,6 @@ class CollectionProfileManager {
 				$returnArr['institutioncode'] = $row->institutioncode;
 				$returnArr['collectioncode'] = $row->CollectionCode;
 				$returnArr['collectionname'] = $row->CollectionName;
-				$returnArr['iid'] = $row->iid;
 				$returnArr['institutionname'] = $row->InstitutionName;
 				$returnArr['address2'] = $row->Address1;
 				$returnArr['address1'] = $row->Address2;
@@ -109,7 +85,7 @@ class CollectionProfileManager {
 				$returnArr['genuscnt'] = $row->genuscnt;
 				$returnArr['speciescnt'] = $row->speciescnt;
 			}
-			$rs->close();
+			$rs->free();
 			//Get catagories
 			$sql = 'SELECT ccpk '.
 				'FROM omcollcatlink '.
@@ -118,7 +94,7 @@ class CollectionProfileManager {
 			if($r = $rs->fetch_object()){
 				$returnArr['ccpk'] = $r->ccpk;
 			}
-			$rs->close();
+			$rs->free();
 			//Get additional statistics
 			$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
@@ -127,7 +103,7 @@ class CollectionProfileManager {
 			if($row = $rs->fetch_object()){
 				$returnArr['imgpercent'] = ($returnArr['recordcnt']?round(($row->imgcnt/$returnArr['recordcnt'])*100):0);
 			}
-			$rs->close();
+			$rs->free();
 			//BOLD count
 			$sql = 'SELECT count(g.occid) as boldcnt '.
 				'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
@@ -136,7 +112,7 @@ class CollectionProfileManager {
 			if($r = $rs->fetch_object()){
 				$returnArr['boldcnt'] = $r->boldcnt;
 			}
-			$rs->close();
+			$rs->free();
 			//GenBank count
 			$sql = 'SELECT count(g.occid) as gencnt '.
 				'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
@@ -145,7 +121,7 @@ class CollectionProfileManager {
 			if($r = $rs->fetch_object()){
 				$returnArr['gencnt'] = $r->gencnt;
 			}
-			$rs->close();
+			$rs->free();
 			//Reference count
 			$sql = 'SELECT count(r.occid) as refcnt '.
 				'FROM omoccurrences o INNER JOIN referenceoccurlink r ON o.occid = r.occid '.
@@ -154,7 +130,7 @@ class CollectionProfileManager {
 			if($r = $rs->fetch_object()){
 				$returnArr['refcnt'] = $r->refcnt;
 			}
-			$rs->close();
+			$rs->free();
 			//Check to make sure Security Key and collection GUIDs exist
 			if(!$returnArr['guid']){
 				$returnArr['guid'] = UuidFactory::getUuidV4();
@@ -177,48 +153,46 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 
-	public function submitCollEdits(){
+	public function submitCollEdits($postArr){
 		$status = true;
 		if($this->collid){
-			$instCode = $this->cleanInStr($_POST['institutioncode']);
-			$collCode = $this->cleanInStr($_POST['collectioncode']);
-			$coleName = $this->cleanInStr($_POST['collectionname']);
-			$iid = $_POST['iid'];
-			$fullDesc = $this->cleanInStr($_POST['fulldescription']);
-			$homepage = $this->cleanInStr($_POST['homepage']);
-			$contact = $this->cleanInStr($_POST['contact']);
-			$email = $this->cleanInStr($_POST['email']);
-			$publicEdits = (array_key_exists('publicedits',$_POST)?$_POST['publicedits']:0);
-			$guidTarget = (array_key_exists('guidtarget',$_POST)?$_POST['guidtarget']:'');
-			$rights = $this->cleanInStr($_POST['rights']);
-			$rightsHolder = $this->cleanInStr($_POST['rightsholder']);
-			$accessRights = $this->cleanInStr($_POST['accessrights']);
+			$instCode = $this->cleanInStr($postArr['institutioncode']);
+			$collCode = $this->cleanInStr($postArr['collectioncode']);
+			$coleName = $this->cleanInStr($postArr['collectionname']);
+			$fullDesc = $this->cleanInStr($postArr['fulldescription']);
+			$homepage = $this->cleanInStr($postArr['homepage']);
+			$contact = $this->cleanInStr($postArr['contact']);
+			$email = $this->cleanInStr($postArr['email']);
+			$publicEdits = (array_key_exists('publicedits',$postArr)?$postArr['publicedits']:0);
+			$guidTarget = (array_key_exists('guidtarget',$postArr)?$postArr['guidtarget']:'');
+			$rights = $this->cleanInStr($postArr['rights']);
+			$rightsHolder = $this->cleanInStr($postArr['rightsholder']);
+			$accessRights = $this->cleanInStr($postArr['accessrights']);
 			
 			$conn = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omcollections '.
 				'SET institutioncode = "'.$instCode.'",'.
 				'collectioncode = '.($collCode?'"'.$collCode.'"':'NULL').','.
 				'collectionname = "'.$coleName.'",'.
-				'iid = '.($iid?$iid:'NULL').','.
 				'fulldescription = '.($fullDesc?'"'.$fullDesc.'"':'NULL').','.
 				'homepage = '.($homepage?'"'.$homepage.'"':'NULL').','.
 				'contact = '.($contact?'"'.$contact.'"':'NULL').','.
 				'email = '.($email?'"'.$email.'"':'NULL').','.
-				'latitudedecimal = '.($_POST['latitudedecimal']?$_POST['latitudedecimal']:'NULL').','.
-				'longitudedecimal = '.($_POST['longitudedecimal']?$_POST['longitudedecimal']:'NULL').','.
+				'latitudedecimal = '.($postArr['latitudedecimal']?$postArr['latitudedecimal']:'NULL').','.
+				'longitudedecimal = '.($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').','.
 				'publicedits = '.$publicEdits.','.
 				'guidtarget = '.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
 				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
 				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').' ';
-			if(array_key_exists('icon',$_POST)){
-				$icon = $this->cleanInStr($_POST['icon']);
-				$indUrl = $this->cleanInStr($_POST['individualurl']);
+			if(array_key_exists('icon',$postArr)){
+				$icon = $this->cleanInStr($postArr['icon']);
+				$indUrl = $this->cleanInStr($postArr['individualurl']);
 				$sql .= ',icon = '.($icon?'"'.$icon.'"':'NULL').','.
-					'managementtype = "'.$_POST['managementtype'].'",'.
-					'colltype = "'.$_POST['colltype'].'",'.
+					'managementtype = "'.$postArr['managementtype'].'",'.
+					'colltype = "'.$postArr['colltype'].'",'.
 					'individualurl = '.($indUrl?'"'.$indUrl.'"':'NULL').', '.
-					'sortseq = '.($_POST['sortseq']?$_POST['sortseq']:'NULL').' ';
+					'sortseq = '.($postArr['sortseq']?$postArr['sortseq']:'NULL').' ';
 			}
 			$sql .= 'WHERE (collid = '.$this->collid.')';
 			//echo $sql;
@@ -228,18 +202,18 @@ class CollectionProfileManager {
 			}
 			
 			//Modify collection category, if needed
-			if(isset($_POST['ccpk']) && $_POST['ccpk']){
+			if(isset($postArr['ccpk']) && $postArr['ccpk']){
 				$rs = $conn->query('SELECT ccpk FROM omcollcatlink WHERE collid = '.$this->collid);
 				if($r = $rs->fetch_object()){
-					if($r->ccpk <> $_POST['ccpk']){
-						if(!$conn->query('UPDATE omcollcatlink SET ccpk = '.$_POST['ccpk'].' WHERE ccpk = '.$r->ccpk.' AND collid = '.$this->collid)){
+					if($r->ccpk <> $postArr['ccpk']){
+						if(!$conn->query('UPDATE omcollcatlink SET ccpk = '.$postArr['ccpk'].' WHERE ccpk = '.$r->ccpk.' AND collid = '.$this->collid)){
 							$status = 'ERROR updating collection category link: '.$conn->error;
 							return $status;
 						}
 					}
 				}
 				else{
-					if(!$conn->query('INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$this->collid.')')){
+					if(!$conn->query('INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$postArr['ccpk'].','.$this->collid.')')){
 						$status = 'ERROR inserting collection category link(1): '.$conn->error;
 						return $status;
 					}
@@ -250,42 +224,41 @@ class CollectionProfileManager {
 		return $status;
 	}
 
-	public function submitCollAdd(){
+	public function submitCollAdd($postArr){
 		global $symbUid;
-		$instCode = $this->cleanInStr($_POST['institutioncode']);
-		$collCode = $this->cleanInStr($_POST['collectioncode']);
-		$coleName = $this->cleanInStr($_POST['collectionname']);
-		$iid = $_POST['iid'];
-		$fullDesc = $this->cleanInStr($_POST['fulldescription']);
-		$homepage = $this->cleanInStr($_POST['homepage']);
-		$contact = $this->cleanInStr($_POST['contact']);
-		$email = $this->cleanInStr($_POST['email']);
-		$rights = $this->cleanInStr($_POST['rights']);
-		$rightsHolder = $this->cleanInStr($_POST['rightsholder']);
-		$accessRights = $this->cleanInStr($_POST['accessrights']);
-		$publicEdits = (array_key_exists('publicedits',$_POST)?$_POST['publicedits']:0);
-		$guidTarget = (array_key_exists('guidtarget',$_POST)?$_POST['guidtarget']:'');
-		$icon = array_key_exists('icon',$_POST)?$this->cleanInStr($_POST['icon']):'';
-		$managementType = array_key_exists('managementtype',$_POST)?$this->cleanInStr($_POST['managementtype']):'';
-		$collType = array_key_exists('colltype',$_POST)?$this->cleanInStr($_POST['colltype']):'';
-		$guid = array_key_exists('collectionguid',$_POST)?$this->cleanInStr($_POST['collectionguid']):'';
+		$instCode = $this->cleanInStr($postArr['institutioncode']);
+		$collCode = $this->cleanInStr($postArr['collectioncode']);
+		$coleName = $this->cleanInStr($postArr['collectionname']);
+		$fullDesc = $this->cleanInStr($postArr['fulldescription']);
+		$homepage = $this->cleanInStr($postArr['homepage']);
+		$contact = $this->cleanInStr($postArr['contact']);
+		$email = $this->cleanInStr($postArr['email']);
+		$rights = $this->cleanInStr($postArr['rights']);
+		$rightsHolder = $this->cleanInStr($postArr['rightsholder']);
+		$accessRights = $this->cleanInStr($postArr['accessrights']);
+		$publicEdits = (array_key_exists('publicedits',$postArr)?$postArr['publicedits']:0);
+		$guidTarget = (array_key_exists('guidtarget',$postArr)?$postArr['guidtarget']:'');
+		$icon = array_key_exists('icon',$postArr)?$this->cleanInStr($postArr['icon']):'';
+		$managementType = array_key_exists('managementtype',$postArr)?$this->cleanInStr($postArr['managementtype']):'';
+		$collType = array_key_exists('colltype',$postArr)?$this->cleanInStr($postArr['colltype']):'';
+		$guid = array_key_exists('collectionguid',$postArr)?$this->cleanInStr($postArr['collectionguid']):'';
 		if(!$guid) $guid = UuidFactory::getUuidV4();
-		$indUrl = array_key_exists('individualurl',$_POST)?$this->cleanInStr($_POST['individualurl']):'';
-		$sortSeq = array_key_exists('sortseq',$_POST)?$_POST['sortseq']:'';
+		$indUrl = array_key_exists('individualurl',$postArr)?$this->cleanInStr($postArr['individualurl']):'';
+		$sortSeq = array_key_exists('sortseq',$postArr)?$postArr['sortseq']:'';
 		
 		$conn = MySQLiConnectionFactory::getCon("write");
-		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,iid,fulldescription,homepage,'.
+		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,fulldescription,homepage,'.
 			'contact,email,latitudedecimal,longitudedecimal,publicedits,guidtarget,rights,rightsholder,accessrights,icon,'.
 			'managementtype,colltype,collectionguid,individualurl,sortseq) '.
 			'VALUES ("'.$instCode.'",'.
 			($collCode?'"'.$collCode.'"':'NULL').',"'.
-			$coleName.'",'.($iid?$iid:'NULL').','.
+			$coleName.'",'.
 			($fullDesc?'"'.$fullDesc.'"':'NULL').','.
 			($homepage?'"'.$homepage.'"':'NULL').','.
 			($contact?'"'.$contact.'"':'NULL').','.
 			($email?'"'.$email.'"':'NULL').','.
-			($_POST['latitudedecimal']?$_POST['latitudedecimal']:'NULL').','.
-			($_POST['longitudedecimal']?$_POST['longitudedecimal']:'NULL').','.
+			($postArr['latitudedecimal']?$postArr['latitudedecimal']:'NULL').','.
+			($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').','.
 			$publicEdits.','.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 			($rights?'"'.$rights.'"':'NULL').','.
 			($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
@@ -303,8 +276,8 @@ class CollectionProfileManager {
 				'VALUES('.$cid.',0,"'.$symbUid.'")';
 			$conn->query($sql);
 			//Add collection to category
-			if(isset($_POST['ccpk']) && $_POST['ccpk']){
-				$sql = 'INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$cid.')';
+			if(isset($postArr['ccpk']) && $postArr['ccpk']){
+				$sql = 'INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$postArr['ccpk'].','.$cid.')';
 				if(!$conn->query($sql)){
 					$status = 'ERROR inserting collection category link(2): '.$conn->error.'; SQL: '.$sql;
 					return $status;
@@ -318,7 +291,69 @@ class CollectionProfileManager {
 		$conn->close();
 		return $cid;
 	}
-	
+
+	public function getAddresses(){
+		$retArr = Array();
+		if($this->collid){
+			$sql = 'SELECT i.iid, i.institutioncode, i.institutionname, i.address1, i.address2, '.
+				'i.city, i.stateprovince, i.postalcode, i.country, i.phone, i.contact, i.email, i.url, i.notes '.
+				'FROM institutions i INNER JOIN omcollections c ON i.iid = c.iid '.
+				'WHERE (c.collid = '.$this->collid.") ";
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->iid]['institutioncode'] = $r->institutioncode;
+				$retArr[$r->iid]['institutionname'] = $r->institutionname;
+				$retArr[$r->iid]['address1'] = $r->address1;
+				$retArr[$r->iid]['address2'] = $r->address2;
+				$retArr[$r->iid]['city'] = $r->city;
+				$retArr[$r->iid]['stateprovince'] = $r->stateprovince;
+				$retArr[$r->iid]['postalcode'] = $r->postalcode;
+				$retArr[$r->iid]['country'] = $r->country;
+				$retArr[$r->iid]['phone'] = $r->phone;
+				$retArr[$r->iid]['contact'] = $r->contact;
+				$retArr[$r->iid]['email'] = $r->email;
+				$retArr[$r->iid]['url'] = $r->url;
+				$retArr[$r->iid]['notes'] = $r->notes;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function linkAddress($addIID){
+		$status = false;
+		if($this->collid && is_numeric($addIID)){
+			$con = MySQLiConnectionFactory::getCon("write");
+			$sql = 'UPDATE omcollections SET iid = '.$addIID.' WHERE collid = '.$this->collid;
+			if($con->query($sql)){
+				$status = true;
+			}
+			else{
+				$this->errorStr = 'ERROR linking institution address: '.$con->error;
+			}
+			$con->close();
+		}
+		return $status;
+	}
+
+	public function removeAddress($removeIID){
+		$status = false;
+		if($this->collid && is_numeric($removeIID)){
+			$con = MySQLiConnectionFactory::getCon("write");
+			$sql = 'UPDATE omcollections SET iid = NULL '.
+				'WHERE collid = '.$this->collid.' AND iid = '.$removeIID;
+			if($con->query($sql)){
+				$status = true;
+			}
+			else{
+				$this->errorStr = 'ERROR removing institution address: '.$con->error;
+			}
+			$con->close();
+		}
+		return $status;
+	}
+
 	public function updateStatistics(){
 		set_time_limit(200);
 		$writeConn = MySQLiConnectionFactory::getCon("write");
@@ -524,10 +559,10 @@ class CollectionProfileManager {
 		$retArr = array();
 		$sql = 'SELECT iid,institutionname,institutioncode '.
 			'FROM institutions '.
-			'ORDER BY Institutioncode ';
+			'ORDER BY institutionname,institutioncode ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->iid] = $r->institutioncode.' - '.$r->institutionname;
+			$retArr[$r->iid] = $r->institutionname.' ('.$r->institutioncode.')';
 		}
 		return $retArr;
 	}
@@ -541,7 +576,32 @@ class CollectionProfileManager {
 		while($r = $rs->fetch_object()){
 			$retArr[$r->ccpk] = $r->catagory;
 		}
+		$rs->free();
 		return $retArr;
+	}
+	
+	public function getCollectionList(){
+		$returnArr = Array();
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, '.
+			'c.fulldescription, c.homepage, c.contact, c.email, c.icon, c.collectionguid '.
+			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
+			'WHERE s.recordcnt > 0 '.
+			'ORDER BY c.SortSeq,c.CollectionName';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$returnArr[$row->collid]['institutioncode'] = $row->institutioncode;
+			$returnArr[$row->collid]['collectioncode'] = $row->collectioncode;
+			$returnArr[$row->collid]['collectionname'] = $row->collectionname;
+			$returnArr[$row->collid]['fulldescription'] = $row->fulldescription;
+			$returnArr[$row->collid]['homepage'] = $row->homepage;
+			$returnArr[$row->collid]['contact'] = $row->contact;
+			$returnArr[$row->collid]['email'] = $row->email;
+			$returnArr[$row->collid]['icon'] = $row->icon;
+			$returnArr[$row->collid]['guid'] = $row->collectionguid;
+		}
+		$rs->free();
+		return $returnArr;
 	}
 
 	//Used to index specimen records for particular collection
@@ -591,7 +651,11 @@ class CollectionProfileManager {
 		}
 	}
 
-	public function cleanOutArr(&$arr){
+	public function getErrorStr(){
+		return $this->errorStr;
+	}
+	
+	private function cleanOutArr(&$arr){
 		foreach($arr as $k => $v){
 			$arr[$k] = $this->cleanOutStr($v);
 		}
