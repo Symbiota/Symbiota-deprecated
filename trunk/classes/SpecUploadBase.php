@@ -449,10 +449,6 @@ class SpecUploadBase extends SpecUpload{
 			$this->conn->query($sql);
 		}
 		
-		//Data cleaning and preparation
-		$this->prepareAssociatedMedia();
-		$this->prepareImages();
-		
 		//Reset $treansferCnt so that count is accurate since some records may have been deleted due to data integrety issues
 		$this->getTransferCount(1); 
 	}
@@ -555,142 +551,24 @@ class SpecUploadBase extends SpecUpload{
 		
 	}
 
-	private function prepareAssociatedMedia(){
-		//Check to see if we have any images to process
-		$sql = 'SELECT associatedmedia, tidinterpreted, occid '.
-			'FROM uploadspectemp '.
-			'WHERE associatedmedia IS NOT NULL AND occid IS NOT NULL AND collid = '.$this->collId;
-		$rs = $this->conn->query($sql);
-		if($rs->num_rows){
-			$this->outputMsg('<li>Preparing associatedMedia for image transfer... ');
-			ob_flush();
-			flush();
-			while($r = $rs->fetch_object()){
-				$mediaFile = trim(str_replace(';',',',$r->associatedmedia),', ');
-				$mediaArr = explode(',',$mediaFile);
-				foreach($mediaArr as $mediaUrl){
-					$mediaUrl = trim($mediaUrl);
-					if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
-						if($this->urlExists($mediaUrl)){
-							$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url) '.
-								'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty")';
-							if(!$this->conn->query($sqlInsert)){
-								$this->outputMsg('<div style="margin-left:10px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</div>');
-								$this->outputMsg('<div style="margin-left:10px;">SQL: '.$sqlInsert.'</div>');
-							}
-						}
-						else{
-							echo 'Bad url: '.$mediaUrl.'<br/>';
-						}
-					}
-				}
-			}
-			$this->outputMsg('Done!</li> ');
-			ob_flush();
-			flush();
-		}
-	}
-
-	private function prepareImages(){
-		$this->outputMsg('<li>Preparing images for transfer... </li>');
-		ob_flush();
-		flush();
-		//Remove images that are not JPGs 
-		$sql = 'DELETE FROM uploadimagetemp '.
-			'WHERE (originalurl LIKE "%.dng") AND (collid = '.$this->collId.')';
-		if($this->conn->query($sql)){
-			$this->outputMsg('<li style="margin-left:10px;">step 1 or 4... </li>');
-		}
-		else{
-			$this->outputMsg('<div style="margin-left:20px;">WARNING removing non-jpgs from uploadimagetemp: '.$this->conn->error.'</div> ');
-		}
-		ob_flush();
-		flush();
-		
-		//Update occid for images of occurrence records already in portal 
-		$sql = 'UPDATE uploadimagetemp ui INNER JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
-			'SET ui.occid = u.occid '.
-			'WHERE (ui.occid IS NULL) AND (u.occid IS NOT NULL) AND (ui.collid = '.$this->collId.')';
-		if($this->conn->query($sql)){
-			$this->outputMsg('<li style="margin-left:10px;">step 2 or 4... </li>');
-		}
-		else{
-			$this->outputMsg('<div style="margin-left:20px;">WARNING updating occids within uploadimagetemp: '.$this->conn->error.'</div> ');
-		}
-		ob_flush();
-		flush();
-		
-		//Remove images that don't have an occurrence record in uploadspectemp table
-		$sql = 'DELETE ui.* '.
-			'FROM uploadimagetemp ui LEFT JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
-			'WHERE (ui.occid IS NULL) AND (ui.collid = '.$this->collId.') AND (u.collid IS NULL)';
-		if($this->conn->query($sql)){
-			$this->outputMsg('<li style="margin-left:10px;">step 3 or 4... </li>');
-		}
-		else{
-			$this->outputMsg('<div style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</div> ');
-		}
-		ob_flush();
-		flush();
-		
-		//Remove previously loaded images where urls match exactly
-		$sql = 'DELETE u.* FROM uploadimagetemp u INNER JOIN images i ON u.occid = i.occid '.
-			'WHERE (u.collid = '.$this->collId.') AND (u.originalurl = i.originalurl)';
-		if($this->conn->query($sql)){
-			$this->outputMsg('<li style="margin-left:10px;">step 4 or 4... </li>');
-		}
-		else{
-			$this->outputMsg('<div style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</div> ');
-		}
-		$sql = 'DELETE u.* FROM uploadimagetemp u INNER JOIN images i ON u.occid = i.occid '.
-			'WHERE (u.collid = '.$this->collId.') AND (u.url = i.url)';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('<div style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</div> ');
-		}
-		ob_flush();
-		flush();
-		
-		//Compare image file names to make sure link wasn't previously loaded
-		/*
-		$sqlTest = 'SELECT i.occid, i.url, u.url as url_new, i.originalurl, u.originalurl as originalurl_new '.
-			'FROM images i INNER JOIN uploadimagetemp u ON i.occid = u.occid '.
-			'WHERE (u.collid = '.$this->collId.')';
-		//echo $sqlTest;
-		$rsTest = $this->conn->query($sqlTest);
-		while($rTest = $rsTest->fetch_object()){
-			if($rTest->originalurl_new){
-				$filename = array_pop(explode('/',$rTest->originalurl));
-				$filenameNew = array_pop(explode('/',$rTest->originalurl_new));
-				if($filename && $filename == $filenameNew){
-					if(!$this->conn->query('DELETE FROM uploadimagetemp WHERE (occid = '.$rTest.') AND (originalurl = "'.$rTest->originalurl_new.'")')){
-						$this->outputMsg('ERROR deleting uploadimagetemp record with matching file names ('.$filename.' != '.$filenameNew.'): '.$this->conn->error.'</li> ');
-					}
-				}
-			}
-		}
-		$rsTest->free();
-		*/
-		//Reset transfer count
-		$sql = 'SELECT count(*) AS cnt FROM uploadimagetemp WHERE (collid = '.$this->collId.')';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$this->imageTransferCount = $r->cnt;
-		}
-		else{
-			$this->outputMsg('<div style="margin-left:20px;">ERROR revising image upload count: '.$this->conn->error.'</div> ');
-		}
-		$this->outputMsg('<li style="margin-left:10px;">Done! (revised count: '.$this->imageTransferCount.' images)</li> ');
-		ob_flush();
-		flush();
-	}
-
 	public function getTransferReport(){
 		$reportArr = array();
 		$reportArr['occur'] = $this->getTransferCount();
+		//Determination history and images from DWCA files
 		if($this->uploadType == $this->DWCAUPLOAD){
 			if($this->includeIdentificationHistory) $reportArr['ident'] = $this->getIdentTransferCount();
 			if($this->includeImages) $reportArr['image'] = $this->getImageTransferCount();
 		}
+		//Append image counts from Associated Media
+		$sql = 'SELECT count(*) AS cnt '.
+			'FROM uploadspectemp '.
+			'WHERE (associatedMedia IS NOT NULL) AND (collid = '.$this->collId.') AND (basisofrecord != "determinationHistory")';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$cnt = (isset($reportArr['image'])?$reportArr['image']:0) + $r->cnt;
+			if($cnt) $reportArr['image'] = $cnt;
+		}
+		$rs->free();
 
 		//Number of new specimen records
 		$sql = 'SELECT count(*) AS cnt '.
@@ -772,6 +650,8 @@ class SpecUploadBase extends SpecUpload{
 	public function finalTransfer(){
 		$this->recordCleaningStage2();
 		$this->transferOccurrences();
+		$this->prepareAssociatedMedia();
+		$this->prepareImages();
 		$this->transferIdentificationHistory();
 		$this->transferImages();
 		$this->finalCleanup();
@@ -914,6 +794,7 @@ class SpecUploadBase extends SpecUpload{
 		if(!$this->conn->query($sqlOcc2)){
 			$this->outputMsg('<div>ERROR updating occid (2nd step) after occurrence insert: '.$this->conn->error.'</div>');
 		}
+		$this->outputMsg('Done!</li> ');
 		
 		//Setup and add datasets and link datasets to current user
 		
@@ -957,6 +838,178 @@ class SpecUploadBase extends SpecUpload{
 			}
 		}
 		$rs->free();
+	}
+
+	private function prepareAssociatedMedia(){
+		//Check to see if we have any images to process
+		$sql1 = 'SELECT associatedmedia, tidinterpreted, occid '.
+			'FROM uploadspectemp '.
+			'WHERE (associatedmedia LIKE "http%") AND (occid IS NOT NULL) AND (collid = '.$this->collId.') LIMIT 5';
+		$rs1 = $this->conn->query($sql1);
+		if($rs1->num_rows){
+			$this->outputMsg('<li>Preparing associatedMedia for image transfer... ');
+			ob_flush();
+			flush();
+			$okToLoad = false; 
+			//Test first 5 urls to make sure they are valid. If they are, then load
+			while($r1 = $rs1->fetch_object()){
+				$mediaFile = trim(str_replace(';',',',$r1->associatedmedia),', ');
+				$mediaArr = explode(',',$mediaFile);
+				foreach($mediaArr as $mediaUrl){
+					$mediaUrl = trim($mediaUrl);
+					if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
+						if($this->urlExists($mediaUrl)){
+							$okToLoad = true;
+						}
+						else{
+							echo '<div style="margin-left:20px;">Bad url: '.$mediaUrl.'</div>';
+						}
+					}
+				}
+			}
+			if($okToLoad){
+				//Bulk transfer single URLs
+				$sql2 = 'INSERT INTO uploadimagetemp(originalurl,url,occid,tid,collid) '.
+					'SELECT trim(associatedmedia), "empty" AS url, occid, tidinterpreted, collid '.
+					'FROM uploadspectemp '.
+					'WHERE (collid = '.$this->collId.') AND (associatedmedia LIKE "http%") AND (occid IS NOT NULL) '.
+					'AND (associatedmedia NOT LIKE "%,%") AND (associatedmedia NOT LIKE "%;%")';
+				if($this->conn->query($sql2)){
+					$sql2b = 'UPDATE uploadspectemp '.
+						'SET associatedmedia = NULL '.
+						'WHERE (collid = '.$this->collId.') AND (associatedmedia LIKE "http%") AND (occid IS NOT NULL) '.
+						'AND (associatedmedia NOT LIKE "%,%") AND (associatedmedia NOT LIKE "%;%")';
+					$this->conn->query($sql2b);
+				}
+				else{
+					echo '<div style="margin-left:20px;">ERROR bulk transferring images: '.$this->conn->error.'</div>';
+				}
+				
+				//Manually transfer multiple URLs
+				$sql3 = 'SELECT associatedmedia, tidinterpreted, occid '.
+					'FROM uploadspectemp '.
+					'WHERE associatedmedia IS NOT NULL AND occid IS NOT NULL AND collid = '.$this->collId;
+				$rs3 = $this->conn->query($sql3);
+				while($r3 = $rs3->fetch_object()){
+					$mediaFile = trim(str_replace(';',',',$r3->associatedmedia),', ');
+					$mediaArr = explode(',',$mediaFile);
+					foreach($mediaArr as $mediaUrl){
+						$mediaUrl = trim($mediaUrl);
+						if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
+							if($this->urlExists($mediaUrl)){
+								$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url,collid) '.
+									'VALUES('.$r3->occid.','.($r3->tidinterpreted?$r3->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty",'.$this->collid.')';
+								if(!$this->conn->query($sqlInsert)){
+									$this->outputMsg('<div style="margin-left:10px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</div>');
+									$this->outputMsg('<div style="margin-left:10px;">SQL: '.$sqlInsert.'</div>');
+								}
+							}
+							else{
+								echo '<div style="margin-left:20px;">Bad url: '.$mediaUrl.'</div>';
+							}
+						}
+					}
+				}
+				$rs3->free();
+			}
+			$this->outputMsg('Done!</li> ');
+			ob_flush();
+			flush();
+		} 
+		$rs1->free();
+	}
+
+	private function prepareImages(){
+		$this->outputMsg('<li>Preparing images for transfer... </li>');
+		ob_flush();
+		flush();
+		//Remove images that are not JPGs 
+		$sql = 'DELETE FROM uploadimagetemp '.
+			'WHERE (originalurl LIKE "%.dng") AND (collid = '.$this->collId.')';
+		if($this->conn->query($sql)){
+			$this->outputMsg('<li style="margin-left:10px;">step 1 or 4... </li>');
+		}
+		else{
+			$this->outputMsg('<div style="margin-left:20px;">WARNING removing non-jpgs from uploadimagetemp: '.$this->conn->error.'</div> ');
+		}
+		ob_flush();
+		flush();
+		
+		//Update occid for images of occurrence records already in portal 
+		$sql = 'UPDATE uploadimagetemp ui INNER JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
+			'SET ui.occid = u.occid '.
+			'WHERE (ui.occid IS NULL) AND (u.occid IS NOT NULL) AND (ui.collid = '.$this->collId.')';
+		if($this->conn->query($sql)){
+			$this->outputMsg('<li style="margin-left:10px;">step 2 or 4... </li>');
+		}
+		else{
+			$this->outputMsg('<div style="margin-left:20px;">WARNING updating occids within uploadimagetemp: '.$this->conn->error.'</div> ');
+		}
+		ob_flush();
+		flush();
+		
+		//Remove images that don't have an occurrence record in uploadspectemp table
+		$sql = 'DELETE ui.* '.
+			'FROM uploadimagetemp ui LEFT JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
+			'WHERE (ui.occid IS NULL) AND (ui.collid = '.$this->collId.') AND (u.collid IS NULL)';
+		if($this->conn->query($sql)){
+			$this->outputMsg('<li style="margin-left:10px;">step 3 or 4... </li>');
+		}
+		else{
+			$this->outputMsg('<div style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</div> ');
+		}
+		ob_flush();
+		flush();
+		
+		//Remove previously loaded images where urls match exactly
+		$sql = 'DELETE u.* FROM uploadimagetemp u INNER JOIN images i ON u.occid = i.occid '.
+			'WHERE (u.collid = '.$this->collId.') AND (u.originalurl = i.originalurl)';
+		if($this->conn->query($sql)){
+			$this->outputMsg('<li style="margin-left:10px;">step 4 or 4... </li>');
+		}
+		else{
+			$this->outputMsg('<div style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</div> ');
+		}
+		$sql = 'DELETE u.* FROM uploadimagetemp u INNER JOIN images i ON u.occid = i.occid '.
+			'WHERE (u.collid = '.$this->collId.') AND (u.url = i.url)';
+		if(!$this->conn->query($sql)){
+			$this->outputMsg('<div style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</div> ');
+		}
+		ob_flush();
+		flush();
+		
+		//Compare image file names to make sure link wasn't previously loaded
+		/*
+		$sqlTest = 'SELECT i.occid, i.url, u.url as url_new, i.originalurl, u.originalurl as originalurl_new '.
+			'FROM images i INNER JOIN uploadimagetemp u ON i.occid = u.occid '.
+			'WHERE (u.collid = '.$this->collId.')';
+		//echo $sqlTest;
+		$rsTest = $this->conn->query($sqlTest);
+		while($rTest = $rsTest->fetch_object()){
+			if($rTest->originalurl_new){
+				$filename = array_pop(explode('/',$rTest->originalurl));
+				$filenameNew = array_pop(explode('/',$rTest->originalurl_new));
+				if($filename && $filename == $filenameNew){
+					if(!$this->conn->query('DELETE FROM uploadimagetemp WHERE (occid = '.$rTest.') AND (originalurl = "'.$rTest->originalurl_new.'")')){
+						$this->outputMsg('ERROR deleting uploadimagetemp record with matching file names ('.$filename.' != '.$filenameNew.'): '.$this->conn->error.'</li> ');
+					}
+				}
+			}
+		}
+		$rsTest->free();
+		*/
+		//Reset transfer count
+		$sql = 'SELECT count(*) AS cnt FROM uploadimagetemp WHERE (collid = '.$this->collId.')';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$this->imageTransferCount = $r->cnt;
+		}
+		else{
+			$this->outputMsg('<div style="margin-left:20px;">ERROR revising image upload count: '.$this->conn->error.'</div> ');
+		}
+		$this->outputMsg('<li style="margin-left:10px;">Done! (revised count: '.$this->imageTransferCount.' images)</li> ');
+		ob_flush();
+		flush();
 	}
 
 	protected function transferImages(){

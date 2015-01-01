@@ -345,13 +345,11 @@ $duManager->loadFieldMap();
 						}
 						echo '</div>';
 						//Extensions
-						if($uploadType == $DWCAUPLOAD){
-							if(isset($reportArr['ident'])){
-								echo '<div>Identification histories pending transfer: '.$reportArr['ident'].'</div>';
-							}
-							if(isset($reportArr['image'])){
-								echo '<div>Images pending transfer: '.$reportArr['image'].'</div>';
-							}
+						if(isset($reportArr['ident'])){
+							echo '<div>Identification histories pending transfer: '.$reportArr['ident'].'</div>';
+						}
+						if(isset($reportArr['image'])){
+							echo '<div>Images pending transfer: '.$reportArr['image'].'</div>';
 						}
 						
 						?>
