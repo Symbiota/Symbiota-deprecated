@@ -48,8 +48,8 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 					if($userStats = $procManager->getUserStats()){
 						$orderArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed','empty status');
 						foreach($userStats as $username => $psArr){
-							$eUrlInner = $eUrl.'&q_enteredby='.$username.str_replace(array('&q_enteredby='),'',$urlBase); 
-							$beUrlInner = $beUrl.'&q_enteredby='.$username.'&bufieldname=processingstatus'.str_replace(array('&q_enteredby='),'',$urlBase);
+							$eUrlInner = $eUrl.'&q_recordenteredby='.$username.str_replace(array('&q_recordenteredby='),'',$urlBase); 
+							$beUrlInner = $beUrl.'&q_recordenteredby='.$username.'&bufieldname=processingstatus'.str_replace(array('&q_recordenteredby='),'',$urlBase);
 							foreach($orderArr as $ps){
 								if(array_key_exists($ps,$psArr)){
 									echo '<tr>';
