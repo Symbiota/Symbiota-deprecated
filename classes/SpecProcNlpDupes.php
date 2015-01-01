@@ -24,7 +24,7 @@ class SpecProcNlpDupes {
 		$cnt = 1;
 		if($r = $rs->fetch_object()){
 			if($this->processFragment($r->rawstr,$r->prlid)){
-				$this->echoStr('Processed #'.$cnt,1);
+				if($cnt%1000 == 0) $this->echoStr($cnt.' OCR records',1);
 			}
 			$cnt++;
 		}
