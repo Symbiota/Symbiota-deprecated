@@ -16,6 +16,9 @@ $width = 300;
 //Enter amount of days between image refreshes of images
 $dayInterval = 7;
 
+//Enter amount of time (in milliseconds) between rotation of images
+$interval = 7000;
+
 //Enter checklist id, if you wish for images to be pulled from a checklist,
 //leave as 0 if you do not wish for images to come from a checklist
 //if you would like to use more than one checklist, separate their ids with a comma ex. "1,2,3,4"
@@ -32,6 +35,6 @@ $numDays = 30;
 ini_set('max_execution_time', 120);
 include_once($serverRoot.'/classes/PluginsManager.php');
 $pluginManager = new PluginsManager();
-$slideshow = $pluginManager->createSlidewhow($ssId,$numSlides,$width,$numDays,$imageType,$clId,$dayInterval);
+$slideshow = $pluginManager->createSlidewhow($ssId,$numSlides,$width,$numDays,$imageType,$clId,$dayInterval,$interval);
 echo $slideshow;
 ?>

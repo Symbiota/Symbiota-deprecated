@@ -13,7 +13,7 @@ class PluginsManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 	
-	public function createSlidewhow($ssId,$numSlides,$width,$numDays,$imageType,$clId,$dayInterval){
+	public function createSlidewhow($ssId,$numSlides,$width,$numDays,$imageType,$clId,$dayInterval,$interval=7000){
 		if($width > 800){
 			$width = 800;
 		}
@@ -23,7 +23,7 @@ class PluginsManager {
 		$ssInfo = $this->setSlidewhow($ssId,$numSlides,$numDays,$imageType,$clId,$dayInterval);
 		$imageArr = $ssInfo['files'];
 		$imageHtml = $this->getImageList($imageArr,$width);
-		$showHtml = $this->setShowHtml($imageHtml,$width);
+		$showHtml = $this->setShowHtml($imageHtml,$width,$interval);
 		return $showHtml;
 	}
 	
@@ -216,7 +216,7 @@ class PluginsManager {
 	public function getImageList($imageArr,$width){
 		global $clientRoot;
 		$windowHeight = $width + 75;
-		$imageHeight = $width + 45;
+		$imageHeight = $width + 50;
 		$html = '';
 		$html = '<div style="border: 2px solid black;border-radius:10px;padding:10px;clear:both;width:'.$width.'px;height:'.$windowHeight.'px;">';
 		$html .= '<div class="container">';
@@ -228,7 +228,8 @@ class PluginsManager {
 				$imgSize = 'height:'.$imageHeight.'px;position:absolute;left:50%;margin-left:-'.$offSet.'px;';
 			}
 			else{
-				$imgSize = 'width:'.$width.'px;';
+				$offSet = (($imgIdArr["height"]/$imgIdArr["width"])*$width)/2;
+				$imgSize = 'width:'.$width.'px;position:absolute;top:50%;margin-top:-'.$offSet.'px;';
 			}
 			$linkUrl = '';
 			if($imgIdArr["occid"]){
@@ -244,7 +245,11 @@ class PluginsManager {
 			$html .= '<img src="'.$imgIdArr["url"].'" style="'.$imgSize.'" alt="'.($imgIdArr["occsciname"]?$imgIdArr["occsciname"]:$imgIdArr["SciName"]).'">';
 			$html .= '</a>';
 			$html .= '</div>';
-			$html .= '<div style="position:absolute;bottom:0;font-size:12px;background-color:rgba(255,255,255,0.8);"><b>';
+			$html .= '<div style="width:'.$width.'px;position:absolute;bottom:0;font-size:12px;background-color:rgba(255,255,255,0.8);">';
+			$onclickText = "toggle('slidecaption".$imgIdArr["imgid"]."');toggle('showcaption".$imgIdArr["imgid"]."');";
+			$html .= '<div id="slidecaption'.$imgIdArr["imgid"].'">';
+			$html .= '<a href="#" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;" onclick="'.$onclickText.'">HIDE CAPTION</a>';
+			$html .= '<div style="clear:both;padding-left:3px;padding-right:3px;"><b>';
 			if($imgIdArr["SciName"] || $imgIdArr["identifier"]){
 				$html .= '<a href="'.$linkUrl.'" target="_blank">';
 				$html .= ($imgIdArr["identifier"]?$imgIdArr["identifier"]:$imgIdArr["SciName"]);
@@ -256,14 +261,17 @@ class PluginsManager {
 			if($imgIdArr["owner"]){
 				$html .= 'Courtesy of: '.$imgIdArr["owner"].'. ';
 			}
-			$html .= '</b></div></div>';
+			$html .= '</b></div>';
+			$html .= '</div>';
+			$html .= '<a href="#" id="showcaption'.$imgIdArr["imgid"].'" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;display:none;" onclick="'.$onclickText.'">SHOW CAPTION</a>';
+			$html .= '</div></div>';
 		}
 		$html .= '</div></div></div>';
 		
 		return $html;
 	}
 	
-	public function setShowHtml($imageHtml,$width){
+	public function setShowHtml($imageHtml,$width,$interval){
 		global $clientRoot;
 		$height = $width + 50;
 		$html = '';
@@ -290,6 +298,7 @@ class PluginsManager {
 		$html .= '</style>';
 		$html .= '<script src="'.$clientRoot.'/js/jquery-1.9.1.js"></script>';
 		$html .= '<script src="'.$clientRoot.'/js/jquery.slides.js"></script>';
+		$html .= '<script src="'.$clientRoot.'/js/symb/plugins.js"></script>';
 		$html .= $imageHtml;
 		$html .= '<script>';
 		$html .= '$(function() {';
@@ -299,7 +308,7 @@ class PluginsManager {
 		$html .= 'play: {';
 		$html .= 'active: true,';
 		$html .= 'auto: true,';
-		$html .= 'interval: 4000,';
+		$html .= 'interval: '.$interval.',';
 		$html .= 'swap: true}});});';
 		$html .= '</script>';
 		
