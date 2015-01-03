@@ -57,6 +57,9 @@ class ImageBatchProcessor {
 	private $webImg = 1;			// 1 = evaluate source and import, 2 = import source and use as is, 3 = map to source  
 	private $tnImg = 1;				// 1 = create from source, 2 = import source, 3 = map to source, 0 = exclude 
 	private $lgImg = 1;				// 1 = import source, 2 = map to source, 3 = import large version (_lg.jpg), 4 = map large version (_lg.jpg), 0 = exclude
+	private $webSourceSuffix = '';
+	private $tnSourceSuffix = '_tn';
+	private $lgSourceSuffix = '_lg';
 	private $keepOrig = 0;
 
 	private $createNewRec = true;
@@ -299,7 +302,7 @@ class ImageBatchProcessor {
 				while($fileName = readdir($dirFH)){
 					if($fileName != "." && $fileName != ".." && $fileName != ".svn"){
 						if(is_file($this->sourcePathBase.$pathFrag.$fileName)){
-							if(!stripos($fileName,'_tn.jpg') && !stripos($fileName,'_lg.jpg')){
+							if(!stripos($fileName,$this->tnSourceSuffix.'.jpg') && !stripos($fileName,$this->lgSourceSuffix.'.jpg')){
 								$this->logOrEcho("Processing File (".date('Y-m-d h:i:s A')."): ".$fileName);
 								$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
 								if($fileExt == ".jpg"){
@@ -368,11 +371,11 @@ class ImageBatchProcessor {
 			$skipAnchors = array('Name','Last modified','Size','Description');
 			foreach( $aNodes as $aNode ) {
 				//$fileName = $aNode->getAttribute('href');
-				$fileName = $aNode->nodeValue;
+				$fileName = trim($aNode->nodeValue);
 				if(!in_array($fileName,$skipAnchors)){
 					$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')+1));
 					if($fileExt){
-						if(!stripos($fileName,'_tn.jpg') && !stripos($fileName,'_lg.jpg')){
+						if(!stripos($fileName,$this->tnSourceSuffix.'.jpg') && !stripos($fileName,$this->lgSourceSuffix.'.jpg')){
 							$this->logOrEcho("Processing File (".date('Y-m-d h:i:s A')."): ".$fileName);
 							if($fileExt == "jpg"){
 								if($this->processImageFile($fileName,$pathFrag)){
@@ -526,6 +529,15 @@ class ImageBatchProcessor {
 			if($this->dbMetadata){
 				$occId = $this->getOccId($specPk);
 			}
+			$fileNameExt = '.jpg';
+			$fileNameBase = $fileName;
+			if($p = strrpos($fileName,'.')){
+				$fileNameExt = substr($fileName,$p);
+				$fileNameBase = substr($fileName,0,$p);
+				if($this->webSourceSuffix){
+					$fileNameBase = substr($fileNameBase,0,-1*strlen($this->webSourceSuffix));
+				}
+			}
 			if($occId || !$this->dbMetadata){
 				$sourcePath = $this->sourcePathBase.$sourcePathFrag;
 				//Setup target path and file name in prep for loading image
@@ -637,7 +649,8 @@ class ImageBatchProcessor {
 						}
 						elseif($this->webImg == 2){
 							// 2 = import source and use as is
-							if(copy($sourcePath.$fileName,$targetPath.$targetFileName)){
+							$webFileName = $fileNameBase.$this->webSourceSuffix.$fileNameExt;
+							if(copy($sourcePath.$webFileName,$targetPath.$targetFileName)){
 								$webUrlFrag = $this->imgUrlBase.$targetFrag.$targetFileName;
 								$this->logOrEcho("Source image imported as web image (".date('Y-m-d h:i:s A').") ",1);
 							}
@@ -645,7 +658,8 @@ class ImageBatchProcessor {
 						elseif($this->webImg == 3){
 							// 3 = map to source as the web image
 							$webImgCreated = true;
-							$webUrlFrag = $sourcePath.$fileName;
+							$webFileName = $fileNameBase.$this->webSourceSuffix.$fileNameExt;
+							$webUrlFrag = $sourcePath.$webFileName;
 							$this->logOrEcho("Source used as web image (".date('Y-m-d h:i:s A').") ",1);
 						}
 					}
@@ -656,7 +670,7 @@ class ImageBatchProcessor {
 					$lgUrlFrag = "";
 					if($this->lgImg){
 						//Large version of image should not be excluded 
-						$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg";
+						$lgTargetFileName = substr($targetFileName,0,-4)."_lg.jpg";
 						if($this->lgImg == 1){
 							// 1 = import source
 							if($width > ($this->webPixWidth*1.3)){
@@ -686,8 +700,8 @@ class ImageBatchProcessor {
 							$this->logOrEcho("Used source as large derivative (".date('Y-m-d h:i:s A').") ",1);
 						}
 						elseif($this->lgImg == 3){
-							// 3 = import large version (_lg.jpg), if it exists
-							$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
+							// 3 = import large version (_lg.jpg or $this->lgSourceSuffix.'.jpg'), if it exists
+							$lgSourceFileName = $fileNameBase.$this->lgSourceSuffix.$fileNameExt;
 							if($this->uriExists($sourcePath.$lgSourceFileName)){
 								if(copy($sourcePath.$lgSourceFileName,$targetPath.$lgTargetFileName)){
 									if(substr($sourcePath,0,4) != 'http') unlink($sourcePath.$lgSourceFileName);
@@ -700,8 +714,8 @@ class ImageBatchProcessor {
 							}
 						}
 						elseif($this->lgImg == 4){
-							// 4 = map to large version (_lg.jpg), if it exist
-							$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
+							// 4 = map to large version (_lg.jpg or $this->lgSourceSuffix.'.jpg'), if it exist
+							$lgSourceFileName = $fileNameBase.$this->lgSourceSuffix.$fileNameExt;
 							if($this->uriExists($sourcePath.$lgSourceFileName)){
 								$lgUrlFrag = $sourcePath.$lgSourceFileName;
 								$this->logOrEcho("Large version mapped to large derivative of source (".date('Y-m-d h:i:s A').") ",1);
@@ -716,7 +730,7 @@ class ImageBatchProcessor {
 					$tnUrlFrag = "";
 					if($this->tnImg){
 						// Don't exclude thumbnails (0 != exclude)
-						$tnTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg";
+						$tnTargetFileName = substr($targetFileName,0,-4)."_tn.jpg";
 						if($this->tnImg == 1){
 							// 1 = create from source, 0 = exclude
 							if($this->createNewImage($sourcePath.$fileName,$targetPath.$tnTargetFileName,$this->tnPixWidth,round($this->tnPixWidth*$height/$width),$width,$height)){
@@ -725,8 +739,8 @@ class ImageBatchProcessor {
 							}
 						}
 						elseif($this->tnImg == 2){
-							// 2 = import source (source name with _tn.jpg suffix)
-							$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
+							// 2 = import source (source name with _tn.jpg (or $this->tnSourceSuffix.'.jpg') suffix)
+							$tnFileName = $fileNameBase.$this->tnSourceSuffix.$fileNameExt;
 							if($this->uriExists($sourcePath.$tnFileName)){
 								rename($sourcePath.$tnFileName,$targetPath.$tnTargetFileName);
 							}
@@ -734,8 +748,8 @@ class ImageBatchProcessor {
 							$this->logOrEcho("Imported source as thumbnail (".date('Y-m-d h:i:s A').") ",1);
 						}
 						elseif($this->tnImg == 3){
-							// 3 = map to source (source name with _tn.jpg suffix)
-							$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
+							// 3 = map to source (source name with _tn.jpg (or $this->tnSourceSuffix.'.jpg') suffix)
+							$tnFileName = $fileNameBase.$this->tnSourceSuffix.$fileNameExt;
 							if($this->uriExists($sourcePath.$tnFileName)){
 								$tnUrlFrag = $sourcePath.$tnFileName;
 								$this->logOrEcho("Thumbnail is map of source thumbnail (".date('Y-m-d h:i:s A').") ",1);
@@ -862,12 +876,24 @@ class ImageBatchProcessor {
 	private function getPrimaryKey($str){
 		$specPk = '';
 		if(isset($this->collArr[$this->activeCollid]['pmterm'])){
-			if(preg_match($this->collArr[$this->activeCollid]['pmterm'],$str,$matchArr)){
+			$pmTerm = $this->collArr[$this->activeCollid]['pmterm'];
+			if(substr($pmTerm,0,1) != '/' || substr($pmTerm,-1) != '/'){
+				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing forward slashes: ".$pmTerm);
+				exit;
+			}
+			if(!strpos($pmTerm,'(') || !strpos($pmTerm,')')){
+				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing capture term: ".$pmTerm);
+				exit;
+			}
+			if(preg_match($pmTerm,$str,$matchArr)){
 				if(array_key_exists(1,$matchArr) && $matchArr[1]){
 					$specPk = $matchArr[1];
 				}
 				if (isset($this->collArr[$this->activeCollid]['prpatt'])) { 				
 					$specPk = preg_replace($this->collArr[$this->activeCollid]['prpatt'],$this->collArr[$this->activeCollid]['prrepl'],$specPk);
+				}
+				if(isset($matchArr[2])){
+					$this->webSourceSuffix = $matchArr[2];
 				}
 			}
 		}
@@ -1682,6 +1708,18 @@ class ImageBatchProcessor {
 	}
 	public function setCreateLgImg($c){
 		$this->lgImg = $c;
+	} 
+
+	public function setWebSourceSuffix($s){
+		$this->webSourceSuffix = $s;
+	} 
+
+	public function setTnSourceSuffix($s){
+		$this->tnSourceSuffix = $s;
+	} 
+
+	public function setLgSourceSuffix($s){
+		$this->lgSourceSuffix = $s;
 	} 
 
 	public function setKeepOrig($c){
