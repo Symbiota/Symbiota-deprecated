@@ -248,7 +248,7 @@ class PluginsManager {
 			$html .= '<div style="width:'.$width.'px;position:absolute;bottom:0;font-size:12px;background-color:rgba(255,255,255,0.8);">';
 			$onclickText = "toggle('slidecaption".$imgIdArr["imgid"]."');toggle('showcaption".$imgIdArr["imgid"]."');";
 			$html .= '<div id="slidecaption'.$imgIdArr["imgid"].'">';
-			$html .= '<a href="#" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;" onclick="'.$onclickText.'">HIDE CAPTION</a>';
+			$html .= '<a style="cursor:pointer;cursor:hand;font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;" onclick="'.$onclickText.'">HIDE CAPTION</a>';
 			$html .= '<div style="clear:both;padding-left:3px;padding-right:3px;"><b>';
 			if($imgIdArr["SciName"] || $imgIdArr["identifier"]){
 				$html .= '<a href="'.$linkUrl.'" target="_blank">';
@@ -263,7 +263,7 @@ class PluginsManager {
 			}
 			$html .= '</b></div>';
 			$html .= '</div>';
-			$html .= '<a href="#" id="showcaption'.$imgIdArr["imgid"].'" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;display:none;" onclick="'.$onclickText.'">SHOW CAPTION</a>';
+			$html .= '<a id="showcaption'.$imgIdArr["imgid"].'" style="cursor:pointer;cursor:hand;font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;display:none;" onclick="'.$onclickText.'">SHOW CAPTION</a>';
 			$html .= '</div></div>';
 		}
 		$html .= '</div></div></div>';
