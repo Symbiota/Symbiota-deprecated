@@ -5,8 +5,11 @@ include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 class TaxonomyUtilities{
 
 	private $conn;
-	private $taxonThesOrder = array('eol','col');
-	private $errorStr;
+	private $taxAuthId = 1;
+	private $activeThesResources = 'eol,col,trop';
+	
+	private $errorCode = 0;
+	private $errorStr = '';
 	private $warningArr = array();
 
 	function __construct() {
@@ -17,17 +20,64 @@ class TaxonomyUtilities{
 		if($this->conn) $this->conn->close();
 	}
 
-	//Taxonomy API methods
-	/*
-	 * Output: Array with keys ('sciname', 'scientificName', 'rankid', 'unitname1', 'unitname2', 'unitind3', 'unitname3', 'author') 
-	 * 
-	 */ 
 	public function initSourceOrder(){
-		if(isset($GLOBALS['taxonThesaurusOrder']) && $GLOBALS['taxonThesaurusOrder']){
-			$this->taxonThesOrder = explode(',',$taxonThesOrder);
+		if(isset($GLOBALS['taxonThesauri']) && $GLOBALS['taxonThesauri']){
+			$this->activeThesResources = explode(',',$GLOBALS['taxonThesauri']);
 		}
 	}
+	
+	public function addSciname($sciname){
+		//Get taxon object
+		$taxonArr = Array();
+		if(!$this->activeThesResources){
+			$this->errorStr = 'ERROR: Taxonomic resources not activated ';
+			$this->errorCode = 1;
+			return false;
+		}
+		$resourceArr = explode(',',$this->activeThesResources);
+		$attemptedResources = '';
+		foreach($resourceArr as $resStr){
+			if($resStr == 'eol'){
+				$taxonArr = $this->getEolTaxonArr($sciname);
+				$attemptedResources .= ', eol';
+			}
+			elseif($resStr == 'col'){
+				$taxonArr = $this->getColTaxonArr($sciname);
+				$attemptedResources .= ', col';
+			}
+			elseif($resStr == 'trop'){
+				$taxonArr = $this->getTropicosTaxonArr($sciname);
+				$attemptedResources .= ', trop';
+			}
+		}
+		if(!$taxonArr){
+			$this->errorStr = 'ERROR: unable to obtain taxon object from: '.trim($attemptedResources,' ,');
+			$this->errorCode = 2;
+			return false;
+		} 
+		//Add taxon to database, return is 
+		$processedTaxonArr = $this->loadNewTaxon($taxonArr);
+		return $processedTaxonArr;
+	} 
 
+	/*
+	 * INPUT: scientific name
+	 *   Example: 'Pinus ponderosa var. arizonica'
+	 * OUTPUT: array representing taxon object 
+	 *   Example: array('scientificName' => 'Pinus ponderosa var. arizonica', 
+	 *        			'unitind1' => '',
+	 *        			'unitname1' => 'Pinus',
+	 *        			'unitind2' => '',
+	 *        			'unitname2' => 'ponderosa',
+	 *        			'unitind3'=>'var.',
+	 *        			'unitname3'=>'arizonica',
+	 *        			'author' => '(Engelm.) Shaw',
+	 *        			'rankid' => '240',
+	 *  				'vern' => array(),
+	 *  				'parent' => array(),
+	 *  				'synonym' => array(),
+	 *        	   )
+	 */
 	public function getEolTaxonArr($sciName){
 		$taxonArr = Array();
 		//Ping EOL
@@ -94,14 +144,12 @@ class TaxonomyUtilities{
 								$parentID = $eolArr['parentNameUsageID'];
 								$ancestors = $eolArr['ancestors'];
 								foreach($ancestors as $ancKey => $ancArr){
-									$taxonArr['parents'][$ancArr['parentNameUsageID']][$ancKey] = $ancArr['taxonID'];
+									$taxonArr['parent'][$ancArr['parentNameUsageID']][$ancKey] = $ancArr['taxonID'];
 								}
 								//Add synonyms
-								//$synonyms = $eolArr['synonyms'];
+								//$synonyms = $eolArr['synonym'];
 								//Dont' deal with synonyms, as of yet
 							}
-							//Add taxon to table
-							//if($taxonArr) $this->loadNewTaxon($taxonArr);
 						}
 						else{
 							$this->errorStr = "Unable to get taxon object for: ".$sciName;
@@ -169,17 +217,29 @@ class TaxonomyUtilities{
 	}
 
 	//Database functions
-	private function loadNewTaxon($taxonArr,$anchorTid = 0){
-		$status = false;
+	private function loadNewTaxon($taxonArr,$tidAccepted = 0){
+		/*
+		 * Default action: add accepted taxon, parents, synonyms, vernacular
+		 * Note: Accepted taxon might already be in thesaurus if taxonomic resource returns search taxon as a synonym    
+		 * Possible conflicts:
+		 * 1) parent of accepted is already in thesaurus as not accepted: parent = 180 then change parent to accepted; for all others link to parent's accepted taxon  
+		 * 2) family is not accepted: use accepted family 
+		 * 3) accepted taxon is in thesaurus as accepted: link to accepted synonym as not accepted
+		 * 4)   
+		 * synonym taxon is accepted  
+		 * 
+		 * INPUT: $taxonArr
+		 * OUPUT: $processedTaxonArr [ex: array('newtid' => '3424','taxonarr' => $taxonArr,'warnings' => array('WARNING: name is a homonym','NOTICE: author not returned'))]
+		 * 
+		 */
+		$retArr = array('taxonarr' => $taxonArr);
+		$newTid = 0;
 		if(!isset($taxonArr['sciname']) || !$taxonArr['sciname']){
 			$this->errorStr = 'ERROR: sciname not defined';
 			return false;
 		}
-		//Get tid 
-		
-		//
 		if(!isset($taxonArr['rankid']) || !$taxonArr['rankid']){
-			$this->errorStr = 'ERROR loading '.$taxonArr['sciname'].', rankid not defined ('.$newTaxon['rankid'].')';
+			$this->errorStr = 'ERROR loading '.$taxonArr['sciname'].', rankid not defined';
 			return false;
 		}
 		if(!array_key_exists('parent',$newTaxon) || !$newTaxon['parent']){
@@ -188,13 +248,23 @@ class TaxonomyUtilities{
 		}
 		$parentName = $newTaxon['parent'];
 		//Get parent tid
-		$sqlParent = 'SELECT tid FROM taxa WHERE (sciname = "'.$parentName.'")';
-		$rs = $this->conn->query($sqlParent);
-		$parTid = $rs->tid;
-		if(!$parTid){
-			$parTid = $loadNewTaxon(Array('name' => $parentName));
+		$sqlParent = 'SELECT t.tid '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE (t.sciname = "'.$parentName.'") AND (ts.taxauthid = '.$this->taxAuthId.')';
+		$parRS = $this->conn->query($sqlParent);
+		$parentTid = 0;
+		if($parRow = $parRS->fetch_object()){
+			$parentTid = $parRow->tid;
 		}
-		
+		else{
+			$parentTaxonArr = $this->addSciname($parentName);
+			$parentTid = $loadNewTaxon(Array('name' => $parentName));
+		}
+		$parRS->free();
+		if(!$parentTid){
+			$this->errorStr = 'ERROR loading '.$taxonArr['sciname'].', unable to add parent';
+			return false;
+		}
 		
 		if(!$parentName){
 			$classArr = Array();
@@ -210,7 +280,7 @@ class TaxonomyUtilities{
 			}
 		}
 		//Load taxon
-		if($parTid){
+		if($parentTid){
 			if($r = $rs->fetch_object()){
 				//We now have everything, now let's load
 				$sciName = trim($newTaxon['genus'].' '.$newTaxon['species'].' '.$newTaxon['infraspecies_marker'].' '.$newTaxon['infraspecies']);
@@ -218,23 +288,24 @@ class TaxonomyUtilities{
 					'VALUES("'.$sciName.'","'.$newTaxon['genus'].'","'.$newTaxon['species'].'","'.$newTaxon['infraspecies_marker'].'","'.
 					$newTaxon['infraspecies'].'","'.$newTaxon['author'].'",'.$rankId.')';
 				if($this->conn->query($sqlInsert)){
-					$tid = $this->conn->insert_id;
-					if(!$anchorTid){
-						$anchorTid = $tid;
-					}
+					$retArr['newtid'] = $this->conn->insert_id;
+					if(!$tidAccepted) $tidAccepted = $retArr['newtid'];
 					$sqlInsert2 = 'INSERT INTO taxstatus(tid,tidaccepted,taxauthid,parenttid) '.
-						'VALUES('.$tid.','.$anchorTid.','.$this->taxAuthId.','.$r->tid.')';
+						'VALUES('.$retArr['newtid'].','.$tidAccepted.','.$this->taxAuthId.','.$r->tid.')';
 					if($this->conn->query($sqlInsert2)){
 						//Add common names
 						
 						
 					}
 				}
-				
+				else{
+					$this->errorStr = 'ERROR inserting '.$taxonArr['sciname'].': '.$this->conn->error;
+					return false;
+				}
 			}
 		}
-		$rs->close();
-		return $tid;
+		$rs->free();
+		return $retArr;
 	}
 
 	//Misc functions
@@ -359,7 +430,18 @@ class TaxonomyUtilities{
 		$endIndex++;
 		return $endIndex;
 	}
-	
+
+	//Setters and getters
+	public function setTaxAuthId($id){
+		if($id && is_numeric($id)){
+			$this->taxAuthId = $id;
+		}
+	}
+
+	public function setActiveThesResources($t){
+		$this->activeThesResources = $t;
+	}
+
 	public function getErrorStr(){
 		return $this->errorStr;
 	}

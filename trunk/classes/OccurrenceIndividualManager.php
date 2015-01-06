@@ -72,7 +72,7 @@ class OccurrenceIndividualManager extends Manager{
 	private function setOccArr(){
 		$sql = 'SELECT o.occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
 			'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
-			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, '.
+			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, taxonremarks, '.
 			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, '.
 			'DATE_FORMAT(eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
 			'verbatimeventdate, country, stateprovince, county, municipality, locality, '.

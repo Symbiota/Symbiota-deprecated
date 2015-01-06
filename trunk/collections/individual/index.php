@@ -363,6 +363,14 @@ $commentArr = $indManager->getCommentArr($isEditor);
 								</div>
 								<?php 
 							} 
+							if($occArr['taxonremarks']){ 
+								?>
+								<div style="margin-left:10px;">
+									<b>Taxon Remarks:</b>
+									<?php echo $occArr['taxonremarks']; ?>
+								</div>
+								<?php 
+							} 
 							if($occArr['identificationremarks']){ 
 								?>
 								<div style="margin-left:10px;">

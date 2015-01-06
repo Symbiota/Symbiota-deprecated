@@ -918,7 +918,10 @@ class ImageBatchProcessor {
 			if($this->conn->query($sql2)){
 				$occId = $this->conn->insert_id;
 				$this->logOrEcho("Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") ",1);
-			} 
+			}
+			else{
+				$this->logOrEcho("ERROR creating new occurrence record: ".$this->conn->error,1);
+			}
 		}
 		if(!$occId){
 			$this->logOrEcho("ERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") ",1);
@@ -1529,7 +1532,7 @@ class ImageBatchProcessor {
 				$sql = 'UPDATE omcollectionstats cs '. 
 					'SET cs.genuscnt = (SELECT COUNT(DISTINCT t.unitname1) '. 
 					'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '. 
-					'WHERE (o.collid = '.$collid.') AND t.rankid >= 180) '. 
+					'WHERE (o.collid = '.$collid.') AND t.rankid IN(180,220,230,240,260)) '. 
 					'WHERE cs.collid = '.$collid.'';
 				if(!$this->conn->query($sql)){
 					$this->logOrEcho('ERROR: unable to update genus counts; '.$this->conn->error);
@@ -1539,7 +1542,7 @@ class ImageBatchProcessor {
 				$sql = 'UPDATE omcollectionstats cs '. 
 					'SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1, t.unitname2) AS spcnt '. 
 					'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '. 
-					'WHERE (o.collid = '.$collid.') AND t.rankid >= 220) '. 
+					'WHERE (o.collid = '.$collid.') AND t.rankid IN(220,230,240,260)) '. 
 					'WHERE cs.collid = '.$collid.'';
 				if(!$this->conn->query($sql)){
 					$this->logOrEcho('ERROR: unable to update species count; '.$this->conn->error);

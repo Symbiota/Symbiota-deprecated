@@ -9,8 +9,8 @@ class OccurrenceEditorDupes {
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
-		$this->targetFields = array('family', 'sciname', 'scientificNameAuthorship', 'taxonRemarks', 
-			'identifiedBy', 'dateIdentified', 'identificationReferences', 'identificationRemarks', 'identificationQualifier', 
+		$this->targetFields = array('family', 'sciname', 'scientificNameAuthorship', 
+			'identifiedBy', 'dateIdentified', 'identificationReferences', 'identificationRemarks', 'taxonRemarks', 'identificationQualifier', 
 			'recordedBy', 'recordNumber', 'associatedCollectors', 'eventDate', 'verbatimEventDate',
 			'country', 'stateProvince', 'county', 'locality', 'decimalLatitude', 'decimalLongitude', 'geodeticDatum',
 			'coordinateUncertaintyInMeters', 'verbatimCoordinates', 'georeferencedBy', 'georeferenceProtocol', 

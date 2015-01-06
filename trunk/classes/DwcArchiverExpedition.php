@@ -84,7 +84,8 @@ class DwcArchiverExpedition{
  			'dateIdentified' => 'http://rs.tdwg.org/dwc/terms/dateIdentified',
  			'identificationReferences' => 'http://rs.tdwg.org/dwc/terms/identificationReferences',
  			'identificationRemarks' => 'http://rs.tdwg.org/dwc/terms/identificationRemarks',
- 			'identificationQualifier' => 'http://rs.tdwg.org/dwc/terms/identificationQualifier',
+ 			'taxonRemarks' => 'http://rs.tdwg.org/dwc/terms/taxonRemarks',
+			'identificationQualifier' => 'http://rs.tdwg.org/dwc/terms/identificationQualifier',
 			'typeStatus' => 'http://rs.tdwg.org/dwc/terms/typeStatus',
 			'recordedBy' => 'http://rs.tdwg.org/dwc/terms/recordedBy',
 			'recordNumber' => 'http://rs.tdwg.org/dwc/terms/recordNumber',
@@ -621,7 +622,7 @@ class DwcArchiverExpedition{
 				'o.family, o.sciname AS scientificName, IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship, '.
 				'IFNULL(CONCAT_WS(" ",t.unitind1,t.unitname1),o.genus) AS genus, IFNULL(CONCAT_WS(" ",t.unitind2,t.unitname2),o.specificEpithet) AS specificEpithet, '.
 				'IFNULL(t.unitind3,o.taxonRank) AS taxonRank, IFNULL(t.unitname3,o.infraspecificEpithet) AS infraspecificEpithet, '.
-				'o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, '.
+				'o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.taxonRemarks, o.identificationQualifier, o.typeStatus, '.
 				'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
 				'o.verbatimEventDate, o.habitat, o.substrate, o.fieldNumber, '.
 				'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, o.informationWithheld, '.

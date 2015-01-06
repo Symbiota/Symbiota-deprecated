@@ -106,7 +106,7 @@ class characterEnclodeCleaner{
 	}
 	
 	public function cleanDeterminations($preview = 1, $fix = 0, $startDetid = 0, $limit = 100000){
-		$sql = 'SELECT detid, identifiedby, dateidentified, sciname, scientificnameauthorship, identificationreferences, identificationremarks '.
+		$sql = 'SELECT detid, identifiedby, dateidentified, sciname, scientificnameauthorship, identificationreferences, identificationremarks, taxonremarks '.
 			'FROM omoccurdeterminations ';
 		if($startDetid) $sql .= 'WHERE detid > '.$startDetid.' ';
 		$sql .= 'ORDER BY detid ';

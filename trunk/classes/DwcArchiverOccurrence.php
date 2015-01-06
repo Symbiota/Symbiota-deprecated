@@ -128,6 +128,8 @@ class DwcArchiverOccurrence{
  		$occurFieldArr['identificationReferences'] = 'o.identificationReferences';
  		$occurTermArr['identificationRemarks'] = 'http://rs.tdwg.org/dwc/terms/identificationRemarks';
  		$occurFieldArr['identificationRemarks'] = 'o.identificationRemarks';
+ 		$occurTermArr['taxonRemarks'] = 'http://rs.tdwg.org/dwc/terms/taxonRemarks';
+ 		$occurFieldArr['taxonRemarks'] = 'o.taxonRemarks';
  		$occurTermArr['identificationQualifier'] = 'http://rs.tdwg.org/dwc/terms/identificationQualifier';
  		$occurFieldArr['identificationQualifier'] = 'o.identificationQualifier';
 		$occurTermArr['typeStatus'] = 'http://rs.tdwg.org/dwc/terms/typeStatus';

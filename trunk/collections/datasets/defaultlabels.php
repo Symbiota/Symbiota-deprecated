@@ -64,6 +64,7 @@ else{
 				.identifiedbydiv {margin-left:15px;}
 				.identificationreferences {margin-left:15px;}
 				.identificationremarks {margin-left:15px;}
+				.taxonremarks {margin-left:15px;}
 				.loc1div {font-size:11pt;}
 				.country {font-weight:bold;}
 				.stateprovince {font-weight:bold;}
@@ -161,13 +162,16 @@ else{
 												<span class="dateidentified"><?php echo $occArr['dateidentified']; ?></span>
 											</div>
 											<?php
-											if($occArr['identificationreferences'] || $occArr['identificationremarks']){
+											if($occArr['identificationreferences'] || $occArr['identificationremarks'] || $occArr['taxonremarks']){
 												?>
 												<div class="identificationreferences">
 													<?php echo $occArr['identificationreferences']; ?>
 												</div>
 												<div class="identificationremarks">
 													<?php echo $occArr['identificationremarks']; ?>
+												</div>
+												<div class="taxonremarks">
+													<?php echo $occArr['taxonremarks']; ?>
 												</div>
 												<?php 
 											}

@@ -150,8 +150,8 @@ class SpecUpload{
 		$retArr = Array();
 		if($limit){
 			$occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
-				'scientificnameauthorship', 'taxonremarks', 'identifiedby', 'dateidentified', 'identificationreferences',
-				'identificationremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
+				'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
+				'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
 				'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
 				'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
 				'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',

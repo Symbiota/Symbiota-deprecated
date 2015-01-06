@@ -23,8 +23,8 @@ class OccurrenceEditorManager {
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		$this->occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
-			'tidinterpreted', 'scientificnameauthorship', 'taxonremarks', 'identifiedby', 'dateidentified', 'identificationreferences',
-			'identificationremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
+			'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
+			'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
 			'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
 			'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
 			'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
@@ -603,25 +603,6 @@ class OccurrenceEditorManager {
 			}
 			*/
 			$this->addTableJoins($sql);
-			/*
-			if(strpos($this->sqlWhere,'ocr.rawstr')){
-				if(strpos($this->sqlWhere,'ocr.rawstr IS NULL')){
-					$sql .= 'LEFT JOIN images i ON o.occid = i.occid LEFT JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
-				}
-				else{
-					$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
-				}
-			}
-			elseif(array_key_exists('io',$this->qryArr)){
-				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
-			}
-			elseif(array_key_exists('woi',$this->qryArr)){
-				$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
-			}
-			if($this->crowdSourceMode){
-				$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
-			}
-			*/
 			$sql .= $this->sqlWhere;
 		}
 		if($sql){
@@ -860,8 +841,8 @@ class OccurrenceEditorManager {
 		if($occArr){
 			$fieldArr = array('basisOfRecord' => 's', 'catalogNumber' => 's', 'otherCatalogNumbers' => 's', 'occurrenceid' => 's', 'ownerInstitutionCode' => 's', 
 				'family' => 's', 'sciname' => 's', 'tidinterpreted' => 'n', 'scientificNameAuthorship' => 's', 'identifiedBy' => 's', 'dateIdentified' => 's', 
-				'identificationReferences' => 's', 'identificationremarks' => 's', 'identificationQualifier' => 's', 'typeStatus' => 's', 'recordedBy' => 's', 'recordNumber' => 's', 
-				'associatedCollectors' => 's', 'eventDate' => 'd', 'year' => 'n', 'month' => 'n', 'day' => 'n', 'startDayOfYear' => 'n', 'endDayOfYear' => 'n', 
+				'identificationReferences' => 's', 'identificationremarks' => 's', 'taxonRemarks' => 's', 'identificationQualifier' => 's', 'typeStatus' => 's',  
+				'recordedBy' => 's', 'recordNumber' => 's', 'associatedCollectors' => 's', 'eventDate' => 'd', 'year' => 'n', 'month' => 'n', 'day' => 'n', 'startDayOfYear' => 'n', 'endDayOfYear' => 'n', 
 				'verbatimEventDate' => 's', 'habitat' => 's', 'substrate' => 's', 'fieldnumber' => 's', 'occurrenceRemarks' => 's', 'associatedTaxa' => 's', 'verbatimattributes' => 's', 
 				'dynamicProperties' => 's', 'reproductiveCondition' => 's', 'cultivationStatus' => 's', 'establishmentMeans' => 's', 
 				'lifestage' => 's', 'sex' => 's', 'individualcount' => 's', 'samplingprotocol' => 's', 'preparations' => 's', 

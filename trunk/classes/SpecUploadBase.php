@@ -704,8 +704,8 @@ class SpecUploadBase extends SpecUpload{
 			'o.scientificName = u.scientificName, o.sciname = u.sciname, o.tidinterpreted = u.tidinterpreted, o.genus = u.genus, o.institutionID = u.institutionID, '.
 			'o.collectionID = u.collectionID, o.specificEpithet = u.specificEpithet, o.datasetID = u.datasetID, o.taxonRank = u.taxonRank, '.
 			'o.infraspecificEpithet = u.infraspecificEpithet, o.institutionCode = u.institutionCode, o.collectionCode = u.collectionCode, '.
-			'o.scientificNameAuthorship = u.scientificNameAuthorship, o.taxonRemarks = u.taxonRemarks, o.identifiedBy = u.identifiedBy, '.
-			'o.dateIdentified = u.dateIdentified, o.identificationReferences = u.identificationReferences, '.
+			'o.scientificNameAuthorship = u.scientificNameAuthorship, o.identifiedBy = u.identifiedBy, '.
+			'o.dateIdentified = u.dateIdentified, o.taxonRemarks = u.taxonRemarks, o.identificationReferences = u.identificationReferences, '.
 			'o.identificationRemarks = u.identificationRemarks, o.identificationQualifier = u.identificationQualifier, o.typeStatus = u.typeStatus, '.
 			'o.recordedBy = u.recordedBy, o.recordNumber = u.recordNumber, o.fieldnumber = u.fieldnumber, '.
 			'o.associatedCollectors = u.associatedCollectors, o.eventDate = u.eventDate, '.
@@ -740,8 +740,8 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, basisOfRecord, catalogNumber, otherCatalogNumbers, occurrenceid, '.
 			'ownerInstitutionCode, institutionID, collectionID, institutionCode, collectionCode, '.
 			'family, scientificName, sciname, tidinterpreted, genus, specificEpithet, datasetID, taxonRank, infraspecificEpithet, '.
-			'scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, '.
-			'identificationQualifier, typeStatus, recordedBy, recordNumber, associatedCollectors, '.
+			'scientificNameAuthorship, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, '.
+			'taxonRemarks, identificationQualifier, typeStatus, recordedBy, recordNumber, associatedCollectors, '.
 			'eventDate, Year, Month, Day, startDayOfYear, endDayOfYear, verbatimEventDate, '.
 			'habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, associatedOccurrences, '.
 			'associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, cultivationStatus, establishmentMeans, '.
@@ -754,8 +754,8 @@ class SpecUploadBase extends SpecUpload{
 			'SELECT u.collid, u.dbpk, u.basisOfRecord, u.catalogNumber, u.otherCatalogNumbers, u.occurrenceid, '.
 			'u.ownerInstitutionCode, u.institutionID, u.collectionID, u.institutionCode, u.collectionCode, '.
 			'u.family, u.scientificName, u.sciname, u.tidinterpreted, u.genus, u.specificEpithet, u.datasetID, u.taxonRank, u.infraspecificEpithet, '.
-			'u.scientificNameAuthorship, u.taxonRemarks, u.identifiedBy, u.dateIdentified, u.identificationReferences, u.identificationRemarks, '.
-			'u.identificationQualifier, u.typeStatus, u.recordedBy, u.recordNumber, u.associatedCollectors, '.
+			'u.scientificNameAuthorship, u.identifiedBy, u.dateIdentified, u.identificationReferences, u.identificationRemarks, '.
+			'u.taxonRemarks, u.identificationQualifier, u.typeStatus, u.recordedBy, u.recordNumber, u.associatedCollectors, '.
 			'u.eventDate, u.Year, u.Month, u.Day, u.startDayOfYear, u.endDayOfYear, u.verbatimEventDate, '.
 			'u.habitat, u.substrate, u.fieldNotes, u.fieldnumber, u.occurrenceRemarks, u.informationWithheld, u.associatedOccurrences, '.
 			'u.associatedTaxa, u.dynamicProperties, u.verbatimAttributes, u.reproductiveCondition, u.cultivationStatus, u.establishmentMeans, '.
@@ -1155,7 +1155,7 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.genuscnt = (SELECT COUNT(DISTINCT t.unitname1) '.
 			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 180) '.
+			'WHERE (o.collid = '.$this->collId.') AND t.rankid IN(180,220,230,240,260)) '.
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
 		$this->outputMsg('Done!</li>');
@@ -1166,7 +1166,7 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1, t.unitname2) AS spcnt '.
 			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 220) '.
+			'WHERE (o.collid = '.$this->collId.') AND t.rankid IN(220,230,240,260)) '.
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
 		$this->outputMsg('Done</li>');
