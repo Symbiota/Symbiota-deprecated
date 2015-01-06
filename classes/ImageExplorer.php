@@ -189,8 +189,8 @@ class ImageExplorer{
 	   		   $includeVerification = TRUE;
 	   		    // include occurrences with no verification of identification and an id of species or lower or those with an identification verification of good
 	   		    // differs from the query above only in rankid>=220 and ranking>=5
-			    $sqlWhere .= "AND ( (o.occid IS NULL AND t.rankid >= 220) OR " . 
-			                 "   (o.occid NOT IN (SELECT occid FROM omoccurverification WHERE (category = \"identification\")) AND t.rankid >= 220) " .
+			    $sqlWhere .= "AND ( (o.occid IS NULL AND t.rankid IN(220,230,240,260)) OR " . 
+			                 "   (o.occid NOT IN (SELECT occid FROM omoccurverification WHERE (category = \"identification\")) AND t.rankid IN(220,230,240,260)) " .
 			                 " OR " . 
 			                 "   (v.category = 'identification' AND v.ranking >= 5) " . 
 			                 " ) ";

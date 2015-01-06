@@ -419,7 +419,7 @@ class CollectionProfileManager {
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.genuscnt = (SELECT COUNT(DISTINCT t.unitname1) '.
 			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collid.') AND t.rankid >= 180) '.
+			'WHERE (o.collid = '.$this->collid.') AND t.rankid IN(180,220,230,240,260)) '.
 			'WHERE cs.collid = '.$this->collid;
 		$writeConn->query($sql);
 		echo 'Done!</li>';
@@ -430,7 +430,7 @@ class CollectionProfileManager {
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1, t.unitname2) AS spcnt '.
 			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collid.') AND t.rankid >= 220) '.
+			'WHERE (o.collid = '.$this->collid.') AND t.rankid IN(220,230,240,260)) '.
 			'WHERE cs.collid = '.$this->collid;
 		$writeConn->query($sql);
 		echo 'Done</li>';

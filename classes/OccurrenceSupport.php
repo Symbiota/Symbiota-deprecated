@@ -127,8 +127,8 @@ class OccurrenceSupport {
 			$rs = $this->conn->query($sql);
 			if($rs){
 				echo "\"occid\",\"catalogNumber\",\"family\",\"scientificName\",\"genus\",\"specificEpithet\",".
-				"\"taxonRank\",\"infraspecificEpithet\",\"scientificNameAuthorship\",\"taxonRemarks\",\"identifiedBy\",".
-				"\"dateIdentified\",\"identificationReferences\",\"identificationRemarks\",\"identificationQualifier\",".
+				"\"taxonRank\",\"infraspecificEpithet\",\"scientificNameAuthorship\",\"identifiedBy\",".
+				"\"dateIdentified\",\"identificationReferences\",\"identificationRemarks\",\"taxonRemarks\",\"identificationQualifier\",".
 	 			"\"recordedBy\",\"recordNumber\",\"associatedCollectors\",\"eventDate\",\"year\",\"month\",\"monthName\",\"day\",".
 		 		"\"verbatimEventDate\",\"habitat\",\"substrate\",\"verbatimAttributes\",\"occurrenceRemarks\",".
 	 			"\"associatedTaxa\",\"reproductiveCondition\",\"establishmentMeans\",\"country\",".
@@ -142,8 +142,8 @@ class OccurrenceSupport {
 						echo $row['occid'].",\"".$row["catalognumber"]."\",\"".
 							$row["family"]."\","."\"".$row["sciname"]."\",\"".$row["genus"]."\",\"".$row["specificepithet"]."\",\"".
 							$row["taxonrank"]."\",\"".$row["infraspecificepithet"]."\",\"".$row["scientificnameauthorship"]."\",\"".
-							$row["taxonremarks"]."\",\"".$row["identifiedby"]."\",\"".$row["dateidentified"]."\",\"".$row["identificationreferences"]."\",\"".
-							$row["identificationremarks"]."\",\"".$row["identificationqualifier"]."\",\"".$row["recordedby"]."\",\"".$row["recordnumber"]."\",\"".
+							$row["identifiedby"]."\",\"".$row["dateidentified"]."\",\"".$row["identificationreferences"]."\",\"".$row["identificationremarks"]."\",\"".
+							$row["taxonremarks"]."\",\"".$row["identificationqualifier"]."\",\"".$row["recordedby"]."\",\"".$row["recordnumber"]."\",\"".
 							$row["associatedcollectors"]."\",\"".$row["eventdate"]."\",".$row["year"].",".$row["month"].",".$row["monthname"].",".$row["day"].",\"".
 							$row["verbatimeventdate"]."\",\"".$row["habitat"]."\",\"".$row["substrate"]."\",\"".
 							$row["verbatimattributes"]."\",\"".

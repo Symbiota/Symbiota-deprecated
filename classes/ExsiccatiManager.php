@@ -512,7 +512,7 @@ class ExsiccatiManager {
 				//Transfer occurrence record
 				if(is_numeric($tokArr[0])){
 					$sql1 = 'INSERT INTO omoccurrences(collid, catalognumber, family, scientificName, sciname, tidinterpreted, scientificNameAuthorship, '.
-						'taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, '. 
+						'identifiedBy, dateIdentified, identificationReferences, identificationRemarks, taxonRemarks, identificationQualifier, typeStatus, '. 
 						'recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, '.
 						'verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
 						'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, '.
@@ -523,7 +523,7 @@ class ExsiccatiManager {
 						'minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, disposition, genericcolumn1, genericcolumn2, '.
 						'processingstatus, dateEntered) '.
 						'SELECT '.$targetCollid.', "'.$this->cleanInStr($catNum).'", family, scientificName, sciname, tidinterpreted, scientificNameAuthorship, '.
-						'taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, '.
+						'identifiedBy, dateIdentified, identificationReferences, identificationRemarks, taxonRemarks, identificationQualifier, typeStatus, '.
 						'recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, '.
 						'verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
 						'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, '.

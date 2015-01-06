@@ -13,8 +13,8 @@ $collManager = new OccurrenceListManager();
 $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Array(IID,Array(fieldName,value))
 
 $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname', 
-	'tidinterpreted', 'scientificnameauthorship', 'taxonremarks', 'identifiedby', 'dateidentified', 'identificationreferences',
-	'identificationremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
+	'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
+	'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
 	'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
 	'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
 	'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans', 

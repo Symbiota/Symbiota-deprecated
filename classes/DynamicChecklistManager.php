@@ -45,7 +45,7 @@ class DynamicChecklistManager {
 			if($tidFilter){
 				$sql .= 'INNER JOIN taxaenumtree e ON ts2.tid = e.tid '; 
 			}
-			$sql .= 'WHERE (t.rankid >= 220) AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) '.
+			$sql .= 'WHERE (t.rankid IN(220,230,240,260)) AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) '.
 				'AND (o.DecimalLatitude BETWEEN '.$lat1.' AND '.$lat2.') AND (o.DecimalLongitude BETWEEN '.$lng1.' AND '.$lng2.') ';
 			if($tidFilter){
 				$sql .= 'and e.parentTid = '.$tidFilter;

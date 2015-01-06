@@ -161,7 +161,7 @@ else{
 			}
 			else{
 				$advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','scientificNameAuthorship'=>'Author','identifiedBy'=>'Identified By',
-					'identificationReferences'=>'Identification References','identificationRemarks'=>'Identification Remarks',
+					'identificationReferences'=>'Identification References','identificationRemarks'=>'Identification Remarks','taxonRemarks'=>'Taxon Remarks',
 					'identificationQualifier'=>'Identification Qualifier','typeStatus'=>'Type Status',
 					'catalogNumber'=>'Catalog Number','otherCatalogNumbers'=>'Other Catalog Numbers',
 					'recordedBy'=>'Collector/Observer','recordNumber'=>'Collector Number','associatedCollectors'=>'Associated Collectors',

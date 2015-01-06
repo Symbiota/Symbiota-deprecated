@@ -564,8 +564,8 @@ class OccurDatasetManager {
 			//Get occurrence records
 			$sql2 = 'SELECT o.occid, o.collid, o.catalognumber, o.othercatalognumbers, '.
 				'o.family, o.sciname AS scientificname, o.genus, o.specificepithet, o.taxonrank, o.infraspecificepithet, '.
-				'o.scientificnameauthorship, "" AS parentauthor, o.taxonremarks, o.identifiedby, o.dateidentified, o.identificationreferences, '.
-				'o.identificationremarks, o.identificationqualifier, o.typestatus, o.recordedby, o.recordnumber, o.associatedcollectors, '.
+				'o.scientificnameauthorship, "" AS parentauthor, o.identifiedby, o.dateidentified, o.identificationreferences, '.
+				'o.identificationremarks, o.taxonremarks, o.identificationqualifier, o.typestatus, o.recordedby, o.recordnumber, o.associatedcollectors, '.
 				'DATE_FORMAT(o.eventdate,"%e %M %Y") AS eventdate, o.year, o.month, o.day, DATE_FORMAT(o.eventdate,"%M") AS monthname, '.
 				'o.verbatimeventdate, o.habitat, o.substrate, o.occurrenceremarks, o.associatedtaxa, o.verbatimattributes, '.
 				'o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, o.country, '.
@@ -650,8 +650,8 @@ class OccurDatasetManager {
 				
 				$fh = fopen('php://output','w');
 				$headerArr = array("occid","catalogNumber","family","scientificName","genus","specificEpithet",
-					"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","taxonRemarks","identifiedBy",
-					"dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
+					"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","identifiedBy",
+					"dateIdentified","identificationReferences","identificationRemarks","taxonRemarks","identificationQualifier",
 		 			"recordedBy","recordNumber","associatedCollectors","eventDate","year","month","monthName","day",
 			 		"verbatimEventDate","habitat","substrate","verbatimAttributes","occurrenceRemarks",
 		 			"associatedTaxa","reproductiveCondition","establishmentMeans","country",

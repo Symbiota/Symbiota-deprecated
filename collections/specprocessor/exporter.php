@@ -431,7 +431,116 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 							</fieldset>
 						</form>
 						<?php
-					} 
+					}
+					//Export for georeferencing (e.g. GeoLocate)
+					?>
+					<form name="expgeoform" action="../download/downloadhandler.php" method="post" onsubmit="return validateExpGeoForm(this);">
+						<fieldset>
+							<legend><b>Export Specimens Lacking Georeferencing Data</b></legend>
+							<div style="margin:15px;">
+								This module extracts specimens that lack decimal coordinates or have coordinates that needs to be verified.
+								This download will result in a Darwin Core Archive containing a UTF-8 encoded CSV file containing 
+								only georeferencing relavent data columns for the occurrences. By default, occurrences 
+								will be limited to records containing locality information but no decimal coordinates. 
+								This output is particularly useful for creating data extracts that will be imported into a GeoLocate 
+								croudsourcing project. 
+							</div>
+							<table>
+								<tr>
+									<td>
+										<div style="margin:10px;">
+											<b>Processing Status:</b>
+										</div> 
+									</td>
+									<td>
+										<div style="margin:10px 0px;">
+											<select name="processingstatus">
+												<option value="">All Records</option>
+												<?php 
+												$statusArr = $dlManager->getProcessingStatusList($collid);
+												foreach($statusArr as $v){
+													echo '<option value="'.$v.'">'.ucwords($v).'</option>';
+												}
+												?>
+											</select>
+										</div> 
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<div style="margin:10px;">
+											<b>Coordinates:</b>
+										</div> 
+									</td>
+									<td>
+										<div style="margin:10px 0px;">
+											<input name="customtype2" type="radio" value="NULL" checked /> are empty (is null)<br/>
+											<input name="customtype2" type="radio" value="NOTNULL" /> have values (e.g. need verification)
+											<input name="customfield2" type="hidden" value="decimallatitude" />
+										</div> 
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<div style="margin:10px;">
+											<b>Additional<br/>Filters:</b>
+										</div> 
+									</td>
+									<td>
+										<div style="margin:10px 0px;">
+											<select name="customfield1" style="width:200px">
+												<option value="">Select Field Name</option>
+												<option value="">---------------------------------</option>
+												<?php 
+												foreach($advFieldArr as $k => $v){
+													echo '<option value="'.$k.'" '.($k==$customField1?'SELECTED':'').'>'.$v.'</option>';
+												}
+												?>
+											</select>
+											<select name="customtype1">
+												<option value="EQUALS">EQUALS</option>
+												<option <?php echo ($customType1=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
+												<option <?php echo ($customType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+												<option <?php echo ($customType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+												<option <?php echo ($customType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
+											</select>
+											<input name="customvalue1" type="text" value="<?php echo $customValue1; ?>" style="width:200px;" />
+										</div> 
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<div style="margin:10px;">
+											<b>Preset variables:</b>
+										</div> 
+									</td>
+									<td>
+										<div style="margin:10px 0px;">
+											<input name="customtype2" type="radio" value="NULL" checked /> are empty (is null)<br/>
+											<input name="customtype2" type="radio" value="NOTNULL" /> have values (e.g. need verification)
+											<input name="customfield2" type="hidden" value="decimallatitude" />
+										</div> 
+									</td>
+								</tr>
+								<tr>
+									<td colspan="2">
+										<div style="margin:10px;">
+											<input name="customfield3" type="hidden" value="locality" />
+											<input name="customtype3" type="hidden" value="NOTNULL" />
+											<input name="format" type="hidden" value="csv" />
+											<input name="cset" type="hidden" value="utf-8" />
+											<input name="zip" type="hidden" value="1" />
+											<input name="targetcollid" type="hidden" value="<?php echo $collid; ?>" />
+											<input name="schema" type="hidden" value="dwc" />
+											<input name="extended" type="hidden" value="1" />
+											<input name="submitaction" type="submit" value="Download Records" />
+										</div>
+									</td>
+								</tr>
+							</table>							
+						</fieldset>
+					</form>
+					<?php 
 				}
 				else{
 					echo '<div>ERROR: collection identifier not defined. Contact administrator</div>';

@@ -275,7 +275,7 @@ class ChecklistVoucherAdmin {
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality, IFNULL(o.cultivationstatus,0) as culstat '.
 				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 				'INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
-				'WHERE t.rankid >= 220 AND ('.$this->sqlFrag.') '.
+				'WHERE t.rankid IN(220,230,240,260) AND ('.$this->sqlFrag.') '.
 				'AND o.tidinterpreted NOT IN (SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
 				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1)';

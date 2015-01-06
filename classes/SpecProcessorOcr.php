@@ -395,24 +395,29 @@ class SpecProcessorOcr{
 		$status = false;
 		if($this->cropX || $this->cropY || $this->cropW < 1 || $this->cropH < 1){
 			// Create image instances
-			if($img = imagecreatefromjpeg($this->imgUrlLocal)){
-				$imgW = imagesx($img);
-				$imgH = imagesy($img);
-				if(($this->cropX + $this->cropW) > 1) $this->cropW = 1 - $this->cropX;
-				if(($this->cropY + $this->cropH) > 1) $this->cropH = 1 - $this->cropY;
-				$pX = $imgW*$this->cropX;
-				$pY = $imgH*$this->cropY;
-				$pW = $imgW*$this->cropW;
-				$pH = $imgH*$this->cropH;
-				$dest = imagecreatetruecolor($pW,$pH);
-
-				// Copy
-				if(imagecopy($dest,$img,0,0,$pX,$pY,$pW,$pH)){
-					//$status = imagejpeg($dest,str_replace('_img.jpg','_crop.jpg',$this->imgUrlLocal));
-					$status = imagejpeg($dest,$this->imgUrlLocal);
+			try{
+				if($img = imagecreatefromjpeg($this->imgUrlLocal)){
+					$imgW = imagesx($img);
+					$imgH = imagesy($img);
+					if(($this->cropX + $this->cropW) > 1) $this->cropW = 1 - $this->cropX;
+					if(($this->cropY + $this->cropH) > 1) $this->cropH = 1 - $this->cropY;
+					$pX = $imgW*$this->cropX;
+					$pY = $imgH*$this->cropY;
+					$pW = $imgW*$this->cropW;
+					$pH = $imgH*$this->cropH;
+					$dest = imagecreatetruecolor($pW,$pH);
+	
+					// Copy
+					if(imagecopy($dest,$img,0,0,$pX,$pY,$pW,$pH)){
+						//$status = imagejpeg($dest,str_replace('_img.jpg','_crop.jpg',$this->imgUrlLocal));
+						$status = imagejpeg($dest,$this->imgUrlLocal);
+					}
+					imagedestroy($dest);
+					imagedestroy($img);
 				}
-				imagedestroy($dest);
-				imagedestroy($img);
+			}
+			catch(Exception $e){
+				//echo 'Caught exception: '.$e->getMessage();
 			}
 		}
 		return $status;

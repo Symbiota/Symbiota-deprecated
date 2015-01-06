@@ -248,6 +248,14 @@ body{
 	width:	95%;
 }
 
+#taxonRemarksDiv{
+	padding:	3px 0px 0px 10px;
+}
+
+#taxonRemarksDiv input{
+	width:	95%;
+}
+
 #countryDiv{
 	float:	left;
 }

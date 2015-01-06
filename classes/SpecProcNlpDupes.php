@@ -19,10 +19,10 @@ class SpecProcNlpDupes {
 		$this->echoStr('Starting batch process');
 		$sql = 'SELECT r.prlid, r.rawstr '.
 			'FROM specprocessorrawlabels r LEFT JOIN specprococrfrag f ON r.prlid = f.prlid '.
-			'WHERE f.prlid IS NULL';
+			'WHERE f.prlid IS NULL LIMIT 1000';
 		$rs = $this->conn->query($sql);
 		$cnt = 1;
-		if($r = $rs->fetch_object()){
+		while($r = $rs->fetch_object()){
 			if($this->processFragment($r->rawstr,$r->prlid)){
 				if($cnt%1000 == 0) $this->echoStr($cnt.' OCR records',1);
 			}
@@ -37,38 +37,37 @@ class SpecProcNlpDupes {
 		//Clean string
 		$rawOcr = str_replace('.', ' ',$rawOcr);
 		$rawOcr = preg_replace('/\s\s+/',' ',$rawOcr);
-		$rawOcr = trim(preg_replace('/[^a-z,0-9]/','',$rawOcr));
-		if(strlen($ocrStr) > 10){
+		$rawOcr = trim(preg_replace('/[^a-zA-Z0-9\s]/','',$rawOcr));
+		if(strlen($rawOcr) > 10){
 			//Load into database
-			$framArr = preg_split("/\s/", $rawOcr);
+			$wordArr = preg_split("/\s/", $rawOcr);
 			$previousWord = '';
 			$cnt = 0;
-			foreach($framArr as $w){
-				if($previousWord){
-					$keyTerm = $previousWord.$w;
-					$sql = 'INSERT INTO(prlid,firstword,secondword,keyterm,wordorder) '.
-						'VALUES('.$prlid.',"'.$previousWord.'","'.$w.'","'.$keyTerm.'",'.$cnt.')';
-					if($this->conn->query($sql)){
-						$status = true;
-						$cnt++;
+			$sqlFrag = '';
+			if(count($wordArr) > 1){
+				foreach($wordArr as $w){
+					if($previousWord){
+						$keyTerm = $previousWord.$w;
+						$sqlFrag .= ',('.$prlid.',"'.$previousWord.'","'.$w.'","'.$keyTerm.'",'.$cnt.')';
 					}
-					else{
-						$this->echoStr('ERROR loading terms: '.$this->conn->error, $indent = 1);
-					}
+					$previousWord = $w;
 				}
-				$previousWord = $w;
+				$sql = 'INSERT INTO specprococrfrag(prlid,firstword,secondword,keyterm,wordorder) '.
+					'VALUES'.substr($sqlFrag,1);
+				//$this->echoStr($sql);
+				if($this->conn->query($sql)){
+					$status = true;
+					$cnt++;
+				}
+				else{
+					$this->echoStr('ERROR loading terms (#'.$prlid.'): '.$this->conn->error, $indent = 1);
+					$this->echoStr($sql);
+				}
 			}
 		}
 		return $status;
 	}
-	
-	private function getKeyTerm($w){
-		if(preg_match('/\d+/',$w)) return '';
-		$w = trim($w,' ,;().');
-		if(strlen($w) < 2) return '';
-		return $w;
-	}
-	
+
 	//Setters and getters
 	public function setVerbose($v){
 		$this->verbose = $v;
