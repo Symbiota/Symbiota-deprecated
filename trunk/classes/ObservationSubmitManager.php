@@ -103,7 +103,7 @@ class ObservationSubmitManager {
 					'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, substrate, occurrenceRemarks, associatedTaxa, '.
 					'verbatimattributes, reproductiveCondition, cultivationStatus, establishmentMeans, country, '.
 					'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
-					'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid) '.
+					'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid, dateEntered) '.
 	
 				'VALUES ('.$this->collId.',"Observation",'.($occArr['family']?'"'.$this->cleanInStr($occArr['family']).'"':'NULL').','.
 				'"'.$this->cleanInStr($occArr['sciname']).'","'.
@@ -134,7 +134,7 @@ class ObservationSubmitManager {
 				($occArr['coordinateuncertaintyinmeters']?'"'.$occArr['coordinateuncertaintyinmeters'].'"':'NULL').','.
 				($occArr['georeferenceremarks']?'"'.$this->cleanInStr($occArr['georeferenceremarks']).'"':'NULL').','.
 				($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').','.
-				$obsUid.') ';
+				$obsUid.',"'.date('Y-m-d H:i:s').'") ';
 				//echo $sql;
 				if($this->conn->query($sql)){
 					$occArr['phuid'] = $obsUid;

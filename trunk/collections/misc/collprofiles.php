@@ -215,7 +215,7 @@ if($symbUid){
 									</a>
 								</li>
 								<li>
-									<a href="../editor/occurrencecleaner.php?obsuid=0&collid=<?php echo $collid; ?>">
+									<a href="../cleaning/occurrencecleaner.php?obsuid=0&collid=<?php echo $collid; ?>">
 										Data Cleaning Tools 
 									</a>
 								</li>
