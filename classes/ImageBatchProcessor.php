@@ -913,8 +913,8 @@ class ImageBatchProcessor {
 		$rs->free();
 		if(!$occId && $this->createNewRec){
 			//Records does not exist, create a new one to which image will be linked
-			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber,processingstatus) '.
-				'VALUES('.$this->activeCollid.',"'.$specPk.'","unprocessed")';
+			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber,processingstatus,dateentered) '.
+				'VALUES('.$this->activeCollid.',"'.$specPk.'","unprocessed","'.date('Y-m-d H:i:s').'")';
 			if($this->conn->query($sql2)){
 				$occId = $this->conn->insert_id;
 				$this->logOrEcho("Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") ",1);
@@ -1339,8 +1339,8 @@ class ImageBatchProcessor {
 							else{
 								//Insert new record
 								if($activeFields){
-									$sqlIns1 = 'INSERT INTO omoccurrences(collid,catalogNumber,processingstatus';
-									$sqlIns2 = 'VALUES ('.$this->activeCollid.',"'.$catNum.'","unprocessed"';
+									$sqlIns1 = 'INSERT INTO omoccurrences(collid,catalogNumber,processingstatus,dateentered';
+									$sqlIns2 = 'VALUES ('.$this->activeCollid.',"'.$catNum.'","unprocessed","'.date('Y-m-d H:i:s').'"';
 									foreach($activeFields as $aField){
 										$sqlIns1 .= ','.$aField;
 										$value = $this->cleanString($recMap[$aField]);
