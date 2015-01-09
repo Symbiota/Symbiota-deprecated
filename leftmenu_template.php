@@ -25,6 +25,11 @@
 		</a>
 	</div>
 	<div class="menuitem">
+    	<a href="<?php echo $clientRoot; ?>/agents/index.php">
+    		Agents
+    	</a>
+    </div>
+	<div class="menuitem">
 		<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist">
 			Dynamic Checklist
 		</a>
@@ -80,5 +85,3 @@
 		<a href='<?php echo $clientRoot; ?>/sitemap.php'>Sitemap</a>
 	</div>
 </div>
-
-

@@ -4687,6 +4687,7 @@ class SpecProcNlpLbcc {
 		return array();
 	}
 
+    
 	private function processCollectorQueryResult($r2, $lName, $fName, $mName) {//echo "\nInput to processCollectorQueryResult:\nlName: ".$lName."\nfName: ".$fName."\nmName: ".$mName,"\n";
 		$firstName = $r2->firstName;
 		$middleInitial = $r2->middleName;
@@ -4694,10 +4695,12 @@ class SpecProcNlpLbcc {
 		if(strlen($mName) == 1 && strlen($middleInitial) > 1) $middleInitial = substr($middleInitial, 0, 1);
 		if(STRLEN($firstName) > 0 && strcmp($firstName, $fName) == 0) {
 			if(STRLEN($middleInitial) > 0 && STRLEN($mName) > 0) {
+                // TODO: Check if downstream consumers can substitute agentID for collectorID.
 				if(strcasecmp($middleInitial, $mName) == 0) {
 					return array
 					(
-						'collectorID' => $r2->recordedById,
+						'agentID' => $r2->agentid,
+						'collectorID' => $r2->agentid,
 						'familyName' => $lName,
 						'collectorName' => $r2->firstName." ".$middleInitial." ".$lName
 					);
@@ -4705,7 +4708,8 @@ class SpecProcNlpLbcc {
 			} else {
 				return array
 				(
-					'collectorID' => $r2->recordedById,
+					'agentID' => $r2->agentid,
+				    'collectorID' => $r2->agentid,
 					'familyName' => $lName,
 					'collectorName' => $r2->firstName." ".$lName
 				);
@@ -4716,9 +4720,9 @@ class SpecProcNlpLbcc {
 
 	private function getCollectorFromDatabase($name, $string) {
 		if(strlen($name) > 2) {//echo "\nInput to getCollectorFromDatabase, Name: ".$name.", String: ".$string."\n";
-			$sql = "SELECT c.recordedById, c.familyName, c.firstName, c.middleName ".
-				"FROM omcollectors c ".
-				"WHERE c.familyName = '".str_replace(array("\"", "'"), "", $name)."'";// AND c.recordedById != 8024";
+			$sql = "SELECT c.agentid, c.familyName, c.firstName, c.middleName ".
+				"FROM agents c ".
+				"WHERE c.familyName = '".str_replace(array("\"", "'"), "", $name)."'";
 
 			if($r2s = $this->conn->query($sql)) {
 				$firstName = "";

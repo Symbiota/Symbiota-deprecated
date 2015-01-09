@@ -1,6 +1,7 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($serverRoot.'/classes/AgentManager.php');
 
 class OccurrenceCleaner {
 
@@ -133,7 +134,7 @@ class OccurrenceCleaner {
 		$rs = $this->conn->query($sql);
 		$collArr = array();
 		while($r = $rs->fetch_object()){
-			$nameArr = $this->parseCollectorName($r->recordedby);
+			$nameArr = Agent::parseLeadingNameInList($r->recordedby);
 			if(isset($nameArr['last']) && $nameArr['last'] && strlen($nameArr['last']) > 2){
 				$lastName = $nameArr['last'];
 				$collArr[$r->eventdate][$r->recordnumber][$lastName][] = $r->occid;
@@ -280,6 +281,8 @@ class OccurrenceCleaner {
 		return $status;
 	}
 
+    /** Populate omoccurrences.recordedbyid using data from omoccurrences.recordedby.
+     */
 	public function indexCollectors(){
 		//Try to populate using already linked names 
 		$sql = 'UPDATE omoccurrences o1 INNER JOIN (SELECT DISTINCT recordedbyid, recordedby FROM omoccurrences WHERE recordedbyid IS NOT NULL) o2 ON o1.recordedby = o2.recordedby '.
@@ -299,24 +302,34 @@ class OccurrenceCleaner {
 		$rs->close();
 		
 		foreach($collArr as $collStr => $occidArr){
-			$collArr = $this->parseCollectorName($collStr);
-			//Check to make sure collector is not already in system 
-			$sql = 'SELECT recordedbyid '.
-				'FROM omcollectors '.
-				'WHERE familyname = "'.$collArr['last'].'" AND firstname = "'.$collArr['first'].'" AND middlename = "'.$collArr['middle'].'"';
-			$rs = $this->conn->query($sql);
-			$recById = 0; 
-			if($r = $rs->fetch_object()){
-				$recById = $r->recordedbyid;
-			}
-			else{
-				//Not in system, thus load and get PK
-				$sql = 'INSERT omcollectors(familyname, firstname, middlename) '.
-					'VALUES("'.$collArr['last'].'","'.$collArr['first'].'","'.$collArr['middle'].'")';
-				$this->conn->query($sql);
-				$recById = $this->conn->insert_id;
-			}
-			$rs->close();
+            // check to see if collector is listed in agents table.
+            $sql = "select distinct agentid from agentname where name = ? ";
+            if ($stmt = $this->conn->prepare($sql)) { 
+               $stmt->bind_param('s',$collStr);
+               $stmt->execute();
+               $stmt->bind_result($agentid);
+               $stmt->store_result();
+               $matches = $stmt->num_rows;
+               $stmt->fetch();  
+               $stmt->close();
+               if ($matches>0) { 
+                  $recById= $agentid
+               } 
+               else { 
+                  // no matches found to collector, add to agent table.
+                  $am = new AgentManager();
+                  $agent = $am->constructAgentDetType($collStr);
+                  if ($agent!=null) { 
+                     $am->saveNewAgent($agent);
+                     $agentid = $agent->getagentid();
+                     $recById= $agentid
+                  }
+               }
+            } 
+            else { 
+               throw new Exception("Error preparing query $sql " . $this->conn->error);
+            }
+
 			//Add recordedbyid to omoccurrence table
 			if($recById){
 				$sql = 'UPDATE omoccurrences '.
@@ -327,54 +340,6 @@ class OccurrenceCleaner {
 		}
 	}
 	
-	private function parseCollectorName($inStr){
-		$name = array();
-		$primaryArr = '';
-		$primaryArr = explode(';',$inStr);
-		$primaryArr = explode('&',$primaryArr[0]);
-		$primaryArr = explode(' and ',$primaryArr[0]);
-		$lastNameArr = explode(',',$primaryArr[0]);
-		if(count($lastNameArr) > 1){
-			//formats: Last, F.I.; Last, First I.; Last, First Initial Last
-			$name['last'] = $lastNameArr[0];
-			if($pos = strpos($lastNameArr[1],' ')){
-				$name['first'] = substr($lastNameArr[1],0,$pos);
-				$name['middle'] = substr($lastNameArr[1],$pos);
-			}
-			elseif($pos = strpos($lastNameArr[1],'.')){
-				$name['first'] = substr($lastNameArr[1],0,$pos);
-				$name['middle'] = substr($lastNameArr[1],$pos);
-			}
-			else{
-				$name['first'] = $lastNameArr[1];
-			}
-		}
-		else{
-			//Formats: F.I. Last; First I. Last; First Initial Last
-			$tempArr = explode(' ',$lastNameArr[0]);
-			$name['last'] = array_pop($tempArr);
-			if($tempArr){
-				$arrCnt = count($tempArr);
-				if($arrCnt == 1){
-					if(preg_match('/(\D+\.+)(\D+\.+)/',$tempArr[0],$m)){
-						$name['first'] = $m[1];
-						$name['middle'] = $m[2];
-					}
-					else{
-						$name['first'] = $tempArr[0];
-					}
-				}
-				elseif($arrCnt == 2){
-					$name['first'] = $tempArr[0];
-					$name['middle'] = $tempArr[1];
-				}
-				else{
-					$name['first'] = implode(' ',$tempArr);
-				}
-			}
-		}
-		return $name;
-	}
 
 	private function encodeStrTargeted($inStr,$inCharset,$outCharset){
 		if($inCharset == $outCharset) return $inStr;

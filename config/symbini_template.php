@@ -87,6 +87,12 @@ $rightsTerms = array(
 	
 //loans/
 	$collections_loans_indexCrumbs = 0;
+
+//agents/
+    $agents_indexMenu = TRUE;
+    $agent_indexCrumbs = array();
+    array_push($agent_indexCrumbs,"<a href='$clientRoot/index.php'>Home</a>");
+    array_push($agent_indexCrumbs,"<a href='$clientRoot/agents/index.php'>Agents</a>");
 		
 //Base code shared by all pages; leave as is
 include_once("symbbase.php");
