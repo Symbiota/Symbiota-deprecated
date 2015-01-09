@@ -1135,6 +1135,57 @@ class SpecProcNlpSalix
 			}
 		return false;
 		}
+   
+	/**
+     * Given a name, check to see if is the same as or similar to an existing 
+     * agent of type individual.
+     *
+     * @param Name, reference to string to check against agent names, 
+     *   may be altered to conform to a match.
+     * @return score for match, 10 if exact match to name of only one agent.
+     */
+    private function ConfirmRecordedByAgents(&$Name) 
+        { 
+        $match = array();
+        $Score = 0;
+		$PregNotNames = "(\b(municip|herbarium|agua|province|university|mun|county|botanical|garden)\b)i";  //Known to be confused with names
+		$Score -= 5*(preg_match_all($PregNotNames,$Name,$match));
+        // Check for exact match against individual name
+        $sql = "select distinct a.agentid from agentnames n left join agents a on n.agentid = a.agentid where a.type = 'Individual' and n.name = ? ";
+        if ($stmt = $this->conn->prepare($sql)) 
+           { 
+           $stmt->bind_param('s',$Name);
+           $stmt->execute();
+           $stmt->bind_result($agentid);
+           $stmt->store_result();
+           if ($stmt->num_rows==1) 
+              {
+              $Score = 10;
+              }
+           else 
+              {
+              // Check for exact match against organization name.
+              $sql = "select distinct a.agentid from agentnames n left join agents a on n.agentid = a.agentid where a.type = 'Organization' and n.name = ? ";
+              if ($stmt = $this->conn->prepare($sql)) 
+                  { 
+                  $stmt->bind_param('s',$Name);
+                  $stmt->execute();
+                  $stmt->bind_result($agentid);
+                  $stmt->store_result();
+                  if ($stmt->num_rows>0) 
+                      { 
+                      $Score = -5;
+                      }
+                  }
+              }
+           } 
+        else 
+           { 
+           throw new Exception("Error preparing query [$sql]. ". $this->conn->error);
+           }
+        return $Score;
+        }
+
 		
 		
 	//**********************************************

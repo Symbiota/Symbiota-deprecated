@@ -1,6 +1,6 @@
 <?php
 include_once('OccurrenceEditorManager.php');
-include_once("ImageShared.php");
+include_once($serverRoot.'/classes/ImageShared.php');
 
 class OccurrenceEditorImages extends OccurrenceEditorManager {
 

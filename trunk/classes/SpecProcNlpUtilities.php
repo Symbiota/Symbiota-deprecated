@@ -82,6 +82,10 @@ class SpecProcNlpUtilities {
 			}
 		}
 		//If no match, try digging deeper
+        // PJM: 2014 Nov 28, have done a simple subtitution of agents for omcollectors here, 
+        //      as this function doesn't appear to be in use, the agents and agentnames 
+        //      tables offer more options for more sophisticated checks for existing 
+        //      agents.
 		if(!isset($this->fragMatches['recordedBy'])){
 			foreach($lineArr as $line){
 				if($nameTokens = str_word_count($line,1)){
@@ -89,7 +93,7 @@ class SpecProcNlpUtilities {
 					foreach($nameTodkens as $v){
 						$sql .= 'OR familyname = "'.str_replace('"','',$v).'" ';
 					}
-					$sql = 'SELECT recordedbyid FROM omcollectors WHERE '.substr($sql,2);
+					$sql = 'SELECT recordedbyid FROM agents WHERE '.substr($sql,2);
 					if($rs = $this->conn->query($sql)){
 						if($r = $rs->fetch_object()){
 							$this->fragMatches['recordedBy'] = trim($line);
@@ -100,6 +104,9 @@ class SpecProcNlpUtilities {
 			}
 		}
 		//And again a little deeper
+        // TODO: Table agentnames has freetext index on agentnames.name and can
+        //       return possible matches with a score - that free text search
+        //       would be suitable for use here instead of a soundex on agent.familyname
 		if(!isset($this->fragMatches['recordedBy'])){
 			foreach($lineArr as $line){
 				if($nameTokens = str_word_count($line,1)){
@@ -107,7 +114,7 @@ class SpecProcNlpUtilities {
 					foreach($nameTodkens as $v){
 						$sql .= 'OR familyname SOUNDS LIKE "'.str_replace('"','',$v).'" ';
 					}
-					$sql = 'SELECT recordedbyid FROM omcollectors WHERE '.substr($sql,2);
+					$sql = 'SELECT recordedbyid FROM agents WHERE '.substr($sql,2);
 					if($rs = $this->conn->query($sql)){
 						if($r = $rs->fetch_object()){
 							$this->fragMatches['recordedBy'] = trim($line);

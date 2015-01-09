@@ -37,6 +37,7 @@ class OmOccurrences  {
         // $supportedVersions[] = '0.9.1.12';         
         // $supportedVersions[] = '0.9.1.13';  // Fields added between 0.9.1.13 and 0.9.1.14
         $supportedVersions[] = '0.9.1.14';         
+        $supportedVersions[] = '0.9.1.15';            
 
         /* 
             When the schema version changes, this class must be updated.  There are two cases:
@@ -306,7 +307,7 @@ CREATE TABLE `omoccurrences` (
   KEY `Index_eventDate` (`eventDate`),
   KEY `Index_occurrences_procstatus` (`processingstatus`),
   CONSTRAINT `FK_omoccurrences_collid` FOREIGN KEY (`collid`) REFERENCES `omcollections` (`CollID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_omoccurrences_recbyid` FOREIGN KEY (`recordedById`) REFERENCES `omcollectors` (`recordedById`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_omoccurrences_recbyid` FOREIGN KEY (`recordedById`) REFERENCES `agents` (`agentId`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `FK_omoccurrences_tid` FOREIGN KEY (`tidinterpreted`) REFERENCES `taxa` (`TID`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `FK_omoccurrences_uid` FOREIGN KEY (`observeruid`) REFERENCES `users` (`uid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=17522 DEFAULT CHARSET=utf8;
