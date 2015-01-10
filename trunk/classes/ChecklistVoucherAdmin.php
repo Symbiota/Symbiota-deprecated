@@ -248,7 +248,7 @@ class ChecklistVoucherAdmin {
 		$retArr = Array();
 		if($this->sqlFrag){
 			
-			$sql = 'SELECT DISTINCT o.tidinterpreted, o.sciname, IFNULL(o.cultivationstatus,0) as culstat FROM omoccurrences o '. 
+			$sql = 'SELECT DISTINCT o.tidinterpreted, o.sciname, o.eventdate, IFNULL(o.cultivationstatus,0) as culstat FROM omoccurrences o '. 
 				'WHERE ('.$this->sqlFrag.') AND o.tidinterpreted NOT IN(SELECT ts1.tid FROM taxstatus ts1 '.
 				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '. 
 				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '. 

@@ -462,7 +462,7 @@ class SpecLoans{
 	public function getSpecList($loanId){
 		$retArr = array();
 		$sql = 'SELECT l.loanid, l.occid, IFNULL(o.catalognumber,o.othercatalognumbers) AS catalognumber, '.
-			'o.sciname, CONCAT(o.recordedby, " (", IFNULL(o.recordnumber,"s.n."),")") AS collector, '.
+			'o.sciname, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, '.
 			'CONCAT_WS(", ",stateprovince,county,locality) AS locality, l.returndate '.
 			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
 			'WHERE l.loanid = '.$loanId.' '.

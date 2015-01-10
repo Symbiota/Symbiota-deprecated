@@ -14,7 +14,7 @@ function cleanOutStr($str){
 	return $newStr;
 }
 
-$sql = 'SELECT o.occid, c.institutioncode, o.catalognumber, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") AS collector, '.
+$sql = 'SELECT o.occid, c.institutioncode, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, '.
 	'o.eventdate, o.family, o.sciname, CONCAT_WS("; ",o.country, o.stateProvince, o.county) AS locality, o.DecimalLatitude, o.DecimalLongitude, '.
 	'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason '.
 	'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';

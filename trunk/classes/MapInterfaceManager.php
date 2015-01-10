@@ -827,9 +827,9 @@ class MapInterfaceManager{
 		global $userRights, $mappingBoundaries;
 		$coordArr = Array();
 		$sql = '';
-		$sql = 'SELECT o.occid, CONCAT_WS("",CONCAT(o.recordedby," "),"(",IFNULL(o.recordnumber,"s.n."),")") AS identifier, '.
-			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, '.
-			'c.CollectionName ';
+		$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
+			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, '.
+			'o.othercatalognumbers, c.institutioncode, c.collectioncode, c.CollectionName ';
 		if($includeDescr){
 			$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
 		}
@@ -912,11 +912,11 @@ class MapInterfaceManager{
 		$seloccids = $match[1];
 		$coordArr = Array();
 		$sql = '';
-		$sql = 'SELECT o.occid, CONCAT_WS("",CONCAT(o.recordedby," "),"(",IFNULL(o.recordnumber,"s.n."),")") AS identifier, '.
-			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, '.
-			'c.CollectionName ';
-		$sql .= "FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
-		$sql .= 'WHERE o.occid IN('.$seloccids.') ';
+		$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
+			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, '.
+			'o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, c.CollectionName '.
+			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			'WHERE o.occid IN('.$seloccids.') ';
 		$collMapper = Array();
 		$collMapper["undefined"] = "undefined";
 		//echo json_encode($this->taxaArr);
@@ -1255,7 +1255,7 @@ class MapInterfaceManager{
 		if(!$this->recordCount){
 			$this->setRecordCnt($mapWhere);
 		}
-		$sql = 'SELECT o.occid, c.institutioncode, o.catalognumber, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") AS collector, '.
+		$sql = 'SELECT o.occid, c.institutioncode, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, '.
 			'o.eventdate, o.family, o.sciname, CONCAT_WS("; ",o.country, o.stateProvince, o.county) AS locality, o.DecimalLatitude, o.DecimalLongitude, '.
 			'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
@@ -1516,7 +1516,7 @@ class MapInterfaceManager{
 		$gpxText = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>';
 		$gpxText .= '<gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="mymy">';
 		$sql = "";
-        $sql = 'SELECT o.occid, o.basisOfRecord, c.institutioncode, o.catalognumber, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") AS collector, '.
+        $sql = 'SELECT o.occid, o.basisOfRecord, c.institutioncode, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, '.
 			'o.eventdate, o.family, o.sciname, o.locality, o.DecimalLatitude, o.DecimalLongitude '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
 		$sql .= 'WHERE o.occid IN('.$seloccids.') ';
@@ -1539,8 +1539,8 @@ class MapInterfaceManager{
 	public function getOccurrences($datasetId){
 		$retArr = array();
 		if($datasetId){
-			$sql = 'SELECT o.occid, o.catalognumber, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") AS collector, '.
-				'o.eventdate, o.family, o.sciname, CONCAT_WS("; ",o.country, o.stateProvince, o.county) AS locality, o.DecimalLatitude, o.DecimalLongitude '.
+			$sql = 'SELECT o.occid, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, o.eventdate, '.
+				'o.family, o.sciname, CONCAT_WS("; ",o.country, o.stateProvince, o.county) AS locality, o.DecimalLatitude, o.DecimalLongitude '.
 				'FROM omoccurrences o INNER JOIN omoccurdatasetlink dl ON o.occid = dl.occid '.
 				'WHERE dl.datasetid = '.$datasetId.' '.
 				'ORDER BY o.sciname ';

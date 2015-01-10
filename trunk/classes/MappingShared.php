@@ -45,9 +45,9 @@ class MappingShared{
 		global $userRights, $mappingBoundaries;
 		$coordArr = Array();
 		$sql = '';
-		$sql = 'SELECT o.occid, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") AS identifier, '.
-			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, '.
-			'c.CollectionName ';
+		$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
+			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, '.
+			'o.othercatalognumbers, c.institutioncode, c.collectioncode, c.CollectionName ';
 		if($includeDescr){
 			$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
 		}

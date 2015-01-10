@@ -68,7 +68,7 @@ header("Content-Type: text/html; charset=".$charset);
 			foreach($occArr as $occId => $vArr){
 				?>
 				<div style="margin:10px;">
-					<?php echo "<b>OccId ".$occId.":</b> ".$vArr["recordedby"]." [".($vArr["recordnumber"]?$vArr["recordnumber"]:"s.n.")."]; ".$vArr["locality"];?>
+					<?php echo "<b>OccId ".$occId.":</b> ".$vArr["recordedby"]." [".($vArr["recordnumber"]?$vArr["recordnumber"]:$vArr["eventdate"])."]; ".$vArr["locality"];?>
 					<div style="margin-left:10px;cursor:pointer;color:blue;" onclick="updateParentForm('<?php echo $occId;?>')">
 						Select Occurrence Record
 					</div>
@@ -119,7 +119,7 @@ header("Content-Type: text/html; charset=".$charset);
  		if($collNumber){
  			$sql .= "AND o.recordnumber LIKE '%".$collNumber."%' ";
  		}
- 		$sql = "SELECT o.occid, o.recordedby, o.recordnumber, CONCAT_WS('; ',o.stateprovince, o.county, o.locality) AS locality ".
+ 		$sql = "SELECT o.occid, o.recordedby, o.recordnumber, o.eventdate, CONCAT_WS('; ',o.stateprovince, o.county, o.locality) AS locality ".
  			"FROM omoccurrences o WHERE ".substr($sql,4);
  		//echo $sql;
  		$rs = $this->conn->query($sql);
@@ -127,6 +127,7 @@ header("Content-Type: text/html; charset=".$charset);
  			$occId = $row->occid;
  			$returnArr[$occId]["recordedby"] = $row->recordedby;
  			$returnArr[$occId]["recordnumber"] = $row->recordnumber;
+ 			$returnArr[$occId]["eventdate"] = $row->eventdate;
  			$returnArr[$occId]["locality"] = $row->locality;
  		}
  		$rs->close();

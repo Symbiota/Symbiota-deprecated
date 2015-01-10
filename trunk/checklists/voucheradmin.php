@@ -328,7 +328,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 															echo '<td><input name="occids[]" type="checkbox" value="'.$occid.'-'.$cltid.'" /></td>';
 															echo '<td><a href="../taxa/index.php?taxon='.$oArr['tid'].'" target="_blank">'.$oArr['sciname'].'</a></td>';
 															echo '<td>';
-															echo $oArr['recordedby'].' ('.($oArr['recordnumber']?$oArr['recordnumber']:'s.n.').')<br/>';
+															echo $oArr['recordedby'].' '.$oArr['recordnumber'].'<br/>';
 															if($oArr['eventdate']) echo $oArr['eventdate'].'<br/>';
 															echo '<a href="../collections/individual/index.php?occid='.$occid.'" target="_blank">';
 															echo $oArr['collcode'];

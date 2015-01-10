@@ -1,14 +1,15 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/OccurrenceUtilities.php');
+include_once($serverRoot.'/classes/EOLUtilities.php');
 
 class TaxonomyUtilities{
 
 	private $conn;
 	private $taxAuthId = 1;
+	private $kingdomId;
 	private $activeThesResources = 'eol,col,trop';
 	
-	private $errorCode = 0;
 	private $errorStr = '';
 	private $warningArr = array();
 
@@ -25,38 +26,37 @@ class TaxonomyUtilities{
 			$this->activeThesResources = explode(',',$GLOBALS['taxonThesauri']);
 		}
 	}
-	
-	public function addSciname($sciname){
+
+	public function addSciname($term){
 		//Get taxon object
 		$taxonArr = Array();
 		if(!$this->activeThesResources){
 			$this->errorStr = 'ERROR: Taxonomic resources not activated ';
-			$this->errorCode = 1;
 			return false;
 		}
 		$resourceArr = explode(',',$this->activeThesResources);
 		$attemptedResources = '';
 		foreach($resourceArr as $resStr){
 			if($resStr == 'eol'){
-				$taxonArr = $this->getEolTaxonArr($sciname);
+				$taxonArr = $this->getEolTaxonArr($term);
 				$attemptedResources .= ', eol';
 			}
 			elseif($resStr == 'col'){
-				$taxonArr = $this->getColTaxonArr($sciname);
+				$taxonArr = $this->getColTaxonArr($term);
 				$attemptedResources .= ', col';
 			}
 			elseif($resStr == 'trop'){
-				$taxonArr = $this->getTropicosTaxonArr($sciname);
+				$taxonArr = $this->getTropicosTaxonArr($term);
 				$attemptedResources .= ', trop';
 			}
 		}
-		if(!$taxonArr){
+		if($taxonArr){
+			$processedTaxonArr = $this->loadNewTaxon($taxonArr);
+		}
+		else{
 			$this->errorStr = 'ERROR: unable to obtain taxon object from: '.trim($attemptedResources,' ,');
-			$this->errorCode = 2;
 			return false;
 		} 
-		//Add taxon to database, return is 
-		$processedTaxonArr = $this->loadNewTaxon($taxonArr);
 		return $processedTaxonArr;
 	} 
 
@@ -64,108 +64,71 @@ class TaxonomyUtilities{
 	 * INPUT: scientific name
 	 *   Example: 'Pinus ponderosa var. arizonica'
 	 * OUTPUT: array representing taxon object 
-	 *   Example: array('scientificName' => 'Pinus ponderosa var. arizonica', 
-	 *        			'unitind1' => '',
-	 *        			'unitname1' => 'Pinus',
-	 *        			'unitind2' => '',
-	 *        			'unitname2' => 'ponderosa',
-	 *        			'unitind3'=>'var.',
-	 *        			'unitname3'=>'arizonica',
+	 *   Example: array('id' => '34554'
+	 *   				'sciname' => 'Pinus arizonica', 
+	 *   				'scientificName' => 'Pinus arizonica (Engelm.) Shaw', 
+	 *        			'unitind1' => '', 'unitname1' => 'Pinus', 'unitind2' => '', 'unitname2' => 'arizonica', 'unitind3'=>'', 'unitname3'=>'',
 	 *        			'author' => '(Engelm.) Shaw',
-	 *        			'rankid' => '240',
-	 *  				'vern' => array(),
-	 *  				'parent' => array(),
-	 *  				'synonym' => array(),
+	 *        			'rankid' => '220',
+	 *        			'taxonRank' => 'Species',
+	 *  				'verns' => array(array('vernacularName'=>'Arizona Ponderosa Pine','language'=>'en'), array(etc...)),
+	 *  				'syns' => array(array('scientificName'=>'Pinus ponderosa var. arizonica','reason'=>'synonym'), array(etc...)),
+	 *  				'parent' => array(	'id' => '43463',
+	 *  									'sciname' => 'Pinus',
+	 *  									'taxonRank' => 'Genus',
+	 *  									'sourceURL' => 'http://eol.org/pages/1905/hierarchy_entries/43463/overview',
+	 *  									,'parentID' => array( etc...)
+	 *  							)
 	 *        	   )
 	 */
-	public function getEolTaxonArr($sciName){
-		$taxonArr = Array();
-		//Ping EOL
-		$pingUrl = 'http://eol.org/api/ping/1.0.json';
-		if($fh = fopen($pingUrl, 'r')){
-			$content = "";
-			while($line = fread($fh, 1024)){
-				$content .= trim($line);
+	public function getEolTaxonArr($term){
+		$taxonArr = array();
+		$eolManager = new EOLUtilities();
+		if($eolManager->pingEOL()){
+			$eolTaxonId = 0;
+			if(is_numeric($term)) $eolTaxonId = $term;
+			if(!$eolTaxonId){
+				$searchRet = $eolManager->searchEOL($term);
+				if(isset($searchRet['id'])){
+					$eolTaxonId = $searchRet['id'];
+				}
 			}
-			fclose($fh);
-			//Ping result
-			$pingArr = json_decode($content);
-			if(isset($pingArr['response']['message']) && $pingArr['response']['message'] == 'Success'){
-				//Get ID
-				$idUrl = 'http://eol.org/api/search/1.0.json?q='.str_replace(" ","%20",$sciName).'&page=1&exact=true';
-				if($fh = fopen($idUrl, 'r')){
-					$content = "";
-					while($line = fread($fh, 1024)){
-						$content .= trim($line);
-					}
-					fclose($fh);
-					//Process return
-					$idArr = json_decode($content);
-					if($idArr['totalResults']){
-						$idList = $idArr['results'];
-						$firstElem = array_shift($idList);
-						$id = $idList[0]['id'];
-						if($id){
-							//Get taxonomy
-							$taxonUrl = 'http://eol.org/api/hierarchy_entries/1.0/'.$id.'.json?common_names=true&synonyms=true';
-							if($fh = fopen($taxonUrl, 'r')){
-								$content = "";
-								while($line = fread($fh, 1024)){
-									$content .= trim($line);
+			if($eolTaxonId){
+				$taxonArr = $eolManager->getHierarchyEntries($searchRet['id']);
+				if($taxonArr && !isset($taxonArr['rankid'])){
+					$rankid = $this->getRankid($taxonArr['taxonRank']);
+					if($rankid){
+						$taxonArr['rankid'] = $rankid;
+						if(!$this->kingdomId){
+							if(isset($taxonArr['parents'])){
+								foreach($taxonArr['parents'] as $parArr){
+									if(isset($parArr['taxonRank']) && $parArr['taxonRank'] == 'kingdom'){
+										switch($parArr['scientificName']){
+											case 'plantae':
+												$this->kingdomId = 3;
+												break;
+											case 'fungi':
+												$this->kingdomId = 4;
+												break;
+											case 'animalia':
+												$this->kingdomId = 5;
+												break;
+										}
+									}
 								}
-								fclose($fh);
-								
-								//Process return
-								$eolArr = json_decode($content);
-								$scientificName = $eolArr['scientificName'];
-								$nameAccordingTo = $eolArr['nameAccordingTo'];
-								//Process EOL array
-								//Set rankID
-								$sqlRank = 'SELECT rankid FROM taxonunits WHERE rankname = "'.$eolArr['taxonRank'].'"';
-								$rsRank = $this->conn->query($sqlRank);
-								$rankId = 0;
-								if($rRank = $rsRank->fetch_object()){
-									$rankId = $rRank->rankid;
-								}
-								else{
-									$this->warningArr[] = "Unable to determine rankid for: ".$eolArr['taxonRank'];
-								}
-								$rsRank->free();
-								//Parse scientific name
-								$taxonArr = $this->parseSciName($scientificName,$rankId);
-								if($scientificName != $taxonArr['sciname']) $taxonArr['scientificName'] = $scientificName;
-
-								//Add vernaculars
-								$vernacularNames = $eolArr['vernacularNames'];
-								foreach($vernacularNames as $vernArr){
-									if($vernArr['language'] == 'en') $taxonArr['vern'][] = $vernArr['vernacularName']; 
-								}
-								//Process ancestors
-								$parentID = $eolArr['parentNameUsageID'];
-								$ancestors = $eolArr['ancestors'];
-								foreach($ancestors as $ancKey => $ancArr){
-									$taxonArr['parent'][$ancArr['parentNameUsageID']][$ancKey] = $ancArr['taxonID'];
-								}
-								//Add synonyms
-								//$synonyms = $eolArr['synonym'];
-								//Dont' deal with synonyms, as of yet
 							}
 						}
-						else{
-							$this->errorStr = "Unable to get taxon object for: ".$sciName;
-							return false;
-						}
 					}
-				}
-				else{
-					$this->errorStr = "Unable to get ID for: ".$sciName;
-					return false;
 				}
 			}
 			else{
-				$this->errorStr = "EOL web service not available";
+				$this->errorStr = 'ERROR getting EOL taxon object ID (term: '.$term.')';
 				return false;
 			}
+		}
+		else{
+			$this->errorStr = 'EOL web services are not available ';
+			return false;
 		}
 		return $taxonArr;
 	}
@@ -220,6 +183,8 @@ class TaxonomyUtilities{
 	private function loadNewTaxon($taxonArr,$tidAccepted = 0){
 		/*
 		 * Default action: add accepted taxon, parents, synonyms, vernacular
+		 * Required fields: sciname, parsed units, rankid, parentTaxon, acceptedTaxon
+		 * Additional fields: author, family
 		 * Note: Accepted taxon might already be in thesaurus if taxonomic resource returns search taxon as a synonym    
 		 * Possible conflicts:
 		 * 1) parent of accepted is already in thesaurus as not accepted: parent = 180 then change parent to accepted; for all others link to parent's accepted taxon  
@@ -232,8 +197,11 @@ class TaxonomyUtilities{
 		 * OUPUT: $processedTaxonArr [ex: array('newtid' => '3424','taxonarr' => $taxonArr,'warnings' => array('WARNING: name is a homonym','NOTICE: author not returned'))]
 		 * 
 		 */
-		$retArr = array('taxonarr' => $taxonArr);
-		$newTid = 0;
+		//
+		if(!$this->kingdomId){
+			$this->errorStr = 'ERROR loading '.$taxonArr['sciname'].', kingdomId is not set';
+			return false; 
+		}
 		if(!isset($taxonArr['sciname']) || !$taxonArr['sciname']){
 			$this->errorStr = 'ERROR: sciname not defined';
 			return false;
@@ -242,74 +210,93 @@ class TaxonomyUtilities{
 			$this->errorStr = 'ERROR loading '.$taxonArr['sciname'].', rankid not defined';
 			return false;
 		}
-		if(!array_key_exists('parent',$newTaxon) || !$newTaxon['parent']){
+		if(!array_key_exists('parent',$taxonArr) || !$taxonArr['parent']){
 			$this->errorStr = 'ERROR loading '.$taxonArr['sciname'].', parent not defined';
 			return false;
 		}
-		$parentName = $newTaxon['parent'];
-		//Get parent tid
-		$sqlParent = 'SELECT t.tid '.
-			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE (t.sciname = "'.$parentName.'") AND (ts.taxauthid = '.$this->taxAuthId.')';
-		$parRS = $this->conn->query($sqlParent);
-		$parentTid = 0;
-		if($parRow = $parRS->fetch_object()){
-			$parentTid = $parRow->tid;
-		}
-		else{
-			$parentTaxonArr = $this->addSciname($parentName);
-			$parentTid = $loadNewTaxon(Array('name' => $parentName));
-		}
-		$parRS->free();
+		$newTid = 0;
+
+		$parentTid = getParentTid($taxonArr['parent']);
 		if(!$parentTid){
-			$this->errorStr = 'ERROR loading '.$taxonArr['sciname'].', unable to add parent';
+			$this->errorStr = 'ERROR loading '.$taxonArr['sciname'].', unable to get parentTid';
 			return false;
 		}
 		
-		if(!$parentName){
-			$classArr = Array();
-			if(array_key_exists('classification',$newTaxon)){
-				$classArr = $newTaxon['classification'];
-			}
-			if(!$classArr){
-				//grab name object and classification from Species2000
-			}
-			if($classArr){
-				$parArr = array_pop($classArr);
-				$parentName = $parArr['name'];
-			}
-		}
-		//Load taxon
-		if($parentTid){
-			if($r = $rs->fetch_object()){
-				//We now have everything, now let's load
-				$sciName = trim($newTaxon['genus'].' '.$newTaxon['species'].' '.$newTaxon['infraspecies_marker'].' '.$newTaxon['infraspecies']);
-				$sqlInsert = 'INSERT INTO taxa(sciname, unitname1, unitname2, unitind3, unitname3, author, rankid) '.
-					'VALUES("'.$sciName.'","'.$newTaxon['genus'].'","'.$newTaxon['species'].'","'.$newTaxon['infraspecies_marker'].'","'.
-					$newTaxon['infraspecies'].'","'.$newTaxon['author'].'",'.$rankId.')';
-				if($this->conn->query($sqlInsert)){
-					$retArr['newtid'] = $this->conn->insert_id;
-					if(!$tidAccepted) $tidAccepted = $retArr['newtid'];
-					$sqlInsert2 = 'INSERT INTO taxstatus(tid,tidaccepted,taxauthid,parenttid) '.
-						'VALUES('.$retArr['newtid'].','.$tidAccepted.','.$this->taxAuthId.','.$r->tid.')';
-					if($this->conn->query($sqlInsert2)){
-						//Add common names
-						
-						
-					}
-				}
-				else{
-					$this->errorStr = 'ERROR inserting '.$taxonArr['sciname'].': '.$this->conn->error;
-					return false;
-				}
-			}
+		//We now have everything, now let's load
+		//Check to see sciname is in taxon table but not under selected thesaurus
+		$sql = 'SELECT tid FROM taxa WHERE sciname = "'.$taxonArr.'"';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$newTid = $r->tid;
 		}
 		$rs->free();
-		return $retArr;
+		
+		if(!$newTid){
+			$sqlInsert = 'INSERT INTO taxa(sciname, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, rankid, kingdomid, source) '.
+				'VALUES("'.$taxonArr['sciname'].'","'.$taxonArr['genus'].'","'.$newTaxon['species'].'","'.$newTaxon['infraspecies_marker'].'","'.
+				$newTaxon['infraspecies'].'","'.$newTaxon['author'].'",'.$rankId.')';
+			if($this->conn->query($sqlInsert)){
+				$newTid = $this->conn->insert_id;
+			}
+			else{
+				$this->errorStr = 'ERROR inserting '.$taxonArr['sciname'].': '.$this->conn->error;
+				return false;
+			}
+		}
+		if($newTid){
+			if(!$tidAccepted) $tidAccepted = $newTid;
+			$sqlInsert2 = 'INSERT INTO taxstatus(tid,tidaccepted,taxauthid,parenttid) '.
+				'VALUES('.$newTid.','.$tidAccepted.','.$this->taxAuthId.','.$parentTid.')';
+			if($this->conn->query($sqlInsert2)){
+				//Add common names
+
+				
+				//Add Synonyms
+
+				
+			}
+			
+		}
+		return $newTid;
+	}
+	
+	private function getRankid($rankStr){
+		if($rankStr){
+			$sqlRank = 'SELECT rankid FROM taxonunits WHERE rankname = "'.$rankStr.'"';
+			$rsRank = $this->conn->query($sqlRank);
+			$rankId = 0;
+			if($rRank = $rsRank->fetch_object()){
+				$rankId = $rRank->rankid;
+			}
+			else{
+				$this->warningArr[] = "Unable to determine rankid from: ".$rankStr;
+			}
+			$rsRank->free();
+		}
+	}
+	
+	private function getParentTid($parentArr){
+		$sciname = $parentArr['scientificName'];
+		$sql = 'SELECT t.tid '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE (t.sciname = "'.$this->cleanInStr($parentArr['scientificName']).'") AND (ts.taxauthid = '.$this->taxAuthId.')';
+		$rs = $this->conn->query($sql);
+		$tid = 0;
+		if($row = $rs->fetch_object()){
+			$tid = $row->tid;
+		}
+		$rs->free();
+		if(!$tid){
+			$parentTaxonArr = $this->addSciname($parentName);
+			$parentTid = $loadNewTaxon(Array('name' => $parentName));
+		}
+
+		$parentStr = $parentArr['sciname'];
+		
 	}
 
 	//Misc functions
-	public static function parseSciName($scientificName,$rankId = 0){
+	public function parseSciName($scientificName,$rankId = 0){
 		//Converts scinetific name with author embedded into separate fields
 		$retArr = array();
 		$retArr = OccurrenceUtilities::parseScientificName($scientificName,$rankId);		
@@ -435,6 +422,12 @@ class TaxonomyUtilities{
 	public function setTaxAuthId($id){
 		if($id && is_numeric($id)){
 			$this->taxAuthId = $id;
+		}
+	}
+
+	public function setKingdomId($id){
+		if($id && is_numeric($id)){
+			$this->kingdomId = $id;
 		}
 	}
 
