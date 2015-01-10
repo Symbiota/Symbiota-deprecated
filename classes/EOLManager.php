@@ -1,6 +1,7 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/ImageShared.php');
+include_once($serverRoot.'/classes/EOLUtilities.php');
 
 class EOLManager {
 

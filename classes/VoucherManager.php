@@ -206,7 +206,7 @@ class VoucherManager {
 	public function getVoucherData(){
 		$voucherData = Array();
  		if(!$this->tid || !$this->clid) return $voucherData;
-		$sql = 'SELECT v.occid, CONCAT(o.recordedby," ",IFNULL(o.recordnumber,"s.n.")) AS collector, o.catalognumber, '.
+		$sql = 'SELECT v.occid, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, o.catalognumber, '.
 			'o.sciname, o.eventdate, v.notes, v.editornotes '.
 			'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 			'WHERE (v.TID = '.$this->tid.') AND (v.CLID = '.$this->clid.')';

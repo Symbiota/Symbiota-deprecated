@@ -215,7 +215,7 @@ class ChecklistManager {
 					$clidStr .= ','.implode(',',$this->childClidArr);
 				}
 				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, '.
-					'CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,"s.n.")) AS collector '.
+					'CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector '.
 					'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 					'INNER JOIN omcollections c ON o.collid = c.collid '.
 					'WHERE (v.clid IN ('.$clidStr.')) AND v.tid IN('.implode(',',array_keys($this->taxaList)).')';
@@ -349,14 +349,14 @@ class ChecklistManager {
 					$sql2 = '';
 					if($tid){
 						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '. 
-							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") as notes '.
+							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
 							'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					else{
 						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '. 
-							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") as notes '.
+							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
 							'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
 							'WHERE v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.

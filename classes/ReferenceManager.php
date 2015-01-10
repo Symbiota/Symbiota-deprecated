@@ -281,7 +281,7 @@ class ReferenceManager{
 	
 	public function getRefOccArr($refId){
 		$retArr = array();
-		$sql = 'SELECT l.occid, CONCAT_WS("; ",a.sciname, a.catalognumber, CONCAT(a.recordedby," (",IFNULL(a.recordnumber,"s.n."),")")) AS identifier '.
+		$sql = 'SELECT l.occid, CONCAT_WS("; ",a.sciname, a.catalognumber, CONCAT_WS(" ",a.recordedby,IFNULL(a.recordnumber,a.eventdate))) AS identifier '.
 			'FROM referenceoccurlink AS l LEFT JOIN omoccurrences AS a ON l.occid = a.occid '.
 			'WHERE l.refid = '.$refId.' '.
 			'ORDER BY a.sciname';

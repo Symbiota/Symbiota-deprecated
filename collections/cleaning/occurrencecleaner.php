@@ -11,7 +11,7 @@ $start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
 $limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:200;
 
 if(!$symbUid){
-	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrencecleaner.php?'.$_SERVER['QUERY_STRING']);
+	header('Location: ../../profile/index.php?refurl=../collections/cleaning/occurrencecleaner.php?'.$_SERVER['QUERY_STRING']);
 }
 
 $cleanManager = new OccurrenceCleaner();

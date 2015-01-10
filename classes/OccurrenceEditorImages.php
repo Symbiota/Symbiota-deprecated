@@ -297,7 +297,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		if($collNumber){
 			$sql .= 'AND (o.recordnumber LIKE "%'.$collNumber.'%") ';
 		}
-		$sql = 'SELECT o.occid, o.recordedby, o.recordnumber, o.sciname, '.
+		$sql = 'SELECT o.occid, o.recordedby, o.recordnumber, o.eventdate, o.sciname, '.
 			'CONCAT_WS("; ",o.stateprovince, o.county, o.locality) AS locality '.
 			'FROM omoccurrences o WHERE '.substr($sql,4);
 		//echo $sql;
@@ -307,6 +307,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 			$returnArr[$occId]['sciname'] = $this->cleanOutStr($row->sciname);
 			$returnArr[$occId]['recordedby'] = $this->cleanOutStr($row->recordedby);
 			$returnArr[$occId]['recordnumber'] = $this->cleanOutStr($row->recordnumber);
+			$returnArr[$occId]['eventdate'] = $this->cleanOutStr($row->eventdate);
 			$returnArr[$occId]['locality'] = $this->cleanOutStr($row->locality);
 		}
 		$rs->close();

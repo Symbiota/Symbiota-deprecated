@@ -517,7 +517,7 @@ class OccurDatasetManager {
 				$sqlOrderBy .= ',catalogNumber';
 			}
 			if($sqlWhere){
-				$sql = 'SELECT occid, IFNULL(duplicatequantity,1) AS q, CONCAT(recordedby," (",IFNULL(recordnumber,"s.n."),")") AS collector, '.
+				$sql = 'SELECT occid, IFNULL(duplicatequantity,1) AS q, CONCAT_WS(" ",recordedby,IFNULL(recordnumber,eventdate)) AS collector, '.
 					'family, sciname, CONCAT_WS("; ",country, stateProvince, county, locality) AS locality '.
 					'FROM omoccurrences '.($postArr['recordedby']?'use index(Index_collector) ':'').
 					'WHERE collid = '.$collId.' '.$sqlWhere;

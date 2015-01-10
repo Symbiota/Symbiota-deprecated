@@ -88,7 +88,7 @@ class PluginsManager {
 			$limit = $numSlides * 3;
 			$sql = 'SELECT i.imgid, i.tid, i.occid, i.url, i.photographer, i.`owner`, t.SciName, o.sciname AS occsciname, '.
 				'CONCAT_WS(" ",u.firstname,u.lastname) AS photographerName, '.
-				'CONCAT_WS("; ",o.sciname, o.catalognumber, CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")")) AS identifier '.
+				'CONCAT_WS("; ",o.sciname, o.catalognumber, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate))) AS identifier '.
 				'FROM (((images AS i LEFT JOIN users AS u ON i.photographeruid = u.uid) '.
 				'LEFT JOIN omoccurrences AS o ON i.occid = o.occid) '.
 				'LEFT JOIN taxa AS t ON i.tid = t.tid) ';

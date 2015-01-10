@@ -927,7 +927,7 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'DELETE FROM uploadimagetemp '.
 			'WHERE (originalurl LIKE "%.dng") AND (collid = '.$this->collId.')';
 		if($this->conn->query($sql)){
-			$this->outputMsg('<li style="margin-left:10px;">step 1 or 4... </li>');
+			$this->outputMsg('<li style="margin-left:10px;">step 1 of 4... </li>');
 		}
 		else{
 			$this->outputMsg('<div style="margin-left:20px;">WARNING removing non-jpgs from uploadimagetemp: '.$this->conn->error.'</div> ');
@@ -940,7 +940,7 @@ class SpecUploadBase extends SpecUpload{
 			'SET ui.occid = u.occid '.
 			'WHERE (ui.occid IS NULL) AND (u.occid IS NOT NULL) AND (ui.collid = '.$this->collId.')';
 		if($this->conn->query($sql)){
-			$this->outputMsg('<li style="margin-left:10px;">step 2 or 4... </li>');
+			$this->outputMsg('<li style="margin-left:10px;">step 2 of 4... </li>');
 		}
 		else{
 			$this->outputMsg('<div style="margin-left:20px;">WARNING updating occids within uploadimagetemp: '.$this->conn->error.'</div> ');
@@ -953,7 +953,7 @@ class SpecUploadBase extends SpecUpload{
 			'FROM uploadimagetemp ui LEFT JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
 			'WHERE (ui.occid IS NULL) AND (ui.collid = '.$this->collId.') AND (u.collid IS NULL)';
 		if($this->conn->query($sql)){
-			$this->outputMsg('<li style="margin-left:10px;">step 3 or 4... </li>');
+			$this->outputMsg('<li style="margin-left:10px;">step 3 of 4... </li>');
 		}
 		else{
 			$this->outputMsg('<div style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</div> ');
@@ -965,7 +965,7 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'DELETE u.* FROM uploadimagetemp u INNER JOIN images i ON u.occid = i.occid '.
 			'WHERE (u.collid = '.$this->collId.') AND (u.originalurl = i.originalurl)';
 		if($this->conn->query($sql)){
-			$this->outputMsg('<li style="margin-left:10px;">step 4 or 4... </li>');
+			$this->outputMsg('<li style="margin-left:10px;">step 4 of 4... </li>');
 		}
 		else{
 			$this->outputMsg('<div style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</div> ');
