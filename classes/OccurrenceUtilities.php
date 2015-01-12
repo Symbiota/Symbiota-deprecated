@@ -457,8 +457,8 @@ class OccurrenceUtilities {
 				$n = $m[3];
 				if($n && $e && $z){
 					$llArr = OccurrenceUtilities::convertUtmToLL($e,$n,$z,$d);
-					if(isset($llArr['lat'])) $recMap['lat'] = $llArr['lat'];
-					if(isset($llArr['lng'])) $recMap['lng'] = $llArr['lng'];
+					if(isset($llArr['lat'])) $retArr['lat'] = $llArr['lat'];
+					if(isset($llArr['lng'])) $retArr['lng'] = $llArr['lng'];
 				}
 				
 			}
@@ -493,8 +493,8 @@ class OccurrenceUtilities {
 					} 
 					if($e && $n){
 						$llArr = OccurrenceUtilities::convertUtmToLL($e,$n,$z,$d);
-						if(isset($llArr['lat'])) $recMap['lat'] = $llArr['lat'];
-						if(isset($llArr['lng'])) $recMap['lng'] = $llArr['lng'];
+						if(isset($llArr['lat'])) $retArr['lat'] = $llArr['lat'];
+						if(isset($llArr['lng'])) $retArr['lng'] = $llArr['lng'];
 					}
 				}				
 			}
