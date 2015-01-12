@@ -70,10 +70,8 @@ class SpecProcNlpSalix
 
 		setlocale(LC_ALL,"en_US");
 		$Label = str_replace("’","'",$Label);
-		//$Label = str_replace("°","*",$Label);
 		if(strpos($Label,"°") > 0)
 			{
-			//echo "Found °<br>";
 			$Label = str_replace("°","17*17",$Label);
 			}
 		if(mb_detect_encoding($Label,'UTF-8') == "UTF-8")
@@ -81,14 +79,12 @@ class SpecProcNlpSalix
 			$Label = iconv("UTF-8","ISO-8859-1//TRANSLIT",$Label);
 			}
 		$Label = str_replace("17*17","°",$Label);
-		//echo "$Label<br>";		
-		//if(strpos($Label,"°") > 0)
-			//echo "Again Found °<br>";
-		
+		//echo $Label."<br>**_*_*_*_*_*_*_*_*_<br>";
 		//A few replacements to format the label making it easier to parse
 		
 		//Make sure space between NSEW cardinal directions and following digits, for Lat/Long 
 		$Label = preg_replace("(([NESW]\.?)(\d))","$1 $2",$Label);
+		$Label = preg_replace("((\d)([NESW]))","$1 $2",$Label);
 		//Make sure space between altitude and indicator (ft or m)
 		$Label = preg_replace("((\d)((m|ft)(\s|.)))","$1 $2",$Label);
 		//Make sure space between period and capital letter, such as an initial followed by a name.
@@ -109,7 +105,7 @@ class SpecProcNlpSalix
 		foreach($FromTo as $From=>$To)
 			{
 			//$Preg = "lsk";
-			$Preg = "([0-9/.]".$From."[0-9/.])";
+			$Preg = "([-0-9/.]".$From."[0-9/.])";
 			do
 				{
 				$Found = preg_match($Preg,$Label,$match);
@@ -134,9 +130,9 @@ class SpecProcNlpSalix
 		//Remove empty lines
 		$Label = str_replace("\r\n\r\n","\r\n",$Label);
 		
-		$this->LabelLines = preg_split("[(?<=[a-z]{4,4})\.|(?<=[a-z]);|\n]",$Label,-1,PREG_SPLIT_DELIM_CAPTURE);
+		$this->LabelLines = preg_split("[(?<=[a-z]{3,3})\.|(?<=[a-z]);|\n]",$Label,-1,PREG_SPLIT_DELIM_CAPTURE);
 		//regex expression to split lines at semicolons and periods.  But not at periods unless the preceding is
-		//at least 4 lower case letters.  This preserves abbreviations.  
+		//at least 3 lower case letters.  This preserves abbreviations.  
 		$L = 0;
 		while($L < count($this->LabelLines))
 			{
@@ -155,7 +151,8 @@ class SpecProcNlpSalix
 			$OneLine = $this->LabelLines[$L];
 			$Words = str_replace('\'','',$OneLine);
 			$Words = str_replace('-',' ',$Words);
-			$WordsArray = str_word_count($Words,1,"0123456789-&."); // Break sentence into words
+			$WordsArray = str_word_count($Words,1);
+			//$WordsArray = str_word_count($Words,1,"0123456789-&."); // Break sentence into words
 			$this->LabelArray[] = $WordsArray; 
 			}
 
@@ -176,13 +173,12 @@ class SpecProcNlpSalix
 		//Here's where the individual fields get called and hopefully filled
 		
 		//Order is important.  
-		//First, easy-to-find fields are done first, and then removed so as to not confuse other fields.
+		//Easy-to-find fields are done first, and then removed so as to not confuse other fields.
 		//Example:  LatLong is easy to find because of degree symbols, sequences of numbers, etc.  And by finding LatLong first, we can then remove it from locality.
 		
 		//Second, knowing one field can help find another related field.
 		//Example:  If we find recordedBy, then we know eventDate and recordNumber are probably very near, likely on the same line, so we can use that to rank the lines.
 		//Example:  If we find LatLong, then we know Locality should be near, probably on the same line.
-
 		$this->GetLatLong();
 		$this->GetScientificName();
 		$this->GetName('recordedBy');
@@ -202,6 +198,8 @@ class SpecProcNlpSalix
 			else
 				$this->Results[$Key] = trim($Val);
 			}
+		//echo $Label."<br>";
+			
 		return $this->Results;
 		
 		
@@ -549,132 +547,61 @@ class SpecProcNlpSalix
 //********************* Associated Taxa **********************************************************************************************
 //************************************************************************************************************************************
 		
-		
-	//**********************************************
 	private function GetAssociatedTaxa()
 		{
+		$SplitPoints = array();
 		$RankArray = $this->RankAssociatedTaxa();
-		$match=array();
+		//$this->printr($RankArray,"AssTaxaRank");
+		//All non-asociated taxa lines have been removed from RankArray
+		reset($RankArray);
+		$Start = key($RankArray);
+		end($RankArray);
+		$End = key($RankArray);
+		//echo "Start, end = $Start, $End<br>";
 		foreach($RankArray as $L=>$Value)
 			{
-			if($Value < 2)
-				return; //All potential lines tested.  Give up.
-			//echo "$Value: {$this->LabelLines[$L]}<br>";
-			$Preg = "(\b(WITH|With|with|w/|W/)[:-]*\s([A-Z][a-z]{3,20}\b.*))";//Must be case sensitive test
-			$Found = preg_match($Preg,$this->LabelLines[$L],$match);
-			//$this->printr($match,"AT Match");
-			if($Found ===1)
-				{//Apparent sciname following the word "With"
-				$this->LabelLines[$L] = $match[2];
-				$TempString = $this->LabelLines[$L];
-				}
-			else if($this->LineStart[$L] == 'associatedTaxa')
-				{//Line starts with an associatedTaxa start word (e.g. "with")
-				$this->RemoveStartWords($L,'associatedTaxa');
-				$TempString = $this->LabelLines[$L];
-				$Found=true;
-				}
-			else 
-				{//Still the most likely line, but none of the above worked.  Just look for a series of scinames on the same line.
-				$Score = 0;
-				$Found = preg_match_all("(([A-Z][a-z]{3,20}) ([a-z]{4,20}))",$this->LabelLines[$L], $match);//Capitalized word followed by lower case word
-				if($Found > 0)
-					{//Found will indicate the number of (apparent) sciname matches found
-					//echo "Found $Found scinames<br>";
-					$Limit = min($Found,4);
-					for($S=0;$S<$Limit;$S++)
-						{//Add up the scores for each entry in the line to see if they probably are scientific names.
-						$OneScore = $this->ScoreSciName($match[1][$S],$match[2][$S],true);
-						$Score += $OneScore;
-						}
-					$Score /= $Limit; //Average score for each entry on the line
-					//echo "Score = $Score<br>";
-					}
-				if($Score < 7)
-					$Found = false;
-				else
+			$this->RemoveStartWords($L,'associatedTaxa');
+			$TempString = $this->LabelLines[$L];
+			$SciString = $TempString;
+			if($L == $Start || $L == $End)
+				{
+				$SplitPoints = $this->SplitString($TempString, $Field, $Score1);
+				if($SplitPoints[1] > 0)
 					{
-					$TempString = $this->LabelLines[$L];
-					if($L > 0 && stripos($this->LabelLines[$L-1],"with") > 0)
+					//$this->printr($SplitPoints,"SplitPoints");
+					if($End > $Start)
 						{
-						preg_match("((\b(WITH|With|with)[:-]*)(.{5,}))",$this->LabelLines[$L-1],$match);
-						if(count($match) > 0)
-							$TempString = $match[3].", ".$TempString;
+						if($L==$Start)
+							$SplitPoints[1] = strlen($TempString);
+						else if($L == $End)
+							$SplitPoints[0] == 0;
 						}
+					$SciString = substr($TempString,$SplitPoints[0],$SplitPoints[1]-$SplitPoints[0]); //Indicates the point to split apart.
+					$this->LabelLines[$L]=str_replace($SciString,"",$this->LabelLines[$L]);
+					//echo "Now: {$this->LabelLines[$L]}<br>";
 					}
 				}
-			if($Found)
-				{//Found the start of the associated species list. 
-				//echo "Down here found $TempString<br>";
-				$StatWord = $this->SplitString($TempString, $Field1, $Score1);
-				//echo "Line $L, StatWord = $StatWord, for $TempString<br>";
-				if($StatWord > 0)
-					{//Ass Taxa seems to end in the middle of the line, followed by something else.  Split apart.
-					$StatString = substr($TempString,$StatWord); //Indicates the point to split apart.
-					
-					if(preg_match("(\A[A-Z]\. )",$StatString) == 0)
-						{//If false, then don't split.  This is probably just an abreviated Genus -- 'O.' .  Leave it as it is.  Otherwise...
-						$this->ScoreString($StatString, $Field, $Score);
-						$this->AddToResults($Field,$StatString,$L); //Add string to the right wordstats field, and remove from the line.
-						$this->LabelLines[$L] = str_replace($StatString,"",$this->LabelLines[$L]);
-						$TempString = substr($TempString,0,$StatWord-1); //Strip off the non-associated taxa stuff
-						}
-					}
-				//$this->RemoveStartWords($L,'associatedTaxa');
-				$this->AddToResults("associatedTaxa", $TempString,$L);
-				//$this->RemoveStartWords($L,'associatedTaxa');
-				$this->LabelLines[$L] = str_replace($TempString,"",$this->LabelLines[$L]);
-				//$this->LabelLines[$L] = str_ireplace("with","",$this->LabelLines[$L]);
-				
-				//Now check subsequent lines for more associated taxa
-				while(++$L < count($this->LabelLines)-1)
-					{
-					//echo "Checking Line $L, {$this->LabelLines[$L]}<br>";
-					$Found = preg_match("(\A([A-Z][a-z]{3,20}) ([a-z]{3,20})(,|\Z ))",$this->LabelLines[$L],$match); //Line starting with "Genus species"
-					if($Found !==1)
-						$Found = preg_match("(\A([A-Z][a-z]{3,20})(\Z|,))",$this->LabelLines[$L],$match); //Line with just "Genus" on the line.  May need to tighten this up by checking subsequent lines or the rest of this line 
-					if($Found !==1)
-						$Found = preg_match("(\A([A-Z]\.\s[a-z]{3,20})(\Z|,))",$this->LabelLines[$L],$match); //Line starting with "Genus" on the line, but then more stuff.  May need to tighten this up
-					if($Found ===1)
-						{
-						//echo "Found next line<br>";
-						if(strpos($match[1], ". ") == 1 && $this->Results['associatedTaxa'] != "")
-							{//Abbreviated Genus.  See if the previous genus starts with the same letter.  If so, expand this one.
-							$LastArray = preg_split("([;,])",$this->Results['associatedTaxa']);
-							$Last = trim(array_pop($LastArray));
-							if(substr($Last,0,1) == substr($match[1],0,1))
-								{
-								$TempArray = explode(" ",$Last);
-								$Genus = $TempArray[0];
-								$match[2] = substr($match[1],3);
-								$match[1] = $Genus;//str_replace(substr($match[1],0,2),$Genus, $match[1]);
-								$this->LabelLines[$L] = str_replace($match[0],$Genus." ".$match[2].",", $this->LabelLines[$L]);
-								}
-							}
-						//Next make sure this line scores low for WordStats
-						$StatScore = $this->StatScore[$L]['Score'];
-						//$this->ScoreOneLine($L,$Field,$StatScore);
-						$SciScore=$this->ScoreSciName($match[1],$match[2],true);
-						//echo "$StatScore and $SciScore for {$match[1]},{$match[2]}<br>";
-						if($SciScore == 0)
-							return; //Definitely not a sciname
-						if($SciScore < 9 && $StatScore/$SciScore > 10)
-							return; //probably not sciname, and likely a wordstats line.
-						$this->AddToResults('associatedTaxa',$this->LabelLines[$L],$L);
-						
-						$this->LabelLines[$L] = "";
-						}
-					}
-				return;
-				}
+			//$SciString = $this->RemoveStartWordsFromString($TempString,'associatedTaxa');
+			$this->AddToResults("associatedTaxa", $SciString,$L);
+			$this->LabelLines[$L] = str_replace($SciString,"",$this->LabelLines[$L]);
+			$this->LabelLines[$L] = str_ireplace("with","",$this->LabelLines[$L]);
+			//$this->LabelLines[$L] = "";
 			}
-		return;
 		}
+		
 
 	private function SplitString($TempString, &$Field, &$Score)
 		{ //Find where an Associated Species series ends and something else begins.  Only works for wordstats fields.
+		
+		$Found = preg_match_all("(([w|W]ith) ([A-Z][a-z]{4,20} ([a-z]{4,20})))",$TempString, $match, PREG_OFFSET_CAPTURE); 
+		if($Found)
+			return array($match[2][0][1],strlen($TempString));
+		
 		$ScoreArray = array();
 		$Found = preg_match_all("(\b[A-Za-z]{1,20}\b)",$TempString,$WordsArray, PREG_OFFSET_CAPTURE);//Break the string up into words
+		$FieldScoreArray = array();
+		$SciScoreArray=array();
+		
 		for($w=0;$w<count($WordsArray[0])-1;$w++)
 			{
 			$Loc = $WordsArray[0][$w][1];
@@ -685,20 +612,37 @@ class SpecProcNlpSalix
 			$Score = $this->SingleWordStats($Phrase);//Get word stats score for these two words
 			$Phrase = trim(str_replace(" sp.","",$Phrase));
 			$Phrase = trim(str_replace(" sp ","",$Phrase));
-			//echo "Phrase = $Phrase, Score=$Score,  ";
-			
+			//echo "Phrase = $Phrase, Score=$Score, ";
+			$FieldScoreArray[$w] = $Score;
 			$SciScore = 0;
-			$query = "SELECT sciname FrOM taxa WHERE sciname LIKE '$Phrase' LIMIT 1";
-			$result = $this->conn->query($query);
-			if($result->num_rows == 1)
-				$SciScore += 10;
-			//echo $SciScore.",  ";
-			//Old way.  Very slow, but maybe a little more refined...?
-			//$SciScore = $this->ScoreSciName($WordsArray[0][$w][0], $WordsArray[0][$w+1][0], true);//Is it a scientific name?
+			if(preg_match("([A-Z][a-z]{3,20} [a-z]{3,20})",$Phrase))
+				{
+				$query = "SELECT sciname FrOM taxa WHERE sciname LIKE '$Phrase' LIMIT 1";
+				//echo $query."<br>";
+				$result = $this->conn->query($query);
+				if($result->num_rows == 1)
+						$SciScore += 1;
+				}
+			else if(preg_match("([A-Z][a-z]{3,20})",$WordsArray[0][$w][0]))
+				{
+				$query = "SELECT sciname FrOM taxa WHERE UnitName1 LIKE '{$WordsArray[0][$w][0]}' LIMIT 1";
+				$result = $this->conn->query($query);
+				if($result->num_rows == 1)
+					$SciScore += 1;
+				}
+			else if(preg_match("([a-z]{3,20})",$WordsArray[0][$w][0]))
+				{
+				$query = "SELECT sciname FrOM taxa WHERE UnitName2 LIKE '{$WordsArray[0][$w][0]}' LIMIT 1";
+				$result = $this->conn->query($query);
+				if($result->num_rows == 1)
+					$SciScore += 1;
+				}
+			$SciScoreArray[$w] = $SciScore;
+			//echo ", SciScore = $SciScore<br>";
 			if($SciScore > 8)//It's a sciname
 				$FScore = 0;
 			else if($SciScore <= 0)
-				$FScore = $Score;//It's not a sciname.
+				$FScore = $Score+5;//It's not a sciname.
 			else
 				$FScore = floor($Score/$SciScore);
 			if($Loc > 1 && $Loc < strlen($TempString) - 5)
@@ -706,14 +650,60 @@ class SpecProcNlpSalix
 				if(strpbrk(substr($TempString,$Loc-2,5),".;") !== false)
 					$FScore += 10;
 				}
-			//echo $FScore."<br>";
+			//echo "FScore=$FScore<br>";
 			$ScoreArray[$w] = $FScore;
-			//if($FScore > 60)//Was 60, probably should still be
-				{
-				//return $WordsArray[0][$w][1];//Return the offset where the line should be split
-				}
 			}
-		//Didn't find obvious split.  Look for less obvious.
+
+		$AverageField = 0;
+		for($w=0;$w<count($FieldScoreArray)-1;$w++)
+			$AverageField += $FieldScoreArray[$w];
+		$AverageField /= count($FieldScoreArray);
+		//echo "<br><br>";
+		for($w=0;$w<count($FieldScoreArray)-1;$w++)
+			{
+			$SciScoreArray[$w] = ($SciScoreArray[$w] + $SciScoreArray[$w+1])/2;
+			$SciScoreArray[$w] *= $AverageField;
+			//echo $FieldScoreArray[$w].", ".$SciScoreArray[$w]."<br>";
+			}
+		$w=count($FieldScoreArray)-1;
+		$SciScoreArray[$w] *= $AverageField;
+		//echo $FieldScoreArray[$w].", ".$SciScoreArray[$w]."<br>";
+		$Limit = 2*$AverageField/5; //Arbitrarily cut off at 3/4
+		
+		//Now find a cluster of high numbers, hopefully on beginning or end of the string.
+		foreach($SciScoreArray as $Key=>$Sci)
+			if($Sci < $Limit)
+				unset($SciScoreArray[$Key]);
+		//$this->printr($SciScoreArray,"SSA After pruning");
+		if(count($SciScoreArray) > 2) // Greater than what?
+			{
+			reset($SciScoreArray);
+			$Start = key($SciScoreArray);
+			if($Start < 4)
+				$Start = 0;
+			if($Start > 0)
+				{
+				if(preg_match("([a-z]{3,20})",$WordsArray[0][$Start][0]) && preg_match("([A-Z][a-z]{3,20})",$WordsArray[0][$Start-1][0]))
+					$Start--; //It's the specific epithet, but previous word is probably the genus.
+				}
+			end($SciScoreArray);
+			$LastKey = key($SciScoreArray);
+			//echo "LastKey = $LastKey.  {$WordsArray[0][$LastKey][0]}<br>";
+			//echo "Count: ".count($WordsArray[0])."<br>";
+			if(count($WordsArray[0]) - $LastKey < 4)
+				$End = strlen($TempString);
+			else if($LastKey < count($WordsArray[0]))
+				$End = $WordsArray[0][$LastKey+1][1];
+			else
+				$End = strlen($TempString);
+			return array($WordsArray[0][$Start][1], $End);
+			}
+		else
+			return array(0,0);
+		
+
+		die("Shouldn't be here");
+		//$this->printr($SciScoreArray,"SSA after filter");
 		for($w=0;$w<count($ScoreArray)-1;$w++)
 			{
 			if($ScoreArray[$w] > 30 && $ScoreArray[$w+1] > 20)
@@ -721,40 +711,117 @@ class SpecProcNlpSalix
 			}
 		return "0";
 		}
+		
+		
 	//**********************************************
 	private function RankAssociatedTaxa()
 		{//Each line is scored for probability of containing associated taxa
 		//The array of lines is sorted by score and then reversed so the line of maximum probability is first, etc.
 		//The routine then starts with the most probable line, continuing until the field is found, or score is below a minimum.
-		$RankArray = array_fill(0,count($this->LabelLines),0);
+		//$RankArray = array_fill(0,count($this->LabelLines),0);
+		$RankArray = array();
+		$match = array();
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{//Score the line
+			$Rank = 0;
 			if(count($this->LabelArray[$L]) < 2)
-				$RankArray[$L] = -10; //Not likely if the line is only one word long.
+				$Rank = -10; //Not likely if the line is only one word long.
 			if($this->Assigned['sciname'] == $L)
-				$RankArray[$L] -=100;
+				$Rank -=100;
 			if($this->LineStart[$L] == "associatedTaxa" && !$this->Assigned['associatedCollectors'] != $L)
 				{
 				//echo "Found start word in line $L<br>";
-				$RankArray[$L] = 100;
+				$Rank = 100;
 				}
 			if($this->Assigned['sciname'] == $L || $this->Assigned['associatedCollectors'] == $L)
-				$RankArray[$L] -=100; //This line is either the scientific name line, or associated collectors line.  Can't be associated species line.
-			$RankArray[$L] += substr_count($this->LabelLines[$L], ","); //Commas indicate a list, perhaps of associated species.
+				$Rank-=100; //This line is either the scientific name line, or associated collectors line.  Can't be associated species line.
+			$Rank += substr_count($this->LabelLines[$L], ","); //Commas indicate a list, perhaps of associated species.
 			if($this->Assigned['associatedCollectors'] != "" && $this->Assigned['associatedCollectors'] != $L)
 				{//As long as associated collectors is clearly not on this line, then the word "associated" means this is probably the line.
 				if(strpos($this->LabelLines[$L],"associated") !== false)
-					$RankArray[$L] += 20;
+					$Rank += 20;
 				}
-			$Found = preg_match("([w|W]ith [A-Z][a-z]{4,20})",$this->LabelLines[$L]); //With followed by a potential sciname is a strong indicator
+			$Found = preg_match("([w|W]ith [A-Z][a-z]{4,20} [a-z]{3,20})",$this->LabelLines[$L]); 
+			if($Found === 1 && $this->Assigned['associatedCollectors'] != $L)	
+				{
+				$Rank+= 20;
+				$Found=0;
+				}
+			else 
+				$Found = preg_match("([w|W]ith [A-Z][a-z]{4,20})",$this->LabelLines[$L]); //With followed by a potential sciname is a strong indicator
 			if($Found === 1 && $this->Assigned['associatedCollectors'] != $L)	
 				{//Found the word "with", and it isn't for associated collectors.
-				$RankArray[$L]+= 15;
+				$Rank+= 10;
 				}
-			$RankArray[$L] += preg_match_all("(([A-Z][a-z]{3,20}) ([a-z]{4,20}))",$this->LabelLines[$L],$match); //Add a point for each potential sciname
+			$Rank += preg_match_all("(([A-Z][a-z]{3,20}) ([a-z]{4,20}))",$this->LabelLines[$L],$match); //Add a point for each potential sciname
+			//$this->printr($match,"Match");
+			if($Rank < 10 && count($match[0]) > 0)
+				{
+				//echo "1,0  2,0 = {$match[1][0]} {$match[2][0]}<br>";
+				$Score = $this->ScoreSciName($match[1][0],$match[2][0],true);
+				if($Score > 0)
+					$Rank += $Score;
+				if(count($match[0]) > 1)
+					{
+					$Score = $this->ScoreSciName($match[1][1],$match[2][1],true);
+					if($Score > 0)
+						$Rank += $Score;
+					}
+				}
+			//$this->printr($match,"SciNames");
+			if($Rank >= 10)
+				$RankArray[$L] = $Rank;
+			//echo "$Rank: {$this->LabelLines[$L]}<br>";
 			}
-		asort($RankArray);//Sort the array of scores...
-		$RankArray = array_reverse($RankArray, true);//Then reverse order to bring most probable to the first position
+			
+		//Find maximum Rank
+		$Max = 0;
+		$MaxLine = -1;
+		foreach($RankArray as $L=>$Val)
+			{
+			if($Val > $Max)
+				{
+				$Max = $Val;
+				$MaxLine = $L;
+				}
+			}
+		//Work up from this line, including lines as long as their rank is high enough.
+		$Start = $MaxLine;
+		$End = $MaxLine;
+		if($Max < 99)
+			{//Only if there is a not a start word.
+			for($L = $MaxLine-1;$L > 0;$L--)
+				{
+				if(isset($RankArray[$L]) && $RankArray[$L]> 5)
+					$Start = $L;
+				else
+					break;
+				}
+			}
+		//Work down from this line in the same way.
+		for($L = $MaxLine+1; $L < count($this->LabelLines);$L++)
+			{
+			if(isset($RankArray[$L]) && $RankArray[$L]> 5)
+				$End = $L;
+			else
+				break;
+			}
+		//Now $Start indicates the first line that has AT, and $End indicates the last.
+		for($A = $Start - 1;$A > 0;$A--)
+			unset($RankArray[$A]);
+		for($A = $End + 1;$A < count($this->LabelLines);$A++)
+			unset($RankArray[$A]);
+		//$this->printr($RankArray,"Reduced RA");
+		for($L=$Start+1;$L<count($this->LabelLines);$L++)
+			{
+			//echo "Check {$this->LabelLines[$L]}<br>";
+			if(preg_match("(\A([A-Z][a-z]{3,20})( [a-z]{3,20})?\Z)",$this->LabelLines[$L],$match))
+				$RankArray[$L] = 10;
+			else
+				break;
+			}
+		//asort($RankArray);//Sort the array of scores...
+		//$RankArray = array_reverse($RankArray, true);//Then reverse order to bring most probable to the first position
 		return $RankArray;
 		}	
 
@@ -801,22 +868,16 @@ class SpecProcNlpSalix
 			}
 		else
 			$OneLine = $this->LabelLines[$L];
-		
 		$Preg = "([0-9]{1,3}\.[0-9]{3,8}[,°:; ])";
 		if($this->PregLatLong($Preg,$L,$OneLine))
 			return;
-		//echo "Stage 2<br>";
 		//Put together the modules to build a Lat/Long in several formats
 		$Preg = array();
-		/*$Preg['dir'] = "[NSEW][\., ]*";
-		$Preg['deg'] = "[0-9\.]+[°\*] ?";
-		$Preg['min'] = "[0-9\.]+[\' ]*";//Used to be a comma next to the last space
-		$Preg['sec'] = "(?:[0-9\.]+\")*";
-		*/
-		$Preg['dir'] = "[NSEW][\., ]*";
+		$Preg['dir'] = "[ ]*[NSEW][\., ]*";
 		$Preg['deg'] = "[0-9\.]+[°\* ]+";
 		$Preg['min'] = "[0-9\.]+[\', ]*";//Used to be a comma next to the last space
-		$Preg['sec'] = "(?:[0-9\.]+\")*";
+		$Preg['sec'] = '[ ]*(?:[0-9\.]+")*';
+		$Preg['decimal'] = '(([0-9\. ]+[°\* ]*[NSEW][\., ]*))';
 		
 		if($this->PregLatLong($Preg['dir'].$Preg['deg'].$Preg['min'].$Preg['sec'],$L,$OneLine))
 			return;
@@ -826,6 +887,7 @@ class SpecProcNlpSalix
 			return;
 		if($this->PregLatLong($Preg['deg'].$Preg['min'].$Preg['dir'],$L,$OneLine))
 			return;
+		$this->PregLatLong($Preg['decimal'],$L,$OneLine);
 		}
 
 	//**********************************************
@@ -834,29 +896,20 @@ class SpecProcNlpSalix
 		//Use the regular expression passed as "$Preg" on $OneLine.  If $OneLine is empty, use LabelLine[$L].
 		if($OneLine == "")
 			$OneLine = $this->LabelLines[$L];
-		//echo "Original OneLine= $OneLine<br>";
 		$match=array();
-		$Preg = "((".$Preg."))";
-		//echo "Original Preg=$Preg<br>";
-		//$OneLine = "N 32° 32' 20\", W 110° 43', 4700 ft., ";
-		//$Preg = "(([NSEW][\., ]*[0-9\.]+[°\* ]+)([,;]?[0-9]+[' ]*)(?:[0-9\.\"]+)*)";
-		//         (([NSEW][\., ]*[0-9\.]+[°\*]        ?[0-9\.]+[\' ]*(?:[0-9\.]+")*))
-		
+		$Preg = '(('.$Preg.'))';
+		//echo "Preg=$Preg<br>";
 		$Found = preg_match_all($Preg, $OneLine,$match);
-		//echo "Checking $OneLine with $Preg<br>";
-		//echo "Found = $Found<br>";
 		if($Found > 1)
 			{
-			//$this->printr($match,"LL Match");
-			//$this->Results['occurrenceRemarks'] .= $Preg;
 			$VerbLatLong = ($match[0][0]." ".$match[0][1]);
+			//Correct where the decimal was rendered a space by OCR
+			//Need to keep an eye on this
+			$VerbLatLong = preg_replace("((\d{1,3}) (\d{3,6}) ([NESW]))","$1.$2 $3",$VerbLatLong);
 			$OU = new OccurrenceUtilities;
 			$LL = $OU->parseVerbatimCoordinates($VerbLatLong);
-			//$this->Results['substrate'] = $VerbLatLong;
 			if(count($LL) > 0)
 				{
-				//$this->printr($LL,"LL");
-				
 				$this->AddToResults('verbatimCoordinates',$VerbLatLong,$L);
 				$this->AddToResults('decimalLatitude',$LL['lat'],$L);
 				$this->AddToResults('decimalLongitude',$LL['lng'],$L);
@@ -886,7 +939,7 @@ class SpecProcNlpSalix
 		{//Determine which lines are most probable to have an Elevation.  
 		//NOTE:  Still doesn't capture maximum elevation.
 		global $Label;
-		$PregWords = "(\b(elevation|elev|m.|m|ft.|ft|feet|meters|altitude|alt|ca)\b|[\d,]{3,5})";
+		$PregWords = "(\b(elevation|elev|meters|m.|m|feet|ft.|ft|altitude|alt|ca)\b|[\d,]{3,5})";
 		$RankArray = array();
 		$match=array();
 		$Start = 0;$End=0;
@@ -913,7 +966,6 @@ class SpecProcNlpSalix
 		//Sort the lines in rank order
 		asort($RankArray);
 		$RankArray = array_reverse($RankArray, true);
-		//$this->printr($RankArray,"Elevs");
 		//Now have an array of probable lines sorted most probable first.
 		//ScoreArray will be filled with possible elevations and a score for each.
 		$ScoreArray = array();
@@ -922,9 +974,8 @@ class SpecProcNlpSalix
 			if($Value < 5)
 				break;
 			$TempString = $this->LabelLines[$L];
-			//echo "$TempString<br>";
-			//$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*[about ]*([0-9,-]+)([\s]*)(f(ee)?t\b|m(eter)?s?\b|\'))",$TempString,$match);
-			$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*[about ]*([0-9,-]+)([\s]*)(m(eter)?s?\b|f(ee)?t?\b|\'))",$TempString,$match);
+			//$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*[about ]*([0-9,-]+)([\s]*)(m(eter)?s?\b|f(ee)?t?\b|\'))",$TempString,$match);
+			$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*[about ]*([0-9, -]+)\s?\d?([\s]*)(m(eter)?s?\b|f(ee)?t?\b|\'))",$TempString,$match);
 			if($Found === 1) //Embedded in a line with number following key word, like "Found at elevation 2342 feet"
 				{
 				//$this->printr($match,"Elev match 1");
@@ -962,6 +1013,7 @@ class SpecProcNlpSalix
 				$Found = preg_match_all("((ca\.?\s)?\b([0-9,]+)(\s?)(m(eter)?s?\b|f(ee)?t?\b|\'))",$TempString,$match);
 				if($Found >0)
 					{
+					//$this->printr($match,"Elev Match 4");
 					$Score = $Value;
 					$Elev = $match[0][0];
 					if($Found > 1 && strpos($match[0][1],"m") > 1)
@@ -983,8 +1035,20 @@ class SpecProcNlpSalix
 		end($ScoreArray); //Select the last (highest) element in the scores array
 		//$this->printr($ScoreArray,"ScoreArray");
 		$TempString = key($ScoreArray);//Should be the best line.
-		$L = array_search($TempString,$this->LabelLines);
-		//echo "L=$L<br>";
+		for($L=0;$L<count($this->LabelLines);$L++)
+			if(strpos($this->LabelLines[$L],$TempString)!== false)
+				{
+				//$L = array_search($TempString, $this->LabelLines);
+				$TempString = $this->RemoveStartWordsFromString($TempString,'minimumElevationInMeters');
+				break;
+				}
+		if($L >= 0 && $L < count($this->LabelLines))
+			{
+			//echo "TempString=$TempString<br>";
+			//echo "Changing this: {$this->LabelLines[$L]}...";
+			$this->LabelLines[$L] = $this->RemoveStartWordsFromString($this->LabelLines[$L],'minimumElevationInMeters');
+			//echo "To this: {$this->LabelLines[$L]}<br>";
+			}
 		$Preg = "(\d+[ to-]+$TempString)";
 		$Found = preg_match($Preg, $Label,$match);
 		//echo "Preg=$Preg, {$this->LabelLines[$L]}<br>";
@@ -1051,7 +1115,7 @@ class SpecProcNlpSalix
 			for($L=0;$L < count($this->LabelLines);$L++)
 				{
 				$Found = preg_match_all($Preg, $this->LabelLines[$L],$match);
-				$this->printr($match,"MidNameMatch");
+				//$this->printr($match,"MidNameMatch");
 				if($Found > 0)
 					{
 					$this->AddToResults($Field,$match[2][0],$L);
@@ -1086,6 +1150,10 @@ class SpecProcNlpSalix
 	private function GetNamesFromLine($L,$Field)
 		{
 		//echo "Testing $Field: {$this->LabelLines[$L]}<br>";
+		$BadWords = "(\b(copyright|herbarium|garden|vascular|specimen|database|institute|instituto|plant)\b)i";
+		if(preg_match($BadWords,$this->LabelLines[$L]) > 0)
+			return false;
+
 		$match=array();
 		$Preg = "(\b(([A-Z][a-z]{2,20} )|([A-Z][\.] ))([A-Z][\.] )?([A-Z][a-z]{2,20}\b))";
 				//(Initial or first name), (optional middle initial), (last name).
@@ -1129,9 +1197,7 @@ class SpecProcNlpSalix
 				$Name = mb_convert_case($match[0],MB_CASE_TITLE);
 				$this->AddToResults($Field,$Name,$L);
 				$this->LabelLines[$L] = str_ireplace($Name,"",$this->LabelLines[$L]);
-				
 				}
-			
 			}
 		return false;
 		}
@@ -1491,7 +1557,8 @@ class SpecProcNlpSalix
 			{//Check words one at a time for a match to typical collection number format.
 			$Word= trim($WordArray[$W]);
 			
-			$PM=preg_match('(([#0-9]+-?)([a-zA-Z-]*))',$Word,$match);
+			$PM=preg_match('(([#0-9]+-?)([0-9a-zA-Z]*))',$Word,$match);
+			//$this->printr($match,"RecNum");
 			if($Word != "" && !ctype_alpha($Word) && $PM!==0)
 				{//Consists of digits, optional letters, and an optional hyphen.
 				$Match = $match[0];
@@ -1513,7 +1580,6 @@ class SpecProcNlpSalix
 //******************* Country/State Functions ***************************
 //******************************************************************
 
-
 	//**********************************************
 	function GetCountryState()
 		{
@@ -1530,23 +1596,50 @@ class SpecProcNlpSalix
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{ //If certain words appear, then much more likely state is there. 
 
-			/*Alternative to using reg exp:
-			$C = array_search("county",array_map('strtolower',$this->LabelArray[$L])); 
-			if($C !== false)
-				echo "Found Line $L: {$this->LabelArray[$L][$C]} in {$this->LabelLines[$L]}<br>";
-			*/
-			
 			$RankArray[$L] = 10-$L;
-			$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(.*))i",$this->LabelLines[$L],$match);
+			$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(\b\S+\b)\s+(\b\S+\b)?)i",$this->LabelLines[$L],$match);
 			if($Found !== 1)
-				$Found = preg_match("((plants|flora|lichens)(\sof\s)(.*))i",$this->LabelLines[$L],$match);
+				$Found = preg_match("((plants|flora|lichens)\s(of|de)\s+(\b\S+\b)\s+(\b\S+\b)?)i",$this->LabelLines[$L],$match);
 
 			if($Found ===1)
 				{
 				$RankArray[$L] += 5;
-				$PlantsOf = trim($match[3]," .,;:");  //Grab the location name.  Could be state or country.
+				$PlantsOf = trim($match[3]," .,;:");  //Grab the location name.  Could be country, state or country.
+				//echo "PlantsOf = $PlantsOf<br>";
+				$Count = count($match);
+				//echo "Count = $Count<br>";
+				if(count($match) > 4)
+					$PlantsOf2 = $PlantsOf." ".trim($match[4]," .,;:");
+				else
+					$PlantsOf2 = "";
 				$PlantsOfLine = $L;
+				if(isset($PlantsOf2)) //Check first for two word country/state/county
+					{
+					//echo "PlantsOf2 = $PlantsOf2<br>";
+					if($this->CheckCountry($L,$PlantsOf2))
+						return;
+					else if($this->CheckState($L, $PlantsOf2))
+						{
+						return;
+						}
+					else if($this->CheckCounty($L, $PlantsOf2))
+						return;
+					}
+				if($this->CheckCountry($L, $PlantsOf2))
+						{
+						//Find State
+						
+						return;
+						}
+				else if($this->CheckState($L, $PlantsOf))
+					{
+					//Find county
+					return;
+					}
+				else if($this->CheckCounty($L, $PlantsOf))
+					return;
 				}
+			//Didn't find "Plants of" or "Flora de", etc.
 			$Preg = "(\b([a-z]{2,20})\s+((\bcounty\b)|(\bco\b)))i";
 			$Found = preg_match($Preg,$this->LabelLines[$L],$match);
 			if($Found === 0)
@@ -1557,9 +1650,7 @@ class SpecProcNlpSalix
 			
 			if($Found === 1)
 				{//Found the word "County" on the label.  Might be enough to determine state and country.
-				//echo "Found word County<br>";
-				//$this->printr($match,"County match");
-				$query = "SELECT c.stateId,c.countyName,s.statename,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[1]}'";
+				$query = "SELECT c.stateId,c.countyName,s.stateName,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[1]}'";
 				$result = $this->conn->query($query);
 				if($result->num_rows == 0)
 					{//Single word not a county name.  Look for two word county
@@ -1567,7 +1658,7 @@ class SpecProcNlpSalix
 					$Found = preg_match($Preg,$this->LabelLines[$L],$match);
 					if($Found)
 						{
-						$query = "SELECT c.stateId,c.countyName,s.statename,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[1]}'";
+						$query = "SELECT c.stateId,c.countyName,s.stateName,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[1]}'";
 						$result = $this->conn->query($query);
 						}
 					if($Found===0)
@@ -1576,7 +1667,7 @@ class SpecProcNlpSalix
 						$Found = preg_match($Preg,$this->LabelLines[$L],$match);
 						if($Found > 0)
 							{
-							$query = "SELECT c.stateId,c.countyName,s.statename,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[2]}'";
+							$query = "SELECT c.stateId,c.countyName,s.stateName,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[2]}'";
 							$result = $this->conn->query($query);
 							}
 						}
@@ -1591,7 +1682,7 @@ class SpecProcNlpSalix
 					$this->LabelLines[$L] = trim($this->LabelLines[$L]," :.\t,;-");
 					if($result->num_rows == 1)
 						{
-						$this->AddToResults('stateProvince',$OneLine['statename'],$PlantsOfLine);
+						$this->AddToResults('stateProvince',$OneLine['stateName'],$PlantsOfLine);
 						$query = "SELECT countryname from lkupcountry where countryId = {$OneLine['countryId']} LIMIT 1";
 						$CountryResult = $this->conn->query($query);
 						$TempArray = $CountryResult->fetch_assoc();
@@ -1617,18 +1708,18 @@ class SpecProcNlpSalix
 				$RankArray[$L] -= 5;
 			}
 
-		if($PlantsOf != "" || $CountyName != "")
-			{//This is a pretty good giveaway.  State or country should follow this.
+		if($CountyName != "")
+			{//This is a pretty good giveaway.  Country should follow this.
 			//Try state first
 			if($CountyName != "")
 				{
-				$query = "SELECT s.stateId,s.statename from lkupstateprovince s INNER JOIN lkupcounty c WHERE s.stateId=c.stateId AND c.countyname LIKE '$CountyName'";
+				$query = "SELECT s.stateId,s.stateName from lkupstateprovince s INNER JOIN lkupcounty c WHERE s.stateId=c.stateId AND c.countyname LIKE '$CountyName'";
 				
 				if($PlantsOf != "")
-					$query .= " AND s.statename LIKE '$PlantsOf'";
+					$query .= " AND s.stateName LIKE '$PlantsOf'";
 				}
 			else
-				$query = "SELECT s.stateId,s.statename from lkupstateprovince s  WHERE stateName LIKE '$PlantsOf'";
+				$query = "SELECT s.stateId,s.stateName from lkupstateprovince s  WHERE stateName LIKE '$PlantsOf'";
 			
 			$StateResult = $this->conn->query($query);
 			if(!$StateResult)
@@ -1650,27 +1741,29 @@ class SpecProcNlpSalix
 			}
 			// End of routine that uses "Plant Of" and/or county.  Either doesn't have "Plant Of", or County, or using them failed.
 			
-		//return;
 		
 		//Neither Plants of nor county found.  Begin a general search.
 		//Reverse sort the Rank array to bring the most likely lines to the beginning.
 		asort($RankArray);
 		$RankArray = array_reverse($RankArray, true);
-
+		//$this->printr($RankArray,"Country");
 		
 		foreach($RankArray as $L=>$Value)
 			{//First look for the country or state at the beginning of the lines, a common place to find it
 			if($Value < 1 || count($this->LabelArray[$L]) < 2)
 				continue;
-			if($this->CheckOneCountry('country',$L,$this->LabelArray[$L][0],$this->LabelArray[$L][1]))
-				{//If found country, look next for a member state.
-				$this->GetStateProvince($this->Results['country'],$L);
+			if($this->CheckCountry($L,$this->LabelArray[$L][0].' '.$this->LabelArray[$L][1]))
 				return; //Found country and maybe state, so return.
-				}
-			if($this->CheckOneCountry('stateProvince',$L,$this->LabelArray[$L][0],$this->LabelArray[$L][1]))
+			if($this->CheckState($L,$this->LabelArray[$L][0].' '.$this->LabelArray[$L][1]))
+				return;
+			//echo "Checking {$this->LabelArray[$L][0]}<br>";
+			if($this->CheckCountry($L,$this->LabelArray[$L][0]))
 				{
+				//echo "Found in {$this->LabelLines[$L]}<br>";
 				return;
 				}
+			if($this->CheckState($L,$this->LabelArray[$L][0]))
+				return;
 			}
 		foreach($RankArray as $L=>$Value)
 			{//Look for country deeper into lines.  Slower, so we checked the first word first above.
@@ -1678,22 +1771,131 @@ class SpecProcNlpSalix
 				continue;
 			for($W=0;$W<count($this->LabelArray[$L])-1;$W++)
 				{
-				if($this->CheckOneCountry('country',$L,$this->LabelArray[$L][$W],$this->LabelArray[$L][$W+1]))
-					{
-					$this->GetStateProvince($this->Results['country'],$L);
+				if($this->CheckCountry($L,$this->LabelArray[$L][$W].' '.$this->LabelArray[$L][$W+1]))
 					return;
-					}
-				}
-			for($W=0;$W<count($this->LabelArray[$L])-1;$W++)
-				{
-				if($this->CheckOneCountry('stateProvince',$L,$this->LabelArray[$L][$W],$this->LabelArray[$L][$W+1]))
-					{
-					$this->GetStateProvince($this->Results['country'],$L);
+				if($this->CheckState($L,$this->LabelArray[$L][$W].' '.$this->LabelArray[$L][$W+1]))
 					return;
-					}
+				if($this->CheckCountry($L,$this->LabelArray[$L][$W]))
+					return;
+				if($this->CheckState($L,$this->LabelArray[$L][$W]))
+					return;
 				}
 			}
 		}
+
+	private function CheckCountry($L, $Word)
+		{
+		$query = "SELECT countryId,countryName from lkupcountry where countryName like '$Word' LIMIT 1";
+		//echo "$query<br>";
+		$result = $this->conn->query($query);
+		$Num = $result->num_rows;
+		if($Num == 0)
+			return false;
+		else
+			{
+			$OneReturn = $result->fetch_assoc();
+			$this->AddToResults('country', $OneReturn['countryName'],$L);
+			$this->SeekState($OneReturn['countryId'],$L);
+			return true;
+			}
+		}
+	
+	private function SeekState($CountryId,$L)
+		{
+		//Given the country, scan the whole label for a contained state.
+		global $Label;
+		$query = "SELECT stateName,stateId from lkupstateprovince where countryId like '$CountryId'";
+		//echo $query."<br>";
+		$StateArray = array();
+		$StateResult = $this->conn->query($query);
+		$Num = $StateResult->num_rows;
+		if($Num > 0)
+			{
+			while($OneState = $StateResult->fetch_assoc())
+				{
+				if(stristr($Label,$OneState['stateName']))
+					$StateArray[] = $OneState['stateName'];
+				}
+			if(count($StateArray) > 0)
+				{
+				$Lengths = array_map('strlen',$StateArray);
+				$MaxLength = max($Lengths);
+				$index = array_search($MaxLength,$Lengths);
+				$this->AddToResults('stateProvince',$StateArray[$index],$L);
+				//echo "Maximum length = {$StateArray[$index]}<br>";
+				}
+			
+			return true;
+			}
+		else
+			return false;
+		
+		}
+	
+	
+	private function CheckState($L, $Word)
+		{
+		$query = "SELECT countryId,stateName,stateId from lkupstateprovince where stateName like '$Word'";
+		//echo $query."<br>";
+		$result = $this->conn->query($query);
+		$Num = $result->num_rows;
+		if($Num > 0)
+			{
+			$this->GetStateFromList($result,$L);
+			return true;
+			}
+		else
+			return false;
+		}
+		
+	private function GetCountryFromId($Id)
+		{
+		$query = "SELECT countryName from lkupcountry where countryId like $Id LIMIT 1";
+		$result = $this->conn->query($query);
+		if($result->num_rows > 0)
+			{
+			$OneReturn = $result->fetch_assoc();
+			return $OneReturn['countryName'];
+			}
+		return "";
+		}
+
+	private function CheckCounty($L, $Word)
+		{
+		$query = "SELECT stateId,countyName from lkupcounty where countyName like '$Word' LIMIT 1";
+		//echo $query."<br>";
+		$result = $this->conn->query($query);
+		$Num = $result->num_rows;
+		if($Num == 0)
+			return false;
+		else
+			{
+			$OneReturn = $result->fetch_assoc();
+			$this->AddToResults('countyParish', $OneReturn['countyName'],$L);
+			if($this->Results['stateProvince'] == "")
+				{
+				$Id = $OneReturn['stateId'];
+				$StateName = $this->GetStateFromId($Id);
+				$this->AddToResults('stateProvince',$StateName,$L);
+				$this->AddToResults('country',$this->GetCountryFromId($Id),$L);
+				}
+			return true;
+			}
+		}
+
+	private function GetStateFromId(&$StateId)
+		{
+		$query = "SELECT stateName,countryId from lkupstate where stateId like $StateId LIMIT 1";
+		$result = $this->conn->query($query);
+		if($result->num_rows > 0)
+			{
+			$OneReturn = $result->fetch_assoc();
+			$Id = $OneReturn['countryId'];
+			return $OneReturn['stateName'];
+			}
+		return "";
+		}
+		
 
 		
 	private function GetStateFromList($StateResult, $L)
@@ -1703,15 +1905,15 @@ class SpecProcNlpSalix
 		global $Label;
 		$OneState = $StateResult->fetch_assoc();
 		//$this->printr($OneState,"OneState");
-		$this->AddToResults('stateProvince', $OneState['statename'],$L);
+		$this->AddToResults('stateProvince', $OneState['stateName'],$L);
 		$query = "SELECT c.countryname FROM lkupcountry c INNER JOIN lkupstateprovince s where s.countryId=c.countryId AND s.stateId={$OneState['stateId']}";
 		$CountryResult = $this->conn->query($query);
 		$OneCountry = $CountryResult->fetch_assoc();
 		$CountryArray[] = $OneCountry['countryname'];
 		if($StateResult->num_rows == 1)
 			{ //Only one result.  Accept it.
-			$this->AddToResults('stateProvince',$OneState['statename'],$L);
-			$this->AddToResults('country', $OneCountry['countryname'],-1);
+			$this->AddToResults('stateProvince',$OneState['stateName'],$L);
+			$this->AddToResults('country', $OneCountry['countryName'],-1);
 			return true;
 			}
 		else 
@@ -1745,7 +1947,9 @@ class SpecProcNlpSalix
 		
 	//**********************************************
 	private function CheckOneCountry($Field,$L,$Word1,$Word2="")
-		{//Can check for either state or country
+		{//Not used any more.  Keep for a while in case some routines might be useful.
+
+		//Can check for either state or country
 		$Word1=trim($Word1,":.,;");
 		if(!ctype_alpha($Word1))
 			return false;
@@ -1951,6 +2155,7 @@ class SpecProcNlpSalix
 		{
 		$OneLine = array();
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|plants of|aceae of|flora de)\b)i";
 		$Max = array();
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{
@@ -1959,8 +2164,8 @@ class SpecProcNlpSalix
 				{//Don't bother scoring if this line has start words or has already been assigned.
 				if($this->LineStart[$L] ==$F)
 					$Skip=true;
-				if($this->Assigned[$F] == $L)
-					$Skip=true;;
+				//if($this->Assigned[$F] == $L)
+				//	$Skip=true;;
 				}
 			if(preg_match("([a-z])",$this->LabelLines[$L]) === 0)
 				{//Usually not all upper case
@@ -1968,10 +2173,14 @@ class SpecProcNlpSalix
 				}
 			if($this->StatScore[$L]['Score'] < 50)
 				$Skip = true;  //Already measured this line and it falls short.
+			if(preg_match($BadWords,$this->LabelLines[$L]) > 0)
+				$Skip=true;
 			if($Skip)
 				{
 				continue;
 				}
+			$this->SplitWordStatLine($L);
+			continue;
 			$this->ScoreOneLine($L, $Field, $Score);// Field and Score are called by reference.
 			if($Score > 50)
 				{//Score is high enough (though limit is empirical).  Add line to highest scoring field.
@@ -1979,6 +2188,7 @@ class SpecProcNlpSalix
 				//Example:  Small herb with yellow flowers growing beside the road.  (verbAttr followed by habitat or locality)
 				//However, this is very hard to do reliably.
 				$this->RemoveStartWords($L,$Field);
+				//echo "Adding {$this->LabelLines[$L]} to $Field<br>";
 				if($this->Results[$Field] != "")
 					$this->Results[$Field] .= ", ".trim($this->LabelLines[$L]); //Append
 				else
@@ -1988,6 +2198,156 @@ class SpecProcNlpSalix
 		return;			
 		}
 
+	private function SplitWordStatLine($L)
+		{
+		//echo "Testing {$this->LabelLines[$L]}<br>";
+		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
+		$ScoreArray = array();
+		$TempString = $this->LabelLines[$L];
+		$Found = preg_match_all("(\b[A-Za-z]{2,20}\b)",$TempString,$WordsArray, PREG_OFFSET_CAPTURE);//Break the string up into words
+		$FieldScoreArray = array();
+		$StatSums = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
+		for($w=0;$w<count($WordsArray[0])-1;$w++)
+			{
+			$Loc = $WordsArray[0][$w][1];
+			$Word1 = $WordsArray[0][$w][0];
+			$Word2 = $WordsArray[0][$w+1][0];
+			$ScoreArray = $this->ScoreTwoWords($Word1,$Word2);//Get word stats score for these two words
+			$FieldScoreArray[$w] = $ScoreArray;
+			foreach($Fields as $F)
+				{
+				$StatSums[$F] += $ScoreArray[$F];
+				}
+			}
+		
+		//Smooth the graph, removing isolated high and low points
+		foreach($Fields as $F)
+			{
+			for($w=1;$w < count($FieldScoreArray)-1;$w++)
+				{
+				if($FieldScoreArray[$w][$F] < $FieldScoreArray[$w-1][$F] && $FieldScoreArray[$w][$F] < $FieldScoreArray[$w+1][$F])
+					$FieldScoreArray[$w][$F] = ($FieldScoreArray[$w-1][$F]+$FieldScoreArray[$w+1][$F])/2;
+				if($FieldScoreArray[$w][$F] > $FieldScoreArray[$w-1][$F] && $FieldScoreArray[$w][$F] > $FieldScoreArray[$w+1][$F])
+					$FieldScoreArray[$w][$F] = ($FieldScoreArray[$w-1][$F]+$FieldScoreArray[$w+1][$F])/2;
+				}
+			}
+		/*
+		for($w=0;$w<count($FieldScoreArray)-1;$w++)
+			{
+			echo "{$WordsArray[0][$w][0]} {$WordsArray[0][$w+1][0]},";
+			foreach($FieldScoreArray[$w] as $F=>$Score)
+				echo $Score.",";
+			echo"<br>";
+			
+			}
+		*/	
+		//$this->printr($FieldScoreArray,"FieldScoreArray");
+		$Max = max($StatSums)/(count($WordsArray[0]));
+		if($Max < 50)
+			return;
+		//Now try to split into Fields.
+		$MaxArray = array();
+		$LastField = "";
+		$LastStart = 0;
+		$Max=0;
+		//echo "Count=".(count($FieldScoreArray))."<br>";
+		for($w=0;$w<count($FieldScoreArray);$w++)
+			{
+			$LastMax = $Max;
+			$Max = max($FieldScoreArray[$w]);
+			$Field = array_search($Max,$FieldScoreArray[$w]);
+			//echo "Max=$Max, Field=$Field<br>";
+			$MaxField[$w] = $Field;
+			if($w==0)
+				$LastField = $Field;
+			else if($LastMax-$Max > 100)
+				continue;
+				
+				
+				
+			if($Field != $LastField || $w>=count($FieldScoreArray)-1)
+				{
+				$Start = $WordsArray[0][$LastStart][1];
+				$End = $WordsArray[0][$w][1];
+				if($w>=count($FieldScoreArray)-1)
+					{
+					//echo"End of line<br>";
+					$End = strlen($this->LabelLines[$L]);
+					}
+				$FoundString = substr($this->LabelLines[$L],$Start,$End-$Start);
+				//echo "Adding $FoundString to $LastField<br>";
+				$this->AddToResults($LastField, $FoundString,$L);
+				$LastField = $Field;
+				$LastStart = $w;
+				}
+			//echo "$w, $Max, $MaxField[$w]<br>";
+			//die("w=$w");
+			}
+		
+		/*
+		for($w=0;$w < count($FieldScoreArray);$w++)
+			{
+			echo $WordsArray[0][$w][0]." ".$WordsArray[0][$w+1][0];
+			foreach($Fields as $F)
+				echo ",".$FieldScoreArray[$w][$F];
+			echo"<br>";
+			
+			}
+		*/
+		}
+		
+	private function ScoreTwoWords($Word1,$Word2)
+		{
+		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
+		$ScoreArray = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
+		$ExcludeWords = array('verbatimAttributes'=>array("herbarium","institute","university","botanical"),'habitat'=>array("herbarium","university"));
+		$query = "Select * from salixwordstats where firstword like '$Word1' AND secondword IS NULL LIMIT 3";
+		//echo "$query<br>";
+		$result = $this->conn->query($query);
+		$num1 = $result->num_rows;
+		$MaxScore1 = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
+		$MaxScore2 = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
+		if($num1 > 0)
+			{
+			while($Values = $result->fetch_assoc())
+				{
+				$Factor = 1;
+				if($Values['totalcount'] < 10) //Reduce impact if only seen few times
+					$Factor = ($Values['totalcount'])/10;
+				foreach($Fields as $F)
+					{
+					$OneScore = $Factor * $Values[$F.'Freq'];
+					if($OneScore > $MaxScore1[$F])
+						$MaxScore1[$F] = $OneScore;
+					}
+				}
+			}
+			if($Word2 != "")
+				{//Look for two-word combinations.  Score with more weight than single words -- 5X as I write this comment.
+				$query = "SELECT * from salixwordstats where firstword like '$Word1' AND secondword LIKE '$Word2' LIMIT 3";
+				$result = $this->conn->query($query);
+				if($result->num_rows > 0)
+					{
+					while($Values = $result->fetch_assoc())
+						{
+						$Factor = 1;
+						if($Values['totalcount'] < 10) //Reduce impact if only seen few times
+							$Factor = ($Values['totalcount'])/10;
+						foreach($Fields as $F)
+							{
+							$OneScore = 10*$Factor * $Values[$F.'Freq'];
+							if($OneScore > $MaxScore2[$F])
+								$MaxScore2[$F] = $OneScore;
+							}
+						}
+					}
+			foreach($Fields as $F)
+				$ScoreArray[$F] = $MaxScore2[$F]+$MaxScore1[$F];
+				}
+		return $ScoreArray;
+		}
+		
+		
 	private function ScoreOneLine($L, &$Field, &$Score)
 		{ //Score a line for wordstats
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
@@ -2024,8 +2384,13 @@ class SpecProcNlpSalix
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
 		$BadWords = "(\b(copyright|herbarium|garden|database)\b)i";
 		$ScoreArray  = array_fill_keys($Fields,0);
+		//echo "Looking for badwords in $TempString<br>";
 		if(preg_match($BadWords,$TempString) > 0)
+			{
+			//echo "Found<br>";
+			
 			return;
+			}
 		$match=array();
 		$Found = preg_match_all("(\b\w{2,20}\b)",$TempString,$match);
 		if($Found == 0)
@@ -2150,8 +2515,10 @@ class SpecProcNlpSalix
 		if($L>=0)
 			$this->Assigned[$Field] = $L;
 		$String = trim($String);
-		if(strpos("xassociatedCollectors,identifiedBy,associatedTaxa",$Field) > 0 && $this->Results[$Field] != "")
+		if(strpos("associatedCollectors,identifiedBy,associatedTaxa",$Field) > 0 && $this->Results[$Field] != "")
 			$this->Results[$Field] .= "; ".$String;  //Append
+		else if($this->Results[$Field] != "")
+			$this->Results[$Field] .= ", ".$String;
 		else
 			$this->Results[$Field] = $String;
 		}
@@ -2215,20 +2582,30 @@ class SpecProcNlpSalix
 	private function RemoveStartWords($L, $Field)
 		{//Clean up a field by removing any start words.  Example:
 		//"Collector Les Landrum" would have "Collector" removed from the line
+		$this->LabelLines[$L] = $this->RemoveStartWordsFromString($this->LabelLines[$L], $Field);
+		return;
+		}
+
+	private function RemoveStartWordsFromString($TempString,$Field)
+		{
+		//echo "In:  $TempString...<br>";
+		$PF = $this->PregStart[$Field];
+		if($Field = 'associatedTaxa')
+			$PF = str_replace("associated with","associated with|with", $PF);
 		$match=array();
 		if($this->PregStart[$Field] == "" )
-			return false;
-		if($L >= count($this->LabelArray))
-			return false;
-		if(count($this->LabelArray[$L]) < 2)
-			return false;
+			return $TempString;
+		if($TempString == "")
+			return $TempString;
 		
-		$Found = preg_match($this->PregStart[$Field], $this->LabelLines[$L],$match);
+		$Found = preg_match($PF, $TempString,$match);
 		if($Found === 1)
 			{
-			$this->LabelLines[$L] = str_ireplace($match[0],"",$this->LabelLines[$L]);
-			$this->LabelLines[$L] = trim($this->LabelLines[$L],": ,;-.\t");
+			$TempString = str_ireplace($match[0],"",$TempString);
+			$TempString = trim($TempString,": ,;-.\t");
 			}
+		return $TempString;
+		
 		}
 		
 		
