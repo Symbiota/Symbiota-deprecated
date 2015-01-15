@@ -314,5 +314,54 @@ class PluginsManager {
 		
 		return $html;
 	}
+	
+	public function createQuickSearch(){
+		global $clientRoot;
+		$html = '';
+		$html .= '<link href="'.$clientRoot.'/css/jquery-ui.css" type="text/css" rel="Stylesheet" />';
+		$html .= '<script type="text/javascript" src="'.$clientRoot.'/js/jquery.js"></script>';
+		$html .= '<script type="text/javascript" src="'.$clientRoot.'/js/jquery-ui.js"></script>';
+		$html .= '<script type="text/javascript">';
+		$html .= '$(document).ready(function() {';
+		$html .= 'function split( val ) {';
+		$html .= 'return val.split( /,\s*/ );}';
+		$html .= 'function extractLast( term ) {';
+		$html .= 'return split( term ).pop();}';
+		$html .= '$( "#quicksearchtaxon" )';
+		$html .= '.bind( "keydown", function( event ) {';
+		$html .= 'if ( event.keyCode === $.ui.keyCode.TAB &&';
+		$html .= '$( this ).data( "autocomplete" ).menu.active ) {';
+		$html .= 'event.preventDefault();}})';
+		$html .= '.autocomplete({';
+		$html .= 'source: function( request, response ) {';
+		$html .= '$.getJSON( "'.$clientRoot.'/collections/rpc/taxalist.php", {';
+		$html .= 'term: extractLast( request.term ), t: function() { return document.quicksearch.taxon.value; }}, response );},';
+		$html .= 'search: function() {';
+		$html .= 'var term = extractLast( this.value );';
+		$html .= 'if ( term.length < 4 ) {';
+		$html .= 'return false;}},';
+		$html .= 'focus: function() {';
+		$html .= 'return false;},';
+		$html .= 'select: function( event, ui ) {';
+		$html .= 'var terms = split( this.value );';
+		$html .= 'terms.pop();';
+		$html .= 'terms.push( ui.item.value );';
+		$html .= 'this.value = terms.join( ", " );';
+		$html .= 'return false;}},{});});';
+		$html .= 'function verifyQuickSearch(f){';
+		$html .= 'if(document.getElementById("quicksearchtaxon").value == ""){';
+		$html .= 'alert("Please enter a scientific name to search for.");';
+		$html .= 'return false;}';
+		$html .= 'return true;}';
+		$html .= '</script>';
+		$html .= '<div id="quicksearchcontainer">';
+		$html .= '<form name="quicksearch" id="quicksearch" action="taxa/index.php" method="post" onsubmit="return verifyQuickSearch(this.form);">';
+		$html .= '<span id="quicksearchtitle">Quick Taxon Search</span>';
+		$html .= '<textarea id="quicksearchtaxon" name="taxon" rows="1" title="Enter taxon name here." ></textarea>';
+		$html .= '<div id="quicksearchbutton"><button name="formsubmit" type="submit" value="Search Terms">Search</button></div>';
+		$html .= '</form></div>';
+		
+		return $html;
+	}
 }
 ?>
