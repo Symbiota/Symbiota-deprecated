@@ -409,7 +409,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<td align="right">
 												<div style="margin:10px;">
 													Georeferenced by: 
-													<input name="georefby" type="text" value="<?php echo $paramsArr['un']; ?>" readonly />
+													<input name="georeferencedby" type="text" value="<?php echo $paramsArr['un']; ?>" readonly />
 												</div>
 											</td>
 										</tr>
