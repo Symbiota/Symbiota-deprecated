@@ -8,6 +8,7 @@ class OccurrenceGeorefTools {
 	private $collName;
 	private $managementType;
 	private $qryVars = array();
+	private $errorStr;
 
 	function __construct($type = 'write') {
 		$this->conn = MySQLiConnectionFactory::getCon($type);
@@ -103,7 +104,7 @@ class OccurrenceGeorefTools {
 				}
 				if($totalCnt > 999) break;
 			}
-			$rs->close();
+			$rs->free();
 		}
 		//usort($retArr,array('OccurrenceGeorefTools', '_cmpLocCnt'));
 		return $retArr;
@@ -112,59 +113,70 @@ class OccurrenceGeorefTools {
 	public function updateCoordinates($geoRefArr){
 		global $paramsArr;
 		if($this->collId){
-			if($geoRefArr['decimallatitude'] && is_numeric($geoRefArr['decimallatitude']) && $geoRefArr['decimallongitude'] && is_numeric($geoRefArr['decimallongitude'])){
+			if(is_numeric($geoRefArr['decimallatitude']) && is_numeric($geoRefArr['decimallongitude'])){
 				set_time_limit(1000);
-				$localList = $geoRefArr['locallist'];
-				$localStr = $this->cleanInStr(implode(',',$localList));
+				$localStr =  $this->cleanInStr(implode(',',$geoRefArr['locallist']));
+				unset($geoRefArr['locallist']);
+				$geoRefArr = $this->cleanInArr($geoRefArr);
 				if($localStr){
-					if($this->managementType == 'Snapshot'){
-						//Presevre coordinate data in omoccuredits; if collection refreshes their data, coordinates will ntoe be lost 
-						$newValueArr = array($geoRefArr['decimallatitude'],$geoRefArr['decimallongitude'],$geoRefArr['coordinateuncertaintyinmeters'],
-							$geoRefArr['geodeticdatum'],$geoRefArr['georeferencesources'],$geoRefArr['georeferenceremarks'],
-							$geoRefArr['georeferenceverificationstatus'],$geoRefArr['minimumelevationinmeters'],$geoRefArr['maximumelevationinmeters']);
-						$newValueStr = $this->cleanInStr(json_encode($newValueArr));
-						$sql = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, appliedstatus, uid) '.
-							"SELECT occid, 'georefbatchstr', '".$newValueStr."', CONCAT_WS(',',decimallatitude, decimallongitude, coordinateUncertaintyInMeters, ".
-							'geodeticdatum, georeferencesources, georeferenceRemarks, georeferenceVerificationStatus, '. 
-							'minimumElevationInMeters, maximumElevationInMeters) AS oldvalue, 1, '.$paramsArr['uid'].' '.
-							'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (occid IN('.$localStr.'))';
-						//echo 'sql: '.$sql.'<br/>';
-						$this->conn->query($sql);
-					}
-					
 					//Update coordinates
+					$this->addOccurEdits('decimallatitude',$geoRefArr['decimallatitude'],$localStr);
+					$this->addOccurEdits('decimallongitude',$geoRefArr['decimallongitude'],$localStr);
+					$this->addOccurEdits('georeferencedby',$geoRefArr['georeferencedby'],$localStr);
 					$sql = 'UPDATE omoccurrences '.
 						'SET decimallatitude = '.$geoRefArr['decimallatitude'].', decimallongitude = '.$geoRefArr['decimallongitude'].
-						',georeferencedBy = "'.$this->cleanInStr($geoRefArr['georefby']).' ('.date('Y-m-d H:i:s').')'.'"';
+						',georeferencedBy = "'.$geoRefArr['georeferencedby'].' ('.date('Y-m-d H:i:s').')'.'"';
 					if($geoRefArr['georeferenceverificationstatus']){
-						$sql .= ',georeferenceverificationstatus = "'.$this->cleanInStr($geoRefArr['georeferenceverificationstatus']).'"';
+						$sql .= ',georeferenceverificationstatus = "'.$geoRefArr['georeferenceverificationstatus'].'"';
+						$this->addOccurEdits('georeferenceverificationstatus',$geoRefArr['georeferenceverificationstatus'],$localStr);
 					}
 					if($geoRefArr['georeferencesources']){
-						$sql .= ',georeferencesources = "'.$this->cleanInStr($geoRefArr['georeferencesources']).'"';
+						$sql .= ',georeferencesources = "'.$geoRefArr['georeferencesources'].'"';
+						$this->addOccurEdits('georeferencesources',$geoRefArr['georeferencesources'],$localStr);
 					}
 					if($geoRefArr['georeferenceremarks']){
-						$sql .= ',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$this->cleanInStr($geoRefArr['georeferenceremarks']).'")';
+						$sql .= ',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$geoRefArr['georeferenceremarks'].'")';
+						$this->addOccurEdits('georeferenceremarks',$geoRefArr['georeferenceremarks'],$localStr);
 					}
 					if($geoRefArr['coordinateuncertaintyinmeters']){
-						$sql .= ',coordinateuncertaintyinmeters = '.$this->cleanInStr($geoRefArr['coordinateuncertaintyinmeters']);
+						$sql .= ',coordinateuncertaintyinmeters = '.$geoRefArr['coordinateuncertaintyinmeters'];
+						$this->addOccurEdits('coordinateuncertaintyinmeters',$geoRefArr['coordinateuncertaintyinmeters'],$localStr);
 					}
 					if($geoRefArr['geodeticdatum']){
-						$sql .= ', geodeticdatum = "'.$this->cleanInStr($geoRefArr['geodeticdatum']).'"';
+						$sql .= ', geodeticdatum = "'.$geoRefArr['geodeticdatum'].'"';
+						$this->addOccurEdits('geodeticdatum',$geoRefArr['geodeticdatum'],$localStr);
 					}
 					if($geoRefArr['maximumelevationinmeters']){
-						$sql .= ',maximumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$this->cleanInStr($geoRefArr['maximumelevationinmeters']).',maximumelevationinmeters)';
+						$sql .= ',maximumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['maximumelevationinmeters'].',maximumelevationinmeters)';
+						$this->addOccurEdits('maximumelevationinmeters',$geoRefArr['maximumelevationinmeters'],$localStr);
 					}
 					if($geoRefArr['minimumelevationinmeters']){
-						$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$this->cleanInStr($geoRefArr['minimumelevationinmeters']).',minimumelevationinmeters)';
+						$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['minimumelevationinmeters'].',minimumelevationinmeters)';
+						$this->addOccurEdits('minimumelevationinmeters',$geoRefArr['minimumelevationinmeters'],$localStr);
 					}
 					$sql .= ' WHERE (collid = '.$this->collId.') AND (occid IN('.$localStr.'))';
 					//echo $sql;
-					$this->conn->query($sql);
+					if(!$this->conn->query($sql)){
+						$this->errorStr = 'ERROR batch updating coordinates: '.$this->conn->error;
+						echo $this->errorStr;
+					}
 				}
 			}
 		}
 	}
 
+	private function addOccurEdits($fieldName, $fieldValue, $occidStr){
+		$sql = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, appliedstatus, uid) '.
+			'SELECT occid, "'.$fieldName.'", "'.$fieldValue.'", IFNULL('.$fieldName.',""), 1 as ap, '.$GLOBALS['SYMB_UID'].' FROM omoccurrences '.
+			'WHERE (collid = '.$this->collId.') AND (occid IN('.$occidStr.')) ';
+		if(strpos($fieldName,'elevationinmeters')) $sql .= 'AND (minimumelevationinmeters IS NULL)';
+		//echo $sql.';<br/>';
+		if(!$this->conn->query($sql)){
+			$this->errorStr = 'ERROR batch updating coordinates: '.$this->conn->error;
+			echo $this->errorStr;
+		}
+	}
+	
 	public function getCoordStatistics(){
 		$retArr = array();
 		$totalCnt = 0;
@@ -175,7 +187,7 @@ class OccurrenceGeorefTools {
 		while($r = $rs->fetch_object()){
 			$totalCnt = $r->cnt;
 		}
-		$rs->close();
+		$rs->free();
 		
 		$sql = 'SELECT COUNT(occid) AS cnt '. 
 			'FROM omoccurrences '. 
@@ -266,7 +278,8 @@ class OccurrenceGeorefTools {
 		$rs->free();
 		return $occArr;
 	}
-	
+
+	//Setters and getters
 	public function setCollId($cid){
 		if(is_numeric($cid)){
 			$this->collId = $cid;
@@ -277,7 +290,7 @@ class OccurrenceGeorefTools {
 				$this->collName = $r->collectionname;
 				$this->managementType = $r->managementtype;
 			}
-			$rs->close();
+			$rs->free();
 		}
 	}
 
@@ -289,6 +302,7 @@ class OccurrenceGeorefTools {
 		return $this->collName;
 	}
 
+	//Get data functions
 	public function getCountryArr(){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT country '.
@@ -298,7 +312,7 @@ class OccurrenceGeorefTools {
 			$cStr = trim($r->country);
 			if($cStr) $retArr[] = $cStr;
 		}
-		$rs->close();
+		$rs->free();
 		return $retArr;
 	}
 	
@@ -315,7 +329,7 @@ class OccurrenceGeorefTools {
 			$sStr = trim($r->stateprovince);
 			if($sStr) $retArr[] = $sStr;
 		}
-		$rs->close();
+		$rs->free();
 		return $retArr;
 	}
 	
@@ -336,17 +350,18 @@ class OccurrenceGeorefTools {
 			$cStr = trim($r->county);
 			if($cStr) $retArr[] = $cStr;
 		}
-		$rs->close();
+		$rs->free();
 		return $retArr;
 	}
 
-	private function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
+	//Misc functions
+	private function cleanInArr($arr){
+		$retArr = array();
+		foreach($arr as $k => $v){
+			$retArr[$k] = $this->cleanInStr($v);
+		}
+		return $retArr;
 	}
-	
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
