@@ -218,7 +218,7 @@ class PluginsManager {
 		$windowHeight = $width + 75;
 		$imageHeight = $width + 50;
 		$html = '';
-		$html = '<div style="border: 2px solid black;border-radius:10px;padding:10px;clear:both;width:'.$width.'px;height:'.$windowHeight.'px;">';
+		$html = '<div id="slideshowcontainer" style="clear:both;width:'.$width.'px;height:'.$windowHeight.'px;">';
 		$html .= '<div class="container">';
 		$html .= '<div id="slides">';
 		foreach($imageArr as $igmAr => $imgIdArr){ 
@@ -355,7 +355,7 @@ class PluginsManager {
 		$html .= 'return true;}';
 		$html .= '</script>';
 		$html .= '<div id="quicksearchcontainer">';
-		$html .= '<form name="quicksearch" id="quicksearch" action="taxa/index.php" method="post" onsubmit="return verifyQuickSearch(this.form);">';
+		$html .= '<form name="quicksearch" id="quicksearch" action="'.$clientRoot.'/taxa/index.php" method="post" onsubmit="return verifyQuickSearch(this.form);">';
 		$html .= '<span id="quicksearchtitle">Quick Taxon Search</span>';
 		$html .= '<textarea id="quicksearchtaxon" name="taxon" rows="1" title="Enter taxon name here." ></textarea>';
 		$html .= '<div id="quicksearchbutton"><button name="formsubmit" type="submit" value="Search Terms">Search</button></div>';

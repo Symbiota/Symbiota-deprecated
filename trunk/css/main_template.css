@@ -174,3 +174,10 @@ h3{
 	font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Slideshow Plugin */
+#slideshowcontainer{
+	border: 2px solid black;
+	border-radius:10px;
+	padding:10px;
+}
+
