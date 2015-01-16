@@ -904,8 +904,15 @@ class DwcArchiverOccurrence{
                    && $r["localitySecurity"] == 1 
                    && !in_array($r['collid'],$this->rareReaderArr)
                 ){
+					$protectedFields = array();
 					foreach($this->securityArr as $v){
-						if(array_key_exists($v,$r) && $r[$v]) $r[$v] = '[Redacted]';
+						if(array_key_exists($v,$r) && $r[$v]){
+							$r[$v] = '';
+							$protectedFields[] = $v;
+						}
+					}
+					if($protectedFields){
+						$r['informationWithheld'] = trim($r['informationWithheld'].'; field values redacted: '.implode(', ',$protectedFields),' ;');
 					}
 				}
 				
@@ -1561,8 +1568,15 @@ class DwcArchiverOccurrence{
 				$hasRecords = true;
 				//Protect sensitive records
 				if($this->redactLocalities && $r["localitySecurity"] == 1 && !in_array($r['collid'],$this->rareReaderArr)){
+					$protectedFields = array();
 					foreach($this->securityArr as $v){
-						if(array_key_exists($v,$r) && $r[$v]) $r[$v] = '[Redacted]';
+						if(array_key_exists($v,$r) && $r[$v]){
+							$r[$v] = '';
+							$protectedFields[] = $v;
+						}
+					}
+					if($protectedFields){
+						$r['informationWithheld'] = trim($r['informationWithheld'].'; field values redacted: '.implode(', ',$protectedFields),' ;');
 					}
 				}
 				
