@@ -146,13 +146,8 @@ function submitBatchUpdate(f){
 		dataType: "json",
 		data: { collid: f.collid.value, fieldname: fieldName, oldvalue: oldValue, bumatch: buMatch, ouid: f.ouid.value }
 	}).done(function( retCnt ) {
-		if(retCnt){
-			if(confirm("You are about to update "+retCnt+" records.\nNote that you won't be able to undo this Replace operation!\nDo you want to continue?")){
-				f.submit();
-			}
-		}
-		else{
-			alert("ERROR: unable to batch update");
+		if(confirm("You are about to update "+retCnt+" records.\nNote that you won't be able to undo this Replace operation!\nDo you want to continue?")){
+			f.submit();
 		}
 	});
 }

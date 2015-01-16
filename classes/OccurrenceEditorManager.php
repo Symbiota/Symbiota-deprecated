@@ -1097,41 +1097,62 @@ class OccurrenceEditorManager {
 		$ov = $this->cleanInStr($oldValue);
 		$nv = $this->cleanInStr($newValue);
 		if($fn && ($ov || $nv)){
-			$sql = 'UPDATE omoccurrences o2 INNER JOIN (SELECT o.occid FROM omoccurrences o ';
-			$this->addTableJoins($sql);
 			//Strip ORDER BY and/or LIMIT fragments
-			if(strpos($this->sqlWhere,'ORDER BY')){
-				$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
-			}
-			elseif(strpos($this->sqlWhere,'LIMIT')){
-				$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'LIMIT'));
-			}
-			else{
-				$sql .= $this->sqlWhere;
-			}
+			$nvSqlFrag = '';
 			if(!$buMatch || $ov===''){
-				$sql .= 'AND (o.'.$fn.' '.($ov===''?'IS NULL':'= "'.$ov.'"').')'.
-					') rt ON o2.occid = rt.occid SET o2.'.$fn.' = '.($nv===''?'NULL':'"'.$nv.'"').' ';
+				$nvSqlFrag = ($nv===''?'NULL':'"'.$nv.'"');
 			}
 			else{
 				//Selected "Match any part of field"
-				$sql .= 'AND (o.'.$fn.' LIKE "%'.$ov.'%")'.
-					') rt ON o2.occid = rt.occid SET o2.'.$fn.' = REPLACE(o2.'.$fn.',"'.$ov.'","'.$nv.'") ';
+				$nvSqlFrag = 'REPLACE(o2.'.$fn.',"'.$ov.'","'.$nv.'")';
 			}
-			//echo $sql;
+			//Add edits to the omoccuredit table
+			$sqlWhere = $this->getBatchUpdateWhere($fn,$ov,$buMatch);
+			
+			$sql2 = 'INSERT INTO omoccuredits(occid,fieldName,fieldValueOld,fieldValueNew,appliedStatus,uid) '.
+				'SELECT o2.occid, "'.$fn.'" AS fieldName, IFNULL(o2.'.$fn.',"") AS oldValue, '.
+				'IFNULL('.$nvSqlFrag.',"") AS newValue, 1 AS appliedStatus, '.$GLOBALS['SYMB_UID'].' AS uid '.
+				'FROM omoccurrences o2 INNER JOIN omoccurrences o ON o2.occid = o.occid ';
+			$this->addTableJoins($sql2);
+			$sql2 .= $sqlWhere;
+			if(!$this->conn->query($sql2)){
+				$statusStr = 'ERROR adding update to omoccuredits: '.$this->conn->error;
+			}
+
+			//Run update and apply edits
+			$sql = 'UPDATE omoccurrences o2 INNER JOIN omoccurrences o ON o2.occid = o.occid ';
+			$this->addTableJoins($sql);
+			$sql .= ' SET o2.'.$fn.' = '.$nvSqlFrag.' ';
+			$sql .= $sqlWhere;
 			if(!$this->conn->query($sql)){
-				$statusStr = 'ERROR: unable to run batch update => '.$this->conn->error;
+				$statusStr = 'ERROR applying batch update: '.$this->conn->error;
 			}
 		}
 		return $statusStr;
 	}
 
 	public function getBatchUpdateCount($fieldName,$oldValue,$buMatch){
+		$retCnt = 0;
+		
 		$fn = $this->cleanInStr($fieldName);
 		$ov = $this->cleanInStr($oldValue);
-		$sql = 'SELECT COUNT(o.occid) AS retcnt FROM omoccurrences o ';
+
+		$sql = 'SELECT COUNT(o.occid) AS retcnt '.
+			'FROM omoccurrences o2 INNER JOIN omoccurrences o ON o2.occid = o.occid ';
 		$this->addTableJoins($sql);
-		//Strip ORDER BY and/or LIMIT fragments
+		$sql .= $this->getBatchUpdateWhere($fn,$ov,$buMatch);
+
+		$result = $this->conn->query($sql);
+		while ($row = $result->fetch_object()) {
+			$retCnt = $row->retcnt;
+		}
+		$result->free();
+		return $retCnt;
+	}
+
+	private function getBatchUpdateWhere($fn,$ov,$buMatch){
+		$sql = '';
+		//Add where and strip ORDER BY and/or LIMIT fragments
 		if(strpos($this->sqlWhere,'ORDER BY')){
 			$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
 		}
@@ -1141,19 +1162,15 @@ class OccurrenceEditorManager {
 		else{
 			$sql .= $this->sqlWhere;
 		}
-		if(!$buMatch || $ov===""){
-			$sql .= ' AND (o.'.$fn.' '.($ov===''?'IS NULL':'= "'.$ov.'"').')';
+		
+		if(!$buMatch || $ov===''){
+			$sql .= ' AND (o.'.$fn.' '.($ov===''?'IS NULL':'= "'.$ov.'"').') ';
 		}
 		else{
-			$sql .= ' AND (o.'.$fn.' LIKE "%'.$ov.'%")';
+			//Selected "Match any part of field"
+			$sql .= ' AND (o.'.$fn.' LIKE "%'.$ov.'%") ';
 		}
-		$result = $this->conn->query($sql);
-		$retCnt = '';
-		while ($row = $result->fetch_object()) {
-			$retCnt = $row->retcnt;
-		}
-		$result->free();
-		return $retCnt;
+		return $sql;
 	}
 
 	public function carryOverValues($fArr){

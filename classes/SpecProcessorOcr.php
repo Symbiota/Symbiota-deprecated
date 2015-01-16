@@ -270,7 +270,7 @@ class SpecProcessorOcr{
 			return false;
 		}
 		//Initiate processing
-		$this->logMsg('Starting image processing: '.$sourcePath);
+		$this->logMsg('Starting processing: '.$sourcePath);
 		if(substr($sourcePath,-1) != '/') $sourcePath .= '/';
 		if(substr($sourcePath,0,4) == 'http'){
 			//http protocol, thus test for a valid page

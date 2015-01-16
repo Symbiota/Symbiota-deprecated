@@ -285,10 +285,10 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		}
 		if($identifier){
 			if(strpos($identifier,'%') !== false){
-	 			$sql .= 'AND (OR (o.catalognumber LIKE "'.$identifier.'") OR (o.othercatalognumber LIKE "'.$identifier.'"))';
+	 			$sql .= 'AND (OR (o.catalognumber LIKE "'.$identifier.'") OR (o.othercatalognumbers LIKE "'.$identifier.'"))';
 			}
 			else{
-	 			$sql .= 'AND ((o.catalognumber = "'.$identifier.'") OR (o.othercatalognumber = "'.$identifier.'"))';
+	 			$sql .= 'AND ((o.catalognumber = "'.$identifier.'") OR (o.othercatalognumbers = "'.$identifier.'"))';
 			}
 		}
 		if($collector){
