@@ -49,6 +49,16 @@ if($isEditor){
 	<script src="../js/symb/shared.js" type="text/javascript"></script>
 </head>
 <body>
+	<div id="fb-root"></div>
+	<script>
+		(function(d, s, id) {
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id)) return;
+			js = d.createElement(s); js.id = id;
+			js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+			fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+	</script>
 	<?php
 	$displayLeftMenu = (isset($taxa_imgdetailsMenu)?$taxa_imgdetailsMenu:false);
 	include($serverRoot.'/header.php');
@@ -60,6 +70,24 @@ if($isEditor){
 	}
 	?>
 	<!-- This is inner text! -->
+	<div style="float:right;">
+		<div style="float:right;">
+			<a class="twitter-share-button" href="https://twitter.com/share">Tweet</a>
+			<script>
+				window.twttr=(function(d,s,id){
+					var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};
+					if(d.getElementById(id))return;js=d.createElement(s);
+					js.id=id;js.src="https://platform.twitter.com/widgets.js";
+					fjs.parentNode.insertBefore(js,fjs);t._e=[];
+					t.ready=function(f){t._e.push(f);};
+					return t;
+				}(document,"script","twitter-wjs"));
+			</script>
+		</div>
+		<div style="float:right;margin-right:10px;">
+			<div class="fb-share-button" data-href="" data-layout="button_count"></div>
+		</div>
+	</div>
 	<div id="innertext">
 		<?php 
 		if($status){ 
