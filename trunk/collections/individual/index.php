@@ -225,6 +225,16 @@ $commentArr = $indManager->getCommentArr($isEditor);
 </head>
 
 <body>
+	<div id="fb-root"></div>
+	<script>
+		(function(d, s, id) {
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id)) return;
+			js = d.createElement(s); js.id = id;
+			js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+			fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+	</script>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
@@ -276,6 +286,24 @@ $commentArr = $indManager->getCommentArr($isEditor);
 					?>
 				</ul>
 				<div id="occurtab" style="padding:30px;">
+					<div style="float:right;">
+						<div style="float:right;">
+							<a class="twitter-share-button" href="https://twitter.com/share">Tweet</a>
+							<script>
+								window.twttr=(function(d,s,id){
+									var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};
+									if(d.getElementById(id))return;js=d.createElement(s);
+									js.id=id;js.src="https://platform.twitter.com/widgets.js";
+									fjs.parentNode.insertBefore(js,fjs);t._e=[];
+									t.ready=function(f){t._e.push(f);};
+									return t;
+								}(document,"script","twitter-wjs"));
+							</script>
+						</div>
+						<div style="float:right;margin-right:10px;">
+							<div class="fb-share-button" data-href="" data-layout="button_count"></div>
+						</div>
+					</div>
 					<div style="float:left;margin:15px 0px;text-align:center;font-weight:bold;width:120px;">
 						<img border='1' height='50' width='50' src='<?php echo (substr($collMetadata["icon"],0,6)=='images'?'../../':'').$collMetadata['icon']; ?>'/><br/>
 						<?php 
