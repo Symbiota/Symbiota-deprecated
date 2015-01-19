@@ -70,7 +70,7 @@ if($isEditor){
 	}
 	?>
 	<!-- This is inner text! -->
-	<div style="float:right;">
+	<div style="width:100%;float:right;clear:both;">
 		<div style="float:right;">
 			<a class="twitter-share-button" href="https://twitter.com/share">Tweet</a>
 			<script>
