@@ -101,6 +101,10 @@ $collData = $collManager->getCollectionData(true);
 				alert("Collection Name must have a value");
 				return false;
 			}
+			else if(f.managementtype.value == "Snapshot" && f.guidtarget.value == "symbiotaUUID"){
+				alert("The Symbiota Generated GUID option cannot be selected for a collection that is managed locally outside of the data portal (e.g. Snapshot management type). In this case, the GUID must be generated within the source collection database and delivered to the data portal as part of the upload process.");
+				return false;
+			}
 			else if(!isNumeric(f.latdec.value) || !isNumeric(f.lngdec.value)){
 				alert("Latitdue and longitude values must be in the decimal format (numeric only)");
 				return false;
@@ -410,12 +414,13 @@ $collData = $collManager->getCollectionData(true);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="guidinfodialog">
-										Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) is field  
-										is supplied by the source database and the GUID is mapped to the occurrenceId field.
+										Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) field  
+										is supplied by the source database (e.g. Specify database) and the GUID is mapped to the occurrenceId field.
 										The use of the Occurrence Id as the GUID is not recommended for live datasets. 
 										Catalog Number can be used when the value within the catalog number field is globally unique.
-										The Symbiota Generated GUID (UUID) option will inform the Symbiota instance to automatically 
-										generate UUID GUIDs for each records. This option is particularly recommended for many for Live Datasets.  
+										The Symbiota Generated GUID (UUID) option will trigger the Symbiota data portal to automatically 
+										generate UUID GUIDs for each records. This option is recommended for many for Live Datasets 
+										but not allowed for Snapshot collections that are managed in local management system.
 									</div>
 								</td>
 							</tr>
@@ -434,6 +439,23 @@ $collData = $collManager->getCollectionData(true);
 										will generate a url to the NYBG collection with &quot;--DBPK--&quot; being replaced with the 
 										NYBG's Primary Key (dbpk data field within the ommoccurrence table). 
 										Template pattern --CATALOGNUMBER-- can also be used in place of --DBPK-- 
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									Icon URL:
+								</td>
+								<td>
+									<input type="text" name="icon" style="width:90%;" value="<?php echo ($collid?$collData["icon"]:'');?>" title="Small url representing the collection" />
+									<a id="iconinfo" href="#" onclick="return false" title="What is an Icon?">
+										<img src="../../images/info.png" style="width:15px;" />
+									</a>
+									<div id="iconinfodialog">
+										URL to an image icon that represents the collection. Icons are usually place in the 
+										/images/collicon/ folder. Path can be absolute, relative, or of the format 
+										&quot;images/collicon/acro.jpg&quot; 
+										The use of icons are optional.
 									</div>
 								</td>
 							</tr>
@@ -487,23 +509,6 @@ $collData = $collManager->getCollectionData(true);
 								</tr>
 								<tr>
 									<td>
-										Icon URL:
-									</td>
-									<td>
-										<input type="text" name="icon" style="width:90%;" value="<?php echo ($collid?$collData["icon"]:'');?>" title="Small url representing the collection" />
-										<a id="iconinfo" href="#" onclick="return false" title="What is an Icon?">
-											<img src="../../images/info.png" style="width:15px;" />
-										</a>
-										<div id="iconinfodialog">
-											URL to an image icon that represents the collection. Icons are usually place in the 
-											/images/collicon/ folder. Path can be absolute, relative, or of the format 
-											&quot;images/collicon/acro.jpg&quot; 
-											The use of icons are optional.
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td>
 										Sort Sequence:
 									</td>
 									<td>
@@ -516,15 +521,18 @@ $collData = $collManager->getCollectionData(true);
 										</div>
 									</td>
 								</tr>
+								<?php 
+							} 
+							if($collid){ 
+								?>
 								<tr>
 									<td>
 										Global Unique ID:
 									</td>
 									<td>
-									<?php
-									if($collid){
-										echo $collData["guid"]; 
-										?>
+										<?php 
+										echo $collData["guid"];
+										?> 
 										<a id="collectionguidinfo" href="#" onclick="return false" title="More information">
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
@@ -534,11 +542,26 @@ $collData = $collManager->getCollectionData(true);
 											collection management application such as Specify), that identifier should be represented here.
 											If you need to change this value, contact your portal manager.  
 										</div>
-										<?php
-									}
-									else{
-										//New collection 
-										?>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Security Key:
+									</td>
+									<td>
+										<?php echo $collData['skey']; ?>
+									</td>
+								</tr>
+								<?php
+							}
+							else{
+								//New collection 
+								?>
+								<tr>
+									<td>
+										Global Unique ID:
+									</td>
+									<td>
 										<input type="text" name="collectionguid" value="" style="width:90%;" />
 										<a id="collectionguidinfo" href="#" onclick="return false" title="More information">
 											<img src="../../images/info.png" style="width:15px;" />
@@ -550,25 +573,10 @@ $collData = $collManager->getCollectionData(true);
 											If you leave blank, the portal will automatically 
 											generate a UUID for this collection (recommended if GUID is not known to already exist).  
 										</div>
-										<?php
-									}
-									?>
 									</td>
 								</tr>
 								<?php
-								if($collid){ 
-									?>
-									<tr>
-										<td>
-											Security Key:
-										</td>
-										<td>
-											<?php echo $collData['skey']; ?>
-										</td>
-									</tr>
-									<?php
-								}
-							} 
+							}
 							?>
 							<tr>
 								<td colspan="2">
