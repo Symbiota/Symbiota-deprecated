@@ -38,13 +38,18 @@ $imgArr = $imgManager->getImageMetadata($imgId);
 if($imgArr){
 	$imgUrl = $imgArr["url"];
 	$origUrl = $imgArr["originalurl"];
+	$metaUrl = $imgArr["url"];
 	if(array_key_exists("imageDomain",$GLOBALS)){
 		if(substr($imgUrl,0,1)=="/"){
 			$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+			$metaUrl = $GLOBALS["imageDomain"].$metaUrl;
 		}
 		if($origUrl && substr($origUrl,0,1)=="/"){
 			$origUrl = $GLOBALS["imageDomain"].$origUrl;
 		}
+	}
+	if(substr($metaUrl,0,1)=="/"){
+		$metaUrl = 'http://'.$_SERVER['SERVER_NAME'].$metaUrl;
 	}
 }
 
@@ -58,7 +63,7 @@ if($imgArr){
 		?>
 		<meta name="twitter:card" content="photo" data-dynamic="true" />
 		<meta name="twitter:title" content="<?php echo $imgArr["sciname"]; ?>" />
-		<meta name="twitter:image" content="<?php echo $imgUrl; ?>" />
+		<meta name="twitter:image" content="<?php echo $metaUrl; ?>" />
 		<meta name="twitter:url" content="<?php echo 'http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/imagelib/imgdetails.php?imgid='.$imgId; ?>" />
 		<?php
 	}
@@ -92,32 +97,32 @@ if($imgArr){
 		echo " <b>Image #$imgId</b>";
 		echo "</div>";
 	}
-	if($imgArr){
-		?>
-		<div style="width:100%;float:right;clear:both;">
-			<div style="float:right;">
-				<a class="twitter-share-button" data-text="<?php echo $imgArr["sciname"]; ?>" href="https://twitter.com/share">Tweet</a>
-				<script>
-					window.twttr=(function(d,s,id){
-						var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};
-						if(d.getElementById(id))return;js=d.createElement(s);
-						js.id=id;js.src="https://platform.twitter.com/widgets.js";
-						fjs.parentNode.insertBefore(js,fjs);t._e=[];
-						t.ready=function(f){t._e.push(f);};
-						return t;
-					}(document,"script","twitter-wjs"));
-				</script>
-			</div>
-			<div style="float:right;margin-right:10px;">
-				<div class="fb-share-button" data-href="" data-layout="button_count"></div>
-			</div>
-		</div>
-		<?php
-	}
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
+		if($imgArr){
+			?>
+			<div style="width:100%;float:right;clear:both;margin-top:10px;">
+				<div style="float:right;">
+					<a class="twitter-share-button" data-text="<?php echo $imgArr["sciname"]; ?>" href="https://twitter.com/share">Tweet</a>
+					<script>
+						window.twttr=(function(d,s,id){
+							var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};
+							if(d.getElementById(id))return;js=d.createElement(s);
+							js.id=id;js.src="https://platform.twitter.com/widgets.js";
+							fjs.parentNode.insertBefore(js,fjs);t._e=[];
+							t.ready=function(f){t._e.push(f);};
+							return t;
+						}(document,"script","twitter-wjs"));
+					</script>
+				</div>
+				<div style="float:right;margin-right:10px;">
+					<div class="fb-share-button" data-href="" data-layout="button_count"></div>
+				</div>
+			</div>
+			<?php
+		}
 		if($status){ 
 			?>
 			<hr/>
