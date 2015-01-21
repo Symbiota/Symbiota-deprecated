@@ -34,11 +34,35 @@ if($isEditor){
 	}
 }
 
+$imgArr = $imgManager->getImageMetadata($imgId);
+if($imgArr){
+	$imgUrl = $imgArr["url"];
+	$origUrl = $imgArr["originalurl"];
+	if(array_key_exists("imageDomain",$GLOBALS)){
+		if(substr($imgUrl,0,1)=="/"){
+			$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+		}
+		if($origUrl && substr($origUrl,0,1)=="/"){
+			$origUrl = $GLOBALS["imageDomain"].$origUrl;
+		}
+	}
+}
+
 ?>
 <!DOCTYPE HTML>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<?php
+	if($imgArr){
+		?>
+		<meta name="twitter:card" content="photo" data-dynamic="true" />
+		<meta name="twitter:title" content="<?php echo $imgArr["sciname"]; ?>" />
+		<meta name="twitter:image" content="<?php echo $imgUrl; ?>" />
+		<meta name="twitter:url" content="<?php echo 'http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/imagelib/imgdetails.php?imgid='.$imgId; ?>" />
+		<?php
+	}
+	?>
 	<title><?php echo $defaultTitle." Image Details: #".$imgId; ?></title>
 	<link href="../css/base.css" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css" type="text/css" rel="stylesheet" />
@@ -68,26 +92,30 @@ if($isEditor){
 		echo " <b>Image #$imgId</b>";
 		echo "</div>";
 	}
+	if($imgArr){
+		?>
+		<div style="width:100%;float:right;clear:both;">
+			<div style="float:right;">
+				<a class="twitter-share-button" data-text="<?php echo $imgArr["sciname"]; ?>" href="https://twitter.com/share">Tweet</a>
+				<script>
+					window.twttr=(function(d,s,id){
+						var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};
+						if(d.getElementById(id))return;js=d.createElement(s);
+						js.id=id;js.src="https://platform.twitter.com/widgets.js";
+						fjs.parentNode.insertBefore(js,fjs);t._e=[];
+						t.ready=function(f){t._e.push(f);};
+						return t;
+					}(document,"script","twitter-wjs"));
+				</script>
+			</div>
+			<div style="float:right;margin-right:10px;">
+				<div class="fb-share-button" data-href="" data-layout="button_count"></div>
+			</div>
+		</div>
+		<?php
+	}
 	?>
 	<!-- This is inner text! -->
-	<div style="width:100%;float:right;clear:both;">
-		<div style="float:right;">
-			<a class="twitter-share-button" href="https://twitter.com/share">Tweet</a>
-			<script>
-				window.twttr=(function(d,s,id){
-					var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};
-					if(d.getElementById(id))return;js=d.createElement(s);
-					js.id=id;js.src="https://platform.twitter.com/widgets.js";
-					fjs.parentNode.insertBefore(js,fjs);t._e=[];
-					t.ready=function(f){t._e.push(f);};
-					return t;
-				}(document,"script","twitter-wjs"));
-			</script>
-		</div>
-		<div style="float:right;margin-right:10px;">
-			<div class="fb-share-button" data-href="" data-layout="button_count"></div>
-		</div>
-	</div>
 	<div id="innertext">
 		<?php 
 		if($status){ 
@@ -99,7 +127,7 @@ if($isEditor){
 			<hr/>
 			<?php 
 		} 
-		if($imgArr = $imgManager->getImageMetadata($imgId)){
+		if($imgArr){
 			?>
 			<table>
 				<?php 
@@ -247,18 +275,6 @@ if($isEditor){
 				?>
 				<tr>
 					<td style="width:50%;text-align:center;padding:10px;">
-						<?php 
-							$imgUrl = $imgArr["url"];
-							$origUrl = $imgArr["originalurl"];
-							if(array_key_exists("imageDomain",$GLOBALS)){
-								if(substr($imgUrl,0,1)=="/"){
-									$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-								}
-								if($origUrl && substr($origUrl,0,1)=="/"){
-									$origUrl = $GLOBALS["imageDomain"].$origUrl;
-								}
-							}
-						?>
 						<a href="<?php echo $imgUrl;?>">
 							<img src="<?php echo $imgUrl;?>" style="width:90%;" />
 						</a>
