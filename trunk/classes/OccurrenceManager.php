@@ -12,10 +12,10 @@ class OccurrenceManager{
 	protected $reset = 0;
 	private $clName;
 	private $collArrIndex = 0;
-	
+
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
-		$this->useCookies = (array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?0:1); 
+		$this->useCookies = (array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?0:1);
  		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
  			$this->reset();
  		}
@@ -47,7 +47,7 @@ class OccurrenceManager{
 		setCookie("collvars","",time()-3600,($clientRoot?$clientRoot:'/'));
  		$this->reset = 1;
 		if(array_key_exists("db",$this->searchTermsArr) || array_key_exists("oic",$this->searchTermsArr)){
-			//reset all other search terms except maintain the db terms 
+			//reset all other search terms except maintain the db terms
 			$dbsTemp = "";
 			if(array_key_exists("db",$this->searchTermsArr)) $dbsTemp = $this->searchTermsArr["db"];
 			$clidTemp = "";
@@ -60,14 +60,14 @@ class OccurrenceManager{
 
 	private function readCollCookies(){
 		if(array_key_exists("colltaxa",$_COOKIE)){
-			$collTaxa = $_COOKIE["colltaxa"]; 
+			$collTaxa = $_COOKIE["colltaxa"];
 			$taxaArr = explode("&",$collTaxa);
 			foreach($taxaArr as $value){
 				$this->searchTermsArr[substr($value,0,strpos($value,":"))] = substr($value,strpos($value,":")+1);
 			}
 		}
 		if(array_key_exists("collsearch",$_COOKIE)){
-			$collSearch = $_COOKIE["collsearch"]; 
+			$collSearch = $_COOKIE["collsearch"];
 			$searArr = explode("&",$collSearch);
 			foreach($searArr as $value){
 				$this->searchTermsArr[substr($value,0,strpos($value,":"))] = substr($value,strpos($value,":")+1);
@@ -84,7 +84,7 @@ class OccurrenceManager{
 		}
 		return $this->searchTermsArr;
 	}
-	
+
 	public function getSearchTerms(){
 		return $this->searchTermsArr;
 	}
@@ -99,7 +99,7 @@ class OccurrenceManager{
 	}
 
 	public function getSqlWhere(){
-		$sqlWhere = ""; 
+		$sqlWhere = "";
 		if(array_key_exists('clid',$this->searchTermsArr)){
 			$sqlWhere .= "AND (v.clid IN(".$this->searchTermsArr['clid'].")) ";
 		}
@@ -141,7 +141,7 @@ class OccurrenceManager{
 				$this->setSciNamesByVerns();
 			}
 			else{
-				if($useThes){ 
+				if($useThes){
 					$this->setSynonyms();
 				}
 			}
@@ -194,7 +194,7 @@ class OccurrenceManager{
 						$synArr = $valueArray["synonyms"];
 						if($synArr){
 							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 5){
-								foreach($synArr as $synTid => $sciName){ 
+								foreach($synArr as $synTid => $sciName){
 									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
 										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
 									}
@@ -203,7 +203,7 @@ class OccurrenceManager{
 							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',array_keys($synArr)).')) ';
 						}
 						/*
-						foreach($synArr as $sciName){ 
+						foreach($synArr as $sciName){
 							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 5){
 								$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
 							}
@@ -261,8 +261,8 @@ class OccurrenceManager{
 		if(array_key_exists("elevlow",$this->searchTermsArr) || array_key_exists("elevhigh",$this->searchTermsArr)){
 			$elevlow = 0;
 			$elevhigh = 30000;
-			if (array_key_exists("elevlow",$this->searchTermsArr))  { $elevlow = $this->searchTermsArr["elevlow"]; } 
-			if (array_key_exists("elevhigh",$this->searchTermsArr))  { $elevhigh = $this->searchTermsArr["elevhigh"]; } 
+			if (array_key_exists("elevlow",$this->searchTermsArr))  { $elevlow = $this->searchTermsArr["elevlow"]; }
+			if (array_key_exists("elevhigh",$this->searchTermsArr))  { $elevhigh = $this->searchTermsArr["elevhigh"]; }
 			$tempArr = Array();
 			$sqlWhere .= "AND ( " .
 						 "	  ( minimumElevationInMeters >= $elevlow AND maximumElevationInMeters <= $elevhigh ) OR " .
@@ -280,7 +280,7 @@ class OccurrenceManager{
 		if(array_key_exists("llpoint",$this->searchTermsArr)){
 			$pointArr = explode(";",$this->searchTermsArr["llpoint"]);
 			if(count($pointArr) == 3){
-				//Formula approximates a bounding box; bounding box is for efficiency, will test practicality of doing a radius query in future  
+				//Formula approximates a bounding box; bounding box is for efficiency, will test practicality of doing a radius query in future
 				$latRadius = $pointArr[2] / 69.1;
 				$longRadius = cos($pointArr[0]/57.3)*($pointArr[2]/69.1);
 				$lat1 = $pointArr[0] - $latRadius;
@@ -382,11 +382,11 @@ class OccurrenceManager{
 						}
 						else{
 							$betweenFrag[] = '(o.catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
-						} 
+						}
 					}
 					else{
 						$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
-						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2); 
+						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2);
 						$betweenFrag[] = '('.$catTerm.')';
 					}
 				}
@@ -408,10 +408,46 @@ class OccurrenceManager{
 				}
 				else{
 					$catWhere .= 'OR (o.catalogNumber IN("'.implode('","',$inFrag).'")) ';
-				} 
+				}
 			}
 			$sqlWhere .= 'AND ('.substr($catWhere,3).') ';
 			$this->localSearchArr[] = $this->searchTermsArr['catnum'];
+		}
+		if(array_key_exists('othercatnum',$this->searchTermsArr)){
+			$otherCatStr = $this->searchTermsArr['othercatnum'];
+			$otherCatArr = explode(',',str_replace(';',',',$otherCatStr));
+			$betweenFrag = array();
+			$inFrag = array();
+			foreach($otherCatArr as $v){
+				if($p = strpos($v,' - ')){
+					$term1 = trim(substr($v,0,$p));
+					$term2 = trim(substr($v,$p+3));
+					if(is_numeric($term1) && is_numeric($term2)){
+						$betweenFrag[] = '(o.otherCatalogNumbers BETWEEN '.$term1.' AND '.$term2.')';
+					}
+					else{
+						$otherCatTerm = 'o.otherCatalogNumbers BETWEEN "'.$term1.'" AND "'.$term2.'"';
+						if(strlen($term1) == strlen($term2)) $otherCatTerm .= ' AND length(o.otherCatalogNumbers) = '.strlen($term2);
+						$betweenFrag[] = '('.$otherCatTerm.')';
+					}
+				}
+				else{
+					$vStr = trim($v);
+					$inFrag[] = $vStr;
+					if(is_numeric($vStr) && substr($vStr,0,1) == '0'){
+						$inFrag[] = ltrim($vStr,0);
+					}
+				}
+			}
+			$otherCatWhere = '';
+			if($betweenFrag){
+				$otherCatWhere .= 'OR '.implode(' OR ',$betweenFrag);
+			}
+			if($inFrag){
+				$otherCatWhere .= 'OR (o.otherCatalogNumbers IN("'.implode('","',$inFrag).'")) ';
+			}
+			$sqlWhere .= 'AND ('.substr($otherCatWhere,3).') ';
+			$this->localSearchArr[] = $this->searchTermsArr['othercatnum'];
 		}
 		if(array_key_exists("typestatus",$this->searchTermsArr)){
 			$typestatusArr = explode(";",$this->searchTermsArr["typestatus"]);
@@ -424,7 +460,7 @@ class OccurrenceManager{
 		}
 		if(array_key_exists("targetclid",$this->searchTermsArr)){
 			$clid = $this->searchTermsArr["targetclid"];
-			$clSql = ""; 
+			$clSql = "";
 			if($clid){
 				$sql = 'SELECT dynamicsql, name FROM fmchecklists WHERE (clid = '.$clid.')';
 				$result = $this->conn->query($sql);
@@ -448,7 +484,7 @@ class OccurrenceManager{
 			$retStr = 'WHERE o.collid = -1 ';
 		}
 		//echo $retStr; exit;
-		return $retStr; 
+		return $retStr;
 	}
 
 	private function formatDate($inDate){
@@ -546,7 +582,7 @@ class OccurrenceManager{
 		}
 		$result->close();
 	}
-	
+
 	protected function setSynonyms(){
 		foreach($this->taxaArr as $key => $value){
 			if(array_key_exists("scinames",$value)){
@@ -585,7 +621,7 @@ class OccurrenceManager{
 		}
 		*/
 	}
-	
+
 	public function getFullCollectionList($catId = ""){
 		$retArr = array();
 		//Set collection array
@@ -637,7 +673,7 @@ class OccurrenceManager{
 			$targetArr = $retArr['spec']['cat'][$catId];
 			unset($retArr['spec']['cat'][$catId]);
 			array_unshift($retArr['spec']['cat'],$targetArr);
-		} 
+		}
 		elseif(isset($retArr['obs']['cat'][$catId])){
 			$targetArr = $retArr['obs']['cat'][$catId];
 			unset($retArr['obs']['cat'][$catId]);
@@ -653,12 +689,12 @@ class OccurrenceManager{
 			?>
 			<div style="float:right;margin-top:20px;">
 				<input type="image" src='../images/next.jpg'
-					onmouseover="this.src = '../images/next_rollover.jpg';" 
+					onmouseover="this.src = '../images/next_rollover.jpg';"
 					onmouseout="this.src = '../images/next.jpg';"
 					title="Click button to advance to the next step" />
 			</div>
 			<table style="float:left;width:80%;">
-				<?php 
+				<?php
 				foreach($categoryArr as $catid => $catArr){
 					$name = $catArr['name'];
 					if($catArr['acronym']) $name .= ' ('.$catArr['acronym'].')';
@@ -670,15 +706,15 @@ class OccurrenceManager{
 					?>
 					<tr>
 						<td style="<?php echo ($catIcon?'width:40px':''); ?>">
-							<?php 
+							<?php
 							if($catIcon){
-								$catIcon = (substr($catIcon,0,6)=='images'?'../':'').$catIcon; 
+								$catIcon = (substr($catIcon,0,6)=='images'?'../':'').$catIcon;
 								echo '<img src="'.$catIcon.'" style="border:0px;width:30px;height:30px;" />';
 							}
 							?>
 						</td>
 						<td style="padding:6px;width:25px;">
-							<input id="cat-<?php echo $idStr; ?>-Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked /> 
+							<input id="cat-<?php echo $idStr; ?>-Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked />
 						</td>
 						<td style="padding:9px 5px;width:10px;">
 							<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
@@ -697,14 +733,14 @@ class OccurrenceManager{
 						<td colspan="4">
 							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px;padding:10px 20px;border:inset">
 								<table>
-									<?php 
+									<?php
 									foreach($catArr as $collid => $collName2){
 										?>
 										<tr>
 											<td style="width:40px;">
-												<?php 
+												<?php
 												if($collName2["icon"]){
-													$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"]; 
+													$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"];
 													?>
 													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'><img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" /></a>
 													<?php
@@ -712,7 +748,7 @@ class OccurrenceManager{
 												?>
 											</td>
 											<td style="padding:6px;width:25px;">
-												<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat-<?php echo $idStr; ?>-Input')" checked /> 
+												<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat-<?php echo $idStr; ?>-Input')" checked />
 											</td>
 											<td style="padding:6px">
 												<div class="collectiontitle">
@@ -721,7 +757,7 @@ class OccurrenceManager{
 														$codeStr = ' ('.$collName2['instcode'];
 														if($collName2['collcode']) $codeStr .= '-'.$collName2['collcode'];
 														$codeStr .= ')';
-														echo $collName2["collname"].$codeStr; 
+														echo $collName2["collname"].$codeStr;
 														?>
 													</a>
 													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
@@ -730,32 +766,32 @@ class OccurrenceManager{
 												</div>
 											</td>
 										</tr>
-										<?php 
-										$collCnt++; 
+										<?php
+										$collCnt++;
 									}
 									?>
 								</table>
 							</div>
 						</td>
 					</tr>
-					<?php 
+					<?php
 				}
 				?>
 			</table>
-			<?php 
+			<?php
 		}
 		if(isset($occArr['coll'])){
 			$collArr = $occArr['coll'];
 			?>
 			<table style="float:left;width:80%;">
-				<?php 
+				<?php
 				foreach($collArr as $collid => $cArr){
 					?>
 					<tr>
 						<td style="<?php ($cArr["icon"]?'width:35px':''); ?>">
-							<?php 
+							<?php
 							if($cArr["icon"]){
-								$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
+								$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"];
 								?>
 								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'><img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" /></a>
 								<?php
@@ -764,16 +800,16 @@ class OccurrenceManager{
 							&nbsp;
 						</td>
 						<td style="padding:6px;width:25px;">
-							<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll()" checked /> 
+							<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll()" checked />
 						</td>
 						<td style="padding:6px">
 							<div class="collectiontitle">
 								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-									<?php 
+									<?php
 									$codeStr = ' ('.$cArr['instcode'];
 									if($cArr['collcode']) $codeStr .= '-'.$cArr['collcode'];
 									$codeStr .= ')';
-									echo $cArr["collname"].$codeStr; 
+									echo $cArr["collname"].$codeStr;
 									?>
 								</a>
 								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
@@ -789,11 +825,11 @@ class OccurrenceManager{
 			</table>
 			<div style="float:right;margin-top:<?php echo count($collArr)*15; ?>px;">
 				<input type="image" src='../images/next.jpg'
-					onmouseover="this.src = '../images/next_rollover.jpg';" 
+					onmouseover="this.src = '../images/next_rollover.jpg';"
 					onmouseout="this.src = '../images/next.jpg';"
 					title="Click button to advance to the next step" />
 			</div>
-			<?php 
+			<?php
 		}
 		$this->collArrIndex++;
 	}
@@ -815,7 +851,7 @@ class OccurrenceManager{
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	public function getOccurVoucherProjects(){
 		$retArr = Array();
 		$titleArr = Array();
@@ -838,7 +874,7 @@ class OccurrenceManager{
 		if($titleArr) $retArr['titles'] = $titleArr;
 		return $retArr;
 	}
-	
+
 	public function getDatasetSearchStr(){
 		$retStr ="";
 		if(array_key_exists("clid",$this->searchTermsArr)){
@@ -878,14 +914,14 @@ class OccurrenceManager{
 		}
 		return $retStr;
 	}
-	
+
 	private function getClidVoucherStr(){
 		$retStr = 'Various Voucher Projects';
 		/*
 		$sql = "SELECT projectname FROM omsurveys WHERE (surveyid IN(".str_replace(";",",",$this->searchTermsArr["surveyid"]).")) ";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnStr .= " ;".$row->projectname; 
+			$returnStr .= " ;".$row->projectname;
 		}
 		return substr($returnStr,2);
 		*/
@@ -906,11 +942,11 @@ class OccurrenceManager{
 		}
 		return implode("; ", $returnArr);
 	}
-	
+
 	public function getLocalSearchStr(){
 		return implode("; ", $this->localSearchArr);
 	}
-	
+
 	public function getTaxonAuthorityList(){
 		$taxonAuthorityList = Array();
 		$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta WHERE (ta.isactive <> 0)";
@@ -984,7 +1020,7 @@ class OccurrenceManager{
 			if($taxa){
 				$taxaStr = "";
 				if(is_numeric($taxa)){
-					$sql = "SELECT t.sciname ". 
+					$sql = "SELECT t.sciname ".
 						"FROM taxa t ".
 						"WHERE (t.tid = ".$taxa.')';
 					$rs = $this->conn->query($sql);
@@ -1005,7 +1041,7 @@ class OccurrenceManager{
 				}
 				$collTaxa = "taxa:".$taxaStr;
 				$this->searchTermsArr["taxa"] = $taxaStr;
-				$useThes = array_key_exists("thes",$_REQUEST)?$this->conn->real_escape_string($_REQUEST["thes"]):0; 
+				$useThes = array_key_exists("thes",$_REQUEST)?$this->conn->real_escape_string($_REQUEST["thes"]):0;
 				if($useThes){
 					$collTaxa .= "&usethes:true";
 					$this->searchTermsArr["usethes"] = true;
@@ -1163,6 +1199,18 @@ class OccurrenceManager{
 			}
 			$searchFieldsActivated = true;
 		}
+		if(array_key_exists("othercatnum",$_REQUEST)){
+			$othercatnum = $this->conn->real_escape_string(trim($_REQUEST["othercatnum"]));
+			if($othercatnum){
+				$str = str_replace(",",";",$othercatnum);
+				$searchArr[] = "othercatnum:".$str;
+				$this->searchTermsArr["othercatnum"] = $str;
+			}
+			else{
+				unset($this->searchTermsArr["othercatnum"]);
+			}
+			$searchFieldsActivated = true;
+		}
 		if(array_key_exists("typestatus",$_REQUEST)){
 			$typestatus = $this->conn->real_escape_string(trim($_REQUEST["typestatus"]));
 			if($typestatus){
@@ -1184,13 +1232,13 @@ class OccurrenceManager{
 		if(array_key_exists("upperlat",$_REQUEST)){
 			$upperLat = $this->conn->real_escape_string($_REQUEST["upperlat"]);
 			if($upperLat || $upperLat === "0") $latLongArr[] = $upperLat;
-		
+
 			$bottomlat = $this->conn->real_escape_string($_REQUEST["bottomlat"]);
 			if($bottomlat || $bottomlat === "0") $latLongArr[] = $bottomlat;
-		
+
 			$leftLong = $this->conn->real_escape_string($_REQUEST["leftlong"]);
 			if($leftLong || $leftLong === "0") $latLongArr[] = $leftLong;
-		
+
 			$rightlong = $this->conn->real_escape_string($_REQUEST["rightlong"]);
 			if($rightlong || $rightlong === "0") $latLongArr[] = $rightlong;
 
@@ -1206,10 +1254,10 @@ class OccurrenceManager{
 		if(array_key_exists("pointlat",$_REQUEST)){
 			$pointLat = $this->conn->real_escape_string($_REQUEST["pointlat"]);
 			if($pointLat || $pointLat === "0") $latLongArr[] = $pointLat;
-			
+
 			$pointLong = $this->conn->real_escape_string($_REQUEST["pointlong"]);
 			if($pointLong || $pointLong === "0") $latLongArr[] = $pointLong;
-		
+
 			$radius = $this->conn->real_escape_string($_REQUEST["radius"]);
 			if($radius) $latLongArr[] = $radius;
 			if(count($latLongArr) == 3){
@@ -1230,7 +1278,7 @@ class OccurrenceManager{
 			if($this->useCookies) setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 	}
-	
+
 	//Misc return functions
 	private function getSynonyms($searchTarget,$taxAuthId = 1){
 		$synArr = array();
@@ -1277,7 +1325,7 @@ class OccurrenceManager{
 				if(!in_array($r2->tid,$targetTidArr)) $synArr[$r2->tid] = $r2->sciname;
 			}
 			$rs2->free();
-	
+
 			//Get synonym that are different than target
 			$sql3 = 'SELECT DISTINCT t.tid, t.sciname '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
@@ -1287,7 +1335,7 @@ class OccurrenceManager{
 				if(!in_array($r3->tid,$targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
 			}
 			$rs3->free();
-	
+
 			//If rank is 220, get synonyms of accepted children
 			if($rankId == 220){
 				$sql4 = 'SELECT DISTINCT t.tid, t.sciname '.
@@ -1303,11 +1351,11 @@ class OccurrenceManager{
 		}
 		return $synArr;
 	}
-	
+
 	public function getUseCookies(){
 		return $this->useCookies;
 	}
-	
+
 	public function getClName(){
 		return $this->clName;
 	}
