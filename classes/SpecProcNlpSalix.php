@@ -1288,10 +1288,17 @@ class SpecProcNlpSalix
 			//Convert Mr. A. B. and Mrs. C. D. Smith to A. B. Smith, C. D. Smith.
 			$this->LabelLines[$L] = str_replace($match[0],$match[2]." ".$match[6].", ".$match[5]." ".$match[6],$this->LabelLines[$L]);
 			}
-		
-		$Preg = "(\b(([A-Z][a-z]{2,20} )|([A-Z][\.] ))([A-Z][\.] )?([A-Z][a-z]{2,20}\b))";
-				//(Initial or first name), (optional middle initial), (last name).
+		$Preg = "(\b([A-Z][.])\s(\b[A-Z][a-z]{2,20}\b)\s(\b[A-Z][a-z]{2,20}\b)\s(No|[0-9]{2,6}))";
+		//(Initial) (middle name) (last name) followed by No or number
 		$Found = preg_match_all($Preg, $this->LabelLines[$L],$match);
+		if($Found > 0) 
+			$match[0][0] = $match[1][0]." ".$match[2][0]." ".$match[3][0];
+		else
+			{
+			$Preg = "(\b(([A-Z][a-z]{2,20} )|([A-Z][\.] ))([A-Z][\.] )?([A-Z][a-z]{2,20}\b))";
+				//(Initial or first name), (optional middle initial), (last name).
+			$Found = preg_match_all($Preg, $this->LabelLines[$L],$match);
+			}
 		if($Found > 0)
 			{
 			for($N=0;$N<$Found;$N++)
@@ -1636,6 +1643,11 @@ class SpecProcNlpSalix
 			$Found = preg_match($Preg,$TempString,$match);
 			//echo "$Preg<br>";
 			}
+		if($Found !== 1)
+			{//Format April, 1929
+			$Preg = "({$this->PregMonths},?\s*(\b[0-9]{1,4}\b)\s*)i";
+			$Found = preg_match($Preg,$TempString,$match);
+			}
 		if($Found !== 0)
 			{
 			$VDate = $match[0];
@@ -1646,8 +1658,6 @@ class SpecProcNlpSalix
 			//echo "Line $L {$this->LabelLines[$L]}<br>";
 			$Preg = "(([0-9]+[./-])([IVX]+)([./-][0-9]+))i";
 			$Found = preg_match($Preg, $TempString,$match);
-			//$VDate = $match[0];
-			//$RealVDate = $VDate;
 			if($Found >0)
 				{
 				
@@ -1752,49 +1762,86 @@ class SpecProcNlpSalix
 			}
 		if($this->Results['country'] != "") //Found it.
 			return;
-
-		//"Plants of" didn't work.  Look for "xxx County".
-		$match = $this->CountyPreg();
-		//$this->printr($match,"Match2");
+		
+		//"Plants of" didn't work.  Look for "xxx State".
+		$match = $this->LabeledRegion("stateProvince");
+		if($match != false)
+			{ //Found "xxx province or state"
+			$State = $match[1]." ".$match[2];
+			//echo "State might be $State<br>";
+			if(!$this->PlantsOf($State))
+				$this->PlantsOf(trim($match[2]));
+			}
+		if($this->Results['country'] != "") //Found it.
+			return;
+		
+		//Look for "xxx County".
+		$match = $this->LabeledRegion("county");
 		if($match != false)
 			{ //Found "xxx County"
 			$County = $match[1]." ".$match[2];
 			//echo "County might be $County<br>";
 			if(!$this->ScanForState($County))
-				$this->ScanForState($match[2]);
+				$this->ScanForState(trim($match[2]));
 			}
 		$this->SeekState(223,-1);
 		}
 
-		
-		
-	private function CountyPreg()
-		{ //Looks for the word County on the label
-		$Preg = "((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*(\b(County|Co)\b))i";
+	//*****************************************************************************
+	private function LabeledRegion($Type)
+		{ //Looks for a labeled region, such as County or province on the label
+		$PrePreg = "((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*";
+		switch($Type)
+			{
+			case "stateProvince":
+				//$Preg = "((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*(\b(prov|province|state|estado)\b))i";
+				$Preg = "(\bprov|province|state|estado\b)";
+				break;
+			case "county":
+				//$Preg = "((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*(\b(County|Co)\b))i";
+				$Preg = "(\b(County|Co)\b)i";
+				break;
+			default:
+				return false;
+			}
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{
 			//echo "Testing {$this->LabelLines[$L]}<br>";
-			$Found = preg_match($Preg,$this->LabelLines[$L],$match);
+			$Found = preg_match($Preg."i",$this->LabelLines[$L],$match);
 			
 			if($Found)
 				{
-				//$this->printr($match,"County Match");
-				$match['Line'] = $L;
-				return $match;
+				$FullPreg = $PrePreg."(".$Preg."))i" ;
+				$Found = preg_match($PrePreg."(".$Preg."))i",$this->LabelLines[$L],$match);
+				if($Found == 0)
+					{
+					$FullPreg = "(".$Preg.$PrePreg."))i";
+					//echo "Full = $FullPreg<br>";
+					$Found = preg_match($FullPreg,$this->LabelLines[$L],$match);
+					}
+				if($Found)
+					{
+					$match['Line'] = $L;
+					//$this->printr($match,"Match");
+					return $match;
+					}
 				}
 			}
 		return false;
 		}
+		
+		
 							
 		
 		
 
+	//*****************************************************************************
 	function PlantsOf($Name)
 		{//Find country/state from "Plants of" statement.
 		$query = "SELECT * FROM lkupcountry where countryName LIKE '$Name'";
 		$result = $this->conn->query($query);
 		if($result->num_rows > 0)
-			{//This needs to be completed once I find an example
+			{
 			$Country = $result->fetch_assoc();
 			$this->AddToResults('country',$Country['countryName'],-1);
 			$this->SeekState($Country['countryId'],-1);
@@ -1803,7 +1850,7 @@ class SpecProcNlpSalix
 		else
 			{
 			//echo "Here for $Name<br>";
-			$match = $this->CountyPreg();
+			$match = $this->LabeledRegion('county');
 			if($match != false)
 				{ //Found a county name on the label.  Check if $Name is a state that contains the county
 				//echo "Here 1<br>";
@@ -1825,20 +1872,25 @@ class SpecProcNlpSalix
 						$this->AddToResults('country',$Result['countryName'],$L);
 						$this->AddToResults('stateProvince',$Result['stateName'],$L);
 						$this->LabelLines[$L] = trim(str_replace($match[0],"",$this->LabelLines[$L])," ,;:");
-						return;
+						return true;
 						}
 					}
 				}
-			else //Didn't find a county.  Just look for the state
-				$query = "SELECT s.stateName, s.stateId, cr.countryName, cr.countryId FROM lkupstateprovince s inner join lkupcountry cr on cr.countryId = s.countryId WHERE s.stateName LIKE '$Name'";
+			//Didn't find a county.  Just look for the state
+			$query = "SELECT s.stateName, s.stateId, cr.countryName, cr.countryId FROM lkupstateprovince s inner join lkupcountry cr on cr.countryId = s.countryId WHERE s.stateName LIKE '$Name'";
+			//echo "$query<br>";
 			$result = $this->conn->query($query);
 			if($result->num_rows > 0)
 				{
+				
 				while($OneState = $result->fetch_assoc())
 					{
 					//$this->printr($OneState,"OneState");
 					if($this->Results['stateProvince'] == "")
+						{
 						$this->AddToResults('stateProvince',$OneState['stateName'],-1);
+						$this->AddCountry($OneState['stateId']);
+						}
 					//$this->printr($OneState,"OneState");
 					$County = $this->ScanForCounty($OneState);
 					if($County != "")
@@ -1855,7 +1907,6 @@ class SpecProcNlpSalix
 								}
 							
 							}
-						$this->AddCountry($OneState['stateId']);
 						}
 					if($this->Results['county'] != "")
 						break;
@@ -1865,6 +1916,7 @@ class SpecProcNlpSalix
 		}
 
 		
+	//*****************************************************************************
 	function ScanForState($County)
 		{ //Given a county, come up with a list of possible states, then scan for them.
 		//global $this->Label;
@@ -1900,26 +1952,29 @@ class SpecProcNlpSalix
 		}
 		
 		
+	//*****************************************************************************
 	function ScanForCounty($OneState)
-		{//Given a state, come with a county
-		//global $this->Label;
+		{//Given a state, find a county
+		$BadCounties = array("island"); //These are much more likely to be false positives.
 		$query = "SELECT cy.countyName from lkupcounty cy INNER JOIN lkupstateprovince s on s.stateId=cy.stateId WHERE cy.stateId = ".$OneState['stateId'];
-		//echo "$query<br>";
+		//echo $query."<br>";
 		$result = $this->conn->query($query);
 		if($result->num_rows > 0)
 			while($OneCounty = $result->fetch_assoc())
 				{
 				$CountyName = $OneCounty['countyName'];
-				$Preg = "(\b$CountyName\b)i";
-				//if(stripos($this->Label, $CountyName) !== false)
+				$Preg = "((\b$CountyName\b)(\scounty)?)i";
 				if(preg_match($Preg,$this->Label,$match))
 					{
-					//echo "Found $CountyName<br>";
-					return $CountyName;
+					if(array_search(strtolower($match[1]),$BadCounties)!== false && !isset($match[2]))
+						continue;
+					else
+						return $CountyName;
 					}
 				}
 		}
 
+	//*****************************************************************************
 	function AddCountry($StateId)
 		{
 		$query = "SELECT countryName FROM lkupcountry c INNER JOIN lkupstateprovince s on s.countryId= c.countryId where s.stateId=$StateId LIMIT 1";
@@ -1934,6 +1989,7 @@ class SpecProcNlpSalix
 		}
 
 		
+	//*****************************************************************************
 	private function SeekState($CountryId,$m)
 		{
 		//Given the country, scan the whole label for a contained state.
@@ -1951,22 +2007,38 @@ class SpecProcNlpSalix
 			while($OneState = $StateResult->fetch_assoc())
 				{
 				if(preg_match("(\b{$OneState['stateName']}\b)i",$this->LabelLines[$L]) > 0)
+					{
 					$StateArray[] = $OneState['stateName'];
+					$StateId[] = $OneState['stateId'];
+					}
 				}
 			if(count($StateArray) > 0)
 				{
 				$Lengths = array_map('strlen',$StateArray);
 				$MaxLength = max($Lengths);
 				$index = array_search($MaxLength,$Lengths);
+				//$this->printr($StateId,"StateId");
 				$this->AddToResults('stateProvince',$StateArray[$index],$L);
+				$this->LabelLines[$L]= str_ireplace($StateArray[$index],"",$this->LabelLines[$L]);
+				$County = $this->ScanForCounty(array ('stateId' => $StateId[$index]));
+				if($County != "")
+					{
+					$this->AddToResults('county',$County,-1);
+					}
+				if($this->Results['country'] == "")
+					{
+					$query = "SELECT countryName from lkupcountry where countryId like $CountryId LIMIT 1";
+					$CountryResult = $this->conn->query($query);
+					$Country = $CountryResult->fetch_assoc();
+					$this->AddToResults('country',$Country['countryName'],-1);
+					}
 				return true;
 				}
-				
 			}
-
 		return false;
 		}
 	
+	//*****************************************************************************
 	private function RankCountryLines()
 		{
 		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|vascular|specimen|botanical\b))i";
@@ -2014,7 +2086,7 @@ class SpecProcNlpSalix
 		
 //*********************************************************************************************************************
 // Old get country stuff
-
+/*
 	//**********************************************
 	function GetCountryStateOld()
 		{
@@ -2224,7 +2296,7 @@ class SpecProcNlpSalix
 				}
 			}
 		}
-/*
+
 	private function CheckCountry($L, $Word)
 		{
 		$query = "SELECT countryId,countryName from lkupcountry where countryName like '$Word' LIMIT 1";
@@ -3109,10 +3181,10 @@ class SpecProcNlpSalix
 		$this->PregStart['recordedBy'] = "(^(collected by|collectors|collector|collected|coll|col|leg|by)\b)i";
 		$this->PregStart['eventDate'] = "(^(EventDate|Date)\b)i";
 		$this->PregStart['recordNumber'] = "(^(number|coll)\b)i";
-		$this->PregStart['identifiedBy'] = "(^(determined by|determined|det|identified by|identified)\b)i";
+		$this->PregStart['identifiedBy'] = "(^(determined by|determined|det. by|det|identified by|identified)\b)i";
 		$this->PregStart['associatedCollectors'] = "(^(with|and|&)\b)i";
 		$this->PregStart['habitat'] = "(^(habitat)\b)i";
-		$this->PregStart['locality'] = "(^(locality|location|loc)\b)i";
+		$this->PregStart['locality'] = "(^(locality|location|loc|collected off|collected near)\b)i";
 		$this->PregStart['substrate'] = "(^(substrate)\b)i";
 		$this->PregStart['country'] = "(^(country)\b)i";
 		$this->PregStart['stateProvince'] = "(^(state|province)\b)i";
