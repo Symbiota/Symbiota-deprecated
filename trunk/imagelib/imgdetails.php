@@ -61,6 +61,9 @@ if($imgArr){
 	<?php
 	if($imgArr){
 		?>
+		<meta property="og:title" content="<?php echo $imgArr["sciname"]; ?>"/>
+		<meta property="og:site_name" content="<?php echo $defaultTitle; ?>"/>
+		<meta property="og:image" content="<?php echo $metaUrl; ?>"/>
 		<meta name="twitter:card" content="photo" data-dynamic="true" />
 		<meta name="twitter:title" content="<?php echo $imgArr["sciname"]; ?>" />
 		<meta name="twitter:image" content="<?php echo $metaUrl; ?>" />
