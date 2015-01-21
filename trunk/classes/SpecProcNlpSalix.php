@@ -78,10 +78,11 @@ class SpecProcNlpSalix
 		$this->Label = preg_replace("/[íìîï]/u","i",$this->Label);
 		$this->Label = preg_replace("/[éèêë]/u","e",$this->Label);
 		$this->Label = preg_replace("/[ÉÈÊË]/u","E",$this->Label);
-		$this->Label = preg_replace("/[óòôõºö]/u","o",$this->Label);
+		$this->Label = preg_replace("/[ôóòôõºö]/u","o",$this->Label);
 		$this->Label = preg_replace("/[ÓÒÔÕÖ]/u","O",$this->Label);
 		$this->Label = preg_replace("/[úùûüú]/u","u",$this->Label);
 		$this->Label = preg_replace("/[ÚÙÛÜ]/u","U",$this->Label);
+		//$this->Label = preg_replace("/[ÚÙÛÜ]/u","U",$this->Label);
 		$this->Label = preg_replace("/[’‘‹›‚]/u","'",$this->Label);
 		$this->Label = preg_replace("/[“”„]/u",'"',$this->Label);
 		$this->Label = preg_replace("/[«»]/u",'-',$this->Label);
@@ -118,13 +119,9 @@ class SpecProcNlpSalix
 		//A few replacements to format the label making it easier to parse
 		
 		if(preg_match("(\n(leg. & det.)(.+)\n)i",$this->Label,$match))
-			{
+			{//A rare instance where both collector and determiner are on the same line.
 			$this->Label = preg_replace("(".$match[0].")","Leg. ".$match[2]."\n"."Det. ".$match[2],$this->Label);
 			}
-		
-		
-		
-		
 		
 		//Make sure space between NSEW cardinal directions and following digits, for Lat/Long 
 		$this->Label = preg_replace("(([NESW]\.?)(\d))","$1 $2",$this->Label);
@@ -149,8 +146,7 @@ class SpecProcNlpSalix
 		$match = array();
 		$FromTo = array("l"=>"1","O"=>"0");
 		foreach($FromTo as $From=>$To)
-			{
-			//$Preg = "lsk";
+			{//Catch cases where zero or one misocr'd as oh or el.
 			$Preg = "([-0-9/.]".$From."[0-9/.])";
 			do
 				{
@@ -159,11 +155,10 @@ class SpecProcNlpSalix
 					{
 					$NewMatch = str_replace($From,$To,$match[0]);
 					$this->Label = str_replace($match[0],$NewMatch,$this->Label);
-					//$this->printr($match,"$From Digit Error");
 					}
-			
 				}while($Found);
 			}
+
 		//Separate at semicolons
 		$this->Label = str_replace(";","\r\n",$this->Label);
 		
@@ -176,7 +171,7 @@ class SpecProcNlpSalix
 		//Remove empty lines
 		$this->Label = str_replace("\r\n\r\n","\r\n",$this->Label);
 		
-		$this->LabelLines = preg_split("[(?<=[a-z]{3,3})\.|(?<=[a-z]);|\n]",$this->Label,-1,PREG_SPLIT_DELIM_CAPTURE);
+		$this->LabelLines = preg_split("[(?<=[a-z]{4,4})\.|(?<=[a-z]);|\n]",$this->Label,-1,PREG_SPLIT_DELIM_CAPTURE);
 		//regex expression to split lines at semicolons and periods.  But not at periods unless the preceding is
 		//at least 3 lower case letters.  This preserves abbreviations.  
 		$L = 0;
@@ -1443,7 +1438,10 @@ class SpecProcNlpSalix
 				continue;
 				}
 			if($this->LineStart[$L] == $Field)
+				{
+				//echo "Found Start word in {$this->LabelLines[$L]}<br>";
 				$RankArray[$L] += 1000;
+				}
 			if($this->StatScore[$L]['Score'] > 100)
 				{
 				//echo "$L: StatScore = {$this->StatScore[$L]['Score']}, {$this->StatScore[$L]['Field']}, {$this->LabelLines[$L]}<br>";
@@ -1638,12 +1636,18 @@ class SpecProcNlpSalix
 			$Found = preg_match($Preg,$TempString,$match);
 			//echo "$Preg<br>";
 			}
-		if($Found !== 1)
+		if($Found !== 0)
+			{
+			$VDate = $match[0];
+			$RealVDate = $VDate;
+			}
+		else 
 			{
 			//echo "Line $L {$this->LabelLines[$L]}<br>";
 			$Preg = "(([0-9]+[./-])([IVX]+)([./-][0-9]+))i";
 			$Found = preg_match($Preg, $TempString,$match);
-			
+			//$VDate = $match[0];
+			//$RealVDate = $VDate;
 			if($Found >0)
 				{
 				
@@ -1658,7 +1662,7 @@ class SpecProcNlpSalix
 
 				}
 			}
-		if($Found)
+		if($Found!== 0)
 			{
 			$OU = new OccurrenceUtilities;
 			//echo "VDate = $VDate<br>";
@@ -1798,7 +1802,7 @@ class SpecProcNlpSalix
 			}
 		else
 			{
-			echo "Here for $Name<br>";
+			//echo "Here for $Name<br>";
 			$match = $this->CountyPreg();
 			if($match != false)
 				{ //Found a county name on the label.  Check if $Name is a state that contains the county
@@ -3126,8 +3130,10 @@ class SpecProcNlpSalix
 			$this->LineStart[$L] = "";
 			foreach($this->PregStart as $Field=>$Val)
 				{
+				//echo "Checking {$this->LabelLines[$L]}<br>";
 				if($this->CheckStartWords($L,$Field))
 					{
+					//echo "Assign $Field to {$this->LabelLines[$L]}<br>";
 					$this->LineStart[$L] = $Field;
 					break;
 					}
