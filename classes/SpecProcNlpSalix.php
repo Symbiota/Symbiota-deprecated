@@ -7,12 +7,12 @@ include_once($serverRoot.'/classes/OccurrenceUtilities.php');
  */ 
 /* The general approach of the algorithm is as follows:
 	The label is pre-formatted and separated into lines, broken both at existing newlines and also at some semi-colons and periods.
+	Some separated lines are re-joined if the previous one ends in words such as by, at, on, etc.
 	Each field is processed one at a time, starting with Latitude/Longitude.  Order matters.
 	For each field (in general): 
 		Lines are evaluated, ranked and sorted for probability of containing that field.
 		Relevant content is focused on in the most probable line(s) (using various techniques), extracted and added to the Results array
-		Content that was extracted is deleted from the line so that other fields won't mistakenly grab it.
-	
+		Content that was extracted is generally deleted from the line so that other fields won't mistakenly grab it.
 */
 	
 
@@ -31,8 +31,11 @@ class SpecProcNlpSalix
 	private $PregStart = array();
 			//An array of regular expressions indicating the start words for many fields.
 	private $Family = "";
+			//Made global as a tentative family for other algorithms to consider
 	private $LichenFamilies =  array();
+			//A list of all lichen families.  Mainly useful during debug, but helps to identify which specimens may have substrates.
 	private $FamilySyn = array();
+			//List of family synonyms to help interpret old labels
 	private $StatScore = array();
 			//The wordstats score of each line
 	private $LineStart = array();
@@ -57,7 +60,7 @@ class SpecProcNlpSalix
 		if(strlen($this->Label) < 20)
 			return $this->Results;
 		$dwcArr = array();
-		//Add the SALIX parsing code here and/or in following functions of a private scope
+		
 		//Set the keys for a few arrays to the names of the return fields
 		$this->Results = array_fill_keys($this->ResultKeys,'');
 		$this->Assigned = array_fill_keys($this->ResultKeys,-1);
@@ -71,10 +74,11 @@ class SpecProcNlpSalix
 
 
 		if(strpos($this->Label,"°") > 0)
-			{
+			{//The degree symbol is the main character above 122 that must be preserved.
 			$this->Label = str_replace("°","17*17",$this->Label);
 			}
 		
+		//Convert everything to English letters.  This may need to be modified for some users...
 	    $this->Label = preg_replace("/[áàâãªä]/u","a",$this->Label);
 		$this->Label = preg_replace("/[ÁÀÂÃÄ]/u","A",$this->Label);
 		$this->Label = preg_replace("/[ÍÌÎÏ¡]/u","I",$this->Label);
@@ -98,14 +102,6 @@ class SpecProcNlpSalix
 		$this->Label = str_replace("¿","-",$this->Label);
 		$this->Label = str_replace("£","L",$this->Label);
 		
-		/*
-		for($i=0;$i<strlen($this->Label)-4;$i++)
-			{
-			if(ord($this->Label[$i]) >= 122)
-					echo $i.", ".ord($this->Label[$i])." ".substr($this->Label,$i-5,10)."<br>";
-			}
-
-		*/
 		for($i=0;$i<strlen($this->Label)-4;$i++)
 			{
 			if(ord($this->Label[$i]) >= 226)
@@ -132,7 +128,7 @@ class SpecProcNlpSalix
 			$this->Label = str_replace("í","i",$this->Label);
 			}
 		$this->Label = str_replace("17*17","°",$this->Label);
-		//echo $this->Label."<br>**_*_*_*_*_*_*_*_*_<br>";
+		
 		if(strlen($this->Label) < 10)
 			return;
 		
@@ -154,23 +150,24 @@ class SpecProcNlpSalix
 		//Sometimes the double quote in Lat/Long gets OCRd as a single.  Look for likely instances and correct.
 		$this->Label = preg_replace("(([0-9]{1,2}\'\s?[0-9]{1,2})(\')(\s?[NSEW]))","$1\"$3",$this->Label);
 		
-		$this->Label = preg_replace("((of)\s?[\r\n]{1,2})","$1 ",$this->Label);
+		//Connect some lines when joined by a connecting preposition or hyphen
+		$this->Label = preg_replace("(\b(of)\s?[\r\n]{1,2})i","$1 ",$this->Label);
+		$this->Label = preg_replace("(\b(by)\s?[\r\n]{1,2})i","$1 ",$this->Label);
+		$this->Label = preg_replace("(\b(at)\s?[\r\n]{1,2})i","$1 ",$this->Label);
 		$this->Label = preg_replace("(([a-z])[-]\s?[\r\n]{1,2}([a-z]))","$1$2",$this->Label);
-		//$this->Label = str_replace("of \r\n","of ",$this->Label);
-		//echo "{$this->Label}<br>";
 		
 		//Remove double spaces and tabs
-		$this->Label = str_replace("  "," ",$this->Label);
 		$this->Label = str_replace("\t"," ",$this->Label);
+		while(strstr($this->Label,"  ") !== false)
+			$this->Label = str_replace("  "," ",$this->Label);
+		
 		//Remove (?) <>.  Perhaps should leave in...?  Would a collector ever write e.g. "Found > 500 m. elevation"? "Collected < 100 meters from stream"?
 		$this->Label = str_replace("<","",$this->Label);
 		$this->Label = str_replace(">","",$this->Label);
 		$this->Label = str_replace("^"," ",$this->Label);
 		$this->Label = str_replace("’","'",$this->Label);
 		$this->Label = str_replace("°;","°",$this->Label);
-		
-		
-		
+
 		$match = array();
 		$FromTo = array("l"=>"1","O"=>"0");
 		foreach($FromTo as $From=>$To)
@@ -200,18 +197,18 @@ class SpecProcNlpSalix
 		$this->Label = str_replace("\r\n\r\n","\r\n",$this->Label);
 		
 		$this->LabelLines = preg_split("[(?<=[a-z]{4,4})\.|(?<=[a-z]);|\n]",$this->Label,-1,PREG_SPLIT_DELIM_CAPTURE);
-		//regex expression to split lines at semicolons and periods.  But not at periods unless the preceding is
-		//at least 3 lower case letters.  This preserves abbreviations.  
+		//Split lines at semicolons and periods.  But not at periods unless the preceding is
+		//at least 4 lower case letters.  This preserves abbreviations.  
 		$L = 0;
 		while($L < count($this->LabelLines))
 			{
-			$this->LabelLines[$L] = trim($this->LabelLines[$L]);
+			$this->LabelLines[$L] = trim($this->LabelLines[$L]," \t");
 			if(strlen($this->LabelLines[$L]) <3) //Remove lines less than 3 characters long
 				unset($this->LabelLines[$L]);
 			$L++;
 			}
 		$this->LabelLines = array_values($this->LabelLines); //renumber the array
-
+		
 			
 		//Break each line up into an array of words resulting in a two-dimensional array -- $this->LabelArray
 		//This may be phased out as regular expressions take over most of the work.  Let's hope!
@@ -221,12 +218,11 @@ class SpecProcNlpSalix
 			$Words = str_replace('\'','',$OneLine);
 			$Words = str_replace('-',' ',$Words);
 			$WordsArray = str_word_count($Words,1);
-			//$WordsArray = str_word_count($Words,1,"0123456789-&."); // Break sentence into words
 			$this->LabelArray[] = $WordsArray; 
 			}
 
 		$this->InitStartWords();//Initialize the array of start words, which are hard coded in the function.
-								//Also creates an array $LineStart where the element for each line indicating if it has a start word.
+								//Also creates an array $LineStart where the element for each line indicates if it has a start word.
 
 		//Save preliminary wordstat measurement of each line.  Avoids some repeated calls later.
 		for($L=0;$L<count($this->LabelLines);$L++)
@@ -239,8 +235,6 @@ class SpecProcNlpSalix
 			}
 		//*************************************************************
 		//Here's where the individual fields get called and hopefully filled
-		//echo("Label = $this->Label");
-		//echo "Count = ".count($this->LabelLines)."<br>";
 		
 		//Order is important.  
 		//Easy-to-find fields are done first, and then removed so as to not confuse other fields.
@@ -1327,6 +1321,14 @@ class SpecProcNlpSalix
 			//Convert Mr. A. B. and Mrs. C. D. Smith to A. B. Smith, C. D. Smith.
 			$this->LabelLines[$L] = str_replace($match[0],$match[2]." ".$match[6].", ".$match[5]." ".$match[6],$this->LabelLines[$L]);
 			}
+		$Found = preg_match("((\bcollected.+\bby\b)\s+([A-Za-z .]{2,25}))i",$this->LabelLines[$L],$match);
+		if($Found >0) //like:  Collected and prepared by John P. Smith
+			{
+			$Name = mb_convert_case($match[2], MB_CASE_TITLE);
+			$this->AddToResults($Field,$Name,$L);
+			$this->LabelLines[$L]= str_replace($match[1],"",$this->LabelLines[$L]);
+			return true;
+			}
 		$Preg = "(\b([A-Z][.])\s(\b[A-Z][a-z]{2,20}\b)\s(\b[A-Z][a-z]{2,20}\b)\s(No|[0-9]{2,6}))";
 		//(Initial) (middle name) (last name) followed by No or number
 		$Found = preg_match_all($Preg, $this->LabelLines[$L],$match);
@@ -1383,56 +1385,6 @@ class SpecProcNlpSalix
 		return false;
 		}
    
-	/**
-     * Given a name, check to see if is the same as or similar to an existing 
-     * agent of type individual.
-     *
-     * @param Name, reference to string to check against agent names, 
-     *   may be altered to conform to a match.
-     * @return score for match, 10 if exact match to name of only one agent.
-     */
-    private function ConfirmRecordedByAgents(&$Name) 
-        { 
-        $match = array();
-        $Score = 0;
-		$PregNotNames = "(\b(municip|herbarium|agua|province|university|mun|county|botanical|garden|island[s]?)\b)i";  //Known to be confused with names
-		$Score -= 5*(preg_match_all($PregNotNames,$Name,$match));
-        // Check for exact match against individual name
-        $sql = "select distinct a.agentid from agentnames n left join agents a on n.agentid = a.agentid where a.type = 'Individual' and n.name = ? ";
-        if ($stmt = $this->conn->prepare($sql)) 
-           { 
-           $stmt->bind_param('s',$Name);
-           $stmt->execute();
-           $stmt->bind_result($agentid);
-           $stmt->store_result();
-           if ($stmt->num_rows==1) 
-              {
-              $Score = 10;
-              }
-           else 
-              {
-              // Check for exact match against organization name.
-              $sql = "select distinct a.agentid from agentnames n left join agents a on n.agentid = a.agentid where a.type = 'Organization' and n.name = ? ";
-              if ($stmt = $this->conn->prepare($sql)) 
-                  { 
-                  $stmt->bind_param('s',$Name);
-                  $stmt->execute();
-                  $stmt->bind_result($agentid);
-                  $stmt->store_result();
-                  if ($stmt->num_rows>0) 
-                      { 
-                      $Score = -5;
-                      }
-                  }
-              }
-           } 
-        else 
-           { 
-           throw new Exception("Error preparing query [$sql]. ". $this->conn->error);
-           }
-        return $Score;
-        }
-
 		
 		
 	//**********************************************
@@ -1440,7 +1392,7 @@ class SpecProcNlpSalix
 		{//Check for the name in the omoccurrences table.  Lower score if it looks like a university, herbarium, county, etc.
 		$match=array();
 		$Score = 0;
-		$PregNotNames = "(\b(municip|herbarium|agua|province|university|mun|county|botanical|garden|pacific|island[s]?)\b)i";  //Known to be confused with names
+		$PregNotNames = "(\b(municip|herbarium|agua|province|university|mun|county|botanical|garden|pacific|date|north|south|canal|mountain|national|island[s]?)\b)i";  //Known to be confused with names
 		$Score -= 5*(preg_match_all($PregNotNames,$Name,$match));
 		$query = "SELECT recordedBy FROM omoccurrences where recordedBy LIKE '$Name' LIMIT 1";
 		$result = $this->conn->query($query);
@@ -1483,7 +1435,6 @@ class SpecProcNlpSalix
 				$RankArray[$L] += 5;
 				//echo "Found By<br>";
 				}
-			
 			if(count($this->LabelArray[$L]) < 2)
 				{
 				$RankArray[$L]-=100;
@@ -1501,7 +1452,6 @@ class SpecProcNlpSalix
 					$RankArray[$L] -= $this->StatScore[$L]['Score'];
 				
 				}
-			//echo "$L: {$RankArray[$L]}<br>";
 			foreach($ConflictFields as $F)
 				{
 				if($this->LineStart[$L] == $F)
@@ -1515,6 +1465,7 @@ class SpecProcNlpSalix
 					if($F == 'sciname' || $F == 'country' || $F == 'county' || $F == 'family')
 						{
 						$RankArray[$L] -= 10; //Decrease if start word for another field
+						//echo "$L Decrease 1<br>";
 						}
 					if($Field != 'identifiedBy' && $F == 'identifiedBy')
 						$RankArray[$L] -= 100; //Decrease if start word for another field
@@ -1534,19 +1485,24 @@ class SpecProcNlpSalix
 				$RankArray[$L] -= 110; //Associated Collectors should always follow main collector
 			
 			if($Field == 'identifiedBy' && $this->Assigned['recordedBy'] == $L)
-				$RankArray[$L] -= 100; //Determiner never on same line as collector (?)
+				$RankArray[$L] -= 10; //Determiner rarely on same line as collector (?)
 
 			if($this->Assigned['infraspecificEpithet'] == $L)
 				{
 				$RankArray[$L] -= 100; //Must be author instead of collector
 				}
-			
 			$Found = preg_match("(\b(([A-Z][a-z]{2,20} )|([A-Z][\.] ))([A-Z][\.] )?([A-Z][a-z]{2,20}\b))",$this->LabelLines[$L]);
 			if($Found === 1) //Looks like a name
 				$RankArray[$L] += 10;
 			else
-				$RankArray[$L] -= 10;
+			{
+				if($Field == "recordedBy" && preg_match("((\bcollected).+(\bby\b)\s+([A-Za-z .]{2,25}))i",$this->LabelLines[$L]) > 0)
+					$RankArray[$L] += 10;
+				else
+					$RankArray[$L] -= 10;
+			}
 			$RankArray[$L] += 3*preg_match("( [0-9]{3,10} ?)",$this->LabelLines[$L]); //Add a little for a number -- could be date or collection number.
+			$RankArray[$L] += 10*preg_match("(collected)i",$this->LabelLines[$L]); //The word "collected" without "by" isn't sure, but it helps
 			$RankArray[$L] -= 3*preg_match("((\bft\b)|(\bm\b))",$this->LabelLines[$L]); //Subtract if looks like altitude
 			$RankArray[$L] -= (3*preg_match_all("([0-9]\.[0-9])",$this->LabelLines[$L],$match)); //Decimal not likely to be in collection number or date
 			$RankArray[$L] -= 2*preg_match_all("(\(|\)|�|\")",$this->LabelLines[$L],$match); //Parenthesis on the line probably mean author, not collector.  Degree looks like lat/long.  Quote looks like lat/long
@@ -1617,14 +1573,24 @@ class SpecProcNlpSalix
 			while(--$L >= 0) //Less likelihood on previous lines
 				$RankArray[$L] = 8 - ($this->Assigned[$EventField]-$L);
 			}
-
 		for($L=0;$L<count($this->LabelArray);$L++)
 			{//Various characteristics increase or decrease probability
 			$TempString = $this->LabelLines[$L];
+			if(preg_match("(\bdate\b)i",$TempString) > 0)	
+				{
+				$RankArray[$L] += 10;	
+				}
 			if(preg_match("(\b\d+\b)",$TempString) !== 1)
-				{// Must be a number on the date line. (Unless roman numeral.  Later...)
-				$RankArray[$L] = -100;
-				continue;
+				{// Must be a number on the date line. (Unless roman numeral.)
+				$Preg = "(([0-9]+[ ./-]{1,2})([IVX]+)([ ./-]{1,2}[0-9]+))i";
+				$Found = preg_match($Preg, $TempString,$match);
+				if($Found > 0)
+					$RankArray += 10; //Probable roman numeral
+				else
+					{
+					$RankArray[$L] -= 100;
+					continue;
+					}
 				}
 			if($Field != "eventDate" && $this->Assigned['eventDate'] == $L)
 				{//Not likely to find identifiedDate on the recordedby line
@@ -1653,7 +1619,6 @@ class SpecProcNlpSalix
 					$RankArray[$L] += 2; //Could be day of the month.
 
 			$RankArray[$L] += 2*substr_count($this->LabelLines[$L],"/");//A slash is often found in a date.
-
 			$Numeric=false;
 			$Roman = false;
 			if(strpos($this->LabelLines[$L],"X") || strpos($this->LabelLines[$L],"I"))
@@ -1664,8 +1629,7 @@ class SpecProcNlpSalix
 				$RankArray[$L] += 10; //Month string appears in the line.
 			if(preg_match("(\d{1,4})",$TempString) != 1)
 					$RankArray[$L] -= 100;  //There must be an appropriate numeric entry somewhere for elevation
-			//if(!$Numeric && $Roman)
-			//	$RankArray[$L] -= 5; // Might be expressed in Roman numerals.  Have not implemented yet.
+
 			}
 		asort($RankArray);
 		return (array_reverse($RankArray, true));
@@ -1676,6 +1640,7 @@ class SpecProcNlpSalix
 		{//Assumes standard format, d/m/y or m,d,y
 		$match=array();
 		$RealVDate = "";
+		$VDate = "";
 		$TempString = ($this->LabelLines[$L]);
 		if($Partial)
 			$Preg = "(\b{$this->PregMonths}\s*(\b[0-9]{1,4}\b))i";
@@ -1684,37 +1649,37 @@ class SpecProcNlpSalix
 		$Found = preg_match($Preg,$TempString,$match);
 		if($Found !== 1)
 			{//Format April 21, 1929
-			$Preg = "({$this->PregMonths}\s*(\b[0-9]{1,4}\b),?\s*(\b[0-9]{1,4}\b)\s*)i";
+			$Preg = "({$this->PregMonths}[.\s]*(\b[0-9]{1,4}\b)[.,]?\s*(\b[0-9]{1,4}\b)\s*)i";
 			$Found = preg_match($Preg,$TempString,$match);
-			//echo "$Preg<br>";
+			if($Found)
+				{
+				$VDate = $match[2]." ".$match[3].", ".$match[4];
+				$RealVDate = $match[0];
+				}
 			}
 		if($Found !== 1)
 			{//Format April, 1929
-			$Preg = "({$this->PregMonths},?\s*(\b[0-9]{1,4}\b)\s*)i";
+			$Preg = "({$this->PregMonths}[.,]?\s*(\b[0-9]{1,4}\b)\s*)i";
 			$Found = preg_match($Preg,$TempString,$match);
 			}
 		if($Found !== 0)
 			{
-			$VDate = $match[0];
-			$RealVDate = $VDate;
+			if($VDate == "")
+				{
+				$VDate = $match[0];
+				$RealVDate = $VDate;
+				}
 			}
 		else 
 			{
-			//echo "Line $L {$this->LabelLines[$L]}<br>";
-			$Preg = "(([0-9]+[./-])([IVX]+)([./-][0-9]+))i";
+			$Preg = "(([0-9]+[ ./-]{1,2})([IVX]+)([ ./-]{1,2}[0-9]+))i";
 			$Found = preg_match($Preg, $TempString,$match);
 			if($Found >0)
 				{
-				
 				$RomanMonths = array("I"=>"Jan","II"=>"Feb","III"=>"Mar","IV"=>"Apr","V"=>"May","VI"=>"Jun","VII"=>"Jul","VIII"=>"Aug","IX"=>"Sep","X"=>"Oct","XI"=>"Nov","XII"=>"Dec");
-				
 				$Month = $RomanMonths[strtoupper($match[2])];
-				$TempString = str_replace($match[2],$Month,$TempString);
-				//$this->printr($match,"Roman Match");
+				$VDate = trim($match[1]," .-")."-".$Month."-".trim($match[3]," .-");
 				$RealVDate = $match[0];
-				$match[0] = str_replace($match[2],$Month,$match[0]);
-				$VDate = str_replace("."," ",$match[0]);
-
 				}
 			}
 		if($Found!== 0)
@@ -1810,9 +1775,9 @@ class SpecProcNlpSalix
 			$Name2 = "";
 			if(count($match) > 4)
 				$Name2 = $Name1." ".trim($match[4]," .,;:");
-			$this->PlantsOf($Name1);
+			$this->PlantsOf($Name2);
 			if($this->Results['country'] == "")
-				$this->PlantsOf($Name2);
+				$this->PlantsOf($Name1);
 			}
 		if($this->Results['country'] != "") //Found it.
 			return;
@@ -2016,13 +1981,22 @@ class SpecProcNlpSalix
 		if($result->num_rows > 0)
 			while($OneCounty = $result->fetch_assoc())
 				{
+				//echo "Checking {$OneCounty['countyName']}<br>";
 				$CountyName = $OneCounty['countyName'];
+				if(preg_match("(\b$CountyName\b)",$this->Results['recordedBy']) > 0) 
+						continue;  //Rare case of collector name matching a county
 				$Preg = "((\b$CountyName\b)(\scounty)?)i";
 				if(preg_match($Preg,$this->Label,$match))
 					{
 					if(array_search(strtolower($match[1]),$BadCounties)!== false && !isset($match[2]))
 						continue;
 					else
+						return $CountyName;
+					}
+				if(preg_match("(Saint [A-Z][a-z]{2,20})",$CountyName))
+					{
+					$Preg = str_replace("Saint ","St. ",$Preg);
+					if(preg_match($Preg,$this->Label,$match))
 						return $CountyName;
 					}
 				}
@@ -2046,7 +2020,8 @@ class SpecProcNlpSalix
 	//*****************************************************************************
 	private function SeekState($CountryId,$m)
 		{
-		//Given the country, scan the whole label for a contained state.
+		//Given the country (or if none assume USA), scan the whole label for a contained state.
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|vascular|university|specimen|botanical\b))i";
 		$query = "SELECT stateName,stateId from lkupstateprovince where countryId like '$CountryId'";
 		//echo $query."<br>";
 		$StateArray = array();
@@ -2058,6 +2033,8 @@ class SpecProcNlpSalix
 		foreach ($RankArray as $L=>$Score)
 			{
 			$StateResult->data_seek(0);
+			if(preg_match($BadWords, $this->LabelLines[$L])>0)
+				continue;
 			while($OneState = $StateResult->fetch_assoc())
 				{
 				if(preg_match("(\b{$OneState['stateName']}\b)i",$this->LabelLines[$L]) > 0)
@@ -2095,7 +2072,7 @@ class SpecProcNlpSalix
 	//*****************************************************************************
 	private function RankCountryLines()
 		{
-		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|vascular|specimen|botanical\b))i";
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|vascular|university|specimen|botanical\b))i";
 		$BadFields = array("recordedBy","family","identifiedBy","associatedCollectors","sciname","infraspecificEpithet");
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{
@@ -2135,565 +2112,7 @@ class SpecProcNlpSalix
 		}
 		
 		
-		
-		
-		
 //*********************************************************************************************************************
-// Old get country stuff
-/*
-	//**********************************************
-	function GetCountryStateOld()
-		{
-		//global $this->Label;
-		//Assumes that the Country and state are already in the lkup... tables
-		$RankArray = array();
-		$match=array();
-		$PlantsOf = "";
-		$PlantsOfLine = -1;
-		$CountyName = "";
-		$CountryArray = array();
-		//Go through and rank the lines, looking for "Plants Of" and "County" at the same time.
-		for($L=0;$L<count($this->LabelLines);$L++)
-			{ //If certain words appear, then much more likely state is there. 
-
-			$RankArray[$L] = 10-$L;
-			$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(\b\S+\b)\s+(\b\S+\b)?)i",$this->LabelLines[$L],$match);
-			if($Found !== 1)
-				$Found = preg_match("((plants|flora|lichens)\s(of|de)\s+(\b\S+\b)(\s?\b\S+\b)?)i",$this->LabelLines[$L],$match);
-
-			if($Found ===1)
-				{
-				$this->Assigned['ignore'] = $L;
-				$RankArray[$L] += 5;
-				$PlantsOf = trim($match[3]," .,;:");  //Grab the location name.  Could be country, state or country.
-				//echo "PlantsOf = $PlantsOf<br>";
-				$Count = count($match);
-				//echo "Count = $Count<br>";
-				if(count($match) > 4)
-					$PlantsOf2 = $PlantsOf." ".trim($match[4]," .,;:");
-				else
-					$PlantsOf2 = "";
-				$PlantsOfLine = $L;
-				if($PlantsOf2 != "") //Check first for two word country/state/county
-					{
-					//echo "PlantsOf2 = $PlantsOf2<br>";
-					if($this->CheckCountry($L,$PlantsOf2))
-						return;
-					else if($this->CheckState($L, $PlantsOf2))
-						{
-						return;
-						}
-					else if($this->CheckCounty($L, $PlantsOf2))
-						return;
-					}
-				if($this->CheckCountry($L, $PlantsOf2))
-						{
-						//Find State
-						//echo "Returning<br>";
-						return;
-						}
-				else if($this->CheckState($L, $PlantsOf))
-					{
-					//echo "Returning<br>";
-					//Find county
-					return;
-					}
-				else if($this->CheckCounty($L, $PlantsOf))
-					return;
-				}
-			//Didn't find "Plants of" or "Flora de", etc.
-			$Preg = "(\b([a-z]{2,20})\s+((\bcounty\b)|(\bco\b)))i";
-			$Found = preg_match($Preg,$this->LabelLines[$L],$match);
-			if($Found === 0)
-				{
-				$Preg = "((\bcounty\b):*\s+\b([a-z]{2,20}))i";
-				$Found = preg_match($Preg,$this->LabelLines[$L],$match);
-				}
-			
-			if($Found === 1)
-				{//Found the word "County" on the label.  Might be enough to determine state and country.
-				$query = "SELECT c.stateId,c.countyName,s.stateName,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[1]}'";
-				$result = $this->conn->query($query);
-				if($result->num_rows == 0)
-					{//Single word not a county name.  Look for two word county
-					$Preg = "(\b([a-z]{2,20}\s+\b[a-z]{2,20})\s+((\bcounty\b)|(\bco\b)))i";
-					$Found = preg_match($Preg,$this->LabelLines[$L],$match);
-					if($Found)
-						{
-						$query = "SELECT c.stateId,c.countyName,s.stateName,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[1]}'";
-						$result = $this->conn->query($query);
-						}
-					if($Found===0)
-						{
-						$Preg = "((\bcounty\b):*\s+\b([a-z]{2,20}\s+\b[a-z]{2,20}))i";
-						$Found = preg_match($Preg,$this->LabelLines[$L],$match);
-						if($Found > 0)
-							{
-							$query = "SELECT c.stateId,c.countyName,s.stateName,s.countryId FROM lkupcounty c INNER JOIN lkupstateprovince s where c.stateId=s.stateId AND countyName LIKE '{$match[2]}'";
-							$result = $this->conn->query($query);
-							}
-						}
-					}
-				if($result->num_rows > 0)
-					{ 
-					$OneLine=$result->fetch_assoc();
-					//$this->printr($OneLine,"OneLine");
-					$this->AddToResults('county',$OneLine['countyName'],$L); //First add the county, and remove the text from the line.
-					$CountyName = $OneLine['countyName'];
-					$this->LabelLines[$L] = str_replace($match[0],"",$this->LabelLines[$L]);
-					$this->LabelLines[$L] = trim($this->LabelLines[$L]," :.\t,;-");
-					if($result->num_rows == 1)
-						{
-						$this->AddToResults('stateProvince',$OneLine['stateName'],$PlantsOfLine);
-						$query = "SELECT countryname from lkupcountry where countryId = {$OneLine['countryId']} LIMIT 1";
-						$CountryResult = $this->conn->query($query);
-						$TempArray = $CountryResult->fetch_assoc();
-						$this->AddToResults('country',$TempArray['countryname'],-1);
-						if($PlantsOfLine >=0)
-							$Assigned['country'] = $L;
-						return;
-						}
-					//Not sure if state and/or country on the same line.  Don't adjust RankArray.
-					}
-				}
-			$Found = preg_match("((herbarium|university|garden|botanical)(\sof\s)(.*))i",$this->LabelLines[$L],$match);
-			if($Found ===1)
-				$RankArray[$L] -= 10;//Looks like institution name;
-
-			if(stripos($this->LabelLines[$L],"country")!== false)
-				$RankArray[$L] += 10;
-			if($this->LineStart[$L] =='locality')
-				$RankArray[$L] += 5;
-			if($this->Assigned['locality'] == $L)
-				$RankArray[$L] += 5;
-			if($this->Assigned['identifiedBy'] == $L)
-				$RankArray[$L] -= 5;
-			if(count($this->LabelArray[$L])<2)
-				$RankArray[$L] -= 5;
-			}
-
-		if($CountyName != "")
-			{//This is a pretty good giveaway.  Country should follow this.
-			//Try state first
-			if($CountyName != "")
-				{
-				$query = "SELECT s.stateId,s.stateName from lkupstateprovince s INNER JOIN lkupcounty c WHERE s.stateId=c.stateId AND c.countyname LIKE '$CountyName'";
-				
-				if($PlantsOf != "")
-					$query .= " AND s.stateName LIKE '$PlantsOf'";
-				}
-			else
-				$query = "SELECT s.stateId,s.stateName from lkupstateprovince s  WHERE stateName LIKE '$PlantsOf'";
-			
-			$StateResult = $this->conn->query($query);
-			if(!$StateResult)
-				return;
-			if($StateResult->num_rows == 0 && $PlantsOf != "")
-				{ //Perhaps the first word after "Plants of" is the state name.
-				$SingleWordState = explode(" ",$PlantsOf);
-				$query = str_replace($PlantsOf, $SingleWordState[0], $query);
-				$StateResult = $this->conn->query($query);
-				}
-				
-			if($StateResult->num_rows > 0)
-				{
-				if($this->GetStateFromList($StateResult, $PlantsOfLine))
-					{
-					if($PlantsOfLine >=0)
-						$Assigned['state'] = $L;
-					return;
-					}
-				
-				}
-			
-			}
-			// End of routine that uses "Plant Of" and/or county.  Either doesn't have "Plant Of", or County, or using them failed.
-			
-		
-		//Neither Plants of nor county found.  Begin a general search.
-		//Reverse sort the Rank array to bring the most likely lines to the beginning.
-		asort($RankArray);
-		$RankArray = array_reverse($RankArray, true);
-		//$this->printr($RankArray,"Country");
-		
-		foreach($RankArray as $L=>$Value)
-			{//First look for the country or state at the beginning of the lines, a common place to find it
-			if($Value < 1 || count($this->LabelArray[$L]) < 2)
-				continue;
-			if($this->CheckCountry($L,$this->LabelArray[$L][0].' '.$this->LabelArray[$L][1]))
-				return; //Found country and maybe state, so return.
-			if($this->CheckState($L,$this->LabelArray[$L][0].' '.$this->LabelArray[$L][1]))
-				return;
-			//echo "Checking {$this->LabelArray[$L][0]}<br>";
-			if($this->CheckCountry($L,$this->LabelArray[$L][0]))
-				{
-				//echo "Found in {$this->LabelLines[$L]}<br>";
-				return;
-				}
-			if($this->CheckState($L,$this->LabelArray[$L][0]))
-				return;
-			}
-		foreach($RankArray as $L=>$Value)
-			{//Look for country deeper into lines.  Slower, so we checked the first word first above.
-			if($Value < 1)
-				continue;
-			for($W=0;$W<count($this->LabelArray[$L])-1;$W++)
-				{
-				if($this->CheckCountry($L,$this->LabelArray[$L][$W].' '.$this->LabelArray[$L][$W+1]))
-					return;
-				if($this->CheckState($L,$this->LabelArray[$L][$W].' '.$this->LabelArray[$L][$W+1]))
-					return;
-				if($this->CheckCountry($L,$this->LabelArray[$L][$W]))
-					return;
-				if($this->CheckState($L,$this->LabelArray[$L][$W]))
-					return;
-				}
-			}
-		}
-
-	private function CheckCountry($L, $Word)
-		{
-		$query = "SELECT countryId,countryName from lkupcountry where countryName like '$Word' LIMIT 1";
-		//echo "$query<br>";
-		$result = $this->conn->query($query);
-		$Num = $result->num_rows;
-		if($Num == 0)
-			return false;
-		else
-			{
-			$OneReturn = $result->fetch_assoc();
-			$this->AddToResults('country', $OneReturn['countryName'],$L);
-			$this->SeekState($OneReturn['countryId'],$L);
-			return true;
-			}
-		}
-	
-	
-	
-	private function CheckState($L, $Word)
-		{
-		//USED echo "CheckState<br>";
-		$query = "SELECT countryId,stateName,stateId from lkupstateprovince where stateName like '$Word'";
-		//echo $query."<br>";
-		$result = $this->conn->query($query);
-		$Num = $result->num_rows;
-		if($Num > 0)
-			{
-			$StateId = $this->GetStateFromList($result,$L);
-			$StateName = $this->Results['stateProvince'];
-			$CountryName = $this->Results['country'];
-			if($StateName != "" && $CountryName != "")
-				$this->County($CountryName, $StateName, $L);
-			//$query = "SELECT countyName FROM lkupcounty WHERE stateId like '$StateId'";
-			return true;
-			}
-		else
-			return false;
-		}
-		
-	private function GetCountryFromId($Id)
-		{
-		echo "GetCOuntryFromId<br>";
-		$query = "SELECT countryName from lkupcountry where countryId like $Id LIMIT 1";
-		$result = $this->conn->query($query);
-		if($result->num_rows > 0)
-			{
-			$OneReturn = $result->fetch_assoc();
-			return $OneReturn['countryName'];
-			}
-		return "";
-		}
-
-	private function CheckCounty($L, $Word)
-		{
-		//USED echo "CheckCountry<br>";
-		$query = "SELECT stateId,countyName from lkupcounty where countyName like '$Word' LIMIT 1";
-		//echo $query."<br>";
-		$result = $this->conn->query($query);
-		$Num = $result->num_rows;
-		if($Num == 0)
-			return false;
-		else
-			{
-			$OneReturn = $result->fetch_assoc();
-			$this->AddToResults('countyParish', $OneReturn['countyName'],$L);
-			if($this->Results['stateProvince'] == "")
-				{
-				$Id = $OneReturn['stateId'];
-				$StateName = $this->GetStateFromId($Id);
-				$this->AddToResults('stateProvince',$StateName,$L);
-				$this->AddToResults('country',$this->GetCountryFromId($Id),$L);
-				}
-			return true;
-			}
-		}
-
-	private function GetStateFromId(&$StateId)
-		{
-		echo "GetStateFromId<br>";
-		$query = "SELECT stateName,countryId from lkupstate where stateId like $StateId LIMIT 1";
-		$result = $this->conn->query($query);
-		if($result->num_rows > 0)
-			{
-			$OneReturn = $result->fetch_assoc();
-			$Id = $OneReturn['countryId'];
-			return $OneReturn['stateName'];
-			}
-		return "";
-		}
-		
-
-		
-	private function GetStateFromList($StateResult, $L)
-		{
-		//USED echo "GetStateFromList<br>";
-		//$StateResult is a mysql result from a query.  Has one or more potential states
-		global $this->Label;
-		$OneState = $StateResult->fetch_assoc();
-		//$this->printr($OneState,"OneState");
-		$this->AddToResults('stateProvince', $OneState['stateName'],$L);
-		$query = "SELECT c.countryname, s.stateId FROM lkupcountry c INNER JOIN lkupstateprovince s where s.countryId=c.countryId AND s.stateId={$OneState['stateId']}";
-		$CountryResult = $this->conn->query($query);
-		$OneCountry = $CountryResult->fetch_assoc();
-		$CountryArray[] = $OneCountry['countryname'];
-		if($StateResult->num_rows == 1)
-			{ //Only one result.  Accept it.
-			$this->AddToResults('stateProvince',$OneState['stateName'],$L);
-			$this->AddToResults('country', $OneCountry['countryName'],-1);
-			return $OneState('stateId');
-			}
-		else 
-			{//More than one result.  See if the Country name is on the label.  
-			while($OneState = $StateResult->fetch_assoc())
-				{
-				$query = "SELECT c.countryname FROM lkupcountry c INNER JOIN lkupstateprovince s where s.countryId=c.countryId AND s.stateId={$OneState['stateId']}";
-				$CountryResult = $this->conn->query($query);
-				$TempArray = $CountryResult->fetch_assoc();
-				$CountryArray[] = $TempArray['countryname'];
-				$StateId = $OneState['stateId'];
-				}
-			//$this->printr($CountryArray,"State Array");
-			foreach($CountryArray as $Country)
-				{//Look for each country name on the label.
-				if(preg_match("(\b$Country\b)i", $this->Label))
-					{
-					$this->AddToResults('country',$Country, -1);
-					return $StateId;
-					}
-				}
-			//Country name not on label.  Default to USA if this state has the name of one of the 50
-			if(count(preg_grep("(United States|USA)", $CountryArray)) > 0)
-				{
-				$this->AddToResults("country","United States",-1);
-				//echo "Default to USA<br>";
-				return $StateId;
-				}
-			}
-		}
-
-		
-	//**********************************************
-	private function CheckOneCountry($Field,$L,$Word1,$Word2="")
-		{//Not used any more.  Keep for a while in case some routines might be useful.
-		echo "CheckOneCountry<br>";
-		//Can check for either state or country
-		$Word1=trim($Word1,":.,;");
-		if(!ctype_alpha($Word1))
-			return false;
-		$Num=0;
-		//If we already have a country and are looking for the state/province:
-		if($Field == 'stateProvince' && $this->Results['country'] != "")
-			$queryEnd = " AND country LIKE '{$this->Results['country']}' LIMIT 5";
-		else
-			$queryEnd = " LIMIT 5";
-			
-		if($Word2 != "" && ctype_alpha($Word2))
-			{//Look for two word countries/states
-			$query = "Select country,stateProvince from omoccurrences where $Field LIKE '$Word1 $Word2' $queryEnd";
-			//echo $query."<br>";
-			$result = $this->conn->query($query);
-			$Num = $result->num_rows;
-			}
-		if($Num <5)//If valid country, there should be more than 5 hits in the whole database...
-			{//Look for one-word countries/states
-			$query = "Select country,stateProvince from omoccurrences where $Field LIKE '$Word1' $queryEnd";
-			$result = $this->conn->query($query);
-			$Num = $result->num_rows;
-			}
-		if($Num > 4)
-			{//Require a minimum number of hits to ensure it's not a database error (it happens!)
-			 // Maybe 9 is more than necessary.  5?  3? (in the interest of speed)
-			$OneReturn = $result->fetch_assoc();
-			$this->AddToResults('country', $OneReturn['country'],$L);
-			if($Field=='stateProvince')
-				$this->AddToResults('stateProvince', $OneReturn['stateProvince'],$L);
-			return true;
-			}
-		
-		}
-	
-
-	//**********************************************
-	private function County($Country,$State, $StateLine)
-		{
-		global $this->Label;
-		//USED echo "County<br>";
-		$match=array();
-		$Found = preg_match("((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*(\b(County|Co)\b))i",$this->Label,$match);
-		if($Found ===1)
-			{
-			$County = trim($match[1]." ".$match[2]);
-			$query = "SELECT * FROM lkupcounty c inner join lkupstateprovince s on c.stateId = s.stateId WHERE s.stateName LIKE '$State' and c.countyName LIKE '$County'";
-			$result = $this->conn->query($query);
-			if($result->num_rows == 0)
-				{
-				$County = trim($match[2]);
-				$query = "SELECT county FROM omoccurrences WHERE country LIKE '$Country' AND stateProvince LIKE '$State' and county LIKE '$County'";
-				$result = $this->conn->query($query);
-				}
-			if($result->num_rows > 0)
-				{
-				$M = trim($match[0]);
-				//echo "M=$M<br>";
-				$this->AddToResults('county',$County,0);
-				$Preg = "($M)";
-				$LArray = preg_grep($Preg,$this->LabelLines);
-				if(count($LArray) > 0)
-					{
-					$L = key($LArray);
-					$this->LabelLines[$L] = trim(str_replace($M,"",$this->LabelLines[$L])," \t:;,.");
-					}
-				return;
-				}
-			}
-		echo "Fell through in County<br>";
-		//Didn't find it from the word "County".  Search the full label for a county that is in the given country/state.
-		$query = "SELECT stateid FROM lkupstateprovince WHERE stateName LIKE '$State'";
-		$Stateresult = $this->conn->query($query);
-		$StartLine = $StateLine-1;
-		if($StartLine < 0)
-			$StartLine = 0;
-		if($Stateresult->num_rows > 0)
-			{
-			$CountyArray = array();
-			while($OneLine = $Stateresult->fetch_assoc())
-				{
-				$query = "SELECT countyname FROM lkupcounty WHERE stateid LIKE '{$OneLine['stateid']}'";
-				$Countyresult = $this->conn->query($query);
-				if($Countyresult->num_rows > 1)
-					{
-					while($Cty = $Countyresult->fetch_assoc())
-						{
-						for($L=$StartLine;$L<count($this->LabelLines);$L++)
-							
-							if(stripos($this->LabelLines[$L],$Cty['countyname'])!==false)
-								{
-								$CountyArray[] = $Cty['countyname'];
-								if(strpos($Cty['countyname']," ") !== false)
-									break;
-								}
-						}
-					}
-				}
-			}
-		if(count($CountyArray) > 0)
-			{//Sort results so the longest is first. 
-			
-			$lengths = array_map('strlen', $CountyArray);
-			array_multisort($lengths,SORT_DESC,$CountyArray);
-			$CountyArray = array_values($CountyArray);
-			$this->AddToResults('county',$CountyArray[0],0);
-			}
-		}
-	
-	//******************************************************************
-	function GetStateProvince($Country, $FLine)
-		{//Called from GetCountryState. $FLine indicates line where country was found. 
-		//global $this->LabelArray,$Results,$this->LabelLines;
-		$Synonyms = array("Brasil"=>"Brazil","U.S.A."=>"USA","United States"=>"USA");
-		echo "GetStateProvince<br>";
-		//Rank lines by probability.
-		$RankArray = array();
-		$RankArray = array_fill(0, count($this->LabelArray),0);
-		$RankArray[$FLine] = 5; //Assume state will be near country.
-		if($FLine < count($this->LabelArray)-2)
-			$RankArray[$FLine+1] = 4;
-		if($FLine < count($this->LabelArray)-3)
-			$RankArray[$FLine+2] = 3;
-		if($FLine > 0)
-			$RankArray[$FLine-1] = 2;
-		for($L=0;$L<count($this->LabelLines);$L++)
-			{ //If certain words appear, then much more likely state is there.
-			if(strpos(strtolower($this->LabelLines[$L]),"state")!== false)
-				{
-				$RankArray[$L] = 10;
-				if(strpos(strtolower($this->LabelLines[$L]),"state of")!== false)
-					$RankArray[$L] += 20;
-				if(strpos(strtolower($this->LabelLines[$L]),"state university")!== false)
-					$RankArray[$L] = 0; //Probably just indicates which university has the specimen, not where it was found
-				}
-			if(strpos(strtolower($this->LabelLines[$L]),"province")!== false)
-				$RankArray[$L] = 10;
-			}
-		asort($RankArray);
-		$RankArray = array_reverse($RankArray, true);
-
-		foreach($RankArray as $L=>$Value)
-			{
-			if($RankArray[$L] <=0)
-				continue;
-			for($W=0;$W<count($this->LabelArray[$L]);$W++)
-				{
-				$Word = $this->LabelArray[$L][$W];
-				if(strlen($Word) < 3)
-					continue;
-				if(strtolower($Word) === strtolower($Country))
-					continue;
-				$Num=0;
-				if($W<count($this->LabelArray[$L])-1)
-					{
-					$Word2 = $this->LabelArray[$L][$W+1];
-					if(strlen($Word) < 3 && strlen($Word2) < 3)
-						continue;
-					if(!ctype_alpha($Word) || !ctype_alpha($Word2))
-						continue;
-					$query = "Select country,stateProvince from omoccurrences where country LIKE '$Country' AND stateProvince LIKE '$Word $Word2' LIMIT 10";
-					$result = $this->conn->query($query);
-					$Num = $result->num_rows;
-					if($Num < 10 && isset($Synonyms[$Country]))
-						{
-						$query = "Select country,stateProvince from omoccurrences where country LIKE '{$Synonyms[$Country]}' AND stateProvince LIKE '$Word $Word2' LIMIT 10";
-						$result = $this->conn->query($query);
-						$Num = $result->num_rows;
-						}
-					}
-				if($Num <10)
-					{
-					if(strlen($Word) < 3)
-						continue;
-					if(!ctype_alpha($Word))
-						continue;
-					$query = "sElect country,stateProvince from omoccurrences where country LIKE '$Country' AND stateProvince LIKE '$Word' LIMIT 10";
-					$result = $this->conn->query($query);
-					$Num = $result->num_rows;
-					if($Num <10 && isset($Synonyms[$Country]))
-						{
-						$query = "sElect country,stateProvince from omoccurrences where country LIKE '{$Synonyms[$Country]}' AND stateProvince LIKE '$Word' LIMIT 10";
-						$result = $this->conn->query($query);
-						$Num = $result->num_rows;
-						}
-					}
-				if($Num > 9)
-					{
-					$OneReturn = $result->fetch_assoc();
-					$this->AddToResults('stateProvince', $OneReturn['stateProvince'],$L);
-					$this->County($Country, $OneReturn['stateProvince'], $L);
-					return;
-					}
-				}
-			}
-		}
-*/
 
 //************************************************************************************************************************************
 //******************* Word Stat functions ********************************************************************************************
@@ -2951,7 +2370,7 @@ class SpecProcNlpSalix
 			{
 			//Whole line is a single field
 			$Field = $ResultFields[0];
-			$this->AddToResults($Field,$this->LabelLines[$L],$L);
+			$this->AddToResults($Field,trim($this->LabelLines[$L],": ,;"),$L);
 			//echo "####### ".$ResultFields[0].":  {$this->LabelLines[$L]}<br>";
 			}
 		else
@@ -2968,16 +2387,13 @@ class SpecProcNlpSalix
 					$p2 = strlen($this->LabelLines[$L]);
 					}
 				$Field = $ResultFields[$ChangeFields[$c]];
-				//echo "####### $p1,$p2: $Field:  ";
-				$TempString = substr($this->LabelLines[$L],$p1,$p2 - $p1);
-				//echo $TempString;
-				//echo"<br>";
+				$TempString = trim(substr($this->LabelLines[$L],$p1,$p2 - $p1),": ,;");
 				$this->AddToResults($Field,$TempString,$L);
 				}
 			if($p2 < strlen($this->LabelLines[$L]))
 				{
 				$Field = $ResultFields[$w2];
-				$TempString = substr($this->LabelLines[$L],$p2);
+				$TempString = trim(substr($this->LabelLines[$L],$p2),": ,;");
 				$this->AddToResults($Field,$TempString,$L);
 				}
 			
