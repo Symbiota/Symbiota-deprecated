@@ -148,9 +148,18 @@ class SpecProcNlpSalix
 		//Sometimes the double quote in Lat/Long gets OCRd as a single.  Look for likely instances and correct.
 		$this->Label = preg_replace("(([0-9]{1,2}\'\s?[0-9]{1,2})(\')(\s?[NSEW]))","$1\"$3",$this->Label);
 		
+		//Sometimes year gets separated to next line from day/month.
+		//echo $this->Label."<br>";
+		$Preg = "(([0-9]{1,2}\s+\b{$this->PregMonths})\.[\s]+(\b[0-9]{4,4}\b))i";
+		//echo $Preg."<br>";
+		//preg_match($Preg,$this->Label,$match);
+		//$this->printr($match,"Match");
+		$this->Label = preg_replace($Preg,"$1, $4",$this->Label);
+		//echo $this->Label."<br>";
+
 		//Connect some lines when joined by a connecting preposition or hyphen
 		$this->Label = preg_replace("(\b(of|by|at|in|over|under|on|from)\s?[\r\n]{1,2})i","$1 ",$this->Label);
-		$this->Label = preg_replace("(\b([A-Z]?[a-z]{2,10})-( )?[\n\r]{1,2}([a-z]{2,10}))","$1$3",$this->Label);
+		$this->Label = preg_replace("(\b([A-Z]?[a-z]{2,10})-( )?[\n\r]{1,2}([a-z]{2,10}))","$1$4",$this->Label);
 		
 		//Remove double spaces and tabs
 		$this->Label = str_replace("\t"," ",$this->Label);
@@ -1366,8 +1375,10 @@ class SpecProcNlpSalix
 						$this->LabelLines[$L+1]="";
 						}
 					}
+				if($Field == 'identifiedBy')
+					return true;
 				}
-			if($Field == "recordedBy" && $L < count($this->LabelLines)-1 && ($this->LineStart[$L+1] == "" || $this->LineStart[$L+1] == "associatedCollectors"))
+			if($Field == "recordedBy" && ($L < count($this->LabelLines)-1 && ($this->LineStart[$L+1] == "" || $this->LineStart[$L+1] == "associatedCollectors")))
 				{
 				$this->GetNamesFromLine(++$L,$Field);//Recursively calls this routine to add possible associated collectors.
 				}
@@ -1674,6 +1685,8 @@ class SpecProcNlpSalix
 			$Preg = "({$this->PregMonths}[.,]?\s*(\b[0-9]{1,4}\b)\s*)i";
 			$Found = preg_match($Preg,$TempString,$match);
 			}
+		//if($Found > 0)
+				//echo "Found<br>";
 		if($Found !== 0)
 			{
 			if($VDate == "")
@@ -1776,6 +1789,17 @@ class SpecProcNlpSalix
 
 	function GetCountryState()
 		{
+		if($this->Results['decimalLatitude'] != "" && $this->Results['decimalLongitude'] != "")
+			{
+			$Lat = round($this->Results['decimalLatitude']);
+			$Long = round($this->Results['decimalLongitude']);
+			}
+		else
+			{
+			$Lat = 0;
+			$Long = 0;
+			}
+			
 		$Label = str_replace("-"," ",$this->Label);
 		$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(\b\S+[\b-])\s+(\b\S+\b)?)i",$Label,$match);
 		if($Found !== 1)
@@ -1816,11 +1840,15 @@ class SpecProcNlpSalix
 				$this->ScanForState(trim($match[2]));
 			}
 		$this->SeekState(223,-1);
+		if($Lat != 0 || $Long != 0)
+			if($this->GetFromLatLong($Lat, $Long))
+				return;
 		}
 
 	//*****************************************************************************
 	private function LabeledRegion($Type)
 		{ //Looks for a labeled region, such as County or province on the label
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|vascular|university|specimen|botanical\b))i";
 		$PrePreg = "((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*";
 		switch($Type)
 			{
@@ -1837,6 +1865,8 @@ class SpecProcNlpSalix
 			}
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{
+			if(preg_match($BadWords,$this->LabelLines[$L]))
+				continue;
 			//echo "Testing {$this->LabelLines[$L]}<br>";
 			$Found = preg_match($Preg."i",$this->LabelLines[$L],$match);
 			
@@ -2027,7 +2057,26 @@ class SpecProcNlpSalix
 			}
 		return;
 		}
-
+		
+	private function GetFromLatLong($Lat,$Long)
+		{//Slow with unindexed lat long in the table.  Left as a last resort.
+		$query = "SELECT * FROM omoccurrences where decimalLatitude LIKE '$Lat%' AND decimalLongitude LIKE '$Long%' AND country IS NOT NULL LIMIT 1";
+		//echo "$query<br>";
+		$result = $this->conn->query($query);
+		if($result->num_rows > 0)
+			{
+			$Loc = $result->fetch_assoc();
+			$Country = $Loc['country'];
+			$State = $Loc['stateProvince'];
+			for($L=0;$L < count($this->LabelLines);$L++)
+				if(preg_match("(\b($State)\b)",$this->LabelLines[$L]))
+					{
+					$this->AddToResults('country',$Country,$L);
+					$this->AddToResults('stateProvince',$State,$L);
+					return true;
+					}
+			}
+		}
 		
 	//*****************************************************************************
 	private function SeekState($CountryId,$m)
@@ -2206,7 +2255,8 @@ class SpecProcNlpSalix
 		//$this->printr($Fields,"Fields");
 		$ScoreArray = array();
 		$TempString = $this->LabelLines[$L];
-		$Found = preg_match_all("(\b[A-Za-z]{2,20}\b)",$TempString,$WordsArray, PREG_OFFSET_CAPTURE);//Break the string up into words
+		$Found = preg_match_all("(\b[A-Za-z]{1,20}\b)",$TempString,$WordsArray, PREG_OFFSET_CAPTURE);//Break the string up into words
+		//$this->printr($WordsArray,"WA");
 		$FieldScoreArray = array();
 		$StatSums = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
 		for($w=0;$w<count($WordsArray[0])-1;$w++)
@@ -2222,6 +2272,21 @@ class SpecProcNlpSalix
 				}
 			//$this->printr($StatSums,"StatSums");
 			}
+		if(count($FieldScoreArray) == 0)
+				return;
+		//Check for first/last words same field and larger than any other field for the rest of the words.
+		$Size = count($WordsArray[0])-2;
+		//echo "Size = $Size<br>";
+		$Field1 = $this->MaxKey($FieldScoreArray[0]);
+		$Field2 = $this->MaxKey($FieldScoreArray[$Size]);
+		if($Field1 == $Field2 && $Field1 != "")
+			{//First and last the same field
+			//echo "First and last ($Size) both $Field1<br>";
+			$this->AddToResults($Field1,$this->LabelLines[$L],$L);	
+			return;
+			}
+		
+		
 		//Smooth the array, removing isolated high and low points
 		foreach($Fields as $F)
 			{
@@ -2245,7 +2310,9 @@ class SpecProcNlpSalix
 		//Now try to split into Fields.
 		$ResultFields = array();
 		$ChangeFields = array();
-		$Prep = array("in","on","of","by","inside","along","ca");
+		$Prep = array("in","on","of","by","inside","along","ca","de","en");
+		//echo "{$this->LabelLines[$L]}<br>";
+		//$this->printr($FieldScoreArray,"FSA");
 		for($w=0;$w<count($FieldScoreArray);$w++)
 			{
 			$Word1 = $WordsArray[0][$w][0];
@@ -2474,7 +2541,7 @@ class SpecProcNlpSalix
 						{
 						$Factor = 1;
 						if($Values['totalcount'] < 10) //Reduce impact if only seen few times
-							$Factor = ($Values['totalcount'])/10;
+							$Factor = ($Values['totalcount'])/20;
 						foreach($Fields as $F)
 							{
 							$OneScore = 10*$Factor * $Values[$F.'Freq'];
@@ -2486,9 +2553,9 @@ class SpecProcNlpSalix
 				foreach($Fields as $F)
 					$ScoreArray[$F] = $MaxScore2[$F]+$MaxScore1[$F];
 				//$this->printr($ScoreArray,"Raw $Word1 $Word2");
-				if("$Word1 $Word2" == mb_convert_case("$Word1 $Word2",MB_CASE_TITLE))
+				//if("$Word1 $Word2" == mb_convert_case("$Word1 $Word2",MB_CASE_TITLE))
 					{
-					$ScoreArray['locality'] += 100; //Title case indicates proper noun, probably location name
+					//$ScoreArray['locality'] += 25; //Title case indicates proper noun, probably location name
 					}
 				}
 		//$this->printr($ScoreArray,"ScoreArray");
@@ -2852,20 +2919,22 @@ class SpecProcNlpSalix
 	echo "<br>";
 	}
 
-
-}
-//**********************************************
-class TwoCharRep 
-	{
-	var $First;
-	var $Second;
-	var $To;
-	public function Load($F,$S,$T)
+	private function MaxKey($A)
 		{
-		$First = $F;
-		$Second = $S;
-		$To = $T;
+		$MaxV = -1000;
+		$Field = "";
+		foreach($A as $Key=>$Value)
+			{
+			if($Value > $MaxV)
+				{
+				$MaxV = $Value;
+				$Field = $Key;
+				}
+			}
+		return $Field;
 		}
-	}
+}
+
+
 
 ?>
