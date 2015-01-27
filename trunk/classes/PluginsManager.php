@@ -136,23 +136,24 @@ class PluginsManager {
 							$file = $row->url;
 						}
 						if(fopen($file, "r")){
-							$size = getimagesize($file);
-							$width = $size[0];
-							$height = $size[1];
-							$files[$imgId]['url'] = $file;
-							$files[$imgId]['width'] = $width;
-							$files[$imgId]['height'] = $height;
-							$files[$imgId]['imgid'] = $row->imgid;
-							$files[$imgId]['tid'] = $row->tid;
-							$files[$imgId]['occid'] = $row->occid;
-							$files[$imgId]['photographer'] = $row->photographer;
-							$files[$imgId]['owner'] = $row->owner;
-							$files[$imgId]['SciName'] = $row->SciName;
-							$files[$imgId]['occsciname'] = $row->occsciname;
-							$files[$imgId]['photographerName'] = $row->photographerName;
-							$files[$imgId]['identifier'] = $row->identifier;
-							$imgIdArr[] = $row->imgid;
-							$cnt++;
+							if($size = getimagesize($file)){
+								$width = $size[0];
+								$height = $size[1];
+								$files[$imgId]['url'] = $file;
+								$files[$imgId]['width'] = $width;
+								$files[$imgId]['height'] = $height;
+								$files[$imgId]['imgid'] = $row->imgid;
+								$files[$imgId]['tid'] = $row->tid;
+								$files[$imgId]['occid'] = $row->occid;
+								$files[$imgId]['photographer'] = $row->photographer;
+								$files[$imgId]['owner'] = $row->owner;
+								$files[$imgId]['SciName'] = $row->SciName;
+								$files[$imgId]['occsciname'] = $row->occsciname;
+								$files[$imgId]['photographerName'] = $row->photographerName;
+								$files[$imgId]['identifier'] = $row->identifier;
+								$imgIdArr[] = $row->imgid;
+								$cnt++;
+							}
 						}
 					}
 				}
@@ -175,22 +176,23 @@ class PluginsManager {
 						$file = $row->url;
 					}
 					if(fopen($file, "r")){
-						$size = getimagesize($file);
-						$width = $size[0];
-						$height = $size[1];
-						$files[$imgId]['url'] = $file;
-						$files[$imgId]['width'] = $width;
-						$files[$imgId]['height'] = $height;
-						$files[$imgId]['imgid'] = $row->imgid;
-						$files[$imgId]['tid'] = $row->tid;
-						$files[$imgId]['occid'] = $row->occid;
-						$files[$imgId]['photographer'] = $row->photographer;
-						$files[$imgId]['owner'] = $row->owner;
-						$files[$imgId]['SciName'] = $row->SciName;
-						$files[$imgId]['occsciname'] = $row->occsciname;
-						$files[$imgId]['photographerName'] = $row->photographerName;
-						$files[$imgId]['identifier'] = $row->identifier;
-						$cnt++;
+						if($size = getimagesize($file)){
+							$width = $size[0];
+							$height = $size[1];
+							$files[$imgId]['url'] = $file;
+							$files[$imgId]['width'] = $width;
+							$files[$imgId]['height'] = $height;
+							$files[$imgId]['imgid'] = $row->imgid;
+							$files[$imgId]['tid'] = $row->tid;
+							$files[$imgId]['occid'] = $row->occid;
+							$files[$imgId]['photographer'] = $row->photographer;
+							$files[$imgId]['owner'] = $row->owner;
+							$files[$imgId]['SciName'] = $row->SciName;
+							$files[$imgId]['occsciname'] = $row->occsciname;
+							$files[$imgId]['photographerName'] = $row->photographerName;
+							$files[$imgId]['identifier'] = $row->identifier;
+							$cnt++;
+						}
 					}
 				}
 			}
