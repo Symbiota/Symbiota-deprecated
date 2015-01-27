@@ -38,7 +38,7 @@ $isEditor = 0;
 $navStr = '<div style="float:right;">';
 if($SYMB_UID){
 	//Set variables
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
 		$isEditor = 1;
 	}
 
