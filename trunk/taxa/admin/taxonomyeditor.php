@@ -305,7 +305,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 						</div>
 					</form>
 				</div>
-				<div id="taxonstatusdiv" style="height:400px;">
+				<div id="taxonstatusdiv" style="min-height:400px;">
 					<fieldset style="width:95%;">
 						<legend><b>Taxonomic Placement</b></legend>
 						<div style="padding:3px 7px;background-color:silver;margin:-12px -10px 5px 0px;float:right;">
