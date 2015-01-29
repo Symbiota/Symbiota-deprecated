@@ -1791,8 +1791,8 @@ class SpecProcNlpSalix
 		{
 		if($this->Results['decimalLatitude'] != "" && $this->Results['decimalLongitude'] != "")
 			{
-			$Lat = round($this->Results['decimalLatitude']);
-			$Long = round($this->Results['decimalLongitude']);
+			$Lat = $this->Results['decimalLatitude'];
+			$Long = $this->Results['decimalLongitude'];
 			}
 		else
 			{
@@ -1803,7 +1803,7 @@ class SpecProcNlpSalix
 		$Label = str_replace("-"," ",$this->Label);
 		$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(\b\S+[\b-])\s+(\b\S+\b)?)i",$Label,$match);
 		if($Found !== 1)
-			$Found = preg_match("((plants|flora|lichens|algae|cryptogams)\s(of|de)\s+(\b\S+\b)(\s?\b\S+\b)?)i",$Label,$match);
+			$Found = preg_match("((plants|flora|lichens|algae|cryptogams)\s(of|de|du)\s+(\b\S+\b)(\s?\b\S+\b)?)i",$Label,$match);
 		if($Found)
 			{// Found "Plants of...".  Look for state or country
 			//$this->printr($match,"Algae of");
@@ -1814,6 +1814,8 @@ class SpecProcNlpSalix
 			$this->PlantsOf($Name2);
 			if($this->Results['country'] == "")
 				$this->PlantsOf($Name1);
+			if($this->Results['country'] == "" && count($match > 4))
+				$this->PlantsOf(trim($match[4]));
 			}
 		if($this->Results['country'] != "") //Found it.
 			return;
@@ -1890,11 +1892,6 @@ class SpecProcNlpSalix
 			}
 		return false;
 		}
-		
-		
-							
-		
-		
 
 	//*****************************************************************************
 	function PlantsOf($Name)
@@ -2060,12 +2057,12 @@ class SpecProcNlpSalix
 		
 	private function GetFromLatLong($Lat,$Long)
 		{//Slow with unindexed lat long in the table.  Left as a last resort.
-		$query = "SELECT * FROM omoccurrences where decimalLatitude LIKE '$Lat%' AND decimalLongitude LIKE '$Long%' AND country IS NOT NULL LIMIT 1";
+		$Box = .5;
+		$query = "SELECT * FROM omoccurrences where decimalLatitude between ".($Lat-$Box)." AND ".($Lat+$Box)." AND decimalLongitude between ".($Long-$Box)." AND ".($Long+$Box)." AND country IS NOT NULL LIMIT 3";
 		//echo "$query<br>";
 		$result = $this->conn->query($query);
-		if($result->num_rows > 0)
+		while($Loc = $result->fetch_assoc())
 			{
-			$Loc = $result->fetch_assoc();
 			$Country = $Loc['country'];
 			$State = $Loc['stateProvince'];
 			for($L=0;$L < count($this->LabelLines);$L++)
@@ -2743,10 +2740,10 @@ class SpecProcNlpSalix
 	private function InitStartWords()
 		{//Fill the StartWords array
 		$this->PregStart['family'] = "(^(family)\b)i";
-		$this->PregStart['recordedBy'] = "(^(collected by|collectors|collector|coll|col|leg|by)\b)i";
+		$this->PregStart['recordedBy'] = "(^(coll(.|ected)? by|collectors|collector|coll|col|leg|by)\b)i";
 		$this->PregStart['eventDate'] = "(^(EventDate|Date)\b)i";
 		$this->PregStart['recordNumber'] = "(^(number)\b)i";
-		$this->PregStart['identifiedBy'] = "(^(determined by|determined|det. by|det|identified by|identified)\b)i";
+		$this->PregStart['identifiedBy'] = "(^(det(.|ermined)? by|determined|det|identified by|identified)\b)i";
 		$this->PregStart['associatedCollectors'] = "(^(with|and|&)\b)i";
 		$this->PregStart['habitat'] = "(^(habitat)\b)i";
 		$this->PregStart['locality'] = "(^(locality|location|loc|collected off|collected near)\b)i";
@@ -2755,7 +2752,7 @@ class SpecProcNlpSalix
 		$this->PregStart['stateProvince'] = "(^(state|province)\b)i";
 		$this->PregStart['county'] = "(^(county|parish)\b)i";
 		$this->PregStart['minimumElevationInMeters'] = "(^(elevation|elev|altitude|alt)\b)i";
-		$this->PregStart['associatedTaxa'] = "(^(assoc|growing with|associated taxa|associated with|associated plants|associated spp|associated species|associated|other spp)\b)i";
+		$this->PregStart['associatedTaxa'] = "(^(growing with|associated taxa|associated with|assoc(.|iated)? plants|assoc(.|iated)? spp|assoc(.|iated)? species|associated|other spp)\b)i";
 		$this->PregStart['infraspecificEpithet'] = "(^(ssp|variety|subsp)\b)i";
 		$this->PregStart['occurrenceRemarks'] = "(^(notes)\b)i";
 		//$this->PregStart['verbatimAttributes'] = "(^(habit)\b)i";
