@@ -2261,6 +2261,7 @@ class SpecProcNlpSalix
 			$Loc = $WordsArray[0][$w][1];
 			$Word1 = $WordsArray[0][$w][0];
 			$Word2 = $WordsArray[0][$w+1][0];
+			
 			$ScoreArray = $this->ScoreTwoWords($Word1,$Word2);//Get word stats score for these two words
 			$FieldScoreArray[$w] = $ScoreArray;
 			foreach($Fields as $F)
@@ -2269,6 +2270,16 @@ class SpecProcNlpSalix
 				}
 			//$this->printr($StatSums,"StatSums");
 			}
+		//Get the value for the single last word
+		$w = count($WordsArray[0])-1;
+		//echo "Final word: {$WordsArray[0][$w][0]}<br>";
+		$ScoreArray = $this->ScoreTwoWords($WordsArray[0][$w][0],"");
+		foreach($Fields as $F)
+			{
+			$FieldScoreArray[$w][$F] = $ScoreArray[$F];
+			$StatSums[$F] += $ScoreArray[$F];
+			}
+		
 		if(count($FieldScoreArray) == 0)
 				return;
 		//Check for first/last words same field and larger than any other field for the rest of the words.
@@ -2511,6 +2522,7 @@ class SpecProcNlpSalix
 		$result = $this->conn->query($query);
 		$num1 = $result->num_rows;
 		$MaxScore1 = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
+		//$MaxScore1A = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
 		$MaxScore2 = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
 		if($num1 > 0)
 			{
@@ -2522,39 +2534,64 @@ class SpecProcNlpSalix
 				foreach($Fields as $F)
 					{
 					$OneScore = $Factor * $Values[$F.'Freq'];
+					//echo "Adding $OneScore to $F for $Word1<br>";
 					if($OneScore > $MaxScore1[$F])
 						$MaxScore1[$F] = $OneScore;
 					}
 				}
 			}
-			if($Word2 != "")
-				{//Look for two-word combinations.  Score with more weight than single words -- 5X as I write this comment.
-				$query = "SELECT * from salixwordstats where firstword like '$Word1' AND secondword LIKE '$Word2' LIMIT 3";
-				//echo "$query<br>";
-				$result = $this->conn->query($query);
-				if($result->num_rows > 0)
+		if($Word2 != "")
+			{//Look for two-word combinations.  Score with more weight than single words -- 5X as I write this comment.
+			/*
+			$query = "Select * from salixwordstats where firstword like '$Word2' AND secondword IS NULL LIMIT 3";
+			//echo "$query<br>";
+			$result = $this->conn->query($query);
+			$num1 = $result->num_rows;
+			if($num1 > 0)
+				{
+				while($Values = $result->fetch_assoc())
 					{
-					while($Values = $result->fetch_assoc())
+					$Factor = 1;
+					if($Values['totalcount'] < 10) //Reduce impact if only seen few times
+						$Factor = ($Values['totalcount'])/10;
+					foreach($Fields as $F)
 						{
-						$Factor = 1;
-						if($Values['totalcount'] < 10) //Reduce impact if only seen few times
-							$Factor = ($Values['totalcount'])/20;
-						foreach($Fields as $F)
-							{
-							$OneScore = 10*$Factor * $Values[$F.'Freq'];
-							if($OneScore > $MaxScore2[$F])
-								$MaxScore2[$F] = $OneScore;
-							}
+						$OneScore = $Factor * $Values[$F.'Freq'];
+						echo "Adding $OneScore to $F for $Word2<br>";
+						if($OneScore > $MaxScore1[$F])
+							$MaxScore1A[$F] = $OneScore;
 						}
 					}
-				foreach($Fields as $F)
-					$ScoreArray[$F] = $MaxScore2[$F]+$MaxScore1[$F];
-				//$this->printr($ScoreArray,"Raw $Word1 $Word2");
-				//if("$Word1 $Word2" == mb_convert_case("$Word1 $Word2",MB_CASE_TITLE))
+				}
+			*/
+			$query = "SELECT * from salixwordstats where firstword like '$Word1' AND secondword LIKE '$Word2' LIMIT 3";
+			//echo "$query<br>";
+			$result = $this->conn->query($query);
+			if($result->num_rows > 0)
+				{
+				while($Values = $result->fetch_assoc())
 					{
-					//$ScoreArray['locality'] += 25; //Title case indicates proper noun, probably location name
+					$Factor = 1;
+					if($Values['totalcount'] < 10) //Reduce impact if only seen few times
+						$Factor = ($Values['totalcount']);
+					$Factor = ($Factor*$Factor)/100;
+					foreach($Fields as $F)
+						{
+						$OneScore = 10*$Factor * $Values[$F.'Freq'];
+						//echo "Adding $OneScore to $F for $Word1, $Word2<br>";
+						if($OneScore > $MaxScore2[$F])
+							$MaxScore2[$F] = $OneScore;
+						}
 					}
 				}
+			foreach($Fields as $F)
+				$ScoreArray[$F] = $MaxScore2[$F]+$MaxScore1[$F];//+$MaxScore1A[$F];
+			//$this->printr($ScoreArray,"Raw $Word1 $Word2");
+			//if("$Word1 $Word2" == mb_convert_case("$Word1 $Word2",MB_CASE_TITLE))
+				{
+				//$ScoreArray['locality'] += 25; //Title case indicates proper noun, probably location name
+				}
+			}
 		//$this->printr($ScoreArray,"ScoreArray");
 		return $ScoreArray;
 		}
