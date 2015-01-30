@@ -1347,7 +1347,7 @@ class SpecProcNlpSalix
 			}
 		if($Found == 0)
 			{
-			$Preg = "(\b(([A-Z][a-z]{2,20} )|([A-Z][\.] ))([A-Z][\.] )?([A-Z][a-z]{2,20}\b))";
+			$Preg = "(\b(([A-Z][a-z]{2,20} )|([A-Z][\.]? ))([A-Z][\.] )?([A-Z][a-z]{2,20}\b))";
 				//(Initial or first name), (optional middle initial), (last name).
 			$Found = preg_match_all($Preg, $this->LabelLines[$L],$match);
 			//$this->printr($match,"Name Match");
@@ -1774,6 +1774,7 @@ class SpecProcNlpSalix
 						}
 					}
 				$this->AddToResults('recordNumber', $Match,$L);
+				$this->LabelLines[$L] = str_replace($Match,"",$this->LabelLines[$L]);
 				return;
 				}
 			}
@@ -2182,7 +2183,7 @@ class SpecProcNlpSalix
 		{
 		$OneLine = array();
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
-		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|plants of|aceae of|flora de|univ)\b)i";
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|plants of|aceae of|flora de|univ|et al)\b)i";
 		$Max = array();
 		//$this->printr($this->LineStart,"Line Start");
 		//$this->printr($this->LabelLines,"Lines");
@@ -2205,29 +2206,39 @@ class SpecProcNlpSalix
 				{//Don't bother scoring if this line has start words or has already been assigned.
 				if($this->LineStart[$L] ==$F)
 					{
+					//echo "2 Starts with $F, {$this->LabelLines[$L]}<br>";
 					$Skip=true;
 					break;
 					}
 				}
 			if($this->Assigned['ignore'] == $L)
+				{
 				$Skip = true;
+				//echo "Skipping for ignore<br>";
+				}
 			if(preg_match("([a-z])",$this->LabelLines[$L]) === 0)
 				{//Usually not all upper case
+				//echo "Skipping for upper case<br>";
 				$Skip=true;
 				}
-			if($this->StatScore[$L]['Score'] < 50)
+			if($this->StatScore[$L]['Score'] < 20)
+				{
 				$Skip = true;  //Already measured this line and it falls short.
+				//echo "Skipping {$this->LabelLines[$L]} for score = ".$this->StatScore[$L]['Score']."<br>";
+				}
 			if(preg_match($BadWords,$this->LabelLines[$L]) > 0)
 				$Skip=true;
 			//if($this->PlantsOfLine == $L)
 			//	$Skip=true;
 			if($Skip)
 				{
+				//echo "Skipping {$this->LabelLines[$L]}<br>";
 				continue;
 				}
 			$this->SplitWordStatLine($L);
 			continue;
 			$this->ScoreOneLine($L, $Field, $Score);// Field and Score are called by reference.
+			//echo "Final Score = $Score<br>";
 			if($Score > 50)
 				{//Score is high enough (though limit is empirical).  Add line to highest scoring field.
 				//NOTE:  May want to look into breaking a line in the middle if it changes fields partway through.
@@ -2247,7 +2258,7 @@ class SpecProcNlpSalix
 
 	private function SplitWordStatLine($L)
 		{
-		//echo "Testing {$this->LabelLines[$L]}<br>";
+		//echo "Testing $L: {$this->LabelLines[$L]}<br>";
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
 		//$this->printr($Fields,"Fields");
 		$ScoreArray = array();
@@ -2294,25 +2305,27 @@ class SpecProcNlpSalix
 			return;
 			}
 		
+		//$this->printr($FieldScoreArray,"1-FSA");
 		
 		//Smooth the array, removing isolated high and low points
 		foreach($Fields as $F)
 			{
 			for($w=1;$w < count($FieldScoreArray)-1;$w++)
 				{
+					//echo "w=$w, F=$F<br>";
 				if($FieldScoreArray[$w][$F] < $FieldScoreArray[$w-1][$F] && $FieldScoreArray[$w][$F] < $FieldScoreArray[$w+1][$F])
-					$FieldScoreArray[$w][$F] = ($FieldScoreArray[$w-1][$F]+$FieldScoreArray[$w+1][$F])/2;
+					$FieldScoreArray[$w][$F] = ($FieldScoreArray[$w][$F]+$FieldScoreArray[$w-1][$F]+$FieldScoreArray[$w+1][$F])/3;
 				if($FieldScoreArray[$w][$F] > $FieldScoreArray[$w-1][$F] && $FieldScoreArray[$w][$F] > $FieldScoreArray[$w+1][$F])
-					$FieldScoreArray[$w][$F] = ($FieldScoreArray[$w-1][$F]+$FieldScoreArray[$w+1][$F])/2;
+					$FieldScoreArray[$w][$F] = ($FieldScoreArray[$w][$F]+$FieldScoreArray[$w-1][$F]+$FieldScoreArray[$w+1][$F])/3;
 				}
 			}
-		//$this->printr($FieldScoreArray,"FSA");
+		//$this->printr($FieldScoreArray,"2-FSA");
 		if(count($WordsArray[0]) > 0)
 			$Max = max($StatSums)/(count($WordsArray[0]));
 		else
 			return;
 		//echo "$Max, {$this->LabelLines[$L]}<br>";
-		if($Max < 40)
+		if($Max < 20)
 			return;
 			
 		//Now try to split into Fields.
@@ -2542,28 +2555,6 @@ class SpecProcNlpSalix
 			}
 		if($Word2 != "")
 			{//Look for two-word combinations.  Score with more weight than single words -- 5X as I write this comment.
-			/*
-			$query = "Select * from salixwordstats where firstword like '$Word2' AND secondword IS NULL LIMIT 3";
-			//echo "$query<br>";
-			$result = $this->conn->query($query);
-			$num1 = $result->num_rows;
-			if($num1 > 0)
-				{
-				while($Values = $result->fetch_assoc())
-					{
-					$Factor = 1;
-					if($Values['totalcount'] < 10) //Reduce impact if only seen few times
-						$Factor = ($Values['totalcount'])/10;
-					foreach($Fields as $F)
-						{
-						$OneScore = $Factor * $Values[$F.'Freq'];
-						echo "Adding $OneScore to $F for $Word2<br>";
-						if($OneScore > $MaxScore1[$F])
-							$MaxScore1A[$F] = $OneScore;
-						}
-					}
-				}
-			*/
 			$query = "SELECT * from salixwordstats where firstword like '$Word1' AND secondword LIKE '$Word2' LIMIT 3";
 			//echo "$query<br>";
 			$result = $this->conn->query($query);
@@ -2650,6 +2641,7 @@ class SpecProcNlpSalix
 			{//Look for each word, and each two word combination in the salix word stats table
 			//First look for single word
 			$query = "Select * from salixwordstats where firstword like '{$WordsArray[$W]}' AND secondword IS NULL LIMIT 3";
+			//echo "$query<br>";
 			$result = $this->conn->query($query);
 			$num1 = $result->num_rows;
 			if($num1 > 0)
@@ -2673,6 +2665,7 @@ class SpecProcNlpSalix
 			if($W < count($WordsArray)-1)
 				{//Look for two-word combinations.  Score with more weight than single words -- 5X as I write this comment.
 				$query = "SELECT * from salixwordstats where firstword like '{$WordsArray[$W]}' AND secondword LIKE '{$WordsArray[$W+1]}' LIMIT 3";
+				//echo "$query<br>";
 				$result = $this->conn->query($query);
 				if($result->num_rows > 0)
 					{
@@ -2687,10 +2680,12 @@ class SpecProcNlpSalix
 					}
 				}
 			}
+		//$this->printr($ScoreArray,"ScoreArray");
 		asort($ScoreArray);
 		end($ScoreArray); //Select the last (highest) element in the scores array
 		$Field = key($ScoreArray); //Maximum field
 		$Score = floor($ScoreArray[$Field]/count($WordsArray));
+		//echo "Score = $Score<br>";
 		}
 
 		
