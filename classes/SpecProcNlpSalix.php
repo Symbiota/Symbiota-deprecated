@@ -194,6 +194,7 @@ class SpecProcNlpSalix
 			
 		//Remove empty lines
 		$this->Label = str_replace("\r\n\r\n","\r\n",$this->Label);
+		$this->Label = str_replace("/","\r\n",$this->Label);
 		
 		$this->LabelLines = preg_split("[(?<=[a-z]{4,4})\.|(?<=[a-z]);|\n]",$this->Label,-1,PREG_SPLIT_DELIM_CAPTURE);
 		//Split lines at semicolons and periods.  But not at periods unless the preceding is
@@ -897,7 +898,8 @@ class SpecProcNlpSalix
 				}
 			}
 
-
+		if($MaxLine < 1)
+			return $RankArray;
 		//Work up from this line, including lines as long as their rank is high enough, if it's not clearly the first line.
 		$Start = $MaxLine;
 		$End = $MaxLine;
@@ -1605,6 +1607,7 @@ class SpecProcNlpSalix
 		//$this->printr($RankArray,"Date Rank");
 		foreach($RankArray as $L => $Value)
 			{
+			//echo "$L: {$this->LabelLines[$L]}<br>";
 			if($Value < 0)
 				break;
 			if($this->DateFromOneLine($Field,$L))
@@ -1710,11 +1713,11 @@ class SpecProcNlpSalix
 		if($Partial)
 			$Preg = "(\b{$this->PregMonths}\s*(\b[0-9]{1,4}\b))i";
 		else
-			$Preg = "((\b[0-9]{1,4}\b)\s*{$this->PregMonths}\s*(\b[0-9]{1,4}\b))i";
+			$Preg = "((\b[0-9]{1,4}\b)\s*{$this->PregMonths}[.,]*\s*(\b[0-9]{1,4}\b))i";
 		$Found = preg_match($Preg,$TempString,$match);
 		if($Found !== 1)
 			{//Format April 21, 1929
-			$Preg = "({$this->PregMonths}[.\s]*(\b[0-9]{1,4}\b)[.,]?\s*(\b[0-9]{1,4}\b)\s*)i";
+			$Preg = "({$this->PregMonths}[.\s]*(\b[0-9]{1,4}\b)[.,]*\s*(\b[0-9]{1,4}\b)\s*)i";
 			$Found = preg_match($Preg,$TempString,$match);
 			if($Found)
 				{
@@ -1748,6 +1751,14 @@ class SpecProcNlpSalix
 				$VDate = trim($match[1]," .-")."-".$Month."-".trim($match[3]," .-");
 				$RealVDate = $match[0];
 				}
+			}
+		if($Found == 0)
+			{
+			$Preg = "(\b(19[0-9]{2,2}|20[01][0-9])\b)";
+			$Found = preg_match($Preg, $TempString,$match);
+			$VDate = $match[0];
+			$RealVDate = $VDate;
+			
 			}
 		if($Found!== 0)
 			{
@@ -1886,8 +1897,11 @@ class SpecProcNlpSalix
 			}
 		$this->SeekState(223,-1);
 		if($Lat != 0 || $Long != 0)
+			{
 			if($this->GetFromLatLong($Lat, $Long))
 				return;
+			}
+		
 		}
 
 	//*****************************************************************************
@@ -2132,7 +2146,7 @@ class SpecProcNlpSalix
 	private function GetFromLatLong($Lat,$Long)
 		{//Slow with unindexed lat long in the table.  Left as a last resort.
 		$Box = .5;
-		$query = "SELECT * FROM omoccurrences where decimalLatitude between ".($Lat-$Box)." AND ".($Lat+$Box)." AND decimalLongitude between ".($Long-$Box)." AND ".($Long+$Box)." AND country IS NOT NULL LIMIT 3";
+		$query = "SELECT country,stateProvince FROM omoccurrences where decimalLatitude between ".($Lat-$Box)." AND ".($Lat+$Box)." AND decimalLongitude between ".($Long-$Box)." AND ".($Long+$Box)." AND country IS NOT NULL LIMIT 5";
 		//echo "$query<br>";
 		$result = $this->conn->query($query);
 		while($Loc = $result->fetch_assoc())
@@ -2140,12 +2154,19 @@ class SpecProcNlpSalix
 			$Country = $Loc['country'];
 			$State = $Loc['stateProvince'];
 			for($L=0;$L < count($this->LabelLines);$L++)
-				if(preg_match("(\b($State)\b)",$this->LabelLines[$L]))
+				{
+				if(preg_match("(\b($State)\b)i",$this->LabelLines[$L]))
 					{
-					$this->AddToResults('country',$Country,$L);
+					if($this->Results['country'] == "" || $this->Results['country'] != $Country)
+						$this->AddToResults('country',$Country,$L);
 					$this->AddToResults('stateProvince',$State,$L);
 					return true;
 					}
+				else if($this->Results['country'] == "" && preg_match("(\b($Country)\b)i",$this->LabelLines[$L]))
+					{
+					$this->AddToResults('country',$Country,$L);
+					}
+				}
 			}
 		}
 		
@@ -2262,6 +2283,8 @@ class SpecProcNlpSalix
 		//$this->printr($this->LabelLines,"Lines");
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{
+			if($this->SpecialWordStatCases($L))
+				continue;
 			$Skip=false;
 			//If contains start word, then just assign the whole line
 			foreach($Fields as $F)
@@ -2328,10 +2351,27 @@ class SpecProcNlpSalix
 		return;			
 		}
 
-
+	private function SpecialWordStatCases($L)
+		{
+		$PregArray[] = array('Preg'=>"(\A[.0-9-]+ m\.?( tall)?[\r\n])",'Field'=>'verbatimAttributes');
+		foreach($PregArray as $P)
+			{
+			if(preg_match($P['Preg'],$this->LabelLines[$L])>0)
+				{
+				//echo "Found {$P['Field']} in {$this->LabelLines[$L]}<br>";
+				$this->AddToResults($P['Field'],$this->LabelLines[$L],$L);
+				return true;
+				}
+			}
+		}
+	
+	
+	
+	//************************************************************************************************	
 	private function SplitWordStatLine($L)
 		{
 		//echo "Testing $L: {$this->LabelLines[$L]}<br>";
+		
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
 		//$this->printr($Fields,"Fields");
 		$ScoreArray = array();
@@ -2345,6 +2385,9 @@ class SpecProcNlpSalix
 			$Loc = $WordsArray[0][$w][1];
 			$Word1 = $WordsArray[0][$w][0];
 			$Word2 = $WordsArray[0][$w+1][0];
+
+
+
 			
 			$ScoreArray = $this->ScoreTwoWords($Word1,$Word2);//Get word stats score for these two words
 			$FieldScoreArray[$w] = $ScoreArray;
@@ -2614,11 +2657,20 @@ class SpecProcNlpSalix
 			}
 		*/
 		}
-		
+	
+	//************************************************************************************************	
 	private function ScoreTwoWords($Word1,$Word2)
 		{
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
 		$ScoreArray = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
+		
+		if(preg_match("([nsewNSEW] of)",$Word1." ".$Word2) > 0)
+			{
+			$ScoreArray['locality'] = 200;
+			return $ScoreArray;
+			}
+
+		
 		$ExcludeWords = array('verbatimAttributes'=>array("herbarium","institute","university","botanical"),'habitat'=>array("herbarium","university"));
 		$query = "Select * from salixwordstats where firstword like '$Word1' AND secondword IS NULL LIMIT 3";
 		//echo "$query<br>";
@@ -2677,6 +2729,7 @@ class SpecProcNlpSalix
 		}
 		
 		
+	//************************************************************************************************	
 	private function ScoreOneLine($L, &$Field, &$Score)
 		{ //Score a line for wordstats
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
@@ -2708,6 +2761,7 @@ class SpecProcNlpSalix
 		return;
 		}
 		
+	//************************************************************************************************	
 	private function ScoreString($TempString,&$Field, &$Score)
 		{//Called by ScoreOneLine and also by associated species routine
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
@@ -2769,6 +2823,8 @@ class SpecProcNlpSalix
 					}
 				}
 			}
+		if(preg_match("(\b[nsewNSEW] of [A-Z][a-z]{2,20})",$TempString) > 0)
+			$ScoreArray['locality'] += 100;
 		//$this->printr($ScoreArray,"ScoreArray");
 		asort($ScoreArray);
 		end($ScoreArray); //Select the last (highest) element in the scores array
@@ -2848,7 +2904,12 @@ class SpecProcNlpSalix
 		if($L>=0)
 			$this->Assigned[$Field] = $L;
 		$String = trim($String);
-		if(strpos("associatedCollectors,identifiedBy,associatedTaxa",$Field) > 0 && $this->Results[$Field] != "")
+		if(array_search($Field, array("country","stateProvince","county","minimimumElevationInMeters")) !== false)
+			{ //Make sure not to add multiple results to these fields.  Assume the later addition is more likely to be correct, so replace.
+			$this->Results[$Field] = $String;
+			return;
+			}
+		if(array_search($Field, array("associatedCollectors","identifiedBy","associatedTaxa")) !== false && $this->Results[$Field] != "")
 			$this->Results[$Field] .= "; ".$String;  //Append
 		else if($this->Results[$Field] != "")
 			$this->Results[$Field] .= ", ".$String;
