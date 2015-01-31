@@ -141,6 +141,9 @@ class SpecProcNlpSalix
 		//Sometimes the double quote in Lat/Long gets OCRd as a single.  Look for likely instances and correct.
 		$this->Label = preg_replace("(([0-9]{1,2}\'\s?[0-9]{1,2})(\')(\s?[NSEW]))","$1\"$3",$this->Label);
 		
+		//Sometimes the minute quote mark gets OCRd as a 1 (one) or l (el).  Look for and correct.
+		$this->Label = preg_replace("(\b([0-9]{1,2})1\s?([0-9]{1,2}\")(\s?[NSEW]\b))","$1'$2$3",$this->Label);
+		
 		//Sometimes year gets separated to next line from day/month.
 		$Preg = "(([0-9]{1,2}\s+\b{$this->PregMonths})\.[\s]+(\b[0-9]{4,4}\b))i";
 		$this->Label = preg_replace($Preg,"$1, $4",$this->Label);
@@ -2385,11 +2388,12 @@ class SpecProcNlpSalix
 			$Loc = $WordsArray[0][$w][1];
 			$Word1 = $WordsArray[0][$w][0];
 			$Word2 = $WordsArray[0][$w+1][0];
-
-
-
-			
 			$ScoreArray = $this->ScoreTwoWords($Word1,$Word2);//Get word stats score for these two words
+			if(max($ScoreArray) == 0)
+				{//Could be a locality
+				if($w>0 && $this->MaxKey($FieldScoreArray[$w-1]) == 'locality' && preg_match("([A-Z][a-z]{2,20})", $Word1) > 0)
+					$ScoreArray['locality'] = 100;
+				}
 			$FieldScoreArray[$w] = $ScoreArray;
 			foreach($Fields as $F)
 				{
