@@ -51,7 +51,7 @@ $collManager->reset();
 		<form name="harvestparams" id="harvestparams" action="list.php" method="get" onsubmit="return checkForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:10px;'>
-				<input type="image" name="display1" id="display1" class="hoverHand" src='../images/search.gif'
+				<input style="border: 1px solid gray;" type="image" name="display1" id="display1" class="hoverHand" src='../images/search.gif'
 					onmouseover="javascript: this.src = '../images/search_rollover.gif';"
 					onmouseout="javascript: this.src = '../images/search.gif';"
 					title="Click button to display the results of your search">
@@ -200,6 +200,12 @@ $collManager->reset();
 				<input type="text" id="eventdate1" size="32" name="eventdate1" style="width:100px;" value="<?php if(array_key_exists("eventdate1",$collArray)) echo $collArray["eventdate1"]; ?>" title="Single date or start date of range" /> -
 				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$collArray)) echo $collArray["eventdate2"]; ?>" title="End date of range; leave blank if searching for single date" />
 			</div>
+			<div style="float:right;">
+				<input style="border: 1px solid gray;" id="display2" name="display2" type="image" class="hoverHand" src='../images/search.gif'
+					onmouseover="javascript:this.src = '../images/search_rollover.gif';"
+					onmouseout="javascript:this.src = '../images/search.gif';"
+					title="Click button to display the results of your search">
+			</div>
 			<div>
 				<h1>Collection Object Criteria:</h1>
 			</div>
@@ -210,22 +216,16 @@ $collManager->reset();
 				Other CatalogNumbers:
 				<input type="text" id="othercatnum" size="32" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$collArray)) echo $collArray["othercatnum"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
+			
 			<!--
 			<div>
 				Type Status:
                 <input type="text" size="32" id="typestatus" name="typestatus" value="<?php if(array_key_exists("typestatus",$collArray)) echo $collArray["typestatus"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			 -->
-			<div><hr></div>
 			<div>
 				<!--  <a href="javascript:var popupReference=window.open('support/help.html','technical','toolbar=1,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=800,height=700,left=20,top=20');" class="bodylink">
 					Click Here</a> for more information on how this query page works... -->
-			</div>
-			<div>
-				<input id="display2" name="display2" type="image" class="hoverHand" src='../images/search.gif'
-					onmouseover="javascript:this.src = '../images/search_rollover.gif';"
-					onmouseout="javascript:this.src = '../images/search.gif';"
-					title="Click button to display the results of your search">
 			</div>
 			<input type="hidden" name="reset" value="1" />
 		</form>
