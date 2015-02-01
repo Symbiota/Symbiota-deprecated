@@ -145,22 +145,6 @@ h3{
 }
 
 /* Quick Search Plugin */
-#quicksearchcontainer{
-	float: right;
-	margin: 5px;
-	width: 200px;
-	padding: 5px;
-	border: #990000 solid 2px;
-	background-color: rgba(204,204,153,0.6);
-}
-
-#quicksearchtitle{
-	float: left;
-	font-size: 120%;
-	margin-bottom: 5px;
-	font-weight: bold;
-}
-
 #quicksearchbutton{
 	float: right;
 	margin-bottom: 5px;
