@@ -13,7 +13,7 @@ $cleanManager;
 $collName = '';
 
 if($collId){
-	$cleanManager = new TaxonomyCleanerOccurrences();
+	$cleanManager = new TaxonomyCleaner();
 	$cleanManager->setCollId($collId);
 	$collName = $cleanManager->getCollectionName();
 }

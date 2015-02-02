@@ -1,6 +1,8 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-  
+include_once($serverRoot.'/classes/Manager.php');
+include_once($serverRoot.'/classes/TaxonomyUtilities.php');
+
 class TaxonomyCleaner extends Manager{
 
 	private $taxAuthId = 1;
@@ -22,6 +24,7 @@ class TaxonomyCleaner extends Manager{
 		parent::__destruct();
 	}
 
+	//Taxonomic thesaurus verifications
 	public function getVerificationCounts(){
 		$retArr;
 		$sql = 'SELECT IFNULL(t.verificationStatus,0) as verificationStatus, COUNT(t.tid) AS cnt '.
@@ -32,7 +35,7 @@ class TaxonomyCleaner extends Manager{
 			while($r = $rs->fetch_object()){
 				$retArr[$r->verificationStatus] = $r->cnt;
 			}
-			$rs->close();
+			$rs->free();
 		}
 		ksort($retArr);
 		return $retArr;
@@ -58,7 +61,7 @@ class TaxonomyCleaner extends Manager{
 					$this->logOrEcho('Taxon not found', 1);
 				}
 			}
-			$rs->close();
+			$rs->free();
 		}
 		else{
 			$this->logOrEcho('ERROR: unable query accepted taxa',1);
