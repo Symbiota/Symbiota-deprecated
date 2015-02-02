@@ -415,6 +415,9 @@ class OccurrenceManager{
 		}
 		if(array_key_exists('othercatnum',$this->searchTermsArr)){
 			$otherCatStr = $this->searchTermsArr['othercatnum'];
+			
+			/*
+			 * Restrict search to a single term until field is fully indexed 
 			$otherCatArr = explode(',',str_replace(';',',',$otherCatStr));
 			$betweenFrag = array();
 			$inFrag = array();
@@ -447,6 +450,8 @@ class OccurrenceManager{
 				$otherCatWhere .= 'OR (o.otherCatalogNumbers IN("'.implode('","',$inFrag).'")) ';
 			}
 			$sqlWhere .= 'AND ('.substr($otherCatWhere,3).') ';
+			*/
+			$sqlWhere .= 'AND (o.otherCatalogNumbers IN("'.$otherCatStr.'")) ';
 			$this->localSearchArr[] = $this->searchTermsArr['othercatnum'];
 		}
 		if(array_key_exists("typestatus",$this->searchTermsArr)){
@@ -1107,7 +1112,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("local",$_REQUEST)){
-			$local = $this->conn->real_escape_string(trim($_REQUEST["local"]));
+			$local = $this->cleanInStr($_REQUEST["local"]);
 			if($local){
 				$str = str_replace(",",";",$local);
 				$searchArr[] = "local:".$str;
@@ -1119,7 +1124,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("elevlow",$_REQUEST)){
-			$elevlow = $this->conn->real_escape_string(trim($_REQUEST["elevlow"]));
+			$elevlow = $this->cleanInStr($_REQUEST["elevlow"]);
 			if($elevlow){
 				$str = str_replace(",",";",$elevlow);
 				$searchArr[] = "elevlow:".$str;
@@ -1131,7 +1136,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("elevhigh",$_REQUEST)){
-			$elevhigh = $this->conn->real_escape_string(trim($_REQUEST["elevhigh"]));
+			$elevhigh = $this->cleanInStr($_REQUEST["elevhigh"]);
 			if($elevhigh){
 				$str = str_replace(",",";",$elevhigh);
 				$searchArr[] = "elevhigh:".$str;
@@ -1143,7 +1148,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("collector",$_REQUEST)){
-			$collector = $this->conn->real_escape_string(trim($_REQUEST["collector"]));
+			$collector = $this->cleanInStr($_REQUEST["collector"]);
 			if($collector){
 				$str = str_replace(",",";",$collector);
 				$searchArr[] = "collector:".$str;
@@ -1155,7 +1160,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("collnum",$_REQUEST)){
-			$collNum = $this->conn->real_escape_string(trim($_REQUEST["collnum"]));
+			$collNum = $this->cleanInStr($_REQUEST["collnum"]);
 			if($collNum){
 				$str = str_replace(",",";",$collNum);
 				$searchArr[] = "collnum:".$str;
@@ -1167,11 +1172,11 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("eventdate1",$_REQUEST)){
-			if($eventDate = $this->conn->real_escape_string(trim($_REQUEST["eventdate1"]))){
+			if($eventDate = $this->cleanInStr($_REQUEST["eventdate1"])){
 				$searchArr[] = "eventdate1:".$eventDate;
 				$this->searchTermsArr["eventdate1"] = $eventDate;
 				if(array_key_exists("eventdate2",$_REQUEST)){
-					if($eventDate2 = $this->conn->real_escape_string(trim($_REQUEST["eventdate2"]))){
+					if($eventDate2 = $this->cleanInStr($_REQUEST["eventdate2"])){
 						if($eventDate2 != $eventDate){
 							$searchArr[] = "eventdate2:".$eventDate2;
 							$this->searchTermsArr["eventdate2"] = $eventDate2;
@@ -1188,7 +1193,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("catnum",$_REQUEST)){
-			$catNum = $this->conn->real_escape_string(trim($_REQUEST["catnum"]));
+			$catNum = $this->cleanInStr($_REQUEST["catnum"]);
 			if($catNum){
 				$str = str_replace(",",";",$catNum);
 				$searchArr[] = "catnum:".$str;
@@ -1200,11 +1205,11 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("othercatnum",$_REQUEST)){
-			$othercatnum = $this->conn->real_escape_string(trim($_REQUEST["othercatnum"]));
+			$othercatnum = $this->cleanInStr($_REQUEST["othercatnum"]);
 			if($othercatnum){
-				$str = str_replace(",",";",$othercatnum);
-				$searchArr[] = "othercatnum:".$str;
-				$this->searchTermsArr["othercatnum"] = $str;
+				//$str = str_replace(",",";",$othercatnum);
+				$searchArr[] = "othercatnum:".$othercatnum;
+				$this->searchTermsArr["othercatnum"] = $othercatnum;
 			}
 			else{
 				unset($this->searchTermsArr["othercatnum"]);
@@ -1212,7 +1217,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("typestatus",$_REQUEST)){
-			$typestatus = $this->conn->real_escape_string(trim($_REQUEST["typestatus"]));
+			$typestatus = $this->cleanInStr($_REQUEST["typestatus"]);
 			if($typestatus){
 				$str = str_replace(",",";",$typestatus);
 				$searchArr[] = "typestatus:".$str;
