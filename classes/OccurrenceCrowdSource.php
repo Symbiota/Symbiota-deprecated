@@ -89,7 +89,8 @@ class OccurrenceCrowdSource {
 			
 			//Get record count for those available for adding to queue
 			$sql = 'SELECT count(o.occid) as cnt '.
-				'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
 				'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL ';
 			$toAddCnt = 0;
 			$rs = $this->conn->query($sql);
@@ -221,8 +222,9 @@ class OccurrenceCrowdSource {
 		if(!$this->omcsid) return 'ERROR adding to queue, omcsid is null';
 		if(!$this->collid) return 'ERROR adding to queue, collid is null';
 		$con = MySQLiConnectionFactory::getCon("write");
-		$sqlFrag = 'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid ';
-		$sqlFrag .= 'WHERE o.collid = '.$this->collid.' AND q.occid IS NULL AND o.processingstatus = "unprocessed" ';
+		$sqlFrag = 'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+			'LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
+			'WHERE o.collid = '.$this->collid.' AND q.occid IS NULL AND o.processingstatus = "unprocessed" ';
 		if($family){
 			$sqlFrag .= 'AND (o.family = "'.$this->cleanInStr($family).'") '; 
 		}
@@ -236,7 +238,7 @@ class OccurrenceCrowdSource {
 			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($stateProvince).'") '; 
 		}
 		//Get count
-		$sqlCnt = 'SELECT COUNT(o.occid) AS cnt '.$sqlFrag;
+		$sqlCnt = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.$sqlFrag;
 		$rs = $con->query($sqlCnt);
 		if($r = $rs->fetch_object()){
 			$statusStr = $r->cnt;
@@ -248,7 +250,7 @@ class OccurrenceCrowdSource {
 			$sqlFrag .= 'LIMIT '.$limit;
 		}
 		$sql = 'INSERT INTO omcrowdsourcequeue(occid, omcsid) '.
-			'SELECT o.occid, '.$omcsid.' AS csid '.$sqlFrag;
+			'SELECT DISTINCT o.occid, '.$omcsid.' AS csid '.$sqlFrag;
 		if(!$con->query($sql)){
 			$statusStr = 'ERROR adding to queue: '.$con->error;
 			$statusStr .= '; SQL: '.$sql;
@@ -276,7 +278,8 @@ class OccurrenceCrowdSource {
 		$country = array();
 		$state = array();
 		$sql = 'SELECT DISTINCT o.country, o.stateprovince '.
-			'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
+			'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+			'LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
 			'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -291,7 +294,8 @@ class OccurrenceCrowdSource {
 		$family = array();
 		$sciname = array();
 		$sql = 'SELECT DISTINCT o.family, o.sciname, t.unitname1 '.
-			'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
+			'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+			'LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
 			'LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
 			'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL ';
 		$rs = $this->conn->query($sql);

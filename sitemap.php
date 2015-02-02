@@ -251,7 +251,7 @@ $smManager = new SiteMapManager();
 								<?php if($submitAction == 'taxanoimages') echo '<a name="taxanoimages"><a/>'; ?>
 								<b>Taxa without images:</b> 
 								<form name="taxanoimg" action="sitemap.php#taxanoimages" method="post" style="display:inline;"> 
-									<select name="clid" onchange="submitTaxaNoImgForm(this.form);">
+									<select name="clid" style="width:450px;" onchange="submitTaxaNoImgForm(this.form);">
 										<option value="">Select a Checklist</option>
 										<option value="">-------------------------------</option>
 										<?php 
@@ -281,7 +281,7 @@ $smManager = new SiteMapManager();
 								<?php if($submitAction == 'taxanofieldimages') echo '<a name="taxanofieldimages"><a/>'; ?>
 								<b>Taxa without field images:</b> 
 								<form name="taxanofieldimg" action="sitemap.php#taxanofieldimages" method="post" style="display:inline;"> 
-									<select name="clid" onchange="submitTaxaNoImgForm(this.form);">
+									<select name="clid" style="width:450px;" onchange="submitTaxaNoImgForm(this.form);">
 										<option value="">Select a Checklist</option>
 										<option value="">--------------------------------</option>
 										<?php 

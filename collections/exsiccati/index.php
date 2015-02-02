@@ -473,7 +473,7 @@ if($isEditor && $formSubmit){
 								<?php 
 								echo '<div><a href="index.php?omenid='.$k.'">';
 								echo '#'.$numArr['number'].' - '.($numArr['sciname']?'<i>'.$numArr['sciname'].'</i>':'').
-								', '.($numArr['collector']?$numArr['collector']:'<collector undefined>'); 
+								', '.($numArr['collector']?$numArr['collector']:'[collector undefined]'); 
 								echo '</a></div>';
 								if($numArr['notes']) echo '<div style="margin-left:15px;">'.$numArr['notes'].'</div>';
 								?>
