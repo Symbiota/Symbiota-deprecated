@@ -355,7 +355,7 @@ $duManager->loadFieldMap();
 						?>
 					</div>
  					<div style="margin:25px;font-weight:bold;"> 
-						<a href="uploadviewer.php?collid=<?php echo $collId;?>" target="_blank">Click to review specimen records</a>  
+						<a href="uploadviewer.php?collid=<?php echo $collId;?>" target="_blank">Click to review specimen records</a>
 					</div>
 					<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
 	 					<input type="hidden" name="collid" value="<?php echo $collId;?>" /> 
