@@ -26,7 +26,7 @@ class SpecProcNlpSalix
 			//The return array
 	private $Assigned = array();
 			//Indicates to what line a field has been assigned.
-	private $PregMonths ="(\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|deciembre)\b\.?)";
+	private $PregMonths ="(\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|deciembre|janvier|febrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre)\b\.?)";
 	private $LabelLines=array();
 	private $PregStart = array();
 			//An array of regular expressions indicating the start words for many fields.
@@ -1336,7 +1336,7 @@ class SpecProcNlpSalix
 		
 		foreach($RankArray as $L=>$Value)
 			{
-			//echo "Check $L: {$this->LabelLines[$L]}<br>";
+			//echo "Check ($Field): $L: {$this->LabelLines[$L]}<br>";
 			if($Field=='identifiedBy' && $Value < 90)
 				return; //Currently can't find identifiedBy unless there is a start word.  Need to find alternative clues.
 			if($Value < 2)
@@ -1545,7 +1545,9 @@ class SpecProcNlpSalix
 				$RankArray[$L] += 10; //Decrease if start word for another field
 				}
 			if($this->SingleWordStats($this->LabelLines[$L],'locality') > 100)
+				{
 				$RankArray[$L] -= 10;
+				}
 			if($Field == 'associatedCollectors' && $this->Assigned['recordedBy'] > $L)
 				$RankArray[$L] -= 110; //Associated Collectors should always follow main collector
 			
@@ -1558,7 +1560,10 @@ class SpecProcNlpSalix
 				}
 			$Found = preg_match("(\b(([A-Z][a-z]{2,20} )|([A-Z][\.] ))([A-Z][\.] )?([A-Z][a-z]{2,20}\b))",$this->LabelLines[$L]);
 			if($Found === 1) //Looks like a name
+				{
 				$RankArray[$L] += 10;
+				//echo "{$RankArray[$L]}: Looks like name:  {$this->LabelLines[$L]}<br>";
+				}
 			//else
 			{
 				if($Field == "recordedBy" && preg_match("((\bcollected).+(\bby\b)\s+([A-Za-z .]{2,25}))i",$this->LabelLines[$L]) > 0)
@@ -1568,8 +1573,8 @@ class SpecProcNlpSalix
 					$RankArray[$L] -= 10;
 					//echo "$L Reducing for collected in<br>";
 					}
-				else
-					$RankArray[$L] -= 10;
+				//else
+				//	$RankArray[$L] -= 10;
 			}
 			$RankArray[$L] += 3*preg_match("( [0-9]{3,10} ?)",$this->LabelLines[$L]); //Add a little for a number -- could be date or collection number.
 			$RankArray[$L] += 10*preg_match("(collected)i",$this->LabelLines[$L]); //The word "collected" without "by" isn't sure, but it helps
@@ -1610,7 +1615,7 @@ class SpecProcNlpSalix
 		//$this->printr($RankArray,"Date Rank");
 		foreach($RankArray as $L => $Value)
 			{
-			//echo "$L: {$this->LabelLines[$L]}<br>";
+			//echo "$Field, $L: {$this->LabelLines[$L]}<br>";
 			if($Value < 0)
 				break;
 			if($this->DateFromOneLine($Field,$L))
@@ -1632,6 +1637,7 @@ class SpecProcNlpSalix
 	//**********************************************
 	private function RankForDate($EventField, $Field)
 		{ //Rank lines for $EventField date
+		$BadFields = array('minimumElevationInMeters','family','sciname');
 		$RankArray = array();
 		$RankArray = array_fill(0,count($this->LabelLines),0);
 		if($this->Assigned[$EventField] != '-1')
@@ -1647,6 +1653,14 @@ class SpecProcNlpSalix
 		for($L=0;$L<count($this->LabelArray);$L++)
 			{//Various characteristics increase or decrease probability
 			$TempString = $this->LabelLines[$L];
+			foreach($BadFields as $F)
+				{
+				if($this->LineStart[$L] == $F)
+					{
+					//echo "Badfield $F in {$this->LabelLines[$L]}<br>";
+					$RankArray[$L] -= 100;
+					}
+				}
 			if(preg_match("(\bdate\b)i",$TempString) > 0)	
 				{
 				$RankArray[$L] += 10;	
@@ -1709,10 +1723,12 @@ class SpecProcNlpSalix
 	//**********************************************
 	private function DateFromOneLine($Field, $L,$Partial=false)
 		{//Assumes standard format, d/m/y or m,d,y
+		$RomanMonths = array("I"=>"Jan","II"=>"Feb","III"=>"Mar","IV"=>"Apr","V"=>"May","VI"=>"Jun","VII"=>"Jul","VIII"=>"Aug","IX"=>"Sep","X"=>"Oct","XI"=>"Nov","XII"=>"Dec");
 		$match=array();
 		$RealVDate = "";
 		$VDate = "";
 		$TempString = ($this->LabelLines[$L]);
+		//echo "Getting date from {$this->LabelLines[$L]}<br>";
 		if($Partial)
 			$Preg = "(\b{$this->PregMonths}\s*(\b[0-9]{1,4}\b))i";
 		else
@@ -1749,7 +1765,6 @@ class SpecProcNlpSalix
 			$Found = preg_match($Preg, $TempString,$match);
 			if($Found >0)
 				{
-				$RomanMonths = array("I"=>"Jan","II"=>"Feb","III"=>"Mar","IV"=>"Apr","V"=>"May","VI"=>"Jun","VII"=>"Jul","VIII"=>"Aug","IX"=>"Sep","X"=>"Oct","XI"=>"Nov","XII"=>"Dec");
 				$Month = $RomanMonths[strtoupper($match[2])];
 				$VDate = trim($match[1]," .-")."-".$Month."-".trim($match[3]," .-");
 				$RealVDate = $match[0];
@@ -1759,22 +1774,30 @@ class SpecProcNlpSalix
 			{
 			$Preg = "(\b(19[0-9]{2,2}|20[01][0-9])\b)";
 			$Found = preg_match($Preg, $TempString,$match);
-			$VDate = $match[0];
-			$RealVDate = $VDate;
+			if($Found !== 0)
+				{
+				$VDate = $match[0];
+				$RealVDate = $VDate;
+				}
 			
 			}
 		if($Found!== 0)
 			{
+			$FrenchMonths = array("janvier","febrier","mars","avril","mai","juin","juillet","aout","septembre","octobre","novembre","decembre");
+			$VDate = str_replace($FrenchMonths,$RomanMonths,$VDate);//Converts french dates to English (Using the same Roman Numeral conversion array)
 			$OU = new OccurrenceUtilities;
-			//echo "VDate = $VDate<br>";
-			$this->AddToResults($Field, $OU->formatDate($VDate),$L);
-			if($RealVDate != "")
-				$VDate = $RealVDate;
-			$this->LabelLines[$L] = str_replace($VDate,"",$this->LabelLines[$L]);
-			if($Field == "eventDate")
-				$this->AddToResults("verbatimEventDate",$VDate,$L);
-			$this->RemoveStartWords($L,$Field);
-			return true;
+			$FormattedDate = $OU->formatDate($VDate);
+			if($FormattedDate != "")
+				{
+				$this->AddToResults($Field, $FormattedDate,$L);
+				if($RealVDate != "")
+					$VDate = $RealVDate;
+				$this->LabelLines[$L] = str_replace($VDate,"",$this->LabelLines[$L]);
+				if($Field == "eventDate")
+					$this->AddToResults("verbatimEventDate",$VDate,$L);
+				$this->RemoveStartWords($L,$Field);
+				return true;
+				}
 			}
 		return;
 		}
@@ -1791,8 +1814,8 @@ class SpecProcNlpSalix
 		//Check for start word
 		for($L1=0;$L1<count($this->LabelLines);$L1++)
 			{
-			//echo "Checking {$this->LabelLines[$L1]}<br>";
-			if($this->LineStart[$L1] =='recordNumber')
+			//echo "Checking $L1: {$this->LabelLines[$L1]}<br>";
+			if($this->LineStart[$L1] =='recordNumber' || $this->CheckStartWords($L1, 'recordNumber'))
 				{
 				$this->RemoveStartWords($L1,'recordNumber');
 				$L = $L1;
@@ -1871,7 +1894,7 @@ class SpecProcNlpSalix
 			$this->PlantsOf($Name2);
 			if($this->Results['country'] == "")
 				$this->PlantsOf($Name1);
-			if($this->Results['country'] == "" && count($match > 4))
+			if($this->Results['country'] == "" && count($match) > 4)
 				$this->PlantsOf(trim($match[4]));
 			}
 		if($this->Results['country'] != "") //Found it.
@@ -2928,10 +2951,10 @@ class SpecProcNlpSalix
 		$this->PregStart['family'] = "(^(family)\b)i";
 		$this->PregStart['recordedBy'] = "(^(coll(.|ected)? by|collectors|collector|coll|col|leg|by)\b)i";
 		$this->PregStart['eventDate'] = "(^(EventDate|Date)\b)i";
-		$this->PregStart['recordNumber'] = "(^(number)\b)i";
-		$this->PregStart['identifiedBy'] = "(^(det(.|ermined)? by|determined|det(.)? dupl|det|identified by|identified)\b)i";
+		$this->PregStart['recordNumber'] = "(^(number|no)\b)i";
+		$this->PregStart['identifiedBy'] = "(^(det(.|:|ermined)? by|determined|det(.)? dupl|det|identified by|identified)\b)i";
 		$this->PregStart['associatedCollectors'] = "(^(with|and|&)\b)i";
-		$this->PregStart['habitat'] = "(^(habitat)\b)i";
+		$this->PregStart['habitat'] = "(^(habitat|site)\b)i";
 		$this->PregStart['locality'] = "(^(locality|location|loc|collected off|collected near)\b)i";
 		$this->PregStart['substrate'] = "(^(substrate)\b)i";
 		$this->PregStart['country'] = "(^(country)\b)i";
@@ -2970,8 +2993,8 @@ class SpecProcNlpSalix
 			return false;
 		if($L >= count($this->LabelArray))
 			return false;
-		if(substr_count ($this->LabelLines[$L]," ") < 1)
-			return false;
+		//if(substr_count ($this->LabelLines[$L]," ") < 1)
+		//	return false;
 		$Found = preg_match($this->PregStart[$Field], $this->LabelLines[$L]);
 		if($Found === 1)
 			{
