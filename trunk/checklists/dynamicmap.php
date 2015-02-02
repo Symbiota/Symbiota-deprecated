@@ -111,58 +111,63 @@ elseif($coordRange > 40){
 			<?php 
 		}
 		?>
-	    <div>
-	    	Pan, zoom and click on map to capture coordinates, then submit coordinates to build a species list. 
-			<span style="cursor:pointer;color:blue;font-size:80%;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='inline'">
-				More Details
-			</span>
-			<span id="moreinfo" style="display:none;">
-				If a radius is defined, species lists are generated using data of specimens collected within the defined area. 
-				If a radius suplied, the area is sampled in concentric rings until the sample size is determined to best represent 
-				the local species diversity. 
-				In other words, poorly collected areas will have a larger radius sampled. Setting the taxon filter will limit the 
-				return to species found within that taxonomic group. 
-			</span>
-	    </div>
-		
-	    <div style="margin-top:5px;">
-			<form name="mapForm" action="dynamicchecklist.php" method="post" onsubmit="return checkForm();">
-				<div style="float:left;width:300px;">
-					<div>
-						<input type="submit" name="buildchecklistbutton" value="Build Checklist" disabled />
-						<input type="hidden" name="interface" value="<?php echo $interface; ?>" />
-						<input type="hidden" id="latbox" name="lat" value="" />
-						<input type="hidden" id="lngbox" name="lng" value="" />
+		<div id='innertext'>
+			<div>
+				Pan, zoom and click on map to capture coordinates, then submit coordinates to build a species list. 
+				<span id="moredetails" style="cursor:pointer;color:blue;font-size:80%;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='inline';document.getElementById('lessdetails').style.display='inline';">
+					More Details
+				</span>
+				<span id="moreinfo" style="display:none;">
+					If a radius is defined, species lists are generated using data of specimens collected within the defined area. 
+					If a radius suplied, the area is sampled in concentric rings until the sample size is determined to best represent 
+					the local species diversity. 
+					In other words, poorly collected areas will have a larger radius sampled. Setting the taxon filter will limit the 
+					return to species found within that taxonomic group. 
+				</span>
+				<span id="lessdetails" style="cursor:pointer;color:blue;font-size:80%;display:none;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='none';document.getElementById('moredetails').style.display='inline';">
+					Less Details
+				</span>
+			</div>
+			
+			<div style="margin-top:5px;">
+				<form name="mapForm" action="dynamicchecklist.php" method="post" onsubmit="return checkForm();">
+					<div style="float:left;width:300px;">
+						<div>
+							<input type="submit" name="buildchecklistbutton" value="Build Checklist" disabled />
+							<input type="hidden" name="interface" value="<?php echo $interface; ?>" />
+							<input type="hidden" id="latbox" name="lat" value="" />
+							<input type="hidden" id="lngbox" name="lng" value="" />
+						</div>
+						<div>
+							<b>Point (Lat, Long):</b> 
+							<span id="latlngspan"> &lt; Click on map &gt; </span>
+						</div>
 					</div>
-					<div>
-						<b>Point (Lat, Long):</b> 
-						<span id="latlngspan"> &lt; Click on map &gt; </span>
+					<div style="float:left;">
+						<div style="margin-right:35px;">
+							<select name="tid">
+								<option value="0">Taxon Filter (optional)</option>
+								<?php 
+								$taxaArr = $dynClManager->getFilterTaxa();
+								foreach($taxaArr as $k => $sciname){
+									echo "<option value='".$k."' ".($k==$tid?"SELECTED":"").">".$sciname."</option>";
+								}
+								?>
+							</select>
+						</div>
+						<div> 
+							<b>Radius:</b> 
+							<input name="radius" value="(optional)" type="text" style="width:140px;" onfocus="this.value = ''" /> 
+							<select name="radiusunits">
+								<option value="km">Kilometers</option>
+								<option value="mi">Miles</option>
+							</select>
+						</div>
 					</div>
-				</div>
-				<div style="float:left;">
-					<div style="margin-right:35px;">
-						<select name="tid">
-							<option value="0">Taxon Filter (optional)</option>
-							<?php 
-							$taxaArr = $dynClManager->getFilterTaxa();
-							foreach($taxaArr as $k => $sciname){
-								echo "<option value='".$k."' ".($k==$tid?"SELECTED":"").">".$sciname."</option>";
-							}
-							?>
-						</select>
-					</div>
-					<div> 
-						<b>Radius:</b> 
-						<input name="radius" value="(optional)" type="text" style="width:140px;" onfocus="this.value = ''" /> 
-						<select name="radiusunits">
-							<option value="km">Kilometers</option>
-							<option value="mi">Miles</option>
-						</select>
-					</div>
-				</div>
-			</form>
+				</form>
+			</div>
+			<div id='map_canvas' style='width:95%; height:650px; clear:both;'></div>
 		</div>
-	    <div id='map_canvas' style='width:95%; height:650px; clear:both;'></div>
 	<?php
 	 	include_once($serverRoot.'/footer.php');
 	?>
