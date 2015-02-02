@@ -9,6 +9,7 @@ class SpecProcessorOcr{
 	private $conn;
 	private $tempPath;
 	private $imgUrlLocal;
+	private $deleteAllOcrFiles = 0;
 
 	private $cropX = 0;
 	private $cropY = 0;
@@ -226,63 +227,108 @@ class SpecProcessorOcr{
 	public function harvestOcrText($postArr){
 		$status = true;
 		set_time_limit(3600);
-		$sourcePath = $postArr['sourcepath'];
-		$this->specKeyPattern = $postArr['speckeypattern'];
 		$this->ocrSource = $postArr['ocrsource'];
+		$this->specKeyPattern = $postArr['speckeypattern'];
 		if(!$this->specKeyPattern){
-			$this->errorStr = 'ERROR: Specimen catalog number pattern missing';
-			$this->logMsg($this->errorStr,1);
+			$this->errorStr = 'ERROR loading OCR files: Specimen catalog number pattern missing';
+			$this->logMsg($this->errorStr);
 			return false;
 		}
-		elseif(!$sourcePath){
-			$this->errorStr = 'ERROR: OCR source path is missing';
-			$this->logMsg($this->errorStr,1);
+		$sourcePath = '';
+		if(array_key_exists('sourcepath',$postArr) && $postArr['sourcepath']){
+			$sourcePath = $postArr['sourcepath'];
+		}
+		else{
+			$this->deleteAllOcrFiles = 1;
+			$sourcePath = $this->uploadOcrFile();
+		}
+		if(!$sourcePath){
+			$this->errorStr = 'ERROR loading OCR files: OCR source path is missing';
+			$this->logMsg($this->errorStr);
 			return false;
 		}
 		if(substr($sourcePath,0,4) == 'http'){
 			//http protocol, thus test for a valid page
 			$headerArr = get_headers($sourcePath);
 			if(!$headerArr){
-				$this->errorStr = 'ERROR: sourcePathBase returned bad headers ('.$sourcePath.')';
-				$this->logMsg($this->errorStr,1);
+				$this->errorStr = 'ERROR loading OCR files: sourcePath returned bad headers ('.$sourcePath.')';
+				$this->logMsg($this->errorStr);
 				return false;
 			} 
 			preg_match('/http.+\s{1}(\d{3})\s{1}/i',$headerArr[0],$codeArr);
 			if($codeArr[1] == '403'){ 
-				$this->errorStr = 'ERROR: sourcePathBase returned Forbidden ('.$sourcePath.')';
-				$this->logMsg($this->errorStr,1);
+				$this->errorStr = 'ERROR loading OCR files: sourcePath returned Forbidden ('.$sourcePath.')';
+				$this->logMsg($this->errorStr);
 				return false;
 			}
 			if($codeArr[1] == '404'){ 
-				$this->errorStr = 'ERROR: sourcePathBase returned a page Not Found error ('.$sourcePath.')';
-				$this->logMsg($this->errorStr,1);
+				$this->errorStr = 'ERROR loading OCR files: sourcePath returned a page Not Found error ('.$sourcePath.')';
+				$this->logMsg($this->errorStr);
 				return false;
 			}
 			if($codeArr[1] != '200'){ 
-				$this->errorStr = 'ERROR: sourcePathBase returned error code '.$codeArr[1].' ('.$sourcePath.')';
-				$this->logMsg($this->errorStr,1);
+				$this->errorStr = 'ERROR loading OCR files: sourcePath returned error code '.$codeArr[1].' ('.$sourcePath.')';
+				$this->logMsg($this->errorStr);
 				return false;
 			}
 		}
 		elseif(!file_exists($sourcePath)){
-			$this->errorStr = 'ERROR: sourcePathBase does not exist ('.$sourcePath.')';
-			$this->logMsg($this->errorStr,1);
+			$this->errorStr = 'ERROR loading OCR files: sourcePath does not exist ('.$sourcePath.')';
+			$this->logMsg($this->errorStr);
 			return false;
 		}
 		//Initiate processing
-		$this->logMsg('Starting processing: '.$sourcePath);
 		if(substr($sourcePath,-1) != '/') $sourcePath .= '/';
 		if(substr($sourcePath,0,4) == 'http'){
-			//http protocol, thus test for a valid page
 			$this->processOcrHtml($sourcePath);
 		}
 		else{
 			$this->processOcrFolder($sourcePath);
 		}
-		$this->logMsg('Done uploading '.$sourcePath.' ('.date('Y-m-d h:i:s A').')');
+		$this->logMsg('Done loading OCR files ');
 		
 		
 		return $status;
+	}
+	
+	private function uploadOcrFile(){
+		$retPath = '';
+		if(!array_key_exists('ocrfile',$_FILES)){
+			$this->errorStr = 'ERROR loading OCR file: OCR file missing';
+			$this->logMsg($this->errorStr);
+			return ;
+		}
+		if(!$this->tempPath){
+			$this->errorStr = 'ERROR loading OCR file: temp target path empty';
+			$this->logMsg($this->errorStr);
+			return ;
+		}
+		$zipPath = $this->tempPath.'ocrupload.zip';
+		if(file_exists($zipPath)) unlink($zipPath);
+		if(move_uploaded_file($_FILES['ocrfile']['tmp_name'], $zipPath)){
+			$zip = new ZipArchive;
+			$res = $zip->open($zipPath);
+			if($res === TRUE) {
+				$extractPath = $this->tempPath.'ocrtext_'.time().'/';
+				mkdir($extractPath);
+				if($zip->extractTo($extractPath)){
+					$retPath = $extractPath;
+				}
+				$zip->close();
+				unlink($zipPath);
+			}
+			else{
+				$this->errorStr = 'ERROR unpacking OCR file: '.$res;
+				$this->logMsg($this->errorStr);
+				return ;
+			}
+		}
+		else{
+			$this->errorStr = 'ERROR loading OCR file: input file lacks zip extension';
+			$this->logMsg($this->errorStr);
+			return ;
+		}
+		return $retPath;
 	}
 	
 	private function processOcrHtml($sourcePath){
@@ -295,12 +341,12 @@ class SpecProcessorOcr{
 			if(!in_array($fileName,$skipAnchors)){
 				$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')+1));
 				if($fileExt){
-					$this->logMsg("Processing OCR File (".date('Y-m-d h:i:s A')."): ".$fileName);
+					$this->logMsg("Processing OCR File: ".$fileName);
 					if($fileExt == "txt"){
 						$this->processOcrFile($fileName,$sourcePath);
 					}
 					else{
-						$this->logMsg("ERROR: File skipped, not a supported OCR file with .txt extension: ".$sourcePath.$fileName,1);
+						$this->logMsg("ERROR: File skipped, not a supported OCR file with .txt extension: ".$sourcePath.$fileName);
 					}
 				}
 				elseif(stripos($fileName,'Parent Dir') === false){
@@ -318,13 +364,13 @@ class SpecProcessorOcr{
 			while($fileName = readdir($dirFH)){
 				if($fileName != "." && $fileName != ".." && $fileName != ".svn"){
 					if(is_file($sourcePath.$fileName)){
-						$this->logMsg("Processing OCR File (".date('Y-m-d h:i:s A')."): ".$fileName);
+						$this->logMsg("Processing OCR File: ".$fileName);
 						$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
 						if($fileExt == ".txt"){
 							$this->processOcrFile($fileName,$sourcePath);
 						}
 						else{
-							$this->logMsg("ERROR: File skipped, not a supported OCR text file (.txt): ".$fileName,1);
+							$this->logMsg("ERROR: File skipped, not a supported OCR text file (.txt): ".$fileName);
 						}
 					}
 					elseif(is_dir($sourcePath.$fileName)){
@@ -337,6 +383,7 @@ class SpecProcessorOcr{
 		else{
 			$this->logMsg("ERROR: unable to access source directory: ".$sourcePath,1);
 		}
+		if($this->deleteAllOcrFiles) unlink($sourcePath); 
 	}
 
 	private function processOcrFile($fileName,$sourcePath){
@@ -345,6 +392,7 @@ class SpecProcessorOcr{
 		if($rawTextFH = fopen($sourcePath.$fileName, 'r')){
 			$rawStr = fread($rawTextFH, filesize($sourcePath.$fileName));
 			fclose($rawTextFH);
+			if($this->deleteAllOcrFiles) unlink($sourcePath.$fileName); 
 			//Grab specimen primary key (e.g. catalog number 
 			$catNumber = ''; 
 			if(preg_match($this->specKeyPattern,$fileName,$matchArr)){
@@ -373,7 +421,7 @@ class SpecProcessorOcr{
 					}
 					//Process and database OCR string
 					if($this->databaseRawStr($imgId,$rawStr,'',$this->ocrSource.': '.date('Y-m-d'))){
-						unlink($sourcePath.$fileName);
+						if(file_exists($sourcePath.$fileName)) unlink($sourcePath.$fileName);
 						$ocrCnt++;
 					}
 				}

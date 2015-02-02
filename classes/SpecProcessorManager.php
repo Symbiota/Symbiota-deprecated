@@ -112,8 +112,8 @@ class SpecProcessorManager {
 		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
 			'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 			'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
-			$this->cleanInStr($addArr['speckeypattern']).'","'.
-			$this->cleanInStr($addArr['sourcepath']).'",'.
+			$this->cleanInStr($addArr['speckeypattern']).'",'.
+			($addArr['sourcepath']?'"'.$this->cleanInStr($addArr['sourcepath']).'"':'NULL').','.
 			(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
 			(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
 			(isset($addArr['webpixwidth'])&&$addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
@@ -135,42 +135,45 @@ class SpecProcessorManager {
 	}
 
 	public function setProjVariables($crit){
-		$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
-			'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
-			'FROM specprocessorprojects p ';
+		$sqlWhere = '';
 		if(is_numeric($crit)){
-			$sql .= 'WHERE (p.spprid = '.$crit.')';
+			$sqlWhere .= 'WHERE (p.spprid = '.$crit.')';
 		}
-		elseif($crit == 'OCR Harvest'){
-			$sql .= 'WHERE (p.title = "OCR Harvest")';
+		elseif($crit == 'OCR Harvest' && $this->collid){
+			$sqlWhere .= 'WHERE (collid = '.$this->collid.') AND (p.title = "OCR Harvest")';
 		}
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		if($row = $rs->fetch_object()){
-			if(!$this->collid) $this->setCollId($row->collid); 
-			$this->title = $row->title;
-			$this->specKeyPattern = $row->speckeypattern;
-			$this->coordX1 = $row->coordx1;
-			$this->coordX2 = $row->coordx2;
-			$this->coordY1 = $row->coordy1;
-			$this->coordY2 = $row->coordy2;
-			$this->sourcePath = $row->sourcepath;
-			$this->targetPath = $row->targetpath;
-			$this->imgUrlBase = $row->imgurl;
-			if($row->webpixwidth) $this->webPixWidth = $row->webpixwidth;
-			if($row->tnpixwidth) $this->tnPixWidth = $row->tnpixwidth;
-			if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
-			if($row->jpgcompression) $this->jpgQuality = $row->jpgcompression;
-			$this->tnImg = $row->createtnimg;
-			$this->lgImg = $row->createlgimg;
-		}
-		$rs->close();
-		
-		//if(!$this->targetPath) $this->targetPath = $GLOBALS['imageRootPath'];
-		//if(!$this->imgUrlBase) $this->imgUrlBase = $GLOBALS['imageRootUrl'];
-		if($this->sourcePath && substr($this->sourcePath,-1) != '/' && substr($this->sourcePath,-1) != '\\') $this->sourcePath .= '/'; 
-		if($this->targetPath && substr($this->targetPath,-1) != '/' && substr($this->targetPath,-1) != '\\') $this->targetPath .= '/'; 
-		if($this->imgUrlBase && substr($this->imgUrlBase,-1) != '/') $this->imgUrlBase .= '/'; 
+		if($sqlWhere){
+			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
+				'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
+				'FROM specprocessorprojects p '.$sqlWhere;
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			if($row = $rs->fetch_object()){
+				if(!$this->collid) $this->setCollId($row->collid); 
+				$this->title = $row->title;
+				$this->specKeyPattern = $row->speckeypattern;
+				$this->coordX1 = $row->coordx1;
+				$this->coordX2 = $row->coordx2;
+				$this->coordY1 = $row->coordy1;
+				$this->coordY2 = $row->coordy2;
+				$this->sourcePath = $row->sourcepath;
+				$this->targetPath = $row->targetpath;
+				$this->imgUrlBase = $row->imgurl;
+				if($row->webpixwidth) $this->webPixWidth = $row->webpixwidth;
+				if($row->tnpixwidth) $this->tnPixWidth = $row->tnpixwidth;
+				if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
+				if($row->jpgcompression) $this->jpgQuality = $row->jpgcompression;
+				$this->tnImg = $row->createtnimg;
+				$this->lgImg = $row->createlgimg;
+			}
+			$rs->free();
+			
+			//if(!$this->targetPath) $this->targetPath = $GLOBALS['imageRootPath'];
+			//if(!$this->imgUrlBase) $this->imgUrlBase = $GLOBALS['imageRootUrl'];
+			if($this->sourcePath && substr($this->sourcePath,-1) != '/' && substr($this->sourcePath,-1) != '\\') $this->sourcePath .= '/'; 
+			if($this->targetPath && substr($this->targetPath,-1) != '/' && substr($this->targetPath,-1) != '\\') $this->targetPath .= '/'; 
+			if($this->imgUrlBase && substr($this->imgUrlBase,-1) != '/') $this->imgUrlBase .= '/';
+		} 
 	}
 	
 	public function getProjects(){

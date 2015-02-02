@@ -13,7 +13,7 @@ $procManager->setProjVariables('OCR Harvest');
 ?>
 <script>
 	$(function() {
-		var dialogArr = new Array("speckeypattern","sourcepath","ocrsource");
+		var dialogArr = new Array("speckeypattern","sourcepath","ocrfile","ocrsource");
 		var dialogStr = "";
 		for(i=0;i<dialogArr.length;i++){
 			dialogStr = dialogArr[i]+"info";
@@ -51,9 +51,18 @@ $procManager->setProjVariables('OCR Harvest');
 			alert("Please enter a pattern matching string for extracting the catalog number");
 			return false;
 		}
-		if(f.sourcepath.value == ""){
-			alert("Please enter the path to the OCR source files");
+
+		if(f.sourcepath.value == "" && f.ocrfile.value == ""){
+			alert("Please select an OCR source");
 			return false;
+		}
+		var fileName = f.ocrfile.value;
+		if(fileName != ""){
+			var ext = fileName.split('.').pop();
+			if(ext != 'zip' && ext != 'ZIP'){
+				alert("Upload file must be a ZIP file with a .zip extension");
+				return false;
+			}
 		}
 		return true;
 	}
@@ -142,28 +151,27 @@ $procManager->setProjVariables('OCR Harvest');
 
 	<fieldset style="padding:20px;margin-top:20px;">
 		<legend><b>OCR Batch Processing</b></legend>
-		<form name="ocruploadform" action="processor.php" method="post" onsubmit="return validateOcrUploadForm(this);">
+		<form name="ocruploadform" action="processor.php" method="post" enctype="multipart/form-data" onsubmit="return validateOcrUploadForm(this);">
 			<div style="float:right;margin:10px;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Close Editor">
 				<img src="../../images/edit.png" style="border:0px" />
 			</div>
 			<div style="margin:15px">
-				This inteface will process and load into the database OCR text files. 
+				This inteface will process and load OCR text files. 
 				ABBYY FineReader (Corporate Edition) includes the ABBYY HotFolder tool that can batch process multiple specimen label images
-				to produce separate text file containing label text. 
-				However, this tool will upload OCR text obtained by other processes.   
-				OCR text is linked directly to the specimen image.  
+				to produce separate text files (.txt) containing label text. 
+				This tool will also upload OCR text obtained by other processes.   
 			</div>
 			<div style="margin:15px">
 				<b>Requirements:</b>
 				<ul>
-					<li>OCR files must be in a text format with a .txt extension. Use the &quot;Create a separate document for each file&quot; and &quot;Save as: Text (*.txt)&quot; HotFolder settings.</li>
+					<li>OCR files must be in a text format with a .txt extension. When using ABBYY Hotfolders, use the &quot;Create a separate document for each file&quot; and &quot;Save as: Text (*.txt)&quot; settings.</li>
 					<li>Files must be named using the Catalog Number</li>
+					<li>Since OCR text is linked directly to image, source image must have been previously loaded into database</li>
 					<li>If there are more than one image linked to a specimen, the full file name will be used to identify which image to link the OCR</li>
-					<li>Source image must have been previously loaded into database</li>
 				</ul> 
 			</div>
 			<div style="margin:15px">
-				<table>
+				<table style="width:100%;">
 					<tr>
 						<td>
 							<b>Regular Expression:</b>
@@ -184,18 +192,31 @@ $procManager->setProjVariables('OCR Harvest');
 					</tr>
 					<tr>
 						<td>
-							<b>Path to OCR Text files:</b> 
+							<b>OCR Text Files:</b> 
 						</td>
-						<td> 
-							<input name="sourcepath" type="text" style="width:400px;" value="<?php echo $procManager->getSourcePath(); ?>" />
-							<a id="sourcepathinfo" href="#" onclick="return false" title="More Information">
-								<img src="../../images/info.png" style="width:15px;" />
-							</a>
-							<div id="sourcepathinfodialog">
-								File path or URL to folder containing the OCR text files.
-								If a URL (e.g. http://) is supplied, the web server needs to be configured to list 
-								all files within the directory, or the html output needs to list all images in anchor tags.
-								Scripts will attempt to crawl through all child directories.
+						<td>
+							<div style="float:right;"><a href="#" onclick="toggle('pathElem');return false;" title="toggle option to enter full path">full path option</a></div>
+							<div class="pathElem">
+								<input name="ocrfile" type="file" size="50" onchange="this.form.sourcepath.value = ''" />
+								<input name="MAX_FILE_SIZE" type="hidden" value="10000000" />
+								<a id="ocrfileinfo" href="#" onclick="return false" title="More Information">
+									<img src="../../images/info.png" style="width:15px;" />
+								</a>
+								<div id="ocrfileinfodialog">
+									Browse and select zip file that contains the multiple OCR text files.
+								</div>
+							</div>
+							<div class="pathElem" style="display:none;"> 
+								<input name="sourcepath" type="text" style="width:350px;" value="<?php echo $procManager->getSourcePath(); ?>" />
+								<a id="sourcepathinfo" href="#" onclick="return false" title="More Information">
+									<img src="../../images/info.png" style="width:15px;" />
+								</a>
+								<div id="sourcepathinfodialog">
+									File path or URL to folder containing the OCR text files.
+									If a URL (e.g. http://) is supplied, the web server needs to be configured to list 
+									all files within the directory, or the html output needs to list all images in anchor tags.
+									Scripts will attempt to crawl through all child directories.
+								</div>
 							</div>
 						</td>
 					</tr>
@@ -209,7 +230,7 @@ $procManager->setProjVariables('OCR Harvest');
 								<img src="../../images/info.png" style="width:15px;" />
 							</a>
 							<div id="ocrsourceinfodialog">
-								Short string describing OCR Source (e.g. ABBYY, Tesseract, etc)
+								Short string describing OCR Source (e.g. ABBYY, Tesseract, etc). This value is placed in source field with current date appended.
 							</div>
 						</td>
 					</tr>
@@ -220,8 +241,7 @@ $procManager->setProjVariables('OCR Harvest');
 							<input name="collid" type="hidden" value="<?php echo $collid; ?>" /> 
 							<input name="tabindex" type="hidden" value="3" />
 							<div style="margin:25px">
-								<input name="submitaction" type="submit" value="Save OCR Processing Profile" />
-								<input name="submitaction" type="submit" value="Initiate OCR Processing" />
+								<input name="submitaction" type="submit" value="Load OCR Files" />
 							</div>
 						</td>
 					</tr>
