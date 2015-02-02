@@ -24,10 +24,6 @@ $isEditor = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
 	$isEditor = true;
 
-	if($action == 'Save OCR Processing Profile'){
-		$specManager->addProject($_POST);
-		header('Location: index.php?collid='.$collid.'&tabindex='.$tabIndex);
-	}
 }
 
 $statusStr = "";
@@ -94,7 +90,8 @@ $statusStr = "";
 					$ocrManager->batchOcrUnprocessed($collid,$procStatus,$batchLimit,0);
 					echo '</ul>';
 				}
-				elseif($action == 'Initiate OCR Processing'){
+				elseif($action == 'Load OCR Files'){
+					$specManager->addProject($_POST);
 					$ocrManager = new SpecProcessorOcr();
 					$ocrManager->setVerbose(2);
 					echo '<ul>';
