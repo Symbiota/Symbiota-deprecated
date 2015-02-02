@@ -1,55 +1,123 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/Manager.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 include_once($serverRoot.'/classes/AgentManager.php');
+include_once($serverRoot.'/classes/TaxonomyUtilities.php');
 
-class OccurrenceCleaner {
+class OccurrenceCleaner extends Manager{
 
-	private $conn;
-	private $collId;
+	private $collid;
 	private $obsUid;
-	
+
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon("write");
+		parent::__construct(null,'write');
 	}
 
 	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
+		parent::__destruct();
 	}
 
-	public function setCollId($collId){
-		if(is_numeric($collId)){
-			$this->collId = $collId;
+	//Taxon name cleaning functions
+	public function getBadTaxaCount(){
+		$retCnt = 0;
+		if($this->collid){
+			$sql = 'SELECT COUNT(DISTINCT sciname) AS taxacnt '.
+				'FROM omoccurrences '.
+				'WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname != "") ';
+			//echo $sql;
+			if($rs = $this->conn->query($sql)){
+				if($row = $rs->fetch_object()){
+					$retCnt = $row->taxacnt;
+				}
+				$rs->free();
+			}
 		}
+		return $retCnt;
 	}
 
-	public function setObsuid($obsUid){
-		if(is_numeric($obsUid)){
-			$this->obsUid = $obsUid;
+	public function analyzeTaxa($startIndex = 0, $limit = 50){
+		$status = true;
+		$this->logOrEcho("Starting taxa check ");
+		$sql = 'SELECT DISTINCT sciname, family '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname != "") '.
+			'ORDER BY sciname '.
+			'LIMIT '.$startIndex.','.$limit;
+		if($rs = $this->conn->query($sql)){
+			//Check name through taxonomic resources
+			$taxUtil = new  TaxonomyUtilities();
+			$taxUtil->setVerboseMode(2);
+			$this->setVerboseMode(2);
+			$nameCnt = 0;
+			while($r = $rs->fetch_object()){
+				$this->logOrEcho('Resolving '.$r->sciname.($r->family?' ('.$r->family.')':'').'...');
+				$newTid = $taxUtil->addSciname($r->sciname, $r->family);
+				if(!$newTid){
+					//Check for near match using SoundEx
+					$this->logOrEcho('Checking close matches in thesaurus...',1);
+					$closeArr = $taxUtil->getSoundexMatch($r->sciname);
+					if(!$closeArr) $closeArr = $taxUtil->getCloseMatchEpithet($r->sciname);
+					if($closeArr){
+						$cnt = 0;
+						foreach($closeArr as $tid => $sciname){
+							$echoStr = '<i>'.$sciname.'</i> =&gt;<a href="#" onclick="remappTaxon(\''.$r->sciname.'\','.$tid.',\''.$sciname.'\')"> remap to this taxon</a>';
+							$this->logOrEcho($echoStr,2);
+							$cnt++;
+						}
+					}
+					else{
+						$this->logOrEcho('No close matches found',1);
+					}
+				}
+				$nameCnt++;
+			}
+			$rs->free();
 		}
+		$this->linkNewTaxa();
+
+		$this->logOrEcho("Done with taxa check ");
+		return $status;
 	}
 	
-	public function getCollMap(){
-		$returnArr = Array();
-		if($this->collId){
-			$sql = 'SELECT CONCAT_WS("-",c.institutioncode, c.collectioncode) AS code, c.collectionname, '.
-				'c.icon, c.colltype, c.managementtype '.
-				'FROM omcollections c '.
-				'WHERE (c.collid = '.$this->collId.') ';
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				$returnArr['code'] = $row->code;
-				$returnArr['collectionname'] = $row->collectionname;
-				$returnArr['icon'] = $row->icon;
-				$returnArr['colltype'] = $row->colltype;
-				$returnArr['managementtype'] = $row->managementtype;
-			}
-			$rs->close();
+	private function linkNewTaxa(){
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
+			'SET o.tidinterpreted = t.tid '.
+			'WHERE o.tidinterpreted IS NULL';
+		if(!$this->conn->query($sql)){
+			$this->logOrEcho('ERROR linking new data to occurrences: '.$this->conn->error);
 		}
-		return $returnArr;
 	}
 
+	public function remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname){
+		$status = false;
+		if(is_numeric($collid) && $oldSciname && is_numeric($tid) && $newSciname){
+			$oldSciname = $this->cleanInStr($oldSciname);
+			$newSciname = $this->cleanInStr($newSciname);
+			//Version edit in edits table 
+			$sql1 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
+				'SELECT occid, "sciname", "'.$newSciname.'", sciname, '.$GLOBALS['SYMB_UID'].', 1, 1 '.
+				'FROM omoccurrences WHERE collid = '.$collid.' AND sciname = "'.$oldSciname.'"'; 
+			if($this->conn->query($sql1)){
+				//Update occurrence table
+				$sql2 = 'UPDATE omoccurrences '.
+					'SET tidinterpreted = '.$tid.', sciname = "'.$newSciname.'" '.
+					'WHERE collid = '.$collid.' AND sciname = "'.$oldSciname.'"';
+				if($this->conn->query($sql2)){
+					$status = true;
+				}
+				else{
+					echo $sql2;
+				}
+			}
+			else{
+				echo $sql1;
+			}
+		}
+		return $status;
+	}
+
+	//Search and resolve duplicate specimen records 
 	public function getDuplicateCatalogNumber($start, $limit = 500){
 		//Search is not available for personal specimen management
 		$dupArr = array();
@@ -57,7 +125,7 @@ class OccurrenceCleaner {
 		$cnt = 0;
 		$sql1 = 'SELECT catalognumber '.
 			'FROM omoccurrences '.
-			'WHERE catalognumber IS NOT NULL AND collid = '.$this->collId;
+			'WHERE catalognumber IS NOT NULL AND collid = '.$this->collid;
 		//echo $sql1;
 		$rs = $this->conn->query($sql1);
 		while($r = $rs->fetch_object()){
@@ -82,7 +150,7 @@ class OccurrenceCleaner {
 			'o.recordedby, o.recordnumber, o.associatedcollectors, o.eventdate, o.verbatimeventdate, '.
 			'o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
 			'FROM omoccurrences o '.
-			'WHERE o.collid = '.$this->collId.' AND o.catalognumber IN("'.implode('","',array_keys($dupArr)).'") '.
+			'WHERE o.collid = '.$this->collid.' AND o.catalognumber IN("'.implode('","',array_keys($dupArr)).'") '.
 			'ORDER BY o.catalognumber';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -97,9 +165,9 @@ class OccurrenceCleaner {
 			'o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
 			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences '.
 			'GROUP BY catalognumber, collid '. 
-			'HAVING Count(occid)>1 AND collid = '.$this->collId.
+			'HAVING Count(occid)>1 AND collid = '.$this->collid.
 			' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
-			'WHERE o.collid = '.$this->collId.' '.
+			'WHERE o.collid = '.$this->collid.' '.
 			'ORDER BY o.catalognumber, o.datelastmodified DESC LIMIT '.$start.', 505';
 		//echo $sql;
 		$retArr = $this->getDuplicates($sql);
@@ -114,21 +182,21 @@ class OccurrenceCleaner {
 			$sql = 'SELECT o.occid, o.eventdate, recordedby, o.recordnumber '.
 				'FROM omoccurrences o INNER JOIN '. 
 				'(SELECT eventdate, recordnumber FROM omoccurrences GROUP BY eventdate, recordnumber, collid, observeruid '.
-				'HAVING Count(*)>1 AND collid = '.$this->collId.' AND observeruid = '.$this->obsUid.
+				'HAVING Count(*)>1 AND collid = '.$this->collid.' AND observeruid = '.$this->obsUid.
 				' AND eventdate IS NOT NULL AND recordnumber IS NOT NULL '.
 				'AND recordnumber NOT IN("sn","s.n.","Not Provided","unknown")) intab '.
 				'ON o.eventdate = intab.eventdate AND o.recordnumber = intab.recordnumber '.
-				'WHERE collid = '.$this->collId.' AND observeruid = '.$this->obsUid.' ';
+				'WHERE collid = '.$this->collid.' AND observeruid = '.$this->obsUid.' ';
 		}
 		else{
 			$sql = 'SELECT o.occid, o.eventdate, recordedby, o.recordnumber '.
 				'FROM omoccurrences o INNER JOIN '. 
 				'(SELECT eventdate, recordnumber FROM omoccurrences GROUP BY eventdate, recordnumber, collid '.
-				'HAVING Count(*)>1 AND collid = '.$this->collId.
+				'HAVING Count(*)>1 AND collid = '.$this->collid.
 				' AND eventdate IS NOT NULL AND recordnumber IS NOT NULL '.
 				'AND recordnumber NOT IN("sn","s.n.","Not Provided","unknown")) intab '.
 				'ON o.eventdate = intab.eventdate AND o.recordnumber = intab.recordnumber '.
-				'WHERE collid = '.$this->collId.' ';
+				'WHERE collid = '.$this->collid.' ';
 		}
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -193,9 +261,11 @@ class OccurrenceCleaner {
 					$this->mergeRecords($targetOccid,$sourceOccid);
 					$statusStr .= ', '.$sourceOccid;
 				}
+				//$this->logOrEcho('Merging records: '.$statusStr);
 				echo '<li>Merging records: '.$statusStr.'</li>';
 			}
 			else{
+				//$this->logOrEcho('Record # '.array_shift($occArr).' skipped because only one record was selected');
 				echo '<li>Record # '.array_shift($occArr).' skipped because only one record was selected</li>';
 			}
 		}
@@ -313,7 +383,7 @@ class OccurrenceCleaner {
                $stmt->fetch();  
                $stmt->close();
                if ($matches>0) { 
-                  $recById= $agentid
+                  $recById= $agentid;
                } 
                else { 
                   // no matches found to collector, add to agent table.
@@ -322,7 +392,7 @@ class OccurrenceCleaner {
                   if ($agent!=null) { 
                      $am->saveNewAgent($agent);
                      $agentid = $agent->getagentid();
-                     $recById= $agentid
+                     $recById= $agentid;
                   }
                }
             } 
@@ -339,26 +409,40 @@ class OccurrenceCleaner {
 			}
 		}
 	}
-	
 
-	private function encodeStrTargeted($inStr,$inCharset,$outCharset){
-		if($inCharset == $outCharset) return $inStr;
-		$retStr = $inStr;
-		if($inCharset == "latin" && $outCharset == 'utf8'){
-			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
-				$retStr = utf8_encode($retStr);
-			}
+	//Setters and getters
+	public function setCollId($collid){
+		if(is_numeric($collid)){
+			$this->collid = $collid;
 		}
-		elseif($inCharset == "utf8" && $outCharset == 'latin'){
-			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-				$retStr = utf8_decode($retStr);
-			}
-		}
-		return $retStr;
 	}
 
-	private function cleanInStr($str){
-		return $this->conn->real_escape_string(trim($str));
+	public function setObsuid($obsUid){
+		if(is_numeric($obsUid)){
+			$this->obsUid = $obsUid;
+		}
+	}
+	
+	//Misc fucntions
+	public function getCollMap(){
+		$retArr = Array();
+		if($this->collid){
+			$sql = 'SELECT CONCAT_WS("-",c.institutioncode, c.collectioncode) AS code, c.collectionname, '.
+				'c.icon, c.colltype, c.managementtype '.
+				'FROM omcollections c '.
+				'WHERE (c.collid = '.$this->collid.') ';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$retArr['code'] = $row->code;
+				$retArr['collectionname'] = $row->collectionname;
+				$retArr['icon'] = $row->icon;
+				$retArr['colltype'] = $row->colltype;
+				$retArr['managementtype'] = $row->managementtype;
+			}
+			$rs->free();
+		}
+		return $retArr;
 	}
 }
 ?>

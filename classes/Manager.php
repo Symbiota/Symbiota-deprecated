@@ -36,14 +36,14 @@ class Manager  {
 
 	protected function logOrEcho($str, $indexLevel=0){
 		//verboseMode: 0 = silent, 1 = log, 2 = out to screen, 3 = both
-		if(!$this->verboseMode){
+		if($this->verboseMode){
 			if($this->verboseMode == 3 || $this->verboseMode == 1){
 				if($this->logFH){
 					fwrite($this->logFH,$str);
 				} 
 			}
 			if($this->verboseMode == 3 || $this->verboseMode == 2){
-				echo '<li style="'.($indexLevel?'Margin:'.($indexLevel*5).'px':'').'">'.$str.'</li>';
+				echo '<li style="'.($indexLevel?'margin-left:'.($indexLevel*15).'px':'').'">'.$str.'</li>';
 				ob_flush();
 				flush();
 			}

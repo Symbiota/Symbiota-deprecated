@@ -1,78 +1,54 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TaxonomyCleaner.php');
+include_once($serverRoot.'/classes/OccurrenceCleaner.php');
+
 header("Content-Type: text/html; charset=".$charset);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/cleaning/taxonomycleaner.php?'.$_SERVER['QUERY_STRING']);
 
-$collId = $_REQUEST["collid"];
-$displayIndex = array_key_exists('displayindex',$_REQUEST)?$_REQUEST['displayindex']:0;
-$analyzeIndex = array_key_exists('analyzeindex',$_REQUEST)?$_REQUEST['analyzeindex']:0;
-$taxAuthId = array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:0;
+$collid = $_REQUEST["collid"];
+$start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
+$limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:5;
 
-$cleanManager;
-$collName = '';
-
-if($collId){
-	$cleanManager = new TaxonomyCleanerOccurrences();
-	$cleanManager->setCollId($collId);
-	$collName = $cleanManager->getCollectionName();
-}
-else{
-	$cleanManager = new TaxonomyCleaner();
-}
-if($taxAuthId){
-	$cleanManager->setTaxAuthId($taxAuthId);
-}
+$cleanManager = new OccurrenceCleaner();
+$cleanManager->setCollId($collid);
+$collMap = $cleanManager->getCollMap();
 
 $isEditor = false;
 if($isAdmin){
 	$isEditor = true;
 }
 else{
-	if($collId){
-		if(array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])){
+	if($collid){
+		if(array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])){
 			$isEditor = true;
 		}
 	}
-	else{
-		if(array_key_exists("Taxonomy",$userRights)) $isEditor = true;
-	}
 }
-
-$status = "";
 
 ?>
 <html>
 	<head>
-		<title><?php echo $defaultTitle; ?> Taxonomic Name Cleaner</title>
+		<title><?php echo $defaultTitle; ?> Occurrence Taxon Cleaner</title>
 		<link href="../../css/base.css" type="text/css" rel="stylesheet" />
 		<link href="../../css/main.css" type="text/css" rel="stylesheet" />
+		<link href="../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+		<script src="../../js/jquery.js" type="text/javascript"></script>
+		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 		<script language="javascript">
-			function toggle(divName){
-				divObj = document.getElementById(divName);
-				if(divObj != null){
-					if(divObj.style.display == "block"){
-						divObj.style.display = "none";
+			function remappTaxon(oldName,targetTid,newName){
+				$.ajax({
+					type: "POST",
+					url: "rpc/remaptaxon.php",
+					dataType: "json",
+					data: { collid: <?php echo $collid; ?>, oldsciname: oldName, tid: targetTid, newsciname: newName }
+				}).done(function( res ) {
+					if(res == "1"){
+						alert("Taxon remapped successfully");
 					}
 					else{
-						divObj.style.display = "block";
+						alert("Taxon failed to remap");
 					}
-				}
-				else{
-					divObjs = document.getElementsByTagName("div");
-					divObjLen = divObjs.length;
-					for(i = 0; i < divObjLen; i++) {
-						var obj = divObjs[i];
-						if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
-							if(obj.style.display=="none"){
-								obj.style.display="inline";
-							}
-							else {
-								obj.style.display="none";
-							}
-						}
-					}
-				}
+				});
 			}
 			
 		</script>
@@ -82,39 +58,38 @@ $status = "";
 		$displayLeftMenu = (isset($taxa_admin_taxonomycleanerMenu)?$taxa_admin_taxonomycleanerMenu:'true');
 		include($serverRoot.'/header.php');
 		if(isset($taxa_admin_taxonomycleanerCrumbs)){
+			if($taxa_admin_taxonomycleanerCrumbs){
+				?>
+				<div class='navpath'>
+					<?php echo $taxa_admin_taxonomycleanerCrumbs; ?>
+					<b>Taxonomic Name Cleaner</b>
+				</div>
+				<?php 
+			}
+		}
+		else{
 			?>
-			<div class='navpath'>
-				<?php echo $taxa_admin_taxonomycleanerCrumbs; ?>
-				<b>Taxonomic Name Cleaner</b>
-			</div>
+			<a href="../../index.php">Home</a> &gt;&gt;
+			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
+			<b>Taxonomic Name Cleaner</b>
 			<?php 
 		}
 		?>
 		<!-- inner text block -->
 		<div id="innertext">
 			<?php 
-			if($symbUid){
-				if($status){ 
+			if($isEditor){
+				if($collid){
 					?>
-					<div style='float:left;margin:20px 0px 20px 0px;'>
-						<hr/>
-						<?php echo $status; ?>
-						<hr/>
+					<h1><?php echo $collMap['collectionname'].' ('.$collMap['code'].')'; ?></h1>
+					<div style="margin:20px;">
+						This module is designed to aid in cleaning scientific names within a collection. 
+						Web services will be used to attempt to resolve names that are not mapped to the taxonomic thesaurus.   
 					</div>
-					<?php 
-				}
-				if($isEditor){
-					if($collId){
-						?>
-						<h1><?php echo $collName; ?></h1>
-						<div>
-							This module is designed to aid in cleaning scientific names that are not mapping  
-							to the taxonomic thesaurus. Unmapped names are likely due to misspelllings, illegidimate names, 
-							or simply because they just have not yet been added to the thesaurus.   
-						</div>
-						<div>
-							Number of mismapped names: <?php echo $cleanManager->getTaxaCount(); ?>
-						</div>
+					<div style="margin:20px;">
+						Number of mismapped names: <?php echo $cleanManager->getBadTaxaCount(); ?>
+					</div>
+					<div style="margin:20px;">
 						<?php 
 						$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 						if(!$action){
@@ -122,134 +97,42 @@ $status = "";
 							<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
 								<fieldset>
 									<legend><b>Main Menu</b></legend>
-									<div>
-										<input type="radio" name="submitaction" value="displaynames" /> 
-										Display unverified names 
-										<div style="margin-left:15px;">Start index: 
-											<input name="displayindex" type="text" value="0" style="width:25px;" />
-											(500 names at a time)
-										</div> 
-									</div>
-									<div>
-										<input type="radio" name="submitaction" value="analyzenames" /> 
-										analyze names 
-										<div style="margin-left:15px;">Start index: 
-											<input name="analyzeindex" type="text" value="0" style="width:25px;" />
-											(10 names at a time)
-										</div> 
-									</div>
-									<div>
-										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-										<input type="submit" name="submitbut" value="Perform Action" />
+									<div style="margin-left:15px;">Start index: 
+										<input name="index" type="text" value="0" style="width:25px;" />
+										(50 names at a time)
+									</div> 
+									<div style="margin:20px">
+										<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
+										<input type="submit" name="submitaction" value="Analyze Names" />
 									</div>								
 								</fieldset>
 							</form>
 							<?php
 						}
-						elseif($action == 'displaynames'){
-							$nameArr = $cleanManager->getTaxaList($displayIndex);
+						elseif($action == 'Analyze Names'){
 							echo '<ul>';
-							foreach($nameArr as $k => $sciName){
-								echo '<li>';
-								echo '<a href="spectaxcleaner.php?submitaction=analyzenames&analyzeindex='.$k.'">';
-								echo '<b><i>'.$sciName.'</i></b>';
-								echo '</a>';
-								echo '</li>';
-							}
+							$cleanManager->analyzeTaxa($start, $limit);
 							echo '</ul>';
-						}
-						elseif($action == 'analyzenames'){
-							$nameArr = $cleanManager->analyzeTaxa($analyzeIndex);
-							echo '<ul>';
-							foreach($nameArr as $sn => $snArr){
-								echo '<li>'.$sn.'</li>';
-								if(array_key_exists('col',$snArr)){
-									
-								}
-								else{
-									echo '<div style="margin-left:15px;font-weight:bold;">';
-									echo '<form name="taxaremapform" method="get" action="" >';
-									echo 'Remap to: ';
-									echo '<input type="input" name="remaptaxon" value="'.$sn.'" />';
-									echo '<input type="submit" name="submitaction" value="Remap" />';
-									echo '</form>';
-									echo '</div>';
-									if(array_key_exists('soundex',$snArr)){
-										foreach($snArr['soundex'] as $t => $s){
-											echo '<div style="margin-left:15px;font-weight:bold;">';
-											echo $s;
-											echo ' <a href="" title="Remap to this name...">==>></a>';
-											echo '</div>';
-										}
-									}
-								}
-							}
-							echo '</ul>';
-						}
-					}
-					else{
-						?>
-						<h1>Taxonomic Thesaurus Validator</h1>
-						<div style="margin:15px;">
-							This module is designed to aid in validating scientific names within the taxonomic thesauri. 
-						</div>
-						<?php
-						$taxonomyAction = array_key_exists('taxonomysubmit',$_POST)?$_POST['taxonomysubmit']:'';
-						if($taxonomyAction == 'Validate Names'){
-							?>
-							<div style="margin:15px;">
-								<b>Validation Status:</b>
-								<ul>
-									<?php $cleanManager->verifyTaxa($_POST['versource']); ?>
-								</ul>
-							</div>
-							<?php
+							echo '<div>';
+							echo '<div style="margin:10px;"><a href="taxonomycleaner.php?collid='.$collid.'">Return to Main Menu</a></div>';
+							echo '<div style="margin:10px;"><a href="taxonomycleaner.php?collid='.$collid.'&submitaction=Analyze%20Names">Continue Analyzing</a></div>';
 						}
 						?>
-						<div style="margin:15px;">
-							<fieldset>
-								<legend><b>Verification Status</b></legend>
-								<?php 
-								$vetArr = $cleanManager->getVerificationCounts();
-								?>
-								Full Verification: <?php $vetArr[1]; ?><br/>
-								Suspect Status: <?php $vetArr[2]; ?><br/>
-								Name Validated Only: <?php $vetArr[3]; ?><br/>
-								Untested: <?php $vetArr[0]; ?>
-							</fieldset>
-						</div>
-						<div style="margin:15px;">
-							<form name="taxonomymainmenu" action="taxonomycleaner.php" method="post">
-								<fieldset>
-									<legend><b>Main Menu</b></legend>
-									<div>
-										<b>Testing Resource:</b><br/> 
-										<input type="radio" name="versource" value="col" CHECKED /> 
-										Catalogue of Life<br/>
-									</div>
-									<div>
-										<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId; ?>" />
-										<input type="submit" name="taxonomysubmit" value="Validate Names" />
-									</div>								
-								</fieldset>
-							</form>
-						
-						</div>
-						<?php 
-					}
+					</div>
+					<?php 
 				}
 				else{
 					?>
 					<div style="margin:20px;font-weight:bold;font-size:120%;">
-						ERROR: You don't have the necessary permissions to access this data cleaning module.
+						ERROR: Collection identifier is NULL
 					</div>
 					<?php 
 				}
 			}
 			else{
 				?>
-				<div style="font-weight:bold;">
-					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/taxa/admin/taxonomycleaner.php?collid=<?php echo $collId; ?>'>login</a>!
+				<div style="margin:20px;font-weight:bold;font-size:120%;">
+					ERROR: You don't have the necessary permissions to access this data cleaning module.
 				</div>
 				<?php 
 			}

@@ -150,7 +150,7 @@ class OccurrenceUtilities {
 	public static function parseScientificName($inStr, $rankId = 0){
 		//Converts scinetific name with author embedded into separate fields
 		$retArr = array('unitname1'=>'','unitname2'=>'','unitind3'=>'','unitname3'=>'');
-		if($inStr || is_string($inStr)){
+		if($inStr && is_string($inStr)){
 			//Remove underscores, common in NPS data
 			$inStr = preg_replace('/_+/',' ',$inStr);
 			//Replace misc 
@@ -208,7 +208,7 @@ class OccurrenceUtilities {
 								$retArr['unitname2'] = '';
 								unset($sciNameArr);
 							}
-							$rs->close();
+							$rs->free();
 							$con->close();
 						}
 						$retArr['unitname2'] = strtolower($retArr['unitname2']);
@@ -228,11 +228,15 @@ class OccurrenceUtilities {
 								if($nextStr == 'var.' || $nextStr == 'ssp.' || $nextStr == 'subsp.'){
 									$retArr['unitind3'] = $nextStr;
 									$retArr['unitname3'] = array_shift($sciNameArr);
+									$retArr['author'] = implode(' ',$sciNameArr);
+								}
+								elseif(preg_match('/^[a-z]+$/',$nextStr)){
+									$retArr['unitname3'] = $nextStr;
+									$retArr['author'] = implode(' ',$sciNameArr);
 								}
 								else{
-									$retArr['unitname3'] = $nextStr;
+									$retArr['unitind3'] = '';
 								}
-								$retArr['author'] = implode(' ',$sciNameArr);
 							}
 						}
 						elseif($sciStr == 'var.' || $sciStr == 'var'){
@@ -242,18 +246,28 @@ class OccurrenceUtilities {
 								if($nextStr == 'ssp.' || $nextStr == 'subsp.'){
 									$retArr['unitind3'] = $nextStr;
 									$retArr['unitname3'] = array_shift($sciNameArr);
+									$retArr['author'] = implode(' ',$sciNameArr);
+								}
+								elseif(preg_match('/^[a-z]+$/',$nextStr)){
+									$retArr['unitname3'] = $nextStr;
+									$retArr['author'] = implode(' ',$sciNameArr);
 								}
 								else{
-									$retArr['unitname3'] = $nextStr;
+									$retArr['unitind3'] = '';
 								}
-								$retArr['author'] = implode(' ',$sciNameArr);
 							}
 						}
 						elseif($sciStr == 'ssp.' || $sciStr == 'ssp' || $sciStr == 'subsp.' || $sciStr == 'subsp'){
 							if($sciNameArr){
 								$retArr['unitind3'] = 'subsp.';
-								$retArr['unitname3'] = array_shift($sciNameArr);
-								$retArr['author'] = implode(' ',$sciNameArr);
+								$nextStr = array_shift($sciNameArr);
+								if(preg_match('/^[a-z]+$/',$nextStr)){
+									$retArr['unitname3'] = $nextStr;
+									$retArr['author'] = implode(' ',$sciNameArr);
+								}
+								else{
+									$retArr['unitind3'] = '';
+								}
 							}
 						}
 					}
