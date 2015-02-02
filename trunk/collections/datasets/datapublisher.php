@@ -222,6 +222,7 @@ include($serverRoot."/header.php");
 						<b>Title:</b> <?php echo $v['title']; ?> 
 						<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
 							<input type="hidden" name="colliddel" value="<?php echo $v['collid']; ?>">
+							<input type="hidden" name="collid" value="<?php echo $v['collid']; ?>">
 							<input type="image" src="../../images/del.gif" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
 						</form>
 					</div>
