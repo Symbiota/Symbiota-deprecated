@@ -95,6 +95,14 @@ if($coordArr){
 		}
 
     </script>
+    <style>
+		html, body, #map_canvas {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+		}
+	</style>
 </head> 
 <body onload="initialize();">
 <?php
@@ -109,6 +117,6 @@ if($coordArr){
         <?php 
     }
     ?>
-	<div id='map_canvas' style='width:95%; height:600px; clear:both;'></div>
+	<div id='map_canvas'></div>
 </body>
 </html>

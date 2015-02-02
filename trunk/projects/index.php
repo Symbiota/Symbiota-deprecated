@@ -313,7 +313,7 @@ if($isEditable && $projSubmit){
 						<form name='claddform' action='index.php' method='post' onsubmit="return validateChecklistAddForm(this)">
 							<fieldset style="padding:15px;background-color:#FFF380;">
 								<legend><b>Add a Checklist</b></legend>
-								<select name="clid">
+								<select name="clid" style="width:450px;">
 									<option value="">Select Checklist to Add</option>
 									<option value="">-----------------------------------------</option>
 									<?php 
@@ -322,7 +322,7 @@ if($isEditable && $projSubmit){
 										echo "<option value='".$clid."'>".$clName."</option>\n";
 									}
 									?>
-								</select>
+								</select><br/>
 								<input type="hidden" name="proj" value="<?php echo $projManager->getProjectId();?>">
 								<input type="submit" name="projsubmit" value="Add Checklist" />
 							</fieldset>
@@ -332,7 +332,7 @@ if($isEditable && $projSubmit){
 						<form name='cldeleteform' action='index.php' method='post' onsubmit="return validateChecklistDeleteForm(this)">
 							<fieldset style="padding:15px;background-color:#FFF380;">
 								<legend><b>Delete a Checklist</b></legend>
-								<select name="clid">
+								<select name="clid" style="width:450px;">
 									<option value="">Select Checklist to Delete</option>
 									<option value="">-----------------------------------------</option>
 									<?php 
@@ -341,7 +341,7 @@ if($isEditable && $projSubmit){
 										echo "<option value='".$clid."'>".$clName."</option>\n";
 									}
 									?>
-								</select>
+								</select><br/>
 								<input type="hidden" name="proj" value="<?php echo $projManager->getProjectId();?>">
 								<input type="submit" name="projsubmit" value="Delete Checklist" />
 							</fieldset>

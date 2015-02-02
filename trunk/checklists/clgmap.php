@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <?php
-//error_reporting(E_ALL);
 include_once('../config/symbini.php');
 include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -72,11 +71,17 @@ $mapperObj = new ChecklistMapper($projValue);
 				}
 	    	}
 		</script>
+	    <style>
+			html, body, #map_canvas {
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+		</style>
 	</head>
 	<body onload="initialize()">
-		<div style="width:800px;height:600px;">
-	    	<div id='map_canvas' style='width:95%; height:650px; clear:both;'></div>
-		</div>
+    	<div id="map_canvas"></div>
 	</body>
 </html>
 
