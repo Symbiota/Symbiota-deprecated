@@ -456,7 +456,7 @@ class OccurrenceEditorManager {
 			$ct = (array_key_exists('ct'.$x,$this->qryArr)?$this->qryArr['ct'.$x]:'');
 			$cv = (array_key_exists('cv'.$x,$this->qryArr)?$this->qryArr['cv'.$x]:'');
 			if($cf){
-				if($cf == 'ocrFragment' && !strpos($sqlWhere,'rawstr')){
+				if($cf == 'ocrFragment'){
 					//Used when OCR frag comes from custom field search within basic query form
 					$cf = 'ocr.rawstr';
 				}
