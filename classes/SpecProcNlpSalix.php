@@ -128,8 +128,8 @@ class SpecProcNlpSalix
 		//Eliminate the "dupl" in determiner line
 		$this->Label = preg_replace("(det(.)? dupl(.)?)i","Det.",$this->Label);
 		//A fairly rare instance where both collector and determiner are same person on the same line. Split into two lines.
-		$this->Label = preg_replace("(\n((leg|coll|col).? (&|and) (det).?)(.+)\n)i","$2. $5\n$4.$5",$this->Label);
-
+		$this->Label = preg_replace("([\n\r]{1,2}((leg|coll|col).? (&|and) (det).?)(.+)[\n\r]{1,2})i","\n$2. $5\n$4.$5",$this->Label);
+		//echo $this->Label."<br>";
 		//Make sure space between NSEW cardinal directions and following digits, for Lat/Long 
 		$this->Label = preg_replace("(([NESW]\.?)(\d))","$1 $2",$this->Label);
 		$this->Label = preg_replace("((\d)([NESW]))","$1 $2",$this->Label);
@@ -149,10 +149,10 @@ class SpecProcNlpSalix
 		$this->Label = preg_replace($Preg,"$1, $4",$this->Label);
 
 		//Connect some lines when joined by a connecting preposition or hyphen
-		$this->Label = preg_replace("(\b(of|to|by|at|in|over|under|on|from)\s?[\r\n]{1,2})i","$1 ",$this->Label);
-		$this->Label = preg_replace("([\r\n]{1,2}\b(of|to|by|at|in|over|under|on|from)\b)","$1",$this->Label);
-		$this->Label = preg_replace("(\b([A-Z]?[a-z]{2,10})-( )?[\n\r]{1,2}([a-z]{2,10}))","$1$4",$this->Label);
-		
+		$this->Label = preg_replace("(\b(of|to|by|at|in|over|under|on|from)\s?[\r\n]{1,2})i","$1 ",$this->Label);//Prepositions at end of line
+		$this->Label = preg_replace("([\r\n]{1,2}\b(of|to|by|at|in|over|under|on|from)\b)","$1",$this->Label);//Prepositions at start of line
+		$this->Label = preg_replace("(\b([A-Z]?[a-z]{2,10})- ?[\n\r]{1,2}([a-z]{2,10}))","$1$2",$this->Label);//Hyphen at end of line
+
 		//Remove double spaces and tabs
 		$this->Label = str_replace("\t"," ",$this->Label);
 		while(strstr($this->Label,"  ") !== false)
@@ -165,20 +165,11 @@ class SpecProcNlpSalix
 		$this->Label = str_replace("’","'",$this->Label);
 		$this->Label = str_replace("°;","°",$this->Label);
 
-		$match = array();
+		//$match = array();
 		$FromTo = array("l"=>"1","O"=>"0");
 		foreach($FromTo as $From=>$To)
-			{//Catch cases where zero or one misocr'd as oh or el.
-			$Preg = "([-0-9/.]".$From."[0-9/.])";
-			do
-				{
-				$Found = preg_match($Preg,$this->Label,$match);
-				if($Found)
-					{
-					$NewMatch = str_replace($From,$To,$match[0]);
-					$this->Label = str_replace($match[0],$NewMatch,$this->Label);
-					}
-				}while($Found);
+			{//Catch cases where zero or one mis-OCR'd as oh or el.
+			$this->Label = preg_replace("(([-0-9/.])".$From."([0-9/.]))",'${1}'.$To.'${2}',$this->Label);
 			}
 
 		//Separate at semicolons
@@ -267,7 +258,7 @@ class SpecProcNlpSalix
 				$this->Results[$Key] = trim($Val);
 			}
 		//echo $this->Label."<br>";
-			
+		//$this->Results['rawnotes'] = "SALIX Version 0.6";	
 		return $this->Results;
 		
 		
@@ -1645,10 +1636,10 @@ class SpecProcNlpSalix
 			$L = $this->Assigned[$EventField];
 			$RankArray[$L] = 10; //Most likely on the same line as the event
 			while(++$L < count($this->LabelArray)) //Diminishing likelihood on subsequent lines
-				$RankArray[$L] = 10 - ($L-$this->Assigned[$EventField]);
+				$RankArray[$L] = 10 - 3*($L-$this->Assigned[$EventField]);
 			$L = $this->Assigned[$EventField];
 			while(--$L >= 0) //Less likelihood on previous lines
-				$RankArray[$L] = 8 - ($this->Assigned[$EventField]-$L);
+				$RankArray[$L] = 8 - 2*($this->Assigned[$EventField]-$L);
 			}
 		for($L=0;$L<count($this->LabelArray);$L++)
 			{//Various characteristics increase or decrease probability
@@ -1883,7 +1874,7 @@ class SpecProcNlpSalix
 		$Label = str_replace("-"," ",$this->Label);
 		$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(\b\S+[\b-])\s+(\b\S+\b)?)i",$Label,$match);
 		if($Found !== 1)
-			$Found = preg_match("((plants|flora|lichens|algae|cryptogams)\s(of|de|du)\s+(\b\S+\b)(\s?\b\S+\b)?)i",$Label,$match);
+			$Found = preg_match("((plants|flora|lichens|algae|fungi|cryptogams)\s(of|de|du)\s+(\b\S+\b)(\s?\b\S+\b)?)i",$Label,$match);
 		if($Found)
 			{// Found "Plants of...".  Look for state or country
 			//$this->printr($match,"Algae of");
@@ -2303,7 +2294,7 @@ class SpecProcNlpSalix
 		{
 		$OneLine = array();
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
-		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|plants of|aceae of|flora de|univ|et al)\b)i";
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|university|plants of|aceae of|flora de|univ|et al)\b)i";
 		$Max = array();
 		//$this->printr($this->LineStart,"Line Start");
 		//$this->printr($this->LabelLines,"Lines");
@@ -2402,7 +2393,8 @@ class SpecProcNlpSalix
 		//$this->printr($Fields,"Fields");
 		$ScoreArray = array();
 		$TempString = $this->LabelLines[$L];
-		$Found = preg_match_all("(\b[A-Za-z]{1,20}\b)",$TempString,$WordsArray, PREG_OFFSET_CAPTURE);//Break the string up into words
+		$TempString = str_replace("'","`",$TempString);
+		$Found = preg_match_all("(\b[A-Za-z`]{1,20}\b)",$TempString,$WordsArray, PREG_OFFSET_CAPTURE);//Break the string up into words
 		//$this->printr($WordsArray,"WA");
 		$FieldScoreArray = array();
 		$StatSums = array("occurrenceRemarks"=>0,"habitat"=>0,"locality"=>0,"verbatimAttributes"=>0,"substrate"=>0);
@@ -2711,11 +2703,16 @@ class SpecProcNlpSalix
 				{
 				$Factor = 1;
 				if($Values['totalcount'] < 10) //Reduce impact if only seen few times
+					{
 					$Factor = ($Values['totalcount'])/10;
+					$Factor = ($Factor*$Factor)/100;
+					}
 				foreach($Fields as $F)
 					{
 					$OneScore = $Factor * $Values[$F.'Freq'];
 					//echo "Adding $OneScore to $F for $Word1<br>";
+					if($OneScore < 1)
+						$OneScore = 0;
 					if($OneScore > $MaxScore1[$F])
 						$MaxScore1[$F] = $OneScore;
 					}
@@ -2732,11 +2729,15 @@ class SpecProcNlpSalix
 					{
 					$Factor = 1;
 					if($Values['totalcount'] < 10) //Reduce impact if only seen few times
+						{
 						$Factor = ($Values['totalcount']);
-					$Factor = ($Factor*$Factor)/100;
+						$Factor = ($Factor*$Factor)/100;
+						}
 					foreach($Fields as $F)
 						{
 						$OneScore = 10*$Factor * $Values[$F.'Freq'];
+						if($OneScore < 1)
+							$OneScore = 0;
 						//echo "Adding $OneScore to $F for $Word1, $Word2<br>";
 						if($OneScore > $MaxScore2[$F])
 							$MaxScore2[$F] = $OneScore;
