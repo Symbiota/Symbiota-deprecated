@@ -61,6 +61,7 @@ class SpecProcNlpSalix
 			return $this->Results;
 		$dwcArr = array();
 		
+		
 		//Set the keys for a few arrays to the names of the return fields
 		$this->Results = array_fill_keys($this->ResultKeys,'');
 		$this->Assigned = array_fill_keys($this->ResultKeys,-1);
@@ -153,6 +154,10 @@ class SpecProcNlpSalix
 		$this->Label = preg_replace("([\r\n]{1,2}\b(of|to|by|at|in|over|under|on|from)\b)","$1",$this->Label);//Prepositions at start of line
 		$this->Label = preg_replace("(\b([A-Z]?[a-z]{2,10})- ?[\n\r]{1,2}([a-z]{2,10}))","$1$2",$this->Label);//Hyphen at end of line
 
+		
+		
+		
+		
 		//Remove double spaces and tabs
 		$this->Label = str_replace("\t"," ",$this->Label);
 		while(strstr($this->Label,"  ") !== false)
@@ -171,7 +176,7 @@ class SpecProcNlpSalix
 			{//Catch cases where zero or one mis-OCR'd as oh or el.
 			$this->Label = preg_replace("(([-0-9/.])".$From."([0-9/.]))",'${1}'.$To.'${2}',$this->Label);
 			}
-
+		$this->Label = str_replace("(M0)","(MO)",$this->Label);
 		//Separate at semicolons
 		$this->Label = str_replace(";","\r\n",$this->Label);
 		
@@ -204,7 +209,30 @@ class SpecProcNlpSalix
 			}
 		$this->LabelLines = array_values($this->LabelLines); //renumber the array
 		
-			
+		//Cases where the institute (capitalized) gets included in another line.  Separate them.
+		$L=0;
+		while($L < count($this->LabelLines))
+			{
+			if(preg_match("(\b(INSTITUTE|INSTITUTO|MUNICIPAL|HERBARIUM|UNIVERSITY|BOTANICAL|GARDEN|RESERVA|NATIONAL|MUSEUM|MUSEO)\b)",$this->LabelLines[$L],$match))
+				{
+				$Found = preg_match("(([^A-Z]{2,20})\s([^a-z0-9]+)\Z)",$this->LabelLines[$L],$match);
+				if($Found > 0)
+					{
+					//$this->printr($match,"Using Preg");
+					if(strlen($match[2]) > 20)
+						{
+						$this->LabelLines[$L] = str_replace($match[2],"",$this->LabelLines[$L]);
+						array_splice($this->LabelLines,$L+1,0,$match[2]);
+						}
+					}
+				}
+			$L++;
+			}
+
+
+
+		$this->LabelLines = array_values($this->LabelLines); //renumber the array
+		
 		//Break each line up into an array of words resulting in a two-dimensional array -- $this->LabelArray
 		//This may be phased out as regular expressions take over most of the work.  Let's hope!
 		for($L=0;$L<count($this->LabelLines);$L++)
@@ -258,7 +286,8 @@ class SpecProcNlpSalix
 				$this->Results[$Key] = trim($Val);
 			}
 		//echo $this->Label."<br>";
-		//$this->Results['rawnotes'] = "SALIX Version 0.6";	
+		//$this->Results['rawnotes'] = "SALIX Version 0.6";
+		//$this->printr($this->Assigned,"Assigned");
 		return $this->Results;
 		
 		
@@ -1303,7 +1332,7 @@ class SpecProcNlpSalix
 		if($this->Results[$Field] != "")
 			return;
 		$RankArray = $this->RankLinesForNames($Field);
-		//$this->printr($RankArray,"Name Rank");
+		//$this->PrintRank($RankArray,"$Field");
 		reset($RankArray);
 		//echo "Current = ".current($RankArray)."<br>";
 		if(current($RankArray) < 2 && $Field == "recordedBy")
@@ -1352,7 +1381,7 @@ class SpecProcNlpSalix
 	private function GetNamesFromLine($L,$Field)
 		{
 		//echo "Testing $Field: {$this->LabelLines[$L]}<br>";
-		$BadWords = "(\b(copyright|herbarium|garden|vascular|specimen|database|institute|instituto|plant|county|pacific|trail|museum|mount|range|island[s]?)\b)i";
+		//$BadWords = "(\b(copyright|herbarium|garden|vascular|specimen|database|institute|instituto|plant|county|pacific|trail|museum|mount|range|image|island[s]?)\b)i";
 		//if(preg_match($BadWords,$this->LabelLines[$L]) > 0)
 		//	return false;
 		$this->RemoveStartWords($L,'recordedBy');
@@ -1394,9 +1423,10 @@ class SpecProcNlpSalix
 			for($N=0;$N<$Found;$N++)
 				{
 				$Name = $match[0][$N];
-				//echo "Name = $Name<br>";
+				//echo "Before CRB: Name = $Name<br>";
 				if($this->ConfirmRecordedBy($Name) < 0)
 					continue;
+				//echo "Adding here<br>";
 				$this->AddToResults($Field,$Name,$L);
 				$this->RemoveStartWords($L,$Field);
 				$this->LabelLines[$L] = str_ireplace("with","",$this->LabelLines[$L]);
@@ -1418,7 +1448,7 @@ class SpecProcNlpSalix
 			if($Field == "recordedBy" && ($L < count($this->LabelLines)-1 && ($this->LineStart[$L+1] == "" || $this->LineStart[$L+1] == "associatedCollectors")))
 				{
 				//echo "Checking next line<br>";
-				$this->GetNamesFromLine(++$L,$Field);//Recursively calls this routine to add possible associated collectors.
+				return $this->GetNamesFromLine(++$L,$Field);//Recursively calls this routine to add possible associated collectors.
 				}
 			return true;
 			}
@@ -1443,7 +1473,7 @@ class SpecProcNlpSalix
 		{//Check for the name in the omoccurrences table.  Lower score if it looks like a university, herbarium, county, etc.
 		$match=array();
 		$Score = 0;
-		$PregNotNames = "(\b(arizona|municip|herbarium|agua|province|university|mun|county|botanical|garden|pacific|date|north|south|canal|mountain|national|island[s]?)\b)i";  //Known to be confused with names
+		$PregNotNames = "(\b(arizona|municip|herbarium|agua|province|university|mun|county|botanical|garden|reserva|conserva|comunidad|pacific|date|north|south|canal|mountain|national|image|island[s]?)\b)i";  //Known to be confused with names
 		$Score -= 5*(preg_match_all($PregNotNames,$Name,$match));
 		$query = "SELECT recordedBy FROM omoccurrences where recordedBy LIKE '$Name' LIMIT 1";
 		$result = $this->conn->query($query);
@@ -1456,12 +1486,15 @@ class SpecProcNlpSalix
 			{
 			$query = "SELECT recordedBy FROM omoccurrences where recordedBy LIKE '$Name%' LIMIT 1";
 			$result = $this->conn->query($query);
+			//echo "Name $Name: $Score<br>";
 			if($result->num_rows > 0)
 				{
+				//echo "Adding 10<br>";
 				$Record = $result->fetch_assoc();
 				$Name = $Record['recordedBy'];
 				return 10;
 				}
+			//echo "Returning $Score from Confirm<br>";
 			return $Score;
 			}
 		}
@@ -1572,18 +1605,21 @@ class SpecProcNlpSalix
 			$RankArray[$L] -= 3*preg_match("((\bft\b)|(\bm\b))",$this->LabelLines[$L]); //Subtract if looks like altitude
 			$RankArray[$L] -= (3*preg_match_all("([0-9]\.[0-9])",$this->LabelLines[$L],$match)); //Decimal not likely to be in collection number or date
 			$RankArray[$L] -= 2*preg_match_all("(\(|\)|°|\")",$this->LabelLines[$L],$match); //Parenthesis on the line probably mean author, not collector.  Degree looks like lat/long.  Quote looks like lat/long
-			$RankArray[$L] += 4*preg_match($this->PregMonths."i",$this->LabelLines[$L]); //Add a little for a month -- could be collection date
+			$RankArray[$L] += 5*preg_match($this->PregMonths."i",$this->LabelLines[$L]); //Add a little for a month -- could be collection date
 			if($L < count($this->LabelLines)-1)
 				$RankArray[$L] += 2*preg_match($this->PregMonths."i",$this->LabelLines[$L+1]); //Add a little for a month -- next line could be collection date
 			if($L >0)
 				$RankArray[$L] += 2*preg_match($this->PregMonths."i",$this->LabelLines[$L-1]); //Add a little for a month -- previous line could be collection date
 			if($Field != 'identifiedBy' && strpos($this->LabelLines[$L], "&") >0)
-				$RankArray[$L]+=3; // Could be associated collectors on the same line
+				{
+				$RankArray[$L] += 4; // Could be associated collectors on the same line
+				if(preg_match("([a-z]{2,20}\s&\s[A-Z][.a-z])",$this->LabelLines[$L]) > 0)
+					$RankArray[$L] += 5; //Capital after ampersand even better.
+				}
 			if($Field == 'recordedBy' && strpos($this->LabelLines[$L]," s. n."))
 				$RankArray[$L]+=10; 
 			}
 		//Sort the lines in rank order
-		
 		
 		asort($RankArray);
 		return (array_reverse($RankArray, true));
@@ -1902,7 +1938,6 @@ class SpecProcNlpSalix
 			}
 		if($this->Results['country'] != "") //Found it.
 			return;
-		
 		//Look for "xxx County".
 		$match = $this->LabeledRegion("county");
 		if($match != false)
@@ -1915,6 +1950,7 @@ class SpecProcNlpSalix
 		$this->SeekState(223,-1);
 		if($Lat != 0 || $Long != 0)
 			{
+			//echo "Here 2<br>";
 			if($this->GetFromLatLong($Lat, $Long))
 				return;
 			}
@@ -2058,7 +2094,6 @@ class SpecProcNlpSalix
 			$Lat = $this->Results['decimalLatitude'];
 			$Long = $this->Results['decimalLongitude'];
 			$query =  "SELECT decimalLatitude, decimalLongitude, stateProvince, country, county from omoccurrences where stateProvince LIKE '$State' AND decimalLongitude IS NOT NULL LIMIT 5";
-			//echo "$query<br>";
 			$result = $this->conn->query($query);
 			if($result->num_rows == 0)
 					return false;
@@ -2177,6 +2212,7 @@ class SpecProcNlpSalix
 					if($this->Results['country'] == "" || $this->Results['country'] != $Country)
 						$this->AddToResults('country',$Country,$L);
 					$this->AddToResults('stateProvince',$State,$L);
+					$this->LabelLines[$L] = preg_replace("(\b($State)\b)i","",$this->LabelLines[$L]);
 					return true;
 					}
 				else if($this->Results['country'] == "" && preg_match("(\b($Country)\b)i",$this->LabelLines[$L]))
@@ -2380,6 +2416,13 @@ class SpecProcNlpSalix
 				return true;
 				}
 			}
+		if(($this->Assigned['stateProvince'] == $L) && strlen($this->LabelLines[$L]) < 20)
+				{
+				//echo "Found {$P['Field']} in {$this->LabelLines[$L]}<br>";
+				$this->AddToResults('locality',$this->LabelLines[$L],$L);
+				return true;
+				}
+		
 		}
 	
 	
@@ -2661,7 +2704,6 @@ class SpecProcNlpSalix
 			
 			
 			}
-		return;
 		/*
 		$this->printr($Fields);
 		echo "{$this->LabelLines[$L]}<br>";
@@ -2675,6 +2717,7 @@ class SpecProcNlpSalix
 			
 			}
 		*/
+		return;
 		}
 	
 	//************************************************************************************************	
@@ -2931,7 +2974,7 @@ class SpecProcNlpSalix
 			}
 		if($L>=0)
 			$this->Assigned[$Field] = $L;
-		$String = trim($String);
+		$String = trim($String," :;,");
 		if(array_search($Field, array("country","stateProvince","county","minimimumElevationInMeters")) !== false)
 			{ //Make sure not to add multiple results to these fields.  Assume the later addition is more likely to be correct, so replace.
 			$this->Results[$Field] = $String;
@@ -3112,20 +3155,33 @@ class SpecProcNlpSalix
 
 	//**********************************************
 	private function printr($A, $Note="omit")
-	{//Enhances the print_r routine by adding an optional note before and a newline after.
-	if(!is_array($A))
-		echo "Not array";
-	else
-		{
-		if($Note != "omit")
-			echo $Note.": ";
-		print_r($A);
-		//$Out = str_replace("\n","<br>",$Out);
-		//echo $Out;
+		{//Debug only.  Enhances the print_r routine by adding an optional note before and a newline after.
+		if(!is_array($A))
+			echo "Not array";
+		else
+			{
+			if($Note != "omit")
+				echo $Note.": ";
+			print_r($A);
+			//$Out = str_replace("\n","<br>",$Out);
+			//echo $Out;
+			}
+		echo "<br>";
 		}
-	echo "<br>";
-	}
 
+	private function PrintRank($RankArray, $Name = "")
+		{//Debug only.  Print RankArray as a table showing line text
+		echo "<br>";
+		if($Name != "")
+			echo "$Name<br>";
+		echo "<table border=1><tr><td>Line</td><td>Score</td><td>Text</td></tr>";
+		//for($L=0;$L<count($this->LabelLines);$L++)
+		foreach($RankArray as $L=>$Value)
+			echo "<tr><td>$L:</td><td>{$RankArray[$L]}</td><td>{$this->LabelLines[$L]}</td></tr>";
+		echo"</table>";
+		}
+	
+	
 	private function MaxKey($A)
 		{
 		$MaxV = -1000;
