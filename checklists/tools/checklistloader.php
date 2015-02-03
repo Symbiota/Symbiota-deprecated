@@ -126,7 +126,7 @@ if($isEditor){
 				else{
 					?>
 					<form enctype="multipart/form-data" action="checklistloader.php" method="post" onsubmit="return validateUploadForm(this);">
-						<fieldset>
+						<fieldset style="padding:10px;">
 							<legend>Checklist Upload Form</legend>
 							<input type="hidden" name="MAX_FILE_SIZE" value="5000000" />
 							<div style="font-weight:bold;">
