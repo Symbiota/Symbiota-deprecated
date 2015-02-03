@@ -147,7 +147,7 @@ if($clValue || $dynClid){
 	}
 	?>
 	<!-- This is inner text! -->
-	<div id='innertext'>
+	<div id='innertext' style="height:100%;">
 		<?php
 		if($clValue || $dynClid){
 			if($clValue && $isEditor && !$printMode){
