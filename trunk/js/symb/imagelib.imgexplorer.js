@@ -3,6 +3,7 @@ function ImageExplorer(options) {
     ImageExplorer.filterCriteria = {};
 }
 
+
 ImageExplorer.prototype.search = function(query, searchCollection) {
     if (searchCollection != undefined) {
         // reset start and filterCriteria
@@ -28,6 +29,7 @@ ImageExplorer.prototype.search = function(query, searchCollection) {
     }
 
     ImageExplorer.filterCriteria.idNeeded = $("#id_needed").prop("checked")?1:0;
+    ImageExplorer.filterCriteria.idPoor = $("#id_poor").prop("checked")?1:0;
     ImageExplorer.filterCriteria.countPerCategory = $("#count_per_category").val();
     ImageExplorer.filterCriteria.idToSpecies = $("#id_to_species").prop("checked")?1:0;
 
@@ -74,6 +76,7 @@ ImageExplorer.prototype.search = function(query, searchCollection) {
         $focused.blur();
     });
 }
+
 
 ImageExplorer.prototype.firstPage = function() {
     var start = 0;
@@ -151,6 +154,10 @@ ImageExplorer.prototype.init = function(containerId) {
     controlsHtml += "            <td><input type=\"checkbox\" id=\"id_needed\" name=\"id_needed\" \/><\/td>";
     controlsHtml += "        <\/tr>";
     controlsHtml += "        <tr>";
+    controlsHtml += "            <td>Display images with low quality identifications: <\/td>";
+    controlsHtml += "            <td><input type=\"checkbox\" id=\"id_poor\" name=\"id_poor\" \/><\/td>";
+    controlsHtml += "        <\/tr>";
+    controlsHtml += "        <tr>";
     controlsHtml += "            <td>Display images identified to species: <\/td>";
     controlsHtml += "            <td><input type=\"checkbox\" id=\"id_to_species\" name=\"id_to_species\" checked=\"true\" \/><\/td>";
     controlsHtml += "        <\/tr>";
@@ -180,6 +187,7 @@ ImageExplorer.prototype.init = function(containerId) {
     $("#"+containerId).html(controlsHtml);
 
     $("#id_needed").change(this.search);
+    $("#id_poor").change(this.search);
     $("#count_per_category").change(this.search);
     $("#id_to_species").change(this.search);
 
@@ -252,6 +260,10 @@ ImageExplorer.prototype.init = function(containerId) {
 
         if (ImageExplorer.options.initialCriteria.countPerCategory) {
             $("#id_to_species").val(ImageExplorer.filterCriteria.countPerCategory);
+        }
+
+        if (ImageExplorer.options.initialCriteria.idPoor) {
+            $("#id_poor").prop("checked", ImageExplorer.filterCriteria.idPoor);
         }
     }
 

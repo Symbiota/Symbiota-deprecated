@@ -2,7 +2,7 @@
 include_once($serverRoot.'/config/dbconnection.php');
 
 class ImageExplorer{
-
+    private $debug = FALSE;
 	private $conn;
 	private $imgCnt = 0;
 
@@ -30,46 +30,7 @@ class ImageExplorer{
            unset($searchCriteria['taxon']);
         }
 		$sql = $this->getSql($searchCriteria);
-
-/* 
-explain SELECT DISTINCT i.imgid, ts.tidaccepted, i.url, i.thumbnailurl, i.originalurl, u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as photographer, i.caption, o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode, i.initialtimestamp 
-FROM images i 
-   LEFT JOIN taxa t ON i.tid = t.tid 
-   LEFT JOIN taxstatus ts ON t.tid = ts.tid 
-   LEFT JOIN users u ON i.photographeruid = u.uid 
-   LEFT JOIN omoccurrences o ON i.occid = o.occid 
-   LEFT JOIN omcollections c ON o.collid = c.collid 
-   LEFT JOIN omoccurverification v ON o.occid = v.occid 
-   WHERE  (
-            i.tid IN
-            (
-            SELECT DISTINCT tid FROM taxstatus
-            WHERE (taxauthid = 1) 
-                AND (tidaccepted = 51910 
-                     OR tidaccepted IN(
-                        SELECT DISTINCT ts.tid 
-                           FROM taxstatus ts 
-                                INNER JOIN taxaenumtree e ON ts.tid = e.tid 
-                           WHERE ts.taxauthid = 1 AND e.taxauthid = 1 AND ts.tid = ts.tidaccepted AND (e.parenttid = 51910 OR ts.parenttid = 51910) 
-                         )
-                    )
-            )
-            or i.tid IN (51910)
-          ) 
-          AND i.sortsequence < 500
-          AND 
-              (
-              (o.occid IS NULL AND t.rankid IN(220,230,240,260))
-              OR 
-                (
-                o.occid NOT IN ( SELECT occid FROM omoccurverification WHERE (category = "identification"))  
-                AND t.rankid IN(220,230,240,260)
-                )
-              OR (v.category = 'identification' AND v.ranking >= 5)
-              )
-    LIMIT 0,100
-*/
-
+        if ($this->debug) { echo "ImageExplorer.getImages sql=[$sql]"; }
 		$rs = $this->conn->query($sql);
 		if($rs){
 			while($r = $rs->fetch_assoc()){
@@ -221,13 +182,13 @@ FROM images i
 		    if(isset($searchCriteria['idNeeded']) && $searchCriteria['idNeeded']){
 	   		    $includeVerification = TRUE;
 	   		    // include occurrences with no verification of identification and an id of genus or higher or those with an identification verification of poor
-	   		    // differs from the query below only in rankid<220 and ranking<5
+	   		    // differs from the query below only in rankid<220 
 	   		    // complexity is added by futureproofing for use of omoccurrverification for categories other than identification, 
 	   		    // testing for null omoccurrverification isn't adequate.
 			    $sqlWhere .= "AND ( " . 
 			                 "   (o.occid NOT IN (SELECT occid FROM omoccurverification WHERE (category = \"identification\")) AND (t.rankid < 220 OR o.tidinterpreted IS NULL) ) " .
-			                 " OR " . 
-			                 "   (v.category = 'identification' AND v.ranking < 5) " . 
+			                 // "   OR " . 
+			                 // "   (v.category = 'identification' AND v.ranking < 5) " . 
 			                 " ) ";
 		    }
 		    //Identified to species or lower
@@ -237,9 +198,15 @@ FROM images i
 	   		    // differs from the query above only in rankid>=220 and ranking>=5
 			    $sqlWhere .= "AND ( (o.occid IS NULL AND t.rankid IN(220,230,240,260)) OR " . 
 			                 "   (o.occid NOT IN (SELECT occid FROM omoccurverification WHERE (category = \"identification\")) AND t.rankid IN(220,230,240,260)) " .
-			                 " OR " . 
+			                 "   OR " . 
 			                 "   (v.category = 'identification' AND v.ranking >= 5) " . 
 			                 " ) ";
+		    }
+            // identified with a low quality identification
+		    if(isset($searchCriteria['idPoor']) && $searchCriteria['idPoor']){
+	   		    $includeVerification = TRUE;
+	   		    // include occurrences with an identification verification of poor
+			    $sqlWhere .= "AND ( v.category = 'identification' AND v.ranking < 5 ) ";
 		    }
 		}
 
@@ -420,14 +387,26 @@ FROM images i
 		$sql = 'SELECT DISTINCT c.collid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode '.
 			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 			'INNER JOIN images i ON o.occid = i.occid ';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-            $retArr[] = (object)array(
-                'value' => $r->collid,
-                'label' => $r->instcode
-            );
+        $sql = 'SELECT count(i.imgid) as ct, c.collid, c.institutioncode, c.collectioncode ' .
+               ' FROM omcollections c '.
+               '    LEFT JOIN omoccurrences o ON c.collid = o.collid '.
+               '    LEFT JOIN images i ON o.occid = i.occid '. 
+               ' WHERE i.imgid is not null  '.
+               '       and i.sortsequence < 500 '.
+               ' GROUP BY c.collid, c.institutioncode, c.collectioncode '.
+               ' HAVING count(i.imgid) > 0 ';
+		$stmt = $this->conn->prepare($sql);
+        if ($stmt) { 
+            $stmt->bind_result($count,$collid,$instcode,$collcode);
+            $stmt->execute();
+  		    while($stmt->fetch()){
+              $retArr[] = (object)array(
+                  'value' => $collid,
+                  'label' => "$instcode-$collcode ($count)"
+              );
 		}
-		$rs->free();
+		   $stmt->close();
+        }
 		return json_encode($retArr);
 	}
 	
