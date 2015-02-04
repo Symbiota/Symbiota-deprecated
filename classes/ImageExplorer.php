@@ -16,7 +16,7 @@ class ImageExplorer{
 
 	/* 
 	 * Input: JSON array 
-	 * Input criteria: taxa (INT: tid), country (string), state (string), tag (string), 
+	 * Input criteria: taxon (INT: tid), country (string), state (string), tag (string), 
 	 *     idNeeded (INT: 0,1), collid (INT), photographer (INT: photographerUid), 
 	 *     cntPerCategory (INT: 0-2), start (INT), limit (INT) 
 	 *     e.g. {"state": {"Arizona", "New Mexico"},"taxa":{"Pinus"}}
@@ -24,7 +24,52 @@ class ImageExplorer{
 	 */
 	public function getImages($searchCriteria){
 		$retArr = array();
+        if (array_key_exists('taxon',$searchCriteria)) { 
+           // rewrite key "taxon" shown to users to that recognised for the fieldname "taxa".
+           $searchCriteria['taxa'] = $searchCriteria['taxon'];
+           unset($searchCriteria['taxon']);
+        }
 		$sql = $this->getSql($searchCriteria);
+
+/* 
+explain SELECT DISTINCT i.imgid, ts.tidaccepted, i.url, i.thumbnailurl, i.originalurl, u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as photographer, i.caption, o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode, i.initialtimestamp 
+FROM images i 
+   LEFT JOIN taxa t ON i.tid = t.tid 
+   LEFT JOIN taxstatus ts ON t.tid = ts.tid 
+   LEFT JOIN users u ON i.photographeruid = u.uid 
+   LEFT JOIN omoccurrences o ON i.occid = o.occid 
+   LEFT JOIN omcollections c ON o.collid = c.collid 
+   LEFT JOIN omoccurverification v ON o.occid = v.occid 
+   WHERE  (
+            i.tid IN
+            (
+            SELECT DISTINCT tid FROM taxstatus
+            WHERE (taxauthid = 1) 
+                AND (tidaccepted = 51910 
+                     OR tidaccepted IN(
+                        SELECT DISTINCT ts.tid 
+                           FROM taxstatus ts 
+                                INNER JOIN taxaenumtree e ON ts.tid = e.tid 
+                           WHERE ts.taxauthid = 1 AND e.taxauthid = 1 AND ts.tid = ts.tidaccepted AND (e.parenttid = 51910 OR ts.parenttid = 51910) 
+                         )
+                    )
+            )
+            or i.tid IN (51910)
+          ) 
+          AND i.sortsequence < 500
+          AND 
+              (
+              (o.occid IS NULL AND t.rankid IN(220,230,240,260))
+              OR 
+                (
+                o.occid NOT IN ( SELECT occid FROM omoccurverification WHERE (category = "identification"))  
+                AND t.rankid IN(220,230,240,260)
+                )
+              OR (v.category = 'identification' AND v.ranking >= 5)
+              )
+    LIMIT 0,100
+*/
+
 		$rs = $this->conn->query($sql);
 		if($rs){
 			while($r = $rs->fetch_assoc()){
@@ -87,7 +132,8 @@ class ImageExplorer{
 			$accArr = array_unique($this->getAcceptedTid($searchCriteria['taxa']));
 			if(count($accArr) == 1){
 				$targetTid = array_shift($accArr);
-				$sqlFrag = $this->getChildSql($targetTid);
+				//$sqlFrag = $this->getChildSql($targetTid);
+                $sqlFrag = $this->getChildTids($targetTid);
 				$sqlWhere .= 'AND (i.tid IN('.$sqlFrag.')) ';
 			}
 			elseif(count($accArr) > 1){
@@ -242,7 +288,7 @@ class ImageExplorer{
 		//$sqlStr .= 'ORDER BY i.sortsequence ';
 		//Set start and limit
 		$start = (isset($searchCriteria['start'])?$searchCriteria['start']:0);
-		$limit = (isset($searchCriteria['limit'])?$searchCriteria['limit']:50);
+		$limit = (isset($searchCriteria['limit'])?$searchCriteria['limit']:100);
 		$sqlStr .= 'LIMIT '.$start.','.$limit;
 
         //error_log($sqlStr);
@@ -259,7 +305,7 @@ class ImageExplorer{
 	
 	private function getAcceptedTid($inTidArr){
 		$retArr = array();
-		$sql = 'SELECT tidaccepted, tid FROM taxstatus WHERE taxauthid = 1 AND tid IN('.implode(',',$inTidArr).') ';
+		$sql = 'SELECT tidaccepted, tid FROM taxstatus WHERE taxauthid = 1 AND tid IN('.preg_replace('/^,+/','',implode(',',$inTidArr)).') ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->tid] = $r->tidaccepted;
@@ -281,6 +327,36 @@ class ImageExplorer{
 		return $sql;
 	}
 	
+    /** 
+     * Construct the same query as getChildSql, only execute the query and get the list of tids, 
+     * instead of returning the sql.  Nested query in this context ends up preventing use of 
+     * and index, and substatively slows down query on taxon names.
+     * 
+     * @param inTid the taxon id for which to find the list of all synonyms and their children.
+     * @return a list tids consisting of the provided tid, all synonyms and children.
+     */
+    private function getChildTids($inTid) { 
+        $result = "$inTid";
+        $comma = ',';
+		$sqlInner = 'SELECT DISTINCT ts.tid '.
+			'FROM taxstatus ts INNER JOIN taxaenumtree e ON ts.tid = e.tid '.
+			'WHERE ts.taxauthid = 1 AND e.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
+			'AND (e.parenttid = ? OR ts.parenttid = ? ) ';
+		$sql = 'SELECT DISTINCT tid FROM taxstatus '. 
+			'WHERE (taxauthid = 1) AND (tidaccepted = ? OR tidaccepted IN('.$sqlInner.'))';
+        $stmt = $this->conn->prepare($sql);
+        if ($stmt) { 
+           $stmt->bind_param('iii',$inTid,$inTid,$inTid);
+           $stmt->bind_result($tid);
+           $stmt->execute();
+           while ($stmt->fetch()) { 
+              $result .= $comma.$tid;
+           }      
+           $stmt->close();
+        } 
+        return $result;
+    }
+
 	private function getTaxaChildren($inTidArr){
 		//Grab all accepted children
 		$childArr = array();

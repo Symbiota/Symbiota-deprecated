@@ -50,7 +50,7 @@ if (!$done) {
   pageheader($agent);
   $am = new AgentManager();
   if ($am->isAgentEditor()) { 
-     echo "<div id='commandDiv'><a id='editLink'>Edit</a>&nbsp;<a id='viewLink'>View</a>&nbsp;<a id='createLink'>New</a></div>";
+     echo "<div id='commandDiv'><span class='link' id='editLink'>Edit</span>&nbsp;<span class='link' id='viewLink'>View</span>&nbsp;<span class='link' id='createLink'>New</span></div>";
      echo "
      <script type='text/javascript'>
         $('#editLink').click(function () {

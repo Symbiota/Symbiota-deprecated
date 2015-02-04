@@ -120,11 +120,11 @@ $imageExplorer = new ImageExplorer();
 
             var options = {
                 displayUrl : "rpc/displayimagesforview.php",
-                limit: 50,
+                limit: 100,
                 start: 0,
                 facets: [
                     {
-                        name: 'taxa',
+                        name: 'taxon',
                         source: taxaSuggest
                     },
                     { name: 'photographer',
@@ -179,6 +179,22 @@ $imageExplorer = new ImageExplorer();
                 imgExplorer.previousPage();
             });
 
+            $('#firstPage').click(function(event) {
+                imgExplorer.firstPage();
+            });
+
+            $('#lastPage').click(function(event) {
+                imgExplorer.lastPage();
+            });
+
+            $('#firstPage_bottom').click(function(event) {
+                imgExplorer.firstPage();
+            });
+
+            $('#lastPage_bottom').click(function(event) {
+                imgExplorer.lastPage();
+            });
+
             $('#displayOptions').click(function(event) {
                 $("#options" ).toggle('slide', 500 );
                 console.log($('#displayOptions').text());
@@ -221,4 +237,3 @@ include($serverRoot . '/footer.php');
 <div class="modal"></div>
 </body>
 </html>
-

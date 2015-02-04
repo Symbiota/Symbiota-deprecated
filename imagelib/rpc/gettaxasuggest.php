@@ -5,14 +5,15 @@ $con = MySQLiConnectionFactory::getCon("readonly");
 $retArr = Array();
 $q = $con->real_escape_string($_REQUEST['term']);
 
-$sql = 'SELECT tid, sciname FROM taxa '.
-	'WHERE sciname LIKE "'.$q.'%" ';
+$sql = 'SELECT count(t.tid) as ct, t.tid, t.sciname FROM taxa t '.
+    ' left join images i on t.tid = i.tid ' .
+	'WHERE i.tid is not null and t.sciname LIKE "'.$q.'%" group by t.tid, t.sciname ';
 //echo $sql;
 $result = $con->query($sql);
 while ($r = $result->fetch_object()) {
     $retArr[] = (object)array(
         'value' => $r->tid,
-        'label' => $r->sciname);
+        'label' => $r->sciname . ' ('. $r->ct . ')');
 }
 $con->close();
 echo json_encode($retArr);

@@ -109,6 +109,16 @@ div.menuitem a:hover {
 #innertext a:hover{
 
 }
+/* Spans that use javascript to add clickable link behaviors */
+span[class=link] { 
+	color: 		#2C405E;
+    text-decoration: none;	
+}
+
+span[class=link]:hover { 
+	color: black;
+    text-decoration: underline;	
+}
 
 /* Image thumbnails   */
 div.tndiv{
