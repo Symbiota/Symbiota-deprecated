@@ -10,7 +10,7 @@ $clManager->setClid($clid);
 
 ?>
 <!-- inner text -->
-<div id="innertext">
+<div id="innertext" style="background-color:white;">
 	<div style="float:right;">
 		<a href="#" onclick="toggle('addchilddiv')"><img src="../images/add.png" /></a>
 	</div>
