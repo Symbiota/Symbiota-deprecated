@@ -150,8 +150,9 @@ class SpecProcNlpSalix
 		$this->Label = preg_replace($Preg,"$1, $4",$this->Label);
 
 		//Connect some lines when joined by a connecting preposition or hyphen
-		$this->Label = preg_replace("(\b(of|to|by|at|in|over|under|on|from)\s?[\r\n]{1,2})i","$1 ",$this->Label);//Prepositions at end of line
-		$this->Label = preg_replace("([\r\n]{1,2}\b(of|to|by|at|in|over|under|on|from)\b)","$1",$this->Label);//Prepositions at start of line
+		$PrepList = "(of|to|by|at|in|over|under|on|from|along|beside|with|de|cerca|en|desde)";
+		$this->Label = preg_replace("(\b".$PrepList."\s?[\r\n]{1,2})i","$1 ",$this->Label);//Prepositions at end of line
+		$this->Label = preg_replace("([\r\n]{1,2}\b".$PrepList."\b)","$1",$this->Label);//Prepositions at start of line
 		$this->Label = preg_replace("(\b([A-Z]?[a-z]{2,10})- ?[\n\r]{1,2}([a-z]{2,10}))","$1$2",$this->Label);//Hyphen at end of line
 
 		
@@ -213,6 +214,8 @@ class SpecProcNlpSalix
 		$L=0;
 		while($L < count($this->LabelLines))
 			{
+			if(preg_match("(\A[^a-z]+(of|de|the)[^a-z]+\Z)",$this->LabelLines[$L]))
+				$this->LabelLines[$L] = strtoupper($this->LabelLines[$L]);
 			if(preg_match("(\b(INSTITUTE|INSTITUTO|MUNICIPAL|HERBARIUM|UNIVERSITY|BOTANICAL|GARDEN|RESERVA|NATIONAL|MUSEUM|MUSEO)\b)",$this->LabelLines[$L],$match))
 				{
 				$Found = preg_match("(([^A-Z]{2,20})\s([^a-z0-9]+)\Z)",$this->LabelLines[$L],$match);
@@ -1563,6 +1566,8 @@ class SpecProcNlpSalix
 						$RankArray[$L] -= 100; //Decrease if start word for another field
 					}
 				}
+			if($this->Assigned['sciname'] == $L)
+				$RankArray[$L] -= 100;
 			if($Field == 'recordedBy' && $this->LineStart[$L] == 'recordNumber')
 				{
 				//echo "Recordnumber<br>";
@@ -1893,7 +1898,6 @@ class SpecProcNlpSalix
 //******************* Country/State Functions ***************************
 //******************************************************************
 
-
 	function GetCountryState()
 		{
 		if($this->Results['decimalLatitude'] != "" && $this->Results['decimalLongitude'] != "")
@@ -1965,12 +1969,10 @@ class SpecProcNlpSalix
 		switch($Type)
 			{
 			case "stateProvince":
-				//$Preg = "((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*(\b(prov|province|state|estado)\b))i";
-				$Preg = "(\bprov|province|state|estado\b)";
+				$Preg = "(\b(prov|province|state|estado)\b[: ]*)";
 				break;
 			case "county":
-				//$Preg = "((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*(\b(County|Co)\b))i";
-				$Preg = "(\b(County|Co)\b)i";
+				$Preg = "(\b(County|Co)\b[: ]*)";
 				break;
 			default:
 				return false;
@@ -1980,17 +1982,28 @@ class SpecProcNlpSalix
 			if(preg_match($BadWords,$this->LabelLines[$L]))
 				continue;
 			//echo "Testing {$this->LabelLines[$L]}<br>";
+			//echo "Preg=$Preg<br>";
 			$Found = preg_match($Preg."i",$this->LabelLines[$L],$match);
-			
+			//$this->printr($match,"Match 0");
+
 			if($Found)
 				{
-				$FullPreg = $PrePreg."(".$Preg."))i" ;
+				//echo "Found<br>";
+				$FullPreg = $PrePreg.$Preg.")i" ;
 				$Found = preg_match($PrePreg."(".$Preg."))i",$this->LabelLines[$L],$match);
+				//echo $PrePreg."(".$Preg."))i<br>";
 				if($Found == 0)
 					{
 					$FullPreg = "(".$Preg.$PrePreg."))i";
 					//echo "Full = $FullPreg<br>";
+					//$this->printr($match,"Match 1");
 					$Found = preg_match($FullPreg,$this->LabelLines[$L],$match);
+					if($Found)
+						{
+						$match[1] = $match[4];
+						$match[2] = $match[5];
+						}
+					//$this->printr($match,"Match 2");
 					}
 				if($Found)
 					{
@@ -2023,26 +2036,20 @@ class SpecProcNlpSalix
 				{ //Found a county name on the label.  Check if $Name is a state that contains the county
 				//echo "Here 1<br>";
 				$County = $match[1]." ".$match[2];
-				//$this->CheckCounty($County, $State
-				$query = "SELECT s.stateName, s.stateId, cr.countryName, cr.countryId, cy.countyName FROM lkupstateprovince s inner join lkupcountry cr on cr.countryId = s.countryId INNER JOIN lkupcounty cy on cy.stateId = s.stateId WHERE s.stateName LIKE '$Name' AND cy.countyName like '$County'";
-				$result = $this->conn->query($query);
-				if($result->num_rows == 0)
+				if(!$this->CheckCounty($County, $Name, $match['Line']))
 					{
 					$County = $match[2];
-					$query = "SELECT s.stateName, s.stateId, cr.countryName, cr.countryId, cy.countyName FROM lkupstateprovince s inner join lkupcountry cr on cr.countryId = s.countryId INNER JOIN lkupcounty cy on cy.stateId = s.stateId WHERE s.stateName LIKE '$Name' AND cy.countyName like '$County'";
-					//echo "$query<br>";
-					$result = $this->conn->query($query);
-					if($result->num_rows > 0)
+					if(!$this->CheckCounty($County, $Name, $match['Line']))
 						{
-						$L = $match['Line'];
-						$Result = $result->fetch_assoc();
-						$this->AddToResults('county',$Result['countyName'],$L);
-						$this->AddToResults('country',$Result['countryName'],$L);
-						$this->AddToResults('stateProvince',$Result['stateName'],$L);
-						$this->LabelLines[$L] = trim(str_replace($match[0],"",$this->LabelLines[$L])," ,;:");
-						return true;
+						$County = $match[1];
+						if(!$this->CheckCounty($County, $Name, $match['Line']))
+							return true;
 						}
+					else
+						return true;
 					}
+				else
+					return true;
 				}
 			//Didn't find a county.  Just look for the state
 			$query = "SELECT s.stateName, s.stateId, cr.countryName, cr.countryId FROM lkupstateprovince s inner join lkupcountry cr on cr.countryId = s.countryId WHERE s.stateName LIKE '$Name'";
@@ -2057,10 +2064,7 @@ class SpecProcNlpSalix
 						{
 						if($this->CheckCoordinates($OneState['stateName']))
 							{
-							//$this->printr($OneState,"OneState");
-							//if($this->Results['stateProvince'] != "")
 								{
-								//echo "Checking county<br>";
 								$County = $this->ScanForCounty($OneState);
 								if($County != "")
 									{
@@ -2086,6 +2090,29 @@ class SpecProcNlpSalix
 				}
 			}
 		}
+	
+	private function CheckCounty($County, $State, $L)
+		{//Look for a match between the state and county.  If found, accept.
+		$match = array();
+		$query = "SELECT s.stateName, s.stateId, cr.countryName, cr.countryId, cy.countyName FROM lkupstateprovince s inner join lkupcountry cr on cr.countryId = s.countryId INNER JOIN lkupcounty cy on cy.stateId = s.stateId WHERE s.stateName LIKE '$State' AND cy.countyName like '$County'";
+		$result = $this->conn->query($query);
+		if($result->num_rows > 0)
+			{
+			//$L = $match['Line'];
+			$Result = $result->fetch_assoc();
+			$this->AddToResults('county',$Result['countyName'],$L);
+			$this->AddToResults('country',$Result['countryName'],$L);
+			$this->AddToResults('stateProvince',$Result['stateName'],$L);
+			if($L >= 0)
+				$this->LabelLines[$L] = trim(str_replace($County,"",$this->LabelLines[$L])," ,;:");
+			return true;
+			}
+
+		
+		
+		}
+	
+	
 	
 	private function CheckCoordinates($State)
 		{
@@ -2153,6 +2180,7 @@ class SpecProcNlpSalix
 	//*****************************************************************************
 	function ScanForCounty($OneState)
 		{//Given a state, find a county
+		//First look for the word "County"...
 		$BadCounties = array("island","park"); //These are much more likely to be false positives.
 		$query = "SELECT cy.countyName from lkupcounty cy INNER JOIN lkupstateprovince s on s.stateId=cy.stateId WHERE cy.stateId = ".$OneState['stateId'];
 		//echo $query."<br>";
@@ -2386,6 +2414,7 @@ class SpecProcNlpSalix
 				}
 			$this->SplitWordStatLine($L);
 			continue;
+			//echo "************************Should never be here***********************<br>";
 			$this->ScoreOneLine($L, $Field, $Score);// Field and Score are called by reference.
 			//echo "Final Score = $Score<br>";
 			if($Score > 50)
@@ -2459,17 +2488,29 @@ class SpecProcNlpSalix
 				}
 			//$this->printr($StatSums,"StatSums");
 			}
+		//$this->printr($ScoreArray,"SA");
+
 		//Get the value for the single last word
 		$w = count($WordsArray[0])-1;
 		//echo "Final word: {$WordsArray[0][$w][0]}<br>";
 		$ScoreArray = $this->ScoreTwoWords($WordsArray[0][$w][0],"");
-		//$this->printr($ScoreArray,"SA");
+		
+		
 		foreach($Fields as $F)
 			{
 			$FieldScoreArray[$w][$F] = $ScoreArray[$F];
 			$StatSums[$F] += $ScoreArray[$F];
 			}
-		
+		/*
+		foreach($WordsArray[0] as $w=>$Word)
+			{
+			echo "$Word[0], ";
+			foreach($Fields as $F)
+				echo $FieldScoreArray[$w][$F].",";
+			echo"<br>";
+			}
+		echo"<br>";
+		*/
 		if(count($FieldScoreArray) == 0)
 				return;
 		//Check for first/last words same field and larger than any other field for the rest of the words.
@@ -2707,7 +2748,7 @@ class SpecProcNlpSalix
 		/*
 		$this->printr($Fields);
 		echo "{$this->LabelLines[$L]}<br>";
-		for($w=0;$w < count($FieldScoreArray);$w++)
+		for($w=0;$w < count($FieldScoreArray)-1;$w++)
 			{
 			echo $WordsArray[0][$w][0]." ".$WordsArray[0][$w+1][0];
 			echo " {$ResultFields[$w]}, ";
@@ -2960,6 +3001,10 @@ class SpecProcNlpSalix
 	//******************************************************************
 	private function AddToResults($Field, $String, $L)
 		{ //Set $Field results to $String.  Mark Line $L as used for this field
+		$Preps = "(\b(of|to|by|at|in|over|under|on|from|along|beside|with)[ \r\n]{0,3}\Z)";
+		//preg_match($Preps,$this->Results[$Field],$match);
+		//$this->printr($match,"PrepMatch");
+		
 		if($Field == "recordedBy" && $this->Results['recordedBy'] != "")
 			{//Separate associated collectors from recordedBy
 			$this->AddToResults('associatedCollectors',$String,$L);  //Recursive call
@@ -2980,12 +3025,20 @@ class SpecProcNlpSalix
 			$this->Results[$Field] = $String;
 			return;
 			}
-		if(array_search($Field, array("associatedCollectors","identifiedBy","associatedTaxa")) !== false && $this->Results[$Field] != "")
+		if($this->Results[$Field] == "")
+			{
+			$this->Results[$Field] = $String;
+			return;
+			}
+		if(array_search($Field, array("associatedCollectors","identifiedBy","associatedTaxa")) !== false)
 			$this->Results[$Field] .= "; ".$String;  //Append
 		else if($this->Results[$Field] != "")
-			$this->Results[$Field] .= ", ".$String;
-		else
-			$this->Results[$Field] = $String;
+			{
+			//if(preg_match($Preps,$this->Results[$Field]) != 0)
+			//	$this->Results[$Field] .= " ".$String;
+			//else
+				$this->Results[$Field] .= ", ".$String;
+			}
 		}
 		
 		
