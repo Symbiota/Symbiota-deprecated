@@ -116,6 +116,16 @@ a:hover{
     text-decoration: underline;
 }
 
+/* Spans that use javascript to add clickable link behaviors */
+span[class=link] { 
+	color: 		#2C405E;
+    text-decoration: none;	
+}
+
+span[class=link]:hover { 
+	color: black;
+    text-decoration: underline;	
+}
 
 /* General Image thumbnails   */
 div.tndiv{

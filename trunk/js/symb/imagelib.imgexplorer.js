@@ -38,21 +38,35 @@ ImageExplorer.prototype.search = function(query, searchCollection) {
         $('body').removeClass("loading");
 
         var toValue = ImageExplorer.currStart+ImageExplorer.currLimit;
-        if($('#imgCnt').val() < toValue) toValue = $('#imgCnt').val();
-        $('#count').html(ImageExplorer.currStart + " - " + toValue + " of " + $('#imgCnt').val() + " images")
-        $('#count_bottom').html(ImageExplorer.currStart + " - " + toValue + " of " + $('#imgCnt').val() + " images")
+        var page = toValue / ImageExplorer.options.limit;
+        var totalPages = Math.ceil($('#imgCnt').val() / ImageExplorer.options.limit);
 
+        if($('#imgCnt').val() < toValue) toValue = $('#imgCnt').val();
+        $('#count').html(ImageExplorer.currStart + " - " + toValue + " of " + $('#imgCnt').val() + " images"); 
+        $('#count_bottom').html(ImageExplorer.currStart + " - " + toValue + " of " + $('#imgCnt').val() + " images");
+
+        $('#pages').html(" page " + page + " of " + totalPages); 
+        $('#pages_bottom').html(" page " + page + " of " + totalPages); 
 
         if (parseFloat($('#imgCnt').val()) <= ImageExplorer.currLimit) {
+            // only one page, so don't display page navigation links
             $("#previousPage").css("display","none");
             $("#nextPage").css("display","none");
             $("#previousPage_bottom").css("display","none");
             $("#nextPage_bottom").css("display","none");
+            $("#firstPage").css("display","none");
+            $("#lastPage").css("display","none");
+            $("#firstPage_bottom").css("display","none");
+            $("#lastPage_bottom").css("display","none");
         } else {
             $("#previousPage").css("display","inline");
             $("#nextPage").css("display","inline");
             $("#previousPage_bottom").css("display","inline");
             $("#nextPage_bottom").css("display","inline");
+            $("#firstPage").css("display","inline");
+            $("#lastPage").css("display","inline");
+            $("#firstPage_bottom").css("display","inline");
+            $("#lastPage_bottom").css("display","inline");
         }
 
         // hack to get autocomplete to close after a search
@@ -61,6 +75,31 @@ ImageExplorer.prototype.search = function(query, searchCollection) {
     });
 }
 
+ImageExplorer.prototype.firstPage = function() {
+    var start = 0;
+
+    if (start < parseFloat($('#imgCnt').val())) {
+        ImageExplorer.filterCriteria.start = start;
+        this.search();
+
+        ImageExplorer.currStart = start;
+    }
+
+}
+ImageExplorer.prototype.lastPage = function() {
+    var totalPages = Math.ceil(parseFloat($('#imgCnt').val()) / ImageExplorer.options.limit);
+    var start = (totalPages -1) * ImageExplorer.options.limit;
+    if (start < 0) { 
+       start = 0;
+    }
+    if (start < parseFloat($('#imgCnt').val())) {
+        ImageExplorer.filterCriteria.start = start;
+        this.search();
+
+        ImageExplorer.currStart = start;
+    }
+
+}
 ImageExplorer.prototype.nextPage = function() {
     var start = ImageExplorer.currStart + ImageExplorer.options.limit;
 
@@ -123,7 +162,7 @@ ImageExplorer.prototype.init = function(containerId) {
     controlsHtml += "</div>";
     controlsHtml += "<div id=\"pagination\">";
     controlsHtml += "    <div style=\"float:right;\">";
-    controlsHtml += "        <span id=\"previousPage\"><a href=\"#\"><< Previous Page</a></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span id=\"nextPage\"><a href=\"#\">Next Page >></a></span>";
+    controlsHtml += "        <span class=\"link\" id=\"firstPage\">&lt;&lt; First</span>&nbsp;<span class=\"link\" id=\"previousPage\"> Previous Page</span>&nbsp;<span id=\"pages\"></span>&nbsp;<span class=\"link\" id=\"nextPage\">Next Page</span>&nbsp;<span class=\"link\" id=\"lastPage\">Last &gt;&gt;</span>";
     controlsHtml += "    <\/div>";
     controlsHtml += "    <div id=\"count\" style=\"font-weight:bold;\">Images: 0 - 100 of 136<\/div>";
     controlsHtml += "</div>";
@@ -132,7 +171,7 @@ ImageExplorer.prototype.init = function(containerId) {
     controlsHtml += "<div id=\"pagination_bottom\" style=\"clear:both;margin-top:40px\">";
     controlsHtml += "<hr />";
     controlsHtml += "    <div style=\"float:right;\">";
-    controlsHtml += "        <span id=\"previousPage_bottom\"><a href=\"#\"><< Previous Page</a></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span id=\"nextPage_bottom\"><a href=\"#\">Next Page >></a></span>";
+    controlsHtml += "        <span class=\"link\" id=\"firstPage_bottom\">&lt;&lt; First</span>&nbsp;<span class=\"link\" id=\"previousPage_bottom\"> Previous Page</span>&nbsp;<span id=\"pages_bottom\"></span>&nbsp;<span class=\"link\" id=\"nextPage_bottom\">Next Page</span>&nbsp;<span class=\"link\" id=\"lastPage_bottom\">Last &gt;&gt;</span>";
     controlsHtml += "    <\/div>";
     controlsHtml += "    <div id=\"count_bottom\" style=\"font-weight:bold;\">Images: 0 - 100 of 136<\/div>";
     controlsHtml += "</div>";
