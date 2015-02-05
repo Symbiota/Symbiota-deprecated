@@ -28,7 +28,7 @@ class GamesFlashcard{
 			'FROM taxa t INNER JOIN '.($this->clid?"fmchklsttaxalink":"fmdyncltaxalink").' ctl ON t.tid = ctl.tid '.
 			'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'WHERE '.($this->clid?"ctl.clid = ".$this->clid:"ctl.dynclid = ".$this->dynClid).' AND ts.taxauthid = 1 ';
-		if($this->taxonFilter) $sql .= 'AND (ts.UpperTaxonomy = "'.$this->taxonFilter.'" OR ts.Family = "'.$this->taxonFilter.'" OR t.sciname Like "'.$this->taxonFilter.'%") ';
+		if($this->taxonFilter) $sql .= 'AND (ts.Family = "'.$this->taxonFilter.'" OR t.sciname Like "'.$this->taxonFilter.'%") ';
 		$sql .= 'ORDER BY RAND() LIMIT 1000 ';
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
@@ -106,8 +106,7 @@ class GamesFlashcard{
 
 	public function echoTaxonFilterList(){
 		$returnArr = Array();
-		$upperList = Array();
-		$sqlFamily = "SELECT DISTINCT ts.uppertaxonomy, ".($this->clid?"IFNULL(ctl.familyoverride,ts.Family)":"ts.Family")." AS family ".
+		$sqlFamily = "SELECT DISTINCT ".($this->clid?"IFNULL(ctl.familyoverride,ts.Family)":"ts.Family")." AS family ".
 			"FROM (taxa t INNER JOIN taxstatus ts ON t.TID = ts.TID) ".
 			"INNER JOIN ".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl ON t.TID = ctl.TID ".
 			"WHERE (ts.taxauthid = 1 AND ctl.".
@@ -116,7 +115,6 @@ class GamesFlashcard{
 		$rsFamily = $this->conn->query($sqlFamily);
 		while ($row = $rsFamily->fetch_object()){
 			$returnArr[] = $row->family;
-			$upperList[$row->uppertaxonomy] = "";
 		}
 		$rsFamily->close();
 		$sqlGenus = "SELECT DISTINCT t.unitname1 ".
@@ -129,10 +127,7 @@ class GamesFlashcard{
 		}
 		$rsGenus->close();
 		natcasesort($returnArr);
-		ksort($upperList);
-		$upperList["-----------------------------------------------"] = "";
 		$returnArr["-----------------------------------------------"] = "";
-		$returnArr = array_merge(array_keys($upperList),$returnArr);
 		foreach($returnArr as $value){
 			echo "<option ";
 			if($this->taxonFilter && $this->taxonFilter == $value){
