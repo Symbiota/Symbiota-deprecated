@@ -27,7 +27,7 @@ else{
 }
 ?>
 
-<div id="innertext">
+<div id="innertext" style="background-color:white;">
 	<div style='float:left;font-weight:bold;margin-left:5px'>
 		 
 		<?php

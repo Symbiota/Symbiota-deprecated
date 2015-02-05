@@ -47,11 +47,12 @@ else{
 				}
 				if(footPolyArr.length > 0){
 					for (i in footPolyArr) {
-						footPolyPaths.push(new google.maps.LatLng(footPolyArr[i].k, footPolyArr[i].A));
-						polyBounds.extend(new google.maps.LatLng(footPolyArr[i].k, footPolyArr[i].A));
+						var keys = Object.keys(footPolyArr[i]);
+						footPolyPaths.push(new google.maps.LatLng(footPolyArr[i][keys[0]], footPolyArr[i][keys[1]]));
+						polyBounds.extend(new google.maps.LatLng(footPolyArr[i][keys[0]], footPolyArr[i][keys[1]]));
 					}
-					footPolyPaths.push(new google.maps.LatLng(footPolyArr[0].k, footPolyArr[0].A));
-					polyBounds.extend(new google.maps.LatLng(footPolyArr[0].k, footPolyArr[0].A));
+					footPolyPaths.push(new google.maps.LatLng(footPolyArr[0][keys[0]], footPolyArr[0][keys[1]]));
+					polyBounds.extend(new google.maps.LatLng(footPolyArr[0][keys[0]], footPolyArr[0][keys[1]]));
 				}
 				var dmLatLng = new google.maps.LatLng(latCenter,lngCenter);
 		    	var dmOptions = {
@@ -151,7 +152,6 @@ else{
 					map.fitBounds(polyBounds);
 					map.panToBounds(polyBounds);
 				}
-				
 			}
 	
 	        function clearSelection() {

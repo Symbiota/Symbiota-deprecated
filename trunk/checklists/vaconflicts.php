@@ -16,7 +16,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 }
 
 ?>
-<div id="innertext">
+<div id="innertext" style="background-color:white;">
 	<h2>Possible Voucher Conflicts</h2>
 	<div style="margin-bottom:10px;">
 		List of specimen vouchers where the current identifications conflict with the checklist. 

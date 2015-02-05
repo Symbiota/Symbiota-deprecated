@@ -294,7 +294,6 @@ $voucherProjects = $clManager->getVoucherProjects();
 									?>
 									<div id="polysavebox" style="display:none;clear:both;">
 										<b>Polygon coordinates ready to save.</b>
-										<input type="hidden" id="footprintWKT" name="eclfootprintWKT" value='<?php echo $clArray["footprintWKT"]; ?>' />
 									</div>
 									<div style="float:right;margin:8px 0px 0px 10px;cursor:pointer;" onclick="openMappingPolyAid();">
 										<img src="../images/world40.gif" style="width:12px;" />
@@ -311,6 +310,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 							<div>
 								<input type='submit' name='submitaction' id='editsubmit' value='Submit Changes' />
 							</div>
+							<input type="hidden" id="footprintWKT" name="eclfootprintWKT" value='<?php echo $clArray["footprintWKT"]; ?>' />
 							<input type="hidden" name="tabindex" value="1" />
 							<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
 							<input type="hidden" name="pid" value="<?php echo $pid; ?>" />

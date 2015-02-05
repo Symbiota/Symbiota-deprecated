@@ -54,7 +54,7 @@ $smManager = new SiteMapManager();
 				
 			</ul>
 				
-			<h2>Image Library</h2>
+			<div style="margin-top:10px;"><h2>Image Library</h2></div>
 			<ul>
 				<li><a href="imagelib/index.php">Image Library</a></li>
 				<li><a href="imagelib/photographers.php">Contributing Photographers</a></li>
@@ -65,7 +65,7 @@ $smManager = new SiteMapManager();
 			$clList = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
 			$projList = $smManager->getProjectList();
 			if($projList){
-				echo '<h2>Biotic Inventory Projects</h2><ul>';
+				echo '<div style="margin-top:10px;"><h2>Biotic Inventory Projects</h2></div><ul>';
 				foreach($projList as $pid => $pArr){
 					echo "<li><a href='projects/index.php?proj=".$pid."'>".$pArr["name"]."</a></li>\n";
 					echo "<ul><li>Manager: ".$pArr["managers"]."</li></ul>\n";
@@ -74,7 +74,7 @@ $smManager = new SiteMapManager();
 			}
 			?>
 
-			<h2>Dynamic Species Lists</h2>
+			<div style="margin-top:10px;"><h2>Dynamic Species Lists</h2></div>
 			<ul>
 				<li>
 					<a href="checklists/dynamicmap.php?interface=checklist">
