@@ -7,7 +7,14 @@ class SpecEditReviewManager {
 	private $conn;
 	private $collId;
 	private $collAcronym;
-	private $recCnt=0;
+
+	private $sqlBase;
+	private $appliedStatusFilter;
+	private $reviewStatusFilter;
+	private $editorUidFilter;
+	private $queryOccidFilter;
+	private $pageNumber = 0;
+	private $limitNumber;
 
 	function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -32,55 +39,69 @@ class SpecEditReviewManager {
 				}
 				$collName .= ')';
 			}
-			$rs->close();
+			$rs->free();
 		}
 		return $collName;
 	}
 
-	public function getEditArr($aStatus, $rStatus, $eUid, $queryOccid, $pageNumber = 0, $limitNumber = 100){
-		if(!$this->collId) return;
-		$retArr = Array();
-		//Build SQL WHERE fragment
-		$sqlBase = 'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
-			'INNER JOIN users u ON e.uid = u.uid '.
-			'WHERE (o.collid = '.$this->collId.') ';
-		if($aStatus === '0' || $aStatus == 1) $sqlBase .= 'AND e.appliedstatus = '.$aStatus.' ';
-		if($rStatus){
-			$sqlBase .= 'AND (e.reviewstatus IN('.$rStatus.')) ';
-		}
-		if($eUid && is_numeric($eUid)){
-			$sqlBase .= 'AND (e.uid = '.$eUid.') ';
-		}
-		if($queryOccid && is_numeric($queryOccid)){
-			$sqlBase .= 'AND (e.occid = '.$queryOccid.') ';
-		}
-		//Grab full return count
-		$rsCnt = $this->conn->query('SELECT COUNT(e.ocedid) AS fullcnt '.$sqlBase);
+	public function getRecCnt(){
+		if(!$this->sqlBase) $this->setSqlBase();
+		$sql = 'SELECT COUNT(e.ocedid) AS fullcnt '.$this->sqlBase;
+		$rsCnt = $this->conn->query($sql);
 		if($rCnt = $rsCnt->fetch_object()){
-			$this->recCnt = $rCnt->fullcnt;
+			$recCnt = $rCnt->fullcnt;
 		}
 		$rsCnt->free();
-		//Grab records
-		$sql = 'SELECT e.ocedid,e.occid,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
-			'CONCAT_WS(", ",u.lastname,u.firstname) AS username, e.initialtimestamp ';
-		$sql .= $sqlBase.'ORDER BY e.initialtimestamp DESC, e.fieldname ASC ';
-		$sql .= 'LIMIT '.($pageNumber*$limitNumber).','.($limitNumber+1);
-		//echo '<div>'.$sql.'</div>';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$ocedid = $r->ocedid;
-			$occId = $r->occid;
-			$retArr[$occId][$ocedid]['catnum'] = $r->catalognumber;
-			$retArr[$occId][$ocedid]['fname'] = $r->fieldname;
-			$retArr[$occId][$ocedid]['fvalueold'] = $r->fieldvalueold;
-			$retArr[$occId][$ocedid]['fvaluenew'] = $r->fieldvaluenew;
-			$retArr[$occId][$ocedid]['rstatus'] = $r->reviewstatus;
-			$retArr[$occId][$ocedid]['astatus'] = $r->appliedstatus;
-			$retArr[$occId][$ocedid]['uname'] = $r->username;
-			$retArr[$occId][$ocedid]['tstamp'] = $r->initialtimestamp;
+		return $recCnt;
+	}
+
+	public function getEditArr(){
+		if(!$this->sqlBase) $this->setSqlBase();
+		$retArr = Array();
+		if($this->sqlBase){
+			//Grab records
+			$sql = 'SELECT e.ocedid,e.occid,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
+				'CONCAT_WS(", ",u.lastname,u.firstname) AS username, e.initialtimestamp '.
+				$this->sqlBase.'ORDER BY e.initialtimestamp DESC, e.fieldname ASC '.
+				'LIMIT '.($this->pageNumber*$this->limitNumber).','.($this->limitNumber+1);
+			//echo '<div>'.$sql.'</div>';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$ocedid = $r->ocedid;
+				$occId = $r->occid;
+				$retArr[$occId][$ocedid]['catnum'] = $r->catalognumber;
+				$retArr[$occId][$ocedid]['fname'] = $r->fieldname;
+				$retArr[$occId][$ocedid]['fvalueold'] = $r->fieldvalueold;
+				$retArr[$occId][$ocedid]['fvaluenew'] = $r->fieldvaluenew;
+				$retArr[$occId][$ocedid]['rstatus'] = $r->reviewstatus;
+				$retArr[$occId][$ocedid]['astatus'] = $r->appliedstatus;
+				$retArr[$occId][$ocedid]['uname'] = $r->username;
+				$retArr[$occId][$ocedid]['tstamp'] = $r->initialtimestamp;
+			}
+			$rs->free();
 		}
-		$rs->free();
 		return $retArr;
+	}
+	
+	private function setSqlBase(){
+		//Build SQL WHERE fragment
+		if($this->collId){
+			$this->sqlBase = 'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
+				'INNER JOIN users u ON e.uid = u.uid '.
+				'WHERE (o.collid = '.$this->collId.') ';
+			if($this->appliedStatusFilter === 0 || $this->appliedStatusFilter == 1){
+				$this->sqlBase .= 'AND e.appliedstatus = '.$this->appliedStatusFilter.' ';
+			}
+			if($this->reviewStatusFilter){
+				$this->sqlBase .= 'AND (e.reviewstatus IN('.$this->reviewStatusFilter.')) ';
+			}
+			if($this->editorUidFilter){
+				$this->sqlBase .= 'AND (e.uid = '.$this->editorUidFilter.') ';
+			}
+			if($this->queryOccidFilter){
+				$this->sqlBase .= 'AND (e.occid = '.$this->queryOccidFilter.') ';
+			}
+		}
 	}
 	
 	public function applyAction($reqArr){
@@ -215,9 +236,42 @@ class SpecEditReviewManager {
 	        exit();
 		}
 	}
+
+	//Setters and getters
+	public function setAppliedStatusFilter($status){
+		if(is_numeric($status)){
+			$this->appliedStatusFilter = $status;
+		}
+	}
+
+	public function setReviewStatusFilter($status){
+		if(is_numeric($status)){
+			$this->reviewStatusFilter = $status;
+		}
+	}
+
+	public function setEditorUidFilter($f){
+		if(is_numeric($f)){
+			$this->editorUidFilter = $f;
+		}
+	}
 	
-	public function getRecCnt(){
-		return $this->recCnt;
+	public function setQueryOccidFilter($num){
+		if(is_numeric($num)){
+			$this->queryOccidFilter = $num;
+		}
+	}
+
+	public function setPageNumber($num){
+		if(is_numeric($num)){
+			$this->pageNumber = $num;
+		}
+	}
+
+	public function setLimitNumber($limit){
+		if(is_numeric($limit)){
+			$this->limitNumber = $limit;
+		}
 	}
 
 	public function getEditorList(){

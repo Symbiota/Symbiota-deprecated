@@ -2,6 +2,10 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecEditReviewManager.php');
 
+if(!$symbUid){
+	header('Location: ../../profile/index.php?refurl=../collections/editor/editreviewer.php?'.$_SERVER['QUERY_STRING']);
+}
+
 $collId = $_REQUEST['collid'];
 $submitStr = array_key_exists('submitstr',$_REQUEST)?$_REQUEST['submitstr']:'';
 $mode = array_key_exists('mode',$_REQUEST)?$_REQUEST['mode']:'';
@@ -13,12 +17,15 @@ $queryOccid = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:'';
 $pageNum = array_key_exists('pagenum',$_REQUEST)?$_REQUEST['pagenum']:'0';
 $limitCnt = array_key_exists('limitcnt',$_REQUEST)?$_REQUEST['limitcnt']:'1000';
 
-if(!$symbUid){
-	header('Location: ../../profile/index.php?refurl=../collections/editor/editreviewer.php?'.$_SERVER['QUERY_STRING']);
-}
-
 $reviewManager = new SpecEditReviewManager();
 $collName = $reviewManager->setCollId($collId);
+$reviewManager->setAppliedStatusFilter($faStatus);
+$reviewManager->setReviewStatusFilter($frStatus);
+$reviewManager->setEditorUidFilter($editorUid);
+$reviewManager->setQueryOccidFilter($queryOccid);
+$reviewManager->setPageNumber($pageNum);
+$reviewManager->setLimitNumber($limitCnt);
+
 
 $editable = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
@@ -215,7 +222,7 @@ header("Content-Type: text/html; charset=".$charset);
 										<th>Timestamp</th>
 									</tr>
 									<?php 
-									$editArr = $reviewManager->getEditArr($faStatus, $frStatus, $editorUid, $queryOccid, $pageNum, $limitCnt);
+									$editArr = $reviewManager->getEditArr();
 									if($editArr){
 										$recCnt = 0;
 										foreach($editArr as $occid => $edits){

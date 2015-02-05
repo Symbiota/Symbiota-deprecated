@@ -150,9 +150,7 @@ class ChecklistManager {
 		if($this->showImages && $retLimit) $retLimit = $this->imageLimit;
 		if(!$this->basicSql) $this->setClSql();
 		$result = $this->conn->query($this->basicSql);
-		//echo $this->basicSql; 
 		while($row = $result->fetch_object()){
-			$this->filterArr[$row->uppertaxonomy] = "";
 			$family = strtoupper($row->family);
 			if(!$family) $family = 'Family Incertae Sedis';
 			$this->filterArr[$family] = '';
@@ -431,58 +429,38 @@ class ChecklistManager {
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
-			if($this->thesFilter){
-				//Filter checklist through thesaurus
-				$this->basicSql = 'SELECT DISTINCT t.tid, ctl.clid, ts.uppertaxonomy, ts.family, '. 
-					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
-					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) '.
-					'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = ts.tid '.
-					'LEFT JOIN fmchklstchildren ch ON ctl.clid = ch.clid '.
-			  		'WHERE (ctl.clid IN ('.$clidStr.')) AND (ts.taxauthid = '.$this->thesFilter.')';
-			}
-			else{
-				//Raw checklist without filtering through checklist
-				$this->basicSql = 'SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, '.
-					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
-					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
-					'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
-				'WHERE (ts.taxauthid = 1) AND (ctl.clid IN ('.$clidStr.'))';
-			}
+			$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
+				't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
+		  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.clid IN ('.$clidStr.')) ';
 		}
 		else{
-			if($this->thesFilter > 1){
-				$this->basicSql = 'SELECT t.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author '.
-					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) '.
-					'INNER JOIN fmdyncltaxalink ctl ON ctl.tid = ts.tid '.
-	    	  		'WHERE (ctl.dynclid = '.$this->dynClid.') AND (ts.taxauthid = '.$this->thesFilter.')';
-			}
-			else{
-				$this->basicSql = 'SELECT t.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author '.
-					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
-					'INNER JOIN fmdyncltaxalink ctl ON ctl.tid = t.tid '.
-	    	  		'WHERE (ts.taxauthid = 1) AND (ctl.dynclid = '.$this->dynClid.')';
-			}
+			$this->basicSql = 'SELECT t.tid, ts.family, t.sciname, t.author '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'INNER JOIN fmdyncltaxalink ctl ON t.tid = ctl.tid '.
+    	  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'0').') AND (ctl.dynclid = '.$this->dynClid.') ';
 		}
 		if($this->taxonFilter){
 			if($this->searchCommon){
-				$this->basicSql .= ' AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE (v.vernacularname LIKE "%'.$this->taxonFilter.'%"))) ';
+				$this->basicSql .= 'AND ts.tidaccepted IN(SELECT ts2.tidaccepted FROM taxavernaculars v INNER JOIN taxstatus ts2 ON v.tid = ts2.tid WHERE (v.vernacularname LIKE "%'.$this->taxonFilter.'%")) ';
 			}
 			else{
-				$this->basicSql .= " AND ((ts.uppertaxonomy = '".$this->taxonFilter."') ";
-				if($this->clid && $this->thesFilter){
-					$this->basicSql .= "OR (IFNULL(ctl.familyoverride,ts.family) = '".$this->taxonFilter."') ";
-				}
-				else{
-					$this->basicSql .= "OR (family = '".$this->taxonFilter."') ";
+				//Search direct name, which is particularly good for a genera term
+				$sqlWhere = 'OR (t.SciName Like "'.$this->taxonFilter.'%") ';
+				if($this->clid && (substr($this->taxonFilter,-5) == 'aceae' || substr($this->taxonFilter,-4) == 'idae')){
+					//Include taxn filter in familyoverride
+					$sqlWhere .= "OR (ctl.familyoverride = '".$this->taxonFilter."') ";
 				}
 				if($this->searchSynonyms){
-					$this->basicSql .= "OR (t.tid IN(SELECT tsb.tid FROM (taxa ta INNER JOIN taxstatus tsa ON ta.tid = tsa.tid) ".
-						"INNER JOIN taxstatus tsb ON tsa.tidaccepted = tsb.tidaccepted ".
-						"WHERE (tsa.uppertaxonomy = '".$this->taxonFilter."') OR (ta.sciname Like '".$this->taxonFilter."%')))) ";
+					$sqlWhere .= "OR (ts.tidaccepted IN(SELECT ts2.tidaccepted FROM taxa t2 INNER JOIN taxstatus ts2 ON t2.tid = ts2.tid ".
+						"WHERE (t2.sciname Like '".$this->taxonFilter."%'))) ";
 				}
-				else{
-					$this->basicSql .= "OR (t.SciName Like '".$this->taxonFilter."%')) ";
-				}
+				//Include parents
+				$sqlWhere .= 'OR (t.tid IN(SELECT e.tid '.
+					'FROM taxa t3 INNER JOIN taxaenumtree e ON t3.tid = e.parenttid '.  
+					'WHERE (e.taxauthid = 1) AND (t3.sciname = "'.$this->taxonFilter.'")))';
+				if($sqlWhere) $this->basicSql .= 'AND ('.substr($sqlWhere,2).') ';
 			}
 		}
 		$this->basicSql .= " ORDER BY family, sciname";
@@ -499,7 +477,7 @@ class ChecklistManager {
 	}
 
 	public function setTaxonFilter($tFilter){
-		$this->taxonFilter = $tFilter;
+		$this->taxonFilter = strtolower($tFilter);
 	}
 	
 	public function setShowAuthors($value = 1){
@@ -556,7 +534,7 @@ class ChecklistManager {
 				$this->pid = $r->pid;
 				$this->projName = $this->cleanOutStr($r->projname);
 			}
-			$rs->close();
+			$rs->free();
 		}
 		else{
 			trigger_error('ERROR: Unable to project => SQL: '.$sql, E_USER_WARNING);
