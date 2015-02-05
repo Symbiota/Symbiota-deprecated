@@ -53,77 +53,9 @@ if (!$fileExists) {
         $endpoint = FPNetworkFactory::getSparqlEndpoint();
 
         // returns query result formatted as html
-        $results = json_decode($endpoint->getAnnotations($_GET));
+        $results = $endpoint->getAnnotations($_GET);
+        echo $results;
 
-        $annotations = array();
-        $responses = array();
-
-        foreach ($results as $result) {
-            if (isset($result->describesObject)) {
-                $responses[] = $result;
-            } else {
-                $annotations[] = $result;
-            }
-        }
-
-        foreach ($annotations as $annotation) {
-            echo "<h1>" . $annotation->scientificName . " - (" . $annotation->scientificNameAuthorship . ")</h1>";
-            echo "<p><a href=\"includes/response.php?uri=" . $annotation->uri . "\" onclick=\"window.open(this.href, 'popupwindow', 'width=500,height=400'); return false;\">Respond</a><br />";
-            echo "<a href=\"".CLIENTHELPER_ENDPOINT."/clientHelper/getAnnotation/?uri=" . $annotation->uri . "\" target=\"_blank\">View</a><br /></p>";
-            ?>
-            <table>
-                <tr>
-                    <td><b>Created By:</b></td>
-                    <td style="padding-right:35px;"><? echo $annotation->createdBy ?></td>
-                    <td><b>Created On:</b></td>
-                    <td><? echo $annotation->date ?></td>
-                </tr>
-                <tr>
-                    <td><b>Collection Code:</b></td>
-                    <td style="padding-right:35px;"><? echo $_GET['collectioncode'] ?></td>
-                    <td><b>Catalog Number:</b></td>
-                    <td><? echo $_GET['catalognumber'] ?></td>
-                </tr>
-                <tr>
-                    <td><b>Institution Code:</b></td>
-                    <td style="padding-right:35px;"><? echo $_GET['institutioncode'] ?></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><b>Date Identified:</b></td>
-                    <td style="padding-right:35px;"><? echo $annotation->dateIdentified ?></td>
-                    <td><b>Identified By:</b></td>
-                    <td><? echo $annotation->identifiedBy ?></td>
-                </tr>
-            </table>
-            <?
-
-            foreach ($responses as $response) {
-                if ($response->describesObject == $annotation->uri) {
-                    ?>
-                    <ul>
-                        <li>
-                            <table>
-                                <tr>
-                                    <td><b>Created By:</b></td>
-                                    <td style="padding-right:35px;"><? echo $response->createdBy ?></td>
-                                    <td><b>Created On:</b></td>
-                                    <td><? echo $response->date ?></td>
-                                </tr>
-                                <tr>
-                                    <td><b>Opinion:</b></td>
-                                    <td style="padding-right:35px;"><? echo $response->opinionText ?></td>
-                                    <td><b>Polarity:</b></td>
-                                    <td><? echo $response->polarity ?></td>
-                                </tr>
-                            </table>
-                        </li>
-                    </ul>
-                <?
-                }
-            }
-        }
     } else {
         throw new Exception("catalognumber and either collectioncode or institutioncode required for \"Annotations\" tab view.");
     }
