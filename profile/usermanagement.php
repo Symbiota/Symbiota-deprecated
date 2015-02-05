@@ -141,7 +141,7 @@ if($isAdmin){
 						<div style="clear:both;margin:0px 0px 20px 30px;">
 							<a href="usermanagement.php?loginas=<?php echo array_shift($loginArr); ?>">Login</a> as this user
 						</div>
-						<fieldset style="clear:both;margin:10px;">
+						<fieldset style="clear:both;margin:10px;padding:15px;padding-left:25px;">
 							<legend><b>Current Permissions</b></legend>
 							<?php 
 							$userPermissions = $userManager->getUserPermissions($userId);
@@ -352,7 +352,7 @@ if($isAdmin){
 							}
 							?>
 							<form name="addpermissions" action="usermanagement.php" method="post"/>
-								<fieldset style="background-color:#FFFFCC;padding:0px 10px 10px 10px;">
+								<fieldset style="margin-top:10px;-color:#FFFFCC;padding:0px 10px 10px 10px;">
 									<legend style="font-weight:bold;">Assign New Permissions</legend>
 									<?php 
 									if($userPermissions && array_key_exists("SuperAdmin",$userPermissions)){
