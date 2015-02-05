@@ -105,7 +105,7 @@ if($symbUid){
 			if($editCode > 0){
 				?>
 				<div id="controlpanel" style="clear:both;display:<?php echo ($eMode?'block':'none'); ?>;">
-					<fieldset style="padding:15px;">
+					<fieldset style="padding:10px;padding-left:25px;">
 						<legend><b>Data Editor Control Panel</b></legend>
 						<ul>
 							<?php
@@ -161,7 +161,7 @@ if($symbUid){
 					<?php 
 					if($editCode > 1){ 
 						?>
-						<fieldset>
+						<fieldset style="padding:10px;padding-left:25px;">
 							<legend><b>Administration Control Panel</b></legend>
 							<ul>
 								<li>

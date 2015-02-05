@@ -90,7 +90,7 @@ $smManager = new SiteMapManager();
 				</li>
 			</ul>
 
-			<fieldset style="margin:30px 0px 10px 10px;padding:15px;">
+			<fieldset style="margin:30px 0px 10px 10px;padding-left:25px;padding-right:15px;">
 				<legend><b>Data Management Tools</b></legend>
 				<?php 
 				if($symbUid){
