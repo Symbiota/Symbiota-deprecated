@@ -139,9 +139,9 @@ class TaxonProfileManager {
 
  	private function setChecklistInfo(){
  		if($this->tid && $this->clid){
-			$sql = "SELECT DISTINCT ctl.Habitat, ctl.Abundance, ctl.Notes ". 
-				"FROM fmchklsttaxalink ctl INNER JOIN taxstatus ts ON ctl.tid = ts.tid ".
-				"WHERE (ctl.tid = ".$this->tid.") AND (ctl.clid = ".$this->clid.") ";
+			$sql = "SELECT Habitat, Abundance, Notes ". 
+				"FROM fmchklsttaxalink  ".
+				"WHERE (tid = ".$this->tid.") AND (clid = ".$this->clid.") ";
 			//echo $sql;
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
@@ -151,7 +151,7 @@ class TaxonProfileManager {
 				if($row->Notes) $info .= "; ".$row->Notes;
 				$this->clInfo = substr($info,2);
 			}
-			$result->close();
+			$result->free();
  		}
  	}
  	
@@ -248,7 +248,7 @@ class TaxonProfileManager {
 				$this->sppArray[$sn]["security"] = $row->securitystatus;  
 				$tids[] = $row->tid;
 			}
-			$result->close();
+			$result->free();
 		}
 		
 		if($tids){
@@ -301,20 +301,24 @@ class TaxonProfileManager {
 	public function setVernaculars(){
 		if($this->tid){
 			$this->vernaculars = Array();
-			$sql = 'SELECT DISTINCT v.VernacularName, v.language '.
+			$sql = 'SELECT v.vid, v.VernacularName, v.language '.
 				'FROM taxavernaculars v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
-				'WHERE (ts.TID = '.$this->tid.') AND (v.SortSequence < 90) '.
+				'WHERE (ts.TID = '.$this->tid.') AND (ts.taxauthid = '.$this->taxAuthId.') AND (v.SortSequence < 90) '.
 				'ORDER BY v.SortSequence,v.VernacularName';
 			//echo $sql;
 			$result = $this->con->query($sql);
 			$tempVernArr = array();
+			$vid = 0;
 			while($row = $result->fetch_object()){
-				$langStr = ucwords($row->language);
-				if($this->language != $langStr){
-					$tempVernArr[$langStr][] = $row->VernacularName;
-				}
-				else{
-					$this->vernaculars[] = $row->VernacularName;
+				if($vid != $row->vid){
+					$vid = $row->vid;
+					$langStr = ucwords($row->language);
+					if($this->language != $langStr){
+						$tempVernArr[$langStr][] = $row->VernacularName;
+					}
+					else{
+						$this->vernaculars[] = $row->VernacularName;
+					}
 				}
 			}
 			ksort($tempVernArr);
@@ -494,14 +498,18 @@ class TaxonProfileManager {
 		//Get hierarchy string
 		if($this->tid){
 			//Get links
-			$sql = 'SELECT DISTINCT tl.tlid, tl.url, tl.icon, tl.title, tl.owner, tl.notes, tl.sortsequence '.
-				'FROM taxalinks tl LEFT JOIN taxaenumtree tn ON tl.tid = tn.parenttid '.
+			$sql = 'SELECT tl.tlid, tl.url, tl.icon, tl.title, tl.notes, tl.sortsequence '.
+				'FROM taxalinks tl INNER JOIN taxaenumtree tn ON tl.tid = tn.parenttid '.
 				'WHERE (tn.tid  = '.$this->tid.') OR (tl.tid = '.$this->tid.') '.
 				'ORDER BY tl.sortsequence, tl.title';
-			//echo $sql;
+			//echo $sql; exit;
 			$result = $this->con->query($sql);
+			$tlid = 0;
 			while($r = $result->fetch_object()){
-				$links[] = array('title'=>$r->title,'url'=>$r->url,'icon'=>$r->icon,'notes'=>$r->notes,'sortseq'=>$r->sortsequence);
+				if($tlid != $r->tlid){
+					$tlid = $r->tlid;
+					$links[] = array('title'=>$r->title,'url'=>$r->url,'icon'=>$r->icon,'notes'=>$r->notes,'sortseq'=>$r->sortsequence);
+				}
 			}
 			$result->free();
 		}
@@ -549,7 +557,7 @@ class TaxonProfileManager {
  		$maxLong = -180;
  		$latlonArr = explode(";",$mappingBoundaries);
 
- 		$sqlBase = "SELECT DISTINCT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
+ 		$sqlBase = "SELECT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
 			"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".
 			"WHERE (gi.tid IN ($tidStr)) ";
  		$sql = $sqlBase;
@@ -606,13 +614,13 @@ class TaxonProfileManager {
 		if($this->tid){
 			$descriptionsStr = "There is no description set for this taxon.";
 			$descriptions = Array();
-			$sql = 'SELECT DISTINCT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
+			$sql = 'SELECT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
 				'tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
 				'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid) '.
 				'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
 				'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = 1) AND (tdb.Language = "'.$this->language.'") '.
 				'ORDER BY tdb.displaylevel,tds.sortsequence';
-			//echo $sql;
+			//echo $sql; exit;
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
 				$tdbId = $row->tdbid;
