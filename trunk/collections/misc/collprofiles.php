@@ -21,7 +21,7 @@ $collManager = new CollectionProfileManager();
 $collManager->setCollectionId($collid);
 $collData = $collManager->getCollectionData();
 
-$editCode = 0;		//0 = no permissions; 1 = CollEditor; 2 = CollAdmin; 3 = SuperAdmin 
+$editCode = 0;		//0 = no permissions; 1 = CollEditor; 2 = CollAdmin; 3 = SuperAdmin
 if($symbUid){
 	if($isAdmin){
 		$editCode = 3;
@@ -95,7 +95,7 @@ if($symbUid){
 			<div style="float:right;margin:3px;cursor:pointer;" onclick="toggleById('controlpanel');" title="Toggle Manager's Control Panel">
 				<img style='border:0px;' src='../../images/edit.png' />
 			</div>
-			<?php 
+			<?php
 		}
 		if($collid){
 			$codeStr = ' ('.$collData['institutioncode'];
@@ -109,7 +109,7 @@ if($symbUid){
 						<legend><b>Data Editor Control Panel</b></legend>
 						<ul>
 							<?php
-							if(stripos($collData['colltype'],'observation') !== false){ 
+							if(stripos($collData['colltype'],'observation') !== false){
 								?>
 								<li>
 									<a href="../editor/observationsubmit.php?collid=<?php echo $collid; ?>">
@@ -130,7 +130,7 @@ if($symbUid){
 								</a>
 							</li>
 							<?php
-							if($collData['colltype'] == 'Preserved Specimens'){ 
+							if($collData['colltype'] == 'Preserved Specimens'){
 								?>
 								<li>
 									<a href="../datasets/labelmanager.php?collid=<?php echo $collid; ?>">
@@ -146,7 +146,7 @@ if($symbUid){
 								</a>
 							</li>
 							<?php
-							if($collData['colltype'] == 'Preserved Specimens'){ 
+							if($collData['colltype'] == 'Preserved Specimens'){
 								?>
 								<li>
 									<a href="../loans/index.php?collid=<?php echo $collid; ?>">
@@ -158,8 +158,8 @@ if($symbUid){
 							?>
 						</ul>
 					</fieldset>
-					<?php 
-					if($editCode > 1){ 
+					<?php
+					if($editCode > 1){
 						?>
 						<fieldset style="padding:10px;padding-left:25px;">
 							<legend><b>Administration Control Panel</b></legend>
@@ -185,16 +185,16 @@ if($symbUid){
 									</a>
 								</li>
 								<?php
-								if($collData['managementtype'] == 'Live Data'){ 
+								if($collData['managementtype'] == 'Live Data'){
 									?>
 									<li style="margin-left:10px;">
 										<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collid; ?>">
 											Quick File Upload
 										</a>
 									</li>
-									<?php 
+									<?php
 								}
-								if($collData['managementtype'] != 'Aggregate'){ 
+								if($collData['managementtype'] != 'Aggregate'){
 									?>
 									<li>
 										<a href="../specprocessor/index.php?collid=<?php echo $collid; ?>">
@@ -203,20 +203,20 @@ if($symbUid){
 									</li>
 									<li>
 										<a href="../datasets/datapublisher.php?collid=<?php echo $collid; ?>">
-											Darwin Core Archive Publishing 
+											Darwin Core Archive Publishing
 										</a>
 									</li>
 									<?php
-								} 
+								}
 								?>
 								<li>
 									<a href="../editor/editreviewer.php?collid=<?php echo $collid; ?>">
-										Review/Verify General Specimen Edits 
+										Review/Verify General Specimen Edits
 									</a>
 								</li>
 								<li>
 									<a href="../cleaning/occurrencecleaner.php?obsuid=0&collid=<?php echo $collid; ?>">
-										Data Cleaning Tools 
+										Data Cleaning Tools
 									</a>
 								</li>
 							<li>
@@ -231,11 +231,11 @@ if($symbUid){
 							</li>
 							</ul>
 						</fieldset>
-						<?php 
-					} 
+						<?php
+					}
 					?>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 			<div style='margin:10px;'>
@@ -245,29 +245,29 @@ if($symbUid){
 				<div style='margin-top:5px;'>
 					<b>Contact:</b> <?php echo $collData["contact"]." (".str_replace("@","&lt;at&gt;",$collData["email"]);?>)
 				</div>
-				<?php 
+				<?php
 				if($collData["homepage"]){
 					?>
 					<div style="margin-top:5px;">
-						<b>Home Page:</b> 
+						<b>Home Page:</b>
 						<a href="<?php echo $collData["homepage"]; ?>">
 							<?php echo $collData["homepage"]; ?>
 						</a>
 					</div>
-					<?php 
+					<?php
 				}
 				?>
-				<div style="margin-top:5px;"> 
-					<b>Collection Type: </b> 
-					<?php 
+				<div style="margin-top:5px;">
+					<b>Collection Type: </b>
+					<?php
 					if($collData['colltype']){
 						echo $collData['colltype'];
 					}
 					?>
 				</div>
-				<div style="margin-top:5px;"> 
-					<b>Management: </b> 
-					<?php 
+				<div style="margin-top:5px;">
+					<b>Management: </b>
+					<?php
 					if($collData['managementtype'] == 'Live Data'){
 						echo 'Live Data managed directly within data portal';
 					}
@@ -282,12 +282,12 @@ if($symbUid){
 					}
 					?>
 				</div>
-				<?php 
+				<?php
 				if(stripos($collData['managementtype'],'live') !== false){
 					?>
 					<div style="margin-top:5px;">
 						<b>Global Unique Identifier: </b>
-						<?php 
+						<?php
 						echo ($collid?$collData['guid']:'');
 						?>
 					</div>
@@ -295,8 +295,8 @@ if($symbUid){
 				}
 				?>
 				<div style="margin-top:5px;">
-					<b>Usage Rights:</b> 
-					<?php 
+					<b>Usage Rights:</b>
+					<?php
 					if($collid && $collData['rights']){
 						$rights = $collData['rights'];
 						$rightsUrl = '';
@@ -317,26 +317,26 @@ if($symbUid){
 					}
 					?>
 				</div>
- 				<?php 
+ 				<?php
  				if($collid && $collData['rightsholder']){
  					?>
 					<div style="margin-top:5px;">
-						<b>Rights Holder:</b> 
-						<?php 
-						echo $collData['rightsholder'];  
+						<b>Rights Holder:</b>
+						<?php
+						echo $collData['rightsholder'];
 						?>
 					</div>
- 					<?php 
+ 					<?php
  				}
  				if($collid && $collData['accessrights']){
  					?>
 					<div style="margin-top:5px;">
-						<b>Access Rights:</b> 
-						<?php 
-						echo $collData['accessrights'];  
+						<b>Access Rights:</b>
+						<?php
+						echo $collData['accessrights'];
 						?>
 					</div>
- 					<?php 
+ 					<?php
  				}
  				$addrArresses = $collManager->getAddresses();
  				if($addrArresses){
@@ -344,7 +344,7 @@ if($symbUid){
 	 					?>
 						<div style="float:left;font-weight:bold;margin-top:5px;">Address:&nbsp;</div>
 						<div style="float:left;margin-top:5px;">
-							<?php 
+							<?php
 							echo "<div>".$addrArr["institutionname"];
 							if($editCode > 1) echo ' <a href="../admin/institutioneditor.php?emode=1&targetcollid='.$collid.'&iid='.$iid.'" title="Edit institution information"><img src="../../images/edit.png" style="width:13px;" /></a>';
 							echo '</div>';
@@ -359,18 +359,18 @@ if($symbUid){
 						</div>
 						<?php
  					}
- 				} 
+ 				}
  				?>
 				<div style="clear:both;margin-top:5px;">
 					<div style="font-weight:bold;">Collection Statistics</div>
 					<ul>
 						<li><?php echo $collData["recordcnt"];?> specimens</li>
 						<li><?php echo $collData["georefpercent"];?>% georeferenced</li>
-						<?php 
+						<?php
 						if($collData['imgpercent']) echo '<li>'.$collData['imgpercent'].'% with images</li>';
-						if($collData['gencnt']) echo '<li>'.$collData['gencnt'].' GenBank references</li>'; 
-						if($collData['boldcnt']) echo '<li>'.$collData['boldcnt'].' BOLD references</li>'; 
-						if($collData['refcnt']) echo '<li>'.$collData['refcnt'].' publication references</li>'; 
+						if($collData['gencnt']) echo '<li>'.$collData['gencnt'].' GenBank references</li>';
+						if($collData['boldcnt']) echo '<li>'.$collData['boldcnt'].' BOLD references</li>';
+						if($collData['refcnt']) echo '<li>'.$collData['refcnt'].' publication references</li>';
 						?>
 						<li><?php echo $collData["familycnt"];?> families</li>
 						<li><?php echo $collData["genuscnt"];?> genera</li>
@@ -397,7 +397,7 @@ if($symbUid){
 				<fieldset style="margin:20px;width:90%;">
 					<legend>
 						<b>
-							<?php 
+							<?php
 							if($showFamilyList){
 								echo 'Family Distribution';
 								if($familyDist){
@@ -418,7 +418,7 @@ if($symbUid){
 					</legend>
 					<div style="margin:15px;">Click on the specimen record counts within the parenthesis to return the records for that term</div>
 					<ul>
-						<?php 
+						<?php
 						$distArr = array();
 						if($showFamilyList){
 							$distArr = $collManager->getTaxonCounts();
@@ -451,11 +451,11 @@ if($symbUid){
 						}
 						?>
 					</ul>
-					<?php 
+					<?php
 						if(!$stateDist && !$familyDist) echo '*Clicking on term in list will display distributions within that term';
 					?>
 				</fieldset>
-				<?php 
+				<?php
 			}
 		}
 		else{
@@ -463,23 +463,24 @@ if($symbUid){
 			?>
 			<h1><?php echo $defaultTitle; ?> Collections </h1>
 			<div style='margin:10px;clear:both;'>
-				Select a collection to see full details. 
+				Select a collection to see full details.
 			</div>
 			<table style='margin:10px;'>
-				<?php 
+				<?php
 				foreach($collList as $cId => $collArr){
 					?>
 					<tr>
 						<td style='text-align:center;vertical-align:top;'>
-							<?php 
+							<?php
 							$iconStr = $collArr['icon'];
 							if($iconStr){
-								if(substr($iconStr,0,6) == 'images') $iconStr = '../../'.$iconStr; 
+								if(substr($iconStr,0,6) == 'images') $iconStr = '../../'.$iconStr;
 								?>
 								<img src='<?php echo $iconStr; ?>' style='border-size:1px;height:30;width:30;' /><br/>
 								<?php
 								echo $collArr['institutioncode'];
-							} 
+								if($collArr['collectioncode']) echo '-'.$collArr['collectioncode'];
+							}
 							?>
 						</td>
 						<td>
@@ -491,11 +492,11 @@ if($symbUid){
 							<div style='margin:10px;'>
 								<div><?php echo $collArr['fulldescription']; ?></div>
 								<div style='margin-top:5px;'>
-									<b>Contact:</b> 
+									<b>Contact:</b>
 									<?php echo $collArr['contact'].' ('.str_replace('@','&lt;at&gt;',$collArr['email']).')';?>
 								</div>
 								<div style='margin-top:5px'>
-									<b>Home Page:</b> 
+									<b>Home Page:</b>
 									<a href='<?php echo $collArr['homepage']; ?>'>
 										<?php echo $collArr['homepage']; ?>
 									</a>
@@ -509,11 +510,11 @@ if($symbUid){
 					<tr>
 						<td colspan='2'><hr/></td>
 					</tr>
-					<?php 
+					<?php
 				}
 				?>
 			</table>
-			<?php 
+			<?php
 		}
 		?>
 	</div>
