@@ -114,6 +114,11 @@ $smManager = new SiteMapManager();
 									Collection GUID Mapper
 								</a>
 							</li>
+							<li>
+								<a href="<?php echo $clientRoot; ?>/collections/specprocessor/salix/salixhandler.php">
+									SALIX WordStat Manager
+								</a>
+							</li>
 						</ul>
 						<?php
 					}
