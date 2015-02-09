@@ -5,9 +5,8 @@ class SalixUtilities {
 
 	private $conn;
 	private	$fieldArr = array('locality', 'habitat', 'substrate', 'verbatimAttributes', 'occurrenceRemarks');
-	private $limit = 100000;
 	private $verbose = 1;
-	private $recCnt = 0;
+	private $lastBuildTimestamp;
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -18,12 +17,13 @@ class SalixUtilities {
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function buildWordStats($reset = 1){
+	public function buildWordStats($collid,$actionType,$limit){
 		//Reset wordstats table for that collection
 		if($this->verbose) echo '<ul>';
-		if($reset){
-			if($this->conn->query('DELETE FROM salixwordstats')){
-				$this->conn->query('OPTIMIZE TABLE salixwordstats');
+		$lts = '';
+		if($actionType == 1 || $actionType == 2){
+			$sqlDel = 'TRUNCATE TABLE salixwordstats ';
+			if($this->conn->query($sqlDel)){
 				$this->echoStr('Deleted old word stats');
 			}
 			else{
@@ -31,6 +31,9 @@ class SalixUtilities {
 			}
 			ob_flush();
 			flush();
+		}
+		elseif($actionType == 3){
+			$lts = $this->getLastBuildTimestamp();
 		}
 		//Build word stats
 		$statsArr = array();
@@ -42,13 +45,26 @@ class SalixUtilities {
 			$recCnt = 0;
 			$sql = 'SELECT DISTINCT '.$field.' AS f '.
 				'FROM omoccurrences '.
-				'WHERE '.$field.' IS NOT NULL '.
-				'ORDER BY rand() '.
-				'LIMIT '.$this->limit;
+				'WHERE '.$field.' IS NOT NULL ';
+			if($actionType == 1){
+				$sql .= 'ORDER BY rand() ';
+			}
+			elseif($actionType == 2){
+				$sql .= 'ORDER BY occid DESC ';
+			}
+			elseif($actionType == 3){
+				if($lts){
+					$sql .= 'AND dateentered > "'.$lts.'" ';
+				}
+			}
+			if($limit){
+				$sql .= 'LIMIT '.$limit;
+			}
+			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$this->countWords($statsArr, $r->f);
-				if($recCnt%($this->limit/10) == 0){
+				if($recCnt%($limit/10) == 0){
 					$this->echoStr('Record count: '.$recCnt,1);
 					ob_flush();
 					flush();
@@ -178,10 +194,27 @@ class SalixUtilities {
 	}
 	
 	//Setters and getters
+	public function getLastBuildTimestamp(){
+		if(!$this->lastBuildTimestamp){
+			$this->setLastBuildTimestamp();
+		}
+		return $this->lastBuildTimestamp;
+	}
+
+	private function setLastBuildTimestamp(){
+		$sql = 'SELECT max(initialtimestamp) as maxts '.
+			'FROM salixwordstats';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$this->lastBuildTimestamp = $r->maxts;
+		}
+		$rs->free();
+	}
+
 	public function setVerbose($v){
 		$this->verbose = $v;
 	}
-	
+
 	private function echoStr($str, $indent = 0){
 		if($this->verbose){
 			echo '<li style="margin-left:'.($indent*15).'px">'.$str."</li>\n";
