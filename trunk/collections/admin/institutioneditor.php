@@ -86,6 +86,7 @@ if($editorCode){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Institution Editor</title>
+	<link type="text/css" href="../../css/base.css" rel="stylesheet" />
 	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
 	<script language=javascript>
 		
