@@ -23,12 +23,12 @@ if($symbUid){
 	}
 }
 ?>
-<div id='innertext' style='width:95%; height:95%; clear:both;background-color: white;'>
+<div id='innertext' style='width:95%;min-height:400px;clear:both;background-color:white;'>
 	<div>
 		<?php 	
 		if($vClArr){
 			echo '<div style="font-weight:bold;font-size:120%;">Specimen serves as voucher of the following checklists</div>';
-			echo '<ul style="margin-top:15px;height:400px;">';
+			echo '<ul style="margin-top:15px;">';
 			foreach($vClArr as $id => $clName){
 				echo '<li>';
 				echo '<a href="../../checklists/checklist.php?showvouchers=1&cl='.$id.'" target="_blank">'.$clName.'</a>&nbsp;&nbsp;';
@@ -44,7 +44,7 @@ if($symbUid){
 		}
 		if($isAdmin || array_key_exists("ClAdmin",$userRights)){
 			?>
-			<div style='margin-top:15px;height:400px;'>
+			<div style='margin-top:15px;'>
 				<?php 
 				if($clArr = $indManager->getChecklists(array_keys($vClArr))){
 					?>
