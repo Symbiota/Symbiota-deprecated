@@ -4,6 +4,9 @@ include_once($serverRoot.'/classes/GlossaryManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $glossId = array_key_exists('glossid',$_REQUEST)?$_REQUEST['glossid']:0;
+$glossgrpId = array_key_exists('glossgrpid',$_REQUEST)?$_REQUEST['glossgrpid']:0;
+$language = array_key_exists('language',$_REQUEST)?$_REQUEST['language']:'';
+$tId = array_key_exists('tid',$_REQUEST)?$_REQUEST['tid']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $glosManager = new GlossaryManager();
@@ -12,15 +15,20 @@ $termList = '';
 $statusStr = '';
 if($formSubmit){
 	if($formSubmit == 'Search Terms'){
-		$termList = $glosManager->getTermList($_POST['searchtermkeyword'],$_POST['searchdefkeyword'],$_POST['searchlanguage']);
+		$termList = $glosManager->getTermList($_POST['searchtermkeyword'],$_POST['searchdefkeyword'],$_POST['searchlanguage'],$_POST['searchtaxa']);
+		$language = $_POST['searchlanguage'];
+		$tId = $_POST['searchtaxa'];
 	}
 	if($formSubmit == 'Delete Term'){
-		$statusStr = $glosManager->deleteTerm($glossId);
+		$statusStr = $glosManager->deleteTerm($glossId,$glossgrpId);
 		$glossId = 0;
 	}
 }
-if(!$formSubmit || $formSubmit != 'Search Terms'){
-	$termList = $glosManager->getTermList('','',$defaultLang);
+elseif($language && $tId){
+	$termList = $glosManager->getTermList('','',$language,$tId);
+}
+elseif(!$formSubmit || $formSubmit != 'Search Terms'){
+	$termList = $glosManager->getTermList('','',$defaultLang,'');
 }
 ?>
 
@@ -65,7 +73,6 @@ if(!$formSubmit || $formSubmit != 'Search Terms'){
 		<?php 
 		if($statusStr){
 			?>
-			<hr/>
 			<div style="margin:15px;color:red;">
 				<?php echo $statusStr; ?>
 			</div>
@@ -93,11 +100,29 @@ if(!$formSubmit || $formSubmit != 'Search Terms'){
 								<?php 
 								$langArr = $glosManager->getLanguageArr();
 								foreach($langArr as $k => $v){
-									if($formSubmit == 'Search Terms'){
-										echo '<option value="'.$k.'" '.($k==$_POST['searchlanguage']?'SELECTED':'').'>'.$k.'</option>';
+									if($language){
+										echo '<option value="'.$k.'" '.($k==$language?'SELECTED':'').'>'.$k.'</option>';
 									}
 									else{
 										echo '<option value="'.$k.'" '.($k==$defaultLang?'SELECTED':'').'>'.$k.'</option>';
+									}
+								}
+								?>
+							</select>
+						</div>
+						<div style="margin-top:8px;">
+							<b>Taxonomic Group:</b><br />
+							<select name="searchtaxa" id="searchtaxa" style="margin-top:2px;width:150px;" onchange="">
+								<option value="">Select Group</option>
+								<option value="">----------------</option>
+								<?php 
+								$taxaArr = $glosManager->getTaxaGroupArr();
+								foreach($taxaArr as $k => $v){
+									if($tId){
+										echo '<option value="'.$k.'" '.($k==$tId?'SELECTED':'').'>'.$v.'</option>';
+									}
+									else{
+										echo '<option value="'.$k.'">'.$v.'</option>';
 									}
 								}
 								?>
@@ -124,27 +149,39 @@ if(!$formSubmit || $formSubmit != 'Search Terms'){
 						<fieldset>
 							<legend><b>Add New Term</b></legend>
 							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="">
+								<div style="float:left;">
 									<b>Term: </b>
 								</div>
-								<div style="margin-left:40px;margin-top:-14px;">
-									<input type="text" name="term" id="term" maxlength="45" style="width:200px;" value="" onchange="verifyNewTerm(this.form);" title="" />
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="term" id="term" maxlength="45" style="width:200px;" value="" onchange="" title="" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="">
+								<div style="float:left;">
 									<b>Definition: </b>
 								</div>
-								<div style="margin-left:65px;margin-top:-14px;">
+								<div style="float:left;margin-left:10px;">
 									<textarea name="definition" id="definition" rows="10" style="width:380px;height:70px;resize:vertical;" ></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="">
+								<div style="float:left;">
 									<b>Language: </b>
 								</div>
-								<div style="margin-left:65px;margin-top:-14px;">
+								<div style="float:left;margin-left:10px;">
 									<input type="text" name="language" id="language" maxlength="45" style="width:200px;" value="" onchange="" title="" />
+								</div>
+							</div>
+							<div style="clear:both;margin-top:12px;float:left;">
+								Please enter the taxonomic group, higher than the rank of family, to which this term applies:
+							</div>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
+									<b>Taxonomic Group: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="taxagroup" id="taxagroup" maxlength="45" style="width:250px;" value="" onchange="" title="" />
+									<input name="tid" id="tid" type="hidden" value="" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:8px;float:right;">
@@ -166,7 +203,7 @@ if(!$formSubmit || $formSubmit != 'Search Terms'){
 				echo '</ul></div>';
 			}
 			elseif($formSubmit == 'Search Terms'){
-				echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There were no terms matching your criteria.</div></div>';
+				echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are no terms matching your criteria.</div></div>';
 			}
 			else{
 				echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are currently no terms in the database.</div></div>';
