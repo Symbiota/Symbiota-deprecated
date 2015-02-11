@@ -168,7 +168,7 @@ class SpecProcNlpSalix
 		$this->Label = str_replace("(M0)","(MO)",$this->Label);
 
 		
-		//Separate at semicolons
+		//Separate at semicolons -- Removed to see if it works better.
 		//$this->Label = str_replace(";","\r\n",$this->Label);
 		
 		$this->InitStartWords();//Initialize the array of start words, which are hard coded in the function.
@@ -183,7 +183,7 @@ class SpecProcNlpSalix
 			$Start = str_replace("(^(","((",$Start);
 			$this->Label = preg_replace($Start,"\n$1",$this->Label);
 			}
-		
+
 		//A series of rare but easy to correct OCR errors. (A series of one so far..., but more are expected)
 		$this->Label = str_ireplace("Jon!","Joni",$this->Label);
 			
@@ -1160,7 +1160,7 @@ class SpecProcNlpSalix
 		//NOTE:  Still doesn't capture maximum elevation.
 		//global $this->Label;
 		$PregWords1 = "([\d,]{2,5})";
-		$PregWords2 = "(\b(meters|m.|m|feet|ft.|ft)\b)";
+		$PregWords2 = "(\b(meters|m.|m|feet|ft.|ft|msnm)\b)";
 		$PregWords3 = "(\b(elevation|elev|altitude|alt)\b)";
 		$RankArray = array();
 		$match=array();
@@ -1192,6 +1192,7 @@ class SpecProcNlpSalix
 		//Sort the lines in rank order
 		asort($RankArray);
 		$RankArray = array_reverse($RankArray, true);
+		$this->PrintRank($RankArray,"Elev");
 		//Now have an array of probable lines sorted most probable first.
 		//ScoreArray will be filled with possible elevations and a score for each.
 		$ScoreArray = array();
@@ -1202,7 +1203,7 @@ class SpecProcNlpSalix
 				break;
 			$TempString = $this->LabelLines[$L];
 			//$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*[about ]*([0-9,-]+)([\s]*)(m(eter)?s?\b|f(ee)?t?\b|\'))",$TempString,$match);
-			$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*[about ]*([0-9, -]+)\s?\d?([\s]*)(m(eter)?s?\b|f(ee)?t?\b|\'))i",$TempString,$match);
+			$Found = preg_match("(([a|A]lt|[e|E]lev)[\S]*[\s]*[about ]*([0-9, -]+)\s?\d?([\s]*)(m(eter|snm)?s?\b|f(ee)?t?\b|\'))i",$TempString,$match);
 			if($Found === 1) //Embedded in a line with number following key word, like "Found at elevation 2342 feet"
 				{
 				//$this->printr($match,"Elev match 1");
@@ -1212,7 +1213,7 @@ class SpecProcNlpSalix
 				}
 			if($Found !== 1)
 				{
-				$Found = preg_match("((ca\.?\s)?([0-9,]+)([ ]*)(m(eter)?s?\b|f(ee)?t?\b|\')[\S]*[\s]*([a|A]lt|[e|E]lev)[ation]?[\S]*)",$TempString,$match);
+				$Found = preg_match("((ca\.?\s)?([0-9,]+)([ ]*)(m(eter|snm)?s?\b|f(ee)?t?\b|\')[\S]*[\s]*([a|A]lt|[e|E]lev)[ation]?[\S]*)",$TempString,$match);
 				if($Found === 1)  //Same as above but with the key word Elevation/Altitude following the number
 					{
 				//$this->printr($match,"Elev match 2");
@@ -1223,7 +1224,7 @@ class SpecProcNlpSalix
 				}
 			if($Found !== 1)
 				{ 
-				$Found = preg_match("(\A(ca\.?\s)?([0-9,]+)([ ]*)(m(eter)?s?\b|f(ee)?t?\b|\'))",$TempString,$match);
+				$Found = preg_match("(\A(ca\.?\s)?([0-9,]+)([ ]*)(m(eter|snm)?s?\b|f(ee)?t?\b|\'))",$TempString,$match);
 				if($Found === 1) //Found at beginning of the line, but without "Elevation" or "Altitude" indicator.  Just feet and meters.
 					{
 					//$this->printr($match,"Elev match 3");
@@ -1237,7 +1238,7 @@ class SpecProcNlpSalix
 				}
 			if($Found !== 1)
 				{//Least certain, just a number followed by feet or meters in middle of a line.  Could be height, distance, etc.
-				$Found = preg_match_all("((ca\.?\s)?\b([0-9,]+)(\s?)(m(eter)?s?\b|f(ee)?t?\b|\'))",$TempString,$match);
+				$Found = preg_match_all("((ca\.?\s)?\b([0-9,]+)(\s?)(m(eter|snm)?s?\b|f(ee)?t?\b|\'))",$TempString,$match);
 				if($Found >0)
 					{
 					//$this->printr($match,"Elev Match 4");
@@ -1274,7 +1275,7 @@ class SpecProcNlpSalix
 			$this->LabelLines[$L] = $this->RemoveStartWordsFromString($this->LabelLines[$L],'minimumElevationInMeters');
 			//echo "To this: {$this->LabelLines[$L]}<br>";
 			}
-		$Preg = "(\d+[ to-]+$TempString)";
+		$Preg = "(\d+[a to-]+$TempString)";
 		$Found = preg_match($Preg, $this->Label,$match);
 		if($Found > 0)
 			{
@@ -1282,7 +1283,7 @@ class SpecProcNlpSalix
 			$TempString = str_replace("to","-",$TempString);
 			}
 		
-		
+		//$TempString = preg_replace("((\d\s?)(a)(\s?\d))","$1-$3",$TempString);
 		
 		$this->AddToResults('verbatimElevation', $TempString,$L);
 		$Found = false;
@@ -1292,6 +1293,8 @@ class SpecProcNlpSalix
 				$this->LabelLines[$L] = str_replace($TempString,"",$this->LabelLines[$L]);
 				$Found=true;
 				}
+		//Replace Spanish "a" with a hyphen
+		$TempString = preg_replace("((\d\s?)(a)(\s?\d))","$1-$3",$TempString);
 		//Remove comma from thousands place for simpler calculations
 		$TempString = preg_replace("(([0-9]),([0-9]))","\\1\\2", $TempString); 
 		$TempString = trim(str_ireplace(array("altitude","elevation","about","ca"),"",$TempString));
@@ -3079,7 +3082,7 @@ class SpecProcNlpSalix
 	private function InitStartWords()
 		{//Fill the StartWords array, an array of start words for each field
 		$this->PregStart['family'] = "(^(family)\b)i";
-		$this->PregStart['recordedBy'] = "(^(Coll(.|ected)? by|Collectors|Collector|Colector|Coll|Col|Leg|by)\b)i";
+		$this->PregStart['recordedBy'] = "(^(Coll(.|ected)? by|Collectors|Collector|Colector|Coll|Col|Leg|By)\b)i";
 		$this->PregStart['eventDate'] = "(^(EventDate|Date|fecha)\b)i";
 		$this->PregStart['recordNumber'] = "(^(Number|no)\b)i";
 		$this->PregStart['identifiedBy'] = "(^(Det(.|:|ermined|ermidado)? (by|por)|Determined|det(.)? dupl|det|Identified by|Identified)\b)i";
