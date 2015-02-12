@@ -32,6 +32,24 @@ if($submitAction){
 	<script type="text/javascript" src="../../js/symb/games.ootd.js"></script>
 	
 	<script type="text/javascript">
+		$(function() {
+			var dialogArr = new Array("game");
+			var dialogStr = "";
+			for(i=0;i<dialogArr.length;i++){
+				dialogStr = dialogArr[i]+"info";
+				$( "#"+dialogStr+"dialog" ).dialog({
+					autoOpen: false,
+					modal: true,
+					position: { my: "center top", at: "right bottom", of: "#"+dialogStr }
+				});
+
+				$( "#"+dialogStr ).click(function() {
+					$( "#"+this.id+"dialog" ).dialog( "open" );
+				});
+			}
+
+		});
+		
 		function toggleById(target){
 			var obj = document.getElementById(target);
 			if(obj.style.display=="none"){
@@ -80,14 +98,12 @@ if($submitAction){
 					<div style="font:bold 16px Arial,Helvetica,sans-serif;float:left;" >
 						<?php echo date('l, F jS, Y'); ?>
 					</div>
-					<div onclick="toggleById('researchlistpopup');" title="How to Play?" style="display:table-cell;vertical-align:middle;cursor:pointer;float:left;height:26px;margin-left:10px;z-index:5;">
+					<a id="gameinfo" href="#" onclick="return false" title="How to Play?">
 						<img src="../../images/games/ootd/qmark.jpg" style="height:20px;"/>
-					</div>
-					<div id="researchlistpopup" class="genericpopup" style="display:none;position:relative;top:30px;left:193px;z-index:100;" >
-						<img src="../../images/games/ootd/uptriangle.png" style="position:absolute;top:-12px;left:60px;" />
-						<div style="position:relative;top:-15px;text-align:left;clear:both;margin-bottom:-15px;" >Look at the picture, and see if you can figure out what the <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is. If you get completely stumped, you can 
-							click the "I give up" button. A new <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is updated daily, so make sure you check back every day to test your knowledge!
-						</div>
+					</a>
+					<div id="gameinfodialog" title="How to Play">
+						Look at the picture, and see if you can figure out what the <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is. If you get completely stumped, you can 
+						click the "I give up" button. A new <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is updated daily, so make sure you check back every day to test your knowledge!
 					</div>
 				</div>
 			</div>

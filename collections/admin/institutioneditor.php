@@ -421,7 +421,7 @@ include($serverRoot.'/header.php');
 					<img src="<?php echo $clientRoot;?>/images/add.png" style="width:15px;border:0px;" title="Add a New Institution" />
 				</a>
 			</div>
-			<div id="instadddiv" style="display:<?php echo ($eMode?'block':'none'); ?>;">
+			<div id="instadddiv" style="display:<?php echo ($eMode?'block':'none'); ?>;margin-bottom:8px;">
 				<form name="instaddform" action="institutioneditor.php" method="post">
 					<fieldset style="padding:20px;">
 						<legend><b>Add New Institution</b></legend>
@@ -565,25 +565,27 @@ include($serverRoot.'/header.php');
 			<?php 
 			if(!$eMode){
 				?>
-				<h2>Select an Institution from the list</h2>
-				<ul>
-					<?php 
-					$instList = $instManager->getInstitutionList();
-					if($instList){
-						foreach($instList as $iid => $iArr){
-							echo '<li><a href="institutioneditor.php?iid='.$iid.'">';
-							echo $iArr['institutionname'].' ('.$iArr['institutioncode'].')';
-							if($editorCode == 3 || array_intersect(explode(',',$iArr['collid']),$USER_RIGHTS["CollAdmin"])){
-								echo ' <a href="institutioneditor.php?emode=1&iid='.$iid.'"><img src="'.$clientRoot.'/images/edit.png" style="width:13px;" /></a>';
+				<div style="padding-left:10px;">
+					<h2>Select an Institution from the list</h2>
+					<ul>
+						<?php 
+						$instList = $instManager->getInstitutionList();
+						if($instList){
+							foreach($instList as $iid => $iArr){
+								echo '<li><a href="institutioneditor.php?iid='.$iid.'">';
+								echo $iArr['institutionname'].' ('.$iArr['institutioncode'].')';
+								if($editorCode == 3 || array_intersect(explode(',',$iArr['collid']),$USER_RIGHTS["CollAdmin"])){
+									echo ' <a href="institutioneditor.php?emode=1&iid='.$iid.'"><img src="'.$clientRoot.'/images/edit.png" style="width:13px;" /></a>';
+								}
+								echo '</a></li>';
 							}
-							echo '</a></li>';
 						}
-					}
-					else{
-						echo "<div>There are no institutions you have right to edit</div>";
-					}
-					?>
-				</ul>
+						else{
+							echo "<div>There are no institutions you have right to edit</div>";
+						}
+						?>
+					</ul>
+				</div>
 				<?php
 			}
 		}

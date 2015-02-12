@@ -21,7 +21,7 @@ if($tid){
 }
 ?>
 <!-- This is inner text! --> 
-<div id="innertext">
+<div id="innertext" style="background-color:white;">
 	<?php 
 	if($editable && $tid){
 		if($category == "imagequicksort"){

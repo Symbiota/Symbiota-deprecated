@@ -345,7 +345,7 @@ $collData = $collManager->getCollectionData(true);
 												}
 												echo '<option value="'.$v.'" '.$selectedTerm.'>'.$k.'</option>'."\n";
 											}
-											if($hasOrphanTerm && $collData["rights"]){
+											if($hasOrphanTerm && array_key_exists("rights",$collData)){
 												echo '<option value="'.$collData["rights"].'" SELECTED>'.$collData["rights"].' [orphaned term]</option>'."\n";
 											}
 											?>
