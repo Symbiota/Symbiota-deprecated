@@ -17,7 +17,7 @@
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<h1>Guidelines for Acceptable Use of Data</h1>
+			<h1>Guidelines for Acceptable Use of Data</h1><br />
 
 			<h2>Recommended Citation Formats</h2>
 			<div style="margin:10px">
@@ -52,7 +52,7 @@
 
 			<a name="occurrences"></a>
 			<h2>Occurrence Record Use Policy</h2>
-		    <div>
+		    <div style="margin:10px;">
 				<ul>
 					<li>
 						While <?php echo $defaultTitle; ?> will make every effort possible to control and document the quality 

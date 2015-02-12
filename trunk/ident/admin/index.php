@@ -86,9 +86,9 @@ else{
 						<img src="../../images/add.png" alt="Create New Character" />
 					</a>
 				</div>
-				<div id="addchardiv" style="display:none;">
+				<div id="addchardiv" style="display:none;margin-bottom:8px;">
 					<form name="newcharform" action="chardetails.php" method="post" onsubmit="return validateNewCharForm(this)">
-						<fieldset>
+						<fieldset style="padding:10px;">
 							<legend><b>New Character</b></legend>
 							<div>
 								Character Name:<br />
@@ -137,7 +137,7 @@ else{
 						</fieldset>
 					</form>
 				</div>
-				<div id="charlist">
+				<div id="charlist" style="padding-left:10px;">
 					<?php 
 					if($charArr){
 						?>
