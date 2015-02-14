@@ -191,7 +191,7 @@ if($taxonManager->getSciName() != "unknown"){
 						<?php 
 						foreach($descriptions as $k => $vArr){
 							?>
-							<div id='tab<?php echo $k; ?>' class="sptab">
+							<div id='tab<?php echo $k; ?>' class="sptab" style="width:92%;">
 								<?php 
 								if($vArr["source"]){
 									echo "<div id='descsource' style='float:right;'>";

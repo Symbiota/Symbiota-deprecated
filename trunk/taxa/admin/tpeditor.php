@@ -311,7 +311,7 @@ if($editable && $action){
 								<div style="float:right;" title="Edit Synonym Sort Order">
 									<a href="#"  onclick="toggle('synsort');return false;"><img style="border:0px;width:12px;" src="../../images/edit.png"/></a>
 								</div>
-								<div style="font-weight:bold;">
+								<div style="font-weight:bold;margin-left:15px;">
 									<ul>
 										<?php 
 										foreach($synonymArr as $tidKey => $valueArr){
