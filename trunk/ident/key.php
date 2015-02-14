@@ -12,7 +12,7 @@ $spLink = "../taxa/index.php?taxon=--SPECIES--";
 $secondaryLink = "";
 $secondaryIcon = "";
 //$secondaryLink = "http://images.google.com/images?q=&#034;--SPECIES--&#034;";
-//$secondaryIcon = "../images/google.jpg";
+//$secondaryIcon = "../images/google.png";
 //$secondaryLink = "http://132.236.163.181/cgi-bin/dol/dol_terminal.pl?taxon_name=--SPECIES--&rank=genus&classif_id=0";
 //$secondaryIcon = "dol.org";
 

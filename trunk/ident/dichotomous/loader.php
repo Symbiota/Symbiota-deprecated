@@ -156,7 +156,7 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights)){
 		foreach($rows as $rowCnt => $row){
 			if($rowCnt === 0 && $row["parentstmtid"]){ 
 				echo "<a href='dichotomous.php?stmtid=".$row["parentstmtid"]."'>";
-				echo "<img src='../images/back.jpg' style='height:10px;border:0px;'/> Go Back";
+				echo "<img src='../images/back.png' style='height:10px;border:0px;'/> Go Back";
 				echo "</a>";
 			}
 			?>

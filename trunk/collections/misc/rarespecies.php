@@ -177,7 +177,7 @@ if($editable){
 					?>
 					<span class="editobj" style="display:none;">
 						<a href="rarespecies.php?submitaction=deletespecies&tidtodel=<?php echo $tid;?>">
-							<img src="../../images/del.gif" style="width:13px;border:0px;" title="remove species from list" />
+							<img src="../../images/del.png" style="width:13px;border:0px;" title="remove species from list" />
 						</a>
 					</span>
 					<?php

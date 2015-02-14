@@ -25,7 +25,7 @@ if($action=="addauthor"){
 		foreach($authArr as $k => $v){
 			$listHtml .= '<li>';
 			$listHtml .= '<a href="authoreditor.php?authid='.$k.'" target="_blank">'.$v.'</a>';
-			$listHtml .= ' <input type="image" style="margin-left:5px;" src="../images/del.gif" onclick="deleteRefAuthor('.$k.');" title="Delete author">';
+			$listHtml .= ' <input type="image" style="margin-left:5px;" src="../images/del.png" onclick="deleteRefAuthor('.$k.');" title="Delete author">';
 			$listHtml .= '</li>';
 		}
 		$listHtml .= '</ul>';
@@ -46,7 +46,7 @@ if($action=="createauthor"){
 		foreach($authArr as $k => $v){
 			$listHtml .= '<li>';
 			$listHtml .= '<a href="authoreditor.php?authid='.$k.'" target="_blank">'.$v.'</a>';
-			$listHtml .= ' <input type="image" style="margin-left:5px;" src="../images/del.gif" onclick="deleteRefAuthor('.$k.');" title="Delete author">';
+			$listHtml .= ' <input type="image" style="margin-left:5px;" src="../images/del.png" onclick="deleteRefAuthor('.$k.');" title="Delete author">';
 			$listHtml .= '</li>';
 		}
 		$listHtml .= '</ul>';
@@ -65,7 +65,7 @@ if($action=="deleterefauthor"){
 		foreach($authArr as $k => $v){
 			$listHtml .= '<li>';
 			$listHtml .= '<a href="authoreditor.php?authid='.$k.'" target="_blank">'.$v.'</a>';
-			$listHtml .= ' <input type="image" style="margin-left:5px;" src="../images/del.gif" onclick="deleteRefAuthor('.$k.');" title="Delete author">';
+			$listHtml .= ' <input type="image" style="margin-left:5px;" src="../images/del.png" onclick="deleteRefAuthor('.$k.');" title="Delete author">';
 			$listHtml .= '</li>';
 		}
 		$listHtml .= '</ul>';

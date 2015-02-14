@@ -159,10 +159,10 @@ $sciArr = array();
 		<div style="width:420px;text-align:center;">
 			<div style="width:100%;">
 				<div style="float:left;cursor:pointer;text-align:center;" onclick="insertNewImage()">
-					<img src="../images/skipthisone.jpg" title="Skip to Next Species" />
+					<img src="../images/skipthisone.png" title="Skip to Next Species" />
 				</div>
 				<div id="rightarrow" style="float:right;cursor:pointer;text-align:center;" onclick="nextImage()">
-					<img src="../images/rightarrow.jpg" title="Show Next Image" /><br/>
+					<img src="../images/rightarrow.png" title="Show Next Image" /><br/>
 					Image <span id="imageindex">1</span> of <span id="imagecount">?</span>
 				</div>
 			</div>

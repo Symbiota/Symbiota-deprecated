@@ -270,7 +270,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 									<input type="text" name="eclpointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
 								</div>
 								<div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
-									<img src="../images/world40.gif" style="width:12px;" />
+									<img src="../images/world.png" style="width:12px;" />
 								</div>
 							</div>
 							<div style="float:right;margin-top:8px;margin-right:25px;">
@@ -296,7 +296,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 										<b>Polygon coordinates ready to save.</b>
 									</div>
 									<div style="float:right;margin:8px 0px 0px 10px;cursor:pointer;" onclick="openMappingPolyAid();">
-										<img src="../images/world40.gif" style="width:12px;" />
+										<img src="../images/world.png" style="width:12px;" />
 									</div>
 								</fieldset>
 							</div>
@@ -343,7 +343,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 									<input id="lngdec" type="text" name="pointlng" style="width:110px;" value="" />
 								</div>
 								<div style="float:left;margin:15px 0px 0px 10px;cursor:pointer;" onclick="openPointAid(<?php echo $clArray["latcentroid"].','.$clArray["longcentroid"]?>);">
-									<img src="../images/world40.gif" style="width:12px;" />
+									<img src="../images/world.png" style="width:12px;" />
 								</div>
 								<div style="clear:both;">
 									Notes:<br/>

@@ -138,7 +138,7 @@ $person = $pHandler->getPerson();
 								$delimiter = '';
 								foreach($loginArr as $login){
 									echo $login;
-									if(count($loginArr) > 1) echo ' <a href="userprofile.php?userid='.$userId.'&dellogin='.$login.'" title="Delete '.$login.'"><img src="../images/del.gif"  /></a>';
+									if(count($loginArr) > 1) echo ' <a href="userprofile.php?userid='.$userId.'&dellogin='.$login.'" title="Delete '.$login.'"><img src="../images/del.png"  /></a>';
 									echo $delimiter;
 									$delimiter = ', '; 
 								} 

@@ -18,7 +18,7 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 		?>
 			<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Open in Interactive Key Interface'>
 				<a href="checklistsymbiota.php?taxonfilter=<?php echo $taxonFilter; ?>&interface=key">
-					<img width='15px' src='../images/key.jpg'/>
+					<img width='15px' src='../images/key.png'/>
 				</a>
 			</div>
 		<?php 

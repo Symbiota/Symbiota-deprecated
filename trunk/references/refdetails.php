@@ -164,7 +164,7 @@ header("Content-Type: text/html; charset=".$charset);
 										foreach($authArr as $k => $v){
 											echo '<li>';
 											echo '<a href="authoreditor.php?authid='.$k.'" target="_blank">'.$v.'</a>';
-											echo ' <input type="image" style="margin-left:5px;" src="../images/del.gif" onclick="deleteRefAuthor('.$k.');" title="Delete author">';
+											echo ' <input type="image" style="margin-left:5px;" src="../images/del.png" onclick="deleteRefAuthor('.$k.');" title="Delete author">';
 											echo '</li>';
 										}
 										echo '</ul>';

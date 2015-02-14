@@ -262,7 +262,7 @@ if(isset($profile_viewprofileCrumbs)){
 									</div>
 									<div style="float:left;margin:20px 0px 0px 3px;">
 										<span style="cursor:pointer;" onclick="openMappingAid();">
-											<img src="../images/world40.gif" style="width:12px;" />
+											<img src="../images/world.png" style="width:12px;" />
 										</span>
 									</div>
 								</div>
@@ -277,7 +277,7 @@ if(isset($profile_viewprofileCrumbs)){
 											<input type="hidden" id="footprintWKT" name="nclfootprintWKT" value='' />
 										</div>
 										<div style="float:right;margin:8px 0px 0px 10px;cursor:pointer;" onclick="openMappingPolyAid();">
-											<img src="../images/world40.gif" style="width:12px;" />
+											<img src="../images/world.png" style="width:12px;" />
 										</div>
 									</fieldset>
 								</div>

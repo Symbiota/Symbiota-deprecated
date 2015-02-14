@@ -239,7 +239,7 @@ $fileName = time();
 				</div>
 				<div style="margin-top:20px;height:20px;width:100%">
 					<div style="float:right;">
-						<img src="../../images/icons/garmin.jpg" title="From the good people at Garmin." />
+						<img src="../../images/icons/garmin.png" title="From the good people at Garmin." />
 					</div>
 				</div>
 			</fieldset>

@@ -125,7 +125,7 @@ if($editable){
 								<input type='hidden' name='tid' value='<?php echo $descEditor->getTid();?>' />
 								<input type="hidden" name="tabindex" value="4" />
 								<input type='hidden' name='action' value='Delete Description Block'>
-								<input name='submitaction' value='Delete Description Block' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
+								<input name='submitaction' value='Delete Description Block' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.png'/> 
 								Delete Description Block (Including all statements below) 
 							</form>
 						</div>
@@ -199,7 +199,7 @@ if($editable){
 											<input type='hidden' name='tid' value='<?php echo $descEditor->getTid();?>' />
 											<input type="hidden" name="tabindex" value="4" />
 											<input type='hidden' name='action' value='Delete Statement'>
-											<input name='submitaction' value='Delete Statement' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
+											<input name='submitaction' value='Delete Statement' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.png'/> 
 											Delete Statement 
 										</form>
 									</div>

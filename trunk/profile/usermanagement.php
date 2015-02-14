@@ -159,7 +159,7 @@ if($isAdmin){
 											echo '</span>'; 
 											?></b> 
 											<a href="usermanagement.php?delrole=SuperAdmin&userid=<?php echo $userId; ?>">
-												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+												<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
 										</li>
 										<?php 
@@ -173,7 +173,7 @@ if($isAdmin){
 											echo '</span>'; 
 											?></b> 
 											<a href="usermanagement.php?delrole=Taxonomy&userid=<?php echo $userId; ?>">
-												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+												<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
 										</li>
 										<?php 
@@ -187,7 +187,7 @@ if($isAdmin){
 											echo '</span>'; 
 											?></b> 
 											<a href="usermanagement.php?delrole=TaxonProfile&userid=<?php echo $userId; ?>">
-												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+												<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
 										</li>
 										<?php 
@@ -201,7 +201,7 @@ if($isAdmin){
 											echo '</span>'; 
 											?></b>
 											<a href="usermanagement.php?delrole=KeyAdmin&userid=<?php echo $userId; ?>">
-												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+												<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
 										</li>
 										<?php 
@@ -215,7 +215,7 @@ if($isAdmin){
 											echo '</span>'; 
 											?></b>
 											<a href="usermanagement.php?delrole=KeyEditor&userid=<?php echo $userId; ?>">
-												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+												<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
 										</li>
 										<?php 
@@ -229,7 +229,7 @@ if($isAdmin){
 											echo '</span>'; 
 											?></b>
 											<a href="usermanagement.php?delrole=RareSppAdmin&userid=<?php echo $userId; ?>">
-												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+												<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
 										</li>
 										<?php 
@@ -243,7 +243,7 @@ if($isAdmin){
 											echo '</span>'; 
 											?></b>
 											<a href="usermanagement.php?delrole=RareSppReadAll&userid=<?php echo $userId; ?>">
-												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+												<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
 										</li>
 										<?php 
@@ -257,7 +257,7 @@ if($isAdmin){
 											$cName = '';
 											echo '<li><span title="'.$v['aby'].'">'.$v['name'].'</span>';
 											echo "<a href='usermanagement.php?delrole=CollAdmin&tablepk=$k&userid=$userId'>";
-											echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
+											echo "<img src='../images/del.png' style='border:0px;width:15px;' title='Delete permission' />";
 											echo "</a></li>";
 										}
 										echo "</ul>";
@@ -270,7 +270,7 @@ if($isAdmin){
 										foreach($collList as $k => $v){
 											echo '<li><span title="'.$v['aby'].'">'.$v['name'].'</span>';
 											echo "<a href='usermanagement.php?delrole=CollEditor&tablepk=$k&userid=$userId'>";
-											echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
+											echo "<img src='../images/del.png' style='border:0px;width:15px;' title='Delete permission' />";
 											echo "</a></li>";
 										}
 										echo "</ul>";
@@ -287,7 +287,7 @@ if($isAdmin){
 												<li>
 													<?php echo '<span title="'.$v['aby'].'">'.$v['name'].'</span>'; ?>
 													<a href="usermanagement.php?delrole=RareSppReader&tablepk=<?php echo $collId?>&userid=<?php echo $userId; ?>">
-														<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+														<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 													</a>
 												</li>
 												<?php 
@@ -309,7 +309,7 @@ if($isAdmin){
 												foreach($projList as $k => $v){
 													echo '<li><a href="../projects/index.php?proj='.$k.'" target="_blank"><span title="'.$v['aby'].'">'.$v['name'].'</span></a>';
 													echo "<a href='usermanagement.php?delrole=ProjAdmin&tablepk=$k&userid=$userId'>";
-													echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
+													echo "<img src='../images/del.png' style='border:0px;width:15px;' title='Delete permission' />";
 													echo "</a></li>";
 												}
 												?>
@@ -334,7 +334,7 @@ if($isAdmin){
 													echo '<span title="'.$v['aby'].'">'.$name.'</span>';
 													echo '</a>';
 													echo "<a href='usermanagement.php?delrole=ClAdmin&tablepk=$k&userid=$userId'>";
-													echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
+													echo "<img src='../images/del.png' style='border:0px;width:15px;' title='Delete permission' />";
 													echo "</a></li>";
 												}
 												?>

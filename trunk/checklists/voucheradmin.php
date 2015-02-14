@@ -207,7 +207,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 										<div>
 											<b>Lat North:</b>
 											<input id="upperlat" type="text" name="latnorth" style="width:70px;" value="<?php echo $latn; ?>" title="Latitude North" /> 
-											<a href="#" onclick="openPopup('../collections/mapboundingbox.php','boundingbox')"><img src="../images/world40.gif" width="15px" title="Find Coordinate" /></a>
+											<a href="#" onclick="openPopup('../collections/mapboundingbox.php','boundingbox')"><img src="../images/world.png" width="15px" title="Find Coordinate" /></a>
 										</div>
 										<div>
 											<b>Lat South:</b>
@@ -296,7 +296,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 								Taxa without Vouchers: <?php echo $nonVoucherCnt; ?>
 							</div>
 							<div style='float:left;'>
-								<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><img src="../images/refresh.jpg" style="border:0px;" title="Refresh List" /></a>
+								<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><img src="../images/refresh.png" style="border:0px;" title="Refresh List" /></a>
 							</div>
 							<?php 
 							if($displayMode){

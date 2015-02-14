@@ -287,13 +287,13 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 				if($keyModIsActive === true || $keyModIsActive === 1){
 					?>
 					<a href="../ident/key.php?surveyid=<?php echo $surveyId."&proj=".$clManager->getPid();?>&taxon=All+Species">
-						<img src='../images/key.jpg' style='width:15px;border:0px;' title='Open Symbiota Key' />
+						<img src='../images/key.png' style='width:15px;border:0px;' title='Open Symbiota Key' />
 					</a>&nbsp;&nbsp;&nbsp;
 					<?php 
 				}
 				?>
 				<a href="flashcards.php?surveyid=<?php echo $surveyId.($taxonFilter?"&taxonfilter=".$taxonFilter:"")."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");?>">
-					<img src="../images/quiz.jpg" style="height:10px;border:0px;" title="Open Flashcard Quiz" />
+					<img src="../images/quiz.png" style="height:10px;border:0px;" title="Open Flashcard Quiz" />
 				</a>
 				<?php 
 			}
@@ -356,7 +356,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 								<span>Latitude Centroid: </span>
 								<input id="latdec" type='text' name='latcentroid' value='<?php echo $mdArray["latcentroid"]; ?>' />
 								<span style="cursor:pointer;" onclick="openMappingAid();">
-									<img src="../images/world40.gif" style="width:12px;" />
+									<img src="../images/world.png" style="width:12px;" />
 								</span>
 							</div>
 							<div>

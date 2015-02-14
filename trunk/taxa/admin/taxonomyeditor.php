@@ -137,7 +137,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 			
 			<div style="float:right;" title="Go to taxonomy display">
 				<a href="taxonomydisplay.php?target=<?php echo $taxonEditorObj->getUnitName1();?>&showsynonyms=1">
-					<img style='border:0px;width:15px;' src='../../images/toparent.jpg'/>
+					<img style='border:0px;width:15px;' src='../../images/toparent.png'/>
 				</a>
 			</div>
 			<div style="float:right;" title="Add a New Taxon">
@@ -401,7 +401,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 										echo "<a href='taxonomyeditor.php?target=".$tidAccepted."&taxauthid=".$taxonEditorObj->getTaxAuthId()."'><i>".$linkedTaxonArr["sciname"]."</i></a> ".$linkedTaxonArr["author"]."\n";
 										if(count($acceptedArr)>1){
 											echo "<span class='acceptedits' style=\"cursor:pointer;display:none;\" onclick=\"deleteAcceptedLink('".$tidAccepted."')\">";
-											echo "<img style='border:0px;width:12px;' src='../../images/del.gif' />";
+											echo "<img style='border:0px;width:12px;' src='../../images/del.png' />";
 											echo "</span>\n";
 										}
 										if($linkedTaxonArr["usagenotes"]){
@@ -576,7 +576,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
 								<input type="hidden" name="submitaction" value="updatehierarchy" />
 								<input type="hidden" name="tabindex" value="2" />
-								<input type="image" name="imagesubmit" src="../../images/undo.jpg" style="width:20px;"/>
+								<input type="image" name="imagesubmit" src="../../images/undo.png" style="width:20px;"/>
 							</form>
 						</div>
 						<?php 

@@ -46,10 +46,10 @@ header("Content-Type: text/html; charset=".$charset);
 				$projName = substr($projStr,$pidPos+1);
 				echo "<div style='margin:3px 0px 0px 15px;'><a name='".$projStr."'></a>";
 				echo "<h3><span style='cursor:pointer;color:#990000;' onclick='javascript:toggle(\"stcl-".$pid."\")'>";
-				echo "<span class='stcl-".$pid."' style='display:none;'><img src='../images/plus.gif'/></span>";
-				echo "<span class='stcl-".$pid."' style='display:inline;'><img src='../images/minus.gif'/></span>";
+				echo "<span class='stcl-".$pid."' style='display:none;'><img src='../images/plus_sm.png'/></span>";
+				echo "<span class='stcl-".$pid."' style='display:inline;'><img src='../images/minus_sm.png'/></span>";
 				echo "&nbsp;&nbsp;".$projName."</span>&nbsp;&nbsp;";
-				echo "<a href='../checklists/clgmap.php?proj=".$pid."&target=keys' title='Show checklists on map'><img src='../images/world40.gif' style='width:10px;border:0' /></a>";
+				echo "<a href='../checklists/clgmap.php?proj=".$pid."&target=keys' title='Show checklists on map'><img src='../images/world.png' style='width:10px;border:0' /></a>";
 				echo "</h3>";
 				echo "<div class='stcl-".$pid."' style='display:block;'><ul>";
 				foreach($clArr as $clid => $clName){

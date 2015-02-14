@@ -51,9 +51,9 @@ $collManager->reset();
 		<form name="harvestparams" id="harvestparams" action="list.php" method="get" onsubmit="return checkForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:10px;'>
-				<input style="border: 1px solid gray;" type="image" name="display1" id="display1" class="hoverHand" src='../images/search.gif'
-					onmouseover="javascript: this.src = '../images/search_rollover.gif';"
-					onmouseout="javascript: this.src = '../images/search.gif';"
+				<input style="border: 1px solid gray;" type="image" name="display1" id="display1" class="hoverHand" src='../images/search.png'
+					onmouseover="javascript: this.src = '../images/search_rollover.png';"
+					onmouseout="javascript: this.src = '../images/search.png';"
 					title="Click button to display the results of your search">
 			</div>
 			<div>
@@ -133,7 +133,7 @@ $collManager->reset();
 					</select>
 				</div>
 				<div style="float:right;cursor:pointer;" onclick="openBoundingBoxMap();">
-					<img src="../images/world40.gif" width="15px" title="Find Coordinate" />
+					<img src="../images/world.png" width="15px" title="Find Coordinate" />
 				</div>
 				<div title="Easterm hemisphere is positive; Western is negative">
 					Eastern Longitude: <input type="text" id="rightlong" name="rightlong" size="7" value="<?php echo $rightLong; ?>" onchange="javascript:checkRightLong();" style="margin-left:3px;">
@@ -172,7 +172,7 @@ $collManager->reset();
 					</select>
 				</div>
 				<div style="float:right;cursor:pointer;" onclick="openPointRadiusMap();">
-					<img src="../images/world40.gif" width="15px" title="Find Coordinate" />
+					<img src="../images/world.png" width="15px" title="Find Coordinate" />
 				</div>
 				<div>
 					Radius: <input type="text" id="radiustemp" name="radiustemp" size="5" value="<?php echo $radius; ?>" style="margin-left:15px;" onchange="updateRadius();">
@@ -201,9 +201,9 @@ $collManager->reset();
 				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$collArray)) echo $collArray["eventdate2"]; ?>" title="End date of range; leave blank if searching for single date" />
 			</div>
 			<div style="float:right;">
-				<input style="border: 1px solid gray;" id="display2" name="display2" type="image" class="hoverHand" src='../images/search.gif'
-					onmouseover="javascript:this.src = '../images/search_rollover.gif';"
-					onmouseout="javascript:this.src = '../images/search.gif';"
+				<input style="border: 1px solid gray;" id="display2" name="display2" type="image" class="hoverHand" src='../images/search.png'
+					onmouseover="javascript:this.src = '../images/search_rollover.png';"
+					onmouseout="javascript:this.src = '../images/search.png';"
 					title="Click button to display the results of your search">
 			</div>
 			<div>

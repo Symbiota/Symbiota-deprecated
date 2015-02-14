@@ -223,7 +223,7 @@ include($serverRoot."/header.php");
 						<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
 							<input type="hidden" name="colliddel" value="<?php echo $v['collid']; ?>">
 							<input type="hidden" name="collid" value="<?php echo $v['collid']; ?>">
-							<input type="image" src="../../images/del.gif" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
+							<input type="image" src="../../images/del.png" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
 						</form>
 					</div>
 					<div><b>Description:</b> <?php echo $v['description']; ?></div>
@@ -342,7 +342,7 @@ include($serverRoot."/header.php");
 								?>
 								<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
 									<input type="hidden" name="colliddel" value="<?php echo $v['collid']; ?>">
-									<input type="image" src="../../images/del.gif" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
+									<input type="image" src="../../images/del.png" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
 								</form>
 								<?php
 							}

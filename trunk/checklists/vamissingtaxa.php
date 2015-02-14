@@ -41,7 +41,7 @@ else{
 		?>
 	</div>
 	<div style="float:left;margin-left:5px">
-		<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid.'&displaymode='.$displayMode; ?>&tabindex=1"><img src="../images/refresh.jpg" style="border:0px;" title="Refresh List" /></a>
+		<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid.'&displaymode='.$displayMode; ?>&tabindex=1"><img src="../images/refresh.png" style="border:0px;" title="Refresh List" /></a>
 	</div>
 	<div style="float:left;margin-left:5px;">
 		<a href="voucherreporthandler.php?rtype=<?php echo ($displayMode==2?'problemtaxacsv':'missingoccurcsv').'&clid='.$clid; ?>" target="_blank" title="Download Specimen Records">

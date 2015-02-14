@@ -382,14 +382,14 @@ if(!$cid) header('Location: index.php');
 							<div>
 								<div id="csplus-<?php echo $cs; ?>" style="margin:5px;">
 									<a href="#" onclick="toggleCharState(<?php echo $cs; ?>);return false;">
-										<img src="../../images/plus.jpg" style="width:10px;" />
+										<img src="../../images/plus.png" style="width:10px;" />
 										<?php echo $stateArr['charstatename']; ?>
 									</a>
 								</div>
 								<div id="<?php echo 'cs-'.$cs.'Div'; ?>" style="display:none;">
 									<div style="margin:5px;">
 										<a href="#" onclick="toggleCharState(<?php echo $cs; ?>);return false;">
-											<img src="../../images/minus.jpg" style="width:10px;" />
+											<img src="../../images/minus.png" style="width:10px;" />
 											<?php echo $stateArr['charstatename']; ?>
 										</a>
 									</div>

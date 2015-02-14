@@ -361,10 +361,10 @@ if($isEditable && $projSubmit){
 					<div style="font-weight:bold;font-size:130%;">
 						Research Checklists
 						<span onclick="toggleResearchInfoBox(this);" title="What is a Research Species List?" style="cursor:pointer;">
-							<img src="../images/qmark.jpg" style="height:15px;"/>
+							<img src="../images/qmark_big.png" style="height:15px;"/>
 						</span> 
 						<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $projManager->getProjectId();?>" title="Map Checklists">
-							<img src='../images/world40.gif' style='width:14px;border:0' />
+							<img src='../images/world.png' style='width:14px;border:0' />
 						</a>
 					</div>
 					<div id="researchlistpopup" class="genericpopup" style="display:none;">
@@ -379,7 +379,7 @@ if($isEditable && $projSubmit){
 					if($keyModIsActive === true || $keyModIsActive === 1){
 						?>
 						<div style="margin-left:15px;font-size:90%">
-							The <img src="../images/key.jpg" style="width: 12px;" alt="Golden Key Symbol" /> 
+							The <img src="../images/key.png" style="width: 12px;" alt="Golden Key Symbol" /> 
 							symbol opens the species list as an interactive key.
 						</div>
 						<?php
@@ -410,7 +410,7 @@ if($isEditable && $projSubmit){
 								if($keyModIsActive === true || $keyModIsActive === 1){
 									?>
 									<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $projManager->getProjectId(); ?>&taxon=All+Species'>
-										<img style='width:12px;border:0px;' src='../images/key.jpg'/>
+										<img style='width:12px;border:0px;' src='../images/key.png'/>
 									</a>
 									<?php
 								}
@@ -427,10 +427,10 @@ if($isEditable && $projSubmit){
 						<div style="font-weight:bold;font-size:130%;">
 							Survey Species Lists 
 							<span onclick="toggleSurveyInfoBox(this);" title="What is a Dynamic Survey Species List?" style="cursor:pointer;">
-								<img src="../images/qmark.jpg" style="height:15px;"/>
+								<img src="../images/qmark_big.png" style="height:15px;"/>
 							</span> 
 							<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $projManager->getProjectId();?>" title="Map checklists">
-								<img src="../images/world40.gif" style="width:14px;border:0" />
+								<img src="../images/world.png" style="width:14px;border:0" />
 							</a>
 						</div>
 					</div>
