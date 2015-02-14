@@ -32,7 +32,7 @@ if($editable){
 	</div>
 	<div id='adddescrblock' style='display:none;'>
 		<form name='adddescrblockform' action="tpeditor.php" method="get">
-			<fieldset style='width:90%;margin:10px;'>
+			<fieldset style='width:90%;margin:10px;padding:10px;'>
     			<legend><b>New Description Block</b></legend>
 				<div style=''>
 					Language: <input id="language" name="language" type="text" value="<?php echo $defaultLang; ?>" />
@@ -64,7 +64,7 @@ if($editable){
 	if($descList = $descEditor->getDescriptions()){
 		foreach($descList as $tdbid => $dArr){
     		?>
-    		<fieldset style='width:90%;margin:10px 5px 5px 5px;'>
+    		<fieldset style='width:90%;margin:10px 5px 5px 5px;padding:10px;'>
 				<legend><b><?php echo ($dArr["caption"]?$dArr["caption"]:"Description ".$dArr["displaylevel"]); ?></b></legend>
 				<div style="float:right;" onclick="toggle('dblock-<?php echo $tdbid;?>');" title="Edit Description Block">
 					<img style='border:0px;width:12px;' src='../../images/edit.png'/>
@@ -84,7 +84,7 @@ if($editable){
 				<div><b>Source URL:</b> <a href='<?php echo $dArr["sourceurl"]; ?>'><?php echo $dArr["sourceurl"]; ?></a></div>
 				<div><b>Notes:</b> <?php echo $dArr["notes"]; ?></div>
 				<div id="dblock-<?php echo $tdbid;?>" style="display:none;margin-top:10px;">
-					<fieldset>
+					<fieldset style="padding:10px;">
 						<legend><b>Description Block Edits</b></legend>
 						<form id='updatedescrblock' name='updatedescrblock' action="tpeditor.php" method="post">
 							<div>
@@ -132,7 +132,7 @@ if($editable){
 					</fieldset>
 				</div>
     			<div style="margin-top:10px;">
-					<fieldset>
+					<fieldset style="padding:10px;">
 						<legend><b>Statements</b></legend>
 						<div onclick="toggle('addstmt-<?php echo $tdbid;?>');" style="float:right;" title="Add a New Statement">
 							<img style='border:0px;width:15px;' src='../../images/add.png'/>

@@ -149,65 +149,67 @@ $sciArr = array();
 	?>
 	<!-- This is inner text! -->
 	<div id='innertext'>
-		<div style="width:420px;height:420px;text-align:center;">
-			<div>
-				<a id="imageanchor" href="">
-					<img id="activeimage" src="" style="height:97%;max-width:450px" />
-				</a>
-			</div>
-		</div>
-		<div style="width:420px;text-align:center;">
-			<div style="width:100%;">
-				<div style="float:left;cursor:pointer;text-align:center;" onclick="insertNewImage()">
-					<img src="../images/skipthisone.png" title="Skip to Next Species" />
-				</div>
-				<div id="rightarrow" style="float:right;cursor:pointer;text-align:center;" onclick="nextImage()">
-					<img src="../images/rightarrow.png" title="Show Next Image" /><br/>
-					Image <span id="imageindex">1</span> of <span id="imagecount">?</span>
+		<div style="width:420px;margin-left:auto;margin-right:auto;">
+			<div style="width:420px;height:420px;text-align:center;">
+				<div>
+					<a id="imageanchor" href="">
+						<img id="activeimage" src="" style="height:97%;max-width:450px" />
+					</a>
 				</div>
 			</div>
-			<div style="clear:both;">
-				<select id="scinameselect" onchange="checkId(this)">
-					<option value="0">Name of Above Organism</option>
-					<option value="0">-------------------------</option>
-					<?php 
-					asort($sciArr);
-					foreach($sciArr as $t => $s){
-						echo "<option value='".$t."'>".$s."</option>";
-					}
-				
-					?>
-				</select>
-			</div>
-			<div><span id="numcomplete">0</span> out of <span id="numtotal">0</span> Species Identified</div>
-			<div><span id="numcorrect">0</span> Identified Correctly on First Try</div>
-			<div style="cursor:pointer;" onclick="tellMe()">Tell Me What It Is!</div>
-			<div style="margin:5px 0px 0px 60px;width:300px;">
-				<form id="taxonfilterform" name="taxonfilterform" action="flashcards.php" method="GET">
-					<fieldset>
-					    <legend>Options</legend>
-						<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
-						<input type="hidden" name="lang" value="<?php echo $lang; ?>" />
-						<div>
-							<select name="taxonfilter" onchange="document.getElementById('taxonfilterform').submit();">
-								<option value="0">Filter Quiz by Taxonomic Group</option>
+			<div style="width:420px;text-align:center;">
+				<div style="width:100%;">
+					<div style="float:left;cursor:pointer;text-align:center;" onclick="insertNewImage()">
+						<img src="../images/skipthisone.png" title="Skip to Next Species" />
+					</div>
+					<div id="rightarrow" style="float:right;cursor:pointer;text-align:center;" onclick="nextImage()">
+						<img src="../images/rightarrow.png" title="Show Next Image" /><br/>
+						Image <span id="imageindex">1</span> of <span id="imagecount">?</span>
+					</div>
+				</div>
+				<div style="clear:both;">
+					<select id="scinameselect" onchange="checkId(this)">
+						<option value="0">Name of Above Organism</option>
+						<option value="0">-------------------------</option>
+						<?php 
+						asort($sciArr);
+						foreach($sciArr as $t => $s){
+							echo "<option value='".$t."'>".$s."</option>";
+						}
+					
+						?>
+					</select>
+				</div>
+				<div><span id="numcomplete">0</span> out of <span id="numtotal">0</span> Species Identified</div>
+				<div><span id="numcorrect">0</span> Identified Correctly on First Try</div>
+				<div style="cursor:pointer;" onclick="tellMe()">Tell Me What It Is!</div>
+				<div style="margin:5px 0px 0px 60px;width:300px;">
+					<form id="taxonfilterform" name="taxonfilterform" action="flashcards.php" method="GET">
+						<fieldset>
+							<legend>Options</legend>
+							<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
+							<input type="hidden" name="lang" value="<?php echo $lang; ?>" />
+							<div>
+								<select name="taxonfilter" onchange="document.getElementById('taxonfilterform').submit();">
+									<option value="0">Filter Quiz by Taxonomic Group</option>
+									<?php 
+										$fcManager->echoTaxonFilterList();
+									?>
+								</select>
+							</div>
+							<div style='margin-top:3px;'>
 								<?php 
-									$fcManager->echoTaxonFilterList();
+									//Display Common Names: 0 = false, 1 = true 
+									if($displayCommonNames){
+										echo '<input id="showcommon" name="showcommon" type="checkbox" value="1" '.($showCommon?"checked":"").' onchange="document.getElementById(\'taxonfilterform\').submit();"/> Display Common Names'."\n";
+									}
 								?>
-							</select>
-						</div>
-						<div style='margin-top:3px;'>
-							<?php 
-								//Display Common Names: 0 = false, 1 = true 
-							    if($displayCommonNames){
-							    	echo '<input id="showcommon" name="showcommon" type="checkbox" value="1" '.($showCommon?"checked":"").' onchange="document.getElementById(\'taxonfilterform\').submit();"/> Display Common Names'."\n";
-							    }
-							?>
-						</div>
-					</fieldset>
-				</form>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<div style="cursor:pointer;" onclick="reset()">Reset Game</div>
 			</div>
-			<div style="cursor:pointer;" onclick="reset()">Reset Game</div>
 		</div>
 	</div>
 	<?php

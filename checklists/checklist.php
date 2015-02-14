@@ -184,7 +184,7 @@ if($clValue || $dynClid){
 				</div>
 				<?php 
 			}
-			if(!$printMode){
+			if(!$printMode && $taxaArray){
 				?>
 				<div style="padding:5px;">
 					<ul id="sddm">
