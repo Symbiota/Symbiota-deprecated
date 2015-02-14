@@ -379,10 +379,10 @@ if($SYMB_UID){
 									<input type="text" id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="coordinateUncertaintyInMetersChanged(this.form);" title="Uncertainty in Meters" />
 								</div>
 								<div id="googleDiv" onclick="openMappingAid();" title="Google Maps">
-									<img src="../../images/world40.gif" />
+									<img src="../../images/world.png" />
 								</div>
 								<div id="geoLocateDiv" title="GeoLocate locality">
-									<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.gif"/></a>
+									<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.png"/></a>
 								</div>
 								<div id="geoToolsDiv" title="Other Coordinate Formats" >
 									<input type="button" value="Tools" onclick="toggleCoordDiv();" />

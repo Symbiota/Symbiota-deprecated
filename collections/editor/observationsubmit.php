@@ -194,7 +194,7 @@ if($collMap){
 							<br/>
 							<input type="text" id="pointlong" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:lightyellow;" value="" onchange="verifyLngValue(this)" title="Decimal Format (eg -112.5436)" />
 							<span style="margin:15px 5px 0px 5px;cursor:pointer;" onclick="openMappingAid('obsform','decimallatitude','decimallongitude');">
-								<img src="../../images/world40.gif" style="width:12px;" title="Coordinate Map Aid" />
+								<img src="../../images/world.png" style="width:12px;" title="Coordinate Map Aid" />
 							</span>
 							<span style="margin:15px 2px 0px 2px;text-align:center;font-size:85%;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggle('dmsdiv');">
 								DMS

@@ -251,7 +251,7 @@ if($isEditor && $formSubmit){
 														<input name="limit" type="hidden" value="<?php echo $limit; ?>" />
 														<input name="action" type="hidden" value="<?php echo $action; ?>" />
 														<input name="formsubmit" type="hidden" value="occdelete" />
-														<input name="submit" type="image" src="../../images/del.gif" style="width:15px;" />
+														<input name="submit" type="image" src="../../images/del.png" style="width:15px;" />
 													</form>
 												</div>
 												<div style="margin-left:15px;clear:both;">

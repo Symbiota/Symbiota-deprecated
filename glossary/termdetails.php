@@ -251,7 +251,7 @@ else{
 										<input name="gltlinkid" type="hidden" value="<?php echo $synArr['gltlinkid']; ?>" />
 										<input name="tid" type="hidden" value="<?php echo $termArr['tid']; ?>" />
 										<input name="relglossid" type="hidden" value="<?php echo $synArr['glossid']; ?>" />
-										<input type="image" name="formsubmit" src='../images/del.gif'  value="Remove Relation" title="Remove Synonym">
+										<input type="image" name="formsubmit" src='../images/del.png'  value="Remove Relation" title="Remove Synonym">
 									</form>
 								</div>
 								<div style="float:right;margin-right:10px;cursor:pointer;" onclick="" title="Edit Term">
@@ -357,7 +357,7 @@ else{
 										<input name="gltlinkid" type="hidden" value="<?php echo $transArr['gltlinkid']; ?>" />
 										<input name="tid" type="hidden" value="<?php echo $termArr['tid']; ?>" />
 										<input name="relglossid" type="hidden" value="<?php echo $transArr['glossid']; ?>" />
-										<input type="image" name="formsubmit" src='../images/del.gif'  value="Remove Relation" title="Remove Translation">
+										<input type="image" name="formsubmit" src='../images/del.png'  value="Remove Relation" title="Remove Translation">
 									</form>
 								</div>
 								<div style="float:right;margin-right:10px;cursor:pointer;" onclick="" title="Edit Term Data">

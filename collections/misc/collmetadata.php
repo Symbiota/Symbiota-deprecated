@@ -272,7 +272,7 @@ $collData = $collManager->getCollectionData(true);
 								<td>
 									<input id="latdec" type="text" name="latitudedecimal" value="<?php echo ($collid?$collData["latitudedecimal"]:'');?>" />
 									<span style="cursor:pointer;" onclick="openMappingAid();">
-										<img src="../../images/world40.gif" style="width:12px;" />
+										<img src="../../images/world.png" style="width:12px;" />
 									</span>
 								</td>
 							</tr>

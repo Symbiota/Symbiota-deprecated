@@ -179,7 +179,7 @@ if($clValue || $dynClid){
 				?>
 				<div style="float:left;padding:5px;">
 					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid;?>&taxon=All+Species">
-						<img src='../images/key.jpg' style="width:15px;border:0px;" title='Open Symbiota Key' />
+						<img src='../images/key.png' style="width:15px;border:0px;" title='Open Symbiota Key' />
 					</a>
 				</div>
 				<?php 

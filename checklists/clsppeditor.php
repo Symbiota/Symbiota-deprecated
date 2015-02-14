@@ -297,7 +297,7 @@ $clArray = $vManager->getChecklistData();
 										<input type='hidden' name='clid' value="<?php echo $vManager->getClid();?>" />
 										<input type='hidden' name='oiddel' id='oiddel' value="<?php echo $occid;?>" />
 										<input type='hidden' name='tabindex' value="1" />
-										<input type="image" name="action" src="../images/del.gif" style="width:15px;" value="Delete Voucher" title="Delete Voucher" />
+										<input type="image" name="action" src="../images/del.png" style="width:15px;" value="Delete Voucher" title="Delete Voucher" />
 									</form>
 									<div id="vouch-<?php echo $occid;?>" style='margin:10px;clear:both;display:none;'>
 										<form action="clsppeditor.php" method='post' name='editvoucher'>

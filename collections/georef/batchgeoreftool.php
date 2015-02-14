@@ -197,10 +197,10 @@ header("Content-Type: text/html; charset=".$charset);
 										<a href="#" onclick="geoCloneTool();"><img src="../../images/list.png" title="Search for clones previously georeferenced" style="width:18px;" /></a>
 									</span>
 									<span style="margin-left:10px;">
-										<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.gif" title="GeoLocate locality" style="width:18px;" /></a>
+										<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.png" title="GeoLocate locality" style="width:18px;" /></a>
 									</span>
 									<span style="margin-left:10px;">
-										<a href="#" onclick="analyseLocalityStr();"><img src="../../images/find.jpg" title="Analyse Locality string for embedded Lat/Long or UTM" style="width:18px;" /></a>
+										<a href="#" onclick="analyseLocalityStr();"><img src="../../images/find.png" title="Analyse Locality string for embedded Lat/Long or UTM" style="width:18px;" /></a>
 									</span>
 									<span style="margin-left:10px;">
 										<a href="#" onclick="openFirstRecSet();"><img src="../../images/edit.png" title="Edit first set of records" style="width:18px;" /></a>
@@ -291,7 +291,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<td>
 												<input id="decimallatitude" name="decimallatitude" type="text" value="" style="width:80px;" />
 												<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();">
-													<img src="../../images/world40.gif" style="border:0px;width:13px;" />
+													<img src="../../images/world.png" style="border:0px;width:13px;" />
 												</span>
 											</td>
 										</tr>

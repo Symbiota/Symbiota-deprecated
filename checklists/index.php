@@ -92,15 +92,15 @@
 						<h3>
 							<span style="cursor:pointer;color:#990000;" onclick="javascript:toggle('stcl-<?php echo $projId; ?>')">
 								<span class="stcl-<?php echo $projId; ?>" style="display:none;">
-									<img src='../images/plus.gif'/>
+									<img src='../images/plus_sm.png'/>
 								</span>
 								<span class="stcl-<?php echo $projId; ?>" style="display:inline;">
-									<img src='../images/minus.gif'/>
+									<img src='../images/minus_sm.png'/>
 								</span>&nbsp;&nbsp;
 								<?php echo $pName;?>
 							</span>&nbsp;&nbsp;
 							<a href="<?php echo "clgmap.php?cltype=research&proj=".$pid; ?>" title='Show checklists on map'>
-								<img src='../images/world40.gif' style='width:10px;border:0' />
+								<img src='../images/world.png' style='width:10px;border:0' />
 							</a>
 						</h3>
 						<div class="stcl-<?php echo $projId; ?>" style="display:block;">
@@ -133,15 +133,15 @@
 						<h3>
 							<span style="cursor:pointer;color:#990000;" onclick="javascript:toggle('pscl-<?php echo $projId; ?>')">
 								<span class="stcl-<?php echo $projId; ?>" style="display:none;">
-									<img src='../images/plus.gif'/>
+									<img src='../images/plus_sm.png'/>
 								</span>
 								<span class="stcl-<?php echo $projId; ?>" style="display:inline;">
-									<img src='../images/minus.gif'/>
+									<img src='../images/minus_sm.png'/>
 								</span>&nbsp;&nbsp;
 								<?php echo $pName;?>
 							</span>&nbsp;&nbsp;
 							<a href="<?php echo "clgmap.php?cltype=survey&proj=".$pid; ?>" title='Show checklists on map'>
-								<img src='../images/world40.gif' style='width:10px;border:0' />
+								<img src='../images/world.png' style='width:10px;border:0' />
 							</a>
 						</h3>
 						<div class="pscl-<?php echo $projId; ?>" style="display:block;">

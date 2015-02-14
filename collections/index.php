@@ -126,16 +126,16 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 							<fieldset style="margin:10px;padding:10px;">
 								<legend style="font-weight:bold;"><?php echo $titleArr[$catPid]; ?></legend>
 								<div style="margin:0px 15px;float:right;">
-									<input type="image" src='../images/next.jpg'
-										onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-										onmouseout="javascript:this.src = '../images/next.jpg';"
+									<input type="image" src='../images/next.png'
+										onmouseover="javascript:this.src = '../images/next_rollover.png';" 
+										onmouseout="javascript:this.src = '../images/next.png';"
 										title="Click button to advance to the next step" />
 								</div>
 								<?php 
 								foreach($catArr as $pid => $clidArr){
 									?>
 									<div>
-										<a href="#" onclick="togglePid('<?php echo $pid; ?>');return false;"><img id="plus-pid-<?php echo $pid; ?>" src="../images/plus.gif" /><img id="minus-pid-<?php echo $pid; ?>" src="../images/minus.gif" style="display:none;" /></a>
+										<a href="#" onclick="togglePid('<?php echo $pid; ?>');return false;"><img id="plus-pid-<?php echo $pid; ?>" src="../images/plus_sm.png" /><img id="minus-pid-<?php echo $pid; ?>" src="../images/minus_sm.png" style="display:none;" /></a>
 										<input name="pid[]" type="checkbox" value="<?php echo $pid; ?>" onchange="selectAllPid(this);" />
 										<b><?php echo $titleArr[$pid]; ?></b>
 									</div>

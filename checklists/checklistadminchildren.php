@@ -58,7 +58,7 @@ $clManager->setClid($clid);
 						<a href="checklist.php?cl=<?php echo $k; ?>"><?php echo $cArr['name']; ?></a>
 						<?php 
 						if($cArr['pclid'] == $clid){
-							echo '<a href="checklistadmin.php?submitaction=delchild&tabindex=2&cliddel='.$k.'&clid='.$clid.'&pid='.$pid.'" onclick="return confirm(\'Are you sure you want to remove'.$cArr['name'].' as a child checklist?\')"><img src="../images/del.gif" style="width:14px;" /></a>';
+							echo '<a href="checklistadmin.php?submitaction=delchild&tabindex=2&cliddel='.$k.'&clid='.$clid.'&pid='.$pid.'" onclick="return confirm(\'Are you sure you want to remove'.$cArr['name'].' as a child checklist?\')"><img src="../images/del.png" style="width:14px;" /></a>';
 						}
 						?>
 					</li>

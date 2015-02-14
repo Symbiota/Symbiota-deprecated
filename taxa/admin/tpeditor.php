@@ -178,7 +178,7 @@ if($editable && $action){
 				//Display Scientific Name and Family
 				echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;'><a href='../index.php?taxon=".$tEditor->getTid()."' style='color:#990000;text-decoration:none;'><b><i>".$tEditor->getSciName()."</i></b></a> ".$tEditor->getAuthor();
 				//Display Parent link
-				if($tEditor->getRankId() > 140) echo "&nbsp;<a href='tpeditor.php?tid=".$tEditor->getParentTid()."'><img border='0' height='10px' src='../../images/toparent.jpg' title='Go to Parent' /></a>";
+				if($tEditor->getRankId() > 140) echo "&nbsp;<a href='tpeditor.php?tid=".$tEditor->getParentTid()."'><img border='0' height='10px' src='../../images/toparent.png' title='Go to Parent' /></a>";
 				echo "</div>\n";
 				//Display Family
 				echo "<div id='family' style='margin-left:20px;margin-top:0.25em;'><b>Family:</b> ".$tEditor->getFamily()."</div>\n";
@@ -288,7 +288,7 @@ if($editable && $action){
 													<input type='hidden' name='delvern' value='<?php echo $vernArr["vid"]; ?>' />
 													<input type='hidden' name='tid' value='<?php echo $tEditor->getTid(); ?>' />
 													<input name='action' type='hidden' value='Delete Common Name' /> 
-													<input name='submitaction' type='image' value='Delete Common Name' style='height:12px;' src='../../images/del.gif' /> 
+													<input name='submitaction' type='image' value='Delete Common Name' style='height:12px;' src='../../images/del.png' /> 
 													Delete Common Name
 												</form>
 											</div>

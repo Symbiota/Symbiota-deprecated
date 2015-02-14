@@ -105,7 +105,7 @@ if($taxonManager->getSciName() != "unknown"){
 				<?php echo $taxonManager->getAuthor(); ?>
 				<?php 
 				$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClid()."&proj=".$projValue."&taxauthid=".$taxAuthId;
-				echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
+				echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.png' title='Go to Parent' /></a>";
 			 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
 			 	if(($taxonManager->getTid() != $taxonManager->getSubmittedTid()) && $taxAuthId){
 			 		echo "<span style='font-size:90%;margin-left:25px;'> (redirected from: <i>".$taxonManager->getSubmittedSciName()."</i>)</span>"; 
@@ -286,7 +286,7 @@ if($taxonManager->getSciName() != "unknown"){
 				if($taxonRank > 140){
 					$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClid()."&proj=".$projValue."&taxauthid=".$taxAuthId;
 					$displayName .= ' <a href="'.$parentLink.'">';
-					$displayName .= '<img border="0" height="10px" src="../images/toparent.jpg" title="Go to Parent" />';
+					$displayName .= '<img border="0" height="10px" src="../images/toparent.png" title="Go to Parent" />';
 					$displayName .= '</a>';
 				}
 				echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
@@ -370,7 +370,7 @@ if($taxonManager->getSciName() != "unknown"){
 					if($clValue){
 						echo "Species within <b>".$taxonManager->getClName()."</b>&nbsp;&nbsp;";
 						if($taxonManager->getParentClid()){
-							echo "<a href='index.php?taxon=$taxonValue&cl=".$taxonManager->getParentClid()."&taxauthid=".$taxAuthId."' title='Go to ".$taxonManager->getParentName()." checklist'><img style='border:0px;width:10px;' src='../images/toparent.jpg'/></a>";
+							echo "<a href='index.php?taxon=$taxonValue&cl=".$taxonManager->getParentClid()."&taxauthid=".$taxAuthId."' title='Go to ".$taxonManager->getParentName()." checklist'><img style='border:0px;width:10px;' src='../images/toparent.png'/></a>";
 						}
 					}
 					?>

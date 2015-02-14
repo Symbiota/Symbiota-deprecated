@@ -417,12 +417,12 @@ $commentArr = $indManager->getCommentArr($isEditor);
 							if(array_key_exists('dets',$occArr)){
 								?>
 								<div class="detdiv" style="margin-left:10px;cursor:pointer;" onclick="toggle('detdiv');">
-									<img src="../../images/plus.gif" style="border:0px;" />
+									<img src="../../images/plus_sm.png" style="border:0px;" />
 									Show Determination History
 								</div>
 								<div class="detdiv" style="display:none;">
 									<div style="margin-left:10px;cursor:pointer;" onclick="toggle('detdiv');">
-										<img src="../../images/minus.gif" style="border:0px;" />
+										<img src="../../images/minus_sm.png" style="border:0px;" />
 										Hide Determination History
 									</div>
 									<fieldset style="width:350px;margin:5px 0px 10px 10px;border:1px solid grey;">

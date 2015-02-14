@@ -163,7 +163,7 @@ include($serverRoot.'/header.php');
 			?>
 			<div style="float:right;">
 				<a href="institutioneditor.php">
-					<img src="<?php echo $clientRoot;?>/images/toparent.jpg" style="width:15px;border:0px;" title="Return to Institution List" />
+					<img src="<?php echo $clientRoot;?>/images/toparent.png" style="width:15px;border:0px;" title="Return to Institution List" />
 				</a>
 				<?php 
 				if($editorCode > 1){
@@ -352,7 +352,7 @@ include($serverRoot.'/header.php');
 									echo '<div style="margin:5px;font-weight:bold;clear:both;height:15px;">';
 									echo '<div style="float:left;"><a href="../misc/collprofiles.php?collid='.$id.'">'.$collName.'</a></div> ';
 									if($editorCode == 3 || in_array($id,$USER_RIGHTS["CollAdmin"])) 
-										echo ' <div class="editdiv" style="margin-left:10px;display:'.($eMode?'':'none').'"><a href="institutioneditor.php?iid='.$iid.'&removecollid='.$id.'"><img src="../../images/del.gif" style="width:15px;"/></a></div>';
+										echo ' <div class="editdiv" style="margin-left:10px;display:'.($eMode?'':'none').'"><a href="institutioneditor.php?iid='.$iid.'&removecollid='.$id.'"><img src="../../images/del.png" style="width:15px;"/></a></div>';
 									echo '</div>';
 								}
 							}

@@ -99,7 +99,7 @@ if($submitAction){
 						<?php echo date('l, F jS, Y'); ?>
 					</div>
 					<a id="gameinfo" href="#" onclick="return false" title="How to Play?">
-						<img src="../../images/games/ootd/qmark.jpg" style="height:20px;"/>
+						<img src="../../images/games/ootd/qmark.png" style="height:20px;"/>
 					</a>
 					<div id="gameinfodialog" title="How to Play">
 						Look at the picture, and see if you can figure out what the <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is. If you get completely stumped, you can 
@@ -161,13 +161,13 @@ if($submitAction){
 					<div style="width:700px;margin-top:80px;margin-left:auto;margin-right:auto;clear:both;text-align:center;display:table;">
 						<div style="display:table-row;" >
 							<div style="width:160px;float:left;display:table-cell;" >
-								<img src = "../../images/games/ootd/balloons-150.jpg">
+								<img src = "../../images/games/ootd/balloons-150.png">
 							</div>
 							<div style="width:350px;font-size:25px;float:left;margin-top:50px;display:table-cell;" >
 								<b>Congratulations! That is<br />correct!</b>
 							</div>
 							<div style="width:160px;float:right;display:table-cell;" >
-								<img src = "../../images/games/ootd/balloons-150.jpg">
+								<img src = "../../images/games/ootd/balloons-150.png">
 							</div>
 						</div>
 					</div>

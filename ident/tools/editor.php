@@ -139,8 +139,8 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 		$charStatesList = $editorManager->getCharStates();
 		if($cList){
 			$count = 0;
-			$minusGif = "<img src='../../images/minus.gif'>";
-			$plusGif = "<img src='../../images/plus.gif'>";
+			$minusGif = "<img src='../../images/minus_sm.png'>";
+			$plusGif = "<img src='../../images/plus_sm.png'>";
 			foreach($cList as $heading => $charArray){ 
 				echo "<div style='font-weight:bold; font-size:150%; margin:1em 0em 1em 0em; color:#990000;".($charValue?" display:none;":"")."'>";
 				echo "<span class='".$heading."' onclick=\"javascript: toggle('".$heading."');\" style=\"display:none;\">$minusGif</span>";

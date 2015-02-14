@@ -693,9 +693,9 @@ class OccurrenceManager{
 			$categoryArr = $occArr['cat'];
 			?>
 			<div style="float:right;margin-top:20px;">
-				<input type="image" src='../images/next.jpg'
-					onmouseover="this.src = '../images/next_rollover.jpg';"
-					onmouseout="this.src = '../images/next.jpg';"
+				<input type="image" src='../images/next.png'
+					onmouseover="this.src = '../images/next_rollover.png';"
+					onmouseout="this.src = '../images/next.png';"
 					title="Click button to advance to the next step" />
 			</div>
 			<table style="float:left;width:80%;">
@@ -723,7 +723,7 @@ class OccurrenceManager{
 						</td>
 						<td style="padding:9px 5px;width:10px;">
 							<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
-								<img id="plus-<?php echo $idStr; ?>" src="../images/plus.gif" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus.gif" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
+								<img id="plus-<?php echo $idStr; ?>" src="../images/plus_sm.png" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus_sm.png" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
 							</a>
 						</td>
 						<td style="padding-top:8px;">
@@ -829,9 +829,9 @@ class OccurrenceManager{
 				?>
 			</table>
 			<div style="float:right;margin-top:<?php echo count($collArr)*15; ?>px;">
-				<input type="image" src='../images/next.jpg'
-					onmouseover="this.src = '../images/next_rollover.jpg';"
-					onmouseout="this.src = '../images/next.jpg';"
+				<input type="image" src='../images/next.png'
+					onmouseover="this.src = '../images/next_rollover.png';"
+					onmouseout="this.src = '../images/next.png';"
 					title="Click button to advance to the next step" />
 			</div>
 			<?php

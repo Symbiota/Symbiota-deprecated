@@ -1117,7 +1117,7 @@ class MapInterfaceManager{
 				<tr>
 					<td>
 						<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
-							<img id="plus-<?php echo $idStr; ?>" src="../../images/plus.gif" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../../images/minus.gif" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
+							<img id="plus-<?php echo $idStr; ?>" src="../../images/plus_sm.png" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../../images/minus_sm.png" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
 						</a>
 					</td>
 					<td>
