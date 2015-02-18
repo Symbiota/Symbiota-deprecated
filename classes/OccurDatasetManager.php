@@ -649,10 +649,10 @@ class OccurDatasetManager {
 				header('Pragma: public');
 				
 				$fh = fopen('php://output','w');
-				$headerArr = array("occid","catalogNumber","family","scientificName","genus","specificEpithet",
+				$headerArr = array("occid","catalogNumber","otherCatalogNumbers","family","scientificName","genus","specificEpithet",
 					"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","identifiedBy",
 					"dateIdentified","identificationReferences","identificationRemarks","taxonRemarks","identificationQualifier",
-		 			"recordedBy","recordNumber","associatedCollectors","eventDate","year","month","monthName","day",
+		 			"typeStatus","recordedBy","recordNumber","associatedCollectors","eventDate","year","month","monthName","day",
 			 		"verbatimEventDate","habitat","substrate","verbatimAttributes","occurrenceRemarks",
 		 			"associatedTaxa","reproductiveCondition","establishmentMeans","country",
 		 			"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
