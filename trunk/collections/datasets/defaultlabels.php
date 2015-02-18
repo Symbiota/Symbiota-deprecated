@@ -283,6 +283,11 @@ else{
 											<div class="occurrenceremarks"><?php echo $occArr['occurrenceremarks']; ?></div>
 											<?php 
 										}
+										if($occArr['typestatus']){
+											?>
+											<div class="typestatus"><?php echo $occArr['typestatus']; ?></div>
+											<?php 
+										}
 										?>
 										<div class="collectordiv">
 											<div class="collectordiv1" style="float:left;">
@@ -313,7 +318,14 @@ else{
 										if($i == 0 && $useBarcode && $occArr['catalognumber']){
 											?>
 											<div class="cnbarcode" style="clear:both;padding-top:15px;">
-												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occArr['catalognumber']; ?>" /><br/>
+												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occArr['catalognumber']; ?>" />
+											</div>
+											<?php 
+										}
+										if($occArr['catalognumber']){
+											?>
+											<div class="catalognumber" style="clear:both;text-align:center;">
+												<?php echo $occArr['catalognumber']; ?>
 											</div>
 											<?php 
 										}
