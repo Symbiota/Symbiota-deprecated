@@ -1192,7 +1192,7 @@ class SpecProcNlpSalix
 		//Sort the lines in rank order
 		asort($RankArray);
 		$RankArray = array_reverse($RankArray, true);
-		$this->PrintRank($RankArray,"Elev");
+		//$this->PrintRank($RankArray,"Elev");
 		//Now have an array of probable lines sorted most probable first.
 		//ScoreArray will be filled with possible elevations and a score for each.
 		$ScoreArray = array();
@@ -1283,7 +1283,6 @@ class SpecProcNlpSalix
 			$TempString = str_replace("to","-",$TempString);
 			}
 		
-		//$TempString = preg_replace("((\d\s?)(a)(\s?\d))","$1-$3",$TempString);
 		
 		$this->AddToResults('verbatimElevation', $TempString,$L);
 		$Found = false;
@@ -3091,7 +3090,7 @@ class SpecProcNlpSalix
 		$this->PregStart['locality'] = "(^(Locality|Location|Localidad|loc|collected off|collected near)\b)i";
 		$this->PregStart['substrate'] = "(^(Substrate|growing on)\b)i";
 		$this->PregStart['country'] = "(^(Country)\b)i";
-		$this->PregStart['stateProvince'] = "(^(State|Province|Provincia( de)?)\b)i";
+		$this->PregStart['stateProvince'] = "(^(State|Province|Provincia de|Provincia|Prov)\b)i";
 		$this->PregStart['county'] = "(^(County|Parish)\b)i";
 		$this->PregStart['minimumElevationInMeters'] = "(^(Elevation|Elevacion|Elev|Altitude|alt)\b)i";
 		$this->PregStart['associatedTaxa'] = "(^(growing with|Associated taxa|Associated with|Assoc(.|iated)? plants|Assoc(.|iated)? spp|Assoc(.|iated)? species|Associated|Other spp)\b)i";
