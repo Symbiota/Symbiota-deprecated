@@ -40,8 +40,6 @@ td.middleleftnomenu{
 }
 
 td.middlecenter{
-	padding:10px;
-	padding-top:15px;
 }
 
 td.middleright{
@@ -108,12 +106,15 @@ div.menuitem a:hover {
 
 /*Central div in the middle center table div */
 #innertext{
-	width:90%;
 	min-height:400px;
-	margin-top:8px;
 	margin-left:auto;
 	margin-right:auto;
-	margin-bottom:0px;
+	margin-bottom: 0px;
+	margin-top: 0px;
+	padding-top: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-bottom: 15px;
 }
 
 #innertext a{
@@ -121,6 +122,13 @@ div.menuitem a:hover {
 }
 #innertext a:hover{
 
+}
+
+div.navpath {
+	padding-top: 8px;
+	padding-bottom: 0px;
+	padding-left: 10px;
+	margin-bottom: 0px;
 }
 
 /* Image thumbnails   */
@@ -158,9 +166,13 @@ h3{
 }
 
 ul#hor_dropdown{
+	font-size:12px;
 	width:auto;
-	margin:0;
-	padding:10px;
+	margin-top: 0px;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
 	list-style:none;
 	background-image:url(images/menu_pri_background.jpg);
 	background-repeat:repeat-x;
@@ -177,7 +189,10 @@ ul#hor_dropdown li{
 ul#hor_dropdown li a{
 	color:#000000;
 	text-decoration:none;
-	padding:10px;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
 	background-image: url(images/menu-item_divider.jpg);
     background-repeat: no-repeat;
     background-position: right bottom;
@@ -186,24 +201,36 @@ ul#hor_dropdown li a.selected{
 	color:#C5EAB8;
 	background-color:#37533A;
 	text-decoration:none;
-	padding:10px;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
 	background-image:none;
 }
 ul#hor_dropdown li a.selected:hover{
 	color:#C5EAB8;
 	background-color:#37533A;
-	padding:10px;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
 	background-image:none;
 }
 ul#hor_dropdown li a.home_selected{
 	color:#999999;
-	padding:10px;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
 	background-image:none;
 }
 ul#hor_dropdown li a:hover{
 	background-color:#999999;
 	color:#FFFFFF;
-	padding:10px;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
 	background-image:none;
 }
 /* Submenu */
