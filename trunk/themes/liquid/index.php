@@ -21,7 +21,7 @@ header("Content-Type: text/html; charset=".$charset);
         <div  id="innertext">
             <h1></h1>
 
-            <div style="margin:20px;">
+            <div style="padding: 0px 10px;">
             	Description and introduction of project
             </div>
         </div>

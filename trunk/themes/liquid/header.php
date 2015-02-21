@@ -7,8 +7,8 @@
 					<img style="" src="<?php echo $clientRoot; ?>/images/layout/defaultheader.jpg" />
 				</div>
 			</div>
-			<div style="clear:both;height:24px;">
-				<div style="clear:both;float:right;color:#000000;margin-top:10px;"
+			<div style="clear:both;height:32px;">
+				<div style="clear:both;font-size:11px;float:right;color:#000000;margin-top:9px;">
 					<?php
 					if($userDisplayName){
 					?>
