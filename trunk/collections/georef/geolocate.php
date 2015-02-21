@@ -1,5 +1,6 @@
 <?php 
 include_once('../../config/symbini.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $locality = $_REQUEST['locality'];
 $country = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
@@ -46,7 +47,6 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 }
 
 ?>
-<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">

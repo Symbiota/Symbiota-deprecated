@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyCharAdmin.php');
+header("Content-Type: text/html; charset=".$charset);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/headingadmin.php?'.$_SERVER['QUERY_STRING']);
 
@@ -31,7 +32,6 @@ if($isEditor && $action){
 $headingArr = $charManager->getHeadingArr();
 $charArr = $charManager->getCharacterArr();
 ?>
-<!DOCTYPE HTML>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">

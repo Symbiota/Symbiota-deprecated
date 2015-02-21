@@ -133,7 +133,6 @@ if($isEditor){
 	if(!$person) $person = $pHandler->getPerson();
 }
 ?>
-<!DOCTYPE html>
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> - View User Profile</title>

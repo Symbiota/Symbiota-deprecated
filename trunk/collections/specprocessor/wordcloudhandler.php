@@ -10,7 +10,6 @@ $cloudHandler->setWidth(800);
 $cloudHandler->buildWordFile($collTarget);
 
 ?>
-<!doctype html>
 <html>
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">

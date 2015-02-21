@@ -46,7 +46,6 @@ if(!$IS_ADMIN){
 	}
 }
 ?>
-<!DOCTYPE html>
 <html>
 	<head>
 		<title><?php echo $defaultTitle; ?> - Duplicate Record Search</title>

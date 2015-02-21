@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/ImageImport.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 $ulFileName = array_key_exists("ulfilename",$_POST)?$_POST["ulfilename"]:"";
@@ -27,7 +28,6 @@ if($isEditor){
 	}
 }
 ?>
-<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Image Loader</title>

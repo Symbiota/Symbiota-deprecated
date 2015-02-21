@@ -93,7 +93,6 @@ if($editable){
 }
  
 ?>
-<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php echo $defaultTitle." Taxon Editor: ".$target; ?></title>

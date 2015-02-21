@@ -56,7 +56,6 @@ $descr = Array();
 
 ?>
 
-<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
