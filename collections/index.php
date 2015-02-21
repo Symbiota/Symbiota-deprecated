@@ -16,7 +16,6 @@ $obsArr = (isset($collList['obs'])?$collList['obs']:null);
 $otherCatArr = $collManager->getOccurVoucherProjects();
 ?>
 
-<!doctype html>
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">

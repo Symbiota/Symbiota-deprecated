@@ -3,6 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TPEditorManager.php');
 include_once($serverRoot.'/classes/TPDescEditorManager.php');
 include_once($serverRoot.'/classes/TPImageEditorManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
 $taxon = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
@@ -105,7 +106,6 @@ if($editable && $action){
 	}
 }
 ?>
-<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php echo $defaultTitle." Taxon Editor: ".$tEditor->getSciName(); ?></title>

@@ -28,7 +28,6 @@ if(array_key_exists('occid',$_POST)){
 
 $projArr = $csManager->getProjectDetails();
 ?>
-<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">

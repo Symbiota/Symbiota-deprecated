@@ -41,7 +41,6 @@ if($addAttrs || $removeAttrs){
 }
 
 ?>
-<!DOCTYPE html>
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Character Mass Updater</title>

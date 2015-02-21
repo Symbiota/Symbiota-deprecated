@@ -18,7 +18,6 @@ if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 }
  
 ?>
-<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php echo $defaultTitle." Taxonomy Display: ".$taxonDisplayObj->getTargetStr(); ?></title>

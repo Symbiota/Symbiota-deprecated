@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $emode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0;
@@ -45,7 +46,6 @@ if($isEditor){
 	}
 }
 ?>
-<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">

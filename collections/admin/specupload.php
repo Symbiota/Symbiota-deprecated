@@ -132,7 +132,6 @@ if(array_key_exists("sf",$_POST)){
 $duManager->loadFieldMap();
 ?>
 
-<!DOCTYPE HTML>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">

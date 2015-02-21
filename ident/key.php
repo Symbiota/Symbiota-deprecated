@@ -56,7 +56,6 @@ if($chars){
 }
 ?>
 
-<!DOCTYPE html>
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Web-Key: <?php echo preg_replace('/\<[^\>]+\>/','',$dataManager->getClName()); ?></title>

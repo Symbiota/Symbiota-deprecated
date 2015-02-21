@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/UuidFactory.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $action = array_key_exists("formsubmit",$_POST)?$_POST["formsubmit"]:'';
@@ -13,7 +14,6 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collId,$us
 $uuidManager = new UuidFactory();
 
 ?>
-<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">

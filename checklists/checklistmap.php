@@ -1,7 +1,7 @@
-<!DOCTYPE html>
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ChecklistManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $clid = $_REQUEST['clid'];
 $thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;

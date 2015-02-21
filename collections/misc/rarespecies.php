@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/RareSpeciesManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $rsManager = new RareSpeciesManager();
 $submitAction = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
@@ -21,7 +22,6 @@ if($editable){
 
 ?>
 
-<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">

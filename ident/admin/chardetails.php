@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyCharAdmin.php');
+header("Content-Type: text/html; charset=".$charset);
 
 if(!$symbUid) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php');
 
@@ -63,7 +64,6 @@ if($formSubmit){
 if(!$cid) header('Location: index.php');
 
 ?>
-<!DOCTYPE HTML>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
