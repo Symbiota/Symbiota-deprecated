@@ -92,65 +92,60 @@ if($submitAction){
 	<div id="innertext" style="">
 		<!-- This is inner text! -->
 		<div style="width:80%;margin-left:auto;margin-right:auto;">	
-			<div style="text-align:center;">
+			<div style="text-align:center;margin-bottom:20px;">
 				<h1><?php echo (isset($ootdGameTitle)?$ootdGameTitle:'Organism of the Day'); ?></h1>
-				<div style="width:280px;margin-left:auto;margin-right:auto;margin-bottom:2px;">
-					<div style="font:bold 16px Arial,Helvetica,sans-serif;float:left;" >
-						<?php echo date('l, F jS, Y'); ?>
-					</div>
-					<a id="gameinfo" href="#" onclick="return false" title="How to Play?">
-						<img src="../../images/games/ootd/qmark.png" style="height:20px;"/>
-					</a>
-					<div id="gameinfodialog" title="How to Play">
-						Look at the picture, and see if you can figure out what the <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is. If you get completely stumped, you can 
-						click the "I give up" button. A new <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is updated daily, so make sure you check back every day to test your knowledge!
-					</div>
-				</div>
 			</div>
 			<?php
 			if(!$submitAction){
 				?>
-				<div id="">
-					<div style="z-index:1;" >
-						<!--Organism of the Day body here-->
-						<div class = "dailypicture" align = "center">
-							<div>
-								<div style="vertical-align:middle;">
-									<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
-								</div><br />
-								<a href="javascript:chgImg(-1)">Previous</a> &nbsp;|&nbsp;
-								<a href="javascript:chgImg(1)">Next</a>
-							</div>
-						</div>
-						<div style="margin-left:auto;margin-right:auto;font-size:18px;text-align:center;margin-top:20px;margin-bottom:20px;" ><b>Name that <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?>!</b></div>
+				<div style="z-index:1;width:500px;margin-left:auto;margin-right:auto;" >
+					<!--Organism of the Day body here-->
+					<div class = "dailypicture" align = "center">
 						<div>
-							<form name="answers" id="answers" method="post" action="index.php" class="asholder">
-								<div style="width:500px;margin-left:auto;margin-right:auto;" >
+							<div style="vertical-align:middle;">
+								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
+							</div><br />
+							<a href="javascript:chgImg(-1)">Previous</a> &nbsp;|&nbsp;
+							<a href="javascript:chgImg(1)">Next</a>
+						</div>
+					</div>
+					<div style="margin-left:auto;margin-right:auto;font-size:18px;text-align:center;margin-top:20px;margin-bottom:20px;" >
+						<b>Name that <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?>!</b>
+						<a id="gameinfo" href="#" onclick="return false" title="How to Play?">
+							<img src="../../images/games/ootd/qmark.png" style="height:20px;"/>
+						</a>
+						<div id="gameinfodialog" title="How to Play">
+							Look at the picture, and see if you can figure out what the <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is. If you get completely stumped, you can 
+							click the "I give up" button. A new <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is updated daily, so make sure you check back every day to test your knowledge!
+						</div>
+					</div>
+					<div>
+						<form name="answers" id="answers" method="post" action="index.php" class="asholder">
+							<div style="width:500px;margin-left:auto;margin-right:auto;" >
+								<div style="float:left;" >
 									<div style="float:left;" >
-										<div style="float:left;" >
-											<b>Family:</b> <input type="text" id="family_answer" name = "family_answer" style="width:200px;color:#888;font-weight:bold;" value = "Family" onfocus="if(this.value=='Family') {this.value='', this.style.color='black', this.style.fontWeight='normal'}" onblur="if(this.value=='') {this.value='Family', this.style.color='#888', this.style.fontWeight='bold'}" />
-										</div>
-										<div style="margin-top:20px;float:left;clear:left;" >
-											<b>Scientific name:</b> <input type="text" id="sciname_answer" style="width:200px;color:#888;font-weight:bold;" name = "sciname_answer" value = "Genus species" onfocus="if(this.value=='Genus species') {this.value='', this.style.color='black', this.style.fontWeight='normal'}" onblur="if(this.value=='') {this.value='Genus species', this.style.color='#888', this.style.fontWeight='bold'}" />
-										</div>
+										<b>Family:</b> <input type="text" id="family_answer" name = "family_answer" style="width:200px;color:#888;font-weight:bold;" value = "Family" onfocus="if(this.value=='Family') {this.value='', this.style.color='black', this.style.fontWeight='normal'}" onblur="if(this.value=='') {this.value='Family', this.style.color='#888', this.style.fontWeight='bold'}" />
 									</div>
-									<div style="float:right;" >
-										<div style="float:right;" >
-											<input name="submitaction" type="submit" value="Submit" style="height:7em; width:10em;"/>
-										</div>
-										<div style="margin-top:20px;float:right;clear:right;" >
-											<button name="submitaction" type="submit" value="giveup" style="height:2em; width:8em;" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >I give up!</button>
-										</div>
-									</div>
-									<div>
-										<input name="oodid" type="hidden" value="<?php echo $oodID; ?>" />
-										<input name="cl" type="hidden" value="<?php echo $ootdGameChecklist; ?>" /> 
-										<input name="title" type="hidden" value="<?php echo $ootdGameTitle; ?>" /> 
-										<input name="type" type="hidden" value="<?php echo $ootdGameType; ?>" /> 
+									<div style="margin-top:20px;float:left;clear:left;" >
+										<b>Scientific name:</b> <input type="text" id="sciname_answer" style="width:200px;color:#888;font-weight:bold;" name = "sciname_answer" value = "Genus species" onfocus="if(this.value=='Genus species') {this.value='', this.style.color='black', this.style.fontWeight='normal'}" onblur="if(this.value=='') {this.value='Genus species', this.style.color='#888', this.style.fontWeight='bold'}" />
 									</div>
 								</div>
-							</form>
-						</div>
+								<div style="float:right;margin-bottom:15px;" >
+									<div style="float:right;" >
+										<input name="submitaction" type="submit" value="Submit" style="height:7em; width:10em;"/>
+									</div>
+									<div style="margin-top:20px;float:right;clear:right;" >
+										<button name="submitaction" type="submit" value="giveup" style="height:2em; width:8em;" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >I give up!</button>
+									</div>
+								</div>
+								<div>
+									<input name="oodid" type="hidden" value="<?php echo $oodID; ?>" />
+									<input name="cl" type="hidden" value="<?php echo $ootdGameChecklist; ?>" /> 
+									<input name="title" type="hidden" value="<?php echo $ootdGameTitle; ?>" /> 
+									<input name="type" type="hidden" value="<?php echo $ootdGameType; ?>" /> 
+								</div>
+							</div>
+						</form>
 					</div>
 				</div>
 				<?php
@@ -158,7 +153,7 @@ if($submitAction){
 			elseif((strtolower($_POST['family_answer']) == strtolower($gameInfo['family'])) && (strtolower($_POST['sciname_answer']) == strtolower($gameInfo['sciname']))){
 				?>
 				<div id="correct" style="">
-					<div style="width:700px;margin-top:80px;margin-left:auto;margin-right:auto;clear:both;text-align:center;display:table;">
+					<div style="width:700px;margin-top:20px;margin-left:auto;margin-right:auto;clear:both;text-align:center;display:table;">
 						<div style="display:table-row;" >
 							<div style="width:160px;float:left;display:table-cell;" >
 								<img src = "../../images/games/ootd/balloons-150.png">
@@ -187,7 +182,7 @@ if($submitAction){
 				?>
 				<div id="incorrect_both" class="middlecenter">
 					<!-- This is inner text! -->
-					<div style="width:670px;margin-top:80px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
+					<div style="width:670px;margin-top:30px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
 						<div style="font-size:25px;" >
 							<b>Sorry, that is not correct</b>
 						</div>
@@ -211,7 +206,7 @@ if($submitAction){
 				?>
 				<div id="incorrect_sciname" class="middlecenter">
 					<!-- This is inner text! -->
-					<div style="width:670px;margin-top:80px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
+					<div style="width:670px;margin-top:30px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
 						<div style="font-size:25px;" >
 							<b>Sorry, that is not correct</b>
 						</div>
@@ -235,7 +230,7 @@ if($submitAction){
 				?>
 				<div id="incorrect_sciname" class="middlecenter">
 					<!-- This is inner text! -->
-					<div style="width:670px;margin-top:80px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
+					<div style="width:670px;margin-top:30px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
 						<div style="font-size:25px;" >
 							<b>Sorry, that is not correct</b>
 						</div>
@@ -259,7 +254,7 @@ if($submitAction){
 				?>
 				<div id="incorrect_sciname" class="middlecenter">
 					<!-- This is inner text! -->
-					<div style="width:670px;margin-top:80px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
+					<div style="width:670px;margin-top:30px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
 						<div style="font-size:25px;" >
 							<b>Sorry, that is not correct</b>
 						</div>
@@ -283,7 +278,7 @@ if($submitAction){
 				?>
 				<div id="incorrect_sciname" class="middlecenter">
 					<!-- This is inner text! -->
-					<div style="width:670px;margin-top:80px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
+					<div style="width:670px;margin-top:30px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
 						<div style="font-size:25px;" >
 							<b>Sorry, that is not correct</b>
 						</div>
@@ -307,7 +302,7 @@ if($submitAction){
 				?>
 				<div id="giveup" class="middlecenter">
 					<!-- This is inner text! -->
-					<div style="width:670px;margin-top:80px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
+					<div style="width:670px;margin-top:30px;margin-left:auto;margin-right:auto;clear:both;text-align:center;" >
 						<div style="font-size:25px;" >
 							<b>Too bad!</b>
 						</div>
