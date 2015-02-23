@@ -256,6 +256,7 @@ ul#hor_dropdown li:hover ul li a {
 	display:block;
 	text-indent:8px;
 	padding-right:8px;
+	background-image: none;
 	background-color:#dcdcdc;
 	z-index:1000;
 }
