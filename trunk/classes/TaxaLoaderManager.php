@@ -565,16 +565,6 @@ class TaxaLoaderManager{
 		echo '<li style="margin-left:10px;">Populating null upper taxonomy and kingdom values (part 2)... ';
 		ob_flush();
 		flush();
-		$sql = 'UPDATE (uploadtaxa ut INNER JOIN taxa t ON ut.unitname1 = t.sciname) '.
-			'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'SET ut.uppertaxonomy = ts.uppertaxonomy '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND t.rankid = 180 AND ts.uppertaxonomy IS NOT NULL AND ut.uppertaxonomy IS NULL';
-		$this->conn->query($sql);
-		$sql = 'UPDATE (uploadtaxa ut INNER JOIN taxa t ON ut.family = t.sciname) '.
-			'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'SET ut.uppertaxonomy = ts.uppertaxonomy '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND t.rankid = 140 AND ts.uppertaxonomy is not null AND ut.uppertaxonomy IS NULL';
-		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.unitname1 = t.sciname '.
 			'SET ut.kingdomid = t.kingdomid '.
 			'WHERE t.rankid = 180 AND t.kingdomid IS NOT NULL AND ut.kingdomid IS NULL';
@@ -593,8 +583,8 @@ class TaxaLoaderManager{
 		echo '<li style="margin-left:10px;">Add parents that are not yet in uploadtaxa table... ';
 		ob_flush();
 		flush();
-		$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput, SciName, KingdomID, uppertaxonomy, family, RankId, UnitName1, UnitName2, parentstr, Source) '.
-			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.kingdomid, ut.uppertaxonomy, ut.family, 220 as r, ut.unitname1, ut.unitname2, ut.unitname1, ut.source '.
+		$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput, SciName, KingdomID, family, RankId, UnitName1, UnitName2, parentstr, Source) '.
+			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.kingdomid, ut.family, 220 as r, ut.unitname1, ut.unitname2, ut.unitname1, ut.source '.
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
 			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.rankid > 220 AND ut2.sciname IS NULL ';
 		$this->conn->query($sql);
@@ -604,8 +594,8 @@ class TaxaLoaderManager{
 		$this->conn->query($sql);
 		
 		//Load into uploadtaxa parents of species not yet in taxa table 
-		$sql = 'INSERT IGNORE INTO uploadtaxa (scinameinput, SciName, KingdomID, uppertaxonomy, family, RankId, UnitName1, parentstr, Source) '.
-			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.kingdomid, ut.uppertaxonomy, ut.family, 180 as r, ut.unitname1, ut.family, ut.source '.
+		$sql = 'INSERT IGNORE INTO uploadtaxa (scinameinput, SciName, KingdomID, family, RankId, UnitName1, parentstr, Source) '.
+			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.kingdomid, ut.family, 180 as r, ut.unitname1, ut.family, ut.source '.
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
 			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.family IS NOT NULL AND ut.rankid = 220 AND ut2.sciname IS NULL';
 		$this->conn->query($sql);
@@ -624,8 +614,8 @@ class TaxaLoaderManager{
 			}
 			$rs->close();
 		}
-		$sql = 'INSERT IGNORE INTO uploadtaxa (scinameinput, SciName, KingdomID, uppertaxonomy, family, RankId, UnitName1, parenttid, Source) '.
-			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.kingdomid, ut.uppertaxonomy, ut.family, 140 as r, ut.parentstr, '.$defaultParent.', ut.source '.
+		$sql = 'INSERT IGNORE INTO uploadtaxa (scinameinput, SciName, KingdomID, family, RankId, UnitName1, parenttid, Source) '.
+			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.kingdomid, ut.family, 140 as r, ut.parentstr, '.$defaultParent.', ut.source '.
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
 			'WHERE ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.rankid = 180 AND ut2.sciname IS NULL';
 		$this->conn->query($sql);
@@ -719,8 +709,8 @@ class TaxaLoaderManager{
 			echo '<li>Create parent and accepted links... ';
 			ob_flush();
 			flush();
-			$sql = 'INSERT IGNORE INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UpperTaxonomy, UnacceptabilityReason ) '.
-				'SELECT DISTINCT ut.TID, ut.TidAccepted, '.$this->taxAuthId.' AS taxauthid, ut.ParentTid, ut.Family, ut.UpperTaxonomy, ut.UnacceptabilityReason '.
+			$sql = 'INSERT IGNORE INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UnacceptabilityReason ) '.
+				'SELECT DISTINCT ut.TID, ut.TidAccepted, '.$this->taxAuthId.' AS taxauthid, ut.ParentTid, ut.Family, ut.UnacceptabilityReason '.
 				'FROM uploadtaxa AS ut '.
 				'WHERE (ut.TID IS NOT NULL AND ut.TidAccepted IS NOT NULL AND ut.parenttid IS NOT NULL)';
 			if(!$this->conn->query($sql)){

@@ -1411,7 +1411,9 @@ class ImageBatchProcessor {
 			}
 			$this->logOrEcho("Skeletal file loaded ",1);
 			fclose($fh);
-			if($this->keepOrig){
+			//if($this->keepOrig){
+			//Skeletal data files are small, thus let's keep them by default 
+			if(true){
 				$fileName = substr($filePath,strrpos($filePath,'/')).'.orig_'.time();
 				if(!file_exists($this->targetPathBase.$this->targetPathFrag.'orig_skeletal')){
 					mkdir($this->targetPathBase.$this->targetPathFrag.'orig_skeletal');

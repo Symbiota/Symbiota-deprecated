@@ -7,12 +7,6 @@ $(document).ready(function() {
 
 	$('#tabs').tabs({active: tabIndex});
 
-	$("#uppertaxonomy").autocomplete({ 
-		source: "rpc/getuppertaxonsuggest.php", 
-		minLength: 1,
-		autoFocus: true
-	});
-
 	$("#parentstr").autocomplete({
 		source: function( request, response ) {
 			$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, taid: document.taxauthidform.taxauthid.value, rhigh: document.taxoneditform.rankid.value }, response );

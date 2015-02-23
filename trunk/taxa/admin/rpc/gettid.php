@@ -22,7 +22,7 @@ $result = $con->query($sql);
 if($row = $result->fetch_object()){
 	$responseStr = $row->tid;
 }
-$result->close();
+$result->free();
 if(!($con === false)) $con->close();
 
 //output the response

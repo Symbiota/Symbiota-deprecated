@@ -26,29 +26,14 @@ if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 
 $statusStr = '';
 if($editable){
-	if(array_key_exists("taxonedits",$_REQUEST)){
-		$taxonEditArray = Array();
-		$taxonEditArray["tid"] = $target;
-		$taxonEditArray["unitind1"] = trim($_REQUEST["unitind1"]);
-		$taxonEditArray["unitname1"] = trim($_REQUEST["unitname1"]);
-		$taxonEditArray["unitind2"] = trim($_REQUEST["unitind2"]);
-		$taxonEditArray["unitname2"] = trim($_REQUEST["unitname2"]);
-		$taxonEditArray["unitind3"] = trim($_REQUEST["unitind3"]);
-		$taxonEditArray["unitname3"] = trim($_REQUEST["unitname3"]);
-		$taxonEditArray["author"] = $_REQUEST["author"];
-		$taxonEditArray["kingdomid"] = $_REQUEST["kingdomid"];
-		$taxonEditArray["rankid"] = $_REQUEST["rankid"];
-		$taxonEditArray["source"] = $_REQUEST["source"];
-		$taxonEditArray["notes"] = $_REQUEST["notes"];
-		$taxonEditArray["securitystatus"] = $_REQUEST["securitystatus"];
-		$statusStr = $taxonEditorObj->submitTaxonEdits($taxonEditArray);
+	if(array_key_exists("taxonedits",$_POST)){
+		$statusStr = $taxonEditorObj->submitTaxonEdits($_POST);
 	}
 	elseif($submitAction == 'updatetaxstatus'){
 		$tsArr = Array();
 		$tsArr["tid"] = $target;
 		$tsArr["tidaccepted"] = $_REQUEST["tidaccepted"];
-		$tsArr["uppertaxonomy"] = $_REQUEST["uppertaxonomy"];
-		$tsArr["family"] = $_REQUEST["family"];
+		if(isset($_REQUEST["family"])) $tsArr["family"] = $_REQUEST["family"];
 		$tsArr["parenttid"] = $_REQUEST["parenttid"];
 		$statusStr = $taxonEditorObj->submitTaxstatusEdits($tsArr);
 	}
@@ -162,7 +147,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 					<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editfield');" title="Toggle Taxon Editing Functions">
 						<img style='border:0px;' src='../../images/edit.png'/>
 					</div>
-					<form id="taxoneditform" name="taxoneditform" action="taxonomyeditor.php" method='GET'>
+					<form id="taxoneditform" name="taxoneditform" action="taxonomyeditor.php" method='post'>
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">UnitName1: </div>
 							<div class="editfield">
@@ -173,7 +158,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 									<input type="text" id="unitind1" name="unitind1" style="width:20px;border-style:inset;" value="<?php echo $taxonEditorObj->getUnitInd1(); ?>" />
 								</div>
 								<div>
-									<input type="text" id="unitname1" name="unitname1" style="border-style:inset;" value="<?php echo $taxonEditorObj->getUnitName1(); ?>" />
+									<input type="text" id="unitname1" name="unitname1" style="width:300px;border-style:inset;" value="<?php echo $taxonEditorObj->getUnitName1(); ?>" />
 								</div>
 							</div>
 						</div>
@@ -187,7 +172,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 									<input type="text" id="unitind2" name="unitind2" style="width:20px;border-style:inset;" value="<?php echo $taxonEditorObj->getUnitInd2(); ?>" />
 								</div>
 								<div>
-									<input type="text" id="unitname2" name="unitname2" style="border-style:inset;" value="<?php echo $taxonEditorObj->getUnitName2(); ?>" />
+									<input type="text" id="unitname2" name="unitname2" style="width:300px;border-style:inset;" value="<?php echo $taxonEditorObj->getUnitName2(); ?>" />
 								</div>
 							</div>
 						</div>
@@ -198,10 +183,10 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							</div>
 							<div class="editfield" style="display:none;">
 								<div style="float:left;">
-									<input type="text" id="unitind3" name="unitind3" style="width:30px;border-style:inset;" value="<?php echo $taxonEditorObj->getUnitInd3(); ?>" />
+									<input type="text" id="unitind3" name="unitind3" style="width:50px;border-style:inset;" value="<?php echo $taxonEditorObj->getUnitInd3(); ?>" />
 								</div>
 								<div>
-									<input type="text" id="unitname3" name="unitname3" style="border-style:inset;" value="<?php echo $taxonEditorObj->getUnitName3(); ?>" />
+									<input type="text" id="unitname3" name="unitname3" style="width:300px;border-style:inset;" value="<?php echo $taxonEditorObj->getUnitName3(); ?>" />
 								</div>
 							</div>
 						</div>
@@ -211,43 +196,41 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<?php echo $taxonEditorObj->getAuthor();?>
 							</div>
 							<div class="editfield" style="display:none;">
-								<input type="text" id="author" name="author" style="border-style:inset;" value="<?php echo $taxonEditorObj->getAuthor(); ?>" />
+								<input type="text" id="author" name="author" style="width:400px;border-style:inset;" value="<?php echo $taxonEditorObj->getAuthor(); ?>" />
 							</div>
 						</div>
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Kingdom: </div>
 							<div class="editfield">
-								<?php 
-									switch($taxonEditorObj->getKingdomId()){
-										case 3:
-											echo "Plantae";
-											break;
-										case 4:
-											echo "Fungi";
-											break;
-										case 5:
-											echo "Animalia";
-											break;
-									} 
+								<?php
+								echo $taxonEditorObj->getKingdomName();
 								?>
 							</div>
 							<div class="editfield" style="display:none;">
-								<select id="kingdomid" name="kingdomid">
-									<option value="3" <?php if($taxonEditorObj->getKingdomId()==3) echo "SELECTED"; ?>>Plantae</option>
-									<option value="4" <?php if($taxonEditorObj->getKingdomId()==4) echo "SELECTED"; ?>>Fungi</option>
-									<option value="5" <?php if($taxonEditorObj->getKingdomId()==5) echo "SELECTED"; ?>>Animalia</option>
+								<select id="kingdomname" name="kingdomname">
+									<?php 
+									$kArr = $taxonEditorObj->getKingdomNameArr();
+									foreach($kArr as $kname => $isDefault){
+										echo '<option '.($kname == $taxonEditorObj->getkingdomName()?'SELECTED':'').'>'.$kname.'</option>';
+									}
+									?>
 								</select>
 							</div>
 						</div>
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Rank Name: </div>
 							<div class="editfield">
-								<?php echo $taxonEditorObj->getRankName();?>
+								<?php echo ($taxonEditorObj->getRankName()?$taxonEditorObj->getRankName():'Non-Ranked Node'); ?>
 							</div>
 							<div class="editfield" style="display:none;">
 								<select id="rankid" name="rankid">
+									<option value="0">Non-Ranked Node</option>
+									<option value="">---------------------------------</option>
 									<?php 
-										$taxonEditorObj->echoRankIdSelect();
+									$rankArr = $taxonEditorObj->getRankArr();
+									foreach($rankArr as $rankId => $rName){
+										echo '<option value="'.$rankId.'" '.($taxonEditorObj->getRankId()==$rankId?'SELECTED':'').'>'.$rName.'</option>';
+									}
 									?>
 								</select>
 							</div>
@@ -258,7 +241,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<?php echo $taxonEditorObj->getNotes();?>
 							</div>
 							<div class="editfield" style="display:none;">
-								<input type="text" id="notes" name="notes" value="<?php echo $taxonEditorObj->getNotes(); ?>" style="width:450px;" />
+								<input type="text" id="notes" name="notes" value="<?php echo $taxonEditorObj->getNotes(); ?>" style="width:475px;" />
 							</div>
 						</div>
 						<div style="clear:both;">
@@ -267,7 +250,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<?php echo $taxonEditorObj->getSource();?>
 							</div>
 							<div class="editfield" style="display:none;">
-								<input type="text" id="source" name="source" style="width:450px;" value="<?php echo $taxonEditorObj->getSource(); ?>" />
+								<input type="text" id="source" name="source" style="width:475px;" value="<?php echo $taxonEditorObj->getSource(); ?>" />
 							</div>
 						</div>
 						<div style="clear:both;">
@@ -313,7 +296,10 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 									<option value="1">Default Taxonomy</option>
 									<option value="1">----------------------------</option>
 									<?php 
-										$taxonEditorObj->echoTaxonomicThesaurusIds();
+										$ttIdArr = $taxonEditorObj->getTaxonomicThesaurusIds();
+										foreach($ttIdArr as $ttID => $ttName){
+											echo '<option value='.$ttID.' '.($taxonEditorObj->getTaxAuthId()==$ttID?'SELECTED':'').'>'.$ttName.'</option>';
+										}
 									?>
 								</select>
 								<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>" />
@@ -342,26 +328,25 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 						</div>
 						<div style="clear:both;margin:10px;">
 							<form name="taxstatusform" action="taxonomyeditor.php" method="post">
-								<div>
-									<div style="float:right;cursor:pointer;" onclick="toggle('tsedit');">
+								<div style="float:right;">
+									<a href="" onclick="toggle('tsedit');return false;">
 										<img style='border:0px;' src='../../images/edit.png'/>
-									</div>
-									<div style="float:left;width:110px;font-weight:bold;">Upper Taxonomy: </div>
-									<div class="tsedit" style="">
-										<?php echo $taxonEditorObj->getUpperTaxon(); ?>
-									</div>
-									<div id="uppertaxondiv" class="tsedit" style="display:none;margin:3px;">
-										<input id="uppertaxonomy" name="uppertaxonomy" type="text" style="width:270px;" value="<?php echo $taxonEditorObj->getUpperTaxon();?>" />
-									</div>
+									</a>
 								</div>
-								<div style="clear:both;">
-									<div style="float:left;width:110px;font-weight:bold;">Family: </div>
-									<div style="">
-										<?php echo $taxonEditorObj->getFamily();?>&nbsp;
-										<input type="hidden" name="family" value="<?php echo $taxonEditorObj->getFamily(); ?>" />
+								<?php
+								if($taxonEditorObj->getRankId() > 140 && $taxonEditorObj->getFamily()){ 
+									?>
+									<div>
+										<div style="float:left;width:110px;font-weight:bold;">Family: </div>
+										<div style="">
+											<?php echo $taxonEditorObj->getFamily();?>&nbsp;
+											<input type="hidden" name="family" value="<?php echo $taxonEditorObj->getFamily(); ?>" />
+										</div>
 									</div>
-								</div>
-								<div style="clear:both;">
+									<?php
+								} 
+								?>
+								<div>
 									<div style="float:left;width:110px;font-weight:bold;">Parent Taxon: </div>
 									<div class="tsedit">
 										<?php echo $taxonEditorObj->getParentNameFull();?>
@@ -376,7 +361,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 									<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
 									<?php 
 										$aArr = $taxonEditorObj->getAcceptedArr();
-										$aStr = array_shift(array_keys($aArr)); 
+										$aStr = key($aArr); 
 									?>
 									<input type="hidden" name="tidaccepted" value="<?php echo ($taxonEditorObj->getIsAccepted()==1?$taxonEditorObj->getTid():$aStr); ?>" />
 									<input type="hidden" name="tabindex" value="1" />
@@ -438,23 +423,27 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 											</div>
 										</fieldset>
 									</form>
-									<?php if($acceptedArr && count($acceptedArr)==1){ ?>
-									<form id="changetoacceptedform" name="changetoacceptedform" action="taxonomyeditor.php" method="get">
-										<fieldset style="width:350px;margin:20px;">
-											<legend><b>Change to Accepted</b></legend>
-											<div>
-												<input type="checkbox" name="switchacceptance" value="1" checked /> Switch Acceptance with Currently Accepted Name
-											</div>
-											<div>
-												<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
-												<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>" />
-												<input type="hidden" name="tidaccepted" value="<?php echo $aStr; ?>" />
-												<input type="hidden" name="tabindex" value="1" />
-												<input type='submit' id='changetoacceptedsubmit' name='changetoaccepted' value='Change Status to Accepted' />
-											</div>
-										</fieldset>
-									</form>
-									<?php } ?>
+									<?php 
+									if($acceptedArr && count($acceptedArr)==1){ 
+										?>
+										<form id="changetoacceptedform" name="changetoacceptedform" action="taxonomyeditor.php" method="get">
+											<fieldset style="width:350px;margin:20px;">
+												<legend><b>Change to Accepted</b></legend>
+												<div>
+													<input type="checkbox" name="switchacceptance" value="1" checked /> Switch Acceptance with Currently Accepted Name
+												</div>
+												<div>
+													<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
+													<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>" />
+													<input type="hidden" name="tidaccepted" value="<?php echo $aStr; ?>" />
+													<input type="hidden" name="tabindex" value="1" />
+													<input type='submit' id='changetoacceptedsubmit' name='changetoaccepted' value='Change Status to Accepted' />
+												</div>
+											</fieldset>
+										</form>
+										<?php 
+									} 
+									?>
 								</div>
 							<?php
 							}
@@ -524,7 +513,9 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 												</div>
 											</form>
 										</fieldset>
-							<?php 	} ?>
+										<?php 	
+									} 
+									?>
 								</ul>
 							<?php
 								}
@@ -587,6 +578,9 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								echo "</div>\n";
 								$indent += 10;
 							}
+							echo '<div style="margin-left:'.$indent.'px;">';
+							echo '<a href="taxonomyeditor.php?target='.$taxonEditorObj->getTid().'">'.$taxonEditorObj->getSciName().'</a>';
+							echo "</div>\n";
 						}
 						else{
 							echo "<div style='margin:10px;'>Empty</div>";

@@ -13,7 +13,7 @@ class ChecklistManager {
 	private $projName = '';
 	private $taxaList = Array();
 	private $language = "English";
-	private $thesFilter = 0;
+	private $thesFilter = 1;
 	private $taxonFilter;
 	private $showAuthors;
 	private $showCommon;
@@ -439,7 +439,7 @@ class ChecklistManager {
 			$this->basicSql = 'SELECT t.tid, ts.family, t.sciname, t.author '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmdyncltaxalink ctl ON t.tid = ctl.tid '.
-    	  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'0').') AND (ctl.dynclid = '.$this->dynClid.') ';
+    	  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.dynclid = '.$this->dynClid.') ';
 		}
 		if($this->taxonFilter){
 			if($this->searchCommon){
@@ -464,7 +464,7 @@ class ChecklistManager {
 			}
 		}
 		$this->basicSql .= " ORDER BY family, sciname";
-		//echo $this->basicSql;
+		//echo $this->basicSql; exit;
 	}
 
 	//Misc set/get functions

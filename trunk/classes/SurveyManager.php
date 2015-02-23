@@ -46,22 +46,21 @@ class SurveyManager {
 	}
 
 	public function echoFilterList(){
-		$sql = 'SELECT DISTINCT ts.uppertaxonomy, ts.family, t.unitname1 '.
+		$sql = 'SELECT DISTINCT ts.family, t.unitname1 '.
 			'FROM ((omsurveyoccurlink sol INNER JOIN omoccurrences o ON sol.occid = o.occid) '.
 			'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) '.
 			'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
 			'WHERE (sol.surveyid = '.$this->surveyId.') '.
 			'AND (ts.taxauthid = '.$this->thesFilter.') ';
 		//echo $sql;
-		$uArr = Array(); $fArr = Array(); $gArr = Array(); 
+		$fArr = Array(); 
+		$gArr = Array(); 
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$uArr[$row->uppertaxonomy] = "";
 			$fArr[$row->family] = "";
 			$gArr[] = $row->unitname1;
 		}
-		$rs->close();
-		echo "'".implode("',\n'",array_keys($uArr))."',\n";
+		$rs->free();
 		echo "'".implode("',\n'",array_keys($fArr))."',\n";
 		echo "'".implode("',\n'",$gArr)."'";
 	}
@@ -239,8 +238,7 @@ class SurveyManager {
 					$this->taxonFilter."%'))) ";
 			}
 			else{
-				$sql .= 'AND ((ts.UpperTaxonomy = "'.$this->taxonFilter.'") '.
-					'OR (t.SciName Like "'.$this->taxonFilter.'%") '.
+				$sql .= 'AND ((t.SciName Like "'.$this->taxonFilter.'%") '.
 					'OR (ts.Family = "'.$this->taxonFilter.'") ';
 				if($this->searchSynonyms){
 					$sql .= 'OR (t.tid IN(SELECT tsa.tidaccepted FROM taxstatus tsa INNER JOIN taxa ta ON tsa.tid = ta.tid '.

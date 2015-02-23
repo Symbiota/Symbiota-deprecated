@@ -27,6 +27,7 @@ class TaxonomyCleaner extends Manager{
 	//Taxonomic thesaurus verifications
 	public function getVerificationCounts(){
 		$retArr;
+		/*
 		$sql = 'SELECT IFNULL(t.verificationStatus,0) as verificationStatus, COUNT(t.tid) AS cnt '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND (t.verificationStatus IS NULL OR t.verificationStatus = 0) '.
@@ -38,6 +39,7 @@ class TaxonomyCleaner extends Manager{
 			$rs->free();
 		}
 		ksort($retArr);
+		*/
 		return $retArr;
 	}
 

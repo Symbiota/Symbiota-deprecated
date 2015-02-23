@@ -60,8 +60,7 @@ class KeyDataManager {
 	
 	public function getTaxaFilterList(){
 		$returnArr = Array();
-		$upperArr = Array();
-		$sql = "SELECT DISTINCT ts.UpperTaxonomy, nt.UnitName1, ts.Family ";
+		$sql = "SELECT DISTINCT nt.UnitName1, ts.Family ";
 		if($this->clid && $this->clType == "static"){
 			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID ".
 				"WHERE (cltl.CLID = ".$this->clid.")";
@@ -84,16 +83,12 @@ class KeyDataManager {
 			$family = $row->Family;
 			if($genus) $returnArr[] = $genus;
 			if($family) $returnArr[] = $family;
-			$upper = $row->UpperTaxonomy;
-			if($upper && !in_array($upper, $upperArr)) $upperArr[] = $upper;
 		}
 
 		$result->free();
 		$returnArr = array_unique($returnArr);
 		natcasesort($returnArr);
-		natcasesort($upperArr);
 		array_unshift($returnArr,"--------------------------");
-		$returnArr = array_merge($upperArr,$returnArr);
 		array_unshift($returnArr, "All Species");
 		return $returnArr;
 	}
@@ -369,7 +364,7 @@ class KeyDataManager {
 
 	public function setTaxaListSQL(){
 		if(!$this->sql){
-			$sqlBase = "SELECT DISTINCT t.tid, ts.UpperTaxonomy, ts.Family, t.SciName AS DisplayName, ts.ParentTID ";
+			$sqlBase = "SELECT DISTINCT t.tid, ts.Family, t.SciName AS DisplayName, ts.ParentTID ";
 			$sqlFromBase = "";
 			$sqlWhere = "";
 			if($this->dynClid){
@@ -399,7 +394,7 @@ class KeyDataManager {
 					//Do nothing
 				}
 				else{
-					$sqlWhere .= "AND ((ts.UpperTaxonomy = \"".$this->taxonFilter."\") OR (ts.Family = \"".$this->taxonFilter."\") OR (t.UnitName1 = \"".$this->taxonFilter."\")) ";
+					$sqlWhere .= 'AND ((ts.Family = "'.$this->taxonFilter.'") OR (t.UnitName1 = "'.$this->taxonFilter.'")) ';
 				}
 			}
 	
@@ -411,7 +406,7 @@ class KeyDataManager {
 				//Create sql string
 				foreach($this->charArr as $cid => $states){		//key=cid, value=array of cs
 					$count++;
-					$sqlFromBase.="INNER JOIN kmdescr AS D".$count." ON t.TID = D$count.TID) ";
+					$sqlFromBase .= 'INNER JOIN kmdescr AS D'.$count.' ON t.TID = D'.$count.TID.') ';
 					$stateStr = "";
 					foreach($states as $cs){
 						 $stateStr.=(empty($stateStr)?"":"OR ")."(D".$count.".CS='$cs') ";

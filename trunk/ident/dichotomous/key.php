@@ -94,7 +94,7 @@ class DichoKeyManager{
 			"INNER JOIN taxa t ON ts.tid = t.tid ".
 			"WHERE ts.taxauthid = 1 AND cl.clid = $clid ";
 		if($taxonFilter){
-			$sql .= "AND (ts.uppertaxonomy = '".$taxonFilter."' OR ts.family = '".$taxonFilter."' OR t.sciname LIKE '".$taxonFilter."%')";
+			$sql .= "AND (ts.family = '".$taxonFilter."' OR t.sciname LIKE '".$taxonFilter."%')";
 		}
 		//echo $sql."<br/>";
 		$result = $con->query($sql);

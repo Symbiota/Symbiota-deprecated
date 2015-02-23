@@ -200,7 +200,7 @@ $status = "";
 							<div style="margin:15px;">
 								<b>Validation Status:</b>
 								<ul>
-									<?php $cleanManager->verifyTaxa($_POST['versource']); ?>
+									<?php //$cleanManager->verifyTaxa($_POST['versource']); ?>
 								</ul>
 							</div>
 							<?php
