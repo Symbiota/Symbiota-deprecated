@@ -811,3 +811,6 @@ DROP INDEX `Index_inst` ,
 ADD UNIQUE INDEX `Index_inst` (`InstitutionCode` ASC, `CollectionCode` ASC);
 
 
+#Taxa table index adjustments
+ALTER TABLE `taxa`
+  DROP FOREIGN KEY `FK_taxa_taxonunit` ;

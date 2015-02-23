@@ -1,8 +1,0 @@
-When creating a new schema patch after 0.9.1.12, include in 
-it a line in the form:
-
-INSERT INTO schemaversion (versionnumber) values ('0.9.1.13');
-
-This will allow easy determination by both DBAs and the codebase
-of whether or not a particular patch has been applied to a 
-particular symbiota installation.
