@@ -314,20 +314,32 @@ class TaxonomyUtilities extends Manager{
 		}
 		return $newTid;
 	}
-	
+
 	private function getRankId($rankStr){
+		$rankId = '';
 		if($rankStr){
 			$sqlRank = 'SELECT rankid FROM taxonunits WHERE rankname = "'.$rankStr.'"';
+			//$sqlRank = 'SELECT rankid, kingdomstr FROM taxonunits WHERE rankname = "'.$rankStr.'"';
 			$rsRank = $this->conn->query($sqlRank);
-			$rankId = 0;
-			if($rRank = $rsRank->fetch_object()){
+			$defaultRankId = 0;
+			while($rRank = $rsRank->fetch_object()){
 				$rankId = $rRank->rankid;
+				/*
+				if(strtolower($rRank->kingdomstr) == strtolower($this->kingdomStr)){
+					$rankId = $rRank->rankid;
+				}
+				$defaultRankId = $rRank->rankid;
+				*/
 			}
-			else{
+			if(!$rankId && $defaultRankId){
+				$rankId = $defaultRankId;
+			}
+			if(!$rankId){
 				$this->warningArr[] = "Unable to determine rankid from: ".$rankStr;
 			}
 			$rsRank->free();
 		}
+		return $rankId;
 	}
 
 	private function setKingdomIdFromParent($parArr){

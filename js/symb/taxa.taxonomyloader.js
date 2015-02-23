@@ -1,6 +1,4 @@
 $(document).ready(function() {
-	$("#uppertaxonomy").autocomplete({ source: "rpc/getuppertaxonsuggest.php" },{ minLength: 3, autoFocus: true });
-
 	$("#acceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
 });
 
@@ -14,12 +12,12 @@ function verifyLoadForm(f){
 		return false;
 	}
 	var rankId = f.rankid.value;
-	if(rankId == 0 || rankId == ""){
+	if(rankId == ""){
 		alert("Taxon rank field required.");
 		return false;
 	}
 	if(f.parenttid.value == "" && rankId != "10"){
-		alert("Parent Taxon rank field required.");
+		alert("Parent taxon field required.");
 		return false;
 	}
 
@@ -59,7 +57,7 @@ function parseName(f){
 	var activeIndex = 0;
 	var unitName1 = "";
 	var unitName2 = "";
-	var rankId = 0;
+	var rankId = "";
 	sciNameArr = sciName.split(' ');
 
 	if(sciNameArr[activeIndex].length == 1){
@@ -106,9 +104,6 @@ function parseName(f){
 		rankId = 140;
 	}
 	f.rankid.value = rankId;
-	if(rankId >= 140){
-		setUpperTaxonomy(f);
-	}
 	if(rankId > 180){
 		setParent(f);
 	}
@@ -160,25 +155,6 @@ function acceptanceChanged(f){
 	}
 	else{
 		document.getElementById("accdiv").style.display = "block";
-	}
-}
-
-function setUpperTaxonomy(f){
-	var genusStr = f.unitname1.value; 
-	if(genusStr){
-		$.ajax({
-			type: "POST",
-			url: "rpc/getuppertaxonomy.php",
-			data: { sciname: genusStr }
-		}).done(function( msg ) {
-			if(msg){
-				f.uppertaxonomy.value = msg;
-				return true;
-			}
-		});
-	}
-	else{
-		return false;
 	}
 }
 

@@ -453,17 +453,17 @@ class MapInterfaceManager{
 			if(isset($cArr[1])) $catIdStr = $cArr[1];
 		}
 		//Set collections
-		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, cat.catagory '.
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, cat.category '.
 			'FROM omcollections c LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
-			'LEFT JOIN omcollcatagories cat ON ccl.ccpk = cat.ccpk '.
-			'ORDER BY ccl.sortsequence, cat.catagory, c.sortseq, c.CollectionName ';
+			'LEFT JOIN omcollcategories cat ON ccl.ccpk = cat.ccpk '.
+			'ORDER BY ccl.sortsequence, cat.category, c.sortseq, c.CollectionName ';
 		//echo "<div>SQL: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($r = $result->fetch_object()){
 			$collType = (stripos($r->colltype, "observation") !== false?'obs':'spec');
 			if($r->ccpk){
 				if(!isset($retArr[$collType]['cat'][$r->ccpk]['name'])){
-					$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->catagory;
+					$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->category;
 				}
 				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["instcode"] = $r->institutioncode;
 				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collcode"] = $r->collectioncode;

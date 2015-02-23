@@ -19,14 +19,14 @@
 		$sqlWhere .= 'AND t.sciname LIKE "'.$q.'%" ';
 	}
 	if($rankLimit){
-		$sqlWhere .= 'AND t.rankid = '.$rankLimit.' ';
+		$sqlWhere .= 'AND (t.rankid = '.$rankLimit.') ';
 	}
 	else{
 		if($rankLow){
-			$sqlWhere .= 'AND t.rankid > '.$rankLow.' ';
+			$sqlWhere .= 'AND (t.rankid > '.$rankLow.' OR t.rankid IS NULL) ';
 		}
 		if($rankHigh){
-			$sqlWhere .= 'AND t.rankid < '.$rankHigh.' ';
+			$sqlWhere .= 'AND (t.rankid < '.$rankHigh.' OR t.rankid IS NULL) ';
 		}
 	}
 	if($sqlWhere){

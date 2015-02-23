@@ -639,12 +639,12 @@ class OccurrenceManager{
 		}
 		//Set collections
 		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, '.
-			'cat.catagory, cat.icon AS caticon, cat.acronym '.
+			'cat.category, cat.icon AS caticon, cat.acronym '.
 			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
 			'LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
-			'LEFT JOIN omcollcatagories cat ON ccl.ccpk = cat.ccpk '.
+			'LEFT JOIN omcollcategories cat ON ccl.ccpk = cat.ccpk '.
 			'WHERE s.recordcnt > 0 '.
-			'ORDER BY ccl.sortsequence, cat.catagory, c.sortseq, c.CollectionName ';
+			'ORDER BY ccl.sortsequence, cat.category, c.sortseq, c.CollectionName ';
 		//echo "<div>SQL: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($r = $result->fetch_object()){
@@ -654,7 +654,7 @@ class OccurrenceManager{
 			if($collType){
 				if($r->ccpk){
 					if(!isset($retArr[$collType]['cat'][$r->ccpk]['name'])){
-						$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->catagory;
+						$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->category;
 						$retArr[$collType]['cat'][$r->ccpk]['icon'] = $r->caticon;
 						$retArr[$collType]['cat'][$r->ccpk]['acronym'] = $r->acronym;
 						//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['isselected'] = 1;
@@ -841,9 +841,9 @@ class OccurrenceManager{
 
 	public function getCollectionList($collIdArr){
 		$retArr = array();
-		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, cat.catagory '.
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, cat.category '.
 			'FROM omcollections c LEFT JOIN omcollcatlink l ON c.collid = l.collid '.
-			'LEFT JOIN omcollcatagories cat ON l.ccpk = cat.ccpk '.
+			'LEFT JOIN omcollcategories cat ON l.ccpk = cat.ccpk '.
 			'WHERE c.collid IN('.implode(',',$collIdArr).') ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -851,7 +851,7 @@ class OccurrenceManager{
 			$retArr[$r->collid]['collcode'] = $r->collectioncode;
 			$retArr[$r->collid]['name'] = $r->collectionname;
 			$retArr[$r->collid]['icon'] = $r->icon;
-			$retArr[$r->collid]['catagory'] = $r->catagory;
+			$retArr[$r->collid]['category'] = $r->category;
 		}
 		$rs->free();
 		return $retArr;
@@ -907,10 +907,10 @@ class OccurrenceManager{
 					$rs->free();
 				}
 				if(isset($cArr[1]) && $cArr[1]){
-					$sql = 'SELECT ccpk, catagory FROM omcollcatagories WHERE ccpk IN('.$cArr[1].') ORDER BY catagory';
+					$sql = 'SELECT ccpk, category FROM omcollcategories WHERE ccpk IN('.$cArr[1].') ORDER BY category';
 					$rs = $this->conn->query($sql);
 					while($r = $rs->fetch_object()){
-						$retStr .= '; '.$r->catagory;
+						$retStr .= '; '.$r->category;
 					}
 					$rs->free();
 				}

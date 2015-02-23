@@ -86,7 +86,7 @@ class CollectionProfileManager {
 				$returnArr['speciescnt'] = $row->speciescnt;
 			}
 			$rs->free();
-			//Get catagories
+			//Get categories
 			$sql = 'SELECT ccpk '.
 				'FROM omcollcatlink '.
 				'WHERE (collid = '.$this->collid.') ';
@@ -569,12 +569,12 @@ class CollectionProfileManager {
 	
 	public function getCategoryArr(){
 		$retArr = array();
-		$sql = 'SELECT ccpk, catagory '.
-			'FROM omcollcatagories '.
-			'ORDER BY catagory ';
+		$sql = 'SELECT ccpk, category '.
+			'FROM omcollcategories '.
+			'ORDER BY category ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->ccpk] = $r->catagory;
+			$retArr[$r->ccpk] = $r->category;
 		}
 		$rs->free();
 		return $retArr;

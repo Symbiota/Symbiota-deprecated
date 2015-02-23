@@ -14,14 +14,14 @@ class DynamicChecklistManager {
 	}
 
 	public function createChecklist($lat, $lng, $radius, $radiusUnits, $tidFilter){
-		global $symbUid;
-		
+		global $SYMB_UID;
+		//Radius is a set value 
 		if($radiusUnits == "mi") $radius = round($radius*1.6);
 		$dynPk = 0;
 		//Create checklist
 		$sql = 'INSERT INTO fmdynamicchecklists(name,details,expiration,uid) '.
-			'VALUES ("'.$lat.' '.$lng.' within '.$radius.' kilometers","'.$lat.' '.$lng.' within '.$radius.' kilometers","'.
-			date('Y-m-d',mktime(0, 0, 0, date('m'), date('d') + 7, date('Y'))).'",'.($symbUid?$symbUid:'NULL').')';
+			'VALUES ("'.round($lat,5).' '.round($lng,5).' within '.round($radius,1).' km","'.$lat.' '.$lng.' within '.$radius.' km","'.
+			date('Y-m-d',mktime(0, 0, 0, date('m'), date('d') + 7, date('Y'))).'",'.($SYMB_UID?$SYMB_UID:'NULL').')';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$dynPk = $this->conn->insert_id;
@@ -33,14 +33,14 @@ class DynamicChecklistManager {
 			$lng1 = $lng - $lngRadius;
 			$lng2 = $lng + $lngRadius;
 
-			$sql = 'SELECT count(o.tid) AS speccnt FROM omoccurgeoindex o '.
-				'WHERE (o.DecimalLatitude BETWEEN lat1 AND lat2) AND (o.DecimalLongitude BETWEEN lng1 AND lng2)';
-			$this->conn->query($sql);
+			//$sql = 'SELECT count(o.tid) AS speccnt FROM omoccurgeoindex o '.
+			//	'WHERE (o.DecimalLatitude BETWEEN lat1 AND lat2) AND (o.DecimalLongitude BETWEEN lng1 AND lng2)';
+			//$this->conn->query($sql);
 			
 			$sql = 'INSERT INTO fmdyncltaxalink (dynclid, tid) '.
 				'SELECT DISTINCT '.$dynPk.' AS dynpk, IF(t.rankid=220,t.tid,ts2.parenttid) as tid '.
-				'FROM ((omoccurgeoindex o INNER JOIN taxstatus ts ON o.tid = ts.tid) '.
-				'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tid) '.
+				'FROM omoccurgeoindex o INNER JOIN taxstatus ts ON o.tid = ts.tid '.
+				'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tid '.
 				'INNER JOIN taxa t ON ts2.tid = t.tid ';
 			if($tidFilter){
 				$sql .= 'INNER JOIN taxaenumtree e ON ts2.tid = e.tid '; 
@@ -50,30 +50,69 @@ class DynamicChecklistManager {
 			if($tidFilter){
 				$sql .= 'and e.parentTid = '.$tidFilter;
 			}
-			//echo $sql; Exit;
+			//echo $sql; exit;
 			$this->conn->query($sql);
 		}
 
 		return $dynPk;
 	}
 	
-	public function createDynamicChecklist($lat, $lng, $dynamicRadius, $tid){
-		global $symbUid;
-		$dynPk = 0;
-		//set_time_limit(120);
-		$sql = "Call DynamicChecklist(".$lat.",".$lng.",".$dynamicRadius.",".$tid.",".($symbUid?$symbUid:"NULL").")";
-		//echo $sql;
-		if($result = $this->conn->query($sql)){
-			if($row = $result->fetch_row()){
-				$dynPk = $row[0];
+	public function createDynamicChecklist($lat, $lng, $radiusUnit, $tidFilter){
+		global $SYMB_UID;
+		$dynPK = 0;
+
+		$specCnt = 0;
+		$radius;
+		$latRadius; $lngRadius;
+		$lat1; $lat2; $lng1; $lng2;
+		$loopCnt = 1;
+		while($specCnt < 2500 && $loopCnt < 10){
+			$radius = $radiusUnit*$loopCnt;
+			$latRadius = $radius / 69.1;
+			$lngRadius = cos($lat / 57.3)*($radius / 69.1);
+			$lat1 = $lat - $latRadius;
+			$lat2 = $lat + $latRadius;
+			$lng1 = $lng - $lngRadius;
+			$lng2 = $lng + $lngRadius;
+		
+			$sql1 = 'SELECT count(tid) AS speccnt '.
+				'FROM omoccurgeoindex '.
+				'WHERE (DecimalLatitude BETWEEN '.$lat1.' AND '.$lat2.') AND (DecimalLongitude BETWEEN '.$lng1.' AND '.$lng2.')';
+			$rs1 = $this->conn->query($sql1);
+			if($r1 = $rs1->fetch_object()){
+				$specCnt = $r1->speccnt;
 			}
-			$result->close();
+			$rs1->free();
+			$loopCnt++;
 		}
-		else{
-			echo 'ERROR building checklist: DynamicChecklist Stored Procedure is probablhy not defined ';
-			exit;
+		
+		$radius = $radius*1.60934;
+		$sql2 = 'INSERT INTO fmdynamicchecklists(name,details,expiration,uid) '.
+			'VALUES ("'.round($lat,5).' '.round($lng,5).' within '.round($radius,1).' km","'.$lat.' '.$lng.' within '.$radius.' km","'.
+			date('Y-m-d',mktime(0, 0, 0, date('m'), date('d') + 7, date('Y'))).'",'.($SYMB_UID?$SYMB_UID:'NULL').')';
+		//echo $sql;
+		if($this->conn->query($sql2)){
+			$dynPK = $this->conn->insert_id;
+			$sql3 = 'INSERT INTO fmdyncltaxalink (dynclid, tid) '.
+				'SELECT DISTINCT '.$dynPK.', IF(t.rankid=220,t.tid,ts2.parenttid) as tid '.
+				'FROM omoccurgeoindex o INNER JOIN taxstatus ts ON o.tid = ts.tid '.
+				'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tid '.
+				'INNER JOIN taxa t ON ts2.tid = t.tid ';
+			if($tidFilter){
+				$sql3 .= 'INNER JOIN taxaenumtree e ON ts2.tid = e.tid '; 
+			}
+			$sql3 .= 'WHERE (t.rankid >= 220) AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) '.
+				'AND (o.DecimalLatitude BETWEEN '.$lat1.' AND '.$lat2.') AND (o.DecimalLongitude BETWEEN '.$lng1.' AND '.$lng2.')';
+			if($tidFilter){
+				$sql3 .= 'and e.parentTid = '.$tidFilter;
+			}
+			//echo $sql3; exit;
+			if(!$this->conn->query($sql3)){
+				
+			}
 		}
-		return $dynPk;
+
+		return $dynPK;
 	}
 	
 	public function getFilterTaxa(){
@@ -81,7 +120,7 @@ class DynamicChecklistManager {
 		$sql = "SELECT t.tid, t.sciname FROM taxa t WHERE t.rankid <= 140 ORDER BY t.sciname ";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$retArr[$row->tid] = $this->cleanOutStr($row->sciname);
+			$retArr[$row->tid] = $row->sciname;
 		}
 		return $retArr;
 	}
@@ -95,12 +134,5 @@ class DynamicChecklistManager {
 		$sql2 = 'DELETE FROM fmdynamicchecklists WHERE expiration < NOW()';
 		$this->conn->query($sql2);
 	} 
-
-	private function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
 }
 ?>

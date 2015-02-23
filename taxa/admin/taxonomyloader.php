@@ -62,22 +62,19 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 					<legend>New Taxon</legend>
 					<div>
 						<div style="float:left;width:170px;">Taxon Name:</div>
-						<input type="text" id="sciname" name="sciname" style="width:200px;border:inset;" value="<?php echo $target;?>" onchange="parseName(this.form)"/>
+						<input type="text" id="sciname" name="sciname" style="width:300px;border:inset;" value="<?php echo $target;?>" onchange="parseName(this.form)"/>
 					</div>
 					<div>
 						<div style="float:left;width:170px;">Author:</div>
-						<input type='text' id='author' name='author' style='width:200px;border:inset;' />
+						<input type='text' id='author' name='author' style='width:300px;border:inset;' />
 					</div>
 					<div style="margin-top:5px;clear:both;">
 						<div style="float:left;width:170px;">Kingdom:</div>
-						<select id="kingdomid" name="kingdomid" style="border:inset;">
+						<select id="kingdomname" name="kingdomname" style="border:inset;">
 							<?php 
-							$kArr = $loaderObj->getKingdomIds();
-							if(array_key_exists(3,$kArr)) $kArr[3] = 'Plantae';
-							if(array_key_exists(4,$kArr)) $kArr[4] = 'Fungi';
-							if(array_key_exists(5,$kArr)) $kArr[5] = 'Animalia';
-							foreach($kArr as $k => $v){
-								echo "<option value='".$k."'>".$v."</option>\n";
+							$kArr = $loaderObj->getKingdomNameArr(1);
+							foreach($kArr as $kname => $isPreferred){
+								echo '<option '.($isPreferred?'selected':'').'>'.$kname.'</option>';
 							}
 							?>
 						</select>
@@ -85,10 +82,11 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Taxon Rank:</div>
 						<select id="rankid" name="rankid" title="Rank ID" onchange="" style="border:inset;">
-							<option value="0">Select Taxon Rank</option>
+							<option value="">Select Taxon Rank</option>
+							<option value="0">Non-Ranked Node</option>
 							<option value="">--------------------------------</option>
 							<?php 
-							$tRankArr = $loaderObj->getTaxonRanks();
+							$tRankArr = $loaderObj->getRankArr();
 							foreach($tRankArr as $rankId => $rankName){
 								echo "<option value='".$rankId."' ".($rankId==220?" SELECTED":"").">".$rankName."</option>\n";
 							}
@@ -112,23 +110,19 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Parent Taxon:</div>
-						<input type="text" id="parentname" name="parentname" style="width:200px;border:inset;" onchange="checkParentExistance(this.form)" />
+						<input type="text" id="parentname" name="parentname" style="width:300px;border:inset;" onchange="checkParentExistance(this.form)" />
 						<span id="addparentspan" style="display:none;">
 							<a id="addparentanchor" href="taxonomyloader.php?target=" target="_blank">Add Parent</a>
 						</span>
 						<input type="hidden" id="parenttid" name="parenttid" value="" />
 					</div>
-					<div id="uppertaxondiv" style="clear:both;margin-top:5px;position:relative;overflow:visible">
-						<div style="float:left;width:170px;">Upper Taxonomy:</div>
-						<input id="uppertaxonomy" name="uppertaxonomy" type="text" style="width:200px;border:inset;" />
-					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Notes:</div>
-						<input type='text' id='notes' name='notes' style='width:200px;border:inset;' title=''/>
+						<input type='text' id='notes' name='notes' style='width:400px;border:inset;' title=''/>
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Source:</div>
-						<input type='text' id='source' name='source' style='width:200px;border:inset;' title=''/>
+						<input type='text' id='source' name='source' style='width:400px;border:inset;' title=''/>
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Locality Security Status:</div>

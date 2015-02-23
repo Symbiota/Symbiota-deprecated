@@ -10,6 +10,7 @@ class TaxonomyDisplayManager{
 	private $taxaArr = Array();
 	private $targetStr = "";
 	private $searchTaxonRank = 0;
+	private $displayAuthor = 0;
 	
 	function __construct($target){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -70,7 +71,9 @@ class TaxonomyDisplayManager{
 					$taxaParentIndex[$tid] = ($parentTid?$parentTid:0);
 				}
 				else{
-					$this->taxaArr[$row1->tidaccepted]["synonyms"][$tid] = $row1->sciname;
+					$synName = $row1->sciname;
+					if($this->displayAuthor) $synName .= ' '.$row1->author;
+					$this->taxaArr[$row1->tidaccepted]["synonyms"][$tid] = $synName;
 				}
 			}
 			$rs1->free();
@@ -121,12 +124,18 @@ class TaxonomyDisplayManager{
 			
 			//Get synonyms for all accepted taxa
 			$synTidStr = implode(",",array_keys($this->taxaArr));
-			$sqlSyns = "SELECT ts.tidaccepted, t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-				"WHERE (ts.tid <> ts.tidaccepted) AND (ts.taxauthid = 1) AND (ts.tidaccepted IN(".$synTidStr."))";
+			$sqlSyns = 'SELECT ts.tidaccepted, t.tid, t.sciname, t.author, t.rankid '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'WHERE (ts.tid <> ts.tidaccepted) AND (ts.taxauthid = 1) AND (ts.tidaccepted IN('.$synTidStr.'))';
 			//echo $sqlSyns;
 			$rsSyns = $this->conn->query($sqlSyns);
 			while($row = $rsSyns->fetch_object()){
-				$this->taxaArr[$row->tidaccepted]["synonyms"][$row->tid] = $row->sciname;
+				$synName = $row->sciname;
+				if($row->rankid > 140){
+					$synName = '<i>'.$row->sciname.'</i>';
+				}
+				if($this->displayAuthor) $synName .= ' '.$row->author;
+				$this->taxaArr[$row->tidaccepted]["synonyms"][$row->tid] = $synName;
 			}
 			$rsSyns->free();
 
@@ -175,7 +184,7 @@ class TaxonomyDisplayManager{
 		}
 		$this->echoTaxonArray($hierarchyArr);
 	}
-	
+
 	private function echoTaxonArray($node){
 		if($node){
 			uksort($node, array($this,"cmp"));
@@ -189,8 +198,9 @@ class TaxonomyDisplayManager{
 					$sciName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$sciName);
 					$taxonRankId = $this->taxaArr[$key]["rankid"];
 					if($this->taxaArr[$key]["rankid"] >= 180){
-						$sciName = "<i>".$sciName."</i>";
+						$sciName = " <i>".$sciName."</i> ";
 					}
+					if($this->displayAuthor) $sciName .= ' '.$this->taxaArr[$key]["author"];
 				}
 				elseif(!$key){
 					$sciName = "&nbsp;";
@@ -212,7 +222,7 @@ class TaxonomyDisplayManager{
 					foreach($synNameArr as $synTid => $synName){
 						$synName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$synName);
 						echo "<div style='margin-left:".($indent+20)."px;'>";
-						echo "[<a href='taxonomyeditor.php?target=".$synTid."'><i>".$synName."</i></a>]";
+						echo "[<a href='taxonomyeditor.php?target=".$synTid."'>".$synName."</a>]";
 						echo "</div>";
 					}
 				}
@@ -225,6 +235,10 @@ class TaxonomyDisplayManager{
 		else{
 			echo "<div style='margin:20px;'>No taxa found matching your search</div>";
 		}
+	}
+
+	public function setDisplayAuthor($display){
+		$this->displayAuthor = $display;
 	}
 
 	private function cmp($a, $b){

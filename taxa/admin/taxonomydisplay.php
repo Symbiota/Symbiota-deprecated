@@ -7,10 +7,12 @@ header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
   
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
+$displayAuthor = array_key_exists('displayauthor',$_REQUEST)?$_REQUEST['displayauthor']:0;
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
 $statusStr = array_key_exists('statusstr',$_REQUEST)?$_REQUEST['statusstr']:'';
 
 $taxonDisplayObj = new TaxonomyDisplayManager($target);
+if($displayAuthor) $taxonDisplayObj->setDisplayAuthor(1);
  
 $editable = false;
 if($isAdmin || array_key_exists("Taxonomy",$userRights)){
@@ -81,9 +83,12 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 							<b>Taxon:</b> 
 							<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
 						</div>
-						<div style="margin:15px 0px 15px 300px;">
-							<input type="submit" name="tdsubmit" value="Display Taxon Tree"/>
+						<div style="float:right;margin:15px 80px 15px 15px;">
+							<input name="tdsubmit" type="submit" value="Display Taxon Tree"/>
 							<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
+						</div>
+						<div style="margin:15px 15px 15px 60px;">
+							<input name="displayauthor" type="checkbox" value="1" <?php echo ($displayAuthor?'checked':''); ?> /> Display Authors
 						</div>
 					</fieldset>
 				</form>

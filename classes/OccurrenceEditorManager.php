@@ -592,7 +592,7 @@ class OccurrenceEditorManager {
 
 	private function setOccurArr(){
 		$retArr = Array();
-		$sql = 'SELECT DISTINCT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o ';
+		$sql = 'SELECT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o ';
 		if($this->occid){
 			$sql .= 'WHERE (o.occid = '.$this->occid.')';
 		}
@@ -610,8 +610,10 @@ class OccurrenceEditorManager {
 			$occid = 0;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_assoc()){
-				$occid = $row['occid'];
-				$retArr[$occid] = array_change_key_case($row);
+				if($occid != $row['occid']){
+					$occid = $row['occid'];
+					$retArr[$occid] = array_change_key_case($row);
+				}
 			}
 			$rs->free();
 			if(!$this->occid && $retArr && count($retArr) == 1){
@@ -1070,7 +1072,7 @@ class OccurrenceEditorManager {
 
 	public function getExsiccatiTitleArr(){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT ometid, title, abbreviation FROM omexsiccatititles ORDER BY title ';
+		$sql = 'SELECT ometid, title, abbreviation FROM omexsiccatititles ORDER BY title ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while ($r = $rs->fetch_object()) {
