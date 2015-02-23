@@ -184,6 +184,7 @@ ul#hor_dropdown{
 ul#hor_dropdown li{		
 	padding:0;
 	margin:0;
+	margin-left:-4px;
 	display:inline;
 }
 ul#hor_dropdown li a{
@@ -248,7 +249,7 @@ ul#hor_dropdown ul {
 ul#hor_dropdown li:hover { position:relative; }
 ul#hor_dropdown li:hover ul {
 	left:0px;
-	top:22px;
+	top:25px;
 	padding:0px;
 	z-index:1000;
 }
