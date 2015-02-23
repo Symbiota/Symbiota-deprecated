@@ -55,7 +55,7 @@ create table ctrelationshiptypes (
    relationship varchar(50) not null primary key, 
    inverse varchar(50),
    collective varchar(50)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 insert into ctrelationshiptypes (relationship, inverse, collective) values ('Child of', 'Parent of', 'Children');
 insert into ctrelationshiptypes (relationship, inverse, collective) values ('Student of', 'Teacher of', 'Students');
 insert into ctrelationshiptypes (relationship, inverse, collective) values ('Spouse of', 'Spouse of', 'Married to');
@@ -63,7 +63,7 @@ insert into ctrelationshiptypes (relationship, inverse, collective) values ('Cou
 
 create table ctnametypes (
    type varchar(32) not null primary key
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 insert into ctnametypes (type) values ('Full Name');
 insert into ctnametypes (type) values ('Initials Last Name');
 insert into ctnametypes (type) values ('Last Name, Initials');
@@ -74,7 +74,7 @@ insert into ctnametypes (type) values ('Standard DwC List');
 insert into ctnametypes (type) values ('Also Known As');
 
 -- Create a backup snapshot of omcollectors;
-create table backup_omcollectors engine=InnoDB as select * from omcollectors;
+create table backup_omcollectors engine=InnoDB DEFAULT CHARSET=utf8 as select * from omcollectors;
 
 -- Begin slow bit, see discussion in commented out alternative below.
 
@@ -87,7 +87,7 @@ alter table omoccurrences drop foreign key FK_omoccurrences_recbyid;
 --  Can't simply rename a primary key auto_increment field with innodb engine.
 --  alter table omcollectors rename to agents;   
 --  alter table agents change column recordedbyid agentid int not null auto_increment primary key;
-create table agents engine=InnoDB as select * from omcollectors;
+create table agents engine=InnoDB DEFAULT CHARSET=utf8 as select * from omcollectors;
 alter table agents change column recordedbyid agentid bigint not null auto_increment primary key, modify initialtimestamp timestamp default now(), add index (firstname);
 -- add the foreign key constraints back in
 alter table agents modify preferredrecbyid bigint, add CONSTRAINT `FK_preferred_recby` FOREIGN KEY (`preferredrecbyid`) REFERENCES `agents` (`agentid`) ON DELETE NO ACTION ON UPDATE CASCADE;
@@ -179,7 +179,7 @@ create table agentsfulltext (
    collectionsat text,
    notes text,
    name text
-) engine MyISAM;
+) engine MyISAM DEFAULT CHARSET=utf8;
 insert into agentsfulltext(agentid, biography,taxonomicgroups,collectionsat,notes,name) select agentid, biography, taxonomicgroups, collectionsat, notes, concat (ifnull(namestring,''), ifnull(firstname,''), ' ', ifnull(middlename,''), ' ' , ifnull(familyname,'')) from agents;
 create fulltext index ft_collectorbio on agentsfulltext(biography, taxonomicgroups, collectionsat, notes, name);
 
@@ -191,12 +191,12 @@ create fulltext index ft_collectorbio on agentsfulltext(biography, taxonomicgrou
 create table agentteams (
    --  To allow agents to represent teams of individuals.
    agentteamid bigint not null primary key auto_increment,
-   teamagentid int not null, 
-   memberagentid int not null, 
+   teamagentid bigint not null, 
+   memberagentid bigint not null, 
    ordinal int,
    FOREIGN KEY (teamagentid) REFERENCES agents(agentid) ON DELETE NO ACTION ON UPDATE CASCADE,
    FOREIGN KEY (memberagentid) REFERENCES agents(agentid) ON DELETE NO ACTION ON UPDATE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table agentnumberpattern (
    --  Machine and human redable descriptions of collector number patterns
@@ -210,7 +210,7 @@ create table agentnumberpattern (
    integerincrement int, -- does number have an integer increment 
    notes text, 
    FOREIGN KEY (agentid) REFERENCES agents(agentid) ON DELETE CASCADE ON UPDATE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table referenceagentlinks (
    --  Alowing links to references about collectors/agents (e.g. obituaries).
@@ -219,7 +219,7 @@ create table referenceagentlinks (
    initialtimestamp timestamp DEFAULT CURRENT_TIMESTAMP, 
    createdbyid int not null,
    primary key (refid, agentid)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table agentlinks (
    --  Supporting hyperlinks out to external sources of information about collectors/agents.
@@ -233,7 +233,7 @@ create table agentlinks (
    createdbyuid int not null, 
    datelastmodified datetime, 
    lastmodifiedbyuid int
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 create table agentnames (
@@ -244,13 +244,13 @@ create table agentnames (
    name  varchar(255), 
    language varchar(6) default 'en_us', 
    timestampcreated timestamp DEFAULT CURRENT_TIMESTAMP, 
-   createdbyuid int not null, 
+   createdbyuid int null, 
    datelastmodified datetime, 
    lastmodifiedbyuid int,
    FOREIGN KEY (type) REFERENCES ctnametypes(type) ON DELETE NO ACTION ON UPDATE CASCADE,
    FOREIGN KEY (agentid)  REFERENCES agents(agentid)  ON DELETE CASCADE  ON UPDATE CASCADE,
    CONSTRAINT UNIQUE INDEX (agentid,type,name) --  Combination of recordedbyid, name, and type must be unique.
-) ENGINE=MyISAM ;  -- to ensure support for fulltext index
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;  -- to ensure support for fulltext index
 create fulltext index ft_collectorname on agentnames(name);
 
 --  Populate agent names from any existing agents
@@ -279,8 +279,8 @@ insert into agentnames(agentid, name, type) select a.agentid, trim(replace(conca
 create table agentrelations (
    --  Representing relationships (family,marrage,mentorship) amongst agents.
    agentrelationsid bigint not null primary key auto_increment, 
-   fromagentid int not null,  --  parent agent in this relationship 
-   toagentid int not null,    --  child agent in this relationship 
+   fromagentid bigint not null,  --  parent agent in this relationship 
+   toagentid bigint not null,    --  child agent in this relationship 
    relationship varchar(50) not null,  -- nature of relationship from ctrelationshiptypes 
    notes varchar(900),
    timestampcreated timestamp DEFAULT CURRENT_TIMESTAMP, 
@@ -290,7 +290,7 @@ create table agentrelations (
    FOREIGN KEY (fromagentid) REFERENCES agents(agentid) ON DELETE CASCADE ON UPDATE CASCADE,
    FOREIGN KEY (toagentid) REFERENCES agents(agentid) ON DELETE CASCADE ON UPDATE CASCADE,
    FOREIGN KEY (relationship) REFERENCES ctrelationshiptypes(relationship) ON DELETE NO ACTION ON UPDATE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --  ******* End of Schema Changes to be applied in this update 
