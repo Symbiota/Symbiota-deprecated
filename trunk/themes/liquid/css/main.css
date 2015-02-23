@@ -240,10 +240,7 @@ ul#hor_dropdown ul {
 	left:-9999px;
 	top:-9999px;
 	list-style-type:none;
-	background-image:url(images/menu_pri_background.jpg);
-	background-repeat:repeat-x;
-	background-position:bottom;
-	background-color:#FFFFFF;
+	background-color:#dcdcdc;
 	z-index:1000;
 }
 ul#hor_dropdown li:hover { position:relative; }
@@ -259,10 +256,7 @@ ul#hor_dropdown li:hover ul li a {
 	display:block;
 	text-indent:8px;
 	padding-right:8px;
-	background-image:url(images/menu_pri_background.jpg);
-	background-repeat:repeat-x;
-	background-position:bottom;
-	background-color:#FFFFFF;
+	background-color:#dcdcdc;
 	z-index:1000;
 }
 ul#hor_dropdown li:hover ul li a:hover { background:#999999; }
