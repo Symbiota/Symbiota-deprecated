@@ -2,8 +2,6 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 if(!$SYMB_UID){
 	header('Location: '.$clientRoot.'/profile/index.php?refurl=../taxa/admin/taxonomyeditor.php?target='.$target);
@@ -95,15 +93,26 @@ if($editable){
 </head>
 <body>
 <?php
-$displayLeftMenu = (isset($taxa_admin_taxonomyeditorMenu)?$taxa_admin_taxonomyeditorMenu:"true");
-include($serverRoot.'/header.php');
-if(isset($taxa_admin_taxonomyeditorCrumbs)){
-	echo "<div class='navpath'>";
-	echo $taxa_admin_taxonomyeditorCrumbs;
-	echo " <b>Taxonomy Editor</b>";
-	echo "</div>";
-}
-?>
+	$displayLeftMenu = (isset($taxa_admin_taxonomyeditorMenu)?$taxa_admin_taxonomyeditorMenu:"true");
+	include($serverRoot.'/header.php');
+	if(isset($taxa_admin_taxonomyeditorCrumbs)){
+		if($taxa_admin_taxonomyeditorCrumbs){
+			echo "<div class='navpath'>";
+			echo $taxa_admin_taxonomyeditorCrumbs;
+			echo " <b>Taxonomy Editor</b>";
+			echo "</div>";
+		}
+	}
+	else{
+		?>
+		<div class="navpath">
+			<a href="../../index.php">Home</a> &gt;&gt; 
+			<a href="taxonomydisplay.php">Taxonomy Tree Viewer</a> &gt;&gt; 
+			<b>Taxonomy Editor</b>
+		</div>
+		<?php 
+	}
+	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php

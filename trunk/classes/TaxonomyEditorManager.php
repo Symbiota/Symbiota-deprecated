@@ -147,17 +147,19 @@ class TaxonomyEditorManager{
 
 	private function setRankName(){
 		if($this->rankid){
-			$sql = 'SELECT rankname '.
+			$sql = 'SELECT rankname, kingdomname '.
 				'FROM taxonunits '.
 				'WHERE (rankid = '.$this->rankid.') ';
 			//echo $sql;
-			if($this->kingdomName) $sql .= 'AND (kingdomName = "'.$this->kingdomName.'") ';
-			//echo $sqlTaxon;
+			$rankArr = array();
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
-				$this->rankName = $r->rankname;
+				$rankArr[$r->kingdomname] = $r->rankname;
 			}
 			$rs->free();
+			if($rankArr){
+				$this->rankName = (array_key_exists($this->kingdomName,$rankArr)?$rankArr[$this->kingdomName]:current($rankArr));
+			}
 		}
 	}
 	
@@ -1032,11 +1034,20 @@ class TaxonomyEditorManager{
 			'FROM taxonunits ';
 		if($this->kingdomName) $sql .= 'WHERE (kingdomname = "'.($this->kingdomName?$this->kingdomName:'Organism').'") ';
 		$sql .= 'ORDER BY rankid ';
+		//echo $sql;
 		$rs = $this->conn->query($sql); 
 		while($row = $rs->fetch_object()){
 			$retArr[$row->rankid] = $row->rankname;
 		}
 		$rs->free();
+		if(!$retArr){
+			$sql2 = 'SELECT rankid, rankname FROM taxonunits ORDER BY rankid ';
+			$rs2 = $this->conn->query($sql2); 
+			while($r2 = $rs2->fetch_object()){
+				$retArr[$r2->rankid] = $r2->rankname;
+			}
+			$rs2->free();
+		}
 		return $retArr;
 	}  
 

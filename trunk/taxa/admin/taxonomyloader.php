@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -39,15 +38,26 @@ if($editable){
 </head>
 <body>
 <?php
-$displayLeftMenu = (isset($taxa_admin_taxonomyloaderMenu)?$taxa_admin_taxonomyloaderMenu:"true");
-include($serverRoot.'/header.php');
-if(isset($taxa_admin_taxonomyloaderCrumbs)){
-	echo "<div class='navpath'>";
-	echo $taxa_admin_taxonomyloaderCrumbs;
-	echo " <b>Taxonomy Loader</b>";
-	echo "</div>";
-}
-?>
+	$displayLeftMenu = (isset($taxa_admin_taxonomyloaderMenu)?$taxa_admin_taxonomyloaderMenu:"true");
+	include($serverRoot.'/header.php');
+	if(isset($taxa_admin_taxonomyloaderCrumbs)){
+		if($taxa_admin_taxonomyloaderCrumbs){
+			echo "<div class='navpath'>";
+			echo $taxa_admin_taxonomyloaderCrumbs;
+			echo " <b>Taxonomy Loader</b>";
+			echo "</div>";
+		}
+	}
+	else{
+		?>
+		<div class="navpath">
+			<a href="../../index.php">Home</a> &gt;&gt; 
+			<a href="taxonomydisplay.php">Taxonomy Tree Viewer</a> &gt;&gt; 
+			<b>Taxonomy Loader</b>
+		</div>
+		<?php 
+	}
+	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
@@ -59,7 +69,7 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 		
 			<form id="loaderform" action="taxonomyloader.php" method="post" onsubmit="return verifyLoadForm(this)">
 				<fieldset>
-					<legend>New Taxon</legend>
+					<legend><b>Add New Taxon</b></legend>
 					<div>
 						<div style="float:left;width:170px;">Taxon Name:</div>
 						<input type="text" id="sciname" name="sciname" style="width:300px;border:inset;" value="<?php echo $target;?>" onchange="parseName(this.form)"/>
@@ -105,7 +115,7 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Unit Name 3:</div>
-						<input type='text' id='unitind3' name='unitind3' style='width:40px;border:inset;' title='Rank: e.g. subsp., var., f.'/>
+						<input type='text' id='unitind3' name='unitind3' style='width:50px;border:inset;' title='Rank: e.g. subsp., var., f.'/>
 						<input type='text' id='unitname3' name='unitname3' style='width:200px;border:inset;' title='infrasp. epithet'/>
 					</div>
 					<div style="clear:both;">
@@ -140,11 +150,11 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 							</div>
 							<div id="accdiv" style="display:none;margin-top:3px;">
 								Accepted Taxon:
-								<input type="text" id="acceptedstr" name="acceptedstr" style="width:300px;border:inset;" />
+								<input id="acceptedstr" name="acceptedstr" type="text" style="width:400px;border:inset;" />
 								<input type="hidden" name="tidaccepted" /> 
 								<div style="margin-top:3px;">
 									UnacceptabilityReason: 
-									<input type='text' id='unacceptabilityreason' name='unacceptabilityreason' style='width:350px;' title=''/>
+									<input type='text' id='unacceptabilityreason' name='unacceptabilityreason' style='width:350px;border:inset;' />
 								</div>
 							</div>
 						</fieldset>

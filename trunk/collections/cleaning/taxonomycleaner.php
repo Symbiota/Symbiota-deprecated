@@ -69,9 +69,11 @@ else{
 		}
 		else{
 			?>
-			<a href="../../index.php">Home</a> &gt;&gt;
-			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
-			<b>Taxonomic Name Cleaner</b>
+			<div class='navpath'>
+				<a href="../../index.php">Home</a> &gt;&gt;
+				<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
+				<b>Taxonomic Name Cleaner</b>
+			</div>
 			<?php 
 		}
 		?>

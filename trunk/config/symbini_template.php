@@ -1,63 +1,62 @@
 <?php
-$defaultLang = 'English';		//Default language
-$defaultProjId = 1;
+$DEFAULT_LANG = 'English';		//Default language
+$DEFAULT_PROJ_ID = 1;
 $DEFAULTCATID = 2;
-$defaultTitle = '';
-$adminEmail = '';
-$charset = '';					//ISO-8859-1 or UTF-8
+$DEFAULT_TITLE = '';
+$ADMIN_EMAIL = '';
+$CHARSET = '';					//ISO-8859-1 or UTF-8
 $PORTAL_GUID = '';
 
-$clientRoot = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
-$serverRoot = '';				//Full path to Symbiota project root folder
-$tempDirRoot = '';				//Must be writable by Apache; will use system default if not specified  
-$logPath = '';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified 
+$CLIENT_ROOT = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
+$SERVER_ROOT = '';				//Full path to Symbiota project root folder
+$TEMP_DIR_ROOT = '';				//Must be writable by Apache; will use system default if not specified  
+$LOG_PATH = '';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified 
 
 //the root for the image directory
-$imageDomain = '';				//Domain path to images, if different from Virtual Flora portal 
-$imageRootUrl = '';				//URL path to images
-$imageRootPath = '';			//Writable path to images, especially needed for downloading images
+$IMAGE_DOMAIN = '';				//Domain path to images, if different from Virtual Flora portal 
+$IMAGE_ROOT_URL = '';				//URL path to images
+$IMAGE_ROOT_PATH = '';			//Writable path to images, especially needed for downloading images
 
 //Pixel witdth of web images
-$imgWebWidth = 1400;
-$imgTnWidth = 200;
-$imgLgWidth = 3200;
-$imgFileSizeLimit = 300000;		//Files above this size limit and still within pixel width limits will still be resaved w/ some compression  
+$IMG_WEB_WIDTH = 1400;
+$IMG_WEB_WIDTH = 200;
+$IMG_LG_WIDTH = 3200;
+$IMG_FILE_SIZE_LIMIT = 300000;		//Files above this size limit and still within pixel width limits will still be resaved w/ some compression  
 
 //Specimen Label and Batch Image Processor variables
-//$useImageMagick = 0;		//1 = ImageMagick resize images, given that it's installed (faster, less memory intensive)
-$tesseractPath = ''; 			//Needed for OCR function in the occurrence editor page
+//$USE_IMAGE_MAGICK = 0;		//1 = ImageMagick resize images, given that it's installed (faster, less memory intensive)
+$TESSERACT_PATH = ''; 			//Needed for OCR function in the occurrence editor page
 $NLP_LBCC_ACTIVATED = 0;
 $NLP_SALIX_ACTIVATED = 0;
 
 //Module activations
-$occurrenceModIsActive = 1;
-$floraModIsActive = 1;
-$keyModIsActive = 1;
-$RequestTrackingIsActive = 1;   // Allow users to request actions such as requests for images to be made for specimens
+$OCCURRENCE_MOD_IS_ACTIVE = 1;
+$FLORA_MOD_IS_ACTIVE = 1;
+$KEY_MOD_IS_ACTIVE = 1;
+$REQUESTED_TRACKING_IS_ACTIVE = 1;   // Allow users to request actions such as requests for images to be made for specimens
 
-$fpEnabled = 0;				//Enable Filtered-Push modules
+$FP_ENABLED = 0;				//Enable Filtered-Push modules
 
 //Misc variables
-$googleMapKey = '';					//Needed for Google Map; get from Google 
-$mappingBoundaries = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
-$googleAnalyticsKey = '';			//Needed for setting up Google Analytics
+$GOOGLE_MAP_KEY = '';					//Needed for Google Map; get from Google 
+$MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
+$GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
 $RECAPTCHA_PUBLIC_KEY = '';	
 $RECAPTCHA_PRIVATE_KEY = '';
-$dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
-$displayCommonNames = 1;
+$DYN_CHECKLIST_RADIUS = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
+$DISPLAY_COMMON_NAMES = 1;
 $ACTIVATE_EXSICCATI = 0;
 
-$rightsTerms = array(
+$RIGHTS_TERMS = array(
 	'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
 	'CC BY (Attribution)' => 'http://creativecommons.org/licenses/by/3.0/',
 	'CC BY-SA (Attribution-ShareAlike)' => 'http://creativecommons.org/licenses/by-sa/3.0/',
 	'CC BY-NC (Attribution-Non-Commercial)' => 'http://creativecommons.org/licenses/by-nc/3.0/',
-
-'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)' => 'http://creativecommons.org/licenses/by-nc-sa/3.0/'
+	'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)' => 'http://creativecommons.org/licenses/by-nc-sa/3.0/'
 );
 
 //set terms for reproductiveCondition drop-down menu
-//$reproductiveConditionTerms = array("term1", "term2", "term3", "term4", "term5", "etc..");
+//$REPRODUCTIVE_CONDITION_TERMS = array("term1", "term2", "term3", "term4", "term5", "etc..");
 
 //Individual page menu and navigation crumbs
 //Menu variables turn on and off the display of left menu 
@@ -91,8 +90,8 @@ $rightsTerms = array(
 //agents/
     $agents_indexMenu = TRUE;
     $agent_indexCrumbs = array();
-    array_push($agent_indexCrumbs,"<a href='$clientRoot/index.php'>Home</a>");
-    array_push($agent_indexCrumbs,"<a href='$clientRoot/agents/index.php'>Agents</a>");
+    array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/index.php'>Home</a>");
+    array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/agents/index.php'>Agents</a>");
 		
 //Base code shared by all pages; leave as is
 include_once("symbbase.php");

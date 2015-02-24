@@ -266,11 +266,11 @@ ALTER TABLE `taxonunits`
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`taxonunitid`);
 
-UPDATE taxonunits SET kingdomName = "Monera" WHERE kingdomid = 1 AND kingdomName IS NULL;
-UPDATE taxonunits SET kingdomName = "Protista" WHERE kingdomid = 2 AND kingdomName IS NULL;
-UPDATE taxonunits SET kingdomName = "Plantae" WHERE kingdomid = 3 AND kingdomName IS NULL;
-UPDATE taxonunits SET kingdomName = "Fungi" WHERE kingdomid = 4 AND kingdomName IS NULL;
-UPDATE taxonunits SET kingdomName = "Animalia" WHERE kingdomid = 5 AND kingdomName IS NULL;
+UPDATE taxonunits SET kingdomName = "Monera" WHERE kingdomid = 1 AND kingdomName = "Organism";
+UPDATE taxonunits SET kingdomName = "Protista" WHERE kingdomid = 2 AND kingdomName = "Organism";
+UPDATE taxonunits SET kingdomName = "Plantae" WHERE kingdomid = 3 AND kingdomName = "Organism";
+UPDATE taxonunits SET kingdomName = "Fungi" WHERE kingdomid = 4 AND kingdomName = "Organism";
+UPDATE taxonunits SET kingdomName = "Animalia" WHERE kingdomid = 5 AND kingdomName = "Organism";
 
 CREATE TABLE `taxaresourcelinks` (
   `taxaresourceid` INT NOT NULL AUTO_INCREMENT,

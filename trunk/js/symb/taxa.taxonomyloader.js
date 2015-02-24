@@ -1,5 +1,12 @@
 $(document).ready(function() {
 	$("#acceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
+	$("#parentname").autocomplete({
+		source: function( request, response ) {
+			$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, rhigh: $("#rankid").val() }, response );
+		},
+		minLength: 3,
+		autoFocus: true
+	});
 });
 
 function verifyLoadForm(f){
