@@ -39,7 +39,7 @@ $statusStr = '';
 	<div id="innertext">
 		<h1>Crowdsourcing Score Board</h1>
 		
-		<div style="margin:20px;float:left;">
+		<div style="margin-left:20px;float:left;">
 			<h2>Top Scores</h2>
 			<table class="styledtable" style="width:300px;">
 				<tr><th><b>User</b></th><th><b>Score</b></th></tr>
@@ -57,12 +57,12 @@ $statusStr = '';
 			</table>
 		</div>
 
-		<div style="margin:20px;float:left;">
+		<div style="margin-right:20px;float:right;">
 			<h2>Current User's Status</h2>
 			<?php 
 			$userStats = $csManager->getUserStats($SYMB_UID);
 			?>
-			<fieldset style="margin-bottom:30px;width:250px;padding:15px;">
+			<fieldset style="background-color:white;margin-bottom:15px;width:250px;padding:15px;">
 				<legend><b>Current Standing</b></legend>
 				<?php 
 				if($SYMB_UID){

@@ -256,7 +256,7 @@ if($isEditor && $formSubmit){
 		}
 		if(!$ometId && !$omenId){
 			?>
-			<div id="cloptiondiv" style="width:240px;">
+			<div id="cloptiondiv" style="width:240px;float:right;margin-right:25px;">
 				<form name="optionform" action="index.php" method="post">
 					<fieldset style="background-color:#FFD700;">
 					    <legend><b>Options</b></legend>
