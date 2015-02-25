@@ -247,7 +247,7 @@ if($isEditor && $formSubmit){
 		<a href="index.php">Exsiccati Index</a>
 	</div>
 	<!-- This is inner text! -->
-	<div id="innertext">
+	<div id="innertext" style="width:95%;">
 		<?php
 		if($statusStr){
 			echo '<hr/>';
@@ -256,7 +256,7 @@ if($isEditor && $formSubmit){
 		}
 		if(!$ometId && !$omenId){
 			?>
-			<div id="cloptiondiv" style="width:240px;float:right;margin-right:25px;">
+			<div id="cloptiondiv" style="width:240px;float:right;">
 				<form name="optionform" action="index.php" method="post">
 					<fieldset style="background-color:#FFD700;">
 					    <legend><b>Options</b></legend>
