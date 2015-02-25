@@ -15,7 +15,6 @@ $gpxText = $mapManager->getGpxText($selections);
 $fileName = time();
 ?>
 
-<!DOCTYPE html >
 <html>
 	<head>
 		<title><?php echo $defaultTitle; ?> - Garmin Downloader</title>

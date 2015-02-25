@@ -50,7 +50,6 @@ if($isEditor){
 	$commentArr = $commentManager->getComments($collid, $start, $limit, $tsStart, $tsEnd, $uid, $rs);
 }
 ?>
-<!DOCTYPE html >
 <html>
 	<head>
 		<title>Comments Listing</title>

@@ -53,8 +53,6 @@ $mdArray = $clManager->getMetaData();
 $taxaArray = $clManager->getTaxaList($pageNumber);
  ?>
 
-<!DOCTYPE html >
-
 <html>
 
 <head>

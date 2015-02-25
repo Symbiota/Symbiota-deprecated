@@ -2,6 +2,7 @@
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/EOLManager.php');
+header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
@@ -18,7 +19,6 @@ if($IS_ADMIN){
 $eolManager = new EOLManager();
  
 ?>
-<!DOCTYPE HTML >
 <html>
 <head>
 	<title><?php echo $defaultTitle." EOL Manager: "; ?></title>

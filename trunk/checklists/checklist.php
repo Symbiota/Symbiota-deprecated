@@ -87,7 +87,6 @@ if($clValue || $dynClid){
 }
 ?>
 
-<!DOCTYPE html >
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
@@ -266,7 +265,7 @@ if($clValue || $dynClid){
 					<!-- Option box -->
 					<div id="cloptiondiv">
 						<form name="optionform" action="checklist.php" method="post">
-							<fieldset>
+							<fieldset style="background-color:white;padding-bottom;10px;">
 							    <legend><b>Options</b></legend>
 								<!-- Taxon Filter option -->
 							    <div id="taxonfilterdiv" title="Filter species list by family or genus">

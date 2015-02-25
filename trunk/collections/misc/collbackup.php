@@ -1,5 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $action = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:'';
@@ -10,7 +11,6 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collid,$us
 	$isEditor = 1;
 }
 ?>
-<!DOCTYPE html >
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>" />
