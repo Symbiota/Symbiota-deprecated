@@ -52,7 +52,6 @@ if($isEditor){
 }
 
 ?>
-<!DOCTYPE html >
 <html>
 	<head>
 		<title>GeoLocate Batch Processes</title>

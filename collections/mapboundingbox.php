@@ -7,7 +7,6 @@ $latCenter = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2]
 $lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
 ?>
 
-<!DOCTYPE html >
 <html>
 	<head>
 		<title><?php echo $defaultTitle; ?> - Coordinate Mapper</title>

@@ -119,7 +119,6 @@ $dupeArr = array();
 $dupeArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
 ?>
-<!DOCTYPE html >
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Detailed Collection Record Information</title>

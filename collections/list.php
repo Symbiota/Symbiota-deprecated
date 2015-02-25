@@ -27,7 +27,6 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	'labelproject','basisofrecord');
 ?>
 
-<!DOCTYPE html >
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">

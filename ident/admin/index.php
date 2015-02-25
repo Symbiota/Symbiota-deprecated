@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyCharAdmin.php');
+header("Content-Type: text/html; charset=".$charset);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php?'.$_SERVER['QUERY_STRING']);
 
@@ -22,7 +23,6 @@ if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
 }
 
 ?>
-<!DOCTYPE HTML >
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">

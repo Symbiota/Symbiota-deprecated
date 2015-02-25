@@ -5,7 +5,6 @@ header("Content-Type: text/html; charset=".$charset);
 $downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen"; 
 $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0; 
 ?>
-<!DOCTYPE html >
 <html>
 <head>
 	<title>Collections Search Download</title>

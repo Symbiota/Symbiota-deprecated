@@ -19,8 +19,6 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 }
 ?>
 
-<!DOCTYPE html >
-
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Character Deficit Finder</title>
