@@ -22,8 +22,8 @@ class SalixUtilities {
 		if($this->verbose) echo '<ul>';
 		$lts = '';
 		if($actionType == 1 || $actionType == 2){
-			$sqlDel = 'TRUNCATE TABLE salixwordstats ';
-			if($this->conn->query($sqlDel)){
+			if($this->conn->query('DELETE FROM salixwordstats')){
+				$this->conn->query('OPTIMIZE TABLE salixwordstats');
 				$this->echoStr('Deleted old word stats');
 			}
 			else{
@@ -64,21 +64,21 @@ class SalixUtilities {
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$this->countWords($statsArr, $r->f);
-				if($recCnt%($limit/10) == 0){
-					$this->echoStr('Record count: '.$recCnt,1);
+				if($recCnt && $recCnt%($limit/10) == 0){
+					$this->echoStr('Running count: '.$recCnt,1);
 					ob_flush();
 					flush();
 				}
 				if($recCnt && $recCnt%(20000) == 0){
-					$this->echoStr('Loading...',1);
-					ob_flush();
-					flush();
+					//$this->echoStr('Loading...',2);
+					//ob_flush();
+					//flush();
 					$this->loadStats($statsArr,$field);
 					unset($statsArr);
 					$statsArr = array();
-					$this->echoStr(' done, continuing to harvest',2);
-					ob_flush();
-					flush();
+					//$this->echoStr(' Loaded, continuing to harvest',3);
+					//ob_flush();
+					//flush();
 				}
 				$recCnt++;
 			}

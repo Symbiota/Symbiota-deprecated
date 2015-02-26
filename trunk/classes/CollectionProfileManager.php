@@ -168,6 +168,7 @@ class CollectionProfileManager {
 			$rights = $this->cleanInStr($postArr['rights']);
 			$rightsHolder = $this->cleanInStr($postArr['rightsholder']);
 			$accessRights = $this->cleanInStr($postArr['accessrights']);
+			$icon = $this->cleanInStr($postArr['icon']);
 			
 			$conn = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omcollections '.
@@ -184,18 +185,17 @@ class CollectionProfileManager {
 				'guidtarget = '.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
 				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
-				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').' ';
-			if(array_key_exists('icon',$postArr)){
-				$icon = $this->cleanInStr($postArr['icon']);
+				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').', '.
+				'icon = '.($icon?'"'.$icon.'"':'NULL').' ';
+			if(array_key_exists('colltype',$postArr)){
 				$indUrl = $this->cleanInStr($postArr['individualurl']);
-				$sql .= ',icon = '.($icon?'"'.$icon.'"':'NULL').','.
-					'managementtype = "'.$postArr['managementtype'].'",'.
+				$sql .= ',managementtype = "'.$postArr['managementtype'].'",'.
 					'colltype = "'.$postArr['colltype'].'",'.
 					'individualurl = '.($indUrl?'"'.$indUrl.'"':'NULL').', '.
 					'sortseq = '.($postArr['sortseq']?$postArr['sortseq']:'NULL').' ';
 			}
 			$sql .= 'WHERE (collid = '.$this->collid.')';
-			//echo $sql;
+			//echo $sql; exit;
 			if(!$conn->query($sql)){
 				$status = 'ERROR updating collection: '.$conn->error;
 				return $status;
