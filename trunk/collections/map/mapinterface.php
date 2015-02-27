@@ -1153,8 +1153,6 @@ if($coordArr && !is_numeric($coordArr)){
 	<div data-role="page" id="page1">
 		<div role="main" class="ui-content" style="height:400px;">
 			<a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars">Open</a>
-			<br />
-			<a href="#" onclick="window.location='../../index.php';" style="position:absolute;top:40;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" >Home</a>
 		</div>
 		<!-- defaultpanel -->
 		<div data-role="panel" data-dismissible="false" class="overflow: hidden;" style="width:380px;" id="defaultpanel" data-position="left" data-display="overlay" >
