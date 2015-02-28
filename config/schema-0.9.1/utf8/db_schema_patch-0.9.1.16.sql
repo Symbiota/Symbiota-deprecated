@@ -307,6 +307,13 @@ ALTER TABLE `taxa`
   DROP COLUMN `verificationSource`,
   DROP COLUMN `verificationStatus`;
 
+ALTER TABLE `taxstatus` 
+  DROP COLUMN `uppertaxonomy`,
+  DROP INDEX `Index_ts_upper` ;
+
+ALTER TABLE `uploadtaxa` 
+  DROP COLUMN `UpperTaxonomy`;
+
 
 #Upload occurrrence temporary tables 
 ALTER TABLE `uploadspectemp` 
