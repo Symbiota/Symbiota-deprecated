@@ -119,7 +119,7 @@ class OccurrenceManager{
 						$dbStr = "(o.collid IN(".trim($dbArr[0]).")) ";
 					}
 					if(isset($dbArr[1]) && $dbArr[1]){
-						$dbStr .= ($dbStr?'OR ':'').'(o.CollID IN(SELECT collid FROM omcollcatlink WHERE (ccpk IN('.$dbArr[1].')))) ';
+						//$dbStr .= ($dbStr?'OR ':'').'(o.CollID IN(SELECT collid FROM omcollcatlink WHERE (ccpk IN('.$dbArr[1].')))) ';
 					}
 					$sqlWhere .= 'AND ('.$dbStr.') ';
 				}
@@ -585,7 +585,7 @@ class OccurrenceManager{
 		else{
 			$this->taxaArr["no records"]["scinames"][] = "no records";
 		}
-		$result->close();
+		$result->free();
 	}
 
 	protected function setSynonyms(){
@@ -628,7 +628,6 @@ class OccurrenceManager{
 	}
 
 	public function getFullCollectionList($catId = ""){
-		$retArr = array();
 		//Set collection array
 		$collIdArr = array();
 		$catIdArr = array();
@@ -647,47 +646,55 @@ class OccurrenceManager{
 			'ORDER BY ccl.sortsequence, cat.category, c.sortseq, c.CollectionName ';
 		//echo "<div>SQL: ".$sql."</div>";
 		$result = $this->conn->query($sql);
+		$collArr = array();
 		while($r = $result->fetch_object()){
 			$collType = '';
 			if(stripos($r->colltype, "observation") !== false) $collType = 'obs';
 			if(stripos($r->colltype, "specimen")) $collType = 'spec';
 			if($collType){
 				if($r->ccpk){
-					if(!isset($retArr[$collType]['cat'][$r->ccpk]['name'])){
-						$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->category;
-						$retArr[$collType]['cat'][$r->ccpk]['icon'] = $r->caticon;
-						$retArr[$collType]['cat'][$r->ccpk]['acronym'] = $r->acronym;
+					if(!isset($collArr[$collType]['cat'][$r->ccpk]['name'])){
+						$collArr[$collType]['cat'][$r->ccpk]['name'] = $r->category;
+						$collArr[$collType]['cat'][$r->ccpk]['icon'] = $r->caticon;
+						$collArr[$collType]['cat'][$r->ccpk]['acronym'] = $r->acronym;
 						//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['isselected'] = 1;
 					}
-					$retArr[$collType]['cat'][$r->ccpk][$r->collid]["instcode"] = $r->institutioncode;
-					$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collcode"] = $r->collectioncode;
-					$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collname"] = $r->collectionname;
-					$retArr[$collType]['cat'][$r->ccpk][$r->collid]["icon"] = $r->icon;
+					$collArr[$collType]['cat'][$r->ccpk][$r->collid]["instcode"] = $r->institutioncode;
+					$collArr[$collType]['cat'][$r->ccpk][$r->collid]["collcode"] = $r->collectioncode;
+					$collArr[$collType]['cat'][$r->ccpk][$r->collid]["collname"] = $r->collectionname;
+					$collArr[$collType]['cat'][$r->ccpk][$r->collid]["icon"] = $r->icon;
 				}
 				else{
-					$retArr[$collType]['coll'][$r->collid]["instcode"] = $r->institutioncode;
-					$retArr[$collType]['coll'][$r->collid]["collcode"] = $r->collectioncode;
-					$retArr[$collType]['coll'][$r->collid]["collname"] = $r->collectionname;
-					$retArr[$collType]['coll'][$r->collid]["icon"] = $r->icon;
+					$collArr[$collType]['coll'][$r->collid]["instcode"] = $r->institutioncode;
+					$collArr[$collType]['coll'][$r->collid]["collcode"] = $r->collectioncode;
+					$collArr[$collType]['coll'][$r->collid]["collname"] = $r->collectionname;
+					$collArr[$collType]['coll'][$r->collid]["icon"] = $r->icon;
 				}
 			}
 		}
-		$result->close();
+		$result->free();
+		
+		$retArr = array();
 		//Modify sort so that default catid is first
-		if(isset($retArr['spec']['cat'][$catId])){
-			$targetArr = $retArr['spec']['cat'][$catId];
-			unset($retArr['spec']['cat'][$catId]);
-			array_unshift($retArr['spec']['cat'],$targetArr);
+		if(isset($collArr['spec']['cat'][$catId])){
+			$retArr['spec']['cat'][$catId] = $collArr['spec']['cat'][$catId];
+			unset($collArr['spec']['cat'][$catId]);
 		}
-		elseif(isset($retArr['obs']['cat'][$catId])){
-			$targetArr = $retArr['obs']['cat'][$catId];
-			unset($retArr['obs']['cat'][$catId]);
-			array_unshift($retArr['obs']['cat'],$targetArr);
+		elseif(isset($collArr['obs']['cat'][$catId])){
+			$retArr['obs']['cat'][$catId] = $collArr['obs']['cat'][$catId];
+			unset($collArr['obs']['cat'][$catId]);
+		}
+		foreach($collArr as $t => $tArr){
+			foreach($tArr as $g => $gArr){
+				foreach($gArr as $id => $idArr){
+					$retArr[$t][$g][$id] = $idArr;
+				}
+			}
 		}
 		return $retArr;
 	}
 
-	public function outputFullCollArr($occArr,$defaultCatid = 0){
+	public function outputFullCollArr($occArr){
 		$collCnt = 0;
 		if(isset($occArr['cat'])){
 			$categoryArr = $occArr['cat'];
@@ -700,6 +707,7 @@ class OccurrenceManager{
 			</div>
 			<table style="float:left;width:80%;">
 				<?php
+				$cnt = 0;
 				foreach($categoryArr as $catid => $catArr){
 					$name = $catArr['name'];
 					if($catArr['acronym']) $name .= ' ('.$catArr['acronym'].')';
@@ -723,7 +731,7 @@ class OccurrenceManager{
 						</td>
 						<td style="padding:9px 5px;width:10px;">
 							<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
-								<img id="plus-<?php echo $idStr; ?>" src="../images/plus_sm.png" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus_sm.png" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
+								<img id="plus-<?php echo $idStr; ?>" src="../images/plus_sm.png" style="<?php echo ($cnt?'':'display:none;') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus_sm.png" style="<?php echo ($cnt?'display:none;':'') ?>" />
 							</a>
 						</td>
 						<td style="padding-top:8px;">
@@ -736,7 +744,7 @@ class OccurrenceManager{
 					</tr>
 					<tr>
 						<td colspan="4">
-							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px;padding:10px 20px;border:inset">
+							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($cnt?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset">
 								<table>
 									<?php
 									foreach($catArr as $collid => $collName2){
@@ -780,6 +788,7 @@ class OccurrenceManager{
 						</td>
 					</tr>
 					<?php
+					$cnt++;
 				}
 				?>
 			</table>
@@ -875,7 +884,7 @@ class OccurrenceManager{
 			if(!array_key_exists($r->pid,$titleArr)) $titleArr[$r->pid] = $r->projname;
 			$retArr[$r->parentpid][$r->pid][$r->clid] = $r->clname;
 		}
-		$rs->close();
+		$rs->free();
 		if($titleArr) $retArr['titles'] = $titleArr;
 		return $retArr;
 	}
@@ -906,6 +915,7 @@ class OccurrenceManager{
 					}
 					$rs->free();
 				}
+				/*
 				if(isset($cArr[1]) && $cArr[1]){
 					$sql = 'SELECT ccpk, category FROM omcollcategories WHERE ccpk IN('.$cArr[1].') ORDER BY category';
 					$rs = $this->conn->query($sql);
@@ -914,6 +924,7 @@ class OccurrenceManager{
 					}
 					$rs->free();
 				}
+				*/
 				$retStr = substr($retStr,2);
 			}
 		}
@@ -1032,7 +1043,7 @@ class OccurrenceManager{
 					while($row = $rs->fetch_object()){
 						$taxaStr = $row->sciname;
 					}
-					$rs->close();
+					$rs->free();
 				}
 				else{
 					$taxaStr = str_replace(",",";",$taxa);
