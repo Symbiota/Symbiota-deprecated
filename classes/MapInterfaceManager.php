@@ -1125,7 +1125,7 @@ class MapInterfaceManager{
 					</td>
 					<td>
 			    		<span style='text-decoration:none;color:black;font-size:14px;font-weight:bold;'>
-				    		<a href = 'misc/collprofiles.php?catid=<?php echo $catid; ?>' target="_blank" ><?php echo $name; ?></a>
+				    		<a href = '../misc/collprofiles.php?catid=<?php echo $catid; ?>' target="_blank" ><?php echo $name; ?></a>
 				    	</span>
 					</td>
 				</tr>
@@ -1142,7 +1142,7 @@ class MapInterfaceManager{
 											if($collName2["icon"]){
 												$cIcon = (substr($collName2["icon"],0,6)=='images'?'../../':'').$collName2["icon"]; 
 												?>
-												<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
+												<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
 													<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
 												</a>
 										    	<?php
@@ -1153,10 +1153,10 @@ class MapInterfaceManager{
 								    		<input name="db[]" value="<?php echo $collid; ?>" data-role="none" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> /> 
 										</td>
 										<td style="padding:6px">
-								    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
+								    		<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
 								    			<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
 								    		</a>
-								    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
+								    		<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
 								    			more info
 								    		</a>
 										</td>
@@ -1188,7 +1188,7 @@ class MapInterfaceManager{
 						if($cArr["icon"]){
 							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../../':'').$cArr["icon"]; 
 							?>
-							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
+							<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
 								<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
 							</a>
 					    	<?php
@@ -1200,10 +1200,10 @@ class MapInterfaceManager{
 			    		<input name="db[]" value="<?php echo $collid; ?>" data-role="none" type="checkbox" onclick="uncheckAll(this.form)" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> /> 
 					</td>
 					<td style="padding:6px">
-			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
+			    		<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
 			    			<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
 			    		</a>
-			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
+			    		<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
 			    			more info
 			    		</a>
 				    </td>
