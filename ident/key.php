@@ -194,7 +194,7 @@ if($chars){
 					  	} 
 						ksort($taxa);
 					  	foreach($taxa as $family => $species){
-							echo "<tr><td colspan='2'><h3>$family</h3></td></tr>\n";
+							echo "<tr><td colspan='2'><h3 style='margin-bottom:0px;margin-top:10px;'>$family</h3></td></tr>\n";
 							natcasesort($species);
 							foreach($species as $tid => $disName){
 								$newSpLink = str_replace("--SPECIES--", $tid, $spLink)."&cl=".($dataManager->getClType()=="static"?$dataManager->getClName():"");
