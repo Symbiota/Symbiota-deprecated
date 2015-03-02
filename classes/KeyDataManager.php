@@ -258,7 +258,7 @@ class KeyDataManager {
 					$charDescr = $row->chardescr;
 					if($charDescr) $charName = "<span title='".$charDescr."'>".$charName."</span>";
 					$url = $row->helpurl;
-					if($url) $charName .= " <a href='$url' border='0' target='_blank'><img src='images/info.png' width='12' border='0'></a>";
+					if($url) $charName .= " <a href='$url' border='0' target='_blank'><img src='../images/info.png' width='12' border='0'></a>";
 					$cs = $row->CS;
 					$charStateName = $row->CharStateName;
 					$csDescr = $row->csdescr;
@@ -406,7 +406,7 @@ class KeyDataManager {
 				//Create sql string
 				foreach($this->charArr as $cid => $states){		//key=cid, value=array of cs
 					$count++;
-					$sqlFromBase .= 'INNER JOIN kmdescr AS D'.$count.' ON t.TID = D'.$count.TID.') ';
+					$sqlFromBase .= 'INNER JOIN kmdescr AS D'.$count.' ON t.TID = D'.$count.'.TID) ';
 					$stateStr = "";
 					foreach($states as $cs){
 						 $stateStr.=(empty($stateStr)?"":"OR ")."(D".$count.".CS='$cs') ";
