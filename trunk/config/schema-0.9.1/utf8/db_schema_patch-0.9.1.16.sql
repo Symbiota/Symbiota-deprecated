@@ -324,6 +324,9 @@ ALTER TABLE `uploadspectemp`
   ADD COLUMN `behavior` VARCHAR(500) NULL AFTER `verbatimAttributes`;
 
 ALTER TABLE `uploadspectemp` 
+  DROP COLUMN `attributes`;
+
+ALTER TABLE `uploadspectemp` 
   CHANGE COLUMN `language` `language` VARCHAR(20) NULL DEFAULT NULL ;
 
 
@@ -542,6 +545,7 @@ ALTER TABLE `omoccurdeterminations`
 
 #Occurrence tables changes
 ALTER TABLE `omoccurrences` 
+  DROP COLUMN `attributes`,
   ADD COLUMN `behavior` VARCHAR(500) NULL AFTER `verbatimAttributes`,
   CHANGE COLUMN `dbpk` `dbpk` VARCHAR(150) NULL DEFAULT NULL ;
 
