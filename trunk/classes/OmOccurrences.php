@@ -12,7 +12,7 @@
   * update this file for new Symbiota schema versions.
   */
 
-// Up to date with schema version 0.9.1.14
+// Up to date with schema version 1.0
 
 include_once($serverRoot.'/config/dbconnection.php');
 $connection = MySQLiConnectionFactory::getCon("write");
@@ -24,7 +24,7 @@ class OmOccurrences  {
  /** 
   * Test to see if this class version is compatible with the current schema version.
   *
-  * @see config/schema/utf8/db_schema_patch_0.9.template.sql
+  * @see config/schema/utf8/db_schema_patch_1.0.template.sql
   */
  public function checkSchema() {
         global $connection;
@@ -39,6 +39,7 @@ class OmOccurrences  {
         // $supportedVersions[] = '0.9.1.14';         
         // $supportedVersions[] = '0.9.1.15';            
         $supportedVersions[] = '0.9.1.16';
+        $supportedVersions[] = '1.0';
         
         /* 
             When the schema version changes, this class must be updated.  There are two cases:
