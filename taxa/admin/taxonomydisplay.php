@@ -52,8 +52,24 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
 	echo $taxa_admin_taxonomydisplayCrumbs;
-	echo " <b>Taxonomy Tree</b>";
+	echo " <b>Taxonomic Tree Viewer</b>";
 	echo "</div>";
+}
+if(isset($taxa_admin_taxonomydisplayCrumbs)){
+	if($taxa_admin_taxonomydisplayCrumbs){
+		echo '<div class="navpath">';
+		echo $taxa_admin_taxonomydisplayCrumbs;
+		echo ' <b>Taxonomic Tree Viewer</b>'; 
+		echo '</div>';
+	}
+}
+else{
+	?>
+	<div class="navpath">
+		<a href="../../index.php">Home</a> &gt;&gt; 
+		<a href="taxaloader.php"><b>Taxonomic Tree Viewer</b></a> 
+	</div>
+	<?php 
 }
 ?>
 	<!-- This is inner text! -->

@@ -1,5 +1,3 @@
-
-
 --
 -- Dumping data for table `lkupcountry`
 --
