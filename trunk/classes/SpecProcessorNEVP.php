@@ -371,6 +371,17 @@ class OCCURRENCE {
        if ($filedUnder!=null) { 
            $occ->setsciname($filedUnder->getNameWithoutAuthor());  // without author
            $occ->setscientificName($filedUnder->getNameWithAuthor());  // with author
+           // Set locality security based on TID of accepted name of filed under name
+           $sectid = $det->lookupAcceptedTID($filedUnder->scientificname);
+           if ($sectid==null) { 
+              $sectid = $det->lookupTID($filedUnder->scientificname);
+           } 
+           if ($sectid==null) { 
+              $occ->setlocalitySecurity(0);
+           } else { 
+               $occ->setlocalitySecurity($det->checkSecurityStatus($sectid));
+           }
+
            if ($det->lookupAcceptedTID($filedUnder->scientificname)>0) {
                $occ->settidinterpreted($det->lookupAcceptedTID($filedUnder->scientificname));
            }

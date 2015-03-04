@@ -50,6 +50,33 @@ class OmOccurDeterminations {
        return $result;
    }
  
+   /**
+    * Check the taxa.securitystatus for a tid.  If no tid 
+    * is given, check the taxa.securitystatus for the 
+    * tidInterpreted for the current omoccurdeterminations.
+    * @param tid 
+    * @return 1 if the taxon has a security status of 1, 
+    *   0 otherwise.
+    */
+   public function checkSecurityStatus($tid=null) { 
+      global $connection;
+      $result = 0;
+      if ($tid==null) { 
+        $tid = $this->tidInterpreted;
+      } 
+      if ($tid<>null) { 
+        $sql = 'select t.securityStatus from taxa t where t.tid = ? ';
+        if ($statement = $connection->prepare($sql)) {
+           $statement->bind_param("i", $tid);
+           $statement->execute();
+           $statement->bind_result($result);
+           $statement->fetch();
+           $statement->close();
+        }
+      }
+      return $result;
+   } 
+
 
    // These constants hold the sizes the fields in this table in the database.
    const DETID_SIZE           = 11; //INTEGER

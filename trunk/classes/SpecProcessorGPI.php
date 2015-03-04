@@ -328,6 +328,17 @@ class GPI_Unit {
        $filedUnder = $this->getFiledUnderID();
        if ($filedUnder!=null) {
            $occ->setsciname($filedUnder->getSciName());
+           // Set locality security based on TID of accepted name of filed under name
+           $sectid = $det->lookupAcceptedTID($filedUnder->getSciName());
+           if ($sectid==null) { 
+              $sectid = $det->lookupTID($filedUnder->getSciName());
+           } 
+           if ($sectid==null) { 
+              $occ->setlocalitySecurity(0);
+           } else { 
+               $occ->setlocalitySecurity($det->checkSecurityStatus($sectid));
+           }
+
            if ($det->lookupAcceptedTID($filedUnder->getSciName())>0) { 
                $occ->settidinterpreted($det->lookupAcceptedTID($filedUnder->getSciName()));
            }
