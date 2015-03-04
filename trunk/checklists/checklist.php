@@ -3,8 +3,6 @@ include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ChecklistManager.php');
 include_once($serverRoot.'/classes/ChecklistAdmin.php');
 header("Content-Type: text/html; charset=".$charset);
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
 $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
@@ -86,10 +84,9 @@ if($clValue || $dynClid){
 	$taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 }
 ?>
-
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<meta charset="<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Research Checklist: <?php echo $clManager->getClName(); ?></title>
 	<link href="../css/base.css" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?ver=131016" type="text/css" rel="stylesheet" />

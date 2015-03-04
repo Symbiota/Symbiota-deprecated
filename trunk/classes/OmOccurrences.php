@@ -36,9 +36,11 @@ class OmOccurrences  {
 
         // $supportedVersions[] = '0.9.1.12';         
         // $supportedVersions[] = '0.9.1.13';  // Fields added between 0.9.1.13 and 0.9.1.14
-        $supportedVersions[] = '0.9.1.14';         
-        $supportedVersions[] = '0.9.1.15';            
-
+        // $supportedVersions[] = '0.9.1.14';         
+        // $supportedVersions[] = '0.9.1.15';            
+        $supportedVersions[] = '0.9.1.16';
+        $supportedVersions[] = '1.0';
+        
         /* 
             When the schema version changes, this class must be updated.  There are two cases:
 
@@ -192,7 +194,7 @@ class OmOccurrences  {
 CREATE TABLE `omoccurrences` (
   `occid` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `collid` int(10) unsigned NOT NULL,
-  `dbpk` varchar(45) DEFAULT NULL,
+  `dbpk` varchar(150) DEFAULT NULL,
   `basisOfRecord` varchar(32) DEFAULT 'PreservedSpecimen' COMMENT 'PreservedSpecimen, LivingSpecimen, HumanObservation',
   `occurrenceID` varchar(255) DEFAULT NULL COMMENT 'UniqueGlobalIdentifier',
   `catalogNumber` varchar(32) DEFAULT NULL,
@@ -241,6 +243,7 @@ CREATE TABLE `omoccurrences` (
   `associatedTaxa` text COMMENT 'Associated Species',
   `dynamicProperties` text,
   `verbatimAttributes` text,
+  `behavior` VARCHAR(500) DEFAULT NULL, 
   `attributes` text COMMENT 'Plant Description?',
   `reproductiveCondition` varchar(255) DEFAULT NULL COMMENT 'Phenology: flowers, fruit, sterile',
   `cultivationStatus` int(10) DEFAULT NULL COMMENT '0 = wild, 1 = cultivated',
@@ -367,6 +370,7 @@ CREATE TABLE `omoccurrences` (
    const ASSOCIATEDTAXA_SIZE  = 255; //LONGVARCHAR
    const DYNAMICPROPERTIES_SIZE = 255; //LONGVARCHAR
    const VERBATIMATTRIBUTES_SIZE = 255; //LONGVARCHAR
+   const BEHAVIOR_SIZE = 500; //VARCHAR 
    const ATTRIBUTES_SIZE      = 255; //LONGVARCHAR
    const REPRODUCTIVECONDITION_SIZE = 255; //255
    const CULTIVATIONSTATUS_SIZE = 11; //INTEGER
@@ -605,6 +609,7 @@ CREATE TABLE `omoccurrences` (
   $associatedTaxa = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['associatedTaxa']), 0, 255);
   $dynamicProperties = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['dynamicProperties']), 0, 255);
   $verbatimAttributes = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['verbatimAttributes']), 0, 255);
+  $behavior = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['behavior']), 0, 255);
   $attributes = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['attributes']), 0, 255);
   $reproductiveCondition = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['reproductiveCondition']), 0, 255);
   $cultivationStatus = substr(preg_replace('/[^0-9\-\[NULL\]]/','',$_GET['cultivationStatus']), 0, 11);
@@ -657,7 +662,7 @@ CREATE TABLE `omoccurrences` (
 
    private $occid; // PK INTEGER 
    private $collid; // INT 
-   private $dbpk; // VARCHAR(45) 
+   private $dbpk; // VARCHAR(150) 
    private $basisOfRecord = "PreservedSpecimen"; // VARCHAR(32) PreservedSpecimen, LivingSpecimen, HumanObservation
    private $occurrenceID; // VARCHAR(255) UniqueGlobalIdentifier
    private $catalogNumber; // VARCHAR(32) 
@@ -706,6 +711,7 @@ CREATE TABLE `omoccurrences` (
    private $associatedTaxa; // LONGVARCHAR Associated Species
    private $dynamicProperties; // LONGVARCHAR 
    private $verbatimAttributes; // LONGVARCHAR 
+   private $behavior; // VARCHAR
    private $attributes; // LONGVARCHAR Plant Description?
    private $reproductiveCondition; // VARCHAR(255) Phenology: flowers, fruit, sterile
    private $cultivationStatus; // INTEGER 0 = wild, 1 = cultivated
