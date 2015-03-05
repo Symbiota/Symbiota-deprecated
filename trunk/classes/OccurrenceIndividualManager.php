@@ -225,10 +225,12 @@ class OccurrenceIndividualManager extends Manager{
 	public function getDuplicateArr(){
 		$retArr = array();
 		 $sql = 'SELECT d.occid, c.institutioncode, c.collectioncode, c.collectionname, o.catalognumber, '.
-			'o.occurrenceid, o.sciname, o.identifiedby, o.dateidentified, d.notes '.
+			'o.occurrenceid, o.sciname, o.identifiedby, o.dateidentified, '.
+			'o.recordedby, o.recordnumber, o.eventdate, d.notes, i.url, i.thumbnailurl '.
 			'FROM omoccurduplicatelink d INNER JOIN omoccurrences o ON d.occid = o.occid '.
 			'INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN omoccurduplicatelink d2 ON d.duplicateid = d2.duplicateid '.
+		 	'LEFT JOIN images i ON o.occid = i.occid '.
 			'WHERE (d2.occid = '.$this->occid.') AND (o.occid <> '.$this->occid.') ';
 		/*
 		$sql = 'SELECT d.occid, c.institutioncode, c.collectioncode, c.collectionname, o.catalognumber, o.occurrenceid, o.sciname, '.
@@ -248,7 +250,12 @@ class OccurrenceIndividualManager extends Manager{
 				$retArr[$r->occid]['sciname'] = $r->sciname;
 				$retArr[$r->occid]['identifiedby'] = $r->identifiedby;
 				$retArr[$r->occid]['dateidentified'] = $r->dateidentified;
+				$retArr[$r->occid]['recordedby'] = $r->recordedby;
+				$retArr[$r->occid]['recordnumber'] = $r->recordnumber;
+				$retArr[$r->occid]['eventdate'] = $r->eventdate;
 				$retArr[$r->occid]['notes'] = $r->notes;
+				$retArr[$r->occid]['tnurl'] = $r->thumbnailurl;
+				$retArr[$r->occid]['url'] = $r->url;
 			}
 		}
 		else{

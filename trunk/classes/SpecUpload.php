@@ -84,7 +84,7 @@ class SpecUpload{
 				$returnArr[$row->uspid]["title"] = $row->title." (".$uploadStr.")";
 				$returnArr[$row->uspid]["uploadtype"] = $row->uploadtype;
 			}
-			$result->close();
+			$result->free();
 		}
 		return $returnArr;
 	}
@@ -106,7 +106,7 @@ class SpecUpload{
 				$this->collMetadataArr["managementtype"] = $row->managementtype;
 				$this->collMetadataArr["securitykey"] = $row->securitykey;
 			}
-			$result->close();
+			$result->free();
 		}
 	}
 	
@@ -211,7 +211,7 @@ class SpecUpload{
 	    		$this->uploadType = $row->uploadtype;
 	    		if(!$this->lastUploadDate) $this->lastUploadDate = date('Y-m-d H:i:s');
 	    	}
-	    	$result->close();
+	    	$result->free();
     	}
     }
 

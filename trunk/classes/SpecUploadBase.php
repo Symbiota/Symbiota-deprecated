@@ -429,6 +429,7 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg('<li style="margin-left:10px;">');
 			if($this->conn->query('CALL '.$this->storedProcedure)){
 				$this->outputMsg('Stored procedure executed: '.$this->storedProcedure);
+				$this->conn->next_result();
 			}
 			else{
 				$this->outputMsg('<span style="color:red;">ERROR: Stored Procedure failed ('.$this->storedProcedure.'): '.$this->conn->error.'</span>');
@@ -1007,6 +1008,7 @@ class SpecUploadBase extends SpecUpload{
 		else{
 			$this->outputMsg('<div style="margin-left:20px;">ERROR revising image upload count: '.$this->conn->error.'</div> ');
 		}
+		$rs->free();
 		$this->outputMsg('<li style="margin-left:10px;">Done! (revised count: '.$this->imageTransferCount.' images)</li> ');
 		ob_flush();
 		flush();
@@ -1037,6 +1039,7 @@ class SpecUploadBase extends SpecUpload{
 			else{
 				$this->outputMsg('<div style="margin-left:20px;">ERROR setting image upload count: '.$this->conn->error.'</div> ');
 			}
+			$rs->free();
 
 			//Load images 
 			$sql = 'INSERT INTO images(url,thumbnailurl,originalurl,occid,tid,caption,photographer,owner,notes ) '.
@@ -1796,7 +1799,7 @@ class SpecUploadBase extends SpecUpload{
 
 	public function getTransferCount($reset = 0){
 		if($this->collId && ($reset || !$this->transferCount)){
-			$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.') ';
+			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = '.$this->collId.') ';
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->transferCount = $row->cnt;

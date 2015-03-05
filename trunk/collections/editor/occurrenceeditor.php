@@ -145,7 +145,7 @@ if($symbUid){
 		//Only full editors can perform following actions
 		if($isEditor == 1 || $isEditor == 2){
 			if($action == 'Add Record'){
-				$statusStr = $occManager->addOccurrence($_REQUEST);
+				$statusStr = $occManager->addOccurrence($_POST);
 				if(strpos($statusStr,'SUCCESS') !== false){
 					$occManager->setQueryVariables();
 					$qryCnt = $occManager->getQueryRecordCount();
@@ -1148,23 +1148,29 @@ else{
 													</select>
 												</div>
 											</div>
-											<div id="pkDiv">
-												<hr/>
-												<div style="float:left;" title="Internal occurrence record Primary Key (occid)">
-													<?php if($occId) echo 'Key: '.$occId; ?>
+											<?php
+											if($occId){
+												?>
+												<div id="pkDiv">
+													<hr/>
+													<div style="float:left;" title="Internal occurrence record Primary Key (occid)">
+														<?php if($occId) echo 'Key: '.$occId; ?>
+													</div>
+													<div style="float:left;margin-left:50px;">
+														<?php if(array_key_exists('datelastmodified',$occArr)) echo 'Modified: '.$occArr['datelastmodified']; ?>
+													</div>
+													<div style="float:left;margin-left:50px;">
+														<?php 
+														if(array_key_exists('recordenteredby',$occArr)){
+															echo 'Entered by: '.($occArr['recordenteredby']?$occArr['recordenteredby']:'not recorded');
+														}
+														if(isset($occArr['dateentered']) && $occArr['dateentered']) echo ' ['.$occArr['dateentered'].']'; 
+														?>
+													</div>
 												</div>
-												<div style="float:left;margin-left:50px;">
-													<?php if(array_key_exists('datelastmodified',$occArr)) echo 'Modified: '.$occArr['datelastmodified']; ?>
-												</div>
-												<div style="float:left;margin-left:50px;">
-													<?php 
-													if(array_key_exists('recordenteredby',$occArr)){
-														echo 'Entered by: '.($occArr['recordenteredby']?$occArr['recordenteredby']:'not recorded');
-													}
-													if(isset($occArr['dateentered']) && $occArr['dateentered']) echo ' ['.$occArr['dateentered'].']'; 
-													?>
-												</div>
-											</div>
+												<?php
+											}
+											?>
 										</fieldset>
 										<?php
 										if($navStr){
@@ -1176,6 +1182,7 @@ else{
 											<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 											<input type="hidden" name="observeruid" value="<?php echo $symbUid; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
+											<input type="hidden" name="linkdupe" value="" />
 											<?php
 											if($occId){
 												if(($isEditor == 1 || $isEditor == 2) && !$crowdSourceMode){
@@ -1220,6 +1227,24 @@ else{
 												<?php
 											}
 											else{
+												$userChecklists = $occManager->getUserChecklists();
+												if($userChecklists){
+													?>
+													<fieldset>
+														<legend><b>Checklist Voucher</b></legend>
+														Link Occurrence to Checklist: 
+														<select name="clidvoucher">
+															<option value="">No Checklist Selected</option>
+															<option value="">---------------------------------------------</option>
+															<?php 
+															foreach($userChecklists as $clid => $clName){
+																echo '<option value="'.$clid.'">'.$clName.'</option>';
+															}
+															?>
+														</select>
+													</fieldset>
+													<?php
+												}
 												?>
 												<div id="addButtonDiv">
 													<input type="hidden" name="recordenteredby" value="<?php echo $paramsArr['un']; ?>" />
@@ -1235,6 +1260,7 @@ else{
 														<input type="radio" name="gotomode" value="0" <?php echo (!$goToMode?'CHECKED':''); ?> /> Remain on Editing Page (add images, determinations, etc)
 													</div>
 												</div>
+												
 												<?php
 											}
 											?>

@@ -19,7 +19,6 @@ class OccurrenceEditorManager {
 	private $symbUid;
 	protected $errorStr = '';
 
-
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		$this->occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
@@ -740,7 +739,7 @@ class OccurrenceEditorManager {
 			}
 			//Edit record only if user is authorized to autoCommit
 			if($autoCommit){
-				$status = 'SUCCESS: edits submitted and activated';
+				$status = 'SUCCESS: edits submitted and activated ';
 				//If processing status was "unprocessed" and recordEnteredBy is null, populate with user login
 				$sql = '';
 				if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
@@ -776,7 +775,7 @@ class OccurrenceEditorManager {
 						$sql = 'UPDATE omcrowdsourcequeue SET uidprocessor = '.$this->symbUid.', reviewstatus = 5 '.
 							'WHERE (uidprocessor IS NULL) AND (occid = '.$occArr['occid'].')';
 						if(!$this->conn->query($sql)){
-							$status = 'ERROR tagging user as the crowdsourcer (#'.$occArr['occid'].'): '.$this->conn->error.'; '.$sql;
+							$status = 'ERROR tagging user as the crowdsourcer (#'.$occArr['occid'].'): '.$this->conn->error.' ';
 						}
 					}
 					//Deal with exsiccati
@@ -801,7 +800,7 @@ class OccurrenceEditorManager {
 									$exsNumberId = $this->conn->insert_id;
 								}
 								else{
-									$status = 'ERROR adding exsiccati number: '.$this->conn->error.'; '.$sqlNum;
+									$status = 'ERROR adding exsiccati number: '.$this->conn->error.' ';
 								}
 							}
 							//Exsiccati was editted
@@ -811,7 +810,7 @@ class OccurrenceEditorManager {
 									'VALUES('.$exsNumberId.','.$occArr['occid'].')';
 								//echo $sql1;
 								if(!$this->conn->query($sql1)){
-									$status = 'ERROR adding exsiccati: '.$this->conn->error.'; '.$sql1;
+									$status = 'ERROR adding exsiccati: '.$this->conn->error.' ';
 								}
 							}
 						}
@@ -820,6 +819,11 @@ class OccurrenceEditorManager {
 							$sql = 'DELETE FROM omexsiccatiocclink WHERE occid = '.$occArr['occid'];
 							$this->conn->query($sql);
 						}
+					}
+					//Deal with duplicate clusters
+					if(isset($occArr['linkdupe']) && $occArr['linkdupe']){
+						$dupTitle = $occArr['recordedby'].' '.$occArr['recordnumber'].' '.$occArr['eventdate'];
+						$status .= $this->linkDuplicates($occArr['linkdupe'],$dupTitle);
 					}
 				}
 				else{
@@ -839,7 +843,7 @@ class OccurrenceEditorManager {
 	}
 
 	public function addOccurrence($occArr){
-		$status = "SUCCESS: new occurrence record submitted successfully";
+		$status = "SUCCESS: new occurrence record submitted successfully ";
 		if($occArr){
 			$fieldArr = array('basisOfRecord' => 's', 'catalogNumber' => 's', 'otherCatalogNumbers' => 's', 'occurrenceid' => 's', 'ownerInstitutionCode' => 's', 
 				'family' => 's', 'sciname' => 's', 'tidinterpreted' => 'n', 'scientificNameAuthorship' => 's', 'identifiedBy' => 's', 'dateIdentified' => 's', 
@@ -891,7 +895,7 @@ class OccurrenceEditorManager {
 				//Create and insert Symbiota GUID (UUID)
 				$guid = UuidFactory::getUuidV4();
 				if(!$this->conn->query('INSERT INTO guidoccurrences(guid,occid) VALUES("'.$guid.'",'.$this->occid.')')){
-					$status .= ' (Warning: Symbiota GUID mapping failed)';
+					$status .= '(WARNING: Symbiota GUID mapping failed) ';
 				}
 				//deal with Exsiccati, if applicable
 				if(isset($occArr['ometid']) && isset($occArr['exsnumber'])){
@@ -914,7 +918,7 @@ class OccurrenceEditorManager {
 								$exsNumberId = $this->conn->insert_id;
 							}
 							else{
-								$status = 'ERROR adding exsiccati number: '.$this->conn->error.'; '.$sqlNum;
+								$status .= '(WARNING adding exsiccati number: '.$this->conn->error.') ';
 							}
 						}
 						if($exsNumberId){
@@ -922,10 +926,50 @@ class OccurrenceEditorManager {
 							$sql1 = 'INSERT INTO omexsiccatiocclink(omenid, occid) '.
 								'VALUES('.$exsNumberId.','.$this->occid.')';
 							if(!$this->conn->query($sql1)){
-								$status = 'ERROR adding exsiccati: '.$this->conn->error.'; '.$sql1;
+								$status .= '(WARNING adding exsiccati: '.$this->conn->error.') ';
 							}
 						}
 					}
+				}
+				//Deal with checklist voucher
+				if(isset($occArr['clidvoucher']) && $occArr['clidvoucher']){
+					if(isset($occArr['tidinterpreted']) && $occArr['tidinterpreted']){
+						//Check to see it the name is in the list, if not, add it
+						$clTid = 0;
+						$sqlCl = 'SELECT cl.tid '.
+							'FROM fmchklsttaxalink cl INNER JOIN taxstatus ts1 ON cl.tid = ts1.tidaccepted '.
+							'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+							'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts2.tid = '.$occArr['tidinterpreted'].' AND cl.clid = '.$occArr['clidvoucher'];
+						$rsCl = $this->conn->query($sqlCl);
+						//echo $sqlCl;
+						if($rowCl = $rsCl->fetch_object()){
+							$clTid = $rowCl->tid;
+						}
+						$rsCl->free();
+						if(!$clTid){
+							$sqlCl1 = 'INSERT INTO fmchklsttaxalink(clid, tid) VALUES('.$occArr['clidvoucher'].','.$occArr['tidinterpreted'].') ';
+							if($this->conn->query($sqlCl1)){
+								$clTid = $occArr['tidinterpreted'];
+							}
+							else{
+								$status .= '(WARNING adding scientific name to checklist: '.$this->conn->error.') ';
+							}
+						}
+						//Add voucher
+						if($clTid){
+							$sqlCl2 = 'INSERT INTO fmvouchers(occid,clid,tid) '.
+								'values('.$this->occid.','.$occArr['clidvoucher'].','.$clTid.')';
+							//echo $sqlCl2;
+							if(!$this->conn->query($sqlCl2)){
+								$status .= '(WARNING adding voucher link: '.$this->conn->error.') ';
+							}
+						}
+					}
+				}
+				//Deal with duplicate clustering
+				if(isset($occArr['linkdupe']) && $occArr['linkdupe']){
+					$dupTitle = $occArr['recordedby'].' '.$occArr['recordnumber'].' '.$occArr['eventdate'];
+					$status .= $this->linkDuplicates($occArr['linkdupe'],$dupTitle);
 				}
 			}
 			else{
@@ -934,7 +978,7 @@ class OccurrenceEditorManager {
 		}
 		return $status;
 	}
-	
+
 	public function deleteOccurrence($delOccid){
 		global $charset, $userDisplayName;
 		$status = '';
@@ -948,7 +992,7 @@ class OccurrenceEditorManager {
 					if($v) $archiveArr[$k] = $this->encodeStrTargeted($v,$charset,'utf8');
 				}
 			}
-			$rs->close();
+			$rs->free();
 			if($archiveArr){
 				//Archive determinations history
 				$detArr = array();
@@ -966,7 +1010,7 @@ class OccurrenceEditorManager {
 					'WHERE (detid = '.$detId.')';
 					$this->conn->query($sqlArchive);
 				}
-				$rs->close();
+				$rs->free();
 				$archiveArr['dets'] = $detArr;
 
 				//Archive image history
@@ -985,7 +1029,7 @@ class OccurrenceEditorManager {
 					'WHERE (imgid = '.$imgId.')';
 					$this->conn->query($sqlArchive);
 				}
-				$rs->close();
+				$rs->free();
 				$archiveArr['imgs'] = $imgArr;
 
 				//Archive Exsiccati info
@@ -1001,7 +1045,7 @@ class OccurrenceEditorManager {
 						if($v) $exsArr[$k] = $this->encodeStrTargeted($v,$charset,'utf8');
 					}
 				}
-				$rs->close();
+				$rs->free();
 				$archiveArr['exsiccati'] = $exsArr;
 
 				//Archive complete occurrence record
@@ -1028,7 +1072,47 @@ class OccurrenceEditorManager {
 		}
 		return $status;
 	}
-	
+
+	private function linkDuplicates($occidStr,$dupTitle){
+		$status = '';
+		if($this->occid && $occidStr){
+			$dupId = 0;
+			//Look for an existing duplicate cluster id 
+			$clusterArr = array($this->occid);
+			$clusterArr = array_merge($clusterArr,explode(',',$occidStr));
+			$sql = 'SELECT occid, duplicateid FROM omoccurduplicatelink WHERE occid IN('.implode(',',$clusterArr).')';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				//In case there are multiple clusters, default to cluster containing active specimen
+				if(!$dupId || $r->occid == $this->occid) $dupId = $r->duplicateid;
+			}
+			$rs->free();
+			//If duplicate id does not exist, create on
+			if(!$dupId){
+				$sql1 = 'INSERT INTO omoccurduplicates(title,dupetype) VALUES("'.$this->cleanInStr($dupTitle).'",1)';
+				if($this->conn->query($sql1)){
+					$dupId = $this->conn->insert_id;
+				}
+				else{
+					$status = '(WARNING: unable to add new dupliate cluster ['.$dupTitle.']: '.$this->conn->error.') ';
+				}
+			}
+			if($dupId){
+				//Add unlinked to duplicate project
+				$outLink = '';
+				$sqlI2 = 'INSERT IGNORE INTO omoccurduplicatelink(duplicateid,occid) VALUES ';
+				foreach($clusterArr as $v){
+					$sqlI2 .= '('.$dupId.','.$v.'),';
+				}
+				$sqlI2 = trim($sqlI2,',');
+				if(!$this->conn->query($sqlI2)){
+					$status = '(WARNING: unable to occurrences to duplicate cluster ['.trim($sqlI2,',').']: '.$this->conn->error.') ';
+				}
+			}							
+		}
+		return $status;
+	}
+
 	public function transferOccurrence($targetOccid,$transferCollid){
 		$status = true;
 		if(is_numeric($targetOccid) && is_numeric($transferCollid)){
@@ -1526,20 +1610,18 @@ class OccurrenceEditorManager {
 		return $retArr;
 	}
 
-	public function getChecklists($clidStr){
+	public function getUserChecklists(){
 		$retArr = Array();
-		$clStr = '';
-		if($clidStr){
+		if(ISSET($GLOBALS['USER_RIGHTS']['ClAdmin'])){
 			$sql = 'SELECT clid, name, access '.
 				'FROM fmchecklists '.
-				'WHERE (clid IN('.$clidStr.')) ';
-			//echo $sql;
+				'WHERE (clid IN('.implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']).')) ';
+			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				$name = $row->name;
-				if($r->access == 'private') $name .= ' (private)';
-				$retArr[$row->clid] = $name;
+			while($r = $rs->fetch_object()){
+				$retArr[$r->clid] = $r->name.($r->access == 'private'?' (private)':'');
 			}
+			$rs->free();
 			asort($retArr);
 		}
 		return $retArr;

@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceSupport.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:'';
+$collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:'';
 $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 
 $harvManager = new OccurrenceSupport();
@@ -16,28 +16,29 @@ if($isAdmin){
 }
 else{
 	if(array_key_exists("CollEditor",$userRights)){
-		if(in_array($collId,$userRights["CollEditor"])){
+		if(in_array($collid,$userRights["CollEditor"])){
 			$isEditor = 1;
 		}
 		$collList = $userRights["CollEditor"];
 	}
 	if(array_key_exists("CollAdmin",$userRights)){
-		if(in_array($collId,$userRights["CollAdmin"])){
+		if(in_array($collid,$userRights["CollAdmin"])){
 			$isEditor = 1;
 		}
 		$collList = array_merge($collList,$userRights["CollAdmin"]);
 	}
 }
-
 ?>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML>
 <html>
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 		<title><?php echo $defaultTitle; ?> - Occurrence Harvester</title>
 		<link href="../../css/base.css" type="text/css" rel="stylesheet" />
 	    <link href="../../css/main.css" type="text/css" rel="stylesheet" />
+		<link href="../../css/jquery-ui.css?ver=140310" type="text/css" rel="stylesheet" />
+		<script src="../../js/jquery.js?ver=140310" type="text/javascript"></script>
+		<script src="../../js/jquery-ui.js?ver=140310" type="text/javascript"></script>
 		<script language="javascript" type="text/javascript">
 			function validateDownloadForm(f){
 				
@@ -46,11 +47,10 @@ else{
 
 			function loadOccurRecord(fieldObj){
 				var occid = fieldObj.value;
-				if(!occid) return false;
 				fieldObj.value = "";
 				fieldObj.focus;
-				var ele = document.getElementById("occid-"+occid);
-				if(ele) return false;
+				if(!occid) return false;
+				if(document.getElementById("occid-"+occid)) return false;
 
 				var newAnchor = document.createElement('a');
 				newAnchor.setAttribute("id", "a-"+occid);
@@ -77,32 +77,25 @@ else{
 				setOccurData(occid);
 			}
 
-			function setOccurData(occid){
-				xmlHttp = GetXmlHttpObject();
-				if(xmlHttp==null){
-					alert ("Your browser does not support AJAX!");
-					return;
-				}
-				var url = "rpc/getoccurrence.php?occid="+occid;
-				xmlHttp.onreadystatechange=function(){
-					if(xmlHttp.readyState==4 && xmlHttp.status==200){
-						var retStr = xmlHttp.responseText;
-						if(retStr){
-							var occurObj = eval('(' + retStr + ')');
-							var aElem = document.getElementById("a-"+occid);
-							var newText = document.createTextNode(" - "+occurObj["recordedby"]+" ("+occurObj["recordnumber"]+") "+occurObj["eventdate"]);
-							aElem.appendChild(newText);
-						}
-						else{
-							alert("Record #"+occid+" does not appear to exist");
-						}
+			function setOccurData(occidInVal){
+				$.ajax({
+					type: "POST",
+					url: "rpc/getoccurrence.php",
+					data: { occid: occidInVal }
+				}).done(function( msg ) {
+					var aElem = document.getElementById("a-"+occid);
+					var newText;
+					if(msg){
+						newText = document.createTextNode(" - "+occurObj["recordedby"]+" ("+occurObj["recordnumber"]+") "+occurObj["eventdate"]);
 					}
-				};
-				xmlHttp.open("POST",url,true);
-				xmlHttp.send(null);
-				return false;
+					else{
+						alert("Record #"+occid+" does not appear to exist");
+						newText = document.createTextNode(" - unable to locate product");
+					}
+					aElem.appendChild(newText);
+				});
 			}
-			
+
 			function openIndPopup(occid){
 				var urlStr = '../individual/index.php?occid=' + occid;
 				var wWidth = 900;
@@ -115,24 +108,6 @@ else{
 				newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 				if (newWindow.opener == null) newWindow.opener = self;
 				return false;
-			}
-
-			function GetXmlHttpObject(){
-				var xmlHttp=null;
-				try{
-					// Firefox, Opera 8.0+, Safari, IE 7.x
-			  		xmlHttp=new XMLHttpRequest();
-			  	}
-				catch (e){
-			  		// Internet Explorer
-			  		try{
-			    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-			    	}
-			  		catch(e){
-			    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-			    	}
-			  	}
-				return xmlHttp;
 			}
 		</script>
 	</head>
@@ -154,7 +129,8 @@ else{
 	<div id="innertext">
 		<div style="margin:15px">
 			Scan or type barcode number into field below and then hit enter or tab to add the specimen to the list. 
-			Once list is complete, you can enter your catalog number in the text field to include it into the file export or data transfer. 
+			Once list is complete, you can enter your catalog number in the text field and then transfer to your collection 
+			or file export to a file that can be imported into your local database. 
 		</div>
 		<div style="margin:20px 0px">
 			<hr/>
@@ -168,16 +144,15 @@ else{
 					</div>
 					<div id="occidlist" style="margin:10px;">
 					</div>
-					<div style="margin:30px">
-						<select>
-							<option value="0">Select Collection</option>
-							<option value="0">--------------------------------</option>
-							<?php 
-							$collArr = $harvManager->getCollections();
-							?>
-						</select>
-						<input name="formsubmit" type="submit" value="Transfer Records" />
-					</div>
+					<?php 
+					if($collid){
+						?>
+						<div style="margin:30px">
+							<input name="formsubmit" type="submit" value="Transfer Records" />
+						</div>
+						<?php 
+					}
+					?>
 					<div style="margin:30px">
 						<input name="formsubmit" type="submit" value="Download Records" />
 					</div>
