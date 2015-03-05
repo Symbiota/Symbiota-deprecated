@@ -90,6 +90,10 @@ if(!$IS_ADMIN){
 			function transferRecord(occId,appendMode){
 				var tArr = occArr[occId]; 
 				var openerForm = opener.document.fullform;
+				if(document.getElementById("linkdupe-"+occId).checked == true){
+					openerForm.linkdupe.value = occId;
+					
+				}
 				for(var k in tArr){
 					try{
 						var elem = openerForm.elements[k];
@@ -218,7 +222,7 @@ if(!$IS_ADMIN){
 							<?php
 						}
 						?> 
-						<div style="font-weight:bold;font-size:120%;">
+						<div style="clear:both;font-weight:bold;font-size:120%;">
 							<?php echo $occObj['institutionCode'].($occObj['collectionCode']?':'.$occObj['collectionCode']:''); ?>
 						</div>
 						<?php if($collId == $occObj['collid'] && ($dupeType == 'exact' || $dupeType == 'exsic')){ ?>
@@ -322,38 +326,41 @@ if(!$IS_ADMIN){
 						}
 						?>
 						<div style="margin:10px;">
-							<span>
+							<div style="float:left">
 								<a href="" onclick="transferRecord(<?php echo $occId; ?>,false);">
 									Transfer All Fields
 								</a>
-							</span>
-							<span style="margin-left:30px;">
+							</div>
+							<div style="margin-left:30px;float:left">
 								<a href="" onclick="transferRecord(<?php echo $occId; ?>,true);">
 									Transfer to Empty Fields Only 
 								</a>
-							</span>
+							</div>
+							<div style="margin-left:30px;float:left;">
+								<input id="linkdupe-<?php echo $occId; ?>" type="checkbox" <?php echo ($dupeType == 'exact'?'checked':''); ?> /> Link as Dupes 
+							</div>
 							<?php 
 							if($collId == $occObj['collid']){ 
 								?>
-								<span style="margin-left:30px;">
+								<div style="margin-left:30px;float:left;">
 									<a href="occurrenceeditor.php?occid=<?php echo $occId; ?>">
 										Go To Record
 									</a>
-								</span>
+								</div>
 								<?php 
 								if($curOccid){ 
 									?>
-									<span style="margin-left:30px;">
+									<div style="margin-left:30px;float:left;">
 										<a href="dupesearch.php?submitaction=mergerecs&curoccid=<?php echo $curOccid.'&occidmerge='.$occId.'&collid='.$collId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
 											Merge Records
 										</a>
-									</span>
+									</div>
 									<?php 
 								}
 							} 
 							?>
 						</div>
-						<hr/>
+						<div style="clear:both;"><hr/></div>
 						<?php 
 					}
 					?>

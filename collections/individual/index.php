@@ -54,9 +54,6 @@ if ($done) {
   die;
 }
 
-header("Content-Type: text/html; charset=".$charset);
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 if($SYMB_UID){
 	//Check editing status
 	if($IS_ADMIN || (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin']))){
@@ -112,12 +109,12 @@ if($SYMB_UID){
 }
 if(!$occArr['localitysecurity']) $displayLocality = true;
 
-
 $displayMap = false;
 if($displayLocality && is_numeric($occArr['decimallatitude']) && is_numeric($occArr['decimallongitude'])) $displayMap = true;
-$dupeArr = array();
 $dupeArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
+
+header("Content-Type: text/html; charset=".$charset);
 ?>
 <html>
 <head>
@@ -818,19 +815,45 @@ $commentArr = $indManager->getCommentArr($isEditor);
 					?>
 					<div id="dupestab" style="padding:15px;height:500px;">
 						<div style="margin:20px;">
-							<?php 
+							<div style="font-weight:bold;font-size:120%;margin-bottom:10px;"><u>Current Record</u></div>
+							<?php
+							echo '<div style="font-weight:bold;font-size:120%;">'.$collMetadata['collectionname'].' ('.$collMetadata['institutioncode'].($collMetadata['collectioncode']?':'.$collMetadata['collectioncode']:'').')</div>';
+							echo '<div style="margin:5px 15px">';
+							if($occArr['recordedby']) echo '<div>'.$occArr['recordedby'].' '.$occArr['recordnumber'].'<span style="margin-left:40px;">'.$occArr['eventdate'].'</span></div>';
+							if($occArr['catalognumber']) echo '<div><b>Catalog Number:</b> '.$occArr['catalognumber'].'</div>';
+							if($occArr['occurrenceid']) echo '<div><b>GUID:</b> '.$occArr['occurrenceid'].'</div>';
+							if($occArr['sciname']) echo '<div><b>Latest Identification:</b> '.$occArr['sciname'].'</div>';
+							if($occArr['identifiedby']) echo '<div><b>Identified by:</b> '.$occArr['identifiedby'].'<span stlye="margin-left:30px;">'.$occArr['dateidentified'].'</span></div>';
+							echo '</div>';
+							echo '<div style="margin:20px 0px;clear:both"><hr/><hr/></div>';
+							//Grab other records
 							foreach($dupeArr as $dupOccid => $dupArr){
-								echo '<div style="font-weight:bold;margin-top:15px;:">';
-								echo $dupArr['collname'].' ('.$dupArr['instcode'].($dupArr['collcode']?':'.$dupArr['collcode']:'').')';
-								echo '</div>';
-								echo '<div style="margin-left:15px">';
+								echo '<div style="clear:both;margin:15px;">';
+								echo '<div style="font-weight:bold;font-size:120%;">'.$dupArr['collname'].' ('.$dupArr['instcode'].($dupArr['collcode']?':'.$dupArr['collcode']:'').')</div>';
+								echo '<div style="float:left;margin:5px 15px">';
+								if($dupArr['recordedby']) echo '<div>'.$dupArr['recordedby'].' '.$dupArr['recordnumber'].'<span style="margin-left:40px;">'.$dupArr['eventdate'].'</span></div>';
 								if($dupArr['catnum']) echo '<div><b>Catalog Number:</b> '.$dupArr['catnum'].'</div>';
 								if($dupArr['occurrenceid']) echo '<div><b>GUID:</b> '.$dupArr['occurrenceid'].'</div>';
 								if($dupArr['sciname']) echo '<div><b>Latest Identification:</b> '.$dupArr['sciname'].'</div>';
-								if($dupArr['identifiedby']) echo '<div><b>Identified by:</b> '.$dupArr['identifiedby'].'</div>';
-								if($dupArr['dateidentified']) echo '<div><b>Date Identified:</b> '.$dupArr['dateidentified'].'</div>';
+								if($dupArr['identifiedby']) echo '<div><b>Identified by:</b> '.$dupArr['identifiedby'].'<span stlye="margin-left:30px;">'.$dupArr['dateidentified'].'</span></div>';
 								if($dupArr['notes']) echo '<div>'.$dupArr['notes'].'</div>';
 								echo '<div><a href="#" onclick="openIndividual('.$dupOccid.')">Show Full Details</a></div>';
+								echo '</div>';
+								if($dupArr['url']){
+									$url = $dupArr['url'];
+									$tnUrl = $dupArr['tnurl'];
+									if(!$tnUrl) $tnUrl = $url;
+									if($IMAGE_DOMAIN){
+										if(substr($url,0,1) == '/') $url = $IMAGE_DOMAIN.$url;
+										if(substr($tnUrl,0,1) == '/') $tnUrl = $IMAGE_DOMAIN.$tnUrl;
+									}
+									echo '<div style="float:left;margin:10px;">';
+									echo '<a href="'.$url.'">';
+									echo '<img src="'.$tnUrl.'" style="width:100px;border:1px solid grey" />';
+									echo '</a>';
+									echo '</div>';
+								}
+								echo '<div style="margin:10px 0px;clear:both"><hr/></div>';
 								echo '</div>';
 							}
 							?>
