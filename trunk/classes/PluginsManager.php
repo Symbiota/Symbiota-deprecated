@@ -317,7 +317,7 @@ class PluginsManager {
 		return $html;
 	}
 	
-	public function createQuickSearch($buttonText){
+	public function createQuickSearch($buttonText,$searchText=''){
 		global $clientRoot;
 		$html = '';
 		$html .= '<link href="'.$clientRoot.'/css/jquery-ui.css" type="text/css" rel="Stylesheet" />';
@@ -357,8 +357,11 @@ class PluginsManager {
 		$html .= 'return true;}';
 		$html .= '</script>';
 		$html .= '<form name="quicksearch" id="quicksearch" action="'.$clientRoot.'/taxa/index.php" method="post" onsubmit="return verifyQuickSearch(this.form);">';
-		$html .= '<textarea id="quicksearchtaxon" name="taxon" rows="1" title="Enter taxon name here." ></textarea>';
-		$html .= '<div id="quicksearchbutton"><button name="formsubmit" type="submit" value="Search Terms">'.$buttonText.'</button></div>';
+		if($searchText){
+			$html .= '<div id="quicksearchtext" ><b>'.$searchText.'</b></div>';
+		}
+		$html .= '<input type="text" name="taxon" id="quicksearchtaxon" title="Enter taxon name here." />';
+		$html .= '<button name="formsubmit"  id="quicksearchbutton" type="submit" value="Search Terms">'.$buttonText.'</button>';
 		$html .= '</form>';
 		
 		return $html;

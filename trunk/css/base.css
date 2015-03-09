@@ -257,16 +257,25 @@ div.button:hover {
 }
 
 /* Quick Search Plugin */
+#quicksearchtext{
+	margin-top:0px;
+	padding-bottom:0px;
+	float: left;
+}
+
 #quicksearchbutton{
-	float: right;
-	margin-bottom: 5px;
-	margin-top: 5px;
+	margin-left:10px;
+	margin-top:0px;
+	margin-bottom:0px;
+	padding-bottom:0px;
+	float: left;
 }
 
 #quicksearchtaxon{
-	height: 50px;
-	width: 200px;
-	resize: none;
+	width: 250px;
+	float: left;
+	margin-bottom:0px;
+	padding-bottom:0px;
 	font-family: Arial, Helvetica, sans-serif;
 }
 
