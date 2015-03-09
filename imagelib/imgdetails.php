@@ -136,7 +136,7 @@ if($imgArr){
 		} 
 		if($imgArr){
 			?>
-			<table>
+			<table style="clear:both;">
 				<?php 
 				if($isEditor){
 					?>
