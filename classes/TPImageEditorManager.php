@@ -134,11 +134,12 @@ class TPImageEditorManager extends TPEditorManager{
 				$imgManager->setMapLargeImg(false);
 			}
 			if(!$imgManager->uploadImage()){
-				echo implode('; ',$imgManager->getErrArr());
+				//echo implode('; ',$imgManager->getErrArr());
 			}
 		}
-		if(!$imgManager->processImage($this->tid)){
-			$this->errorStr = implode('; ',$imgManager->getErrArr());
+		$imgManager->processImage($this->tid);
+		if($imgManager->getErrArr()){
+			$this->errorStr = implode('<br/>',$imgManager->getErrArr());
 		}
 		return $status;
 	}

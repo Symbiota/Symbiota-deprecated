@@ -28,6 +28,16 @@ else{
 		$collList = array_merge($collList,$userRights["CollAdmin"]);
 	}
 }
+
+if($isEditor){
+	if($action == 'Download Records'){
+		$harvManager->exportCsvFile($_POST);
+		exit;
+	}
+	else{
+		
+	}
+}
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -48,7 +58,6 @@ else{
 			function loadOccurRecord(fieldObj){
 				var occid = fieldObj.value;
 				fieldObj.value = "";
-				fieldObj.focus;
 				if(!occid) return false;
 				if(document.getElementById("occid-"+occid)) return false;
 
@@ -69,28 +78,30 @@ else{
 				newInput.setAttribute("value", occid);
 
 				var listElem = document.getElementById("occidlist");
-				listElem.appendChild(newDiv);
+				//listElem.appendChild(newDiv);
+				listElem.insertBefore(newDiv,listElem.childNodes[0]);
 				listElem.appendChild(newInput);
 
 				document.getElementById("emptylistdiv").style.display = "none";
 				
 				setOccurData(occid);
+				fieldObj.focus();
 			}
 
 			function setOccurData(occidInVal){
 				$.ajax({
 					type: "POST",
 					url: "rpc/getoccurrence.php",
+					dataType: "json",
 					data: { occid: occidInVal }
-				}).done(function( msg ) {
-					var aElem = document.getElementById("a-"+occid);
+				}).done(function( data ) {
+					var aElem = document.getElementById("a-"+occidInVal);
 					var newText;
-					if(msg){
-						newText = document.createTextNode(" - "+occurObj["recordedby"]+" ("+occurObj["recordnumber"]+") "+occurObj["eventdate"]);
+					if(data != ""){
+						newText = document.createTextNode(" - "+data.recordedby+" #"+data.recordnumber+" ("+data.eventdate+")");
 					}
 					else{
-						alert("Record #"+occid+" does not appear to exist");
-						newText = document.createTextNode(" - unable to locate product");
+						newText = document.createTextNode(" - unable to locate occurrence record");
 					}
 					aElem.appendChild(newText);
 				});
@@ -135,8 +146,8 @@ else{
 		<div style="margin:20px 0px">
 			<hr/>
 		</div>
-		<div style="width:300px;float:right;">
-			<form name="dlform" method="post" action="occurharvester.php" onsubmit="return validateDownloadForm(this)">
+		<div style="width:450px;float:right;">
+			<form name="dlform" method="post" action="occurharvester.php" target="_blank">
 				<fieldset>
 					<legend><b>Specimen Queue</b></legend>
 					<div id="emptylistdiv" style="margin:20px;">

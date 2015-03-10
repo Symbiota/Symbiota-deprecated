@@ -85,8 +85,11 @@ class ImageShared{
         // If, however, changes were made to the table, they must be reflected in this class.
 
         //$supportedVersions[] = '0.9.1.13';         
-        $supportedVersions[] = '0.9.1.14';         
-         
+        $supportedVersions[] = '0.9.1.14';
+        $supportedVersions[] = '0.9.1.15';
+        $supportedVersions[] = '0.9.1.16';
+        $supportedVersions[] = '1.0';
+        
         // Find the most recently applied version number
         $preparesql = "select versionnumber from schemaversion order by dateapplied desc limit 1;";
         if ($statement = $this->conn->prepare($preparesql)) {
@@ -148,16 +151,16 @@ class ImageShared{
 					return true;
 				}
 				else{
-					$this->errArr[] = 'ERROR: unable to move image to target ('.$this->targetPath.$fileName.$this->imgExt.')';
+					$this->errArr[] = 'FATAL ERROR: unable to move image to target ('.$this->targetPath.$fileName.$this->imgExt.')';
 				}
 			}
 			else{
-				$this->errArr[] = 'ERROR: Target path does not exist in uploadImage method ('.$this->targetPath.')';
+				$this->errArr[] = 'FATAL ERROR: Target path does not exist in uploadImage method ('.$this->targetPath.')';
 				//trigger_error('Path does not exist in uploadImage method',E_USER_ERROR);
 			}
 		}
 		else{
-			$this->errArr[] = 'ERROR: Path NULL in uploadImage method';
+			$this->errArr[] = 'FATAL ERROR: Path NULL in uploadImage method';
 			//trigger_error('Path NULL in uploadImage method',E_USER_ERROR);
 		}
 		return false;
@@ -166,22 +169,22 @@ class ImageShared{
 	public function copyImageFromUrl($sourceUri){
 		//Returns full path
 		if(!$sourceUri){
-			$this->errArr[] = 'ERROR: Image source uri NULL in copyImageFromUrl method';
+			$this->errArr[] = 'FATAL ERROR: Image source uri NULL in copyImageFromUrl method';
 			//trigger_error('Image source uri NULL in copyImageFromUrl method',E_USER_ERROR);
 			return false;
 		}
 		if(!$this->uriExists($sourceUri)){
-			$this->errArr[] = 'ERROR: Image source file ('.$sourceUri.') does not exist in copyImageFromUrl method';
+			$this->errArr[] = 'FATAL ERROR: Image source file ('.$sourceUri.') does not exist in copyImageFromUrl method';
 			//trigger_error('Image source file ('.$sourceUri.') does not exist in copyImageFromUrl method',E_USER_ERROR);
 			return false;
 		}
 		if(!$this->targetPath){
-			$this->errArr[] = 'ERROR: Image target url NULL in copyImageFromUrl method';
+			$this->errArr[] = 'FATAL ERROR: Image target url NULL in copyImageFromUrl method';
 			//trigger_error('Image target url NULL in copyImageFromUrl method',E_USER_ERROR);
 			return false;
 		}
 		if(!file_exists($this->targetPath)){
-			$this->errArr[] = 'ERROR: Image target file ('.$this->targetPath.') does not exist in copyImageFromUrl method';
+			$this->errArr[] = 'FATAL ERROR: Image target file ('.$this->targetPath.') does not exist in copyImageFromUrl method';
 			//trigger_error('Image target file ('.$this->targetPath.') does not exist in copyImageFromUrl method',E_USER_ERROR);
 			return false;
 		}
@@ -193,7 +196,7 @@ class ImageShared{
 			//$this->testOrientation();
 			return true;
 		}
-		$this->errArr[] = 'ERROR: Unable to copy image to target ('.$this->targetPath.$fileName.$this->imgExt.')';
+		$this->errArr[] = 'FATAL ERROR: Unable to copy image to target ('.$this->targetPath.$fileName.$this->imgExt.')';
 		return false;
 	}
 
@@ -222,7 +225,7 @@ class ImageShared{
 			$status = true;
 		}
 		else{
-			$this->errArr[] = 'ERROR: image url does not exist ('.$url.')';
+			$this->errArr[] = 'FATAL ERROR: image url does not exist ('.$url.')';
 		}
 		return $status;
 	}
@@ -294,7 +297,7 @@ class ImageShared{
 		$path = $this->imageRootPath;
 		$url = $this->imageRootUrl;
 		if(!$path){
-			$this->errArr[] = 'Path empty in setTargetPath method';
+			$this->errArr[] = 'FATAL ERROR: Path empty in setTargetPath method';
 			trigger_error('Path empty in setTargetPath method',E_USER_ERROR);
 			return false;
 		}
@@ -314,7 +317,7 @@ class ImageShared{
 		$url .= $subPath;
 		if(!file_exists($path)){
 			if(!mkdir( $path, 0777, true )){
-				$this->errArr[] = 'Unable to create directory: '.$path;
+				$this->errArr[] = 'FATAL ERROR: Unable to create directory: '.$path;
 				//trigger_error('Unable to create directory: '.$path,E_USER_ERROR);
 				return false;
 			}
@@ -328,7 +331,7 @@ class ImageShared{
 		global $paramsArr;
 
 		if(!$this->imgName){
-			$this->errArr[] = 'Image file name null in processImage fucntion';
+			$this->errArr[] = 'FATAL ERROR: Image file name null in processImage fucntion';
 			//trigger_error('Image file name null in processImage function',E_USER_ERROR);
 			return false;
 		}
@@ -386,8 +389,8 @@ class ImageShared{
 		}
 		else{
 			//Image width or file size is too large
-			//$newWidth = ($this->sourceWidth<($this->webPixWidth*1.2)?$this->sourceWidth:$this->webPixWidth);
-			$this->createNewImage('',$this->sourceWidth);
+			$newWidth = ($this->sourceWidth<($this->webPixWidth*1.2)?$this->sourceWidth:$this->webPixWidth);
+			$this->createNewImage('',$newWidth);
 			$imgWebUrl = $this->imgName.'.jpg';
 		}
 
@@ -417,6 +420,9 @@ class ImageShared{
 				$this->errArr[] = 'ERROR: No appropriate image handler for image conversions';
 			}
 		}
+		else{
+			$this->errArr[] = 'ERROR: Empty sourcePath or failure in uriExist test (sourcePath: '.$this->sourcePath.')';
+		}
 		return $status;
 	}
 	
@@ -432,12 +438,15 @@ class ImageShared{
 		if(file_exists($targetPath)){
 			return true;
 		}
+		else{
+			$this->errArr[] = 'ERROR: Image failed to be created in Imagick function (target path: '.$targetPath.')';
+		}
 		return false;
 	}
 
 	private function createNewImageGD($subExt, $newWidth, $qualityRating = 0){
 		$status = false;
-		ini_set('memory_limit','512M');
+		//ini_set('memory_limit','512M');
 
 		if(!$this->sourceWidth || !$this->sourceHeight){
 			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
@@ -461,24 +470,29 @@ class ImageShared{
 				}
 			}
 			
-			$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
-			//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
-			imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$this->sourceWidth,$this->sourceHeight);
-	
-			//Irrelavent of import image, output JPG 
-			$targetPath = $this->targetPath.$this->imgName.$subExt.'.jpg';
-			if($qualityRating){
-				$status = imagejpeg($tmpImg, $targetPath, $qualityRating);
+			if($this->sourceGdImg){
+				$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+				//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+				imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$this->sourceWidth,$this->sourceHeight);
+		
+				//Irrelavent of import image, output JPG 
+				$targetPath = $this->targetPath.$this->imgName.$subExt.'.jpg';
+				if($qualityRating){
+					$status = imagejpeg($tmpImg, $targetPath, $qualityRating);
+				}
+				else{
+					$status = imagejpeg($tmpImg, $targetPath);
+				}
+					
+				if(!$status){
+					$this->errArr[] = 'ERROR: failed to create images using target path ('.$targetPath.')';
+				}
+		
+				imagedestroy($tmpImg);
 			}
 			else{
-				$status = imagejpeg($tmpImg, $targetPath);
+				$this->errArr[] = 'ERROR: unable to create image object in createNewImageGD method (sourcePath: '.$this->sourcePath.')';
 			}
-				
-			if(!$status){
-				$this->errArr[] = 'ERROR: failed to create images in target path ('.$targetPath.')';
-			}
-	
-			imagedestroy($tmpImg);
 		}
 		else{
 			$this->errArr[] = 'ERROR: unable to get source image width ('.$this->sourcePath.')';
