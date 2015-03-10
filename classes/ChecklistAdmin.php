@@ -21,7 +21,7 @@ class ChecklistAdmin {
 		if($this->clid){
 			$sql = "SELECT c.clid, c.name, c.locality, c.publication, ".
 				"c.abstract, c.authors, c.parentclid, c.notes, ".
-				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.access, ".
+				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.access, c.defaultSettings, ".
 				"c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp, c.footprintWKT ".
 				"FROM fmchecklists c WHERE (c.clid = ".$this->clid.')';
 	 		$result = $this->conn->query($sql);
@@ -39,6 +39,7 @@ class ChecklistAdmin {
 				$retArr["longcentroid"] = $row->longcentroid;
 				$retArr["pointradiusmeters"] = $row->pointradiusmeters;
 				$retArr["access"] = $row->access;
+				$retArr["defaultSettings"] = $row->defaultSettings;
 				$retArr["dynamicsql"] = $row->dynamicsql;
 				$retArr["datelastmodified"] = $row->datelastmodified;
 				$retArr["footprintWKT"] = $row->footprintWKT;

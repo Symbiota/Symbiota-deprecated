@@ -32,6 +32,21 @@ if($clValue){
 elseif($dynClid){
 	$clManager->setDynClid($dynClid);
 }
+$clArray = Array();
+if($clValue || $dynClid){
+	$clArray = $clManager->getClMetaData();
+}
+$showDetails = 0;
+if($clValue && $clArray["defaultSettings"]){
+	$defaultArr = json_decode($clArray["defaultSettings"], true);
+	$showDetails = $defaultArr["ddetails"];
+	if($action != "Rebuild List"){
+		$showCommon = $defaultArr["dcommon"];
+		$showImages = $defaultArr["dimages"]; 
+		$showVouchers = $defaultArr["dvouchers"];
+		$showAuthors = $defaultArr["dauthors"];
+	}
+}
 if($pid) $clManager->setProj($pid);
 elseif(array_key_exists("proj",$_REQUEST)) $pid = $clManager->setProj($_REQUEST['proj']);
 if($thesFilter) $clManager->setThesFilter($thesFilter);
@@ -77,10 +92,8 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 		$statusStr = $clAdmin->addNewSpecies($dataArr,$setRareSpp);
 	}
 }
-$clArray = Array();
 $taxaArray = Array();
 if($clValue || $dynClid){
-	$clArray = $clManager->getClMetaData();
 	$taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 }
 ?>
@@ -223,9 +236,9 @@ if($clValue || $dynClid){
 		
 			if(($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"]) && !$printMode){
 				?>
-				<div class="moredetails" style="color:blue;cursor:pointer;" onclick="toggle('moredetails')">More Details</div>
-				<div class="moredetails" style="display:none;color:blue;cursor:pointer;" onclick="toggle('moredetails')">Less Details</div>
-				<div class="moredetails" style="display:none">
+				<div class="moredetails" style="<?php echo ($showDetails?'display:none;':''); ?>color:blue;cursor:pointer;" onclick="toggle('moredetails')">More Details</div>
+				<div class="moredetails" style="display:<?php echo ($showDetails?'block':'none'); ?>;color:blue;cursor:pointer;" onclick="toggle('moredetails')">Less Details</div>
+				<div class="moredetails" style="display:<?php echo ($showDetails?'block':'none'); ?>;">
 					<?php 
 					$locStr = $clArray["locality"];
 					if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";

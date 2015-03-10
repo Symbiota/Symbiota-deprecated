@@ -90,6 +90,19 @@ function verifyPointAddForm(f){
 	return true;
 }
 
+function showImagesDefaultChecked(f){
+	if(f.dimages.checked){
+		f.dvouchers.checked = false;
+		f.dvouchers.disabled = true;
+		f.dauthors.checked = false;
+		f.dauthors.disabled = true;
+	}
+	else{
+		f.dvouchers.disabled = false; 
+		f.dauthors.disabled = false; 
+	}
+}
+
 function validateAddChildForm(f){
 	
 }
