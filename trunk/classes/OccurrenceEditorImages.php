@@ -250,7 +250,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		
 		//Get errors and warnings
 		if($imgManager->getErrArr()) {
-			$this->errorStr = implode('; ',$imgManager->getErrArr());
+			$this->errorStr = implode('<br/>',$imgManager->getErrArr());
 		}
 		return $status;
 	}

@@ -191,8 +191,8 @@ if($symbUid){
 					$statusStr = 'Image added successfully';
 					$tabTarget = 2;
 				}
-				else{
-					$statusStr = $occManager->getErrorStr();
+				if($occManager->getErrorStr()){
+					$statusStr .= $occManager->getErrorStr();
 				}
 			}
 			elseif($action == "Delete Image"){

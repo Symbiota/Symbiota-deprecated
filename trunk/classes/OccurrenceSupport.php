@@ -15,6 +15,7 @@ class OccurrenceSupport {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
+	//Comment functions
 	public function getComments($collid, $start, $limit, $tsStart, $tsEnd, $uid, $rs){
 		$retArr = array();
 		if($collid){
@@ -116,53 +117,37 @@ class OccurrenceSupport {
 		return $retArr;
 	}
 
-	public function exportCsvFile(){
-		$sql = $this->getLabelSql();
-		//echo 'SQL: '.$sql;
-		if($sql){
-	    	$fileName = 'labeloutput_'.time().".csv";
-			header ('Content-Type: text/csv');
-			header ("Content-Disposition: attachment; filename=\"$fileName\""); 
-			
-			$rs = $this->conn->query($sql);
-			if($rs){
-				echo "\"occid\",\"catalogNumber\",\"family\",\"scientificName\",\"genus\",\"specificEpithet\",".
-				"\"taxonRank\",\"infraspecificEpithet\",\"scientificNameAuthorship\",\"identifiedBy\",".
-				"\"dateIdentified\",\"identificationReferences\",\"identificationRemarks\",\"taxonRemarks\",\"identificationQualifier\",".
-	 			"\"recordedBy\",\"recordNumber\",\"associatedCollectors\",\"eventDate\",\"year\",\"month\",\"monthName\",\"day\",".
-		 		"\"verbatimEventDate\",\"habitat\",\"substrate\",\"verbatimAttributes\",\"occurrenceRemarks\",".
-	 			"\"associatedTaxa\",\"reproductiveCondition\",\"establishmentMeans\",\"country\",".
-	 			"\"stateProvince\",\"county\",\"municipality\",\"locality\",\"decimalLatitude\",\"decimalLongitude\",".
-		 		"\"geodeticDatum\",\"coordinateUncertaintyInMeters\",\"verbatimCoordinates\",".
-	 			"\"minimumElevationInMeters\",\"maximumElevationInMeters\",\"verbatimElevation\",\"disposition\"\n";
-				
-				while($row = $rs->fetch_assoc()){
-					$dupCnt = $_POST['q-'.$row['occid']];
-					for($i = 0;$i < $dupCnt;$i++){
-						echo $row['occid'].",\"".$row["catalognumber"]."\",\"".
-							$row["family"]."\","."\"".$row["sciname"]."\",\"".$row["genus"]."\",\"".$row["specificepithet"]."\",\"".
-							$row["taxonrank"]."\",\"".$row["infraspecificepithet"]."\",\"".$row["scientificnameauthorship"]."\",\"".
-							$row["identifiedby"]."\",\"".$row["dateidentified"]."\",\"".$row["identificationreferences"]."\",\"".$row["identificationremarks"]."\",\"".
-							$row["taxonremarks"]."\",\"".$row["identificationqualifier"]."\",\"".$row["recordedby"]."\",\"".$row["recordnumber"]."\",\"".
-							$row["associatedcollectors"]."\",\"".$row["eventdate"]."\",".$row["year"].",".$row["month"].",".$row["monthname"].",".$row["day"].",\"".
-							$row["verbatimeventdate"]."\",\"".$row["habitat"]."\",\"".$row["substrate"]."\",\"".
-							$row["verbatimattributes"]."\",\"".
-							$row["occurrenceremarks"]."\",\"".$row["associatedtaxa"]."\",\"".$row["reproductivecondition"]."\",\"".
-							$row["establishmentmeans"]."\",\"".$row["country"]."\",\"".$row["stateprovince"]."\",\"".
-							$row["county"]."\",\"".$row["municipality"]."\",\"".$row["locality"]."\",".$row["decimallatitude"].",".
-							$row["decimallongitude"].",\"".$row["geodeticdatum"]."\",".$row["coordinateuncertaintyinmeters"].",\"".
-							$row["verbatimcoordinates"]."\",".$row["minimumelevationinmeters"].",".$row["maximumelevationinmeters"].",\"".
-							$row["verbatimelevation"]."\",\"".$row["disposition"]."\"\n";
-					}
-				}
+	//Occurrence harvester function (occurharvester.php)
+	public function exportCsvFile($postArr){
+		$fieldArr = array('occid','occurrenceID','catalogNumber','otherCatalogNumbers','family','sciname','genus','specificEpithet','taxonRank',
+		'infraspecificEpithet','scientificNameAuthorship','taxonRemarks','identifiedBy','dateIdentified','identificationReferences',
+		'identificationRemarks','identificationQualifier','typeStatus','recordedBy','recordNumber','associatedCollectors','eventDate',
+		'year','month','day','verbatimEventDate','habitat','substrate','fieldNotes','fieldnumber','occurrenceRemarks','informationWithheld',
+		'associatedOccurrences','associatedTaxa','dynamicProperties','verbatimAttributes','behavior','reproductiveCondition','cultivationStatus',
+		'establishmentMeans','lifeStage','sex','individualCount','samplingProtocol','samplingEffort','preparations','country','stateProvince',
+		'county','municipality','locality','decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','locationRemarks',
+		'verbatimCoordinates','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation','minimumDepthInMeters',
+		'maximumDepthInMeters','verbatimDepth','dateEntered','dateLastModified');
+		$fileName = 'specimenOutput_'.time().'.csv';
+		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header ('Content-Type: text/csv');
+		header ('Content-Disposition: attachment; filename="'.$fileName.'"');
+		$sql = 'SELECT '.implode(',',$fieldArr).' FROM omoccurrences WHERE occid IN() ';
+		$rs = $this->conn->query($sql);
+		if($rs->num_rows){
+			$out = fopen('php://output', 'w');
+			echo implode(',',$fieldArr)."\n";
+			while($r = $rs->fetch_assoc()){
+				fputcsv($out, $r);
 			}
-			else{
-				echo "Recordset is empty.\n";
-			}
-	        if($rs) $rs->close();
+			fclose($out);
 		}
+		else{
+			echo "Recordset is empty.\n";
+		}
+		$rs->free();
 	}
-
+	
 	public function getErrorStr(){
 		return $this->errorMessage;
 	} 

@@ -2,7 +2,6 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
 include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
-include_once($serverRoot.'/classes/ImageBatchProcessor.php');
 include_once($serverRoot.'/classes/SpecProcessorOcr.php');
 
 header("Content-Type: text/html; charset=".$charset);

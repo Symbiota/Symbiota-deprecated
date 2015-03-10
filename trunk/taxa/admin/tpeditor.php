@@ -100,8 +100,8 @@ if($editable && $action){
 		if($tEditor->loadImage($_POST)){
 			$statusStr = 'Image uploaded successfully';
 		}
-		else{
-			$statusStr = 'ERROR: '.$tEditor->getErrorStr();
+		if($tEditor->getErrorStr()){
+			$statusStr .= '<br/>'.$tEditor->getErrorStr();
 		}
 	}
 }
@@ -128,7 +128,7 @@ if($editable && $action){
 		$(document).ready(function() {
 			$("#sninput").autocomplete({
 				source: function( request, response ) {
-					$.getJSON( "rpc/gettaxalist.php", { "term": request.term, "taid": "1" }, response );
+					$.getJSON( "rpc/gettaxasuggest.php", { "term": request.term, "taid": "1" }, response );
 				}
 			},{ minLength: 3, autoFocus: true }
 			);
