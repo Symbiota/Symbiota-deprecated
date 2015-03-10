@@ -22,7 +22,7 @@ class ImageShared{
 	private $webPixWidth = 1600;
 	private $lgPixWidth = 3168;
 	private $webFileSizeLimit = 300000;
-	private $jpgCompression= 80;
+	private $jpgCompression= 70;
 
 	private $mapLargeImg = true;
 	
@@ -250,19 +250,18 @@ class ImageShared{
 		
 		if(!$this->imgExt && $imgInfo){
 			if($imgInfo[2] == IMAGETYPE_GIF){
-				$this->imgExt = 'gif';
+				$this->imgExt = '.gif';
 			}
 			elseif($imgInfo[2] == IMAGETYPE_PNG){
-				$this->imgExt = 'png';
+				$this->imgExt = '.png';
 			}
 			elseif($imgInfo[2] == IMAGETYPE_JPEG){
-				$this->imgExt = 'jpg';
+				$this->imgExt = '.jpg';
 			}
 		}
 
-		$fName = str_replace("%20","_",$fName);
-		$fName = str_replace("%23","_",$fName);
-		$fName = str_replace(" ","_",$fName);
+		$fName = str_replace(".","",$fName);
+		$fName = str_replace(array("%20","%23"," ","__"),"_",$fName);
 		$fName = str_replace("__","_",$fName);
 		$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
 		$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);

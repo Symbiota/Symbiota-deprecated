@@ -79,8 +79,8 @@ class ImageCleaner{
 					}
 					if($webIsEmpty){
 						if($sourceWidth && $sourceWidth < $imgManager->getWebPixWidth()){
-							if(copy($imgManager->getSourcePath(),$imgManager->getTargetPath().$imgManager->getImgName().'_web.'.$imgManager->getImgExt())){
-								$webFullUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_web.'.$imgManager->getImgExt();
+							if(copy($imgManager->getSourcePath(),$imgManager->getTargetPath().$imgManager->getImgName().'_web'.$imgManager->getImgExt())){
+								$webFullUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_web'.$imgManager->getImgExt();
 							}
 						}
 						if(!$webFullUrl){
