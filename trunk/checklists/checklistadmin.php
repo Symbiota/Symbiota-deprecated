@@ -23,11 +23,19 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 	//Submit checklist MetaData edits
 	if($action == "Submit Changes"){
 		$editArr = Array();
+		$defaultViewArr = Array();
+		$defaultViewArr["ddetails"] = array_key_exists("ddetails",$_REQUEST)?1:0;
+		$defaultViewArr["dcommon"] = array_key_exists("dcommon",$_REQUEST)?1:0;
+		$defaultViewArr["dimages"] = array_key_exists("dimages",$_REQUEST)?1:0;
+		$defaultViewArr["dvouchers"] = array_key_exists("dvouchers",$_REQUEST)?1:0;
+		$defaultViewArr["dauthors"] = array_key_exists("dauthors",$_REQUEST)?1:0;
+		$defaultView = json_encode($defaultViewArr);
 		foreach($_REQUEST as $k => $v){
 			if(substr($k,0,3) == "ecl"){
 				$editArr[substr($k,3)] = $_REQUEST[$k];
 			}
 		}
+		$editArr["defaultSettings"] = $defaultView;
 		$clManager->editMetaData($editArr);
 		header('Location: checklist.php?cl='.$clid.'&pid='.$pid);
 	}
@@ -52,6 +60,10 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 	}
 }
 $clArray = $clManager->getMetaData();
+$defaultArr = array();
+if($clArray["defaultSettings"]){
+	$defaultArr = json_decode($clArray["defaultSettings"], true);
+}
 
 $voucherProjects = $clManager->getVoucherProjects(); 
 ?>
@@ -255,58 +267,89 @@ $voucherProjects = $clManager->getVoucherProjects();
 								<b>Notes</b><br/>
 								<input type="text" name="eclnotes" style="width:95%" value="<?php echo $clArray["notes"]; ?>" />
 							</div>
-							<div style="float:left;">
+							<div style="width:100%;">
 								<div style="float:left;">
 									<b>Latitude Centroid</b><br/>
 									<input id="latdec" type="text" name="ecllatcentroid" style="width:110px;" value="<?php echo $clArray["latcentroid"]; ?>" />
 								</div>
-								<div style="float:left;margin-left:5px;">
+								<div style="float:left;margin-left:15px;">
 									<b>Longitude Centroid</b><br/>
 									<input id="lngdec" type="text" name="ecllongcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
 								</div>
-								<div style="float:left;margin-left:5px;">
+								<div style="float:left;margin-left:15px;">
 									<b>Point Radius (meters)</b><br/>
 									<input type="text" name="eclpointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
 								</div>
 								<div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
 									<img src="../images/world.png" style="width:12px;" />
 								</div>
+								<div style="float:right;margin-top:8px;margin-right:25px;">
+									<fieldset style="width:175px;">
+										<legend><b>Polygon Footprint</b></legend>
+										<?php
+										if($clArray&&$clArray["footprintWKT"]){
+											?>
+											<div id="polyexistsbox" style="display:block;clear:both;">
+												<b>Footprint polygon saved.</b>
+											</div>
+											<?php
+										}
+										else{
+											?>
+											<div id="polycreatebox" style="display:block;clear:both;">
+												<b>Create footprint polygon.</b>
+											</div>
+											<?php
+										}
+										?>
+										<div id="polysavebox" style="display:none;clear:both;">
+											<b>Polygon coordinates ready to save.</b>
+										</div>
+										<div style="float:right;margin:8px 0px 0px 10px;cursor:pointer;" onclick="openMappingPolyAid();">
+											<img src="../images/world.png" style="width:12px;" />
+										</div>
+									</fieldset>
+								</div>
 							</div>
-							<div style="float:right;margin-top:8px;margin-right:25px;">
-								<fieldset style="width:175px;">
-									<legend><b>Polygon Footprint</b></legend>
-									<?php
-									if($clArray&&$clArray["footprintWKT"]){
-										?>
-										<div id="polyexistsbox" style="display:block;clear:both;">
-											<b>Footprint polygon saved.</b>
-										</div>
-										<?php
-									}
-									else{
-										?>
-										<div id="polycreatebox" style="display:block;clear:both;">
-											<b>Create footprint polygon.</b>
-										</div>
-										<?php
-									}
-									?>
-									<div id="polysavebox" style="display:none;clear:both;">
-										<b>Polygon coordinates ready to save.</b>
+							<div style="float:left;margin-top:15px;margin-right:25px;">
+								<fieldset style="width:250px;">
+									<legend><b>Default View Settings</b></legend>
+									<div>
+										<!-- Display Details: 0 = false, 1 = true  --> 
+										<input name='ddetails' id='ddetails' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["ddetails"])?"checked":""); ?> /> 
+										Show Details
 									</div>
-									<div style="float:right;margin:8px 0px 0px 10px;cursor:pointer;" onclick="openMappingPolyAid();">
-										<img src="../images/world.png" style="width:12px;" />
+									<div>
+										<?php 
+											//Display Common Names: 0 = false, 1 = true 
+											if($displayCommonNames) echo "<input id='dcommon' name='dcommon' type='checkbox' value='1' ".(($defaultArr&&$defaultArr["dcommon"])?"checked":"")."/> Common Names";
+										?>
+									</div>
+									<div>
+										<!-- Display as Images: 0 = false, 1 = true  --> 
+										<input name='dimages' id='dimages' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"checked":""); ?> onclick="showImagesDefaultChecked(this.form);" /> 
+										Display as Images
+									</div>
+									<div>
+										<!-- Display as Vouchers: 0 = false, 1 = true  --> 
+										<input name='dvouchers' id='dvouchers' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dvouchers"])?"checked":"")); ?>/> 
+										Notes &amp; Vouchers
+									</div>
+									<div>
+										<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
+										<input name='dauthors' id='dauthors' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dauthors"])?"checked":"")); ?>/> 
+										Taxon Authors
 									</div>
 								</fieldset>
 							</div>
-							<div style="clear:both;">
+							<div style="clear:both;float:left;margin-top:15px;">
 								<b>Access</b><br/>
 								<select name="eclaccess">
 									<option value="private">Private</option>
 									<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public</option>
 								</select>
 							</div>
-							<div>
+							<div style="clear:both;float:left;margin-top:15px;">
 								<input type='submit' name='submitaction' id='editsubmit' value='Submit Changes' />
 							</div>
 							<input type="hidden" id="footprintWKT" name="eclfootprintWKT" value='<?php echo $clArray["footprintWKT"]; ?>' />
