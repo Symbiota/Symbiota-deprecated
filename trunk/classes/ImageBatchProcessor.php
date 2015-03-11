@@ -541,11 +541,18 @@ class ImageBatchProcessor {
 			if($occId || !$this->dbMetadata){
 				$sourcePath = $this->sourcePathBase.$sourcePathFrag;
 				//Setup target path and file name in prep for loading image
-				$targetFolder = '00001/';
+				$targetFolder = '';
 				if(strlen($specPk) > 3){
-					$targetFolder = substr($specPk,0,strlen($specPk)-3).'/';
-					if(strlen($targetFolder) < 6) $targetFolder = str_repeat('0',6-strlen($targetFolder)).$targetFolder;
+					$folderName = $specPk;
+					if(preg_match('/^(\D*\d+)\D+/',$folderName,$m)){
+						$folderName = $m[1];
+					}
+					$targetFolder = substr($folderName,0,strlen($folderName)-3).'/';
+					if($targetFolder && strlen($targetFolder) < 6){
+						$targetFolder = str_repeat('0',6-strlen($targetFolder)).$targetFolder;
+					}
 				}
+				if(!$targetFolder) $targetFolder = date('Ym').'/';
 				$targetFrag = $this->targetPathFrag.$targetFolder;
 				$targetPath = $this->targetPathBase.$targetFrag;
 				if(!file_exists($targetPath)){
