@@ -13,7 +13,7 @@ class ChecklistManager {
 	private $projName = '';
 	private $taxaList = Array();
 	private $language = "English";
-	private $thesFilter = 1;
+	private $thesFilter = 0;
 	private $taxonFilter;
 	private $showAuthors;
 	private $showCommon;
@@ -430,11 +430,20 @@ class ChecklistManager {
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
-			$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
-				't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
-				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-				'INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
-		  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.clid IN ('.$clidStr.')) ';
+			if($this->thesFilter){
+				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
+					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
+					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
+					'INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid '.
+			  		'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (ctl.clid IN ('.$clidStr.')) ';
+			}
+			else{
+				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
+					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
+					'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
+					'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			  		'WHERE (ts.taxauthid = 1) AND (ctl.clid IN ('.$clidStr.')) ';
+			}
 		}
 		else{
 			$this->basicSql = 'SELECT t.tid, ts.family, t.sciname, t.author '.
@@ -460,7 +469,7 @@ class ChecklistManager {
 				//Include parents
 				$sqlWhere .= 'OR (t.tid IN(SELECT e.tid '.
 					'FROM taxa t3 INNER JOIN taxaenumtree e ON t3.tid = e.parenttid '.  
-					'WHERE (e.taxauthid = 1) AND (t3.sciname = "'.$this->taxonFilter.'")))';
+					'WHERE (e.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (t3.sciname = "'.$this->taxonFilter.'")))';
 				if($sqlWhere) $this->basicSql .= 'AND ('.substr($sqlWhere,2).') ';
 			}
 		}

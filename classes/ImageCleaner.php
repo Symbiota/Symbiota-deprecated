@@ -33,6 +33,7 @@ class ImageCleaner{
 	}
 
 	public function buildThumbnailImages($collid = 0){
+		ini_set('memory_limit','512M');
 		$imgManager = new ImageShared();
 		$imgManager->setTargetPath('misc');
 		
