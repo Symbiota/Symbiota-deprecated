@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/GamesFlashcard.php');
+include_once($serverRoot.'/classes/GamesManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
@@ -10,7 +10,7 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 $showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
 $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang; 
 
-$fcManager = new GamesFlashcard();
+$fcManager = new GamesManager();
 $fcManager->setClid($clid);
 $fcManager->setDynClid($dynClid);
 $fcManager->setTaxonFilter($taxonFilter);
@@ -40,12 +40,12 @@ $sciArr = array();
 
 		function init(){
 			<?php 
-				$imagesArr = $fcManager->getImages();
+				$imagesArr = $fcManager->getFlashcardImages();
 				if($imagesArr){
 					foreach($imagesArr as $imgArr){
 						if(array_key_exists('url',$imgArr)){
 							$scinameStr = $imgArr['sciname'];
-							if($showCommon){
+							if($showCommon && array_key_exists('vern',$imgArr)){
 								$scinameStr .= ' ('.$imgArr['vern'].')';
 							}
 							$sciArr[$imgArr['tid']] = $scinameStr;
@@ -136,7 +136,7 @@ $sciArr = array();
 	</script>
 </head>
 
-<body onload="init()">
+<body onload="init();">
 <?php
 	$displayLeftMenu = (isset($checklists_flashcardsMenu)?$checklists_flashcardsMenu:"true");
 	include($serverRoot.'/header.php');
@@ -157,17 +157,19 @@ $sciArr = array();
 					</a>
 				</div>
 			</div>
-			<div style="width:420px;text-align:center;">
+			<div style="width:450px;text-align:center;">
 				<div style="width:100%;">
 					<div style="float:left;cursor:pointer;text-align:center;" onclick="insertNewImage()">
 						<img src="../images/skipthisone.png" title="Skip to Next Species" />
 					</div>
 					<div id="rightarrow" style="float:right;cursor:pointer;text-align:center;" onclick="nextImage()">
-						<img src="../images/rightarrow.png" title="Show Next Image" /><br/>
+						<img src="../images/rightarrow.png" title="Show Next Image" />
+					</div>
+					<div style="width:200px;margin-left:auto;margin-right:auto;">
 						Image <span id="imageindex">1</span> of <span id="imagecount">?</span>
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div style="clear:both;margin-top:10px;">
 					<select id="scinameselect" onchange="checkId(this)">
 						<option value="0">Name of Above Organism</option>
 						<option value="0">-------------------------</option>
@@ -180,10 +182,16 @@ $sciArr = array();
 						?>
 					</select>
 				</div>
-				<div><span id="numcomplete">0</span> out of <span id="numtotal">0</span> Species Identified</div>
-				<div><span id="numcorrect">0</span> Identified Correctly on First Try</div>
-				<div style="cursor:pointer;" onclick="tellMe()">Tell Me What It Is!</div>
-				<div style="margin:5px 0px 0px 60px;width:300px;">
+				<div style="clear:both;margin-top:10px;">
+					<div>
+						<b><span id="numcomplete">0</span></b> out of <b><span id="numtotal">0</span></b> Species Identified
+					</div>
+					<div>
+						<b><span id="numcorrect">0</span></b> Identified Correctly on First Try
+					</div>
+				</div>
+				<div style="cursor:pointer;margin-top:10px;color:green;" onclick="tellMe()"><b>Tell Me What It Is!</b></div>
+				<div style="margin-left:auto;margin-right:auto;margin-top:10px;width:300px;">
 					<form id="taxonfilterform" name="taxonfilterform" action="flashcards.php" method="GET">
 						<fieldset>
 							<legend>Options</legend>
@@ -193,7 +201,7 @@ $sciArr = array();
 								<select name="taxonfilter" onchange="document.getElementById('taxonfilterform').submit();">
 									<option value="0">Filter Quiz by Taxonomic Group</option>
 									<?php 
-										$fcManager->echoTaxonFilterList();
+										$fcManager->echoFlashcardTaxonFilterList();
 									?>
 								</select>
 							</div>
@@ -208,7 +216,7 @@ $sciArr = array();
 						</fieldset>
 					</form>
 				</div>
-				<div style="cursor:pointer;" onclick="reset()">Reset Game</div>
+				<div style="cursor:pointer;color:red;" onclick="reset()"><b>Reset Game</b></div>
 			</div>
 		</div>
 	</div>
