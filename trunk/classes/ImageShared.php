@@ -420,7 +420,7 @@ class ImageShared{
 			}
 		}
 		else{
-			$this->errArr[] = 'ERROR: Empty sourcePath or failure in uriExist test (sourcePath: '.$this->sourcePath.')';
+			//$this->errArr[] = 'ERROR: Empty sourcePath or failure in uriExist test (sourcePath: '.$this->sourcePath.')';
 		}
 		return $status;
 	}
