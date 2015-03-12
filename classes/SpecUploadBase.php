@@ -96,7 +96,9 @@ class SpecUploadBase extends SpecUpload{
 		}
 
 		//Get uploadspectemp metadata
-		$skipOccurFields = array('dbpk','initialtimestamp','occid','collid','tidinterpreted');
+		$skipOccurFields = array('dbpk','initialtimestamp','occid','collid','tidinterpreted','fieldnotes','coordinateprecision',
+			'verbatimcoordinatesystem','ownerinstitutioncode','institutionid','collectionid','datasetid','associatedoccurrences',
+			'associatedreferences','associatedsequences','previousidentifications');
 		$sql = "SHOW COLUMNS FROM uploadspectemp";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
@@ -711,7 +713,7 @@ class SpecUploadBase extends SpecUpload{
 			'o.recordedBy = u.recordedBy, o.recordNumber = u.recordNumber, o.fieldnumber = u.fieldnumber, '.
 			'o.associatedCollectors = u.associatedCollectors, o.eventDate = u.eventDate, '.
 			'o.year = u.year, o.month = u.month, o.day = u.day, o.startDayOfYear = u.startDayOfYear, o.endDayOfYear = u.endDayOfYear, '.
-			'o.verbatimEventDate = u.verbatimEventDate, o.habitat = u.habitat, o.substrate = u.substrate, o.fieldNotes = u.fieldNotes, o.occurrenceRemarks = u.occurrenceRemarks, o.informationWithheld = u.informationWithheld, '.
+			'o.verbatimEventDate = u.verbatimEventDate, o.habitat = u.habitat, o.substrate = u.substrate, o.occurrenceRemarks = u.occurrenceRemarks, o.informationWithheld = u.informationWithheld, '.
 			'o.associatedOccurrences = u.associatedOccurrences, o.associatedTaxa = u.associatedTaxa, '.
 			'o.dynamicProperties = u.dynamicProperties, o.verbatimAttributes = u.verbatimAttributes, '.
 			'o.reproductiveCondition = u.reproductiveCondition, o.cultivationStatus = u.cultivationStatus, '.
@@ -744,7 +746,7 @@ class SpecUploadBase extends SpecUpload{
 			'scientificNameAuthorship, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, '.
 			'taxonRemarks, identificationQualifier, typeStatus, recordedBy, recordNumber, associatedCollectors, '.
 			'eventDate, Year, Month, Day, startDayOfYear, endDayOfYear, verbatimEventDate, '.
-			'habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, associatedOccurrences, '.
+			'habitat, substrate, fieldnumber, occurrenceRemarks, informationWithheld, associatedOccurrences, '.
 			'associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, cultivationStatus, establishmentMeans, '.
 			'lifestage, sex, individualcount, samplingprotocol, preparations, '.
 			'country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, '.
@@ -758,7 +760,7 @@ class SpecUploadBase extends SpecUpload{
 			'u.scientificNameAuthorship, u.identifiedBy, u.dateIdentified, u.identificationReferences, u.identificationRemarks, '.
 			'u.taxonRemarks, u.identificationQualifier, u.typeStatus, u.recordedBy, u.recordNumber, u.associatedCollectors, '.
 			'u.eventDate, u.Year, u.Month, u.Day, u.startDayOfYear, u.endDayOfYear, u.verbatimEventDate, '.
-			'u.habitat, u.substrate, u.fieldNotes, u.fieldnumber, u.occurrenceRemarks, u.informationWithheld, u.associatedOccurrences, '.
+			'u.habitat, u.substrate, u.fieldnumber, u.occurrenceRemarks, u.informationWithheld, u.associatedOccurrences, '.
 			'u.associatedTaxa, u.dynamicProperties, u.verbatimAttributes, u.reproductiveCondition, u.cultivationStatus, u.establishmentMeans, '.
 			'u.lifestage, u.sex, u.individualcount, u.samplingprotocol, u.preparations, '.
 			'u.country, u.stateProvince, u.county, u.municipality, u.locality, u.localitySecurity, u.localitySecurityReason, '.

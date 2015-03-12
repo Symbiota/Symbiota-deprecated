@@ -58,7 +58,7 @@ class DwcArchiverOccurrence{
 			'decimallatitude','decimallongitude','minimumelevationinmeters','maximumelevationinmeters','datelastmodified','modified');
 		
 		$this->securityArr = array('eventDate','month','day','startDayOfYear','endDayOfYear','verbatimEventDate',
-			'recordNumber','locality','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
+			'recordNumber','locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
 			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT',
 			'verbatimCoordinates','georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources',
 			'georeferenceVerificationStatus','habitat','informationWithheld');
@@ -215,6 +215,8 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['municipality'] = 'o.municipality';
 		$occurTermArr['locality'] = 'http://rs.tdwg.org/dwc/terms/locality';
 		$occurFieldArr['locality'] = 'o.locality';
+		$occurTermArr['locationRemarks'] = 'http://rs.tdwg.org/dwc/terms/locationRemarks';
+		$occurFieldArr['locationRemarks'] = 'o.locationremarks';
 		$occurTermArr['localitySecurity'] = 'http://symbiota.org/terms/localitySecurity';
 		$occurFieldArr['localitySecurity'] = 'o.localitySecurity';
 		if($this->schemaType != 'dwc'){
@@ -247,6 +249,12 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['minimumElevationInMeters'] = 'o.minimumElevationInMeters';
 		$occurTermArr['maximumElevationInMeters'] = 'http://rs.tdwg.org/dwc/terms/maximumElevationInMeters';
 		$occurFieldArr['maximumElevationInMeters'] = 'o.maximumElevationInMeters';
+		$occurTermArr['minimumDepthInMeters'] = 'http://rs.tdwg.org/dwc/terms/minimumDepthInMeters';
+		$occurFieldArr['minimumDepthInMeters'] = 'o.minimumDepthInMeters';
+		$occurTermArr['maximumDepthInMeters'] = 'http://rs.tdwg.org/dwc/terms/maximumDepthInMeters';
+		$occurFieldArr['maximumDepthInMeters'] = 'o.maximumDepthInMeters';
+		$occurTermArr['verbatimDepth'] = 'http://rs.tdwg.org/dwc/terms/verbatimDepth';
+		$occurFieldArr['verbatimDepth'] = 'o.verbatimDepth';
 		$occurTermArr['verbatimElevation'] = 'http://rs.tdwg.org/dwc/terms/verbatimElevation';
 		$occurFieldArr['verbatimElevation'] = 'o.verbatimElevation';
 		$occurTermArr['disposition'] = 'http://rs.tdwg.org/dwc/terms/disposition';
@@ -254,8 +262,14 @@ class DwcArchiverOccurrence{
 		$occurTermArr['language'] = 'http://purl.org/dc/terms/language';
 		$occurFieldArr['language'] = 'o.language';
 		if($this->schemaType == 'backup' || ($this->schemaType == 'symbiota' && $this->extended)){
-			$occurTermArr['observeruID'] = 'http://symbiota.org/terms/observeruID';
-			$occurFieldArr['observeruID'] = 'o.observeruid';
+			$occurTermArr['genericcolumn1'] = 'http://symbiota.org/terms/genericcolumn1';
+			$occurFieldArr['genericcolumn1'] = 'o.genericcolumn1';
+			$occurTermArr['genericcolumn2'] = 'http://symbiota.org/terms/genericcolumn2';
+			$occurFieldArr['genericcolumn2'] = 'o.genericcolumn2';
+			$occurTermArr['storageLocation'] = 'http://symbiota.org/terms/storageLocation';
+			$occurFieldArr['storageLocation'] = 'o.storageLocation';
+			$occurTermArr['observerUid'] = 'http://symbiota.org/terms/observerUid';
+			$occurFieldArr['observerUid'] = 'o.observeruid';
 			$occurTermArr['processingStatus'] = 'http://symbiota.org/terms/processingStatus';
 			$occurFieldArr['processingStatus'] = 'o.processingstatus';
 			$occurTermArr['duplicateQuantity'] = 'http://symbiota.org/terms/duplicateQuantity';

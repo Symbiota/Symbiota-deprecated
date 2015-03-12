@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php');
 include_once($serverRoot.'/classes/MapInterfaceManager.php');
-include_once($serverRoot.'/classes/OccurDatasetManager.php');
+include_once($serverRoot.'/classes/OccurrenceDataset.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $uid = array_key_exists("uid",$_REQUEST)?$_REQUEST["uid"]:'';
@@ -13,7 +13,7 @@ $selections = array_key_exists('selections',$_REQUEST)?$_REQUEST['selections']:0
 $selset = array_key_exists('selset',$_REQUEST)?$_REQUEST['selset']:0;
 
 $mapManager = new MapInterfaceManager();
-$datasetManager = new OccurDatasetManager();
+$datasetManager = new OccurrenceDataset();
 if($action=="loadlist"){
 	$recordsetlist = $mapManager->getPersonalRecordsets($uid);
 	$listHtml = '';
