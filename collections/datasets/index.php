@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurDatasetManager.php');
+include_once($serverRoot.'/classes/OccurrenceDataset.php');
 header("Content-Type: text/html; charset=".$charset);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/datasets/index.php?'.$_SERVER['QUERY_STRING']);
@@ -10,7 +10,7 @@ $mode = array_key_exists('mode',$_REQUEST)?$_REQUEST['mode']:'';
 $datasetId = array_key_exists('datasetid',$_REQUEST)?$_REQUEST['datasetid']:0;
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
 
-$datasetManager = new OccurDatasetManager();
+$datasetManager = new OccurrenceDataset();
 $datasetManager->setSymbUid($SYMB_UID);
 
 $statusStr = '';

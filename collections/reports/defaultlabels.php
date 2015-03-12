@@ -1,9 +1,9 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurDatasetManager.php');
+include_once($serverRoot.'/classes/OccurrenceLabel.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$collId = $_POST["collid"];
+$collid = $_POST["collid"];
 $hPrefix = $_POST['lhprefix'];
 $hMid = $_POST['lhmid'];
 $hSuffix = $_POST['lhsuffix'];
@@ -19,11 +19,12 @@ $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
 $exportDoc = ($action == 'Export to DOC'?1:0);
 
-$labelManager = new OccurDatasetManager();
+$labelManager = new OccurrenceLabel();
+$labelManager->setCollid($collid);
 
 $isEditor = 0;
 if($symbUid){
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
+	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"]))){
 		$isEditor = 1;
 	}
 }
