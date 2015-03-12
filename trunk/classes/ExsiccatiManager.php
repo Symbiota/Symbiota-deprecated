@@ -514,7 +514,7 @@ class ExsiccatiManager {
 					$sql1 = 'INSERT INTO omoccurrences(collid, catalognumber, family, scientificName, sciname, tidinterpreted, scientificNameAuthorship, '.
 						'identifiedBy, dateIdentified, identificationReferences, identificationRemarks, taxonRemarks, identificationQualifier, typeStatus, '. 
 						'recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, '.
-						'verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
+						'verbatimEventDate, habitat, substrate, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
 						'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, '.
 						'cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, '.
 						'preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, '.
@@ -525,7 +525,7 @@ class ExsiccatiManager {
 						'SELECT '.$targetCollid.', "'.$this->cleanInStr($catNum).'", family, scientificName, sciname, tidinterpreted, scientificNameAuthorship, '.
 						'identifiedBy, dateIdentified, identificationReferences, identificationRemarks, taxonRemarks, identificationQualifier, typeStatus, '.
 						'recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, '.
-						'verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
+						'verbatimEventDate, habitat, substrate, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
 						'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, '.
 						'cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, '.
 						'preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, '.
