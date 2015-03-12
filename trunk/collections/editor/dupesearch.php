@@ -23,8 +23,8 @@ $onLoadStr = '';
 $statusStr = '';
 if($submitAction){
 	$isEditor = 0;
-	if($IS_ADMIN 
-		|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) 
+	if($IS_ADMIN
+		|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
 		|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
 		$isEditor = 1;
 	}
@@ -35,7 +35,7 @@ if($submitAction){
 		}
 	}
 }
-//Get list of collections user can edit 
+//Get list of collections user can edit
 $collRightsArr = array();
 if(!$IS_ADMIN){
 	if(array_key_exists('CollAdmin',$userRights)){
@@ -56,7 +56,7 @@ if(!$IS_ADMIN){
 	    </style>
 		<script type="text/javascript">
 			var occArr = new Array();
-			<?php 
+			<?php
 			if($occArr){
 				foreach($occArr as $occId => $oArr){
 					echo 'var oArr = new Array();'."\n";
@@ -80,7 +80,7 @@ if(!$IS_ADMIN){
 						unset($tempOcc['recordnumber']);
 					}
 					foreach($tempOcc as $k => $v){
-						if($v) echo 'oArr["'.$k.'"] = "'.str_replace('"','\"',$v).'";'."\n";
+						if($v) echo 'oArr["'.$k.'"] = "'.str_replace(array("\r\n",'"'),array(" ",'\"'),$v).'";'."\n";
 					}
 					echo 'occArr['.$occId.'] = oArr;'."\n";
 				}
@@ -88,7 +88,7 @@ if(!$IS_ADMIN){
 			?>
 
 			function transferRecord(occId,appendMode){
-				var tArr = occArr[occId]; 
+				var tArr = occArr[occId];
 				var openerForm = opener.document.fullform;
 				if(document.getElementById("linkdupe-"+occId).checked == true){
 					openerForm.linkdupe.value = occId;
@@ -117,16 +117,16 @@ if(!$IS_ADMIN){
 				opener.document.queryform.submit();
 				//opener.location.reload();
 				<?php
-				if($statusStr === true){ 
+				if($statusStr === true){
 					?>
 					window.close();
-					<?php 
+					<?php
 				}
 				?>
 			}
 
 		</script>
-	</head> 
+	</head>
 	<body onload="<?php echo $onLoadStr; ?>">
 		<!-- inner text -->
 		<div id="innertext">
@@ -138,7 +138,7 @@ if(!$IS_ADMIN){
 					<?php echo $statusStr; ?>
 				</div>
 				<hr/>
-				<?php 
+				<?php
 			}
 			if($occArr){
 				echo '<div style="font-weight:bold;font-size:130%;">';
@@ -166,14 +166,14 @@ if(!$IS_ADMIN){
 							<th>&nbsp;</th>
 							<th>&nbsp;</th>
 							<th>&nbsp;</th>
-							<?php 
+							<?php
 							$relFields = $dupeManager->getRelevantFields();
 							foreach($relFields as $fieldName){
 								echo '<th>'.$fieldName.'</th>';
 							}
 							?>
 						</tr>
-						<?php 
+						<?php
 						foreach($occArr as $id => $oArr){
 							?>
 							<tr>
@@ -184,32 +184,32 @@ if(!$IS_ADMIN){
 									<a href="#" onclick="transferRecord(<?php echo $id; ?>,false);return false;">T-all</a>
 								</td>
 								<td>
-									<?php 
+									<?php
 									if($curOccid){
 										echo '<a href="dupesearch.php?submitaction=mergerecs&curoccid='.$curOccid.'&occidmerge='.$id.'&collid='.$collId.'" onclick="return confirm(\'Are you sure you want to merge these two records?\')">Merge</a>';
 									}
 									?>
 								</td>
 								<td>
-									<?php 
+									<?php
 									if($collId == $oArr['collid']){
 										echo '<a href="occurrenceeditor.php?occid='.$occId.'"><img src="../../images/edit.png" /></a>';
 									}
 									?>
 								</td>
-								<?php 
+								<?php
 								foreach($relFields as $fieldName){
 									echo '<td>'.$oArr[$fieldName].'</td>';
 								}
 								?>
 							</tr>
-							<?php 
+							<?php
 						}
 						?>
 					</table>
 				</div>
 				<div id="paragraphview" style="display:block;">
-					<?php 
+					<?php
 					foreach($occArr as $occId => $occObj){
 						if($IS_ADMIN || in_array($occObj['collid'],$collRightsArr)){
 							//User can edit this specimen
@@ -221,7 +221,7 @@ if(!$IS_ADMIN){
 							</div>
 							<?php
 						}
-						?> 
+						?>
 						<div style="clear:both;font-weight:bold;font-size:120%;">
 							<?php echo $occObj['institutionCode'].($occObj['collectionCode']?':'.$occObj['collectionCode']:''); ?>
 						</div>
@@ -230,14 +230,14 @@ if(!$IS_ADMIN){
 								NOTICE: Possible exact matches within collection. Record may already exist.
 							</div>
 							<div style="font-weight:bold;">
-								<?php 
+								<?php
 								if($occObj['catalogNumber']) echo $occObj['catalogNumber'];
 								if($occObj['otherCatalogNumbers']) echo ' ('.$occObj['otherCatalogNumbers'].')';
 								?>
 							</div>
 						<?php } ?>
 						<div>
-							<?php 
+							<?php
 							echo '<span title="recordedby">'.($occObj['recordedBy']?$occObj['recordedBy']:'Collector field empty').'</span>';
 							if($occObj['recordNumber']) echo '<span style="margin-left:20px;" title="recordnumber">'.$occObj['recordNumber'].'</span>';
 							if($occObj['eventDate']){
@@ -250,12 +250,12 @@ if(!$IS_ADMIN){
 								echo '<span style="margin-left:20px;" title="eventdate">Date field empty</span>';
 							}
 							if($occObj['associatedCollectors']) echo '<div style="margin-left:10px;" title="associatedCollectors">Assoc. Collectors: '.$occObj['associatedCollectors'].'</div>';
-							?> 
+							?>
 						</div>
 						<div>
 							<?php
 							if($occObj['sciname']){
-								if($occObj['identificationQualifier']) echo '<span title="identificationQualifier">'.$occObj['identificationQualifier'].'</span> '; 
+								if($occObj['identificationQualifier']) echo '<span title="identificationQualifier">'.$occObj['identificationQualifier'].'</span> ';
 								echo '<span title="sciname"><i>'.$occObj['sciname'].'</i></span> ';
 								echo '<span title="scientificNameAuthorship">'.$occObj['scientificNameAuthorship'].'</span>';
 								echo '<span style="margin-left:25px;color:red;" title="typeStatus">'.$occObj['typeStatus'].'</span>';
@@ -266,12 +266,12 @@ if(!$IS_ADMIN){
 							?>
 						</div>
 						<div style='margin-left:10px;'>
-							<?php 
+							<?php
 							if($occObj['identificationRemarks'] || $occObj['identificationReferences']){
 								echo '<span title="identificationRemarks">'.$occObj['identificationRemarks'].'</span>';
 								if($occObj['identificationRemarks'] && $occObj['identificationReferences']) echo '<br/>';
 								echo '<span title="identificationReferences">'.$occObj['identificationReferences'].'</span>';
-							} 
+							}
 							?>
 						</div>
 						<div>
@@ -282,19 +282,19 @@ if(!$IS_ADMIN){
 							echo '<span title="locality">'.($occObj['locality']?$occObj['locality']:'Locality data empty').'</span>';
 							?>
 						</div>
-						<?php 
+						<?php
 						if($occObj['habitat']) echo '<div title="habitat">'.$occObj['habitat'].'</div>';
 						if($occObj['substrate']) echo '<div title="substrate">'.$occObj['substrate'].'</div>';
 						if($occObj['decimalLatitude'] || $occObj['verbatimCoordinates']){
 							?>
 							<div>
-								<?php 
+								<?php
 								echo '<span title="decimalLatitude">'.$occObj['decimalLatitude'].'</span>; ';
 								echo '<span title="decimalLongitude">'.$occObj['decimalLongitude'].'</span>';
 								if($occObj['coordinateUncertaintyInMeters']) echo ' +-<span title="coordinateUncertaintyInMeters">'.$occObj['coordinateUncertaintyInMeters'].'</span>m. ';
 								if($occObj['geodeticDatum']) echo ' (<span title="geodeticDatum">'.$occObj['geodeticDatum'].'</span>)';
 								if($occObj['verbatimCoordinates']) echo '<div style="margin-left:10px;" title="verbatimCoordinates">'.$occObj['verbatimCoordinates'].'</div>';
-								$geoDetails = ''; 
+								$geoDetails = '';
 								if($occObj['georeferenceProtocol']) $geoDetails = '; <span title="georeferenceProtocol">'.$occObj['georeferenceProtocol']."</span>";
 								if($occObj['georeferenceSources']) $geoDetails = '; <span title="georeferenceSources">'.$occObj['georeferenceSources']."</span>";
 								if($occObj['georeferenceRemarks']) $geoDetails = '; <span title="georeferenceRemarks">'.$occObj['georeferenceRemarks']."</span>";
@@ -307,7 +307,7 @@ if(!$IS_ADMIN){
 						if($occObj['minimumElevationInMeters'] || $occObj['verbatimElevation']){
 							?>
 							<div>
-								<?php 
+								<?php
 								if($occObj['minimumElevationInMeters']){
 									echo '<span title="minimumElevationInMeters">'.$occObj['minimumElevationInMeters'].'</span>';
 									if($occObj['maximumElevationInMeters']) echo '-<span title="maximumElevationInMeters">'.$occObj['maximumElevationInMeters'].'</span>';
@@ -317,7 +317,7 @@ if(!$IS_ADMIN){
 								?>
 							</div>
 							<?php
-						} 
+						}
 						if($occObj['occurrenceRemarks']) echo '<div title="occurrenceRemarks">Notes: '.$occObj['occurrenceRemarks'].'</div>';
 						if($occObj['associatedTaxa']) echo '<div title="associatedTaxa">Associated Taxa: '.$occObj['associatedTaxa'].'</div>';
 						if($occObj['dynamicProperties']) echo '<div title="dynamicProperties">Description: '.$occObj['dynamicProperties'].'</div>';
@@ -333,39 +333,39 @@ if(!$IS_ADMIN){
 							</div>
 							<div style="margin-left:30px;float:left">
 								<a href="" onclick="transferRecord(<?php echo $occId; ?>,true);">
-									Transfer to Empty Fields Only 
+									Transfer to Empty Fields Only
 								</a>
 							</div>
 							<div style="margin-left:30px;float:left;">
 								<input id="linkdupe-<?php echo $occId; ?>" type="checkbox" <?php echo ($dupeType == 'exact'?'checked':''); ?> /> Link as Dupes 
 							</div>
-							<?php 
-							if($collId == $occObj['collid']){ 
+							<?php
+							if($collId == $occObj['collid']){
 								?>
 								<div style="margin-left:30px;float:left;">
 									<a href="occurrenceeditor.php?occid=<?php echo $occId; ?>">
 										Go To Record
 									</a>
 								</div>
-								<?php 
-								if($curOccid){ 
+								<?php
+								if($curOccid){
 									?>
 									<div style="margin-left:30px;float:left;">
 										<a href="dupesearch.php?submitaction=mergerecs&curoccid=<?php echo $curOccid.'&occidmerge='.$occId.'&collid='.$collId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
 											Merge Records
 										</a>
 									</div>
-									<?php 
+									<?php
 								}
-							} 
+							}
 							?>
 						</div>
 						<div style="clear:both;"><hr/></div>
-						<?php 
+						<?php
 					}
 					?>
 				</div>
-				<?php 
+				<?php
 			}
 			else{
 				echo '<h2>No duplicate records have been located</h2>';
