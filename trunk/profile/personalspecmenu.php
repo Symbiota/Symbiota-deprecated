@@ -55,7 +55,7 @@ if($symbUid){
 						</a>
 					</li>
 					<li>
-						<a href="../collections/datasets/labelmanager.php?collid=<?php echo $collId; ?>">
+						<a href="../collections/reports/labelmanager.php?collid=<?php echo $collId; ?>">
 							Print Labels
 						</a>
 					</li>

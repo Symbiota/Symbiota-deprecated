@@ -1,23 +1,23 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurDatasetManager.php');
+include_once($serverRoot.'/classes/OccurrenceLabel.php');
 header("Content-Type: text/html; charset=".$charset);
 
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/datasets/labelmanager.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/reports/labelmanager.php?'.$_SERVER['QUERY_STRING']);
 
-$collId = $_REQUEST["collid"];
+$collid = $_REQUEST["collid"];
+$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 
-$datasetManager = new OccurDatasetManager();
+$datasetManager = new OccurrenceLabel();
+$datasetManager->setCollid($collid);
 
 $isEditor = 0;
 $occArr = array();
-$datasetManager->setSymbUid($SYMB_UID);
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
-	$datasetManager->setIsAdmin(1);
+if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
 	$isEditor = 1;
 }
-if(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+elseif(array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"])){
 	$isEditor = 1;
 }
 if($isEditor){
@@ -30,22 +30,10 @@ if($isEditor){
 <html>
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
-		<title><?php echo $defaultTitle; ?> Specimen Dataset Definer</title>
+		<title><?php echo $defaultTitle; ?> Specimen Label Manager</title>
 		<link href="../../css/base.css" type="text/css" rel="stylesheet" />
 	    <link href="../../css/main.css" type="text/css" rel="stylesheet" />
 		<script language="javascript" type="text/javascript">
-			function init(){
-				if(navigator.appName == "Microsoft Internet Explorer"){
-					alert("You are using Internet Explorer as your web browser. We recommend that you use Firefox or Google Chrome since these browsers are generally more reliable when using these tools.");
-				}
-				else{
-					if(/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){
-						var ffversion=new Number(RegExp.$1);
-						if(ffversion < 7 ) alert("You are using an older version of Firefox. For best results, we recommend that you update your browser.");
-					}
-				}
-			}
-		
 			function selectAll(cb){
 				boxesChecked = true;
 				if(!cb.checked){
@@ -59,20 +47,19 @@ if($isEditor){
 			}
 
 			function validateQueryForm(f){
-				var dateStr = f.datelastmodified.value;
-				if(dateStr == "") return true;
-				try{
-					var validformat1 = /^\s*\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
-					var validformat2 = /^\s*\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
-					if(!validformat1.test(dateStr) && !validformat2.test(dateStr)){
-						alert("Date entered must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
-						return false;
-					}
-				}
-				catch(ex){
-					
+				if(!validateDateFields(f)){
+					return false;
 				}
 				return true;
+			}
+
+			function validateDateFields(f){
+				var status = true;
+				var validformat1 = /^\s*\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
+				if(f.date1.value !== "" && !validformat1.test(f.date1.value)) status = false;
+				if(f.date2.value !== "" && !validformat1.test(f.date2.value)) status = false;
+				if(!status) alert("Date entered must follow the format YYYY-MM-DD");
+				return status;
 			}
 
 			function validateSelectForm(f){
@@ -108,19 +95,24 @@ if($isEditor){
 
 		</script>
 	</head>
-	<body onload="init()">
+	<body>
 	<?php
-	$displayLeftMenu = (isset($collections_datasets_labelmanagerMenu)?$collections_datasets_labelmanagerMenu:false);
+	$displayLeftMenu = (isset($collections_reports_labelmanagerMenu)?$collections_reports_labelmanagerMenu:false);
 	include($serverRoot."/header.php");
 	?>
 	<div class='navpath'>
 		<a href='../../index.php'>Home</a> &gt;&gt; 
 		<?php
-		if(isset($collections_datasets_labelmanagerCrumbs)){
-			echo $collections_datasets_labelmanagerCrumbs;
+		if(isset($collections_reports_labelmanagerCrumbs)){
+			echo $collections_reports_labelmanagerCrumbs;
 		}
 		else{
-			echo '<a href="../misc/collprofiles.php?collid='.$collId.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
+			if($datasetManager->getMetaDataTerm('colltype')){
+				echo '<a href="../../profile/viewprofile.php?tabindex=1">Peronsal Management Menu</a> &gt;&gt; ';
+			}
+			else{
+				echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
+			}
 		}
 		?>
 		<b>Label Printing</b>
@@ -129,7 +121,7 @@ if($isEditor){
 	<div id="innertext">
 		<?php 
 		if($isEditor){
-			echo '<h2>'.$datasetManager->getCollName($collId).'</h2>';
+			echo '<h2>'.$datasetManager->getCollName().'</h2>';
 			?>
 			<form name="datasetqueryform" action="labelmanager.php" method="post" onsubmit="return validateQueryForm(this)">
 				<fieldset>
@@ -137,15 +129,15 @@ if($isEditor){
 					<div style="margin:3px;">
 						<span title="Full or last name of collector as entered in database.">
 							Collector: 
-							<input type="text" name="recordedby" style="width:100px;" value="<?php echo (array_key_exists('recordedby',$_REQUEST)?$_REQUEST['recordedby']:''); ?>" />
+							<input type="text" name="recordedby" style="width:150px;" value="<?php echo (array_key_exists('recordedby',$_REQUEST)?$_REQUEST['recordedby']:''); ?>" />
 						</span>
 						<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash required), e.g.: 3700 - 3750">
 							Number(s): 
-							<input type="text" name="recordnumber" style="width:100px;" value="<?php echo (array_key_exists('recordnumber',$_REQUEST)?$_REQUEST['recordnumber']:''); ?>" />
+							<input type="text" name="recordnumber" style="width:150px;" value="<?php echo (array_key_exists('recordnumber',$_REQUEST)?$_REQUEST['recordnumber']:''); ?>" />
 						</span>
 						<span style="margin-left:20px;" title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 							Identifier: 
-							<input type="text" name="identifier" style="width:100px;" value="<?php echo (array_key_exists('identifier',$_REQUEST)?$_REQUEST['identifier']:''); ?>" />
+							<input type="text" name="identifier" style="width:150px;" value="<?php echo (array_key_exists('identifier',$_REQUEST)?$_REQUEST['identifier']:''); ?>" />
 						</span>
 					</div>
 					<div style="margin:3px;">
@@ -153,9 +145,15 @@ if($isEditor){
 							Entered by: 
 							<input type="text" name="recordenteredby" value="<?php echo (array_key_exists('recordenteredby',$_REQUEST)?$_REQUEST['recordenteredby']:''); ?>" style="width:100px;" title="login name of data entry person" />
 						</span>
-						<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash required), e.g.: 3700 - 3750">
-							Date Modified: 
-							<input type="text" name="datelastmodified" style="width:100px;" value="<?php echo (array_key_exists('datelastmodified',$_REQUEST)?$_REQUEST['datelastmodified']:''); ?>" />
+						<span style="margin-left:20px;" title="">
+							Date range: 
+							<input type="text" name="date1" style="width:100px;" value="<?php echo (array_key_exists('date1',$_REQUEST)?$_REQUEST['date1']:''); ?>" onchange="validateDateFields(this.form)" /> to 
+							<input type="text" name="date2" style="width:100px;" value="<?php echo (array_key_exists('date2',$_REQUEST)?$_REQUEST['date2']:''); ?>" onchange="validateDateFields(this.form)" />
+							<select name="datetarget">
+								<option value="dateentered">Date Entered</option>
+								<option value="datelastmodified" <?php echo (isset($_POST['datetarget']) && $_POST['datetarget'] == 'datelastmodified'?'SELECTED':''); ?>>Date Modified</option>
+								<option value="eventdate"<?php echo (isset($_POST['datetarget']) && $_POST['datetarget'] == 'eventdate'?'SELECTED':''); ?>>Date Collected</option>
+							</select>
 						</span>
 					</div>
 					<div style="margin:3px;">
@@ -166,7 +164,7 @@ if($isEditor){
 							<?php 
 							$lProj = '';
 							if(array_key_exists('labelproject',$_REQUEST)) $lProj = $_REQUEST['labelproject'];
-							$lProjArr = $datasetManager->getLabelProjects($collId);
+							$lProjArr = $datasetManager->getLabelProjects();
 							foreach($lProjArr as $projStr){
 								echo '<option '.($lProj==$projStr?'SELECTED':'').'>'.$projStr.'</option>'."\n";
 							} 
@@ -180,7 +178,7 @@ if($isEditor){
 							<?php 
 							$datasetProj = '';
 							if(array_key_exists('datasetproject',$_REQUEST)) $datasetProj = $_REQUEST['datasetproject'];
-							$dProjArr = $datasetManager->getDatasetProjects($collId);
+							$dProjArr = $datasetManager->getDatasetProjects();
 							foreach($dProjArr as $dsid => $dsProjStr){
 								echo '<option id="'.$dsid.'" '.($datasetProj==$dsProjStr?'SELECTED':'').'>'.$dsProjStr.'</option>'."\n";
 							}
@@ -190,7 +188,7 @@ if($isEditor){
 					</div>
 					<div>
 						<span style="margin-left:20px;">
-							<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+							<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
 							<input type="submit" name="submitaction" value="Filter Specimen Records" />
 						</span>
 						<span style="margin-left:20px;">
@@ -303,7 +301,7 @@ if($isEditor){
 								<input type="radio" name="rpp" value="0" /> Auto (unreliable)
 							</fieldset>
 							<div style="float:left;margin: 15px 50px;">
-								<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+								<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
 								<input type="submit" name="submitaction" value="Print in Browser" />
 								<br/><br/> 
 								<input type="submit" name="submitaction" value="Export to CSV" />
