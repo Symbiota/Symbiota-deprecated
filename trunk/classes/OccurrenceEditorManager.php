@@ -647,9 +647,8 @@ class OccurrenceEditorManager {
 	}
 
 	public function editOccurrence($occArr,$autoCommit){
-		global $paramsArr;
 		$status = '';
-		if(!$autoCommit && $this->getObserverUid() == $paramsArr['uid']){
+		if(!$autoCommit && $this->getObserverUid() == $GLOBALS['SYMB_UID']){
 			//Specimen is owned by editor
 			$autoCommit = 1;
 		}
@@ -707,7 +706,7 @@ class OccurrenceEditorManager {
 
 			//Version edits
 			$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
-				'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$paramsArr['uid'].',';
+				'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$GLOBALS['SYMB_UID'].',';
 			foreach($editArr as $fieldName){
 				if(!array_key_exists($fieldName,$occArr)){
 					//Field is a checkbox that is unchecked: cultivationstatus, localitysecurity
@@ -742,12 +741,12 @@ class OccurrenceEditorManager {
 				$status = 'SUCCESS: edits submitted and activated ';
 				//If processing status was "unprocessed" and recordEnteredBy is null, populate with user login
 				$sql = '';
-				if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
-					$occArr['recordenteredby'] = $paramsArr['un'];
-				}
 				//Apply autoprocessing status if set
 				if(array_key_exists('autoprocessingstatus',$occArr) && $occArr['autoprocessingstatus']){
 					$occArr['processingstatus'] = $occArr['autoprocessingstatus'];
+				}
+				if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
+					$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
 				}
 				foreach($occArr as $oField => $ov){
 					if(in_array($oField,$this->occFieldArr) && $oField != 'observeruid'){

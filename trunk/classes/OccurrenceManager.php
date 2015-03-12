@@ -12,6 +12,7 @@ class OccurrenceManager{
 	protected $reset = 0;
 	private $clName;
 	private $collArrIndex = 0;
+	private $occurSearchProjectExists = 0;
 
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
@@ -875,14 +876,13 @@ class OccurrenceManager{
 			'INNER JOIN fmchklstprojlink cl ON p1.pid = cl.pid '.
 			'INNER JOIN fmchecklists c ON cl.clid = c.clid '.
 			'INNER JOIN fmvouchers v ON c.clid = v.clid '.
-			'WHERE p2.occurrencesearch = 1 AND p1.ispublic = 1 '.
-			'ORDER BY p2.sortsequence, p2.projname, p1.projname';
+			'WHERE p2.occurrencesearch = 1 AND p1.ispublic = 1 ';
 		//echo "<div>$sql</div>";
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			if(!array_key_exists($r->parentpid,$titleArr)) $titleArr[$r->parentpid] = $r->catname;
-			if(!array_key_exists($r->pid,$titleArr)) $titleArr[$r->pid] = $r->projname;
-			$retArr[$r->parentpid][$r->pid][$r->clid] = $r->clname;
+			if(!isset($titleArr['cat'][$r->parentpid])) $titleArr['cat'][$r->parentpid] = $r->catname;
+			if(!isset($titleArr['proj'][$r->pid])) $titleArr[$r->parentpid]['proj'][$r->pid] = $r->projname;
+			$retArr[$r->pid][$r->clid] = $r->clname;
 		}
 		$rs->free();
 		if($titleArr) $retArr['titles'] = $titleArr;
