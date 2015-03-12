@@ -113,34 +113,38 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				</div>
 				<?php 
 			} 
-			if($otherCatArr){
-				$titleArr = $otherCatArr['titles'];
-				unset($otherCatArr['titles']);
+			if($otherCatArr && isset($otherCatArr['titles'])){
+				$catTitleArr = $otherCatArr['titles']['cat'];
+				asort($catTitleArr);
 				?>
 				<div id="otherdiv">
 					<form id="othercatform" action="harvestparams.php" method="get" onsubmit="return verifyOtherCatForm(this)">
-						<?php 
-						foreach($otherCatArr as $catPid => $catArr){
+						<?php
+						foreach($catTitleArr as $catPid => $catTitle){
 							?>
 							<fieldset style="margin:10px;padding:10px;">
-								<legend style="font-weight:bold;"><?php echo $titleArr[$catPid]; ?></legend>
+								<legend style="font-weight:bold;"><?php echo $catTitle; ?></legend>
 								<div style="margin:0px 15px;float:right;">
 									<input type="image" src='../images/next.png'
 										onmouseover="javascript:this.src = '../images/next_rollover.png';" 
 										onmouseout="javascript:this.src = '../images/next.png';"
 										title="Click button to advance to the next step" />
 								</div>
-								<?php 
-								foreach($catArr as $pid => $clidArr){
+								<?php
+								$projTitleArr = $otherCatArr['titles'][$catPid]['proj'];
+								asort($projTitleArr);
+								foreach($projTitleArr as $pid => $projTitle){
 									?>
 									<div>
 										<a href="#" onclick="togglePid('<?php echo $pid; ?>');return false;"><img id="plus-pid-<?php echo $pid; ?>" src="../images/plus_sm.png" /><img id="minus-pid-<?php echo $pid; ?>" src="../images/minus_sm.png" style="display:none;" /></a>
 										<input name="pid[]" type="checkbox" value="<?php echo $pid; ?>" onchange="selectAllPid(this);" />
-										<b><?php echo $titleArr[$pid]; ?></b>
+										<b><?php echo $projTitle; ?></b>
 									</div>
 									<div id="pid-<?php echo $pid; ?>" style="margin:10px 15px;display:none;">
 										<?php 
-										foreach($clidArr as $clid => $clidName){
+										$clArr = $otherCatArr[$pid];
+										asort($clArr);
+										foreach($clArr as $clid => $clidName){
 											?>
 											<div>
 												<input name="clid[]" class="pid-<?php echo $pid; ?>" type="checkbox" value="<?php echo $clid; ?>" />
@@ -160,7 +164,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					</form>
 				</div>
 				<?php 
-			} 
+			}
 			?>
 		</div>
 	</div>
