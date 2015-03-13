@@ -80,7 +80,7 @@ if(!$IS_ADMIN){
 						unset($tempOcc['recordnumber']);
 					}
 					foreach($tempOcc as $k => $v){
-						if($v) echo 'oArr["'.$k.'"] = "'.str_replace(array("\r\n",'"'),array(" ",'\"'),$v).'";'."\n";
+						if($v) echo 'oArr["'.$k.'"] = "'.str_replace(array("\r\n", "\r", "\n", '"'),array(" "," "," ",'\"'),$v).'";'."\n";
 					}
 					echo 'occArr['.$occId.'] = oArr;'."\n";
 				}
@@ -92,7 +92,7 @@ if(!$IS_ADMIN){
 				var openerForm = opener.document.fullform;
 				if(document.getElementById("linkdupe-"+occId).checked == true){
 					openerForm.linkdupe.value = occId;
-					
+
 				}
 				for(var k in tArr){
 					try{
@@ -337,7 +337,7 @@ if(!$IS_ADMIN){
 								</a>
 							</div>
 							<div style="margin-left:30px;float:left;">
-								<input id="linkdupe-<?php echo $occId; ?>" type="checkbox" <?php echo ($dupeType == 'exact'?'checked':''); ?> /> Link as Dupes 
+								<input id="linkdupe-<?php echo $occId; ?>" type="checkbox" <?php echo ($dupeType == 'exact'?'checked':''); ?> /> Link as Dupes
 							</div>
 							<?php
 							if($collId == $occObj['collid']){
