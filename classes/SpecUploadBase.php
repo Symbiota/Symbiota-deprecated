@@ -1705,7 +1705,6 @@ class SpecUploadBase extends SpecUpload{
 				$sqlFragments = $this->getSqlFragments($recMap,$this->imageFieldMap);
 				$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
 					'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
-				echo "<div>SQL: ".$sql."</div>"; exit;
 				
 				if($this->conn->query($sql)){
 					$this->imageTransferCount++;
