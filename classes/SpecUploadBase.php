@@ -36,7 +36,8 @@ class SpecUploadBase extends SpecUpload{
 		'plantdescription'=>'verbatimattributes','description'=>'verbatimattributes','field:habitat'=>'habitat');
 	private $identTranslationMap = array('scientificname'=>'sciname','detby'=>'identifiedby','determinor'=>'identifiedby',
 		'determinationdate'=>'dateidentified','notes'=>'identificationremarks','cf' => 'identificationqualifier');
-	private $imageTranslationMap = array('accessuri'=>'originalurl','identifier'=>'originalurl','creator'=>'owner');
+	private $imageTranslationMap = array('accessuri'=>'originalurl','thumbnailaccessuri'=>'thumbnailurl',
+		'goodqualityaccessuri'=>'url','creator'=>'owner');
 
 	function __construct() {
 		parent::__construct();
@@ -144,9 +145,9 @@ class SpecUploadBase extends SpecUpload{
 		
 		if($this->uploadType == $this->FILEUPLOAD || $this->uploadType == $this->DWCAUPLOAD || $this->uploadType == $this->DIRECTUPLOAD){
 			//Get identification metadata
-			$skipDetFields = array('detid','occid','tidinterpreted','idbyid','appliedstatus','iscurrent','sortsequence','sourceidentifier','initialtimestamp');
+			$skipDetFields = array('detid','occid','tidinterpreted','idbyid','appliedstatus','sortsequence','sourceidentifier','initialtimestamp');
 
-			$rs = $this->conn->query('SHOW COLUMNS FROM omoccurdeterminations');
+			$rs = $this->conn->query('SHOW COLUMNS FROM uploaddetermtemp');
 			while($r = $rs->fetch_object()){
 				$field = strtolower($r->Field);
 				if(!in_array($field,$skipDetFields)){
@@ -387,8 +388,10 @@ class SpecUploadBase extends SpecUpload{
 	 	//First, delete all records in uploadspectemp and uploadimagetemp table associated with this collection
 		$sqlDel1 = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 		$this->conn->query($sqlDel1);
-		$sqlDel2 = "DELETE FROM uploadimagetemp WHERE (collid = ".$this->collId.')';
+		$sqlDel2 = "DELETE FROM uploaddetermtemp WHERE (collid = ".$this->collId.')';
 		$this->conn->query($sqlDel2);
+		$sqlDel3 = "DELETE FROM uploadimagetemp WHERE (collid = ".$this->collId.')';
+		$this->conn->query($sqlDel3);
  	}
  	
  	public function uploadData($finalTransfer){
@@ -565,7 +568,7 @@ class SpecUploadBase extends SpecUpload{
 		//Append image counts from Associated Media
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM uploadspectemp '.
-			'WHERE (associatedMedia IS NOT NULL) AND (collid = '.$this->collId.') AND (basisofrecord != "determinationHistory")';
+			'WHERE (associatedMedia IS NOT NULL) AND (collid = '.$this->collId.')';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$cnt = (isset($reportArr['image'])?$reportArr['image']:0) + $r->cnt;
@@ -576,7 +579,7 @@ class SpecUploadBase extends SpecUpload{
 		//Number of new specimen records
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM uploadspectemp '.
-			'WHERE (occid IS NULL) AND (collid = '.$this->collId.') AND (basisofrecord != "determinationHistory")';
+			'WHERE (occid IS NULL) AND (collid = '.$this->collId.')';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$reportArr['new'] = $r->cnt;
@@ -586,7 +589,7 @@ class SpecUploadBase extends SpecUpload{
 		//Number of matching records that will be updated
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM uploadspectemp '.
-			'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.') AND (basisofrecord != "determinationHistory")';
+			'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$reportArr['update'] = $r->cnt;
@@ -598,7 +601,7 @@ class SpecUploadBase extends SpecUpload{
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
-				'AND (o.catalogNumber IS NOT NULL) AND (u.basisofrecord != "determinationHistory")';
+				'AND (o.catalogNumber IS NOT NULL)';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['matchappend'] = $r->cnt;
@@ -611,7 +614,7 @@ class SpecUploadBase extends SpecUpload{
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
-				'AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) AND (u.basisofrecord != "determinationHistory")';
+				'AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL)';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['sync'] = $r->cnt;
@@ -632,7 +635,7 @@ class SpecUploadBase extends SpecUpload{
 		if($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate'){
 			//Look for null dbpk
 			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp '.
-				'WHERE (dbpk IS NULL) AND (collid = '.$this->collId.') AND (basisofrecord != "determinationHistory")';
+				'WHERE (dbpk IS NULL) AND (collid = '.$this->collId.')';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['nulldbpk'] = $r->cnt;
@@ -642,7 +645,7 @@ class SpecUploadBase extends SpecUpload{
 			//Look for duplicate dbpk
 			$sql = 'SELECT dbpk FROM uploadspectemp '.
 				'GROUP BY dbpk, collid, basisofrecord '.
-				'HAVING (Count(*)>1) AND (collid = '.$this->collId.') AND basisofrecord != "determinationHistory"';
+				'HAVING (Count(*)>1) AND (collid = '.$this->collId.')';
 			$rs = $this->conn->query($sql);
 			$reportArr['dupdbpk'] = $rs->num_rows;
 			$rs->free();
@@ -684,7 +687,7 @@ class SpecUploadBase extends SpecUpload{
 			flush();
 			$sql = 'DELETE u.* '.
 				'FROM uploadspectemp u INNER JOIN (SELECT dbpk FROM uploadspectemp '.
-				'GROUP BY dbpk, collid, basisofrecord HAVING Count(*)>1 AND collid = '.$this->collId.' AND basisofrecord != "determinationHistory") t2 ON u.dbpk = t2.dbpk '.
+				'GROUP BY dbpk, collid HAVING Count(*)>1 AND collid = '.$this->collId.') t2 ON u.dbpk = t2.dbpk '.
 				'WHERE collid = '.$this->collId;
 			if($this->conn->query($sql)){
 				$this->outputMsg('Done! ');
@@ -729,7 +732,7 @@ class SpecUploadBase extends SpecUpload{
 			'o.maximumElevationInMeters = u.maximumElevationInMeters, o.verbatimElevation = u.verbatimElevation, '.
 			'o.previousIdentifications = u.previousIdentifications, o.disposition = u.disposition, o.modified = u.modified, '.
 			'o.language = u.language, o.recordEnteredBy = u.recordEnteredBy, o.labelProject = u.labelProject, o.duplicateQuantity = u.duplicateQuantity '.
-			'WHERE u.collid = '.$this->collId.' AND (u.basisofrecord IS NULL OR u.basisofrecord != "determinationHistory")';
+			'WHERE u.collid = '.$this->collId.'';
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
 		}
@@ -770,7 +773,7 @@ class SpecUploadBase extends SpecUpload{
 			'u.verbatimElevation, u.previousIdentifications, u.disposition, u.modified, u.language, u.recordEnteredBy, u.labelProject, '.
 			'u.duplicateQuantity, "'.date('Y-m-d H:i:s').'" '.
 			'FROM uploadspectemp u '.
-			'WHERE u.occid IS NULL AND u.collid = '.$this->collId.' AND (u.basisofrecord IS NULL OR u.basisofrecord != "determinationHistory")';
+			'WHERE u.occid IS NULL AND u.collid = '.$this->collId.'';
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
 		}
@@ -807,32 +810,42 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	protected function transferIdentificationHistory(){
-		$sql = 'SELECT count(*) FROM uploadspectemp WHERE (collid = '.$this->collId.') AND basisofrecord = "determinationHistory"';
+		$sql = 'SELECT count(*) FROM uploaddetermtemp WHERE (collid = '.$this->collId.')';
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
 			$this->outputMsg('<li>Tranferring Determination History... ');
 			ob_flush();
 			flush();
-	
+
+			//Update occid for determinations of occurrence records already in portal 
+			$sql = 'UPDATE uploaddetermtemp ud INNER JOIN uploadspectemp u ON ud.collid = u.collid AND ud.dbpk = u.dbpk '.
+				'SET ud.occid = u.occid '.
+				'WHERE (ud.occid IS NULL) AND (u.occid IS NOT NULL) AND (ud.collid = '.$this->collId.')';
+			if(!$this->conn->query($sql)){
+				$this->outputMsg('<div style="margin-left:20px;">WARNING updating occids within uploaddetermtemp: '.$this->conn->error.'</div> ');
+			}
+			ob_flush();
+			flush();
+
 			//Delete already existing determinations
 			$sqlDel = 'DELETE u.* '.
-				'FROM uploadspectemp u INNER JOIN omoccurdeterminations d ON u.occid = d.occid '.
-				'WHERE (u.collid = '.$this->collId.') AND (u.basisofrecord = "determinationHistory") '.
+				'FROM uploaddetermtemp u INNER JOIN omoccurdeterminations d ON u.occid = d.occid '.
+				'WHERE (u.collid = '.$this->collId.') '.
 				'AND (d.sciname = u.sciname) AND (d.identifiedBy = u.identifiedBy) AND (d.dateIdentified = u.dateIdentified)';
 			$this->conn->query($sqlDel);
 	
 			//Load identification history records
 			$sql = 'INSERT IGNORE INTO omoccurdeterminations (occid, sciname, scientificNameAuthorship, identifiedBy, dateIdentified, '.
-				'identificationQualifier, identificationReferences, identificationRemarks) '.
+				'identificationQualifier, iscurrent, identificationReferences, identificationRemarks, sourceIdentifier) '.
 				'SELECT u.occid, u.sciname, u.scientificNameAuthorship, u.identifiedBy, u.dateIdentified, '.
-				'u.identificationQualifier, u.identificationReferences, u.identificationRemarks '.
-				'FROM uploadspectemp u '.
-				'WHERE u.occid IS NOT NULL AND u.collid = '.$this->collId.' AND u.basisofrecord = "determinationHistory"';
+				'u.identificationQualifier, u.iscurrent, u.identificationReferences, u.identificationRemarks, sourceIdentifier '.
+				'FROM uploaddetermtemp u '.
+				'WHERE u.occid IS NOT NULL AND (u.collid = '.$this->collId.')';
 			if($this->conn->query($sql)){
 				//Delete all determinations
 				$sqlDel = 'DELETE * '.
-					'FROM uploadspectemp '.
-					'WHERE (collid = '.$this->collId.') AND (basisofrecord = "determinationHistory")';
+					'FROM uploaddetermtemp '.
+					'WHERE (collid = '.$this->collId.')';
 				$this->conn->query($sqlDel);
 				$this->outputMsg('Done!</li> ');
 			}
@@ -1124,6 +1137,12 @@ class SpecUploadBase extends SpecUpload{
 		$this->conn->query($sql);
 		//Optimize table to reset indexes
 		$this->conn->query('OPTIMIZE TABLE uploadspectemp');
+		
+		//Remove records from determination temp table (uploaddetermtemp)
+		$sql = 'DELETE FROM uploaddetermtemp WHERE (collid = '.$this->collId.') OR (initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY))';
+		$this->conn->query($sql);
+		//Optimize table to reset indexes
+		$this->conn->query('OPTIMIZE TABLE uploaddetermtemp');
 		
 		//Remove records from image temp table (uploadimagetemp)
 		$sql = 'DELETE FROM uploadimagetemp WHERE (collid = '.$this->collId.') OR (initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY))';
@@ -1657,8 +1676,8 @@ class SpecUploadBase extends SpecUpload{
 				if($recMap['identifiedby'] || $recMap['dateidentified']){
 					if(!$recMap['identifiedby']) $recMap['identifiedby'] = 'not specified';
 					if(!$recMap['dateidentified']) $recMap['dateidentified'] = 'not specified';
-					$sql = 'INSERT INTO uploadspectemp(collid,basisofrecord'.$sqlFragments['fieldstr'].') '.
-						'VALUES('.$this->collId.',"determinationHistory"'.$sqlFragments['valuestr'].')';
+					$sql = 'INSERT INTO uploaddetermtemp(collid'.$sqlFragments['fieldstr'].') '.
+						'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
 					//echo "<div>SQL: ".$sql."</div>"; exit;
 					
 					if($this->conn->query($sql)){
@@ -1686,7 +1705,7 @@ class SpecUploadBase extends SpecUpload{
 				$sqlFragments = $this->getSqlFragments($recMap,$this->imageFieldMap);
 				$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
 					'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
-				//echo "<div>SQL: ".$sql."</div>"; exit;
+				echo "<div>SQL: ".$sql."</div>"; exit;
 				
 				if($this->conn->query($sql)){
 					$this->imageTransferCount++;
@@ -1813,8 +1832,8 @@ class SpecUploadBase extends SpecUpload{
 	
 	public function getIdentTransferCount(){
 		if($this->collId && !$this->identTransferCount){
-			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp '.
-				'WHERE (collid = '.$this->collId.') AND (basisofrecord = "determinationHistory")';
+			$sql = 'SELECT count(*) AS cnt FROM uploaddetermtemp '.
+				'WHERE (collid = '.$this->collId.')';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){

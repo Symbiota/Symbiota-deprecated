@@ -405,11 +405,11 @@ class DwcArchiverOccurrence{
 		$imgFieldArr['identifier'] = 'IFNULL(i.originalurl,i.url) as identifier';
 		$imgTermArr['accessURI'] = 'http://rs.tdwg.org/ac/terms/accessURI';
 		$imgFieldArr['accessURI'] = 'IFNULL(i.originalurl,i.url) as accessURI';
+		$imgTermArr['thumbnailAccessURI'] = 'http://rs.tdwg.org/ac/terms/thumbnailAccessURI';	
+		$imgFieldArr['thumbnailAccessURI'] = 'i.thumbnailurl as thumbnailAccessURI';
+		$imgTermArr['goodQualityAccessURI'] = 'http://rs.tdwg.org/ac/terms/goodQualityAccessURI';
+		$imgFieldArr['goodQualityAccessURI'] = 'i.url as goodQualityAccessURI';
 		if($this->schemaType == 'backup'){
-			$imgTermArr['thumbnailURI'] = 'http://symbiota.org/terms/thumbnailURI';	
-			$imgFieldArr['thumbnailURI'] = 'i.thumbnailurl';
-			$imgTermArr['webURI'] = 'http://symbiota.org/terms/webURI';
-			$imgFieldArr['webURI'] = 'i.url';
 			$imgTermArr['rights'] = 'http://purl.org/dc/terms/rights';	
 			$imgFieldArr['rights'] = 'i.copyright';
 		}
@@ -459,6 +459,7 @@ class DwcArchiverOccurrence{
 				'INNER JOIN omcollections c ON o.collid = c.collid '.
 				'INNER JOIN guidimages g ON i.imgid = g.imgid '.
 				'INNER JOIN guidoccurrences og ON o.occid = og.occid ';
+
 			if(strpos($this->conditionSql,'v.clid')){
 				//Search criteria came from custom search page
 				$sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
@@ -1732,6 +1733,9 @@ class DwcArchiverOccurrence{
 			while($r = $rs->fetch_assoc()){
 				if(substr($r['identifier'],0,1) == '/') $r['identifier'] = $localDomain.$r['identifier'];
 				if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $localDomain.$r['accessURI'];
+				if(substr($r['thumbnailAccessURI'],0,1) == '/') $r['thumbnailAccessURI'] = $localDomain.$r['thumbnailAccessURI'];
+				if(substr($r['goodQualityAccessURI'],0,1) == '/') $r['goodQualityAccessURI'] = $localDomain.$r['goodQualityAccessURI'];
+
 				if($this->schemaType != 'backup'){
 					if(stripos($r['rights'],'http://creativecommons.org') === 0){
 						$r['webstatement'] = $r['rights'];
