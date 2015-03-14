@@ -573,7 +573,7 @@ if($isEditor && $formSubmit){
 								<option value="">Select a Collection</option>
 								<option value="">----------------------</option>
 								<?php 
-								$collArr = $exsManager->getCollArr(0);
+								$collArr = $exsManager->getCollArr();
 								foreach($collArr as $id => $collName){
 									echo '<option value="'.$id.'">'.$collName.'</option>';
 								}
@@ -615,9 +615,9 @@ if($isEditor && $formSubmit){
 			</div>
 			<hr/> 
 			<div style="margin:15px 10px 0px 0px;">
-				<?php 
-				$exsOccArr = array_shift($exsManager->getExsOccArr($omenId));
-				if($exsOccArr){
+				<?php
+				$occurArr = $exsManager->getExsOccArr($omenId);
+				if($exsOccArr = array_shift($occurArr)){
 					?>
 					<table style="width:90%;">
 						<?php 

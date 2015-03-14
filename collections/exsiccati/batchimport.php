@@ -30,6 +30,9 @@ if($isEditor && $formSubmit){
 	if($formSubmit == 'Import Selected Records'){
 		$statusStr = $exsManager->batchImport($collid,$_POST);
 	}
+	elseif($formSubmit == 'Export Selected Records'){
+		$statusStr = $exsManager->exportAsCsv($_POST);
+	}
 }
 
 ?>
@@ -53,22 +56,68 @@ if($isEditor && $formSubmit){
 				alert("Enter at least one catalog number!");
 				return false;
 			}
-			return true;
-		}
-
-		function verifyQueryForm(f){
 			if(f.collid.value == ""){
 				alert("Target collection must be selected");
 				return false;
 			}
+			return true;
+		}
+
+		function verifyFirstForm(f){
 			if(f.ometid.value == ""){
 				alert("Exsiccati title must be selected");
 				return false;
 			}
 			return true;
 		}
+
+		function checkRecord(textObj,occid){
+			var cbObj = document.getElementById(occid);
+			if(textObj.value == ""){
+				cbObj.checked = false;
+			}
+			else{
+				cbObj.checked = true;
+			}
+		}
+
+		function selectAll(selectObj){
+			var boxesChecked = true;
+			if(!selectObj.checked){
+				boxesChecked = false;
+			}
+			var f = selectObj.form;
+			for(var i=0;i<f.length;i++){
+				if(f.elements[i].name == "occid[]") f.elements[i].checked = boxesChecked;
+			}
+		}
+
+		function openIndPU(occId){
+			var wWidth = 900;
+			if(document.getElementById('maintable').offsetWidth){
+				wWidth = document.getElementById('maintable').offsetWidth*1.05;
+			}
+			else if(document.body.offsetWidth){
+				wWidth = document.body.offsetWidth*0.9;
+			}
+			newWindow = window.open('../individual/index.php?occid='+occId,'indspec','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			if(newWindow.opener == null) newWindow.opener = self;
+			return false;
+		}
+
+		function openExsPU(omenid){
+			var wWidth = 900;
+			if(document.getElementById('maintable').offsetWidth){
+				wWidth = document.getElementById('maintable').offsetWidth*1.05;
+			}
+			else if(document.body.offsetWidth){
+				wWidth = document.body.offsetWidth*0.9;
+			}
+			newWindow = window.open('index.php?omenid='+omenid,'exsnum','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			if(newWindow.opener == null) newWindow.opener = self;
+			return false;
+		}
 	</script>
-	<script type="text/javascript" src="../../js/symb/shared.js?ver=130926"></script>
 </head>
 <body>
 	<?php 
@@ -88,7 +137,34 @@ if($isEditor && $formSubmit){
 			echo '<div style="margin:10px;color:'.(strpos($statusStr,'SUCCESS') === false?'red':'green').';">'.$statusStr.'</div>';
 			echo '<hr/>';
 		}
-		if($formSubmit == 'Show Exsiccati Table'){
+		if(!$ometid){
+			if($exsArr = $exsManager->getTitleArr('', 1)){
+				?>
+				<form name="firstform" action="batchimport.php" method="post" onsubmit="return verifyFirstForm(this)">
+					<fieldset>
+						<legend><b>Batch Import Module</b></legend>
+						<div style="margin:30px">
+							<select name="ometid" style="width:500px;" onchange="this.form.submit()">
+								<option value="">Choose Exsiccati Series</option>
+								<option value="">------------------------------------</option>
+								<?php 
+								//Get only titles with linked specimens
+								foreach($exsArr as $exid => $exTitle){
+									echo '<option value="'.$exid.'">'.$exTitle.'</option>';
+								}
+								?>
+							</select>
+							<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+						</div>
+					</fieldset>
+				</form>
+				<?php
+			}
+			else{
+				echo '<div style="margin:20px;font-size:120%;"><b>The system does not yet have occurrence linked to exsiccati that can be transferred</b></div>';
+			}				
+		}
+		elseif($formSubmit == 'Show Exsiccati Table'){
 			$occurArr = $exsManager->getExsOccArr($ometid, 'ometid');
 			if($occurArr){
 				$exsMetadata = $exsManager->getTitleObj($ometid);
@@ -97,10 +173,11 @@ if($isEditor && $formSubmit){
 				?>
 				<form name="exstableform" method="post" action="batchimport.php" onsubmit="return verifyExsTableForm(this)">
 					<div style="margin:10px 0px;">
-						<b>Enter your catalog numbers in field associated with record to be imported</b> 
+						Enter your catalog numbers in field associated with record and then transfer into your collection or download as a spreadsheet (CSV) 
+						for import into a local database application.   
 					</div>
 					<table class="styledtable">
-						<tr><th>Catalog Number</th><th>Ranking</th><th>Details</th></tr>
+						<tr><th><input name="selectAllCB" type="checkbox" onchange="selectAll(this)" /></th><th>Catalog Number</th><th>Exsiccati #</th><th>Details</th></tr>
 						<?php 
 						foreach($occurArr as $omenid => $occArr){
 							//Sort by preferred source collections and ranking
@@ -131,17 +208,35 @@ if($isEditor && $formSubmit){
 						}
 						?>
 					</table>
+					<!-- 
 					<div style="margin:10px 0px">
 						<b>Dataset Title</b><br/>
 						<input name="dataset" type="text" value="" style="width:300px;" /><br/>
 						*Enter value to create a dataset to which imported records will be linked 
 					</div>
+					 -->
+					<?php
+					if($targetCollArr = $exsManager->getTargetCollArr()){
+						?>
+						<div style="margin:10px">
+							<select name="collid">
+								<option value="">Choose Target Collection</option>
+								<option value="">----------------------------------</option>
+								<?php
+								foreach($targetCollArr as $id => $collName){
+									echo '<option value="'.$id.'" '.($id==$collid?'SELECTED':'').'>'.$collName.'</option>';
+								}
+								?>
+							</select>
+							<input name="formsubmit" type="submit" value="Import Selected Records" />
+						</div>
+						<?php 
+					}
+					?>
 					<div style="margin:15px">
 						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 						<input name="ometid" type="hidden" value="<?php echo $ometid; ?>" />
-						<input name="source1" type="hidden" value="<?php echo $source1; ?>" />
-						<input name="source2" type="hidden" value="<?php echo $source2; ?>" />
-						<input name="formsubmit" type="submit" value="Import Selected Records" />
+						<input name="formsubmit" type="submit" value="Export Selected Records" />
 					</div>
 				</form>
 				<?php 
@@ -155,96 +250,52 @@ if($isEditor && $formSubmit){
 			<form name="queryform" action="batchimport.php" method="post" onsubmit="return verifyQueryForm(this)">
 				<fieldset>
 					<legend><b>Batch Import Module</b></legend>
-					<div style="margin:10px">
-						<b>Target Collection</b><br/>
-						<select name="collid">
-							<option value="">----------------------------------</option>
-							<?php
-							$collArr = $exsManager->getCollArr();
-							if(!$IS_ADMIN){
-								//Get list of collection user has permission to edit 
-								$permArr = array();
-								if(array_key_exists('CollAdmin',$userRights)){
-									$permArr = $userRights['CollAdmin'];
-								}
-								if(array_key_exists('CollEditor',$userRights)){
-									$permArr = array_merge($userRights['CollEditor'],$permArr);
-								}
-								//Remove collections 
-								$collArr = array_intersect_key($collArr,array_flip($permArr));
-							}
-							foreach($collArr as $id => $collName){
-								echo '<option value="'.$id.'" '.($id==$collid?'SELECTED':'').'>'.$collName.'</option>';
-							}
-							?>
-						</select>
-					</div>
-					<div style="margin:10px">
-						<b>Exsiccati Title</b><br/>
-						<select name="ometid" style="width:500px;">
-							<option value="">------------------------------------</option>
-							<?php 
-							$exsArr = $exsManager->getTitleArr('', 1);
-							foreach($exsArr as $exid => $exTitle){
-								echo '<option value="'.$exid.'" '.($ometid==$exid?'SELECTED':'').'>'.$exTitle.'</option>';
-							}
-							?>
-						</select>
-					</div>
 					<?php 
-					if($ometid){
-						if($sourceCollArr = $exsManager->getCollArr($ometid)){
-							?>
-							<div style="margin:10px">
-								<div>
-									<b>Select up to two collections that are the preferred sources for occurrence records</b>
-								</div>
+					$exsTitleArr = $exsManager->getTitleArr();
+					echo '<h2>'.$exsTitleArr[$ometid].'</h2>';
+					if($sourceCollArr = $exsManager->getCollArr($ometid)){
+						?>
+						<div style="margin:10px">
+							<div>
+								<b>Select up to two collections that are the preferred sources for occurrence records</b>
+							</div>
+							<div style="margin:5px 0px">
+								<select name="source1">
+									<option value="">Source Collection 1</option>
+									<option value="">------------------------------------</option>
+									<?php 
+									foreach($sourceCollArr as $id => $cTitle){
+										echo '<option value="'.$id.'" '.($source1==$id?'SELECTED':'').'>'.$cTitle.'</option>';
+									}
+									?>
+								</select>
+							</div>
+							<?php 
+							if(count($sourceCollArr) > 1){
+								?>
 								<div style="margin:5px 0px">
-									<b>Source Collection 1</b><br/>
-									<select name="source1">
+									<select name="source2">
+										<option value="">Source Collection 2</option>
 										<option value="">------------------------------------</option>
 										<?php 
 										foreach($sourceCollArr as $id => $cTitle){
-											echo '<option value="'.$id.'" '.($source1==$id?'SELECTED':'').'>'.$cTitle.'</option>';
+											echo '<option value="'.$id.'" '.($source2==$id?'SELECTED':'').'>'.$cTitle.'</option>';
 										}
 										?>
 									</select>
-									
 								</div>
 								<?php 
-								if(count($sourceCollArr) > 1){
-									?>
-									<div style="margin:5px 0px">
-										<b>Source Collection 2</b><br/>
-										<select name="source2">
-											<option value="">------------------------------------</option>
-											<?php 
-											foreach($sourceCollArr as $id => $cTitle){
-												echo '<option value="'.$id.'" '.($source2==$id?'SELECTED':'').'>'.$cTitle.'</option>';
-											}
-											?>
-										</select>
-									</div>
-									<?php 
-								}
-								?>
-							</div>
-							<?php 
-						}
-						?>
-						<div style="margin:20px">
-							<input name="formsubmit" type="submit" value="Show Exsiccati Table" />
-						</div>
-						<?php 
-					}
-					else{
-						?>
-						<div style="margin:20px">
-							<input name="formsubmit" type="submit" value="Choose Source Collections" />
+							}
+							?>
 						</div>
 						<?php 
 					}
 					?>
+					<div style="margin:20px">
+						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+						<input name="ometid" type="hidden" value="<?php echo $ometid; ?>" />
+						<input name="formsubmit" type="submit" value="Show Exsiccati Table" />
+					</div>
 				</fieldset>
 			</form>
 			<?php

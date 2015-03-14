@@ -663,7 +663,8 @@ class OccurrenceEditorManager {
 		foreach($editArr as $k => $fName){
 			if(!trim($fName)){
 				unset($editArr[$k]);
-			} else if(strcasecmp($fName, 'exstitle') == 0) {
+			} 
+			else if(strcasecmp($fName, 'exstitle') == 0) {
 				unset($editArr[$k]);
 				$editArr[$k] = 'title';
 			}
