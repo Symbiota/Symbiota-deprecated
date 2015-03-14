@@ -195,7 +195,8 @@ class ExsiccatiManager {
 		}
 		return $retArr;
 	}
-	
+
+	//Exsiccati edit functions
 	public function addTitle($pArr,$editedBy){
 		$con = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO omexsiccatititles(title, abbreviation, editor, exsrange, startdate, enddate, source, notes,lasteditedby) '.
@@ -488,62 +489,44 @@ class ExsiccatiManager {
 		return $statusStr;
 	} 
 	
+	//Batch transfer functions
 	public function batchImport($targetCollid,$postArr){
 		$statusStr = '';
-		$con = MySQLiConnectionFactory::getCon("write");
-		$datasetId = '';
-		$datasetTitle = '';
-		if(array_key_exists('dataset',$postArr)){
-			//Create new dataset to link all new records
-			$datasetTitle = $postArr['dataset'];
-			$sqlDs = 'INSERT INTO omoccurdatasets(name, uid) VALUES("'.$this->cleanInStr($datasetTitle).'",'.$GLOBALS['SYMB_UID'].') ';
-			if($con->query($sqlDs)){
-				$datasetId = $con->insert_id;
-			}
-			else{
-				$statusStr = 'ERROR creating dataset, '.$con->error;
-				$statusStr .= '<br/>SQL: '.$sqlDs;
-			}
-		}
 		$transferCnt = 0;
-		foreach($postArr as $k => $catNum){
-			if(substr($k,0,4) == 'occ:' && $catNum){
-				$tokArr = explode('-',substr($k,4));
-				//Transfer occurrence record
-				if(is_numeric($tokArr[0])){
-					$sql1 = 'INSERT INTO omoccurrences(collid, catalognumber, family, scientificName, sciname, tidinterpreted, scientificNameAuthorship, '.
-						'identifiedBy, dateIdentified, identificationReferences, identificationRemarks, taxonRemarks, identificationQualifier, typeStatus, '. 
-						'recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, '.
-						'verbatimEventDate, habitat, substrate, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
-						'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, '.
-						'cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, '.
-						'preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, '.
-						'decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, verbatimCoordinates, '.
-						'georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, '.
-						'minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, disposition, genericcolumn1, genericcolumn2, '.
-						'processingstatus, dateEntered) '.
-						'SELECT '.$targetCollid.', "'.$this->cleanInStr($catNum).'", family, scientificName, sciname, tidinterpreted, scientificNameAuthorship, '.
-						'identifiedBy, dateIdentified, identificationReferences, identificationRemarks, taxonRemarks, identificationQualifier, typeStatus, '.
-						'recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, '.
-						'verbatimEventDate, habitat, substrate, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
-						'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, '.
-						'cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, '.
-						'preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, '.
-						'decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, verbatimCoordinates, '.
-						'georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, '.
-						'minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, disposition, genericcolumn1, genericcolumn2, '.
-						'processingstatus, "'.date('Y-m-d H:i:s').'" AS dateEntered '. 
-						'FROM omoccurrences '.
-						'WHERE occid = '.$tokArr[0];
+		if(array_key_exists('occid[]',$postArr)){
+			$con = MySQLiConnectionFactory::getCon("write");
+			$datasetId = '';
+			if(array_key_exists('dataset',$postArr) && $postArr['dataset']){
+				//Create new dataset to link all new records
+				$sqlDs = 'INSERT INTO omoccurdatasets(name, uid) VALUES("'.$this->cleanInStr($postArr['dataset']).'",'.$GLOBALS['SYMB_UID'].') ';
+				if($con->query($sqlDs)){
+					$datasetId = $con->insert_id;
+				}
+				else{
+					$statusStr = 'ERROR creating dataset, '.$con->error;
+					//$statusStr .= '<br/>SQL: '.$sqlDs;
+				}
+			}
+			//Transfer records
+			$occidArr = $postArr['occid[]'];
+			$targetFieldArr = $this->getTargetFields();
+			$sqlBase = 'INSERT INTO omoccurrences('.implode(',',$targetFieldArr).',collid, catalognumber, dateEntered) '.
+				'SELECT '.implode(',',$targetFieldArr).',';
+			foreach($occidArr as $occid){
+				if(is_numeric($occid)){
+					$catNum = $this->cleanInStr($postArr['cat-'.$occid]);
+					$sql1 = $targetCollid.', "'.$catNum.'", "'.date('Y-m-d H:i:s').'" AS dateEntered '. 
+						'FROM omoccurrences WHERE occid = '.$occid;
 					if($con->query($sql1)){
 						$transferCnt++;
 						//Add new record to exsiccati index 
 						$newOccid = $con->insert_id;
-						if($newOccid && $tokArr[1]){
-							$sql2 = 'INSERT INTO omexsiccatiocclink(omenid,occid) VALUES('.$tokArr[1].','.$newOccid.') ';
+						if($newOccid){
+							$sql2 = 'INSERT INTO omexsiccatiocclink(omenid,occid) '.
+								'SELECT omenid, occid FROM omexsiccatiocclink WHERE occid = '.$newOccid;
 							if(!$con->query($sql2)){
 								$statusStr = 'ERROR linking new record to exsiccati: '.$con->error;
-								$statusStr .= '<br/>SQL: '.$sql2;
+								//$statusStr .= '<br/>SQL: '.$sql2;
 							}
 						}
 						if($datasetId){
@@ -551,23 +534,71 @@ class ExsiccatiManager {
 							$sql3 = 'INSERT INTO omoccurdatasetlink(occid,datasetid) VALUES('.$newOccid.','.$datasetId.') ';
 							if(!$con->query($sql3)){
 								$statusStr = 'ERROR add new record to dataset: '.$con->error;
-								$statusStr .= '<br/>SQL: '.$sql3;
+								//$statusStr .= '<br/>SQL: '.$sql3;
 							}
 						}
 					}
 					else{
-						$statusStr = 'ERROR transferring record #'.$tokArr[0].'; '.$con->error;
-						$statusStr .= '<br/>SQL: '.$sql1;
+						$statusStr .= '<b/>ERROR transferring record #'.$occid.': '.$con->error;
+						//$statusStr .= '<br/>SQL: '.$sql1;
 					}
 				}
 			}
+			$con->close();
 		}
-		$con->close();
 		if($transferCnt){
 			$statusStr = 'SUCCESS transferring '.$transferCnt.' records ';
 			//if($datasetId) $statusStr = '<br/>Records linked to dataset: <a href="">'.$datasetTitle.'</a>';
 		}
 		return $statusStr;
+	}
+
+	public function exportAsCsv($postArr){
+		if(array_key_exists('occid[]',$postArr)){
+			$fieldArr = $this->getTargetFields();
+			$occidArr = array_flip($postArr['occid[]']);
+			$fileName = 'exsiccatiOutput_'.time().'.csv';
+			header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			header ('Content-Type: text/csv');
+			header ('Content-Disposition: attachment; filename="'.$fileName.'"');
+			$sql = 'SELECT '.implode(',',$fieldArr).', occid FROM omoccurrences WHERE occid IN('.implode(',',$occidArr).') ';
+			$rs = $this->conn->query($sql);
+			if($rs->num_rows){
+				$out = fopen('php://output', 'w');
+				array_unshift($fieldArr,'catalogNumber');
+				array_push($fieldArr,'occid');
+				echo implode(',',$fieldArr)."\n";
+				while($r = $rs->fetch_assoc()){
+					array_unshift($r,$occidArr[$r->occid]);
+					fputcsv($out, $r);
+				}
+				fclose($out);
+			}
+			else{
+				echo "Recordset is empty.\n";
+			}
+			$rs->free();
+		}
+	}
+	
+	private function getTargetFields(){
+		$fieldArr = array();
+		$skipFields = array('occid','collid','dbpk','ownerinstitutioncode','institutionid','collectionid','datasetid','institutioncode','collectioncode',
+			'occurrenceid', 'catalognumber', 'othercatalognumbers','previousidentifications', 'taxonremarks', 'identifiedby', 'dateidentified', 
+			'identificationreferences', 'identificationremarks', 'recordedbyid', 'informationwithheld', 'associatedoccurrences', 'datageneralizations', 
+			'dynamicproperties', 'verbatimcoordinatesystem', 'storagelocation', 'disposition', 'genericcolumn1', 'genericcolumn2', 'modified', 
+			'observeruid', 'processingstatus', 'recordenteredby', 'duplicatequantity', 'labelproject', 'dateentered', 'datelastmodified',
+			'initialtimestamp');
+		$sql = "SHOW COLUMNS FROM uploadspectemp";
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$field = strtolower($r->Field);
+			if(!in_array($field, $skipFields)){
+				$fieldArr[] = $field;
+			}
+		}
+		$rs->free();
+		return $fieldArr;
 	}
 
 	//Misc
@@ -594,9 +625,33 @@ class ExsiccatiManager {
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->collid] = $this->cleanOutStr($r->collectionname).' ('.$r->institutioncode.($r->collectioncode?' - '.$r->collectioncode:'').')';
+			$retArr[$r->collid] = $r->collectionname.' ('.$r->institutioncode.($r->collectioncode?' - '.$r->collectioncode:'').')';
 		}
-		$rs->close();
+		$rs->free();
+		return $retArr;
+	}
+
+	public function getTargetCollArr(){
+		$retArr = array();
+		$collArr = array();
+		if(isset($GLOBALS['CollAdmin'])){
+			$collArr = $GLOBALS['CollAdmin'];
+		}
+		if(isset($GLOBALS['CollEditor'])){
+			$collArr = array_merge($collArr,$GLOBALS['CollEditor']);
+		}
+		if($collArr){
+			$sql ='SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode '.
+				'FROM omcollections c '.
+				'WHERE (colltype != "Preserved Specimens") '.
+				'ORDER BY c.collectionname, c.institutioncode';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->collid] = $r->collectionname.' ('.$r->institutioncode.($r->collectioncode?' - '.$r->collectioncode:'').')';
+			}
+			$rs->free();
+		}
 		return $retArr;
 	}
 
@@ -605,17 +660,20 @@ class ExsiccatiManager {
 		if($targetCollid == $oArr['collid']) $isTarget = true;
 		$retStr = '<tr>';
 		$retStr .= '<td align="center">';
+		$retStr .= '<input id="'.$occid.'" name="occid[]" type="checkbox" value="'.$occid.'" '.($isTarget?'disabled':'').' />';
+		$retStr .= '</td>';
+		$retStr .= '<td align="center">';
 		if($isTarget){
 			$retStr .= '<span style="color:red;"><b>Cannot Import</b><br/>Is Target Collection</span>';
 		}
 		else{
-			$retStr .= '<input name="occ:'.$occid.'-'.$omenid.'" type="text" />';
+			$retStr .= '<input name="cat-'.$occid.'" type="text" onchange="checkRecord(this,'.$occid.')" />';
 		}
 		$retStr .= '</td>';
-		$retStr .= '<td align="center"><a href="index.php?omenid='.$omenid.'" target="_blank" tabindex="1">#'.$oArr['exsnum'].'</a><br/>[rank: '.$oArr['ranking'].']</td>';
+		$retStr .= '<td align="center"><a href="#" onclick="openExsPU('.$omenid.')">#'.$oArr['exsnum'].'</a></td>';
 		$retStr .= '<td>';
 		$retStr .= '<span '.($isTarget?'style="color:red;"':'').' title="'.$oArr['collname'].'">'.$oArr['collcode'].'</span>, ';
-		$retStr .= '<a href="../individual/index.php?occid='.$occid.'" target="_blank" tabindex="1">'.$oArr['recby'].' '.($oArr['recnum']?$oArr['recnum']:'s.n.').'</a>';
+		$retStr .= '<a href="#" onclick="openIndPU('.$occid.')">'.$oArr['recby'].' '.($oArr['recnum']?$oArr['recnum']:'s.n.').'</a>';
 		$retStr .= ($oArr['eventdate']?', '.$oArr['eventdate']:'');
 		$retStr .= ', <i>'.$oArr['sciname'].'</i> '.$oArr['author'];
 		$retStr .= $oArr['country'].', '.$oArr['state'].', '.$oArr['county'].', '.(strlen($oArr['locality'])>75?substr($oArr['locality'],0,75).'...':$oArr['locality']);
