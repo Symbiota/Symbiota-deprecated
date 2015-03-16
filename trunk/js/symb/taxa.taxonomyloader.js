@@ -4,6 +4,9 @@ $(document).ready(function() {
 		source: function( request, response ) {
 			$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, rhigh: $("#rankid").val() }, response );
 		},
+		change: function( event, ui ) {
+			checkParentExistance(document.loaderform);
+		},
 		minLength: 3,
 		autoFocus: true
 	});
@@ -24,8 +27,13 @@ function verifyLoadForm(f){
 		return false;
 	}
 	if(f.parenttid.value == "" && rankId != "10"){
-		alert("Parent taxon field required.");
-		return false;
+		checkParentExistance(document.loaderform);
+		setTimeout(function (){
+			if(f.parenttid.value == "" && rankId != "10"){
+				alert("Parent taxon field required.");
+				return false;
+			}
+		}, 2000);
 	}
 
 	var accStatusObj = f.acceptstatus;
