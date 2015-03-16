@@ -34,7 +34,7 @@ if($editable){
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script language="javascript" src="../../js/symb/taxa.taxonomyloader.js"></script>
+	<script language="javascript" src="../../js/symb/taxa.taxonomyloader.js?ver=150316"></script>
 </head>
 <body>
 <?php
@@ -67,7 +67,7 @@ if($editable){
 		if($editable){
 			?>
 		
-			<form id="loaderform" action="taxonomyloader.php" method="post" onsubmit="return verifyLoadForm(this)">
+			<form id="loaderform" name="loaderform" action="taxonomyloader.php" method="post" onsubmit="return verifyLoadForm(this)">
 				<fieldset>
 					<legend><b>Add New Taxon</b></legend>
 					<div>
