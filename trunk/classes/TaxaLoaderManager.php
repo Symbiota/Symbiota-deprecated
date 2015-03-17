@@ -119,7 +119,7 @@ class TaxaLoaderManager{
 					$sql = $sqlBase;
 					$valueSql = "";
 					foreach($uploadTaxaIndexArr as $recIndex => $targetField){
-						$valIn = $this->encodeString($recordArr[$recIndex]);
+						$valIn = $this->cleanInStr($this->encodeString($recordArr[$recIndex]));
 						if($targetField == 'acceptance' && !is_numeric($valIn)){
 							$valInTest = strtolower($valIn);
 							if($valInTest == 'accepted' || $valInTest == 'valid'){
@@ -994,7 +994,7 @@ class TaxaLoaderManager{
 		if($this->conn->query($sql)){
 			//Continue building taxaenumtree  
 			$sql2 = 'SELECT DISTINCT e.tid, ts.parenttid, ts.taxauthid '. 
-				'FROM taxaenumtree e INNER JOIN taxstatus ts ON e.parenttid = ts.tid AND e.taxauthid = ts.taxauthid '.
+				'FROM taxaenumtree e LEFT JOIN taxstatus ts ON e.parenttid = ts.tid AND e.taxauthid = ts.taxauthid '.
 				'LEFT JOIN taxaenumtree e2 ON e.tid = e2.tid AND ts.parenttid = e2.parenttid AND e.taxauthid = e2.taxauthid '.
 				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND e2.tid IS NULL';
 			//$this->outputMsg($sql;
