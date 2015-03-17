@@ -9,7 +9,7 @@ class TaxaLoaderManager{
 	private $taxAuthId = 1;
 	private $statArr = array();
 	
-	private $verboseMode = 0; // 0 = silent, 1 = $this->outputMsg(only, 2 = $this->outputMsg(and log
+	private $verboseMode = 1; // 0 = silent, 1 = echo only, 2 = echo and log
 	private $logFH;
 	private $errorStr = '';
 
@@ -57,7 +57,8 @@ class TaxaLoaderManager{
 	public function loadFile($fieldMap){
 		//fieldMap = array(source field => target field)
 		$this->outputMsg('Starting Upload',0);
-		$this->conn->query("TRUNCATE TABLE uploadtaxa");
+		$this->conn->query("DELETE FROM uploadtaxa");
+		$this->conn->query("OPTIMIZE TABLE uploadtaxa");
 		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r') or die("Can't open file");
 		$headerArr = fgetcsv($fh);
 		$uploadTaxaFieldArr = $this->getUploadTaxaFieldArr();
@@ -80,11 +81,14 @@ class TaxaLoaderManager{
 		}
 		$familyIndex = 0; 
 		if(in_array('family',$fieldMap)) $familyIndex = array_search(array_search('family',$fieldMap),$headerArr);
-		$recordCnt = 0;
 		//scinameinput field is required
 		if(in_array("scinameinput",$fieldMap) || count($taxonUnitIndexArr) > 2){
+			$recordCnt = 0;
 			asort($taxonUnitIndexArr);
 			$childParentArr = array();		//array(taxon => array('p'=>parentStr,'r'=>rankid)
+			$this->conn->query('SET autocommit=0');
+			$this->conn->query('SET unique_checks=0');
+			$this->conn->query('SET foreign_key_checks=0');
 			$sqlBase = "INSERT INTO uploadtaxa(".implode(",",$uploadTaxaIndexArr).") ";
 			while($recordArr = fgetcsv($fh)){
 				//Load taxonunits fields into Array which will be loaded into taxon table at the end
@@ -132,12 +136,24 @@ class TaxaLoaderManager{
 					}
 					$sql .= 'VALUES ('.substr($valueSql,1).')';
 					//$this->outputMsg("<div>".$sql."</div>";
-					if(!$this->conn->query($sql)){
+					if($this->conn->query($sql)){
+						if($recordCnt%1000 == 0){
+							$this->outputMsg('Upload count: '.$recordCnt,1);
+							ob_flush();
+							flush();
+						}
+					}
+					else{
 						$this->outputMsg('ERROR loading taxon: '.$this->conn->error);
 					}
 				}
 				$recordCnt++;
 			}
+			$this->conn->query('COMMIT');
+			$this->conn->query('SET autocommit=1');
+			$this->conn->query('SET unique_checks=1');
+			$this->conn->query('SET foreign_key_checks=1');
+			
 			//Process and load taxon units data ($childParentArr)
 			foreach($childParentArr as $taxon => $tArr){
 				$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput,rankid,parentstr,family,acceptance) '.
@@ -212,7 +228,6 @@ class TaxaLoaderManager{
 			}
 		}
 
-		$this->outputMsg(' Done!');
 		$this->outputMsg($recordCnt.' records loaded');
 		fclose($fh);
 		$this->setUploadCount();
@@ -282,7 +297,6 @@ class TaxaLoaderManager{
 		$rs->free();
 		if($sspStr == 'ssp.') $inSspStr = 'subsp.';
 		
-		$this->outputMsg('Starting data cleaning... ');
 		$this->outputMsg('Cleaning AcceptedStr... ');
 		$sql = 'UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," '.$inSspStr.' "," '.$sspStr.' ") '.
 			'WHERE (AcceptedStr LIKE "% '.$inSspStr.' %")';
@@ -318,7 +332,6 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error.'... ',1);
 		}
-		$this->outputMsg('Done!');
 		
 		//Insert into uploadtaxa table all accepted taxa not already present in scinameinput. If they turn out to be in taxa table, they will be deleted later
 		/*
@@ -331,11 +344,10 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 		*/
 
 		//Clean sciname field (sciname input gets cleaned later) 
-		$this->outputMsg('Cleaning sciname field... ');
+		$this->outputMsg('Cleaning sciname fields... ');
 		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname," '.$inSspStr.' "," '.$sspStr.' ") WHERE (sciname like "% '.$inSspStr.' %")';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
@@ -380,10 +392,8 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 
 		//Clean scinameinput field
-		$this->outputMsg('Cleaning scinameinput field... ',1);
 		$sql = 'UPDATE uploadtaxa SET scinameinput = replace(scinameinput," '.$inSspStr.' "," '.$sspStr.' ") '.
 			'WHERE (scinameinput like "% '.$inSspStr.' %")';
 		if(!$this->conn->query($sql)){
@@ -430,10 +440,9 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 
 		//Parse scinameinput into unitind and unitname fields 
-		$this->outputMsg('Parse scinameinput field into unitind and unitname fields');
+		$this->outputMsg('Parse scinameinput field...');
 		$sql = 'UPDATE uploadtaxa SET unitind1 = "x" WHERE unitind1 IS NULL AND scinameinput LIKE "x %"';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
@@ -493,24 +502,23 @@ class TaxaLoaderManager{
 		}
 		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceParentId = u2.sourceId '.
 			'SET u.parentstr = u2.sciname '.
-			'WHERE u.parentstr IS NULL';
+			'WHERE u.parentstr IS NULL AND u.sourceParentId IS NOT NULL AND u2.sourceId IS NOT NULL';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceAcceptedId = u2.sourceId '.
 			'SET u.acceptedstr = u2.sciname '.
-			'WHERE u.acceptedstr IS NULL';
+			'WHERE u.acceptedstr IS NULL AND u.sourceAcceptedId IS NOT NULL AND u2.sourceId IS NOT NULL';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 
 		//Delete taxa where sciname can't be inserted. These are taxa where sciname already exists
 		$sql = 'DELETE FROM uploadtaxa WHERE sciname IS NULL';
 		$this->conn->query($sql);
 
 		//Link names already in theusaurus 
-		$this->outputMsg('Linking names already in thesaurus... ',1);
+		$this->outputMsg('Linking names already in thesaurus... ');
 		$sql = 'UPDATE uploadtaxa u INNER JOIN taxa t ON u.sciname = t.sciname '.
 			'SET u.tid = t.tid WHERE u.tid IS NULL';
 		if(!$this->conn->query($sql)){
@@ -522,9 +530,7 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 		
-		$this->outputMsg('Populating null family values... ',1);
 		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.sourceParentId = u2.sourceId '.
 			'SET u1.family = u2.sciname '.
 			'WHERE u2.sourceId IS NOT NULL AND u1.sourceParentId IS NOT NULL AND u2.rankid = 140 AND u1.family is null ';
@@ -564,18 +570,17 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 
-		$this->outputMsg('Loading vernaculars... ',1);
+		$this->outputMsg('Loading vernaculars... ');
 		//This is first pass for all taxa that have non-null tids just before they are removed
 		$this->transferVernaculars();
-		$this->outputMsg('Done!');
 		
 		$sql = 'DELETE * FROM uploadtaxa WHERE tid IS NOT NULL';
 		//$this->conn->query($sql);
 
-		$this->outputMsg('Set null rankid values... ',1);
-		$sql = 'UPDATE uploadtaxa SET rankid = 140 WHERE rankid IS NULL AND (sciname like "%aceae" || sciname like "%idae")';
+		$this->outputMsg('Set null rankid values... ');
+		$sql = 'UPDATE uploadtaxa SET rankid = 140 '.
+			'WHERE (rankid IS NULL) AND (sciname NOT like "% %") AND (sciname like "%aceae" || sciname like "%idae")';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -587,9 +592,8 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 		
-		$this->outputMsg('Set null author values... ',1);
+		$this->outputMsg('Set null author values... ');
 		$sql = 'UPDATE uploadtaxa '.
 			'SET author = TRIM(SUBSTRING(scinameinput,LENGTH(sciname)+1)) '.
 			'WHERE (author IS NULL) AND rankid <= 220';
@@ -606,9 +610,8 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 		
-		$this->outputMsg('Populating null family values (part 2)... ',1);
+		$this->outputMsg('Populating null family values... ');
 		$sql = 'UPDATE uploadtaxa SET family = NULL WHERE family = ""';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
@@ -628,9 +631,8 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 		
-		$this->outputMsg('Populating and mapping parent taxon... ',1);
+		$this->outputMsg('Populating and mapping parent taxon... ');
 		$sql = 'UPDATE uploadtaxa SET parentstr = CONCAT_WS(" ", unitname1, unitname2) WHERE (parentstr IS NULL OR parentstr = "") AND rankid > 220';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
@@ -655,10 +657,9 @@ class TaxaLoaderManager{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$this->outputMsg('Done!');
 		
 		//Load into uploadtaxa parents of infrasp not yet in taxa table 
-		$this->outputMsg('Add parents that are not yet in uploadtaxa table... ',1);
+		$this->outputMsg('Add parents that are not yet in uploadtaxa table... ');
 		$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput, SciName, family, RankId, UnitName1, UnitName2, parentstr, Source) '.
 			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.family, 220 as r, ut.unitname1, ut.unitname2, ut.unitname1, ut.source '.
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
@@ -707,8 +708,7 @@ class TaxaLoaderManager{
 			'SET acceptance = 0 '.
 			'WHERE acceptedstr IS NOT NULL AND sciname IS NOT NULL AND sciname <> acceptedstr';
 		$this->conn->query($sql);
-		$this->outputMsg('Done!');
-		$this->outputMsg('Done data cleaning');
+		$this->outputMsg('Done processing taxa');
 	}
 	
 	public function analysisUpload(){
@@ -888,7 +888,6 @@ class TaxaLoaderManager{
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
-			$this->outputMsg('Done!');
 
 			$this->outputMsg('Create parent and accepted links... ');
 			$sql = 'INSERT IGNORE INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UnacceptabilityReason ) '.
@@ -898,12 +897,10 @@ class TaxaLoaderManager{
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
-			$this->outputMsg('Done!');
 
 			$this->outputMsg('Transferring vernaculars for new taxa... ');
 			//Covers taxa with newly assigned tids just before they are removed
 			$this->transferVernaculars(1);
-			$this->outputMsg('Done!');
 			
 			$this->outputMsg('Preparing for next round... ');
 			$sql = 'DELETE FROM uploadtaxa WHERE tid IS NOT NULL AND tidaccepted IS NOT NULL';
@@ -930,7 +927,6 @@ class TaxaLoaderManager{
 			$rs = $this->conn->query($sql);
 			$r = $rs->fetch_object();
 			$endLoadCnt = $r->cnt;
-			$this->outputMsg('Done!');
 			
 			$loopCnt++;
 		}
@@ -947,7 +943,6 @@ class TaxaLoaderManager{
 			'FROM omoccurrences o LEFT JOIN omoccurgeoindex g ON o.tidinterpreted = g.tid '.
 			'WHERE g.tid IS NULL AND o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL';
 		$this->conn->query($sql);
-		$this->outputMsg('Done!');
 	}
 
 	private function transferVernaculars($secondRound = 0){
