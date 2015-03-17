@@ -456,7 +456,9 @@ class SpecUploadBase extends SpecUpload{
 		}
 		
 		//Reset $treansferCnt so that count is accurate since some records may have been deleted due to data integrety issues
-		$this->getTransferCount(1); 
+		$this->setTransferCount(); 
+		$this->setIdentTransferCount();
+		$this->setImageTransferCount();
 	}
 
 	private function recordCleaningStage1(){
@@ -1015,15 +1017,7 @@ class SpecUploadBase extends SpecUpload{
 		$rsTest->free();
 		*/
 		//Reset transfer count
-		$sql = 'SELECT count(*) AS cnt FROM uploadimagetemp WHERE (collid = '.$this->collId.')';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$this->imageTransferCount = $r->cnt;
-		}
-		else{
-			$this->outputMsg('<div style="margin-left:20px;">ERROR revising image upload count: '.$this->conn->error.'</div> ');
-		}
-		$rs->free();
+		$this->setImageTransferCount();
 		$this->outputMsg('<li style="margin-left:10px;">Done! (revised count: '.$this->imageTransferCount.' images)</li> ');
 		ob_flush();
 		flush();
@@ -1046,15 +1040,7 @@ class SpecUploadBase extends SpecUpload{
 			}
 
 			//Set image transfer count
-			$sql = 'SELECT count(*) AS cnt FROM uploadimagetemp WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$this->imageTransferCount = $r->cnt;
-			}
-			else{
-				$this->outputMsg('<div style="margin-left:20px;">ERROR setting image upload count: '.$this->conn->error.'</div> ');
-			}
-			$rs->free();
+			$this->setImageTransferCount();
 
 			//Load images 
 			$sql = 'INSERT INTO images(url,thumbnailurl,originalurl,occid,tid,caption,photographer,owner,notes ) '.
@@ -1817,8 +1803,13 @@ class SpecUploadBase extends SpecUpload{
 		return array('fieldstr' => $sqlFields,'valuestr' => $sqlValues);
 	}
 
-	public function getTransferCount($reset = 0){
-		if($this->collId && ($reset || !$this->transferCount)){
+	public function getTransferCount(){
+		if(!$this->transferCount) $this->setTransferCount();
+		return $this->transferCount;
+	}
+	
+	private function setTransferCount(){
+		if($this->collId){
 			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = '.$this->collId.') ';
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
@@ -1826,11 +1817,15 @@ class SpecUploadBase extends SpecUpload{
 			}
 			$rs->free();
 		}
-		return $this->transferCount;
+	}
+
+	public function getIdentTransferCount(){
+		if(!$this->identTransferCount) $this->setIdentTransferCount();
+		return $this->identTransferCount;
 	}
 	
-	public function getIdentTransferCount(){
-		if($this->collId && !$this->identTransferCount){
+	private function setIdentTransferCount(){
+		if($this->collId){
 			$sql = 'SELECT count(*) AS cnt FROM uploaddetermtemp '.
 				'WHERE (collid = '.$this->collId.')';
 			//echo $sql;
@@ -1840,11 +1835,25 @@ class SpecUploadBase extends SpecUpload{
 			}
 			$rs->free();
 		}
-		return $this->identTransferCount;
+	}
+
+	private function getImageTransferCount(){
+		if(!$this->imageTransferCount) $this->setImageTransferCount();
+		return $this->imageTransferCount;
 	}
 	
-	public function getImageTransferCount(){
-		return $this->imageTransferCount;
+	private function setImageTransferCount(){
+		if($this->collId){
+			$sql = 'SELECT count(*) AS cnt FROM uploadimagetemp WHERE (collid = '.$this->collId.')';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$this->imageTransferCount = $r->cnt;
+			}
+			else{
+				$this->outputMsg('<div style="margin-left:20px;">ERROR setting image upload count: '.$this->conn->error.'</div> ');
+			}
+			$rs->free();
+		}		
 	}
 	
 	protected function setUploadTargetPath(){

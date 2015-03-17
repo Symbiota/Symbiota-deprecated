@@ -35,13 +35,13 @@ if($collMap['managementtype'] == 'Snapshot'){
 
 $recCnt = $uploadManager->getUploadCount();
 $isEditor = 0;
-$navStr = '<div style="float:right;">';
+//$navStr = '<div style="float:right;">';
 if($SYMB_UID){
 	//Set variables
 	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
 		$isEditor = 1;
 	}
-
+/*
 	if(($pageIndex) >= $recLimit){
 		$navStr .= '<a href="uploadviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex=0" title="First page">|&lt;&lt;</a> | ';
 		$navStr .= '<a href="uploadviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex='.($pageIndex-1).'" title="Previous '.$recLimit.' record">&lt;&lt;</a>';
@@ -61,6 +61,7 @@ if($SYMB_UID){
 		$navStr .= '&gt;&gt; | &gt;&gt;|';
 	}
 	$navStr .= '</div>';
+*/
 }
 ?>
 <html>
@@ -126,7 +127,7 @@ if($SYMB_UID){
 					?>
 				</table>
 				<div style="width:790px;">
-					<?php echo $navStr; ?>
+					<?php //echo $navStr; ?>
 				</div>
 				<?php 
 			}

@@ -238,10 +238,10 @@ if($isEditor){
 						if($statArr){
 							if(isset($statArr['upload'])) echo '<u>Taxa uploaded</u>: <b>'.$statArr['upload'].'</b><br/>';
 							echo '<u>Total taxa</u>: <b>'.$statArr['total'].'</b> (includes new parent taxa)<br/>';
-							echo '<u>Taxa already in thesaurus</u>: <b>'.$statArr['exist'].'</b><br/>';
-							echo '<u>New taxa</u>: <b>'.$statArr['new'].'</b><br/>';
-							echo '<u>Accepted taxa</u>: <b>'.$statArr['accepted'].'</b><br/>';
-							echo '<u>Non-accepted taxa</u>: <b>'.$statArr['nonaccepted'].'</b><br/>';
+							echo '<u>Taxa already in thesaurus</u>: <b>'.(isset($statArr['exist'])?$statArr['exist']:0).'</b><br/>';
+							echo '<u>New taxa</u>: <b>'.(isset($statArr['new'])?$statArr['new']:0).'</b><br/>';
+							echo '<u>Accepted taxa</u>: <b>'.(isset($statArr['accepted'])?$statArr['accepted']:0).'</b><br/>';
+							echo '<u>Non-accepted taxa</u>: <b>'.(isset($statArr['nonaccepted'])?$statArr['nonaccepted']:0).'</b><br/>';
 							if(isset($statArr['bad'])){
 								?>
 								<fieldset style="margin:15px;padding:15px;"> 
