@@ -1440,17 +1440,17 @@ class MapInterfaceManager{
 		while($row = $result->fetch_object()){
 			$family = strtoupper($row->family);
 			if(!$family) $family = 'undefined';
+			if($row->tid){
+				$tidcode = $row->tid;
+			}
+			else{
+				$tidcode = str_replace( " ", "",$row->sciname);
+				$tidcode = str_replace( ".", "",$tidcode);
+			}
 			$sciName = $row->sciname;
 			if($sciName){
-				if($row->tid){
-					$returnVec[$family][$sciName]["tid"] = $row->tid;
-				}
-				else{
-					$tidcode = str_replace( " ", "",$row->sciname);
-					$tidcode = str_replace( ".", "",$tidcode);
-					$returnVec[$family][$sciName]["tid"] = $this->xmlentities($tidcode);
-				}
-				$returnVec[$family][$sciName]["sciname"] = $sciName;
+				$returnVec[$family][$tidcode]["tid"] = $this->xmlentities($tidcode);
+				$returnVec[$family][$tidcode]["sciname"] = $sciName;
 				$this->checklistTaxaCnt++;
 			}
         }
