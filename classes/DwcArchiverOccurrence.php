@@ -672,6 +672,7 @@ class DwcArchiverOccurrence{
                     $institutionCode = $dwcArray['institutionCode'];
                     $collectionCode = $dwcArray['collectionCode'];
                     $occurrenceid = "urn:catalog:$institutionCode:$collectionCode:$catalogNumber";
+                }
              }
              $returnvalue .= "<$occurrenceid>\n";
              $returnvalue .= "    a dwc:Occurrence ";
