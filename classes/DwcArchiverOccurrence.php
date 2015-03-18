@@ -664,6 +664,14 @@ class DwcArchiverOccurrence{
              $occurrenceid = $dwcArray['occurrenceID'];
              if (UuidFactory::is_valid($occurrenceid)) { 
                 $occurrenceid = "urn:uuid:$occurrenceid";
+             } else {
+                $catalogNumber = $dwcArray['catalogNumber'];
+                if (strlen($occurrenceid)==0 || $occurrenceid==$catalogNumber) {
+                    // If no occurrenceID is present, construct one with a urn:catalog: scheme.
+                    // Pathology may also exist of an occurrenceID equal to the catalog number, fix this.
+                    $institutionCode = $dwcArray['institutionCode'];
+                    $collectionCode = $dwcArray['collectionCode'];
+                    $occurrenceid = "urn:catalog:$institutionCode:$collectionCode:$catalogNumber";
              }
              $returnvalue .= "<$occurrenceid>\n";
              $returnvalue .= "    a dwc:Occurrence ";
@@ -678,7 +686,9 @@ class DwcArchiverOccurrence{
                       break;
                     case "collectionID":
                          // RDF Guide Section 2.3.3 owl:sameAs for urn:lsid and resolvable IRI.
-                         if (stripos("urn:lsid:biocol.org",$value)==0) { 
+                         if (stripos("urn:uuid:",$value)===false && UuidFactory::is_valid($value)) { 
+                           $lsid = "urn:uuid:$value";
+                         } elseif (stripos("urn:lsid:biocol.org",$value)===0) { 
                            $lsid = "http://biocol.org/$value";
                            $dwcguide223 .= "<http://biocol.org/$value>\n";
                            $dwcguide223 .= "    owl:sameAs <$value> .\n";
@@ -803,7 +813,9 @@ class DwcArchiverOccurrence{
                       break;
                     case "collectionID":
                          // RDF Guide Section 2.3.3 owl:sameAs for urn:lsid and resolvable IRI.
-                         if (stripos("urn:lsid:biocol.org",$value)==0) { 
+                         if (stripos("urn:uuid:",$value)===false && UuidFactory::is_valid($value)) { 
+                           $lsid = "urn:uuid:$value";
+                         }elseif (stripos("urn:lsid:biocol.org",$value)===0) { 
                            $lsid = "http://biocol.org/$value";
                            $sameAsElem = $newDoc->createElement("rdf:Description");
                            $sameAsElem->setAttribute("rdf:about","http://biocol.org/$value");
