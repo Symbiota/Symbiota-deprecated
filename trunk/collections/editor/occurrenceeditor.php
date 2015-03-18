@@ -741,7 +741,7 @@ else{
 													<a href="#" onclick="return dwcDoc('scientificName')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" onchange="fieldChanged('sciname');" <?php if((!$isEditor || $isEditor == 3) && $occArr['sciname']) echo 'disabled '; ?> />
-													<input type="hidden" id="tidinterpreted" name="tidinterpreted" value="" />
+													<input type="hidden" id="tidinterpreted" name="tidinterpreted" value="<?php echo array_key_exists('tidinterpreted',$occArr)?$occArr['tidinterpreted']:''; ?>" />
 													<?php
 													if(!$isEditor && isset($occArr['sciname']) && $occArr['sciname'] != ''){
 														echo '<div style="clear:both;color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>';
