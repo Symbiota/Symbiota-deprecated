@@ -873,7 +873,8 @@ class DwcArchiverOccurrence{
                     default: 
                          if (isset($occurTermArr[$key])) { 
                             $ns = RdfUtility::namespaceAbbrev($occurTermArr[$key]);
-                            $elem = $newDoc->createElement($ns,$value);
+                            $elem = $newDoc->createElement($ns);
+                            $elem->appendChild($newDoc->createTextNode($value));
                          }
                   }
                   if ($elem!=null) { 
