@@ -796,13 +796,14 @@ class MapInterfaceManager{
 	}
 	
     public function getGenObsInfo(){
-		$retVar = '';
-		$sql = 'SELECT collid '.
-			'FROM omcollections '.
-			'WHERE collectionname = "General Observations"';
+		$retVar = array();
+		$sql = 'SELECT collid, CollType '.
+			'FROM omcollections ';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retVar = $r->collid;
+				if(stripos($r->CollType, "observation") !== false){
+					$retVar[] = $r->collid;
+				}
 			}
 			$rs->close();
 		}
