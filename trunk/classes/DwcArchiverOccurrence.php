@@ -637,6 +637,14 @@ class DwcArchiverOccurrence{
 		}
 	}
 
+    public function getAsJson() {
+        $this->applyConditions();
+        $this->schemaType='dwc';
+        $arr = $this->getDwcArray();
+        return json_encode($arr[0]);
+
+    }
+
     /** 
      * Render the records as RDF in a turtle serialization following the TDWG
      *  DarwinCore RDF Guide.
