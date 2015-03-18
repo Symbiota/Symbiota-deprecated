@@ -775,6 +775,15 @@ class DwcArchiverOccurrence{
              $occurrenceid = $dwcArray['occurrenceID'];
              if (UuidFactory::is_valid($occurrenceid)) { 
                 $occurrenceid = "urn:uuid:$occurrenceid";
+             } else {
+                $catalogNumber = $dwcArray['catalogNumber'];
+                if (strlen($occurrenceid)==0 || $occurrenceid==$catalogNumber) {
+                    // If no occurrenceID is present, construct one with a urn:catalog: scheme.
+                    // Pathology may also exist of an occurrenceID equal to the catalog number, fix this.
+                    $institutionCode = $dwcArray['institutionCode'];
+                    $collectionCode = $dwcArray['collectionCode'];
+                    $occurrenceid = "urn:catalog:$institutionCode:$collectionCode:$catalogNumber";
+                }
              }
              $occElem = $newDoc->createElement('dwc:Occurrence');
              $occElem->setAttribute("rdf:about","$occurrenceid");
