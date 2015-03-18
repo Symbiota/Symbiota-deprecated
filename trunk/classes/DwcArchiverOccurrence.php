@@ -660,7 +660,7 @@ class DwcArchiverOccurrence{
        $dwcguide223 = "";
        foreach ($arr as $rownum => $dwcArray)  {
           if ($debug) { print_r($dwcArray);  } 
-          if (isset($dwcArray['occurrenceID'])) { 
+          if (isset($dwcArray['occurrenceID'])||(isset($dwcArray['catalogNumber'] && isset($dwcArray('collectionCode'))))) { 
              $occurrenceid = $dwcArray['occurrenceID'];
              if (UuidFactory::is_valid($occurrenceid)) { 
                 $occurrenceid = "urn:uuid:$occurrenceid";
@@ -782,7 +782,7 @@ class DwcArchiverOccurrence{
 	   $occurTermArr = $this->occurrenceFieldArr['terms'];
        foreach ($arr as $rownum => $dwcArray)  {
           if ($debug) { print_r($dwcArray);  } 
-          if (isset($dwcArray['occurrenceID'])) { 
+          if (isset($dwcArray['occurrenceID'])||(isset($dwcArray['catalogNumber'] && isset($dwcArray('collectionCode'))))) { 
              $occurrenceid = $dwcArray['occurrenceID'];
              if (UuidFactory::is_valid($occurrenceid)) { 
                 $occurrenceid = "urn:uuid:$occurrenceid";
