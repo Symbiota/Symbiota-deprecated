@@ -49,6 +49,14 @@ while (!$done && list($key, $mediarange) = each($accept)) {
        echo $dwcManager->getAsRdfXml();
        $done = TRUE;
     }
+    if ($mediarange=='application/json') {
+       Header("Content-Type: application/json; charset=".$charset);
+       $dwcManager = new DwcArchiverOccurrence();
+       $dwcManager->setCustomWhereSql(" o.occid = $occid ");
+       echo json_encode($dwcManager->getDwcArray());
+       $done = TRUE;
+    }
+
 }
 if ($done) {
   die;
@@ -1010,7 +1018,8 @@ header("Content-Type: text/html; charset=".$charset);
 					<?php
 					ob_flush();
 					flush();
-					$rawArchArr = $indManager->checkArchive();
+$rawArchArr = array();
+					//$rawArchArr = $indManager->checkArchive();
 					//print_r($rawArchArr);
 					if($rawArchArr && $rawArchArr['obj']){
 						$archArr = $rawArchArr['obj'];
