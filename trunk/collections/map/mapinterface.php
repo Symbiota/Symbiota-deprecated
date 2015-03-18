@@ -43,17 +43,22 @@ $clusterOff = "n";
 $recLimit = "5000";
 $mysqlVersion = $mapManager->getMysqlVersion();
 if($mysqlVersion){
-	$mysqlVerNums = explode(".", $mysqlVersion);
-	if($mysqlVerNums[0] > 5){
+	if($mysqlVersion["db"] == 'MariaDB'){
 		$spatial = true;
 	}
-	elseif($mysqlVerNums[0] == 5){
-		if($mysqlVerNums[1] > 6){
+	elseif($mysqlVersion["db"] == 'mysql'){
+		$mysqlVerNums = explode(".", $mysqlVersion["ver"]);
+		if($mysqlVerNums[0] > 5){
 			$spatial = true;
 		}
-		elseif($mysqlVerNums[1] == 6){
-			if($mysqlVerNums[2] >= 1){
+		elseif($mysqlVerNums[0] == 5){
+			if($mysqlVerNums[1] > 6){
 				$spatial = true;
+			}
+			elseif($mysqlVerNums[1] == 6){
+				if($mysqlVerNums[2] >= 1){
+					$spatial = true;
+				}
 			}
 		}
 	}
@@ -330,7 +335,7 @@ if($coordArr && !is_numeric($coordArr)){
 				}
 			});
 
-		
+			
 			var polyOptions = {
 				strokeWeight: 0,
 				fillOpacity: 0.45,
@@ -739,6 +744,7 @@ if($coordArr && !is_numeric($coordArr)){
 						echo 'markers'.$groupCnt.'.push(m'.$occId.');',"\n";
 					}
 					?>
+					
 					mcOptions<?php echo $groupCnt; ?> = {
 						styles: [{
 							color: "<?php echo $iconColor; ?>"
@@ -773,7 +779,7 @@ if($coordArr && !is_numeric($coordArr)){
 							if (markers<?php echo $gCnt; ?>) {
 								var newMarkerColor = '#'+newColor;
 								for (i in markers<?php echo $gCnt; ?>) {
-									if(markers<?php echo $gCnt; ?>[i].taxatid == <?php echo $tId; ?>){
+									if(markers<?php echo $gCnt; ?>[i].taxatid == '<?php echo $tId; ?>'){
 										<?php
 										if($clusterOff=="n"){
 											?>
@@ -1122,13 +1128,13 @@ if($coordArr && !is_numeric($coordArr)){
 				<?php
 			}
 			?>
-		
+			
 			// Clear the current selection when the drawing mode is changed, or when the
 			// map is clicked.
 			//google.maps.event.addListener(drawingManager, 'drawingmode_changed', clearSelection);
 			//google.maps.event.addListener(map, 'click', clearSelection);
 			google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', deleteSelectedShape);
-
+			
 			<?php echo ($queryShape?$queryShape:''); ?>
 			
 			<?php
@@ -1234,23 +1240,27 @@ if($coordArr && !is_numeric($coordArr)){
 											<button data-role="none" id="display2" name="display2" onclick='submitMapForm(this.form);' >Search</button>
 										</div>
 									</div>
-									<div style="margin:10 0 10 0;"><hr></div>
+									<div style="margin:5 0 5 0;"><hr /></div>
 									<div>
 										<span style=""><input data-role="none" type='checkbox' name='thes' value='1' <?php if(array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"]) echo "CHECKED"; ?> >Include Synonyms</span>
 									</div>
 									<div id="taxonSearch0">
 										<div id="taxa_autocomplete" >
-											<select data-role="none" id="taxontype" name="type">
-												<option id='familysciname' value='1' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "1") echo "SELECTED"; ?> >Family or Scientific Name</option>
-												<option id='family' value='2' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "2") echo "SELECTED"; ?> >Family only</option>
-												<option id='sciname' value='3' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
-												<option id='highertaxon' value='4' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "4") echo "SELECTED"; ?> >Higher Taxonomy</option>
-												<option id='commonname' value='5' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "5") echo "SELECTED"; ?> >Common Name</option>
-											</select><br />
-											Taxa: <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="<?php if(array_key_exists("taxa",$previousCriteria)) echo $previousCriteria["taxa"]; ?>" title="Separate multiple taxa w/ commas" />
+											<div style="margin-top:5px;">
+												<select data-role="none" id="taxontype" name="type">
+													<option id='familysciname' value='1' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "1") echo "SELECTED"; ?> >Family or Scientific Name</option>
+													<option id='family' value='2' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "2") echo "SELECTED"; ?> >Family only</option>
+													<option id='sciname' value='3' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
+													<option id='highertaxon' value='4' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "4") echo "SELECTED"; ?> >Higher Taxonomy</option>
+													<option id='commonname' value='5' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "5") echo "SELECTED"; ?> >Common Name</option>
+												</select>
+											</div>
+											<div style="margin-top:5px;">
+												Taxa: <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="<?php if(array_key_exists("taxa",$previousCriteria)) echo $previousCriteria["taxa"]; ?>" title="Separate multiple taxa w/ commas" />
+											</div>
 										</div>
 									</div>
-									<div style="margin:10 0 10 0;"><hr></div>
+									<div style="margin:5 0 5 0;"><hr /></div>
 									<!-- <div id="checklistSearch0">
 										<div id="checklist_autocomplete" >
 											Checklist:
@@ -1262,16 +1272,16 @@ if($coordArr && !is_numeric($coordArr)){
 									<div>
 										Country: <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="<?php if(array_key_exists("country",$previousCriteria)) echo $previousCriteria["country"]; ?>" title="Separate multiple terms w/ commas" />
 									</div>
-									<div>
+									<div style="margin-top:5px;">
 										State/Province: <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="<?php if(array_key_exists("state",$previousCriteria)) echo $previousCriteria["state"]; ?>" title="Separate multiple terms w/ commas" />
 									</div>
-									<div>
+									<div style="margin-top:5px;">
 										County: <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="<?php if(array_key_exists("county",$previousCriteria)) echo $previousCriteria["county"]; ?>" title="Separate multiple terms w/ commas" />
 									</div>
-									<div>
+									<div style="margin-top:5px;">
 										Locality: <input data-role="none" type="text" id="locality" style="width:225px;" name="local" value="<?php if(array_key_exists("local",$previousCriteria)) echo $previousCriteria["local"]; ?>" />
 									</div>
-									<div style="margin:10 0 10 0;"><hr></div>
+									<div style="margin:5 0 5 0;"><hr /></div>
 									<div id="shapecriteria">
 										<div id="noshapecriteria" style="display:<?php echo ((!$previousCriteria || ((!$previousCriteria['poly_array']) && (!$previousCriteria['upperlat'])))?'block':'none'); ?>;">
 											<div id="geocriteria" style="display:<?php echo ((!$previousCriteria || ((!$previousCriteria['poly_array']) && (!$previousCriteria['distFromMe']) && (!$previousCriteria['pointlat']) && (!$previousCriteria['upperlat'])))?'block':'none'); ?>;">
@@ -1304,17 +1314,17 @@ if($coordArr && !is_numeric($coordArr)){
 										<div id="deleteshapediv" style="margin-top:5px;display:<?php echo (($previousCriteria && ($previousCriteria['pointlat'] || $previousCriteria['upperlat'] || $previousCriteria['poly_array']))?'block':'none'); ?>;">
 											<button data-role="none" type=button id="delete-button">Delete Selected Shape</button>
 										</div>
-										<div><hr></div>
 									</div>
+									<div style="margin:5 0 5 0;"><hr /></div>
 									<div>
 										Collector's Last Name: 
 										<input data-role="none" type="text" id="collector" style="width:125px;" name="collector" value="<?php if(array_key_exists("collector",$previousCriteria)) echo $previousCriteria["collector"]; ?>" title="" />
 									</div>
-									<div>
+									<div style="margin-top:5px;">
 										Collector's Number: 
 										<input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="<?php if(array_key_exists("collnum",$previousCriteria)) echo $previousCriteria["collnum"]; ?>" title="Separate multiple terms by commas and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750" />
 									</div>
-									<div>
+									<div style="margin-top:5px;">
 										Collection Date: 
 										<input data-role="none" type="text" id="eventdate1" style="width:80px;" name="eventdate1" style="width:100px;" value="<?php if(array_key_exists("eventdate1",$previousCriteria)) echo $previousCriteria["eventdate1"]; ?>" title="Single date or start date of range" /> - 
 										<input data-role="none" type="text" id="eventdate2" style="width:80px;" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$previousCriteria)) echo $previousCriteria["eventdate2"]; ?>" title="End date of range; leave blank if searching for single date" />
@@ -1407,12 +1417,12 @@ if($coordArr && !is_numeric($coordArr)){
 											<div>
 												<button data-role="none" id="symbolizeReset1" name="symbolizeReset1" onclick='' >Reset Symbology</button>
 											</div>
-											<div>
+											<div style="margin-top:5px;">
 												<button data-role="none" id="randomColorColl" name="randomColorColl" onclick='' >Auto Color</button>
 											</div>
 										</div>
 									</div>
-									<hr />
+									<div style="margin:5 0 5 0;"><hr /></div>
 									<div style="" >
 										<div style="margin-top:8px;">
 											<div style="display:table;">
@@ -1433,15 +1443,15 @@ if($coordArr && !is_numeric($coordArr)){
 											<div style="float:left;">
 												<button data-role="none" id="fullquerycsvbut" onclick='openCsvOptions("fullquery");' >Download CSV file</button>
 											</div>
-											<form style="float:right;" name="fullquerykmlform" id="fullquerykmlform" action="kmlmanager.php" method="post" onsubmit="">
-												<div>
+											<div style="float:right;">
+												<form name="fullquerykmlform" id="fullquerykmlform" action="kmlmanager.php" method="post" style="margin-bottom:0px;" onsubmit="">
 													<input data-role="none" name="selectionskml" id="selectionskml" type="hidden" value="" />
 													<input data-role="none" name="starrkml" id="starrselectionkml" type="hidden" value="" />
 													<input data-role="none" name="kmltype" id="kmltype" type="hidden" value="fullquery" />
 													<input data-role="none" name="kmlreclimit" id="kmlreclimit" type="hidden" value="<?php echo $recLimit; ?>" />
 													<button data-role="none" name="submitaction" type="button" onclick='prepSelectionKml(this.form);' >Download KML file</button>
-												</div>
-											</form>
+												</form>
+											</div>
 										</div>
 									</div>
 									<div id="queryrecords" style=""></div>
@@ -1477,16 +1487,19 @@ if($coordArr && !is_numeric($coordArr)){
 												<div>
 													<button data-role="none" id="symbolizeReset2" name="symbolizeReset2" onclick='' >Reset Symbology</button>
 												</div>
-												<div>
+												<div style="margin-top:5px;">
 													<button data-role="none" id="randomColorTaxa" name="randomColorTaxa" onclick='' >Auto Color</button>
 												</div>
 											</div>
 										</div>
-										<hr />
+										<div style="margin:5 0 5 0;"><hr /></div>
 										<?php
-										echo "<div style='font-weight:bold;font-size:125%;'>Taxa Count: ".$mapManager->getChecklistTaxaCnt()."</div>";
+										echo "<div style='font-weight:bold;'>Taxa Count: ".$mapManager->getChecklistTaxaCnt()."</div>";
 										$undFamilyArray = Array();
-										if(array_key_exists("undefined",$checklistArr)) $undFamilyArray = $checklistArr["undefined"]; 
+										if(array_key_exists("undefined",$checklistArr)){ 
+											$undFamilyArray = $checklistArr["undefined"];
+											unset($checklistArr["undefined"]);
+										}
 										foreach($checklistArr as $family => $sciNameArr){
 											$show = false;
 											foreach($sciNameArr as $sciName => $cntArr){
@@ -1495,17 +1508,21 @@ if($coordArr && !is_numeric($coordArr)){
 												}
 											}
 											if($show == true){
-												echo "<div style='margin-left:5;margin-top:5;'><h3>".$family."</h3></div>";
+												echo "<div style='margin-left:5px;'><h3 style='margin-top:8px;margin-bottom:5px;'>".$family."</h3></div>";
 												echo "<div style='display:table;'>";
 												foreach($sciNameArr as $sciName => $fsciArr){
 													if(array_key_exists($fsciArr['tid'],$tIdArr)){
 														echo '<div id="'.$fsciArr['tid'].'keyrow">';
 														echo '<div style="display:table-row;">';
-														echo '<div style="display:table-cell;vertical-align:middle;padding-bottom:5px;" ><input data-role="none" id="taxaColor'.$fsciArr['tid'].'" class="color" style="cursor:pointer;border:1px black solid;height:12px;width:12px;margin-bottom:-2px;font-size:0px;" value="ffffff" onclick="" /></div>';
+														echo '<div style="display:table-cell;vertical-align:middle;padding-bottom:5px;" ><input data-role="none" id="taxaColor'.$fsciArr['tid'].'" class="color" style="cursor:pointer;border:1px black solid;height:12px;width:12px;margin-bottom:-2px;font-size:0px;" value="e69e67" onclick="" /></div>';
 														echo '<div style="display:table-cell;vertical-align:middle;padding-left:8px;"> = </div>';
-														echo "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../../taxa/index.php?taxon=".$fsciArr['sciname']."'>".$fsciArr['sciname']."</a></i></div>";
+														if(is_numeric($fsciArr['tid'])){
+															echo "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../../taxa/index.php?taxon=".$fsciArr['sciname']."'>".$fsciArr['sciname']."</a></i></div>";
+														}
+														else{
+															echo "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i>".$fsciArr['sciname']."</i></div>";
+														}
 														echo "</div>";
-														echo '<div style="display:table-row;height:8px;"></div>';
 														echo '</div>';
 													}
 												}
@@ -1513,17 +1530,21 @@ if($coordArr && !is_numeric($coordArr)){
 											}
 										}
 										if($undFamilyArray){
-											echo "<div style='margin-left:5;margin-top:5;'><h3>Family Not Defined</h3></div>";
+											echo "<div style='margin-left:5px;'><h3 style='margin-top:8px;margin-bottom:5px;'>Family Not Defined</h3></div>";
 											echo "<div style='display:table;'>";
 											foreach($undFamilyArray as $sciName => $usciArr){
 												if(array_key_exists($usciArr['tid'],$tIdArr)){
 													echo '<div id="'.$usciArr['tid'].'keyrow">';
 													echo '<div style="display:table-row;">';
-													echo '<div style="display:table-cell;vertical-align:middle;padding-bottom:5px;" ><input data-role="none" id="taxaColor'.$usciArr['tid'].'" class="color" style="cursor:pointer;border:1px black solid;height:12px;width:12px;margin-bottom:-2px;font-size:0px;" value="ffffff" onclick="" /></div>';
+													echo '<div style="display:table-cell;vertical-align:middle;padding-bottom:5px;" ><input data-role="none" id="taxaColor'.$usciArr['tid'].'" class="color" style="cursor:pointer;border:1px black solid;height:12px;width:12px;margin-bottom:-2px;font-size:0px;" value="e69e67" onclick="" /></div>';
 													echo '<div style="display:table-cell;vertical-align:middle;padding-left:8px;"> = </div>';
-													echo "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../../taxa/index.php?taxon=".$usciArr['sciname']."'>".$usciArr['sciname']."</a></i></div>";
+													if(is_numeric($usciArr['tid'])){
+														echo "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../../taxa/index.php?taxon=".$usciArr['sciname']."'>".$usciArr['sciname']."</a></i></div>";
+													}
+													else{
+														echo "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i>".$usciArr['sciname']."</i></div>";
+													}
 													echo "</div>";
-													echo '<div style="display:table-row;height:8px;"></div>';
 													echo '</div>';
 												}
 											}
@@ -1537,10 +1558,10 @@ if($coordArr && !is_numeric($coordArr)){
 											<div>
 												<button data-role="none" id="clearselectionsbut" onclick='' >Clear Selections</button>
 											</div>
-											<div>
+											<div style="margin-top:5px;">
 												<button data-role="none" id="sendtogpsbut" onclick='openGarminDownloader("query");' >Send to GPS</button>
 											</div>
-											<div>
+											<div style="margin-top:5px;">
 												<button data-role="none" id="selectioncsvbut" onclick='openCsvOptions("selection");' >Download CSV file</button>
 											</div>
 										</div>
@@ -1548,23 +1569,23 @@ if($coordArr && !is_numeric($coordArr)){
 											<div>
 												<button data-role="none" id="zoomtoselectionsbut" onclick='' >Zoom to Selections</button>
 											</div>
-											<form name="selectionkmlform" id="selectionkmlform" action="kmlmanager.php" method="post" onsubmit="">
-												<div>
+											<div style="margin-top:5px;">
+												<form name="selectionkmlform" id="selectionkmlform" action="kmlmanager.php" method="post" style="margin-bottom:0px;" onsubmit="">
 													<input data-role="none" name="selectionskml" id="selectionskml" type="hidden" value="" />
 													<input data-role="none" name="starrkml" id="starrselectionkml" type="hidden" value="" />
 													<input data-role="none" name="kmltype" id="kmltype" type="hidden" value="selection" />
 													<input data-role="none" name="kmlreclimit" id="kmlreclimit" type="hidden" value="<?php echo $recLimit; ?>" />
 													<button data-role="none" name="submitaction" type="button" onclick='prepSelectionKml(this.form);' >Download KML file</button>
-												</div>
-											</form>
-											<div id="dsaddrecbut" style="display:none;">
+												</form>
+											</div>
+											<div id="dsaddrecbut" style="display:none;margin-top:5px;">
 												<button data-role="none" onclick='addSelectedToDs();' >Add to Dataset</button>
 											</div>
 										</div>
 									</div>
-									<hr />
+									<div style="margin:5 0 5 0;"><hr /></div>
 									<form name="selectform" action="" method="post" onsubmit="" target="_blank">
-										<table class="styledtable" style="margin-left:-15px;">
+										<table class="styledtable" style="margin-left:-15px;font-size:12px;">
 											<thead>
 												<tr>
 													<th style="width:15px;"></th>
@@ -1595,16 +1616,16 @@ if($coordArr && !is_numeric($coordArr)){
 								<div id="recordslist" style="">
 									<div style="height:40px;margin-bottom:15px;">
 										<div style="float:left;">
-											<form name="dsselectionkmlform" id="dsselectionkmlform" action="kmlmanager.php" method="post" onsubmit="">
-												<div>
+											<div>
+												<form name="dsselectionkmlform" id="dsselectionkmlform" action="kmlmanager.php" method="post" style="margin-bottom:0px;" onsubmit="">
 													<input data-role="none" name="selectionskml" id="selectionskml" type="hidden" value="" />
 													<input data-role="none" name="starrkml" id="starrselectionkml" type="hidden" value="" />
 													<input data-role="none" name="kmltype" id="kmltype" type="hidden" value="dsselectionquery" />
 													<input data-role="none" name="kmlreclimit" id="kmlreclimit" type="hidden" value="<?php echo $recLimit; ?>" />
 													<button data-role="none" name="submitaction" type="button" onclick='prepSelectionKml(this.form);' >Download KML file</button>
-												</div>
-											</form>
-											<div>
+												</form>
+											</div>
+											<div style="margin-top:5px;">
 												<button data-role="none" id="" onclick='openGarminDownloader("dataset");' >Send to GPS</button>
 											</div>
 										</div>
@@ -1612,24 +1633,24 @@ if($coordArr && !is_numeric($coordArr)){
 											<div>
 												<button data-role="none" id="" onclick='zoomToDsSelections();' >Zoom to Selections</button>
 											</div>
-											<div>
+											<div style="margin-top:5px;">
 												<button data-role="none" id="dsselectionquerycsvbut" onclick='openCsvOptions("dsselectionquery");' >Download CSV file</button>
 											</div>
 										</div>
 									</div>
-									<div id="dsdeleterecbut" style="height:25px;margin-top:-5px;display:none;">
+									<div id="dsdeleterecbut" style="height:25px;display:none;">
 										<div style="float:left;width:100%;">
 											<button data-role="none" id="" onclick='deleteSelectedFromDs();' >Delete Selections</button>
 										</div>
 									</div>
-									<hr />
+									<div style="margin:5 0 5 0;"><hr /></div>
 									<form name="dsselectform" id="dsselectform" action="" method="post" onsubmit="">
-										<div id="recordsetcntdiv" style="float:right;"></div>
-										<div style="float:left;margin-bottom:5px;">
+										<div id="recordsetcntdiv" style="float:right;padding-top:3px;"></div>
+										<div style="float:left;margin-bottom:5px;margin-left:-15px;">
 											<input data-role="none" name="" id="dsselectallcheck" value="" type="checkbox" onclick="selectAll(this);" />
 											Select/Deselect all Records
 										</div>
-										<table class="styledtable" style="margin-left:-16px;">
+										<table class="styledtable" style="margin-left:-15px;font-size:12px;">
 											<thead>
 												<tr>
 													<th style="width:15px;"></th>
@@ -1656,7 +1677,7 @@ if($coordArr && !is_numeric($coordArr)){
 						</div>
 					</div>
 				</div><!-- <a href="../../index.php" style="position:absolute;top:0;right:0;margin-right:38px;margin-bottom:0px;margin-top:1px;padding-top:3px;padding-bottom:3px;z-index:10;" data-role="button" data-inline="true" >Home</a> -->
-				<a href="#" style="position:absolute;top:0;right:0;margin-right:0px;margin-bottom:0px;margin-top:1px;padding-top:3px;padding-bottom:3px;padding-left:20px;z-index:10;height:20px;" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true"></a>
+				<a href="#" style="position:absolute;top:2;right:0;margin-right:0px;margin-bottom:0px;margin-top:1px;padding-top:3px;padding-bottom:3px;padding-left:20px;z-index:10;height:20px;" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true"></a>
 			</div><!-- /content wrapper for padding -->
 		</div><!-- /defaultpanel -->
 	</div>

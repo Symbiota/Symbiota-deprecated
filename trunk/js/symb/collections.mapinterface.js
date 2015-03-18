@@ -1036,41 +1036,41 @@ function loadRecordsetList(uid,selset){
 	sutXmlHttp.send(null);
 	
 	if(recordsets){
-		recordsetlisthtml += '<div id="adddiv" style="border:1px black solid;margin-top:10px;margin-bottom:8px;padding:5px;display:none;">';
+		recordsetlisthtml += '<div id="adddiv" style="border:1px black solid;margin-top:10px;padding:5px;display:none;">';
 	}
 	else{
-		recordsetlisthtml += '<div id="adddiv" style="border:1px black solid;margin-top:10px;margin-bottom:8px;padding:5px;display:block;">';
+		recordsetlisthtml += '<div id="adddiv" style="border:1px black solid;margin-top:10px;padding:5px;display:block;">';
 	}
 	recordsetlisthtml += '<legend><b>Create New Dataset</b></legend><br />';
 	recordsetlisthtml += '<form name="datasetadminform" action="#" method="post">';
 	recordsetlisthtml += '<div>Name<br /><input data-role="none" name="name" id="newdsname" type="text" style="width:250px" /></div>';
-	recordsetlisthtml += '<div>Notes<br /><input data-role="none" name="notes" id="newdsnotes" type="text" style="width:90%;" /></div>';
+	recordsetlisthtml += '<div style="margin-top:5px;">Notes<br /><input data-role="none" name="notes" id="newdsnotes" type="text" style="width:90%;" value="" /></div>';
 	var onclickhandler = "createDataset("+uid+");"
-	recordsetlisthtml += '<div><input data-role="none" name="submitaction" type="button" onclick="'+onclickhandler+'" value="Create New Dataset" /></div></form></div>';
+	recordsetlisthtml += '<div style="margin-top:5px;"><input data-role="none" name="submitaction" type="button" onclick="'+onclickhandler+'" value="Create New Dataset" /></div></form></div>';
 	var toggle = "toggle('adddiv')";
-	recordsetlisthtml += '<div style="width:100%;"><div style="float:right;margin:10px;" title="Create New Dataset" onclick="'+toggle+'">';
-	recordsetlisthtml += '<img src="../../images/add.png" style="width:14px;" /></div></div>';
 	if(recordsets){
-		recordsetlisthtml += '<div id="nodsdiv" style="display:none;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
-	}
-	else{
-		recordsetlisthtml += '<div id="nodsdiv" style="display:block;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
+		recordsetlisthtml += '<div style="width:100%;"><div style="float:right;margin:10px;" title="Create New Dataset" onclick="'+toggle+'">';
+		recordsetlisthtml += '<img src="../../images/add.png" style="width:14px;" /></div></div>';
 	}
 	if(recordsets){
-		recordsetlisthtml += '<div id="dsdiv" style="display:block;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
+		recordsetlisthtml += '<div id="nodsdiv" style="display:none;margin-top:5px;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
 	}
 	else{
-		recordsetlisthtml += '<div id="dsdiv" style="display:none;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
+		recordsetlisthtml += '<div id="nodsdiv" style="display:block;margin-top:5px;">There are no datasets linked to your profile, please create one in the box above to continue.</div>';
+	}
+	if(recordsets){
+		recordsetlisthtml += '<div id="dsdiv" style="display:block;margin-top:5px;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
+	}
+	else{
+		recordsetlisthtml += '<div id="dsdiv" style="display:none;margin-top:5px;">Select a dataset from the list below, or click on the green plus sign to create a new one.</div>';
 	}
 	if(recordsets){
 		recordsetlisthtml += '<div id="dsmanagementdiv" style="display:none;"><hr />';
-		recordsetlisthtml += '<div style="height:25px;margin-top:-5px;">';
+		recordsetlisthtml += '<div style="height:25px;">';
 		recordsetlisthtml += '<div style="float:left;"><button data-role="none" id="" onclick="clearDataset();" >Remove Dataset</button></div>';
-		recordsetlisthtml += '<div id="dsdeletediv" style="height:25px;margin-top:-5px;display:none;">';
-		recordsetlisthtml += '<div style="float:right;"><button data-role="none" onclick="deleteDataset();" >Delete Dataset</button></div>';
+		recordsetlisthtml += '<div id="dsdeletediv" style="float:right;display:none;"><button data-role="none" onclick="deleteDataset();" >Delete Dataset</button></div>';
 		recordsetlisthtml += '</div>';
 		//recordsetlisthtml += '<div style="float:right;"><button data-role="none" id="" onclick="cloneDataset();" >Duplicate Dataset</button></div>';
-		recordsetlisthtml += '</div>';
 		recordsetlisthtml += '</div>';
 		recordsetlisthtml += '<div><hr></div><div id="datasetlist" style="margin-top:8px;">'+recordsets+'</div>';
 	}
@@ -1181,15 +1181,23 @@ function clearDataset(){
 	clearDatasetPts();
 	selectedds = '';
 	selecteddsrole = '';
-	document.getElementById("dsmanagementdiv").style.display = "none";
-	document.getElementById("dsdeletediv").style.display = "none";
+	if(document.getElementById("dsmanagementdiv")){
+		document.getElementById("dsmanagementdiv").style.display = "none";
+	}
+	if(document.getElementById("dsdeletediv")){
+		document.getElementById("dsdeletediv").style.display = "none";
+	}
 	if(document.getElementById("dsaddrecbut")){
 		document.getElementById("dsaddrecbut").style.display = "none";
 	}
-	document.getElementById("dsdeleterecbut").style.display = "none";
-	var ele = document.getElementsByName("dsid");
-	for(var i=0;i<ele.length;i++){
-		ele[i].checked = false;
+	if(document.getElementById("dsdeleterecbut")){
+		document.getElementById("dsdeleterecbut").style.display = "none";
+	}
+	if(document.getElementsByName("dsid")){
+		var ele = document.getElementsByName("dsid");
+		for(var i=0;i<ele.length;i++){
+			ele[i].checked = false;
+		}
 	}
 }
 
@@ -1347,7 +1355,6 @@ function createDataset(uid){
 		alert ("Your browser does not support AJAX!");
 		return;
 	}
-	
 	var url="rpc/maprecordsetmanager.php?uid="+uid+"&action=createset&newname="+newname+"&newnotes"+newnotes;
 	
 	var newDsid = '';
