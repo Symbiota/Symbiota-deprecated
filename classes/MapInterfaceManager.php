@@ -53,16 +53,23 @@ class MapInterfaceManager{
     }
 	
 	public function getMysqlVersion(){
-		$version = '';
-		if(mysql_get_server_info()){
-			$output = mysql_get_server_info();
-			preg_match('@[0-9]+\.[0-9]+\.[0-9]+@', $output, $ver);
-			$version = $ver[0];
+		$version = array();
+		$output = '';
+		if(mysqli_get_server_info($this->conn)){
+			$output = mysqli_get_server_info($this->conn);
 		}
 		else{
 			$output = shell_exec('mysql -V'); 
-			preg_match('@[0-9]+\.[0-9]+\.[0-9]+@', $output, $ver); 
-			$version = $ver[0];
+		}
+		if($output){
+			if(strpos($output,'MariaDB') !== false){
+				$version["db"] = 'MariaDB';
+			}
+			else{
+				$version["db"] = 'mysql';
+				preg_match('@[0-9]+\.[0-9]+\.[0-9]+@',$output,$ver);
+				$version["ver"] = $ver[0];
+			}
 		}
 		return $version;
 	}
@@ -254,11 +261,13 @@ class MapInterfaceManager{
 			if($coordArr){
 				$coordStr = '';
 				$coordStr = 'Polygon((';
+				$keys = array();
 				foreach($coordArr as $k => $v){
-					$coordStr .= $v['k']." ".$v['A'].",";
+					$keys = array_keys($v);
+					$coordStr .= $v[$keys[0]]." ".$v[$keys[1]].",";
 				}
-				$coordStr .= $coordArr[0]['k']." ";
-				$coordStr .= $coordArr[0]['A']."))";
+				$coordStr .= $coordArr[0][$keys[0]]." ";
+				$coordStr .= $coordArr[0][$keys[1]]."))";
 				$sqlWhere .= "AND (ST_Within(p.point,GeomFromText('".$coordStr." '))) ";
 			}
 		}
@@ -874,7 +883,14 @@ class MapInterfaceManager{
 				if(!array_key_exists($collName,$collMapper)) $collName = "undefined"; 
 				$coordArr[$collMapper[$collName]][$occId]["latLngStr"] = $latLngStr;
 				$coordArr[$collMapper[$collName]][$occId]["collid"] = $this->xmlentities($row->collid);
-				$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
+				if($row->tidinterpreted){
+					$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
+				}
+				else{
+					$tidcode = str_replace( " ", "",$row->sciname);
+					$tidcode = str_replace( ".", "",$tidcode);
+					$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
+				}
 				$coordArr[$collMapper[$collName]][$occId]["identifier"] = $this->xmlentities($row->identifier);
 				$coordArr[$collMapper[$collName]][$occId]["institutioncode"] = $this->xmlentities($row->institutioncode);
 				$coordArr[$collMapper[$collName]][$occId]["collectioncode"] = $this->xmlentities($row->collectioncode);
@@ -1377,12 +1393,14 @@ class MapInterfaceManager{
 					$shapeBounds = 'var queryShapeBounds = new google.maps.LatLngBounds();';
 					$queryShape = 'var queryPolygon = new google.maps.Polygon({';
 					$queryShape .= 'paths: [';
+					$keys = array();
 					foreach($coordArr as $k => $v){
-						$queryShape .= 'new google.maps.LatLng('.$v['k'].', '.$v['A'].'),';
-						$shapeBounds .= 'queryShapeBounds.extend(new google.maps.LatLng('.$v['k'].', '.$v['A'].'));';
+						$keys = array_keys($v);
+						$queryShape .= 'new google.maps.LatLng('.$v[$keys[0]].', '.$v[$keys[1]].'),';
+						$shapeBounds .= 'queryShapeBounds.extend(new google.maps.LatLng('.$v[$keys[0]].', '.$v[$keys[1]].'));';
 					}
-					$queryShape .= 'new google.maps.LatLng('.$coordArr[0]['k'].', '.$coordArr[0]['A'].')],';
-					$shapeBounds .= 'queryShapeBounds.extend(new google.maps.LatLng('.$coordArr[0]['k'].', '.$coordArr[0]['A'].'));';
+					$queryShape .= 'new google.maps.LatLng('.$coordArr[0][$keys[0]].', '.$coordArr[0][$keys[1]].')],';
+					$shapeBounds .= 'queryShapeBounds.extend(new google.maps.LatLng('.$coordArr[0][$keys[0]].', '.$coordArr[0][$keys[1]].'));';
 					$queryShape .= $properties;
 					$queryShape .= "queryPolygon.type = 'polygon';";
 					$queryShape .= "google.maps.event.addListener(queryPolygon, 'click', function() {";
@@ -1409,22 +1427,28 @@ class MapInterfaceManager{
 		$returnVec = Array();
 		$this->checklistTaxaCnt = 0;
 		$sql = "";
-        $sql = 'SELECT DISTINCT t.tid, IFNULL(ts.family,o.family) AS family, t.sciname '.
+        $sql = 'SELECT DISTINCT t.tid, IFNULL(ts.family,o.family) AS family, IFNULL(t.sciname,o.sciname) AS sciname '.
 			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
 			'LEFT JOIN taxstatus ts ON t.tid = ts.tid ';
 		if(array_key_exists("surveyid",$stArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 		if(array_key_exists("polycoords",$stArr)) $sql .= "INNER JOIN omoccurpoints p ON o.occid = p.occid ";
-		$sql .= $mapWhere." AND (t.rankid >= 140) AND (ts.taxauthid = 1) ";
+		$sql .= $mapWhere." AND (ISNULL(ts.taxauthid) OR ts.taxauthid = 1) ";
 		$sql .= " ORDER BY family, o.sciname ";
         //echo "<div>".$sql."</div>";
         $result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$family = strtoupper($row->family);
 			if(!$family) $family = 'undefined';
-			$tid = $row->tid;
 			$sciName = $row->sciname;
 			if($sciName){
-				$returnVec[$family][$sciName]["tid"] = $tid;
+				if($row->tid){
+					$returnVec[$family][$sciName]["tid"] = $row->tid;
+				}
+				else{
+					$tidcode = str_replace( " ", "",$row->sciname);
+					$tidcode = str_replace( ".", "",$tidcode);
+					$returnVec[$family][$sciName]["tid"] = $this->xmlentities($tidcode);
+				}
 				$returnVec[$family][$sciName]["sciname"] = $sciName;
 				$this->checklistTaxaCnt++;
 			}
@@ -1569,15 +1593,25 @@ class MapInterfaceManager{
 		$retArr = Array();
 		$sql = "";
         //Get datasets owned by user
-		$sql = 'SELECT d.datasetid, d.name, d.notes, d.sortsequence, d.initialtimestamp, r.role '.
-			'FROM omoccurdatasets d LEFT JOIN userroles r ON d.datasetid = r.tablepk '.
-			'WHERE ((d.uid = '.$uid.') OR ((r.uid = '.$uid.') AND (r.role IN("DatasetAdmin","DatasetEditor","DatasetReader")))) '.
-			'ORDER BY d.name';
+		$sql = 'SELECT datasetid, name '.
+			'FROM omoccurdatasets '.
+			'WHERE (uid = '.$uid.') '.
+			'ORDER BY name';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->datasetid]['datasetid'] = $r->datasetid;
 			$retArr[$r->datasetid]['name'] = $r->name;
-			$retArr[$r->datasetid]['role'] = ($r->role?$r->role:"DatasetAdmin");
+			$retArr[$r->datasetid]['role'] = "DatasetAdmin";
+		}
+		$sql2 = 'SELECT d.datasetid, d.name, r.role '.
+			'FROM omoccurdatasets d INNER JOIN userroles r ON d.datasetid = r.tablepk '.
+			'WHERE (r.uid = '.$uid.') AND (r.role IN("DatasetAdmin","DatasetEditor","DatasetReader")) '.
+			'ORDER BY sortsequence,name';
+		$rs = $this->conn->query($sql2);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->datasetid]['datasetid'] = $r->datasetid;
+			$retArr[$r->datasetid]['name'] = $r->name;
+			$retArr[$r->datasetid]['role'] = $r->role;
 		}
 		$rs->free();
 		return $retArr;
