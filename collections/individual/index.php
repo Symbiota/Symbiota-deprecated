@@ -53,7 +53,7 @@ while (!$done && list($key, $mediarange) = each($accept)) {
        Header("Content-Type: application/json; charset=".$charset);
        $dwcManager = new DwcArchiverOccurrence();
        $dwcManager->setCustomWhereSql(" o.occid = $occid ");
-       echo json_encode($dwcManager->getDwcArray());
+       echo $dwcManager->getAsJson();
        $done = TRUE;
     }
 
