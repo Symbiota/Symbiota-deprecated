@@ -278,7 +278,7 @@ else{
 			<?php 
 			if($recArr){
 				?>
-				<table class="styledtable">
+				<table class="styledtable" style="font-family:Arial;font-size:12px;">
 					<tr>
 						<th>Symbiota ID</th>
 						<?php 
