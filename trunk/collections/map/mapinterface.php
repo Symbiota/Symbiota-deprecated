@@ -715,7 +715,7 @@ if($coordArr && !is_numeric($coordArr)){
 						$type = '';
 						$displayStr = '';      
 						$displayStr = $spArr['identifier'];
-						if($spArr['collid'] == $genObs){
+						if(in_array($spArr['collid'],$genObs)){
 							$type = 'obs';
 							?>
 							var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
@@ -1413,7 +1413,7 @@ if($coordArr && !is_numeric($coordArr)){
 											<?php
 										}
 										?>
-										<div id="symbolizeResetButt" style='margin-right:15px;float:right;' >
+										<div id="symbolizeResetButt" style='float:right;' >
 											<div>
 												<button data-role="none" id="symbolizeReset1" name="symbolizeReset1" onclick='' >Reset Symbology</button>
 											</div>
@@ -1483,7 +1483,7 @@ if($coordArr && !is_numeric($coordArr)){
 												<?php
 											}
 											?>
-											<div id="symbolizeResetButt" style='margin-right:15px;float:right;' >
+											<div id="symbolizeResetButt" style='float:right;' >
 												<div>
 													<button data-role="none" id="symbolizeReset2" name="symbolizeReset2" onclick='' >Reset Symbology</button>
 												</div>
