@@ -3814,23 +3814,6 @@ CREATE TABLE `userlogin` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `userpermissions`
---
-
-DROP TABLE IF EXISTS `userpermissions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `userpermissions` (
-  `uid` int(10) unsigned NOT NULL,
-  `pname` varchar(45) NOT NULL COMMENT 'SuperAdmin, TaxonProfile, IdentKey, RareSpecies, coll-1, cl-1, proj-1',
-  `assignedby` varchar(45) DEFAULT NULL,
-  `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`uid`,`pname`),
-  CONSTRAINT `FK_userpermissions_uid` FOREIGN KEY (`uid`) REFERENCES `users` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `userroles`
 --
 
@@ -3943,12 +3926,9 @@ CREATE TABLE `usertaxonomy` (
 INSERT INTO schemaversion (versionnumber) values ("1.0");
 
 -- Create the general admin user
-INSERT INTO users(uid,firstname,lastname,state,country,email)
-VALUES (1,"General","Administrator","NA","NA","NA");
-INSERT INTO userlogin(uid,username,password)
-VALUES (1,"admin",password("admin"));
-INSERT INTO userpermissions(uid,pname)
-VALUES (1,"SuperAdmin");
+INSERT INTO users(uid,firstname,lastname,state,country,email) VALUES (1,"General","Administrator","NA","NA","NA");
+INSERT INTO userlogin(uid,username,password) VALUES (1,"admin",password("admin"));
+INSERT INTO userroles(uid,role) VALUES (1,"SuperAdmin");
 
 -- Prime taxonunits table
 INSERT IGNORE INTO `taxonunits`(kingdomName,rankid,rankName, dirparentrankid, reqparentrankid) 
