@@ -3,9 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-if(!$SYMB_UID){
-	header('Location: '.$clientRoot.'/profile/index.php?refurl=../taxa/admin/taxonomyeditor.php?target='.$target);
-}
+if(!$SYMB_UID) header('Location: '.$clientRoot.'/profile/index.php?refurl=../taxa/admin/taxonomyeditor.php?'.$_SERVER['QUERY_STRING']);
 
 $submitAction = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
@@ -74,7 +72,6 @@ if($editable){
 
 	$taxonEditorObj->setTaxon();
 }
- 
 ?>
 <html>
 <head>

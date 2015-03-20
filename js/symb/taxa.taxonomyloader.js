@@ -26,14 +26,16 @@ function verifyLoadForm(f){
 		alert("Taxon rank field required.");
 		return false;
 	}
-	if(f.parenttid.value == "" && rankId != "10"){
+	if(f.parentname.value == "" && rankId > "10"){
+		alert("Parent taxon required");
+		return false;
+	}
+	if(f.parenttid.value == "" && rankId > "10"){
 		checkParentExistance(document.loaderform);
 		setTimeout(function (){
-			if(f.parenttid.value == "" && rankId != "10"){
-				alert("Parent taxon field required.");
-				return false;
-			}
+			if(f.parenttid.value != "") f.submit();
 		}, 2000);
+		return false;
 	}
 
 	var accStatusObj = f.acceptstatus;

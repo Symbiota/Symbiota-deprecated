@@ -319,7 +319,6 @@ class UuidFactory {
 			$data = file_get_contents('/dev/random', NULL, NULL, 0, 16);
 		}
 		if(!$data){
-			echo 'option3 ';
 			for($cnt = 0; $cnt < 16; $cnt ++) {
 				$data .= chr ( mt_rand ( 0, 255 ) );
 			}

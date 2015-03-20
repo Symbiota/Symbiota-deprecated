@@ -118,7 +118,7 @@ class TaxonomyEditorManager{
 				}
 				elseif($this->kingdomName){
 					//Kingdom is parent
-					$sqlPar .= 't.rankid = 10 AND t.unitName1 = '.$this->kingdomName;
+					$sqlPar .= 't.rankid = 10 AND t.unitName1 = "'.$this->kingdomName.'"';
 				}
 				else{
 					//Organism is parent
@@ -576,7 +576,15 @@ class TaxonomyEditorManager{
 		 	//Load accepteance status into taxstatus table
 			$tidAccepted = ($dataArr['acceptstatus']?$tid:$dataArr['tidaccepted']);
 			$parTid = $this->cleanInStr($dataArr['parenttid']);
-			if(!$parTid && $dataArr['rankid'] <= 10) $parTid = $tid; 
+			if(!$parTid && $dataArr['rankid'] <= 10) $parTid = $tid;
+			if(!$parTid && $dataArr['parentname']){
+				$sqlPar = 'SELECT tid FROM taxa WHERE sciname = "'.$dataArr['parentname'].'"';
+				$rsPar = $this->conn->query($sqlPar);
+				if($rPar = $rsPar->fetch_object()){
+					$parTid = $rPar->tid;
+				}
+				$rsPar->free();
+			}
 			if($parTid){ 
 				//Get family from hierarchy
 				$family = '';
@@ -589,16 +597,16 @@ class TaxonomyEditorManager{
 					if($r = $rsFam->fetch_object()){
 						$family = $r->sciname;
 					}
+					$rsFam->free();
 				}
 				
 				//Load new record into taxstatus table
 				$sqlTaxStatus = 'INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, parenttid, unacceptabilityreason) '.
 					'VALUES ('.$tid.','.$tidAccepted.','.$this->taxAuthId.','.($family?'"'.$this->cleanInStr($family).'"':'NULL').','.
-					($parTid?$parTid:'NULL').',"'.
-					$this->cleanInStr($dataArr["unacceptabilityreason"]).'") ';
+					$parTid.','.($dataArr["unacceptabilityreason"]?'"'.$this->cleanInStr($dataArr["unacceptabilityreason"]).'"':'NULL').') ';
 				//echo "sqlTaxStatus: ".$sqlTaxStatus;
 				if(!$this->conn->query($sqlTaxStatus)){
-					return "ERROR: Taxon loaded into taxa, but failed to load taxstatus: sql = ".$sqlTaxa;
+					return "ERROR: Taxon loaded into taxa, but failed to load taxstatus: ".$this->conn->error.'; '.$sqlTaxStatus;
 				}
 				
 				//Load hierarchy into taxaenumtree table
@@ -614,6 +622,9 @@ class TaxonomyEditorManager{
 				else{
 					echo 'WARNING: Taxon loaded into taxa, but failed to populate taxaenumtree: '.$this->conn->error;
 				}
+			}
+			else{
+				return "ERROR loading taxon due to missing parentTid";
 			}
 		 	
 			//Link new name to existing specimens and set locality secirity if needed
@@ -641,7 +652,7 @@ class TaxonomyEditorManager{
 			$this->conn->query($sql3);
 		}
 		else{
-			$this->errorStr = 'Taxon Insert FAILED: '.$this->conn->error;
+			$this->errorStr = 'ERROR inserting new taxon: '.$this->conn->error;
 			//$this->errorStr .= '; SQL = '.$sqlTaxa;
 			return $this->errorStr;
 		}
@@ -915,7 +926,7 @@ class TaxonomyEditorManager{
 	}
 	
 	public function setTaxAuthId($taid){
-		if(is_numeric($taid)){
+		if($taid && is_numeric($taid)){
 			$this->taxAuthId = $taid;
 		}
 	}
