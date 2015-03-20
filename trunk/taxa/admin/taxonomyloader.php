@@ -2,20 +2,20 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+
+if(!$SYMB_UID) header('Location: '.$clientRoot.'/profile/index.php?refurl=../taxa/admin/taxonomyloader.php?'.$_SERVER['QUERY_STRING']);
 
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $status = "";
 
 $loaderObj = new TaxonomyEditorManager();
  
-$editable = false;
+$isEditor = false;
 if($isAdmin || array_key_exists("Taxonomy",$userRights)){
-	$editable = true;
+	$isEditor = true;
 }
  
-if($editable){
+if($isEditor){
 	if(array_key_exists('sciname',$_POST)){
 		$status = $loaderObj->loadNewName($_POST);
 		if(is_int($status)){
@@ -64,9 +64,8 @@ if($editable){
 		if($status){
 			echo "<div style='color:red;font-size:120%;'>".$status."</div>";
 		}
-		if($editable){
+		if($isEditor){
 			?>
-		
 			<form id="loaderform" name="loaderform" action="taxonomyloader.php" method="post" onsubmit="return verifyLoadForm(this)">
 				<fieldset>
 					<legend><b>Add New Taxon</b></legend>
@@ -164,22 +163,18 @@ if($editable){
 					</div>
 				</fieldset>
 			</form>
-		</div>
-		<?php 
+			<?php 
 		}
 		else{
 			?>
 			<div style="margin:30px;font-weight:bold;font-size:120%;">
-				Please 
-				<a href="<?php echo $clientRoot; ?>/profile/index.php?refurl=<?php echo $clientRoot?>/taxa/admin/taxonomyloader.php">
-					login
-				</a>
+				You do not have permission to access this page. Please contact the portal manager. 
 			</div>
 			<?php 
 		}
 		include($serverRoot.'/footer.php');
 		?>
-
+	</div>
 </body>
 </html>
 
