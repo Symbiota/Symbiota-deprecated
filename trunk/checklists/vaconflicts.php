@@ -34,9 +34,14 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 				?>
 				<tr>
 					<td>
-						<a href="#" onclick="return openPopup('clsppeditor.php?tid=<?php echo $vArr['tid']."&clid=".$clid; ?>','editorwindow');">
-							<?php echo $vArr['listid'] ?>
+						<a href="#" onclick="return openPopup('clsppeditor.php?tid=<?php echo $vArr['tid']."&clid=".$vArr['clid']; ?>','editorwindow');">
+							<?php 
+							echo $vArr['listid'];
+							?>
 						</a>
+						<?php 
+						if($vArr['clid'] != $clid) echo '<br/>(from child checklists)';
+						?>
 					</td>
 					<td>
 						<a href="#" onclick="return openPopup('../collections/individual/index.php?occid=<?php echo $vArr['occid']; ?>','occwindow');">

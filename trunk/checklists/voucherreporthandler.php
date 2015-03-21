@@ -18,7 +18,7 @@ elseif($rType == 'problemtaxacsv'){
 	$vManager->exportProblemTaxaCsv();
 }
 elseif($rType == 'fullvoucherscsv'){
-	$vManager->downloadDatasetCsv(true);
+	$vManager->downloadDatasetCsv();
 }
 
 ?>
