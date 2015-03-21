@@ -5,6 +5,7 @@ ALTER TABLE `omoccurrences`
   ADD COLUMN `eventID` VARCHAR(45) NULL AFTER `fieldnumber`;
 
 
+DROP TABLE `userpermissions`;
 
 
 

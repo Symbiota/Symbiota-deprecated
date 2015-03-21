@@ -22,7 +22,7 @@ $isEditor = 0;
 if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
 	$isEditor = 1;
 
-	if($action == "Create SQL Fragment"){
+	if($action == "Save Search Terms"){
 		$statusStr = $clManager->saveSql($_POST);
 	}
 	elseif($action == 'Delete SQL Fragment'){
@@ -87,64 +87,28 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 		
 		if($clid && $isEditor){
 			$dynSql = $clManager->getDynamicSql();
-			$country = ''; $state = ''; $county = ''; $locality = ''; $taxon = '';
-			$collid = ''; $recordedBy = '';  
-			$latn = ''; $lats = ''; $lnge = ''; $lngw = '';
-			$latLngOr = 0; $culStatus = 0; $onlyCoord = 0;
+			$termArr = $clManager->parseSql();
+			$collList = $clManager->getCollectionList();
 			if($dynSql){
-				if(preg_match('/country = "(.+)"/',$dynSql,$m)){
-					$country = $m[1];
-				}
-				if(preg_match('/stateprovince = "(.+)"/',$dynSql,$m)){
-					$state = $m[1];
-				}
-				if(preg_match('/county LIKE "([^\)]+)%"/',$dynSql,$m)){
-					$county = trim($m[1],' %');
-				}
-				if(preg_match('/locality LIKE "%([^\)]+)%"/',$dynSql,$m)){
-					$locality = trim($m[1],' %');
-				}
-				if(preg_match('/parenttid = (\d+)\)/',$dynSql,$m)){
-					$taxon = $clManager->getSciname($m[1]);
-				} 
-				if(preg_match('/decimallatitude BETWEEN ([-\.\d]+) AND ([-\.\d]+)\D+/',$dynSql,$m)){
-					$lats = $m[1];
-					$latn = $m[2];
-				} 
-				if(preg_match('/decimallongitude BETWEEN ([-\.\d]+) AND ([-\.\d]+)\D+/',$dynSql,$m)){
-					$lngw = $m[1];
-					$lnge = $m[2];
-				} 
-				if(preg_match('/collid = (\d+)\D/',$dynSql,$m)){
-					$collid = $m[1];
-				}
-				if(preg_match('/recordedby LIKE "%([^\)]+)%"\)/',$dynSql,$m)){
-					$recordedBy = trim($m[1],' %');
-				}
-				if(preg_match('/ OR \(\(o.decimallatitude/',$dynSql) || preg_match('/ OR \(\(o.decimallongitude/',$dynSql)){
-					$latLngOr = 1;
-				}
-				if(preg_match('/cultivationStatus/',$dynSql)){
-					$culStatus = 1;
-				}
-				if(preg_match('/decimallatitude/',$dynSql)){
-					$onlyCoord = 1;
-				}
 				?>
-				<div style="margin:10px 0px;">
-					<b>Search statement:</b> <?php echo $dynSql; ?>
+				<div style="margin:10px;">
+					<?php 
+					$searchStr = '';
+					if($termArr['collid']) $searchStr .= '<b>collection:</b> '.$collList[$termArr['collid']].'; ';
+					if($termArr['country']) $searchStr .= '<b>country:</b> '.$termArr['country'].'; ';
+					if($termArr['state']) $searchStr .= '<b>state:</b> '.$termArr['state'].'; ';
+					if($termArr['county']) $searchStr .= '<b>county:</b> '.$termArr['county'].'; ';
+					if($termArr['locality']) $searchStr .= '<b>locality:</b> '.$termArr['locality'].'; ';
+					if($termArr['taxon']) $searchStr .= '<b>taxon:</b> '.$termArr['taxon'].'; ';
+					if($termArr['recordedBy']) $searchStr .= '<b>recordedBy:</b> '.$termArr['recordedBy'].'; ';
+					if($termArr['lats'] && $termArr['latn']) $searchStr .= '<b>Lat</b> between '.$termArr['lats'].' and '.$termArr['latn'].'; ';
+					if($termArr['lngw'] && $termArr['lnge']) $searchStr .= '<b>Long</b> between '.$termArr['lngw'].' and '.$termArr['lnge'].'; ';
+					if($termArr['latLngOr']) $searchStr .= 'Include Lat/Long and locality as an "OR" condition; ';
+					if($termArr['culStatus']) $searchStr .= 'Exclude cultivated species; ';
+					if($termArr['onlyCoord']) $searchStr .= 'Only include occurrences with coordinates; ';
+					echo trim($searchStr,' ;');
+					?>
 					<span style="margin-left:10px;"><a href="#" onclick="toggle('sqlbuilderdiv');return false;" title="Edit Search Statement"><img src="../images/edit.png" style="width:15px;border:0px;"/></a></span>
-				</div>
-				<?php
-			}
-			else{
-				?>
-				<div style="margin-left:5px;"> 
-					To use the voucher administration functions, it is first necessary to define a search statement (SQL fragment) 
-					that will be used to limit occurrence records to those collected within the vacinity of the research area. 
-					Click the 'Create SQL Fragment' button to build the search statement using the terms supplied in the form. 
-					If needed, your data <a href="mailto:<?php echo $adminEmail; ?>">administrator</a> can aid in 
-					establishing more complex searches than can be created within this form.
 				</div>
 				<?php
 			}
@@ -154,34 +118,31 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 					<legend><b>Edit Search Statement</b></legend>
 					<form name="sqlbuilderform" action="voucheradmin.php" method="post" onsubmit="return validateSqlFragForm(this);">
 						<div style="margin:10px;">
-							Use this form to build an SQL fragment that will be used by the voucher management tools to limit occurrence records 
-							to those collected within the vacinity of the research area. 
-							Click the 'Create SQL Fragment' button to build and save the SQL using the terms supplied in the form. 
-							If needed, your data administrator can aid you in establishing more complex SQL fragments than can be 
-							created within this form.
+							To use the voucher administration functions, it is first necessary to define a search terms 
+							that will be used to limit occurrence records to those collected within the vicinity of the research area. 
 						</div>
 						<table style="margin:15px;">
 							<tr>
 								<td>
 									<div style="margin:2px;">
 										<b>Country:</b>
-										<input type="text" name="country" value="<?php echo $country; ?>" />
+										<input type="text" name="country" value="<?php echo $termArr['country']; ?>" />
 									</div>
 									<div style="margin:2px;">
 										<b>State:</b>
-										<input type="text" name="state" value="<?php echo $state; ?>" />
+										<input type="text" name="state" value="<?php echo $termArr['state']; ?>" />
 									</div>
 									<div style="margin:2px;">
 										<b>County:</b>
-										<input type="text" name="county" value="<?php echo $county; ?>" />
+										<input type="text" name="county" value="<?php echo $termArr['county']; ?>" />
 									</div>
 									<div style="margin:2px;">
 										<b>Locality:</b>
-										<input type="text" name="locality" value="<?php echo $locality; ?>" />
+										<input type="text" name="locality" value="<?php echo $termArr['locality']; ?>" />
 									</div>
 									<div style="margin:2px;">
 										<b>Family or Genus:</b>
-										<input type="text" name="taxon" value="<?php echo $taxon; ?>" />
+										<input type="text" name="taxon" value="<?php echo $termArr['taxon']; ?>" />
 									</div>
 									<div>
 										<b>Collecion:</b> 
@@ -189,47 +150,46 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 											<option value="">Target Specific Collection</option>
 											<option value="">-------------------------------------</option>
 											<?php 
-											$collList = $clManager->getCollectionList();
 											foreach($collList as $id => $name){
-												echo '<option value="'.$id.'" '.($collid==$id?'SELECTED':'').'>'.$name.'</option>';
+												echo '<option value="'.$id.'" '.($termArr['collid']==$id?'SELECTED':'').'>'.$name.'</option>';
 											}
 											?>
 										</select>
 									</div>
 									<div>
 										<b>Collector:</b>  
-										<input name="recordedby" type="text" value="<?php echo $recordedBy; ?>" style="width:250px" />
+										<input name="recordedby" type="text" value="<?php echo $termArr['recordedBy']; ?>" style="width:250px" />
 									</div>
 								</td>
 								<td style="padding-left:20px;">
 									<div style="float:left;">
 										<div>
 											<b>Lat North:</b>
-											<input id="upperlat" type="text" name="latnorth" style="width:70px;" value="<?php echo $latn; ?>" title="Latitude North" /> 
+											<input id="upperlat" type="text" name="latnorth" style="width:70px;" value="<?php echo $termArr['latn']; ?>" title="Latitude North" /> 
 											<a href="#" onclick="openPopup('../collections/mapboundingbox.php','boundingbox')"><img src="../images/world.png" width="15px" title="Find Coordinate" /></a>
 										</div>
 										<div>
 											<b>Lat South:</b>
-											<input id="bottomlat" type="text" name="latsouth" style="width:70px;" value="<?php echo $lats; ?>" title="Latitude South" />
+											<input id="bottomlat" type="text" name="latsouth" style="width:70px;" value="<?php echo $termArr['lats']; ?>" title="Latitude South" />
 										</div>
 										<div>
 											<b>Long East:</b>
-											<input id="rightlong" type="text" name="lngeast" style="width:70px;" value="<?php echo $lnge; ?>" title="Longitude East" />
+											<input id="rightlong" type="text" name="lngeast" style="width:70px;" value="<?php echo $termArr['lnge']; ?>" title="Longitude East" />
 										</div>
 										<div>
 											<b>Long West:</b>
-											<input id="leftlong" type="text" name="lngwest" style="width:70px;" value="<?php echo $lngw; ?>" title="Longitude West" />
+											<input id="leftlong" type="text" name="lngwest" style="width:70px;" value="<?php echo $termArr['lngw']; ?>" title="Longitude West" />
 										</div>
 										<div>
-											<input type="checkbox" name="latlngor" value="1" <?php if ($latLngOr) echo 'CHECKED'; ?> />
+											<input type="checkbox" name="latlngor" value="1" <?php if ($termArr['latLngOr']) echo 'CHECKED'; ?> />
 											Include Lat/Long and locality as an "OR" condition
 										</div>
 										<div>
-											<input name="onlycoord" value="1" type="checkbox" <?php if ($onlyCoord) echo 'CHECKED'; ?> /> 
+											<input name="onlycoord" value="1" type="checkbox" <?php if ($termArr['onlyCoord']) echo 'CHECKED'; ?> /> 
 											Only include occurrences with coordinates
 										</div>
 										<div>
-											<input name="excludecult" value="1" type="checkbox" <?php if ($culStatus) echo 'CHECKED'; ?> /> 
+											<input name="excludecult" value="1" type="checkbox" <?php if ($termArr['culStatus']) echo 'CHECKED'; ?> /> 
 											Exclude cultivated species
 										</div>
 									</div>
@@ -238,7 +198,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 							<tr>
 								<td colspan="2">
 									<div style="margin:10px;">
-										<input type="submit" name="submitaction" value="Create SQL Fragment" />
+										<input type="submit" name="submitaction" value="Save Search Terms" />
 										<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
 										<input type='hidden' name='pid' value='<?php echo $pid; ?>' />
 									</div>
@@ -269,7 +229,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 				?>
 				<div id="tabs" style="margin-top:25px;">
 				    <ul>
-				        <li><a href="#nonVoucheredDiv"><span>Non-Vouchered Taxa</span></a></li>
+				        <li><a href="#nonVoucheredDiv"><span>New Vouchers</span></a></li>
 				        <li><a href="vamissingtaxa.php?clid=<?php echo $clid.'&pid='.$pid.'&start='.$startPos.'&displaymode='.($tabIndex==1?$displayMode:0); ?>"><span>Missing Taxa</span></a></li>
 				        <li><a href="vaconflicts.php?clid=<?php echo $clid.'&pid='.$pid.'&start='.$startPos; ?>"><span>Voucher Conflicts</span></a></li>
 				        <li><a href="#reportDiv"><span>Reports</span></a></li>
@@ -283,16 +243,22 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 								<form name="displaymodeform" method="post" action="voucheradmin.php">
 									<b>Display Mode:</b> 
 									<select name="displaymode" onchange="this.form.submit()">
-										<option value="0">Species List</option>
-										<option value="1" <?php echo ($displayMode?'SELECTED':''); ?>>Batch Linking</option>
+										<option value="0">Non-vouchered taxa list</option>
+										<option value="1" <?php echo ($displayMode==1?'SELECTED':''); ?>>Occurrences for non-vouchered taxa</option>
+										<option value="2" <?php echo ($displayMode==2?'SELECTED':''); ?>>New occurrences for all taxa</option>
 									</select>
 									<input name="clid" type="hidden" value="<?php echo $clid; ?>" />
 									<input name="pid" type="hidden" value="<?php echo $pid; ?>" />
 									<input name="tabindex" type="hidden" value="0" />
 								</form>
 							</div> 
-							<div style='float:left;font-weight:bold;margin-top:3px;height:30px;'>
-								Taxa without Vouchers: <?php echo $nonVoucherCnt; ?>
+							<div style='float:left;margin-top:3px;height:30px;'>
+								<b>Taxa without Vouchers: <?php echo $nonVoucherCnt; ?></b> 
+								<?php 
+								if($clManager->getChildClidArr()){
+									echo ' (excludes taxa from children checklists)';
+								} 
+								?>
 							</div>
 							<div style='float:left;'>
 								<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><img src="../images/refresh.png" style="border:0px;" title="Refresh List" /></a>
@@ -302,11 +268,11 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 								?>
 								<div style="clear:both;">
 									<div style="margin:10px;">
-										Listed below are possible specimen vouchers that can be batch linked to species within the checklist.
+										Listed below are occurrences that can be batch linked to species within the checklist.
 									</div>
 									<div>
 										<?php 
-										if($specArr = $clManager->getNewVouchers($startPos,0)){
+										if($specArr = $clManager->getNewVouchers($startPos,$displayMode)){
 											?>
 											<form name="batchnonvoucherform" method="post" action="voucheradmin.php" onsubmit="return validateBatchNonVoucherForm(this)">
 												<table class="styledtable">

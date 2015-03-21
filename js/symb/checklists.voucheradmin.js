@@ -95,11 +95,6 @@ function validateSqlFragForm(f){
 		alert("Latitude and longitudes values muct be numeric values only");
 		return false;
 	}
-	if(!f.country.value && !f.state.value && !f.county.value && !f.locality.value && !f.taxon.value && 
-			!f.latnorth.value && !f.latsouth.value && !f.lngwest.value && !f.lngeast.value){
-		alert("One of the form fields must contain a value");
-		return false;
-	}
 	return true;
 }
 
