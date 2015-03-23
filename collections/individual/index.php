@@ -292,7 +292,7 @@ header("Content-Type: text/html; charset=".$charset);
 				<div id="occurtab" style="padding:30px;">
 					<div style="float:right;">
 						<div style="float:right;">
-							<a class="twitter-share-button" href="https://twitter.com/share">Tweet</a>
+							<a class="twitter-share-button" href="https://twitter.com/share" data-url="<?php echo $_SERVER['HTTP_HOST'].$clientRoot.'/collections/individual/index.php?occid='.$occid.'&clid='.$clid; ?>">Tweet</a>
 							<script>
 								window.twttr=(function(d,s,id){
 									var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};
