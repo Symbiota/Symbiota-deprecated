@@ -227,10 +227,20 @@ if($coordArr && !is_numeric($coordArr)){
 		var mapSymbol = 'coll';
 		var selected = false;
 		var deselected = false;
+		var positionFound = false;
 		
 		function getCoords(){
-			if (navigator.geolocation) {
-				var timeoutVal = 5000;
+			if (navigator.geolocation){
+				var options = {
+					timeout: 4000,
+					maximumAge: 0
+				};
+				setTimeout(function(){
+					if(!positionFound){
+						gotCoords = false;
+						initialize();
+					}
+				},4005)
 				navigator.geolocation.getCurrentPosition(
 					initialize, 
 					function (error) { 
@@ -238,7 +248,8 @@ if($coordArr && !is_numeric($coordArr)){
 							gotCoords = false;
 							initialize();
 						}
-					}
+					},
+					options
 				);
 			}
 			else{
@@ -281,6 +292,7 @@ if($coordArr && !is_numeric($coordArr)){
 			?>
 			var pos = '';
 			if(gotCoords==true){
+				positionFound = true;
 				pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 				posLat = position.coords.latitude;
 				posLong = position.coords.longitude;
