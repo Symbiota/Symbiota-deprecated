@@ -126,7 +126,7 @@ class GamesManager {
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
-				if(($row->cnt => 3) && (!in_array($row->TID, $previous))){
+				if(($row->cnt > 2) && (!in_array($row->TID, $previous))){
 					$tidArr[] = $row->TID;
 				}
 			}
