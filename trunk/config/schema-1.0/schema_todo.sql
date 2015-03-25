@@ -79,3 +79,10 @@ END
 //
 
 DELIMITER ;
+
+
+
+
+ALTER TABLE `omoccurrencesfulltext` 
+DROP COLUMN `collid`,
+DROP INDEX `Index_occurfull_collid` ;
