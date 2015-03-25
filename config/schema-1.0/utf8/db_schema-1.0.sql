@@ -2421,11 +2421,9 @@ DROP TABLE IF EXISTS `omoccurrencesfulltext`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `omoccurrencesfulltext` (
   `occid` int(11) NOT NULL,
-  `collid` int(11) NOT NULL,
   `locality` text,
   `recordedby` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`occid`),
-  KEY `Index_occurfull_collid` (`collid`),
   FULLTEXT KEY `ft_occur_locality` (`locality`),
   FULLTEXT KEY `ft_occur_recordedby` (`recordedby`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

@@ -556,11 +556,9 @@ ALTER TABLE `omoccurrences`
 
 CREATE TABLE `omoccurrencesfulltext` (
   `occid` INT NOT NULL,
-  `collid` INT NOT NULL,
   `locality` TEXT NULL,
   `recordedby` VARCHAR(255) NULL,
-  PRIMARY KEY (`occid`),
-  INDEX `Index_occurfull_collid` (`collid` ASC)
+  PRIMARY KEY (`occid`)
 )ENGINE = MyISAM DEFAULT CHARSET=latin1;
 
 INSERT INTO omoccurrencesfulltext(occid,collid,recordedby,locality) 
