@@ -836,7 +836,7 @@ function openGarminDownloader(type){
 		}
 	}
 	var url = 'garmin.php?selections='+jsonSelections;
-	newWindow = window.open(url,'popup','scrollbars=1,toolbar=1,resizable=1,width=420,height=350,left=20,top=20');
+	newWindow = window.open(url,'popup','scrollbars=1,toolbar=1,resizable=1,width=450,height=350,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }
@@ -874,7 +874,7 @@ function prepSelectionKml(f){
 }
 
 function openPopup(urlStr){
-	var wWidth = 900;
+	wWidth = opener.document.body.offsetWidth*0.95;
 	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
@@ -1386,8 +1386,7 @@ function openCsvOptions(type){
 	document.getElementById("selectionscsv").value = jsonSelections;
 	document.getElementById("starrcsv").value = starr;
 	var urlStr = 'csvoptions.php?dltype=specimen';
-	var wWidth = 720;
-	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600');
+	newWindow = window.open(urlStr,'popup','scrollbars=0,toolbar=1,resizable=1,width=650,height=650');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }
