@@ -1425,7 +1425,7 @@ if($coordArr && !is_numeric($coordArr)){
 											<?php
 										}
 										?>
-										<div id="symbolizeResetButt" style='float:right;' >
+										<div id="symbolizeResetButt" style='float:right;margin-bottom:5px;' >
 											<div>
 												<button data-role="none" id="symbolizeReset1" name="symbolizeReset1" onclick='' >Reset Symbology</button>
 											</div>
@@ -1434,7 +1434,7 @@ if($coordArr && !is_numeric($coordArr)){
 											</div>
 										</div>
 									</div>
-									<div style="margin:5 0 5 0;"><hr /></div>
+									<div style="margin:5 0 5 0;clear:both;"><hr /></div>
 									<div style="" >
 										<div style="margin-top:8px;">
 											<div style="display:table;">
@@ -1495,7 +1495,7 @@ if($coordArr && !is_numeric($coordArr)){
 												<?php
 											}
 											?>
-											<div id="symbolizeResetButt" style='float:right;' >
+											<div id="symbolizeResetButt" style='float:right;margin-bottom:5px;' >
 												<div>
 													<button data-role="none" id="symbolizeReset2" name="symbolizeReset2" onclick='' >Reset Symbology</button>
 												</div>
@@ -1504,7 +1504,7 @@ if($coordArr && !is_numeric($coordArr)){
 												</div>
 											</div>
 										</div>
-										<div style="margin:5 0 5 0;"><hr /></div>
+										<div style="margin:5 0 5 0;clear:both;"><hr /></div>
 										<?php
 										echo "<div style='font-weight:bold;'>Taxa Count: ".$mapManager->getChecklistTaxaCnt()."</div>";
 										$undFamilyArray = Array();

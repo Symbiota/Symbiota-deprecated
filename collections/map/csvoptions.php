@@ -52,21 +52,21 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 		}
 	</script>
 </head>
-<body  style="width:700px;">
+<body style="width:575px;margin-left:0px;margin-right:0px;background-color:white;overflow-y:hidden;overflow-x:hidden;">
 	<div id="innertext">
 		<h2>Data Usage Guidelines</h2>
-	 	 <div style="margin:15px;">
-	 	 	By downloading data, the user confirms that he/she has read and agrees with the general 
-	 	 	<a href="../../misc/usagepolicy.php#images" target="_blank">data usage terms</a>. 
-	 	 	Note that additional terms of use specific to the individual collections 
-	 	 	may be distributed with the data download. When present, the terms 
-	 	 	supplied by the owning institution should take precedence over the 
-	 	 	general terms posted on the website.
-	 	 </div>
-		<div style='margin:30px;'>
-			<form name="downloadform" action="downloadhandler.php" method="post" onsubmit="return validateDownloadForm(this);">
-				<fieldset>
-					<legend><b>Download Specimen Records</b></legend>
+		<div style="margin:15px;width:575px;">
+			By downloading data, the user confirms that he/she has read and agrees with the general 
+			<a href="../../misc/usagepolicy.php#images" target="_blank">data usage terms</a>. 
+			Note that additional terms of use specific to the individual collections 
+			may be distributed with the data download. When present, the terms 
+			supplied by the owning institution should take precedence over the 
+			general terms posted on the website.
+		</div>
+		<div style='margin:15px;width:575px;'>
+			<fieldset style="width:575px;margin-left:0px;margin-right:0px;">
+				<legend><b>Download Specimen Records</b></legend>
+				<form name="downloadform" action="csvdownloadhandler.php" method="post" onsubmit="return validateDownloadForm(this);">
 					<table>
 						<tr>
 							<td valign="top">
@@ -163,9 +163,9 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 								</div>
 							</td>
 						</tr>
-					</table>							
-				</fieldset>
-			</form>
+					</table>
+				</form>					
+			</fieldset>
 		</div>
 	</div>
 </body>

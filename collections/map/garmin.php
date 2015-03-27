@@ -208,7 +208,7 @@ $fileName = time();
 			}
 		</script>
 	</head> 
-	<body style="width:400px;height:330px;" onload="load()">
+	<body style="width:400px;height:330px;margin-left:0px;margin-right:0px;background-color:white;overflow-y:hidden;overflow-x:hidden;" onload="load()">
 		<div id="innertext">
 			<fieldset style="padding:10px;height:280px;width:350px;">
 				<legend><b>Garmin GPS Downloader</b></legend>
