@@ -28,44 +28,50 @@ $(document).ready(function() {
 	});
 });
 
-function toggle(target){
-  	var divs = document.getElementsByTagName("div");
-  	var i;
-  	for(i = 0; i < divs.length; i++) {
-	  	var divObj = divs[i];
-		if(divObj.className == target){
-			if(divObj.style.display=="none"){
-				divObj.style.display="block";
-			}
-		 	else {
-		 		divObj.style.display="none";
-		 	}
-		}
-	}
-
-  	var spans = document.getElementsByTagName("span");
-  	var j;
-  	for(j = 0; j < spans.length; j++) {
-	  	var spanObj = spans[j];
-		if(spanObj.className == target){
-			if(spanObj.style.display=="none"){
-				spanObj.style.display="inline";
-			}
-		 	else {
-		 		spanObj.style.display="none";
-		 	}
-		}
-	}
+function toggleEditFields(){
+  	toggle('editfield');
+	toggle('kingdomdiv');
 }
 
-function toggleById(target){
-	var obj = document.getElementById(target);
-	if(obj.style.display=="none"){
-		obj.style.display="block";
+function toggle(target){
+	var ele = document.getElementById(target);
+	if(ele){
+		if(ele.style.display=="none"){
+			ele.style.display="";
+  		}
+	 	else {
+	 		ele.style.display="none";
+	 	}
 	}
- 	else {
- 		obj.style.display="none";
- 	}
+	else{
+	  	var divs = document.getElementsByTagName("div");
+	  	var i;
+	  	for(i = 0; i < divs.length; i++) {
+		  	var divObj = divs[i];
+			if(divObj.className == target){
+				if(divObj.style.display=="none"){
+					divObj.style.display="block";
+				}
+			 	else {
+			 		divObj.style.display="none";
+			 	}
+			}
+		}
+	
+	  	var spans = document.getElementsByTagName("span");
+	  	var j;
+	  	for(j = 0; j < spans.length; j++) {
+		  	var spanObj = spans[j];
+			if(spanObj.className == target){
+				if(spanObj.style.display=="none"){
+					spanObj.style.display="inline";
+				}
+			 	else {
+			 		spanObj.style.display="none";
+			 	}
+			}
+		}
+	}
 }
 
 function deleteAcceptedLink(tidAcc){
