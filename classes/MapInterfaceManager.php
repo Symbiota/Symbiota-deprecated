@@ -888,7 +888,7 @@ class MapInterfaceManager{
 					$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
 				}
 				else{
-					$tidcode = str_replace( " ", "",$row->sciname);
+					$tidcode = strtolower(str_replace( " ", "",$row->sciname));
 					$tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
 					$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
 				}
@@ -1442,7 +1442,7 @@ class MapInterfaceManager{
 				$tidcode = $row->tid;
 			}
 			else{
-				$tidcode = str_replace( " ", "",$row->sciname);
+				$tidcode = strtolower(str_replace( " ", "",$row->sciname));
 				$tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
 			}
 			$sciName = $row->sciname;
