@@ -86,7 +86,7 @@ if($editable){
 		var tid = <?php echo $taxonEditorObj->getTid(); ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
 	</script>
-	<script language="javascript" src="../../js/symb/taxa.taxonomyeditor.js?ver=20150330"></script>
+	<script language="javascript" src="../../js/symb/taxa.taxonomyeditor.js?ver=20150329"></script>
 </head>
 <body>
 <?php
@@ -521,34 +521,36 @@ if($editable){
 									echo "<div style='margin:20px;'>No Synonyms Linked to this Taxon</div>";
 								}
 								?>
-								<form id="changetonotacceptedform" name="changetonotacceptedform" action="taxonomyeditor.php" method="post" onsubmit="return verifyChangeToNotAcceptedForm(this);">
-									<fieldset id="tonotaccepted" style="width:90%px;display:none;">
-										<legend><b>Change to Not Accepted</b></legend>
-										<div style="margin:5px;">
-											<b>Accepted Name:</b> 
-											<input id="ctnafacceptedstr" name="acceptedstr" type="text" style="width:270px;" />
-											<input name="tidaccepted" type="hidden" value="" />
-										</div>
-										<div style="margin:5px;">
-											<b>Reason:</b> 
-											<input name="unacceptabilityreason" type="text" style="width:400px;" />
-										</div>
-										<div style="margin:5px;">
-											<b>Notes:</b> 
-											<input name="notes" type="text" style="width:400px;" />
-										</div>
-										<div style="margin:5px;">
-											<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
-											<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
-											<input type="hidden" name="tabindex" value="1" />
-											<input type="hidden" name="submitaction" value="changetonotaccepted" /> 
-											<input type='submit' name='pseudosubmit' value='Change Status to Not Accepted' />
-										</div>
-										<div style="margin:5px;">
-											* Synonyms will be transferred to Accepted Taxon
-										</div>
-									</fieldset>
-								</form>
+								<div id="tonotaccepted" style="display:none;">
+									<form id="changetonotacceptedform" name="changetonotacceptedform" action="taxonomyeditor.php" method="post" onsubmit="return verifyChangeToNotAcceptedForm(this);">
+										<fieldset style="width:90%px;">
+											<legend><b>Change to Not Accepted</b></legend>
+											<div style="margin:5px;">
+												<b>Accepted Name:</b> 
+												<input id="ctnafacceptedstr" name="acceptedstr" type="text" style="width:270px;" />
+												<input name="tidaccepted" type="hidden" value="" />
+											</div>
+											<div style="margin:5px;">
+												<b>Reason:</b> 
+												<input name="unacceptabilityreason" type="text" style="width:400px;" />
+											</div>
+											<div style="margin:5px;">
+												<b>Notes:</b> 
+												<input name="notes" type="text" style="width:400px;" />
+											</div>
+											<div style="margin:5px;">
+												<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
+												<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
+												<input type="hidden" name="tabindex" value="1" />
+												<input type="hidden" name="submitaction" value="changetonotaccepted" /> 
+												<input type='submit' name='pseudosubmit' value='Change Status to Not Accepted' />
+											</div>
+											<div style="margin:5px;">
+												* Synonyms will be transferred to Accepted Taxon
+											</div>
+										</fieldset>
+									</form>
+								</div>
 								<?php 
 							}
 							?>

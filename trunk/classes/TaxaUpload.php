@@ -225,6 +225,9 @@ class TaxaUpload{
 		$recordCnt = 0;
 		rewind($fh);
 		
+		$this->conn->query('SET autocommit=0');
+		$this->conn->query('SET unique_checks=0');
+		$this->conn->query('SET foreign_key_checks=0');
 		while($record = fgets($fh)){
 			$recordArr = explode($delimtStr,$record);
 			if($recordArr[0] == "[TU]"){
@@ -234,8 +237,12 @@ class TaxaUpload{
 				$recordCnt++;
 			}
 		}
-
 		$this->deleteIllegalHomonyms();
+		$this->conn->query('COMMIT');
+		$this->conn->query('SET autocommit=1');
+		$this->conn->query('SET unique_checks=1');
+		$this->conn->query('SET foreign_key_checks=1');
+		
 		$this->outputMsg($recordCnt.' records loaded');
 		fclose($fh);
 		$this->setUploadCount();
