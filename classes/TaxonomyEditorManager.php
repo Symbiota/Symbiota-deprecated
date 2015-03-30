@@ -40,7 +40,7 @@ class TaxonomyEditorManager{
 	}
 	
 	public function setTaxon(){
-		$sqlTaxon = 'SELECT tid, kingdomname, rankid, sciname, unitind1, unitname1, '.
+		$sqlTaxon = 'SELECT tid, rankid, sciname, unitind1, unitname1, '.
 			'unitind2, unitname2, unitind3, unitname3, author, source, notes, securitystatus, initialtimestamp '.
 			'FROM taxa '.
 			'WHERE (tid = '.$this->tid.')';
@@ -48,7 +48,6 @@ class TaxonomyEditorManager{
 		$rs = $this->conn->query($sqlTaxon);
 		if($r = $rs->fetch_object()){
 			$this->sciName = $r->sciname;
-			$this->kingdomName = $r->kingdomname;
 			$this->rankid = $r->rankid;
 			$this->unitInd1 = $r->unitind1;
 			$this->unitName1 = $r->unitname1;
@@ -65,7 +64,8 @@ class TaxonomyEditorManager{
 		
 		if($this->sciName){
 			$this->setRankName();
-
+			$this->setHierarchy();
+			
 			//Deal with TaxaStatus table stuff
 			$sqlTs = "SELECT ts.parenttid, ts.tidaccepted, ts.unacceptabilityreason, ".
 				"ts.family, t.sciname, t.author, t.notes, ts.sortsequence ".
@@ -139,7 +139,6 @@ class TaxonomyEditorManager{
 			}
 			$rsTs->free();
 
-			$this->setHierarchy();
 			if($this->isAccepted == 1) $this->setSynonyms();
 			if($this->parentTid) $this->setParentName();
 		}
@@ -166,13 +165,25 @@ class TaxonomyEditorManager{
 	private function setHierarchy(){
 		unset($this->hierarchyArr);
 		$this->hierarchyArr = array();
-		$sql = 'SELECT parenttid FROM taxaenumtree '.
+		$sql = 'SELECT parenttid '.
+			'FROM taxaenumtree '.
 			'WHERE (tid = '.$this->tid.') AND (taxauthid = '.$this->taxAuthId.')';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$this->hierarchyArr[] = $r->parenttid;
 		}
 		$rs->free();
+		//Set kingdom name
+		if($this->hierarchyArr){
+			$sql2 = 'SELECT sciname '.
+				'FROM taxa '.
+				'WHERE (tid IN('.implode(',',$this->hierarchyArr).')) AND (rankid = 10)';
+			$rs2 = $this->conn->query($sql2);
+			while($r2 = $rs2->fetch_object()){
+				$this->kingdomName = $r2->sciname;
+			}
+			$rs2->free();
+		}
 	}
 
 	private function setSynonyms(){
@@ -204,7 +215,7 @@ class TaxonomyEditorManager{
 		}
 		$rs->free();
 	}
-	
+
 	//Edit Functions
 	public function submitTaxonEdits($postArr){
 		$statusStr = '';
@@ -217,7 +228,6 @@ class TaxonomyEditorManager{
 			'unitind3 = '.($postArr['unitind3']?'"'.$this->cleanInStr($postArr['unitind3']).'"':'NULL').', '.
 			'unitname3 = '.($postArr['unitname3']?'"'.$this->cleanInStr($postArr['unitname3']).'"':'NULL').', '.
 			'author = '.($postArr['author']?'"'.$this->cleanInStr($postArr['author']).'"':'NULL').', '.
-			'kingdomname = '.($postArr['kingdomname']?'"'.$this->cleanInStr($postArr['kingdomname']).'"':'NULL').', '.
 			'rankid = '.($postArr['rankid']?$this->cleanInStr($postArr['rankid']):'NULL').', '.
 			'source = '.($postArr['source']?'"'.$this->cleanInStr($postArr['source']).'"':'NULL').', '.
 			'notes = '.($postArr['notes']?'"'.$this->cleanInStr($postArr['notes']).'"':'NULL').', '.
@@ -520,46 +530,13 @@ class TaxonomyEditorManager{
 	}
 
 	//Load Taxon functions
-	public function getKingdomNameArr($setPrefered = 0){
-		$retArr = array();
-		//Get kingdomName list
-		$sql = 'SELECT DISTINCT kingdomname FROM taxonunits ORDER BY kingdomname';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[$r->kingdomname] = 0;
-		}
-		$rs->free();
-		if($setPrefered){
-			//identify the preferred
-			$pKingdom = '';
-			$cnt = 0;
-			$sql2 = 'SELECT kingdomname, count(*) as cnt '.
-				'FROM taxa '. 
-				'GROUP BY kingdomname';
-			//echo $sql2;
-			$rs2 = $this->conn->query($sql2);
-			while($r2 = $rs2->fetch_object()){
-				if($r2->cnt > $cnt){
-					$pKingdom = $r2->kingdomname;
-				}
-			}
-			$rs2->free();
-			if($pKingdom && in_array($pKingdom,$retArr)){
-				$retArr[$pKingdom] = 1;
-			}
-		}
-		
-		return $retArr;
-	}
-	
 	public function loadNewName($dataArr){
 		//Load new name into taxa table
 		$tid = 0;
-		$sqlTaxa = 'INSERT INTO taxa(sciname, author, kingdomname, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, '.
+		$sqlTaxa = 'INSERT INTO taxa(sciname, author, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, '.
 			'source, notes, securitystatus) '.
 			'VALUES ("'.$this->cleanInStr($dataArr['sciname']).'",'.
 			($dataArr['author']?'"'.$this->cleanInStr($dataArr['author']).'"':'NULL').','.
-			($dataArr['kingdomname']?'"'.$this->cleanInStr($dataArr["kingdomname"]).'"':'NULL').','.
 			($dataArr['rankid']?$dataArr['rankid']:'NULL').','.
 			($dataArr['unitind1']?'"'.$this->cleanInStr($dataArr['unitind1']).'"':'NULL').',"'.
 			$this->cleanInStr($dataArr['unitname1']).'",'.

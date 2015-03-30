@@ -1,7 +1,7 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 
-class TaxaLoaderManager{
+class TaxaUpload{
 	
 	private $conn;
 	private $uploadFileName;
@@ -22,7 +22,12 @@ class TaxaLoaderManager{
 	}
 
 	function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
+		if($this->uploadTargetPath && $this->uploadFileName){
+			if(file_exists($this->uploadTargetPath.$this->uploadFileName)){
+				unlink($this->uploadTargetPath.$this->uploadFileName);
+			}
+		}
+		if(!($this->conn === false)) $this->conn->close();
 		if($this->verboseMode == 2){
 			if($this->logFH) fclose($this->logFH);
 		}
@@ -169,9 +174,6 @@ class TaxaLoaderManager{
 			$this->outputMsg('ERROR: Scientific name is not mapped to &quot;scinameinput&quot;');
 		}
 		fclose($fh);
-		if(file_exists($this->uploadTargetPath.$this->uploadFileName)){
-			unlink($this->uploadTargetPath.$this->uploadFileName);
-		}
 		$this->setUploadCount();
 	}
 
@@ -180,8 +182,9 @@ class TaxaLoaderManager{
 		//Initiate upload process
 		$extraArr = array();
 		$authArr = array();
-		$this->conn->query('TRUNCATE TABLE uploadtaxa');
-		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'rb') or die("Can't open file");
+		$this->conn->query('DELETE FROM uploadtaxa');
+		$this->conn->query('OPTIMIZE TABLE uploadtaxa');
+		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r') or die("Can't open file");
 		$this->outputMsg('Taxa file uploaded and successfully opened');
 		
 		//First run through file and grab and store Authors, Synonyms, and Vernaculars
@@ -196,15 +199,17 @@ class TaxaLoaderManager{
 			}
 			if(substr($record,4) != '[TU]'){
 				$recordArr = explode($delimtStr,$record);
+				$this->cleanInArr($recordArr);
+				$this->encodeArr($recordArr);
 				if($recordArr[0] == "[SY]"){
-					$extraArr[$recordArr[2]]['s'] = $this->cleanInStr($recordArr[3]);
+					$extraArr[$recordArr[2]]['s'] = $recordArr[3];
 				}
 				elseif($recordArr[0] == "[TA]"){
-					$authArr[$recordArr[1]] = $this->cleanInStr($recordArr[2]);
+					$authArr[$recordArr[1]] = $recordArr[2];
 				}
 				elseif($recordArr[0] == "[VR]"){
-					$extraArr[$recordArr[4]]['v'] = $this->cleanInStr($recordArr[3]);
-					$extraArr[$recordArr[4]]['l'] = $this->cleanInStr($recordArr[5]);
+					$extraArr[$recordArr[4]]['v'] = $recordArr[3];
+					$extraArr[$recordArr[4]]['l'] = $recordArr[5];
 				}
 			}
 		}
@@ -223,11 +228,14 @@ class TaxaLoaderManager{
 		while($record = fgets($fh)){
 			$recordArr = explode($delimtStr,$record);
 			if($recordArr[0] == "[TU]"){
+				$this->cleanInArr($recordArr);
+				$this->encodeArr($recordArr);
 				$this->loadItisTaxonUnit($recordArr,$extraArr,$authArr);
 				$recordCnt++;
 			}
 		}
 
+		$this->deleteIllegalHomonyms();
 		$this->outputMsg($recordCnt.' records loaded');
 		fclose($fh);
 		$this->setUploadCount();
@@ -236,15 +244,16 @@ class TaxaLoaderManager{
 	private function loadItisTaxonUnit($tuArr,$extraArr,$authArr){
 		if(count($tuArr) > 24){
 			
-			$unitInd3 = $this->cleanInStr($tuArr[8]?$tuArr[8]:$tuArr[6]);
-			$unitName3 = $this->cleanInStr($tuArr[9]?$tuArr[9]:$tuArr[7]);
-			$sciName = $this->cleanInStr(trim($tuArr[2]." ".$tuArr[3].($tuArr[4]?" ".$tuArr[4]:"")." ".$tuArr[5]." ".$unitInd3." ".$unitName3));
+			$unitInd3 = ($tuArr[8]?$tuArr[8]:$tuArr[6]);
+			$unitName3 = ($tuArr[9]?$tuArr[9]:$tuArr[7]);
+			$sciName = trim($tuArr[2]." ".$tuArr[3].($tuArr[4]?" ".$tuArr[4]:"")." ".$tuArr[5]." ".$unitInd3." ".$unitName3);
+			$sciName = preg_replace('/\s\s+/', ' ',$sciName);
 			$author = '';
 			if($tuArr[20] && array_key_exists($tuArr[20],$authArr)){
 				$author = $authArr[$tuArr[20]];
 				unset($authArr[$tuArr[20]]);
 			}
-			$sourceId = $this->cleanInStr($tuArr[1]);
+			$sourceId = $tuArr[1];
 			$sourceAcceptedId = '';
 			$acceptance = '1';
 			$vernacular = '';
@@ -264,26 +273,45 @@ class TaxaLoaderManager{
 			$sql = "INSERT INTO uploadtaxa(SourceId,scinameinput,sciname,unitind1,unitname1,unitind2,unitname2,unitind3,".
 				"unitname3,SourceParentId,author,rankid,SourceAcceptedId,acceptance,vernacular,vernlang) ".
 				"VALUES (".$sourceId.',"'.$sciName.'","'.$sciName.'",'.
-				($tuArr[2]?'"'.$this->cleanInStr($tuArr[2]).'"':"NULL").",".
-				($tuArr[3]?'"'.$this->cleanInStr($tuArr[3]).'"':"NULL").",".
-				($tuArr[4]?'"'.$this->cleanInStr($tuArr[4]).'"':"NULL").",".
-				($tuArr[5]?'"'.$this->cleanInStr($tuArr[5]).'"':"NULL").",".
+				($tuArr[2]?'"'.$tuArr[2].'"':"NULL").",".
+				($tuArr[3]?'"'.$tuArr[3].'"':"NULL").",".
+				($tuArr[4]?'"'.$tuArr[4].'"':"NULL").",".
+				($tuArr[5]?'"'.$tuArr[5].'"':"NULL").",".
 				($unitInd3?'"'.$unitInd3.'"':"NULL").",".($unitName3?'"'.$unitName3.'"':"NULL").",".
-				($tuArr[18]?$this->cleanInStr($tuArr[18]):"NULL").",".
+				($tuArr[18]?$tuArr[18]:"NULL").",".
 				($author?'"'.$author.'"':"NULL").",".
-				($tuArr[24]?$this->cleanInStr($tuArr[24]):"NULL").",".
+				($tuArr[24]?$tuArr[24]:"NULL").",".
 				($sourceAcceptedId?$sourceAcceptedId:'NULL').','.$acceptance.','.
 				($vernacular?'"'.$vernacular.'"':'NULL').','.
 				($vernlang?'"'.$vernlang.'"':'NULL').')';
-			//$this->outputMsg('<div>'.$sql.'</div>';
+			//echo '<div>'.$sql.'</div>';
 			if(!$this->conn->query($sql)){
 				//Failed because name is already in table, thus replace if this one is accepted
 				if($acceptance){
 					$sql = 'REPLACE'.substr($sql,6);
-					$this->conn->query($sql);
+					if(!$this->conn->query($sql)){
+						$this->outputMsg('ERROR loading ITIS taxon: '.$this->conn->error);
+					}
 				}
 			}
 		}
+	}
+	
+	private function deleteIllegalHomonyms(){
+		$homonymArr = array();
+		//Grab homonyms
+		$sql = 'SELECT sciname, COUNT(*) cnt FROM uploadtaxa GROUP BY sciname HAVING cnt > 1';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$homonymArr[] = $r->sciname;
+		}
+		$rs->free();
+		//Remove unaccepted, illegal homonyms
+		if($homonymArr){
+			$sql2 = 'DELETE FROM uploadtaxa '.
+				'WHERE (sciname IN("'.implode('","',$homonymArr).'")) AND (acceptance = 0) ';
+			$this->conn->query($sql2);
+		}		
 	}
 
 	public function cleanUpload(){
@@ -750,7 +778,7 @@ class TaxaLoaderManager{
 		//Tag non-accepted taxa linked to non-existent taxon
 		$sql5 = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.acceptedStr = u2.sciname '.
 			'SET u1.notes = "FAILED: Non-accepted taxa linked to non-existent taxa" '.
-			'WHERE u1.acceptance = 0 AND u1.tidAccepted IS NULL AND u2.sciname IS NULL ';
+			'WHERE (u1.acceptance = 0) AND (u1.tidAccepted IS NULL) AND (u2.sciname IS NULL) ';
 		if(!$this->conn->query($sql5)){
 			$this->outputMsg('ERROR tagging non-accepted taxon linked to non-existent taxon: '.$this->conn->error,1);
 		}
@@ -758,13 +786,13 @@ class TaxaLoaderManager{
 		//Tag non-accepted linked to other non-accepted taxa
 		$sql6a = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.acceptedStr = u2.sciname '.
 			'SET u1.notes = "FAILED: Non-accepted linked to another non-accepted taxa" '.
-			'WHERE u1.acceptance = 0 AND u1.tidAccepted IS NULL AND u2.acceptance = 0';
+			'WHERE (u1.acceptance = 0) AND (u1.tidAccepted IS NULL) AND (u2.acceptance = 0)';
 		if(!$this->conn->query($sql6a)){
 			$this->outputMsg('ERROR tagging non-accepted linked to non-accepted (#1): '.$this->conn->error,1);
 		}
 		$sql6b = 'UPDATE uploadtaxa u INNER JOIN taxstatus ts ON u.tidaccepted = ts.tid '.
 			'SET u.notes = "FAILED: Non-accepted linked to another non-accepted taxa" '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND u.acceptance = 0 AND u.tidAccepted IS NOT NULL AND ts.tid <> ts.tidaccepted';
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (u.acceptance = 0) AND (u.tidAccepted IS NOT NULL) AND (ts.tid <> ts.tidaccepted)';
 		if(!$this->conn->query($sql6b)){
 			$this->outputMsg('ERROR tagging non-accepted linked to non-accepted (#2): '.$this->conn->error,1);
 		}
@@ -772,7 +800,7 @@ class TaxaLoaderManager{
 		//Tag taxa with non-existent parents
 		$sql6 = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.parentStr = u2.sciname '.
 			'SET u1.notes = "FAILED: Taxa with non-existent parent taxon" '.
-			'WHERE u1.parentTid IS NULL AND u2.sciname IS NULL ';
+			'WHERE (u1.tid IS NULL) AND (u1.parentTid IS NULL) AND (u2.sciname IS NULL) ';
 		if(!$this->conn->query($sql6)){
 			$this->outputMsg('ERROR tagging taxa with non-existent parent taxon: '.$this->conn->error,1);
 		}
@@ -780,14 +808,14 @@ class TaxaLoaderManager{
 		//Tag taxa with a FAILED parent
 		$sql8a = 'SELECT COUNT(u1.sciname) as cnt '.
 			'FROM uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.parentStr = u2.sciname '.
-			'WHERE u2.notes LIKE "FAILED%" AND (u1.notes IS NULL OR u1.notes NOT LIKE "FAILED%")';
+			'WHERE (u2.notes LIKE "FAILED%") AND (u1.notes IS NULL OR u1.notes NOT LIKE "FAILED%")';
 		$rs8a = $this->conn->query($sql8a);
 		$loopCnt = 0;
 		while($r8a = $rs8a->fetch_object()){
 			if($r8a->cnt == 0) break;
 			$sql8b = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.parentStr = u2.sciname '.
 				'SET u1.notes = "FAILED: Taxa linked to a FAILED parent" '.
-				'WHERE u2.notes LIKE "FAILED%" AND (u1.notes IS NULL OR u1.notes NOT LIKE "FAILED%")';
+				'WHERE (u2.notes LIKE "FAILED%") AND (u1.notes IS NULL OR u1.notes NOT LIKE "FAILED%")';
 			if(!$this->conn->query($sql8b)){
 				$this->outputMsg('ERROR tagging taxa with FAILED parents: '.$this->conn->error,1);
 			}
@@ -869,9 +897,9 @@ class TaxaLoaderManager{
 			}
 			
 			$sql = 'UPDATE uploadtaxa ut1 INNER JOIN uploadtaxa ut2 ON ut1.sourceacceptedid = ut2.sourceid '.
-				'INNER JOIN taxa t ON ut2.scinameinput = t.sciname '.
+				'INNER JOIN taxa t ON ut2.sciname = t.sciname '.
 				'SET ut1.tidaccepted = t.tid '.
-				'WHERE ut1.acceptance = 0 AND ut1.tidaccepted IS NULL AND ut1.sourceacceptedid IS NOT NULL';
+				'WHERE (ut1.acceptance = 0) AND (ut1.tidaccepted IS NULL) AND (ut1.sourceacceptedid IS NOT NULL) AND (ut2.sourceid IS NOT NULL)';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
@@ -908,9 +936,9 @@ class TaxaLoaderManager{
 
 			//Update parentTids
 			$sql = 'UPDATE uploadtaxa ut1 INNER JOIN uploadtaxa ut2 ON ut1.sourceparentid = ut2.sourceid '.
-				'INNER JOIN taxa t ON ut2.scinameinput = t.sciname '.
+				'INNER JOIN taxa t ON ut2.sciname = t.sciname '.
 				'SET ut1.parenttid = t.tid '.
-				'WHERE ut1.parenttid IS NULL AND ut1.sourceparentid IS NOT NULL';
+				'WHERE ut1.parenttid IS NULL AND ut1.sourceparentid IS NOT NULL AND ut2.sourceid IS NOT NULL';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
@@ -967,15 +995,14 @@ class TaxaLoaderManager{
 			else{
 				$vernArr[] = $vernStr;
 			}
-			$langStr = $this->cleanInStr($r->vernlang);
+			$langStr = $r->vernlang;
 			if(!$langStr) $langStr = 'en';
 			foreach($vernArr as $vStr){
-				$vStr = $this->cleanInStr($vStr);
 				if($vStr){
 					$sqlInsert = 'INSERT INTO taxavernaculars (tid, VernacularName, Language, Source) '.
-						'VALUES('.$r->tid.',"'.$vStr.'","'.$langStr.'",'.($r->source?'"'.$this->cleanInStr($r->source).'"':'NULL').')';
+						'VALUES('.$r->tid.',"'.$vStr.'","'.$langStr.'",'.($r->source?'"'.$r->source.'"':'NULL').')';
 					if(!$this->conn->query($sqlInsert)){
-						$this->outputMsg('ERROR: '.$this->conn->error,1);
+						if(substr($this->conn->error,0,9) != 'Duplicate') $this->outputMsg('ERROR: '.$this->conn->error,1);
 					}
 				}
 			}
@@ -1098,7 +1125,7 @@ class TaxaLoaderManager{
 
 	public function getSourceArr(){
 		$sourceArr = array();
-		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'rb') or die("Can't open file");
+		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r') or die("Can't open file");
 		$headerArr = fgetcsv($fh);
 		foreach($headerArr as $field){
 			$fieldStr = strtolower(trim($field));
@@ -1130,10 +1157,13 @@ class TaxaLoaderManager{
 		if(!$tPath){
 			$tPath = ini_get('upload_tmp_dir');
 		}
-		if(!$tPath){
-			$tPath = $GLOBALS["serverRoot"]."/temp";
+		if(!$tPath && isset($GLOBALS["TEMP_DIR_ROOT"])){
+			$tPath = $GLOBALS['TEMP_DIR_ROOT'];
 		}
-		$this->uploadTargetPath = $tPath."/"; 
+		if(!$tPath){
+			$tPath = $GLOBALS['SERVER_ROOT']."/temp/downloads";
+		}
+		if(substr($this->uploadTargetPath,-1) != '/') $this->uploadTargetPath = $tPath."/"; 
 	}
 
 	public function setFileName($fName){
@@ -1185,11 +1215,23 @@ class TaxaLoaderManager{
 		}
 	}
 
+	private function cleanInArr(&$inArr){
+		foreach($inArr as $k => $v){
+			$inArr[$k] = $this->cleanInStr($v);
+		}
+	}
+
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
+	}
+	
+	private function encodeArr(&$inArr){
+		foreach($inArr as $k => $v){
+			$inArr[$k] = $this->encodeString($v);
+		}
 	}
 
 	private function encodeString($inStr){
