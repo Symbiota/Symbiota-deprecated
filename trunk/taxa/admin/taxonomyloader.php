@@ -35,6 +35,8 @@ if($isEditor){
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 	<script language="javascript" src="../../js/symb/taxa.taxonomyloader.js?ver=150316"></script>
+	<script type="text/javascript">
+	</script>
 </head>
 <body>
 <?php
@@ -77,20 +79,9 @@ if($isEditor){
 						<div style="float:left;width:170px;">Author:</div>
 						<input type='text' id='author' name='author' style='width:300px;border:inset;' />
 					</div>
-					<div style="margin-top:5px;clear:both;">
-						<div style="float:left;width:170px;">Kingdom:</div>
-						<select id="kingdomname" name="kingdomname" style="border:inset;">
-							<?php 
-							$kArr = $loaderObj->getKingdomNameArr(1);
-							foreach($kArr as $kname => $isPreferred){
-								echo '<option '.($isPreferred?'selected':'').'>'.$kname.'</option>';
-							}
-							?>
-						</select>
-					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Taxon Rank:</div>
-						<select id="rankid" name="rankid" title="Rank ID" onchange="" style="border:inset;">
+						<select id="rankid" name="rankid" title="Rank ID" onchange="kingdomChanged()" style="border:inset;">
 							<option value="">Select Taxon Rank</option>
 							<option value="0">Non-Ranked Node</option>
 							<option value="">--------------------------------</option>

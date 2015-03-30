@@ -7,8 +7,7 @@ include_once($serverRoot.'/classes/EOLUtilities.php');
 class TaxonomyUtilities extends Manager{
 
 	private $taxAuthId = 1;
-	private $kingdomId;
-	private $kingdomStr;
+	private $kingdomName;
 	private $activeThesResources = 'eol';
 	
 	function __construct() {
@@ -61,7 +60,7 @@ class TaxonomyUtilities extends Manager{
 			}
 			if($taxonArr){
 				$this->logOrEcho('Taxon found',1);
-				if(!$this->kingdomId) $this->setDefaultKingdom();
+				if(!$this->kingdomName) $this->setDefaultKingdom();
 				if(!array_key_exists('parent',$taxonArr) || !$taxonArr['parent']){
 					$this->determineParents($taxonArr, $family);
 				}
@@ -175,9 +174,6 @@ class TaxonomyUtilities extends Manager{
 					$rankid = $this->getRankId($taxonArr['taxonRank']);
 					if($rankid) $taxonArr['rankid'] = $rankid;
 				}
-				if(!$this->kingdomId && isset($taxonArr['parent'])){
-					$this->setKingdomIdFromParent($taxonArr['parent']);
-				}
 				if(!isset($taxonArr['source'])) $taxonArr['source'] = 'EOL - '.date('Y-m-d G:i:s');
 			}
 		}
@@ -252,8 +248,8 @@ class TaxonomyUtilities extends Manager{
 		 * OUPUT: $processedTaxonArr [ex: array('newtid' => '3424','taxonarr' => $taxonArr,'warnings' => array('WARNING: name is a homonym','NOTICE: author not returned'))]
 		 * 
 		 */
-		if(!$this->kingdomId){
-			//$this->errorMessage = 'ERROR loading '.$taxonArr['sciname'].', kingdomId is not set';
+		if(!$this->kingdomName){
+			//$this->errorMessage = 'ERROR loading '.$taxonArr['sciname'].', kingdomName is not set';
 			return false; 
 		}
 		$newTid = 0;
@@ -272,14 +268,14 @@ class TaxonomyUtilities extends Manager{
 		$rs->free();
 		
 		if(!$newTid){
-			$sqlInsert = 'INSERT INTO taxa(sciname, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, rankid, kingdomid, source) '.
+			$sqlInsert = 'INSERT INTO taxa(sciname, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, rankid, source) '.
 				'VALUES("'.$taxonArr['sciname'].'",'.
 				(isset($taxonArr['unitind1']) && $taxonArr['unitind1']?'"'.$taxonArr['unitind1'].'"':'NULL').',"'.
 				$taxonArr['unitname1'].'",'.
 				(isset($taxonArr['unitind2']) && $taxonArr['unitind2']?'"'.$taxonArr['unitind2'].'"':'NULL').','.($taxonArr['unitname2']?'"'.$taxonArr['unitname2'].'"':'NULL').','.
 				($taxonArr['unitind3']?'"'.$taxonArr['unitind3'].'"':'NULL').','.($taxonArr['unitname3']?'"'.$taxonArr['unitname3'].'"':'NULL').','.
 				(isset($taxonArr['author']) && $taxonArr['author']?'"'.$taxonArr['author'].'"':'NULL').','.
-				$taxonArr['rankid'].','.$this->kingdomId.','.($taxonArr['source']?'"'.$taxonArr['source'].'"':'NULL').')';
+				$taxonArr['rankid'].','.($taxonArr['source']?'"'.$taxonArr['source'].'"':'NULL').')';
 			if($this->conn->query($sqlInsert)){
 				$newTid = $this->conn->insert_id;
 			}
@@ -319,17 +315,10 @@ class TaxonomyUtilities extends Manager{
 		$rankId = '';
 		if($rankStr){
 			$sqlRank = 'SELECT rankid FROM taxonunits WHERE rankname = "'.$rankStr.'"';
-			//$sqlRank = 'SELECT rankid, kingdomstr FROM taxonunits WHERE rankname = "'.$rankStr.'"';
 			$rsRank = $this->conn->query($sqlRank);
 			$defaultRankId = 0;
 			while($rRank = $rsRank->fetch_object()){
 				$rankId = $rRank->rankid;
-				/*
-				if(strtolower($rRank->kingdomstr) == strtolower($this->kingdomStr)){
-					$rankId = $rRank->rankid;
-				}
-				$defaultRankId = $rRank->rankid;
-				*/
 			}
 			if(!$rankId && $defaultRankId){
 				$rankId = $defaultRankId;
@@ -342,15 +331,6 @@ class TaxonomyUtilities extends Manager{
 		return $rankId;
 	}
 
-	private function setKingdomIdFromParent($parArr){
-		if(isset($parArr['taxonRank']) && $parArr['taxonRank'] == 'kingdom'){
-			$this->setKingdomIdFromString($parArr['sciname']);
-		}
-		if(!$this->kingdomId && isset($parArr['parent'])){
-			$this->setKingdomIdFromParent($parArr['parent']);
-		}
-	}
-	
 	private function setDefaultKingdom(){
 		$sql = 'SELECT t.sciname, COUNT(e.tid) as cnt '. 
 			'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.parenttid '.
@@ -359,24 +339,9 @@ class TaxonomyUtilities extends Manager{
 			'ORDER BY cnt desc';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
-			$this->kingdomStr = $r->sciname;
-			$this->setKingdomIdFromString($r->sciname);
+			$this->kingdomName = $r->sciname;
 		}
 		$rs->free();
-	}
-
-	private function setKingdomIdFromString($inStr){
-		switch(strtolower($inStr)){
-			case 'plantae':
-				$this->kingdomId = 3;
-				break;
-			case 'fungi':
-				$this->kingdomId = 4;
-				break;
-			case 'animalia':
-				$this->kingdomId = 5;
-				break;
-		}
 	}
 
 	private function getParentTid($taxonArr){
@@ -425,10 +390,10 @@ class TaxonomyUtilities extends Manager{
 				}
 			}
 			if($taxonArr['rankid']){
-				if(!$this->kingdomStr) $this->setDefaultKingdom();
-				if($this->kingdomStr){
+				if(!$this->kingdomName) $this->setDefaultKingdom();
+				if($this->kingdomName){
 					$parArr = array(
-						'sciname' => $this->kingdomStr, 
+						'sciname' => $this->kingdomName, 
 						'taxonRank' => 'kingdom', 
 						'rankid' => '10' 
 					);
@@ -592,12 +557,6 @@ class TaxonomyUtilities extends Manager{
 	public function setTaxAuthId($id){
 		if($id && is_numeric($id)){
 			$this->taxAuthId = $id;
-		}
-	}
-
-	public function setKingdomId($id){
-		if($id && is_numeric($id)){
-			$this->kingdomId = $id;
 		}
 	}
 

@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TaxaLoaderManager.php');
+include_once($serverRoot.'/classes/TaxaUpload.php');
 header("Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl='.$CLIENT_ROOT.'/taxa/admin/taxaloader.php');
 
@@ -14,7 +14,7 @@ if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
-$loaderManager = new TaxaLoaderManager();
+$loaderManager = new TaxaUpload();
 $loaderManager->setTaxaAuthId($taxAuthId);
 
 $status = "";
@@ -341,13 +341,14 @@ if($isEditor){
 						<legend style="font-weight:bold;font-size:120%;">ITIS Upload File</legend>
 						<div style="margin:10px;">
 							ITIS data extract from the <a href="http://www.itis.gov/access.html" target="_blank">ITIS Download Page</a> can be uploaded
-							using this function. Note that the file needs to be in their single file format (.bin).
-							If you are looking for a full kingdom extraction, follow the "Download a specific taxonomic group" link and
-							a link to a data extract will be emailed to you.   
+							using this function. Note that the file needs to be in their single file pipe-delimited format 
+							(example: <a href="CyprinidaeItisExample.bin">CyprinidaeItisExample.bin</a>). 
+							File might have .csv extension, even though it is NOT comma delimited. 
+							This upload option is not guaranteed to work if the ITIS download format change often. 
 							Large data files can be compressed as a ZIP file before import. 
 							If the file upload step fails without displaying an error message, it is possible that the 
-							file size excedes the file upload limits set within your PHP installation (see your php configuraton file).
-							Note that if synonyms and vernaculars are included, these data will also be incorporated into the upload process.
+							file size exceeds the file upload limits set within your PHP installation (see your php configuration file). 
+							If synonyms and vernaculars are included, these data will also be incorporated into the upload process.
 						</div>
 						<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
 						<div class="itisoverrideopt">
