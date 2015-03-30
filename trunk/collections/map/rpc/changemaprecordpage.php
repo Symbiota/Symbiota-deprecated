@@ -77,10 +77,10 @@ if($occArr){
 	$recordListHtml .= '</div>';
 	$recordListHtml .= '<table class="styledtable" style="margin-left:-15px;font-size:12px;">';
 	$recordListHtml .= '<tr>';
-	$recordListHtml .= '<th style="width:15px;"></th>';
+	$recordListHtml .= '<th style="width:10px;"></th>';
 	$recordListHtml .= '<th>Catalog #</th>';
 	$recordListHtml .= '<th>Collector</th>';
-	$recordListHtml .= '<th style="width:40px;">Date</th>';
+	$recordListHtml .= '<th>Date</th>';
 	$recordListHtml .= '<th>Scientific Name</th>';
 	$recordListHtml .= '</tr>';
 	$trCnt = 0;
@@ -88,15 +88,15 @@ if($occArr){
 		$trCnt++;
 		$infoBoxLabel = "'".$recArr["c"]."'";
 		$recordListHtml .= '<tr '.($trCnt%2?'class="alt"':'').' id="tr'.$occId.'" >';
-		$recordListHtml .= '<td>';
+		$recordListHtml .= '<td style="width:10px;">';
 		$recordListHtml .= '<input type="checkbox" class="occcheck" id="ch'.$occId.'" name="occid[]" value="'.$occId.'" onchange="findSelections(this);" '.(in_array($occId,$selections)?"checked":"").' />';
 		$recordListHtml .= '</td>';
-		$recordListHtml .= '<td id="cat'.$occId.'" >'.$recArr["cat"].'</td>';
+		$recordListHtml .= '<td id="cat'.$occId.'" >'.wordwrap($recArr["cat"], 7, "<br />\n", true).'</td>';
 		$recordListHtml .= '<td id="label'.$occId.'" >';
-		$recordListHtml .= '<a href="#" onmouseover="openOccidInfoBox('.$infoBoxLabel.','.$recArr["lat"].','.$recArr["lon"].');" onmouseout="closeOccidInfoBox();" onclick="openIndPopup('.$occId.'); return false;">'.$recArr["c"].'</a>';
+		$recordListHtml .= '<a href="#" onmouseover="openOccidInfoBox('.$infoBoxLabel.','.$recArr["lat"].','.$recArr["lon"].');" onmouseout="closeOccidInfoBox();" onclick="openIndPopup('.$occId.'); return false;">'.wordwrap($recArr["c"], 12, "<br />\n", true).'</a>';
 		$recordListHtml .= '</td>';
-		$recordListHtml .= '<td id="e'.$occId.'" >'.$recArr["e"].'</td>';
-		$recordListHtml .= '<td id="s'.$occId.'" >'.$recArr["s"].'</td>';
+		$recordListHtml .= '<td id="e'.$occId.'" >'.wordwrap($recArr["e"], 10, "<br />\n", true).'</td>';
+		$recordListHtml .= '<td id="s'.$occId.'" >'.wordwrap($recArr["s"], 12, "<br />\n", true).'</td>';
 		$recordListHtml .= '</tr>';
 	}
 	$recordListHtml .= '</table>';
