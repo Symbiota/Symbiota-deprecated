@@ -397,7 +397,7 @@ class MapInterfaceManager{
 		$retStr = '';
 		if($sqlWhere){
 			$retStr = 'WHERE '.substr($sqlWhere,4);
-			$retStr .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
+			$retStr .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL) ";
 		}
 		else{
 			//Make the sql valid, but return nothing
@@ -1243,7 +1243,6 @@ class MapInterfaceManager{
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 			if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurpoints p ON o.occid = p.occid ";
 			$sql .= $sqlWhere;
-			$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
 			if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 				//Is global rare species reader, thus do nothing to sql and grab all records
 			}
@@ -1280,7 +1279,6 @@ class MapInterfaceManager{
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurpoints p ON o.occid = p.occid ";
 		$sql .= $mapWhere;
-		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
 		}

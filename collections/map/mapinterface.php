@@ -792,13 +792,6 @@ if($coordArr && !is_numeric($coordArr)){
 								var newMarkerColor = '#'+newColor;
 								for (i in markers<?php echo $gCnt; ?>) {
 									if(markers<?php echo $gCnt; ?>[i].taxatid == '<?php echo $tId; ?>'){
-										<?php
-										if($clusterOff=="n"){
-											?>
-											markerCluster<?php echo $gCnt; ?>.removeMarker(markers<?php echo $gCnt; ?>[i]);
-											<?php
-										}
-										?>
 										if(markers<?php echo $gCnt; ?>[i].customInfo=='obs'){
 											if(markers<?php echo $gCnt; ?>[i].selected==true){
 												var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:newMarkerColor,fillOpacity:1,scale:1,strokeColor:"#10D8E6",strokeWeight:2};
@@ -820,6 +813,13 @@ if($coordArr && !is_numeric($coordArr)){
 											markers<?php echo $gCnt; ?>[i].setIcon(markerIcon);
 										}
 										newMarkers<?php echo $tId; ?>.push(markers<?php echo $gCnt; ?>[i]);
+										<?php
+										if($clusterOff=="n"){
+											?>
+											markerCluster<?php echo $gCnt; ?>.removeMarker(markers<?php echo $gCnt; ?>[i]);
+											<?php
+										}
+										?>
 									}
 								}
 							}
@@ -904,7 +904,7 @@ if($coordArr && !is_numeric($coordArr)){
 						if(markerCluster<?php echo $tId; ?>){
 							markerCluster<?php echo $tId; ?>.clearMarkers();
 						}
-						document.getElementById("taxaColor<?php echo $tId; ?>").color.fromString("FFFFFF");
+						document.getElementById("taxaColor<?php echo $tId; ?>").color.fromString("E69E67");
 						<?php
 					}
 					?>
@@ -914,7 +914,7 @@ if($coordArr && !is_numeric($coordArr)){
 					<?php
 					foreach($grpCntArr as $gcnt){
 						?>
-						changeMainKey<?php echo $gcnt; ?>("e69e67");
+						changeMainKey<?php echo $gcnt; ?>("E69E67");
 						document.getElementById("keyColor<?php echo $gcnt; ?>").color.fromString("E69E67");
 						<?php
 					}
@@ -981,9 +981,7 @@ if($coordArr && !is_numeric($coordArr)){
 					'click', 
 					function(){ 
 						document.getElementById("randomColorTaxa").disabled = true;
-						if(mapSymbol == 'coll'){
-							resetMainSymbology();
-						}
+						resetMainSymbology();
 						var usedColors = [];
 						<?php
 						foreach($tIdArr as $tId => $gcArr){
@@ -1573,7 +1571,7 @@ if($coordArr && !is_numeric($coordArr)){
 											<div style="margin-top:5px;">
 												<button data-role="none" id="sendtogpsbut" onclick='openGarminDownloader("query");' >Send to GPS</button>
 											</div>
-											<div style="margin-top:5px;">
+											<div style="margin-top:5px;margin-bottom:5px;">
 												<button data-role="none" id="selectioncsvbut" onclick='openCsvOptions("selection");' >Download CSV file</button>
 											</div>
 										</div>
@@ -1595,7 +1593,7 @@ if($coordArr && !is_numeric($coordArr)){
 											</div>
 										</div>
 									</div>
-									<div style="margin:5 0 5 0;"><hr /></div>
+									<div style="margin:5 0 5 0;clear:both;"><hr /></div>
 									<form name="selectform" action="" method="post" onsubmit="" target="_blank">
 										<table class="styledtable" style="margin-left:-15px;font-size:12px;">
 											<thead>
