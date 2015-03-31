@@ -53,6 +53,12 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script src="../../js/symb/collections.imageoccursubmit.js?ver=141119" type="text/javascript"></script>
 	<script src="../../js/symb/shared.js?ver=141119" type="text/javascript"></script>
+	<script type="text/javascript">
+	function validateImgOccurForm(f){
+
+		return true;
+	}
+	</script>
 </head>
 <body>
 	<?php
@@ -171,7 +177,7 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 			<?php 
 		}
 		else{
-			echo 'You are authorized to submit to an observation. ';
+			echo 'You are not authorized to submit to an observation. ';
 			echo '<br/><b>Please contact an administrator to obtain the necessary permissions.</b> ';
 		}
 		?>
