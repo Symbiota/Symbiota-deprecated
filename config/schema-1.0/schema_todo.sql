@@ -66,8 +66,8 @@ INSERT INTO omoccurpoints (occid,point)
 SELECT occid,Point(decimalLatitude, decimalLongitude) FROM omoccurrences WHERE decimalLatitude IS NOT NULL AND decimalLongitude IS NOT NULL;
 
 DELIMITER //
-DROP TRIGGER IF EXISTS `omoccurpoints_insert`//
-CREATE TRIGGER `omoccurpoints_insert` AFTER INSERT ON `omoccurrences`
+DROP TRIGGER IF EXISTS `omoccurrencesfulltext_insert`//
+CREATE TRIGGER `omoccurrencesfulltextpoint_insert` AFTER INSERT ON `omoccurrences`
 FOR EACH ROW BEGIN
   IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
 	  INSERT INTO omoccurpoints (
@@ -78,28 +78,46 @@ FOR EACH ROW BEGIN
 		Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`)
 	  );
   END IF;
+
+  INSERT INTO omoccurrencesfulltext (
+    `occid`,
+    `recordedby`,
+    `locality`
+  ) VALUES (
+    NEW.`occid`,
+    NEW.`recordedby`,
+    NEW.`locality`
+  );
 END
 //
 
-DROP TRIGGER IF EXISTS `omoccurpoints_update`//
-CREATE TRIGGER `omoccurpoints_update` AFTER UPDATE ON `omoccurrences`
+DROP TRIGGER IF EXISTS `omoccurrencesfulltext_update`//
+CREATE TRIGGER `omoccurrencesfulltextpoint_update` AFTER UPDATE ON `omoccurrences`
 FOR EACH ROW BEGIN
   IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
 	  UPDATE omoccurpoints SET
 		`point` = Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`)
 	  WHERE `occid` = NEW.`occid`;
   END IF;
+
+  UPDATE omoccurrencesfulltext SET
+    `recordedby` = NEW.`recordedby`,
+    `locality` = NEW.`locality`
+  WHERE `occid` = NEW.`occid`;
 END
 //
 
-DROP TRIGGER IF EXISTS `omoccurpoints_delete`//
-CREATE TRIGGER `omoccurpoints_delete` BEFORE DELETE ON `omoccurrences`
+DROP TRIGGER IF EXISTS `omoccurrencesfulltext_delete`//
+CREATE TRIGGER `omoccurrencesfulltextpoint_delete` BEFORE DELETE ON `omoccurrences`
 FOR EACH ROW BEGIN
   DELETE FROM omoccurpoints WHERE `occid` = OLD.`occid`;
+  DELETE FROM omoccurrencesfulltext WHERE `occid` = OLD.`occid`;
 END
 //
 
 DELIMITER ;
+
+
 
 
 

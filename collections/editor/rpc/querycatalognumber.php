@@ -4,8 +4,8 @@
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$catNum = $con->real_escape_string($_REQUEST['cn']);
 	$collId = $con->real_escape_string($_REQUEST['collid']);
-	$occid = $con->real_escape_string($_REQUEST['occid']);
-	
+	$occid = $con->real_escape_string(isset($_REQUEST['occid'])?$_REQUEST['occid']:0);
+
 	if($catNum && $collId){
 		$sql = 'SELECT occid FROM omoccurrences '.
 			'WHERE catalognumber = "'.$catNum.'" AND collid = '.$collId.' AND occid <> '.$occid;
@@ -14,8 +14,8 @@
 		while ($row = $result->fetch_object()) {
 			$retArr[] = $row->occid;
 		}
-		$result->close();
+		$result->free();
 	}
 	$con->close();
-	echo 'catnu:'.implode(',',$retArr);
+	echo implode(',',$retArr);
 ?>

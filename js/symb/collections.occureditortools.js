@@ -282,7 +282,6 @@ function searchDupesCatalogNumber(f){
 	var cnValue = f.catalognumber.value;
 	if(cnValue){
 		var occid = f.occid.value;
-		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId + "&occid=" + occid;
 		
 		document.getElementById("dupeMsgDiv").style.display = "block";
 		document.getElementById("dupesearch").style.display = "block";
@@ -296,7 +295,7 @@ function searchDupesCatalogNumber(f){
 			if(msg.length > 6){
 				catalogNumberIsDupe = true;
 				if(confirm("Record(s) of same catalog number already exists. Do you want to view this record?")){
-					var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+					var occWindow=open("dupesearch.php?occidquery=catnu:"+msg+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 					if(occWindow != null){
 						if (occWindow.opener == null) occWindow.opener = self;
 						occWindow.focus();
