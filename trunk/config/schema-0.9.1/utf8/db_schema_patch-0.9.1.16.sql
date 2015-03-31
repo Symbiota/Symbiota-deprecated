@@ -562,8 +562,8 @@ CREATE TABLE `omoccurrencesfulltext` (
   PRIMARY KEY (`occid`)
 )ENGINE = MyISAM DEFAULT CHARSET=utf8;
 
-INSERT INTO omoccurrencesfulltext(occid,collid,recordedby,locality) 
-  SELECT occid,collid,recordedby,locality 
+INSERT INTO omoccurrencesfulltext(occid,recordedby,locality) 
+  SELECT occid,recordedby,locality 
   FROM omoccurrences;
 
 ALTER TABLE `omoccurrencesfulltext` 

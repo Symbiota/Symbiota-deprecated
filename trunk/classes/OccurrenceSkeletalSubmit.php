@@ -94,14 +94,16 @@ class OccurrenceSkeletalSubmit {
 	private function getCountry($state){
 		$countryStr = '';
 		if($state){
-			if(in_array($state,$this->stateList)){
+			if(in_array(ucwords($state),$this->stateList)){
 				$countryStr = 'United States';
 			}
 			else{
-				$sql = 'SELECT ';
+				$sql = 'SELECT c.countryname '.
+					'FROM lkupstateprovince s INNER JOIN lkupcountry c ON s.countryid = c.countryid '.
+					'WHERE s.statename = "alberta"';
 				$rs = $this->conn->query($sql);
-				while ($r = $rs->fetch_object()) {
-					$retArr[] = $r->occid;
+				if($r = $rs->fetch_object()) {
+					$countryStr = $r->countryname;
 				}
 				$rs->free();
 			}
