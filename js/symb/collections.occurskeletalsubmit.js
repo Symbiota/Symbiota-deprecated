@@ -151,21 +151,25 @@ function createOccurDiv(catalogNumber, occid){
 	var newAnchor = document.createElement('a');
 	newAnchor.setAttribute("id", "a-"+occid);
 	newAnchor.setAttribute("href", "#");
-	newAnchor.setAttribute("onclick", "openEditPopup("+occid+");return false;");
+	newAnchor.setAttribute("onclick", "openEditPopup("+occid+",false);return false;");
 	var newText = document.createTextNode(catalogNumber);
 	newAnchor.appendChild(newText);
+
+	//Image submission  
+	var newAnchor2 = document.createElement('a');
+	newAnchor2.setAttribute("id", "a2-"+occid);
+	newAnchor2.setAttribute("href", "#");
+	newAnchor2.setAttribute("onclick", "openEditPopup("+occid+",true);return false;");
+	var newImg = document.createElement('img');
+	newImg.setAttribute("src", "../../images/jpg.png");
+	newImg.setAttribute("style", "width:13px;margin-left:5px;");
+	newAnchor2.appendChild(newImg);
 
 	var newDiv = document.createElement('div');
 	newDiv.setAttribute("id", "o-"+occid);
 	newDiv.appendChild(newAnchor);
+	newDiv.appendChild(newAnchor2);
 
-	//Image submission  
-	/*
-	var newInput = document.createElement('input');
-	newInput.setAttribute("type", "hidden");
-	newInput.setAttribute("name", "occid[]");
-	newInput.setAttribute("value", occid);
-	*/
 	return newDiv;
 }
 
@@ -176,9 +180,11 @@ function deleteOccurrence(occid){
 	}
 }
 
-function openEditPopup(occidStr){
+function openEditPopup(occidStr,targetImgTab){
 	collid = $( "#fcollid" ).val();
 	var urlStr = "occurrenceeditor.php?collid="+collid+"&q_catalognumber=occid"+occidStr+"&occindex=0";
+	if(targetImgTab) urlStr = urlStr + '&tabtarget=2';
+	
 	var wWidth = 900;
 	if(document.getElementById('maintable').offsetWidth){
 		wWidth = document.getElementById('maintable').offsetWidth*1.05;
