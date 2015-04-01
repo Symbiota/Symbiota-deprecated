@@ -1,5 +1,4 @@
 <?php
-//error_reporting(0);
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonProfileManager.php');
 Header("Content-Type: text/html; charset=".$charset);
@@ -61,10 +60,10 @@ $descr = Array();
 	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<meta name='keywords' content='<?php echo $spDisplay; ?>' />
-	<link href="../css/base.css" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css" type="text/css" rel="stylesheet" />
-	<link href="../css/speciesprofilebase.css" type="text/css" rel="stylesheet" />
-	<link href="../css/speciesprofile.css" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?ver=20150401" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css?ver=20150401" type="text/css" rel="stylesheet" />
+	<link href="../css/speciesprofilebase.css?ver=20150401" type="text/css" rel="stylesheet" />
+	<link href="../css/speciesprofile.css?ver=20150401" type="text/css" rel="stylesheet" />
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
