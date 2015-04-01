@@ -397,7 +397,7 @@ class MapInterfaceManager{
 		$retStr = '';
 		if($sqlWhere){
 			$retStr = 'WHERE '.substr($sqlWhere,4);
-			$retStr .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL) ";
+			$retStr .= " AND (o.sciname IS NOT NULL AND o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL) ";
 		}
 		else{
 			//Make the sql valid, but return nothing
