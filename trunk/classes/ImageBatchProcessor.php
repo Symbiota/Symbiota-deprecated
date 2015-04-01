@@ -547,9 +547,9 @@ class ImageBatchProcessor {
 					if(preg_match('/^(\D*\d+)\D+/',$folderName,$m)){
 						$folderName = $m[1];
 					}
-					$targetFolder = substr($folderName,0,strlen($folderName)-3).'/';
-					$targetFolder = str_replace(array('.','\\','/','#',' '),'',$targetFolder);
-					if($targetFolder && strlen($targetFolder) < 6){
+					$targetFolder = substr($folderName,0,strlen($folderName)-3);
+					$targetFolder = str_replace(array('.','\\','/','#',' '),'',$targetFolder).'/';
+					if($targetFolder && strlen($targetFolder) < 6 && is_numeric(substr($targetFolder,0,1))){
 						$targetFolder = str_repeat('0',6-strlen($targetFolder)).$targetFolder;
 					}
 				}
