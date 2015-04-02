@@ -1,7 +1,6 @@
 <table id="maintable" cellspacing="0">
 	<tr>
 		<td class="header" colspan="3">
-			<!-- <div style="height:110px;background-image:url(<?php //echo $clientRoot; ?>/images/layout/defaultheader.jpg);background-repeat:no-repeat;position:relative;"> -->
 			<div style="clear:both;">
 				<div style="clear:both;">
 					<img style="" src="<?php echo $clientRoot; ?>/images/layout/defaultheader.jpg" />
