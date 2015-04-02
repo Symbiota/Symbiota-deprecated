@@ -24,8 +24,8 @@ if($isEditor){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Species Checklist Loader</title>
-	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
-	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function validateUploadForm(thisForm){
 			var testStr = document.getElementById("uploadfile").value;

@@ -357,16 +357,16 @@ else{
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
-	<link href="../../css/jquery-ui.css?ver=140310" type="text/css" rel="stylesheet" />
+	<link href="../../css/jquery-ui.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=150106" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=150106" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){

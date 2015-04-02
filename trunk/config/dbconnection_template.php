@@ -8,7 +8,7 @@ class MySQLiConnectionFactory {
 			'password' => '',
 			'database' => '',
 			'port' => '3306',
-			'charset' => ''		//utf8, latin1, latin2, etc
+			'charset' => 'utf8'		//utf8, latin1, latin2, etc
         ),
         array(
 			'type' => 'write',
@@ -17,7 +17,7 @@ class MySQLiConnectionFactory {
 			'password' => '',
 			'database' => '',
 			'port' => '3306',
-			'charset' => ''
+			'charset' => 'utf8'
         )
     );
 

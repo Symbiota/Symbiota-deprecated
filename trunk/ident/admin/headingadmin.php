@@ -36,8 +36,8 @@ $charArr = $charManager->getCharacterArr();
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 	<title>Heading Administration</title>
-    <link href="../../css/base.css" type="text/css" rel="stylesheet" />
-    <link href="../../css/main.css" type="text/css" rel="stylesheet" />
+    <link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+    <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript" src="../../js/symb/shared.js"></script>
 	<script type="text/javascript">
 		function validateHeadingForm(f){

@@ -78,8 +78,8 @@ header("Content-Type: text/html; charset=".$charset);
 <html>
 	<head>
 		<title>Specimen Edit Reviewer</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<script language="javascript">
 			function selectAllOcedid(cbObj){
 				var eElements = document.getElementsByName("ocedid[]");

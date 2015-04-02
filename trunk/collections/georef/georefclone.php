@@ -36,8 +36,8 @@ if($coorArr && count($coorArr) == 4){
 	<head>
 		<title>Georeference Clone Tool</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<script src="http://www.google.com/jsapi"></script>
 		<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 		<script type="text/javascript">

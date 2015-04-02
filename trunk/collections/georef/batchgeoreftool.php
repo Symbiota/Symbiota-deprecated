@@ -69,8 +69,8 @@ header("Content-Type: text/html; charset=".$charset);
 <html>
 	<head>
 		<title>Georeferencing Tools</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link type="text/css" href="<?php echo $clientRoot; ?>/css/jquery-ui.css" rel="Stylesheet" />
 		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
 		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/jquery-ui.js"></script>

@@ -31,8 +31,8 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
     <title><?php echo $defaultTitle; ?> Collections Search Results</title>
-    <link href="../css/base.css" type="text/css" rel="stylesheet" />
-    <link href="../css/main.css" type="text/css" rel="stylesheet" />
+    <link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+    <link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<style type="text/css">
 		.ui-tabs .ui-tabs-nav li { width:32%; }
