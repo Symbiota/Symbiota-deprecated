@@ -7,8 +7,8 @@ header("Content-Type: text/html; charset=".$charset);
 <html>
 	<head>
 		<title>Page</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
-		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
+		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" />
 	</head>
 	<body>
 		<?php

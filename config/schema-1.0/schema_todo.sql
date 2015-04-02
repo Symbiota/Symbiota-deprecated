@@ -56,6 +56,8 @@ ALTER TABLE `omoccurrencesfulltext`
 
 
 
+
+
 SET FOREIGN_KEY_CHECKS=0;
 
 TRUNCATE TABLE `omoccurpoints`;
@@ -69,53 +71,45 @@ DELIMITER //
 DROP TRIGGER IF EXISTS `omoccurrencesfulltext_insert`//
 CREATE TRIGGER `omoccurrencesfulltextpoint_insert` AFTER INSERT ON `omoccurrences`
 FOR EACH ROW BEGIN
-  IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
-	  INSERT INTO omoccurpoints (
-		`occid`,
-		`point`
-	  ) VALUES (
-		NEW.`occid`,
-		Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`)
-	  );
-  END IF;
-
-  INSERT INTO omoccurrencesfulltext (
-    `occid`,
-    `recordedby`,
-    `locality`
-  ) VALUES (
-    NEW.`occid`,
-    NEW.`recordedby`,
-    NEW.`locality`
-  );
+	IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
+		INSERT INTO omoccurpoints (`occid`,`point`) 
+		VALUES (NEW.`occid`,Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`));
+	END IF;
+	INSERT INTO omoccurrencesfulltext (`occid`,`recordedby`,`locality`) 
+	VALUES (NEW.`occid`,NEW.`recordedby`,NEW.`locality`);
 END
 //
 
 DROP TRIGGER IF EXISTS `omoccurrencesfulltext_update`//
 CREATE TRIGGER `omoccurrencesfulltextpoint_update` AFTER UPDATE ON `omoccurrences`
 FOR EACH ROW BEGIN
-  IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
-	  UPDATE omoccurpoints SET
-		`point` = Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`)
-	  WHERE `occid` = NEW.`occid`;
-  END IF;
-
-  UPDATE omoccurrencesfulltext SET
-    `recordedby` = NEW.`recordedby`,
-    `locality` = NEW.`locality`
-  WHERE `occid` = NEW.`occid`;
+	IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
+		IF EXISTS (SELECT `occid` FROM omoccurpoints WHERE `occid`=NEW.`occid`) THEN
+			UPDATE omoccurpoints 
+			SET `point` = Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`)
+			WHERE `occid` = NEW.`occid`;
+		ELSE 
+			INSERT INTO omoccurpoints (`occid`,`point`) 
+			VALUES (NEW.`occid`,Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`));
+		END IF;
+	END IF;
+	UPDATE omoccurrencesfulltext 
+	SET `recordedby` = NEW.`recordedby`,`locality` = NEW.`locality`
+	WHERE `occid` = NEW.`occid`;
 END
 //
 
 DROP TRIGGER IF EXISTS `omoccurrencesfulltext_delete`//
 CREATE TRIGGER `omoccurrencesfulltextpoint_delete` BEFORE DELETE ON `omoccurrences`
 FOR EACH ROW BEGIN
-  DELETE FROM omoccurpoints WHERE `occid` = OLD.`occid`;
-  DELETE FROM omoccurrencesfulltext WHERE `occid` = OLD.`occid`;
+	DELETE FROM omoccurpoints WHERE `occid` = OLD.`occid`;
+	DELETE FROM omoccurrencesfulltext WHERE `occid` = OLD.`occid`;
 END
 //
 
 DELIMITER ;
+
+
 
 
 

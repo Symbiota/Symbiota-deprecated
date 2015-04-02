@@ -60,10 +60,10 @@ $descr = Array();
 	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<meta name='keywords' content='<?php echo $spDisplay; ?>' />
-	<link href="../css/base.css?ver=20150401" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?ver=20150401" type="text/css" rel="stylesheet" />
-	<link href="../css/speciesprofilebase.css?ver=20150401" type="text/css" rel="stylesheet" />
-	<link href="../css/speciesprofile.css?ver=20150401" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/speciesprofilebase.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/speciesprofile.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>

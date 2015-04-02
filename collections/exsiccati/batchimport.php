@@ -32,6 +32,7 @@ if($isEditor && $formSubmit){
 	}
 	elseif($formSubmit == 'Export Selected Records'){
 		$statusStr = $exsManager->exportAsCsv($_POST);
+		exit;
 	}
 }
 
@@ -39,26 +40,24 @@ if($isEditor && $formSubmit){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Exsiccati Batch Transfer</title>
-    <link href="../../css/base.css" type="text/css" rel="stylesheet" />
-    <link href="../../css/main.css" type="text/css" rel="stylesheet" />
+    <link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+    <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function verifyExsTableForm(f){
 			var formVerified = false;
 			for(var h=0;h<f.length;h++){
-				if(f.elements[h].name.substring(0,4) == "occ:"){
-					if(f.elements[h].value != ""){
-						formVerified = true;
-						break;
-					}
+				if(f.elements[h].name == "occid[]" && f.elements[h].checked){
+					formVerified = true;
+					break;
 				}
 			}
 			if(!formVerified){
-				alert("Enter at least one catalog number!");
+				alert("Select at least one record");
 				return false;
 			}
 			if(f.collid.value == ""){
-				alert("Target collection must be selected");
-				return false;
+				//alert("Target collection must be selected");
+				//return false;
 			}
 			return true;
 		}

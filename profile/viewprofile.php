@@ -136,8 +136,8 @@ if($isEditor){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> - View User Profile</title>
-	<link href="../css/base.css" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>

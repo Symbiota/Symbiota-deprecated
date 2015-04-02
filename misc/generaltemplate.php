@@ -54,8 +54,8 @@ if($isEditor){
 <html>
 	<head>
 		<title>Page Title</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $clientRoot; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
 		<script src="<?php echo $clientRoot; ?>/js/jquery.js" type="text/javascript"></script>
 		<script src="<?php echo $clientRoot; ?>/js/jquery-ui.js" type="text/javascript"></script>

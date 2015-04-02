@@ -18,8 +18,8 @@ $uuidManager = new UuidFactory();
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title>UUID GUID Mapper</title>
-	<link rel="stylesheet" href="../css/base.css" type="text/css" />
-    <link rel="stylesheet" href="../css/main.css" type="text/css" />
+	<link rel="stylesheet" href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" />
+    <link rel="stylesheet" href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" />
 	<script type="text/javascript">
 		function toggle(target){
 			var objDiv = document.getElementById(target);

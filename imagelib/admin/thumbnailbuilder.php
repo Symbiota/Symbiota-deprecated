@@ -18,8 +18,8 @@ $imgManager = new ImageCleaner();
 <html>
 <head>
 <title><?php echo $defaultTitle; ?> Thumbnail Builder</title>
-	<link href="../../css/base.css" type="text/css" rel="stylesheet" />
-	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 </head>
 <body>
 	<?php
