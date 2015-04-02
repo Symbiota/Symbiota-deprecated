@@ -257,3 +257,33 @@ ul#hor_dropdown li:hover ul a {
 ul#hor_dropdown li:hover ul li a:hover { 
 	background:#999999; 
 }
+
+/* Quick Search Plugin */
+#quicksearchtext{
+	margin-top:0px;
+	padding-bottom:0px;
+	float: left;
+}
+
+#quicksearchbutton{
+	margin-left:10px;
+	margin-top:0px;
+	margin-bottom:0px;
+	padding-bottom:0px;
+	float: left;
+}
+
+#quicksearchtaxon{
+	width: 250px;
+	float: left;
+	margin-bottom:0px;
+	padding-bottom:0px;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Slideshow Plugin */
+#slideshowcontainer{
+	border: 2px solid black;
+	border-radius:10px;
+	padding:10px;
+}
