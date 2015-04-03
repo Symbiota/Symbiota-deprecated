@@ -88,59 +88,69 @@ if($isAdmin){
 				</h1>
 				<div style="margin-left:10px;">
 					<div style="clear:left;">
-						<div style="float:left;width:75px;font-weight:bold;">Title: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;">Title: </div>
 						<div style="float:left;"><?php echo $user["title"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;width:75px;font-weight:bold;">Institution: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;">Institution: </div>
 						<div style="float:left;"><?php echo $user["institution"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;width:75px;font-weight:bold;">City: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;">City: </div>
 						<div style="float:left;"><?php echo $user["city"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;width:75px;font-weight:bold;">State: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;">State: </div>
 						<div style="float:left;"><?php echo $user["state"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;width:75px;font-weight:bold;">Zip: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;">Zip: </div>
 						<div style="float:left;"><?php echo $user["zip"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;width:75px;font-weight:bold;">Country: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;">Country: </div>
 						<div style="float:left;"><?php echo $user["country"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;width:75px;font-weight:bold;">Email: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;">Email: </div>
 						<div style="float:left;"><?php echo $user["email"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;width:75px;font-weight:bold;">URL: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;">URL: </div>
 						<div style="float:left;">
 							<a href='<?php echo $user["url"];?>'>
 								<?php echo $user["url"];?>
 							</a>
 						</div>
 					</div>
-					<div style="clear:left;">
-						<div style="float:left;width:75px;font-weight:bold;">Logins: </div>
-						<div style="float:left;margin-bottom:30px;">
-							<?php
-								$loginArr = $user["username"];
-								if($loginArr){
-									echo implode("; ",$loginArr);
-								}
-								else{
-									echo "No logins are registered";
-								}
-							?>
+					<?php
+					$loginArr = $user["username"];
+					if(implode("; ",$loginArr)){
+						?>
+						<div style="clear:left;">
+							<div style="float:left;font-weight:bold;margin-right:8px;">Logins: </div>
+							<div style="float:left;margin-bottom:30px;"><?php echo implode("; ",$loginArr); ?></div>
 						</div>
+						<?php
+					}
+					else{
+						?>
+						<div style="clear:left;">
+							<div style="float:left;font-weight:bold;margin-bottom:30px;">No logins are registered for this user</div>
+						</div>
+						<?php
+					}
+					?>
+				</div>
+				<?php
+				if(implode("; ",$loginArr)){
+					?>
+					<div style="clear:both;margin:0px 0px 20px 30px;">
+						<a href="usermanagement.php?loginas=<?php echo array_shift($loginArr); ?>">Login</a> as this user
 					</div>
-				</div>
-				<div style="clear:both;margin:0px 0px 20px 30px;">
-					<a href="usermanagement.php?loginas=<?php echo array_shift($loginArr); ?>">Login</a> as this user
-				</div>
+					<?php
+				}
+				?>
 				<fieldset style="clear:both;margin:10px;padding:15px;padding-left:25px;">
 					<legend><b>Current Permissions</b></legend>
 					<?php 

@@ -70,6 +70,8 @@ class ProfileManager{
 		}
 		
 		if($authStatus){
+			$this->userRights = array();
+			$this->reset();
 			$this->setUserRights();
 			$this->setCookies();
 			
