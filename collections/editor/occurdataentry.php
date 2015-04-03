@@ -73,15 +73,15 @@ if($SYMB_UID){
 	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
 	<link href="../../css/jquery-ui.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/occureditor.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" id="editorCssLink" />
-	<script src="../../js/jquery.js?<?php echo $JS_VERSION; ?>" type="text/javascript"></script>
-	<script src="../../js/jquery-ui.js?<?php echo $JS_VERSION; ?>" type="text/javascript"></script>
-	<script src="../../js/jquery.imagetool-1.7.js?<?php echo $JS_VERSION; ?>" type="text/javascript"></script>
+	<script src="../../js/jquery.js" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
+	<script src="../../js/jquery.imagetool-1.7.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		var collId = "<?php echo $collid; ?>";
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?<?php echo $JS_VERSION; ?>"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?<?php echo $JS_VERSION; ?>"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?<?php echo $JS_VERSION; ?>"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js"></script>
 </head>
 <body>
 	<!-- inner text -->
