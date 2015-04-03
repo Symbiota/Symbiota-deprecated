@@ -309,7 +309,7 @@ if($isEditor){
 							If the file upload step fails without displaying an error message, it is possible that the 
 							file size excedes the file upload limits set within your PHP installation (see your php configuraton file).
 						</div>
-						<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
+						<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
 						<div>
 							<div class="overrideopt">
 								<b>Upload File:</b>

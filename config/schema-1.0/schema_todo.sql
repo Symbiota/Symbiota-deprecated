@@ -9,10 +9,13 @@ ALTER TABLE `uploadtaxa`
   ADD INDEX `sourceParentId_index` (`SourceParentId` ASC),
   ADD INDEX `acceptance_index` (`Acceptance` ASC);
 
-
 ALTER TABLE `taxa` 
   DROP COLUMN `KingdomID`,
   DROP COLUMN `kingdomName`;
+
+ALTER TABLE `taxonunits` 
+  DROP COLUMN `kingdomid`,
+  ADD UNIQUE INDEX `UNIQUE_taxonunits` (`kingdomName` ASC, `rankid` ASC);
 
 
 ALTER TABLE `omoccurrences` 
