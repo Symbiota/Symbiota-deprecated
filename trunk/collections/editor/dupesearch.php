@@ -127,7 +127,7 @@ if(!$IS_ADMIN){
 
 		</script>
 	</head>
-	<body onload="<?php echo $onLoadStr; ?>">
+	<body onload="<?php echo $onLoadStr; ?>" style="background-color:white;">
 		<!-- inner text -->
 		<div id="innertext">
 			<?php
