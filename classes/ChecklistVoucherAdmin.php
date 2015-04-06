@@ -8,6 +8,7 @@ class ChecklistVoucherAdmin {
 	private $childClidArr = array();
 	private $clName;
 	private $sqlFrag;
+	private $missingTaxaCount = 0;
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -237,7 +238,7 @@ class ChecklistVoucherAdmin {
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
 			$sql = 'SELECT DISTINCT cl.tid AS cltid, t.sciname AS clsciname, o.occid, '. 
-				'CONCAT_WS(":",c.institutioncode,c.collectioncode,IFNULL(o.catalognumber,"<no catalog number")) AS collcode, '. 
+				'IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '. 
 				'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
@@ -313,60 +314,114 @@ class ChecklistVoucherAdmin {
 	public function getMissingTaxa(){
 		$retArr = Array();
 		if($this->sqlFrag){
-			$clidStr = $this->clid;
-			if($this->childClidArr){
-				$clidStr .= ','.implode(',',$this->childClidArr);
-			}
-			$sql = 'SELECT DISTINCT o.tidinterpreted, o.sciname, o.eventdate, IFNULL(o.cultivationstatus,0) as culstat FROM omoccurrences o '. 
-				'WHERE ('.$this->sqlFrag.') AND o.tidinterpreted NOT IN(SELECT ts1.tid FROM taxstatus ts1 '.
-				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '. 
-				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '. 
-				'WHERE (ctl.clid IN('.$clidStr.')) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1)';
-			//echo '<div>'.$sql.'</div>';
+			$sql = 'SELECT DISTINCT t.tid, t.sciname '.
+				'FROM omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+				'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
+				$this->getMissingTaxaSqlWhere();
+			//echo '<div>'.$sql.'</div>'; 
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
-				if(strpos($row->sciname,' ') && !$row->culstat){
-					$retArr[$row->tidinterpreted] = $this->cleanOutStr($row->sciname);
-				}
+				$retArr[$row->tid] = $this->cleanOutStr($row->sciname);
 			}
 			asort($retArr);
 			$rs->free();
 		}
+		$this->missingTaxaCount = count($retArr);
 		return $retArr;
 	}
 
-	public function getMissingTaxaSpecimens(){
+	public function getMissingTaxaSpecimens($limitIndex){
 		$retArr = Array();
 		if($this->sqlFrag){
 			$clidStr = $this->clid;
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
-			$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(":",c.institutioncode,c.collectioncode,IFNULL(o.catalognumber,"<no catalog number>")) AS collcode, '.
+			$sqlWhere = $this->getMissingTaxaSqlWhere();
+			$sql = 'SELECT DISTINCT o.occid, IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
 				'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
-				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality, IFNULL(o.cultivationstatus,0) as culstat '.
+				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-				'INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
-				'WHERE t.rankid IN(220,230,240,260) AND ('.$this->sqlFrag.') '.
-				'AND o.tidinterpreted NOT IN (SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-				'WHERE (ctl.clid IN('.$clidStr.')) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1)';
+				'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+				'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
+				$sqlWhere.' LIMIT '.($limitIndex?($limitIndex*1000).',':'').'1000';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			$spTidArr = array();
 			while($r = $rs->fetch_object()){
-				if(!$r->culstat){
-					$retArr[$r->sciname][$r->occid]['tid'] = $r->tidinterpreted;
-					$retArr[$r->sciname][$r->occid]['collcode'] = $r->collcode;
-					$retArr[$r->sciname][$r->occid]['recordedby'] = $r->recordedby;
-					$retArr[$r->sciname][$r->occid]['recordnumber'] = $r->recordnumber;
-					$retArr[$r->sciname][$r->occid]['eventdate'] = $r->eventdate;
-					$retArr[$r->sciname][$r->occid]['locality'] = $r->locality;
-				}
+				$retArr[$r->sciname][$r->occid]['tid'] = $r->tidinterpreted;
+				$retArr[$r->sciname][$r->occid]['collcode'] = $r->collcode;
+				$retArr[$r->sciname][$r->occid]['recordedby'] = $r->recordedby;
+				$retArr[$r->sciname][$r->occid]['recordnumber'] = $r->recordnumber;
+				$retArr[$r->sciname][$r->occid]['eventdate'] = $r->eventdate;
+				$retArr[$r->sciname][$r->occid]['locality'] = $r->locality;
+			}
+			$rs->free();
+			$this->setMissingTaxaCount($sqlWhere);
+		}
+		return $retArr;
+	}
+
+	private function setMissingTaxaCount($sqlWhere){
+		if($this->sqlFrag){
+			$sql = 'SELECT count(DISTINCT ts.tidaccepted) as cnt '.
+				'FROM omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+				'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
+			$sqlWhere;
+			//echo '<div>'.$sql.'</div>'; exit;
+			$rs = $this->conn->query($sql);
+			if($row = $rs->fetch_object()){
+				$this->missingTaxaCount = $row->cnt;
 			}
 			$rs->free();
 		}
-		return $retArr;
+	}
+	
+	//Export functions used within voucherreporthandler.php
+	public function exportMissingOccurCsv(){
+		$fileName = 'Missing_'.$this->getExportFileName();
+
+		$fieldArr = $this->getFieldArr();
+		$localitySecurityFields = $this->getLocalitySecurityArr();
+		
+		$clidStr = $this->clid;
+		if($this->childClidArr){
+			$clidStr .= ','.implode(',',$this->childClidArr);
+		}
+
+		$sql = 'SELECT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
+			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+			'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
+			$this->getMissingTaxaSqlWhere();
+			//'ORDER BY o.family, o.sciname, c.institutioncode ';
+		//echo $sql;
+		$this->exportCsv($fileName,$sql,$fieldArr,$localitySecurityFields);
+	}
+
+	private function getMissingTaxaSqlWhere(){
+		$sqlWhere = '';
+		if($this->sqlFrag){
+			$sqlWhere = 'WHERE ('.$this->sqlFrag.') AND (o.cultivationstatus IS NULL OR o.cultivationstatus = 0) '.
+				'AND (t.rankid IN(220,230,240,260,230)) AND (ts.taxauthid = 1) ';
+			$taxaArr = array();
+			$clidStr = $this->clid;
+			if($this->childClidArr){
+				$clidStr .= ','.implode(',',$this->childClidArr);
+			}
+			$sql = 'SELECT DISTINCT ts.tidaccepted '.
+				'FROM taxstatus ts INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid '. 
+				'WHERE (ctl.clid IN('.$clidStr.')) AND ts.taxauthid = 1';
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$taxaArr[] = $row->tidaccepted;
+			}
+			$rs->free();
+			if($taxaArr){
+				$sqlWhere .= 'AND ts.tidaccepted NOT IN('.implode(',',$taxaArr).')';
+			}
+		}
+		return $sqlWhere;
 	}
 
 	public function getMissingProblemTaxa(){
@@ -379,7 +434,7 @@ class ChecklistVoucherAdmin {
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
-			$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(":",c.institutioncode,c.collectioncode,IFNULL(o.catalognumber,"<no catalog number>")) AS collcode, '.
+			$sql = 'SELECT DISTINCT o.occid, IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
 				'o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
@@ -399,31 +454,10 @@ class ChecklistVoucherAdmin {
 			}
 			$rs->free();
 		}
+		$this->missingTaxaCount = count($retArr);
 		return $retArr;
 	}
 	
-	//Export functions used within voucherreporthandler.php
-	public function exportMissingOccurCsv(){
-		$fileName = 'Missing_'.$this->getExportFileName();
-
-		$fieldArr = $this->getFieldArr();
-		$localitySecurityFields = $this->getLocalitySecurityArr();
-		
-		$clidStr = $this->clid;
-		if($this->childClidArr){
-			$clidStr .= ','.implode(',',$this->childClidArr);
-		}
-
-		$sql = 'SELECT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
-			'WHERE o.tidinterpreted NOT IN(SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-			'WHERE (ctl.clid IN('.$clidStr.')) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) AND ('.$this->sqlFrag.') AND (o.sciname LIKE "% %") '.
-			'ORDER BY o.family, o.sciname, c.institutioncode ';
-		//echo $sql;
-		$this->exportCsv($fileName,$sql,$fieldArr,$localitySecurityFields);
-	}
-
 	public function exportProblemTaxaCsv(){
 		$fileName = 'ProblemTaxa_'.$this->getExportFileName();
 
@@ -631,6 +665,10 @@ class ChecklistVoucherAdmin {
 	}
 
 	//Misc fucntions
+	public function getMissingTaxaCount(){
+		return $this->missingTaxaCount;
+	}
+		
 	private function isRareSpeciesReader(){
 		$canReadRareSpp = false;
 		if($GLOBALS['IS_ADMIN'] 
