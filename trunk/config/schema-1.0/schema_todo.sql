@@ -1,5 +1,6 @@
 ALTER TABLE `uploadtaxa` 
   ADD COLUMN `uploadStatus` VARCHAR(45) NULL AFTER `Hybrid`,
+  ADD COLUMN `RankName` VARCHAR(45) NULL AFTER `RankId`,
   DROP COLUMN `KingdomID`;
 
 ALTER TABLE `uploadtaxa` 

@@ -6,6 +6,7 @@ $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 $displayMode = (array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode']:0);
+$startIndex = array_key_exists("start",$_REQUEST)?$_REQUEST["start"]:0;
 
 $vManager = new ChecklistVoucherAdmin();
 $vManager->setClid($clid);
@@ -17,7 +18,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 //Get records
 $missingArr;
 if($displayMode==1){
-	$missingArr = $vManager->getMissingTaxaSpecimens();
+	$missingArr = $vManager->getMissingTaxaSpecimens($startIndex);
 }
 elseif($displayMode==2){
 	$missingArr = $vManager->getMissingProblemTaxa();
@@ -37,7 +38,7 @@ else{
 		else{
 			echo 'Possible Missing Taxa: ';
 		}
-		echo count($missingArr); 
+		echo $vManager->getMissingTaxaCount(); 
 		?>
 	</div>
 	<div style="float:left;margin-left:5px">
@@ -69,7 +70,7 @@ else{
 				?>
 				<div style="clear:both;margin:10px;">
 					Listed below are specimens identified to a species not found in the checklist. Use the form to add the
-					names and link the vouchers as a batch action.
+					names and link the vouchers as a batch action. Specimens are displayed in batches of 1000.
 				</div>
 				<form name="batchmissingform" method="post" action="voucheradmin.php" onsubmit="return validateBatchMissingForm(this)">
 					<table class="styledtable">
@@ -110,8 +111,12 @@ else{
 					<input name="displaymode" value="1" type="hidden" />
 					<input name="usecurrent" value="1" type="checkbox" checked /> Add name using current taxonomy<br/>
 					<input name="submitaction" value="Add Taxa and Vouchers" type="submit" />
+					<input name="start" type="hidden" value="<?php echo $startIndex; ?>" />
 				</form>
-				<?php 
+				<?php
+				echo 'Specimen count: '.$recCnt;
+				$queryStr = 'tabindex=1&displaymode=1&clid='.$clid.'&pid='.$pid.'&start='.(++$startIndex);
+				if($recCnt > 999) echo '<a href="voucheradmin.php?'.$queryStr.'">View Next 1000</a>';
 			}
 			elseif($displayMode==2){
 				?>

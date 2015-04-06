@@ -487,7 +487,7 @@ class ChecklistManager {
 	}
 
 	public function setTaxonFilter($tFilter){
-		$this->taxonFilter = strtolower($tFilter);
+		$this->taxonFilter = $this->cleanInStr(strtolower($tFilter));
 	}
 	
 	public function setShowAuthors($value = 1){
@@ -600,6 +600,13 @@ class ChecklistManager {
 		$str = str_replace('"',"&quot;",$str);
 		$str = str_replace("'","&apos;",$str);
 		return $str;
+	}
+
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>
