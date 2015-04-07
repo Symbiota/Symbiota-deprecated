@@ -77,7 +77,11 @@ if($isEditor){
 						<input type="checkbox" onclick="toggle('countrydiv')" /> Country<br/>
 						<input type="checkbox" onclick="toggle('statediv')" CHECKED /> State / Province<br/>
 						<input type="checkbox" onclick="toggle('countydiv')" CHECKED /> County / Parish<br/>
-						<input type="checkbox" onclick="toggle('processingstatusdiv')" CHECKED /> Processing Status<br/>
+						<input type="checkbox" onclick="toggle('processingstatusdiv')" /> Processing Status<br/>
+						<input type="checkbox" onclick="toggle('recordedbydiv')" /> Collector<br/>
+						<input type="checkbox" onclick="toggle('recordnumberdiv')" /> Collector Number<br/>
+						<input type="checkbox" onclick="toggle('eventdatediv')" /> Collection Date<br/>
+						<input type="checkbox" onclick="toggle('languagediv')" /> Language<br/>
 					</fieldset> 
 				</div>
 				<div style="position:absolute;background-color:white;top:10px;right:10px;">
@@ -111,28 +115,57 @@ if($isEditor){
 								<b>Country:</b><br/> 
 								<input id="fcountry" name="country" type="text" value="" autocomplete="off" />
 							</div> 
-							<div id="statediv" style="float:left;margin:3px;">
+							<div id="statediv" style="float:left;margin:3px 3px 3px 0px;">
 								<b>State/Province:</b><br/>
 								<input id="fstateprovince" name="stateprovince" type="text" value="" autocomplete="off" onchange="localitySecurityCheck(this.form)" />
 							</div> 
-							<div id="countydiv" style="float:left;margin:3px;">
+							<div id="countydiv" style="float:left;margin:3px 3px 3px 0px;">
 								<b>County/Parish:</b><br/>
 								<input id="fcounty" name="county" type="text" autocomplete="off" value="" />
 							</div> 
-							<div id="processingstatusdiv" style="float:left;margin:3px;">
+							<div id="processingstatusdiv" style="display:none;float:left;margin:3px 3px 3px 0px">
 								<b>Processing Status:</b><br/>
 								<select id="fprocessingstatus" name="processingstatus">
 									<option>unprocessed</option>
 									<option>stage 1</option>
 									<option>stage 2</option>
 									<option>stage 3</option>
+									<option>expert required</option>
 									<option>pending review</option>
 									<option>reviewed</option>
 									<option>closed</option>
 								</select>
 							</div> 
 						</div>
+						<div style="clear:both;padding-top:5px">
+							<div id="recordedbydiv" style="display:none;float:left;margin:3px 3px 3px 0px;">
+								<b>Collector:</b><br/> 
+								<input id="frecordedby" name="recordedby" type="text" value="" />
+							</div> 
+							<div id="recordnumberdiv" style="display:none;float:left;margin:3px 3px 3px 0px;">
+								<b>Collector Number:</b><br/> 
+								<input id="frecordnumber" name="recordnumber" type="text" value="" />
+							</div> 
+							<div id="eventdatediv" style="display:none;float:left;margin:3px 3px 3px 0px;">
+								<b>Date:</b><br/> 
+								<input id="feventdate" name="eventdate" type="text" value="" onchange="eventDateChanged(this)" />
+							</div> 
+							<div id="languagediv" style="display:none;float:left;margin:3px 3px 3px 0px;">
+								<b>Language:</b><br/> 
+								<select id="flanguage" name="language">
+									<?php 
+									$langArr = $skeletalManager->getLanguageArr();
+									foreach($langArr as $code => $langStr){
+										echo '<option value="'.$code.'" '.($code == 'en'?'selected':'').'>'.$langStr.'</option>';
+									}
+									?>
+								</select>
+							</div> 
+						</div> 
 						<div style="clear:both;padding:15px 0px 0px 20px;">
+							<div style="float:right;">
+								<input name="clearform" type="reset" value="Clear Form" style="margin-right:40px" />
+							</div>
 							<b>Catalog Number:</b>
 							<input id="fcatalognumber" name="catalognumber" type="text" style="border-color:green;" />
 							<input id="fcollid" name="collid" type="hidden" value="<?php echo $collid; ?>" />

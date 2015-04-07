@@ -33,7 +33,8 @@ class OccurrenceSkeletalSubmit {
 		if($this->collid){
 			if($this->isEditor()){
 				$allowedFields = array('collid'=>'n','catalognumber'=>'s','sciname'=>'s','tidinterpreted'=>'s','family'=>'s','scientificnameauthorship'=>'s',
-					'localitysecurity'=>'n','country'=>'s','stateprovince'=>'s','county'=>'s','processingstatus'=>'s');
+					'localitysecurity'=>'n','country'=>'s','stateprovince'=>'s','county'=>'s','processingstatus'=>'s',
+					'recordedby'=>'s','recordnumber'=>'s','eventdate'=>'d','language'=>'s');
 				if($postArr['stateprovince'] && strlen($postArr['stateprovince']) == 2){
 					$postArr['stateprovince'] = $this->translateStateAbbreviation($postArr['stateprovince']);
 				}
@@ -156,6 +157,19 @@ class OccurrenceSkeletalSubmit {
 		return $this->collectionMap;
 	}
 	
+	public function getLanguageArr(){
+		$retArr = array();
+		$sql = 'SELECT iso639_1, langname '.
+			'FROM adminlanguages ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->iso639_1] = $r->langname;
+		}
+		$rs->free();
+		asort($retArr);
+		return $retArr;
+	}
+
 	public function getErrorStr(){
 		return $this->errorStr;	
 	}
