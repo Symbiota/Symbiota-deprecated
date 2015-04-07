@@ -65,7 +65,13 @@ class ProfileManager{
 		$result = $this->conn->query($sql);
 		if($row = $result->fetch_object()){
 			$this->uid = $row->uid;
-			$this->displayName = $row->firstname;
+			$dispNameArr = explode(' ',$row->firstname);
+			if((substr($dispNameArr[0],-1) == '.') || (strlen($dispNameArr[0]) == 1)){
+				$this->displayName = $dispNameArr[0].' '.$dispNameArr[1];
+			}
+			else{
+				$this->displayName = $dispNameArr[0];
+			}
 			$authStatus = true;
 		}
 		
