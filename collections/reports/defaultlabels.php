@@ -309,13 +309,13 @@ else{
 											?>
 										</div>
 										<?php 
-										if($occArr['othercatalognumbers']){
+										/*if($occArr['othercatalognumbers']){
 											?>
 											<div class="othercatalognumbers" style="clear:both;">
 												<?php echo $occArr['othercatalognumbers']; ?>
 											</div>
 											<?php 
-										}
+										}*/
 										if($i == 0 && $useBarcode && $occArr['catalognumber']){
 											?>
 											<div class="cnbarcode" style="clear:both;padding-top:15px;">
@@ -323,13 +323,13 @@ else{
 											</div>
 											<?php 
 										}
-										if($occArr['catalognumber']){
+										/*if($occArr['catalognumber']){
 											?>
 											<div class="catalognumber" style="clear:both;text-align:center;">
 												<?php echo $occArr['catalognumber']; ?>
 											</div>
 											<?php 
-										}
+										}*/
 										?>
 										<div class="lfooter"><?php echo $lFooter; ?></div>
 										<?php 
