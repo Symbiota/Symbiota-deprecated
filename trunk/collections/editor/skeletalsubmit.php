@@ -56,6 +56,7 @@ if($isEditor){
 	</div>
 	<!-- inner text -->
 	<div id="innertext">
+		<div style="float:right;"><a href="#" onclick="toggle('descriptiondiv')"><b>Display Instructions</b></a></div>
 		<h1><?php echo $collMap['collectionname']; ?></h1>
 		<?php 
 		if($statusStr){
@@ -67,7 +68,20 @@ if($isEditor){
 				<legend>
 					<b>Skeletal Data</b> 
 					<img src="../../images/list.png" style="width:12px;" onclick="toggle('optiondiv')" title="Display Options" />
+					<img src="../../images/info.png" style="width:12px;" onclick="toggle('descriptiondiv')" title="Descrition of Tool" />
 				</legend>
+				<div id="descriptiondiv" style="display:none;margin:10px;width:80%">
+					This page is typically used to enter skeletal records into the system during the imaging process. Since collections are 
+					commonly organized by scientific name, country, and state, it takes little extra effort for imaging teams to 
+					collect this information while they are imaging specimens. The imaging team enters the basic collection 
+					information shared by the batch of specimens being processed, and then each time they scan a barcode into the catalog 
+					number field, a record is added to the system only containing the catalog number and the skeletal data. 
+					More complete data can be entered by clicking on the catalog number, or a more common workflow is to process the full label 
+					data directly from the image of the specimen label at a later stage. An image can be uploaded by clicking on the image 
+					symbol to the right of the catalog number. However, projects that store their images on remote image servers will 
+					typically have separate workflows for batch processing images. Contact your project / portal manager to find out 
+					the preferred way to load specimen images.
+ 				</div>
 				<div id="optiondiv" style="display:none;position:absolute;background-color:white;">
 					<fieldset>
 						<legend><b>Display Options</b></legend>

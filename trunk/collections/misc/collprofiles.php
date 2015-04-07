@@ -124,6 +124,17 @@ if($symbUid){
 									Add New Occurrence Record
 								</a>
 							</li>
+							<?php
+							if($collData['colltype'] == 'Preserved Specimens'){
+								?>
+								<li>
+									<a href="../editor/skeletalsubmit.php?collid=<?php echo $collid; ?>">
+										Add Skeletal Records
+									</a>
+								</li>
+								<?php
+							}
+							?>
 							<li>
 								<a href="../editor/occurrenceeditor.php?collid=<?php echo $collid; ?>">
 									Edit Existing Occurrence Records
