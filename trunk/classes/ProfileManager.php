@@ -65,7 +65,7 @@ class ProfileManager{
 		$result = $this->conn->query($sql);
 		if($row = $result->fetch_object()){
 			$this->uid = $row->uid;
-			$this->displayName = $row->firstname." ".$row->lastname;
+			$this->displayName = $row->firstname;
 			$authStatus = true;
 		}
 		
