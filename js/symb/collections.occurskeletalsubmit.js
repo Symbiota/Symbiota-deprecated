@@ -103,7 +103,21 @@ function stateProvinceChanged(stateVal){
 }
 
 function submitDefaultForm(f){
-	if($( "#fcatalognumber" ).val() != ""){
+	var continueSubmit = true;
+	if($("#feventdate").val() != ""){
+		var dateStr = $("#feventdate").val();
+		try{
+			var validformat1 = /^\s*[<>]{0,1}\s{0,1}\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd, >yyyy-mm-dd, <yyyy-mm-dd
+			if(!validformat1.test(dateStr)){
+				alert("Event date must follow YYYY-MM-DD format. Note that 00 can be entered for a non-determined month or day.");
+				return false;
+			}
+		}
+		catch(ex){
+		}
+	}
+
+	if(continueSubmit && $( "#fcatalognumber" ).val() != ""){
 		//Add new occurrence 
 		$.ajax({
 			type: "POST",
@@ -117,6 +131,10 @@ function submitDefaultForm(f){
 				stateprovince: $( "#fstateprovince" ).val(), 
 				county: $( "#fcounty" ).val(), 
 				processingstatus: $( "#fprocessingstatus" ).val(), 
+				recordedby: $( "#frecordedby" ).val(), 
+				recordnumber: $( "#frecordnumber" ).val(), 
+				eventdate: $( "#feventdate" ).val(), 
+				language: $( "#flanguage" ).val(), 
 				catalognumber: $( "#fcatalognumber" ).val(),
 				collid: $( "#fcollid" ).val()
 			}
@@ -178,6 +196,120 @@ function deleteOccurrence(occid){
 		var elem = document.getElementById("delapprovediv");
 		elem.style.display = "block";
 	}
+}
+
+function eventDateChanged(eventDateInput){
+	var dateStr = eventDateInput.value;
+	if(dateStr == "") return true;
+
+	var dateArr = parseDate(dateStr);
+	if(dateArr['y'] == 0){
+		alert("Unable to interpret Date. Please use the following formats: yyyy-mm-dd, mm/dd/yyyy, or dd mmm yyyy");
+		return false;
+	}
+	else{
+		//Check to see if date is in the future 
+		try{
+			var testDate = new Date(dateArr['y'],dateArr['m']-1,dateArr['d']);
+			var today = new Date();
+			if(testDate > today){
+				alert("Was this plant really collected in the future? The date you entered has not happened yet. Please revise.");
+				return false;
+			}
+		}
+		catch(e){
+		}
+
+		//Invalid format is month > 12
+		if(dateArr['m'] > 12){
+			alert("Month cannot be greater than 12. Note that the format should be YYYY-MM-DD");
+			return false;
+		}
+
+		//Check to see if day is valid
+		if(dateArr['d'] > 28){
+			if(dateArr['d'] > 31 
+				|| (dateArr['d'] == 30 && dateArr['m'] == 2) 
+				|| (dateArr['d'] == 31 && (dateArr['m'] == 4 || dateArr['m'] == 6 || dateArr['m'] == 9 || dateArr['m'] == 11))){
+				alert("The Day (" + dateArr['d'] + ") is invalid for that month");
+				return false;
+			}
+		}
+
+		//Enter date into date fields
+		var mStr = dateArr['m'];
+		if(mStr.length == 1){
+			mStr = "0" + mStr;
+		}
+		var dStr = dateArr['d'];
+		if(dStr.length == 1){
+			dStr = "0" + dStr;
+		}
+		eventDateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
+	}
+	return true;
+}
+
+function parseDate(dateStr){
+	var y = 0;
+	var m = 0;
+	var d = 0;
+	try{
+		var validformat1 = /^\d{4}-\d{1,2}-\d{1,2}$/; //Format: yyyy-mm-dd
+		var validformat2 = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/; //Format: mm/dd/yyyy
+		var validformat3 = /^\d{1,2} \D+ \d{2,4}$/; //Format: dd mmm yyyy
+		if(validformat1.test(dateStr)){
+			var dateTokens = dateStr.split("-");
+			y = dateTokens[0];
+			m = dateTokens[1];
+			d = dateTokens[2];
+		}
+		else if(validformat2.test(dateStr)){
+			var dateTokens = dateStr.split("/");
+			m = dateTokens[0];
+			d = dateTokens[1];
+			y = dateTokens[2];
+			if(y.length == 2){
+				if(y < 20){
+					y = "20" + y;
+				}
+				else{
+					y = "19" + y;
+				}
+			}
+		}
+		else if(validformat3.test(dateStr)){
+			var dateTokens = dateStr.split(" ");
+			d = dateTokens[0];
+			mText = dateTokens[1];
+			y = dateTokens[2];
+			if(y.length == 2){
+				if(y < 15){
+					y = "20" + y;
+				}
+				else{
+					y = "19" + y;
+				}
+			}
+			mText = mText.substring(0,3);
+			mText = mText.toLowerCase();
+			var mNames = new Array("jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec");
+			m = mNames.indexOf(mText)+1;
+		}
+		else if(dateObj instanceof Date && dateObj != "Invalid Date"){
+			var dateObj = new Date(dateStr);
+			y = dateObj.getFullYear();
+			m = dateObj.getMonth() + 1;
+			d = dateObj.getDate();
+		}
+	}
+	catch(ex){
+	}
+	var retArr = new Array();
+	retArr["y"] = y.toString();
+	retArr["m"] = m.toString();
+	retArr["d"] = d.toString();
+	return retArr;
 }
 
 function openEditPopup(occidStr,targetImgTab){
