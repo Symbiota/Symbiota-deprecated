@@ -169,6 +169,7 @@ class CollectionProfileManager {
 			$rightsHolder = $this->cleanInStr($postArr['rightsholder']);
 			$accessRights = $this->cleanInStr($postArr['accessrights']);
 			$icon = $this->cleanInStr($postArr['icon']);
+			$indUrl = $this->cleanInStr($postArr['individualurl']);
 			
 			$conn = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omcollections '.
@@ -186,12 +187,11 @@ class CollectionProfileManager {
 				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
 				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
 				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').', '.
-				'icon = '.($icon?'"'.$icon.'"':'NULL').' ';
+				'icon = '.($icon?'"'.$icon.'"':'NULL').', '.
+				'individualurl = '.($indUrl?'"'.$indUrl.'"':'NULL').' ';
 			if(array_key_exists('colltype',$postArr)){
-				$indUrl = $this->cleanInStr($postArr['individualurl']);
 				$sql .= ',managementtype = "'.$postArr['managementtype'].'",'.
 					'colltype = "'.$postArr['colltype'].'",'.
-					'individualurl = '.($indUrl?'"'.$indUrl.'"':'NULL').', '.
 					'sortseq = '.($postArr['sortseq']?$postArr['sortseq']:'NULL').' ';
 			}
 			$sql .= 'WHERE (collid = '.$this->collid.')';
