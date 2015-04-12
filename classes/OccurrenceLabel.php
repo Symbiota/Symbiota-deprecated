@@ -1,7 +1,7 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 
-class OccurrenceLabel {
+class OccurrenceLabel{
 
 	private $conn;
 	private $collid;
@@ -124,7 +124,7 @@ class OccurrenceLabel {
 					'WHERE collid = '.$this->collid.' '.$sqlWhere;
 				if($this->collArr['colltype'] == 'General Observations') $sql .= ' AND observeruid = '.$GLOBALS['SYMB_UID'];
 				//if($sqlOrderBy) $sql .= ' ORDER BY '.substr($sqlOrderBy,1);
-				$sql .= ' LIMIT 500';
+				$sql .= ' LIMIT 400';
 				//echo '<div>'.$sql.'</div>';
 				$rs = $this->conn->query($sql);
 				while($r = $rs->fetch_object()){
@@ -177,7 +177,7 @@ class OccurrenceLabel {
 				'o.minimumelevationinmeters, o.maximumelevationinmeters, '.
 				'o.verbatimelevation, o.disposition, o.duplicatequantity, o.datelastmodified '.
 				'FROM omoccurrences o '.$sqlWhere;
-			//echo 'SQL: '.$sql;
+			//echo 'SQL: '.$sql2;
 			if($rs2 = $this->conn->query($sql2)){
 				while($row2 = $rs2->fetch_assoc()){
 					$row2 = array_change_key_case($row2);
