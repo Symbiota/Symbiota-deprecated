@@ -11,13 +11,11 @@ $lFooter = $_POST['lfooter'];
 $occIdArr = $_POST['occid'];
 $rowsPerPage = $_POST['rpp'];
 $speciesAuthors = ((array_key_exists('speciesauthors',$_POST) && $_POST['speciesauthors'])?1:0);
-$floatingWidth = array_key_exists('fw',$_POST)?$_POST['fw']:0;
+$showcatalognumbers = ((array_key_exists('catalognumbers',$_POST) && $_POST['catalognumbers'])?1:0);
 $useBarcode = array_key_exists('bc',$_POST)?$_POST['bc']:0;
 $useSymbBarcode = array_key_exists('symbbc',$_POST)?$_POST['symbbc']:0;
 $barcodeOnly = array_key_exists('bconly',$_POST)?$_POST['bconly']:0;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
-
-$exportDoc = ($action == 'Export to DOC'?1:0);
 
 $labelManager = new OccurrenceLabel();
 $labelManager->setCollid($collid);
@@ -33,31 +31,22 @@ if($action == 'Export to CSV'){
 }
 else{
 	?>
-	<!DOCTYPE HTML>
-	<html <?php echo ($exportDoc?'xmlns:w="urn:schemas-microsoft-com:office:word"':'') ?>>
+	<html>
 		<head>
-			<?php 
-			if($exportDoc){
-				header('Content-Type: application/msword');
-				header('Content-disposition: attachment; filename='.$paramsArr['un'].'_'.date('Ymd').'_labels.doc');
-				?>
-				<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-				<xml>
-					<w:WordDocument>
-					<w:View>Print</w:View>
-					<w:Pages>1</w:Pages>
-					</w:WordDocument>
-				</xml>
-				<?php
-			}
-			?>
 			<title><?php echo $defaultTitle; ?> Default Labels</title>
 			<style type="text/css">
-				body {font-family:arial,sans-serif;<?php echo ($floatingWidth?'':'width:560pt;') ?>}
-				table {page-break-before:auto;page-break-inside:avoid;}
-				td {font-size:10pt;}
-				td.lefttd {width:50%;padding:10px 23px 10px 0px;}
-				td.righttd {width:50%;padding:10px 0px 10px 23px;}
+				body {font-family:arial,sans-serif;}
+				table.labels {page-break-before:auto;page-break-inside:avoid;}
+				table.labels td {width:<?php echo ($rowsPerPage==1?'600px':(100/$rowsPerPage).'%'); ?>;font-size:10pt;}
+				<?php
+				if($rowsPerPage!=1){
+					?>
+					table.labels td:first-child {padding:10px 23px 10px 0px;}
+					table.labels td:not(:first-child):not(:last-child) {padding:10px 23px 10px 23px;}
+					table.labels td:last-child {padding:10px 0px 10px 23px;}
+					<?php
+				}
+				?>
 				p.printbreak {page-break-after:always;}
 				.lheader {width:100%; text-align:center; font:bold 14pt arial,sans-serif; margin-bottom:10px;}
 				.family {width:100%;text-align:right;}
@@ -78,26 +67,10 @@ else{
 				.lfooter {width:100%; text-align:center; font:bold 12pt arial,sans-serif; padding-top:10px;clear:both;}
 				.barcodeonly {width:220px; height:50px; float:left;padding:10px; text-align:center; }
 				.symbbarcode {width:100%; text-align:center;margin-top:10px}
-				<?php 
-				if($exportDoc) {
-					?>
-					@page WordSection1{
-						size:8.5in 11.0in;
-						margin:.25in .25in .25in .25in;
-						mso-header-margin:0;
-						mso-footer-margin:0;
-						mso-paper-source:0;
-					}
-					div.WordSection1{ 
-						page:WordSection1; 
-					}
-					<?php 
-				}
-				?>
 			</style>
 		</head>
 		<body>
-			<div <?php echo ($exportDoc?'class=WordSection1':'') ?>>
+			<div>
 				<?php 
 				if($isEditor){
 					if($action){
@@ -128,26 +101,45 @@ else{
 								elseif($hMid == 4){
 									$midStr = $occArr['family'];
 								}
-								$headerStr = $hPrefix.' '.$midStr.' '.$hSuffix;
+								$headerStr = ' ';
+								if($hPrefix || $midStr || $hSuffix){
+									$headerStrArr = array();
+									$headerStrArr[] = trim($hPrefix);
+									$headerStrArr[] = trim($midStr);
+									$headerStrArr[] = trim($hSuffix);
+									$headerStr = implode(" ",$headerStrArr);
+								}
 								
 								$dupCnt = $_POST['q-'.$occid];
 								for($i = 0;$i < $dupCnt;$i++){
 									$labelCnt++;
-									if($labelCnt%2) echo '<table><tr>'."\n";
+									if($rowsPerPage == 1 || $labelCnt%$rowsPerPage == 1) echo '<table class="labels"><tr>'."\n";
 									?>
-									<td class="<?php echo (($labelCnt%2)?"lefttd":"righttd"); ?>" valign="top">
-										<div class="lheader">
-											<?php echo $headerStr; ?>
-										</div>
-										<?php if($hMid != 4) echo '<div class="family">'.$occArr['family'].'</div>'; ?>
+									<td class="" valign="top">
+										<?php
+										if($headerStr){
+											?>
+											<div class="lheader">
+												<?php echo $headerStr; ?>
+											</div>
+											<?php
+										}
+										if($hMid != 4) echo '<div class="family">'.$occArr['family'].'</div>'; ?>
 										<div class="scientificnamediv">
 											<?php 
 											if($occArr['identificationqualifier']) echo '<span class="identificationqualifier">'.$occArr['identificationqualifier'].'</span> ';
 											$scinameStr = $occArr['scientificname'];
 											$parentAuthor = (array_key_exists('parentauthor',$occArr)?' '.$occArr['parentauthor']:'');
+											$scinameStr = str_replace(' sp. ','</i></b>'.$parentAuthor.' <b>sp.</b>',$scinameStr);
 											$scinameStr = str_replace(' subsp. ','</i></b>'.$parentAuthor.' <b>subsp. <i>',$scinameStr);
 											$scinameStr = str_replace(' ssp. ','</i></b>'.$parentAuthor.' <b>ssp. <i>',$scinameStr);
 											$scinameStr = str_replace(' var. ','</i></b>'.$parentAuthor.' <b>var. <i>',$scinameStr);
+											$scinameStr = str_replace(' variety ','</i></b>'.$parentAuthor.' <b>var. <i>',$scinameStr);
+											$scinameStr = str_replace(' Variety ','</i></b>'.$parentAuthor.' <b>var. <i>',$scinameStr);
+											$scinameStr = str_replace(' v. ','</i></b>'.$parentAuthor.' <b>var. <i>',$scinameStr);
+											$scinameStr = str_replace(' f. ','</i></b>'.$parentAuthor.' <b>f. <i>',$scinameStr);
+											$scinameStr = str_replace(' cf. ','</i></b>'.$parentAuthor.' <b>cf. <i>',$scinameStr);
+											$scinameStr = str_replace(' aff. ','</i></b>'.$parentAuthor.' <b>aff. <i>',$scinameStr);
 											?>
 											<span class="sciname">
 												<b><i><?php echo $scinameStr; ?></i></b>
@@ -309,57 +301,76 @@ else{
 											?>
 										</div>
 										<?php 
-										/*if($occArr['othercatalognumbers']){
-											?>
-											<div class="othercatalognumbers" style="clear:both;">
-												<?php echo $occArr['othercatalognumbers']; ?>
-											</div>
-											<?php 
-										}*/
 										if($i == 0 && $useBarcode && $occArr['catalognumber']){
 											?>
 											<div class="cnbarcode" style="clear:both;padding-top:15px;">
 												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occArr['catalognumber']; ?>" />
 											</div>
 											<?php 
+											if($occArr['catalognumber']){
+												?>
+												<div class="catalognumber" style="clear:both;text-align:center;">
+													<?php echo $occArr['catalognumber']; ?>
+												</div>
+												<?php
+											}
+											if($occArr['othercatalognumbers']){
+												?>
+												<div class="othercatalognumbers" style="clear:both;text-align:center;">
+													<?php echo $occArr['othercatalognumbers']; ?>
+												</div>
+												<?php 
+											}
 										}
-										/*if($occArr['catalognumber']){
-											?>
-											<div class="catalognumber" style="clear:both;text-align:center;">
-												<?php echo $occArr['catalognumber']; ?>
-											</div>
-											<?php 
-										}*/
+										elseif($showcatalognumbers){
+											if($occArr['catalognumber']){
+												?>
+												<div class="catalognumber" style="clear:both;text-align:center;">
+													<?php echo $occArr['catalognumber']; ?>
+												</div>
+												<?php
+											}
+											if($occArr['othercatalognumbers']){
+												?>
+												<div class="othercatalognumbers" style="clear:both;text-align:center;">
+													<?php echo $occArr['othercatalognumbers']; ?>
+												</div>
+												<?php 
+											}
+										}
 										?>
 										<div class="lfooter"><?php echo $lFooter; ?></div>
 										<?php 
 										if($useSymbBarcode){
 											?>
 											<hr style="border:dashed;" />
-											<div class="symbbarcode" style="padding:10px;">
-												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occid; ?>" /><br/>
+											<div class="symbbarcode" style="padding-top:10px;">
+												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occid; ?>" />
 											</div>
 											<?php 
+											if($occArr['catalognumber']){
+												?>
+												<div class="catalognumber" style="clear:both;text-align:center;">
+													<?php echo $occArr['catalognumber']; ?>
+												</div>
+												<?php
+											}
 										}
 										?>
 									</td> 
 									<?php
-									if($labelCnt%2 == 0){
+									if($labelCnt%$rowsPerPage == 0){
 										echo '</tr></table>'."\n";
-										if($rowsPerPage && ($labelCnt/2)%$rowsPerPage == 0){
-											if($exportDoc){
-												echo '<br clear=all style=\'mso-special-character:line-break;page-break-before:always\'>';
-											}
-											else{
-												echo '<p class="printbreak"></p>'."\n";
-											}
-										}
 									}
 								}
 							}
 						}
-						if($labelCnt%2){
-							echo '<td class="righttd"></td></tr></table>'; //If label count is odd, close final labelrowdiv
+						if($labelCnt%$rowsPerPage){
+							$remaining = $rowsPerPage-($labelCnt%$rowsPerPage);
+							for($i = 0;$i < $remaining;$i++){
+								echo '<td></td>';
+							}
+							echo '</tr></table>'."\n"; //If label count is odd, close final labelrowdiv
 						} 
 					}
 				}

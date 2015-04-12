@@ -1,5 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
+@include_once('Image/Barcode.php');
+@include_once('Image/Barcode2.php');
+
 include_once($serverRoot.'/classes/OccurrenceLabel.php');
 header("Content-Type: text/html; charset=".$charset);
 
@@ -11,6 +14,11 @@ $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'
 
 $datasetManager = new OccurrenceLabel();
 $datasetManager->setCollid($collid);
+
+$reportsWritable = false;
+if(is_writable($serverRoot.'/temp/report')){
+	$reportsWritable = true;
+}
 
 $isEditor = 0;
 $occArr = array();
@@ -92,6 +100,25 @@ if($isEditor){
 				if (newWindow.opener == null) newWindow.opener = self;
 				return false;
 			}
+			
+			function changeFormExport(action){
+				document.selectform.action = action;
+			}
+			
+			function checkPrintOnlyCheck(f){
+				if(f.bconly.checked){
+					f.speciesauthors.checked = false;
+					f.catalognumbers.checked = false;
+					f.bc.checked = false;
+					f.symbbc.checked = false;
+				}
+			}
+			
+			function checkBarcodeCheck(f){
+				if(f.bc.checked || f.symbbc.checked || f.speciesauthors.checked || f.catalognumbers.checked){
+					f.bconly.checked = false;
+				}
+			}
 
 		</script>
 	</head>
@@ -121,6 +148,13 @@ if($isEditor){
 	<div id="innertext">
 		<?php 
 		if($isEditor){
+			if(!$reportsWritable){
+				?>
+				<div style="padding:5px;">
+					<span style="color:red;">Please contact the site administrator to make temp/report folder writable in order to export to docx files.</span>
+				</div>
+				<?php 
+			}
 			echo '<h2>'.$datasetManager->getCollName().'</h2>';
 			?>
 			<form name="datasetqueryform" action="labelmanager.php" method="post" onsubmit="return validateQueryForm(this)">
@@ -192,7 +226,7 @@ if($isEditor){
 							<input type="submit" name="submitaction" value="Filter Specimen Records" />
 						</span>
 						<span style="margin-left:20px;">
-							* Specimen return is limited to 500 records
+							* Specimen return is limited to 400 records
 						</span>
 						<!-- 
 						<span style="margin-left:150px;">
@@ -209,12 +243,12 @@ if($isEditor){
 			if($action == "Filter Specimen Records"){
 				if($occArr){
 					?>
-					<form name="selectform" action="defaultlabels.php" method="post" onsubmit="return validateSelectForm(this)" target="_blank">
+					<form name="selectform" id="selectform" action="defaultlabels.php" method="post" onsubmit="return validateSelectForm(this);">
 			        	<div style="margin-top: 15px; margin-left: 15px;">
 			         		<input name="" value="" type="checkbox" onclick="selectAll(this);" />
 			         		Select/Deselect all Specimens
 			        	</div>
-						<table class="styledtable">
+						<table class="styledtable" style="font-size:12px;">
 							<tr>
 								<th></th>
 								<th>#</th>
@@ -256,8 +290,8 @@ if($isEditor){
 						<fieldset style="margin-top:15px;">
 							<legend><b>Label Printing</b></legend>
 							<div style="margin:4px;">
-								<b>Heading Prefix:</b> 
-								<input type="text" name="lhprefix" value="Plants of " style="width:450px" />
+								<b>Heading Prefix:</b>
+								<input type="text" name="lhprefix" value="" style="width:450px" /> (e.g. Plants of, Insects of, Vertebrates of)
 								<div style="margin:3px 0px 3px 0px;">
 									<b>Heading Mid-Section:</b> 
 									<input type="radio" name="lhmid" value="1" />Country 
@@ -274,39 +308,50 @@ if($isEditor){
 								<input type="text" name="lfooter" value="" style="width:450px" />
 							</div>
 							<div style="margin:4px;">
-								<input type="checkbox" name="speciesauthors" value="1" />
+								<input type="checkbox" name="speciesauthors" value="1" onclick="checkBarcodeCheck(this.form);" />
 								<b>Print species authors for infraspecific taxa</b> 
 							</div>
 							<div style="margin:4px;">
-								<input type="checkbox" name="fw" value="1" />
-								<b>Floating label width (allows one to adjust overall font in print preview)</b> 
+								<input type="checkbox" name="catalognumbers" value="1" onclick="checkBarcodeCheck(this.form);" />
+								<b>Print Catalog Numbers</b> 
 							</div>
-							<div style="margin:4px;">
-								<input type="checkbox" name="bc" value="1" />
-								<b>Include barcode of Catalog Number</b> 
-							</div>
-							<div style="margin:4px;">
-								<input type="checkbox" name="bconly" value="1" />
-								<b>Print only Barcode</b> 
-							</div>
-							<div style="margin:4px;">
-								<input type="checkbox" name="symbbc" value="1" />
-								<b>Include barcode of Symbiota Identifier</b> 
-							</div>
+							<?php
+							if(class_exists('Image_Barcode2') || class_exists('Image_Barcode')){
+								?>
+								<div style="margin:4px;">
+									<input type="checkbox" name="bc" value="1" onclick="checkBarcodeCheck(this.form);" />
+									<b>Include barcode of Catalog Number</b> 
+								</div>
+								<div style="margin:4px;">
+									<input type="checkbox" name="symbbc" value="1" onclick="checkBarcodeCheck(this.form);" />
+									<b>Include barcode of Symbiota Identifier</b> 
+								</div>
+								<div style="margin:4px;">
+									<input type="checkbox" name="bconly" value="1" onclick="checkPrintOnlyCheck(this.form);" />
+									<b>Print only Barcode</b> 
+								</div>
+								<?php
+							}
+							?>
 							<fieldset style="float:left;margin:10px;width:150px;">
-								<legend><b>Label Rows Per Page</b></legend>
+								<legend><b>Label Columns Per Page</b></legend>
 								<input type="radio" name="rpp" value="1" /> 1<br/>
 								<input type="radio" name="rpp" value="2" checked /> 2<br/>
 								<input type="radio" name="rpp" value="3" /> 3<br/>
-								<input type="radio" name="rpp" value="0" /> Auto (unreliable)
 							</fieldset>
 							<div style="float:left;margin: 15px 50px;">
 								<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
-								<input type="submit" name="submitaction" value="Print in Browser" />
+								<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php');" value="Print in Browser" />
 								<br/><br/> 
-								<input type="submit" name="submitaction" value="Export to CSV" />
-								<br/><br/>
-								<input type="submit" name="submitaction" value="Export to DOC" />
+								<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php');" value="Export to CSV" />
+								<?php
+								if($reportsWritable){
+									?>
+									<br/><br/>
+									<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabelsexport.php');" value="Export to DOCX" />
+									<?php
+								}
+								?>
 							</div>
 						</fieldset>					
 					</form>
