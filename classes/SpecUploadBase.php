@@ -316,15 +316,13 @@ class SpecUploadBase extends SpecUpload{
 
 	public function savePrimaryKey($dbpk){
 		if($this->uspid){
-			$sql = "";
-			if($dbpk){
-				$sql = "REPLACE INTO uploadspecmap(uspid,symbspecfield,sourcefield) ".
-					"VALUES (".$this->uspid.",'dbpk','".$dbpk."')";
-			}
-			else{
-				$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") AND symbspecfield = 'dbpk'";
-			}
+			$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") AND symbspecfield = 'dbpk'";
 			$this->conn->query($sql);
+			if($dbpk){
+				$sql2 = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ".
+					"VALUES (".$this->uspid.",'dbpk','".$dbpk."')";
+				$this->conn->query($sql2);
+			}
 		}
 	}
 
@@ -916,7 +914,7 @@ class SpecUploadBase extends SpecUpload{
 						if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
 							if($this->urlExists($mediaUrl)){
 								$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url,collid) '.
-									'VALUES('.$r3->occid.','.($r3->tidinterpreted?$r3->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty",'.$this->collid.')';
+									'VALUES('.$r3->occid.','.($r3->tidinterpreted?$r3->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty",'.$this->collId.')';
 								if(!$this->conn->query($sqlInsert)){
 									$this->outputMsg('<div style="margin-left:10px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</div>');
 									$this->outputMsg('<div style="margin-left:10px;">SQL: '.$sqlInsert.'</div>');

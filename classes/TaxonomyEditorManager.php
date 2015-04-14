@@ -255,15 +255,17 @@ class TaxonomyEditorManager{
 	
 	public function submitTaxstatusEdits($tsArr){
 		$status = '';
-		$this->setTaxon();
-		$sql = 'UPDATE taxstatus '.
-			'SET parenttid = '.$tsArr["parenttid"].' '.
-			'WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$tsArr['tid'].') AND (tidaccepted = '.$tsArr['tidaccepted'].')';
-		if($this->conn->query($sql)){
-			$this->rebuildHierarchy($tsArr["tid"]);
-		}
-		else{
-			$status = 'Unable to edit taxonomic placement. SQL: '.$sql; 
+		if(isset($tsArr["parenttid"])){
+			$this->setTaxon();
+			$sql = 'UPDATE taxstatus '.
+				'SET parenttid = '.$tsArr["parenttid"].' '.
+				'WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$tsArr['tid'].') AND (tidaccepted = '.$tsArr['tidaccepted'].')';
+			if($this->conn->query($sql)){
+				$this->rebuildHierarchy($tsArr["tid"]);
+			}
+			else{
+				$status = 'Unable to edit taxonomic placement. SQL: '.$sql; 
+			}
 		}
 		return $status;
 	}
