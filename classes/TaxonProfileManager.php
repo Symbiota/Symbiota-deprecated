@@ -498,10 +498,9 @@ class TaxonProfileManager {
 		//Get hierarchy string
 		if($this->tid){
 			//Get links
-			$sql = 'SELECT tl.tlid, tl.url, tl.icon, tl.title, tl.notes, tl.sortsequence '.
+			$sql = 'SELECT DISTINCT tl.tlid, tl.url, tl.icon, tl.title, tl.notes, tl.sortsequence '.
 				'FROM taxalinks tl LEFT JOIN taxaenumtree tn ON tl.tid = tn.parenttid '.
-				'WHERE (tn.tid  = '.$this->tid.') OR (tl.tid = '.$this->tid.') '.
-				'ORDER BY tl.sortsequence, tl.title';
+				'WHERE (tn.tid  = '.$this->tid.') OR (tl.tid = '.$this->tid.') ';
 			//echo $sql; exit;
 			$result = $this->con->query($sql);
 			$tlid = 0;
@@ -509,6 +508,14 @@ class TaxonProfileManager {
 				if($tlid != $r->tlid){
 					$tlid = $r->tlid;
 					$links[] = array('title'=>$r->title,'url'=>$r->url,'icon'=>$r->icon,'notes'=>$r->notes,'sortseq'=>$r->sortsequence);
+					usort($links, function($a, $b) {
+						if($a['sortseq'] == $b['sortseq']){
+							return (strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
+						}
+						else{
+							return $a['sortseq'] - $b['sortseq'];
+						}
+					});
 				}
 			}
 			$result->free();
