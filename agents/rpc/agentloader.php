@@ -50,6 +50,7 @@ if (file_exists($filename) && is_readable($filename)) {
       echo "$name ($startyear-$endyear) ";
       $prefix = null;
       $guid = null;
+      $notes = null;
       $result = $am->addAgentsFromPartsIfNotExistExt($name,$prefix,$firstname,$middlename,$familyname,$suffix,$startyear,$endyear,$living,$notes,$guid);
       if ($debug) { print_r($result); }
       $agentid = $result['agentid'];
