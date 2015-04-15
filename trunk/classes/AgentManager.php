@@ -646,6 +646,14 @@ class AgentManager{
                     }
                     break;
                 case 'Individual':
+                 $suffix = "";
+                 if (strlen($toSave->getsuffix())>0) { 
+                    $suffix = " ". $toSave->getsuffix();
+                 }
+                 $prefix = "";
+                 if (strlen($toSave->getprefix())>0) { 
+                    $prefix = $toSave->getprefix() . " ";
+                 }
                  $hitlong = FALSE;
                  if (strlen($toSave->getfirstname())>2 && strlen($toSave->getmiddlename())>2) { 
                     $an = new agentnames();
@@ -674,7 +682,7 @@ class AgentManager{
                     $an = new agentnames();
                     $an->setagentid($toSave->getagentid());
                     $an->setType('Last Name, Initials');
-                    $an->setname(str_replace(" .",'',$toSave->getfamilyname() . ", " . substr($toSave->getfirstname(),0,1) . ". " . substr($toSave->getmiddlename(),0,1) . "."));
+                    $an->setname(str_replace(" .",'',$prefix.$toSave->getfamilyname() . "$suffix, " . substr($toSave->getfirstname(),0,1) . ". " . substr($toSave->getmiddlename(),0,1) . "."));
                     if (!$an->save()) {  
                         $result .=  "Error in saving agent name record: " . $an->errorMessage();
                     }
@@ -683,7 +691,7 @@ class AgentManager{
                     $an = new agentnames();
                     $an->setagentid($toSave->getagentid());
                     $an->setType('Initials Last Name');
-                    $an->setname(str_replace(" .",'',substr($toSave->getfirstname(),0,1) . ". " . substr($toSave->getmiddlename(),0,1) . ". "  . $toSave->getfamilyname()));
+                    $an->setname(str_replace(" .",'',substr($toSave->getfirstname(),0,1) . ". " . substr($toSave->getmiddlename(),0,1) . ". $prefix"  . $toSave->getfamilyname(). $suffix));
                     if (!$an->save()) {  
                         $result .=  "Error in saving agent name record: " . $an->errorMessage();
                     }
@@ -692,7 +700,7 @@ class AgentManager{
                     $an = new agentnames();
                     $an->setagentid($toSave->getagentid());
                     $an->setType('First Initials Last');
-                    $an->setname(str_replace(" .",'',$toSave->getfirstname() . " " . substr($toSave->getmiddlename(),0,1) . ". "  . $toSave->getfamilyname()));
+                    $an->setname(str_replace(" .",'',$toSave->getfirstname() . " " . substr($toSave->getmiddlename(),0,1) . ". $prefix"  . $toSave->getfamilyname().$suffix));
                     if (!$an->save()) {  
                         $result .=  "Error in saving agent name record: " . $an->errorMessage();
                     }
@@ -1328,6 +1336,55 @@ class AgentManager{
            if ($endyear=='0' || strlen(trim($endyear)==0)) { $endyear = null; } 
            $toSave = $this->constructNewAgent('Individual',$bits[0],$bits[1],$bits[2],'',$notes);
            $toSave->setPlausibleYearValues($startyear,$endyear);
+           $result['name']  = $this->saveNewAgent($toSave,TRUE);
+           $result['agentid'] = $toSave->getagentid();
+           $result['added'] = 1;
+        } else { 
+           $result['name'] = $name;
+           $result['agentid'] = $matches[0];  // get first agentid from matches array
+           $result['added'] = 0;
+        }
+        return $result; 
+    }
+
+    public function addAgentsFromPartsIfNotExist($name,$firstname,$middlename,$familyname,$birthyear,$deathyear,$living,$notes) { 
+        $result = array();
+        $name = AgentManager::standardizeNameString($name);
+        $an = new agentnames();
+        $matches = $an->findAgentIdByName(trim($name));
+        if (count($matches)==0) { 
+           if ($startyear=='0' || strlen(trim($startyear)==0)) { $startyear = null; } 
+           if ($endyear=='0' || strlen(trim($endyear)==0)) { $endyear = null; } 
+           $toSave = $this->constructNewAgent('Individual',$firstname,$middlename,$familyname,$name,$notes);
+           $toSave->setyearofbirth($birthyear);
+           $toSave->setyearofdeath($deathyear);
+           $toSave->setliving($living);
+           $result['name']  = $this->saveNewAgent($toSave,TRUE);
+           $result['agentid'] = $toSave->getagentid();
+           $result['added'] = 1;
+        } else { 
+           $result['name'] = $name;
+           $result['agentid'] = $matches[0];  // get first agentid from matches array
+           $result['added'] = 0;
+        }
+        return $result; 
+    }
+
+    public function addAgentsFromPartsIfNotExistExt($name,$prefix,$firstname,$middlename,$familyname,$suffix,$birthyear,$deathyear,$living,$notes,$guid) { 
+        $result = array();
+        $name = AgentManager::standardizeNameString($name);
+        $an = new agentnames();
+        $matches = $an->findAgentIdByName(trim($name));
+        if (count($matches)==0) { 
+           if ($startyear=='0' || strlen(trim($startyear)==0)) { $startyear = null; } 
+           if ($endyear=='0' || strlen(trim($endyear)==0)) { $endyear = null; } 
+           $toSave = $this->constructNewAgent('Individual',$firstname,$middlename,$familyname,$name,$notes);
+           $toSave->setyearofbirth($birthyear);
+           $toSave->setyearofdeath($deathyear);
+           $toSave->setliving($living);
+           if ($prefix!=null && strlen($prefix)>0) { $toSave->setprefix($prefix); } 
+           if ($suffix!=null && strlen($suffix)>0) { $toSave->setsuffix($suffix); } 
+           if ($guid!=null && strlen($guid)>0) { $toSave->setguid($guid); } 
            $result['name']  = $this->saveNewAgent($toSave,TRUE);
            $result['agentid'] = $toSave->getagentid();
            $result['added'] = 1;
