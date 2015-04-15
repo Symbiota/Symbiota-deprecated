@@ -1353,8 +1353,8 @@ class AgentManager{
         $an = new agentnames();
         $matches = $an->findAgentIdByName(trim($name));
         if (count($matches)==0) { 
-           if ($startyear=='0' || strlen(trim($startyear)==0)) { $startyear = null; } 
-           if ($endyear=='0' || strlen(trim($endyear)==0)) { $endyear = null; } 
+           if ($birthyear=='0' || strlen(trim($birthyear)==0)) { $birthyear = null; } 
+           if ($deathyear=='0' || strlen(trim($deathyear)==0)) { $deathyear = null; } 
            $toSave = $this->constructNewAgent('Individual',$firstname,$middlename,$familyname,$name,$notes);
            $toSave->setyearofbirth($birthyear);
            $toSave->setyearofdeath($deathyear);
@@ -1376,8 +1376,8 @@ class AgentManager{
         $an = new agentnames();
         $matches = $an->findAgentIdByName(trim($name));
         if (count($matches)==0) { 
-           if ($startyear=='0' || strlen(trim($startyear)==0)) { $startyear = null; } 
-           if ($endyear=='0' || strlen(trim($endyear)==0)) { $endyear = null; } 
+           if ($birthyear=='0' || strlen(trim($birthyear)==0)) { $birthyear = null; } 
+           if ($deathyear=='0' || strlen(trim($deathyear)==0)) { $deathyear = null; } 
            $toSave = $this->constructNewAgent('Individual',$firstname,$middlename,$familyname,$name,$notes);
            $toSave->setyearofbirth($birthyear);
            $toSave->setyearofdeath($deathyear);
