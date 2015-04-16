@@ -1734,7 +1734,7 @@ class Agent {
 	const ENDYEARACTIVE_SIZE   = 11; //INTEGER
 	const NOTES_SIZE           = 255; //255
 	const RATING_SIZE          = 11; //INTEGER
-	const GUID_SIZE            = 45; //45
+	const GUID_SIZE            = 900; //900 may be a uuid with a resolvable IRI.
 	const PREFERREDRECBYID_SIZE = 11; //INTEGER
 	const INITIALTIMESTAMP_SIZE = 21; //TIMESTAMP
 	const BIOGRAPHY_SIZE       = 65536; //TEXT
@@ -1753,8 +1753,8 @@ class Agent {
 	const YEAROFBIRTHMODIFIER_SIZE     = 12; //12
 	const YEAROFDEATHMODIFIER_SIZE     = 12; //12
 	const LIVING_SIZE          = 1;   // enum, 1 char
-	const MBOX_SHA1SUM_SIZE    = 40; //40
-	const UUID_SIZE            = 43; //43
+	const MBOX_SHA1SUM_SIZE    = 40; //40 sha1 hash
+	const UUID_SIZE            = 43; //43 for a uuid
 
 
 	public $LIVING_VALUES = array('Y', 'N', '?');
