@@ -134,7 +134,7 @@ if($isEditor){
 			echo $collections_reports_labelmanagerCrumbs;
 		}
 		else{
-			if($datasetManager->getMetaDataTerm('colltype')){
+			if(stripos(strtolower($datasetManager->getMetaDataTerm('colltype')), "observation") !== false){
 				echo '<a href="../../profile/viewprofile.php?tabindex=1">Peronsal Management Menu</a> &gt;&gt; ';
 			}
 			else{
