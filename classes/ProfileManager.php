@@ -482,7 +482,12 @@ class ProfileManager{
 				//echo $sql;
 				if($rs = $this->conn->query($sql)){
 					while($r = $rs->fetch_object()){
-						$retArr[strtolower($r->colltype)][$r->collid] = $r->collectionname.($r->instcode?' ('.$r->instcode.')':'');
+						if(stripos(strtolower($r->colltype), "observation") !== false){
+							$retArr['observation'][$r->collid] = $r->collectionname.($r->instcode?' ('.$r->instcode.')':'');
+						}
+						else{
+							$retArr[strtolower($r->colltype)][$r->collid] = $r->collectionname.($r->instcode?' ('.$r->instcode.')':'');
+						}
 					}
 					$rs->free();
 				}

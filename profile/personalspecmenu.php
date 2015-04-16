@@ -29,8 +29,8 @@ if($symbUid){
 		<hr/>
 		<?php 
 	}
-	if(array_key_exists('general observations',$collArr)){
-		$genArr = $collArr['general observations'];
+	if(array_key_exists('observation',$collArr)){
+		$genArr = $collArr['observation'];
 		foreach($genArr as $collId => $cName){
 			?>
 			<fieldset style="margin:15px;padding:15px;">
