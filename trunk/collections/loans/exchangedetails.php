@@ -91,7 +91,7 @@
 								Date Shipped:
 							</span><br />
 							<span>
-								<input type="text" autocomplete="off" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['datesent']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+								<input type="text" autocomplete="off" name="datesent" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $exchangeArr['datesent']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 							</span>
 						</div>
 						<div style="margin-left:40px;float:left;">
@@ -99,7 +99,7 @@
 								Date Received:
 							</span><br />
 							<span>
-								<input type="text" autocomplete="off" name="datereceived" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['datereceived']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+								<input type="text" autocomplete="off" name="datereceived" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $exchangeArr['datereceived']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 							</span>
 						</div>
 					</div>
@@ -223,7 +223,7 @@
 						</span>
 					</div>
 			<?php } ?>	
-				<div style="padding-top:8px;float:left;">
+				<div style="clear:both;padding-top:8px;float:right;">
 					<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 					<input name="exchangeid" type="hidden" value="<?php echo $exchangeId; ?>" />
 					<button name="formsubmit" type="submit" value="Save Exchange">Save</button>
@@ -232,7 +232,7 @@
 		</form>
 		<?php
 		if($exchangeArr['transactiontype']=='Shipment'){ ?>
-			<form name="reportsform" onsubmit="return ProcessReport();" method="post" onsubmit="" target="_blank">
+			<form name="reportsform" onsubmit="return ProcessReport();" method="post" onsubmit="">
 				<fieldset>
 					<legend>Generate Loan Paperwork</legend>
 					<div style="float:right;">
@@ -241,7 +241,7 @@
 					</div>
 					<div style="padding-bottom:2px;">
 						<b>Print Method:</b> <input type="radio" name="print" value="browser" checked /> Print in Browser
-						<input type="radio" name="print" value="doc" /> Export to doc
+						<input type="radio" name="print" value="doc" /> Export to DOCX
 					</div>
 					<div style="padding-bottom:8px;">
 						<b>Invoice Language:</b> <input type="radio" name="languagedef" value="0" checked /> English

@@ -56,6 +56,9 @@ if($collId && is_numeric($collId)){
 				}
 			}
 		}
+		else{
+			$retMsg = 1;
+		}
 	}
 }
 echo $retMsg;

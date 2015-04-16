@@ -20,7 +20,7 @@ $specList = $loanManager->getSpecList($loanId);
 		?>
 		<form name="editloanform" action="index.php" method="post">
 			<fieldset>
-				<legend>Loan Details</legend>
+				<legend>Loan In Details</legend>
 				<div style="padding-top:18px;float:left;">
 					<span>
 						<b>Loan Number:</b> <input type="text" autocomplete="off" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($loanArr['loanidentifierborr']?$loanArr['loanidentifierborr']:$loanArr['loanidentifierown']); ?>" />
@@ -47,7 +47,7 @@ $specList = $loanManager->getSpecList($loanId);
 						Date Received:
 					</span><br />
 					<span>
-						<input type="text" autocomplete="off" name="datereceivedborr" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedborr']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+						<input type="text" autocomplete="off" name="datereceivedborr" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $loanArr['datereceivedborr']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 					</span>
 				</div>
 				<div style="margin-left:20px;padding-top:4px;float:left;">
@@ -55,7 +55,7 @@ $specList = $loanManager->getSpecList($loanId);
 						Date Due:
 					</span><br />
 					<span>
-						<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange="verifyDueDate(this);" title="format: yyyy-mm-dd" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
+						<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $loanArr['datedue']; ?>" onchange="verifyDueDate(this);" title="format: yyyy-mm-dd" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 					</span>
 				</div>
 				<div style="padding-top:8px;float:left;">
@@ -79,7 +79,7 @@ $specList = $loanManager->getSpecList($loanId);
 							Sender's Loan Number:
 						</span><br />
 						<span>
-							<input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
+							<input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:160px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 						</span>
 					</div>
 				</div>
@@ -125,7 +125,7 @@ $specList = $loanManager->getSpecList($loanId);
 							Date Returned:
 						</span><br />
 						<span>
-							<input type="text" autocomplete="off" name="datesentreturn" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesentreturn']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+							<input type="text" autocomplete="off" name="datesentreturn" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $loanArr['datesentreturn']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 						</span>
 					</div>
 					<div style="margin-left:40px;float:left;">
@@ -157,7 +157,7 @@ $specList = $loanManager->getSpecList($loanId);
 							Date Closed:
 						</span><br />
 						<span>
-							<input type="text" autocomplete="off" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
+							<input type="text" autocomplete="off" name="dateclosed" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 						</span>
 					</div>
 				</div>
@@ -169,7 +169,7 @@ $specList = $loanManager->getSpecList($loanId);
 						<textarea name="invoicemessageborr" rows="5" style="width:700px;resize:vertical;" onchange=" "><?php echo $loanArr['invoicemessageborr']; ?></textarea>
 					</span>
 				</div>
-				<div style="padding-top:8px;float:left;">
+				<div style="clear:both;padding-top:8px;float:right;">
 					<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 					<input name="collidborr" type="hidden" value="<?php echo $collId; ?>" />
 					<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
@@ -177,7 +177,7 @@ $specList = $loanManager->getSpecList($loanId);
 				</div>
 			</fieldset>
 		</form>
-		<form name="reportsform" onsubmit="return ProcessReport();" method="post" onsubmit="" target="_blank">
+		<form name="reportsform" onsubmit="return ProcessReport();" method="post" onsubmit="" >
 			<fieldset>
 				<legend>Generate Loan Paperwork</legend>
 				<div style="float:right;">
@@ -186,7 +186,7 @@ $specList = $loanManager->getSpecList($loanId);
 				</div>
 				<div style="padding-bottom:2px;">
 					<b>Print Method:</b> <input type="radio" name="print" value="browser" checked /> Print in Browser
-					<input type="radio" name="print" value="doc" /> Export to doc
+					<input type="radio" name="print" value="doc" /> Export to DOCX
 				</div>
 				<div style="padding-bottom:8px;">
 					<b>Invoice Language:</b> <input type="radio" name="languagedef" value="0" checked /> English

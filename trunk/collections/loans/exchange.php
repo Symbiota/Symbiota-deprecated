@@ -8,24 +8,31 @@ $exchangeId = array_key_exists('exchangeid',$_REQUEST)?$_REQUEST['exchangeid']:0
 $loanManager = new SpecLoans();
 if($collId) $loanManager->setCollId($collId);
 
+$transInstList = $loanManager->getTransInstList($collId);
+if($transInstList){
+	?>
+	<div id="exchangeToggle" style="float:right;margin:10px;">
+		<a href="#" onclick="displayNewExchange()">
+			<img src="../../images/add.png" alt="Create New Exchange" />
+		</a>
+	</div>
+	<?php
+}
+else{
+	echo '<script type="text/javascript">displayNewExchange();</script>';
+}
 ?>
-
-<div style="float:right;margin:10px;">
-	<a href="#" onclick="displayNewExchange()">
-		<img src="../../images/add.png" alt="Create New Exchange" />
-	</a>
-</div>
-<div id="newexchangediv" style="display:none;width:550px;">
+<div id="newexchangediv" style="display:<?php echo ($transInstList?'none':'block'); ?>;width:550px;">
 	<form name="newexchangegiftform" action="index.php" method="post" onsubmit="return verfifyExchangeAddForm(this)">
 		<fieldset>
 			<legend>New Gift/Exchange</legend>
-			<div style="padding-top:20px;float:left;">
+			<div style="padding-top:10px;float:left;">
 				<span>
 					<b>Transaction Number:</b> 
 					<input type="text" autocomplete="off" id="identifier" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="exIdentCheck(identifier,<?php echo $collId; ?>);" />
 				</span>
 			</div>
-			<div style="padding-top:6px;margin-left:20px;float:left;">
+			<div style="clear:left;padding-top:6px;float:left;">
 				<span>
 					Transaction Type:
 				</span><br />
@@ -66,23 +73,22 @@ if($collId) $loanManager->setCollId($collId);
 					</a>
 				</span>
 			</div>
-			<div style="padding-top:20px;float:right;">
+			<div style="clear:both;padding-top:8px;float:right;">
 				<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 				<button name="formsubmit" type="submit" value="Create Exchange">Create</button>
 			</div>
 		</fieldset>
 	</form>
 </div>
-<div>
+<div style="margin-top:10px;">
 	<?php 
-	$transInstList = $loanManager->getTransInstList($collId);
 	if($transInstList){
 		echo '<h3>Transaction Records by Institution</h3>';
 		echo '<ul>';
 		foreach($transInstList as $k => $transArr){
 			echo '<li>';
 			echo '<a href="#" onclick="toggle(\''.$k.'\');">'.$transArr['institutioncode'].'</a>';
-			echo ' (Balance: '.($transArr['invoicebalance'] < 0?'<span style="color:red;font-weight:bold;">'.$transArr['invoicebalance'].'</span>':$transArr['invoicebalance']).')';
+			echo ' (Balance: '.($transArr['invoicebalance']?($transArr['invoicebalance'] < 0?'<span style="color:red;font-weight:bold;">'.$transArr['invoicebalance'].'</span>':$transArr['invoicebalance']):0).')';
 			echo '<div id="'.$k.'" style="display:none;">';
 			$transList = $loanManager->getTransactions($collId,$k);
 			echo '<ul>';
@@ -117,7 +123,7 @@ if($collId) $loanManager->setCollId($collId);
 		echo '</ul>';
 	}
 	else{
-		'<div style="font-weight:bold;font-size:120%;">There are no transactions registered for this collection</div>';
+		echo '<div style="font-weight:bold;font-size:120%;margin-top:10px;">There are no transactions registered for this collection</div>';
 	}
 	?>
 <ul id="transactionlist"></ul>
