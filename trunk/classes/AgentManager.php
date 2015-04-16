@@ -24,7 +24,7 @@ class AgentManager{
 	protected $reset = 0;
 	
  	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
+		$this->conn = MySQLiConnectionFactory::getCon('write');
 		$this->useCookies = (array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?0:1); 
  		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
  			$this->reset();
@@ -132,10 +132,10 @@ class AgentManager{
      *  @return true if authorized, otherwise false.
      */ 
     public function isAgentEditor() { 
-        global $SYMB_UID, $IS_ADMIN;
+        global $SYMB_UID, $IS_ADMIN, $userRights;
         $isAgentEditor = FALSE;
         if($SYMB_UID){
-	        if($IS_ADMIN) { 
+	        if($IS_ADMIN || array_key_exists("CollEditor",$userRights) || array_key_exists("CollAdmin",$userRights)) { 
                $isAgentEditor = TRUE;
             }
         }
@@ -1761,7 +1761,7 @@ class Agent {
 	public $TYPE_VALUES = array('Individual', 'Team', 'Organization');
 
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
+		$this->conn = MySQLiConnectionFactory::getCon('write');
 		$this->agentid = NULL;
 		$this->curated = 0;
 		$this->living = 'N';
@@ -3152,7 +3152,7 @@ class ctnametypes {
    protected $conn;
 
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
+		$this->conn = MySQLiConnectionFactory::getCon('write');
     }
 
    /**
@@ -3192,7 +3192,7 @@ class agentteams {
    const ORDINAL           = 'ordinal';
 
    public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
+		$this->conn = MySQLiConnectionFactory::getCon('write');
 		$this->agentteamid = NULL;
 		$this->ordinal = 0;
    }
@@ -3804,7 +3804,7 @@ class agentnames {
 
    //---------------------------------------------------------------------------
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
+		$this->conn = MySQLiConnectionFactory::getCon('write');
     }
 
 /*  Example sanitized retrieval of variable matching object variables from $_GET 
@@ -4526,7 +4526,7 @@ class agentnumberpattern
    //---------------------------------------------------------------------------
 
    public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
+		$this->conn = MySQLiConnectionFactory::getCon('write');
 		$this->agentid = NULL;
 		$this->curated = 0;
 		$this->living = 'N';
@@ -5389,7 +5389,7 @@ class agentlinks {
 
    //---------------------------------------------------------------------------
 	public function __construct(){
-	   $this->conn = MySQLiConnectionFactory::getCon('readonly');
+	   $this->conn = MySQLiConnectionFactory::getCon('write');
 	   $this->agentid = NULL;
        $this->agentlinksid = NULL;
        $this->agentid = '';
@@ -6154,7 +6154,7 @@ class ctrelationshiptypes {
    protected $conn;
 
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
+		$this->conn = MySQLiConnectionFactory::getCon('write');
     }
 
    /**
@@ -6329,7 +6329,7 @@ class agentrelations
    //---------------------------------------------------------------------------
 
    function __construct(){
-       $this->conn = MySQLiConnectionFactory::getCon('readonly');
+       $this->conn = MySQLiConnectionFactory::getCon('write');
        $this->agentrelationsid = NULL;
        $this->fromagentid = '';
        $this->toagentid = '';
