@@ -62,7 +62,9 @@ function ProcessReport(){
 }
 
 function displayNewLoanOut(){
-	toggle('newloanoutdiv');
+	if(document.getElementById("loanoutToggle")){
+		toggle('newloanoutdiv');
+	}
 	var f = document.newloanoutform;
 	if(f.loanidentifierown.value == ""){
 		generateNewId(f.collid.value,f.loanidentifierown,"out");
@@ -70,7 +72,9 @@ function displayNewLoanOut(){
 }
 
 function displayNewLoanIn(){
-	toggle('newloanindiv');
+	if(document.getElementById("loaninToggle")){
+		toggle('newloanindiv');
+	}
 	var f = document.newloaninform;
 	if(f.loanidentifierborr.value == ""){
 		generateNewId(f.collid.value,f.loanidentifierborr,"in");
@@ -78,7 +82,9 @@ function displayNewLoanIn(){
 }
 
 function displayNewExchange(){
-	toggle('newexchangediv');
+	if(document.getElementById("exchangeToggle")){
+		toggle('newexchangediv');
+	}
 	var f = document.newexchangegiftform;
 	if(f.identifier.value == ""){
 		generateNewId(f.collid.value,f.identifier,"ex");
@@ -131,7 +137,7 @@ function verfifyExchangeAddForm(f){
 		return false;
 	}
 	if(f.identifier.value == ""){
-		alert("Enter a loan identifier");
+		alert("Enter an exchange identifier");
 		return false;
 	}
 	return true;
@@ -197,7 +203,7 @@ function addSpecimen(f,splist){
 					document.getElementById("addspecerr3").style.display = "none";
 					setTimeout(function () { 
 						document.getElementById("addspecerr1").style.display = "none";
-						}, 750);
+					}, 750);
 					//alert("ERROR: Specimen record not found in database.");
 				}
 				else if(responseCode == "1"){
@@ -207,7 +213,7 @@ function addSpecimen(f,splist){
 					document.getElementById("addspecerr3").style.display = "none";
 					setTimeout(function () { 
 						document.getElementById("addspecsuccess").style.display = "none";
-						}, 750);
+					}, 750);
 					//alert("SUCCESS: Specimen record added to loan.");
 					if(splist == 0){
 						document.getElementById("speclistdiv").style.display = "block";
@@ -221,7 +227,7 @@ function addSpecimen(f,splist){
 					document.getElementById("addspecerr3").style.display = "none";
 					setTimeout(function () { 
 						document.getElementById("addspecerr2").style.display = "none";
-						}, 750);
+					}, 750);
 					//alert("ERROR: More than one specimen with that catalog number.");
 				}
 				else if(responseCode == "3"){
@@ -231,7 +237,7 @@ function addSpecimen(f,splist){
 					document.getElementById("addspecerr3").style.display = "block";
 					setTimeout(function () { 
 						document.getElementById("addspecerr3").style.display = "none";
-						}, 750);
+					}, 750);
 					//alert("ERROR: More than one specimen with that catalog number.");
 				}
 				else{

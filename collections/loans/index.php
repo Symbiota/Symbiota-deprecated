@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecLoans.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $collId = $_REQUEST['collid'];
 $loanId = array_key_exists('loanid',$_REQUEST)?$_REQUEST['loanid']:0;
@@ -67,11 +68,10 @@ if($isEditor){
 	}
 }
 
-header("Content-Type: text/html; charset=".$charset);
+$loanOutList = $loanManager->getLoanOutList($searchTerm,$displayAll);
+$loansOnWay = $loanManager->getLoanOnWayList();
+$loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 ?>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
@@ -156,22 +156,28 @@ header("Content-Type: text/html; charset=".$charset);
 									<div>
 										<input type="radio" name="displayall" value="1"<?php echo ($displayAll?'checked':'');?> /> Display all loans
 									</div>
-									<div>
+									<div style="float:right;">
 										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 										<input type="submit" name="formsubmit" value="Refresh List" />
 									</div>
 								</fieldset>
 							</form>	
 						</div>
-						<div style="float:right;margin:10px;">
-							<a href="#" onclick="displayNewLoanOut();">
-								<img src="../../images/add.png" alt="Create New Loan" />
-							</a>
-						</div>
-						<div id="newloanoutdiv" style="display:none;">
-							<form name="newloanoutform" action="index.php" method="post" onsubmit="return verfifyLoanOutAddForm(this)">
+						<?php
+						if($loanOutList){
+							?>
+							<div id="loanoutToggle" style="float:right;margin:10px;">
+								<a href="#" onclick="displayNewLoanOut();">
+									<img src="../../images/add.png" alt="Create New Loan" />
+								</a>
+							</div>
+							<?php
+						}
+						?>
+						<div id="newloanoutdiv" style="display:<?php echo ($loanOutList?'none':'block'); ?>;">
+							<form name="newloanoutform" action="index.php" method="post" onsubmit="return verfifyLoanOutAddForm(this);">
 								<fieldset>
-									<legend><b>New Loan</b></legend>
+									<legend><b>New Outgoing Loan</b></legend>
 									<div style="padding-top:4px;float:left;">
 										<span>
 											Entered By:
@@ -185,7 +191,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 										</span>
 									</div>
-									<div style="padding-top:6px;float:left;">
+									<div style="clear:both;padding-top:6px;float:left;">
 										<span>
 											Send to Institution:
 										</span><br />
@@ -207,16 +213,20 @@ header("Content-Type: text/html; charset=".$charset);
 											</a>
 										</span>
 									</div>
-									<div style="padding-top:8px;float:left;">
+									<div style="clear:both;padding-top:8px;float:right;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<button name="formsubmit" type="submit" value="Create Loan Out">Create Loan</button>
 									</div>
 								</fieldset>
 							</form>
 						</div>
+						<?php
+						if(!$loanOutList){
+							echo '<script type="text/javascript">displayNewLoanOut();</script>';
+						}
+						?>
 						<div>
 							<?php 
-							$loanOutList = $loanManager->getLoanOutList($searchTerm,$displayAll);
 							if($loanOutList){
 								echo '<h3>Outgoing Loan Records</h3>';
 								echo '<ul>';
@@ -231,7 +241,7 @@ header("Content-Type: text/html; charset=".$charset);
 								echo '</ul>';
 							}
 							else{
-								echo '<div style="font-weight:bold;font-size:120%;">There are no loans out registered for this collection</div>';
+								echo '<div style="font-weight:bold;font-size:120%;margin-top:10px;">There are no loans out registered for this collection</div>';
 							}
 							?>
 						</div>
@@ -251,22 +261,28 @@ header("Content-Type: text/html; charset=".$charset);
 									<div>
 										<input type="radio" name="displayall" value="1"<?php echo ($displayAll?'checked':'');?> /> Display all loans
 									</div>
-									<div>
+									<div style="float:right;">
 										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 										<input type="submit" name="formsubmit" value="Refresh List" />
 									</div>
 								</fieldset>
 							</form>	
 						</div>
-						<div style="float:right;margin:10px;">
-							<a href="#" onclick="displayNewLoanIn()">
-								<img src="../../images/add.png" alt="Create New Loan" />
-							</a>
-						</div>
-						<div id="newloanindiv" style="display:none;">
-							<form name="newloaninform" action="index.php" method="post" onsubmit="return verifyLoanInAddForm(this)">
+						<?php
+						if($loansOnWay || $loanInList){
+							?>
+							<div id="loaninToggle" style="float:right;margin:10px;">
+								<a href="#" onclick="displayNewLoanIn();">
+									<img src="../../images/add.png" alt="Create New Loan" />
+								</a>
+							</div>
+							<?php
+						}
+						?>
+						<div id="newloanindiv" style="display:<?php echo (($loansOnWay || $loanInList)?'none':'block'); ?>;">
+							<form name="newloaninform" action="index.php" method="post" onsubmit="return verifyLoanInAddForm(this);">
 								<fieldset>
-									<legend><b>New Loan</b></legend>
+									<legend><b>New Incoming Loan</b></legend>
 									<div style="padding-top:4px;float:left;">
 										<span>
 											Entered By:
@@ -281,7 +297,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" autocomplete="off" id="loanidentifierborr" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="inIdentCheck(loanidentifierborr,<?php echo $collId; ?>);" />
 										</span>
 									</div>
-									<div style="padding-top:6px;float:left;">
+									<div style="clear:both;padding-top:6px;float:left;">
 										<span>
 											Sent From:
 										</span><br />
@@ -303,16 +319,20 @@ header("Content-Type: text/html; charset=".$charset);
 											</a>
 										</span>
 									</div>
-									<div style="padding-top:8px;float:left;">
+									<div style="clear:both;padding-top:8px;float:right;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<button name="formsubmit" type="submit" value="Create Loan In">Create Loan</button>
 									</div>
 								</fieldset>
 							</form>
 						</div>
+						<?php
+						if(!$loansOnWay && !$loanInList){
+							echo '<script type="text/javascript">displayNewLoanIn();</script>';
+						}
+						?>
 						<div>
 							<?php 
-							$loansOnWay = $loanManager->getLoanOnWayList();
 							if($loansOnWay){
 								echo '<h3>Loans on Their Way</h3>';
 								echo '<ul>';
@@ -326,13 +346,12 @@ header("Content-Type: text/html; charset=".$charset);
 								echo '</ul>';
 							}
 							else{
-								echo '<div style="font-weight:bold;font-size:120%;">There are no loans on their way to this collection.</div>';
+								echo '<div style="font-weight:bold;font-size:120%;margin-top:10px;">There are no loans on their way to this collection.</div>';
 							}
 							?>
 						</div>
 						<div>
 							<?php 
-							$loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 							if($loanInList){
 								echo '<h3>Incoming Loan Records</h3>';
 								echo '<ul>';
@@ -347,7 +366,7 @@ header("Content-Type: text/html; charset=".$charset);
 								echo '</ul>';
 							}
 							else{
-								echo '<div style="font-weight:bold;font-size:120%;">There are no loans in registered for this collection</div>';
+								echo '<div style="font-weight:bold;font-size:120%;margin-top:10px;">There are no loans in registered for this collection</div>';
 							}
 							?>
 						</div>

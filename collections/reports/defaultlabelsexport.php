@@ -47,15 +47,15 @@ if($action == 'Export to DOCX'){
 $sectionStyle = array();
 if($rowsPerPage==1){
 	$lineWidth = 740;
-	$sectionStyle = array('marginLeft'=>360,'marginRight'=>360,'marginTop'=>360,'marginBottom'=>360,'headerHeight'=>0,'footerHeight'=>0);
+	$sectionStyle = array('pageSizeW'=>12240,'pageSizeH'=>15840,'marginLeft'=>360,'marginRight'=>360,'marginTop'=>360,'marginBottom'=>360,'headerHeight'=>0,'footerHeight'=>0);
 }
 if($rowsPerPage==2){
 	$lineWidth = 350;
-	$sectionStyle = array('marginLeft'=>360,'marginRight'=>360,'marginTop'=>360,'marginBottom'=>360,'headerHeight'=>0,'footerHeight'=>0,'colsNum'=>2,'colsSpace'=>690,'breakType'=>'continuous');
+	$sectionStyle = array('pageSizeW'=>12240,'pageSizeH'=>15840,'marginLeft'=>360,'marginRight'=>360,'marginTop'=>360,'marginBottom'=>360,'headerHeight'=>0,'footerHeight'=>0,'colsNum'=>2,'colsSpace'=>690,'breakType'=>'continuous');
 }
 if($rowsPerPage==3){
 	$lineWidth = 220;
-	$sectionStyle = array('marginLeft'=>360,'marginRight'=>360,'marginTop'=>360,'marginBottom'=>360,'headerHeight'=>0,'footerHeight'=>0,'colsNum'=>3,'colsSpace'=>690,'breakType'=>'continuous');
+	$sectionStyle = array('pageSizeW'=>12240,'pageSizeH'=>15840,'marginLeft'=>360,'marginRight'=>360,'marginTop'=>360,'marginBottom'=>360,'headerHeight'=>0,'footerHeight'=>0,'colsNum'=>3,'colsSpace'=>690,'breakType'=>'continuous');
 }
 
 $labelManager->setCollid($collid);

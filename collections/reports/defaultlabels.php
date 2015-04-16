@@ -69,7 +69,7 @@ else{
 				.symbbarcode {width:100%; text-align:center;margin-top:10px}
 			</style>
 		</head>
-		<body>
+		<body style="background-color:#ffffff;">
 			<div>
 				<?php 
 				if($isEditor){

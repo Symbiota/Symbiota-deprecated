@@ -14,7 +14,7 @@ $specList = $loanManager->getSpecList($loanId);
 		?>
 		<form name="editloanform" action="index.php" method="post">
 			<fieldset>
-				<legend>Loan Details</legend>
+				<legend>Loan Out Details</legend>
 				<div style="padding-top:18px;float:left;">
 					<span>
 						<b>Loan Number:</b> <input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" />
@@ -41,7 +41,7 @@ $specList = $loanManager->getSpecList($loanId);
 						Date Sent:
 					</span><br />
 					<span>
-						<input type="text" autocomplete="off" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesent']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+						<input type="text" autocomplete="off" name="datesent" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $loanArr['datesent']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 					</span>
 				</div>
 				<div style="margin-left:20px;padding-top:4px;float:left;">
@@ -49,7 +49,7 @@ $specList = $loanManager->getSpecList($loanId);
 						Date Due:
 					</span><br />
 					<span>
-						<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange="verifyDueDate(this);" title="format: yyyy-mm-dd" />
+						<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $loanArr['datedue']; ?>" onchange="verifyDueDate(this);" title="format: yyyy-mm-dd" />
 					</span>
 				</div>
 				<div style="padding-top:8px;float:left;">
@@ -136,7 +136,7 @@ $specList = $loanManager->getSpecList($loanId);
 							Date Received:
 						</span><br />
 						<span>
-							<input type="text" autocomplete="off" name="datereceivedown" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedown']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+							<input type="text" autocomplete="off" name="datereceivedown" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $loanArr['datereceivedown']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 						</span>
 					</div>
 					<div style="margin-left:40px;float:left;">
@@ -152,26 +152,26 @@ $specList = $loanManager->getSpecList($loanId);
 							Date Closed:
 						</span><br />
 						<span>
-							<input type="text" autocomplete="off" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+							<input type="text" autocomplete="off" name="dateclosed" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 						</span>
 					</div>
 				</div>
-				<div style="padding-top:8px;float:left;">
+				<div style="clear:left;padding-top:8px;float:left;">
 					<span>
 						Additional Invoice Message:
-					</span>
+					</span><br />
 					<span>
 						<textarea name="invoicemessageown" rows="5" style="width:700px;resize:vertical;" onchange=" "><?php echo $loanArr['invoicemessageown']; ?></textarea>
 					</span>
 				</div>
-				<div style="padding-top:8px;float:left;">
+				<div style="clear:both;padding-top:8px;float:right;">
 					<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 					<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 					<button name="formsubmit" type="submit" value="Save Outgoing">Save</button>
 				</div>
 			</fieldset>
 		</form>
-		<form name="reportsform" onsubmit="return ProcessReport();" method="post" onsubmit="" target="_blank">
+		<form name="reportsform" onsubmit="return ProcessReport();" method="post" onsubmit="">
 			<fieldset>
 				<legend>Generate Loan Paperwork</legend>
 				<div style="float:right;">
@@ -180,7 +180,7 @@ $specList = $loanManager->getSpecList($loanId);
 				</div>
 				<div style="padding-bottom:2px;">
 					<b>Print Method:</b> <input type="radio" name="print" value="browser" checked /> Print in Browser
-					<input type="radio" name="print" value="doc" /> Export to doc
+					<input type="radio" name="print" value="doc" /> Export to DOCX
 				</div>
 				<div style="padding-bottom:8px;">
 					<b>Invoice Language:</b> <input type="radio" name="languagedef" value="0" checked /> English
@@ -199,16 +199,16 @@ $specList = $loanManager->getSpecList($loanId);
 	</div>
 	<div id="outloanspecdiv">
 		<div style="float:right;margin:10px;">
-			<a href="#" onclick="toggle('newspecdiv');toggle('refreshbut');">
+			<a href="#" onclick="toggle('newspecdiv');">
 				<img src="../../images/add.png" title="Add New Specimen" />
 			</a>
 		</div>
 		<div id="newspecdiv" style="display:<?php echo ($eMode?'block':'none'); ?>;">
-			<form name="addspecform" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post" onsubmit="return addSpecimen(this,<?php echo (!$specList?'0':'1'); ?>);">
-				<fieldset>
+			<fieldset style="padding:10px;">
+				<form name="addspecform" style="margin-bottom:0px;padding-bottom:0px;" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post" onsubmit="return addSpecimen(this,<?php echo (!$specList?'0':'1'); ?>);">
 					<legend><b>Add Specimen</b></legend>
 					<div style="float:left;padding-bottom:2px;">
-						<b>Catalog Number: </b><input type="text" autocomplete="off" name="catalognumber" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+						<b>Catalog Number: </b><input type="text" autocomplete="off" name="catalognumber" maxlength="255" style="width:200px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 					</div>
 					<div id="addspecsuccess" style="float:left;margin-left:30px;padding-bottom:2px;color:green;display:<?php echo ($eMode?'block':'none'); ?>;">
 						SUCCESS: Specimen record added to loan.
@@ -222,13 +222,23 @@ $specList = $loanManager->getSpecList($loanId);
 					<div id="addspecerr3" style="float:left;margin-left:30px;padding-bottom:2px;color:orange;display:none;">
 						Warning: Specimen already linked to loan.
 					</div>
-					<div style="padding-top:8px;clear:both;">
+					<div style="padding-top:8px;clear:left;float:left;">
 						<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 						<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 						<input name="formsubmit" type="submit" value="Add Specimen" />
 					</div>
-				</fieldset>
-			</form>
+				</form>
+				<div id="refreshbut" style="float:left;padding-top:10px;margin-left:10px;">
+					<form style="margin-bottom:0px;" name="refreshspeclist" action="index.php" method="post">
+						<input name="loantype" type="hidden" value="<?php echo $loanType; ?>" />
+						<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
+						<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+						<input name="emode" type="hidden" value="0" />
+						<input name="tabindex" type="hidden" value="1" />
+						<input name="formsubmit" type="submit" value="Refresh List" />
+					</form>
+				</div>
+			</fieldset>
 		</div>
 		<div id="speclistdiv" style="<?php echo (!$specList?'display:none;':''); ?>">	
 			<div style="height:25px;margin-top:15px;">
@@ -248,7 +258,7 @@ $specList = $loanManager->getSpecList($loanId);
 				</div>
 			</div>
 			<form name="speceditform" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post" onsubmit="return verifySpecEditForm(this)" >
-				<table class="styledtable">
+				<table class="styledtable" style="font-family:Arial;font-size:12px;">
 					<tr>
 						<th style="width:25px;text-align:center;">&nbsp;</th>
 						<th style="width:100px;text-align:center;">Catalog Number</th>
