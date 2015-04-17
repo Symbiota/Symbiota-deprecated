@@ -62,16 +62,16 @@
 						<a href="<?php echo $clientRoot; ?>/projects/index.php?" >Inventories</a>
 						<!-- <ul>
 							<li>
-								<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=1" >Project 1</a>
+								<a href="<?php echo $clientRoot; ?>/projects/index.php?pid=1" >Project 1</a>
 							</li>
 							<li>
-								<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=2" >Project 2</a>
+								<a href="<?php echo $clientRoot; ?>/projects/index.php?pid=2" >Project 2</a>
 							</li>
 							<li>
-								<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=3" >Project 3</a>
+								<a href="<?php echo $clientRoot; ?>/projects/index.php?pid=3" >Project 3</a>
 							</li>
 							<li>
-								<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=4" >Project 4</a>
+								<a href="<?php echo $clientRoot; ?>/projects/index.php?pid=4" >Project 4</a>
 							</li>
 						</ul> -->
 					</li>

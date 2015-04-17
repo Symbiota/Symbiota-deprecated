@@ -187,7 +187,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 							if($projArr){
 								foreach($projArr as $pid => $pName){
 									echo '<li>';
-									echo '<a href="../projects/index.php?proj='.$pid.'">'.$pName.'</a>';
+									echo '<a href="../projects/index.php?pid='.$pid.'">'.$pName.'</a>';
 									echo '</li>';
 								}
 							}

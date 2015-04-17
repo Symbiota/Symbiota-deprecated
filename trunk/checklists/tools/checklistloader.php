@@ -57,7 +57,7 @@ if($isEditor){
 	<div class='navpath'>
 		<a href='../../index.php'>Home</a> &gt;&gt;
 		<?php 
-		if($pid) echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'">';
+		if($pid) echo '<a href="'.$clientRoot.'/projects/index.php?pid='.$pid.'">';
 		echo '<a href="../checklist.php?cl='.$clid.'&pid='.$pid.'">Return to Checklist</a> &gt;&gt; '; 
 		?> 
 		<a href="checklistloader.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><b>Checklists Loader</b></a>

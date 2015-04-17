@@ -317,7 +317,7 @@ if($isAdmin){
 										$projList = $userPermissions["ProjAdmin"];
 										asort($projList);
 										foreach($projList as $k => $v){
-											echo '<li><a href="../projects/index.php?proj='.$k.'" target="_blank"><span title="'.$v['aby'].'">'.$v['name'].'</span></a>';
+											echo '<li><a href="../projects/index.php?pid='.$k.'" target="_blank"><span title="'.$v['aby'].'">'.$v['name'].'</span></a>';
 											echo "<a href='usermanagement.php?delrole=ProjAdmin&tablepk=$k&userid=$userId'>";
 											echo "<img src='../images/del.png' style='border:0px;width:15px;' title='Delete permission' />";
 											echo "</a></li>";
@@ -534,7 +534,7 @@ if($isAdmin){
 										<div style='margin-left:15px;'>
 											<?php 
 											echo '<input type="checkbox" name="p[]" value="ProjAdmin-'.$k.'" />';
-											echo '<a href="../projects/index.php?proj='.$k.'" target="_blank">'.$v.'</a>'; 
+											echo '<a href="../projects/index.php?pid='.$k.'" target="_blank">'.$v.'</a>'; 
 											?>
 										</div>
 										<?php 

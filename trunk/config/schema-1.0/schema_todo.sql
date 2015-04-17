@@ -26,6 +26,7 @@ ALTER TABLE `omoccurrences`
 DROP TABLE `userpermissions`;
 
 
+
 # Event date range within omoccurrence table
 
 

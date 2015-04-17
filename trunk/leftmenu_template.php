@@ -20,7 +20,7 @@
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=1">
+		<a href="<?php echo $clientRoot; ?>/projects/index.php?pid=1">
 			Blabla Flora
 		</a>
 	</div>

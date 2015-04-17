@@ -104,7 +104,7 @@ if($chars){
 			echo '</a> &gt;&gt; ';
 		}
 		elseif($pid){
-			echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'">';
+			echo '<a href="'.$clientRoot.'/projects/index.php?pid='.$pid.'">';
 			echo 'Project Checklists';
 			echo '</a> &gt;&gt; ';
 		}

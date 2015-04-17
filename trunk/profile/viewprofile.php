@@ -349,10 +349,10 @@ if(isset($profile_viewprofileCrumbs)){
 						foreach($projArr as $pid => $projName){
 							?>
 							<li>
-								<a href="../projects/index.php?proj=<?php echo $pid; ?>&emode=0">
+								<a href="../projects/index.php?pid=<?php echo $pid; ?>&emode=0">
 									<?php echo $projName; ?>
 								</a>
-								<a href="../projects/index.php?proj=<?php echo $pid; ?>&emode=1">
+								<a href="../projects/index.php?pid=<?php echo $pid; ?>&emode=1">
 									<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Project" />
 								</a>
 							</li>

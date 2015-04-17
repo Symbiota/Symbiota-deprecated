@@ -243,7 +243,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 	if($proj){
 		echo '<div class="navpath">';
 		echo '<a href="../index.php">Home</a> &gt; ';
-		echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$clManager->getPid().'">';
+		echo '<a href="'.$clientRoot.'/projects/index.php?pid='.$clManager->getPid().'">';
 		echo $clManager->getProjName();
 		echo '</a> &gt; ';
 		echo '<b>'.$clManager->getSurveyName().'</b>';
