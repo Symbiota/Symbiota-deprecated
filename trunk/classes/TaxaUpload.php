@@ -22,11 +22,6 @@ class TaxaUpload{
 	}
 
 	function __destruct(){
-		if($this->uploadTargetPath && $this->uploadFileName){
-			if(file_exists($this->uploadTargetPath.$this->uploadFileName)){
-				unlink($this->uploadTargetPath.$this->uploadFileName);
-			}
-		}
 		if(!($this->conn === false)) $this->conn->close();
 		if($this->verboseMode == 2){
 			if($this->logFH) fclose($this->logFH);
@@ -167,8 +162,8 @@ class TaxaUpload{
 					$this->outputMsg('ERROR loading taxonunit: '.$this->conn->error);
 				}
 			}
-			
 			$this->outputMsg($recordCnt.' taxon records pre-processed');
+			$this->removeUploadFile();
 		}
 		else{
 			$this->outputMsg('ERROR: Scientific name is not mapped to &quot;scinameinput&quot;');
@@ -246,6 +241,7 @@ class TaxaUpload{
 		$this->outputMsg($recordCnt.' records loaded');
 		fclose($fh);
 		$this->setUploadCount();
+		$this->removeUploadFile();
 	}
 
 	private function loadItisTaxonUnit($tuArr,$extraArr,$authArr){
@@ -304,6 +300,14 @@ class TaxaUpload{
 		}
 	}
 	
+	private function removeUploadFile(){
+		if($this->uploadTargetPath && $this->uploadFileName){
+			if(file_exists($this->uploadTargetPath.$this->uploadFileName)){
+				unlink($this->uploadTargetPath.$this->uploadFileName);
+			}
+		}
+	}
+
 	private function deleteIllegalHomonyms(){
 		$homonymArr = array();
 		//Grab homonyms
@@ -1168,9 +1172,12 @@ class TaxaUpload{
 			$tPath = $GLOBALS['TEMP_DIR_ROOT'];
 		}
 		if(!$tPath){
-			$tPath = $GLOBALS['SERVER_ROOT']."/temp/downloads";
+			$tPath = $GLOBALS['SERVER_ROOT'];
+			if(substr($tPath,-1) != '/') $tPath .= "/"; 
+			$tPath .= "temp/downloads";
 		}
-		if(substr($this->uploadTargetPath,-1) != '/') $this->uploadTargetPath = $tPath."/"; 
+		if(substr($tPath,-1) != '/') $tPath .= '/';
+		$this->uploadTargetPath = $tPath; 
 	}
 
 	public function setFileName($fName){
