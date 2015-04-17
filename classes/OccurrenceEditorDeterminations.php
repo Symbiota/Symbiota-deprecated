@@ -219,11 +219,15 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 
 	public function deleteDetermination($detId){
 		$status = 'Determination deleted successfully!';
+		$isCurrent = 0;
+		$occid = 0;
 
 		$sql = 'SELECT * FROM omoccurdeterminations WHERE detid = '.$detId;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_assoc()){
 			$detArr = array();
+			$isCurrent = $r['iscurrent'];
+			$occid = $r['occid'];
 			foreach($r as $k => $v){
 				if($v) $detArr[$k] = $this->encodeStr($v);
 			}
@@ -233,6 +237,19 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($detObj).'" '.
 			'WHERE (detid = '.$detId.')';
 			$this->conn->query($sqlArchive);
+		}
+		
+		if($isCurrent){
+			$prevDetId = 0;
+			$sql2 = 'SELECT detid FROM omoccurdeterminations WHERE occid = '.$occid.' AND detid <> '.$detId.' '.
+			'ORDER BY detid DESC LIMIT 1 ';
+			$rs = $this->conn->query($sql2);
+			if($r = $rs->fetch_object()){
+				$prevDetId = $r->detid;
+			}
+			if($prevDetId){
+				$this->applyDetermination($prevDetId, 1);
+			}
 		}
 		
 		$sql = 'DELETE FROM omoccurdeterminations WHERE (detid = '.$detId.')';
