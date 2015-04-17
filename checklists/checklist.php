@@ -135,7 +135,7 @@ if($clValue || $dynClid){
 		echo '<div class="navpath">';
 		if($pid){
 			echo '<a href="../index.php">Home</a> &gt; ';
-			echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'">';
+			echo '<a href="'.$clientRoot.'/projects/index.php?pid='.$pid.'">';
 			echo $clManager->getProjName();
 			echo '</a> &gt; ';
 			echo '<b>'.$clManager->getClName().'</b>';

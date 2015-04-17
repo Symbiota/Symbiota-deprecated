@@ -67,7 +67,7 @@ $smManager = new SiteMapManager();
 			if($projList){
 				echo '<div style="margin-top:10px;"><h2>Biotic Inventory Projects</h2></div><ul>';
 				foreach($projList as $pid => $pArr){
-					echo "<li><a href='projects/index.php?proj=".$pid."'>".$pArr["name"]."</a></li>\n";
+					echo "<li><a href='projects/index.php?pid=".$pid."'>".$pArr["name"]."</a></li>\n";
 					echo "<ul><li>Manager: ".$pArr["managers"]."</li></ul>\n";
 				}
 				echo '</ul>';
@@ -325,7 +325,7 @@ $smManager = new SiteMapManager();
 								echo '<li><b>List of Current Projects</b> (click to edit)</li>';
 								echo '<ul>';
 								foreach($projList as $pid => $pArr){
-									echo '<li><a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
+									echo '<li><a href="'.$clientRoot.'/projects/index.php?pid='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
 								}
 								echo '</ul>';
 							}
