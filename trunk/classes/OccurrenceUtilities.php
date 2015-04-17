@@ -189,11 +189,17 @@ class OccurrenceUtilities {
 						$retArr['unitind2'] = array_shift($sciNameArr);
 						$retArr['unitname2'] = array_shift($sciNameArr);
 					}
-					elseif((strpos($sciNameArr[0],'.') !== false) || (strpos($sciNameArr[0],'(') !== false)){
+					elseif(strpos($sciNameArr[0],'.') !== false){
 						//It is assumed that Author has been reached, thus stop process 
+						$retArr['author'] = implode(' ',$sciNameArr);
 						unset($sciNameArr);
 					}
 					else{
+						if(strpos($sciNameArr[0],'(') !== false){
+							//Assumed subgenus exists, but keep a author incase an epithet does exist
+							$retArr['author'] = implode(' ',$sciNameArr);
+							array_shift($sciNameArr); 
+						}
 						//Specific Epithet
 						$retArr['unitname2'] = array_shift($sciNameArr);
 					}
@@ -203,7 +209,10 @@ class OccurrenceUtilities {
 							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'"';
 							$con = MySQLiConnectionFactory::getCon('readonly');
 							$rs = $con->query($sql);
-							if(!$rs->num_rows){
+							if($rs->num_rows){
+								if(isset($retArr['author'])) unset($retArr['author']);
+							}
+							else{
 								//Second word is likely author, thus assume assume author has been reach and stop process
 								$retArr['unitname2'] = '';
 								unset($sciNameArr);
