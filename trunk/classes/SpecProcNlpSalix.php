@@ -282,7 +282,7 @@ class SpecProcNlpSalix
 			else
 				$this->Results[$Key] = trim($Val);
 			}
-		$this->Results['SALIXVersion'] = "0.900";
+		$this->Results['SALIXVersion'] = "0.901";
 		return $this->Results;
 	}
 
@@ -1343,7 +1343,7 @@ class SpecProcNlpSalix
 			for($L=0;$L < count($this->LabelLines);$L++)
 				{
 				$Found = preg_match_all($Preg, $this->LabelLines[$L],$match);
-				//$this->printr($match,"MidNameMatch");
+				$this->printr($match,"MidNameMatch");
 				if($Found > 0)
 					{
 					$this->AddToResults($Field,$match[2][0],$L);
@@ -1421,21 +1421,38 @@ class SpecProcNlpSalix
 		if(count($match[0]) == 0)//Found == 0)
 			preg_match_all("(($PName|$PIn)\s?$PIn?\s$PName)$I", $TempString,$match);
 
+		//((Last name, init. init. init.) -- like Faria, J.E.Q.
+		if(count($match[0]) == 0)//Found == 0)
+			{
+			$Preg = "(($PName),?\s?$PIn\s?$PIn\s?$PIn)$I";
+			preg_match_all($Preg, $TempString,$match);
+			}
+
+		//((Last name, init. init.) -- like Staggemeier, V.G.
+		if(count($match[0]) == 0)//Found == 0)
+			{
+			$Preg = "(($PName),?\s?$PIn\s?$PIn)$I";
+			preg_match_all($Preg, $TempString,$match);
+			}
+			
 		if(count($match[0]) != 0)//Found a match
 			{
 			for($N=0;$N<count($match[0]);$N++)
 				{
 				$Name = $match[0][$N];
 				$Confirm = $this->ConfirmRecordedBy($Name);
-				if($Confirm < 10 || ($TitleCase == false && $Confirm < 0))
+				//if($Confirm < 10 || ($TitleCase == false && $Confirm < 0))
 				if($this->ConfirmRecordedBy($Name) < 0)
 					continue;
 				$Name = mb_convert_case($Name,MB_CASE_TITLE);
 				$this->AddToResults($Field,$Name,$L);
 				$this->RemoveStartWords($L,$Field);
 				$this->LabelLines[$L] = str_ireplace("with","",$this->LabelLines[$L]);
-				$this->LabelLines[$L] = trim(str_replace($match[0][$N],"",$this->LabelLines[$L])," ,");
+				$this->LabelLines[$L] = trim(str_replace($match[0][$N],"",$this->LabelLines[$L])," ,;");
+				if(strlen($this->LabelLines[$L]) > 5)
+					$this->GetNamesFromLine($L,$Field);
 				//echo "L=$L<br>";
+				//echo "{$this->LabelLines[$L]}<br>";
 				if($L < count($this->LabelLines)-1 && preg_match("(\A$PName\Z)",$this->LabelLines[$L]) && preg_match("(\A$PName\Z)",$this->LabelLines[$L+1]))
 					{//Catch the case where the given name on this line, surname is on the next line.  Fairly rare, but happens.
 					$Name = $this->LabelLines[$L]." ".$this->LabelLines[$L+1];
@@ -1541,7 +1558,7 @@ class SpecProcNlpSalix
 				}
 			if($this->LineStart[$L] == $Field)
 				{
-				//echo "Found Start word in {$this->LabelLines[$L]}<br>";
+				//echo "Found $Field Start word in {$this->LabelLines[$L]}<br>";
 				$RankArray[$L] += 1000;
 				}
 			if($this->StatScore[$L]['Score'] > 100)
@@ -1947,7 +1964,7 @@ class SpecProcNlpSalix
 
 	function GetCountryState()
 		{
-		//Look for phrases like "Plants of Arizona" or "Asteraceae of Brazil"	
+		//Look for phrases like "Plants of Arizona" or "Asteraceae of Brazil"
 		$Label = str_replace("-"," ",$this->Label);
 		$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(\b\S+[\b-])\s+(\b\S+\b)?)i",$Label,$match);
 		if($Found !== 1)
@@ -1969,7 +1986,6 @@ class SpecProcNlpSalix
 			}
 		if($this->Results['country'] != "") //Found it.
 			return;
-
 		//"Plants of" didn't work.  Look for "xxx State".
 		$match = $this->LabeledRegion("stateProvince");
 		if($match != false)
@@ -1981,7 +1997,6 @@ class SpecProcNlpSalix
 			}
 		if($this->Results['country'] != "") //Found it.
 			return;
-			
 		//Look for "xxx County".
 		$match = $this->LabeledRegion("county");
 		if($match != false)
@@ -1991,10 +2006,17 @@ class SpecProcNlpSalix
 			if(!$this->ScanForState($County))
 				$this->ScanForState(trim($match[2]));
 			}
+		//Brute force, look for country with matching state
+		$this->AnyCountry();
+		if($this->Results['country'] != "")
+			return;
+
+		
+		
 		$this->SeekState(223,-1);
 		if($this->Results['stateProvince'] != "")
 			return;
-			
+		//echo "Still here<br>";
 		//If coordinates have been found look in omoccurrences table for similar ..
 		if($this->Results['decimalLatitude'] != "" && $this->Results['decimalLongitude'] != "")
 			{
@@ -2147,6 +2169,7 @@ class SpecProcNlpSalix
 				}
 			}
 		}
+	
 	
 	//*****************************************************************************
 	private function CheckCounty($County, $State, $L)
@@ -2304,7 +2327,27 @@ class SpecProcNlpSalix
 		}
 		
 	//*****************************************************************************
-	private function SeekState($CountryId,$m)
+	private function AnyCountry()
+		{
+		//Look through label for any country.  Require that a matching state be present.
+		$query = "SELECT countryId, countryName from lkupcountry where 1";
+		$result = $this->conn->query($query);
+		$Preg = "(\bbrasil\b)i";
+		$FullLabel = preg_replace($Preg,"Brazil",$this->Label);
+		while(($Country = $result->fetch_assoc()) && $this->Results['country'] == "")
+			{
+			//$this->printr($Country,"Country");
+			$Preg = "(\b{$Country['countryName']}\b)i";
+			if(preg_match($Preg,$FullLabel,$match))
+				{
+				$this->SeekState($Country['countryId']);
+				}
+			}
+		}
+	
+	
+	//*****************************************************************************
+	private function SeekState($CountryId,$m=-1)
 		{
 		//Given the country (or if none assume USA), scan the whole label for a contained state.
 		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|vascular|university|specimen|botanical\b))i";
@@ -2330,7 +2373,8 @@ class SpecProcNlpSalix
 			while($OneState = $StateResult->fetch_assoc())
 				{ //Check each potential state one at a time.
 				if(preg_match("(\b{$OneState['stateName']}\b)i",$this->LabelLines[$L]) > 0)
-					{ //Found a state listed on the line.  
+					{ //Found a state listed on the line. 
+					//echo "Found state {$OneState['stateName']}<br>";
 					$StateArray[] = $OneState['stateName'];
 					$StateId[] = $OneState['stateId'];
 					}
@@ -2339,9 +2383,6 @@ class SpecProcNlpSalix
 				{
 				$Lengths = array_map('strlen',$StateArray); //Get the length of each potential state name
 				$index = $this->MaxKey($Lengths); //Take the longest state name in the array.  Least likely to be a random match.
-				//$MaxLength = max($Lengths);
-				//$index = array_search($MaxLength,$Lengths);
-				//$this->printr($StateId,"StateId");
 				$this->AddToResults('stateProvince',$StateArray[$index],$L);
 				$this->LabelLines[$L]= str_ireplace($StateArray[$index],"",$this->LabelLines[$L]);
 				
