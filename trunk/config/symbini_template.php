@@ -19,7 +19,7 @@ $IMAGE_ROOT_PATH = '';			//Writable path to images, especially needed for downlo
 
 //Pixel witdth of web images
 $IMG_WEB_WIDTH = 1400;
-$IMG_WEB_WIDTH = 200;
+$IMG_TN_WIDTH = 200;
 $IMG_LG_WIDTH = 3200;
 $IMG_FILE_SIZE_LIMIT = 300000;		//Files above this size limit and still within pixel width limits will still be resaved w/ some compression  
 

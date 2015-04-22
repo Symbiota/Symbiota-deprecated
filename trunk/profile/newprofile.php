@@ -7,34 +7,32 @@ if(isset($RECAPTCHA_PUBLIC_KEY) && $RECAPTCHA_PUBLIC_KEY && isset($RECAPTCHA_PRI
 	$useRecaptcha = true;
 }
 header("Content-Type: text/html; charset=".$charset);
+header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
+header('Pragma: no-cache'); // HTTP 1.0.
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
+$login = array_key_exists('login',$_POST)?$_POST['login']:'';
+$emailAddr = array_key_exists('emailaddr',$_POST)?$_POST['emailaddr']:'';
 $action = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:""; 
 
-$displayMsg = "";
 
-$refUrl = "";
-if(array_key_exists("refurl",$_REQUEST)){
-	$refGetStr = "";
-	foreach($_GET as $k => $v){
-		if($k != "refurl"){
-			if($k == "attr" && is_array($v)){
-				foreach($v as $v2){
-					$refGetStr .= "&attr[]=".$v2;
-				}
-			}
-			else{
-				$refGetStr .= "&".$k."=".$v;
-			}
-		}
-	}
-	$refUrl = $_REQUEST["refurl"];
-	if(substr($refUrl,-4) == ".php"){
-		$refUrl .= "?".substr($refGetStr,1);
-	}
-	else{
-		$refUrl .= $refGetStr;
+$pHandler = new ProfileManager();
+$displayStr = '';
+
+//Sanitation
+if($login){
+	if(!$pHandler->setUserName($login)){
+		$login = '';
+		$displayStr = 'Invalid login name';
 	}
 }
+if($emailAddr){
+	if(!$pHandler->validateEmailAddress($emailAddr)){
+		$emailAddr = '';
+		$displayStr = 'Invalid login name';
+	}
+}
+if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
 
 if($action == "Create Login"){
 	$okToCreateLogin = true;
@@ -43,25 +41,21 @@ if($action == "Create Login"){
 		if (!$resp->is_valid) {
 			// What happens when the CAPTCHA was entered incorrectly
 			$okToCreateLogin = false;
-			$displayMsg = "The reCAPTCHA wasn't entered correctly. Go back and try it again. (reCAPTCHA said: " . $resp->error . ")";
+			$displayStr = "The reCAPTCHA wasn't entered correctly. Go back and try it again. (reCAPTCHA said: " . $resp->error . ")";
 		}
 	}
 
 	if($okToCreateLogin){
-		$pHandler = new ProfileManager();
-		$displayMsg = $pHandler->checkLogin($_POST["username"], $_POST["email"]);
-		if(!$displayMsg){
-			$displayMsg = $pHandler->register($_POST);
-		}
-		if(substr($displayMsg,0,7) == "SUCCESS"){
-			$pHandler->authenticate($_POST["username"], $_POST["pwd"]);
-			//Forward to page where user came from
-			if($refUrl){
-				header("Location: ".$refUrl);
-			}
-			else{
+		if($pHandler->checkLogin($emailAddr)){
+			if($pHandler->register($_POST)){
 				header("Location: viewprofile.php");
 			}
+			else{
+				$displayStr = 'FAILED: Unable to create user.<div style="margin-left:55px;">Please contact system administrator for assistance.</div>';
+			}
+		}
+		else{
+			$displayStr = $pHandler->getErrorStr();
 		}
 	}
 }
@@ -70,6 +64,7 @@ if($action == "Create Login"){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> - New User Profile</title>
+	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script language="JavaScript" type="text/javascript">
@@ -101,11 +96,19 @@ if($action == "Create Login"){
 				f.pwd2.focus();
 				return false;
 			}
-			if(f.username.value.replace(/\s/g, "") == ""){
+			if(f.login.value.replace(/\s/g, "") == ""){
 				window.alert("User Name must contain a value");
 				return false;
 			}
-			if(f.email.value.replace(/\s/g, "") == "" ){
+		    if(f.login.value.instr(" ") > 0){
+				window.alert("Login name cannot contain spaces");
+				return false;
+			}
+			if( /[^0-9A-Za-z_!@#$-+]/.test( f.login.value ) ) {
+		        alert("Login name should only contain 0-9A-Za-z_!@");
+		        return false;
+		    }
+			if(f.emailaddr.value.replace(/\s/g, "") == "" ){
 				window.alert("Email address is required");
 				return false;
 			}
@@ -115,10 +118,6 @@ if($action == "Create Login"){
 			}
 			if(f.lastname.value.replace(/\s/g, "") == ""){
 				window.alert("Last Name must contain a value");
-				return false;
-			}
-			if(f.username.value.instr(" ") > 0){
-				window.alert("Login cannot contain spaces");
 				return false;
 			}
 	
@@ -142,9 +141,36 @@ if($action == "Create Login"){
 	<h1>Create New Profile</h1>
 	
 	<?php
-		echo "<div style='margin:10px;font-size:110%;font-weight:bold;color:red;'>".$displayMsg."</div>";
+	if($displayStr){
+		echo '<div style="margin:10px;font-size:110%;font-weight:bold;color:red;">';
+		if($displayStr == 'login_exists'){
+			echo 'This login ('.$login.') is already being used.<br> '.
+				'Please choose a different login name or visit the <a href="index.php?login='.$login.'">login page</a> if you believe this might be you';
+		}
+		elseif($displayStr == 'email_registered'){
+			?>
+			<div>
+				A different login is already registered to this email address.<br/> 
+				Use button below to have login emailed to <?php echo $emailAddr; ?>
+				<div style="margin:15px">
+					<form name="retrieveLoginForm" method="post" action="index.php">
+						<input name="emailaddr" type="hidden" value="<?php echo $emailAddr; ?>" />
+						<input name="action" type="submit" value="Retrieve Login" />
+					</form>
+				</div>
+			</div>
+			<?php 
+		}
+		elseif($displayStr == 'email_invalid'){
+			echo 'Email address not valid';
+		}
+		else{
+			echo $displayStr;
+		}
+		echo '</div>';
+	}
 	?>
-	<fieldset style='margin:10px;width:390px;'>
+	<fieldset style='margin:10px;width:95%;'>
 		<legend><b>Login Details</b></legend>
 		<form action="newprofile.php" method="post" onsubmit="return checkform(this);">
 			<div style="margin:15px;">
@@ -154,7 +180,8 @@ if($action == "Create Login"){
 							<b>Login:</b>
 						</td>
 						<td>
-							<input name="username" value="<?php echo (isset($_POST["username"])?$_POST["username"]:''); ?>" size="20" />
+							<input name="login" value="<?php echo $login; ?>" size="20" /> 
+							<span style="color:red;">*</span>
 							<br/>&nbsp;
 						</td>
 					</tr>
@@ -163,7 +190,8 @@ if($action == "Create Login"){
 							<b>Password:</b>
 						</td>
 						<td>
-							<input name="pwd" id="pwd" value="" size="20" type="password" /><br/>
+							<input name="pwd" id="pwd" value="" size="20" type="password" autocomplete="off" /> 
+							<span style="color:red;">*</span>
 						</td> 
 					</tr>
 					<tr>
@@ -171,27 +199,35 @@ if($action == "Create Login"){
 							<b>Password Again:</b> 
 						</td>
 						<td>
-							<input id="pwd2" name="pwd2" value="" size="20" type="password" />
+							<input id="pwd2" name="pwd2" value="" size="20" type="password" autocomplete="off" /> 
+							<span style="color:red;">*</span>
 							<br/>&nbsp;
 						</td> 
 					</tr>
 					<tr>
 						<td><span style="font-weight:bold;">First Name:</span></td>
 						<td>
-							<input id="firstname" name="firstname" size="40" value="<?php echo (isset($_POST['firstname'])?$_POST['firstname']:''); ?>">
+							<input id="firstname" name="firstname" size="40" value="<?php echo (isset($_POST['firstname'])?$_POST['firstname']:''); ?>"> 
+							<span style="color:red;">*</span>
 						</td>
 					</tr>
 					<tr>
 						<td><span style="font-weight:bold;">Last Name:</span></td>
 						<td>
-							<input id="lastname" name="lastname" size="40" value="<?php echo (isset($_POST['lastname'])?$_POST['lastname']:''); ?>">
+							<input id="lastname" name="lastname" size="40" value="<?php echo (isset($_POST['lastname'])?$_POST['lastname']:''); ?>"> 
+							<span style="color:red;">*</span>
 						</td>
 					</tr>
 					<tr>
 						<td><span style="font-weight:bold;">Email Address:</span></td>
 						<td>
-							<span class="profile"><input id="email" name="email"  size="40" value="<?php echo (isset($_POST['email'])?$_POST['email']:''); ?>"></span>
+							<span class="profile"><input name="emailaddr"  size="40" value="<?php echo $emailAddr; ?>"></span> 
+							<span style="color:red;">*</span>
 						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><span style="color:red;">* required fields</span></td>
 					</tr>
 				</table>
 				<div style="margin:15px 0px 10px 0px;"><b><u>Information below is optional, but encouraged</u></b></div>
@@ -265,7 +301,6 @@ if($action == "Create Login"){
 							</div>
 							<div style="float:right;margin:20px;">
 								<input type="submit" value="Create Login" name="submit" id="submit" />
-								<input type="hidden" name="refurl" value="<?php echo $refUrl; ?>" />
 							</div>
 						</td>
 					</tr>

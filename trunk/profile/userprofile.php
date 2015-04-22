@@ -5,20 +5,22 @@ header("Content-Type: text/html; charset=".$charset);
 
 $userId = $_REQUEST["userid"];
 
+//Sanitation
+if(!is_numeric($userId)) $userId = 0;
+
 $pHandler = new ProfileManager();
 $pHandler->setUid($userId);
 $person = $pHandler->getPerson();
-
+$isSelf = true;
+if($userId != $SYMB_UID) $isSelf = false;
 ?>
 <div style="padding:15px;">
 	<div>
 		<div>
 			<b><u>Profile Details</u></b>
-			<a href="#" onclick="toggle('profileeditdiv')"><img src="../images/edit.png" /></a>
 		</div>
 		<div style="margin:20px;">
 			<?php
-			
 			echo '<div>'.$person->getFirstName().' '.$person->getLastName().'</div>';
 			if($person->getTitle()) echo '<div>'.$person->getTitle().'</div>';
 			if($person->getInstitution()) echo '<div>'.$person->getInstitution().'</div>';
@@ -28,15 +30,18 @@ $person = $pHandler->getPerson();
 			if($person->getEmail()) echo '<div>'.$person->getEmail().'</div>';
 			if($person->getUrl()) echo '<div><a href="'.$person->getUrl().'">'.$person->getUrl().'</a></div>';
 			if($person->getBiography()) echo '<div style="margin:10px;">'.$person->getBiography().'</div>';
-			$loginArr = $person->getLoginArr();
-			if($loginArr) echo '<div>Login name: '.implode(', ',$loginArr).'</div>';
+			echo '<div>Login name: '.($person->getUserName()?$person->getUserName():'not registered').'</div>';
 			echo '<div>User information: '.($person->getIsPublic()?'public':'private').'</div>';
-	
 			?>
+			<div style="font-weight:bold;margin-top:10px;">
+				<div><a href="#" onclick="toggleEditingTools('profileeditdiv')">Edit Profile</a></div>
+				<div><a href="#" onclick="toggleEditingTools('pwdeditdiv')">Change Password</a></div>
+				<div><a href="#" onclick="toggleEditingTools('logineditdiv')">Change Login</a></div>
+			</div>
 		</div>	
 	</div>
 	<div id="profileeditdiv" style="display:none;margin:15px;">
-		<form id="editprofileform" name="editprofile" action="viewprofile.php" method="post" onsubmit="return verifyEditProfileForm(this);">
+		<form name="editprofileform" action="viewprofile.php" method="post" onsubmit="return verifyEditProfileForm(this);">
 			<fieldset>
 				<legend><b>Edit User Profile</b></legend>
 				<table cellspacing='1' style="width:100%;">
@@ -130,26 +135,6 @@ $person = $pHandler->getPerson();
 						</td>
 				    </tr>
 				    <tr>
-				        <td><b>Login:</b></td>
-				        <td>
-							<?php 
-							$loginArr = $person->getLoginArr();
-							if($loginArr){
-								$delimiter = '';
-								foreach($loginArr as $login){
-									echo $login;
-									if(count($loginArr) > 1) echo ' <a href="userprofile.php?userid='.$userId.'&dellogin='.$login.'" title="Delete '.$login.'"><img src="../images/del.png"  /></a>';
-									echo $delimiter;
-									$delimiter = ', '; 
-								} 
-							}
-							else{
-								echo "No logins are registered";
-							}
-							?>
-						</td>
-				    </tr>
-				    <tr>
 				        <td colspan="2">
 							<div>
 								<input type="checkbox" name="ispublic" value="1" <?php if($person->getIsPublic()) echo "CHECKED"; ?> /> 
@@ -161,19 +146,28 @@ $person = $pHandler->getPerson();
 						<td colspan="2">
 							<div style="margin:10px;">
 								<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-								<input type="submit" name="action" value="Submit Edits" id="editprofile">
+								<input type="submit" name="action" value="Submit Edits" />
 							</div>
 						</td>
 					</tr>
 				</table>
 			</fieldset>
 		</form>
-		<form id="changepwd" name="changepwd" action="viewprofile.php" method="post" onsubmit="return checkPwdForm(this);">
+		<form name="delprofileform" action="viewprofile.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete profile?');">
+			<fieldset style='padding:15px;width:200px;'>
+		    	<legend><b>Delete Profile</b></legend>
+				<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+	    		<input type="submit" name="action" value="Delete Profile" />
+			</fieldset>
+		</form>
+	</div>
+	<div id="pwdeditdiv" style="display:none;margin:15px;">
+		<form name="changepwdform" action="viewprofile.php" method="post" onsubmit="return verifyPwdForm(this);">
 			<fieldset style='padding:15px;width:500px;'>
 		    	<legend><b>Change Password</b></legend>
 		    	<table>
 					<?php 
-					if($userId == $SYMB_UID){ 
+					if($isSelf){ 
 						?>
 			    		<tr>
 			    			<td>
@@ -205,19 +199,31 @@ $person = $pHandler->getPerson();
 		    		<tr>
 		    			<td colspan="2">
 							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-							<input type="submit" name="action" value="Change Password" id="editpwd"/>
+							<input type="submit" name="action" value="Change Password" />
 		    			</td>
 		    		</tr>
 				</table>
 			</fieldset>
 		</form>
-		<form action="viewprofile.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete profile?');">
-			<fieldset style='padding:15px;width:200px;'>
-		    	<legend><b>Delete Profile</b></legend>
-				<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-	    		<input type="submit" name="action" value="Delete Profile" id="submitdelete" />
-			</fieldset>
-		</form>
+	</div>
+	<div id="logineditdiv" style="display:none;margin:15px;">
+		<fieldset style='padding:15px;width:500px;'>
+	    	<legend><b>Change Login Name</b></legend>
+			<form name="modifyloginform" action="viewprofile.php" method="post" onsubmit="return verifyModifyLoginForm(this);">
+				<div><b>New Login Name:</b> <input name="newlogin" type="text" /></div>
+				<?php 
+				if($isSelf){ 
+					?>
+					<div><b>Current Password:</b> <input name="newloginpwd" type="password" /></div>
+					<?php
+				}
+				?>
+				<div style="margin:10px">
+					<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+					<input type="submit" name="action" value="Change Login" />
+				</div>
+			</form>
+		</fieldset>
 	</div>
 	<div>
 		<div>

@@ -9,6 +9,11 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:0;
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 
+//Sanitation
+if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
+if(!is_numeric($userId)) $userId = 0;
+if(!is_numeric($tabIndex)) $tabIndex = 0;
+
 $isSelf = 0;
 $isEditor = 0;
 if(isset($SYMB_UID) && $SYMB_UID){
@@ -90,10 +95,12 @@ if($isEditor){
 		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
 		else $tabIndex = 2;
 	}
-	elseif($action == "Create Login"){
-		$newLogin = $_REQUEST["newlogin"];
-		$newPwd = $_REQUEST["newloginpwd"];
-		$statusStr = $pHandler->createNewLogin($userId, $newLogin, $newPwd);
+	elseif($action == "Change Login"){
+		$pwd = '';
+		if($isSelf && isset($_POST["newloginpwd"])) $pwd = $_POST["newloginpwd"];
+		if(!$pHandler->changeLogin($_POST["newlogin"], $pwd)){
+			$statusStr = $pHandler->getErrorStr();
+		}
 		$person = $pHandler->getPerson();
 		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
 		else $tabIndex = 2;
@@ -136,6 +143,7 @@ if($isEditor){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> - View User Profile</title>
+	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	

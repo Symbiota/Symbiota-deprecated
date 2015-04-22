@@ -7,10 +7,12 @@ class ProfileManager{
 	private $rememberMe = false;
 	private $uid;
 	private $userName;
+
 	private $displayName;
 	private $visitId;
 	private $userRights = Array();
 	private $conn;
+	private $errorStr;
 	
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -26,8 +28,10 @@ class ProfileManager{
 	
 	public function reset(){
 		//Delete cookies
-		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
-		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
+		$domainName = $_SERVER['HTTP_HOST'];
+		if(!$domainName) $domainName = $_SERVER['SERVER_NAME'];
+		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'), $domainName);
+		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'), $domainName);
 	}
 	
 	public function setCookies(){
@@ -38,7 +42,10 @@ class ProfileManager{
 		if($this->rememberMe){
 			$cookieExpire = time()+60*60*24*30;
 		}
-		setcookie("SymbiotaBase", $cookieStr, $cookieExpire, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
+		$domainName = $_SERVER['SERVER_NAME'];
+		if(!$domainName) $domainName = $_SERVER['HTTP_HOST'];
+		if($domainName == 'localhost') $domainName = false;
+		setcookie("SymbiotaBase", $cookieStr, $cookieExpire, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'),$domainName,false,true);
 		//Set admin cookie
 		if($this->userRights){
 			$cookieStr = '';
@@ -46,87 +53,55 @@ class ProfileManager{
 				$vStr = implode(',',$vArr);
 				$cookieStr .= $name.($vStr?'-'.$vStr:'').'&';
 			}
-			setcookie("SymbiotaRights", trim($cookieStr,"&"), $cookieExpire, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
+			setcookie("SymbiotaRights", trim($cookieStr,"&"), $cookieExpire, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'),$domainName,false,true);
 		}
 	}
 	
-	public function authenticate($userNameStr, $pwdStr = ''){
+	public function authenticate($pwdStr = ''){
 		$authStatus = false;
-		$this->userName = $userNameStr;
-		//check login
-		$sql = 'SELECT u.uid, u.firstname, u.lastname '.
-			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
-			'WHERE (ul.username = "'.$this->cleanInStr($userNameStr).'") ';
-		if($pwdStr){
-			$sql .= 'AND ((ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'")) '.
-				'OR (ul.password = OLD_PASSWORD("'.$this->cleanInStr($pwdStr).'")))';
-		}
-		//echo $sql;
-		$result = $this->conn->query($sql);
-		if($row = $result->fetch_object()){
-			$this->uid = $row->uid;
-			$dispNameArr = explode(' ',$row->firstname);
-			if((substr($dispNameArr[0],-1) == '.') || (strlen($dispNameArr[0]) == 1)){
-				$this->displayName = $dispNameArr[0].' '.$dispNameArr[1];
-			}
-			else{
-				$this->displayName = $dispNameArr[0];
-			}
-			$authStatus = true;
-		}
-		
-		if($authStatus){
-			$this->userRights = array();
-			$this->reset();
-			$this->setUserRights();
-			$this->setCookies();
-			
-			//Update last login data
-			$conn = $this->getConnection("write");
-			$sql = 'UPDATE userlogin SET lastlogindate = NOW() WHERE (username = "'.$this->cleanInStr($userNameStr).'")';
-			$conn->query($sql); 
-			
-			return "success";
-		}
-		else{
-			//Check and see why authentication failed
-			$sqlStr = 'SELECT u.uid, u.firstname, u.lastname, u.email, ul.password '.
-				'FROM userlogin ul INNER JOIN users u ON ul.uid = u.uid '.
-				'WHERE (ul.username = "'.$this->cleanInStr($userNameStr).'")';
-			//echo $sqlStr;
-			$result = $this->conn->query($sqlStr);
+		if($this->userName){
+			$sql = 'SELECT u.uid, u.firstname, u.lastname '.
+				'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
+				'WHERE (ul.username = "'.$this->userName.'") ';
+			if($pwdStr) $sql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
+			//echo $sql;
+			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
-				return 'badPassword';
+				$this->uid = $row->uid;
+				$this->displayName = $row->firstname;
+				if(strlen($this->displayName) > 15) $this->displayName = $this->userName;
+				if(strlen($this->displayName) > 15) $this->displayName = substr($this->displayName,0,10).'...';
+				
+				$authStatus = true;
+				$this->userRights = array();
+				$this->reset();
+				$this->setUserRights();
+				$this->setCookies();
+				
+				//Update last login data
+				$conn = $this->getConnection("write");
+				$sql = 'UPDATE userlogin SET lastlogindate = NOW() WHERE (username = "'.$this->userName.'")';
+				$conn->query($sql);
+				$conn->close();
 			}
-			return 'badUserId';
 		}
+		return $authStatus;
 	}
 	
 	public function getPerson(){
 		$sqlStr = "SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.department, ".
 			"u.address, u.city, u.state, u.zip, u.country, u.phone, u.email, ".
-			"u.url, u.biography, u.ispublic, u.notes, ul.username ".
+			"u.url, u.biography, u.ispublic, u.notes, ul.username, ul.lastlogindate ".
 			"FROM users u LEFT JOIN userlogin ul ON u.uid = ul.uid ".
 			"WHERE (u.uid = ".$this->uid.")";
-		return $this->getPersonBySql($sqlStr);
-	}
-		
-	public function getPersonByUsername($userName){
-		$sqlStr = 'SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.department, '.
-			'u.address, u.city, u.state, u.zip, u.country, u.phone, u.email, '.
-			'u.url, u.biography, u.ispublic, u.notes, ul.username '.
-			'FROM userlogin ul INNER JOIN users u ON ul.uid = u.uid '.
-			'WHERE (ul.username = "'.$this->cleanInStr($userName).'")';
-		return $this->getPersonBySql($sqlStr);
-	}
-		
-	private function getPersonBySql($sqlStr){
-		$person = null;
+		$person = new Person();
 		//echo $sqlStr;
+		$badUserNameArr = array();
 		$result = $this->conn->query($sqlStr);
 		if($row = $result->fetch_object()){
-			$person = new Person();
 			$person->setUid($row->uid);
+			$person->setUserName($row->username);
+			$person->setLastLoginDate($row->lastlogindate);
 			$person->setFirstName($row->firstname);
 			$person->setLastName($row->lastname);
 			$person->setTitle($row->title);
@@ -142,13 +117,27 @@ class ProfileManager{
 			$person->setUrl($row->url);
 			$person->setBiography($row->biography);
 			$person->setIsPublic($row->ispublic);
-			$person->addLogin($row->username);
+			$this->setUserTaxonomy($person);
 			while($row = $result->fetch_object()){
-				$person->addLogin($row->username);
+				//Old code allowed folks to maintain more than one login names. This code will make sure the most recently active one is used 
+				if($row->lastlogindate && (!$person->getLastLoginDate() || $row->lastlogindate > $person->getLastLoginDate())){
+					$badUserNameArr[] = $person->getUserName();
+					$person->setUserName($row->username);
+					$person->setLastLoginDate($row->lastlogindate);
+				}
+				else{
+					$badUserNameArr[] = $row->userName;
+				}
 			}
 		}
-		$result->close();
-		$this->setUserTaxonomy($person);
+		if($badUserNameArr){
+			//Delete the none active logins
+			$sql = 'DELETE FROM userlogin WHERE username IN("'.implode('","',$badUserNameArr).'")';
+			if(!$this->conn->query($sql)){
+				$this->errorStr = 'ERROR removing extra logins: '.$this->conn->error;
+			}
+		}
+		$result->free();
 		return $person;
 	}
 	
@@ -271,16 +260,15 @@ class ProfileManager{
 	}
 	
 	public function register($postArr){
-		$returnStr = "";
-		$userNew = true;
+		$status = false;
 		
 		$firstName = $postArr['firstname'];
 		$lastName = $postArr['lastname'];
-		if($firstName == $lastName && $postArr['biography']) return ''; 
+		if($firstName == $lastName && $postArr['biography']) return false; 
 		
 		$person = new Person();
 		$person->setPassword($postArr['pwd']);
-		$person->setUserName($postArr['username']);
+		$person->setUserName($this->userName);
 		$person->setFirstName($firstName);
 		$person->setLastName($lastName);
 		$person->setTitle($postArr['title']);
@@ -289,118 +277,107 @@ class ProfileManager{
 		$person->setState($postArr['state']);
 		$person->setZip($postArr['zip']);
 		$person->setCountry($postArr['country']);
-		$person->setEmail($postArr['email']);
+		$person->setEmail($postArr['emailaddr']);
 		$person->setUrl($postArr['url']);
 		$person->setBiography($postArr['biography']);
 		$person->setIsPublic(isset($postArr['ispublic'])?1:0);
 		
-		//Test to see if user already exists
+		
+		//Add to users table
+		$fields = 'INSERT INTO users (';
+		$values = 'VALUES (';
+		$fields .= 'firstname ';
+		$values .= '"'.$this->cleanInStr($person->getFirstName()).'"';
+		$fields .= ', lastname';
+		$values .= ', "'.$this->cleanInStr($person->getLastName()).'"';
+		if($person->getTitle()){
+			$fields .= ', title';
+			$values .= ', "'.$this->cleanInStr($person->getTitle()).'"';
+		}
+		if($person->getInstitution()){
+			$fields .= ', institution';
+			$values .= ', "'.$this->cleanInStr($person->getInstitution()).'"';
+		}
+		if($person->getDepartment()){
+			$fields .= ', department';
+			$values .= ', "'.$this->cleanInStr($person->getDepartment()).'"';
+		}
+		if($person->getAddress()){
+			$fields .= ', address';
+			$values .= ', "'.$this->cleanInStr($person->getAddress()).'"';
+		}
+		if($person->getCity()){
+			$fields .= ', city';
+			$values .= ', "'.$this->cleanInStr($person->getCity()).'"';
+		}
+		$fields .= ', state';
+		$values .= ', "'.$this->cleanInStr($person->getState()).'"';
+		$fields .= ', country';
+		$values .= ', "'.$this->cleanInStr($person->getCountry()).'"';
+		if($person->getZip()){
+			$fields .= ', zip';
+			$values .= ', "'.$this->cleanInStr($person->getZip()).'"';
+		}
+		if($person->getPhone()){
+			$fields .= ', phone';
+			$values .= ', "'.$this->cleanInStr($person->getPhone()).'"';
+		}
 		if($person->getEmail()){
-			$sql = 'SELECT u.uid FROM users u WHERE (u.email = "'.$person->getEmail().'") AND (u.lastname = "'.$person->getLastName().'")';
-			$result = $this->conn->query($sql);
-			if($row = $result->fetch_object()){
-				$person->setUid($row->uid);
-				//$returnStr = "Note: Using profile already in system that matched submitted name and email address. ";
-				$userNew = false;
-			}
-			$result->free();
+			$fields .= ', email';
+			$values .= ', "'.$this->cleanInStr($person->getEmail()).'"';
+		}
+		if($person->getUrl()){
+			$fields .= ', url';
+			$values .= ', "'.$person->getUrl().'"';
+		}
+		if($person->getBiography()){
+			$fields .= ', biography';
+			$values .= ', "'.$this->cleanInStr($person->getBiography()).'"';
+		}
+		if($person->getIsPublic()){
+			$fields .= ', ispublic';
+			$values .= ', '.$person->getIsPublic();
 		}
 		
-		//If newuser, add to users table
-		if($userNew){
-			$fields = 'INSERT INTO users (';
-			$values = 'VALUES (';
-			$fields .= 'firstname ';
-			$values .= '"'.$this->cleanInStr($person->getFirstName()).'"';
-			$fields .= ', lastname';
-			$values .= ', "'.$this->cleanInStr($person->getLastName()).'"';
-			if($person->getTitle()){
-				$fields .= ', title';
-				$values .= ', "'.$this->cleanInStr($person->getTitle()).'"';
-			}
-			if($person->getInstitution()){
-				$fields .= ', institution';
-				$values .= ', "'.$this->cleanInStr($person->getInstitution()).'"';
-			}
-			if($person->getDepartment()){
-				$fields .= ', department';
-				$values .= ', "'.$this->cleanInStr($person->getDepartment()).'"';
-			}
-			if($person->getAddress()){
-				$fields .= ', address';
-				$values .= ', "'.$this->cleanInStr($person->getAddress()).'"';
-			}
-			if($person->getCity()){
-				$fields .= ', city';
-				$values .= ', "'.$this->cleanInStr($person->getCity()).'"';
-			}
-			$fields .= ', state';
-			$values .= ', "'.$this->cleanInStr($person->getState()).'"';
-			$fields .= ', country';
-			$values .= ', "'.$this->cleanInStr($person->getCountry()).'"';
-			if($person->getZip()){
-				$fields .= ', zip';
-				$values .= ', "'.$this->cleanInStr($person->getZip()).'"';
-			}
-			if($person->getPhone()){
-				$fields .= ', phone';
-				$values .= ', "'.$this->cleanInStr($person->getPhone()).'"';
-			}
-			if($person->getEmail()){
-				$fields .= ', email';
-				$values .= ', "'.$this->cleanInStr($person->getEmail()).'"';
-			}
-			if($person->getUrl()){
-				$fields .= ', url';
-				$values .= ', "'.$person->getUrl().'"';
-			}
-			if($person->getBiography()){
-				$fields .= ', biography';
-				$values .= ', "'.$this->cleanInStr($person->getBiography()).'"';
-			}
-			if($person->getIsPublic()){
-				$fields .= ', ispublic';
-				$values .= ', '.$person->getIsPublic();
-			}
-			
-			$sql = $fields.') '.$values.')';
-			//echo "SQL: ".$sql;
-			$editCon = $this->getConnection('write');
-			if($editCon->query($sql)){
-				$person->setUid($editCon->insert_id);
-			}
-			$editCon->close();
-		}
-		
-		//Add userlogin
-		$sql = 'INSERT INTO userlogin (uid, username, password) '.
-			'VALUES ('.$person->getUid().', "'.
-			$this->cleanInStr($person->getUserName()).
-			'", PASSWORD("'.$this->cleanInStr($person->getPassword()).'"))';
+		$sql = $fields.') '.$values.')';
+		//echo "SQL: ".$sql;
 		$editCon = $this->getConnection('write');
 		if($editCon->query($sql)){
-			$returnStr = 'SUCCESS: new user added successfully. '.$returnStr;
-		}
-		else{
-			$returnStr = 'FAILED: Unable to create user.<div style="margin-left:55px;">Please contact system administrator for assistance.</div>';
+			$person->setUid($editCon->insert_id);
+			$this->uid = $person->getUid();
+			//Add userlogin
+			$sql = 'INSERT INTO userlogin (uid, username, password) '.
+				'VALUES ('.$person->getUid().', "'.
+				$this->cleanInStr($person->getUserName()).
+				'", PASSWORD("'.$this->cleanInStr($person->getPassword()).'"))';
+			if($editCon->query($sql)){
+				$status = true;
+				//authenicate
+				$this->userName = $person->getUserName();
+				$this->displayName = $person->getFirstName();
+				$this->reset();
+				$this->setCookies();
+			}
+			else{
+				$this->errorStr = 'FAILED: Unable to create user.<div style="margin-left:55px;">Please contact system administrator for assistance.</div>';
+			}
 		}
 		$editCon->close();
-		return $returnStr;
+		
+		return $status;
 	}
 
-	public function lookupLogin($emailAddr){
+	public function lookupUserName($emailAddr){
 		global $charset;
-		$login = '';
+		$status = false;
+		if(!$this->validateEmailAddress($emailAddr)) return false;
 		$sql = 'SELECT u.uid, ul.username '.
 			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
 			'WHERE (u.email = "'.$emailAddr.'")';
 		$result = $this->conn->query($sql);
 		if($row = $result->fetch_object()){
 			$login = $row->username;
-		}
-		$result->free();
-
-		if($login){
+			//Email login
 			$subject = $GLOBALS['defaultTitle'].' Login Name';
 			$bodyStr = 'Your '.$GLOBALS['defaultTitle'].' (<a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'">http://'.
 				$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'</a>) login name is: '.$login.' ';
@@ -414,58 +391,90 @@ class ProfileManager{
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$headerStr .= "From: Admin <".$GLOBALS["adminEmail"]."> \r\n";
 			}
-			mail($emailAddr,$subject,$bodyStr,$headerStr);
-			return 1;
-		}		
-		return 0;
-	}
-	
-	public function createNewLogin($newLogin, $newPwd){
-		$statusStr = '<span color="red">Creation of New Login failed!</span>';
-		if($this->uid){
-			$newLogin = trim($newLogin);
-	
-			//Test if login exists
-			$sqlTestLogin = 'SELECT ul.uid FROM userlogin ul WHERE (ul.username = "'.$this->cleanInStr($newLogin).'") ';
-			$rs = $this->conn->query($sqlTestLogin);
-			$numRows = $rs->num_rows;
-			$rs->close();
-			if($numRows) return "<span color='red'>FAILED! Login $newLogin is already being used by another user. Please try a new login.</span>";
-			
-			//Create new login
-			$sql = 'INSERT INTO userlogin (uid, username, password) '.
-				'VALUES ('.$this->uid.',"'.
-				$this->cleanInStr($newLogin).
-				'",PASSWORD("'.$this->cleanInStr($newPwd).'"))';
-			//echo $sql;
-			$editCon = $this->getConnection('write');
-			if($editCon->query($sql)) $statusStr = '<span color="green">Creation of New Login successful!</span>';
-			$editCon->close();
-		}
-		return $statusStr;
-	}
-	
-	public function checkLogin($username, $email){
-		//Check to see if userlogin already exists 
-		$returnStr = '';
-	   	$sql = 'SELECT u.uid, u.email '.
-			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
-			'WHERE (ul.username = "'.$this->cleanInStr($username).'")';
-		$result = $this->conn->query($sql);
-		if($row = $result->fetch_object()){
-			$loginEmail = $row->email;
-			if($loginEmail == $email){
-				$returnStr = "FAILED: Login already associated with this email address.<br/> ".
-					"Click <a href='index.php?resetpwd=1&username=".$username."'>here</a> to reset password for this username.<br/>".
-					"Or change username below and resubmit form.";
+			if(mail($emailAddr,$subject,$bodyStr,$headerStr)){
+				$status = true;
 			}
 			else{
-				$returnStr = "FAILED: username <b>".$username."</b> login is already being used.<br> ".
-				"Please choose a different username and resubmit form.";
+				$this->errorStr = 'ERROR sending email, mailserver might not be properly setup';
+			}
+		}
+		else{
+			$this->errorStr = 'There are no users registered to email address: '.$emailAddr;
+		}
+		$result->free();
+
+		return $status;
+	}
+	
+	public function changeLogin($newLogin, $pwd = ''){
+		$status = true;
+		if($this->uid){
+			$isSelf = true;
+			if($this->uid != $GLOBALS['SYMB_UID']) $isSelf = false;
+			$newLogin = trim($newLogin);
+			if(!$this->validateUserName($newLogin)) return false;
+	
+			//Test if login exists
+			$sqlTestLogin = 'SELECT ul.uid FROM userlogin ul WHERE (ul.username = "'.$newLogin.'") ';
+			$rs = $this->conn->query($sqlTestLogin);
+			if($rs->num_rows){
+				$this->errorStr = 'Login '.$newLogin.' is already being used by another user. Please try a new login.';
+				$status = false;
+			}
+			$rs->free();
+
+			if($status){
+				$this->setUserName();
+				if($isSelf){
+					if(!$this->authenticate($pwd)){
+						$this->errorStr = 'ERROR saving new login: incorrect password';
+						$status = false;
+					}
+				}
+				if($status){
+					//Change login
+					$sql = 'UPDATE userlogin '.
+						'SET username = "'.$newLogin.'" '.
+						'WHERE (uid = '.$this->uid.') AND (username = "'.$this->userName.'")';
+					//echo $sql;
+					$editCon = $this->getConnection('write');
+					if($editCon->query($sql)){
+						if($isSelf){
+							$this->userName = $newLogin;
+							$this->authenticate();
+						}
+					}
+					else{
+						$this->errorStr = 'ERROR saving new login: '.$editCon->error;
+						$status = false;
+					}
+					$editCon->close();
+				}
+			}
+		}
+		return $status;
+	}
+
+	public function checkLogin($email){
+		if(!$this->validateEmailAddress($email)) return false;
+		//Check to see if userlogin already exists
+		$status = true; 
+	   	$sql = 'SELECT u.email, ul.username '.
+			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
+			'WHERE (ul.username = "'.$this->userName.'" OR u.email = "'.$email.'" )';
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$status = false;
+			if($row->username == $this->userName){
+				$this->errorStr = 'login_exists';
+				break;
+			}
+			else{
+				$this->errorStr = 'email_registered';
 			}
 		}
 		$result->free();
-		return $returnStr;
+		return $status;
 	}
 	
 	//Personal and general specimen management
@@ -546,7 +555,8 @@ class ProfileManager{
 			$editCon = $this->getConnection("write");
 			if($editCon->query($sql)){
 				if($this->uid == $GLOBALS['SYMB_UID']){
-					$this->authenticate($GLOBALS['USERNAME']);
+					$this->userName = $GLOBALS['USERNAME'];
+					$this->authenticate();
 				}
 			}
 			else{
@@ -580,7 +590,8 @@ class ProfileManager{
 			$editCon = $this->getConnection("write");
 			if($editCon->query($sql2)){
 				if($this->uid == $GLOBALS['SYMB_UID']){
-					$this->authenticate($GLOBALS['USERNAME']);
+					$this->userName = $GLOBALS['USERNAME'];
+					$this->authenticate();
 				}
 			}
 			else{
@@ -682,52 +693,6 @@ class ProfileManager{
 		}
 	}
 
-	//Setters and getters
-	public function setUid($uid){
-		if(is_numeric($uid)){
-			$this->uid = $uid;
-		}
-	}
-
-	private function setUserRights(){
-		//Get Admin Rights 
-		$sql = 'SELECT role, tablepk FROM userroles WHERE (uid = '.$this->uid.')';
-		//$sql = 'SELECT up.pname FROM userpermissions up WHERE (up.uid = '.$this->uid.')';
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			//$pTok = explode('-',$r->pname);
-			//$this->userRights[$pTok[0]][] = (isset($pTok[1])?$pTok[1]:'');
-			$this->userRights[$r->role][] = ($r->tablepk);
-		}
-	}
-	
-	public function getUserRights(){
-		return $this->userRights;
-	}
-	public function setRememberMe($test){
-		$this->rememberMe = $test;
-	}
-
-	public function getRememberMe(){
-		return $this->rememberMe;
-	}
-
-	//Other misc functions
-	private function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-	
-	private function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-	
 	//Functions to be replaced
 	public function dlSpecBackup($collId, $characterSet, $zipFile = 1){
 		global $charset, $paramsArr;
@@ -821,7 +786,60 @@ class ProfileManager{
     	}
 		return $fileUrl;
 	}
+
+	//Setters and getters
+	public function setUid($uid){
+		if(is_numeric($uid)){
+			$this->uid = $uid;
+		}
+	}
+
+	private function setUserRights(){
+		//Get Admin Rights 
+		if($this->uid){
+			$sql = 'SELECT role, tablepk FROM userroles WHERE (uid = '.$this->uid.')';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$this->userRights[$r->role][] = $r->tablepk;
+			}
+			$rs->free();
+		}
+	}
 	
+	public function getUserRights(){
+		return $this->userRights;
+	}
+	public function setRememberMe($test){
+		$this->rememberMe = $test;
+	}
+
+	public function getRememberMe(){
+		return $this->rememberMe;
+	}
+
+	public function setUserName($un = ''){
+		if($un){
+			if(!$this->validateUserName($un)) return false;
+			$this->userName = $un;
+		}
+		else{
+			if($this->uid == $GLOBALS['SYMB_UID']){
+				$this->userName = $GLOBALS['USERNAME'];
+			}
+			elseif($this->uid){
+				$sql = 'SELECT username FROM userlogin WHERE (uid = '.$this->uid.') ';
+				//echo $sql;
+				$rs = $this->conn->query($sql);
+				if($r = $rs->fetch_object()){
+					$this->userName = $r->username;
+				}
+				$rs->free();
+			}
+		}
+		return true;
+	}
+
 	private function getTempPath(){
 		$tPath = $GLOBALS["serverRoot"];
 		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\') $tPath .= '/';
@@ -831,7 +849,43 @@ class ProfileManager{
 		}
 		return $tPath;
 	}
+	
+	public function getErrorStr(){
+		return $this->errorStr;
+	}
 
+	//Other misc functions
+	public function validateEmailAddress($emailAddress){
+		if(!filter_var($emailAddress, FILTER_VALIDATE_EMAIL)){
+			$this->errorStr = 'email_invalid';
+			return false;
+		}
+		return true;
+	}
+	
+	private function validateUserName($un){
+		$status = true;
+		if (preg_match('/^[0-9A-Za-z_!@#$\s\.+\-]+$/', $un) == 0) $status = false;
+		if (substr($un,0,1) == ' ') $status = false;
+		if (substr($un,-1) == ' ') $status = false;
+		if(!$status) $this->errorStr = 'username not valid';
+		return $status;
+	}
+
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
 	private function encodeArr(&$inArr,$cSet){
 		foreach($inArr as $k => $v){
 			$inArr[$k] = $this->encodeString($v,$cSet);

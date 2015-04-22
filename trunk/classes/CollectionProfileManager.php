@@ -17,10 +17,12 @@ class CollectionProfileManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function setCollectionId($collid){
+	public function setCollid($collid){
 		if($collid && is_numeric($collid)){
 			$this->collid = $this->cleanInStr($collid);
+			return true;
 		}
+		return false; 
 	}
 
 	public function getCollectionData($filterForForm = 0){
@@ -636,7 +638,7 @@ class CollectionProfileManager {
 					echo '<div><b>Collector:</b> '.$r->recordedby.' '.$r->recordnumber.'</div>';
 					echo '<div style="margin-left:10px;"><b>Scientific Name:</b> '.$r->sciname.'</div>';
 					echo '<div style="margin-left:10px;"><b>Identifiers:</b> '.$r->catalognumber.' '.$r->occurrenceid.'</div>';
-					echo '<div style="margin-left:10px;"><b>GUID:</b> '.$r->guid.'</div>';
+					//echo '<div style="margin-left:10px;"><b>GUID:</b> '.$r->guid.'</div>';
 					echo '<div style="margin-left:10px;"><a href="'.$clientRoot.'/collections/individual/index.php?occid='.$r->occid.'" target="_blank"><b>Full Details</b></a></div>';
 					echo '</div>';
 				}
