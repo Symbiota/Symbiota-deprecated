@@ -718,7 +718,7 @@ header("Content-Type: text/html; charset=".$charset);
 							}
 							if($indUrl){
 								echo '<div style="margin-top:10px;clear:both;">';
-								echo '<b>Source:</b> <a href="'.$indUrl.'">';
+								echo '<b>Source:</b> <a href="'.$indUrl.'" target="_blank">';
 								echo $collMetadata['institutioncode'].' #'.($occArr['catalognumber']?$occArr['catalognumber']:$occArr['dbpk']);
 								echo '</a></div>';
 							}
@@ -1018,7 +1018,7 @@ header("Content-Type: text/html; charset=".$charset);
 					<?php
 					ob_flush();
 					flush();
-$rawArchArr = array();
+					$rawArchArr = array();
 					//$rawArchArr = $indManager->checkArchive();
 					//print_r($rawArchArr);
 					if($rawArchArr && $rawArchArr['obj']){
