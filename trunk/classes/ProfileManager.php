@@ -28,10 +28,8 @@ class ProfileManager{
 	
 	public function reset(){
 		//Delete cookies
-		$domainName = $_SERVER['HTTP_HOST'];
-		if(!$domainName) $domainName = $_SERVER['SERVER_NAME'];
-		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'), $domainName);
-		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'), $domainName);
+		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
+		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
 	}
 	
 	public function setCookies(){
