@@ -108,7 +108,7 @@ else{
 	
 		function resetPassword(){
 			if(document.getElementById("login").value == ""){
-				alert("Enter your login name in the User Id field and leave the password blank");
+				alert("Enter your login name in the Login field and leave the password blank");
 				return false;
 			}
 			document.getElementById("resetpwd").value = "1";
