@@ -9,7 +9,7 @@ $start = array_key_exists("start",$_REQUEST)?$_REQUEST["start"]:'';
 $limit = array_key_exists("limit",$_REQUEST)?$_REQUEST["limit"]:1000;
 
 $collManager = new CollectionProfileManager();
-$collManager->setCollectionId($collId);
+if(!$collManager->setCollid($collId)) $collId = ''; 
 $collData = array();
 if($collId) $collData = $collManager->getCollectionData();
 ?>
@@ -73,10 +73,7 @@ if($collId) $collData = $collManager->getCollectionData();
 					<div style="margin:2px 0px 2px 15px;">
 						<b>Homepage:</b> <?php echo $cArr['homepage']; ?>
 					</div>
-					<div style="margin:2px 0px 2px 15px;">
-						<b>Global Unique Identifier:</b> <?php echo $cArr['guid']; ?>
-					</div>
-					<div style="margin:2px 0px 2px 15px;">
+ 					<div style="margin:2px 0px 2px 15px;">
 						<?php echo '<a href="collectionindex.php?collid='.$cid.'">Specimen List</a>'; ?>
 					</div>
 				</div>

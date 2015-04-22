@@ -18,7 +18,8 @@ $countryDist = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
 $stateDist = array_key_exists('state',$_REQUEST)?$_REQUEST['state']:'';
 
 $collManager = new CollectionProfileManager();
-$collManager->setCollectionId($collid);
+if(!$collManager->setCollid($collid)) $collid = '';
+
 $collData = $collManager->getCollectionData();
 
 $editCode = 0;		//0 = no permissions; 1 = CollEditor; 2 = CollAdmin; 3 = SuperAdmin

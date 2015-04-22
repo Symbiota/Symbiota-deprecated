@@ -11,7 +11,7 @@ $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $statusStr = '';
 
 $collManager = new CollectionProfileManager();
-$collManager->setCollectionId($collid);
+if(!$collManager->setCollid($collid)) $collid = '';
 
 $isEditor = 0;
 if($IS_ADMIN){
