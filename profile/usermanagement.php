@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/PermissionsManager.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
@@ -38,6 +37,7 @@ if($isAdmin){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> User Management</title>
+	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 </head>

@@ -8,6 +8,7 @@ class Person{
 	
 	private $uid;
 	private $userName;
+	private $lastLoginDate;
 	private $firstName;
 	private $lastName;
 	private $title;
@@ -24,7 +25,6 @@ class Person{
 	private $biography;
 	private $isPublic = 0;
 	private $password;
-	private $loginArr = Array();
 	private $userTaxonomy = array();		// = array($category => array($utid => array($fieldTitle => $fieldValue))); e.g. array("OccurrenceEditor" => array(24 => array("sciname" => "Asteraceae", "geographicScope" => "Maine")))
 	private $isTaxonomyEditor = false;
 	
@@ -224,22 +224,14 @@ class Person{
 		$this->password = $password;
 	}
 	
-	public function addLogin($loginStr){
-		if(trim($loginStr)) $this->loginArr[] = $loginStr;
+	public function getLastLoginDate(){
+		return $this->lastLoginDate;
 	}
 	
-	public function setLoginArr($arr){
-		$this->loginArr = $arr;
-	}
-
-	public function getLoginArr(){
-		return $this->loginArr;
+	public function setLastLoginDate($loginDate){
+		$this->lastLoginDate = $loginDate;
 	}
 	
-	public function getLoginStr(){
-		return implode("; ",$this->loginArr);
-	}
-
 	private function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);

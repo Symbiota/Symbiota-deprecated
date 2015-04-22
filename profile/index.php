@@ -2,12 +2,17 @@
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
+header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
+header('Pragma: no-cache'); // HTTP 1.0.
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-$action = array_key_exists("action",$_POST)?$_POST["action"]:""; 
-$submit = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:"";
-$resetPwd = array_key_exists("resetpwd",$_REQUEST)?$_REQUEST["resetpwd"]:"";
-$login = array_key_exists("login",$_REQUEST)?trim($_REQUEST["login"]):"";
+$login = array_key_exists('login',$_REQUEST)?$_REQUEST['login']:'';
 $remMe = array_key_exists("remember",$_POST)?$_POST["remember"]:"";
+$emailAddr = array_key_exists('emailaddr',$_POST)?$_POST['emailaddr']:'';
+$resetPwd = array_key_exists("resetpwd",$_REQUEST)?$_REQUEST["resetpwd"]:0;
+$action = array_key_exists("action",$_POST)?$_POST["action"]:"";
+if(!$action && array_key_exists('submit',$_REQUEST)) $action = $_REQUEST['submit'];
+
 $refUrl = "";
 if(array_key_exists("refurl",$_REQUEST)){
 	$refGetStr = "";
@@ -33,34 +38,52 @@ if(array_key_exists("refurl",$_REQUEST)){
 }
 
 $pHandler = new ProfileManager();
-if($remMe) $pHandler->setRememberMe(true);
 
 $statusStr = "";
-if($submit == "logout"){
+
+//Sanitation
+if($login){
+	if(!$pHandler->setUserName($login)){
+		$login = '';
+		$statusStr = 'Invalid login name';
+	}
+}
+if($emailAddr){
+	if(!$pHandler->validateEmailAddress($emailAddr)){
+		$emailAddr = '';
+		$statusStr = 'Invalid email';
+	}
+}
+if(!is_numeric($resetPwd)) $resetPwd = 0;
+if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
+
+if($remMe) $pHandler->setRememberMe(true);
+
+if($action == "logout"){
 	$pHandler->reset();
 	header("Location: ../index.php");
 }
 elseif($action == "Login"){
-	$password = trim($_REQUEST["password"]);
-	if(!$password) $password = "emptypwd"; 
-	$statusStr = $pHandler->authenticate($login, $password);
-    if($statusStr == "success"){
-    	if($refUrl && !strpos($refUrl,'newprofile.php')){
+	$password = trim($_POST["password"]);
+	if($pHandler->authenticate($password)){
+		if($refUrl && !strpos($refUrl,'newprofile.php')){
 			header("Location: ".$refUrl);
-        }
-        else{
+		}
+		else{
 			header("Location: ../index.php");
-        }
-    }
+		}
+	}
+	else{
+		$statusStr = 'Your username or password was incorrect. Please try again.<br/> If you are unable to remember your login credentials,<br/> use the controls below to retrieve your login or reset your password.';
+	}
 }
 elseif($action == "Retrieve Login"){
-	$emailAddr = $_REQUEST["emailaddr"];
 	if($emailAddr){
-		if($pHandler->lookupLogin($emailAddr)){
+		if($pHandler->lookupUserName($emailAddr)){
 			$statusStr = "Your login name will be emailed to you.";
 		}
 		else{
-			$statusStr = "There are no users registered to email address: ".$emailAddr;
+			$statusStr = $pHandler->getErrorStr();
 		}
 	}
 }
@@ -68,21 +91,19 @@ elseif($resetPwd){
 	$statusStr = $pHandler->resetPassword($login);
 }
 else{
-	$statusStr = $action;
+	$statusStr = $pHandler->getErrorStr();
 }
-
 ?>
 
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Login</title>
+	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
-		function init(){
-			if(!navigator.cookieEnabled){
-				alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
-			}
+		if(!navigator.cookieEnabled){
+			alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
 		}
 	
 		function resetPassword(){
@@ -96,7 +117,7 @@ else{
 	</script>
 	<script src="../js/symb/shared.js" type="text/javascript"></script>
 </head>
-<body onload="init()">
+<body>
 
 <?php
 $displayLeftMenu = (isset($profile_indexMenu)?$profile_indexMenu:"true");
@@ -116,17 +137,7 @@ if(isset($profile_indexCrumbs)){
 		?>
 		<div style='color:#FF0000;margin: 1em 1em 0em 1em;'>
 			<?php 
-			if($statusStr == "badUserId"){
-				echo "Your username or password was incorrect. Please try again.<br />";
-				//echo "We do not have a record of your User ID in the database.";
-			}
-			elseif($statusStr == "badPassword"){
-				echo "Your username or password was incorrect. Please try again.<br />";
-			    echo "Click <a href='index.php?resetpwd=1&login=".$login."'><b>here</b></a> to reset your password.";
-			}
-			else{
-			    echo $statusStr;
-			}
+			echo $statusStr;
 			?>
 		</div>
 		<?php 
@@ -141,7 +152,7 @@ if(isset($profile_indexCrumbs)){
 				</div>
 				
 				<div style="margin:10px;font-weight:bold;">
-					Password:&nbsp;&nbsp;<input type="password" name="password"  style="border-style:inset;"/>
+					Password:&nbsp;&nbsp;<input type="password" name="password"  style="border-style:inset;" autocomplete="off" />
 				</div>
 				
 				<div style="margin:10px">

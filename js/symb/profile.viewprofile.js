@@ -51,11 +51,10 @@ function verifyEditProfileForm(f){
         window.alert("Email field must have a value ");
         return false;
     };
-
     return true;
 }
 
-function checkPwdForm(f){
+function verifyPwdForm(f){
     var pwd1 = f.newpwd.value.replace(/\s/g, "");
     var pwd2 = f.newpwd2.value.replace(/\s/g, "");
     if(pwd1 == "" || pwd2 == ""){
@@ -72,18 +71,15 @@ function checkPwdForm(f){
     return true;
 }
 
-function checkNewLoginForm(f){
-    var pwd1 = f.newloginpwd.value.replace(/\s/g, "");
-    var pwd2 = f.newloginpwd2.value.replace(/\s/g, "");
-    if(pwd1 == "" || pwd2 == ""){
-        window.alert("Both password fields must contain a value.");
+function verifyModifyLoginForm(f){
+    var newLogin = f.newlogin.value.replace(/\s/g, "");
+    if(newLogin == ""){
+        window.alert("New login can be null");
         return false;
     }
-    if(pwd1 != pwd2){
-        window.alert("Password do not match. Please enter again.");
-        f.newloginpwd.value = "";
-        f.newloginpwd2.value = "";
-        f.newloginpwd.focus();
+    var pwd = f.newloginpwd.value.replace(/\s/g, "");
+    if(pwd == ""){
+        window.alert("Enter your password");
         return false;
     }
     return true;
@@ -113,4 +109,11 @@ function verifyClAddForm(f){
 		}
 	}
 	return true;
+}
+
+function toggleEditingTools(targetStr){
+	document.getElementById("logineditdiv").style.display = "none";
+	document.getElementById("pwdeditdiv").style.display = "none";
+	document.getElementById("profileeditdiv").style.display = "none";
+	toggle(targetStr);
 }
