@@ -43,9 +43,11 @@ class OccurrenceManager{
 
 	public function reset(){
 		global $clientRoot;
-		setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'));
-		setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'));
-		setCookie("collvars","",time()-3600,($clientRoot?$clientRoot:'/'));
+		$domainName = $_SERVER['HTTP_HOST'];
+		if(!$domainName) $domainName = $_SERVER['SERVER_NAME'];
+		setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
+		setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
+		setCookie("collvars","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
  		$this->reset = 1;
 		if(array_key_exists("db",$this->searchTermsArr) || array_key_exists("oic",$this->searchTermsArr)){
 			//reset all other search terms except maintain the db terms
@@ -975,30 +977,43 @@ class OccurrenceManager{
 
 	private function readRequestVariables(){
 		global $clientRoot;
+		
+		function isArrayNumeric($arr){
+			return is_numeric($arr) || $arr == 'allspec' || $arr == 'allobs' || $arr == 'all';
+		}
+
 		//Search will be confinded to a clid vouchers, collid, catid, or will remain open to all collection
 		if(array_key_exists('clid',$_REQUEST)){
 			//Limit by checklist voucher links
 			$clidIn = $_REQUEST['clid'];
 			$clidStr = '';
 			if(is_string($clidIn)){
-				$clidStr = $clidIn;
+				if(is_numeric($clidIn)){
+					$clidStr = $clidIn;
+				}
 			}
 			else{
+				$clidIn = array_filter($clidIn,'isArrayNumeric');
 				$clidStr = $this->conn->real_escape_string(implode(',',array_unique($clidIn)));
 			}
 		 	if($this->useCookies) setCookie("collclid",$clidStr,0,($clientRoot?$clientRoot:'/'));
 			$this->searchTermsArr["clid"] = $clidStr;
 			//Since checklist vouchers are being searched, clear colldbs
-			setCookie("colldbs","",time()-3600,($clientRoot?$clientRoot:'/'));
+			$domainName = $_SERVER['HTTP_HOST'];
+			if(!$domainName) $domainName = $_SERVER['SERVER_NAME'];
+			setCookie("colldbs","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
 		}
 		elseif(array_key_exists("db",$_REQUEST)){
 			//Limit collids and/or catids
 			$dbStr = '';
 			$dbs = $_REQUEST["db"];
 			if(is_string($dbs)){
-				$dbStr = $dbs.';';
+				if(is_numeric($dbs) || $dbs == 'allspec' || $dbs == 'allobs' || $dbs == 'all'){
+					$dbStr = $dbs.';';
+				}
 			}
 			else{
+				$dbs = array_filter($dbs,'isArrayNumeric');
 				$dbStr = $this->conn->real_escape_string(implode(',',array_unique($dbs))).';';
 			}
 			if(strpos($dbStr,'allspec') !== false){
@@ -1024,7 +1039,11 @@ class OccurrenceManager{
 			}
 
 			if($dbStr){
-				if($this->useCookies) setCookie("colldbs",$dbStr,0,($clientRoot?$clientRoot:'/'));
+				if($this->useCookies){ 
+					$domainName = $_SERVER['HTTP_HOST'];
+					if(!$domainName) $domainName = $_SERVER['SERVER_NAME'];
+					setCookie("colldbs",$dbStr,0,($clientRoot?$clientRoot:'/'),$domainName,false,true);
+				}
 				$this->searchTermsArr["db"] = $dbStr;
 			}
 			//Since coll IDs are being searched, clear checklist voucher ids
@@ -1032,7 +1051,7 @@ class OccurrenceManager{
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
 			$taxa = $this->conn->real_escape_string($_REQUEST["taxa"]);
-			$searchType = array_key_exists("type",$_REQUEST)?$this->conn->real_escape_string($_REQUEST["type"]):1;
+			$searchType = ((array_key_exists("type",$_REQUEST) && is_numeric($_REQUEST["type"]))?$this->conn->real_escape_string($_REQUEST["type"]):1);
 			if($taxa){
 				$taxaStr = "";
 				if(is_numeric($taxa)){
@@ -1135,28 +1154,32 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("elevlow",$_REQUEST)){
-			$elevlow = $this->cleanInStr($_REQUEST["elevlow"]);
-			if($elevlow){
-				$str = str_replace(",",";",$elevlow);
-				$searchArr[] = "elevlow:".$str;
-				$this->searchTermsArr["elevlow"] = $str;
+			if(is_numeric($_REQUEST["elevlow"])){
+				$elevlow = $this->cleanInStr($_REQUEST["elevlow"]);
+				if($elevlow){
+					$str = str_replace(",",";",$elevlow);
+					$searchArr[] = "elevlow:".$str;
+					$this->searchTermsArr["elevlow"] = $str;
+				}
+				else{
+					unset($this->searchTermsArr["elevlow"]);
+				}
+				$searchFieldsActivated = true;
 			}
-			else{
-				unset($this->searchTermsArr["elevlow"]);
-			}
-			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("elevhigh",$_REQUEST)){
-			$elevhigh = $this->cleanInStr($_REQUEST["elevhigh"]);
-			if($elevhigh){
-				$str = str_replace(",",";",$elevhigh);
-				$searchArr[] = "elevhigh:".$str;
-				$this->searchTermsArr["elevhigh"] = $str;
+			if(is_numeric($_REQUEST["elevhigh"])){
+				$elevhigh = $this->cleanInStr($_REQUEST["elevhigh"]);
+				if($elevhigh){
+					$str = str_replace(",",";",$elevhigh);
+					$searchArr[] = "elevhigh:".$str;
+					$this->searchTermsArr["elevhigh"] = $str;
+				}
+				else{
+					unset($this->searchTermsArr["elevhigh"]);
+				}
+				$searchFieldsActivated = true;
 			}
-			else{
-				unset($this->searchTermsArr["elevhigh"]);
-			}
-			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("collector",$_REQUEST)){
 			$collector = $this->cleanInStr($_REQUEST["collector"]);
@@ -1246,44 +1269,48 @@ class OccurrenceManager{
 		}
 		$latLongArr = Array();
 		if(array_key_exists("upperlat",$_REQUEST)){
-			$upperLat = $this->conn->real_escape_string($_REQUEST["upperlat"]);
-			if($upperLat || $upperLat === "0") $latLongArr[] = $upperLat;
+			if(is_numeric($_REQUEST["upperlat"]) && is_numeric($_REQUEST["bottomlat"]) && is_numeric($_REQUEST["leftlong"]) && is_numeric($_REQUEST["rightlong"])){
+				$upperLat = $this->conn->real_escape_string($_REQUEST["upperlat"]);
+				if($upperLat || $upperLat === "0") $latLongArr[] = $upperLat;
 
-			$bottomlat = $this->conn->real_escape_string($_REQUEST["bottomlat"]);
-			if($bottomlat || $bottomlat === "0") $latLongArr[] = $bottomlat;
+				$bottomlat = $this->conn->real_escape_string($_REQUEST["bottomlat"]);
+				if($bottomlat || $bottomlat === "0") $latLongArr[] = $bottomlat;
 
-			$leftLong = $this->conn->real_escape_string($_REQUEST["leftlong"]);
-			if($leftLong || $leftLong === "0") $latLongArr[] = $leftLong;
+				$leftLong = $this->conn->real_escape_string($_REQUEST["leftlong"]);
+				if($leftLong || $leftLong === "0") $latLongArr[] = $leftLong;
 
-			$rightlong = $this->conn->real_escape_string($_REQUEST["rightlong"]);
-			if($rightlong || $rightlong === "0") $latLongArr[] = $rightlong;
+				$rightlong = $this->conn->real_escape_string($_REQUEST["rightlong"]);
+				if($rightlong || $rightlong === "0") $latLongArr[] = $rightlong;
 
-			if(count($latLongArr) == 4){
-				$searchArr[] = "llbound:".implode(";",$latLongArr);
-				$this->searchTermsArr["llbound"] = implode(";",$latLongArr);
+				if(count($latLongArr) == 4){
+					$searchArr[] = "llbound:".implode(";",$latLongArr);
+					$this->searchTermsArr["llbound"] = implode(";",$latLongArr);
+				}
+				else{
+					unset($this->searchTermsArr["llbound"]);
+				}
+				$searchFieldsActivated = true;
 			}
-			else{
-				unset($this->searchTermsArr["llbound"]);
-			}
-			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("pointlat",$_REQUEST)){
-			$pointLat = $this->conn->real_escape_string($_REQUEST["pointlat"]);
-			if($pointLat || $pointLat === "0") $latLongArr[] = $pointLat;
+			if(is_numeric($_REQUEST["pointlat"]) && is_numeric($_REQUEST["pointlong"]) && is_numeric($_REQUEST["radius"])){
+				$pointLat = $this->conn->real_escape_string($_REQUEST["pointlat"]);
+				if($pointLat || $pointLat === "0") $latLongArr[] = $pointLat;
 
-			$pointLong = $this->conn->real_escape_string($_REQUEST["pointlong"]);
-			if($pointLong || $pointLong === "0") $latLongArr[] = $pointLong;
+				$pointLong = $this->conn->real_escape_string($_REQUEST["pointlong"]);
+				if($pointLong || $pointLong === "0") $latLongArr[] = $pointLong;
 
-			$radius = $this->conn->real_escape_string($_REQUEST["radius"]);
-			if($radius) $latLongArr[] = $radius;
-			if(count($latLongArr) == 3){
-				$searchArr[] = "llpoint:".implode(";",$latLongArr);
-				$this->searchTermsArr["llpoint"] = implode(";",$latLongArr);
+				$radius = $this->conn->real_escape_string($_REQUEST["radius"]);
+				if($radius) $latLongArr[] = $radius;
+				if(count($latLongArr) == 3){
+					$searchArr[] = "llpoint:".implode(";",$latLongArr);
+					$this->searchTermsArr["llpoint"] = implode(";",$latLongArr);
+				}
+				else{
+					unset($this->searchTermsArr["llpoint"]);
+				}
+				$searchFieldsActivated = true;
 			}
-			else{
-				unset($this->searchTermsArr["llpoint"]);
-			}
-			$searchFieldsActivated = true;
 		}
 
 		$searchStr = implode("&",$searchArr);

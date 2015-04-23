@@ -192,7 +192,7 @@ $sciArr = array();
 				</div>
 				<div style="cursor:pointer;margin-top:10px;color:green;" onclick="tellMe()"><b>Tell Me What It Is!</b></div>
 				<div style="margin-left:auto;margin-right:auto;margin-top:10px;width:300px;">
-					<form id="taxonfilterform" name="taxonfilterform" action="flashcards.php" method="GET">
+					<form id="taxonfilterform" name="taxonfilterform" action="flashcards.php" method="post">
 						<fieldset>
 							<legend>Options</legend>
 							<input type="hidden" name="clid" value="<?php echo $clid; ?>" />

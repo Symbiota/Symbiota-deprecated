@@ -2,6 +2,8 @@
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceManager.php');
 header("Content-Type: text/html; charset=".$charset);
+header('Pragma: no-cache');
+header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidate');
 
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
@@ -66,7 +68,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			if($specArr && $obsArr){
 				?>
 				<div id="specobsdiv">
-					<form name="collform1" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
+					<form name="collform1" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" checked />
 					 		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
@@ -84,7 +86,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			if($specArr){
 				?>
 				<div id="specimendiv">
-					<form name="collform2" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
+					<form name="collform2" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballspeccb" name="db[]" class="spec" value='allspec' type="checkbox" onclick="selectAll(this);" checked />
 					 		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
@@ -100,7 +102,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			if($obsArr){
 				?>
 				<div id="observationdiv">
-					<form name="collform3" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
+					<form name="collform3" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballobscb" name="db[]" class="obs" value='allobs' type="checkbox" onclick="selectAll(this);" checked />
 							Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
@@ -118,7 +120,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				asort($catTitleArr);
 				?>
 				<div id="otherdiv">
-					<form id="othercatform" action="harvestparams.php" method="get" onsubmit="return verifyOtherCatForm(this)">
+					<form id="othercatform" action="harvestparams.php" method="post" onsubmit="return verifyOtherCatForm(this)">
 						<?php
 						foreach($catTitleArr as $catPid => $catTitle){
 							?>
