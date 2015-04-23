@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecLoans.php');
 header("Content-Type: text/html; charset=".$charset);
+ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
 $collId = $_REQUEST['collid'];
 $loanId = array_key_exists('loanid',$_REQUEST)?$_REQUEST['loanid']:0;
@@ -64,6 +65,15 @@ if($isEditor){
 		}
 		elseif($formSubmit == 'Perform Action'){
 			$statusStr = $loanManager->editSpecimen($_REQUEST);
+		}
+		elseif($formSubmit == 'Add New Determinations'){
+			include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+			$occManager = new OccurrenceEditorDeterminations();
+			$occidArr = $_REQUEST['occid'];
+			foreach($occidArr as $k){
+				$occManager->setOccId($k);
+				$occManager->addDetermination($_REQUEST,$isEditor);
+			}
 		}
 	}
 }

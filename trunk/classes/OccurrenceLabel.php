@@ -191,6 +191,62 @@ class OccurrenceLabel{
 		}
 		return $retArr;
 	}
+	
+	public function getAnnoArray($detidArr, $speciesAuthors){
+		$retArr = array();
+		if($detidArr){
+			$authorArr = array();
+			$sqlWhere = 'WHERE (d.detid IN('.implode(',',$detidArr).')) ';
+			//Get species authors for infraspecific taxa
+			$sql1 = 'SELECT d.detid, t2.author '.
+				'FROM (taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted) '.
+				'INNER JOIN omoccurdeterminations d ON o.occid = d.occid '.
+				'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'INNER JOIN taxa t2 ON ts.parenttid = t2.tid '.
+				$sqlWhere.' AND t.rankid > 220 AND ts.taxauthid = 1 ';
+			if(!$speciesAuthors){
+				$sql1 .= 'AND t.unitname2 = t.unitname3 ';
+			}
+			//echo $sql1; exit;
+			if($rs1 = $this->conn->query($sql1)){
+				while($row1 = $rs1->fetch_object()){
+					$authorArr[$row1->detid] = $row1->author;
+				}
+				$rs1->free();
+			}
+				
+			//Get determination records
+			$sql2 = 'SELECT d.detid, d.identifiedBy, d.dateIdentified, d.sciname, d.scientificNameAuthorship, '.
+				'd.identificationQualifier, d.identificationReferences, d.identificationRemarks '.
+				'FROM omoccurdeterminations d '.$sqlWhere;
+			//echo 'SQL: '.$sql2;
+			if($rs2 = $this->conn->query($sql2)){
+				while($row2 = $rs2->fetch_assoc()){
+					$row2 = array_change_key_case($row2);
+					if(array_key_exists($row2['detid'],$authorArr)){
+						$row2['parentauthor'] = $authorArr[$row2['detid']];
+					}
+					$retArr[$row2['detid']] = $row2;
+				}
+				$rs2->free();
+			}
+		}
+		return $retArr;
+	}
+	
+	public function clearAnnoQueue($detidArr){
+		$statusStr = '';
+		if($detidArr){
+			$sql = 'UPDATE omoccurdeterminations '.
+				'SET printqueue = NULL '.
+				'WHERE (detid IN('.implode(',',$detidArr).')) ';
+			//echo $sql; exit;
+			if($this->conn->query($sql)){
+				$statusStr = 'Success!';
+			}
+		}
+		return $statusStr;
+	}
 
 	public function getLabelProjects(){
 		$retArr = array();
@@ -236,7 +292,30 @@ class OccurrenceLabel{
 		}
 		return $retArr;
 	}
-
+	
+	public function getAnnoQueue(){
+		$retArr = array();
+		if($this->collid){
+			$sql = 'SELECT o.occid, d.detid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, '.
+				'CONCAT_WS(" ",o.identificationQualifier,o.sciname) AS sciname, '.
+				'CONCAT_WS(", ",d.identifiedBy,d.dateIdentified,d.identificationRemarks,d.identificationReferences) AS determination '.
+				'FROM omoccurrences AS o LEFT JOIN omoccurdeterminations AS d ON o.occid = d.occid '.
+				'WHERE o.collid = '.$this->collid.' AND d.printqueue = 1 ';
+			$sql .= 'LIMIT 400 ';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->detid]['occid'] = $r->occid;
+				$retArr[$r->detid]['detid'] = $r->detid;
+				$retArr[$r->detid]['collector'] = $r->collector;
+				$retArr[$r->detid]['sciname'] = $r->sciname;
+				$retArr[$r->detid]['determination'] = $r->determination;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+	
 	//General functions
 	public function exportCsvFile($postArr, $speciesAuthors){
 		global $charset;
@@ -294,6 +373,10 @@ class OccurrenceLabel{
 	
 	public function getCollName(){
 		return $this->collArr['collname'].' ('.$this->collArr['instcode'].($this->collArr['collcode']?':'.$this->collArr['collcode']:'').')';
+	}
+	
+	public function getAnnoCollName(){
+		return $this->collArr['collname'].' ('.$this->collArr['instcode'].')';
 	}
 
 	public function getMetaDataTerm($key){

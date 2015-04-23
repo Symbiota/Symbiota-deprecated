@@ -263,9 +263,24 @@ function addSpecimen(f,splist){
 	return false;
 }
 
-function openOccurrenceDetails(occid){
-	occWindow=open("../individual/index.php?occid="+occid,"occdetails","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
-	if(occWindow.opener == null) occWindow.opener = self;
+function openIndPopup(occid){
+	openPopup('../individual/index.php?occid=' + occid);
+}
+
+function openEditorPopup(occid){
+	openPopup('../editor/occurrenceeditor.php?occid=' + occid);
+}
+
+function openPopup(urlStr){
+	var wWidth = 900;
+	if(document.getElementById('maintable').offsetWidth){
+		wWidth = document.getElementById('maintable').offsetWidth*1.05;
+	}
+	else if(document.body.offsetWidth){
+		wWidth = document.body.offsetWidth*0.9;
+	}
+	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }
 
@@ -570,4 +585,68 @@ function exIdentCheck(identifier,collid){
 	};
 	sutXmlHttp.open("POST",url,true);
 	sutXmlHttp.send(null);
+}
+
+function verifyLoanDet(){
+	if(document.getElementById('dafsciname').value == ""){
+		alert("Scientific Name field must have a value");
+		return false;
+	}
+	if(document.getElementById('identifiedby').value == ""){
+		alert("Determiner field must have a value (enter 'unknown' if not defined)");
+		return false;
+	}
+	if(document.getElementById('dateidentified').value == ""){
+		alert("Determination Date field must have a value (enter 'unknown' if not defined)");
+		return false;
+	}
+	//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified 
+	if(pauseSubmit){
+		var date = new Date();
+		var curDate = null;
+		do{ 
+			curDate = new Date(); 
+		}while(curDate - date < 5000 && pauseSubmit);
+	}
+	return true;
+}
+
+//Determination form methods 
+function initLoanDetAutocomplete(f){
+	$( f.sciname ).autocomplete({ 
+		source: "../editor/rpc/getspeciessuggest.php", 
+		minLength: 3,
+		change: function(event, ui) {
+			if(f.sciname.value){
+				pauseSubmit = true;
+				verifyLoanDetSciName(f);
+			}
+			else{
+				f.scientificnameauthorship.value = "";
+				f.family.value = "";
+				f.tidtoadd.value = "";
+			}				
+		}
+	});
+}
+
+function verifyLoanDetSciName(f){
+	$.ajax({
+		type: "POST",
+		url: "../editor/rpc/verifysciname.php",
+		dataType: "json",
+		data: { term: f.sciname.value }
+	}).done(function( data ) {
+		if(data){
+			f.scientificnameauthorship.value = data.author;
+			f.family.value = data.family;
+			f.tidtoadd.value = data.tid;
+		}
+		else{
+			alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
+			f.scientificnameauthorship.value = "";
+			f.family.value = "";
+			f.tidtoadd.value = "";
+		}
+	});
 }

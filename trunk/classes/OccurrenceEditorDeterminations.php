@@ -56,6 +56,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		if(!$this->occid) return 'ERROR: occid is null';
 		$isCurrent = 0;
 		if(!array_key_exists('makecurrent',$detArr)) $detArr['makecurrent'] = 0;
+		if(!array_key_exists('printqueue',$detArr)) $detArr['printqueue'] = 0;
 		if($detArr['makecurrent'] == 1 && $isEditor < 3){
 			$isCurrent = 1;
 		}
@@ -81,11 +82,11 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			$notes .= ($notes?'; ':'').'ConfidenceRanking: '.$detArr['confidenceranking'];
 		}
 		$sql = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
-			'identificationQualifier, iscurrent, appliedStatus, identificationReferences, identificationRemarks, sortsequence) '.
+			'identificationQualifier, iscurrent, printqueue, appliedStatus, identificationReferences, identificationRemarks, sortsequence) '.
 			'VALUES ('.$this->occid.',"'.$this->cleanInStr($detArr['identifiedby']).'","'.$this->cleanInStr($detArr['dateidentified']).'","'.
 			$sciname.'",'.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
 			($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
-			$detArr['makecurrent'].','.($isEditor==3?0:1).','.
+			$detArr['makecurrent'].','.$detArr['printqueue'].','.($isEditor==3?0:1).','.
 			($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
 			($notes?'"'.$notes.'"':'NULL').','.
 			$sortSeq.')';
@@ -399,6 +400,72 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			}
 		}
 		return $statusStr;
+	}
+	
+	public function addNomAdjustment($detArr,$isEditor){
+		$sql = 'SELECT identifiedBy, dateIdentified, identificationQualifier '.
+			'FROM omoccurrences '.
+			'WHERE occid = '.$this->occid;
+		//echo "<div>".$sql."</div>";
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$detArr['identifiedby'] = $r->identifiedBy;
+			$detArr['dateidentified'] = $r->dateIdentified;
+			$detArr['identificationqualifier'] = $r->identificationQualifier;
+		}
+		$rs->free();
+		$this->addDetermination($detArr,$isEditor);
+	}
+	
+	public function getBulkDetRows($collid,$catNum,$sciName,$occStr){
+		$retHtml = '';
+		$sql = 'SELECT occid, catalogNumber, sciname, CONCAT_WS(" ",recordedby,IFNULL(recordnumber,eventdate)) AS collector, '.
+			'CONCAT_WS(", ",country,stateprovince,county,locality) AS locality '.
+			'FROM omoccurrences '.
+			'WHERE collid = '.$collid.' ';
+		if($catNum){
+			$sql .= 'AND catalogNumber = "'.$catNum.'" ';
+		}
+		elseif($sciName){
+			$sql .= 'AND sciname = "'.$sciName.'" ';
+		}
+		elseif($occStr){
+			$sql .= 'AND occid IN('.$occStr.') ';
+		}
+		$sql .= 'LIMIT 400 ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$loc = $r->locality;
+			if(strlen($loc) > 500) $loc = substr($loc,400);
+			$retHtml .= '<tr>';
+			$retHtml .= '<td><input type="checkbox" name="occid[]" value="'.$r->occid.'" /></td>';
+			$retHtml .= '<td>';
+			$retHtml .= '<a href="#" onclick="openIndPopup('.$r->occid.'); return false;">'.($r->catalogNumber?$r->catalogNumber:'[no catalog number]').'</a>';
+			$retHtml .= '<a href="#" onclick="openEditorPopup('.$r->occid.'); return false;"><img src="../../images/edit.png" /></a>';
+			$retHtml .= '</td>';
+			$retHtml .= '<td>'.$r->sciname.'</td>';
+			$retHtml .= '<td>'.$r->collector.'; '.$loc.'</td>';
+			$retHtml .= '</tr>';
+		}
+		$rs->free();
+		return $retHtml;
+	}
+	
+	public function getCatNumArr($occStr){
+		$retArr = array();
+		$sql = 'SELECT catalogNumber '.
+			'FROM omoccurrences '.
+			'WHERE occid IN('.$occStr.') ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[] = $r->catalogNumber;
+		}
+		$rs->free();
+		return $retArr;
+	}
+	
+	public function getCollName(){
+		return $this->collMap['collectionname'].' ('.$this->collMap['institutioncode'].($this->collMap['collectioncode']?':'.$this->collMap['collectioncode']:'').')';
 	}
 
 }
