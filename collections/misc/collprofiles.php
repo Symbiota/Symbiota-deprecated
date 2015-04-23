@@ -3,19 +3,19 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/CollectionProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
-$eMode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
+$collid = ((array_key_exists("collid",$_REQUEST) && is_numeric($_REQUEST["collid"]))?$_REQUEST["collid"]:0);
+$action = array_key_exists("action",$_REQUEST)?htmlspecialchars($_REQUEST["action"]):"";
+$eMode = array_key_exists('emode',$_REQUEST)?htmlspecialchars($_REQUEST['emode']):0;
 
 if($eMode && !$SYMB_UID){
 	header('Location: ../../profile/index.php?refurl=../collections/misc/collprofiles.php?'.$_SERVER['QUERY_STRING']);
 }
 
-$showFamilyList = array_key_exists("sfl",$_REQUEST)?$_REQUEST["sfl"]:0;
-$familyDist = array_key_exists('family',$_REQUEST)?$_REQUEST['family']:'';
-$showGeographicList = array_key_exists("sgl",$_REQUEST)?$_REQUEST["sgl"]:0;
-$countryDist = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
-$stateDist = array_key_exists('state',$_REQUEST)?$_REQUEST['state']:'';
+$showFamilyList = ((array_key_exists("sfl",$_REQUEST) && is_numeric($_REQUEST["sfl"]))?$_REQUEST["sfl"]:0);
+$familyDist = array_key_exists('family',$_REQUEST)?htmlspecialchars($_REQUEST['family']):'';
+$showGeographicList = ((array_key_exists("sgl",$_REQUEST) && is_numeric($_REQUEST["sgl"]))?$_REQUEST["sgl"]:0);
+$countryDist = array_key_exists('country',$_REQUEST)?htmlspecialchars($_REQUEST['country']):'';
+$stateDist = array_key_exists('state',$_REQUEST)?htmlspecialchars($_REQUEST['state']):'';
 
 $collManager = new CollectionProfileManager();
 if(!$collManager->setCollid($collid)) $collid = '';
