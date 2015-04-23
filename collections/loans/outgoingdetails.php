@@ -1,6 +1,7 @@
 <?php 
 $specList = $loanManager->getSpecList($loanId);
 ?>
+<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=141210"></script>
 <div id="tabs" style="margin:0px;">
     <ul>
 		<li><a href="#outloandetaildiv"><span>Loan Details</span></a></li>
@@ -273,8 +274,11 @@ $specList = $loanManager->getSpecList($loanId);
 								<input name="occid[]" type="checkbox" value="<?php echo $specArr['occid']; ?>" />
 							</td>
 							<td>
-								<a href="#" onclick="openOccurrenceDetails(<?php echo $k; ?>);">
+								<a href="#" onclick="openIndPopup(<?php echo $specArr['occid']; ?>); return false;">
 									<?php echo $specArr['catalognumber']; ?>
+								</a>
+								<a href="#" onclick="openEditorPopup(<?php echo $specArr['occid']; ?>); return false;">
+									<img src="../../images/edit.png" />
 								</a>
 							</td>
 							<td>
@@ -292,20 +296,87 @@ $specList = $loanManager->getSpecList($loanId);
 					}
 				?>
 				</table>
-				<table>
+				<table style="width:100%;">
 					<tr>
 						<td colspan="10" valign="bottom">
-							<div style="margin:10px;">
+							<div id="newdetdiv" style="display:none;">
+								<fieldset style="margin: 15px 15px 0px 15px;padding:15px;">
+									<legend><b>Add a New Determinations</b></legend>
+									<div style='margin:3px;'>
+										<b>Identification Qualifier:</b>
+										<input type="text" name="identificationqualifier" title="e.g. cf, aff, etc" />
+									</div>
+									<div style='margin:3px;'>
+										<b>Scientific Name:</b> 
+										<input type="text" id="dafsciname" name="sciname" style="background-color:lightyellow;width:350px;" onfocus="initLoanDetAutocomplete(this.form)" />
+										<input type="hidden" id="daftidtoadd" name="tidtoadd" value="" />
+										<input type="hidden" name="family" value="" />
+									</div>
+									<div style='margin:3px;'>
+										<b>Author:</b> 
+										<input type="text" name="scientificnameauthorship" style="width:200px;" />
+									</div>
+									<div style='margin:3px;'>
+										<b>Confidence of Determination:</b> 
+										<select name="confidenceranking">
+											<option value="8">High</option>
+											<option value="5" selected>Medium</option>
+											<option value="2">Low</option>
+										</select>
+									</div>
+									<div style='margin:3px;'>
+										<b>Determiner:</b> 
+										<input type="text" name="identifiedby" id="identifiedby" style="background-color:lightyellow;width:200px;" />
+									</div>
+									<div style='margin:3px;'>
+										<b>Date:</b> 
+										<input type="text" name="dateidentified" id="dateidentified" style="background-color:lightyellow;" onchange="detDateChanged(this.form);" />
+									</div>
+									<div style='margin:3px;'>
+										<b>Reference:</b> 
+										<input type="text" name="identificationreferences" style="width:350px;" />
+									</div>
+									<div style='margin:3px;'>
+										<b>Notes:</b> 
+										<input type="text" name="identificationremarks" style="width:350px;" />
+									</div>
+									<div style='margin:3px;'>
+										<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination
+									</div>
+									<div style='margin:3px;'>
+										<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
+									</div>
+									<?php 
+									global $fpEnabled;
+									if($fpEnabled){
+										echo '<div style="float:left;margin-left:30px;">';
+										echo '<input type="checkbox" name="fpsubmit" value="1" checked="true" /> Submit determination to Filtered Push network';
+										echo '</div>';
+									}
+									?>
+									<div style='margin:15px;'>
+										<div style="float:left;">
+											<input type="submit" name="formsubmit" onclick="verifyLoanDet();" value="Add New Determinations" />
+										</div>
+									</div>
+								</fieldset>
+							</div>
+							<div style="margin:10px;float:left;">
 								<div style="float:left;">
-									<input name="applytask" type="radio" value="check" CHECKED title="Check-in Specimens" />Check-in Specimens<br/>
+									<input name="applytask" type="radio" value="check" title="Check-in Specimens" CHECKED />Check-in Specimens<br/>
 									<input name="applytask" type="radio" value="delete" title="Delete Specimens" />Delete Specimens from Loan
 								</div>
-								<span style="margin-left:25px;">
+								<span style="margin-left:25px;float:left;">
 									<input name="formsubmit" type="submit" value="Perform Action" />
 									<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 									<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 									<input name="tabindex" type="hidden" value="1" />
 								</span>
+							</div>
+							<div style="margin:10px;float:right;">
+								<div id="detAddToggleDiv" onclick="toggle('newdetdiv');">
+									<a href="#" onclick="return false;">Add New Determinations</a>
+								</div>
 							</div>
 						</td>
 					</tr>

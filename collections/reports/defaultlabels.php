@@ -101,7 +101,7 @@ else{
 								elseif($hMid == 4){
 									$midStr = $occArr['family'];
 								}
-								$headerStr = ' ';
+								$headerStr = '';
 								if($hPrefix || $midStr || $hSuffix){
 									$headerStrArr = array();
 									$headerStrArr[] = trim($hPrefix);

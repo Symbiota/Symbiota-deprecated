@@ -141,12 +141,17 @@ if($symbUid){
 									Edit Existing Occurrence Records
 								</a>
 							</li>
+							<li>
+								<a href="../editor/batchdeterminations.php?collid=<?php echo $collid; ?>">
+									Add Batch Determinations/Nomenclatural Adjustments
+								</a>
+							</li>
 							<?php
 							if($collData['colltype'] == 'Preserved Specimens'){
 								?>
 								<li>
 									<a href="../reports/labelmanager.php?collid=<?php echo $collid; ?>">
-										Print Labels
+										Print Labels/Annotations
 									</a>
 								</li>
 								<?php

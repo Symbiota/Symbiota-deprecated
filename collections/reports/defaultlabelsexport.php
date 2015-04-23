@@ -125,7 +125,7 @@ foreach($labelArr as $occid => $occArr){
 		elseif($hMid == 4){
 			$midStr = $occArr['family'];
 		}
-		$headerStr = ' ';
+		$headerStr = '';
 		if($hPrefix || $midStr || $hSuffix){
 			$headerStrArr = array();
 			$headerStrArr[] = trim($hPrefix);

@@ -195,6 +195,9 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 						<div style='margin:3px;'>
 							<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination
 						</div>
+						<div style='margin:3px;'>
+							<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
+						</div>
 						<?php 
 						global $fpEnabled;
 						if($fpEnabled){
