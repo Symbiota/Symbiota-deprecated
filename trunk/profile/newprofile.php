@@ -7,13 +7,13 @@ if(isset($RECAPTCHA_PUBLIC_KEY) && $RECAPTCHA_PUBLIC_KEY && isset($RECAPTCHA_PRI
 	$useRecaptcha = true;
 }
 header("Content-Type: text/html; charset=".$charset);
-header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
+header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidate');
 header('Pragma: no-cache'); // HTTP 1.0.
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-$login = array_key_exists('login',$_POST)?$_POST['login']:'';
-$emailAddr = array_key_exists('emailaddr',$_POST)?$_POST['emailaddr']:'';
-$action = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:""; 
+$login = array_key_exists('login',$_POST)?htmlspecialchars($_POST['login']):'';
+$emailAddr = array_key_exists('emailaddr',$_POST)?htmlspecialchars($_POST['emailaddr']):'';
+$action = array_key_exists("submit",$_REQUEST)?htmlspecialchars($_REQUEST["submit"]):""; 
 
 
 $pHandler = new ProfileManager();
@@ -207,14 +207,14 @@ if($action == "Create Login"){
 					<tr>
 						<td><span style="font-weight:bold;">First Name:</span></td>
 						<td>
-							<input id="firstname" name="firstname" size="40" value="<?php echo (isset($_POST['firstname'])?$_POST['firstname']:''); ?>"> 
+							<input id="firstname" name="firstname" size="40" value="<?php echo (isset($_POST['firstname'])?htmlspecialchars($_POST['firstname']):''); ?>"> 
 							<span style="color:red;">*</span>
 						</td>
 					</tr>
 					<tr>
 						<td><span style="font-weight:bold;">Last Name:</span></td>
 						<td>
-							<input id="lastname" name="lastname" size="40" value="<?php echo (isset($_POST['lastname'])?$_POST['lastname']:''); ?>"> 
+							<input id="lastname" name="lastname" size="40" value="<?php echo (isset($_POST['lastname'])?htmlspecialchars($_POST['lastname']):''); ?>"> 
 							<span style="color:red;">*</span>
 						</td>
 					</tr>
@@ -235,13 +235,13 @@ if($action == "Create Login"){
 					<tr>
 						<td><b>Title:</b></td>
 						<td>
-							<span class="profile"><input name="title"  size="40" value="<?php echo (isset($_POST['title'])?$_POST['title']:''); ?>"></span>
+							<span class="profile"><input name="title"  size="40" value="<?php echo (isset($_POST['title'])?htmlspecialchars($_POST['title']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
 						<td><b>Institution:</b></td>
 						<td>
-							<span class="profile"><input name="institution"  size="40" value="<?php echo (isset($_POST['institution'])?$_POST['institution']:'') ?>"></span>
+							<span class="profile"><input name="institution"  size="40" value="<?php echo (isset($_POST['institution'])?htmlspecialchars($_POST['institution']):'') ?>"></span>
 						</td>
 					</tr>
 					<tr>
@@ -253,32 +253,32 @@ if($action == "Create Login"){
 					<tr>
 						<td><span style="font-weight:bold;">State:</span></td>
 						<td>
-							<span class="profile"><input id="state" name="state"  size="40" value="<?php echo (isset($_POST['state'])?$_POST['state']:''); ?>"></span>
+							<span class="profile"><input id="state" name="state"  size="40" value="<?php echo (isset($_POST['state'])?htmlspecialchars($_POST['state']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
 						<td><b>Zip Code:</b></td>
 						<td>
-							<span class="profile"><input name="zip"  size="40" value="<?php echo (isset($_POST['zip'])?$_POST['zip']:''); ?>"></span>
+							<span class="profile"><input name="zip"  size="40" value="<?php echo (isset($_POST['zip'])?htmlspecialchars($_POST['zip']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
 						<td><span style="font-weight:bold;">Country:</span></td>
 						<td>
-							<span class="profile"><input id="country" name="country"  size="40" value="<?php echo (isset($_POST['country'])?$_POST['country']:''); ?>"></span>
+							<span class="profile"><input id="country" name="country"  size="40" value="<?php echo (isset($_POST['country'])?htmlspecialchars($_POST['country']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
 						<td><b>Url:</b></td>
 						<td>
-							<span class="profile"><input name="url"  size="40" value="<?php echo (isset($_POST['url'])?$_POST['url']:''); ?>"></span>
+							<span class="profile"><input name="url"  size="40" value="<?php echo (isset($_POST['url'])?htmlspecialchars($_POST['url']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
 						<td><b>Biography:</b></td>
 						<td>
 							<span class="profile">
-								<textarea name="biography" rows="4" cols="40"><?php echo (isset($_POST['biography'])?$_POST['biography']:''); ?></textarea>
+								<textarea name="biography" rows="4" cols="40"><?php echo (isset($_POST['biography'])?htmlspecialchars($_POST['biography']):''); ?></textarea>
 							</span>
 						</td>
 					</tr>
