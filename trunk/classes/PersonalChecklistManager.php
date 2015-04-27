@@ -81,7 +81,8 @@ class PersonalChecklistManager{
 		 	$this->conn->query('INSERT INTO userroles (uid, role, tablename, tablepk) VALUES('.$GLOBALS["symbUid"].',"ClAdmin","fmchecklists",'.$newClId.') ');
 		 	//$this->conn->query("INSERT INTO userpermissions (uid, pname) VALUES(".$GLOBALS["symbUid"].",'ClAdmin-".$newClId."') ");
 		 	$newPManager = new ProfileManager();
-		 	$newPManager->authenticate($GLOBALS["paramsArr"]["un"]);
+		 	$newPManager->setUserName($USERNAME);
+		 	$newPManager->authenticate();
 		}
 		return $newClId;
 	}
