@@ -305,7 +305,7 @@ $sharedMapManager->setTaxaArr($tArr);
 		
 	</script>
 </head>
-<body onload="initialize()">
+<body style="background-color:#ffffff;" onload="initialize()">
 	<?php
 	//echo json_encode($coordArr);
 	if(!$coordExist){ //no results
