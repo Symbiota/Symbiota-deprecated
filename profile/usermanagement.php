@@ -14,7 +14,8 @@ $userManager = new PermissionsManager();
 if($isAdmin){
 	if($loginAs){
 		$pHandler = new ProfileManager();
-		$pHandler->authenticate($loginAs);
+		$pHandler->setUserName($loginAs);
+		$pHandler->authenticate();
 		header("Location: ../index.php");
 	}
 	elseif($delRole){
