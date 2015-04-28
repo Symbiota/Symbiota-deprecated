@@ -163,7 +163,7 @@ $specImgArr = $occManager->getImageMap();
 							<div style="float:right;cursor:pointer;" onclick="toggle('img<?php echo $imgId; ?>editdiv');" title="Edit Image MetaData">
 								<img style="border:0px;width:12px;" src="../../images/edit.png" />
 							</div>
-							<div style="margin-top:30px;">
+							<div style="margin-top:30px">
 								<div>
 									<b>Caption:</b> 
 									<?php echo $imgArr["caption"]; ?>
@@ -204,25 +204,41 @@ $specImgArr = $occManager->getImageMap();
 								<div>
 									<b>Source Webpage:</b>
 									<a href="<?php echo $imgArr["sourceurl"]; ?>" target="_blank">
-										<?php echo $imgArr["sourceurl"]; ?>
+										<?php 
+										$sourceUrlDisplay = $imgArr["sourceurl"];
+										if(strlen($sourceUrlDisplay) > 60) $sourceUrlDisplay = '...'.substr($sourceUrlDisplay,-60);
+										echo $sourceUrlDisplay;
+										?>
 									</a>
 								</div>
 								<div>
 									<b>Web URL: </b>
-									<a href="<?php echo $imgArr["url"]; ?>" target="_blank">
-										<?php echo $imgArr["url"]; ?>
+									<a href="<?php echo $imgArr["url"]; ?>"  title="<?php echo $imgArr["url"]; ?>" target="_blank">
+										<?php 
+										$urlDisplay = $imgArr["url"];
+										if(strlen($urlDisplay) > 60) $urlDisplay = '...'.substr($urlDisplay,-60);
+										echo $urlDisplay;
+										?>
 									</a>
 								</div>
 								<div>
 									<b>Large Image URL: </b>
-									<a href="<?php echo $imgArr["origurl"]; ?>" target="_blank">
-										<?php echo $imgArr["origurl"]; ?>
+									<a href="<?php echo $imgArr["origurl"]; ?>" title="<?php echo $imgArr["origurl"]; ?>" target="_blank">
+										<?php 
+										$origUrlDisplay = $imgArr["origurl"];
+										if(strlen($origUrlDisplay) > 60) $origUrlDisplay = '...'.substr($origUrlDisplay,-60);
+										echo $origUrlDisplay;
+										?>
 									</a>
 								</div>
 								<div>
 									<b>Thumbnail URL: </b>
-									<a href="<?php echo $imgArr["tnurl"]; ?>" target="_blank">
-										<?php echo $imgArr["tnurl"]; ?>
+									<a href="<?php echo $imgArr["tnurl"]; ?>" title="<?php echo $imgArr["tnurl"]; ?>" target="_blank">
+										<?php 
+										$tnUrlDisplay = $imgArr["tnurl"];
+										if(strlen($tnUrlDisplay) > 60) $tnUrlDisplay = '...'.substr($tnUrlDisplay,-60);
+										echo $tnUrlDisplay;
+										?>
 									</a>
 								</div>
 							</div>
@@ -263,19 +279,19 @@ $specImgArr = $occManager->getImageMap();
 										</div>
 										<div>
 											<b>Notes:</b><br/>
-											<input name="notes" type="text" value="<?php echo $imgArr["notes"]; ?>" style="width:90%;" />
+											<input name="notes" type="text" value="<?php echo $imgArr["notes"]; ?>" style="width:95%;" />
 										</div>
 										<div>
 											<b>Copyright:</b><br/>
-											<input name="copyright" type="text" value="<?php echo $imgArr["copyright"]; ?>" style="width:90%;" />
+											<input name="copyright" type="text" value="<?php echo $imgArr["copyright"]; ?>" style="width:95%;" />
 										</div>
 										<div>
 											<b>Source Webpage:</b><br/>
-											<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"]; ?>" style="width:90%;" />
+											<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"]; ?>" style="width:95%;" />
 										</div>
 										<div>
 											<b>Web URL: </b><br/>
-											<input name="url" type="text" value="<?php echo $imgArr["url"]; ?>" style="width:90%;" />
+											<input name="url" type="text" value="<?php echo $imgArr["url"]; ?>" style="width:95%;" />
 											<?php if(stripos($imgArr["url"],$imageRootUrl) === 0){ ?>
 												<div style="margin-left:10px;">
 													<input type="checkbox" name="renameweburl" value="1" />
@@ -286,7 +302,7 @@ $specImgArr = $occManager->getImageMap();
 										</div>
 										<div>
 											<b>Large Image URL: </b><br/>
-											<input name="origurl" type="text" value="<?php echo $imgArr["origurl"]; ?>" style="width:90%;" />
+											<input name="origurl" type="text" value="<?php echo $imgArr["origurl"]; ?>" style="width:95%;" />
 											<?php if(stripos($imgArr["origurl"],$imageRootUrl) === 0){ ?>
 												<div style="margin-left:10px;">
 													<input type="checkbox" name="renameorigurl" value="1" />
@@ -297,7 +313,7 @@ $specImgArr = $occManager->getImageMap();
 										</div>
 										<div>
 											<b>Thumbnail URL: </b><br/>
-											<input name="tnurl" type="text" value="<?php echo $imgArr["tnurl"]; ?>" style="width:90%;" />
+											<input name="tnurl" type="text" value="<?php echo $imgArr["tnurl"]; ?>" style="width:95%;" />
 											<?php if(stripos($imgArr["tnurl"],$imageRootUrl) === 0){ ?>
 												<div style="margin-left:10px;">
 													<input type="checkbox" name="renametnurl" value="1" />

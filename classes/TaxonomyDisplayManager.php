@@ -5,8 +5,6 @@ include_once($serverRoot.'/classes/TaxonomyUtilities.php');
 class TaxonomyDisplayManager{
 
 	private $conn;
-	private $indentValue = 0;
-	private $indentMap = array();
 	private $taxaArr = Array();
 	private $targetStr = "";
 	private $searchTaxonRank = 0;
@@ -21,7 +19,7 @@ class TaxonomyDisplayManager{
 		if(!($this->conn === null)) $this->conn->close();
 	}
  	
-	public function getTaxa(){
+	public function getTaxa($displayFullTree = false){
 		//Temporary code: check to make sure taxaenumtree is populated
 		//This code can be removed somewhere down the line
 		$sqlTest = 'SELECT tid FROM taxaenumtree LIMIT 1';
@@ -42,6 +40,7 @@ class TaxonomyDisplayManager{
 		//Get target taxa (we don't want children and parents of non-accepted taxa, so we'll get those later) 
 		$taxaParentIndex = Array();
 		if($this->targetStr){
+			$subGenera = array();
 			$sql1 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid, ts.tidaccepted '.
 				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
 				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted '.
@@ -66,7 +65,7 @@ class TaxonomyDisplayManager{
 					$this->taxaArr[$tid]["author"] = $row1->author; 
 					$this->taxaArr[$tid]["parenttid"] = $parentTid; 
 					$this->taxaArr[$tid]["rankid"] = $row1->rankid;
-					$this->indentMap[$row1->rankid] = 0;
+					if($row1->rankid == 190) $subGenera[] = $tid;
 					$this->searchTaxonRank = $row1->rankid;
 					$taxaParentIndex[$tid] = ($parentTid?$parentTid:0);
 				}
@@ -81,14 +80,14 @@ class TaxonomyDisplayManager{
 
 		$hierarchyArr = Array();
 		if($this->taxaArr){
-			//Get parents and children, but only accepted children
+			//Get direct parents and children, but only accepted children
 			$tidStr = implode(',',array_keys($this->taxaArr));
 			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '. 
 				'INNER JOIN taxaenumtree te ON t.tid = te.tid '.
 				'WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND (te.taxauthid = 1) '.
 				'AND ((te.parenttid IN('.$tidStr.')) OR (t.tid IN('.$tidStr.'))) ';
-			if($this->searchTaxonRank < 140) $sql2 .= "AND t.rankid <= 140 ";
+			if($this->searchTaxonRank < 140 && !$displayFullTree) $sql2 .= "AND t.rankid <= 140 ";
 			//echo $sql2."<br>";
 			$rs2 = $this->conn->query($sql2);
 			while($row2 = $rs2->fetch_object()){
@@ -97,8 +96,8 @@ class TaxonomyDisplayManager{
 				$this->taxaArr[$tid]["sciname"] = $row2->sciname;
 				$this->taxaArr[$tid]["author"] = $row2->author; 
 				$this->taxaArr[$tid]["rankid"] = $row2->rankid;
-				$this->indentMap[$row2->rankid] = 0;
 				$this->taxaArr[$tid]["parenttid"] = $parentTid; 
+				if($row2->rankid == 190) $subGenera[] = $tid;
 				if($parentTid) $taxaParentIndex[$tid] = $parentTid;
 			}
 			$rs2->free();
@@ -116,8 +115,8 @@ class TaxonomyDisplayManager{
 				$this->taxaArr[$tid]["sciname"] = $row3->sciname;
 				$this->taxaArr[$tid]["author"] = $row3->author; 
 				$this->taxaArr[$tid]["rankid"] = $row3->rankid;
-				$this->indentMap[$row3->rankid] = 0;
 				$this->taxaArr[$tid]["parenttid"] = $parentTid; 
+				if($row3->rankid == 190) $subGenera[] = $tid;
 				if($parentTid) $taxaParentIndex[$tid] = $parentTid;
 			}
 			$rs3->free();
@@ -147,24 +146,16 @@ class TaxonomyDisplayManager{
 					"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND (t.tid IN (".implode(",",$orphanTaxa)."))";
 				//echo $sqlOrphan;
 				$rsOrphan = $this->conn->query($sqlOrphan);
-				while($row = $rsOrphan->fetch_object()){
-					$tid = $row->tid;
-					$taxaParentIndex[$tid] = $row->parenttid;
-					$this->taxaArr[$tid]["sciname"] = $row->sciname; 
-					$this->taxaArr[$tid]["author"] = $row->author;
-					$this->taxaArr[$tid]["parenttid"] = $row->parenttid; 
-					$this->taxaArr[$tid]["rankid"] = $row->rankid;
-					$this->indentMap[$row->rankid] = 0;
+				while($row4 = $rsOrphan->fetch_object()){
+					$tid = $row4->tid;
+					$taxaParentIndex[$tid] = $row4->parenttid;
+					$this->taxaArr[$tid]["sciname"] = $row4->sciname; 
+					$this->taxaArr[$tid]["author"] = $row4->author;
+					$this->taxaArr[$tid]["parenttid"] = $row4->parenttid; 
+					$this->taxaArr[$tid]["rankid"] = $row4->rankid;
+					if($row4->rankid == 190) $subGenera[] = $tid;
 				}
 				$rsOrphan->free();
-			}
-			
-			//Set $indentMap to correct values
-			ksort($this->indentMap);
-			$indentCnt = 0;
-			foreach($this->indentMap as $rid => $v){
-				$this->indentMap[$rid] = $indentCnt*10;
-				$indentCnt++;
 			}
 			
 			//Build Hierarchy Array: grab leaf nodes and attach to parent until none are left
@@ -181,15 +172,21 @@ class TaxonomyDisplayManager{
 					unset($taxaParentIndex[$value]);
 				}
 			}
+			//Adjust scientific name display for subgenera
+			foreach($subGenera as $subTid){
+				$genusDisplay = $this->taxaArr[$this->taxaArr[$subTid]['parenttid']]['sciname'];
+				$subGenusDisplay = $genusDisplay.' ('.$this->taxaArr[$subTid]['sciname'].')';
+				$this->taxaArr[$subTid]['sciname'] = $subGenusDisplay;
+			}
 		}
-		$this->echoTaxonArray($hierarchyArr);
+		$this->echoTaxonArray($hierarchyArr,$displayFullTree);
 	}
 
-	private function echoTaxonArray($node){
+	private function echoTaxonArray($node,$displayFullTree){
 		if($node){
 			uksort($node, array($this,"cmp"));
-			$indent = $this->indentValue; 
-			$this->indentValue += 10;
+			//$indent = $this->indentValue; 
+			//$this->indentValue += 10;
 			foreach($node as $key => $value){
 				$sciName = "";
 				$taxonRankId = 0;
@@ -208,9 +205,14 @@ class TaxonomyDisplayManager{
 				else{
 					$sciName = "<br/>Problematic Rooting (".$key.")";
 				}
-				echo "<div style='margin-left:".$indent."px;'>";
+				$indent = $taxonRankId;
+				if($indent > 230) $indent -= 10;
+				if($indent > 200) $indent -= 30;
+				elseif($indent > 160) $indent -= 20;
+				//echo "<div style='margin-left:".$indent."px;'>";
+				echo "<div>".str_repeat('&nbsp;',$indent/5);
 				echo "<a href='taxonomyeditor.php?target=".$key."'>".$sciName."</a>";
-				if($this->searchTaxonRank < 140 && $taxonRankId == 140){
+				if($this->searchTaxonRank < 140 && !$displayFullTree && $taxonRankId == 140){
 					echo '<a href="taxonomydisplay.php?target='.$sciName.'">';
 					echo '<img src="../../images/tochild.png" style="width:9px;" />';
 					echo '</a>';
@@ -221,16 +223,17 @@ class TaxonomyDisplayManager{
 					asort($synNameArr);
 					foreach($synNameArr as $synTid => $synName){
 						$synName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$synName);
-						echo "<div style='margin-left:".($indent+20)."px;'>";
+						//echo "<div style='padding-left:".($indent+30)."px;'>";
+						echo "<div>".str_repeat('&nbsp;',$indent/5).str_repeat('&nbsp;',7);
 						echo "[<a href='taxonomyeditor.php?target=".$synTid."'>".$synName."</a>]";
 						echo "</div>";
 					}
 				}
 				if(is_array($value)){
-					$this->echoTaxonArray($value);
+					$this->echoTaxonArray($value,$displayFullTree);
 				}
 			}
-			$this->indentValue -= 10;
+			//$this->indentValue -= 10;
 		}
 		else{
 			echo "<div style='margin:20px;'>No taxa found matching your search</div>";
