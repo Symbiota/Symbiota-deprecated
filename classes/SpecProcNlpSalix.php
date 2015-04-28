@@ -26,6 +26,7 @@ class SpecProcNlpSalix
 	private $Assigned = array(); //Indicates to what line a field has been assigned.
 	private $PregMonths ="(\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|deciembre|janvier|febrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre|janeiro|febreso|marco|maio|junho|julho|setembro|outrubo|novembro|dezembro)\b\.?)";
 	private $LabelLines=array(); //The main array of lines of the label.
+	private $VirginLines=array(); //Lines unmodified by the program.  Used to pinpoint location of words in the line even after they have been removed.
 	private $PregStart = array(); //An array of regular expressions indicating the start words for many fields.
 	private $Family = ""; //Made global as a tentative family for other algorithms to consider
 	private $LichenFamilies =  array(); //A list of all lichen families.  Mainly useful during debug, but helps to identify which specimens may have substrates.
@@ -139,6 +140,9 @@ class SpecProcNlpSalix
 		//Sometimes year gets separated to next line from day/month.
 		$Preg = "(([0-9]{1,2}\s+\b{$this->PregMonths})\.[\s]+(\b[0-9]{4,4}\b))i";
 		$this->Label = preg_replace($Preg,"$1, $4",$this->Label);
+		
+		$Preg = "(\b([0-9]{1,2})([XVI]+)([0-9]{2,4})\b)";
+		$this->Label = preg_replace($Preg,"$1 $2 $3",$this->Label);
 
 		//Connect some lines when joined by a connecting preposition or hyphen
 		$PrepList = "(of|to|by|at|in|over|under|on|from|along|beside|with|de|cerca|en|desde)";
@@ -158,15 +162,17 @@ class SpecProcNlpSalix
 		$this->Label = str_replace("’","'",$this->Label);
 		$this->Label = str_replace("°;","°",$this->Label);
 
-		//Catch cases where zero or one mis-OCR'd as oh or el.
-		$FromTo = array("l"=>"1","O"=>"0");
+		//Catch cases where zero or 1 mis-OCR'd as oh, I or el.
+		$FromTo = array("l"=>"1","O"=>"0","I"=>"1");
 		foreach($FromTo as $From=>$To)
 			{
 			$this->Label = preg_replace("(([-0-9/.])".$From."([0-9/.]))",'${1}'.$To.'${2}',$this->Label);
+			//echo "(\b$From([0-9/.]))<br>";
+			$this->Label = preg_replace("(\b$From([0-9/.]))","$To$1",$this->Label);
+			//$this->Label = preg_replace("(\bI([0-9/.]))","1$1",$this->Label);
 			$this->Label = preg_replace("(([a-z]{2,}\s)0(\.\s[A-Z][a-z]{2,20}))",'${1}'."O".'${2}',$this->Label);
 			}
 		$this->Label = str_replace("(M0)","(MO)",$this->Label);
-
 		
 		//Separate at semicolons -- Removed to see if it works better.
 		//$this->Label = str_replace(";","\r\n",$this->Label);
@@ -189,12 +195,13 @@ class SpecProcNlpSalix
 			
 		//Remove empty lines
 		$this->Label = str_replace("\r\n\r\n","\r\n",$this->Label);
-		$this->Label = str_replace("/","\r\n",$this->Label);
+		//$this->Label = str_replace("/","\r\n",$this->Label);
 		
 		//echo $this->Label."<br>";
 		//Split lines at semicolons and periods.  But not at periods unless the preceding is
 		//at least 4 lower case letters.  This preserves abbreviations.  
 		$this->LabelLines = preg_split("[(?<=[a-z]{4,4})\.|(?<=[a-z]);|\n]",$this->Label,-1,PREG_SPLIT_DELIM_CAPTURE);
+		//echo "Line 185:".$this->Label."<br>";
 
 		//Remove lines less than 3 characters long
 		$L = 0;
@@ -252,6 +259,9 @@ class SpecProcNlpSalix
 			$OneStat['Score'] = $Score;
 			$this->StatScore[$L] = $OneStat;
 			}
+			
+		//Save the lines as they are before fields are removed or modified.
+		$this->VirginLines = $this->LabelLines;
 		//*************************************************************
 		//Here's where the individual fields get called and hopefully filled
 		
@@ -282,7 +292,7 @@ class SpecProcNlpSalix
 			else
 				$this->Results[$Key] = trim($Val);
 			}
-		$this->Results['SALIXVersion'] = "0.901";
+		$this->Results['SALIXVersion'] = "0.902";
 		return $this->Results;
 	}
 
@@ -1051,10 +1061,11 @@ class SpecProcNlpSalix
 		
 		//Replace "O" for "Oeste" with "W" for "West"
 		$OneLine = preg_replace("/(\d[\"\'][ ]?)(0|O)/",'$1W',$OneLine);
-		
+		$OneLine = preg_replace("(\bOeste)","W",$OneLine);
+		$OneLine = preg_replace("(\bNorte)","N",$OneLine);
 		//Put together the modules to build a Lat/Long in several formats
 		$Preg = array();
-		$Preg['dir'] = "[ ]*[NSEW][\., ]*";
+		$Preg['dir'] = "[ ]*[NSEW][\.,: ]*";
 		$Preg['deg'] = "[0-9\.]+[°\* ]+";
 		$Preg['min'] = "[0-9\.]+[\', ]*";//Used to be a comma next to the last space
 		//$Preg['sec'] = '[ ]*(?:[0-9\.]+")*';
@@ -1382,7 +1393,7 @@ class SpecProcNlpSalix
 		{
 		//echo "Testing $Field: {$this->LabelLines[$L]}<br>";
 		$PName = "(\b(D')?[A-Z][a-z]{2,20}\b)";
-		$PIn = "(\b[A-Z][. ]+)";
+		$PIn = "(\b[A-Z][. ]*)";
 		$this->RemoveStartWords($L,'recordedBy');
 		$match=array();
 		if($TitleCase)
@@ -1410,7 +1421,6 @@ class SpecProcNlpSalix
 			}
 		
 		//(Initial) (middle name) (last name) followed by No or number	
-		//$Preg = "($PIn\s$PName\s$PName\s(No|[0-9]{2,6}))";
 		if(preg_match_all("($PIn\s$PName\s$PName\s(No|[0-9]{2,6}))$I", $TempString,$match) > 0)
 			{
 			$match[0][0] = $match[1][0]." ".$match[2][0]." ".$match[3][0];
@@ -1683,6 +1693,7 @@ class SpecProcNlpSalix
 		$FoundLine=0;
 		$ReturnDate = array('Year'=>0,'Month'=>$m,'Day'=>0);
 		$RankArray = $this->RankForDate($EventField, $Field);
+		//$this->PrintRank($RankArray,$Field);
 		foreach($RankArray as $L => $Value)
 			{
 			if($Value < 0)
@@ -1730,7 +1741,7 @@ class SpecProcNlpSalix
 					$RankArray[$L] -= 100;
 					}
 				}
-			if(preg_match("(\bdate\b)i",$TempString) > 0)	
+			if(preg_match("(\b(date|fecha)\b)i",$TempString) > 0)	
 				{//Found the word "Date" on the line
 				$RankArray[$L] += 10;	
 				}
@@ -1806,8 +1817,6 @@ class SpecProcNlpSalix
 		$TempString = ($this->LabelLines[$L]);
 		
 		//Reformat expressions like:  "23 de abril de 1956" to "23 abril 1956"
-		//$Preg = "((\d{1,2})\sde\s({$this->PregMonths})\sde\s(\d{2,4}))";
-		//echo $Preg."<br>";
 		$TempString = preg_replace("((\d{1,2})\sde\s({$this->PregMonths})[\sde]{0,3}\s(\d{2,4}))","$1 $2 $5",$TempString);
 		
 		//echo "Getting date from {$this->LabelLines[$L]}<br>";
@@ -1831,8 +1840,6 @@ class SpecProcNlpSalix
 			$Preg = "({$this->PregMonths}[.,]?\s*(\b[0-9]{1,4}\b)\s*)i";
 			$Found = preg_match($Preg,$TempString,$match);
 			}
-		//if($Found > 0)
-				//echo "Found<br>";
 		if($Found !== 0)
 			{
 			if($VDate == "")
@@ -1842,7 +1849,7 @@ class SpecProcNlpSalix
 				}
 			}
 		if($Found == 0) 
-			{ //Roman numberal for month
+			{ //Roman numeral for month
 			$Preg = "(([0-9]+[ ./-]{1,2})([IVX]+)([ ./-]{1,2}[0-9]+))i";
 			$Found = preg_match($Preg, $TempString,$match);
 			if($Found >0)
@@ -1853,7 +1860,7 @@ class SpecProcNlpSalix
 				}
 			}
 		if($Found == 0) 
-			{//Day-Month-Year
+			{//Day-AlphaMonth-Year
 			$Preg = "(([0-9]+[ ./-]{1,2}){$this->PregMonths}([ ./-]{1,2}[0-9]{2,4}))i";
 			$Found = preg_match($Preg, $TempString,$match);
 			if($Found >0)
@@ -1864,11 +1871,25 @@ class SpecProcNlpSalix
 				}
 			}
 		if($Found == 0)
+			{// day-month-year all numeric
+			//echo "Checking $TempString: <br>";
+			$Preg = "(\b([0-9]{1,2})[ ./-]+([0-9]{1,2})[ ./-]+([0-9]{2,4})\b)";
+			$Found = preg_match($Preg, $TempString,$match);
+			if($Found !== 0)
+				{
+				//echo "Found {$match[0]}<br>";
+				$VDate = $match[0];
+				$RealVDate = $VDate;
+				}
+			
+			}
+		if($Found == 0)
 			{
 			$Preg = "(\b(19[0-9]{2,2}|20[01][0-9])\b)";
 			$Found = preg_match($Preg, $TempString,$match);
 			if($Found !== 0)
 				{
+				//echo "Found {$match[0]}<br>";
 				$VDate = $match[0];
 				$RealVDate = $VDate;
 				}
@@ -3085,6 +3106,14 @@ class SpecProcNlpSalix
 		
 		if($Field == "recordedBy" && $this->Results['recordedBy'] != "")
 			{//Separate associated collectors from recordedBy
+			$RBStart = strpos($this->VirginLines[$L],$this->Results['recordedBy']);
+			$ACStart = strpos($this->VirginLines[$L],$String);
+			if($RBStart !== false && $ACStart !== false && $ACStart < $RBStart && strpos($this->Results['associatedCollectors'],";") === false)
+				{//First name should be collector, not associated collectors.  Swap them.
+				$TempName = $this->Results['recordedBy'];
+				$this->Results['recordedBy'] = $String;
+				$String = $TempName;
+				}
 			$this->AddToResults('associatedCollectors',$String,$L);  //Recursive call
 			return;
 			}
@@ -3138,7 +3167,7 @@ class SpecProcNlpSalix
 		$this->PregStart['infraspecificEpithet'] = "(^(ssp|variety|subsp)\b)i";
 		$this->PregStart['occurrenceRemarks'] = "(^(Notes)\b)i";
 		//$this->PregStart['verbatimAttributes'] = "(^(habit)\b)i";
-		$this->PregStart['verbatimCoordinates'] = "(^(utm|Latitude|Longitude|Coordenadas|Lat|Long)\b)i";
+		$this->PregStart['verbatimCoordinates'] = "(^(utm|Latitude|Latitud|Longitude|Longitud|Coordenadas|Lat|Long)\b)i";
 		$this->PregStart['ignore'] = "(^(synonym)\b)i";
 		}
 
