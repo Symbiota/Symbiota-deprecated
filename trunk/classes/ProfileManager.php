@@ -64,7 +64,7 @@ class ProfileManager{
 			$sql = 'SELECT u.uid, u.firstname, u.lastname '.
 				'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
 				'WHERE (ul.username = "'.$this->userName.'") ';
-			if($pwdStr) $sql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
+			if($pwdStr) $sql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'") OR ul.password = OLD_PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
 			//echo $sql;
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
@@ -372,16 +372,21 @@ class ProfileManager{
 		global $charset;
 		$status = false;
 		if(!$this->validateEmailAddress($emailAddr)) return false;
-		$sql = 'SELECT u.uid, ul.username '.
+		$loginStr = '';
+		$sql = 'SELECT u.uid, ul.username, concat_ws("; ",u.lastname,u.firstname) '.
 			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
 			'WHERE (u.email = "'.$emailAddr.'")';
 		$result = $this->conn->query($sql);
-		if($row = $result->fetch_object()){
-			$login = $row->username;
+		while($row = $result->fetch_object()){
+			if($loginStr) $loginStr .= '; ';
+			$loginStr .= $row->username;
+		}
+		$result->free();
+		if($loginStr){
 			//Email login
 			$subject = $GLOBALS['defaultTitle'].' Login Name';
 			$bodyStr = 'Your '.$GLOBALS['defaultTitle'].' (<a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'">http://'.
-				$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'</a>) login name is: '.$login.' ';
+				$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'</a>) login name is: '.$loginStr.' ';
 			$bodyStr .= "<br/>If you continue to have login issues, contact the System Administrator ";
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
@@ -402,7 +407,6 @@ class ProfileManager{
 		else{
 			$this->errorStr = 'There are no users registered to email address: '.$emailAddr;
 		}
-		$result->free();
 
 		return $status;
 	}

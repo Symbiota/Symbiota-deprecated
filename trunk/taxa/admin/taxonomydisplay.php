@@ -5,9 +5,12 @@ include_once($serverRoot.'/classes/TaxonomyDisplayManager.php');
 header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-  
+
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../taxa/admin/taxonomydisplay.php?'.$_SERVER['QUERY_STRING']);
+
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $displayAuthor = array_key_exists('displayauthor',$_REQUEST)?$_REQUEST['displayauthor']:0;
+$displayFullTree = array_key_exists('displayfulltree',$_REQUEST)?$_REQUEST['displayfulltree']:0;
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
 $statusStr = array_key_exists('statusstr',$_REQUEST)?$_REQUEST['statusstr']:'';
 
@@ -103,24 +106,24 @@ else{
 							<input name="tdsubmit" type="submit" value="Display Taxon Tree"/>
 							<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
 						</div>
-						<div style="margin:15px 15px 15px 60px;">
-							<input name="displayauthor" type="checkbox" value="1" <?php echo ($displayAuthor?'checked':''); ?> /> Display Authors
+						<div style="margin:15px 15px 0px 60px;">
+							<input name="displayauthor" type="checkbox" value="1" <?php echo ($displayAuthor?'checked':''); ?> /> Display authors
+						</div>
+						<div style="margin:3px 15px 15px 60px;">
+							<input name="displayfulltree" type="checkbox" value="1" <?php echo ($displayFullTree?'checked':''); ?> /> Display full tree below family 
 						</div>
 					</fieldset>
 				</form>
 			</div>
 			<?php 
 			if($target){
-				$taxonDisplayObj->getTaxa();
+				$taxonDisplayObj->getTaxa($displayFullTree);
 			}
 		}
 		else{
 			?>
 			<div style="margin:30px;font-weight:bold;font-size:120%;">
-				Please 
-				<a href="<?php echo $clientRoot; ?>/profile/index.php?target=<?php echo $target; ?>&refurl=<?php echo $clientRoot?>/taxa/admin/taxonomydisplay.php">
-					login
-				</a>
+				You do not have permission to view this page. Please contact your portal administrator
 			</div>
 			<?php 
 		}
