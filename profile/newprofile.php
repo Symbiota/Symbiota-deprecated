@@ -11,9 +11,9 @@ header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidat
 header('Pragma: no-cache'); // HTTP 1.0.
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-$login = array_key_exists('login',$_POST)?htmlspecialchars($_POST['login']):'';
-$emailAddr = array_key_exists('emailaddr',$_POST)?htmlspecialchars($_POST['emailaddr']):'';
-$action = array_key_exists("submit",$_REQUEST)?htmlspecialchars($_REQUEST["submit"]):""; 
+$login = array_key_exists('login',$_POST)?$_POST['login']:'';
+$emailAddr = array_key_exists('emailaddr',$_POST)?$_POST['emailaddr']:'';
+$action = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:'';
 
 
 $pHandler = new ProfileManager();
