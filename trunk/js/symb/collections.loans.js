@@ -58,6 +58,12 @@ function ProcessReport(){
 	else if(document.pressed == 'envelope'){
 		document.reportsform.action ="reports/defaultenvelope.php";
 	}
+	if(document.getElementById("printbrowser").checked){
+		document.reportsform.target = "_blank";
+	}
+	if(document.getElementById("printdoc").checked){
+		document.reportsform.target = "_self";
+	}
 	return true;
 }
 

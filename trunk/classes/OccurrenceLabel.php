@@ -297,7 +297,7 @@ class OccurrenceLabel{
 		$retArr = array();
 		if($this->collid){
 			$sql = 'SELECT o.occid, d.detid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, '.
-				'CONCAT_WS(" ",o.identificationQualifier,o.sciname) AS sciname, '.
+				'CONCAT_WS(" ",d.identificationQualifier,d.sciname) AS sciname, '.
 				'CONCAT_WS(", ",d.identifiedBy,d.dateIdentified,d.identificationRemarks,d.identificationReferences) AS determination '.
 				'FROM omoccurrences AS o LEFT JOIN omoccurdeterminations AS d ON o.occid = d.occid '.
 				'WHERE o.collid = '.$this->collid.' AND d.printqueue = 1 ';

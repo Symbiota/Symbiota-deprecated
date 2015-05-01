@@ -240,8 +240,8 @@
 						<b>Mailing Account #:</b> <input type="text" autocomplete="off" name="mailaccnum" tabindex="100" maxlength="32" style="width:100px;" value="" />
 					</div>
 					<div style="padding-bottom:2px;">
-						<b>Print Method:</b> <input type="radio" name="print" value="browser" checked /> Print in Browser
-						<input type="radio" name="print" value="doc" /> Export to DOCX
+						<b>Print Method:</b> <input type="radio" name="print" id="printbrowser" value="browser" checked /> Print in Browser
+						<input type="radio" name="print" id="printdoc" value="doc" /> Export to DOCX
 					</div>
 					<div style="padding-bottom:8px;">
 						<b>Invoice Language:</b> <input type="radio" name="languagedef" value="0" checked /> English

@@ -137,12 +137,14 @@ if($isEditor){
 				return false;
 			}
 			
-			function changeFormExport(action){
+			function changeFormExport(action,target){
 				document.selectform.action = action;
+				document.selectform.target = target;
 			}
 			
-			function changeAnnoFormExport(action){
+			function changeAnnoFormExport(action,target){
 				document.annoselectform.action = action;
+				document.annoselectform.target = target;
 			}
 			
 			function checkPrintOnlyCheck(f){
@@ -388,14 +390,14 @@ if($isEditor){
 										</fieldset>
 										<div style="float:left;margin: 15px 50px;">
 											<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
-											<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php');" value="Print in Browser" />
+											<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php','_blank');" value="Print in Browser" />
 											<br/><br/> 
-											<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php');" value="Export to CSV" />
+											<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php','_self');" value="Export to CSV" />
 											<?php
 											if($reportsWritable){
 												?>
 												<br/><br/>
-												<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabelsexport.php');" value="Export to DOCX" />
+												<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabelsexport.php','_self');" value="Export to DOCX" />
 												<?php
 											}
 											?>
@@ -487,12 +489,12 @@ if($isEditor){
 									</div>
 									<div style="float:right;">
 										<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
-										<input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotations.php');" value="Print in Browser" />
+										<input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotations.php','_blank');" value="Print in Browser" />
 										<?php
 										if($reportsWritable){
 											?>
 											<br/><br/>
-											<input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotationsexport.php');" value="Export to DOCX" />
+											<input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotationsexport.php','_self');" value="Export to DOCX" />
 											<?php
 										}
 										?>

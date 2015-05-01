@@ -81,18 +81,22 @@ if($isEditor){
 			}
 			
 			function clearAccForm(){
-				catalogNumbers.length = 0;
-				adjustAccTab();
-				document.getElementById("catrecordstbody").innerHTML = '';
-				document.getElementById("fcatalognumber").value = '';
-				document.getElementById("accselectall").checked = false;
+				if(confirm("Clearing the form will erase all records. Are you sure you want to do this?") == true){
+					catalogNumbers.length = 0;
+					adjustAccTab();
+					document.getElementById("catrecordstbody").innerHTML = '';
+					document.getElementById("fcatalognumber").value = '';
+					document.getElementById("accselectall").checked = false;
+				}
 			}
 			
 			function clearNomForm(){
-				document.getElementById("nomrecordlistdviv").style.display = "none";
-				document.getElementById("nomrecordstbody").innerHTML = '';
-				document.getElementById("nomsciname").value = '';
-				document.getElementById("nomselectall").checked = false;
+				if(confirm("Clearing the form will erase all records. Are you sure you want to do this?") == true){
+					document.getElementById("nomrecordlistdviv").style.display = "none";
+					document.getElementById("nomrecordstbody").innerHTML = '';
+					document.getElementById("nomsciname").value = '';
+					document.getElementById("nomselectall").checked = false;
+				}
 			}
 			
 			function submitAccForm(f){
@@ -138,6 +142,8 @@ if($isEditor){
 			}
 			
 			function submitNomForm(f){
+				document.getElementById("nomrecordsubmit").disabled = true;
+				document.getElementById("workingcircle").style.display = "inline";
 				var continueSubmit = true;
 				var sciName = document.getElementById("nomsciname").value;
 				if(continueSubmit && $( "#nomsciname" ).val() != ""){
@@ -163,6 +169,8 @@ if($isEditor){
 				}
 				
 				$( "#nomsciname" ).focus();
+				document.getElementById("workingcircle").style.display = "none";
+				document.getElementById("nomrecordsubmit").disabled = false;
 				return false;
 			}
 			
@@ -355,7 +363,7 @@ if($isEditor){
 					<div id="accrecordlistdviv" style="display:<?php echo ($catTBody?'block;':'none;'); ?>none;">
 						<form name="accselectform" id="accselectform" action="batchdeterminations.php" method="post" onsubmit="return validateSelectForm(this);">
 							<div style="margin-top: 15px; margin-left: 15px;">
-								<input id="accselectall" value="" type="checkbox" onclick="selectAll(this);" />
+								<input name="accselectall" value="" type="checkbox" onclick="selectAll(this);" checked />
 								Select/Deselect all Specimens
 							</div>
 							<table class="styledtable" style="font-size:12px;">
@@ -447,12 +455,15 @@ if($isEditor){
 								</div>
 								<div style="clear:both;padding:15px 0px 0px 20px;">
 									<div style="float:right;">
-										<button name="clearnomform"  type="button" style="margin-right:40px" onclick='clearNomForm();' >Clear Form</button>
+										<button name="clearnomform"  type="button" style="margin-right:15px" onclick='clearNomForm();' >Clear Form</button>
 									</div>
-									<b>Taxon:</b>
-									<input type="text" id="nomsciname" name="sciname" style="background-color:lightyellow;width:450px;" onfocus="initNomAdjAutocomplete(this.form)" />
-									<input id="nomcollid" name="collid" type="hidden" value="<?php echo $collid; ?>" />
-									<input name="recordsubmit" type="submit" value="Find Records" />
+									<div style="float:left;width:675px;">
+										<b>Taxon:</b>
+										<input type="text" id="nomsciname" name="sciname" style="background-color:lightyellow;width:450px;" onfocus="initNomAdjAutocomplete(this.form)" />
+										<input id="nomcollid" name="collid" type="hidden" value="<?php echo $collid; ?>" />
+										<input name="recordsubmit" id="nomrecordsubmit" type="submit" value="Find Records" />
+										<img id="workingcircle" src="../../images/workingcircle.gif" style="display:none;" />
+									</div>
 								</div>
 							</div>
 						</fieldset>
@@ -460,7 +471,7 @@ if($isEditor){
 					<div id="nomrecordlistdviv" style="display:<?php echo ($nomTBody?'block;':'none;'); ?>none;">
 						<form name="nomselectform" id="accselectform" action="batchdeterminations.php" method="post" onsubmit="return validateSelectForm(this);">
 							<div style="margin-top: 15px; margin-left: 15px;">
-								<input id="nomselectall" value="" type="checkbox" onclick="selectAll(this);" />
+								<input type="checkbox" name="nomselectall" value="" onclick="selectAll(this);" checked />
 								Select/Deselect all Specimens
 							</div>
 							<table class="styledtable" style="font-size:12px;">
@@ -493,7 +504,7 @@ if($isEditor){
 									</div>
 									<div style='margin:3px;'>
 										<b>Notes:</b> 
-										<input type="text" name="identificationremarks" style="width:350px;" value="Nomenclatural Adjustment" />
+										<input type="text" name="identificationremarks" style="width:350px;" value="" />
 									</div>
 									<div style='margin:3px;'>
 										<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue

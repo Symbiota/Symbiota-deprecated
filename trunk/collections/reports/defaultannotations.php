@@ -30,13 +30,13 @@ if($symbUid){
 			table.labels {page-break-before:auto;page-break-inside:avoid;border-spacing:5px;}
 			table.labels td {width:<?php echo ($rowsPerPage==1?'600px':(100/$rowsPerPage).'%'); ?>;border:1px solid black;padding:8px;}
 			p.printbreak {page-break-after:always;}
-			.lheader {width:100%;text-align:center;font:bold 9pt arial,sans-serif;}
-			.scientificnamediv {clear:both;font-size:10pt;margin-top:5px;}
+			.lheader {width:100%;margin-bottom:5px;text-align:center;font:bold 9pt arial,sans-serif;}
+			.scientificnamediv {clear:both;font-size:10pt;}
 			.identifiedbydiv {float:left;font-size:8pt;margin-top:5px;}
 			.dateidentifieddiv {float:left;font-size:8pt;}
 			.identificationreferences {clear:both;font-size:8pt;margin-top:5px;}
 			.identificationremarks {clear:both;font-size:8pt;margin-top:5px;}
-			.lfooter {width:100%;text-align:center;font:bold 9pt arial,sans-serif;margin-top:5px;}
+			.lfooter {clear:both;width:100%;text-align:center;font:bold 9pt arial,sans-serif;margin-top:18px;}
 		</style>
 	</head>
 	<body style="background-color:#ffffff;">

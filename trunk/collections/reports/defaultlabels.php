@@ -36,7 +36,7 @@ else{
 			<title><?php echo $defaultTitle; ?> Default Labels</title>
 			<style type="text/css">
 				body {font-family:arial,sans-serif;}
-				table.labels {page-break-before:auto;page-break-inside:avoid;}
+				table.labels {table-layout:fixed;width:100%;page-break-before:auto;page-break-inside:avoid;}
 				table.labels td {width:<?php echo ($rowsPerPage==1?'600px':(100/$rowsPerPage).'%'); ?>;font-size:10pt;}
 				<?php
 				if($rowsPerPage!=1){
@@ -81,8 +81,7 @@ else{
 								if($occArr['catalognumber']){
 									?>
 									<div class="barcodeonly">
-										<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occArr['catalognumber']; ?>" /><br/>
-										<?php echo strtoupper($occArr['catalognumber']); ?>
+										<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occArr['catalognumber']; ?>" />
 									</div>
 									<?php 
 								}
@@ -301,19 +300,12 @@ else{
 											?>
 										</div>
 										<?php 
-										if($i == 0 && $useBarcode && $occArr['catalognumber']){
+										if($useBarcode && $occArr['catalognumber']){
 											?>
 											<div class="cnbarcode" style="clear:both;padding-top:15px;">
 												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occArr['catalognumber']; ?>" />
 											</div>
 											<?php 
-											if($occArr['catalognumber']){
-												?>
-												<div class="catalognumber" style="clear:both;text-align:center;">
-													<?php echo $occArr['catalognumber']; ?>
-												</div>
-												<?php
-											}
 											if($occArr['othercatalognumbers']){
 												?>
 												<div class="othercatalognumbers" style="clear:both;text-align:center;">
