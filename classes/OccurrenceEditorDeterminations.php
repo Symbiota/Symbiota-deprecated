@@ -200,6 +200,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 	}
 
 	public function editDetermination($detArr){
+		if(!array_key_exists('printqueue',$detArr)) $detArr['printqueue'] = 0;
 		$status = "Determination editted successfully!";
 		//Update determination table
 		$sql = 'UPDATE omoccurdeterminations '.
@@ -210,7 +211,8 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
 			'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
 			'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').','.
-			'sortsequence = '.($detArr['sortsequence']?$detArr['sortsequence']:'10').' '.
+			'sortsequence = '.($detArr['sortsequence']?$detArr['sortsequence']:'10').','.
+			'printqueue = '.($detArr['printqueue']?$detArr['printqueue']:'NULL').' '.
 			'WHERE (detid = '.$detArr['detid'].')';
 		if(!$this->conn->query($sql)){
 			$status = "ERROR - failed to edit determination: ".$this->conn->error;
@@ -403,17 +405,17 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 	}
 	
 	public function addNomAdjustment($detArr,$isEditor){
-		$sql = 'SELECT identifiedBy, dateIdentified, identificationQualifier '.
+		$sql = 'SELECT identificationQualifier '.
 			'FROM omoccurrences '.
 			'WHERE occid = '.$this->occid;
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
-			$detArr['identifiedby'] = $r->identifiedBy;
-			$detArr['dateidentified'] = $r->dateIdentified;
 			$detArr['identificationqualifier'] = $r->identificationQualifier;
 		}
 		$rs->free();
+		$detArr['identifiedby'] = 'Nomenclatural Adjustment';
+		$detArr['dateidentified'] = date('F').' '.date('j').', '.date('Y');
 		$this->addDetermination($detArr,$isEditor);
 	}
 	
@@ -438,7 +440,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			$loc = $r->locality;
 			if(strlen($loc) > 500) $loc = substr($loc,400);
 			$retHtml .= '<tr>';
-			$retHtml .= '<td><input type="checkbox" name="occid[]" value="'.$r->occid.'" /></td>';
+			$retHtml .= '<td><input type="checkbox" name="occid[]" value="'.$r->occid.'" checked /></td>';
 			$retHtml .= '<td>';
 			$retHtml .= '<a href="#" onclick="openIndPopup('.$r->occid.'); return false;">'.($r->catalogNumber?$r->catalogNumber:'[no catalog number]').'</a>';
 			$retHtml .= '<a href="#" onclick="openEditorPopup('.$r->occid.'); return false;"><img src="../../images/edit.png" /></a>';

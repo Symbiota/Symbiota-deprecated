@@ -107,8 +107,6 @@ foreach($labelArr as $occid => $occArr){
 			imagepng($bc,$serverRoot.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png');
 			$textrun->addImage($serverRoot.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png', array('align'=>'center'));
 			imagedestroy($bc);
-			$textrun->addTextBreak(1);
-			$textrun->addText(htmlspecialchars(strtoupper($occArr['catalognumber'])),'scientificnameauthFont','barcodeonly');
 		}
 	}
 	else{
@@ -293,13 +291,11 @@ foreach($labelArr as $occid => $occArr){
 			if($occArr['associatedcollectors']){
 				$section->addText(htmlspecialchars('With: '.$occArr['associatedcollectors']),'otherFont','identified');
 			}
-			if($i == 0 && $useBarcode && $occArr['catalognumber']){
+			if($useBarcode && $occArr['catalognumber']){
 				$textrun = $section->addTextRun('cnbarcode');
 				$bc = $bcObj->draw(strtoupper($occArr['catalognumber']),"Code39","png",false,40);
 				imagepng($bc,$serverRoot.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png');
 				$textrun->addImage($serverRoot.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png', array('align'=>'center','marginTop'=>0.15625));
-				$textrun->addTextBreak(1);
-				$textrun->addText(htmlspecialchars($occArr['catalognumber']),'otherFont');
 				if($occArr['othercatalognumbers']){
 					$textrun->addTextBreak(1);
 					$textrun->addText(htmlspecialchars($occArr['othercatalognumbers']),'otherFont');
@@ -329,8 +325,10 @@ foreach($labelArr as $occid => $occArr){
 				$bc = $bcObj->draw(strtoupper($occid),"Code39","png",false,40);
 				imagepng($bc,$serverRoot.'/temp/report/'.$ses_id.$occid.'.png');
 				$textrun->addImage($serverRoot.'/temp/report/'.$ses_id.$occid.'.png', array('align'=>'center','marginTop'=>0.104166667));
-				$textrun->addTextBreak(1);
-				$textrun->addText(htmlspecialchars($occArr['catalognumber']),'otherFont');
+				if($occArr['catalognumber']){
+					$textrun->addTextBreak(1);
+					$textrun->addText(htmlspecialchars($occArr['catalognumber']),'otherFont');
+				}
 				imagedestroy($bc);
 			}
 			$section->addText(htmlspecialchars(' '),'dividerFont','lastLine');

@@ -320,6 +320,9 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 									<b>Sort Sequence:</b> 
 									<input type="text" name="sortsequence" value="<?php echo $detRec['sortsequence']; ?>" style="width:40px;" />
 								</div>
+								<div style='margin:3px;'>
+									<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
+								</div>
 								<div style='margin:15px;'>
 									<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 									<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
