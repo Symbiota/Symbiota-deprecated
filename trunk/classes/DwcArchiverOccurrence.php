@@ -6,7 +6,7 @@ class DwcArchiverOccurrence{
 
 	private $conn;
 	private $ts;
-	
+
 	private $collArr;
 	private $customWhereSql;
 	private $conditionSql;
@@ -16,9 +16,9 @@ class DwcArchiverOccurrence{
 
 	private $targetPath;
 	private $serverDomain;
-	
+
 	private $logFH;
-	private $verbose = 0;
+	private $verbose = false;
 
 	private $schemaType = 'dwc';			//dwc, symbiota, backup
 	private $extended = 0;
@@ -27,6 +27,9 @@ class DwcArchiverOccurrence{
 	private $occurrenceFieldArr = array();
 	private $determinationFieldArr = array();
 	private $imageFieldArr = array();
+	private $occurrenceTargetFieldArr = array();
+	private $determinationTargetFieldArr = array();
+	private $imageTargetFieldArr = array();
 	private $securityArr = array();
 	private $includeDets = 1;
 	private $includeImgs = 1;
@@ -80,10 +83,8 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['institutionCode'] = 'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode';
 		$occurTermArr['collectionCode'] = 'http://rs.tdwg.org/dwc/terms/collectionCode';
 		$occurFieldArr['collectionCode'] = 'IFNULL(o.collectionCode,c.collectionCode) AS collectionCode';
-		if($this->schemaType != 'backup'){
-			$occurTermArr['collectionID'] = 'http://rs.tdwg.org/dwc/terms/collectionID';
-			$occurFieldArr['collectionID'] = 'IFNULL(o.collectionID, c.collectionguid) AS collectionID';
-		}
+		$occurTermArr['collectionID'] = 'http://rs.tdwg.org/dwc/terms/collectionID';
+		$occurFieldArr['collectionID'] = 'IFNULL(o.collectionID, c.collectionguid) AS collectionID';
 		$occurTermArr['basisOfRecord'] = 'http://rs.tdwg.org/dwc/terms/basisOfRecord';
 		$occurFieldArr['basisOfRecord'] = 'o.basisOfRecord';
 		$occurTermArr['occurrenceID'] = 'http://rs.tdwg.org/dwc/terms/occurrenceID';
@@ -103,13 +104,11 @@ class DwcArchiverOccurrence{
 		$occurTermArr['family'] = 'http://rs.tdwg.org/dwc/terms/family';
 		$occurFieldArr['family'] = 'o.family';
 		$occurTermArr['scientificName'] = 'http://rs.tdwg.org/dwc/terms/scientificName';
-		$occurFieldArr['scientificName'] = 't.sciname AS scientificName';
-		$occurTermArr['verbatimScientificName'] = 'http://symbiota.org/terms/verbatimScientificName';
-		$occurFieldArr['verbatimScientificName'] = 'o.sciname AS verbatimScientificName';
-		if($this->schemaType == 'backup' || ($this->schemaType == 'symbiota' && $this->extended)){
-			$occurTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
-			$occurFieldArr['tidInterpreted'] = 'o.tidinterpreted';
-		}
+		$occurFieldArr['scientificName'] = 'o.sciname AS scientificName';
+		//$occurTermArr['verbatimScientificName'] = 'http://symbiota.org/terms/verbatimScientificName';
+		//$occurFieldArr['verbatimScientificName'] = 'o.scientificname AS verbatimScientificName';
+		$occurTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
+		$occurFieldArr['tidInterpreted'] = 'o.tidinterpreted';
 		$occurTermArr['scientificNameAuthorship'] = 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship';
 		$occurFieldArr['scientificNameAuthorship'] = 'IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship';
 		$occurTermArr['genus'] = 'http://rs.tdwg.org/dwc/terms/genus';
@@ -135,16 +134,11 @@ class DwcArchiverOccurrence{
 		$occurTermArr['typeStatus'] = 'http://rs.tdwg.org/dwc/terms/typeStatus';
 		$occurFieldArr['typeStatus'] = 'o.typeStatus';
 		$occurTermArr['recordedBy'] = 'http://rs.tdwg.org/dwc/terms/recordedBy';
-		if($this->schemaType == 'dwc'){
-			$occurFieldArr['recordedBy'] = 'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy';
-		}
-		else{
-			$occurFieldArr['recordedBy'] = 'o.recordedBy';
-			$occurTermArr['recordedByID'] = 'http://symbiota.org/terms/recordedByID';
-			$occurFieldArr['recordedByID'] = 'o.recordedById';
-			$occurTermArr['associatedCollectors'] = 'http://symbiota.org/terms/associatedCollectors'; 
-			$occurFieldArr['associatedCollectors'] = 'o.associatedCollectors'; 
-		}
+		$occurFieldArr['recordedBy'] = 'o.recordedBy';
+		$occurTermArr['recordedByID'] = 'http://symbiota.org/terms/recordedByID';
+		$occurFieldArr['recordedByID'] = 'o.recordedById';
+		$occurTermArr['associatedCollectors'] = 'http://symbiota.org/terms/associatedCollectors'; 
+		$occurFieldArr['associatedCollectors'] = 'o.associatedCollectors'; 
 		$occurTermArr['recordNumber'] = 'http://rs.tdwg.org/dwc/terms/recordNumber';
 		$occurFieldArr['recordNumber'] = 'o.recordNumber';
 		$occurTermArr['eventDate'] = 'http://rs.tdwg.org/dwc/terms/eventDate';
@@ -163,18 +157,12 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['verbatimEventDate'] = 'o.verbatimEventDate';
 		$occurTermArr['occurrenceRemarks'] = 'http://rs.tdwg.org/dwc/terms/occurrenceRemarks';
 		$occurTermArr['habitat'] = 'http://rs.tdwg.org/dwc/terms/habitat';
-		if($this->schemaType == 'dwc'){
-			$occurFieldArr['occurrenceRemarks'] = 'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks';
-			$occurFieldArr['habitat'] = 'CONCAT_WS("; ",o.habitat, o.substrate) AS habitat';
-		}
-		else{
-			$occurFieldArr['occurrenceRemarks'] = 'o.occurrenceRemarks';
-			$occurFieldArr['habitat'] = 'o.habitat';
-			$occurTermArr['substrate'] = 'http://symbiota.org/terms/substrate';
-			$occurFieldArr['substrate'] = 'o.substrate';
-			$occurTermArr['verbatimAttributes'] = 'http://symbiota.org/terms/verbatimAttributes';
-			$occurFieldArr['verbatimAttributes'] = 'o.verbatimAttributes';
-		}
+		$occurFieldArr['occurrenceRemarks'] = 'o.occurrenceRemarks';
+		$occurFieldArr['habitat'] = 'o.habitat';
+		$occurTermArr['substrate'] = 'http://symbiota.org/terms/substrate';
+		$occurFieldArr['substrate'] = 'o.substrate';
+		$occurTermArr['verbatimAttributes'] = 'http://symbiota.org/terms/verbatimAttributes';
+		$occurFieldArr['verbatimAttributes'] = 'o.verbatimAttributes';
 		$occurTermArr['fieldNumber'] = 'http://rs.tdwg.org/dwc/terms/fieldNumber';
 		$occurFieldArr['fieldNumber'] = 'o.fieldNumber';
 		$occurTermArr['informationWithheld'] = 'http://rs.tdwg.org/dwc/terms/informationWithheld';
@@ -189,10 +177,8 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['reproductiveCondition'] = 'o.reproductiveCondition';
 		$occurTermArr['establishmentMeans'] = 'http://rs.tdwg.org/dwc/terms/establishmentMeans';
 		$occurFieldArr['establishmentMeans'] = 'o.establishmentMeans';
-		if($this->schemaType != 'dwc'){
-			$occurTermArr['cultivationStatus'] = 'http://symbiota.org/terms/cultivationStatus';
-			$occurFieldArr['cultivationStatus'] = 'cultivationStatus';
-		}
+		$occurTermArr['cultivationStatus'] = 'http://symbiota.org/terms/cultivationStatus';
+		$occurFieldArr['cultivationStatus'] = 'cultivationStatus';
 		$occurTermArr['lifeStage'] = 'http://rs.tdwg.org/dwc/terms/lifeStage';
 		$occurFieldArr['lifeStage'] = 'o.lifeStage';
 		$occurTermArr['sex'] = 'http://rs.tdwg.org/dwc/terms/sex';
@@ -219,10 +205,8 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['locationRemarks'] = 'o.locationremarks';
 		$occurTermArr['localitySecurity'] = 'http://symbiota.org/terms/localitySecurity';
 		$occurFieldArr['localitySecurity'] = 'o.localitySecurity';
-		if($this->schemaType != 'dwc'){
-			$occurTermArr['localitySecurityReason'] = 'http://symbiota.org/terms/localitySecurityReason';
-			$occurFieldArr['localitySecurityReason'] = 'o.localitySecurityReason';
-		}
+		$occurTermArr['localitySecurityReason'] = 'http://symbiota.org/terms/localitySecurityReason';
+		$occurFieldArr['localitySecurityReason'] = 'o.localitySecurityReason';
 		$occurTermArr['decimalLatitude'] = 'http://rs.tdwg.org/dwc/terms/decimalLatitude';
 		$occurFieldArr['decimalLatitude'] = 'o.decimalLatitude';
 		$occurTermArr['decimalLongitude'] = 'http://rs.tdwg.org/dwc/terms/decimalLongitude';
@@ -261,51 +245,82 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['disposition'] = 'o.disposition';
 		$occurTermArr['language'] = 'http://purl.org/dc/terms/language';
 		$occurFieldArr['language'] = 'o.language';
-		if($this->schemaType == 'backup' || ($this->schemaType == 'symbiota' && $this->extended)){
-			$occurTermArr['genericcolumn1'] = 'http://symbiota.org/terms/genericcolumn1';
-			$occurFieldArr['genericcolumn1'] = 'o.genericcolumn1';
-			$occurTermArr['genericcolumn2'] = 'http://symbiota.org/terms/genericcolumn2';
-			$occurFieldArr['genericcolumn2'] = 'o.genericcolumn2';
-			$occurTermArr['storageLocation'] = 'http://symbiota.org/terms/storageLocation';
-			$occurFieldArr['storageLocation'] = 'o.storageLocation';
-			$occurTermArr['observerUid'] = 'http://symbiota.org/terms/observerUid';
-			$occurFieldArr['observerUid'] = 'o.observeruid';
-			$occurTermArr['processingStatus'] = 'http://symbiota.org/terms/processingStatus';
-			$occurFieldArr['processingStatus'] = 'o.processingstatus';
-			$occurTermArr['duplicateQuantity'] = 'http://symbiota.org/terms/duplicateQuantity';
-			$occurFieldArr['duplicateQuantity'] = 'o.duplicateQuantity';
-			$occurTermArr['recordEnteredBy'] = 'http://symbiota.org/terms/recordEnteredBy';
-			$occurFieldArr['recordEnteredBy'] = 'o.recordEnteredBy';
-			$occurTermArr['dateEntered'] = 'http://symbiota.org/terms/dateEntered';
-			$occurFieldArr['dateEntered'] = 'o.dateEntered';
-			$occurTermArr['dateLastModified'] = 'http://rs.tdwg.org/dwc/terms/dateLastModified';
-			$occurFieldArr['dateLastModified'] = 'o.datelastmodified';
-		}
+		$occurTermArr['genericcolumn1'] = 'http://symbiota.org/terms/genericcolumn1';
+		$occurFieldArr['genericcolumn1'] = 'o.genericcolumn1';
+		$occurTermArr['genericcolumn2'] = 'http://symbiota.org/terms/genericcolumn2';
+		$occurFieldArr['genericcolumn2'] = 'o.genericcolumn2';
+		$occurTermArr['storageLocation'] = 'http://symbiota.org/terms/storageLocation';
+		$occurFieldArr['storageLocation'] = 'o.storageLocation';
+		$occurTermArr['observerUid'] = 'http://symbiota.org/terms/observerUid';
+		$occurFieldArr['observerUid'] = 'o.observeruid';
+		$occurTermArr['processingStatus'] = 'http://symbiota.org/terms/processingStatus';
+		$occurFieldArr['processingStatus'] = 'o.processingstatus';
+		$occurTermArr['duplicateQuantity'] = 'http://symbiota.org/terms/duplicateQuantity';
+		$occurFieldArr['duplicateQuantity'] = 'o.duplicateQuantity';
+		$occurTermArr['recordEnteredBy'] = 'http://symbiota.org/terms/recordEnteredBy';
+		$occurFieldArr['recordEnteredBy'] = 'o.recordEnteredBy';
+		$occurTermArr['dateEntered'] = 'http://symbiota.org/terms/dateEntered';
+		$occurFieldArr['dateEntered'] = 'o.dateEntered';
+		$occurTermArr['dateLastModified'] = 'http://rs.tdwg.org/dwc/terms/dateLastModified';
+		$occurFieldArr['dateLastModified'] = 'o.datelastmodified';
 		$occurTermArr['modified'] = 'http://purl.org/dc/terms/modified';
 		$occurFieldArr['modified'] = 'IFNULL(o.modified,o.datelastmodified) AS modified';
-		if($this->schemaType == 'dwc'){
-			//If not DWC, don't output rights becasue that data is already in the eml file
-	 		$occurTermArr['rights'] = 'http://purl.org/dc/elements/1.1/rights';
-	 		$occurFieldArr['rights'] = 'c.rights';
-			$occurTermArr['rightsHolder'] = 'http://purl.org/dc/terms/rightsHolder';
-			$occurFieldArr['rightsHolder'] = 'c.rightsHolder';
-			$occurTermArr['accessRights'] = 'http://purl.org/dc/terms/accessRights';
-			$occurFieldArr['accessRights'] = 'c.accessRights';
-		}
-		else{
-			$occurTermArr['sourcePrimaryKey'] = 'http://symbiota.org/terms/sourcePrimaryKey'; 
-			$occurFieldArr['sourcePrimaryKey'] = 'o.dbpk'; 
-		}
+		$occurTermArr['rights'] = 'http://purl.org/dc/elements/1.1/rights';
+		$occurFieldArr['rights'] = 'c.rights';
+		$occurTermArr['rightsHolder'] = 'http://purl.org/dc/terms/rightsHolder';
+		$occurFieldArr['rightsHolder'] = 'c.rightsHolder';
+		$occurTermArr['accessRights'] = 'http://purl.org/dc/terms/accessRights';
+		$occurFieldArr['accessRights'] = 'c.accessRights';
+		$occurTermArr['sourcePrimaryKey'] = 'http://symbiota.org/terms/sourcePrimaryKey'; 
+		$occurFieldArr['sourcePrimaryKey'] = 'o.dbpk'; 
 		$occurTermArr['collId'] = 'http://symbiota.org/terms/collId'; 
 		$occurFieldArr['collId'] = 'c.collid'; 
 		$occurTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
 		$occurFieldArr['recordId'] = 'g.guid AS recordId';
 		$occurTermArr['references'] = 'http://purl.org/dc/terms/references';
 		$occurFieldArr['references'] = '';
-		$this->occurrenceFieldArr['terms'] = $occurTermArr;
+
+		$this->occurrenceFieldArr['terms'] = $this->trimOccurrenceBySchemaType($occurTermArr);
+		$occurFieldArr = $this->trimOccurrenceBySchemaType($occurFieldArr);
+		if($this->schemaType == 'dwc'){
+			$occurFieldArr['recordedBy'] = 'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy';
+			$occurFieldArr['occurrenceRemarks'] = 'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks';
+			$occurFieldArr['habitat'] = 'CONCAT_WS("; ",o.habitat, o.substrate) AS habitat';
+		}
 		$this->occurrenceFieldArr['fields'] = $occurFieldArr;
 	}
 
+	private function trimOccurrenceBySchemaType($occurArr){
+		$retArr = array();
+		if($this->schemaType == 'dwc'){
+			$trimArr = array('tidInterpreted','recordedByID','associatedCollectors','substrate','verbatimAttributes','cultivationStatus',
+				'localitySecurityReason','genericcolumn1','genericcolumn2','storageLocation','observerUid','processingStatus',
+				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey');
+			$retArr = array_diff_key($occurArr,array_flip($trimArr));
+		}
+		elseif($this->schemaType == 'symbiota'){
+			$trimArr = array();
+			if(!$this->extended){
+				$trimArr = array('collectionID','rights','rightsHolder','accessRights','tidInterpreted','genericcolumn1','genericcolumn2',
+					'storageLocation','observerUid','processingStatus','duplicateQuantity','dateEntered','dateLastModified'); 
+			}
+			$retArr = array_diff_key($occurArr,array_flip($trimArr));
+		}
+		elseif($this->schemaType == 'backup'){
+			$trimArr = array('collectionID','rights','rightsHolder','accessRights'); 
+			$retArr = array_diff_key($occurArr,array_flip($trimArr));
+		}
+		elseif($this->schemaType == 'coge'){
+			$targetArr = array('id','institutionCode','collectionCode','catalogNumber','family','scientificName','scientificNameAuthorship',
+				'recordedBy','recordNumber','eventDate','year','month','day','fieldNumber','country','stateProvince','county','municipality',
+				'locality','localitySecurity','decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters',
+				'verbatimCoordinates','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation','dateEntered',
+				'dateLastModified','recordId','references'); 
+			$retArr = array_intersect_key($occurArr,array_flip($targetArr));
+		}
+		return $retArr;
+	}
+	
 	private function getSqlOccurrences(){
 		$sql = '';
 		$fieldArr = $this->occurrenceFieldArr['fields'];
@@ -337,24 +352,18 @@ class DwcArchiverOccurrence{
 		$detFieldArr['coreid'] = 'o.occid';
 		$detTermArr['identifiedBy'] = 'http://rs.tdwg.org/dwc/terms/identifiedBy';
 		$detFieldArr['identifiedBy'] = 'd.identifiedBy';
-		if($this->schemaType == 'backup' || ($this->schemaType == 'symbiota' && $this->extended)){
-			$detTermArr['identifiedByID'] = 'http://symbiota.org/terms/identifiedByID';
-			$detFieldArr['identifiedByID'] = 'd.idbyid';
-		}
+		$detTermArr['identifiedByID'] = 'http://symbiota.org/terms/identifiedByID';
+		$detFieldArr['identifiedByID'] = 'd.idbyid';
 		$detTermArr['dateIdentified'] = 'http://rs.tdwg.org/dwc/terms/dateIdentified';
 		$detFieldArr['dateIdentified'] = 'd.dateIdentified';
 		$detTermArr['identificationQualifier'] = 'http://rs.tdwg.org/dwc/terms/identificationQualifier';
 		$detFieldArr['identificationQualifier'] = 'd.identificationQualifier';
 		$detTermArr['scientificName'] = 'http://rs.tdwg.org/dwc/terms/scientificName';
 		$detFieldArr['scientificName'] = 'd.sciName AS scientificName';
-		if($this->schemaType == 'backup' || ($this->schemaType == 'symbiota' && $this->extended)){
-			$detTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
-			$detFieldArr['tidInterpreted'] = 'd.tidinterpreted';
-		}
-		if($this->schemaType != 'dwc'){
-			$detTermArr['identificationIsCurrent'] = 'http://symbiota.org/terms/identificationIsCurrent';
-			$detFieldArr['identificationIsCurrent'] = 'd.iscurrent';
-		}
+		$detTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
+		$detFieldArr['tidInterpreted'] = 'd.tidinterpreted';
+		$detTermArr['identificationIsCurrent'] = 'http://symbiota.org/terms/identificationIsCurrent';
+		$detFieldArr['identificationIsCurrent'] = 'd.iscurrent';
 		$detTermArr['scientificNameAuthorship'] = 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship';
 		$detFieldArr['scientificNameAuthorship'] = 'd.scientificNameAuthorship';
 		$detTermArr['genus'] = 'http://rs.tdwg.org/dwc/terms/genus';
@@ -371,10 +380,33 @@ class DwcArchiverOccurrence{
 		$detFieldArr['identificationRemarks'] = 'd.identificationRemarks';
 		$detTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
 		$detFieldArr['recordId'] = 'g.guid AS recordId';
-		$this->determinationFieldArr['terms'] = $detTermArr;
-		$this->determinationFieldArr['fields'] = $detFieldArr;
+
+		$this->determinationFieldArr['terms'] = $this->trimDeterminationBySchemaType($detTermArr);
+		$this->determinationFieldArr['fields'] = $this->trimDeterminationBySchemaType($detFieldArr);
 	}
 	
+	private function trimDeterminationBySchemaType($detArr){
+		$trimArr = array();
+		if($this->schemaType == 'dwc'){
+			$trimArr = array('identifiedByID');
+			$trimArr = array('tidInterpreted');
+			$trimArr = array('identificationIsCurrent');
+		}
+		elseif($this->schemaType == 'symbiota'){
+			if(!$this->extended){
+				$trimArr = array('identifiedByID');
+				$trimArr = array('tidInterpreted');
+			}
+		}
+		elseif($this->schemaType == 'backup'){
+			$trimArr = array(); 
+		}
+		elseif($this->schemaType == 'coge'){
+			$trimArr = array(); 
+		}
+		return array_diff_key($detArr,array_flip($trimArr));
+	}
+
 	public function getSqlDeterminations(){
 		$sql = ''; 
 		$fieldArr = $this->determinationFieldArr['fields'];
@@ -409,20 +441,14 @@ class DwcArchiverOccurrence{
 		$imgFieldArr['thumbnailAccessURI'] = 'i.thumbnailurl as thumbnailAccessURI';
 		$imgTermArr['goodQualityAccessURI'] = 'http://rs.tdwg.org/ac/terms/goodQualityAccessURI';
 		$imgFieldArr['goodQualityAccessURI'] = 'i.url as goodQualityAccessURI';
-		if($this->schemaType == 'backup'){
-			$imgTermArr['rights'] = 'http://purl.org/dc/terms/rights';	
-			$imgFieldArr['rights'] = 'i.copyright';
-		}
-		else{
-			$imgTermArr['Owner'] = 'http://ns.adobe.com/xap/1.0/rights/Owner';	//Institution name
-			$imgFieldArr['Owner'] = 'IFNULL(c.rightsholder,CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")")) AS owner';
-			$imgTermArr['rights'] = 'http://purl.org/dc/terms/rights';		//Copyright unknown
-			$imgFieldArr['rights'] = 'c.rights';
-			$imgTermArr['UsageTerms'] = 'http://ns.adobe.com/xap/1.0/rights/UsageTerms';	//Creative Commons BY-SA 3.0 license
-			$imgFieldArr['UsageTerms'] = 'i.copyright AS usageterms';
-			$imgTermArr['WebStatement'] = 'http://ns.adobe.com/xap/1.0/rights/WebStatement';	//http://creativecommons.org/licenses/by-nc-sa/3.0/us/
-			$imgFieldArr['WebStatement'] = 'c.accessrights AS webstatement';
-		}
+		$imgTermArr['rights'] = 'http://purl.org/dc/terms/rights';	
+		$imgFieldArr['rights'] = 'c.rights';
+		$imgTermArr['Owner'] = 'http://ns.adobe.com/xap/1.0/rights/Owner';	//Institution name
+		$imgFieldArr['Owner'] = 'IFNULL(c.rightsholder,CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")")) AS owner';
+		$imgTermArr['UsageTerms'] = 'http://ns.adobe.com/xap/1.0/rights/UsageTerms';	//Creative Commons BY-SA 3.0 license
+		$imgFieldArr['UsageTerms'] = 'i.copyright AS usageterms';
+		$imgTermArr['WebStatement'] = 'http://ns.adobe.com/xap/1.0/rights/WebStatement';	//http://creativecommons.org/licenses/by-nc-sa/3.0/us/
+		$imgFieldArr['WebStatement'] = 'c.accessrights AS webstatement';
 		$imgTermArr['caption'] = 'http://rs.tdwg.org/ac/terms/caption';	
 		$imgFieldArr['caption'] = 'i.caption';
 		$imgTermArr['comments'] = 'http://rs.tdwg.org/ac/terms/comments';	
@@ -442,8 +468,20 @@ class DwcArchiverOccurrence{
 		$imgTermArr['metadataLanguage'] = 'http://rs.tdwg.org/ac/terms/metadataLanguage';	//en
 		$imgFieldArr['metadataLanguage'] = '';
 
-		$this->imageFieldArr['terms'] = $imgTermArr;
-		$this->imageFieldArr['fields'] = $imgFieldArr;
+		if($this->schemaType == 'backup'){
+			$imgFieldArr['rights'] = 'i.copyright';
+		}
+
+		$this->imageFieldArr['terms'] = $this->trimImageBySchemaType($imgTermArr);
+		$this->imageFieldArr['fields'] = $this->trimImageBySchemaType($imgFieldArr);
+	}
+
+	private function trimImageBySchemaType($imageArr){
+		$trimArr = array();
+		if($this->schemaType == 'backup'){
+			$trimArr = array('Owner', 'UsageTerms', 'WebStatement'); 
+		}
+		return array_diff_key($imageArr,array_flip($trimArr));
 	}
 
 	public function getSqlImages(){
@@ -578,6 +616,10 @@ class DwcArchiverOccurrence{
 	}
 	
 	public function addCondition($field, $cond, $value = ''){
+		//Sanitation 
+		if(!preg_match('/^[A-Z]+$/',$field)) return false;
+		if(!preg_match('/^[A-Z]+$/',$cond)) return false;
+		//Set condition
 		if($field){
 			if(!trim($cond)) $cond = 'EQUALS';
 			if($value || ($cond == 'NULL' || $cond == 'NOTNULL')){
@@ -1096,7 +1138,8 @@ class DwcArchiverOccurrence{
 		$this->logOrEcho("\n-----------------------------------------------------\n");
 		return $archiveFile;
 	}
-	
+
+	//Generate DwC support files
 	private function writeMetaFile(){
 		$this->logOrEcho("Creating meta.xml (".date('h:i:s A').")... ");
 		
@@ -1553,6 +1596,7 @@ class DwcArchiverOccurrence{
 		return $newDoc;
 	}
 
+	//Generate Data files
 	private function writeOccurrenceFile(){
 		global $clientRoot;
 		$this->logOrEcho("Creating occurrence file (".date('h:i:s A').")... ");
@@ -2024,6 +2068,71 @@ class DwcArchiverOccurrence{
 		return true;
 	}
 
+	//GeoLocate functions 
+	public function publishCoGeoFile($collid = 0){
+		//Publish GeoLocate Community File
+		if($collid && is_numeric($collid)){
+			$this->setCharSetOut('UTF-8');
+			$dwcaHandler->setSchemaType($schema);
+			$dwcaHandler->setExtended($extended);
+			$dwcaHandler->setDelimiter($format);
+			$dwcaHandler->setVerbose(0);
+			$dwcaHandler->setRedactLocalities(0);
+			$dwcaHandler->setIncludeDets(1);
+			$dwcaHandler->setIncludeImgs(1);
+			$dwcaHandler->setCollArr($collid);
+			if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
+		
+		
+			$archiveFile = $dwcaHandler->createDwcArchive();
+		
+			if($archiveFile){
+				//ob_start();
+				header('Content-Description: Symbiota Occurrence Backup File (DwC-Archive data package)');
+				header('Content-Type: application/zip');
+				header('Content-Disposition: attachment; filename='.basename($archiveFile));
+				header('Content-Transfer-Encoding: binary');
+				header('Expires: 0');
+				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+				header('Pragma: public');
+				header('Content-Length: ' . filesize($archiveFile));
+				//od_end_clean();
+				readfile($archiveFile);
+				unlink($archiveFile);
+			}
+			else{
+				echo 'ERROR creating output file. Query probably did not include any records.';
+			}
+			
+			
+			//Request is coming from exporter.php for collection manager tools
+			$dwcaHandler->setCollArr($_POST['targetcollid']);
+			if(array_key_exists('processingstatus',$_POST) && $_POST['processingstatus']){
+				$dwcaHandler->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);
+			}
+			if(array_key_exists('customfield1',$_POST) && $_POST['customfield1']){
+				$dwcaHandler->addCondition($_POST['customfield1'],$_POST['customtype1'],$_POST['customvalue1']);
+			}
+			if(array_key_exists('customfield2',$_POST) && $_POST['customfield2']){
+				$dwcaHandler->addCondition($_POST['customfield2'],$_POST['customtype2'],$_POST['customvalue2']);
+			}
+			
+			header('Content-Description: COGE Community File');
+			header('Content-Type: application/zip');
+			header('Content-Disposition: attachment; filename='.basename($outputFile));
+			header('Content-Transfer-Encoding: binary');
+			header('Expires: 0');
+			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			header('Pragma: public');
+			header('Content-Length: ' . filesize($outputFile));
+			ob_clean();
+			flush();
+			//od_end_clean();
+			readfile($outputFile);
+			unlink($outputFile);
+		}
+	}
+
 	//getters, setters, and misc functions
 	public function getDwcaItems($collid = 0){
 		global $serverRoot;
@@ -2131,11 +2240,25 @@ class DwcArchiverOccurrence{
 	}
 
 	public function setVerbose($c){
-		$this->verbose = $c;
+		if($c){
+			$this->verbose = true;
+		}
 	}
-	
+
 	public function setSchemaType($type){
-		$this->schemaType = $type;
+		//dwc, symbiota, backup, coge
+		if($type == 'dwc'){
+			$this->schemaType = 'dwc';
+		}
+		elseif($type == ''){
+			$this->schemaType = 'backup';
+		}
+		elseif($type == ''){
+			$this->schemaType = 'coge';
+		}
+		else{
+			$this->schemaType = 'symbiota';
+		}
 	}
 	
 	public function setExtended($e){

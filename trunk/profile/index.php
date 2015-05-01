@@ -6,11 +6,11 @@ header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidat
 header('Pragma: no-cache'); // HTTP 1.0.
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-$login = array_key_exists('login',$_REQUEST)?htmlspecialchars($_REQUEST['login']):'';
-$remMe = array_key_exists("remember",$_POST)?htmlspecialchars($_POST["remember"]):"";
-$emailAddr = array_key_exists('emailaddr',$_POST)?htmlspecialchars($_POST['emailaddr']):'';
+$login = array_key_exists('login',$_REQUEST)?$_REQUEST['login']:'';
+$remMe = array_key_exists("remember",$_POST)?$_POST["remember"]:'';
+$emailAddr = array_key_exists('emailaddr',$_POST)?$_POST['emailaddr']:'';
 $resetPwd = ((array_key_exists("resetpwd",$_REQUEST) && is_numeric($_REQUEST["resetpwd"]))?$_REQUEST["resetpwd"]:0);
-$action = array_key_exists("action",$_POST)?htmlspecialchars($_POST["action"]):"";
+$action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 if(!$action && array_key_exists('submit',$_REQUEST)) $action = $_REQUEST['submit'];
 
 $refUrl = "";
@@ -66,11 +66,11 @@ if($action == "logout"){
 elseif($action == "Login"){
 	$password = trim($_POST["password"]);
 	if($pHandler->authenticate($password)){
-		if($refUrl && (stripos($refUrl,$clientRoot) !== false) && !strpos($refUrl,'newprofile.php')){
-			header("Location: ".$refUrl);
+		if(!$refUrl || (strtolower(substr($refUrl,0,4)) == 'http') || strpos($refUrl,'newprofile.php')){
+			header("Location: ../index.php");
 		}
 		else{
-			header("Location: ../index.php");
+			header("Location: ".$refUrl);
 		}
 	}
 	else{

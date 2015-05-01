@@ -471,27 +471,40 @@ class CollectionProfileManager {
 		$returnArr = Array();
 		$sql = '';
 		if($family){
+			/*
 			$sql = 'SELECT t.unitname1 as taxon, Count(o.occid) AS cnt '.
 				'FROM omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
 				'GROUP BY o.CollID, t.unitname1, o.Family '.
 				'HAVING (o.CollID = '.$this->collid.') '.
 				'AND (o.Family = "'.$family.'") AND (t.unitname1 != "'.$family.'") '.
 				'ORDER BY t.unitname1';
+			*/
+			$sql = 'SELECT t.unitname1 as taxon, Count(o.occid) AS cnt '.
+				'FROM omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+				'WHERE (o.CollID = '.$this->collid.') AND (o.Family = "'.$family.'") AND (t.unitname1 != "'.$family.'") '.
+				'GROUP BY o.CollID, t.unitname1, o.Family ';
 		}
 		else{
+			/*
 			$sql = 'SELECT o.family as taxon, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.Family '.
 				'HAVING (o.CollID = '.$this->collid.') '.
 				'AND (o.Family IS NOT NULL) AND (o.Family <> "") '.
 				'ORDER BY o.Family';
+			*/
+			$sql = 'SELECT o.family as taxon, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'WHERE (o.CollID = '.$this->collid.') AND (o.Family IS NOT NULL) AND (o.Family <> "") '.
+				'GROUP BY o.CollID, o.Family ';
 		}
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->taxon] = $row->cnt;
 		}
-		$rs->close();
+		$rs->free();
+		asort($returnArr);
 		return $returnArr;
 	}
 
