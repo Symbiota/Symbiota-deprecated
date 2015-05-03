@@ -95,7 +95,7 @@ else{
 	        }
 	    </script>
 	</head> 
-	<body onload="initialize()">
+	<body style="background-color:#ffffff;" onload="initialize()">
 		<div style="width:770px;height:650px;">
 			<div style="margin:3px;">
 				Click once to capture coordinates.  

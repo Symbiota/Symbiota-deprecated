@@ -79,7 +79,7 @@ $mapperObj = new ChecklistMapper($projValue);
 			}
 		</style>
 	</head>
-	<body onload="initialize()">
+	<body style="background-color:#ffffff;" onload="initialize()">
     	<div id="map_canvas"></div>
 	</body>
 </html>

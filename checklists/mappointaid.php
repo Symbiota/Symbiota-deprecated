@@ -104,7 +104,7 @@ if(!is_numeric($latCenter) || !is_numeric($lngCenter) || (!$latCenter && !$lngCe
 	    </script>
 
 	</head> 
-	<body onload="initialize()">
+	<body style="background-color:#ffffff;" onload="initialize()">
 		<div style="width:770px;height:650px;">
 			<div>
 				Click once to capture coordinates.  

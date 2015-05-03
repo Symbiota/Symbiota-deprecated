@@ -133,6 +133,8 @@ div.tndiv{
 	text-align: center;
 	width: 165px;
 	height: 250px;
+	page-break-before:auto;
+	page-break-inside:avoid;
 }
 
 div.tnimg{

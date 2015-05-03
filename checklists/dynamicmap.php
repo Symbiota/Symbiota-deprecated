@@ -88,7 +88,7 @@ elseif($coordRange > 40){
 		}
 	</script>
 </head> 
-<body onload="initialize()">
+<body style="background-color:#ffffff;" onload="initialize()">
 	<?php 
 		$displayLeftMenu = false;
 		include($serverRoot.'/header.php');
