@@ -19,6 +19,7 @@ $searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcomm
 $searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
 $editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
 $printMode = array_key_exists("printmode",$_REQUEST)?$_REQUEST["printmode"]:0; 
+$exportDoc = array_key_exists("exportdoc",$_REQUEST)?$_REQUEST["exportdoc"]:0;
 
 $statusStr='';
 
@@ -127,7 +128,7 @@ if($clValue || $dynClid){
 	</style>
 </head>
 
-<body>
+<body <?php echo ($printMode?'style="background-color:#ffffff;"':''); ?>>
 <?php
 	if(!$printMode){
 		$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:false);
@@ -234,11 +235,11 @@ if($clValue || $dynClid){
 				}
 			}
 		
-			if(($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"]) && !$printMode){
+			if(($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"])){
 				?>
-				<div class="moredetails" style="<?php echo ($showDetails?'display:none;':''); ?>color:blue;cursor:pointer;" onclick="toggle('moredetails')">More Details</div>
-				<div class="moredetails" style="display:<?php echo ($showDetails?'block':'none'); ?>;color:blue;cursor:pointer;" onclick="toggle('moredetails')">Less Details</div>
-				<div class="moredetails" style="display:<?php echo ($showDetails?'block':'none'); ?>;">
+				<div class="moredetails" style="<?php echo (($showDetails || $printMode)?'display:none;':''); ?>color:blue;cursor:pointer;" onclick="toggle('moredetails')">More Details</div>
+				<div class="moredetails" style="display:<?php echo (($showDetails && !$printMode)?'block':'none'); ?>;color:blue;cursor:pointer;" onclick="toggle('moredetails')">Less Details</div>
+				<div class="moredetails" style="display:<?php echo (($showDetails || $printMode)?'block':'none'); ?>;">
 					<?php 
 					$locStr = $clArray["locality"];
 					if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
@@ -336,12 +337,15 @@ if($clValue || $dynClid){
 									<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
 									<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
 									<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
-									<input type="submit" name="submitaction" value="Rebuild List" />
-									<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Download Checklist">
-										<input type="image" name="dllist" value="Download List" src="../images/dl.png" />
+									<input type="submit" name="submitaction" value="Rebuild List" onclick="changeOptionFormAction('checklist.php','_self');" />
+									<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Download Checklist">
+										<input type="image" name="dllist" value="Download List" src="../images/dl.png" onclick="changeOptionFormAction('checklist.php','_self');" />
 									</div>
-									<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Print Checklist">
-										<input type="image" name="printlist" value="Print List" src="../images/print.png" />
+									<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Print in Browser">
+										<input type="image" name="printlist" value="Print List" src="../images/print.png" onclick="changeOptionFormAction('checklist.php','_blank');" />
+									</div>
+									<div class="button" id="wordicondiv" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;<?php echo ($showImages?'display:none;':''); ?>' title="Export to DOCX">
+										<input type="image" name="exportdoc" value="Export to DOCX" src="../images/wordicon.png" onclick="changeOptionFormAction('defaultchecklistexport.php','_self');" />
 									</div>
 								</div>
 							</fieldset>

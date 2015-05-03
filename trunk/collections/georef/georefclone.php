@@ -116,7 +116,7 @@ if($coorArr && count($coorArr) == 4){
 			}			
 		</script>
 	</head>
-	<body onload="initialize()">
+	<body style="background-color:#ffffff;" onload="initialize()">
 		<!-- This is inner text! -->
 		<div id="innertext">
 			<?php 

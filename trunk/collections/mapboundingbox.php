@@ -11,7 +11,7 @@ $lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3]
 	<head>
 		<title><?php echo $defaultTitle; ?> - Coordinate Mapper</title>
 	</head> 
-	<body>
+	<body style="background-color:#ffffff;">
 	<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 	<script type="text/javascript">
       	var map;

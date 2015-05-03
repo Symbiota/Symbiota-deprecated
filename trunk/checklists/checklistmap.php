@@ -104,7 +104,7 @@ if($coordArr){
 		}
 	</style>
 </head> 
-<body onload="initialize();">
+<body style="background-color:#ffffff;" onload="initialize();">
 <?php
     if(!$coordArr){ //no results
     	?>
