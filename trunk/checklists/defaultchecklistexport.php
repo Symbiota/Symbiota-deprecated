@@ -101,7 +101,7 @@ $section = $phpWord->addSection(array('pageSizeW'=>12240,'pageSizeH'=>15840,'mar
 $title = str_replace('&quot;','"',$clManager->getClName());
 $title = str_replace('&apos;',"'",$title);
 $textrun = $section->addTextRun('defaultPara');
-$textrun->addText(htmlspecialchars($title),'titleFont');
+$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/checklists/checklist.php?cl='.$clValue."&proj=".$pid."&dynclid=".$dynClid,htmlspecialchars($title),'titleFont');
 $textrun->addTextBreak(1);
 if($clValue){
 	if($clArray['type'] == 'rarespp'){
@@ -180,7 +180,7 @@ if($showImages){
 			$textrun = $cell->addTextRun('imagePara');
 			$textrun->addImage($imgSrc,array('width'=>160,'height'=>160));
 			$textrun->addTextBreak(1);
-			$textrun->addText(htmlspecialchars($sppArr['sciname']),'topicFont');
+			$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'topicFont');
 			$textrun->addTextBreak(1);
 			if(array_key_exists('vern',$sppArr)){
 				$vern = str_replace('&quot;','"',$sppArr["vern"]);
@@ -189,7 +189,7 @@ if($showImages){
 				$textrun->addTextBreak(1);
 			}
 			if($family != $prevfam){
-				$textrun->addText(htmlspecialchars('['.$family.']'),'textFont');
+				$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars('['.$family.']'),'textFont');
 				$prevfam = $family;
 			}
 		}
@@ -210,11 +210,11 @@ else{
 		$family = $sppArr['family'];
 		if($family != $prevfam){
 			$textrun = $section->addTextRun('familyPara');
-			$textrun->addText(htmlspecialchars($family),'familyFont');
+			$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars($family),'familyFont');
 			$prevfam = $family;
 		}
 		$textrun = $section->addTextRun('scinamePara');
-		$textrun->addText(htmlspecialchars($sppArr["sciname"]),'scientificnameFont');
+		$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'scientificnameFont');
 		if(array_key_exists("author",$sppArr)){ 
 			$sciAuthor = str_replace('&quot;','"',$sppArr["author"]);
 			$sciAuthor = str_replace('&apos;',"'",$sciAuthor);
@@ -226,24 +226,23 @@ else{
 			$textrun->addText(htmlspecialchars(' - '.$vern),'topicFont');
 		}
 		if($showVouchers){
-			$voucStr = '';
-			if(array_key_exists($tid,$voucherArr)){
-				foreach($voucherArr[$tid] as $occid => $collName){
-					$voucStr .= ', ';
-					$voucStr .= $collName;
-				}
-				$voucStr = substr($voucStr,2);
-				$voucStr = str_replace('&quot;','"',$voucStr);
-				$voucStr = str_replace('&apos;',"'",$voucStr);
+			if(array_key_exists('notes',$sppArr) || array_key_exists($tid,$voucherArr)){
+				$textrun = $section->addTextRun('notesvouchersPara');
 			}
-			$noteStr = '';
 			if(array_key_exists('notes',$sppArr)){
 				$noteStr = str_replace('&quot;','"',trim($sppArr['notes']));
 				$noteStr = str_replace('&apos;',"'",$noteStr);
+				$textrun->addText(htmlspecialchars($noteStr.($noteStr && array_key_exists($tid,$voucherArr)?'; ':'')),'textFont');
 			}
-			if($noteStr || $voucStr){
-				$textrun = $section->addTextRun('notesvouchersPara');
-				$textrun->addText(htmlspecialchars($noteStr.($noteStr && $voucStr?'; ':'').$voucStr),'textFont');
+			if(array_key_exists($tid,$voucherArr)){
+				$i = 0;
+				foreach($voucherArr[$tid] as $occid => $collName){
+					if($i > 0) $textrun->addText(htmlspecialchars(', '),'textFont');
+					$voucStr = str_replace('&quot;','"',$collName);
+					$voucStr = str_replace('&apos;',"'",$voucStr);
+					$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/collections/individual/index.php?occid='.$occid,htmlspecialchars($voucStr),'textFont');
+					$i++;
+				}
 			}
 		}
 	}
