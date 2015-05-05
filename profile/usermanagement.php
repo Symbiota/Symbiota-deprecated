@@ -124,30 +124,16 @@ if($isAdmin){
 							</a>
 						</div>
 					</div>
-					<?php
-					$loginArr = $user["username"];
-					if(implode("; ",$loginArr)){
-						?>
-						<div style="clear:left;">
-							<div style="float:left;font-weight:bold;margin-right:8px;">Logins: </div>
-							<div style="float:left;margin-bottom:30px;"><?php echo implode("; ",$loginArr); ?></div>
-						</div>
-						<?php
-					}
-					else{
-						?>
-						<div style="clear:left;">
-							<div style="float:left;font-weight:bold;margin-bottom:30px;">No logins are registered for this user</div>
-						</div>
-						<?php
-					}
-					?>
+					<div style="clear:left;">
+						<div style="float:left;font-weight:bold;margin-right:8px;">Login: </div>
+						<div style="float:left;margin-bottom:30px;"><?php echo ($user["username"]?$user["username"].' (last login: '.$user['lastlogindate'].')':'login not registered for this user'); ?></div>
+					</div>
 				</div>
 				<?php
-				if(implode("; ",$loginArr)){
+				if($user["username"]){
 					?>
 					<div style="clear:both;margin:0px 0px 20px 30px;">
-						<a href="usermanagement.php?loginas=<?php echo array_shift($loginArr); ?>">Login</a> as this user
+						<a href="usermanagement.php?loginas=<?php echo $user["username"]; ?>">Login</a> as this user
 					</div>
 					<?php
 				}

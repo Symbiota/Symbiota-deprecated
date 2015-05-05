@@ -13,9 +13,9 @@
             ,allowResizeX: true
             ,allowResizeY: true
             ,zoomFactor: 5
-            ,defaultCursor: "url(openhand.cur), move"
+            ,defaultCursor: "url(../../images/openhand.cur), move"
             ,zoomCursor: "crosshair"
-            ,panCursor: "url(closedhand.cur), move"
+            ,panCursor: "url(../../images/closedhand.cur), move"
             ,disabledCursor: "not-allowed"
             ,viewportWidth: 400
             ,viewportHeight: 300

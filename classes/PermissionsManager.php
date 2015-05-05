@@ -35,7 +35,7 @@ class PermissionsManager{
 		$returnArr = Array();
 		if(is_numeric($uid)){
 			$sql = "SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.city, u.state, ".
-				"u.zip, u.country, u.email, u.url, u.notes, ul.username ".
+				"u.zip, u.country, u.email, u.url, u.notes, ul.username, ul.lastlogindate ".
 				"FROM users u LEFT JOIN userlogin ul ON u.uid = ul.uid ".
 				"WHERE (u.uid = ".$uid.')';
 			//echo "<div>$sql</div>";
@@ -53,10 +53,8 @@ class PermissionsManager{
 				$returnArr["email"] = $row->email;
 				$returnArr["url"] = $row->url;
 				$returnArr["notes"] = $row->notes;
-				$returnArr["username"][] = $row->username;
-				while($row = $result->fetch_object()){
-					$returnArr["username"][] = $row->username;
-				}
+				$returnArr["username"] = $row->username;
+				$returnArr['lastlogindate'] = $row->lastlogindate;
 			}
 			$result->free();
 		}

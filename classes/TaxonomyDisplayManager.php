@@ -207,8 +207,6 @@ class TaxonomyDisplayManager{
 				}
 				$indent = $taxonRankId;
 				if($indent > 230) $indent -= 10;
-				if($indent > 200) $indent -= 30;
-				elseif($indent > 160) $indent -= 20;
 				//echo "<div style='margin-left:".$indent."px;'>";
 				echo "<div>".str_repeat('&nbsp;',$indent/5);
 				echo "<a href='taxonomyeditor.php?target=".$key."'>".$sciName."</a>";
