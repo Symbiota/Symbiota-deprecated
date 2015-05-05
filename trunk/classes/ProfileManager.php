@@ -256,7 +256,7 @@ class ProfileManager{
 		// generate new random password
 		$newPassword = "";
 		$alphabet = str_split("0123456789abcdefghijklmnopqrstuvwxyz");
-		for($i = 0; $i<6; $i++) {
+		for($i = 0; $i<8; $i++) {
 			$newPassword .= $alphabet[rand(0,count($alphabet)-1)];
 		}
 		return $newPassword;
