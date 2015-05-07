@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ChecklistAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistAdmin.php');
 header("Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID) header('Location: ../profile/index.php?refurl=../checklists/checklistadmin.php?'.$_SERVER['QUERY_STRING']);
 
@@ -17,7 +17,7 @@ $clManager->setClid($clid);
 $statusStr = "";
 $isEditor = 0;
 
-if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = 1;
 
 	//Submit checklist MetaData edits
@@ -226,7 +226,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 								<input type="text" name="eclauthors" style="width:95%" value="<?php echo $clArray["authors"]; ?>" />
 							</div>
 							<?php 
-							if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
+							if(isset($GLOBALS['USER_RIGHTS']['RareSppAdmin']) || $IS_ADMIN){
 								?>
 								<div>
 									<b>Checklist Type</b><br/>
