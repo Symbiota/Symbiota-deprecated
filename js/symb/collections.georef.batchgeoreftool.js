@@ -55,6 +55,10 @@ function verifyGeorefForm(f){
 	return true;
 }
 
+function verifyFootprintWKT(f) {
+	return true;
+}
+
 function updateLatDec(f){
 	var latDec = parseInt(f.latdeg.value);
 	var latMin = parseFloat(f.latmin.value);
@@ -141,11 +145,12 @@ function geoLocateLocality(){
 	}
 }
 
-function geoLocateUpdateCoord(latValue,lngValue,coordErrValue){
+function geoLocateUpdateCoord(latValue,lngValue,coordErrValue,footprintWKTValue){
 	var f = document.georefform;
 	f.decimallatitude.value = latValue;
 	f.decimallongitude.value = lngValue;
 	f.coordinateuncertaintyinmeters.value = coordErrValue;
+	f.footprintwkt.value = footprintWKTValue;
 	var baseStr = f.georeferencesources.value;
 	if(baseStr){
 		var baseTokens = baseStr.split(";"); 

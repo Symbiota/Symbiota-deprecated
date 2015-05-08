@@ -77,13 +77,14 @@ function geoLocateLocality(){
 	}
 }
 
-function geoLocateUpdateCoord(latValue,lngValue,coordErrValue){
+function geoLocateUpdateCoord(latValue,lngValue,coordErrValue, footprintWKT){
 	document.getElementById("locExtraDiv").style.display = "block";
 
 	var f = document.fullform;
 	f.decimallatitude.value = latValue;
 	f.decimallongitude.value = lngValue;
 	f.coordinateuncertaintyinmeters.value = coordErrValue;
+	f.footprintwkt.value = footprintWKT;
 	f.georeferencesources.value = "GeoLocate";
 	f.geodeticdatum.value = "WGS84";
 
