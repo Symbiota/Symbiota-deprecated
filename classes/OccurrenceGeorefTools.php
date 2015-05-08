@@ -1,6 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
- 
+
 class OccurrenceGeorefTools {
 
 	private $conn;
@@ -74,7 +74,7 @@ class OccurrenceGeorefTools {
 			$countryStr='';$stateStr='';$countyStr='';$localityStr='';$verbCoordStr = '';$decLatStr='';$decLngStr='';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				if($countryStr != trim($r->country) || $stateStr != trim($r->stateprovince) || $countyStr != trim($r->county)  
+				if($countryStr != trim($r->country) || $stateStr != trim($r->stateprovince) || $countyStr != trim($r->county)
 					|| $localityStr != trim($r->locality," .,;") || $verbCoordStr != trim($r->verbatimcoordinates)
 					|| $decLatStr != $r->decimallatitude || $decLngStr != $r->decimallongitude){
 					$countryStr = trim($r->country);
@@ -142,6 +142,10 @@ class OccurrenceGeorefTools {
 						$sql .= ',coordinateuncertaintyinmeters = '.$geoRefArr['coordinateuncertaintyinmeters'];
 						$this->addOccurEdits('coordinateuncertaintyinmeters',$geoRefArr['coordinateuncertaintyinmeters'],$localStr);
 					}
+					if($geoRefArr['footprintwkt']){
+						$sql .= ',footprintwkt = "'.$geoRefArr['footprintwkt'].'"';
+						$this->addOccurEdits('footprintwkt',$geoRefArr['footprintwkt'],$localStr);
+					}
 					if($geoRefArr['geodeticdatum']){
 						$sql .= ', geodeticdatum = "'.$geoRefArr['geodeticdatum'].'"';
 						$this->addOccurEdits('geodeticdatum',$geoRefArr['geodeticdatum'],$localStr);
@@ -176,21 +180,21 @@ class OccurrenceGeorefTools {
 			echo $this->errorStr;
 		}
 	}
-	
+
 	public function getCoordStatistics(){
 		$retArr = array();
 		$totalCnt = 0;
-		$sql = 'SELECT COUNT(occid) AS cnt '. 
-			'FROM omoccurrences '. 
-			'WHERE (collid = '.$this->collId.')'; 
+		$sql = 'SELECT COUNT(occid) AS cnt '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collId.')';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$totalCnt = $r->cnt;
 		}
 		$rs->free();
-		
-		$sql = 'SELECT COUNT(occid) AS cnt '. 
-			'FROM omoccurrences '. 
+
+		$sql = 'SELECT COUNT(occid) AS cnt '.
+			'FROM omoccurrences '.
 			'WHERE (collid = '.$this->collId.') AND (decimalLatitude IS NULL) AND (georeferenceVerificationStatus IS NULL) ';
 		$k = '';
 		$limitedSql = '';
@@ -225,14 +229,14 @@ class OccurrenceGeorefTools {
 			}
 			$rs->close();
 		}
-		
+
 		return $retArr;
-	} 
+	}
 
 	public function getGeorefClones($locality, $country, $state, $county){
 		$occArr = array();
-		$sql = 'SELECT count(occid) AS cnt, decimallatitude, decimallongitude, coordinateUncertaintyInMeters, country, stateprovince, county, georeferencedby '. 
-			'FROM omoccurrences '. 
+		$sql = 'SELECT count(occid) AS cnt, decimallatitude, decimallongitude, coordinateUncertaintyInMeters, footprintWKT, country, stateprovince, county, georeferencedby '.
+			'FROM omoccurrences '.
 			'WHERE decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL AND locality = "'.$this->cleanInStr($locality).'" ';
 		if($country){
 			$synArr = array('usa','u.s.a', 'united states','united states of america','u.s.');
@@ -251,7 +255,7 @@ class OccurrenceGeorefTools {
 		$sql .= 'GROUP BY decimallatitude, decimallongitude '.
 			'ORDER BY georeferencedBy DESC, count(occid) DESC';
 		//echo '<div>'.$sql.'</div>';
-		
+
 		$rs = $this->conn->query($sql);
 		$cnt = 0;
 		$lat = 0;
@@ -264,6 +268,7 @@ class OccurrenceGeorefTools {
 				$occArr[$cnt]['lat'] = $r->decimallatitude;
 				$occArr[$cnt]['lng'] = $r->decimallongitude;
 				$occArr[$cnt]['err'] = $r->coordinateUncertaintyInMeters;
+				$occArr[$cnt]['footprint'] = $r->footprintWKT;
 				$occArr[$cnt]['country'] = $r->country;
 				$occArr[$cnt]['state'] = $r->stateprovince;
 				$occArr[$cnt]['county'] = $r->county;
@@ -315,7 +320,7 @@ class OccurrenceGeorefTools {
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	public function getStateArr($countryStr = ''){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT stateprovince '.
@@ -332,7 +337,7 @@ class OccurrenceGeorefTools {
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	public function getCountyArr($countryStr = '',$stateStr = ''){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT county '.
@@ -368,7 +373,7 @@ class OccurrenceGeorefTools {
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
- 	
+
 	private static function _cmpLocCnt ($a, $b){
 		$aCnt = $a['cnt'];
 		$bCnt = $b['cnt'];
