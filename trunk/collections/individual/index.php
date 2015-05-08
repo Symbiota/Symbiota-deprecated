@@ -11,6 +11,14 @@ $submit = array_key_exists('formsubmit',$_REQUEST)?trim($_REQUEST['formsubmit'])
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
 $clid = array_key_exists("clid",$_REQUEST)?trim($_REQUEST["clid"]):0;
 
+//Sanitize input variables
+if(!is_numeric($occid)) $occid = 0;
+if(!is_numeric($collId)) $collId = 0;
+if(!is_numeric($tabIndex)) $tabIndex = 0;
+if(!is_numeric($clid)) $clid = 0;
+if($pk && !preg_match('/^[a-zA-Z0-9\s_]+$/',$pk)) $pk = '';
+if($submit && !preg_match('/^[a-zA-Z0-9\s_]+$/',$submit)) $submit = '';
+
 $indManager = new OccurrenceIndividualManager();
 if($occid){
 	$indManager->setOccid($occid);
@@ -111,6 +119,12 @@ if($SYMB_UID){
 	}
 	elseif(array_key_exists('publiccomid',$_GET)){
 		if(!$indManager->makeCommentPublic($_GET['publiccomid'])){
+			$statusStr = $indManager->getErrorMessage();
+		}
+	}
+	elseif($submit == "Link to Dataset"){
+		$dsid = (isset($_POST['dsid'])?$_POST['dsid']:0);
+		if(!$indManager->linkToDataset($dsid,$_POST['dsname'],$_POST['notes'],$SYMB_UID)){
 			$statusStr = $indManager->getErrorMessage();
 		}
 	}
@@ -270,7 +284,7 @@ header("Content-Type: text/html; charset=".$charset);
 					}
 					?> 
 					<li><a href="#commenttab"><span><?php echo ($commentArr?count($commentArr).' ':''); ?>Comments</span></a></li> 
-					<li><a href="other.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collId.'&obsuid='.$occArr['observeruid']; ?>"><span>Related Resources</span></a></li>
+					<li><a href="linkedresources.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collId; ?>"><span>Linked Resources</span></a></li>
 					<?php 
 					if($isEditor){
 						?>

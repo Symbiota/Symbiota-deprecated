@@ -98,8 +98,9 @@ class SpecUploadBase extends SpecUpload{
 
 		//Get uploadspectemp metadata
 		$skipOccurFields = array('dbpk','initialtimestamp','occid','collid','tidinterpreted','fieldnotes','coordinateprecision',
-			'verbatimcoordinatesystem','ownerinstitutioncode','institutionid','collectionid','datasetid','associatedoccurrences',
-			'associatedreferences','associatedsequences','previousidentifications');
+			'verbatimcoordinatesystem','institutionid','collectionid','associatedoccurrences','datasetid','associatedreferences',
+			'previousidentifications','associatedsequences');
+		//Other to deal with/skip later: 'ownerinstitutioncode'
 		$sql = "SHOW COLUMNS FROM uploadspectemp";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){

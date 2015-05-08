@@ -973,15 +973,23 @@ class TaxaUpload{
 		$this->outputMsg('Finishing up with some house cleaning... ');
 		//Something is wrong with the buildHierarchy method. Needs to be fixed. 
 		$this->buildHierarchy($this->taxAuthId);
-		
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL';
-		$this->conn->query($sql);
 
-		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '. 
+		//Update occurrences with new tids
+		$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL';
+		$this->conn->query($sql1);
+		
+		//Update occurrence images with new tids
+		$sql2 = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+			'SET i.tid = o.TidInterpreted '.
+			'WHERE i.tid is null AND o.TidInterpreted IS NOT NULL';
+		$this->conn->query($sql2);
+		
+		//Update geo lookup table 
+		$sql3 = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '. 
 			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '. 
 			'FROM omoccurrences o LEFT JOIN omoccurgeoindex g ON o.tidinterpreted = g.tid '.
 			'WHERE g.tid IS NULL AND o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL';
-		$this->conn->query($sql);
+		$this->conn->query($sql3);
 	}
 
 	private function transferVernaculars($secondRound = 0){
