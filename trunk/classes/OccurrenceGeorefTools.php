@@ -237,7 +237,7 @@ class OccurrenceGeorefTools {
 		$occArr = array();
 		$sql = 'SELECT count(occid) AS cnt, decimallatitude, decimallongitude, coordinateUncertaintyInMeters, footprintWKT, country, stateprovince, county, georeferencedby '.
 			'FROM omoccurrences '.
-			'WHERE decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL AND locality = "'.$this->cleanInStr($locality).'" ';
+			'WHERE decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL AND TRIM(TRIM(TRAILING "." FROM locality)) = "'.trim($this->cleanInStr($locality), " .").'" ';
 		if($country){
 			$synArr = array('usa','u.s.a', 'united states','united states of america','u.s.');
 			if(in_array($country,$synArr)){
