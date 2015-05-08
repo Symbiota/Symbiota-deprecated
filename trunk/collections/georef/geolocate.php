@@ -1,4 +1,4 @@
-<?php 
+<?php
 include_once('../../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
 
@@ -14,7 +14,7 @@ if(!$country || !$state || !$county){
 	if(!$state && $locArr) $state = trim(array_shift($locArr));
 	if(!$county && $locArr) $county = trim(array_shift($locArr));
 }
-//Modify TRS data to make it more compatable to the GeoLocate format (S23 needs to be Sec23) 
+//Modify TRS data to make it more compatable to the GeoLocate format (S23 needs to be Sec23)
 if(preg_match('/\d{1,2}[NS]{1}T\s\d{1,2}[EW]{1}R\s\d{1,2}S/',$locality)){
 	$locality = preg_replace('/(\d{1,2}[NS]{1})T\s(\d{1,2}[EW]{1})R\s(\d{1,2})S/', 'T$1 R$2 Sec$3', $locality);
 }
@@ -66,14 +66,14 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 	        if(evt.origin !== "http://www.museum.tulane.edu") {
 				alert("iframe url does not have permision to interact with me");
 	        }
-	        else {
+	        else {//alert(evt.data);
 	            var breakdown = evt.data.split("|");
                 if(breakdown.length == 4){
                     if(breakdown[0] == ""){
                     	alert("There are no data points to tranfer");
                     }
                     else{
-	                	opener.geoLocateUpdateCoord(breakdown[0],breakdown[1],breakdown[2]);
+	                	opener.geoLocateUpdateCoord(breakdown[0],breakdown[1],breakdown[2],breakdown[3]);
 	                    self.close();
                     }
                 }
@@ -98,7 +98,7 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 	</div>
 </body>
 </html>
-<?php 
+<?php
 
 function removeAccents($string) {
     if ( !preg_match('/[\x80-\xff]/', $string) )
