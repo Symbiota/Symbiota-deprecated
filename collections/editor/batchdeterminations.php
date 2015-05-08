@@ -81,7 +81,7 @@ if($isEditor){
 			}
 			
 			function clearAccForm(){
-				if(confirm("Clearing the form will erase all records. Are you sure you want to do this?") == true){
+				if(confirm("Clearing the form will clear the form and restart the process. Are you sure you want to do this?") == true){
 					catalogNumbers.length = 0;
 					adjustAccTab();
 					document.getElementById("catrecordstbody").innerHTML = '';
@@ -91,7 +91,7 @@ if($isEditor){
 			}
 			
 			function clearNomForm(){
-				if(confirm("Clearing the form will erase all records. Are you sure you want to do this?") == true){
+				if(confirm("Clearing the form will clear the form and restart the process. Are you sure you want to do this?") == true){
 					document.getElementById("nomrecordlistdviv").style.display = "none";
 					document.getElementById("nomrecordstbody").innerHTML = '';
 					document.getElementById("nomsciname").value = '';
@@ -162,7 +162,10 @@ if($isEditor){
 							document.getElementById("nomselectall").checked = false;
 						}
 						else{
-							clearNomForm();
+							document.getElementById("nomrecordlistdviv").style.display = "none";
+							document.getElementById("nomrecordstbody").innerHTML = '';
+							document.getElementById("nomsciname").value = '';
+							document.getElementById("nomselectall").checked = false;
 							alert("There are no specimens identified to that taxon.");
 						}
 					});
