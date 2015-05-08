@@ -29,6 +29,7 @@ $coordinateUncertaintyInMeters = array_key_exists('coordinateuncertaintyinmeters
 $geodeticDatum = array_key_exists('geodeticdatum',$_POST)?$_POST['geodeticdatum']:'';
 $georeferenceSources = array_key_exists('georeferencesources',$_POST)?$_POST['georeferencesources']:'';
 $georeferenceRemarks = array_key_exists('georeferenceremarks',$_POST)?$_POST['georeferenceremarks']:'';
+$footprintWKT = array_key_exists('footprintwkt',$_POST)?$_POST['footprintwkt']:'';
 $georeferenceVerificationStatus = array_key_exists('georeferenceverificationstatus',$_POST)?$_POST['georeferenceverificationstatus']:'';
 $minimumElevationInMeters = array_key_exists('minimumelevationinmeters',$_POST)?$_POST['minimumelevationinmeters']:'';
 $maximumElevationInMeters = array_key_exists('maximumelevationinmeters',$_POST)?$_POST['maximumelevationinmeters']:'';
@@ -42,7 +43,7 @@ $geoManager = new OccurrenceGeorefTools();
 $geoManager->setCollId($collId);
 
 $editor = false;
-if($isAdmin 
+if($isAdmin
 	|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
 	|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
  	$editor = true;
@@ -88,30 +89,30 @@ header("Content-Type: text/html; charset=".$charset);
 					<?php echo $geoManager->getCollName(); ?>
 				</div>
 				<div class='navpath' style="margin:10px;">
-					<a href='../../index.php'>Home</a> &gt;&gt; 
-					<?php 
+					<a href='../../index.php'>Home</a> &gt;&gt;
+					<?php
 					if(isset($collections_editor_georeftoolsCrumbs)){
-						echo $collections_editor_georeftoolsCrumbs." &gt;&gt;"; 
+						echo $collections_editor_georeftoolsCrumbs." &gt;&gt;";
 					}
 					else{
 						?>
 						<a href='../misc/collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Control Menu</a> &gt;&gt;
-						<?php  
+						<?php
 					}
 					?>
 					<b>Batch Georeferencing Tools</b>
 				</div>
-				<?php 
-				if($statusStr){ 
+				<?php
+				if($statusStr){
 					?>
 					<div style='margin:20px;font-weight:bold;color:red;'>
 						<?php echo $statusStr; ?>
 					</div>
-					<?php 
+					<?php
 				}
 				?>
 			</div>
-			<?php 
+			<?php
 			if($symbUid){
 				if($collId){
 					if($editor){
@@ -122,11 +123,11 @@ header("Content-Type: text/html; charset=".$charset);
 									<legend><b>Query Form</b></legend>
 									<div style="height:20px;">
 										<div style="float:left;margin-right:10px;">
-											<b>Country:</b> 
+											<b>Country:</b>
 											<select name="qcountry" style="width:150px;">
 												<option value=''>All Countries</option>
 												<option value=''>--------------------</option>
-												<?php 
+												<?php
 												$cArr = $geoManager->getCountryArr();
 												foreach($cArr as $c){
 													echo '<option '.($qCountry==$c?'SELECTED':'').'>'.$c.'</option>';
@@ -139,7 +140,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<select name="qstate" style="width:150px;">
 												<option value=''>All States</option>
 												<option value=''>--------------------</option>
-												<?php 
+												<?php
 												$sArr = $geoManager->getStateArr($qCountry);
 												foreach($sArr as $s){
 													echo '<option '.($qState==$s?'SELECTED':'').'>'.$s.'</option>';
@@ -148,11 +149,11 @@ header("Content-Type: text/html; charset=".$charset);
 											</select>
 										</div>
 										<div style="float:left;">
-											<b>County:</b> 
+											<b>County:</b>
 											<select name="qcounty" style="width:180px;">
 												<option value=''>All Counties</option>
 												<option value=''>--------------------</option>
-												<?php 
+												<?php
 												$coArr = $geoManager->getCountyArr($qCountry,$qState);
 												foreach($coArr as $c){
 													echo '<option '.($qCounty==$c?'SELECTED':'').'>'.$c.'</option>';
@@ -164,30 +165,30 @@ header("Content-Type: text/html; charset=".$charset);
 									</div>
 									<div id="advfilterdiv" style="clear:both;display:<?php echo ($qSciname || $qVStatus || $qDisplayAll?'block':'none'); ?>;">
 										<div style="margin-top:5px;">
-											<b>Verification status:</b> 
+											<b>Verification status:</b>
 											<input id="qvstatus" name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="width:200px;" />
 											<span style="margin-left:15px;">
-												<b>Family/Genus:</b> 
+												<b>Family/Genus:</b>
 												<input name="qsciname" type="text" value="<?php echo $qSciname; ?>" style="width:200px;" />
 											</span>
 										</div>
 										<div style="margin-top:5px;">
-											<input name="qdisplayall" type="checkbox" value="1" <?php echo ($qDisplayAll?'checked':''); ?> /> 
-											Including previously georeferenced records 
+											<input name="qdisplayall" type="checkbox" value="1" <?php echo ($qDisplayAll?'checked':''); ?> />
+											Including previously georeferenced records
 										</div>
 									</div>
 									<div style="padding:2px;clear:both;">
-										<b>Locality Term:</b> 
+										<b>Locality Term:</b>
 										<input name="qlocality" type="text" value="<?php echo $qLocality; ?>" style="width:250px;" />
 										<span style="margin-left:175px;">
 											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-											<input name="submitaction" type="submit" value="Generate List" /> 
+											<input name="submitaction" type="submit" value="Generate List" />
 											<span id="qworkingspan" style="display:none;">
 												<img src="../../images/workingcircle.gif" />
 											</span>
 										</span>
 									</div>
-								</fieldset> 
+								</fieldset>
 							</form>
 						</div>
 						<div style="clear:both;">
@@ -207,7 +208,7 @@ header("Content-Type: text/html; charset=".$charset);
 									</span>
 								</div>
 								<div style="font-weight:bold;">
-									<?php 
+									<?php
 									$localCnt = '---';
 									if(isset($localArr)){
 										$localCnt = count($localArr);
@@ -220,7 +221,7 @@ header("Content-Type: text/html; charset=".$charset);
 								</div>
 								<div style="clear:both;">
 									<select id="locallist" name="locallist[]" size="15" multiple="multiple" style="width:100%">
-										<?php 
+										<?php
 										if(isset($localArr)){
 											if($localArr){
 												foreach($localArr as $k => $v){
@@ -250,10 +251,10 @@ header("Content-Type: text/html; charset=".$charset);
 									<fieldset>
 										<legend><b>Statistics</b></legend>
 										<div style="">
-											Records to be Georeferenced 
+											Records to be Georeferenced
 										</div>
 										<div style="margin:5px;">
-											<?php 
+											<?php
 											$statArr = $geoManager->getCoordStatistics();
 											foreach($statArr as $k => $v){
 												echo '<div>';
@@ -311,18 +312,26 @@ header("Content-Type: text/html; charset=".$charset);
 										</tr>
 										<tr>
 											<td colspan="3" style="vertical-align:middle">
-												<b>Error (in meters):</b> 
+												<b>Error (in meters):</b>
 											</td>
 											<td colspan="2" style="vertical-align:middle">
-												<input id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" type="text" value="" style="width:50px;" onchange="verifyCoordUncertainty(this)" /> 
+												<input id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" type="text" value="" style="width:50px;" onchange="verifyCoordUncertainty(this)" />
 												meters
 											</td>
 											<td colspan="2" style="vertical-align:middle">
-												<span style="margin-left:20px;font-weight:bold;">Datum:</span> 
+												<span style="margin-left:20px;font-weight:bold;">Datum:</span>
 												<input id="geodeticdatum" name="geodeticdatum" type="text" value="" style="width:75px;" />
 												<span style="cursor:pointer;margin-left:3px;" onclick="toggle('utmdiv');">
 													<img src="../../images/editplus.png" style="border:0px;width:14px;" />
 												</span>
+											</td>
+										</tr>
+										<tr rowspan="2">
+											<td colspan="3" style="vertical-align:middle">
+												<b>Footprint WKT:</b>
+											</td>
+											<td colspan="4" style="vertical-align:middle">
+												<input id="footprintwkt" name="footprintwkt" type="text" value="" style="width:500px;" onchange="verifyFootprintWKT(this)" />
 											</td>
 										</tr>
 										<tr>
@@ -341,7 +350,7 @@ header("Content-Type: text/html; charset=".$charset);
 													</div>
 													<div style="clear:both;margin:3px;">
 														<div style="float:left;">
-															Hemisphere: 
+															Hemisphere:
 															<select name="hemisphere" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
 																<option value="Northern">North</option>
 																<option value="Southern">South</option>
@@ -356,7 +365,7 @@ header("Content-Type: text/html; charset=".$charset);
 										</tr>
 										<tr>
 											<td colspan="3" style="vertical-align:middle">
-												<b>Sources:</b> 
+												<b>Sources:</b>
 											</td>
 											<td colspan="4">
 												<input id="georeferencesources" name="georeferencesources" type="text" value="<?php echo $georeferenceSources; ?>" style="width:500px;" />
@@ -364,7 +373,7 @@ header("Content-Type: text/html; charset=".$charset);
 										</tr>
 										<tr>
 											<td colspan="3" style="vertical-align:middle">
-												<b>Remarks:</b> 
+												<b>Remarks:</b>
 											</td>
 											<td colspan="4">
 												<input name="georeferenceremarks" type="text" value="" style="width:500px;" />
@@ -372,7 +381,7 @@ header("Content-Type: text/html; charset=".$charset);
 										</tr>
 										<tr>
 											<td colspan="3" style="vertical-align:middle">
-												<b>Verification Status:</b> 
+												<b>Verification Status:</b>
 											</td>
 											<td colspan="4">
 												<input id="georeferenceverificationstatus" name="georeferenceverificationstatus" type="text" value="<?php echo $georeferenceVerificationStatus; ?>" style="width:400px;" />
@@ -380,13 +389,13 @@ header("Content-Type: text/html; charset=".$charset);
 										</tr>
 										<tr>
 											<td colspan="3" style="vertical-align:middle">
-												<b>Elevation:</b> 
+												<b>Elevation:</b>
 											</td>
 											<td colspan="4">
-												<input name="minimumelevationinmeters" type="text" value="" style="width:50px;" /> to 
+												<input name="minimumelevationinmeters" type="text" value="" style="width:50px;" /> to
 												<input name="maximumelevationinmeters" type="text" value="" style="width:50px;" /> meters
 												<span style="margin-left:80px;">
-													<input type="text" value="" style="width:50px;" onchange="updateMinElev(this.value)" /> to 
+													<input type="text" value="" style="width:50px;" onchange="updateMinElev(this.value)" /> to
 													<input type="text" value="" style="width:50px;" onchange="updateMaxElev(this.value)" /> feet
 												</span>
 											</td>
@@ -408,7 +417,7 @@ header("Content-Type: text/html; charset=".$charset);
 											</td>
 											<td align="right">
 												<div style="margin:10px;">
-													Georeferenced by: 
+													Georeferenced by:
 													<input name="georeferencedby" type="text" value="<?php echo $paramsArr['un']; ?>" readonly />
 												</div>
 											</td>
@@ -424,7 +433,7 @@ header("Content-Type: text/html; charset=".$charset);
 						<div style='font-weight:bold;font-size:120%;'>
 							ERROR: You do not have permission to edit this collection
 						</div>
-						<?php 
+						<?php
 					}
 				}
 				else{
@@ -432,7 +441,7 @@ header("Content-Type: text/html; charset=".$charset);
 					<div style='font-weight:bold;font-size:120%;'>
 						ERROR: Collection identifier is null
 					</div>
-					<?php 
+					<?php
 				}
 			}
 			else{
@@ -440,11 +449,11 @@ header("Content-Type: text/html; charset=".$charset);
 				<div style='font-weight:bold;font-size:120%;clear:both;'>
 					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/georef/batchgeoreftool.php?collid=<?php echo $collId; ?>'>login</a>!
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 		</div>
-		<?php 	
+		<?php
 		//include($serverRoot.'/footer.php');
 		?>
 	</body>
