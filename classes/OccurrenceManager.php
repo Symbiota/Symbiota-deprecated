@@ -630,7 +630,8 @@ class OccurrenceManager{
 		*/
 	}
 
-	public function getFullCollectionList($catId = ""){
+	public function getFullCollectionList($catId = ''){
+		if($catId && !is_numeric($catId)) $catId = ''; 
 		//Set collection array
 		$collIdArr = array();
 		$catIdArr = array();

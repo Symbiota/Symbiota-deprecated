@@ -325,6 +325,7 @@ class OccurrenceIndividualManager extends Manager{
 
 	public function reportComment($repComId){
 		$status = true;
+		if(!is_numeric($repComId)) return false;
 		if(array_key_exists('adminEmail',$GLOBALS)){
 			//Set Review status to supress
  			$con = MySQLiConnectionFactory::getCon("write");
@@ -358,6 +359,7 @@ class OccurrenceIndividualManager extends Manager{
 	
 	public function makeCommentPublic($comId){
 		$status = true;
+		if(!is_numeric($comId)) return false;
 		$con = MySQLiConnectionFactory::getCon("write");
 		if(!$con->query('UPDATE omoccurcomments SET reviewstatus = 1 WHERE comid = '.$comId)){
 			$this->errorMessage = 'ERROR making comment public, err msg: '.$con->error;
@@ -370,7 +372,6 @@ class OccurrenceIndividualManager extends Manager{
 	public function getGeneticArr(){
 		$retArr = array();
 		if($this->occid){
- 			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'SELECT idoccurgenetic, identifier, resourcename, locus, resourceurl, notes '.
 				'FROM omoccurgenetic '.
 				'WHERE occid = '.$this->occid;
@@ -391,7 +392,89 @@ class OccurrenceIndividualManager extends Manager{
 		}
 		return $retArr;
 	}
+
+	public function getDatasetArr($uid){
+		$retArr = array();
+		if(is_numeric($uid)){
+			//Get datasets for current user
+			$datasetIdStr = '';
+			$sql1 = 'SELECT tablepk '.
+				'FROM userroles '.
+				'WHERE (tablename = "omoccurdatasets") AND (uid = '.$uid.') ';
+			$rs1 = $this->conn->query($sql1);
+			while($r1 = $rs1->fetch_object()){
+				$datasetIdStr .= ','.$r1->tablepk;
+			}
+			$rs1->free();
+			
+			//Get all datasets for user
+			$sql2 = 'SELECT datasetid, name FROM omoccurdatasets WHERE uid = '.$uid;
+			if($datasetIdStr){
+				$sql2 .= ' OR datasetid IN('.trim($datasetIdStr,',').')';
+			}
+			$sql2 .= ' ORDER BY name';
+			//echo $sql2;
+			$rs2 = $this->conn->query($sql2);
+			if($rs2){
+				while($r2 = $rs2->fetch_object()){
+					$retArr[$r2->datasetid]['name'] = $r2->name;
+				}
+				$rs2->free();
+			}
+			else{
+				trigger_error('Unable to get datasets for user; '.$this->conn->error,E_USER_WARNING);
+			}
+			
+			//Get datasets linked to this specimen
+			$sql3 = 'SELECT datasetid, notes '.
+				'FROM omoccurdatasetlink '.
+				'WHERE occid = '.$this->occid;
+			//echo $sql2;
+			$rs3 = $this->conn->query($sql3);
+			if($rs3){
+				while($r3 = $rs3->fetch_object()){
+					$retArr[$r3->datasetid]['linked'] = ($r3->notes?' ('.$r3->notes.')':'');
+				}
+				$rs3->free();
+			}
+			else{
+				trigger_error('Unable to get related datasets; '.$this->conn->error,E_USER_WARNING);
+			}
+		}
+		return $retArr;
+	}
 	
+	public function linkToDataset($dsid,$dsName,$notes,$symbUid){
+		$status = true;
+		if(!$this->occid) return false;
+		if($dsid && !is_numeric($dsid)) return false;
+		if(!$dsid && !$dsName) return false;
+		$con = MySQLiConnectionFactory::getCon("write");
+		if(!$dsid && $dsName){
+			//Create new dataset
+			if(strlen($dsName) > 100) $dsName = substr($dsName,0,100);
+			$sql1 = 'INSERT INTO omoccurdatasets(name,uid,collid) '.
+				'VALUES("'.$this->cleanInStr($dsName).'",'.$symbUid.','.$this->collid.')';
+			if($con->query($sql1)){
+				$dsid = $con->insert_id;
+			}
+			else{
+				$this->errorMessage = 'ERROR creating new dataset, err msg: '.$con->error;
+				$status = false;
+			}
+		}
+		if($dsid){
+			$sql2 = 'INSERT INTO omoccurdatasetlink(datasetid,occid,notes) '.
+				'VALUES('.$dsid.','.$this->occid.',"'.$this->cleanInStr($notes).'")';
+			if(!$con->query($sql2)){
+				$this->errorMessage = 'ERROR linking to dataset, err msg: '.$con->error;
+				$status = false;
+			}
+		}
+		$con->close();
+		return $status;
+	} 
+
 	public function getEditArr(){
 		$retArr = array();
 		$sql = 'SELECT e.ocedid, e.fieldname, e.fieldvalueold, e.fieldvaluenew, e.reviewstatus, e.appliedstatus, '.
