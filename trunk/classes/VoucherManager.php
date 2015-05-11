@@ -165,14 +165,7 @@ class VoucherManager {
 				$rsTarget->close();
 			}
 			if($rareLocality){
-				$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
-					'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-					'SET o.localitysecurity = 1 '.
-					'WHERE o.localitysecurity = NULL AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
-					'AND o.stateprovince = "'.$rareLocality.'" AND ts2.tid = '.$this->tid;
-				if(!$this->conn->query($sqlRare)){
-					$statusStr = "ERROR resetting locality security during taxon transfer: ".$this->conn->error;
-				}
+				$this->setStateRare($rareLocality);
 			}
 		}
 		return $statusStr;
@@ -187,20 +180,35 @@ class VoucherManager {
 		$sql = 'DELETE ctl.* FROM fmchklsttaxalink ctl WHERE (ctl.tid = '.$this->tid.') AND (ctl.clid = '.$this->clid.')';
 		if($this->conn->query($sql)){
 			if($rareLocality){
-				$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
-					'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-					'SET o.localitysecurity = NULL '.
-					'WHERE o.localitysecurity = 1 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
-					'AND o.stateprovince = "'.$rareLocality.'" AND ts2.tid = '.$this->tid;
-				if(!$this->conn->query($sqlRare)){
-					$statusStr = "ERROR resetting locality security during taxon delete: ".$this->conn->error;
-				}
+				$this->setStateRare($rareLocality);
 			}
 		}
 		else{
 			$statusStr = "ERROR deleting taxon from checklist: ".$this->conn->error;
 		}
 		return $statusStr;
+	}
+	
+	private function setStateRare($rareLocality){
+		//Check to make sure name it's already on global list
+		$sql = 'SELECT IFNULL(securitystatus,0) as securitystatus FROM taxa WHERE tid = '.$this->tid;
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			if($r->securitystatus == 0){
+				//Set occurrence
+				$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+					'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+					'SET o.localitysecurity = NULL '.
+					'WHERE o.localitysecurity = 1 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+					'AND o.stateprovince = "'.$rareLocality.'" AND ts2.tid = '.$this->tid;
+				//echo $sqlRare; exit;
+				if(!$this->conn->query($sqlRare)){
+					$statusStr = "ERROR resetting locality security during taxon delete: ".$this->conn->error;
+				}
+			}
+		}
+		$rs->free();
 	}
 
 	public function getVoucherData(){

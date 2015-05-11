@@ -217,8 +217,9 @@ class ChecklistAdmin {
 					$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
 						'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 						'SET o.localitysecurity = 1 '.
-						'WHERE o.localitysecurity = NULL AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+						'WHERE o.localitysecurity IS NULL AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
 						'AND o.stateprovince = "'.$state.'" AND ts2.tid = '.$dataArr['tid'];
+					//echo $sqlRare; exit;
 					$this->conn->query($sqlRare);
 				}
 			}
