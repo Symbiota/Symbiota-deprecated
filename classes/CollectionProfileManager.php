@@ -689,5 +689,72 @@ class CollectionProfileManager {
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
+	
+	public function runStatistics($collId){
+		$returnArr = Array();
+		$sql = 'SELECT CollID, CollectionName FROM omcollections WHERE CollID IN('.$collId.') ORDER BY CollectionName ';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$returnArr['collections'][$r->CollID] = $r->CollectionName;
+		}
+		$sql2 = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
+			'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(DISTINCT t.UnitName1) AS GeneraCount, COUNT(o.typeStatus) AS TypeCount, '.
+			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS SpecimensCountID, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount, '.
+			'COUNT(CASE WHEN ISNULL(o.family) THEN o.occid ELSE NULL END) AS SpecimensNullFamily, '.
+			'COUNT(CASE WHEN ISNULL(o.country) THEN o.occid ELSE NULL END) AS SpecimensNullCountry, '.
+			'COUNT(CASE WHEN ISNULL(o.decimalLatitude) THEN o.occid ELSE NULL END) AS SpecimensNullLatitude '.
+			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
+			'WHERE o.collid IN('.$collId.') ';
+		$rs = $this->conn->query($sql2);
+		while($r = $rs->fetch_object()){
+			$returnArr['SpecimenCount'] = $r->SpecimenCount;
+			$returnArr['GeorefCount'] = $r->GeorefCount;
+			$returnArr['SpecimensCountID'] = $r->SpecimensCountID;
+			$returnArr['FamilyCount'] = $r->FamilyCount;
+			$returnArr['GeneraCount'] = $r->GeneraCount;
+			$returnArr['SpeciesCount'] = $r->SpeciesCount;
+			$returnArr['TotalTaxaCount'] = $r->TotalTaxaCount;
+			$returnArr['TypeCount'] = $r->TypeCount;
+			$returnArr['SpecimensNullFamily'] = $r->SpecimensNullFamily;
+			$returnArr['SpecimensNullCountry'] = $r->SpecimensNullCountry;
+			$returnArr['SpecimensNullLatitude'] = $r->SpecimensNullLatitude;
+		}
+		$sql3 = 'SELECT o.family, COUNT(o.occid) AS SpecimensPerFamily, COUNT(o.decimalLatitude) AS GeorefSpecimensPerFamily, '.
+			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerFamily, '.
+			'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerFamily '.
+			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
+			'WHERE o.collid IN('.$collId.') '.
+			'GROUP BY o.family ';
+		$rs = $this->conn->query($sql3);
+		while($r = $rs->fetch_object()){
+			if($r->family){
+				$returnArr['families'][$r->family]['SpecimensPerFamily'] = $r->SpecimensPerFamily;
+				$returnArr['families'][$r->family]['GeorefSpecimensPerFamily'] = $r->GeorefSpecimensPerFamily;
+				$returnArr['families'][$r->family]['IDSpecimensPerFamily'] = $r->IDSpecimensPerFamily;
+				$returnArr['families'][$r->family]['IDGeorefSpecimensPerFamily'] = $r->IDGeorefSpecimensPerFamily;
+			}
+		}
+		$sql4 = 'SELECT o.country, COUNT(o.occid) AS CountryCount, COUNT(o.decimalLatitude) AS GeorefSpecimensPerCountry, '.
+			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerCountry, '.
+			'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerCountry '.
+			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
+			'WHERE o.collid IN('.$collId.') '.
+			'GROUP BY o.country ';
+		$rs = $this->conn->query($sql4);
+		while($r = $rs->fetch_object()){
+			if($r->country){
+				$returnArr['countries'][$r->country]['CountryCount'] = $r->CountryCount;
+				$returnArr['countries'][$r->country]['GeorefSpecimensPerCountry'] = $r->GeorefSpecimensPerCountry;
+				$returnArr['countries'][$r->country]['IDSpecimensPerCountry'] = $r->IDSpecimensPerCountry;
+				$returnArr['countries'][$r->country]['IDGeorefSpecimensPerCountry'] = $r->IDGeorefSpecimensPerCountry;
+			}
+		}
+		$rs->free();
+		
+		return $returnArr;
+	}
 }
 ?>
