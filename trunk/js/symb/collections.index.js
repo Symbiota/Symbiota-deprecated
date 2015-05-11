@@ -55,9 +55,15 @@ function selectAll(cb){
 }
 
 function uncheckAll(){
-	document.getElementById('dballcb').checked = false;
-	document.getElementById('dballspeccb').checked = false;
-	document.getElementById('dballobscb').checked = false;
+	if(document.getElementById('dballcb')){
+		document.getElementById('dballcb').checked = false;
+	}
+	if(document.getElementById('dballspeccb')){
+		document.getElementById('dballspeccb').checked = false;
+	}
+	if(document.getElementById('dballobscb')){
+		document.getElementById('dballobscb').checked = false;
+	}
 }
 
 function selectAllCat(cb,target){
