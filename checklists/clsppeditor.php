@@ -20,9 +20,9 @@ $vManager->setTid($tid);
 $vManager->setClid($clid);
 
 if($action == "Rename Taxon"){
-	$locality = '';
-	if($_POST['cltype'] == 'rarespp') $locality = $_POST['locality'];
-	$vManager->renameTaxon($_POST["renametid"],$locality);
+	$rareLocality = '';
+	if($_POST['cltype'] == 'rarespp') $rareLocality = $_POST['locality'];
+	$vManager->renameTaxon($_POST["renametid"],$rareLocality);
 	$action = "close";
 }
 elseif($action == "Submit Checklist Edits"){
@@ -37,9 +37,9 @@ elseif($action == "Submit Checklist Edits"){
 	$action = "close";
 }
 elseif($action == "Delete Taxon From Checklist"){
-	$locality = '';
-	if($_POST['cltype'] == 'rarespp') $locality = $_POST['locality'];
-	$status = $vManager->deleteTaxon($locality);
+	$rareLocality = '';
+	if($_POST['cltype'] == 'rarespp') $rareLocality = $_POST['locality'];
+	$status = $vManager->deleteTaxon($rareLocality);
 	$action = "close";
 }
 elseif($action == "Submit Voucher Edits"){
