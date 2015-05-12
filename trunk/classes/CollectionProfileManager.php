@@ -665,31 +665,72 @@ class CollectionProfileManager {
 			}
 		}
 	}
-
-	public function getErrorStr(){
-		return $this->errorStr;
-	}
 	
-	private function cleanOutArr(&$arr){
-		foreach($arr as $k => $v){
-			$arr[$k] = $this->cleanOutStr($v);
+	public function getStatCollectionList($catId = ""){
+		//Set collection array
+		$collIdArr = array();
+		$catIdArr = array();
+		if(isset($this->searchTermsArr['db']) && array_key_exists('db',$this->searchTermsArr)){
+			$cArr = explode(';',$this->searchTermsArr['db']);
+			$collIdArr = explode(',',$cArr[0]);
+			if(isset($cArr[1])) $catIdStr = $cArr[1];
 		}
+		//Set collections
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, '.
+			'cat.category, cat.icon AS caticon, cat.acronym '.
+			'FROM omcollections c LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
+			'LEFT JOIN omcollcategories cat ON ccl.ccpk = cat.ccpk '.
+			'ORDER BY ccl.sortsequence, cat.category, c.sortseq, c.CollectionName ';
+		//echo "<div>SQL: ".$sql."</div>";
+		$result = $this->conn->query($sql);
+		$collArr = array();
+		while($r = $result->fetch_object()){
+			$collType = '';
+			if(stripos($r->colltype, "observation") !== false) $collType = 'obs';
+			if(stripos($r->colltype, "specimen")) $collType = 'spec';
+			if($collType){
+				if($r->ccpk){
+					if(!isset($collArr[$collType]['cat'][$r->ccpk]['name'])){
+						$collArr[$collType]['cat'][$r->ccpk]['name'] = $r->category;
+						$collArr[$collType]['cat'][$r->ccpk]['icon'] = $r->caticon;
+						$collArr[$collType]['cat'][$r->ccpk]['acronym'] = $r->acronym;
+						//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['isselected'] = 1;
+					}
+					$collArr[$collType]['cat'][$r->ccpk][$r->collid]["instcode"] = $r->institutioncode;
+					$collArr[$collType]['cat'][$r->ccpk][$r->collid]["collcode"] = $r->collectioncode;
+					$collArr[$collType]['cat'][$r->ccpk][$r->collid]["collname"] = $r->collectionname;
+					$collArr[$collType]['cat'][$r->ccpk][$r->collid]["icon"] = $r->icon;
+				}
+				else{
+					$collArr[$collType]['coll'][$r->collid]["instcode"] = $r->institutioncode;
+					$collArr[$collType]['coll'][$r->collid]["collcode"] = $r->collectioncode;
+					$collArr[$collType]['coll'][$r->collid]["collname"] = $r->collectionname;
+					$collArr[$collType]['coll'][$r->collid]["icon"] = $r->icon;
+				}
+			}
+		}
+		$result->free();
+		
+		$retArr = array();
+		//Modify sort so that default catid is first
+		if(isset($collArr['spec']['cat'][$catId])){
+			$retArr['spec']['cat'][$catId] = $collArr['spec']['cat'][$catId];
+			unset($collArr['spec']['cat'][$catId]);
+		}
+		elseif(isset($collArr['obs']['cat'][$catId])){
+			$retArr['obs']['cat'][$catId] = $collArr['obs']['cat'][$catId];
+			unset($collArr['obs']['cat'][$catId]);
+		}
+		foreach($collArr as $t => $tArr){
+			foreach($tArr as $g => $gArr){
+				foreach($gArr as $id => $idArr){
+					$retArr[$t][$g][$id] = $idArr;
+				}
+			}
+		}
+		return $retArr;
 	}
 
-	private function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-	
-	private function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-	
 	public function runStatistics($collId){
 		$returnArr = Array();
 		$sql = 'SELECT CollID, CollectionName FROM omcollections WHERE CollID IN('.$collId.') ORDER BY CollectionName ';
@@ -755,6 +796,30 @@ class CollectionProfileManager {
 		$rs->free();
 		
 		return $returnArr;
+	}
+	
+	public function getErrorStr(){
+		return $this->errorStr;
+	}
+	
+	private function cleanOutArr(&$arr){
+		foreach($arr as $k => $v){
+			$arr[$k] = $this->cleanOutStr($v);
+		}
+	}
+	
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>
