@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/CollectionProfileManager.php');
+include_once($SERVER_ROOT.'/classes/CollectionProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collid = ((array_key_exists("collid",$_REQUEST) && is_numeric($_REQUEST["collid"]))?$_REQUEST["collid"]:0);
@@ -23,15 +23,15 @@ if(!$collManager->setCollid($collid)) $collid = '';
 $collData = $collManager->getCollectionData();
 
 $editCode = 0;		//0 = no permissions; 1 = CollEditor; 2 = CollAdmin; 3 = SuperAdmin
-if($symbUid){
-	if($isAdmin){
+if($SYMB_UID){
+	if($IS_ADMIN){
 		$editCode = 3;
 	}
 	else if($collid){
-		if(array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])){
+		if(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
 			$editCode = 2;
 		}
-		elseif(array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"])){
+		elseif(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollEditor"])){
 			$editCode = 1;
 		}
 	}
@@ -40,7 +40,7 @@ if($symbUid){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
+	<title><?php echo $DEFAULT_TITLE." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData["collectionname"]:""); ?>" />
@@ -62,7 +62,7 @@ if($symbUid){
 <body>
 	<?php
 	$displayLeftMenu = (isset($collections_misc_collprofilesMenu)?$collections_misc_collprofilesMenu:true);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	echo "<div class='navpath'>";
 	if(isset($collections_misc_collprofilesCrumbs)){
 		if($collections_misc_collprofilesCrumbs){
@@ -211,6 +211,13 @@ if($symbUid){
 									</li>
 									<?php
 								}
+								?>
+								<li style="margin-left:10px;">
+									<a href="../admin/specupload.php?uploadtype=7&collid=<?php echo $collid; ?>">
+										Skeletal File Upload
+									</a>
+								</li>
+								<?php 
 								if($collData['managementtype'] != 'Aggregate'){
 									?>
 									<li>
@@ -478,7 +485,7 @@ if($symbUid){
 		else{
 			$collList = $collManager->getCollectionList();
 			?>
-			<h1><?php echo $defaultTitle; ?> Collections </h1>
+			<h1><?php echo $DEFAULT_TITLE; ?> Collections </h1>
 			<div style='margin:10px;clear:both;'>
 				Select a collection to see full details.
 			</div>
@@ -536,7 +543,7 @@ if($symbUid){
 		?>
 	</div>
 	<?php
-		include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

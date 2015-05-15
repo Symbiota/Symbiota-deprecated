@@ -175,7 +175,7 @@ function verifyFullFormSciName(){
 				if(data.tid){
 					var stateVal = $( 'input[name=stateprovince]' ).val();
 					if(stateVal != ""){
-						localitySecurityCheck($( "#fullform" ));
+						localitySecurityCheck();
 					}
 				}
 			}
@@ -186,9 +186,9 @@ function verifyFullFormSciName(){
 	});
 }
 
-function localitySecurityCheck(f){
-	var tidIn = f.tidinterpreted.value;
-	var stateIn = f.stateprovince.value;
+function localitySecurityCheck(){
+	var tidIn = $( "input[name=tidinterpreted]" ).val();
+	var stateIn = $( "input[name=stateprovince]" ).val();
 	if(tidIn != "" && stateIn != ""){
 		$.ajax({
 			type: "POST",
@@ -221,7 +221,7 @@ function stateProvinceChanged(stateVal){
 	fieldChanged('stateprovince');
 	var tidVal = $( "#tidinterpreted" ).val();
 	if(tidVal != "" && stateVal != ""){
-		localitySecurityCheck("#fullform");
+		localitySecurityCheck();
 	}
 }
 

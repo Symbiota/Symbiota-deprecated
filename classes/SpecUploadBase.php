@@ -144,7 +144,7 @@ class SpecUploadBase extends SpecUpload{
 //			}
 //		}
 		
-		if($this->uploadType == $this->FILEUPLOAD || $this->uploadType == $this->DWCAUPLOAD || $this->uploadType == $this->DIRECTUPLOAD){
+		if($this->uploadType == $this->FILEUPLOAD || $this->uploadType == $this->SKELETAL || $this->uploadType == $this->DWCAUPLOAD || $this->uploadType == $this->DIRECTUPLOAD){
 			//Get identification metadata
 			$skipDetFields = array('detid','occid','tidinterpreted','idbyid','appliedstatus','sortsequence','sourceidentifier','initialtimestamp');
 
@@ -433,7 +433,7 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg('<li style="margin-left:10px;">');
 			if($this->conn->query('CALL '.$this->storedProcedure)){
 				$this->outputMsg('Stored procedure executed: '.$this->storedProcedure);
-				$this->conn->next_result();
+				if($this->conn->more_results()) $this->conn->next_result();
 			}
 			else{
 				$this->outputMsg('<span style="color:red;">ERROR: Stored Procedure failed ('.$this->storedProcedure.'): '.$this->conn->error.'</span>');
@@ -666,7 +666,7 @@ class SpecUploadBase extends SpecUpload{
 	} 
 	
 	private function recordCleaningStage2(){
-		if($this->collMetadataArr["managementtype"] == 'Snapshot'){
+		if($this->collMetadataArr["managementtype"] == 'Snapshot' && $this->uploadType != $this->SKELETAL){
 			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid, o.dbpk = u.dbpk '.
@@ -705,35 +705,35 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li>Updating existing records... ');
 		ob_flush();
 		flush();
-		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
-			'SET o.basisOfRecord = u.basisOfRecord, o.catalogNumber = u.catalogNumber, o.occurrenceid = u.occurrenceid, '.
-			'o.otherCatalogNumbers = u.otherCatalogNumbers, o.ownerInstitutionCode = u.ownerInstitutionCode, o.family = u.family, '.
-			'o.scientificName = u.scientificName, o.sciname = u.sciname, o.tidinterpreted = u.tidinterpreted, o.genus = u.genus, o.institutionID = u.institutionID, '.
-			'o.collectionID = u.collectionID, o.specificEpithet = u.specificEpithet, o.datasetID = u.datasetID, o.taxonRank = u.taxonRank, '.
-			'o.infraspecificEpithet = u.infraspecificEpithet, o.institutionCode = u.institutionCode, o.collectionCode = u.collectionCode, '.
-			'o.scientificNameAuthorship = u.scientificNameAuthorship, o.identifiedBy = u.identifiedBy, '.
-			'o.dateIdentified = u.dateIdentified, o.taxonRemarks = u.taxonRemarks, o.identificationReferences = u.identificationReferences, '.
-			'o.identificationRemarks = u.identificationRemarks, o.identificationQualifier = u.identificationQualifier, o.typeStatus = u.typeStatus, '.
-			'o.recordedBy = u.recordedBy, o.recordNumber = u.recordNumber, o.fieldnumber = u.fieldnumber, '.
-			'o.associatedCollectors = u.associatedCollectors, o.eventDate = u.eventDate, '.
-			'o.year = u.year, o.month = u.month, o.day = u.day, o.startDayOfYear = u.startDayOfYear, o.endDayOfYear = u.endDayOfYear, '.
-			'o.verbatimEventDate = u.verbatimEventDate, o.habitat = u.habitat, o.substrate = u.substrate, o.occurrenceRemarks = u.occurrenceRemarks, o.informationWithheld = u.informationWithheld, '.
-			'o.associatedOccurrences = u.associatedOccurrences, o.associatedTaxa = u.associatedTaxa, '.
-			'o.dynamicProperties = u.dynamicProperties, o.verbatimAttributes = u.verbatimAttributes, '.
-			'o.reproductiveCondition = u.reproductiveCondition, o.cultivationStatus = u.cultivationStatus, '.
-			'o.establishmentMeans = u.establishmentMeans, o.lifestage = u.lifestage, o.sex = u.sex, o.individualcount = u.individualcount, '.
-			'o.samplingprotocol = u.samplingprotocol, o.preparations = u.preparations, '.
-			'o.country = u.country, o.stateProvince = u.stateProvince, o.county = u.county, o.municipality = u.municipality, o.locality = u.locality, '.
-			'o.localitySecurity = u.localitySecurity, o.localitySecurityReason = u.localitySecurityReason, o.decimalLatitude = u.decimalLatitude, o.decimalLongitude = u.decimalLongitude, '.
-			'o.geodeticDatum = u.geodeticDatum, o.coordinateUncertaintyInMeters = u.coordinateUncertaintyInMeters, o.footprintWKT = u.footprintWKT, '.
-			'o.coordinatePrecision = u.coordinatePrecision, o.locationRemarks = u.locationRemarks, o.verbatimCoordinates = u.verbatimCoordinates, '.
-			'o.verbatimCoordinateSystem = u.verbatimCoordinateSystem, o.georeferencedBy = u.georeferencedBy, o.georeferenceProtocol = u.georeferenceProtocol, '.
-			'o.georeferenceSources = u.georeferenceSources, o.georeferenceVerificationStatus = u.georeferenceVerificationStatus, '.
-			'o.georeferenceRemarks = u.georeferenceRemarks, o.minimumElevationInMeters = u.minimumElevationInMeters, '.
-			'o.maximumElevationInMeters = u.maximumElevationInMeters, o.verbatimElevation = u.verbatimElevation, '.
-			'o.previousIdentifications = u.previousIdentifications, o.disposition = u.disposition, o.modified = u.modified, '.
-			'o.language = u.language, o.recordEnteredBy = u.recordEnteredBy, o.labelProject = u.labelProject, o.duplicateQuantity = u.duplicateQuantity '.
-			'WHERE u.collid = '.$this->collId.'';
+		$fieldArr = array('basisOfRecord', 'catalogNumber','otherCatalogNumbers','occurrenceid',
+			'ownerInstitutionCode','institutionID','collectionID','institutionCode','collectionCode',
+			'family','scientificName','sciname','tidinterpreted','genus','specificEpithet','datasetID','taxonRank','infraspecificEpithet',
+			'scientificNameAuthorship','identifiedBy','dateIdentified','identificationReferences','identificationRemarks',
+			'taxonRemarks','identificationQualifier','typeStatus','recordedBy','recordNumber','associatedCollectors',
+			'eventDate','Year','Month','Day','startDayOfYear','endDayOfYear','verbatimEventDate',
+			'habitat','substrate','fieldnumber','occurrenceRemarks','informationWithheld','associatedOccurrences',
+			'associatedTaxa','dynamicProperties','verbatimAttributes','reproductiveCondition','cultivationStatus','establishmentMeans',
+			'lifestage','sex','individualcount','samplingprotocol','preparations',
+			'country','stateProvince','county','municipality','locality','localitySecurity','localitySecurityReason',
+			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','coordinatePrecision',
+			'locationRemarks','verbatimCoordinates','verbatimCoordinateSystem','georeferencedBy','georeferenceProtocol','georeferenceSources',
+			'georeferenceVerificationStatus','georeferenceRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
+			'previousIdentifications','disposition','modified','language','recordEnteredBy','labelProject','duplicateQuantity','processingStatus');
+		//Update matching records
+		$sqlFrag = '';
+		if($this->uploadType == $this->SKELETAL){
+			foreach($fieldArr as $v){
+				$sqlFrag .= 'o.'.$v.' = IFNULL(o.'.$v.',u.'.$v.'), ';
+			}
+		}
+		else{
+			foreach($fieldArr as $v){
+				$sqlFrag .= 'o.'.$v.' = u.'.$v.', ';
+			}
+		}
+		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid SET '.trim($sqlFrag,' ,').
+			' WHERE (u.collid = '.$this->collId.')';
+		//echo $sql; exit;
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
 		}
@@ -744,36 +744,8 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li>Transferring new records... ');
 		ob_flush();
 		flush();
-		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, basisOfRecord, catalogNumber, otherCatalogNumbers, occurrenceid, '.
-			'ownerInstitutionCode, institutionID, collectionID, institutionCode, collectionCode, '.
-			'family, scientificName, sciname, tidinterpreted, genus, specificEpithet, datasetID, taxonRank, infraspecificEpithet, '.
-			'scientificNameAuthorship, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, '.
-			'taxonRemarks, identificationQualifier, typeStatus, recordedBy, recordNumber, associatedCollectors, '.
-			'eventDate, Year, Month, Day, startDayOfYear, endDayOfYear, verbatimEventDate, '.
-			'habitat, substrate, fieldnumber, occurrenceRemarks, informationWithheld, associatedOccurrences, '.
-			'associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, cultivationStatus, establishmentMeans, '.
-			'lifestage, sex, individualcount, samplingprotocol, preparations, '.
-			'country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, '.
-			'decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, '.
-			'coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, '.
-			'georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, '.
-			'verbatimElevation, previousIdentifications, disposition, modified, language, recordEnteredBy, labelProject, duplicateQuantity, dateentered ) '.
-			'SELECT u.collid, u.dbpk, u.basisOfRecord, u.catalogNumber, u.otherCatalogNumbers, u.occurrenceid, '.
-			'u.ownerInstitutionCode, u.institutionID, u.collectionID, u.institutionCode, u.collectionCode, '.
-			'u.family, u.scientificName, u.sciname, u.tidinterpreted, u.genus, u.specificEpithet, u.datasetID, u.taxonRank, u.infraspecificEpithet, '.
-			'u.scientificNameAuthorship, u.identifiedBy, u.dateIdentified, u.identificationReferences, u.identificationRemarks, '.
-			'u.taxonRemarks, u.identificationQualifier, u.typeStatus, u.recordedBy, u.recordNumber, u.associatedCollectors, '.
-			'u.eventDate, u.Year, u.Month, u.Day, u.startDayOfYear, u.endDayOfYear, u.verbatimEventDate, '.
-			'u.habitat, u.substrate, u.fieldnumber, u.occurrenceRemarks, u.informationWithheld, u.associatedOccurrences, '.
-			'u.associatedTaxa, u.dynamicProperties, u.verbatimAttributes, u.reproductiveCondition, u.cultivationStatus, u.establishmentMeans, '.
-			'u.lifestage, u.sex, u.individualcount, u.samplingprotocol, u.preparations, '.
-			'u.country, u.stateProvince, u.county, u.municipality, u.locality, u.localitySecurity, u.localitySecurityReason, '.
-			'u.decimalLatitude, u.decimalLongitude, u.geodeticDatum, u.coordinateUncertaintyInMeters, u.footprintWKT, '.
-			'u.coordinatePrecision, u.locationRemarks, u.verbatimCoordinates, u.verbatimCoordinateSystem, u.georeferencedBy, u.georeferenceProtocol, '.
-			'u.georeferenceSources, u.georeferenceVerificationStatus, u.georeferenceRemarks, u.minimumElevationInMeters, u.maximumElevationInMeters, '.
-			'u.verbatimElevation, u.previousIdentifications, u.disposition, u.modified, u.language, u.recordEnteredBy, u.labelProject, '.
-			'u.duplicateQuantity, "'.date('Y-m-d H:i:s').'" '.
-			'FROM uploadspectemp u '.
+		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, dateentered, '.implode(', ',$fieldArr).' ) '.
+			'SELECT u.collid, u.dbpk, "'.date('Y-m-d H:i:s').'", u.'.implode(', u.',$fieldArr).' FROM uploadspectemp u '.
 			'WHERE u.occid IS NULL AND u.collid = '.$this->collId.'';
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
@@ -1060,7 +1032,7 @@ class SpecUploadBase extends SpecUpload{
 
 	protected function finalCleanup(){
 		$this->outputMsg('<li>Transfer process complete</li>');
-		$this->outputMsg('<li>House cleaning</li>');
+		$this->outputMsg('<li>Cleaning house</li>');
 
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table  
 		$this->outputMsg('<li style="margin-left:10px;">Establish links to taxonomic thesaurus...');
@@ -1894,18 +1866,20 @@ class SpecUploadBase extends SpecUpload{
 	    }
 
 	    if(!$exists){
-		    // Version 4.x supported
-		    $handle   = curl_init($url);
-		    if (false === $handle){
-				$exists = false;
-		    }
-		    curl_setopt($handle, CURLOPT_HEADER, false);
-		    curl_setopt($handle, CURLOPT_FAILONERROR, true);  // this works
-		    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
-		    curl_setopt($handle, CURLOPT_NOBODY, true);
-		    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
-		    $exists = curl_exec($handle);
-		    curl_close($handle);
+	    	if(function_exists('curl_init')){
+		    	// Version 4.x supported
+			    $handle   = curl_init($url);
+			    if (false === $handle){
+					$exists = false;
+			    }
+			    curl_setopt($handle, CURLOPT_HEADER, false);
+			    curl_setopt($handle, CURLOPT_FAILONERROR, true);  // this works
+			    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
+			    curl_setopt($handle, CURLOPT_NOBODY, true);
+			    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
+			    $exists = curl_exec($handle);
+			    curl_close($handle);
+	    	}
 	    }
 	     
 		//One more  check

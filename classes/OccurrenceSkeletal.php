@@ -2,7 +2,7 @@
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/UuidFactory.php');
 
-class OccurrenceSkeletalSubmit {
+class OccurrenceSkeletal {
 
 	private $conn;
 	private $collid;
