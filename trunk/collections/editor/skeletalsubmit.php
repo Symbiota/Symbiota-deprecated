@@ -1,13 +1,13 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceSkeletalSubmit.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceSkeletal.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/skeletalsubmit.php?'.$_SERVER['QUERY_STRING']);
 
 $collid  = $_REQUEST["collid"];
 $action = array_key_exists("formaction",$_REQUEST)?$_REQUEST["formaction"]:"";
 
-$skeletalManager = new OccurrenceSkeletalSubmit();
+$skeletalManager = new OccurrenceSkeletal();
 if($collid){
 	$skeletalManager->setCollid($collid);
 	$collMap = $skeletalManager->getCollectionMap();
@@ -34,8 +34,8 @@ if($isEditor){
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Skeletal Record Submission</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Skeletal Record Submission</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />	
@@ -47,7 +47,7 @@ if($isEditor){
 <body>
 	<?php
 	$displayLeftMenu = false;
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
@@ -206,7 +206,7 @@ if($isEditor){
 		?>
 	</div>
 <?php 	
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>

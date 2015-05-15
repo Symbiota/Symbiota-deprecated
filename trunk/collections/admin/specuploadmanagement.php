@@ -1,22 +1,29 @@
 <?php 
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecUpload.php');
-header("Content-Type: text/html; charset=".$charset);
-if(!$symbUid) header('Location: ../../profile/index.php?refurl=../collections/admin/specuploadmanagement.php?'.$_SERVER['QUERY_STRING']);
+include_once($SERVER_ROOT.'/classes/SpecUpload.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
-$collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/admin/specuploadmanagement.php?'.$_SERVER['QUERY_STRING']);
+
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
+$collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
-$statusStr = "";
-$DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5;$DWCAUPLOAD = 6;
+
+//Sanitation
+if(!is_numeric($collid)) $collid = 0;
+if(!is_numeric($uspid)) $uspid = 0;
+if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
+
+$DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5;$DWCAUPLOAD = 6;$SKELETAL = 7;
 
 $duManager = new SpecUpload();
 
-$duManager->setCollId($collId);
+$duManager->setCollId($collid);
 $duManager->setUspid($uspid);
 
+$statusStr = '';
 $isEditor = 0;
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
 	$isEditor = 1;
 }
 if($isEditor){
@@ -38,8 +45,8 @@ $duManager->readUploadParameters();
 
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Specimen Upload Profile Manager</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Specimen Upload Profile Manager</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script language=javascript>
@@ -120,13 +127,16 @@ $duManager->readUploadParameters();
 				document.getElementById("cleanupspDiv").style.display='block';
 				//document.getElementById("querystrDiv").style.display='none';
 			}
+			else if(selValue == 7){ //Skeletal File Upload
+				document.getElementById("cleanupspDiv").style.display='block';
+			}
 		}
 	</script>
 </head>
 <body onload="<?php if($uspid && $action) echo 'adjustParameterForm()'; ?>">
 <?php
 	$displayLeftMenu = (isset($collections_admin_specuploadMenu)?$collections_admin_specuploadMenu:false);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($collections_admin_specuploadCrumbs)){
 		if($collections_admin_specuploadCrumbs){
 			?>
@@ -142,7 +152,7 @@ $duManager->readUploadParameters();
 		?>
 		<div class="navpath">
 			<a href="../../index.php">Home</a> &gt;&gt; 
-			<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management Panel</a> &gt;&gt; 
+			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Panel</a> &gt;&gt; 
 			<b>Specimen Loader</b> 
 		</div>
 		<?php 
@@ -160,7 +170,7 @@ $duManager->readUploadParameters();
 	}
 
 	if($isEditor){
-		if($collId){
+		if($collid){
 			echo '<div style="font-weight:bold;font-size:130%;">'.$duManager->getCollInfo('name').'</div>';
 			if($duManager->getCollInfo("uploaddate")) {
 				echo "<div style='margin:0px 0px 15px 15px;'><b>Last Upload Date:</b> ".$duManager->getCollInfo("uploaddate")."</div>";
@@ -174,7 +184,7 @@ $duManager->readUploadParameters();
 						<legend style="font-weight:bold;font-size:120%;">Upload Options</legend>
 						<div style="float:right;">
 							<?php 
-							echo '<a href="specuploadmanagement.php?collid='.$collId.'&action=addprofile"><img src="'.$clientRoot.'/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" /></a>';
+							echo '<a href="specuploadmanagement.php?collid='.$collid.'&action=addprofile"><img src="'.$clientRoot.'/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" /></a>';
 							?>
 						</div>
 						<?php 
@@ -184,13 +194,13 @@ $duManager->readUploadParameters();
 						 		<div style="margin:10px;">
 									<input type="radio" name="uspid" value="<?php echo $id.'-'.$v["uploadtype"];?>" />
 									<?php echo $v["title"]; ?> 
-									<a href="specuploadmanagement.php?action=editprofile&collid=<?php echo $collId.'&uspid='.$id; ?>" title="View/Edit Parameters"><img src="../../images/edit.png" /></a>
+									<a href="specuploadmanagement.php?action=editprofile&collid=<?php echo $collid.'&uspid='.$id; ?>" title="View/Edit Parameters"><img src="../../images/edit.png" /></a>
 									<input type="hidden" name="uploadtype" value="<?php echo $v["uploadtype"];?>" />
 								</div>
 								<?php 
 						 	}
 							?>
-							<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+							<input type="hidden" name="collid" value="<?php echo $collid;?>" />
 							<div style="margin:10px;">
 								<input type="submit" name="action" value="Initialize Upload..." />
 							</div>
@@ -200,7 +210,7 @@ $duManager->readUploadParameters();
 					 		?>
 							<div style="padding:30px;">
 								There are no Upload Profiles associated with this collection. <br />
-								Click <a href="specuploadmanagement.php?collid=<?php echo ($collId);?>&action=addprofile">here</a> to add a new profile.
+								Click <a href="specuploadmanagement.php?collid=<?php echo ($collid);?>&action=addprofile">here</a> to add a new profile.
 							</div>
 							<?php 
 					 	}
@@ -217,7 +227,7 @@ $duManager->readUploadParameters();
 						<legend><b>Upload Parameters</b></legend>
 						<div style="float:right;">
 							<?php 
-							echo '<a href="specuploadmanagement.php?collid='.$collId.'">View All</a> ';
+							echo '<a href="specuploadmanagement.php?collid='.$collid.'">View All</a> ';
 							?>
 						</div>
 						<form name="parameterform" action="specuploadmanagement.php" method="post" onsubmit="return checkParameterForm(this)">
@@ -232,6 +242,7 @@ $duManager->readUploadParameters();
 									echo '<option value="'.$DWCAUPLOAD.'" '.($uploadType==$DWCAUPLOAD?'SELECTED':'').'>Darwin Core Archive Provider</option>';
 									echo '<option value="'.$DIGIRUPLOAD.'" '.($uploadType==$DIGIRUPLOAD?'SELECTED':'').'>DiGIR Provider</option>';
 									echo '<option value="'.$FILEUPLOAD.'" '.($uploadType==$FILEUPLOAD?'SELECTED':'').'>File Upload</option>';
+									echo '<option value="'.$SKELETAL.'" '.($uploadType==$SKELETAL?'SELECTED':'').'>Skeletal File Upload</option>';
 									echo '<option value="'.$STOREDPROCEDURE.'" '.($uploadType==$STOREDPROCEDURE?'SELECTED':'').'>Stored Procedure</option>';
 									echo '<option value="'.$SCRIPTUPLOAD.'" '.($uploadType==$SCRIPTUPLOAD?'SELECTED':'').'>Script Upload</option>';
 									?>
@@ -291,7 +302,7 @@ $duManager->readUploadParameters();
 							</div>
 							<div style="">
 								<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
-								<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+								<input type="hidden" name="collid" value="<?php echo $collid;?>" />
 								<?php
 								if($uspid){ 
 									?>
@@ -316,7 +327,7 @@ $duManager->readUploadParameters();
 							<legend><b>Delete this Profile</b></legend>
 							<div>
 								<input type="hidden" name="uspid" value="<?php echo $uspid; ?>" />
-								<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+								<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
 								<input type="submit" name="action" value="Delete Profile" />
 							</div>
 						</fieldset>
@@ -339,9 +350,7 @@ $duManager->readUploadParameters();
 	?>
 </div>
 <?php 
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
-
 </body>
 </html>
-

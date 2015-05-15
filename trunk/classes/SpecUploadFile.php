@@ -70,6 +70,7 @@ class SpecUploadFile extends SpecUploadBase{
 	        //Open and grab header fields
 			$fh = fopen($fullPath,'rb') or die("Can't open file");
 			$this->sourceArr = $this->getHeaderArr($fh);
+			fclose($fh);
 		}
 	}
 
@@ -102,7 +103,12 @@ class SpecUploadFile extends SpecUploadBase{
 						$recMap[$symbField] = $valueStr;
 					}
 				}
-				$this->loadRecord($recMap);
+				$goodToLoad = true;
+				if($this->uploadType == $this->SKELETAL){
+					$recMap['processingstatus'] = 'unprocessed';
+					if(!array_key_exists('catalognumber',$recMap) || !$recMap['catalognumber']) $goodToLoad = false;
+				}
+				if($goodToLoad) $this->loadRecord($recMap);
 				unset($recMap);
 			}
 			fclose($fh);

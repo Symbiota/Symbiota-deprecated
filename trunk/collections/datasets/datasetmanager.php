@@ -284,7 +284,7 @@ if($isEditor){
 							<table class="styledtable">
 								<tr>
 									<th><input name="" value="" type="checkbox" onclick="selectAll(this);" title="Select/Deselect all Specimens" /></th>
-									<th>#</th>
+									<th>catalog #</th>
 									<th>Collector</th>
 									<th>Scientific Name</th>
 									<th>Locality</th>

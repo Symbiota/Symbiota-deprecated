@@ -28,7 +28,7 @@ class SpecUpload{
 	private $logFH;
 	protected $errorStr;
 
-	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6;
+	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6, $SKELETAL = 7;
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -74,6 +74,9 @@ class SpecUpload{
 				}
 				elseif($uploadType == $this->FILEUPLOAD){
 					$uploadStr = "File Upload";
+				}
+				elseif($uploadType == $this->SKELETAL){
+					$uploadStr = "Skeletal File Upload";
 				}
 				elseif($uploadType == $this->STOREDPROCEDURE){
 					$uploadStr = "Stored Procedure";
@@ -315,6 +318,12 @@ class SpecUpload{
 	
 	public function getUploadType(){
 		return $this->uploadType;
+	}
+	
+	public function setUploadType($uploadType){
+		if(is_numeric($uploadType)){
+			$this->uploadType = $uploadType;
+		}
 	}
 	
 	public function getErrorStr(){
