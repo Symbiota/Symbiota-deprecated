@@ -215,6 +215,7 @@ $duManager->loadFieldMap();
 			var tfArr = [];
 			var idTfArr = [];
 			var imTfArr = [];
+			var lacksCatalogNumber = true;
 			for(var i=0;i<f.length;i++){
 				var obj = f.elements[i];
 				if(obj.name == "sf[]"){
@@ -269,6 +270,16 @@ $duManager->loadFieldMap();
 						}
 					}
 				}
+				if(f.uploadtype.value == 7){
+					//Is skeletal file upload
+					if(obj.name == "tf[]"){
+						if(obj.value == "catalognumber") lacksCatalogNumber = false;
+					}
+				}
+			}
+			if(lacksCatalogNumber){
+				alert("ERROR: Catalog Number is required for Skeletal File Uploads");
+				return false;
 			}
 			return true;
 		}
@@ -629,7 +640,7 @@ $duManager->loadFieldMap();
 								</div>
 								<?php 
 							}
-							if(($dbpk && in_array($dbpk,$dbpkOptions)) || $isLiveData){
+							if(($dbpk && in_array($dbpk,$dbpkOptions)) || $isLiveData || $uploadType == $SKELETAL){
 								?>
 								<div id="mdiv">
 									<?php $duManager->echoFieldMapTable($autoMap,'spec'); ?>
