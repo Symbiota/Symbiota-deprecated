@@ -446,7 +446,7 @@ class SpecUploadBase extends SpecUpload{
  		//Prefrom general cleaning and parsing tasks
 		$this->recordCleaningStage1();
 		
-		if($this->collMetadataArr["managementtype"] == 'Live Data' && $this->matchCatalogNumber){
+		if(($this->collMetadataArr["managementtype"] == 'Live Data' || $this->uploadType == $this->SKELETAL) && $this->matchCatalogNumber){
 			//Match records based on Catalog Number 
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid '.
@@ -610,7 +610,7 @@ class SpecUploadBase extends SpecUpload{
 			$rs->free();
 		}
 
-		if($this->collMetadataArr["managementtype"] == 'Snapshot'){
+		if($this->uploadType != $this->SKELETAL && $this->collMetadataArr["managementtype"] == 'Snapshot'){
 			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
@@ -622,7 +622,7 @@ class SpecUploadBase extends SpecUpload{
 			}
 			$rs->free();
 
-			//Records already in portal that don't match with an incoming record 
+			//Records already in portal that won't match with an incoming record 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM omoccurrences o LEFT JOIN uploadspectemp u  ON (o.occid = u.occid) '.
 				'WHERE (o.collid = '.$this->collId.') AND (u.occid IS NULL)';
@@ -633,7 +633,7 @@ class SpecUploadBase extends SpecUpload{
 			$rs->free();
 		}
 
-		if($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate'){
+		if($this->uploadType != $this->SKELETAL && ($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate')){
 			//Look for null dbpk
 			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp '.
 				'WHERE (dbpk IS NULL) AND (collid = '.$this->collId.')';
@@ -666,7 +666,7 @@ class SpecUploadBase extends SpecUpload{
 	} 
 	
 	private function recordCleaningStage2(){
-		if($this->collMetadataArr["managementtype"] == 'Snapshot' && $this->uploadType != $this->SKELETAL){
+		if($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->uploadType == $this->SKELETAL){
 			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid, o.dbpk = u.dbpk '.
@@ -674,7 +674,7 @@ class SpecUploadBase extends SpecUpload{
 			$this->conn->query($sql);
 		}
 		
-		if($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate'){
+		if(($this->collMetadataArr["managementtype"] == 'Snapshot' && $this->uploadType != $this->SKELETAL) || $this->collMetadataArr["managementtype"] == 'Aggregate'){
 			$this->outputMsg('<li>Starting Stage 2 cleaning</li>');
 			$this->outputMsg('<li style="margin-left:10px;">Remove NULL dbpk values... ');
 			ob_flush();
@@ -733,7 +733,7 @@ class SpecUploadBase extends SpecUpload{
 		}
 		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid SET '.trim($sqlFrag,' ,').
 			' WHERE (u.collid = '.$this->collId.')';
-		//echo $sql; exit;
+		//echo '<div>'.$sql.'</div>'; exit;
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
 		}
@@ -747,6 +747,7 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, dateentered, '.implode(', ',$fieldArr).' ) '.
 			'SELECT u.collid, u.dbpk, "'.date('Y-m-d H:i:s').'", u.'.implode(', u.',$fieldArr).' FROM uploadspectemp u '.
 			'WHERE u.occid IS NULL AND u.collid = '.$this->collId.'';
+		//echo '<div>'.$sql.'</div>'; exit;
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
 		}
