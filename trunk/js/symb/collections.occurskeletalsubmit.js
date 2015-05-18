@@ -126,7 +126,7 @@ function submitDefaultForm(f){
 				sciname: $( "#fsciname" ).val(), 
 				scientificnameauthorship: $( "#fscientificnameauthorship" ).val(), 
 				family: $( "#ffamily" ).val(), 
-				localitysecurity: $( "#flocalitysecurity" ).val(),
+				localitysecurity: ($( "#flocalitysecurity" ).prop('checked')?"1":"0"),
 				country: $( "#fcountry" ).val(), 
 				stateprovince: $( "#fstateprovince" ).val(), 
 				county: $( "#fcounty" ).val(), 
