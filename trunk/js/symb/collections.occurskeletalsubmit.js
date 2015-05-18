@@ -48,6 +48,16 @@ $(document).ready(function() {
 	}, 1000);
 });
 
+function showOptions(){
+	$( "#optiondiv" ).show();
+	$( "#hidespan" ).show();
+}
+
+function hideOptions(){
+	$( "#optiondiv" ).hide();
+	$( "#hidespan" ).hide();
+}
+
 //Field changed and verification functions
 function verifySciName(){
 	$.ajax({
@@ -135,6 +145,7 @@ function submitDefaultForm(f){
 				recordnumber: $( "#frecordnumber" ).val(), 
 				eventdate: $( "#feventdate" ).val(), 
 				language: $( "#flanguage" ).val(), 
+				othercatalognumbers: $( "#fothercatalognumbers" ).val(),
 				catalognumber: $( "#fcatalognumber" ).val(),
 				collid: $( "#fcollid" ).val()
 			}
@@ -148,6 +159,7 @@ function submitDefaultForm(f){
 
 				incrementCount();
 				catalognumber: $( "#fcatalognumber" ).val("");
+				othercatalognumbers: $( "#fothercatalognumbers" ).val("");
 			}
 			else if(retStr.substring(0,6) == "dupcat"){
 				if(confirm("Another record exists with the same catalog number, which is not allowed. Do you want to view the other record(s)?")){

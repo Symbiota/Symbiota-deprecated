@@ -41,7 +41,7 @@ if($isEditor){
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />	
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occurskeletalsubmit.js?ver=150518" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occurskeletalsubmit.js?ver=150516" type="text/javascript"></script>
 	<script src="../../js/symb/shared.js?ver=150324" type="text/javascript"></script>
 </head>
 <body>
@@ -67,8 +67,9 @@ if($isEditor){
 			<fieldset style="padding:0px 15px 15px 15px;position:relative;">
 				<legend>
 					<b>Skeletal Data</b> 
-					<img src="../../images/list.png" style="width:12px;" onclick="toggle('optiondiv')" title="Display Options" />
-					<img src="../../images/info.png" style="width:12px;" onclick="toggle('descriptiondiv')" title="Descrition of Tool" />
+					<a id="optionimgspan" href="#" onclick="showOptions()"><img src="../../images/list.png" style="width:12px;" title="Display Options" /></a>
+					<a id="hidespan" href="#" style="display:none;" onclick="hideOptions()">Hide</a>
+					<a href="#" onclick="toggle('descriptiondiv')"><img src="../../images/info.png" style="width:12px;" title="Descrition of Tool" /></a>
 				</legend>
 				<div id="descriptiondiv" style="display:none;margin:10px;width:80%">
 					This page is typically used to enter skeletal records into the system during the imaging process. Since collections are 
@@ -92,6 +93,7 @@ if($isEditor){
 						<input type="checkbox" onclick="toggle('statediv')" CHECKED /> State / Province<br/>
 						<input type="checkbox" onclick="toggle('countydiv')" CHECKED /> County / Parish<br/>
 						<input type="checkbox" onclick="toggle('processingstatusdiv')" /> Processing Status<br/>
+						<input type="checkbox" onclick="toggle('othercatalognumbersdiv')" /> Other Catalog Numbers<br/>
 						<input type="checkbox" onclick="toggle('recordedbydiv')" /> Collector<br/>
 						<input type="checkbox" onclick="toggle('recordnumberdiv')" /> Collector Number<br/>
 						<input type="checkbox" onclick="toggle('eventdatediv')" /> Collection Date<br/>
@@ -176,14 +178,22 @@ if($isEditor){
 								</select>
 							</div> 
 						</div> 
-						<div style="clear:both;padding:15px 0px 0px 20px;">
-							<div style="float:right;">
+						<div style="clear:both;padding:15px;">
+							<div style="float:right;left;margin:16px 30px 0px 0px;">
 								<input name="clearform" type="reset" value="Clear Form" style="margin-right:40px" />
 							</div>
-							<b>Catalog Number:</b>
-							<input id="fcatalognumber" name="catalognumber" type="text" style="border-color:green;" />
-							<input id="fcollid" name="collid" type="hidden" value="<?php echo $collid; ?>" />
-							<input name="recordsubmit" type="submit" value="Add Record" />
+							<div style="float:left;">
+								<b>Catalog Number:</b><br/>
+								<input id="fcatalognumber" name="catalognumber" type="text" style="border-color:green;" />
+							</div>
+							<div id="othercatalognumbersdiv" style="display:none;float:left;margin:3px;">
+								<b>Other Catalog Numbers:</b><br/> 
+								<input id="fothercatalognumbers" name="othercatalognumbers" type="text" value="" />
+							</div>
+							<div style="float:left;margin:16px 3px 3px 3px;">
+								<input id="fcollid" name="collid" type="hidden" value="<?php echo $collid; ?>" />
+								<input name="recordsubmit" type="submit" value="Add Record" />
+							</div>
 						</div> 
 					</form>
 				</div>
