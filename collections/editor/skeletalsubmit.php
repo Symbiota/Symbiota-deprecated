@@ -41,7 +41,7 @@ if($isEditor){
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />	
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occurskeletalsubmit.js?ver=150324" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occurskeletalsubmit.js?ver=150518" type="text/javascript"></script>
 	<script src="../../js/symb/shared.js?ver=150324" type="text/javascript"></script>
 </head>
 <body>
