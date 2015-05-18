@@ -4,7 +4,7 @@ include_once($serverRoot.'/classes/OccurrenceCleaner.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
-$obsUid = array_key_exists('obsuid',$_REQUEST)?$_REQUEST['obsuid']:0;
+$obsUid = array_key_exists('obsuid',$_REQUEST)?$_REQUEST['obsuid']:'';
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $function = array_key_exists('fn',$_REQUEST)?$_REQUEST['fn']:'';
 $start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
@@ -13,14 +13,6 @@ $limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:200;
 if(!$symbUid){
 	header('Location: ../../profile/index.php?refurl=../collections/cleaning/occurrencecleaner.php?'.$_SERVER['QUERY_STRING']);
 }
-
-//Sanitation
-if(!is_numeric($collId)) $collId = 0;
-if(!is_numeric($obsUid)) $obsUid = 0;
-if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
-if($function && !preg_match('/^[a-zA-Z0-9\s_]+$/',$function)) $function = '';
-if(!is_numeric($start)) $start = 0;
-if(!is_numeric($limit)) $limit = 0;
 
 $cleanManager = new OccurrenceCleaner();
 if($collId) $cleanManager->setCollId($collId);
@@ -252,7 +244,7 @@ elseif($action == 'listdupsrecordedby'){
 									foreach($occArr as $occId => $occArr){
 										$setCnt++;
 										echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
-										echo '<td><a href="../editor/occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a></td>'."\n";
+										echo '<td><a href="occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a></td>'."\n";
 										echo '<td><input name="dupid[]" type="checkbox" value="'.$dupId.':'.$occId.'" /></td>'."\n";
 										echo '<td>'.$occArr['catalognumber'].'</td>'."\n";
 										echo '<td>'.$occArr['othercatalognumbers'].'</td>'."\n";
