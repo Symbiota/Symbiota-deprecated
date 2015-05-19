@@ -2,8 +2,6 @@
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceManager.php');
 header("Content-Type: text/html; charset=".$charset);
-header('Pragma: no-cache');
-header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidate');
 
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
