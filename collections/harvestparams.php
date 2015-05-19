@@ -49,7 +49,7 @@ $collManager->reset();
 		<h1>Select Search Parameters</h1>
 		Fill in one or more of the following query criteria and click 'Search' to view your results.
 
-		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkForm()">
+		<form name="harvestparams" id="harvestparams" action="list.php" method="get" onsubmit="return checkForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:10px;'>
 				<input style="border: 1px solid gray;" type="image" name="display1" id="display1" class="hoverHand" src='../images/search.png'
