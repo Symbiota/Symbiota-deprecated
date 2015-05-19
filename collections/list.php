@@ -2,8 +2,6 @@
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$charset);
-header('Pragma: no-cache');
-header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidate');
 
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1; 
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
