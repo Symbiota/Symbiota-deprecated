@@ -36,7 +36,7 @@ class CollectionProfileManager {
 				"c.guidtarget, c.rights, c.rightsholder, c.accessrights, c.sortseq, cs.uploaddate, ".
 				"IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
 				"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt, ".
-				"c.securitykey, c.collectionguid ".
+				"cs.dynamicProperties, c.securitykey, c.collectionguid ".
 				"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
 				"LEFT JOIN institutions i ON c.iid = i.iid ".
 				"WHERE (c.collid = ".$this->collid.") ";
@@ -82,10 +82,11 @@ class CollectionProfileManager {
 				}
 				$returnArr['uploaddate'] = $uDate;
 				$returnArr['recordcnt'] = $row->recordcnt;
-				$returnArr['georefpercent'] = ($returnArr['recordcnt']?round(($row->georefcnt/$returnArr['recordcnt'])*100):0);
+				$returnArr['georefcnt'] = $row->georefcnt;
 				$returnArr['familycnt'] = $row->familycnt;
 				$returnArr['genuscnt'] = $row->genuscnt;
 				$returnArr['speciescnt'] = $row->speciescnt;
+				$returnArr['dynamicProperties'] = $row->dynamicProperties;
 			}
 			$rs->free();
 			//Get categories
@@ -98,7 +99,7 @@ class CollectionProfileManager {
 			}
 			$rs->free();
 			//Get additional statistics
-			$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
+			/*$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 				'WHERE (o.collid = '.$this->collid.') ';
 			$rs = $this->conn->query($sql);
@@ -132,7 +133,7 @@ class CollectionProfileManager {
 			if($r = $rs->fetch_object()){
 				$returnArr['refcnt'] = $r->refcnt;
 			}
-			$rs->free();
+			$rs->free();*/
 			//Check to make sure Security Key and collection GUIDs exist
 			if(!$returnArr['guid']){
 				$returnArr['guid'] = UuidFactory::getUuidV4();
@@ -357,7 +358,7 @@ class CollectionProfileManager {
 	}
 
 	public function updateStatistics(){
-		set_time_limit(200);
+		set_time_limit(800);
 		$writeConn = MySQLiConnectionFactory::getCon("write");
 
 		echo '<li>Updating specimen taxon links... ';
@@ -365,26 +366,28 @@ class CollectionProfileManager {
 		flush();
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.TidInterpreted = t.tid '.
-			'WHERE o.TidInterpreted IS NULL';
+			'WHERE o.collid = '.$this->collid.' AND ISNULL(o.TidInterpreted)';
 		$writeConn->query($sql);
-
-		echo '<li>Update specimen image taxon links ... ';
+		echo $writeConn->affected_rows.' records updated</li>';
+		
+		echo '<li>Update specimen image taxon links... ';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 			'SET i.tid = o.tidinterpreted '.
-			'WHERE o.tidinterpreted IS NOT NULL AND (i.tid IS NULL OR o.tidinterpreted <> i.tid)';
+			'WHERE o.collid = '.$this->collid.' AND o.tidinterpreted IS NOT NULL AND (ISNULL(i.tid) OR o.tidinterpreted <> i.tid)';
 		$writeConn->query($sql);
-
+		echo $writeConn->affected_rows.' records updated</li>';
+		
 		echo '<li>Updating records with null families... ';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 			'SET o.family = ts.family '.
-			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "")';
+			'WHERE o.collid = '.$this->collid.' AND ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (ISNULL(o.family) OR o.family = "")';
 		$writeConn->query($sql);
 		echo $writeConn->affected_rows.' records updated</li>';
-
+		
 		/*
 		echo '<li>Updating records with null author... ';
 		ob_flush();
@@ -396,56 +399,134 @@ class CollectionProfileManager {
 		echo $writeConn->affected_rows.' records updated</li>';
 		*/
 		
-		echo '<li>Updating total record count... ';
+		echo '<li>Calculating specimen, georeference, family, genera, and species counts... ';
+		$returnArr = Array();
+		$recordCnt = 0;
+		$georefCnt = 0;
+		$familyCnt = 0;
+		$genusCnt = 0;
+		$speciesCnt = 0;
 		ob_flush();
 		flush();
+		$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
+			'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(o.typeStatus) AS TypeCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
+			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS SpecimensCountID, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount, '.
+			'COUNT(CASE WHEN ISNULL(o.family) THEN o.occid ELSE NULL END) AS SpecimensNullFamily, '.
+			'COUNT(CASE WHEN ISNULL(o.country) THEN o.occid ELSE NULL END) AS SpecimensNullCountry '.
+			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
+			'WHERE (o.collid = '.$this->collid.') ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$recordCnt = $r->SpecimenCount;
+			$georefCnt = $r->GeorefCount;
+			$returnArr['SpecimensCountID'] = $r->SpecimensCountID;
+			$familyCnt = $r->FamilyCount;
+			$genusCnt = $r->GeneraCount;
+			$speciesCnt = $r->SpeciesCount;
+			$returnArr['TotalTaxaCount'] = $r->TotalTaxaCount;
+			$returnArr['TypeCount'] = $r->TypeCount;
+			$returnArr['SpecimensNullFamily'] = $r->SpecimensNullFamily;
+			$returnArr['SpecimensNullCountry'] = $r->SpecimensNullCountry;
+		}
+		$rs->free();
+		echo 'Done!</li>';
+		
+		echo '<li>Calculating number of specimens imaged... ';
+		ob_flush();
+		flush();
+		$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
+			'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+			'WHERE (o.collid = '.$this->collid.') ';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$returnArr['imgcnt'] = $r->imgcnt;
+		}
+		$rs->free();
+		echo 'Done!</li>';
+		
+		echo '<li>Calculating genetic resources counts... ';
+		ob_flush();
+		flush();
+		$sql = 'SELECT COUNT(CASE WHEN g.resourceurl LIKE "http://www.boldsystems%" THEN o.occid ELSE NULL END) AS boldcnt, '.
+			'COUNT(CASE WHEN g.resourceurl LIKE "http://www.ncbi%" THEN o.occid ELSE NULL END) AS gencnt '.
+			'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
+			'WHERE (o.collid = '.$this->collid.') ';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$returnArr['boldcnt'] = $r->boldcnt;
+			$returnArr['gencnt'] = $r->gencnt;
+		}
+		$rs->free();
+		echo 'Done!</li>';
+		
+		echo '<li>Calculating reference counts... ';
+		ob_flush();
+		flush();
+		$sql = 'SELECT count(r.occid) as refcnt '.
+			'FROM omoccurrences o INNER JOIN referenceoccurlink r ON o.occid = r.occid '.
+			'WHERE (o.collid = '.$this->collid.') ';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$returnArr['refcnt'] = $r->refcnt;
+		}
+		$rs->free();
+		echo 'Done!</li>';
+		
+		echo '<li>Calculating counts per family... ';
+		ob_flush();
+		flush();
+		$sql = 'SELECT o.family, COUNT(o.occid) AS SpecimensPerFamily, COUNT(o.decimalLatitude) AS GeorefSpecimensPerFamily, '.
+			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerFamily, '.
+			'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerFamily '.
+			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
+			'WHERE (o.collid = '.$this->collid.') '.
+			'GROUP BY o.family ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			if($r->family){
+				$returnArr['families'][$r->family]['SpecimensPerFamily'] = $r->SpecimensPerFamily;
+				$returnArr['families'][$r->family]['GeorefSpecimensPerFamily'] = $r->GeorefSpecimensPerFamily;
+				$returnArr['families'][$r->family]['IDSpecimensPerFamily'] = $r->IDSpecimensPerFamily;
+				$returnArr['families'][$r->family]['IDGeorefSpecimensPerFamily'] = $r->IDGeorefSpecimensPerFamily;
+			}
+		}
+		$rs->free();
+		echo 'Done!</li>';
+		
+		echo '<li>Calculating counts per country... ';
+		ob_flush();
+		flush();
+		$sql = 'SELECT o.country, COUNT(o.occid) AS CountryCount, COUNT(o.decimalLatitude) AS GeorefSpecimensPerCountry, '.
+			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerCountry, '.
+			'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerCountry '.
+			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
+			'WHERE (o.collid = '.$this->collid.') '.
+			'GROUP BY o.country ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			if($r->country){
+				$returnArr['countries'][$r->country]['CountryCount'] = $r->CountryCount;
+				$returnArr['countries'][$r->country]['GeorefSpecimensPerCountry'] = $r->GeorefSpecimensPerCountry;
+				$returnArr['countries'][$r->country]['IDSpecimensPerCountry'] = $r->IDSpecimensPerCountry;
+				$returnArr['countries'][$r->country]['IDGeorefSpecimensPerCountry'] = $r->IDGeorefSpecimensPerCountry;
+			}
+		}
+		$rs->free();
+		echo 'Done!</li>';
+		
+		echo '<li>Updating statistics records... ';
+		ob_flush();
+		flush();
+		$returnArrJson = json_encode($returnArr);
 		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.recordcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.collid = '.$this->collid.')) '.
+			'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.','.
+			"cs.speciescnt = ".$speciesCnt.",cs.datelastmodified = CURDATE(),cs.dynamicProperties = '".$returnArrJson."' ".
 			'WHERE cs.collid = '.$this->collid;
 		$writeConn->query($sql);
 		echo 'Done!</li> ';
-		
-		echo '<li>Updating family count... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.familycnt = (SELECT COUNT(DISTINCT o.family) '.
-			'FROM omoccurrences o WHERE (o.collid = '.$this->collid.')) '.
-			'WHERE cs.collid = '.$this->collid;
-		$writeConn->query($sql);
-		echo 'Done!</li> ';
-		
-		echo '<li>Updating genus count... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.genuscnt = (SELECT COUNT(DISTINCT t.unitname1) '.
-			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collid.') AND t.rankid IN(180,220,230,240,260)) '.
-			'WHERE cs.collid = '.$this->collid;
-		$writeConn->query($sql);
-		echo 'Done!</li>';
-		
-		echo '<li>Updating species count... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1, t.unitname2) AS spcnt '.
-			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collid.') AND t.rankid IN(220,230,240,260)) '.
-			'WHERE cs.collid = '.$this->collid;
-		$writeConn->query($sql);
-		echo 'Done</li>';
-		
-		echo '<li>Updating georeference count... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.DecimalLatitude Is Not Null) '.
-			'AND (o.DecimalLongitude Is Not Null) AND (o.CollID = '.$this->collid.')) '.
-			'WHERE cs.collid = '.$this->collid;
-		$writeConn->query($sql);
-		echo 'Done!</li>';
 		
 		/*
 		echo '<li>Updating georeference indexing... ';
@@ -740,7 +821,8 @@ class CollectionProfileManager {
 			$returnArr['collections'][$r->CollID] = $r->CollectionName;
 		}
 		$sql2 = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
-			'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(DISTINCT t.UnitName1) AS GeneraCount, COUNT(o.typeStatus) AS TypeCount, '.
+			'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(o.typeStatus) AS TypeCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
 			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS SpecimensCountID, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount, '.
