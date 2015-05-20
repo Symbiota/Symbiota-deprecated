@@ -878,7 +878,6 @@ class OccurrenceManager{
 			'FROM fmprojects p1 INNER JOIN fmprojects p2 ON p1.parentpid = p2.pid '.
 			'INNER JOIN fmchklstprojlink cl ON p1.pid = cl.pid '.
 			'INNER JOIN fmchecklists c ON cl.clid = c.clid '.
-			'INNER JOIN fmvouchers v ON c.clid = v.clid '.
 			'WHERE p2.occurrencesearch = 1 AND p1.ispublic = 1 ';
 		//echo "<div>$sql</div>";
 		$rs = $this->conn->query($sql);
