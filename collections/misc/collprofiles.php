@@ -11,9 +11,6 @@ if($eMode && !$SYMB_UID){
 	header('Location: ../../profile/index.php?refurl=../collections/misc/collprofiles.php?'.$_SERVER['QUERY_STRING']);
 }
 
-$showFamilyList = ((array_key_exists("sfl",$_REQUEST) && is_numeric($_REQUEST["sfl"]))?$_REQUEST["sfl"]:0);
-$familyDist = array_key_exists('family',$_REQUEST)?htmlspecialchars($_REQUEST['family']):'';
-$showGeographicList = ((array_key_exists("sgl",$_REQUEST) && is_numeric($_REQUEST["sgl"]))?$_REQUEST["sgl"]:0);
 $countryDist = array_key_exists('country',$_REQUEST)?htmlspecialchars($_REQUEST['country']):'';
 $stateDist = array_key_exists('state',$_REQUEST)?htmlspecialchars($_REQUEST['state']):'';
 
@@ -99,6 +96,28 @@ if($SYMB_UID){
 			<?php
 		}
 		if($collid){
+			$extrastatsArr = Array();
+			$famArr = Array();
+			$countryArr = Array();
+			$georefPerc = 0;
+			$spidPerc = 0;
+			$imgPerc = 0;
+			$georefPerc = (100*($collData['georefcnt']/$collData['recordcnt']));
+			if($collData['dynamicProperties']){
+				$extrastatsArr = json_decode($collData['dynamicProperties'],true);
+				if(array_key_exists("families",$extrastatsArr)){
+					$famArr = $extrastatsArr['families'];
+				}
+				if(array_key_exists("countries",$extrastatsArr)){
+					$countryArr = $extrastatsArr['countries'];
+				}
+				if($extrastatsArr['SpecimensCountID']){
+					$spidPerc = (100*($extrastatsArr['SpecimensCountID']/$collData['recordcnt']));
+				}
+				if($extrastatsArr['imgcnt']){
+					$imgPerc = (100*($extrastatsArr['imgcnt']/$collData['recordcnt']));
+				}
+			}
 			$codeStr = ' ('.$collData['institutioncode'];
 			if($collData['collectioncode']) $codeStr .= '-'.$collData['collectioncode'];
 			$codeStr .= ')';
@@ -267,7 +286,7 @@ if($SYMB_UID){
 					<?php echo $collData["fulldescription"]; ?>
 				</div>
 				<div style='margin-top:5px;'>
-					<b>Contact:</b> <?php echo $collData["contact"]." (".str_replace("@","&lt;at&gt;",$collData["email"]);?>)
+					<b>Contact:</b> <?php echo $collData["contact"]." (".str_replace("@","&#64;",$collData["email"]);?>)
 				</div>
 				<?php
 				if($collData["homepage"]){
@@ -366,8 +385,8 @@ if($SYMB_UID){
  				if($addrArresses){
  					foreach($addrArresses as $iid => $addrArr){
 	 					?>
-						<div style="float:left;font-weight:bold;margin-top:5px;">Address:&nbsp;</div>
-						<div style="float:left;margin-top:5px;">
+						<div style="font-weight:bold;margin-top:5px;">Address:</div>
+						<div style="margin-top:5px;">
 							<?php
 							echo "<div>".$addrArr["institutionname"];
 							if($editCode > 1) echo ' <a href="../admin/institutioneditor.php?emode=1&targetcollid='.$collid.'&iid='.$iid.'" title="Edit institution information"><img src="../../images/edit.png" style="width:13px;" /></a>';
@@ -386,56 +405,74 @@ if($SYMB_UID){
  				}
  				?>
 				<div style="clear:both;margin-top:5px;">
-					<div style="font-weight:bold;">Collection Statistics</div>
-					<ul>
+					<div style="font-weight:bold;">Collection Statistics:</div>
+					<ul style="margin-top:5px;">
 						<li><?php echo $collData["recordcnt"];?> specimens</li>
-						<li><?php echo $collData["georefpercent"];?>% georeferenced</li>
+						<li><?php echo ($collData['georefcnt']?$collData['georefcnt']:0).($georefPerc?" (".($georefPerc>1?round($georefPerc):round($georefPerc,2))."%)":'');?> georeferenced</li>
 						<?php
-						if($collData['imgpercent']) echo '<li>'.$collData['imgpercent'].'% with images</li>';
-						if($collData['gencnt']) echo '<li>'.$collData['gencnt'].' GenBank references</li>';
-						if($collData['boldcnt']) echo '<li>'.$collData['boldcnt'].' BOLD references</li>';
-						if($collData['refcnt']) echo '<li>'.$collData['refcnt'].' publication references</li>';
+						if($extrastatsArr&&$extrastatsArr['imgcnt']) echo '<li>'.($extrastatsArr['imgcnt']?$extrastatsArr['imgcnt']:0).($imgPerc?" (".($imgPerc>1?round($imgPerc):round($imgPerc,2))."%)":'').' with images</li>';
+						if($extrastatsArr&&$extrastatsArr['gencnt']) echo '<li>'.$extrastatsArr['gencnt'].' GenBank references</li>';
+						if($extrastatsArr&&$extrastatsArr['boldcnt']) echo '<li>'.$extrastatsArr['boldcnt'].' BOLD references</li>';
+						if($extrastatsArr&&$extrastatsArr['refcnt']) echo '<li>'.$extrastatsArr['refcnt'].' publication references</li>';
+						if($extrastatsArr&&$extrastatsArr['SpecimensCountID']) echo '<li>'.($extrastatsArr['SpecimensCountID']?$extrastatsArr['SpecimensCountID']:0).($spidPerc?" (".($spidPerc>1?round($spidPerc):round($spidPerc,2))."%)":'').' identified to species</li>';
 						?>
 						<li><?php echo $collData["familycnt"];?> families</li>
 						<li><?php echo $collData["genuscnt"];?> genera</li>
 						<li><?php echo $collData["speciescnt"];?> species</li>
+						<?php
+						if($extrastatsArr&&$extrastatsArr['TotalTaxaCount']) echo '<li>'.$extrastatsArr['TotalTaxaCount'].' total taxa (including subsp. and var.)</li>';
+						if($extrastatsArr&&$extrastatsArr['TypeCount']) echo '<li>'.$extrastatsArr['TypeCount'].' type specimens</li>';
+						?>
 					</ul>
 				</div>
 			</div>
-			<fieldset style='margin:20px;width:200px;background-color:#FFFFCC;'>
-				<legend><b>Extra Statistics</b></legend>
-				<div>
-					<a href='collprofiles.php?collid=<?php echo $collid;?>&sfl=1'>
-						Show Family Distribution
-					</a>
-				</div>
-				<div>
-					<a href='collprofiles.php?collid=<?php echo $collid;?>&sgl=1'>
-						Show Geographic Distribution
-					</a>
-				</div>
-			</fieldset>
 			<?php
-			if($showFamilyList || $showGeographicList){
+			if($extrastatsArr){
+				?>
+				<fieldset style='margin:20px;width:300px;background-color:#FFFFCC;'>
+					<legend><b>Extra Statistics</b></legend>
+					<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
+						<div style="">
+							<div id="showfamdist" style="float:left;display:block;" >
+								<a href="#" onclick="toggleById('famdistbox');toggleById('showfamdist');toggleById('hidefamdist');return false;">Show Family Distribution</a>
+							</div>
+							<div id="hidefamdist" style="float:left;display:none;" >
+								<a href="#" onclick="toggleById('famdistbox');toggleById('showfamdist');toggleById('hidefamdist');return false;">Hide Family Distribution</a>
+							</div>
+							<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
+								<input type="image" name="action" value="Download Family Dist" src="../../images/dl.png" onclick="" />
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div id="showgeodist" style="float:left;display:block;" >
+								<a href="#" onclick="toggleById('geodistbox');toggleById('showgeodist');toggleById('hidegeodist');return false;">Show Geographic Distribution</a>
+							</div>
+							<div id="hidegeodist" style="float:left;display:none;" >
+								<a href="#" onclick="toggleById('geodistbox');toggleById('showgeodist');toggleById('hidegeodist');return false;">Hide Geographic Distribution</a>
+							</div>
+							<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
+								<input type="image" name="action" value="Download Geo Dist" src="../../images/dl.png" onclick="" />
+							</div>
+						</div>
+						<input type="hidden" name="famarrjson" id="famarrjson" value='<?php echo json_encode($famArr); ?>' />
+						<input type="hidden" name="geoarrjson" id="geoarrjson" value='<?php echo json_encode($countryArr); ?>' />
+					</form>
+				</fieldset>
+				<div style="clear:both;"> </div>
+				<?php
+			}
+			if($countryDist || $stateDist){
 				?>
 				<fieldset style="margin:20px;width:90%;">
 					<legend>
 						<b>
 							<?php
-							if($showFamilyList){
-								echo 'Family Distribution';
-								if($familyDist){
-									echo ' - '.$familyDist;
-								}
+							echo 'Geographic Distribution';
+							if($countryDist){
+								echo ' - '.$countryDist;
 							}
-							else{
-								echo 'Geographic Distribution';
-								if($countryDist){
-									echo ' - '.$countryDist;
-								}
-								elseif($stateDist){
-									echo ' - '.$stateDist;
-								}
+							elseif($stateDist){
+								echo ' - '.$stateDist;
 							}
 							?>
 						</b>
@@ -444,28 +481,17 @@ if($SYMB_UID){
 					<ul>
 						<?php
 						$distArr = array();
-						if($showFamilyList){
-							$distArr = $collManager->getTaxonCounts();
-						}
-						else{
-							$distArr = $collManager->getGeographicCounts($countryDist,$stateDist);
-						}
+						$distArr = $collManager->getGeographicCounts($countryDist,$stateDist);
 						foreach($distArr as $term => $cnt){
 							echo '<li>';
 							$colTarget = 'county';
-							if($showGeographicList && !$stateDist){
+							if(!$stateDist){
 								echo '<a href="collprofiles.php?sgl=1&collid='.$collid.($countryDist?'&state=':'&country=').$term.'">';
 								echo $term;
 								echo '</a>';
 								$colTarget = 'country';
 								if($countryDist) $colTarget = 'state';
 								echo ' (<a href="../list.php?db[]='.$collid.'&reset=1&'.$colTarget.'='.$term.'" target="_blank">'.$cnt.'</a>)';
-							}
-							elseif($showFamilyList && !$familyDist){
-								//echo '<a href="collprofiles.php?sfl=1&collid='.$collid.'&family='.$term.'">';
-								echo $term;
-								//echo '</a>';
-								echo ' (<a href="../list.php?db[]='.$collid.'&type=1&reset=1&taxa='.$term.'" target="_blank">'.$cnt.'</a>)';
 							}
 							else{
 								echo $term;
@@ -476,11 +502,43 @@ if($SYMB_UID){
 						?>
 					</ul>
 					<?php
-						if(!$stateDist && !$familyDist) echo '*Clicking on term in list will display distributions within that term';
+						echo '*Clicking on name in list will display distributions within';
 					?>
 				</fieldset>
 				<?php
 			}
+			?>
+			<fieldset id="famdistbox" style="clear:both;margin-top:15px;width:800px;display:none;">
+				<legend><b>Family Distribution</b></legend>
+				<div style="margin:15px;">Click on the specimen record counts within the parenthesis to return the records for that family</div>
+				<ul>
+					<?php
+					foreach($famArr as $name => $data){
+						echo '<li>';
+						echo $name;
+						echo ' (<a href="../list.php?db[]='.$collid.'&type=1&reset=1&taxa='.$name.'" target="_blank">'.$data['SpecimensPerFamily'].'</a>)';
+						echo '</li>';
+					}
+					?>
+				</ul>
+			</fieldset>
+			<fieldset id="geodistbox" style="margin-top:15px;width:800px;display:none;">
+				<legend><b>Geographic Distribution - Countries</b></legend>
+				<div style="margin:15px;">Click on the specimen record counts within the parenthesis to return the records for that country</div>
+				<ul>
+					<?php
+					foreach($countryArr as $name => $data){
+						echo '<li>';
+						echo '<a href="collprofiles.php?sgl=1&collid='.$collid.'&country='.$name.'">';
+						echo $name;
+						echo '</a>';
+						echo ' (<a href="../list.php?db[]='.$collid.'&reset=1&country='.$name.'" target="_blank">'.$data['CountryCount'].'</a>)';
+						echo '</li>';
+					}
+					?>
+				</ul>
+			</fieldset>
+			<?php
 		}
 		else{
 			$collList = $collManager->getCollectionList();
