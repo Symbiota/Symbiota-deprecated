@@ -1108,61 +1108,39 @@ class SpecUploadBase extends SpecUpload{
 		//Optimize table to reset indexes
 		$this->conn->query('OPTIMIZE TABLE uploadimagetemp');
 		
-		//Update collection stats
-		$sql = 'UPDATE omcollectionstats SET uploaddate = NOW() WHERE collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$this->outputMsg('<li style="margin-left:10px;">Updating total record count... ');
+		$this->outputMsg('<li style="margin-left:10px;">Calculating specimen, georeference, family, genera, and species counts... ');
+		ob_flush();
+		flush();
+		$recordCnt = 0;
+		$georefCnt = 0;
+		$familyCnt = 0;
+		$genusCnt = 0;
+		$speciesCnt = 0;
+		$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
+			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
+			'WHERE (o.collid = '.$this->collId.') ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$recordCnt = $r->SpecimenCount;
+			$georefCnt = $r->GeorefCount;
+			$familyCnt = $r->FamilyCount;
+			$genusCnt = $r->GeneraCount;
+			$speciesCnt = $r->SpeciesCount;
+		}
+		$this->outputMsg('Done!</li> ');
+		
+		$this->outputMsg('<li style="margin-left:10px;">Updating statistics records... ');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.recordcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
+			'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.','.
+			"cs.speciescnt = ".$speciesCnt.",cs.uploaddate = NOW(),cs.datelastmodified = CURDATE() ".
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
 		$this->outputMsg('Done!</li> ');
-		
-		$this->outputMsg('<li style="margin-left:10px;">Updating family count... ');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.familycnt = (SELECT COUNT(DISTINCT o.family) '.
-			'FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
-			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-		
-		$this->outputMsg('<li style="margin-left:10px;">Updating genus count... ');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.genuscnt = (SELECT COUNT(DISTINCT t.unitname1) '.
-			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collId.') AND t.rankid IN(180,220,230,240,260)) '.
-			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li>');
-
-		$this->outputMsg('<li style="margin-left:10px;">Updating species count... ');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1, t.unitname2) AS spcnt '.
-			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collId.') AND t.rankid IN(220,230,240,260)) '.
-			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done</li>');
-		
-		$this->outputMsg('<li style="margin-left:10px;">Updating georeference count... ');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.DecimalLatitude Is Not Null) '.
-			'AND (o.DecimalLongitude Is Not Null) AND (o.CollID = '.$this->collId.')) '.
-			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li>');
-
+				
 		/*
 		$this->outputMsg('<li style="margin-left:10px;">Searching for duplicate Catalog Numbers... ');
 		ob_flush();
