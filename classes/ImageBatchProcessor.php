@@ -1521,50 +1521,32 @@ class ImageBatchProcessor {
 			}
 			
 			foreach($this->collProcessedArr as $collid){
-				#Updating total record count
-				$sql = 'UPDATE omcollectionstats cs '. 
-					'SET cs.recordcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.collid = '.$collid.')) '. 
-					'WHERE cs.collid = '.$collid.'';
-				if(!$this->conn->query($sql)){
-					$this->logOrEcho('ERROR: unable to update record counts; '.$this->conn->error);
+				$recordCnt = 0;
+				$georefCnt = 0;
+				$familyCnt = 0;
+				$genusCnt = 0;
+				$speciesCnt = 0;
+				$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
+					'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
+					'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
+					'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
+					'WHERE (o.collid = '.$collid.') ';
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$recordCnt = $r->SpecimenCount;
+					$georefCnt = $r->GeorefCount;
+					$familyCnt = $r->FamilyCount;
+					$genusCnt = $r->GeneraCount;
+					$speciesCnt = $r->SpeciesCount;
 				}
+				$rs->free();
 				
-				#Updating family count
-				$sql = 'UPDATE omcollectionstats cs '. 
-					'SET cs.familycnt = (SELECT COUNT(DISTINCT o.family) '. 
-					'FROM omoccurrences o WHERE (o.collid = '.$collid.')) '. 
-					'WHERE cs.collid = '.$collid.'';
+				$sql = 'UPDATE omcollectionstats cs '.
+					'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.','.
+					"cs.speciescnt = ".$speciesCnt.",cs.datelastmodified = CURDATE() ".
+					'WHERE cs.collid = '.$collid;
 				if(!$this->conn->query($sql)){
-					$this->logOrEcho('ERROR: unable to update family counts; '.$this->conn->error);
-				}
-				
-				#Updating genus count
-				$sql = 'UPDATE omcollectionstats cs '. 
-					'SET cs.genuscnt = (SELECT COUNT(DISTINCT t.unitname1) '. 
-					'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '. 
-					'WHERE (o.collid = '.$collid.') AND t.rankid IN(180,220,230,240,260)) '. 
-					'WHERE cs.collid = '.$collid.'';
-				if(!$this->conn->query($sql)){
-					$this->logOrEcho('ERROR: unable to update genus counts; '.$this->conn->error);
-				}
-				
-				#Updating species count
-				$sql = 'UPDATE omcollectionstats cs '. 
-					'SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1, t.unitname2) AS spcnt '. 
-					'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '. 
-					'WHERE (o.collid = '.$collid.') AND t.rankid IN(220,230,240,260)) '. 
-					'WHERE cs.collid = '.$collid.'';
-				if(!$this->conn->query($sql)){
-					$this->logOrEcho('ERROR: unable to update species count; '.$this->conn->error);
-				}
-				
-				#Updating georeference count
-				$sql = 'UPDATE omcollectionstats cs '. 
-					'SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.DecimalLatitude Is Not Null) '. 
-					'AND (o.DecimalLongitude Is Not Null) AND (o.CollID = '.$collid.')) '. 
-					'WHERE cs.collid = '.$collid.'';
-				if(!$this->conn->query($sql)){
-					$this->logOrEcho('ERROR: unable to update georeference count; '.$this->conn->error);
+					$this->logOrEcho('ERROR: unable to update counts; '.$this->conn->error);
 				}
 			}
 		}
