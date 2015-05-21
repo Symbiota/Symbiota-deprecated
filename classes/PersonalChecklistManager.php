@@ -78,10 +78,10 @@ class PersonalChecklistManager{
 		if($this->conn->query($sql)){
 			$newClId = $this->conn->insert_id;
 			//Set permissions to allow creater to be an editor
-		 	$this->conn->query('INSERT INTO userroles (uid, role, tablename, tablepk) VALUES('.$GLOBALS["symbUid"].',"ClAdmin","fmchecklists",'.$newClId.') ');
+		 	$this->conn->query('INSERT INTO userroles (uid, role, tablename, tablepk) VALUES('.$GLOBALS["SYMB_UID"].',"ClAdmin","fmchecklists",'.$newClId.') ');
 		 	//$this->conn->query("INSERT INTO userpermissions (uid, pname) VALUES(".$GLOBALS["symbUid"].",'ClAdmin-".$newClId."') ");
 		 	$newPManager = new ProfileManager();
-		 	$newPManager->setUserName($USERNAME);
+		 	$newPManager->setUserName($GLOBALS['USERNAME']);
 		 	$newPManager->authenticate();
 		}
 		return $newClId;
