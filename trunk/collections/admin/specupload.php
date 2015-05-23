@@ -215,7 +215,8 @@ $duManager->loadFieldMap();
 			var tfArr = [];
 			var idTfArr = [];
 			var imTfArr = [];
-			var lacksCatalogNumber = true;
+			var lacksCatalogNumber = false;
+			if(f.uploadtype.value == 7) lacksCatalogNumber = true;
 			for(var i=0;i<f.length;i++){
 				var obj = f.elements[i];
 				if(obj.name == "sf[]"){
@@ -270,11 +271,9 @@ $duManager->loadFieldMap();
 						}
 					}
 				}
-				if(f.uploadtype.value == 7){
+				if(lacksCatalogNumber && obj.name == "tf[]"){
 					//Is skeletal file upload
-					if(obj.name == "tf[]"){
-						if(obj.value == "catalognumber") lacksCatalogNumber = false;
-					}
+					if(obj.value == "catalognumber") lacksCatalogNumber = false;
 				}
 			}
 			if(lacksCatalogNumber){
