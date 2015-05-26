@@ -37,10 +37,10 @@ class DwcArchiverOccurrence{
 	private $rareReaderArr = array();
 	private $charSetSource = '';
 	private $charSetOut = '';
-	
+
 	public function __construct(){
 		global $serverRoot, $charset;
-		
+
 		//Ensure that PHP DOMDocument class is installed
 		if(!class_exists('DOMDocument')){
 			exit('FATAL ERROR: PHP DOMDocument class is not installed, please contact your server admin');
@@ -51,7 +51,7 @@ class DwcArchiverOccurrence{
 			$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
 			$this->logFH = fopen($logFile, 'a');
 		}
-		
+
 		//Character set
 		$this->charSetSource = strtoupper($charset);
 		$this->charSetOut = $this->charSetSource;
@@ -313,39 +313,58 @@ class DwcArchiverOccurrence{
 		elseif($this->schemaType == 'coge'){
 			$targetArr = array('id','institutionCode','collectionCode','catalogNumber','family','scientificName','scientificNameAuthorship',
 				'recordedBy','recordNumber','eventDate','year','month','day','fieldNumber','country','stateProvince','county','municipality',
-				'locality','localitySecurity','decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters',
+				'locality','localitySecurity','geodeticDatum',
 				'verbatimCoordinates','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation','dateEntered',
-				'dateLastModified','recordId','references'); 
+				'dateLastModified','recordId','references','collId');
 			$retArr = array_intersect_key($occurArr,array_flip($targetArr));
 		}
 		return $retArr;
 	}
 	
-	private function getSqlOccurrences(){
+	private function getSqlOccurrences($fullSql = true){
 		$sql = '';
-		$fieldArr = $this->occurrenceFieldArr['fields'];
-		if($fieldArr && $this->conditionSql){
-			$sqlFrag = '';
-			foreach($fieldArr as $fieldName => $colName){
-				if($colName){
-					$sqlFrag .= ', '.$colName;
+		$this->applyConditions();
+		if($this->conditionSql){
+			if($fullSql){
+				$fieldArr = $this->occurrenceFieldArr['fields'];
+				$sqlFrag = '';
+				foreach($fieldArr as $fieldName => $colName){
+					if($colName){
+						$sqlFrag .= ', '.$colName;
+					}
+					else{
+						$sqlFrag .= ', "" AS t_'.$fieldName;
+					}
 				}
-				else{
-					$sqlFrag .= ', "" AS t_'.$fieldName;
-				}
+				$sql = 'SELECT DISTINCT '.trim($sqlFrag,', ');
 			}
-			$sql = 'SELECT '.trim($sqlFrag,', ').
-				' FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
+			$sql .= ' FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
 			if(strpos($this->conditionSql,'v.clid')){
 				//Search criteria came from custom search page
 				$sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 			}
-			$sql .= $this->conditionSql.'ORDER BY o.collid LIMIT 1000000'; 
+			$sql .= $this->conditionSql;
+			if($fullSql) $sql .= ' ORDER BY o.collid'; 
 			//echo '<div>'.$sql.'</div>'; exit;
 		}
 		return $sql;
+	}
+	
+	public function getOccurrenceCnt(){
+		$retStr = 0;
+		$sql = $this->getSqlOccurrences(false);
+		if($sql){
+			$sql = 'SELECT COUNT(o.occid) as cnt '.$sql;
+			//echo $sql; exit;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retStr = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $retStr;
 	}
 
 	private function initDeterminationArr(){
@@ -616,8 +635,8 @@ class DwcArchiverOccurrence{
 	}
 	
 	public function addCondition($field, $cond, $value = ''){
-		//Sanitation 
-		if(!preg_match('/^[A-Z]+$/',$field)) return false;
+		//Sanitation
+		if(!preg_match('/^[A-Za-z]+$/',$field)) return false;
 		if(!preg_match('/^[A-Z]+$/',$cond)) return false;
 		//Set condition
 		if($field){
@@ -630,6 +649,7 @@ class DwcArchiverOccurrence{
 
 	private function applyConditions(){
 		$sqlFrag = '';
+		if($this->conditionSql) return true;
 		if($this->conditionArr){
 			foreach($this->conditionArr as $field => $condArr){
 				$sqlFrag2 = '';
@@ -680,7 +700,6 @@ class DwcArchiverOccurrence{
 	}
 
     public function getAsJson() {
-        $this->applyConditions();
         $this->schemaType='dwc';
         $arr = $this->getDwcArray();
         return json_encode($arr[0]);
@@ -703,7 +722,6 @@ class DwcArchiverOccurrence{
        $returnvalue .= "@prefix dc: <http://purl.org/dc/elements/1.1/> . \n";
        $returnvalue .= "@prefix dcterms: <http://purl.org/dc/terms/> . \n";
        $returnvalue .= "@prefix dcmitype: <http://purl.org/dc/dcmitype/> . \n";
-	   $this->applyConditions();
        $this->schemaType='dwc';
        $arr = $this->getDwcArray();
 	   $occurTermArr = $this->occurrenceFieldArr['terms'];
@@ -826,7 +844,6 @@ class DwcArchiverOccurrence{
        $rootElem->setAttribute('xmlns:dcmitype','http://purl.org/dc/dcmitype/');
        $newDoc->appendChild($rootElem);
 
-	   $this->applyConditions();
        $this->schemaType='dwc';
        $arr = $this->getDwcArray();
 	   $occurTermArr = $this->occurrenceFieldArr['terms'];
@@ -946,7 +963,7 @@ class DwcArchiverOccurrence{
        return $returnvalue;
     }
 
-    public function getDwcArray() { 
+    private function getDwcArray() { 
 		global $clientRoot;
 		$result = Array();
 		if(!$this->occurrenceFieldArr){
@@ -1029,7 +1046,7 @@ class DwcArchiverOccurrence{
 					unset($r['collid']);
 				}
 				//Add upper taxonomic data
-				if($r['family']){
+				if($r['family'] && $this->upperTaxonomy){
 					$famStr = strtolower($r['family']);
 					if(isset($this->upperTaxonomy[$famStr]['o'])){
 						$r['t_order'] = $this->upperTaxonomy[$famStr]['o'];
@@ -1074,7 +1091,6 @@ class DwcArchiverOccurrence{
 		}
 		$fileName = str_replace(array(' ','"',"'"),'',$fileNameSeed).'_DwC-A.zip';
 		
-		$this->applyConditions();
 		if(!$this->targetPath) $this->setTargetPath();
 		$archiveFile = '';
 		$this->logOrEcho('Creating DwC-A file: '.$fileName."\n");
@@ -1696,7 +1712,7 @@ class DwcArchiverOccurrence{
 					unset($r['collid']);
 				}
 				//Add upper taxonomic data
-				if($r['family']){
+				if($r['family'] && $this->upperTaxonomy){
 					$famStr = strtolower($r['family']);
 					if(isset($this->upperTaxonomy[$famStr]['o'])){
 						$r['t_order'] = $this->upperTaxonomy[$famStr]['o'];
@@ -1733,7 +1749,6 @@ class DwcArchiverOccurrence{
 	}
 	
 	public function getOccurrenceFile(){
-		$this->applyConditions();
 		if(!$this->targetPath) $this->setTargetPath();
 		$filePath = $this->writeOccurrenceFile();
 		return $filePath;
@@ -2068,71 +2083,6 @@ class DwcArchiverOccurrence{
 		return true;
 	}
 
-	//GeoLocate functions 
-	public function publishCoGeoFile($collid = 0){
-		//Publish GeoLocate Community File
-		if($collid && is_numeric($collid)){
-			$this->setCharSetOut('UTF-8');
-			$dwcaHandler->setSchemaType($schema);
-			$dwcaHandler->setExtended($extended);
-			$dwcaHandler->setDelimiter($format);
-			$dwcaHandler->setVerbose(0);
-			$dwcaHandler->setRedactLocalities(0);
-			$dwcaHandler->setIncludeDets(1);
-			$dwcaHandler->setIncludeImgs(1);
-			$dwcaHandler->setCollArr($collid);
-			if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
-		
-		
-			$archiveFile = $dwcaHandler->createDwcArchive();
-		
-			if($archiveFile){
-				//ob_start();
-				header('Content-Description: Symbiota Occurrence Backup File (DwC-Archive data package)');
-				header('Content-Type: application/zip');
-				header('Content-Disposition: attachment; filename='.basename($archiveFile));
-				header('Content-Transfer-Encoding: binary');
-				header('Expires: 0');
-				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-				header('Pragma: public');
-				header('Content-Length: ' . filesize($archiveFile));
-				//od_end_clean();
-				readfile($archiveFile);
-				unlink($archiveFile);
-			}
-			else{
-				echo 'ERROR creating output file. Query probably did not include any records.';
-			}
-			
-			
-			//Request is coming from exporter.php for collection manager tools
-			$dwcaHandler->setCollArr($_POST['targetcollid']);
-			if(array_key_exists('processingstatus',$_POST) && $_POST['processingstatus']){
-				$dwcaHandler->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);
-			}
-			if(array_key_exists('customfield1',$_POST) && $_POST['customfield1']){
-				$dwcaHandler->addCondition($_POST['customfield1'],$_POST['customtype1'],$_POST['customvalue1']);
-			}
-			if(array_key_exists('customfield2',$_POST) && $_POST['customfield2']){
-				$dwcaHandler->addCondition($_POST['customfield2'],$_POST['customtype2'],$_POST['customvalue2']);
-			}
-			
-			header('Content-Description: COGE Community File');
-			header('Content-Type: application/zip');
-			header('Content-Disposition: attachment; filename='.basename($outputFile));
-			header('Content-Transfer-Encoding: binary');
-			header('Expires: 0');
-			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			header('Pragma: public');
-			header('Content-Length: ' . filesize($outputFile));
-			ob_clean();
-			flush();
-			//od_end_clean();
-			readfile($outputFile);
-			unlink($outputFile);
-		}
-	}
-
 	//getters, setters, and misc functions
 	public function getDwcaItems($collid = 0){
 		global $serverRoot;
@@ -2168,47 +2118,48 @@ class DwcArchiverOccurrence{
 	}
 
 	private function setUpperTaxonomy(){
-		if(!$this->upperTaxonomy){
-			$upperTaxonomy = '';
-			$sqlOrder = 'SELECT t.sciname AS family, t2.sciname AS taxonorder '.
-				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '. 
-				'WHERE t.rankid = 140 AND t2.rankid = 100';
-			$rsOrder = $this->conn->query($sqlOrder);
-			while($rowOrder = $rsOrder->fetch_object()){
-				$this->upperTaxonomy[strtolower($rowOrder->family)]['o'] = $rowOrder->taxonorder;
+		if($this->schemaType != 'coge'){
+			if(!$this->upperTaxonomy){
+				$sqlOrder = 'SELECT t.sciname AS family, t2.sciname AS taxonorder '.
+					'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+					'INNER JOIN taxa t2 ON e.parenttid = t2.tid '. 
+					'WHERE t.rankid = 140 AND t2.rankid = 100';
+				$rsOrder = $this->conn->query($sqlOrder);
+				while($rowOrder = $rsOrder->fetch_object()){
+					$this->upperTaxonomy[strtolower($rowOrder->family)]['o'] = $rowOrder->taxonorder;
+				}
+				$rsOrder->free();
+				
+				$sqlClass = 'SELECT t.sciname AS family, t2.sciname AS taxonclass '.
+					'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+					'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+					'WHERE t.rankid = 140 AND t2.rankid = 60';
+				$rsClass = $this->conn->query($sqlClass);
+				while($rowClass = $rsClass->fetch_object()){
+					$this->upperTaxonomy[strtolower($rowClass->family)]['c'] = $rowClass->taxonclass;
+				}
+				$rsClass->free();
+				
+				$sqlPhylum = 'SELECT t.sciname AS family, t2.sciname AS taxonphylum '.
+					'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+					'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+					'WHERE t.rankid = 140 AND t2.rankid = 30';
+				$rsPhylum = $this->conn->query($sqlPhylum);
+				while($rowPhylum = $rsPhylum->fetch_object()){
+					$this->upperTaxonomy[strtolower($rowPhylum->family)]['p'] = $rowPhylum->taxonphylum;
+				}
+				$rsPhylum->free();
+				
+				$sqlKing = 'SELECT t.sciname AS family, t2.sciname AS kingdom '.
+					'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+					'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+					'WHERE t.rankid = 140 AND t2.rankid = 10';
+				$rsKing = $this->conn->query($sqlKing);
+				while($rowKing = $rsKing->fetch_object()){
+					$this->upperTaxonomy[strtolower($rowKing->family)]['k'] = $rowKing->kingdom;
+				}
+				$rsKing->free();
 			}
-			$rsOrder->free();
-			
-			$sqlClass = 'SELECT t.sciname AS family, t2.sciname AS taxonclass '.
-				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
-				'WHERE t.rankid = 140 AND t2.rankid = 60';
-			$rsClass = $this->conn->query($sqlClass);
-			while($rowClass = $rsClass->fetch_object()){
-				$this->upperTaxonomy[strtolower($rowClass->family)]['c'] = $rowClass->taxonclass;
-			}
-			$rsClass->free();
-			
-			$sqlPhylum = 'SELECT t.sciname AS family, t2.sciname AS taxonphylum '.
-				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
-				'WHERE t.rankid = 140 AND t2.rankid = 30';
-			$rsPhylum = $this->conn->query($sqlPhylum);
-			while($rowPhylum = $rsPhylum->fetch_object()){
-				$this->upperTaxonomy[strtolower($rowPhylum->family)]['p'] = $rowPhylum->taxonphylum;
-			}
-			$rsPhylum->free();
-			
-			$sqlKing = 'SELECT t.sciname AS family, t2.sciname AS kingdom '.
-				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
-				'WHERE t.rankid = 140 AND t2.rankid = 10';
-			$rsKing = $this->conn->query($sqlKing);
-			while($rowKing = $rsKing->fetch_object()){
-				$this->upperTaxonomy[strtolower($rowKing->family)]['k'] = $rowKing->kingdom;
-			}
-			$rsKing->free();
 		}
 	}
 
@@ -2247,14 +2198,8 @@ class DwcArchiverOccurrence{
 
 	public function setSchemaType($type){
 		//dwc, symbiota, backup, coge
-		if($type == 'dwc'){
-			$this->schemaType = 'dwc';
-		}
-		elseif($type == ''){
-			$this->schemaType = 'backup';
-		}
-		elseif($type == ''){
-			$this->schemaType = 'coge';
+		if(in_array($type, array('dwc','backup','coge'))){
+			$this->schemaType = $type;
 		}
 		else{
 			$this->schemaType = 'symbiota';

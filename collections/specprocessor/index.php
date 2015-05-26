@@ -15,7 +15,18 @@ $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
 $spNlpId = array_key_exists('spnlpid',$_REQUEST)?$_REQUEST['spnlpid']:0;
 $procStatus = array_key_exists('procstatus',$_REQUEST)?$_REQUEST['procstatus']:'unprocessed';
 
+$displayMode = array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode']:0;
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
+
+//Sanitation
+if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
+if(!is_numeric($collid)) $collid = 0;
+if(!is_numeric($spprId)) $spprId = 0;
+if(!is_numeric($spNlpId)) $spNlpId = 0;
+if($procStatus && !preg_match('/^[a-zA-Z]+$/',$procStatus)) $procStatus = '';
+if(!is_numeric($displayMode)) $displayMode = 0;
+if(!is_numeric($tabIndex)) $tabIndex = 0;
+
 
 $specManager = new SpecProcessorManager();
 
@@ -131,7 +142,7 @@ if($isEditor){
 				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">NLP</a></li>
 				         -->
 				        <li><a href="reports.php?collid=<?php echo $collid.'&menu='.(isset($_REQUEST['menu'])?$_REQUEST['menu']:''); ?>">Reports</a></li>
-				        <li><a href="exporter.php?collid=<?php echo $collid; ?>">Exporter</a></li>
+				        <li><a href="exporter.php?collid=<?php echo $collid.'&displaymode='.$displayMode; ?>">Exporter</a></li>
 				    </ul>
 					<div id="introdiv">
 						<h1>Specimen Processor Control Panel</h1>

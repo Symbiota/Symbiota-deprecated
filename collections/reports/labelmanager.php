@@ -177,7 +177,7 @@ if($isEditor){
 		}
 		else{
 			if(stripos(strtolower($datasetManager->getMetaDataTerm('colltype')), "observation") !== false){
-				echo '<a href="../../profile/viewprofile.php?tabindex=1">Peronsal Management Menu</a> &gt;&gt; ';
+				echo '<a href="../../profile/viewprofile.php?tabindex=1">Personal Management Menu</a> &gt;&gt; ';
 			}
 			else{
 				echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management Panel</a> &gt;&gt; ';

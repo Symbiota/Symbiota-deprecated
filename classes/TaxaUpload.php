@@ -658,7 +658,7 @@ class TaxaUpload{
 		$sql = 'UPDATE (uploadtaxa ut INNER JOIN taxa t ON ut.unitname1 = t.sciname) '.
 			'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'SET ut.family = ts.family '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ut.rankid > 140 AND t.rankid = 180 AND ts.family is not null AND (ut.family IS NULL OR ts.family <> ut.family)';
+			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ut.rankid > 140 AND t.rankid = 180 AND ts.family is not null AND (ut.family IS NULL)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -666,7 +666,7 @@ class TaxaUpload{
 			'INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
 			'INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid '.
 			'SET ut.family = t2.sciname '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ut.rankid > 140 AND t.rankid = 140 AND ts.tid <> ts.tidaccepted';
+			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ut.rankid > 140 AND t.rankid = 140 AND ts.tid <> ts.tidaccepted AND ut.family IS NULL ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -849,7 +849,7 @@ class TaxaUpload{
 		}
 
 		//Get bad counts
-		$sql = 'SELECT notes, count(*) as cnt FROM uploadtaxa WHERE notes IS NOT NULL GROUP BY notes';
+		$sql = 'SELECT notes, count(*) as cnt FROM uploadtaxa WHERE notes LIKE "FAILED%" GROUP BY notes';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$this->statArr['bad'][substr($r->notes,7)] = $r->cnt;

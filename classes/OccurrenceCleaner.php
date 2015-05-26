@@ -410,6 +410,204 @@ class OccurrenceCleaner extends Manager{
 		}
 	}
 
+	//Geographic functions
+	public function echoCountryClean(){
+		//Trim fields
+		echo '<div>General cleaning... ';
+		flush();
+		ob_flush();
+		$sqlTrim = 'UPDATE omoccurrences SET country = trim(country) WHERE ((country LIKE " %") OR (country LIKE "% ")) AND collid = '.$this->collid;
+		$this->conn->query($sqlTrim);
+		
+		//Trim fields
+		$sqlEmpty = 'UPDATE omoccurrences SET country = NULL WHERE (country = "")';
+		$this->conn->query($sqlEmpty);
+		echo 'Done!</div>';
+		flush();
+		ob_flush();
+	}		
+
+	public function echoCountryReport(){
+		//Get bad country count
+		echo '<div>Questionable countries: ';
+		flush();
+		ob_flush();
+		$sql = 'SELECT COUNT(o.occid) AS cnt '.
+			'FROM omoccurrences o LEFT JOIN lkupcountry l ON o.country = l.countryname '.
+			'WHERE o.country IS NOT NULL AND o.collid = '.$this->collid.' AND l.countryid IS NULL ';
+		$rs = $this->conn->query($sql); 
+		if($r = $rs->fetch_object()){
+			echo $r->cnt;
+			if($r->cnt) echo ' => <a href="fieldcleaner.php?collid='.$this->collid.'&target=country&mode=bad"><b>Fix Values</b></a>';
+			echo '</div>';
+			flush();
+			ob_flush();
+		}
+		$rs->free();
+		//Get Null country and not null state county
+		echo '<div>Null countries: ';
+		flush();
+		ob_flush();
+		$sql = 'SELECT COUNT(o.occid) AS cnt '.
+			'FROM omoccurrences o '.
+			'WHERE o.country IS NULL AND o.stateprovince IS NOT NULL AND o.collid = '.$this->collid;
+		$rs = $this->conn->query($sql); 
+		if($r = $rs->fetch_object()){
+			echo $r->cnt.'</div>';
+			flush();
+			ob_flush();
+		}
+		$rs->free();
+		
+		
+		//Get null country count 
+	}
+
+	public function getBadCountryArr(){
+		$retArr = array();
+		$sql = 'SELECT country, count(*) as cnt '.
+			'FROM omoccurrences o LEFT JOIN lkupcountry l ON o.country = l.countryname '.
+			'WHERE o.country IS NOT NULL AND o.collid = '.$this->collid.' AND l.countryid IS NULL '.
+			'GROUP BY o.country ';
+		$rs = $this->conn->query($sql); 
+		while($r = $rs->fetch_object()){
+			$cStr = $r->country.' ('.$r->cnt.')';
+			$retArr[] = $cStr;
+		}
+		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+	
+	public function getGoodCountryArr(){
+		$retArr = array();
+		$sql = 'SELECT country '.
+			'FROM lkupcountry ';
+		$rs = $this->conn->query($sql); 
+		while($r = $rs->fetch_object()){
+			$retArr[] = $r->country;
+		}
+		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+	
+	public function getStateArr($country, $limitToBad = true){
+		$retArr = array();
+		$sql = '';
+		if($limitToBad){
+			$sql = 'SELECT o.stateprovince, count(*) as cnt '.
+				'FROM omoccurrences o LEFT JOIN lkupstateprovince l ON o.stateprovince = l.statename '.
+				'WHERE o.stateprovince IS NOT NULL AND o.collid = '.$this->collid.' AND l.stateid IS NULL ';
+			if($country) $sql .= 'AND o.country = "'.$country.'" ';
+			$sql .= 'GROUP BY o.stateprovince ';
+		}
+		else{
+			$sql = 'SELECT stateprovince '.
+				'FROM omoccurrences '.
+				'WHERE o.collid = '.$this->collid.' AND stateprovince IS NOT NULL ';
+			if($country) $sql .= 'AND o.country = "'.$country.'" ';
+		}
+		$rs = $this->conn->query($sql); 
+		while($r = $rs->fetch_object()){
+			$cStr = $r->stateprovince;
+			if($limitToBad) $cStr .= ' ('.$r->cnt.')';
+			$retArr[] = $cStr;
+		}
+		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+	
+	public function getGoodStateArr($country = ''){
+		$retArr = array();
+		$sql = 'SELECT s.statename '.
+			'FROM lkupstateprovince s ';
+		if($country) $sql .= 'INNER JOIN lkupcountry c ON s.countryid = c.countryid '.
+			'WHERE c.country = "'.$country.'"';
+		$rs = $this->conn->query($sql); 
+		while($r = $rs->fetch_object()){
+			$retArr[] = $r->statename;
+		}
+		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+	
+	
+	public function getCountyArr($state, $limitToBad = true){
+		$retArr = array();
+		$sql = '';
+		if($limitToBad){
+			$sql = 'SELECT o.county, count(o.occid) as cnt '.
+				'FROM omoccurrences o LEFT JOIN lkupcounty l ON o.county = l.countyname '.
+				'WHERE o.county IS NOT NULL AND o.collid = '.$this->collid.' AND l.countyid IS NULL ';
+			if($state) $sql .= 'AND o.stateprovince = "'.$state.'" ';
+			$sql .= 'GROUP BY o.county ';
+		}
+		else{
+			$sql = 'SELECT county '.
+				'FROM omoccurrences '.
+				'WHERE county IS NOT NULL AND o.collid = '.$this->collid;
+		}
+		$rs = $this->conn->query($sql); 
+		while($r = $rs->fetch_object()){
+			$cStr = $r->county;
+			if($limitToBad) $cStr .= ' ('.$r->cnt.')';
+			$retArr[] = $cStr;
+		}
+		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+	
+	public function getGoodCountyArr($state){
+		$retArr = array();
+		$sql = 'SELECT county '.
+			'FROM lkupcounty c ';
+		if($state){
+			$sql .= ' INNER JOIN lkupstateprovince s ON c.stateid = s.stateid '.
+				'WHERE s.statename = "'.$state.'"';
+		}
+		$rs = $this->conn->query($sql); 
+		while($r = $rs->fetch_object()){
+			$retArr[] = $r->county;
+		}
+		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+
+	public function getBadCountryState(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT o.country, o.stateprovince '.
+			'FROM omoccurrences o INNER JOIN lkupcountry c ON o.country = c.countryname '.
+			'LEFT JOIN lkupstateprovince s ON c.countryid = s.countryid AND s.statename = o.stateprovince '.
+			'WHERE s.countryid IS NULL AND o.country IS NOT NULL AND o.stateprovince IS NOT NULL';
+		$rs = $this->conn->query($sql); 
+		while($r = $rs->fetch_object()){
+			$retArr[] = '';
+		}
+		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+
+	public function getBadStateCounty(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT o.country, o.stateprovince '.
+			'FROM omoccurrences o INNER JOIN lkupstateprovince s ON o.stateprovince = s.statename '.
+			'LEFT JOIN lkupcounty c ON s.stateid = c.stateid AND c.countyname = o.county '.
+			'WHERE c.countyid IS NULL AND o.stateprovince IS NOT NULL AND o.county IS NOT NULL';
+		$rs = $this->conn->query($sql); 
+		while($r = $rs->fetch_object()){
+			$retArr[] = '';
+		}
+		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+
 	//Setters and getters
 	public function setCollId($collid){
 		if(is_numeric($collid)){
