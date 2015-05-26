@@ -17,6 +17,7 @@ $showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0
 $showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
 $searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
 $searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
+$defaultOverride = array_key_exists("defaultoverride",$_REQUEST)?$_REQUEST["defaultoverride"]:0;
 $editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
 $printMode = array_key_exists("printmode",$_REQUEST)?$_REQUEST["printmode"]:0; 
 $exportDoc = array_key_exists("exportdoc",$_REQUEST)?$_REQUEST["exportdoc"]:0;
@@ -25,6 +26,7 @@ $statusStr='';
 
 //Search Synonyms is default
 if($action != "Rebuild List" && !array_key_exists('dllist_x',$_POST)) $searchSynonyms = 1;
+if($action == "Rebuild List") $defaultOverride = 1;
 
 $clManager = new ChecklistManager();
 if($clValue){
@@ -41,7 +43,7 @@ $showDetails = 0;
 if($clValue && $clArray["defaultSettings"]){
 	$defaultArr = json_decode($clArray["defaultSettings"], true);
 	$showDetails = $defaultArr["ddetails"];
-	if($action != "Rebuild List"){
+	if(!$defaultOverride){
 		$showCommon = $defaultArr["dcommon"];
 		$showImages = $defaultArr["dimages"]; 
 		$showVouchers = $defaultArr["dvouchers"];
@@ -336,6 +338,7 @@ if($clValue || $dynClid){
 									<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
 									<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
 									<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
+									<input type='hidden' name='defaultoverride' value='1' />
 									<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
 									<input type="submit" name="submitaction" value="Rebuild List" onclick="changeOptionFormAction('checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>','_self');" />
 									<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Download Checklist">
@@ -453,6 +456,7 @@ if($clValue || $dynClid){
 						$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
 						$argStr .= ($pid?"&pid=".$pid:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
 						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
+						$argStr .= ($defaultOverride?"&defaultoverride=".$defaultOverride:"");
 						echo "<hr /><div>Page <b>".($pageNumber)."</b> of <b>$pageCount</b>: ";
 						for($x=1;$x<=$pageCount;$x++){
 							if($x>1) echo " | ";
