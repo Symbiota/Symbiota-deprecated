@@ -918,11 +918,6 @@ class OccurrenceManager{
 
 	private function readRequestVariables(){
 		global $clientRoot;
-		
-		function isArrayNumeric($arr){
-			return is_numeric($arr) || $arr == 'allspec' || $arr == 'allobs' || $arr == 'all';
-		}
-
 		//Search will be confinded to a clid vouchers, collid, catid, or will remain open to all collection
 		if(array_key_exists('clid',$_REQUEST)){
 			//Limit by checklist voucher links
@@ -934,7 +929,6 @@ class OccurrenceManager{
 				}
 			}
 			else{
-				$clidIn = array_filter($clidIn,'isArrayNumeric');
 				$clidStr = $this->conn->real_escape_string(implode(',',array_unique($clidIn)));
 			}
 		 	if($this->useCookies) setCookie("collclid",$clidStr,0,($clientRoot?$clientRoot:'/'));
@@ -954,7 +948,6 @@ class OccurrenceManager{
 				}
 			}
 			else{
-				$dbs = array_filter($dbs,'isArrayNumeric');
 				$dbStr = $this->conn->real_escape_string(implode(',',array_unique($dbs))).';';
 			}
 			if(strpos($dbStr,'allspec') !== false){
