@@ -12,7 +12,8 @@ $sql = 'SELECT count(t.tid) as ct, t.tid, t.sciname FROM taxa t '.
 $result = $con->query($sql);
 while ($r = $result->fetch_object()) {
     $retArr[] = (object)array(
-        'value' => $r->tid,
+        'id' => $r->sciname,
+		'value' => $r->tid,
         'label' => $r->sciname . ' ('. $r->ct . ')');
 }
 $con->close();

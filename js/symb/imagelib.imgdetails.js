@@ -8,7 +8,7 @@ $(document).ready(function() {
 			return false;
 		},
 		select: function( event, ui ) {
-			$( "#targettaxon" ).val(ui.item.label);
+			$( "#targettaxon" ).val(ui.item.id);
 			//$( "#targettid" ).val(ui.item.value);
 			return false;
 		}
