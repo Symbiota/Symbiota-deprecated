@@ -261,7 +261,7 @@ if($coordArr && !is_numeric($coordArr)){
 		function getMarker(newLat, newLng, newTitle, color, newIcon, type, tid, occid, clid){
 			var m = new google.maps.Marker({
 				position: new google.maps.LatLng(newLat, newLng),
-				title: newTitle,
+				text: newTitle,
 				<?php
 				if($clusterOff=="y"){
 					?>
@@ -743,12 +743,55 @@ if($coordArr && !is_numeric($coordArr)){
 						?>
 						google.maps.event.addListener(
 							m<?php echo $occId; ?>, 
-							'rightclick', 
+							'mouseover', 
 							function(){ 
-								closeAllInfoWins();
 								occid = m<?php echo $occId; ?>.occid;
 								clid = m<?php echo $occId; ?>.clid;
-								openIndPU(occid,clid); 
+								markerLabel = m<?php echo $occId; ?>.text;
+								boxPosition = m<?php echo $occId; ?>.getPosition();
+								boxText = '<div>'+markerLabel+'<br /><a href="#" onclick="closeAllInfoWins();openIndPU('+occid+','+clid+');return false;"><span style="color:blue;">See Details</span></a></div>';
+								var myOptions<?php echo $occId; ?> = {
+									content: boxText,
+									boxStyle: {
+										border: "1px solid black",
+										background: "#ffffff",
+										textAlign: "center",
+										padding: "2px",
+										fontSize: "12px"
+									},
+									disableAutoPan: true,
+									pixelOffset: new google.maps.Size(0,10),
+									position: boxPosition,
+									isHidden: false,
+									closeBoxURL: "",
+									pane: "floatPane",
+									enableEventPropagation: false
+								};
+								
+								mouseoverTimeout<?php echo $occId; ?> = setTimeout(
+									function(){
+										ibLabel<?php echo $occId; ?> = new InfoBox(myOptions<?php echo $occId; ?>);
+										ibLabel<?php echo $occId; ?>.open(map); 
+									},1000
+								);
+							}
+						);
+						
+						google.maps.event.addListener(
+							m<?php echo $occId; ?>, 
+							'mouseout', 
+							function(){ 
+								if(mouseoverTimeout<?php echo $occId; ?>){   
+									clearTimeout(mouseoverTimeout<?php echo $occId; ?>); 
+									mouseoverTimeout<?php echo $occId; ?> = null; 
+								}
+								mouseoutTimeout<?php echo $occId; ?> = setTimeout(
+									function(){
+										if(ibLabel<?php echo $occId; ?>){
+											ibLabel<?php echo $occId; ?>.close();
+										}
+									},3000
+								);
 							}
 						);
 						<?php
