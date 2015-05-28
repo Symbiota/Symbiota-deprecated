@@ -1118,7 +1118,7 @@ class SpecUploadBase extends SpecUpload{
 		$speciesCnt = 0;
 		$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
-			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount '.
 			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
 			'WHERE (o.collid = '.$this->collId.') ';
 		$rs = $this->conn->query($sql);
