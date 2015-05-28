@@ -438,7 +438,8 @@ function openOccidInfoBox(label,lat,lon){
 			border: "1px solid black",
 			background: "#ffffff",
 			textAlign: "center",
-			fontSize: "8pt"
+			padding: "2px",
+			fontSize: "12px"
 		},
 		disableAutoPan: true,
 		pixelOffset: new google.maps.Size(-25, 0),
@@ -446,7 +447,7 @@ function openOccidInfoBox(label,lat,lon){
 		isHidden: false,
 		closeBoxURL: "",
 		pane: "floatPane",
-		enableEventPropagation: true
+		enableEventPropagation: false
 	};
 
 	ibLabel = new InfoBox(myOptions);
