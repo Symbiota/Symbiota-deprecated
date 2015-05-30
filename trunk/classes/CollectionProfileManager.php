@@ -356,8 +356,8 @@ class CollectionProfileManager {
 		}
 		return $status;
 	}
-
-	public function updateStatistics(){
+	
+	public function updateRecords(){
 		set_time_limit(800);
 		$writeConn = MySQLiConnectionFactory::getCon("write");
 
@@ -399,7 +399,30 @@ class CollectionProfileManager {
 		echo $writeConn->affected_rows.' records updated</li>';
 		*/
 		
-		echo '<li>Calculating specimen, georeference, family, genera, and species counts... ';
+		/*
+		echo '<li>Updating georeference indexing... ';
+		ob_flush();
+		flush();
+		$sql = 'REPLACE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
+			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
+			'FROM omoccurrences o '.
+			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
+			'AND o.decimallongitude IS NOT NULL';
+		$writeConn->query($sql);
+		
+		$sql = 'DELETE FROM omoccurgeoindex WHERE InitialTimestamp < DATE_SUB(CURDATE(), INTERVAL 1 DAY)';
+		$writeConn->query($sql);
+		echo 'Done!</li>';
+		*/
+	}
+
+	public function updateStatistics($messages){
+		set_time_limit(800);
+		$writeConn = MySQLiConnectionFactory::getCon("write");
+
+		if($messages){
+			echo '<li>Calculating specimen, georeference, family, genera, and species counts... ';
+		}
 		$returnArr = Array();
 		$recordCnt = 0;
 		$georefCnt = 0;
@@ -432,9 +455,13 @@ class CollectionProfileManager {
 			$returnArr['SpecimensNullCountry'] = $r->SpecimensNullCountry;
 		}
 		$rs->free();
-		echo 'Done!</li>';
+		if($messages){
+			echo 'Done!</li>';
+		}
 		
-		echo '<li>Calculating number of specimens imaged... ';
+		if($messages){
+			echo '<li>Calculating number of specimens imaged... ';
+		}
 		ob_flush();
 		flush();
 		$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
@@ -445,9 +472,13 @@ class CollectionProfileManager {
 			$returnArr['imgcnt'] = $r->imgcnt;
 		}
 		$rs->free();
-		echo 'Done!</li>';
+		if($messages){
+			echo 'Done!</li>';
+		}
 		
-		echo '<li>Calculating genetic resources counts... ';
+		if($messages){
+			echo '<li>Calculating genetic resources counts... ';
+		}
 		ob_flush();
 		flush();
 		$sql = 'SELECT COUNT(CASE WHEN g.resourceurl LIKE "http://www.boldsystems%" THEN o.occid ELSE NULL END) AS boldcnt, '.
@@ -460,9 +491,13 @@ class CollectionProfileManager {
 			$returnArr['gencnt'] = $r->gencnt;
 		}
 		$rs->free();
-		echo 'Done!</li>';
+		if($messages){
+			echo 'Done!</li>';
+		}
 		
-		echo '<li>Calculating reference counts... ';
+		if($messages){
+			echo '<li>Calculating reference counts... ';
+		}
 		ob_flush();
 		flush();
 		$sql = 'SELECT count(r.occid) as refcnt '.
@@ -473,9 +508,13 @@ class CollectionProfileManager {
 			$returnArr['refcnt'] = $r->refcnt;
 		}
 		$rs->free();
-		echo 'Done!</li>';
+		if($messages){
+			echo 'Done!</li>';
+		}
 		
-		echo '<li>Calculating counts per family... ';
+		if($messages){
+			echo '<li>Calculating counts per family... ';
+		}
 		ob_flush();
 		flush();
 		$sql = 'SELECT o.family, COUNT(o.occid) AS SpecimensPerFamily, COUNT(o.decimalLatitude) AS GeorefSpecimensPerFamily, '.
@@ -487,16 +526,22 @@ class CollectionProfileManager {
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			if($r->family){
-				$returnArr['families'][$r->family]['SpecimensPerFamily'] = $r->SpecimensPerFamily;
-				$returnArr['families'][$r->family]['GeorefSpecimensPerFamily'] = $r->GeorefSpecimensPerFamily;
-				$returnArr['families'][$r->family]['IDSpecimensPerFamily'] = $r->IDSpecimensPerFamily;
-				$returnArr['families'][$r->family]['IDGeorefSpecimensPerFamily'] = $r->IDGeorefSpecimensPerFamily;
+				$family = str_replace('"',"",$r->family);
+				$family = str_replace("'","",$family);
+				$returnArr['families'][$family]['SpecimensPerFamily'] = $r->SpecimensPerFamily;
+				$returnArr['families'][$family]['GeorefSpecimensPerFamily'] = $r->GeorefSpecimensPerFamily;
+				$returnArr['families'][$family]['IDSpecimensPerFamily'] = $r->IDSpecimensPerFamily;
+				$returnArr['families'][$family]['IDGeorefSpecimensPerFamily'] = $r->IDGeorefSpecimensPerFamily;
 			}
 		}
 		$rs->free();
-		echo 'Done!</li>';
+		if($messages){
+			echo 'Done!</li>';
+		}
 		
-		echo '<li>Calculating counts per country... ';
+		if($messages){
+			echo '<li>Calculating counts per country... ';
+		}
 		ob_flush();
 		flush();
 		$sql = 'SELECT o.country, COUNT(o.occid) AS CountryCount, COUNT(o.decimalLatitude) AS GeorefSpecimensPerCountry, '.
@@ -508,16 +553,22 @@ class CollectionProfileManager {
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			if($r->country){
-				$returnArr['countries'][$r->country]['CountryCount'] = $r->CountryCount;
-				$returnArr['countries'][$r->country]['GeorefSpecimensPerCountry'] = $r->GeorefSpecimensPerCountry;
-				$returnArr['countries'][$r->country]['IDSpecimensPerCountry'] = $r->IDSpecimensPerCountry;
-				$returnArr['countries'][$r->country]['IDGeorefSpecimensPerCountry'] = $r->IDGeorefSpecimensPerCountry;
+				$country = str_replace('"',"",$r->country);
+				$country = str_replace("'","",$country);
+				$returnArr['countries'][$country]['CountryCount'] = $r->CountryCount;
+				$returnArr['countries'][$country]['GeorefSpecimensPerCountry'] = $r->GeorefSpecimensPerCountry;
+				$returnArr['countries'][$country]['IDSpecimensPerCountry'] = $r->IDSpecimensPerCountry;
+				$returnArr['countries'][$country]['IDGeorefSpecimensPerCountry'] = $r->IDGeorefSpecimensPerCountry;
 			}
 		}
 		$rs->free();
-		echo 'Done!</li>';
+		if($messages){
+			echo 'Done!</li>';
+		}
 		
-		echo '<li>Updating statistics records... ';
+		if($messages){
+			echo '<li>Updating statistics records... ';
+		}
 		ob_flush();
 		flush();
 		$returnArrJson = json_encode($returnArr);
@@ -526,25 +577,13 @@ class CollectionProfileManager {
 			"cs.speciescnt = ".$speciesCnt.",cs.datelastmodified = CURDATE(),cs.dynamicProperties = '".$returnArrJson."' ".
 			'WHERE cs.collid = '.$this->collid;
 		$writeConn->query($sql);
-		echo 'Done!</li> ';
+		if($messages){
+			echo 'Done!</li>';
+		}
 		
-		/*
-		echo '<li>Updating georeference indexing... ';
-		ob_flush();
-		flush();
-		$sql = 'REPLACE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
-			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
-			'FROM omoccurrences o '.
-			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
-			'AND o.decimallongitude IS NOT NULL';
-		$writeConn->query($sql);
-		
-		$sql = 'DELETE FROM omoccurgeoindex WHERE InitialTimestamp < DATE_SUB(CURDATE(), INTERVAL 1 DAY)';
-		$writeConn->query($sql);
-		echo 'Done!</li>';
-		*/
-		
-		echo '<li>Finished updating collection statistics</li>';
+		if($messages){
+			echo '<li>Finished updating collection statistics</li>';
+		}
 	}
 
 	public function getTaxonCounts($f=''){
@@ -811,69 +850,55 @@ class CollectionProfileManager {
 		}
 		return $retArr;
 	}
-
-	public function runStatistics($collId){
-		$returnArr = Array();
-		$sql = 'SELECT CollID, CollectionName FROM omcollections WHERE CollID IN('.$collId.') ORDER BY CollectionName ';
+	
+	public function batchUpdateStatistics($collId){
+		$collArr = Array();
+		$sql = "SELECT c.collid, c.CollectionName ".
+				"FROM omcollections c ".
+				"WHERE c.collid IN(".$collId.") ";
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$returnArr['collections'][$r->CollID] = $r->CollectionName;
+			$collArr[$r->collid] = $r->CollectionName;
 		}
-		$sql2 = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
-			'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(o.typeStatus) AS TypeCount, '.
+		$rs->free();
+		echo '<ul>';
+		foreach($collArr as $k => $name){
+			$this->setCollid($k);
+			$this->updateStatistics(false);
+			echo '<li>'.$name.' updated!</li>';
+		}
+		echo '</ul>';
+		echo 'Statistics update complete!';
+	}
+	
+	public function runStatistics($collId){
+		$returnArr = Array();
+		$sql = "SELECT c.collid, c.CollectionName, IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
+				"cs.dynamicProperties ".
+				"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
+				"WHERE c.collid IN(".$collId.") ";
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$returnArr[$r->CollectionName]['collid'] = $r->collid;
+			$returnArr[$r->CollectionName]['CollectionName'] = $r->CollectionName;
+			$returnArr[$r->CollectionName]['recordcnt'] = $r->recordcnt;
+			$returnArr[$r->CollectionName]['georefcnt'] = $r->georefcnt;
+			$returnArr[$r->CollectionName]['dynamicProperties'] = $r->dynamicProperties;
+		}
+		$sql2 = 'SELECT COUNT(DISTINCT o.family) AS FamilyCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
-			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS SpecimensCountID, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
-			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount, '.
-			'COUNT(CASE WHEN ISNULL(o.family) THEN o.occid ELSE NULL END) AS SpecimensNullFamily, '.
-			'COUNT(CASE WHEN ISNULL(o.country) THEN o.occid ELSE NULL END) AS SpecimensNullCountry, '.
-			'COUNT(CASE WHEN ISNULL(o.decimalLatitude) THEN o.occid ELSE NULL END) AS SpecimensNullLatitude '.
+			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount '.
 			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
 			'WHERE o.collid IN('.$collId.') ';
 		$rs = $this->conn->query($sql2);
 		while($r = $rs->fetch_object()){
-			$returnArr['SpecimenCount'] = $r->SpecimenCount;
-			$returnArr['GeorefCount'] = $r->GeorefCount;
-			$returnArr['SpecimensCountID'] = $r->SpecimensCountID;
-			$returnArr['FamilyCount'] = $r->FamilyCount;
-			$returnArr['GeneraCount'] = $r->GeneraCount;
-			$returnArr['SpeciesCount'] = $r->SpeciesCount;
+			$returnArr['familycnt'] = $r->FamilyCount;
+			$returnArr['genuscnt'] = $r->GeneraCount;
+			$returnArr['speciescnt'] = $r->SpeciesCount;
 			$returnArr['TotalTaxaCount'] = $r->TotalTaxaCount;
-			$returnArr['TypeCount'] = $r->TypeCount;
-			$returnArr['SpecimensNullFamily'] = $r->SpecimensNullFamily;
-			$returnArr['SpecimensNullCountry'] = $r->SpecimensNullCountry;
-			$returnArr['SpecimensNullLatitude'] = $r->SpecimensNullLatitude;
-		}
-		$sql3 = 'SELECT o.family, COUNT(o.occid) AS SpecimensPerFamily, COUNT(o.decimalLatitude) AS GeorefSpecimensPerFamily, '.
-			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerFamily, '.
-			'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerFamily '.
-			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-			'WHERE o.collid IN('.$collId.') '.
-			'GROUP BY o.family ';
-		$rs = $this->conn->query($sql3);
-		while($r = $rs->fetch_object()){
-			if($r->family){
-				$returnArr['families'][$r->family]['SpecimensPerFamily'] = $r->SpecimensPerFamily;
-				$returnArr['families'][$r->family]['GeorefSpecimensPerFamily'] = $r->GeorefSpecimensPerFamily;
-				$returnArr['families'][$r->family]['IDSpecimensPerFamily'] = $r->IDSpecimensPerFamily;
-				$returnArr['families'][$r->family]['IDGeorefSpecimensPerFamily'] = $r->IDGeorefSpecimensPerFamily;
-			}
-		}
-		$sql4 = 'SELECT o.country, COUNT(o.occid) AS CountryCount, COUNT(o.decimalLatitude) AS GeorefSpecimensPerCountry, '.
-			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerCountry, '.
-			'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerCountry '.
-			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-			'WHERE o.collid IN('.$collId.') '.
-			'GROUP BY o.country ';
-		$rs = $this->conn->query($sql4);
-		while($r = $rs->fetch_object()){
-			if($r->country){
-				$returnArr['countries'][$r->country]['CountryCount'] = $r->CountryCount;
-				$returnArr['countries'][$r->country]['GeorefSpecimensPerCountry'] = $r->GeorefSpecimensPerCountry;
-				$returnArr['countries'][$r->country]['IDSpecimensPerCountry'] = $r->IDSpecimensPerCountry;
-				$returnArr['countries'][$r->country]['IDGeorefSpecimensPerCountry'] = $r->IDGeorefSpecimensPerCountry;
-			}
 		}
 		$rs->free();
 		
