@@ -83,7 +83,8 @@ if($SYMB_UID){
 			if($action == 'UpdateStatistics'){
 				echo '<h2>Updating statistics related to this collection...</h2>';
 				echo '<ul>';
-				$collManager->updateStatistics();
+				$collManager->updateRecords();
+				$collManager->updateStatistics(true);
 				echo '</ul><hr/>';
 				$collData = $collManager->getCollectionData();
 			}
@@ -575,7 +576,7 @@ if($SYMB_UID){
 								<div><?php echo $collArr['fulldescription']; ?></div>
 								<div style='margin-top:5px;'>
 									<b>Contact:</b>
-									<?php echo $collArr['contact'].' ('.str_replace('@','&lt;at&gt;',$collArr['email']).')';?>
+									<?php echo $collArr['contact'].' ('.str_replace('@','&#64;',$collArr['email']).')';?>
 								</div>
 								<div style='margin-top:5px'>
 									<b>Home Page:</b>
