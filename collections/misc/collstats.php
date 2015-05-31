@@ -3,7 +3,7 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/CollectionProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
-ini_set('max_execution_time', 600); //600 seconds = 10 minutes
+ini_set('max_execution_time', 1200); //1200 seconds = 20 minutes
 
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
@@ -73,20 +73,6 @@ if($collId){
 				}
 				else{
 					$results['TypeCount'] = $dynPropTempArr['TypeCount'];
-				}
-				
-				if(array_key_exists("SpecimensNullFamily",$results)){
-					$results['SpecimensNullFamily'] = $results['SpecimensNullFamily'] + $dynPropTempArr['SpecimensNullFamily'];
-				}
-				else{
-					$results['SpecimensNullFamily'] = $dynPropTempArr['SpecimensNullFamily'];
-				}
-				
-				if(array_key_exists("SpecimensNullCountry",$results)){
-					$results['SpecimensNullCountry'] = $results['SpecimensNullCountry'] + $dynPropTempArr['SpecimensNullCountry'];
-				}
-				else{
-					$results['SpecimensNullCountry'] = $dynPropTempArr['SpecimensNullCountry'];
 				}
 				
 				if(array_key_exists("families",$dynPropTempArr)){
@@ -175,7 +161,7 @@ if($action != "Update Statistics"){
 					var collid = "";
 					for(i = 0; i < dbElements.length; i++){
 						var dbElement = dbElements[i];
-						if(dbElement.checked){
+						if(dbElement.checked && !isNaN(dbElement.value)){
 							if(c == true) collid = collid+",";
 							collid = collid + dbElement.value;
 							c = true;
@@ -616,23 +602,20 @@ if($action != "Update Statistics"){
 								</div>
 								<fieldset id="famdistbox" style="clear:both;margin-top:15px;width:800px;display:none;">
 									<legend><b>Family Distribution</b></legend>
-									<ul style="float: left">
-										<strong>Names</strong>
-										<?php
-										foreach($familyArr as $name => $data){
-											echo '<li>'.$name.'</li>';
-										}
-										echo "<br />";
-										echo "<li><strong>Total Specimens (w/ Family):</strong></li>";
-										echo "<li>Specimens w/ No Family:</li>";
-										?>
-									</ul>
-									<ul style="float:left;list-style-type:none;margin-left:-20px;">
-										<strong>Specimens</strong>
+									<table class="styledtable" style="width:780px;font-size:12px;">
+										<tr>
+											<th style="text-align:center;">Family</th>
+											<th style="text-align:center;">Specimens</th>
+											<th style="text-align:center;">Georeferenced</th>
+											<th style="text-align:center;">Species ID</th>
+											<th style="text-align:center;">Georeferenced<br />and<br />Species ID</th>
+										</tr>
 										<?php
 										$total = 0;
 										foreach($familyArr as $name => $data){
-											echo '<li>';
+											echo '<tr>';
+											echo '<td>'.wordwrap($name,52,"<br />\n",true).'</td>';
+											echo '<td>';
 											if(count($resultsTemp) == 1){
 												echo '<a href="../list.php?db[]='.$collId.'&reset=1&taxa='.$name.'" target="_blank">';
 											}
@@ -640,58 +623,36 @@ if($action != "Update Statistics"){
 											if(count($resultsTemp) == 1){
 												echo '</a>';
 											}
-											echo '</li>';
+											echo '</td>';
+											echo '<td>'.($data['GeorefSpecimensPerFamily']?round(100*($data['GeorefSpecimensPerFamily']/$data['SpecimensPerFamily'])):0).'%</td>';
+											echo '<td>'.($data['IDSpecimensPerFamily']?round(100*($data['IDSpecimensPerFamily']/$data['SpecimensPerFamily'])):0).'%</td>';
+											echo '<td>'.($data['IDGeorefSpecimensPerFamily']?round(100*($data['IDGeorefSpecimensPerFamily']/$data['SpecimensPerFamily'])):0).'%</td>';
+											echo '</tr>';
 											$total = $total + $data['SpecimensPerFamily'];
 										}
-										echo "<br />";
-										echo "<li><strong>".$total."</strong></li>";
-										echo "<li>".$results['SpecimensNullFamily']."</li>";
 										?>
-									</ul>
-									<ul style="float:left;list-style-type:none;margin-left:-20px;">
-										<strong>Georef</strong>
-										<?php
-										foreach($familyArr as $name => $data){
-											echo '<li>'.($data['GeorefSpecimensPerFamily']?round(100*($data['GeorefSpecimensPerFamily']/$data['SpecimensPerFamily'])):0).'%</li>';
-										}
-										?>
-									</ul>
-									<ul style="float:left;list-style-type:none;margin-left:-20px;">
-										<strong>Species ID</strong>
-										<?php
-										foreach($familyArr as $name => $data){
-											echo '<li>'.($data['IDSpecimensPerFamily']?round(100*($data['IDSpecimensPerFamily']/$data['SpecimensPerFamily'])):0).'%</li>';
-										}
-										?>
-									</ul>
-									<ul style="float:left;list-style-type:none;margin-left:-20px;">
-										<strong>Georef and ID</strong>
-										<?php
-										foreach($familyArr as $name => $data){
-											echo '<li>'.($data['IDGeorefSpecimensPerFamily']?round(100*($data['IDGeorefSpecimensPerFamily']/$data['SpecimensPerFamily'])):0).'%</li>';
-										}
-										?>
-									</ul>
+									</table>
+									<div style="margin-top:10px;">
+										<b>Total Specimens with Family:</b> <?php echo $total; ?><br />
+										Specimens without Family: <?php echo ($results['SpecimenCount']-$total); ?><br />
+									</div>
 								</fieldset>
 								<fieldset id="geodistbox" style="margin-top:15px;width:800px;display:none;">
 									<legend><b>Geographic Distribution</b></legend>
-									<ul style="float: left">
-										<strong>Names</strong>
-										<?php
-										foreach($countryArr as $name => $data){
-											echo '<li>'.$name.'</li>';
-										}
-										echo "<br />";
-										echo "<li><strong>Total Specimens (w/ Country):</strong></li>";
-										echo "<li>Specimens w/ No Country/Georef:</li>";
-										?>
-									</ul>
-									<ul style="float:left;list-style-type:none;margin-left:-20px;">
-										<strong>Specimens</strong>
+									<table class="styledtable" style="width:780px;font-size:12px;">
+										<tr>
+											<th style="text-align:center;">Country</th>
+											<th style="text-align:center;">Specimens</th>
+											<th style="text-align:center;">Georeferenced</th>
+											<th style="text-align:center;">Species ID</th>
+											<th style="text-align:center;">Georeferenced<br />and<br />Species ID</th>
+										</tr>
 										<?php
 										$total = 0;
 										foreach($countryArr as $name => $data){
-											echo '<li>';
+											echo '<tr>';
+											echo '<td>'.wordwrap($name,52,"<br />\n",true).'</td>';
+											echo '<td>';
 											if(count($resultsTemp) == 1){
 												echo '<a href="../list.php?db[]='.$collId.'&reset=1&country='.$name.'" target="_blank">';
 											}
@@ -699,38 +660,19 @@ if($action != "Update Statistics"){
 											if(count($resultsTemp) == 1){
 												echo '</a>';
 											}
-											echo '</li>';
+											echo '</td>';
+											echo '<td>'.($data['GeorefSpecimensPerCountry']?round(100*($data['GeorefSpecimensPerCountry']/$data['CountryCount'])):0).'%</td>';
+											echo '<td>'.($data['IDSpecimensPerCountry']?round(100*($data['IDSpecimensPerCountry']/$data['CountryCount'])):0).'%</td>';
+											echo '<td>'.($data['IDGeorefSpecimensPerCountry']?round(100*($data['IDGeorefSpecimensPerCountry']/$data['CountryCount'])):0).'%</td>';
+											echo '</tr>';
 											$total = $total + $data['CountryCount'];
 										}
-										echo "<br />";
-										echo "<li><strong>".$total."</strong></li>";
-										echo "<li>".($results['SpecimensNullCountry']+$results['SpecimensNullLatitude'])."</li>";
 										?>
-									</ul>
-									<ul style="float:left;list-style-type:none;margin-left:-20px;">
-										<strong>Georef</strong>
-										<?php
-										foreach($countryArr as $name => $data){
-											echo '<li>'.($data['GeorefSpecimensPerCountry']?round(100*($data['GeorefSpecimensPerCountry']/$data['CountryCount'])):0).'%</li>';
-										}
-										?>
-									</ul>
-									<ul style="float:left;list-style-type:none;margin-left:-20px;">
-										<strong>Species ID</strong>
-										<?php
-										foreach($countryArr as $name => $data){
-											echo '<li>'.($data['IDSpecimensPerCountry']?round(100*($data['IDSpecimensPerCountry']/$data['CountryCount'])):0).'%</li>';
-										}
-										?>
-									</ul>
-									<ul style="float:left;list-style-type:none;margin-left:-20px;">
-										<strong>Georef and ID</strong>
-										<?php
-										foreach($countryArr as $name => $data){
-											echo '<li>'.($data['IDGeorefSpecimensPerCountry']?round(100*($data['IDGeorefSpecimensPerCountry']/$data['CountryCount'])):0).'%</li>';
-										}
-										?>
-									</ul>
+									</table>
+									<div style="margin-top:10px;">
+										<b>Total Specimens with Country:</b> <?php echo $total; ?><br />
+										Specimens without Country or Georeferencing: <?php echo (($results['SpecimenCount']-$total)+$results['SpecimensNullLatitude']); ?><br />
+									</div>
 								</fieldset>
 							</div>
 						</div>

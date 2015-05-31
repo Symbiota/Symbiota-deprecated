@@ -436,9 +436,7 @@ class CollectionProfileManager {
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
 			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS SpecimensCountID, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
-			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount, '.
-			'COUNT(CASE WHEN ISNULL(o.family) THEN o.occid ELSE NULL END) AS SpecimensNullFamily, '.
-			'COUNT(CASE WHEN ISNULL(o.country) THEN o.occid ELSE NULL END) AS SpecimensNullCountry '.
+			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount '.
 			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
 			'WHERE (o.collid = '.$this->collid.') ';
 		$rs = $this->conn->query($sql);
@@ -451,8 +449,6 @@ class CollectionProfileManager {
 			$speciesCnt = $r->SpeciesCount;
 			$returnArr['TotalTaxaCount'] = $r->TotalTaxaCount;
 			$returnArr['TypeCount'] = $r->TypeCount;
-			$returnArr['SpecimensNullFamily'] = $r->SpecimensNullFamily;
-			$returnArr['SpecimensNullCountry'] = $r->SpecimensNullCountry;
 		}
 		$rs->free();
 		if($messages){
@@ -862,6 +858,7 @@ class CollectionProfileManager {
 			$collArr[$r->collid] = $r->CollectionName;
 		}
 		$rs->free();
+		echo 'Updating collection statistics...';
 		echo '<ul>';
 		foreach($collArr as $k => $name){
 			$this->setCollid($k);
