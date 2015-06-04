@@ -24,7 +24,7 @@ class SpecProcNlpSalix
 			//A list of all the potential return fields
 	private $Results = array(); //The return array
 	private $Assigned = array(); //Indicates to what line a field has been assigned.
-	private $PregMonths ="(\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|deciembre|janvier|febrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre|janeiro|febreso|marco|maio|junho|julho|setembro|outrubo|novembro|dezembro)\b\.?)";
+	private $PregMonths ="(\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|janvier|febrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre|janeiro|febreso|marco|maio|junho|julho|setembro|outrubo|novembro|dezembro)\b\.?)";
 	private $LabelLines=array(); //The main array of lines of the label.
 	private $VirginLines=array(); //Lines unmodified by the program.  Used to pinpoint location of words in the line even after they have been removed.
 	private $PregStart = array(); //An array of regular expressions indicating the start words for many fields.
@@ -67,7 +67,7 @@ class SpecProcNlpSalix
 		//******************************************************************************************************************************
 		// Do lots of preformatting on the input label text
 		//******************************************************************************************************************************
-
+		$this->Label = str_replace("\r\n\r\n","\r\n",$this->Label);
 		if(strpos($this->Label,"°") > 0)
 			{//The degree symbol is the main character above 122 that must be preserved.
 			$this->Label = str_replace("°","17*17",$this->Label);
@@ -144,11 +144,13 @@ class SpecProcNlpSalix
 		$Preg = "(\b([0-9]{1,2})([XVI]+)([0-9]{2,4})\b)";
 		$this->Label = preg_replace($Preg,"$1 $2 $3",$this->Label);
 
+		//echo $this->Label."<br>";;
 		//Connect some lines when joined by a connecting preposition or hyphen
 		$PrepList = "(of|to|by|at|in|over|under|on|from|along|beside|with|de|cerca|en|desde)";
 		$this->Label = preg_replace("(\b".$PrepList."\s?[\r\n]{1,2})i","$1 ",$this->Label);//Prepositions at end of line
+		$this->Label = preg_replace("(\s(&)\s?[\r\n]{1,2})i"," $1 ",$this->Label);//Ampersand at end of line
 		$this->Label = preg_replace("([\r\n]{1,2}\b".$PrepList."\b)","$1",$this->Label);//Prepositions at start of line
-		$this->Label = preg_replace("(\b([A-Z]?[a-z]{2,10})- ?[\n\r]{1,2}([a-z]{2,10}))","$1$2",$this->Label);//Hyphen at end of line
+		$this->Label = preg_replace("(\b([A-Z]?[a-z]{2,10})- ?[\n\r]{1,2}([a-z]{2,10}))","$1$2",$this->Label);//Hyphen at end of line breaking a word in two.
 		
 		//Remove double spaces and tabs
 		$this->Label = str_replace("\t"," ",$this->Label);
@@ -431,12 +433,12 @@ class SpecProcNlpSalix
 					return;
 					}
 				}
-			else if($PotentialFamily == "")
+			else if($PotentialFamily == "" && $L < 4)
 				{
 				$Found = preg_match("((\b\w{2,20}(aceae))\b)i",$this->LabelLines[$L],$match);//Replace above with case insensitive version
 				if($Found === 1)
 					{ //If not found as "...aceae of...", then use the first "...acea..." found.
-					//$this->printr($match,"ACEAE match:");
+					$this->printr($match,"ACEAE match:");
 					$query = "SELECT family from taxstatus WHERE family LIKE '{$match[1]}' LIMIT 1";
 					$result = $this->conn->query($query);
 					if($result->num_rows > 0)
@@ -1340,13 +1342,14 @@ class SpecProcNlpSalix
 		{//Ranks lines for probability, then looks for name pattern
 		//Names are confirmed by checking the omoccurrences table for same name.
 		//Names are rejected if they match 
+		global $NameRankArray;  //I know, but it simplifies things...
 		if($this->Results[$Field] != "")
 			return;
-		$RankArray = $this->RankLinesForNames($Field);
-		//$this->PrintRank($RankArray,"$Field");
-		reset($RankArray);
-		//echo "Current = ".current($RankArray)."<br>";
-		if(current($RankArray) < 2 && $Field == "recordedBy")
+		$NameRankArray = $this->RankLinesForNames($Field);
+		//$this->PrintRank($NameRankArray,"$Field");
+		reset($NameRankArray);
+		//echo "Current = ".current($NameRankArray)."<br>";
+		if(current($NameRankArray) < 2 && $Field == "recordedBy")
 			{
 			$match=array();
 			$Preg = "((Collector|Collected by:?)\s\b((([A-Z][a-z]{2,20} )|([A-Z][\.] ))([A-Z][\.] )?([A-Z][a-z]{2,20})\b))";
@@ -1365,7 +1368,7 @@ class SpecProcNlpSalix
 			}
 		
 		
-		foreach($RankArray as $L=>$Value)
+		foreach($NameRankArray as $L=>$Value)
 			{
 			//echo "Check ($Field): $L: {$this->LabelLines[$L]}<br>";
 			if($Field=='identifiedBy' && $Value < 90)
@@ -1391,6 +1394,7 @@ class SpecProcNlpSalix
 
 	private function GetNamesFromLine($L,$Field,$TitleCase = false, $TempString = "")
 		{
+		global $NameRankArray;
 		//echo "Testing $Field: {$this->LabelLines[$L]}<br>";
 		$PName = "(\b(D')?[A-Z][a-z]{2,20}\b)";
 		$PIn = "(\b[A-Z][. ]*)";
@@ -1444,14 +1448,13 @@ class SpecProcNlpSalix
 			$Preg = "(($PName),?\s?$PIn\s?$PIn)$I";
 			preg_match_all($Preg, $TempString,$match);
 			}
-			
+		//echo "Second TempString=$TempString<br>";	
 		if(count($match[0]) != 0)//Found a match
 			{
 			for($N=0;$N<count($match[0]);$N++)
 				{
 				$Name = $match[0][$N];
 				$Confirm = $this->ConfirmRecordedBy($Name);
-				//if($Confirm < 10 || ($TitleCase == false && $Confirm < 0))
 				if($this->ConfirmRecordedBy($Name) < 0)
 					continue;
 				$Name = mb_convert_case($Name,MB_CASE_TITLE);
@@ -1459,10 +1462,9 @@ class SpecProcNlpSalix
 				$this->RemoveStartWords($L,$Field);
 				$this->LabelLines[$L] = str_ireplace("with","",$this->LabelLines[$L]);
 				$this->LabelLines[$L] = trim(str_replace($match[0][$N],"",$this->LabelLines[$L])," ,;");
-				if(strlen($this->LabelLines[$L]) > 5)
-					$this->GetNamesFromLine($L,$Field);
-				//echo "L=$L<br>";
-				//echo "{$this->LabelLines[$L]}<br>";
+				//if(strlen($this->LabelLines[$L]) > 5) //Just removed this, seemed to be causing problems and not sure why it is here. 6/3/15
+				//	$this->GetNamesFromLine($L,$Field);
+
 				if($L < count($this->LabelLines)-1 && preg_match("(\A$PName\Z)",$this->LabelLines[$L]) && preg_match("(\A$PName\Z)",$this->LabelLines[$L+1]))
 					{//Catch the case where the given name on this line, surname is on the next line.  Fairly rare, but happens.
 					$Name = $this->LabelLines[$L]." ".$this->LabelLines[$L+1];
@@ -1478,25 +1480,11 @@ class SpecProcNlpSalix
 				}
 			if($Field == "recordedBy" && ($L < count($this->LabelLines)-1 && ($this->LineStart[$L+1] == "" || $this->LineStart[$L+1] == "associatedCollectors")))
 				{
-				//echo "Checking next line<br>";
-				return $this->GetNamesFromLine(++$L,$Field);//Recursively calls this routine to add possible associated collectors.
+				if($NameRankArray[$L+1] > 5)
+					return $this->GetNamesFromLine(++$L,$Field);//Recursively calls this routine to add possible associated collectors.
 				}
 			return true;
 			}
-		/*
-		if($this->LineStart[$L]== $Field)
-			{
-			$this->RemoveStartWords($L,$Field);
-			$Found = preg_match("(\A[A-Za-z\. ]{4,20}\b)",$this->LabelLines[$L],$match);
-			if($Found > 0)
-				{
-				$Name = mb_convert_case($match[0],MB_CASE_TITLE);
-				$this->AddToResults($Field,$Name,$L);
-				$this->LabelLines[$L] = str_ireplace($Name,"",$this->LabelLines[$L]);
-				return true;
-				}
-			}
-		*/
 		if(!$TitleCase)
 			{
 			$TempString = mb_convert_case($this->LabelLines[$L],MB_CASE_TITLE);
@@ -1553,7 +1541,7 @@ class SpecProcNlpSalix
 		for($L=0;$L<count($this->LabelArray);$L++)
 			{
 			$RankArray[$L] = 0;
-			$PregNotNames = "(\b(municip|trail|peak|mountain|herbarium|agua|province|university|mun|county|botanical|garden|pacific|island[s]?)\b)i";  //Known to be confused with names
+			$PregNotNames = "(\b(national|nacional|municip|trail|peak|mountain|herbarium|agua|province|university|mun|county|botanical|garden|forestal|pacific|island[s]?)\b)i";  //Known to be confused with names
 			$RankArray[$L] -= 5*(preg_match_all($PregNotNames,$this->LabelLines[$L],$match));
 			
 			if(preg_match("(By[:\s]{0,2}(\b[A-Z][a-z]{3,20}\b)\s+(\b[A-Z][a-z]{3,20}\b))", $this->LabelLines[$L]))
@@ -3328,8 +3316,6 @@ class SpecProcNlpSalix
 			if($Note != "")
 				echo $Note.": ";
 			print_r($A);
-			//$Out = str_replace("\n","<br>",$Out);
-			//echo $Out;
 			}
 		echo "<br>";
 		}
@@ -3340,7 +3326,6 @@ class SpecProcNlpSalix
 		if($Name != "")
 			echo "$Name<br>";
 		echo "<table border=1><tr><td>Line</td><td>Score</td><td>Text</td></tr>";
-		//for($L=0;$L<count($this->LabelLines);$L++)
 		foreach($RankArray as $L=>$Value)
 			echo "<tr><td>$L:</td><td>{$RankArray[$L]}</td><td>{$this->LabelLines[$L]}</td></tr>";
 		echo"</table>";
