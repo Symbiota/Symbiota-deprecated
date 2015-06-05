@@ -560,6 +560,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												</div>
 												<div style="float:left;margin:5px 15px"> 
 													<input type='hidden' name='MAX_FILE_SIZE' value='20000000' />
+													<input type='hidden' name='speckeypattern' value='<?php echo $specManager->getSpecKeyPattern();?>' />
 													<div>
 														<input name='idigbiofile' id='idigbiofile' type='file' size='70'/>
 													</div>

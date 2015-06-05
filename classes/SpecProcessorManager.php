@@ -206,31 +206,69 @@ class SpecProcessorManager {
 		return $projArr;
 	}
 	
-	public function processiDigBioOutput(){
+	public function processiDigBioOutput($pArr){
 		global $serverRoot;
 		$statusStr = '';
 		$csvFile = basename($_FILES['idigbiofile']['tmp_name']);
 		$csvFileName = 'idigbio_'.time().'.csv';
 		$fullPath = $serverRoot.(substr($serverRoot,-1) != '/'?'/':'').'temp/logs/';
-		if($csvFileName == 'uploaded.csv'){
-			if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath.$csvFileName)){
-				if($fh = fopen($fullPath.$csvFileName,'rb')){
-					$headerArr = fgetcsv($fh,0,',');
+		$pmTerm = $pArr['speckeypattern'];
+		if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath.$csvFileName)){
+			if($fh = fopen($fullPath.$csvFileName,'rb')){
+				$headerArr = fgetcsv($fh,0,',');
+				if(in_array('MediaGUID',$headerArr) && in_array('MediaMD5',$headerArr)){
+					$mediaGuidIndex = array_search('MediaGUID',$headerArr);
+					$mediaMd5Index = array_search('MediaMD5',$headerArr);
+					while(($data = fgetcsv($fh,1000,",")) !== FALSE){
+						if(preg_match($pmTerm,$data[$mediaGuidIndex],$matchArr)){
+							echo 'here';
+							if(array_key_exists(1,$matchArr) && $matchArr[1]){
+								$specPk = $matchArr[1];
+								$recOccid = $this->getOccId($specPk);
+								echo $recOccid;
+							}
+						}
+					}
+					
+				}
 
-					echo json_encode($headerArr);
-					//$this->sourceArr = $this->getHeaderArr($fh);
-					fclose($fh);
-				}
-				else{
-					$statusStr = "Can't open file.";
-				}
+				fclose($fh);
 			}
-		}
-		else{
-			$statusStr = 'Incorrect file uploaded.';
+			else{
+				$statusStr = "Can't open file.";
+			}
 		}
 		
 		return $statusStr;
+	}
+	
+	private function getOccId($specPk){
+		$occId = 0;
+		//Check to see if record with pk already exists
+		$sql = 'SELECT occid FROM omoccurrences '.
+			'WHERE (catalognumber IN("'.$specPk.'"'.(substr($specPk,0,1)=='0'?',"'.ltrim($specPk,'0 ').'"':'').')) '.
+			'AND (collid = '.$this->collid.')';
+		$rs = $this->conn->query($sql);
+		if($row = $rs->fetch_object()){
+			$occId = $row->occid;
+		}
+		$rs->free();
+		if(!$occId && $this->createNewRec){
+			//Records does not exist, create a new one to which image will be linked
+			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber,processingstatus,dateentered) '.
+				'VALUES('.$this->collid.',"'.$specPk.'","unprocessed","'.date('Y-m-d H:i:s').'")';
+			if($this->conn->query($sql2)){
+				$occId = $this->conn->insert_id;
+				$this->logOrEcho("Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") ",1);
+			}
+			else{
+				$this->logOrEcho("ERROR creating new occurrence record: ".$this->conn->error,1);
+			}
+		}
+		if(!$occId){
+			$this->logOrEcho("ERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") ",1);
+		}
+		return $occId;
 	}
 
 	//Report functions
