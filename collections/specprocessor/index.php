@@ -48,6 +48,9 @@ if($isEditor){
 	elseif($action == 'Delete Image Project'){
 		$specManager->deleteProject($_POST['sppriddel']);
 	}
+	elseif($action == 'Process Output File'){
+		$statusStr = $specManager->processiDigBioOutput($_POST);
+	}
 	elseif($action == 'Add to Queue'){
 		$csManager = new OccurrenceCrowdSource();
 		$csManager->setCollid($collid);
