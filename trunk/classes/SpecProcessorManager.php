@@ -84,19 +84,27 @@ class SpecProcessorManager {
 	//Functions not needed for standalone scripts
 	public function editProject($editArr){
 		if($editArr['spprid']){
-			$sql = 'UPDATE specprocessorprojects '.
-				'SET title = "'.$this->cleanInStr($editArr['title']).'", '.
-				'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).'",'.
-				'sourcepath = "'.$this->cleanInStr($editArr['sourcepath']).'",'.
-				'targetpath = '.(isset($editArr['targetpath'])&&$editArr['targetpath']?'"'.$this->cleanInStr($editArr['targetpath']).'"':'NULL').','.
-				'imgurl = '.(isset($editArr['imgurl'])&&$editArr['imgurl']?'"'.$editArr['imgurl'].'"':'NULL').','.
-				'webpixwidth = '.(isset($editArr['webpixwidth'])&&$editArr['webpixwidth']?$editArr['webpixwidth']:'NULL').','.
-				'tnpixwidth = '.(isset($editArr['tnpixwidth'])&&$editArr['tnpixwidth']?$editArr['tnpixwidth']:'NULL').','.
-				'lgpixwidth = '.(isset($editArr['lgpixwidth'])&&$editArr['lgpixwidth']?$editArr['lgpixwidth']:'NULL').','.
-				'jpgcompression = '.(isset($editArr['jpgquality'])&&$editArr['jpgquality']?$editArr['jpgquality']:'NULL').','.
-				'createtnimg = '.(isset($editArr['tnimg'])&&$editArr['tnimg']?$editArr['tnimg']:'NULL').','.
-				'createlgimg = '.(isset($editArr['lgimg'])&&$editArr['lgimg']?$editArr['lgimg']:'NULL').' '.
-				'WHERE (spprid = '.$editArr['spprid'].')';
+			if($editArr['imageuploadtype'] == 'idigbio'){
+				$sql = 'UPDATE specprocessorprojects '.
+					'SET title = "iDigBio CSV upload", '.
+					'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).'" '.
+					'WHERE (spprid = '.$editArr['spprid'].')';
+			}
+			if($editArr['imageuploadtype'] == 'local'){
+				$sql = 'UPDATE specprocessorprojects '.
+					'SET title = "'.$this->cleanInStr($editArr['title']).'", '.
+					'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).'",'.
+					'sourcepath = "'.$this->cleanInStr($editArr['sourcepath']).'",'.
+					'targetpath = '.(isset($editArr['targetpath'])&&$editArr['targetpath']?'"'.$this->cleanInStr($editArr['targetpath']).'"':'NULL').','.
+					'imgurl = '.(isset($editArr['imgurl'])&&$editArr['imgurl']?'"'.$editArr['imgurl'].'"':'NULL').','.
+					'webpixwidth = '.(isset($editArr['webpixwidth'])&&$editArr['webpixwidth']?$editArr['webpixwidth']:'NULL').','.
+					'tnpixwidth = '.(isset($editArr['tnpixwidth'])&&$editArr['tnpixwidth']?$editArr['tnpixwidth']:'NULL').','.
+					'lgpixwidth = '.(isset($editArr['lgpixwidth'])&&$editArr['lgpixwidth']?$editArr['lgpixwidth']:'NULL').','.
+					'jpgcompression = '.(isset($editArr['jpgquality'])&&$editArr['jpgquality']?$editArr['jpgquality']:'NULL').','.
+					'createtnimg = '.(isset($editArr['tnimg'])&&$editArr['tnimg']?$editArr['tnimg']:'NULL').','.
+					'createlgimg = '.(isset($editArr['lgimg'])&&$editArr['lgimg']?$editArr['lgimg']:'NULL').' '.
+					'WHERE (spprid = '.$editArr['spprid'].')';
+			}
 			//echo 'SQL: '.$sql;
 			if(!$this->conn->query($sql)){
 				echo 'ERROR saving project: '.$this->conn->error;
@@ -109,19 +117,26 @@ class SpecProcessorManager {
 		if($addArr['title'] == 'OCR Harvest'){
 			$this->conn->query('DELETE FROM specprocessorprojects WHERE (title = "OCR Harvest") AND (collid = '.$this->collid.')');
 		}
-		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
-			'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
-			'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
-			$this->cleanInStr($addArr['speckeypattern']).'",'.
-			($addArr['sourcepath']?'"'.$this->cleanInStr($addArr['sourcepath']).'"':'NULL').','.
-			(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
-			(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
-			(isset($addArr['webpixwidth'])&&$addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
-			(isset($addArr['tnpixwidth'])&&$addArr['tnpixwidth']?$addArr['tnpixwidth']:'NULL').','.
-			(isset($addArr['lgpixwidth'])&&$addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
-			(isset($addArr['jpgquality'])&&$addArr['jpgquality']?$addArr['jpgquality']:'NULL').','.
-			(isset($addArr['tnimg'])&&$addArr['tnimg']?$addArr['tnimg']:'NULL').','.
-			(isset($addArr['lgimg'])&&$addArr['lgimg']?$addArr['lgimg']:'NULL').')';
+		if($addArr['imageuploadtype'] == 'idigbio'){
+			$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
+				'VALUES('.$this->collid.',"iDigBio CSV upload","'.
+				$this->cleanInStr($addArr['speckeypattern']).'")';
+		}
+		if($addArr['imageuploadtype'] == 'local'){
+			$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
+				'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
+				'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
+				$this->cleanInStr($addArr['speckeypattern']).'",'.
+				($addArr['sourcepath']?'"'.$this->cleanInStr($addArr['sourcepath']).'"':'NULL').','.
+				(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
+				(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
+				(isset($addArr['webpixwidth'])&&$addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
+				(isset($addArr['tnpixwidth'])&&$addArr['tnpixwidth']?$addArr['tnpixwidth']:'NULL').','.
+				(isset($addArr['lgpixwidth'])&&$addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
+				(isset($addArr['jpgquality'])&&$addArr['jpgquality']?$addArr['jpgquality']:'NULL').','.
+				(isset($addArr['tnimg'])&&$addArr['tnimg']?$addArr['tnimg']:'NULL').','.
+				(isset($addArr['lgimg'])&&$addArr['lgimg']?$addArr['lgimg']:'NULL').')';
+		}
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			echo 'ERROR saving project: '.$this->conn->error;
@@ -189,6 +204,34 @@ class SpecProcessorManager {
 			$rs->free();
 		}
 		return $projArr;
+	}
+	
+	public function processiDigBioOutput(){
+		global $serverRoot;
+		$statusStr = '';
+		$csvFile = basename($_FILES['idigbiofile']['tmp_name']);
+		$csvFileName = basename($_FILES['idigbiofile']['name']);
+		$fullPath = $serverRoot.'temp/logs/';
+		echo $fullPath.$csvFileName;
+		if($csvFileName == 'uploaded.csv'){
+			if(move_uploaded_file($csvFile,$fullPath.$csvFileName)){
+				echo $fullPath.$csvFileName;
+				if($fh = fopen($fullPath.$csvFile,'rb')){
+					$headerArr = fgetcsv($fh,0,',');
+					echo json_encode($headerArr);
+					//$this->sourceArr = $this->getHeaderArr($fh);
+					fclose($fh);
+				}
+				else{
+					$statusStr = "Can't open file.";
+				}
+			}
+		}
+		else{
+			$statusStr = 'Incorrect file uploaded.';
+		}
+		
+		return $statusStr;
 	}
 
 	//Report functions
