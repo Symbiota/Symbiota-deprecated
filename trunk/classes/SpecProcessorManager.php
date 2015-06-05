@@ -210,14 +210,13 @@ class SpecProcessorManager {
 		global $serverRoot;
 		$statusStr = '';
 		$csvFile = basename($_FILES['idigbiofile']['tmp_name']);
-		$csvFileName = basename($_FILES['idigbiofile']['name']);
-		$fullPath = $serverRoot.'temp/logs/';
-		echo $fullPath.$csvFileName;
+		$csvFileName = 'idigbio_'.time().'.csv';
+		$fullPath = $serverRoot.(substr($serverRoot,-1) != '/'?'/':'').'temp/logs/';
 		if($csvFileName == 'uploaded.csv'){
-			if(move_uploaded_file($csvFile,$fullPath.$csvFileName)){
-				echo $fullPath.$csvFileName;
-				if($fh = fopen($fullPath.$csvFile,'rb')){
+			if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath.$csvFileName)){
+				if($fh = fopen($fullPath.$csvFileName,'rb')){
 					$headerArr = fgetcsv($fh,0,',');
+
 					echo json_encode($headerArr);
 					//$this->sourceArr = $this->getHeaderArr($fh);
 					fclose($fh);
