@@ -1,5 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 include_once($serverRoot.'/classes/UuidFactory.php');
 
 //Used by /collections/misc/collprofiles.php page
@@ -357,66 +358,26 @@ class CollectionProfileManager {
 		return $status;
 	}
 	
-	public function updateRecords(){
-		set_time_limit(800);
-		$writeConn = MySQLiConnectionFactory::getCon("write");
-
-		echo '<li>Updating specimen taxon links... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
-			'SET o.TidInterpreted = t.tid '.
-			'WHERE o.collid = '.$this->collid.' AND ISNULL(o.TidInterpreted)';
-		$writeConn->query($sql);
-		echo $writeConn->affected_rows.' records updated</li>';
-		
-		echo '<li>Update specimen image taxon links... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-			'SET i.tid = o.tidinterpreted '.
-			'WHERE o.collid = '.$this->collid.' AND o.tidinterpreted IS NOT NULL AND (ISNULL(i.tid) OR o.tidinterpreted <> i.tid)';
-		$writeConn->query($sql);
-		echo $writeConn->affected_rows.' records updated</li>';
-		
-		echo '<li>Updating records with null families... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
-			'SET o.family = ts.family '.
-			'WHERE o.collid = '.$this->collid.' AND ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (ISNULL(o.family) OR o.family = "")';
-		$writeConn->query($sql);
-		echo $writeConn->affected_rows.' records updated</li>';
-		
-		/*
-		echo '<li>Updating records with null author... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
-			'SET o.scientificNameAuthorship = t.author '.
-			'WHERE o.scientificNameAuthorship IS NULL and t.author is not null';
-		$writeConn->query($sql);
-		echo $writeConn->affected_rows.' records updated</li>';
-		*/
-		
-		/*
-		echo '<li>Updating georeference indexing... ';
-		ob_flush();
-		flush();
-		$sql = 'REPLACE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
-			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
-			'FROM omoccurrences o '.
-			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
-			'AND o.decimallongitude IS NOT NULL';
-		$writeConn->query($sql);
-		
-		$sql = 'DELETE FROM omoccurgeoindex WHERE InitialTimestamp < DATE_SUB(CURDATE(), INTERVAL 1 DAY)';
-		$writeConn->query($sql);
-		echo 'Done!</li>';
-		*/
-	}
-
 	public function updateStatistics($messages){
+		$occurUtil = new OccurrenceUtilities();
+		
+		echo '<li>General cleaning in preparation for collecting stats... ';
+		flush();
+		ob_flush();
+		$occurUtil->generalOccurrenceCleaning();
+		echo 'Done!</li> ';
+		
+		echo '<li>General cleaning in preparation for collecting stats... ';
+		flush();
+		ob_flush();
+		$occurUtil->updateCollectionStats($this->collid, true);
+		echo 'Done!</li> ';
+
+		echo '<li>Finished updating collection statistics</li>';
+		flush();
+		ob_flush();
+		
+		
 		set_time_limit(800);
 		$writeConn = MySQLiConnectionFactory::getCon("write");
 
