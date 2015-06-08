@@ -82,10 +82,8 @@ if($SYMB_UID){
 		if($editCode > 1){
 			if($action == 'UpdateStatistics'){
 				echo '<h2>Updating statistics related to this collection...</h2>';
-				echo '<ul>';
-				$collManager->updateRecords();
 				$collManager->updateStatistics(true);
-				echo '</ul><hr/>';
+				echo '<hr/>';
 				$collData = $collManager->getCollectionData();
 			}
 		}

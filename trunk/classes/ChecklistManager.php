@@ -214,14 +214,25 @@ class ChecklistManager {
 					$clidStr .= ','.implode(',',$this->childClidArr);
 				}
 				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, '.
-					'CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector '.
+					'o.recordedby, o.recordnumber, o.eventdate '.
 					'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 					'INNER JOIN omcollections c ON o.collid = c.collid '.
 					'WHERE (v.clid IN ('.$clidStr.')) AND v.tid IN('.implode(',',array_keys($this->taxaList)).')';
 				//echo $vSql; exit;
 		 		$vResult = $this->conn->query($vSql);
 				while ($row = $vResult->fetch_object()){
-					$this->voucherArr[$row->tid][$row->occid] = $row->collector.' ['.$row->institutioncode.']';
+					$collector = $row->recordedby;
+					if(strlen($collector) > 25){
+						//Collector string is too big, thus reduce
+						$strPos = strpos($collector,';');
+						if(!$strPos) $strPos = strpos($collector,',');
+						if(!$strPos) $strPos = strpos($collector,' ');
+						if($strPos) $collector = substr($collector,0,$strPos).'...';
+					}
+					if($row->recordnumber) $collector .= ' '.$row->recordnumber;
+					else $collector .= ' '.$row->eventdate;
+					$collector .= ' ['.$row->institutioncode.']';
+					$this->voucherArr[$row->tid][$row->occid] = $collector;
 				}
 				$vResult->close();
 			}

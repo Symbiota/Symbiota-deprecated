@@ -7,6 +7,12 @@ if(isset($serverRoot)){
 	if(file_exists($serverRoot.'/config/dbconnection.php')){ 
 		include_once($serverRoot.'/config/dbconnection.php');
 	}
+	else{
+		include_once('ImageBatchConnectionFactory.php');
+	}
+	if(file_exists($serverRoot.'/classes/OccurrenceUtilities.php')){ 
+		include_once($serverRoot.'/classes/OccurrenceUtilities.php');
+	}
 }
 // Check for the symbiota class files used herein for parsing 
 // batch files of xml formatted strucutured data.
@@ -1456,97 +1462,44 @@ class ImageBatchProcessor {
 	
 	private function updateCollectionStats(){
 		if($this->dbMetadata){
-			$this->logOrEcho('Updating collection statistics...');
-			//General cleaning
-			//populate image ids
-			$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'SET i.tid = o.tidinterpreted '.
-				'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
-			if(!$this->conn->query($sql)){
-				$this->logOrEcho('ERROR: unable to update image tids; '.$this->conn->error);
-			}
-
-			#Update family
-			$sql = 'UPDATE omoccurrences o '.
-				'SET o.family = o.sciname '.
-				'WHERE o.family IS NULL AND (o.sciname LIKE "%aceae" OR o.sciname LIKE "%idae")';
-			if(!$this->conn->query($sql)){
-				$this->logOrEcho('ERROR: unable to update family; '.$this->conn->error);
-			}
+		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
+			$occurUtil = new OccurrenceUtilities();
 	
-			$sql = 'UPDATE omoccurrences o '. 
-				'SET o.sciname = o.genus '.
-				'WHERE o.genus IS NOT NULL AND o.sciname IS NULL';
-			if(!$this->conn->query($sql)){
-				$this->logOrEcho('ERROR: unable to update sciname using genus; '.$this->conn->error);
+			$this->outputMsg('<li>Cleaning house</li>');
+			ob_flush();
+			flush();
+			if(!$occurUtil->generalOccurrenceCleaning()){
+				$errorArr = $occurUtil->getErrorArr();
+				foreach($errorArr as $errorStr){
+					echo '<div style="margin-left:25px;">'.$errorStr.'</div>';
+				}
 			}
+			$this->outputMsg('Done!</li> ');
 			
-			$sql = 'UPDATE omoccurrences o '. 
-				'SET o.sciname = o.family '.
-				'WHERE o.family IS NOT NULL AND o.sciname IS NULL';
-			if(!$this->conn->query($sql)){
-				$this->logOrEcho('ERROR: unable to update sciname using family; '.$this->conn->error);
+			$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...');
+			ob_flush();
+			flush();
+			if(!$occurUtil->protectRareSpecies($this->collId)){
+				$errorArr = $occurUtil->getErrorArr();
+				foreach($errorArr as $errorStr){
+					echo '<div style="margin-left:25px;">'.$errorStr.'</div>';
+				}
 			}
+			$this->outputMsg('Done!</li> ');
 			
-			#Link new occurrence records to taxon table
-			$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '. 
-				'SET o.TidInterpreted = t.tid '. 
-				'WHERE o.TidInterpreted IS NULL';
-			if(!$this->conn->query($sql)){
-				$this->logOrEcho('ERROR: unable to update tidinterpreted; '.$this->conn->error);
-			}
-	
-			#Update specimen image taxon links
-			$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '. 
-				'SET i.tid = o.tidinterpreted '. 
-				'WHERE o.tidinterpreted IS NOT NULL AND (i.tid IS NULL OR o.tidinterpreted <> i.tid)';
-			if(!$this->conn->query($sql)){
-				$this->logOrEcho('ERROR: unable to update image tid field; '.$this->conn->error);
-			}
-
-			#Updating records with null families
-			$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '. 
-				'SET o.family = ts.family '. 
-				'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "")';
-			if(!$this->conn->query($sql)){
-				$this->logOrEcho('ERROR: unable to update family in omoccurrence table; '.$this->conn->error);
-			}
-	
-			#Updating records with null author
-			$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '. 
-				'SET o.scientificNameAuthorship = t.author '. 
-				'WHERE o.scientificNameAuthorship IS NULL and t.author is not null';
-			if(!$this->conn->query($sql)){
-				$this->logOrEcho('ERROR: unable to update author; '.$this->conn->error);
-			}
+			$this->outputMsg('<li>Updating statistics</li>');
+			ob_flush();
+			flush();
+			$this->outputMsg('Done!</li> ');
+			
+			
 			
 			foreach($this->collProcessedArr as $collid){
-				$recordCnt = 0;
-				$georefCnt = 0;
-				$familyCnt = 0;
-				$genusCnt = 0;
-				$speciesCnt = 0;
-				$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
-					'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
-					'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
-					'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-					'WHERE (o.collid = '.$collid.') ';
-				$rs = $this->conn->query($sql);
-				while($r = $rs->fetch_object()){
-					$recordCnt = $r->SpecimenCount;
-					$georefCnt = $r->GeorefCount;
-					$familyCnt = $r->FamilyCount;
-					$genusCnt = $r->GeneraCount;
-					$speciesCnt = $r->SpeciesCount;
-				}
-				$rs->free();
-				
-				$sql = 'UPDATE omcollectionstats cs '.
-					'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.','.
-					"cs.speciescnt = ".$speciesCnt.",cs.datelastmodified = CURDATE() ".
-					'WHERE cs.collid = '.$collid;
-				if(!$this->conn->query($sql)){
-					$this->logOrEcho('ERROR: unable to update counts; '.$this->conn->error);
+				if(!$occurUtil->updateCollectionStats($collid)){
+					$errorArr = $occurUtil->getErrorArr();
+					foreach($errorArr as $errorStr){
+						echo '<div style="margin-left:25px;">'.$errorStr.'</div>';
+					}
 				}
 			}
 		}

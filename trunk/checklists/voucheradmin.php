@@ -139,8 +139,8 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 										<b>Locality:</b>
 										<input type="text" name="locality" value="<?php echo $termArr['locality']; ?>" />
 									</div>
-									<div style="margin:2px;">
-										<b>Family or Genus:</b>
+									<div style="margin:2px;" title="Genus, family, or higher rank">
+										<b>Taxon:</b>
 										<input type="text" name="taxon" value="<?php echo $termArr['taxon']; ?>" />
 									</div>
 									<div>

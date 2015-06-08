@@ -1033,62 +1033,9 @@ class SpecUploadBase extends SpecUpload{
 
 	protected function finalCleanup(){
 		$this->outputMsg('<li>Transfer process complete</li>');
-		$this->outputMsg('<li>Cleaning house</li>');
 
-		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table  
-		$this->outputMsg('<li style="margin-left:10px;">Establish links to taxonomic thesaurus...');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
-			'SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL AND o.collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-		
-		$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'SET o.LocalitySecurity = t.SecurityStatus '.
-			'WHERE (t.SecurityStatus > 0) AND (o.LocalitySecurity IS NULL)';
-		$this->conn->query($sql);
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
-			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
-			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
-			'SET o.localitysecurity = 1 '.
-			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND c.type = "rarespp" '.
-			'AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND o.collid ='.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-		
-		$this->outputMsg('<li style="margin-left:10px;">Populating NULL families and authors...');
-		ob_flush();
-		flush();
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
-			'SET o.family = ts.family '.
-			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "") AND o.collid = '.$this->collId;
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
-			'SET o.scientificNameAuthorship = t.author '.
-			'WHERE (o.scientificNameAuthorship = "" OR o.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL AND o.collid = '.$this->collId;
-		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-		
-		$this->outputMsg('<li style="margin-left:10px;">Updating georeference indexing... ');
-		ob_flush();
-		flush();
-		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
-			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
-			'FROM uploadspectemp o '.
-			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
-			'AND o.decimallongitude IS NOT NULL AND collid = '.$this->collId;
-		if($this->conn->query($sql)){
-			$this->outputMsg('Done!</li> ');
-		}
-		else{
-			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
-		}
+		//Update uploaddate 
+		$sql = 'UPDATE omcollectionstats SET uploaddate = CURDATE() WHERE collid = '.$collid;
 		
 		//Remove records from occurrence temp table (uploadspectemp)
 		$sql = 'DELETE FROM uploadspectemp WHERE (collid = '.$this->collId.') OR (initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY))';
@@ -1108,39 +1055,42 @@ class SpecUploadBase extends SpecUpload{
 		//Optimize table to reset indexes
 		$this->conn->query('OPTIMIZE TABLE uploadimagetemp');
 		
-		$this->outputMsg('<li style="margin-left:10px;">Calculating specimen, georeference, family, genera, and species counts... ');
+		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
+		$occurUtil = new OccurrenceUtilities();
+
+		$this->outputMsg('<li>Cleaning house</li>');
 		ob_flush();
 		flush();
-		$recordCnt = 0;
-		$georefCnt = 0;
-		$familyCnt = 0;
-		$genusCnt = 0;
-		$speciesCnt = 0;
-		$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
-			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
-			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount '.
-			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-			'WHERE (o.collid = '.$this->collId.') ';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$recordCnt = $r->SpecimenCount;
-			$georefCnt = $r->GeorefCount;
-			$familyCnt = $r->FamilyCount;
-			$genusCnt = $r->GeneraCount;
-			$speciesCnt = $r->SpeciesCount;
+		if(!$occurUtil->generalOccurrenceCleaning()){
+			$errorArr = $occurUtil->getErrorArr();
+			foreach($errorArr as $errorStr){
+				echo '<div style="margin-left:25px;">'.$errorStr.'</div>';
+			}
 		}
 		$this->outputMsg('Done!</li> ');
 		
-		$this->outputMsg('<li style="margin-left:10px;">Updating statistics records... ');
+		$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...');
 		ob_flush();
 		flush();
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.','.
-			"cs.speciescnt = ".$speciesCnt.",cs.uploaddate = NOW(),cs.datelastmodified = CURDATE() ".
-			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
+		if(!$occurUtil->protectRareSpecies($this->collId)){
+			$errorArr = $occurUtil->getErrorArr();
+			foreach($errorArr as $errorStr){
+				echo '<div style="margin-left:25px;">'.$errorStr.'</div>';
+			}
+		}
 		$this->outputMsg('Done!</li> ');
-				
+		
+		$this->outputMsg('<li>Updating statistics</li>');
+		ob_flush();
+		flush();
+		if(!$occurUtil->updateCollectionStats($this->collId)){
+			$errorArr = $occurUtil->getErrorArr();
+			foreach($errorArr as $errorStr){
+				echo '<div style="margin-left:25px;">'.$errorStr.'</div>';
+			}
+		}
+		$this->outputMsg('Done!</li> ');
+
 		/*
 		$this->outputMsg('<li style="margin-left:10px;">Searching for duplicate Catalog Numbers... ');
 		ob_flush();

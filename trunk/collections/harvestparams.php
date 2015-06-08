@@ -217,12 +217,10 @@ $collManager->reset();
 				Other CatalogNumbers:
 				<input type="text" id="othercatnum" size="32" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$collArray)) echo $collArray["othercatnum"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
-			<!--
 			<div>
 				Type Status:
                 <input type="text" size="32" id="typestatus" name="typestatus" value="<?php if(array_key_exists("typestatus",$collArray)) echo $collArray["typestatus"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
-			 -->
 			<input type="hidden" name="reset" value="1" />
 		</form>
 	</div>

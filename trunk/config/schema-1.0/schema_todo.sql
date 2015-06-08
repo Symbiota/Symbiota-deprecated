@@ -14,6 +14,13 @@ ALTER TABLE `taxa`
   DROP COLUMN `KingdomID`,
   DROP COLUMN `kingdomName`;
 
+ALTER TABLE `taxa` 
+  DROP INDEX `sciname_unique` ,
+  ADD UNIQUE INDEX `sciname_unique` (`SciName` ASC, `RankId` ASC);
+
+ALTER TABLE `taxa` 
+  ADD INDEX `sciname_index` (`SciName` ASC);
+
 ALTER TABLE `taxonunits` 
   DROP COLUMN `kingdomid`,
   ADD UNIQUE INDEX `UNIQUE_taxonunits` (`kingdomName` ASC, `rankid` ASC);
@@ -22,8 +29,13 @@ ALTER TABLE `taxonunits`
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `eventID` VARCHAR(45) NULL AFTER `fieldnumber`;
 
+ALTER TABLE `omcollectionstats` 
+  CHANGE COLUMN `dynamicProperties` `dynamicProperties` TEXT NULL DEFAULT NULL ;
 
 DROP TABLE `userpermissions`;
+
+
+# Deal with state and country definitions with the rare species state lists
 
 
 
