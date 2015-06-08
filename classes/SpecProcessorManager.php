@@ -209,29 +209,70 @@ class SpecProcessorManager {
 	public function processiDigBioOutput($pArr){
 		global $serverRoot;
 		$statusStr = '';
-		$csvFile = basename($_FILES['idigbiofile']['tmp_name']);
-		$csvFileName = 'idigbio_'.time().'.csv';
-		$fullPath = $serverRoot.(substr($serverRoot,-1) != '/'?'/':'').'temp/logs/';
+		$fullPath = $serverRoot.(substr($serverRoot,-1) != '/'?'/':'').'temp/logs/idigbio_'.time().'.csv';
 		$pmTerm = $pArr['speckeypattern'];
-		if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath.$csvFileName)){
-			if($fh = fopen($fullPath.$csvFileName,'rb')){
+		if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath)){
+			if($fh = fopen($fullPath,'rb')){
 				$headerArr = fgetcsv($fh,0,',');
-				if(in_array('MediaGUID',$headerArr) && in_array('MediaMD5',$headerArr)){
-					$mediaGuidIndex = array_search('MediaGUID',$headerArr);
-					$mediaMd5Index = array_search('MediaMD5',$headerArr);
+				$mediaGuidIndex = array_search('MediaGUID',$headerArr);
+				$mediaMd5Index = array_search('MediaMD5',$headerArr);
+				if(is_numeric($mediaGuidIndex) && is_numeric($mediaMd5Index)){
 					while(($data = fgetcsv($fh,1000,",")) !== FALSE){
 						if(preg_match($pmTerm,$data[$mediaGuidIndex],$matchArr)){
-							echo 'here';
 							if(array_key_exists(1,$matchArr) && $matchArr[1]){
 								$specPk = $matchArr[1];
 								$recOccid = $this->getOccId($specPk);
-								echo $recOccid;
+								if($recOccid){
+									//Check to see if urls are already in system
+									$sql1 = 'SELECT i.imgid '.
+										'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+										'WHERE o.collid = '.$this->collid.' AND i.sourceIdentifier = "'.$data[$mediaGuidIndex].'"';
+									//echo $sql1;
+									$rs1 = $this->conn->query($sql1);
+									
+									if(!$rs1->num_rows){
+										//Image hasn't been loaded, thus insert image urls into image table
+										$tnUrl = 'http://media.idigbio.org/lookup/images/'.$data[$mediaMd5Index].'?size=thumbnail';
+										$webUrl = 'http://media.idigbio.org/lookup/images/'.$data[$mediaMd5Index].'?size=webview';
+										$lgUrl = 'http://media.idigbio.org/lookup/images/'.$data[$mediaMd5Index].'?size=fullsize';
+										$sql2 = 'INSERT INTO images (occid,url,thumbnailurl,originalurl,sourceIdentifier) '.
+											'VALUES('.$recOccid.',"'.$webUrl.'","'.$tnUrl.'","'.$lgUrl.'","'.$data[$mediaGuidIndex].'")';
+										if($this->conn->query($sql2)){
+											//Output to log file
+											echo 'Success: image (#'.$recOccid.': '.$mediaGuidIndex.') link  loaded to database<br/>';
+										}
+										else{
+											//Output SQL error to error log file
+											//FAILED: Output error message
+											echo $this->conn->error;
+										}
+									}
+									else{
+										//Output to log file
+										echo 'File skipped because it is already in system<br/>';
+									}
+									$rs1->free();
+								}
+								else{
+									echo 'ERROR bad occid: '.$recOccid;
+								}
+							}
+							else{
+								//Output to error log file
+								echo 'ERROR: failed to extract match term';
+								print_r($matchArr);
 							}
 						}
+						else{
+							//Output to error log file
+							echo 'ERROR: unable to extract catalogNumber using pattern matching terms (subject: '.$data[$mediaGuidIndex].', pmTerm: '.$pmTerm.')';
+						}
 					}
-					
 				}
-
+				else{
+					//Output to error log file
+					echo 'Bad input fields: '.$mediaGuidIndex.', '.$mediaMd5Index;
+				}
 				fclose($fh);
 			}
 			else{
@@ -259,14 +300,14 @@ class SpecProcessorManager {
 				'VALUES('.$this->collid.',"'.$specPk.'","unprocessed","'.date('Y-m-d H:i:s').'")';
 			if($this->conn->query($sql2)){
 				$occId = $this->conn->insert_id;
-				$this->logOrEcho("Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") ",1);
+				//$this->logOrEcho("Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") ",1);
 			}
 			else{
-				$this->logOrEcho("ERROR creating new occurrence record: ".$this->conn->error,1);
+				//$this->logOrEcho("ERROR creating new occurrence record: ".$this->conn->error,1);
 			}
 		}
 		if(!$occId){
-			$this->logOrEcho("ERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") ",1);
+			//$this->logOrEcho("ERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") ",1);
 		}
 		return $occId;
 	}

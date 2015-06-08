@@ -358,188 +358,26 @@ class CollectionProfileManager {
 		return $status;
 	}
 	
-	public function updateStatistics($messages){
+	public function updateStatistics($verbose = false){
 		$occurUtil = new OccurrenceUtilities();
-		
-		echo '<li>General cleaning in preparation for collecting stats... ';
-		flush();
-		ob_flush();
+		if($verbose){
+			echo '<ul>';
+			$occurUtil->setVerbose(true);
+			echo '<li>General cleaning in preparation for collecting stats...</li>';
+			flush();
+			ob_flush();
+		}
 		$occurUtil->generalOccurrenceCleaning();
-		echo 'Done!</li> ';
-		
-		echo '<li>General cleaning in preparation for collecting stats... ';
-		flush();
-		ob_flush();
+		if($verbose){
+			echo '<li>Updating statistics...</li>';
+			flush();
+			ob_flush();
+		}
 		$occurUtil->updateCollectionStats($this->collid, true);
-		echo 'Done!</li> ';
-
-		echo '<li>Finished updating collection statistics</li>';
-		flush();
-		ob_flush();
-		
-		
-		set_time_limit(800);
-		$writeConn = MySQLiConnectionFactory::getCon("write");
-
-		if($messages){
-			echo '<li>Calculating specimen, georeference, family, genera, and species counts... ';
-		}
-		$returnArr = Array();
-		$recordCnt = 0;
-		$georefCnt = 0;
-		$familyCnt = 0;
-		$genusCnt = 0;
-		$speciesCnt = 0;
-		ob_flush();
-		flush();
-		$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
-			'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(o.typeStatus) AS TypeCount, '.
-			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
-			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS SpecimensCountID, '.
-			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
-			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount '.
-			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-			'WHERE (o.collid = '.$this->collid.') ';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$recordCnt = $r->SpecimenCount;
-			$georefCnt = $r->GeorefCount;
-			$returnArr['SpecimensCountID'] = $r->SpecimensCountID;
-			$familyCnt = $r->FamilyCount;
-			$genusCnt = $r->GeneraCount;
-			$speciesCnt = $r->SpeciesCount;
-			$returnArr['TotalTaxaCount'] = $r->TotalTaxaCount;
-			$returnArr['TypeCount'] = $r->TypeCount;
-		}
-		$rs->free();
-		if($messages){
-			echo 'Done!</li>';
-		}
-		
-		if($messages){
-			echo '<li>Calculating number of specimens imaged... ';
-		}
-		ob_flush();
-		flush();
-		$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
-			'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-			'WHERE (o.collid = '.$this->collid.') ';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$returnArr['imgcnt'] = $r->imgcnt;
-		}
-		$rs->free();
-		if($messages){
-			echo 'Done!</li>';
-		}
-		
-		if($messages){
-			echo '<li>Calculating genetic resources counts... ';
-		}
-		ob_flush();
-		flush();
-		$sql = 'SELECT COUNT(CASE WHEN g.resourceurl LIKE "http://www.boldsystems%" THEN o.occid ELSE NULL END) AS boldcnt, '.
-			'COUNT(CASE WHEN g.resourceurl LIKE "http://www.ncbi%" THEN o.occid ELSE NULL END) AS gencnt '.
-			'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
-			'WHERE (o.collid = '.$this->collid.') ';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$returnArr['boldcnt'] = $r->boldcnt;
-			$returnArr['gencnt'] = $r->gencnt;
-		}
-		$rs->free();
-		if($messages){
-			echo 'Done!</li>';
-		}
-		
-		if($messages){
-			echo '<li>Calculating reference counts... ';
-		}
-		ob_flush();
-		flush();
-		$sql = 'SELECT count(r.occid) as refcnt '.
-			'FROM omoccurrences o INNER JOIN referenceoccurlink r ON o.occid = r.occid '.
-			'WHERE (o.collid = '.$this->collid.') ';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$returnArr['refcnt'] = $r->refcnt;
-		}
-		$rs->free();
-		if($messages){
-			echo 'Done!</li>';
-		}
-		
-		if($messages){
-			echo '<li>Calculating counts per family... ';
-		}
-		ob_flush();
-		flush();
-		$sql = 'SELECT o.family, COUNT(o.occid) AS SpecimensPerFamily, COUNT(o.decimalLatitude) AS GeorefSpecimensPerFamily, '.
-			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerFamily, '.
-			'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerFamily '.
-			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-			'WHERE (o.collid = '.$this->collid.') '.
-			'GROUP BY o.family ';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			if($r->family){
-				$family = str_replace('"',"",$r->family);
-				$family = str_replace("'","",$family);
-				$returnArr['families'][$family]['SpecimensPerFamily'] = $r->SpecimensPerFamily;
-				$returnArr['families'][$family]['GeorefSpecimensPerFamily'] = $r->GeorefSpecimensPerFamily;
-				$returnArr['families'][$family]['IDSpecimensPerFamily'] = $r->IDSpecimensPerFamily;
-				$returnArr['families'][$family]['IDGeorefSpecimensPerFamily'] = $r->IDGeorefSpecimensPerFamily;
-			}
-		}
-		$rs->free();
-		if($messages){
-			echo 'Done!</li>';
-		}
-		
-		if($messages){
-			echo '<li>Calculating counts per country... ';
-		}
-		ob_flush();
-		flush();
-		$sql = 'SELECT o.country, COUNT(o.occid) AS CountryCount, COUNT(o.decimalLatitude) AS GeorefSpecimensPerCountry, '.
-			'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerCountry, '.
-			'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerCountry '.
-			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-			'WHERE (o.collid = '.$this->collid.') '.
-			'GROUP BY o.country ';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			if($r->country){
-				$country = str_replace('"',"",$r->country);
-				$country = str_replace("'","",$country);
-				$returnArr['countries'][$country]['CountryCount'] = $r->CountryCount;
-				$returnArr['countries'][$country]['GeorefSpecimensPerCountry'] = $r->GeorefSpecimensPerCountry;
-				$returnArr['countries'][$country]['IDSpecimensPerCountry'] = $r->IDSpecimensPerCountry;
-				$returnArr['countries'][$country]['IDGeorefSpecimensPerCountry'] = $r->IDGeorefSpecimensPerCountry;
-			}
-		}
-		$rs->free();
-		if($messages){
-			echo 'Done!</li>';
-		}
-		
-		if($messages){
-			echo '<li>Updating statistics records... ';
-		}
-		ob_flush();
-		flush();
-		$returnArrJson = json_encode($returnArr);
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.','.
-			"cs.speciescnt = ".$speciesCnt.",cs.datelastmodified = CURDATE(),cs.dynamicProperties = '".$returnArrJson."' ".
-			'WHERE cs.collid = '.$this->collid;
-		$writeConn->query($sql);
-		if($messages){
-			echo 'Done!</li>';
-		}
-		
-		if($messages){
+		if($verbose){
 			echo '<li>Finished updating collection statistics</li>';
+			flush();
+			ob_flush();
 		}
 	}
 
@@ -809,25 +647,27 @@ class CollectionProfileManager {
 	}
 	
 	public function batchUpdateStatistics($collId){
-		$collArr = Array();
-		$sql = "SELECT c.collid, c.CollectionName ".
-				"FROM omcollections c ".
-				"WHERE c.collid IN(".$collId.") ";
+		echo 'Updating collection statistics...';
+		echo '<ul>';
+		echo '<li>General cleaning in preparation for collecting stats... </li>';
+		flush();
+		ob_flush();
+		$occurUtil = new OccurrenceUtilities();
+		$occurUtil->generalOccurrenceCleaning();
+		$sql = 'SELECT collid, collectionname FROM omcollections WHERE collid IN('.$collId.') ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$collArr[$r->collid] = $r->CollectionName;
+			echo '<li style="margin-left:15px;">Cleaning statistics for: '.$r->collectionname.'</li>';
+			flush();
+			ob_flush();
+			$occurUtil->updateCollectionStats($r->collid, true);
 		}
 		$rs->free();
-		echo 'Updating collection statistics...';
-		echo '<ul>';
-		foreach($collArr as $k => $name){
-			$this->setCollid($k);
-			$this->updateStatistics(false);
-			echo '<li>'.$name.' updated!</li>';
-		}
+		echo '<li>Statistics update complete!</li>';
 		echo '</ul>';
-		echo 'Statistics update complete!';
+		flush();
+		ob_flush();
 	}
 	
 	public function runStatistics($collId){

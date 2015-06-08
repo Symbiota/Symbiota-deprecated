@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/CollectionProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -91,7 +90,7 @@ if($collId){
 							$familyArr[$k]['IDGeorefSpecimensPerFamily'] = $famArr['IDGeorefSpecimensPerFamily'];
 						}
 					}
-					ksort($familyArr,SORT_STRING | SORT_FLAG_CASE);
+					ksort($familyArr, SORT_STRING || SORT_FLAG_CASE);
 				}
 				
 				if(array_key_exists("countries",$dynPropTempArr)){
@@ -110,7 +109,7 @@ if($collId){
 							$countryArr[$k]['IDGeorefSpecimensPerCountry'] = $countArr['IDGeorefSpecimensPerCountry'];
 						}
 					}
-					ksort($countryArr,SORT_STRING | SORT_FLAG_CASE);
+					ksort($countryArr,SORT_STRING || SORT_FLAG_CASE);
 				}
 			}
 			$c++;
@@ -526,45 +525,46 @@ if($action != "Update Statistics"){
 							<div style="min-height:300px;">
 								<div style="height:100%;">
 									<h1>Selected Collection Statistics</h1>
-									<h2 style="font-size:105%">
-										<?php 
-											echo $collStr." - Analysis Statistics gathered";
-										?> 
-									</h2>
+									<div style="font-weight:bold;font-size:105%;margin:10px;">
+										<div id="colllistlabel"><a href="#" onclick="toggle('colllist');toggle('colllistlabel');">Display List of Collections Analyzed</a></div>
+										<div id="colllist" style="display:none">
+											<?php echo $collStr; ?> 
+										</div>
+									</div>
 									<fieldset style="float:left;width:450px;margin-bottom:15px;">
 										<ul style="margin:0px;padding-left:10px;">
 											<?php
 											echo "<li>";
-											echo ($results['SpecimenCount']?$results['SpecimenCount']:0)." specimens";
+											echo ($results['SpecimenCount']?number_format($results['SpecimenCount']):0)." specimens";
 											echo "</li>";
 											echo "<li>";
 											$percGeo = '';
 											if($results['SpecimenCount'] && $results['GeorefCount']){
 												$percGeo = (100* ($results['GeorefCount'] / $results['SpecimenCount']));
 											}
-											echo ($results['GeorefCount']?$results['GeorefCount']:0).($percGeo?" (".($percGeo>1?round($percGeo):round($percGeo,2))."%)":'')." georeferenced";
+											echo ($results['GeorefCount']?number_format($results['GeorefCount']):0).($percGeo?" (".($percGeo>1?round($percGeo):round($percGeo,2))."%)":'')." georeferenced";
 											echo "</li>";
 											echo "<li>";
 											$percId = '';
 											if($results['SpecimenCount'] && $results['SpecimensCountID']){
 												$percId = (100* ($results['SpecimensCountID'] / $results['SpecimenCount']));
 											}
-											echo ($results['SpecimensCountID']?$results['SpecimensCountID']:0).($percId?" (".($percId>1?round($percId):round($percId,2))."%)":'')." identified to species";
+											echo ($results['SpecimensCountID']?number_format($results['SpecimensCountID']):0).($percId?" (".($percId>1?round($percId):round($percId,2))."%)":'')." identified to species";
 											echo "</li>";
 											echo "<li>";
-											echo ($results['FamilyCount']?$results['FamilyCount']:0)." families";
+											echo ($results['FamilyCount']?number_format($results['FamilyCount']):0)." families";
 											echo "</li>";
 											echo "<li>";
-											echo ($results['GeneraCount']?$results['GeneraCount']:0)." genera";
+											echo ($results['GeneraCount']?number_format($results['GeneraCount']):0)." genera";
 											echo "</li>";
 											echo "<li>";
-											echo ($results['SpeciesCount']?$results['SpeciesCount']:0)." species";
+											echo ($results['SpeciesCount']?number_format($results['SpeciesCount']):0)." species";
 											echo "</li>";
 											echo "<li>";
-											echo ($results['TotalTaxaCount']?$results['TotalTaxaCount']:0)." total taxa (including subsp. and var.)";
+											echo ($results['TotalTaxaCount']?number_format($results['TotalTaxaCount']):0)." total taxa (including subsp. and var.)";
 											echo "</li>";
 											echo "<li>";
-											echo ($results['TypeCount']?$results['TypeCount']:0)." type specimens";
+											echo ($results['TypeCount']?number_format($results['TypeCount']):0)." type specimens";
 											echo "</li>";
 											?>
 										</ul>
@@ -619,7 +619,7 @@ if($action != "Update Statistics"){
 											if(count($resultsTemp) == 1){
 												echo '<a href="../list.php?db[]='.$collId.'&reset=1&taxa='.$name.'" target="_blank">';
 											}
-											echo $data['SpecimensPerFamily'];
+											echo number_format($data['SpecimensPerFamily']);
 											if(count($resultsTemp) == 1){
 												echo '</a>';
 											}
@@ -633,8 +633,8 @@ if($action != "Update Statistics"){
 										?>
 									</table>
 									<div style="margin-top:10px;">
-										<b>Total Specimens with Family:</b> <?php echo $total; ?><br />
-										Specimens without Family: <?php echo ($results['SpecimenCount']-$total); ?><br />
+										<b>Total Specimens with Family:</b> <?php echo number_format($total); ?><br />
+										Specimens without Family: <?php echo number_format($results['SpecimenCount']-$total); ?><br />
 									</div>
 								</fieldset>
 								<fieldset id="geodistbox" style="margin-top:15px;width:800px;display:none;">
@@ -656,7 +656,7 @@ if($action != "Update Statistics"){
 											if(count($resultsTemp) == 1){
 												echo '<a href="../list.php?db[]='.$collId.'&reset=1&country='.$name.'" target="_blank">';
 											}
-											echo $data['CountryCount'];
+											echo number_format($data['CountryCount']);
 											if(count($resultsTemp) == 1){
 												echo '</a>';
 											}
@@ -670,8 +670,8 @@ if($action != "Update Statistics"){
 										?>
 									</table>
 									<div style="margin-top:10px;">
-										<b>Total Specimens with Country:</b> <?php echo $total; ?><br />
-										Specimens without Country or Georeferencing: <?php echo (($results['SpecimenCount']-$total)+$results['SpecimensNullLatitude']); ?><br />
+										<b>Total Specimens with Country:</b> <?php echo number_format($total); ?><br />
+										Specimens without Country or Georeferencing: <?php echo number_format(($results['SpecimenCount']-$total)+$results['SpecimensNullLatitude']); ?><br />
 									</div>
 								</fieldset>
 							</div>

@@ -326,15 +326,13 @@ $collData = $collManager->getCollectionData(true);
 							</tr>
 							<tr>
 								<td>
-									Rights:
+									License:
 								</td>
 								<td>
 									<?php 
 									if(isset($rightsTerms)){
 										?>
 										<select name="rights">
-											<option value="">Select usage rights</option>
-											<option value="">-----------------------</option>
 											<?php
 											$hasOrphanTerm = true; 
 											foreach($rightsTerms as $k => $v){
@@ -362,9 +360,9 @@ $collData = $collManager->getCollectionData(true);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="rightsinfodialog">
-										Information about rights held in and over the resource. 
+										A legal document giving official permission to do something with the resource. 
 										This field can be limited to a set of values by modifying the portal's central configuration file.
-										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:rights" target="_blank">Darwin Core definition</a>.
+										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:license" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -415,7 +413,8 @@ $collData = $collManager->getCollectionData(true);
 									</a>
 									<div id="guidinfodialog">
 										Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) field  
-										is supplied by the source database (e.g. Specify database) and the GUID is mapped to the occurrenceId field.
+										is supplied by the source database (e.g. Specify database) and the GUID is mapped to the 
+										<a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#occurrenceID" target="_blank">occurrenceId</a> field.
 										The use of the Occurrence Id as the GUID is not recommended for live datasets. 
 										Catalog Number can be used when the value within the catalog number field is globally unique.
 										The Symbiota Generated GUID (UUID) option will trigger the Symbiota data portal to automatically 
