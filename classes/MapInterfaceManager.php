@@ -1002,19 +1002,19 @@ class MapInterfaceManager{
             echo "<IconStyle><scale>1.3</scale><Icon>";
 			echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
 			echo "</Icon><hotSpot x='20' y='2' xunits='pixels' yunits='pixels'/></IconStyle>\n</Style>\n";
-			echo "<StyleMap id='".str_replace(" ","_",$sciName)."'>\n";
+			echo "<StyleMap id='".htmlspecialchars(str_replace(" ","_",$sciName), ENT_QUOTES)."'>\n";
             echo "<Pair><key>normal</key><styleUrl>#sn_".$iconStr."</styleUrl></Pair>";
 			echo "<Pair><key>highlight</key><styleUrl>#sh_".$iconStr."</styleUrl></Pair>";
 			echo "</StyleMap>\n";
-			echo "<Folder><name>".$sciName."</name>\n";
+			echo "<Folder><name>".htmlspecialchars($sciName, ENT_QUOTES)."</name>\n";
 			foreach($contentArr as $occId => $pointArr){
 				echo "<Placemark>\n";
 				echo "<name>".htmlspecialchars($pointArr["identifier"], ENT_QUOTES)."</name>\n";
 				echo "<ExtendedData>\n";
-				echo "<Data name='institutioncode'>".$pointArr["institutioncode"]."</Data>\n";
-				echo "<Data name='collectioncode'>".$pointArr["collectioncode"]."</Data>\n";
-				echo "<Data name='catalognumber'>".$pointArr["catalognumber"]."</Data>\n";
-				echo "<Data name='othercatalognumbers'>".$pointArr["othercatalognumbers"]."</Data>\n";
+				echo "<Data name='institutioncode'>".htmlspecialchars($pointArr["institutioncode"], ENT_QUOTES)."</Data>\n";
+				echo "<Data name='collectioncode'>".htmlspecialchars($pointArr["collectioncode"], ENT_QUOTES)."</Data>\n";
+				echo "<Data name='catalognumber'>".htmlspecialchars($pointArr["catalognumber"], ENT_QUOTES)."</Data>\n";
+				echo "<Data name='othercatalognumbers'>".htmlspecialchars($pointArr["othercatalognumbers"], ENT_QUOTES)."</Data>\n";
 				if($this->fieldArr){
 					foreach($this->fieldArr as $k => $v){
 						echo "<Data name='".$v."'>".$pointArr[$v]."</Data>\n";
@@ -1024,7 +1024,7 @@ class MapInterfaceManager{
 				$url = "http://".$_SERVER["SERVER_NAME"].$clientRoot."/collections/individual/index.php?occid=".$occId;
 				echo "<Data name='RecordURL'>".$url."</Data>\n";
 				echo "</ExtendedData>\n";
-				echo "<styleUrl>#".str_replace(" ","_",$sciName)."</styleUrl>\n";
+				echo "<styleUrl>#".htmlspecialchars(str_replace(" ","_",$sciName), ENT_QUOTES)."</styleUrl>\n";
 				echo "<Point><coordinates>".implode(",",array_reverse(explode(",",$pointArr["latLngStr"]))).",0</coordinates></Point>\n";
 				echo "</Placemark>\n";
 			}
