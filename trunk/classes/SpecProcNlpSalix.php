@@ -1357,7 +1357,7 @@ class SpecProcNlpSalix
 			for($L=0;$L < count($this->LabelLines);$L++)
 				{
 				$Found = preg_match_all($Preg, $this->LabelLines[$L],$match);
-				$this->printr($match,"MidNameMatch");
+				//$this->printr($match,"MidNameMatch");
 				if($Found > 0)
 					{
 					$this->AddToResults($Field,$match[2][0],$L);
@@ -3309,6 +3309,7 @@ class SpecProcNlpSalix
 	//**********************************************
 	private function printr($A, $Note="")
 		{//Debug only.  Enhances the print_r routine by adding an optional note before and a newline after.
+		// [^/]\$this->printr regular expression search to find uncommented instances
 		if(!is_array($A))
 			echo "Not array";
 		else
