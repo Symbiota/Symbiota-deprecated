@@ -438,7 +438,7 @@ class SpecProcNlpSalix
 				$Found = preg_match("((\b\w{2,20}(aceae))\b)i",$this->LabelLines[$L],$match);//Replace above with case insensitive version
 				if($Found === 1)
 					{ //If not found as "...aceae of...", then use the first "...acea..." found.
-					$this->printr($match,"ACEAE match:");
+					//$this->printr($match,"ACEAE match:");
 					$query = "SELECT family from taxstatus WHERE family LIKE '{$match[1]}' LIMIT 1";
 					$result = $this->conn->query($query);
 					if($result->num_rows > 0)
