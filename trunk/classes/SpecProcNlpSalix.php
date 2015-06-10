@@ -3151,7 +3151,7 @@ class SpecProcNlpSalix
 		$this->PregStart['stateProvince'] = "(^(State|Province|Provincia de|Provincia|Prov)\b)i";
 		$this->PregStart['county'] = "(^(County|Parish)\b)i";
 		$this->PregStart['minimumElevationInMeters'] = "(^(Elevation|Elevacion|Elev|Altitude|alt)\b)i";
-		$this->PregStart['associatedTaxa'] = "(^(growing with|Associated taxa|Associated with|Assoc(.|iated)? plants|Assoc(.|iated)? spp|Assoc(.|iated)? species|Associated|Other spp)\b)i";
+		$this->PregStart['associatedTaxa'] = "(^(growing with|Associated taxa|Associated with|Assoc(.|iated)? plants|Assoc(.|iated)? spp|Assoc(.|iated)? species|Especies representativas|especies|Associated|Other spp)\b)i";
 		$this->PregStart['infraspecificEpithet'] = "(^(ssp|variety|subsp)\b)i";
 		$this->PregStart['occurrenceRemarks'] = "(^(Notes)\b)i";
 		//$this->PregStart['verbatimAttributes'] = "(^(habit)\b)i";
