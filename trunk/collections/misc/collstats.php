@@ -90,7 +90,7 @@ if($collId){
 							$familyArr[$k]['IDGeorefSpecimensPerFamily'] = $famArr['IDGeorefSpecimensPerFamily'];
 						}
 					}
-					ksort($familyArr, SORT_STRING || SORT_FLAG_CASE);
+					ksort($familyArr, SORT_STRING | SORT_FLAG_CASE);
 				}
 				
 				if(array_key_exists("countries",$dynPropTempArr)){
@@ -109,7 +109,7 @@ if($collId){
 							$countryArr[$k]['IDGeorefSpecimensPerCountry'] = $countArr['IDGeorefSpecimensPerCountry'];
 						}
 					}
-					ksort($countryArr,SORT_STRING || SORT_FLAG_CASE);
+					ksort($countryArr, SORT_STRING | SORT_FLAG_CASE);
 				}
 			}
 			$c++;
