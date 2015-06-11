@@ -649,11 +649,11 @@ class CollectionProfileManager {
 	public function batchUpdateStatistics($collId){
 		echo 'Updating collection statistics...';
 		echo '<ul>';
-		echo '<li>General cleaning in preparation for collecting stats... </li>';
+		//echo '<li>General cleaning in preparation for collecting stats... </li>';
 		flush();
 		ob_flush();
 		$occurUtil = new OccurrenceUtilities();
-		$occurUtil->generalOccurrenceCleaning();
+		//$occurUtil->generalOccurrenceCleaning();
 		$sql = 'SELECT collid, collectionname FROM omcollections WHERE collid IN('.$collId.') ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
