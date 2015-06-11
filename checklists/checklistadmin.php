@@ -82,7 +82,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 		var tabIndex = <?php echo $tabIndex; ?>;
 	</script>
 	<script type="text/javascript" src="../js/symb/shared.js"></script>
-	<script type="text/javascript" src="../js/symb/checklists.checklistadmin.js"></script>
+	<script type="text/javascript" src="../js/symb/checklists.checklistadmin.js?ver=20150610"></script>
 </head>
 
 <body>

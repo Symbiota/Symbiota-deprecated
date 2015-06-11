@@ -228,7 +228,7 @@ if(isset($profile_viewprofileCrumbs)){
 									<input name="nclauthors" type="text" maxlength="250" style="width:90%;" />
 								</div>
 								<?php 
-								if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
+								if(isset($GLOBALS['USER_RIGHTS']['RareSppAdmin']) || $IS_ADMIN){
 									echo '<div style="margin:3px;">';
 									echo '<b>Checklist Type</b><br/>';
 									echo '<select name="ncltype">';
