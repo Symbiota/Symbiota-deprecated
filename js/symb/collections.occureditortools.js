@@ -84,7 +84,15 @@ function geoLocateUpdateCoord(latValue,lngValue,coordErrValue, footprintWKT){
 	f.decimallatitude.value = latValue;
 	f.decimallongitude.value = lngValue;
 	f.coordinateuncertaintyinmeters.value = coordErrValue;
-	f.footprintwkt.value = footprintWKT;
+	if(footprintWKT.length > 0){
+		if(footprintWKT == "Unavailable") footprintWKT = "";
+		if(footprintWKT.length > 65000){
+			footprintWKT = "";
+			//alert("WKT footprint is too large to save in the database");
+		}
+		f.footprintwkt.value = footprintWKT;
+		fieldChanged('footprintwkt');
+	}
 	f.georeferencesources.value = "GeoLocate";
 	f.geodeticdatum.value = "WGS84";
 
