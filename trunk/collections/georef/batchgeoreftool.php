@@ -83,7 +83,7 @@ header("Content-Type: text/html; charset=".$charset);
 		//include($serverRoot.'/header.php');
 		?>
 		<!-- This is inner text! -->
-		<div style="width:98%">
+		<div  id='innertext'>
 			<div style="float:left;">
 				<div style="font-weight:bold;font-size:150%;margin-top:6px;">
 					<?php echo $geoManager->getCollName(); ?>
@@ -195,16 +195,16 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="georefform" method="post" action="batchgeoreftool.php" onsubmit="return verifyGeorefForm(this)">
 								<div style="float:right;">
 									<span>
-										<a href="#" onclick="geoCloneTool();"><img src="../../images/list.png" title="Search for clones previously georeferenced" style="width:18px;" /></a>
+										<a href="#" onclick="geoCloneTool();"><img src="../../images/list.png" title="Search for clones previously georeferenced" style="width:15px;" /></a>
 									</span>
 									<span style="margin-left:10px;">
-										<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.png" title="GeoLocate locality" style="width:18px;" /></a>
+										<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.png" title="GeoLocate locality" style="width:15px;" /></a>
 									</span>
 									<span style="margin-left:10px;">
-										<a href="#" onclick="analyseLocalityStr();"><img src="../../images/find.png" title="Analyse Locality string for embedded Lat/Long or UTM" style="width:18px;" /></a>
+										<a href="#" onclick="analyseLocalityStr();"><img src="../../images/find.png" title="Analyse Locality string for embedded Lat/Long or UTM" style="width:15px;" /></a>
 									</span>
 									<span style="margin-left:10px;">
-										<a href="#" onclick="openFirstRecSet();"><img src="../../images/edit.png" title="Edit first set of records" style="width:18px;" /></a>
+										<a href="#" onclick="openFirstRecSet();"><img src="../../images/edit.png" title="Edit first set of records" style="width:15px;" /></a>
 									</span>
 								</div>
 								<div style="font-weight:bold;">
@@ -326,7 +326,7 @@ header("Content-Type: text/html; charset=".$charset);
 												</span>
 											</td>
 										</tr>
-										<tr rowspan="2">
+										<tr>
 											<td colspan="3" style="vertical-align:middle">
 												<b>Footprint WKT:</b>
 											</td>

@@ -149,7 +149,13 @@ function geoLocateUpdateCoord(latValue,lngValue,coordErrValue,footprintWKTValue)
 	var f = document.georefform;
 	f.decimallatitude.value = latValue;
 	f.decimallongitude.value = lngValue;
+	if(coordErrValue == "Unavailable") coordErrValue = "";
 	f.coordinateuncertaintyinmeters.value = coordErrValue;
+	if(footprintWKTValue == "Unavailable") footprintWKTValue = "";
+	if(footprintWKTValue.length > 65000){
+		footprintWKTValue = "";
+		//alert("WKT footprint is too large to save in the database");
+	}
 	f.footprintwkt.value = footprintWKTValue;
 	var baseStr = f.georeferencesources.value;
 	if(baseStr){

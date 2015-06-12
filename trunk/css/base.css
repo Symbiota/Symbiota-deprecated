@@ -92,6 +92,7 @@ div.menuitem a:hover {
 /*Central div and general components */
 #innertext{
 	margin:	15px;	
+	background-color: #FFFFFF;
 }
 
 #innertext a{

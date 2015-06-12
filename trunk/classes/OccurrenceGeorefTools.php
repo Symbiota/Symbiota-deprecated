@@ -21,7 +21,7 @@ class OccurrenceGeorefTools {
 	public function getLocalityArr(){
 		$retArr = array();
 		if($this->collId){
-			$sql = 'SELECT occid, country, stateprovince, county, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
+			$sql = 'SELECT occid, country, stateprovince, county, CONCAT_WS("; ",municipality,locality) AS locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
 				'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) AND (locality <> "") ';
 			if(!$this->qryVars || !array_key_exists('qdisplayall',$this->qryVars) || !$this->qryVars['qdisplayall']){
 				$sql .= 'AND (decimalLatitude IS NULL) ';
@@ -64,11 +64,11 @@ class OccurrenceGeorefTools {
 					$orderBy .= 'county,';
 				}
 				if(array_key_exists('qlocality',$this->qryVars) && $this->qryVars['qlocality']){
-					$sql .= 'AND (locality LIKE "%'.$this->qryVars['qlocality'].'%") ';
+					$sql .= 'AND ((locality LIKE "%'.$this->qryVars['qlocality'].'%") OR (municipality LIKE "'.$this->qryVars['qlocality'].'%")) ';
 				}
 			}
-			$sql .= 'ORDER BY '.$orderBy.'locality,verbatimcoordinates ';
-			//echo $sql;
+			$sql .= 'ORDER BY '.$orderBy.'municipality,locality,verbatimcoordinates ';
+			//echo $sql; exit;
 			$totalCnt = 0;
 			$locCnt = 1;
 			$countryStr='';$stateStr='';$countyStr='';$localityStr='';$verbCoordStr = '';$decLatStr='';$decLngStr='';
@@ -159,7 +159,7 @@ class OccurrenceGeorefTools {
 						$this->addOccurEdits('minimumelevationinmeters',$geoRefArr['minimumelevationinmeters'],$localStr);
 					}
 					$sql .= ' WHERE (collid = '.$this->collId.') AND (occid IN('.$localStr.'))';
-					//echo $sql;
+					//echo $sql; exit;
 					if(!$this->conn->query($sql)){
 						$this->errorStr = 'ERROR batch updating coordinates: '.$this->conn->error;
 						echo $this->errorStr;
@@ -235,9 +235,10 @@ class OccurrenceGeorefTools {
 
 	public function getGeorefClones($locality, $country, $state, $county){
 		$occArr = array();
+		if(strlen($locality) > 150) $locality = substr($locality,0,150);
 		$sql = 'SELECT count(occid) AS cnt, decimallatitude, decimallongitude, coordinateUncertaintyInMeters, footprintWKT, country, stateprovince, county, georeferencedby '.
 			'FROM omoccurrences '.
-			'WHERE decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL AND TRIM(TRIM(TRAILING "." FROM locality)) = "'.trim($this->cleanInStr($locality), " .").'" ';
+			'WHERE decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL AND locality LIKE "'.trim($this->cleanInStr($locality), " .").'%" ';
 		if($country){
 			$synArr = array('usa','u.s.a', 'united states','united states of america','u.s.');
 			if(in_array($country,$synArr)){
@@ -253,8 +254,8 @@ class OccurrenceGeorefTools {
 			$sql .= 'AND (county LIKE "'.$this->cleanInStr($county).'%") ';
 		}
 		$sql .= 'GROUP BY decimallatitude, decimallongitude '.
-			'ORDER BY georeferencedBy DESC, count(occid) DESC';
-		//echo '<div>'.$sql.'</div>';
+			'ORDER BY georeferencedBy DESC, cnt DESC';
+		//echo '<div>'.$sql.'</div>'; exit;
 
 		$rs = $this->conn->query($sql);
 		$cnt = 0;

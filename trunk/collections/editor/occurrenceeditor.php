@@ -975,7 +975,7 @@ else{
 													<div id="footprintWktDiv">
 														<?php echo (defined('FOOTPRINTWKTLABEL')?FOOTPRINTWKTLABEL:'footprint (polygon)'); ?>
 														<br/>
-														<textarea name="footprintwkt" onchange="fieldChanged('footprintwkt');"><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
+														<textarea name="footprintwkt" onchange="footPrintWktChanged(this)" style="height:22px;"><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
 													</div>
 												</div>
 											</div>

@@ -244,6 +244,14 @@ function coordinateUncertaintyInMetersChanged(f){
 	fieldChanged('coordinateuncertaintyinmeters');
 }
 
+function footPrintWktChanged(formObj){
+	fieldChanged('footprintwkt');
+	if(formObj.value.length > 65000){
+		formObj.value = "";
+		alert("WKT footprint is too large to save in the database");
+	}
+}
+
 function minimumElevationInMetersChanged(f){
 	verifyMinimumElevationInMeters(f);
 	fieldChanged('minimumelevationinmeters');
