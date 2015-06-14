@@ -235,10 +235,13 @@ class OccurrenceGeorefTools {
 
 	public function getGeorefClones($locality, $country, $state, $county){
 		$occArr = array();
-		if(strlen($locality) > 150) $locality = substr($locality,0,150);
-		$sql = 'SELECT count(occid) AS cnt, decimallatitude, decimallongitude, coordinateUncertaintyInMeters, footprintWKT, country, stateprovince, county, georeferencedby '.
+		$sql = 'SELECT count(occid) AS cnt, decimallatitude, decimallongitude, coordinateUncertaintyInMeters, georeferencedby '.
 			'FROM omoccurrences '.
-			'WHERE decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL AND locality LIKE "'.trim($this->cleanInStr($locality), " .").'%" ';
+			'WHERE decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL ';
+		if(strlen($locality) > 95){
+			$locality = substr($locality,0,95);
+		}
+		$sql .= 'AND locality LIKE "'.trim($this->cleanInStr($locality), " .").'%" ';
 		if($country){
 			$synArr = array('usa','u.s.a', 'united states','united states of america','u.s.');
 			if(in_array($country,$synArr)){
@@ -269,10 +272,10 @@ class OccurrenceGeorefTools {
 				$occArr[$cnt]['lat'] = $r->decimallatitude;
 				$occArr[$cnt]['lng'] = $r->decimallongitude;
 				$occArr[$cnt]['err'] = $r->coordinateUncertaintyInMeters;
-				$occArr[$cnt]['footprint'] = $r->footprintWKT;
-				$occArr[$cnt]['country'] = $r->country;
-				$occArr[$cnt]['state'] = $r->stateprovince;
-				$occArr[$cnt]['county'] = $r->county;
+				//$occArr[$cnt]['footprint'] = $r->footprintWKT;
+				//$occArr[$cnt]['country'] = $r->country;
+				//$occArr[$cnt]['state'] = $r->stateprovince;
+				//$occArr[$cnt]['county'] = $r->county;
 				$occArr[$cnt]['georefby'] = $r->georeferencedby;
 				$cnt++;
 			}
