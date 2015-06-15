@@ -970,7 +970,7 @@ class OccurrenceUtilities {
 		}
 		else{
 			if($this->verbose) $this->outputMsg('Calculating specimen, georeference, family, genera, and species counts... ',1);
-			$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
+			$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, COUNT(DISTINCT o.family) AS FamilyCount, '.
 				'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
 				'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount '.
 				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
@@ -986,8 +986,8 @@ class OccurrenceUtilities {
 		}
 		
 		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.','.
-			"cs.speciescnt = ".$speciesCnt.", cs.datelastmodified = CURDATE() ".
+			'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.
+			',cs.speciescnt = '.$speciesCnt.', cs.datelastmodified = CURDATE() '.
 			'WHERE cs.collid = '.$collid;
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update collection stats table [2]; '.$this->conn->error;
@@ -1006,7 +1006,7 @@ class OccurrenceUtilities {
 		}
 	}
 
-	private function getErrorArr(){
+	public function getErrorArr(){
 		return $this->errorArr;
 	}
 

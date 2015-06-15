@@ -27,6 +27,9 @@ ALTER TABLE `taxonunits`
 
 
 ALTER TABLE `omoccurrences` 
+  ADD INDEX `Index_locality` (`locality`(100) ASC);
+
+ALTER TABLE `omoccurrences` 
   ADD COLUMN `eventID` VARCHAR(45) NULL AFTER `fieldnumber`;
 
 ALTER TABLE `omcollectionstats` 

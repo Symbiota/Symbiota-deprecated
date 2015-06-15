@@ -240,8 +240,11 @@ class OccurrenceGeorefTools {
 			'WHERE decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL ';
 		if(strlen($locality) > 95){
 			$locality = substr($locality,0,95);
+			$sql .= 'AND locality LIKE "'.trim($this->cleanInStr($locality), " .").'%" ';
 		}
-		$sql .= 'AND locality LIKE "'.trim($this->cleanInStr($locality), " .").'%" ';
+		else{
+			$sql .= 'AND locality = "'.trim($this->cleanInStr($locality), " .").'" ';
+		}
 		if($country){
 			$synArr = array('usa','u.s.a', 'united states','united states of america','u.s.');
 			if(in_array($country,$synArr)){
@@ -265,7 +268,7 @@ class OccurrenceGeorefTools {
 		$lat = 0;
 		$lng = 0;
 		while($r = $rs->fetch_object()){
-			if($lat != $r->decimallatitude && $lng != $r->decimallongitude){
+			if($lat != $r->decimallatitude || $lng != $r->decimallongitude){
 				$lat = $r->decimallatitude;
 				$lng = $r->decimallongitude;
 				$occArr[$cnt]['cnt'] = $r->cnt;
@@ -283,6 +286,7 @@ class OccurrenceGeorefTools {
 				$occArr[$cnt]['cnt'] = ($occArr[$cnt]['cnt']+$r->cnt);
 				if($occArr[$cnt]['georefby'] != $r->georeferencedby) $occArr[$cnt]['georefby'] = $occArr[$cnt]['georefby'].', '.$r->georeferencedby;
 			}
+			if($cnt > 15) break;
 		}
 		$rs->free();
 		return $occArr;
