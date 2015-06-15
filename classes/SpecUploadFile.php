@@ -78,8 +78,9 @@ class SpecUploadFile extends SpecUploadBase{
 		if($this->ulFileName){
 			set_time_limit(7200);
 		 	ini_set("max_input_time",240);
-	
-			//First, delete all records in uploadspectemp table associated with this collection
+
+			$this->outputMsg('<li>Initiating data upload for file: '.$this->ulFileName.'</li>');
+		 	//First, delete all records in uploadspectemp table associated with this collection
 			$this->prepUploadData();
 			
 			$fullPath = $this->uploadTargetPath.$this->ulFileName;
@@ -89,6 +90,7 @@ class SpecUploadFile extends SpecUploadBase{
 			
 			//Grab data 
 			$this->transferCount = 0;
+			$this->outputMsg('<li>Beginning to load records...</li>',1);
 			while($recordArr = $this->getRecordArr($fh)){
 				$recMap = Array();
 				foreach($this->fieldMap as $symbField => $sMap){
@@ -121,6 +123,9 @@ class SpecUploadFile extends SpecUploadBase{
 			if($finalTransfer){
 				$this->transferOccurrences();
 				$this->finalCleanup();
+			}
+			else{
+				$this->outputMsg('<li>Record upload complete, ready for final transfer and activation</li>');
 			}
 		}
 		else{

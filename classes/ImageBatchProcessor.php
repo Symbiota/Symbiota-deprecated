@@ -13,6 +13,9 @@ if(isset($serverRoot)){
 	if(file_exists($serverRoot.'/classes/OccurrenceUtilities.php')){ 
 		include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 	}
+	if(file_exists($serverRoot.'/classes/UuidFactory.php')){ 
+		include_once($serverRoot.'/classes/UuidFactory.php');
+	}
 }
 // Check for the symbiota class files used herein for parsing 
 // batch files of xml formatted strucutured data.
@@ -1465,43 +1468,36 @@ class ImageBatchProcessor {
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
 			$occurUtil = new OccurrenceUtilities();
 	
-			$this->outputMsg('<li>Cleaning house</li>');
-			ob_flush();
-			flush();
+			$this->logOrEcho('Cleaning house...');
 			if(!$occurUtil->generalOccurrenceCleaning()){
 				$errorArr = $occurUtil->getErrorArr();
 				foreach($errorArr as $errorStr){
-					echo '<div style="margin-left:25px;">'.$errorStr.'</div>';
+					$this->logOrEcho($errorStr,1);
 				}
 			}
-			$this->outputMsg('Done!</li> ');
 			
-			$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...');
-			ob_flush();
-			flush();
-			if(!$occurUtil->protectRareSpecies($this->collId)){
+			$this->logOrEcho('Protecting sensitive species...');
+			if(!$occurUtil->protectRareSpecies()){
 				$errorArr = $occurUtil->getErrorArr();
 				foreach($errorArr as $errorStr){
-					echo '<div style="margin-left:25px;">'.$errorStr.'</div>';
+					$this->logOrEcho($errorStr,1);
 				}
 			}
-			$this->outputMsg('Done!</li> ');
 			
-			$this->outputMsg('<li>Updating statistics</li>');
-			ob_flush();
-			flush();
-			$this->outputMsg('Done!</li> ');
-			
-			
-			
+			$this->logOrEcho('Updating statistics...');
 			foreach($this->collProcessedArr as $collid){
 				if(!$occurUtil->updateCollectionStats($collid)){
 					$errorArr = $occurUtil->getErrorArr();
 					foreach($errorArr as $errorStr){
-						echo '<div style="margin-left:25px;">'.$errorStr.'</div>';
+						$this->logOrEcho($errorStr,1);
 					}
 				}
 			}
+			
+			$this->logOrEcho('Populating global unique identifiers (GUIDs) for all records...');
+			$uuidManager = new UuidFactory();
+			$uuidManager->setSilent(1);
+			$uuidManager->populateGuids();
 		}
 		$this->logOrEcho("Stats update completed");
 	}
@@ -1945,6 +1941,8 @@ class ImageBatchProcessor {
 		}
 		elseif($this->logMode == 1){
 			echo '<li '.($indent?'style="margin-left:'.($indent*15).'px"':'').'>'.$str."</li>\n";
+			ob_flush();
+			flush();
 		}
 	}
 }
