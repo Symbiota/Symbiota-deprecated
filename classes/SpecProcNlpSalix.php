@@ -261,7 +261,7 @@ class SpecProcNlpSalix
 			$OneStat['Score'] = $Score;
 			$this->StatScore[$L] = $OneStat;
 			}
-			
+		//$this->PrintLines();	
 		//Save the lines as they are before fields are removed or modified.
 		$this->VirginLines = $this->LabelLines;
 		//*************************************************************
@@ -1148,9 +1148,9 @@ class SpecProcNlpSalix
 				$this->AddToResults('decimalLongitude',$LL['lng'],$L);
 				for($Line=$L-1;$Line < $L+2;$Line++)
 					{
-					if($L < 0)
+					if($Line < 0)
 						continue;
-					if($L >= count($this->LabelLines))
+					if($Line >= count($this->LabelLines))
 						continue;
 					$this->LabelLines[$Line] = str_replace($match[0][0],"",$this->LabelLines[$Line]);
 					$this->LabelLines[$Line] = str_replace($match[0][1],"",$this->LabelLines[$Line]);
@@ -1977,9 +1977,10 @@ class SpecProcNlpSalix
 		$Label = str_replace("-"," ",$this->Label);
 		$Found = preg_match("(([A-Za-z]{2,20}ACEAE)\s+(of)\s+(\b\S+[\b-])\s+(\b\S+\b)?)i",$Label,$match);
 		if($Found !== 1)
-			$Found = preg_match("((plants|plantas|flora|lichens|algae|fungi|cryptogams)\s(of|de|du)\s+(\b\S+\b)(\s?\b\S+\b)?)i",$Label,$match);
+			$Found = preg_match("((plants|plantas|flora|lichens|algae|fungi|cryptogams)\s(of|de|del|du)\s+(\b\S+\b)(\s?\b\S+\b)?)i",$Label,$match);
 		if($Found)
 			{// Found "Plants of...".  Look for state or country
+			//echo "Found Plants of...<br>";
 			$Name1 = trim($match[3]," .,;:");
 			$Name2 = "";
 			if(count($match) > 4)
