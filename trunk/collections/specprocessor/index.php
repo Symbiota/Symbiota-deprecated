@@ -29,7 +29,6 @@ if(!is_numeric($tabIndex)) $tabIndex = 0;
 
 
 $specManager = new SpecProcessorManager();
-
 $specManager->setCollId($collid);
 
 $isEditor = false;
@@ -39,17 +38,14 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$u
 
 $statusStr = "";
 if($isEditor){
-	if($action == 'Add New Image Project'){
+	if($action == 'Add New Profile'){
 		$specManager->addProject($_POST);
 	}
-	elseif($action == 'Save Image Project'){
+	elseif($action == 'Save Profile'){
 		$specManager->editProject($_POST);
 	}
-	elseif($action == 'Delete Image Project'){
+	elseif($action == 'Delete Profile'){
 		$specManager->deleteProject($_POST['sppriddel']);
-	}
-	elseif($action == 'Process Output File'){
-		$statusStr = $specManager->processiDigBioOutput($_POST);
 	}
 	elseif($action == 'Add to Queue'){
 		$csManager = new OccurrenceCrowdSource();

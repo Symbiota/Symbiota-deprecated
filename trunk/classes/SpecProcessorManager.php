@@ -83,29 +83,21 @@ class SpecProcessorManager {
 	//Project Functions (create, edit, delete, etc)
 	//Functions not needed for standalone scripts
 	public function editProject($editArr){
-		if($editArr['spprid']){
-			if($editArr['imageuploadtype'] == 'idigbio'){
-				$sql = 'UPDATE specprocessorprojects '.
-					'SET title = "iDigBio CSV upload", '.
-					'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).'" '.
-					'WHERE (spprid = '.$editArr['spprid'].')';
+		if(is_numeric($editArr['spprid'])){
+			$sqlFrag = '';
+			$targetFields = array('title','speckeypattern','sourcepath','targetpath','imgurl','webpixwidth','tnpixwidth','lgpixwidth','jpgcompression','createtnimg','createlgimg');
+			foreach($editArr as $k => $v){
+				if(in_array($k,$targetFields)){
+					if($v){
+						$sqlFrag .= ','.$k.' = "'.$v.'"';
+					}
+					else{
+						$sqlFrag .= ','.$k.' = NULL';
+					}
+				}
 			}
-			if($editArr['imageuploadtype'] == 'local'){
-				$sql = 'UPDATE specprocessorprojects '.
-					'SET title = "'.$this->cleanInStr($editArr['title']).'", '.
-					'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).'",'.
-					'sourcepath = "'.$this->cleanInStr($editArr['sourcepath']).'",'.
-					'targetpath = '.(isset($editArr['targetpath'])&&$editArr['targetpath']?'"'.$this->cleanInStr($editArr['targetpath']).'"':'NULL').','.
-					'imgurl = '.(isset($editArr['imgurl'])&&$editArr['imgurl']?'"'.$editArr['imgurl'].'"':'NULL').','.
-					'webpixwidth = '.(isset($editArr['webpixwidth'])&&$editArr['webpixwidth']?$editArr['webpixwidth']:'NULL').','.
-					'tnpixwidth = '.(isset($editArr['tnpixwidth'])&&$editArr['tnpixwidth']?$editArr['tnpixwidth']:'NULL').','.
-					'lgpixwidth = '.(isset($editArr['lgpixwidth'])&&$editArr['lgpixwidth']?$editArr['lgpixwidth']:'NULL').','.
-					'jpgcompression = '.(isset($editArr['jpgquality'])&&$editArr['jpgquality']?$editArr['jpgquality']:'NULL').','.
-					'createtnimg = '.(isset($editArr['tnimg'])&&$editArr['tnimg']?$editArr['tnimg']:'NULL').','.
-					'createlgimg = '.(isset($editArr['lgimg'])&&$editArr['lgimg']?$editArr['lgimg']:'NULL').' '.
-					'WHERE (spprid = '.$editArr['spprid'].')';
-			}
-			//echo 'SQL: '.$sql;
+			$sql = 'UPDATE specprocessorprojects SET '.trim($sqlFrag,' ,').' WHERE (spprid = '.$editArr['spprid'].')';
+			//echo 'SQL: '.$sql; exit;
 			if(!$this->conn->query($sql)){
 				echo 'ERROR saving project: '.$this->conn->error;
 				//echo '<br/>SQL: '.$sql;
@@ -122,7 +114,12 @@ class SpecProcessorManager {
 				'VALUES('.$this->collid.',"iDigBio CSV upload","'.
 				$this->cleanInStr($addArr['speckeypattern']).'")';
 		}
-		if($addArr['imageuploadtype'] == 'local'){
+		elseif($addArr['imageuploadtype'] == 'iplant'){
+			$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
+				'VALUES('.$this->collid.',"IPlant Image Processing","'.
+				$this->cleanInStr($addArr['speckeypattern']).'")';
+		}
+		elseif($addArr['imageuploadtype'] == 'local'){
 			$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
 				'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 				'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
@@ -206,112 +203,6 @@ class SpecProcessorManager {
 		return $projArr;
 	}
 	
-	public function processiDigBioOutput($pArr){
-		global $serverRoot;
-		$statusStr = '';
-		$fullPath = $serverRoot.(substr($serverRoot,-1) != '/'?'/':'').'temp/logs/idigbio_'.time().'.csv';
-		$pmTerm = $pArr['speckeypattern'];
-		if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath)){
-			if($fh = fopen($fullPath,'rb')){
-				$headerArr = fgetcsv($fh,0,',');
-				$mediaGuidIndex = array_search('MediaGUID',$headerArr);
-				$mediaMd5Index = array_search('MediaMD5',$headerArr);
-				if(is_numeric($mediaGuidIndex) && is_numeric($mediaMd5Index)){
-					while(($data = fgetcsv($fh,1000,",")) !== FALSE){
-						if(preg_match($pmTerm,$data[$mediaGuidIndex],$matchArr)){
-							if(array_key_exists(1,$matchArr) && $matchArr[1]){
-								$specPk = $matchArr[1];
-								$recOccid = $this->getOccId($specPk);
-								if($recOccid){
-									//Check to see if urls are already in system
-									$sql1 = 'SELECT i.imgid '.
-										'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-										'WHERE o.collid = '.$this->collid.' AND i.sourceIdentifier = "'.$data[$mediaGuidIndex].'"';
-									//echo $sql1;
-									$rs1 = $this->conn->query($sql1);
-									
-									if(!$rs1->num_rows){
-										//Image hasn't been loaded, thus insert image urls into image table
-										$tnUrl = 'http://media.idigbio.org/lookup/images/'.$data[$mediaMd5Index].'?size=thumbnail';
-										$webUrl = 'http://media.idigbio.org/lookup/images/'.$data[$mediaMd5Index].'?size=webview';
-										$lgUrl = 'http://media.idigbio.org/lookup/images/'.$data[$mediaMd5Index].'?size=fullsize';
-										$sql2 = 'INSERT INTO images (occid,url,thumbnailurl,originalurl,sourceIdentifier) '.
-											'VALUES('.$recOccid.',"'.$webUrl.'","'.$tnUrl.'","'.$lgUrl.'","'.$data[$mediaGuidIndex].'")';
-										if($this->conn->query($sql2)){
-											//Output to log file
-											echo 'Success: image (#'.$recOccid.': '.$mediaGuidIndex.') link  loaded to database<br/>';
-										}
-										else{
-											//Output SQL error to error log file
-											//FAILED: Output error message
-											echo $this->conn->error;
-										}
-									}
-									else{
-										//Output to log file
-										echo 'File skipped because it is already in system<br/>';
-									}
-									$rs1->free();
-								}
-								else{
-									echo 'ERROR bad occid: '.$recOccid;
-								}
-							}
-							else{
-								//Output to error log file
-								echo 'ERROR: failed to extract match term';
-								print_r($matchArr);
-							}
-						}
-						else{
-							//Output to error log file
-							echo 'ERROR: unable to extract catalogNumber using pattern matching terms (subject: '.$data[$mediaGuidIndex].', pmTerm: '.$pmTerm.')';
-						}
-					}
-				}
-				else{
-					//Output to error log file
-					echo 'Bad input fields: '.$mediaGuidIndex.', '.$mediaMd5Index;
-				}
-				fclose($fh);
-			}
-			else{
-				$statusStr = "Can't open file.";
-			}
-		}
-		
-		return $statusStr;
-	}
-	
-	private function getOccId($specPk){
-		$occId = 0;
-		//Check to see if record with pk already exists
-		$sql = 'SELECT occid FROM omoccurrences '.
-			'WHERE (catalognumber IN("'.$specPk.'"'.(substr($specPk,0,1)=='0'?',"'.ltrim($specPk,'0 ').'"':'').')) '.
-			'AND (collid = '.$this->collid.')';
-		$rs = $this->conn->query($sql);
-		if($row = $rs->fetch_object()){
-			$occId = $row->occid;
-		}
-		$rs->free();
-		if(!$occId && $this->createNewRec){
-			//Records does not exist, create a new one to which image will be linked
-			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber,processingstatus,dateentered) '.
-				'VALUES('.$this->collid.',"'.$specPk.'","unprocessed","'.date('Y-m-d H:i:s').'")';
-			if($this->conn->query($sql2)){
-				$occId = $this->conn->insert_id;
-				//$this->logOrEcho("Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") ",1);
-			}
-			else{
-				//$this->logOrEcho("ERROR creating new occurrence record: ".$this->conn->error,1);
-			}
-		}
-		if(!$occId){
-			//$this->logOrEcho("ERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") ",1);
-		}
-		return $occId;
-	}
-
 	//Report functions
 	public function getProcessingStats(){
 		$retArr = array();
@@ -502,7 +393,7 @@ class SpecProcessorManager {
 		return $retArr;
  	}
 
- 	//Misc status
+ 	//Misc stats
 	public function downloadReportData($target){
 		$fileName = 'SymbSpecNoImages_'.time().'.csv';
 		header ('Content-Type: text/csv; charset='.$GLOBALS['charset']);
