@@ -57,22 +57,8 @@ if($spprId) $specManager->setProjVariables($spprId);
 				}
 	
 			});
-	
-			function validateCollidForm(f){
-				if(f.collid.length == null){
-					if(f.collid.checked) return true;
-				}
-				else{
-					var radioCnt = f.collid.length;
-					for(var counter = 0; counter < radioCnt; counter++){
-						if (f.collid[counter].checked) return true; 
-					}
-				}
-				alert("Please select a Collection Project");
-				return false;
-			}
-			
-			function checkUploadType(){
+
+			function uploadTypeChanged(){
 				var uploadType = document.getElementById('imageuploadtype').value;
 				if(uploadType == 'local'){
 					document.getElementById('titlerow').style.display = "block";
@@ -86,7 +72,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 					document.getElementById('thumbnailrow').style.display = "block";
 					document.getElementById('largeimagerow').style.display = "block";
 				}
-				if(uploadType == 'idigbio'){
+				if(uploadType == 'idigbio' || uploadType == 'iplant'){
 					document.getElementById('titlerow').style.display = "none";
 					document.getElementById('sourcepathrow').style.display = "none";
 					document.getElementById('targetpathrow').style.display = "none";
@@ -100,23 +86,9 @@ if($spprId) $specManager->setProjVariables($spprId);
 				}
 			}
 
-			function validateSppridForm(f){
-				if(f.spprid.length == null){
-					if(f.spprid.checked) return true;
-				}
-				else{
-					var radioCnt = f.spprid.length;
-					for(var counter = 0; counter < radioCnt; counter++){
-						if (f.spprid[counter].checked) return true; 
-					}
-				}
-				alert("Please select a Specimen Processing Project");
-				return false;
-			}
-
 			function validateProjectForm(f){
 				if(f.speckeypattern.value == ""){
-					alert("Regular expression field must have a value");
+					alert("Pattern matching term must have a value");
 					return false;
 				}
 				if(uploadType == 'local'){
@@ -164,9 +136,6 @@ if($spprId) $specManager->setProjVariables($spprId);
 					}
 				}
 			}
-
-			function validateDelForm(f){
-			}
 		</script>
 	</head>
 	<body>
@@ -184,12 +153,12 @@ if($spprId) $specManager->setProjVariables($spprId);
 			}
 			?>
 			<div style="padding:15px;">
-				This tool is designed to aid collection manager in batch processing specimen images and integrating them into the biodiversity portal.
-				Contact portal manager for helping in setting up a batch image uploading workflow. 
-				Once an upload profile has been established, the collection manager can use this form to manually trigger image processing.
+				These tools are designed to aid collection managers in batch processing specimen images. 
+				Contact portal manager for helping in setting up a new workflow. 
+				Once a profile is established, the collection manager can use this form to manually trigger image processing.
 				For more information, see the Symbiota documentation for 
-				<b><a href="http://symbiota.org/docs/batch-loading-specimen-images-2/">recommended practices</a></b> for batch 
-				loading images thorugh Symbiota.   
+				<b><a href="http://symbiota.org/docs/batch-loading-specimen-images-2/" target="_blank">recommended practices</a></b> for 
+				integrating images.   
 			</div>
 			<?php 
 			if($SYMB_UID){
@@ -198,39 +167,48 @@ if($spprId) $specManager->setProjVariables($spprId);
 					?>
 					<div id="editdiv" style="display:<?php echo ($spprId||$specProjects?'none':'block'); ?>;">
 						<form name="editproj" action="index.php" method="post" onsubmit="return validateProjectForm(this);">
-							<fieldset>
-								<legend><b><?php echo ($spprId?'Edit':'New'); ?> Project</b></legend>
+							<fieldset style="padding:15px">
+								<legend><b><?php echo ($spprId?'Edit':'New'); ?> Profile</b></legend>
 								<?php
-								if($specProjects||$spprId){
+								if($spprId){
 									?>
 									<div style="float:right;margin:10px;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Close Editor">
 										<img src="../../images/edit.png" style="border:0px" />
 									</div>
 									<?php
 								}
+								else{
+									?>
+									<div style="">
+										<div style="width:180px;float:left;">
+											<b>Upload Type:</b>
+										</div>
+										<div style="float:left;">
+											<select name="imageuploadtype" id="imageuploadtype" style="width:300px;" onchange="uploadTypeChanged()" <?php echo ($spprId?'DISABLED':'');?>>
+												<option value="local">Local Image Mapping</option>
+												<option value="idigbio">iDigBio CSV Upload</option>
+												<option value="iplant">iPlant Image Harvest</option>
+											</select>
+										</div>
+									</div>
+									<?php 
+								}
+								if($projectTitle != 'iDigBio CSV upload' && $projectTitle != 'IPlant Image Processing'){
+									?>
+									<div style="clear:both;" id="titlerow">
+										<div style="width:180px;float:left;">
+											<b>Title:</b>
+										</div>
+										<div style="float:left;">
+											<input name="title" type="text" style="width:300px;" value="<?php echo $projectTitle; ?>" />
+										</div>
+									</div>
+									<?php 
+								}
 								?>
 								<div style="clear:both;">
-									<div style="width:225px;float:left;">
-										<b>Upload Type:</b>
-									</div>
-									<div style="float:left;">
-										<select name="imageuploadtype" id="imageuploadtype" style="width:300px;" onchange="checkUploadType();">
-											<option value="local" <?php echo ($projectTitle!='iDigBio CSV upload'?'selected':''); ?>>Local Image Mapping</option>
-											<option value="idigbio" <?php echo ($projectTitle=='iDigBio CSV upload'?'selected':''); ?>>iDigBio CSV Upload</option>
-										</select>
-									</div>
-								</div>
-								<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>" id="titlerow">
-									<div style="width:225px;float:left;">
-										<b>Title:</b>
-									</div>
-									<div style="float:left;">
-										<input name="title" type="text" style="width:300px;" value="<?php echo $projectTitle; ?>" />
-									</div>
-								</div>
-								<div style="clear:both;">
-									<div style="width:225px;float:left;">
-										<b>Regular Expression:</b> 
+									<div style="width:180px;float:left;">
+										<b>Pattern match term:</b> 
 									</div>
 									<div style="float:left;">
 										<input name="speckeypattern" type="text" style="width:300px;" value="<?php echo $specManager->getSpecKeyPattern(); ?>" />
@@ -238,163 +216,162 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="speckeypatterninfodialog">
-											Regular expression (PHP version) needed to extract the unique identifier from source text.
+											Regular expression needed to extract the unique identifier from source text.
 											For example, regular expression /^(WIS-L-\d{7})\D*/ will extract catalog number WIS-L-0001234 
 											from image file named WIS-L-0001234_a.jpg. For more information on creating regular expressions,
 											Google &quot;Regular Expression PHP Tutorial&quot;
 										</div>
 									</div>
 								</div>
-								<div id="sourcepathrow" style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-									<div style="width:225px;float:left;">
-										<b>Image source path:</b>
-									</div>
-									<div style="float:left;"> 
-										<input name="sourcepath" type="text" style="width:400px;" value="<?php echo $specManager->getSourcePath(); ?>" />
-										<a id="sourcepathinfo" href="#" onclick="return false" title="More Information">
-											<img src="../../images/info.png" style="width:15px;" />
-										</a>
-										<div id="sourcepathinfodialog">
-											Server path to folder containing source images.
-											If a URL (e.g. http://) is supplied, the web server needs to be configured to list 
-											all files within the directory, or the html output needs to list all images in anchor tags.
-											Scripts will attempt to crawl through all child directories.
+								<?php
+								if($projectTitle != 'iDigBio CSV upload' && $projectTitle != 'IPlant Image Processing'){ 
+									?>
+									<div id="sourcepathrow" style="clear:both;">
+										<div style="width:180px;float:left;">
+											<b>Image source path:</b>
+										</div>
+										<div style="float:left;"> 
+											<input name="sourcepath" type="text" style="width:400px;" value="<?php echo $specManager->getSourcePath(); ?>" />
+											<a id="sourcepathinfo" href="#" onclick="return false" title="More Information">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="sourcepathinfodialog">
+												Server path to folder containing source images.
+												If a URL (e.g. http://) is supplied, the web server needs to be configured to list 
+												all files within the directory, or the html output needs to list all images in anchor tags.
+												Scripts will attempt to crawl through all child directories.
+											</div>
 										</div>
 									</div>
-								</div>
-								<div id="targetpathrow" style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-									<div style="width:225px;float:left;">
-										<b>Image target path:</b>
-									</div>
-									<div style="float:left;"> 
-										<input name="targetpath" type="text" style="width:400px;" value="<?php echo $specManager->getTargetPath(); ?>" />
-										<a id="targetpathinfo" href="#" onclick="return false" title="More Information">
-											<img src="../../images/info.png" style="width:15px;" />
-										</a>
-										<div id="targetpathinfodialog">
-											Web server path to where the image derivatives will be depositied. 
-											The web server (e.g. apache user) must have read/write access to this directory.
-											If this field is left blank, the portal's default image target (imageRootPath) will be used.
+									<div id="targetpathrow" style="clear:both;">
+										<div style="width:180px;float:left;">
+											<b>Image target path:</b>
+										</div>
+										<div style="float:left;"> 
+											<input name="targetpath" type="text" style="width:400px;" value="<?php echo $specManager->getTargetPath(); ?>" />
+											<a id="targetpathinfo" href="#" onclick="return false" title="More Information">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="targetpathinfodialog">
+												Web server path to where the image derivatives will be depositied. 
+												The web server (e.g. apache user) must have read/write access to this directory.
+												If this field is left blank, the portal's default image target (imageRootPath) will be used.
+											</div>
 										</div>
 									</div>
-								</div>
-								<div id="urlbaserow" style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-									<div style="width:225px;float:left;">
-										<b>Image URL base:</b>
-									</div>
-									<div style="float:left;"> 
-										<input name="imgurl" type="text" style="width:400px;" value="<?php echo $specManager->getImgUrlBase(); ?>" />
-										<a id="imgurlinfo" href="#" onclick="return false" title="More Information">
-											<img src="../../images/info.png" style="width:15px;" />
-										</a>
-										<div id="imgurlinfodialog">
-											Image URL prefix that will access the target folder from the browser.
-											This will be used to create the image URLs that will be stored in the database.
-											If absolute URL is supplied without the domain name, the portal domain will be assumed. 
-											If this field is left blank, the portal's default image url will be used ($imageRootUrl).
+									<div id="urlbaserow" style="clear:both;">
+										<div style="width:180px;float:left;">
+											<b>Image URL base:</b>
+										</div>
+										<div style="float:left;"> 
+											<input name="imgurl" type="text" style="width:400px;" value="<?php echo $specManager->getImgUrlBase(); ?>" />
+											<a id="imgurlinfo" href="#" onclick="return false" title="More Information">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="imgurlinfodialog">
+												Image URL prefix that will access the target folder from the browser.
+												This will be used to create the image URLs that will be stored in the database.
+												If absolute URL is supplied without the domain name, the portal domain will be assumed. 
+												If this field is left blank, the portal's default image url will be used ($imageRootUrl).
+											</div>
 										</div>
 									</div>
-								</div>
-								<div id="centralwidthrow" style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-									<div style="width:225px;float:left;">
-										<b>Central pixel width:</b>
-									</div>
-									<div style="float:left;"> 
-										<input name="webpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getWebPixWidth(); ?>" /> 
-										<a id="webpixwidthinfo" href="#" onclick="return false" title="More Information">
-											<img src="../../images/info.png" style="width:15px;" />
-										</a>
-										<div id="webpixwidthinfodialog">
-											Width of the standard web image. 
-											If the source image is smaller than this width, the file will simply be copied over without resizing. 
+									<div id="centralwidthrow" style="clear:both;">
+										<div style="width:180px;float:left;">
+											<b>Central pixel width:</b>
+										</div>
+										<div style="float:left;"> 
+											<input name="webpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getWebPixWidth(); ?>" /> 
+											<a id="webpixwidthinfo" href="#" onclick="return false" title="More Information">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="webpixwidthinfodialog">
+												Width of the standard web image. 
+												If the source image is smaller than this width, the file will simply be copied over without resizing. 
+											</div>
 										</div>
 									</div>
-								</div>
-								<div id="thumbwidthrow" style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-									<div style="width:225px;float:left;">
-										<b>Thumbnail pixel width:</b> 
-									</div>
-									<div style="float:left;">
-										<input name="tnpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getTnPixWidth(); ?>" /> 
-										<a id="tnpixwidthinfo" href="#" onclick="return false" title="More Information">
-											<img src="../../images/info.png" style="width:15px;" />
-										</a>
-										<div id="tnpixwidthinfodialog">
-											Width of the image thumbnail. Width should be greater than image sizing within the thumbnail display pages. 
+									<div id="thumbwidthrow" style="clear:both;">
+										<div style="width:180px;float:left;">
+											<b>Thumbnail pixel width:</b> 
+										</div>
+										<div style="float:left;">
+											<input name="tnpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getTnPixWidth(); ?>" /> 
+											<a id="tnpixwidthinfo" href="#" onclick="return false" title="More Information">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="tnpixwidthinfodialog">
+												Width of the image thumbnail. Width should be greater than image sizing within the thumbnail display pages. 
+											</div>
 										</div>
 									</div>
-								</div>
-								<div id="largewidthrow" style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-									<div style="width:225px;float:left;">
-										<b>Large pixel width:</b>
-									</div>
-									<div style="float:left;"> 
-										<input name="lgpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getLgPixWidth(); ?>" /> 
-										<a id="lgpixwidthinfo" href="#" onclick="return false" title="More Information">
-											<img src="../../images/info.png" style="width:15px;" />
-										</a>
-										<div id="lgpixwidthinfodialog">
-											Width of the large version of the image. 
-											If the source image is smaller than this width, the file will simply be copied over without resizing. 
-											Note that resizing large images may be limited by the PHP configuration settings (e.g. memory_limit).
-											If this is a problem, having this value greater than the maximum width of your source images will avoid 
-											errors related to resampling large images. 
+									<div id="largewidthrow" style="clear:both;">
+										<div style="width:180px;float:left;">
+											<b>Large pixel width:</b>
+										</div>
+										<div style="float:left;"> 
+											<input name="lgpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getLgPixWidth(); ?>" /> 
+											<a id="lgpixwidthinfo" href="#" onclick="return false" title="More Information">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="lgpixwidthinfodialog">
+												Width of the large version of the image. 
+												If the source image is smaller than this width, the file will simply be copied over without resizing. 
+												Note that resizing large images may be limited by the PHP configuration settings (e.g. memory_limit).
+												If this is a problem, having this value greater than the maximum width of your source images will avoid 
+												errors related to resampling large images. 
+											</div>
 										</div>
 									</div>
-								</div>
-								<div id="jpgqualityrow" style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-									<div style="width:225px;float:left;">
-										<b>JPG quality:</b>
-									</div>
-									<div style="float:left;"> 
-										<input name="jpgquality" type="text" style="width:50px;" value="<?php echo $specManager->getJpgQuality(); ?>" />
-										<a id="jpgcompressioninfo" href="#" onclick="return false" title="More Information">
-											<img src="../../images/info.png" style="width:15px;" />
-										</a>
-										<div id="jpgcompressioninfodialog">
-											JPG quality refers to amount of compression applied. 
-											Value should be numeric and range from 0 (worst quality, smaller file) to 
-											100 (best quality, biggest file). 
-											If null, 75 is used as the default. 
+									<div id="jpgqualityrow" style="clear:both;">
+										<div style="width:180px;float:left;">
+											<b>JPG quality:</b>
+										</div>
+										<div style="float:left;"> 
+											<input name="jpgquality" type="text" style="width:50px;" value="<?php echo $specManager->getJpgQuality(); ?>" />
+											<a id="jpgcompressioninfo" href="#" onclick="return false" title="More Information">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="jpgcompressioninfodialog">
+												JPG quality refers to amount of compression applied. 
+												Value should be numeric and range from 0 (worst quality, smaller file) to 
+												100 (best quality, biggest file). 
+												If null, 75 is used as the default. 
+											</div>
 										</div>
 									</div>
-								</div>
-								<div id="thumbnailrow" style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-									<div>
-										<b>Thumbnail:</b>
-										<div style="margin:5px 15px;">
-											<input name="tnimg" type="radio" value="1" <?php echo ($specManager->getTnImg()==1?'CHECKED':''); ?> /> Create new thumbnail from source image<br/>
-											<input name="tnimg" type="radio" value="2" <?php echo ($specManager->getTnImg()==2?'CHECKED':''); ?> /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
-											<input name="tnimg" type="radio" value="3" <?php echo ($specManager->getTnImg()==3?'CHECKED':''); ?> /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
-											<input name="tnimg" type="radio" value="0" <?php echo (!$specManager->getTnImg()?'CHECKED':''); ?> /> Exclude thumbnail <br/>
+									<div id="thumbnailrow" style="clear:both;">
+										<div>
+											<b>Thumbnail:</b>
+											<div style="margin:5px 15px;">
+												<input name="tnimg" type="radio" value="1" <?php echo ($specManager->getTnImg()==1?'CHECKED':''); ?> /> Create new thumbnail from source image<br/>
+												<input name="tnimg" type="radio" value="2" <?php echo ($specManager->getTnImg()==2?'CHECKED':''); ?> /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
+												<input name="tnimg" type="radio" value="3" <?php echo ($specManager->getTnImg()==3?'CHECKED':''); ?> /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
+												<input name="tnimg" type="radio" value="0" <?php echo (!$specManager->getTnImg()?'CHECKED':''); ?> /> Exclude thumbnail <br/>
+											</div>
 										</div>
 									</div>
-								</div>
-								<div id="largeimagerow" style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-									<div>
-										<b>Large Image:</b>
-										<div style="margin:5px 15px;">
-											<input name="lgimg" type="radio" value="1" <?php echo ($specManager->getLgImg()==1?'CHECKED':''); ?> /> Import source image as large version<br/>
-											<input name="lgimg" type="radio" value="2" <?php echo ($specManager->getLgImg()==2?'CHECKED':''); ?> /> Map to source image as large version<br/>
-											<input name="lgimg" type="radio" value="3" <?php echo ($specManager->getLgImg()==3?'CHECKED':''); ?> /> Import large version from source location (source name with _lg.jpg suffix)<br/>
-											<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg()==4?'CHECKED':''); ?> /> Map to large version at source location (source name with _lg.jpg suffix)<br/>
-											<input name="lgimg" type="radio" value="0" <?php echo (!$specManager->getLgImg()?'CHECKED':''); ?> /> Exclude large version<br/>
+									<div id="largeimagerow" style="clear:both;">
+										<div>
+											<b>Large Image:</b>
+											<div style="margin:5px 15px;">
+												<input name="lgimg" type="radio" value="1" <?php echo ($specManager->getLgImg()==1?'CHECKED':''); ?> /> Import source image as large version<br/>
+												<input name="lgimg" type="radio" value="2" <?php echo ($specManager->getLgImg()==2?'CHECKED':''); ?> /> Map to source image as large version<br/>
+												<input name="lgimg" type="radio" value="3" <?php echo ($specManager->getLgImg()==3?'CHECKED':''); ?> /> Import large version from source location (source name with _lg.jpg suffix)<br/>
+												<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg()==4?'CHECKED':''); ?> /> Map to large version at source location (source name with _lg.jpg suffix)<br/>
+												<input name="lgimg" type="radio" value="0" <?php echo (!$specManager->getLgImg()?'CHECKED':''); ?> /> Exclude large version<br/>
+											</div>
 										</div>
 									</div>
-								</div>
-								<div style="clear:both;margin-bottom:15px;">
+									<?php
+								} 
+								?>
+								<div style="clear:both;margin:25px 15px;">
 									<div>
 										<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
 										<input name="tabindex" type="hidden" value="1" />
-										<?php 
-										if($spprId){
-											echo '<input name="submitaction" type="submit" value="Save Image Project" />';
-										}
-										else{
-											echo '<input name="submitaction" type="submit" value="Add New Image Project" />';
-										}
-										?>
+										<input name="submitaction" type="submit" value="<?php echo ($spprId?'Save':'Add New'); ?> Profile" />
 									</div>
 								</div>
 							</fieldset>
@@ -402,14 +379,14 @@ if($spprId) $specManager->setProjVariables($spprId);
 						<?php 
 						if($spprId){
 							?>
-							<form id="delform" action="index.php" method="post" onsubmit="return validateDelForm(this);" >
-								<fieldset>
+							<form id="delform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to delete this image processing profile?')" >
+								<fieldset style="padding:25px">
 									<legend><b>Delete Project</b></legend>
 									<div>
 										<input name="sppriddel" type="hidden" value="<?php echo $spprId; ?>" />
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
 										<input name="tabindex" type="hidden" value="1" />
-										<input name="submitaction" type="submit" value="Delete Image Project" />
+										<input name="submitaction" type="submit" value="Delete Profile" />
 									</div>
 								</fieldset>
 							</form>
@@ -421,18 +398,92 @@ if($spprId) $specManager->setProjVariables($spprId);
 					if($spprId){
 						?>
 						<div id="imgprocessdiv">
-							<form name="imgprocessform" action="<?php echo ($projectTitle=='iDigBio CSV upload'?'index.php':'processor.php'); ?>" method="post" enctype="multipart/form-data" onsubmit="return validateProcForm(this);">
-								<fieldset>
-									<legend><b>Image Processor</b></legend>
-									<div style="float:right;margin:10px;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Open Editor">
-										<img src="../../images/edit.png" style="border:0px" />
+							<form name="imgprocessform" action="processor.php" method="post" enctype="multipart/form-data" onsubmit="return validateProcForm(this);">
+								<fieldset style="padding:20px;">
+									<legend><b><?php echo $specManager->getTitle(); ?></b></legend>
+									<div style="float:right;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Open Editor">
+										<img src="../../images/edit.png" style="border:0px;width:15px;" />
 									</div>
-									<div style="font-size:120%;font-weight:bold;">
-										<?php echo $specManager->getTitle(); ?>
+									<?php
+									if($projectTitle == 'iDigBio CSV upload'){
+										?>
+										<div style="font-weight:bold;">Select iDigBio Image Appliance output file</div>
+										<div style="" title="Upload output file created by iDigBio Image Upload Appliance here.">
+											<input type='hidden' name='MAX_FILE_SIZE' value='20000000' />
+											<input type='hidden' name='speckeypattern' value='<?php echo $specManager->getSpecKeyPattern();?>' />
+											<input name='idigbiofile' id='idigbiofile' type='file' size='70' value="Choose image alliance output file" />
+										</div>
+										<?php
+									} 
+									?>
+									<div style="margin-top:10px">
+										<div style="width:200px;float:left;">
+											<b>Pattern match term:</b> 
+										</div>
+										<div style="float:left;"> 
+											<?php echo $specManager->getSpecKeyPattern();?><br/>
+										</div>
 									</div>
-									<fieldset style="margin:15px;">
-										<legend><b>Project Variables</b></legend>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
+									<?php
+									if($projectTitle != 'iDigBio CSV upload' && $projectTitle != 'IPlant Image Processing'){ 
+										?>
+										<div style="clear:both;">
+											<div style="width:200px;float:left;">
+												<b>Source folder:</b>
+											</div>
+											<div style="float:left;"> 
+												<?php echo $specManager->getSourcePath();?><br/>
+											</div>
+										</div>
+										<div style="clear:both;">
+											<div style="width:200px;float:left;">
+												<b>Target folder:</b> 
+											</div>
+											<div style="float:left;"> 
+												<?php echo ($specManager->getTargetPath()?$specManager->getTargetPath():$imageRootPath);?><br/>
+											</div>
+										</div>
+										<div style="clear:both;">
+											<div style="width:200px;float:left;">
+												<b>URL prefix:</b> 
+											</div>
+											<div style="float:left;"> 
+												<?php echo ($specManager->getImgUrlBase()?$specManager->getImgUrlBase():$imageRootUrl);?><br/>
+											</div>
+										</div>
+										<div style="clear:both;">
+											<div style="width:200px;float:left;">
+												<b>Web image width:</b> 
+											</div>
+											<div style="float:left;"> 
+												<?php echo ($specManager->getWebPixWidth()?$specManager->getWebPixWidth():$imgWebWidth);?><br/>
+											</div>
+										</div>
+										<div style="clear:both;">
+											<div style="width:200px;float:left;">
+												<b>Thumbnail width:</b> 
+											</div>
+											<div style="float:left;"> 
+												<?php echo ($specManager->getTnPixWidth()?$specManager->getTnPixWidth():$imgTnWidth);?><br/>
+											</div>
+										</div>
+										<div style="clear:both;">
+											<div style="width:200px;float:left;">
+												<b>Large image width:</b> 
+											</div>
+											<div style="float:left;"> 
+												<?php echo ($specManager->getLgPixWidth()?$specManager->getLgPixWidth():$imgLgWidth);?><br/>
+											</div>
+										</div>
+										<div style="clear:both;">
+											<div style="width:200px;float:left;">
+												<b>JPG quality (1-100): </b> 
+											</div>
+											<div style="float:left;"> 
+												<?php echo ($specManager->getJpgQuality()?$specManager->getJpgQuality():80);?><br/>
+											</div>
+										</div>
+										<div style="clear:both;padding-top:10px;">
 											<div>
 												<b>Web Image:</b>
 												<div style="margin:5px 15px"> 
@@ -442,7 +493,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												</div>
 											</div>
 										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
+										<div style="clear:both;">
 											<div>
 												<b>Thumbnail:</b>
 												<div style="margin:5px 15px"> 
@@ -453,7 +504,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												</div>
 											</div>
 										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
+										<div style="clear:both;">
 											<div>
 												<b>Large Image:</b>
 												<div style="margin:5px 15px"> 
@@ -465,7 +516,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												</div>
 											</div>
 										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
+										<div style="clear:both;">
 											<div title="Unable to match primary identifer with an existing database record">
 												<b>Missing record:</b> 
 												<div style="margin:5px 15px"> 
@@ -476,7 +527,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												</div>
 											</div>
 										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
+										<div style="clear:both;">
 											<div title="Image with exact same name already exists">
 												<b>Image already exists:</b>
 												<div style="margin:5px 15px"> 
@@ -489,104 +540,15 @@ if($spprId) $specManager->setProjVariables($spprId);
 												</div>
 											</div>
 										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-											<div style="width:200px;float:left;">
-												<b>Source folder:</b>
-											</div>
-											<div style="float:left;"> 
-												<?php echo $specManager->getSourcePath();?><br/>
-											</div>
-										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-											<div style="width:200px;float:left;">
-												<b>Target folder:</b> 
-											</div>
-											<div style="float:left;"> 
-												<?php echo ($specManager->getTargetPath()?$specManager->getTargetPath():$imageRootPath);?><br/>
-											</div>
-										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-											<div style="width:200px;float:left;">
-												<b>URL prefix:</b> 
-											</div>
-											<div style="float:left;"> 
-												<?php echo ($specManager->getImgUrlBase()?$specManager->getImgUrlBase():$imageRootUrl);?><br/>
-											</div>
-										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-											<div style="width:200px;float:left;">
-												<b>Web image width:</b> 
-											</div>
-											<div style="float:left;"> 
-												<?php echo ($specManager->getWebPixWidth()?$specManager->getWebPixWidth():$imgWebWidth);?><br/>
-											</div>
-										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-											<div style="width:200px;float:left;">
-												<b>Thumbnail width:</b> 
-											</div>
-											<div style="float:left;"> 
-												<?php echo ($specManager->getTnPixWidth()?$specManager->getTnPixWidth():$imgTnWidth);?><br/>
-											</div>
-										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-											<div style="width:200px;float:left;">
-												<b>Large image width:</b> 
-											</div>
-											<div style="float:left;"> 
-												<?php echo ($specManager->getLgPixWidth()?$specManager->getLgPixWidth():$imgLgWidth);?><br/>
-											</div>
-										</div>
-										<div style="clear:both;<?php echo ($projectTitle=='iDigBio CSV upload'?'display:none;':''); ?>">
-											<div style="width:200px;float:left;">
-												<b>JPG quality (1-100): </b> 
-											</div>
-											<div style="float:left;"> 
-												<?php echo ($specManager->getJpgQuality()?$specManager->getJpgQuality():80);?><br/>
-											</div>
-										</div>
-										<div style="clear:both;">
-											<div style="width:200px;float:left;">
-												<b>PK pattern match term:</b> 
-											</div>
-											<div style="float:left;"> 
-												<?php echo $specManager->getSpecKeyPattern();?><br/>
-											</div>
-										</div>
-										<div style="clear:both;margin-top:10px;<?php echo ($projectTitle=='iDigBio CSV upload'?'':'display:none;'); ?>">
-											<div title="Upload output file created by iDigBio Image Upload Appliance here.">
-												<div style="width:425px;float:left;">
-													<b>Upload iDigBio Image Upload Appliance Output File:</b>
-												</div>
-												<div style="float:left;margin:5px 15px"> 
-													<input type='hidden' name='MAX_FILE_SIZE' value='20000000' />
-													<input type='hidden' name='speckeypattern' value='<?php echo $specManager->getSpecKeyPattern();?>' />
-													<div>
-														<input name='idigbiofile' id='idigbiofile' type='file' size='70'/>
-													</div>
-												</div>
-											</div>
-										</div>
-									</fieldset>
-									<div style="margin:15px 0px 0px 15px;">
+										<?php
+									} 
+									?>
+									<div style="clear:both;padding:20px;">
 										<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<input id="projtitle" type="hidden" value="<?php echo $projectTitle; ?>" />
 										<input name="tabindex" type="hidden" value="1" />
-										<?php
-										if($projectTitle!='iDigBio CSV upload'){
-											?>
-											<input name="submitaction" type="submit" value="Process Images" />
-											<?php
-										}
-										?>
-										<?php
-										if($projectTitle=='iDigBio CSV upload'){
-											?>
-											<input name="submitaction" type="submit" value="Process Output File" />
-											<?php
-										}
-										?>
+										<input name="submitaction" type="submit" value="Process <?php echo ($projectTitle=='iDigBio CSV upload'?'Output File':'Images') ?>" />
 									</div>
 									<div style="margin:20px;">
 										<!-- <a href="logs/">Log Files</a>  -->
@@ -598,20 +560,19 @@ if($spprId) $specManager->setProjVariables($spprId);
 					}
 					elseif($specProjects){
 						?> 
-						<form name="sppridform" action="index.php" method="post" onsubmit="return validateSppridForm(this);">
+						<form name="sppridform" action="index.php" method="post">
 							<fieldset>
-								<legend><b>Specimen Loading Projects</b></legend>
+								<legend><b>Image Processing Profiles</b></legend>
 								<div style="margin:15px;">
 									<?php 
 									foreach($specProjects as $spprid => $projTitle){
-										echo '<input type="radio" name="spprid" value="'.$spprid.'" /> '.$projTitle.'<br/>';
+										echo '<input type="radio" name="spprid" value="'.$spprid.'" onchange="this.form.submit()" /> '.$projTitle.'<br/>';
 									}
 									?>
 								</div>
 								<div style="margin:15px;">
 									<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
 									<input name="tabindex" type="hidden" value="1" />
-									<input type="submit" name="submitaction" value="Select Collection Project" />
 								</div>
 							</fieldset>
 						</form>

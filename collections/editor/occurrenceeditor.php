@@ -471,17 +471,20 @@ else{
 							<?php
 						}
 						else{
-							if(!$isGenObs || $isEditor == 1 || $isEditor == 2){
-								?>
-								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
-								<?php
-							}
 							if($isGenObs){
 								?>
 								<a href="../../profile/viewprofile.php?tabindex=1" onclick="return verifyLeaveForm()">Personal Management</a> &gt;&gt;
 								<?php
 							}
+							else{
+								if($isEditor == 1 || $isEditor == 2){
+									?>
+									<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
+									<?php
+								}
+							}
 						}
+						if($occId) echo '<a href="../individual/index.php?occid='.$occId.'">Public Display</a> &gt;&gt;';
 						?>
 						<b><?php if($isEditor == 3) echo 'Taxonomic '; ?>Editor</b>
 					</div>
@@ -575,19 +578,14 @@ else{
 												<a href="includes/imagetab.php?<?php echo $anchorVars; ?>"
 													style="margin:0px 20px 0px 20px;">Images</a>
 											</li>
-											<li id="genTab">
-												<a href="includes/genetictab.php?<?php echo $anchorVars; ?>"
-													style="margin:0px 20px 0px 20px;">Genetic Links</a>
+											<li id="resourceTab">
+												<a href="includes/resourcetab.php?<?php echo $anchorVars; ?>"
+													style="margin:0px 20px 0px 20px;">Linked Resources</a>
 											</li>
 											<li id="adminTab">
 												<a href="includes/admintab.php?<?php echo $anchorVars; ?>"
 													style="margin:0px 20px 0px 20px;">Admin</a>
 											</li>
-											<!-- 
-											<li id="adminTab">
-												<a href="#admindiv" style="margin:0px 20px 0px 20px;">Admin</a>
-											</li>
-											 -->
 											<?php
 										}
 									}

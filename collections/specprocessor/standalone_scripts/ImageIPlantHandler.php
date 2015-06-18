@@ -1,10 +1,10 @@
 <?php
 require_once('../../../config/symbini.php');
-require_once($serverRoot.'/classes/ImageIPlantProcessor.php');
+require_once($serverRoot.'/classes/ImageProcessor.php');
 
-$imageProcessor = new ImageIPlantProcessor();
+$imageProcessor = new ImageProcessor();
 
 //Run process
 $imageProcessor->initProcessor();
-$imageProcessor->batchProcessImages();
+$imageProcessor->processIPlantImages();
 ?>

@@ -81,6 +81,9 @@ $statusStr = "";
 					$imageProcessor->batchLoadImages();
 					echo '</div>'."\n";
 				}
+				elseif($action == 'Process Output File'){
+					$statusStr = $specManager->processiDigBioOutput($_POST);
+				}
 				elseif($action == 'Run Batch OCR'){
 					$ocrManager = new SpecProcessorOcr();
 					$ocrManager->setVerbose(2);

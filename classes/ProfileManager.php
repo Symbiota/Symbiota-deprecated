@@ -178,6 +178,7 @@ class ProfileManager{
 		if($this->uid){
 			$editCon = $this->getConnection("write");
 			$sql = "DELETE FROM users WHERE (uid = ".$this->uid.')';
+			//echo $sql; Exit;
 			$success = $editCon->query($sql);
 			$editCon->close();
 		}
