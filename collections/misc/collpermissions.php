@@ -224,7 +224,6 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 				<legend><b>Add a User</b></legend>
 				<form name="addrights" action="collpermissions.php" method="post" onsubmit="return verifyAddRights(this)">
 					<div>
-						<b>User:</b><br/> 
 						<select name="uid">
 							<option value="">Select User</option>
 							<option value="">-----------------------------------</option>

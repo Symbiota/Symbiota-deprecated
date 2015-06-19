@@ -355,21 +355,20 @@ class PermissionsManager{
 
 	public function getUsers($searchTerm){
 		$retArr = Array();
-		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS uname '.
-			'FROM users u ';
+		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS uname, l.username '.
+			'FROM users u LEFT JOIN userlogin l ON u.uid = l.uid ';
 		if($searchTerm){
 			$searchTerm = $this->cleanInStr($searchTerm);
-			$sql .= 'LEFT JOIN userlogin ul ON u.uid = ul.uid '.
-				'WHERE (u.lastname LIKE "'.$searchTerm.'%") ';
+			$sql .= 'WHERE (u.lastname LIKE "'.$searchTerm.'%") ';
 			if(strlen($searchTerm) > 1) $sql .= "OR (ul.username LIKE '".$searchTerm."%') ";
 		}
-		$sql .= 'ORDER BY u.lastname, u.firstname';
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->uid] = $this->cleanOutStr($r->uname);
+			$retArr[$r->uid] = $this->cleanOutStr($r->uname.($r->username?' ('.$r->username.')':''));
 		}
 		$rs->free();
+		asort($retArr);
 		return $retArr;
 	}
 
