@@ -154,36 +154,10 @@ $duManager->loadFieldMap();
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Specimen Uploader</title>
-	<link type="text/css" href="../../css/base.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" />
-	<link type="text/css" href="../../css/main.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" />
+	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<script src="../../js/symb/shared.js" type="text/javascript"></script>
 	<script language=javascript>
-		
-		function toggle(target){
-			var tDiv = document.getElementById(target);
-			if(tDiv != null){
-				if(tDiv.style.display=="none"){
-					tDiv.style.display="block";
-				}
-			 	else {
-			 		tDiv.style.display="none";
-			 	}
-			}
-			else{
-			  	var divs = document.getElementsByTagName("div");
-			  	for (var i = 0; i < divs.length; i++) {
-			  	var divObj = divs[i];
-					if(divObj.className == target){
-						if(divObj.style.display=="none"){
-							divObj.style.display="block";
-						}
-					 	else {
-					 		divObj.style.display="none";
-					 	}
-					}
-				}
-			}
-		}
-
 		function verifyFileUploadForm(f){
 			var fileName = "";
 			if(f.uploadfile || f.ulfnoverride){
@@ -215,8 +189,8 @@ $duManager->loadFieldMap();
 			var tfArr = [];
 			var idTfArr = [];
 			var imTfArr = [];
-			var lacksCatalogNumber = false;
-			if(f.uploadtype.value == 7) lacksCatalogNumber = true;
+			var lacksCatalogNumber = true;
+			var possibleMappingErr = false; 
 			for(var i=0;i<f.length;i++){
 				var obj = f.elements[i];
 				if(obj.name == "sf[]"){
@@ -225,6 +199,20 @@ $duManager->loadFieldMap();
 						return false;
 					}
 					sfArr[sfArr.length] = obj.value;
+					//Test value to make sure source file isn't missing the header and making directly to file record
+					if(!possibleMappingErr){
+						if(isNumeric(obj.value)){
+							possibleMappingErr = true;
+						} 
+						if(obj.value.length > 7){
+							if(isNumeric(obj.value.substring(5))){ 
+								possibleMappingErr = true;
+							}
+							else if(obj.value.slice(-5) == "aceae" || obj.value.slice(-4) == "idae"){
+								possibleMappingErr = true;
+							}
+						}
+					}
 				}
 				else if(obj.name == "ID-sf[]"){
 					if(f.importident.value == "1"){
@@ -273,12 +261,18 @@ $duManager->loadFieldMap();
 				}
 				if(lacksCatalogNumber && obj.name == "tf[]"){
 					//Is skeletal file upload
-					if(obj.value == "catalognumber") lacksCatalogNumber = false;
+					if(obj.value == "catalognumber"){
+						lacksCatalogNumber = false;
+					}
 				}
 			}
-			if(lacksCatalogNumber){
+			if(lacksCatalogNumber && f.uploadtype.value == 7){
+				//Skeletal records require catalog number to be mapped
 				alert("ERROR: Catalog Number is required for Skeletal File Uploads");
 				return false;
+			}
+			if(possibleMappingErr){
+				return confirm("Does the first row of the input file contain the column names? It appears that you may be mapping directly to the first row of active data rather than a header row. If so, the first row of data will be lost and some columns might be skipped. Select OK to proceed, or cancel to abort");
 			}
 			return true;
 		}
