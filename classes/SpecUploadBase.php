@@ -12,6 +12,7 @@ class SpecUploadBase extends SpecUpload{
 	protected $includeIdentificationHistory = true;
 	protected $includeImages = true;
 	private $matchCatalogNumber = 1;
+	private $matchOtherCatalogNumbers = 0;
 	protected $uploadTargetPath;
 
 	protected $sourceArr = Array();
@@ -451,12 +452,25 @@ class SpecUploadBase extends SpecUpload{
  		//Prefrom general cleaning and parsing tasks
 		$this->recordCleaningStage1();
 		
-		if(($this->collMetadataArr["managementtype"] == 'Live Data' || $this->uploadType == $this->SKELETAL) && $this->matchCatalogNumber){
-			//Match records based on Catalog Number 
-			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-				'SET u.occid = o.occid '.
-				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) ';
-			$this->conn->query($sql);
+		if($this->collMetadataArr["managementtype"] == 'Live Data' || $this->uploadType == $this->SKELETAL){
+			if($this->matchCatalogNumber){
+				//Match records based on Catalog Number 
+				$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
+					'SET u.occid = o.occid '.
+					'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) ';
+				if(!$this->conn->query($sql)){
+					$this->outputMsg('<span style="color:red;">Warning: unable to match on catalog number: '.$this->conn->error.'</span>');
+				}
+			}
+			if($this->matchOtherCatalogNumbers){
+				//Match records based on other Catalog Numbers fields 
+				$sql2 = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.otherCatalogNumbers = o.otherCatalogNumbers) AND (u.collid = o.collid) '.
+					'SET u.occid = o.occid '.
+					'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.othercatalogNumbers IS NOT NULL) AND (o.othercatalogNumbers IS NOT NULL) ';
+				if(!$this->conn->query($sql2)){
+					$this->outputMsg('<span style="color:red;">Warning: unable to match on other catalog numbers: '.$this->conn->error.'</span>');
+				}
+			}
 		}
 		
 		//Reset $treansferCnt so that count is accurate since some records may have been deleted due to data integrety issues
@@ -602,12 +616,11 @@ class SpecUploadBase extends SpecUpload{
 		}
 		$rs->free();
 
-		if($this->collMetadataArr["managementtype"] == 'Live Data' && !$this->matchCatalogNumber){
+		if($this->collMetadataArr["managementtype"] == 'Live Data' && !$this->matchCatalogNumber  && !$this->matchOtherCatalogNumbers){
 			//Records that can be matched on on Catalog Number, but will be appended 
 			$sql = 'SELECT count(o.occid) AS cnt '.
-				'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
-				'AND (o.catalogNumber IS NOT NULL)';
+				'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.collid = o.collid '.
+				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['matchappend'] = $r->cnt;
@@ -1791,10 +1804,14 @@ class SpecUploadBase extends SpecUpload{
 		$this->includeImages = $boolIn;
 	}
 	
-	public function setMatchCatalogNumber($matchCatNum){
-		$this->matchCatalogNumber = $matchCatNum;
+	public function setMatchCatalogNumber($match){
+		$this->matchCatalogNumber = $match;
 	}
-	
+
+	public function setMatchOtherCatalogNumbers($match){
+		$this->matchOtherCatalogNumbers = $match;
+	}
+
 	protected function urlExists($url) {
 		$exists = false;
 		if(!strstr($url, "http")){

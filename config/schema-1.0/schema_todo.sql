@@ -37,6 +37,9 @@ ALTER TABLE `omoccurrences`
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `eventID` VARCHAR(45) NULL AFTER `fieldnumber`;
 
+ALTER TABLE `omoccurrences` 
+  ADD INDEX `Index_otherCatalogNumbers` (`otherCatalogNumbers` ASC);
+
 ALTER TABLE `omcollectionstats` 
   CHANGE COLUMN `dynamicProperties` `dynamicProperties` TEXT NULL DEFAULT NULL ;
 

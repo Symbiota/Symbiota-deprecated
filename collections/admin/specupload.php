@@ -18,6 +18,7 @@ $ulPath = array_key_exists("ulpath",$_REQUEST)?$_REQUEST["ulpath"]:"";
 $importIdent = array_key_exists("importident",$_REQUEST)?true:false;
 $importImage = array_key_exists("importimage",$_REQUEST)?true:false;
 $matchCatNum = array_key_exists("matchcatnum",$_REQUEST)?true:false;
+$matchOtherCatNum = array_key_exists("matchothercatnum",$_REQUEST)?true:false;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:'';
 $recStart = array_key_exists("recstart",$_REQUEST)?$_REQUEST["recstart"]:0;
@@ -30,6 +31,7 @@ if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
 if($autoMap !== true) $autoMap = false;
 if($importIdent !== true) $importIdent = false;
 if($matchCatNum !== true) $matchCatNum = false;
+if($matchOtherCatNum !== true) $matchOtherCatNum = false;
 if($autoMap !== true) $autoMap = false;
 if(!is_numeric($finalTransfer)) $finalTransfer = 0;
 if($dbpk && !preg_match('/^[a-zA-Z]+$/',$dbpk)) $action = '';
@@ -73,6 +75,7 @@ $duManager->setCollId($collid);
 $duManager->setUspid($uspid);
 $duManager->setUploadType($uploadType);
 $duManager->setMatchCatalogNumber($matchCatNum);
+$duManager->setMatchOtherCatalogNumbers($matchOtherCatNum);
 
 if($action == 'Automap Fields'){
 	$autoMap = true;
@@ -411,10 +414,20 @@ $duManager->loadFieldMap();
 						</div>
 						<?php 
 						if($isLiveData){
-							echo '<div style="margin:10px 0px;">';
-							echo '<input name="matchcatnum" type="checkbox" value="1" checked /> ';
-							echo 'Match on Catalog Number (Note: matching records will be replaced with incoming records)';
-							echo '</div>';
+							?>
+							<div style="margin:10px 0px;">
+								<input name="matchcatnum" type="checkbox" value="1" checked /> 
+								Match on Catalog Number 
+							</div>
+							<div style="margin:10px 0px;">
+								<input name="matchothercatnum" type="checkbox" value="1" /> 
+								Match on Other Catalog Numbers  
+							</div>
+							<ul style="margin:10px 0px;">
+								<li><b>Caution:</b> Matching records will be replaced with incoming records</li>
+								<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarly on others catalog numbers</li>
+							</ul>
+							<?php 
 						}
 						?>
 						<div style="margin:10px;">
@@ -560,10 +573,20 @@ $duManager->loadFieldMap();
 											<div>
 												<?php 
 												if($isLiveData){
-													echo '<div style="margin:30px 0px 10px 0px;">';
-													echo '<input name="matchcatnum" type="checkbox" value="1" checked /> ';
-													echo 'Match on Catalog Number (Note: matching records will be replaced with incoming records)';
-													echo '</div>';
+													?>
+													<div style="margin:30px 0px 10px 0px;">
+														<input name="matchcatnum" type="checkbox" value="1" checked /> 
+														Match on Catalog Number
+													</div>
+													<div style="margin:10px 0px;">
+														<input name="matchothercatnum" type="checkbox" value="1" /> 
+														Match on Other Catalog Numbers  
+													</div>
+													<ul style="margin:10px 0px;">
+														<li><b>Caution:</b> Matching records will be replaced with incoming records</li>
+														<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarly on others catalog numbers</li>
+													</ul>
+													<?php 
 												}
 												?>
 												<div style="margin:10px;">
@@ -655,14 +678,30 @@ $duManager->loadFieldMap();
 									<div id="uldiv">
 										<?php 
 										if($isLiveData || $uploadType == $SKELETAL){
-											echo '<div style="margin:10px 0px;">';
-											echo '<input name="matchcatnum" type="checkbox" value="1" checked '.($uploadType == $SKELETAL?'DISABLED':'').' /> ';
-											echo 'Match on Catalog Number';
-											if($uploadType != $SKELETAL) echo ' (Note: matching records will be replaced with incoming records)';
-											echo '</div>';
+											?>
+											<div style="margin:10px 0px;">
+												<input name="matchcatnum" type="checkbox" value="1" checked <?php echo ($uploadType == $SKELETAL?'DISABLED':''); ?> /> 
+												Match on Catalog Number
+											</div>
+											<div style="margin:10px 0px;">
+												<input name="matchothercatnum" type="checkbox" value="1" /> 
+												Match on Other Catalog Numbers  
+											</div>
+											<ul style="margin:10px 0px;">
+												<?php 
+												if($uploadType == $SKELETAL){
+													echo '<li>Incoming skeletal data will be appended only if targeted field is empty</li>';
+												}
+												else{
+													echo '<li><b>Caution:</b> Matching records will be totally replaced with incoming records</li>';
+												}
+												?>
+												<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarly on others catalog numbers</li>
+											</ul>
+											<?php 
 										}
 										?>
-										<div style="margin:10px;">
+										<div style="margin:20px;">
 											<input type="submit" name="action" value="Start Upload" />
 										</div>
 									</div>
