@@ -237,7 +237,96 @@ class TaxonomyDisplayManager{
 			echo "<div style='margin:20px;'>No taxa found matching your search</div>";
 		}
 	}
-
+	
+	public function getDynamicTreePath(){
+		$retArr = Array();
+		$tid = '';
+		$acceptedTid = '';
+		//Temporary code: check to make sure taxaenumtree is populated
+		//This code can be removed somewhere down the line
+		$sqlTest = 'SELECT tid FROM taxaenumtree LIMIT 1';
+		$rsTest = $this->conn->query($sqlTest);
+		if(!$rsTest->num_rows){
+			echo '<div style="color:red;margin:30px;">';
+			echo 'NOTICE: Building new taxonomic hierarchy table (taxaenumtree).<br/>';
+			echo 'This may take a few minutes, but only needs to be done once.<br/>';
+			echo 'Do not terminate this process early.';
+			echo '</div>';
+			ob_flush();
+			flush();
+			$taxMainObj = new TaxonomyUtilities();
+			$taxMainObj->buildHierarchyEnumTree();
+		}
+		$rsTest->free();
+		
+		//Get target taxa (we don't want children and parents of non-accepted taxa, so we'll get those later) 
+		if($this->targetStr){
+			$sql1 = 'SELECT DISTINCT t.tid, ts.tidaccepted '.
+				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
+				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted '.
+				'LEFT JOIN taxa t1 ON ts1.tid = t1.tid '.
+				'WHERE (ts.taxauthid = 1 OR ts.taxauthid IS NULL) AND (ts1.taxauthid = 1 OR ts1.taxauthid IS NULL) ';
+			if(is_numeric($this->targetStr)){
+				$sql1 .= 'AND (t.tid IN('.implode(',',$this->targetStr).') OR (ts1.tid = '.$this->targetStr.'))';
+			}
+			else{
+				$sql1 .= 'AND ((t.sciname = "'.$this->targetStr.'") OR (t1.sciname = "'.$this->targetStr.'"))';
+			}
+			//echo "<div>".$sql1."</div>";
+			$rs1 = $this->conn->query($sql1);
+			while($row1 = $rs1->fetch_object()){
+				if($rs1->num_rows == 1){
+					$tid = $row1->tid;
+				}
+				elseif($row1->tid != $row1->tidaccepted){
+					$tid = $row1->tid;
+					$acceptedTid = $row1->tidaccepted;
+				}
+			}
+			$rs1->free();
+			
+			if($tid){
+				$i = 1;
+				$prevTid = '';
+				$retArr[0] = 'root';
+				$sql2 = 'SELECT t.RankId, te.parenttid, ts.tidaccepted, ts.parenttid AS par2 '.
+					'FROM (taxa t LEFT JOIN taxaenumtree te ON t.TID = te.parenttid) '.
+					'LEFT JOIN taxstatus ts ON te.parenttid = ts.tid '.
+					'WHERE te.TID = '.($acceptedTid?$acceptedTid:$tid).' AND te.taxauthid = 1 AND ts.taxauthid = 1 '.
+					'ORDER BY t.RankId ';
+				//echo "<div>".$sql2."</div>";
+				$rs2 = $this->conn->query($sql2);
+				while($row2 = $rs2->fetch_object()){
+					if(!$prevTid || ($row2->par2 == $prevTid)){
+						$retArr[$i] = $row2->tidaccepted;
+						$prevTid = $row2->tidaccepted;
+					}
+					else{
+						$sql3 = 'SELECT tid '.
+							'FROM taxstatus '.
+							'WHERE parenttid = '.$prevTid.' AND taxauthid = 1 '.
+							'AND tid IN(SELECT parenttid FROM taxaenumtree WHERE tid = '.$tid.' AND taxauthid = 1) ';
+						//echo "<div>".$sql3."</div>";
+						$rs3 = $this->conn->query($sql3);
+						while($row3 = $rs3->fetch_object()){
+							$retArr[$i] = $row3->tid;
+							$prevTid = $row3->tid;
+						}
+						$rs3->free();
+					}
+					$i++;
+				}
+				if($acceptedTid){
+					$retArr[$i] = $acceptedTid;
+					$i++;
+				}
+				$retArr[$i] = $tid;
+				$rs2->free();
+			}
+		}
+		return $retArr;
+	}
+	
 	public function setDisplayAuthor($display){
 		$this->displayAuthor = $display;
 	}
@@ -252,6 +341,4 @@ class TaxonomyDisplayManager{
 		return $this->targetStr;
 	}
 }
-
-
 ?>
