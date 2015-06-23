@@ -336,12 +336,13 @@ class OccurrenceLabel{
 				$headerArr = array("occid","catalogNumber","otherCatalogNumbers","family","scientificName","genus","specificEpithet",
 					"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","identifiedBy",
 					"dateIdentified","identificationReferences","identificationRemarks","taxonRemarks","identificationQualifier",
-		 			"typeStatus","recordedBy","recordNumber","associatedCollectors","eventDate","year","month","monthName","day",
-			 		"verbatimEventDate","habitat","substrate","verbatimAttributes","occurrenceRemarks",
-		 			"associatedTaxa","reproductiveCondition","establishmentMeans","country",
+		 			"typeStatus","recordedBy","recordNumber","associatedCollectors","eventDate","year","month","day","monthName",
+			 		"verbatimEventDate","habitat","substrate","occurrenceRemarks","associatedTaxa","verbatimAttributes",
+		 			"reproductiveCondition","establishmentMeans","country",
 		 			"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
 			 		"geodeticDatum","coordinateUncertaintyInMeters","verbatimCoordinates",
 		 			"minimumElevationInMeters","maximumElevationInMeters","verbatimElevation","disposition");
+
 				fputcsv($fh,$headerArr);
 				//change header value to lower case
 				$headerLcArr = array();

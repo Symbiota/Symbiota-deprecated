@@ -54,6 +54,28 @@ if($SYMB_UID){
 			}
 			return false;
 		}
+
+		function toggleFamilyDist(){
+			toggleById("famdistbox");
+			toggleById("showfamdist");
+			toggleById("hidefamdist");
+
+			document.getElementById("geodistbox").style.display="none";
+			document.getElementById("showgeodist").style.display="block";
+			document.getElementById("hidegeodist").style.display="none";
+			return false;
+		}
+
+		function toggleGeoDist(){
+			toggleById("geodistbox");
+			toggleById("showgeodist");
+			toggleById("hidegeodist");
+
+			document.getElementById("famdistbox").style.display="none";
+			document.getElementById("showfamdist").style.display="block";
+			document.getElementById("hidefamdist").style.display="none";
+			return false;
+		}
 	</script>
 </head>
 <body>
@@ -433,10 +455,10 @@ if($SYMB_UID){
 					<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
 						<div style="">
 							<div id="showfamdist" style="float:left;display:block;" >
-								<a href="#" onclick="toggleById('famdistbox');toggleById('showfamdist');toggleById('hidefamdist');return false;">Show Family Distribution</a>
+								<a href="#" onclick="return toggleFamilyDist()">Show Family Distribution</a>
 							</div>
 							<div id="hidefamdist" style="float:left;display:none;" >
-								<a href="#" onclick="toggleById('famdistbox');toggleById('showfamdist');toggleById('hidefamdist');return false;">Hide Family Distribution</a>
+								<a href="#" onclick="return toggleFamilyDist()">Hide Family Distribution</a>
 							</div>
 							<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 								<input type="image" name="action" value="Download Family Dist" src="../../images/dl.png" onclick="" />
@@ -444,10 +466,10 @@ if($SYMB_UID){
 						</div>
 						<div style="clear:both;">
 							<div id="showgeodist" style="float:left;display:block;" >
-								<a href="#" onclick="toggleById('geodistbox');toggleById('showgeodist');toggleById('hidegeodist');return false;">Show Geographic Distribution</a>
+								<a href="#" onclick="return toggleGeoDist()">Show Geographic Distribution</a>
 							</div>
 							<div id="hidegeodist" style="float:left;display:none;" >
-								<a href="#" onclick="toggleById('geodistbox');toggleById('showgeodist');toggleById('hidegeodist');return false;">Hide Geographic Distribution</a>
+								<a href="#" onclick="return toggleGeoDist()">Hide Geographic Distribution</a>
 							</div>
 							<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 								<input type="image" name="action" value="Download Geo Dist" src="../../images/dl.png" onclick="" />
