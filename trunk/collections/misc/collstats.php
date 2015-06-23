@@ -140,7 +140,29 @@ if($action != "Update Statistics"){
 					}
 					$("#tabs").tabs({<?php echo ($action == "Run Statistics"?'active: 1':''); ?>});
 				});
-				
+
+				function toggleFamilyDist(){
+					toggleById("famdistbox");
+					toggleById("showfamdist");
+					toggleById("hidefamdist");
+
+					document.getElementById("geodistbox").style.display="none";
+					document.getElementById("showgeodist").style.display="block";
+					document.getElementById("hidegeodist").style.display="none";
+					return false;
+				}
+
+				function toggleGeoDist(){
+					toggleById("geodistbox");
+					toggleById("showgeodist");
+					toggleById("hidegeodist");
+
+					document.getElementById("famdistbox").style.display="none";
+					document.getElementById("showfamdist").style.display="block";
+					document.getElementById("hidefamdist").style.display="none";
+					return false;
+				}
+
 				function toggleById(target){
 					if(target != null){
 						var obj = document.getElementById(target);
@@ -180,7 +202,7 @@ if($action != "Update Statistics"){
 		</head>
 		<body>
 			<?php
-			$displayLeftMenu = (isset($collections_misc_collstatsMenu)?$collections_misc_collstatsMenu:true);
+			$displayLeftMenu = (isset($collections_misc_collstatsMenu)?$collections_misc_collstatsMenu:false);
 			include($serverRoot.'/header.php');
 			if(isset($collections_misc_collstatsCrumbs)){
 				if($collections_misc_collstatsCrumbs){
@@ -531,7 +553,7 @@ if($action != "Update Statistics"){
 											<?php echo $collStr; ?> 
 										</div>
 									</div>
-									<fieldset style="float:left;width:450px;margin-bottom:15px;">
+									<fieldset style="float:left;width:400px;margin-bottom:15px;">
 										<ul style="margin:0px;padding-left:10px;">
 											<?php
 											echo "<li>";
@@ -569,15 +591,15 @@ if($action != "Update Statistics"){
 											?>
 										</ul>
 									</fieldset>
-									<fieldset style="float:right;width:300px;margin:20px 0px 20px 20px;background-color:#FFFFCC;">
+									<fieldset style="width:250px;margin:20px 0px 20px 20px;background-color:#FFFFCC;">
 										<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
 											<div class='legend'><b>Extra Statistics</b></div>
 											<div style="margin-top:8px;">
 												<div id="showfamdist" style="float:left;display:block;" >
-													<a href="#" onclick="toggleById('famdistbox');toggleById('showfamdist');toggleById('hidefamdist');return false;">Show Family Distribution</a>
+													<a href="#" onclick="return toggleFamilyDist()">Show Family Distribution</a>
 												</div>
 												<div id="hidefamdist" style="float:left;display:none;" >
-													<a href="#" onclick="toggleById('famdistbox');toggleById('showfamdist');toggleById('hidefamdist');return false;">Hide Family Distribution</a>
+													<a href="#" onclick="return toggleFamilyDist()">Hide Family Distribution</a>
 												</div>
 												<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 													<input type="image" name="action" value="Download Family Dist" src="../../images/dl.png" onclick="" />
@@ -585,10 +607,10 @@ if($action != "Update Statistics"){
 											</div>
 											<div style="clear:both;">
 												<div id="showgeodist" style="float:left;display:block;" >
-													<a href="#" onclick="toggleById('geodistbox');toggleById('showgeodist');toggleById('hidegeodist');return false;">Show Geographic Distribution</a>
+													<a href="#" onclick="return toggleGeoDist()">Show Geographic Distribution</a>
 												</div>
 												<div id="hidegeodist" style="float:left;display:none;" >
-													<a href="#" onclick="toggleById('geodistbox');toggleById('showgeodist');toggleById('hidegeodist');return false;">Hide Geographic Distribution</a>
+													<a href="#" onclick="return toggleGeoDist();">Hide Geographic Distribution</a>
 												</div>
 												<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 													<input type="image" name="action" value="Download Geo Dist" src="../../images/dl.png" onclick="" />

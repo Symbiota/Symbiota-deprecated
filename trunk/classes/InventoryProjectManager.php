@@ -66,13 +66,16 @@ class InventoryProjectManager {
 
 	public function submitProjEdits($projArr){
 		$conn = MySQLiConnectionFactory::getCon("write");
+		$fieldArr = array('projname', 'displayname', 'managers', 'fulldescription', 'notes', 'ispublic', 'parentpid', 'SortSequence');
 		$sql = "";
 		foreach($projArr as $field => $value){
-			$v = $this->cleanInStr($value);
-			$sql .= ','.$field.' = "'.$v.'"';
+			if(in_array($field,$fieldArr)){
+				$v = $this->cleanInStr($value);
+				$sql .= ','.$field.' = "'.$v.'"';
+			}
 		}
 		$sql = 'UPDATE fmprojects SET '.substr($sql,1).' WHERE (pid = '.$this->pid.')';
-		//echo $sql;
+		//echo $sql; exit;
 		$conn->query($sql);
 		$conn->close();
 	}
