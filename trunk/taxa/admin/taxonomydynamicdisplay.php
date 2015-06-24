@@ -152,7 +152,7 @@ else{
 							target: "rpc/getdynamicchildren.php",
 							labelAttribute: "label",
 							getChildren: function(object){
-								return this.query({id:object.id,authors:<?php echo $displayAuthor; ?>,targetid:<?php echo $targetId; ?>},{sort:[{attribute:"label",descending:false}]}).then(function(fullObject){
+								return this.query({id:object.id,authors:<?php echo $displayAuthor; ?>,targetid:<?php echo $targetId; ?>}).then(function(fullObject){
 									return fullObject.children;
 								});
 							},
@@ -177,7 +177,7 @@ else{
 							store: taxonTreeStore,
 							deferItemLoadingUntilExpand: true,
 							getRoot: function(onItem){
-								this.store.query({id:"root",authors:<?php echo $displayAuthor; ?>,targetid:<?php echo $targetId; ?>},{sort:[{attribute:"label",descending:false}]}).then(onItem);
+								this.store.query({id:"root",authors:<?php echo $displayAuthor; ?>,targetid:<?php echo $targetId; ?>}).then(onItem);
 							},
 							mayHaveChildren: function(object){
 								return "children" in object;
