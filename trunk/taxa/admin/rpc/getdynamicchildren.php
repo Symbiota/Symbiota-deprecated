@@ -33,7 +33,7 @@ if($taxId == 'root'){
 	$rs1 = $con->query($sql1);
 	$i = 0;
 	while($row1 = $rs1->fetch_object()){
-		$label = '2'.$row1->rankid.$row1->sciname;
+		$label = '2-'.$row1->rankid.'-'.$row1->rankname.'-'.$row1->sciname;
 		if($row1->tid == $targetId){
 			$sciName = '<b>'.$row1->sciname.'</b>';
 		}
@@ -45,14 +45,14 @@ if($taxId == 'root'){
 		$childArr[$i]['label'] = $label;
 		$childArr[$i]['name'] = $sciName;
 		$childArr[$i]['url'] = 'taxonomyeditor.php?target='.$row1->tid;
-		$sql3 = 'SELECT tid FROM taxaenumtree WHERE parenttid = '.$row1->tid.' LIMIT 1 ';
+		$sql3 = 'SELECT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid = '.$row1->tid.' LIMIT 1 ';
 		//echo "<div>".$sql3."</div>";
 		$rs3 = $con->query($sql3);
 		if($row3 = $rs3->fetch_object()){
 			$childArr[$i]['children'] = true;
 		}
 		else{
-			$sql4 = 'SELECT DISTINCT tid, tidaccepted FROM taxstatus WHERE tidaccepted = '.$row2->tid.' ';
+			$sql4 = 'SELECT DISTINCT tid, tidaccepted FROM taxstatus WHERE taxauthid = 1 AND tidaccepted = '.$row1->tid.' ';
 			//echo "<div>".$sql4."</div>";
 			$rs4 = $con->query($sql4);
 			while($row4 = $rs4->fetch_object()){
