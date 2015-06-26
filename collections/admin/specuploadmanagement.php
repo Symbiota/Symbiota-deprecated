@@ -235,14 +235,15 @@ $duManager->readUploadParameters();
 								<b>Upload Type:</b> 
 								<select name="uploadtype" onchange="adjustParameterForm()" <?php if($uspid) echo 'DISABLED'; ?>>
 									<option value="">Select an Upload Type</option>
-									<option value="">------------------------</option>
+									<option value="">----------------------------------</option>
 									<?php 
 									$uploadType = $duManager->getUploadType();
-									echo '<option value="'.$DIRECTUPLOAD.'" '.($uploadType==$DIRECTUPLOAD?'SELECTED':'').'>Direct Database Upload</option>';
 									echo '<option value="'.$DWCAUPLOAD.'" '.($uploadType==$DWCAUPLOAD?'SELECTED':'').'>Darwin Core Archive Provider (IPT)</option>';
-									echo '<option value="'.$DIGIRUPLOAD.'" '.($uploadType==$DIGIRUPLOAD?'SELECTED':'').'>DiGIR Provider</option>';
 									echo '<option value="'.$FILEUPLOAD.'" '.($uploadType==$FILEUPLOAD?'SELECTED':'').'>File Upload</option>';
 									echo '<option value="'.$SKELETAL.'" '.($uploadType==$SKELETAL?'SELECTED':'').'>Skeletal File Upload</option>';
+									echo '<option value="">......................................</option>';
+									echo '<option value="'.$DIGIRUPLOAD.'" '.($uploadType==$DIGIRUPLOAD?'SELECTED':'').'>DiGIR Provider</option>';
+									echo '<option value="'.$DIRECTUPLOAD.'" '.($uploadType==$DIRECTUPLOAD?'SELECTED':'').'>Direct Database Mapping</option>';
 									echo '<option value="'.$STOREDPROCEDURE.'" '.($uploadType==$STOREDPROCEDURE?'SELECTED':'').'>Stored Procedure</option>';
 									echo '<option value="'.$SCRIPTUPLOAD.'" '.($uploadType==$SCRIPTUPLOAD?'SELECTED':'').'>Script Upload</option>';
 									?>
