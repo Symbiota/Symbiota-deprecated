@@ -7,8 +7,11 @@ class SpecProcessorManager {
 	protected $collid = 0;
 	protected $title;
 	protected $collectionName;
+	protected $projectType;
 	protected $managementType;
 	protected $specKeyPattern;
+	protected $patternReplace;
+	protected $replaceStr;
 	protected $coordX1;
 	protected $coordX2;
 	protected $coordY1;
@@ -23,8 +26,9 @@ class SpecProcessorManager {
 	protected $webMaxFileSize = 300000;
 	protected $lgMaxFileSize = 3000000;
 	protected $webImg = 1;
-	protected $tnImg = 1;
-	protected $lgImg = 1;
+	protected $createTnImg = 1;
+	protected $createLgImg = 1;
+	protected $lastRunDate = '';
 	
 	protected $dbMetadata = 1;			//Only used when run as a standalone script
 	protected $processUsingImageMagick = 0;
@@ -85,11 +89,17 @@ class SpecProcessorManager {
 	public function editProject($editArr){
 		if(is_numeric($editArr['spprid'])){
 			$sqlFrag = '';
-			$targetFields = array('title','speckeypattern','sourcepath','targetpath','imgurl','webpixwidth','tnpixwidth','lgpixwidth','jpgcompression','createtnimg','createlgimg');
+			$targetFields = array('title','projecttype','speckeypattern','patternreplace','replacestr','sourcepath','targetpath','imgurl',
+				'webpixwidth','tnpixwidth','lgpixwidth','jpgcompression','createtnimg','createlgimg','source');
+			if(!isset($editArr['createtnimg'])) $editArr['createtnimg'] = 0;
+			if(!isset($editArr['createlgimg'])) $editArr['createlgimg'] = 0;
 			foreach($editArr as $k => $v){
 				if(in_array($k,$targetFields)){
-					if($v){
-						$sqlFrag .= ','.$k.' = "'.$v.'"';
+					if(is_numeric($v)){
+						$sqlFrag .= ','.$k.' = '.$this->cleanInStr($v);
+					}
+					elseif($v){
+						$sqlFrag .= ','.$k.' = "'.$this->cleanInStr($v).'"';
 					}
 					else{
 						$sqlFrag .= ','.$k.' = NULL';
@@ -97,7 +107,8 @@ class SpecProcessorManager {
 				}
 			}
 			$sql = 'UPDATE specprocessorprojects SET '.trim($sqlFrag,' ,').' WHERE (spprid = '.$editArr['spprid'].')';
-			//echo 'SQL: '.$sql; exit;
+//print_r($editArr);
+//			echo '<br/>SQL: '.$sql; exit;
 			if(!$this->conn->query($sql)){
 				echo 'ERROR saving project: '.$this->conn->error;
 				//echo '<br/>SQL: '.$sql;
@@ -131,8 +142,8 @@ class SpecProcessorManager {
 				(isset($addArr['tnpixwidth'])&&$addArr['tnpixwidth']?$addArr['tnpixwidth']:'NULL').','.
 				(isset($addArr['lgpixwidth'])&&$addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
 				(isset($addArr['jpgquality'])&&$addArr['jpgquality']?$addArr['jpgquality']:'NULL').','.
-				(isset($addArr['tnimg'])&&$addArr['tnimg']?$addArr['tnimg']:'NULL').','.
-				(isset($addArr['lgimg'])&&$addArr['lgimg']?$addArr['lgimg']:'NULL').')';
+				(isset($addArr['createTnImg'])&&$addArr['createTnImg']?$addArr['createTnImg']:'NULL').','.
+				(isset($addArr['createLgImg'])&&$addArr['createLgImg']?$addArr['createLgImg']:'NULL').')';
 		}
 		//echo $sql;
 		if(!$this->conn->query($sql)){
@@ -149,21 +160,23 @@ class SpecProcessorManager {
 	public function setProjVariables($crit){
 		$sqlWhere = '';
 		if(is_numeric($crit)){
-			$sqlWhere .= 'WHERE (p.spprid = '.$crit.')';
+			$sqlWhere .= 'WHERE (spprid = '.$crit.')';
 		}
 		elseif($crit == 'OCR Harvest' && $this->collid){
-			$sqlWhere .= 'WHERE (collid = '.$this->collid.') AND (p.title = "OCR Harvest")';
+			$sqlWhere .= 'WHERE (collid = '.$this->collid.') AND (title = "OCR Harvest")';
 		}
 		if($sqlWhere){
-			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
-				'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
-				'FROM specprocessorprojects p '.$sqlWhere;
+			$sql = 'SELECT collid, title, speckeypattern, coordx1, coordx2, coordy1, coordy2, sourcepath, targetpath, '.
+				'imgurl, webpixwidth, tnpixwidth, lgpixwidth, jpgcompression, createtnimg, createlgimg, source '.
+				'FROM specprocessorprojects '.$sqlWhere;
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				if(!$this->collid) $this->setCollId($row->collid); 
 				$this->title = $row->title;
 				$this->specKeyPattern = $row->speckeypattern;
+				//$this->patternReplace = $row->patternreplace;
+				//$this->replaceStr = $row->replacestr;
 				$this->coordX1 = $row->coordx1;
 				$this->coordX2 = $row->coordx2;
 				$this->coordY1 = $row->coordy1;
@@ -175,8 +188,17 @@ class SpecProcessorManager {
 				if($row->tnpixwidth) $this->tnPixWidth = $row->tnpixwidth;
 				if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
 				if($row->jpgcompression) $this->jpgQuality = $row->jpgcompression;
-				$this->tnImg = $row->createtnimg;
-				$this->lgImg = $row->createlgimg;
+				$this->createTnImg = $row->createtnimg;
+				$this->createLgImg = $row->createlgimg;
+				//Temporary code for setting projectType until proectType field is added to specprocessorprojects table
+				$this->lastRunDate = $row->source;
+				//$this->lastRunDate = $row->lastrundate;
+				if($this->title == 'idigbio CSV upload'){
+					$this->projectType = 'idigbio';
+				}
+				elseif($this->title == 'IPlant Image Processing'){
+					$this->projectType = 'iplant';
+				}
 			}
 			$rs->free();
 			
@@ -481,6 +503,14 @@ class SpecProcessorManager {
 		return $this->collectionName;
 	}
 
+	public function setProjectType($t){
+		$this->projectType = $t;
+	}
+
+	public function getProjectType(){
+		return $this->projectType;
+	}
+
 	public function setManagementType($t){
 		$this->managementType = $t;
 	}
@@ -495,6 +525,22 @@ class SpecProcessorManager {
 
 	public function getSpecKeyPattern(){
 		return $this->specKeyPattern;
+	}
+
+	public function setPatternReplace($str){
+		$this->patternReplace = $str;
+	}
+
+	public function getPatternReplace(){
+		return $this->patternReplace;
+	}
+
+	public function setReplaceStr($str){
+		$this->replaceStr = $str;
+	}
+
+	public function getReplaceStr(){
+		return $this->replaceStr;
 	}
 
 	public function setCoordX1($x){
@@ -610,20 +656,28 @@ class SpecProcessorManager {
 		return $this->webImg;
 	}
 
-	public function setTnImg($c){
-		$this->tnImg = $c;
+	public function setCreateTnImg($c){
+		$this->createTnImg = $c;
 	}
 
-	public function getTnImg(){
-		return $this->tnImg;
+	public function getCreateTnImg(){
+		return $this->createTnImg;
 	}
 
-	public function setLgImg($c){
-		$this->lgImg = $c;
+	public function setCreateLgImg($c){
+		$this->createLgImg = $c;
 	}
 
-	public function getLgImg(){
-		return $this->lgImg;
+	public function getCreateLgImg(){
+		return $this->createLgImg;
+	}
+	
+	public function setLastRunDate($date){
+		$this->lastRunDate = $date;
+	}
+	
+	public function getLastRunDate(){
+		return $this->lastRunDate;
 	}
 	
 	public function setDbMetadata($v){

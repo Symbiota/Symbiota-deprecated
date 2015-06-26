@@ -10,7 +10,6 @@ $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
 
 $specManager = new SpecProcessorManager();
-
 $specManager->setCollId($collId);
 
 $editable = false;
@@ -129,7 +128,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 			}
 			
 			function validateProcForm(f){
-				if(document.getElementById('projtitle').value=='iDigBio CSV upload'){
+				if(f.projtype.value == 'idigbio'){
 					if(!document.getElementById("idigbiofile").files[0]){
 						alert("Please upload the output file from the iDigBio Image Upload Appliance.");
 						return false;
@@ -163,7 +162,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 			<?php 
 			if($SYMB_UID){
 				if($collId){
-					$projectTitle = $specManager->getTitle();
+					$projectType = $specManager->getProjectType();
 					?>
 					<div id="editdiv" style="display:<?php echo ($spprId||$specProjects?'none':'block'); ?>;">
 						<form name="editproj" action="index.php" method="post" onsubmit="return validateProjectForm(this);">
@@ -193,14 +192,14 @@ if($spprId) $specManager->setProjVariables($spprId);
 									</div>
 									<?php 
 								}
-								if($projectTitle != 'iDigBio CSV upload' && $projectTitle != 'IPlant Image Processing'){
+								if($projectType != 'idigbio' && $projectType != 'iplant'){
 									?>
 									<div style="clear:both;" id="titlerow">
 										<div style="width:180px;float:left;">
 											<b>Title:</b>
 										</div>
 										<div style="float:left;">
-											<input name="title" type="text" style="width:300px;" value="<?php echo $projectTitle; ?>" />
+											<input name="title" type="text" style="width:300px;" value="<?php echo $specManager->getTitle(); ?>" />
 										</div>
 									</div>
 									<?php 
@@ -224,7 +223,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 									</div>
 								</div>
 								<?php
-								if($projectTitle != 'iDigBio CSV upload' && $projectTitle != 'IPlant Image Processing'){ 
+								if($projectType != 'idigbio' && $projectType != 'iplant'){ 
 									?>
 									<div id="sourcepathrow" style="clear:both;">
 										<div style="width:180px;float:left;">
@@ -344,10 +343,10 @@ if($spprId) $specManager->setProjVariables($spprId);
 										<div>
 											<b>Thumbnail:</b>
 											<div style="margin:5px 15px;">
-												<input name="tnimg" type="radio" value="1" <?php echo ($specManager->getTnImg()==1?'CHECKED':''); ?> /> Create new thumbnail from source image<br/>
-												<input name="tnimg" type="radio" value="2" <?php echo ($specManager->getTnImg()==2?'CHECKED':''); ?> /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
-												<input name="tnimg" type="radio" value="3" <?php echo ($specManager->getTnImg()==3?'CHECKED':''); ?> /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
-												<input name="tnimg" type="radio" value="0" <?php echo (!$specManager->getTnImg()?'CHECKED':''); ?> /> Exclude thumbnail <br/>
+												<input name="createtnimg" type="radio" value="1" <?php echo ($specManager->getCreateTnImg()==1?'CHECKED':''); ?> /> Create new thumbnail from source image<br/>
+												<input name="createtnimg" type="radio" value="2" <?php echo ($specManager->getCreateTnImg()==2?'CHECKED':''); ?> /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
+												<input name="createtnimg" type="radio" value="3" <?php echo ($specManager->getCreateTnImg()==3?'CHECKED':''); ?> /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
+												<input name="createtnimg" type="radio" value="0" <?php echo (!$specManager->getCreateTnImg()?'CHECKED':''); ?> /> Exclude thumbnail <br/>
 											</div>
 										</div>
 									</div>
@@ -355,11 +354,11 @@ if($spprId) $specManager->setProjVariables($spprId);
 										<div>
 											<b>Large Image:</b>
 											<div style="margin:5px 15px;">
-												<input name="lgimg" type="radio" value="1" <?php echo ($specManager->getLgImg()==1?'CHECKED':''); ?> /> Import source image as large version<br/>
-												<input name="lgimg" type="radio" value="2" <?php echo ($specManager->getLgImg()==2?'CHECKED':''); ?> /> Map to source image as large version<br/>
-												<input name="lgimg" type="radio" value="3" <?php echo ($specManager->getLgImg()==3?'CHECKED':''); ?> /> Import large version from source location (source name with _lg.jpg suffix)<br/>
-												<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg()==4?'CHECKED':''); ?> /> Map to large version at source location (source name with _lg.jpg suffix)<br/>
-												<input name="lgimg" type="radio" value="0" <?php echo (!$specManager->getLgImg()?'CHECKED':''); ?> /> Exclude large version<br/>
+												<input name="createlgimg" type="radio" value="1" <?php echo ($specManager->getCreateLgImg()==1?'CHECKED':''); ?> /> Import source image as large version<br/>
+												<input name="createlgimg" type="radio" value="2" <?php echo ($specManager->getCreateLgImg()==2?'CHECKED':''); ?> /> Map to source image as large version<br/>
+												<input name="createlgimg" type="radio" value="3" <?php echo ($specManager->getCreateLgImg()==3?'CHECKED':''); ?> /> Import large version from source location (source name with _lg.jpg suffix)<br/>
+												<input name="createlgimg" type="radio" value="4" <?php echo ($specManager->getCreateLgImg()==4?'CHECKED':''); ?> /> Map to large version at source location (source name with _lg.jpg suffix)<br/>
+												<input name="createlgimg" type="radio" value="0" <?php echo (!$specManager->getCreateLgImg()?'CHECKED':''); ?> /> Exclude large version<br/>
 											</div>
 										</div>
 									</div>
@@ -405,7 +404,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 										<img src="../../images/edit.png" style="border:0px;width:15px;" />
 									</div>
 									<?php
-									if($projectTitle == 'iDigBio CSV upload'){
+									if($projectType == 'idigbio'){
 										?>
 										<div style="font-weight:bold;">Select iDigBio Image Appliance output file</div>
 										<div style="" title="Upload output file created by iDigBio Image Upload Appliance here.">
@@ -425,7 +424,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 										</div>
 									</div>
 									<?php
-									if($projectTitle != 'iDigBio CSV upload' && $projectTitle != 'IPlant Image Processing'){ 
+									if($projectType != 'idigbio' && $projectType != 'iplant'){ 
 										?>
 										<div style="clear:both;">
 											<div style="width:200px;float:left;">
@@ -497,10 +496,10 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<div>
 												<b>Thumbnail:</b>
 												<div style="margin:5px 15px"> 
-													<input name="tnimg" type="radio" value="1" <?php echo ($specManager->getTnImg() == 1?'CHECKED':'') ?> /> Create new from source image<br/>
-													<input name="tnimg" type="radio" value="2" <?php echo ($specManager->getTnImg() == 2?'CHECKED':'') ?> /> Import existing source thumbnail (source name with _tn.jpg suffix)<br/>
-													<input name="tnimg" type="radio" value="3" <?php echo ($specManager->getTnImg() == 3?'CHECKED':'') ?> /> Map to existing source thumbnail (source name with _tn.jpg suffix)<br/>
-													<input name="tnimg" type="radio" value="0" <?php echo (!$specManager->getTnImg()?'CHECKED':'') ?> /> Exclude thumbnail <br/>
+													<input name="createtnimg" type="radio" value="1" <?php echo ($specManager->getCreateTnImg() == 1?'CHECKED':'') ?> /> Create new from source image<br/>
+													<input name="createtnimg" type="radio" value="2" <?php echo ($specManager->getCreateTnImg() == 2?'CHECKED':'') ?> /> Import existing source thumbnail (source name with _tn.jpg suffix)<br/>
+													<input name="createtnimg" type="radio" value="3" <?php echo ($specManager->getCreateTnImg() == 3?'CHECKED':'') ?> /> Map to existing source thumbnail (source name with _tn.jpg suffix)<br/>
+													<input name="createtnimg" type="radio" value="0" <?php echo (!$specManager->getCreateTnImg()?'CHECKED':'') ?> /> Exclude thumbnail <br/>
 												</div>
 											</div>
 										</div>
@@ -508,11 +507,11 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<div>
 												<b>Large Image:</b>
 												<div style="margin:5px 15px"> 
-													<input name="lgimg" type="radio" value="1" <?php echo ($specManager->getLgImg() == 1?'CHECKED':'') ?> /> Import source image as large version<br/>
-													<input name="lgimg" type="radio" value="2" <?php echo ($specManager->getLgImg() == 2?'CHECKED':'') ?> /> Map to source image as large version<br/>
-													<input name="lgimg" type="radio" value="3" <?php echo ($specManager->getLgImg() == 3?'CHECKED':'') ?> /> Import existing large version (source name with _lg.jpg suffix)<br/>
-													<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg() == 4?'CHECKED':'') ?> /> Map to existing large version (source name with _lg.jpg suffix)<br/>
-													<input name="lgimg" type="radio" value="0" <?php echo (!$specManager->getLgImg()?'CHECKED':'') ?> /> Exclude large version<br/>
+													<input name="createlgimg" type="radio" value="1" <?php echo ($specManager->getCreateLgImg() == 1?'CHECKED':'') ?> /> Import source image as large version<br/>
+													<input name="createlgimg" type="radio" value="2" <?php echo ($specManager->getCreateLgImg() == 2?'CHECKED':'') ?> /> Map to source image as large version<br/>
+													<input name="createlgimg" type="radio" value="3" <?php echo ($specManager->getCreateLgImg() == 3?'CHECKED':'') ?> /> Import existing large version (source name with _lg.jpg suffix)<br/>
+													<input name="createlgimg" type="radio" value="4" <?php echo ($specManager->getCreateLgImg() == 4?'CHECKED':'') ?> /> Map to existing large version (source name with _lg.jpg suffix)<br/>
+													<input name="createlgimg" type="radio" value="0" <?php echo (!$specManager->getCreateLgImg()?'CHECKED':'') ?> /> Exclude large version<br/>
 												</div>
 											</div>
 										</div>
@@ -546,9 +545,9 @@ if($spprId) $specManager->setProjVariables($spprId);
 									<div style="clear:both;padding:20px;">
 										<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-										<input id="projtitle" type="hidden" value="<?php echo $projectTitle; ?>" />
+										<input name="projtype" type="hidden" value="<?php echo $projectType; ?>" />
 										<input name="tabindex" type="hidden" value="1" />
-										<input name="submitaction" type="submit" value="Process <?php echo ($projectTitle=='iDigBio CSV upload'?'Output File':'Images') ?>" />
+										<input name="submitaction" type="submit" value="Process <?php echo ($projectType=='idigbio'?'Output File':'Images') ?>" />
 									</div>
 									<div style="margin:20px;">
 										<!-- <a href="logs/">Log Files</a>  -->

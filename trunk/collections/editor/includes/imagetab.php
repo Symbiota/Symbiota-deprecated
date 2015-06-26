@@ -145,13 +145,13 @@ $specImgArr = $occManager->getImageMap();
 									$tnUrl = $GLOBALS["imageDomain"].$tnUrl;
 								}
 							}
-							$displayUrl = $imgUrl;
-							if(strtolower(substr($displayUrl,-4)) != '.jpg' && $tnUrl){
-								$displayUrl = $tnUrl;
-							}
+							//$displayUrl = $imgUrl;
+							//if(strtolower(substr($displayUrl,-4)) != '.jpg' && $tnUrl){
+								//$displayUrl = $tnUrl;
+							//}
 							?>
 							<a href="<?php echo $imgUrl;?>" target="_blank">
-								<img src="<?php echo $displayUrl;?>" style="width:250px;" title="<?php echo $imgArr["caption"]; ?>" />
+								<img src="<?php echo $imgUrl;?>" style="width:250px;" title="<?php echo $imgArr["caption"]; ?>" />
 							</a>
 							<?php 
 							if($origUrl){

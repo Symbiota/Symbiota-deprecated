@@ -28,8 +28,11 @@ ALTER TABLE `taxonunits`
 ALTER TABLE `specprocessorprojects` 
   ADD COLUMN `projecttype` VARCHAR(45) NULL AFTER `title`,
   ADD COLUMN `lastrundate` DATE NULL AFTER `source`,
-  ADD COLUMN `pattReplace` VARCHAR(45) NULL AFTER `specKeyPattern`,
+  ADD COLUMN `patternReplace` VARCHAR(45) NULL AFTER `specKeyPattern`,
   ADD COLUMN `replaceStr` VARCHAR(45) NULL AFTER `pattReplace`;
+
+ALTER TABLE `images` 
+  CHANGE COLUMN `sourceIdentifier` `sourceIdentifier` VARCHAR(100) NULL DEFAULT NULL ;
 
 ALTER TABLE `omoccurrences` 
   ADD INDEX `Index_locality` (`locality`(100) ASC),

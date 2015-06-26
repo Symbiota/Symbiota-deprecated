@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
 include_once($serverRoot.'/classes/ImageBatchProcessor.php');
+include_once($serverRoot.'/classes/ImageProcessor.php');
 include_once($serverRoot.'/classes/SpecProcessorOcr.php');
 
 header("Content-Type: text/html; charset=".$charset);
@@ -10,7 +11,7 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/s
 
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
-$spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
+$spprid = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 
 //NLP and OCR variables
@@ -50,39 +51,53 @@ $statusStr = "";
 			<h2><?php echo $specManager->getCollectionName(); ?></h2>
 			<?php
 			if($isEditor){
-				$specManager->setProjVariables($spprId); 
+				$specManager->setProjVariables($spprid);
 				if($action == 'Process Images'){
-					echo '<div style="padding:15px;">'."\n";
-					$imageProcessor = new ImageBatchProcessor();
-	
-					$imageProcessor->setLogMode(1);
-					$imageProcessor->initProcessor();
-					$imageProcessor->setCollArr(array($collid => array('pmterm' => $specManager->getSpecKeyPattern())));
-					$imageProcessor->setDbMetadata(1);
-					$imageProcessor->setSourcePathBase($specManager->getSourcePath());
-					$imageProcessor->setTargetPathBase($specManager->getTargetPath());
-					$imageProcessor->setImgUrlBase($specManager->getImgUrlBase());
-					$imageProcessor->setServerRoot($serverRoot);
-					if($specManager->getWebPixWidth()) $imageProcessor->setWebPixWidth($specManager->getWebPixWidth());
-					if($specManager->getTnPixWidth()) $imageProcessor->setTnPixWidth($specManager->getTnPixWidth());
-					if($specManager->getLgPixWidth()) $imageProcessor->setLgPixWidth($specManager->getLgPixWidth());
-					if($specManager->getWebMaxFileSize()) $imageProcessor->setWebFileSizeLimit($specManager->getWebMaxFileSize());
-					if($specManager->getLgMaxFileSize()) $imageProcessor->setLgFileSizeLimit($specManager->getLgMaxFileSize());
-					if($specManager->getJpgQuality()) $imageProcessor->setJpgQuality($specManager->getJpgQuality());
-					$imageProcessor->setUseImageMagick($specManager->getUseImageMagick());
-					$imageProcessor->setWebImg($_POST['webimg']);
-					$imageProcessor->setTnImg($_POST['tnimg']);
-					$imageProcessor->setLgImg($_POST['lgimg']);
-					$imageProcessor->setCreateNewRec($_POST['createnewrec']);
-					$imageProcessor->setImgExists($_POST['imgexists']);
-					$imageProcessor->setKeepOrig(0);
-					
-					//Run process
-					$imageProcessor->batchLoadImages();
-					echo '</div>'."\n";
+					if($specManager->getProjectType() == 'iplant'){
+						$imageProcessor = new ImageProcessor();
+						echo '<ul>';
+						$imageProcessor->setLogMode(3);
+						$imageProcessor->setCollid($collid);
+						$newLastRunDates = $imageProcessor->processIPlantImages($specManager->getSpecKeyPattern(), $specManager->getLastRunDate());
+						if($newLastRunDates) $specManager->editProject(array('sppid' => $spprid, 'source' => $newLastRunDates));
+						echo '</ul>';
+					}
+					else{
+						echo '<div style="padding:15px;">'."\n";
+						$imageProcessor = new ImageBatchProcessor();
+		
+						$imageProcessor->setLogMode(1);
+						$imageProcessor->initProcessor();
+						$imageProcessor->setCollArr(array($collid => array('pmterm' => $specManager->getSpecKeyPattern())));
+						$imageProcessor->setDbMetadata(1);
+						$imageProcessor->setSourcePathBase($specManager->getSourcePath());
+						$imageProcessor->setTargetPathBase($specManager->getTargetPath());
+						$imageProcessor->setImgUrlBase($specManager->getImgUrlBase());
+						$imageProcessor->setServerRoot($serverRoot);
+						if($specManager->getWebPixWidth()) $imageProcessor->setWebPixWidth($specManager->getWebPixWidth());
+						if($specManager->getTnPixWidth()) $imageProcessor->setTnPixWidth($specManager->getTnPixWidth());
+						if($specManager->getLgPixWidth()) $imageProcessor->setLgPixWidth($specManager->getLgPixWidth());
+						if($specManager->getWebMaxFileSize()) $imageProcessor->setWebFileSizeLimit($specManager->getWebMaxFileSize());
+						if($specManager->getLgMaxFileSize()) $imageProcessor->setLgFileSizeLimit($specManager->getLgMaxFileSize());
+						if($specManager->getJpgQuality()) $imageProcessor->setJpgQuality($specManager->getJpgQuality());
+						$imageProcessor->setUseImageMagick($specManager->getUseImageMagick());
+						$imageProcessor->setWebImg($_POST['webimg']);
+						$imageProcessor->setTnImg($_POST['createtnimg']);
+						$imageProcessor->setLgImg($_POST['createlgimg']);
+						$imageProcessor->setCreateNewRec($_POST['createnewrec']);
+						$imageProcessor->setImgExists($_POST['imgexists']);
+						$imageProcessor->setKeepOrig(0);
+						
+						//Run process
+						$imageProcessor->batchLoadImages();
+						echo '</div>'."\n";
+					}
 				}
 				elseif($action == 'Process Output File'){
-					$statusStr = $specManager->processiDigBioOutput($_POST);
+					$imageProcessor = new ImageProcessor();
+					$imageProcessor->setLogMode(3);
+					$imageProcessor->setCollid($collid);
+					$statusStr = $imageProcessor->processiDigBioOutput($specManager->getSpecKeyPattern());
 				}
 				elseif($action == 'Run Batch OCR'){
 					$ocrManager = new SpecProcessorOcr();
