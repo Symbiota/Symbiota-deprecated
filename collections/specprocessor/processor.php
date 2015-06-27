@@ -58,8 +58,8 @@ $statusStr = "";
 						echo '<ul>';
 						$imageProcessor->setLogMode(3);
 						$imageProcessor->setCollid($collid);
-						$newLastRunDates = $imageProcessor->processIPlantImages($specManager->getSpecKeyPattern(), $specManager->getLastRunDate());
-						if($newLastRunDates) $specManager->editProject(array('spprid' => $spprid, 'source' => $newLastRunDates));
+						$imageProcessor->setSpprid($spprid);
+						$imageProcessor->processIPlantImages($specManager->getSpecKeyPattern(), $specManager->getLastRunDate());
 						echo '</ul>';
 					}
 					else{

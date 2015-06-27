@@ -40,24 +40,7 @@ class SpecProcessorManager {
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		if(!$this->logPath){
-			if(array_key_exists('logPath',$GLOBALS)){
-				$this->logPath = $GLOBALS['logPath'];
-			}
-			elseif(array_key_exists('tempDirRoot',$GLOBALS)){
-				$this->logPath = $GLOBALS['tempDirRoot'];
-			}
-			else{
-				$this->logPath = ini_get('upload_tmp_dir');
-			}
-		}
-		if(!$this->logPath && array_key_exists('serverRoot',$GLOBALS)){
-			$this->logPath = $GLOBALS['serverRoot'].'/temp/';
-		}
-		if($this->logPath){
-			if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
-			$this->logPath .= 'logs/';
-		}
+		$this->logPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) == '/'?'':'/').'content/logs/';
 	}
 
 	function __destruct(){
@@ -107,8 +90,7 @@ class SpecProcessorManager {
 				}
 			}
 			$sql = 'UPDATE specprocessorprojects SET '.trim($sqlFrag,' ,').' WHERE (spprid = '.$editArr['spprid'].')';
-//print_r($editArr);
-//			echo '<br/>SQL: '.$sql; exit;
+			//echo '<br/>SQL: '.$sql; exit;
 			if(!$this->conn->query($sql)){
 				echo 'ERROR saving project: '.$this->conn->error;
 				//echo '<br/>SQL: '.$sql;
@@ -485,7 +467,24 @@ class SpecProcessorManager {
 		}
 		return $retArr;
 	}
-	
+
+	public function getLogListing(){
+		$retArr = array();
+		if($this->collid){
+			$logPath = $this->logPath;
+			if($this->projectType) $logPath .= $this->projectType.'/';
+			if($fh = opendir($logPath)){
+				while($fileName = readdir($fh)){
+					if(strpos($fileName,$this->collid.'_') === 0){
+						$retArr[] = $fileName;
+					}
+				}
+			}
+		}
+		rsort($retArr);
+		return $retArr;
+	}
+
 	//Set and Get functions
 	public function setTitle($t){
 		$this->title = $t;
