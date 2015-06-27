@@ -7,6 +7,7 @@ class ImageProcessor {
 	private $conn;
 
 	private $collid = 0;
+	private $sprid;
 	private $collArr;
 
 	private $logMode = 0;		//0 = silent, 1 = html, 2 = log file, 3 = both html & log
@@ -31,14 +32,15 @@ class ImageProcessor {
 		if($this->logMode > 1){
 			//Create log File
 			$logPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) == '/'?'':'/').'content/logs/';
+			if($processorType) $logPath .= $processorType.'/';
 			if(file_exists($logPath)){
 				$logFile = $logPath.$this->collid.'_'.$this->collArr['instcode'];
 				if($this->collArr['collcode']) $logFile .= '-'.$this->collArr['collcode'];
-				$logFile .= '_'.date('Ymd').".log";
+				$logFile .= '_'.date('Y-m-d').".log";
 				$this->logFH = fopen($logFile, 'a');
 			}
 			else{
-				echo 'ERROR creating Log file; path not found: '.$this->logPath."\n";
+				echo 'ERROR creating Log file; path not found: '.$logPath."\n";
 			}
 		}
 	}
@@ -66,6 +68,7 @@ class ImageProcessor {
 
 	//iPlant functions
 	public function processIPlantImages($pmTerm, $lastRunDate){
+		set_time_limit(1000);
 		if($this->collid){
 			$this->initProcessor('iplant');
 			$iPlantDataUrl = 'http://bovary.iplantcollaborative.org/data_service/';
@@ -95,7 +98,14 @@ class ImageProcessor {
 					$result = $http_response_header;
 					//check if response is 200
 					if(strpos($result[0],'200') !== false) {
-						$xml = new SimpleXMLElement($contents);
+						$xml = '';
+						try { 
+							$xml = new SimpleXMLElement($contents);
+						} 
+						catch (Exception $e) { 
+							$this->logOrEcho('ABORTED: bad content received from iPlant: '.$contents);
+							return false; 
+						} 
 						if(count($xml->image)){
 							$this->logOrEcho('Starting to process '.count($xml->image).' images uploaded on '.$lastRunDate,1);
 							$cnt = 0;
@@ -129,7 +139,7 @@ class ImageProcessor {
 						}
 						else{
 							$this->logOrEcho('No images were loaded on this date: '.$lastRunDate,1);
-						}
+							}
 					}
 					else{
 						$this->logOrEcho("ERROR: bad response status code returned for $url (code: $result[0])",1);
@@ -139,12 +149,13 @@ class ImageProcessor {
 					$this->logOrEcho("ERROR: failed to obtain response from iPlant (".$url.")",1);
 					return false;
 				}
+				$this->updateLastRunDate($lastRunDate);
 				$lastRunDate = date('Y-m-d', strtotime($lastRunDate. ' + 1 days'));
 			}
 			$this->cleanHouse(array($this->collid));
 			$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
 		}
-		return $lastRunDate;
+		return true;
 	}
 
 	//iDigBio Image ingestion processing functions
@@ -353,6 +364,15 @@ class ImageProcessor {
 		$uuidManager->populateGuids();
 	}
 
+	private function updateLastRunDate($date){
+		if($this->spprid){
+			$sql = 'UPDATE specprocessorprojects SET source = "'.$date.'" WHERE spprid = '.$this->spprid;
+			if(!$this->conn->query($sql)){
+				$this->logOrEcho('ERROR updating last run date: '.$this->conn->error);
+			}
+		}
+	}
+
 	//Set and Get functions
 	private function setCollArr(){
 		if($this->collid){
@@ -376,6 +396,12 @@ class ImageProcessor {
 			$this->setCollArr();
 		}
 	}
+	
+	public function setSpprid($spprid){
+		if(is_numeric($spprid)){
+			$this->spprid = $spprid;
+		}
+	}
 
 	public function setLogMode($c){
 		$this->logMode = $c;
@@ -384,7 +410,8 @@ class ImageProcessor {
 	public function getLogMode(){
 		return $this->logMode;
 	}
-
+	
+	//Misc functions
 	private function cleanInStr($inStr){
 		$retStr = trim($inStr);
 		$retStr = str_replace(chr(10),' ',$retStr);

@@ -27,7 +27,6 @@ if(!$spprId && $action != 'addmode'){
 	}
 }
 if($spprId) $specManager->setProjVariables($spprId);
-
 ?>
 <html>
 	<head>
@@ -566,7 +565,21 @@ if($spprId) $specManager->setProjVariables($spprId);
 										<input name="submitaction" type="submit" value="Process <?php echo ($projectType=='idigbio'?'Output File':'Images') ?>" />
 									</div>
 									<div style="margin:20px;">
-										<!-- <a href="logs/">Log Files</a>  -->
+										<fieldset style="padding:15px;">
+											<legend><b>Log Files</b></legend>
+											<?php 
+											$logArr = $specManager->getLogListing();
+											$logPath = '../../content/logs/'.$specManager->getProjectType().'/';
+											if($logArr){
+												foreach($logArr as $logFile){
+													echo '<div><a href="'.$logPath.$logFile.'" target="_blank">'.$logFile.'</a></div>';
+												}
+											}
+											else{
+												echo '<div>No logs exist for this collection</div>';
+											}
+											?>
+										</fieldset>
 									</div>
 								</fieldset>
 							</form>
