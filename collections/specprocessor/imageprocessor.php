@@ -1,9 +1,9 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcessorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/SpecProcessorManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl='.$CLIENT_ROOT.'/collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
 
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -32,8 +32,8 @@ if($spprId) $specManager->setProjVariables($spprId);
 <html>
 	<head>
 		<title>Image Processor</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 		<script src="../../js/jquery.js" type="text/javascript"></script>
 		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
@@ -90,7 +90,11 @@ if($spprId) $specManager->setProjVariables($spprId);
 					alert("Pattern matching term must have a value");
 					return false;
 				}
-				if(uploadType == 'local'){
+				if(f.speckeypattern.value == ""){
+					alert("Pattern matching term must have a value");
+					return false;
+				}
+				if(f.imageuploadtype.value == 'local'){
 					if(!isNumeric(f.webpixwidth.value)){
 						alert("Central image pixel width can only be a numeric value");
 						return false;
@@ -413,73 +417,85 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<input name='idigbiofile' id='idigbiofile' type='file' size='70' value="Choose image alliance output file" />
 										</div>
 										<?php
-									} 
+									}
+									elseif($projectType == 'iplant'){
+										?>
+										<div style="margin-top:10px">
+											<div style="width:140px;float:left;">
+												<b>Last Run Date:</b> 
+											</div>
+											<div style="float:left;"> 
+												<?php echo ($specManager->getLastRunDate()?$specManager->getLastRunDate():'no run date'); ?>
+											</div>
+										</div>
+										<?php 
+									}
 									?>
-									<div style="margin-top:10px">
-										<div style="width:200px;float:left;">
+									<div style="margin-top:10px;clear:both;">
+										<div style="width:140px;float:left;">
 											<b>Pattern match term:</b> 
 										</div>
 										<div style="float:left;"> 
-											<?php echo $specManager->getSpecKeyPattern();?><br/>
+											<?php echo $specManager->getSpecKeyPattern(); ?>
 										</div>
 									</div>
 									<?php
 									if($projectType != 'idigbio' && $projectType != 'iplant'){ 
 										?>
 										<div style="clear:both;">
-											<div style="width:200px;float:left;">
+											<div style="width:140px;float:left;">
 												<b>Source folder:</b>
 											</div>
 											<div style="float:left;"> 
-												<?php echo $specManager->getSourcePath();?><br/>
+												<?php echo $specManager->getSourcePath(); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:200px;float:left;">
+											<div style="width:140px;float:left;">
 												<b>Target folder:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getTargetPath()?$specManager->getTargetPath():$imageRootPath);?><br/>
+												<?php echo ($specManager->getTargetPath()?$specManager->getTargetPath():$imageRootPath); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:200px;float:left;">
+											<div style="width:140px;float:left;">
 												<b>URL prefix:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getImgUrlBase()?$specManager->getImgUrlBase():$imageRootUrl);?><br/>
+												<?php echo ($specManager->getImgUrlBase()?$specManager->getImgUrlBase():$imageRootUrl); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:200px;float:left;">
+											<div style="width:140px;float:left;">
 												<b>Web image width:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getWebPixWidth()?$specManager->getWebPixWidth():$imgWebWidth);?><br/>
+												<?php echo ($specManager->getWebPixWidth()?$specManager->getWebPixWidth():$imgWebWidth); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:200px;float:left;">
+											<div style="width:140px;float:left;">
 												<b>Thumbnail width:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getTnPixWidth()?$specManager->getTnPixWidth():$imgTnWidth);?><br/>
+												<?php echo ($specManager->getTnPixWidth()?$specManager->getTnPixWidth():$imgTnWidth); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:200px;float:left;">
+											<div style="width:140px;float:left;">
 												<b>Large image width:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getLgPixWidth()?$specManager->getLgPixWidth():$imgLgWidth);?><br/>
+												<?php echo ($specManager->getLgPixWidth()?$specManager->getLgPixWidth():$imgLgWidth); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:200px;float:left;">
+											<div style="width:140px;float:left;">
 												<b>JPG quality (1-100): </b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getJpgQuality()?$specManager->getJpgQuality():80);?><br/>
+												<?php echo ($specManager->getJpgQuality()?$specManager->getJpgQuality():80); ?>
 											</div>
 										</div>
 										<div style="clear:both;padding-top:10px;">
