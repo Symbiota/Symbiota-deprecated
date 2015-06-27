@@ -45,6 +45,7 @@ class ImageProcessor {
 
 	public function batchProcessIPlantImages(){
 		//Start processing images for each day from the start date to the current date
+		$status = false;
 		if($this->logMode == 1) echo '<ul>';
 		$processList = array();
 		$sql = 'SELECT collid, speckeypattern, source FROM specprocessorprojects WHERE (title = "IPlant Image Processing") ';
@@ -53,13 +54,13 @@ class ImageProcessor {
 			$this->collid = $r->collid;
 			$this->setLogMode(2);
 			$status = $this->processIPlantImages();
-			if($status) $processList[] = $this->collid;
+			if($status){
+				$processList[] = $this->collid;
+			}
 		}
 		$rs->free();
-		
-		$this->cleanHouse($processList);
+		if($status) $this->cleanHouse($processList);
 		$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
-
 		if($this->logMode == 1) echo '</ul>';
 	}
 
@@ -85,8 +86,7 @@ class ImageProcessor {
 				return false;
 			}
 			//Get start date
-			//if(!$lastRunDate) $lastRunDate = '2015-04-01';
-			if(!$lastRunDate) $lastRunDate = '2015-05-18';
+			if(!$lastRunDate) $lastRunDate = '2015-04-01';
 			while(strtotime($lastRunDate) < strtotime('now')){
 				$url = $iPlantDataUrl.'image?value=*/sernec/'.$this->collArr['instcode'].'/*&tag_query=upload_datetime:'.$lastRunDate.'*';
 				$contents = @file_get_contents($url);
@@ -97,7 +97,7 @@ class ImageProcessor {
 					if(strpos($result[0],'200') !== false) {
 						$xml = new SimpleXMLElement($contents);
 						if(count($xml->image)){
-							$this->logOrEcho('Processing '.count($xml->image).' image loaded '.$lastRunDate.' ('.date('Y-m-d h:i:s A').')!',1);
+							$this->logOrEcho('Starting to process '.count($xml->image).' images uploaded on '.$lastRunDate,1);
 							$cnt = 0;
 							foreach($xml->image as $i){
 								$fileName = $i['name'];
@@ -117,15 +117,14 @@ class ImageProcessor {
 											$archiveUrl = $iPlantImageUrl.$guid;
 											
 											$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$guid.'; filename: '.$fileName);
-											$this->logOrEcho("Image processed successfully (".date('Y-m-d h:i:s A').")!",1);
+											//$this->logOrEcho("Image processed successfully (".date('Y-m-d h:i:s A').")!",2);
 										}
 									}
 									else{
-										$this->logOrEcho("File skipped (".$sourcePathFrag.$fileName."), unable to extract specimen identifier",2);
+										$this->logOrEcho("NOTICE: File skipped due to being unable to extract specimen identifier (".$sourcePathFrag.$fileName.")",2);
 									}
 								}
 								$cnt++;
-								if($cnt > 10) exit;
 							}
 						}
 						else{
@@ -138,9 +137,12 @@ class ImageProcessor {
 				}
 				else{
 					$this->logOrEcho("ERROR: failed to obtain response from iPlant (".$url.")",1);
+					return false;
 				}
 				$lastRunDate = date('Y-m-d', strtotime($lastRunDate. ' + 1 days'));
 			}
+			$this->cleanHouse(array($this->collid));
+			$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
 		}
 		return $lastRunDate;
 	}
@@ -212,6 +214,7 @@ class ImageProcessor {
 			}
 			$rs->free();
 			if($occid){
+				$occLink = '<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
 				if($fileName){
 					//Check to see if image has already been linked
 					$fileBaseName = $fileName;
@@ -232,31 +235,30 @@ class ImageProcessor {
 					//Process images to determine if new images should be added
 					foreach($imgArr as $imgId => $sourceId){
 						if($sourceId){
-							if($p = strpos('; filename: ',$sourceId)){
+							if($p = strpos($sourceId,'; filename: ')){
 								$source = substr($sourceId,$p+12);
 								$pos = strrpos($source,'.');
 								$ext = strtolower(substr($source,$pos+1));
 								if($source == $fileName){
 									//Image file already loaded, thus abort and don't reload 
-									$occid = 0;
-									echo 'new ext: '.$ext.' -> abort1<br/>';
+									$occid = false;
+									$this->logOrEcho('NOTICE: Image mapping skipped due to image already being mapped ('.$fileName.'; #'.$occLink.')',2); 
 									break;
 								}
 								elseif($ext == 'cr2' || $ext == 'dng' || $ext == 'tiff' || $ext == 'tif'){
 									//High res already mapped, thus abort and don't reload 
-									$occid = 0;
-									echo 'new ext: '.$ext.' -> abort2<br/>';
+									$occid = false;
+									//$this->logOrEcho('NOTICE: Image mapping skipped due to high-res image with same name already being mapped ('.$fileName.'; '.$occLink.')',2); 
 									break;
 								}
 								elseif($ext == 'jpg' && ($fileExt == 'cr2' || $fileExt == 'dng' || $fileExt == 'tif' || $fileExt == 'tiff')){
-									echo 'new ext: '.$ext.' -> replace 2<br/>';
+									//$this->logOrEcho('NOTICE: Replacing exist map of low-res with this high-res version of image ('.$fileName.'; #'.$occLink.')',2); 
 									//Replace low res source with high res source by deleteing current low res source 
-									//$this->conn->query('DELETE FROM image WHERE imgid = '.$rTest->imgId);
+									$this->conn->query('DELETE FROM image WHERE imgid = '.$imgId);
 								}
 							}
 						}
 					}
-					if($imgArr) exit;
 				}
 				else{
 					//Check to see if urls are already in system
@@ -266,10 +268,12 @@ class ImageProcessor {
 					//echo $sql1;
 					$rs1 = $this->conn->query($sql1);
 					if($rs1->num_rows){
-						$this->logOrEcho('NOTICE: Image already mapped in system (#<a href="../individual/index.php?occid='.$occid.'">'.$occid.'</a>)');
+						$this->logOrEcho('NOTICE: Image already mapped in system (#'.$occLink.')',2);
+						$occid = false;
 					}
 					$rs1->free();
 				}
+				if($occid) $this->logOrEcho('Image linked to existing record ('.($fileName?$fileName.'; ':'').'#'.$occLink.') ',2);
 			}
 			else{
 				//Records does not exist, create a new one to which image will be linked
@@ -277,14 +281,11 @@ class ImageProcessor {
 					'VALUES('.$this->collid.',"'.$specPk.'","unprocessed","'.date('Y-m-d H:i:s').'")';
 				if($this->conn->query($sql2)){
 					$occid = $this->conn->insert_id;
-					$this->logOrEcho("Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occid.") ",1);
+					$this->logOrEcho('Image linked to a new "unprocessed" specimen record (#<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>) ',2);
 				}
 				else{
-					$this->logOrEcho("ERROR creating new occurrence record: ".$this->conn->error,1);
+					$this->logOrEcho("ERROR creating new occurrence record: ".$this->conn->error,2);
 				}
-			}
-			if(!$occid){
-				$this->logOrEcho("ERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") ",1);
 			}
 		}
 		return $occid;
@@ -293,13 +294,13 @@ class ImageProcessor {
 	private function databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$ownerStr,$sourceIdentifier){
 		$status = true;
 		if($occid){
-			$this->logOrEcho("Preparing to load record into database",1);
+			//$this->logOrEcho("Preparing to load record into database",2);
 			$sql = 'INSERT images(occid,url,thumbnailurl,originalurl,archiveurl,owner,sourceIdentifier) '.
 				'VALUES ('.$occid.',"'.$webUrl.'",'.($tnUrl?'"'.$tnUrl.'"':'NULL').','.($lgUrl?'"'.$lgUrl.'"':'NULL').','.
 				($archiveUrl?'"'.$archiveUrl.'"':'NULL').','.($ownerStr?'"'.$this->cleanInStr($ownerStr).'"':'NULL').','.
 				($sourceIdentifier?'"'.$this->cleanInStr($sourceIdentifier).'"':'NULL').')';
 			if($this->conn->query($sql)){
-				$this->logOrEcho('SUCCESS: Image loaded into database (<a href="../individual/index.php?occid='.$occid.'">#'.$occid.($sourceIdentifier?'</a>: '.$sourceIdentifier:'').')',2);
+				//$this->logOrEcho('Image loaded into database (<a href="../individual/index.php?occid='.$occid.'" target="_blank">#'.$occid.($sourceIdentifier?'</a>: '.$sourceIdentifier:'').')',2);
 			}
 			else{
 				$status = false;
@@ -309,7 +310,7 @@ class ImageProcessor {
 		}
 		else{
 			$status = false;
-			$this->logOrEcho("ERROR: Missing occid (omoccurrences PK), unable to load record ",1);
+			$this->logOrEcho("ERROR: Missing occid (omoccurrences PK), unable to load record ",2);
 		}
 		return $status;
 	}
