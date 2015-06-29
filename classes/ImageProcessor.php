@@ -256,13 +256,13 @@ class ImageProcessor {
 									$this->logOrEcho('NOTICE: Image mapping skipped due to image already being mapped ('.$fileName.'; #'.$occLink.')',2); 
 									break;
 								}
-								elseif($ext == 'cr2' || $ext == 'dng' || $ext == 'tiff' || $ext == 'tif'){
+								elseif($ext == 'cr2' || $ext == 'dng' || $ext == 'tiff' || $ext == 'tif' || $ext == 'nef'){
 									//High res already mapped, thus abort and don't reload 
 									$occid = false;
 									//$this->logOrEcho('NOTICE: Image mapping skipped due to high-res image with same name already being mapped ('.$fileName.'; '.$occLink.')',2); 
 									break;
 								}
-								elseif($ext == 'jpg' && ($fileExt == 'cr2' || $fileExt == 'dng' || $fileExt == 'tif' || $fileExt == 'tiff')){
+								elseif($ext == 'jpg' && ($fileExt == 'cr2' || $fileExt == 'dng' || $fileExt == 'tif' || $fileExt == 'tiff' || $fileExt == 'nef')){
 									//$this->logOrEcho('NOTICE: Replacing exist map of low-res with this high-res version of image ('.$fileName.'; #'.$occLink.')',2); 
 									//Replace low res source with high res source by deleteing current low res source 
 									$this->conn->query('DELETE FROM image WHERE imgid = '.$imgId);
@@ -338,7 +338,7 @@ class ImageProcessor {
 			}
 		}
 		
-		$this->logOrEcho('Protecting sensitive species...');
+		$this->logOrEcho('Protecting sensitive species...',2);
 		if(!$occurUtil->protectRareSpecies()){
 			$errorArr = $occurUtil->getErrorArr();
 			foreach($errorArr as $errorStr){
@@ -347,7 +347,7 @@ class ImageProcessor {
 		}
 
 		if($collList){
-			$this->logOrEcho('<li style="margin-left:10px;">Updating collection statistics...</li>');
+			$this->logOrEcho('Updating collection statistics...',2);
 			foreach($collList as $collid){
 				if(!$occurUtil->updateCollectionStats($collid)){
 					$errorArr = $occurUtil->getErrorArr();
@@ -358,7 +358,7 @@ class ImageProcessor {
 			}
 		}
 
-		$this->logOrEcho('Populating global unique identifiers (GUIDs) for all records...');
+		$this->logOrEcho('Populating global unique identifiers (GUIDs) for all records...',2);
 		$uuidManager = new UuidFactory();
 		$uuidManager->setSilent(1);
 		$uuidManager->populateGuids();

@@ -34,7 +34,7 @@ if($matchCatNum !== true) $matchCatNum = false;
 if($matchOtherCatNum !== true) $matchOtherCatNum = false;
 if($autoMap !== true) $autoMap = false;
 if(!is_numeric($finalTransfer)) $finalTransfer = 0;
-if($dbpk && !preg_match('/^[a-zA-Z]+$/',$dbpk)) $action = '';
+if($dbpk) $dbpk = htmlspecialchars($dbpk);
 if(!is_numeric($recStart)) $recStart = 0;
 if(!is_numeric($recLimit)) $recLimit = 1000;
 
