@@ -175,7 +175,7 @@ class SpecProcessorManager {
 				//Temporary code for setting projectType until proectType field is added to specprocessorprojects table
 				$this->lastRunDate = $row->source;
 				//$this->lastRunDate = $row->lastrundate;
-				if($this->title == 'idigbio CSV upload'){
+				if($this->title == 'iDigBio CSV upload'){
 					$this->projectType = 'idigbio';
 				}
 				elseif($this->title == 'IPlant Image Processing'){

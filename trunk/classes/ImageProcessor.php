@@ -131,7 +131,7 @@ class ImageProcessor {
 										}
 									}
 									else{
-										$this->logOrEcho("NOTICE: File skipped due to being unable to extract specimen identifier (".$sourcePathFrag.$fileName.")",2);
+										$this->logOrEcho("NOTICE: File skipped, unable to extract specimen identifier (".$sourcePathFrag.$fileName.")",2);
 									}
 								}
 								$cnt++;
@@ -154,59 +154,67 @@ class ImageProcessor {
 			}
 			$this->cleanHouse(array($this->collid));
 			$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
+			$this->logOrEcho('--------------------------------------------------------------------');
+			$this->logOrEcho(' ');
+			$this->logOrEcho(' ');
 		}
 		return true;
 	}
 
 	//iDigBio Image ingestion processing functions
 	public function processiDigBioOutput($pmTerm){
-		global $serverRoot;
 		$status = '';
+		$idigbioImageUrl = 'http://media.idigbio.org/lookup/images/';
 		$this->initProcessor('idigbio');
-		$fullPath = $serverRoot.(substr($serverRoot,-1) != '/'?'/':'').'temp/data/idigbio_'.time().'.csv';
-		if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath)){
-			if($fh = fopen($fullPath,'rb')){
-				$headerArr = fgetcsv($fh,0,',');
-				$mediaGuidIndex = array_search('MediaGUID',$headerArr);
-				$mediaMd5Index = array_search('MediaMD5',$headerArr);
-				if(is_numeric($mediaGuidIndex) && is_numeric($mediaMd5Index)){
-					while(($data = fgetcsv($fh,1000,",")) !== FALSE){
-						if(preg_match($pmTerm,$data[$mediaGuidIndex],$matchArr)){
-							if(array_key_exists(1,$matchArr) && $matchArr[1]){
-								$specPk = $matchArr[1];
-								$occid = $this->getOccid($specPk,$data[$mediaGuidIndex]);
-								if($occid){
-									//Image hasn't been loaded, thus insert image urls into image table
-									$tnUrl = 'http://media.idigbio.org/lookup/images/'.$data[$mediaMd5Index].'?size=thumbnail';
-									$webUrl = 'http://media.idigbio.org/lookup/images/'.$data[$mediaMd5Index].'?size=webview';
-									$lgUrl = 'http://media.idigbio.org/lookup/images/'.$data[$mediaMd5Index].'?size=fullsize';
-									$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,'',$data[$mediaGuidIndex]);
-								}
-								else{
-									echo 'ERROR bad occid: '.$occid;
+		$collStr = $this->collArr['instcode'].($this->collArr['collcode']?'-'.$this->collArr['collcode']:'');
+		$this->logOrEcho('Starting image processing for '.$collStr.' ('.date('Y-m-d h:i:s A').')');
+		if($pmTerm){
+			$fullPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/idigbio_'.time().'.csv';
+			if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath)){
+				if($fh = fopen($fullPath,'rb')){
+					$headerArr = fgetcsv($fh,0,',');
+					$mediaGuidIndex = array_search('MediaGUID',$headerArr);
+					$mediaMd5Index = array_search('MediaMD5',$headerArr);
+					if(is_numeric($mediaGuidIndex) && is_numeric($mediaMd5Index)){
+						while(($data = fgetcsv($fh,1000,",")) !== FALSE){
+							if(preg_match($pmTerm,$data[$mediaGuidIndex],$matchArr)){
+								if(array_key_exists(1,$matchArr) && $matchArr[1]){
+									$specPk = $matchArr[1];
+									$occid = $this->getOccid($specPk,$data[$mediaGuidIndex]);
+									if($occid){
+										//Image hasn't been loaded, thus insert image urls into image table
+										$webUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=webview';
+										$tnUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=thumbnail';
+										$lgUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=fullsize';
+										$archiveUrl = $idigbioImageUrl;
+										$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$data[$mediaGuidIndex]);
+									}
 								}
 							}
 							else{
 								//Output to error log file
-								echo 'ERROR: failed to extract match term';
-								print_r($matchArr);
+								$this->logOrEcho('NOTICE: file skipped File skipped, unable to extract specimen identifier ('.$data[$mediaGuidIndex].', pmTerm: '.$pmTerm.')',2);
 							}
 						}
-						else{
-							//Output to error log file
-							echo 'ERROR: unable to extract catalogNumber using pattern matching terms (subject: '.$data[$mediaGuidIndex].', pmTerm: '.$pmTerm.')';
-						}
+						$this->cleanHouse(array($this->collid));
+						$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').")");
+						$this->logOrEcho('--------------------------------------------------------------------');
+						$this->logOrEcho(' ');
 					}
+					else{
+						//Output to error log file
+						$this->logOrEcho('Bad input fields: '.$mediaGuidIndex.', '.$mediaMd5Index,2);
+					}
+					fclose($fh);
 				}
 				else{
-					//Output to error log file
-					echo 'Bad input fields: '.$mediaGuidIndex.', '.$mediaMd5Index;
+					$this->logOrEcho('Cannot open input file',2);
 				}
-				fclose($fh);
+				unlink($fullPath);
 			}
-			else{
-				$status = "Can't open file.";
-			}
+		}
+		else{
+			$this->logOrEcho('ERROR: Pattern matching term has not been defined ',2);
 		}
 		return $status;
 	}
@@ -327,10 +335,10 @@ class ImageProcessor {
 	}
 
 	private function cleanHouse($collList){
-		$this->logOrEcho('Updating collection statistics...');
+		$this->logOrEcho('Updating collection statistics...',1);
 		$occurUtil = new OccurrenceUtilities();
 
-		$this->logOrEcho('General cleaning...');
+		$this->logOrEcho('General cleaning...',2);
 		if(!$occurUtil->generalOccurrenceCleaning()){
 			$errorArr = $occurUtil->getErrorArr();
 			foreach($errorArr as $errorStr){
