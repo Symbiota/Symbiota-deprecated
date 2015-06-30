@@ -130,6 +130,63 @@ $collData = $collManager->getCollectionData(true);
 			}
 			return true;
 		}
+		
+		function toggle(target){
+			var objDiv = document.getElementById(target);
+			if(objDiv){
+				if(objDiv.style.display=="none"){
+					objDiv.style.display = "block";
+				}
+				else{
+					objDiv.style.display = "none";
+				}
+			}
+			else{
+				var divs = document.getElementsByTagName("div");
+				for (var h = 0; h < divs.length; h++) {
+				var divObj = divs[h];
+					if(divObj.className == target){
+						if(divObj.style.display=="none"){
+							divObj.style.display="block";
+						}
+						else {
+							divObj.style.display="none";
+						}
+					}
+				}
+			}
+		}
+		
+		function verifyIconImage(f){
+			var iconImageFile = document.getElementById("iconfile").value;
+			if((iconImageFile.substr(iconImageFile.length-4) != '.jpg') && (iconImageFile.substr(iconImageFile.length-4) != '.png') && (iconImageFile.substr(iconImageFile.length-4) != '.gif')){
+				document.getElementById("iconfile").value = '';
+				alert("The file you have uploaded is not a supported image file. Please upload a jpg, png, or gif file.");
+			}
+			else{
+				var fr = new FileReader;
+				fr.onload = function(){
+					var img = new Image;
+					img.onload = function(){
+						if((img.width>350) || (img.height>350)){
+							document.getElementById("iconfile").value = '';
+							img = '';
+							alert("The image file must be less than 350 pixels in both width and height.");
+						}
+					};
+					img.src = fr.result;
+				};
+				fr.readAsDataURL(document.getElementById("iconfile").files[0]);
+			}
+		}
+		
+		function verifyIconURL(f){
+			var iconImageFile = document.getElementById("iconurl").value;
+			if((iconImageFile.substr(iconImageFile.length-4) != '.jpg') && (iconImageFile.substr(iconImageFile.length-4) != '.png') && (iconImageFile.substr(iconImageFile.length-4) != '.gif')){
+				document.getElementById("iconurl").value = '';
+				alert("The url you have entered is not for a supported image file. Please enter a url for a jpg, png, or gif file.");
+			}
+		}
 
 		function isNumeric(sText){
 		   	var ValidChars = "0123456789-.";
@@ -192,7 +249,7 @@ $collData = $collManager->getCollectionData(true);
 			<div id="colledit">
 				<fieldset style="background-color:#FFF380;">
 					<legend><b><?php echo ($collid?'Edit':'Add New'); ?> Collection Information</b></legend>
-					<form id="colleditform" name="colleditform" action="collmetadata.php" method="post" onsubmit="return verifyCollEditForm(this)">
+					<form id="colleditform" name="colleditform" action="collmetadata.php" method="post" enctype="multipart/form-data" onsubmit="return verifyCollEditForm(this)">
 						<table style="width:100%;">
 							<tr>
 								<td>
@@ -446,15 +503,34 @@ $collData = $collManager->getCollectionData(true);
 									Icon URL:
 								</td>
 								<td>
-									<input type="text" name="icon" style="width:90%;" value="<?php echo ($collid?$collData["icon"]:'');?>" title="Small url representing the collection" />
+									<div style='float:left;width:90%;margin-top:0px;'>
+										<div class="targetdiv" style="<?php echo (($collid&&$collData["icon"])?'display:none;':'display:block;'); ?>margin-top:0px;">
+											<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
+											<div style="float:left;">
+												<input type='hidden' name='MAX_FILE_SIZE' value='20000000' />
+												<input name='iconfile' id='iconfile' type='file' size='70' onchange="verifyIconImage(this.form);" />
+											</div>
+											<div style="margin-right:15px;text-decoration:underline;float:right;font-weight:bold;">
+												<a href="#" onclick="toggle('targetdiv');return false;">Enter URL</a>
+											</div>
+										</div>
+										<div class="targetdiv" style="<?php echo (($collid&&$collData["icon"])?'display:block;':'display:none;'); ?>margin-top:0px;">
+											<div style="float:left;width:65%;">
+												<input style="width:100%;margin-top:0px;" type='text' name='iconurl' id='iconurl' value="<?php echo ($collid?$collData["icon"]:'');?>" onchange="verifyIconURL(this.form);" />
+											</div>
+											<div style="margin-right:15px;text-decoration:underline;float:right;font-weight:bold;">
+												<a href="#" onclick="toggle('targetdiv');return false;">
+													Upload Local Image
+												</a>
+											</div>
+										</div>
+									</div>
 									<a id="iconinfo" href="#" onclick="return false" title="What is an Icon?">
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="iconinfodialog">
-										URL to an image icon that represents the collection. Icons are usually place in the 
-										/images/collicon/ folder. Path can be absolute, relative, or of the format 
-										&quot;images/collicon/acro.jpg&quot; 
-										The use of icons are optional.
+										Upload an icon image file or enter the URL of an image icon that represents the collection. If entering the URL of an image already located 
+										on a server, click on &quot;Enter URL&quot;. The URL path can be absolute or relative. The use of icons are optional.
 									</div>
 								</td>
 							</tr>
