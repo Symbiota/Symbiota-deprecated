@@ -123,7 +123,12 @@ if($SYMB_UID){
 			$georefPerc = 0;
 			$spidPerc = 0;
 			$imgPerc = 0;
-			$georefPerc = (100*($collData['georefcnt']/$collData['recordcnt']));
+			if($collData['georefcnt']&&$collData['recordcnt']){
+				$georefPerc = (100*($collData['georefcnt']/$collData['recordcnt']));
+			}
+			else{
+				$georefPerc = 0;
+			}
 			if($collData['dynamicProperties']){
 				$extrastatsArr = json_decode($collData['dynamicProperties'],true);
 				if(array_key_exists("families",$extrastatsArr)){

@@ -9,6 +9,10 @@ class CollectionProfileManager {
 	private $conn;
 	private $collid;
 	private $errorStr;
+	private $sourcePath = '';
+	private $targetPath = '';
+	private $imgName = '';
+	private $imgExt = '';
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -172,7 +176,12 @@ class CollectionProfileManager {
 			$rights = $this->cleanInStr($postArr['rights']);
 			$rightsHolder = $this->cleanInStr($postArr['rightsholder']);
 			$accessRights = $this->cleanInStr($postArr['accessrights']);
-			$icon = $this->cleanInStr($postArr['icon']);
+			if($_FILES['iconfile']['name']){
+				$icon = $this->addIconImageFile();
+			}
+			else{
+				$icon = $this->cleanInStr($postArr['iconurl']);
+			}
 			$indUrl = $this->cleanInStr($postArr['individualurl']);
 			
 			$conn = MySQLiConnectionFactory::getCon("write");
@@ -242,7 +251,12 @@ class CollectionProfileManager {
 		$accessRights = $this->cleanInStr($postArr['accessrights']);
 		$publicEdits = (array_key_exists('publicedits',$postArr)?$postArr['publicedits']:0);
 		$guidTarget = (array_key_exists('guidtarget',$postArr)?$postArr['guidtarget']:'');
-		$icon = array_key_exists('icon',$postArr)?$this->cleanInStr($postArr['icon']):'';
+		if($_FILES['iconfile']['name']){
+			$icon = $this->addIconImageFile();
+		}
+		else{
+			$icon = array_key_exists('iconurl',$postArr)?$this->cleanInStr($postArr['iconurl']):'';
+		}
 		$managementType = array_key_exists('managementtype',$postArr)?$this->cleanInStr($postArr['managementtype']):'';
 		$collType = array_key_exists('colltype',$postArr)?$this->cleanInStr($postArr['colltype']):'';
 		$guid = array_key_exists('collectionguid',$postArr)?$this->cleanInStr($postArr['collectionguid']):'';
@@ -703,6 +717,82 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 	
+	public function addIconImageFile(){
+		global $SERVER_ROOT;
+		global $CLIENT_ROOT;
+		
+		$fullUrl = '';
+		//Set download paths and variables
+		set_time_limit(120);
+		ini_set("max_input_time",120);
+		
+		$this->targetPath = $SERVER_ROOT.'/images/collicons/';
+		$urlBase = $CLIENT_ROOT.'/images/collicons/';
+		$urlPrefix = "http://";
+		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+		$urlPrefix .= $_SERVER["SERVER_NAME"];
+		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+		$urlBase = $urlPrefix.$urlBase;
+    	
+		if(!$this->loadImage()) return;
+		
+		$fullUrl = $urlBase.$this->imgName.$this->imgExt;
+		
+		return $fullUrl;
+	}
+	
+	public function cleanFileName($fPath){
+		$fName = $fPath;
+		$imgInfo = null;
+		//Parse extension
+		if($p = strrpos($fName,".")){
+			$this->imgExt = strtolower(substr($fName,$p));
+			$fName = substr($fName,0,$p);
+		}
+		
+		$fName = str_replace("%20","_",$fName);
+		$fName = str_replace("%23","_",$fName);
+		$fName = str_replace(" ","_",$fName);
+		$fName = str_replace("__","_",$fName);
+		$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
+		$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
+		$fName = str_replace(array(chr(239),chr(240),chr(241),chr(261)),"i",$fName);
+		$fName = str_replace(array(chr(247),chr(248),chr(249),chr(262)),"o",$fName);
+		$fName = str_replace(array(chr(250),chr(251),chr(263)),"u",$fName);
+		$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
+		$fName = preg_replace("/[^a-zA-Z0-9\-_]/", "", $fName);
+		$fName = trim($fName,' _-');
+		
+		if(strlen($fName) > 30) {
+			$fName = substr($fName,0,30);
+		}
+		//Test to see if target images exist (can happen batch loading images with similar names)
+		if($this->targetPath){
+			//Check and see if file already exists, if so, rename filename until it has a unique name
+			$tempFileName = $fName;
+			$cnt = 0;
+			while(file_exists($this->targetPath.$tempFileName)){
+				$tempFileName = $fName.'_'.$cnt;
+				$cnt++;
+			}
+			if($cnt) $fName = $tempFileName;
+		}
+		
+		//Returns file name without extension
+		return $fName;
+ 	}
+	
+	private function loadImage(){
+		$imgFile = basename($_FILES['iconfile']['name']);
+		$fileName = $this->cleanFileName($imgFile);
+		if(move_uploaded_file($_FILES['iconfile']['tmp_name'], $this->targetPath.$fileName.$this->imgExt)){
+			$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
+			$this->imgName = $fileName;
+			return true;
+		}
+		return false;
+	}
+
 	public function getErrorStr(){
 		return $this->errorStr;
 	}
