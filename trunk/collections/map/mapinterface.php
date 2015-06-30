@@ -1387,6 +1387,16 @@ if($coordArr && !is_numeric($coordArr)){
 										Catalog Number:
 										<input data-role="none" type="text" id="catnum" style="width:150px;" name="catnum" value="<?php if(array_key_exists("catnum",$previousCriteria)) echo $previousCriteria["catnum"]; ?>" title="" />
 									</div>
+									<div style="margin-top:5px;">
+										Other Catalog Number:
+										<input data-role="none" type="text" id="othercatnum" style="width:150px;" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$previousCriteria)) echo $previousCriteria["othercatnum"]; ?>" title="" />
+									</div>
+									<div style="margin-top:5px;">
+										<input data-role="none" type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$previousCriteria) && $previousCriteria["typestatus"]) echo "CHECKED"; ?> > Limit to Type Specimens Only
+									</div>
+									<div style="margin-top:5px;">
+										<input data-role="none" type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$previousCriteria) && $previousCriteria["hasimages"]) echo "CHECKED"; ?> > Limit to Specimens with Images Only
+									</div>
 									<div><hr></div>
 									<input type="hidden" name="reset" value="1" />
 								</div>

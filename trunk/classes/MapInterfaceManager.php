@@ -394,6 +394,19 @@ class MapInterfaceManager{
 			$sqlWhere .= 'AND ('.substr($catWhere,3).') ';
 			$this->localSearchArr[] = $this->searchTermsArr['catnum'];
 		}
+		if(array_key_exists('othercatnum',$this->searchTermsArr)&&$this->searchTermsArr["othercatnum"]){
+			$otherCatStr = $this->searchTermsArr['othercatnum'];
+			$sqlWhere .= 'AND (o.otherCatalogNumbers IN("'.$otherCatStr.'")) ';
+			$this->localSearchArr[] = $this->searchTermsArr['othercatnum'];
+		}
+		if(array_key_exists('typestatus',$this->searchTermsArr)&&$this->searchTermsArr["typestatus"]){
+			$sqlWhere .= 'AND (o.typestatus IS NOT NULL) ';
+			$this->localSearchArr[] = 'is type';
+		}
+		if(array_key_exists('hasimages',$this->searchTermsArr)&&$this->searchTermsArr["hasimages"]){
+			$sqlWhere .= 'AND (o.occid IN(SELECT occid FROM images)) ';
+			$this->localSearchArr[] = 'has images';
+		}
 		$retStr = '';
 		if($sqlWhere){
 			$retStr = 'WHERE '.substr($sqlWhere,4);
@@ -724,6 +737,28 @@ class MapInterfaceManager{
 			if($catNum){
 				$str = str_replace(",",";",$catNum);
 				$this->searchTermsArr["catnum"] = $str;
+			}
+		}
+		$this->searchTermsArr["othercatnum"] = '';
+		if(array_key_exists("othercatnum",$_REQUEST)){
+			$otherCatNum = $this->conn->real_escape_string(trim($_REQUEST["othercatnum"]));
+			if($otherCatNum){
+				$str = str_replace(",",";",$otherCatNum);
+				$this->searchTermsArr["othercatnum"] = $str;
+			}
+		}
+		$this->searchTermsArr["typestatus"] = '';
+		if(array_key_exists("typestatus",$_REQUEST)){
+			$typestatus = $_REQUEST["typestatus"];
+			if($typestatus){
+				$this->searchTermsArr["typestatus"] = true;
+			}
+		}
+		$this->searchTermsArr["hasimages"] = '';
+		if(array_key_exists("hasimages",$_REQUEST)){
+			$hasimages = $_REQUEST["hasimages"];
+			if($hasimages){
+				$this->searchTermsArr["hasimages"] = true;
 			}
 		}
 		$latLongArr = Array();

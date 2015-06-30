@@ -96,7 +96,7 @@ $collManager->reset();
 				<hr>
 				<h1>Latitude and Longitude: </h1>
 			</div>
-			<div style="width:270px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
+			<div style="width:300px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
 				<div style="font-weight:bold;">
 					Bounding box coordinates in decimal degrees
 				</div>
@@ -132,9 +132,6 @@ $collManager->reset();
 						<option id="llE" value="E">E</option>
 					</select>
 				</div>
-				<div style="float:right;cursor:pointer;" onclick="openBoundingBoxMap();">
-					<img src="../images/world.png" width="15px" title="Find Coordinate" />
-				</div>
 				<div title="Easterm hemisphere is positive; Western is negative">
 					Eastern Longitude: <input type="text" id="rightlong" name="rightlong" size="7" value="<?php echo $rightLong; ?>" onchange="javascript:checkRightLong();" style="margin-left:3px;">
 					<select id="rightlong_EW" name="rightlong_EW" onchange="javascript:checkRightLong();">
@@ -142,8 +139,11 @@ $collManager->reset();
 						<option id="rlE" value="E">E</option>
 					</select>
 				</div>
+				<div style="clear:both;float:right;margin-top:8px;cursor:pointer;" onclick="openBoundingBoxMap();">
+					<img src="../images/world.png" width="15px" title="Find Coordinate" />
+				</div>
 			</div>
-			<div style="width:240px; float:left;border:2px solid brown;padding:10px;margin-left:10px;">
+			<div style="width:260px; float:left;border:2px solid brown;padding:10px;margin-left:10px;">
 				<div style="font-weight:bold;">
 					Point-Radius search
 				</div>
@@ -171,9 +171,6 @@ $collManager->reset();
 						<option id="E" value="E">E</option>
 					</select>
 				</div>
-				<div style="float:right;cursor:pointer;" onclick="openPointRadiusMap();">
-					<img src="../images/world.png" width="15px" title="Find Coordinate" />
-				</div>
 				<div>
 					Radius: <input type="text" id="radiustemp" name="radiustemp" size="5" value="<?php echo $radius; ?>" style="margin-left:15px;" onchange="updateRadius();">
 					<select id="radiusunits" name="radiusunits" onchange="updateRadius();">
@@ -181,6 +178,9 @@ $collManager->reset();
 						<option value="mi">Miles</option>
 					</select>
 					<input type="hidden" id="radius" name="radius" value="" />
+				</div>
+				<div style="clear:both;float:right;margin-top:8px;cursor:pointer;" onclick="openPointRadiusMap();">
+					<img src="../images/world.png" width="15px" title="Find Coordinate" />
 				</div>
 			</div>
 			<div style=";clear:both;"><hr/></div>
@@ -214,12 +214,14 @@ $collManager->reset();
                 <input type="text" id="catnum" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			<div>
-				Other CatalogNumbers:
+				Other Catalog Number:
 				<input type="text" id="othercatnum" size="32" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$collArray)) echo $collArray["othercatnum"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			<div>
-				Type Status:
-                <input type="text" size="32" id="typestatus" name="typestatus" value="<?php if(array_key_exists("typestatus",$collArray)) echo $collArray["typestatus"]; ?>" title="Separate multiple terms w/ commas" />
+				<input type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$collArray) && $collArray["typestatus"]) echo "CHECKED"; ?> > Limit to Type Specimens Only
+			</div>
+			<div>
+				<input type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$collArray) && $collArray["hasimages"]) echo "CHECKED"; ?> > Limit to Specimens with Images Only
 			</div>
 			<input type="hidden" name="reset" value="1" />
 		</form>

@@ -459,13 +459,12 @@ class OccurrenceManager{
 			$this->localSearchArr[] = $this->searchTermsArr['othercatnum'];
 		}
 		if(array_key_exists("typestatus",$this->searchTermsArr)){
-			$typestatusArr = explode(";",$this->searchTermsArr["typestatus"]);
-			$tempArr = Array();
-			foreach($typestatusArr as $value){
-				$tempArr[] = "(o.typestatus LIKE '%".trim($value)."%')";
-			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
-			$this->localSearchArr[] = implode(", ",$typestatusArr);
+			$sqlWhere .= "AND (o.typestatus IS NOT NULL) ";
+			$this->localSearchArr[] = 'is type';
+		}
+		if(array_key_exists("hasimages",$this->searchTermsArr)){
+			$sqlWhere .= "AND (o.occid IN(SELECT occid FROM images)) ";
+			$this->localSearchArr[] = 'has images';
 		}
 		if(array_key_exists("targetclid",$this->searchTermsArr)){
 			$clid = $this->searchTermsArr["targetclid"];
@@ -1185,14 +1184,24 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("typestatus",$_REQUEST)){
-			$typestatus = $this->cleanInStr($_REQUEST["typestatus"]);
+			$typestatus = $_REQUEST["typestatus"];
 			if($typestatus){
-				$str = str_replace(",",";",$typestatus);
-				$searchArr[] = "typestatus:".$str;
-				$this->searchTermsArr["typestatus"] = $str;
+				$searchArr[] = "typestatus:".$typestatus;
+				$this->searchTermsArr["typestatus"] = true;
 			}
 			else{
 				unset($this->searchTermsArr["typestatus"]);
+			}
+			$searchFieldsActivated = true;
+		}
+		if(array_key_exists("hasimages",$_REQUEST)){
+			$hasimages = $_REQUEST["hasimages"];
+			if($hasimages){
+				$searchArr[] = "hasimages:".$typestatus;
+				$this->searchTermsArr["hasimages"] = true;
+			}
+			else{
+				unset($this->searchTermsArr["hasimages"]);
 			}
 			$searchFieldsActivated = true;
 		}
