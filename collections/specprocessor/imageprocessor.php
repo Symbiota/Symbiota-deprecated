@@ -133,7 +133,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 			function validateProcForm(f){
 				if(f.projtype.value == 'idigbio'){
 					if(!document.getElementById("idigbiofile").files[0]){
-						alert("Please upload the output file from the iDigBio Image Upload Appliance.");
+						alert("Select the output file from the iDigBio Image Appliance that will be uploaded into the system");
 						return false;
 					}
 				}

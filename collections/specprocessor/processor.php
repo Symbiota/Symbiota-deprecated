@@ -94,10 +94,15 @@ $statusStr = "";
 					}
 				}
 				elseif($action == 'Process Output File'){
+					//Process iDigBio Image ingestion appliance ouput file 
 					$imageProcessor = new ImageProcessor();
+					echo '<ul>';
 					$imageProcessor->setLogMode(3);
+					$imageProcessor->setSpprid($spprid);
 					$imageProcessor->setCollid($collid);
-					$statusStr = $imageProcessor->processiDigBioOutput($specManager->getSpecKeyPattern());
+					$imageProcessor->processiDigBioOutput($specManager->getSpecKeyPattern());
+					echo '</ul>';
+					
 				}
 				elseif($action == 'Run Batch OCR'){
 					$ocrManager = new SpecProcessorOcr();
