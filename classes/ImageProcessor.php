@@ -274,7 +274,7 @@ class ImageProcessor {
 								elseif($ext == 'jpg' && in_array($fileExt,$highResList)){
 									//$this->logOrEcho('NOTICE: Replacing exist map of low-res with this high-res version of image ('.$fileName.'; #'.$occLink.')',2); 
 									//Replace low res source with high res source by deleteing current low res source 
-									$this->conn->query('DELETE FROM image WHERE imgid = '.$imgId);
+									$this->conn->query('DELETE FROM images WHERE imgid = '.$imgId);
 								}
 							}
 						}
