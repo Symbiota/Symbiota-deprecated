@@ -252,6 +252,7 @@ class ImageProcessor {
 					}
 					$rsTest->free();
 					//Process images to determine if new images should be added
+					$highResList = array('cr2','dng','tiff','tif','nef');
 					foreach($imgArr as $imgId => $sourceId){
 						if($sourceId){
 							if($p = strpos($sourceId,'; filename: ')){
@@ -264,13 +265,13 @@ class ImageProcessor {
 									$this->logOrEcho('NOTICE: Image mapping skipped due to image already being mapped ('.$fileName.'; #'.$occLink.')',2); 
 									break;
 								}
-								elseif($ext == 'cr2' || $ext == 'dng' || $ext == 'tiff' || $ext == 'tif' || $ext == 'nef'){
+								elseif(in_array($ext,$highResList)){
 									//High res already mapped, thus abort and don't reload 
 									$occid = false;
 									//$this->logOrEcho('NOTICE: Image mapping skipped due to high-res image with same name already being mapped ('.$fileName.'; '.$occLink.')',2); 
 									break;
 								}
-								elseif($ext == 'jpg' && ($fileExt == 'cr2' || $fileExt == 'dng' || $fileExt == 'tif' || $fileExt == 'tiff' || $fileExt == 'nef')){
+								elseif($ext == 'jpg' && in_array($fileExt,$highResList)){
 									//$this->logOrEcho('NOTICE: Replacing exist map of low-res with this high-res version of image ('.$fileName.'; #'.$occLink.')',2); 
 									//Replace low res source with high res source by deleteing current low res source 
 									$this->conn->query('DELETE FROM image WHERE imgid = '.$imgId);

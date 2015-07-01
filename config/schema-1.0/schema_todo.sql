@@ -34,6 +34,12 @@ ALTER TABLE `specprocessorprojects`
 ALTER TABLE `images` 
   CHANGE COLUMN `sourceIdentifier` `sourceIdentifier` VARCHAR(100) NULL DEFAULT NULL ;
 
+ALTER TABLE `omcollections` 
+  ADD COLUMN `dwcaUrl` VARCHAR(75) NULL AFTER `publishToGbif`;
+
+ALTER TABLE `omcollectionstats` 
+  CHANGE COLUMN `dynamicProperties` `dynamicProperties` TEXT NULL DEFAULT NULL ;
+
 ALTER TABLE `omoccurrences` 
   ADD INDEX `Index_locality` (`locality`(100) ASC),
   ADD INDEX `Index_otherCatalogNumbers` (`otherCatalogNumbers` ASC);
@@ -41,8 +47,6 @@ ALTER TABLE `omoccurrences`
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `eventID` VARCHAR(45) NULL AFTER `fieldnumber`;
 
-ALTER TABLE `omcollectionstats` 
-  CHANGE COLUMN `dynamicProperties` `dynamicProperties` TEXT NULL DEFAULT NULL ;
 
 DROP TABLE `userpermissions`;
 
