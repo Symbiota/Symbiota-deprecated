@@ -193,7 +193,7 @@ $smManager = new SiteMapManager();
 										echo '<div style="margin:5px 0px 0px 10px;"><b>Editor by Inventory Project</b></div>';
 										foreach($projList as $pid => $pArr){
 											echo '<ul>';
-											echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?proj=".$pid."'>".$pArr["name"]."</a></li>";
+											echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?pid=".$pid."'>".$pArr["name"]."</a></li>";
 											echo '</ul>';
 										}
 									}

@@ -1,3 +1,65 @@
+//Multi-language support
+CREATE TABLE `adminlangpage` (
+  `langpageid` INT NOT NULL AUTO_INCREMENT,
+  `pagename` VARCHAR(45) NOT NULL,
+  `pagepath` VARCHAR(150) NOT NULL,
+  `username` VARCHAR(45) NOT NULL,
+  `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`langpageid`),
+  INDEX `index_pagename` (`pagename` ASC)
+);
+
+ALTER TABLE `adminlangpage` 
+  ADD UNIQUE INDEX `pagename_UNIQUE` (`pagename` ASC),
+  ADD UNIQUE INDEX `pagepath_UNIQUE` (`pagepath` ASC);
+
+CREATE TABLE `adminlangvariables` (
+  `pagevarid` INT NOT NULL AUTO_INCREMENT,
+  `langpageid` INT NOT NULL,
+  `variablename` VARCHAR(45) NOT NULL,
+  `section` VARCHAR(45) NULL,
+  `username` VARCHAR(45) NOT NULL,
+  `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`pagevarid`),
+  UNIQUE INDEX `langpageid_UNIQUE` (`langpageid` ASC),
+  UNIQUE INDEX `variablename_UNIQUE` (`variablename` ASC));
+
+ALTER TABLE `adminlangvariables` 
+  ADD CONSTRAINT `FK_langpageid`
+    FOREIGN KEY (`langpageid`)
+    REFERENCES `adminlangpage` (`langpageid`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+
+CREATE TABLE `adminlangtranslation` (
+  `translationid` INT NOT NULL AUTO_INCREMENT,
+  `pagevarid` INT NOT NULL,
+  `langid` INT NOT NULL,
+  `translation` TEXT NOT NULL,
+  `notes` VARCHAR(250) NULL,
+  `uid` INT UNSIGNED NULL,
+  `uidmodified` INT UNSIGNED NULL,
+  `datelastmodified` DATETIME NULL,
+  `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`translationid`),
+  UNIQUE INDEX `pagevarid_UNIQUE` (`pagevarid` ASC),
+  UNIQUE INDEX `langid_UNIQUE` (`langid` ASC),
+  INDEX `FK_uid_idx` (`uid` ASC),
+    CONSTRAINT `FK_pagevariableid`
+      FOREIGN KEY (`pagevarid`) REFERENCES `adminlangvariables` (`pagevarid`)
+      ON DELETE CASCADE  ON UPDATE CASCADE,
+    CONSTRAINT `FK_langid`
+      FOREIGN KEY (`langid`) REFERENCES `adminlanguages` (`langid`)
+      ON DELETE RESTRICT  ON UPDATE RESTRICT,
+    CONSTRAINT `FK_uid`
+      FOREIGN KEY (`uid`) REFERENCES `users` (`uid`)
+      ON DELETE SET NULL  ON UPDATE SET NULL,
+    CONSTRAINT `FK_uidmodified`
+      FOREIGN KEY (`uid`) REFERENCES `users` (`uid`)
+      ON DELETE SET NULL  ON UPDATE SET NULL
+);
+
+
 ALTER TABLE `uploadtaxa` 
   ADD COLUMN `uploadStatus` VARCHAR(45) NULL AFTER `Hybrid`,
   ADD COLUMN `RankName` VARCHAR(45) NULL AFTER `RankId`,

@@ -1,5 +1,5 @@
 <?php
-$DEFAULT_LANG = 'English';		//Default language
+$DEFAULT_LANG = 'en';		//Default language
 $DEFAULT_PROJ_ID = 1;
 $DEFAULTCATID = 2;
 $DEFAULT_TITLE = '';
