@@ -1,5 +1,6 @@
 <?php
 include_once('../config/symbini.php');
+include_once $SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG.'.php';
 include_once($serverRoot.'/classes/OccurrenceManager.php');
 header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
@@ -12,7 +13,7 @@ $collManager->reset();
 
 <html>
 <head>
-    <title><?php echo $defaultTitle; ?> Collection Search Parameters</title>
+    <title><?php echo $defaultTitle.' '.$LANG['PAGE_TITLE']; ?></title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
@@ -27,26 +28,26 @@ $collManager->reset();
 	include($serverRoot.'/header.php');
 	if(isset($collections_harvestparamsCrumbs)){
 		if($collections_harvestparamsCrumbs){
-			echo "<div class='navpath'>";
+			echo '<div class="navpath">';
 			echo $collections_harvestparamsCrumbs.' &gt;&gt; ';
-			echo "<b>Search Criteria</b>";
-			echo "</div>";
+			echo '<b>'.$LANG['NAV_3'].'</b>';
+			echo '</div>';
 		}
 	}
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../index.php'>Home</a> &gt;&gt;
-			<a href='index.php'>Collections</a> &gt;&gt;
-			<b>Search Criteria</b>
+			<a href="../index.php"><?php echo $LANG['NAV_1']; ?></a> &gt;&gt;
+			<a href="index.php"><?php echo $LANG['NAV_2']; ?></a> &gt;&gt;
+			<b><?php echo $LANG['NAV_3']; ?></b>
 		</div>
 		<?php
 	}
 	?>
 
 	<div id="innertext">
-		<h1>Select Search Parameters</h1>
-		Fill in one or more of the following query criteria and click 'Search' to view your results.
+		<h1><?php echo $LANG['PAGE_HEADER']; ?></h1>
+		<?php echo $LANG['GENERAL_TEXT_1']; ?>
 
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
@@ -57,48 +58,48 @@ $collManager->reset();
 					title="Click button to display the results of your search">
 			</div>
 			<div>
-				<h1>Taxonomic Criteria:</h1>
-				<span style="margin-left:5px;"><input type='checkbox' name='thes' value='1' <?php if(array_key_exists("usethes",$collArray) && $collArray["usethes"]) echo "CHECKED"; ?> >Include Synonyms from Taxonomic Thesaurus<!--<a href="support/TaxThesDescription.php" target="_blank" class="bodylink">  What's This?</a>--></SPAN>
+				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>
+				<span style="margin-left:5px;"><input type='checkbox' name='thes' value='1' CHECKED /><?php echo $LANG['GENERAL_TEXT_2']; ?></SPAN>
 			</div>
 			<div id="taxonSearch0">
 				<div>
 					<select id="taxontype" name="type">
-						<option id='familysciname' value='1' <?php if(!array_key_exists("taxontype",$collArray) || $collArray["taxontype"] == "1") echo "SELECTED"; ?> >Family or Scientific Name</option>
-						<option id='family' value='2' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "2") echo "SELECTED"; ?> >Family only</option>
-						<option id='sciname' value='3' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
-						<option id='highertaxon' value='4' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "4") echo "SELECTED"; ?> >Higher Taxonomy</option>
-						<option id='commonname' value='5' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "5") echo "SELECTED"; ?> >Common Name</option>
+						<option id='familysciname' value='1' <?php if(!array_key_exists("taxontype",$collArray) || $collArray["taxontype"] == "1") echo "SELECTED"; ?> ><?php echo $LANG['SELECT_1-1']; ?></option>
+						<option id='family' value='2' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "2") echo "SELECTED"; ?> ><?php echo $LANG['SELECT_1-2']; ?></option>
+						<option id='sciname' value='3' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "3") echo "SELECTED"; ?> ><?php echo $LANG['SELECT_1-3']; ?></option>
+						<option id='highertaxon' value='4' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "4") echo "SELECTED"; ?> ><?php echo $LANG['SELECT_1-4']; ?></option>
+						<option id='commonname' value='5' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "5") echo "SELECTED"; ?> ><?php echo $LANG['SELECT_1-5']; ?></option>
 					</select>:
-					<input id="taxa" type="text" size="60" name="taxa" value="<?php if(array_key_exists("taxa",$collArray)) echo $collArray["taxa"]; ?>" title="Separate multiple taxa w/ commas" />
+					<input id="taxa" type="text" size="60" name="taxa" value="<?php if(array_key_exists("taxa",$collArray)) echo $collArray["taxa"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 				</div>
 			</div>
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div>
-				<h1>Locality Criteria:</h1>
+				<h1><?php echo $LANG['LOCALITY_HEADER']; ?></h1>
 			</div>
 			<div>
-				Country: <input type="text" id="country" size="43" name="country" value="<?php if(array_key_exists("country",$collArray)) echo $collArray["country"]; ?>" title="Separate multiple terms w/ commas" />
+				<?php echo $LANG['COUNTRY_INPUT']; ?> <input type="text" id="country" size="43" name="country" value="<?php if(array_key_exists("country",$collArray)) echo $collArray["country"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 			</div>
 			<div>
-				State/Province: <input type="text" id="state" size="37" name="state" value="<?php if(array_key_exists("state",$collArray)) echo $collArray["state"]; ?>" title="Separate multiple terms w/ commas" />
+				<?php echo $LANG['STATE_INPUT']; ?> <input type="text" id="state" size="37" name="state" value="<?php if(array_key_exists("state",$collArray)) echo $collArray["state"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 			</div>
 			<div>
-				County: <input type="text" id="county" size="37"  name="county" value="<?php if(array_key_exists("county",$collArray)) echo $collArray["county"]; ?>" title="Separate multiple terms w/ commas" />
+				<?php echo $LANG['COUNTY_INPUT']; ?> <input type="text" id="county" size="37"  name="county" value="<?php if(array_key_exists("county",$collArray)) echo $collArray["county"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 			</div>
 			<div>
-				Locality: <input type="text" id="locality" size="43" name="local" value="<?php if(array_key_exists("local",$collArray)) echo $collArray["local"]; ?>" />
+				<?php echo $LANG['LOCALITY_INPUT']; ?> <input type="text" id="locality" size="43" name="local" value="<?php if(array_key_exists("local",$collArray)) echo $collArray["local"]; ?>" />
 			</div>
 			<div>
-				Elevation: <input type="text" id="elevlow" size="10" name="elevlow" value="<?php if(array_key_exists("elevlow",$collArray)) echo $collArray["elevlow"]; ?>" /> to
+				<?php echo $LANG['ELEV_INPUT_1']; ?> <input type="text" id="elevlow" size="10" name="elevlow" value="<?php if(array_key_exists("elevlow",$collArray)) echo $collArray["elevlow"]; ?>" /> <?php echo $LANG['ELEV_INPUT_2']; ?>
 				<input type="text" id="elevhigh" size="10" name="elevhigh" value="<?php if(array_key_exists("elevhigh",$collArray)) echo $collArray["elevhigh"]; ?>" />
 			</div>
 			<div style="margin:10 0 10 0;">
 				<hr>
-				<h1>Latitude and Longitude: </h1>
+				<h1><?php echo $LANG['LAT_LNG_HEADER']; ?></h1>
 			</div>
 			<div style="width:300px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
 				<div style="font-weight:bold;">
-					Bounding box coordinates in decimal degrees
+					<?php echo $LANG['LL_BOUND_TEXT']; ?>
 				</div>
 				<?php
 					$upperLat = "";$bottomLat = "";$leftLong = "";$rightLong = "";
@@ -111,41 +112,41 @@ $collManager->reset();
 					}
 
 				?>
-				<div title="Northern hemisphere is positive; Southern is negative">
-					Northern Latitude: <input type="text" id="upperlat" name="upperlat" size="7" value="<?php echo $upperLat; ?>" onchange="javascript:checkUpperLat();" style="margin-left:9px;">
-					<select id="upperlat_NS" name="upperlat_NS" onchange="javascript:checkUpperLat();">
-						<option id="nlN" value="N">N</option>
-						<option id="nlS" value="S">S</option>
+				<div>
+					<?php echo $LANG['LL_BOUND_NLAT']; ?> <input type="text" id="upperlat" name="upperlat" size="7" value="<?php echo $upperLat; ?>" onchange="checkUpperLat();" style="margin-left:9px;">
+					<select id="upperlat_NS" name="upperlat_NS" onchange="checkUpperLat();">
+						<option id="nlN" value="N"><?php echo $LANG['LL_N_SYMB']; ?></option>
+						<option id="nlS" value="S"><?php echo $LANG['LL_S_SYMB']; ?></option>
 					</select>
 				</div>
 				<div>
-					Southern Latitude: <input type="text" id="bottomlat" name="bottomlat" size="7" value="<?php echo $bottomLat; ?>" onchange="javascript:checkBottomLat();" style="margin-left:7px;">
-					<select id="bottomlat_NS" name="bottomlat_NS" onchange="javascript:checkBottomLat();">
-						<option id="blN" value="N">N</option>
-						<option id="blS" value="S">S</option>
+					<?php echo $LANG['LL_BOUND_SLAT']; ?> <input type="text" id="bottomlat" name="bottomlat" size="7" value="<?php echo $bottomLat; ?>" onchange="javascript:checkBottomLat();" style="margin-left:7px;">
+					<select id="bottomlat_NS" name="bottomlat_NS" onchange="checkBottomLat();">
+						<option id="blN" value="N"><?php echo $LANG['LL_N_SYMB']; ?></option>
+						<option id="blS" value="S"><?php echo $LANG['LL_S_SYMB']; ?></option>
 					</select>
 				</div>
-				<div title="Easterm hemisphere is positive; Western is negative">
-					Western Longitude: <input type="text" id="leftlong" name="leftlong" size="7" value="<?php echo $leftLong; ?>" onchange="javascript:checkLeftLong();">
-					<select id="leftlong_EW" name="leftlong_EW" onchange="javascript:checkLeftLong();">
-						<option id="llW" value="W">W</option>
-						<option id="llE" value="E">E</option>
+				<div>
+					<?php echo $LANG['LL_BOUND_WLNG']; ?> <input type="text" id="leftlong" name="leftlong" size="7" value="<?php echo $leftLong; ?>" onchange="javascript:checkLeftLong();">
+					<select id="leftlong_EW" name="leftlong_EW" onchange="checkLeftLong();">
+						<option id="llW" value="W"><?php echo $LANG['LL_W_SYMB']; ?></option>
+						<option id="llE" value="E"><?php echo $LANG['LL_E_SYMB']; ?></option>
 					</select>
 				</div>
-				<div title="Easterm hemisphere is positive; Western is negative">
-					Eastern Longitude: <input type="text" id="rightlong" name="rightlong" size="7" value="<?php echo $rightLong; ?>" onchange="javascript:checkRightLong();" style="margin-left:3px;">
-					<select id="rightlong_EW" name="rightlong_EW" onchange="javascript:checkRightLong();">
-						<option id="rlW" value="W">W</option>
-						<option id="rlE" value="E">E</option>
+				<div>
+					<?php echo $LANG['LL_BOUND_ELNG']; ?> <input type="text" id="rightlong" name="rightlong" size="7" value="<?php echo $rightLong; ?>" onchange="javascript:checkRightLong();" style="margin-left:3px;">
+					<select id="rightlong_EW" name="rightlong_EW" onchange="checkRightLong();">
+						<option id="rlW" value="W"><?php echo $LANG['LL_W_SYMB']; ?></option>
+						<option id="rlE" value="E"><?php echo $LANG['LL_E_SYMB']; ?></option>
 					</select>
 				</div>
 				<div style="clear:both;float:right;margin-top:8px;cursor:pointer;" onclick="openBoundingBoxMap();">
-					<img src="../images/world.png" width="15px" title="Find Coordinate" />
+					<img src="../images/world.png" width="15px" title="<?php echo $LANG['LL_P-RADIUS_TITLE_1']; ?>" />
 				</div>
 			</div>
 			<div style="width:260px; float:left;border:2px solid brown;padding:10px;margin-left:10px;">
 				<div style="font-weight:bold;">
-					Point-Radius search
+					<?php echo $LANG['LL_P-RADIUS_TEXT']; ?>
 				</div>
 				<?php
 					$pointLat = "";$pointLong = "";$radius = "";
@@ -155,50 +156,49 @@ $collManager->reset();
 						$pointLong = $llPointArr[1];
 						$radius = $llPointArr[2];
 					}
-
 				?>
-				<div title="Northern hemisphere is positive; Southern is negative">
-					Latitude: <input type="text" id="pointlat" name="pointlat" size="7" value="<?php echo $pointLat; ?>" onchange="javascript:checkPointLat();" style="margin-left:11px;">
-					<select id="pointlat_NS" name="pointlat_NS" onchange="javascript:checkPointLat();">
-						<option id="N" value="N">N</option>
-						<option id="S" value="S">S</option>
-					</select>
-				</div>
-				<div title="Easterm hemisphere is positive; Western is negative">
-					Longitude: <input type="text" id="pointlong" name="pointlong" size="7" value="<?php echo $pointLong; ?>" onchange="javascript:checkPointLong();">
-					<select id="pointlong_EW" name="pointlong_EW" onchange="javascript:checkPointLong();">
-						<option id="W" value="W">W</option>
-						<option id="E" value="E">E</option>
+				<div>
+					<?php echo $LANG['LL_P-RADIUS_LAT']; ?> <input type="text" id="pointlat" name="pointlat" size="7" value="<?php echo $pointLat; ?>" onchange="javascript:checkPointLat();" style="margin-left:11px;">
+					<select id="pointlat_NS" name="pointlat_NS" onchange="checkPointLat();">
+						<option id="N" value="N"><?php echo $LANG['LL_N_SYMB']; ?></option>
+						<option id="S" value="S"><?php echo $LANG['LL_S_SYMB']; ?></option>
 					</select>
 				</div>
 				<div>
-					Radius: <input type="text" id="radiustemp" name="radiustemp" size="5" value="<?php echo $radius; ?>" style="margin-left:15px;" onchange="updateRadius();">
+					<?php echo $LANG['LL_P-RADIUS_LNG']; ?> <input type="text" id="pointlong" name="pointlong" size="7" value="<?php echo $pointLong; ?>" onchange="javascript:checkPointLong();">
+					<select id="pointlong_EW" name="pointlong_EW" onchange="checkPointLong();">
+						<option id="W" value="W"><?php echo $LANG['LL_W_SYMB']; ?></option>
+						<option id="E" value="E"><?php echo $LANG['LL_E_SYMB']; ?></option>
+					</select>
+				</div>
+				<div>
+					<?php echo $LANG['LL_P-RADIUS_RADIUS']; ?> <input type="text" id="radiustemp" name="radiustemp" size="5" value="<?php echo $radius; ?>" style="margin-left:15px;" onchange="updateRadius();">
 					<select id="radiusunits" name="radiusunits" onchange="updateRadius();">
-						<option value="km">Kilometers</option>
-						<option value="mi">Miles</option>
+						<option value="km"><?php echo $LANG['LL_P-RADIUS_KM']; ?></option>
+						<option value="mi"><?php echo $LANG['LL_P-RADIUS_MI']; ?></option>
 					</select>
 					<input type="hidden" id="radius" name="radius" value="" />
 				</div>
 				<div style="clear:both;float:right;margin-top:8px;cursor:pointer;" onclick="openPointRadiusMap();">
-					<img src="../images/world.png" width="15px" title="Find Coordinate" />
+					<img src="../images/world.png" width="15px" title="<?php echo $LANG['LL_P-RADIUS_TITLE_1']; ?>" />
 				</div>
 			</div>
 			<div style=";clear:both;"><hr/></div>
 			<div>
-				<h1>Collector Criteria:</h1>
+				<h1><?php echo $LANG['COLLECTOR_HEADER']; ?></h1>
 			</div>
 			<div>
-				Collector's Last Name:
-				<input type="text" id="collector" size="32" name="collector" value="<?php if(array_key_exists("collector",$collArray)) echo $collArray["collector"]; ?>" title="Separate multiple terms w/ commas" />
+				<?php echo $LANG['COLLECTOR_LASTNAME']; ?>
+				<input type="text" id="collector" size="32" name="collector" value="<?php if(array_key_exists("collector",$collArray)) echo $collArray["collector"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 			</div>
 			<div>
-				Collector's Number:
-				<input type="text" id="collnum" size="31" name="collnum" value="<?php if(array_key_exists("collnum",$collArray)) echo $collArray["collnum"]; ?>" title="Separate multiple terms by commas and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750" />
+				<?php echo $LANG['COLLECTOR_NUMBER']; ?>
+				<input type="text" id="collnum" size="31" name="collnum" value="<?php if(array_key_exists("collnum",$collArray)) echo $collArray["collnum"]; ?>" title="<?php echo $LANG['TITLE_TEXT_2']; ?>" />
 			</div>
 			<div>
-				Collection Date:
-				<input type="text" id="eventdate1" size="32" name="eventdate1" style="width:100px;" value="<?php if(array_key_exists("eventdate1",$collArray)) echo $collArray["eventdate1"]; ?>" title="Single date or start date of range" /> -
-				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$collArray)) echo $collArray["eventdate2"]; ?>" title="End date of range; leave blank if searching for single date" />
+				<?php echo $LANG['COLLECTOR_DATE']; ?>
+				<input type="text" id="eventdate1" size="32" name="eventdate1" style="width:100px;" value="<?php if(array_key_exists("eventdate1",$collArray)) echo $collArray["eventdate1"]; ?>" title="<?php echo $LANG['TITLE_TEXT_3']; ?>" /> -
+				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$collArray)) echo $collArray["eventdate2"]; ?>" title="<?php echo $LANG['TITLE_TEXT_4']; ?>" />
 			</div>
 			<div style="float:right;">
 				<input style="border: 1px solid gray;" id="display2" name="display2" type="image" class="hoverHand" src='../images/search.png'
@@ -207,21 +207,21 @@ $collManager->reset();
 					title="Click button to display the results of your search">
 			</div>
 			<div>
-				<h1>Collection Object Criteria:</h1>
+				<h1><?php echo $LANG['SPECIMEN_HEADER']; ?></h1>
 			</div>
 			<div>
-				Catalog Number:
-                <input type="text" id="catnum" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="Separate multiple terms w/ commas" />
+				<?php echo $LANG['CATALOG_NUMBER']; ?>
+                <input type="text" id="catnum" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 			</div>
 			<div>
-				Other Catalog Number:
-				<input type="text" id="othercatnum" size="32" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$collArray)) echo $collArray["othercatnum"]; ?>" title="Separate multiple terms w/ commas" />
+				<?php echo $LANG['OTHER_CATALOG_NUMBERS']; ?>
+				<input type="text" id="othercatnum" size="32" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$collArray)) echo $collArray["othercatnum"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 			</div>
 			<div>
-				<input type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$collArray) && $collArray["typestatus"]) echo "CHECKED"; ?> > Limit to Type Specimens Only
+				<input type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$collArray) && $collArray["typestatus"]) echo "CHECKED"; ?> /> <?php echo $LANG['TYPE']; ?>
 			</div>
 			<div>
-				<input type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$collArray) && $collArray["hasimages"]) echo "CHECKED"; ?> > Limit to Specimens with Images Only
+				<input type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$collArray) && $collArray["hasimages"]) echo "CHECKED"; ?> /> <?php echo $LANG['HAS_IMAGE']; ?>
 			</div>
 			<input type="hidden" name="reset" value="1" />
 		</form>

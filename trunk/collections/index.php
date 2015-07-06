@@ -1,7 +1,8 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once $SERVER_ROOT.'/content/lang/collections/index.'.$LANG.'.php';
+include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
@@ -18,8 +19,8 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
-		<title><?php echo $defaultTitle; ?> Collections Search</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
+		<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
 		<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
@@ -27,39 +28,38 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		<script src="../js/jquery-ui.js" type="text/javascript"></script>
 		<script src="../js/symb/collections.index.js" type="text/javascript"></script>
 		<script type="text/javascript">
-			<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+			<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 		</script>
 	</head>
 	<body>
 	
 	<?php
 	$displayLeftMenu = (isset($collections_indexMenu)?$collections_indexMenu:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	if(isset($collections_indexCrumbs)){
 		if($collections_indexCrumbs){
 			echo "<div class='navpath'>";
 			echo $collections_indexCrumbs;
-			echo " <b>Collections</b>";
+			echo ' <b>'.$LANG['NAV_2'].'</b>'; 
 			echo "</div>";
 		}
 	}
 	else{
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt;&gt; ";
-		echo "<b>Collections</b>";
+		echo '<div class="navpath">';
+		echo '<a href="../index.php">'.$LANG['NAV_1'].'</a> &gt;&gt; ';
+		echo '<b>'.$LANG['NAV_2'].'</b>';
 		echo "</div>";
 	}
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<h1>Collections to be Searched</h1>
 		<div id="tabs" style="margin:0px;">
 			<ul>
 				<?php 
-				if($specArr && $obsArr) echo '<li><a href="#specobsdiv">Specimens &amp; Observations</a></li>';
-				if($specArr) echo '<li><a href="#specimendiv">Specimens</a></li>';
-				if($obsArr) echo '<li><a href="#observationdiv">Observations</a></li>';
-				if($otherCatArr) echo '<li><a href="#otherdiv">Federal Units</a></li>';
+				if($specArr && $obsArr) echo '<li><a href="#specobsdiv">'.$LANG['TAB_1'].'</a></li>';
+				if($specArr) echo '<li><a href="#specimendiv">'.$LANG['TAB_2'].'</a></li>';
+				if($obsArr) echo '<li><a href="#observationdiv">'.$LANG['TAB_3'].'</a></li>';
+				if($otherCatArr) echo '<li><a href="#otherdiv">'.$LANG['TAB_4'].'</a></li>';
 				?>
 			</ul>
 			<?php 
@@ -69,7 +69,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					<form name="collform1" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" checked />
-					 		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+					 		<?php echo $LANG['SELECT_ALL_1'].' <a href="'.$clientRoot.'/collections/misc/collprofiles.php">'.$LANG['SELECT_ALL_2'].'</a>'; ?>
 						</div>
 						<?php 
 						$collManager->outputFullCollArr($specArr); 
@@ -87,7 +87,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					<form name="collform2" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballspeccb" name="db[]" class="spec" value='allspec' type="checkbox" onclick="selectAll(this);" checked />
-					 		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+					 		<?php echo $LANG['SELECT_ALL_1'].' <a href="'.$clientRoot.'/collections/misc/collprofiles.php">'.$LANG['SELECT_ALL_2'].'</a>'; ?>
 						</div>
 						<?php
 						$collManager->outputFullCollArr($specArr);
@@ -103,7 +103,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					<form name="collform3" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballobscb" name="db[]" class="obs" value='allobs' type="checkbox" onclick="selectAll(this);" checked />
-							Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+					 		<?php echo $LANG['SELECT_ALL_1'].' <a href="'.$clientRoot.'/collections/misc/collprofiles.php">'.$LANG['SELECT_ALL_2'].'</a>'; ?>
 						</div>
 						<?php
 						$collManager->outputFullCollArr($obsArr);
@@ -169,7 +169,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		</div>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 	</body>
 </html>

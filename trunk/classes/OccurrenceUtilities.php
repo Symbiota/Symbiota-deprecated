@@ -808,7 +808,7 @@ class OccurrenceUtilities {
 		if($this->verbose) $this->outputMsg('Updating georeference index... ',1);
 		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
 			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
-			'FROM uploadspectemp o '.
+			'FROM omoccurrences o '.
 			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
 			'AND o.decimallongitude IS NOT NULL ';
 		if(!$this->conn->query($sql)){

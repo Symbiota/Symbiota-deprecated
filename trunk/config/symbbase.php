@@ -1,4 +1,7 @@
 <?php
+session_start();
+header('Cache-control: private'); // IE 6 FIX
+
 if(!isset($CLIENT_ROOT) && isset($clientRoot)) $CLIENT_ROOT = $clientRoot; 
 if(!isset($SERVER_ROOT) && isset($serverRoot)) $SERVER_ROOT = $serverRoot;
 
@@ -117,4 +120,23 @@ if(!isset($dynChecklistRadius) && isset($DYN_CHECKLIST_RADIUS)) $dynChecklistRad
 if(!isset($displayCommonNames) && isset($DISPLAY_COMMON_NAMES)) $displayCommonNames = $DISPLAY_COMMON_NAMES;
 if(!isset($rightsTerms) && isset($RIGHTS_TERMS)) $rightsTerms = $RIGHTS_TERMS;
 if(!isset($reproductiveConditionTerms) && isset($REPRODUCTIVE_CONDITION_TERMS)) $reproductiveConditionTerms = $REPRODUCTIVE_CONDITION_TERMS;
+
+//Multi-langauge support
+$LANG = 'en';
+if(isset($_REQUEST['lang'])){
+	$LANG = $_REQUEST['lang'];
+
+	// register the session and set the cookie
+	$_SESSION['lang'] = $LANG;
+	setcookie('lang', $LANG, time() + (3600 * 24 * 30));
+}
+else if(isset($_SESSION['lang'])){
+	$LANG = $_SESSION['lang'];
+}
+else if(isset($_COOKIE['lang'])){
+	$LANG = $_COOKIE['lang'];
+}
+else{
+	if(strlen($DEFAULT_LANG) == 2) $LANG = $DEFAULT_LANG;
+}
 ?>
