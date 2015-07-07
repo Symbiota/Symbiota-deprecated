@@ -10,6 +10,8 @@ $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
 $mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
 $gridSize = array_key_exists('gridSizeSetting',$_REQUEST)?$_REQUEST['gridSizeSetting']:10;
 $minClusterSize = array_key_exists('minClusterSetting',$_REQUEST)?$_REQUEST['minClusterSetting']:50;
+$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
+$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 $sharedMapManager = new MappingShared();
 
@@ -29,6 +31,12 @@ if($mapType == 'taxa'){
 }
 elseif($mapType == 'occquery'){
 	$occurMapManager = new OccurrenceMapManager();
+	if($stArrCollJson && $stArrSearchJson){
+		$collStArr = json_decode($stArrCollJson, true);
+		$searchStArr = json_decode($stArrSearchJson, true);
+		$stArr = array_merge($searchStArr,$collStArr);
+		$occurMapManager->setSearchTermsArr($stArr);
+	}
 	$mapWhere = $occurMapManager->getOccurSqlWhere();
 	$tArr = $occurMapManager->getTaxaArr();
 	$stArr = $occurMapManager->getSearchTermsArr();

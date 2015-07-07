@@ -4,6 +4,8 @@ header("Content-Type: text/html; charset=".$charset);
 
 $downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen"; 
 $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0; 
+$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
+$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 ?>
 <html>
 <head>
@@ -15,6 +17,21 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script language="javascript">
+		$(document).ready(function() {
+			var crumbs = document.getElementsByClassName('navpath')[0].getElementsByTagName('a');
+			for(var i = 0; i < crumbs.length; i++){
+				if (crumbs[i].getAttribute("href") == "../list.php"){
+					crumbs[i].setAttribute('href','../list.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
+				}
+				if (crumbs[i].getAttribute("href") == "../harvestparams.php"){
+					crumbs[i].setAttribute('href','../harvestparams.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
+				}
+				if (crumbs[i].getAttribute("href") == "../index.php"){
+					crumbs[i].setAttribute('href','../index.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
+				}
+			}
+		});
+		
 		$(function() {
 			var dialogArr = new Array("schemanative","schemadwc");
 			var dialogStr = "";
@@ -208,6 +225,8 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 									?>
 									<input name="publicsearch" type="hidden" value="1" />
 									<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilterCode; ?>" />
+									<input name="jsoncollstarr" type="hidden" value='<?php echo $stArrCollJson; ?>' />
+									<input name="starr" type="hidden" value='<?php echo $stArrSearchJson; ?>' />
 									<input type="submit" name="submitaction" value="Download Data" />
 								</div>
 							</td>

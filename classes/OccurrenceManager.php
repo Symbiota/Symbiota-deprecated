@@ -18,7 +18,7 @@ class OccurrenceManager{
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
 		$this->useCookies = (array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?0:1);
- 		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
+		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
  			$this->reset();
  		}
  		if($this->useCookies && !$this->reset){
@@ -86,7 +86,7 @@ class OccurrenceManager{
 				}
 			}
 		}
-		return $this->searchTermsArr;
+		//return $this->searchTermsArr;
 	}
 
 	public function getSearchTerms(){
@@ -1255,7 +1255,7 @@ class OccurrenceManager{
 				$searchFieldsActivated = true;
 			}
 		}
-
+		
 		$searchStr = implode("&",$searchArr);
 		if($searchStr){
 			if($this->useCookies) setCookie("collsearch",$searchStr,0,($clientRoot?$clientRoot:'/'));
@@ -1345,7 +1345,11 @@ class OccurrenceManager{
 	public function getClName(){
 		return $this->clName;
 	}
-
+	
+	public function setSearchTermsArr($stArr){
+    	$this->searchTermsArr = $stArr;
+	}
+	
 	protected function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);

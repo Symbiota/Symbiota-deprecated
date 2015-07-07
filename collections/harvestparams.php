@@ -6,8 +6,21 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
+$clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
+$db = array_key_exists('db',$_REQUEST)?$_REQUEST['db']:0;
+$cat = array_key_exists('cat',$_REQUEST)?$_REQUEST['cat']:0;
+$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
+$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
+
 $collManager = new OccurrenceManager();
+if($stArrSearchJson){
+	$stArr = json_decode($stArrSearchJson, true);
+	$collManager->setSearchTermsArr($stArr);
+}
 $collArray = $collManager->getSearchTerms();
+if(!$stArrCollJson){
+	$stArrCollJson = json_encode($collArray);
+}
 $collManager->reset();
 ?>
 
@@ -20,6 +33,16 @@ $collManager->reset();
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?var=1303"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			var crumbs = document.getElementsByClassName('navpath')[0].getElementsByTagName('a');
+			for(var i = 0; i < crumbs.length; i++){
+				if (crumbs[i].getAttribute("href") == "index.php"){
+					crumbs[i].setAttribute('href','index.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
+				}
+			}
+		});
+	</script>
 </head>
 <body>
 
@@ -224,6 +247,8 @@ $collManager->reset();
 				<input type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$collArray) && $collArray["hasimages"]) echo "CHECKED"; ?> /> <?php echo $LANG['HAS_IMAGE']; ?>
 			</div>
 			<input type="hidden" name="reset" value="1" />
+			<input type="hidden" name="usecookies" value="false" />
+			<input type="hidden" name="jsoncollstarr" value='<?php echo ($stArrCollJson?$stArrCollJson:''); ?>' />
 		</form>
 	</div>
 	<?php

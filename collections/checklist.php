@@ -4,12 +4,21 @@ include_once($serverRoot.'/classes/OccurrenceChecklistManager.php');
 
 $checklistManager = new OccurrenceChecklistManager();
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
+$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
+$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
+
+if($stArrCollJson && $stArrSearchJson){
+	$collStArr = json_decode($stArrCollJson, true);
+	$searchStArr = json_decode($stArrSearchJson, true);
+	$stArr = array_merge($searchStArr,$collStArr);
+	$checklistManager->setSearchTermsArr($stArr);
+}
 
 ?>
 
 	<div>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Download Checklist Data'>
-			<a href='download/index.php?dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
+			<a href='download/index.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
 				<img width="15px" src="../images/dl.png" />
 			</a>
 		</div>
@@ -17,7 +26,7 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 		if($keyModIsActive === true || $keyModIsActive === 1){
 		?>
 			<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Open in Interactive Key Interface'>
-				<a href="checklistsymbiota.php?taxonfilter=<?php echo $taxonFilter; ?>&interface=key">
+				<a href='checklistsymbiota.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>
 					<img width='15px' src='../images/key.png'/>
 				</a>
 			</div>
@@ -26,7 +35,7 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 		if($floraModIsActive){
 		?>
 			<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Open in Checklist Explorer Interface'>
-				<a href="checklistsymbiota.php?taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist">
+				<a href='checklistsymbiota.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
 					<img width='15px' src='../images/list.png'/>
 				</a>
 			</div>
@@ -46,6 +55,9 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 	                        ?>
 					</select>
 					<input type="hidden" name="tabindex" value="0" />
+					<input type="hidden" name="usecookies" value="false" />
+					<input type="hidden" name="jsoncollstarr" value='<?php echo ($stArrCollJson?$stArrCollJson:''); ?>' />
+					<input type="hidden" name="starr" value='<?php echo ($stArrSearchJson?$stArrSearchJson:''); ?>' />
 			</form>
 		</div>
 		<div style="clear:both;"><hr/></div>

@@ -6,10 +6,27 @@ header("Content-Type: text/html; charset=".$charset);
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1; 
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
+$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
+$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
 $collManager = new OccurrenceListManager();
+$stArr = array();
 
+if($stArrCollJson && $stArrSearchJson){
+	$collStArr = json_decode($stArrCollJson, true);
+	$searchStArr = json_decode($stArrSearchJson, true);
+	$stArr = array_merge($searchStArr,$collStArr);
+}
+elseif($stArrCollJson && !$stArrSearchJson){
+	$collArray = $collManager->getSearchTerms();
+	$collStArr = json_decode($stArrCollJson, true);
+	$stArr = array_merge($collArray,$collStArr);
+	$stArrSearchJson = json_encode($collArray);
+}
+
+$stArrJson = json_encode($stArr);
+$collManager->setSearchTermsArr($stArr);
 $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Array(IID,Array(fieldName,value))
 
 $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname', 
@@ -57,8 +74,17 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					$(ui.panel).html("<p>Loading...</p>");
 				}
 			});
+			var crumbs = document.getElementsByClassName('navpath')[0].getElementsByTagName('a');
+			for(var i = 0; i < crumbs.length; i++){
+				if (crumbs[i].getAttribute("href") == "harvestparams.php"){
+					crumbs[i].setAttribute('href','harvestparams.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
+				}
+				if (crumbs[i].getAttribute("href") == "index.php"){
+					crumbs[i].setAttribute('href','index.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
+				}
+			}
 		});
-
+		
 		function addVoucherToCl(occidIn,clidIn,tidIn){
 			$.ajax({
 				type: "POST",
@@ -98,6 +124,10 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					}
 				}
 			}
+		}
+		
+		function openMapPU(){
+			window.open('../map/googlemap.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&maptype=occquery','gmap','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=950,height=700,left=20,top=20');
 		}
 
 		function openIndPU(occId,clid){
@@ -142,7 +172,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	<div id="tabs" style="width:95%;">
 	    <ul>
 	        <li>
-	        	<a href="checklist.php?taxonfilter=<?php echo $taxonFilter; ?>">
+	        	<a href='checklist.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>'>
 	        		<span>Species List</span>
 	        	</a>
 	        </li>
@@ -159,7 +189,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	    </ul>
 		<div id="speclist">
 			<div class='button' style='margin:15px 15px 0px 0px;float:right;width:13px;height:13px;' title='Download Specimen Data'>
-				<a href='download/index.php?dltype=specimen'>
+				<a href='download/index.php?usecookies=false&dltype=specimen&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>'>
 					<img src='../images/dl.png'/>
 				</a>
 			</div>
@@ -179,7 +209,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			$lastPage = (int) ($collManager->getRecordCnt() / $cntPerPage) + 1;
 			$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 			$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
-			$hrefPrefix = 'list.php?'.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';
+			$hrefPrefix = 'list.php?usecookies=false&starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';
 			$pageBar = '';
 			if($startPage > 1){
 			    $pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='".$hrefPrefix."1'>First</a></span>";
@@ -373,13 +403,13 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	    <div id="maps" style="min-height:400px;margin-bottom:10px;">
 	
 		    <div class="button" style="margin-top:20px;float:right;width:13px;height:13px;" title="Download Coordinate Data">
-				<a href="download/index.php?dltype=georef"><img src="../images/dl.png"/></a>
+				<a href='download/index.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&dltype=georef'><img src="../images/dl.png"/></a>
 	        </div>
 	        <div style='margin-top:10px;'>
 	        	<h2>Google Map</h2>
 	        </div>
 			<div style='margin:10 0 0 20;'>
-			    <a href='javascript:var popupReference=window.open("../map/googlemap.php?maptype=occquery","gmap","toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=950,height=700,left=20,top=20");'>
+			    <a href="#" onclick="openMapPU();" >
 			        Display coordinates in Google Map
 			    </a>
 			</div>
@@ -417,6 +447,8 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					</fieldset>
 				</div>
 				<div style="margin-top:8px;float:right;">
+					<input name="jsoncollstarr" type="hidden" value='<?php echo $stArrCollJson; ?>' />
+					<input name="starr" type="hidden" value='<?php echo $stArrSearchJson; ?>' />
 					<button name="formsubmit" type="submit" value="Create KML">Create KML</button>
 				</div>
 			</form>

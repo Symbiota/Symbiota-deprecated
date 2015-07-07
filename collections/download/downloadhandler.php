@@ -8,6 +8,19 @@ header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 $schema = array_key_exists("schema",$_POST)?$_POST["schema"]:"symbiota"; 
 $cSet = array_key_exists("cset",$_POST)?$_POST["cset"]:'';
+$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
+$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
+
+$dlManager = new OccurrenceDownload();
+$dwcaHandler = new DwcArchiverOccurrence();
+$occurManager = new OccurrenceManager();
+
+if($stArrCollJson && $stArrSearchJson){
+	$collStArr = json_decode($stArrCollJson, true);
+	$searchStArr = json_decode($stArrSearchJson, true);
+	$stArr = array_merge($searchStArr,$collStArr);
+	$occurManager->setSearchTermsArr($stArr);
+}
 
 if($schema == "backup"){
 
@@ -15,7 +28,6 @@ if($schema == "backup"){
 	if($collid && is_numeric($collid)){
 		//check permissions due to sensitive localities not being redacted
 		if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])){
-			$dwcaHandler = new DwcArchiverOccurrence();
 			$dwcaHandler->setSchemaType('backup');
 			$dwcaHandler->setCharSetOut($cSet);
 			$dwcaHandler->setVerbose(0);
@@ -69,9 +81,7 @@ else{
 	}
 		
 	if($schema == "georef"){
-		$dlManager = new OccurrenceDownload();
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
-			$occurManager = new OccurrenceManager();
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
 		}
 		$dlManager->setSchemaType($schema);
@@ -93,9 +103,7 @@ else{
 		$dlManager->downloadData();
 	}
 	elseif($schema == 'checklist'){
-		$dlManager = new OccurrenceDownload();
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
-			$occurManager = new OccurrenceManager();
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
 		}
 		$dlManager->setSchemaType($schema);
@@ -108,7 +116,6 @@ else{
 	}
 	else{
 		//Is an occurrence download 
-		$dwcaHandler = new DwcArchiverOccurrence();
 		$dwcaHandler->setCharSetOut($cSet);
 		$dwcaHandler->setSchemaType($schema);
 		$dwcaHandler->setExtended($extended);
@@ -118,7 +125,6 @@ else{
 		if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
 
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
-			$occurManager = new OccurrenceManager();
 			$dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
 		}
 		else{
