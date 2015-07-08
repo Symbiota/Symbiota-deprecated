@@ -726,8 +726,8 @@ class CollectionProfileManager {
 		set_time_limit(120);
 		ini_set("max_input_time",120);
 		
-		$this->targetPath = $SERVER_ROOT.'/images/collicons/';
-		$urlBase = $CLIENT_ROOT.'/images/collicons/';
+		$this->targetPath = $SERVER_ROOT.'/content/collicon/';
+		$urlBase = $CLIENT_ROOT.'/content/collicon/';
 		$urlPrefix = "http://";
 		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
 		$urlPrefix .= $_SERVER["SERVER_NAME"];
@@ -749,33 +749,14 @@ class CollectionProfileManager {
 			$this->imgExt = strtolower(substr($fName,$p));
 			$fName = substr($fName,0,$p);
 		}
-		
+		$fName = $_REQUEST["institutioncode"].'-'.$_REQUEST["collectioncode"];
 		$fName = str_replace("%20","_",$fName);
 		$fName = str_replace("%23","_",$fName);
 		$fName = str_replace(" ","_",$fName);
 		$fName = str_replace("__","_",$fName);
-		$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
-		$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
-		$fName = str_replace(array(chr(239),chr(240),chr(241),chr(261)),"i",$fName);
-		$fName = str_replace(array(chr(247),chr(248),chr(249),chr(262)),"o",$fName);
-		$fName = str_replace(array(chr(250),chr(251),chr(263)),"u",$fName);
-		$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
-		$fName = preg_replace("/[^a-zA-Z0-9\-_]/", "", $fName);
-		$fName = trim($fName,' _-');
 		
 		if(strlen($fName) > 30) {
 			$fName = substr($fName,0,30);
-		}
-		//Test to see if target images exist (can happen batch loading images with similar names)
-		if($this->targetPath){
-			//Check and see if file already exists, if so, rename filename until it has a unique name
-			$tempFileName = $fName;
-			$cnt = 0;
-			while(file_exists($this->targetPath.$tempFileName)){
-				$tempFileName = $fName.'_'.$cnt;
-				$cnt++;
-			}
-			if($cnt) $fName = $tempFileName;
 		}
 		
 		//Returns file name without extension
