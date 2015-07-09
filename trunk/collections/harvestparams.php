@@ -33,16 +33,6 @@ $collManager->reset();
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?var=1303"></script>
-	<script type="text/javascript">
-		$(document).ready(function() {
-			var crumbs = document.getElementsByClassName('navpath')[0].getElementsByTagName('a');
-			for(var i = 0; i < crumbs.length; i++){
-				if (crumbs[i].getAttribute("href") == "index.php"){
-					crumbs[i].setAttribute('href','index.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
-				}
-			}
-		});
-	</script>
 </head>
 <body>
 

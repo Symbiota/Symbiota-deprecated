@@ -26,9 +26,6 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 				if (crumbs[i].getAttribute("href") == "../harvestparams.php"){
 					crumbs[i].setAttribute('href','../harvestparams.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
 				}
-				if (crumbs[i].getAttribute("href") == "../index.php"){
-					crumbs[i].setAttribute('href','../index.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
-				}
 			}
 		});
 		
