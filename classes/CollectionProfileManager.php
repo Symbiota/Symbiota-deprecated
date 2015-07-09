@@ -717,6 +717,45 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 	
+	public function getYearStatsHeaderArr($collId){
+		$dateArr = array();
+		$sql = 'SELECT DISTINCT CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered '.
+			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < 365 '.
+			'ORDER BY year(o.dateEntered),month(o.dateEntered) ';
+		//echo $sql;
+		$i = 0;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$dateArr[$i] = $r->dateEntered;
+			$i++;
+		}
+		$rs->free();
+		
+		return $dateArr;
+	}
+	
+	public function getYearStatsDataArr($collId){
+		$statArr = array();
+		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
+			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, count(o.occid) AS speccnt, count(i.imgid) AS imgcnt '.
+			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			'LEFT JOIN images i ON o.occid = i.occid '.
+			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < 365 '.
+			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$statArr[$r->collcode]['collcode'] = $r->collcode;
+			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
+			$statArr[$r->collcode]['stats'][$r->dateEntered]['speccnt'] = $r->speccnt;
+			$statArr[$r->collcode]['stats'][$r->dateEntered]['imgcnt'] = $r->imgcnt;
+		}
+		$rs->free();
+		
+		return $statArr;
+	}
+	
 	public function addIconImageFile(){
 		global $SERVER_ROOT;
 		global $CLIENT_ROOT;

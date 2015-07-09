@@ -140,7 +140,7 @@ if($action != "Update Statistics"){
 					}
 					$("#tabs").tabs({<?php echo ($action == "Run Statistics"?'active: 1':''); ?>});
 				});
-
+				
 				function toggleFamilyDist(){
 					toggleById("famdistbox");
 					toggleById("showfamdist");
@@ -553,7 +553,7 @@ if($action != "Update Statistics"){
 											<?php echo $collStr; ?> 
 										</div>
 									</div>
-									<fieldset style="float:left;width:400px;margin-bottom:15px;">
+									<fieldset style="float:left;width:400px;margin-bottom:15px;margin-right:15px;">
 										<ul style="margin:0px;padding-left:10px;">
 											<?php
 											echo "<li>";
@@ -591,35 +591,49 @@ if($action != "Update Statistics"){
 											?>
 										</ul>
 									</fieldset>
-									<fieldset style="width:250px;margin:20px 0px 20px 20px;background-color:#FFFFCC;">
-										<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
-											<div class='legend'><b>Extra Statistics</b></div>
-											<div style="margin-top:8px;">
-												<div id="showfamdist" style="float:left;display:block;" >
-													<a href="#" onclick="return toggleFamilyDist()">Show Family Distribution</a>
+									<div style="">
+										<fieldset style="width:275px;margin:20px 0px 10px 20px;background-color:#FFFFCC;">
+											<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
+												<div class='legend'><b>Extra Statistics</b></div>
+												<div style="margin-top:8px;">
+													<div id="showfamdist" style="float:left;display:block;" >
+														<a href="#" onclick="return toggleFamilyDist()">Show Family Distribution</a>
+													</div>
+													<div id="hidefamdist" style="float:left;display:none;" >
+														<a href="#" onclick="return toggleFamilyDist()">Hide Family Distribution</a>
+													</div>
+													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
+														<input type="image" name="action" value="Download Family Dist" src="../../images/dl.png" onclick="" />
+													</div>
 												</div>
-												<div id="hidefamdist" style="float:left;display:none;" >
-													<a href="#" onclick="return toggleFamilyDist()">Hide Family Distribution</a>
+												<div style="clear:both;">
+													<div id="showgeodist" style="float:left;display:block;" >
+														<a href="#" onclick="return toggleGeoDist()">Show Geographic Distribution</a>
+													</div>
+													<div id="hidegeodist" style="float:left;display:none;" >
+														<a href="#" onclick="return toggleGeoDist();">Hide Geographic Distribution</a>
+													</div>
+													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
+														<input type="image" name="action" value="Download Geo Dist" src="../../images/dl.png" onclick="" />
+													</div>
 												</div>
-												<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
-													<input type="image" name="action" value="Download Family Dist" src="../../images/dl.png" onclick="" />
-												</div>
+												<input type="hidden" name="famarrjson" id="famarrjson" value='<?php echo json_encode($familyArr); ?>' />
+												<input type="hidden" name="geoarrjson" id="geoarrjson" value='<?php echo json_encode($countryArr); ?>' />
+											</form>
+										</fieldset>
+										<?php
+										if($SYMB_UID && $IS_ADMIN){
+											?>
+											<div style="">
+												<form name="yearstats" style="margin-bottom:0px" action="collyearstats.php" method="post" target="_blank" onsubmit="">
+													<input type="hidden" name="collid" id="collid" value='<?php echo $collId; ?>' />
+													<input type="submit" name="action" value="Load Stats for Past Year" />
+												</form>
 											</div>
-											<div style="clear:both;">
-												<div id="showgeodist" style="float:left;display:block;" >
-													<a href="#" onclick="return toggleGeoDist()">Show Geographic Distribution</a>
-												</div>
-												<div id="hidegeodist" style="float:left;display:none;" >
-													<a href="#" onclick="return toggleGeoDist();">Hide Geographic Distribution</a>
-												</div>
-												<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
-													<input type="image" name="action" value="Download Geo Dist" src="../../images/dl.png" onclick="" />
-												</div>
-											</div>
-											<input type="hidden" name="famarrjson" id="famarrjson" value='<?php echo json_encode($familyArr); ?>' />
-											<input type="hidden" name="geoarrjson" id="geoarrjson" value='<?php echo json_encode($countryArr); ?>' />
-										</form>
-									</fieldset>
+											<?php
+										}
+										?>
+									</div>
 									<div style="clear:both;"> </div>
 								</div>
 								<fieldset id="famdistbox" style="clear:both;margin-top:15px;width:800px;display:none;">
