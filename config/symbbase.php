@@ -139,4 +139,5 @@ else if(isset($_COOKIE['lang'])){
 else{
 	if(strlen($DEFAULT_LANG) == 2) $LANG = $DEFAULT_LANG;
 }
+if(strlen($LANG) != 2) $LANG = 'en';
 ?>

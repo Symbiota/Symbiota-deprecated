@@ -50,12 +50,12 @@ class OccurrenceManager{
 		setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
 		setCookie("collvars","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
  		$this->reset = 1;
-		if(array_key_exists("db",$this->searchTermsArr) || array_key_exists("oic",$this->searchTermsArr)){
+		if(isset($this->searchTermsArr['db']) || isset($this->searchTermsArr['oic'])){
 			//reset all other search terms except maintain the db terms
 			$dbsTemp = "";
-			if(array_key_exists("db",$this->searchTermsArr)) $dbsTemp = $this->searchTermsArr["db"];
+			if(isset($this->searchTermsArr['db'])) $dbsTemp = $this->searchTermsArr["db"];
 			$clidTemp = "";
-			if(array_key_exists("clid",$this->searchTermsArr)) $clidTemp = $this->searchTermsArr["clid"];
+			if(isset($this->searchTermsArr['clid'])) $clidTemp = $this->searchTermsArr["clid"];
 			unset($this->searchTermsArr);
 			if($dbsTemp) $this->searchTermsArr["db"] = $dbsTemp;
 			if($clidTemp) $this->searchTermsArr["clid"] = $clidTemp;
@@ -63,30 +63,32 @@ class OccurrenceManager{
 	}
 
 	private function readCollCookies(){
-		if(array_key_exists("colltaxa",$_COOKIE)){
-			$collTaxa = $_COOKIE["colltaxa"];
-			$taxaArr = explode("&",$collTaxa);
-			foreach($taxaArr as $value){
-				$this->searchTermsArr[substr($value,0,strpos($value,":"))] = substr($value,strpos($value,":")+1);
-			}
-		}
-		if(array_key_exists("collsearch",$_COOKIE)){
-			$collSearch = $_COOKIE["collsearch"];
-			$searArr = explode("&",$collSearch);
-			foreach($searArr as $value){
-				$this->searchTermsArr[substr($value,0,strpos($value,":"))] = substr($value,strpos($value,":")+1);
-			}
-		}
-		if(array_key_exists("collvars",$_COOKIE)){
-			$collVarStr = $_COOKIE["collvars"];
-			$varsArr = explode("&",$collVarStr);
-			foreach($varsArr as $value){
-				if(strpos($value,"reccnt") === 0){
-					$this->recordCount = substr($value,strpos($value,":")+1);
+		if($_COOKIE){
+			if(array_key_exists("colltaxa",$_COOKIE)){
+				$collTaxa = $_COOKIE["colltaxa"];
+				$taxaArr = explode("&",$collTaxa);
+				foreach($taxaArr as $value){
+					$this->searchTermsArr[substr($value,0,strpos($value,":"))] = substr($value,strpos($value,":")+1);
 				}
 			}
+			if(array_key_exists("collsearch",$_COOKIE)){
+				$collSearch = $_COOKIE["collsearch"];
+				$searArr = explode("&",$collSearch);
+				foreach($searArr as $value){
+					$this->searchTermsArr[substr($value,0,strpos($value,":"))] = substr($value,strpos($value,":")+1);
+				}
+			}
+			if(array_key_exists("collvars",$_COOKIE)){
+				$collVarStr = $_COOKIE["collvars"];
+				$varsArr = explode("&",$collVarStr);
+				foreach($varsArr as $value){
+					if(strpos($value,"reccnt") === 0){
+						$this->recordCount = substr($value,strpos($value,":")+1);
+					}
+				}
+			}
+			//return $this->searchTermsArr;
 		}
-		//return $this->searchTermsArr;
 	}
 
 	public function getSearchTerms(){
@@ -1347,7 +1349,7 @@ class OccurrenceManager{
 	}
 	
 	public function setSearchTermsArr($stArr){
-    	$this->searchTermsArr = $stArr;
+		if($stArr) $this->searchTermsArr = $stArr;
 	}
 	
 	protected function cleanOutStr($str){
