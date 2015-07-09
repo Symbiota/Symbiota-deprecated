@@ -43,6 +43,7 @@ $smManager = new SiteMapManager();
 			<ul>
 				<li><a href="collections/index.php">Search Engine</a> - search Collections</li>
 				<li><a href="collections/misc/collprofiles.php">Collections</a> - list of collection participating in project</li>
+				<li><a href="collections/misc/collstats.php">Collection Statistics</a></li>
 				<li><a href="collections/exsiccati/index.php">Exsiccati Index</a></li>
 				<li><a href="collections/datasets/datapublisher.php">Darwin Core Archives</a> - published datasets of selected collections</li>
 				<?php 
@@ -370,6 +371,7 @@ $smManager = new SiteMapManager();
 						if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 							?>
 							<li><a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer</a></li>
+							<li><a href="taxa/admin/taxonomydynamicdisplay.php">Taxonomic Dynamic Tree Viewer</a></li>
 							<li>Edit Taxonomic Placement (use <a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer)</a></li>
 							<li><a href="taxa/admin/taxonomyloader.php">Add New Taxonomic Name</a></li>
 							<li><a href="taxa/admin/taxaloader.php">Batch
