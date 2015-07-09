@@ -43,16 +43,16 @@ $collManager->reset();
 		if($collections_harvestparamsCrumbs){
 			echo '<div class="navpath">';
 			echo $collections_harvestparamsCrumbs.' &gt;&gt; ';
-			echo '<b>'.$LANG['NAV_3'].'</b>';
+			echo '<b>'.$LANG['NAV_SEARCH'].'</b>';
 			echo '</div>';
 		}
 	}
 	else{
 		?>
 		<div class='navpath'>
-			<a href="../index.php"><?php echo $LANG['NAV_1']; ?></a> &gt;&gt;
-			<a href="index.php"><?php echo $LANG['NAV_2']; ?></a> &gt;&gt;
-			<b><?php echo $LANG['NAV_3']; ?></b>
+			<a href="../index.php"><?php echo $LANG['NAV_HOME']; ?></a> &gt;&gt;
+			<a href="index.php"><?php echo $LANG['NAV_COLLECTIONS']; ?></a> &gt;&gt;
+			<b><?php echo $LANG['NAV_SEARCH']; ?></b>
 		</div>
 		<?php
 	}

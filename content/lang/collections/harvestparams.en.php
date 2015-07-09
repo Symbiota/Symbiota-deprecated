@@ -4,13 +4,10 @@
 Language: English
 ------------------
 */
- 
-$LANG = array();
- 
+
+include_once('sharedterms.en.php');
+
 $LANG['PAGE_TITLE'] = 'Collection Search Parameters';
-$LANG['NAV_1'] = 'Home';
-$LANG['NAV_2'] = 'Collections';
-$LANG['NAV_3'] = 'Search Criteria';
 $LANG['PAGE_HEADER'] = 'Enter Search Parameters';
 $LANG['GENERAL_TEXT_1'] = 'Fill in one or more of the following query criteria and click &quot;Search&quot; to view your results.';
 $LANG['TAXON_HEADER'] = 'Taxonomic Criteria:';

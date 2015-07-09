@@ -793,6 +793,32 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg('<div>ERROR updating occid (2nd step) after occurrence insert: '.$this->conn->error.'</div>');
 		}
 		$this->outputMsg('Done!</li> ');
+
+		//Exsiccati transfer
+		$rsTest = $this->conn->query('SHOW COLUMNS FROM uploadspectemp WHERE field = "exsiccatiIdentifier"');
+		if($rsTest->num_rows){
+			//Add any new exsiccati numbers 
+			$sqlExs1 = 'INSERT INTO omexsiccatinumbers(ometid, exsnumber) '.
+				'SELECT DISTINCT u.exsiccatiIdentifier, u.exsiccatinumber '.
+				'FROM uploadspectemp u LEFT JOIN omexsiccatinumbers e ON u.exsiccatiIdentifier = e.ometid AND u.exsiccatinumber = e.exsnumber '.
+				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NOT NULL) '.
+				'AND (u.exsiccatiIdentifier IS NOT NULL) AND (u.exsiccatinumber IS NOT NULL) AND (e.exsnumber IS NULL)';
+			if(!$this->conn->query($sqlExs1)){
+				$this->outputMsg('<div>ERROR adding new exsiccati numbers: '.$this->conn->error.'</div>');
+			}
+			//Load exsiccati 
+			$sqlExs2 = 'INSERT IGNORE INTO omexsiccatiocclink(omenid,occid) '.
+				'SELECT e.omenid, u.occid '.
+				'FROM uploadspectemp u INNER JOIN omexsiccatinumbers e ON u.exsiccatiIdentifier = e.ometid AND u.exsiccatinumber = e.exsnumber '.
+				'WHERE (u.collid = '.$this->collId.') AND (e.omenid IS NOT NULL) AND (u.occid IS NOT NULL)';
+			if($this->conn->query($sqlExs2)){
+				$this->outputMsg('<li>Specimens linked to exsiccati index </li>');
+			}
+			else{
+				$this->outputMsg('<div>ERROR adding new exsiccati numbers: '.$this->conn->error.'</div>');
+			}
+		}
+		$rsTest->free();
 		
 		//Setup and add datasets and link datasets to current user
 		

@@ -40,14 +40,14 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		if($collections_indexCrumbs){
 			echo "<div class='navpath'>";
 			echo $collections_indexCrumbs;
-			echo ' <b>'.$LANG['NAV_2'].'</b>'; 
+			echo ' <b>'.$LANG['NAV_COLLECTIONS'].'</b>'; 
 			echo "</div>";
 		}
 	}
 	else{
 		echo '<div class="navpath">';
-		echo '<a href="../index.php">'.$LANG['NAV_1'].'</a> &gt;&gt; ';
-		echo '<b>'.$LANG['NAV_2'].'</b>';
+		echo '<a href="../index.php">'.$LANG['NAV_HOME'].'</a> &gt;&gt; ';
+		echo '<b>'.$LANG['NAV_COLLECTIONS'].'</b>';
 		echo "</div>";
 	}
 	?>
@@ -69,7 +69,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					<form name="collform1" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" checked />
-					 		<?php echo $LANG['SELECT_ALL_1'].' <a href="'.$clientRoot.'/collections/misc/collprofiles.php">'.$LANG['SELECT_ALL_2'].'</a>'; ?>
+					 		<?php echo $LANG['SELECT_ALL'].' <a href="'.$clientRoot.'/collections/misc/collprofiles.php"></a>'; ?>
 						</div>
 						<?php 
 						$collManager->outputFullCollArr($specArr); 
