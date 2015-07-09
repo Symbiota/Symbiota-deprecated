@@ -622,7 +622,7 @@ if($action != "Update Statistics"){
 											</form>
 										</fieldset>
 										<?php
-										if($SYMB_UID && $IS_ADMIN){
+										if($SYMB_UID && ($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS))){
 											?>
 											<div style="">
 												<form name="yearstats" style="margin-bottom:0px" action="collyearstats.php" method="post" target="_blank" onsubmit="">
