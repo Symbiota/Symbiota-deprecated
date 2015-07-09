@@ -7,6 +7,9 @@ include_once($serverRoot.'/classes/OccurrenceManager.php');
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
 $famArrJson = array_key_exists("famarrjson",$_REQUEST)?$_REQUEST["famarrjson"]:'';
 $geoArrJson = array_key_exists("geoarrjson",$_REQUEST)?$_REQUEST["geoarrjson"]:'';
+$collId = array_key_exists("collids",$_REQUEST)?$_REQUEST["collids"]:'';
+
+$collManager = new CollectionProfileManager();
 
 $fileName = '';
 $outputArr = array();
@@ -39,20 +42,60 @@ if($action == 'Download Geo Dist'){
 		array_push($outputArr,array($name,$specCnt,$geoRefCnt,$IDCnt,$IDGeoRefCnt,$geoRefPerc,$IDPerc,$IDgeoRefPerc));
 	}
 }
+if($action == 'Download CSV'){
+	$fileName = 'year_stats.csv';
+	$headerArr = $collManager->getYearStatsHeaderArr($collId);
+	$dataArr = $collManager->getYearStatsDataArr($collId);
+}
 
 header ('Content-Type: text/csv');
 header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 
 //Write column names out to file
-if($outputArr){
-	$outstream = fopen("php://output", "w");
-	fputcsv($outstream,$header);
-	
-	foreach($outputArr as $row){
-		fputcsv($outstream,$row);
+if($action == 'Download Family Dist' || $action == 'Download Geo Dist'){
+	if($outputArr){
+		$outstream = fopen("php://output", "w");
+		fputcsv($outstream,$header);
+		
+		foreach($outputArr as $row){
+			fputcsv($outstream,$row);
+		}
+		fclose($outstream);
 	}
-	fclose($outstream);
+	else{
+		echo "Recordset is empty.\n";
+	}
 }
-else{
-	echo "Recordset is empty.\n";
+if($action == 'Download CSV'){
+	if($dataArr){
+		$outputArr = array();
+		$i = 0;
+		foreach($dataArr as $code => $data){
+			$outputArr[$i]['name'] = $data['collectionname'];
+			$outputArr[$i]['object'] = 'Specimens';
+			foreach($headerArr as $h => $month){
+				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['speccnt']:0);
+			}
+			$i++;
+			$outputArr[$i]['name'] = '';
+			$outputArr[$i]['object'] = 'Images';
+			foreach($headerArr as $h => $month){
+				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['imgcnt']:0);
+			}
+			$i++;
+		}
+		
+		array_unshift($headerArr,"Institution","Object");
+		
+		$outstream = fopen("php://output", "w");
+		fputcsv($outstream,$headerArr);
+		
+		foreach($outputArr as $row){
+			fputcsv($outstream,$row);
+		}
+		fclose($outstream);
+	}
+	else{
+		echo "Recordset is empty.\n";
+	}
 }
