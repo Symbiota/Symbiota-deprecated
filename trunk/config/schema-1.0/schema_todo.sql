@@ -60,6 +60,11 @@ CREATE TABLE `adminlangtranslation` (
 );
 
 
+ALTER TABLE `uploadspectemp` 
+  ADD COLUMN `exsiccatiIdentifier` INT NULL AFTER `genericcolumn2`,
+  ADD COLUMN `exsiccatiNumber` VARCHAR(45) NULL AFTER `exsiccatiIdentifier`;
+
+
 ALTER TABLE `uploadtaxa` 
   ADD COLUMN `uploadStatus` VARCHAR(45) NULL AFTER `Hybrid`,
   ADD COLUMN `RankName` VARCHAR(45) NULL AFTER `RankId`,

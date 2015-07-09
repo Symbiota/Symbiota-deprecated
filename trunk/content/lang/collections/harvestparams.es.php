@@ -5,12 +5,9 @@ Language: Espanol, Spanish
 ------------------
 */
  
-$LANG = array();
+include_once('sharedterms.en.php');
  
 $LANG['PAGE_TITLE'] = 'Collection Search Parameters';
-$LANG['NAV_1'] = 'Inicio';
-$LANG['NAV_2'] = 'Colecciones';
-$LANG['NAV_3'] = 'Formulario de búsqueda';
 $LANG['PAGE_HEADER'] = 'Formulario de Búsqueda';
 $LANG['GENERAL_TEXT_1'] = 'Ingrese uno o más de los criterios de consulta siguientes y haga click en el botón &quot;Search&quot; para ver los resultados.';
 $LANG['TAXON_HEADER'] = 'Criterios Taxonómicos:';
