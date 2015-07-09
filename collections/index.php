@@ -13,7 +13,6 @@ $collManager = new OccurrenceManager();
 $collList = $collManager->getFullCollectionList($catId);
 $specArr = (isset($collList['spec'])?$collList['spec']:null);
 $obsArr = (isset($collList['obs'])?$collList['obs']:null);
-$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 $otherCatArr = $collManager->getOccurVoucherProjects();
 ?>
@@ -169,7 +168,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						}
 						?>
 						<input type="hidden" name="usecookies" value="false" />
-						<input type="hidden" name="starr" value='<?php echo $stArrSearchJson; ?>' />
 					</form>
 				</div>
 				<?php 
