@@ -398,8 +398,6 @@ class KeyDataManager {
 				}
 			}
 	
-			//Limit 
-			
 			//Limit by character attribute selections
 			$count = 0;
 			if($this->charArr){

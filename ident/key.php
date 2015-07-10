@@ -205,7 +205,7 @@ if($chars){
 									echo "&nbsp;<a href='".$newLink."' target='_blank'><img src='".$secondaryIcon."' width='40' border='0' title='View Google Images'/></a>";
 								}
 								if($editable){
-									echo "<a href='tools/editor.php?taxon=$tid&action=Get+Character+Info&lang=".$defaultLang."' target='_blank'><img src='../images/edit.png' width='15px' border='0' title='Edit morphology' /></a>\n";
+									echo "<a href='tools/editor.php?tid=$tid&lang=".$defaultLang."' target='_blank'><img src='../images/edit.png' width='15px' border='0' title='Edit morphology' /></a>\n";
 								}
 								echo "</td></tr>\n";
 							}
