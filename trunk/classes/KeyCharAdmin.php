@@ -374,17 +374,17 @@ class KeyCharAdmin{
 		$status = false;
 		$imgWidth = 800;
 		$webFileSizeLimit = 300000;
-		$qualityRating= 80;
+		$qualityRating= 100;
 		
 		list($width, $height) = getimagesize($path);
 		$fileSize = filesize($path);
 		
-		$imgHeight = round($height*($imgWidth/$width));
-		
+		$imgHeight = ($imgWidth*($height/$width));
+		echo $imgHeight;
    		$sourceImg = imagecreatefromjpeg($path);
 		$newImg = imagecreatetruecolor($imgWidth,$imgHeight);
-		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
-		imagecopyresized($newImg,$sourceImg,0,0,0,0,$imgWidth,$imgHeight,$width,$height);
+		imagecopyresampled($newImg,$sourceImg,0,0,0,0,$imgWidth,$imgHeight,$width,$height);
+		//imagecopyresized($newImg,$sourceImg,0,0,0,0,$imgWidth,$imgHeight,$width,$height);
 		$status = imagejpeg($newImg, str_replace('_temp','',$path), $qualityRating);
 		if(!$status){
 			echo 'Error: Unable to create image file: '.$path;
