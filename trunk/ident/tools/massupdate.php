@@ -2,44 +2,31 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyMassUpdate.php');
 header("Content-Type: text/html; charset=".$charset);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/tools/massupdate.php?'.$_SERVER['QUERY_STRING']);
+
+$clFilter = array_key_exists("clf",$_REQUEST)?$_REQUEST["clf"]:''; 
+$taxonFilter = array_key_exists("tf",$_REQUEST)?$_REQUEST["tf"]:'';
+$generaOnly = array_key_exists("generaonly",$_POST)?$_POST["generaonly"]:0; 
+$cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:'';
+$removeAttrs = array_key_exists("r",$_REQUEST)?$_REQUEST["r"]:""; 
+$addAttrs = array_key_exists("a",$_REQUEST)?$_REQUEST["a"]:""; 
+$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:""; 
+$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
+
+$muManager = new KeyMassUpdate();
+if($langValue) $muManager->setLang($langValue);
+if($cidValue) $muManager->setCid($cidValue);
 
 $isEditor = false;
 if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){
 	$isEditor = true;
 }
 
-$muManager = new KeyMassUpdate();
-
-$removeAttrs = Array();
-$addAttrs = Array();
-
-$clFilter = array_key_exists("clf",$_REQUEST)?$_REQUEST["clf"]:'all'; 
-$taxonFilter = array_key_exists("tf",$_REQUEST)?$_REQUEST["tf"]:'all';
-$generaOnly = array_key_exists("generaonly",$_REQUEST)?$_REQUEST["generaonly"]:0; 
-$cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:'';
-$removeAttrs = array_key_exists("r",$_REQUEST)?$_REQUEST["r"]:""; 
-$addAttrs = array_key_exists("a",$_REQUEST)?$_REQUEST["a"]:""; 
-$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
-$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
-
-$muManager->setProj($projValue);
-if($langValue) $muManager->setLang($langValue);
-$muManager->setClFilter($clFilter);
-$muManager->setTaxonFilter($taxonFilter);
-if($generaOnly) $muManager->setGeneraOnly($generaOnly);
-if($cidValue) $muManager->setCid($cidValue);
-
-//Set username
- if(array_key_exists("un",$paramsArr)) $muManager->setUsername($paramsArr["un"]);
-
-if($addAttrs || $removeAttrs){
-	if($removeAttrs) $muManager->setRemoves($removeAttrs);
-	if($addAttrs) $muManager->setAdds($addAttrs);
-	$muManager->deleteInheritance();
-	$muManager->processAttrs();
-	$muManager->resetInheritance();
+if($isEditor){
+	if($removeAttrs || $addAttrs){
+		$muManager->processAttributes($removeAttrs,$addAttrs);
+	}
 }
-
 ?>
 <html>
 <head>
@@ -62,7 +49,7 @@ if($addAttrs || $removeAttrs){
 
 		function submitFilterForm(inputObj){
 			var f = inputObj.form;
-			if((f.clf.value == "" || f.clf.value == "all") && (f.tf.value == "" || f.tf.value == "all")){
+			if((f.clf.value == "") && (f.tf.value == "")){
 				alert("Taxon OR checklist needs to have a defined scope ");
 				inputObj.checked = false;
 				return false;
@@ -169,8 +156,7 @@ include($serverRoot.'/header.php');
 		  			<div>
 						<b>Checklist:</b> 
 						<select name="clf"> 
-							<option value="">-- Select a Checklist --</option>
-							<option value="all" <?php echo ($clFilter=="all"?"SELECTED":""); ?>>Checklist Filter Off (all taxa)</option>
+							<option value="">Checklist Filter Off (all taxa)</option>
 							<option value="">---------------------------------</option>
 					 		<?php 
 					 		$selectList = $muManager->getClQueryList();
@@ -179,10 +165,9 @@ include($serverRoot.'/header.php');
 				 			}
 					 		?>
 				  		</select><br/>
-				  		<b>Taxon:</b> 
+				  		<b>Taxon:</b>
 						<select name="tf">
-				 			<option value="">-- Select Taxon --</option>
-				 			<option value="all" <?php if($taxonFilter == 'all') echo 'SELECTED'; ?>>All Taxa</option>
+				 			<option value="">All Taxa</option>
 				 			<option value="">--------------------------</option>
 					  		<?php 
 					  		$selectList = $muManager->getTaxaQueryList();
@@ -191,13 +176,16 @@ include($serverRoot.'/header.php');
 				  			}
 					  		?>
 						</select>
+						<?php 
+						count($selectList);
+						?>
 					</div>
 					<div style="margin: 10px 0px;">
 						<input type="checkbox" name="generaonly" value="1" <?php if($generaOnly) echo "checked"; ?> /> 
 						Exclude Species Rank
 					</div>
 			 		<?php 
-	 				$cList = $muManager->getCharList();			//Array(Heading => Array(CID => CharName))
+	 				$cList = $muManager->getCharList($taxonFilter);			//Array(Heading => Array(CID => CharName))
 					foreach($cList as $h => $charData){
 						echo "<div style='margin-top:1em;font-size:125%;font-weight:bold;'>$h</div>\n";
 						ksort($charData);
@@ -206,7 +194,7 @@ include($serverRoot.'/header.php');
 						}
 					}
 			 		?>
-					<input type="hidden" name="proj" value="<?php echo $projValue; ?>" />
+					<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
 					<input type="hidden" name="lang" value="<?php echo $langValue; ?>" />
 			 	</fieldset>
 			</form>
@@ -238,7 +226,7 @@ include($serverRoot.'/header.php');
 		 		<?php 
 		 		$count = 0;
 		 		//Array(familyName => Array(SciName => Array("TID" => TIDvalue,"csArray" => Array(csValues => Inheritance))))
-		 		$tList = $muManager->getTaxaList();
+		 		$tList = $muManager->getTaxaList($clFilter,$taxonFilter,$generaOnly);
 		 		$csArr = array();
 				if(isset($tList['cs'])){
 					$csArr = $tList['cs'];
@@ -254,10 +242,10 @@ include($serverRoot.'/header.php');
 						<tr>
 							<td>
 								<span style='font-weight:bold;'>
-									<a href="massupdate.php?clf=<?php echo $clFilter.'&tf='.$famTid.'&cid='.$cidValue.'&proj='.$projValue.'&lang='.$langValue; ?>">
+									<a href="massupdate.php?clf=<?php echo $clFilter.'&tf='.$famTid.'&cid='.$cidValue.'&pid='.$pid.'&lang='.$langValue; ?>">
 										<b><?php echo $fam; ?></b>
 									</a>
-									<a href='editor.php?taxon=<?php echo $famTid; ?>&action=Get+Character+Info' target='_blank'>
+									<a href='editor.php?tid=<?php echo $famTid; ?>' target='_blank'>
 										<img src="../../images/edit.png" />
 									</a>
 								</span>
@@ -304,7 +292,7 @@ include($serverRoot.'/header.php');
 							<tr <?php echo $trClassStr; ?>>
 								<td>
 									<span style="margin-left:<?php echo (strpos($sciName,' ')?'20px':'10px;font-weight:bold;'); ?>;"><i><?php echo $sciName; ?></i></span> 
-									<a href='editor.php?taxon=<?php echo $tid; ?>&action=Get+Character+Info' target='_blank'>
+									<a href='editor.php?tid=<?php echo $tid; ?>' target='_blank'>
 										<img src="../../images/edit.png" />
 									</a>
 								</td>
@@ -362,7 +350,7 @@ include($serverRoot.'/header.php');
 				<input type='hidden' name='clf' value='<?php echo $clFilter; ?>' />
 				<input type='hidden' name='tf' value='<?php echo $taxonFilter; ?>' />
 				<input type='hidden' name='cid' value='<?php echo $cidValue; ?>' />
-				<input type='hidden' name='proj' value='<?php echo $projValue; ?>' />
+				<input type='hidden' name='pid' value='<?php echo $pid; ?>' />
 				<input type='hidden' name='lang' value='<?php echo $langValue; ?>' />
 			</form>
 			<?php

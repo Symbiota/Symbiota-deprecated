@@ -121,8 +121,8 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 	      			foreach($tList as $f=>$sArr){
 	      				echo "<div style='margin-top:1em;font-size:125%;'>$f</div>\n";
 	      				foreach($sArr as $idValue => $spValue){
-	      					echo "<div style=''>&nbsp;&nbsp;<a href='editor.php?tid=".$idValue."&action=Get+Character+Info&lang=English&lang=English' target='_blank'>$spValue</a> ";
-	      					echo "(<a href=\"#\" onclick=\"openPopup('editor.php?taxon=".$idValue."&action=Get+Character+Info&char=".$cidValue."','technical');\">@</a>)</div>\n";
+	      					echo "<div style=''>&nbsp;&nbsp;<a href='editor.php?tid=".$idValue."&lang=English&lang=English' target='_blank'>$spValue</a> ";
+	      					echo "(<a href=\"#\" onclick=\"openPopup('editor.php?tid=".$idValue."&char=".$cidValue."','technical');\">@</a>)</div>\n";
 	      				}
 	      			}
 	      		}

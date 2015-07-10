@@ -1,30 +1,38 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyEditorManager.php');
+include_once($SERVER_ROOT.'/classes/KeyEditorManager.php');
 header("Cache-control: private; Content-Type: text/html; charset=".$charset);
- 
-$addValues = Array();
-$removeValues = Array();
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/tools/editor.php?'.$_SERVER['QUERY_STRING']);
+
+$action = array_key_exists("action",$_POST)?$_POST["action"]:""; 
 $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
-$charValue = array_key_exists("char",$_REQUEST)?$_REQUEST["char"]:""; 
-$child1Value = array_key_exists("child1",$_REQUEST)?$_REQUEST["child1"]:""; 
-$child2Value = array_key_exists("child2",$_REQUEST)?$_REQUEST["child2"]:""; 
-$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
-$tQueryValue = array_key_exists("tquery",$_REQUEST)?$_REQUEST["tquery"]:""; 
-$tidValue = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
-$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
-$addValues = array_key_exists("add",$_REQUEST)?$_REQUEST["add"]:""; 
-$removeValues = array_key_exists("remove",$_REQUEST)?$_REQUEST["remove"]:""; 
+$charValue = array_key_exists("char",$_REQUEST)?$_REQUEST["char"]:"";
+$childrenStr = array_key_exists("children",$_REQUEST)?$_REQUEST["children"]:"";
+$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
 
 $editorManager = new KeyEditorManager();
-if($langValue) $editorManager->setLanguage($langValue);
-$editable = false;
+
+if(!$tid && $childrenStr){
+	$childrenArr = explode(',',$childrenStr);
+	$tid = array_pop($childrenArr);
+	$childrenStr = implode(',',$childrenArr);
+}
+$editorManager->setLanguage($langValue);
+$editorManager->setTid($tid);
+
+$isEditor = false;
 if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){
-	$editable = true;
+	$isEditor = true;
+}
+
+if($isEditor && $action){
+	if($action=="Submit Changes"){
+		$addArr = array_key_exists('add',$_POST)?$_POST['add']:null;
+		$removeArr = array_key_exists('remove',$_POST)?$_POST['remove']:null;
+		$editorManager->processTaxa($addArr,$removeArr);
+	}
 }
 ?>
-
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Identification Character Editor</title>
@@ -33,7 +41,6 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 	<script language="javascript">
 
 		var dataChanged = false;
-		
 		window.onbeforeunload = verifyClose;
 		
 		function verifyClose() { 
@@ -89,46 +96,40 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 </head>
 <body>
 <?php
-	$displayLeftMenu = (isset($ident_tools_editorMenu)?$ident_tools_editorMenu:"true");
-	include($serverRoot.'/header.php');
-	if(isset($ident_tools_editorCrumbs)){
+	$displayLeftMenu = (isset($ident_tools_editorMenu)?$ident_tools_editorMenu:'false');
+	include($SERVER_ROOT.'/header.php');
+	if(isset($ident_tools_editorCrumbs) && $ident_tools_editorCrumbs){
 		echo "<div class='navpath'>";
 		echo $ident_tools_editorCrumbs;
 		echo "<b>Character Editor</b>";
 		echo "</div>";
 	}
-	
-	
-	
+	else{
+		?>
+		<div class="navpath">
+			<a href="../../index.php">Home</a> &gt;&gt;
+			<b>Character Editor</b>
+		</div>
+		<?php 
+	}
 ?>
 <div style="margin:15px;">
 <?php 
- if($editable){
-	 if($tidValue) $editorManager->setTaxon($tidValue);
-	 if($taxonValue) $editorManager->setTaxon($taxonValue);
-	 if($addValues) $editorManager->setAddStates($addValues);
-	 if($removeValues) $editorManager->setRemoveStates($removeValues);
-	
-	 //Set username
-	 if(array_key_exists("un",$paramsArr)) $editorManager->setUsername($paramsArr["un"]);
+if($isEditor){
 	?>
-  	<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get" onsubmit="dataChanged=false;">
+  	<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="dataChanged=false;">
 	<?php 
-	if(($action=="Submit Changes" || $action=="Get Character Info") && (!empty($taxonValue) || !empty($tidValue))){
-		//Show character info for selected taxon
- 		if($action=="Submit Changes"){
- 			$editorManager->processTaxa();
- 		}
+	if($tid){
  		$sn = $editorManager->getTaxonName();
  		if($editorManager->getRankId() > 140){
 	  		$sn = "<i>$sn</i>";
  		}
  		echo "<div style='float:right;'>";
  		if($editorManager->getRankId() > 140){
-			echo "<a href='editor.php?taxon=".$editorManager->getParentTid()."&action=Get+Character+Info&child1=".$editorManager->getTid().($child1Value?"&child2=$child1Value":"")."'>edit parent</a>&nbsp;&nbsp;";
+			echo "<a href='editor.php?tid=".$editorManager->getParentTid()."&children=".($childrenStr?$childrenStr.',':'').$tid."'>edit parent</a>&nbsp;&nbsp;";
  		}
-		if($child1Value){
-			echo "<br><a href='editor.php?taxon=".$child1Value."&action=Get+Character+Info".($child2Value?"&child1=".$child2Value:"")."'>back to child</a>";
+		if($childrenStr){
+			echo "<br><a href='editor.php?children=".$childrenStr."'>back to child</a>";
 		}
 		echo "</div>";
  		echo "<h2>$sn</h2>";
@@ -141,8 +142,8 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 			$plusGif = "<img src='../../images/plus_sm.png'>";
 			foreach($cList as $heading => $charArray){ 
 				echo "<div style='font-weight:bold; font-size:150%; margin:1em 0em 1em 0em; color:#990000;".($charValue?" display:none;":"")."'>";
-				echo "<span class='".$heading."' onclick=\"javascript: toggle('".$heading."');\" style=\"display:none;\">$minusGif</span>";
-				echo "<span class='".$heading."' onclick=\"javascript: toggle('".$heading."');\" style=\"display:;\">$plusGif</span>";
+				echo "<span class='".$heading."' onclick=\"toggle('".$heading."');\" style=\"display:none;\">$minusGif</span>";
+				echo "<span class='".$heading."' onclick=\"toggle('".$heading."');\" style=\"display:;\">$plusGif</span>";
 				echo " $heading</div>\n";
 				echo "<div class='".$heading."' id='".$heading."' style='text-indent:1em;".($charValue?"":" display:none;")."'>";
 				foreach($charArray as $cidKey => $charNameStr){
@@ -151,7 +152,7 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 						echo "<div style='margin-top:1em;'><span style='font-weight:bold; font-size:larger;'>$charNameStr</span>\n";
 						if($editorManager->getRankId() > 140){
 							echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-size:smaller;'>";
-							echo "<a href=\"#\" onclick=\"openPopup('editor.php?taxon=".$editorManager->getParentTid()."&action=Get+Character+Info&char=".$cidKey."','technical');\">parent</a>";
+							echo "<a href=\"#\" onclick=\"openPopup('editor.php?tid=".$editorManager->getParentTid()."&char=".$cidKey."','technical');\">parent</a>";
 							echo "</span>\n";
 						}
 						echo "</div>\n";
@@ -182,28 +183,22 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 			?>
 			<div>
 				<input type="hidden" name="tid" value="<?php echo $editorManager->getTid(); ?>" />
-				<input type="hidden" name="child1" value="<?php echo $child1Value; ?>" />
-				<input type="hidden" name="child2" value="<?php echo $child2Value; ?>" />
+				<input type="hidden" name="children" value="<?php echo $childrenStr; ?>" />
 			</div>
 			<?php 
 		}
   	}
- 	else{
- 		echo "<h3>Enter a taxon and checklist combination and hit submit.</h3>";
- 	}
 	?>
 	</form>
- <?php 
- }
- else{  //Not editable or writable connection is not set
-	echo "<h1>You do not have authority to edit character data or there is a problem with the database connection.</h1> <h3>Note that you must first login to the system.</h3>";
- }
- ?>
- </div>
- <?php 
- include($serverRoot.'/footer.php');
+	<?php 
+}
+else{  
+	echo "<h1>You do not have authority to edit character data or there is a problem with the database connection.</h1>";
+}
 ?>
- 
- </body>
-</html>
-	
+</div>
+<?php 
+include($SERVER_ROOT.'/footer.php');
+?>
+</body>
+</html>	
