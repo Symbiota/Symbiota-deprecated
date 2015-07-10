@@ -8,7 +8,7 @@ header("Content-Type: text/html; charset=".$charset);
 <title><?php echo $defaultTitle; ?> Identification Keys</title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<meta name='keywords' content='Symbiota,interactive key,plants identification' />
+	<meta name='keywords' content='Symbiota, interactive key, identification' />
 </head>
 
 <body>

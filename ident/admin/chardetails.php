@@ -138,7 +138,7 @@ if(!$cid) header('Location: index.php');
 		}
 
 		function verifyStateIllustForm(f){
-			if(f.url == ''){
+			if(!f.urlupload.files[0]){
 				alert("Select a file to upload");
 				return false;
 			}
