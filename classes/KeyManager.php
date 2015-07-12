@@ -56,25 +56,11 @@ class KeyManager{
 	}
 
 	protected function resetInheritance($tidStr, $cidStr){
-		//set inheritance for target only
-		$sql1 = 'INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) '.
-			'SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, '.
-			'd1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent '.
-			'FROM taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID '.
-			'INNER JOIN taxstatus ts1 ON d1.TID = ts1.tid '.
-			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID '.
-			'INNER JOIN taxa t2 ON ts2.tid = t2.tid '.
-			'LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) '.
-			'WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.tid = ts2.tidaccepted) '.
-			'AND (t2.tid IN('.$tidStr.')) AND (d1.cid IN('.$cidStr.')) AND (d2.CID Is Null)';
-		//echo $sql1.'<br/><br/>';
-		$this->conn->query($sql1);
-
-		//Set inheritance for all children of target
+		//Set inheritance for target and all children of target
 		$cnt = 0;
 		$childrenStr = trim(implode(',',$this->getChildrenArr($tidStr)).','.$tidStr,' ,'); 
 		do{
-			$sql2 = 'INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) '.
+			$sql = 'INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) '.
 				'SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, '.
 				'd1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent '.
 				'FROM taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID '.
@@ -84,8 +70,10 @@ class KeyManager{
 				'LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) '.
 				'WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.tid = ts2.tidaccepted) '.
 				'AND (d1.cid IN('.$cidStr.')) AND (t2.tid IN('.$childrenStr.')) AND (d2.CID Is Null) AND (t2.RankId <= 220)';
-			//echo $sql2.'<br/><br/>';
-			$this->conn->query($sql2);
+			//echo $sql.'<br/><br/>';
+			if(!$this->conn->query($sql)){
+				echo 'ERROR setting inheritance: '.$this->conn->error;
+			}
 			$cnt++;
 		}while($this->conn->affected_rows && $cnt < 10);
 	}
