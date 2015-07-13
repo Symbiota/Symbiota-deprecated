@@ -78,7 +78,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						?>
 						<div style="clear:both;">&nbsp;</div>
 						<input type="hidden" name="usecookies" value="false" />
-						<input type="hidden" name="starr" value='<?php echo $stArrSearchJson; ?>' />
 					</form>
 				</div>
 			<?php 
@@ -96,7 +95,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						?>
 						<div style="clear:both;">&nbsp;</div>
 						<input type="hidden" name="usecookies" value="false" />
-						<input type="hidden" name="starr" value='<?php echo $stArrSearchJson; ?>' />
 					</form>
 				</div>
 				<?php 
@@ -114,7 +112,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						?>
 						<div style="clear:both;">&nbsp;</div>
 						<input type="hidden" name="usecookies" value="false" />
-						<input type="hidden" name="starr" value='<?php echo $stArrSearchJson; ?>' />
 					</form>
 				</div>
 				<?php 
