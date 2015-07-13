@@ -719,18 +719,13 @@ class CollectionProfileManager {
 	
 	public function getYearStatsHeaderArr($collId){
 		$dateArr = array();
-		$sql = 'SELECT DISTINCT CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
-			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < 365 '.
-			'ORDER BY year(o.dateEntered),month(o.dateEntered) ';
-		//echo $sql;
-		$i = 0;
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$dateArr[$i] = $r->dateEntered;
-			$i++;
+		$a = 13;
+		for ($i = 0; $i < 13; $i++) {
+			$timestamp = mktime(0, 0, 0, date('n') - $i, 1);
+			$dateArr[$a] = date('Y', $timestamp).'-'.date('n', $timestamp);
+			$a--;
 		}
-		$rs->free();
+		ksort($dateArr);
 		
 		return $dateArr;
 	}
