@@ -6,7 +6,6 @@ header("Content-Type: text/html; charset=".$charset);
 $rsManager = new RareSpeciesManager();
 $submitAction = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 
-
 $editable = 0;
 if($isAdmin || array_key_exists("RareSppAdmin",$userRights)){
 	$editable = 1;
@@ -21,7 +20,6 @@ if($editable){
 }
 
 ?>
-
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
@@ -191,7 +189,7 @@ if($editable){
 	}
 	else{
 		?>
-		<div sytle="margin:30px;font-weight:bold;font-size:120px;">
+		<div style="margin:30px;font-weight:bold;font-size:120px;">
 			No species have been marked as sensitive within the system.
 		</div>
 		<?php 
