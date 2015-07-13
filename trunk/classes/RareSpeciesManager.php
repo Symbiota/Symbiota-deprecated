@@ -1,6 +1,7 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
- 
+include_once($serverRoot.'/classes/OccurrenceUtilities.php');
+
 class RareSpeciesManager {
     
  	private $con;
@@ -36,8 +37,8 @@ class RareSpeciesManager {
 	 		//echo $sql;
 			$this->con->query($sql);
 			//Update specimen records
-			$sql2 = 'UPDATE omoccurrences o SET o.LocalitySecurity = 1 WHERE (o.tidinterpreted = '.$tid.')';
-			$this->con->query($sql2);
+			$occurUtil = new OccurrenceUtilities();
+			$occurUtil->protectGloballyRareSpecies();
 		}
 	}
 
@@ -47,8 +48,15 @@ class RareSpeciesManager {
 	 		//echo $sql;
 			$this->con->query($sql);
 			//Update specimen records
-			$sql2 = 'UPDATE omoccurrences o SET o.LocalitySecurity = 0 WHERE (o.tidinterpreted = '.$tid.')';
+			$sql2 = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+				'INNER JOIN taxa t ON ts2.tid = t.tid '.
+				'SET o.LocalitySecurity = 0 '.
+				'WHERE (t.tid = '.$tid.')';
+			//echo $sql2; exit;
 			$this->con->query($sql2);
+			$occurUtil = new OccurrenceUtilities();
+			$occurUtil->protectGloballyRareSpecies();
 		}
 	}
 }

@@ -60,7 +60,8 @@ class OccurrenceSkeletal {
 						$sql2 .= ',NULL';
 					}
 				}
-				$sql = 'INSERT INTO omoccurrences('.trim($sql1,' ,').') VALUES('.trim($sql2,' ,').')';
+				$sql = 'INSERT INTO omoccurrences('.trim($sql1,' ,').',recordenteredby,dateentered) '.
+					'VALUES('.trim($sql2,' ,').',"'.$GLOBALS['USERNAME'].'","'.date('Y-m-d H:i:s').'")';
 				//echo $sql;
 				if($this->conn->query($sql)){
 					$occid = $this->conn->insert_id;

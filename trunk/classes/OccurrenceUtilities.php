@@ -823,10 +823,17 @@ class OccurrenceUtilities {
 	
 	//Protect Rare species data
 	public function protectRareSpecies($collid = 0){
+		$this->protectGloballyRareSpecies($collid);
+		$this->protectStateRareSpecies($collid);
+	}
+	
+	public function protectGloballyRareSpecies($collid = 0){
 		$status = true;
 		//protect globally rare species
 		if($this->verbose) $this->outputMsg('Protecting globally rare species... ',1);
-		$sql = 'UPDATE taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+			'INNER JOIN taxa t ON ts2.tid = t.tid '.
 			'SET o.LocalitySecurity = t.SecurityStatus '.
 			'WHERE (t.SecurityStatus > 0) AND (o.LocalitySecurity IS NULL)';
 		if(!$this->conn->query($sql)){
@@ -835,7 +842,11 @@ class OccurrenceUtilities {
 			if($this->verbose) $this->outputMsg($errStr,2);
 			$status = false;
 		}
-		
+		return $status;
+	}
+
+	public function protectStateRareSpecies($collid = 0){
+		$status = true;
 		//Protect state level rare species
 		if($this->verbose) $this->outputMsg('Protecting state level rare species... ',1);
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
