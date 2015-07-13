@@ -12,15 +12,15 @@ class OccurrenceSkeletal {
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$this->stateList = array('AK' => 'Alaska', 'AL' => 'Alabama', 'AZ' => 'Arizona', 'AR' => 'Arkansas', 'CA' => 'California', 
-			'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware', 'DC' => 'District of Columbia', 'FL' => 'Florida', 
-			'GA' => 'Georgia', 'GU' => 'Guam', 'HI' => 'Hawaii', 'ID' => 'Idaho', 'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 
-			'Iowa', 'KS' => 'Kansas', 'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MH' => 'Marshall Islands', 'MD' => 
-			'Maryland', 'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi', 'MO' => 'Missouri', 
-			'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada', 'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 
-			'NY' => 'New York', 'NC' => 'North Carolina', 'ND' => 'North Dakota', 'MP' => 'Northern Mariana Islands', 'OH' => 'Ohio', 
-			'OK' => 'Oklahoma', 'OR' => 'Oregon', 'PW' => 'Palau', 'PA' => 'Pennsylvania', 'PR' => 'Puerto Rico', 'RI' => 'Rhode Island', 
-			'SC' => 'South Carolina', 'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah', 'VT' => 'Vermont', 
+		$this->stateList = array('AK' => 'Alaska', 'AL' => 'Alabama', 'AZ' => 'Arizona', 'AR' => 'Arkansas', 'CA' => 'California',
+			'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware', 'DC' => 'District of Columbia', 'FL' => 'Florida',
+			'GA' => 'Georgia', 'GU' => 'Guam', 'HI' => 'Hawaii', 'ID' => 'Idaho', 'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' =>
+			'Iowa', 'KS' => 'Kansas', 'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MH' => 'Marshall Islands', 'MD' =>
+			'Maryland', 'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi', 'MO' => 'Missouri',
+			'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada', 'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico',
+			'NY' => 'New York', 'NC' => 'North Carolina', 'ND' => 'North Dakota', 'MP' => 'Northern Mariana Islands', 'OH' => 'Ohio',
+			'OK' => 'Oklahoma', 'OR' => 'Oregon', 'PW' => 'Palau', 'PA' => 'Pennsylvania', 'PR' => 'Puerto Rico', 'RI' => 'Rhode Island',
+			'SC' => 'South Carolina', 'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah', 'VT' => 'Vermont',
 			'VI' => 'Virgin Islands', 'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia', 'WI' => 'Wisconsin', 'WY' =>  'Wyoming');
 	}
 
@@ -38,7 +38,7 @@ class OccurrenceSkeletal {
 				if($postArr['stateprovince'] && strlen($postArr['stateprovince']) == 2){
 					$postArr['stateprovince'] = $this->translateStateAbbreviation($postArr['stateprovince']);
 				}
-				//If country is NULL and state populated, grab country from geo-lookup tables 
+				//If country is NULL and state populated, grab country from geo-lookup tables
 				if((!isset($postArr['country']) || !$postArr['country']) && $postArr['stateprovince']){
 					$postArr['country'] = $this->getCountry($postArr['stateprovince']);
 				}
@@ -102,7 +102,7 @@ class OccurrenceSkeletal {
 			else{
 				$sql = 'SELECT c.countryname '.
 					'FROM lkupstateprovince s INNER JOIN lkupcountry c ON s.countryid = c.countryid '.
-					'WHERE s.statename = "alberta"';
+					'WHERE s.statename = "'.$state.'"';
 				$rs = $this->conn->query($sql);
 				if($r = $rs->fetch_object()) {
 					$countryStr = $r->countryname;
@@ -153,11 +153,11 @@ class OccurrenceSkeletal {
 			$rs->free();
 		}
 	}
-	
+
 	public function getCollectionMap(){
 		return $this->collectionMap;
 	}
-	
+
 	public function getLanguageArr(){
 		$retArr = array();
 		$sql = 'SELECT iso639_1, langname '.
@@ -172,7 +172,7 @@ class OccurrenceSkeletal {
 	}
 
 	public function getErrorStr(){
-		return $this->errorStr;	
+		return $this->errorStr;
 	}
 
 	//Misc functions
