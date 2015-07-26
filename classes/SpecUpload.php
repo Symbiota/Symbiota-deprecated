@@ -149,7 +149,7 @@ class SpecUpload{
 	}
 
 	//Upload Review
-	public function getUploadMap($start, $limit){
+	public function getUploadMap($start,$limit,$type){
 		$retArr = Array();
 		if($limit){
 			$occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
@@ -166,7 +166,14 @@ class SpecUpload{
 				'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
 				'labelproject','basisofrecord','ownerinstitutioncode', 'processingstatus', 'recordenteredby');
 			$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp '.
-				'WHERE collid = '.$this->collId.' LIMIT 1000';
+				'WHERE collid = '.$this->collId.' ';
+			if($type == 'new'){
+				$sql .= 'AND ISNULL(occid) ';
+			}
+			if($type == 'update'){
+				$sql .= 'AND occid IS NOT NULL ';
+			}
+			$sql .= 'LIMIT 1000 ';
 			//echo "<div>".$sql."</div>"; exit;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_assoc()){
