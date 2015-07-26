@@ -4,6 +4,7 @@ include_once($serverRoot.'/classes/SpecUpload.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$type = array_key_exists('type',$_REQUEST)?$_REQUEST['type']:'';
 $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:1000;
 $pageIndex = array_key_exists('pageindex',$_REQUEST)?$_REQUEST['pageindex']:0;
 
@@ -76,7 +77,7 @@ if($SYMB_UID){
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 </head>
-<body style="margin-left: 0px; margin-right: 0px;">
+<body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<!-- inner text -->
 	<div id="">
 		<?php 
@@ -85,7 +86,7 @@ if($SYMB_UID){
 				echo '<h2>'.$collMap['name'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 			}
 			//Setup header map
-			$recArr = $uploadManager->getUploadMap(($recLimit*$pageIndex),$recLimit);
+			$recArr = $uploadManager->getUploadMap(($recLimit*$pageIndex),$recLimit,$type);
 			if($recArr){
 				//Check to see which headers have values
 				$headerArr = array();
@@ -98,7 +99,7 @@ if($SYMB_UID){
 				}
 				$headerMap = array_intersect_key($headerMapBase, $headerArr);
 				?>
-				<table class="styledtable">
+				<table class="styledtable" style="font-family:Arial;font-size:12px;">
 					<tr>
 						<?php 
 						foreach($headerMap as $k => $v){
