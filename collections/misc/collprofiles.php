@@ -433,7 +433,7 @@ if($SYMB_UID){
 				<div style="clear:both;margin-top:5px;">
 					<div style="font-weight:bold;">Collection Statistics:</div>
 					<ul style="margin-top:5px;">
-						<li><?php echo $collData["recordcnt"];?> specimens</li>
+						<li><?php echo $collData["recordcnt"];?> specimen records</li>
 						<li><?php echo ($collData['georefcnt']?$collData['georefcnt']:0).($georefPerc?" (".($georefPerc>1?round($georefPerc):round($georefPerc,2))."%)":'');?> georeferenced</li>
 						<?php
 						if($extrastatsArr&&$extrastatsArr['imgcnt']) echo '<li>'.($extrastatsArr['imgcnt']?$extrastatsArr['imgcnt']:0).($imgPerc?" (".($imgPerc>1?round($imgPerc):round($imgPerc,2))."%)":'').' with images</li>';
@@ -542,7 +542,7 @@ if($SYMB_UID){
 					foreach($famArr as $name => $data){
 						echo '<li>';
 						echo $name;
-						echo ' (<a href="../list.php?db[]='.$collid.'&type=1&reset=1&taxa='.$name.'" target="_blank">'.$data['SpecimensPerFamily'].'</a>)';
+						echo ' (<a href="../list.php?usecookies=false&db[]='.$collid.'&type=1&reset=1&taxa='.$name.'" target="_blank">'.$data['SpecimensPerFamily'].'</a>)';
 						echo '</li>';
 					}
 					?>
@@ -558,7 +558,7 @@ if($SYMB_UID){
 						echo '<a href="collprofiles.php?sgl=1&collid='.$collid.'&country='.$name.'">';
 						echo $name;
 						echo '</a>';
-						echo ' (<a href="../list.php?db[]='.$collid.'&reset=1&country='.$name.'" target="_blank">'.$data['CountryCount'].'</a>)';
+						echo ' (<a href="../list.php?usecookies=false&db[]='.$collid.'&reset=1&country='.$name.'" target="_blank">'.$data['CountryCount'].'</a>)';
 						echo '</li>';
 					}
 					?>
