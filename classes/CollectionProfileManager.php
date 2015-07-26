@@ -733,7 +733,11 @@ class CollectionProfileManager {
 	public function getYearStatsDataArr($collId){
 		$statArr = array();
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
-			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, count(o.occid) AS speccnt, count(i.imgid) AS imgcnt '.
+			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, count(o.occid) AS speccnt, '.
+			'COUNT(CASE WHEN o.processingstatus = "stage 1" THEN o.occid ELSE NULL END) AS stage1Count, '.
+			'COUNT(CASE WHEN o.processingstatus = "stage 2" THEN o.occid ELSE NULL END) AS stage2Count, '.
+			'COUNT(CASE WHEN o.processingstatus = "stage 3" THEN o.occid ELSE NULL END) AS stage3Count, '.
+			'count(i.imgid) AS imgcnt '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
 			'LEFT JOIN images i ON o.occid = i.occid '.
 			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < 365 '.
@@ -744,6 +748,9 @@ class CollectionProfileManager {
 			$statArr[$r->collcode]['collcode'] = $r->collcode;
 			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['speccnt'] = $r->speccnt;
+			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage1Count'] = $r->stage1Count;
+			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage2Count'] = $r->stage2Count;
+			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage3Count'] = $r->stage3Count;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['imgcnt'] = $r->imgcnt;
 		}
 		$rs->free();

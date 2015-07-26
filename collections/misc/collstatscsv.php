@@ -78,6 +78,24 @@ if($action == 'Download CSV'){
 			}
 			$i++;
 			$outputArr[$i]['name'] = '';
+			$outputArr[$i]['object'] = 'Stage 1';
+			foreach($headerArr as $h => $month){
+				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['stage1Count']:0);
+			}
+			$i++;
+			$outputArr[$i]['name'] = '';
+			$outputArr[$i]['object'] = 'Stage 2';
+			foreach($headerArr as $h => $month){
+				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['stage2Count']:0);
+			}
+			$i++;
+			$outputArr[$i]['name'] = '';
+			$outputArr[$i]['object'] = 'Stage 3';
+			foreach($headerArr as $h => $month){
+				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['stage3Count']:0);
+			}
+			$i++;
+			$outputArr[$i]['name'] = '';
 			$outputArr[$i]['object'] = 'Images';
 			foreach($headerArr as $h => $month){
 				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['imgcnt']:0);
