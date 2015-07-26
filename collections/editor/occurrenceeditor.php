@@ -973,7 +973,10 @@ else{
 													<div id="footprintWktDiv">
 														<?php echo (defined('FOOTPRINTWKTLABEL')?FOOTPRINTWKTLABEL:'footprint (polygon)'); ?>
 														<br/>
-														<textarea name="footprintwkt" onchange="footPrintWktChanged(this)" style="height:22px;"><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
+														<div style="float:right;margin-top:-2px;margin-left:2px;" id="googleDiv" onclick="openMappingPolyAid();" title="Google Maps">
+															<img src="../../images/world.png" />
+														</div>
+														<textarea name="footprintwkt" id="footprintWKT" onchange="footPrintWktChanged(this)" style="height:22px;resize:vertical;" readonly><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
 													</div>
 												</div>
 											</div>
