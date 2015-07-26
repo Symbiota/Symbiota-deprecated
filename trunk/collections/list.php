@@ -24,6 +24,13 @@ elseif($stArrCollJson && !$stArrSearchJson){
 	$stArr = array_merge($collArray,$collStArr);
 	$stArrSearchJson = json_encode($collArray);
 }
+else{
+	$collArray = $collManager->getSearchTerms();
+	$collStArr = $collManager->getSearchTerms();
+	$stArr = array_merge($collArray,$collStArr);
+	$stArrSearchJson = json_encode($collArray);
+	$stArrCollJson = json_encode($collArray);
+}
 
 $stArrJson = json_encode($stArr);
 $collManager->setSearchTermsArr($stArr);
