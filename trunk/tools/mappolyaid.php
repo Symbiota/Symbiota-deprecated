@@ -42,17 +42,80 @@ else{
 				var footPolyPaths = [];
 				var polyBounds = new google.maps.LatLngBounds();
 				if(opener.document.getElementById("footprintWKT").value != ''){
-					footPolyArr = JSON.parse(opener.document.getElementById("footprintWKT").value);
+					/*if(/^[\],:{}\s]*$/.test(opener.document.getElementById("footprintWKT").value.replace(/\\["\\\/bfnrtu]/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){
+						footPolyArr = JSON.parse(opener.document.getElementById("footprintWKT").value);
+					}*/
+					var jsonTest = true;
+					try{
+						JSON.parse(opener.document.getElementById("footprintWKT").value);
+					}catch(e){
+						jsonTest = false;
+					}
+					if(jsonTest){
+						footPolyArr = JSON.parse(opener.document.getElementById("footprintWKT").value);
+					}
+					else if(!isNaN(opener.document.getElementById("footprintWKT").value.substr(0,opener.document.getElementById("footprintWKT").value.indexOf(',')))){
+						var numWktArr = opener.document.getElementById("footprintWKT").value.split(",");
+						if(numWktArr.length % 2 === 0){
+							for(i=0;i<numWktArr.length;i+=2){
+								var b = i+1;
+								footPolyArr.push({"A":numWktArr[i],"D":numWktArr[b]});
+							}
+							footPolyArr.push({"A":numWktArr[0],"D":numWktArr[1]});
+						}
+						else{
+							alert("The footprint is not in the proper format. Please recreate it using the map tools.");
+						}
+					}
+					else if((opener.document.getElementById("footprintWKT").value.substring(0,10) == "POLYGON ((") && (opener.document.getElementById("footprintWKT").value.lastIndexOf('))') == opener.document.getElementById("footprintWKT").value.length - '))'.length)){
+						var cleanedStr = opener.document.getElementById("footprintWKT").value.replace("POLYGON ((","");
+						cleanedStr = cleanedStr.replace("))","");
+						var cleanedStrArr = cleanedStr.split(",");
+						var validForm = true;
+						for(i=0;i<cleanedStrArr.length;i++){
+							var partsArr = cleanedStrArr[i].trim().split(" ");
+							if(i===0){
+								var firstParts = partsArr;
+							}
+							if(partsArr.length % 2 === 0){
+								footPolyArr.push({"A":partsArr[1],"D":partsArr[0]});
+							}
+							else{
+								alert("The footprint is not in the proper format. Please recreate it using the map tools.");
+								validForm = false;
+								footPolyArr = [];
+								break;
+							}
+						}
+						if(validForm){
+							footPolyArr.push({"A":firstParts[1],"D":firstParts[0]});
+						}
+					}
+					else{
+						alert("The footprint is not in the proper format. Please recreate it using the map tools.");
+					}
 				}
 				if(footPolyArr.length > 0){
-					for (i in footPolyArr) {
+					for(i in footPolyArr){
 						var keys = Object.keys(footPolyArr[i]);
-						footPolyPaths.push(new google.maps.LatLng(footPolyArr[i][keys[0]], footPolyArr[i][keys[1]]));
-						polyBounds.extend(new google.maps.LatLng(footPolyArr[i][keys[0]], footPolyArr[i][keys[1]]));
+						if(!isNaN(footPolyArr[i][keys[0]]) && !isNaN(footPolyArr[i][keys[1]])){
+							footPolyPaths.push(new google.maps.LatLng(footPolyArr[i][keys[0]],footPolyArr[i][keys[1]]));
+							polyBounds.extend(new google.maps.LatLng(footPolyArr[i][keys[0]],footPolyArr[i][keys[1]]));
+						}
+						else{
+							alert("The footprint is not in the proper format. Please recreate it using the map tools.");
+							validWKT = false;
+							break;
+						}
 					}
-					footPolyPaths.push(new google.maps.LatLng(footPolyArr[0][keys[0]], footPolyArr[0][keys[1]]));
-					polyBounds.extend(new google.maps.LatLng(footPolyArr[0][keys[0]], footPolyArr[0][keys[1]]));
+					if(validWKT){
+						footPolyPaths.push(new google.maps.LatLng(footPolyArr[0][keys[0]],footPolyArr[0][keys[1]]));
+						polyBounds.extend(new google.maps.LatLng(footPolyArr[0][keys[0]],footPolyArr[0][keys[1]]));
+					}
 				}
+				/*else{
+					alert("here");
+				}*/
 				var dmLatLng = new google.maps.LatLng(latCenter,lngCenter);
 		    	var dmOptions = {
 					zoom: <?php echo $zoom; ?>,
@@ -188,20 +251,20 @@ else{
 			}
 
 	        function updateParentForm() {
-				try{
-		            opener.document.getElementById("footprintWKT").value = document.getElementById("poly_array").value;
+				if(opener.document.getElementById("footprintWKT")){
+					opener.document.getElementById("footprintWKT").value = document.getElementById("poly_array").value;
+					opener.document.getElementById("footprintWKT").onchange();
+				}
+				else if(opener.document.getElementById("polysavebox")){
 					opener.document.getElementById("polysavebox").style.display = "block";
-					if(opener.document.getElementById("polyexistsbox")){
-						opener.document.getElementById("polyexistsbox").style.display = "none";
-					}
-					if(opener.document.getElementById("polycreatebox")){
-						opener.document.getElementById("polycreatebox").style.display = "none";
-					}
 				}
-				catch(myErr){
-					alert("Unable to transfer data. Please let an administrator know.");
+				if(opener.document.getElementById("polyexistsbox")){
+					opener.document.getElementById("polyexistsbox").style.display = "none";
 				}
-	            self.close();
+				if(opener.document.getElementById("polycreatebox")){
+					opener.document.getElementById("polycreatebox").style.display = "none";
+				}
+				self.close();
 	            return false;
 	        }
 	    </script>
