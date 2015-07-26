@@ -45,8 +45,9 @@ if($collId){
 						?>
 					</tr>
 					<?php
+					$recCnt = 0;
 					foreach($statArr as $code => $data){
-						echo '<tr>';
+						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td>'.wordwrap($data['collectionname'],52,"<br />\n",true).'</td>';
 						echo '<td>Specimens</td>';
 						foreach($dateArr as $i => $month){
@@ -58,7 +59,43 @@ if($collId){
 							}
 						}
 						echo '</tr>';
-						echo '<tr>';
+						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
+						echo '<td></td>';
+						echo '<td>Stage 1</td>';
+						foreach($dateArr as $i => $month){
+							if(array_key_exists($month,$data['stats'])){
+								echo '<td>'.$data['stats'][$month]['stage1Count'].'</td>';
+							}
+							else{
+								echo '<td>0</td>';
+							}
+						}
+						echo '</tr>';
+						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
+						echo '<td></td>';
+						echo '<td>Stage 2</td>';
+						foreach($dateArr as $i => $month){
+							if(array_key_exists($month,$data['stats'])){
+								echo '<td>'.$data['stats'][$month]['stage2Count'].'</td>';
+							}
+							else{
+								echo '<td>0</td>';
+							}
+						}
+						echo '</tr>';
+						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
+						echo '<td></td>';
+						echo '<td>Stage 3</td>';
+						foreach($dateArr as $i => $month){
+							if(array_key_exists($month,$data['stats'])){
+								echo '<td>'.$data['stats'][$month]['stage3Count'].'</td>';
+							}
+							else{
+								echo '<td>0</td>';
+							}
+						}
+						echo '</tr>';
+						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td></td>';
 						echo '<td>Images</td>';
 						foreach($dateArr as $i => $month){
@@ -70,6 +107,7 @@ if($collId){
 							}
 						}
 						echo '</tr>';
+						$recCnt++;
 					}
 					?>
 				</table>
