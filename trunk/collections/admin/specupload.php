@@ -379,22 +379,7 @@ $duManager->loadFieldMap();
 						?>
 					</div>
  					<div style="margin:25px;font-weight:bold;"> 
-						<?php
-						if($reportArr['update']){
-							?>
-							<div style="font-weight:bold;"> 
-								<a href="uploadviewer.php?collid=<?php echo $collid;?>&type=update" target="_blank">Click to review records to be updated</a>
-							</div>
-							<?php
-						}
-						if($reportArr['new']){
-							?>
-							<div style="margin-top:5px;font-weight:bold;"> 
-								<a href="uploadviewer.php?collid=<?php echo $collid;?>&type=new" target="_blank">Click to review new records</a>
-							</div>
-							<?php
-						}
-						?>
+						<a href="uploadviewer.php?collid=<?php echo $collid;?>" target="_blank">Click to review specimen records</a>
 					</div>
 					<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
 	 					<input type="hidden" name="collid" value="<?php echo $collid;?>" /> 
