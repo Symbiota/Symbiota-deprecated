@@ -341,31 +341,56 @@ $duManager->loadFieldMap();
  					<div style="margin:5px;">
  						<?php 
  						$reportArr = $duManager->getTransferReport();
-						echo '<div>Occurrences pending transfer: '.$reportArr['occur'].'</div>';
+						echo '<div>Occurrences pending transfer: '.$reportArr['occur'];
+						if($reportArr['occur']){
+							echo ' <a href="uploadviewer.php?collid='.$collid.'" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+						}
+						echo '</div>';
 						echo '<div style="margin-left:15px;">';
-						echo '<div>Records to be updated: '.$reportArr['update'].'</div>';
-						echo '<div>New records: '.$reportArr['new'].'</div>';
+						echo '<div>Records to be updated: ';
+						echo $reportArr['update'];
+						if($reportArr['update']) echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+						echo '</div>';
+						echo '<div>New records: ';
+						echo $reportArr['new'];
+						if($reportArr['new']) echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+						echo '</div>';
 						if(isset($reportArr['matchappend']) && $reportArr['matchappend']){
-							echo '<div>Records matching on catalog number that will be appended : '.$reportArr['matchappend'].'</div>';
+							echo '<div>Records matching on catalog number that will be appended : ';
+							echo $reportArr['matchappend'];
+							if($reportArr['matchappend']) echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=matchappend" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo '</div>';
 							echo '<div style="margin-left:15px;color:orange;">WARNING: This will result in records with duplicate catalog numbers</div>';
 						}
 						if(isset($reportArr['sync']) && $reportArr['sync']){
-							echo '<div>Records that will be syncronized with central database: '.$reportArr['sync'].'</div>';
-							echo '<div style="margin-left:15px;">These are typically records that have been originally processed within the portal, exported and integrated into local management database, and are not be reimported and synchronized with the portal records by matching on catalog number.</div>';
-							echo '<div style="margin-left:15px;color:orange;">WARNING: Incoming records will replace portal records with matching catalog numbers. Make sure incoming records are the most up-to-date.</div>';
+							echo '<div>Records that will be syncronized with central database: ';
+							echo $reportArr['sync'];
+							if($reportArr['sync'])  echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=sync" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo '</div>';
+							echo '<div style="margin-left:15px;">These are typically records that have been originally processed within the portal, exported and integrated into a local management database, and then reimported and synchronized with the portal records by matching on catalog number.</div>';
+							echo '<div style="margin-left:15px;color:orange;">WARNING: Incoming records will replace portal records by matching on catalog numbers. Make sure incoming records are the most up-to-date record!</div>';
 						}
 						if(isset($reportArr['exist']) && $reportArr['exist']){
-							echo '<div>Previous loaded records not matching incoming records: '.$reportArr['exist'].'</div>';
+							echo '<div>Previous loaded records not matching incoming records: ';
+							echo $reportArr['exist'];
+							if($reportArr['exist'])  echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=exist" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo '</div>';
 							echo '<div style="margin-left:15px;">';
 							echo 'Note: If you are doing a partical upload, this is expected. ';
 							echo 'If you are doing a full data refresh, these may be records that were deleted within your local database but not within the portal.';
 							echo '</div>';
 						}
 						if(isset($reportArr['nulldbpk']) && $reportArr['nulldbpk']){
-							echo '<div style="color:red;">Records that will be removed due to NULL Primary Identifier: '.$reportArr['nulldbpk'].'</div>';
+							echo '<div style="color:red;">Records that will be removed due to NULL Primary Identifier: ';
+							echo $reportArr['nulldbpk'];
+							if($reportArr['nulldbpk']) echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo '</div>';
 						}
 						if(isset($reportArr['dupdbpk']) && $reportArr['dupdbpk']){
-							echo '<div style="color:red;">Records that will be removed due to DUPLICATE Primary Identifier: '.$reportArr['dupdbpk'].'</div>';
+							echo '<div style="color:red;">Records that will be removed due to DUPLICATE Primary Identifier: ';
+							echo $reportArr['dupdbpk'];
+							if($reportArr['dupdbpk'])  echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dupdbpk" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo '</div>';
 						}
 						echo '</div>';
 						//Extensions
@@ -377,9 +402,6 @@ $duManager->loadFieldMap();
 						}
 						
 						?>
-					</div>
- 					<div style="margin:25px;font-weight:bold;"> 
-						<a href="uploadviewer.php?collid=<?php echo $collid;?>" target="_blank">Click to review specimen records</a>
 					</div>
 					<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
 	 					<input type="hidden" name="collid" value="<?php echo $collid;?>" /> 

@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once $SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG.'.php';
+include_once $SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php';
 include_once($serverRoot.'/classes/OccurrenceManager.php');
 header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1

@@ -617,7 +617,7 @@ class SpecUploadBase extends SpecUpload{
 		$rs->free();
 
 		if($this->collMetadataArr["managementtype"] == 'Live Data' && !$this->matchCatalogNumber  && !$this->matchOtherCatalogNumbers){
-			//Records that can be matched on on Catalog Number, but will be appended 
+			//Records that can be matched on Catalog Number, but will be appended 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.collid = o.collid '.
 				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';

@@ -452,7 +452,7 @@ class DwcArchiverOccurrence{
 
 	private function initImageArr(){
 		$imgFieldArr['coreid'] = 'o.occid';
-		$imgTermArr['identifier'] = '"http://purl.org/dc/terms/identifier';
+		$imgTermArr['identifier'] = 'http://purl.org/dc/terms/identifier';
 		$imgFieldArr['identifier'] = 'IFNULL(i.originalurl,i.url) as identifier';
 		$imgTermArr['accessURI'] = 'http://rs.tdwg.org/ac/terms/accessURI';
 		$imgFieldArr['accessURI'] = 'IFNULL(i.originalurl,i.url) as accessURI';
@@ -649,7 +649,6 @@ class DwcArchiverOccurrence{
 
 	private function applyConditions(){
 		$sqlFrag = '';
-		if($this->conditionSql) return true;
 		if($this->conditionArr){
 			foreach($this->conditionArr as $field => $condArr){
 				$sqlFrag2 = '';

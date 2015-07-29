@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/imageoccursubmit.php?'.$_SERVER['QUERY_STRING']);
 
 $collid  = $_REQUEST["collid"];
-$action = array_key_exists("formaction",$_REQUEST)?$_REQUEST["formaction"]:"";
+$action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 
 $occurManager = new OccurrenceEditorImages();
 $occurManager->setCollid($collid);
@@ -28,8 +28,10 @@ if($isEditor){
 	if($action == 'Submit Occurrence'){
 		if($occurManager->addImageOccurrence($_POST)){
 			$occid = $occurManager->getOccid();
+			if($occid) $statusStr = 'New record has been created: <a href="occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
+		}
+		else{
 			$statusStr = $occurManager->getErrorStr();
-			if($occid && isset($_POST['gotomode']) && $_POST['gotomode']) header('Location: occurrenceeditor.php?occid='.$occid);
 		}
 	}
 }
@@ -104,7 +106,7 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 						</div>
 						<div>
 							<input type="checkbox" name="copytoserver" value="1" <?php echo (isset($_POST['copytoserver'])&&$_POST['copytoserver']?'checked':''); ?> /> 
-							Copy large image to server (if left unchecked, source URL will server as large version)
+							Copy large image to server (if left unchecked, source URL will serve as large version)
 						</div>
 					</div>
 					<div style="float:right;text-decoration:underline;font-weight:bold;">
@@ -132,8 +134,6 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 						<input name="scientificnameauthorship" type="text" value="<?php echo (isset($_POST['scientificnameauthorship'])?$_POST['scientificnameauthorship']:''); ?>" /><br/>
 						<input type="hidden" id="tidinterpreted" name="tidinterpreted" value="<?php echo (isset($_POST['tidinterpreted'])?$_POST['tidinterpreted']:''); ?>" />
 						<b>Family:</b> <input name="family" type="text" value="<?php echo (isset($_POST['family'])?$_POST['family']:''); ?>" />
-						<input type="checkbox" name="localitysecurity" tabindex="0" value="1" <?php echo (isset($occArr['localitysecurity'])&&$occArr['localitysecurity']?'CHECKED':''); ?> />
-						Protect locality details from general public
 					</div>
 					<div> 
 						<div style="float:left;margin:3px;">
@@ -142,7 +142,7 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 						</div> 
 						<div style="float:left;margin:3px;">
 							<b>State/Province:</b><br/>
-							<input id="state" name="stateprovince" type="text" value="<?php echo (isset($_POST['stateprovince'])?$_POST['stateprovince']:''); ?>" onchange="localitySecurityCheck(this.form)" />
+							<input id="state" name="stateprovince" type="text" value="<?php echo (isset($_POST['stateprovince'])?$_POST['stateprovince']:''); ?>" />
 						</div> 
 						<div style="float:left;margin:3px;">
 							<b>County:</b><br/>
@@ -163,15 +163,8 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 				</fieldset>
 				<div style="margin:10px;clear:both;">
 					<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
-					<input type="submit" name="formaction" value="Submit Occurrence" />
+					<input type="submit" name="action" value="Submit Occurrence" />
 					<input type="reset" name="reset" value="Reset Form" />
-					<div style="margin-top:10px;">
-						<b>Follow-up Action:</b>
-					</div>
-					<div style="margin-left:20px;">
-						<input type="radio" name="gotomode" value="0" <?php echo (isset($_POST['gotomode'])&&$_POST['gotomode']?'':'CHECKED'); ?> /> Add Another Image<br/>
-						<input type="radio" name="gotomode" value="1" <?php echo (isset($_POST['gotomode'])&&$_POST['gotomode']?'CHECKED':''); ?> /> Go to Editor 
-					</div>
 				</div>
 			</form>
 			<?php 

@@ -556,7 +556,7 @@ class OccurrenceUtilities {
 		ob_flush();
 		flush();
 		$sql = 'SELECT o.occid, o.associatedtaxa '.
-			'FROM omoccurrences o LEFT JOIN omoccurassoctaxa a ON o.occid = a.occid '.
+			'FROM omoccurrences o LEFT JOIN omoccurassociation a ON o.occid = a.occid '.
 			'WHERE o.associatedtaxa IS NOT NULL AND a.occid IS NULL ';
 		if($collid && is_numeric($collid)){
 			$sql .= 'AND o.collid = '.$collid;
@@ -577,7 +577,7 @@ class OccurrenceUtilities {
 		echo '<li>Populate tid field using taxa table... ';
 		ob_flush();
 		flush();
-		$sql2 = 'UPDATE omoccurassoctaxa a INNER JOIN taxa t ON a.verbatimstr = t.sciname '.
+		$sql2 = 'UPDATE omoccurassociation a INNER JOIN taxa t ON a.verbatimsciname = t.sciname '.
 			'SET a.tid = t.tid '.
 			'WHERE a.tid IS NULL';
 		if(!$this->conn->query($sql2)){
@@ -590,7 +590,7 @@ class OccurrenceUtilities {
 		echo '<li>Populate tid field using taxavernaculars table... ';
 		ob_flush();
 		flush();
-		$sql3 = 'UPDATE omoccurassoctaxa a INNER JOIN taxavernaculars v ON a.verbatimstr = v.vernacularname '.
+		$sql3 = 'UPDATE omoccurassociation a INNER JOIN taxavernaculars v ON a.verbatimsciname = v.vernacularname '.
 			'SET a.tid = v.tid '.
 			'WHERE a.tid IS NULL ';
 		if(!$this->conn->query($sql3)){
@@ -599,16 +599,16 @@ class OccurrenceUtilities {
 		}
 		echo 'Done!</li>';
 		
-		//Populate tid field by linking back to omoccurassoctaxa table
+		//Populate tid field by linking back to omoccurassociation table
 		//This assumes that tids are correct; in future verificationscore field can be used to select only those that have been verified
-		echo '<li>Populate tid field by linking back to omoccurassoctaxa table... ';
+		echo '<li>Populate tid field by linking back to omoccurassociation table... ';
 		ob_flush();
 		flush();
-		$sql4 = 'UPDATE omoccurassoctaxa a INNER JOIN omoccurassoctaxa a2 ON a.verbatimstr = a2.verbatimstr '.
+		$sql4 = 'UPDATE omoccurassociation a INNER JOIN omoccurassociation a2 ON a.verbatimsciname = a2.verbatimsciname '.
 			'SET a.tid = a2.tid '.
 			'WHERE a.tid IS NULL AND a2.tid IS NOT NULL ';
 		if(!$this->conn->query($sql4)){
-			echo '<li style="margin-left:10px;">Unable to populate tid field relinking back to omoccurassoctaxa table: '.$this->conn->error.'</li>';
+			echo '<li style="margin-left:10px;">Unable to populate tid field relinking back to omoccurassociation table: '.$this->conn->error.'</li>';
 			echo '<li style="margin-left:10px;">'.$sql4.'</li>';
 		}
 		echo 'Done!</li>';
@@ -617,17 +617,17 @@ class OccurrenceUtilities {
 		echo '<li>Mining database for the more difficult matches... ';
 		ob_flush();
 		flush();
-		$sql5 = 'SELECT DISTINCT verbatimstr '.
-			'FROM omoccurassoctaxa '.
+		$sql5 = 'SELECT DISTINCT verbatimsciname '.
+			'FROM omoccurassociation '.
 			'WHERE tid IS NULL ';
 		$rs5 = $this->conn->query($sql5);
 		while($r5 = $rs5->fetch_object()){
-			$verbStr = $r5->verbatimstr;
+			$verbStr = $r5->verbatimsciname;
 			$tid = $this->mineAssocSpeciesMatch($verbStr);
 			if($tid){
-				$sql5b = 'UPDATE omoccurassoctaxa '.
+				$sql5b = 'UPDATE omoccurassociation '.
 					'SET tid = '.$tid.' '.
-					'WHERE tid IS NULL AND verbatimstr = "'.$verbStr.'"';
+					'WHERE tid IS NULL AND verbatimsciname = "'.$verbStr.'"';
 				if(!$this->conn->query($sql5b)){
 					echo '<li style="margin-left:10px;">Unable to populate NULL tid field: '.$this->conn->error.'</li>';
 					echo '<li style="margin-left:10px;">'.$sql5b.'</li>';
@@ -642,8 +642,8 @@ class OccurrenceUtilities {
 		ob_flush();
 		flush();
 	}
-	
-	public function parseAssocSpecies($assocSpeciesStr,$occid){
+
+	private function parseAssocSpecies($assocSpeciesStr,$occid){
 		$parseArr = array();
 		if($assocSpeciesStr){
 			//Separate associated species
@@ -680,9 +680,9 @@ class OccurrenceUtilities {
 
 	private function databaseAssocSpecies($assocArr, $occid){
 		if($assocArr){
-			$sql = 'INSERT INTO omoccurassoctaxa(occid, verbatimstr) VALUES';
+			$sql = 'INSERT INTO omoccurassociation(occid, verbatimsciname, relationship) VALUES';
 			foreach($assocArr as $aStr){
-				$sql .= '('.$occid.',"'.$this->conn->real_escape_string($aStr).'"), ';
+				$sql .= '('.$occid.',"'.$this->conn->real_escape_string($aStr).'","associatedSpecies"), ';
 			}
 			$sql = trim($sql,', ');
 			//echo $sql; exit;
