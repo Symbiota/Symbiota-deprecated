@@ -145,8 +145,7 @@ if($symbUid){
 		//Only full editors can perform following actions
 		if($isEditor == 1 || $isEditor == 2){
 			if($action == 'Add Record'){
-				$statusStr = $occManager->addOccurrence($_POST);
-				if(strpos($statusStr,'SUCCESS') !== false){
+				if($occManager->addOccurrence($_POST)){
 					$occManager->setQueryVariables();
 					$qryCnt = $occManager->getQueryRecordCount();
 					$qryCnt++;
@@ -158,6 +157,9 @@ if($symbUid){
 						//Stay on record and get $occId
 						$occId = $occManager->getOccId();
 					}
+				}
+				else{
+					$statusStr = $occManager->getErrorStr();
 				}
 			}
 			elseif($action == 'Delete Occurrence'){

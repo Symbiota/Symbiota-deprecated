@@ -6,6 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:1000;
 $pageIndex = array_key_exists('pageindex',$_REQUEST)?$_REQUEST['pageindex']:0;
+$searchVar = array_key_exists('searchvar',$_REQUEST)?$_REQUEST['searchvar']:'';
 
 $uploadManager = new SpecUpload();
 $uploadManager->setCollId($collid);
@@ -33,7 +34,7 @@ if($collMap['managementtype'] == 'Snapshot'){
 	$headerMapBase['dbpk'] = 'Source Identifier';
 }
 
-$recCnt = $uploadManager->getUploadCount();
+//$recCnt = $uploadManager->getUploadCount();
 $isEditor = 0;
 //$navStr = '<div style="float:right;">';
 if($SYMB_UID){
@@ -85,7 +86,7 @@ if($SYMB_UID){
 				echo '<h2>'.$collMap['name'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 			}
 			//Setup header map
-			$recArr = $uploadManager->getUploadMap(($recLimit*$pageIndex),$recLimit);
+			$recArr = $uploadManager->getUploadMap(($recLimit*$pageIndex),$recLimit,$searchVar);
 			if($recArr){
 				//Check to see which headers have values
 				$headerArr = array();

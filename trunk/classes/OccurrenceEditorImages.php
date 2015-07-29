@@ -22,12 +22,9 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
      * in the database.
      */
 	public function addImageOccurrence($postArr){
-		$status = false;
+		$status = true;
 		//Load occurrence record
-		$occid = $this->addOccurrence($postArr);
-		if($occid){
-			$status = true;
-			$this->occid = $occid;
+		if($this->addOccurrence($postArr)){
 			//Load images
 			if($this->addImage($postArr)){
 				if($this->activeImgId){
@@ -41,6 +38,9 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 					}
 				}
 			}
+		}
+		else{
+			$status = false;
 		}
 		return $status;
 	}

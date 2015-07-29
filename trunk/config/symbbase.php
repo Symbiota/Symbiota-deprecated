@@ -122,22 +122,22 @@ if(!isset($rightsTerms) && isset($RIGHTS_TERMS)) $rightsTerms = $RIGHTS_TERMS;
 if(!isset($reproductiveConditionTerms) && isset($REPRODUCTIVE_CONDITION_TERMS)) $reproductiveConditionTerms = $REPRODUCTIVE_CONDITION_TERMS;
 
 //Multi-langauge support
-$LANG = 'en';
+$LANG_TAG = 'en';
 if(isset($_REQUEST['lang'])){
-	$LANG = $_REQUEST['lang'];
+	$LANG_TAG = $_REQUEST['lang'];
 
 	// register the session and set the cookie
-	$_SESSION['lang'] = $LANG;
-	setcookie('lang', $LANG, time() + (3600 * 24 * 30));
+	$_SESSION['lang'] = $LANG_TAG;
+	setcookie('lang', $LANG_TAG, time() + (3600 * 24 * 30));
 }
 else if(isset($_SESSION['lang'])){
-	$LANG = $_SESSION['lang'];
+	$LANG_TAG = $_SESSION['lang'];
 }
 else if(isset($_COOKIE['lang'])){
-	$LANG = $_COOKIE['lang'];
+	$LANG_TAG = $_COOKIE['lang'];
 }
 else{
-	if(strlen($DEFAULT_LANG) == 2) $LANG = $DEFAULT_LANG;
+	if(strlen($DEFAULT_LANG) == 2) $LANG_TAG = $DEFAULT_LANG;
 }
-if(strlen($LANG) != 2) $LANG = 'en';
+if(strlen($LANG_TAG) != 2) $LANG_TAG = 'en';
 ?>

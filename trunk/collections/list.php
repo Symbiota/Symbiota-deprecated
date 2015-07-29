@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceListManager.php');
+include_once $SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php';
+include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1; 
@@ -53,10 +54,10 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
-    <title><?php echo $defaultTitle; ?> Collections Search Results</title>
-    <link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-    <link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+	<title><?php echo $defaultTitle.' '.$LANG['PAGE_TITLE']; ?></title>
+	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<style type="text/css">
 		.ui-tabs .ui-tabs-nav li { width:32%; }
@@ -152,45 +153,44 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 <body>
 <?php
 	$displayLeftMenu = (isset($collections_listMenu)?$collections_listMenu:false);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($collections_listCrumbs)){
 		if($collections_listCrumbs){
-			echo "<div class='navpath'>";
+			echo '<div class="navpath">';
 			echo $collections_listCrumbs.' &gt;&gt; ';
-			echo " <b>Specimen Records</b>";
-			echo "</div>";
+			echo ' <b>'.$LANG['NAV_SPECIMEN_LIST'].'</b>';
+			echo '</div>';
 		}
 	}
 	else{
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt;&gt; ";
-		echo "<a href='index.php'>Collections</a> &gt;&gt; ";
-		echo "<a href='harvestparams.php'>Search Criteria</a> &gt;&gt; ";
-		echo "<b>Specimen Records</b>";
-		echo "</div>";
+		echo '<div class="navpath">';
+		echo '<a href="../index.php">'.$LANG['NAV_HOME'].'</a> &gt;&gt; ';
+		echo '<a href="index.php">'.$LANG['NAV_COLLECTIONS'].'</a> &gt;&gt; ';
+		echo '<a href="harvestparams.php">'.$LANG['NAV_SEARCH'].'</a> &gt;&gt; ';
+		echo '<b>'.$LANG['NAV_SPECIMEN_LIST'].'</b>';
+		echo '</div>';
 	}
 	?>
-
 <!-- This is inner text! -->
 <div id="innertext">
 	<div id="tabs" style="width:95%;">
-	    <ul>
-	        <li>
-	        	<a href='checklist.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>'>
-	        		<span>Species List</span>
-	        	</a>
-	        </li>
-	        <li>
-	        	<a href="#speclist">
-	        		<span>Occurrence Records</span>
-	        	</a>
-	        </li>
-	        <li>
-	        	<a href="#maps">
-	        		<span>Maps</span>
-	        	</a>
-	        </li>
-	    </ul>
+		<ul>
+			<li>
+				<a href='checklist.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>'>
+					<span><?php echo $LANG['TAB_CHECKLIST']; ?></span>
+				</a>
+			</li>
+			<li>
+				<a href="#speclist">
+					<span><?php echo $LANG['TAB_OCCURRENCES']; ?></span>
+				</a>
+			</li>
+			<li>
+				<a href="#maps">
+					<span><?php echo $LANG['TAB_MAP']; ?></span>
+				</a>
+			</li>
+		</ul>
 		<div id="speclist">
 			<div class='button' style='margin:15px 15px 0px 0px;float:right;width:13px;height:13px;' title='Download Specimen Data'>
 				<a href='download/index.php?usecookies=false&dltype=specimen&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>'>
@@ -198,46 +198,46 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				</a>
 			</div>
 			<div style='margin:10px;'>
-				<div><b>Dataset:</b> <?php echo $collManager->getDatasetSearchStr(); ?></div>
+				<div><b><?php echo $LANG['DATASET']; ?>:</b> <?php echo $collManager->getDatasetSearchStr(); ?></div>
 				<?php 
 				if($collManager->getTaxaSearchStr()){
-					echo "<div><b>Taxa:</b> ".$collManager->getTaxaSearchStr()."</div>";
+					echo '<div><b>'.$LANG['TAXA'].':</b> '.$collManager->getTaxaSearchStr().'</div>';
 				}
 				if($collManager->getLocalSearchStr()){
-				    echo "<div><b>Search Criteria:</b> ".$collManager->getLocalSearchStr()."</div>";
+					echo '<div><b>'.$LANG['SEARCH_CRITERIA'].':</b> '.$collManager->getLocalSearchStr().'</div>';
 				}
 				?>
 			</div>
 			<?php 
-			$paginationStr = "<div><div style='clear:both;'><hr/></div><div style='float:left;margin:5px;'>\n";
+			$paginationStr = '<div><div style="clear:both;"><hr/></div><div style="float:left;margin:5px;">';
 			$lastPage = (int) ($collManager->getRecordCnt() / $cntPerPage) + 1;
 			$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 			$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
 			$hrefPrefix = 'list.php?usecookies=false&starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';
 			$pageBar = '';
 			if($startPage > 1){
-			    $pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='".$hrefPrefix."1'>First</a></span>";
-			    $pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='".$hrefPrefix.(($pageNumber - 10) < 1 ?1:$pageNumber - 10)."'>&lt;&lt;</a></span>";
+				$pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='".$hrefPrefix."1'>".$LANG['PAGINATION_FIRST'].'</a></span>';
+				$pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='".$hrefPrefix.(($pageNumber - 10) < 1 ?1:$pageNumber - 10)."'>&lt;&lt;</a></span>";
 			}
 			for($x = $startPage; $x <= $endPage; $x++){
-			    if($pageNumber != $x){
-			        $pageBar .= "<span class='pagination' style='margin-right:3px;margin-right:3px;'><a href='".$hrefPrefix.$x."'>".$x."</a></span>";
-			    }
-			    else{
-			        $pageBar .= "<span class='pagination' style='margin-right:3px;margin-right:3px;font-weight:bold;'>".$x."</span>";
-			    }
+				if($pageNumber != $x){
+					$pageBar .= "<span class='pagination' style='margin-right:3px;margin-right:3px;'><a href='".$hrefPrefix.$x."'>".$x."</a></span>";
+				}
+				else{
+					$pageBar .= "<span class='pagination' style='margin-right:3px;margin-right:3px;font-weight:bold;'>".$x."</span>";
+				}
 			}
 			if(($lastPage - $startPage) >= 10){
-			    $pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='".$hrefPrefix.(($pageNumber + 10) > $lastPage?$lastPage:($pageNumber + 10))."'>&gt;&gt;</a></span>";
-			    $pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='".$hrefPrefix.$lastPage."'>Last</a></span>";
+				$pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='".$hrefPrefix.(($pageNumber + 10) > $lastPage?$lastPage:($pageNumber + 10))."'>&gt;&gt;</a></span>";
+				$pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='".$hrefPrefix.$lastPage."'>Last</a></span>";
 			}
-			$pageBar .= "</div><div style='float:right;margin:5px;'>";
+			$pageBar .= '</div><div style="float:right;margin:5px;">';
 			$beginNum = ($pageNumber - 1)*$cntPerPage + 1;
 			$endNum = $beginNum + $cntPerPage - 1;
 			if($endNum > $collManager->getRecordCnt()) $endNum = $collManager->getRecordCnt();
-			$pageBar .= "Page ".$pageNumber.", records ".$beginNum."-".$endNum." of ".$collManager->getRecordCnt();
+			$pageBar .= $LANG['PAGINATION_PAGE'].' '.$pageNumber.', '.$LANG['PAGINATION_RECORDS'].$beginNum.'-'.$endNum.' '.$LANG['PAGINATION_OF'].' '.$collManager->getRecordCnt();
 			$paginationStr .= $pageBar;
-			$paginationStr .= "</div><div style='clear:both;'><hr/></div></div>";
+			$paginationStr .= '</div><div style="clear:both;"><hr/></div></div>';
 			echo $paginationStr;
 	
 			//Display specimen records
@@ -246,13 +246,13 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				$collManager->reset();
 			}
 			elseif($specimenArray){
-			    $collectionArr = $collManager->getCollectionList(array_keys($specimenArray));
-			    ?>
+				$collectionArr = $collManager->getCollectionList(array_keys($specimenArray));
+				?>
 				<table id="omlisttable" cellspacing="4">
 				<?php 
-			    foreach($specimenArray as $collId => $specData){
-			    	$isEditor = false;
-			    	if($symbUid && (array_key_exists("SuperAdmin",$userRights)
+				foreach($specimenArray as $collId => $specData){
+					$isEditor = false;
+					if($symbUid && (array_key_exists("SuperAdmin",$userRights)
 					|| (array_key_exists('CollAdmin',$userRights) && in_array($collId,$userRights['CollAdmin']))
 					|| (array_key_exists('CollEditor',$userRights) && in_array($collId,$userRights['CollEditor'])))){
 						$isEditor = true;
@@ -261,19 +261,19 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					if($collectionArr[$collId]['collcode']) $instCode1 .= ":".$collectionArr[$collId]['collcode'];
 		
 					$icon = (substr($collectionArr[$collId]['icon'],0,6)=='images'?'../':'').$collectionArr[$collId]['icon']; 
-			        ?>
+					?>
 					<tr>
 						<td colspan='4'>
 							<h2>
 								<a href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
 									<?php echo $collectionArr[$collId]['name'];?>
-					        	</a>
-				        	</h2>
+								</a>
+							</h2>
 							<hr />
 						</td>
 					</tr>
 					<?php 
-			        foreach($specData as $occId => $fieldArr){
+					foreach($specData as $occId => $fieldArr){
 						$instCode2 = "";
 						if($fieldArr["institutioncode"] && $fieldArr["institutioncode"] != $collectionArr[$collId]['instcode']){
 							$instCode2 = $fieldArr["institutioncode"];
@@ -283,20 +283,20 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 						<tr>
 							<td rowspan="4" width='60' valign='top' align='center'>
 								<a href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
-			                    	<img align='bottom' width='30' src='<?php echo $icon; ?>' style="border:0px;" title='<?php echo ($instCode2?$instCode2:$instCode1); ?> Collection Statistics' />
-			                    </a>
-			                    <div style='font-weight:bold;font-size:75%;'>
-			                    	<?php 
-			                    	echo $instCode1;
+									<img align='bottom' width='30' src='<?php echo $icon; ?>' style="border:0px;" />
+								</a>
+								<div style='font-weight:bold;font-size:75%;'>
+									<?php 
+									echo $instCode1;
 									if($instCode2) echo "<br/>".$instCode2;
-			                    	?>
-			                    </div>
+									?>
+								</div>
 							</td>
 							<td colspan='3'>
 								<?php 
 								if($isEditor || ($symbUid && $symbUid == $fieldArr['observeruid'])){ 
 									?>
-									<div style="float:right;" title="Edit Occurrence Record">
+									<div style="float:right;" title="<?php echo $LANG['OCCUR_EDIT_TITLE']; ?>">
 										<a href="editor/occurrenceeditor.php?occid=<?php echo $occId; ?>" target="_blank">
 											<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" />
 										</a>
@@ -305,7 +305,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 								} 
 								if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){
 									?>
-									<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $occId.",".$collManager->getSearchTerm("targetclid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
+									<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $occId.",".$collManager->getSearchTerm("targetclid").",".$_REQUEST["targettid"];?>)" title="<?php echo $LANG['VOUCHER_LINK_TITLE'].' '.$collManager->getClName(); ?>">
 										<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
 									</div>
 									<?php 
@@ -313,7 +313,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 								?>
 								<div style="float:left;">
 									<a target='_blank' href='../taxa/index.php?taxon=<?php echo $fieldArr["sciname"];?>'>
-										<span style='font-style:italic;' title='General Species Information'>
+										<span style="font-style:italic;">
 											<?php echo $fieldArr["sciname"];?>
 										</span>
 									</a> 
@@ -334,36 +334,36 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 						</tr>
 						<tr>
 							<?php 
-				            $localStr = "";
-				            if($fieldArr["country"]) $localStr .= $fieldArr["country"].", ";
-				            if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
-				            if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
-				            if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
-				            if(isset($fieldArr["elev"]) && $fieldArr["elev"]) $localStr .= $fieldArr["elev"].'m';
-				            if(strlen($localStr) > 2) $localStr = trim($localStr,' ,');
-				            ?>
-				            <td colspan='3'>
-				            	<?php echo $localStr; ?>
-				            </td>
-			            </tr>
-			            <tr>
-			            	<td colspan='3'>
-					            <b>
-					            	<a href="#" onclick="return openIndPU(<?php echo $occId.",".($collManager->getSearchTerm("targetclid")?$collManager->getSearchTerm("targetclid"):"0"); ?>);">
-				            			Full Record Details
-				            		</a>
-				            	</b>
-			            	</td>
-			            </tr>
-			            <tr>
-			            	<td colspan='4'>
-			            		<hr/>
-			            	</td>
-			            </tr>
-			            <?php 
-			        }
-			    }
-			    ?>
+							$localStr = "";
+							if($fieldArr["country"]) $localStr .= $fieldArr["country"].", ";
+							if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
+							if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
+							if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
+							if(isset($fieldArr["elev"]) && $fieldArr["elev"]) $localStr .= $fieldArr["elev"].'m';
+							if(strlen($localStr) > 2) $localStr = trim($localStr,' ,');
+							?>
+							<td colspan='3'>
+								<?php echo $localStr; ?>
+							</td>
+						</tr>
+						<tr>
+							<td colspan='3'>
+								<b>
+									<a href="#" onclick="return openIndPU(<?php echo $occId.",".($collManager->getSearchTerm("targetclid")?$collManager->getSearchTerm("targetclid"):"0"); ?>);">
+										<?php echo $LANG['FULL_DETAILS']; ?>
+									</a>
+								</b>
+							</td>
+						</tr>
+						<tr>
+							<td colspan='4'>
+								<hr/>
+							</td>
+						</tr>
+						<?php 
+					}
+				}
+				?>
 				</table>
 				<?php 
 				echo $paginationStr;
@@ -372,7 +372,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			else{
 				?>
 				<div>
-					<h3>Your query did not return any results. Please modify your query parameters.</h3>
+					<h3><?php echo $LANG['NO_RESULTS']; ?></h3>
 					<?php
 					$tn = $collManager->getTaxaSearchStr();
 					if($p = strpos($tn,';')){
@@ -387,8 +387,8 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					if($closeArr = $collManager->getCloseTaxaMatch(trim($tn))){
 						?>
 						<div style="margin: 40px 0px 200px 20px;font-weight:bold;font-size:140%;">
-							Perhaps you were looking for:
 							<?php
+							echo $LANG['PERHAPS_LOOKING_FOR'];
 							$delimiter = '';
 							foreach($closeArr as $v){
 								echo $delimiter.'<a href="harvestparams.php?taxa='.$v.'">'.$v.'</a>';
@@ -404,38 +404,32 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			}
 			?>
 		</div>
-	    <div id="maps" style="min-height:400px;margin-bottom:10px;">
-	
-		    <div class="button" style="margin-top:20px;float:right;width:13px;height:13px;" title="Download Coordinate Data">
+		<div id="maps" style="min-height:400px;margin-bottom:10px;">
+			<div class="button" style="margin-top:20px;float:right;width:13px;height:13px;" title="<?php echo $LANG['MAP_DOWNLOAD']; ?>">
 				<a href='download/index.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&dltype=georef'><img src="../images/dl.png"/></a>
-	        </div>
-	        <div style='margin-top:10px;'>
-	        	<h2>Google Map</h2>
-	        </div>
-			<div style='margin:10 0 0 20;'>
-			    <a href="#" onclick="openMapPU();" >
-			        Display coordinates in Google Map
-			    </a>
 			</div>
-			<div style='margin:10 0 0 20;'>Google Maps is a web mapping service provided by Google that features a 
-			    map that users can pan (by dragging the mouse) and zoom (by using the mouse wheel). Collection points are 
-			    displayed as colored markers that when clicked on, displays the full information for that collection. When 
-			    multiple species are queried (separated by semi-colons), 
-			    different colored markers denote each individual species.
+			<div style='margin-top:10px;'>
+				<h2><?php echo $LANG['GOOGLE_MAP_HEADER']; ?></h2>
+			</div>
+			<div style='margin:10 0 0 20;'>
+				<a href="#" onclick="openMapPU();" >
+					<?php echo $LANG['GOOGLE_MAP_DISPLAY']; ?>
+				</a>
+			</div>
+			<div style='margin:10 0 0 20;'>
+				<?php echo $LANG['GOOGLE_MAP_DESCRIPTION'];?>
 			</div>
 	
 			<div style='margin-top:10px;'>
-			    <h2>Google Earth (KML)</h2>
+				<h2><?php echo $LANG['GOOGLE_EARTH_HEADER']; ?></h2>
 			</div>
 			<form name="kmlform" action="../map/googlekml.php" method="post" onsubmit="">
 				<div style='margin:10 0 0 20;'>
-					This creates an KML file that can be opened in the Google Earth mapping application.
-					Note that you must have <a href='http://earth.google.com/' target="_blank">
-					Google Earth</a> installed on your computer to make use of this option.
+					<?php echo $LANG['GOOGLE_EARTH_DESCRIPTION'];?>
 				</div>
 				<div style='margin:10 0 0 20;'>
 					<a href="#" onclick="toggle('fieldBox');">
-						Add Extra Fields
+						<?php echo $LANG['GOOGLE_EARTH_EXTRA']; ?>
 					</a>
 				</div>
 				<div id="fieldBox" style="display:none;">
@@ -453,14 +447,14 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				<div style="margin-top:8px;float:right;">
 					<input name="jsoncollstarr" type="hidden" value='<?php echo $stArrCollJson; ?>' />
 					<input name="starr" type="hidden" value='<?php echo $stArrSearchJson; ?>' />
-					<button name="formsubmit" type="submit" value="Create KML">Create KML</button>
+					<button name="formsubmit" type="submit" value="<?php echo $LANG['CREATE_KML']; ?>"><?php echo $LANG['CREATE_KML']; ?></button>
 				</div>
 			</form>
-	    </div>
+		</div>
 	</div>
 </div>
 <?php 
-	include($serverRoot."/footer.php");
+include($SERVER_ROOT."/footer.php");
 ?>
 </body>
 </html>
