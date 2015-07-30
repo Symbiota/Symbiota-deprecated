@@ -666,11 +666,26 @@ if($isEditor && $formSubmit){
 									<div>
 										<?php echo ($occArr['notes']?$occArr['notes']:''); ?>
 									</div>
-									<div>
-										<a href="#" onclick="openIndPU(<?php echo $k; ?>)">
-											Full Record Details
-										</a>
-									</div>
+									<?php
+									if($isEditor){
+										?>
+										<div>
+											<a href="../editor/occurrenceeditor.php?occid=<?php echo $k;?>" target="_blank">
+												Full Record Details
+											</a>
+										</div>
+										<?php
+									}
+									else{
+										?>
+										<div>
+											<a href="#" onclick="openIndPU(<?php echo $k; ?>)">
+												Full Record Details
+											</a>
+										</div>
+										<?php
+									}
+									?>
 								</td>
 								<td style="width:100px;">
 									<?php
