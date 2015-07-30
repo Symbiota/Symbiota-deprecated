@@ -11,6 +11,7 @@ $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncoll
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 if($stArrCollJson && $stArrSearchJson){
+	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 	$collStArr = json_decode($stArrCollJson, true);
 	$searchStArr = json_decode($stArrSearchJson, true);
 	$stArr = array_merge($searchStArr,$collStArr);

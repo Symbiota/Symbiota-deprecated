@@ -14,6 +14,7 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 $collManager = new OccurrenceManager();
 if($stArrSearchJson){
+	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 	$stArr = json_decode($stArrSearchJson, true);
 	$collManager->setSearchTermsArr($stArr);
 }
