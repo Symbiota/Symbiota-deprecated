@@ -16,6 +16,7 @@ $dwcaHandler = new DwcArchiverOccurrence();
 $occurManager = new OccurrenceManager();
 
 if($stArrCollJson && $stArrSearchJson){
+	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 	$collStArr = json_decode($stArrCollJson, true);
 	$searchStArr = json_decode($stArrSearchJson, true);
 	$stArr = array_merge($searchStArr,$collStArr);

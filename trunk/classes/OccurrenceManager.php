@@ -228,41 +228,45 @@ class OccurrenceManager{
 		}
 
 		if(array_key_exists("country",$this->searchTermsArr)){
-			$countryArr = explode(";",$this->searchTermsArr["country"]);
+			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["country"]);
+			$countryArr = explode(";",$searchStr);
 			$tempArr = Array();
 			foreach($countryArr as $value){
-				$tempArr[] = "(o.Country = '".trim($value)."')";
+				$tempArr[] = '(o.Country = "'.trim($value).'")';
 			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
-			$this->localSearchArr[] = implode(" OR ",$countryArr);
+			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
+			$this->localSearchArr[] = implode(' OR ',$countryArr);
 		}
 		if(array_key_exists("state",$this->searchTermsArr)){
-			$stateAr = explode(";",$this->searchTermsArr["state"]);
+			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["state"]);
+			$stateAr = explode(";",$searchStr);
 			$tempArr = Array();
 			foreach($stateAr as $value){
-				$tempArr[] = "(o.StateProvince = '".trim($value)."')";
+				$tempArr[] = '(o.StateProvince = "'.trim($value).'")';
 			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
-			$this->localSearchArr[] = implode(" OR ",$stateAr);
+			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
+			$this->localSearchArr[] = implode(' OR ',$stateAr);
 		}
 		if(array_key_exists("county",$this->searchTermsArr)){
-			$countyArr = explode(";",$this->searchTermsArr["county"]);
+			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["county"]);
+			$countyArr = explode(";",$searchStr);
 			$tempArr = Array();
 			foreach($countyArr as $value){
 				$value = trim(str_ireplace(' county',' ',$value));
-				$tempArr[] = "(o.county LIKE '".trim($value)."%')";
+				$tempArr[] = '(o.county LIKE "'.trim($value).'%")';
 			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
-			$this->localSearchArr[] = implode(" OR ",$countyArr);
+			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
+			$this->localSearchArr[] = implode(' OR ',$countyArr);
 		}
 		if(array_key_exists("local",$this->searchTermsArr)){
-			$localArr = explode(";",$this->searchTermsArr["local"]);
+			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["local"]);
+			$localArr = explode(";",$searchStr);
 			$tempArr = Array();
 			foreach($localArr as $value){
-				$tempArr[] = "(o.municipality LIKE '".trim($value)."%' OR o.Locality LIKE '%".trim($value)."%')";
+				$tempArr[] = '(o.municipality LIKE "'.trim($value).'%" OR o.Locality LIKE "%'.trim($value).'%")';
 			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
-			$this->localSearchArr[] = implode(" OR ",$localArr);
+			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
+			$this->localSearchArr[] = implode(' OR ',$localArr);
 		}
 		if(array_key_exists("elevlow",$this->searchTermsArr) || array_key_exists("elevhigh",$this->searchTermsArr)){
 			$elevlow = 0;
@@ -299,13 +303,14 @@ class OccurrenceManager{
 			$this->localSearchArr[] = "Point radius: ".$pointArr[0].", ".$pointArr[1].", within ".$pointArr[2]." miles";
 		}
 		if(array_key_exists("collector",$this->searchTermsArr)){
-			$collectorArr = explode(";",$this->searchTermsArr["collector"]);
+			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["collector"]);
+			$collectorArr = explode(";",$searchStr);
 			$tempArr = Array();
 			foreach($collectorArr as $value){
-				$tempArr[] = "(o.recordedBy LIKE '%".trim($value)."%')";
+				$tempArr[] = '(o.recordedBy LIKE "%'.trim($value).'%")';
 			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
-			$this->localSearchArr[] = implode(", ",$collectorArr);
+			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
+			$this->localSearchArr[] = implode(', ',$collectorArr);
 		}
 		if(array_key_exists("collnum",$this->searchTermsArr)){
 			$collNumArr = explode(";",$this->searchTermsArr["collnum"]);
@@ -1033,7 +1038,7 @@ class OccurrenceManager{
 		$searchArr = Array();
 		$searchFieldsActivated = false;
 		if(array_key_exists("country",$_REQUEST)){
-			$country = $this->conn->real_escape_string($_REQUEST["country"]);
+			$country = $this->conn->real_escape_string($this->cleanSearchQuotes($_REQUEST["country"]));
 			if($country){
 				$str = str_replace(",",";",$country);
 				if(stripos($str, "USA") !== false && stripos($str, "United States") === false){
@@ -1051,7 +1056,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("state",$_REQUEST)){
-			$state = $this->conn->real_escape_string($_REQUEST["state"]);
+			$state = $this->conn->real_escape_string($this->cleanSearchQuotes($_REQUEST["state"]));
 			if($state){
 				$str = str_replace(",",";",$state);
 				$searchArr[] = "state:".$str;
@@ -1063,7 +1068,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("county",$_REQUEST)){
-			$county = $this->conn->real_escape_string($_REQUEST["county"]);
+			$county = $this->conn->real_escape_string($this->cleanSearchQuotes($_REQUEST["county"]));
 			$county = str_ireplace(" Co.","",$county);
 			$county = str_ireplace(" County","",$county);
 			if($county){
@@ -1077,7 +1082,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("local",$_REQUEST)){
-			$local = $this->cleanInStr($_REQUEST["local"]);
+			$local = $this->cleanInStr($this->cleanSearchQuotes($_REQUEST["local"]));
 			if($local){
 				$str = str_replace(",",";",$local);
 				$searchArr[] = "local:".$str;
@@ -1117,7 +1122,7 @@ class OccurrenceManager{
 			}
 		}
 		if(array_key_exists("collector",$_REQUEST)){
-			$collector = $this->cleanInStr($_REQUEST["collector"]);
+			$collector = $this->cleanInStr($this->cleanSearchQuotes($_REQUEST["collector"]));
 			if($collector){
 				$str = str_replace(",",";",$collector);
 				$searchArr[] = "collector:".$str;
@@ -1356,6 +1361,12 @@ class OccurrenceManager{
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
 		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	protected function cleanSearchQuotes($str){
+		$newStr = str_replace('"',"",$str);
+		$newStr = str_replace("'","%apos;",$newStr);
 		return $newStr;
 	}
 
