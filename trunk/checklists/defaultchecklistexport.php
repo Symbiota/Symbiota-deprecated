@@ -6,7 +6,9 @@ require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
 header("Content-Type: text/html; charset=".$charset);
 ini_set('max_execution_time', 240); //240 seconds = 4 minutes
 
-session_start();
+if(session_id() == ''){
+    session_start();
+}
 $ses_id = session_id();
 
 $clManager = new ChecklistManager();
@@ -80,11 +82,11 @@ if($clValue || $dynClid){
 }
 
 $phpWord = new \PhpOffice\PhpWord\PhpWord();
-$phpWord->addParagraphStyle('defaultPara', array('align'=>'left','lineHeight'=>1.0,'spaceBefore'=>0,'spaceAfter'=>0));
+$phpWord->addParagraphStyle('defaultPara', array('align'=>'left','lineHeight'=>1.0,'spaceBefore'=>0,'spaceAfter'=>0,'keepNext'=>true));
 $phpWord->addFontStyle('titleFont', array('bold'=>true,'size'=>20,'name'=>'Arial'));
 $phpWord->addFontStyle('topicFont', array('bold'=>true,'size'=>12,'name'=>'Arial'));
 $phpWord->addFontStyle('textFont', array('size'=>12,'name'=>'Arial'));
-$phpWord->addParagraphStyle('linePara', array('align'=>'left','lineHeight'=>1.0,'spaceBefore'=>0,'spaceAfter'=>0));
+$phpWord->addParagraphStyle('linePara', array('align'=>'left','lineHeight'=>1.0,'spaceBefore'=>0,'spaceAfter'=>0,'keepNext'=>true));
 $phpWord->addParagraphStyle('familyPara', array('align'=>'left','lineHeight'=>1.0,'spaceBefore'=>225,'spaceAfter'=>75,'keepNext'=>true));
 $phpWord->addFontStyle('familyFont', array('bold'=>true,'size'=>16,'name'=>'Arial'));
 $phpWord->addParagraphStyle('scinamePara', array('align'=>'left','lineHeight'=>1.0,'indent'=>0.3125,'spaceBefore'=>0,'spaceAfter'=>45,'keepNext'=>true));
