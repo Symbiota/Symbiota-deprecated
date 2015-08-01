@@ -599,11 +599,11 @@ class DwcArchiverOccurrence{
 			while($r = $rs->fetch_object()){
 				$this->collArr[$r->collid]['instcode'] = $r->institutioncode;
 				$this->collArr[$r->collid]['collcode'] = $r->collectioncode;
-				$this->collArr[$r->collid]['collname'] = htmlspecialchars($r->collectionname);
-				$this->collArr[$r->collid]['description'] = htmlspecialchars($r->fulldescription);
+				$this->collArr[$r->collid]['collname'] = $r->collectionname;
+				$this->collArr[$r->collid]['description'] = $r->fulldescription;
 				$this->collArr[$r->collid]['collectionguid'] = $r->collectionguid;
 				$this->collArr[$r->collid]['url'] = $r->url;
-				$this->collArr[$r->collid]['contact'] = htmlspecialchars($r->contact);
+				$this->collArr[$r->collid]['contact'] = $r->contact;
 				$this->collArr[$r->collid]['email'] = $r->email;
 				$this->collArr[$r->collid]['guidtarget'] = $r->guidtarget;
 				$this->collArr[$r->collid]['lat'] = $r->latitudedecimal;
@@ -614,8 +614,8 @@ class DwcArchiverOccurrence{
 				$this->collArr[$r->collid]['rights'] = $r->rights;
 				$this->collArr[$r->collid]['rightsholder'] = $r->rightsholder;
 				$this->collArr[$r->collid]['usageterm'] = $r->usageterm;
-				$this->collArr[$r->collid]['address1'] = htmlspecialchars($r->address1);
-				$this->collArr[$r->collid]['address2'] = htmlspecialchars($r->address2);
+				$this->collArr[$r->collid]['address1'] = $r->address1;
+				$this->collArr[$r->collid]['address2'] = $r->address2;
 				$this->collArr[$r->collid]['city'] = $r->city;
 				$this->collArr[$r->collid]['state'] = $r->stateprovince;
 				$this->collArr[$r->collid]['postalcode'] = $r->postalcode;
