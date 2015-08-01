@@ -1,5 +1,6 @@
 <?php
-include_once('OccurrenceEditorManager.php');
+include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($serverRoot.'/classes/SpecProcessorOcr.php');
 include_once($serverRoot.'/classes/ImageShared.php');
 
 class OccurrenceEditorImages extends OccurrenceEditorManager {
@@ -29,11 +30,24 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 			if($this->addImage($postArr)){
 				if($this->activeImgId){
 					//Load OCR
+					$rawStr = '';
+					$ocrSource = '';
 					if($postArr['ocrblock']){
-						$sql = 'INSERT INTO specprocessorrawlabels(imgid, rawstr) '.
-							'VALUES('.$this->activeImgId.',"'.$this->cleanInStr($postArr['ocrblock']).'")';
+						$rawStr = trim($postArr['ocrblock']);
+						if($postArr['ocrsource']) $ocrSource = $postArr['ocrsource'];
+						else $ocrSource = 'User submitted';
+					}
+					elseif(isset($postArr['tessocr']) && $postArr['tessocr']){
+						$ocrManager = new SpecProcessorOcr();
+						$rawStr = $ocrManager->ocrImageById($this->activeImgId);
+						$ocrSource = 'Tesseract';
+					}
+					if($rawStr){
+						if($ocrSource) $ocrSource .= ': '.date('Y-m-d');
+						$sql = 'INSERT INTO specprocessorrawlabels(imgid, rawstr, source) '.
+							'VALUES('.$this->activeImgId.',"'.$this->cleanInStr($rawStr).'","'.$this->cleanInStr($ocrSource).'")';
 						if(!$this->conn->query($sql)){
-							$this->errorStr = 'Error loading OCR text block: '.$this->conn->error;
+							$this->errorStr = 'ERROR loading OCR text block: '.$this->conn->error;
 						}
 					}
 				}

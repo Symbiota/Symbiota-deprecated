@@ -173,7 +173,12 @@ if($SYMB_UID){
 							<?php
 							if($collData['colltype'] == 'Preserved Specimens'){
 								?>
-								<li>
+								<li style="margin-left:10px">
+									<a href="../editor/imageoccursubmit.php?collid=<?php echo $collid; ?>">
+										Create New Records Using Image
+									</a>
+								</li>
+								<li style="margin-left:10px">
 									<a href="../editor/skeletalsubmit.php?collid=<?php echo $collid; ?>">
 										Add Skeletal Records
 									</a>

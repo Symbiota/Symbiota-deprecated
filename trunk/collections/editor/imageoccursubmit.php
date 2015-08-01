@@ -57,7 +57,17 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 	<script src="../../js/symb/shared.js?ver=141119" type="text/javascript"></script>
 	<script type="text/javascript">
 	function validateImgOccurForm(f){
-
+		if(f.imgfile.value == ""){
+			alert("Please select an image file to upload");
+			return false;
+		}
+		else{ 
+			var fileName = f.imgfile.value.toLowerCase();
+			if(fileName.indexOf(".jpg") == -1 && fileName.indexOf(".jpeg") == -1){
+				alert("Image file must be a JPG");
+				return false;
+			}
+		}
 		return true;
 	}
 	</script>
@@ -77,7 +87,7 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 		<h1><?php echo $collMap['collectionname']; ?></h1>
 		<?php 
 		if($statusStr){
-			echo '<div style="margin:15px;color:red;">'.$statusStr.'</div>';
+			echo '<div style="margin:15px;color:'.(stripos($statusStr,'error') !== false?'red':'green').';">'.$statusStr.'</div>';
 		}
 		if($isEditor){
 			?>
@@ -150,15 +160,22 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 						</div> 
 					</div>
 					<div style="clear:both;margin:3px;">
-						<div style="float:left;">
-							<input name="tessocr" type="checkbox" value=1 <?php if(isset($_POST['tessocr'])) echo 'checked'; ?> /> 
-							OCR Text using Tesseract OCR engine
-						</div>
+						<?php
+						if(isset($TESSERACT_PATH) && $TESSERACT_PATH){
+							?>
+							<div style="float:left;">
+								<input name="tessocr" type="checkbox" value=1 <?php if(isset($_POST['tessocr'])) echo 'checked'; ?> /> 
+								OCR Text using Tesseract OCR engine
+							</div>
+							<?php
+						}
+						?>
 						<div style="float:left;margin:8px 0px 0px 20px;">(<a href="#" onclick="toggle('manualocr')">Manually add OCR</a>)</div>
 					</div>
 					<div id="manualocr" style="clear:both;display:none;margin:3px;">
 						<b>OCR Text</b><br/>
-						<textarea name="ocrblock" style="width:100%;height:100px;"></textarea>
+						<textarea name="ocrblock" style="width:100%;height:100px;"></textarea><br/>
+						<b>Source:</b> <input type="text" name="ocrsource" value="" />
 					</div>
 				</fieldset>
 				<div style="margin:10px;clear:both;">
