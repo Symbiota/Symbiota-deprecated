@@ -15,14 +15,14 @@ if(is_numeric($latDef) && is_numeric($lngDef)){
 	$lat = $latDef; 
 	$lng = $lngDef; 
 }
-$err = 0;
-if(is_numeric($errRad)){
-	$err = $errRad; 
-}
 else{
 	$boundaryArr = explode(";",$mappingBoundaries);
 	$lat = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
 	$lng = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
+}
+$err = 0;
+if(is_numeric($errRad)){
+	$err = $errRad; 
 }
 ?>
 <html>
