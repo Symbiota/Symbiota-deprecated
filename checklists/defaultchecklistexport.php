@@ -27,6 +27,7 @@ $showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"
 $showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
 $showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
 $showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
+$showAlphaTaxa = array_key_exists("showalphataxa",$_REQUEST)?$_REQUEST["showalphataxa"]:0; 
 $searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
 $searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
 
@@ -46,7 +47,7 @@ if($clValue || $dynClid){
 	$clArray = $clManager->getClMetaData();
 }
 $showDetails = 0;
-if($clValue && $clArray["defaultSettings"]){
+/*if($clValue && $clArray["defaultSettings"]){
 	$defaultArr = json_decode($clArray["defaultSettings"], true);
 	$showDetails = $defaultArr["ddetails"];
 	if($action != "Rebuild List"){
@@ -54,8 +55,9 @@ if($clValue && $clArray["defaultSettings"]){
 		$showImages = $defaultArr["dimages"]; 
 		$showVouchers = $defaultArr["dvouchers"];
 		$showAuthors = $defaultArr["dauthors"];
+		$showAlphaTaxa = $defaultArr["dalpha"];
 	}
-}
+}*/
 if($pid) $clManager->setProj($pid);
 elseif(array_key_exists("proj",$_REQUEST)) $pid = $clManager->setProj($_REQUEST['proj']);
 if($thesFilter) $clManager->setThesFilter($thesFilter);
@@ -69,6 +71,7 @@ if($showAuthors) $clManager->setShowAuthors();
 if($showCommon) $clManager->setShowCommon();
 if($showImages) $clManager->setShowImages();
 if($showVouchers) $clManager->setShowVouchers();
+if($showAlphaTaxa) $clManager->setShowAlphaTaxa();
 $clid = $clManager->getClid();
 $pid = $clManager->getPid();
 
@@ -190,9 +193,11 @@ if($showImages){
 				$textrun->addText(htmlspecialchars($vern),'topicFont');
 				$textrun->addTextBreak(1);
 			}
-			if($family != $prevfam){
-				$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars('['.$family.']'),'textFont');
-				$prevfam = $family;
+			if(!$showAlphaTaxa){
+				if($family != $prevfam){
+					$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars('['.$family.']'),'textFont');
+					$prevfam = $family;
+				}
 			}
 		}
 		else{
@@ -209,11 +214,13 @@ if($showImages){
 else{
 	$voucherArr = $clManager->getVoucherArr();
 	foreach($taxaArray as $tid => $sppArr){
-		$family = $sppArr['family'];
-		if($family != $prevfam){
-			$textrun = $section->addTextRun('familyPara');
-			$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars($family),'familyFont');
-			$prevfam = $family;
+		if(!$showAlphaTaxa){
+			$family = $sppArr['family'];
+			if($family != $prevfam){
+				$textrun = $section->addTextRun('familyPara');
+				$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars($family),'familyFont');
+				$prevfam = $family;
+			}
 		}
 		$textrun = $section->addTextRun('scinamePara');
 		$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'scientificnameFont');

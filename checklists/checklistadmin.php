@@ -29,6 +29,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 		$defaultViewArr["dimages"] = array_key_exists("dimages",$_REQUEST)?1:0;
 		$defaultViewArr["dvouchers"] = array_key_exists("dvouchers",$_REQUEST)?1:0;
 		$defaultViewArr["dauthors"] = array_key_exists("dauthors",$_REQUEST)?1:0;
+		$defaultViewArr["dalpha"] = array_key_exists("dalpha",$_REQUEST)?1:0;
 		$defaultView = json_encode($defaultViewArr);
 		foreach($_REQUEST as $k => $v){
 			if(substr($k,0,3) == "ecl"){
@@ -339,6 +340,11 @@ $voucherProjects = $clManager->getVoucherProjects();
 										<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
 										<input name='dauthors' id='dauthors' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dauthors"])?"checked":"")); ?>/> 
 										Taxon Authors
+									</div>
+									<div>
+										<!-- Display Taxa Alphabetically: 0 = false, 1 = true  --> 
+										<input name='dalpha' id='dalpha' type='checkbox' value='1' <?php echo ($defaultArr&&$defaultArr["dalpha"]?"checked":""); ?>/> 
+										Show Taxa Alphabetically
 									</div>
 								</fieldset>
 							</div>
