@@ -96,37 +96,39 @@ class MappingShared{
 		//echo "<div>SQL: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			$occId = $row->occid;
-			$sciName = $row->sciname;
-			$family = $row->family;
-			//$latLngStr = round($row->DecimalLatitude,4).",".round($row->DecimalLongitude,4);
-			$latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
-			if(!array_key_exists($sciName,$taxaMapper)){
-				foreach($taxaMapper as $keySciname => $v){
-					if(strpos($sciName,$keySciname) === 0){
-						$sciName = $keySciname;
-						break;
+			if(($row->DecimalLongitude <= 180 && $row->DecimalLongitude >= -180) && ($row->DecimalLatitude <= 90 && $row->DecimalLatitude >= -90)){
+				$occId = $row->occid;
+				$sciName = $row->sciname;
+				$family = $row->family;
+				//$latLngStr = round($row->DecimalLatitude,4).",".round($row->DecimalLongitude,4);
+				$latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
+				if(!array_key_exists($sciName,$taxaMapper)){
+					foreach($taxaMapper as $keySciname => $v){
+						if(strpos($sciName,$keySciname) === 0){
+							$sciName = $keySciname;
+							break;
+						}
+					}
+					if(!array_key_exists($sciName,$taxaMapper) && array_key_exists($family,$taxaMapper)){
+						$sciName = $family;
 					}
 				}
-				if(!array_key_exists($sciName,$taxaMapper) && array_key_exists($family,$taxaMapper)){
-					$sciName = $family;
+				if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
+				$coordArr[$taxaMapper[$sciName]][$occId]["collid"] = $row->collid;
+				$coordArr[$taxaMapper[$sciName]][$occId]["latLngStr"] = $latLngStr;
+				$coordArr[$taxaMapper[$sciName]][$occId]["identifier"] = $row->identifier;
+				$coordArr[$taxaMapper[$sciName]][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
+				$coordArr[$taxaMapper[$sciName]][$occId]["institutioncode"] = $row->institutioncode;
+				$coordArr[$taxaMapper[$sciName]][$occId]["collectioncode"] = $row->collectioncode;
+				$coordArr[$taxaMapper[$sciName]][$occId]["catalognumber"] = $row->catalognumber;
+				$coordArr[$taxaMapper[$sciName]][$occId]["othercatalognumbers"] = $row->othercatalognumbers;
+				if($includeDescr){
+					$coordArr[$taxaMapper[$sciName]][$occId]["descr"] = $row->descr;
 				}
-			}
-			if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
-			$coordArr[$taxaMapper[$sciName]][$occId]["collid"] = $row->collid;
-			$coordArr[$taxaMapper[$sciName]][$occId]["latLngStr"] = $latLngStr;
-			$coordArr[$taxaMapper[$sciName]][$occId]["identifier"] = $row->identifier;
-			$coordArr[$taxaMapper[$sciName]][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
-			$coordArr[$taxaMapper[$sciName]][$occId]["institutioncode"] = $row->institutioncode;
-			$coordArr[$taxaMapper[$sciName]][$occId]["collectioncode"] = $row->collectioncode;
-			$coordArr[$taxaMapper[$sciName]][$occId]["catalognumber"] = $row->catalognumber;
-			$coordArr[$taxaMapper[$sciName]][$occId]["othercatalognumbers"] = $row->othercatalognumbers;
-			if($includeDescr){
-				$coordArr[$taxaMapper[$sciName]][$occId]["descr"] = $row->descr;
-			}
-			if($this->fieldArr){
-				foreach($this->fieldArr as $k => $v){
-					$coordArr[$taxaMapper[$sciName]][$occId][$v] = $this->xmlentities($row->$v);
+				if($this->fieldArr){
+					foreach($this->fieldArr as $k => $v){
+						$coordArr[$taxaMapper[$sciName]][$occId][$v] = $this->xmlentities($row->$v);
+					}
 				}
 			}
 		}

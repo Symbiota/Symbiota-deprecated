@@ -913,31 +913,33 @@ class MapInterfaceManager{
 		$recCnt = 0;
 		while($row = $result->fetch_object()){
 			if($result->num_rows <= $recLimit){
-				$occId = $row->occid;
-				$collName = $row->CollectionName;
-				$latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
-				if(!array_key_exists($collName,$collMapper)) $collName = "undefined"; 
-				$coordArr[$collMapper[$collName]][$occId]["latLngStr"] = $latLngStr;
-				$coordArr[$collMapper[$collName]][$occId]["collid"] = $this->xmlentities($row->collid);
-				if($row->tidinterpreted){
-					$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
-				}
-				else{
-					$tidcode = strtolower(str_replace( " ", "",$row->sciname));
-					$tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
-					$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
-				}
-				$coordArr[$collMapper[$collName]][$occId]["identifier"] = $this->xmlentities($row->identifier);
-				$coordArr[$collMapper[$collName]][$occId]["institutioncode"] = $this->xmlentities($row->institutioncode);
-				$coordArr[$collMapper[$collName]][$occId]["collectioncode"] = $this->xmlentities($row->collectioncode);
-				$coordArr[$collMapper[$collName]][$occId]["catalognumber"] = $this->xmlentities($row->catalognumber);
-				$coordArr[$collMapper[$collName]][$occId]["othercatalognumbers"] = $this->xmlentities($row->othercatalognumbers);
-				if($includeDescr){
-					$coordArr[$collMapper[$collName]][$occId]["descr"] = $this->xmlentities($row->descr);
-				}
-				if($this->fieldArr){
-					foreach($this->fieldArr as $k => $v){
-						$coordArr[$collMapper[$collName]][$occId][$v] = $this->xmlentities($row->$v);
+				if(($row->DecimalLongitude <= 180 && $row->DecimalLongitude >= -180) && ($row->DecimalLatitude <= 90 && $row->DecimalLatitude >= -90)){
+					$occId = $row->occid;
+					$collName = $row->CollectionName;
+					$latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
+					if(!array_key_exists($collName,$collMapper)) $collName = "undefined"; 
+					$coordArr[$collMapper[$collName]][$occId]["latLngStr"] = $latLngStr;
+					$coordArr[$collMapper[$collName]][$occId]["collid"] = $this->xmlentities($row->collid);
+					if($row->tidinterpreted){
+						$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
+					}
+					else{
+						$tidcode = strtolower(str_replace( " ", "",$row->sciname));
+						$tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
+						$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
+					}
+					$coordArr[$collMapper[$collName]][$occId]["identifier"] = $this->xmlentities($row->identifier);
+					$coordArr[$collMapper[$collName]][$occId]["institutioncode"] = $this->xmlentities($row->institutioncode);
+					$coordArr[$collMapper[$collName]][$occId]["collectioncode"] = $this->xmlentities($row->collectioncode);
+					$coordArr[$collMapper[$collName]][$occId]["catalognumber"] = $this->xmlentities($row->catalognumber);
+					$coordArr[$collMapper[$collName]][$occId]["othercatalognumbers"] = $this->xmlentities($row->othercatalognumbers);
+					if($includeDescr){
+						$coordArr[$collMapper[$collName]][$occId]["descr"] = $this->xmlentities($row->descr);
+					}
+					if($this->fieldArr){
+						foreach($this->fieldArr as $k => $v){
+							$coordArr[$collMapper[$collName]][$occId][$v] = $this->xmlentities($row->$v);
+						}
 					}
 				}
 			}
