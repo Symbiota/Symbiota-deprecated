@@ -19,6 +19,7 @@ class ChecklistManager {
 	private $showCommon;
 	private $showImages;
 	private $showVouchers;
+	private $showAlphaTaxa;
 	private $searchCommon;
 	private $searchSynonyms;
 	private $filterArr = Array();
@@ -484,7 +485,12 @@ class ChecklistManager {
 				if($sqlWhere) $this->basicSql .= 'AND ('.substr($sqlWhere,2).') ';
 			}
 		}
-		$this->basicSql .= " ORDER BY family, sciname";
+		if($this->showAlphaTaxa){
+			$this->basicSql .= " ORDER BY sciname";
+		}
+		else{
+			$this->basicSql .= " ORDER BY family, sciname";
+		}
 		//echo $this->basicSql; exit;
 	}
 
@@ -515,6 +521,10 @@ class ChecklistManager {
 
 	public function setShowVouchers($value = 1){
 		$this->showVouchers = $value;
+	}
+	
+	public function setShowAlphaTaxa($value = 1){
+		$this->showAlphaTaxa = $value;
 	}
 
 	public function setSearchCommon($value = 1){

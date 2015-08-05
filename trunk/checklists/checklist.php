@@ -15,6 +15,7 @@ $showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"
 $showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
 $showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
 $showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
+$showAlphaTaxa = array_key_exists("showalphataxa",$_REQUEST)?$_REQUEST["showalphataxa"]:0; 
 $searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
 $searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
 $defaultOverride = array_key_exists("defaultoverride",$_REQUEST)?$_REQUEST["defaultoverride"]:0;
@@ -48,6 +49,7 @@ if($clValue && $clArray["defaultSettings"]){
 		$showImages = $defaultArr["dimages"]; 
 		$showVouchers = $defaultArr["dvouchers"];
 		$showAuthors = $defaultArr["dauthors"];
+		$showAlphaTaxa = $defaultArr["dalpha"];
 	}
 }
 if($pid) $clManager->setProj($pid);
@@ -63,6 +65,7 @@ if($showAuthors) $clManager->setShowAuthors();
 if($showCommon) $clManager->setShowCommon();
 if($showImages) $clManager->setShowImages();
 if($showVouchers) $clManager->setShowVouchers();
+if($showAlphaTaxa) $clManager->setShowAlphaTaxa();
 $clid = $clManager->getClid();
 $pid = $clManager->getPid();
 
@@ -334,6 +337,11 @@ if($clValue || $dynClid){
 								    <input name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/> 
 								    Taxon Authors
 								</div>
+								<div style='' id="showalphataxadiv">
+									<!-- Display Taxa Alphabetically: 0 = false, 1 = true  --> 
+								    <input name='showalphataxa' type='checkbox' value='1' <?php echo ($showAlphaTaxa?"checked":""); ?>/> 
+								    Show Taxa Alphabetically
+								</div>
 								<div style="margin:5px 0px 0px 5px;">
 									<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
 									<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
@@ -512,13 +520,15 @@ if($clValue || $dynClid){
 									if(array_key_exists('vern',$sppArr)){
 										echo "<div style='font-weight:bold;'>".$sppArr["vern"]."</div>";
 									}
-									if($family != $prevfam){
-										?>
-										<div class="familydiv" id="<?php echo $family; ?>">
-											[<?php echo $family; ?>]
-										</div>
-										<?php
-										$prevfam = $family;
+									if(!$showAlphaTaxa){
+										if($family != $prevfam){
+											?>
+											<div class="familydiv" id="<?php echo $family; ?>">
+												[<?php echo $family; ?>]
+											</div>
+											<?php
+											$prevfam = $family;
+										}
 									}
 									?>
 								</div>
@@ -529,15 +539,17 @@ if($clValue || $dynClid){
 					else{
 						$voucherArr = $clManager->getVoucherArr();
 						foreach($taxaArray as $tid => $sppArr){
-							$family = $sppArr['family'];
-							if($family != $prevfam){
-								$famUrl = "../taxa/index.php?taxauthid=1&taxon=$family&cl=".$clid;
-								?>
-								<div class="familydiv" id="<?php echo $family;?>" style="margin:15px 0px 5px 0px;font-weight:bold;font-size:120%;">
-									<a href="<?php echo $famUrl; ?>" target="_blank" style="color:black;"><?php echo $family;?></a>
-								</div>
-								<?php
-								$prevfam = $family;
+							if(!$showAlphaTaxa){
+								$family = $sppArr['family'];
+								if($family != $prevfam){
+									$famUrl = "../taxa/index.php?taxauthid=1&taxon=$family&cl=".$clid;
+									?>
+									<div class="familydiv" id="<?php echo $family;?>" style="margin:15px 0px 5px 0px;font-weight:bold;font-size:120%;">
+										<a href="<?php echo $famUrl; ?>" target="_blank" style="color:black;"><?php echo $family;?></a>
+									</div>
+									<?php
+									$prevfam = $family;
+								}
 							}
 							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
 							echo "<div id='tid-$tid' style='margin:0px 0px 3px 10px;'>";
