@@ -159,24 +159,28 @@ $collData = $collManager->getCollectionData(true);
 		
 		function verifyIconImage(f){
 			var iconImageFile = document.getElementById("iconfile").value;
-			if((iconImageFile.substr(iconImageFile.length-4) != '.jpg') && (iconImageFile.substr(iconImageFile.length-4) != '.png') && (iconImageFile.substr(iconImageFile.length-4) != '.gif')){
-				document.getElementById("iconfile").value = '';
-				alert("The file you have uploaded is not a supported image file. Please upload a jpg, png, or gif file.");
-			}
-			else{
-				var fr = new FileReader;
-				fr.onload = function(){
-					var img = new Image;
-					img.onload = function(){
-						if((img.width>350) || (img.height>350)){
-							document.getElementById("iconfile").value = '';
-							img = '';
-							alert("The image file must be less than 350 pixels in both width and height.");
-						}
+			if(iconImageFile){
+				var iconExt = iconImageFile.substr(iconImageFile.length-4);
+				iconExt = iconExt.toLowerCase();
+				if((iconExt != '.jpg') && (iconExt != 'jpeg') && (iconExt != '.png') && (iconExt != '.gif')){
+					document.getElementById("iconfile").value = '';
+					alert("The file you have uploaded is not a supported image file. Please upload a jpg, png, or gif file.");
+				}
+				else{
+					var fr = new FileReader;
+					fr.onload = function(){
+						var img = new Image;
+						img.onload = function(){
+							if((img.width>350) || (img.height>350)){
+								document.getElementById("iconfile").value = '';
+								img = '';
+								alert("The image file must be less than 350 pixels in both width and height.");
+							}
+						};
+						img.src = fr.result;
 					};
-					img.src = fr.result;
-				};
-				fr.readAsDataURL(document.getElementById("iconfile").files[0]);
+					fr.readAsDataURL(document.getElementById("iconfile").files[0]);
+				}
 			}
 		}
 		
