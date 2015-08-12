@@ -40,6 +40,7 @@ else{
 				var lngCenter = <?php echo $lng; ?>;
 				var footPolyArr = [];
 				var footPolyPaths = [];
+				var validWKT = true;
 				var polyBounds = new google.maps.LatLngBounds();
 				if(opener.document.getElementById("footprintWKT").value != ''){
 					/*if(/^[\],:{}\s]*$/.test(opener.document.getElementById("footprintWKT").value.replace(/\\["\\\/bfnrtu]/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){
@@ -113,9 +114,6 @@ else{
 						polyBounds.extend(new google.maps.LatLng(footPolyArr[0][keys[0]],footPolyArr[0][keys[1]]));
 					}
 				}
-				/*else{
-					alert("here");
-				}*/
 				var dmLatLng = new google.maps.LatLng(latCenter,lngCenter);
 		    	var dmOptions = {
 					zoom: <?php echo $zoom; ?>,
