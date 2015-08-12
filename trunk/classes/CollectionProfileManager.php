@@ -9,10 +9,6 @@ class CollectionProfileManager {
 	private $conn;
 	private $collid;
 	private $errorStr;
-	private $sourcePath = '';
-	private $targetPath = '';
-	private $imgName = '';
-	private $imgExt = '';
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -758,63 +754,31 @@ class CollectionProfileManager {
 		return $statArr;
 	}
 	
-	public function addIconImageFile(){
-		global $SERVER_ROOT;
-		global $CLIENT_ROOT;
-		
-		$fullUrl = '';
-		//Set download paths and variables
-		set_time_limit(120);
-		ini_set("max_input_time",120);
-		
-		$this->targetPath = $SERVER_ROOT.'/content/collicon/';
-		$urlBase = $CLIENT_ROOT.'/content/collicon/';
+	private function addIconImageFile(){
+		$targetPath = $GLOBALS['SERVER_ROOT'].'/content/collicon/';
+		$urlBase = $GLOBALS['CLIENT_ROOT'].'/content/collicon/';
 		$urlPrefix = "http://";
 		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
 		$urlPrefix .= $_SERVER["SERVER_NAME"];
 		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 		$urlBase = $urlPrefix.$urlBase;
     	
-		if(!$this->loadImage()) return;
-		
-		$fullUrl = $urlBase.$this->imgName.$this->imgExt;
-		
+		//Clean file name
+		$fileName = basename($_FILES['iconfile']['name']);
+		$imgExt = '';
+		if($p = strrpos($fileName,".")) $imgExt = strtolower(substr($fileName,$p));
+		$fileName = strtolower($_REQUEST["institutioncode"].($_REQUEST["collectioncode"]?'-'.$_REQUEST["collectioncode"]:''));
+		$fileName = str_replace(array("%20","%23"," ","__"),"_",$fileName);
+		if(strlen($fileName) > 30) $fileName = substr($fileName,0,30);
+		$fileName .= $imgExt;
+
+		//Upload file
+		$fullUrl = '';
+		if(move_uploaded_file($_FILES['iconfile']['tmp_name'], $targetPath.$fileName)) $fullUrl = $urlBase.$fileName;
+
 		return $fullUrl;
 	}
 	
-	public function cleanFileName($fPath){
-		$fName = $fPath;
-		$imgInfo = null;
-		//Parse extension
-		if($p = strrpos($fName,".")){
-			$this->imgExt = strtolower(substr($fName,$p));
-			$fName = substr($fName,0,$p);
-		}
-		$fName = $_REQUEST["institutioncode"].'-'.$_REQUEST["collectioncode"];
-		$fName = str_replace("%20","_",$fName);
-		$fName = str_replace("%23","_",$fName);
-		$fName = str_replace(" ","_",$fName);
-		$fName = str_replace("__","_",$fName);
-		
-		if(strlen($fName) > 30) {
-			$fName = substr($fName,0,30);
-		}
-		
-		//Returns file name without extension
-		return $fName;
- 	}
-	
-	private function loadImage(){
-		$imgFile = basename($_FILES['iconfile']['name']);
-		$fileName = $this->cleanFileName($imgFile);
-		if(move_uploaded_file($_FILES['iconfile']['tmp_name'], $this->targetPath.$fileName.$this->imgExt)){
-			$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
-			$this->imgName = $fileName;
-			return true;
-		}
-		return false;
-	}
-
 	public function getErrorStr(){
 		return $this->errorStr;
 	}
