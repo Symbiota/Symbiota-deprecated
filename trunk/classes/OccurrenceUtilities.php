@@ -476,7 +476,7 @@ class OccurrenceUtilities {
 			//UTM parsing
 			$d = ''; 
 			if(preg_match('/NAD\s*27/i',$inStr)) $d = 'NAD27';
-			if(preg_match('/\D*(\d{1,2}\D{0,1})\s*(\d{6,7})E\s*(\d{7})N/i',$inStr,$m)){
+			if(preg_match('/\D*(\d{1,2}\D{0,1})\s+(\d{6,7})E\s+(\d{7})N/i',$inStr,$m)){
 				$z = $m[1];
 				$e = $m[2];
 				$n = $m[3];
@@ -490,7 +490,9 @@ class OccurrenceUtilities {
 			elseif(preg_match('/UTM/',$inStr) || preg_match('/\d{1,2}[\D\s]+\d{6,7}[\D\s]+\d{6,7}/',$inStr)){
 				//UTM
 				$z = ''; $e = ''; $n = '';
-				if(preg_match('/[\s\D]*(\d{1,2}\D{0,1})[\s\D]*/',$inStr,$m)) $z = $m[1];
+				if(preg_match('/^(\d{1,2}\D{0,1})[\s\D]+/',$inStr,$m)) $z = $m[1];
+				if(!$z && preg_match('/[\s\D]+(\d{1,2}\D{0,1})$/',$inStr,$m)) $z = $m[1];
+				if(!$z && preg_match('/[\s\D]+(\d{1,2}\D{0,1})[\s\D]+/',$inStr,$m)) $z = $m[1];
 				if($z){
 					if(preg_match('/(\d{6,7})E{1}[\D\s]+(\d{7})N{1}/i',$inStr,$m)){
 						$e = $m[1];
