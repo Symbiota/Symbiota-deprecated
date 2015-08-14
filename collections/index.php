@@ -69,7 +69,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					<form name="collform1" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" checked />
-					 		<?php echo $LANG['SELECT_ALL'].' <a href="'.$clientRoot.'/collections/misc/collprofiles.php"></a>'; ?>
+					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
 						<?php 
 						$collManager->outputFullCollArr($specArr); 
@@ -88,7 +88,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					<form name="collform2" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballspeccb" name="db[]" class="spec" value='allspec' type="checkbox" onclick="selectAll(this);" checked />
-					 		<?php echo $LANG['SELECT_ALL_1'].' <a href="'.$clientRoot.'/collections/misc/collprofiles.php">'.$LANG['SELECT_ALL_2'].'</a>'; ?>
+					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
 						<?php
 						$collManager->outputFullCollArr($specArr);
@@ -105,7 +105,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					<form name="collform3" action="harvestparams.php" method="post" onsubmit="return verifyCollForm(this)">
 						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballobscb" name="db[]" class="obs" value='allobs' type="checkbox" onclick="selectAll(this);" checked />
-					 		<?php echo $LANG['SELECT_ALL_1'].' <a href="'.$clientRoot.'/collections/misc/collprofiles.php">'.$LANG['SELECT_ALL_2'].'</a>'; ?>
+					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
 						<?php
 						$collManager->outputFullCollArr($obsArr);
