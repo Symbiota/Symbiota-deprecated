@@ -1113,7 +1113,35 @@ else{
 												<div id="basisOfRecordDiv">
 													<?php echo (defined('BASISOFRECORDLABEL')?BASISOFRECORDLABEL:'Basis of Record'); ?>
 													<a href="#" onclick="return dwcDoc('basisOfRecord')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-													<input type="text" name="basisofrecord" tabindex="109" maxlength="32" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:($collMap['colltype']=='Preserved Specimens'?'PreservedSpecimen':'Observation'); ?>" onchange="fieldChanged('basisofrecord');" />
+													<?php
+													$borArr = array('FossilSpecimen','HumanObservation','LivingSpecimen','MachineObservation','PreservedSpecimen');
+													$targetBOR = '';
+													$extraBOR = '';
+													if(isset($occArr['basisofrecord']) && $occArr['basisofrecord']){
+														if(in_array($occArr['basisofrecord'],$borArr)){
+															$targetBOR = $occArr['basisofrecord'];
+														}
+														else{
+															$extraBOR = $occArr['basisofrecord'];
+														}
+													} 
+													if(!isset($occArr['basisofrecord']) || !$occArr['basisofrecord']){
+														if($collMap['colltype']=='General Observations' || $collMap['colltype']=='Observations'){
+															$targetBOR = 'HumanObservation';
+														}
+														elseif($collMap['colltype']=='Preserved Specimens'){
+															$targetBOR = 'PreservedSpecimen';
+														}
+													} 
+													?>
+													<select name="basisofrecord" tabindex="109" onchange="fieldChanged('basisofrecord');">
+														<?php 
+														foreach($borArr as $bValue){
+															echo '<option '.($bValue == $targetBOR?'SELECTED':'').'>'.$bValue.'</option>';
+														}
+														if($extraBOR) echo '<option value="">---Non Sanctioned Value---</option><option SELECTED>'.$extraBOR.'</option>';
+														?>
+													</select>
 												</div>
 												<div id="languageDiv">
 													<?php echo (defined('LANGUAGELABEL')?LANGUAGELABEL:'Language'); ?><br/>

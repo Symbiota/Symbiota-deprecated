@@ -105,7 +105,7 @@ class ObservationSubmitManager {
 					'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
 					'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid, dateEntered) '.
 	
-				'VALUES ('.$this->collId.',"Observation",'.($occArr['family']?'"'.$this->cleanInStr($occArr['family']).'"':'NULL').','.
+				'VALUES ('.$this->collId.',"HumanObservation",'.($occArr['family']?'"'.$this->cleanInStr($occArr['family']).'"':'NULL').','.
 				'"'.$this->cleanInStr($occArr['sciname']).'","'.
 				$this->cleanInStr($occArr['sciname'].' '.$occArr['scientificnameauthorship']).'",'.
 				($occArr['scientificnameauthorship']?'"'.$this->cleanInStr($occArr['scientificnameauthorship']).'"':'NULL').','.
