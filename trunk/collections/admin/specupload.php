@@ -327,8 +327,7 @@ $duManager->loadFieldMap();
 		//Grab collection name and last upload date and display for all
 		echo '<div style="font-weight:bold;font-size:130%;">'.$duManager->getCollInfo('name').'</div>';
 		echo '<div style="margin:0px 0px 15px 15px;"><b>Last Upload Date:</b> '.($duManager->getCollInfo('uploaddate')?$duManager->getCollInfo('uploaddate'):'not recorded').'</div>';
-
-		if(($action == "Start Upload") || ($uploadType == $STOREDPROCEDURE || $uploadType == $SCRIPTUPLOAD)){
+		if(($action == "Start Upload") || (!$action && ($uploadType == $STOREDPROCEDURE || $uploadType == $SCRIPTUPLOAD))){
 			//Upload records
 	 		echo "<div style='font-weight:bold;font-size:120%'>Upload Status:</div>";
 	 		echo "<ul style='margin:10px;font-weight:bold;'>";
@@ -415,7 +414,7 @@ $duManager->loadFieldMap();
 				<?php
 			}
 	 	}
-		elseif(($action == 'Transfer Records to Central Specimen Table') || $finalTransfer){
+		elseif($action == 'Transfer Records to Central Specimen Table' || $finalTransfer){
 			echo '<ul>';
 			$duManager->finalTransfer();
 			echo '</ul>';
