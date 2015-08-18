@@ -50,8 +50,8 @@ if(is_numeric($errRad)){
 				var polyOptions = {
 					strokeWeight: 0,
 					fillOpacity: 0.45,
-					editable: true,
-					draggable: true
+					editable: false,
+					draggable: false
 				};
 				
 				var drawingManager = new google.maps.drawing.DrawingManager({
@@ -97,6 +97,12 @@ if(is_numeric($errRad)){
 						var radius = (errCircle.getRadius());
 						document.getElementById("uncbox").value = radius.toFixed(0);
 					});
+					google.maps.event.addListener(errCircle, 'center_changed', function(){
+						var latLng = (errCircle.getCenter());
+						document.getElementById("latbox").value = latLng.lat().toFixed(6);
+						document.getElementById("lngbox").value = latLng.lng().toFixed(6);
+					});
+					errCircle.bindTo('center', marker, 'position');
 					<?php
 				}
 				?>
@@ -132,6 +138,12 @@ if(is_numeric($errRad)){
 								var radius = (errCircle.getRadius());
 								document.getElementById("uncbox").value = radius.toFixed(0);
 							});
+							google.maps.event.addListener(errCircle, 'center_changed', function(){
+								var latLng = (errCircle.getCenter());
+								document.getElementById("latbox").value = latLng.lat().toFixed(6);
+								document.getElementById("lngbox").value = latLng.lng().toFixed(6);
+							});
+							errCircle.bindTo('center', marker, 'position');
 						}
 					}
 				);
