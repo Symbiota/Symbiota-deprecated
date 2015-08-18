@@ -73,7 +73,7 @@ else{
 					names and link the vouchers as a batch action. Specimens are displayed in batches of 1000.
 				</div>
 				<form name="batchmissingform" method="post" action="voucheradmin.php" onsubmit="return validateBatchMissingForm(this)">
-					<table class="styledtable">
+					<table class="styledtable" style="font-family:Arial;font-size:12px;">
 						<tr>
 							<th>
 								<span title="Select All">

@@ -275,7 +275,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 											if($specArr = $clManager->getNewVouchers($startPos,$displayMode)){
 												?>
 												<form name="batchnonvoucherform" method="post" action="voucheradmin.php" onsubmit="return validateBatchNonVoucherForm(this)">
-													<table class="styledtable">
+													<table class="styledtable" style="font-family:Arial;font-size:12px;">
 														<tr>
 															<th>
 																<span title="Select All">

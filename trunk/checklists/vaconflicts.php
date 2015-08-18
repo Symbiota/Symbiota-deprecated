@@ -27,7 +27,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 	if($conflictArr = $vManager->getConflictVouchers()){
 		echo '<div style="font-weight:bold;">Conflict Count: '.count($conflictArr).'</div>';
 		?>
-		<table class="styledtable">
+		<table class="styledtable" style="font-family:Arial;font-size:12px;">
 			<tr><th><b>Checklist ID</b></th><th><b>Collector</b></th><th><b>Specimen ID</b></th><th><b>Identified By</b></th></tr>
 			<?php
 			foreach($conflictArr as $id => $vArr){
