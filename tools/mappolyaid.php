@@ -43,9 +43,6 @@ else{
 				var validWKT = true;
 				var polyBounds = new google.maps.LatLngBounds();
 				if(opener.document.getElementById("footprintWKT").value != ''){
-					/*if(/^[\],:{}\s]*$/.test(opener.document.getElementById("footprintWKT").value.replace(/\\["\\\/bfnrtu]/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){
-						footPolyArr = JSON.parse(opener.document.getElementById("footprintWKT").value);
-					}*/
 					var jsonTest = true;
 					try{
 						JSON.parse(opener.document.getElementById("footprintWKT").value);
@@ -237,6 +234,7 @@ else{
 				if (selectedShape){
 					selectedShape.setMap(null);
 					clearSelection();
+					updateParentForm();
 				}
 			}
 
@@ -280,8 +278,8 @@ else{
 				</div>
 				<div style="float:right;margin-right:30px;">
 					<input type="hidden" id="poly_array" name="poly_array" value='' />
-					<input type="submit" name="addcoords" value="Submit Polygon" onclick="updateParentForm();" />&nbsp;&nbsp;&nbsp;
-					<button id="delete-button">Delete Selected Shape</button>
+					<button type="submit" name="addcoords" value="Submit Polygon" onclick="updateParentForm();">Submit</button>&nbsp;&nbsp;&nbsp;
+					<button id="delete-button">Delete Shape</button>
 				</div>
 			</div>
 			<div id='map_canvas' style='width:95%; height:90%; clear:both;'></div>

@@ -978,7 +978,7 @@ else{
 														<div style="float:right;margin-top:-2px;margin-left:2px;" id="googleDiv" onclick="openMappingPolyAid();" title="Google Maps">
 															<img src="../../images/world.png" />
 														</div>
-														<textarea name="footprintwkt" id="footprintWKT" onchange="footPrintWktChanged(this)" style="height:22px;resize:vertical;" readonly><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
+														<textarea name="footprintwkt" id="footprintWKT" onchange="footPrintWktChanged(this)" style="height:40px;resize:vertical;"  onclick="openMappingPolyAid();" readonly><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
 													</div>
 												</div>
 											</div>

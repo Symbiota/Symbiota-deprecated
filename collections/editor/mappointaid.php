@@ -162,6 +162,7 @@ if(is_numeric($errRad)){
 	    	        var lonValue = startLocation.lng();
 					if(errCircle){
 						errCircle.setCenter(new google.maps.LatLng(latValue,lonValue));
+						errCircle.bindTo('center', marker, 'position');
 					}
 					latValue = latValue.toFixed(5);;
 					lonValue = lonValue.toFixed(5);
