@@ -99,6 +99,10 @@ $specImgArr = $occManager->getImageMap();
 					<input name="sourceurl" type="text" size="40" value="" />
 				</div>
 				<div style="margin:0px 0px 5px 10px;">
+					<b>Sort Sequence:</b>
+					<input name="sortsequence" type="text" size="10" value="" />
+				</div>
+				<div style="margin:0px 0px 5px 10px;">
 					<b>Describe this image</b>
 				</div>
                     <?php 
@@ -241,6 +245,10 @@ $specImgArr = $occManager->getImageMap();
 										?>
 									</a>
 								</div>
+								<div>
+									<b>Sort Sequence:</b>
+									<?php echo $imgArr["sortseq"]; ?>
+								</div>
 							</div>
 						</td>
 					</tr>
@@ -321,6 +329,10 @@ $specImgArr = $occManager->getImageMap();
 												</div>
 												<input name='oldtnurl' type='hidden' value='<?php echo $imgArr["tnurl"];?>' />
 											<?php } ?>
+										</div>
+										<div>
+											<b>Sort Sequence:</b><br/>
+											<input name="sortsequence" type="text" value="<?php echo $imgArr["sortseq"]; ?>" style="width:10%;" />
 										</div>
 					                    <div>
 						                   <b>Describe this image</b>

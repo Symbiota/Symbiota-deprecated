@@ -123,6 +123,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$photographerUid = (array_key_exists('photographeruid',$_REQUEST)?$_REQUEST['photographeruid']:'');
 		$notes = $this->cleanInStr($_REQUEST["notes"]);
 		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
+		$sortSeq = (is_numeric($_REQUEST["sortsequence"])?$_REQUEST["sortsequence"]:'');
 		$sourceUrl = $this->cleanInStr($_REQUEST["sourceurl"]);
 
 		//If central images are on remote server and new ones stored locally, then we need to use full domain
@@ -146,6 +147,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 			',photographer = '.($photographer?'"'.$photographer.'"':"NULL").
 			',photographeruid = '.($photographerUid?$photographerUid:"NULL").
 			',notes = '.($notes?'"'.$notes.'"':'NULL').
+			($sortSeq?',sortsequence = '.$sortSeq:'').
 			',copyright = '.($copyRight?'"'.$copyRight.'"':'NULL').',imagetype = "specimen",sourceurl = '.
 			($sourceUrl?'"'.$sourceUrl.'"':'NULL').
 			' WHERE (imgid = '.$imgId.')';
@@ -235,6 +237,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		if(array_key_exists('sourceurl',$postArr)) $imgManager->setSourceUrl($postArr['sourceurl']);
 		if(array_key_exists('copyright',$postArr)) $imgManager->setCopyright($postArr['copyright']);
 		if(array_key_exists("notes",$postArr)) $imgManager->setNotes($postArr['notes']);
+		if(array_key_exists("sortsequence",$postArr)) $imgManager->setSortSeq($postArr['sortsequence']);
 
 		$sourceImgUri = $postArr['imgurl'];
 		if($sourceImgUri){
