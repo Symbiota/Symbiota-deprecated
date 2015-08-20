@@ -17,9 +17,11 @@ $(document).ready(function() {
 
 });
 
-function toggleVoucherDiv(tid,anchorObj){
+function toggleVoucherDiv(tid){
 	toggle("voucdiv-"+tid);
-	anchorObj.style.display = "none";
+	toggle("morevouch-"+tid);
+	toggle("lessvouch-"+tid);
+	//anchorObj.style.display = "none";
 	return false;
 }
 
@@ -29,7 +31,7 @@ function toggle(target){
 		if(ele.style.display=="none"){
 			ele.style.display="";
   		}
-	 	else {
+	 	else{
 	 		ele.style.display="none";
 	 	}
 	}
