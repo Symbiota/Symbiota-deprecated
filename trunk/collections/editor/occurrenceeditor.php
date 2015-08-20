@@ -536,7 +536,7 @@ else{
 							<div id="occedittabs" style="clear:both;">
 								<ul>
 									<li>
-										<a href="#occdiv"  style="margin:0px 20px 0px 20px;">
+										<a href="#occdiv"  style="">
 											<?php
 											if($occId){
 												echo 'Occurrence Data';
@@ -565,28 +565,28 @@ else{
 										?>
 										<li id="detTab">
 											<a href="includes/determinationtab.php?<?php echo $anchorVars.'&'.$detVars; ?>"
-												style="margin:0px 20px 0px 20px;">Determination History</a>
+												style="">Determination History</a>
 										</li>
 										<?php
 										if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
 											echo '<li>';
 											echo '<a href="includes/findannotations.php?'.$anchorVars.'&'.$detVars.'"';
-											echo ' style="margin: 0px 20px 0px 20px;"> Annotations </a>';
+											echo ' style=""> Annotations </a>';
 											echo '</li>';
 										}
 										if($isEditor == 1 || $isEditor == 2){
 											?>
 											<li id="imgTab">
 												<a href="includes/imagetab.php?<?php echo $anchorVars; ?>"
-													style="margin:0px 20px 0px 20px;">Images</a>
+													style="">Images</a>
 											</li>
 											<li id="resourceTab">
 												<a href="includes/resourcetab.php?<?php echo $anchorVars; ?>"
-													style="margin:0px 20px 0px 20px;">Linked Resources</a>
+													style="">Linked Resources</a>
 											</li>
 											<li id="adminTab">
 												<a href="includes/admintab.php?<?php echo $anchorVars; ?>"
-													style="margin:0px 20px 0px 20px;">Admin</a>
+													style="">Admin</a>
 											</li>
 											<?php
 										}
