@@ -588,7 +588,7 @@ if($clValue || $dynClid){
 									foreach($voucherArr[$tid] as $occid => $collName){
 										$voucStr .= ', ';
 										if($voucCnt == 4 && !$printMode){
-											$voucStr .= '<a href="#" onclick="return toggleVoucherDiv('.$tid.',this);">more ...</a>'.
+											$voucStr .= '<a href="#" id="morevouch-'.$tid.'" onclick="return toggleVoucherDiv('.$tid.');">more...</a>'.
 												'<span id="voucdiv-'.$tid.'" style="display:none;">';
 										}
 										if(!$printMode) $voucStr .= '<a href="#" onclick="return openIndividualPopup('.$occid.')">';
@@ -596,7 +596,7 @@ if($clValue || $dynClid){
 										if(!$printMode) $voucStr .= "</a>\n";
 										$voucCnt++;
 									}
-									if($voucCnt > 4 && !$printMode) $voucStr .= '</span>';
+									if($voucCnt > 4 && !$printMode) $voucStr .= '</span><a href="#" id="lessvouch-'.$tid.'" style="display:none;" onclick="return toggleVoucherDiv('.$tid.');">...less</a>';
 									$voucStr = substr($voucStr,2);
 								}
 								$noteStr = '';
