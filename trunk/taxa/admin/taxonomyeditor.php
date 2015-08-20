@@ -286,7 +286,7 @@ if($editable){
 				<div id="taxonstatusdiv" style="min-height:400px;">
 					<fieldset style="width:95%;">
 						<legend><b>Taxonomic Placement</b></legend>
-						<div style="padding:3px 7px;background-color:silver;margin:-12px -10px 5px 0px;float:right;">
+						<div style="padding:3px 7px;margin:-12px -10px 5px 0px;float:right;">
 							<form name="taxauthidform" action="taxonomyeditor.php" method="post">
 								<select name="taxauthid" onchange="this.form.submit()">
 									<option value="1">Default Taxonomy</option>
