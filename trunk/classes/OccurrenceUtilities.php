@@ -774,7 +774,7 @@ class OccurrenceUtilities {
 		if($this->verbose) $this->outputMsg('Updating and indexing occurrence images... ',1);
 		$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '. 
 			'SET i.tid = o.tidinterpreted '. 
-			'WHERE o.tidinterpreted IS NOT NULL AND (i.tid IS NULL OR o.tidinterpreted <> i.tid)';
+			'WHERE (i.tid IS NULL) AND (o.tidinterpreted IS NOT NULL)';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update image tid field; '.$this->conn->error;
 			$this->errorArr[] = $errStr;
@@ -794,6 +794,7 @@ class OccurrenceUtilities {
 		}
 
 		#Updating records with null author
+		/*
 		if($this->verbose) $this->outputMsg('Updating null scientific authors using taxonomic thesaurus... ',1);
 		$sql = 'UPDATE omoccurrences SET scientificNameAuthorship = NULL WHERE scientificNameAuthorship = ""';
 		$this->conn->query($sql);
@@ -819,6 +820,7 @@ class OccurrenceUtilities {
 			if($this->verbose) $this->outputMsg($errStr,2);
 			$status = false;
 		}
+		*/
 		
 		return $status;
 	}

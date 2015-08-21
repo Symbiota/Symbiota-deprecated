@@ -155,9 +155,7 @@ if($action && $isEditor){
 		echo '<h2>'.$collMap['collectionname'].' ('.$collMap['code'].')</h2>';
 		if($isEditor){
 			?>
-			<div>
-				Description...
-			</div>
+			<div></div>
 			<fieldset style="padding:20px;">
 				<legend><b>Geographic Report</b></legend>
 				<?php 
