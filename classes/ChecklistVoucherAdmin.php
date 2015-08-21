@@ -389,7 +389,8 @@ class ChecklistVoucherAdmin {
 			$clidStr .= ','.implode(',',$this->childClidArr);
 		}
 
-		$sql = 'SELECT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
+		//$sql = 'SELECT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
+		$sql = 'SELECT o.* '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 			'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
@@ -469,7 +470,8 @@ class ChecklistVoucherAdmin {
 			$clidStr .= ','.implode(',',$this->childClidArr);
 		}
 		
-		$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
+		//$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
+		$sql = 'SELECT DISTINCT o.* '.
 			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 			'WHERE (o.occid NOT IN (SELECT occid FROM fmvouchers WHERE clid IN('.$clidStr.'))) AND ('.$this->sqlFrag.') '.
 			'AND o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
@@ -498,7 +500,8 @@ class ChecklistVoucherAdmin {
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
 			
-			$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
+			//$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
+			$sql = 'SELECT DISTINCT o.* '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
 				'LEFT JOIN fmvouchers v ON ctl.clid = v.clid AND ctl.tid = v.tid '.
@@ -516,11 +519,16 @@ class ChecklistVoucherAdmin {
 		header ('Content-Disposition: attachment; filename="'.$fileName.'"'); 
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
+			$headerArr = array();
+			$fields = mysqli_fetch_fields($rs);
+			foreach ($fields as $val) {
+				$headerArr[] = $val->name;
+			}
 			$rareSpeciesReader = $this->isRareSpeciesReader();
 			$out = fopen('php://output', 'w');
-			fputcsv($out, array_keys($fieldArr));
+			fputcsv($out, $headerArr);
 			while($row = $rs->fetch_assoc()){
-				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
+				$localSecurity = ($row["localitySecurity"]?$row["localitySecurity"]:0); 
 				if(!$rareSpeciesReader && $localSecurity != 1 && (!array_key_exists('RareSppReader', $GLOBALS['USER_RIGHTS']) || !in_array($row['collid'],$GLOBALS['USER_RIGHTS']['RareSppReader']))){
 					$redactStr = '';
 					foreach($localitySecurityFields as $fieldName){
@@ -528,7 +536,7 @@ class ChecklistVoucherAdmin {
 					}
 					if($redactStr) $row['informationWithheld'] = 'Fields with redacted values (e.g. rare species localities):'.trim($redactStr,', ');
 				}
-				unset($row['localitysecurity']);
+				unset($row['localitySecurity']);
 				unset($row['collid']);
 				fputcsv($out, $row);
 			}
