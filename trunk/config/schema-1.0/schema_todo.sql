@@ -337,7 +337,8 @@ END
 
 DELIMITER ;
 
-
+ALTER TABLE `omcollectionstats`
+MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
 
 
 
