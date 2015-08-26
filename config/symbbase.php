@@ -123,21 +123,21 @@ if(!isset($reproductiveConditionTerms) && isset($REPRODUCTIVE_CONDITION_TERMS)) 
 
 //Multi-langauge support
 $LANG_TAG = 'en';
-if(isset($_REQUEST['lang'])){
+if(isset($_REQUEST['lang']) && $_REQUEST['lang']){
 	$LANG_TAG = $_REQUEST['lang'];
 
 	// register the session and set the cookie
 	$_SESSION['lang'] = $LANG_TAG;
 	setcookie('lang', $LANG_TAG, time() + (3600 * 24 * 30));
 }
-else if(isset($_SESSION['lang'])){
+else if(isset($_SESSION['lang']) && $_SESSION['lang']){
 	$LANG_TAG = $_SESSION['lang'];
 }
-else if(isset($_COOKIE['lang'])){
+else if(isset($_COOKIE['lang']) && $_COOKIE['lang']){
 	$LANG_TAG = $_COOKIE['lang'];
 }
 else{
 	if(strlen($DEFAULT_LANG) == 2) $LANG_TAG = $DEFAULT_LANG;
 }
-if(strlen($LANG_TAG) != 2) $LANG_TAG = 'en';
+if(!$LANG_TAG || strlen($LANG_TAG) != 2) $LANG_TAG = 'en';
 ?>

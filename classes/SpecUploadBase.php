@@ -386,7 +386,7 @@ class SpecUploadBase extends SpecUpload{
 
  	protected function prepUploadData(){
 	 	//First, delete all records in uploadspectemp and uploadimagetemp table associated with this collection
-		$this->outputMsg('<li>Clearing staging tables</li>',1);
+		$this->outputMsg('<li>Clearing staging tables</li>');
  		$sqlDel1 = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 		$this->conn->query($sqlDel1);
 		$sqlDel2 = "DELETE FROM uploaddetermtemp WHERE (collid = ".$this->collId.')';
@@ -424,27 +424,24 @@ class SpecUploadBase extends SpecUpload{
 
 		if($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate'){
 			//If collection is a snapshot, map upload to existing records. These records will be updated rather than appended
-			$this->outputMsg('<li>Linking records (e.g. matching Primary Identifier)... ');
+			$this->outputMsg('<li>Linking records (e.g. matching Primary Identifier)... </li>');
 			ob_flush();
 			flush();
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid '.
 				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND (u.dbpk IS NOT NULL) AND (o.dbpk IS NOT NULL)';
 			$this->conn->query($sql);
-			$this->outputMsg('Done!</li> ');
 		}
 		
 		//Run custom cleaning Stored Procedure, if one exists
 		if($this->storedProcedure){
-			$this->outputMsg('<li style="margin-left:10px;">');
 			if($this->conn->query('CALL '.$this->storedProcedure)){
-				$this->outputMsg('Stored procedure executed: '.$this->storedProcedure);
+				$this->outputMsg('<li style="margin-left:10px;">Stored procedure executed: '.$this->storedProcedure.'</li>');
 				if($this->conn->more_results()) $this->conn->next_result();
 			}
 			else{
-				$this->outputMsg('<span style="color:red;">ERROR: Stored Procedure failed ('.$this->storedProcedure.'): '.$this->conn->error.'</span>');
+				$this->outputMsg('<li style="margin-left:10px;"><span style="color:red;">ERROR: Stored Procedure failed ('.$this->storedProcedure.'): '.$this->conn->error.'</span></li>');
 			}
-			$this->outputMsg('</li>');
 			ob_flush();
 			flush();
 		}
@@ -459,7 +456,7 @@ class SpecUploadBase extends SpecUpload{
 					'SET u.occid = o.occid '.
 					'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) ';
 				if(!$this->conn->query($sql)){
-					$this->outputMsg('<span style="color:red;">Warning: unable to match on catalog number: '.$this->conn->error.'</span>');
+					$this->outputMsg('<li><span style="color:red;">Warning: unable to match on catalog number: '.$this->conn->error.'</span></li>');
 				}
 			}
 			if($this->matchOtherCatalogNumbers){
@@ -468,7 +465,7 @@ class SpecUploadBase extends SpecUpload{
 					'SET u.occid = o.occid '.
 					'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.othercatalogNumbers IS NOT NULL) AND (o.othercatalogNumbers IS NOT NULL) ';
 				if(!$this->conn->query($sql2)){
-					$this->outputMsg('<span style="color:red;">Warning: unable to match on other catalog numbers: '.$this->conn->error.'</span>');
+					$this->outputMsg('<li><span style="color:red;">Warning: unable to match on other catalog numbers: '.$this->conn->error.'</span></li>');
 				}
 			}
 		}
@@ -481,7 +478,7 @@ class SpecUploadBase extends SpecUpload{
 
 	private function recordCleaningStage1(){
 		$this->outputMsg('<li>Data cleaning:</li>');
-		$this->outputMsg('<li style="margin-left:10px;">Cleaning event dates...');
+		$this->outputMsg('<li style="margin-left:10px;">Cleaning event dates...</li>');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp u '.
@@ -513,11 +510,8 @@ class SpecUploadBase extends SpecUpload{
 			'SET u.eventDate = CONCAT_WS("-",LPAD(u.year,4,"19"),IFNULL(LPAD(u.month,2,"0"),"00"),IFNULL(LPAD(u.day,2,"0"),"00")) '.
 			'WHERE u.eventDate IS NULL AND u.year > 1300 AND u.year < 2020 AND collid = '.$this->collId;
 		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
-		ob_flush();
-		flush();
 		
-		$this->outputMsg('<li style="margin-left:10px;">Cleaning country and state/province ...');
+		$this->outputMsg('<li style="margin-left:10px;">Cleaning country and state/province ...</li>');
 		ob_flush();
 		flush();
 		//Convert country abbreviations to full spellings
@@ -547,9 +541,8 @@ class SpecUploadBase extends SpecUpload{
 			'SET u.country = c.countryName '.
 			'WHERE u.country IS NULL AND u.collid = '.$this->collId;
 		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
 
-		$this->outputMsg('<li style="margin-left:10px;">Cleaning coordinates...');
+		$this->outputMsg('<li style="margin-left:10px;">Cleaning coordinates...</li>');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp '.
@@ -573,7 +566,6 @@ class SpecUploadBase extends SpecUpload{
 			'SET DecimalLatitude = NULL, DecimalLongitude = NULL '.
 			'WHERE collid = '.$this->collId.' AND (DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180)';
 		$this->conn->query($sql);
-		$this->outputMsg('Done!</li> ');
 		
 	}
 
@@ -681,6 +673,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->transferImages();
 		$this->finalCleanup();
 		$this->outputMsg('<li style="">Upload Procedure Complete ('.date('Y-m-d h:i:s A').')!</li>');
+		$this->outputMsg(' ');
 	} 
 	
 	private function recordCleaningStage2(){
@@ -694,33 +687,28 @@ class SpecUploadBase extends SpecUpload{
 		
 		if(($this->collMetadataArr["managementtype"] == 'Snapshot' && $this->uploadType != $this->SKELETAL) || $this->collMetadataArr["managementtype"] == 'Aggregate'){
 			$this->outputMsg('<li>Starting Stage 2 cleaning</li>');
-			$this->outputMsg('<li style="margin-left:10px;">Remove NULL dbpk values... ');
+			$this->outputMsg('<li style="margin-left:10px;">Remove NULL dbpk values...</li>');
 			ob_flush();
 			flush();
 			$sql = 'DELETE FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collId;
 			$this->conn->query($sql);
-			$this->outputMsg('Done!</li> ');
 			
-			$this->outputMsg('<li style="margin-left:10px;">Remove duplicate dbpk values... ');
+			$this->outputMsg('<li style="margin-left:10px;">Remove duplicate dbpk values...</li>');
 			ob_flush();
 			flush();
 			$sql = 'DELETE u.* '.
 				'FROM uploadspectemp u INNER JOIN (SELECT dbpk FROM uploadspectemp '.
 				'GROUP BY dbpk, collid HAVING Count(*)>1 AND collid = '.$this->collId.') t2 ON u.dbpk = t2.dbpk '.
 				'WHERE collid = '.$this->collId;
-			if($this->conn->query($sql)){
-				$this->outputMsg('Done! ');
+			if(!$this->conn->query($sql)){
+				$this->outputMsg('<li style="margin-left:10px"><span style="color:red;">ERROR</span> ('.$this->conn->error.')</li>');
 			}
-			else{
-				$this->outputMsg('<span style="color:red;">ERROR</span> ('.$this->conn->error.')');
-			}
-			$this->outputMsg('</li>');
 		}
 	}
 
 	protected function transferOccurrences(){
 		//Clean and Transfer records from uploadspectemp to specimens
-		$this->outputMsg('<li>Updating existing records... ');
+		$this->outputMsg('<li>Updating existing records... </li>');
 		ob_flush();
 		flush();
 		$fieldArr = array('basisOfRecord', 'catalogNumber','otherCatalogNumbers','occurrenceid',
@@ -752,30 +740,24 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid SET '.trim($sqlFrag,' ,').
 			' WHERE (u.collid = '.$this->collId.')';
 		//echo '<div>'.$sql.'</div>'; exit;
-		if($this->conn->query($sql)){
-			$this->outputMsg('Done!</li> ');
-		}
-		else{
-			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
+		if(!$this->conn->query($sql)){
+			$this->outputMsg('<li style="margin-left:10px">FAILED! ERROR: '.$this->conn->error.'</li> ');
 		}
 		
-		$this->outputMsg('<li>Transferring new records... ');
+		$this->outputMsg('<li>Transferring new records...</li>');
 		ob_flush();
 		flush();
 		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, dateentered, '.implode(', ',$fieldArr).' ) '.
 			'SELECT u.collid, u.dbpk, "'.date('Y-m-d H:i:s').'", u.'.implode(', u.',$fieldArr).' FROM uploadspectemp u '.
 			'WHERE u.occid IS NULL AND u.collid = '.$this->collId.'';
 		//echo '<div>'.$sql.'</div>'; exit;
-		if($this->conn->query($sql)){
-			$this->outputMsg('Done!</li> ');
-		}
-		else{
-			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
-			$this->outputMsg($sql);
+		if(!$this->conn->query($sql)){
+			$this->outputMsg('<li>FAILED! ERROR: '.$this->conn->error.'</li> ');
+			//$this->outputMsg($sql);
 		}
 
 		//Link all newly intersted records back to uploadspectemp in prep for loading determiantion history and associatedmedia
-		$this->outputMsg('<li>Linking records in prep for loading determination history and associatedmedia... ');
+		$this->outputMsg('<li>Linking records in prep for loading determination history and associatedmedia...</li>');
 		ob_flush();
 		flush();
 		//Update occid by matching dbpk 
@@ -783,16 +765,15 @@ class SpecUploadBase extends SpecUpload{
 			'SET u.occid = o.occid '.
 			'WHERE (u.occid IS NULL) AND (u.dbpk IS NOT NULL) AND (o.dbpk IS NOT NULL) AND (u.collid = '.$this->collId.')';
 		if(!$this->conn->query($sqlOcc1)){
-			$this->outputMsg('<div>ERROR updating occid after occurrence insert: '.$this->conn->error.'</div>');
+			$this->outputMsg('<li>ERROR updating occid after occurrence insert: '.$this->conn->error.'</li>');
 		}
 		//Update occid by linking catalognumbers
 		$sqlOcc2 = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 			'SET u.occid = o.occid '.
 			'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) ';
 		if(!$this->conn->query($sqlOcc2)){
-			$this->outputMsg('<div>ERROR updating occid (2nd step) after occurrence insert: '.$this->conn->error.'</div>');
+			$this->outputMsg('<li>ERROR updating occid (2nd step) after occurrence insert: '.$this->conn->error.'</li>');
 		}
-		$this->outputMsg('Done!</li> ');
 
 		//Exsiccati transfer
 		$rsTest = $this->conn->query('SHOW COLUMNS FROM uploadspectemp WHERE field = "exsiccatiIdentifier"');
@@ -804,7 +785,7 @@ class SpecUploadBase extends SpecUpload{
 				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NOT NULL) '.
 				'AND (u.exsiccatiIdentifier IS NOT NULL) AND (u.exsiccatinumber IS NOT NULL) AND (e.exsnumber IS NULL)';
 			if(!$this->conn->query($sqlExs1)){
-				$this->outputMsg('<div>ERROR adding new exsiccati numbers: '.$this->conn->error.'</div>');
+				$this->outputMsg('<li>ERROR adding new exsiccati numbers: '.$this->conn->error.'</li>');
 			}
 			//Load exsiccati 
 			$sqlExs2 = 'INSERT IGNORE INTO omexsiccatiocclink(omenid,occid) '.
@@ -815,7 +796,7 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg('<li>Specimens linked to exsiccati index </li>');
 			}
 			else{
-				$this->outputMsg('<div>ERROR adding new exsiccati numbers: '.$this->conn->error.'</div>');
+				$this->outputMsg('<li>ERROR adding new exsiccati numbers: '.$this->conn->error.'</li>');
 			}
 		}
 		$rsTest->free();
@@ -832,7 +813,7 @@ class SpecUploadBase extends SpecUpload{
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			if($r->cnt){
-				$this->outputMsg('<li>Tranferring Determination History... ');
+				$this->outputMsg('<li>Tranferring Determination History...</li>');
 				ob_flush();
 				flush();
 	
@@ -841,10 +822,8 @@ class SpecUploadBase extends SpecUpload{
 					'SET ud.occid = u.occid '.
 					'WHERE (ud.occid IS NULL) AND (u.occid IS NOT NULL) AND (ud.collid = '.$this->collId.')';
 				if(!$this->conn->query($sql)){
-					$this->outputMsg('<div style="margin-left:20px;">WARNING updating occids within uploaddetermtemp: '.$this->conn->error.'</div> ');
+					$this->outputMsg('<li style="margin-left:20px;">WARNING updating occids within uploaddetermtemp: '.$this->conn->error.'</li> ');
 				}
-				ob_flush();
-				flush();
 	
 				//Delete already existing determinations
 				$sqlDel = 'DELETE u.* '.
@@ -866,10 +845,9 @@ class SpecUploadBase extends SpecUpload{
 						'FROM uploaddetermtemp '.
 						'WHERE (collid = '.$this->collId.')';
 					$this->conn->query($sqlDel);
-					$this->outputMsg('Done!</li> ');
 				}
 				else{
-					$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
+					$this->outputMsg('<li>FAILED! ERROR: '.$this->conn->error.'</li> ');
 				}
 			}
 		}
@@ -883,7 +861,7 @@ class SpecUploadBase extends SpecUpload{
 			'WHERE (associatedmedia LIKE "http%") AND (occid IS NOT NULL) AND (collid = '.$this->collId.') LIMIT 5';
 		$rs1 = $this->conn->query($sql1);
 		if($rs1->num_rows){
-			$this->outputMsg('<li>Preparing associatedMedia for image transfer... ');
+			$this->outputMsg('<li>Preparing associatedMedia for image transfer...</li>');
 			ob_flush();
 			flush();
 			$okToLoad = false; 
@@ -898,7 +876,7 @@ class SpecUploadBase extends SpecUpload{
 							$okToLoad = true;
 						}
 						else{
-							echo '<div style="margin-left:20px;">Bad url: '.$mediaUrl.'</div>';
+							echo '<li style="margin-left:20px;">Bad url: '.$mediaUrl.'</li>';
 						}
 					}
 				}
@@ -918,7 +896,7 @@ class SpecUploadBase extends SpecUpload{
 					$this->conn->query($sql2b);
 				}
 				else{
-					echo '<div style="margin-left:20px;">ERROR bulk transferring images: '.$this->conn->error.'</div>';
+					echo '<li style="margin-left:20px;">ERROR bulk transferring images: '.$this->conn->error.'</li>';
 				}
 				
 				//Manually transfer multiple URLs
@@ -936,21 +914,18 @@ class SpecUploadBase extends SpecUpload{
 								$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url,collid) '.
 									'VALUES('.$r3->occid.','.($r3->tidinterpreted?$r3->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty",'.$this->collId.')';
 								if(!$this->conn->query($sqlInsert)){
-									$this->outputMsg('<div style="margin-left:10px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</div>');
-									$this->outputMsg('<div style="margin-left:10px;">SQL: '.$sqlInsert.'</div>');
+									$this->outputMsg('<li style="margin-left:10px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</li>');
+									$this->outputMsg('<li style="margin-left:10px;">SQL: '.$sqlInsert.'</li>');
 								}
 							}
 							else{
-								echo '<div style="margin-left:20px;">Bad url: '.$mediaUrl.'</div>';
+								echo '<li style="margin-left:20px;">Bad url: '.$mediaUrl.'</li>';
 							}
 						}
 					}
 				}
 				$rs3->free();
 			}
-			$this->outputMsg('Done!</li> ');
-			ob_flush();
-			flush();
 		} 
 		$rs1->free();
 	}
@@ -969,7 +944,7 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg('<li style="margin-left:10px;">step 1 of 4... </li>');
 			}
 			else{
-				$this->outputMsg('<div style="margin-left:20px;">WARNING removing non-jpgs from uploadimagetemp: '.$this->conn->error.'</div> ');
+				$this->outputMsg('<li style="margin-left:20px;">WARNING removing non-jpgs from uploadimagetemp: '.$this->conn->error.'</li> ');
 			}
 			ob_flush();
 			flush();
@@ -982,7 +957,7 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg('<li style="margin-left:10px;">step 2 of 4... </li>');
 			}
 			else{
-				$this->outputMsg('<div style="margin-left:20px;">WARNING updating occids within uploadimagetemp: '.$this->conn->error.'</div> ');
+				$this->outputMsg('<li style="margin-left:20px;">WARNING updating occids within uploadimagetemp: '.$this->conn->error.'</li> ');
 			}
 			ob_flush();
 			flush();
@@ -995,7 +970,7 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg('<li style="margin-left:10px;">step 3 of 4... </li>');
 			}
 			else{
-				$this->outputMsg('<div style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</div> ');
+				$this->outputMsg('<li style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</li> ');
 			}
 			ob_flush();
 			flush();
@@ -1007,12 +982,12 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg('<li style="margin-left:10px;">step 4 of 4... </li>');
 			}
 			else{
-				$this->outputMsg('<div style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</div> ');
+				$this->outputMsg('<li style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</li> ');
 			}
 			$sql = 'DELETE u.* FROM uploadimagetemp u INNER JOIN images i ON u.occid = i.occid '.
 				'WHERE (u.collid = '.$this->collId.') AND (u.url = i.url)';
 			if(!$this->conn->query($sql)){
-				$this->outputMsg('<div style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</div> ');
+				$this->outputMsg('<li style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</li> ');
 			}
 			ob_flush();
 			flush();
@@ -1051,7 +1026,7 @@ class SpecUploadBase extends SpecUpload{
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			if($r->cnt){
-				$this->outputMsg('<li>Tranferring images... ');
+				$this->outputMsg('<li>Tranferring images...</li>');
 				ob_flush();
 				flush();
 				//Update occid for images of new records
@@ -1060,7 +1035,7 @@ class SpecUploadBase extends SpecUpload{
 					'WHERE (ui.occid IS NULL) AND (u.occid IS NOT NULL) AND (ui.collid = '.$this->collId.')';
 				//echo $sql.'<br/>';
 				if(!$this->conn->query($sql)){
-					$this->outputMsg('<div style="margin-left:20px;">WARNING updating occids within uploadimagetemp: '.$this->conn->error.'</div> ');
+					$this->outputMsg('<li style="margin-left:20px;">WARNING updating occids within uploadimagetemp: '.$this->conn->error.'</li> ');
 				}
 	
 				//Set image transfer count
@@ -1072,10 +1047,10 @@ class SpecUploadBase extends SpecUpload{
 					'FROM uploadimagetemp '.
 					'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
 				if($this->conn->query($sql)){
-					$this->outputMsg('Done! ('.$this->imageTransferCount.' images)</li> ');
+					$this->outputMsg('<li>Done! ('.$this->imageTransferCount.' images)</li> ');
 				}
 				else{
-					$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
+					$this->outputMsg('<li>FAILED! ERROR: '.$this->conn->error.'</li> ');
 				}
 				ob_flush();
 				flush();
@@ -1567,8 +1542,8 @@ class SpecUploadBase extends SpecUpload{
 			}
 			else{
 				$this->outputMsg("<li>FAILED adding record #".$this->transferCount."</li>");
-				$this->outputMsg("<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>");
-				$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
+				$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
+				$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
 			}
 		}
 	}
@@ -1623,8 +1598,8 @@ class SpecUploadBase extends SpecUpload{
 					}
 					else{
 						$this->outputMsg("<li>FAILED adding indetification history record #".$this->identTransferCount."</li>");
-						$this->outputMsg("<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>");
-						$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
+						$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
+						$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
 					}
 				}
 			}
@@ -1649,8 +1624,8 @@ class SpecUploadBase extends SpecUpload{
 				}
 				else{
 					$this->outputMsg("<li>FAILED adding image record #".$this->imageTransferCount."</li>");
-					$this->outputMsg("<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>");
-					$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
+					$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
+					$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
 				}
 			}
 		}
@@ -1799,7 +1774,7 @@ class SpecUploadBase extends SpecUpload{
 				$this->imageTransferCount = $r->cnt;
 			}
 			else{
-				$this->outputMsg('<div style="margin-left:20px;">ERROR setting image upload count: '.$this->conn->error.'</div> ');
+				$this->outputMsg('<li style="margin-left:20px;">ERROR setting image upload count: '.$this->conn->error.'</li> ');
 			}
 			$rs->free();
 		}		
