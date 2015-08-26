@@ -58,20 +58,20 @@ $duManager->setVerboseMode(2);
 $duManager->loadFieldMap(true);
 $ulPath = $duManager->uploadFile();
 if(!$ulPath){
-	exit('ERROR uploading file: '.$this->getErrorStr());
+	exit('ERROR uploading file: '.$duManager->getErrorStr());
 }
 
 if(!$duManager->analyzeUpload()){
-	exit('ERROR analyzing upload file: '.$this->getErrorStr());
+	exit('ERROR analyzing upload file: '.$duManager->getErrorStr());
 }
 if(!$duManager->uploadData(false)){
-	exit('ERROR uploading file: '.$this->getErrorStr());
+	exit('ERROR uploading file: '.$duManager->getErrorStr());
 }
 $transferCnt = $duManager->getTransferCount();
 $duManager->finalTransfer();
 
 if($transferCnt > 0){
-	echo $transferCnt;
+	echo 'Transfer successful: '.$transferCnt.' records transferred';
 }
 else{
 	echo 'FAILED: 0 records uploaded';

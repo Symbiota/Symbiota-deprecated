@@ -374,7 +374,7 @@ class SpecUploadDwca extends SpecUploadBase{
 					}
 					//Grab data
 					$this->transferCount = 0;
-			 		if(!in_array($this->fieldMap['dbpk']['field'],$this->sourceArr)){
+			 		if(!isset($this->fieldMap['dbpk']['field']) || !in_array($this->fieldMap['dbpk']['field'],$this->sourceArr)){
 						$this->fieldMap['dbpk']['field'] = strtolower($this->metaArr['occur']['fields'][$id]);
 					}
 					$collName = $this->collMetadataArr["name"].' ('.$this->collMetadataArr["institutioncode"];
