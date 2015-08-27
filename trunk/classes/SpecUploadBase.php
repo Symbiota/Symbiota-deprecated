@@ -26,13 +26,13 @@ class SpecUploadBase extends SpecUpload{
 	protected $imageSymbFields = Array();
 
 	private $translationMap = array('accession'=>'catalognumber','accessionid'=>'catalognumber','accessionnumber'=>'catalognumber',
-		'taxonfamilyname'=>'family','scientificname'=>'sciname','species'=>'specificepithet',
-		'collector'=>'recordedby','primarycollector'=>'recordedby','field:collector'=>'recordedby',
+		'taxonfamilyname'=>'family','scientificname'=>'sciname','species'=>'specificepithet','commonname'=>'taxonremarks',
+		'observer'=>'recordedby','collector'=>'recordedby','primarycollector'=>'recordedby','field:collector'=>'recordedby',
 		'collectornumber'=>'recordnumber','collectionnumber'=>'recordnumber','field:collectorfieldnumber'=>'recordnumber',
-		'datecollected'=>'eventdate','date'=>'eventdate','collectiondate'=>'eventdate','observedon'=>'eventdate',
+		'datecollected'=>'eventdate','date'=>'eventdate','collectiondate'=>'eventdate','observedon'=>'eventdate','dateobserved'=>'eventdate',
 		'cf' => 'identificationqualifier','detby'=>'identifiedby','determinor'=>'identifiedby','determinationdate'=>'dateidentified',
-		'placestatename'=>'stateprovince','state'=>'stateprovince','placecountyname'=>'county','field:localitydescription'=>'locality', 
-		'latitude'=>'verbatimlatitude','longitude'=>'verbatimlongitude','field:associatedspecies'=>'associatedtaxa',
+		'placestatename'=>'stateprovince','state'=>'stateprovince','placecountyname'=>'county','municipiocounty'=>'county','field:localitydescription'=>'locality', 
+		'latitude'=>'verbatimlatitude','longitude'=>'verbatimlongitude','elevationmeters'=>'minimumelevationinmeters','field:associatedspecies'=>'associatedtaxa',
 		'specimennotes'=>'occurrenceremarks','notes'=>'occurrenceremarks','generalnotes'=>'occurrenceremarks',
 		'plantdescription'=>'verbatimattributes','description'=>'verbatimattributes','field:habitat'=>'habitat');
 	private $identTranslationMap = array('scientificname'=>'sciname','detby'=>'identifiedby','determinor'=>'identifiedby',
