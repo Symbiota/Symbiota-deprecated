@@ -56,9 +56,9 @@ class DwcArchiverOccurrence{
 		$this->charSetSource = strtoupper($charset);
 		$this->charSetOut = $this->charSetSource;
 		
-		$this->condAllowArr = array('catalognumber','othercatalognumbers','occurrenceid','family','sciname','scientificname',
-			'country','stateprovince','county','recordedby','recordnumber','eventdate','municipality',
-			'decimallatitude','decimallongitude','minimumelevationinmeters','maximumelevationinmeters','datelastmodified','modified');
+		$this->condAllowArr = array('catalognumber','othercatalognumbers','occurrenceid','family','sciname',
+			'country','stateprovince','county','municipality','recordedby','recordnumber','eventdate',
+			'decimallatitude','decimallongitude','minimumelevationinmeters','maximumelevationinmeters','datelastmodified','dateentered');
 		
 		$this->securityArr = array('eventDate','month','day','startDayOfYear','endDayOfYear','verbatimEventDate',
 			'recordNumber','locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
@@ -636,11 +636,12 @@ class DwcArchiverOccurrence{
 	
 	public function addCondition($field, $cond, $value = ''){
 		//Sanitation
+		$cond = strtoupper(trim($cond));
 		if(!preg_match('/^[A-Za-z]+$/',$field)) return false;
 		if(!preg_match('/^[A-Z]+$/',$cond)) return false;
 		//Set condition
 		if($field){
-			if(!trim($cond)) $cond = 'EQUALS';
+			if(!$cond) $cond = 'EQUALS';
 			if($value || ($cond == 'NULL' || $cond == 'NOTNULL')){
 				$this->conditionArr[$field][$cond][] = $this->cleanInStr($value);
 			}
@@ -669,6 +670,12 @@ class DwcArchiverOccurrence{
 							}
 							elseif($cond == 'LIKE'){ 
 								$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
+							}
+							elseif($cond == 'LESSTHAN'){ 
+								$sqlFrag2 .= 'OR o.'.$field.' < "'.$value.'" ';
+							}
+							elseif($cond == 'GREATERTHAN'){ 
+								$sqlFrag2 .= 'OR o.'.$field.' > "'.$value.'" ';
 							}
 						}
 					}

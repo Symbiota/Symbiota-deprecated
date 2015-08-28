@@ -25,7 +25,7 @@ if($collid){
 				$valueArr = array();
 				if($p = strpos($tok[0],'-')){
 					$field = substr($tok[0],0,$p);
-					$cond = strtoupper(substr($tok[0],$p+1));
+					$cond = substr($tok[0],$p+1);
 				}
 				if(isset($tok[1]) && $tok[1]){
 					$valueArr = explode(',',$tok[1]);
