@@ -256,24 +256,24 @@ if(isset($profile_viewprofileCrumbs)){
 								</div>
 								<div style="float:left;">
 									<div style="float:left;margin:3px;">
-										<b>Latitude Centroid</b><br/>
+										<b>Latitude<br />Centroid</b><br />
 										<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" style="width:110px;"/>
 									</div>
 									<div style="float:left;margin:3px;">
-										<b>Longitude Centroid</b><br/>
+										<b>Longitude<br />Centroid</b><br />
 										<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" style="width:110px;" />
 									</div>
 									<div style="float:left;margin:3px;">
-										<b>Point Radius (meters)</b><br/>
+										<b>Point Radius<br />(meters)</b><br />
 										<input name="nclpointradiusmeters" type="text" maxlength="15" style="width:110px;"/>
-									</div>
-									<div style="float:left;margin:20px 0px 0px 3px;">
-										<span style="cursor:pointer;" onclick="openMappingAid();">
-											<img src="../images/world.png" style="width:12px;" />
-										</span>
+										<div style="float:right;margin:20px 0px 0px 3px;">
+											<span style="cursor:pointer;" onclick="openMappingAid();">
+												<img src="../images/world.png" style="width:12px;" />
+											</span>
+										</div>
 									</div>
 								</div>
-								<div style="float:left;margin-top:8px;margin-bottom:8px;">
+								<div style="float:left;margin-top:8px;margin-bottom:8px;margin-left:8px;">
 									<fieldset style="width:175px;">
 										<legend><b>Polygon Footprint</b></legend>
 										<div id="polycreatebox" style="display:block;clear:both;">
