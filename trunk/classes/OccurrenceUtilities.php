@@ -835,16 +835,27 @@ class OccurrenceUtilities {
 		$status = true;
 		//protect globally rare species
 		if($this->verbose) $this->outputMsg('Protecting globally rare species... ',1);
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
-			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN taxa t ON ts2.tid = t.tid '.
-			'SET o.LocalitySecurity = t.SecurityStatus '.
-			'WHERE (t.SecurityStatus > 0) AND (o.LocalitySecurity IS NULL)';
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to protect globally rare species; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
+		$sensitiveArr = array();
+		$sql = 'SELECT DISTINCT t.tid, ts.tidaccepted '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '. 
+			'WHERE (ts.taxauthid = 1) AND (t.SecurityStatus > 0)';
+		$rs = $this->conn->query($sql); 
+		while($r = $rs->fetch_object()){
+			$sensitiveArr[$r->tid] = $r->tid; 
+			$sensitiveArr[$r->tidaccepted] = $r->tidaccepted; 
+		}
+		$rs->free();
+
+		if($sensitiveArr){
+			$sql2 = 'UPDATE omoccurrences o '.
+				'SET o.LocalitySecurity = 1 '.
+				'WHERE (o.LocalitySecurity IS NULL OR o.LocalitySecurity = 0) AND (o.tidinterpreted IN('.implode(',',$sensitiveArr).'))';
+			if(!$this->conn->query($sql2)){
+				$errStr = 'WARNING: unable to protect globally rare species; '.$this->conn->error;
+				$this->errorArr[] = $errStr;
+				if($this->verbose) $this->outputMsg($errStr,2);
+				$status = false;
+			}
 		}
 		return $status;
 	}
@@ -858,8 +869,8 @@ class OccurrenceUtilities {
 			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
 			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
 			'SET o.localitysecurity = 1 '.
-			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND c.type = "rarespp" '.
-			'AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 ';
+			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (c.type = "rarespp") '.
+			'AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
 		if($collid) $sql .= ' AND o.collid ='.$collid;
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to protect state level rare species; '.$this->conn->error;
