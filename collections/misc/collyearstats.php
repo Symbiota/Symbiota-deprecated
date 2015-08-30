@@ -52,7 +52,12 @@ if($collId){
 						echo '<td>Specimens</td>';
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
-								echo '<td>'.$data['stats'][$month]['speccnt'].'</td>';
+								if(array_key_exists('speccnt',$data['stats'][$month])){
+									echo '<td>'.$data['stats'][$month]['speccnt'].'</td>';
+								}
+								else{
+									echo '<td>0</td>';
+								}
 							}
 							else{
 								echo '<td>0</td>';
@@ -64,7 +69,12 @@ if($collId){
 						echo '<td>Stage 1</td>';
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
-								echo '<td>'.$data['stats'][$month]['stage1Count'].'</td>';
+								if(array_key_exists('stage1Count',$data['stats'][$month])){
+									echo '<td>'.$data['stats'][$month]['stage1Count'].'</td>';
+								}
+								else{
+									echo '<td>0</td>';
+								}
 							}
 							else{
 								echo '<td>0</td>';
@@ -76,7 +86,12 @@ if($collId){
 						echo '<td>Stage 2</td>';
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
-								echo '<td>'.$data['stats'][$month]['stage2Count'].'</td>';
+								if(array_key_exists('stage2Count',$data['stats'][$month])){
+									echo '<td>'.$data['stats'][$month]['stage2Count'].'</td>';
+								}
+								else{
+									echo '<td>0</td>';
+								}
 							}
 							else{
 								echo '<td>0</td>';
@@ -88,7 +103,12 @@ if($collId){
 						echo '<td>Stage 3</td>';
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
-								echo '<td>'.$data['stats'][$month]['stage3Count'].'</td>';
+								if(array_key_exists('stage3Count',$data['stats'][$month])){
+									echo '<td>'.$data['stats'][$month]['stage3Count'].'</td>';
+								}
+								else{
+									echo '<td>0</td>';
+								}
 							}
 							else{
 								echo '<td>0</td>';
@@ -100,7 +120,12 @@ if($collId){
 						echo '<td>Images</td>';
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
-								echo '<td>'.$data['stats'][$month]['imgcnt'].'</td>';
+								if(array_key_exists('imgcnt',$data['stats'][$month])){
+									echo '<td>'.$data['stats'][$month]['imgcnt'].'</td>';
+								}
+								else{
+									echo '<td>0</td>';
+								}
 							}
 							else{
 								echo '<td>0</td>';
