@@ -118,18 +118,25 @@ class OccurrenceCleaner extends Manager{
 	}
 
 	//Search and resolve duplicate specimen records 
-	public function getDuplicateCatalogNumber($start, $limit = 500){
+	public function getDuplicateCatalogNumber($type,$start,$limit = 500){
 		//Search is not available for personal specimen management
 		$dupArr = array();
 		$catArr = array();
 		$cnt = 0;
-		$sql1 = 'SELECT catalognumber '.
-			'FROM omoccurrences '.
-			'WHERE catalognumber IS NOT NULL AND collid = '.$this->collid;
+		if($type=='cat'){
+			$sql1 = 'SELECT catalognumber '.
+				'FROM omoccurrences '.
+				'WHERE catalognumber IS NOT NULL AND collid = '.$this->collid;
+		}
+		else{
+			$sql1 = 'SELECT otherCatalogNumbers '.
+				'FROM omoccurrences '.
+				'WHERE otherCatalogNumbers IS NOT NULL AND collid = '.$this->collid;
+		}
 		//echo $sql1;
 		$rs = $this->conn->query($sql1);
 		while($r = $rs->fetch_object()){
-			$cn = $r->catalognumber;
+			$cn = ($type=='cat'?$r->catalognumber:$r->otherCatalogNumbers);
 			if(array_key_exists($cn,$catArr)){
 				//Dupe found
 				$cnt++;
@@ -146,12 +153,22 @@ class OccurrenceCleaner extends Manager{
 		$rs->free();
 		
 		$retArr = array();
-		$sql = 'SELECT o.catalognumber AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, '.
-			'o.recordedby, o.recordnumber, o.associatedcollectors, o.eventdate, o.verbatimeventdate, '.
-			'o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
-			'FROM omoccurrences o '.
-			'WHERE o.collid = '.$this->collid.' AND o.catalognumber IN("'.implode('","',array_keys($dupArr)).'") '.
-			'ORDER BY o.catalognumber';
+		if($type=='cat'){
+			$sql = 'SELECT o.catalognumber AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, '.
+				'o.recordedby, o.recordnumber, o.associatedcollectors, o.eventdate, o.verbatimeventdate, '.
+				'o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
+				'FROM omoccurrences o '.
+				'WHERE o.collid = '.$this->collid.' AND o.catalognumber IN("'.implode('","',array_keys($dupArr)).'") '.
+				'ORDER BY o.catalognumber';
+		}
+		else{
+			$sql = 'SELECT o.otherCatalogNumbers AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, '.
+				'o.recordedby, o.recordnumber, o.associatedcollectors, o.eventdate, o.verbatimeventdate, '.
+				'o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
+				'FROM omoccurrences o '.
+				'WHERE o.collid = '.$this->collid.' AND o.otherCatalogNumbers IN("'.implode('","',array_keys($dupArr)).'") '.
+				'ORDER BY o.otherCatalogNumbers';
+		}
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_assoc()){
@@ -247,19 +264,16 @@ class OccurrenceCleaner extends Manager{
 	}
 	
 	public function mergeDupeArr($occidArr){
-		$dupArr = array();
-		foreach($occidArr as $v){
-			$vArr = explode(':',$v);
-			$k = strtoupper(trim($vArr[0]));
-			if($k !== '') $dupArr[$k][] = $vArr[1];
-		}
-		foreach($dupArr as $catNum => $occArr){
+		foreach($occidArr as $catNum => $occArr){
+			$targetOccid = $occArr['target'];
+			unset($occArr['target']);
 			if(count($occArr) > 1){
-				$targetOccid = array_shift($occArr);
 				$statusStr = $targetOccid;
 				foreach($occArr as $sourceOccid){
-					$this->mergeRecords($targetOccid,$sourceOccid);
-					$statusStr .= ', '.$sourceOccid;
+					if($sourceOccid != $targetOccid){
+						$this->mergeRecords($targetOccid,$sourceOccid);
+						$statusStr .= ', '.$sourceOccid;
+					}
 				}
 				//$this->logOrEcho('Merging records: '.$statusStr);
 				echo '<li>Merging records: '.$statusStr.'</li>';
