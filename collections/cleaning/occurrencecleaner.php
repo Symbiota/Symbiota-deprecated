@@ -43,7 +43,11 @@ if($action == 'listdupscatalog') $limit = 500;
 
 $dupArr = array();
 if($action == 'listdupscatalog'){
-	$dupArr = $cleanManager->getDuplicateCatalogNumber($start,$limit);
+	$dupArr = $cleanManager->getDuplicateCatalogNumber('cat',$start,$limit);
+	$function = $action;
+}
+if($action == 'listdupsothercatalog'){
+	$dupArr = $cleanManager->getDuplicateCatalogNumber('other',$start,$limit);
 	$function = $action;
 }
 elseif($action == 'listdupsrecordedby'){
@@ -138,7 +142,7 @@ elseif($action == 'listdupsrecordedby'){
 			echo '<a href="occurrencecleaner.php?collid='.$collId.'">';
 			echo 'Data Cleaning Module';
 			echo '</a> &gt;&gt; ';
-			if($action == 'listdupscatalog' || $action == 'listdupsrecordedby') echo '<b>Duplicate Occurrences</b>';
+			if($action == 'listdupscatalog' || $action == 'listdupsothercatalog' || $action == 'listdupsrecordedby') echo '<b>Duplicate Occurrences</b>';
 		}
 		else{
 			echo '<b>Data Cleaning Module</b>';
@@ -181,6 +185,11 @@ elseif($action == 'listdupsrecordedby'){
 								Search for duplicates based on <b>Catalog Numbers</b>
 							</a>
 						</div>
+						<div style="margin:25px;font-weight:bold;font-size:120%;">
+							<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>&action=listdupsothercatalog">
+								Search for duplicates based on <b>Other Catalog Numbers</b>
+							</a>
+						</div>
 						<?php
 					}
 					?>
@@ -215,13 +224,16 @@ elseif($action == 'listdupsrecordedby'){
 				<?php
 			}
 			else{
-				if($action == 'listdupscatalog' || $action == 'listdupsrecordedby'){
+				if($action == 'listdupscatalog' || $action == 'listdupsothercatalog' || $action == 'listdupsrecordedby'){
 					//Look for duplicate catalognumbers 
 					if($dupArr){
 						$recCnt = count($dupArr);
 						//Build table
 						?>
-						<form name="mergeform" action="occurrencecleaner.php" method="post" onsubmit="return validateMergeForm(this)">
+						<div style="margin-bottom:10px;">
+							<b>Use the checkboxes to select the records you would like to merge, and use the radio buttons to select which record is most accurate.</b>
+						</div>
+						<form name="mergeform" action="occurrencecleaner.php" method="post" onsubmit="return validateMergeForm(this);">
 							<?php 
 							if($recCnt > $limit){
 								$href = 'occurrencecleaner.php?collid='.$collId.'&obsuid='.$obsUid.'&action='.$action.'&start='.($start+$limit); 
@@ -229,10 +241,11 @@ elseif($action == 'listdupsrecordedby'){
 							}
 							echo '<div><b>'.($start+1).' to '.($start+$recCnt).' Duplicate Clusters </b></div>';
 							?>
-							<table class="styledtable">
+							<table class="styledtable" style="font-family:Arial;font-size:12px;">
 								<tr>
 									<th style="width:40px;">ID</th>
 									<th style="width:20px;"><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>
+									<th></th>
 									<th style="width:40px;">Catalog Number</th>
 									<th style="width:40px;">Other Catalog Numbers</th>
 									<th>Scientific Name</th>
@@ -250,11 +263,13 @@ elseif($action == 'listdupsrecordedby'){
 								<?php 
 								$setCnt = 0;
 								foreach($dupArr as $dupId => $occArr){
+									$setCnt++;
+									$first = true;
 									foreach($occArr as $occId => $occArr){
-										$setCnt++;
 										echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
 										echo '<td><a href="../editor/occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a></td>'."\n";
 										echo '<td><input name="dupid[]" type="checkbox" value="'.$dupId.':'.$occId.'" /></td>'."\n";
+										echo '<td><input name="dup'.$dupId.'target" type="radio" value="'.$occId.'" '.($first?'checked':'').'/></td>'."\n";
 										echo '<td>'.$occArr['catalognumber'].'</td>'."\n";
 										echo '<td>'.$occArr['othercatalognumbers'].'</td>'."\n";
 										echo '<td>'.$occArr['sciname'].'</td>'."\n";
@@ -269,6 +284,7 @@ elseif($action == 'listdupsrecordedby'){
 										echo '<td>'.$occArr['locality'].'</td>'."\n";
 										echo '<td>'.$occArr['datelastmodified'].'</td>'."\n";
 										echo '</tr>';
+										$first = false;
 									}
 								}
 								?>
@@ -295,7 +311,14 @@ elseif($action == 'listdupsrecordedby'){
 					<ul>
 						<li>Duplicate merging process started</li>
 						<?php 
-						$cleanManager->mergeDupeArr($_POST['dupid']);
+						$dupArr = array();
+						foreach($_POST['dupid'] as $v){
+							$vArr = explode(':',$v);
+							$k = strtoupper(trim($vArr[0]));
+							if($k !== '') $dupArr[$k][] = $vArr[1];
+							if($k !== '') $dupArr[$k]['target'] = $_POST['dup'.$k.'target'];
+						}
+						$cleanManager->mergeDupeArr($dupArr);
 						?>
 						<li>Done!</li>
 					</ul>
