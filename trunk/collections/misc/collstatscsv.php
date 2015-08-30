@@ -74,31 +74,81 @@ if($action == 'Download CSV'){
 			$outputArr[$i]['name'] = $data['collectionname'];
 			$outputArr[$i]['object'] = 'Specimens';
 			foreach($headerArr as $h => $month){
-				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['speccnt']:0);
+				if(array_key_exists($month,$data['stats'])){
+					if(array_key_exists('speccnt',$data['stats'][$month])){
+						$outputArr[$i][$month] = $data['stats'][$month]['speccnt'];
+					}
+					else{
+						$outputArr[$i][$month] = 0;
+					}
+				}
+				else{
+					$outputArr[$i][$month] = 0;
+				}
 			}
 			$i++;
 			$outputArr[$i]['name'] = '';
 			$outputArr[$i]['object'] = 'Stage 1';
 			foreach($headerArr as $h => $month){
-				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['stage1Count']:0);
+				if(array_key_exists($month,$data['stats'])){
+					if(array_key_exists('stage1Count',$data['stats'][$month])){
+						$outputArr[$i][$month] = $data['stats'][$month]['stage1Count'];
+					}
+					else{
+						$outputArr[$i][$month] = 0;
+					}
+				}
+				else{
+					$outputArr[$i][$month] = 0;
+				}
 			}
 			$i++;
 			$outputArr[$i]['name'] = '';
 			$outputArr[$i]['object'] = 'Stage 2';
 			foreach($headerArr as $h => $month){
-				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['stage2Count']:0);
+				if(array_key_exists($month,$data['stats'])){
+					if(array_key_exists('stage2Count',$data['stats'][$month])){
+						$outputArr[$i][$month] = $data['stats'][$month]['stage2Count'];
+					}
+					else{
+						$outputArr[$i][$month] = 0;
+					}
+				}
+				else{
+					$outputArr[$i][$month] = 0;
+				}
 			}
 			$i++;
 			$outputArr[$i]['name'] = '';
 			$outputArr[$i]['object'] = 'Stage 3';
 			foreach($headerArr as $h => $month){
-				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['stage3Count']:0);
+				if(array_key_exists($month,$data['stats'])){
+					if(array_key_exists('stage3Count',$data['stats'][$month])){
+						$outputArr[$i][$month] = $data['stats'][$month]['stage3Count'];
+					}
+					else{
+						$outputArr[$i][$month] = 0;
+					}
+				}
+				else{
+					$outputArr[$i][$month] = 0;
+				}
 			}
 			$i++;
 			$outputArr[$i]['name'] = '';
 			$outputArr[$i]['object'] = 'Images';
 			foreach($headerArr as $h => $month){
-				$outputArr[$i][$month] = (array_key_exists($month,$data['stats'])?$data['stats'][$month]['imgcnt']:0);
+				if(array_key_exists($month,$data['stats'])){
+					if(array_key_exists('imgcnt',$data['stats'][$month])){
+						$outputArr[$i][$month] = $data['stats'][$month]['imgcnt'];
+					}
+					else{
+						$outputArr[$i][$month] = 0;
+					}
+				}
+				else{
+					$outputArr[$i][$month] = 0;
+				}
 			}
 			$i++;
 		}
