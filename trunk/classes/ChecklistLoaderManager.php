@@ -1,11 +1,13 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/TaxonomyUtilities.php');
+include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 
 class ChecklistLoaderManager {
 
 	private $conn;
 	private $clid;
+	private $clMeta = array();
 	private $problemTaxa = array();
 	private $errorArr = array();
 	private $errorStr = '';
@@ -44,6 +46,7 @@ class ChecklistLoaderManager {
 			$cnt = 0;
 			ob_flush();
 			flush();
+			$taxUtil = new TaxonomyUtilities();
 			while($valueArr = fgetcsv($fh)){
 				$tid = 0;
 				$rankId = 0;
@@ -51,7 +54,7 @@ class ChecklistLoaderManager {
 				$sciNameStr = $this->cleanInStr($valueArr[$headerArr["sciname"]]);
 				$noteStr = '';
 				if($sciNameStr){
-					$sciNameArr = TaxonomyUtilities::parseSciName($sciNameStr);
+					$sciNameArr = $taxUtil->parseSciName($sciNameStr);
 					//Check name is in taxa table and grab tid if it is
 					$sql = "";
 					if($thesId && is_numeric($thesId)){
@@ -74,7 +77,7 @@ class ChecklistLoaderManager {
 							$family = $row->family;
 							$rankId = $row->rankid;
 						}
-						$rs->close();
+						$rs->free();
 					}
 					
 					//Load taxon into checklist
@@ -130,6 +133,10 @@ class ChecklistLoaderManager {
 				}
 			}
 			fclose($fh);
+			if($cnt && $this->clMeta['type'] == 'rarespp'){
+				$occUtil = new OccurrenceUtilities();
+				$occUtil->protectStateRareSpecies();
+			}
 		}
 		else{
 			$this->errorStr = 'ERROR: unable to locate scientific name column';
@@ -196,6 +203,7 @@ class ChecklistLoaderManager {
 	public function setClid($c){
 		if($c && is_numeric($c)){
 			$this->clid = $c;
+			$this->setChecklistMetadata();
 		}
 	}
 
@@ -211,18 +219,23 @@ class ChecklistLoaderManager {
 		return $this->errorStr;
 	}
 
-	public function getChecklistMetadata(){
-		$retArr = array();
+	private function setChecklistMetadata(){
 		if($this->clid){
-			$sql = 'SELECT c.name, c.authors FROM fmchecklists c '.
-				'WHERE c.clid = '.$this->clid;
+			$sql = 'SELECT name, authors, type '.
+				'FROM fmchecklists '.
+				'WHERE clid = '.$this->clid;
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
-				$retArr['name'] = $row->name;
-				$retArr['authors'] = $row->authors;
+				$this->clMeta['name'] = $row->name;
+				$this->clMeta['authors'] = $row->authors;
+				$this->clMeta['type'] = $row->type;
 			}
+			$rs->free();
 		}
-		return $retArr;
+	}
+
+	public function getChecklistMetadata(){
+		return $this->clMeta;
 	}
 
 	public function getThesauri(){
