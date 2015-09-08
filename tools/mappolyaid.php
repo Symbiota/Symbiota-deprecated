@@ -249,9 +249,12 @@ else{
 	        function updateParentForm() {
 				if(opener.document.getElementById("footprintWKT")){
 					opener.document.getElementById("footprintWKT").value = document.getElementById("poly_array").value;
-					opener.document.getElementById("footprintWKT").onchange();
+					try{
+						opener.document.getElementById("footprintWKT").onchange();
+					}
+					catch(myErr){}
 				}
-				else if(opener.document.getElementById("polysavebox")){
+				if(opener.document.getElementById("polysavebox")){
 					opener.document.getElementById("polysavebox").style.display = "block";
 				}
 				if(opener.document.getElementById("polyexistsbox")){
