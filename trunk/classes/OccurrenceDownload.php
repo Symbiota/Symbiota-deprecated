@@ -80,7 +80,7 @@ class OccurrenceDownload{
 				if($this->schemaType == 'checklist'){
 					$tempName = 'checklist';
 				}
-				elseif($this->schemaType == 'georeference'){
+				elseif($this->schemaType == 'georef'){
 					$tempName = 'georef';
 				}
 				else{
