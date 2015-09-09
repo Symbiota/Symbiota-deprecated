@@ -127,15 +127,16 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 				if(objName == "customtype1" || objName == "customvalue1"){
 					if(f.customfield1.value == '') return false;
 					if(f.customtype1.value == "EQUALS" || f.customtype1.value == "STARTS" || f.customtype1.value == "LIKE"){
-						if(f.customvalue1.value == '') return false;
+						if(objName == "customtype1" && f.customvalue1.value == '') return false;
 					}
 				}
 				if(objName == "customtype2" || objName == "customvalue2"){
 					if(f.customfield2.value == '') return false;
 					if(f.customtype2.value == "EQUALS" || f.customtype2.value == "STARTS" || f.customtype2.value == "LIKE"){
-						if(f.customvalue2.value == '') return false;
+						if(objName == "customtype2" && f.customvalue2.value == '') return false;
 					}
 				}
+				$("#recalspan").show();
 				$.ajax({
 					type: "POST",
 					url: "rpc/coge_getCount.php",
@@ -153,6 +154,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 				}).done(function( response ) {
 					if(response == 0) f.builddwcabutton.disalbed = true;
 					$("#countdiv").html(response);
+					$("#recalspan").hide();
 				});
 			}
 
@@ -571,12 +573,13 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												$dwcaHandler->addCondition('locality','NOTNULL');
 												echo '<span id="countdiv">'.$dwcaHandler->getOccurrenceCnt().'</span> records'; 
 												?>
+												<span id="recalspan" style="color:orange;display:none;">recalculating... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 											</div>
 											<div>
 												<b>CoGe Authentication:</b>
 												<span id="cogeStatus" style="width:150px;color:red;">Disconnected</span>
 												<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" disabled /></span>
-												<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank" disabled >Login to CoGe</a></span>
+												<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank">Login to CoGe</a></span>
 											</div>
 										</fieldset>
 										<div style="margin:20px;">
