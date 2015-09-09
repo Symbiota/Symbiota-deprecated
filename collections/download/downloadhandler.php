@@ -80,7 +80,6 @@ else{
 			$rareReaderArr = array_unique(array_merge($rareReaderArr,$userRights['RareSppReader']));
 		}
 	}
-		
 	if($schema == "georef"){
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
@@ -116,21 +115,19 @@ else{
 		$dlManager->downloadData();
 	}
 	else{
-		//Is an occurrence download 
-		$dwcaHandler->setCharSetOut($cSet);
-		$dwcaHandler->setSchemaType($schema);
-		$dwcaHandler->setExtended($extended);
-		$dwcaHandler->setDelimiter($format);
 		$dwcaHandler->setVerbose(0);
-		$dwcaHandler->setRedactLocalities($redactLocalities);
-		if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
-
-		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
-			$dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
-		}
-		else{
-			//Request is coming from exporter.php for collection manager tools
-			$dwcaHandler->setCollArr($_POST['targetcollid']);
+		if($schema == "coge"){
+			$dwcaHandler->setCollArr($_POST["collid"]);
+			$dwcaHandler->setCharSetOut('UTF-8');
+			$dwcaHandler->setSchemaType('coge');
+			$dwcaHandler->setExtended(false);
+			$dwcaHandler->setDelimiter('csv');
+			$dwcaHandler->setRedactLocalities(0);
+			$dwcaHandler->setIncludeDets(0);
+			$dwcaHandler->setIncludeImgs(0);
+			$dwcaHandler->addCondition('decimallatitude','NULL');
+			$dwcaHandler->addCondition('decimallongitude','NULL');
+			$dwcaHandler->addCondition('locality','NOTNULL');
 			if(array_key_exists('processingstatus',$_POST) && $_POST['processingstatus']){
 				$dwcaHandler->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);
 			}
@@ -140,12 +137,38 @@ else{
 			if(array_key_exists('customfield2',$_POST) && $_POST['customfield2']){
 				$dwcaHandler->addCondition($_POST['customfield2'],$_POST['customtype2'],$_POST['customvalue2']);
 			}
-			if(array_key_exists('customfield3',$_POST) && $_POST['customfield3']){
-				$dwcaHandler->addCondition($_POST['customfield3'],$_POST['customtype3'],$_POST['customvalue3']);
+		}
+		else{
+			//Is an occurrence download 
+			$dwcaHandler->setCharSetOut($cSet);
+			$dwcaHandler->setSchemaType($schema);
+			$dwcaHandler->setExtended($extended);
+			$dwcaHandler->setDelimiter($format);
+			$dwcaHandler->setRedactLocalities($redactLocalities);
+			if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
+	
+			if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
+				$dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
 			}
-			if(array_key_exists('newrecs',$_POST) && $_POST['newrecs'] == 1){
-				$dwcaHandler->addCondition('dbpk','NULL');
-				$dwcaHandler->addCondition('catalognumber','NOTNULL');
+			else{
+				//Request is coming from exporter.php for collection manager tools
+				$dwcaHandler->setCollArr($_POST['targetcollid']);
+				if(array_key_exists('processingstatus',$_POST) && $_POST['processingstatus']){
+					$dwcaHandler->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);
+				}
+				if(array_key_exists('customfield1',$_POST) && $_POST['customfield1']){
+					$dwcaHandler->addCondition($_POST['customfield1'],$_POST['customtype1'],$_POST['customvalue1']);
+				}
+				if(array_key_exists('customfield2',$_POST) && $_POST['customfield2']){
+					$dwcaHandler->addCondition($_POST['customfield2'],$_POST['customtype2'],$_POST['customvalue2']);
+				}
+				if(array_key_exists('customfield3',$_POST) && $_POST['customfield3']){
+					$dwcaHandler->addCondition($_POST['customfield3'],$_POST['customtype3'],$_POST['customvalue3']);
+				}
+				if(array_key_exists('newrecs',$_POST) && $_POST['newrecs'] == 1){
+					$dwcaHandler->addCondition('dbpk','NULL');
+					$dwcaHandler->addCondition('catalognumber','NOTNULL');
+				}
 			}
 		}
 		$outputFile = null;

@@ -249,7 +249,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 		<!-- This is inner text! -->
 		<div id="innertext">
 			<div style="float:right;width:165px;margin-right:10px">
-				<!-- 
 				<fieldset>
 					<legend><b>Export Type</b></legend>
 					<form name="submenuForm" method="post" action="index.php">
@@ -262,7 +261,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						<input name="tabindex" type="hidden" value="5" />
 					</form>
 				</fieldset>
-				 -->
 			</div>
 			<div style="padding:15px 0px;">
 				This download module is designed to aid collection managers in extracting specimen data
@@ -461,20 +459,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									</td>
 								</tr>
 								<tr>
-									<td>
-										<div style="margin:10px;">
-											<b>Preset variables:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<input name="customtype2" type="radio" value="NULL" checked /> are empty (is null)<br/>
-											<input name="customtype2" type="radio" value="NOTNULL" /> have values (e.g. need verification)
-											<input name="customfield2" type="hidden" value="decimallatitude" />
-										</div> 
-									</td>
-								</tr>
-								<tr>
 									<td colspan="2">
 										<div style="margin:10px;">
 											<input name="customfield3" type="hidden" value="locality" />
@@ -497,7 +481,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 				elseif($displayMode == 2){
 					//GeoLocate tools
 					?>
-					<form name="expgeolocateform" action="../download/downloadhandler.php" method="post" onsubmit="return false;">
+					<form name="expgeolocateform" action="../download/downloadhandler.php" method="post" onsubmit="">
 						<fieldset>
 							<legend><b>GeoLocate Community Toolkit</b></legend>
 							<div style="margin:15px;">
@@ -591,13 +575,16 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 											<div>
 												<b>CoGe Authentication:</b>
 												<span id="cogeStatus" style="width:150px;color:red;">Disconnected</span>
-												<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" /></span>
-												<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank">Login to CoGe</a></span>
+												<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" disabled /></span>
+												<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank" disabled >Login to CoGe</a></span>
 											</div>
 										</fieldset>
 										<div style="margin:20px;">
 											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-											<input name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled />
+											<input name="format" type="hidden" value="csv" />
+											<input name="schema" type="hidden" value="coge" />
+											<input name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> *In development <br/>
+											<input name="submitaction" type="submit" value="Download Records Locally" />
 										</div>
 										<div style="margin-left:20px;">
 											* Default query criteria: locality IS NOT NULL, decimalLatitude IS NULL, decimalLongitude IS NULL
