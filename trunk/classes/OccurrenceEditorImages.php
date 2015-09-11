@@ -292,45 +292,6 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		return $this->photographerArr;
 	}
 
-	//Used in imgremapaid.php
-	public function getOccurrenceList($collId, $identifier, $collector, $collNumber){
-		$returnArr = Array();
-		if(!$identifier && !$collector && !$collNumber) return $returnArr;
-		$sql = '';
-		if($collId){
-			$sql .= 'AND (o.collid = '.$collId.') ';
-		}
-		if($identifier){
-			if(strpos($identifier,'%') !== false){
-	 			$sql .= 'AND (OR (o.catalognumber LIKE "'.$identifier.'") OR (o.othercatalognumbers LIKE "'.$identifier.'"))';
-			}
-			else{
-	 			$sql .= 'AND ((o.catalognumber = "'.$identifier.'") OR (o.othercatalognumbers = "'.$identifier.'"))';
-			}
-		}
-		if($collector){
-			$sql .= 'AND (o.recordedby LIKE "%'.$collector.'%") ';
-		}
-		if($collNumber){
-			$sql .= 'AND (o.recordnumber LIKE "%'.$collNumber.'%") ';
-		}
-		$sql = 'SELECT o.occid, o.recordedby, o.recordnumber, o.eventdate, o.sciname, '.
-			'CONCAT_WS("; ",o.stateprovince, o.county, o.locality) AS locality '.
-			'FROM omoccurrences o WHERE '.substr($sql,4);
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$occId = $row->occid;
-			$returnArr[$occId]['sciname'] = $this->cleanOutStr($row->sciname);
-			$returnArr[$occId]['recordedby'] = $this->cleanOutStr($row->recordedby);
-			$returnArr[$occId]['recordnumber'] = $this->cleanOutStr($row->recordnumber);
-			$returnArr[$occId]['eventdate'] = $this->cleanOutStr($row->eventdate);
-			$returnArr[$occId]['locality'] = $this->cleanOutStr($row->locality);
-		}
-		$rs->close();
-		return $returnArr;
-	}
-
     /**
      * Obtain an array of the keys used for tagging images by content type.
      *

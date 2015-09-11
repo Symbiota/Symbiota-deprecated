@@ -262,7 +262,13 @@ ul#hor_dropdown li:hover ul li a:hover {
 #quicksearchtext{
 	margin-top:0px;
 	padding-bottom:0px;
-	float: left;
+}
+
+#quicksearchtaxon{
+	width: 250px;
+	margin-bottom:0px;
+	padding-bottom:0px;
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 #quicksearchbutton{
@@ -270,15 +276,6 @@ ul#hor_dropdown li:hover ul li a:hover {
 	margin-top:0px;
 	margin-bottom:0px;
 	padding-bottom:0px;
-	float: left;
-}
-
-#quicksearchtaxon{
-	width: 250px;
-	float: left;
-	margin-bottom:0px;
-	padding-bottom:0px;
-	font-family: Arial, Helvetica, sans-serif;
 }
 
 /* Slideshow Plugin */

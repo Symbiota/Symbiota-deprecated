@@ -53,6 +53,6 @@ function checkScinameExistance(sciname){
 } 
 
 function openOccurrenceSearch(target) {
-	occWindow=open("occurrencesearch.php?targetid="+target,"occsearch","resizable=1,scrollbars=1,width=530,height=500,left=20,top=20");
+	occWindow=open("../collections/misc/occurrencesearch.php?targetid="+target,"occsearch","resizable=1,scrollbars=0,width=750,height=500,left=20,top=20");
 	if (occWindow.opener == null) occWindow.opener = self;
 }

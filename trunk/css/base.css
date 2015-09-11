@@ -263,7 +263,13 @@ div.button:hover {
 #quicksearchtext{
 	margin-top:0px;
 	padding-bottom:0px;
-	float: left;
+}
+
+#quicksearchtaxon{
+	width: 250px;
+	margin-bottom:0px;
+	padding-bottom:0px;
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 #quicksearchbutton{
@@ -271,15 +277,6 @@ div.button:hover {
 	margin-top:0px;
 	margin-bottom:0px;
 	padding-bottom:0px;
-	float: left;
-}
-
-#quicksearchtaxon{
-	width: 250px;
-	float: left;
-	margin-bottom:0px;
-	padding-bottom:0px;
-	font-family: Arial, Helvetica, sans-serif;
 }
 
 /* Slideshow Plugin */
