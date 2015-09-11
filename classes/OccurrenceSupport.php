@@ -117,6 +117,56 @@ class OccurrenceSupport {
 		return $retArr;
 	}
 
+	//OccurrenceSearch tool used to search for and link images to existing occurrence
+ 	public function getOccurrenceList($collid, $catalogNumber, $otherCatalogNumbers, $recordedBy, $recordNumber){
+ 		$retArr = Array();
+ 		if(!$catalogNumber && !$otherCatalogNumbers && !$recordedBy && !$recordNumber) return $retArr;
+ 		$sqlWhere = "";
+ 		if($collid){
+ 			$sqlWhere .= "AND (o.collid = ".$collid.") ";
+ 		}
+ 		if($catalogNumber){
+ 			$sqlWhere .= 'AND (o.catalognumber = "'.$catalogNumber.'") ';
+ 		}
+ 		if($otherCatalogNumbers){
+ 			$sqlWhere .= 'AND (o.othercatalognumbers = "'.$otherCatalogNumbers.'") ';
+ 		}
+ 		if($recordedBy){
+ 			$sqlWhere .= 'AND (o.recordedby LIKE "%'.$recordedBy.'%") ';
+ 		}
+ 		if($recordNumber){
+ 			$sqlWhere .= 'AND (o.recordnumber = "'.$recordNumber.'") ';
+ 		}
+ 		$sql = "SELECT occid, recordedby, recordnumber, eventdate, CONCAT_WS('; ',stateprovince, county, locality) AS locality ".
+ 			"FROM omoccurrences o WHERE ".substr($sqlWhere,4);
+ 		//echo $sql;
+ 		$rs = $this->conn->query($sql);
+ 		while($row = $rs->fetch_object()){
+ 			$occId = $row->occid;
+ 			$retArr[$occId]["recordedby"] = $row->recordedby;
+ 			$retArr[$occId]["recordnumber"] = $row->recordnumber;
+ 			$retArr[$occId]["eventdate"] = $row->eventdate;
+ 			$retArr[$occId]["locality"] = $row->locality;
+ 		}
+ 		$rs->free();
+ 		return $retArr;
+ 	}
+ 	
+ 	//Used by /collections/misc/occurrencesearch.php 
+ 	public function getCollectionArr($filter){
+ 		$retArr = array();
+ 		if(!$filter) return $retArr;
+ 		$sql = "SELECT collid, collectionname FROM omcollections ";
+ 		if($filter != 'all' && is_array($filter)) $sql .= 'WHERE collid IN('.implode(',',$filter).')';
+ 		$rs = $this->conn->query($sql);
+ 		while($row = $rs->fetch_object()){
+ 			$retArr[$row->collid] = $row->collectionname;
+ 		}
+ 		$rs->free();
+ 		asort($retArr);
+ 		return $retArr;
+ 	}
+
 	//Occurrence harvester function (occurharvester.php)
 	public function exportCsvFile($postArr){
 		$fieldArr = array('occid','occurrenceID','catalogNumber','otherCatalogNumbers','family','sciname','genus','specificEpithet','taxonRank',
@@ -150,6 +200,6 @@ class OccurrenceSupport {
 	
 	public function getErrorStr(){
 		return $this->errorMessage;
-	} 
+	}
 }
 ?>

@@ -586,8 +586,12 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 											<input name="format" type="hidden" value="csv" />
 											<input name="schema" type="hidden" value="coge" />
-											<input name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> *In development <br/>
-											<input name="submitaction" type="submit" value="Download Records Locally" />
+											<div style="margin:5px">
+												<input name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> *In development <br/>
+											</div>
+											<div style="margin:5px">
+												<input name="submitaction" type="submit" value="Download Records Locally" />
+											</div>
 										</div>
 										<div style="margin-left:20px;">
 											* Default query criteria: locality IS NOT NULL, decimalLatitude IS NULL, decimalLongitude IS NULL

@@ -2,20 +2,34 @@
 include_once('../../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceSkeletal.php');
 
-$occid = '';
-$skelHandler = new OccurrenceSkeletal();
-if(array_key_exists('collid',$_REQUEST) && array_key_exists('catalognumber',$_REQUEST)){
-	$skelHandler->setCollid($_REQUEST['collid']);
-	if($skelHandler->catalogNumberExists($_REQUEST['catalognumber'])){
-		echo 'dupcat:'.$skelHandler->getErrorStr();
+$collid = array_key_exists('collid',$_POST);
+$isEditor = 0;
+if($collid){
+	if($IS_ADMIN){
+		$isEditor = 1;
 	}
-	else{
-		$occid = $skelHandler->occurrenceAdd($_REQUEST);
-		if($occid && is_numeric($occid)){
-			echo $occid;
+	elseif(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin'])){
+		$isEditor = 1;
+	}
+	elseif(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollEditor'])){
+		$isEditor = 1;
+	}
+}
+if($isEditor){
+	$skelHandler = new OccurrenceSkeletal();
+	if(array_key_exists('collid',$_POST)){
+		$skelHandler->setCollid($_POST['collid']);
+		if(array_key_exists('catalognumber',$_POST) && $skelHandler->catalogNumberExists($_POST['catalognumber'])){
+			echo 'dupcat:'.$skelHandler->getErrorStr();
 		}
 		else{
-			echo $skelHandler->getErrorStr();
+			$occid = $skelHandler->occurrenceAdd($_POST);
+			if($occid && is_numeric($occid)){
+				echo $occid;
+			}
+			else{
+				echo $skelHandler->getErrorStr();
+			}
 		}
 	}
 }

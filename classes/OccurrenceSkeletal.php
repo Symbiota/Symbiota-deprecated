@@ -35,11 +35,11 @@ class OccurrenceSkeletal {
 				$allowedFields = array('collid'=>'n','catalognumber'=>'s','othercatalognumbers'=>'s','sciname'=>'s','tidinterpreted'=>'s','family'=>'s',
 					'scientificnameauthorship'=>'s','localitysecurity'=>'n','country'=>'s','stateprovince'=>'s','county'=>'s','processingstatus'=>'s',
 					'recordedby'=>'s','recordnumber'=>'s','eventdate'=>'d','language'=>'s');
-				if($postArr['stateprovince'] && strlen($postArr['stateprovince']) == 2){
+				if(isset($postArr['stateprovince']) && $postArr['stateprovince'] && strlen($postArr['stateprovince']) == 2){
 					$postArr['stateprovince'] = $this->translateStateAbbreviation($postArr['stateprovince']);
 				}
 				//If country is NULL and state populated, grab country from geo-lookup tables
-				if((!isset($postArr['country']) || !$postArr['country']) && $postArr['stateprovince']){
+				if((!isset($postArr['country']) || !$postArr['country']) && isset($postArr['stateprovince']) && $postArr['stateprovince']){
 					$postArr['country'] = $this->getCountry($postArr['stateprovince']);
 				}
 				//Add record
@@ -65,6 +65,13 @@ class OccurrenceSkeletal {
 				//echo $sql;
 				if($this->conn->query($sql)){
 					$occid = $this->conn->insert_id;
+					//Update collection stats
+					$this->conn->query('UPDATE omcollectionstats SET recordcnt = recordcnt + 1 WHERE collid = '.$this->collid);
+					//Create and insert Symbiota GUID (UUID)
+					$guid = UuidFactory::getUuidV4();
+					if(!$this->conn->query('INSERT INTO guidoccurrences(guid,occid) VALUES("'.$guid.'",'.$occid.')')){
+						$this->errorStr = '(WARNING: Symbiota GUID mapping failed) ';
+					}
 				}
 				else{
 					$this->errorStr = 'ERROR adding occurrence record: '.$this->conn->error;

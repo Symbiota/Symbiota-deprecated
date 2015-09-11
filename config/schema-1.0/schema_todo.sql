@@ -187,6 +187,11 @@ ALTER TABLE `omoccurassociation`
   ADD INDEX `INDEX_verbatimSciname` (`verbatimsciname` ASC);
 
 
+#Checklist changes
+ALTER TABLE `fmvouchers` 
+  DROP COLUMN `Collector`;
+
+
 #Misc
 ALTER TABLE `uploadspectemp` 
   ADD COLUMN `exsiccatiIdentifier` INT NULL AFTER `genericcolumn2`,
@@ -338,7 +343,7 @@ END
 DELIMITER ;
 
 ALTER TABLE `omcollectionstats`
-MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
+  MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
 
 
 
