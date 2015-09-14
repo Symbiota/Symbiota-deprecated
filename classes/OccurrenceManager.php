@@ -651,10 +651,7 @@ class OccurrenceManager{
 			$categoryArr = $occArr['cat'];
 			?>
 			<div style="float:right;margin-top:20px;">
-				<input type="image" src='../images/next.png'
-					onmouseover="this.src = '../images/next_rollover.png';"
-					onmouseout="this.src = '../images/next.png';"
-					title="Click button to advance to the next step" />
+				<input type="submit" class="searchcollnextbtn" value="" title="" />
 			</div>
 			<table style="float:left;width:80%;">
 				<?php
@@ -789,10 +786,7 @@ class OccurrenceManager{
 				?>
 			</table>
 			<div style="float:right;margin-top:<?php echo count($collArr)*15; ?>px;">
-				<input type="image" src='../images/next.png'
-					onmouseover="this.src = '../images/next_rollover.png';"
-					onmouseout="this.src = '../images/next.png';"
-					title="Click button to advance to the next step" />
+				<input type="submit" class="searchcollnextbtn" value="" title="" />
 			</div>
 			<?php
 		}

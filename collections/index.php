@@ -128,10 +128,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 							<fieldset style="margin:10px;padding:10px;">
 								<legend style="font-weight:bold;"><?php echo $catTitle; ?></legend>
 								<div style="margin:0px 15px;float:right;">
-									<input type="image" src='../images/next.png'
-										onmouseover="javascript:this.src = '../images/next_rollover.png';" 
-										onmouseout="javascript:this.src = '../images/next.png';"
-										title="Click button to advance to the next step" />
+									<input type="submit" class="searchcollnextbtn" value="" title="" />
 								</div>
 								<?php
 								$projTitleArr = $otherCatArr['titles'][$catPid]['proj'];
