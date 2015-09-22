@@ -33,7 +33,8 @@ if($view == 'thumb'){
 	$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 	if($lastPage > $startPage){
 		$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
-		$hrefPrefix = "<a href='#' onclick='changeImagePage('thumb',starr,";
+		$onclick = 'changeImagePage("","thumb",starr,';
+		$hrefPrefix = "<a href='#' onclick='".$onclick;
 		$pageBar = '<div style="float:left" >';
 		if($startPage > 1){
 			$pageBar .= "<span class='pagination' style='margin-right:5px;'>".$hrefPrefix."1); return false;'>First</a></span>";
