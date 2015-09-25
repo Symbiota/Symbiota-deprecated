@@ -302,6 +302,7 @@ else{
 						<option value="stateprovince" <?php echo ($qOrderBy=='stateprovince'?'SELECTED':''); ?>>State / Province</option>
 						<option value="county" <?php echo ($qOrderBy=='county'?'SELECTED':''); ?>>County</option>
 						<option value="municipality" <?php echo ($qOrderBy=='municipality'?'SELECTED':''); ?>>Municipality</option>
+						<option value="locality" <?php echo ($qOrderBy=='locality'?'SELECTED':''); ?>>Locality</option>
 						<option value="decimallatitude" <?php echo ($qOrderBy=='decimallatitude'?'SELECTED':''); ?>>Decimal Latitude</option>
 						<option value="decimallongitude" <?php echo ($qOrderBy=='decimallongitude'?'SELECTED':''); ?>>Decimal Longitude</option>
 						<option value="minimumelevationinmeters" <?php echo ($qOrderBy=='minimumelevationinmeters'?'SELECTED':''); ?>>Elevation Minimum</option>
