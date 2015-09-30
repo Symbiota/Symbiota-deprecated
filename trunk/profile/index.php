@@ -114,6 +114,14 @@ else{
 			document.getElementById("resetpwd").value = "1";
 			document.forms["loginform"].submit();
 		}
+		
+		function checkCreds(){
+			if(document.getElementById("login").value == "" || document.getElementById("password").value == ""){
+				alert("Please enter your login and password.");
+				return false;
+			}
+			return true;
+		}
 	</script>
 	<script src="../js/symb/shared.js" type="text/javascript"></script>
 </head>
@@ -145,52 +153,51 @@ if(isset($profile_indexCrumbs)){
 	?>
 	
 	<div style="width:300px;margin-right:auto;margin-left:auto;">
-		<form id="loginform" name="loginform" action="index.php" method="post">
-			<fieldset style='padding:25px;margin:20px;width:300px;background-color:#FFFFCC;border:2px outset #E8EEFA;'>
+		<fieldset style='padding:25px;margin:20px;width:300px;background-color:#FFFFCC;border:2px outset #E8EEFA;'>
+			<form id="loginform" name="loginform" action="index.php" onsubmit="return checkCreds();" method="post">
 				<div style="margin: 10px;font-weight:bold;">
 					Login:&nbsp;&nbsp;&nbsp;<input id="login" name="login" value="<?php echo $login; ?>" style="border-style:inset;" />
 				</div>
-				
 				<div style="margin:10px;font-weight:bold;">
-					Password:&nbsp;&nbsp;<input type="password" name="password"  style="border-style:inset;" autocomplete="off" />
+					Password:&nbsp;&nbsp;<input type="password" id="password" name="password"  style="border-style:inset;" autocomplete="off" />
 				</div>
-				
 				<div style="margin:10px">
 					<input type="checkbox" value='1' name="remember" >
 					Remember me on this computer
 				</div>
-				
-				<div style="margin:20px 0px 10px 140px;">
+				<div style="margin-right:10px;float:right;">
 					<input type="hidden" name="refurl" value="<?php echo $refUrl; ?>" />
+					<input type="hidden" id="resetpwd" name="resetpwd" value="">
 					<input type="submit" value="Login" name="action">
 				</div>
-			</fieldset>
-			<div style="width:300px;text-align:center;margin:20px;">
-				<div style="font-weight:bold;">
-					Don't have an Account?
-				</div>
-				<div style="">
-					<a href="newprofile.php?refurl=<?php echo $refUrl; ?>">Create an account now</a>
-				</div>
-				<div style="font-weight:bold;margin-top:5px">
-					Can't remember your password?
-				</div>
-				<div style="color:blue;cursor:pointer;" onclick="resetPassword()">Reset Password</div>
-				<input type="hidden" id="resetpwd" name="resetpwd" value="">
-				<div style="font-weight:bold;margin-top:5px">
-					Can't Remember Login Name?
-				</div>
-				<div>
-					<a href="#" onclick="toggle('emaildiv')">Retrieve Login</a>
-					<div id="emaildiv" style="display:none;margin:10px 0px 10px 40px;">
-						<fieldset style="padding:10px;">
+			</form>
+		</fieldset>
+		<div style="width:300px;text-align:center;margin:20px;">
+			<div style="font-weight:bold;">
+				Don't have an Account?
+			</div>
+			<div style="">
+				<a href="newprofile.php?refurl=<?php echo $refUrl; ?>">Create an account now</a>
+			</div>
+			<div style="font-weight:bold;margin-top:5px">
+				Can't remember your password?
+			</div>
+			<div style="color:blue;cursor:pointer;" onclick="resetPassword();">Reset Password</div>
+			<div style="font-weight:bold;margin-top:5px">
+				Can't Remember Login Name?
+			</div>
+			<div>
+				<div style="color:blue;cursor:pointer;" onclick="toggle('emaildiv');">Retrieve Login</div>
+				<div id="emaildiv" style="display:none;margin:10px 0px 10px 40px;">
+					<fieldset style="padding:10px;">
+						<form id="retrieveloginform" name="retrieveloginform" action="index.php" method="post">
 							<div>Your Email: <input type="text" name="emailaddr" /></div>
 							<div><input type="submit" name="action" value="Retrieve Login"/></div>
-						</fieldset>
-					</div>
+						</form>
+					</fieldset>
 				</div>
 			</div>
-		</form>
+		</div>
 	</div>
 </div>
 <?php include($serverRoot.'/footer.php'); ?>
