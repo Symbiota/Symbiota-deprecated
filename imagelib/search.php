@@ -304,7 +304,7 @@ if($action){
 				?>
 			</ul>
 			
-			<form name="imagesearchform" id="imagesearchform" action="index.php" method="get" onsubmit="submitImageForm();">
+			<form name="imagesearchform" id="imagesearchform" action="search.php" method="get" onsubmit="submitImageForm();">
 				<div id="criteriadiv">
 					<div id="thesdiv" style="display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'none':'block'); ?>;" >
 						<input type='checkbox' id='thes' name='thes' value='1' <?php if(array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"]) echo "CHECKED"; ?> >Include Synonyms
