@@ -250,6 +250,8 @@ ALTER TABLE `omoccurrences`
 
 DROP TABLE `userpermissions`;
 
+#Needed for FP functions
+CREATE INDEX idx_taxacreated ON taxa(initialtimestamp);
 
 # Deal with state and country definitions with the rare species state lists
 

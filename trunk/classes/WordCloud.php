@@ -87,9 +87,9 @@ class WordCloud{
 			echo $cloudStr.'<br/><br/>';
 			//Write word out to text file
 			$wcPath = $GLOBALS['serverRoot'];
-			if(substr($wcPath,-1) != '/' && substr($wcPath,-1) != "\\") $wcPath .= 'temp/wordclouds/';
-			$wcPath .= 'ocrcloud'.$collid.'.html';
-			if(is_writable($wcPath)){
+			if(substr($wcPath,-1) != '/' && substr($wcPath,-1) != "\\") $wcPath .= '/'; 
+			$wcPath .= 'temp/wordclouds/ocrcloud'.$collid.'.html';
+			if(file_exists($wcPath)){
 				$wcFH = fopen($wcPath, 'a');
 			    if(!$wcFH = fopen($wcPath, 'a')) {
 			         echo "Cannot open file ($wcPath)";
@@ -102,7 +102,7 @@ class WordCloud{
 			    fclose($handle);
 			}
 			else{
-				echo 'ERROR trying to right out word cloud to temp folder: '.$wcPath;
+				echo 'ERROR trying to write word cloud to temp folder: '.$wcPath;
 				echo '<br/>Is the symbiota temp folder writable to Apache?';
 			}
 		}

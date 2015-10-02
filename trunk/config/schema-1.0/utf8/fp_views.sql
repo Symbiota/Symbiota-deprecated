@@ -1,8 +1,3 @@
---  Index definitions to support OAI/PMH harvesting of occurrences and taxa
-
-create index idx_omocclastmodified on omoccurrences(datelastmodified);
-create index idx_taxacreated on taxa(initialtimestamp);
---  TODO: Need to add date last modified to taxa.
 
 --  View definitions to support OAI/PMH harvesting of occurrences and taxa from Symbiota.
 
@@ -57,7 +52,6 @@ omoccurrences.associatedOccurrences AS associatedOccurrences,
 omoccurrences.associatedTaxa AS associatedTaxa,
 omoccurrences.dynamicProperties AS dynamicProperties,
 omoccurrences.verbatimAttributes AS verbatimAttributes,
-omoccurrences.attributes AS attributes,
 omoccurrences.reproductiveCondition AS reproductiveCondition,
 omoccurrences.cultivationStatus AS cultivationStatus,
 omoccurrences.establishmentMeans AS establishmentMeans,
@@ -99,7 +93,7 @@ omoccurrences.dateLastModified AS modified
 from omoccurrences join omcollections on omoccurrences.collid = omcollections.CollID;
 
 --  View for taxon tree 1
-CREATE ALGORITHM=UNDEFINED DEFINER=debian-sys-maint@localhost SQL SECURITY DEFINER 
+CREATE ALGORITHM=UNDEFINED DEFINER='debian-sys-maint'@'localhost' SQL SECURITY DEFINER 
 VIEW tbl_taxa_default AS 
 select concat('scan.taxon.default.', taxa.TID) AS id,
 taxa.tid as pk,
@@ -107,7 +101,7 @@ taxa.tid as pk,
 taxstatus.initialtimestamp AS modified,
 taxa.SciName AS scientificName, 
 if(isnull(taxstatus.parenttid), NULL, concat('scan.taxon.default.', taxstatus.parenttid)) AS parentNameUsageID,
-(case taxa.kingdomid when 3 then 'Plantae' when 5 then 'Animalia' else NULL end) AS kingdom,
+taxonunits.kingdomname AS kingdom,
 taxstatus.family AS family,
 taxonunits.rankname AS taxonRank,
 if((taxa.RankId >= 220),
@@ -117,11 +111,11 @@ taxa.Notes AS taxonRemarks,
 taxa.Author AS scientificNameAuthorship, 
 if(isnull(taxstatus.tidaccepted), NULL, concat('scan.taxon.default.', taxstatus.tidaccepted)) AS acceptedNameUsageID,
 taxonunits.rankid AS rankid 
-from (((taxa left join taxstatus on((taxa.TID = taxstatus.tid))) left join taxonunits on(((taxa.RankId = taxonunits.rankid) and (taxa.kingdomid = taxonunits.kingdomid)))) left join taxa parent on((taxstatus.parenttid = parent.TID))) 
+from (((taxa left join taxstatus on((taxa.TID = taxstatus.tid))) left join taxonunits on((taxa.RankId = taxonunits.rankid))) left join taxa parent on((taxstatus.parenttid = parent.TID))) 
 where (taxstatus.taxauthid = 1);
 
 --  View for taxon tree 2
-CREATE ALGORITHM=UNDEFINED DEFINER=debian-sys-maint@localhost SQL SECURITY DEFINER 
+CREATE ALGORITHM=UNDEFINED DEFINER='debian-sys-maint'@'localhost' SQL SECURITY DEFINER 
 VIEW tbl_taxa_itis AS 
 select concat('scan.taxon.itis.', taxa.TID) AS id,
 taxa.tid as pk,
@@ -129,7 +123,7 @@ taxa.tid as pk,
 taxstatus.initialtimestamp AS modified,
 taxa.SciName AS scientificName,
 if(isnull(taxstatus.parenttid), NULL, concat('scan.taxon.itis.', taxstatus.parenttid)) AS parentNameUsageID,
-(case taxa.kingdomid when 3 then 'Plantae' when 5 then 'Animalia' else NULL end) AS kingdom,
+taxonunits.kingdomname AS kingdom,
 taxstatus.family AS family,
 taxonunits.rankname AS taxonRank, 
 if((taxa.RankId >= 220), parent.SciName, NULL) AS genus,
@@ -137,6 +131,6 @@ taxa.Notes AS taxonRemarks,
 taxa.Author AS scientificNameAuthorship,
 if(isnull(taxstatus.tidaccepted), NULL, concat('scan.taxon.itis.', taxstatus.tidaccepted)) AS acceptedNameUsageID,
 taxonunits.rankid AS rankid 
-from (((taxa left join taxstatus on((taxa.TID = taxstatus.tid))) left join taxonunits on(((taxa.RankId = taxonunits.rankid) and (taxa.kingdomid = taxonunits.kingdomid)))) left join taxa parent on((taxstatus.parenttid = parent.TID))) 
+from (((taxa left join taxstatus on((taxa.TID = taxstatus.tid))) left join taxonunits on((taxa.RankId = taxonunits.rankid))) left join taxa parent on((taxstatus.parenttid = parent.TID))) 
 where (taxstatus.taxauthid = 2)
 
