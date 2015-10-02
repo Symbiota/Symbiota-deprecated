@@ -19,89 +19,99 @@ class ImageLibraryManager{
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
- 	public function getFamilyList($sqlWhere){
+ 	public function getFamilyList($sqlWhere = ''){
  		$returnArray = Array();
 		$sql = 'SELECT DISTINCT ts.Family '.
 			'FROM images AS i LEFT JOIN taxa t ON i.tid = t.tid '.
 			'LEFT JOIN taxstatus AS ts ON t.tid = ts.tid '.
-			'LEFT JOIN users AS u ON i.photographeruid = u.uid '.
-			'LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-			'LEFT JOIN omcollections AS c ON o.collid = c.collid ';
+			'LEFT JOIN omoccurrences AS o ON i.occid = o.occid ';
 		if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
 			$sql .= 'LEFT JOIN imagetag AS it ON i.imgid = it.imgid ';
 		}
 		if(array_key_exists("keywords",$this->searchTermsArr)&&$this->searchTermsArr["keywords"]){
 			$sql .= 'LEFT JOIN imagekeywords AS ik ON i.imgid = ik.imgid ';
 		}
-		$sql .= $sqlWhere;
-		$sql .= 'AND (i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId > 180) AND (ts.Family Is Not Null) ';
-		$sql .= 'ORDER BY ts.Family ';
+		if($sqlWhere){
+			$sql .= $sqlWhere.' AND ';
+		}
+		else{
+			$sql .= 'WHERE ';
+		}
+		$sql .= '(i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId > 180) AND (ts.Family Is Not Null) ';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$returnArray[] = $row->Family;
     	}
     	$result->free();
+    	sort($returnArray);
 		return $returnArray;
 	}
 	
-	public function getGenusList($taxon,$sqlWhere){
+	public function getGenusList($taxon = '',$sqlWhere = ''){
  		$sql = 'SELECT DISTINCT t.UnitName1 '.
 			'FROM images AS i LEFT JOIN taxa t ON i.tid = t.tid '.
 			'LEFT JOIN taxstatus AS ts ON t.tid = ts.tid '.
-			'LEFT JOIN users AS u ON i.photographeruid = u.uid '.
-			'LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-			'LEFT JOIN omcollections AS c ON o.collid = c.collid ';
+			'LEFT JOIN omoccurrences AS o ON i.occid = o.occid ';
 		if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
 			$sql .= 'LEFT JOIN imagetag AS it ON i.imgid = it.imgid ';
 		}
 		if(array_key_exists("keywords",$this->searchTermsArr)&&$this->searchTermsArr["keywords"]){
 			$sql .= 'LEFT JOIN imagekeywords AS ik ON i.imgid = ik.imgid ';
 		}
-		$sql .= $sqlWhere;
-		$sql .= 'AND (i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId > 180) AND (ts.Family Is Not Null) ';
+		if($sqlWhere){
+			$sql .= $sqlWhere.' AND ';
+		}
+		else{
+			$sql .= 'WHERE ';
+		}
+		$sql .= '(i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId > 180) AND (ts.Family Is Not Null) ';
 		if($taxon){
 			$taxon = $this->cleanInStr($taxon);
 			$sql .= "AND (ts.Family = '".$taxon."') ";
 		}
-		$sql .= 'ORDER BY t.UnitName1 ';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$returnArray[] = $row->UnitName1;
     	}
     	$result->free();
-		return $returnArray;
+    	sort($returnArray);
+    	return $returnArray;
 	}
 	
-	public function getSpeciesList($taxon,$sqlWhere){
+	public function getSpeciesList($taxon = '',$sqlWhere = ''){
 		$returnArray = Array();
-		if(strpos($taxon,' ') !== false){
-			$taxonArr = explode(' ',trim($taxon));
+		$taxon = trim($taxon);
+		if(strpos($taxon,' ')){
+			$taxonArr = explode(' ',$taxon);
 			$taxon = $taxonArr[0];
 		}
 		$sql = 'SELECT DISTINCT t.tid, t.SciName '.
 			'FROM images AS i LEFT JOIN taxa t ON i.tid = t.tid '.
 			'LEFT JOIN taxstatus AS ts ON t.tid = ts.tid '.
-			'LEFT JOIN users AS u ON i.photographeruid = u.uid '.
-			'LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-			'LEFT JOIN omcollections AS c ON o.collid = c.collid ';
+			'LEFT JOIN omoccurrences AS o ON i.occid = o.occid ';
 		if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
 			$sql .= 'LEFT JOIN imagetag AS it ON i.imgid = it.imgid ';
 		}
 		if(array_key_exists("keywords",$this->searchTermsArr)&&$this->searchTermsArr["keywords"]){
 			$sql .= 'LEFT JOIN imagekeywords AS ik ON i.imgid = ik.imgid ';
 		}
-		$sql .= $sqlWhere;
-		$sql .= 'AND (i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId >= 220) AND (ts.Family Is Not Null) ';
+		if($sqlWhere){
+			$sql .= $sqlWhere.' AND ';
+		}
+		else{
+			$sql .= 'WHERE ';
+		}
+		$sql .= '(i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId >= 220) AND (ts.Family Is Not Null) ';
 		if($taxon){
 			$taxon = $this->cleanInStr($taxon);
-			$sql .= "AND (t.SciName LIKE '".$taxon."%') ";
+			$sql .= "AND ((t.SciName LIKE '".$taxon."%') OR (ts.family = '".$taxon."')) ";
 		}
-		$sql .= 'ORDER BY t.SciName ';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$returnArray[$row->tid] = $row->SciName;
 	    }
 	    $result->free();
+    	asort($returnArray);
 	    return $returnArray;
 	}
 	
@@ -660,9 +670,7 @@ class ImageLibraryManager{
 			}
 			$sql .= 'FROM images AS i LEFT JOIN taxa t ON i.tid = t.tid '.
 				'LEFT JOIN taxstatus AS ts ON t.tid = ts.tid '.
-				'LEFT JOIN users AS u ON i.photographeruid = u.uid '.
-				'LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-				'LEFT JOIN omcollections AS c ON o.collid = c.collid ';
+				'LEFT JOIN omoccurrences AS o ON i.occid = o.occid ';
 			if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
 				$sql .= 'LEFT JOIN imagetag AS it ON i.imgid = it.imgid ';
 			}
