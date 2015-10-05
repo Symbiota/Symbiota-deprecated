@@ -252,18 +252,18 @@ xmlwriter_end_attribute($xml_resource);
 	}*/
 
 	//Return latest activity
-	public function getDataEntryActivity($format='rss',$days=5){
+	public function getDataEntryActivity($format='rss',$days=0, $limit=0){
 		//format: rss, json
 		if($format == 'json'){
-			$xml = simplexml_load_string($this->getDataEntryXML($days));
+			$xml = simplexml_load_string($this->getDataEntryXML($days,$limit));
 			return json_encode($xml);
 		}
 		else{
-			return $this->getDataEntryXML($days);
+			return $this->getDataEntryXML($days,$limit);
 		}
 	}
 
-	private function getDataEntryXML($days){
+	private function getDataEntryXML($days, $limit){
 		
 		//Create new document and write out to target
 		$newDoc = new DOMDocument('1.0',$this->charSetOut);
@@ -305,13 +305,17 @@ xmlwriter_end_attribute($xml_resource);
 		//Create new item for target archives and load into array
 		$sql = 'SELECT o.occid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode, c.collectionname, g.guid, c.guidtarget, '. 
 			'o.occurrenceid, o.catalognumber, o.sciname, o.recordedby, o.recordnumber, IFNULL(CAST(o.eventdate AS CHAR),o.verbatimeventdate) as eventdate, '. 
-			'o.decimallatitude, o.decimallongitude, o.dateentered, o.recordenteredby, i.thumbnailurl, o.processingstatus '.
+			'o.decimallatitude, o.decimallongitude, o.dateentered, o.recordenteredby, 
+			IFNULL(i.thumbnailurl,i.url) AS thumbnailurl, o.processingstatus '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN images i ON o.occid = i.occid '.
 			'INNER JOIN guidoccurrences g ON o.occid = g.occid '. 
-			'WHERE o.dateentered > DATE_SUB(NOW(), INTERVAL 5 DAY) AND c.colltype = "Preserved Specimens" '.
-			'AND o.processingstatus IN("reviewed","pending review","closed") AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) '.
-			'ORDER BY o.dateentered DESC';
+			'WHERE c.colltype = "Preserved Specimens" AND (o.locality IS NOT NULL) '.
+			'AND o.processingstatus NOT IN("unprocessed") AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) ';
+		if($days && is_numeric($days)) $sql .= 'AND (o.dateentered > DATE_SUB(NOW(), INTERVAL '.$days.' DAY)) ';
+		$sql .= 'ORDER BY o.dateentered DESC ';
+		if(!$days && !$limit) $limit = '100';
+		if($limit && is_numeric($limit)) $sql .= 'LIMIT '.$limit;
 		$rs = $this->conn->query($sql);
 		//echo $sql;
 		while($r = $rs->fetch_object()){
@@ -325,6 +329,10 @@ xmlwriter_end_attribute($xml_resource);
 
 			$collLinkElem = $newDoc->createElement('collectionName',$r->collectionname.' ('.$r->instcode.')');
 			$itemElem->appendChild($collLinkElem);
+
+			$catalogLinkElem = $newDoc->createElement('catalogNumber',$r->catalognumber);
+			$itemElem->appendChild($catalogLinkElem);
+			
 			if($r->guidtarget){
 				$occID = $r->guid;
 				if($r->guidtarget == 'occurrenceId'){
