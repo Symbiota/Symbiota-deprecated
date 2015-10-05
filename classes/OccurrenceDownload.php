@@ -251,6 +251,129 @@ xmlwriter_end_attribute($xml_resource);
 		$result->close();
 	}*/
 
+	//Return latest activity
+	public function getDataEntryActivity($format='rss',$days=5){
+		//format: rss, json
+		if($format == 'json'){
+			$xml = simplexml_load_string($this->getDataEntryXML($days));
+			return json_encode($xml);
+		}
+		else{
+			return $this->getDataEntryXML($days);
+		}
+	}
+
+	private function getDataEntryXML($days){
+		
+		//Create new document and write out to target
+		$newDoc = new DOMDocument('1.0',$this->charSetOut);
+
+		//Add root element 
+		$rootElem = $newDoc->createElement('rss');
+		$rootAttr = $newDoc->createAttribute('version');
+		$rootAttr->value = '2.0';
+		$rootElem->appendChild($rootAttr);
+		$newDoc->appendChild($rootElem);
+
+		//Add Channel
+		$channelElem = $newDoc->createElement('channel');
+		$rootElem->appendChild($channelElem);
+		
+		//Add title, link, description, language
+		$titleElem = $newDoc->createElement('title');
+		$titleElem->appendChild($newDoc->createTextNode($GLOBALS['DEFAULT_TITLE'].' New Occurrence Records'));
+		$channelElem->appendChild($titleElem);
+		
+		$serverDomain = "http://";
+		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $serverDomain = "https://";
+		$serverDomain .= $_SERVER["SERVER_NAME"];
+		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+		$urlPathPrefix = '';
+		if($serverDomain){
+			$urlPathPrefix = $serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
+		}
+		
+		$linkElem = $newDoc->createElement('link');
+		$linkElem->appendChild($newDoc->createTextNode($urlPathPrefix));
+		$channelElem->appendChild($linkElem);
+		$descriptionElem = $newDoc->createElement('description');
+		$descriptionElem->appendChild($newDoc->createTextNode('An RSS feed that lists summary information for new occurrence records recently entered into the '.$GLOBALS['DEFAULT_TITLE'].' portal'));
+		$channelElem->appendChild($descriptionElem);
+		$languageElem = $newDoc->createElement('language','en-us');
+		$channelElem->appendChild($languageElem);
+
+		//Create new item for target archives and load into array
+		$sql = 'SELECT o.occid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode, c.collectionname, g.guid, c.guidtarget, '. 
+			'o.occurrenceid, o.catalognumber, o.sciname, o.recordedby, o.recordnumber, IFNULL(CAST(o.eventdate AS CHAR),o.verbatimeventdate) as eventdate, '. 
+			'o.decimallatitude, o.decimallongitude, o.dateentered, o.recordenteredby, i.thumbnailurl, o.processingstatus '.
+			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			'INNER JOIN images i ON o.occid = i.occid '.
+			'INNER JOIN guidoccurrences g ON o.occid = g.occid '. 
+			'WHERE o.dateentered > DATE_SUB(NOW(), INTERVAL 5 DAY) AND c.colltype = "Preserved Specimens" '.
+			'AND o.processingstatus IN("reviewed","pending review","closed") AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) '.
+			'ORDER BY o.dateentered DESC';
+		$rs = $this->conn->query($sql);
+		//echo $sql;
+		while($r = $rs->fetch_object()){
+			$itemElem = $newDoc->createElement('item');
+			$channelElem->appendChild($itemElem);
+			
+			$itemTitleElem = $newDoc->createElement('title');
+			$titleStr = $r->sciname.' - '.$r->recordedby.' '.($r->recordnumber?'#'.$r->recordnumber:'');
+			$itemTitleElem->appendChild($newDoc->createTextNode($titleStr));
+			$itemElem->appendChild($itemTitleElem);
+
+			$collLinkElem = $newDoc->createElement('collectionName',$r->collectionname.' ('.$r->instcode.')');
+			$itemElem->appendChild($collLinkElem);
+			if($r->guidtarget){
+				$occID = $r->guid;
+				if($r->guidtarget == 'occurrenceId'){
+					$occID = $r->occurrenceid;
+				}
+				if($r->guidtarget == 'catalogNumber'){
+					$occID = $r->catalognumber;
+				}
+				$guidLinkElem = $newDoc->createElement('occurrenceID',$occID);
+				$itemElem->appendChild($guidLinkElem);
+			}
+			
+			$itemLinkElem = $newDoc->createElement('link');
+			$itemLinkElem->appendChild($newDoc->createTextNode($serverDomain.'/collections/individual/index.php?occid='.$r->occid));
+			$itemElem->appendChild($itemLinkElem);
+			
+			$tnUrl = $r->thumbnailurl;
+			if(substr($tnUrl,0,1) == '/'){
+				if(isset($GLOBALS['IMAGE_DOMAIN']) && $GLOBALS['IMAGE_DOMAIN']){
+					$tnUrl = $GLOBALS['IMAGE_DOMAIN'].$tnUrl;
+				}
+				else{
+					$tnUrl = $serverDomain.$tnUrl;
+				}
+			}
+			$tnLinkElem = $newDoc->createElement('thumbnailUri');
+			$tnLinkElem->appendChild($newDoc->createTextNode($tnUrl));
+			$itemElem->appendChild($tnLinkElem);
+			
+			$latLinkElem = $newDoc->createElement('decimalLatitude',$r->decimallatitude);
+			$itemElem->appendChild($latLinkElem);
+			$lngLinkElem = $newDoc->createElement('decimalLongitude',$r->decimallongitude);
+			$itemElem->appendChild($lngLinkElem);
+			$eventDateLinkElem = $newDoc->createElement('verbatimEventDate');
+			$eventDateLinkElem->appendChild($newDoc->createTextNode($r->eventdate));
+			$itemElem->appendChild($eventDateLinkElem);
+			//$pubDateLinkElem = $newDoc->createElement('pubDate',$r->dateentered);
+			$pubDateLinkElem = $newDoc->createElement('pubDate',gmdate(DATE_RSS, strtotime($r->dateentered)));
+			$itemElem->appendChild($pubDateLinkElem);
+			$creatorLinkElem = $newDoc->createElement('creator',$r->recordenteredby);
+			$itemElem->appendChild($creatorLinkElem);
+			
+			//<decimalLatitudeTranscribing>Transcription Lat</decimalLatitudeTranscribing>
+			//<decimalLongitudeTranscribing>Transcription Long</decimalLongitudeTranscribing>
+		}
+
+		return $newDoc->saveXML();
+	}
+
 	//General setter, getters, and other configurations
 	public function setSchemaType($t){
 		$this->schemaType = $t;
