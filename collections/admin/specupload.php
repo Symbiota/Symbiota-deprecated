@@ -314,7 +314,7 @@ $duManager->loadFieldMap();
 	}
 ?> 
 <!-- This is inner text! -->
-<div id="innertext">
+<div id="innertext" style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen';  ?>">
 	<h1>Data Upload Module</h1>
 	<?php
 	if($statusStr){
@@ -322,7 +322,7 @@ $duManager->loadFieldMap();
 		echo "<div>$statusStr</div>";
 		echo "<hr />";
 	}
-	
+	$recReplaceMsg = '<span style="color:orange"><b>Caution:</b></span> Matching records will be replaced with incoming records';
 	if($isEditor && $collid){
 		//Grab collection name and last upload date and display for all
 		echo '<div style="font-weight:bold;font-size:130%;">'.$duManager->getCollInfo('name').'</div>';
@@ -348,7 +348,10 @@ $duManager->loadFieldMap();
 						echo '<div style="margin-left:15px;">';
 						echo '<div>Records to be updated: ';
 						echo $reportArr['update'];
-						if($reportArr['update']) echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+						if($reportArr['update']){
+							echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							if($uploadType != $SKELETAL) echo '&nbsp;&nbsp;&nbsp;<span style="color:orange"><b>Caution:</b></span> incoming records will replace existing records';
+						}
 						echo '</div>';
 						echo '<div>New records: ';
 						echo $reportArr['new'];
@@ -359,7 +362,7 @@ $duManager->loadFieldMap();
 							echo $reportArr['matchappend'];
 							if($reportArr['matchappend']) echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=matchappend" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
 							echo '</div>';
-							echo '<div style="margin-left:15px;color:orange;">WARNING: This will result in records with duplicate catalog numbers</div>';
+							echo '<div style="margin-left:15px;"><span style="color:orange;">WARNING:</span> This will result in records with duplicate catalog numbers</div>';
 						}
 						if(isset($reportArr['sync']) && $reportArr['sync']){
 							echo '<div>Records that will be syncronized with central database: ';
@@ -367,7 +370,7 @@ $duManager->loadFieldMap();
 							if($reportArr['sync'])  echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=sync" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
 							echo '</div>';
 							echo '<div style="margin-left:15px;">These are typically records that have been originally processed within the portal, exported and integrated into a local management database, and then reimported and synchronized with the portal records by matching on catalog number.</div>';
-							echo '<div style="margin-left:15px;color:orange;">WARNING: Incoming records will replace portal records by matching on catalog numbers. Make sure incoming records are the most up-to-date record!</div>';
+							echo '<div style="margin-left:15px;"><span style="color:orange;">WARNING:</span> Incoming records will replace portal records by matching on catalog numbers. Make sure incoming records are the most up-to-date record!</div>';
 						}
 						if(isset($reportArr['exist']) && $reportArr['exist']){
 							echo '<div>Previous loaded records not matching incoming records: ';
@@ -445,7 +448,7 @@ $duManager->loadFieldMap();
 								Match on Other Catalog Numbers  
 							</div>
 							<ul style="margin:10px 0px;">
-								<li><b>Caution:</b> Matching records will be replaced with incoming records</li>
+								<li><?php echo $recReplaceMsg; ?></li>
 								<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarly on others catalog numbers</li>
 							</ul>
 							<?php 
@@ -473,7 +476,7 @@ $duManager->loadFieldMap();
 							<fieldset style="width:95%;">
 								<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?> (Step 1)</legend>
 								<div>
-									<div style="margin:10px;">
+									<div style="margin:10px">
 										<div class="ulfnoptions">
 											<input name="uploadfile" type="file" size="50" onchange="this.form.ulfnoverride.value = ''" />
 										</div>
@@ -488,6 +491,8 @@ $duManager->loadFieldMap();
 										<?php 
 										if(!$uspid) echo '<input name="automap" type="checkbox" value="1" CHECKED /> <b>Automap fields</b><br/>';
 										?>
+									</div>
+									<div style="margin:10px;">
 										<input name="action" type="submit" value="Analyze File" />
 										<input name="uspid" type="hidden" value="<?php echo $uspid;?>" />
 										<input name="collid" type="hidden" value="<?php echo $collid;?>" />
@@ -604,7 +609,7 @@ $duManager->loadFieldMap();
 														Match on Other Catalog Numbers  
 													</div>
 													<ul style="margin:10px 0px;">
-														<li><b>Caution:</b> Matching records will be replaced with incoming records</li>
+														<li><?php echo $recReplaceMsg; ?></li>
 														<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarly on others catalog numbers</li>
 													</ul>
 													<?php 
@@ -682,7 +687,12 @@ $duManager->loadFieldMap();
 								<div id="mdiv">
 									<?php $duManager->echoFieldMapTable($autoMap,'spec'); ?>
 									<div>
-										* Mappings that are not yet saved are displayed in Yellow
+										* Mappings that are not yet saved are displayed in Yellow<br/>
+										* To learn more about mapping to Symbiota fields (and Darwin Core): 
+										<div style="margin-left:15px;">
+											<a href="http://symbiota.org/docs/wp-content/uploads/SymbiotaOccurrenceFields.pdf" target="_blank">SymbiotaOccurrenceFields.pdf</a><br/>
+											<a href="http://symbiota.org/docs/symbiota-introduction/loading-specimen-data/" target="_blank">Loading Data into Symbiota</a>
+										</div>
 									</div>
 									<div style="margin:10px;">
 										<?php 
@@ -714,7 +724,7 @@ $duManager->loadFieldMap();
 													echo '<li>Incoming skeletal data will be appended only if targeted field is empty</li>';
 												}
 												else{
-													echo '<li><b>Caution:</b> Matching records will be totally replaced with incoming records</li>';
+													echo '<li>'.$recReplaceMsg.'</li>';
 												}
 												?>
 												<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarly on others catalog numbers</li>

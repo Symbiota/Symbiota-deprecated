@@ -1368,25 +1368,25 @@ class SpecUploadBase extends SpecUpload{
 					$latDec = $recMap['latdeg'];
 					if(isset($recMap['latmin']) && $recMap['latmin'] && is_numeric($recMap['latmin'])) $latDec += $recMap['latmin']/60;
 					if(isset($recMap['latsec']) && $recMap['latsec'] && is_numeric($recMap['latsec'])) $latDec += $recMap['latsec']/3600;
-					if(stripos($recMap['latns'],'s') !== false) $latDec *= -1;
+					if(stripos($recMap['latns'],'s') === 0 && $latDec > 0) $latDec *= -1;
 					$lngDec = $recMap['lngdeg'];
 					if(isset($recMap['lngmin']) && $recMap['lngmin'] && is_numeric($recMap['lngmin'])) $lngDec += $recMap['lngmin']/60;
 					if(isset($recMap['lngsec']) && $recMap['lngsec'] && is_numeric($recMap['lngsec'])) $lngDec += $recMap['lngsec']/3600;
-					if(stripos($recMap['lngew'],'e') === false) $lngDec *= -1;
+					if(stripos($recMap['lngew'],'e') === 0 ) $lngDec *= -1;
 					$recMap['decimallatitude'] = round($latDec,6);
 					$recMap['decimallongitude'] = round($lngDec,6);
 				}
 				//Place into verbatim coord field
 				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
 				if($vCoord) $vCoord .= '; ';
-				$vCoord .= $recMap['latdeg'].'d ';
+				$vCoord .= $recMap['latdeg'].'° ';
 				if(isset($recMap['latmin']) && $recMap['latmin']) $vCoord .= $recMap['latmin'].'m '; 
 				if(isset($recMap['latsec']) && $recMap['latsec']) $vCoord .= $recMap['latsec'].'s ';
 				if(isset($recMap['latns'])) $vCoord .= $recMap['latns'].'; ';
-				$vCoord .= $recMap['lngdeg'].'d ';
+				$vCoord .= $recMap['lngdeg'].'° ';
 				if(isset($recMap['lngmin']) && $recMap['lngmin']) $vCoord .= $recMap['lngmin'].'m '; 
 				if(isset($recMap['lngsec']) && $recMap['lngsec']) $vCoord .= $recMap['lngsec'].'s ';
-				if(isset($recMap['latew'])) $vCoord .= $recMap['lngew'];
+				if(isset($recMap['lngew'])) $vCoord .= $recMap['lngew'];
 				$recMap['verbatimcoordinates'] = $vCoord;
 			}
 			//Transfer TRS to verbatim coords
