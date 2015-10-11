@@ -264,6 +264,7 @@ class SpecProcNlpSalix
 		//$this->PrintLines();	
 		//Save the lines as they are before fields are removed or modified.
 		$this->VirginLines = $this->LabelLines;
+		
 		//*************************************************************
 		//Here's where the individual fields get called and hopefully filled
 		
@@ -294,7 +295,7 @@ class SpecProcNlpSalix
 			else
 				$this->Results[$Key] = trim($Val);
 			}
-		$this->Results['SALIXVersion'] = "0.902";
+		$this->Results['SALIXVersion'] = "0.903";
 		return $this->Results;
 	}
 
@@ -2350,6 +2351,7 @@ class SpecProcNlpSalix
 			$Preg = "(\b{$Country['countryName']}\b)i";
 			if(preg_match($Preg,$FullLabel,$match))
 				{
+				//echo "Checking..<br>";
 				$this->SeekState($Country['countryId']);
 				}
 			}
@@ -2370,9 +2372,10 @@ class SpecProcNlpSalix
 		$Num = $StateResult->num_rows;
 		if($Num == 0)
 			return false; //No states found.
-		
+		//echo "Looking for state<br>";
 		//Look in the most likely lines first.
 		$RankArray = $this->RankCountryLines();
+		//$this->PrintRank($RankArray,"States");
 		foreach ($RankArray as $L=>$Score)
 			{
 			$StateResult->data_seek(0); //Set the query result pointer back to the start
@@ -2382,6 +2385,7 @@ class SpecProcNlpSalix
 				break; //No need to keep checking.  The rest of the lines probably contain misleading results.
 			while($OneState = $StateResult->fetch_assoc())
 				{ //Check each potential state one at a time.
+				//echo "Looking for {$OneState['stateName']}<br>";
 				if(preg_match("(\b{$OneState['stateName']}\b)i",$this->LabelLines[$L]) > 0)
 					{ //Found a state listed on the line. 
 					//echo "Found state {$OneState['stateName']}<br>";
@@ -2444,17 +2448,16 @@ class SpecProcNlpSalix
 					break;
 					}
 				}
-				
 			//If the line is shorter than 5 characters, doubtful to be country or state
 			if(strlen($this->LabelLines[$L]) < 5)
-				$Score -= (10 - strlen($this->LabelLines[$L]));
+				$Score -= (5 - strlen($this->LabelLines[$L]));
 
 			if($this->LineStart[$L] =='locality')
 				$RankArray[$L] += 5;  //Country/state often found on locality line
 			if($this->Assigned['locality'] == $L)
 				$RankArray[$L] += 5;  //Country/state often found on locality line
-			if(count($this->LabelArray[$L])<2)
-				$RankArray[$L] -= 5;  //Less than two words.  Less likely
+			//if(count($this->LabelArray[$L])<2)
+			//	$RankArray[$L] -= 5;  //Less than two words.  Less likely
 			
 			//Look for title case words and increase probability one point for each found.
 			$RankArray[$L] += preg_match_all("(\b[A-Z][a-z]{3,20}\b)",$this->LabelLines[$L]);
