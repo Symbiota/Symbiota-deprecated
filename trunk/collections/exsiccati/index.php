@@ -287,11 +287,11 @@ if($isEditor && $formSubmit){
 							    <input name='imagesonly' type='checkbox' value='1' <?php echo ($imagesOnly?"CHECKED":""); ?> />
 							    Display only those w/ images
 							</div>
-							<div>
-								Display and sort by:<br />
-								<input type="radio" name="sortby" value="0" <?php echo ($sortBy == 0?"CHECKED":""); ?>>Title
-								<input type="radio" name="sortby" value="1" <?php echo ($sortBy == 1?"CHECKED":""); ?>>Abbreviation
-							</div>
+						</div>
+						<div style="margin:5px 0px 0px 5px;">
+							Display and sort by:<br />
+							<input type="radio" name="sortby" value="0" <?php echo ($sortBy == 0?"CHECKED":""); ?>>Title
+							<input type="radio" name="sortby" value="1" <?php echo ($sortBy == 1?"CHECKED":""); ?>>Abbreviation
 						</div>
 						<div style="margin:5px 0px 0px 5px;">
 							<input name="formsubmit" type="submit" value="Rebuild List" />
@@ -299,7 +299,7 @@ if($isEditor && $formSubmit){
 					</fieldset>
 				</form>
 			</div>
-			<div style="font-weight:bold;font-size:120%;">Exsiccati Titles</div>
+			<div style="font-weight:bold;font-size:120%;">Exsiccati</div>
 			<?php
 			if($isEditor){
 				?>
