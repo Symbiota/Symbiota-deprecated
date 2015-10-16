@@ -249,7 +249,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 	</head>
 	<body>
 		<!-- This is inner text! -->
-		<div id="innertext">
+		<div id="innertext" style="background-color:white;">
 			<div style="float:right;width:165px;margin-right:10px">
 				<fieldset>
 					<legend><b>Export Type</b></legend>
