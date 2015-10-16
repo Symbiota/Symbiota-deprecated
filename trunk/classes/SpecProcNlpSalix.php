@@ -108,7 +108,7 @@ class SpecProcNlpSalix
 		*/
 		//Try just deleting rather than converting to hyphen.
 		for($i=0;$i<strlen($this->Label)-4;$i++)
-			{ //Multi-byte characters still remaining after the above subsitutions are converted to hyphens here.
+			{ //Multi-byte characters still remaining after the above subsitutions are converted to spaces here.
 			if(ord($this->Label[$i]) >= 226)
 				$this->Label = substr($this->Label,0,$i).substr($this->Label,$i+3);// was +5
 			else if(ord($this->Label[$i]) >= 224)
@@ -305,7 +305,7 @@ class SpecProcNlpSalix
 			else
 				$this->Results[$Key] = trim($Val);
 			}
-		$this->Results['SALIXVersion'] = "0.904";
+		$this->Results['SALIXVersion'] = "0.905";
 		return $this->Results;
 	}
 
@@ -1406,6 +1406,7 @@ class SpecProcNlpSalix
 	private function GetNamesFromLine($L,$Field,$TitleCase = false, $TempString = "")
 		{
 		global $NameRankArray;
+		$ColNum = "";
 		//echo "Testing $Field: {$this->LabelLines[$L]}<br>";
 		$PName = "(\b(D')?[A-Z][a-z]{2,20}\b)";
 		$PIn = "(\b[A-Z][. ]*)";
@@ -1442,7 +1443,17 @@ class SpecProcNlpSalix
 			if(preg_match("(\b(january|february|september|october|november|december)\b)",$match[0][0]) > 0)
 				$Found = 0;
 			}
-		//(Initial or first name), (optional middle initial), (last name).
+
+		//(First name) (Middle name) (last name) No.	
+		if(count($match[0]) == 0 && preg_match_all("($PName\s$PName\s$PName\s(No|[0-9]{2,6}))$I", $TempString,$match) > 0)
+			{
+			$match[0][0] = $match[1][0]." ".$match[3][0]." ".$match[5][0];
+			if($Field == "recordedBy")
+				$ColNum = $match[7][0];
+			if(preg_match("(\b(january|february|september|october|november|december)\b)",$match[0][0]) > 0)
+				$Found = 0;
+			}
+		//(Initial or first name), (optional middle initial), (last name).  Most common case.
 		if(count($match[0]) == 0)//Found == 0)
 			preg_match_all("(($PName|$PIn)\s?$PIn?\s$PName)$I", $TempString,$match);
 
@@ -1473,6 +1484,8 @@ class SpecProcNlpSalix
 				$this->RemoveStartWords($L,$Field);
 				$this->LabelLines[$L] = str_ireplace("with","",$this->LabelLines[$L]);
 				$this->LabelLines[$L] = trim(str_replace($match[0][$N],"",$this->LabelLines[$L])," ,;");
+				if($ColNum != "")
+					$this->AddToResults("recordNumber",$ColNum,$L);
 				//if(strlen($this->LabelLines[$L]) > 5) //Just removed this, seemed to be causing problems and not sure why it is here. 6/3/15
 				//	$this->GetNamesFromLine($L,$Field);
 
