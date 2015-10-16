@@ -17,7 +17,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
  	$isEditor = true;
 }
 ?>
-<div id="innertext">
+<div id="innertext" style="background-color:white;">
 	<div style="float:right;width:165px;">
 		<fieldset>
 			<legend><b>Sub-Menu</b></legend>

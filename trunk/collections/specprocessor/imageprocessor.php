@@ -142,7 +142,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 	</head>
 	<body>
 		<!-- This is inner text! -->
-		<div id="innertext">
+		<div id="innertext" style="background-color:white;">
 			<?php
 			if($editable && $collId){ 
 				if($specProjects||$spprId){

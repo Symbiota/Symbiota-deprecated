@@ -24,7 +24,7 @@ $statusStr = '';
 $projArr = $csManager->getProjectDetails();
 ?>
 <!-- inner text -->
-<div id="innertext">
+<div id="innertext" style="background-color:white;">
 	<?php
 	if($statusStr){
 		?>
@@ -40,7 +40,7 @@ $projArr = $csManager->getProjectDetails();
 		<div style="float:right;"><a href="#" onclick="toggle('projFormDiv')"><img src="../../images/edit.png" /></a></div>
 		<div style="font-weight:bold;font-size:130%;"><?php echo (($omcsid && $projArr)?$projArr['name']:''); ?></div>
 		<div>
-			This module can be used to submit and manage &quot;unprocessed&quot; for data entry by the  
+			This module can be used to submit and manage records for data entry by the  
 			general public. For more information, see the <a href="http://symbiota.org/docs/crowdsourcing-within-symbiota-2/">Symbiota documentation on crowdsourcing</a>.
 		</div>
 		<div id="projFormDiv" style="display:none">
