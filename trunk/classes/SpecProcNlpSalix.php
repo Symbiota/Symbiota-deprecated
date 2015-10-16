@@ -95,7 +95,7 @@ class SpecProcNlpSalix
 		$this->Label = str_replace("Ñ","N",$this->Label);
 		$this->Label = str_replace("¿","-",$this->Label);
 		$this->Label = str_replace("£","L",$this->Label);
-		
+		/* Was converting to hyphen.  May cause problems.  
 		for($i=0;$i<strlen($this->Label)-4;$i++)
 			{ //Multi-byte characters still remaining after the above subsitutions are converted to hyphens here.
 			if(ord($this->Label[$i]) >= 226)
@@ -104,6 +104,17 @@ class SpecProcNlpSalix
 				$this->Label = substr($this->Label,0,$i)."-".substr($this->Label,$i+4);
 			else if(ord($this->Label[$i]) >= 192)
 				$this->Label = substr($this->Label,0,$i)."-".substr($this->Label,$i+3);
+			}	
+		*/
+		//Try just deleting rather than converting to hyphen.
+		for($i=0;$i<strlen($this->Label)-4;$i++)
+			{ //Multi-byte characters still remaining after the above subsitutions are converted to hyphens here.
+			if(ord($this->Label[$i]) >= 226)
+				$this->Label = substr($this->Label,0,$i).substr($this->Label,$i+3);// was +5
+			else if(ord($this->Label[$i]) >= 224)
+				$this->Label = substr($this->Label,0,$i).substr($this->Label,$i+4);
+			else if(ord($this->Label[$i]) >= 192)
+				$this->Label = substr($this->Label,0,$i).substr($this->Label,$i+3);
 			}	
 		
 		//An attempt to convert to UTF-8, though it doesn't seem to work very well.  Hence the routines above.
@@ -264,7 +275,6 @@ class SpecProcNlpSalix
 		//$this->PrintLines();	
 		//Save the lines as they are before fields are removed or modified.
 		$this->VirginLines = $this->LabelLines;
-		
 		//*************************************************************
 		//Here's where the individual fields get called and hopefully filled
 		
@@ -295,7 +305,7 @@ class SpecProcNlpSalix
 			else
 				$this->Results[$Key] = trim($Val);
 			}
-		$this->Results['SALIXVersion'] = "0.903";
+		$this->Results['SALIXVersion'] = "0.904";
 		return $this->Results;
 	}
 
