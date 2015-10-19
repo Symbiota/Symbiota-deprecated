@@ -165,7 +165,7 @@ else{
 					'identificationQualifier'=>'Identification Qualifier','typeStatus'=>'Type Status',
 					'catalogNumber'=>'Catalog Number','otherCatalogNumbers'=>'Other Catalog Numbers',
 					'recordedBy'=>'Collector/Observer','recordNumber'=>'Collector Number','associatedCollectors'=>'Associated Collectors',
-					'verbatimEventDate'=>'Verbatim Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Occurrence Remarks',
+					'verbatimEventDate'=>'Verbatim Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Notes (Occurrence Remarks)',
 					'associatedTaxa'=>'Associated Taxa','verbatimAttributes'=>'Description','reproductiveCondition'=>'Reproductive Condition',
 					'establishmentMeans'=>'Establishment Means','lifeStage'=>'Life Stage','sex'=>'Sex','preparations'=>'Preparations',
 					'individualCount'=>'Individual Count','samplingProtocol'=>'Sampling Protocol','country'=>'Country',
