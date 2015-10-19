@@ -240,7 +240,18 @@ else{
 
 			function getPolygonCoords(polygon) {
 				var coordinates = [];
-				coordinates = (polygon.getPath().getArray());
+				var coordinatesMVC = (polygon.getPath().getArray());
+				for(i=0;i<coordinatesMVC.length;i++){
+					var mvcString = coordinatesMVC[i].toString();
+					mvcString = mvcString.replace("(","");
+					mvcString = mvcString.replace(")","");
+					var latlngArr = mvcString.split(", ");
+					coordinates.push({"A":latlngArr[0],"D":latlngArr[1]});
+					if(i==0){
+						var firstSet = latlngArr;
+					}
+				}
+				coordinates.push({"A":firstSet[0],"D":firstSet[1]});
 				var json_coords = JSON.stringify(coordinates);
 				document.getElementById("poly_array").value = json_coords;
 				document.getElementById("polycoord_message").style.display = "block";

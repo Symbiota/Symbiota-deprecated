@@ -185,7 +185,7 @@ if($coordArr && !is_numeric($coordArr)){
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.mapinterface.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.mapinterface.js?ver=130330"></script>
 	<script type="text/javascript" src="../../js/symb/markerclusterer.js?ver=260913"></script>
 	<script type="text/javascript" src="../../js/symb/oms.min.js"></script>
 	<script type="text/javascript" src="../../js/symb/keydragzoom.js"></script>
