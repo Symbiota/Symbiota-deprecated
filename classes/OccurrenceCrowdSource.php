@@ -91,7 +91,7 @@ class OccurrenceCrowdSource {
 			$sql = 'SELECT count(o.occid) as cnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 				'LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
-				'WHERE o.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed" OR o.processingstatus = "Stage 1") AND q.occid IS NULL ';
+				'WHERE o.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed") AND q.occid IS NULL ';
 			$toAddCnt = 0;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
@@ -224,7 +224,7 @@ class OccurrenceCrowdSource {
 		$con = MySQLiConnectionFactory::getCon("write");
 		$sqlFrag = 'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 			'LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
-			'WHERE o.collid = '.$this->collid.' AND q.occid IS NULL AND (o.processingstatus = "unprocessed" OR o.processingstatus = "Stage 1") ';
+			'WHERE o.collid = '.$this->collid.' AND q.occid IS NULL AND (o.processingstatus = "unprocessed") ';
 		if($family){
 			$sqlFrag .= 'AND (o.family = "'.$this->cleanInStr($family).'") '; 
 		}
@@ -280,7 +280,7 @@ class OccurrenceCrowdSource {
 		$sql = 'SELECT DISTINCT o.country, o.stateprovince '.
 			'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 			'LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
-			'WHERE o.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed" OR o.processingstatus = "Stage 1") AND q.occid IS NULL ';
+			'WHERE o.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed") AND q.occid IS NULL ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			if($r->country) $country[$r->country] = '';
@@ -297,7 +297,7 @@ class OccurrenceCrowdSource {
 			'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 			'LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
 			'LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
-			'WHERE o.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed" OR o.processingstatus = "Stage 1") AND q.occid IS NULL ';
+			'WHERE o.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed") AND q.occid IS NULL ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			if($r->family) $family[$r->family] = '';

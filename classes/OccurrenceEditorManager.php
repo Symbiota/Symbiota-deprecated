@@ -498,7 +498,7 @@ class OccurrenceEditorManager {
 			}
 		}
 		if($this->crowdSourceMode){
-			$sqlWhere .= 'AND (q.reviewstatus = 0) AND (o.processingstatus = "unprocessed" OR o.processingstatus = "Stage 1") ';
+			$sqlWhere .= 'AND (q.reviewstatus = 0) ';
 		}
 		if($this->collId) $sqlWhere .= 'AND (o.collid = '.$this->collId.') ';
 		if($sqlWhere) $sqlWhere = 'WHERE '.substr($sqlWhere,4);
