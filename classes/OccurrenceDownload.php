@@ -305,15 +305,15 @@ xmlwriter_end_attribute($xml_resource);
 		//Create new item for target archives and load into array
 		$sql = 'SELECT o.occid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode, c.collectionname, g.guid, c.guidtarget, '. 
 			'o.occurrenceid, o.catalognumber, o.sciname, o.recordedby, o.recordnumber, IFNULL(CAST(o.eventdate AS CHAR),o.verbatimeventdate) as eventdate, '. 
-			'o.decimallatitude, o.decimallongitude, o.dateentered, o.recordenteredby, 
-			IFNULL(i.thumbnailurl,i.url) AS thumbnailurl, o.processingstatus '.
+			'o.decimallatitude, o.decimallongitude, o.datelastmodified, o.recordenteredby, o.genericcolumn2, '. 
+			'IFNULL(i.thumbnailurl,i.url) AS thumbnailurl, o.processingstatus '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN images i ON o.occid = i.occid '.
 			'INNER JOIN guidoccurrences g ON o.occid = g.occid '. 
-			'WHERE c.colltype = "Preserved Specimens" AND (o.locality IS NOT NULL) '.
-			'AND o.processingstatus NOT IN("unprocessed") AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) ';
-		if($days && is_numeric($days)) $sql .= 'AND (o.dateentered > DATE_SUB(NOW(), INTERVAL '.$days.' DAY)) ';
-		$sql .= 'ORDER BY o.dateentered DESC ';
+			'WHERE c.colltype = "Preserved Specimens" '.
+			'AND o.processingstatus IN("pending review","reviewed", "closed") AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) ';
+		if($days && is_numeric($days)) $sql .= 'AND (o.datelastmodified > DATE_SUB(NOW(), INTERVAL '.$days.' DAY)) ';
+		$sql .= 'ORDER BY o.datelastmodified DESC ';
 		if(!$days && !$limit) $limit = '100';
 		if($limit && is_numeric($limit)) $sql .= 'LIMIT '.$limit;
 		$rs = $this->conn->query($sql);
@@ -369,14 +369,18 @@ xmlwriter_end_attribute($xml_resource);
 			$eventDateLinkElem = $newDoc->createElement('verbatimEventDate');
 			$eventDateLinkElem->appendChild($newDoc->createTextNode($r->eventdate));
 			$itemElem->appendChild($eventDateLinkElem);
-			//$pubDateLinkElem = $newDoc->createElement('pubDate',$r->dateentered);
-			$pubDateLinkElem = $newDoc->createElement('pubDate',gmdate(DATE_RSS, strtotime($r->dateentered)));
+			//$pubDateLinkElem = $newDoc->createElement('pubDate',$r->datelastmodified);
+			$pubDateLinkElem = $newDoc->createElement('pubDate',gmdate(DATE_RSS, strtotime($r->datelastmodified)));
 			$itemElem->appendChild($pubDateLinkElem);
 			$creatorLinkElem = $newDoc->createElement('creator',$r->recordenteredby);
 			$itemElem->appendChild($creatorLinkElem);
 			
-			//<decimalLatitudeTranscribing>Transcription Lat</decimalLatitudeTranscribing>
-			//<decimalLongitudeTranscribing>Transcription Long</decimalLongitudeTranscribing>
+			if($r->genericcolumn2){
+				$ipAddr = $newDoc->createElement('ipAddress',$r->genericcolumn2);
+				$itemElem->appendChild($ipAddr);
+				//<decimalLatitudeTranscribing>Transcription Lat</decimalLatitudeTranscribing>
+				//<decimalLongitudeTranscribing>Transcription Long</decimalLongitudeTranscribing>
+			}
 		}
 
 		return $newDoc->saveXML();

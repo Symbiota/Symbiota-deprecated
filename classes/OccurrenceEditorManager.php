@@ -749,6 +749,9 @@ class OccurrenceEditorManager {
 				if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
 					$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
 				}
+				//Temp code needed for WeDigBio data entry event, will remove or refactor afterward
+				$occArr['genericcolumn2'] = $_SERVER['REMOTE_ADDR'];
+				////////////////
 				foreach($occArr as $oField => $ov){
 					if(in_array($oField,$this->occFieldArr) && $oField != 'observeruid'){
 						$vStr = $this->cleanInStr($ov);
@@ -857,7 +860,7 @@ class OccurrenceEditorManager {
 				'georeferencedBy' => 's', 'georeferenceProtocol' => 's', 'georeferenceSources' => 's', 
 				'georeferenceVerificationStatus' => 's', 'georeferenceRemarks' => 's', 'minimumElevationInMeters' => 'n', 'maximumElevationInMeters' => 'n', 
 				'verbatimElevation' => 's', 'disposition' => 's', 'language' => 's', 'duplicateQuantity' => 'n', 'labelProject' => 's', 
-				'processingstatus' => 's', 'recordEnteredBy' => 's', 'observeruid' => 'n', 'dateentered' => 'd');
+				'processingstatus' => 's', 'recordEnteredBy' => 's', 'observeruid' => 'n', 'dateentered' => 'd', 'genericcolumn2' => 's');
 			$sql = 'INSERT INTO omoccurrences(collid, '.implode(array_keys($fieldArr),',').') '.
 				'VALUES ('.$occArr["collid"];
 			$fieldArr = array_change_key_case($fieldArr);
@@ -865,6 +868,10 @@ class OccurrenceEditorManager {
 			if(array_key_exists('localitysecurity',$occArr)) $occArr['localitysecurity'] = '1';
 			if(!isset($occArr['dateentered']) || !$occArr['dateentered']) $occArr['dateentered'] = date('Y-m-d H:i:s');
 			if(!isset($occArr['basisofrecord']) || !$occArr['basisofrecord']) $occArr['basisofrecord'] = (strpos($this->collMap['colltype'],'Observations') !== false?'HumanObservation':'PreservedSpecimen');
+			//Temp code for WeDigBio date entry event
+			$occArr['genericcolumn2'] = $_SERVER['REMOTE_ADDR'];
+			///////////////////
+			
 			foreach($fieldArr as $fieldStr => $fieldType){
 				$fieldValue = '';
 				if(array_key_exists($fieldStr,$occArr)) $fieldValue = $occArr[$fieldStr];
