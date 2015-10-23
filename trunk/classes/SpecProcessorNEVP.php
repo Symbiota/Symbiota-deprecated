@@ -458,18 +458,18 @@ class OCCURRENCE {
                               $iPlantID = $imageresult->resource_uniq;
                               if ($accesspoint->format=="dng") { 
                                  // Original dng file
-                                 $sourceUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID";
+                                 $sourceUrl = "http://bisque.iplantcollaborative.org/image_service/image/$iPlantID";
                                  $sourceID = $iPlantID;
                               } 
                               if ($accesspoint->format=="jpg") { 
                                  // Preconstructed derivative JPG file
-                                 $imgWebUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?resize=1250&format=jpeg";
+                                 $imgWebUrl = "http://bisque.iplantcollaborative.org/image_service/image/$iPlantID?resize=1250&format=jpeg";
                                  $imgWebID = $iPlantID;
-                                 $imgTnUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?thumbnail=225,225";
+                                 $imgTnUrl = "http://bisque.iplantcollaborative.org/image_service/image/$iPlantID?thumbnail=225,225";
                                  // Because this is a JPEG, no need to request ?rotate=guess&format=jpeg,quality,100
                                  // and the folks at iPlant are requesting that this request be made without the 
                                  // un-needed transformation parameters.
-                                 $imgLgUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID";
+                                 $imgLgUrl = "http://bisque.iplantcollaborative.org/image_service/image/$iPlantID";
                               } 
                            }
                         } // end if accesspoint has accessURL
