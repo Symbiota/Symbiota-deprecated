@@ -71,8 +71,8 @@ class ImageProcessor {
 		set_time_limit(1000);
 		if($this->collid){
 			$this->initProcessor('iplant');
-			$iPlantDataUrl = 'http://bovary.iplantcollaborative.org/data_service/';
-			$iPlantImageUrl = 'http://bovary.iplantcollaborative.org/image_service/image/';
+			$iPlantDataUrl = 'http://bisque.iplantcollaborative.org/data_service/'; 
+			$iPlantImageUrl = 'http://bisque.iplantcollaborative.org/image_service/image/';
 			$collStr = $this->collArr['instcode'].($this->collArr['collcode']?'-'.$this->collArr['collcode']:'');
 			$this->logOrEcho('Starting image processing: '.$collStr.' ('.date('Y-m-d h:i:s A').')');
 			
