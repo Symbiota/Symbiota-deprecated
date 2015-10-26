@@ -10,7 +10,8 @@ $tId = array_key_exists('tid',$_REQUEST)?$_REQUEST['tid']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $glosManager = new GlossaryManager();
-$termList = '';
+$termList = array();
+$taxonName = '';
 
 $statusStr = '';
 if($formSubmit){
@@ -24,16 +25,7 @@ if($formSubmit){
 		$glossId = 0;
 	}
 }
-elseif($language && $tId){
-	$termList = $glosManager->getTermList('','',$language,$tId);
-}
-elseif(!$formSubmit || $formSubmit != 'Search Terms'){
-	$termList = $glosManager->getTermList('','',$defaultLang,'');
-}
 ?>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
     <title><?php echo $defaultTitle; ?> Glossary</title>
@@ -42,7 +34,17 @@ elseif(!$formSubmit || $formSubmit != 'Search Terms'){
 	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/symb/glossary.index.js"></script>
+	<script type="text/javascript" src="../js/symb/glossary.index.js?ver=130330"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#tabs').tabs({
+				active: <?php echo (($imageArr || $taxaList)?'2':'0'); ?>,
+				beforeLoad: function( event, ui ) {
+					$(ui.panel).html("<p>Loading...</p>");
+				}
+			});
+		});
+	</script>
 </head>
 <body>
 	<?php
@@ -79,60 +81,62 @@ elseif(!$formSubmit || $formSubmit != 'Search Terms'){
 			<?php 
 		}
 		?>
-		<div id="" style="float:right;width:240px;">
-			<form name="filtertermform" action="index.php" method="post">
-				<fieldset style="background-color:#FFD700;">
-					<legend><b>Filter List</b></legend>
-					<div>
-						<div>
-							<b>Term Keyword:</b> 
-							<input type="text" autocomplete="off" name="searchtermkeyword" id="searchtermkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchtermkeyword']:''); ?>" />
-						</div>
-						<div style="margin-top:8px;">
-							<b>Definition Keyword:</b> 
-							<input type="text" autocomplete="off" name="searchdefkeyword" id="searchdefkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchdefkeyword']:''); ?>" />
-						</div>
-						<div style="margin-top:8px;">
-							<b>Language:</b><br />
-							<select name="searchlanguage" id="searchlanguage" style="margin-top:2px;" onchange="">
-								<option value="">Select Language</option>
-								<option value="">----------------</option>
-								<?php 
-								$langArr = $glosManager->getLanguageArr();
-								foreach($langArr as $k => $v){
-									if($language){
-										echo '<option value="'.$k.'" '.($k==$language?'SELECTED':'').'>'.$k.'</option>';
-									}
-									else{
-										echo '<option value="'.$k.'" '.($k==$defaultLang?'SELECTED':'').'>'.$k.'</option>';
-									}
+		<div id="tabs" style="margin:0px;margin-bottom:20px;padding:10px;">
+			<form name="filtertermform" action="index.php" method="post" onsubmit="return verifySearchForm(this.form);">
+				<div style="clear:both;height:15px;">
+					<div style="float:left;">
+						<b>Language:</b>
+						<select name="searchlanguage" id="searchlanguage" style="margin-top:2px;" onchange="">
+							<option value="">Select Language</option>
+							<option value="">----------------</option>
+							<?php 
+							$langArr = $glosManager->getLanguageArr();
+							foreach($langArr as $k => $v){
+								if($language){
+									echo '<option value="'.$k.'" '.($k==$language?'SELECTED':'').'>'.$k.'</option>';
 								}
-								?>
-							</select>
-						</div>
-						<div style="margin-top:8px;">
-							<b>Taxonomic Group:</b><br />
-							<select name="searchtaxa" id="searchtaxa" style="margin-top:2px;width:150px;" onchange="">
-								<option value="">Select Group</option>
-								<option value="">----------------</option>
-								<?php 
-								$taxaArr = $glosManager->getTaxaGroupArr();
-								foreach($taxaArr as $k => $v){
-									if($tId){
-										echo '<option value="'.$k.'" '.($k==$tId?'SELECTED':'').'>'.$v.'</option>';
-									}
-									else{
-										echo '<option value="'.$k.'">'.$v.'</option>';
-									}
+								else{
+									echo '<option value="'.$k.'" '.($k==$defaultLang?'SELECTED':'').'>'.$k.'</option>';
 								}
-								?>
-							</select>
-						</div>
-						<div style="padding-top:8px;float:right;">
-							<button name="formsubmit" type="submit" value="Search Terms">Filter List</button>
-						</div>
+							}
+							?>
+						</select>
 					</div>
-				</fieldset>
+					<div style="float:left;margin-left:10px;">
+						<b>Taxonomic Group:</b>
+						<select name="searchtaxa" id="searchtaxa" style="margin-top:2px;width:150px;" onchange="">
+							<option value="">Select Group</option>
+							<option value="">----------------</option>
+							<?php 
+							$taxaArr = $glosManager->getTaxaGroupArr();
+							foreach($taxaArr as $k => $v){
+								if($tId){
+									echo '<option value="'.$k.'" '.($k==$tId?'SELECTED':'').'>'.$v.'</option>';
+									if($k==$tId){
+										$taxonName = $v;
+									}
+								}
+								else{
+									echo '<option value="'.$k.'">'.$v.'</option>';
+								}
+							}
+							?>
+						</select>
+					</div>
+				</div>
+				<div style="clear:both;height:15px;margin-top:15px;">
+					<div style="float:left;">
+						<b>Term Keyword:</b> 
+						<input type="text" autocomplete="off" name="searchtermkeyword" id="searchtermkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchtermkeyword']:''); ?>" />
+					</div>
+					<div style="float:left;margin-left:10px;">
+						<b>Definition Keyword:</b> 
+						<input type="text" autocomplete="off" name="searchdefkeyword" id="searchdefkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchdefkeyword']:''); ?>" />
+					</div>
+					<div style="float:right;">
+						<button name="formsubmit" type="submit" value="Search Terms">Show Terms</button>
+					</div>
+				</div>
 			</form>
 		</div>
 		<div id="termlistdiv" style="min-height:200px;">
@@ -193,7 +197,14 @@ elseif(!$formSubmit || $formSubmit != 'Search Terms'){
 				<?php
 			}
 			if($termList){
-				echo '<div style="font-weight:bold;font-size:120%;">Terms</div>';
+				$title = 'Terms for '.$taxonName.' in '.$_POST['searchlanguage'];
+				if($_POST['searchtermkeyword']){
+					$title .= ' and with a keyword of '.$_POST['searchtermkeyword'];
+				}
+				if($_POST['searchdefkeyword']){
+					$title .= ' and with a definition keyword of '.$_POST['searchdefkeyword'];
+				}
+				echo '<div style="font-weight:bold;font-size:120%;">'.$title.'</div>';
 				echo '<div><ul>';
 				foreach($termList as $termId => $terArr){
 					echo '<li>';
@@ -206,7 +217,7 @@ elseif(!$formSubmit || $formSubmit != 'Search Terms'){
 				echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are no terms matching your criteria.</div></div>';
 			}
 			else{
-				echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are currently no terms in the database.</div></div>';
+				echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">Enter search criteria above to see terms.</div></div>';
 			}
 			?>
 		</div>
