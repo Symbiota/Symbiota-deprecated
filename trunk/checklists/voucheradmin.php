@@ -49,7 +49,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 		var clid = <?php echo $clid; ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.voucheradmin.js"></script>
+	<script type="text/javascript" src="../js/symb/checklists.voucheradmin.js?ver=130330"></script>
 	<style type="text/css">
 		li{margin:5px;}
 	</style>
@@ -236,22 +236,25 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 					<div id="nonVoucheredDiv">
 						<div style="margin:10px;">
 							<?php
-							if(!$tabIndex){ 
-								$nonVoucherCnt = $clManager->getNonVoucheredCnt();
+							$nonVoucherCnt = $clManager->getNonVoucheredCnt();
+							?>
+							<div style="float:right;">
+								<form name="displaymodeform" method="post" action="voucheradmin.php">
+									<b>Display Mode:</b> 
+									<select name="displaymode" onchange="this.form.submit()">
+										<option value="0">Non-vouchered taxa list</option>
+										<option value="1" <?php echo ($displayMode==1?'SELECTED':''); ?>>Occurrences for non-vouchered taxa</option>
+										<option value="2" <?php echo ($displayMode==2?'SELECTED':''); ?>>New occurrences for all taxa</option>
+										<!-- <option value="3" <?php //echo ($displayMode==3?'SELECTED':''); ?>>Non-species level or poorly identified vouchers</option> -->
+									</select>
+									<input name="clid" type="hidden" value="<?php echo $clid; ?>" />
+									<input name="pid" type="hidden" value="<?php echo $pid; ?>" />
+									<input name="tabindex" type="hidden" value="0" />
+								</form>
+							</div> 
+							<?php
+							if(!$displayMode || $displayMode==1 || $displayMode==2){
 								?>
-								<div style="float:right;">
-									<form name="displaymodeform" method="post" action="voucheradmin.php">
-										<b>Display Mode:</b> 
-										<select name="displaymode" onchange="this.form.submit()">
-											<option value="0">Non-vouchered taxa list</option>
-											<option value="1" <?php echo ($displayMode==1?'SELECTED':''); ?>>Occurrences for non-vouchered taxa</option>
-											<option value="2" <?php echo ($displayMode==2?'SELECTED':''); ?>>New occurrences for all taxa</option>
-										</select>
-										<input name="clid" type="hidden" value="<?php echo $clid; ?>" />
-										<input name="pid" type="hidden" value="<?php echo $pid; ?>" />
-										<input name="tabindex" type="hidden" value="0" />
-									</form>
-								</div> 
 								<div style='float:left;margin-top:3px;height:30px;'>
 									<b>Taxa without Vouchers: <?php echo $nonVoucherCnt; ?></b> 
 									<?php 
@@ -264,113 +267,113 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 									<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><img src="../images/refresh.png" style="border:0px;" title="Refresh List" /></a>
 								</div>
 								<?php 
-								if($displayMode){
-									?>
-									<div style="clear:both;">
-										<div style="margin:10px;">
-											Listed below are occurrences that can be batch linked to species within the checklist.
-										</div>
-										<div>
-											<?php 
-											if($specArr = $clManager->getNewVouchers($startPos,$displayMode)){
-												?>
-												<form name="batchnonvoucherform" method="post" action="voucheradmin.php" onsubmit="return validateBatchNonVoucherForm(this)">
-													<table class="styledtable" style="font-family:Arial;font-size:12px;">
-														<tr>
-															<th>
-																<span title="Select All">
-												         			<input name="occids[]" type="checkbox" onclick="selectAll(this);" value="0-0" />
-												         		</span>
-															</th>
-															<th>Checklist ID</th>
-															<th>Collector</th>
-															<th>Locality</th>
-														</tr>
-														<?php 
-														foreach($specArr as $cltid => $occArr){
-															foreach($occArr as $occid => $oArr){
-																echo '<tr>';
-																echo '<td><input name="occids[]" type="checkbox" value="'.$occid.'-'.$cltid.'" /></td>';
-																echo '<td><a href="../taxa/index.php?taxon='.$oArr['tid'].'" target="_blank">'.$oArr['sciname'].'</a></td>';
-																echo '<td>';
-																echo $oArr['recordedby'].' '.$oArr['recordnumber'].'<br/>';
-																if($oArr['eventdate']) echo $oArr['eventdate'].'<br/>';
-																echo '<a href="../collections/individual/index.php?occid='.$occid.'" target="_blank">';
-																echo $oArr['collcode'];
-																echo '</a>';
-																echo '</td>';
-																echo '<td>'.$oArr['locality'].'</td>';
-																echo '</tr>';
-															}
+							}
+							if($displayMode){
+								?>
+								<div style="clear:both;">
+									<div style="margin:10px;">
+										Listed below are occurrences that can be batch linked to species within the checklist.
+									</div>
+									<div>
+										<?php 
+										if($specArr = $clManager->getNewVouchers($startPos,$displayMode)){
+											?>
+											<form name="batchnonvoucherform" method="post" action="voucheradmin.php" onsubmit="return validateBatchNonVoucherForm(this)">
+												<table class="styledtable" style="font-family:Arial;font-size:12px;">
+													<tr>
+														<th>
+															<span title="Select All">
+																<input name="occids[]" type="checkbox" onclick="selectAll(this);" value="0-0" />
+															</span>
+														</th>
+														<th>Checklist ID</th>
+														<th>Collector</th>
+														<th>Locality</th>
+													</tr>
+													<?php 
+													foreach($specArr as $cltid => $occArr){
+														foreach($occArr as $occid => $oArr){
+															echo '<tr>';
+															echo '<td><input name="occids[]" type="checkbox" value="'.$occid.'-'.$cltid.'" /></td>';
+															echo '<td><a href="../taxa/index.php?taxon='.$oArr['tid'].'" target="_blank">'.$oArr['sciname'].'</a></td>';
+															echo '<td>';
+															echo $oArr['recordedby'].' '.$oArr['recordnumber'].'<br/>';
+															if($oArr['eventdate']) echo $oArr['eventdate'].'<br/>';
+															echo '<a href="../collections/individual/index.php?occid='.$occid.'" target="_blank">';
+															echo $oArr['collcode'];
+															echo '</a>';
+															echo '</td>';
+															echo '<td>'.$oArr['locality'].'</td>';
+															echo '</tr>';
 														}
-														?>
-													</table>
-													<input name="tabindex" value="0" type="hidden" /> 
-													<input name="clid" value="<?php echo $clid; ?>" type="hidden" /> 
-													<input name="pid" value="<?php echo $pid; ?>" type="hidden" />
-													<input name="displaymode" value="1" type="hidden" />
-													<input name="usecurrent" value="1" type="checkbox" checked /> Add name using current taxonomy<br/>
-													<input name="submitaction" value="Add Vouchers" type="submit" />
-												</form>
-												<?php 
-											}
-											else{
-												echo '<div style="font-weight:bold;font-size:120%;">No vouchers located</div>';
-											}
-											?>
-										</div>
-									</div>
-									
-									<?php 
-								}
-								else{
-									?>
-									<div style="clear:both;">
-										<div style="margin:10px;">
-											Listed below are species from the checklist that do not have linked specimen vouchers.    
-											Click on name to use the search statement above to dynamically query the occurrence dataset for 
-											possible voucher specimens. Use the pulldown to the right to display the specimens in a table format.
-										</div>
-										<div style="margin:20px;">
-											<?php 
-											if($nonVoucherArr = $clManager->getNonVoucheredTaxa($startPos)){
-												foreach($nonVoucherArr as $family => $tArr){
-													echo '<div style="font-weight:bold;">'.strtoupper($family).'</div>';
-													echo '<div style="margin:10px;text-decoration:italic;">';
-													foreach($tArr as $tid => $sciname){
-														?>
-														<div>
-															<a href="#" onclick="openPopup('../taxa/index.php?taxauthid=1&taxon=<?php echo $tid.'&cl='.$clid; ?>','taxawindow');return false;"><?php echo $sciname; ?></a>
-															<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid.'&targetclid='.$clid.'&targettid='.$tid;?>','editorwindow');return false;">
-																<img src="../images/link.png" style="width:13px;" title="Link Voucher Specimens" />
-															</a>
-														</div>
-														<?php 
 													}
-													echo '</div>';
-												}
-												$arrCnt = $nonVoucherArr;
-												if($startPos || $nonVoucherCnt > 100){
-													echo '<div style="text-weight:bold;">';
-													if($startPos > 0) echo '<a href="voucheradmin.php?clid='.$clid.'&pid='.$pid.'&start='.($startPos-100).'">';
-													echo '&lt;&lt; Previous';
-													if($startPos > 0) echo '</a>';
-													echo ' || <b>'.$startPos.'-'.($startPos+($arrCnt<100?$arrCnt:100)).' Records</b> || ';
-													if(($startPos + 100) <= $nonVoucherCnt) echo '<a href="voucheradmin.php?clid='.$clid.'&pid='.$pid.'&start='.($startPos+100).'">';
-													echo 'Next &gt;&gt;';
-													if(($startPos + 100) <= $nonVoucherCnt) echo '</a>';
-													echo '</div>';
-												}
-											}
-											else{
-												echo '<h2>All taxa contain voucher links</h2>';
-											}
-											?>
-										</div>
+													?>
+												</table>
+												<input name="tabindex" value="0" type="hidden" /> 
+												<input name="clid" value="<?php echo $clid; ?>" type="hidden" /> 
+												<input name="pid" value="<?php echo $pid; ?>" type="hidden" />
+												<input name="displaymode" value="1" type="hidden" />
+												<input name="usecurrent" value="1" type="checkbox" checked /> Add name using current taxonomy<br/>
+												<input name="submitaction" value="Add Vouchers" type="submit" />
+											</form>
+											<?php 
+										}
+										else{
+											echo '<div style="font-weight:bold;font-size:120%;">No vouchers located</div>';
+										}
+										?>
 									</div>
-									<?php
-								}
-							}	
+								</div>
+								
+								<?php 
+							}
+							else{
+								?>
+								<div style="clear:both;">
+									<div style="margin:10px;">
+										Listed below are species from the checklist that do not have linked specimen vouchers.    
+										Click on name to use the search statement above to dynamically query the occurrence dataset for 
+										possible voucher specimens. Use the pulldown to the right to display the specimens in a table format.
+									</div>
+									<div style="margin:20px;">
+										<?php 
+										if($nonVoucherArr = $clManager->getNonVoucheredTaxa($startPos)){
+											foreach($nonVoucherArr as $family => $tArr){
+												echo '<div style="font-weight:bold;">'.strtoupper($family).'</div>';
+												echo '<div style="margin:10px;text-decoration:italic;">';
+												foreach($tArr as $tid => $sciname){
+													?>
+													<div>
+														<a href="#" onclick="openPopup('../taxa/index.php?taxauthid=1&taxon=<?php echo $tid.'&cl='.$clid; ?>','taxawindow');return false;"><?php echo $sciname; ?></a>
+														<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid.'&targetclid='.$clid.'&targettid='.$tid;?>','editorwindow');return false;">
+															<img src="../images/link.png" style="width:13px;" title="Link Voucher Specimens" />
+														</a>
+													</div>
+													<?php 
+												}
+												echo '</div>';
+											}
+											$arrCnt = $nonVoucherArr;
+											if($startPos || $nonVoucherCnt > 100){
+												echo '<div style="text-weight:bold;">';
+												if($startPos > 0) echo '<a href="voucheradmin.php?clid='.$clid.'&pid='.$pid.'&start='.($startPos-100).'">';
+												echo '&lt;&lt; Previous';
+												if($startPos > 0) echo '</a>';
+												echo ' || <b>'.$startPos.'-'.($startPos+($arrCnt<100?$arrCnt:100)).' Records</b> || ';
+												if(($startPos + 100) <= $nonVoucherCnt) echo '<a href="voucheradmin.php?clid='.$clid.'&pid='.$pid.'&start='.($startPos+100).'">';
+												echo 'Next &gt;&gt;';
+												if(($startPos + 100) <= $nonVoucherCnt) echo '</a>';
+												echo '</div>';
+											}
+										}
+										else{
+											echo '<h2>All taxa contain voucher links</h2>';
+										}
+										?>
+									</div>
+								</div>
+								<?php
+							}
 							?>
 						</div>
 					</div>

@@ -83,7 +83,7 @@ if($symbUid){
 		}
 	}
 	else{
-		echo '<div>Personal specimen management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to active this feature.</div>';
+		echo '<div>Personal specimen management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to activate this feature.</div>';
 	}
 	if(array_key_exists('preserved specimens',$collArr)){
 		$cArr = $collArr['preserved specimens'];

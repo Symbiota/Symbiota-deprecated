@@ -15,7 +15,8 @@ $proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
 //Display option
 $showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0; 
 $showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
-$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
+$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0;
+$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
 $thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0; 
 //Search options
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
@@ -414,6 +415,8 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 										echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/> Common Names";
 									}
 								?>
+							</div>
+							<div>
 								<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/> Synonyms
 							</div>
 						</div>
@@ -429,9 +432,6 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 								?>
 							</select>
 						</div>
-						<div class="button" style='margin:5px;float:right;width:13px;height:13px;' title="Download Checklist">
-							<input type="image" name="action" value="Download List" src="../images/dl.png" />
-						</div>
 						<div>
 							<?php 
 								//Display Common Names: 0 = false, 1 = true 
@@ -443,16 +443,19 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 						    <input id='showimages' name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this);" /> 
 						    Display as Images
 						</div>
-						<div style="float:right;">
-							<input type='hidden' name='surveyid' value='<?php echo $surveyId; ?>' />
-							<input type='hidden' name='proj' value='<?php echo $clManager->getPid(); ?>' />
-							<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
-							<input type="submit" name="action" value="Rebuild List" />
-						</div>
 						<div>
 							<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
 						    <input id='showauthors' name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/> 
 						    Taxon Authors
+						</div>
+						<div style="margin:5px 0px 0px 5px;">
+							<input type='hidden' name='surveyid' value='<?php echo $surveyId; ?>' />
+							<input type='hidden' name='proj' value='<?php echo $clManager->getPid(); ?>' />
+							<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
+							<input type="submit" name="action" value="Rebuild List" />
+							<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Download Checklist">
+								<input type="image" name="action" value="Download List" src="../images/dl.png" />
+							</div>
 						</div>
 					</fieldset>
 				</form>

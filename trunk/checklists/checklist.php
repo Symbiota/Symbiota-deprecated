@@ -170,15 +170,18 @@ if($clValue || $dynClid){
 				<div style="float:right;width:90px;">
 					<span style="">
 						<a href="checklistadmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>" style="margin-right:10px;" title="Checklist Administration">
-							<img style="border:0px;height:15px;" src="../images/editadmin.png" /></a>
+							<img style="border:0px;height:15px;" src="../images/editadmin.png" />
+						</a>
 					</span>
 					<span style="">
 						<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>" style="margin-right:10px;" title="Manage Linked Voucher">
-							<img style="border:0px;height:15px;" src="../images/editvoucher.png" /></a>
+							<img style="border:0px;height:15px;" src="../images/editvoucher.png" />
+						</a>
 					</span>
-					<span style="" onclick="toggle('editspp');return false;" >
+					<span style=""> <!-- onclick="toggle('editspp');return false;" -->
 						<a href="#" title="Edit Species List">
-							<img style="border:0px;height:17px;" src="../images/editspp.png" /></a>
+							<img style="border:0px;height:15px;" src="../images/editspp.png" />
+						</a>
 					</span>
 				</div>
 				<?php 
@@ -364,7 +367,7 @@ if($clValue || $dynClid){
 						<?php 
 						if($clValue && $isEditor){
 							?>
-							<div class="editspp" style="display:<?php echo ($editMode==1?'block':'none');?>;width:250px;margin-top:10px;">
+							<div class="editspp" style="display:block;width:250px;margin-top:10px;">
 								<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 									<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 										<legend><b>Add New Species to Checklist</b></legend>
