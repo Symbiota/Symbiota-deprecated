@@ -304,18 +304,17 @@ if($action){
 				?>
 			</ul>
 			
-			<form name="imagesearchform" id="imagesearchform" action="search.php" method="get" onsubmit="submitImageForm();">
+			<form name="imagesearchform" id="imagesearchform" action="search.php" method="get" onsubmit="return submitImageForm();">
 				<div id="criteriadiv">
 					<div id="thesdiv" style="display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'none':'block'); ?>;" >
 						<input type='checkbox' id='thes' name='thes' value='1' <?php if(array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"]) echo "CHECKED"; ?> >Include Synonyms
 					</div>
 					<div style="margin-top:5px;">
 						<select id="taxontype" name="nametype" onchange="checkTaxonType();" >
-							<option id='sciname' value='1' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "1") echo "SELECTED"; ?> >Scientific Name</option>
-							<option id='scinamechild' value='2' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "2") echo "SELECTED"; ?> >Scientific Name with Child Taxa</option>
+							<option id='sciname' value='1' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "2") echo "SELECTED"; ?> >Scientific Name</option>
 							<option id='commonname' value='3' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3") echo "SELECTED"; ?> >Common Name</option>
 						</select>
-						<input id="taxtp" name="taxtp" type="hidden" value="<?php echo (array_key_exists("taxtp",$previousCriteria)?$previousCriteria["taxtp"]:'1'); ?>" />
+						<input id="taxtp" name="taxtp" type="hidden" value="<?php echo (array_key_exists("taxtp",$previousCriteria)?$previousCriteria["taxtp"]:'2'); ?>" />
 					</div>
 					<div style="clear:both;margin-top:5px;">
 						<div id="taxanamelabel" style="float:left;margin-right:8px;padding-top:8px;">
@@ -328,7 +327,7 @@ if($action){
 							<input id="common" type="text" style="width:450px;" name="common" value="" title="Separate multiple names w/ commas" autocomplete="off" />
 						</div>
 					</div>
-					<div style="clear:both;margin:5 0 5 0;"><hr /></div>
+					<!-- <div style="clear:both;margin:5 0 5 0;"><hr /></div>
 					<div style="margin-top:5px;">
 						<div style="float:left;margin-right:8px;padding-top:8px;">
 							Country: 
@@ -344,7 +343,7 @@ if($action){
 						<div style="float:left;margin-bottom:10px;">
 							<input type="text" id="state" style="width:350px;" name="state" value="" title="Separate multiple states w/ commas" />
 						</div>
-					</div>
+					</div> -->
 					<div style="clear:both;margin:5 0 5 0;"><hr /></div>
 					<div>
 						<div style="float:left;margin-right:8px;padding-top:8px;">
@@ -356,7 +355,7 @@ if($action){
 					</div>
 					<div style="clear:both;margin:5 0 5 0;"><hr /></div>
 					<?php
-					$tagArr = $imgLibManager->getTagArr();
+					/*$tagArr = $imgLibManager->getTagArr();
 					if($tagArr){
 						?>
 						<div>
@@ -372,7 +371,7 @@ if($action){
 							</select>
 						</div>
 						<?php
-					}
+					}*/
 					?>
 					<div style="margin-top:5px;">
 						<div style="float:left;margin-right:8px;padding-top:8px;">

@@ -72,13 +72,16 @@ function submitImageForm(){
 	var countryvals = $('#country').manifest('values');
 	var statevals = $('#state').manifest('values');
 	var keywordsvals = $('#keywords').manifest('values');
+	var criteria = 0;
 	if(taxavals.length > 0){
 		var taxastr = taxavals.join();
 		document.getElementById('taxastr').value = taxastr;
+		criteria = 1;
 	}
 	else if(commonvals.length > 0){
 		var taxastr = commonvals.join();
 		document.getElementById('taxastr').value = taxastr;
+		criteria = 1;
 	}
 	else{
 		document.getElementById('taxastr').value = '';
@@ -86,6 +89,7 @@ function submitImageForm(){
 	if(countryvals.length > 0){
 		var countrystr = countryvals.join();
 		document.getElementById('countrystr').value = countrystr;
+		criteria = 1;
 	}
 	else{
 		document.getElementById('countrystr').value = '';
@@ -93,6 +97,7 @@ function submitImageForm(){
 	if(statevals.length > 0){
 		var statestr = statevals.join();
 		document.getElementById('statestr').value = statestr;
+		criteria = 1;
 	}
 	else{
 		document.getElementById('statestr').value = '';
@@ -100,6 +105,7 @@ function submitImageForm(){
 	if(keywordsvals.length > 0){
 		var keywordstr = keywordsvals.join();
 		document.getElementById('keywordstr').value = keywordstr;
+		criteria = 1;
 	}
 	else{
 		document.getElementById('keywordstr').value = '';
@@ -112,10 +118,18 @@ function submitImageForm(){
 		var phidstr = phids.join();
 		document.getElementById('phuidstr').value = phidstr;
 		document.getElementById('phjson').value = JSON.stringify(phArr);
+		criteria = 1;
 	}
 	else{
 		document.getElementById('phuidstr').value = '';
 		document.getElementById('phjson').value = '';
+	}
+	if(criteria){
+		return true;
+	}
+	else{
+		alert("Please specify either a scientific name, common name, photographer, or keyword for which you would like to search images for.");
+		return false;
 	}
 }
 
