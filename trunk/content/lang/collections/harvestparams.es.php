@@ -5,7 +5,7 @@ Language: Espanol, Spanish
 ------------------
 */
  
-include_once('sharedterms.en.php');
+include_once('sharedterms.es.php');
  
 $LANG['PAGE_TITLE'] = 'Collection Search Parameters';
 $LANG['PAGE_HEADER'] = 'Formulario de Búsqueda';
@@ -44,14 +44,30 @@ $LANG['LL_P-RADIUS_MI'] = 'Millas';
 $LANG['LL_P-RADIUS_TITLE_1'] = 'Encuentra Coordenada';
 $LANG['COLLECTOR_HEADER'] = 'Datos del Colector:';
 $LANG['COLLECTOR_LASTNAME'] = 'Apellido del Colector:';
-$LANG['TITLE_TEXT_2'] = 'Separate multiple terms by commas and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750';
+$LANG['TITLE_TEXT_2'] = 'Usar comas para separar varios t�rminos, por ejemplo: Guaymas, Hermosillo, Pitiquito; y guiones para delimitar rangos (usar espacio antes y despu�s del gui�n), por ejemplo: 3542,3602,3700 - 3750';
 $LANG['COLLECTOR_NUMBER'] = "Número del Colector:";
 $LANG['COLLECTOR_DATE'] = 'Fecha de Colecta:';
-$LANG['TITLE_TEXT_3'] = 'Single date or start date of range';
-$LANG['TITLE_TEXT_4'] = 'End date of range; leave blank if searching for single date';
+$LANG['TITLE_TEXT_3'] = 'Fecha determinada o fecha de inicio del per�odo';
+$LANG['TITLE_TEXT_4'] = 'Fecha final del per�odo; dejar en blanco si busca para una fecha determinada';
 $LANG['SPECIMEN_HEADER'] = 'Catálogo de la Colección:';
 $LANG['CATALOG_NUMBER'] = 'Número de Catálogo:';
 $LANG['OTHER_CATALOG_NUMBERS'] = 'Otros Números de Catálogo:';
-$LANG['TYPE'] = 'Limit to Type Specimens Only';
-$LANG['HAS_IMAGE'] = 'Limit to Specimens with Images Only';
+$LANG['TYPE'] = 'Limitar Solamente a Ejemplares Tipo';
+$LANG['HAS_IMAGE'] = 'Limitar Solamente a Ejemplares con Im�genes';
+
+//Following used in mapboundingbox.php
+$LANG['MBB_TITLE'] = 'Coordinate Mapper'; 
+$LANG['MBB_INSTRUCTIONS'] = 'Click once to start drawing and again to finish rectangle. Click on the Submit button to transfer Coordinates.';
+$LANG['MBB_NORTHERN'] = 'Northern Lat';
+$LANG['MBB_EASTERN'] = 'Eastern Long';
+$LANG['MBB_SOUTHERN'] = 'Southern Lat';
+$LANG['MBB_WESTERN'] = 'Western Long';
+
+//Following used in mappointradius.php
+$LANG['MPR_TITLE'] = 'Coordinate Mapper'; 
+$LANG['MPR_INSTRUCTIONS'] = 'Click once to capture coordinates. Click on the Submit Coordinate button to transfer Coordinates.';
+$LANG['MPR_LAT'] = 'Latitude'; 
+$LANG['MPR_LNG'] = 'Longitude';
+$LANG['SUBMIT'] = 'Submit';
+
 ?>
