@@ -1,15 +1,16 @@
 <?php
 include_once('../config/symbini.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
-$boundaryArr = explode(";",$mappingBoundaries);
+$boundaryArr = explode(";",$MAPPING_BOUNDARIES);
 $latCenter = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
 $lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
 ?>
 
 <html>
 	<head>
-		<title><?php echo $defaultTitle; ?> - Coordinate Mapper</title>
+		<title><?php echo $DEFAULT_TITLE.' - '.$LANG['MBB_TITLE']; ?></title>
 	</head> 
 	<body style="background-color:#ffffff;">
 	<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
@@ -88,21 +89,20 @@ $lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3]
 		google.maps.event.addDomListener(window, 'load', initialize);
 
     </script>
-    <div style="width:500px;">Click once to start drawing and again to finish rectangle. 
-    Click on the Submit button to transfer Coordinates.</div>
+    <div style="width:500px;"><?php echo $LANG['MBB_INSTRUCTIONS']; ?></div>
     <div id='map' style='width:100%; height: 520px'></div>
 	<form id="mapForm" onsubmit="return updateParentForm();">
 		<table>
 			<tr><td>
-				Northern Lat: <input type="text" id="nlat" size="13" name="nlat" value="" />
+				<?php echo $LANG['MBB_NORTHERN']; ?>: <input type="text" id="nlat" size="13" name="nlat" value="" />
 			</td><td>
-				Eastern Long: <input type="text" id="elon" size="13" name="elon" value="" />
-				<input type="submit" name="addcoords" value="Submit" />	
+				<?php echo $LANG['MBB_EASTERN']; ?>: <input type="text" id="elon" size="13" name="elon" value="" />
+				<input type="submit" name="addcoords" value="<?php echo $LANG['SUBMIT']; ?>" />	
 			</td></tr>
 			<tr><td>
-				Southern Lat: <input type="text" id="slat" size="13" name="slat" value="" />
+				<?php echo $LANG['MBB_SOUTHERN']; ?>: <input type="text" id="slat" size="13" name="slat" value="" />
 			</td><td>
-				Western Long: <input type="text" id="wlon" size="13" name="wlon" value="" />
+				<?php echo $LANG['MBB_WESTERN']; ?>: <input type="text" id="wlon" size="13" name="wlon" value="" />
 			</td></tr>
 		</table>
 	</form>

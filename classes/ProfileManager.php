@@ -268,7 +268,7 @@ class ProfileManager{
 		
 		$firstName = $postArr['firstname'];
 		$lastName = $postArr['lastname'];
-		if($postArr['institution'] && !strpos($postArr['institution'],' ') && !preg_match('/^[A-Z]{1}[a-z]+$/',$postArr['institution'])) return false;
+		if($postArr['institution'] && !trim(strpos($postArr['institution'],' ')) && preg_match('/[a-z]+[A-Z]+[a-z]+[A-Z]+/',$postArr['institution'])) return false;
 		
 		$person = new Person();
 		$person->setPassword($postArr['pwd']);

@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once $SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php';
+include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
