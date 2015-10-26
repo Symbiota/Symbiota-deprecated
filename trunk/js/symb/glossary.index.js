@@ -284,6 +284,16 @@ function verifyNewSynForm(f){
 	return true;
 }
 
+function verifySearchForm(f){
+	var language = document.getElementById("searchlanguage").value;
+	var taxon = document.getElementById("searchtaxa").value;
+	if(!language || !taxon){
+		alert("Please select a language and taxonomic group to see term list.");
+		return false;
+	}
+	return true;
+}
+
 function verifyNewTransForm(f){
 	var term = document.getElementById("newtransterm").value;
 	var language = document.getElementById("newtranslanguage").value;
