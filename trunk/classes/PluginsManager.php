@@ -48,6 +48,7 @@ class PluginsManager {
 		}
 		
 		if($replace == 1){
+			ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 			$sinceDate = date('Y-m-d', strtotime($currentDate. ' - '.$numDays.' days'));
 			
 			//Delete old files
@@ -135,7 +136,12 @@ class PluginsManager {
 						else{
 							$file = $row->url;
 						}
-						if(fopen($file, "r")){
+						$ch = curl_init($file);    
+						curl_setopt($ch, CURLOPT_NOBODY, true);
+						curl_exec($ch);
+						$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+						curl_close($ch);
+						if($code == 200){
 							if($size = getimagesize($file)){
 								$width = $size[0];
 								$height = $size[1];
