@@ -162,7 +162,7 @@ if($clValue || $dynClid){
 	}
 	?>
 	<!-- This is inner text! -->
-	<div id='innertext' style="">
+	<div id='innertext' style="<?php echo ($printMode?'background-color:#ffffff;':''); ?>">
 		<?php
 		if($clValue || $dynClid){
 			if($clValue && $isEditor && !$printMode){
@@ -178,11 +178,17 @@ if($clValue || $dynClid){
 							<img style="border:0px;height:15px;" src="../images/editvoucher.png" />
 						</a>
 					</span>
-					<span style=""> <!-- onclick="toggle('editspp');return false;" -->
-						<a href="#" title="Edit Species List">
-							<img style="border:0px;height:15px;" src="../images/editspp.png" />
-						</a>
-					</span>
+					<?php
+					if(!$showImages){
+						?>
+						<span style="" onclick="toggle('editspp');return false;">
+							<a href="#" title="Edit Species List">
+								<img style="border:0px;height:15px;" src="../images/editspp.png" />
+							</a>
+						</span>
+						<?php
+					}
+					?>
 				</div>
 				<?php 
 			}
@@ -367,7 +373,7 @@ if($clValue || $dynClid){
 						<?php 
 						if($clValue && $isEditor){
 							?>
-							<div class="editspp" style="display:block;width:250px;margin-top:10px;">
+							<div class="editsppbox" style="display:<?php echo ($showImages?'none':'block'); ?>;width:250px;margin-top:10px;">
 								<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 									<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 										<legend><b>Add New Species to Checklist</b></legend>
