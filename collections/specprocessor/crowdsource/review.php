@@ -64,7 +64,7 @@ $projArr = $csManager->getProjectDetails();
 		}
 	</script>
 </head>
-<body>
+<body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<?php 	
 	//$displayLeftMenu = false;
 	//include($serverRoot.'/header.php');
@@ -177,7 +177,7 @@ $projArr = $csManager->getProjectDetails();
 								echo '<input name="uid" type="hidden" value="'.$uid.'" />';
 							}
 							?>
-							<table class="styledtable">
+							<table class="styledtable" style="font-family:Arial;font-size:12px;">
 								<tr>
 									<?php 
 									if($collid) echo '<th><span title="Select All"><input name="selectall" type="checkbox" onclick="selectAll(this)" /></span></th>';
