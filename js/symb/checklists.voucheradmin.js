@@ -108,6 +108,16 @@ function validateBatchNonVoucherForm(f){
   	return false;
 }
 
+function validateBatchMissingForm(f){
+	var dbElements = document.getElementsByName("occids[]");
+	for(i = 0; i < dbElements.length; i++){
+		var dbElement = dbElements[i];
+		if(dbElement.checked) return true;
+	}
+   	alert("Please select at least one specimen to link as a voucher!");
+  	return false;
+}
+
 
 //Misc functions
 function selectAll(cb){

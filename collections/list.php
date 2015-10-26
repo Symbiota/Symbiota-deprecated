@@ -13,6 +13,7 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
 $collManager = new OccurrenceListManager();
 $stArr = array();
+$specOccJson = '';
 
 if($stArrCollJson && $stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
@@ -37,6 +38,15 @@ else{
 $stArrJson = json_encode($stArr);
 $collManager->setSearchTermsArr($stArr);
 $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Array(IID,Array(fieldName,value))
+if($specimenArray){
+	$specOccArr = array();
+	foreach($specimenArray as $collId => $specData){
+		foreach($specData as $occId => $fieldArr){
+			$specOccArr[] = $occId;
+		}
+	}
+	$specOccJson = json_encode($specOccArr);
+}
 
 $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname', 
 	'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
@@ -99,6 +109,21 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			}).done(function( msg ) {
 				if(msg == "1"){
 					alert("Success! Voucher added to checklist.");
+				}
+				else{
+					alert(msg);
+				}
+			});
+		}
+		
+		function addAllVouchersToCl(clidIn){
+			$.ajax({
+				type: "POST",
+				url: "rpc/addallvouchers.php",
+				data: { clid: clidIn, jsonOccArr: <?php echo $specOccJson; ?>, tid: <?php echo $_REQUEST["targettid"]; ?> }
+			}).done(function( msg ) {
+				if(msg == "1"){
+					alert("Success! All vouchers added to checklist.");
 				}
 				else{
 					alert(msg);
@@ -193,10 +218,21 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			</li>
 		</ul>
 		<div id="speclist">
-			<div class='button' style='margin:15px 15px 0px 0px;float:right;width:13px;height:13px;' title='Download Specimen Data'>
-				<a href='download/index.php?usecookies=false&dltype=specimen&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>'>
-					<img src='../images/dl.png'/>
-				</a>
+			<div style="float:right;">
+				<div class='button' style='margin:15px 15px 0px 0px;width:13px;height:13px;' title='Download Specimen Data'>
+					<a href='download/index.php?usecookies=false&dltype=specimen&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>'>
+						<img src='../images/dl.png'/>
+					</a>
+				</div>
+				<?php
+				if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){
+					?>
+					<div style="cursor:pointer;margin:8px 8px 0px 0px;" onclick="addAllVouchersToCl(<?php echo $collManager->getSearchTerm("targetclid"); ?>)" title="Link All Vouchers on Page">
+						<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
+					</div>
+					<?php
+				}
+				?>
 			</div>
 			<div style='margin:10px;'>
 				<div><b><?php echo $LANG['DATASET']; ?>:</b> <?php echo $collManager->getDatasetSearchStr(); ?></div>

@@ -16,7 +16,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 	$isEditor = true;
 }
 //Get records
-$missingArr;
+$missingArr = array();
 if($displayMode==1){
 	$missingArr = $vManager->getMissingTaxaSpecimens($startIndex);
 }
@@ -64,21 +64,21 @@ else{
 	</div> 
 	<div>
 		<?php 
-		if($missingArr){
-			$recCnt = 0;
-			if($displayMode==1){
+		$recCnt = 0;
+		if($displayMode==1){
+			if($missingArr){
 				?>
 				<div style="clear:both;margin:10px;">
 					Listed below are specimens identified to a species not found in the checklist. Use the form to add the
 					names and link the vouchers as a batch action. Specimens are displayed in batches of 1000.
 				</div>
-				<form name="batchmissingform" method="post" action="voucheradmin.php" onsubmit="return validateBatchMissingForm(this)">
+				<form name="batchmissingform" method="post" action="voucheradmin.php" onsubmit="return validateBatchMissingForm(this.form);">
 					<table class="styledtable" style="font-family:Arial;font-size:12px;">
 						<tr>
 							<th>
 								<span title="Select All">
-				         			<input name="occids[]" type="checkbox" onclick="selectAll(this);" value="0-0" />
-				         		</span>
+									<input name="selectallbatch" type="checkbox" onclick="selectAll(this);" value="0-0" />
+								</span>
 							</th>
 							<th>Specimen ID</th>
 							<th>Collector</th>
@@ -109,16 +109,18 @@ else{
 					<input name="clid" value="<?php echo $clid; ?>" type="hidden" /> 
 					<input name="pid" value="<?php echo $pid; ?>" type="hidden" />
 					<input name="displaymode" value="1" type="hidden" />
-					<input name="usecurrent" value="1" type="checkbox" checked /> Add name using current taxonomy<br/>
-					<input name="submitaction" value="Add Taxa and Vouchers" type="submit" />
+					<input name="usecurrent" style="margin-top:8px;" value="1" type="checkbox" checked /> Add name using current taxonomy<br/>
+					<input name="submitaction" style="margin-top:8px;" value="Add Taxa and Vouchers" type="submit" />
 					<input name="start" type="hidden" value="<?php echo $startIndex; ?>" />
 				</form>
 				<?php
 				echo 'Specimen count: '.$recCnt;
 				$queryStr = 'tabindex=1&displaymode=1&clid='.$clid.'&pid='.$pid.'&start='.(++$startIndex);
-				if($recCnt > 999) echo '<a href="voucheradmin.php?'.$queryStr.'">View Next 1000</a>';
+				if($recCnt > 399) echo '<a style="margin-left:10px;" href="voucheradmin.php?'.$queryStr.'">View Next 400</a>';
 			}
-			elseif($displayMode==2){
+		}
+		elseif($displayMode==2){
+			if($missingArr){
 				?>
 				<div style="clear:both;margin:10px;">
 					Listed below are species name obtained from specimens matching the above search term but 
@@ -134,7 +136,7 @@ else{
 						<th>Locality</th>
 					</tr>
 					<?php 
-					ksort($missingArr);
+					/*ksort($missingArr);
 					foreach($missingArr as $sciname => $sArr){
 						foreach($sArr as $occid => $oArr){
 							?>
@@ -158,12 +160,14 @@ else{
 							<?php 
 							$recCnt++;
 						}
-					}
+					}*/
 					?>
 				</table>
-				<?php 
+				<?php
 			}
-			else{
+		}
+		else{
+			if($missingArr){
 				?>
 				<div style="margin:20px;clear:both;">
 					<div style="clear:both;margin:10px;">
@@ -184,11 +188,8 @@ else{
 					}
 					?>
 				</div>
-				<?php 
+				<?php
 			}
-		}
-		else{
-			echo '<div style="clear:both;"><h2>No possible addition found</h2></div>';
 		}
 		?>
 	</div>

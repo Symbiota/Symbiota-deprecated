@@ -85,7 +85,7 @@ class ChecklistLoaderManager {
 						if($rankId >= 180){
 							$sqlInsert = '';
 							$sqlValues = '';
-							if(array_key_exists('family',$headerArr) && strtolower($family) != strtolower($valueArr[$headerArr['family']])){
+							if(array_key_exists('family',$headerArr) && ($valueArr[$headerArr['family']] && (strtolower($family) != strtolower($valueArr[$headerArr['family']])))){
 								$sqlInsert .= ',familyoverride';
 								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['family']]).'"';
 							}
