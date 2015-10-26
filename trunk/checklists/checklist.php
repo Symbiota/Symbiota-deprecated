@@ -45,11 +45,11 @@ if($clValue && $clArray["defaultSettings"]){
 	$defaultArr = json_decode($clArray["defaultSettings"], true);
 	$showDetails = $defaultArr["ddetails"];
 	if(!$defaultOverride){
-		$showCommon = $defaultArr["dcommon"];
-		$showImages = $defaultArr["dimages"]; 
-		$showVouchers = $defaultArr["dvouchers"];
-		$showAuthors = $defaultArr["dauthors"];
-		$showAlphaTaxa = $defaultArr["dalpha"];
+		if(array_key_exists('dcommon',$defaultArr)){$showCommon = $defaultArr["dcommon"];}
+		if(array_key_exists('dimages',$defaultArr)){$showImages = $defaultArr["dimages"];} 
+		if(array_key_exists('dvouchers',$defaultArr)){$showVouchers = $defaultArr["dvouchers"];}
+		if(array_key_exists('dauthors',$defaultArr)){$showAuthors = $defaultArr["dauthors"];}
+		if(array_key_exists('dalpha',$defaultArr)){$showAlphaTaxa = $defaultArr["dalpha"];}
 	}
 }
 if($pid) $clManager->setProj($pid);
