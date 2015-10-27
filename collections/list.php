@@ -120,7 +120,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			$.ajax({
 				type: "POST",
 				url: "rpc/addallvouchers.php",
-				data: { clid: clidIn, jsonOccArr: <?php echo $specOccJson; ?>, tid: <?php echo (isset($_REQUEST["targettid"])?$_REQUEST["targettid"]:'0'); ?> }
+				data: { clid: clidIn, jsonOccArr: <?php echo (isset($specOccJson)&&$specOccJson?$specOccJson:'0'); ?>, tid: <?php echo (isset($_REQUEST["targettid"])?$_REQUEST["targettid"]:'0'); ?> }
 			}).done(function( msg ) {
 				if(msg == "1"){
 					alert("Success! All vouchers added to checklist.");
