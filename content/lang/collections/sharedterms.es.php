@@ -1,7 +1,7 @@
 <?php 
 /*
 ------------------
-Language: English
+Language: Español (Spanish)
 ------------------
 */
  
@@ -9,7 +9,7 @@ $LANG = array();
  
 $LANG['NAV_HOME'] = 'Inicio';
 $LANG['NAV_COLLECTIONS'] = 'Colecciones';
-$LANG['NAV_SEARCH'] = 'Search Criteria';
+$LANG['NAV_SEARCH'] = 'Criterios de BÃºsqueda';
 
 $LANG['TAB_CHECKLIST'] = 'Listado de Especies';
 $LANG['TAB_OCCURRENCES'] = 'Registros de Ocurrencia';

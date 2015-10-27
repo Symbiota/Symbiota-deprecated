@@ -219,7 +219,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 		</ul>
 		<div id="speclist">
 			<div style="float:right;">
-				<div class='button' style='margin:15px 15px 0px 0px;width:13px;height:13px;' title='Download Specimen Data'>
+				<div class='button' style='margin:15px 15px 0px 0px;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>'>
 					<a href='download/index.php?usecookies=false&dltype=specimen&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>'>
 						<img src='../images/dl.png'/>
 					</a>

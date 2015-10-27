@@ -213,7 +213,7 @@ $fileName = time();
 			<fieldset style="padding:10px;height:280px;width:350px;">
 				<legend><b>Garmin GPS Downloader</b></legend>
 				<div id="actionStatus">
-					<b><div id="statusText">Plug-in initialized.  Find some devices to get started.</div></b>
+					<div id="statusText"><b>Plug-in initialized.  Find some devices to get started.</b></div>
 					<div id="progressBar" style="display: none;" align="left">
 						<div id="progressWrapper"><div id="progressBarDisplay"></div></div>
 					</div><br />
