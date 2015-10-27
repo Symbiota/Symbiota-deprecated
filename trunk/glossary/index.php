@@ -9,6 +9,11 @@ $language = array_key_exists('language',$_REQUEST)?$_REQUEST['language']:'';
 $tId = array_key_exists('tid',$_REQUEST)?$_REQUEST['tid']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
+$isEditor = false;
+if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
+	$isEditor = true;
+}
+
 $glosManager = new GlossaryManager();
 $termList = array();
 $taxonName = '';
@@ -141,7 +146,7 @@ if($formSubmit){
 		</div>
 		<div id="termlistdiv" style="min-height:200px;">
 			<?php
-			if($symbUid){
+			if($isEditor){
 				?>
 				<div style="float:right;margin:10px;">
 					<a href="#" onclick="toggle('newtermdiv');">
