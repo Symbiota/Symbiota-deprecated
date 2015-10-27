@@ -8,6 +8,11 @@ $glossgrpId = array_key_exists('glossgrpid',$_REQUEST)?$_REQUEST['glossgrpid']:0
 $glimgId = array_key_exists('glimgid',$_REQUEST)?$_REQUEST['glimgid']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
+$isEditor = false;
+if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
+	$isEditor = true;
+}
+
 $glosManager = new GlossaryManager();
 $termArr = array();
 $termImgArr = array();
@@ -76,7 +81,7 @@ else{
 			</ul>
 			<div id="terminfo" style="width:540px;padding:10px;">
 				<?php
-				if($SYMB_UID){
+				if($isEditor){
 					?>
 					<div style="float:right;margin-right:15px;cursor:pointer;" onclick="" title="Edit Term Data">
 						<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $glossId;?>'); return false;">
@@ -126,7 +131,7 @@ else{
 					</div>
 					
 					<?php
-					if(!$SYMB_UID){
+					if(!$isEditor){
 						?>
 						<div style="margin-bottom:10px;margin-top:8px;">
 							See an error? <a href="#" onclick="leaveTermPopup('../profile/index.php?refurl=../glossary/termdetails.php?glossid=<?php echo $glossId; ?>'); return false;">Login</a> to edit data
@@ -146,7 +151,7 @@ else{
 						?>
 						<fieldset style='clear:both;width:505px;padding:8px;margin-bottom:10px;'>
 							<?php
-							if($SYMB_UID){
+							if($isEditor){
 								?>
 								<div style="float:right;margin-right:15px;cursor:pointer;" onclick="" title="Edit Term Data">
 									<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $synArr['glossid'];?>'); return false;">
@@ -188,7 +193,7 @@ else{
 						?>
 						<fieldset style='clear:both;width:505px;padding:8px;margin-bottom:10px;'>
 							<?php
-							if($SYMB_UID){
+							if($isEditor){
 								?>
 								<div style="float:right;margin-right:15px;cursor:pointer;" onclick="" title="Edit Term Data">
 									<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $transArr['glossid'];?>'); return false;">

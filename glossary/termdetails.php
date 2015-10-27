@@ -8,6 +8,11 @@ $glossgrpId = array_key_exists('glossgrpid',$_REQUEST)?$_REQUEST['glossgrpid']:0
 $glimgId = array_key_exists('glimgid',$_REQUEST)?$_REQUEST['glimgid']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
+$isEditor = false;
+if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
+	$isEditor = true;
+}
+
 $glosManager = new GlossaryManager();
 $termArr = array();
 $termImgArr = array();
@@ -57,9 +62,6 @@ else{
 	header("Location: index.php");
 }
 ?>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
     <title><?php echo $defaultTitle; ?> Glossary Management</title>
@@ -104,7 +106,7 @@ else{
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
-		if($symbUid){
+		if($isEditor){
 			if($statusStr){
 				?>
 				<div style="margin:15px;color:red;">
@@ -578,7 +580,7 @@ else{
 				header("Location: ../profile/index.php?refurl=../glossary/termdetails.php?glossid=".$glossId);
 			}
 			else{
-				echo '<h2>ERROR: unknown error, please contact system administrator</h2>';
+				echo '<h2>You do not have permissions to edit glossary data, please contact system administrator</h2>';
 			}
 		}
 		?>
