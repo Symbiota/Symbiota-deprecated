@@ -116,20 +116,26 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			});
 		}
 		
-		function addAllVouchersToCl(clidIn){
-			$.ajax({
-				type: "POST",
-				url: "rpc/addallvouchers.php",
-				data: { clid: clidIn, jsonOccArr: <?php echo (isset($specOccJson)&&$specOccJson?$specOccJson:'0'); ?>, tid: <?php echo (isset($_REQUEST["targettid"])?$_REQUEST["targettid"]:'0'); ?> }
-			}).done(function( msg ) {
-				if(msg == "1"){
-					alert("Success! All vouchers added to checklist.");
-				}
-				else{
-					alert(msg);
-				}
-			});
+		<?php
+		if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){
+			?>
+			function addAllVouchersToCl(clidIn){
+				$.ajax({
+					type: "POST",
+					url: "rpc/addallvouchers.php",
+					data: { clid: clidIn, jsonOccArr: <?php echo (isset($specOccJson)&&$specOccJson?$specOccJson:'0'); ?>, tid: <?php echo (isset($_REQUEST["targettid"])?$_REQUEST["targettid"]:'0'); ?> }
+				}).done(function( msg ) {
+					if(msg == "1"){
+						alert("Success! All vouchers added to checklist.");
+					}
+					else{
+						alert(msg);
+					}
+				});
+			}
+			<?php
 		}
+		?>
 		
 		function toggle(target){
 			var objDiv = document.getElementById(target);
