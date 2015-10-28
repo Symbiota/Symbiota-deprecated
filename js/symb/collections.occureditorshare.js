@@ -35,6 +35,30 @@ function setOrderBy(formObject){
 	}
 }
 
+function detectBatchUpdateField(){
+	var fieldSelected = document.getElementById('bufieldname').value;
+	if(fieldSelected == "processingstatus"){
+		var buNewValue = '';
+		buNewValue += '<select name="bunewvalue">';
+		buNewValue += '<option value="unprocessed">Unprocessed</option>';
+		buNewValue += '<option value="unprocessed/nlp">Unprocessed/NLP</option>';
+		buNewValue += '<option value="stage 1">Stage 1</option>';
+		buNewValue += '<option value="stage 2">Stage 2</option>';
+		buNewValue += '<option value="stage 3">Stage 3</option>';
+		buNewValue += '<option value="pending review">Pending Review</option>';
+		buNewValue += '<option value="expert required">Expert Required</option>';
+		buNewValue += '<option value="reviewed">Reviewed</option>';
+		buNewValue += '<option value="closed">Closed</option>';
+		buNewValue += '</select>';
+		document.getElementById("bunewvaluediv").innerHTML = buNewValue;
+	}
+	else{
+		var buNewValue = '';
+		buNewValue += '<input name="bunewvalue" type="text" value="" />';
+		document.getElementById("bunewvaluediv").innerHTML = buNewValue;
+	}
+}
+
 function verifyQueryForm(f){
 	//if(f.q_catalognumber.value == "" && f.q_othercatalognumbers.value == ""  
 	//	&& f.q_recordedby.value == "" && f.q_recordnumber.value == "" && f.q_eventdate.value == ""
