@@ -89,10 +89,6 @@ if($spprId) $specManager->setProjVariables($spprId);
 					alert("Pattern matching term must have a value");
 					return false;
 				}
-				if(f.speckeypattern.value == ""){
-					alert("Pattern matching term must have a value");
-					return false;
-				}
 				if(f.imageuploadtype.value == 'local'){
 					if(!isNumeric(f.webpixwidth.value)){
 						alert("Central image pixel width can only be a numeric value");
@@ -137,6 +133,15 @@ if($spprId) $specManager->setProjVariables($spprId);
 						return false;
 					}
 				}
+				else if(f.projtype.value == 'iplant'){
+					var regexObj = /^\d{4}-\d{2}-\d{2}$/;
+					var startDate = f.startdate.value;
+					if(startDate != "" && !regexObj.test(startDate)){
+						alert("Processing Start Date needs to be in the format YYYY-MM-DD (e.g. 2015-10-18)");
+						return false;
+					}
+				}
+				return true;
 			}
 		</script>
 	</head>
@@ -418,20 +423,29 @@ if($spprId) $specManager->setProjVariables($spprId);
 										<?php
 									}
 									elseif($projectType == 'iplant'){
+										$lastRunDate = ($specManager->getLastRunDate()?$specManager->getLastRunDate():'no run date');
 										?>
 										<div style="margin-top:10px">
-											<div style="width:140px;float:left;">
+											<div style="width:200px;float:left;">
 												<b>Last Run Date:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getLastRunDate()?$specManager->getLastRunDate():'no run date'); ?>
+												<?php echo $lastRunDate; ?>
+											</div>
+										</div>
+										<div style="margin-top:10px;clear:both;">
+											<div style="width:200px;float:left;">
+												<b>Processing start date:</b> 
+											</div>
+											<div style="float:left;"> 
+												<input name="startdate" type="text" value="<?php echo $lastRunDate; ?>" />
 											</div>
 										</div>
 										<?php 
 									}
 									?>
 									<div style="margin-top:10px;clear:both;">
-										<div style="width:140px;float:left;">
+										<div style="width:200px;float:left;">
 											<b>Pattern match term:</b> 
 										</div>
 										<div style="float:left;"> 
@@ -442,7 +456,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 									if($projectType != 'idigbio' && $projectType != 'iplant'){ 
 										?>
 										<div style="clear:both;">
-											<div style="width:140px;float:left;">
+											<div style="width:200px;float:left;">
 												<b>Source folder:</b>
 											</div>
 											<div style="float:left;"> 
@@ -450,7 +464,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:140px;float:left;">
+											<div style="width:200px;float:left;">
 												<b>Target folder:</b> 
 											</div>
 											<div style="float:left;"> 
@@ -458,7 +472,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:140px;float:left;">
+											<div style="width:200px;float:left;">
 												<b>URL prefix:</b> 
 											</div>
 											<div style="float:left;"> 
@@ -466,7 +480,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:140px;float:left;">
+											<div style="width:200px;float:left;">
 												<b>Web image width:</b> 
 											</div>
 											<div style="float:left;"> 
@@ -474,7 +488,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:140px;float:left;">
+											<div style="width:200px;float:left;">
 												<b>Thumbnail width:</b> 
 											</div>
 											<div style="float:left;"> 
@@ -482,7 +496,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:140px;float:left;">
+											<div style="width:200px;float:left;">
 												<b>Large image width:</b> 
 											</div>
 											<div style="float:left;"> 
@@ -490,7 +504,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											</div>
 										</div>
 										<div style="clear:both;">
-											<div style="width:140px;float:left;">
+											<div style="width:200px;float:left;">
 												<b>JPG quality (1-100): </b> 
 											</div>
 											<div style="float:left;"> 

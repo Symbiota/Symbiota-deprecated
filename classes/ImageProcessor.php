@@ -89,7 +89,7 @@ class ImageProcessor {
 				return false;
 			}
 			//Get start date
-			if(!$lastRunDate) $lastRunDate = '2015-04-01';
+			if(!$lastRunDate || !preg_match('/^\d{4}-\d{2}-\d{2}$/',$lastRunDate)) $lastRunDate = '2015-04-01';
 			while(strtotime($lastRunDate) < strtotime('now')){
 				$url = $iPlantDataUrl.'image?value=*/sernec/'.$this->collArr['instcode'].'/*&tag_query=upload_datetime:'.$lastRunDate.'*';
 				$contents = @file_get_contents($url);
@@ -262,13 +262,13 @@ class ImageProcessor {
 								if($source == $fileName){
 									//Image file already loaded, thus abort and don't reload 
 									$occid = false;
-									$this->logOrEcho('NOTICE: Image mapping skipped due to image already being mapped ('.$fileName.'; #'.$occLink.')',2); 
+									$this->logOrEcho('NOTICE: Image mapping skipped; already in system ('.$fileName.'; #'.$occLink.')',2); 
 									break;
 								}
 								elseif(in_array($ext,$highResList)){
 									//High res already mapped, thus abort and don't reload 
 									$occid = false;
-									//$this->logOrEcho('NOTICE: Image mapping skipped due to high-res image with same name already being mapped ('.$fileName.'; '.$occLink.')',2); 
+									//$this->logOrEcho('NOTICE: Image mapping skipped; high-res image with same name already in system ('.$fileName.'; '.$occLink.')',2); 
 									break;
 								}
 								elseif($ext == 'jpg' && in_array($fileExt,$highResList)){
