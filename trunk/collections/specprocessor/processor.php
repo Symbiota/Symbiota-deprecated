@@ -59,7 +59,8 @@ $statusStr = "";
 						$imageProcessor->setLogMode(3);
 						$imageProcessor->setCollid($collid);
 						$imageProcessor->setSpprid($spprid);
-						$imageProcessor->processIPlantImages($specManager->getSpecKeyPattern(), $specManager->getLastRunDate());
+						$runDate = $_POST['startdate'];
+						$imageProcessor->processIPlantImages($specManager->getSpecKeyPattern(), $runDate);
 						echo '</ul>';
 					}
 					else{
