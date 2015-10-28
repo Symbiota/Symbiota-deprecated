@@ -124,13 +124,14 @@ function submitImageForm(){
 		document.getElementById('phuidstr').value = '';
 		document.getElementById('phjson').value = '';
 	}
-	if(criteria){
+	return true;
+	/*if(criteria){
 		return true;
 	}
 	else{
 		alert("Please specify either a scientific name, common name, photographer, or keyword for which you would like to search images for.");
 		return false;
-	}
+	}*/
 }
 
 function GetXmlHttpObject(){
