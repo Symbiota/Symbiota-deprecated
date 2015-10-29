@@ -98,7 +98,7 @@ if($editable && $action){
 	} 
 	elseif($action == "Upload Image"){
 		if($tEditor->loadImage($_POST)){
-			$statusStr = 'Image uploaded successfully';
+			$statusStr = 'Image uploaded successful';
 		}
 		if($tEditor->getErrorStr()){
 			$statusStr .= '<br/>'.$tEditor->getErrorStr();
