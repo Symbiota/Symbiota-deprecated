@@ -268,7 +268,11 @@ class ProfileManager{
 		
 		$firstName = $postArr['firstname'];
 		$lastName = $postArr['lastname'];
-		if($postArr['institution'] && !trim(strpos($postArr['institution'],' ')) && preg_match('/[a-z]+[A-Z]+[a-z]+[A-Z]+/',$postArr['institution'])) return false;
+		if($postArr['institution'] && !trim(strpos($postArr['institution'],' ')) && preg_match('/[a-z]+[A-Z]+[a-z]+[A-Z]+/',$postArr['institution'])){
+			if($postArr['title'] && !trim(strpos($postArr['title'],' ')) && preg_match('/[a-z]+[A-Z]+[a-z]+[A-Z]+/',$postArr['title'])){
+				return false;
+			}
+		}
 		
 		$person = new Person();
 		$person->setPassword($postArr['pwd']);

@@ -395,7 +395,7 @@ class KeyCharAdmin{
 	}
 
 	public function deleteCsImage($csImgId){
-		$statusStr = 'SUCCESS: image uploaded successfully';
+		$statusStr = 'SUCCESS: image uploaded successful';
 		//Remove image from file system
 	 	$imageRootPath = $GLOBALS["imageRootPath"];
 		if(substr($imageRootPath,-1) != "/") $imageRootPath .= "/";
