@@ -131,17 +131,19 @@ if($SYMB_UID){
 			}
 			if($collData['dynamicProperties']){
 				$extrastatsArr = json_decode($collData['dynamicProperties'],true);
-				if(array_key_exists("families",$extrastatsArr)){
-					$famArr = $extrastatsArr['families'];
-				}
-				if(array_key_exists("countries",$extrastatsArr)){
-					$countryArr = $extrastatsArr['countries'];
-				}
-				if($extrastatsArr['SpecimensCountID']){
-					$spidPerc = (100*($extrastatsArr['SpecimensCountID']/$collData['recordcnt']));
-				}
-				if($extrastatsArr['imgcnt']){
-					$imgPerc = (100*($extrastatsArr['imgcnt']/$collData['recordcnt']));
+				if(is_array($extrastatsArr)){
+					if(array_key_exists("families",$extrastatsArr)){
+						$famArr = $extrastatsArr['families'];
+					}
+					if(array_key_exists("countries",$extrastatsArr)){
+						$countryArr = $extrastatsArr['countries'];
+					}
+					if($extrastatsArr['SpecimensCountID']){
+						$spidPerc = (100*($extrastatsArr['SpecimensCountID']/$collData['recordcnt']));
+					}
+					if($extrastatsArr['imgcnt']){
+						$imgPerc = (100*($extrastatsArr['imgcnt']/$collData['recordcnt']));
+					}
 				}
 			}
 			$codeStr = ' ('.$collData['institutioncode'];
@@ -317,7 +319,7 @@ if($SYMB_UID){
 					<?php echo $collData["fulldescription"]; ?>
 				</div>
 				<div style='margin-top:5px;'>
-					<b>Contact:</b> <?php echo $collData["contact"]." (".str_replace("@","&#64;",$collData["email"]);?>)
+					<b>Contact:</b> <?php echo $collData["contact"].($collData["email"]?" (".str_replace("@","&#64;",$collData["email"]).")":"");?>
 				</div>
 				<?php
 				if($collData["homepage"]){
