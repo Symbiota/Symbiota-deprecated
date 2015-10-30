@@ -970,9 +970,9 @@ class TaxaUpload{
 			$loopCnt++;
 		}
 
-		$this->outputMsg('Finishing up with some house cleaning... ');
+		$this->outputMsg('House cleaning... ');
 		//Something is wrong with the buildHierarchy method. Needs to be fixed. 
-		$this->buildHierarchy($this->taxAuthId);
+		$this->buildHierarchy();
 
 		//Update occurrences with new tids
 		$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL';
