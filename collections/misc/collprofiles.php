@@ -326,7 +326,7 @@ if($SYMB_UID){
 					?>
 					<div style="margin-top:5px;">
 						<b>Home Page:</b>
-						<a href="<?php echo $collData["homepage"]; ?>">
+						<a href="<?php echo $collData["homepage"]; ?>" target="_blank">
 							<?php echo $collData["homepage"]; ?>
 						</a>
 					</div>
@@ -612,7 +612,7 @@ if($SYMB_UID){
 								</div>
 								<div style='margin-top:5px'>
 									<b>Home Page:</b>
-									<a href='<?php echo $collArr['homepage']; ?>'>
+									<a href="<?php echo $collArr['homepage']; ?>" target="_blank">
 										<?php echo $collArr['homepage']; ?>
 									</a>
 								</div>

@@ -479,14 +479,26 @@ class TaxonomyUtilities extends Manager{
 	}
 
 	//Taxonomic indexing functions
-	public function buildHierarchyEnumTree($taxAuthId = 1){
+	public function rebuildHierarchyEnumTree(){
+		$status = true;
+		if($this->conn->query('DELETE FROM taxaenumtree')){
+			$this->buildHierarchyEnumTree();
+		}
+		else{
+			$status = false;
+			$this->errorMessage = 'ERROR deleting taxaenumtree prior to re-populating: '.$this->conn->error;
+		}
+		return $status;
+	}
+
+	public function buildHierarchyEnumTree(){
 		set_time_limit(600);
 		$status = true;
 		//Seed taxaenumtree table
 		$sql = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
 			'SELECT DISTINCT ts.tid, ts.parenttid, ts.taxauthid '. 
 			'FROM taxstatus ts '. 
-			'WHERE (ts.taxauthid = '.$taxAuthId.') AND ts.tid NOT IN(SELECT tid FROM taxaenumtree WHERE taxauthid = '.$taxAuthId.')';
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND ts.tid NOT IN(SELECT tid FROM taxaenumtree WHERE taxauthid = '.$this->taxAuthId.')';
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			$status = false;
@@ -497,7 +509,7 @@ class TaxonomyUtilities extends Manager{
 			$sql2 = 'SELECT DISTINCT e.tid, ts.parenttid, ts.taxauthid '. 
 				'FROM taxaenumtree e INNER JOIN taxstatus ts ON e.parenttid = ts.tid AND e.taxauthid = ts.taxauthid '.
 				'LEFT JOIN taxaenumtree e2 ON e.tid = e2.tid AND ts.parenttid = e2.parenttid AND e.taxauthid = e2.taxauthid '.
-				'WHERE (ts.taxauthid = '.$taxAuthId.') AND e2.tid IS NULL';
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND e2.tid IS NULL';
 			//echo $sql;
 			$cnt = 0;
 			$targetCnt = 0;
