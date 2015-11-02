@@ -77,7 +77,7 @@ if($SYMB_UID){
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 </head>
-<body style="margin-left: 0px; margin-right: 0px;">
+<body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<!-- inner text -->
 	<div id="">
 		<?php 
@@ -99,7 +99,7 @@ if($SYMB_UID){
 				}
 				$headerMap = array_intersect_key($headerMapBase, $headerArr);
 				?>
-				<table class="styledtable">
+				<table class="styledtable" style="font-family:Arial;font-size:12px;">
 					<tr>
 						<?php 
 						foreach($headerMap as $k => $v){

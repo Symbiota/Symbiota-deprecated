@@ -343,6 +343,7 @@ $duManager->loadFieldMap();
 						echo '<div>Occurrences pending transfer: '.$reportArr['occur'];
 						if($reportArr['occur']){
 							echo ' <a href="uploadviewer.php?collid='.$collid.'" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo ' <a href="uploadcsv.php?collid='.$collid.'" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
 						}
 						echo '</div>';
 						echo '<div style="margin-left:15px;">';
@@ -350,48 +351,67 @@ $duManager->loadFieldMap();
 						echo $reportArr['update'];
 						if($reportArr['update']){
 							echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
 							if($uploadType != $SKELETAL) echo '&nbsp;&nbsp;&nbsp;<span style="color:orange"><b>Caution:</b></span> incoming records will replace existing records';
 						}
 						echo '</div>';
 						echo '<div>New records: ';
 						echo $reportArr['new'];
-						if($reportArr['new']) echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+						if($reportArr['new']){ 
+							echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+						}
 						echo '</div>';
 						if(isset($reportArr['matchappend']) && $reportArr['matchappend']){
 							echo '<div>Records matching on catalog number that will be appended : ';
 							echo $reportArr['matchappend'];
-							if($reportArr['matchappend']) echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=matchappend" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							if($reportArr['matchappend']){ 
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=matchappend" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=matchappend" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							}
 							echo '</div>';
 							echo '<div style="margin-left:15px;"><span style="color:orange;">WARNING:</span> This will result in records with duplicate catalog numbers</div>';
 						}
 						if(isset($reportArr['sync']) && $reportArr['sync']){
 							echo '<div>Records that will be syncronized with central database: ';
 							echo $reportArr['sync'];
-							if($reportArr['sync'])  echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=sync" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							if($reportArr['sync']){  
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=sync" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=sync" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							}
 							echo '</div>';
 							echo '<div style="margin-left:15px;">These are typically records that have been originally processed within the portal, exported and integrated into a local management database, and then reimported and synchronized with the portal records by matching on catalog number.</div>';
-							echo '<div style="margin-left:15px;"><span style="color:orange;">WARNING:</span> Incoming records will replace portal records by matching on catalog numbers. Make sure incoming records are the most up-to-date record!</div>';
+							echo '<div style="margin-left:15px;"><span style="color:orange;">WARNING:</span> Incoming records will replace portal records by matching on catalog numbers. Make sure incoming records are the most up to date!</div>';
 						}
 						if(isset($reportArr['exist']) && $reportArr['exist']){
 							echo '<div>Previous loaded records not matching incoming records: ';
 							echo $reportArr['exist'];
-							if($reportArr['exist'])  echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=exist" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							if($reportArr['exist']){  
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=exist" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=exist" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							}
 							echo '</div>';
 							echo '<div style="margin-left:15px;">';
-							echo 'Note: If you are doing a partical upload, this is expected. ';
+							echo 'Note: If you are doing a partial upload, this is expected. ';
 							echo 'If you are doing a full data refresh, these may be records that were deleted within your local database but not within the portal.';
 							echo '</div>';
 						}
 						if(isset($reportArr['nulldbpk']) && $reportArr['nulldbpk']){
 							echo '<div style="color:red;">Records that will be removed due to NULL Primary Identifier: ';
 							echo $reportArr['nulldbpk'];
-							if($reportArr['nulldbpk']) echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							if($reportArr['nulldbpk']){ 
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							}
 							echo '</div>';
 						}
 						if(isset($reportArr['dupdbpk']) && $reportArr['dupdbpk']){
 							echo '<div style="color:red;">Records that will be removed due to DUPLICATE Primary Identifier: ';
 							echo $reportArr['dupdbpk'];
-							if($reportArr['dupdbpk'])  echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dupdbpk" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+							if($reportArr['dupdbpk']){  
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dupdbpk" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dupdbpk" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							}
 							echo '</div>';
 						}
 						echo '</div>';
@@ -449,7 +469,7 @@ $duManager->loadFieldMap();
 							</div>
 							<ul style="margin:10px 0px;">
 								<li><?php echo $recReplaceMsg; ?></li>
-								<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarly on others catalog numbers</li>
+								<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarily on other catalog numbers</li>
 							</ul>
 							<?php 
 						}
@@ -610,7 +630,7 @@ $duManager->loadFieldMap();
 													</div>
 													<ul style="margin:10px 0px;">
 														<li><?php echo $recReplaceMsg; ?></li>
-														<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarly on others catalog numbers</li>
+														<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarily on other catalog numbers</li>
 													</ul>
 													<?php 
 												}
@@ -727,7 +747,7 @@ $duManager->loadFieldMap();
 													echo '<li>'.$recReplaceMsg.'</li>';
 												}
 												?>
-												<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarly on others catalog numbers</li>
+												<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarily on other catalog numbers</li>
 											</ul>
 											<?php 
 										}
@@ -745,9 +765,9 @@ $duManager->loadFieldMap();
 											Skeletal fields typically collected include filed by or current scientific name, country, state/province, and sometimes county, though any supported field can be included. 
 											Skeletal file uploads are similar to regular uploads though differ in several ways.
 											<ul>
-												<li>General file uploads typically consist of full records, while skeletal uploads will almost alwasy be an annotated record with data for only a few selected fields</li>
+												<li>General file uploads typically consist of full records, while skeletal uploads will almost always be an annotated record with data for only a few selected fields</li>
 												<li>The catalog number field is required for skeletal file uploads since this field is used to find matches on images or existing records</li>
-												<li>In cases where a record already exists, a general file upload will completely replace the eixisting record with the data in the new record. 
+												<li>In cases where a record already exists, a general file upload will completely replace the existing record with the data in the new record. 
 												On the other hand, a skeletal upload will augment the existing record only with new field data. 
 												Fields are only added if data does not already exist within the target field.</li>
 												<li>If a record DOES NOT already exist, a new record will be created in both cases, but only the skeletal record will be tagged as unprocessed</li>
@@ -778,10 +798,10 @@ $duManager->loadFieldMap();
 		else{
 			?>
 			<div style="font-weight:bold;font-size:120%;">
-				ERROR: Either you have tried to reach this page without going through the collection managment menu 
+				ERROR: Either you have tried to reach this page without going through the collection management menu 
 				or you have tried to upload a file that is too large. 
 				You may want to breaking the upload file into smaller files or compressing the file into a zip archive (.zip extension). 
-				You may want to contact portal administrator to request assistance in uploading the file (hint to admin: increaing PHP upload limits may help,  
+				You may want to contact portal administrator to request assistance in uploading the file (hint to admin: increasing PHP upload limits may help,  
 				current upload_max_filesize = <?php echo ini_get("upload_max_filesize").'; post_max_size = '.ini_get("post_max_size"); ?>) 
 				Use the back arrows to get back to the file upload page.
 			</div>
