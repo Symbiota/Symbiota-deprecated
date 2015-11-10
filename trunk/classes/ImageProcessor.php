@@ -235,6 +235,7 @@ class ImageProcessor {
 			if($occid){
 				$occLink = '<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
 				if($fileName){
+					//Is iPlant mapped image
 					//Check to see if image has already been linked
 					$fileBaseName = $fileName;
 					$fileExt = '';
@@ -255,25 +256,33 @@ class ImageProcessor {
 					$highResList = array('cr2','dng','tiff','tif','nef');
 					foreach($imgArr as $imgId => $sourceId){
 						if($sourceId){
-							if($p = strpos($sourceId,'; filename: ')){
-								$source = substr($sourceId,$p+12);
-								$pos = strrpos($source,'.');
-								$ext = strtolower(substr($source,$pos+1));
-								if($source == $fileName){
-									//Image file already loaded, thus abort and don't reload 
+							if(preg_match('/^([A-Za-z0-9\-]+);\sfilename:\s(.+)$/',$sourceId,$m)){
+								$guid = $m[1];
+								$fn = $m[2];
+								$fnArr = explode('.',$fn);
+								$fnExt = strtolower(array_pop($fnArr));
+								$fnBase = implode($fnArr);
+								if($guid == $sourceIdentifier){
+									//Image file already loaded (based on identifier, thus abort and don't reload 
 									$occid = false;
-									$this->logOrEcho('NOTICE: Image mapping skipped; already in system ('.$fileName.'; #'.$occLink.')',2); 
+									$this->logOrEcho('NOTICE: Image mapping skipped; image identifier ('.$sourceIdentifier.') already in system (#'.$occLink.')',2);
 									break;
 								}
-								elseif(in_array($ext,$highResList)){
-									//High res already mapped, thus abort and don't reload 
+								elseif($fn == $fileName){
+									//Image file already loaded, thus abort and don't reload 
+									$occid = false;
+									$this->logOrEcho('NOTICE: Image mapping skipped; file ('.$fileName.') already in system (#'.$occLink.')',2); 
+									break;
+								}
+								elseif($fileBaseName  == $fnBase && $fnExt == 'jpg'){
+									//JPG already mapped for this image, thus abort and don't reload 
 									$occid = false;
 									//$this->logOrEcho('NOTICE: Image mapping skipped; high-res image with same name already in system ('.$fileName.'; '.$occLink.')',2); 
 									break;
 								}
-								elseif($ext == 'jpg' && in_array($fileExt,$highResList)){
-									//$this->logOrEcho('NOTICE: Replacing exist map of low-res with this high-res version of image ('.$fileName.'; #'.$occLink.')',2); 
-									//Replace low res source with high res source by deleteing current low res source 
+								elseif($fileExt == 'jpg' && in_array($fnExt,$highResList)){
+									//$this->logOrEcho('NOTICE: Replacing exist map of high-res with this JPG version ('.$fileName.'; #'.$occLink.')',2); 
+									//Replace high res source with JPG by deleteing high res from database 
 									$this->conn->query('DELETE FROM images WHERE imgid = '.$imgId);
 								}
 							}
@@ -324,7 +333,7 @@ class ImageProcessor {
 			}
 			else{
 				$status = false;
-				$this->logOrEcho("ERROR: Unable to load image record into database: ".$this->conn->error,2);
+				$this->logOrEcho("ERROR: Unable to load image record into database: ".$this->conn->error,3);
 				//$this->logOrEcho($sql);
 			}
 		}

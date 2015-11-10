@@ -231,7 +231,7 @@ ALTER TABLE `specprocessorprojects`
   ADD COLUMN `replaceStr` VARCHAR(45) NULL AFTER `pattReplace`;
 
 ALTER TABLE `images` 
-  CHANGE COLUMN `sourceIdentifier` `sourceIdentifier` VARCHAR(100) NULL DEFAULT NULL ;
+  CHANGE COLUMN `sourceIdentifier` `sourceIdentifier` VARCHAR(150) NULL DEFAULT NULL ;
 
 ALTER TABLE `omcollections` 
   ADD COLUMN `dwcaUrl` VARCHAR(75) NULL AFTER `publishToGbif`;
@@ -287,6 +287,8 @@ ALTER TABLE `omoccurrencesfulltext`
 
 #Collection GUID issue
 
+
+#identification key activator field
 
 
 
