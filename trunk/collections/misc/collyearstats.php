@@ -43,16 +43,19 @@ if($collId){
 							echo '<th style="text-align:center;">'.$month.'</th>';
 						}
 						?>
+						<th style="text-align:center;">Total</th>
 					</tr>
 					<?php
 					$recCnt = 0;
 					foreach($statArr as $code => $data){
 						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
-						echo '<td>'.wordwrap($data['collectionname'],52,"<br />\n",true).'</td>';
+						echo '<td>'.wordwrap($data['collectionname'],32,"<br />\n",true).'</td>';
 						echo '<td>Specimens</td>';
+						$total = 0;
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
 								if(array_key_exists('speccnt',$data['stats'][$month])){
+									$total = $total + $data['stats'][$month]['speccnt'];
 									echo '<td>'.$data['stats'][$month]['speccnt'].'</td>';
 								}
 								else{
@@ -63,13 +66,36 @@ if($collId){
 								echo '<td>0</td>';
 							}
 						}
+						echo '<td>'.$total.'</td>';
+						echo '</tr>';
+						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
+						echo '<td></td>';
+						echo '<td>Unprocessed</td>';
+						$total = 0;
+						foreach($dateArr as $i => $month){
+							if(array_key_exists($month,$data['stats'])){
+								if(array_key_exists('unprocessedCount',$data['stats'][$month])){
+									$total = $total + $data['stats'][$month]['unprocessedCount'];
+									echo '<td>'.$data['stats'][$month]['unprocessedCount'].'</td>';
+								}
+								else{
+									echo '<td>0</td>';
+								}
+							}
+							else{
+								echo '<td>0</td>';
+							}
+						}
+						echo '<td>'.$total.'</td>';
 						echo '</tr>';
 						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td></td>';
 						echo '<td>Stage 1</td>';
+						$total = 0;
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
 								if(array_key_exists('stage1Count',$data['stats'][$month])){
+									$total = $total + $data['stats'][$month]['stage1Count'];
 									echo '<td>'.$data['stats'][$month]['stage1Count'].'</td>';
 								}
 								else{
@@ -80,13 +106,16 @@ if($collId){
 								echo '<td>0</td>';
 							}
 						}
+						echo '<td>'.$total.'</td>';
 						echo '</tr>';
 						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td></td>';
 						echo '<td>Stage 2</td>';
+						$total = 0;
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
 								if(array_key_exists('stage2Count',$data['stats'][$month])){
+									$total = $total + $data['stats'][$month]['stage2Count'];
 									echo '<td>'.$data['stats'][$month]['stage2Count'].'</td>';
 								}
 								else{
@@ -97,13 +126,16 @@ if($collId){
 								echo '<td>0</td>';
 							}
 						}
+						echo '<td>'.$total.'</td>';
 						echo '</tr>';
 						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td></td>';
 						echo '<td>Stage 3</td>';
+						$total = 0;
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
 								if(array_key_exists('stage3Count',$data['stats'][$month])){
+									$total = $total + $data['stats'][$month]['stage3Count'];
 									echo '<td>'.$data['stats'][$month]['stage3Count'].'</td>';
 								}
 								else{
@@ -114,13 +146,16 @@ if($collId){
 								echo '<td>0</td>';
 							}
 						}
+						echo '<td>'.$total.'</td>';
 						echo '</tr>';
 						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td></td>';
 						echo '<td>Images</td>';
+						$total = 0;
 						foreach($dateArr as $i => $month){
 							if(array_key_exists($month,$data['stats'])){
 								if(array_key_exists('imgcnt',$data['stats'][$month])){
+									$total = $total + $data['stats'][$month]['imgcnt'];
 									echo '<td>'.$data['stats'][$month]['imgcnt'].'</td>';
 								}
 								else{
@@ -131,6 +166,27 @@ if($collId){
 								echo '<td>0</td>';
 							}
 						}
+						echo '<td>'.$total.'</td>';
+						echo '</tr>';
+						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
+						echo '<td></td>';
+						echo '<td>Georeferenced</td>';
+						$total = 0;
+						foreach($dateArr as $i => $month){
+							if(array_key_exists($month,$data['stats'])){
+								if(array_key_exists('georcnt',$data['stats'][$month])){
+									$total = $total + $data['stats'][$month]['georcnt'];
+									echo '<td>'.$data['stats'][$month]['georcnt'].'</td>';
+								}
+								else{
+									echo '<td>0</td>';
+								}
+							}
+							else{
+								echo '<td>0</td>';
+							}
+						}
+						echo '<td>'.$total.'</td>';
 						echo '</tr>';
 						$recCnt++;
 					}

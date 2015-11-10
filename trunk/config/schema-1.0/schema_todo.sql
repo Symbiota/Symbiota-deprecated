@@ -346,7 +346,10 @@ END
 DELIMITER ;
 
 ALTER TABLE `omcollectionstats`
-  MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
+	MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
+  
+ALTER TABLE `glossary`
+	ADD COLUMN `resourceurl`  varchar(255) NULL AFTER `notes`;
 
 
 
