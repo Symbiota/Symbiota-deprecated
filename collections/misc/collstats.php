@@ -25,7 +25,6 @@ $collStr = '';
 if($collId){
 	$collIdArr = explode(",",$collId);
 	if($action == "Run Statistics"){
-		$collIdArr = explode(",",$collId);
 		$resultsTemp = $collManager->runStatistics($collId);
 		$results['FamilyCount'] = $resultsTemp['familycnt'];
 		$results['GeneraCount'] = $resultsTemp['genuscnt'];
@@ -61,6 +60,9 @@ if($collId){
 				$dynPropTempArr = json_decode($collArr['dynamicProperties'],true);
 				
 				if(is_array($dynPropTempArr)){
+					$resultsTemp[$k]['speciesID'] = $dynPropTempArr['SpecimensCountID'];
+					$resultsTemp[$k]['types'] = $dynPropTempArr['TypeCount'];
+					
 					if(array_key_exists("SpecimensCountID",$results)){
 						$results['SpecimensCountID'] = $results['SpecimensCountID'] + $dynPropTempArr['SpecimensCountID'];
 					}
@@ -143,6 +145,20 @@ if($action != "Update Statistics"){
 					$("#tabs").tabs({<?php echo ($action == "Run Statistics"?'active: 1':''); ?>});
 				});
 				
+				function toggleStatsPerColl(){
+					toggleById("statspercollbox");
+					toggleById("showstatspercoll");
+					toggleById("hidestatspercoll");
+
+					document.getElementById("geodistbox").style.display="none";
+					document.getElementById("showgeodist").style.display="block";
+					document.getElementById("hidegeodist").style.display="none";
+					document.getElementById("famdistbox").style.display="none";
+					document.getElementById("showfamdist").style.display="block";
+					document.getElementById("hidefamdist").style.display="none";
+					return false;
+				}
+				
 				function toggleFamilyDist(){
 					toggleById("famdistbox");
 					toggleById("showfamdist");
@@ -151,6 +167,9 @@ if($action != "Update Statistics"){
 					document.getElementById("geodistbox").style.display="none";
 					document.getElementById("showgeodist").style.display="block";
 					document.getElementById("hidegeodist").style.display="none";
+					document.getElementById("statspercollbox").style.display="none";
+					document.getElementById("showstatspercoll").style.display="block";
+					document.getElementById("hidestatspercoll").style.display="none";
 					return false;
 				}
 
@@ -162,6 +181,9 @@ if($action != "Update Statistics"){
 					document.getElementById("famdistbox").style.display="none";
 					document.getElementById("showfamdist").style.display="block";
 					document.getElementById("hidefamdist").style.display="none";
+					document.getElementById("statspercollbox").style.display="none";
+					document.getElementById("showstatspercoll").style.display="block";
+					document.getElementById("hidestatspercoll").style.display="none";
 					return false;
 				}
 
@@ -592,6 +614,20 @@ if($action != "Update Statistics"){
 											echo "</li>";
 											?>
 										</ul>
+										<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
+											<div style="margin-top:8px;">
+												<div id="showstatspercoll" style="float:left;display:block;" >
+													<a href="#" onclick="return toggleStatsPerColl()">Show Statistics per Collection</a>
+												</div>
+												<div id="hidestatspercoll" style="float:left;display:none;" >
+													<a href="#" onclick="return toggleStatsPerColl()">Hide Statistics per Collection</a>
+												</div>
+												<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
+													<input type="hidden" name="collids" id="collids" value='<?php echo $collId; ?>' />
+													<input type="image" name="action" value="Download Stats per Coll" src="../../images/dl.png" onclick="" />
+												</div>
+											</div>
+										</form>
 									</fieldset>
 									<div style="">
 										<fieldset style="width:275px;margin:20px 0px 10px 20px;background-color:#FFFFCC;">
@@ -638,6 +674,38 @@ if($action != "Update Statistics"){
 									</div>
 									<div style="clear:both;"> </div>
 								</div>
+								
+								<fieldset id="statspercollbox" style="clear:both;margin-top:15px;width:90%;display:none;">
+									<legend><b>Statistics per Collection</b></legend>
+									<table class="styledtable" style="font-size:12px;">
+										<tr>
+											<th style="text-align:center;">Collection</th>
+											<th style="text-align:center;">Specimens</th>
+											<th style="text-align:center;">Georeferenced</th>
+											<th style="text-align:center;">Species ID</th>
+											<th style="text-align:center;">Families</th>
+											<th style="text-align:center;">Genera</th>
+											<th style="text-align:center;">Species</th>
+											<th style="text-align:center;">Total Taxa</th>
+											<th style="text-align:center;">Types</th>
+										</tr>
+										<?php
+										foreach($resultsTemp as $name => $data){
+											echo '<tr>';
+											echo '<td>'.wordwrap($name,52,"<br />\n",true).'</td>';
+											echo '<td>'.$data['recordcnt'].'</td>';
+											echo '<td>'.$data['georefcnt'].'</td>';
+											echo '<td>'.(array_key_exists('speciesID',$data)?$data['speciesID']:0).'</td>';
+											echo '<td>'.$data['familycnt'].'</td>';
+											echo '<td>'.$data['genuscnt'].'</td>';
+											echo '<td>'.$data['speciescnt'].'</td>';
+											echo '<td>'.$data['TotalTaxaCount'].'</td>';
+											echo '<td>'.(array_key_exists('types',$data)?$data['types']:0).'</td>';
+											echo '</tr>';
+										}
+										?>
+									</table>
+								</fieldset>
 								<fieldset id="famdistbox" style="clear:both;margin-top:15px;width:800px;display:none;">
 									<legend><b>Family Distribution</b></legend>
 									<table class="styledtable" style="width:780px;font-size:12px;">

@@ -683,9 +683,9 @@ class CollectionProfileManager {
 	public function runStatistics($collId){
 		$returnArr = Array();
 		$sql = "SELECT c.collid, c.CollectionName, IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
-				"cs.dynamicProperties ".
-				"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
-				"WHERE c.collid IN(".$collId.") ";
+			"cs.dynamicProperties ".
+			"FROM omcollections AS c INNER JOIN omcollectionstats AS cs ON c.collid = cs.collid ".
+			"WHERE c.collid IN(".$collId.") ";
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -695,13 +695,28 @@ class CollectionProfileManager {
 			$returnArr[$r->CollectionName]['georefcnt'] = $r->georefcnt;
 			$returnArr[$r->CollectionName]['dynamicProperties'] = $r->dynamicProperties;
 		}
-		$sql2 = 'SELECT COUNT(DISTINCT o.family) AS FamilyCount, '.
+		$sql2 = 'SELECT c.CollectionName, COUNT(DISTINCT o.family) AS FamilyCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
+			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount '.
+			'FROM omoccurrences AS o LEFT JOIN taxa AS t ON o.tidinterpreted = t.TID '.
+			'LEFT JOIN omcollections AS c ON o.collid = c.CollID '.
+			'WHERE c.CollID IN('.$collId.') '.
+			'GROUP BY c.CollectionName ';
+		$rs = $this->conn->query($sql2);
+		while($r = $rs->fetch_object()){
+			$returnArr[$r->CollectionName]['familycnt'] = $r->FamilyCount;
+			$returnArr[$r->CollectionName]['genuscnt'] = $r->GeneraCount;
+			$returnArr[$r->CollectionName]['speciescnt'] = $r->SpeciesCount;
+			$returnArr[$r->CollectionName]['TotalTaxaCount'] = $r->TotalTaxaCount;
+		}
+		$sql3 = 'SELECT COUNT(DISTINCT o.family) AS FamilyCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount '.
 			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
 			'WHERE o.collid IN('.$collId.') ';
-		$rs = $this->conn->query($sql2);
+		$rs = $this->conn->query($sql3);
 		while($r = $rs->fetch_object()){
 			$returnArr['familycnt'] = $r->FamilyCount;
 			$returnArr['genuscnt'] = $r->GeneraCount;
@@ -730,10 +745,11 @@ class CollectionProfileManager {
 		$statArr = array();
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
 			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, COUNT(o.occid) AS speccnt, '.
+			'COUNT(CASE WHEN o.processingstatus = "unprocessed" THEN o.occid ELSE NULL END) AS unprocessedCount, '.
 			'COUNT(CASE WHEN o.processingstatus = "stage 1" THEN o.occid ELSE NULL END) AS stage1Count, '.
 			'COUNT(CASE WHEN o.processingstatus = "stage 2" THEN o.occid ELSE NULL END) AS stage2Count, '.
 			'COUNT(CASE WHEN o.processingstatus = "stage 3" THEN o.occid ELSE NULL END) AS stage3Count '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
 			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < 365 '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
 		//echo $sql;
@@ -742,6 +758,7 @@ class CollectionProfileManager {
 			$statArr[$r->collcode]['collcode'] = $r->collcode;
 			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['speccnt'] = $r->speccnt;
+			$statArr[$r->collcode]['stats'][$r->dateEntered]['unprocessedCount'] = $r->unprocessedCount;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage1Count'] = $r->stage1Count;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage2Count'] = $r->stage2Count;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage3Count'] = $r->stage3Count;
@@ -750,14 +767,29 @@ class CollectionProfileManager {
 		$sql2 = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(i.InitialTimeStamp),month(i.InitialTimeStamp)) as dateEntered, '.
 			'c.collectionname, month(i.InitialTimeStamp) as monthEntered, year(i.InitialTimeStamp) as yearEntered, '.
 			'COUNT(i.imgid) AS imgcnt '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
-			'LEFT JOIN images i ON o.occid = i.occid '.
+			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
+			'LEFT JOIN images AS i ON o.occid = i.occid '.
 			'WHERE o.collid in('.$collId.') AND datediff(curdate(), i.InitialTimeStamp) < 365 '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
 		//echo $sql2;
 		$rs = $this->conn->query($sql2);
 		while($r = $rs->fetch_object()){
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['imgcnt'] = $r->imgcnt;
+		}
+		
+		$sql3 = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(e.InitialTimeStamp),month(e.InitialTimeStamp)) as dateEntered, '.
+			'c.collectionname, month(e.InitialTimeStamp) as monthEntered, year(e.InitialTimeStamp) as yearEntered, '.
+			'COUNT(DISTINCT e.occid) AS georcnt '.
+			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
+			'LEFT JOIN omoccuredits AS e ON o.occid = e.occid '.
+			'WHERE o.collid in('.$collId.') AND datediff(curdate(), e.InitialTimeStamp) < 365 '.
+			'AND ((e.FieldName = "decimallongitude" AND e.FieldValueNew IS NOT NULL) '.
+			'OR (e.FieldName = "decimallatitude" AND e.FieldValueNew IS NOT NULL)) '.
+			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
+		//echo $sql2;
+		$rs = $this->conn->query($sql3);
+		while($r = $rs->fetch_object()){
+			$statArr[$r->collcode]['stats'][$r->dateEntered]['georcnt'] = $r->georcnt;
 		}
 		$rs->free();
 		
