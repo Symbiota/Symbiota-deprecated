@@ -276,7 +276,7 @@ if($action != "Update Statistics"){
 									if(isset($specArr['cat'])){
 										$categoryArr = $specArr['cat'];
 										?>
-										<div style="float:right;margin-top:20px;">
+										<div style="float:right;margin-top:20px;margin-bottom:10px;">
 											<div>
 												<input type="submit" name="submitaction" value="Run Statistics" />
 											</div>
@@ -393,7 +393,7 @@ if($action != "Update Statistics"){
 											}
 											?>
 										</table>
-										<div style="float:right;margin-top:20px;">
+										<div style="float:right;margin-top:20px;margin-bottom:10px;">
 											<div>
 												<input type="submit" name="submitaction" value="Run Statistics" />
 											</div>
@@ -417,7 +417,7 @@ if($action != "Update Statistics"){
 									if(isset($obsArr['cat'])){
 										$categoryArr = $obsArr['cat'];
 										?>
-										<div style="float:right;margin-top:20px;">
+										<div style="float:right;margin-top:20px;margin-bottom:10px;">
 											<div>
 												<input type="submit" name="submitaction" value="Run Statistics" />
 											</div>
@@ -534,7 +534,7 @@ if($action != "Update Statistics"){
 											}
 											?>
 										</table>
-										<div style="float:right;margin-top:20px;">
+										<div style="float:right;margin-top:20px;margin-bottom:10px;">
 											<div>
 												<input type="submit" name="submitaction" value="Run Statistics" />
 											</div>

@@ -377,7 +377,7 @@ class CollectionProfileManager {
 			flush();
 			ob_flush();
 		}
-		$occurUtil->generalOccurrenceCleaning();
+		$occurUtil->generalOccurrenceCleaning($this->collid);
 		if($verbose){
 			echo '<li>Updating statistics...</li>';
 			flush();
@@ -520,13 +520,18 @@ class CollectionProfileManager {
 		return $retArr;
 	}
 	
-	public function getCollectionList(){
+	public function getCollectionList($full = false){
 		$returnArr = Array();
 		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, '.
 			'c.fulldescription, c.homepage, c.contact, c.email, c.icon, c.collectionguid '.
-			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
-			'WHERE s.recordcnt > 0 '.
-			'ORDER BY c.SortSeq,c.CollectionName';
+			'FROM omcollections AS c INNER JOIN omcollectionstats AS s ON c.collid = s.collid ';
+		if(!$full){
+			$sql .= 'WHERE s.recordcnt > 0 ';
+			$sql .= 'ORDER BY c.SortSeq,c.CollectionName';
+		}
+		else{
+			$sql .= 'ORDER BY c.CollectionName';
+		}
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){

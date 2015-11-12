@@ -349,7 +349,8 @@ class ImageProcessor {
 		$occurUtil = new OccurrenceUtilities();
 
 		$this->logOrEcho('General cleaning...',2);
-		if(!$occurUtil->generalOccurrenceCleaning()){
+		$collString = implode(',',$collList);
+		if(!$occurUtil->generalOccurrenceCleaning($collString)){
 			$errorArr = $occurUtil->getErrorArr();
 			foreach($errorArr as $errorStr){
 				$this->logOrEcho($errorStr,1);

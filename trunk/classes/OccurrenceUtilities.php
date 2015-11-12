@@ -721,7 +721,7 @@ class OccurrenceUtilities {
 	}
 	
 	//General cleaning functions 
-	public function generalOccurrenceCleaning(){
+	public function generalOccurrenceCleaning($collId){
 		set_time_limit(600);
 		$status = true;
 
@@ -730,7 +730,7 @@ class OccurrenceUtilities {
 		$this->conn->query($sql);
 		$sql = 'UPDATE omoccurrences '.
 			'SET family = sciname '.
-			'WHERE family IS NULL AND (sciname LIKE "%aceae" OR sciname LIKE "%idae")';
+			'WHERE collid IN('.$collId.') AND ISNULL(family) AND (sciname LIKE "%aceae" OR sciname LIKE "%idae")';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update family; '.$this->conn->error;
 			$this->errorArr[] = $errStr;
@@ -741,7 +741,7 @@ class OccurrenceUtilities {
 		if($this->verbose) $this->outputMsg('Updating null scientific names of genus rank identifications... ',1);
 		$sql = 'UPDATE omoccurrences '. 
 			'SET sciname = genus '.
-			'WHERE genus IS NOT NULL AND sciname IS NULL';
+			'WHERE collid IN('.$collId.') AND genus IS NOT NULL AND ISNULL(sciname) ';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update sciname using genus; '.$this->conn->error;
 			$this->errorArr[] = $errStr;
@@ -750,9 +750,9 @@ class OccurrenceUtilities {
 		}
 		
 		if($this->verbose) $this->outputMsg('Updating null scientific names of family rank identifications... ',1);
-		$sql = 'UPDATE omoccurrences o '. 
+		$sql = 'UPDATE omoccurrences AS o '. 
 			'SET o.sciname = o.family '.
-			'WHERE o.family IS NOT NULL AND o.sciname IS NULL';
+			'WHERE o.collid IN('.$collId.') AND o.family IS NOT NULL AND ISNULL(o.sciname) ';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update sciname using family; '.$this->conn->error;
 			$this->errorArr[] = $errStr;
@@ -761,9 +761,9 @@ class OccurrenceUtilities {
 		}
 		
 		if($this->verbose) $this->outputMsg('Indexing valid scientific names (e.g. populating tidinterpreted)... ',1);
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '. 
+		$sql = 'UPDATE omoccurrences AS o INNER JOIN taxa AS t ON o.sciname = t.sciname '. 
 			'SET o.TidInterpreted = t.tid '. 
-			'WHERE o.TidInterpreted IS NULL';
+			'WHERE o.collid IN('.$collId.') AND ISNULL(o.TidInterpreted) ';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update tidinterpreted; '.$this->conn->error;
 			$this->errorArr[] = $errStr;
@@ -772,9 +772,9 @@ class OccurrenceUtilities {
 		}
 
 		if($this->verbose) $this->outputMsg('Updating and indexing occurrence images... ',1);
-		$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '. 
+		$sql = 'UPDATE omoccurrences AS o INNER JOIN images AS i ON o.occid = i.occid '. 
 			'SET i.tid = o.tidinterpreted '. 
-			'WHERE (i.tid IS NULL) AND (o.tidinterpreted IS NOT NULL)';
+			'WHERE o.collid IN('.$collId.') AND (ISNULL(i.tid)) AND (o.tidinterpreted IS NOT NULL)';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update image tid field; '.$this->conn->error;
 			$this->errorArr[] = $errStr;
@@ -783,9 +783,9 @@ class OccurrenceUtilities {
 		}
 
 		if($this->verbose) $this->outputMsg('Updating null families using taxonomic thesaurus... ',1);
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '. 
+		$sql = 'UPDATE omoccurrences AS o INNER JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '. 
 			'SET o.family = ts.family '. 
-			'WHERE (ts.taxauthid = 1) AND (ts.family IS NOT NULL) AND (o.family IS NULL)';
+			'WHERE o.collid IN('.$collId.') AND (ts.taxauthid = 1) AND (ts.family IS NOT NULL) AND (ISNULL(o.family))';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update family in omoccurrence table; '.$this->conn->error;
 			$this->errorArr[] = $errStr;

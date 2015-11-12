@@ -1469,7 +1469,8 @@ class ImageBatchProcessor {
 			$occurUtil = new OccurrenceUtilities();
 	
 			$this->logOrEcho('Cleaning house...');
-			if(!$occurUtil->generalOccurrenceCleaning()){
+			$collString = implode(',',$this->collProcessedArr);
+			if(!$occurUtil->generalOccurrenceCleaning($collString)){
 				$errorArr = $occurUtil->getErrorArr();
 				foreach($errorArr as $errorStr){
 					$this->logOrEcho($errorStr,1);

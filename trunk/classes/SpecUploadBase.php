@@ -1090,7 +1090,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li>Cleaning house</li>');
 		ob_flush();
 		flush();
-		if(!$occurUtil->generalOccurrenceCleaning()){
+		if(!$occurUtil->generalOccurrenceCleaning($this->collId)){
 			$errorArr = $occurUtil->getErrorArr();
 			foreach($errorArr as $errorStr){
 				echo '<li style="margin-left:20px;">'.$errorStr.'</li>';
