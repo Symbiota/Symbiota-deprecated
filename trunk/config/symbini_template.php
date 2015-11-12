@@ -13,7 +13,7 @@ $TEMP_DIR_ROOT = '';				//Must be writable by Apache; will use system default if
 $LOG_PATH = '';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified 
 
 //the root for the image directory
-$IMAGE_DOMAIN = '';				//Domain path to images, if different from Virtual Flora portal 
+$IMAGE_DOMAIN = '';				//Domain path to images, if different from portal 
 $IMAGE_ROOT_URL = '';				//URL path to images
 $IMAGE_ROOT_PATH = '';			//Writable path to images, especially needed for downloading images
 
