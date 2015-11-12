@@ -574,7 +574,7 @@ if($SYMB_UID){
 			<?php
 		}
 		else{
-			$collList = $collManager->getCollectionList();
+			$collList = $collManager->getCollectionList(true);
 			?>
 			<h1><?php echo $DEFAULT_TITLE; ?> Collections </h1>
 			<div style='margin:10px;clear:both;'>
