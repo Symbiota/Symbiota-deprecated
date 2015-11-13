@@ -113,7 +113,7 @@ if($tid){
 		elseif($category == "imageadd"){
 			?>
 			<div style='clear:both;'>
-				<form enctype='multipart/form-data' action='tpeditor.php' id='imageaddform' method='post' target='_self' onsubmit='return submitAddForm(this);'>
+				<form enctype='multipart/form-data' action='tpeditor.php' id='imageaddform' method='post' target='_self' onsubmit='return submitAddImageForm(this);'>
 					<fieldset style='margin:15px;padding:15px;width:90%;'>
 				    	<legend><b>Add a New Image</b></legend>
 						<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
@@ -124,7 +124,7 @@ if($tid){
 						    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
 								<input type='hidden' name='MAX_FILE_SIZE' value='3000000' />
 								<div>
-									<input name='imgfile' type='file' size='70'/>
+									<input name='imgfile' id='imgfile' type='file' size='70'/>
 								</div>
 								<div style="margin-left:10px;">
 									<input type="checkbox" name="createlargeimg" value="1" /> Keep a large version of image, when applicable

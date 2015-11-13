@@ -146,6 +146,15 @@ if($editable && $action){
 			}
 			return true;
 		}
+		
+		function submitAddImageForm(f){
+			var fileBox = document.getElementById("imgfile");
+			var file = fileBox.files[0];
+			if(file.size>2000000){
+				alert("The image you are trying to upload is too big, please reduce the file size to less than 2MB");
+				return false;
+			}
+		}
 
 		function openOccurrenceSearch(target) {
 			occWindow=open("../../collections/misc/occurrencesearch.php?targetid="+target,"occsearch","resizable=1,scrollbars=1,width=700,height=500,left=20,top=20");

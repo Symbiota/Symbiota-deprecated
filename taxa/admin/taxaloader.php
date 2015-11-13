@@ -231,7 +231,7 @@ if($isEditor){
 					<fieldset style="width:450px;">
 						<legend style="font-weight:bold;font-size:120%;">Transfer Taxa To Central Table</legend>
 						<div style="margin:10px;">
-							Reveiw upload statistics below before activating. Use the download option to review and/or adjust for reload if necessary.  
+							Review upload statistics below before activating. Use the download option to review and/or adjust for reload if necessary.  
 						</div>
 						<div style="margin:10px;">
 							<?php 
@@ -308,7 +308,7 @@ if($isEditor){
 								For upper level taxa, parents and rankids need to be included in order to build the taxonomic hierarchy.
 								Large data files can be compressed as a ZIP file before import. 
 								If the file upload step fails without displaying an error message, it is possible that the 
-								file size excedes the file upload limits set within your PHP installation (see your php configuraton file).
+								file size exceeds the file upload limits set within your PHP installation (see your php configuration file).
 							</div>
 							<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
 							<div>
@@ -381,7 +381,7 @@ if($isEditor){
 							<legend style="font-weight:bold;font-size:120%;">Clean and Analyze</legend>
 							<div style="margin:10px;">
 								If taxa information was loaded into the UploadTaxa table using other means, 
-								one can use this form to clean and analyze taxa names in preparation to loading into the taxonomic tables (taxa, tastatus).  
+								one can use this form to clean and analyze taxa names in preparation to loading into the taxonomic tables (taxa, taxstatus).  
 							</div>
 							<div style="margin:10px;">
 								Target Thesaurus: 

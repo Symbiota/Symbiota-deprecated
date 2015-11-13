@@ -143,7 +143,7 @@ if($isEditor){
 								<input id="acceptedstr" name="acceptedstr" type="text" style="width:400px;border:inset;" />
 								<input type="hidden" name="tidaccepted" /> 
 								<div style="margin-top:3px;">
-									UnacceptabilityReason: 
+									Unacceptability Reason: 
 									<input type='text' id='unacceptabilityreason' name='unacceptabilityreason' style='width:350px;border:inset;' />
 								</div>
 							</div>
