@@ -19,6 +19,8 @@ $termImgArr = array();
 $termGrpArr = array();
 $synonymArr = array();
 $translationArr = array();
+$synonymStr = '';
+$translationStr = '';
 
 if($glossId){
 	$termArr = $glosManager->getTermArr($glossId);
@@ -26,9 +28,46 @@ if($glossId){
 	$termGrpArr = $glosManager->getGrpArr($glossId,$glossgrpId,$termArr['language']);
 	if(array_key_exists('synonym',$termGrpArr)){
 		$synonymArr = $termGrpArr['synonym'];
+		if($synonymArr){
+			$synonymStr = "<div style='width:300px;margin-top:8px;' ><b>Synonyms:</b>";
+			$i = 0;
+			$cnt = count($synonymArr);
+			foreach($synonymArr as $synId => $synArr){
+				$onClick = "leaveTermPopup('termdetails.php?glossid=".$synArr['glossid']."'); return false;";
+				$synonymStr .= ' '.$synArr['term'];
+				if($isEditor){
+					$synonymStr .= ' <a href="#" onclick="'.$onClick.'">';
+					$synonymStr .= '<img style="border:0px;width:12px;" src="../images/edit.png" /></a>';
+				}
+				if($i < ($cnt - 1)){
+					$synonymStr .= ',';
+				}
+				$i++;
+			}
+			$synonymStr .= "</div>";
+		}
 	}
 	if(array_key_exists('translation',$termGrpArr)){
 		$translationArr = $termGrpArr['translation'];
+		if($translationArr){
+			$translationStr = "<div style='width:300px;margin-top:8px;' ><b>Translations:</b>";
+			$i = 0;
+			$cnt = count($translationArr);
+			foreach($translationArr as $transId => $transArr){
+				$onClick = "leaveTermPopup('termdetails.php?glossid=".$transArr['glossid']."'); return false;";
+				$translationStr .= ' '.$transArr['term'];
+				$translationStr .= ' ('.$transArr['language'].')';
+				if($isEditor){
+					$translationStr .= ' <a href="#" onclick="'.$onClick.'">';
+					$translationStr .= '<img style="border:0px;width:12px;" src="../images/edit.png" /></a>';
+				}
+				if($i < ($cnt - 1)){
+					$translationStr .= ',';
+				}
+				$i++;
+			}
+			$translationStr .= "</div>";
+		}
 	}
 	$termImgArr = $glosManager->getImgArr($glossgrpId);
 }
@@ -43,43 +82,16 @@ else{
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
     <link href="../css/main.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
 	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
-	<style type="text/css">
-		#tabs a{
-			outline-color: transparent;
-			font-size: 12px;
-			font-weight: normal;
-		}
-	</style>
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../js/symb/glossary.index.js"></script>
 </head>
 
-<body style="overflow-x:hidden;overflow-y:auto;width:550px;margin-left:auto;margin-right:auto;">
+<body style="overflow-x:hidden;overflow-y:auto;width:625px;margin-left:auto;margin-right:auto;">
 	<!-- This is inner text! -->
-	<div id="innertext" >
-		<div id="tabs" style="width:550px;padding:0px;margin:0px;">
-			<ul>
-				<li><a href="#terminfo">Details</a></li>
-				<?php
-				if($synonymArr){
-					?>
-					<li><a href="#termsyndiv">Synonyms</a></li>
-					<?php
-				}
-				if($translationArr){
-					?>
-					<li><a href="#termtransdiv">Translations</a></li>
-					<?php
-				}
-				if($termImgArr){
-					?>
-					<li><a href="#termimagediv">Images</a></li>
-					<?php
-				}
-				?>
-			</ul>
-			<div id="terminfo" style="width:540px;padding:10px;">
+	<div id="innertext" style="width:625px;margin-left:0px;margin-right:0px;">
+		<div id="tabs" style="padding:10px;width:600px;margin:0px;">
+			<div style="clear:both;width:600px;">
 				<?php
 				if($isEditor){
 					?>
@@ -92,28 +104,31 @@ else{
 				}
 				?>
 				<div style="float:left;">
-					<span style="font-size:18px;font-weight:bold;vertical-align:60%;">
+					<span style="font-size:18px;font-weight:bold;">
 						<?php echo $termArr['term']; ?>
 					</span>
 				</div>
+			</div>
+			<div style="clear:both;width:600px;">
+			<div id="terminfo" style="float:left;width:300px;padding:10px;">
 				<div style="clear:both;">
-					<div style='width:540px;' >
-						<div style='width:530px;margin-top:8px;' >
+					<div style='width:300px;' >
+						<div style='width:300px;margin-top:8px;' >
 							<b>Definition:</b> 
 							<?php echo $termArr['definition']; ?>
 						</div>
-						<div style='width:530px;margin-top:8px;' >
+						<div style='width:300px;margin-top:8px;' >
 							<b>Language:</b> 
 							<?php echo $termArr['language']; ?>
 						</div>
-						<div style='width:530px;margin-top:8px;' >
+						<div style='width:300px;margin-top:8px;' >
 							<b>Source:</b> 
 							<?php echo $termArr['source']; ?>
 						</div>
 						<?php
 						if($termArr['notes']){
 							?>
-							<div style='width:530px;margin-top:8px;' >
+							<div style='width:300px;margin-top:8px;' >
 								<b>Notes:</b> 
 								<?php echo $termArr['notes']; ?>
 							</div>
@@ -121,9 +136,30 @@ else{
 						}
 						if($termArr['SciName']){
 							?>
-							<div style='width:530px;margin-top:8px;' >
+							<div style='width:300px;margin-top:8px;' >
 								<b>Taxonomic Group:</b> 
 								<?php echo $termArr['SciName']; ?>
+							</div>
+							<?php
+						}
+						if($synonymStr){
+							echo $synonymStr;
+						}
+						if($translationStr){
+							echo $translationStr;
+						}
+						if($termArr['resourceurl']){
+							$resource = '';
+							if(substr($termArr['resourceurl'],0,4)=="http" || substr($termArr['resourceurl'],0,4)=="www."){
+								$resource = "<a href='".$termArr['resourceurl']."' target='_blank'>".$termArr['resourceurl']."</a>";
+							}
+							else{
+								$resource = $termArr['resourceurl'];
+							}
+							?>
+							<div style='width:300px;margin-top:8px;' >
+								<b>Resource:</b> 
+								<?php echo $resource; ?>
 							</div>
 							<?php
 						}
@@ -143,107 +179,30 @@ else{
 			</div>
 			
 			<?php
-			if($synonymArr){
-				?>
-				<div id="termsyndiv" style="width:540px;padding:10px;">
-					<?php
-					foreach($synonymArr as $synId => $synArr){
-						?>
-						<fieldset style='clear:both;width:505px;padding:8px;margin-bottom:10px;'>
-							<?php
-							if($isEditor){
-								?>
-								<div style="float:right;margin-right:15px;cursor:pointer;" onclick="" title="Edit Term Data">
-									<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $synArr['glossid'];?>'); return false;">
-										<img style="border:0px;width:12px;" src="../images/edit.png" />
-									</a>
-								</div>
-								<?php
-							}
-							?>
-							<div style='width:490px;' >
-								<b>Term:</b> 
-								<?php echo $synArr['term']; ?>
-							</div>
-							<div style='width:490px;margin-top:8px;' >
-								<b>Definition:</b> 
-								<?php echo $synArr['definition']; ?>
-							</div>
-							<div style='width:490px;margin-top:8px;' >
-								<b>Language:</b> 
-								<?php echo $synArr['language']; ?>
-							</div>
-							<div style='width:490px;margin-top:8px;' >
-								<b>Source:</b> 
-								<?php echo $synArr['source']; ?>
-							</div>
-						</fieldset>
-						<?php
-					}
-					?>
-				</div>
-				<?php
-			}
-			
-			if($translationArr){
-				?>
-				<div id="termtransdiv" style="width:540px;padding:10px;">
-					<?php
-					foreach($translationArr as $transId => $transArr){
-						?>
-						<fieldset style='clear:both;width:505px;padding:8px;margin-bottom:10px;'>
-							<?php
-							if($isEditor){
-								?>
-								<div style="float:right;margin-right:15px;cursor:pointer;" onclick="" title="Edit Term Data">
-									<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $transArr['glossid'];?>'); return false;">
-										<img style="border:0px;width:12px;" src="../images/edit.png" />
-									</a>
-								</div>
-								<?php
-							}
-							?>
-							<div style='width:490px;' >
-								<b>Term:</b> 
-								<?php echo $transArr['term']; ?>
-							</div>
-							<div style='width:490px;margin-top:8px;' >
-								<b>Definition:</b> 
-								<?php echo $transArr['definition']; ?>
-							</div>
-							<div style='width:490px;margin-top:8px;' >
-								<b>Language:</b> 
-								<?php echo $transArr['language']; ?>
-							</div>
-							<div style='width:490px;margin-top:8px;' >
-								<b>Source:</b> 
-								<?php echo $transArr['source']; ?>
-							</div>
-						</fieldset>
-						<?php
-					}
-					?>
-				</div>
-				<?php
-			}
-			
 			if($termImgArr){
 				?>
-				<div id="termimagediv" style="width:540px;padding:10px;">
+				<div id="termimagediv" style="float:right;width:250px;padding:10px;">
 					<?php
 					foreach($termImgArr as $imgId => $imgArr){
+						$imgUrl = $imgArr["url"];
+						if(array_key_exists("imageDomain",$GLOBALS)){
+							if(substr($imgUrl,0,1)=="/"){
+								$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+							}
+						}			
+						$displayUrl = $imgUrl;
 						?>
-						<fieldset style='clear:both;width:505px;border:0px;padding:0px;'>
-							<div style='float:left;width:200px;padding:5px;'>
+						<fieldset style='clear:both;border:0px;padding:0px;margin-top:10px;'>
+							<div style='width:250px;'>
 								<a href='<?php echo $imgArr['url']; ?>' target="_blank">
-									<img border=1 style="width:200px;" src='<?php echo ($imgArr['thumbnailurl']?$imgArr['thumbnailurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['structures']; ?>'/>
+									<img border=1 style="width:250px;" src='<?php echo $displayUrl; ?>' title='<?php echo $imgArr['structures']; ?>'/>
 								</a>
 							</div>
-							<div style='float:right;width:290px;'>
+							<div style='width:250px;'>
 								<?php
 								if($imgArr['structures']){
 									?>
-									<div style='float:right;overflow:hidden;width:290px;margin-top:8px;' >
+									<div style='overflow:hidden;width:250px;margin-top:8px;' >
 										<b>Structures:</b> 
 										<?php echo wordwrap($imgArr["structures"], 370, "<br />\n"); ?>
 									</div>
@@ -251,7 +210,7 @@ else{
 								}
 								if($imgArr['notes']){
 									?>
-									<div style='float:right;overflow:hidden;width:290px;margin-top:8px;' >
+									<div style='overflow:hidden;width:250px;margin-top:8px;' >
 										<b>Notes:</b> 
 										<?php echo wordwrap($imgArr["notes"], 370, "<br />\n"); ?>
 									</div>
@@ -267,6 +226,8 @@ else{
 				<?php
 			}
 			?>
+			</div>
+			<div style="clear:both"></div>
 		</div>
 	</div>
 </body>

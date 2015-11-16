@@ -140,7 +140,7 @@ else{
 									<b>Definition: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<textarea name="definition" id="definition" rows="10" style="width:380px;height:70px;resize:vertical;" ><?php echo $termArr['definition']; ?></textarea>
+									<textarea name="definition" id="definition" rows="10" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['definition']; ?></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -165,6 +165,14 @@ else{
 								</div>
 								<div style="float:left;margin-left:10px;">
 									<textarea name="notes" id="notes" rows="10" style="width:380px;height:40px;resize:vertical;" ><?php echo $termArr['notes']; ?></textarea>
+								</div>
+							</div>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
+									<b>Resource: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<textarea name="resourceurl" id="resourceurl" rows="10" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['resourceurl']; ?></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
