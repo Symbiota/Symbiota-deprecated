@@ -1198,7 +1198,7 @@ class OccurrenceManager{
 		if(array_key_exists("hasimages",$_REQUEST)){
 			$hasimages = $_REQUEST["hasimages"];
 			if($hasimages){
-				$searchArr[] = "hasimages:".$typestatus;
+				$searchArr[] = "hasimages:".$hasimages;
 				$this->searchTermsArr["hasimages"] = true;
 			}
 			else{
