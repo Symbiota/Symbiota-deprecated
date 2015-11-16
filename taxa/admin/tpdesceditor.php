@@ -61,7 +61,7 @@ if($editable){
 		</form>
 	</div>
 	<?php 
-	if($descList = $descEditor->getDescriptions()){
+	if($descList = $descEditor->getDescriptions(true)){
 		foreach($descList as $tdbid => $dArr){
     		?>
     		<fieldset style='width:90%;margin:10px 5px 5px 5px;padding:10px;'>

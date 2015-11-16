@@ -11,13 +11,16 @@ class TPDescEditorManager extends TPEditorManager{
  		parent::__destruct();
  	}
 
-	public function getDescriptions(){
+	public function getDescriptions($editor = false){
 		$descrArr = Array();
 		$sql = 'SELECT t.tid, t.sciname, tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, tdb.displaylevel, tdb.notes, tdb.language '.
 			'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid) '.
 			'INNER JOIN taxa t ON ts.tid = t.tid '.
-			'WHERE (ts.TidAccepted = '.$this->tid.') AND (ts.taxauthid = 1) AND (tdb.Language = "'.$this->language.'") '.
-			'ORDER BY tdb.DisplayLevel';
+			'WHERE (ts.TidAccepted = '.$this->tid.') AND (ts.taxauthid = 1) ';
+		if(!$editor){
+			$sql .= 'AND (tdb.Language = "'.$this->language.'") ';
+		}
+		$sql .= 'ORDER BY tdb.DisplayLevel ';
 		//echo $sql;
 		if($rs = $this->taxonCon->query($sql)){
 			while($r = $rs->fetch_object()){
@@ -34,7 +37,7 @@ class TPDescEditorManager extends TPEditorManager{
 			$rs->free();
 		}
 		else{
-			trigger_error('Unable to get descriptions; '.$this->conn->error);
+			trigger_error('Unable to get descriptions; '.$this->taxonCon->error);
 		}
 		if($descrArr){
 			//Grab statements
