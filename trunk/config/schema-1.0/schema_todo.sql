@@ -349,7 +349,7 @@ ALTER TABLE `omcollectionstats`
 	MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
   
 ALTER TABLE `glossary`
-	ADD COLUMN `resourceurl`  varchar(255) NULL AFTER `notes`;
+	ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`;
 
 
 

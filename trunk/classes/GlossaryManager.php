@@ -123,7 +123,7 @@ class GlossaryManager{
 	
 	public function getTermArr($glossId){
 		$retArr = array();
-		$sql = 'SELECT g.glossid, g.term, g.definition, g.`language`, g.source, g.notes, t.glossgrpid, gt.tid, tx.SciName '.
+		$sql = 'SELECT g.glossid, g.term, g.definition, g.`language`, g.source, g.notes, g.resourceurl, t.glossgrpid, gt.tid, tx.SciName '.
 			'FROM ((glossary AS g LEFT JOIN glossarytermlink AS t ON g.glossid = t.glossid) '.
 			'LEFT JOIN glossarytaxalink AS gt ON t.glossgrpid = gt.glossgrpid) '.
 			'LEFT JOIN taxa AS tx ON gt.tid = tx.TID '.
@@ -137,6 +137,7 @@ class GlossaryManager{
 				$retArr['language'] = $r->language;
 				$retArr['source'] = $r->source;
 				$retArr['notes'] = $r->notes;
+				$retArr['resourceurl'] = $r->resourceurl;
 				$retArr['glossgrpid'] = $r->glossgrpid;
 				$retArr['tid'] = $r->tid;
 				$retArr['SciName'] = $r->SciName;
