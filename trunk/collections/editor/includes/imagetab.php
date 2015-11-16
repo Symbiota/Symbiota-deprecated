@@ -335,7 +335,7 @@ $specImgArr = $occManager->getImageMap();
 											<input name="sortsequence" type="text" value="<?php echo $imgArr["sortseq"]; ?>" style="width:10%;" />
 										</div>
 					                    <div>
-						                   <b>Describe this image</b>
+						                   <b>Describe this image:</b>
 					                    </div>
 	                                        <?php 
 	                                           $kArr = $occManager->getImageTagUsage($imgId);
