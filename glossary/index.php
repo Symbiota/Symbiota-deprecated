@@ -139,7 +139,7 @@ if($formSubmit){
 						<input type="text" autocomplete="off" name="searchdefkeyword" id="searchdefkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchdefkeyword']:''); ?>" />
 					</div>
 					<div style="float:right;">
-						<button name="formsubmit" type="submit" value="Search Terms">Show Terms</button>
+						<button name="formsubmit" type="submit" value="Search Terms">Browse Terms</button>
 					</div>
 				</div>
 			</form>

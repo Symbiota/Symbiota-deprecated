@@ -351,7 +351,8 @@ ALTER TABLE `omcollectionstats`
 ALTER TABLE `glossary`
 	ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`;
 
-
+ALTER TABLE `taxadescrblock`
+	MODIFY COLUMN `caption`  varchar(40) NULL DEFAULT NULL AFTER `tid`;
 
 
 
