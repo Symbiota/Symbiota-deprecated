@@ -692,14 +692,14 @@ if($action != "Update Statistics"){
 										<?php
 										foreach($resultsTemp as $name => $data){
 											echo '<tr>';
-											echo '<td>'.wordwrap($name,52,"<br />\n",true).'</td>';
-											echo '<td>'.$data['recordcnt'].'</td>';
-											echo '<td>'.$data['georefcnt'].'</td>';
+											echo '<td>'.wordwrap($name,40,"<br />\n",true).'</td>';
+											echo '<td>'.(array_key_exists('recordcnt',$data)?$data['recordcnt']:0).'</td>';
+											echo '<td>'.(array_key_exists('georefcnt',$data)?$data['georefcnt']:0).'</td>';
 											echo '<td>'.(array_key_exists('speciesID',$data)?$data['speciesID']:0).'</td>';
-											echo '<td>'.$data['familycnt'].'</td>';
-											echo '<td>'.$data['genuscnt'].'</td>';
-											echo '<td>'.$data['speciescnt'].'</td>';
-											echo '<td>'.$data['TotalTaxaCount'].'</td>';
+											echo '<td>'.(array_key_exists('familycnt',$data)?$data['familycnt']:0).'</td>';
+											echo '<td>'.(array_key_exists('genuscnt',$data)?$data['genuscnt']:0).'</td>';
+											echo '<td>'.(array_key_exists('speciescnt',$data)?$data['speciescnt']:0).'</td>';
+											echo '<td>'.(array_key_exists('TotalTaxaCount',$data)?$data['TotalTaxaCount']:0).'</td>';
 											echo '<td>'.(array_key_exists('types',$data)?$data['types']:0).'</td>';
 											echo '</tr>';
 										}
