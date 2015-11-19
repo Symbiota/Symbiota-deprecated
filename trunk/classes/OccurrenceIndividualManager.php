@@ -1,6 +1,7 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once('Manager.php');
+include_once('OccurrenceDuplicate.php');
 
 class OccurrenceIndividualManager extends Manager{
 
@@ -223,44 +224,9 @@ class OccurrenceIndividualManager extends Manager{
 	}
 
 	public function getDuplicateArr(){
-		$retArr = array();
-		 $sql = 'SELECT d.occid, c.institutioncode, c.collectioncode, c.collectionname, o.catalognumber, '.
-			'o.occurrenceid, o.sciname, o.identifiedby, o.dateidentified, '.
-			'o.recordedby, o.recordnumber, o.eventdate, d.notes, i.url, i.thumbnailurl '.
-			'FROM omoccurduplicatelink d INNER JOIN omoccurrences o ON d.occid = o.occid '.
-			'INNER JOIN omcollections c ON o.collid = c.collid '.
-			'INNER JOIN omoccurduplicatelink d2 ON d.duplicateid = d2.duplicateid '.
-		 	'LEFT JOIN images i ON o.occid = i.occid '.
-			'WHERE (d2.occid = '.$this->occid.') AND (o.occid <> '.$this->occid.') ';
-		/*
-		$sql = 'SELECT d.occid, c.institutioncode, c.collectioncode, c.collectionname, o.catalognumber, o.occurrenceid, o.sciname, '.
-			'o.identifiedby, o.dateidentified, d.notes '.
-			'FROM omoccurduplicatelink d INNER JOIN omoccurrences o ON d.occid = o.occid '.
-			'INNER JOIN omcollections c ON o.collid = c.collid '.
-			'WHERE d.duplicateid IN(SELECT duplicateid FROM omoccurduplicatelink WHERE occid = '.$this->occid.') '.
-			'AND (o.occid <> '.$this->occid.')';
-		*/
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$retArr[$r->occid]['instcode'] = $r->institutioncode;
-				$retArr[$r->occid]['collcode'] = $r->collectioncode;
-				$retArr[$r->occid]['collname'] = $r->collectionname;
-				$retArr[$r->occid]['catnum'] = $r->catalognumber;
-				$retArr[$r->occid]['occurrenceid'] = $r->occurrenceid;
-				$retArr[$r->occid]['sciname'] = $r->sciname;
-				$retArr[$r->occid]['identifiedby'] = $r->identifiedby;
-				$retArr[$r->occid]['dateidentified'] = $r->dateidentified;
-				$retArr[$r->occid]['recordedby'] = $r->recordedby;
-				$retArr[$r->occid]['recordnumber'] = $r->recordnumber;
-				$retArr[$r->occid]['eventdate'] = $r->eventdate;
-				$retArr[$r->occid]['notes'] = $r->notes;
-				$retArr[$r->occid]['tnurl'] = $r->thumbnailurl;
-				$retArr[$r->occid]['url'] = $r->url;
-			}
-		}
-		else{
-			trigger_error('Unable to get duplicate records'.$this->conn->error);
-		}
+		$dupManager = new OccurrenceDuplicate();
+		$retArr = $dupManager->getClusterArr($this->occid);
+		unset($retArr[$this->occid]);
 		return $retArr;
 	}
 

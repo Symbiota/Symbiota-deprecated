@@ -1,4 +1,3 @@
-var catalogNumberIsDupe = false;
 
 function openAssocSppAid(){
 	var assocWindow = open("assocsppaid.php","assocaid","resizable=0,width=550,height=200,left=20,top=20");
@@ -300,22 +299,22 @@ function insertTRS(f) {
 }
 
 //Dupe searches
-function searchDupesCatalogNumber(f){
+function searchDupesCatalogNumber(f,verbose){
 	var cnValue = f.catalognumber.value;
 	if(cnValue){
 		var occid = f.occid.value;
-		
-		document.getElementById("dupeMsgDiv").style.display = "block";
-		document.getElementById("dupesearch").style.display = "block";
-		document.getElementById("dupenone").style.display = "none";
+		if(verbose){
+			document.getElementById("dupeMsgDiv").style.display = "block";
+			document.getElementById("dupesearch").style.display = "block";
+			document.getElementById("dupenone").style.display = "none";
+		}
 
 		$.ajax({
 			type: "POST",
-			url: "rpc/querycatalognumber.php",
-			data: { cn: cnValue, collid: f.collid.value, occid: f.occid.value }
+			url: "rpc/dupequerycatnum.php",
+			data: { catnum: cnValue, collid: f.collid.value, occid: f.occid.value }
 		}).done(function( msg ) {
 			if(msg){
-				catalogNumberIsDupe = true;
 				if(confirm("Record(s) of same catalog number already exists. Do you want to view this record?")){
 					var occWindow=open("dupesearch.php?occidquery=catnu:"+msg+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 					if(occWindow != null){
@@ -326,49 +325,25 @@ function searchDupesCatalogNumber(f){
 						alert("Unable to display record, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
 					}
 				}
-				document.getElementById("dupesearch").style.display = "none";
-				document.getElementById("dupeMsgDiv").style.display = "none";
+				if(verbose){
+					document.getElementById("dupesearch").style.display = "none";
+					document.getElementById("dupeMsgDiv").style.display = "none";
+				}
+				return true;
 			}
 			else{
-				document.getElementById("dupesearch").style.display = "none";
-				document.getElementById("dupenone").style.display = "block";
-				setTimeout(function () { 
-					document.getElementById("dupenone").style.display = "none";
-					document.getElementById("dupeMsgDiv").style.display = "none";
-					}, 3000);
-				catalogNumberIsDupe = false;
+				if(verbose){
+					document.getElementById("dupesearch").style.display = "none";
+					document.getElementById("dupenone").style.display = "block";
+					setTimeout(function () { 
+						document.getElementById("dupenone").style.display = "none";
+						document.getElementById("dupeMsgDiv").style.display = "none";
+						}, 3000);
+				}
+				return false;
 			}
 		});
 	}
-}
-
-function verifyDupeCatalogNumber(f){
-	var cnValue = f.catalognumber.value;
-	if(!cnValue || !catalogNumberIsDupe) return true;
-
-	$.ajax({
-		type: "POST",
-		url: "rpc/querycatalognumber.php",
-		data: { cn: cnValue, collid: f.collid.value, occid: f.occid.value }
-	}).done(function( msg ) {
-		if(msg.length > 6){
-			if(confirm("Another record exists with the same catalog number, which is not allowed. Do you want to view the other record(s)?")){
-				var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+f.occid.value,"dupesearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
-				if(occWindow != null){
-					if (occWindow.opener == null) occWindow.opener = self;
-					occWindow.focus();
-				}
-				else{
-					alert("Unable to display record, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
-				}
-			}
-			return false;
-		}
-		else{
-			return true;
-		}
-	});
-	
 }
 
 function searchDupesOtherCatalogNumbers(f){
@@ -381,7 +356,7 @@ function searchDupesOtherCatalogNumbers(f){
 
 		$.ajax({
 			type: "POST",
-			url: "rpc/queryothercatalognumbers.php",
+			url: "rpc/dupequeryothercatnum.php",
 			data: { invalue: ocnValue, collid: f.collid.value, occid: f.occid.value }
 		}).done(function( msg ) {
 			if(msg.length > 6){
@@ -433,7 +408,7 @@ function searchDupes(f,silent){
 
 	$.ajax({
 		type: "POST",
-		url: "rpc/querydupes.php",
+		url: "rpc/dupequery.php",
 		data: { cname: cNameIn, cnum: cNumIn, cdate: cDateIn, ometid: ometidIn, exsnumber: exsNumberIn, curoccid: currOccidIn }
 	}).done(function( msg ) {
 		if(msg){

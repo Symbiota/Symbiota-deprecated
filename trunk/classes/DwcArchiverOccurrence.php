@@ -719,6 +719,7 @@ class DwcArchiverOccurrence{
      * @return strin containing turtle serialization of selected dwc records.
      */
     public function getAsTurtle() { 
+       $debug = false;
        $returnvalue  = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n";
        $returnvalue .= "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n";
        $returnvalue .= "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n";
@@ -835,6 +836,7 @@ class DwcArchiverOccurrence{
      * @return string containing rdf/xml serialization of selected dwc records.
      */
     public function getAsRdfXml() { 
+       $debug = false;
 	   $newDoc = new DOMDocument('1.0',$this->charSetOut);
        $newDoc->formatOutput = true;
 
@@ -873,7 +875,8 @@ class DwcArchiverOccurrence{
              $occElem->setAttribute("rdf:about","$occurrenceid");
              $sameAsElem = null;
              foreach($dwcArray as $key => $value) { 
-                $flags = ENT_NOQUOTES | ENT_XML1 | ENT_DISALLOWED; 
+                $flags = ENT_NOQUOTES;
+                if(defined('ENT_XML1')) $flags = ENT_NOQUOTES | ENT_XML1 | ENT_DISALLOWED;
                 $value = htmlentities($value,$flags,$this->charSetOut);
                 // TODO: Figure out how to use mb_encode_numericentity() here.
                 $value = str_replace("&copy;","&#169;",$value);  // workaround, need to fix &copy; rendering

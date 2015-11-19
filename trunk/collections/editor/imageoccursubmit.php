@@ -136,7 +136,7 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 					<legend><b>Skeletal Data</b></legend>
 					<div style="margin:3px;">
 						<b>Catalog Number:</b> 
-						<input name="catalognumber" type="text" onchange="<?php if(!defined('CATNUMDUPECHECK') || CATNUMDUPECHECK) echo 'searchDupesCatalogNumber(this.form)'; ?>" />
+						<input name="catalognumber" type="text" onchange="<?php if(!defined('CATNUMDUPECHECK') || CATNUMDUPECHECK) echo 'searchDupesCatalogNumber(this.form,true)'; ?>" />
 					</div>
 					<div style="margin:3px;">
 						<b>Scientific Name:</b> 

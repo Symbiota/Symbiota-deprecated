@@ -459,7 +459,7 @@ function verifyFullForm(f){
 	f.submitaction.focus();
 	if(abortFormVerification) return true;
 
-	if(!verifyDupeCatalogNumber(f)) return false;
+	if(searchDupesCatalogNumber(f,false)) return false;
 	var validformat1 = /^\d{4}-[0]{1}[0-9]{1}-\d{1,2}$/; //Format: yyyy-mm-dd
 	var validformat2 = /^\d{4}-[1]{1}[0-2]{1}-\d{1,2}$/; //Format: yyyy-mm-dd
 	if(f.eventdate.value && !(validformat1.test(f.eventdate.value) || validformat2.test(f.eventdate.value))){
