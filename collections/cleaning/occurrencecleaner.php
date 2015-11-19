@@ -231,7 +231,7 @@ elseif($action == 'listdupsrecordedby'){
 						//Build table
 						?>
 						<div style="margin-bottom:10px;">
-							<b>Use the checkboxes to select the records you would like to merge, and use the radio buttons to select which record is most accurate.</b>
+							<b>Use the checkboxes to select the records you would like to merge, and the radio buttons to select which target record to merge into.</b>
 						</div>
 						<form name="mergeform" action="occurrencecleaner.php" method="post" onsubmit="return validateMergeForm(this);">
 							<?php 

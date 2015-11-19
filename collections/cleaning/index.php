@@ -281,20 +281,6 @@ elseif($action == 'listdupsrecordedby'){
 						<?php 
 					}
 				}
-				elseif($action == 'Merge Duplicate Records'){
-					?>
-					<ul>
-						<li>Duplicate merging process started</li>
-						<?php 
-						$cleanManager->mergeDupeArr($_POST['dupid']);
-						?>
-						<li>Done!</li>
-					</ul>
-					<div>
-						<a href="occurrencecleaner.php?action=<?php echo $function.'&collid='.$collId.'&obsuid='.$obsUid; ?>">Return to duplicate list</a><br/>
-					</div> 
-					<?php 
-				}
 				?>
 				<div>
 					<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>">Return to main menu</a>

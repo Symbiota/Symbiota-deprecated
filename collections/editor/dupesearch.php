@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceEditorDupes.php');
+include_once($serverRoot.'/classes/OccurrenceDuplicate.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $occidQuery = array_key_exists('occidquery',$_REQUEST)?$_REQUEST['occidquery']:'';
@@ -11,12 +11,13 @@ $cNum = (array_key_exists('cnum',$_GET)?$_GET['cnum']:'');
 $occIdMerge = (array_key_exists('occidmerge',$_GET)?$_GET['occidmerge']:'');
 $submitAction = (array_key_exists('submitaction',$_GET)?$_GET['submitaction']:'');
 
-$dupeManager = new OccurrenceEditorDupes();
+$dupeManager = new OccurrenceDuplicate();
 
 $dupeType = substr($occidQuery,0,5);
 $occArr = array();
 if(!$submitAction && $occidQuery){
 	$occArr = $dupeManager->getDupesOccid(substr($occidQuery,6));
+	unset($occArr[$curOccid]);  
 }
 
 $onLoadStr = '';
@@ -30,8 +31,10 @@ if($submitAction){
 	}
 	if($isEditor){
 		if($submitAction == 'mergerecs'){
-			$statusStr = $dupeManager->mergeRecords($curOccid,$occIdMerge);
-			$onLoadStr = 'reloadParent()';
+			if(!$dupeManager->mergeRecords($curOccid,$occIdMerge)){
+				$statusStr = $dupeManager->getErrorStr();
+			}
+			$onLoadStr = 'reloadParent();close()';
 		}
 	}
 }
@@ -374,4 +377,3 @@ if(!$IS_ADMIN){
 		</div>
 	</body>
 </html>
-
