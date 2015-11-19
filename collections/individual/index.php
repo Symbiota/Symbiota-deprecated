@@ -1,8 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceIndividualManager.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
-include_once($serverRoot.'/classes/RdfUtility.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceIndividualManager.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/RdfUtility.php');
 
 $occid = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
 $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
@@ -10,6 +10,7 @@ $pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";
 $submit = array_key_exists('formsubmit',$_REQUEST)?trim($_REQUEST['formsubmit']):'';
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
 $clid = array_key_exists("clid",$_REQUEST)?trim($_REQUEST["clid"]):0;
+$format = isset($_GET['format'])?$_GET['format']:'';
 
 //Sanitize input variables
 if(!is_numeric($occid)) $occid = 0;
@@ -18,6 +19,7 @@ if(!is_numeric($tabIndex)) $tabIndex = 0;
 if(!is_numeric($clid)) $clid = 0;
 if($pk && !preg_match('/^[a-zA-Z0-9\s_]+$/',$pk)) $pk = '';
 if($submit && !preg_match('/^[a-zA-Z0-9\s_]+$/',$submit)) $submit = '';
+if($format && !in_array($format,array('json','xml','rdf','turtle'))) $format = '';
 
 $indManager = new OccurrenceIndividualManager();
 if($occid){
@@ -43,22 +45,22 @@ $isEditor = false;
 $done=FALSE;
 $accept = RdfUtility::parseHTTPAcceptHeader($_SERVER['HTTP_ACCEPT']);
 while (!$done && list($key, $mediarange) = each($accept)) {
-    if ($mediarange=='text/turtle') {
-       Header("Content-Type: text/turtle; charset=".$charset);
+    if ($mediarange=='text/turtle' || $format == 'turtle') {
+       Header("Content-Type: text/turtle; charset=".$CHARSET);
        $dwcManager = new DwcArchiverOccurrence();
        $dwcManager->setCustomWhereSql(" o.occid = $occid ");
        echo $dwcManager->getAsTurtle();
        $done = TRUE;
     }
-    if ($mediarange=='application/rdf+xml') {
-       Header("Content-Type: application/rdf+xml; charset=".$charset);
+    if ($mediarange=='application/rdf+xml' || $format == 'rdf') {
+       Header("Content-Type: application/rdf+xml; charset=".$CHARSET);
        $dwcManager = new DwcArchiverOccurrence();
        $dwcManager->setCustomWhereSql(" o.occid = $occid ");
        echo $dwcManager->getAsRdfXml();
        $done = TRUE;
     }
-    if ($mediarange=='application/json') {
-       Header("Content-Type: application/json; charset=".$charset);
+    if ($mediarange=='application/json' || $format == 'json') {
+       Header("Content-Type: application/json; charset=".$CHARSET);
        $dwcManager = new DwcArchiverOccurrence();
        $dwcManager->setCustomWhereSql(" o.occid = $occid ");
        echo $dwcManager->getAsJson();
@@ -133,15 +135,15 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 
 $displayMap = false;
 if($displayLocality && is_numeric($occArr['decimallatitude']) && is_numeric($occArr['decimallongitude'])) $displayMap = true;
-$dupeArr = $indManager->getDuplicateArr();
+$dupClusterArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
 
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Detailed Collection Record Information</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<title><?php echo $DEFAULT_TITLE; ?> Detailed Collection Record Information</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<meta name="description" content="<?php echo 'Occurrence author: '.$occArr['recordedby'].','.$occArr['recordnumber']; ?>" />
 	<meta name="keywords" content="<?php echo $occArr['guid']; ?>">
@@ -166,6 +168,11 @@ header("Content-Type: text/html; charset=".$charset);
 					return true;
 				},
 				active: tabIndex 
+			});
+
+			$("#tabs").tabs().css({
+				'min-height': '400px',
+				'overflow': 'auto'
 			});
 		});
 
@@ -277,7 +284,7 @@ header("Content-Type: text/html; charset=".$charset);
 						<?php 
 					}
 					if($genticArr) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>'; 
-					if($dupeArr){
+					if($dupClusterArr){
 						?>
 						<li><a href="#dupestab"><span>Duplicates</span></a></li>
 						<?php
@@ -303,7 +310,7 @@ header("Content-Type: text/html; charset=".$charset);
 					}
 					?>
 				</ul>
-				<div id="occurtab" style="padding:30px;">
+				<div id="occurtab">
 					<div style="float:right;">
 						<div style="float:right;">
 							<a class="twitter-share-button" href="https://twitter.com/share" data-url="<?php echo $_SERVER['HTTP_HOST'].$clientRoot.'/collections/individual/index.php?occid='.$occid.'&clid='.$clid; ?>">Tweet</a>
@@ -770,7 +777,7 @@ header("Content-Type: text/html; charset=".$charset);
 						<div style="margin-top:10px;clear:both;">
 							For additional information on this specimen, please contact: 
 							<?php 
-							$emailSubject = $defaultTitle.' occurrence #'.$occArr['occid'];
+							$emailSubject = $DEFAULT_TITLE.' occurrence #'.$occArr['occid'];
 							$emailBody = 'Specimen being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/collections/individual/index.php?occid='.$occArr['occid'];
 							$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
 							?>
@@ -813,7 +820,7 @@ header("Content-Type: text/html; charset=".$charset);
 				}
 				if($genticArr){
 					?>
-					<div id="genetictab" style="height:300px">
+					<div id="genetictab">
 						<?php 
 						foreach($genticArr as $genId => $gArr){
 							?>
@@ -833,9 +840,9 @@ header("Content-Type: text/html; charset=".$charset);
 					</div>
 					<?php 
 				}
-				if($dupeArr){
+				if($dupClusterArr){
 					?>
-					<div id="dupestab" style="padding:15px;height:500px;">
+					<div id="dupestab">
 						<div style="margin:20px;">
 							<div style="font-weight:bold;font-size:120%;margin-bottom:10px;"><u>Current Record</u></div>
 							<?php
@@ -849,34 +856,37 @@ header("Content-Type: text/html; charset=".$charset);
 							echo '</div>';
 							echo '<div style="margin:20px 0px;clear:both"><hr/><hr/></div>';
 							//Grab other records
-							foreach($dupeArr as $dupOccid => $dupArr){
-								echo '<div style="clear:both;margin:15px;">';
-								echo '<div style="font-weight:bold;font-size:120%;">'.$dupArr['collname'].' ('.$dupArr['instcode'].($dupArr['collcode']?':'.$dupArr['collcode']:'').')</div>';
-								echo '<div style="float:left;margin:5px 15px">';
-								if($dupArr['recordedby']) echo '<div>'.$dupArr['recordedby'].' '.$dupArr['recordnumber'].'<span style="margin-left:40px;">'.$dupArr['eventdate'].'</span></div>';
-								if($dupArr['catnum']) echo '<div><b>Catalog Number:</b> '.$dupArr['catnum'].'</div>';
-								if($dupArr['occurrenceid']) echo '<div><b>GUID:</b> '.$dupArr['occurrenceid'].'</div>';
-								if($dupArr['sciname']) echo '<div><b>Latest Identification:</b> '.$dupArr['sciname'].'</div>';
-								if($dupArr['identifiedby']) echo '<div><b>Identified by:</b> '.$dupArr['identifiedby'].'<span stlye="margin-left:30px;">'.$dupArr['dateidentified'].'</span></div>';
-								if($dupArr['notes']) echo '<div>'.$dupArr['notes'].'</div>';
-								echo '<div><a href="#" onclick="openIndividual('.$dupOccid.')">Show Full Details</a></div>';
-								echo '</div>';
-								if($dupArr['url']){
-									$url = $dupArr['url'];
-									$tnUrl = $dupArr['tnurl'];
-									if(!$tnUrl) $tnUrl = $url;
-									if($IMAGE_DOMAIN){
-										if(substr($url,0,1) == '/') $url = $IMAGE_DOMAIN.$url;
-										if(substr($tnUrl,0,1) == '/') $tnUrl = $IMAGE_DOMAIN.$tnUrl;
+							foreach($dupClusterArr as $dupid => $dArr){
+								$innerDupArr = $dArr['o'];
+								foreach($innerDupArr as $dupOccid => $dupArr){
+									echo '<div style="clear:both;margin:15px;">';
+									echo '<div style="font-weight:bold;font-size:120%;">'.$dupArr['collname'].' ('.$dupArr['instcode'].($dupArr['collcode']?':'.$dupArr['collcode']:'').')</div>';
+									echo '<div style="float:left;margin:5px 15px">';
+									if($dupArr['recordedby']) echo '<div>'.$dupArr['recordedby'].' '.$dupArr['recordnumber'].'<span style="margin-left:40px;">'.$dupArr['eventdate'].'</span></div>';
+									if($dupArr['catnum']) echo '<div><b>Catalog Number:</b> '.$dupArr['catnum'].'</div>';
+									if($dupArr['occurrenceid']) echo '<div><b>GUID:</b> '.$dupArr['occurrenceid'].'</div>';
+									if($dupArr['sciname']) echo '<div><b>Latest Identification:</b> '.$dupArr['sciname'].'</div>';
+									if($dupArr['identifiedby']) echo '<div><b>Identified by:</b> '.$dupArr['identifiedby'].'<span stlye="margin-left:30px;">'.$dupArr['dateidentified'].'</span></div>';
+									if($dupArr['notes']) echo '<div>'.$dupArr['notes'].'</div>';
+									echo '<div><a href="#" onclick="openIndividual('.$dupOccid.')">Show Full Details</a></div>';
+									echo '</div>';
+									if($dupArr['url']){
+										$url = $dupArr['url'];
+										$tnUrl = $dupArr['tnurl'];
+										if(!$tnUrl) $tnUrl = $url;
+										if($IMAGE_DOMAIN){
+											if(substr($url,0,1) == '/') $url = $IMAGE_DOMAIN.$url;
+											if(substr($tnUrl,0,1) == '/') $tnUrl = $IMAGE_DOMAIN.$tnUrl;
+										}
+										echo '<div style="float:left;margin:10px;">';
+										echo '<a href="'.$url.'">';
+										echo '<img src="'.$tnUrl.'" style="width:100px;border:1px solid grey" />';
+										echo '</a>';
+										echo '</div>';
 									}
-									echo '<div style="float:left;margin:10px;">';
-									echo '<a href="'.$url.'">';
-									echo '<img src="'.$tnUrl.'" style="width:100px;border:1px solid grey" />';
-									echo '</a>';
+									echo '<div style="margin:10px 0px;clear:both"><hr/></div>';
 									echo '</div>';
 								}
-								echo '<div style="margin:10px 0px;clear:both"><hr/></div>';
-								echo '</div>';
 							}
 							?>
 						</div>
@@ -1083,8 +1093,5 @@ header("Content-Type: text/html; charset=".$charset);
 		}
 		?>
 	</div>
-	<?php
-	//include($serverRoot."/footer.php");
-	?>
 </body>
-</html> 
+</html>

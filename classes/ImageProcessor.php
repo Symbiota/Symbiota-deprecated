@@ -302,7 +302,7 @@ class ImageProcessor {
 					}
 					$rs1->free();
 				}
-				if($occid) $this->logOrEcho('Image linked to existing record ('.($fileName?$fileName.'; ':'').'#'.$occLink.') ',2);
+				if($occid) $this->logOrEcho('Linked image to existing record ('.($fileName?$fileName.'; ':'').'#'.$occLink.') ',2);
 			}
 			else{
 				//Records does not exist, create a new one to which image will be linked
@@ -310,7 +310,7 @@ class ImageProcessor {
 					'VALUES('.$this->collid.',"'.$specPk.'","unprocessed","'.date('Y-m-d H:i:s').'")';
 				if($this->conn->query($sql2)){
 					$occid = $this->conn->insert_id;
-					$this->logOrEcho('Image linked to a new "unprocessed" specimen record (#<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>) ',2);
+					$this->logOrEcho('Linked image to new "unprocessed" specimen record (#<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>) ',2);
 				}
 				else{
 					$this->logOrEcho("ERROR creating new occurrence record: ".$this->conn->error,2);

@@ -1,8 +1,9 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceEditorDeterminations.php');
-include_once($serverRoot.'/classes/OccurrenceEditorImages.php');
-include_once($serverRoot.'/classes/UuidFactory.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorDeterminations.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorImages.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceDuplicate.php');
+include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 class OccurrenceEditorManager {
 
@@ -17,10 +18,17 @@ class OccurrenceEditorManager {
 	private $crowdSourceMode = 0;
 	private $exsiccatiMode = 0;
 	private $symbUid;
-	protected $errorStr = '';
+	protected $errorArr = '';
+	protected $isShareConn = false;
 
-	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon("write");
+	public function __construct($conn = null){
+		if($conn){
+			$this->conn = $conn;
+			$this->isShareConn = true;
+		}
+		else{
+			$this->conn = MySQLiConnectionFactory::getCon("write");
+		}
 		$this->occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
 			'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 			'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
@@ -37,7 +45,7 @@ class OccurrenceEditorManager {
 	}
 
 	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
+		if(!$this->isShareConn && $this->conn !== false) $this->conn->close();
 	}
 
 	public function setOccId($id){
@@ -989,11 +997,12 @@ class OccurrenceEditorManager {
 
 	public function deleteOccurrence($delOccid){
 		global $charset, $userDisplayName;
-		$status = '';
+		$status = true;
 		if(is_numeric($delOccid)){
 			//Archive data, first grab occurrence data
 			$archiveArr = array();
 			$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$delOccid;
+			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_assoc()){
 				foreach($r as $k => $v){
@@ -1072,51 +1081,163 @@ class OccurrenceEditorManager {
 			if($this->conn->query($sqlDel)){
 				//Update collection stats
 				$this->conn->query('UPDATE omcollectionstats SET recordcnt = recordcnt - 1 WHERE collid = '.$this->collId);
-				$status = 'SUCCESS: Occurrence Record Deleted!';
 			}
 			else{
-				$status = 'ERROR trying to delete occurrence record: '.$this->conn->error;
+				$this->errorArr[] = 'ERROR trying to delete occurrence record: '.$this->conn->error;
+				$status = false;
 			}
 		}
 		return $status;
 	}
+	
+	public function mergeRecords($targetOccid,$sourceOccid){
+		$status = true;
+		if(!$targetOccid || !$sourceOccid){
+			$this->errorArr[] = 'ERROR: target or source is null';
+			return false;
+		}
+		if($targetOccid == $sourceOccid){
+			$this->errorArr[] = 'ERROR: target and source are equal';
+			return false;
+		}
 
-	private function linkDuplicates($occidStr,$dupTitle){
-		$status = '';
-		if($this->occid && $occidStr){
-			$dupId = 0;
-			//Look for an existing duplicate cluster id 
-			$clusterArr = array($this->occid);
-			$clusterArr = array_merge($clusterArr,explode(',',$occidStr));
-			$sql = 'SELECT occid, duplicateid FROM omoccurduplicatelink WHERE occid IN('.implode(',',$clusterArr).')';
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				//In case there are multiple clusters, default to cluster containing active specimen
-				if(!$dupId || $r->occid == $this->occid) $dupId = $r->duplicateid;
+		$oArr = array();
+		//Merge records
+		$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$targetOccid.' OR occid = '.$sourceOccid;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_assoc()){
+			$tempArr = array_change_key_case($r);
+			$id = $tempArr['occid'];
+			unset($tempArr['occid']);
+			unset($tempArr['collid']);
+			unset($tempArr['dbpk']);
+			unset($tempArr['datelastmodified']);
+			$oArr[$id] = $tempArr;
+		}
+		$rs->free();
+
+		$tArr = $oArr[$targetOccid];
+		$sArr = $oArr[$sourceOccid];
+		$sqlFrag = '';
+		foreach($sArr as $k => $v){
+			if(($v != '') && $tArr[$k] == ''){
+				$sqlFrag .= ','.$k.'="'.$v.'"';
 			}
-			$rs->free();
-			//If duplicate id does not exist, create on
-			if(!$dupId){
-				$sql1 = 'INSERT INTO omoccurduplicates(title,dupetype) VALUES("'.$this->cleanInStr($dupTitle).'",1)';
-				if($this->conn->query($sql1)){
-					$dupId = $this->conn->insert_id;
-				}
-				else{
-					$status = '(WARNING: unable to add new dupliate cluster ['.$dupTitle.']: '.$this->conn->error.') ';
-				}
+		}
+		if($sqlFrag){
+			//Remap source to target
+			$sqlIns = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$targetOccid;
+			//echo $sqlIns;
+			if(!$this->conn->query($sqlIns)){
+				$this->errorArr[] = 'ABORT due to error merging records: '.$this->conn->error;
+				return false;
 			}
-			if($dupId){
-				//Add unlinked to duplicate project
-				$outLink = '';
-				$sqlI2 = 'INSERT IGNORE INTO omoccurduplicatelink(duplicateid,occid) VALUES ';
-				foreach($clusterArr as $v){
-					$sqlI2 .= '('.$dupId.','.$v.'),';
-				}
-				$sqlI2 = trim($sqlI2,',');
-				if(!$this->conn->query($sqlI2)){
-					$status = '(WARNING: unable to occurrences to duplicate cluster ['.trim($sqlI2,',').']: '.$this->conn->error.') ';
-				}
-			}							
+		}
+
+		//Remap determinations
+		$sql = 'UPDATE omoccurdeterminations SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			$this->errorArr[] .= '; ERROR remapping determinations: '.$this->conn->error;
+			$status = false;
+		}
+
+		//Delete occurrence edits
+		$sql = 'DELETE FROM omoccuredits WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			$this->errorArr[] .= '; ERROR remapping occurrence edits: '.$this->conn->error;
+			$status = false;
+		}
+
+		//Remap images
+		$sql = 'UPDATE images SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			$this->errorArr[] .= '; ERROR remapping images: '.$this->conn->error;
+			$status = false;
+		}
+
+		//Remap comments
+		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			$this->errorArr[] .= '; ERROR remapping comments: '.$this->conn->error;
+			$status = false;
+		}
+
+		//Remap genetic resources
+		$sql = 'UPDATE omoccurgenetic SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			$this->errorArr[] .= '; ERROR remapping genetic resources: '.$this->conn->error;
+			$status = false;
+		}
+		
+		//Remap identifiers 
+		$sql = 'UPDATE omoccuridentifiers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			$this->errorArr[] .= '; ERROR remapping occurrence identifiers: '.$this->conn->error;
+			$status = false;
+		}
+
+		//Remap exsiccati
+		$sql = 'UPDATE omexsiccatiocclink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			if(strpos($this->conn->error,'Duplicate') !== false){
+				$this->conn->query('DELETE FROM omexsiccatiocclink WHERE occid = '.$sourceOccid);
+			}
+			else{
+				$this->errorArr[] .= '; ERROR remapping exsiccati: '.$this->conn->error;
+				$status = false;
+			}
+		}
+
+		//Remap occurrence dataset links
+		$sql = 'UPDATE omoccurdatasetlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			if(strpos($this->conn->error,'Duplicate') !== false){
+				$this->conn->query('DELETE FROM omoccurdatasetlink WHERE occid = '.$sourceOccid);
+			}
+			else{
+				$this->errorArr[] .= '; ERROR remapping dataset links: '.$this->conn->error;
+				$status = false;
+			}
+		}
+
+		//Remap loans
+		$sql = 'UPDATE omoccurloanslink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			if(strpos($this->conn->error,'Duplicate') !== false){
+				$this->conn->query('DELETE FROM omoccurloanslink WHERE occid = '.$sourceOccid);
+			}
+			else{
+				$this->errorArr[] .= '; ERROR remapping loans: '.$this->conn->error;
+				$status = false;
+			}
+		}
+
+		//Remap checklists voucher links
+		$sql = 'UPDATE fmvouchers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			if(strpos($this->conn->error,'Duplicate') !== false){
+				$this->conn->query('DELETE FROM fmvouchers WHERE occid = '.$sourceOccid);
+			}
+			else{
+				$this->errorArr[] .= '; ERROR remapping voucher links: '.$this->conn->error;
+				$status = false;
+			}
+		}
+
+		//Remap survey lists
+		$sql = 'UPDATE omsurveyoccurlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			if(strpos($this->conn->error,'Duplicate') !== false){
+				$this->conn->query('DELETE FROM omsurveyoccurlink WHERE occid = '.$sourceOccid);
+			}
+			else{
+				$this->errorArr[] .= '; ERROR remapping survey links: '.$this->conn->error;
+				$status = false;
+			}
+		}
+
+		if(!$this->deleteOccurrence($sourceOccid)){
+			$status = false;
 		}
 		return $status;
 	}
@@ -1126,7 +1247,7 @@ class OccurrenceEditorManager {
 		if(is_numeric($targetOccid) && is_numeric($transferCollid)){
 			$sql = 'UPDATE omoccurrences SET collid = '.$transferCollid.' WHERE occid = '.$targetOccid;
 			if(!$this->conn->query($sql)){
-				$this->errorStr = 'ERROR trying to delete occurrence record: '.$this->conn->error;
+				$this->errorArr[] = 'ERROR trying to delete occurrence record: '.$this->conn->error;
 				$status = false;
 			}
 		}
@@ -1279,6 +1400,14 @@ class OccurrenceEditorManager {
 		return $retArr;
 	}
 
+	//Duplicate functions
+	private function linkDuplicates($occidStr,$dupTitle){
+		$status = '';
+		$dupManager = new OccurrenceDuplicate();
+		$dupManager->linkDuplicates($this->occid,$occidStr,$dupTitle);
+		return $status;
+	}
+	
 	//Genetic link functions
 	public function getGeneticArr(){
 		$retArr = array();
@@ -1598,7 +1727,7 @@ class OccurrenceEditorManager {
 
 	//Setters and getters
 	public function getErrorStr(){
-		return $this->errorStr;	
+		return implode('; ',$this->errorArr);	
 	}
 
 	public function getCollectionList(){
