@@ -262,109 +262,41 @@ class OccurrenceCleaner extends Manager{
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	public function mergeDupeArr($occidArr){
+		$status = true;
+		$this->verboseMode = 2;
+		$editorManager = new OccurrenceEditorManager($this->conn);
 		foreach($occidArr as $catNum => $occArr){
 			$targetOccid = $occArr['target'];
 			unset($occArr['target']);
 			if(count($occArr) > 1){
-				$statusStr = $targetOccid;
+				$mergeArr = array($targetOccid);
 				foreach($occArr as $sourceOccid){
 					if($sourceOccid != $targetOccid){
-						$this->mergeRecords($targetOccid,$sourceOccid);
-						$statusStr .= ', '.$sourceOccid;
+						if($editorManager->mergeRecords($targetOccid,$sourceOccid)){
+							$mergeArr[] = $sourceOccid;
+							if(!$editorManager->deleteOccurrence($sourceOccid)){
+								$this->logOrEcho($editorManager->getErrorStr(),1);
+							}
+						}
+						else{
+							$this->logOrEcho($editorManager->getErrorStr(),1);
+							$status = false;
+						}
 					}
 				}
-				//$this->logOrEcho('Merging records: '.$statusStr);
-				echo '<li>Merging records: '.$statusStr.'</li>';
+				if(count($mergeArr) > 1){
+					$this->logOrEcho('Merged records: '.implode(', ',$mergeArr),1);
+				}
 			}
 			else{
-				//$this->logOrEcho('Record # '.array_shift($occArr).' skipped because only one record was selected');
-				echo '<li>Record # '.array_shift($occArr).' skipped because only one record was selected</li>';
+				$this->logOrEcho('Record # '.array_shift($occArr).' skipped because only one record was selected',1);
 			}
 		}
-	}
-	
-	public function mergeRecords($targetOccid,$sourceOccid){
-		global $charset;
-		if(!$targetOccid || !$sourceOccid) return 'ERROR: target or source is null';
-		if($targetOccid == $sourceOccid) return 'ERROR: target and source are equal';
-		$status = true;
-
-		$oArr = array();
-		//Merge records
-		$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$targetOccid.' OR occid = '.$sourceOccid;
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_assoc()){
-			$tempArr = array_change_key_case($r);
-			$id = $tempArr['occid'];
-			unset($tempArr['occid']);
-			unset($tempArr['collid']);
-			unset($tempArr['dbpk']);
-			unset($tempArr['datelastmodified']);
-			$oArr[$id] = $tempArr;
-		}
-		$rs->free();
-
-		$tArr = $oArr[$targetOccid];
-		$sArr = $oArr[$sourceOccid];
-		$sqlFrag = '';
-		foreach($sArr as $k => $v){
-			if(($v != '') && $tArr[$k] == ''){
-				$sqlFrag .= ','.$k.'="'.$v.'"';
-			} 
-		}
-		if($sqlFrag){
-			//Remap source to target
-			$sqlIns = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$targetOccid;
-			//echo $sqlIns;
-			$this->conn->query($sqlIns);
-		}
-
-		//Remap determinations
-		$sql = 'UPDATE omoccurdeterminations SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Delete occurrence edits
-		$sql = 'DELETE FROM omoccuredits WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap images
-		$sql = 'UPDATE images SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap comments
-		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap exsiccati
-		$sql = 'UPDATE omexsiccatiocclink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap occurrence dataset links
-		$sql = 'UPDATE omoccurdatasetlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap loans
-		$sql = 'UPDATE omoccurloanslink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap checklists voucher links
-		$sql = 'UPDATE fmvouchers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap survey lists
-		$sql = 'UPDATE omsurveyoccurlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Delete source record data through the Editor class so that record is properly archived
-		$editorManager = new OccurrenceEditorManager();
-		$status = $editorManager->deleteOccurrence($sourceOccid);
-		if(strpos($status,'ERROR') === 0) $status = '';
-		
 		return $status;
 	}
-
+	
     /** Populate omoccurrences.recordedbyid using data from omoccurrences.recordedby.
      */
 	public function indexCollectors(){

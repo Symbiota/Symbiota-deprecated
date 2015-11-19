@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceDuplicateManager.php');
+include_once($serverRoot.'/classes/OccurrenceDuplicate.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -13,9 +13,8 @@ if(!$symbUid){
 	header('Location: ../../profile/index.php?refurl=../collections/datasets/duplicatemanager.php?'.$_SERVER['QUERY_STRING']);
 }
 
-$dupManager = new OccurrenceDuplicateManager();
-$dupManager->setCollId($collId);
-$collMap = $dupManager->getCollMap();
+$dupManager = new OccurrenceDuplicate();
+$collMap = $dupManager->getCollMap($collId);
 
 $statusStr = '';
 $isEditor = 0; 
@@ -31,10 +30,10 @@ if($collMap['colltype'] == 'General Observations'){
 
 if($isEditor && $formSubmit){
 	if($formSubmit == 'clusteredit'){
-		$statusStr = $dupManager->editDuplicateCluster($_POST['dupid'],$_POST['title'],$_POST['description'],$_POST['notes']);
+		$statusStr = $dupManager->editCluster($_POST['dupid'],$_POST['title'],$_POST['description'],$_POST['notes']);
 	}
 	elseif($formSubmit == 'clusterdelete'){
-		$statusStr = $dupManager->deleteDuplicateCluster($_POST['deldupid']);
+		$statusStr = $dupManager->deleteCluster($_POST['deldupid']);
 	}
 	elseif($formSubmit == 'occdelete'){
 		$statusStr = $dupManager->deleteOccurFromCluster($_POST['dupid'],$_POST['occid']);
@@ -159,13 +158,13 @@ if($isEditor && $formSubmit){
 					?>
 					<ul>
 						<?php 
-						$dupManager->linkDuplicates($collId,true);
+						$dupManager->batchLinkDuplicates($collId,true);
 						?>
 					</ul>
 					<?php 
 				}
 				elseif($action == 'listdupes' || $action == 'listdupeconflicts'){
-					$clusterArr = $dupManager->getDuplicateClusters($action == 'listdupes'?0:1,$start,$limit);
+					$clusterArr = $dupManager->getDuplicateClusterList($collId, $action == 'listdupes'?0:1,$start,$limit);
 					$totalCnt = $clusterArr['cnt'];
 					unset($clusterArr['cnt']);
 					if($clusterArr){
