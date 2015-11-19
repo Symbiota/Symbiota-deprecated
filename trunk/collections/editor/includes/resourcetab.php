@@ -159,7 +159,7 @@ $lastName = $dupManager->parseLastName($occArr['recordedby']);
 				foreach($dupClusterArr as $dupid => $dupArr){
 					echo '<div id="dupediv-'.$occid.'">';
 					echo '<div style="padding:15px;"><b>Cluster Title:</b> '.$dupArr['title'];
-					echo '<div style="float:right" title="Unlink this occurrences from duplicate cluster but maintain other specimens as a valid duplicate cluster"><button name="unlinkthisdupebutton" onclick="deleteDuplicateLink('.$dupid.','.$occid.')">Remove this Occurrence from Cluster</button></div>';
+					//echo '<div style="float:right" title="Unlink this occurrences from duplicate cluster but maintain other specimens as a valid duplicate cluster"><button name="unlinkthisdupebutton" onclick="deleteDuplicateLink('.$dupid.','.$occid.')">Remove this Occurrence from Cluster</button></div>';
 					$note = trim($dupArr['description'].'; '.$dupArr['notes'],' ;');
 					if($note) echo ' - '.$notes;
 					echo '</div>';
@@ -172,7 +172,9 @@ $lastName = $dupManager->parseLastName($occArr['recordedby']);
 								<?php echo $dArr['collname'].' ('.$dArr['instcode'].($dArr['collcode']?':'.$dArr['collcode']:'').')'; ?>
 							</div>
 							<div style="float:right;">
+								<!--  
 								<button name="unlinkdupebut" onclick="deleteDuplicateLink(<?php echo $dupid.','.$dupeOccid; ?>)">Unlink</button>
+								 -->
 							</div>
 							<?php 
 							echo '<div style="float:left;margin:5px 15px">';
