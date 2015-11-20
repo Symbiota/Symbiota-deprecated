@@ -357,7 +357,7 @@ function searchDupesOtherCatalogNumbers(f){
 		$.ajax({
 			type: "POST",
 			url: "rpc/dupequeryothercatnum.php",
-			data: { invalue: ocnValue, collid: f.collid.value, occid: f.occid.value }
+			data: { othercatnum: ocnValue, collid: f.collid.value, occid: f.occid.value }
 		}).done(function( msg ) {
 			if(msg.length > 6){
 				if(confirm("Record(s) using the same identifier already exists. Do you want to view this record?")){
