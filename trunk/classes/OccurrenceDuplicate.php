@@ -245,12 +245,12 @@ class OccurrenceDuplicate {
 		return $retArr;
 	}
 
-	private function getDupesCollector($collName, $collNum, $currentOccid){
+	private function getDupesCollector($collName, $collNum, $skipOccid){
 		$retArr = array();
 		$lastName = $this->parseLastName($collName);
 		if($lastName && $collNum){
 			$sql = 'SELECT occid FROM omoccurrences '.
-				'WHERE (recordedby LIKE "%'.$lastName.'%") AND (recordnumber = "'.$collNum.'") AND (occid != '.$currentOccid.') ';
+				'WHERE (recordedby LIKE "%'.$lastName.'%") AND (recordnumber = "'.$collNum.'") AND (occid != '.$skipOccid.') ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -261,29 +261,44 @@ class OccurrenceDuplicate {
 		return $retArr;
 	}
 
-	public function getDupesCatalogNumber($catNum, $collid, $occid){
+	public function getDupesCatalogNumber($catNum, $collid, $skipOccid){
 		$retArr = array();
-		$catNumber = $this->cleanInStr($catNum);
-		if(!is_numeric($collid)) $collid = 0;
-		if(!is_numeric($occid)) $occid = 0;
-		$sql = 'SELECT occid FROM omoccurrences '.
-			'WHERE (catalognumber = "'.$catNumber.'") AND (collid = '.$collid.') AND (occid != '.$occid.') ';
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[$r->occid] = $r->occid;
+		if(is_numeric($collid) && is_numeric($skipOccid) && $catNum){
+			$catNumber = $this->cleanInStr($catNum);
+			$sql = 'SELECT occid FROM omoccurrences '.
+				'WHERE (catalognumber = "'.$catNumber.'") AND (collid = '.$collid.') AND (occid != '.$skipOccid.') ';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->occid] = $r->occid;
+			}
+			$rs->free();
 		}
-		$rs->free();
 		return $retArr;
 	}
 
-	private function getDupesCollectorEvent($collName, $collNum, $collDate, $currentOccid){
+	public function getDupesOtherCatalogNumbers($otherCatNum, $collid, $skipOccid){
+		$retArr = array();
+		if(is_numeric($collid) && is_numeric($skipOccid) && $otherCatNum){
+			$sql = 'SELECT occid FROM omoccurrences '.
+				'WHERE (othercatalognumbers = "'.$this->cleanInStr($otherCatNum).'") AND (collid = '.$collid.') AND (occid != '.$skipOccid.') ';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->occid] = $r->occid;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	private function getDupesCollectorEvent($collName, $collNum, $collDate, $skipOccid){
 		$retArr = array();
 		$lastName = $this->parseLastName($collName);
 		if($lastName){
 			$sql = 'SELECT occid '.
 				'FROM omoccurrences '.
-				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") AND (recordedby LIKE "%'.$lastName.'%") AND (occid != '.$currentOccid.') ';
+				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") AND (recordedby LIKE "%'.$lastName.'%") AND (occid != '.$skipOccid.') ';
 			$runQry = true;
 			if($collNum){
 				if(is_numeric($collNum)){
@@ -615,7 +630,7 @@ class OccurrenceDuplicate {
 		if(count($lastNameArr) > 1){
 			//formats: Last, F.I.; Last, First I.; Last, First Initial
 			$lastName = array_shift($lastNameArr);
-			$lastName = array_shift(explode(' ',$lastName));
+			//$lastName = array_shift(explode(' ',$lastName));
 		}
 		else{
 			//Formats: F.I. Last; First I. Last; First Initial Last

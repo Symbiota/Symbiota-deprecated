@@ -262,14 +262,14 @@ elseif($action == 'listdupsrecordedby'){
 								</tr>
 								<?php 
 								$setCnt = 0;
-								foreach($dupArr as $dupId => $occArr){
+								foreach($dupArr as $dupKey => $occArr){
 									$setCnt++;
 									$first = true;
 									foreach($occArr as $occId => $occArr){
 										echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
 										echo '<td><a href="../editor/occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a></td>'."\n";
-										echo '<td><input name="dupid[]" type="checkbox" value="'.$dupId.':'.$occId.'" /></td>'."\n";
-										echo '<td><input name="dup'.$dupId.'target" type="radio" value="'.$occId.'" '.($first?'checked':'').'/></td>'."\n";
+										echo '<td><input name="dupid[]" type="checkbox" value="'.$dupKey.':'.$occId.'" /></td>'."\n";
+										echo '<td><input name="dup'.$dupKey.'target" type="radio" value="'.$occId.'" '.($first?'checked':'').'/></td>'."\n";
 										echo '<td>'.$occArr['catalognumber'].'</td>'."\n";
 										echo '<td>'.$occArr['othercatalognumbers'].'</td>'."\n";
 										echo '<td>'.$occArr['sciname'].'</td>'."\n";
@@ -314,9 +314,10 @@ elseif($action == 'listdupsrecordedby'){
 						$dupArr = array();
 						foreach($_POST['dupid'] as $v){
 							$vArr = explode(':',$v);
-							$k = strtoupper(trim($vArr[0]));
-							if($k !== '') $dupArr[$k][] = $vArr[1];
-							if($k !== '') $dupArr[$k]['target'] = $_POST['dup'.$k.'target'];
+							if(count($vArr) > 1){
+								$target = $_POST['dup'.$vArr[0].'target'];
+								if($target != $vArr[1]) $dupArr[$target][] = $vArr[1];
+							}
 						}
 						$cleanManager->mergeDupeArr($dupArr);
 						?>

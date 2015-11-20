@@ -170,25 +170,8 @@ class OccurrenceCleaner extends Manager{
 				'ORDER BY o.otherCatalogNumbers';
 		}
 		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_assoc()){
-			$retArr[(string)$row['dupid']][$row['occid']] = array_change_key_case($row);
-		}
-		ksort($retArr);
 		
-		/*
-		$sql = 'SELECT o.catalognumber AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, '.
-			'o.recordedby, o.recordnumber, o.associatedcollectors, o.eventdate, o.verbatimeventdate, '.
-			'o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
-			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences '.
-			'GROUP BY catalognumber, collid '. 
-			'HAVING Count(occid)>1 AND collid = '.$this->collid.
-			' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
-			'WHERE o.collid = '.$this->collid.' '.
-			'ORDER BY o.catalognumber, o.datelastmodified DESC LIMIT '.$start.', 505';
-		//echo $sql;
 		$retArr = $this->getDuplicates($sql);
-		*/ 
 		return $retArr;
 	}
 	
@@ -254,10 +237,13 @@ class OccurrenceCleaner extends Manager{
 
 	private function getDuplicates($sql){
 		$retArr = array();
-		//echo $sql;
+		$cnt = 0;
+		$dupid = '';
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_assoc()){
-			$retArr[$row['dupid']][$row['occid']] = array_change_key_case($row);
+			if($dupid != $row['dupid']) $cnt++;
+			$retArr[$cnt][$row['occid']] = array_change_key_case($row);
+			$dupid = $row['dupid'];
 		}
 		$rs->free();
 		return $retArr;
@@ -267,31 +253,21 @@ class OccurrenceCleaner extends Manager{
 		$status = true;
 		$this->verboseMode = 2;
 		$editorManager = new OccurrenceEditorManager($this->conn);
-		foreach($occidArr as $catNum => $occArr){
-			$targetOccid = $occArr['target'];
-			unset($occArr['target']);
-			if(count($occArr) > 1){
-				$mergeArr = array($targetOccid);
-				foreach($occArr as $sourceOccid){
-					if($sourceOccid != $targetOccid){
-						if($editorManager->mergeRecords($targetOccid,$sourceOccid)){
-							$mergeArr[] = $sourceOccid;
-							if(!$editorManager->deleteOccurrence($sourceOccid)){
-								$this->logOrEcho($editorManager->getErrorStr(),1);
-							}
-						}
-						else{
-							$this->logOrEcho($editorManager->getErrorStr(),1);
-							$status = false;
-						}
+		foreach($occidArr as $target => $occArr){
+			$mergeArr = array($target);
+			foreach($occArr as $source){
+				if($source != $target){
+					if($editorManager->mergeRecords($target,$source)){
+						$mergeArr[] = $source;
+					}
+					else{
+						$this->logOrEcho($editorManager->getErrorStr(),1);
+						$status = false;
 					}
 				}
-				if(count($mergeArr) > 1){
-					$this->logOrEcho('Merged records: '.implode(', ',$mergeArr),1);
-				}
 			}
-			else{
-				$this->logOrEcho('Record # '.array_shift($occArr).' skipped because only one record was selected',1);
+			if(count($mergeArr) > 1){
+				$this->logOrEcho('Merged records: '.implode(', ',$mergeArr),1);
 			}
 		}
 		return $status;
