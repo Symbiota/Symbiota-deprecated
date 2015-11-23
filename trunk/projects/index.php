@@ -238,8 +238,14 @@ if($isEditable && $projSubmit){
 				<div id="tabs" style="height:500px;margin:10px;display:<?php echo ($newProj||$editMode?'block':'none'); ?>;">
 				    <ul>
 				        <li><a href="#mdtab"><span>Metadata</span></a></li>
-				        <li><a href="managertab.php?pid=<?php echo $pid; ?>"><span>Inventory Managers</span></a></li>
-				        <li><a href="checklisttab.php?pid=<?php echo $pid; ?>"><span>Checklist Management</span></a></li>
+				        <?php
+						if($pid){
+							?>
+							<li><a href="managertab.php?pid=<?php echo $pid; ?>"><span>Inventory Managers</span></a></li>
+							<li><a href="checklisttab.php?pid=<?php echo $pid; ?>"><span>Checklist Management</span></a></li>
+							<?php
+						}
+						?>
 				    </ul>
 					<div id="mdtab">
 						<fieldset style="background-color:#FFF380;">
