@@ -181,9 +181,9 @@ ALTER TABLE `omoccurassococcurrences`
     FOREIGN KEY (`createduid`)  REFERENCES `users` (`uid`)  ON DELETE SET NULL  ON UPDATE CASCADE;
 
 ALTER TABLE `omoccurassococcurrences` 
-  RENAME TO  `omoccurassociation` ;
+  RENAME TO  `omoccurassociations` ;
 
-ALTER TABLE `omoccurassociation` 
+ALTER TABLE `omoccurassociations` 
   ADD INDEX `INDEX_verbatimSciname` (`verbatimsciname` ASC);
 
 

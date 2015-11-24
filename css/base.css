@@ -260,6 +260,16 @@ div.button:hover {
 }
 
 /* Quick Search Plugin */
+#quicksearchdiv{
+	float: right;
+	width: 335px;
+	margin: 8px;
+	padding: 5px 5px 0px 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border: 1px solid black;	
+}
+
 #quicksearchtext{
 	margin-top:0px;
 	padding-bottom:0px;

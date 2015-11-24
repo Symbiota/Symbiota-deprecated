@@ -362,13 +362,14 @@ class PermissionsManager{
 			$sql .= 'WHERE (u.lastname LIKE "'.$searchTerm.'%") ';
 			if(strlen($searchTerm) > 1) $sql .= "OR (ul.username LIKE '".$searchTerm."%') ";
 		}
+		$sql .= 'ORDER BY u.lastname, u.firstname';
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->uid] = $this->cleanOutStr($r->uname.($r->username?' ('.$r->username.')':''));
 		}
 		$rs->free();
-		asort($retArr);
+		//asort($retArr);
 		return $retArr;
 	}
 
