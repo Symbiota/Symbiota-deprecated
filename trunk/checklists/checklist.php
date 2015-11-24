@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ChecklistManager.php');
-include_once($serverRoot.'/classes/ChecklistAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
+include_once($SERVER_ROOT.'/classes/ChecklistAdmin.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
@@ -105,15 +105,15 @@ if($clValue || $dynClid){
 ?>
 <html>
 <head>
-	<meta charset="<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Research Checklist: <?php echo $clManager->getClName(); ?></title>
+	<meta charset="<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Research Checklist: <?php echo $clManager->getClName(); ?></title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 		<?php if($clid) echo 'var clid = '.$clid.';'; ?>
@@ -137,7 +137,7 @@ if($clValue || $dynClid){
 <?php
 	if(!$printMode){
 		$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:false);
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		echo '<div class="navpath">';
 		if($pid){
 			echo '<a href="../index.php">Home</a> &gt; ';
@@ -373,7 +373,7 @@ if($clValue || $dynClid){
 						<?php 
 						if($clValue && $isEditor){
 							?>
-							<div class="editsppbox" style="display:<?php echo ($showImages?'none':'block'); ?>;width:250px;margin-top:10px;">
+							<div class="editspp" style="display:<?php echo ($editMode?'block':'none'); ?>;width:250px;margin-top:10px;">
 								<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 									<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 										<legend><b>Add New Species to Checklist</b></legend>
@@ -573,7 +573,7 @@ if($clValue || $dynClid){
 							if($isEditor){
 								//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
 								?> 
-								<span class="editspp" style="display:<?php echo ($editMode==1?'inline':'none'); ?>;">
+								<span class="editspp" style="display:<?php echo ($editMode?'inline':'none'); ?>;">
 									<a href="#" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clid; ?>','editorwindow');">
 										<img src='../images/edit.png' style='width:13px;' title='edit details' />
 									</a>
@@ -640,7 +640,7 @@ if($clValue || $dynClid){
 		?>
 	</div>
 	<?php
-	if(!$printMode) include($serverRoot.'/footer.php');
+	if(!$printMode) include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html> 

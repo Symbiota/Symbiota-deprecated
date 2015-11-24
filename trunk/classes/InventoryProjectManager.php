@@ -206,13 +206,14 @@ class InventoryProjectManager {
 	public function getPotentialManagerArr(){
 		$retArr = array();
 		$sql = 'SELECT u.uid, CONCAT_WS(", ", u.lastname, u.firstname) as fullname, l.username '.
-			'FROM users u INNER JOIN userlogin l ON u.uid = l.uid ';
+			'FROM users u INNER JOIN userlogin l ON u.uid = l.uid '.
+			'ORDER BY u.lastname, u.firstname';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->uid] = $r->fullname.' ('.$r->username.')';
 		}
 		$rs->free();
-		asort($retArr);
+		//asort($retArr);
 		return $retArr;
 	}
 	

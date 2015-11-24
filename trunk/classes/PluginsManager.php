@@ -1,16 +1,12 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
  
 class PluginsManager {
 
-	private $conn;
-	
  	public function __construct(){
- 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
  	}
  	
  	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
 	}
 	
 	public function createSlidewhow($ssId,$numSlides,$width,$numDays,$imageType,$clId,$dayInterval,$interval=7000){
@@ -28,11 +24,11 @@ class PluginsManager {
 	}
 	
 	public function setSlidewhow($ssId,$numSlides,$numDays,$imageType,$clId,$dayInterval){
-		global $serverRoot;
+		global $SERVER_ROOT;
 		$currentDate = date("Y-m-d");
 		$replace = 0;
-		if(file_exists($serverRoot.'/temp/slideshow/'.$ssId.'_info.json')){
-			$oldArr = json_decode(file_get_contents($serverRoot.'/temp/slideshow/'.$ssId.'_info.json'), true);
+		if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json')){
+			$oldArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json'), true);
 			$lastDate = $oldArr['lastDate'];
 			$lastCLID = $oldArr['clid'];
 			$lastNumSlides = $oldArr['numslides'];
@@ -54,21 +50,21 @@ class PluginsManager {
 			//Delete old files
 			if($clId){
 				$previous = Array();
-				if(file_exists($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json')){
-					$previous = json_decode(file_get_contents($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json'), true);
-					unlink($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json');
+				if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json')){
+					$previous = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json'), true);
+					unlink($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json');
 					if($clId != $lastCLID){
 						$previous = Array();
 					}
 				}
 			}
 			else{
-				if(file_exists($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json')){
-					unlink($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json');
+				if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json')){
+					unlink($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json');
 				}
 			}
-			if(file_exists($serverRoot.'/temp/slideshow/'.$ssId.'_info.json')){
-				unlink($serverRoot.'/temp/slideshow/'.$ssId.'_info.json');
+			if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json')){
+				unlink($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json');
 			}
 			
 			//Create new files
@@ -113,7 +109,8 @@ class PluginsManager {
 			//echo '<div>'.$sql.'</div>';
 			$cnt = 1;
 			$imgIdArr = Array();
-			$rs = $this->conn->query($sql);
+ 			$conn = MySQLiConnectionFactory::getCon("readonly");
+			$rs = $conn->query($sql);
 			while(($row = $rs->fetch_object()) && ($cnt < ($numSlides + 1))){
 				$file = '';
 				$imgId = $row->imgid;
@@ -203,20 +200,21 @@ class PluginsManager {
 				}
 			}
 			$rs->free();
+			$conn->close();
 			$ssIdInfo['files'] = $files;
 			$previous = array_merge($previous,$imgIdArr);
 			
 			if($clId){
-				$fp = fopen($serverRoot.'/temp/slideshow/'.$ssId.'_previous.json', 'w');
+				$fp = fopen($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json', 'w');
 				fwrite($fp, json_encode($previous));
 				fclose($fp);
 			}
-			$fp = fopen($serverRoot.'/temp/slideshow/'.$ssId.'_info.json', 'w');
+			$fp = fopen($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json', 'w');
 			fwrite($fp, json_encode($ssIdInfo));
 			fclose($fp);
 		}
 		
-		$infoArr = json_decode(file_get_contents($serverRoot.'/temp/slideshow/'.$ssId.'_info.json'), true);
+		$infoArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json'), true);
 		//echo json_encode($infoArr);
 		return $infoArr;
 	}
