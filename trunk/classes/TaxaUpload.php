@@ -66,7 +66,7 @@ class TaxaUpload{
 		$uploadTaxaIndexArr = array();		//Array of index values associated with uploadtaxa table; array(index => targetName)
 		$taxonUnitIndexArr = array();		//Array of index values associated with taxonunits table;
 		foreach($headerArr as $k => $sourceName){
-			$sourceName = strtolower($sourceName);
+			$sourceName = trim(strtolower($sourceName));
 			if(array_key_exists($sourceName,$fieldMap)){
 				$targetName = $fieldMap[$sourceName];
 				if(in_array($targetName,$uploadTaxaFieldArr)){
@@ -78,6 +78,11 @@ class TaxaUpload{
 					$taxonUnitIndexArr[$k] = array_search($targetName,$taxonUnitArr);  //array(recIndex => rankid)
 				}
 			}
+		}
+		$parentIndex = 0; 
+		if(!in_array('parentstr',$uploadTaxaIndexArr)){
+			$parentIndex = max(array_keys($uploadTaxaIndexArr))+1;
+			$uploadTaxaIndexArr[$parentIndex] = 'parentstr';
 		}
 		$familyIndex = 0; 
 		if(in_array('family',$fieldMap)) $familyIndex = array_search(array_search('family',$fieldMap),$headerArr);
@@ -113,6 +118,7 @@ class TaxaUpload{
 						$parentStr = $taxonStr;
 					}
 				}
+				if($parentIndex) $recordArr[$parentIndex] = $parentStr;  
 				
 				if(in_array("scinameinput",$fieldMap)){
 					//Load relavent fields into uploadtaxa table
@@ -135,7 +141,7 @@ class TaxaUpload{
 						$valueSql .= ','.($valIn?'"'.$valIn.'"':'NULL');
 					}
 					$sql .= 'VALUES ('.substr($valueSql,1).')';
-					//$this->outputMsg("<div>".$sql."</div>";
+					//echo "<div>".$sql."</div>";
 					if($this->conn->query($sql)){
 						if($recordCnt%1000 == 0){
 							$this->outputMsg('Upload count: '.$recordCnt,1);
@@ -672,15 +678,19 @@ class TaxaUpload{
 		}
 		
 		$this->outputMsg('Populating and mapping parent taxon... ');
-		$sql = 'UPDATE uploadtaxa SET parentstr = CONCAT_WS(" ", unitname1, unitname2) WHERE (parentstr IS NULL OR parentstr = "") AND rankid > 220';
+		$sql = 'UPDATE uploadtaxa '.
+			'SET parentstr = CONCAT_WS(" ", unitname1, unitname2) '.
+			'WHERE (parentstr IS NULL OR parentstr = "") AND rankid > 220';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa SET parentstr = unitname1 WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 220';
+		$sql = 'UPDATE uploadtaxa SET parentstr = unitname1 '.
+			'WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 220';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa SET parentstr = family WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 180';
+		$sql = 'UPDATE uploadtaxa SET parentstr = family '.
+			'WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 180';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
