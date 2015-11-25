@@ -73,7 +73,7 @@ if($symbUid){
 						</a>
 					</li>
 					<li>
-						<a href="../collections/editor/occurrencecleaner.php?collid=<?php echo $collId; ?>">
+						<a href="../collections/cleaning/occurrencecleaner.php?collid=<?php echo $collId; ?>">
 							Data Cleaning Module
 						</a>
 					</li>
