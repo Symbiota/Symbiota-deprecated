@@ -347,7 +347,7 @@ if($isEditable && $projSubmit){
 						</div>
 						<div id="researchlistpopup" class="genericpopup" style="display:none;">
 							<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-				            Research checklists are pre-compiled by floristic scientists.
+				            Research checklists are pre-compiled by biologists.
 				            This is a very controlled method for building a species list, which allows for  
 				            specific specimens to be linked to the species names within the checklist and thus serve as vouchers. 
 				            Specimen vouchers are proof that the species actually occurs in the given area. If there is any doubt, one

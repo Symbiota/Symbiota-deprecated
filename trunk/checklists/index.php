@@ -64,7 +64,7 @@
 		<h1>Species Checklists</h1>
         <div style="margin:20px">
 			Research and Dynamic Survey Species Lists are listed below. 
-            Research Checklists are pre-compiled by floristic researchers.
+            Research Checklists are pre-compiled by biologists.
             This is a very controlled method for building a species list where specific specimens can be linked in order to serve 
             as vouchers. Vouchers specimens serve as physical proof that the species actually occurs in the given area. 
             While Research Checklists are compiled with vouchers linked afterwards as support data, 
