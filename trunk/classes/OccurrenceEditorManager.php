@@ -656,6 +656,7 @@ class OccurrenceEditorManager {
 
 	public function editOccurrence($occArr,$autoCommit){
 		$status = '';
+		$quickHostEntered = false;
 		if(!$autoCommit && $this->getObserverUid() == $GLOBALS['SYMB_UID']){
 			//Specimen is owned by editor
 			$autoCommit = 1;
@@ -669,79 +670,85 @@ class OccurrenceEditorManager {
 		$editedFields = trim($occArr['editedfields']);
 		$editArr = array_unique(explode(';',$editedFields));
 		foreach($editArr as $k => $fName){
+			if(trim($fName) == 'host' || trim($fName) == 'hostassocid'){
+				$quickHostEntered = true;
+				unset($editArr[$k]);
+			}
 			if(!trim($fName)){
 				unset($editArr[$k]);
-			} 
+			}
 			else if(strcasecmp($fName, 'exstitle') == 0) {
 				unset($editArr[$k]);
 				$editArr[$k] = 'title';
 			}
 		}
-		if($editArr){
-			//Deal with scientific name changes, which isn't allows handled correctly with AJAX code
-			if(in_array('sciname',$editArr) && $occArr['sciname'] && !$occArr['tidinterpreted']){
-				$sql2 = 'SELECT t.tid, t.author, ts.family '.
-					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-					'WHERE ts.taxauthid = 1 AND sciname = "'.$occArr['sciname'].'"';
-				$rs2 = $this->conn->query($sql2);
-				while($r2 = $rs2->fetch_object()){
-					$occArr['tidinterpreted'] = $r2->tid;
-					if(!$occArr['scientificnameauthorship']) $occArr['scientificnameauthorship'] = $r2->author;
-					if(!$occArr['family']) $occArr['family'] = $r2->family;
+		if($editArr || $quickHostEntered){
+			if($editArr){
+				//Deal with scientific name changes, which isn't allows handled correctly with AJAX code
+				if(in_array('sciname',$editArr) && $occArr['sciname'] && !$occArr['tidinterpreted']){
+					$sql2 = 'SELECT t.tid, t.author, ts.family '.
+						'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+						'WHERE ts.taxauthid = 1 AND sciname = "'.$occArr['sciname'].'"';
+					$rs2 = $this->conn->query($sql2);
+					while($r2 = $rs2->fetch_object()){
+						$occArr['tidinterpreted'] = $r2->tid;
+						if(!$occArr['scientificnameauthorship']) $occArr['scientificnameauthorship'] = $r2->author;
+						if(!$occArr['family']) $occArr['family'] = $r2->family;
+					}
+					$rs2->free();
 				}
-				$rs2->free();
-			}
-			//Add edits to omoccuredits
-			//Get old values before they are changed
-			$sql = '';
-			if(in_array('ometid',$editArr) || in_array('exsnumber',$editArr)){
-				//Exsiccati edit has been submitted
-				$sql = 'SELECT '.str_replace(array('ometid','exstitle'),array('et.ometid','et.title'),($editArr?implode(',',$editArr):'')).',et.title'.
-				(in_array('processingstatus',$editArr)?'':',processingstatus').(in_array('recordenteredby',$editArr)?'':',recordenteredby').
-				' FROM omoccurrences o LEFT JOIN omexsiccatiocclink el ON o.occid = el.occid '.
-				'LEFT JOIN omexsiccatinumbers en ON el.omenid = en.omenid '.
-				'LEFT JOIN omexsiccatititles et ON en.ometid = et.ometid '.
-				'WHERE o.occid = '.$occArr['occid'];
-			}
-			else{
-				$sql = 'SELECT '.($editArr?implode(',',$editArr):'').(in_array('processingstatus',$editArr)?'':',processingstatus').
-				(in_array('recordenteredby',$editArr)?'':',recordenteredby').
-				' FROM omoccurrences WHERE occid = '.$occArr['occid'];
-			}
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			$oldValues = $rs->fetch_assoc();
-			$rs->free();
+				//Add edits to omoccuredits
+				//Get old values before they are changed
+				$sql = '';
+				if(in_array('ometid',$editArr) || in_array('exsnumber',$editArr)){
+					//Exsiccati edit has been submitted
+					$sql = 'SELECT '.str_replace(array('ometid','exstitle'),array('et.ometid','et.title'),($editArr?implode(',',$editArr):'')).',et.title'.
+					(in_array('processingstatus',$editArr)?'':',processingstatus').(in_array('recordenteredby',$editArr)?'':',recordenteredby').
+					' FROM omoccurrences o LEFT JOIN omexsiccatiocclink el ON o.occid = el.occid '.
+					'LEFT JOIN omexsiccatinumbers en ON el.omenid = en.omenid '.
+					'LEFT JOIN omexsiccatititles et ON en.ometid = et.ometid '.
+					'WHERE o.occid = '.$occArr['occid'];
+				}
+				else{
+					$sql = 'SELECT '.($editArr?implode(',',$editArr):'').(in_array('processingstatus',$editArr)?'':',processingstatus').
+					(in_array('recordenteredby',$editArr)?'':',recordenteredby').
+					' FROM omoccurrences WHERE occid = '.$occArr['occid'];
+				}
+				//echo $sql;
+				$rs = $this->conn->query($sql);
+				$oldValues = $rs->fetch_assoc();
+				$rs->free();
 
-			//Version edits
-			$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
-				'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$GLOBALS['SYMB_UID'].',';
-			foreach($editArr as $fieldName){
-				if(!array_key_exists($fieldName,$occArr)){
-					//Field is a checkbox that is unchecked: cultivationstatus, localitysecurity
-					$occArr[$fieldName] = 0;
-				}
-				$newValue = $this->cleanInStr($occArr[$fieldName]);
-				$oldValue = $this->cleanInStr($oldValues[$fieldName]);
-				//Version edits only if value has changed
-				if($oldValue != $newValue){
-					if($fieldName != 'tidinterpreted'){
-						if($fieldName == 'ometid'){
-							//Exsiccati title has been changed, thus grab title string
-							$exsTitleStr = '';
-							$sql = 'SELECT title FROM omexsiccatititles WHERE ometid = '.$occArr['ometid'];
-							$rs = $this->conn->query($sql);
-							if($r = $rs->fetch_object()){
-								$exsTitleStr = $r->title;
+				//Version edits
+				$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
+					'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$GLOBALS['SYMB_UID'].',';
+				foreach($editArr as $fieldName){
+					if(!array_key_exists($fieldName,$occArr)){
+						//Field is a checkbox that is unchecked: cultivationstatus, localitysecurity
+						$occArr[$fieldName] = 0;
+					}
+					$newValue = $this->cleanInStr($occArr[$fieldName]);
+					$oldValue = $this->cleanInStr($oldValues[$fieldName]);
+					//Version edits only if value has changed
+					if($oldValue != $newValue){
+						if($fieldName != 'tidinterpreted'){
+							if($fieldName == 'ometid'){
+								//Exsiccati title has been changed, thus grab title string
+								$exsTitleStr = '';
+								$sql = 'SELECT title FROM omexsiccatititles WHERE ometid = '.$occArr['ometid'];
+								$rs = $this->conn->query($sql);
+								if($r = $rs->fetch_object()){
+									$exsTitleStr = $r->title;
+								}
+								$rs->free();
+								//Setup old and new strings
+								if($newValue) $newValue = $exsTitleStr.' (ometid: '.$occArr['ometid'].')';
+								if($oldValue) $oldValue = $oldValues['title'].' (ometid: '.$oldValues['ometid'].')';
 							}
-							$rs->free();
-							//Setup old and new strings
-							if($newValue) $newValue = $exsTitleStr.' (ometid: '.$occArr['ometid'].')';
-							if($oldValue) $oldValue = $oldValues['title'].' (ometid: '.$oldValues['ometid'].')';
+							$sqlEdit = $sqlEditsBase.'"'.$fieldName.'","'.$newValue.'","'.$oldValue.'")';
+							//echo '<div>'.$sqlEdit.'</div>';
+							$this->conn->query($sqlEdit);
 						}
-						$sqlEdit = $sqlEditsBase.'"'.$fieldName.'","'.$newValue.'","'.$oldValue.'")';
-						//echo '<div>'.$sqlEdit.'</div>';
-						$this->conn->query($sqlEdit);
 					}
 				}
 			}
@@ -754,8 +761,10 @@ class OccurrenceEditorManager {
 				if(array_key_exists('autoprocessingstatus',$occArr) && $occArr['autoprocessingstatus']){
 					$occArr['processingstatus'] = $occArr['autoprocessingstatus'];
 				}
-				if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
-					$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
+				if($editArr){
+					if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
+						$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
+					}
 				}
 				//Temp code needed for WeDigBio data entry event, will remove or refactor afterward
 				$occArr['genericcolumn2'] = $_SERVER['REMOTE_ADDR'];
@@ -776,6 +785,23 @@ class OccurrenceEditorManager {
 					$sqlImgTid = 'UPDATE images SET tid = '.($occArr['tidinterpreted']?$occArr['tidinterpreted']:'NULL').' '.
 						'WHERE occid = ('.$occArr['occid'].')';
 					$this->conn->query($sqlImgTid);
+				}
+				//If host was entered in quickhost field, update record 
+				if($quickHostEntered){
+					if($occArr['hostassocid']){
+						if($occArr['host']){
+							$sqlHost = 'UPDATE omoccurassociations SET verbatimsciname = "'.$occArr['host'].'" '.
+								'WHERE associd = '.$occArr['hostassocid'].' ';
+						}
+						else{
+							$sqlHost = 'DELETE FROM omoccurassociations WHERE associd = '.$occArr['hostassocid'].' ';
+						}
+					}
+					else{
+						$sqlHost = 'INSERT INTO omoccurassociations(occid,relationship,verbatimsciname) '.
+							'VALUES('.$occArr['occid'].',"host","'.$occArr['host'].'")';
+					}
+					$this->conn->query($sqlHost);
 				}
 				//Update occurrence record
 				$sql = 'UPDATE omoccurrences SET '.substr($sql,1).' WHERE (occid = '.$occArr['occid'].')';
@@ -1761,6 +1787,21 @@ class OccurrenceEditorManager {
 			$rs->free();
 			asort($retArr);
 		}
+		return $retArr;
+	}
+	
+	public function getQuickHost($occId){
+		$retArr = Array();
+		$sql = 'SELECT associd, verbatimsciname '.
+			'FROM omoccurassociations '.
+			'WHERE relationship = "host" AND occid = '.$occId.' ';
+		//echo $sql; exit;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['associd'] = $r->associd;
+			$retArr['verbatimsciname'] = $r->verbatimsciname;
+		}
+		$rs->free();
 		return $retArr;
 	}
 

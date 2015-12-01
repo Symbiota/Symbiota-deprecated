@@ -3,6 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
+header('Access-Control-Allow-Origin: http://www.catalogueoflife.org/col/webservice');
 //header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 //header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
@@ -995,6 +996,18 @@ else{
 												<?php echo (defined('SUBSTRATELABEL')?SUBSTRATELABEL:'Substrate'); ?><br/>
 												<input type="text" name="substrate" tabindex="82" maxlength="500" value="<?php echo array_key_exists('substrate',$occArr)?$occArr['substrate']:''; ?>" onchange="fieldChanged('substrate');" />
 											</div>
+											<?php
+											if(isset($QuickHostEntryIsActive) && $QuickHostEntryIsActive) { // Quick host field
+												$quickHostArr = $occManager->getQuickHost($occId);
+												?>
+												<div id="hostDiv">
+													<?php echo (defined('HOSTLABEL')?HOSTLABEL:'Host'); ?><br/>
+													<input type="text" name="host" id="quickhost" tabindex="82" maxlength="500" value="<?php echo ($quickHostArr?$quickHostArr['verbatimsciname']:''); ?>" onchange="fieldChanged('host');" />
+													<input type="hidden" name="hostassocid" value="<?php echo ($quickHostArr?$quickHostArr['associd']:''); ?>" />
+												</div>
+												<?php
+											}
+											?>
 											<div id="associatedTaxaDiv">
 												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?><br/>
 												<textarea name="associatedtaxa" tabindex="84" onchange="fieldChanged('associatedtaxa');" style="height:22px;"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea>

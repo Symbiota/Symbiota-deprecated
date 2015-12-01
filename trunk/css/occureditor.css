@@ -499,6 +499,14 @@ body{
 	width: 95%;
 }
 
+#hostDiv{
+	padding: 2px;
+}
+
+#hostDiv input{
+	width: 95%;
+}
+
 #associatedTaxaDiv{
 	padding: 2px;
 }
