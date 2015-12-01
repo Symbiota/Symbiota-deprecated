@@ -133,6 +133,20 @@ $(document).ready(function() {
 		if ((evt.keyCode == 13)) { return false; }
 	});
 	
+	if(document.getElementById('hostDiv')){
+		$("#quickhost").autocomplete({
+			source: function( request, response ) {
+				var name = request.term.replace(" ","+");
+				$.getJSON( "rpc/getcolspeciessuggest.php", { term: name }, response );
+			},
+			minLength: 4,
+			autoFocus: true,
+			change: function(event, ui){
+				fieldChanged("host");
+			}
+		});
+	}
+	
 	//Remember Auto Processing Status
 	var apstatus = getCookie("autopstatus");
 	if(getCookie("autopstatus")) document.fullform.autoprocessingstatus.value = apstatus;

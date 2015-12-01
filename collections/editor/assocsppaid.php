@@ -36,9 +36,9 @@ header("Content-Type: text/html; charset=".$charset);
 	</script>
 </head>
 
-<body>
+<body style="background-color:white">
 	<!-- This is inner text! -->
-	<div id="innertext">
+	<div id="innertext" style="background-color:white;">
 		<fieldset style="width:450px;">
 			<legend><b>Associated Species Entry Aid</b></legend>
 			<div style="">
