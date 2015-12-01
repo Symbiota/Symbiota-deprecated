@@ -73,7 +73,7 @@ INSTRUCTIONS
 
 
 1. Data – The general layers of data within Symbiota are: user, 
-   taxonomic, occurrence (specimen), images, floristic, identification 
+   taxonomic, occurrence (specimen), images, checklist, identification 
    key, and taxon profile (common names, text descriptions, etc). 
    While user interfaces have been developed for web management of 
    some of the data layers, others are still in development and data 
