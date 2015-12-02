@@ -350,6 +350,7 @@ ALTER TABLE `omcollectionstats`
   
 ALTER TABLE `glossary`
 	ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`;
+	MODIFY COLUMN `definition`  varchar(1000) NULL DEFAULT NULL AFTER `term`;
 
 ALTER TABLE `taxadescrblock`
 	MODIFY COLUMN `caption`  varchar(40) NULL DEFAULT NULL AFTER `tid`;
