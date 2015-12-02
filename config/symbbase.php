@@ -47,7 +47,7 @@ if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))
 	}
 }
 
-$CSS_VERSION = 'ver=20150403';
+$CSS_VERSION = 'ver=20150404';
 $USER_DISPLAY_NAME = (array_key_exists("dn",$PARAMS_ARR)?$PARAMS_ARR["dn"]:"");
 $USERNAME = (array_key_exists("un",$PARAMS_ARR)?$PARAMS_ARR["un"]:0);
 $SYMB_UID = (array_key_exists("uid",$PARAMS_ARR)?$PARAMS_ARR["uid"]:0);
