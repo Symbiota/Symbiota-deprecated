@@ -109,10 +109,10 @@ class TaxonProfileManager {
  	
  	public function setAttributes(){
  		if(count($this->acceptedTaxa) < 2){
-				if($this->clid) $this->setChecklistInfo();
-				$this->setVernaculars();
-	 			$this->setSynonyms();
-			}
+			if($this->clid) $this->setChecklistInfo();
+			$this->setVernaculars();
+			$this->setSynonyms();
+		}
  		
  	}
 

@@ -6,12 +6,12 @@ Header("Content-Type: text/html; charset=".$charset);
 $descrDisplayLevel;
 $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1; 
-$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:"";
-$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
+$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0;
+$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:0;
 $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang;
 $descrDisplayLevel = array_key_exists("displaylevel",$_REQUEST)?$_REQUEST["displaylevel"]:"";
 
-if(!$projValue && !$clValue) $projValue = $defaultProjId;
+//if(!$projValue && !$clValue) $projValue = $defaultProjId;
 
 $taxonManager = new TaxonProfileManager();
 if($taxAuthId || $taxAuthId === "0") {
@@ -363,16 +363,16 @@ if($taxonManager->getSciName() != "unknown"){
 		<tr>
 			<td colspan="2">
 				<fieldset style="padding:10px 2px 10px 2px;">
-					<legend>
 					<?php 
 					if($clValue){
+						echo "<legend>";
 						echo "Species within <b>".$taxonManager->getClName()."</b>&nbsp;&nbsp;";
 						if($taxonManager->getParentClid()){
 							echo "<a href='index.php?taxon=$taxonValue&cl=".$taxonManager->getParentClid()."&taxauthid=".$taxAuthId."' title='Go to ".$taxonManager->getParentName()." checklist'><img style='border:0px;width:10px;' src='../images/toparent.png'/></a>";
 						}
+						echo "</legend>";
 					}
 					?>
-					</legend>
 					<div>
 					<?php 
 					if($sppArr = $taxonManager->getSppArray()){
