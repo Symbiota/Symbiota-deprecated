@@ -152,7 +152,7 @@ if($isEditor){
 			theme_advanced_buttons3 : ""
 		});
 	</script>
-	<script type="text/javascript" src="../js/symb/profile.viewprofile.js"></script>
+	<script type="text/javascript" src="../js/symb/profile.viewprofile.js?ver=20151202"></script>
 	<script type="text/javascript" src="../js/symb/shared.js"></script>
 </head>
 <body>

@@ -29,12 +29,12 @@ function verifyAddTaxonomyForm(f){
 }
 
 function openMappingAid() {
-    mapWindow=open("../tools/mappointaid.php?formname=checklistaddform&latname=ncllatcentroid&longname=ncllongcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+    mapWindow=open("../tools/mappointaid.php?formname=checklistaddform&latname=latcentroid&longname=longcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
     if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
 function openMappingPolyAid() {
-	mapWindow=open("../tools/mappolyaid.php?formname=checklistaddform&latname=ncllatcentroid&longname=ncllongcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+	mapWindow=open("../tools/mappolyaid.php?formname=checklistaddform&latname=latcentroid&longname=longcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
     if(mapWindow.opener == null) mapWindow.opener = self;
 }
 
@@ -86,24 +86,24 @@ function verifyModifyLoginForm(f){
 }
 
 function verifyClAddForm(f){
-	if(f.nclname.value == ""){
+	if(f.name.value == ""){
 		alert("The Checklist Name field must have a value before a new checklist can be created");
 		return false;
 	}
-	if(!isNumeric(f.ncllatcentroid.value)){
+	if(!isNumeric(f.latcentroid.value)){
 		alert("The Latitude Centriod field must contain a numeric value only");
 		return false;
 	}
-	if(!isNumeric(f.ncllongcentroid.value)){
+	if(!isNumeric(f.longcentroid.value)){
 		alert("The Longitude Centriod field must contain a numeric value only");
 		return false;
 	}
-	if(!isNumeric(f.nclpointradiusmeters.value)){
+	if(!isNumeric(f.pointradiusmeters.value)){
 		alert("The Point Radius field must contain only a numeric value");
 		return false;
 	}
-	if(f.ncltype){ 
-		if(f.ncltype.value == "rarespp" && f.ncllocality.value == ""){
+	if(f.type){ 
+		if(f.type.value == "rarespp" && f.locality.value == ""){
 			alert("Rare species checklists must have a state value entered into the locality field");
 			return false;
 		}
