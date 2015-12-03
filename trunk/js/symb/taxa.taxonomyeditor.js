@@ -120,6 +120,14 @@ function GetXmlHttpObject(){
 	return xmlHttp;
 }
 
+function validateTaxonEditForm(f){
+	if(f.unitname1.value.trim() == ""){
+		alert('Unitname 1 field must have a value');
+		return false;
+	}
+	return true;
+}
+
 function verifyAcceptEditsForm(f){
 	if(f.acceptedstr.value == ""){
 		alert("Please enter an accepted name to link this name to!");

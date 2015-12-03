@@ -114,14 +114,7 @@ if($isEditor){
 		}
 	}
 	elseif($action == "Create Checklist"){
-		$newClArr = Array();
-		foreach($_REQUEST as $k => $v){
-			if(substr($k,0,3) == "ncl"){
-				$newClArr[substr($k,3)] = $_REQUEST[$k];
-			}
-		}
-		$newClArr["uid"] = $_REQUEST["userid"];
-		$newClid = $pClManager->createChecklist($newClArr);
+		$newClid = $pClManager->createChecklist($_POST);
 		header("Location: ".$clientRoot."/checklists/checklist.php?cl=".$newClid."&emode=1");
 	}
 	elseif($action == "delusertaxonomy"){
@@ -149,8 +142,15 @@ if($isEditor){
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
+	<script type="text/javascript" src="../js/tiny_mce/tiny_mce.js"></script>
 	<script type="text/javascript">
 		var tabIndex = <?php echo $tabIndex; ?>;
+		tinyMCE.init({
+			mode : "textareas",
+			theme_advanced_buttons1 : "bold,italic,underline,charmap,hr,outdent,indent,link,unlink,code",
+			theme_advanced_buttons2 : "",
+			theme_advanced_buttons3 : ""
+		});
 	</script>
 	<script type="text/javascript" src="../js/symb/profile.viewprofile.js"></script>
 	<script type="text/javascript" src="../js/symb/shared.js"></script>
@@ -221,17 +221,17 @@ if(isset($profile_viewprofileCrumbs)){
 								<legend style="font-weight:bold;">Create a New Checklist</legend>
 								<div style="margin:3px;">
 									<b>Checklist Name</b><br/>
-									<input name="nclname" type="text" maxlength="50" style="width:90%;" />
+									<input name="name" type="text" maxlength="50" style="width:90%;" />
 								</div>
 								<div style="margin:3px;">
 									<b>Authors</b><br/>
-									<input name="nclauthors" type="text" maxlength="250" style="width:90%;" />
+									<input name="authors" type="text" maxlength="250" style="width:90%;" />
 								</div>
 								<?php 
 								if(isset($GLOBALS['USER_RIGHTS']['RareSppAdmin']) || $IS_ADMIN){
 									echo '<div style="margin:3px;">';
 									echo '<b>Checklist Type</b><br/>';
-									echo '<select name="ncltype">';
+									echo '<select name="type">';
 									echo '<option value="static">General Checklist</option>';
 									echo '<option value="rarespp">Rare, threatened, protected species list</option>';
 									echo '</select>';
@@ -240,32 +240,32 @@ if(isset($profile_viewprofileCrumbs)){
 								?>
 								<div style="margin:3px;">
 									<b>Locality</b><br/>
-									<input name="ncllocality" type="text" maxlength="500" style="width:90%;" />
+									<input name="locality" type="text" maxlength="500" style="width:90%;" />
 								</div>
 								<div style="margin:3px;">
-									<b>Publication</b><br/>
-									<input name="nclpublication" type="text" maxlength="500" style="width:90%;" />
+									<b>Citation</b><br/>
+									<input name="publication" type="text" maxlength="500" style="width:90%;" />
 								</div>
 								<div style="margin:3px;">
 									<b>Abstract</b><br/>
-									<textarea name="nclabstract" style="width:90%;height:60px;"></textarea>
+									<textarea name="abstract" style="width:90%;height:60px;"></textarea>
 								</div>
 								<div style="margin:3px;">
 									<b>Notes</b><br/>
-									<input name="nclnotes" type="text" maxlength="500" size="60" />
+									<input name="notes" type="text" maxlength="500" size="60" />
 								</div>
 								<div style="float:left;">
 									<div style="float:left;margin:3px;">
 										<b>Latitude<br />Centroid</b><br />
-										<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" style="width:110px;"/>
+										<input id="latdec" name="latcentroid" type="text" maxlength="15" style="width:110px;"/>
 									</div>
 									<div style="float:left;margin:3px;">
 										<b>Longitude<br />Centroid</b><br />
-										<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" style="width:110px;" />
+										<input id="lngdec" name="longcentroid" type="text" maxlength="15" style="width:110px;" />
 									</div>
 									<div style="float:left;margin:3px;">
 										<b>Point Radius<br />(meters)</b><br />
-										<input name="nclpointradiusmeters" type="text" maxlength="15" style="width:110px;"/>
+										<input name="pointradiusmeters" type="text" maxlength="15" style="width:110px;"/>
 										<div style="float:right;margin:20px 0px 0px 3px;">
 											<span style="cursor:pointer;" onclick="openMappingAid();">
 												<img src="../images/world.png" style="width:12px;" />
@@ -281,7 +281,7 @@ if(isset($profile_viewprofileCrumbs)){
 										</div>
 										<div id="polysavebox" style="display:none;clear:both;">
 											<b>Polygon coordinates ready to save.</b>
-											<input type="hidden" id="footprintWKT" name="nclfootprintWKT" value='' />
+											<input type="hidden" id="footprintWKT" name="footprintWKT" value='' />
 										</div>
 										<div style="float:right;margin:8px 0px 0px 10px;cursor:pointer;" onclick="openMappingPolyAid();">
 											<img src="../images/world.png" style="width:12px;" />
@@ -290,7 +290,7 @@ if(isset($profile_viewprofileCrumbs)){
 								</div>
 								<div style="clear:both;margin:3px;">
 									<b>Parent Checklist:</b><br/>
-									<select name="nclparentclid">
+									<select name="parentclid">
 										<option value="">None Selected</option>
 										<option value="">----------------------------------</option>
 										<?php $pClManager->echoParentSelect(); ?>
@@ -299,14 +299,14 @@ if(isset($profile_viewprofileCrumbs)){
 								<div style="clear:both;margin:3px;">
 									<div style="font-weight:bold;">
 										<b>Access:</b> 
-										<select name="nclaccess">
+										<select name="access">
 											<option value="private">Private</option>
 											<option value="public">Public</option>
 										</select>
 									</div>
 								</div>
 								<div style="clear:both;margin:10px;">
-									<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+									<input type="hidden" name="uid" value="<?php echo $userId;?>" />
 									<div style="margin-left:20px;">
 										<input name="action" type="submit" value="Create Checklist" />
 									</div>

@@ -100,7 +100,7 @@ else{
 
 	</head> 
 	<body style="background-color:#ffffff;" onload="initialize()">
-		<div style="width:770px;height:650px;">
+		<div style="">
 			<div>
 				Click once to capture coordinates.  
 				Submit Coordinate button will transfer to form. 

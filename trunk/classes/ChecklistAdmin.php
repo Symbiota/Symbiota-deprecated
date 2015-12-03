@@ -50,19 +50,41 @@ class ChecklistAdmin {
 		return $retArr;
 	}
 	
-	public function editMetaData($editArr){
+	public function editMetaData($postArr){
 		$statusStr = '';
 		$setSql = "";
-		foreach($editArr as $key =>$value){
-			if($value){
-				$setSql .= ', '.$key.' = "'.$this->cleanInStr($value).'"';
+		$defaultViewArr = Array();
+		$defaultViewArr["ddetails"] = array_key_exists("ddetails",$postArr)?1:0;
+		$defaultViewArr["dcommon"] = array_key_exists("dcommon",$postArr)?1:0;
+		$defaultViewArr["dimages"] = array_key_exists("dimages",$postArr)?1:0;
+		$defaultViewArr["dvouchers"] = array_key_exists("dvouchers",$postArr)?1:0;
+		$defaultViewArr["dauthors"] = array_key_exists("dauthors",$postArr)?1:0;
+		$defaultViewArr["dalpha"] = array_key_exists("dalpha",$postArr)?1:0;
+		$postArr["defaultsettings"] = json_encode($defaultViewArr);
+		
+		$fieldArr = array('name'=>'s','authors'=>'s','type'=>'s','locality'=>'s','publication'=>'s','abstract'=>'s','notes'=>'s','latcentroid'=>'n',
+			'longcentroid'=>'n','pointradiusmeters'=>'n','footprintWKT'=>'s','parentclid'=>'n','access'=>'s','defaultsettings'=>'s');
+		foreach($fieldArr as $fieldName => $fieldType){
+			$v = $this->cleanInStr($postArr[$fieldName]);
+			if($fieldName != 'abstract') $v = strip_tags($v, '<i><u><b><a>');
+
+			if($v){
+				if($fieldType == 's'){
+					$setSql .= ', '.$fieldName.' = "'.$v.'"';
+				}
+				elseif($fieldType == 'n' && is_numeric($v)){
+					$setSql .= ', '.$fieldName.' = "'.$v.'"';
+				}
+				else{
+					$setSql .= ', '.$fieldName.' = NULL';
+				}
 			}
 			else{
-				$setSql .= ', '.$key.' = NULL';
+				$setSql .= ', '.$fieldName.' = NULL';
 			}
 		}
 		$sql = 'UPDATE fmchecklists SET '.substr($setSql,2).' WHERE (clid = '.$this->clid.')';
-		//echo $sql;
+		//echo $sql; exit;
 		if(!$this->conn->query($sql)){
 			$statusStr = 'Error: unable to update checklist metadata. SQL: '.$this->conn->error;
 		}

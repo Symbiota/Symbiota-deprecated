@@ -1,7 +1,6 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ChecklistManager.php');
-include_once($serverRoot.'/classes/ChecklistAdmin.php');
 require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
 header("Content-Type: text/html; charset=".$charset);
 ini_set('max_execution_time', 240); //240 seconds = 4 minutes
