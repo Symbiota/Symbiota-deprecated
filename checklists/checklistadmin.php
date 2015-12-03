@@ -76,7 +76,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 		});
 	</script>
 	<script type="text/javascript" src="../js/symb/shared.js"></script>
-	<script type="text/javascript" src="../js/symb/checklists.checklistadmin.js?ver=20150610"></script>
+	<script type="text/javascript" src="../js/symb/checklists.checklistadmin.js?ver=20151202"></script>
 </head>
 
 <body>
