@@ -30,7 +30,6 @@ if(is_numeric($errRad)){
 		<title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
-		</script>
 	    <script type="text/javascript">
 		    var map;
 		    var currentMarker;
@@ -192,7 +191,7 @@ if(is_numeric($errRad)){
 	    </script>
 	</head> 
 	<body style="background-color:#ffffff;" onload="initialize()">
-		<div style="width:770px;height:650px;">
+		<div style="">
 			<div style="margin:3px;">
 				Click on the map to capture coordinates, or move the marker. Enter a number into the Uncertainty in Meters box to create an error radius circle around the marker.
 				You can edit the error radius circle by clicking on any of its sides and dragging to the size you want.
@@ -206,7 +205,7 @@ if(is_numeric($errRad)){
 				<b>Uncertainty in Meters:</b>&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="uncbox" size="13" name="unc" value="<?php echo $errRad; ?>" />&nbsp;&nbsp;&nbsp; 
 				<input type="submit" name="addcoords" value="Submit Coordinates" onclick="updateParentForm();" />&nbsp;&nbsp;&nbsp;
 			</div>
-			<div id='map_canvas' style='width:95%; height:90%; clear:both;'></div>
+			<div id='map_canvas' style='width:98%; height:83%; clear:both;'></div>
 		</div>
 	</body>
 </html>

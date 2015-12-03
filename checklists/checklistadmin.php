@@ -22,22 +22,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 
 	//Submit checklist MetaData edits
 	if($action == "Submit Changes"){
-		$editArr = Array();
-		$defaultViewArr = Array();
-		$defaultViewArr["ddetails"] = array_key_exists("ddetails",$_REQUEST)?1:0;
-		$defaultViewArr["dcommon"] = array_key_exists("dcommon",$_REQUEST)?1:0;
-		$defaultViewArr["dimages"] = array_key_exists("dimages",$_REQUEST)?1:0;
-		$defaultViewArr["dvouchers"] = array_key_exists("dvouchers",$_REQUEST)?1:0;
-		$defaultViewArr["dauthors"] = array_key_exists("dauthors",$_REQUEST)?1:0;
-		$defaultViewArr["dalpha"] = array_key_exists("dalpha",$_REQUEST)?1:0;
-		$defaultView = json_encode($defaultViewArr);
-		foreach($_REQUEST as $k => $v){
-			if(substr($k,0,3) == "ecl"){
-				$editArr[substr($k,3)] = $_REQUEST[$k];
-			}
-		}
-		$editArr["defaultSettings"] = $defaultView;
-		$clManager->editMetaData($editArr);
+		$clManager->editMetaData($_POST);
 		header('Location: checklist.php?cl='.$clid.'&pid='.$pid);
 	}
 	elseif($action == 'Delete Checklist'){
@@ -78,9 +63,17 @@ $voucherProjects = $clManager->getVoucherProjects();
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
+	<script type="text/javascript" src="../js/tiny_mce/tiny_mce.js"></script>
 	<script type="text/javascript">
 		var clid = <?php echo $clid; ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
+
+		tinyMCE.init({
+			mode : "textareas",
+			theme_advanced_buttons1 : "bold,italic,underline,charmap,hr,outdent,indent,link,unlink,code",
+			theme_advanced_buttons2 : "",
+			theme_advanced_buttons3 : ""
+		});
 	</script>
 	<script type="text/javascript" src="../js/symb/shared.js"></script>
 	<script type="text/javascript" src="../js/symb/checklists.checklistadmin.js?ver=20150610"></script>
@@ -220,18 +213,18 @@ $voucherProjects = $clManager->getVoucherProjects();
 							<legend><b>Edit Checklist Details</b></legend>
 							<div>
 								<b>Checklist Name</b><br/>
-								<input type="text" name="eclname" style="width:95%" value="<?php echo $clManager->getClName();?>" />
+								<input type="text" name="name" style="width:95%" value="<?php echo $clManager->getClName();?>" />
 							</div>
 							<div>
 								<b>Authors</b><br/>
-								<input type="text" name="eclauthors" style="width:95%" value="<?php echo $clArray["authors"]; ?>" />
+								<input type="text" name="authors" style="width:95%" value="<?php echo $clArray["authors"]; ?>" />
 							</div>
 							<?php 
 							if(isset($GLOBALS['USER_RIGHTS']['RareSppAdmin']) || $IS_ADMIN){
 								?>
 								<div>
 									<b>Checklist Type</b><br/>
-									<select name="ecltype">
+									<select name="type">
 										<option value="static">General Checklist</option>
 										<option value="rarespp" <?php echo ($clArray["type"]=='rarespp'?'SELECTED':'') ?>>Rare, threatened, protected species list</option>
 									</select>
@@ -241,19 +234,19 @@ $voucherProjects = $clManager->getVoucherProjects();
 							?>
 							<div>
 								<b>Locality</b><br/>
-								<input type="text" name="ecllocality" style="width:95%" value="<?php echo $clArray["locality"]; ?>" />
+								<input type="text" name="locality" style="width:95%" value="<?php echo $clArray["locality"]; ?>" />
 							</div> 
 							<div>
-								<b>Publication</b><br/>
-								<input type="text" name="eclpublication" style="width:95%" value="<?php echo str_replace('"',"&quot;",$clArray["publication"]); ?>" />
+								<b>Citation</b><br/>
+								<input type="text" name="publication" style="width:95%" value="<?php echo $clArray["publication"]; ?>" />
 							</div>
 							<div>
 								<b>Abstract</b><br/>
-								<textarea name="eclabstract" style="width:95%" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
+								<textarea name="abstract" style="width:95%" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
 							</div>
 							<div>
 								<b>Parent Checklist</b><br/>
-								<select name="eclparentclid">
+								<select name="parentclid">
 									<option value="">Select a Parent checklist</option>
 									<option value="">----------------------------------</option>
 									<?php 
@@ -266,20 +259,20 @@ $voucherProjects = $clManager->getVoucherProjects();
 							</div>
 							<div>
 								<b>Notes</b><br/>
-								<input type="text" name="eclnotes" style="width:95%" value="<?php echo $clArray["notes"]; ?>" />
+								<input type="text" name="notes" style="width:95%" value="<?php echo $clArray["notes"]; ?>" />
 							</div>
 							<div style="width:100%;">
 								<div style="float:left;">
 									<b>Latitude Centroid</b><br/>
-									<input id="latdec" type="text" name="ecllatcentroid" style="width:110px;" value="<?php echo $clArray["latcentroid"]; ?>" />
+									<input id="latdec" type="text" name="latcentroid" style="width:110px;" value="<?php echo $clArray["latcentroid"]; ?>" />
 								</div>
 								<div style="float:left;margin-left:15px;">
 									<b>Longitude Centroid</b><br/>
-									<input id="lngdec" type="text" name="ecllongcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
+									<input id="lngdec" type="text" name="longcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
 								</div>
 								<div style="float:left;margin-left:15px;">
 									<b>Point Radius (meters)</b><br/>
-									<input type="text" name="eclpointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
+									<input type="text" name="pointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
 								</div>
 								<div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
 									<img src="../images/world.png" style="width:12px;" />
@@ -350,7 +343,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 							</div>
 							<div style="clear:both;float:left;margin-top:15px;">
 								<b>Access</b><br/>
-								<select name="eclaccess">
+								<select name="access">
 									<option value="private">Private</option>
 									<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public</option>
 								</select>
@@ -358,7 +351,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 							<div style="clear:both;float:left;margin-top:15px;">
 								<input type='submit' name='submitaction' id='editsubmit' value='Submit Changes' />
 							</div>
-							<input type="hidden" id="footprintWKT" name="eclfootprintWKT" value='<?php echo $clArray["footprintWKT"]; ?>' />
+							<input type="hidden" id="footprintWKT" name="footprintWKT" value='<?php echo $clArray["footprintWKT"]; ?>' />
 							<input type="hidden" name="tabindex" value="1" />
 							<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
 							<input type="hidden" name="pid" value="<?php echo $pid; ?>" />

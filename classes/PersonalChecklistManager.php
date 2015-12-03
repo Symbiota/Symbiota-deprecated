@@ -59,20 +59,34 @@ class PersonalChecklistManager{
 		return $returnArr;
 	}
 
-	public function createChecklist($newClArr){
+	public function createChecklist($postArr){
 		$sqlInsert = "";
 		$sqlValues = "";
-		foreach($newClArr as $k => $v){
-			$sqlInsert .= ','.$k;
+		$fieldArr = array('name'=>'s','authors'=>'s','type'=>'s','locality'=>'s','publication'=>'s','abstract'=>'s','notes'=>'s','latcentroid'=>'n',
+			'longcentroid'=>'n','pointradiusmeters'=>'n','footprintWKT'=>'s','parentclid'=>'n','access'=>'s','uid'=>'n');
+
+		foreach($fieldArr as $fieldName => $fieldType){
+			$sqlInsert .= ','.$fieldName;
+			$v = $this->cleanInStr($postArr[$fieldName]);
+			if($fieldName != 'abstract') $v = strip_tags($v, '<i><u><b><a>');
 			if($v){
-				$sqlValues .= ',"'.$this->cleanInStr($v).'"';
+				if($fieldType == 's'){
+					$sqlValues .= ',"'.$v.'"';
+				}
+				else{
+					if(is_numeric($v)){
+						$sqlValues .= ','.$v;
+					}
+					else{
+						$sqlValues .= ',NULL';
+					}
+				}
 			}
 			else{
 				$sqlValues .= ',NULL';
 			}
 		}
 		$sql = "INSERT INTO fmchecklists (".substr($sqlInsert,1).") VALUES (".substr($sqlValues,1).")";
-		//echo $sql; exit;
 		
 		$newClId = 0;
 		if($this->conn->query($sql)){

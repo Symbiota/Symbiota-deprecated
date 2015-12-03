@@ -86,7 +86,7 @@ if($editable){
 		var tid = <?php echo $taxonEditorObj->getTid(); ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
 	</script>
-	<script language="javascript" src="../../js/symb/taxa.taxonomyeditor.js?ver=20150329"></script>
+	<script language="javascript" src="../../js/symb/taxa.taxonomyeditor.js?ver=20151124"></script>
 </head>
 <body>
 <?php
@@ -153,7 +153,7 @@ if($editable){
 					<div style="float:right;cursor:pointer;" onclick="toggleEditFields()" title="Toggle Taxon Editing Functions">
 						<img style='border:0px;' src='../../images/edit.png'/>
 					</div>
-					<form id="taxoneditform" name="taxoneditform" action="taxonomyeditor.php" method='post'>
+					<form id="taxoneditform" name="taxoneditform" action="taxonomyeditor.php" method="post" onsubmit="return validateTaxonEditForm(this)">
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">UnitName1: </div>
 							<div class="editfield">
@@ -279,7 +279,7 @@ if($editable){
 						<div class="editfield" style="display:none;">
 							<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>" />
 							<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
-							<input type='submit' id='taxoneditsubmit' name='taxonedits' value='Submit Edits' />
+							<input type="submit" id="taxoneditsubmit" name="taxonedits" value="Submit Edits" />
 						</div>
 					</form>
 				</div>
