@@ -8,6 +8,7 @@ $submitAction = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'
 $qCountry = array_key_exists('qcountry',$_REQUEST)?$_REQUEST['qcountry']:'';
 $qState = array_key_exists('qstate',$_REQUEST)?$_REQUEST['qstate']:'';
 $qCounty = array_key_exists('qcounty',$_REQUEST)?$_REQUEST['qcounty']:'';
+$qMunicipality = array_key_exists('qmunicipality',$_REQUEST)?$_REQUEST['qmunicipality']:'';
 $qLocality = array_key_exists('qlocality',$_REQUEST)?$_REQUEST['qlocality']:'';
 $qDisplayAll = array_key_exists('qdisplayall',$_REQUEST)?$_REQUEST['qdisplayall']:0;
 $qVStatus = array_key_exists('qvstatus',$_REQUEST)?$_REQUEST['qvstatus']:'';
@@ -55,6 +56,7 @@ if($editor && $submitAction){
 	if($qCountry) $geoManager->setQueryVariables('qcountry',$qCountry);
 	if($qState) $geoManager->setQueryVariables('qstate',$qState);
 	if($qCounty) $geoManager->setQueryVariables('qcounty',$qCounty);
+	if($qMunicipality) $geoManager->setQueryVariables('qmunicipality',$qMunicipality);
 	if($qSciname) $geoManager->setQueryVariables('qsciname',$qSciname);
 	if($qDisplayAll) $geoManager->setQueryVariables('qdisplayall',$qDisplayAll);
 	if($qVStatus) $geoManager->setQueryVariables('qvstatus',$qVStatus);
@@ -119,52 +121,71 @@ header("Content-Type: text/html; charset=".$charset);
 						?>
 						<div style="float:right;">
 							<form name="queryform" method="post" action="batchgeoreftool.php" onsubmit="return verifyQueryForm(this)">
-								<fieldset style="padding:10px;width:700px;background-color:lightyellow;">
+								<fieldset style="padding:5px;width:700px;background-color:lightyellow;">
 									<legend><b>Query Form</b></legend>
 									<div style="height:20px;">
-										<div style="float:left;margin-right:10px;">
-											<b>Country:</b>
-											<select name="qcountry" style="width:150px;">
-												<option value=''>All Countries</option>
-												<option value=''>--------------------</option>
-												<?php
-												$cArr = $geoManager->getCountryArr();
-												foreach($cArr as $c){
-													echo '<option '.($qCountry==$c?'SELECTED':'').'>'.$c.'</option>';
-												}
-												?>
-											</select>
+										<div style="clear:both;float:left;">
+											<div style="float:left;margin-right:10px;">
+												<b>Country:</b>
+												<select name="qcountry" style="width:150px;">
+													<option value=''>All Countries</option>
+													<option value=''>--------------------</option>
+													<?php
+													$cArr = $geoManager->getCountryArr();
+													foreach($cArr as $c){
+														echo '<option '.($qCountry==$c?'SELECTED':'').'>'.$c.'</option>';
+													}
+													?>
+												</select>
+											</div>
+											<div style="float:left;">
+												<b>State: </b>
+												<select name="qstate" style="width:150px;">
+													<option value=''>All States</option>
+													<option value=''>--------------------</option>
+													<?php
+													$sArr = $geoManager->getStateArr($qCountry);
+													foreach($sArr as $s){
+														echo '<option '.($qState==$s?'SELECTED':'').'>'.$s.'</option>';
+													}
+													?>
+												</select>
+											</div>
 										</div>
-										<div style="float:left;margin-right:10px;">
-											<b>State: </b>
-											<select name="qstate" style="width:150px;">
-												<option value=''>All States</option>
-												<option value=''>--------------------</option>
-												<?php
-												$sArr = $geoManager->getStateArr($qCountry);
-												foreach($sArr as $s){
-													echo '<option '.($qState==$s?'SELECTED':'').'>'.$s.'</option>';
-												}
-												?>
-											</select>
-										</div>
-										<div style="float:left;">
-											<b>County:</b>
-											<select name="qcounty" style="width:180px;">
-												<option value=''>All Counties</option>
-												<option value=''>--------------------</option>
-												<?php
-												$coArr = $geoManager->getCountyArr($qCountry,$qState);
-												foreach($coArr as $c){
-													echo '<option '.($qCounty==$c?'SELECTED':'').'>'.$c.'</option>';
-												}
-												?>
-											</select>
-											<img src="../../images/add.png" onclick="toggle('advfilterdiv')" title="Advanced Options" />
+										<div style="clear:both;float:left;margin-top:5px;">
+											<div style="float:left;margin-right:10px;">
+												<b>County:</b>
+												<select name="qcounty" style="width:180px;">
+													<option value=''>All Counties</option>
+													<option value=''>--------------------</option>
+													<?php
+													$coArr = $geoManager->getCountyArr($qCountry,$qState);
+													foreach($coArr as $c){
+														echo '<option '.($qCounty==$c?'SELECTED':'').'>'.$c.'</option>';
+													}
+													?>
+												</select>
+											</div>
+											<div style="float:left;margin-right:10px;">
+												<b>Municipality:</b>
+												<select name="qmunicipality" style="width:180px;">
+													<option value=''>All Municipalities</option>
+													<option value=''>--------------------</option>
+													<?php
+													$muArr = $geoManager->getMunicipalityArr($qCountry,$qState);
+													foreach($muArr as $m){
+														echo '<option '.($qMunicipality==$m?'SELECTED':'').'>'.$m.'</option>';
+													}
+													?>
+												</select>
+											</div>
+											<div style="float:left;">
+												<img src="../../images/add.png" onclick="toggle('advfilterdiv')" title="Advanced Options" />
+											</div>
 										</div>
 									</div>
-									<div id="advfilterdiv" style="clear:both;display:<?php echo ($qSciname || $qVStatus || $qDisplayAll?'block':'none'); ?>;">
-										<div style="margin-top:5px;">
+									<div id="advfilterdiv" style="clear:both;float:left;margin-top:5px;display:<?php echo ($qSciname || $qVStatus || $qDisplayAll?'block':'none'); ?>;">
+										<div style="">
 											<b>Verification status:</b>
 											<input id="qvstatus" name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="width:200px;" />
 											<span style="margin-left:15px;">
@@ -177,7 +198,7 @@ header("Content-Type: text/html; charset=".$charset);
 											Including previously georeferenced records
 										</div>
 									</div>
-									<div style="padding:2px;clear:both;">
+									<div style="margin-top:5px;float:left;clear:both;">
 										<b>Locality Term:</b>
 										<input name="qlocality" type="text" value="<?php echo $qLocality; ?>" style="width:250px;" />
 										<span style="margin-left:175px;">
@@ -229,6 +250,7 @@ header("Content-Type: text/html; charset=".$charset);
 													if(!$qCountry && $v['country']) $locStr = $v['country'].'; ';
 													if(!$qState && $v['stateprovince']) $locStr .= $v['stateprovince'].'; ';
 													if(!$qCounty && $v['county']) $locStr .= $v['county'].'; ';
+													if(!$qMunicipality && $v['municipality']) $locStr .= $v['municipality'].'; ';
 													if($v['locality']) $locStr .= str_replace(';',',',$v['locality']);
 													if($v['verbatimcoordinates']) $locStr .= ', '.$v['verbatimcoordinates'];
 													if(array_key_exists('decimallatitude',$v) && $v['decimallatitude']){
