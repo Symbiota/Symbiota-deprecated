@@ -726,88 +726,135 @@ class OccurrenceUtilities {
 		$status = true;
 
 		if($this->verbose) $this->outputMsg('Updating null families of family rank identifications... ',1);
-		$sql = 'UPDATE omoccurrences SET family = NULL WHERE family = ""';
-		$this->conn->query($sql);
-		$sql = 'UPDATE omoccurrences '.
-			'SET family = sciname '.
-			'WHERE collid IN('.$collId.') AND ISNULL(family) AND (sciname LIKE "%aceae" OR sciname LIKE "%idae")';
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to update family; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
+		$sql1 = 'SELECT occid FROM omoccurrences WHERE (family IS NULL) AND (sciname LIKE "%aceae" OR sciname LIKE "%idae")';
+		$rs1 = $this->conn->query($sql1);
+		$occidArr1 = array();
+		while($r1 = $rs1->fetch_object()){
+			$occidArr1[] = $r1->occid;
 		}
-
-		if($this->verbose) $this->outputMsg('Updating null scientific names of genus rank identifications... ',1);
-		$sql = 'UPDATE omoccurrences '. 
-			'SET sciname = genus '.
-			'WHERE collid IN('.$collId.') AND genus IS NOT NULL AND ISNULL(sciname) ';
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to update sciname using genus; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
+		$rs1->free();
+		if($occidArr1){
+			$sql = 'UPDATE omoccurrences '.
+				'SET family = sciname '.
+				'WHERE occid IN('.implode(',',$occidArr1).')';
+			if(!$this->conn->query($sql)){
+				$errStr = 'WARNING: unable to update family; '.$this->conn->error;
+				$this->errorArr[] = $errStr;
+				if($this->verbose) $this->outputMsg($errStr,2);
+				$status = false;
+			}
 		}
+		unset($occidArr1);
 		
 		if($this->verbose) $this->outputMsg('Updating null scientific names of family rank identifications... ',1);
-		$sql = 'UPDATE omoccurrences AS o '. 
-			'SET o.sciname = o.family '.
-			'WHERE o.collid IN('.$collId.') AND o.family IS NOT NULL AND ISNULL(o.sciname) ';
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to update sciname using family; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
+		$sql1 = 'SELECT occid FROM omoccurrences WHERE family IS NOT NULL AND sciname IS NULL';
+		$rs1 = $this->conn->query($sql1);
+		$occidArr2 = array();
+		while($r1 = $rs1->fetch_object()){
+			$occidArr2[] = $r1->occid;
 		}
+		$rs1->free();
+		if($occidArr2){
+			$sql = 'UPDATE omoccurrences SET sciname = family WHERE occid IN('.implode(',',$occidArr2).') ';
+			if(!$this->conn->query($sql)){
+				$errStr = 'WARNING: unable to update sciname using family; '.$this->conn->error;
+				$this->errorArr[] = $errStr;
+				if($this->verbose) $this->outputMsg($errStr,2);
+				$status = false;
+			}
+		}
+		unset($occidArr2);
 		
 		if($this->verbose) $this->outputMsg('Indexing valid scientific names (e.g. populating tidinterpreted)... ',1);
-		$sql = 'UPDATE omoccurrences AS o INNER JOIN taxa AS t ON o.sciname = t.sciname '. 
-			'SET o.TidInterpreted = t.tid '. 
-			'WHERE o.collid IN('.$collId.') AND ISNULL(o.TidInterpreted) ';
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to update tidinterpreted; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
+		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
+			'WHERE o.collid IN('.$collId.') AND o.TidInterpreted IS NULL';
+		$rs1 = $this->conn->query($sql1);
+		$occidArr3 = array();
+		while($r1 = $rs1->fetch_object()){
+			$occidArr3[] = $r1->occid;
 		}
-
+		$rs1->free();
+		if($occidArr3){
+			$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
+				'SET o.TidInterpreted = t.tid '. 
+				'WHERE o.occid IN('.implode(',',$occidArr3).') ';
+			if(!$this->conn->query($sql)){
+				$errStr = 'WARNING: unable to update tidinterpreted; '.$this->conn->error;
+				$this->errorArr[] = $errStr;
+				if($this->verbose) $this->outputMsg($errStr,2);
+				$status = false;
+			}
+		}
+		unset($occidArr3);
+		
 		if($this->verbose) $this->outputMsg('Updating and indexing occurrence images... ',1);
-		$sql = 'UPDATE omoccurrences AS o INNER JOIN images AS i ON o.occid = i.occid '. 
-			'SET i.tid = o.tidinterpreted '. 
-			'WHERE o.collid IN('.$collId.') AND (ISNULL(i.tid)) AND (o.tidinterpreted IS NOT NULL)';
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to update image tid field; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
+		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+			'WHERE o.collid IN('.$collId.') AND (i.tid IS NULL) AND (o.tidinterpreted IS NOT NULL)';
+		$rs1 = $this->conn->query($sql1);
+		$occidArr4 = array();
+		while($r1 = $rs1->fetch_object()){
+			$occidArr4[] = $r1->occid;
 		}
-
+		$rs1->free();
+		if($occidArr4){
+			$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '. 
+				'SET i.tid = o.tidinterpreted '. 
+				'WHERE o.occid IN('.implode(',',$occidArr4).')';
+			if(!$this->conn->query($sql)){
+				$errStr = 'WARNING: unable to update image tid field; '.$this->conn->error;
+				$this->errorArr[] = $errStr;
+				if($this->verbose) $this->outputMsg($errStr,2);
+				$status = false;
+			}
+		}
+		unset($occidArr4);
+		
 		if($this->verbose) $this->outputMsg('Updating null families using taxonomic thesaurus... ',1);
-		$sql = 'UPDATE omoccurrences AS o INNER JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '. 
-			'SET o.family = ts.family '. 
-			'WHERE o.collid IN('.$collId.') AND (ts.taxauthid = 1) AND (ts.family IS NOT NULL) AND (ISNULL(o.family))';
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to update family in omoccurrence table; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
+		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+			'WHERE o.collid IN('.$collId.') AND (ts.taxauthid = 1) AND (ts.family IS NOT NULL) AND (o.family IS NULL)';
+		$rs1 = $this->conn->query($sql1);
+		$occidArr5 = array();
+		while($r1 = $rs1->fetch_object()){
+			$occidArr5[] = $r1->occid;
 		}
+		$rs1->free();
+		if($occidArr5){
+			$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '. 
+				'SET o.family = ts.family '. 
+				'WHERE o.occid IN('.implode(',',$occidArr5).')';
+			if(!$this->conn->query($sql)){
+				$errStr = 'WARNING: unable to update family in omoccurrence table; '.$this->conn->error;
+				$this->errorArr[] = $errStr;
+				if($this->verbose) $this->outputMsg($errStr,2);
+				$status = false;
+			}
+		}
+		unset($occidArr5);
 
 		#Updating records with null author
-		/*
 		if($this->verbose) $this->outputMsg('Updating null scientific authors using taxonomic thesaurus... ',1);
-		$sql = 'UPDATE omoccurrences SET scientificNameAuthorship = NULL WHERE scientificNameAuthorship = ""';
-		$this->conn->query($sql);
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '. 
-			'SET o.scientificNameAuthorship = t.author '. 
-			'WHERE (o.scientificNameAuthorship IS NULL) AND (t.author IS NOT NULL)';
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to update author; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
+		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+			'WHERE o.scientificNameAuthorship IS NULL AND t.author IS NOT NULL LIMIT 5000 ';
+		$rs1 = $this->conn->query($sql1);
+		$occidArr6 = array();
+		while($r1 = $rs1->fetch_object()){
+			$occidArr6[] = $r1->occid;
 		}
-
+		$rs1->free();
+		if($occidArr6){
+			$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '. 
+				'SET o.scientificNameAuthorship = t.author '. 
+				'WHERE (o.occid IN('.implode(',',$occidArr6).'))';
+			if(!$this->conn->query($sql)){
+				$errStr = 'WARNING: unable to update author; '.$this->conn->error;
+				$this->errorArr[] = $errStr;
+				if($this->verbose) $this->outputMsg($errStr,2);
+				$status = false;
+			}
+		}
+		unset($occidArr6);
+		
+		/*
 		if($this->verbose) $this->outputMsg('Updating georeference index... ',1);
 		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
 			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.

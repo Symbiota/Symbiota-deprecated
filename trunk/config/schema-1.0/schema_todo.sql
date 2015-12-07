@@ -231,7 +231,9 @@ ALTER TABLE `specprocessorprojects`
   ADD COLUMN `replaceStr` VARCHAR(45) NULL AFTER `pattReplace`;
 
 ALTER TABLE `images` 
-  CHANGE COLUMN `sourceIdentifier` `sourceIdentifier` VARCHAR(150) NULL DEFAULT NULL ;
+  CHANGE COLUMN `sourceIdentifier` `sourceIdentifier` VARCHAR(150) NULL DEFAULT NULL,
+  ADD COLUMN `referenceUrl` VARCHAR(255) NULL AFTER `sourceurl`;
+
 
 ALTER TABLE `omcollections` 
   ADD COLUMN `dwcaUrl` VARCHAR(75) NULL AFTER `publishToGbif`;
