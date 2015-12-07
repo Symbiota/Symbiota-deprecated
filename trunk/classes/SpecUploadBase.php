@@ -566,7 +566,23 @@ class SpecUploadBase extends SpecUpload{
 			'SET DecimalLatitude = NULL, DecimalLongitude = NULL '.
 			'WHERE collid = '.$this->collId.' AND (DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180)';
 		$this->conn->query($sql);
+
 		
+		$this->outputMsg('<li style="margin-left:10px;">Cleaning taxonomy...</li>');
+		ob_flush();
+		flush();
+		$sql = 'UPDATE uploadspectemp SET family = sciname '.
+			'WHERE (family IS NULL) AND (sciname LIKE "%aceae" OR sciname LIKE "%idae")';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp SET sciname = family WHERE (family IS NOT NULL) AND (sciname IS NULL) ';
+		$this->conn->query($sql);
+
+		#Updating records with null author
+		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.sciname = t.sciname '. 
+			'SET u.scientificNameAuthorship = t.author '. 
+			'WHERE u.scientificNameAuthorship IS NULL AND t.author IS NOT NULL';
+		$this->conn->query($sql);
 	}
 
 	public function getTransferReport(){
