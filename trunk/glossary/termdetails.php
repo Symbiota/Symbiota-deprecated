@@ -19,6 +19,10 @@ $termImgArr = array();
 $termGrpArr = array();
 $synonymArr = array();
 $translationArr = array();
+$termTaxaArr = array();
+$tidArr = array();
+$tidStr = '';
+$hasImages = false;
 
 $statusStr = '';
 if($formSubmit){
@@ -44,11 +48,18 @@ if($formSubmit){
 	elseif($formSubmit == 'Remove Relation'){
 		$glosManager->removeRelation($_POST);
 	}
+	elseif($formSubmit == 'Add Taxa Group'){
+		$glosManager->setGrpTaxaLink($_POST['tid'],$_POST['glossgrpid']);
+	}
+	elseif($formSubmit == 'Delete Taxa Group'){
+		$glosManager->deleteGrpTaxaLink($_POST['glossgrpid'],$_POST['tid']);
+	}
 }
 
 if($glossId){
 	$termArr = $glosManager->getTermArr($glossId);
 	$glossgrpId = $termArr['glossgrpid'];
+	$termTaxaArr = $glosManager->getTermTaxaArr($glossgrpId);
 	$termGrpArr = $glosManager->getGrpArr($glossId,$glossgrpId,$termArr['language']);
 	if(array_key_exists('synonym',$termGrpArr)){
 		$synonymArr = $termGrpArr['synonym'];
@@ -89,7 +100,7 @@ else{
 			<div class='navpath'>
 				<a href='../index.php'>Home</a> &gt;&gt; 
 				<?php echo $glossary_indexCrumbs; ?>
-				<a href='index.php?language=<?php echo $termArr['language']; ?>&tid=<?php echo $termArr['tid']; ?>'> <b>Glossary Management</b></a>
+				<a href='index.php?language=<?php echo $termArr['language']; ?>'> <b>Glossary Management</b></a>
 			</div>
 			<?php 
 		}
@@ -98,7 +109,7 @@ else{
 		?>
 		<div class='navpath'>
 			<a href='../index.php'>Home</a> &gt;&gt; 
-			<a href='index.php?language=<?php echo $termArr['language']; ?>&tid=<?php echo $termArr['tid']; ?>'> <b>Glossary Management</b></a>
+			<a href='index.php?language=<?php echo $termArr['language']; ?>'> <b>Glossary Management</b></a>
 		</div>
 		<?php 
 	}
@@ -175,24 +186,51 @@ else{
 									<textarea name="resourceurl" id="resourceurl" rows="10" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['resourceurl']; ?></textarea>
 								</div>
 							</div>
-							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="float:left;">
-									<b>Taxonomic Group: </b>
-								</div>
-								<div style="float:left;margin-left:10px;">
-									<input type="text" name="taxagroup" id="taxagroup" maxlength="45" style="width:250px;" value="<?php echo $termArr['SciName']; ?>" onchange="" title="" />
-									<input name="tid" id="tid" type="hidden" value="<?php echo $termArr['tid']; ?>" />
-								</div>
-							</div>
 							<div style="clear:both;padding-top:8px;float:right;">
 								<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
 								<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 								<input id="origterm" type="hidden" value="<?php echo $termArr['term']; ?>" />
 								<input id="origlang" type="hidden" value="<?php echo $termArr['language']; ?>" />
-								<input name="origtid" id="origtid" type="hidden" value="<?php echo $termArr['tid']; ?>" />
 								<button name="formsubmit" type="submit" value="Edit Term">Save Edits</button>
 							</div>
 						</form>
+						<div style="clear:both;height:15px;"></div>
+						<fieldset style='clear:both;padding:8px;margin-bottom:10px;'>
+							<legend><b>Taxonomic Groups</b></legend>
+							<form name="taxaaddform" id="taxaaddform" action="termdetails.php" method="post" onsubmit="">
+								<div style="float:left;">
+									<b>Add Taxonomic Group: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="taxagroup" id="taxagroup" maxlength="45" style="width:250px;" value="" onchange="" title="" />
+									<input name="tid" id="tid" type="hidden" value="" />
+								</div>
+								<div style="float:right;">
+									<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
+									<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
+									<button name="formsubmit" type="submit" value="Add Taxa Group">Add Group</button>
+								</div>
+							</form>
+							<div style="float:left;clear:both;cursor:pointer;" onclick="" title="Taxa Groups">
+								<?php
+								$taxaCnt = count($termTaxaArr);
+								foreach($termTaxaArr as $taxId => $tArr){
+									$tidArr[] = $tArr['tid'];
+									echo '<form name="taxadelform" id="'.$tArr['SciName'].'" action="termdetails.php" style="margin-top:0px;margin-bottom:0px;" method="post" onsubmit="">';
+									echo $tArr['SciName'];
+									if($taxaCnt > 1){
+										echo '<input style="margin-left:15px;" type="image" src="../images/del.png" title="Delete Taxa Group">';
+										echo '<input name="glossid" type="hidden" value="'.$glossId.'" />';
+										echo '<input name="glossgrpid" type="hidden" value="'.$glossgrpId.'" />';
+										echo '<input name="tid" type="hidden" value="'.$tArr['tid'].'" />';
+										echo '<input name="formsubmit" type="hidden" value="Delete Taxa Group" />';
+									}
+									echo '</form>';
+								}
+								$tidStr = implode(',',$tidArr);
+								?>
+							</div>
+						</fieldset>
 					</div>
 				</div>
 				
@@ -242,7 +280,7 @@ else{
 									<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 									<input name="relglossgrpid" id="newsynglossgrpid" type="hidden" value="" />
 									<input name="language" id="newsynlanguage" type="hidden" value="<?php echo $termArr['language']; ?>" />
-									<input name="tid" id="newsyntid" type="hidden" value="<?php echo $termArr['tid']; ?>" />
+									<input name="tid" id="newsyntid" type="hidden" value="<?php echo $tidStr; ?>" />
 									<input id="synorigterm" type="hidden" value="<?php echo $termArr['term']; ?>" />
 									<button name="formsubmit" type="submit" value="Add Relation">Add Synonym</button>
 								</div>
@@ -259,7 +297,6 @@ else{
 										<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
 										<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 										<input name="gltlinkid" type="hidden" value="<?php echo $synArr['gltlinkid']; ?>" />
-										<input name="tid" type="hidden" value="<?php echo $termArr['tid']; ?>" />
 										<input name="relglossid" type="hidden" value="<?php echo $synArr['glossid']; ?>" />
 										<input type="image" name="formsubmit" src='../images/del.png'  value="Remove Relation" title="Remove Synonym">
 									</form>
@@ -348,7 +385,7 @@ else{
 									<input name="relglossid" id="transglossid" type="hidden" value="" />
 									<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 									<input name="relglossgrpid" id="newtransglossgrpid" type="hidden" value="" />
-									<input name="tid" id="newtranstid" type="hidden" value="<?php echo $termArr['tid']; ?>" />
+									<input name="tid" id="newtranstid" type="hidden" value="<?php echo $tidStr; ?>" />
 									<input id="transoriglanguage" type="hidden" value="<?php echo $termArr['language']; ?>" />
 									<button name="formsubmit" type="submit" value="Add Relation">Add Translation</button>
 								</div>
@@ -365,7 +402,6 @@ else{
 										<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
 										<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 										<input name="gltlinkid" type="hidden" value="<?php echo $transArr['gltlinkid']; ?>" />
-										<input name="tid" type="hidden" value="<?php echo $termArr['tid']; ?>" />
 										<input name="relglossid" type="hidden" value="<?php echo $transArr['glossid']; ?>" />
 										<input type="image" name="formsubmit" src='../images/del.png'  value="Remove Relation" title="Remove Translation">
 									</form>
@@ -466,7 +502,6 @@ else{
 						<div style="clear:both;">
 							<?php
 							if($termImgArr){
-								$hasImages = false;
 								foreach($termImgArr as $imgId => $imgArr){
 									$termImage = false;
 									if($imgArr["glossid"] == $glossId){

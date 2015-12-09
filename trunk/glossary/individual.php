@@ -25,11 +25,24 @@ $translationStr = '';
 if($glossId){
 	$termArr = $glosManager->getTermArr($glossId);
 	$glossgrpId = $termArr['glossgrpid'];
+	$termTaxaArr = $glosManager->getTermTaxaArr($glossgrpId);
+	if($termTaxaArr){
+		$taxaStr = '';
+		$i = 0;
+		$cnt = count($termTaxaArr);
+		foreach($termTaxaArr as $taxId => $tArr){
+			$taxaStr .= ' '.$tArr['SciName'];
+			if($i < ($cnt - 1)){
+				$taxaStr .= ',';
+			}
+			$i++;
+		}
+	}
 	$termGrpArr = $glosManager->getGrpArr($glossId,$glossgrpId,$termArr['language']);
 	if(array_key_exists('synonym',$termGrpArr)){
 		$synonymArr = $termGrpArr['synonym'];
 		if($synonymArr){
-			$synonymStr = "<div style='width:300px;margin-top:8px;' ><b>Synonyms:</b>";
+			$synonymStr = "<div style='margin-top:8px;' ><b>Synonyms:</b>";
 			$i = 0;
 			$cnt = count($synonymArr);
 			foreach($synonymArr as $synId => $synArr){
@@ -50,7 +63,7 @@ if($glossId){
 	if(array_key_exists('translation',$termGrpArr)){
 		$translationArr = $termGrpArr['translation'];
 		if($translationArr){
-			$translationStr = "<div style='width:300px;margin-top:8px;' ><b>Translations:</b>";
+			$translationStr = "<div style='margin-top:8px;' ><b>Translations:</b>";
 			$i = 0;
 			$cnt = count($translationArr);
 			foreach($translationArr as $transId => $transArr){
@@ -110,35 +123,35 @@ else{
 				</div>
 			</div>
 			<div style="clear:both;width:600px;">
-			<div id="terminfo" style="float:left;width:300px;padding:10px;">
+			<div id="terminfo" style="float:left;<?php echo ($termImgArr?'width:300px;':''); ?>padding:10px;">
 				<div style="clear:both;">
-					<div style='width:300px;' >
-						<div style='width:300px;margin-top:8px;' >
+					<div style='' >
+						<div style='margin-top:8px;' >
 							<b>Definition:</b> 
 							<?php echo $termArr['definition']; ?>
 						</div>
-						<div style='width:300px;margin-top:8px;' >
+						<div style='margin-top:8px;' >
 							<b>Language:</b> 
 							<?php echo $termArr['language']; ?>
 						</div>
-						<div style='width:300px;margin-top:8px;' >
+						<div style='margin-top:8px;' >
 							<b>Source:</b> 
 							<?php echo $termArr['source']; ?>
 						</div>
 						<?php
 						if($termArr['notes']){
 							?>
-							<div style='width:300px;margin-top:8px;' >
+							<div style='margin-top:8px;' >
 								<b>Notes:</b> 
 								<?php echo $termArr['notes']; ?>
 							</div>
 							<?php
 						}
-						if($termArr['SciName']){
+						if($termTaxaArr){
 							?>
-							<div style='width:300px;margin-top:8px;' >
-								<b>Taxonomic Group:</b> 
-								<?php echo $termArr['SciName']; ?>
+							<div style='margin-top:8px;' >
+								<b>Taxonomic Groups:</b> 
+								<?php echo $taxaStr; ?>
 							</div>
 							<?php
 						}
@@ -157,7 +170,7 @@ else{
 								$resource = $termArr['resourceurl'];
 							}
 							?>
-							<div style='width:300px;margin-top:8px;' >
+							<div style='margin-top:8px;' >
 								<b>Resource:</b> 
 								<?php echo $resource; ?>
 							</div>
