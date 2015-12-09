@@ -107,7 +107,7 @@ class GlossaryManager{
 					'VALUES('.$this->glossId.','.$this->glossId.') ';
 				if($this->conn->query($sql2)){
 					$sql3 = 'INSERT INTO glossarytaxalink(glossgrpid,tid) '.
-						'VALUES('.$this->glossId.','.$this->cleanInStr($pArr['tid']).') ';
+						'VALUES('.$this->glossId.','.$pArr['tid'].') ';
 					if($this->conn->query($sql3)){
 						$statusStr = '';
 					}
@@ -123,10 +123,8 @@ class GlossaryManager{
 	
 	public function getTermArr($glossId){
 		$retArr = array();
-		$sql = 'SELECT g.glossid, g.term, g.definition, g.`language`, g.source, g.notes, g.resourceurl, t.glossgrpid, gt.tid, tx.SciName '.
-			'FROM ((glossary AS g LEFT JOIN glossarytermlink AS t ON g.glossid = t.glossid) '.
-			'LEFT JOIN glossarytaxalink AS gt ON t.glossgrpid = gt.glossgrpid) '.
-			'LEFT JOIN taxa AS tx ON gt.tid = tx.TID '.
+		$sql = 'SELECT g.glossid, g.term, g.definition, g.`language`, g.source, g.notes, g.resourceurl, t.glossgrpid '.
+			'FROM glossary AS g LEFT JOIN glossarytermlink AS t ON g.glossid = t.glossid '.
 			'WHERE g.glossid = '.$glossId;
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
@@ -139,8 +137,23 @@ class GlossaryManager{
 				$retArr['notes'] = $r->notes;
 				$retArr['resourceurl'] = $r->resourceurl;
 				$retArr['glossgrpid'] = $r->glossgrpid;
-				$retArr['tid'] = $r->tid;
-				$retArr['SciName'] = $r->SciName;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
+	public function getTermTaxaArr($glossgrpId){
+		$retArr = array();
+		$sql = 'SELECT gt.tid, tx.SciName '.
+			'FROM glossarytaxalink AS gt LEFT JOIN taxa AS tx ON gt.tid = tx.TID '.
+			'WHERE gt.glossgrpid = '.$glossgrpId.' '.
+			'ORDER BY tx.SciName ';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->tid]['tid'] = $r->tid;
+				$retArr[$r->tid]['SciName'] = $r->SciName;
 			}
 			$rs->close();
 		}
@@ -240,9 +253,9 @@ class GlossaryManager{
 		}
 	}
 	
-	public function deleteGrpTaxaLink($glossgrpId){
+	public function deleteGrpTaxaLink($glossgrpId,$tidStr){
 		$sql = '';
-		$sql = 'DELETE FROM glossarytaxalink WHERE glossgrpid = '.$glossgrpId;
+		$sql = 'DELETE FROM glossarytaxalink WHERE glossgrpid = '.$glossgrpId.' AND tid IN('.$tidStr.') ';
 		if($this->conn->query($sql)){
 			$statusStr = 'SUCCESS: information saved';
 		}
@@ -272,24 +285,37 @@ class GlossaryManager{
 		$statusStr = '';
 		$glossId = $pArr['glossid'];
 		$glossgrpId = $pArr['glossgrpid'];
-		$newtId = $pArr['tid'];
-		$oldtId = $pArr['origtid'];
 		if(!$glossgrpId){
 			$this->setGrpTermLink($glossId,$glossId);
-			if($newtId){
-				$this->setGrpTaxaLink($newtId,$glossId);
-			}
-		}
-		elseif($newtId && !$oldtId){
-			$this->setGrpTaxaLink($newtId,$glossgrpId);
-		}
-		elseif($newtId && $oldtId && ($newtId != $oldtId)){
-			$this->updateGrpTaxaLink($newtId,$glossgrpId);
 		}
 		if(is_numeric($glossId)){
 			$statusStr = $this->saveEditTerm($pArr);
 		}
 		return $statusStr;
+	}
+	
+	public function findCommonTidString($glossgrpId1,$glossgrpId2){
+		$tidArr1 = array();
+		$tidArr2 = array();
+		$tid1Str = '';
+		$tid2Str = '';
+		$sql = '';
+		$sql = 'SELECT tid FROM glossarytaxalink WHERE glossgrpid = '.$glossgrpId1;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$tidArr1[] = $r->tid;
+			}
+			$tid1Str = implode(',',$tidArr1);
+			$sql = 'SELECT tid FROM glossarytaxalink WHERE glossgrpid = '.$glossgrpId2.' AND tid IN('.$tid1Str.') ';
+			if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					$tidArr2[] = $r->tid;
+				}
+				$tid2Str = implode(',',$tidArr2);
+			}
+		}
+		$rs->close();
+		return $tid2Str;
 	}
 	
 	public function addRelation($pArr){
@@ -312,7 +338,8 @@ class GlossaryManager{
 			$statusStr = $this->setGrpTermLink($glossId,$glossgrpId);
 		}
 		else{
-			$this->deleteGrpTaxaLink($relglossgrpId);
+			$commonTids = $this->findCommonTidString($relglossgrpId,$glossgrpId);
+			$this->deleteGrpTaxaLink($relglossgrpId,$commonTids);
 			$statusStr = $this->updateGrpTermLink($relglossgrpId,0,$glossgrpId);
 		}
 		return $statusStr;
@@ -320,10 +347,13 @@ class GlossaryManager{
 	
 	public function removeRelation($pArr){
 		$gltlinkId = $pArr['gltlinkid'];
-		$tId = $pArr['tid'];
+		$glossgrpId = $pArr['glossgrpid'];
+		$tidArr = $this->getTermTaxaArr($glossgrpId);
 		$relglossId = $pArr['relglossid'];
 		$this->updateGrpTermLink(0,$gltlinkId,$relglossId);
-		$this->setGrpTaxaLink($tId,$relglossId);
+		foreach($tidArr as $taxId => $tArr){
+			$this->setGrpTaxaLink($tArr['tid'],$relglossId);
+		}
 	}
 	
 	public function editImageData($pArr){

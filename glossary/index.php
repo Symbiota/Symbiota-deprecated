@@ -85,6 +85,64 @@ if($formSubmit){
 			</div>
 			<?php 
 		}
+		if($isEditor){
+			?>
+			<div style="width:100%;margin-top:0px;margin-bottom:8px;">
+				<div style="float:right;">
+					<a href="#" onclick="toggle('newtermdiv');">
+						<img src="../images/add.png" alt="Create New Term" />
+					</a>
+				</div>
+				<div style="clear:both;"></div>
+				<div id="newtermdiv" style="display:none;margin-bottom:10px;">
+					<form name="termeditform" action="termdetails.php" method="post" onsubmit="return verifyNewTermForm(this.form);">
+						<fieldset>
+							<legend><b>Add New Term</b></legend>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
+									<b>Term: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="term" id="term" maxlength="45" style="width:200px;" value="" onchange="" title="" />
+								</div>
+							</div>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
+									<b>Definition: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<textarea name="definition" id="definition" rows="10" style="width:380px;height:70px;resize:vertical;" ></textarea>
+								</div>
+							</div>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
+									<b>Language: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="language" id="language" maxlength="45" style="width:200px;" value="" onchange="" title="" />
+								</div>
+							</div>
+							<div style="clear:both;margin-top:12px;float:left;">
+								Please enter the taxonomic group, higher than the rank of family, to which this term applies:
+							</div>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
+									<b>Taxonomic Group: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="taxagroup" id="taxagroup" maxlength="45" style="width:250px;" value="" onchange="" title="" />
+									<input name="tid" id="tid" type="hidden" value="" />
+								</div>
+							</div>
+							<div style="clear:both;padding-top:8px;float:right;">
+								<button name="formsubmit" type="submit" value="Create Term">Create Term</button>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+			</div>
+			<?php
+		}
 		?>
 		<div id="tabs" style="margin:0px;margin-bottom:20px;padding:10px;">
 			<form name="filtertermform" action="index.php" method="post" onsubmit="return verifySearchForm(this.form);">
@@ -146,61 +204,6 @@ if($formSubmit){
 		</div>
 		<div id="termlistdiv" style="min-height:200px;">
 			<?php
-			if($isEditor){
-				?>
-				<div style="float:right;margin:10px;">
-					<a href="#" onclick="toggle('newtermdiv');">
-						<img src="../images/add.png" alt="Create New Term" />
-					</a>
-				</div>
-				<div id="newtermdiv" style="display:none;margin-bottom:10px;">
-					<form name="termeditform" action="termdetails.php" method="post" onsubmit="return verifyNewTermForm(this.form);">
-						<fieldset>
-							<legend><b>Add New Term</b></legend>
-							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="float:left;">
-									<b>Term: </b>
-								</div>
-								<div style="float:left;margin-left:10px;">
-									<input type="text" name="term" id="term" maxlength="45" style="width:200px;" value="" onchange="" title="" />
-								</div>
-							</div>
-							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="float:left;">
-									<b>Definition: </b>
-								</div>
-								<div style="float:left;margin-left:10px;">
-									<textarea name="definition" id="definition" rows="10" style="width:380px;height:70px;resize:vertical;" ></textarea>
-								</div>
-							</div>
-							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="float:left;">
-									<b>Language: </b>
-								</div>
-								<div style="float:left;margin-left:10px;">
-									<input type="text" name="language" id="language" maxlength="45" style="width:200px;" value="" onchange="" title="" />
-								</div>
-							</div>
-							<div style="clear:both;margin-top:12px;float:left;">
-								Please enter the taxonomic group, higher than the rank of family, to which this term applies:
-							</div>
-							<div style="clear:both;padding-top:4px;float:left;">
-								<div style="float:left;">
-									<b>Taxonomic Group: </b>
-								</div>
-								<div style="float:left;margin-left:10px;">
-									<input type="text" name="taxagroup" id="taxagroup" maxlength="45" style="width:250px;" value="" onchange="" title="" />
-									<input name="tid" id="tid" type="hidden" value="" />
-								</div>
-							</div>
-							<div style="clear:both;padding-top:8px;float:right;">
-								<button name="formsubmit" type="submit" value="Create Term">Create Term</button>
-							</div>
-						</fieldset>
-					</form>
-				</div>
-				<?php
-			}
 			if($termList){
 				$title = 'Terms for '.$taxonName.' in '.$_POST['searchlanguage'];
 				if($_POST['searchtermkeyword']){

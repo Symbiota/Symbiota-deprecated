@@ -108,9 +108,16 @@ $(document).ready(function() {
 		})
 		.autocomplete({
 			source: function( request, response ) {
-				$.getJSON( "rpc/taxalist.php", {
-					term: extractLast( request.term ), t: function() { return document.termeditform.taxagroup.value; }
-				}, response );
+				if(!document.getElementById('taxaaddform')){
+					$.getJSON( "rpc/taxalist.php", {
+						term: extractLast( request.term ), t: function() { return document.termeditform.taxagroup.value; }
+					}, response );
+				}
+				else{
+					$.getJSON( "rpc/taxalist.php", {
+						term: extractLast( request.term ), t: function() { return document.taxaaddform.taxagroup.value; }
+					}, response );
+				}
 			},
 			search: function() {
 				// custom minLength
@@ -139,6 +146,11 @@ $(document).ready(function() {
 					document.getElementById('tid').value = '';
 					alert("You must select a name from the list.");
 				}
+				else if (document.getElementById(ui.item.label)) {
+					this.value = '';
+					document.getElementById('tid').value = '';
+					alert("Taxonomic group has already been added.");
+				}
 			}
 		},{});
 });
@@ -154,8 +166,7 @@ function verifyNewTermForm(f){
 	if(document.getElementById("origterm")){
 		var origterm = document.getElementById("origterm").value;
 		var origlanguage = document.getElementById("origlang").value;
-		var origtid = document.getElementById("origtid").value;
-		if((origterm == term) && (origlanguage == language) && (origtid == tid)){
+		if((origterm == term) && (origlanguage == language)){
 			return true;
 		}
 	}
