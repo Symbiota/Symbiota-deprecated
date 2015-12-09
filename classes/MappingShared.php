@@ -184,10 +184,10 @@ class MappingShared{
 				echo "<Placemark>\n";
 				echo "<name>".htmlspecialchars($pointArr["identifier"], ENT_QUOTES)."</name>\n";
 				echo "<ExtendedData>\n";
-				echo "<Data name='institutioncode'>".$pointArr["institutioncode"]."</Data>\n";
-				echo "<Data name='collectioncode'>".$pointArr["collectioncode"]."</Data>\n";
-				echo "<Data name='catalognumber'>".$pointArr["catalognumber"]."</Data>\n";
-				echo "<Data name='othercatalognumbers'>".$pointArr["othercatalognumbers"]."</Data>\n";
+				echo "<Data name='institutioncode'>".$this->xmlentities($pointArr["institutioncode"])."</Data>\n";
+				echo "<Data name='collectioncode'>".$this->xmlentities($pointArr["collectioncode"])."</Data>\n";
+				echo "<Data name='catalognumber'>".$this->xmlentities($pointArr["catalognumber"])."</Data>\n";
+				echo "<Data name='othercatalognumbers'>".$this->xmlentities($pointArr["othercatalognumbers"])."</Data>\n";
 				if($this->fieldArr){
 					foreach($this->fieldArr as $k => $v){
 						echo "<Data name='".$v."'>".$pointArr[$v]."</Data>\n";
