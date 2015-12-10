@@ -453,7 +453,9 @@ if($taxonManager->getSciName() != "unknown"){
 			</span>
 			<?php 
 		}
-		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:toggle('links')\">Web Links</a>";
+		if($taxonRank > 180 && $links){
+			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:toggle('links')\">Web Links</a>";
+		}
 	}
 
 	if($taxonRank > 140){
@@ -515,7 +517,7 @@ elseif($taxonValue){
 						</a>
 					</li>
 					<li>
-						<a target="_blank" href="http://images.google.com/images?q="<?php echo $taxonValue; ?>"'>
+						<a target="_blank" href='http://images.google.com/images?q="<?php echo $taxonValue; ?>"'>
 							Google Images
 						</a>
 					</li>
