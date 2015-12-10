@@ -84,6 +84,9 @@ if(isset($taxa_admin_eoladminCrumbs)){
 				<?php 
 			}
 			?>
+			<div style="color:red;margin:15px;">
+				Note: these processes may take a great deal of time to complete
+			</div>
 			<div style="margin:15px;">
 				<fieldset style="padding:15px;">
 					<legend><b>Taxa Mapping</b></legend>

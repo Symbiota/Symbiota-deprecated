@@ -374,9 +374,13 @@ $smManager = new SiteMapManager();
 							<li><a href="taxa/admin/taxonomydynamicdisplay.php">Dynamic Taxonomic Tree Viewer (beta version)</a></li>
 							<li>Edit Taxonomic Placement (use <a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer)</a></li>
 							<li><a href="taxa/admin/taxonomyloader.php">Add New Taxonomic Name</a></li>
-							<li><a href="taxa/admin/taxaloader.php">Batch
-							 Upload a Taxonomic Data File</a></li>
+							<li><a href="taxa/admin/taxaloader.php">Batch Upload a Taxonomic Data File</a></li>
 							<?php 
+							if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+								?>
+								<li><a href="taxa/admin/eolmapper.php">Encyclopedia of Life Linkage Manager</a></li>
+								<?php 
+							}
 						}
 						else{
 							echo '<li>You are not authorized to edit taxonomy</li>';
