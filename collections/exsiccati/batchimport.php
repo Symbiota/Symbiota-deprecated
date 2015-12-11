@@ -175,7 +175,7 @@ if($isEditor && $formSubmit){
 						Enter your catalog numbers in field associated with record and then transfer into your collection or download as a spreadsheet (CSV) 
 						for import into a local database application.   
 					</div>
-					<table class="styledtable">
+					<table class="styledtable" style="font-family:Arial;font-size:12px;">
 						<tr><th><input name="selectAllCB" type="checkbox" onchange="selectAll(this)" /></th><th>Catalog Number</th><th>Exsiccati #</th><th>Details</th></tr>
 						<?php 
 						foreach($occurArr as $omenid => $occArr){

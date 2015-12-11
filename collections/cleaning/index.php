@@ -220,7 +220,7 @@ elseif($action == 'listdupsrecordedby'){
 							}
 							echo '<div><b>'.($start+1).' to '.($start+$recCnt).' Duplicate Clusters </b></div>';
 							?>
-							<table class="styledtable">
+							<table class="styledtable" style="font-family:Arial;font-size:12px;">
 								<tr>
 									<th style="width:40px;">ID</th>
 									<th style="width:20px;"><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>

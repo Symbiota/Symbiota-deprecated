@@ -1059,7 +1059,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							$imgs = $archArr['imgs'];
 							unset($archArr['imgs']);
 						}
-						echo '<table class="styledtable"><tr><th>Field</th><th>Value</th></tr>';
+						echo '<table class="styledtable" style="font-family:Arial;font-size:12px;"><tr><th>Field</th><th>Value</th></tr>';
 						foreach($archArr as $f => $v){
 							echo '<tr><td style="width:175px;"><b>'.$f.'</b></td><td>'.$v.'</td></tr>';
 						}

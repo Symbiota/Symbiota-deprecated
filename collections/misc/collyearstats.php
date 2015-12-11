@@ -34,7 +34,7 @@ if($collId){
 		<div id="innertext">
 			<fieldset id="yearstatsbox" style="clear:both;margin-top:15px;width:97%;">
 				<legend><b>Past Year Totals</b></legend>
-				<table class="styledtable" style="width:98%;font-size:12px;">
+				<table class="styledtable" style="font-family:Arial;font-size:12px;width:98%;">
 					<tr>
 						<th style="text-align:center;">Institution</th>
 						<th style="text-align:center;">Object</th>

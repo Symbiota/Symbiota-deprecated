@@ -281,7 +281,7 @@ if($isEditor){
 							<div style="float:right;margin-right:10px">
 								<b>Count: <?php echo count($occArr); ?> records</b>
 							</div>
-							<table class="styledtable">
+							<table class="styledtable" style="font-family:Arial;font-size:12px;">
 								<tr>
 									<th><input name="" value="" type="checkbox" onclick="selectAll(this);" title="Select/Deselect all Specimens" /></th>
 									<th>catalog #</th>

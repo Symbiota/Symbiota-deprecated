@@ -325,7 +325,7 @@ include($serverRoot."/header.php");
 		}
 		if($dwcaArr = $dwcaManager->getDwcaItems()){
 			?>
-			<table class="styledtable" style="margin:10px;">
+			<table class="styledtable" style="font-family:Arial;font-size:12px;margin:10px;">
 				<tr><th>Code</th><th>Collection Name</th><th>DwC-Archive</th><th>Pub Date</th></tr>
 				<?php 
 				foreach($dwcaArr as $k => $v){ 

@@ -677,7 +677,7 @@ if($action != "Update Statistics"){
 								
 								<fieldset id="statspercollbox" style="clear:both;margin-top:15px;width:90%;display:none;">
 									<legend><b>Statistics per Collection</b></legend>
-									<table class="styledtable" style="font-size:12px;">
+									<table class="styledtable" style="font-family:Arial;font-size:12px;">
 										<tr>
 											<th style="text-align:center;">Collection</th>
 											<th style="text-align:center;">Specimens</th>
@@ -708,7 +708,7 @@ if($action != "Update Statistics"){
 								</fieldset>
 								<fieldset id="famdistbox" style="clear:both;margin-top:15px;width:800px;display:none;">
 									<legend><b>Family Distribution</b></legend>
-									<table class="styledtable" style="width:780px;font-size:12px;">
+									<table class="styledtable" style="font-family:Arial;font-size:12px;width:780px;">
 										<tr>
 											<th style="text-align:center;">Family</th>
 											<th style="text-align:center;">Specimens</th>
@@ -745,7 +745,7 @@ if($action != "Update Statistics"){
 								</fieldset>
 								<fieldset id="geodistbox" style="margin-top:15px;width:800px;display:none;">
 									<legend><b>Geographic Distribution</b></legend>
-									<table class="styledtable" style="width:780px;font-size:12px;">
+									<table class="styledtable" style="font-family:Arial;font-size:12px;width:780px;">
 										<tr>
 											<th style="text-align:center;">Country</th>
 											<th style="text-align:center;">Specimens</th>

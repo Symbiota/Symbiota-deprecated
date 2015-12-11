@@ -252,7 +252,7 @@ class SpecUploadBase extends SpecUpload{
 		}
 
 		//Output table rows for source data
-		echo '<table class="styledtable">';
+		echo '<table class="styledtable" style="font-family:Arial;font-size:12px;">';
 		echo '<tr><th>Source Field</th><th>Target Field</th></tr>'."\n";
 		sort($symbFields);
 		$autoMapArr = Array();

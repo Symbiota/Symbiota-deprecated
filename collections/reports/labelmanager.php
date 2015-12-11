@@ -297,7 +297,7 @@ if($isEditor){
 										<input name="" value="" type="checkbox" onclick="selectAll(this);" />
 										Select/Deselect all Specimens
 									</div>
-									<table class="styledtable" style="font-size:12px;">
+									<table class="styledtable" style="font-family:Arial;font-size:12px;">
 										<tr>
 											<th></th>
 											<th>#</th>
@@ -428,7 +428,7 @@ if($isEditor){
 									<input name="" value="" type="checkbox" onclick="selectAllAnno(this);" />
 									Select/Deselect all Specimens
 								</div>
-								<table class="styledtable" style="font-size:12px;">
+								<table class="styledtable" style="font-family:Arial;font-size:12px;">
 									<tr>
 										<th style="width:25px;text-align:center;"></th>
 										<th style="width:25px;text-align:center;">#</th>

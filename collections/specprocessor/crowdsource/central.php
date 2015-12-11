@@ -49,7 +49,7 @@ $statusStr = '';
 		
 		<div style="margin-left:20px;float:left;">
 			<h2>Top Scores</h2>
-			<table class="styledtable" style="width:300px;">
+			<table class="styledtable" style="font-family:Arial;font-size:12px;width:300px;">
 				<tr><th><b>User</b></th><th><b>Score</b></th></tr>
 			<?php 
 			$topScoreArr = $csManager->getTopScores();
@@ -107,7 +107,7 @@ $statusStr = '';
 		?>		
 		<div style="margin:20px;clear:both;">
 			<h2>User Stats by Collections</h2>
-			<table class="styledtable">
+			<table class="styledtable" style="font-family:Arial;font-size:12px;">
 				<tr>
 					<th><b>Collection</b></th>
 					<th><b>Specimen<br/>Count</b></th>

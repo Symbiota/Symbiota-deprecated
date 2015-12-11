@@ -38,7 +38,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 		if($menu == 'user'){
 			?>
 			<div style="margin:15px 0px 25px 15px;">
-				<table class="styledtable" style="width:500px;">
+				<table class="styledtable" style="font-family:Arial;font-size:12px;width:500px;">
 					<tr>
 						<th>User</th>
 						<th>Processing Status</th>
@@ -186,7 +186,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 				}
 				?>
 				<div style="margin:20px 5px;">
-					<table class="styledtable" style="width:400px;">
+					<table class="styledtable" style="font-family:Arial;font-size:12px;width:400px;">
 						<tr><th>Processing Status</th><th>Count</th></tr>
 						<?php 
 						foreach($statsArr['ps'] as $processingStatus => $cnt){
