@@ -75,7 +75,7 @@ if($occArr){
 	$recordListHtml .= '<input name="" id="selectallcheck" value="" type="checkbox" onclick="selectAll(this);" '.($allSelected==true?"checked":"").' />';
 	$recordListHtml .= 'Select/Deselect all Records';
 	$recordListHtml .= '</div>';
-	$recordListHtml .= '<table class="styledtable" style="margin-left:-15px;font-size:12px;">';
+	$recordListHtml .= '<table class="styledtable" style="font-family:Arial;font-size:12px;margin-left:-15px;">';
 	$recordListHtml .= '<tr>';
 	$recordListHtml .= '<th style="width:10px;"></th>';
 	$recordListHtml .= '<th>Catalog #</th>';

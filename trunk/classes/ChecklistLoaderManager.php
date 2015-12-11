@@ -147,7 +147,7 @@ class ChecklistLoaderManager {
 	public function resolveProblemTaxa(){
 		if($this->problemTaxa){
 			$taxUtil = new TaxonomyUtilities();
-			echo '<table class="styledtable">';
+			echo '<table class="styledtable" style="font-family:Arial;font-size:12px;">';
 			echo '<tr><th>Cnt</th><th>Name</th><th>Actions</th></tr>';
 			$cnt = 1;
 			foreach($this->problemTaxa as $nameStr){

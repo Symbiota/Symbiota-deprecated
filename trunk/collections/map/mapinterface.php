@@ -1648,7 +1648,7 @@ if($coordArr && !is_numeric($coordArr)){
 									</div>
 									<div style="margin:5 0 5 0;clear:both;"><hr /></div>
 									<form name="selectform" action="" method="post" onsubmit="" target="_blank">
-										<table class="styledtable" style="margin-left:-15px;font-size:12px;">
+										<table class="styledtable" style="font-family:Arial;font-size:12px;margin-left:-15px;">
 											<thead>
 												<tr>
 													<th style="width:15px;"></th>
@@ -1713,7 +1713,7 @@ if($coordArr && !is_numeric($coordArr)){
 											<input data-role="none" name="" id="dsselectallcheck" value="" type="checkbox" onclick="selectAll(this);" />
 											Select/Deselect all Records
 										</div>
-										<table class="styledtable" style="margin-left:-15px;font-size:12px;">
+										<table class="styledtable" style="font-family:Arial;font-size:12px;margin-left:-15px;">
 											<thead>
 												<tr>
 													<th style="width:15px;"></th>

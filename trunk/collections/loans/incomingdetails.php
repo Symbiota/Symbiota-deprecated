@@ -210,7 +210,7 @@ $specList = $loanManager->getSpecList($loanId);
 	if($specList){
 		?>
 		<div id="specdiv">
-			<table class="styledtable">
+			<table class="styledtable" style="font-family:Arial;font-size:12px;">
 				<tr>
 					<th style="width:100px;text-align:center;">Catalog Number</th>
 					<th style="width:375px;text-align:center;">Details</th>

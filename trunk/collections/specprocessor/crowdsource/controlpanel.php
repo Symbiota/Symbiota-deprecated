@@ -202,7 +202,7 @@ $projArr = $csManager->getProjectDetails();
 				?>
 				<div style="margin:15px;">
 					<div style="font-weight:bold;text-decoration:underline;margin-bottom:15px;">Volunteers</div>
-					<table class="styledtable" style="width:500px;">
+					<table class="styledtable" style="font-family:Arial;font-size:12px;width:500px;">
 						<tr>
 							<th>User</th>
 							<th>Score</th>
@@ -237,7 +237,7 @@ $projArr = $csManager->getProjectDetails();
 				</div>
 				<div style="margin:25px 15px">
 					<div style="font-weight:bold;text-decoration:underline;margin-bottom:15px;">Approved Editors</div>
-					<table class="styledtable" style="width:500px;">
+					<table class="styledtable" style="font-family:Arial;font-size:12px;width:500px;">
 						<tr>
 							<th>User</th>
 							<th>Score</th>

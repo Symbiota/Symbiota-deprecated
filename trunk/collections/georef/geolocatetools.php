@@ -117,7 +117,7 @@ if($isEditor){
 					
 					?>
 					<form name="coordsubmitform" action="geolocatetool" method="post">
-						<table class="styledtable">
+						<table class="styledtable" style="font-family:Arial;font-size:12px;">
 							<tr>
 								<th>occid</th>
 								<th>Map Tool</th>

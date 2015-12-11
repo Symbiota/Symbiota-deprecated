@@ -128,7 +128,7 @@ else{
 					type the correct name from the checklist, and then click the Link Voucher button. 
 					The correct name must already be added to the checklist before voucher can be linked. 
 				</div>
-				<table class="styledtable">
+				<table class="styledtable" style="font-family:Arial;font-size:12px;">
 					<tr>
 						<th>Specimen ID</th>
 						<th>Link to</th>
@@ -136,7 +136,7 @@ else{
 						<th>Locality</th>
 					</tr>
 					<?php 
-					/*ksort($missingArr);
+					ksort($missingArr);
 					foreach($missingArr as $sciname => $sArr){
 						foreach($sArr as $occid => $oArr){
 							?>
@@ -160,7 +160,7 @@ else{
 							<?php 
 							$recCnt++;
 						}
-					}*/
+					}
 					?>
 				</table>
 				<?php

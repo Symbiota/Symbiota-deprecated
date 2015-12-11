@@ -204,7 +204,7 @@ include($serverRoot.'/header.php');
 			$inheritStr = "&nbsp;<span title='State has been inherited from parent taxon'><b>(i)</b></span>";
 			?>
 			<div><?php echo $inheritStr; ?> = character state is inherited as true from a parent taxon (genus, family, etc)</div>
-		 	<table class="styledtable">
+		 	<table class="styledtable" style="font-family:Arial;font-size:12px;">
 				<?php 
 				$muManager->echoTaxaList($clFilter,$taxonFilter,$generaOnly);
 				?>

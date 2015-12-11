@@ -163,7 +163,7 @@ if(!$IS_ADMIN){
 				echo '</div><hr/>';
 				?>
 				<div id="tableview" style="display:none;">
-					<table class="styledtable">
+					<table class="styledtable" style="font-family:Arial;font-size:12px;">
 						<tr>
 							<th>&nbsp;</th>
 							<th>&nbsp;</th>

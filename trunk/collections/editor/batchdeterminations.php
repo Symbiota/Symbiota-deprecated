@@ -369,7 +369,7 @@ if($isEditor){
 								<input name="accselectall" value="" type="checkbox" onclick="selectAll(this);" checked />
 								Select/Deselect all Specimens
 							</div>
-							<table class="styledtable" style="font-size:12px;">
+							<table class="styledtable" style="font-family:Arial;font-size:12px;">
 								<thead>
 									<tr>
 										<th style="width:25px;text-align:center;">&nbsp;</th>
@@ -477,7 +477,7 @@ if($isEditor){
 								<input type="checkbox" name="nomselectall" value="" onclick="selectAll(this);" checked />
 								Select/Deselect all Specimens
 							</div>
-							<table class="styledtable" style="font-size:12px;">
+							<table class="styledtable" style="font-family:Arial;font-size:12px;">
 								<thead>
 									<tr>
 										<th style="width:25px;text-align:center;">&nbsp;</th>
