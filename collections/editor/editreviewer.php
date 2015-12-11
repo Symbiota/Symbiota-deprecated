@@ -206,7 +206,7 @@ header("Content-Type: text/html; charset=".$charset);
 							}
 							?>
 							<form name="editform" action="editreviewer.php" method="post" onsubmit="return validateEditForm(this);" >
-								<table class="styledtable" style="<?php if($mode == 'printmode') echo "width:675px;"; ?>">
+								<table class="styledtable" style="font-family:Arial;font-size:12px;<?php if($mode == 'printmode') echo "width:90%;"; ?>">
 									<tr>
 										<?php if($mode != 'printmode'){ ?>
 											<th></th>
@@ -263,12 +263,12 @@ header("Content-Type: text/html; charset=".$charset);
 													</td>
 													<td>
 														<div title="Old Value">
-															<?php echo $edObj['fvalueold']; ?>
+															<?php echo wordwrap($edObj['fvalueold'],40,"<br />\n",true); ?>
 														</div>
 													</td>
 													<td>
-														<div title="New Status">
-															<?php echo $edObj['fvaluenew']; ?>
+														<div title="New Value">
+															<?php echo wordwrap($edObj['fvaluenew'],40,"<br />\n",true); ?>
 														</div>
 													</td>
 													<td>
