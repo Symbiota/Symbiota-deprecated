@@ -23,7 +23,6 @@ td.header{
 	background-color:#026B6E;
 	text-align:left;
 	padding:0px;
-	padding-bottom:0px;
 }
 
 td.header a{
@@ -50,73 +49,8 @@ td.middleright{
 td.footer{
 }
 
-/*Left menu components*/
-div.menu {
-	background-color:   white;
-	margin:				15px;
-	border:   			1px solid #CCCCFF;
-	padding-bottom:   	25px;
-	overflow:   		hidden;
-	width:   			150px;
-	border-radius:		0.5em 0.5em 1.5em 0.5em;
-	-moz-border-radius:	0.5em 0.5em 1.5em 0.5em;
-	-khtml-border-radius: 0.5em 0.5em 1.5em 0.5em;
-}
-
-div.menuheader{
-	background-color:   #C0C0C0;
-	font-family:   		Verdana, Geneva, Arial, Helvetica, sans-serif;
-	font-size:   		13px;
-	color:   			white;
-	overflow:   		hidden;
-	text-align:   		center;
-	padding:   			3px;
-	margin:			   	0px; 
-}
-
-div.menuheader a{
-
-}
-
-div.menuheader a:hover {
-
-}
-
-div.menusubheader{
-
-}
-
-div.menusubheader a{
-
-}
-
-div.menusubheader a:hover {
-
-}
-
-div.menuitem {
-
-}
-
-div.menuitem a {
-	color: #669999;
-}
-
-div.menuitem a:hover {
-	color: 	#00008B;
-}
-
 /*Central div in the middle center table div */
 #innertext{
-	min-height:400px;
-	margin-left:auto;
-	margin-right:auto;
-	margin-bottom: 0px;
-	margin-top: 0px;
-	padding-top: 10px;
-	padding-left: 15px;
-	padding-right: 15px;
-	padding-bottom: 15px;
 }
 
 #innertext a{
@@ -127,10 +61,6 @@ div.menuitem a:hover {
 }
 
 div.navpath {
-	padding-top: 8px;
-	padding-bottom: 0px;
-	padding-left: 10px;
-	margin-bottom: 0px;
 }
 
 /* Image thumbnails   */
