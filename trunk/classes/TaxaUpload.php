@@ -126,6 +126,11 @@ class TaxaUpload{
 					$valueSql = "";
 					foreach($uploadTaxaIndexArr as $recIndex => $targetField){
 						$valIn = $this->cleanInStr($this->encodeString($recordArr[$recIndex]));
+						if($targetField == 'scinameinput' && !$valIn){
+							$valueSql = '';
+							$recordCnt--;
+							break;
+						} 
 						if($targetField == 'acceptance' && !is_numeric($valIn)){
 							$valInTest = strtolower($valIn);
 							if($valInTest == 'accepted' || $valInTest == 'valid'){
@@ -140,17 +145,19 @@ class TaxaUpload{
 						}
 						$valueSql .= ','.($valIn?'"'.$valIn.'"':'NULL');
 					}
-					$sql .= 'VALUES ('.substr($valueSql,1).')';
-					//echo "<div>".$sql."</div>";
-					if($this->conn->query($sql)){
-						if($recordCnt%1000 == 0){
-							$this->outputMsg('Upload count: '.$recordCnt,1);
-							ob_flush();
-							flush();
+					if($valueSql){
+						$sql .= 'VALUES ('.substr($valueSql,1).')';
+						//echo "<div>".$sql."</div>";
+						if($this->conn->query($sql)){
+							if($recordCnt%1000 == 0){
+								$this->outputMsg('Upload count: '.$recordCnt,1);
+								ob_flush();
+								flush();
+							}
 						}
-					}
-					else{
-						$this->outputMsg('ERROR loading taxon: '.$this->conn->error);
+						else{
+							$this->outputMsg('ERROR loading taxon: '.$this->conn->error);
+						}
 					}
 				}
 				$recordCnt++;
