@@ -182,7 +182,7 @@ h3{
 	color:#000000;
 	margin-top:9px;
 }
-ul#hor_dropdown{
+#hor_dropdown{
 	list-style:none;
 	float:left;
 	position:relative;
@@ -197,13 +197,13 @@ ul#hor_dropdown{
 	background-position:top;
 	background-color:#c2c2c2;
 }
-ul#hor_dropdown li{		
+#hor_dropdown li{		
 	float:left;
 	position:relative;
 	padding:0;
 	margin:0;
 }
-ul#hor_dropdown a{
+#hor_dropdown a{
 	display:block;
 	color:#000000;
 	text-decoration:none;
@@ -215,7 +215,7 @@ ul#hor_dropdown a{
     background-repeat: no-repeat;
     background-position: right bottom;
 }
-ul#hor_dropdown a:hover{
+#hor_dropdown a:hover{
 	background-color:#999999;
 	color:#FFFFFF;
 	padding-top:8px;
@@ -225,7 +225,7 @@ ul#hor_dropdown a:hover{
 	background-image:none;
 }
 /* Submenu */
-ul#hor_dropdown ul {
+#hor_dropdown ul {
 	list-style:none;
 	position:absolute;
 	left:-9999px;
@@ -233,19 +233,19 @@ ul#hor_dropdown ul {
 	background-color:#dcdcdc;
 	z-index:1000;
 }
-ul#hor_dropdown ul li{
+#hor_dropdown ul li{
 	float:none;
 }
-ul#hor_dropdown ul a{
+#hor_dropdown ul a{
 	white-space:nowrap;
 }
-ul#hor_dropdown li:hover ul {
+#hor_dropdown li:hover ul {
 	left:0;
 	top:33px;
 	padding:0px;
 	z-index:1000;
 }
-ul#hor_dropdown li:hover ul a {
+#hor_dropdown li:hover ul a {
 	padding:5px;
 	text-decoration:none;
 	text-indent:8px;
@@ -254,7 +254,30 @@ ul#hor_dropdown li:hover ul a {
 	background-color:#dcdcdc;
 	z-index:1000;
 }
-ul#hor_dropdown li:hover ul li a:hover { 
+#hor_dropdown li:hover ul li a:hover { 
+	background:#999999; 
+}
+/* Submenu to right */
+#hor_dropdown li ul li ul {
+	display: none;
+}
+#hor_dropdown li ul li:hover ul {
+	left:100%;
+	top:0;
+	display: block;
+	padding:0px;
+	z-index:1000;
+}
+#hor_dropdown li ul li:hover ul a {
+	padding:5px;
+	text-decoration:none;
+	text-indent:8px;
+	padding-right:8px;
+	background-image: none;
+	background-color:#dcdcdc;
+	z-index:1000;
+}
+#hor_dropdown li ul li:hover ul li a:hover { 
 	background:#999999; 
 }
 
