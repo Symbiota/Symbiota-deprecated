@@ -898,8 +898,8 @@ class OccurrenceEditorManager {
 			$sql = 'INSERT INTO omoccurrences(collid, '.implode(array_keys($fieldArr),',').') '.
 				'VALUES ('.$occArr["collid"];
 			$fieldArr = array_change_key_case($fieldArr);
-			if(array_key_exists('cultivationstatus',$occArr)) $occArr['cultivationstatus'] = '1';
-			if(array_key_exists('localitysecurity',$occArr)) $occArr['localitysecurity'] = '1';
+			if(array_key_exists('cultivationstatus',$occArr) && $occArr['cultivationstatus']) $occArr['cultivationstatus'] = '1';
+			if(array_key_exists('localitysecurity',$occArr) && $occArr['localitysecurity']) $occArr['localitysecurity'] = '1';
 			if(!isset($occArr['dateentered']) || !$occArr['dateentered']) $occArr['dateentered'] = date('Y-m-d H:i:s');
 			if(!isset($occArr['basisofrecord']) || !$occArr['basisofrecord']) $occArr['basisofrecord'] = (strpos($this->collMap['colltype'],'Observations') !== false?'HumanObservation':'PreservedSpecimen');
 			//Temp code for WeDigBio date entry event

@@ -50,8 +50,8 @@ $ACTIVATE_EXSICCATI = 0;
 
 $RIGHTS_TERMS = array(
 	'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
-	'CC BY (Attribution)' => 'http://creativecommons.org/licenses/by/3.0/',
-	'CC BY-NC (Attribution-Non-Commercial)' => 'http://creativecommons.org/licenses/by-nc/3.0/'
+	'CC BY (Attribution)' => 'http://creativecommons.org/licenses/by/4.0/',
+	'CC BY-NC (Attribution-Non-Commercial)' => 'http://creativecommons.org/licenses/by-nc/4.0/'
 );
 
 //set terms for reproductiveCondition drop-down menu

@@ -66,7 +66,6 @@ $collData = $collManager->getCollectionData(true);
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData["collectionname"]:""); ?>" />
 	<script language=javascript>
 
 		$(function() {
@@ -121,6 +120,12 @@ $collData = $collManager->getCollectionData(true);
 			}
 			catch(ex){}
 			return true;
+		}
+
+		function mtypeguidChanged(f){
+			if(f.managementtype.value == "Snapshot" && f.guidtarget.value == "symbiotaUUID"){
+				alert("The Symbiota Generated GUID option cannot be selected for a collection that is managed locally outside of the data portal (e.g. Snapshot management type). In this case, the GUID must be generated within the source collection database and delivered to the data portal as part of the upload process.");
+			}
 		}
 
 		function verifyAddAddressForm(f){
@@ -462,7 +467,7 @@ $collData = $collManager->getCollectionData(true);
 									<span title="Source of Global Unique Identifier">GUID source:</span> 
 								</td>
 								<td>
-									<select name="guidtarget">
+									<select name="guidtarget" onchange="mtypeguidChanged(this.form)">
 										<option value="">Not defined</option>
 										<option value="">-------------------</option>
 										<option value="occurrenceId" <?php echo ($collid && $collData["guidtarget"]=='occurrenceId'?'SELECTED':''); ?>>Occurrence Id</option>
@@ -571,7 +576,7 @@ $collData = $collManager->getCollectionData(true);
 										Management:
 									</td>
 									<td>
-										<select name="managementtype">
+										<select name="managementtype" onchange="mtypeguidChanged(this.form)">
 											<option>Snapshot</option>
 											<option <?php echo ($collid && $collData["managementtype"]=='Live Data'?'SELECTED':''); ?>>Live Data</option>
 											<option <?php echo ($collid && $collData["managementtype"]=='Aggregate'?'SELECTED':''); ?>>Aggregate</option>
