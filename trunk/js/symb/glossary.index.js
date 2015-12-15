@@ -298,11 +298,45 @@ function verifyNewSynForm(f){
 function verifySearchForm(f){
 	var language = document.getElementById("searchlanguage").value;
 	var taxon = document.getElementById("searchtaxa").value;
-	if(!language || !taxon){
-		alert("Please select a language and taxonomic group to see term list.");
-		return false;
+	var downloadtype = document.getElementById("exporttype").checked.value;
+	var formaction = document.getElementById("formaction").value;
+	if(formaction == 'index.php'){
+		if(!language || !taxon){
+			alert("Please select a language and taxonomic group to see term list.");
+			return false;
+		}
+	}
+	if(formaction == 'glossdocexport.php'){
+		if(!language || !taxon){
+			alert("Please select a primary language and taxonomic group to download.");
+			return false;
+		}
+		if(downloadtype == 'translation'){
+			var numTranslations = 0;
+			var e = document.forms["filtertermform"].getElementsByTagName("input");
+			for(var i=0;i<e.length;i++){
+				if(e[i].name == "language[]"){ 
+					if(e[i].checked == true){
+						numTranslations++;
+					}
+				}
+			}
+			if(numTranslations > 3){
+				alert("Please select a maximum of three translations for the Translation Table. Please be sure to not select the primary language.");
+				return false;
+			}
+			if(numTranslations === 0){
+				alert("Please select at least one translation for the Translation Table. Please be sure to not select the primary language.");
+				return false;
+			}
+		}
 	}
 	return true;
+}
+
+function changeFilterTermFormAction(action){
+	document.filtertermform.action = action;
+	document.getElementById("formaction").value = action;
 }
 
 function verifyNewTransForm(f){
