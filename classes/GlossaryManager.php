@@ -934,6 +934,64 @@ class GlossaryManager{
 		return $retArr;
 	}
 	
+	public function getTransExportArr($language,$taxon,$translations,$definitions){
+		$retArr = array();
+		$transStr = '"';
+		$transStr .= implode('","',$translations);
+		$transStr .= '"';
+		$sql = 'SELECT t.SciName, gt.glossgrpid, g.term, g.`language`, g.definition '.
+			'FROM ((glossarytermlink AS gt LEFT JOIN glossarytaxalink AS gx ON gt.glossgrpid = gx.glossgrpid) '.
+			'LEFT JOIN taxa AS t ON gx.tid = t.TID) '.
+			'LEFT JOIN glossary AS g ON gt.glossid = g.glossid '.
+			'WHERE gx.tid = '.$taxon.' AND (g.`language` = "'.$language.'" OR g.`language` IN('.$transStr.')) ';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['glossSciName'] = $r->SciName;
+				if($r->language == $language){
+					$retArr[$r->term]['term'] = $r->term;
+					$retArr[$r->term]['glossgrpid'] = $r->glossgrpid;
+					if($definitions != 'nodef'){
+						$retArr[$r->term]['definition'] = $r->definition;
+					}
+				}
+				else{
+					$retArr['glossTranslations'][$r->glossgrpid][$r->language]['term'] = $r->term;
+					if($definitions == 'alldef'){
+						$retArr['glossTranslations'][$r->glossgrpid][$r->language]['definition'] = $r->definition;
+					}
+				}
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
+	public function getSingleExportArr($language,$taxon,$images){
+		$retArr = array();
+		$sql = 'SELECT t.SciName, g.term, g.definition, gi.glimgid, gi.url, gi.structures, gi.notes '.
+			'FROM (((glossarytermlink AS gt LEFT JOIN glossarytaxalink AS gx ON gt.glossgrpid = gx.glossgrpid) '.
+			'LEFT JOIN taxa AS t ON gx.tid = t.TID) '.
+			'LEFT JOIN glossary AS g ON gt.glossid = g.glossid) '.
+			'LEFT JOIN glossaryimages AS gi ON g.glossid = gi.glossid '.
+			'WHERE gx.tid = '.$taxon.' AND g.`language` = "'.$language.'" ';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['glossSciName'] = $r->SciName;
+				$retArr[$r->term]['term'] = $r->term;
+				$retArr[$r->term]['definition'] = $r->definition;
+				if($images && ($r->url != '')){
+					$retArr[$r->term]['images'][$r->glimgid]['url'] = $r->url;
+					$retArr[$r->term]['images'][$r->glimgid]['structures'] = $r->structures;
+					$retArr[$r->term]['images'][$r->glimgid]['notes'] = $r->notes;
+				}
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
 	public function getTermId(){
 		return $this->glossId;
 	}

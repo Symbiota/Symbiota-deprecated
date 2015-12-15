@@ -146,6 +146,7 @@ if($formSubmit){
 		?>
 		<div id="tabs" style="margin:0px;margin-bottom:20px;padding:10px;">
 			<form name="filtertermform" action="index.php" method="post" onsubmit="return verifySearchForm(this.form);">
+				<input id="formaction" type="hidden" value="" />
 				<div style="clear:both;height:15px;">
 					<div style="float:left;">
 						<b>Language:</b>
@@ -197,10 +198,57 @@ if($formSubmit){
 						<input type="text" autocomplete="off" name="searchdefkeyword" id="searchdefkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchdefkeyword']:''); ?>" />
 					</div>
 					<div style="float:right;">
-						<button name="formsubmit" type="submit" value="Search Terms">Browse Terms</button>
+						<div style="margin-bottom:8px;" onclick="toggle('downloadoptionsdiv');return false;">
+							<a href="#" title="Show download options">
+								Download Options
+							</a>
+						</div>
+						<button name="formsubmit" type="submit" value="Search Terms" onclick="changeFilterTermFormAction('index.php');">Browse Terms</button>
+					</div>
+					<div id="downloadoptionsdiv" style="float:left;display:none;margin-top:15px;">
+						<fieldset style="padding:8px">
+							<legend><b>Download Options</b></legend>
+							<div style="clear:both;float:left;margin-bottom:8px;">
+								Primary language of download will be language selected above.
+							</div>
+							<div style="clear:left;float:left;">
+								<fieldset style="padding:8px">
+									<div style="clear:both;margin-bottom:8px;">
+										<input name="exporttype" id="exporttype" type="radio" value="translation" checked /> Translation Table
+									</div>
+									<div style="float:left;">
+										<b>Translations</b><br />
+										<?php
+										foreach($langArr as $k => $v){
+											echo '<input name="language[]" type="checkbox" value="'.$k.'" /> '.$k.'<br />';
+										}
+										?>
+									</div>
+									<div style="float:left;margin-left:15px;padding-top:1.1em;">
+										<input name="definitions" type="radio" value="nodef" checked /> Without Definitions<br />
+										<input name="definitions" type="radio" value="onedef" /> Include Primary Definition Only<br />
+										<input name="definitions" type="radio" value="alldef" /> Include All Definitions
+									</div>
+								</fieldset>
+							</div>
+							<div style="float:left;margin-left:10px;">
+								<fieldset style="padding:8px">
+									<div style="clear:both;margin-bottom:8px;">
+										<input name="exporttype" id="exporttype" type="radio" value="singlelanguage" /> Single Language
+									</div>
+									<div style="float:left;">
+										<input name="images" type="checkbox" value="images" /> Include Images
+									</div>
+								</fieldset>
+							</div>
+							<div style="clear:both;float:right;">
+								<button name="formsubmit" type="submit" value="Download" onclick="changeFilterTermFormAction('glossdocexport.php');">Download</button>
+							</div>
+						</fieldset>
 					</div>
 				</div>
 			</form>
+			<div style="clear:both;"></div>
 		</div>
 		<div id="termlistdiv" style="min-height:200px;">
 			<?php
