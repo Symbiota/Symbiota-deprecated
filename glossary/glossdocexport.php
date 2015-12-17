@@ -181,7 +181,7 @@ if($exportType == 'singlelanguage' && $singleExportArr){
 						$imgSrc = $GLOBALS["imageDomain"].$imgSrc;
 					}
 					else{
-						$imgSrc = 'http://'.$_SERVER['HTTP_HOST'].$IMAGE_ROOT_URL.$imgSrc;
+						$imgSrc = 'http://'.$_SERVER['HTTP_HOST'].$imgSrc;
 					}
 				}
 				$table->addRow();
