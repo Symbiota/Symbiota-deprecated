@@ -176,7 +176,14 @@ if($exportType == 'singlelanguage' && $singleExportArr){
 			$table = $section->addTable('exportTable');
 			foreach($imageArr as $img => $imgArr){
 				$imgSrc = $imgArr["url"];
-				$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgSrc;
+				if(substr($imgSrc,0,1)=="/"){
+					if(array_key_exists("imageDomain",$GLOBALS)){
+						$imgSrc = $GLOBALS["imageDomain"].$imgSrc;
+					}
+					else{
+						$imgSrc = $_SERVER['HTTP_HOST'].$IMAGE_ROOT_URL.$imgSrc;
+					}
+				}
 				$table->addRow();
 				$cell = $table->addCell(4125,$imageCellStyle);
 				$textrun = $cell->addTextRun('transDefPara');
