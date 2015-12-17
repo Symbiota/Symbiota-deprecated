@@ -184,7 +184,6 @@ if($exportType == 'singlelanguage' && $singleExportArr){
 						$imgSrc = 'http://'.$_SERVER['HTTP_HOST'].$IMAGE_ROOT_URL.$imgSrc;
 					}
 				}
-				echo $imgSrc;
 				$table->addRow();
 				$cell = $table->addCell(4125,$imageCellStyle);
 				$textrun = $cell->addTextRun('transDefPara');
