@@ -177,13 +177,14 @@ if($exportType == 'singlelanguage' && $singleExportArr){
 			foreach($imageArr as $img => $imgArr){
 				$imgSrc = $imgArr["url"];
 				if(substr($imgSrc,0,1)=="/"){
-					if(array_key_exists("imageDomain",$GLOBALS)){
+					if(array_key_exists("imageDomain",$GLOBALS) && $GLOBALS["imageDomain"]){
 						$imgSrc = $GLOBALS["imageDomain"].$imgSrc;
 					}
 					else{
-						$imgSrc = $_SERVER['HTTP_HOST'].$IMAGE_ROOT_URL.$imgSrc;
+						$imgSrc = 'http://'.$_SERVER['HTTP_HOST'].$IMAGE_ROOT_URL.$imgSrc;
 					}
 				}
+				echo $imgSrc;
 				$table->addRow();
 				$cell = $table->addCell(4125,$imageCellStyle);
 				$textrun = $cell->addTextRun('transDefPara');
