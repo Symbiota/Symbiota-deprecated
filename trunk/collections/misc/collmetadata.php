@@ -384,7 +384,7 @@ $collData = $collManager->getCollectionData(true);
 									</a>
 									<div id="peditsinfodialog">
 										Checking public edits will allow any user logged into the system to modify specimen records 
-										and resolve errors found within the system. However, if the user does not have explicit 
+										and resolve errors found within the collection. However, if the user does not have explicit 
 										authorization for the given collection, edits will not be applied until they are 
 										reviewed and approved by collection administrator.
 									</div>
@@ -484,7 +484,7 @@ $collData = $collManager->getCollectionData(true);
 										The use of the Occurrence Id as the GUID is not recommended for live datasets. 
 										Catalog Number can be used when the value within the catalog number field is globally unique.
 										The Symbiota Generated GUID (UUID) option will trigger the Symbiota data portal to automatically 
-										generate UUID GUIDs for each records. This option is recommended for many for Live Datasets 
+										generate UUID GUIDs for each record. This option is recommended for many for Live Datasets 
 										but not allowed for Snapshot collections that are managed in local management system.
 									</div>
 								</td>
@@ -560,12 +560,12 @@ $collData = $collManager->getCollectionData(true);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="colltypeinfodialog">
-											Preserve Specimens mean that physical samples exist and can be inspected by researchers. 
+											Preserve Specimens means that physical samples exist and can be inspected by researchers. 
 											Use Observations when the record is not based on a physical specimen. 
 											General Observations are used for setting up group projects where registered users
-											can independently manage their own dataset directly within the single project. General Observation 
-											projects are typically used by field researchers to manage their collection data and print labels 
-											prior to depositing the physIcal material within a collection. Even though personal collections 
+											can independently manage their own dataset directly within the single collection. General Observation 
+											collections are typically used by field researchers to manage their collection data and print labels 
+											prior to depositing the physical material within a collection. Even though personal collections 
 											are represented by a physical sample, they are classified as &quot;observations&quot; until the 
 											physical material is deposited within a publicly available collection with active curation.     
 										</div>
@@ -586,7 +586,7 @@ $collData = $collManager->getCollectionData(true);
 										</a>
 										<div id="managementinfodialog">
 											Use Snapshot when there is a separate in-house database maintained in the collection and the dataset 
-											within the Symbiota portal is only a periotically updated snapshot of the central database. 
+											within the Symbiota portal is only a periodically updated snapshot of the central database. 
 											A Live dataset is when the data is managed directly within the portal and the central database is the portal data. 
 										</div>
 									</td>
