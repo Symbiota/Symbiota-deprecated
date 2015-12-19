@@ -31,7 +31,8 @@ if(!$action){
 }
 
 $dataManager = new KeyDataManager();
-if(!$langValue) $langValue = $defaultLang;
+//if(!$langValue) $langValue = $defaultLang;
+$langValue = 'English';
 if($displayMode) $dataManager->setCommonDisplay(true);;  
 $dataManager->setLanguage($langValue);
 if($projValue) $pid = $dataManager->setProject($projValue);
