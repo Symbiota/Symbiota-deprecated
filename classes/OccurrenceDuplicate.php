@@ -213,7 +213,7 @@ class OccurrenceDuplicate {
 		
 		//Check for exact dupes
 		if(!$retStr){
-			$occArr = $this->getDupesCollector($collName, $collNum, $collDate, $currentOccid);
+			$occArr = $this->getDupesCollector($collName, $collNum, $currentOccid);
 			//Remove current occid
 			if($occArr){
 				$retStr = 'exact:'.implode(',',$occArr);
