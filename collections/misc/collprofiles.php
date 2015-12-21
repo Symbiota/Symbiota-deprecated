@@ -1,5 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
+include_once($SERVER_ROOT.'/content/lang/collections/misc/collprofiles.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/CollectionProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
@@ -91,8 +92,8 @@ if($SYMB_UID){
 		}
 	}
 	else{
-		echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
-		echo "<a href='../index.php'>Collection Search Page</a> &gt;&gt; ";
+		echo '<a href="../../index.php">Home</a> &gt;&gt; ';
+		echo '<a href="../index.php">'.$LANG['COLLECTION_SEARCH'].'</a> &gt;&gt; ';
 		echo "<b>".($collData?$collData["collectionname"]:"Collection Profiles")." Details</b>";
 	}
 	echo "</div>";
@@ -103,7 +104,7 @@ if($SYMB_UID){
 		<?php
 		if($editCode > 1){
 			if($action == 'UpdateStatistics'){
-				echo '<h2>Updating statistics related to this collection...</h2>';
+				echo '<h2> '.$LANG['UPDATE_STATISTICS'].'</h2>';
 				$collManager->updateStatistics(true);
 				echo '<hr/>';
 				$collData = $collManager->getCollectionData();
@@ -161,7 +162,7 @@ if($SYMB_UID){
 								?>
 								<li>
 									<a href="../editor/observationsubmit.php?collid=<?php echo $collid; ?>">
-										Submit an Image Voucher (observation supported by a photo)
+										<?php echo $LANG['SUBMIT_IMAGE_V']; ?>
 									</a>
 								</li>
 								<?php
@@ -169,7 +170,7 @@ if($SYMB_UID){
 							?>
 							<li>
 								<a href="../editor/occurrenceeditor.php?gotomode=1&collid=<?php echo $collid; ?>">
-									Add New Occurrence Record
+									<?php echo $LANG['ADD_NEW_OCCUR']; ?>
 								</a>
 							</li>
 							<?php
@@ -177,12 +178,12 @@ if($SYMB_UID){
 								?>
 								<li style="margin-left:10px">
 									<a href="../editor/imageoccursubmit.php?collid=<?php echo $collid; ?>">
-										Create New Records Using Image
+										<?php echo $LANG['CREATE_NEW_REC']; ?>
 									</a>
 								</li>
 								<li style="margin-left:10px">
 									<a href="../editor/skeletalsubmit.php?collid=<?php echo $collid; ?>">
-										Add Skeletal Records
+										<?php echo $LANG['SKELETAL']; ?>
 									</a>
 								</li>
 								<?php
@@ -190,12 +191,12 @@ if($SYMB_UID){
 							?>
 							<li>
 								<a href="../editor/occurrenceeditor.php?collid=<?php echo $collid; ?>">
-									Edit Existing Occurrence Records
+									<?php echo $LANG['EDIT_EXISTING']; ?>
 								</a>
 							</li>
 							<li>
 								<a href="../editor/batchdeterminations.php?collid=<?php echo $collid; ?>">
-									Add Batch Determinations/Nomenclatural Adjustments
+									<?php echo $LANG['ADD_BATCH_DETER']; ?>
 								</a>
 							</li>
 							<?php
@@ -203,7 +204,7 @@ if($SYMB_UID){
 								?>
 								<li>
 									<a href="../reports/labelmanager.php?collid=<?php echo $collid; ?>">
-										Print Labels/Annotations
+										<?php echo $LANG['PRINT_LABELS']; ?>
 									</a>
 								</li>
 								<?php
@@ -211,7 +212,7 @@ if($SYMB_UID){
 							?>
 							<li>
 								<a href="../georef/batchgeoreftool.php?collid=<?php echo $collid; ?>">
-									Batch Georeference Specimens
+									<?php echo $LANG['BATCH_GEOREF']; ?>
 								</a>
 							</li>
 							<?php
@@ -219,7 +220,7 @@ if($SYMB_UID){
 								?>
 								<li>
 									<a href="../loans/index.php?collid=<?php echo $collid; ?>">
-										Loan Management
+										<?php echo $LANG['LOAN_MANAGEMENT']; ?>
 									</a>
 								</li>
 								<?php
@@ -231,26 +232,32 @@ if($SYMB_UID){
 					if($editCode > 1){
 						?>
 						<fieldset style="padding:10px;padding-left:25px;">
-							<legend><b>Administration Control Panel</b></legend>
+							<legend><b><?php echo $LANG['ADMIN_CONTROL']; ?></b></legend>
 							<ul>
+
+                                <li>
+                                    <a href="commentlist.php?collid=<?php echo $collid; ?>" >
+										<?php echo $LANG['VIEW_COMMENTS']; ?>
+                                    </a>
+                                </li>
 								<li>
 									<a href="collmetadata.php?collid=<?php echo $collid; ?>" >
-										Edit Metadata and Contact Information
+										<?php echo $LANG['EDIT_META']; ?>
 									</a>
 								</li>
 								<li>
 									<a href="collprofiles.php?collid=<?php echo $collid; ?>&action=UpdateStatistics" >
-										Update Statistics
+										<?php echo $LANG['UPDATE_STATS'];?>
 									</a>
 								</li>
 								<li>
 									<a href="collpermissions.php?collid=<?php echo $collid; ?>" >
-										Manage Permissions
+										<?php echo $LANG['MANAGE_PERMISSIONS']; ?>
 									</a>
 								</li>
 								<li>
 									<a href="../admin/specuploadmanagement.php?collid=<?php echo $collid; ?>">
-										Import/Update Specimen Records
+										<?php echo $LANG['IMPORT_SPECIMEN']; ?>
 									</a>
 								</li>
 								<?php
@@ -258,7 +265,7 @@ if($SYMB_UID){
 									?>
 									<li style="margin-left:10px;">
 										<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collid; ?>">
-											Quick File Upload
+											<?php echo $LANG['QUICK_FILE']; ?>
 										</a>
 									</li>
 									<?php
@@ -266,7 +273,7 @@ if($SYMB_UID){
 								?>
 								<li style="margin-left:10px;">
 									<a href="../admin/specupload.php?uploadtype=7&collid=<?php echo $collid; ?>">
-										Skeletal File Upload
+										<?php echo $LANG['SKELETAL_FILE_UPLOAD']; ?>
 									</a>
 								</li>
 								<?php 
@@ -274,12 +281,12 @@ if($SYMB_UID){
 									?>
 									<li>
 										<a href="../specprocessor/index.php?collid=<?php echo $collid; ?>">
-											Processing Toolbox
+											<?php echo $LANG['PROCESSING_TOOLBOX']; ?>
 										</a>
 									</li>
 									<li>
 										<a href="../datasets/datapublisher.php?collid=<?php echo $collid; ?>">
-											Darwin Core Archive Publishing
+                                            <?php echo $LANG['DARWIN_CORE_PUB']; ?>
 										</a>
 									</li>
 									<?php
@@ -287,22 +294,22 @@ if($SYMB_UID){
 								?>
 								<li>
 									<a href="../editor/editreviewer.php?collid=<?php echo $collid; ?>">
-										Review/Verify General Specimen Edits
+										<?php echo $LANG['REVIEW_SPEC_EDITS']; ?>
 									</a>
 								</li>
 								<li>
 									<a href="../cleaning/occurrencecleaner.php?obsuid=0&collid=<?php echo $collid; ?>">
-										Data Cleaning Tools
+                                        <?php echo $LANG['DATA_CLEANING']; ?>
 									</a>
 								</li>
 							<li>
 								<a href="../datasets/duplicatemanager.php?collid=<?php echo $collid; ?>">
-									Duplicate Clustering
+									<?php echo $LANG['DUP_CLUSTER']; ?>
 								</a>
 							</li>
 							<li>
 								<a href="#" onclick="newWindow = window.open('collbackup.php?collid=<?php echo $collid; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=400,height=200,left=20,top=20');">
-									Download Backup Data File
+									<?php echo $LANG['BACKUP_DATA_FILE']; ?>
 								</a>
 							</li>
 							</ul>
@@ -319,13 +326,13 @@ if($SYMB_UID){
 					<?php echo $collData["fulldescription"]; ?>
 				</div>
 				<div style='margin-top:5px;'>
-					<b>Contact:</b> <?php echo $collData["contact"].($collData["email"]?" (".str_replace("@","&#64;",$collData["email"]).")":"");?>
+					<?php echo '<b>'.$LANG['CONTACT'].'</b> '.$collData["contact"].($collData["email"]?" (".str_replace("@","&#64;",$collData["email"]).")":"");?>
 				</div>
 				<?php
 				if($collData["homepage"]){
 					?>
 					<div style="margin-top:5px;">
-						<b>Home Page:</b>
+						<b><?php echo $LANG['HOMEPAGE']; ?></b>
 						<a href="<?php echo $collData["homepage"]; ?>" target="_blank">
 							<?php echo $collData["homepage"]; ?>
 						</a>
@@ -334,16 +341,16 @@ if($SYMB_UID){
 				}
 				?>
 				<div style="margin-top:5px;">
-					<b>Collection Type: </b>
 					<?php
+					echo '<b>'.$LANG['COLLECTION_TYPE'].' </b>';
 					if($collData['colltype']){
 						echo $collData['colltype'];
 					}
 					?>
 				</div>
 				<div style="margin-top:5px;">
-					<b>Management: </b>
 					<?php
+					echo '<b>'.$LANG['MANAGEMENT'].' </b>';
 					if($collData['managementtype'] == 'Live Data'){
 						echo 'Live Data managed directly within data portal';
 					}
@@ -354,7 +361,7 @@ if($SYMB_UID){
 						else{
 							echo 'Data snapshot of local collection database ';
 						}
-						echo '<div style="margin-top:5px;"><b>Last Update:</b> '.$collData['uploaddate'].'</div>';
+						echo '<div style="margin-top:5px;"><b>'.$LANG['LAST_UPDATE'].'</b> '.$collData['uploaddate'].'</div>';
 					}
 					?>
 				</div>
@@ -362,8 +369,8 @@ if($SYMB_UID){
 				if(stripos($collData['managementtype'],'live') !== false){
 					?>
 					<div style="margin-top:5px;">
-						<b>Global Unique Identifier: </b>
 						<?php
+						echo '<b>'.$LANG['GLOBAL_UNIQUE_ID'].' </b>';
 						echo ($collid?$collData['guid']:'');
 						?>
 					</div>
@@ -371,8 +378,8 @@ if($SYMB_UID){
 				}
 				?>
 				<div style="margin-top:5px;">
-					<b>Usage Rights:</b>
 					<?php
+					echo '<b>'.$LANG['USAGE_RIGHTS'].'</b>';
 					if($collid && $collData['rights']){
 						$rights = $collData['rights'];
 						$rightsUrl = '';
@@ -397,8 +404,8 @@ if($SYMB_UID){
  				if($collid && $collData['rightsholder']){
  					?>
 					<div style="margin-top:5px;">
-						<b>Rights Holder:</b>
 						<?php
+						echo '<b>'.$LANG['RIGHTS_HOLDER'].'</b>';
 						echo $collData['rightsholder'];
 						?>
 					</div>
@@ -407,8 +414,8 @@ if($SYMB_UID){
  				if($collid && $collData['accessrights']){
  					?>
 					<div style="margin-top:5px;">
-						<b>Access Rights:</b>
 						<?php
+						echo '<b>'.$LANG['ACCESS_RIGHTS'].'</b>';
 						echo $collData['accessrights'];
 						?>
 					</div>
@@ -438,9 +445,9 @@ if($SYMB_UID){
  				}
  				?>
 				<div style="clear:both;margin-top:5px;">
-					<div style="font-weight:bold;">Collection Statistics:</div>
+					<div style="font-weight:bold;"><?php echo $LANG['COLL_STATISTICS']; ?></div>
 					<ul style="margin-top:5px;">
-						<li><?php echo $collData["recordcnt"];?> specimen records</li>
+						<li><?php echo $collData["recordcnt"].' '.$LANG['SPECIMEN_RECORDS'];?></li>
 						<li><?php echo ($collData['georefcnt']?$collData['georefcnt']:0).($georefPerc?" (".($georefPerc>1?round($georefPerc):round($georefPerc,2))."%)":'');?> georeferenced</li>
 						<?php
 						if($extrastatsArr&&$extrastatsArr['imgcnt']) echo '<li>'.($extrastatsArr['imgcnt']?$extrastatsArr['imgcnt']:0).($imgPerc?" (".($imgPerc>1?round($imgPerc):round($imgPerc,2))."%)":'').' with images</li>';
@@ -449,9 +456,9 @@ if($SYMB_UID){
 						if($extrastatsArr&&$extrastatsArr['refcnt']) echo '<li>'.$extrastatsArr['refcnt'].' publication references</li>';
 						if($extrastatsArr&&$extrastatsArr['SpecimensCountID']) echo '<li>'.($extrastatsArr['SpecimensCountID']?$extrastatsArr['SpecimensCountID']:0).($spidPerc?" (".($spidPerc>1?round($spidPerc):round($spidPerc,2))."%)":'').' identified to species</li>';
 						?>
-						<li><?php echo $collData["familycnt"];?> families</li>
-						<li><?php echo $collData["genuscnt"];?> genera</li>
-						<li><?php echo $collData["speciescnt"];?> species</li>
+						<li><?php echo $collData["familycnt"].' '.$LANG['FAMILIES'];?></li>
+						<li><?php echo $collData["genuscnt"].' '.$LANG['GENERA'];?></li>
+						<li><?php echo $collData["speciescnt"].' '.$LANG['SPECIES'];?></li>
 						<?php
 						if($extrastatsArr&&$extrastatsArr['TotalTaxaCount']) echo '<li>'.$extrastatsArr['TotalTaxaCount'].' total taxa (including subsp. and var.)</li>';
 						if($extrastatsArr&&$extrastatsArr['TypeCount']) echo '<li>'.$extrastatsArr['TypeCount'].' type specimens</li>';
@@ -463,14 +470,14 @@ if($SYMB_UID){
 			if($extrastatsArr){
 				?>
 				<fieldset style='margin:20px;width:300px;background-color:#FFFFCC;'>
-					<legend><b>Extra Statistics</b></legend>
+					<legend><b><?php echo $LANG['EXTRA_STATS']; ?></b></legend>
 					<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
 						<div style="">
 							<div id="showfamdist" style="float:left;display:block;" >
-								<a href="#" onclick="return toggleFamilyDist()">Show Family Distribution</a>
+								<a href="#" onclick="return toggleFamilyDist()"><?php echo $LANG['SHOW_FAMILY_DIST'];?></a>
 							</div>
 							<div id="hidefamdist" style="float:left;display:none;" >
-								<a href="#" onclick="return toggleFamilyDist()">Hide Family Distribution</a>
+								<a href="#" onclick="return toggleFamilyDist()"><?php echo $LANG['HIDE_FAMILY_DIST']; ?></a>
 							</div>
 							<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 								<input type="image" name="action" value="Download Family Dist" src="../../images/dl.png" onclick="" />
@@ -478,10 +485,10 @@ if($SYMB_UID){
 						</div>
 						<div style="clear:both;">
 							<div id="showgeodist" style="float:left;display:block;" >
-								<a href="#" onclick="return toggleGeoDist()">Show Geographic Distribution</a>
+								<a href="#" onclick="return toggleGeoDist()"><?php echo $LANG['SHOW_GEOG_DIST'];?></a>
 							</div>
 							<div id="hidegeodist" style="float:left;display:none;" >
-								<a href="#" onclick="return toggleGeoDist()">Hide Geographic Distribution</a>
+								<a href="#" onclick="return toggleGeoDist()"><?php echo $LANG['HIDE_GEOG_DIST']; ?></a>
 							</div>
 							<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 								<input type="image" name="action" value="Download Geo Dist" src="../../images/dl.png" onclick="" />
@@ -510,10 +517,9 @@ if($SYMB_UID){
 							?>
 						</b>
 					</legend>
-					<div style="margin:15px;">Click on the specimen record counts within the parenthesis to return the records for that term</div>
+					<div style="margin:15px;"><?php echo $LANG['CLICK_ON_SPEC_REC'];?></div>
 					<ul>
 						<?php
-						$distArr = array();
 						$distArr = $collManager->getGeographicCounts($countryDist,$stateDist);
 						foreach($distArr as $term => $cnt){
 							echo '<li>';
@@ -534,16 +540,14 @@ if($SYMB_UID){
 						}
 						?>
 					</ul>
-					<?php
-						echo '*Clicking on name in list will display distributions within';
-					?>
+					<?php echo $LANG['CLICKING_NAME_DISPLAY']; ?>
 				</fieldset>
 				<?php
 			}
 			?>
 			<fieldset id="famdistbox" style="clear:both;margin-top:15px;width:800px;display:none;">
-				<legend><b>Family Distribution</b></legend>
-				<div style="margin:15px;">Click on the specimen record counts within the parenthesis to return the records for that family</div>
+				<legend><b><?php echo $LANG['FAMILY_DIST']; ?></b></legend>
+				<div style="margin:15px;"><?php echo $LANG['CLICK_ON_SPEC_FAM']; ?></div>
 				<ul>
 					<?php
 					foreach($famArr as $name => $data){
@@ -556,8 +560,8 @@ if($SYMB_UID){
 				</ul>
 			</fieldset>
 			<fieldset id="geodistbox" style="margin-top:15px;width:800px;display:none;">
-				<legend><b>Geographic Distribution - Countries</b></legend>
-				<div style="margin:15px;">Click on the specimen record counts within the parenthesis to return the records for that country</div>
+				<legend><b><?php echo $LANG['GEOG_DIST_COUNTRIES']; ?></b></legend>
+				<div style="margin:15px;"><?php echo $LANG['CLICK_ON_SPEC_COUNTRY']; ?></div>
 				<ul>
 					<?php
 					foreach($countryArr as $name => $data){
@@ -578,7 +582,7 @@ if($SYMB_UID){
 			?>
 			<h1><?php echo $DEFAULT_TITLE; ?> Collections </h1>
 			<div style='margin:10px;clear:both;'>
-				Select a collection to see full details.
+				<?php echo $LANG['COLLECTION_DETAILS']; ?>
 			</div>
 			<table style='margin:10px;'>
 				<?php
@@ -607,18 +611,18 @@ if($SYMB_UID){
 							<div style='margin:10px;'>
 								<div><?php echo $collArr['fulldescription']; ?></div>
 								<div style='margin-top:5px;'>
-									<b>Contact:</b>
+									<b><?php echo $LANG['CONTACT']; ?></b>
 									<?php echo $collArr['contact'].' ('.str_replace('@','&#64;',$collArr['email']).')';?>
 								</div>
 								<div style='margin-top:5px'>
-									<b>Home Page:</b>
+									<b><?php echo $LANG['HOMEPAGE']; ?></b>
 									<a href="<?php echo $collArr['homepage']; ?>" target="_blank">
 										<?php echo $collArr['homepage']; ?>
 									</a>
 								</div>
 							</div>
 							<div style='margin:5px 0px 15px 10px;'>
-								<a href='collprofiles.php?collid=<?php echo $cId; ?>'>More Information</a>
+								<a href='collprofiles.php?collid=<?php echo $cId; ?>'><?php echo $LANG['MORE_INFO']; ?></a>
 							</div>
 						</td>
 					</tr>
