@@ -158,7 +158,12 @@ $(document).ready(function() {
 function verifyNewTermForm(f){
 	var term = document.getElementById("term").value;
 	var language = document.getElementById("language").value;
-	var tid = document.getElementById("tid").value;
+	if(document.getElementById("tidstr")){
+		var tid = document.getElementById("tidstr").value;
+	}
+	else{
+		var tid = document.getElementById("tid").value;
+	}
 	if(!term || !language || !tid){
 		alert("Please enter at least the term, language, and taxonomic group.");
 		return false;
