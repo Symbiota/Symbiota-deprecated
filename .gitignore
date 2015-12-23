@@ -2,3 +2,12 @@
 .settings/.jsdtscope
 .project
 .settings/org.eclipse.wst.jsdt.ui.superType.container
+.buildpath
+config/dbconnection.php
+config/symbini.php
+css/main.css
+css/speciesprofile.css
+footer.php
+header.php
+leftmenu.php
+.settings/org.eclipse.php.core.prefs
