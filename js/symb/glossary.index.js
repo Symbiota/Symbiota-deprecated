@@ -110,12 +110,12 @@ $(document).ready(function() {
 			source: function( request, response ) {
 				if(!document.getElementById('taxaaddform')){
 					$.getJSON( "rpc/taxalist.php", {
-						term: extractLast( request.term ), t: function() { return document.termeditform.taxagroup.value; }
+						term: extractLast( request.term ), t: 'single'
 					}, response );
 				}
 				else{
 					$.getJSON( "rpc/taxalist.php", {
-						term: extractLast( request.term ), t: function() { return document.taxaaddform.taxagroup.value; }
+						term: extractLast( request.term ), t: 'single'
 					}, response );
 				}
 			},
