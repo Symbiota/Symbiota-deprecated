@@ -135,7 +135,12 @@ if($formSubmit){
 								</div>
 							</div>
 							<div style="clear:both;padding-top:8px;float:right;">
-								<button name="formsubmit" type="submit" value="Create Term">Create Term</button>
+								<div style="float:right;">
+									<button name="formsubmit" type="submit" value="Create Term">Create Term</button>
+								</div>
+								<div style="float:right;margin-right:10px;">
+									<a href='glossaryloader.php'>Batch Upload Terms</a>
+								</div>
 							</div>
 						</fieldset>
 					</form>

@@ -110,12 +110,12 @@ $(document).ready(function() {
 			source: function( request, response ) {
 				if(!document.getElementById('taxaaddform')){
 					$.getJSON( "rpc/taxalist.php", {
-						term: extractLast( request.term ), t: function() { return document.termeditform.taxagroup.value; }
+						term: extractLast( request.term ), t: 'single'
 					}, response );
 				}
 				else{
 					$.getJSON( "rpc/taxalist.php", {
-						term: extractLast( request.term ), t: function() { return document.taxaaddform.taxagroup.value; }
+						term: extractLast( request.term ), t: 'single'
 					}, response );
 				}
 			},
@@ -158,7 +158,12 @@ $(document).ready(function() {
 function verifyNewTermForm(f){
 	var term = document.getElementById("term").value;
 	var language = document.getElementById("language").value;
-	var tid = document.getElementById("tid").value;
+	if(document.getElementById("tidstr")){
+		var tid = document.getElementById("tidstr").value;
+	}
+	else{
+		var tid = document.getElementById("tid").value;
+	}
 	if(!term || !language || !tid){
 		alert("Please enter at least the term, language, and taxonomic group.");
 		return false;

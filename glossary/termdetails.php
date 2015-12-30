@@ -230,6 +230,7 @@ else{
 								$tidStr = implode(',',$tidArr);
 								?>
 							</div>
+							<input id="tidstr" type="hidden" value="<?php echo $tidStr; ?>" />
 						</fieldset>
 					</div>
 				</div>

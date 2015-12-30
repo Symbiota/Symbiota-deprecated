@@ -139,7 +139,7 @@ class TPEditorManager {
 		$sql = "SELECT v.VID, v.VernacularName, v.Language, v.Source, v.username, v.notes, v.SortSequence ".
 			"FROM taxavernaculars v ".
 			"WHERE (v.tid = ".$this->tid.") ";
-		if($this->language) $sql .= "AND (v.Language = '".$this->language."') ";
+		//if($this->language) $sql .= "AND (v.Language = '".$this->language."') ";
 		$sql .= "ORDER BY v.Language, v.SortSequence";
 		$result = $this->taxonCon->query($sql);
 		$vernCnt = 0;
