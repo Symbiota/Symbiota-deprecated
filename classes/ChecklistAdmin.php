@@ -1,6 +1,5 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 
 class ChecklistAdmin {
 
@@ -85,7 +84,22 @@ class ChecklistAdmin {
 		}
 		$sql = 'UPDATE fmchecklists SET '.substr($setSql,2).' WHERE (clid = '.$this->clid.')';
 		//echo $sql; exit;
-		if(!$this->conn->query($sql)){
+		if($this->conn->query($sql)){
+			if($postArr['type'] == 'rarespp'){
+				if($postArr['locality']){
+					$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+						'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+						'INNER JOIN fmchklsttaxalink cl ON ts2.tid = cl.tid '.
+						'SET o.localitysecurity = 1 '.
+						'WHERE (cl.clid = '.$this->clid.') AND (o.stateprovince = "'.$postArr['locality'].'") '.
+						'AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
+					if(!$this->conn->query($sql)){
+						$statusStr = 'Error updating rare state species: '.$this->conn->error;
+					}
+				}
+			}
+		}
+		else{
 			$statusStr = 'Error: unable to update checklist metadata. SQL: '.$this->conn->error;
 		}
 		return $statusStr;
@@ -240,8 +254,8 @@ class ChecklistAdmin {
 					$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
 						'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 						'SET o.localitysecurity = 1 '.
-						'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
-						'AND o.stateprovince = "'.$state.'" AND ts2.tid = '.$dataArr['tid'];
+						'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) '.
+						'AND (o.stateprovince = "'.$state.'") AND (ts2.tid = '.$dataArr['tid'].')';
 					//echo $sqlRare; exit;
 					$this->conn->query($sqlRare);
 				}

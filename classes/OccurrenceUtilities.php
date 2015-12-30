@@ -883,13 +883,13 @@ class OccurrenceUtilities {
 		//protect globally rare species
 		if($this->verbose) $this->outputMsg('Protecting globally rare species... ',1);
 		$sensitiveArr = array();
-		$sql = 'SELECT DISTINCT t.tid, ts.tidaccepted '.
-			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '. 
-			'WHERE (ts.taxauthid = 1) AND (t.SecurityStatus > 0)';
+		$sql = 'SELECT DISTINCT ts2.tid '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
+			'WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (t.SecurityStatus > 0)';
 		$rs = $this->conn->query($sql); 
 		while($r = $rs->fetch_object()){
-			$sensitiveArr[$r->tid] = $r->tid; 
-			$sensitiveArr[$r->tidaccepted] = $r->tidaccepted; 
+			$sensitiveArr[] = $r->tid; 
 		}
 		$rs->free();
 

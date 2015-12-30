@@ -190,7 +190,7 @@ class VoucherManager {
 	}
 	
 	private function setStateRare($rareLocality){
-		//Check to make sure name it's already on global list
+		//Remove state based security protection only if name is not on global list
 		$sql = 'SELECT IFNULL(securitystatus,0) as securitystatus FROM taxa WHERE tid = '.$this->tid;
 		//echo $sql;
 		$rs = $this->conn->query($sql);
