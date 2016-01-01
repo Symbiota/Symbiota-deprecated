@@ -5,7 +5,7 @@
  *  cleanInStr() and cleanInArray();
  */
 
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class Manager  {
 	protected $conn = null;
