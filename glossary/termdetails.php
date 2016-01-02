@@ -143,7 +143,7 @@ else{
 									<b>Term: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<input type="text" name="term" id="term" maxlength="45" style="width:400px;" value="<?php echo $termArr['term']; ?>" onchange="" title="" />
+									<input type="text" name="term" id="term" maxlength="150" style="width:400px;" value="<?php echo $termArr['term']; ?>" onchange="" title="" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -151,7 +151,7 @@ else{
 									<b>Definition: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<textarea name="definition" id="definition" rows="10" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['definition']; ?></textarea>
+									<textarea name="definition" id="definition" rows="10" maxlength="1000" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['definition']; ?></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -164,10 +164,26 @@ else{
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
 								<div style="float:left;">
+									<b>Author: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="author" id="author" maxlength="250" style="width:500px;" value="<?php echo $termArr['author']; ?>" onchange="" title="" />
+								</div>
+							</div>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
+									<b>Translator: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="translator" id="translator" maxlength="250" style="width:500px;" value="<?php echo $termArr['translator']; ?>" onchange="" title="" />
+								</div>
+							</div>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
 									<b>Source: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<input type="text" name="source" id="source" maxlength="45" style="width:200px;" value="<?php echo $termArr['source']; ?>" onchange="" title="" />
+									<textarea name="source" id="source" rows="10" maxlength="1000" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['source']; ?></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -175,15 +191,15 @@ else{
 									<b>Notes: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<textarea name="notes" id="notes" rows="10" style="width:380px;height:40px;resize:vertical;" ><?php echo $termArr['notes']; ?></textarea>
+									<textarea name="notes" id="notes" rows="10" maxlength="250" style="width:380px;height:40px;resize:vertical;" ><?php echo $termArr['notes']; ?></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
 								<div style="float:left;">
-									<b>Resource: </b>
+									<b>Resource URL: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<textarea name="resourceurl" id="resourceurl" rows="10" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['resourceurl']; ?></textarea>
+									<textarea name="resourceurl" id="resourceurl" rows="10" maxlength="600" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['resourceurl']; ?></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:8px;float:right;">
@@ -248,7 +264,7 @@ else{
 										<b>Term: </b>
 									</div>
 									<div style="float:left;margin-left:10px;">
-										<input type="text" name="term" id="newsynterm" maxlength="45" style="width:400px;" value="" onchange="lookupNewsynonym(this.form);" title="" />
+										<input type="text" name="term" id="newsynterm" maxlength="150" style="width:400px;" value="" onchange="lookupNewsynonym(this.form);" title="" />
 									</div>
 								</div>
 								<div style="clear:both;padding-top:4px;float:left;">
@@ -256,7 +272,23 @@ else{
 										<b>Definition: </b>
 									</div>
 									<div style="float:left;margin-left:10px;">
-										<textarea name="definition" id="newsyndefinition" rows="10" style="width:380px;height:70px;resize:vertical;" DISABLED></textarea>
+										<textarea name="definition" id="newsyndefinition" rows="10" maxlength="1000" style="width:380px;height:70px;resize:vertical;" DISABLED></textarea>
+									</div>
+								</div>
+								<div style="clear:both;padding-top:4px;float:left;">
+									<div style="float:left;">
+										<b>Author: </b>
+									</div>
+									<div style="float:left;margin-left:10px;">
+										<input type="text" name="author" id="newsynauthor" maxlength="250" style="width:500px;" value="" onchange="" title="" DISABLED />
+									</div>
+								</div>
+								<div style="clear:both;padding-top:4px;float:left;">
+									<div style="float:left;">
+										<b>Translator: </b>
+									</div>
+									<div style="float:left;margin-left:10px;">
+										<input type="text" name="translator" id="newsyntranslator" maxlength="250" style="width:500px;" value="" onchange="" title="" DISABLED />
 									</div>
 								</div>
 								<div style="clear:both;padding-top:4px;float:left;">
@@ -264,7 +296,7 @@ else{
 										<b>Source: </b>
 									</div>
 									<div style="float:left;margin-left:10px;">
-										<input type="text" name="source" id="newsynsource" maxlength="45" style="width:200px;" value="" onchange="" title="" DISABLED />
+										<input type="text" name="source" id="newsynsource" maxlength="1000" style="width:200px;" value="" onchange="" title="" DISABLED />
 									</div>
 								</div>
 								<div style="clear:both;padding-top:4px;float:left;">
@@ -272,7 +304,15 @@ else{
 										<b>Notes: </b>
 									</div>
 									<div style="float:left;margin-left:10px;">
-										<textarea name="notes" id="newsynnotes" rows="10" style="width:380px;height:40px;resize:vertical;" DISABLED></textarea>
+										<textarea name="notes" id="newsynnotes" rows="10" maxlength="250" style="width:380px;height:40px;resize:vertical;" DISABLED></textarea>
+									</div>
+								</div>
+								<div style="clear:both;padding-top:4px;float:left;">
+									<div style="float:left;">
+										<b>Resource URL: </b>
+									</div>
+									<div style="float:left;margin-left:10px;">
+										<textarea name="resourceurl" id="newsynresourceurl" rows="10" maxlength="600" style="width:500px;height:70px;resize:vertical;" DISABLED></textarea>
 									</div>
 								</div>
 								<div style="clear:both;padding-top:8px;float:right;">
@@ -354,7 +394,7 @@ else{
 										<b>Term: </b>
 									</div>
 									<div style="float:left;margin-left:10px;">
-										<input type="text" name="term" id="newtransterm" maxlength="45" style="width:400px;" value="" onchange="lookupNewtranslation(this.form);" title="" />
+										<input type="text" name="term" id="newtransterm" maxlength="150" style="width:400px;" value="" onchange="lookupNewtranslation(this.form);" title="" />
 									</div>
 								</div>
 								<div style="clear:both;padding-top:4px;float:left;">
@@ -362,7 +402,23 @@ else{
 										<b>Definition: </b>
 									</div>
 									<div style="float:left;margin-left:10px;">
-										<textarea name="definition" id="newtransdefinition" rows="10" style="width:380px;height:70px;resize:vertical;" DISABLED></textarea>
+										<textarea name="definition" id="newtransdefinition" rows="10" maxlength="1000" style="width:380px;height:70px;resize:vertical;" DISABLED></textarea>
+									</div>
+								</div>
+								<div style="clear:both;padding-top:4px;float:left;">
+									<div style="float:left;">
+										<b>Author: </b>
+									</div>
+									<div style="float:left;margin-left:10px;">
+										<input type="text" name="author" id="newtransauthor" maxlength="250" style="width:500px;" value="" onchange="" title="" DISABLED />
+									</div>
+								</div>
+								<div style="clear:both;padding-top:4px;float:left;">
+									<div style="float:left;">
+										<b>Translator: </b>
+									</div>
+									<div style="float:left;margin-left:10px;">
+										<input type="text" name="translator" id="newtranstranslator" maxlength="250" style="width:500px;" value="" onchange="" title="" DISABLED />
 									</div>
 								</div>
 								<div style="clear:both;padding-top:4px;float:left;">
@@ -370,7 +426,7 @@ else{
 										<b>Source: </b>
 									</div>
 									<div style="float:left;margin-left:10px;">
-										<input type="text" name="source" id="newtranssource" maxlength="45" style="width:200px;" value="" onchange="" title="" DISABLED />
+										<input type="text" name="source" id="newtranssource" maxlength="1000" style="width:200px;" value="" onchange="" title="" DISABLED />
 									</div>
 								</div>
 								<div style="clear:both;padding-top:4px;float:left;">
@@ -378,7 +434,15 @@ else{
 										<b>Notes: </b>
 									</div>
 									<div style="float:left;margin-left:10px;">
-										<textarea name="notes" id="newtransnotes" rows="10" style="width:380px;height:40px;resize:vertical;" DISABLED></textarea>
+										<textarea name="notes" id="newtransnotes" rows="10" maxlength="250" style="width:380px;height:40px;resize:vertical;" DISABLED></textarea>
+									</div>
+								</div>
+								<div style="clear:both;padding-top:4px;float:left;">
+									<div style="float:left;">
+										<b>Resource URL: </b>
+									</div>
+									<div style="float:left;margin-left:10px;">
+										<textarea name="resourceurl" id="newtransresourceurl" rows="10" maxlength="600" style="width:500px;height:70px;resize:vertical;" DISABLED></textarea>
 									</div>
 								</div>
 								<div style="clear:both;padding-top:8px;float:right;">
@@ -478,6 +542,14 @@ else{
 									</div>
 									<div style="clear:both;padding-top:4px;float:left;">
 										<div style="float:left;">
+											<b>Created By:</b>
+										</div>
+										<div style="float:left;margin-left:10px;">
+											<textarea name="createdBy" id="createdBy" rows="10" style="width:380px;height:50px;resize:vertical;" ></textarea>
+										</div>
+									</div>
+									<div style="clear:both;padding-top:4px;float:left;">
+										<div style="float:left;">
 											<b>Structures:</b>
 										</div>
 										<div style="float:left;margin-left:10px;">
@@ -528,14 +600,22 @@ else{
 												<img src="<?php echo $displayUrl;?>" style="width:250px;" title="<?php echo $imgArr["structures"]; ?>" />
 											</a>
 										</div>
-										<div style="float:left;margin-left:10px;padding:10px;">
+										<div style="float:left;margin-left:10px;padding:10px;width:350px;">
 											<div style="">
 												<?php
+												if($imgArr["createdBy"]){
+													?>
+													<div style="overflow:hidden;">
+														<b>Created By:</b> 
+														<?php echo wordwrap($imgArr["createdBy"], 150, "<br />\n"); ?>
+													</div>
+													<?php
+												}
 												if($imgArr["structures"]){
 													?>
 													<div style="overflow:hidden;">
 														<b>Structures:</b> 
-														<?php echo wordwrap($imgArr["structures"], 420, "<br />\n"); ?>
+														<?php echo wordwrap($imgArr["structures"], 150, "<br />\n"); ?>
 													</div>
 													<?php
 												}
@@ -543,7 +623,7 @@ else{
 													?>
 													<div style="overflow:hidden;margin-top:8px;">
 														<b>Notes:</b> 
-														<?php echo wordwrap($imgArr["notes"], 420, "<br />\n"); ?>
+														<?php echo wordwrap($imgArr["notes"], 150, "<br />\n"); ?>
 													</div>
 													<?php
 												}
@@ -554,6 +634,14 @@ else{
 											<form name="img<?php echo $imgId; ?>editform" action="termdetails.php" method="post" onsubmit="return verifyImageEditForm(this.form);">
 												<fieldset style="">
 													<legend><b>Edit Image Data</b></legend>
+													<div style="clear:both;">
+														<div style="float:left;">
+															<b>Created By:</b>
+														</div>
+														<div style="float:left;margin-left:10px;">
+															<textarea name="createdBy" id="createdBy" rows="10" style="width:380px;height:50px;resize:vertical;" ><?php echo $imgArr["createdBy"]; ?></textarea>
+														</div>
+													</div>
 													<div style="clear:both;">
 														<div style="float:left;">
 															<b>Structures:</b>

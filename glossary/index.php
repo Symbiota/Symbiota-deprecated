@@ -21,7 +21,7 @@ $taxonName = '';
 $statusStr = '';
 if($formSubmit){
 	if($formSubmit == 'Search Terms'){
-		$termList = $glosManager->getTermList($_POST['searchtermkeyword'],$_POST['searchdefkeyword'],$_POST['searchlanguage'],$_POST['searchtaxa']);
+		$termList = $glosManager->getTermList($_POST['searchkeyword'],$_POST['searchlanguage'],$_POST['searchtaxa']);
 		$language = $_POST['searchlanguage'];
 		$tId = $_POST['searchtaxa'];
 	}
@@ -78,6 +78,11 @@ if($formSubmit){
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
+		if(isset($glossary_indexBanner)){
+			if($glossary_indexBanner){
+				echo $glossary_indexBanner;
+			}
+		}
 		if($statusStr){
 			?>
 			<div style="margin:15px;color:red;">
@@ -103,7 +108,7 @@ if($formSubmit){
 									<b>Term: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<input type="text" name="term" id="term" maxlength="45" style="width:200px;" value="" onchange="" title="" />
+									<input type="text" name="term" id="term" maxlength="150" style="width:350px;" value="" onchange="" title="" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -111,7 +116,7 @@ if($formSubmit){
 									<b>Definition: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<textarea name="definition" id="definition" rows="10" style="width:380px;height:70px;resize:vertical;" ></textarea>
+									<textarea name="definition" id="definition" rows="10" maxlength="1000" style="width:450px;height:70px;resize:vertical;" ></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -120,6 +125,22 @@ if($formSubmit){
 								</div>
 								<div style="float:left;margin-left:10px;">
 									<input type="text" name="language" id="language" maxlength="45" style="width:200px;" value="" onchange="" title="" />
+								</div>
+							</div>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
+									<b>Author: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="author" id="author" maxlength="250" style="width:400px;" value="" onchange="" title="" />
+								</div>
+							</div>
+							<div style="clear:both;padding-top:4px;float:left;">
+								<div style="float:left;">
+									<b>Translator: </b>
+								</div>
+								<div style="float:left;margin-left:10px;">
+									<input type="text" name="translator" id="translator" maxlength="250" style="width:400px;" value="" onchange="" title="" />
 								</div>
 							</div>
 							<div style="clear:both;margin-top:12px;float:left;">
@@ -153,6 +174,9 @@ if($formSubmit){
 			<form name="filtertermform" action="index.php" method="post" onsubmit="return verifySearchForm(this.form);">
 				<input id="formaction" type="hidden" value="" />
 				<div style="clear:both;height:15px;">
+					<div style="float:right;">
+						<button name="formsubmit" type="submit" value="Search Terms" onclick="changeFilterTermFormAction('index.php');">Browse Terms</button>
+					</div>
 					<div style="float:left;">
 						<b>Language:</b>
 						<select name="searchlanguage" id="searchlanguage" style="margin-top:2px;" onchange="">
@@ -173,7 +197,7 @@ if($formSubmit){
 					</div>
 					<div style="float:left;margin-left:10px;">
 						<b>Taxonomic Group:</b>
-						<select name="searchtaxa" id="searchtaxa" style="margin-top:2px;width:150px;" onchange="">
+						<select name="searchtaxa" id="searchtaxa" style="margin-top:2px;width:300px;" onchange="">
 							<option value="">Select Group</option>
 							<option value="">----------------</option>
 							<?php 
@@ -195,20 +219,15 @@ if($formSubmit){
 				</div>
 				<div style="clear:both;height:15px;margin-top:15px;">
 					<div style="float:left;">
-						<b>Term Keyword:</b> 
-						<input type="text" autocomplete="off" name="searchtermkeyword" id="searchtermkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchtermkeyword']:''); ?>" />
-					</div>
-					<div style="float:left;margin-left:10px;">
-						<b>Definition Keyword:</b> 
-						<input type="text" autocomplete="off" name="searchdefkeyword" id="searchdefkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchdefkeyword']:''); ?>" />
+						<b>Search for Specific Term Keyword:</b> 
+						<input type="text" autocomplete="off" name="searchkeyword" id="searchkeyword" size="25" value="<?php echo ($formSubmit == 'Search Terms'?$_POST['searchkeyword']:''); ?>" />
 					</div>
 					<div style="float:right;">
-						<div style="margin-bottom:8px;" onclick="toggle('downloadoptionsdiv');return false;">
+						<div style="" onclick="toggle('downloadoptionsdiv');return false;">
 							<a href="#" title="Show download options">
 								Download Options
 							</a>
 						</div>
-						<button name="formsubmit" type="submit" value="Search Terms" onclick="changeFilterTermFormAction('index.php');">Browse Terms</button>
 					</div>
 					<div id="downloadoptionsdiv" style="float:left;display:none;margin-top:15px;">
 						<fieldset style="padding:8px">
@@ -216,35 +235,31 @@ if($formSubmit){
 							<div style="clear:both;float:left;margin-bottom:8px;">
 								Primary language of download will be language selected above.
 							</div>
-							<div style="clear:left;float:left;">
-								<fieldset style="padding:8px">
-									<div style="clear:both;margin-bottom:8px;">
-										<input name="exporttype" id="exporttype" type="radio" value="translation" checked /> Translation Table
-									</div>
-									<div style="float:left;">
-										<b>Translations</b><br />
-										<?php
-										foreach($langArr as $k => $v){
-											echo '<input name="language[]" type="checkbox" value="'.$k.'" /> '.$k.'<br />';
-										}
-										?>
-									</div>
-									<div style="float:left;margin-left:15px;padding-top:1.1em;">
-										<input name="definitions" type="radio" value="nodef" checked /> Without Definitions<br />
-										<input name="definitions" type="radio" value="onedef" /> Include Primary Definition Only<br />
-										<input name="definitions" type="radio" value="alldef" /> Include All Definitions
-									</div>
-								</fieldset>
+							<div style="clear:both;float:left;margin-bottom:8px;">
+								<div style="clear:both;">
+									<input name="exporttype" id="exporttype" type="radio" value="singlelanguage" checked /> Single Language
+								</div>
+								<div style="float:left;clear:both;margin-left:25px;">
+									<input name="images" type="checkbox" value="images" /> Include Images
+								</div>
 							</div>
-							<div style="float:left;margin-left:10px;">
-								<fieldset style="padding:8px">
-									<div style="clear:both;margin-bottom:8px;">
-										<input name="exporttype" id="exporttype" type="radio" value="singlelanguage" /> Single Language
-									</div>
-									<div style="float:left;">
-										<input name="images" type="checkbox" value="images" /> Include Images
-									</div>
-								</fieldset>
+							<div style="clear:left;float:left;">
+								<div style="clear:both;">
+									<input name="exporttype" id="exporttype" type="radio" value="translation" /> Translation Table
+								</div>
+								<div style="float:left;margin-left:25px;">
+									<b>Translations</b><br />
+									<?php
+									foreach($langArr as $k => $v){
+										echo '<input name="language[]" type="checkbox" value="'.$k.'" /> '.$k.'<br />';
+									}
+									?>
+								</div>
+								<div style="float:left;margin-left:15px;padding-top:1.1em;">
+									<input name="definitions" type="radio" value="nodef" checked /> Without Definitions<br />
+									<input name="definitions" type="radio" value="onedef" /> Include Primary Definition Only<br />
+									<input name="definitions" type="radio" value="alldef" /> Include All Definitions
+								</div>
 							</div>
 							<div style="clear:both;float:right;">
 								<button name="formsubmit" type="submit" value="Download" onclick="changeFilterTermFormAction('glossdocexport.php');">Download</button>
@@ -259,11 +274,8 @@ if($formSubmit){
 			<?php
 			if($termList){
 				$title = 'Terms for '.$taxonName.' in '.$_POST['searchlanguage'];
-				if($_POST['searchtermkeyword']){
-					$title .= ' and with a keyword of '.$_POST['searchtermkeyword'];
-				}
-				if($_POST['searchdefkeyword']){
-					$title .= ' and with a definition keyword of '.$_POST['searchdefkeyword'];
+				if($_POST['searchkeyword']){
+					$title .= ' and with a keyword of '.$_POST['searchkeyword'];
 				}
 				echo '<div style="font-weight:bold;font-size:120%;">'.$title.'</div>';
 				echo '<div><ul>';
@@ -275,7 +287,7 @@ if($formSubmit){
 				echo '</ul></div>';
 			}
 			elseif($formSubmit == 'Search Terms'){
-				echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are no terms matching your criteria.</div></div>';
+				echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are no terms matching your criteria. If you would like to contribute terms or translations please <a href="mailto:'.$adminEmail.'" target="_top">contact us</a>.</div></div>';
 			}
 			else{
 				echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">Enter search criteria above to see terms.</div></div>';

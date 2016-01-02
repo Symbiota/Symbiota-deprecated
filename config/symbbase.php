@@ -89,6 +89,8 @@ if(!isset($DYN_CHECKLIST_RADIUS) && isset($dynChecklistRadius)) $DYN_CHECKLIST_R
 if(!isset($DISPLAY_COMMON_NAMES) && isset($displayCommonNames)) $DISPLAY_COMMON_NAMES = $displayCommonNames;
 if(!isset($RIGHTS_TERMS) && isset($rightsTerms)) $RIGHTS_TERMS = $rightsTerms;
 if(!isset($REPRODUCTIVE_CONDITION_TERMS) && isset($reproductiveConditionTerms)) $REPRODUCTIVE_CONDITION_TERMS = $reproductiveConditionTerms;
+if(!isset($GLOSSARY_EXPORT_HEADER) && isset($glossaryExportHeader)) $GLOSSARY_EXPORT_HEADER = $glossaryExportHeader;
+if(!isset($GLOSSARY_EXPORT_BANNER) && isset($glossaryExportBanner)) $GLOSSARY_EXPORT_BANNER = $glossaryExportBanner;
 
 //temporatly needed until all variables within code are mapped to constants
 if(!isset($clientRoot) && isset($CLIENT_ROOT)) $clientRoot = $CLIENT_ROOT; 
@@ -122,6 +124,8 @@ if(!isset($dynChecklistRadius) && isset($DYN_CHECKLIST_RADIUS)) $dynChecklistRad
 if(!isset($displayCommonNames) && isset($DISPLAY_COMMON_NAMES)) $displayCommonNames = $DISPLAY_COMMON_NAMES;
 if(!isset($rightsTerms) && isset($RIGHTS_TERMS)) $rightsTerms = $RIGHTS_TERMS;
 if(!isset($reproductiveConditionTerms) && isset($REPRODUCTIVE_CONDITION_TERMS)) $reproductiveConditionTerms = $REPRODUCTIVE_CONDITION_TERMS;
+if(!isset($glossaryExportHeader) && isset($GLOSSARY_EXPORT_HEADER)) $glossaryExportHeader = $GLOSSARY_EXPORT_HEADER;
+if(!isset($glossaryExportBanner) && isset($GLOSSARY_EXPORT_BANNER)) $glossaryExportBanner = $GLOSSARY_EXPORT_BANNER;
 
 //Multi-langauge support
 $LANG_TAG = 'en';
