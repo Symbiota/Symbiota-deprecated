@@ -133,30 +133,25 @@ class PluginsManager {
 						else{
 							$file = $row->url;
 						}
-						$ch = curl_init($file);    
-						curl_setopt($ch, CURLOPT_NOBODY, true);
-						curl_exec($ch);
-						$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-						curl_close($ch);
-						if($code == 200){
-							if($size = getimagesize($file)){
-								$width = $size[0];
-								$height = $size[1];
-								$files[$imgId]['url'] = $file;
-								$files[$imgId]['width'] = $width;
-								$files[$imgId]['height'] = $height;
-								$files[$imgId]['imgid'] = $row->imgid;
-								$files[$imgId]['tid'] = $row->tid;
-								$files[$imgId]['occid'] = $row->occid;
-								$files[$imgId]['photographer'] = $row->photographer;
-								$files[$imgId]['owner'] = $row->owner;
-								$files[$imgId]['SciName'] = $row->SciName;
-								$files[$imgId]['occsciname'] = $row->occsciname;
-								$files[$imgId]['photographerName'] = $row->photographerName;
-								$files[$imgId]['identifier'] = $row->identifier;
-								$imgIdArr[] = $row->imgid;
-								$cnt++;
-							}
+						$size = array();
+						@$size = getimagesize($file);
+						if($size){
+							$width = $size[0];
+							$height = $size[1];
+							$files[$imgId]['url'] = $file;
+							$files[$imgId]['width'] = $width;
+							$files[$imgId]['height'] = $height;
+							$files[$imgId]['imgid'] = $row->imgid;
+							$files[$imgId]['tid'] = $row->tid;
+							$files[$imgId]['occid'] = $row->occid;
+							$files[$imgId]['photographer'] = $row->photographer;
+							$files[$imgId]['owner'] = $row->owner;
+							$files[$imgId]['SciName'] = $row->SciName;
+							$files[$imgId]['occsciname'] = $row->occsciname;
+							$files[$imgId]['photographerName'] = $row->photographerName;
+							$files[$imgId]['identifier'] = $row->identifier;
+							$imgIdArr[] = $row->imgid;
+							$cnt++;
 						}
 					}
 				}
