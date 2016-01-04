@@ -284,19 +284,30 @@ class ChecklistManager {
 
 	private function setVernaculars($tidReturn){
 		if($tidReturn){
-			$sql = 'SELECT v2.tid, v.vernacularname FROM taxavernaculars v INNER JOIN '.
-				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(v.sortsequence,6,"0"),v.vid)),7) AS vid '. 
-				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-				'INNER JOIN taxavernaculars v ON ts2.tid = v.tid '.
+			$tempVernArr = array();
+			$sql = 'SELECT DISTINCT ts1.tid, v.`Language`, v.VernacularName '.
+				'FROM taxstatus AS ts1 INNER JOIN taxstatus AS ts2 ON ts1.tidaccepted = ts2.tidaccepted '. 
+				'INNER JOIN taxavernaculars AS v ON ts2.tid = v.tid '.
 				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tidReturn).')) '.
-				'AND (v.language = "'.$this->language.'") '.
-				'GROUP BY ts1.tid) v2 ON v.vid = v2.vid';
+				'ORDER BY v.TID, v.`Language`, v.VernacularName ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
-				$this->taxaList[$row->tid]["vern"] = $this->cleanOutStr($row->vernacularname);
+				$vern = $row->VernacularName;
+				if($vern){
+					$tempVernArr[$row->tid]['language'][$row->Language][] = $this->cleanOutStr($vern);
+				}
 			}
 			$rs->free();
+			foreach($tempVernArr as $tid => $tidArr){
+				$vernStrParts = array();
+				$langArr = $tidArr['language'];
+				foreach($langArr as $lang => $vernArr){
+					$vernStr = $lang.': '.implode(', ',$vernArr);
+					$vernStrParts[] = $vernStr;
+				}
+				$this->taxaList[$tid]["vern"] = $this->cleanOutStr(implode('; ',$vernStrParts));
+			}
 		}
 	}
 

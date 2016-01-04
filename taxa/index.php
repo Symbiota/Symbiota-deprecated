@@ -189,7 +189,7 @@ if($taxonManager->getSciName() != "unknown"){
 						<?php 
 						foreach($descriptions as $k => $vArr){
 							?>
-							<div id='tab<?php echo $k; ?>' class="sptab" style="width:92%;">
+							<div id='tab<?php echo $k; ?>' class="sptab" style="width:94%;">
 								<?php 
 								if($vArr["source"]){
 									echo "<div id='descsource' style='float:right;'>";
@@ -290,6 +290,16 @@ if($taxonManager->getSciName() != "unknown"){
 				echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
 				if($taxonRank > 140) echo "<div id='family' style='margin-top:3px;margin-left:20px;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
 				if($projValue) echo "<div style='margin-top:3px;margin-left:20px;'><b>Project:</b> ".$taxonManager->getProjName()."</div>\n";
+				if(!$taxonManager->echoImages(0,1,0)){
+					echo "<div class='image' style='width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;'>";
+					if($isEditor){
+						echo "<a href='admin/tpeditor.php?category=imageadd&tid=".$taxonManager->getTid()."'><b>Add an Image</b></a>";
+					}
+					else{
+						echo "<br/><br/><br/><br/><br/><br/>Images<br/>not yet<br/>available";
+					}
+					echo "</div>";
+				}
 				?>
 			</td>
 			<td>
@@ -321,7 +331,7 @@ if($taxonManager->getSciName() != "unknown"){
 						<?php 
 						foreach($descriptions as $k => $vArr){
 							?>
-							<div id='tab<?php echo $k; ?>' class='spptab'>
+							<div id='tab<?php echo $k; ?>' class='spptab' style='width:94%;'>
 								<?php 
 								if($vArr["source"]){
 									echo "<div id='descsource' style='float:right;'>";
