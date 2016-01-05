@@ -7,6 +7,7 @@ CREATE TABLE `tmtraits` (
   `description` VARCHAR(250) NULL,
   `refurl` VARCHAR(250) NULL,
   `notes` VARCHAR(250) NULL,
+  `dynamicProperties` TEXT NULL,
   `modifieduid` INT UNSIGNED NULL,
   `datelastmodified` DATETIME NULL,
   `createduid` INT UNSIGNED NULL,
@@ -24,7 +25,7 @@ CREATE TABLE `tmstates` (
   `stateid` INT NOT NULL AUTO_INCREMENT,
   `traitid` INT NOT NULL,
   `statecode` VARCHAR(2) NOT NULL,
-  `statename` VARCHAR(45) NOT NULL,
+  `statename` VARCHAR(75) NOT NULL,
   `description` VARCHAR(250) NULL,
   `notes` VARCHAR(250) NULL,
   `sortseq` INT NULL,
@@ -43,8 +44,7 @@ CREATE TABLE `tmstates` (
   CONSTRAINT `FK_tmstates_traits`
     FOREIGN KEY (`traitid`)   REFERENCES `tmtraits` (`traitid`)   ON DELETE RESTRICT   ON UPDATE CASCADE);
 
-CREATE TABLE `tmdescription` (
-  `tmdescid` INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE `tmattributes` (
   `stateid` INT NOT NULL,
   `occid` INT UNSIGNED NOT NULL,
   `modifier` VARCHAR(100) NULL,
@@ -57,21 +57,21 @@ CREATE TABLE `tmdescription` (
   `datelastmodified` DATETIME NULL,
   `createduid` INT UNSIGNED NULL,
   `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
-  PRIMARY KEY (`tmdescid`),
-  INDEX `FK_tmdesc_stateid_idx` (`stateid` ASC),
-  INDEX `FK_tmdesc_occid_idx` (`occid` ASC),
-  INDEX `FK_tmdesc_imgid_idx` (`imgid` ASC);
-  INDEX `FK_tmdesc_uidcreate_idx` (`createduid` ASC),
-  INDEX `FK_tmdesc_uidmodified_idx` (`modifieduid` ASC),
-  CONSTRAINT `FK_tmdesc_stateid`
+  PRIMARY KEY (`stateid`,`occid`),
+  INDEX `FK_tmattr_stateid_idx` (`stateid` ASC),
+  INDEX `FK_tmattr_occid_idx` (`occid` ASC),
+  INDEX `FK_tmattr_imgid_idx` (`imgid` ASC),
+  INDEX `FK_attr_uidcreate_idx` (`createduid` ASC),
+  INDEX `FK_tmattr_uidmodified_idx` (`modifieduid` ASC),
+  CONSTRAINT `FK_tmattr_stateid`
     FOREIGN KEY (`stateid`)   REFERENCES `tmstates` (`stateid`)   ON DELETE CASCADE   ON UPDATE CASCADE,
-  CONSTRAINT `FK_tmdesc_occid`
+  CONSTRAINT `FK_tmattr_occid`
     FOREIGN KEY (`occid`)   REFERENCES `omoccurrences` (`occid`)   ON DELETE CASCADE   ON UPDATE CASCADE,
-  CONSTRAINT `FK_tmdesc_imgid`
+  CONSTRAINT `FK_tmattr_imgid`
     FOREIGN KEY (`imgid`)  REFERENCES `images` (`imgid`)  ON DELETE SET NULL  ON UPDATE CASCADE,
-  CONSTRAINT `FK_tmdesc_uidcreate`
+  CONSTRAINT `FK_tmattr_uidcreate`
     FOREIGN KEY (`createduid`)   REFERENCES `users` (`uid`)   ON DELETE SET NULL   ON UPDATE CASCADE,
-  CONSTRAINT `FK_tmdesc_uidmodified`
+  CONSTRAINT `FK_tmattr_uidmodified`
     FOREIGN KEY (`modifieduid`)   REFERENCES `users` (`uid`)   ON DELETE SET NULL   ON UPDATE CASCADE
 );
 

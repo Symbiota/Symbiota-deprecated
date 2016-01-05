@@ -61,6 +61,10 @@ function initImageTool(imgId){
 	}
 }
 
+function setPortXY(portWidth,portHeight){
+	document.cookie = "symbimgport=" + portWidth + ":" + portHeight;
+}
+
 function initImgRes(){
 	var imgObj = document.getElementById("activeimg-"+activeImgIndex);
 	if(imgObj){

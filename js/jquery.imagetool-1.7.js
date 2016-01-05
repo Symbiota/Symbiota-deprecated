@@ -376,7 +376,8 @@
                 o.w = o.viewportWidth/o._width;
                 o.h = o.viewportHeight/o._height;
                 //Set cookie to remember width and height of view port
-                document.cookie = "symbimgport=" + escape(o.viewportWidth) + ":" + escape(o.viewportHeight);
+                //document.cookie = "symbimgport=" + escape(o.viewportWidth) + ":" + escape(o.viewportHeight);
+                setPortXY(escape(o.viewportWidth),escape(o.viewportHeight));
         }
 
         ,_resize: function() {
