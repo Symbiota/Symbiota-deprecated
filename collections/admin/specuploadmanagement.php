@@ -294,7 +294,7 @@ $duManager->readUploadParameters();
 								<input name="schemaname" type="text" size="65" value="<?php echo $duManager->getSchemaName(); ?>" />
 							</div>
 							<div id="cleanupspDiv" style="display:none">
-								<b>Stored Procedure (clean/transfer):</b> 
+								<b>Stored Procedure:</b> 
 								<input name="cleanupsp" type="text" size="40" value="<?php echo $duManager->getStoredProcedure(); ?>" style="width:400px;" />
 							</div>
 							<div id="querystrDiv" style="display:none">

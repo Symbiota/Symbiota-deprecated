@@ -287,14 +287,40 @@ DELIMITER ;
 
 ALTER TABLE `omcollectionstats`
 	MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
-  
-ALTER TABLE `glossary`
-	ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`;
-	MODIFY COLUMN `definition`  varchar(1000) NULL DEFAULT NULL AFTER `term`;
-
+	
 ALTER TABLE `taxadescrblock`
 	MODIFY COLUMN `caption`  varchar(40) NULL DEFAULT NULL AFTER `tid`;
+  
+ALTER TABLE `glossary`
+	ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`,
+	MODIFY COLUMN `definition`  varchar(1000) NULL DEFAULT NULL AFTER `term`,
+	MODIFY COLUMN `source`  varchar(1000) NULL DEFAULT NULL AFTER `language`,
+	ADD COLUMN `translator`  varchar(250) NULL AFTER `source`,
+	ADD COLUMN `author`  varchar(250) NULL AFTER `translator`;
+	
+ALTER TABLE `glossaryimages`
+	ADD COLUMN `createdBy`  varchar(250) NULL AFTER `notes`;
 
+ALTER TABLE `glossarytaxalink` 
+	DROP FOREIGN KEY `glossarytaxalink_ibfk_1`,
+	DROP FOREIGN KEY `glossarytaxalink_ibfk_2`;
+	
+ALTER TABLE `glossarytermlink` DROP FOREIGN KEY `glossarytermlink_ibfk_1`;
 
-
-
+CREATE TABLE `uploadglossary` (
+  `term` varchar(150) DEFAULT NULL,
+  `definition` varchar(1000) DEFAULT NULL,
+  `language` varchar(45) DEFAULT NULL,
+  `source` varchar(1000) DEFAULT NULL,
+  `author` varchar(250) DEFAULT NULL,
+  `translator` varchar(250) DEFAULT NULL,
+  `notes` varchar(250) DEFAULT NULL,
+  `resourceurl` varchar(600) DEFAULT NULL,
+  `tidStr` varchar(100) DEFAULT NULL,
+  `synonym` tinyint(1) DEFAULT NULL,
+  `newGroupId` int(10) DEFAULT NULL,
+  `currentGroupId` int(10) DEFAULT NULL,
+  `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `term_index` (`term`),
+  KEY `relatedterm_index` (`newGroupId`)
+);

@@ -237,11 +237,17 @@ function lookupNewsynonym(f){
 		document.getElementById("newsynnotes").disabled = false;
 		document.getElementById("synglossid").value = termArr['glossid'];
 		document.getElementById("newsynglossgrpid").value = termArr['glossgrpid'];
+		document.getElementById("newsynauthor").disabled = false;
+		document.getElementById("newsyntranslator").disabled = false;
+		document.getElementById("newsynresourceurl").disabled = false;
 	}
 	else{
 		document.getElementById("newsyndefinition").disabled = false;
+		document.getElementById("newsynauthor").disabled = false;
+		document.getElementById("newsyntranslator").disabled = false;
 		document.getElementById("newsynsource").disabled = false;
 		document.getElementById("newsynnotes").disabled = false;
+		document.getElementById("newsynresourceurl").disabled = false;
 	}
 }
 
@@ -282,11 +288,17 @@ function lookupNewtranslation(f){
 			document.getElementById("newtransnotes").disabled = false;
 			document.getElementById("transglossid").value = termArr['glossid'];
 			document.getElementById("newtransglossgrpid").value = termArr['glossgrpid'];
+			document.getElementById("newtransauthor").disabled = false;
+			document.getElementById("newtranstranslator").disabled = false;
+			document.getElementById("newtransresourceurl").disabled = false;
 		}
 		else{
 			document.getElementById("newtransdefinition").disabled = false;
+			document.getElementById("newtransauthor").disabled = false;
+			document.getElementById("newtranstranslator").disabled = false;
 			document.getElementById("newtranssource").disabled = false;
 			document.getElementById("newtransnotes").disabled = false;
+			document.getElementById("newtransresourceurl").disabled = false;
 		}
 	}
 }
@@ -315,6 +327,29 @@ function verifySearchForm(f){
 		if(!language || !taxon){
 			alert("Please select a primary language and taxonomic group to download.");
 			return false;
+		}
+		else{
+			var sutXmlHttp=GetXmlHttpObject();
+			if (sutXmlHttp==null){
+				alert ("Your browser does not support AJAX!");
+				return;
+			}
+			
+			var url="rpc/checksearch.php?language="+language+"&tid="+taxon;
+			
+			var termList = 'null';
+			
+			sutXmlHttp.onreadystatechange=function(){
+				if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+					termList = JSON.parse(sutXmlHttp.responseText);
+				}
+			};
+			sutXmlHttp.open("POST",url,false);
+			sutXmlHttp.send(null);
+			if(termList == 'null'){
+				alert("There are no terms in the primary language you selected for the taxonomic group you selected.");
+				return false;
+			}
 		}
 		if(downloadtype == 'translation'){
 			var numTranslations = 0;
@@ -373,7 +408,7 @@ function verifyImageEditForm(f){
 
 function openTermPopup(glossid){
 	var urlStr = 'individual.php?glossid='+glossid;
-	newWindow = window.open(urlStr,'popup','toolbar=1,status=1,scrollbars=1,width=650,height=450,left=20,top=20');
+	newWindow = window.open(urlStr,'popup','toolbar=1,status=1,scrollbars=1,width=675,height=450,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }

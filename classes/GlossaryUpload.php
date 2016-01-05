@@ -80,6 +80,8 @@ class GlossaryUpload{
 					$term = '';
 					$definition = '';
 					$source = '';
+					$author = '';
+					$translator = '';
 					$notes = '';
 					$resourceUrl = '';
 					$synonym = '';
@@ -100,6 +102,14 @@ class GlossaryUpload{
 							$index = array_search($csvField,array_keys($fieldMap));
 							$source = $this->cleanInStr($this->encodeString($recordArr[$index]));
 						}
+						if($field == $lang.'_author'){
+							$index = array_search($csvField,array_keys($fieldMap));
+							$author = $this->cleanInStr($this->encodeString($recordArr[$index]));
+						}
+						if($field == $lang.'_translator'){
+							$index = array_search($csvField,array_keys($fieldMap));
+							$translator = $this->cleanInStr($this->encodeString($recordArr[$index]));
+						}
 						if($field == $lang.'_notes'){
 							$index = array_search($csvField,array_keys($fieldMap));
 							$notes = $this->cleanInStr($this->encodeString($recordArr[$index]));
@@ -114,8 +124,9 @@ class GlossaryUpload{
 						}
 					}
 					if($term){
-						$sql = "INSERT INTO uploadglossary(term,definition,`language`,source,notes,resourceurl,tidStr,newGroupId) ";
-						$sql .= 'VALUES ("'.$term.'",'.($definition?'"'.$definition.'"':'null').',"'.ucfirst($lang).'",'.($source?'"'.$source.'"':($batchSources?'"'.$batchSources.'"':'null')).','.($notes?'"'.$notes.'"':'null').','.($resourceUrl?'"'.$resourceUrl.'"':'null').',"'.$tidStr.'",'.$id.')';
+						$sql = "INSERT INTO uploadglossary(term,definition,`language`,source,author,translator,notes,resourceurl,tidStr,newGroupId) ";
+						$sql .= 'VALUES ("'.$term.'",'.($definition?'"'.$definition.'"':'null').',"'.ucfirst($lang).'",'.($source?'"'.$source.'"':($batchSources?'"'.$batchSources.'"':'null')).',';
+						$sql .= ($author?'"'.$author.'"':'null').','.($translator?'"'.$translator.'"':'null').','.($notes?'"'.$notes.'"':'null').','.($resourceUrl?'"'.$resourceUrl.'"':'null').',"'.$tidStr.'",'.$id.')';
 						//echo "<div>".$sql."</div>";
 						if($this->conn->query($sql)){
 							$recordCnt++;
@@ -129,8 +140,9 @@ class GlossaryUpload{
 							$this->outputMsg('ERROR loading term: '.$this->conn->error);
 						}
 						if($synonym){
-							$sql = "INSERT INTO uploadglossary(term,definition,`language`,source,notes,resourceurl,tidStr,synonym,newGroupId) ";
-							$sql .= 'VALUES ("'.$synonym.'",'.($definition?'"'.$definition.'"':'null').',"'.ucfirst($lang).'",'.($source?'"'.$source.'"':($batchSources?'"'.$batchSources.'"':'null')).','.($notes?'"'.$notes.'"':'null').','.($resourceUrl?'"'.$resourceUrl.'"':'null').',"'.$tidStr.'",1,'.$id.')';
+							$sql = "INSERT INTO uploadglossary(term,definition,`language`,source,author,translator,notes,resourceurl,tidStr,synonym,newGroupId) ";
+							$sql .= 'VALUES ("'.$synonym.'",'.($definition?'"'.$definition.'"':'null').',"'.ucfirst($lang).'",'.($source?'"'.$source.'"':($batchSources?'"'.$batchSources.'"':'null')).',';
+							$sql .= ($author?'"'.$author.'"':'null').','.($translator?'"'.$translator.'"':'null').','.($notes?'"'.$notes.'"':'null').','.($resourceUrl?'"'.$resourceUrl.'"':'null').',"'.$tidStr.'",1,'.$id.')';
 							//echo "<div>".$sql."</div>";
 							if($this->conn->query($sql)){
 								$recordCnt++;
@@ -266,8 +278,8 @@ class GlossaryUpload{
 		$tidArr = explode(",",$tidStr);
 		
 		$this->outputMsg('Adding new '.$primaryLanguage.' terms... ');
-		$sql = 'INSERT INTO glossary(term,definition,`language`,source,notes,resourceurl,uid) '.
-			'SELECT term, definition, `language`, source, notes, resourceurl, '.$SYMB_UID.' '.
+		$sql = 'INSERT INTO glossary(term,definition,`language`,source,translator,author,notes,resourceurl,uid) '.
+			'SELECT term, definition, `language`, source, translator, author, notes, resourceurl, '.$SYMB_UID.' '.
 			'FROM uploadglossary '.
 			'WHERE term IS NOT NULL AND ISNULL(currentGroupId) AND `language` = "'.$primaryLanguage.'" ';
 		if(!$this->conn->query($sql)){
@@ -315,8 +327,8 @@ class GlossaryUpload{
 		foreach($languageArr as $lang){
 			if($lang != $primaryLanguage){
 				$this->outputMsg('Adding new '.$lang.' terms... ');
-				$sql = 'INSERT INTO glossary(term,definition,`language`,source,notes,resourceurl,uid) '.
-					'SELECT term, definition, `language`, source, notes, resourceurl, '.$SYMB_UID.' '.
+				$sql = 'INSERT INTO glossary(term,definition,`language`,source,translator,author,notes,resourceurl,uid) '.
+					'SELECT term, definition, `language`, source, translator, author, notes, resourceurl, '.$SYMB_UID.' '.
 					'FROM uploadglossary '.
 					'WHERE term IS NOT NULL AND ISNULL(currentGroupId) AND `language` = "'.$lang.'" ';
 				if(!$this->conn->query($sql)){
@@ -343,7 +355,7 @@ class GlossaryUpload{
 	}
 
 	public function exportUploadTerms(){
-		$fieldArr = array('term','definition','`language`','source','notes','resourceurl');
+		$fieldArr = array('term','definition','`language`','source','translator','author','notes','resourceurl');
 		$fileName = 'termUpload_'.time().'.csv';
 		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
@@ -410,7 +422,7 @@ class GlossaryUpload{
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$field = strtolower($row->Field);
-			if(strtolower($field) != 'language' && strtolower($field) != 'groupId' && strtolower($field) != 'initialtimestamp'){
+			if(strtolower($field) != 'language' && strtolower($field) != 'tidstr' && strtolower($field) != 'synonym' && strtolower($field) != 'newgroupid' && strtolower($field) != 'currentgroupid' && strtolower($field) != 'initialtimestamp'){
 				$targetArr[$field] = $field;
 			}
 		}

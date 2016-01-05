@@ -44,6 +44,8 @@ $MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g.
 $GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
 $RECAPTCHA_PUBLIC_KEY = '';	
 $RECAPTCHA_PRIVATE_KEY = '';
+$GLOSSARY_EXPORT_HEADER = '';		//Title at the top of glossary exports
+$GLOSSARY_EXPORT_BANNER = '';		//Banner image for glossary exports. Place in images/layout folder.
 $DYN_CHECKLIST_RADIUS = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $DISPLAY_COMMON_NAMES = 1;
 $ACTIVATE_EXSICCATI = 0;
@@ -82,6 +84,9 @@ $RIGHTS_TERMS = array(
 //taxa/
 	$taxa_indexMenu = 0;
 	$taxa_admin_tpeditorMenu = 0;
+	
+//glossary/
+	$glossary_indexBanner = 0;
 	
 //loans/
 	$collections_loans_indexCrumbs = 0;

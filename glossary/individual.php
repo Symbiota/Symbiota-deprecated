@@ -25,7 +25,7 @@ $translationStr = '';
 if($glossId){
 	$termArr = $glosManager->getTermArr($glossId);
 	$glossgrpId = $termArr['glossgrpid'];
-	$termTaxaArr = $glosManager->getTermTaxaArr($glossgrpId);
+	/*$termTaxaArr = $glosManager->getTermTaxaArr($glossgrpId);
 	if($termTaxaArr){
 		$taxaStr = '';
 		$i = 0;
@@ -37,7 +37,7 @@ if($glossId){
 			}
 			$i++;
 		}
-	}
+	}*/
 	$termGrpArr = $glosManager->getGrpArr($glossId,$glossgrpId,$termArr['language']);
 	if(array_key_exists('synonym',$termGrpArr)){
 		$synonymArr = $termGrpArr['synonym'];
@@ -104,6 +104,9 @@ else{
 	<!-- This is inner text! -->
 	<div id="innertext" style="width:625px;margin-left:0px;margin-right:0px;">
 		<div id="tabs" style="padding:10px;width:600px;margin:0px;">
+			<div style="clear:both;width:600px;margin-bottom:5px;font-size:12px;">
+				<?php echo $termArr['sciname']; ?>
+			</div>
 			<div style="clear:both;width:600px;">
 				<?php
 				if($isEditor){
@@ -123,122 +126,149 @@ else{
 				</div>
 			</div>
 			<div style="clear:both;width:600px;">
-			<div id="terminfo" style="float:left;<?php echo ($termImgArr?'width:300px;':''); ?>padding:10px;">
-				<div style="clear:both;">
-					<div style='' >
-						<div style='margin-top:8px;' >
-							<b>Definition:</b> 
-							<?php echo $termArr['definition']; ?>
+				<div id="terminfo" style="float:left;<?php echo ($termImgArr?'width:300px;':''); ?>padding:10px;">
+					<div style="clear:both;">
+						<div style='' >
+							<div style='margin-top:8px;' >
+								<b>Definition:</b> 
+								<?php echo $termArr['definition']; ?>
+							</div>
+							<?php
+							if($termArr['author']){
+								?>
+								<div style='margin-top:8px;' >
+									<b>Author:</b> 
+									<?php echo $termArr['author']; ?>
+								</div>
+								<?php
+							}
+							if($termArr['translator']){
+								?>
+								<div style='margin-top:8px;' >
+									<b>Translator:</b> 
+									<?php echo $termArr['translator']; ?>
+								</div>
+								<?php
+							}
+							if($synonymStr){
+								echo $synonymStr;
+							}
+							if($translationStr){
+								echo $translationStr;
+							}
+							if($termArr['notes']){
+								?>
+								<div style='margin-top:8px;' >
+									<b>Notes:</b> 
+									<?php echo $termArr['notes']; ?>
+								</div>
+								<?php
+							}
+							/*if($termTaxaArr){
+								?>
+								<div style='margin-top:8px;' >
+									<b>Taxonomic Groups:</b> 
+									<?php echo $taxaStr; ?>
+								</div>
+								<?php
+							}*/
+							if($termArr['resourceurl']){
+								$resource = '';
+								if(substr($termArr['resourceurl'],0,4)=="http" || substr($termArr['resourceurl'],0,4)=="www."){
+									$resource = "<a href='".$termArr['resourceurl']."' target='_blank'>".wordwrap($termArr['resourceurl'],($termImgArr?37:70),'<br />\n',true)."</a>";
+								}
+								else{
+									$resource = $termArr['resourceurl'];
+								}
+								?>
+								<div style='margin-top:8px;' >
+									<b>Resource URL:</b> 
+									<?php echo $resource; ?>
+								</div>
+								<?php
+							}
+							if($termArr['source']){
+								?>
+								<div style='margin-top:8px;' >
+									<b>Source:</b> 
+									<?php echo $termArr['source']; ?>
+								</div>
+								<?php
+							}
+							?>
+							<!-- <div style='margin-top:8px;' >
+								<b>Language:</b> 
+								<?php //echo $termArr['language']; ?>
+							</div> -->
 						</div>
-						<div style='margin-top:8px;' >
-							<b>Language:</b> 
-							<?php echo $termArr['language']; ?>
-						</div>
-						<div style='margin-top:8px;' >
-							<b>Source:</b> 
-							<?php echo $termArr['source']; ?>
-						</div>
+						
 						<?php
-						if($termArr['notes']){
+						if(!$isEditor){
 							?>
-							<div style='margin-top:8px;' >
-								<b>Notes:</b> 
-								<?php echo $termArr['notes']; ?>
-							</div>
-							<?php
-						}
-						if($termTaxaArr){
-							?>
-							<div style='margin-top:8px;' >
-								<b>Taxonomic Groups:</b> 
-								<?php echo $taxaStr; ?>
-							</div>
-							<?php
-						}
-						if($synonymStr){
-							echo $synonymStr;
-						}
-						if($translationStr){
-							echo $translationStr;
-						}
-						if($termArr['resourceurl']){
-							$resource = '';
-							if(substr($termArr['resourceurl'],0,4)=="http" || substr($termArr['resourceurl'],0,4)=="www."){
-								$resource = "<a href='".$termArr['resourceurl']."' target='_blank'>".$termArr['resourceurl']."</a>";
-							}
-							else{
-								$resource = $termArr['resourceurl'];
-							}
-							?>
-							<div style='margin-top:8px;' >
-								<b>Resource:</b> 
-								<?php echo $resource; ?>
+							<div style="margin-bottom:10px;margin-top:12px;font-size:12px;">
+								<a href="mailto:<?php echo $adminEmail; ?>" target="_top">Comment or suggest an addition, correction, or change</a>
 							</div>
 							<?php
 						}
 						?>
 					</div>
-					
-					<?php
-					if(!$isEditor){
-						?>
-						<div style="margin-bottom:10px;margin-top:8px;">
-							See an error? <a href="#" onclick="leaveTermPopup('../profile/index.php?refurl=../glossary/termdetails.php?glossid=<?php echo $glossId; ?>'); return false;">Login</a> to edit data
-						</div>
-						<?php
-					}
-					?>
 				</div>
-			</div>
-			
-			<?php
-			if($termImgArr){
-				?>
-				<div id="termimagediv" style="float:right;width:250px;padding:10px;">
-					<?php
-					foreach($termImgArr as $imgId => $imgArr){
-						$imgUrl = $imgArr["url"];
-						if(array_key_exists("imageDomain",$GLOBALS)){
-							if(substr($imgUrl,0,1)=="/"){
-								$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-							}
-						}			
-						$displayUrl = $imgUrl;
-						?>
-						<fieldset style='clear:both;border:0px;padding:0px;margin-top:10px;'>
-							<div style='width:250px;'>
-								<a href='<?php echo $imgArr['url']; ?>' target="_blank">
-									<img border=1 style="width:250px;" src='<?php echo $displayUrl; ?>' title='<?php echo $imgArr['structures']; ?>'/>
-								</a>
-							</div>
-							<div style='width:250px;'>
-								<?php
-								if($imgArr['structures']){
-									?>
-									<div style='overflow:hidden;width:250px;margin-top:8px;' >
-										<b>Structures:</b> 
-										<?php echo wordwrap($imgArr["structures"], 370, "<br />\n"); ?>
-									</div>
-									<?php
-								}
-								if($imgArr['notes']){
-									?>
-									<div style='overflow:hidden;width:250px;margin-top:8px;' >
-										<b>Notes:</b> 
-										<?php echo wordwrap($imgArr["notes"], 370, "<br />\n"); ?>
-									</div>
-									<?php
-								}
-								?>
-							</div>
-						</fieldset>
-						<?php
-					}
-					?>
-				</div>
+				
 				<?php
-			}
-			?>
+				if($termImgArr){
+					?>
+					<div id="termimagediv" style="float:right;width:250px;padding:10px;">
+						<?php
+						foreach($termImgArr as $imgId => $imgArr){
+							$imgUrl = $imgArr["url"];
+							if(array_key_exists("imageDomain",$GLOBALS)){
+								if(substr($imgUrl,0,1)=="/"){
+									$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+								}
+							}			
+							$displayUrl = $imgUrl;
+							?>
+							<fieldset style='clear:both;border:0px;padding:0px;margin-top:10px;'>
+								<div style='width:250px;'>
+									<a href='<?php echo $imgArr['url']; ?>' target="_blank">
+										<img border=1 style="width:250px;" src='<?php echo $displayUrl; ?>' title='<?php echo $imgArr['structures']; ?>'/>
+									</a>
+								</div>
+								<div style='width:250px;'>
+									<?php
+									if($imgArr['createdBy']){
+										?>
+										<div style='overflow:hidden;width:250px;margin-top:2px;font-size:12px;' >
+											Image courtesy of: <?php echo wordwrap($imgArr['createdBy'], 370, "<br />\n"); ?>
+										</div>
+										<?php
+									}
+									if($imgArr['structures']){
+										?>
+										<div style='overflow:hidden;width:250px;margin-top:8px;' >
+											<b>Structures:</b> 
+											<?php echo wordwrap($imgArr["structures"], 370, "<br />\n"); ?>
+										</div>
+										<?php
+									}
+									if($imgArr['notes']){
+										?>
+										<div style='overflow:hidden;width:250px;margin-top:8px;' >
+											<b>Notes:</b> 
+											<?php echo wordwrap($imgArr["notes"], 370, "<br />\n"); ?>
+										</div>
+										<?php
+									}
+									?>
+								</div>
+							</fieldset>
+							<?php
+						}
+						?>
+					</div>
+					<?php
+				}
+				?>
 			</div>
 			<div style="clear:both"></div>
 		</div>

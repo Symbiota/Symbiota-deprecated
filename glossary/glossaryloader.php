@@ -71,7 +71,8 @@ if($isEditor){
 					formatItem: function (data) {
 						return data.name;
 					}
-				}
+				},
+				required: true
 			});
 			
 			$('#batchtaxagroup').on('marcopoloselect', function (event, data, $item, initial) {
@@ -247,7 +248,7 @@ if($isEditor){
 							<input type="submit" name="action" value="Activate Terms" />
 						</div>
 						<div style="float:right;margin:10px;">
-							<a href="glossaryloader.php?action=downloadcsv" target="_blank">Download CSV Terms File</a>
+							<a href="glossaryloader.php?action=downloadcsv" >Download CSV Terms File</a>
 						</div>
 					</fieldset>
 				</form>
@@ -272,7 +273,7 @@ if($isEditor){
 								For each language in the CSV file, name the column with the terms as the language the terms are in,
 								and then name all columns related to that term as the language underscore and then the column name
 								(ex. English, English_definition, Spanish, Spanish_Definition, etc.). Columns can be added for the definition,
-								source, notes, and an online resource url.
+								author, translator, source, notes, and an online resource url.
 								Synonyms can be added by naming the column the language underscore synonym (ex. English_synonym).
 								A source can be added for all of the terms by filling in the Enter Sources box below. 
 								Please do not use spaces in the column names or file names.
@@ -284,7 +285,7 @@ if($isEditor){
 								<div class="overrideopt">
 									<b>Enter Taxonomic Groups:</b>
 									<div style="margin:10px;">
-										<input type="text" name="batchtaxagroup" id="batchtaxagroup" style="width:450px;" value="" onchange="" title="Separate multiple names with commas" autocomplete="off" />
+										<input type="text" name="batchtaxagroup" id="batchtaxagroup" style="width:550px;" value="" onchange="" autocomplete="off" />
 										<input name="batchtid" id="batchtid" type="hidden" value="" />
 									</div>
 								</div>
@@ -293,7 +294,7 @@ if($isEditor){
 								<div class="overrideopt">
 									<b>Enter Sources:</b>
 									<div style="margin:10px;">
-										<textarea name="batchsources" id="batchsources" maxlength="600" rows="10" style="width:450px;height:40px;resize:vertical;" ></textarea>
+										<textarea name="batchsources" id="batchsources" maxlength="1000" rows="10" style="width:450px;height:40px;resize:vertical;" ></textarea>
 									</div>
 								</div>
 							</div>
