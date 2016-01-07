@@ -118,8 +118,9 @@ class TaxaUpload{
 						$parentStr = $taxonStr;
 					}
 				}
-				if($parentIndex) $recordArr[$parentIndex] = $parentStr;  
-				
+				if($parentIndex){
+					$recordArr[$parentIndex] = 'PENDING:'.$parentStr;  
+				}
 				if(in_array("scinameinput",$fieldMap)){
 					//Load relavent fields into uploadtaxa table
 					$sql = $sqlBase;
@@ -147,7 +148,7 @@ class TaxaUpload{
 					}
 					if($valueSql){
 						$sql .= 'VALUES ('.substr($valueSql,1).')';
-						//echo "<div>".$sql."</div>";
+						//echo "<div>".$sql."</div>"; exit;
 						if($this->conn->query($sql)){
 							if($recordCnt%1000 == 0){
 								$this->outputMsg('Upload count: '.$recordCnt,1);
@@ -683,21 +684,26 @@ class TaxaUpload{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		
+
 		$this->outputMsg('Populating and mapping parent taxon... ');
 		$sql = 'UPDATE uploadtaxa '.
 			'SET parentstr = CONCAT_WS(" ", unitname1, unitname2) '.
-			'WHERE (parentstr IS NULL OR parentstr = "") AND rankid > 220';
+			'WHERE (parentstr IS NULL OR parentstr LIKE "PENDING:%") AND rankid > 220';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa SET parentstr = unitname1 '.
-			'WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 220';
+			'WHERE (parentstr IS NULL OR parentstr LIKE "PENDING:%") AND rankid = 220';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa SET parentstr = family '.
-			'WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 180';
+			'WHERE (parentstr IS NULL OR parentstr LIKE "PENDING:%") AND rankid = 180';
+		if(!$this->conn->query($sql)){
+			$this->outputMsg('ERROR: '.$this->conn->error,1);
+		}
+		$sql = 'UPDATE uploadtaxa SET parentstr = SUBSTRING(parentstr,9) '.
+			'WHERE (parentstr LIKE "PENDING:%")';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -1189,17 +1195,19 @@ class TaxaUpload{
 
 	//Setters and getters
 	private function setUploadTargetPath(){
-		$tPath = $GLOBALS["tempDirRoot"];
-		if(!$tPath){
-			$tPath = ini_get('upload_tmp_dir');
-		}
+		$tPath = '';
 		if(!$tPath && isset($GLOBALS["TEMP_DIR_ROOT"])){
 			$tPath = $GLOBALS['TEMP_DIR_ROOT'];
+			if(substr($tPath,-1) != '/') $tPath .= "/"; 
+			if(file_exists($tPath.'downloads')) $tPath .= 'downloads/';
+		}
+		elseif(!$tPath){
+			$tPath = ini_get('upload_tmp_dir');
 		}
 		if(!$tPath){
 			$tPath = $GLOBALS['SERVER_ROOT'];
 			if(substr($tPath,-1) != '/') $tPath .= "/"; 
-			$tPath .= "temp/downloads";
+			$tPath .= "temp/downloads/";
 		}
 		if(substr($tPath,-1) != '/') $tPath .= '/';
 		$this->uploadTargetPath = $tPath; 
