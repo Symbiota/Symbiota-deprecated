@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorAttr.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../collections/editor/extras/occurattributes.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../collections/traitattr/occurattributes.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST['collid'];
 $submitForm = array_key_exists('submitform',$_POST)?$_POST['submitform']:'';
@@ -39,6 +39,7 @@ if($SYMB_UID){
 
 $attrManager = new OccurrenceEditorAttr();
 if($tidFilter) $attrManager->setTidFilter($tidFilter);
+if($collid) $attrManager->setCollid($collid);
 
 $statusStr = '';
 if($isEditor){
@@ -241,6 +242,9 @@ $imgTotal = count($imgArr);
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext" style="position:relative;">
+		<?php 
+		if($collid){
+			?>
 			<div style="position:absolute;top:0px;right:0px;width:250px;">
 				<fieldset style="margin:20px">
 					<legend><b>Filter</b></legend>
@@ -292,7 +296,12 @@ $imgTotal = count($imgArr);
 								$attrStateArr = $attrManager->getAttrStates($attrID);
 								if($controlType == 'checkbox'){
 									foreach($attrStateArr as $sid => $sArr){
-										echo '<div><input name="stateid[]" type="checkbox" value="'.$sid.'" title="'.$sArr['description'].'" /> '.$sArr['name'].'</div>';
+										echo '<div title="'.$sArr['description'].'"><input name="stateid[]" type="checkbox" value="'.$sid.'" /> '.$sArr['name'].'</div>';
+									}
+								}
+								elseif($controlType == 'radio'){
+									foreach($attrStateArr as $sid => $sArr){
+										echo '<div title="'.$sArr['description'].'"><input name="stateid[]" type="radio" value="'.$sid.'" /> '.$sArr['name'].'</div>';
 									}
 								}
 								elseif($controlType == 'select'){
@@ -327,8 +336,8 @@ $imgTotal = count($imgArr);
 				<div>
 					<span><input id="imgresmed" name="resradio"  type="radio" checked onchange="changeImgRes('med')" />Med Res.</span>
 					<span style="margin-left:6px;"><input id="imgreslg" name="resradio" type="radio" onchange="changeImgRes('lg')" />High Res.</span>
-					<span style="margin-left:60px;"><a href="../individual/index.php?occid=<?php echo $occid; ?>" target="_blank"/>Specimen Details</a></span>
 					<?php 
+					if($occid) echo '<span style="margin-left:60px;"><a href="../individual/index.php?occid='.$occid.'" target="_blank"/>Specimen Details</a></span>';
 					echo '<span id="labelcnt" style="margin-left:60px;">1</span> of '.$imgTotal.' images '.($imgTotal>1?'<a href="#" onclick="nextImage()">&gt;&gt; next</a>':'');
 					?>
 				</div>
@@ -346,6 +355,12 @@ $imgTotal = count($imgArr);
 				}
 				?>
 			</div>
+			<?php
+		}
+		else{
+			echo '<div><b>ERROR: collection identifier is not set</b></div>';
+		} 
+		?>
 		</div>
 	</body>
 </html>

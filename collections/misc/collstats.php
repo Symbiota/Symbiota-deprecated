@@ -231,7 +231,7 @@ if($action != "Update Statistics"){
 			if(isset($collections_misc_collstatsCrumbs)){
 				if($collections_misc_collstatsCrumbs){
 					echo "<div class='navpath'>";
-					echo "<a href='../../../index.php'>Home</a> &gt;&gt; ";
+					echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
 					echo $collections_misc_collstatsCrumbs.' &gt;&gt; ';
 					echo "<b>Collection Statistics</b>";
 					echo "</div>";
@@ -240,7 +240,7 @@ if($action != "Update Statistics"){
 			else{
 				?>
 				<div class='navpath'>
-					<a href='../../../index.php'>Home</a> &gt;&gt;
+					<a href='../../index.php'>Home</a> &gt;&gt;
 					<a href='collprofiles.php'>Collections</a> &gt;&gt;
 					<b>Collection Statistics</b>
 				</div>

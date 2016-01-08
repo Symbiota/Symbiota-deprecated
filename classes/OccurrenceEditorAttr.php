@@ -31,32 +31,37 @@ class OccurrenceEditorAttr extends Manager {
 	//Get data functions
 	public function getImageUrls(){
 		$retArr = array();
-		$sql = 'SELECT i.occid '.
-			'FROM images i LEFT JOIN tmattributes a ON i.occid = a.occid '. 
-			'WHERE (a.occid IS NULL) AND (i.occid IS NOT NULL) '.
-			'ORDER BY RAND() LIMIT 1';
-		if($this->tidFilter){
+		if($this->collid){
 			$sql = 'SELECT i.occid '.
-				'FROM images i INNER JOIN taxaenumtree e ON i.tid = e.tid '.
-				'LEFT JOIN tmattributes a ON i.occid = a.occid '.
-				'WHERE (e.parenttid = '.$this->tidFilter.' OR e.tid = '.$this->tidFilter.') AND (a.occid IS NULL) AND (i.occid IS NOT NULL) '.
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'LEFT JOIN tmattributes a ON i.occid = a.occid '. 
+				'WHERE (a.occid IS NULL) AND (o.collid = '.$this->collid.') '.
 				'ORDER BY RAND() LIMIT 1';
-		}
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$sql2 = 'SELECT i.imgid, i.url, i.originalurl, i.occid '.
-				'FROM images i '.
-				'WHERE (i.occid = '.$r->occid.') ';
-			$rs2 = $this->conn->query($sql2);
-			$cnt = 1;
-			while($r2 = $rs2->fetch_object()){
-				$retArr[$r2->occid][$cnt]['web'] = $r2->url;
-				$retArr[$r2->occid][$cnt]['lg'] = $r2->originalurl;
-				$cnt++;
+			if($this->tidFilter){
+				$sql = 'SELECT i.occid '.
+					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+					'INNER JOIN taxaenumtree e ON i.tid = e.tid '.
+					'LEFT JOIN tmattributes a ON i.occid = a.occid '.
+					'WHERE (e.parenttid = '.$this->tidFilter.' OR e.tid = '.$this->tidFilter.') AND (a.occid IS NULL) AND (o.collid = '.$this->collid.') '.
+					'ORDER BY RAND() LIMIT 1';
 			}
-			$rs2->free();
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$sql2 = 'SELECT i.imgid, i.url, i.originalurl, i.occid '.
+					'FROM images i '.
+					'WHERE (i.occid = '.$r->occid.') ';
+				$rs2 = $this->conn->query($sql2);
+				$cnt = 1;
+				while($r2 = $rs2->fetch_object()){
+					$retArr[$r2->occid][$cnt]['web'] = $r2->url;
+					$retArr[$r2->occid][$cnt]['lg'] = $r2->originalurl;
+					$cnt++;
+				}
+				$rs2->free();
+			}
+			$rs->free();
 		}
-		$rs->free();
 		return $retArr;
 	}
 
