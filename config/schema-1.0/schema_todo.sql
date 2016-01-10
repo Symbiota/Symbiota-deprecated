@@ -132,6 +132,99 @@ ALTER TABLE `fmvouchers`
   DROP COLUMN `Collector`;
 
 
+#Copy over INSERT data priming statements that should have been included in original schema definition 
+INSERT IGNORE INTO `adminlanguages`(langid,langname,iso639_1) 
+VALUES ('1', 'English', 'en'), ('2', 'German', 'de'), ('3', 'French', 'fr'), ('4', 'Dutch', 'nl'), ('5', 'Italian', 'it'), ('6', 'Spanish', 'es'), ('7', 'Polish', 'pl'), ('8', 'Russian', 'ru'), ('9', 'Japanese', 'ja'), ('10', 'Portuguese', 'pt'), ('11', 'Swedish', 'sv'), ('12', 'Chinese', 'zh'), ('13', 'Catalan', 'ca'), ('14', 'Ukrainian', 'uk'), ('15', 'Norwegian (Bokmål)', 'no'), ('16', 'Finnish', 'fi'), ('17', 'Vietnamese', 'vi'), ('18', 'Czech', 'cs'), ('19', 'Hungarian', 'hu'), ('20', 'Korean', 'ko'), ('21', 'Indonesian', 'id'), ('22', 'Turkish', 'tr'), ('23', 'Romanian', 'ro'), ('24', 'Persian', 'fa'), ('25', 'Arabic', 'ar'), ('26', 'Danish', 'da'), ('27', 'Esperanto', 'eo'), ('28', 'Serbian', 'sr'), ('29', 'Lithuanian', 'lt'), ('30', 'Slovak', 'sk'), ('31', 'Malay', 'ms'), ('32', 'Hebrew', 'he'), ('33', 'Bulgarian', 'bg'), ('34', 'Slovenian', 'sl'), ('35', 'Volapük', 'vo'), ('36', 'Kazakh', 'kk'), ('37', 'Waray-Waray', 'war'), ('38', 'Basque', 'eu'), ('39', 'Croatian', 'hr'), ('40', 'Hindi', 'hi'), ('41', 'Estonian', 'et'), ('42', 'Azerbaijani', 'az'), ('43', 'Galician', 'gl'), ('44', 'Simple English', 'simple'), ('45', 'Norwegian (Nynorsk)', 'nn'), ('46', 'Thai', 'th'), ('47', 'Newar / Nepal Bhasa', 'new'), ('48', 'Greek', 'el'), ('49', 'Aromanian', 'roa-rup'), ('50', 'Latin', 'la'), ('51', 'Occitan', 'oc'), ('52', 'Tagalog', 'tl'), ('53', 'Haitian', 'ht'), ('54', 'Macedonian', 'mk'), ('55', 'Georgian', 'ka'), ('56', 'Serbo-Croatian', 'sh'), ('57', 'Telugu', 'te'), ('58', 'Piedmontese', 'pms'), ('59', 'Cebuano', 'ceb'), ('60', 'Tamil', 'ta'), ('61', 'Belarusian (Taraškievica)', 'be-x-old'), ('62', 'Breton', 'br'), ('63', 'Latvian', 'lv'), ('64', 'Javanese', 'jv'), ('65', 'Albanian', 'sq'), ('66', 'Belarusian', 'be'), ('67', 'Marathi', 'mr'), ('68', 'Welsh', 'cy'), ('69', 'Luxembourgish', 'lb'), ('70', 'Icelandic', 'is'), ('71', 'Bosnian', 'bs'), ('72', 'Yoruba', 'yo'), ('73', 'Malagasy', 'mg'), ('74', 'Aragonese', 'an'), ('75', 'Bishnupriya Manipuri', 'bpy'), ('76', 'Lombard', 'lmo'), ('77', 'West Frisian', 'fy'), ('78', 'Bengali', 'bn'), ('79', 'Ido', 'io'), ('80', 'Swahili', 'sw'), ('81', 'Gujarati', 'gu'), ('82', 'Malayalam', 'ml'), ('83', 'Western Panjabi', 'pnb'), ('84', 'Afrikaans', 'af'), ('85', 'Low Saxon', 'nds'), ('86', 'Sicilian', 'scn'), ('87', 'Urdu', 'ur'), ('88', 'Kurdish', 'ku'), ('89', 'Cantonese', 'zh-yue'), ('90', 'Armenian', 'hy'), ('91', 'Quechua', 'qu'), ('92', 'Sundanese', 'su'), ('93', 'Nepali', 'ne'), ('94', 'Zazaki', 'diq'), ('95', 'Asturian', 'ast'), ('96', 'Tatar', 'tt'), ('97', 'Neapolitan', 'nap'), ('98', 'Irish', 'ga'), ('99', 'Chuvash', 'cv'), ('100', 'Samogitian', 'bat-smg'), ('101', 'Walloon', 'wa'), ('102', 'Amharic', 'am'), ('103', 'Kannada', 'kn'), ('104', 'Alemannic', 'als'), ('105', 'Buginese', 'bug'), ('106', 'Burmese', 'my'), ('107', 'Interlingua', 'ia');
+
+INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('HasOrganism','Image shows an organism.','Organism',0);
+INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('HasLabel','Image shows label data.','Label',10);
+INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('HasIDLabel','Image shows an annotation/identification label.','Annotation',20);
+INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('TypedText','Image has typed or printed text.','Typed/Printed',30);
+INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('Handwriting','Image has handwritten label text.','Handwritten',40);
+INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('ShowsHabitat','Field image of habitat.','Habitat',50);
+INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('HasProblem','There is a problem with this image.','QC Problem',60);
+
+insert into ctrelationshiptypes (relationship, inverse, collective) values ('Child of', 'Parent of', 'Children');
+insert into ctrelationshiptypes (relationship, inverse, collective) values ('Student of', 'Teacher of', 'Students');
+insert into ctrelationshiptypes (relationship, inverse, collective) values ('Spouse of', 'Spouse of', 'Married to');
+insert into ctrelationshiptypes (relationship, inverse, collective) values ('Could be', 'Confused with', 'Confused with');  -- to accompany notOtherwiseSpecified 
+
+insert into ctnametypes (type) values ('Full Name');
+insert into ctnametypes (type) values ('Initials Last Name');
+insert into ctnametypes (type) values ('Last Name, Initials');
+insert into ctnametypes (type) values ('First Initials Last');
+insert into ctnametypes (type) values ('First Last');
+insert into ctnametypes (type) values ('Standard Abbreviation');
+insert into ctnametypes (type) values ('Standard DwC List');
+insert into ctnametypes (type) values ('Also Known As');
+
+INSERT INTO `referencetype` VALUES ('1', 'Generic', null, 'Title', 'SecondaryTitle', 'PlacePublished', 'Publisher', 'Volume', 'NumberVolumes', 'Number', 'Pages', 'Section', 'TertiaryTitle', 'Edition', 'Date', 'TypeWork', 'ShortTitle', 'AlternativeTitle', 'Isbn_Issn', 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('2', 'Journal Article', null, 'Title', 'Periodical Title', null, null, 'Volume', null, 'Issue', 'Pages', null, null, null, 'Date', null, 'Short Title', 'Alt. Jour.', null, 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('3', 'Book', '1', 'Title', 'Series Title', 'City', 'Publisher', 'Volume', 'No. Vols.', 'Number', 'Pages', null, null, 'Edition', 'Date', null, 'Short Title', null, 'ISBN', 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('4', 'Book Section', null, 'Title', 'Book Title', 'City', 'Publisher', 'Volume', 'No. Vols.', 'Number', 'Pages', null, 'Ser. Title', 'Edition', 'Date', null, 'Short Title', null, 'ISBN', 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('5', 'Manuscript', null, 'Title', 'Collection Title', 'City', null, null, null, 'Number', 'Pages', null, null, 'Edition', 'Date', 'Type Work', 'Short Title', null, null, 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('6', 'Edited Book', '1', 'Title', 'Series Title', 'City', 'Publisher', 'Volume', 'No. Vols.', 'Number', 'Pages', null, null, 'Edition', 'Date', null, 'Short Title', null, 'ISBN', 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('7', 'Magazine Article', null, 'Title', 'Periodical Title', null, null, 'Volume', null, 'Issue', 'Pages', null, null, null, 'Date', null, 'Short Title', null, null, 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('8', 'Newspaper Article', null, 'Title', 'Periodical Title', 'City', null, null, null, null, 'Pages', 'Section', null, 'Edition', 'Date', 'Type Art.', 'Short Title', null, null, 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('9', 'Conference Proceedings', null, 'Title', 'Conf. Name', 'Conf. Loc.', 'Publisher', 'Volume', 'No. Vols.', null, 'Pages', null, 'Ser. Title', 'Edition', 'Date', null, 'Short Title', null, 'ISBN', 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('10', 'Thesis', null, 'Title', 'Academic Dept.', 'City', 'University', null, null, null, 'Pages', null, null, null, 'Date', 'Thesis Type', 'Short Title', null, null, 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('11', 'Report', null, 'Title', null, 'City', 'Institution', null, null, null, 'Pages', null, null, null, 'Date', 'Type Work', 'Short Title', null, 'Rpt. No.', 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('12', 'Personal Communication', null, 'Title', null, 'City', 'Publisher', null, null, null, null, null, null, null, 'Date', 'Type Work', 'Short Title', null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('13', 'Computer Program', null, 'Title', null, 'City', 'Publisher', 'Version', null, null, null, null, null, 'Platform', 'Date', 'Type Work', 'Short Title', null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('14', 'Electronic Source', null, 'Title', null, null, 'Publisher', 'Access Year', 'Extent', 'Acc. Date', null, null, null, 'Edition', 'Date', 'Medium', 'Short Title', null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('15', 'Audiovisual Material', null, 'Title', 'Collection Title', 'City', 'Publisher', null, null, 'Number', null, null, null, null, 'Date', 'Type Work', 'Short Title', null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('16', 'Film or Broadcast', null, 'Title', 'Series Title', 'City', 'Distributor', null, null, null, 'Length', null, null, null, 'Date', 'Medium', 'Short Title', null, 'ISBN', null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('17', 'Artwork', null, 'Title', null, 'City', 'Publisher', null, null, null, null, null, null, null, 'Date', 'Type Work', 'Short Title', null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('18', 'Map', null, 'Title', null, 'City', 'Publisher', null, null, null, 'Scale', null, null, 'Edition', 'Date', 'Type Work', 'Short Title', null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('19', 'Patent', null, 'Title', 'Published Source', 'Country', 'Assignee', 'Volume', 'No. Vols.', 'Issue', 'Pages', null, null, null, 'Date', null, 'Short Title', null, 'Pat. No.', 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('20', 'Hearing', null, 'Title', 'Committee', 'City', 'Publisher', null, null, 'Doc. No.', 'Pages', null, 'Leg. Boby', 'Session', 'Date', null, 'Short Title', null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('21', 'Bill', null, 'Title', 'Code', null, null, 'Code Volume', null, 'Bill No.', 'Pages', 'Section', 'Leg. Boby', 'Session', 'Date', null, 'Short Title', null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('22', 'Statute', null, 'Title', 'Code', null, null, 'Code Number', null, 'Law No.', '1st Pg.', 'Section', null, 'Session', 'Date', null, 'Short Title', null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('23', 'Case', null, 'Title', null, null, 'Court', 'Reporter Vol.', null, null, null, null, null, null, 'Date', null, null, null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('24', 'Figure', null, 'Title', 'Source Program', null, null, null, '-', null, null, null, null, null, 'Date', null, null, null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('25', 'Chart or Table', null, 'Title', 'Source Program', null, null, null, null, null, null, null, null, null, 'Date', null, null, null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('26', 'Equation', null, 'Title', 'Source Program', null, null, 'Volume', null, 'Number', null, null, null, null, 'Date', null, null, null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('27', 'Book Series', '1', 'Title', null, 'City', 'Publisher', null, 'No. Vols.', null, 'Pages', null, null, 'Edition', 'Date', null, null, null, 'ISBN', 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('28', 'Determination', null, 'Title', null, null, 'Institution', null, null, null, null, null, null, null, 'Date', null, null, null, null, null, null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('29', 'Sub-Reference', null, 'Title', null, null, null, null, null, null, 'Pages', null, null, null, 'Date', null, null, null, null, 'Figures', null, '2014-06-17 00:27:12');
+INSERT INTO `referencetype` VALUES ('30', 'Periodical', '1', 'Title', null, 'City', null, 'Volume', null, 'Issue', null, null, null, 'Edition', 'Date', null, 'Short Title', 'Alt. Jour.', null, null, null, '2014-10-30 21:34:44');
+INSERT INTO `referencetype` VALUES ('31', 'Web Page', null, 'Title', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, '2014-10-30 21:37:12');
+
+
+#Language support extended
+ALTER TABLE `kmcslang` 
+  ADD INDEX `FK_cslang_lang_idx` (`langid` ASC),
+  ADD CONSTRAINT `FK_cslang_lang`  FOREIGN KEY (`langid`)  REFERENCES `adminlanguages` (`langid`)  ON DELETE NO ACTION  ON UPDATE NO ACTION;
+
+ALTER TABLE `kmcharacterlang` 
+  ADD INDEX `FK_charlang_lang_idx` (`langid` ASC);
+
+ALTER TABLE `kmcharacterlang` 
+  ADD CONSTRAINT `FK_charlang_lang`  FOREIGN KEY (`langid`)  REFERENCES `adminlanguages` (`langid`)  ON DELETE NO ACTION  ON UPDATE NO ACTION;
+
+ALTER TABLE `taxadescrblock` 
+  ADD COLUMN `langid` INT NULL AFTER `language`,
+  ADD INDEX `FK_taxadesc_lang_idx` (`langid` ASC);
+
+ALTER TABLE `taxadescrblock` 
+  ADD CONSTRAINT `FK_taxadesc_lang`  FOREIGN KEY (`langid`)  REFERENCES `adminlanguages` (`langid`)  ON DELETE NO ACTION  ON UPDATE NO ACTION;
+
+UPDATE taxadescrblock t INNER JOIN adminlanguages l ON t.language = l.langname
+  SET t.langid = l.langid
+  WHERE t.langid IS NULL;
+
+ALTER TABLE `taxavernaculars` 
+  ADD COLUMN `langid` INT NULL AFTER `Language`,
+  ADD INDEX `FK_vern_lang_idx` (`langid` ASC);
+
+ALTER TABLE `taxavernaculars` 
+  ADD CONSTRAINT `FK_vern_lang`  FOREIGN KEY (`langid`)  REFERENCES `adminlanguages` (`langid`)  ON DELETE NO ACTION  ON UPDATE NO ACTION;
+
+UPDATE taxavernaculars t INNER JOIN adminlanguages l ON t.language = l.langname
+  SET t.langid = l.langid
+  WHERE t.langid IS NULL;
+
+
 #Misc
 ALTER TABLE `uploadspectemp` 
   ADD COLUMN `exsiccatiIdentifier` INT NULL AFTER `genericcolumn2`,

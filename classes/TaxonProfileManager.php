@@ -38,12 +38,9 @@ class TaxonProfileManager {
 	private $con; 
 
  	public function __construct(){
-		global $defaultLang;
  		$this->con = MySQLiConnectionFactory::getCon("readonly");
  		//Default settings
  		$this->taxAuthId = 1;			//0 = do not resolve taxonomy (no thesaurus); 1 = default taxonomy; > 1 = other taxonomies
-		//$this->projName = "Arizona";
-		$this->language = $defaultLang;
  	}
 
  	public function __destruct(){
@@ -312,7 +309,7 @@ class TaxonProfileManager {
 			while($row = $result->fetch_object()){
 				if($vid != $row->vid){
 					$vid = $row->vid;
-					$langStr = ucwords($row->language);
+					$langStr = strtolower($row->language);
 					if($this->language != $langStr){
 						$tempVernArr[$langStr][] = $row->VernacularName;
 					}
@@ -740,7 +737,13 @@ class TaxonProfileManager {
 	}
 	
 	public function setLanguage($lang){
-		$this->language = ucwords($this->con->real_escape_string($lang));
+		$lang = strtolower($lang);
+		if(strlen($lang) == 2){
+			if($lang == 'en') $lang = 'english';
+			if($lang == 'es') $lang = 'spanish';
+			if($lang == 'fr') $lang = 'french';
+		}
+		$this->language = $lang;
 	}
 	
 	public function getLanguage(){

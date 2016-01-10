@@ -5,7 +5,7 @@ header("Cache-control: private; Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/tools/editor.php?'.$_SERVER['QUERY_STRING']);
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:""; 
-$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
+$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$DEFAULT_LANG; 
 $charValue = array_key_exists("char",$_REQUEST)?$_REQUEST["char"]:"";
 $childrenStr = array_key_exists("children",$_REQUEST)?$_REQUEST["children"]:"";
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
@@ -117,7 +117,7 @@ if($isEditor && $action){
 <?php 
 if($isEditor){
 	?>
-  	<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="dataChanged=false;">
+  	<form action="editor.php" method="post" onsubmit="dataChanged=false;">
 	<?php 
 	if($tid){
  		$sn = $editorManager->getTaxonName();
@@ -184,6 +184,7 @@ if($isEditor){
 			<div>
 				<input type="hidden" name="tid" value="<?php echo $editorManager->getTid(); ?>" />
 				<input type="hidden" name="children" value="<?php echo $childrenStr; ?>" />
+				<input type="hidden" name="lang" value="<?php echo $langValue; ?>" />
 			</div>
 			<?php 
 		}

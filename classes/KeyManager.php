@@ -130,7 +130,13 @@ class KeyManager{
 	}
 
 	public function setLanguage($lang){
-		if($lang) $this->language = $lang;
+		$lang = strtolower($lang);
+		if(strlen($lang) == 2){
+			if($lang == 'en') $lang = 'english';
+			if($lang == 'es') $lang = 'spanish';
+			if($lang == 'fr') $lang = 'french';
+		}
+		$this->language = $lang;
 	}
 
 	//Misc functions

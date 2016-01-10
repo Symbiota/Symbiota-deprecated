@@ -353,7 +353,13 @@ class GamesManager {
 	}
 
 	public function setLang($l){
-		$this->lang = $l;
+		$lang = strtolower($l);
+		if(strlen($lang) == 2){
+			if($lang == 'en') $lang = 'english';
+			if($lang == 'es') $lang = 'spanish';
+			if($lang == 'fr') $lang = 'french';
+		}
+		$this->lang = $lang;
 	}
 }
 ?>
