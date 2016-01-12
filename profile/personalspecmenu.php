@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"";
@@ -9,8 +9,8 @@ $formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"
 $specHandler = new ProfileManager();
 
 $collArr = array();
-if($symbUid){
-	$specHandler->setUid($symbUid);
+if($SYMB_UID){
+	$specHandler->setUid($SYMB_UID);
 	$collArr = $specHandler->getPersonalCollectionArr();
 }
 
@@ -18,7 +18,7 @@ $statusStr = '';
 ?>
 <div style="margin:10px;">
 <?php 
-if($symbUid){
+if($SYMB_UID){
 	//Collection is defined and User is logged-in and have permissions
 	if($statusStr){
 		?>
@@ -29,8 +29,9 @@ if($symbUid){
 		<hr/>
 		<?php 
 	}
-	if(array_key_exists('observation',$collArr)){
-		$genArr = $collArr['observation'];
+	$genArr = array();
+	if(array_key_exists('General Observations',$collArr)){
+		$genArr = $collArr['General Observations'];
 		foreach($genArr as $collId => $cName){
 			?>
 			<fieldset style="margin:15px;padding:15px;">
@@ -40,12 +41,12 @@ if($symbUid){
 				</div>
 				<ul>
 					<li>
-						<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$symbUid; ?>">
+						<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$SYMB_UID; ?>">
 							Display All Records
 						</a>
 					</li>
 					<li>
-						<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$symbUid; ?>&displayquery=1">
+						<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$SYMB_UID; ?>&displayquery=1">
 							Search Records
 						</a>
 					</li>
@@ -85,15 +86,11 @@ if($symbUid){
 	else{
 		echo '<div>Personal specimen management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to activate this feature.</div>';
 	}
-	if(array_key_exists('preserved specimens',$collArr)){
-		$cArr = $collArr['preserved specimens'];
+	if(array_key_exists('Preserved Specimens',$collArr)){
+		$cArr = $collArr['Preserved Specimens'];
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Collection Management</b></legend>
-			<div>
-				List of collections to which you have explicit editing rights. 
-				Click a collection to be taken to the managment menu for that collection.   
-			</div>
 			<ul>
 				<?php 
 				foreach($cArr as $collId => $cName){
@@ -104,14 +101,11 @@ if($symbUid){
 		</fieldset>
 		<?php 
 	}
-	if(array_key_exists('observations',$collArr)){
-		$cArr = $collArr['observations'];
+	if(array_key_exists('Observations',$collArr)){
+		$cArr = $collArr['Observations'];
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Observation Project Management</b></legend>
-			<div>
-				List of observation projects to which you have explicit editing rights. 
-			</div>
 			<ul>
 				<?php 
 				foreach($cArr as $collId => $cName){
@@ -122,9 +116,23 @@ if($symbUid){
 		</fieldset>
 		<?php 
 	}
-}
-else{
-	echo '<h2>Please <a href="../profile/index.php?&refurl='.$clientRoot.'/profile/personalspec.php?collid='.$collId.'">login</a></h2>';
+	if($genArr && isset($USER_RIGHTS['CollAdmin'])){
+		$genAdminArr = array_intersect_key($genArr,array_flip($USER_RIGHTS['CollAdmin']));
+		if($genAdminArr){
+			?>
+			<fieldset style="margin:15px;padding:15px;">
+				<legend style="font-weight:bold;"><b>General Observation Administration</b></legend>
+				<ul>
+					<?php 
+					foreach($genAdminArr as $id => $name){
+						echo '<li><a href="../collections/misc/collprofiles.php?collid='.$id.'&emode=1">'.$name.'</a></li>';
+					}
+					?>
+				</ul>
+			</fieldset>
+			<?php
+		} 
+	}
 }
 ?>	
 </div>

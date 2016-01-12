@@ -55,7 +55,9 @@ $occManager->setOccId($occid);
 		?>
 	</fieldset>
 	<?php 
-	if($collAdminList = $occManager->getCollectionList()){
+	$collAdminList = $occManager->getCollectionList();
+	unset($collAdminList[$collId]);
+	if($collAdminList){
 		?>
 		<fieldset style="padding:15px;margin:10px 0px;">
 			<legend><b>Transfer Specimen</b></legend>

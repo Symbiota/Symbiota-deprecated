@@ -255,63 +255,69 @@ if($SYMB_UID){
 										<?php echo $LANG['MANAGE_PERMISSIONS']; ?>
 									</a>
 								</li>
-								<li>
-									<a href="../admin/specuploadmanagement.php?collid=<?php echo $collid; ?>">
-										<?php echo $LANG['IMPORT_SPECIMEN']; ?>
-									</a>
-								</li>
-								<?php
-								if($collData['managementtype'] == 'Live Data'){
+								<?php 
+								if($collData['colltype'] != 'General Observations'){
+									?>
+									<li>
+										<a href="../admin/specuploadmanagement.php?collid=<?php echo $collid; ?>">
+											<?php echo $LANG['IMPORT_SPECIMEN']; ?>
+										</a>
+									</li>
+									<?php
+									if($collData['managementtype'] == 'Live Data'){
+										?>
+										<li style="margin-left:10px;">
+											<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collid; ?>">
+												<?php echo $LANG['QUICK_FILE']; ?>
+											</a>
+										</li>
+										<?php
+									}
 									?>
 									<li style="margin-left:10px;">
-										<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collid; ?>">
-											<?php echo $LANG['QUICK_FILE']; ?>
+										<a href="../admin/specupload.php?uploadtype=7&collid=<?php echo $collid; ?>">
+											<?php echo $LANG['SKELETAL_FILE_UPLOAD']; ?>
 										</a>
 									</li>
-									<?php
-								}
-								?>
-								<li style="margin-left:10px;">
-									<a href="../admin/specupload.php?uploadtype=7&collid=<?php echo $collid; ?>">
-										<?php echo $LANG['SKELETAL_FILE_UPLOAD']; ?>
-									</a>
-								</li>
-								<?php 
-								if($collData['managementtype'] != 'Aggregate'){
+									<?php 
+									if($collData['managementtype'] != 'Aggregate'){
+										?>
+										<li>
+											<a href="../specprocessor/index.php?collid=<?php echo $collid; ?>">
+												<?php echo $LANG['PROCESSING_TOOLBOX']; ?>
+											</a>
+										</li>
+										<li>
+											<a href="../datasets/datapublisher.php?collid=<?php echo $collid; ?>">
+	                                            <?php echo $LANG['DARWIN_CORE_PUB']; ?>
+											</a>
+										</li>
+										<?php
+									}
 									?>
 									<li>
-										<a href="../specprocessor/index.php?collid=<?php echo $collid; ?>">
-											<?php echo $LANG['PROCESSING_TOOLBOX']; ?>
+										<a href="../editor/editreviewer.php?collid=<?php echo $collid; ?>">
+											<?php echo $LANG['REVIEW_SPEC_EDITS']; ?>
 										</a>
 									</li>
 									<li>
-										<a href="../datasets/datapublisher.php?collid=<?php echo $collid; ?>">
-                                            <?php echo $LANG['DARWIN_CORE_PUB']; ?>
+										<a href="../cleaning/occurrencecleaner.php?obsuid=0&collid=<?php echo $collid; ?>">
+	                                        <?php echo $LANG['DATA_CLEANING']; ?>
 										</a>
 									</li>
 									<?php
-								}
+								} 
 								?>
 								<li>
-									<a href="../editor/editreviewer.php?collid=<?php echo $collid; ?>">
-										<?php echo $LANG['REVIEW_SPEC_EDITS']; ?>
+									<a href="../datasets/duplicatemanager.php?collid=<?php echo $collid; ?>">
+										<?php echo $LANG['DUP_CLUSTER']; ?>
 									</a>
 								</li>
 								<li>
-									<a href="../cleaning/occurrencecleaner.php?obsuid=0&collid=<?php echo $collid; ?>">
-                                        <?php echo $LANG['DATA_CLEANING']; ?>
+									<a href="#" onclick="newWindow = window.open('collbackup.php?collid=<?php echo $collid; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=400,height=200,left=20,top=20');">
+										<?php echo $LANG['BACKUP_DATA_FILE']; ?>
 									</a>
 								</li>
-							<li>
-								<a href="../datasets/duplicatemanager.php?collid=<?php echo $collid; ?>">
-									<?php echo $LANG['DUP_CLUSTER']; ?>
-								</a>
-							</li>
-							<li>
-								<a href="#" onclick="newWindow = window.open('collbackup.php?collid=<?php echo $collid; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=400,height=200,left=20,top=20');">
-									<?php echo $LANG['BACKUP_DATA_FILE']; ?>
-								</a>
-							</li>
 							</ul>
 						</fieldset>
 						<?php

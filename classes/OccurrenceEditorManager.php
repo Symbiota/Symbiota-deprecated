@@ -766,9 +766,6 @@ class OccurrenceEditorManager {
 						$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
 					}
 				}
-				//Temp code needed for WeDigBio data entry event, will remove or refactor afterward
-				$occArr['genericcolumn2'] = $_SERVER['REMOTE_ADDR'];
-				////////////////
 				foreach($occArr as $oField => $ov){
 					if(in_array($oField,$this->occFieldArr) && $oField != 'observeruid'){
 						$vStr = $this->cleanInStr($ov);
@@ -902,9 +899,6 @@ class OccurrenceEditorManager {
 			if(array_key_exists('localitysecurity',$occArr) && $occArr['localitysecurity']) $occArr['localitysecurity'] = '1';
 			if(!isset($occArr['dateentered']) || !$occArr['dateentered']) $occArr['dateentered'] = date('Y-m-d H:i:s');
 			if(!isset($occArr['basisofrecord']) || !$occArr['basisofrecord']) $occArr['basisofrecord'] = (strpos($this->collMap['colltype'],'Observations') !== false?'HumanObservation':'PreservedSpecimen');
-			//Temp code for WeDigBio date entry event
-			$occArr['genericcolumn2'] = $_SERVER['REMOTE_ADDR'];
-			///////////////////
 			
 			foreach($fieldArr as $fieldStr => $fieldType){
 				$fieldValue = '';
@@ -1776,17 +1770,19 @@ class OccurrenceEditorManager {
 
 	public function getCollectionList(){
 		$retArr = array();
-		if(isset($GLOBALS['USER_RIGHTS']['CollAdmin'])){
-			$collArr = $GLOBALS['USER_RIGHTS']['CollAdmin'];
-			if($collArr){
-				$sql = 'SELECT collid, collectionname FROM omcollections WHERE collid IN('.implode(',',$collArr).')';
-				$rs = $this->conn->query($sql);
-				while($r = $rs->fetch_object()){
-					$retArr[$r->collid] = $r->collectionname;
-				}
-				$rs->free();
-			}
+		$collArr = array('0');
+		if(isset($GLOBALS['USER_RIGHTS']['CollAdmin'])) $collArr = $GLOBALS['USER_RIGHTS']['CollAdmin'];
+		$sql = 'SELECT collid, collectionname FROM omcollections '.
+			'WHERE (collid IN('.implode(',',$collArr).')) ';
+		$collEditorArr = $GLOBALS['USER_RIGHTS']['CollEditor'];
+		if($collEditorArr){
+			$sql .= 'OR (collid IN('.implode(',',$collEditorArr).') AND colltype = "General Observations")';
 		}
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->collid] = $r->collectionname;
+		}
+		$rs->free();
 		asort($retArr);
 		return $retArr;
 	}

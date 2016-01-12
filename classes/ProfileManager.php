@@ -491,24 +491,20 @@ class ProfileManager{
 	
 	//Personal and general specimen management
 	public function getPersonalCollectionArr(){
-		global $userRights;
+		global $USER_RIGHTS;
 		$retArr = array();
 		if($this->uid){
-			$cArr = array();
-			if(array_key_exists('CollAdmin',$userRights)) $cArr = $userRights['CollAdmin'];
-			if(array_key_exists('CollEditor',$userRights)) $cArr = array_merge($cArr,$userRights['CollEditor']);
+			$cAdminArr = array();
+			if(array_key_exists('CollAdmin',$USER_RIGHTS)) $cAdminArr = $USER_RIGHTS['CollAdmin'];
+			$cArr = $cAdminArr;
+			if(array_key_exists('CollEditor',$USER_RIGHTS)) $cArr = array_merge($cArr,$USER_RIGHTS['CollEditor']);
 			if($cArr){
 				$sql = 'SELECT collid, collectionname, colltype, CONCAT_WS(" ",institutioncode,collectioncode) AS instcode '.
 					'FROM omcollections WHERE collid IN('.implode(',',$cArr).') ORDER BY collectionname';
 				//echo $sql;
 				if($rs = $this->conn->query($sql)){
 					while($r = $rs->fetch_object()){
-						if(stripos(strtolower($r->colltype), "observation") !== false){
-							$retArr['observation'][$r->collid] = $r->collectionname.($r->instcode?' ('.$r->instcode.')':'');
-						}
-						else{
-							$retArr[strtolower($r->colltype)][$r->collid] = $r->collectionname.($r->instcode?' ('.$r->instcode.')':'');
-						}
+						$retArr[$r->colltype][$r->collid] = $r->collectionname.($r->instcode?' ('.$r->instcode.')':'');
 					}
 					$rs->free();
 				}

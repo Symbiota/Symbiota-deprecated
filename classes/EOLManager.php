@@ -242,7 +242,7 @@ class EOLManager {
 							$imgCnt++;
 							$retStatus = true;
 						}
-						if($imgCnt > 10) break;
+						if($imgCnt > 5) break;
 					}
 				}
 				echo '<li style="margin-left:10px;">'.$imgCnt.' images mapped</li>';

@@ -360,7 +360,7 @@ class PermissionsManager{
 		if($searchTerm){
 			$searchTerm = $this->cleanInStr($searchTerm);
 			$sql .= 'WHERE (u.lastname LIKE "'.$searchTerm.'%") ';
-			if(strlen($searchTerm) > 1) $sql .= "OR (ul.username LIKE '".$searchTerm."%') ";
+			if(strlen($searchTerm) > 1) $sql .= "OR (l.username LIKE '".$searchTerm."%') ";
 		}
 		$sql .= 'ORDER BY u.lastname, u.firstname';
 		//echo "<div>".$sql."</div>";
