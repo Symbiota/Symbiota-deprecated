@@ -151,7 +151,7 @@ elseif($action == 'listdupsrecordedby'){
 	</div>
 
 	<!-- inner text -->
-	<div id="innertext">
+	<div id="innertext" style="background-color:white;">
 		<?php
 		if($statusStr){
 			?>

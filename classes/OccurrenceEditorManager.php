@@ -973,6 +973,14 @@ class OccurrenceEditorManager {
 						}
 					}
 				}
+				//Deal with host data
+				if(array_key_exists('host',$occArr)){
+					$sql1 = 'INSERT INTO omoccurassociations(occid,relationship,verbatimsciname) '.
+						'VALUES('.$this->occid.',"host","'.$this->cleanInStr($occArr['host']).'")';
+					if(!$this->conn->query($sql1)){
+						$status .= '(WARNING adding host: '.$this->conn->error.') ';
+					}
+				}
 				//Deal with checklist voucher
 				if(isset($occArr['clidvoucher']) && $occArr['clidvoucher']){
 					if(isset($occArr['tidinterpreted']) && $occArr['tidinterpreted']){
@@ -1117,6 +1125,7 @@ class OccurrenceEditorManager {
 	}
 	
 	public function mergeRecords($targetOccid,$sourceOccid){
+		global $QUICK_HOST_ENTRY_IS_ACTIVE;
 		$status = true;
 		if(!$targetOccid || !$sourceOccid){
 			$this->errorArr[] = 'ERROR: target or source is null';
@@ -1180,7 +1189,16 @@ class OccurrenceEditorManager {
 			$this->errorArr[] .= '; ERROR remapping images: '.$this->conn->error;
 			$status = false;
 		}
-
+		
+		//Remap associations
+		if($QUICK_HOST_ENTRY_IS_ACTIVE){
+			$sql = 'UPDATE omoccurassociations SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+			if(!$this->conn->query($sql)){
+				$this->errorArr[] .= '; ERROR remapping associations: '.$this->conn->error;
+				$status = false;
+			}
+		}
+		
 		//Remap comments
 		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		if(!$this->conn->query($sql)){
