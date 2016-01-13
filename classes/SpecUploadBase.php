@@ -681,13 +681,16 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	public function finalTransfer(){
+		global $QUICK_HOST_ENTRY_IS_ACTIVE;
 		$this->recordCleaningStage2();
 		$this->transferOccurrences();
 		$this->prepareAssociatedMedia();
 		$this->prepareImages();
 		$this->transferIdentificationHistory();
 		$this->transferImages();
-		$this->transferHostAssociations();
+		if($QUICK_HOST_ENTRY_IS_ACTIVE){
+			$this->transferHostAssociations();
+		}
 		$this->finalCleanup();
 		$this->outputMsg('<li style="">Upload Procedure Complete ('.date('Y-m-d h:i:s A').')!</li>');
 		$this->outputMsg(' ');
