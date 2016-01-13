@@ -135,7 +135,7 @@ class SpecUploadBase extends SpecUpload{
 			}
 		}
 		$rs->free();
-
+		
 //		if($autoBuildFieldMap){
 //			if($this->uploadType == $this->DWCAUPLOAD){
 //				$this->fieldMap['dbpk']['field'] = 'id';
@@ -687,6 +687,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->prepareImages();
 		$this->transferIdentificationHistory();
 		$this->transferImages();
+		$this->transferHostAssociations();
 		$this->finalCleanup();
 		$this->outputMsg('<li style="">Upload Procedure Complete ('.date('Y-m-d h:i:s A').')!</li>');
 		$this->outputMsg(' ');
@@ -829,7 +830,7 @@ class SpecUploadBase extends SpecUpload{
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			if($r->cnt){
-				$this->outputMsg('<li>Tranferring Determination History...</li>');
+				$this->outputMsg('<li>Transferring Determination History...</li>');
 				ob_flush();
 				flush();
 	
@@ -1042,7 +1043,7 @@ class SpecUploadBase extends SpecUpload{
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			if($r->cnt){
-				$this->outputMsg('<li>Tranferring images...</li>');
+				$this->outputMsg('<li>Transferring images...</li>');
 				ob_flush();
 				flush();
 				//Update occid for images of new records
@@ -1064,6 +1065,41 @@ class SpecUploadBase extends SpecUpload{
 					'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
 				if($this->conn->query($sql)){
 					$this->outputMsg('<li>Done! ('.$this->imageTransferCount.' images)</li> ');
+				}
+				else{
+					$this->outputMsg('<li>FAILED! ERROR: '.$this->conn->error.'</li> ');
+				}
+				ob_flush();
+				flush();
+			}
+		}
+		$rs->free();
+	}
+	
+	protected function transferHostAssociations(){
+		$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE collid = '.$this->collId.' AND `host` IS NOT NULL';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			if($r->cnt){
+				$this->outputMsg('<li>Transferring host associations...</li>');
+				ob_flush();
+				flush();
+				//Update existing host association records
+				$sql = 'UPDATE uploadspectemp AS s LEFT JOIN omoccurassociations AS a ON s.occid = a.occid '.
+					'SET a.verbatimsciname = s.`host` '.
+					'WHERE a.occid IS NOT NULL AND s.`host` IS NOT NULL AND a.relationship = "host" ';
+				//echo $sql.'<br/>';
+				if(!$this->conn->query($sql)){
+					$this->outputMsg('<li style="margin-left:20px;">WARNING updating host associations within omoccurassociations: '.$this->conn->error.'</li> ');
+				}
+	
+				//Load images 
+				$sql = 'INSERT INTO omoccurassociations(occid,relationship,verbatimsciname) '.
+					'SELECT s.occid, "host", s.`host` '.
+					'FROM uploadspectemp AS s LEFT JOIN omoccurassociations AS a ON s.occid = a.occid '.
+					'WHERE ISNULL(a.occid) AND s.`host` IS NOT NULL ';
+				if($this->conn->query($sql)){
+					$this->outputMsg('<li>Done! Host associations updated</li> ');
 				}
 				else{
 					$this->outputMsg('<li>FAILED! ERROR: '.$this->conn->error.'</li> ');
@@ -1613,7 +1649,7 @@ class SpecUploadBase extends SpecUpload{
 						flush();
 					}
 					else{
-						$this->outputMsg("<li>FAILED adding indetification history record #".$this->identTransferCount."</li>");
+						$this->outputMsg("<li>FAILED adding identification history record #".$this->identTransferCount."</li>");
 						$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
 						$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
 					}

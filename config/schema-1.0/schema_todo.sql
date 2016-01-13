@@ -228,7 +228,8 @@ UPDATE taxavernaculars t INNER JOIN adminlanguages l ON t.language = l.langname
 #Misc
 ALTER TABLE `uploadspectemp` 
   ADD COLUMN `exsiccatiIdentifier` INT NULL AFTER `genericcolumn2`,
-  ADD COLUMN `exsiccatiNumber` VARCHAR(45) NULL AFTER `exsiccatiIdentifier`;
+  ADD COLUMN `exsiccatiNumber` VARCHAR(45) NULL AFTER `exsiccatiIdentifier`,
+  ADD COLUMN `host`  varchar(250) NULL AFTER `substrate`;
 
 ALTER TABLE `uploadtaxa` 
   ADD COLUMN `ErrorStatus` VARCHAR(150) NULL AFTER `Hybrid`,

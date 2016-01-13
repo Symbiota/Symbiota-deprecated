@@ -63,7 +63,6 @@ elseif($action == 'listdupsrecordedby'){
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <style type="text/css">
-		body { background-color:white; } 
 		table.styledtable td { white-space: nowrap; }
     </style>
 	<script type="text/javascript">

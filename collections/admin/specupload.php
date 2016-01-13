@@ -7,6 +7,7 @@ include_once($SERVER_ROOT.'/classes/SpecUploadFile.php');
 include_once($SERVER_ROOT.'/classes/SpecUploadDwca.php');
 
 header("Content-Type: text/html; charset=".$CHARSET);
+ini_set('max_execution_time', 3600);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/admin/specuploadmanagement.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST["collid"];
@@ -294,7 +295,7 @@ $duManager->loadFieldMap();
 	if(isset($collections_admin_specuploadCrumbs)){
 		if($collections_admin_specuploadCrumbs){
 			?>
-			<div class="navpath">
+			<div class="navpath" style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen';  ?>">
 				<a href="../../index.php">Home</a> &gt;&gt;
 				<?php echo $collections_admin_specuploadCrumbs; ?>
 				<b>Specimen Loader</b> 
@@ -304,7 +305,7 @@ $duManager->loadFieldMap();
 	}
 	else{
 		?>
-		<div class="navpath">
+		<div class="navpath" style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen';  ?>">
 			<a href="../../index.php">Home</a> &gt;&gt; 
 			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Panel</a> &gt;&gt; 
 			<a href="specuploadmanagement.php?collid=<?php echo $collid; ?>">List of Upload Profiles</a> &gt;&gt; 
