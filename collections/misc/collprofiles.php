@@ -385,7 +385,7 @@ if($SYMB_UID){
 				?>
 				<div style="margin-top:5px;">
 					<?php
-					echo '<b>'.$LANG['USAGE_RIGHTS'].'</b>';
+					echo '<b>'.$LANG['USAGE_RIGHTS'].'</b> ';
 					if($collid && $collData['rights']){
 						$rights = $collData['rights'];
 						$rightsUrl = '';
@@ -411,7 +411,7 @@ if($SYMB_UID){
  					?>
 					<div style="margin-top:5px;">
 						<?php
-						echo '<b>'.$LANG['RIGHTS_HOLDER'].'</b>';
+						echo '<b>'.$LANG['RIGHTS_HOLDER'].'</b> ';
 						echo $collData['rightsholder'];
 						?>
 					</div>
@@ -421,7 +421,7 @@ if($SYMB_UID){
  					?>
 					<div style="margin-top:5px;">
 						<?php
-						echo '<b>'.$LANG['ACCESS_RIGHTS'].'</b>';
+						echo '<b>'.$LANG['ACCESS_RIGHTS'].'</b> ';
 						echo $collData['accessrights'];
 						?>
 					</div>
