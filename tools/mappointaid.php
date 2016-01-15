@@ -17,10 +17,14 @@ if(is_numeric($latDef) && is_numeric($lngDef)){
 	$lat = $latDef; 
 	$lng = $lngDef; 
 }
-else{
+elseif($mappingBoundaries){
 	$boundaryArr = explode(";",$mappingBoundaries);
 	$lat = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
 	$lng = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
+}
+else{
+	$lat = 42.877742;
+	$lng = -97.380979;
 }
 ?>
 <html>
