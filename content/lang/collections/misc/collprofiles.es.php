@@ -1,11 +1,9 @@
 <?php
 /*
 ------------------
-Language: English
+Language: Español (Spanish)
 ------------------
 */
-
-//include_once('sharedterms.en.php');
 
 $LANG['COLLECTION_DETAILS'] = 'Select a collection to see full details.';
 $LANG['CONTACT'] = 'Contact:';

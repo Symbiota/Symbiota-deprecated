@@ -1,15 +1,15 @@
 <?php
 include_once('config/symbini.php');
-include_once($serverRoot.'/classes/SiteMapManager.php');
-
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/SiteMapManager.php');
+include_once($SERVER_ROOT.'/content/lang/sitemap.'.$LANG_TAG.'.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 $submitAction = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:''; 
 
 $smManager = new SiteMapManager();
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Site Map</title>
+	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['SITEMAP'];?></title>
 	<link href="css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
@@ -25,48 +25,48 @@ $smManager = new SiteMapManager();
 <body>
 	<?php
 	$displayLeftMenu = (isset($sitemapMenu)?$sitemapMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($sitemapCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='index.php'>Home</a> &gt; ";
+		echo '<a href="index.php">'.$LANG['HOME'].'</a> &gt; ';
 		echo $sitemapCrumbs;
-		echo " <b>Sitemap</b>";
+		echo " <b>".$LANG['SITEMAP']."</b>";
 		echo "</div>";
 	}
 		
 	?> 
 	<!-- This is inner text! --> 
 	<div id="innertext">
-		<h1>Site Map</h1>
+		<h1><?php echo $LANG['SITEMAP']; ?></h1>
 		<div style="margin:10px;">
-			<h2>Collections</h2>
+			<h2><?php echo $LANG['COLLECTIONS']; ?></h2>
 			<ul>
-				<li><a href="collections/index.php">Search Engine</a> - search Collections</li>
-				<li><a href="collections/misc/collprofiles.php">Collections</a> - list of collection participating in project</li>
-				<li><a href="collections/misc/collstats.php">Collection Statistics</a></li>
-				<li><a href="collections/exsiccati/index.php">Exsiccati Index</a></li>
-				<li><a href="collections/datasets/datapublisher.php">Darwin Core Archives</a> - published datasets of selected collections</li>
+				<li><a href="collections/index.php"><?php echo $LANG['SEARCHENGINE'];?></a><?php echo $LANG['SEARCH_COLL'];?></li>
+				<li><a href="collections/misc/collprofiles.php"><?php echo $LANG['COLLECTIONS'];?></a><?php echo $LANG['LISTOFCOLL'];?></li>
+				<li><a href="collections/misc/collstats.php"><?php echo $LANG['COLLSTATS'];?></a></li>
+				<li><a href="collections/exsiccati/index.php"><?php echo $LANG['EXSICC'];?></a></li>
+				<li><a href="collections/datasets/datapublisher.php"><?php echo $LANG['DARWINCORE'];?></a><?php echo $LANG['PUBDATA'];?></li>
 				<?php 
 				if(file_exists('webservices/dwc/rss.xml')){
-					echo '<li style="margin-left:15px;"><a href="webservices/dwc/rss.xml">RSS Feed</a></li>';
+					echo '<li style="margin-left:15px;"><a href="webservices/dwc/rss.xml">'.$LANG['RSS'].'</a></li>';
 				}
 				?>
-				<li><a href="collections/misc/rarespecies.php">Rare Species</a> - list of taxa where locality information is hidden due to rare/threatened/endangered status</li>
+				<li><a href="collections/misc/rarespecies.php"><?php echo $LANG['RARESPEC'];?></a><?php echo $LANG['LISTOFTAXA'];?></li>
 				
 			</ul>
 				
-			<div style="margin-top:10px;"><h2>Image Library</h2></div>
+			<div style="margin-top:10px;"><h2><?php echo $LANG['IMGLIB'];?></h2></div>
 			<ul>
-				<li><a href="imagelib/index.php">Image Library</a></li>
-				<li><a href="imagelib/photographers.php">Contributing Photographers</a></li>
-				<li><a href="misc/usagepolicy.php">Usage Policy and Copyright Information</a></li>
+				<li><a href="imagelib/index.php"><?php echo $LANG['IMGLIB'];?></a></li>
+				<li><a href="imagelib/photographers.php"><?php echo $LANG['CONTRIB'];?></a></li>
+				<li><a href="misc/usagepolicy.php"><?php echo $LANG['USAGEPOLICY'];?></a></li>
 			</ul>
 
 			<?php 
 			$clList = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
 			$projList = $smManager->getProjectList();
 			if($projList){
-				echo '<div style="margin-top:10px;"><h2>Biotic Inventory Projects</h2></div><ul>';
+				echo '<div style="margin-top:10px;"><h2>'.$LANG['BIOINV'].'</h2></div><ul>';
 				foreach($projList as $pid => $pArr){
 					echo "<li><a href='projects/index.php?pid=".$pid."'>".$pArr["name"]."</a></li>\n";
 					echo "<ul><li>Manager: ".$pArr["managers"]."</li></ul>\n";
@@ -75,49 +75,49 @@ $smManager = new SiteMapManager();
 			}
 			?>
 
-			<div style="margin-top:10px;"><h2>Dynamic Species Lists</h2></div>
+			<div style="margin-top:10px;"><h2><?php echo $LANG['DYNAMIC'];?></h2></div>
 			<ul>
 				<li>
 					<a href="checklists/dynamicmap.php?interface=checklist">
-						Checklist
-					</a> 
-					- dynamically build a checklist using georeferenced specimen records
+                        <?php echo $LANG['CHECKLIST'];?>
+					</a>
+                    <?php echo $LANG['BUILDCHECK'];?>
 				</li>
 				<li>
 					<a href="checklists/dynamicmap.php?interface=key">
-						Dynamic Key
-					</a> 
-					- dynamically build a key using georeferenced specimen records
+                        <?php echo $LANG['DYNAMICKEY'];?>
+					</a>
+                    <?php echo $LANG['BUILDDKEY'];?>
 				</li>
 			</ul>
 
 			<fieldset style="margin:30px 0px 10px 10px;padding-left:25px;padding-right:15px;">
-				<legend><b>Data Management Tools</b></legend>
+				<legend><b><?php echo $LANG['MANAGTOOL'];?></b></legend>
 				<?php 
 				if($symbUid){
 					if($isAdmin){
 						?>
-						<h3>Administrative Functions (Super Admins only)</h3>
+						<h3><?php echo $LANG['ADMIN'];?></h3>
 						<ul>
 							<li>
-								<a href="profile/usermanagement.php">User Permissions</a>
+								<a href="profile/usermanagement.php"><?php echo $LANG['USERPERM'];?></a>
 							</li>
 							<li>
-								<a href="profile/usertaxonomymanager.php">Taxonomic Interest User Permissions</a>
+								<a href="profile/usertaxonomymanager.php"><?php echo $LANG['TAXINTER'];?></a>
 							</li>  
 							<li>
 								<a href="<?php echo $clientRoot; ?>/collections/misc/collmetadata.php">
-									Create a New Collection or Observation Profile
+                                    <?php echo $LANG['CREATENEWCOLL'];?>
 								</a>
 							</li>
 							<li>
 								<a href="<?php echo $clientRoot; ?>/admin/guidmapper.php">
-									Collection GUID Mapper
+                                    <?php echo $LANG['GUIDMAP'];?>
 								</a>
 							</li>
 							<li>
 								<a href="<?php echo $clientRoot; ?>/collections/specprocessor/salix/salixhandler.php">
-									SALIX WordStat Manager
+                                    <?php echo $LANG['SALIX'];?>
 								</a>
 							</li>
 						</ul>
@@ -130,14 +130,12 @@ $smManager = new SiteMapManager();
 							$clActive = array_intersect_key($clList,array_flip($userRights['ClAdmin']));
 						}
 						?>
-						<h3>Identification Keys</h3>
+						<h3><?php echo $LANG['IDKEYS'];?></h3>
 						<?php 
 						if(!$keyModIsActive && array_key_exists("KeyAdmin",$userRights)){
 							?>
 							<div style="color:red;margin-left:10px;">
-								Note: The Identification Key module is deactivated within this portal. 
-								However, as a Identification Key Adminitrator you have access to editing tools and 
-								keys for development and testing.
+                                <?php echo $LANG['KEYMODULE'];?>
 							</div>
 							<?php 
 						}
@@ -147,14 +145,14 @@ $smManager = new SiteMapManager();
 							if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
 								?>
 								<li>
-									You are authorized to access the <a href="<?php echo $clientRoot; ?>/ident/admin/index.php">Characters and Character States Editor</a>
+                                    <?php echo $LANG['AUTHOKEY'];?><a href="<?php echo $clientRoot; ?>/ident/admin/index.php"><?php echo $LANG['CHARASTATES'];?></a>
 								</li>
 								<?php 
 								if($clActive){
 									asort($clActive);
 									?>
 									<li id="testkeyhead" style="margin-left:15px;">
-										<a href="#" onclick="toggle('testkey');toggle('testkeyhead');return false;">Display Test Keys</a>
+										<a href="#" onclick="toggle('testkey');toggle('testkeyhead');return false;"><?php echo $LANG['DISPLAYTESTK'];?></a>
 									</li>
 									<div id="testkey" style="display:none;margin-left:15px;">
 										<?php 
@@ -171,19 +169,16 @@ $smManager = new SiteMapManager();
 							if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){ 
 								?>
 								<li>
-									You are authorized to edit Identification Keys. 
-									To edit morphological characters, login and go to any key. Open the 
-									morphological character editor by clicking on the 
-									editing symbol to the right of Scientific Name that you wish to modify. 
+                                    <?php echo $LANG['YAATE'];?>
 								</li>
 								<li>
-									For coding characters in a table format, open the   
-									<a href="<?php echo $clientRoot; ?>/ident/tools/massupdate.php">Mass-Update Editor</a><br/>
+                                    <?php echo $LANG['CODINGCHARA'];?>
+									<a href="<?php echo $clientRoot; ?>/ident/tools/massupdate.php"><?php echo $LANG['MASSUPDATEED'];?></a><br/>
 									<?php 
 									if($projList){
 										//Show Checklists that user has explicit editing rights
 										if($clActive){
-											echo '<div style="margin:5px 0px 0px 10px;"><b>Editor by Checklist</b></div>';
+											echo '<div style="margin:5px 0px 0px 10px;"><b>'.$LANG['EDITBYCHECK'].'</b></div>';
 											echo '<ul>';
 											foreach($clActive as $vClid => $name){
 												echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?clf=".$vClid."'>".$name."</a></li>";
@@ -191,7 +186,7 @@ $smManager = new SiteMapManager();
 											echo '</ul>';
 										}
 										//Show projects for access to a greater scope of checklist 
-										echo '<div style="margin:5px 0px 0px 10px;"><b>Editor by Inventory Project</b></div>';
+										echo '<div style="margin:5px 0px 0px 10px;"><b>'.$LANG['EDITBYINV'].'</b></div>';
 										foreach($projList as $pid => $pArr){
 											echo '<ul>';
 											echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?pid=".$pid."'>".$pArr["name"]."</a></li>";
@@ -199,7 +194,7 @@ $smManager = new SiteMapManager();
 										}
 									}
 									elseif($clList){
-										echo '<div style="margin:5px 0px 0px 10px;"><b>Editor by Checklist</b></div>';
+										echo '<div style="margin:5px 0px 0px 10px;"><b>'.$LANG['EDITBYCHECK'].'</b></div>';
 										echo '<ul>';
 										foreach($clList as $clidKey => $clName){
 											echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?clf=".$clidKey."'>".$clName."</a></li>";
@@ -212,7 +207,7 @@ $smManager = new SiteMapManager();
 							}
 							else{
 								?>
-								<li>You are not authorized to edit Identification Keys</li>
+								<li><?php echo $LANG['NOTAUTHIDKEY'];?></li>
 								<?php 
 							}
 							?>
@@ -220,16 +215,11 @@ $smManager = new SiteMapManager();
 						<?php
 					}
 					?>
-					<h3>Images</h3>
+					<h3><?php echo $LANG['IMAGES'];?></h3>
 					<div style="margin:10px;">
-						See the Symbiota documentation on 
-						<a href="http://symbiota.org/docs/image-submission-2/">Image Submission</a> 
-						for an overview of how images are managed within a Symbiota data portal. Field images without 
-						detailed locality information can be uploaded using the Taxon Species Profile page.
-						Specimen images are loaded through the Specimen Editing page or through a batch upload process 
-						established by a portal manager. Image Observations (Image Vouchers) with detailed locality information can be 
-						uploaded using the link below. Note that you will need the necessary permission assignments to use this 
-						feature. 
+                        <?php echo $LANG['SEESYMBDOC'];?>
+						<a href="http://symbiota.org/docs/image-submission-2/"><?php echo $LANG['IMGSUB'];?></a>
+                        <?php echo $LANG['FORANOVERVIEW'];?>
 					</div>
 					<ul>
 						<?php 
@@ -237,7 +227,7 @@ $smManager = new SiteMapManager();
 							?>
 							<li>
 								<a href="taxa/admin/tpeditor.php?tabindex=1" target="_blank">
-									Basic Field Image Submission 
+                                    <?php echo $LANG['BASICFIELD'];?>
 								</a>
 							</li>
 							<?php
@@ -246,7 +236,7 @@ $smManager = new SiteMapManager();
 						?>
 						<li>
 							<a href="collections/editor/observationsubmit.php">
-								Image Observation Submission Module
+                                <?php echo $LANG['IMGOBSER'];?>
 							</a>
 						</li>
 						<?php 
@@ -255,10 +245,10 @@ $smManager = new SiteMapManager();
 							?>
 							<li>
 								<?php if($submitAction == 'taxanoimages') echo '<a name="taxanoimages"><a/>'; ?>
-								<b>Taxa without images:</b> 
+								<b><?php echo $LANG['TAXANOIMG'];?></b>
 								<form name="taxanoimg" action="sitemap.php#taxanoimages" method="post" style="display:inline;"> 
 									<select name="clid" style="width:450px;" onchange="submitTaxaNoImgForm(this.form);">
-										<option value="">Select a Checklist</option>
+										<option value=""><?php echo $LANG['SELECTCHECK'];?></option>
 										<option value="">-------------------------------</option>
 										<?php 
 											$clArr = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
@@ -285,10 +275,10 @@ $smManager = new SiteMapManager();
 							</li>
 							<li>
 								<?php if($submitAction == 'taxanofieldimages') echo '<a name="taxanofieldimages"><a/>'; ?>
-								<b>Taxa without field images:</b> 
+								<b><?php echo $LANG['TAXANOFIELD'];?></b>
 								<form name="taxanofieldimg" action="sitemap.php#taxanofieldimages" method="post" style="display:inline;"> 
 									<select name="clid" style="width:450px;" onchange="submitTaxaNoImgForm(this.form);">
-										<option value="">Select a Checklist</option>
+										<option value=""><?php echo $LANG['SELECTCHECK'];?></option>
 										<option value="">--------------------------------</option>
 										<?php 
 											foreach($clArr as $clid => $clname){
@@ -317,13 +307,13 @@ $smManager = new SiteMapManager();
 						<?php }?>
 					</ul>
 
-					<h3>Biotic Inventory Projects</h3>
+					<h3><?php echo $LANG['BIOINV'];?></h3>
 					<ul>
 						<?php 
 						if($isAdmin){
-							echo '<li><a href="projects/index.php?newproj=1">Add a New Project</a></li>';
+							echo '<li><a href="projects/index.php?newproj=1">'.$LANG['ADDNEWPROJ'].'</a></li>';
 							if($projList){
-								echo '<li><b>List of Current Projects</b> (click to edit)</li>';
+								echo '<li><b>'.$LANG['LISTOFCURR'].'</b>'.$LANG['CLICKEDIT'].'</li>';
 								echo '<ul>';
 								foreach($projList as $pid => $pArr){
 									echo '<li><a href="'.$clientRoot.'/projects/index.php?pid='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
@@ -331,69 +321,65 @@ $smManager = new SiteMapManager();
 								echo '</ul>';
 							}
 							else{
-								echo '<li>There are no projects in the system</li>';	
+								echo '<li>'.$LANG['NOPROJ'].'</li>';
 							}
 						}
 						else{
-							echo '<li>You are not authorized to edit any of the Projects</li>';
+							echo '<li>'.$LANG['NOEDITPROJ'].'</li>';
 						}
 						?>
 					</ul>
 
-					<h3>Taxon Profile Page</h3>
+					<h3><?php echo $LANG['TAXONPROF'];?></h3>
 					<?php 
 					if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
 						?>
 						<div style="margin:10px;">
-							The following Species Profile page editing features are also available to editors via an
-							editing link located in the upper right of each Species Profile page. 
+                            <?php echo $LANG['THEFOLLOWINGSPEC'];?>
 						</div>
 						<ul>
-							<li><a href="taxa/admin/tpeditor.php?taxon=">Synonyms / Common Names</a></li>
-							<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=4">Text Descriptions</a></li>
-							<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=1">Edit Images</a></li>
-							<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imagequicksort&tabindex=2">Edit Image Sorting Order</a></li>
-							<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imageadd&tabindex=3">Add a New Image</a></li>
+							<li><a href="taxa/admin/tpeditor.php?taxon="><?php echo $LANG['SYN_COM'];?></a></li>
+							<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=4"><?php echo $LANG['TEXTDESC'];?></a></li>
+							<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=1"><?php echo $LANG['EDITIMG'];?></a></li>
+							<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imagequicksort&tabindex=2"><?php echo $LANG['IMGSORTORD'];?></a></li>
+							<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imageadd&tabindex=3"><?php echo $LANG['ADDNEWIMG'];?></a></li>
 						</ul>
 						<?php 
 					}
 					else{
 						?>
 						<ul>
-							<li>You are not yet authorized to edit the Taxon Profile</li>
+							<li><?php echo $LANG['NOTAUTHOTAXONPAGE'];?></li>
 						</ul>
 						<?php 
 					}
 					?>
-					<h3>Taxonomy</h3>
+					<h3><?php echo $LANG['TAXONOMY'];?></h3>
 					<ul>
 						<?php 
 						if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 							?>
-							<li><a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer</a></li>
-							<li><a href="taxa/admin/taxonomydynamicdisplay.php">Dynamic Taxonomic Tree Viewer (beta version)</a></li>
-							<li>Edit Taxonomic Placement (use <a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer)</a></li>
-							<li><a href="taxa/admin/taxonomyloader.php">Add New Taxonomic Name</a></li>
-							<li><a href="taxa/admin/taxaloader.php">Batch Upload a Taxonomic Data File</a></li>
+							<li><a href="taxa/admin/taxonomydisplay.php"><?php echo $LANG['TAXTREE'];?></a></li>
+							<li><a href="taxa/admin/taxonomydynamicdisplay.php"><?php echo $LANG['DYNTAXTREE'];?></a></li>
+							<li><?php echo $LANG['EDITTAXPL'];?><a href="taxa/admin/taxonomydisplay.php"><?php echo $LANG['TAXTREEVIEW'];?></a></li>
+							<li><a href="taxa/admin/taxonomyloader.php"><?php echo $LANG['ADDTAXANAME'];?></a></li>
+							<li><a href="taxa/admin/taxaloader.php"><?php echo $LANG['BATCHTAXA'];?></a></li>
 							<?php 
 							if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 								?>
-								<li><a href="taxa/admin/eolmapper.php">Encyclopedia of Life Linkage Manager</a></li>
+								<li><a href="taxa/admin/eolmapper.php"><?php echo $LANG['EOLLINK'];?></a></li>
 								<?php 
 							}
 						}
 						else{
-							echo '<li>You are not authorized to edit taxonomy</li>';
+							echo '<li>'.$LANG['NOTEDITTAXA'].'</li>';
 						}
 						?>
 					</ul>
 
-					<h3>Checklists</h3>
+					<h3><?php echo $LANG['CHECKLISTS'];?></h3>
 					<div style="margin:10px;">
-						Tools for managing Checklists are available from each checklist display page.
-						Editing symbols located in the upper right of the page will display 
-						editing options for that checklist.  
-						Below is a list of the checklists you are authorized to edit. 
+                        <?php echo $LANG['TOOLSFORMANAGE'];?>
 					</div>
 					<ul>
 						<?php 
@@ -403,7 +389,7 @@ $smManager = new SiteMapManager();
 							}
 						}
 						else{
-							echo "<li>You are not authorized to edit any of the Checklists</li>";
+							echo "<li>".$LANG['NOTEDITCHECK']."</li>";
 						}
 						?>
 					</ul>
@@ -411,31 +397,24 @@ $smManager = new SiteMapManager();
 					<?php 
 					if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI){
 						?>
-						<h3>Exsiccati</h3>
+						<h3><?php echo $LANG['EXSICCATII'];?></h3>
 						<div style="margin:10px;">
-							The Exsiccati module is activated for this portal. 
-							The exsiccati index (listed below) can be browsed or searched by everyone. 
-							However, to add or modify exsiccati titles or series, 
-							the user must be an administrator for at least one collection. 
+                            <?php echo $LANG['ESCMOD'];?>
 						</div>
 						<ul>
-							<li><a href="collections/exsiccati/index.php">Exsiccati Index</a></li>
+							<li><a href="collections/exsiccati/index.php"><?php echo $LANG['EXSICC'];?></a></li>
 						</ul>
 						<?php 
 					}
 					?>
 
-					<h3>Collections</h3>
+					<h3><?php echo $LANG['COLLECTIONS'];?></h3>
 					<div style="margin:10px;">
-						Tools for managing data specific to a particular collection are available through the collection's profile page. 
-						Clicking on a collection name in the list below will take you to this page for that given collection. 
-						An additional method to reach this page is by clicking on the collection name within the specimen search engine.
-						The editing symbol located in the upper right of Collection Profile page will open 
-						the editing pane and display a list of editing options.  
+                        <?php echo $LANG['PARA1'];?>
 					</div>
 					<div style="margin:10px;">
 						<div style="font-weight:bold;">
-							List of collections you have permissions to edit
+                            <?php echo $LANG['COLLLIST'];?>
 						</div>
 						<ul>
 						<?php 
@@ -450,21 +429,16 @@ $smManager = new SiteMapManager();
 							}
 						}
 						else{
-							echo "<li>You have no explicit editing permissions for a particular collections</li>";
+							echo "<li>".$LANG['NOTEDITCOLL']."</li>";
 						}
 						?>
 						</ul>
 					</div>
 
-					<h3>Observations</h3>
+					<h3><?php echo $LANG['OBSERV'];?></h3>
 					<div style="margin:10px;">
-						Data management for observation projects is handled in a similar manner to what is described in the Collections paragraph above.
-						One difference is the General Observation project. This project serves two central purposes: 
-						1) Allows registered users to submit a image voucherd field observation. 
-						2) Allows collectors to enter their own collection data for label printing and to make the data available 
-						to the collections obtaining the physical specimens through donations or exchange.
-						Visit the <a href="http://symbiota.org/docs/specimen-data-management/" target="_blank">Symbiota Documentation</a> for more information on specimen processing capabilites. 
-						Note that observation projects are not activated on all Symbiota data portals. 
+                        <?php echo $LANG['PARA2'];?>
+						<a href="http://symbiota.org/docs/specimen-data-management/" target="_blank"><?php echo $LANG['SYMBDOCU'];?></a><?php echo $LANG['FORMOREINFO'];?>
 					</div>
 					<div style="margin:10px;">
 						<?php 
@@ -473,7 +447,7 @@ $smManager = new SiteMapManager();
 						$obsManagementStr = '';
 						?>
 						<div style="font-weight:bold;">
-							Observation Image Voucher Submission
+                            <?php echo $LANG['OIVS'];?>
 						</div>
 						<ul>
 							<?php 
@@ -500,7 +474,7 @@ $smManager = new SiteMapManager();
 								}
 							}
 							else{
-								echo "<li>There are no Observation Projects to which you have permissions</li>";
+								echo "<li>".$LANG['NOOBSVPROJ']."</li>";
 							}
 							?>
 						</ul>
@@ -508,7 +482,7 @@ $smManager = new SiteMapManager();
 						if($genObsList){ 
 							?>
 							<div style="font-weight:bold;">
-								Personal Specimen Management and Label Printing Features
+                                <?php echo $LANG['PERSONAL'];?>
 							</div>
 							<ul>
 								<?php 
@@ -528,7 +502,7 @@ $smManager = new SiteMapManager();
 						if($obsManagementStr){
 							?>
 							<div style="font-weight:bold;">
-								Observation project Management
+                                <?php echo $LANG['OPM'];?>
 							</div>
 							<ul>
 								<?php echo $obsManagementStr; ?>
@@ -540,23 +514,21 @@ $smManager = new SiteMapManager();
 					<?php 
 				}
 				else{
-					echo 'Please <a href="'.$clientRoot.'/profile/index.php?refurl=../sitemap.php">login</a> to access editing tools.<br/>'.
-					'Contact a portal administrator for obtaining editing permissions.';
+					echo ''.$LANG['PLEASE'].' <a href="'.$clientRoot.'/profile/index.php?refurl=../sitemap.php">'.$LANG['LOGIN'].'</a>'.$LANG['TOACCESS'].'<br/>'.$LANG['CONTACTPORTAL'].'';
 				}
 			?>
 			</fieldset>
 
-			<h2>About Symbiota</h2>
+			<h2><?php echo $LANG['ABOUT'];?></h2>
 			<ul>
 				<li>
-					Schema Version <?php echo $smManager->getSchemaVersion(); ?>
+                    <?php echo $LANG['SCHEMA'];?><?php echo $smManager->getSchemaVersion(); ?>
 				</li>
 			</ul>
 		</div>
 	</div>
 	<?php
-		include($serverRoot.'/footer.php');
+		include($SERVER_ROOT.'/footer.php');
 	?> 
-
 </body>
 </html>

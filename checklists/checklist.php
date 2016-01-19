@@ -2,7 +2,8 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
 include_once($SERVER_ROOT.'/classes/ChecklistAdmin.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/content/lang/checklists/checklist.'.$LANG_TAG.'.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
 $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
@@ -106,7 +107,7 @@ if($clValue || $dynClid){
 <html>
 <head>
 	<meta charset="<?php echo $CHARSET; ?>">
-	<title><?php echo $DEFAULT_TITLE; ?> Research Checklist: <?php echo $clManager->getClName(); ?></title>
+	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['RESCHECK'];?><?php echo $clManager->getClName(); ?></title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="stylesheet" />
@@ -140,7 +141,7 @@ if($clValue || $dynClid){
 		include($SERVER_ROOT.'/header.php');
 		echo '<div class="navpath">';
 		if($pid){
-			echo '<a href="../index.php">Home</a> &gt; ';
+			echo '<a href="../index.php">'.$LANG['NAV_HOME'].'</a> &gt; ';
 			echo '<a href="'.$clientRoot.'/projects/index.php?pid='.$pid.'">';
 			echo $clManager->getProjName();
 			echo '</a> &gt; ';
@@ -154,7 +155,7 @@ if($clValue || $dynClid){
 				}
 			}
 			else{
-				echo '<a href="../index.php">Home</a> &gt;&gt; ';
+				echo '<a href="../index.php">'.$LANG['NAV_HOME'].'</a> &gt;&gt; ';
 				echo ' <b>'.$clManager->getClName().'</b>';
 			}
 		}
@@ -220,8 +221,8 @@ if($clValue || $dynClid){
 					        	<?php 
 									$varStr = "?clid=".$clid."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():""); 
 					        	?>
-						        <a href="../games/namegame.php<?php echo $varStr; ?>">Name Game</a>
-						        <a href="../games/flashcards.php<?php echo $varStr; ?>">Flash Card Quiz</a>
+						        <a href="../games/namegame.php<?php echo $varStr; ?>"><?php echo $LANG['NAMEGAME'];?></a>
+						        <a href="../games/flashcards.php<?php echo $varStr; ?>"><?php echo $LANG['FLASH'];?></a>
 					        </div>
 					    </li>
 					</ul>
@@ -239,29 +240,29 @@ if($clValue || $dynClid){
 				?>
 				<div style="clear:both;">
 					<span style="font-weight:bold;">
-						Authors: 
+						<?php echo $LANG['AUTHORS'];?>
 					</span>
 					<?php echo $clArray["authors"]; ?>
 				</div>
 				<?php 
 				if($clArray["publication"]){
-					echo "<div><span style='font-weight:bold;'>Publication: </span>".$clArray["publication"]."</div>";
+					echo "<div><span style='font-weight:bold;'>".$LANG['PUBLICATION']."</span>".$clArray["publication"]."</div>";
 				}
 			}
 		
 			if(($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"])){
 				?>
-				<div class="moredetails" style="<?php echo (($showDetails || $printMode)?'display:none;':''); ?>color:blue;cursor:pointer;" onclick="toggle('moredetails')">More Details</div>
-				<div class="moredetails" style="display:<?php echo (($showDetails && !$printMode)?'block':'none'); ?>;color:blue;cursor:pointer;" onclick="toggle('moredetails')">Less Details</div>
+				<div class="moredetails" style="<?php echo (($showDetails || $printMode)?'display:none;':''); ?>color:blue;cursor:pointer;" onclick="toggle('moredetails')"><?php echo $LANG['MOREDETS'];?></div>
+				<div class="moredetails" style="display:<?php echo (($showDetails && !$printMode)?'block':'none'); ?>;color:blue;cursor:pointer;" onclick="toggle('moredetails')"><?php echo $LANG['LESSDETS'];?></div>
 				<div class="moredetails" style="display:<?php echo (($showDetails || $printMode)?'block':'none'); ?>;">
 					<?php 
 					$locStr = $clArray["locality"];
 					if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
 					if($locStr){
-						echo "<div><span style='font-weight:bold;'>Locality: </span>".$locStr."</div>";
+						echo "<div><span style='font-weight:bold;'>".$LANG['LOC']."</span>".$locStr."</div>";
 					}
 					if($clValue && $clArray["abstract"]){
-						echo "<div><span style='font-weight:bold;'>Abstract: </span>".$clArray["abstract"]."</div>";
+						echo "<div><span style='font-weight:bold;'>".$LANG['ABSTRACT']."</span>".$clArray["abstract"]."</div>";
 					}
 					if($clValue && $clArray["notes"]){
 						echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
@@ -291,29 +292,29 @@ if($clValue || $dynClid){
 					<div id="cloptiondiv">
 						<form name="optionform" action="checklist.php" method="post">
 							<fieldset style="background-color:white;padding-bottom;10px;">
-							    <legend><b>Options</b></legend>
+							    <legend><b><?php echo $LANG['OPTIONS'];?></b></legend>
 								<!-- Taxon Filter option -->
 							    <div id="taxonfilterdiv" title="Filter species list by family or genus">
 							    	<div>
-							    		<b>Search:</b> 
+							    		<b><?php echo $LANG['SEARCH'];?></b>
 										<input type="text" id="taxonfilter" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" />
 									</div>
 									<div>
 										<div style="margin-left:10px;">
 											<?php 
 												if($displayCommonNames){
-													echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/> Common Names<br/>";
+													echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/>".$LANG['COMMON']."<br/>";
 												}
 											?>
-											<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/> Synonyms
+											<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/><?php echo $LANG['SYNON'];?>
 										</div>
 									</div>
 								</div>
 							    <!-- Thesaurus Filter -->
 							    <div>
-							    	<b>Filter:</b><br/>
+							    	<b><?php echo $LANG['FILTER'];?></b><br/>
 							    	<select name='thesfilter'>
-										<option value='0'>Original Checklist</option>
+										<option value='0'><?php echo $LANG['OGCHECK'];?></option>
 										<?php 
 											$taxonAuthList = Array();
 											$taxonAuthList = $clManager->getTaxonAuthorityList();
@@ -326,30 +327,30 @@ if($clValue || $dynClid){
 								<div>
 									<?php 
 										//Display Common Names: 0 = false, 1 = true 
-									    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/> Common Names";
+									    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/>".$LANG['COMMON']."";
 									?>
 								</div>
 								<div>
 									<!-- Display as Images: 0 = false, 1 = true  --> 
-								    <input name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this.form);" /> 
-								    Display as Images
+								    <input name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this.form);" />
+                                    <?php echo $LANG['DISPLAYIMG'];?>
 								</div>
 								<?php if($clValue){ ?>
 									<div style='display:<?php echo ($showImages?"none":"block");?>' id="showvouchersdiv">
 										<!-- Display as Vouchers: 0 = false, 1 = true  --> 
-									    <input name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/> 
-									    Notes &amp; Vouchers
+									    <input name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/>
+                                        <?php echo $LANG['NOTESVOUC'];?>
 									</div>
 								<?php } ?>
 								<div style='display:<?php echo ($showImages?"none":"block");?>' id="showauthorsdiv">
 									<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
-								    <input name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/> 
-								    Taxon Authors
+								    <input name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/>
+                                    <?php echo $LANG['TAXONAUT'];?>
 								</div>
 								<div style='' id="showalphataxadiv">
 									<!-- Display Taxa Alphabetically: 0 = false, 1 = true  --> 
-								    <input name='showalphataxa' type='checkbox' value='1' <?php echo ($showAlphaTaxa?"checked":""); ?>/> 
-								    Show Taxa Alphabetically
+								    <input name='showalphataxa' type='checkbox' value='1' <?php echo ($showAlphaTaxa?"checked":""); ?>/>
+                                    <?php echo $LANG['TAXONABC'];?>
 								</div>
 								<div style="margin:5px 0px 0px 5px;">
 									<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
@@ -376,34 +377,34 @@ if($clValue || $dynClid){
 							<div class="editspp" style="display:<?php echo ($editMode?'block':'none'); ?>;width:250px;margin-top:10px;">
 								<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 									<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
-										<legend><b>Add New Species to Checklist</b></legend>
+										<legend><b><?php echo $LANG['NEWSPECIES'];?></b></legend>
 										<div>
-											<b>Taxon:</b><br/> 
+											<b><?php echo $LANG['TAXON'];?>:</b><br/>
 											<input type="text" id="speciestoadd" name="speciestoadd" style="width:174px;" />
 											<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 										</div>
 										<div>
-											<b>Family Override:</b><br/>
+											<b><?php echo $LANG['FAMOVER'];?></b><br/>
 											<input type="text" name="familyoverride" style="width:122px;" title="Only enter if you want to override current family" />
 										</div>
 										<div>
-											<b>Habitat:</b><br/>
+											<b><?php echo $LANG['HABITAT'];?></b><br/>
 											<input type="text" name="habitat" style="width:170px;" />
 										</div>
 										<div>
-											<b>Abundance:</b><br/>
+											<b><?php echo $LANG['ABUN'];?></b><br/>
 											<input type="text" name="abundance" style="width:145px;" />
 										</div>
 										<div>
-											<b>Notes:</b><br/>
+											<b><?php echo $LANG['NOTES'];?></b><br/>
 											<input type="text" name="notes" style="width:175px;" />
 										</div>
 										<div style="padding:2px;">
-											<b>Internal Notes:</b><br/>
+											<b><?php echo $LANG['INTNOTES'];?></b><br/>
 											<input type="text" name="internalnotes" style="width:126px;" title="Displayed to administrators only" />
 										</div>
 										<div>
-											<b>Source:</b><br/>
+											<b><?php echo $LANG['SOURCE'];?></b><br/>
 											<input type="text" name="source" style="width:167px;" />
 										</div>
 										<div>
@@ -421,7 +422,7 @@ if($clValue || $dynClid){
 											<hr />
 										</div>
 										<div style="text-align:center;">
-											<a href="tools/checklistloader.php?clid=<?php echo $clid.'&pid='.$pid;?>">Batch Upload Spreadsheet</a>
+											<a href="tools/checklistloader.php?clid=<?php echo $clid.'&pid='.$pid;?>"><?php echo $LANG['BATCHSPREAD'];?></a>
 										</div>
 									</fieldset>
 								</form>
@@ -446,22 +447,22 @@ if($clValue || $dynClid){
 				?>
 				<div>
 					<div style="margin:3px;">
-						<b>Families:</b> 
+						<b><?php echo $LANG['FAMILIES'];?></b>
 						<?php echo $clManager->getFamilyCount(); ?>
 					</div>
 					<div style="margin:3px;">
-						<b>Genera:</b>
+						<b><?php echo $LANG['GENERA'];?></b>
 						<?php echo $clManager->getGenusCount(); ?>
 					</div>
 					<div style="margin:3px;">
-						<b>Species:</b>
+						<b><?php echo $LANG['SPECIES'];?></b>
 						<?php echo $clManager->getSpeciesCount(); ?>
-						(species rank)
+                        <?php echo $LANG['SPECRANK'];?>
 					</div>
 					<div style="margin:3px;">
-						<b>Total Taxa:</b> 
+						<b><?php echo $LANG['TOTTAX'];?></b>
 						<?php echo $clManager->getTaxaCount(); ?>
-						(including subsp. and var.)
+                        <?php echo $LANG['INCLUDSUB'];?>
 					</div>
 					<?php 
 					$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());
@@ -474,7 +475,7 @@ if($clValue || $dynClid){
 						$argStr .= ($pid?"&pid=".$pid:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
 						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
 						$argStr .= ($defaultOverride?"&defaultoverride=".$defaultOverride:"");
-						echo "<hr /><div>Page <b>".($pageNumber)."</b> of <b>$pageCount</b>: ";
+						echo "<hr /><div>".$LANG['PAGE']."<b>".($pageNumber)."</b>".$LANG['OF']."<b>$pageCount</b>: ";
 						for($x=1;$x<=$pageCount;$x++){
 							if($x>1) echo " | ";
 							if(($pageNumber) == $x){
@@ -515,7 +516,7 @@ if($clValue || $dynClid){
 									else{
 										?>
 										<div style="margin-top:50px;">
-											<b>Image<br/>not yet<br/>available</b>
+											<b><?php echo $LANG['IMAGE'];?><br/><?php echo $LANG['NOTY'];?><br/><?php echo $LANG['AVAIL'];?></b>
 										</div>
 										<?php 
 									}
@@ -597,7 +598,7 @@ if($clValue || $dynClid){
 									foreach($voucherArr[$tid] as $occid => $collName){
 										$voucStr .= ', ';
 										if($voucCnt == 4 && !$printMode){
-											$voucStr .= '<a href="#" id="morevouch-'.$tid.'" onclick="return toggleVoucherDiv('.$tid.');">more...</a>'.
+											$voucStr .= '<a href="#" id="morevouch-'.$tid.'" onclick="return toggleVoucherDiv('.$tid.');">'.$LANG['MORE'].'</a>'.
 												'<span id="voucdiv-'.$tid.'" style="display:none;">';
 										}
 										if(!$printMode) $voucStr .= '<a href="#" onclick="return openIndividualPopup('.$occid.')">';
@@ -605,7 +606,7 @@ if($clValue || $dynClid){
 										if(!$printMode) $voucStr .= "</a>\n";
 										$voucCnt++;
 									}
-									if($voucCnt > 4 && !$printMode) $voucStr .= '</span><a href="#" id="lessvouch-'.$tid.'" style="display:none;" onclick="return toggleVoucherDiv('.$tid.');">...less</a>';
+									if($voucCnt > 4 && !$printMode) $voucStr .= '</span><a href="#" id="lessvouch-'.$tid.'" style="display:none;" onclick="return toggleVoucherDiv('.$tid.');">'.$LANG['LESS'].'</a>';
 									$voucStr = substr($voucStr,2);
 								}
 								$noteStr = '';
@@ -622,9 +623,9 @@ if($clValue || $dynClid){
 					$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());
 					if($clManager->getTaxaCount() > (($pageNumber)*$taxaLimit) && !$printMode){
 						echo '<div style="margin:20px;clear:both;">';
-						echo '<a href="checklist.php?pagenumber='.($pageNumber+1).$argStr.'">Display next '.$taxaLimit.' taxa...</a></div>';
+						echo '<a href="checklist.php?pagenumber='.($pageNumber+1).$argStr.'">'.$LANG['DISPLAYNEXT'].''.$taxaLimit.''.$LANG['TAXA'].'</a></div>';
 					}
-					if(!$taxaArray) echo "<h1 style='margin:40px;'>No Taxa Found</h1>";
+					if(!$taxaArray) echo "<h1 style='margin:40px;'>".$LANG['NOTAXA']."</h1>";
 					?>
 				</div>
 			</div>
@@ -633,7 +634,7 @@ if($clValue || $dynClid){
 		else{
 			?>
 			<div style="color:red;">
-				ERROR: Checklist identification is null!
+                <?php echo $LANG['CHECKNULL'];?>
 			</div>
 			<?php 
 		}

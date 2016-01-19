@@ -5,8 +5,6 @@ Language: English
 ------------------
 */
 
-//include_once('sharedterms.en.php');
-
 $LANG['COLLECTION_DETAILS'] = 'Select a collection to see full details.';
 $LANG['CONTACT'] = 'Contact:';
 $LANG['HOMEPAGE'] = 'Home Page:';
