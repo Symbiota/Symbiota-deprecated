@@ -683,7 +683,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						if($occArr['disposition']){
 							?>
 							<div style="clear:both;">
-								<b>Duplicates sent to: </b>
+								<b>Disposition: </b>
 								<?php echo $occArr['disposition']; ?>
 							</div>
 							<?php 
@@ -859,33 +859,35 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							foreach($dupClusterArr as $dupid => $dArr){
 								$innerDupArr = $dArr['o'];
 								foreach($innerDupArr as $dupOccid => $dupArr){
-									echo '<div style="clear:both;margin:15px;">';
-									echo '<div style="font-weight:bold;font-size:120%;">'.$dupArr['collname'].' ('.$dupArr['instcode'].($dupArr['collcode']?':'.$dupArr['collcode']:'').')</div>';
-									echo '<div style="float:left;margin:5px 15px">';
-									if($dupArr['recordedby']) echo '<div>'.$dupArr['recordedby'].' '.$dupArr['recordnumber'].'<span style="margin-left:40px;">'.$dupArr['eventdate'].'</span></div>';
-									if($dupArr['catnum']) echo '<div><b>Catalog Number:</b> '.$dupArr['catnum'].'</div>';
-									if($dupArr['occurrenceid']) echo '<div><b>GUID:</b> '.$dupArr['occurrenceid'].'</div>';
-									if($dupArr['sciname']) echo '<div><b>Latest Identification:</b> '.$dupArr['sciname'].'</div>';
-									if($dupArr['identifiedby']) echo '<div><b>Identified by:</b> '.$dupArr['identifiedby'].'<span stlye="margin-left:30px;">'.$dupArr['dateidentified'].'</span></div>';
-									if($dupArr['notes']) echo '<div>'.$dupArr['notes'].'</div>';
-									echo '<div><a href="#" onclick="openIndividual('.$dupOccid.')">Show Full Details</a></div>';
-									echo '</div>';
-									if($dupArr['url']){
-										$url = $dupArr['url'];
-										$tnUrl = $dupArr['tnurl'];
-										if(!$tnUrl) $tnUrl = $url;
-										if($IMAGE_DOMAIN){
-											if(substr($url,0,1) == '/') $url = $IMAGE_DOMAIN.$url;
-											if(substr($tnUrl,0,1) == '/') $tnUrl = $IMAGE_DOMAIN.$tnUrl;
+									if($dupOccid != $occid){
+										echo '<div style="clear:both;margin:15px;">';
+										echo '<div style="font-weight:bold;font-size:120%;">'.$dupArr['collname'].' ('.$dupArr['instcode'].($dupArr['collcode']?':'.$dupArr['collcode']:'').')</div>';
+										echo '<div style="float:left;margin:5px 15px">';
+										if($dupArr['recordedby']) echo '<div>'.$dupArr['recordedby'].' '.$dupArr['recordnumber'].'<span style="margin-left:40px;">'.$dupArr['eventdate'].'</span></div>';
+										if($dupArr['catnum']) echo '<div><b>Catalog Number:</b> '.$dupArr['catnum'].'</div>';
+										if($dupArr['occurrenceid']) echo '<div><b>GUID:</b> '.$dupArr['occurrenceid'].'</div>';
+										if($dupArr['sciname']) echo '<div><b>Latest Identification:</b> '.$dupArr['sciname'].'</div>';
+										if($dupArr['identifiedby']) echo '<div><b>Identified by:</b> '.$dupArr['identifiedby'].'<span stlye="margin-left:30px;">'.$dupArr['dateidentified'].'</span></div>';
+										if($dupArr['notes']) echo '<div>'.$dupArr['notes'].'</div>';
+										echo '<div><a href="#" onclick="openIndividual('.$dupOccid.')">Show Full Details</a></div>';
+										echo '</div>';
+										if($dupArr['url']){
+											$url = $dupArr['url'];
+											$tnUrl = $dupArr['tnurl'];
+											if(!$tnUrl) $tnUrl = $url;
+											if($IMAGE_DOMAIN){
+												if(substr($url,0,1) == '/') $url = $IMAGE_DOMAIN.$url;
+												if(substr($tnUrl,0,1) == '/') $tnUrl = $IMAGE_DOMAIN.$tnUrl;
+											}
+											echo '<div style="float:left;margin:10px;">';
+											echo '<a href="'.$url.'">';
+											echo '<img src="'.$tnUrl.'" style="width:100px;border:1px solid grey" />';
+											echo '</a>';
+											echo '</div>';
 										}
-										echo '<div style="float:left;margin:10px;">';
-										echo '<a href="'.$url.'">';
-										echo '<img src="'.$tnUrl.'" style="width:100px;border:1px solid grey" />';
-										echo '</a>';
+										echo '<div style="margin:10px 0px;clear:both"><hr/></div>';
 										echo '</div>';
 									}
-									echo '<div style="margin:10px 0px;clear:both"><hr/></div>';
-									echo '</div>';
 								}
 							}
 							?>
