@@ -246,7 +246,6 @@ ALTER TABLE `uploadtaxa`
 ALTER TABLE `taxa` 
   DROP COLUMN `KingdomID`,
   DROP COLUMN `kingdomName`,
-  ADD COLUMN `TSN` int(10) NULL AFTER `SecurityStatus`,
   DROP INDEX `sciname_unique`,
   ADD UNIQUE INDEX `sciname_unique` (`SciName` ASC, `RankId` ASC),
   ADD INDEX `sciname_index` (`SciName` ASC);

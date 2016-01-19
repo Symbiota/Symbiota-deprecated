@@ -140,7 +140,7 @@ class MapInterfaceManager{
 						if(array_key_exists("tid",$valueArray)){
 							$tidArr = $valueArray['tid'];
 							$sql = 'SELECT DISTINCT t.sciname '.
-								'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+								'FROM taxa t LEFT JOIN taxaenumtree e ON t.tid = e.tid '.
 								'WHERE t.rankid = 140 AND e.taxauthid = 1 AND e.parenttid IN('.implode(',',$tidArr).')';
 							$rs = $this->conn->query($sql);
 							while($r = $rs->fetch_object()){
@@ -200,7 +200,7 @@ class MapInterfaceManager{
 			$clidArr = explode(";",$this->searchTermsArr["clid"]);
 			$tempArr = Array();
 			foreach($clidArr as $value){
-				$tempArr[] = "(o.occid IN(SELECT occid FROM fmvouchers WHERE CLID = ".trim($value)."))";
+				$tempArr[] = "(fmv.CLID = ".trim($value).")";
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(" OR ",$clidArr);
@@ -421,8 +421,8 @@ class MapInterfaceManager{
 	
 	protected function setSciNamesByVerns(){
         $sql = "SELECT DISTINCT v.VernacularName, t.tid, t.sciname, ts.family, t.rankid ".
-            "FROM (taxstatus ts INNER JOIN taxavernaculars v ON ts.TID = v.TID) ".
-            "INNER JOIN taxa t ON t.TID = ts.tidaccepted ";
+            "FROM (taxstatus ts LEFT JOIN taxavernaculars v ON ts.TID = v.TID) ".
+            "LEFT JOIN taxa t ON t.TID = ts.tidaccepted ";
     	$whereStr = "";
 		foreach($this->taxaArr as $key => $value){
 			$whereStr .= "OR v.VernacularName = '".$key."' ";
@@ -884,10 +884,9 @@ class MapInterfaceManager{
 				$sql .= ", o.".$v." ";
 			}
 		}
-		$sql .= "FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
-		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		if((array_key_exists("surveyid",$this->searchTermsArr))) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-		if((array_key_exists("polycoords",$this->searchTermsArr))) $sql .= "INNER JOIN omoccurpoints p ON o.occid = p.occid ";
+		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
+		if((array_key_exists("surveyid",$this->searchTermsArr)) || (array_key_exists("clid",$this->searchTermsArr))) $sql .= "LEFT JOIN fmvouchers fmv ON o.occid = fmv.occid ";
+		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 		$sql .= $mapWhere;
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
@@ -969,7 +968,7 @@ class MapInterfaceManager{
 		$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
 			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, '.
 			'o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, c.CollectionName '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid '.
 			'WHERE o.occid IN('.$seloccids.') ';
 		$collMapper = Array();
 		$collMapper["undefined"] = "undefined";
@@ -1276,9 +1275,8 @@ class MapInterfaceManager{
 		global $userRights, $clientRoot;
 		if($sqlWhere){
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
-			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-			if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurpoints p ON o.occid = p.occid ";
+			if((array_key_exists("surveyid",$this->searchTermsArr)) || (array_key_exists("clid",$this->searchTermsArr))) $sql .= "LEFT JOIN fmvouchers fmv ON o.occid = fmv.occid ";
+			if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 			$sql .= $sqlWhere;
 			if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 				//Is global rare species reader, thus do nothing to sql and grab all records
@@ -1311,10 +1309,9 @@ class MapInterfaceManager{
 		$sql = 'SELECT o.occid, c.institutioncode, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, '.
 			'o.eventdate, o.family, o.sciname, CONCAT_WS("; ",o.country, o.stateProvince, o.county) AS locality, o.DecimalLatitude, o.DecimalLongitude, '.
 			'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
-		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurpoints p ON o.occid = p.occid ";
+			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
+		if((array_key_exists("surveyid",$this->searchTermsArr)) || (array_key_exists("clid",$this->searchTermsArr))) $sql .= "LEFT JOIN fmvouchers fmv ON o.occid = fmv.occid ";
+		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 		$sql .= $mapWhere;
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
@@ -1466,8 +1463,8 @@ class MapInterfaceManager{
         $sql = 'SELECT DISTINCT t.tid, IFNULL(ts.family,o.family) AS family, IFNULL(t.sciname,o.sciname) AS sciname '.
 			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
 			'LEFT JOIN taxstatus ts ON t.tid = ts.tid ';
-		if(array_key_exists("surveyid",$stArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-		if(array_key_exists("polycoords",$stArr)) $sql .= "INNER JOIN omoccurpoints p ON o.occid = p.occid ";
+		if((array_key_exists("surveyid",$this->searchTermsArr)) || (array_key_exists("clid",$this->searchTermsArr))) $sql .= "LEFT JOIN fmvouchers fmv ON o.occid = fmv.occid ";
+		if(array_key_exists("polycoords",$stArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 		$sql .= $mapWhere." AND (ISNULL(ts.taxauthid) OR ts.taxauthid = 1) ";
 		$sql .= " ORDER BY family, o.sciname ";
         //echo "<div>".$sql."</div>";
@@ -1531,7 +1528,7 @@ class MapInterfaceManager{
 			$accArr = array();
 			$rankId = 0;
 			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.rankid '.
-				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.TidAccepted '.
+				'FROM taxa t LEFT JOIN taxstatus ts ON t.Tid = ts.TidAccepted '.
 				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tid IN('.implode(',',$targetTidArr).')) ';
 			$rs2 = $this->conn->query($sql2);
 			while($r2 = $rs2->fetch_object()){
@@ -1544,7 +1541,7 @@ class MapInterfaceManager{
 	
 			//Get synonym that are different than target
 			$sql3 = 'SELECT DISTINCT t.tid, t.sciname '.
-				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
 				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tidaccepted IN('.implode('',$accArr).')) ';
 			$rs3 = $this->conn->query($sql3);
 			while($r3 = $rs3->fetch_object()){
@@ -1555,7 +1552,7 @@ class MapInterfaceManager{
 			//If rank is 220, get synonyms of accepted children
 			if($rankId == 220){
 				$sql4 = 'SELECT DISTINCT t.tid, t.sciname '.
-					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+					'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
 					'WHERE (ts.parenttid IN('.implode('',$accArr).')) AND (ts.taxauthid = '.$taxAuthId.') '.
 					'AND (ts.TidAccepted = ts.tid)';
 				$rs4 = $this->conn->query($sql4);
@@ -1578,7 +1575,7 @@ class MapInterfaceManager{
 		$sql = "";
         $sql = 'SELECT o.occid, o.basisOfRecord, c.institutioncode, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, '.
 			'o.eventdate, o.family, o.sciname, o.locality, o.DecimalLatitude, o.DecimalLongitude '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
+			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
 		$sql .= 'WHERE o.occid IN('.$seloccids.') ';
         //echo "<div>".$sql."</div>";
         $result = $this->conn->query($sql);
@@ -1601,7 +1598,7 @@ class MapInterfaceManager{
 		if($datasetId){
 			$sql = 'SELECT o.occid, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, o.eventdate, '.
 				'o.family, o.sciname, CONCAT_WS("; ",o.country, o.stateProvince, o.county) AS locality, o.DecimalLatitude, o.DecimalLongitude '.
-				'FROM omoccurrences o INNER JOIN omoccurdatasetlink dl ON o.occid = dl.occid '.
+				'FROM omoccurrences o LEFT JOIN omoccurdatasetlink dl ON o.occid = dl.occid '.
 				'WHERE dl.datasetid = '.$datasetId.' '.
 				'ORDER BY o.sciname ';
 			$rs = $this->conn->query($sql);
@@ -1640,7 +1637,7 @@ class MapInterfaceManager{
 			$retArr[$r->datasetid]['role'] = "DatasetAdmin";
 		}
 		$sql2 = 'SELECT d.datasetid, d.name, r.role '.
-			'FROM omoccurdatasets d INNER JOIN userroles r ON d.datasetid = r.tablepk '.
+			'FROM omoccurdatasets d LEFT JOIN userroles r ON d.datasetid = r.tablepk '.
 			'WHERE (r.uid = '.$uid.') AND (r.role IN("DatasetAdmin","DatasetEditor","DatasetReader")) '.
 			'ORDER BY sortsequence,name';
 		$rs = $this->conn->query($sql2);

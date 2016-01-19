@@ -340,7 +340,7 @@ class ChecklistManager {
 						'WHERE cc.clid IN ('.$clidStr.') AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
 				}
 				if($abbreviated){
-					$sql1 .= 'LIMIT 50'; 
+					$sql1 .= 'ORDER BY RAND() LIMIT 50'; 
 				}
 				//echo $sql1;
 				$rs1 = $this->conn->query($sql1);
@@ -385,7 +385,7 @@ class ChecklistManager {
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					if($abbreviated){
-						$sql2 .= 'LIMIT 50'; 
+						$sql2 .= 'ORDER BY RAND() LIMIT 50'; 
 					}
 					//echo $sql2;
 					$rs2 = $this->conn->query($sql2);

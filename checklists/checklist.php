@@ -432,7 +432,7 @@ if($clValue || $dynClid){
 							if($coordArr = $clManager->getCoordinates(0,true)){
 								?>
 								<div style="text-align:center;padding:10px">
-									<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" target="_blank">
+									<a href="../collections/map/mapinterface.php?clid=<?php echo $clid.'&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
 										<img src="http://maps.google.com/maps/api/staticmap?size=170x170&maptype=terrain&sensor=false&markers=size:tiny|<?php echo implode('|',$coordArr); ?>" style="border:0px;" />
 									</a>
 								</div>
@@ -643,4 +643,4 @@ if($clValue || $dynClid){
 	if(!$printMode) include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
-</html> 
+</html>

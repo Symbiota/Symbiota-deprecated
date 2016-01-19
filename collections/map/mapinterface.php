@@ -79,15 +79,20 @@ if($_REQUEST || $stArr){
 }
 
 if($previousCriteria){
-	$gridSize = $previousCriteria['gridSizeSetting'];
-	$minClusterSize = $previousCriteria['minClusterSetting'];
-	$clusterOff = $previousCriteria['clusterSwitch'];
-	$recLimit = (($previousCriteria['recordlimit']&&is_numeric($previousCriteria['recordlimit']))?$previousCriteria['recordlimit']:5000);
+	if(array_key_exists('gridSizeSetting',$previousCriteria)) $gridSize = $previousCriteria['gridSizeSetting'];
+	if(array_key_exists('minClusterSetting',$previousCriteria)) $minClusterSize = $previousCriteria['minClusterSetting'];
+	if(array_key_exists('clusterSwitch',$previousCriteria)) $clusterOff = $previousCriteria['clusterSwitch'];
+	if(array_key_exists('recordlimit',$previousCriteria)) $recLimit = (($previousCriteria['recordlimit']&&is_numeric($previousCriteria['recordlimit']))?$previousCriteria['recordlimit']:5000);
 }
 
 $dbArr = Array();
 if(array_key_exists('db',$_REQUEST)){
-	$dbArr = $previousCriteria["db"];
+	if(!is_array($previousCriteria["db"])){
+		$dbArr[] = 'all';
+	}
+	else{
+		$dbArr = $previousCriteria["db"];
+	}
 }
 elseif(array_key_exists('db',$previousCriteria)){
 	$dbArr = explode(';',$previousCriteria["db"]);
@@ -96,6 +101,10 @@ elseif(array_key_exists('db',$previousCriteria)){
 if((array_key_exists("upperlat",$previousCriteria)) || (array_key_exists("pointlat",$previousCriteria)) || (array_key_exists("poly_array",$previousCriteria))){
 	$queryShape = $mapManager->createShape($previousCriteria);
 }
+
+if(!array_key_exists("poly_array",$previousCriteria)) $previousCriteria["poly_array"] = '';
+if(!array_key_exists("upperlat",$previousCriteria)) $previousCriteria["upperlat"] = '';
+if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"] = '';
 
 if($mapType && $mapType == 'taxa'){
 	$taxaMapManager = new TaxonProfileMap();
@@ -155,7 +164,7 @@ if($coordArr && !is_numeric($coordArr)){
 	<script type="text/javascript" src="../../js/jquery.mobile-1.4.0.min.js"></script>
 	<script type="text/javascript" src="../../js/jquery-1.9.1.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui-1.10.4.js"></script>
-	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing"></script>
 	<script type="text/javascript" src="../../js/jscolor/jscolor.js"></script>
 	<script type="text/javascript">
 		$(function() {
@@ -1289,6 +1298,7 @@ if($coordArr && !is_numeric($coordArr)){
 											<input type="hidden" id="bottomlat" name="bottomlat" value='<?php echo (array_key_exists("bottomlat",$previousCriteria)?$previousCriteria["bottomlat"]:""); ?>' />
 											<input type="hidden" id="leftlong" name="leftlong" value='<?php echo (array_key_exists("leftlong",$previousCriteria)?$previousCriteria["leftlong"]:""); ?>' />
 											<input type="hidden" id="poly_array" name="poly_array" value='<?php echo (array_key_exists("poly_array",$previousCriteria)?$previousCriteria["poly_array"]:""); ?>' />
+											<input type="hidden" id="clid" name="clid" value='<?php echo (array_key_exists("clid",$previousCriteria)?$previousCriteria["clid"]:""); ?>' />
 											<button data-role="none" type=button id="resetform" name="resetform" onclick='window.open("mapinterface.php", "_self");' >Reset</button>
 											<button data-role="none" id="display2" name="display2" onclick='submitMapForm(this.form);' >Search</button>
 										</div>
