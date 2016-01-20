@@ -551,20 +551,20 @@ class OccurrenceUtilities {
 	}
 	
 	//Associated species parser
-	public function buildAssociatedTaxaIndex($collid = 0){
+	public function parseAssociatedTaxa($collid = 0){
 		set_time_limit(900);
 		echo '<ul>';
 		echo '<li>Starting to parse associated species text blocks </li>';
 		ob_flush();
 		flush();
 		$sql = 'SELECT o.occid, o.associatedtaxa '.
-			'FROM omoccurrences o LEFT JOIN omoccurassociation a ON o.occid = a.occid '.
-			'WHERE o.associatedtaxa IS NOT NULL AND a.occid IS NULL ';
+			'FROM omoccurrences o LEFT JOIN omoccurassociations a ON o.occid = a.occid '.
+			'WHERE (o.associatedtaxa IS NOT NULL) AND (o.associatedtaxa <> "") AND (a.occid IS NULL) ';
 		if($collid && is_numeric($collid)){
-			$sql .= 'AND o.collid = '.$collid;
+			$sql .= 'AND (o.collid = '.$collid.') ';
 		}
-		//$sql .= ' AND o.tidinterpreted = 4058 ';
 		//$sql .= ' LIMIT 100';
+		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		echo '<li>Parsing new associated species text blocks (target count: '.$rs->num_rows.')... ';
 		ob_flush();
@@ -579,7 +579,7 @@ class OccurrenceUtilities {
 		echo '<li>Populate tid field using taxa table... ';
 		ob_flush();
 		flush();
-		$sql2 = 'UPDATE omoccurassociation a INNER JOIN taxa t ON a.verbatimsciname = t.sciname '.
+		$sql2 = 'UPDATE omoccurassociations a INNER JOIN taxa t ON a.verbatimsciname = t.sciname '.
 			'SET a.tid = t.tid '.
 			'WHERE a.tid IS NULL';
 		if(!$this->conn->query($sql2)){
@@ -592,7 +592,7 @@ class OccurrenceUtilities {
 		echo '<li>Populate tid field using taxavernaculars table... ';
 		ob_flush();
 		flush();
-		$sql3 = 'UPDATE omoccurassociation a INNER JOIN taxavernaculars v ON a.verbatimsciname = v.vernacularname '.
+		$sql3 = 'UPDATE omoccurassociations a INNER JOIN taxavernaculars v ON a.verbatimsciname = v.vernacularname '.
 			'SET a.tid = v.tid '.
 			'WHERE a.tid IS NULL ';
 		if(!$this->conn->query($sql3)){
@@ -601,16 +601,16 @@ class OccurrenceUtilities {
 		}
 		echo 'Done!</li>';
 		
-		//Populate tid field by linking back to omoccurassociation table
+		//Populate tid field by linking back to omoccurassociations table
 		//This assumes that tids are correct; in future verificationscore field can be used to select only those that have been verified
-		echo '<li>Populate tid field by linking back to omoccurassociation table... ';
+		echo '<li>Populate tid field by linking back to omoccurassociations table... ';
 		ob_flush();
 		flush();
-		$sql4 = 'UPDATE omoccurassociation a INNER JOIN omoccurassociation a2 ON a.verbatimsciname = a2.verbatimsciname '.
+		$sql4 = 'UPDATE omoccurassociations a INNER JOIN omoccurassociations a2 ON a.verbatimsciname = a2.verbatimsciname '.
 			'SET a.tid = a2.tid '.
 			'WHERE a.tid IS NULL AND a2.tid IS NOT NULL ';
 		if(!$this->conn->query($sql4)){
-			echo '<li style="margin-left:10px;">Unable to populate tid field relinking back to omoccurassociation table: '.$this->conn->error.'</li>';
+			echo '<li style="margin-left:10px;">Unable to populate tid field relinking back to omoccurassociations table: '.$this->conn->error.'</li>';
 			echo '<li style="margin-left:10px;">'.$sql4.'</li>';
 		}
 		echo 'Done!</li>';
@@ -620,14 +620,14 @@ class OccurrenceUtilities {
 		ob_flush();
 		flush();
 		$sql5 = 'SELECT DISTINCT verbatimsciname '.
-			'FROM omoccurassociation '.
+			'FROM omoccurassociations '.
 			'WHERE tid IS NULL ';
 		$rs5 = $this->conn->query($sql5);
 		while($r5 = $rs5->fetch_object()){
 			$verbStr = $r5->verbatimsciname;
 			$tid = $this->mineAssocSpeciesMatch($verbStr);
 			if($tid){
-				$sql5b = 'UPDATE omoccurassociation '.
+				$sql5b = 'UPDATE omoccurassociations '.
 					'SET tid = '.$tid.' '.
 					'WHERE tid IS NULL AND verbatimsciname = "'.$verbStr.'"';
 				if(!$this->conn->query($sql5b)){
@@ -682,7 +682,7 @@ class OccurrenceUtilities {
 
 	private function databaseAssocSpecies($assocArr, $occid){
 		if($assocArr){
-			$sql = 'INSERT INTO omoccurassociation(occid, verbatimsciname, relationship) VALUES';
+			$sql = 'INSERT INTO omoccurassociations(occid, verbatimsciname, relationship) VALUES';
 			foreach($assocArr as $aStr){
 				$sql .= '('.$occid.',"'.$this->conn->real_escape_string($aStr).'","associatedSpecies"), ';
 			}
@@ -719,7 +719,62 @@ class OccurrenceUtilities {
 		
 		return $retTid;
 	}
-	
+
+	public function getParsingStats($collid){
+		$retArr = array();
+		//Get parsed count
+		$sqlZ = 'SELECT COUNT(DISTINCT o.occid) as cnt '.
+			'FROM omoccurrences o INNER JOIN omoccurassociations a ON o.occid = a.occid '.
+			'WHERE (a.relationship = "associatedSpecies") ';
+		if($collid){
+			$sqlZ .= 'AND (o.collid = '.$collid.') ';
+		}
+		$rsZ = $this->conn->query($sqlZ);
+		while($rZ = $rsZ->fetch_object()){
+			$retArr['parsed'] = $rZ->cnt;
+		}
+		$rsZ->free();
+		
+		//Get unparsed count
+		$sqlA = 'SELECT count(o.occid) as cnt '.
+			'FROM omoccurrences o LEFT JOIN omoccurassociations a ON o.occid = a.occid '.
+			'WHERE (o.associatedtaxa IS NOT NULL) AND (o.associatedtaxa <> "") AND (a.occid IS NULL) ';
+		if($collid){
+			$sqlA .= 'AND (o.collid = '.$collid.') ';
+		}
+		$rsA = $this->conn->query($sqlA);
+		while($rA = $rsA->fetch_object()){
+			$retArr['unparsed'] = $rA->cnt;
+		}
+		$rsA->free();
+		
+		//Get field count for parsing failures
+		$sqlB = 'SELECT count(a.occid) as cnt '.
+			'FROM omoccurrences o INNER JOIN omoccurassociations a ON o.occid = a.occid '.
+			'WHERE (a.verbatimsciname IS NOT NULL) AND (a.tid IS NULL) ';
+		if($collid){
+			$sqlB .= 'AND (o.collid = '.$collid.') ';
+		}
+		$rsB = $this->conn->query($sqlB);
+		while($rB = $rsB->fetch_object()){
+			$retArr['failed'] = $rB->cnt;
+		}
+		$rsB->free();
+		//Get specimen count for parsing failures
+		$sqlC = 'SELECT count(DISTINCT o.occid) as cnt '.
+			'FROM omoccurrences o INNER JOIN omoccurassociations a ON o.occid = a.occid '.
+			'WHERE (a.verbatimsciname IS NOT NULL) AND (a.tid IS NULL) ';
+		if($collid){
+			$sqlC .= 'AND (o.collid = '.$collid.') ';
+		}
+		$rsC = $this->conn->query($sqlC);
+		while($rC = $rsC->fetch_object()){
+			$retArr['failedOccur'] = $rC->cnt;
+		}
+		$rsC->free();
+		return $retArr;
+	}
+
 	//General cleaning functions 
 	public function generalOccurrenceCleaning($collId){
 		set_time_limit(600);
@@ -1070,6 +1125,25 @@ class OccurrenceUtilities {
 	}
 	
 	//Misc support functions
+	public function getCollectionMetadata($collid){
+		$retArr = array();
+		if(is_numeric($collid)){
+			$sql = 'SELECT institutioncode, collectioncode, collectionname, colltype, managementtype '.
+				'FROM omcollections '.
+				'WHERE collid = '.$collid;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr['instcode'] = $r->institutioncode;
+				$retArr['collcode'] = $r->collectioncode;
+				$retArr['collname'] = $r->collectionname;
+				$retArr['colltype'] = $r->colltype;
+				$retArr['mantype'] = $r->managementtype;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+	
 	public function setVerbose($v){
 		if($v){
 			$this->verbose = true;
@@ -1097,6 +1171,5 @@ class OccurrenceUtilities {
 		$retStr = $this->conn->real_escape_string($retStr);
 		return $retStr;
 	}
-	
 }
 ?>

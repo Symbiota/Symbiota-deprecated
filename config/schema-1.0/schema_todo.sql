@@ -126,6 +126,8 @@ ALTER TABLE `omoccurassococcurrences`
 ALTER TABLE `omoccurassociations` 
   ADD INDEX `INDEX_verbatimSciname` (`verbatimsciname` ASC);
 
+DROP TABLE IF EXISTS `omoccurassoctaxa`;
+
 
 #Checklist changes
 ALTER TABLE `fmvouchers` 
@@ -258,7 +260,7 @@ ALTER TABLE `specprocessorprojects`
   ADD COLUMN `projecttype` VARCHAR(45) NULL AFTER `title`,
   ADD COLUMN `lastrundate` DATE NULL AFTER `source`,
   ADD COLUMN `patternReplace` VARCHAR(45) NULL AFTER `specKeyPattern`,
-  ADD COLUMN `replaceStr` VARCHAR(45) NULL AFTER `pattReplace`;
+  ADD COLUMN `replaceStr` VARCHAR(45) NULL AFTER `patternReplace`;
 
 ALTER TABLE `images` 
   CHANGE COLUMN `sourceIdentifier` `sourceIdentifier` VARCHAR(150) NULL DEFAULT NULL,
@@ -280,8 +282,6 @@ ALTER TABLE `omoccurrences`
   ADD COLUMN `waterBody`  varchar(255) NULL AFTER `municipality`;
 
 
-DROP TABLE `userpermissions`;
-
 #Needed for FP functions
 CREATE INDEX idx_taxacreated ON taxa(initialtimestamp);
 
@@ -291,11 +291,6 @@ CREATE INDEX idx_taxacreated ON taxa(initialtimestamp);
 
 # Event date range within omoccurrence table
 
-
-#Need to add condition to run only if collid exists
-ALTER TABLE `omoccurrencesfulltext` 
-  DROP COLUMN `collid`,
-  DROP INDEX `Index_occurfull_collid` ;
 
 
 # Add one to many relationship between collections and institutions
@@ -607,3 +602,10 @@ CREATE TABLE `omoccurlithostratigraphy` (
   CONSTRAINT `FK_occurlitho_chronoid` FOREIGN KEY (`chronoId`) REFERENCES `paleochronostratigraphy` (`chronoId`) ON UPDATE CASCADE,
   CONSTRAINT `FK_occurlitho_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`) ON UPDATE CASCADE
 );
+
+
+# OK if fails: put at end because may fail due to collid not existing (depending on verion of installation)
+ALTER TABLE `omoccurrencesfulltext` 
+  DROP COLUMN `collid`,
+  DROP INDEX `Index_occurfull_collid` ;
+

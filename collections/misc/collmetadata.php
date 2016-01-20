@@ -227,8 +227,8 @@ $collData = $collManager->getCollectionData(true);
 	}
 	else{
 		echo '<a href="../../index.php">Home</a> &gt;&gt; ';
-		echo '<a href="collprofiles.php?collid='.$collid.'">Collection Profile</a> &gt;&gt; ';
 		if($collid){
+			echo '<a href="collprofiles.php?collid='.$collid.'&emode=1">Collection Management</a> &gt;&gt; ';
 			echo '<b>'.$collData['collectionname'].' Metadata Editor</b>';
 		}
 		else{
