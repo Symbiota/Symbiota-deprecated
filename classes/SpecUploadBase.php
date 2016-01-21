@@ -1367,46 +1367,22 @@ class SpecUploadBase extends SpecUpload{
 					if(trim($vcStr)) $recMap['verbatimcoordinates'] = trim($vcStr);
 				}
 			}
-			if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && (!isset($recMap['decimallatitude']) || !$recMap['decimallatitude'])){
-				$coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimcoordinates']);
-				if($coordArr){
-					if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
-					if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
-				}
-			}
-			//Convert UTM to Lat/Long
-			if((array_key_exists('utmnorthing',$recMap) && $recMap['utmnorthing']) || (array_key_exists('utmeasting',$recMap) && $recMap['utmeasting'])){
-				$no = (array_key_exists('utmnorthing',$recMap)?$recMap['utmnorthing']:'');
-				$ea = (array_key_exists('utmeasting',$recMap)?$recMap['utmeasting']:'');
-				$zo = (array_key_exists('utmzoning',$recMap)?$recMap['utmzoning']:'');
-				$da = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
-				if((!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude'])){
-					if($no && $ea && $zo){
-						//Northing, easting, and zoning all had values
-						$llArr = OccurrenceUtilities::convertUtmToLL($ea,$no,$zo,$da);
-						if(isset($llArr['lat'])) $recMap['decimallatitude'] = $llArr['lat'];
-						if(isset($llArr['lng'])) $recMap['decimallongitude'] = $llArr['lng'];
-					}
-					else{
-						//UTM was a single field which was placed in UTM northing field within uploadspectemp table
-						$coordArr = OccurrenceUtilities::parseVerbatimCoordinates(trim($zo.' '.$ea.' '.$no),'UTM');
-						if($coordArr){
-							if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
-							if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
-						}
-					}
-				}
-				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
-				if(!($no && strpos($vCoord,$no))) $recMap['verbatimcoordinates'] = ($vCoord?$vCoord.'; ':'').$zo.' '.$ea.'E '.$no.'N';
-			}
 			//Transfer verbatim Lat/Long to verbatim coords
-			if((isset($recMap['verbatimlatitude']) && $recMap['verbatimlatitude']) || (isset($recMap['verbatimlongitude']) && $recMap['verbatimlongitude'])){
-				//Attempt to extract decimal lat/long
-				if(!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude']){
-					$coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'],'LL');
-					if($coordArr){
-						if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
-						if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
+			if(isset($recMap['verbatimlatitude']) || isset($recMap['verbatimlongitude'])){
+				if(isset($recMap['verbatimlatitude']) && isset($recMap['verbatimlongitude'])){
+					if(!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude'])){
+						if((is_numeric($recMap['verbatimlatitude']) && is_numeric($recMap['verbatimlongitude']))){
+							$recMap['decimallatitude'] = $recMap['verbatimlatitude'];
+							$recMap['decimallongitude'] = $recMap['verbatimlongitude'];
+						}
+						else{
+							//Attempt to extract decimal lat/long
+							$coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'],'LL');
+							if($coordArr){
+								if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+								if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
+							}
+						}
 					}
 				}
 				//Place into verbatim coord field
@@ -1419,7 +1395,7 @@ class SpecUploadBase extends SpecUpload{
 			//Transfer DMS to verbatim coords
 			if(isset($recMap['latdeg']) && $recMap['latdeg'] && isset($recMap['lngdeg']) && $recMap['lngdeg']){
 				//Attempt to create decimal lat/long
-				if(is_numeric($recMap['latdeg']) && is_numeric($recMap['lngdeg']) && (!isset($recMap['decimallatitude']) || !$recMap['decimallatitude']) && (!isset($recMap['decimallongitude']) || !$recMap['decimallongitude'])){
+				if(is_numeric($recMap['latdeg']) && is_numeric($recMap['lngdeg']) && (!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude']))){
 					$latDec = $recMap['latdeg'];
 					if(isset($recMap['latmin']) && $recMap['latmin'] && is_numeric($recMap['latmin'])) $latDec += $recMap['latmin']/60;
 					if(isset($recMap['latsec']) && $recMap['latsec'] && is_numeric($recMap['latsec'])) $latDec += $recMap['latsec']/3600;
@@ -1443,6 +1419,38 @@ class SpecUploadBase extends SpecUpload{
 				if(isset($recMap['lngsec']) && $recMap['lngsec']) $vCoord .= $recMap['lngsec'].'s ';
 				if(isset($recMap['lngew'])) $vCoord .= $recMap['lngew'];
 				$recMap['verbatimcoordinates'] = $vCoord;
+			}
+			if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && (!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude']))){
+				$coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimcoordinates']);
+				if($coordArr){
+					if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+					if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
+				}
+			}
+			//Convert UTM to Lat/Long
+			if((array_key_exists('utmnorthing',$recMap) && $recMap['utmnorthing']) || (array_key_exists('utmeasting',$recMap) && $recMap['utmeasting'])){
+				$no = (array_key_exists('utmnorthing',$recMap)?$recMap['utmnorthing']:'');
+				$ea = (array_key_exists('utmeasting',$recMap)?$recMap['utmeasting']:'');
+				$zo = (array_key_exists('utmzoning',$recMap)?$recMap['utmzoning']:'');
+				$da = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
+				if(!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude'])){
+					if($no && $ea && $zo){
+						//Northing, easting, and zoning all had values
+						$llArr = OccurrenceUtilities::convertUtmToLL($ea,$no,$zo,$da);
+						if(isset($llArr['lat'])) $recMap['decimallatitude'] = $llArr['lat'];
+						if(isset($llArr['lng'])) $recMap['decimallongitude'] = $llArr['lng'];
+					}
+					else{
+						//UTM was a single field which was placed in UTM northing field within uploadspectemp table
+						$coordArr = OccurrenceUtilities::parseVerbatimCoordinates(trim($zo.' '.$ea.' '.$no),'UTM');
+						if($coordArr){
+							if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+							if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
+						}
+					}
+				}
+				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
+				if(!($no && strpos($vCoord,$no))) $recMap['verbatimcoordinates'] = ($vCoord?$vCoord.'; ':'').$zo.' '.$ea.'E '.$no.'N';
 			}
 			//Transfer TRS to verbatim coords
 			if(isset($recMap['trstownship']) && $recMap['trstownship'] && isset($recMap['trsrange']) && $recMap['trsrange']){
