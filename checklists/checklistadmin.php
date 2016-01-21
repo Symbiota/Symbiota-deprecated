@@ -22,15 +22,15 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
     $isEditor = 1;
 
     //Submit checklist MetaData edits
-    if($action == "Submit Changes"){
+    if($action == "SubmitChange"){
         $clManager->editMetaData($_POST);
         header('Location: checklist.php?cl='.$clid.'&pid='.$pid);
     }
-    elseif($action == 'Delete Checklist'){
+    elseif($action == 'DeleteCheck'){
         $statusStr = $clManager->deleteChecklist($_POST['delclid']);
         if($statusStr === true) header('Location: ../index.php');
     }
-    elseif($action == 'Add Editor'){
+    elseif($action == 'Addeditor'){
         $statusStr = $clManager->addEditor($_POST['editoruid']);
     }
     elseif(array_key_exists('deleteuid',$_REQUEST)){
@@ -138,7 +138,7 @@ if($clid && $isEditor){
                         ?>
                         <li>
                             <?php echo $uName; ?>
-                            <a href="checklistadmin.php?clid=<?php echo $clid.'&deleteuid='.$uid.'&pid='.$pid.'&tabindex='.$tabIndex; ?>" onclick="return confirm(<?php echo $LANG['REMOVEEDITPRIVCONFIRM'];?>);" title="Delete this user">
+                            <a href="checklistadmin.php?clid=<?php echo $clid.'&deleteuid='.$uid.'&pid='.$pid.'&tabindex='.$tabIndex; ?>" onclick="return confirm(<?php echo $LANG['REMOVEEDITPRIVCONFIRM'];?>);" title="<?php echo $LANG['DELETETHISU'];?>">
                                 <img src="../images/drop.png" style="width:12px;" />
                             </a>
                         </li>
@@ -166,7 +166,8 @@ if($clid && $isEditor){
                             }
                             ?>
                         </select>
-                        <input name="submitaction" type="submit" value="<?php echo $LANG['ADDEDITOR'];?>" />
+                        <input name="submit" type="submit" value="<?php echo $LANG['ADDEDITOR'];?>" />
+                        <input type="hidden" name="submitaction" value="Addeditor" />
                         <input type="hidden" name="pid" value="<?php echo $pid; ?>" />
                         <input type="hidden" name="clid" value="<?php echo $clid; ?>" />
                     </div>
@@ -202,7 +203,8 @@ if($clid && $isEditor){
             <div style="margin:15px;">
                 <form action="checklistadmin.php" method="post" name="deleteclform" onsubmit="return window.confirm('<?php echo $LANG['CONFIRMDELETE'];?>')">
                     <input name="delclid" type="hidden" value="<?php echo $clid; ?>" />
-                    <input name="submitaction" type="submit" value="<?php echo $LANG['DELETECHECK'];?>" <?php if($projArr || count($editorArr) > 1) echo 'DISABLED'; ?> />
+                    <input name="submit" type="submit" value="<?php echo $LANG['DELETECHECK'];?>" <?php if($projArr || count($editorArr) > 1) echo 'DISABLED'; ?> />
+                    <input type="hidden" name="submitaction" value="DeleteCheck" />
                 </form>
             </div>
         </div>
@@ -349,7 +351,8 @@ if($clid && $isEditor){
                     </select>
                 </div>
                 <div style="clear:both;float:left;margin-top:15px;">
-                    <input type='submit' name='submitaction' id='editsubmit' value='<?php echo $LANG['SUBMITCHANG'];?>' />
+                    <input type='submit' name='submit' id='editsubmit' value='<?php echo $LANG['SUBMITCHANG'];?>' />
+                    <input type="hidden" name="submitaction" value="SubmitChange" />
                 </div>
                 <input type="hidden" id="footprintWKT" name="footprintWKT" value='<?php echo $clArray["footprintWKT"]; ?>' />
                 <input type="hidden" name="tabindex" value="1" />
