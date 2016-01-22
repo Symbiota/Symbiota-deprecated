@@ -293,34 +293,36 @@ class GamesManager {
 	
 	public function echoFlashcardTaxonFilterList(){
 		$returnArr = Array();
-		$sqlFamily = "SELECT DISTINCT ".($this->clid?"IFNULL(ctl.familyoverride,ts.Family)":"ts.Family")." AS family ".
-			"FROM (taxa t INNER JOIN taxstatus ts ON t.TID = ts.TID) ".
-			"INNER JOIN ".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl ON t.TID = ctl.TID ".
-			"WHERE (ts.taxauthid = 1 AND ctl.".
-			($this->clid?"clid = ".$this->clid:"dynclid = ".$this->dynClid).") ";
-		//echo $sqlFamily."<br>";
-		$rsFamily = $this->conn->query($sqlFamily);
-		while ($row = $rsFamily->fetch_object()){
-			$returnArr[] = $row->family;
-		}
-		$rsFamily->close();
-		$sqlGenus = "SELECT DISTINCT t.unitname1 ".
-			"FROM taxa t INNER JOIN ".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl ON t.tid = ctl.tid ".
-			"WHERE (ctl.clid = ".$this->clid.") ";
-		//echo $sqlGenus."<br>";
- 		$rsGenus = $this->conn->query($sqlGenus);
-		while ($row = $rsGenus->fetch_object()){
-			$returnArr[] = $row->unitname1;
-		}
-		$rsGenus->close();
-		natcasesort($returnArr);
-		$returnArr["-----------------------------------------------"] = "";
-		foreach($returnArr as $value){
-			echo "<option ";
-			if($this->taxonFilter && $this->taxonFilter == $value){
-				echo " SELECTED";
+		if($this->clid || $this->dynClid){
+			$sqlFamily = "SELECT DISTINCT ".($this->clid?"IFNULL(ctl.familyoverride,ts.Family)":"ts.Family")." AS family ".
+				"FROM (taxa t INNER JOIN taxstatus ts ON t.TID = ts.TID) ".
+				"INNER JOIN ".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl ON t.TID = ctl.TID ".
+				"WHERE (ts.taxauthid = 1 AND ctl.".
+				($this->clid?"clid = ".$this->clid:"dynclid = ".$this->dynClid).") ";
+			//echo $sqlFamily."<br>";
+			$rsFamily = $this->conn->query($sqlFamily);
+			while ($row = $rsFamily->fetch_object()){
+				$returnArr[] = $row->family;
 			}
-			echo ">".$value."</option>\n";
+			$rsFamily->close();
+			$sqlGenus = "SELECT DISTINCT t.unitname1 ".
+				"FROM taxa t INNER JOIN ".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl ON t.tid = ctl.tid ".
+				"WHERE (ctl.clid = ".$this->clid.") ";
+			//echo $sqlGenus."<br>";
+	 		$rsGenus = $this->conn->query($sqlGenus);
+			while ($row = $rsGenus->fetch_object()){
+				$returnArr[] = $row->unitname1;
+			}
+			$rsGenus->close();
+			natcasesort($returnArr);
+			$returnArr["-----------------------------------------------"] = "";
+			foreach($returnArr as $value){
+				echo "<option ";
+				if($this->taxonFilter && $this->taxonFilter == $value){
+					echo " SELECTED";
+				}
+				echo ">".$value."</option>\n";
+			}
 		}
 	}
 	
@@ -337,15 +339,21 @@ class GamesManager {
 	}
 	
 	public function setClid($id){
-		$this->clid = $id;
+		if(is_numeric($id)){
+			$this->clid = $id;
+		}
 	}
 
 	public function setDynClid($id){
-		$this->dynClid = $id;
+		if(is_numeric($id)){
+			$this->dynClid = $id;
+		}
 	}
 
 	public function setTaxonFilter($tValue){
-		$this->taxonFilter = $tValue;
+		if(preg_match('/^[\D\s]+$/',$tValue)){
+			$this->taxonFilter = $tValue;
+		}
 	}
 
 	public function setShowCommon($sc){
