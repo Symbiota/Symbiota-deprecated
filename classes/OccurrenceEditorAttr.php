@@ -108,16 +108,20 @@ class OccurrenceEditorAttr extends Manager {
 
 	public function getAttrStates($attrId){
 		$retArr = array();
-		$sql = 'SELECT stateid, statename, description, notes '.
-			'FROM tmstates '.
-			'WHERE traitid = '.$attrId.' ORDER BY sortseq ';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[$r->stateid]['name'] = $r->statename;
-			$retArr[$r->stateid]['description'] = $r->description;
-			$retArr[$r->stateid]['notes'] = $r->notes;
+		if(is_numeric($attrId)){
+			$sql = 'SELECT stateid, statename, description, notes, refurl '.
+				'FROM tmstates '.
+				'WHERE traitid = '.$attrId.' ORDER BY sortseq ';
+			//echo $sql; exit;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->stateid]['name'] = $r->statename;
+				$retArr[$r->stateid]['description'] = $r->description;
+				$retArr[$r->stateid]['notes'] = $r->notes;
+				$retArr[$r->stateid]['refurl'] = $r->refurl;
+			}
+			$rs->free();
 		}
-		$rs->free();
 		return $retArr;
 	}
 
@@ -138,6 +142,37 @@ class OccurrenceEditorAttr extends Manager {
 			$rs->free();
 		}
 		return json_encode($retArr);
+	}
+
+	//Attribute mining 
+	public function getFieldValueArr($collid, $traitID, $fieldName){
+		$retArr = array();
+		if(is_numeric($collid) && is_numeric($traitID)){
+			$sql = 'SELECT DISTINCT o.'.$fieldName.' FROM omoccurrences o '.
+				'WHERE o.collid = '.$collid.' AND o.'.$fieldName.' IS NOT NULL '. 
+				'AND o.occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.') ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_assoc()){
+				$retArr[] = $r[$fieldName];
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function submitBatchAttributes($collid, $stateID, $fieldName, $fieldValue, $uid){
+		if(!is_numeric($collid) || !is_numeric($stateId) || !is_numeric($uid)){
+			$this->errorMessage = 'ERROR saving occurrence attribute: bad input values';
+			return false;
+		}
+		$sql = 'INSERT INTO tmattributes(stateid,occid,createduid) '.
+			'SELECT "'.$stateID.'", occid, "'.$uid.'" FROM omoccurrences '.
+			'WHERE collid = '.$collid.' AND '.$fieldName.' = "'.$this->cleanInStr($fieldValue).'"';
+		if(!$this->conn->query($sql)){
+			$this->errorMessage = 'ERROR saving batch occurrence attributes: '.$this->error;
+			return false;
+		}
+		return true;
 	}
 
 	//Setters and getters

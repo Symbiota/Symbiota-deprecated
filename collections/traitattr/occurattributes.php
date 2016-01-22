@@ -216,6 +216,14 @@ $imgTotal = count($imgArr);
 				return true;
 			}
 
+			function verifyFilterForm(f){
+				if(f.attrid.value == ""){
+					alert("You must select a trait");
+					return false;
+				}
+				return true;
+			}
+
 			function verifySubmitForm(f){
 
 				return true;
