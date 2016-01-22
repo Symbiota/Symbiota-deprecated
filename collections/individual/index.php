@@ -542,8 +542,8 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							?>
 						</div>
 						<?php 
-						$localityStr1 = ($occArr['country']?$occArr['country']:'Country Not Recorded').', ';
-						$localityStr1 .= ($occArr['stateprovince']?$occArr['stateprovince']:'State/Province Not Recorded').', ';
+						$localityStr1 = $occArr['country'].', ';
+						$localityStr1 .= $occArr['stateprovince'].', ';
 						if($occArr['county']) $localityStr1 .= $occArr['county'].', ';
 					  if($occArr['municipality']) $localityStr1 .= $occArr['municipality'].'.  ';
 						?>

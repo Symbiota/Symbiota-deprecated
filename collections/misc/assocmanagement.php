@@ -78,7 +78,7 @@ if($SYMB_UID){
 							echo '</div>';
 							echo '<div style="margin:3px"><b>Number of parsed specimens:</b> '.$statArr['parsed'].'</div>';
 							echo '<div style="margin:3px"><b>Number of unparsed specimens:</b> '.$statArr['unparsed'].'</div>';
-							echo '<div style="margin:3px"><b>Number of non-index parsing terms:</b> '.$statArr['failed'].' (from '.$statArr['failedOccur'].' specimen records)'.'</div>';
+							echo '<div style="margin:3px"><b>Number of non-indexed parsing terms:</b> '.$statArr['failed'].' (from '.$statArr['failedOccur'].' specimen records)'.'</div>';
 							?>
 						</div>
 						<div style="margin:20px;">

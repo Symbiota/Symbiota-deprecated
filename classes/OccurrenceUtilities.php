@@ -552,6 +552,10 @@ class OccurrenceUtilities {
 	
 	//Associated species parser
 	public function parseAssociatedTaxa($collid = 0){
+		if(!is_numeric($collid)){
+			echo '<div><b>FAIL ERROR: abort process</b></div>';
+			return;
+		} 
 		set_time_limit(900);
 		echo '<ul>';
 		echo '<li>Starting to parse associated species text blocks </li>';
@@ -566,62 +570,96 @@ class OccurrenceUtilities {
 		//$sql .= ' LIMIT 100';
 		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
-		echo '<li>Parsing new associated species text blocks (target count: '.$rs->num_rows.')... ';
+		echo '<li>Parsing new associated species text blocks (target count: '.$rs->num_rows.')... </li>';
 		ob_flush();
 		flush();
+		$cnt = 1;
 		while($r = $rs->fetch_object()){
 			$assocArr = $this->parseAssocSpecies($r->associatedtaxa,$r->occid);
+			if($cnt%5000 == 0) echo '<li style="margin-left:10px">'.$cnt.' specimens parsed</li>';
+			$cnt++;
 		}
 		$rs->free();
-		echo 'Done!</li>';
 		
 		//Populate tid field using taxa table
-		echo '<li>Populate tid field using taxa table... ';
+		echo '<li>Populate tid field using taxa table... </li>';
 		ob_flush();
 		flush();
-		$sql2 = 'UPDATE omoccurassociations a INNER JOIN taxa t ON a.verbatimsciname = t.sciname '.
-			'SET a.tid = t.tid '.
-			'WHERE a.tid IS NULL';
-		if(!$this->conn->query($sql2)){
-			echo '<li style="margin-left:10px;">Unable to populate tid field using taxa table: '.$this->conn->error.'</li>';
-			echo '<li style="margin-left:10px;">'.$sql2.'</li>';
+		$sql2 = '';
+		if($collid){
+			$sql2 = 'UPDATE omoccurassociations a INNER JOIN taxa t ON a.verbatimsciname = t.sciname '.
+				'INNER JOIN omoccurrences o ON a.occid = o.occid '.
+				'SET a.tid = t.tid '.
+				'WHERE a.tid IS NULL AND (o.collid = '.$collid.') ';
 		}
-		echo 'Done!</li>';
+		else{
+			$sql2 = 'UPDATE omoccurassociations a INNER JOIN taxa t ON a.verbatimsciname = t.sciname '.
+				'SET a.tid = t.tid '.
+				'WHERE a.tid IS NULL';
+		}
+		if(!$this->conn->query($sql2)){
+			echo '<li style="margin-left:20px;">Unable to populate tid field using taxa table: '.$this->conn->error.'</li>';
+			//echo '<li style="margin-left:20px;">'.$sql2.'</li>';
+		}
 
 		//Populate tid field using taxavernaculars table
-		echo '<li>Populate tid field using taxavernaculars table... ';
+		echo '<li>Populate tid field using taxavernaculars table... </li>';
 		ob_flush();
 		flush();
-		$sql3 = 'UPDATE omoccurassociations a INNER JOIN taxavernaculars v ON a.verbatimsciname = v.vernacularname '.
-			'SET a.tid = v.tid '.
-			'WHERE a.tid IS NULL ';
-		if(!$this->conn->query($sql3)){
-			echo '<li style="margin-left:10px;">Unable to populate tid field using taxavernaculars table: '.$this->conn->error.'</li>';
-			echo '<li style="margin-left:10px;">'.$sql3.'</li>';
+		$sql3 = '';
+		if($collid){
+			$sql3 = 'UPDATE omoccurassociations a INNER JOIN taxavernaculars v ON a.verbatimsciname = v.vernacularname '.
+				'INNER JOIN omoccurrences o ON a.occid = o.occid '.
+				'SET a.tid = v.tid '.
+				'WHERE (a.tid IS NULL) AND (o.collid = '.$collid.') ';
 		}
-		echo 'Done!</li>';
+		else{
+			$sql3 = 'UPDATE omoccurassociations a INNER JOIN taxavernaculars v ON a.verbatimsciname = v.vernacularname '.
+				'SET a.tid = v.tid '.
+				'WHERE a.tid IS NULL ';
+		}
+		if(!$this->conn->query($sql3)){
+			echo '<li style="margin-left:20px;">Unable to populate tid field using taxavernaculars table: '.$this->conn->error.'</li>';
+			//echo '<li style="margin-left:20px;">'.$sql3.'</li>';
+		}
 		
 		//Populate tid field by linking back to omoccurassociations table
 		//This assumes that tids are correct; in future verificationscore field can be used to select only those that have been verified
-		echo '<li>Populate tid field by linking back to omoccurassociations table... ';
+		echo '<li>Populate tid field by linking back to omoccurassociations table... </li>';
 		ob_flush();
 		flush();
-		$sql4 = 'UPDATE omoccurassociations a INNER JOIN omoccurassociations a2 ON a.verbatimsciname = a2.verbatimsciname '.
-			'SET a.tid = a2.tid '.
-			'WHERE a.tid IS NULL AND a2.tid IS NOT NULL ';
-		if(!$this->conn->query($sql4)){
-			echo '<li style="margin-left:10px;">Unable to populate tid field relinking back to omoccurassociations table: '.$this->conn->error.'</li>';
-			echo '<li style="margin-left:10px;">'.$sql4.'</li>';
+		$sql4 = '';
+		if($collid){
+			$sql4 = 'UPDATE omoccurassociations a INNER JOIN omoccurassociations a2 ON a.verbatimsciname = a2.verbatimsciname '.
+				'INNER JOIN omoccurrences o ON a.occid = o.occid '.
+				'SET a.tid = a2.tid '.
+				'WHERE (a.tid IS NULL) AND (a2.tid IS NOT NULL) AND (o.collid = '.$collid.') ';
 		}
-		echo 'Done!</li>';
+		else{
+			$sql4 = 'UPDATE omoccurassociations a INNER JOIN omoccurassociations a2 ON a.verbatimsciname = a2.verbatimsciname '.
+				'SET a.tid = a2.tid '.
+				'WHERE a.tid IS NULL AND a2.tid IS NOT NULL ';
+		}
+		if(!$this->conn->query($sql4)){
+			echo '<li style="margin-left:20px;">Unable to populate tid field relinking back to omoccurassociations table: '.$this->conn->error.'</li>';
+			//echo '<li style="margin-left:20px;">'.$sql4.'</li>';
+		}
 		
 		//Lets get the harder ones
-		echo '<li>Mining database for the more difficult matches... ';
+		echo '<li>Mining database for the more difficult matches... </li>';
 		ob_flush();
 		flush();
-		$sql5 = 'SELECT DISTINCT verbatimsciname '.
-			'FROM omoccurassociations '.
-			'WHERE tid IS NULL ';
+		$sql5 = '';
+		if($collid){
+			$sql5 = 'SELECT DISTINCT a.verbatimsciname '.
+				'FROM omoccurassociations a INNER JOIN omoccurrences o ON a.occid = o.occid '.
+				'WHERE (a.tid IS NULL) AND (o.collid = '.$collid.') ';
+		}
+		else{
+			$sql5 = 'SELECT DISTINCT verbatimsciname '.
+				'FROM omoccurassociations '.
+				'WHERE tid IS NULL ';
+		}
 		$rs5 = $this->conn->query($sql5);
 		while($r5 = $rs5->fetch_object()){
 			$verbStr = $r5->verbatimsciname;
@@ -631,13 +669,12 @@ class OccurrenceUtilities {
 					'SET tid = '.$tid.' '.
 					'WHERE tid IS NULL AND verbatimsciname = "'.$verbStr.'"';
 				if(!$this->conn->query($sql5b)){
-					echo '<li style="margin-left:10px;">Unable to populate NULL tid field: '.$this->conn->error.'</li>';
-					echo '<li style="margin-left:10px;">'.$sql5b.'</li>';
+					echo '<li style="margin-left:20px;">Unable to populate NULL tid field: '.$this->conn->error.'</li>';
+					//echo '<li style="margin-left:20px;">'.$sql5b.'</li>';
 				}
 			}
 		}
 		$rs5->free();
-		echo 'Done!</li>';
 		
 		echo '<li>DONE!</li>';
 		echo '</ul>';
@@ -689,8 +726,8 @@ class OccurrenceUtilities {
 			$sql = trim($sql,', ');
 			//echo $sql; exit;
 			if(!$this->conn->query($sql)){
-				echo '<li style="margin-left:10px;">ERROR: unable to database assocaited values: '.$this->conn->error.'</li>';
-				echo '<li style="margin-left:10px;">SQL: '.$sql.'</li>';
+				echo '<li style="margin-left:20px;">ERROR adding assocaited values (<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>): '.$this->conn->error.'</li>';
+				//echo '<li style="margin-left:20px;">SQL: '.$sql.'</li>';
 			}
 		}
 	}
@@ -734,7 +771,7 @@ class OccurrenceUtilities {
 			$retArr['parsed'] = $rZ->cnt;
 		}
 		$rsZ->free();
-		
+
 		//Get unparsed count
 		$sqlA = 'SELECT count(o.occid) as cnt '.
 			'FROM omoccurrences o LEFT JOIN omoccurassociations a ON o.occid = a.occid '.
@@ -747,7 +784,7 @@ class OccurrenceUtilities {
 			$retArr['unparsed'] = $rA->cnt;
 		}
 		$rsA->free();
-		
+
 		//Get field count for parsing failures
 		$sqlB = 'SELECT count(a.occid) as cnt '.
 			'FROM omoccurrences o INNER JOIN omoccurassociations a ON o.occid = a.occid '.
@@ -760,6 +797,7 @@ class OccurrenceUtilities {
 			$retArr['failed'] = $rB->cnt;
 		}
 		$rsB->free();
+
 		//Get specimen count for parsing failures
 		$sqlC = 'SELECT count(DISTINCT o.occid) as cnt '.
 			'FROM omoccurrences o INNER JOIN omoccurassociations a ON o.occid = a.occid '.
