@@ -418,8 +418,8 @@ function verifyImageEditForm(f){
 	return true;
 }
 
-function openTermPopup(glossid){
-	var urlStr = 'individual.php?glossid='+glossid;
+function openTermPopup(glossid,tid){
+	var urlStr = 'individual.php?glossid='+glossid+'&tid='+tid;
 	newWindow = window.open(urlStr,'popup','toolbar=1,status=1,scrollbars=1,width=675,height=450,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;

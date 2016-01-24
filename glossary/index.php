@@ -348,7 +348,7 @@ if($formSubmit){
 				echo '<div><ul>';
 				foreach($termList as $termId => $terArr){
 					echo '<li>';
-					echo '<a href="#" onclick="openTermPopup('.$termId.'); return false;"><b>'.$terArr["term"].'</b></a>';
+					echo '<a href="#" onclick="openTermPopup('.$termId.','.$tId.'); return false;"><b>'.$terArr["term"].'</b></a>';
 					echo '</li>';
 				}
 				echo '</ul></div>';

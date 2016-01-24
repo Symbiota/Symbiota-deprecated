@@ -6,6 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
 $glossId = array_key_exists('glossid',$_REQUEST)?$_REQUEST['glossid']:0;
 $glossgrpId = array_key_exists('glossgrpid',$_REQUEST)?$_REQUEST['glossgrpid']:0;
 $glimgId = array_key_exists('glimgid',$_REQUEST)?$_REQUEST['glimgid']:0;
+$tId = array_key_exists('tid',$_REQUEST)?$_REQUEST['tid']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $isEditor = false;
@@ -19,26 +20,17 @@ $termImgArr = array();
 $termGrpArr = array();
 $synonymArr = array();
 $translationArr = array();
+$sourceArr = array();
 $synonymStr = '';
 $translationStr = '';
 
 if($glossId){
 	$termArr = $glosManager->getTermArr($glossId);
 	$glossgrpId = $termArr['glossgrpid'];
-	/*$termTaxaArr = $glosManager->getTermTaxaArr($glossgrpId);
-	if($termTaxaArr){
-		$taxaStr = '';
-		$i = 0;
-		$cnt = count($termTaxaArr);
-		foreach($termTaxaArr as $taxId => $tArr){
-			$taxaStr .= ' '.$tArr['SciName'];
-			if($i < ($cnt - 1)){
-				$taxaStr .= ',';
-			}
-			$i++;
-		}
-	}*/
 	$termGrpArr = $glosManager->getGrpArr($glossId,$glossgrpId,$termArr['language']);
+	if(isset($glossary_indexBanner)){
+		$sourceArr = $glosManager->getTaxonSources($tId);
+	}
 	if(array_key_exists('synonym',$termGrpArr)){
 		$synonymArr = $termGrpArr['synonym'];
 		if($synonymArr){
@@ -164,14 +156,6 @@ else{
 								</div>
 								<?php
 							}
-							/*if($termTaxaArr){
-								?>
-								<div style='margin-top:8px;' >
-									<b>Taxonomic Groups:</b> 
-									<?php echo $taxaStr; ?>
-								</div>
-								<?php
-							}*/
 							if($termArr['resourceurl']){
 								$resource = '';
 								if(substr($termArr['resourceurl'],0,4)=="http" || substr($termArr['resourceurl'],0,4)=="www."){
@@ -196,13 +180,52 @@ else{
 								<?php
 							}
 							?>
-							<!-- <div style='margin-top:8px;' >
-								<b>Language:</b> 
-								<?php //echo $termArr['language']; ?>
-							</div> -->
 						</div>
 						
 						<?php
+						if(isset($glossary_indexBanner)){
+							if($sourceArr){
+								?>
+								<div id="sourcetoggle" style="float:right;clear:both;">
+									<div style="" onclick="toggle('sourcesdiv');return false;">
+										<a href="#">Show Sources</a>
+									</div>
+								</div>
+								<div id="sourcesdiv" style="display:none;clear:both;margin-top:8px;">
+									<?php
+									if($sourceArr['contributorTerm']){
+										?>
+										<div style="">
+											<b>Term and Definition contributed by:</b> <?php echo $sourceArr['contributorTerm']; ?>
+										</div>
+										<?php
+									}
+									if($sourceArr['contributorImage'] && $termImgArr){
+										?>
+										<div style="margin-top:8px;">
+											<b>Image contributed by:</b> <?php echo $sourceArr['contributorImage']; ?>
+										</div>
+										<?php
+									}
+									if($sourceArr['translator'] && $translationStr){
+										?>
+										<div style="margin-top:8px;">
+											<b>Translation by:</b> <?php echo $sourceArr['translator']; ?>
+										</div>
+										<?php
+									}
+									if($sourceArr['additionalSources'] && ($translationStr || $termImgArr)){
+										?>
+										<div style="margin-top:8px;">
+											<b>Translation and/or image were also sourced from the following references:</b> <?php echo $sourceArr['additionalSources']; ?>
+										</div>
+										<?php
+									}
+									?>
+								</div>
+								<?php
+							}
+						}
 						if(!$isEditor){
 							?>
 							<div style="margin-bottom:10px;margin-top:12px;font-size:12px;">
@@ -274,4 +297,4 @@ else{
 		</div>
 	</div>
 </body>
-</html> 
+</html>
