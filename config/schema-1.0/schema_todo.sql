@@ -395,6 +395,16 @@ ALTER TABLE `glossarytaxalink`
 	
 ALTER TABLE `glossarytermlink` DROP FOREIGN KEY `glossarytermlink_ibfk_1`;
 
+CREATE TABLE `glossarysources` (
+  `tid` int(10) unsigned NOT NULL,
+  `contributorTerm` varchar(1000) DEFAULT NULL,
+  `contributorImage` varchar(1000) DEFAULT NULL,
+  `translator` varchar(1000) DEFAULT NULL,
+  `additionalSources` varchar(1000) DEFAULT NULL,
+  `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`tid`)
+);
+
 CREATE TABLE `uploadglossary` (
   `term` varchar(150) DEFAULT NULL,
   `definition` varchar(1000) DEFAULT NULL,

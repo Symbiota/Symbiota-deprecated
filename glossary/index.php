@@ -16,14 +16,21 @@ if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
 
 $glosManager = new GlossaryManager();
 $termList = array();
+$sourceArr = array();
 $taxonName = '';
 
 $statusStr = '';
 if($formSubmit){
-	if($formSubmit == 'Search Terms'){
+	if($formSubmit == 'Edit Sources'){
+		$statusStr = $glosManager->editSources($_POST);
+	}
+	if($formSubmit == 'Search Terms' || $formSubmit == 'Edit Sources'){
 		$termList = $glosManager->getTermList($_POST['searchkeyword'],$_POST['searchlanguage'],$_POST['searchtaxa']);
 		$language = $_POST['searchlanguage'];
 		$tId = $_POST['searchtaxa'];
+		if(isset($glossary_indexBanner)){
+			$sourceArr = $glosManager->getTaxonSources($tId);
+		}
 	}
 	if($formSubmit == 'Delete Term'){
 		$statusStr = $glosManager->deleteTerm($glossId,$glossgrpId);
@@ -273,6 +280,66 @@ if($formSubmit){
 		<div id="termlistdiv" style="min-height:200px;">
 			<?php
 			if($termList){
+				if(isset($glossary_indexBanner)){
+					if($sourceArr){
+						?>
+						<div id="sourcetoggle" style="float:right;clear:both;">
+							<div style="" onclick="toggle('sourcesdiv');return false;">
+								<a href="#">Show Sources</a>
+							</div>
+						</div>
+						<div id="sourcesdiv" style="display:none;margin-bottom:15px;">
+							<?php
+							if($sourceArr['contributorTerm']){
+								?>
+								<div style="">
+									<b>Terms and Definitions contributed by:</b> <?php echo $sourceArr['contributorTerm']; ?>
+								</div>
+								<?php
+							}
+							if($sourceArr['contributorImage']){
+								?>
+								<div style="margin-top:8px;">
+									<b>Images contributed by:</b> <?php echo $sourceArr['contributorImage']; ?>
+								</div>
+								<?php
+							}
+							if($sourceArr['translator']){
+								?>
+								<div style="margin-top:8px;">
+									<b>Translations by:</b> <?php echo $sourceArr['translator']; ?>
+								</div>
+								<?php
+							}
+							if($sourceArr['additionalSources']){
+								?>
+								<div style="margin-top:8px;">
+									<b>Translations and images were also sourced from the following references:</b> <?php echo $sourceArr['additionalSources']; ?>
+								</div>
+								<?php
+							}
+							if($isEditor){
+								?>
+								<div style="float:right;">
+									<a href="sources.php?tid=<?php echo $tId; ?>&keyword=<?php echo $_POST['searchkeyword']; ?>&language=<?php echo $_POST['searchlanguage']; ?>&taxa=<?php echo $_POST['searchtaxa']; ?>">Edit Sources</a>
+								</div>
+								<div style="clear:both;"></div>
+								<?php
+							}
+							?>
+						</div>
+						<?php
+					}
+					else{
+						if($isEditor){
+							?>
+							<div style="float:right;">
+								<a href="sources.php?tid=<?php echo $tId; ?>&keyword=<?php echo $_POST['searchkeyword']; ?>&language=<?php echo $_POST['searchlanguage']; ?>&taxa=<?php echo $_POST['searchtaxa']; ?>">Add Sources</a>
+							</div>
+							<?php
+						}
+					}
+				}
 				$title = 'Terms for '.$taxonName.' in '.$_POST['searchlanguage'];
 				if($_POST['searchkeyword']){
 					$title .= ' and with a keyword of '.$_POST['searchkeyword'];

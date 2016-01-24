@@ -44,7 +44,6 @@ $MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g.
 $GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
 $RECAPTCHA_PUBLIC_KEY = '';	
 $RECAPTCHA_PRIVATE_KEY = '';
-$GLOSSARY_EXPORT_HEADER = '';		//Title at the top of glossary exports
 $GLOSSARY_EXPORT_BANNER = '';		//Banner image for glossary exports. Place in images/layout folder.
 $DYN_CHECKLIST_RADIUS = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $DISPLAY_COMMON_NAMES = 1;

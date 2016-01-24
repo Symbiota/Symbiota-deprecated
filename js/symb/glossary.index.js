@@ -201,6 +201,18 @@ function verifyNewTermForm(f){
 	}
 }
 
+function verifyTermEditForm(f){
+	var newTerm = document.getElementById("term").value;
+	var origTerm = document.getElementById("origterm").value;
+	if(newTerm.toLowerCase() == origTerm.toLowerCase()){
+		return true;
+	}
+	else{
+		var result = verifyNewTermForm(f);
+		return result;
+	}
+}
+
 function lookupNewsynonym(f){
 	var term = document.getElementById("newsynterm").value;
 	var language = document.getElementById("newsynlanguage").value;

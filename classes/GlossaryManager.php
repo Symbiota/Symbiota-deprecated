@@ -162,6 +162,24 @@ class GlossaryManager{
 		return $retArr;
 	}
 	
+	public function getTaxonSources($tId){
+		$retArr = array();
+		$sql = 'SELECT contributorTerm, contributorImage, translator, additionalSources '.
+			'FROM glossarysources '.
+			'WHERE tid = '.$tId;
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['contributorTerm'] = $r->contributorTerm;
+				$retArr['contributorImage'] = $r->contributorImage;
+				$retArr['translator'] = $r->translator;
+				$retArr['additionalSources'] = $r->additionalSources;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
 	public function getTermTaxaArr($glossgrpId){
 		$retArr = array();
 		$sql = 'SELECT gt.tid, tx.SciName '.
@@ -963,6 +981,7 @@ class GlossaryManager{
 		$retArr = array();
 		$referencesArr = array();
 		$contributorsArr = array();
+		$imgcontributorsArr = array();
 		$transStr = '"';
 		$transStr .= implode('","',$translations);
 		$transStr .= '"';
@@ -1015,8 +1034,34 @@ class GlossaryManager{
 				}
 			}
 			$rs->close();
+		}
+		$sql = 'SELECT contributorTerm, contributorImage, translator, additionalSources '.
+			'FROM glossarysources '.
+			'WHERE tid = '.$taxon.' ';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$source = $r->additionalSources;
+				$translator = $r->translator;
+				$author = $r->contributorTerm;
+				$imgSource = $r->contributorImage;
+				if($source && !in_array($source,$referencesArr)){
+					$referencesArr[] = $source;
+				}
+				if($translator && !in_array($translator,$contributorsArr)){
+					$contributorsArr[] = $translator;
+				}
+				if($author && !in_array($author,$contributorsArr)){
+					$contributorsArr[] = $author;
+				}
+				if($imgSource && !in_array($imgSource,$imgcontributorsArr)){
+					$imgcontributorsArr[] = $imgSource;
+				}
+			}
+			$rs->close();
 			$retArr['references'] = $referencesArr;
 			$retArr['contributors'] = $contributorsArr;
+			$retArr['imgcontributors'] = $imgcontributorsArr;
 		}
 		return $retArr;
 	}
@@ -1025,6 +1070,7 @@ class GlossaryManager{
 		$retArr = array();
 		$referencesArr = array();
 		$contributorsArr = array();
+		$imgcontributorsArr = array();
 		$sciName = '';
 		$commonName = '';
 		$source = '';
@@ -1083,10 +1129,68 @@ class GlossaryManager{
 				}
 			}
 			$rs->close();
+		}
+		$sql = 'SELECT contributorTerm, contributorImage, translator, additionalSources '.
+			'FROM glossarysources '.
+			'WHERE tid = '.$taxon.' ';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$source = $r->additionalSources;
+				$translator = $r->translator;
+				$author = $r->contributorTerm;
+				$imgSource = $r->contributorImage;
+				if($source && !in_array($source,$referencesArr)){
+					$referencesArr[] = $source;
+				}
+				if($translator && !in_array($translator,$contributorsArr)){
+					$contributorsArr[] = $translator;
+				}
+				if($author && !in_array($author,$contributorsArr)){
+					$contributorsArr[] = $author;
+				}
+				if($imgSource && !in_array($imgSource,$imgcontributorsArr)){
+					$imgcontributorsArr[] = $imgSource;
+				}
+			}
+			$rs->close();
 			$retArr['references'] = $referencesArr;
 			$retArr['contributors'] = $contributorsArr;
+			$retArr['imgcontributors'] = $imgcontributorsArr;
 		}
 		return $retArr;
+	}
+	
+	public function editSources($pArr){
+		$sql = '';
+		$statusStr = '';
+		$tId = $pArr['tid'];
+		$new = $pArr['newsources'];
+		if($new){
+			$sql = 'INSERT INTO glossarysources(tid,contributorTerm,contributorImage,translator,additionalSources) '.
+				'VALUES('.$tId.',"'.$this->cleanInStr($_REQUEST["contributorTerm"]).'","'.$this->cleanInStr($_REQUEST["contributorImage"]).'",'.
+				'"'.$this->cleanInStr($_REQUEST["translator"]).'","'.$this->cleanInStr($_REQUEST["additionalSources"]).'") ';
+		}
+		elseif($pArr['contributorTerm'] || $pArr['contributorImage'] || $pArr['translator'] || $pArr['additionalSources']){
+			foreach($pArr as $k => $v){
+				if($k != 'formsubmit' && $k != 'tid' && $k != 'searchkeyword' && $k != 'searchlanguage' && $k != 'searchtaxa' && $k != 'newsources'){
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
+				}
+			}
+			$sql = 'UPDATE glossarysources SET '.substr($sql,1).' WHERE (tid = '.$tId.')';
+		}
+		else{
+			$sql = 'DELETE FROM glossarysources WHERE (tid = '.$tId.')';
+		}
+		//echo $sql;
+		if($this->conn->query($sql)){
+			$statusStr = 'SUCCESS: information saved';
+		}
+		else{
+			$statusStr = 'ERROR: Editing of sources failed: '.$this->conn->error.'<br/>';
+			$statusStr .= 'SQL: '.$sql;
+		}
+		return $statusStr;
 	}
 	
 	public function getTermId(){

@@ -137,7 +137,7 @@ else{
 				
 				<div id="termdetaildiv" style="">
 					<div id="termdetails" style="overflow:auto;">
-						<form name="termeditform" id="termeditform" action="termdetails.php" method="post" onsubmit="return verifyNewTermForm(this.form);">
+						<form name="termeditform" id="termeditform" action="termdetails.php" method="post" onsubmit="return verifyTermEditForm(this.form);">
 							<div style="clear:both;padding-top:4px;float:left;">
 								<div style="float:left;">
 									<b>Term: </b>
