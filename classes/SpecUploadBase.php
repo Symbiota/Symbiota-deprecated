@@ -1372,8 +1372,11 @@ class SpecUploadBase extends SpecUpload{
 				if(isset($recMap['verbatimlatitude']) && isset($recMap['verbatimlongitude'])){
 					if(!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude'])){
 						if((is_numeric($recMap['verbatimlatitude']) && is_numeric($recMap['verbatimlongitude']))){
-							$recMap['decimallatitude'] = $recMap['verbatimlatitude'];
-							$recMap['decimallongitude'] = $recMap['verbatimlongitude'];
+							if($recMap['verbatimlatitude'] > -90 && $recMap['verbatimlatitude'] < 90 
+								&& $recMap['verbatimlongitude'] > -180 && $recMap['verbatimlongitude'] < 180){
+									$recMap['decimallatitude'] = $recMap['verbatimlatitude'];
+								$recMap['decimallongitude'] = $recMap['verbatimlongitude'];
+							}
 						}
 						else{
 							//Attempt to extract decimal lat/long
@@ -1420,6 +1423,7 @@ class SpecUploadBase extends SpecUpload{
 				if(isset($recMap['lngew'])) $vCoord .= $recMap['lngew'];
 				$recMap['verbatimcoordinates'] = $vCoord;
 			}
+			/*
 			if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && (!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude']))){
 				$coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimcoordinates']);
 				if($coordArr){
@@ -1427,6 +1431,7 @@ class SpecUploadBase extends SpecUpload{
 					if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
 				}
 			}
+			*/
 			//Convert UTM to Lat/Long
 			if((array_key_exists('utmnorthing',$recMap) && $recMap['utmnorthing']) || (array_key_exists('utmeasting',$recMap) && $recMap['utmeasting'])){
 				$no = (array_key_exists('utmnorthing',$recMap)?$recMap['utmnorthing']:'');
@@ -1500,7 +1505,7 @@ class SpecUploadBase extends SpecUpload{
 					$recMap['verbatimelevation'] = $vElev.$elevStr;
 				}
 			}
-			//Concatinate collectorfamilyname and collectorinitials into recordedby
+			//Concatenate collectorfamilyname and collectorinitials into recordedby
 			if(isset($recMap['collectorfamilyname']) && $recMap['collectorfamilyname'] && (!isset($recMap['recordedby']) || !$recMap['recordedby'])){
 				$recordedBy = $recMap['collectorfamilyname'];
 				if(isset($recMap['collectorinitials']) && $recMap['collectorinitials']) $recordedBy .= ', '.$recMap['collectorinitials'];

@@ -424,7 +424,7 @@ class OccurrenceUtilities {
 				if(!$lngDir && $m[4]) $lngDir = trim($m[4]);
 				if($retArr['lng'] > 0 && $latDir && ($lngDir == 'W' || $lngDir == 'w')) $retArr['lng'] = -1*$retArr['lng'];
 			}
-			elseif(preg_match('/(\d{1,2})\D{1,3}\s{0,2}(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*)/i',$inStr,$m)){
+			elseif(preg_match('/(\d{1,2})[^\d]{1,3}\s{0,2}(\d{1,2}\.{0,1}\d*)[\']{1}(.*)/i',$inStr,$m)){
 				//DMS format
 				$latDeg = $m[1];
 				$latMin = $m[2];
@@ -437,19 +437,19 @@ class OccurrenceUtilities {
 					$lngEW = 'E';
 				}
 				//Grab lat sec
-				if(preg_match('/^(\d{1,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
+				if(preg_match('/^(\d{1,2}\.{0,1}\d*)["]{1}(.*)/i',$leftOver,$m)){
 					$latSec = $m[1];
 					if(count($m)>2){
 						$leftOver = trim($m[2]);
 					}
 				}
 				//Grab lng deg and min
-				if(preg_match('/(\d{1,3})\D{1,3}\s{0,2}(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*)/i',$leftOver,$m)){
+				if(preg_match('/(\d{1,3})\D{1,3}\s{0,2}(\d{1,2}\.{0,1}\d*)[\']{1}(.*)/i',$leftOver,$m)){
 					$lngDeg = $m[1];
 					$lngMin = $m[2];
 					$leftOver = trim($m[3]);
 					//Grab lng sec
-					if(preg_match('/^(\d{1,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
+					if(preg_match('/^(\d{1,2}\.{0,1}\d*)["]{1}(.*)/i',$leftOver,$m)){
 						$lngSec = $m[1];
 						if(count($m)>2){
 							$leftOver = trim($m[2]);
@@ -476,7 +476,7 @@ class OccurrenceUtilities {
 			//UTM parsing
 			$d = ''; 
 			if(preg_match('/NAD\s*27/i',$inStr)) $d = 'NAD27';
-			if(preg_match('/\D*(\d{1,2}\D{0,1})\s+(\d{6,7})E\s+(\d{7})N/i',$inStr,$m)){
+			if(preg_match('/\D*(\d{1,2}\D{0,1})\s+(\d{6,7})m{0,1}E\s+(\d{7})m{0,1}N/i',$inStr,$m)){
 				$z = $m[1];
 				$e = $m[2];
 				$n = $m[3];
@@ -494,19 +494,19 @@ class OccurrenceUtilities {
 				if(!$z && preg_match('/[\s\D]+(\d{1,2}\D{0,1})$/',$inStr,$m)) $z = $m[1];
 				if(!$z && preg_match('/[\s\D]+(\d{1,2}\D{0,1})[\s\D]+/',$inStr,$m)) $z = $m[1];
 				if($z){
-					if(preg_match('/(\d{6,7})E{1}[\D\s]+(\d{7})N{1}/i',$inStr,$m)){
+					if(preg_match('/(\d{6,7})m{0,1}E{1}[\D\s]+(\d{7})m{0,1}N{1}/i',$inStr,$m)){
 						$e = $m[1];
 						$n = $m[2];
 					} 
-					elseif(preg_match('/E{1}(\d{6,7})[\D\s]+N{1}(\d{7})/i',$inStr,$m)){
+					elseif(preg_match('/m{0,1}E{1}(\d{6,7})[\D\s]+m{0,1}N{1}(\d{7})/i',$inStr,$m)){
 						$e = $m[1];
 						$n = $m[2];
 					} 
-					elseif(preg_match('/(\d{7})N{1}[\D\s]+(\d{6,7})E{1}/i',$inStr,$m)){
+					elseif(preg_match('/(\d{7})m{0,1}N{1}[\D\s]+(\d{6,7})m{0,1}E{1}/i',$inStr,$m)){
 						$e = $m[2];
 						$n = $m[1];
 					} 
-					elseif(preg_match('/N{1}(\d{7})[\D\s]+E{1}(\d{6,7})/i',$inStr,$m)){
+					elseif(preg_match('/m{0,1}N{1}(\d{7})[\D\s]+m{0,1}E{1}(\d{6,7})/i',$inStr,$m)){
 						$e = $m[2];
 						$n = $m[1];
 					} 
@@ -518,6 +518,7 @@ class OccurrenceUtilities {
 						$e = $m[2];
 						$n = $m[1];
 					} 
+echo $e.' '.$n.' '.$z.' '.$d.'</br>';
 					if($e && $n){
 						$llArr = OccurrenceUtilities::convertUtmToLL($e,$n,$z,$d);
 						if(isset($llArr['lat'])) $retArr['lat'] = $llArr['lat'];
