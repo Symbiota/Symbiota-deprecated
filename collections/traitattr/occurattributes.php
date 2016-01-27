@@ -7,7 +7,7 @@ if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../co
 
 $collid = $_REQUEST['collid'];
 $submitForm = array_key_exists('submitform',$_POST)?$_POST['submitform']:'';
-$attrID = array_key_exists('attrid',$_POST)?$_POST['attrid']:'';
+$traitID = array_key_exists('traitid',$_POST)?$_POST['traitid']:'';
 $taxonFilter = array_key_exists('taxonfilter',$_POST)?$_POST['taxonfilter']:'';
 $tidFilter = array_key_exists('tidfilter',$_POST)?$_POST['tidfilter']:'';
 $paneX = array_key_exists('panex',$_POST)?$_POST['panex']:'600';
@@ -16,7 +16,7 @@ $imgRes = array_key_exists('imgres',$_POST)?$_POST['imgres']:'med';
 
 //Sanitation
 if(!is_numeric($collid)) $collid = 0;
-if(!is_numeric($attrID)) $attrID = '';
+if(!is_numeric($traitID)) $traitID = '';
 if(!is_numeric($tidFilter)) $tidFilter = '';
 if(!is_numeric($paneX)) $paneX = '';
 if(!is_numeric($paneY)) $paneY = '';
@@ -60,8 +60,8 @@ if($isEditor){
 }
 $imgArr = array();
 $occid = 0;
-if($attrID){
-	$attrArr = $attrManager->getAttrArr($attrID);
+if($traitID){
+	$traitArr = $attrManager->getTraitArr($traitID);
 	$imgRetArr = $attrManager->getImageUrls();
 	$imgArr = current($imgRetArr);
 	$occid = key($imgRetArr);
@@ -122,17 +122,23 @@ $imgTotal = count($imgArr);
 
 				$("#taxonfilter").change(function(){
 					$("#tidfilter").val("");
+					$( "#filtersubmit" ).prop( "disabled", true );
+					$( "#verify-span" ).show();
+					$( "#notvalid-span" ).hide();
+
 					$.ajax({
 						type: "POST",
 						url: "rpc/getTaxonFilter.php",
 						data: { term: $( this ).val(), exact: 1 }
 					}).done(function( msg ) {
 						if(msg == ""){
-							alert("Taxon not found in taxonomicthesaurus");
+							$( "#notvalid-span" ).show();
 						}
 						else{
 							$("#tidfilter").val(msg[0].id);
 						}
+						$( "#filtersubmit" ).prop( "disabled", false );
+						$( "#verify-span" ).hide();
 					});
 				});
 			});
@@ -205,7 +211,7 @@ $imgTotal = count($imgArr);
 			}
 
 			function verifyFilterForm(f){
-				if(f.attrid.value == ""){
+				if(f.traitid.value == ""){
 					alert("An occurrence trait must be selected");
 					return false;
 				}
@@ -217,7 +223,7 @@ $imgTotal = count($imgArr);
 			}
 
 			function verifyFilterForm(f){
-				if(f.attrid.value == ""){
+				if(f.traitid.value == ""){
 					alert("You must select a trait");
 					return false;
 				}
@@ -253,8 +259,8 @@ $imgTotal = count($imgArr);
 		<?php 
 		if($collid){
 			?>
-			<div style="position:absolute;top:0px;right:0px;width:250px;">
-				<fieldset style="margin:20px">
+			<div style="position:absolute;top:0px;right:20px;width:250px;">
+				<fieldset style="margin-top:20px">
 					<legend><b>Filter</b></legend>
 					<form name="filterform" method="post" action="occurattributes.php" onsubmit="return verifyFilterForm(this)" >
 						<div>
@@ -263,14 +269,14 @@ $imgTotal = count($imgArr);
 							<input id="tidfilter" name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
 						</div>
 						<div>
-							<select name="attrid">
+							<select name="traitid">
 								<option value="">Select Trait</option>
 								<option value="">------------------------------------</option>
 								<?php 
-								$attrNameArr = $attrManager->getAttrNames();
+								$attrNameArr = $attrManager->getTraitNames();
 								if($attrNameArr){
 									foreach($attrNameArr as $ID => $aName){
-										echo '<option value="'.$ID.'" '.($attrID==$ID?'SELECTED':'').'>'.$aName.'</option>';
+										echo '<option value="'.$ID.'" '.($traitID==$ID?'SELECTED':'').'>'.$aName.'</option>';
 									}
 								}
 								else{
@@ -284,24 +290,26 @@ $imgTotal = count($imgArr);
 							<input id="panex1" name="panex" type="hidden" value="<?php echo $paneX; ?>" />
 							<input id="paney1" name="paney" type="hidden" value="<?php echo $paneY; ?>" />
 							<input id="imgres1"  name="imgres" type="hidden" value="<?php echo $imgRes; ?>" />
-							<input name="submitform" type="submit" value="Load Images" />
+							<input id="filtersubmit" name="submitform" type="submit" value="Load Images" />
+							<span id="verify-span" style="display:none;font-weight:bold;color:green;">verifying taxonomy...</span>
+							<span id="notvalid-span" style="display:none;font-weight:bold;color:red;">taxon not valid...</span>
 						</div>
 					</form>
 				</fieldset>
 				<?php 
-				if($attrID){
+				if($traitID){
 					?>
-					<fieldset style="margin:20px">
+					<fieldset style="margin-top:20px">
 						<legend><b>Action Panel</b></legend>
 						<form name="submitform" method="post" action="occurattributes.php" onsubmit="return verifySubmitForm(this)" >
 							<div>
 								<?php 
 								$controlType = 'checkbox';
-								if($attrArr['props']){
-									$propArr = json_decode($attrArr['props']);
+								if($traitArr['props']){
+									$propArr = json_decode($traitArr['props']);
 									if(isset($propArr['controlType'])) $controlType = $propArr['controlType'];
 								}
-								$attrStateArr = $attrManager->getAttrStates($attrID);
+								$attrStateArr = $attrManager->getTraitStates($traitID);
 								if($controlType == 'checkbox'){
 									foreach($attrStateArr as $sid => $sArr){
 										echo '<div title="'.$sArr['description'].'"><input name="stateid[]" type="checkbox" value="'.$sid.'" /> '.$sArr['name'].'</div>';
@@ -326,7 +334,7 @@ $imgTotal = count($imgArr);
 							<div style="margin:20px">
 								<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
 								<input name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
-								<input name="attrid" type="hidden" value="<?php echo $attrID; ?>" />
+								<input name="traitid" type="hidden" value="<?php echo $traitID; ?>" />
 								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 								<input id="panex2" name="panex" type="hidden" value="<?php echo $paneX; ?>" />
 								<input id="paney2" name="paney" type="hidden" value="<?php echo $paneY; ?>" />

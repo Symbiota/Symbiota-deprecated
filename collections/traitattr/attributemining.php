@@ -6,7 +6,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../collections/editor/extras/attributemining.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST['collid'];
-$attrID = array_key_exists('attrid',$_POST)?$_POST['attrid']:'';
 $taxonFilter = array_key_exists('taxonfilter',$_POST)?$_POST['taxonfilter']:'';
 $tidFilter = array_key_exists('tidfilter',$_POST)?$_POST['tidfilter']:'';
 $fieldName = array_key_exists('fieldname',$_POST)?$_POST['fieldname']:'';
@@ -15,7 +14,6 @@ $submitForm = array_key_exists('submitform',$_POST)?$_POST['submitform']:'';
 
 //Sanitation
 if(!is_numeric($collid)) $collid = 0;
-if(!is_numeric($attrID)) $attrID = 0;
 if(!is_numeric($tidFilter)) $tidFilter = 0;
 if(!is_numeric($traitID)) $traitID = 0;
 
@@ -40,16 +38,28 @@ $attrManager = new OccurrenceEditorAttr();
 $statusStr = '';
 if($isEditor){
 	if($submitForm == 'Batch Assign State'){
-		$stateID = array_key_exists('stateid',$_POST)?$_POST['stateid']:'';
-		$fieldValue = array_key_exists('fieldvalue',$_POST)?$_POST['fieldvalue']:'';
-		if($collid && $stateID && $fieldName && $fieldValue){
-			if(!$attrManager->submitBatchAttributes($collid, $stateID, $fieldName, $fieldValue, $SYMB_UID)){
-				$statusStr = $attrManager->getErrorMessage();
+		if($collid && $fieldName){
+			$fieldValue = array_key_exists('fieldvalue',$_POST)?$_POST['fieldvalue']:'';
+			if(!is_array($fieldValue)) $fieldValue = array($fieldValue);
+			$stateID = array_key_exists('stateid',$_POST)?$_POST['stateid']:'';
+			if(!is_array($stateID)) $stateID = array($stateID);
+			if($stateID && $fieldValue){
+				foreach($fieldValue as $fValue){
+					foreach($stateID as $id){
+						if(!$attrManager->submitBatchAttributes($collid, $id, $fieldName, $fValue, $SYMB_UID)){
+							$statusStr = $attrManager->getErrorMessage();
+						}
+					}
+				}
 			}
 		}
 	}
 }
 
+$fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenceremarks' => 'Occurrence Remarks (notes)',
+	'dynamicproperties' => 'Dynamic Properties', 'verbatimattributes' => 'Verbatim Attributes (description)',
+	'behavior' => 'Behavior', 'reproductivecondition' => 'Reproductive Condition', 'lifestage' => 'Life Stage', 
+	'sex' => 'Sex');
 ?>
 <html>
 	<head>
@@ -72,23 +82,31 @@ if($isEditor){
 	
 				$("#taxonfilter").change(function(){
 					$("#tidfilter").val("");
-					$.ajax({
-						type: "POST",
-						url: "rpc/getTaxonFilter.php",
-						data: { term: $( this ).val(), exact: 1 }
-					}).done(function( msg ) {
-						if(msg == ""){
-							alert("Taxon not found in taxonomicthesaurus");
-						}
-						else{
-							$("#tidfilter").val(msg[0].id);
-						}
-					});
+					if($( this ).val() != ""){
+						$( "#filtersubmit" ).prop( "disabled", true );
+						$( "#verify-span" ).show();
+						$( "#notvalid-span" ).hide();
+											
+						$.ajax({
+							type: "POST",
+							url: "rpc/getTaxonFilter.php",
+							data: { term: $( this ).val(), exact: 1 }
+						}).done(function( msg ) {
+							if(msg == ""){
+								$( "#notvalid-span" ).show();
+							}
+							else{
+								$("#tidfilter").val(msg[0].id);
+							}
+							$( "#filtersubmit" ).prop( "disabled", false );
+							$( "#verify-span" ).hide();
+						});
+					}
 				});
 			});
 
 			function verifyFilterForm(f){
-				if(f.attrid.value == ""){
+				if(f.traitid.value == ""){
 					alert("You must select a trait");
 					return false;
 				}
@@ -100,12 +118,20 @@ if($isEditor){
 			}
 
 			function verifyMiningForm(f){
-				if(f.stateid.value == ""){
-					alert("You must select a trait state");
+				if(f.elements["fieldvalue[]"].selectedIndex == -1){
+					alert("You muct select at least one field value");
 					return false;
 				}
-				if(f.fieldvalue.value == ""){
-					alert("You muct select a target field value");
+				
+				var formVerified = false;
+				for(var h=0;h<f.length;h++){
+					if(f.elements[h].name == "stateid[]" && f.elements[h].checked){
+						formVerified = true;
+						break;
+					}
+				}
+				if(!formVerified){
+					alert("Please choose at least one state to assign");
 					return false;
 				}
 				return true;
@@ -131,93 +157,119 @@ if($isEditor){
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<div style="float:right;width:250px;">
-				<fieldset style="margin:20px">
-					<legend><b>Filter</b></legend>
-					<form name="filterform" method="post" action="occurattributes.php" onsubmit="return verifyFilterForm(this)" >
-						<div>
-							<b>Taxon: </b>
-							<input id="taxonfilter" name="taxonfilter" type="text" value="<?php echo $taxonFilter; ?>" />
-							<input id="tidfilter" name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
-						</div>
-						<div>
-							<select name="attrid">
-								<option value="">Select Trait</option>
-								<option value="">------------------------------------</option>
-								<?php 
-								$attrNameArr = $attrManager->getAttrNames();
-								if($attrNameArr){
-									foreach($attrNameArr as $ID => $aName){
-										echo '<option value="'.$ID.'" '.($attrID==$ID?'SELECTED':'').'>'.$aName.'</option>';
-									}
-								}
-								else{
-									echo '<option value="0">No attributes are available</option>';
-								}
-								?>
-							</select>
-						</div>
-						<div>
-							<select name="fieldname">
-								<option value="">Select Target Field</option>
-								<option value="">------------------------------------</option>
-								<?php 
-								$fieldArr = array('habitat' => 'habitat', 'substrate' => 'substrate', 'occurrenceremarks' => 'occurrenceRemarks (notes)',
-									'dynamicproperties' => 'dynamicProperties', 'verbatimattributes' => 'verbatimAttributes (description)',
-									'behavior' => 'behavior', 'reproductivecondition' => 'reproductiveCondition', 'lifestage' => 'lifeStage', 
-									'sex' => 'sex');
-								foreach($fieldArr as $k => $fName){
-									echo '<option value="'.$k.'" '.($k==$fieldName?'SELECTED':'').'>'.$fName.'</option>';
-								}
-								?>
-							</select>
-						</div>
-						<div>
-							<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-							<input name="submitform" type="submit" value="Get Field Values" />
-						</div>
-					</form>
-				</fieldset>
-			</div>
 			<?php 
-			if($traitID && $fieldName){
+			if($collid){
 				?>
-				<div>
-					<fieldset>
-						<legend><b>Batch Attribute Assignment</b></legend>
-						<form name="miningform" method="post" action="attributemining.php" onsubmit="return verifyMiningForm(this)">
+				<div style="width:600px;">
+					<fieldset style="margin:15px;padding:15px">
+						<legend><b>Filter</b></legend>
+						<form name="filterform" method="post" action="attributemining.php" onsubmit="return verifyFilterForm(this)" >
 							<div>
-								<select name="stateid">
-									<option value="">Select Trait State</option>
-									<option value="">-----------------------------</option>
+								<b>Taxon: </b>
+								<input id="taxonfilter" name="taxonfilter" type="text" value="<?php echo $taxonFilter; ?>" /> 
+								<input id="tidfilter" name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
+								<span id="verify-span" style="display:none;font-weight:bold;color:green;">verifying taxonomy...</span>
+								<span id="notvalid-span" style="display:none;font-weight:bold;color:red;">taxon not valid...</span>
+							</div>
+							<div>
+								<select name="traitid">
+									<option value="">Select Trait</option>
+									<option value="">------------------------------------</option>
 									<?php 
-									$stateArr = $attrManager->getAttrStates($traitID);
-									foreach($stateArr as $sid => $stateName){
-										echo '<option value="'.$sid.'">'.$stateName.'</option>';
+									$traitNameArr = $attrManager->getTraitNames();
+									if($traitNameArr){
+										foreach($traitNameArr as $ID => $aName){
+											echo '<option value="'.$ID.'" '.($traitID==$ID?'SELECTED':'').'>'.$aName.'</option>';
+										}
+									}
+									else{
+										echo '<option value="0">No attributes are available</option>';
 									}
 									?>
 								</select>
 							</div>
 							<div>
-								<b><?php echo $fieldName; ?>:</b> 
-								<select name="fieldvalue">
-									<option value="">Select Target Field Value</option>
-									<option value="">--------------------------------</option>
+								<select name="fieldname">
+									<option value="">Select Target Field</option>
+									<option value="">------------------------------------</option>
 									<?php 
-									$valueArr = $attrManager->getFieldValueArr($collid, $traitID, $fieldName);
-									foreach($valueArr as $v){
-										echo '<option>'.$v.'</option>';
+									foreach($fieldArr as $k => $fName){
+										echo '<option value="'.$k.'" '.($k==$fieldName?'SELECTED':'').'>'.$fName.'</option>';
 									}
 									?>
 								</select>
 							</div>
 							<div>
-								<input name="formsubmit" type="submit" value="Batch Assign State" />
+								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+								<input id="filtersubmit" name="submitform" type="submit" value="Get Field Values" />
 							</div>
 						</form>
 					</fieldset>
 				</div>
-				<?php
+				<?php 
+				if($traitID && $fieldName){
+					?>
+					<div style="width:600px">
+						<fieldset style="margin:15px;padding:15px">
+							<legend><b><?php echo $fieldArr[$fieldName]; ?></b></legend>
+							<form name="miningform" method="post" action="attributemining.php" onsubmit="return verifyMiningForm(this)">
+								<div style="margin:5px;">
+									<b>Select Target Field Value(s)</b> - hold down control or shift buttons to select more than one value<br/>
+									<select name="fieldvalue[]" size="15" multiple="multiple" style="width:100%">
+										<?php 
+										$valueArr = $attrManager->getFieldValueArr($collid, $traitID, $fieldName, $tidFilter);
+										foreach($valueArr as $v){
+											if($v) echo '<option>'.$v.'</option>';
+										}
+										?>
+									</select>
+								</div>
+								<div style="margin:5px;">
+									<?php 
+									$traitArr = $attrManager->getTraitArr($traitID);
+									$controlType = 'checkbox';
+									if($traitArr['props']){
+										$propArr = json_decode($traitArr['props']);
+										if(isset($propArr['controlType'])) $controlType = $propArr['controlType'];
+									}
+									$attrStateArr = $attrManager->getTraitStates($traitID);
+									if($controlType == 'checkbox'){
+										foreach($attrStateArr as $sid => $sArr){
+											echo '<div title="'.$sArr['description'].'"><input name="stateid[]" type="checkbox" value="'.$sid.'" /> '.$sArr['name'].'</div>';
+										}
+									}
+									elseif($controlType == 'radio'){
+										foreach($attrStateArr as $sid => $sArr){
+											echo '<div title="'.$sArr['description'].'"><input name="stateid[]" type="radio" value="'.$sid.'" /> '.$sArr['name'].'</div>';
+										}
+									}
+									elseif($controlType == 'select'){
+										echo '<select name="stateid">';
+										echo '<option value="">Select State</option>';
+										echo '<option value="">------------------------------</option>';
+										foreach($attrStateArr as $sid => $sArr){
+											echo '<option value="'.$sid.'">'.$sArr['name'].'</option>';
+										}
+										echo '</select>';
+									}
+									?>
+								</div>
+								<div style="margin:5px;">
+									<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
+									<input name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
+									<input name="traitid" type="hidden" value="<?php echo $traitID; ?>" />
+									<input name="fieldname" type="hidden" value="<?php echo $fieldName; ?>" />
+									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+									<input name="submitform" type="submit" value="Batch Assign State" />
+								</div>
+							</form>
+						</fieldset>
+					</div>
+					<?php
+				}
+			}
+			else{
+				echo '<div style="margin:20px"><b>ERROR: Identifier not set</b></div>';
 			} 
 			?> 
 		</div>

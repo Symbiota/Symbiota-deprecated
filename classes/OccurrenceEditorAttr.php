@@ -65,7 +65,7 @@ class OccurrenceEditorAttr extends Manager {
 		return $retArr;
 	}
 
-	public function getAttrNames(){
+	public function getTraitNames(){
 		$retArr = array();
 		$sql = 'SELECT traitid, traitname '.
 			'FROM tmtraits '. 
@@ -85,12 +85,12 @@ class OccurrenceEditorAttr extends Manager {
 		return $retArr;
 	}
 
-	public function getAttrArr($attrID){
+	public function getTraitArr($traitID){
 		$retArr = array();
-		if(is_numeric($attrID)){
+		if(is_numeric($traitID)){
 			$sql = 'SELECT traitname, traittype, units, description, refurl, notes, dynamicproperties '.
 				'FROM tmtraits '. 
-				'WHERE traitid = '.$attrID;
+				'WHERE (traitid = '.$traitID.')';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr['name'] = $r->traitname;
@@ -106,12 +106,12 @@ class OccurrenceEditorAttr extends Manager {
 		return $retArr;
 	}
 
-	public function getAttrStates($attrId){
+	public function getTraitStates($traitId){
 		$retArr = array();
-		if(is_numeric($attrId)){
+		if(is_numeric($traitId)){
 			$sql = 'SELECT stateid, statename, description, notes, refurl '.
 				'FROM tmstates '.
-				'WHERE traitid = '.$attrId.' ORDER BY sortseq ';
+				'WHERE traitid = '.$traitId.' ORDER BY sortseq ';
 			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -145,31 +145,45 @@ class OccurrenceEditorAttr extends Manager {
 	}
 
 	//Attribute mining 
-	public function getFieldValueArr($collid, $traitID, $fieldName){
+	public function getFieldValueArr($collid, $traitID, $fieldName, $tidFilter){
 		$retArr = array();
 		if(is_numeric($collid) && is_numeric($traitID)){
-			$sql = 'SELECT DISTINCT o.'.$fieldName.' FROM omoccurrences o '.
-				'WHERE o.collid = '.$collid.' AND o.'.$fieldName.' IS NOT NULL '. 
-				'AND o.occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.') ';
+			$sql = '';
+			if($tidFilter){
+				$sql = 'SELECT DISTINCT o.'.$fieldName.' '.
+					'FROM omoccurrences o INNER JOIN taxaenumtree e ON o.tidinterpreted = e.tid '.
+					'WHERE (o.collid = '.$collid.') AND (o.'.$fieldName.' IS NOT NULL) AND (e.taxauthid = 1) AND (e.parenttid = '.$tidFilter.' OR o.tidinterpreted = '.$tidFilter.') '. 
+					'AND (o.occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.')) '.
+					'ORDER BY o.'.$fieldName;
+			}
+			else{
+				$sql = 'SELECT DISTINCT o.'.$fieldName.' FROM omoccurrences o '.
+					'WHERE o.collid = '.$collid.' AND o.'.$fieldName.' IS NOT NULL '. 
+					'AND o.occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.') '.
+					'ORDER BY o.'.$fieldName;
+			}
+			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_assoc()){
 				$retArr[] = $r[$fieldName];
 			}
 			$rs->free();
+			//sort($retArr);
 		}
 		return $retArr;
 	}
 
 	public function submitBatchAttributes($collid, $stateID, $fieldName, $fieldValue, $uid){
-		if(!is_numeric($collid) || !is_numeric($stateId) || !is_numeric($uid)){
+		if(!is_numeric($collid) || !is_numeric($stateID) || !is_numeric($uid)){
 			$this->errorMessage = 'ERROR saving occurrence attribute: bad input values';
 			return false;
 		}
 		$sql = 'INSERT INTO tmattributes(stateid,occid,createduid) '.
 			'SELECT "'.$stateID.'", occid, "'.$uid.'" FROM omoccurrences '.
 			'WHERE collid = '.$collid.' AND '.$fieldName.' = "'.$this->cleanInStr($fieldValue).'"';
+		//echo $sql; exit;
 		if(!$this->conn->query($sql)){
-			$this->errorMessage = 'ERROR saving batch occurrence attributes: '.$this->error;
+			$this->errorMessage = 'ERROR saving batch occurrence attributes: '.$this->conn->error;
 			return false;
 		}
 		return true;
