@@ -343,7 +343,11 @@ class DwcArchiverOccurrence{
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
 			if(strpos($this->conditionSql,'v.clid')){
 				//Search criteria came from custom search page
-				$sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
+			}
+			if(strpos($this->conditionSql,'p.point')){
+				//Search criteria came from map search page
+				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 			}
 			$sql .= $this->conditionSql;
 			if($fullSql) $sql .= ' ORDER BY o.collid'; 
@@ -441,7 +445,11 @@ class DwcArchiverOccurrence{
 				'LEFT JOIN taxa t ON d.tidinterpreted = t.tid ';
 			if(strpos($this->conditionSql,'v.clid')){
 				//Search criteria came from custom search page
-				$sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
+			}
+			if(strpos($this->conditionSql,'p.point')){
+				//Search criteria came from map search page
+				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 			}
 			$sql .= $this->conditionSql.'AND d.appliedstatus = 1 '.
 				'ORDER BY o.collid';
@@ -519,7 +527,11 @@ class DwcArchiverOccurrence{
 
 			if(strpos($this->conditionSql,'v.clid')){
 				//Search criteria came from custom search page
-				$sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
+			}
+			if(strpos($this->conditionSql,'p.point')){
+				//Search criteria came from map search page
+				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 			}
 			$sql .= $this->conditionSql;
 			if($this->redactLocalities){
@@ -993,7 +1005,10 @@ class DwcArchiverOccurrence{
 			$sql1 = 'SELECT DISTINCT o.collid FROM omoccurrences o ';
 			if($this->conditionSql){
 				if(stripos($this->conditionSql,'v.clid')){
-					$sql1 .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+					$sql1 .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
+				}
+				if(stripos($this->conditionSql,'p.point')){
+					$sql1 .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 				}
 				$sql1 .= $this->conditionSql;
 			}
@@ -1649,7 +1664,10 @@ class DwcArchiverOccurrence{
 			$sql1 = 'SELECT DISTINCT o.collid FROM omoccurrences o ';
 			if($this->conditionSql){
 				if(stripos($this->conditionSql,'v.clid')){
-					$sql1 .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+					$sql1 .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
+				}
+				if(stripos($this->conditionSql,'p.point')){
+					$sql1 .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 				}
 				$sql1 .= $this->conditionSql;
 			}

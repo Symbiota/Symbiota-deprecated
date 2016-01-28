@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen"; 
-$taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0; 
+$taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0;
 ?>
 <html>
 <head>
@@ -46,10 +46,6 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 				obj.form.identifications.checked = false;
 			}
 		}
-		
-		function validateDownloadForm(f){
-			return true;
-		}
 	</script>
 </head>
 <body style="width:575px;margin-left:0px;margin-right:0px;background-color:white;overflow-y:hidden;overflow-x:hidden;">
@@ -66,7 +62,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 		<div style='margin:15px;width:575px;'>
 			<fieldset style="width:575px;margin-left:0px;margin-right:0px;">
 				<legend><b>Download Specimen Records</b></legend>
-				<form name="downloadform" action="csvdownloadhandler.php" method="post" onsubmit="return validateDownloadForm(this);">
+				<form name="downloadform" action="csvdownloadhandler.php" method="post">
 					<table>
 						<tr>
 							<td valign="top">
@@ -85,7 +81,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 										Symbiota native is very similar to Darwin Core except with the addtion of a few fields
 										such as substrate, associated collectors, verbatim description.
 									</div>
-									<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this)" /> 
+									<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this);" /> 
 									Darwin Core
 									<a id="schemadwcinfo" href="#" target="" title="More Information">
 										<img src="../../images/info.png" style="width:13px;" />
@@ -107,8 +103,8 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
-									<input type="checkbox" name="identifications" value="1" onchange="extensionSelected(this)" checked /> include Determination History<br/>
-									<input type="checkbox" name="images" value="1" onchange="extensionSelected(this)" checked /> include Image Records<br/>
+									<input type="checkbox" name="identifications" value="1" onchange="extensionSelected(this);" checked /> include Determination History<br/>
+									<input type="checkbox" name="images" value="1" onchange="extensionSelected(this);" checked /> include Image Records<br/>
 									*Output must be a compressed archive 
 								</div>
 							</td>
@@ -150,7 +146,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
-									<input type="checkbox" name="zip" value="1" onchange="zipSelected(this)" checked />Compressed ZIP file<br/>
+									<input type="checkbox" name="zip" value="1" onchange="zipSelected(this);" checked />Compressed ZIP file<br/>
 								</div>
 							</td>
 						</tr>
