@@ -116,6 +116,17 @@ if($isEditor){
 							<div id="authordiv" style="float:left"> 
 								<input id="fscientificnameauthorship" name="scientificnameauthorship" type="text" value="" />
 							</div>
+							<?php
+							if($IS_ADMIN || isset($USER_RIGHTS['Taxonomy'])){ 
+								?>
+								<div style="float:left;padding:2px 3px;">
+									<a href="../../taxa/admin/taxonomyloader.php" target="_blank">
+										<img src="../../images/add.png" style="width:14px;" title="Add new name to taxonomic thesaurus" />
+									</a>
+								</div>
+								<?php
+							}
+							?> 
 							<div style="clear:both;">
 								<div id="familydiv" style="float:left">
 									<b>Family:</b> <input id="ffamily" name="family" type="text" tabindex="0" value="" />
