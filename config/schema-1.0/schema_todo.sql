@@ -279,7 +279,12 @@ ALTER TABLE `omoccurrences`
 
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `eventID` VARCHAR(45) NULL AFTER `fieldnumber`,
-  ADD COLUMN `waterBody`  varchar(255) NULL AFTER `municipality`;
+  ADD COLUMN `waterBody`  varchar(255) NULL AFTER `municipality`,
+  CHANGE COLUMN `establishmentMeans` `establishmentMeans` VARCHAR(150) NULL DEFAULT NULL ;
+
+
+ALTER TABLE `omoccurdeterminations` 
+  CHANGE COLUMN `identificationRemarks` `identificationRemarks` VARCHAR(500) NULL DEFAULT NULL ;
 
 
 #Needed for FP functions

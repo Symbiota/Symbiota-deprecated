@@ -777,7 +777,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						<div style="margin-top:10px;clear:both;">
 							For additional information on this specimen, please contact: 
 							<?php 
-							$emailSubject = $DEFAULT_TITLE.' occurrence #'.$occArr['occid'];
+							$emailSubject = $DEFAULT_TITLE.' occurrence: '.$occArr['catalognumber'].' ('.$occArr['othercatalognumbers'].')';
 							$emailBody = 'Specimen being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/collections/individual/index.php?occid='.$occArr['occid'];
 							$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
 							?>

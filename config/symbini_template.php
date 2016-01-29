@@ -88,7 +88,7 @@ $RIGHTS_TERMS = array(
 	$glossary_indexBanner = 0;
 	
 //loans/
-	$collections_loans_indexCrumbs = 0;
+	$collections_loans_indexMenu = 0;
 
 //agents/
     $agents_indexMenu = TRUE;
