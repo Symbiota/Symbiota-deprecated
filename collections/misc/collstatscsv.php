@@ -55,7 +55,8 @@ if($action == 'Download CSV'){
 	$dataArr = $collManager->getYearStatsDataArr($collId);
 }
 if($action == 'Download Stats per Coll'){
-	$header = array('Collection','Specimens','Georeferenced','Species ID','Families','Genera','Species','Total Taxa','Types');
+	$header = array('Collection','Specimens','Georeferenced','Species ID','Families','Genera','Species','Total Taxa');
+	//$header = array('Collection','Specimens','Georeferenced','Species ID','Families','Genera','Species','Total Taxa','Types');
 	$fileName = 'stats_per_coll.csv';
 	$resultsTemp = $collManager->runStatistics($collId);
 	if($resultsTemp){
@@ -80,11 +81,11 @@ if($action == 'Download Stats per Coll'){
 			$outputArr[$i]['genuscnt'] = $collArr['genuscnt'];
 			$outputArr[$i]['speciescnt'] = $collArr['speciescnt'];
 			$outputArr[$i]['TotalTaxaCount'] = $collArr['TotalTaxaCount'];
-			if($collArr['dynamicProperties']){
+			/*if($collArr['dynamicProperties']){
 				if(is_array($dynPropTempArr)){
 					$outputArr[$i]['TypeCount'] = $dynPropTempArr['TypeCount'];
 				}
-			}
+			}*/
 			$i++;
 		}
 	}

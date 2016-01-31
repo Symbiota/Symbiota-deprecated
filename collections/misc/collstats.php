@@ -609,9 +609,9 @@ if($action != "Update Statistics"){
 											echo "<li>";
 											echo ($results['TotalTaxaCount']?number_format($results['TotalTaxaCount']):0)." total taxa (including subsp. and var.)";
 											echo "</li>";
-											echo "<li>";
+											/*echo "<li>";
 											echo ($results['TypeCount']?number_format($results['TypeCount']):0)." type specimens";
-											echo "</li>";
+											echo "</li>";*/
 											?>
 										</ul>
 										<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
@@ -687,7 +687,7 @@ if($action != "Update Statistics"){
 											<th style="text-align:center;">Genera</th>
 											<th style="text-align:center;">Species</th>
 											<th style="text-align:center;">Total Taxa</th>
-											<th style="text-align:center;">Types</th>
+											<!-- <th style="text-align:center;">Types</th> -->
 										</tr>
 										<?php
 										foreach($resultsTemp as $name => $data){
@@ -700,7 +700,7 @@ if($action != "Update Statistics"){
 											echo '<td>'.(array_key_exists('genuscnt',$data)?$data['genuscnt']:0).'</td>';
 											echo '<td>'.(array_key_exists('speciescnt',$data)?$data['speciescnt']:0).'</td>';
 											echo '<td>'.(array_key_exists('TotalTaxaCount',$data)?$data['TotalTaxaCount']:0).'</td>';
-											echo '<td>'.(array_key_exists('types',$data)?$data['types']:0).'</td>';
+											//echo '<td>'.(array_key_exists('types',$data)?$data['types']:0).'</td>';
 											echo '</tr>';
 										}
 										?>

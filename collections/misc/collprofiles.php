@@ -467,7 +467,7 @@ if($SYMB_UID){
 						<li><?php echo $collData["speciescnt"].' '.$LANG['SPECIES'];?></li>
 						<?php
 						if($extrastatsArr&&$extrastatsArr['TotalTaxaCount']) echo '<li>'.$extrastatsArr['TotalTaxaCount'].' total taxa (including subsp. and var.)</li>';
-						if($extrastatsArr&&$extrastatsArr['TypeCount']) echo '<li>'.$extrastatsArr['TypeCount'].' type specimens</li>';
+						//if($extrastatsArr&&$extrastatsArr['TypeCount']) echo '<li>'.$extrastatsArr['TypeCount'].' type specimens</li>';
 						?>
 					</ul>
 				</div>
