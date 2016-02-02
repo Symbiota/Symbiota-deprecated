@@ -63,7 +63,11 @@ $smManager = new SiteMapManager();
 			</ul>
 
 			<?php 
-			$clList = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
+			$clList = $smManager->getChecklistList((array_key_exists('ClAdmin',$USER_RIGHTS)?$USER_RIGHTS['ClAdmin']:0));
+			$clAdmin = array();
+			if($clList && isset($USER_RIGHTS['ClAdmin'])){
+				$clAdmin = array_intersect_key($clList,array_flip($USER_RIGHTS['ClAdmin']));
+			}
 			$projList = $smManager->getProjectList();
 			if($projList){
 				echo '<div style="margin-top:10px;"><h2>'.$LANG['BIOINV'].'</h2></div><ul>';
@@ -95,7 +99,7 @@ $smManager = new SiteMapManager();
 				<legend><b><?php echo $LANG['MANAGTOOL'];?></b></legend>
 				<?php 
 				if($symbUid){
-					if($isAdmin){
+					if($IS_ADMIN){
 						?>
 						<h3><?php echo $LANG['ADMIN'];?></h3>
 						<ul>
@@ -124,15 +128,11 @@ $smManager = new SiteMapManager();
 						<?php
 					}
 					
-					if($keyModIsActive || array_key_exists("KeyAdmin",$userRights)){ 
-						$clActive = array();
-						if($clList && isset($userRights['ClAdmin'])){
-							$clActive = array_intersect_key($clList,array_flip($userRights['ClAdmin']));
-						}
+					if($keyModIsActive || array_key_exists("KeyAdmin",$USER_RIGHTS)){ 
 						?>
 						<h3><?php echo $LANG['IDKEYS'];?></h3>
 						<?php 
-						if(!$keyModIsActive && array_key_exists("KeyAdmin",$userRights)){
+						if(!$keyModIsActive && array_key_exists("KeyAdmin",$USER_RIGHTS)){
 							?>
 							<div style="color:red;margin-left:10px;">
                                 <?php echo $LANG['KEYMODULE'];?>
@@ -142,21 +142,21 @@ $smManager = new SiteMapManager();
 						?>
 						<ul>
 							<?php 
-							if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
+							if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 								?>
 								<li>
                                     <?php echo $LANG['AUTHOKEY'];?><a href="<?php echo $clientRoot; ?>/ident/admin/index.php"><?php echo $LANG['CHARASTATES'];?></a>
 								</li>
 								<?php 
-								if($clActive){
-									asort($clActive);
+								if($clAdmin){
+									asort($clAdmin);
 									?>
 									<li id="testkeyhead" style="margin-left:15px;">
 										<a href="#" onclick="toggle('testkey');toggle('testkeyhead');return false;"><?php echo $LANG['DISPLAYTESTK'];?></a>
 									</li>
 									<div id="testkey" style="display:none;margin-left:15px;">
 										<?php 
-										foreach($clActive as $clKey => $clValue){
+										foreach($clAdmin as $clKey => $clValue){
 											echo '<li>';
 											echo '<a href="'.$clientRoot.'/ident/key.php?cl='.$clKey.'&taxon=All+Species">'.$clValue.'</a>';
 											echo '</li>';
@@ -166,7 +166,7 @@ $smManager = new SiteMapManager();
 									<?php
 								}
 							}
-							if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){ 
+							if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("KeyAdmin",$USER_RIGHTS)){ 
 								?>
 								<li>
                                     <?php echo $LANG['YAATE'];?>
@@ -177,10 +177,10 @@ $smManager = new SiteMapManager();
 									<?php 
 									if($projList){
 										//Show Checklists that user has explicit editing rights
-										if($clActive){
+										if($clAdmin){
 											echo '<div style="margin:5px 0px 0px 10px;"><b>'.$LANG['EDITBYCHECK'].'</b></div>';
 											echo '<ul>';
-											foreach($clActive as $vClid => $name){
+											foreach($clAdmin as $vClid => $name){
 												echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?clf=".$vClid."'>".$name."</a></li>";
 											}
 											echo '</ul>';
@@ -223,7 +223,7 @@ $smManager = new SiteMapManager();
 					</div>
 					<ul>
 						<?php 
-						if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ 
+						if($IS_ADMIN || array_key_exists('TaxonProfile',$USER_RIGHTS)){ 
 							?>
 							<li>
 								<a href="taxa/admin/tpeditor.php?tabindex=1" target="_blank">
@@ -232,85 +232,22 @@ $smManager = new SiteMapManager();
 							</li>
 							<?php
 						}
-						if($isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("CollEditor",$userRights)){
-						?>
-						<li>
-							<a href="collections/editor/observationsubmit.php">
-                                <?php echo $LANG['IMGOBSER'];?>
-							</a>
-						</li>
-						<?php 
-						}
-						if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ 
+						if($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("CollEditor",$USER_RIGHTS)){
 							?>
 							<li>
-								<?php if($submitAction == 'taxanoimages') echo '<a name="taxanoimages"><a/>'; ?>
-								<b><?php echo $LANG['TAXANOIMG'];?></b>
-								<form name="taxanoimg" action="sitemap.php#taxanoimages" method="post" style="display:inline;"> 
-									<select name="clid" style="width:450px;" onchange="submitTaxaNoImgForm(this.form);">
-										<option value=""><?php echo $LANG['SELECTCHECK'];?></option>
-										<option value="">-------------------------------</option>
-										<?php 
-											$clArr = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
-											foreach($clArr as $clid => $clname){
-												echo '<option value="'.$clid.'">'.$clname."</option>\n";
-											}
-										?>
-									</select>
-									<input type="hidden" name="submitaction" value="taxanoimages" />
-								</form>
-								<?php 
-								if($submitAction == 'taxanoimages'){
-									$tArr = $smManager->getTaxaWithoutImages($_REQUEST['clid']);
-									echo '<fieldset style="margin:10px;width:400px;">';
-									echo '<div style="margin:10px;"><b>'.$clArr[$_REQUEST['clid']].':</b> '.count($tArr).' taxa without images</div>';
-									echo "<ul style='margin:10px'>\n";
-									foreach($tArr as $tid => $sn){
-										echo "<li><a href='taxa/admin/tpeditor.php?tid=".$tid."&category=imageadd&tabindex=3' target='_blank'>".$sn."</a></li>\n";
-									}
-									echo "</ul>\n";
-									echo '</fieldset>';
-								}
-								?>
+								<a href="collections/editor/observationsubmit.php">
+	                                <?php echo $LANG['IMGOBSER'];?>
+								</a>
 							</li>
-							<li>
-								<?php if($submitAction == 'taxanofieldimages') echo '<a name="taxanofieldimages"><a/>'; ?>
-								<b><?php echo $LANG['TAXANOFIELD'];?></b>
-								<form name="taxanofieldimg" action="sitemap.php#taxanofieldimages" method="post" style="display:inline;"> 
-									<select name="clid" style="width:450px;" onchange="submitTaxaNoImgForm(this.form);">
-										<option value=""><?php echo $LANG['SELECTCHECK'];?></option>
-										<option value="">--------------------------------</option>
-										<?php 
-											foreach($clArr as $clid => $clname){
-												echo '<option value="'.$clid.'">'.$clname."</option>\n";
-											}
-										?>
-									</select>
-									<input type="hidden" name="submitaction" value="taxanofieldimages" />
-								</form>
-								<?php 
-								if($submitAction == 'taxanofieldimages'){
-									$tArr = $smManager->getTaxaWithoutImages($_REQUEST['clid'],true);
-									echo '<fieldset style="margin:10px;width:400px;">';
-									echo '<div style="margin:10px;"><b>'.$clArr[$_REQUEST['clid']].':</b> '.count($tArr).' taxa without field images</div>';
-									echo "<ul>";
-									foreach($tArr as $tid => $sn){
-										echo '<li>';
-										echo '<a href="taxa/admin/tpeditor.php?tid='.$tid.'&category=imageadd&tabindex=3" target="_blank">'.$sn.'</a>';
-										echo "</li>";
-									}
-									echo "</ul>";
-									echo '</fieldset>';
-								}
-								?>
-							</li>
-						<?php }?>
+							<?php 
+						}
+						?>
 					</ul>
 
 					<h3><?php echo $LANG['BIOINV'];?></h3>
 					<ul>
 						<?php 
-						if($isAdmin){
+						if($IS_ADMIN){
 							echo '<li><a href="projects/index.php?newproj=1">'.$LANG['ADDNEWPROJ'].'</a></li>';
 							if($projList){
 								echo '<li><b>'.$LANG['LISTOFCURR'].'</b>'.$LANG['CLICKEDIT'].'</li>';
@@ -325,14 +262,14 @@ $smManager = new SiteMapManager();
 							}
 						}
 						else{
-							echo '<li>'.$LANG['NOEDITPROJ'].'</li>';
+							echo '<li>'.$LANG['NOTEDITPROJ'].'</li>';
 						}
 						?>
 					</ul>
 
 					<h3><?php echo $LANG['TAXONPROF'];?></h3>
 					<?php 
-					if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
+					if($IS_ADMIN || array_key_exists("TaxonProfile",$USER_RIGHTS)){
 						?>
 						<div style="margin:10px;">
                             <?php echo $LANG['THEFOLLOWINGSPEC'];?>
@@ -357,7 +294,7 @@ $smManager = new SiteMapManager();
 					<h3><?php echo $LANG['TAXONOMY'];?></h3>
 					<ul>
 						<?php 
-						if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+						if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 							?>
 							<li><a href="taxa/admin/taxonomydisplay.php"><?php echo $LANG['TAXTREE'];?></a></li>
 							<li><a href="taxa/admin/taxonomydynamicdisplay.php"><?php echo $LANG['DYNTAXTREE'];?></a></li>
@@ -365,7 +302,7 @@ $smManager = new SiteMapManager();
 							<li><a href="taxa/admin/taxonomyloader.php"><?php echo $LANG['ADDTAXANAME'];?></a></li>
 							<li><a href="taxa/admin/taxaloader.php"><?php echo $LANG['BATCHTAXA'];?></a></li>
 							<?php 
-							if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+							if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 								?>
 								<li><a href="taxa/admin/eolmapper.php"><?php echo $LANG['EOLLINK'];?></a></li>
 								<?php 
@@ -383,8 +320,8 @@ $smManager = new SiteMapManager();
 					</div>
 					<ul>
 						<?php 
-						if($clList){
-							foreach($clList as $k => $v){
+						if($clAdmin){
+							foreach($clAdmin as $k => $v){
 								echo "<li><a href='".$clientRoot."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
 							}
 						}
@@ -429,7 +366,7 @@ $smManager = new SiteMapManager();
 							}
 						}
 						else{
-							echo "<li>".$LANG['NOTEDITCOLL']."</li>";
+							echo "<li>".$LANG['NOEDITCOLL']."</li>";
 						}
 						?>
 						</ul>
@@ -474,7 +411,7 @@ $smManager = new SiteMapManager();
 								}
 							}
 							else{
-								echo "<li>".$LANG['NOOBSVPROJ']."</li>";
+								echo "<li>".$LANG['NOOBSPROJ']."</li>";
 							}
 							?>
 						</ul>
