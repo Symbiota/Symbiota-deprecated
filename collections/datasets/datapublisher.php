@@ -193,10 +193,10 @@ include($serverRoot."/header.php");
 	<div style="margin:20px;">
 		RSS Feed: 
 		<?php 
+		$urlPrefix = 'http://'.$_SERVER["SERVER_NAME"];
+		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+		$urlPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
 		if(file_exists('../../webservices/dwc/rss.xml')){
-			$urlPrefix = 'http://'.$_SERVER["SERVER_NAME"];
-			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
-			$urlPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
 			$feedLink = $urlPrefix.'webservices/dwc/rss.xml';
 			echo '<a href="'.$feedLink.'" target="_blank">'.$feedLink.'</a>';
 		}

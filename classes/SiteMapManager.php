@@ -74,10 +74,10 @@ class SiteMapManager{
 		return $this->genObsArr;
 	}
 
-	public function getChecklistList($isAdmin, $clArr){
+	public function getChecklistList($clArr){
 		$returnArr = Array();
 		$sql = 'SELECT clid, name, access FROM fmchecklists ';
-		if($isAdmin){
+		if($GLOBALS['IS_ADMIN']){
 			//Show all without restrictions
 		}
 		elseif($clArr){
@@ -116,31 +116,6 @@ class SiteMapManager{
 			$rs->close();
 		}
 		return $returnArr;
-	}
-	
-	public function getTaxaWithoutImages($clid, $fieldImagesOnly=false){
-		$retArr = Array();
-		if($clid){
-			$sql = 'SELECT DISTINCT t.tid, t.sciname '.
-				'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
-				'LEFT JOIN (SELECT ts2.tid '.
-				'FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
-				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
-				($fieldImagesOnly?'AND imagetype NOT LIKE "%specimen%" ':'').
-				') i ON t.tid = i.tid '.
-				'WHERE (ctl.clid = '.$clid.') AND i.tid IS NULL '.
-				'ORDER BY t.sciname';
-			//echo '<div>'.$sql.'</div>';
-			$rs = $this->conn->query($sql);
-			if($rs){
-				while($row = $rs->fetch_object()){
-					$retArr[$row->tid] = $row->sciname;
-				}
-				$rs->close();
-			}
-		}
-		return $retArr;
 	}
 	
 	/**
