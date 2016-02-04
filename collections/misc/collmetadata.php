@@ -126,6 +126,10 @@ $collData = $collManager->getCollectionData(true);
 			if(f.managementtype.value == "Snapshot" && f.guidtarget.value == "symbiotaUUID"){
 				alert("The Symbiota Generated GUID option cannot be selected for a collection that is managed locally outside of the data portal (e.g. Snapshot management type). In this case, the GUID must be generated within the source collection database and delivered to the data portal as part of the upload process.");
 			}
+			else if(f.managementtype.value == "Aggregate" && f.guidtarget.value != "" && f.guidtarget.value != "occurrenceId"){
+				alert("An Aggregate dataset (e.g. specimens coming from multiple collections) can only have occurrenceID selected for the GUID source");
+				f.guidtarget.value = 'occurrenceId';
+			}
 		}
 
 		function verifyAddAddressForm(f){

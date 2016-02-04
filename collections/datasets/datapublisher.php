@@ -210,6 +210,7 @@ include($serverRoot."/header.php");
 		if($action == 'Create/Refresh Darwin Core Archive'){
 			echo '<ul>';
 			$dwcaManager->setVerbose(1);
+			$dwcaManager->setLimitToGuids(true);
 			$dwcaManager->createDwcArchive();
 			$dwcaManager->writeRssFile();
 			echo '</ul>';
@@ -264,10 +265,19 @@ include($serverRoot."/header.php");
 					<input type="radio" name="schema" value="2" /> Symbiota Archive
 					-->
 				</div>
-				<div style="clear:both;">
+				<div style="clear:both;margin:10px;">
 					<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 					<input type="submit" name="formsubmit" value="Create/Refresh Darwin Core Archive" />
 				</div>
+				<?php 
+				if($collArr[$collId]['managementtype'] != 'Live Data' || $collArr[$collId]['guidtarget'] != 'symbiotaUUID'){
+					?>
+					<div style="margin:10px;font-weight:bold">
+						NOTE: all records lacking occurrenceID GUIDs will be excluded
+					</div>
+					<?php
+				}
+				?>
 			</fieldset>
 		</form>
 		<?php
@@ -277,6 +287,7 @@ include($serverRoot."/header.php");
 			if($action == 'Create/Refresh Darwin Core Archive(s)'){
 				echo '<ul>';
 				$dwcaManager->setVerbose(1);
+				$dwcaManager->setLimitToGuids(true);
 				$dwcaManager->batchCreateDwca($_POST['coll']);
 				echo '</ul>';
 			}

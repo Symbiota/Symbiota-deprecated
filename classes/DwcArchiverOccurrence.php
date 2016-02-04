@@ -21,6 +21,7 @@ class DwcArchiverOccurrence{
 	private $verbose = false;
 
 	private $schemaType = 'dwc';			//dwc, symbiota, backup
+	private $limitToGuids = false;			//Limit output to only records with GUIDs
 	private $extended = 0;
 	private $delimiter = ',';
 	private $fileExt = '.csv';
@@ -311,11 +312,12 @@ class DwcArchiverOccurrence{
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));
 		}
 		elseif($this->schemaType == 'coge'){
-			$targetArr = array('id','institutionCode','collectionCode','catalogNumber','family','scientificName','scientificNameAuthorship',
+			$targetArr = array('id','basisOfRecord','institutionCode','collectionCode','catalogNumber','occurrenceID','family','scientificName','scientificNameAuthorship',
+				'kingdom','phylum','class','order','genus','specificEpithet','infraSpecificEpithet',
 				'recordedBy','recordNumber','eventDate','year','month','day','fieldNumber','country','stateProvince','county','municipality',
-				'locality','localitySecurity','geodeticDatum',
-				'verbatimCoordinates','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation','dateEntered',
-				'dateLastModified','recordId','references','collId');
+				'locality','localitySecurity','geodeticDatum','decimalLatitude','decimalLongitude','verbatimCoordinates',
+				'minimumElevationInMeters','maximumElevationInMeters','verbatimElevation','maximumDepthInMeters','minimumDepthInMeters',
+				'sex','occurrenceRemarks','preparationType','individualCount','dateEntered','dateLastModified','recordId','references','collId');
 			$retArr = array_intersect_key($occurArr,array_flip($targetArr));
 		}
 		return $retArr;
@@ -1045,16 +1047,6 @@ class DwcArchiverOccurrence{
 					}
 				}
 				
-				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
-				//Add collection GUID based on management type
-				$managementType = $this->collArr[$r['collid']]['managementtype'];
-				if($managementType && $managementType == 'Live Data'){
-					if(array_key_exists('collectionID',$r) && !$r['collectionID']){
-						$guid = $this->collArr[$r['collid']]['collectionguid'];
-						if(strlen($guid) == 36) $guid = 'urn:uuid:'.$guid;
-						$r['collectionID'] = $guid;
-					}
-				}
 				//Set occurrence GUID based on GUID target
 				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
 				if($guidTarget == 'catalogNumber'){
@@ -1063,29 +1055,43 @@ class DwcArchiverOccurrence{
 				elseif($guidTarget == 'symbiotaUUID'){
 					$r['occurrenceID'] = $r['recordId'];
 				}
-				if($this->schemaType == 'dwc'){
-					unset($r['localitySecurity']);
+				
+				if($this->schemaType != 'dwc' || $r['occurrenceID']){
+					//If data is a DwC extract, output data only if specimen GUID (occurrenceID) has been defined
+					$r['recordId'] = 'urn:uuid:'.$r['recordId'];
+					//Add collection GUID based on management type
+					$managementType = $this->collArr[$r['collid']]['managementtype'];
+					if($managementType && $managementType == 'Live Data'){
+						if(array_key_exists('collectionID',$r) && !$r['collectionID']){
+							$guid = $this->collArr[$r['collid']]['collectionguid'];
+							if(strlen($guid) == 36) $guid = 'urn:uuid:'.$guid;
+							$r['collectionID'] = $guid;
+						}
+					}
+					if($this->schemaType == 'dwc'){
+						unset($r['localitySecurity']);
+					}
+					if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+						unset($r['collid']);
+					}
+					//Add upper taxonomic data
+					if($r['family'] && $this->upperTaxonomy){
+						$famStr = strtolower($r['family']);
+						if(isset($this->upperTaxonomy[$famStr]['o'])){
+							$r['t_order'] = $this->upperTaxonomy[$famStr]['o'];
+						}
+						if(isset($this->upperTaxonomy[$famStr]['c'])){
+							$r['t_class'] = $this->upperTaxonomy[$famStr]['c'];
+						}
+						if(isset($this->upperTaxonomy[$famStr]['p'])){
+							$r['t_phylum'] = $this->upperTaxonomy[$famStr]['p'];
+						}
+						if(isset($this->upperTaxonomy[$famStr]['k'])){
+							$r['t_kingdom'] = $this->upperTaxonomy[$famStr]['k'];
+						}
+					}
+	                $result[] = $r;
 				}
-				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
-					unset($r['collid']);
-				}
-				//Add upper taxonomic data
-				if($r['family'] && $this->upperTaxonomy){
-					$famStr = strtolower($r['family']);
-					if(isset($this->upperTaxonomy[$famStr]['o'])){
-						$r['t_order'] = $this->upperTaxonomy[$famStr]['o'];
-					}
-					if(isset($this->upperTaxonomy[$famStr]['c'])){
-						$r['t_class'] = $this->upperTaxonomy[$famStr]['c'];
-					}
-					if(isset($this->upperTaxonomy[$famStr]['p'])){
-						$r['t_phylum'] = $this->upperTaxonomy[$famStr]['p'];
-					}
-					if(isset($this->upperTaxonomy[$famStr]['k'])){
-						$r['t_kingdom'] = $this->upperTaxonomy[$famStr]['k'];
-					}
-				}
-                $result[] = $r; 
 			}
 			$rs->free();
 		}
@@ -1171,10 +1177,14 @@ class DwcArchiverOccurrence{
 			}
 		}
 		else{
-			$errStr = "FAILED to create archive file. No records were located in this collection. If records exist, it may be that they don't have Symbiota GUID assignments. Have the portal manager run the GUID mapper (available in sitemap)";
+			$errStr = "<span style='color:red;'>FAILED to create archive file due to failure to return occurrence records. ".
+				"Note that OccurrenceID GUID assignments are required for Darwin Core Archive publishing. ".
+				"Symbiota GUID (recordID) assignments are also required, which can be verified by the portal manager through running the GUID mapping utilitiy available in sitemap</span>";
 			$this->logOrEcho($errStr);
+			$collid = key($this->collArr);
+			if($collid) $this->deleteArchive($collid);
+			unset($this->collArr[$collid]);
 		}
-		
 		$this->logOrEcho("\n-----------------------------------------------------\n");
 		return $archiveFile;
 	}
@@ -1642,6 +1652,7 @@ class DwcArchiverOccurrence{
 		$this->logOrEcho("Creating occurrence file (".date('h:i:s A').")... ");
 		$filePath = $this->targetPath.$this->ts.'-occur'.$this->fileExt;
 		$fh = fopen($filePath, 'w');
+		$hasRecords = false;
 		
 		if(!$this->occurrenceFieldArr){
 			$this->initOccurrenceArr();
@@ -1658,7 +1669,26 @@ class DwcArchiverOccurrence{
 		if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
 			unset($fieldArr['collId']);
 		}
-		$this->writeOutRecord($fh,array_keys($fieldArr));
+		$fieldOutArr = array();
+		if($this->schemaType == 'coge'){
+			//Convert to GeoLocate flavor
+			$glFields = array('specificEpithet'=>'Species','scientificNameAuthorship'=>'ScientificNameAuthor','recordedBy'=>'Collector','recordNumber'=>'CollectorNumber',
+				'year'=>'YearCollected','month'=>'MonthCollected','day'=>'DayCollected','decimalLatitude'=>'Latitude','decimalLongitude'=>'Longitude',
+				'minimumElevationInMeters'=>'MinimumElevation','maximumElevationInMeters'=>'MaximumElevation','maximumDepthInMeters'=>'MaximumDepth','minimumDepthInMeters'=>'MinimumDepth',
+				'occurrenceRemarks'=>'Notes','dateEntered','dateLastModified','collId','recordId','references');
+			foreach($fieldArr as $k => $v){
+				if(array_key_exists($k,$glFields)){
+					$fieldOutArr[] = $glFields[$k];
+				} 
+				else{
+					$fieldOutArr[] = strtoupper(substr($k,0,1)).substr($k,1);
+				}
+			}
+		}
+		else{
+			$fieldOutArr = array_keys($fieldArr);
+		}
+		$this->writeOutRecord($fh,$fieldOutArr);
 		if(!$this->collArr){
 			//Collection array not previously primed by source  
 			$sql1 = 'SELECT DISTINCT o.collid FROM omoccurrences o ';
@@ -1696,8 +1726,19 @@ class DwcArchiverOccurrence{
 				$urlPathPrefix = $this->serverDomain.$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
 			}
 			
-			$hasRecords = false;
 			while($r = $rs->fetch_assoc()){
+				//Set occurrence GUID based on GUID target
+				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
+				if($guidTarget == 'catalogNumber'){
+					$r['occurrenceID'] = $r['catalogNumber'];
+				}
+				elseif($guidTarget == 'symbiotaUUID'){
+					$r['occurrenceID'] = $r['recordId'];
+				}
+				if($this->limitToGuids && !$r['occurrenceID']){
+					// Skip record because there is no occurrenceID guid
+					continue;
+				}
 				$hasRecords = true;
 				//Protect sensitive records
 				if($this->redactLocalities && $r["localitySecurity"] == 1 && !in_array($r['collid'],$this->rareReaderArr)){
@@ -1723,14 +1764,6 @@ class DwcArchiverOccurrence{
 						if(strlen($guid) == 36) $guid = 'urn:uuid:'.$guid;
 						$r['collectionID'] = $guid;
 					}
-				}
-				//Set occurrence GUID based on GUID target
-				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
-				if($guidTarget == 'catalogNumber'){
-					$r['occurrenceID'] = $r['catalogNumber'];
-				}
-				elseif($guidTarget == 'symbiotaUUID'){
-					$r['occurrenceID'] = $r['recordId'];
 				}
 				if($this->schemaType == 'dwc'){
 					unset($r['localitySecurity']);
@@ -1760,10 +1793,6 @@ class DwcArchiverOccurrence{
 				$this->writeOutRecord($fh,$r);
 			}
 			$rs->free();
-			if(!$hasRecords){
-				$this->writeOutRecord($fh,array('No records returned. Modify query variables to be more inclusive.'));
-				$this->logOrEcho("No records returned. Modify query variables to be more inclusive. \n");
-			}
 		}
 		else{
 			$this->logOrEcho("ERROR creating occurrence file: ".$this->conn->error."\n");
@@ -1771,7 +1800,12 @@ class DwcArchiverOccurrence{
 		}
 
 		fclose($fh);
-    	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
+		if(!$hasRecords){
+			$filePath = false;
+			//$this->writeOutRecord($fh,array('No records returned. Modify query variables to be more inclusive.'));
+			$this->logOrEcho("No records returned. Modify query variables to be more inclusive. \n");
+		}
+		$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 		return $filePath;
 	}
 	
@@ -2145,48 +2179,46 @@ class DwcArchiverOccurrence{
 	}
 
 	private function setUpperTaxonomy(){
-		if($this->schemaType != 'coge'){
-			if(!$this->upperTaxonomy){
-				$sqlOrder = 'SELECT t.sciname AS family, t2.sciname AS taxonorder '.
-					'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-					'INNER JOIN taxa t2 ON e.parenttid = t2.tid '. 
-					'WHERE t.rankid = 140 AND t2.rankid = 100';
-				$rsOrder = $this->conn->query($sqlOrder);
-				while($rowOrder = $rsOrder->fetch_object()){
-					$this->upperTaxonomy[strtolower($rowOrder->family)]['o'] = $rowOrder->taxonorder;
-				}
-				$rsOrder->free();
-				
-				$sqlClass = 'SELECT t.sciname AS family, t2.sciname AS taxonclass '.
-					'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-					'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
-					'WHERE t.rankid = 140 AND t2.rankid = 60';
-				$rsClass = $this->conn->query($sqlClass);
-				while($rowClass = $rsClass->fetch_object()){
-					$this->upperTaxonomy[strtolower($rowClass->family)]['c'] = $rowClass->taxonclass;
-				}
-				$rsClass->free();
-				
-				$sqlPhylum = 'SELECT t.sciname AS family, t2.sciname AS taxonphylum '.
-					'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-					'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
-					'WHERE t.rankid = 140 AND t2.rankid = 30';
-				$rsPhylum = $this->conn->query($sqlPhylum);
-				while($rowPhylum = $rsPhylum->fetch_object()){
-					$this->upperTaxonomy[strtolower($rowPhylum->family)]['p'] = $rowPhylum->taxonphylum;
-				}
-				$rsPhylum->free();
-				
-				$sqlKing = 'SELECT t.sciname AS family, t2.sciname AS kingdom '.
-					'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-					'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
-					'WHERE t.rankid = 140 AND t2.rankid = 10';
-				$rsKing = $this->conn->query($sqlKing);
-				while($rowKing = $rsKing->fetch_object()){
-					$this->upperTaxonomy[strtolower($rowKing->family)]['k'] = $rowKing->kingdom;
-				}
-				$rsKing->free();
+		if(!$this->upperTaxonomy){
+			$sqlOrder = 'SELECT t.sciname AS family, t2.sciname AS taxonorder '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '. 
+				'WHERE t.rankid = 140 AND t2.rankid = 100';
+			$rsOrder = $this->conn->query($sqlOrder);
+			while($rowOrder = $rsOrder->fetch_object()){
+				$this->upperTaxonomy[strtolower($rowOrder->family)]['o'] = $rowOrder->taxonorder;
 			}
+			$rsOrder->free();
+			
+			$sqlClass = 'SELECT t.sciname AS family, t2.sciname AS taxonclass '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+				'WHERE t.rankid = 140 AND t2.rankid = 60';
+			$rsClass = $this->conn->query($sqlClass);
+			while($rowClass = $rsClass->fetch_object()){
+				$this->upperTaxonomy[strtolower($rowClass->family)]['c'] = $rowClass->taxonclass;
+			}
+			$rsClass->free();
+			
+			$sqlPhylum = 'SELECT t.sciname AS family, t2.sciname AS taxonphylum '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+				'WHERE t.rankid = 140 AND t2.rankid = 30';
+			$rsPhylum = $this->conn->query($sqlPhylum);
+			while($rowPhylum = $rsPhylum->fetch_object()){
+				$this->upperTaxonomy[strtolower($rowPhylum->family)]['p'] = $rowPhylum->taxonphylum;
+			}
+			$rsPhylum->free();
+			
+			$sqlKing = 'SELECT t.sciname AS family, t2.sciname AS kingdom '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+				'WHERE t.rankid = 140 AND t2.rankid = 10';
+			$rsKing = $this->conn->query($sqlKing);
+			while($rowKing = $rsKing->fetch_object()){
+				$this->upperTaxonomy[strtolower($rowKing->family)]['k'] = $rowKing->kingdom;
+			}
+			$rsKing->free();
 		}
 	}
 
@@ -2233,6 +2265,10 @@ class DwcArchiverOccurrence{
 		}
 	}
 	
+	public function setLimitToGuids($testValue){
+		if($testValue) $this->limitToGuids = true;
+	}
+
 	public function setExtended($e){
 		$this->extended = $e;
 	} 
