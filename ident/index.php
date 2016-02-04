@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($SERVER_ROOT.'/content/lang/indent/index.'.$LANG_TAG.'.php');
+include_once($SERVER_ROOT.'/content/lang/ident/index.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 ?>
 <html>

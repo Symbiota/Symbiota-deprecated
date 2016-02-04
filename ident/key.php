@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/KeyDataManager.php');
-include_once($SERVER_ROOT.'/content/lang/indent/key.'.$LANG_TAG.'.php');
+include_once($SERVER_ROOT.'/content/lang/ident/key.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 $editable = false;
 if($isAdmin || array_key_exists("KeyEditor",$userRights)){

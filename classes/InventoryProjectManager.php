@@ -123,25 +123,6 @@ class InventoryProjectManager {
 		return $returnArr;
 	}
 	
-	public function getSurveyLists(){
-		$returnArr = Array();
-		$sql = "SELECT s.surveyid, s.projectname, s.latcentroid, s.longcentroid ".
-			"FROM omsurveyprojlink spl INNER JOIN omsurveys s ON spl.surveyid = s.surveyid ".
-			"WHERE (spl.pid = ".$this->pid.") ".
-			"ORDER BY s.SortSequence, s.projectname";
-		$rs = $this->conn->query($sql);
-		$cnt = 0;
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->surveyid] = $this->cleanOutStr($row->projectname);
-			if($cnt < 50 && $row->latcentroid){
-				$this->surveyCoord[] = $row->latcentroid.','.$row->longcentroid;
-			}
-			$cnt++;
-		}
-		$rs->free();
-		return $returnArr;
-	}
-
 	public function getGoogleStaticMap($type){
 		$googleUrlLocal = $this->googleUrl;
 		//$googleUrlLocal .= "&zoom=6";

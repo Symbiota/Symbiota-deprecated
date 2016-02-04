@@ -1,7 +1,7 @@
 <?php
 /*
 ------------------
-Language: Espaï¿½ol (Spanish)
+Language: Español (Spanish)
 ------------------
 */
 
@@ -16,7 +16,7 @@ $LANG['NOTES'] = 'Notes';
 $LANG['PUBLIC'] = 'Public';
 $LANG['PRIVATE'] = 'Private';
 $LANG['SORTSEQ'] = 'Sort Sequence';
-$LANG['SUBEDIT'] = 'Submit Edits';
+$LANG['SUBMITEDIT'] = 'Submit Edits';
 $LANG['PROJNAME'] = 'Project Name';
 $LANG['RESCHECK'] = 'Research Checklists';
 $LANG['RESCHECKQUES'] = 'Research checklists are pre-compiled by biologists.
@@ -53,8 +53,3 @@ $LANG['SUCINVPROJ'] = 'Success: Inventory Project created! To add checklists to 
 $LANG['TOGGLEEDIT'] = 'Toggle Editing Functions';
 $LANG['MAPREP'] = 'Map representation of checklists';
 ?>
- * Created by PhpStorm.
- * User: David Fleming
- * Date: 1/27/16
- * Time: 12:45 AM
- */ 

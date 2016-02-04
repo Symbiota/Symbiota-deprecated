@@ -335,9 +335,8 @@ if($isEditable && $projSubmit){
 				?>
 		        <div style="margin:20px;">
 		            <?php
-		            $researchList = $projManager->getResearchChecklists();
-					if($researchList){
-					?>
+					if($researchList = $projManager->getResearchChecklists()){
+						?>
 						<div style="font-weight:bold;font-size:130%;">
                             <?php echo $LANG['RESCHECK'];?>
 							<span onclick="toggleResearchInfoBox(this);" title="<?php echo $LANG['QUESRESSPEC'];?>" style="cursor:pointer;">
@@ -395,52 +394,9 @@ if($isEditable && $projSubmit){
 								<?php } ?>
 							</ul>
 						</div>
-					<?php }
-					$surveyList = $projManager->getSurveyLists();
-					if($surveyList){
-					?>
-						<div style="clear:both;">
-							<div style="font-weight:bold;font-size:130%;">
-                                <?php echo $LANG['SURVSPEC'];?>
-								<span onclick="toggleSurveyInfoBox(this);" title="<?php echo $LANG['QUESDYNAM'];?>" style="cursor:pointer;">
-									<img src="../images/qmark_big.png" style="height:15px;"/>
-								</span> 
-								<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $pid;?>" title="<?php echo $LANG['MAPCHECK'];?>">
-									<img src="../images/world.png" style="width:14px;border:0" />
-								</a>
-							</div>
-						</div>
-						<div id="surveylistpopup" class="genericpopup" style="display:none;">
-							<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-                            <?php echo $LANG['SURVSPECPARA'];?>
-						</div>
 						<?php 
-						$gMapUrl = $projManager->getGoogleStaticMap("survey");
-						if($gMapUrl){
-							?>
-							<div style="float:right;text-align:center;">
-								<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $pid;?>" title="Map Checklists">
-									<img src="<?php echo $gMapUrl; ?>" title="<?php echo $LANG['MAPREP'];?>" alt="Map representation of checklists" />
-									<br/>
-                                    <?php echo $LANG['OPENMAP'];?>
-								</a>
-							</div>
-							<?php
-						} 
-						?>
-						<div style="float:left;">
-							<ul>
-							<?php 	
-							foreach($surveyList as $key=>$value){
-				            ?>
-			            
-								<li>
-									<a href='../checklists/survey.php?surveyid=<?php echo $key.'&proj='.$pid;?>'><?php echo $value;?></a> 
-								</li>
-								<?php } ?>
-							</ul>
-						</div>
-					<?php } ?>
+					}
+					?>
 				</div>
 				<?php
 			}

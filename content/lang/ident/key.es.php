@@ -1,7 +1,7 @@
 <?php
 /*
 ------------------
-Language: English
+Language: Español
 ------------------
 */
 
@@ -22,9 +22,3 @@ $LANG['NOMATCH'] = 'There are no species matching your criteria. Please deselect
 $LANG['SPECCOUNT'] = 'Species Count';
 $LANG['EDITMORP'] = 'Edit morphology';
 ?>
-
- * Created by PhpStorm.
- * User: David Fleming
- * Date: 2/2/16
- * Time: 11:48 PM
- */ 
