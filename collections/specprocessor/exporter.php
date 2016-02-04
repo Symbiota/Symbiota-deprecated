@@ -97,11 +97,43 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 			}
 
 			//CoGe GeoLocate functions
+			function cogeCheckAuthentication(){
+				//$("#cogeStatus").html("");
+				$("#coge-status").css('color', 'orange');
+				$("#coge-status").html("Checking status...");
+
+				$.ajax({
+					type: "GET",
+					url: cogeUrl,
+					crossDomain: true,
+					xhrFields: { withCredentials: true },
+					dataType: 'json'
+				}).done(function( response ) {
+					var result = response.result;
+					if(result == "authentication required"){
+						$("#coge-status").css('color', 'green');
+						$("#coge-status").html("Connected");
+						$("#builddwcabutton").prop("disabled",true);
+						cogeGetUserCommunityList();
+					}
+					else{
+						$("#coge-status").html("Unauthorized");
+						$("#coge-status").css("color", "red");
+						$("#builddwcabutton").prop("disabled",true);
+					}
+				}).fail(function(jqXHR, textStatus, errorThrown ){
+					$("#coge-status").html("Unauthorized");
+					$("#coge-status").css("color", "red");
+					alert( "ERROR: it may be that GeoLocate has not been configured to automatically accept files from this Symbiota portal " );
+				});
+			}			
+
 			function cogePublishDwca(f){
 				if($("#countdiv").html() == 0){
 					alert("No records exist matching search criteria");
 					return false;
 				}
+				$("#coge-download").show();
 				$.ajax({
 					type: "POST",
 					url: "rpc/coge_build_dwca.php",
@@ -117,7 +149,14 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						cv2: f.customvalue2.value
 					}
 				}).done(function( response ) {
-					alert(response);
+					var result = response.result;
+					$("#coge-download").hide();
+					if(result == "ERROR"){
+						alert(result);
+					}
+					else{
+						cogeSubmitData(response);
+					}
 				});
 			}
 
@@ -158,47 +197,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 				});
 			}
 
-			function cogeCheckAuthentication(){
-				$("#cogeStatus").html("");
-				$.ajax({
-					type: "GET",
-					url: 'rpc/coge_check_authentication.php'
-				}).done(function( response ) {
-					if(response == 1){
-						$("#cogeStatus").css('color', 'green');
-						$("#cogeStatus").html("Connected");
-					}
-					else{
-						alert("You are not logged into to the GeoLocate Collaborative Georeferencing Data Portal (CoGe). The CoGe login page will open in a new tab. Login and then return to this page and recheck connection status.");
-						window.open("https://www.museum.tulane.edu/coge/Login.aspx","_blank");
-						$("#cogeStatus").css("color", "red");
-						$("#cogeStatus").html("Disconnected");
-					}
-				});
-			}			
-
-			function cogeCheckAuthentication_old(){
-				//$("#cogeStatus").html("");
-				$.ajax({
-					type: "GET",
-					url: cogeUrl
-					//dataType: "json"
-				}).done(function( response ) {
-					alert(response);
-					response = response.trim();
-					alert(response);
-					if(response.substring(0,1) == '{'){
-						$("#cogeStatus").css('color', 'green');
-						$("#cogeStatus").html("Connected");
-					}
-					else{
-						$("#cogeStatus").css('color', 'red');
-						$("#cogeStatus").html("Disconnected");
-					}
-				});
-			}			
-
 			function cogeSubmitData(dwcaPath){
+				$("#coge-push2coge").show();
 				$.ajax({
 					type: "POST",
 					url: cogeUrl,
@@ -206,7 +206,9 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					data: { t: "import", q: dwcaPath }
 				}).done(function( response ) {
 					//{"result":{"datasourceId":"7ab8ffb8-032a-4f7a-8968-a012ce287c2d"}}
-					
+					var result = response.result;
+					alert(result.datasourceId);
+					$("#coge-push2coge").hide();
 				});
 			}			
 
@@ -242,7 +244,25 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					data: { t: "comlist" }
 				}).done(function( response ) {
 					//{"result":[{"name":"Sandbox","description":"Feel free to join and experiment.","role":"Owner"},{"name":"TU Volunteer Georeferencing","description":"This project focuses on georeferencing selected data from FishNet and involves volunteers from the Tulane University student community.","role":"Owner"},{"name":"Empty Community","description":"Testing ONLY","role":"Owner"},{"name":"FSU","description":"Test FSU site","role":"Admin"},{"name":"Penstemon","description":"This web site will focus on georeferencing specimens of Penstemon but its purpose is to help those involved gain a better understanding of how to use collaborative georeferencing.","role":"Admin"},{"name":"FishNet 2","description":"Collaborative georeferencing of data from FishNet 2","role":"Owner"},{"name":"NR Box","description":"","role":"Owner"},{"name":"TU FishNet Service Group","description":"","role":"User"},{"name":"Engine Georeferencing","description":"","role":"User"},{"name":"SIUC FishNet","description":"Records from the SIUC fish Collections","role":"Owner"}]} 
-					
+					//{"result":[{"name":"NR Box","description":"","role":"User"},{"name":"Phoenix","description":"General Areas around Phoenix that need coordinates","role":"Owner"}]}
+					var result = response.result;
+					if(result == "authentication required"){
+						alert("Not Authenicated");
+					}
+					else{
+						$("#coge-comm-div").show();
+						for(var i in result){
+							htmlOut = '<div style="margin:5px">';
+							var name = result[i].name;
+							htmlOut = htmlOut + "<b>"+name+"</b> ";
+							var role = result[i].role;
+							htmlOut = htmlOut + "("+role+")";
+							var descr = result[i].description;
+							if(descr != "") htmlOut = htmlOut + ": "+name;
+							htmlOut = '</div>';
+							$("#commlist-div").html(htmlOut);
+						}
+					}
 				});
 			}	
 		</script>
@@ -256,8 +276,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					<form name="submenuForm" method="post" action="index.php">
 						<select name="displaymode" onchange="this.form.submit()">
 							<option value="0">Custom Export</option>
-							<option value="1">Georeference Export</option>
-							<option value="2">GeoLocate Toolkit</option>
+							<option value="1" <?php echo ($displayMode==1?'selected':''); ?>>Georeference Export</option>
+							<option value="2" <?php echo ($displayMode==2?'selected':''); ?>>GeoLocate Toolkit</option>
 						</select>
 						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 						<input name="tabindex" type="hidden" value="5" />
@@ -577,9 +597,13 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 											</div>
 											<div>
 												<b>CoGe Authentication:</b>
-												<span id="cogeStatus" style="width:150px;color:red;">Disconnected</span>
-												<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" disabled /></span>
+												<span id="coge-status" style="width:150px;color:red;">Disconnected</span>
+												<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" /></span>
 												<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank">Login to CoGe</a></span>
+											</div>
+											<div id="coge-comm-div" style="display:none;margin:5px">
+												<div style="font-weight:bold">Available Communities</div>
+												<div id="commlist-div" style="margin:10px"></div>
 											</div>
 										</fieldset>
 										<div style="margin:20px;">
@@ -587,7 +611,10 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 											<input name="format" type="hidden" value="csv" />
 											<input name="schema" type="hidden" value="coge" />
 											<div style="margin:5px">
-												<input name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> *In development <br/>
+												<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" /> 
+												<span id="coge-download" style="display:none;color:orange">Downloading data... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
+												<span id="coge-push2coge" style="display:none;color:orange">Pushing data to CoGe... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
+												 *In development
 											</div>
 											<div style="margin:5px">
 												<input name="submitaction" type="submit" value="Download Records Locally" />

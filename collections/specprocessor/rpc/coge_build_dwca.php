@@ -43,8 +43,20 @@ if($collid && is_numeric($collid)){
 		}
 		$tPath .= "temp/data/geolocate/";
 		$dwcaHandler->setTargetPath($tPath);
-		$retArr['cnt'] = $dwcaHandler->getOccurrenceCnt();
-		$retArr['path'] = $dwcaHandler->createDwcArchive('CoGeCommunityFile'.'_'.time());
+		$cnt = $dwcaHandler->getOccurrenceCnt();
+		$path = $dwcaHandler->createDwcArchive('CoGeCommunityFile'.'_'.time());
+		if($cnt){
+			if(file_exists($path)){
+				$retArr['result']['cnt'] = $cnt;
+				$retArr['result']['path'] = $path;
+			}
+			else{
+				$retArr['result'] = 'ERROR';
+			}
+		}
+		else{
+			$retArr['result'] = 'Zero records returned';
+		}
 	}
 }
 echo json_encode($retArr)

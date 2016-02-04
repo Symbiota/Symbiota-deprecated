@@ -1,0 +1,77 @@
+<!DOCTYPE html >
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>For testing GeoLocate web services</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script language="javascript">
+		var cogeUrl = "https://www.museum.tulane.edu/coge/symbiota/";
+		var d;
+		function cogeCheckStatus(){
+			$.ajax({
+				type: "GET",
+				url: cogeUrl,
+				crossDomain: true,
+				xhrFields: { withCredentials: true },
+				dataType: 'json'
+			})
+			.done(function( data ) {
+					$("#coge-status").html("Connected");
+					$("#coge-status").css("color", "green");
+					var result = data.result;
+					if  (result != "authentication required")
+					{
+						$("#coge-name").html(result.name);
+						$("#coge-name").css("color", "green");
+						$("#coge-description").html(result.description);
+						$("#coge-description").css("color", "green");
+						$("#coge-version").html(result.version);
+						$("#coge-version").css("color", "green");
+					}
+					else
+					{
+						$("#coge-status").html("Unauthorized");
+						$("#coge-status").css("color", "red");
+					}
+			})
+			.fail(function(){
+				$("#coge-status").html("Failed");
+				$("#coge-status").css("color", "red");
+			});
+		}
+		
+		function reset(){
+			$("#coge-status").html("Unknown");
+			$("#coge-status").css("color", "black");
+			$("#coge-name").html("");
+			$("#coge-description").html("");
+			$("#coge-version").html("");
+		}
+	</script>
+</head>
+<body>
+	<div>
+		<div style="clear:both;height:20px;">
+			<div style="float:left;font-weight:bold;">Status:</div> 
+			<div id="coge-status" style="float:left;margin-left:5px">Not Connected</div>
+		</div>
+		<div style="clear:both;height:20px;">
+			<div style="float:left;font-weight:bold;">Name:</div> 
+			<div id="coge-name" style="float:left;margin-left:5px;color:green;"></div>
+		</div>
+		<div style="clear:both;height:20px;">
+			<div style="float:left;font-weight:bold;">Description:</div> 
+			<div id="coge-description" style="float:left;margin-left:5px;color:green;"></div>
+		</div>
+		<div style="clear:both;height:20px;">
+			<div style="float:left;font-weight:bold;">Version:</div> 
+			<div id="coge-version" style="float:left;margin-left:5px;color:green;"></div>
+		</div>
+		<div style="clear:both;margin:15px">
+			<div style="float:left"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckStatus()" /></div>
+			<div style="float:left;margin-left:30px;"><input type="button" name="resetButton" value="Reset" onclick="reset()" /></div>
+			<div style="float:left;margin-left:30px;"><a href="https://www.museum.tulane.edu/coge/" target="_blank">Login to CoGe</a></div>
+		</div> 
+	</div>
+</body>
+</html>
