@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/KeyDataManager.php');
+include_once($SERVER_ROOT.'/content/lang/indent/key.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 $editable = false;
 if($isAdmin || array_key_exists("KeyEditor",$userRights)){
@@ -59,7 +60,8 @@ if($chars){
 
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Web-Key: <?php echo preg_replace('/\<[^\>]+\>/','',$dataManager->getClName()); ?></title>
+	<title><?php echo $defaultTitle; ?><?php echo $LANG['WEBKEY'];?>
+        <?php echo preg_replace('/\<[^\>]+\>/','',$dataManager->getClName()); ?></title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name="keywords" content="interactive key,plants identification,<?php echo $dataManager->getClName(); ?>" />
@@ -91,7 +93,7 @@ if($chars){
 	}
 	else{
 		echo '<div class="navpath">';
-		echo '<a href="../index.php">Home</a> &gt;&gt; ';
+		echo '<a href="../index.php">'.$LANG['HOME'].'</a> &gt;&gt; ';
 		if($dynClid){
 			if($dataManager->getClType() == 'Specimen Checklist'){
 				echo '<a href="'.$clientRoot.'/collections/list.php?tabindex=0">';
@@ -120,10 +122,10 @@ if($chars){
 			<tr>
 			<td valign="top" width="200">
 				<div>
-					<div style="font-weight:bold; margin-top:0.5em;">Taxon:</div>
+					<div style="font-weight:bold; margin-top:0.5em;"><?php echo $LANG['TAXON'];?>:</div>
 					<select name="taxon">
 				  		<?php  
-			  				echo "<option value='All Species'>-- Select a Taxonomic Group --</option>\n";
+			  				echo "<option value='All Species'>".$LANG['SELECTTAX']."</option>\n";
 				  			$selectList = Array();
 				  			$selectList = $dataManager->getTaxaFilterList();
 				  			foreach($selectList as $value){
@@ -138,7 +140,7 @@ if($chars){
 					<input type="hidden" id="dynclid" name="dynclid" value="<?php echo $dynClid; ?>" />
 					<input type="hidden" id="proj" name="proj" value="<?php echo $projValue; ?>" />
 					<input type="hidden" id="rv" name="rv" value="<?php echo $dataManager->getRelevanceValue(); ?>" />
-				    <input type="submit" name="submitbutton" id="submitbutton" value="Display/Reset Species List"/>
+				    <input type="submit" name="submitbutton" id="submitbutton" value="<?php echo $LANG['DISPRESSPEC'];?>"/>
 				</div>
 		  		<hr size="2" />
 			  		
@@ -152,7 +154,7 @@ if($chars){
 					}
 					echo "</select></div>\n";
 		  		}
-		  		echo "<div style='margin:5px'>Display as: <select name='displaymode' onchange='javascript: document.forms[0].submit();'><option value='0'>Scientific Name</option><option value='1'".($displayMode?" SELECTED":"").">Common Name</option></select></div>";
+                echo "<div style='margin:5px'>".$LANG['DISPLAY'].": <select name='displaymode' onchange='javascript: document.forms[0].submit();'><option value='0'>".$LANG['SCINAME']."</option><option value='1'".($displayMode?" SELECTED":"").">".$LANG['COMMON']."</option></select></div>";
 		  		if($chars){
 					//echo "<div id='showall' class='dynamControl' style='display:none'><a href='#' onclick='javascript: toggleAll();'>Show All Characters</a></div>\n";
 					//echo "<div class='dynamControl' style='display:block'><a href='#' onclick='javascript: toggleAll();'>Hide Advanced Characters</a></div>\n";
@@ -188,10 +190,10 @@ if($chars){
 						<?php 
 						$count = $dataManager->getTaxaCount();
 					  	if($count > 0){
-					  		echo "<tr><td colspan='2'>Species Count: ".$count."</td></tr>\n";
+					  		echo "<tr><td colspan='2'>".$LANG['SPECCOUNT'].": ".$count."</td></tr>\n";
 					  	}
 					  	else{
-								echo "<tr><td colspan='2'>There are no species matching your criteria. Please deselect some characters to make the search less restrictive.</td></tr>\n";
+								echo "<tr><td colspan='2'>".$LANG['NOMATCHING']."</td></tr>\n";
 					  	} 
 						ksort($taxa);
 					  	foreach($taxa as $family => $species){
@@ -206,7 +208,7 @@ if($chars){
 									echo "&nbsp;<a href='".$newLink."' target='_blank'><img src='".$secondaryIcon."' width='40' border='0' title='View Google Images'/></a>";
 								}
 								if($editable){
-									echo "<a href='tools/editor.php?tid=$tid&lang=".$defaultLang."' target='_blank'><img src='../images/edit.png' width='15px' border='0' title='Edit morphology' /></a>\n";
+									echo "<a href='tools/editor.php?tid=$tid&lang=".$defaultLang."' target='_blank'><img src='../images/edit.png' width='15px' border='0' title='".$LANG['EDITMORP']."' /></a>\n";
 								}
 								echo "</td></tr>\n";
 							}

@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/InventoryProjectManager.php');
+include_once($SERVER_ROOT.'/content/lang/projects/index.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
@@ -26,14 +27,13 @@ if($isAdmin || (array_key_exists("ProjAdmin",$userRights) && in_array($pid,$user
 }
 
 if($isEditable && $projSubmit){
-	if($projSubmit == 'Add New Project'){
+	if($projSubmit == 'addnewproj'){
 		$pid = $projManager->addNewProject($_POST);
 		if($pid){
-			$statusStr = 'Success: Inventory Project created! To add checklists to the project, open the editing pane by '.
-				'clicking on editing symbol to the far right of project name and then select the Checklist Management tab.';
+            $statusStr = $LANG['SUCINVPROJ'];
 		}
 	}
-	elseif($projSubmit == 'Submit Edits'){
+	elseif($projSubmit == 'subedit'){
 		$projManager->submitProjEdits($_POST);
 	}
 	elseif($projSubmit == 'deluid'){
@@ -57,7 +57,7 @@ if($isEditable && $projSubmit){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?>: Inventory Projects</title>
+	<title><?php echo $defaultTitle; ?><?php echo $LANG['INVPROJ'];?></title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
@@ -138,15 +138,15 @@ if($isEditable && $projSubmit){
 
 		function validateProjectForm(f){
 			if(f.projname.value == ""){
-				alert("Project name field cannot be empty.");
+				alert("<?php echo $LANG['PROJNAMEEMP'];?>.");
 				return false;
 			}
 			else if(!isNumeric(f.sortsequence.value)){
-				alert("Sort sequence can only be a numeric value.");
+				alert("<?php echo $LANG['ONLYNUMER'];?>.");
 				return false;
 			}
 			else if(f.fulldescription.value.length > 2000){
-				alert("Description can only have a maximum of 2000 characters. The description is currently " + f.fulldescription.value.length + " characters long.");
+				alert("<?php echo $LANG['DESCMAXCHAR'];?>" + f.fulldescription.value.length + " <?php echo $LANG['CHARLONG'];?>.");
 				return false;
 			}
 			return true;
@@ -154,7 +154,7 @@ if($isEditable && $projSubmit){
 
 		function validateChecklistForm(f){
 			if(f.clid.value == ""){
-				alert("Select a checklist from the pulldown");
+				alert("<?php echo $LANG['SELECTCHECKPULL'];?>");
 				return false;
 			}
 			return true;
@@ -162,7 +162,7 @@ if($isEditable && $projSubmit){
 
 		function validateManagerAddForm(f){
 			if(f.uid.value == ""){
-				alert("Select a user from the pulldown");
+				alert("<?php echo $LANG['CHOOSEUSER'];?>");
 				return false;
 			}
 			return true;
@@ -188,7 +188,7 @@ if($isEditable && $projSubmit){
 		?>
 		<div class="navpath">
 			<?php echo $projects_indexCrumbs;?>
-			<b>Inventory Projects</b> 
+			<b><?php echo $LANG['INVPROJ'];?></b>
 		</div>
 		<?php 
 	}
@@ -209,7 +209,7 @@ if($isEditable && $projSubmit){
 		if($pid || $newProj){
 			if($isEditable && !$newProj){
 				?>
-				<div style="float:right;cursor:pointer;" onclick="toggleById('tabs');" title="Toggle Editing Functions">
+				<div style="float:right;cursor:pointer;" onclick="toggleById('tabs');" title="<?php echo $LANG['TOGGLEEDIT'];?>">
 					<img style="border:0px;" src="../images/edit.png"/>
 				</div>
 				<?php 
@@ -221,7 +221,7 @@ if($isEditable && $projSubmit){
 				<h1><?php echo $projArr["projname"]; ?></h1>
 				<div style='margin: 10px;'>
 					<div>
-						<b>Project Managers:</b> 
+						<b><?php echo $LANG['PROJMANAG'];?></b>
 						<?php echo $projArr["managers"];?>
 					</div>
 					<div style='margin-top:10px;'>
@@ -237,12 +237,12 @@ if($isEditable && $projSubmit){
 				?>
 				<div id="tabs" style="height:500px;margin:10px;display:<?php echo ($newProj||$editMode?'block':'none'); ?>;">
 				    <ul>
-				        <li><a href="#mdtab"><span>Metadata</span></a></li>
+				        <li><a href="#mdtab"><span><?php echo $LANG['METADATA'];?></span></a></li>
 				        <?php
 						if($pid){
 							?>
-							<li><a href="managertab.php?pid=<?php echo $pid; ?>"><span>Inventory Managers</span></a></li>
-							<li><a href="checklisttab.php?pid=<?php echo $pid; ?>"><span>Checklist Management</span></a></li>
+							<li><a href="managertab.php?pid=<?php echo $pid; ?>"><span><?php echo $LANG['INVMANAG'];?></span></a></li>
+							<li><a href="checklisttab.php?pid=<?php echo $pid; ?>"><span><?php echo $LANG['CHECKMANAG'];?></span></a></li>
 							<?php
 						}
 						?>
@@ -254,7 +254,7 @@ if($isEditable && $projSubmit){
 								<table style="width:100%;">
 									<tr>
 										<td>
-											Project Name:
+                                            <?php echo $LANG['PROJNAME'];?>:
 										</td>
 										<td>
 											<input type="text" name="projname" value="<?php if($projArr) echo $projArr["projname"]; ?>" style="width:95%;"/>
@@ -262,7 +262,7 @@ if($isEditable && $projSubmit){
 									</tr>	
 									<tr>
 										<td>
-											Managers: 
+                                            <?php echo $LANG['MANAG'];?>:
 										</td>
 										<td>
 											<input type="text" name="managers" value="<?php if($projArr) echo $projArr["managers"]; ?>" style="width:95%;"/>
@@ -270,7 +270,7 @@ if($isEditable && $projSubmit){
 									</tr>	
 									<tr>
 										<td>
-											Description: 
+                                            <?php echo $LANG['DESCRIP'];?>:
 										</td>
 										<td>
 											<textarea rows="8" cols="45" name="fulldescription" maxlength="2000" style="width:95%"><?php if($projArr) echo $projArr["fulldescription"];?></textarea>
@@ -278,7 +278,7 @@ if($isEditable && $projSubmit){
 									</tr>	
 									<tr>
 										<td>
-											Notes:
+                                            <?php echo $LANG['NOTES'];?>:
 										</td>
 										<td>
 											<input type="text" name="notes" value="<?php if($projArr) echo $projArr["notes"];?>" style="width:95%;"/>
@@ -286,18 +286,18 @@ if($isEditable && $projSubmit){
 									</tr>	
 									<tr>
 										<td>
-											Public: 
+                                            <?php echo $LANG['PUBLIC'];?>:
 										</td>
 										<td>
 											<select name="ispublic">
-												<option value="0">Private</option>
-												<option value="1" <?php echo ($projArr&&$projArr['ispublic']?'SELECTED':''); ?>>Public</option>
+												<option value="0"><?php echo $LANG['PRIVATE'];?></option>
+												<option value="1" <?php echo ($projArr&&$projArr['ispublic']?'SELECTED':''); ?>><?php echo $LANG['PUBLIC'];?></option>
 											</select>
 										</td>
 									</tr>	
 									<tr>
 										<td>
-											Sort Sequence: 
+                                            <?php echo $LANG['SORTSEQ'];?>:
 										</td>
 										<td>
 											<input type="text" name="sortsequence" value="<?php if($projArr) echo $projArr["sortsequence"];?>" style="width:40;"/>
@@ -309,13 +309,15 @@ if($isEditable && $projSubmit){
 												<?php 
 												if($newProj){
 													?>
-													<input type="submit" name="projsubmit" value="Add New Project" />
+													<input type="submit" name="submit" value="<?php echo $LANG['ADDNEWPR'];?>" />
+                                                    <input type="hidden" name="projsubmit" value="addnewproj" />
 													<?php
 												}
 												else{
 													?>
 													<input type="hidden" name="proj" value="<?php echo $pid;?>">
-													<input type="submit" name="projsubmit" value="Submit Edits" />
+                                                    <input type="hidden" name="projsubmit" value="subedit" />
+													<input type="submit" name="submit" value="<?php echo $LANG['SUBMITEDIT'];?>" />
 													<?php 
 												}
 												?>
@@ -337,28 +339,24 @@ if($isEditable && $projSubmit){
 					if($researchList){
 					?>
 						<div style="font-weight:bold;font-size:130%;">
-							Research Checklists
-							<span onclick="toggleResearchInfoBox(this);" title="What is a Research Species List?" style="cursor:pointer;">
+                            <?php echo $LANG['RESCHECK'];?>
+							<span onclick="toggleResearchInfoBox(this);" title="<?php echo $LANG['QUESRESSPEC'];?>" style="cursor:pointer;">
 								<img src="../images/qmark_big.png" style="height:15px;"/>
 							</span> 
-							<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $pid;?>" title="Map Checklists">
+							<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $pid;?>" title="<?php echo $LANG['MAPCHECK'];?>">
 								<img src='../images/world.png' style='width:14px;border:0' />
 							</a>
 						</div>
 						<div id="researchlistpopup" class="genericpopup" style="display:none;">
 							<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-				            Research checklists are pre-compiled by biologists.
-				            This is a very controlled method for building a species list, which allows for  
-				            specific specimens to be linked to the species names within the checklist and thus serve as vouchers. 
-				            Specimen vouchers are proof that the species actually occurs in the given area. If there is any doubt, one
-				            can inspect these specimens for verification or annotate the identification when necessary.
+                            <?php echo $LANG['RESCHECKQUES'];?>
 						</div>
 						<?php 
 						if($keyModIsActive === true || $keyModIsActive === 1){
 							?>
 							<div style="margin-left:15px;font-size:90%">
-								The <img src="../images/key.png" style="width: 12px;" alt="Golden Key Symbol" /> 
-								symbol opens the species list as an interactive key.
+                                <?php echo $LANG['THE'];?> <img src="../images/key.png" style="width: 12px;" alt="Golden Key Symbol" />
+                                <?php echo $LANG['SYMBOLOPEN'];?>.
 							</div>
 							<?php
 						}
@@ -367,9 +365,9 @@ if($isEditable && $projSubmit){
 							?>
 							<div style="float:right;text-align:center;">
 								<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $pid;?>" title="Map Checklists">
-									<img src="<?php echo $gMapUrl; ?>" title="Map representation of checklists" alt="Map representation of checklists" />
+									<img src="<?php echo $gMapUrl; ?>" title="<?php echo $LANG['MAPREP'];?>" alt="Map representation of checklists" />
 									<br/>
-									Click to Open Map
+                                    <?php echo $LANG['OPENMAP'];?>
 								</a>
 							</div>
 							<?php
@@ -403,25 +401,18 @@ if($isEditable && $projSubmit){
 					?>
 						<div style="clear:both;">
 							<div style="font-weight:bold;font-size:130%;">
-								Survey Species Lists 
-								<span onclick="toggleSurveyInfoBox(this);" title="What is a Dynamic Survey Species List?" style="cursor:pointer;">
+                                <?php echo $LANG['SURVSPEC'];?>
+								<span onclick="toggleSurveyInfoBox(this);" title="<?php echo $LANG['QUESDYNAM'];?>" style="cursor:pointer;">
 									<img src="../images/qmark_big.png" style="height:15px;"/>
 								</span> 
-								<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $pid;?>" title="Map checklists">
+								<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $pid;?>" title="<?php echo $LANG['MAPCHECK'];?>">
 									<img src="../images/world.png" style="width:14px;border:0" />
 								</a>
 							</div>
 						</div>
 						<div id="surveylistpopup" class="genericpopup" style="display:none;">
 							<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-				            Survey Species Lists are defined through the linkage of species occurrences 
-				            to a survey project name. This method allows long-term biological surveys to be conducted through group participation. 
-				            If a team member comes across a new species, they document the occurrence through a specimen collection or a
-				            photo observation. Linking the occurrence to a survey project automatically adds the species to the checklist. 
-				            Verification of the occurrence by taxonomic experts ensure that a correct identified has been made. If the occurrence was 
-				            misidentified, an annotation of the physical specimen within a collection or of an image stored within the system   
-							will automatically adjust the species. Explicit maintenance of the species list is unnecessary since the checklist is 
-							dynamically generated from the vouchers on demand. 
+                            <?php echo $LANG['SURVSPECPARA'];?>
 						</div>
 						<?php 
 						$gMapUrl = $projManager->getGoogleStaticMap("survey");
@@ -429,9 +420,9 @@ if($isEditable && $projSubmit){
 							?>
 							<div style="float:right;text-align:center;">
 								<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $pid;?>" title="Map Checklists">
-									<img src="<?php echo $gMapUrl; ?>" title="Map representation of checklists" alt="Map representation of checklists" />
+									<img src="<?php echo $gMapUrl; ?>" title="<?php echo $LANG['MAPREP'];?>" alt="Map representation of checklists" />
 									<br/>
-									Click to Open Map
+                                    <?php echo $LANG['OPENMAP'];?>
 								</a>
 							</div>
 							<?php
@@ -461,7 +452,7 @@ if($isEditable && $projSubmit){
 				?>
 				<h2><a href="index.php?pid=<?php echo $pid; ?>"><?php echo $projList["projname"]; ?></a></h2>
 				<div style="margin:0px 0px 30px 15px;">
-					<div><b>Managers:</b> <?php echo ($projList["managers"]?$projList["managers"]:'Not defined'); ?></div>
+					<div><b><?php echo $LANG['MANAG'];?>:</b> <?php echo ($projList["managers"]?$projList["managers"]:'Not defined'); ?></div>
 					<div style='margin-top:10px;'><?php echo $projList["descr"]; ?></div>
 				</div>
 				<?php 

@@ -1,11 +1,12 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/content/lang/indent/index.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 ?>
 <html>
 <head>
-<title><?php echo $defaultTitle; ?> Identification Keys</title>
+<title><?php echo $defaultTitle; ?><?php echo $LANG['IDKEY'];?></title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name='keywords' content='Symbiota, interactive key, identification' />
@@ -22,7 +23,7 @@ header("Content-Type: text/html; charset=".$charset);
 	if(isset($ident_indexCrumbs)){
 		echo "<div class='navpath'>";
 		echo $ident_indexCrumbs;
-		echo "<b>Identification Key Listing</b>";
+		echo "<b>".$LANG['IDKEYLIST']."</b>";
 		echo "</div>";
 	}
 	
@@ -31,10 +32,7 @@ header("Content-Type: text/html; charset=".$charset);
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<h2>Identification Keys</h2>
-	    <div style="margin:20px">Symbiota interactive identification keys have the ability to function with any 
-	    taxonomically complex species list. This enables a keying interface that can even be used with species 
-	    lists dynamically generated from geo-referenced specimen data. Below is a collection of species lists 
-	    that can be used with the key interface. 
+	    <div style="margin:20px"><?php echo $LANG['IDKEYPARA'];?>
 		</div>
 	                    
 	    <div style='margin:20px;'>
@@ -49,7 +47,7 @@ header("Content-Type: text/html; charset=".$charset);
 				echo "<span class='stcl-".$pid."' style='display:none;'><img src='../images/plus_sm.png'/></span>";
 				echo "<span class='stcl-".$pid."' style='display:inline;'><img src='../images/minus_sm.png'/></span>";
 				echo "&nbsp;&nbsp;".$projName."</span>&nbsp;&nbsp;";
-				echo "<a href='../checklists/clgmap.php?proj=".$pid."&target=keys' title='Show checklists on map'><img src='../images/world.png' style='width:10px;border:0' /></a>";
+				echo "<a href='../checklists/clgmap.php?proj=".$pid."&target=keys' title='".$LANG['SHOWCHECK']."'><img src='../images/world.png' style='width:10px;border:0' /></a>";
 				echo "</h3>";
 				echo "<div class='stcl-".$pid."' style='display:block;'><ul>";
 				foreach($clArr as $clid => $clName){
