@@ -313,7 +313,7 @@ if($clid && $isEditor){
                         <div>
                             <!-- Display Details: 0 = false, 1 = true  -->
                             <input name='ddetails' id='ddetails' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["ddetails"])?"checked":""); ?> />
-                            <?php echo $LANG['SHOWDET'];?>
+                            <?php echo $LANG['SHOWDETAILS'];?>
                         </div>
                         <div>
                             <?php
@@ -334,7 +334,7 @@ if($clid && $isEditor){
                         <div>
                             <!-- Display Taxon Authors: 0 = false, 1 = true  -->
                             <input name='dauthors' id='dauthors' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dauthors"])?"checked":"")); ?>/>
-                            <?php echo $LANG['TAXONAUT'];?>
+                            <?php echo $LANG['TAXONAUTHOR'];?>
                         </div>
                         <div>
                             <!-- Display Taxa Alphabetically: 0 = false, 1 = true  -->

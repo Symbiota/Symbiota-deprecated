@@ -16,8 +16,7 @@ $LANG['LOCALITY'] = 'Locality';
 $LANG['TAXON'] = 'Taxon';
 $LANG['COLLECTION'] = 'Collection';
 $LANG['TARGETCOLL'] = 'Target Specific Collection';
-$LANG['CHECKVOUCINSTRUC'] = 'To use the voucher administration functions, it is first necessary to define a search terms
-							that will be used to limit occurrence records to those collected within the vicinity of the research area. ';
+$LANG['CHECKVOUCINSTRUC'] = 'To use the voucher administration functions, it is first necessary to define a search terms that will be used to limit occurrence records to those collected within the vicinity of the research area. ';
 $LANG['COLLECTOR'] = 'Collector';
 $LANG['LATN'] = 'Lat North';
 $LANG['LATS'] = 'Lat South';
@@ -42,9 +41,8 @@ $LANG['LISTEDBELOW'] = 'Listed below are occurrences that can be batch linked to
 $LANG['CHECKLISTID'] = 'Checklist ID';
 $LANG['ADDNAMECURRTAX'] = ' Add name using current taxonomy';
 $LANG['NOVOUCHLOCA'] = 'No vouchers located';
-$LANG['LISTEDBELOWARESPECINSTRUC'] = 'Listed below are species from the checklist that do not have linked specimen vouchers.
-										Click on name to use the search statement above to dynamically query the occurrence dataset for
-										possible voucher specimens. Use the pulldown to the right to display the specimens in a table format.';
+$LANG['LISTEDBELOWARESPECINSTRUC'] = 'Listed below are species from the checklist that do not have linked specimen vouchers. Click on name to use the search statement above to dynamically query the occurrence dataset for 
+possible voucher specimens. Use the pulldown to the right to display the specimens in a table format.';
 $LANG['ALLTAXACONTAINVOUCH'] = 'All taxa contain voucher links';
 $LANG['FULLSPECLIST'] = 'Full species list with vouchers (CSV)';
 $LANG['FULLPRINT'] = 'Full species list with vouchers (Print Friendly)';
