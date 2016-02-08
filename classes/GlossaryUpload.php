@@ -291,14 +291,14 @@ class GlossaryUpload{
 			'SELECT DISTINCT g.glossid, g.glossid '.
 			'FROM glossary AS g LEFT JOIN uploadglossary AS ug ON g.term = ug.term AND g.`language` = ug.`language` '.
 			'WHERE ug.term IS NOT NULL AND ISNULL(ug.currentGroupId) AND ug.`language` = "'.$primaryLanguage.'" '.
-			'AND g.glossid NOT IN(SELECT glossid FROM glossarytermlink) AND ISNULL(ug.synonym) ';
+			'AND g.glossid NOT IN(SELECT glossid FROM glossarytermlink) ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		
 		$this->outputMsg('Linking synonyms to new '.$primaryLanguage.' terms... ');
-		$sql = 'INSERT INTO glossarytermlink(glossgrpid,glossid) '.
-			'SELECT DISTINCT gt.glossgrpid, g1.glossid '.
+		$sql = 'INSERT INTO glossarytermlink(glossgrpid,glossid,relationshipType) '.
+			'SELECT DISTINCT gt.glossgrpid, g1.glossid, "synonym" '.
 			'FROM glossary AS g1 LEFT JOIN uploadglossary AS ug1 ON g1.term = ug1.term AND g1.`language` = ug1.`language` '.
 			'LEFT JOIN uploadglossary AS ug2 ON ug1.newGroupId = ug2.newGroupId '.
 			'LEFT JOIN glossary AS g2 ON g2.term = ug2.term AND g2.`language` = ug2.`language` '.
@@ -307,6 +307,19 @@ class GlossaryUpload{
 			'AND ug2.term IS NOT NULL AND ISNULL(ug2.currentGroupId) '.
 			'AND ug2.`language` = "'.$primaryLanguage.'" AND ISNULL(ug2.synonym) '.
 			'AND g1.glossid NOT IN(SELECT glossid FROM glossarytermlink) AND ug1.synonym = 1 ';
+		if(!$this->conn->query($sql)){
+			$this->outputMsg('ERROR: '.$this->conn->error,1);
+		}
+		$sql = 'INSERT INTO glossarytermlink(glossgrpid,glossid,relationshipType) '.
+			'SELECT DISTINCT gt.glossgrpid, g1.glossid, "synonym" '.
+			'FROM glossary AS g1 LEFT JOIN uploadglossary AS ug1 ON g1.term = ug1.term AND g1.`language` = ug1.`language` '.
+			'LEFT JOIN uploadglossary AS ug2 ON ug1.newGroupId = ug2.newGroupId '.
+			'LEFT JOIN glossary AS g2 ON g2.term = ug2.term AND g2.`language` = ug2.`language` '.
+			'LEFT JOIN glossarytermlink AS gt ON g2.glossid = gt.glossid '.
+			'WHERE ug1.term IS NOT NULL AND ISNULL(ug1.currentGroupId) AND ug1.`language` = "'.$primaryLanguage.'" '.
+			'AND ug2.term IS NOT NULL AND ISNULL(ug2.currentGroupId) '.
+			'AND ug2.`language` = "'.$primaryLanguage.'" AND ISNULL(ug2.synonym) '.
+			'AND g1.glossid NOT IN(SELECT glossid FROM glossarytermlink) AND ug2.synonym = 1 ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}

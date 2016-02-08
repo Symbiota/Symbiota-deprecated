@@ -427,7 +427,7 @@ function openTermPopup(glossid,tid){
 
 function leaveTermPopup(urlStr){
 	self.close();
-	opener.document.location = urlStr;
+	window.open(urlStr);
 	return false;
 }
 

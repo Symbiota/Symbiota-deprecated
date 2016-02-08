@@ -5,8 +5,9 @@ header("Content-Type: text/html; charset=".$charset);
 
 $glossId = array_key_exists('glossid',$_REQUEST)?$_REQUEST['glossid']:0;
 $glossgrpId = array_key_exists('glossgrpid',$_REQUEST)?$_REQUEST['glossgrpid']:0;
-$language = array_key_exists('language',$_REQUEST)?$_REQUEST['language']:'';
-$tId = array_key_exists('tid',$_REQUEST)?$_REQUEST['tid']:'';
+$language = array_key_exists('searchlanguage',$_REQUEST)?$_REQUEST['searchlanguage']:'';
+$keyword = array_key_exists('searchkeyword',$_REQUEST)?$_REQUEST['searchkeyword']:'';
+$tId = array_key_exists('searchtaxa',$_REQUEST)?$_REQUEST['searchtaxa']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $isEditor = false;
@@ -25,15 +26,13 @@ if($formSubmit){
 		$statusStr = $glosManager->editSources($_POST);
 	}
 	if($formSubmit == 'Search Terms' || $formSubmit == 'Edit Sources'){
-		$termList = $glosManager->getTermList($_POST['searchkeyword'],$_POST['searchlanguage'],$_POST['searchtaxa']);
-		$language = $_POST['searchlanguage'];
-		$tId = $_POST['searchtaxa'];
+		$termList = $glosManager->getTermList($keyword,$language,$tId);
 		if(isset($glossary_indexBanner)){
 			$sourceArr = $glosManager->getTaxonSources($tId);
 		}
 	}
 	if($formSubmit == 'Delete Term'){
-		$statusStr = $glosManager->deleteTerm($glossId,$glossgrpId);
+		$statusStr = $glosManager->deleteTerm($_POST);
 		$glossId = 0;
 	}
 }
@@ -321,7 +320,7 @@ if($formSubmit){
 							if($isEditor){
 								?>
 								<div style="float:right;">
-									<a href="sources.php?tid=<?php echo $tId; ?>&keyword=<?php echo $_POST['searchkeyword']; ?>&language=<?php echo $_POST['searchlanguage']; ?>&taxa=<?php echo $_POST['searchtaxa']; ?>">Edit Sources</a>
+									<a href="sources.php?tid=<?php echo $tId; ?>&keyword=<?php echo $keyword; ?>&language=<?php echo $language; ?>&taxa=<?php echo $tId; ?>">Edit Sources</a>
 								</div>
 								<div style="clear:both;"></div>
 								<?php
@@ -334,15 +333,15 @@ if($formSubmit){
 						if($isEditor){
 							?>
 							<div style="float:right;">
-								<a href="sources.php?tid=<?php echo $tId; ?>&keyword=<?php echo $_POST['searchkeyword']; ?>&language=<?php echo $_POST['searchlanguage']; ?>&taxa=<?php echo $_POST['searchtaxa']; ?>">Add Sources</a>
+								<a href="sources.php?tid=<?php echo $tId; ?>&keyword=<?php echo $keyword; ?>&language=<?php echo $language; ?>&taxa=<?php echo $tId; ?>">Add Sources</a>
 							</div>
 							<?php
 						}
 					}
 				}
-				$title = 'Terms for '.$taxonName.' in '.$_POST['searchlanguage'];
-				if($_POST['searchkeyword']){
-					$title .= ' and with a keyword of '.$_POST['searchkeyword'];
+				$title = 'Terms for '.$taxonName.' in '.$language;
+				if($keyword){
+					$title .= ' and with a keyword of '.$keyword;
 				}
 				echo '<div style="font-weight:bold;font-size:120%;">'.$title.'</div>';
 				echo '<div><ul>';

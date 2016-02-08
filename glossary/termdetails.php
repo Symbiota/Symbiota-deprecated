@@ -48,6 +48,12 @@ if($formSubmit){
 	elseif($formSubmit == 'Remove Relation'){
 		$glosManager->removeRelation($_POST);
 	}
+	elseif($formSubmit == 'Add Syn Relation'){
+		$statusStr = $glosManager->addSynRelation($_POST);
+	}
+	elseif($formSubmit == 'Remove Syn Relation'){
+		$glosManager->removeSynRelation($_POST);
+	}
 	elseif($formSubmit == 'Add Taxa Group'){
 		$glosManager->setGrpTaxaLink($_POST['tid'],$_POST['glossgrpid']);
 	}
@@ -316,14 +322,14 @@ else{
 									</div>
 								</div>
 								<div style="clear:both;padding-top:8px;float:right;">
-									<input name="glossid" type="hidden" value="<?php echo $glossgrpId; ?>" />
-									<input name="relglossid" id="synglossid" type="hidden" value="" />
+									<input name="sglossid" type="hidden" value="<?php echo $glossId; ?>" />
+									<input name="glossid" id="synglossid" type="hidden" value="" />
 									<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 									<input name="relglossgrpid" id="newsynglossgrpid" type="hidden" value="" />
 									<input name="language" id="newsynlanguage" type="hidden" value="<?php echo $termArr['language']; ?>" />
 									<input name="tid" id="newsyntid" type="hidden" value="<?php echo $tidStr; ?>" />
 									<input id="synorigterm" type="hidden" value="<?php echo $termArr['term']; ?>" />
-									<button name="formsubmit" type="submit" value="Add Relation">Add Synonym</button>
+									<button name="formsubmit" type="submit" value="Add Syn Relation">Add Synonym</button>
 								</div>
 							</fieldset>
 						</form>
@@ -339,7 +345,7 @@ else{
 										<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 										<input name="gltlinkid" type="hidden" value="<?php echo $synArr['gltlinkid']; ?>" />
 										<input name="relglossid" type="hidden" value="<?php echo $synArr['glossid']; ?>" />
-										<input type="image" name="formsubmit" src='../images/del.png'  value="Remove Relation" title="Remove Synonym">
+										<input type="image" name="formsubmit" src='../images/del.png'  value="Remove Syn Relation" title="Remove Synonym">
 									</form>
 								</div>
 								<div style="float:right;margin-right:10px;cursor:pointer;" onclick="" title="Edit Term">
@@ -701,6 +707,7 @@ else{
 							<input name="formsubmit" type="submit" value="Delete Term" <?php if($hasImages) echo 'DISABLED'; ?> />
 							<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
 							<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
+							<input name="language" type="hidden" value="<?php echo $termArr['language']; ?>" />
 						</fieldset>
 					</form>
 				</div>

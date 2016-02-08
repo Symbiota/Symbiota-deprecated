@@ -26,6 +26,7 @@ $translationStr = '';
 
 if($glossId){
 	$termArr = $glosManager->getTermArr($glossId);
+	$sciName = $glosManager->getSciName($tId);
 	$glossgrpId = $termArr['glossgrpid'];
 	$termGrpArr = $glosManager->getGrpArr($glossId,$glossgrpId,$termArr['language']);
 	if(isset($glossary_indexBanner)){
@@ -41,7 +42,7 @@ if($glossId){
 				$onClick = "leaveTermPopup('termdetails.php?glossid=".$synArr['glossid']."'); return false;";
 				$synonymStr .= ' '.$synArr['term'];
 				if($isEditor){
-					$synonymStr .= ' <a href="#" onclick="'.$onClick.'">';
+					$synonymStr .= ' <a href="#" onclick="'.$onClick.'" target="_blank">';
 					$synonymStr .= '<img style="border:0px;width:12px;" src="../images/edit.png" /></a>';
 				}
 				if($i < ($cnt - 1)){
@@ -63,7 +64,7 @@ if($glossId){
 				$translationStr .= ' '.$transArr['term'];
 				$translationStr .= ' ('.$transArr['language'].')';
 				if($isEditor){
-					$translationStr .= ' <a href="#" onclick="'.$onClick.'">';
+					$translationStr .= ' <a href="#" onclick="'.$onClick.'" target="_blank">';
 					$translationStr .= '<img style="border:0px;width:12px;" src="../images/edit.png" /></a>';
 				}
 				if($i < ($cnt - 1)){
@@ -97,14 +98,14 @@ else{
 	<div id="innertext" style="width:625px;margin-left:0px;margin-right:0px;">
 		<div id="tabs" style="padding:10px;width:600px;margin:0px;">
 			<div style="clear:both;width:600px;margin-bottom:5px;font-size:12px;">
-				<?php echo $termArr['sciname']; ?>
+				<?php echo $sciName; ?>
 			</div>
 			<div style="clear:both;width:600px;">
 				<?php
 				if($isEditor){
 					?>
 					<div style="float:right;margin-right:15px;cursor:pointer;" onclick="" title="Edit Term Data">
-						<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $glossId;?>'); return false;">
+						<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $glossId;?>'); return false;" target="_blank">
 							<img style="border:0px;width:12px;" src="../images/edit.png" />
 						</a>
 					</div>
@@ -186,12 +187,12 @@ else{
 						if(isset($glossary_indexBanner)){
 							if($sourceArr){
 								?>
-								<div id="sourcetoggle" style="float:right;clear:both;">
-									<div style="" onclick="toggle('sourcesdiv');return false;">
-										<a href="#">Show Sources</a>
+								<div id="sourcetoggle" style="float:right;clear:both;margin-top:8px;margin-bottom:8px;">
+									<div style="font-size:12px;" onclick="toggle('sourcesdiv');return false;">
+										<a href="#">Show Sources for <?php echo $sciName; ?></a>
 									</div>
 								</div>
-								<div id="sourcesdiv" style="display:none;clear:both;margin-top:8px;">
+								<div id="sourcesdiv" style="display:none;clear:both;">
 									<?php
 									if($sourceArr['contributorTerm']){
 										?>
@@ -228,7 +229,7 @@ else{
 						}
 						if(!$isEditor){
 							?>
-							<div style="margin-bottom:10px;margin-top:12px;font-size:12px;">
+							<div style="clear:both;margin-bottom:10px;margin-top:12px;font-size:12px;">
 								<a href="mailto:<?php echo $adminEmail; ?>" target="_top">Comment or suggest an addition, correction, or change</a>
 							</div>
 							<?php
