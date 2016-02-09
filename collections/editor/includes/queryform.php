@@ -175,7 +175,7 @@ else{
 					'georeferencedBy'=>'Georeferenced By','georeferenceProtocol'=>'Georeference Protocol','georeferenceSources'=>'Georeference Sources',
 					'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks',
 					'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
-					'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','ocrFragment'=>'OCR Fragment','dateEntered'=>'Date Entered');
+					'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','ocrFragment'=>'OCR Fragment','username'=>'Modified By','dateEntered'=>'Date Entered');
 			}
 			//sort($advFieldArr);
 			?>

@@ -467,6 +467,10 @@ class OccurrenceEditorManager {
 					//Used when OCR frag comes from custom field search within basic query form
 					$cf = 'ocr.rawstr';
 				}
+				elseif($cf == 'username'){
+					//Used when Modified By comes from custom field search within basic query form
+					$cf = 'ul.username';
+				}
 				else{
 					$cf = 'o.'.$cf;
 				}
@@ -642,6 +646,9 @@ class OccurrenceEditorManager {
 			else{
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
 			}
+		}
+		elseif(strpos($this->sqlWhere,'ul.username')){
+			$sql .= 'LEFT JOIN omoccuredits ome ON o.occid = ome.occid LEFT JOIN userlogin ul ON ome.uid = ul.uid ';
 		}
 		elseif(array_key_exists('io',$this->qryArr)){
 			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
