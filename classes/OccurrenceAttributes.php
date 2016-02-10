@@ -1,7 +1,7 @@
 <?php 
 include_once($SERVER_ROOT.'/classes/Manager.php');
 
-class OccurrenceEditorAttr extends Manager {
+class OccurrenceAttributes extends Manager {
 
 	private $collid;
 	private $tidFilter;
@@ -27,7 +27,7 @@ class OccurrenceEditorAttr extends Manager {
 		}
 		return true;
 	}
-	
+
 	//Get data functions
 	public function getImageUrls(){
 		$retArr = array();
@@ -63,6 +63,29 @@ class OccurrenceEditorAttr extends Manager {
 			$rs->free();
 		}
 		return $retArr;
+	}
+	
+	public function getImageCount(){
+		$retCnt = 0;
+		if($this->collid){
+			$sql = 'SELECT COUNT(i.imgid) AS cnt '.
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'LEFT JOIN tmattributes a ON i.occid = a.occid '. 
+				'WHERE (a.occid IS NULL) AND (o.collid = '.$this->collid.') ';
+			if($this->tidFilter){
+				$sql = 'SELECT COUNT(i.imgid) AS cnt '.
+					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+					'INNER JOIN taxaenumtree e ON i.tid = e.tid '.
+					'LEFT JOIN tmattributes a ON i.occid = a.occid '.
+					'WHERE (e.parenttid = '.$this->tidFilter.' OR e.tid = '.$this->tidFilter.') AND (a.occid IS NULL) AND (o.collid = '.$this->collid.') ';
+			}
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$retCnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $retCnt;
 	}
 
 	public function getTraitNames(){
@@ -142,6 +165,157 @@ class OccurrenceEditorAttr extends Manager {
 			$rs->free();
 		}
 		return json_encode($retArr);
+	}
+
+	//Attribute review functions
+	public function getReviewUrls($traitID, $reviewUid, $reviewDate, $reviewStatus, $start){
+		$retArr = array();
+		//Some sanitation
+		if($reviewUid && !is_numeric($reviewUid)) return false;
+		if($reviewStatus && !is_numeric($reviewStatus)) return false;
+		if($reviewDate && !preg_match('/^\d{4}-\d{2}-\d{2}$/',$reviewDate)) return false;
+		if(is_numeric($traitID) && $this->collid){
+			$targetOccid = 0;
+			//$traitID is required
+			$sql1 = 'SELECT DISTINCT o.occid '.$this->getReviewSqlBase($traitID, $reviewUid, $reviewDate, $reviewStatus).' LIMIT '.$start.',1';
+			$rs1 = $this->conn->query($sql1);
+			while($r1 = $rs1->fetch_object()){
+				$targetOccid = $r1->occid;
+			}
+			$rs1->free();
+			//Get images for target occid (isolation query into separate statements returns all images where there are multiples per specimen) 
+			$sql = 'SELECT imgid, url, originalurl, occid FROM images WHERE (occid = '.$targetOccid.')';
+			//echo $sql; exit;
+			$rs = $this->conn->query($sql);
+			$cnt = 1;
+			while($r = $rs->fetch_object()){
+				$retArr[$r->occid][$cnt]['web'] = $r->url;
+				$retArr[$r->occid][$cnt]['lg'] = $r->originalurl;
+				$cnt++;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+	
+	public function getReviewCount($traitID, $reviewUid, $reviewDate, $reviewStatus){
+		$cnt = 0;
+		//Some sanitation
+		if($reviewUid && !is_numeric($reviewUid)) return false;
+		if($reviewStatus && !is_numeric($reviewStatus)) return false;
+		if($reviewDate && !preg_match('/^\d{4}-\d{2}-\d{2}$/',$reviewDate)) return false;
+		if(is_numeric($traitID) && $this->collid){
+			//$traitID is required
+			$sql = 'SELECT COUNT(DISTINCT o.occid) as cnt '.
+				$this->getReviewSqlBase($traitID, $reviewUid, $reviewDate, $reviewStatus);
+			//echo $sql; exit;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$cnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $cnt;
+	}
+
+	private function getReviewSqlBase($traitID, $reviewUid, $reviewDate, $reviewStatus){
+		$sqlFrag = 'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+			'INNER JOIN tmattributes a ON i.occid = a.occid '.
+			'INNER JOIN tmstates s ON a.stateid = s.stateid '. 
+			'WHERE (s.traitid = '.$traitID.') AND (o.collid = '.$this->collid.') ';
+		if($reviewUid){
+			$sqlFrag .= 'AND (a.createduid = '.$reviewUid.') ';
+		}
+		if($reviewDate){
+			$sqlFrag .= 'AND (date(a.initialtimestamp) = "'.$reviewDate.'") ';
+		}
+		if($reviewStatus){
+			$sqlFrag .= 'AND (a.status = '.$reviewStatus.') ';
+		}
+		else{
+			$sqlFrag .= 'AND (a.status IS NULL OR a.status = 0) ';
+		}
+		return $sqlFrag;
+	}
+
+	public function getCodedAttribute($traitID,$occid){
+		$retArr = array();
+		//Some sanitation
+		if(is_numeric($traitID) && is_numeric($occid)){
+			//$traitID and $occid are required
+			$sql = 'SELECT a.stateid FROM tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
+				'WHERE a.occid = '.$occid.' AND s.traitid = '.$traitID;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[] = $r->stateid;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function saveReviewStatus($traitID, $targetOccid,$setStatus,$addArr,$delArr){
+		$status = false;
+		if(is_numeric($traitID) && is_numeric($targetOccid) && is_numeric($setStatus)){
+			if($addArr){
+				foreach($addArr as $id){
+					if(is_numeric($id)){
+						$sql = 'INSERT INTO tmattributes(stateid,occid,createduid) VALUES('.$id.','.$targetOccid.','.$GLOBALS['SYMB_UID'].') ';
+						if(!$this->conn->query($sql)){
+							$this->errorMessage = 'ERROR addin occurrence attribute: '.$this->conn->error;
+							$status = false;
+						}
+					}
+				}
+			} 
+			if($delArr){
+				foreach($delArr as $id){
+					if(is_numeric($id)){
+						$sql = 'DELETE FROM tmattributes WHERE stateid = '.$id.' AND occid = '.$targetOccid;
+						if(!$this->conn->query($sql)){
+							$this->errorMessage = 'ERROR removing occurrence attribute: '.$this->conn->error;
+							$status = false;
+						}
+					}
+				}
+			} 
+			
+			$sql = 'UPDATE tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
+				'SET a.status = '.$setStatus.' WHERE a.occid = '.$targetOccid.' AND s.traitid = '.$traitID;
+			if(!$this->conn->query($sql)){
+				$this->errorMessage = 'ERROR updating occurrence attribute review status: '.$this->conn->error;
+				$status = false;
+			}
+		}
+		return $status;
+	}
+
+	public function getEditorArr(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT u.uid, u.lastname, u.firstname, l.username '.
+			'FROM tmattributes a INNER JOIN users u ON a.createduid = u.uid '.
+			'INNER JOIN userlogin l ON u.uid = l.uid '.
+			'INNER JOIN omoccurrences o ON a.occid = o.occid '.
+			'WHERE o.collid = '.$this->collid.' ORDER BY u.lastname, u.firstname';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->uid] = $r->lastname.($r->firstname?', '.$r->firstname:'').' ('.$r->username.')';
+		}
+		$rs->free();
+		return $retArr;
+	}
+	
+	public function getEditDates(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT DATE(a.initialtimestamp) as d '.
+			'FROM tmattributes a INNER JOIN omoccurrences o ON a.occid = o.occid '.
+			'WHERE o.collid = '.$this->collid.' ORDER BY a.initialtimestamp DESC';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[] = $r->d;
+		}
+		$rs->free();
+		return $retArr;
 	}
 
 	//Attribute mining 
