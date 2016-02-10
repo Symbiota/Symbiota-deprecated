@@ -230,10 +230,10 @@ class OccurrenceAttributes extends Manager {
 			$sqlFrag .= 'AND (date(a.initialtimestamp) = "'.$reviewDate.'") ';
 		}
 		if($reviewStatus){
-			$sqlFrag .= 'AND (a.status = '.$reviewStatus.') ';
+			$sqlFrag .= 'AND (a.statuscode = '.$reviewStatus.') ';
 		}
 		else{
-			$sqlFrag .= 'AND (a.status IS NULL OR a.status = 0) ';
+			$sqlFrag .= 'AND (a.statuscode IS NULL OR a.statuscode = 0) ';
 		}
 		return $sqlFrag;
 	}
@@ -281,7 +281,7 @@ class OccurrenceAttributes extends Manager {
 			} 
 			
 			$sql = 'UPDATE tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
-				'SET a.status = '.$setStatus.' WHERE a.occid = '.$targetOccid.' AND s.traitid = '.$traitID;
+				'SET a.statuscode = '.$setStatus.' WHERE a.occid = '.$targetOccid.' AND s.traitid = '.$traitID;
 			if(!$this->conn->query($sql)){
 				$this->errorMessage = 'ERROR updating occurrence attribute review status: '.$this->conn->error;
 				$status = false;
