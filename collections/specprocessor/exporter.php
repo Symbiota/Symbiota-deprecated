@@ -55,7 +55,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 		<script src="../../js/symb/shared.js" type="text/javascript"></script>
 		<script language="javascript">
-			var cogeUrl = "https://www.museum.tulane.edu/coge/symbiota";
+			var cogeUrl = "https://www.museum.tulane.edu/coge/symbiota/";
 
 			$(function() {
 				var dialogArr = new Array("schemanative","schemadwc","newrecs");
@@ -111,15 +111,15 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 				}).done(function( response ) {
 					var result = response.result;
 					if(result == "authentication required"){
-						$("#coge-status").css('color', 'green');
-						$("#coge-status").html("Connected");
-						$("#builddwcabutton").prop("disabled",true);
-						cogeGetUserCommunityList();
-					}
-					else{
 						$("#coge-status").html("Unauthorized");
 						$("#coge-status").css("color", "red");
 						$("#builddwcabutton").prop("disabled",true);
+					}
+					else{
+						$("#coge-status").css('color', 'green');
+						$("#coge-status").html("Connected");
+						$("#builddwcabutton").prop("disabled",false);
+						cogeGetUserCommunityList();
 					}
 				}).fail(function(jqXHR, textStatus, errorThrown ){
 					$("#coge-status").html("Unauthorized");
@@ -155,7 +155,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						alert(result);
 					}
 					else{
-						cogeSubmitData(response);
+						var path =  result.path;
+						cogeSubmitData(path);
 					}
 				});
 			}
@@ -199,10 +200,14 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 
 			function cogeSubmitData(dwcaPath){
 				$("#coge-push2coge").show();
+				$("#coge-push2coge").html("<a href='"+dwcaPath+"'>"+dwcaPath+"</a>");
+				/*
 				$.ajax({
-					type: "POST",
+					type: "GET",
 					url: cogeUrl,
-					dataType: "json",
+					crossDomain: true,
+					xhrFields: { withCredentials: true },
+					dataType: 'json',
 					data: { t: "import", q: dwcaPath }
 				}).done(function( response ) {
 					//{"result":{"datasourceId":"7ab8ffb8-032a-4f7a-8968-a012ce287c2d"}}
@@ -210,13 +215,16 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					alert(result.datasourceId);
 					$("#coge-push2coge").hide();
 				});
+				*/
 			}			
 
 			function cogeCheckStatus(id){
 				$.ajax({
-					type: "POST",
+					type: "GET",
 					url: cogeUrl,
-					dataType: "json",
+					crossDomain: true,
+					xhrFields: { withCredentials: true },
+					dataType: 'json',
 					data: { t: "importstatus", q: id }
 				}).done(function( response ) {
 					//{"result":{"importProgess":{"state":"ready"}}}
@@ -226,9 +234,11 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 
 			function cogeCheckGeorefStatus(id){
 				$.ajax({
-					type: "POST",
+					type: "GET",
 					url: cogeUrl,
-					dataType: "json",
+					crossDomain: true,
+					xhrFields: { withCredentials: true },
+					dataType: 'json',
 					data: { t: "dsstatus", q: id }
 				}).done(function( response ) {
 					//{"result":{"datasource":"0a289c73-5317-45f1-9486-656597f98626","stats":{"specimens":{"total":48004,"corrected":774,"skipped":0},"localities":{"total":18876,"corrected":226,"skipped":0}}}}
@@ -238,9 +248,11 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 
 			function cogeGetUserCommunityList(){
 				$.ajax({
-					type: "POST",
+					type: "GET",
 					url: cogeUrl,
-					dataType: "json",
+					crossDomain: true,
+					xhrFields: { withCredentials: true },
+					dataType: 'json',
 					data: { t: "comlist" }
 				}).done(function( response ) {
 					//{"result":[{"name":"Sandbox","description":"Feel free to join and experiment.","role":"Owner"},{"name":"TU Volunteer Georeferencing","description":"This project focuses on georeferencing selected data from FishNet and involves volunteers from the Tulane University student community.","role":"Owner"},{"name":"Empty Community","description":"Testing ONLY","role":"Owner"},{"name":"FSU","description":"Test FSU site","role":"Admin"},{"name":"Penstemon","description":"This web site will focus on georeferencing specimens of Penstemon but its purpose is to help those involved gain a better understanding of how to use collaborative georeferencing.","role":"Admin"},{"name":"FishNet 2","description":"Collaborative georeferencing of data from FishNet 2","role":"Owner"},{"name":"NR Box","description":"","role":"Owner"},{"name":"TU FishNet Service Group","description":"","role":"User"},{"name":"Engine Georeferencing","description":"","role":"User"},{"name":"SIUC FishNet","description":"Records from the SIUC fish Collections","role":"Owner"}]} 
@@ -250,16 +262,17 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						alert("Not Authenicated");
 					}
 					else{
-						$("#coge-comm-div").show();
+						$("#coge-communities").show();
+						var htmlOut = "";
 						for(var i in result){
-							htmlOut = '<div style="margin:5px">';
+							htmlOut = htmlOut + '<div style="margin:5px">';
 							var name = result[i].name;
-							htmlOut = htmlOut + "<b>"+name+"</b> ";
+							htmlOut = htmlOut + "<u>"+name+"</u>";
 							var role = result[i].role;
-							htmlOut = htmlOut + "("+role+")";
+							htmlOut = htmlOut + " ("+role+")";
 							var descr = result[i].description;
-							if(descr != "") htmlOut = htmlOut + ": "+name;
-							htmlOut = '</div>';
+							if(descr != "") htmlOut = htmlOut + ": " + descr;
+							htmlOut = htmlOut + '</div>';
 							$("#commlist-div").html(htmlOut);
 						}
 					}
@@ -601,17 +614,17 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" /></span>
 												<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank">Login to CoGe</a></span>
 											</div>
-											<div id="coge-comm-div" style="display:none;margin:5px">
-												<div style="font-weight:bold">Available Communities</div>
+											<fieldset id="coge-communities" style="display:none;margin:5px;padding:5px;">
+												<legend style="font-weight:bold">Available Communities</legend>
 												<div id="commlist-div" style="margin:10px"></div>
-											</div>
+											</fieldset>
 										</fieldset>
 										<div style="margin:20px;">
 											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 											<input name="format" type="hidden" value="csv" />
 											<input name="schema" type="hidden" value="coge" />
 											<div style="margin:5px">
-												<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" /> 
+												<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> 
 												<span id="coge-download" style="display:none;color:orange">Downloading data... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 												<span id="coge-push2coge" style="display:none;color:orange">Pushing data to CoGe... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 												 *In development
