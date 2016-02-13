@@ -39,11 +39,11 @@ $QUICK_HOST_ENTRY_IS_ACTIVE = 0;   // Allows quick entry for host taxa in occurr
 $FP_ENABLED = 0;				//Enable Filtered-Push modules
 
 //Misc variables
-$GOOGLE_MAP_KEY = '';					//Needed for Google Map; get from Google 
+$GOOGLE_MAP_KEY = '';				//Needed for Google Map; get from Google 
 $MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
 $GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
-$RECAPTCHA_PUBLIC_KEY = '';	
-$RECAPTCHA_PRIVATE_KEY = '';
+$RECAPTCHA_PUBLIC_KEY = '';			//Now called site key
+$RECAPTCHA_PRIVATE_KEY = '';		//Now called secret key
 $GLOSSARY_EXPORT_BANNER = '';		//Banner image for glossary exports. Place in images/layout folder.
 $DYN_CHECKLIST_RADIUS = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $DISPLAY_COMMON_NAMES = 1;

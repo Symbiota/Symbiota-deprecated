@@ -67,7 +67,7 @@ if($action == "Create Login"){
 	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<script language="JavaScript" type="text/javascript">
+	<script type="text/javascript">
 		function checkform(f){
 			<?php 
 			if($useRecaptcha){
@@ -294,7 +294,6 @@ if($action == "Create Login"){
 							<div style="margin:10px;">
 								<?php 
 								if($useRecaptcha){
-									require_once('recaptchalib.php');
 									echo recaptcha_get_html($RECAPTCHA_PUBLIC_KEY);
 								}
 								?>

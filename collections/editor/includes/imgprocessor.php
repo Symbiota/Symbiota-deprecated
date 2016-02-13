@@ -1,7 +1,25 @@
+<script>
+$(function() {
+	$( "#zoomInfoDialog" ).dialog({
+		autoOpen: false,
+		position: { my: "left top", at: "right bottom", of: "#zoomInfoDiv" }
+	});
+	
+	$( "#zoomInfoDiv" ).click(function() {
+		$( "#zoomInfoDialog" ).dialog( "open" );
+	});
+});
+</script>
 <div style="width:100%;height:1050px;">
 	<fieldset style="height:95%;background-color:white;">
 		<legend><b>Label Processing</b></legend>
-		<div style="margin-top:-10px;height:15px;">
+		<div style="margin-top:-10px;height:15px;position:relative">
+			<div style="float:left;padding-top:3px"><a id="zoomInfoDiv" href="#">Zoom?</a></div>
+			<div id="zoomInfoDialog">
+				Hold down control button and click on the image to quick zoom into specific location
+				or hold down the shift button and move the mouse up or down for a more controlled zoom action. 
+				Click and drag bottom right corner of image to resize display panel.  
+			</div>
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgreslg" name="resradio" type="radio" onchange="changeImgRes('lg')" />High Res.</div>
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgresmed" name="resradio"  type="radio" checked onchange="changeImgRes('med')" />Med Res.</div>
 		</div>
