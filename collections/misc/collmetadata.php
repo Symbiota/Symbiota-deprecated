@@ -20,6 +20,7 @@ if($IS_ADMIN){
 elseif($collid){
 	if(array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])){
 		$isEditor = 1;
+		$isAdmin = 1;
 	}
 	elseif(array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"])){
 		$isEditor = 1;
