@@ -5,8 +5,9 @@ include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
 include_once($SERVER_ROOT.'/classes/RdfUtility.php');
 
 $occid = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
-$collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
+$collid = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
 $pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";
+$guid = array_key_exists("guid",$_REQUEST)?trim($_REQUEST["guid"]):"";
 $submit = array_key_exists('formsubmit',$_REQUEST)?trim($_REQUEST['formsubmit']):'';
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
 $clid = array_key_exists("clid",$_REQUEST)?trim($_REQUEST["clid"]):0;
@@ -14,7 +15,8 @@ $format = isset($_GET['format'])?$_GET['format']:'';
 
 //Sanitize input variables
 if(!is_numeric($occid)) $occid = 0;
-if(!is_numeric($collId)) $collId = 0;
+if($guid && !preg_match('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/', $guid)) $guid = ''; 
+if(!is_numeric($collid)) $collid = 0;
 if(!is_numeric($tabIndex)) $tabIndex = 0;
 if(!is_numeric($clid)) $clid = 0;
 if($pk && !preg_match('/^[a-zA-Z0-9\s_]+$/',$pk)) $pk = '';
@@ -25,15 +27,18 @@ $indManager = new OccurrenceIndividualManager();
 if($occid){
 	$indManager->setOccid($occid);
 }
-elseif($collId && $pk){
-	$indManager->setCollId($collId);
+elseif($guid){
+	$occid = $indManager->setGuid($guid);
+}
+elseif($collid && $pk){
+	$indManager->setCollid($collid);
 	$indManager->setDbpk($pk);
 }
 
 $occArr = $indManager->getOccData();
 if(!$occid) $occid = $indManager->getOccid();
 $collMetadata = $indManager->getMetadata();
-if(!$collId) $collId = $occArr['collid'];
+if(!$collid) $collid = $occArr['collid'];
 
 $genticArr = $indManager->getGeneticArr();
 
@@ -74,10 +79,10 @@ if ($done) {
 
 if($SYMB_UID){
 	//Check editing status
-	if($IS_ADMIN || (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin']))){
+	if($IS_ADMIN || (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin']))){
 		$isEditor = true;
 	}
-	elseif((array_key_exists('CollEditor',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollEditor']))){
+	elseif((array_key_exists('CollEditor',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollEditor']))){
 		$isEditor = true;
 	}
 	elseif($occArr['observeruid'] == $SYMB_UID){
@@ -91,7 +96,7 @@ if($SYMB_UID){
 	if($isEditor || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
 		$displayLocality = true;
 	}
-	elseif(array_key_exists("RareSppReader",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["RareSppReader"])){
+	elseif(array_key_exists("RareSppReader",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["RareSppReader"])){
 		$displayLocality = true;
 	}
 	
@@ -291,7 +296,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					}
 					?> 
 					<li><a href="#commenttab"><span><?php echo ($commentArr?count($commentArr).' ':''); ?>Comments</span></a></li> 
-					<li><a href="linkedresources.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collId; ?>"><span>Linked Resources</span></a></li>
+					<li><a href="linkedresources.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collid; ?>"><span>Linked Resources</span></a></li>
 					<?php 
 					if($isEditor){
 						?>
@@ -980,10 +985,10 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					<div id="edittab">
 						<div style="padding:15px;">
 							<?php 
-							if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
+							if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin'])){
 								?>
 								<div style="float:right;" title="Manage Edits">
-									<a href="../editor/editreviewer.php?collid=<?php echo $collId.'&occid='.$occid; ?>"><img src="../../images/edit.png" style="border:0px;width:14px;" /></a>
+									<a href="../editor/editreviewer.php?collid=<?php echo $collid.'&occid='.$occid; ?>"><img src="../../images/edit.png" style="border:0px;width:14px;" /></a>
 								</div>
 								<?php
 							}

@@ -19,27 +19,7 @@ class OccurrenceIndividualManager extends Manager{
 		parent::__destruct();
 	}
 
-	public function setOccid($occid){
-		if(is_numeric($occid)){
-			$this->occid = $occid;
-		}
-	}
-
-	public function getOccid(){
-		return $this->occid;
-	}
-
-	public function getCollId($id){
- 		if(is_numeric($o)){
-			$this->collid = $id;
- 		}
-	}
-	
-	public function setDbpk($pk){
-		$this->dbpk = $pk;
-	}
-
-	private function setMetadata(){
+	private function loadMetadata(){
 		if($this->collid){
 			$sql = 'SELECT institutioncode, collectioncode, collectionname, homepage, individualurl, contact, email, icon, '.
 				'publicedits, rights, rightsholder, accessrights, guidtarget '.
@@ -58,19 +38,65 @@ class OccurrenceIndividualManager extends Manager{
 	public function getMetadata(){
 		return $this->metadataArr;
 	}
+	
+	public function setGuid($guid){
+		$guid = $this->cleanInStr($guid);
+		if(!$this->occid){
+			$sql = 'SELECT occid FROM guidoccurrences WHERE guid = "'.$guid.'"';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$this->occid = $r->occid;
+			}
+			$rs->free();
+		}		
+		if(!$this->occid){
+			//Check occurrence recordID 
+			$sql = 'SELECT occid FROM omoccurrences WHERE occurrenceid = "'.$guid.'"';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$this->occid = $r->occid;
+			}
+			$rs->free();
+		}
+		if(!$this->occid){
+			//Check image recordID
+			$sql = 'SELECT i.occid '.
+				'FROM guidimages g INNER JOIN images i ON g.imgid = i.imgid '.
+				'WHERE g.guid = "'.$guid.'" AND i.occid IS NOT NULL ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$this->occid = $r->occid;
+			}
+			$rs->free();
+		}
+		if(!$this->occid){
+			//Check identification recordID 
+			$sql = 'SELECT d.occid '.
+				'FROM guidoccurdeterminations g INNER JOIN omoccurdeterminations d ON g.detid = d.detid '.
+				'WHERE g.guid = "'.$guid.'" ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$this->occid = $r->occid;
+			}
+			$rs->free();
+		}
+		return $this->occid;
+	}
 
 	public function getOccData($fieldKey = ""){
-		if(!$this->occArr) $this->setOccArr();
-		if($fieldKey){
-			if(array_key_exists($fieldKey,$this->occArr)){
-				return $this->occArr($fieldKey);
+		if($this->occid){
+			if(!$this->occArr) $this->loadOccurData();
+			if($fieldKey){
+				if(array_key_exists($fieldKey,$this->occArr)){
+					return $this->occArr($fieldKey);
+				}
+				return;
 			}
-			return;
 		}
 		return $this->occArr;
 	}
 
-	private function setOccArr(){
+	private function loadOccurData(){
 		$sql = 'SELECT o.occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
 			'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
 			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, taxonremarks, '.
@@ -97,7 +123,7 @@ class OccurrenceIndividualManager extends Manager{
 			if($this->occArr = $result->fetch_assoc()){
 				if(!$this->occid) $this->occid = $this->occArr['occid'];
 				if(!$this->collid) $this->collid = $this->occArr['collid'];
-				$this->setMetadata();
+				$this->loadMetadata();
 				//Set occurrenceId according to guidsource \
 				if($this->metadataArr['guidtarget'] == 'catalogNumber'){
 					$this->occArr['occurrenceid'] = $this->occArr['catalognumber'];
@@ -121,10 +147,10 @@ class OccurrenceIndividualManager extends Manager{
 					}
 					$rsSec->close();
 				}
-				$this->setImages();
-				$this->setDeterminations();
-				$this->setLoan();
-				$this->setExsiccati();
+				$this->loadImages();
+				$this->loadDeterminations();
+				$this->loadLoan();
+				$this->loadExsiccati();
 				$result->free();
 			}
 		}
@@ -133,7 +159,7 @@ class OccurrenceIndividualManager extends Manager{
 		}
 	}
 
-	private function setImages(){
+	private function loadImages(){
 		global $imageDomain;
 		$sql = 'SELECT imgid, url, thumbnailurl, originalurl, notes, caption FROM images '.
 			'WHERE (occid = '.$this->occid.') ORDER BY sortsequence';
@@ -161,7 +187,7 @@ class OccurrenceIndividualManager extends Manager{
 		}
 	}
 
-	private function setDeterminations(){
+	private function loadDeterminations(){
 		$sql = 'SELECT detid, dateidentified, identifiedby, sciname, scientificnameauthorship, identificationqualifier, '.
 			'identificationreferences, identificationremarks '.
 			'FROM omoccurdeterminations '.
@@ -182,11 +208,11 @@ class OccurrenceIndividualManager extends Manager{
 			$result->free();
 		}
 		else{
-			trigger_error('Unable to setDeterminations; '.$this->conn->error,E_USER_NOTICE);
+			trigger_error('Unable to loadDeterminations; '.$this->conn->error,E_USER_NOTICE);
 		}
 	}
 
-	private function setLoan(){
+	private function loadLoan(){
 		$sql = 'SELECT l.loanIdentifierOwn, i.institutioncode '.
 			'FROM omoccurloanslink llink INNER JOIN omoccurloans l ON llink.loanid = l.loanid '.
 			'INNER JOIN institutions i ON l.iidBorrower = i.iid '.
@@ -200,11 +226,11 @@ class OccurrenceIndividualManager extends Manager{
 			$result->free();
 		}
 		else{
-			trigger_error('Unable to set loan info; '.$this->conn->error,E_USER_WARNING);
+			trigger_error('Unable to load loan info; '.$this->conn->error,E_USER_WARNING);
 		}
 	}
 
-	private function setExsiccati(){
+	private function loadExsiccati(){
 		$sql = 'SELECT t.title, t.editor, n.omenid, n.exsnumber '.
 			'FROM omexsiccatititles t INNER JOIN omexsiccatinumbers n ON t.ometid = n.ometid '.
 			'INNER JOIN omexsiccatiocclink l ON n.omenid = l.omenid '.
@@ -635,6 +661,27 @@ class OccurrenceIndividualManager extends Manager{
 			}
 		}
 		return $isEditor;
+	}
+
+	// Setters and getters
+	public function setOccid($occid){
+		if(is_numeric($occid)){
+			$this->occid = $occid;
+		}
+	}
+
+	public function getOccid(){
+		return $this->occid;
+	}
+
+	public function setCollid($id){
+		if(is_numeric($o)){
+			$this->collid = $id;
+		}
+	}
+
+	public function setDbpk($pk){
+		$this->dbpk = $pk;
 	}
 }
 ?>
