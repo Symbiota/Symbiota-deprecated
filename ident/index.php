@@ -31,7 +31,7 @@ header("Content-Type: text/html; charset=".$charset);
 	
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<h2>Identification Keys</h2>
+		<h2><?php echo $LANG['IDKEYS']; ?></h2>
 	    <div style="margin:20px"><?php echo $LANG['IDKEYPARA'];?>
 		</div>
 	                    

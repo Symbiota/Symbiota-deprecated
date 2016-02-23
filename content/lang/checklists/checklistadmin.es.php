@@ -1,74 +1,72 @@
-<?php
+﻿<?php
 /*
 ------------------
-Language: Espa�ol (Spanish)
+Language: Español (Spanish)
 ------------------
 */
 
 include_once('Checklist.en.php');
 
-$LANG['NAV_HOME'] = 'Home';
-$LANG['CHECKADMIN'] = ' Checklist Administration';
-$LANG['RETURNCHECK'] = 'Return to Checklist';
+$LANG['NAV_HOME'] = 'Inicio';
+$LANG['CHECKADMIN'] = ' Administraci&oacute;n de Listado de Comprobaci&oacute;n';
+$LANG['RETURNCHECK'] = 'Volver al Listado de Comprobaci&oacute;n';
 $LANG['ADMIN'] = 'Admin';
-$LANG['DESCRIPTION'] = 'Description';
-$LANG['RELATEDCHECK'] = 'Related Checklists';
-$LANG['ADDIMGV'] = 'Add Image Voucher';
-$LANG['NOEDITOR'] = 'No one has been explicitly assigned as an editor';
-$LANG['ADDNEWU'] = 'Add New User';
-$LANG['SELECTU'] = 'Select User';
-$LANG['INVPROJAS'] = 'Inventory Project Assignments';
-$LANG['CHECKNOTAS'] = 'Checklist has not been assigned to any inventory projects';
-$LANG['FILTER'] = 'Filter:';
-$LANG['PERMREMOVECHECK'] = 'Permanently Remove Checklist';
-$LANG['REMOVEUSERCHECK'] = 'Before a checklist can be deleted, all editors (except yourself) and inventory project assignments must be removed.
-							Inventory project assignments can only be removed by active managers of the project or a system administrator. ';
-$LANG['WARNINGNOUN'] = 'WARNING: Action cannot be undone.';
-$LANG['CONFIRMDELETE'] = 'Are you sure you want to permanently remove checklist? This action cannot be undone!';
-$LANG['EDITCHECKDET'] = 'Edit Checklist Details';
-$LANG['CHECKNAME'] = 'Checklist Name';
-$LANG['CHECKTYPE'] = 'Checklist Type';
-$LANG['RARETHREAT'] = 'Rare, threatened, protected species list';
-$LANG['AUTHORS'] = 'Authors';
-$LANG['GENCHECK'] = 'General Checklist';
-$LANG['LOC'] = 'Locality';
-$LANG['CITATION'] = 'Citation';
-$LANG['INTNOTES'] = 'Internal Notes:';
-$LANG['ABSTRACT'] = 'Abstract:';
-$LANG['PARCHECK'] = 'Parent Checklist';
-$LANG['SELECTPARCHECK'] = 'Select a Parent checklist';
-$LANG['SPECIES'] = 'Species:';
-$LANG['NOTES'] = 'Notes';
-$LANG['LATCENT'] = 'Latitude Centroid';
-$LANG['LONGCENT'] = 'Longitude Centroid';
-$LANG['POINTRAD'] = 'Point Radius (meters)';
-$LANG['POLYFOOT'] = 'Polygon Footprint';
-$LANG['POLYFOOTSAVE'] = 'Footprint polygon saved.';
-$LANG['CREATEPOLYFOOT'] = 'Create footprint polygon.';
-$LANG['POLYFOOTRDYSAVE'] = 'Polygon coordinates ready to save.';
-$LANG['DEFVIEWSETT'] = 'Default View Settings';
-$LANG['SHOWDETAILS'] = 'Show Details';
-$LANG['COMMON'] = ' Common Names';
-$LANG['DISPLAYIMG'] = 'Display as Images';
-$LANG['NOTESVOUC'] = 'Notes &amp; Vouchers';
-$LANG['TAXONAUTHOR'] = 'Taxon Authors';
-$LANG['TAXONABC'] = ' Show Taxa Alphabetically';
-$LANG['PRIVATE'] = 'Private';
-$LANG['PUBLIC'] = 'Public';
-$LANG['ADDIMGVOUC'] = 'Add Image Voucher and Link to Checklist';
-$LANG['FORMADDVOUCH'] = 'This form will allow you to add an image voucher linked to this checklist.<br/>
-								If not already present, Scientific name will be added to checklist.';
-$LANG['SELECTVOUCPROJ'] = 'Select the voucher project to which you wish to add the voucher. ';
-$LANG['ADDIMGVOUCH'] = 'Add Image Voucher';
-$LANG['IDNOTSET'] = ' Checklist identifier not set';
-$LANG['NOADMINPERM'] = ' You do not have administrative permission for this checklist';
-$LANG['CURREDIT'] = 'Current Editors';
-$LANG['REMOVEEDITPRIVCONFIRM'] = 'Are you sure you want to remove editing rights for this user?';
-$LANG['MASSUPDATEED'] = 'Edit Checklist Details';
-$LANG['ADDEDITOR'] = 'Add Editor';
-$LANG['DELETECHECK'] = 'Delete Checklist';
-$LANG['SUBMITCHANG'] = 'Submit Changes';
-$LANG['DELETETHISU'] = 'Delete this user';
-
-
+$LANG['DESCRIPTION'] = 'Descripci&oacute;n';
+$LANG['RELATEDCHECK'] = 'Listados de Comprobaci&oacute;n Relacionados';
+$LANG['ADDIMGV'] = 'Agregar Im&aacute;gen Voucher';
+$LANG['NOEDITOR'] = 'Nadie ha sido asignado expl&iacute;citamente como un editor';
+$LANG['ADDNEWU'] = 'Agregar Usuario Nuevo';
+$LANG['SELECTU'] = 'Seleccionar Usuario';
+$LANG['INVPROJAS'] = 'Asignaciones a Proyecto de Inventario';
+$LANG['CHECKNOTAS'] = 'Listado de Comprobaci&oacute;n no ha sido asignado a ning&uacute;n Proyecto de Inventario';
+$LANG['FILTER'] = 'Filtro:';
+$LANG['PERMREMOVECHECK'] = 'Retirar permanentemente Listado de Comprobaci&oacute;n';
+$LANG['REMOVEUSERCHECK'] = 'Antes de que una lista de comprobaci&oacute;n se pueda eliminar, todos los editores (excepto a s&iacute; mismo) y las asignaciones del proyecto de inventario deben ser eliminados.
+							Las asignaciones del proyecto de inventario s&oacute;lo pueden ser eliminados por el administrador activo del proyecto o un administrador del sistema. ';
+$LANG['WARNINGNOUN'] = 'ADVERTENCIA: La acci&oacute;n no se puede deshacer.';
+$LANG['CONFIRMDELETE'] = '¿Est&aacute; seguro de que desea eliminar permanentemente el Listado de Comprobaci&oacute;n? ¡Esta acci&oacute;n no se puede deshacer!';
+$LANG['EDITCHECKDET'] = 'Editar detalles del Listado de Comprobaci&oacute;n';
+$LANG['CHECKNAME'] = 'Nombre del Listado de Comprobaci&oacute;n';
+$LANG['CHECKTYPE'] = 'Tipo de Listado de Comprobaci&oacute;n';
+$LANG['RARETHREAT'] = 'Listado de especies raras, amenazadas, protegidas';
+$LANG['AUTHORS'] = 'Autores';
+$LANG['GENCHECK'] = 'Listado de Comprobaci&oacute;n General';
+$LANG['LOC'] = 'Localidad';
+$LANG['CITATION'] = 'Cita';
+$LANG['INTNOTES'] = 'Notas Internas:';
+$LANG['ABSTRACT'] = 'Resumen:';
+$LANG['PARCHECK'] = 'Listado de Comprobaci&oacute;n Padre';
+$LANG['SELECTPARCHECK'] = 'Seleccionar un Listado de Comprobaci&oacute;n Padre';
+$LANG['SPECIES'] = 'Especies:';
+$LANG['NOTES'] = 'Notas';
+$LANG['LATCENT'] = 'Centroide Latitud';
+$LANG['LONGCENT'] = 'Centroide Longitud';
+$LANG['POINTRAD'] = 'Punto Radio (metros)';
+$LANG['POLYFOOT'] = 'Huella de Pol&iacute;gono';
+$LANG['POLYFOOTSAVE'] = 'Huella de pol&iacute;gono guardada.';
+$LANG['CREATEPOLYFOOT'] = 'Crear Huella de Pol&iacute;gono.';
+$LANG['POLYFOOTRDYSAVE'] = 'Coordenadas de pol&iacute;gono listas para guardar.';
+$LANG['DEFVIEWSETT'] = 'Ajustes de Vista por Defecto';
+$LANG['SHOWDETAILS'] = 'Mostrar Detalles';
+$LANG['COMMON'] = ' Nombres comunes';
+$LANG['DISPLAYIMG'] = 'Mostrar como Im&aacute;genes';
+$LANG['NOTESVOUC'] = 'Notas &amp; Vouchers';
+$LANG['TAXONAUTHOR'] = 'Autores del Tax&oacute;n';
+$LANG['TAXONABC'] = ' Mostrar Taxa Alfab&eacute;ticamente';
+$LANG['PRIVATE'] = 'Privado';
+$LANG['PUBLIC'] = 'P&uacute;blico';
+$LANG['ADDIMGVOUC'] = 'Agregar Im&aacute;gen Voucher y V&iacute;nculo a Listado de Comprobaci&oacute;n';
+$LANG['FORMADDVOUCH'] = 'Este formulario le permitir&aacute; a&ntilde;adir un voucher de im&aacute;gen vinculado a este listado de comprobaci&oacute;n.<br/>
+								Si no est&aacute; ya presente, el nombre cient&iacute;fico se a&ntilde;adir&aacute; al listado de comprobaci&oacute;n.';
+$LANG['SELECTVOUCPROJ'] = 'Seleccione el proyecto al que desea a&ntilde;adir el voucher.';
+$LANG['ADDIMGVOUCH'] = 'Agregar Voucher de Im&aacute;gen';
+$LANG['IDNOTSET'] = ' Identificador de listado de Comprobaci&oacute;n no se ha establecido';
+$LANG['NOADMINPERM'] = ' Usted no tiene permiso administrativo para este listado de comprobaci&oacute;n';
+$LANG['CURREDIT'] = 'Editores Actuales';
+$LANG['REMOVEEDITPRIVCONFIRM'] = '¿Est&aacute; seguro de que desea eliminar los derechos de edici&oacute;n para este usuario?';
+$LANG['MASSUPDATEED'] = 'Editar Detalles del Listado de Comprobaci&oacute;n';
+$LANG['ADDEDITOR'] = 'Agregar Editor';
+$LANG['DELETECHECK'] = 'Borrar Listado de Comprobaci&oacute;n';
+$LANG['SUBMITCHANG'] = 'Someter Cambios';
+$LANG['DELETETHISU'] = 'Borrar este usuario';
 ?>
