@@ -216,8 +216,8 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['geodeticDatum'] = 'o.geodeticDatum';
 		$occurTermArr['coordinateUncertaintyInMeters'] = 'http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters';
 		$occurFieldArr['coordinateUncertaintyInMeters'] = 'o.coordinateUncertaintyInMeters';
-		$occurTermArr['footprintWKT'] = 'http://rs.tdwg.org/dwc/terms/footprintWKT';
-		$occurFieldArr['footprintWKT'] = 'o.footprintWKT';
+		//$occurTermArr['footprintWKT'] = 'http://rs.tdwg.org/dwc/terms/footprintWKT';
+		//$occurFieldArr['footprintWKT'] = 'o.footprintWKT';
 		$occurTermArr['verbatimCoordinates'] = 'http://rs.tdwg.org/dwc/terms/verbatimCoordinates';
 		$occurFieldArr['verbatimCoordinates'] = 'o.verbatimCoordinates';
 		$occurTermArr['georeferencedBy'] = 'http://rs.tdwg.org/dwc/terms/georeferencedBy';
