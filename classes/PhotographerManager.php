@@ -26,13 +26,13 @@ class PhotographerManager{
 			$retArr[$row->collid]['name'] = $row->collname; 
 			$retArr[$row->collid]['imgcnt'] = $row->imgcnt; 
 		}
-    	$result->close();
+    	$result->free();
     	return $retArr;
 	}
 	
 	public function getCollectionName($collId){
 		$retStr = '';
-		if($collId){
+		if($collId && is_numeric($collId)){
 	 		$sql = 'SELECT CONCAT(collectionname, CONCAT_WS("-",institutioncode,collectioncode)) as collname '.
 				'FROM omcollections '.
 	 			'WHERE collid = '.$collId;
@@ -40,7 +40,7 @@ class PhotographerManager{
 			while($row = $result->fetch_object()){
 				$retStr = $row->collname; 
 			}
-	    	$result->close();
+	    	$result->free();
 		}
     	return $retStr;
 	}
@@ -56,7 +56,7 @@ class PhotographerManager{
 			$retArr[$row->uid]['name'] = $row->pname; 
 			$retArr[$row->uid]['imgcnt'] = $row->imgcnt; 
 		}
-    	$result->close();
+    	$result->free();
     	return $retArr;
 	}
 
@@ -82,12 +82,14 @@ class PhotographerManager{
 			$retArr['biography'] = $this->cleanOutStr($row->biography);
 			$retArr['url'] = $row->url;
 		}
-    	$result->close();
+    	$result->free();
     	return $retArr;
 	}
 
 	public function getPhotographerImages($uid, $collId, $lStart, $lNum){
 		$retArr = array();
+		if(!is_numeric($uid)) return $retArr;
+		if(!is_numeric($collId)) return $retArr;
 		$limitStart = 0;
 		$limitNum = 100;
 		$imgCnt = 0;
@@ -121,7 +123,7 @@ class PhotographerManager{
 			$retArr[$imgId]['tid'] = $row->tid;
 			$retArr[$imgId]['sciname'] = $this->cleanOutStr($row->sciname);
 		}
-    	$result->close();
+    	$result->free();
     	return $retArr;
 	}
 

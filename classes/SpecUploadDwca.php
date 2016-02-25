@@ -29,6 +29,9 @@ class SpecUploadDwca extends SpecUploadBase{
 			//If they incorrectly mapped to the IPT instance, adjust to point to the Archive file 
 			if(strpos($this->path,'/resource.do')){
 				$this->path = str_replace('/resource.do','/archive.do',$this->path);
+			}
+			elseif(strpos($this->path,'/resource?')){
+				$this->path = str_replace('/resource','/archive.do',$this->path);
 			} 
 			if(copy($this->path,$fullPath)){
 				$this->baseFolderName = $localFolder;

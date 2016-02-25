@@ -544,7 +544,7 @@ xmlwriter_end_attribute($xml_resource);
 		elseif($this->schemaType == 'georef'){
 			$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
 				'o.catalogNumber, o.occurrenceId, o.decimalLatitude, o.decimalLongitude, '.
-				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, ';
+				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.verbatimCoordinates, ';
 			if($this->extended){
 				$sql .= 'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
@@ -583,7 +583,7 @@ xmlwriter_end_attribute($xml_resource);
 		}
 		elseif($this->schemaType == 'georef'){
 			$this->headerArr = array("institutionCode","collectionCode","catalogNumber","occurrenceId","decimalLatitude","decimalLongitude",
-		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates","georeferencedBy",
+		 		"geodeticDatum","coordinateUncertaintyInMeters","verbatimCoordinates","georeferencedBy",
 				"georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
 				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
 				"modified","symbiotaId","recordId");

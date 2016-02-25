@@ -9,6 +9,12 @@ $limitStart = array_key_exists("lstart",$_REQUEST)?$_REQUEST["lstart"]:0;
 $limitNum = array_key_exists("lnum",$_REQUEST)?$_REQUEST["lnum"]:100;
 $imgCnt = array_key_exists("imgcnt",$_REQUEST)?$_REQUEST["imgcnt"]:0;
 
+//
+if(!is_numeric($collId)) $collId = 0;
+if(!is_numeric($limitStart)) $limitStart = 0;
+if(!is_numeric($limitNum)) $limitNum = 0;
+if(!is_numeric($imgCnt)) $imgCnt = 0;
+
 $pManager = new PhotographerManager();
 ?>
 <html>

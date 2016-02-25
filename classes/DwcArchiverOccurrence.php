@@ -216,8 +216,8 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['geodeticDatum'] = 'o.geodeticDatum';
 		$occurTermArr['coordinateUncertaintyInMeters'] = 'http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters';
 		$occurFieldArr['coordinateUncertaintyInMeters'] = 'o.coordinateUncertaintyInMeters';
-		$occurTermArr['footprintWKT'] = 'http://rs.tdwg.org/dwc/terms/footprintWKT';
-		$occurFieldArr['footprintWKT'] = 'o.footprintWKT';
+		//$occurTermArr['footprintWKT'] = 'http://rs.tdwg.org/dwc/terms/footprintWKT';
+		//$occurFieldArr['footprintWKT'] = 'o.footprintWKT';
 		$occurTermArr['verbatimCoordinates'] = 'http://rs.tdwg.org/dwc/terms/verbatimCoordinates';
 		$occurFieldArr['verbatimCoordinates'] = 'o.verbatimCoordinates';
 		$occurTermArr['georeferencedBy'] = 'http://rs.tdwg.org/dwc/terms/georeferencedBy';
@@ -723,7 +723,6 @@ class DwcArchiverOccurrence{
         $this->schemaType='dwc';
         $arr = $this->getDwcArray();
         return json_encode($arr[0]);
-
     }
 
     /** 
@@ -1026,8 +1025,18 @@ class DwcArchiverOccurrence{
 		//Populate Upper Taxonomic data
 		$this->setUpperTaxonomy();
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			
+			if(!$this->serverDomain){
+				$this->serverDomain = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
+				$this->serverDomain .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+			}
+			$urlPathPrefix = '';
+			if($this->serverDomain){
+				$urlPathPrefix = $this->serverDomain.$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+			}
 			$hasRecords = false;
+			$cnt = 0;
 			while($r = $rs->fetch_assoc()){
 				$hasRecords = true;
 				//Protect sensitive records
@@ -1056,50 +1065,65 @@ class DwcArchiverOccurrence{
 					$r['occurrenceID'] = $r['recordId'];
 				}
 				
-				if($this->schemaType != 'dwc' || $r['occurrenceID']){
-					//If data is a DwC extract, output data only if specimen GUID (occurrenceID) has been defined
-					$r['recordId'] = 'urn:uuid:'.$r['recordId'];
-					//Add collection GUID based on management type
-					$managementType = $this->collArr[$r['collid']]['managementtype'];
-					if($managementType && $managementType == 'Live Data'){
-						if(array_key_exists('collectionID',$r) && !$r['collectionID']){
-							$guid = $this->collArr[$r['collid']]['collectionguid'];
-							if(strlen($guid) == 36) $guid = 'urn:uuid:'.$guid;
-							$r['collectionID'] = $guid;
-						}
+				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
+				//Add collection GUID based on management type
+				$managementType = $this->collArr[$r['collid']]['managementtype'];
+				if($managementType && $managementType == 'Live Data'){
+					if(array_key_exists('collectionID',$r) && !$r['collectionID']){
+						$guid = $this->collArr[$r['collid']]['collectionguid'];
+						if(strlen($guid) == 36) $guid = 'urn:uuid:'.$guid;
+						$r['collectionID'] = $guid;
 					}
-					if($this->schemaType == 'dwc'){
-						unset($r['localitySecurity']);
-					}
-					if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
-						unset($r['collid']);
-					}
-					//Add upper taxonomic data
-					if($r['family'] && $this->upperTaxonomy){
-						$famStr = strtolower($r['family']);
-						if(isset($this->upperTaxonomy[$famStr]['o'])){
-							$r['t_order'] = $this->upperTaxonomy[$famStr]['o'];
-						}
-						if(isset($this->upperTaxonomy[$famStr]['c'])){
-							$r['t_class'] = $this->upperTaxonomy[$famStr]['c'];
-						}
-						if(isset($this->upperTaxonomy[$famStr]['p'])){
-							$r['t_phylum'] = $this->upperTaxonomy[$famStr]['p'];
-						}
-						if(isset($this->upperTaxonomy[$famStr]['k'])){
-							$r['t_kingdom'] = $this->upperTaxonomy[$famStr]['k'];
-						}
-					}
-	                $result[] = $r;
 				}
+				if($this->schemaType == 'dwc'){
+					unset($r['localitySecurity']);
+				}
+				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+					unset($r['collid']);
+				}
+				//Add upper taxonomic data
+				if($r['family'] && $this->upperTaxonomy){
+					$famStr = strtolower($r['family']);
+					if(isset($this->upperTaxonomy[$famStr]['o'])){
+						$r['t_order'] = $this->upperTaxonomy[$famStr]['o'];
+					}
+					if(isset($this->upperTaxonomy[$famStr]['c'])){
+						$r['t_class'] = $this->upperTaxonomy[$famStr]['c'];
+					}
+					if(isset($this->upperTaxonomy[$famStr]['p'])){
+						$r['t_phylum'] = $this->upperTaxonomy[$famStr]['p'];
+					}
+					if(isset($this->upperTaxonomy[$famStr]['k'])){
+						$r['t_kingdom'] = $this->upperTaxonomy[$famStr]['k'];
+					}
+				}
+				if($urlPathPrefix) $r['t_references'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
+				
+				foreach($r as $rKey => $rValue){
+					if(substr($rKey, 0, 2) == 't_') $rKey = substr($rKey,2);
+	                $result[$cnt][$rKey] = $rValue;
+				}
+				$cnt++;
 			}
 			$rs->free();
+			$result[0]['associatedMedia'] = $this->getAssociatedMedia();
 		}
 		else{
 			$this->logOrEcho("ERROR creating occurrence file: ".$this->conn->error."\n");
 			$this->logOrEcho("\tSQL: ".$sql."\n");
 		}
 		return $result;
+    }
+    
+    private function getAssociatedMedia(){
+    	$retStr = '';
+    	$sql = 'SELECT originalurl FROM images '.str_replace('o.','',$this->conditionSql);
+    	$rs = $this->conn->query($sql);
+    	while($r = $rs->fetch_object()){
+    		$retStr .= ';'.$r->originalurl;
+    	}
+    	$rs->free();
+    	return trim($retStr,';');
     }
 
 	public function createDwcArchive($fileNameSeed = ''){

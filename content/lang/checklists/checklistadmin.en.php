@@ -69,5 +69,4 @@ $LANG['ADDEDITOR'] = 'Add Editor';
 $LANG['DELETECHECK'] = 'Delete Checklist';
 $LANG['SUBMITCHANG'] = 'Submit Changes';
 $LANG['DELETETHISU'] = 'Delete this user';
-
 ?>
