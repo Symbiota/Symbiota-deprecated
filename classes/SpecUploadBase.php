@@ -24,6 +24,7 @@ class SpecUploadBase extends SpecUpload{
 	protected $symbFields = Array();
 	protected $identSymbFields = Array();
 	protected $imageSymbFields = Array();
+	protected $sourceDatabaseType = '';
 
 	private $translationMap = array('accession'=>'catalognumber','accessionid'=>'catalognumber','accessionnumber'=>'catalognumber',
 		'taxonfamilyname'=>'family','scientificname'=>'sciname','species'=>'specificepithet','commonname'=>'taxonremarks',
@@ -1594,7 +1595,12 @@ class SpecUploadBase extends SpecUpload{
 			if(array_key_exists('dbpk',$recMap)){
 				$recMap['dbpk'] = trim(preg_replace('/\s\s+/',' ',$recMap['dbpk']));
 			}
-			
+
+			//Temporarily code until Specify output UUID as occurrenceID 
+			if($this->sourceDatabaseType == 'specify' && !$recMap['occurrenceid']){
+				if(strlen($recMap['dbpk']) == 36) $recMap['occurrenceid'] = $recMap['dbpk'];
+			}
+
 			$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
 			$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].') '.
 				'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
@@ -1881,6 +1887,11 @@ class SpecUploadBase extends SpecUpload{
 		$this->matchOtherCatalogNumbers = $match;
 	}
 
+	public function setSourceDatabaseType($type){
+		$this->sourceDatabaseType = $type;
+	}
+
+	//Misc functions
 	protected function urlExists($url) {
 		$exists = false;
 		if(!strstr($url, "http")){
