@@ -894,8 +894,8 @@ class ImageBatchProcessor {
 		$specPk = '';
 		if(isset($this->collArr[$this->activeCollid]['pmterm'])){
 			$pmTerm = $this->collArr[$this->activeCollid]['pmterm'];
-			if(substr($pmTerm,0,1) != '/' || substr($pmTerm,-1) != '/'){
-				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing forward slashes: ".$pmTerm);
+			if(substr($pmTerm,0,1) != '/' || stripos(substr($pmTerm,-3),'/') === false){
+				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing forward slashes delimiting the term: ".$pmTerm);
 				exit;
 			}
 			if(!strpos($pmTerm,'(') || !strpos($pmTerm,')')){
