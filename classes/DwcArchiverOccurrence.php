@@ -39,6 +39,8 @@ class DwcArchiverOccurrence{
 	private $charSetSource = '';
 	private $charSetOut = '';
 
+	private $geolocateVariables = array();
+	
 	public function __construct(){
 		global $serverRoot, $charset;
 
@@ -1663,6 +1665,28 @@ class DwcArchiverOccurrence{
 		
 		$metaElem = $newDoc->createElement('metadata');
 		$metaElem->appendChild($symbElem);
+		if($this->schemaType == 'coge' && $this->geolocateVariables){
+			if(!$this->serverDomain){
+				$this->serverDomain = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
+				$this->serverDomain .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+			}
+			$urlPathPrefix = '';
+			if($this->serverDomain){
+				$urlPathPrefix = $this->serverDomain.$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+				//Add Geolocate metadata
+				$glElem = $newDoc->createElement('geoLocate');
+				$glElem->appendChild($newDoc->createElement('dataSourcePrimaryName',$this->geolocateVariables['cogename']));
+				$glElem->appendChild($newDoc->createElement('dataSourceSecondaryName',$this->geolocateVariables['cogedescr']));
+				$glElem->appendChild($newDoc->createElement('targetCommunityName',$this->geolocateVariables['cogecomm']));
+				#if(isset($this->geolocateVariables['targetcommunityidentifier'])) $glElem->appendChild($newDoc->createElement('targetCommunityIdentifier',''));
+				$glElem->appendChild($newDoc->createElement('specimenHyperlinkBase',$urlPathPrefix));
+				$glElem->appendChild($newDoc->createElement('specimenHyperlinkParameter','occid'));
+				$glElem->appendChild($newDoc->createElement('specimenHyperlinkValueField','Id'));
+				$metaElem->appendChild($glElem);
+			}
+		}
 		$addMetaElem = $newDoc->createElement('additionalMetadata');
 		$addMetaElem->appendChild($metaElem);
 		$rootElem->appendChild($addMetaElem);
@@ -2338,6 +2362,10 @@ class DwcArchiverOccurrence{
 		if($cs == 'ISO-8859-1' || $cs == 'UTF-8'){
 			$this->charSetOut = $cs;
 		}
+	}
+	
+	public function setGeolocateVariables($geolocateArr){
+		$this->geolocateVariables = $geolocateArr;
 	}
 
 	private function logOrEcho($str){

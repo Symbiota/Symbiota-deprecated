@@ -37,6 +37,9 @@ if($collid && is_numeric($collid)){
 		if($customField1) $dwcaHandler->addCondition($customField1,$_POST['ct1'],$_POST['cv1']);
 		if($customField2) $dwcaHandler->addCondition($customField2,$_POST['ct2'],$_POST['cv2']);
 
+		//Set GeoLocate CoGe variables
+		$dwcaHandler->setGeolocateVariables(array('cogecomm'=>$_POST['cogecomm'],'cogename'=>$_POST['cogename'],'cogedescr'=>$_POST['cogedescr'],));
+
 		//Set direct path to file
 		$tPath = $SERVER_ROOT;
 		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\'){

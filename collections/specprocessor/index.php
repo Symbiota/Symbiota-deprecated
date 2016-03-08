@@ -133,7 +133,7 @@ if($isEditor){
 				?>
 				<div id="tabs" class="taxondisplaydiv">
 				    <ul>
-				        <li><a href="#introdiv">Introduction</a></li>
+				        <li><a href="#">Introduction</a></li>
 				        <li><a href="imageprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId.'&submitaction='.$action; ?>">Image Loading</a></li>
 				        <li><a href="crowdsource/controlpanel.php?collid=<?php echo $collid; ?>">Crowdsourcing Module</a></li>
 				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&procstatus='.$procStatus.'&spprid='.$spprId; ?>">OCR</a></li>

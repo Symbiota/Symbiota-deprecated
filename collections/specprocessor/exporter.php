@@ -133,6 +133,14 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					alert("No records exist matching search criteria");
 					return false;
 				}
+				if(f.cogecomm.value == ""){
+					alert("You must select a target community");
+					return false;
+				}
+				if(f.cogename.value == ""){
+					alert("You must enter a data source identifier");
+					return false;
+				}
 				$("#coge-download").show();
 				$.ajax({
 					type: "POST",
@@ -146,7 +154,10 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						cv1: f.customvalue1.value,
 						cf2: f.customfield2.value, 
 						ct2: f.customtype2.value,
-						cv2: f.customvalue2.value
+						cv2: f.customvalue2.value,
+						cogecomm: f.cogecomm.value,
+						cogename: f.cogename.value,
+						cogedescr: f.cogedescr.value
 					}
 				}).done(function( response ) {
 					var result = response.result;
@@ -267,6 +278,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						for(var i in result){
 							htmlOut = htmlOut + '<div style="margin:5px">';
 							var name = result[i].name;
+							htmlOut = htmlOut + '<input name="cogecomm" type="radio" value="'+name+'" />';
 							htmlOut = htmlOut + "<u>"+name+"</u>";
 							var role = result[i].role;
 							htmlOut = htmlOut + " ("+role+")";
@@ -614,12 +626,28 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" /></span>
 												<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank">Login to CoGe</a></span>
 											</div>
-											<fieldset id="coge-communities" style="display:none;margin:5px;padding:5px;">
-												<legend style="font-weight:bold">Available Communities</legend>
-												<div id="commlist-div" style="margin:10px"></div>
-											</fieldset>
 										</fieldset>
-										<div style="margin:20px;">
+										<fieldset id="coge-communities" style="display:;margin:10px;padding:10px;">
+											<legend style="font-weight:bold">Available Communities</legend>
+											<div style="margin:10px;">
+												To import data into an existing geoLocate community, login to GeoLocate (see above), select the target community, 
+												provide a required identifier, an optional descriptive name, and then click the Push Data to GeoLocate button. 
+											</div>
+											<div style="margin:10px;">
+												<div id="commlist-div" style="margin:5px">
+													<span style="color:orange;">Login to GeoLocate and click check status button to list available communities</span>
+												</div>
+												<div style="margin:5px;clear:both;">
+													<div style="float:left;">Data source identifier (primary name):</div>
+													<div style="margin-left:250px;"><input name="cogename" type="text" style="width:300px" /></div>
+												</div>
+												<div style="margin:5px;clear:both;">
+													<div style="float:left;">Description:</div>
+													<div style="margin-left:250px;"><input name="cogedescr" type="text" style="width:300px" /></div>
+												</div>
+											</div>
+										</fieldset>
+										<div style="margin:20px;clear:both;">
 											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 											<input name="format" type="hidden" value="csv" />
 											<input name="schema" type="hidden" value="coge" />
