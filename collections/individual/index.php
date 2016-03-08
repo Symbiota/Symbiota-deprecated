@@ -4,6 +4,12 @@ include_once($SERVER_ROOT.'/classes/OccurrenceIndividualManager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
 include_once($SERVER_ROOT.'/classes/RdfUtility.php');
 
+if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443){
+	$url = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
+	header("Location: $url");
+	exit;
+}
+
 $occid = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
 $collid = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
 $pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";

@@ -276,16 +276,18 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						$("#coge-communities").show();
 						var htmlOut = "";
 						for(var i in result){
-							htmlOut = htmlOut + '<div style="margin:5px">';
-							var name = result[i].name;
-							htmlOut = htmlOut + '<input name="cogecomm" type="radio" value="'+name+'" />';
-							htmlOut = htmlOut + "<u>"+name+"</u>";
 							var role = result[i].role;
-							htmlOut = htmlOut + " ("+role+")";
-							var descr = result[i].description;
-							if(descr != "") htmlOut = htmlOut + ": " + descr;
-							htmlOut = htmlOut + '</div>';
-							$("#commlist-div").html(htmlOut);
+							if(role == "Owner" || role == "Admin"){
+								htmlOut = htmlOut + '<div style="margin:5px">';
+								var name = result[i].name;
+								htmlOut = htmlOut + '<input name="cogecomm" type="radio" value="'+name+'" />';
+								htmlOut = htmlOut + "<u>"+name+"</u>";
+								htmlOut = htmlOut + " ("+role+")";
+								var descr = result[i].description;
+								if(descr != "") htmlOut = htmlOut + ": " + descr;
+								htmlOut = htmlOut + '</div>';
+								$("#commlist-div").html(htmlOut);
+							}
 						}
 					}
 				});

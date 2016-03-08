@@ -11,8 +11,8 @@ $mode = array_key_exists('mode',$_REQUEST)?$_REQUEST['mode']:1;
 $traitID = array_key_exists('traitid',$_REQUEST)?$_REQUEST['traitid']:'';
 $taxonFilter = array_key_exists('taxonfilter',$_POST)?$_POST['taxonfilter']:'';
 $tidFilter = array_key_exists('tidfilter',$_POST)?$_POST['tidfilter']:'';
-$paneX = array_key_exists('panex',$_POST)?$_POST['panex']:'600';
-$paneY = array_key_exists('paney',$_POST)?$_POST['paney']:'500';
+$paneX = array_key_exists('panex',$_POST)?$_POST['panex']:'575';
+$paneY = array_key_exists('paney',$_POST)?$_POST['paney']:'550';
 $imgRes = array_key_exists('imgres',$_POST)?$_POST['imgres']:'med';
 
 $reviewUid = array_key_exists('reviewuid',$_POST)?$_POST['reviewuid']:0;
@@ -323,11 +323,11 @@ if($traitID){
 		<?php
 		if($collid){
 			?>
-			<div style="position:absolute;top:0px;right:20px;width:300px;">
+			<div style="position:absolute;top:0px;right:10px;width:300px;">
 				<?php
 				if($mode == 1){ 
 					?>
-					<fieldset style="margin-top:20px">
+					<fieldset style="margin-top:25px">
 						<legend><b>Filter</b></legend>
 						<form id="filterform" name="filterform" method="post" action="occurattributes.php" onsubmit="return verifyFilterForm(this)" >
 							<div>
@@ -370,7 +370,7 @@ if($traitID){
 				} 
 				elseif($mode == 2){
 					?>
-					<fieldset style="margin-top:20px">
+					<fieldset style="margin-top:25px">
 						<legend><b>Reviewer</b></legend>
 						<form id="reviewform" name="reviewform" method="post" action="occurattributes.php" onsubmit="return verifyReviewForm(this)" >
 							<div style="margin:3px">
