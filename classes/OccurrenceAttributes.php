@@ -15,12 +15,12 @@ class OccurrenceAttributes extends Manager {
 	}
 
 	//Edit functions
-	public function saveAttributes($stateId,$occid,$uid){
+	public function saveAttributes($stateId,$occid,$notes,$uid){
 		if(!is_numeric($stateId) || !is_numeric($occid) || !is_numeric($uid)){
 			$this->errorMessage = 'ERROR saving occurrence attribute: bad input values';
 			return false;
 		}
-		$sql = 'INSERT INTO tmattributes(stateid,occid,createduid) VALUES('.$stateId.','.$occid.','.$uid.') ';
+		$sql = 'INSERT INTO tmattributes(stateid,occid,notes,createduid) VALUES('.$stateId.','.$occid.',"'.$notes.'",'.$uid.') ';
 		if(!$this->conn->query($sql)){
 			$this->errorMessage = 'ERROR saving occurrence attribute: '.$this->error;
 			return false;
@@ -32,13 +32,13 @@ class OccurrenceAttributes extends Manager {
 	public function getImageUrls(){
 		$retArr = array();
 		if($this->collid){
-			$sql = 'SELECT i.occid '.
+			$sql = 'SELECT i.occid, IFNULL(o.catalognumber, o.othercatalognumbers) AS catnum '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 				'LEFT JOIN tmattributes a ON i.occid = a.occid '. 
 				'WHERE (a.occid IS NULL) AND (o.collid = '.$this->collid.') '.
 				'ORDER BY RAND() LIMIT 1';
 			if($this->tidFilter){
-				$sql = 'SELECT i.occid '.
+				$sql = 'SELECT i.occid, IFNULL(o.catalognumber, o.othercatalognumbers) AS catnum '.
 					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 					'INNER JOIN taxaenumtree e ON i.tid = e.tid '.
 					'LEFT JOIN tmattributes a ON i.occid = a.occid '.
@@ -48,6 +48,7 @@ class OccurrenceAttributes extends Manager {
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
+				$retArr[$r->occid]['catnum'] = $r->catnum;
 				$sql2 = 'SELECT i.imgid, i.url, i.originalurl, i.occid '.
 					'FROM images i '.
 					'WHERE (i.occid = '.$r->occid.') ';
@@ -65,19 +66,19 @@ class OccurrenceAttributes extends Manager {
 		return $retArr;
 	}
 	
-	public function getImageCount(){
+	public function getSpecimenCount(){
 		$retCnt = 0;
 		if($this->collid){
-			$sql = 'SELECT COUNT(i.imgid) AS cnt '.
+			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 				'LEFT JOIN tmattributes a ON i.occid = a.occid '. 
 				'WHERE (a.occid IS NULL) AND (o.collid = '.$this->collid.') ';
 			if($this->tidFilter){
-				$sql = 'SELECT COUNT(i.imgid) AS cnt '.
+				$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
 					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 					'INNER JOIN taxaenumtree e ON i.tid = e.tid '.
 					'LEFT JOIN tmattributes a ON i.occid = a.occid '.
-					'WHERE (e.parenttid = '.$this->tidFilter.' OR e.tid = '.$this->tidFilter.') AND (a.occid IS NULL) AND (o.collid = '.$this->collid.') ';
+					'WHERE (e.parenttid = '.$this->tidFilter.' OR e.tid = '.$this->tidFilter.') AND (a.occid IS NULL) AND (o.collid = '.$this->collid.') AND (e.taxauthid = 1) ';
 			}
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
@@ -177,10 +178,12 @@ class OccurrenceAttributes extends Manager {
 		if(is_numeric($traitID) && $this->collid){
 			$targetOccid = 0;
 			//$traitID is required
-			$sql1 = 'SELECT DISTINCT o.occid '.$this->getReviewSqlBase($traitID, $reviewUid, $reviewDate, $reviewStatus).' LIMIT '.$start.',1';
+			$sql1 = 'SELECT DISTINCT o.occid, IFNULL(o.catalognumber, o.othercatalognumbers) AS catnum '.
+				$this->getReviewSqlBase($traitID, $reviewUid, $reviewDate, $reviewStatus).' LIMIT '.$start.',1';
 			$rs1 = $this->conn->query($sql1);
 			while($r1 = $rs1->fetch_object()){
 				$targetOccid = $r1->occid;
+				$retArr[$r1->occid]['catnum'] = $r1->catnum;
 			}
 			$rs1->free();
 			//Get images for target occid (isolation query into separate statements returns all images where there are multiples per specimen) 
@@ -243,18 +246,19 @@ class OccurrenceAttributes extends Manager {
 		//Some sanitation
 		if(is_numeric($traitID) && is_numeric($occid)){
 			//$traitID and $occid are required
-			$sql = 'SELECT a.stateid FROM tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
+			$sql = 'SELECT a.stateid, a.notes FROM tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
 				'WHERE a.occid = '.$occid.' AND s.traitid = '.$traitID;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[] = $r->stateid;
+				$retArr['notes'] = $r->notes;
 			}
 			$rs->free();
 		}
 		return $retArr;
 	}
 
-	public function saveReviewStatus($traitID, $targetOccid,$setStatus,$addArr,$delArr){
+	public function saveReviewStatus($traitID, $targetOccid,$setStatus,$addArr,$delArr,$notes){
 		$status = false;
 		if(is_numeric($traitID) && is_numeric($targetOccid) && is_numeric($setStatus)){
 			if($addArr){
@@ -281,7 +285,8 @@ class OccurrenceAttributes extends Manager {
 			} 
 			
 			$sql = 'UPDATE tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
-				'SET a.statuscode = '.$setStatus.' WHERE a.occid = '.$targetOccid.' AND s.traitid = '.$traitID;
+				'SET a.statuscode = '.$setStatus.', a.notes = "'.$this->cleanInStr($notes).'" '.
+				'WHERE a.occid = '.$targetOccid.' AND s.traitid = '.$traitID;
 			if(!$this->conn->query($sql)){
 				$this->errorMessage = 'ERROR updating occurrence attribute review status: '.$this->conn->error;
 				$status = false;
@@ -347,13 +352,13 @@ class OccurrenceAttributes extends Manager {
 		return $retArr;
 	}
 
-	public function submitBatchAttributes($collid, $stateID, $fieldName, $fieldValue, $uid){
+	public function submitBatchAttributes($collid, $stateID, $fieldName, $fieldValue, $notes, $uid){
 		if(!is_numeric($collid) || !is_numeric($stateID) || !is_numeric($uid)){
 			$this->errorMessage = 'ERROR saving occurrence attribute: bad input values';
 			return false;
 		}
-		$sql = 'INSERT INTO tmattributes(stateid,occid,createduid) '.
-			'SELECT "'.$stateID.'", occid, "'.$uid.'" FROM omoccurrences '.
+		$sql = 'INSERT INTO tmattributes(stateid,occid,notes,createduid) '.
+			'SELECT "'.$stateID.'", occid, "'.$this->cleanInStr($notes).'", '.$uid.' FROM omoccurrences '.
 			'WHERE collid = '.$collid.' AND '.$fieldName.' = "'.$this->cleanInStr($fieldValue).'"';
 		//echo $sql; exit;
 		if(!$this->conn->query($sql)){

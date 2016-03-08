@@ -52,15 +52,16 @@ if($isEditor){
 	if($submitForm == 'Save and Next'){
 		$stateID = $_POST['stateid'];
 		$targetOccid = $_POST['targetoccid'];
+		$notes = $_POST['notes'];
 		if(is_array($stateID)){
 			foreach($stateID as $id){
-				if(!$attrManager->saveAttributes($id,$targetOccid,$SYMB_UID)){
+				if(!$attrManager->saveAttributes($id,$targetOccid,$notes,$SYMB_UID)){
 					$statusStr = $attrManager->getErrorStr();
 				}
 			}
 		}
 		else{
-			$attrManager->saveAttributes($stateID,$targetOccid,$SYMB_UID);
+			$attrManager->saveAttributes($stateID,$targetOccid,$notes,$SYMB_UID);
 		}
 	}
 	if($submitForm == 'Set Status and Save'){
@@ -77,11 +78,13 @@ if($isEditor){
 		$addArr = array_diff($stateIdArr,$currentStatusArr);
 		$delArr = array_diff($currentStatusArr,$stateIdArr);
 		$setStatus = $_POST['setstatus'];
-		$attrManager->saveReviewStatus($traitID,$targetOccid,$setStatus,$addArr,$delArr);
+		$notes = $_POST['notes'];
+		$attrManager->saveReviewStatus($traitID,$targetOccid,$setStatus,$addArr,$delArr,$notes);
 	}
 }
 $imgArr = array();
 $occid = 0;
+$catNum = '';
 if($traitID){
 	$traitArr = $attrManager->getTraitArr($traitID);
 	$imgRetArr = array();
@@ -94,7 +97,11 @@ if($traitID){
 		if($imgRetArr) $imgArr = current($imgRetArr);
 		
 	}
-	if($imgRetArr) $occid = key($imgRetArr);
+	if($imgRetArr){
+		$catNum = $imgArr['catnum'];
+		unset($imgArr['catnum']);
+		$occid = key($imgRetArr);
+	}
 }
 ?>
 <html>
@@ -264,7 +271,7 @@ if($traitID){
 				return true;
 			}
 
-			function nextReviewImage(startValue){
+			function nextReviewRecord(startValue){
 				var f = document.getElementById("reviewform");
 				f.start.value = startValue;
 				f.submit();
@@ -282,7 +289,7 @@ if($traitID){
 		$displayLeftMenu = false;
 		include($SERVER_ROOT.'/header.php');
 		if($isEditor == 2){
-			echo '<div style="float:right;margin:3px;font-size:90%">';
+			echo '<div style="float:right;margin:0px 3px;font-size:90%">';
 			if($mode == 1){
 				echo '<a href="occurattributes.php?collid='.$collid.'&mode=2&traitid='.$traitID.'"><img src="../../images/edit.png" style="" />review</a>';
 			}
@@ -316,7 +323,7 @@ if($traitID){
 		<?php
 		if($collid){
 			?>
-			<div style="position:absolute;top:0px;right:20px;width:250px;">
+			<div style="position:absolute;top:0px;right:20px;width:300px;">
 				<?php
 				if($mode == 1){ 
 					?>
@@ -355,7 +362,7 @@ if($traitID){
 								<span id="notvalid-span" style="display:none;font-weight:bold;color:red;">taxon not valid...</span>
 							</div>
 							<div style="margin:10px">
-								<?php if($traitID) echo '<b>Target Specimens:</b> '.$attrManager->getImageCount(); ?>
+								<?php if($traitID) echo '<b>Target Specimens:</b> '.$attrManager->getSpecimenCount(); ?>
 							</div>
 						</form>
 					</fieldset>
@@ -431,7 +438,7 @@ if($traitID){
 									if($rCnt > 1){
 										$next = ($start+1);
 										if($next >= $rCnt) $next = 0; 
-										echo ' (<a href="#" onclick="nextReviewImage('.($next).')">Next image &gt;&gt;</a>)';
+										echo ' (<a href="#" onclick="nextReviewRecord('.($next).')">Next record &gt;&gt;</a>)';
 									} 
 								} 
 								?>
@@ -454,7 +461,12 @@ if($traitID){
 								}
 								$attrStateArr = $attrManager->getTraitStates($traitID);
 								$attributesCoded = array();
-								if($mode == 2) $attributesCoded = $attrManager->getCodedAttribute($traitID,$occid);
+								$attrNotes = '';
+								if($mode == 2){
+									$attributesCoded = $attrManager->getCodedAttribute($traitID,$occid);
+									$attrNotes = $attributesCoded['notes'];
+									unset($attributesCoded['notes']);
+								}
 								if($controlType == 'checkbox'){
 									foreach($attrStateArr as $sid => $sArr){
 										echo '<div title="'.$sArr['description'].'"><input name="stateid[]" type="checkbox" value="'.$sid.'" '.(in_array($sid, $attributesCoded)?'checked':'').' /> '.$sArr['name'].'</div>';
@@ -475,6 +487,9 @@ if($traitID){
 									echo '</select>';
 								}
 								?>
+							</div>
+							<div style="margin:10px 5px;">
+								Notes: <input name="notes" type="text" style="width:200px" value="<?php echo $attrNotes; ?>" /> 
 							</div>
 							<div style="margin:20px">
 								<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
@@ -518,7 +533,7 @@ if($traitID){
 				} 
 				?>
 			</div>
-			<div>
+			<div style="height:600px">
 				<?php 
 				if($imgArr){
 					?>
@@ -526,7 +541,12 @@ if($traitID){
 						<span><input id="imgresmed" name="resradio"  type="radio" checked onchange="changeImgRes('med')" />Med Res.</span>
 						<span style="margin-left:6px;"><input id="imgreslg" name="resradio" type="radio" onchange="changeImgRes('lg')" />High Res.</span>
 						<?php 
-						if($occid) echo '<span style="margin-left:60px;"><a href="../individual/index.php?occid='.$occid.'" target="_blank"/>Specimen Details</a></span>';
+						if($occid){
+							if(!$catNum) $catNum = 'Specimen Details';
+							echo '<span style="margin-left:50px;">';
+							echo '<a href="../individual/index.php?occid='.$occid.'" target="_blank" title="Specimen Details">'.$catNum.'</a>';
+							echo '</span>';
+						}
 						$imgTotal = count($imgArr);
 						if($imgTotal > 1) echo '<span id="labelcnt" style="margin-left:60px;">1</span> of '.$imgTotal.' images '.($imgTotal>1?'<a href="#" onclick="nextImage()">&gt;&gt; next</a>':'');
 						if($occid && $mode != 2) echo '<span style="margin-left:80px" title="Skip Specimen"><a href="#" onclick="skipSpecimen()">SKIP &gt;&gt;</a></span>';

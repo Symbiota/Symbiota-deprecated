@@ -42,11 +42,12 @@ if($isEditor){
 			$fieldValue = array_key_exists('fieldvalue',$_POST)?$_POST['fieldvalue']:'';
 			if(!is_array($fieldValue)) $fieldValue = array($fieldValue);
 			$stateID = array_key_exists('stateid',$_POST)?$_POST['stateid']:'';
+			$notes = $_POST['notes'];
 			if(!is_array($stateID)) $stateID = array($stateID);
 			if($stateID && $fieldValue){
 				foreach($fieldValue as $fValue){
 					foreach($stateID as $id){
-						if(!$attrManager->submitBatchAttributes($collid, $id, $fieldName, $fValue, $SYMB_UID)){
+						if(!$attrManager->submitBatchAttributes($collid, $id, $fieldName, $fValue, $notes, $SYMB_UID)){
 							$statusStr = $attrManager->getErrorMessage();
 						}
 					}
@@ -253,6 +254,9 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 										echo '</select>';
 									}
 									?>
+								</div>
+								<div style="margin:10px;">
+									Notes: <input name="notes" type="text" style="width:350px" value="" /> 
 								</div>
 								<div style="margin:5px;">
 									<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
