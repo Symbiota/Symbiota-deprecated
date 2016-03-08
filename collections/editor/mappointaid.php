@@ -1,6 +1,14 @@
 <?php
 include_once('../../config/symbini.php');
+
+if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443){
+	$url = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
+	header("Location: $url");
+	exit;
+}
+
 header("Content-Type: text/html; charset=".$charset);
+
 $latDef = array_key_exists("latdef",$_REQUEST)?$_REQUEST["latdef"]:0; 
 $lngDef = array_key_exists("lngdef",$_REQUEST)?$_REQUEST["lngdef"]:0; 
 $errRad = array_key_exists("errrad",$_REQUEST)?$_REQUEST["errrad"]:0;

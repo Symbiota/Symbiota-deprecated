@@ -1,7 +1,13 @@
 <?php
 include_once('../../config/symbini.php');
-header("Content-Type: text/html; charset=".$charset);
 include_once($serverRoot.'/classes/MapInterfaceManager.php');
+
+if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443){
+	$url = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
+	header("Location: $url");
+	exit;
+}
+
 header("Content-Type: text/html; charset=".$charset);
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.

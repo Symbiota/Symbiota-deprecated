@@ -1,6 +1,13 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
+
+if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443){
+	$url = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
+	header("Location: $url");
+	exit;
+}
+
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $boundaryArr = explode(";",$MAPPING_BOUNDARIES);
