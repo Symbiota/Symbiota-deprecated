@@ -74,7 +74,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 				}
 	
 			});
-	
+
 			function validateDownloadForm(f){
 				if(f.newrecs.checked == true && (f.processingstatus.value == "unprocessed" || f.processingstatus.value == "")){
 					alert("New records cannot have an unprocessed or undefined processing status. Please select a valid processing status.");
@@ -116,6 +116,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						$("#builddwcabutton").prop("disabled",true);
 					}
 					else{
+						clearInterval(t);
 						$("#coge-status").css('color', 'green');
 						$("#coge-status").html("Connected");
 						$("#builddwcabutton").prop("disabled",false);
@@ -124,9 +125,15 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 				}).fail(function(jqXHR, textStatus, errorThrown ){
 					$("#coge-status").html("Unauthorized");
 					$("#coge-status").css("color", "red");
-					alert( "ERROR: it may be that GeoLocate has not been configured to automatically accept files from this Symbiota portal " );
+					alert( "ERROR: it may be that GeoLocate has not been configured to automatically accept files from this Symbiota portal. Please contact your portal adminstrator to setup automated GeoLocate submissions. " );
+					clearInterval(t);
 				});
-			}			
+			}
+
+			function startAuthMonitoring(){
+				//every 10 seconds, check authenication
+				var t=setInterval(cogeCheckAuthentication,10000);
+			}
 
 			function cogePublishDwca(f){
 				if($("#countdiv").html() == 0){
@@ -291,20 +298,22 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						}
 					}
 				});
-			}	
+			}
 		</script>
 	</head>
 	<body>
 		<!-- This is inner text! -->
 		<div id="innertext" style="background-color:white;">
-			<div style="float:right;width:165px;margin-right:10px">
+			<div style="float:right;width:165px;margin-right:30px">
 				<fieldset>
 					<legend><b>Export Type</b></legend>
 					<form name="submenuForm" method="post" action="index.php">
 						<select name="displaymode" onchange="this.form.submit()">
 							<option value="0">Custom Export</option>
 							<option value="1" <?php echo ($displayMode==1?'selected':''); ?>>Georeference Export</option>
-							<option value="2" <?php echo ($displayMode==2?'selected':''); ?>>GeoLocate Toolkit</option>
+							<?php 
+							if($ACTIVATE_GEOLOCATE_TOOLKIT) echo '<option value="2" '.($displayMode==2?'selected':'').'>GeoLocate Toolkit</option>';
+							?>
 						</select>
 						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 						<input name="tabindex" type="hidden" value="5" />
@@ -528,150 +537,153 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					<?php 
 				}
 				elseif($displayMode == 2){
-					//GeoLocate tools
-					?>
-					<form name="expgeolocateform" action="../download/downloadhandler.php" method="post" onsubmit="">
-						<fieldset>
-							<legend><b>GeoLocate Community Toolkit</b></legend>
-							<div style="margin:15px;">
-								This module extracts specimen records that have text locality details but lack decimal coordinates.  
-								These specimens are packaged and delivered directly into the GeoLocate Community Tools.
-							</div>
-							<table>
-								<tr>
-									<td>
-										<div style="margin:10px;">
-											<b>Processing Status:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<select name="processingstatus" onchange="cogeUpdateCount(this)">
-												<option value="">All Records</option>
-												<?php 
-												$statusArr = $dlManager->getProcessingStatusList($collid);
-												foreach($statusArr as $v){
-													echo '<option value="'.$v.'">'.ucwords($v).'</option>';
-												}
-												?>
-											</select>
-										</div> 
-									</td>
-								</tr>
- 								<tr>
-									<td>
-										<div style="margin:10px;">
-											<b>Additional<br/>Filters:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<select name="customfield1" style="width:200px">
-												<option value="">Select Field Name</option>
-												<option value="">---------------------------------</option>
-												<?php 
-												foreach($advFieldArr as $k => $v){
-													echo '<option value="'.$k.'" '.($k==$customField1?'SELECTED':'').'>'.$v.'</option>';
-												}
-												?>
-											</select>
-											<select name="customtype1" onchange="cogeUpdateCount(this)">
-												<option value="EQUALS">EQUALS</option>
-												<option <?php echo ($customType1=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
-												<option <?php echo ($customType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
-												<option <?php echo ($customType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
-												<option <?php echo ($customType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
-											</select>
-											<input name="customvalue1" type="text" value="<?php echo $customValue1; ?>" style="width:200px;" onchange="cogeUpdateCount(this)" />
-										</div> 
-										<div style="margin:10px 0px;">
-											<select name="customfield2" style="width:200px">
-												<option value="">Select Field Name</option>
-												<option value="">---------------------------------</option>
-												<?php 
-												foreach($advFieldArr as $k => $v){
-													echo '<option value="'.$k.'" '.($k==$customField2?'SELECTED':'').'>'.$v.'</option>';
-												}
-												?>
-											</select>
-											<select name="customtype2" onchange="cogeUpdateCount(this)">
-												<option value="EQUALS">EQUALS</option>
-												<option <?php echo ($customType2=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
-												<option <?php echo ($customType2=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
-												<option <?php echo ($customType2=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
-												<option <?php echo ($customType2=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
-											</select>
-											<input name="customvalue2" type="text" value="<?php echo $customValue2; ?>" style="width:200px;" onchange="cogeUpdateCount(this)" />
-										</div> 
-									</td>
-								</tr>
-								<tr>
-									<td colspan="2">
-										<fieldset style="margin:10px;padding:20px;">
-											<legend><b>CoGe Status</b></legend>
-											<div>
-												<b>Match Count:</b> 
-												<?php 
-												$dwcaHandler = new DwcArchiverOccurrence();
-												$dwcaHandler->setCollArr($collid);
-												$dwcaHandler->setVerbose(0);
-												$dwcaHandler->addCondition('decimallatitude','NULL');
-												$dwcaHandler->addCondition('decimallongitude','NULL');
-												$dwcaHandler->addCondition('locality','NOTNULL');
-												echo '<span id="countdiv">'.$dwcaHandler->getOccurrenceCnt().'</span> records'; 
-												?>
-												<span id="recalspan" style="color:orange;display:none;">recalculating... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
-											</div>
-											<div>
-												<b>CoGe Authentication:</b>
-												<span id="coge-status" style="width:150px;color:red;">Disconnected</span>
-												<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" /></span>
-												<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank">Login to CoGe</a></span>
-											</div>
-										</fieldset>
-										<fieldset id="coge-communities" style="display:;margin:10px;padding:10px;">
-											<legend style="font-weight:bold">Available Communities</legend>
+					if($ACTIVATE_GEOLOCATE_TOOLKIT){
+						//GeoLocate tools
+						?>
+						<form name="expgeolocateform" action="../download/downloadhandler.php" method="post" onsubmit="">
+							<fieldset>
+								<legend><b>GeoLocate Community Toolkit</b></legend>
+								<div style="margin:15px;">
+									This module extracts specimen records that have text locality details but lack decimal coordinates.  
+									These specimens are packaged and delivered directly into the GeoLocate Community Tools.
+								</div>
+								<table>
+									<tr>
+										<td>
 											<div style="margin:10px;">
-												To import data into an existing geoLocate community, login to GeoLocate (see above), select the target community, 
-												provide a required identifier, an optional descriptive name, and then click the Push Data to GeoLocate button. 
-											</div>
+												<b>Processing Status:</b>
+											</div> 
+										</td>
+										<td>
+											<div style="margin:10px 0px;">
+												<select name="processingstatus" onchange="cogeUpdateCount(this)">
+													<option value="">All Records</option>
+													<?php 
+													$statusArr = $dlManager->getProcessingStatusList($collid);
+													foreach($statusArr as $v){
+														echo '<option value="'.$v.'">'.ucwords($v).'</option>';
+													}
+													?>
+												</select>
+											</div> 
+										</td>
+									</tr>
+	 								<tr>
+										<td>
 											<div style="margin:10px;">
-												<div id="commlist-div" style="margin:5px">
-													<span style="color:orange;">Login to GeoLocate and click check status button to list available communities</span>
+												<b>Additional<br/>Filters:</b>
+											</div> 
+										</td>
+										<td>
+											<div style="margin:10px 0px;">
+												<select name="customfield1" style="width:200px">
+													<option value="">Select Field Name</option>
+													<option value="">---------------------------------</option>
+													<?php 
+													foreach($advFieldArr as $k => $v){
+														echo '<option value="'.$k.'" '.($k==$customField1?'SELECTED':'').'>'.$v.'</option>';
+													}
+													?>
+												</select>
+												<select name="customtype1" onchange="cogeUpdateCount(this)">
+													<option value="EQUALS">EQUALS</option>
+													<option <?php echo ($customType1=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
+													<option <?php echo ($customType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+													<option <?php echo ($customType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+													<option <?php echo ($customType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
+												</select>
+												<input name="customvalue1" type="text" value="<?php echo $customValue1; ?>" style="width:200px;" onchange="cogeUpdateCount(this)" />
+											</div> 
+											<div style="margin:10px 0px;">
+												<select name="customfield2" style="width:200px">
+													<option value="">Select Field Name</option>
+													<option value="">---------------------------------</option>
+													<?php 
+													foreach($advFieldArr as $k => $v){
+														echo '<option value="'.$k.'" '.($k==$customField2?'SELECTED':'').'>'.$v.'</option>';
+													}
+													?>
+												</select>
+												<select name="customtype2" onchange="cogeUpdateCount(this)">
+													<option value="EQUALS">EQUALS</option>
+													<option <?php echo ($customType2=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
+													<option <?php echo ($customType2=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+													<option <?php echo ($customType2=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+													<option <?php echo ($customType2=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
+												</select>
+												<input name="customvalue2" type="text" value="<?php echo $customValue2; ?>" style="width:200px;" onchange="cogeUpdateCount(this)" />
+											</div> 
+										</td>
+									</tr>
+									<tr>
+										<td colspan="2">
+											<fieldset style="margin:10px;padding:20px;">
+												<legend><b>CoGe Status</b></legend>
+												<div>
+													<b>Match Count:</b> 
+													<?php 
+													$dwcaHandler = new DwcArchiverOccurrence();
+													$dwcaHandler->setCollArr($collid);
+													$dwcaHandler->setVerbose(0);
+													$dwcaHandler->addCondition('decimallatitude','NULL');
+													$dwcaHandler->addCondition('decimallongitude','NULL');
+													$dwcaHandler->addCondition('locality','NOTNULL');
+													$dwcaHandler->addCondition('catalognumber','NOTNULL');
+													echo '<span id="countdiv">'.$dwcaHandler->getOccurrenceCnt().'</span> records'; 
+													?>
+													<span id="recalspan" style="color:orange;display:none;">recalculating... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 												</div>
-												<div style="margin:5px;clear:both;">
-													<div style="float:left;">Data source identifier (primary name):</div>
-													<div style="margin-left:250px;"><input name="cogename" type="text" style="width:300px" /></div>
+												<div>
+													<b>CoGe Authentication:</b>
+													<span id="coge-status" style="width:150px;color:red;">Disconnected</span>
+													<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" /></span>
+													<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank" onclick="startAuthMonitoring()">Login to CoGe</a></span>
 												</div>
-												<div style="margin:5px;clear:both;">
-													<div style="float:left;">Description:</div>
-													<div style="margin-left:250px;"><input name="cogedescr" type="text" style="width:300px" /></div>
+											</fieldset>
+											<fieldset id="coge-communities" style="display:;margin:10px;padding:10px;">
+												<legend style="font-weight:bold">Available Communities</legend>
+												<div style="margin:10px;">
+													To import data into an existing geoLocate community, login to GeoLocate (see above), select the target community, 
+													provide a required identifier, an optional descriptive name, and then click the Push Data to GeoLocate button. 
+												</div>
+												<div style="margin:10px;">
+													<div id="commlist-div" style="margin:5px">
+														<span style="color:orange;">Login to GeoLocate and click check status button to list available communities</span>
+													</div>
+													<div style="margin:5px;clear:both;">
+														<div style="float:left;">Data source identifier (primary name):</div>
+														<div style="margin-left:250px;"><input name="cogename" type="text" style="width:300px" /></div>
+													</div>
+													<div style="margin:5px;clear:both;">
+														<div style="float:left;">Description:</div>
+														<div style="margin-left:250px;"><input name="cogedescr" type="text" style="width:300px" /></div>
+													</div>
+												</div>
+											</fieldset>
+											<div style="margin:20px;clear:both;">
+												<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+												<input name="format" type="hidden" value="csv" />
+												<input name="schema" type="hidden" value="coge" />
+												<div style="margin:5px">
+													<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> 
+													<span id="coge-download" style="display:none;color:orange">Downloading data... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
+													<span id="coge-push2coge" style="display:none;color:orange">Pushing data to CoGe... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
+													 *In development
+												</div>
+												<div style="margin:5px">
+													<input name="submitaction" type="submit" value="Download Records Locally" />
 												</div>
 											</div>
-										</fieldset>
-										<div style="margin:20px;clear:both;">
-											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-											<input name="format" type="hidden" value="csv" />
-											<input name="schema" type="hidden" value="coge" />
-											<div style="margin:5px">
-												<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> 
-												<span id="coge-download" style="display:none;color:orange">Downloading data... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
-												<span id="coge-push2coge" style="display:none;color:orange">Pushing data to CoGe... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
-												 *In development
+											<div style="margin-left:20px;">
+												<b>* Default query criteria: catalogNumber and locality are NOT NULL, decimalLatitude is NULL, decimalLongitude is NULL</b>
 											</div>
-											<div style="margin:5px">
-												<input name="submitaction" type="submit" value="Download Records Locally" />
-											</div>
-										</div>
-										<div style="margin-left:20px;">
-											* Default query criteria: locality IS NOT NULL, decimalLatitude IS NULL, decimalLongitude IS NULL
-										</div>
-									</td>
-								</tr>
-							</table>							
-						</fieldset>
-					</form>
-					<?php 
+										</td>
+									</tr>
+								</table>							
+							</fieldset>
+						</form>
+						<?php 
+					}
 				}
 				else{
 					?>

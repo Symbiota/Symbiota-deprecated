@@ -32,6 +32,7 @@ if($collid && is_numeric($collid)){
 		$dwcaHandler->setIncludeImgs(0);
 		$dwcaHandler->addCondition('decimallatitude','NULL');
 		$dwcaHandler->addCondition('decimallongitude','NULL');
+		$dwcaHandler->addCondition('catalognumber','NOTNULL');
 		$dwcaHandler->addCondition('locality','NOTNULL');
 		if($processingStatus) $dwcaHandler->addCondition('processingstatus','EQUALS',$processingStatus);
 		if($customField1) $dwcaHandler->addCondition($customField1,$_POST['ct1'],$_POST['cv1']);

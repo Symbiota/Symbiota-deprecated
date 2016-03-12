@@ -127,6 +127,7 @@ else{
 			$dwcaHandler->setIncludeImgs(0);
 			$dwcaHandler->addCondition('decimallatitude','NULL');
 			$dwcaHandler->addCondition('decimallongitude','NULL');
+			$dwcaHandler->addCondition('catalognumber','NOTNULL');
 			$dwcaHandler->addCondition('locality','NOTNULL');
 			if(array_key_exists('processingstatus',$_POST) && $_POST['processingstatus']){
 				$dwcaHandler->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);

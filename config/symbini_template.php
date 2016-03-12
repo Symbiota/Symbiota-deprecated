@@ -46,8 +46,9 @@ $RECAPTCHA_PUBLIC_KEY = '';			//Now called site key
 $RECAPTCHA_PRIVATE_KEY = '';		//Now called secret key
 $GLOSSARY_EXPORT_BANNER = '';		//Banner image for glossary exports. Place in images/layout folder.
 $DYN_CHECKLIST_RADIUS = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
-$DISPLAY_COMMON_NAMES = 1;
-$ACTIVATE_EXSICCATI = 0;
+$DISPLAY_COMMON_NAMES = 1;			//Display common names in species profile page and checklists displays
+$ACTIVATE_EXSICCATI = 0;			//Activates exsiccati fields within data entry pages; adding link to exsiccati search tools to portal menu is recommended
+$ACTIVATE_GEOLOCATE_TOOLKIT = 0;	//Activates GeoLocate Toolkit located within Exporter tab within Processing Toolkit menu item 
 
 $RIGHTS_TERMS = array(
 	'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
