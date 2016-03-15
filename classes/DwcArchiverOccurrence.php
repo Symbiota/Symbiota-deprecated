@@ -488,14 +488,14 @@ class DwcArchiverOccurrence{
 		$imgFieldArr['providerManagedID'] = 'g.guid AS providermanagedid';
 		$imgTermArr['MetadataDate'] = 'http://ns.adobe.com/xap/1.0/MetadataDate';	//timestamp
 		$imgFieldArr['MetadataDate'] = 'i.initialtimestamp AS metadatadate';
+		$imgTermArr['format'] = 'http://purl.org/dc/terms/format';		//jpg
+		$imgFieldArr['format'] = 'i.format';
 		$imgTermArr['associatedSpecimenReference'] = 'http://rs.tdwg.org/ac/terms/associatedSpecimenReference';	//reference url in portal
 		$imgFieldArr['associatedSpecimenReference'] = '';
 		$imgTermArr['type'] = 'http://purl.org/dc/terms/type';		//StillImage
 		$imgFieldArr['type'] = '';
 		$imgTermArr['subtype'] = 'http://rs.tdwg.org/ac/terms/subtype';		//Photograph
 		$imgFieldArr['subtype'] = '';
-		$imgTermArr['format'] = 'http://purl.org/dc/terms/format';		//jpg
-		$imgFieldArr['format'] = '';
 		$imgTermArr['metadataLanguage'] = 'http://rs.tdwg.org/ac/terms/metadataLanguage';	//en
 		$imgFieldArr['metadataLanguage'] = '';
 
@@ -1964,20 +1964,22 @@ class DwcArchiverOccurrence{
 				$r['type'] = 'StillImage';
 				$r['subtype'] = 'Photograph';
 				$extStr = strtolower(substr($r['accessURI'],strrpos($r['accessURI'],'.')+1));
-				if($extStr == 'jpg' || $extStr == 'jpeg'){
-					$r['format'] = 'image/jpeg';
-				}
-				elseif($extStr == 'gif'){
-					$r['format'] = 'image/gif';
-				}
-				elseif($extStr == 'png'){
-					$r['format'] = 'image/png';
-				}
-				elseif($extStr == 'tiff' || $extStr == 'tif'){
-					$r['format'] = 'image/tiff';
-				}
-				else{
-					$r['format'] = '';
+				if($r['format'] == ''){
+					if($extStr == 'jpg' || $extStr == 'jpeg'){
+						$r['format'] = 'image/jpeg';
+					}
+					elseif($extStr == 'gif'){
+						$r['format'] = 'image/gif';
+					}
+					elseif($extStr == 'png'){
+						$r['format'] = 'image/png';
+					}
+					elseif($extStr == 'tiff' || $extStr == 'tif'){
+						$r['format'] = 'image/tiff';
+					}
+					else{
+						$r['format'] = '';
+					}
 				}
 				$r['metadataLanguage'] = 'en';
 				//Load record array into output file
