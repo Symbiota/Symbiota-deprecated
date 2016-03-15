@@ -210,18 +210,7 @@ $sharedMapManager->setTaxaArr($tArr);
 		}
 
 		function openIndPU(occId,clid){
-			var wWidth = 900;
-			try{
-				if(opener.document.getElementById('maintable').offsetWidth){
-					wWidth = opener.document.getElementById('maintable').offsetWidth*1.05;
-				}
-				else if(opener.document.body.offsetWidth){
-					wWidth = opener.document.body.offsetWidth*0.9;
-				}
-			}
-			catch(err){
-			}
-			newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=700,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			setTimeout(function () { newWindow.focus(); }, 0.5);
 		}
@@ -319,7 +308,7 @@ $sharedMapManager->setTaxaArr($tArr);
 		
 	</script>
 </head>
-<body style="background-color:#ffffff;" onload="initialize()">
+<body style="background-color:#ffffff;width:100%" onload="initialize()">
 	<?php
 	//echo json_encode($coordArr);
 	if(!$coordExist){ //no results
@@ -339,7 +328,7 @@ $sharedMapManager->setTaxaArr($tArr);
         <?php 
     }
     ?>
-    <div id='map_canvas' style='width: 100%; height: 600px'></div>
+    <div id="map_canvas" style="width:100%;height:700px"></div>
     <table title='Add Point of Reference' style="width:100%;" >
     	<tr>
     		<td style="width:330px" valign='top'>
@@ -381,8 +370,8 @@ $sharedMapManager->setTaxaArr($tArr);
 				<div>
 					<fieldset>
 						<legend>Add Point of Reference</legend>
-						<div style='float:left;width:275px;'>
-							<div class='latlongdiv' style='display:block;'>
+						<div style='float:left;width:350px;'>
+							<div class="latlongdiv">
 								<div>
 									Latitude decimal: <input name='lat' id='lat' size='10' type='text' /> eg: 34.57
 								</div>

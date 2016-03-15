@@ -1700,6 +1700,10 @@ class DwcArchiverOccurrence{
 		$this->logOrEcho("Creating occurrence file (".date('h:i:s A').")... ");
 		$filePath = $this->targetPath.$this->ts.'-occur'.$this->fileExt;
 		$fh = fopen($filePath, 'w');
+		if($fh){
+			$this->logOrEcho('ERROR establishing output file ('.$filePath.'), perhaps target folder is not readable by web server.');
+			return false;
+		}
 		$hasRecords = false;
 		
 		if(!$this->occurrenceFieldArr){
@@ -1866,6 +1870,10 @@ class DwcArchiverOccurrence{
 	private function writeDeterminationFile(){
 		$this->logOrEcho("Creating identification file (".date('h:i:s A').")... ");
 		$fh = fopen($this->targetPath.$this->ts.'-det'.$this->fileExt, 'w');
+		if($fh){
+			$this->logOrEcho('ERROR establishing output file ('.$filePath.'), perhaps target folder is not readable by web server.');
+			return false;
+		}
 		
 		if(!$this->determinationFieldArr){
 			$this->initDeterminationArr();
@@ -1898,7 +1906,11 @@ class DwcArchiverOccurrence{
 
 		$this->logOrEcho("Creating image file (".date('h:i:s A').")... ");
 		$fh = fopen($this->targetPath.$this->ts.'-images'.$this->fileExt, 'w');
-		
+		if($fh){
+			$this->logOrEcho('ERROR establishing output file ('.$filePath.'), perhaps target folder is not readable by web server.');
+			return false;
+		}
+
 		if(!$this->imageFieldArr){
 			$this->initImageArr();
 		}
