@@ -248,11 +248,11 @@ if($taxonManager->getSciName() != "unknown"){
 				}
 				if($url){
 					echo '<div class="mapthumb">';
-					if($aUrl){
-						echo '<a href="'.$aUrl.'">';
-					}
-					elseif($gAnchor){
+					if($gAnchor){
 						echo '<a href="#" onclick="'.$gAnchor.';return false">';
+					}
+					elseif($aUrl){
+						echo '<a href="'.$aUrl.'">';
 					}
 					echo '<img src="'.$url.'" title="'.$spDisplay.' dot map" alt="'.$spDisplay.' dot map" />';
 					if($aUrl || $gAnchor) echo '</a>';
