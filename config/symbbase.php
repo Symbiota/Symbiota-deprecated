@@ -80,6 +80,7 @@ if(!isset($OCCURRENCE_MOD_IS_ACTIVE) && isset($occurrenceModIsActive)) $OCCURREN
 if(!isset($FLORA_MOD_IS_ACTIVE) && isset($floraModIsActive)) $FLORA_MOD_IS_ACTIVE = $floraModIsActive;
 if(!isset($KEY_MOD_IS_ACTIVE) && isset($keyModIsActive)) $KEY_MOD_IS_ACTIVE = $keyModIsActive;
 if(!isset($REQUEST_TRACKING_IS_ACTIVE) && isset($RequestTrackingIsActive)) $REQUEST_TRACKING_IS_ACTIVE = $RequestTrackingIsActive;
+if(!isset($QUICK_HOST_ENTRY_IS_ACTIVE) && isset($QuickHostEntryIsActive)) $QUICK_HOST_ENTRY_IS_ACTIVE = $QuickHostEntryIsActive;
 if(!isset($FP_ENABLED) && isset($fpEnabled)) $FP_ENABLED = $fpEnabled;
 if(!isset($GOOGLE_MAP_KEY) && isset($googleMapKey)) $GOOGLE_MAP_KEY = $googleMapKey;
 if(!isset($MAPPING_BOUNDARIES) && isset($mappingBoundaries)) $MAPPING_BOUNDARIES = $mappingBoundaries;
@@ -112,6 +113,7 @@ if(!isset($occurrenceModIsActive) && isset($OCCURRENCE_MOD_IS_ACTIVE)) $occurren
 if(!isset($floraModIsActive) && isset($FLORA_MOD_IS_ACTIVE)) $floraModIsActive = $FLORA_MOD_IS_ACTIVE;
 if(!isset($keyModIsActive) && isset($KEY_MOD_IS_ACTIVE)) $keyModIsActive = $KEY_MOD_IS_ACTIVE;
 if(!isset($RequestTrackingIsActive) && isset($REQUEST_TRACKING_IS_ACTIVE)) $RequestTrackingIsActive = $REQUEST_TRACKING_IS_ACTIVE;
+if(!isset($QuickHostEntryIsActive) && isset($QUICK_HOST_ENTRY_IS_ACTIVE)) $QuickHostEntryIsActive = $QUICK_HOST_ENTRY_IS_ACTIVE;
 if(!isset($fpEnabled) && isset($FP_ENABLED)) $fpEnabled = $FP_ENABLED;
 if(!isset($googleMapKey) && isset($GOOGLE_MAP_KEY)) $googleMapKey = $GOOGLE_MAP_KEY;
 if(!isset($mappingBoundaries) && isset($MAPPING_BOUNDARIES)) $mappingBoundaries = $MAPPING_BOUNDARIES;
