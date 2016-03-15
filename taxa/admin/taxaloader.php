@@ -3,6 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxaUpload.php');
 header("Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl='.$CLIENT_ROOT.'/taxa/admin/taxaloader.php');
+ini_set('max_execution_time', 3600);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:"";
@@ -205,6 +206,7 @@ if($isEditor){
 						<div style="margin:10px;">
 							<input type="submit" name="action" value="Verify Mapping" />
 							<input type="submit" name="action" value="Upload Taxa" />
+							<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>" />
 							<input type="hidden" name="ulfilename" value="<?php echo $loaderManager->getFileName();?>" />
 						</div>
 					</fieldset>
@@ -279,6 +281,7 @@ if($isEditor){
 						</div>
 						-->
 						<div style="margin:10px;">
+							<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>" />
 							<input type="submit" name="action" value="Activate Taxa" />
 						</div>
 						<div style="float:right;margin:10px;">
@@ -325,6 +328,17 @@ if($isEditor){
 										* This option is for manual upload of a data file. 
 										Enter full path to data file located on working server.
 									</div>   
+								</div>
+								<div style="margin:10px;">
+									Target Thesaurus: 
+									<select name="taxauthid">
+										<?php 
+										$taxonAuthArr = $loaderManager->getTaxAuthorityArr(); 
+										foreach($taxonAuthArr as $k => $v){
+											echo '<option value="'.$k.'" '.($k==$taxAuthId?'SELECTED':'').'>'.$v.'</option>'."\n";
+										}
+										?>
+									</select>
 								</div>
 								<div style="margin:10px;">
 									<input type="submit" name="action" value="Map Input File" />

@@ -379,9 +379,9 @@ class TaxaUpload{
 		}
 		
 		//Value if only a Source Id was supplied
-		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceAcceptedId = u2.sourceId '.
+		$sql = 'UPDATE uploadtaxa u LEFT JOIN uploadtaxa u2 ON u.sourceAcceptedId = u2.sourceId '.
 			'SET u.AcceptedStr = u2.scinameinput '.
-			'WHERE u.sourceAcceptedId IS NOT NULL AND u2.sourceId IS NOT NULL AND u.AcceptedStr IS NULL';
+			'WHERE u.sourceAcceptedId IS NOT NULL AND u2.sourceId IS NOT NULL AND ISNULL(u.AcceptedStr)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error.'... ',1);
 		}
@@ -496,28 +496,28 @@ class TaxaUpload{
 
 		//Parse scinameinput into unitind and unitname fields 
 		$this->outputMsg('Parse scinameinput field...');
-		$sql = 'UPDATE uploadtaxa SET unitind1 = "x" WHERE unitind1 IS NULL AND scinameinput LIKE "x %"';
+		$sql = 'UPDATE uploadtaxa SET unitind1 = "x" WHERE ISNULL(unitind1) AND scinameinput LIKE "x %"';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa SET unitind2 = "x" WHERE unitind2 IS NULL AND scinameinput LIKE "% x %" AND scinameinput NOT LIKE "% % x %"';
+		$sql = 'UPDATE uploadtaxa SET unitind2 = "x" WHERE ISNULL(unitind2) AND scinameinput LIKE "% x %" AND scinameinput NOT LIKE "% % x %"';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa SET unitname1 = TRIM(substring(scinameinput,3,LOCATE(" ",scinameinput,3)-3)) '.
-			'WHERE unitname1 IS NULL and scinameinput LIKE "x %"';
+			'WHERE ISNULL(unitname1) and scinameinput LIKE "x %"';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa '.
 			'SET unitname1 = TRIM(substring(scinameinput,1,LOCATE(" ",CONCAT(scinameinput," ")))) '.
-			'WHERE unitname1 IS NULL';
+			'WHERE ISNULL(unitname1) ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa '.
 			'SET unitname2 = TRIM(substring(scinameinput,LENGTH(CONCAT_WS(" ",unitind1, unitname1, unitind2))+2,LOCATE(" ",CONCAT(scinameinput," "),LENGTH(CONCAT_WS(" ",unitind1, unitname1, unitind2))+2)-(LENGTH(CONCAT_WS(" ",unitind1, unitname1, unitind2))+2))) '.
-			'WHERE unitname2 IS NULL';
+			'WHERE ISNULL(unitname2)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -526,100 +526,100 @@ class TaxaUpload{
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa SET unitind3 = "f.", rankid = 260 '.
-			'WHERE unitind3 IS NULL AND (scinameinput LIKE "% f. %" OR scinameinput LIKE "% forma %") AND (rankid IS NULL OR rankid = 260)';
+			'WHERE ISNULL(unitind3) AND (scinameinput LIKE "% f. %" OR scinameinput LIKE "% forma %") AND (ISNULL(rankid) OR rankid = 260)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa SET unitind3 = "var.", rankid = 240 '.
-			'WHERE unitind3 IS NULL AND scinameinput LIKE "% var. %" AND (rankid IS NULL OR rankid = 240)';
+			'WHERE ISNULL(unitind3) AND scinameinput LIKE "% var. %" AND (ISNULL(rankid) OR rankid = 240)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa SET unitind3 = "'.$sspStr.'", rankid = 230 '.
-			'WHERE unitind3 IS NULL AND (scinameinput LIKE "% '.$sspStr.' %") AND (rankid IS NULL OR rankid = 230)';
+			'WHERE ISNULL(unitind3) AND (scinameinput LIKE "% '.$sspStr.' %") AND (ISNULL(rankid) OR rankid = 230)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa '.
 			'SET unitname3 = TRIM(SUBSTRING(scinameinput,LOCATE(unitind3,scinameinput)+LENGTH(unitind3)+1, '.
 			'LOCATE(" ",CONCAT(scinameinput," "),LOCATE(unitind3,scinameinput)+LENGTH(unitind3)+1)-LOCATE(unitind3,scinameinput)-LENGTH(unitind3))) '.
-			'WHERE unitname3 IS NULL AND rankid > 220 ';
+			'WHERE ISNULL(unitname3) AND rankid > 220 ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE IGNORE uploadtaxa '.
 			'SET sciname = CONCAT_WS(" ",unitind1, unitname1, unitind2, unitname2, unitind3, unitname3) '.
-			'WHERE sciname IS NULL';
+			'WHERE ISNULL(sciname)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceParentId = u2.sourceId '.
+		$sql = 'UPDATE uploadtaxa u LEFT JOIN uploadtaxa u2 ON u.sourceParentId = u2.sourceId '.
 			'SET u.parentstr = u2.sciname '.
-			'WHERE u.parentstr IS NULL AND u.sourceParentId IS NOT NULL AND u2.sourceId IS NOT NULL';
+			'WHERE ISNULL(u.parentstr) AND u.sourceParentId IS NOT NULL AND u2.sourceId IS NOT NULL';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceAcceptedId = u2.sourceId '.
+		$sql = 'UPDATE uploadtaxa u LEFT JOIN uploadtaxa u2 ON u.sourceAcceptedId = u2.sourceId '.
 			'SET u.acceptedstr = u2.sciname '.
-			'WHERE u.acceptedstr IS NULL AND u.sourceAcceptedId IS NOT NULL AND u2.sourceId IS NOT NULL';
+			'WHERE ISNULL(u.acceptedstr) AND u.sourceAcceptedId IS NOT NULL AND u2.sourceId IS NOT NULL';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 
 		//Delete taxa where sciname can't be inserted. These are taxa where sciname already exists
-		$sql = 'DELETE FROM uploadtaxa WHERE sciname IS NULL';
+		$sql = 'DELETE FROM uploadtaxa WHERE ISNULL(sciname)';
 		$this->conn->query($sql);
 
 		//Link names already in theusaurus 
 		$this->outputMsg('Linking names already in thesaurus... ');
-		$sql = 'UPDATE uploadtaxa u INNER JOIN taxa t ON u.sciname = t.sciname '.
-			'SET u.tid = t.tid WHERE u.tid IS NULL';
+		$sql = 'UPDATE uploadtaxa u LEFT JOIN taxa t ON u.sciname = t.sciname '.
+			'SET u.tid = t.tid WHERE ISNULL(u.tid)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.acceptedstr = u2.scinameinput '.
+		$sql = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.acceptedstr = u2.scinameinput '.
 			'SET u1.tidaccepted = u2.tid '. 
-			'WHERE u1.tidaccepted IS NULL AND u2.tid IS NOT NULL';
+			'WHERE ISNULL(u1.tidaccepted) AND u2.tid IS NOT NULL';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		
-		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.sourceParentId = u2.sourceId '.
+		$sql = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.sourceParentId = u2.sourceId '.
 			'SET u1.family = u2.sciname '.
-			'WHERE u2.sourceId IS NOT NULL AND u1.sourceParentId IS NOT NULL AND u2.rankid = 140 AND u1.family is null ';
+			'WHERE u2.sourceId IS NOT NULL AND u1.sourceParentId IS NOT NULL AND u2.rankid = 140 AND ISNULL(u1.family) ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname '.
+		$sql = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname '.
 			'SET u1.family = u2.family '.
-			'WHERE u1.family IS NULL AND u2.family IS NOT NULL ';
+			'WHERE ISNULL(u1.family) AND u2.family IS NOT NULL ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE (uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.sourceAcceptedId = u2.sourceId) '.
+		$sql = 'UPDATE (uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.sourceAcceptedId = u2.sourceId) '.
 			'SET u1.family = u2.family '.
-			'WHERE u1.sourceAcceptedId IS NOT NULL AND  u2.sourceId IS NOT NULL AND u1.family IS NULL AND u2.family IS NOT NULL ';
+			'WHERE u1.sourceAcceptedId IS NOT NULL AND  u2.sourceId IS NOT NULL AND ISNULL(u1.family) AND u2.family IS NOT NULL ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE (uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname) '.
-			'INNER JOIN uploadtaxa u3 ON u2.sourceParentId = u3.sourceId '.
+		$sql = 'UPDATE (uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname) '.
+			'LEFT JOIN uploadtaxa u3 ON u2.sourceParentId = u3.sourceId '.
 			'SET u1.family = u3.sciname '.
 			'WHERE u2.sourceParentId IS NOT NULL AND u3.sourceId IS NOT NULL '.
-			'AND u1.family is null AND u1.rankid > 140 AND u2.rankid = 180 AND u3.rankid = 140';
+			'AND ISNULL(u1.family) AND u1.rankid > 140 AND u2.rankid = 180 AND u3.rankid = 140';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa u0 INNER JOIN uploadtaxa u1 ON u0.sourceAcceptedId = u1.sourceid '.
+		$sql = 'UPDATE uploadtaxa u0 LEFT JOIN uploadtaxa u1 ON u0.sourceAcceptedId = u1.sourceid '.
 			'SET u0.family = u1.family '.
 			'WHERE u0.sourceParentId IS NOT NULL AND u1.sourceId IS NOT NULL AND '.
-			'u0.family IS NULL AND u0.rankid > 140 AND u1.family IS NOT NULL';
+			'ISNULL(u0.family) AND u0.rankid > 140 AND u1.family IS NOT NULL';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa u0 INNER JOIN uploadtaxa u1 ON u0.scinameinput = u1.acceptedstr '.
+		$sql = 'UPDATE uploadtaxa u0 LEFT JOIN uploadtaxa u1 ON u0.scinameinput = u1.acceptedstr '.
 			'SET u0.family = u1.family '.
-			'WHERE u0.family IS NULL AND u0.rankid > 140 AND u1.family IS NOT NULL';
+			'WHERE ISNULL(u0.family) AND u0.rankid > 140 AND u1.family IS NOT NULL';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -633,15 +633,15 @@ class TaxaUpload{
 
 		$this->outputMsg('Set null rankid values... ');
 		$sql = 'UPDATE uploadtaxa SET rankid = 140 '.
-			'WHERE (rankid IS NULL) AND (sciname NOT like "% %") AND (sciname like "%aceae" || sciname like "%idae")';
+			'WHERE (ISNULL(rankid)) AND (sciname NOT like "% %") AND (sciname like "%aceae" || sciname like "%idae")';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa SET rankid = 220 WHERE rankid IS NULL AND unitname1 is not null AND unitname2 is not null';
+		$sql = 'UPDATE uploadtaxa SET rankid = 220 WHERE ISNULL(rankid) AND unitname1 is not null AND unitname2 is not null';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa SET rankid = 180 WHERE rankid IS NULL AND unitname1 is not null AND unitname2 is null';
+		$sql = 'UPDATE uploadtaxa SET rankid = 180 WHERE ISNULL(rankid) AND unitname1 is not null AND ISNULL(unitname2)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -649,13 +649,13 @@ class TaxaUpload{
 		$this->outputMsg('Set null author values... ');
 		$sql = 'UPDATE uploadtaxa '.
 			'SET author = TRIM(SUBSTRING(scinameinput,LENGTH(sciname)+1)) '.
-			'WHERE (author IS NULL) AND rankid <= 220';
+			'WHERE (ISNULL(author)) AND rankid <= 220';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa '.
 			'SET author = TRIM(SUBSTRING(scinameinput,LOCATE(unitind3,scinameinput)+LENGTH(CONCAT_WS(" ",unitind3,unitname3)))) '.
-			'WHERE (author IS NULL) AND rankid > 220';
+			'WHERE (ISNULL(author)) AND rankid > 220';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -669,18 +669,18 @@ class TaxaUpload{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE (uploadtaxa ut INNER JOIN taxa t ON ut.unitname1 = t.sciname) '.
-			'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+		$sql = 'UPDATE (uploadtaxa ut LEFT JOIN taxa t ON ut.unitname1 = t.sciname) '.
+			'LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
 			'SET ut.family = ts.family '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ut.rankid > 140 AND t.rankid = 180 AND ts.family is not null AND (ut.family IS NULL)';
+			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ut.rankid > 140 AND t.rankid = 180 AND ts.family is not null AND (ISNULL(ut.family))';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE ((uploadtaxa ut INNER JOIN taxa t ON ut.family = t.sciname) '.
-			'INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
-			'INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid '.
+		$sql = 'UPDATE ((uploadtaxa ut LEFT JOIN taxa t ON ut.family = t.sciname) '.
+			'LEFT JOIN taxstatus ts ON t.tid = ts.tid) '.
+			'LEFT JOIN taxa t2 ON ts.tidaccepted = t2.tid '.
 			'SET ut.family = t2.sciname '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ut.rankid > 140 AND t.rankid = 140 AND ts.tid <> ts.tidaccepted AND ut.family IS NULL ';
+			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ut.rankid > 140 AND t.rankid = 140 AND ts.tid <> ts.tidaccepted AND ISNULL(ut.family) ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -688,17 +688,17 @@ class TaxaUpload{
 		$this->outputMsg('Populating and mapping parent taxon... ');
 		$sql = 'UPDATE uploadtaxa '.
 			'SET parentstr = CONCAT_WS(" ", unitname1, unitname2) '.
-			'WHERE (parentstr IS NULL OR parentstr LIKE "PENDING:%") AND rankid > 220';
+			'WHERE (ISNULL(parentstr) OR parentstr LIKE "PENDING:%") AND rankid > 220';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa SET parentstr = unitname1 '.
-			'WHERE (parentstr IS NULL OR parentstr LIKE "PENDING:%") AND rankid = 220';
+			'WHERE (ISNULL(parentstr) OR parentstr LIKE "PENDING:%") AND rankid = 220';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa SET parentstr = family '.
-			'WHERE (parentstr IS NULL OR parentstr LIKE "PENDING:%") AND rankid = 180';
+			'WHERE (ISNULL(parentstr) OR parentstr LIKE "PENDING:%") AND rankid = 180';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -707,15 +707,15 @@ class TaxaUpload{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.sourceAcceptedID = u2.sourceId '.
+		$sql = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.sourceAcceptedID = u2.sourceId '.
 			'SET u1.sourceParentId = u2.sourceParentId, u1.parentStr = u2.parentStr '.
-			'WHERE u1.sourceParentId IS NULL AND u1.sourceAcceptedID IS NOT NULL AND u2.sourceParentId IS NOT NULL AND u1.rankid < 220 ';
+			'WHERE ISNULL(u1.sourceParentId) AND u1.sourceAcceptedID IS NOT NULL AND u2.sourceParentId IS NOT NULL AND u1.rankid < 220 ';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		
-		$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
-			'SET parenttid = t.tid WHERE parenttid IS NULL';
+		$sql = 'UPDATE uploadtaxa up LEFT JOIN taxa t ON up.parentstr = t.sciname '.
+			'SET parenttid = t.tid WHERE ISNULL(parenttid)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
@@ -725,22 +725,22 @@ class TaxaUpload{
 		$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput, SciName, family, RankId, UnitName1, UnitName2, parentstr, Source) '.
 			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.family, 220 as r, ut.unitname1, ut.unitname2, ut.unitname1, ut.source '.
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
-			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.rankid > 220 AND ut2.sciname IS NULL ';
+			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.rankid > 220 AND ISNULL(ut2.sciname) ';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
+		$sql = 'UPDATE uploadtaxa up LEFT JOIN taxa t ON up.parentstr = t.sciname '.
 			'SET up.parenttid = t.tid '.
-			'WHERE up.parenttid IS NULL';
+			'WHERE ISNULL(up.parenttid)';
 		$this->conn->query($sql);
 		
 		//Load into uploadtaxa parents of species not yet in taxa table 
 		$sql = 'INSERT IGNORE INTO uploadtaxa (scinameinput, SciName, family, RankId, UnitName1, parentstr, Source) '.
 			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.family, 180 as r, ut.unitname1, ut.family, ut.source '.
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
-			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.family IS NOT NULL AND ut.rankid = 220 AND ut2.sciname IS NULL';
+			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ISNULL(ut.parenttid) AND ut.family IS NOT NULL AND ut.rankid = 220 AND ISNULL(ut2.sciname)';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
+		$sql = 'UPDATE uploadtaxa up LEFT JOIN taxa t ON up.parentstr = t.sciname '.
 			'SET up.parenttid = t.tid '.
-			'WHERE up.parenttid IS NULL';
+			'WHERE ISNULL(up.parenttid)';
 		$this->conn->query($sql);
 
 		//Load into uploadtaxa parents of genera not yet in taxa table
@@ -812,19 +812,19 @@ class TaxaUpload{
 		//Tag non-accepted taxa linked to non-existent taxon
 		$sql5 = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.acceptedStr = u2.sciname '.
 			'SET u1.notes = "FAILED: Non-accepted taxa linked to non-existent taxa" '.
-			'WHERE (u1.acceptance = 0) AND (u1.tidAccepted IS NULL) AND (u2.sciname IS NULL) ';
+			'WHERE (u1.acceptance = 0) AND (ISNULL(u1.tidAccepted)) AND (ISNULL(u2.sciname)) ';
 		if(!$this->conn->query($sql5)){
 			$this->outputMsg('ERROR tagging non-accepted taxon linked to non-existent taxon: '.$this->conn->error,1);
 		}
 		
 		//Tag non-accepted linked to other non-accepted taxa
-		$sql6a = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.acceptedStr = u2.sciname '.
+		$sql6a = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.acceptedStr = u2.sciname '.
 			'SET u1.notes = "FAILED: Non-accepted linked to another non-accepted taxa" '.
-			'WHERE (u1.acceptance = 0) AND (u1.tidAccepted IS NULL) AND (u2.acceptance = 0)';
+			'WHERE (u1.acceptance = 0) AND (ISNULL(u1.tidAccepted)) AND (u2.acceptance = 0)';
 		if(!$this->conn->query($sql6a)){
 			$this->outputMsg('ERROR tagging non-accepted linked to non-accepted (#1): '.$this->conn->error,1);
 		}
-		$sql6b = 'UPDATE uploadtaxa u INNER JOIN taxstatus ts ON u.tidaccepted = ts.tid '.
+		$sql6b = 'UPDATE uploadtaxa u LEFT JOIN taxstatus ts ON u.tidaccepted = ts.tid '.
 			'SET u.notes = "FAILED: Non-accepted linked to another non-accepted taxa" '.
 			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (u.acceptance = 0) AND (u.tidAccepted IS NOT NULL) AND (ts.tid <> ts.tidaccepted)';
 		if(!$this->conn->query($sql6b)){
@@ -834,22 +834,22 @@ class TaxaUpload{
 		//Tag taxa with non-existent parents
 		$sql6 = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.parentStr = u2.sciname '.
 			'SET u1.notes = "FAILED: Taxa with non-existent parent taxon" '.
-			'WHERE (u1.tid IS NULL) AND (u1.parentTid IS NULL) AND (u2.sciname IS NULL) ';
+			'WHERE (ISNULL(u1.tid)) AND (ISNULL(u1.parentTid)) AND (ISNULL(u2.sciname)) ';
 		if(!$this->conn->query($sql6)){
 			$this->outputMsg('ERROR tagging taxa with non-existent parent taxon: '.$this->conn->error,1);
 		}
 		
 		//Tag taxa with a FAILED parent
 		$sql8a = 'SELECT COUNT(u1.sciname) as cnt '.
-			'FROM uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.parentStr = u2.sciname '.
-			'WHERE (u2.notes LIKE "FAILED%") AND (u1.notes IS NULL OR u1.notes NOT LIKE "FAILED%")';
+			'FROM uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.parentStr = u2.sciname '.
+			'WHERE (u2.notes LIKE "FAILED%") AND (ISNULL(u1.notes) OR u1.notes NOT LIKE "FAILED%")';
 		$rs8a = $this->conn->query($sql8a);
 		$loopCnt = 0;
 		while($r8a = $rs8a->fetch_object()){
 			if($r8a->cnt == 0) break;
-			$sql8b = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.parentStr = u2.sciname '.
+			$sql8b = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.parentStr = u2.sciname '.
 				'SET u1.notes = "FAILED: Taxa linked to a FAILED parent" '.
-				'WHERE (u2.notes LIKE "FAILED%") AND (u1.notes IS NULL OR u1.notes NOT LIKE "FAILED%")';
+				'WHERE (u2.notes LIKE "FAILED%") AND (ISNULL(u1.notes) OR u1.notes NOT LIKE "FAILED%")';
 			if(!$this->conn->query($sql8b)){
 				$this->outputMsg('ERROR tagging taxa with FAILED parents: '.$this->conn->error,1);
 			}
@@ -864,7 +864,7 @@ class TaxaUpload{
 		if($rs8a) $rs8a->free();
 
 		//Tag non-accepted taxa linked to FAILED taxon
-		$sql9 = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.acceptedStr = u2.sciname '.
+		$sql9 = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.acceptedStr = u2.sciname '.
 			'SET u1.notes = "FAILED: Non-accepted taxa linked to a FAILED name" '.
 			'WHERE u1.acceptance = 0 AND u1.notes NOT LIKE "FAILED%" AND u2.notes LIKE "FAILED%"';
 		if(!$this->conn->query($sql9)){
@@ -888,16 +888,16 @@ class TaxaUpload{
 		$loopCnt = 0;
 		$this->outputMsg('Starting data transfer...');
 		//Prime table with kingdoms that are not yet in table
-		$sql = 'INSERT IGNORE INTO taxa ( SciName, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes ) '.
+		$sql = 'INSERT IGNORE INTO taxa(SciName, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes) '.
 			'SELECT DISTINCT ut.SciName, ut.RankId, ut.UnitInd1, ut.UnitName1, ut.UnitInd2, ut.UnitName2, ut.UnitInd3, '.
 			'ut.UnitName3, ut.Author, ut.Source, ut.Notes '.
 			'FROM uploadtaxa AS ut '.
-			'WHERE (ut.TID Is Null AND rankid = 10)';
+			'WHERE (ISNULL(ut.TID) AND rankid = 10)';
 		if($this->conn->query($sql)){
-			$sql = 'INSERT IGNORE INTO taxstatus (tid, tidaccepted, taxauthid, parenttid) '.
-				'SELECT DISTINCT t.tid, t.tid, '.$this->taxAuthId.' AS taxauthid, t.tid '.
-				'FROM uploadtaxa AS ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
-				'WHERE (ut.TID Is Null AND ut.rankid = 10)';
+			$sql = 'INSERT IGNORE INTO taxstatus(tid, tidaccepted, taxauthid, parenttid) '.
+				'SELECT DISTINCT t.tid, t.tid, '.$this->taxAuthId.', t.tid '.
+				'FROM uploadtaxa AS ut LEFT JOIN taxa t ON ut.sciname = t.sciname '.
+				'WHERE (ISNULL(ut.TID) AND ut.rankid = 10)';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
@@ -915,45 +915,45 @@ class TaxaUpload{
 
 			$this->outputMsg('Starting loop '.$loopCnt);
 			$this->outputMsg('Transferring taxa to taxon table... ');
-			$sql = 'INSERT IGNORE INTO taxa ( SciName, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes ) '.
+			$sql = 'INSERT IGNORE INTO taxa(SciName, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes) '.
 				'SELECT DISTINCT ut.SciName, ut.RankId, ut.UnitInd1, ut.UnitName1, ut.UnitInd2, ut.UnitName2, ut.UnitInd3, '.
 				'ut.UnitName3, ut.Author, ut.Source, ut.Notes '.
 				'FROM uploadtaxa AS ut '.
-				'WHERE (ut.TID Is Null AND ut.parenttid IS NOT NULL AND rankid IS NOT NULL )';
+				'WHERE (ISNULL(ut.TID) AND ut.parenttid IS NOT NULL AND rankid IS NOT NULL )';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
 			
-			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
-				'SET ut.tid = t.tid WHERE ut.tid IS NULL';
+			$sql = 'UPDATE uploadtaxa ut LEFT JOIN taxa AS t ON ut.sciname = t.sciname '.
+				'SET ut.tid = t.tid WHERE ISNULL(ut.tid)';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
 			
-			$sql = 'UPDATE uploadtaxa ut1 INNER JOIN uploadtaxa ut2 ON ut1.sourceacceptedid = ut2.sourceid '.
-				'INNER JOIN taxa t ON ut2.sciname = t.sciname '.
+			$sql = 'UPDATE uploadtaxa ut1 LEFT JOIN uploadtaxa AS ut2 ON ut1.sourceacceptedid = ut2.sourceid '.
+				'LEFT JOIN taxa AS t ON ut2.sciname = t.sciname '.
 				'SET ut1.tidaccepted = t.tid '.
-				'WHERE (ut1.acceptance = 0) AND (ut1.tidaccepted IS NULL) AND (ut1.sourceacceptedid IS NOT NULL) AND (ut2.sourceid IS NOT NULL)';
+				'WHERE (ut1.acceptance = 0) AND (ISNULL(ut1.tidaccepted)) AND (ut1.sourceacceptedid IS NOT NULL) AND (ut2.sourceid IS NOT NULL)';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
 			
-			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.acceptedstr = t.sciname '.
+			$sql = 'UPDATE uploadtaxa ut LEFT JOIN taxa AS t ON ut.acceptedstr = t.sciname '.
 				'SET ut.tidaccepted = t.tid '.
-				'WHERE ut.acceptance = 0 AND ut.tidaccepted IS NULL AND ut.acceptedstr IS NOT NULL';
+				'WHERE ut.acceptance = 0 AND ISNULL(ut.tidaccepted) AND ut.acceptedstr IS NOT NULL';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
 			
 			$sql = 'UPDATE uploadtaxa SET tidaccepted = tid '.
-				'WHERE tidaccepted IS NULL AND tid IS NOT NULL';
+				'WHERE ISNULL(tidaccepted) AND tid IS NOT NULL';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
 
 			$this->outputMsg('Create parent and accepted links... ');
-			$sql = 'INSERT IGNORE INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UnacceptabilityReason ) '.
-				'SELECT DISTINCT ut.TID, ut.TidAccepted, '.$this->taxAuthId.' AS taxauthid, ut.ParentTid, ut.Family, ut.UnacceptabilityReason '.
+			$sql = 'INSERT IGNORE INTO taxstatus(TID, TidAccepted, taxauthid, ParentTid, Family, UnacceptabilityReason) '.
+				'SELECT DISTINCT ut.TID, ut.TidAccepted, '.$this->taxAuthId.', ut.ParentTid, ut.Family, ut.UnacceptabilityReason '.
 				'FROM uploadtaxa AS ut '.
 				'WHERE (ut.TID IS NOT NULL AND ut.TidAccepted IS NOT NULL AND ut.parenttid IS NOT NULL)';
 			if(!$this->conn->query($sql)){
@@ -969,17 +969,17 @@ class TaxaUpload{
 			$this->conn->query($sql);
 
 			//Update parentTids
-			$sql = 'UPDATE uploadtaxa ut1 INNER JOIN uploadtaxa ut2 ON ut1.sourceparentid = ut2.sourceid '.
-				'INNER JOIN taxa t ON ut2.sciname = t.sciname '.
+			$sql = 'UPDATE uploadtaxa ut1 LEFT JOIN uploadtaxa AS ut2 ON ut1.sourceparentid = ut2.sourceid '.
+				'LEFT JOIN taxa AS t ON ut2.sciname = t.sciname '.
 				'SET ut1.parenttid = t.tid '.
-				'WHERE ut1.parenttid IS NULL AND ut1.sourceparentid IS NOT NULL AND ut2.sourceid IS NOT NULL';
+				'WHERE ISNULL(ut1.parenttid) AND ut1.sourceparentid IS NOT NULL AND ut2.sourceid IS NOT NULL';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
 			
-			$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
+			$sql = 'UPDATE uploadtaxa up LEFT JOIN taxa AS t ON up.parentstr = t.sciname '.
 				'SET up.parenttid = t.tid '.
-				'WHERE up.parenttid IS NULL';
+				'WHERE ISNULL(up.parenttid)';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
@@ -998,20 +998,20 @@ class TaxaUpload{
 		$this->buildHierarchy();
 
 		//Update occurrences with new tids
-		$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL';
+		$sql1 = 'UPDATE omoccurrences AS o LEFT JOIN taxa AS t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE ISNULL(o.TidInterpreted)';
 		$this->conn->query($sql1);
 		
 		//Update occurrence images with new tids
-		$sql2 = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+		$sql2 = 'UPDATE images AS i LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
 			'SET i.tid = o.TidInterpreted '.
-			'WHERE i.tid is null AND o.TidInterpreted IS NOT NULL';
+			'WHERE ISNULL(i.tid) AND o.TidInterpreted IS NOT NULL';
 		$this->conn->query($sql2);
 		
 		//Update geo lookup table 
 		$sql3 = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '. 
 			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '. 
-			'FROM omoccurrences o LEFT JOIN omoccurgeoindex g ON o.tidinterpreted = g.tid '.
-			'WHERE g.tid IS NULL AND o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL';
+			'FROM omoccurrences AS o LEFT JOIN omoccurgeoindex AS g ON o.tidinterpreted = g.tid '.
+			'WHERE ISNULL(g.tid) AND o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL';
 		$this->conn->query($sql3);
 	}
 
@@ -1041,7 +1041,7 @@ class TaxaUpload{
 			if(!$langStr) $langStr = 'en';
 			foreach($vernArr as $vStr){
 				if($vStr){
-					$sqlInsert = 'INSERT INTO taxavernaculars (tid, VernacularName, Language, Source) '.
+					$sqlInsert = 'INSERT INTO taxavernaculars(tid, VernacularName, Language, Source) '.
 						'VALUES('.$r->tid.',"'.$vStr.'","'.$langStr.'",'.($r->source?'"'.$r->source.'"':'NULL').')';
 					if(!$this->conn->query($sqlInsert)){
 						if(substr($this->conn->error,0,9) != 'Duplicate') $this->outputMsg('ERROR: '.$this->conn->error,1);
@@ -1052,20 +1052,19 @@ class TaxaUpload{
 	}
 
 	private function buildHierarchy(){
-		set_time_limit(600);
 		$status = true;
 		//Seed taxaenumtree table
 		$sql = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
 			'SELECT DISTINCT ts.tid, ts.parenttid, ts.taxauthid '. 
-			'FROM taxstatus ts '. 
+			'FROM taxstatus AS ts '. 
 			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND ts.tid NOT IN(SELECT tid FROM taxaenumtree WHERE taxauthid = '.$this->taxAuthId.')';
 		//$this->outputMsg($sql;
 		if($this->conn->query($sql)){
 			//Continue building taxaenumtree  
 			$sql2 = 'SELECT DISTINCT e.tid, ts.parenttid, ts.taxauthid '. 
-				'FROM taxaenumtree e LEFT JOIN taxstatus ts ON e.parenttid = ts.tid AND e.taxauthid = ts.taxauthid '.
-				'LEFT JOIN taxaenumtree e2 ON e.tid = e2.tid AND ts.parenttid = e2.parenttid AND e.taxauthid = e2.taxauthid '.
-				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND e2.tid IS NULL';
+				'FROM taxaenumtree AS e LEFT JOIN taxstatus AS ts ON e.parenttid = ts.tid AND e.taxauthid = ts.taxauthid '.
+				'LEFT JOIN taxaenumtree AS e2 ON e.tid = e2.tid AND ts.parenttid = e2.parenttid AND e.taxauthid = e2.taxauthid '.
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND ISNULL(e2.tid)';
 			//$this->outputMsg($sql;
 			$cnt = 0;
 			$targetCnt = 0;
