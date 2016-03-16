@@ -54,9 +54,10 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 		<script src="../../js/jquery.js" type="text/javascript"></script>
 		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 		<script src="../../js/symb/shared.js" type="text/javascript"></script>
-		<script language="javascript">
+		<script>
 			var cogeUrl = "https://www.museum.tulane.edu/coge/symbiota/";
-
+			var t;
+			
 			$(function() {
 				var dialogArr = new Array("schemanative","schemadwc","newrecs");
 				var dialogStr = "";
@@ -132,7 +133,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 
 			function startAuthMonitoring(){
 				//every 10 seconds, check authenication
-				var t=setInterval(cogeCheckAuthentication,10000);
+				t = setInterval(cogeCheckAuthentication,3000);
 			}
 
 			function cogePublishDwca(f){
@@ -284,7 +285,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						var htmlOut = "";
 						for(var i in result){
 							var role = result[i].role;
-							if(role == "Owner" || role == "Admin"){
+							if(role == "Owner" || role == "Admin" || role == "Reviewer"){
 								htmlOut = htmlOut + '<div style="margin:5px">';
 								var name = result[i].name;
 								htmlOut = htmlOut + '<input name="cogecomm" type="radio" value="'+name+'" />';
@@ -647,7 +648,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 													provide a required identifier, an optional descriptive name, and then click the Push Data to GeoLocate button. 
 												</div>
 												<div style="margin:10px;">
-													<div id="commlist-div" style="margin:5px">
+													<div id="commlist-div" style="margin:15px 0px;padding:15px;border:1px solid orange;">
 														<span style="color:orange;">Login to GeoLocate and click check status button to list available communities</span>
 													</div>
 													<div style="margin:5px;clear:both;">

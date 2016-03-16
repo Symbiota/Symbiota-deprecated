@@ -286,6 +286,9 @@ ALTER TABLE `omoccurrences`
 ALTER TABLE `omoccurdeterminations` 
   CHANGE COLUMN `identificationRemarks` `identificationRemarks` VARCHAR(500) NULL DEFAULT NULL ;
 
+ALTER TABLE `salixwordstats` 
+  ADD INDEX `INDEX_secondword` (`secondword` ASC);
+
 
 #Needed for FP functions
 CREATE INDEX idx_taxacreated ON taxa(initialtimestamp);
