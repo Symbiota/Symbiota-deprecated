@@ -1,7 +1,7 @@
     	</td>
 	</tr>
 	<tr>
-		<td class="footer">
+		<td class="footer"  colspan="3">
 			
 		</td>
 	</tr>

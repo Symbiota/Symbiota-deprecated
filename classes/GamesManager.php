@@ -74,8 +74,9 @@ class GamesManager {
 	
 	public function setOOTD($oodID,$clid){
 		global $serverRoot;
-		$retArr = array();
-		if(is_numeric($oodID) && is_numeric($clid)){
+		//Sanitation: $clid variable cound be a single checklist or a collection of clid separated by commas
+		if(!preg_match('/^[\d,]+$/',$clid)) return '';
+		if(is_numeric($oodID)){
 			$currentDate = date("Y-m-d");
 			$replace = 0;
 			if(file_exists($serverRoot.'/temp/ootd/'.$oodID.'_info.json')){
@@ -135,72 +136,74 @@ class GamesManager {
 				$rs->free();
 				$k = array_rand($tidArr);
 				$randTaxa = $tidArr[$k];
-				$previous[] = $randTaxa;
-				//echo $randTaxa.' ';
-				//echo json_encode($previous);
-				
-				$ootdInfo['clid'] = $clid;
-				
-				$sql2 = 'SELECT t.TID, t.SciName, t.UnitName1, s.family '.
-					'FROM taxa AS t INNER JOIN taxstatus AS s ON t.TID = s.tid '.
-					'WHERE s.taxauthid = 1 AND t.TID = '.$randTaxa.' ';
-				//echo '<div>'.$sql2.'</div>';
-				$rs = $this->conn->query($sql2);
-				while($row = $rs->fetch_object()){
-					$ootdInfo['tid'] = $row->TID;
-					$ootdInfo['sciname'] = $row->SciName;
-					$ootdInfo['genus'] = $row->UnitName1;
-					$ootdInfo['family'] = $row->family;
-				}
-				$rs->free();
-				
-				$files = Array();
-				$sql3 = 'SELECT i.url '.
-					'FROM images AS i '.
-					'WHERE ISNULL(i.occid) AND i.tid = '.$randTaxa.' '.
-					'ORDER BY i.sortsequence ';
-				//echo '<div>'.$sql.'</div>';
-				$cnt = 1;
-				$repcnt = 1;
-				$rs = $this->conn->query($sql3);
-				while(($row = $rs->fetch_object()) && ($cnt < 6)){
-					$file = '';
-					if (substr($row->url, 0, 1) == '/'){
-						//If imageDomain variable is set within symbini file, image  
-						if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
-							$file = $GLOBALS['imageDomain'].$row->url;
+				if($randTaxa){
+					$previous[] = $randTaxa;
+					//echo $randTaxa.' ';
+					//echo json_encode($previous);
+					
+					$ootdInfo['clid'] = $clid;
+					
+					$sql2 = 'SELECT t.TID, t.SciName, t.UnitName1, s.family '.
+						'FROM taxa AS t INNER JOIN taxstatus AS s ON t.TID = s.tid '.
+						'WHERE s.taxauthid = 1 AND t.TID = '.$randTaxa.' ';
+					//echo '<div>'.$sql2.'</div>';
+					$rs = $this->conn->query($sql2);
+					while($row = $rs->fetch_object()){
+						$ootdInfo['tid'] = $row->TID;
+						$ootdInfo['sciname'] = $row->SciName;
+						$ootdInfo['genus'] = $row->UnitName1;
+						$ootdInfo['family'] = $row->family;
+					}
+					$rs->free();
+					
+					$files = Array();
+					$sql3 = 'SELECT i.url '.
+						'FROM images AS i '.
+						'WHERE ISNULL(i.occid) AND i.tid = '.$randTaxa.' '.
+						'ORDER BY i.sortsequence ';
+					//echo '<div>'.$sql.'</div>';
+					$cnt = 1;
+					$repcnt = 1;
+					$rs = $this->conn->query($sql3);
+					while(($row = $rs->fetch_object()) && ($cnt < 6)){
+						$file = '';
+						if (substr($row->url, 0, 1) == '/'){
+							//If imageDomain variable is set within symbini file, image  
+							if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
+								$file = $GLOBALS['imageDomain'].$row->url;
+							}
+							else{
+								//Use local domain 
+								$domain = "http://";
+								if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
+								$domain .= $_SERVER["HTTP_HOST"];
+								if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
+								$file = $domain.$row->url;
+							}
 						}
 						else{
-							//Use local domain 
-							$domain = "http://";
-							if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
-							$domain .= $_SERVER["HTTP_HOST"];
-							if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
-							$file = $domain.$row->url;
+							$file = $row->url;
+						}
+						$newfile = $serverRoot.'/temp/ootd/'.$oodID.'_organism300_'.$cnt.'.jpg';
+						$newfilepath = '../../temp/ootd/'.$oodID.'_organism300_'.$cnt.'.jpg';
+						if(fopen($file, "r")){
+							copy($file, $newfile);
+							$files[] = $newfilepath;
+							$cnt++;
 						}
 					}
-					else{
-						$file = $row->url;
+					$rs->free();
+					$ootdInfo['images'] = $files;
+					
+					if(array_diff($tidArr,$previous)){
+						$fp = fopen($serverRoot.'/temp/ootd/'.$oodID.'_previous.json', 'w');
+						fwrite($fp, json_encode($previous));
+						fclose($fp);
 					}
-					$newfile = $serverRoot.'/temp/ootd/'.$oodID.'_organism300_'.$cnt.'.jpg';
-					$newfilepath = '../../temp/ootd/'.$oodID.'_organism300_'.$cnt.'.jpg';
-					if(fopen($file, "r")){
-						copy($file, $newfile);
-						$files[] = $newfilepath;
-						$cnt++;
-					}
-				}
-				$rs->free();
-				$ootdInfo['images'] = $files;
-				
-				if(array_diff($tidArr,$previous)){
-					$fp = fopen($serverRoot.'/temp/ootd/'.$oodID.'_previous.json', 'w');
-					fwrite($fp, json_encode($previous));
+					$fp = fopen($serverRoot.'/temp/ootd/'.$oodID.'_info.json', 'w');
+					fwrite($fp, json_encode($ootdInfo));
 					fclose($fp);
 				}
-				$fp = fopen($serverRoot.'/temp/ootd/'.$oodID.'_info.json', 'w');
-				fwrite($fp, json_encode($ootdInfo));
-				fclose($fp);
 			}
 			
 			$infoArr = json_decode(file_get_contents($serverRoot.'/temp/ootd/'.$oodID.'_info.json'), true);

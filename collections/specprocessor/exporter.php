@@ -141,7 +141,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					alert("No records exist matching search criteria");
 					return false;
 				}
-				if(f.cogecomm.value == ""){
+				if($('input[name=cogecomm]:checked').length == 0) {
 					alert("You must select a target community");
 					return false;
 				}

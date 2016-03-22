@@ -1032,10 +1032,11 @@ class ImageShared{
 			if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
 				$x = array_change_key_case(get_headers($this->sourcePath, 1),CASE_LOWER); 
 				if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) { 
-					$fileSize = $x['content-length'][1]; 
+					if(isset($x['content-length'][1])) $fileSize = $x['content-length'][1];
+					elseif(isset($x['content-length'])) $fileSize = $x['content-length'];
 				}
 	 			else { 
-	 				$fileSize = $x['content-length']; 
+	 				if(isset($x['content-length'])) $fileSize = $x['content-length']; 
 	 			}
 	 			/*
 				$ch = curl_init($this->sourcePath);
@@ -1082,7 +1083,7 @@ class ImageShared{
 		if(file_exists($url) || ($localUrl && file_exists($localUrl))){
 			return true;
 	    }
-
+return true;
 	    //Second check
 	    if(!$exists){
 		    // Version 4.x supported
