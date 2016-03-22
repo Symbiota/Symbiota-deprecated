@@ -62,7 +62,7 @@ class EOLManager {
 		echo 'Mapping EOL identifiers for '.$recCnt.' taxa ';
 		if($startingTid) echo '(starting tid: '.$startingTid.')';
 		echo '</div>'."\n";
-		echo "<ul>\n";
+		echo "<ol>\n";
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
 			$sciName = $r->sciname;
@@ -72,17 +72,16 @@ class EOLManager {
 			}
 		}
 		echo "<li>EOL mapping successfully completed for $successCnt taxa</li>\n";
-		echo "</ul>\n";
+		echo "</ol>\n";
 		$rs->close();
 	}
 	
 	private function queryEolIdentifier($tid, $sciName, $makePrimaryLink){
-		global $eolKey;
 		$retStatus = false;
-		$url = 'http://eol.org/api/search/1.0/'.urlencode($sciName).'.json';
-		if(isset($eolKey) && $eolKey) $url .= '?key='.$eolKey;
+		$url = 'http://eol.org/api/search/1.0.json?q='.urlencode($sciName);
+		if(isset($GLOBALS['EOL_KEY']) && $GLOBALS['EOL_KEY']) $url .= '?key='.$GLOBALS['EOL_KEY'];
 		if($fh = fopen($url, 'r')){
-			echo '<li>Reading identifier for '.$sciName.' (tid: '.$tid.")</li>\n";
+			echo '<li>Reading identifier for '.$sciName.' (tid: <a href="../index.php?tid='.$tid.'" target="_blank">'.$tid.'</a>)... ';
 			$content = '';
 			while($line = fread($fh, 1024)){
 				$content .= trim($line);
@@ -97,16 +96,16 @@ class EOLManager {
 					$sql = 'INSERT INTO taxalinks(tid, url, sourceIdentifier, owner, title, sortsequence) '.
 						'VALUES('.$tid.',"'.$link.'","'.$this->cleanInStr($identifier).'","EOL","Encyclopedia of Life", '.($makePrimaryLink?1:50).') ';
 					if($this->conn->query($sql)){
-						echo '<li>Identifier mapped successfully</li>'."\n";
+						echo ' success!</li>'."\n";
 						$retStatus = true;
 					}
 					else{
-						echo '<li style="margin:10px;color:red;">ERROR: unable to read identifier for '.$sciName.' (tid: '.$tid.")</li>\n";
+						echo '<span style="color:red;">ERROR reading data</span></li>';
 					}
 				}
 			}
 			else{
-				echo '<li style="margin:10px;">No results returned for '.$sciName.' (tid: '.$tid.")</li>\n";
+				echo 'No results returned )</li>';
 			}
 		}
 		else{
@@ -168,8 +167,8 @@ class EOLManager {
 		echo "<ul>\n";
 		$this->imgManager = new ImageShared();
 		while($r = $rs->fetch_object()){
-			$tid = $r->tid;
-			echo '<li>Mapping images for '.$this->cleanOutStr($r->sciname).' (tid: <a href="../index.php?taxon='.$tid.'" target="_blank">'.$tid.'</a>; EOL:'.$this->cleanOutStr($r->sourceidentifier).")</li>\n";
+			$tid = $r->tid;  
+			echo '<li>Mapping images for '.$this->cleanOutStr($r->sciname).' (tid: <a href="../index.php?taxon='.$tid.'" target="_blank">'.$tid.'</a>; EOL:<a href="http://eol.org/pages/'.$r->sourceidentifier.'/overview" target="_blank">'.$r->sourceidentifier."</a>)</li>\n";
 			if($this->mapEolImages($tid, $this->cleanOutStr($r->sourceidentifier))){
 				$successCnt++;
 			}
@@ -180,11 +179,11 @@ class EOLManager {
 	}
 
 	private function mapEolImages($tid, $identifier){
-		global $eolKey;
+
 		$retStatus = false;
-		$url = 'http://eol.org/api/pages/1.0/'.$identifier.'.json?images=15&vetted=2&details=1 ';
+		$url = 'http://eol.org/api/pages/1.0.json?id='.$identifier.'&images_per_page=20&vetted=2&details=1';
 		//echo $url;
-		if(isset($eolKey) && $eolKey) $url .= '&key='.$eolKey;
+		if(isset($GLOBALS['EOL_KEY']) && $GLOBALS['EOL_KEY']) $url .= '&key='.$GLOBALS['EOL_KEY'];
 		if($fh = fopen($url, 'r')){
 			$content = '';
 			while($line = fread($fh, 1024)){
@@ -205,6 +204,8 @@ class EOLManager {
 						elseif(isset($objArr['eolMediaURL'])){
 							$imageUrl = $objArr['eolMediaURL'];
 						}
+						//Skip NMNH web images , at least for now
+						if(strpos($imageUrl,'mnh.si.edu')) continue;
 						//if(array_key_exists('eolThumbnailURL',$objArr)) $resourceArr['urltn'] = $objArr['eolThumbnailURL'];
 
 						if(array_key_exists('agents',$objArr)){
@@ -364,32 +365,4 @@ class EOLManager {
 		return $newStr;
 	}
 }
-/*
-{"identifier":8757321,"scientificName":"Ruellia humboldtiana","richness_score":13.8777,"synonyms":[],"vernacularNames":[],"references":[],
-"taxonConcepts":[
-	{"identifier":57260591,"scientificName":"Ruellia humboldtiana","nameAccordingTo":"NCBI Taxonomy","canonicalForm":"Ruellia humboldtiana","sourceIdentfier":"440967","taxonRank":"Species"},
-	{"identifier":50904234,"scientificName":"Ruellia humboldtiana","nameAccordingTo":"NCBI Taxonomy","canonicalForm":"Ruellia humboldtiana","sourceIdentfier":"440967","taxonRank":"Species"},
-	{"identifier":43634016,"scientificName":"Ruellia thyrsacanthoides Lindau","nameAccordingTo":"GBIF Nub Taxonomy","canonicalForm":"Ruellia thyrsacanthoides","sourceIdentfier":"5576320","taxonRank":"Species"},
-	{"identifier":43633623,"scientificName":"Ruellia humboldtiana Lindau","nameAccordingTo":"GBIF Nub Taxonomy","canonicalForm":"Ruellia humboldtiana","sourceIdentfier":"5574379","taxonRank":"Species"}
-],
-"dataObjects":[
-	{"identifier":"ffa6fdde4fa94cb8d61c188e68a02b10","dataObjectVersionID":28418333,"dataType":"http://purl.org/dc/dcmitype/StillImage","dataSubtype":"","vettedStatus":"Trusted","dataRating":2.5,"mimeType":"image/jpeg","title":"Ruellia_humboldtiana.jpg","license":"http://creativecommons.org/licenses/by-nc/3.0/",
-	"source":"http://neotropical-pollination.myspecies.info/file/306",
-	"mediaURL":"http://neotropical-pollination.myspecies.info/sites/neotropical-pollination.myspecies.info/files/Ruellia_humboldtiana.jpg",
-	"eolMediaURL":"http://media.eol.org/content/2014/03/07/17/97311_orig.jpg","eolThumbnailURL":"http://media.eol.org/content/2014/03/07/17/97311_98_68.jpg",
-	"agents":[{"full_name":"Nathan Muchhala","homepage":"","role":null},{"full_name":"Neotropical Pollination","homepage":"","role":"provider"}],"references":[]},
-	
-	{"identifier":"d76ef0ab43c0a9eaf2f5a4926e5c30a7","dataObjectVersionID":28418374,"dataType":"http://purl.org/dc/dcmitype/StillImage","dataSubtype":"","vettedStatus":"Trusted","dataRating":2.5,"mimeType":"image/jpeg","title":"Ruellia_humboldtiana_extrafloralnectaries.jpg","license":"http://creativecommons.org/licenses/by-nc/3.0/",
-	"source":"http://neotropical-pollination.myspecies.info/file/307",
-	"mediaURL":"http://neotropical-pollination.myspecies.info/sites/neotropical-pollination.myspecies.info/files/Ruellia_humboldtiana_extrafloralnectaries.jpg",
-	"eolMediaURL":"http://media.eol.org/content/2014/03/07/17/30534_orig.jpg","eolThumbnailURL":"http://media.eol.org/content/2014/03/07/17/30534_98_68.jpg",
-	"agents":[{"full_name":"Nathan Muchhala","homepage":"","role":null},{"full_name":"Neotropical Pollination","homepage":"","role":"provider"}],"references":[]},
-
-	{"identifier":"be3616ee97538284cd2da8630d12dd9a","dataObjectVersionID":28418395,"dataType":"http://purl.org/dc/dcmitype/StillImage","dataSubtype":"","vettedStatus":"Trusted","dataRating":2.5,"mimeType":"image/jpeg","title":"Ruellia_humboldtiana_fullofnectar.jpg","license":"http://creativecommons.org/licenses/by-nc/3.0/",
-	"source":"http://neotropical-pollination.myspecies.info/file/308",
-	"mediaURL":"http://neotropical-pollination.myspecies.info/sites/neotropical-pollination.myspecies.info/files/Ruellia_humboldtiana_fullofnectar.jpg",
-	"eolMediaURL":"http://media.eol.org/content/2014/03/07/17/81882_orig.jpg","eolThumbnailURL":"http://media.eol.org/content/2014/03/07/17/81882_98_68.jpg",
-	"agents":[{"full_name":"Nathan Muchhala","homepage":"","role":null},{"full_name":"Neotropical Pollination","homepage":"","role":"provider"}],"references":[]}
-]}
-*/
 ?>
