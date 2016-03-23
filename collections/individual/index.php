@@ -4,12 +4,6 @@ include_once($SERVER_ROOT.'/classes/OccurrenceIndividualManager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
 include_once($SERVER_ROOT.'/classes/RdfUtility.php');
 
-if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443){
-	$url = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
-	header("Location: $url");
-	exit;
-}
-
 $occid = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
 $collid = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
 $pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";
@@ -163,7 +157,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
 	<script type="text/javascript">
 		var tabIndex = <?php echo $tabIndex; ?>;
 		var map;

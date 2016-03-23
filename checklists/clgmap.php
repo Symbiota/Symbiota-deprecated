@@ -1,13 +1,6 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/config/dbconnection.php');
-
-if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443){
-	$url = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
-	header("Location: $url");
-	exit;
-}
-
 header("Content-Type: text/html; charset=".$charset);
 
 $projValue = $_REQUEST['proj'];
@@ -22,7 +15,7 @@ $mapperObj = new ChecklistMapper($projValue);
 	<head>
 		<title><?php echo $defaultTitle?> - Species Checklists</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false">
+		<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false">
 		</script>
 		<script type="text/javascript">
 		    var map;

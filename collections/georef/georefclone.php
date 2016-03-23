@@ -1,13 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceGeorefTools.php');
-
-if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443){
-	$url = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
-	header("Location: $url");
-	exit;
-}
-
 header("Content-Type: text/html; charset=".$charset);
 
 $country = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
@@ -45,8 +38,8 @@ if($coorArr && count($coorArr) == 4){
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<script src="http://www.google.com/jsapi"></script>
-		<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+		<script src="//www.google.com/jsapi"></script>
+		<script src="//maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 		<script type="text/javascript">
 			var map;
 			var infoWins = new Array();

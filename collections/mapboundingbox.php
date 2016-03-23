@@ -1,13 +1,6 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
-
-if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443){
-	$url = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
-	header("Location: $url");
-	exit;
-}
-
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $boundaryArr = explode(";",$MAPPING_BOUNDARIES);
@@ -20,7 +13,7 @@ $lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3]
 		<title><?php echo $DEFAULT_TITLE.' - '.$LANG['MBB_TITLE']; ?></title>
 	</head> 
 	<body style="background-color:#ffffff;">
-	<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+	<script src="//maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 	<script type="text/javascript">
       	var map;
       	var rectangle;

@@ -1,12 +1,5 @@
 <?php
 include_once('../config/symbini.php');
-
-if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443){
-	$url = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
-	header("Location: $url");
-	exit;
-}
-
 header("Content-Type: text/html; charset=".$charset);
 
 $formName = array_key_exists("formname",$_REQUEST)?$_REQUEST["formname"]:"";
@@ -40,7 +33,7 @@ else{
 	<head>
 		<title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+		<script src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
 	    <script type="text/javascript">
 		    var map;
 		    var currentMarker;
