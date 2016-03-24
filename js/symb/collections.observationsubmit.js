@@ -136,7 +136,11 @@ function verifyObsForm(f){
 		return false;
     }
     if(f.decimallatitude.value == "" || f.decimallongitude.value == ""){
-		window.alert("Latitude and Longitude must have a value to submit an observation. Note that one can submit an image without a locality definition through the Taxon Profile page.");
+		window.alert("Latitude and Longitude are required values. Click on global symbol to open mapping aid.");
+		return false;
+    }
+    if(f.coordinateuncertaintyinmeters.value == ""){
+		window.alert("Coordinate uncertainty (in meters) is required.");
 		return false;
     }
     if(isNumeric(f.decimallatitude.value) == false){
@@ -147,12 +151,12 @@ function verifyObsForm(f){
 		window.alert("Longitude must be in the decimal format with numeric characters only. Note that the western hemisphere is represented as a negitive number (-110.5335). ");
 		return false;
     }
-    if(parseInt(f.decimallongitude.value ) > 0 && (f.stateprovince == 'USA' || f.stateprovince == 'Canada' || f.stateprovince == 'Mexico')){
+    if(parseInt(f.decimallongitude.value ) > 0 && (f.country == 'USA' || f.country == 'Canada' || f.country == 'Mexico')){
 		window.alert("For North America, the decimal format of longitude should be negitive value. ");
 		return false;
     }
     if(isNumeric(f.coordinateuncertaintyinmeters.value) == false){
-		window.alert("Coordinate Uncertainty must be a numeric value only. ");
+		window.alert("Coordinate Uncertainty must be a numeric value only (in meters). ");
 		return false;
     }
     if(isNumeric(f.minimumelevationinmeters.value) == false){
@@ -160,7 +164,7 @@ function verifyObsForm(f){
 		return false;
     }
     if(f.imgfile1.value == ""){
-   		window.alert("An observation submitted through this interface must be documented with an image.");
+   		window.alert("An observation submitted through this interface must be documented with at least one image.");
 		return false;
     }
     return true;
@@ -275,24 +279,106 @@ function parseDate(dateStr){
 	return retArr;
 }
 
-function openMappingAid(targetForm,targetLat,targetLong) {
-    mapWindow=open("../../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
-    if (mapWindow.opener == null) mapWindow.opener = self;
-    mapWindow.focus();
-    if(document.obsform.geodeticdatum.value == "") document.obsform.geodeticdatum.value = "WGS84"; 
-}
-
-function verifyLatValue(inputObj){
+function verifyLatValue(f){
+	var inputObj = f.decimallatitude.value;
 	inputIsNumeric(inputObj, 'Decimal Latitude');
 	if(inputObj.value > 90 || inputObj.value < -90){
 		alert('Decimal latitude value should be between -90 and 90 degrees');
 	}
+	verifyCoordinates(f);
 }
 
-function verifyLngValue(inputObj){
+function verifyLngValue(f){
+	var inputObj = f.decimallongitude.value;
 	inputIsNumeric(inputObj, 'Decimal Longitude');
 	if(inputObj.value > 180 || inputObj.value < -180){
 		alert('Decimal longitude value should be between -180 and 180 degrees');
+	}
+	verifyCoordinates(f);
+}
+
+function verifyCoordinates(f){
+	//Check to see if coordinates are within country/state/county
+	var lngValue = f.decimallongitude.value;
+	var latValue = f.decimallatitude.value;
+	if(latValue && lngValue){
+		var url = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+latValue+","+lngValue+"&sensor=false";
+		
+		$.ajax({
+			type: "GET",
+			url: "http://maps.googleapis.com/maps/api/geocode/json?sensor=false",
+			dataType: "json",
+			data: { latlng: latValue+","+lngValue }
+		}).done(function( data ) {
+			if(data){
+				if(data.status != "ZERO_RESULTS"){
+					var result = data.results[0];
+					if(result.address_components){
+						var compArr = result.address_components;
+						var coordCountry = "";
+						var coordState = "";
+						var coordCounty = "";
+						for (var p1 in compArr) {
+							var compObj = compArr[p1];
+							if(compObj.long_name && compObj.types){
+								var longName = compObj.long_name;
+								var types = compObj.types;
+								if(types[0] == "country"){
+									var coordCountry = longName;
+								}
+								else if(types[0] == "administrative_area_level_1"){
+									var coordState = longName;
+								}
+								else if(types[0] == "administrative_area_level_2"){
+									var coordCounty = longName;
+								}
+							}
+						}
+						var coordValid = true;
+						if(f.country.value != ""){
+							//if(f.country.value.toLowerCase().indexOf(coordCountry.toLowerCase()) == -1) coordValid = false;
+						}
+						else if(coordCountry != ""){
+							f.country.value = coordCountry;
+						}
+						if(coordState != ""){
+							if(f.stateprovince.value != ""){
+								if(f.stateprovince.value.toLowerCase().indexOf(coordState.toLowerCase()) == -1) coordValid = false;
+							}
+							else{
+								f.stateprovince.value = coordState;
+							}
+						}
+						if(coordCounty != ""){
+							var coordCountyIn = coordCounty.replace(" County","");
+							coordCountyIn = coordCountyIn.replace(" Parish","");
+							if(f.county.value != ""){
+								var fCounty = f.county.value;
+								if(f.county.value.toLowerCase().indexOf(coordCountyIn.toLowerCase()) == -1){
+									if(f.county.value.toLowerCase() != coordCountyIn.toLowerCase()){
+										coordValid = false;
+									}
+								}
+							}
+							else{
+								f.county.value = coordCountyIn;
+							}
+						}
+						if(!coordValid){
+							var msg = "Are coordinates accurate? They currently map to: "+coordCountry+", "+coordState;
+							if(coordCounty) msg = msg + ", " + coordCounty;
+							msg = msg + ", which differs from what is in the form. Click globe symbol to display coordinates in map.";
+							alert(msg);
+						}
+					}
+				}
+				else{
+					if(f.country.value != ""){
+						alert("Unable to identify country! Are coordinates accurate? Click globe symbol to display coordinates in map.");
+					}
+				}
+			}
+		});
 	}
 }
 
@@ -303,6 +389,18 @@ function verifyElevValue(inputObj){
 	}
 }
 
+function verifyImageSize(inputObj){
+	if (!window.FileReader) {
+		//alert("The file API isn't supported on this browser yet.");
+		return;
+	}
+
+	var file = inputObj.files[0];
+	if(file.size > maxUpload){
+		alert("Image "+file.name+" file size ("+Math.round(file.size/100000)/10+"mb) is larger than is allowed ("+(maxUpload/1000000)+"mb)");
+    }
+}
+
 function inputIsNumeric(inputObj, titleStr){
 	if(!isNumeric(inputObj.value)){
 		alert("Input value for " + titleStr + " must be a number value only! " );
@@ -310,16 +408,25 @@ function inputIsNumeric(inputObj, titleStr){
 }
 
 function isNumeric(sText){
-   	var ValidChars = "0123456789-.";
    	var IsNumber = true;
-   	var Char;
  
-   	for(var i = 0; i < sText.length && IsNumber == true; i++){ 
-	   Char = sText.charAt(i); 
-		if(ValidChars.indexOf(Char) == -1){
-			IsNumber = false;
-			break;
-      	}
-   	}
+	if(sText){
+	   	var ValidChars = "0123456789-.";
+	   	var Char;
+	   	for(var i = 0; i < sText.length && IsNumber == true; i++){ 
+		   Char = sText.charAt(i); 
+			if(ValidChars.indexOf(Char) == -1){
+				IsNumber = false;
+				break;
+	      	}
+	   	}
+	}
 	return IsNumber;
+}
+
+function openMappingAid(targetForm,targetLat,targetLong) {
+    mapWindow=open("../../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+    if (mapWindow.opener == null) mapWindow.opener = self;
+    mapWindow.focus();
+    if(document.obsform.geodeticdatum.value == "") document.obsform.geodeticdatum.value = "WGS84"; 
 }

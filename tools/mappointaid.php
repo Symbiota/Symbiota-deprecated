@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 
 $formName = array_key_exists("formname",$_REQUEST)?$_REQUEST["formname"]:""; 
@@ -93,11 +93,14 @@ else{
 
 	        function updateParentForm() {
 				try{
-		            opener.document.<?php echo $formName.'.'.$latName; ?>.value = document.getElementById("latbox").value;
-		            opener.document.<?php echo $formName.'.'.$longName; ?>.value = document.getElementById("lngbox").value;
+					var latObj = opener.document.<?php echo $formName.'.'.$latName; ?>;
+					var lngObj = opener.document.<?php echo $formName.'.'.$longName; ?>;
+					latObj.value = document.getElementById("latbox").value;
+					lngObj.value = document.getElementById("lngbox").value;
+					lngObj.onchange();
 				}
 				catch(myErr){
-					alert("Unable to transfer data. Please let an administrator know.");
+					//alert("Unable to transfer data. Please let an administrator know.");
 				}
 	            self.close();
 	            return false;

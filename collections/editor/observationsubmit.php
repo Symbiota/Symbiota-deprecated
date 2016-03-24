@@ -1,15 +1,20 @@
 <?php
 //TODO: add code to automatically select hide locality details when taxon/state match name on list
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ObservationSubmitManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ObservationSubmitManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/observatoinsubmit.php?'.$_SERVER['QUERY_STRING']);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId  = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $clid  = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
+$recordedBy = array_key_exists("recordedby",$_REQUEST)?$_REQUEST["recordedby"]:0;
 
-$obsManager = new ObservationSubmitManager($collId);
+//Sanitation
+if(!is_numeric($clid)) $clid = 0;
+
+$obsManager = new ObservationSubmitManager();
+$obsManager->setCollid($collId);
 $collMap = $obsManager->getCollMap(); 
 if(!$collId && $collMap) $collId = $collMap['collid']; 
 
@@ -19,26 +24,34 @@ if($collMap){
 	if($isAdmin){
 		$isEditor = 1;
 	}
-	elseif(array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights['CollAdmin'])){
+	elseif(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
 		$isEditor = 1;
 	}
-	elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights['CollEditor'])){
+	elseif(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollEditor'])){
 		$isEditor = 1;
 	}
 	if($isEditor && $action == "Submit Observation"){
-		if(isset($useImageMagick) && $useImageMagick) $obsManager->setUseImageMagick(1);
-		$occid = $obsManager->addObservation($_POST,$symbUid);
+		$occid = $obsManager->addObservation($_POST);
 	}
+	if(!$recordedBy) $recordedBy = $obsManager->getUserName();
 }
 ?>
 
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Observation Submission</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Observation Submission</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript">
+		<?php 
+		$maxUpload = ini_get('upload_max_filesize');
+		$maxUpload = str_replace("M", "000000", $maxUpload);
+		if($maxUpload > 4000000) $maxUpload = 4000000;
+		echo 'var maxUpload = '.$maxUpload.";\n";
+		?>
+	</script>
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../../js/symb/collections.observationsubmit.js"></script>
@@ -47,7 +60,7 @@ if($collMap){
 
 	<?php
 	$displayLeftMenu = (isset($collections_editor_observationsubmitMenu)?$collections_editor_observationsubmitMenu:false);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($collections_editor_observationsubmitCrumbs)){
 		echo "<div class='navpath'>";
 		echo $collections_editor_observationsubmitCrumbs;
@@ -62,26 +75,28 @@ if($collMap){
 		if($action || (isset($_SERVER['REQUEST_METHOD']) && strtolower($_SERVER['REQUEST_METHOD']) == 'post' && empty($_FILES) && empty($_POST))){
 			?>
 			<hr />
-			<div style="margin:15px;font-weight:bold;color:red;">
+			<div style="margin:15px;font-weight:bold;">
 				<?php
 				if($occid){
 					?>
-					<div>
+					<div style="color:green;">
 						SUCCESS: Image loaded successfully!
 					</div>
 					<div style="font:weight;font-size:120%;margin-top:10px;">
 						Open  
-						<a href="../individual/index.php?occid=<?php echo $occid; ?>">Occurrence Details Viewer</a> to see the new record 
+						<a href="../individual/index.php?occid=<?php echo $occid; ?>" target="_blank">Occurrence Details Viewer</a> to see the new record 
 					</div>
 					<?php
 				}
 				$errArr = $obsManager->getErrorArr();
 				if($errArr){
+					echo '<div style="color:red;">';
 					echo 'ERROR:<ol>';
 					foreach($errArr as $e){
 						echo '<li>'.$e.'</li>';
 					}
 					echo '</ol>';
+					echo '</div>';
 				}
 				if(!$action){
 					echo 'UNKNOWN ERROR: image file may have been larger than allowed by server. Try uploading a smaller image or have system administrator modify PHP configurations';
@@ -117,7 +132,7 @@ if($collMap){
 						<div style="float:left;">
 							Observer:
 							<br/>
-							<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $userDisplayName; ?>" />
+							<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $recordedBy; ?>" />
 						</div>
 						<div style="float:left">
 							Number:
@@ -187,12 +202,12 @@ if($collMap){
 						<div style="float:left;">
 							Latitude
 							<br/>
-							<input type="text" id="pointlat" name="decimallatitude" tabindex="44" maxlength="10" style="width:88px;background-color:lightyellow;" value="" onchange="verifyLatValue(this)" title="Decimal Format (eg 34.5436)" />
+							<input type="text" id="pointlat" name="decimallatitude" tabindex="44" maxlength="10" style="width:88px;background-color:lightyellow;" value="" onchange="verifyLatValue(this.form)" title="Decimal Format (eg 34.5436)" />
 						</div>
 						<div style="float:left;">
 							Longitude
 							<br/>
-							<input type="text" id="pointlong" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:lightyellow;" value="" onchange="verifyLngValue(this)" title="Decimal Format (eg -112.5436)" />
+							<input type="text" id="pointlong" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:lightyellow;" value="" onchange="verifyLngValue(this.form)" title="Decimal Format (eg -112.5436)" />
 							<span style="margin:15px 5px 0px 5px;cursor:pointer;" onclick="openMappingAid('obsform','decimallatitude','decimallongitude');">
 								<img src="../../images/world.png" style="width:12px;" title="Coordinate Map Aid" />
 							</span>
@@ -201,9 +216,9 @@ if($collMap){
 							</span>
 						</div>
 						<div style="float:left;">
-							Uncertainty
+							Uncertainty(m)
 							<br/>
-							<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" maxlength="10" style="width:70px;" onchange="inputIsNumeric(this, 'Lat/long uncertainty')" title="Uncertainty in Meters" />
+							<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" maxlength="10" style="width:80px;background-color:lightyellow;" onchange="inputIsNumeric(this, 'Lat/long uncertainty')" title="Uncertainty in Meters" />
 						</div>
 						<div style="float:left;">
 							Datum
@@ -295,7 +310,7 @@ if($collMap){
 					</div>
 				</fieldset>
 				<?php 
-				$clArr = $obsManager->getChecklists($userRights); 
+				$clArr = $obsManager->getChecklists(); 
 				if($clArr){
 					?>
 					<fieldset>
@@ -306,7 +321,7 @@ if($collMap){
 							<option value="0">------------------------------</option>
 							<?php 
 							foreach($clArr as $id => $clName){
-								echo '<option value="'.$id.'" '.($id=='cl'.$clid?'SELECTED':'').'>'.$clName.'</option>';
+								echo '<option value="'.$id.'" '.($id==$clid?'SELECTED':'').'>'.$clName.'</option>';
 							}
 							?>
 						</select>
@@ -320,7 +335,7 @@ if($collMap){
 				    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
 						<input type='hidden' name='MAX_FILE_SIZE' value='4000000' />
 						<div>
-							Image 1: <input name='imgfile1' type='file' size='70' style="background-color:lightyellow;"/>
+							Image 1: <input name='imgfile1' type='file' size='70' style="background-color:lightyellow;" onchange="verifyImageSize(this)" />
 							<input type="button" value="Reset" onclick="document.obsform.imgfile1.value = ''">
 						</div>
 						<div style="margin:5px;">
@@ -336,10 +351,8 @@ if($collMap){
 						</div>
 					</div>
 					<div id="img2div" style='padding:10px;width:675px;border:1px solid yellow;background-color:FFFF99;display:none;'>
-				    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-						<input type='hidden' name='MAX_FILE_SIZE' value='4000000' />
 						<div>
-							Image 2: <input name='imgfile2' type='file' size='70'/>
+							Image 2: <input name="imgfile2" type="file" size="70" onchange="verifyImageSize(this)" />
 							<input type="button" value="Reset" onclick="document.obsform.imgfile2.value = ''">
 						</div>
 						<div style="margin:5px;">
@@ -355,10 +368,8 @@ if($collMap){
 						</div>
 					</div>
 					<div id="img3div" style='padding:10px;width:675px;border:1px solid yellow;background-color:FFFF99;display:none;'>
-				    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-						<input type='hidden' name='MAX_FILE_SIZE' value='4000000' />
 						<div>
-							Image 3: <input name='imgfile3' type='file' size='70'/>
+							Image 3: <input name="imgfile3" type="file" size="70" onchange="verifyImageSize(this)" />
 							<input type="button" value="Reset" onclick="document.obsform.imgfile3.value = ''">
 						</div>
 						<div style="margin:5px;">
@@ -370,7 +381,7 @@ if($collMap){
 							</span>
 						</div>
 					</div>
-					<div style="margin-left:10px;">* Uploading web-ready images recommended. Upload image size can not be greater than 1MB</div>
+					<div style="margin-left:10px;">* Uploading web-ready images recommended. Upload image size can not be greater than <?php echo ($maxUpload/1000000); ?>MB</div>
 				</fieldset>
 				<div style="margin:10px;">
 					<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
@@ -387,7 +398,7 @@ if($collMap){
 		?>
 	</div>
 <?php 	
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 ?>
 
 </body>

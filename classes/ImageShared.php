@@ -327,7 +327,6 @@ class ImageShared{
 	}
 	
 	public function processImage($tid=0){
-		global $paramsArr;
 
 		if(!$this->imgName){
 			$this->errArr[] = 'FATAL ERROR: Image file name null in processImage fucntion';
@@ -500,7 +499,6 @@ class ImageShared{
 	}
 	
 	public function databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid){
-		global $paramsArr;
 		$status = true;
 		if($imgWebUrl){
 			$urlBase = $this->getUrlBase();
@@ -540,7 +538,7 @@ class ImageShared{
 				($this->locality?'"'.$this->locality.'"':'NULL').','.
 				($this->occid?$this->occid:'NULL').','.
 				($this->notes?'"'.$this->notes.'"':'NULL').',"'.
-				$this->cleanInStr($paramsArr['un']).'",'.
+				$this->cleanInStr($GLOBALS['USERNAME']).'",'.
 				($this->sortSeq?$this->sortSeq:'50').','.
 				($this->sourceIdentifier?'"'.$this->sourceIdentifier.'"':'NULL').','.
 				($this->rights?'"'.$this->rights.'"':'NULL').','.
