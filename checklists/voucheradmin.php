@@ -284,9 +284,9 @@ if($clid && $isEditor){
                                         <table class="styledtable" style="font-family:Arial;font-size:12px;">
                                             <tr>
                                                 <th>
-															<span title="Select All">
-																<input name="occids[]" type="checkbox" onclick="selectAll(this);" value="0-0" />
-															</span>
+													<span title="Select All">
+														<input name="occids[]" type="checkbox" onclick="selectAll(this);" value="0-0" />
+													</span>
                                                 </th>
                                                 <th><?php echo $LANG['CHECKLISTID'];?></th>
                                                 <th><?php echo $LANG['COLLECTOR'];?></th>
@@ -345,7 +345,7 @@ if($clid && $isEditor){
                                             ?>
                                             <div>
                                                 <a href="#" onclick="openPopup('../taxa/index.php?taxauthid=1&taxon=<?php echo $tid.'&cl='.$clid; ?>','taxawindow');return false;"><?php echo $sciname; ?></a>
-                                                <a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid.'&targetclid='.$clid.'&targettid='.$tid;?>','editorwindow');return false;">
+                                                <a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $sciname.'&targetclid='.$clid.'&targettid='.$tid;?>','editorwindow');return false;">
                                                     <img src="../images/link.png" style="width:13px;" title="<?php echo $LANG['LINKVOUCHSPECIMEN'];?>" />
                                                 </a>
                                             </div>
