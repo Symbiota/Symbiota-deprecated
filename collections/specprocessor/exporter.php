@@ -57,6 +57,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 		<script>
 			var cogeUrl = "https://www.museum.tulane.edu/coge/symbiota/";
 			var t;
+			var t2;
+			var datasetList = {};
 			
 			$(function() {
 				var dialogArr = new Array("schemanative","schemadwc","newrecs");
@@ -115,6 +117,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						$("#coge-status").html("Unauthorized");
 						$("#coge-status").css("color", "red");
 						$("#builddwcabutton").prop("disabled",true);
+						$("#coge-commlist").html('<span style="color:orange;">Login to GeoLocate and click check status button to list available communities</span>');
 					}
 					else{
 						clearInterval(t);
@@ -132,7 +135,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 			}
 
 			function startAuthMonitoring(){
-				//every 10 seconds, check authenication
+				//every 3 seconds, check authenication
 				t = setInterval(cogeCheckAuthentication,3000);
 			}
 
@@ -174,8 +177,14 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						alert(result);
 					}
 					else{
-						var path =  result.path;
-						cogeSubmitData(path);
+						var dwcaPath =  result.path;
+						if(dwcaPath){
+							$("#coge-dwcalink").html("<u>Data package (DwC-Archive)</u>: <a href='"+dwcaPath+"'>"+dwcaPath+"</a>");
+							cogeSubmitData(dwcaPath);
+						}
+						else{
+
+						}
 					}
 				});
 			}
@@ -219,8 +228,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 
 			function cogeSubmitData(dwcaPath){
 				$("#coge-push2coge").show();
-				$("#coge-push2coge").html("<a href='"+dwcaPath+"'>"+dwcaPath+"</a>");
-				/*
 				$.ajax({
 					type: "GET",
 					url: cogeUrl,
@@ -231,11 +238,14 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 				}).done(function( response ) {
 					//{"result":{"datasourceId":"7ab8ffb8-032a-4f7a-8968-a012ce287c2d"}}
 					var result = response.result;
-					alert(result.datasourceId);
-					$("#coge-push2coge").hide();
+					var dataSourceGuid = result.datasourceId;
+					if(dataSourceGuid){
+						$("#coge-push2coge").hide();
+						$("#coge-guid").html("<u>Dataset identifier</u>: " + dataSourceGuid);
+						window.setTimeout(cogeCheckStatus(dataSourceGuid),2000);
+					}
 				});
-				*/
-			}			
+			}		
 
 			function cogeCheckStatus(id){
 				$.ajax({
@@ -246,10 +256,114 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					dataType: 'json',
 					data: { t: "importstatus", q: id }
 				}).done(function( response ) {
-					//{"result":{"importProgess":{"state":"ready"}}}
-					
+					//{"result":{"importProgess":{"state":"portal interation required"}}}
+					var result = response.result;
+					if(result == "authentication required"){
+						$("#coge-status").html("Unauthorized");
+						$("#coge-status").css("color", "red");
+						alert("Authentication Required! Login may have timed out, please login back into GeoLocate website");
+						t2 = setInterval(cogeCheckStatus(id),3000);
+					}
+					else {
+						clearInterval(t2);
+						var iStatus = result.importStatus.state;
+						if(iStatus == "portal_interaction_required"){
+							$("#coge-importcomplete").show();
+							//Default import status will be displayed in #coge-importstatus
+							$("#coge-importstatus").show();
+							cogeGetUserCommunityList();
+						}
+						else if(iStatus == "ready"){
+							$("#coge-importstatus").html("Dataset ready for processing");
+							$("#coge-importstatus").show();
+						}
+						else if(iStatus == "unspecified"){
+							$("#coge-importstatus").html("Unbable to locate dataset");
+							$("#coge-importstatus").show();
+						}
+						else if(iStatus == "retrieval" || iStatus == "extraction" || iStatus == "discovery" || iStatus == "datasource_creation"){
+							//Import is still processing
+							window.setTimeout(cogeCheckStatus(id),2000);
+						}
+						else{
+							alert(iStatus);
+							$("#coge-importstatus").html("Unknown Error: Visit GeoLocate for details");
+							$("#coge-importstatus").show();
+						}
+					}
 				});
-			}			
+			}
+
+			function cogeGetUserCommunityList(){
+				$.ajax({
+					type: "GET",
+					url: cogeUrl,
+					crossDomain: true,
+					xhrFields: { withCredentials: true },
+					dataType: 'json',
+					data: { t: "comlist" }
+				}).done(function( response ) {
+					/*
+					{"result":[{"name":"Phoenix","description":"General Areas around Phoenix that need coordinates","role":"Owner",
+					"dataSources":[{"name":"Fabaceae test","description":"","uploadedBy":"egbott","uploadType":"csv"},
+					{"guid":"95b7fdb7-8667-469f-88c5-ad1bf3a6ea29","name":"Arizona Fabaceae","description":"","uploadedBy":"egbott","uploadType":"Symbiota (DwCA)"},
+					{"guid":"19e68aae-b870-4f81-aa08-ab17a827985e","name":"Fabaceae","description":"test upload of Fabaceae","uploadedBy":"egbott","uploadType":"Symbiota (DwCA)"}]}]}
+					*/
+					var result = response.result;
+					if(result == "authentication required"){
+						alert("Authentication Required! Login may have timed out, please login back into GeoLocate website");
+					}
+					else{
+						$("#coge-communities").show();
+						var htmlOut = "";
+						for(var i in result){
+							var role = result[i].role;
+							if(role == "Owner" || role == "Admin" || role == "Reviewer"){
+								htmlOut = htmlOut + '<div style="margin:5px">';
+								var name = result[i].name;
+								htmlOut = htmlOut + '<input name="cogecomm" type="radio" value="'+name+'" onclick="verifyDataSourceIdentifier(this.form)" />';
+								htmlOut = htmlOut + "<u>"+name+"</u>";
+								htmlOut = htmlOut + " (" + role + ")";
+								var descr = result[i].description;
+								if(descr) htmlOut = htmlOut + ": " + descr;
+								var dataSources = result[i].dataSources;
+								if(dataSources){
+									htmlOut = htmlOut + '<fieldset style="margin:0px 30px;padding:10px"><legend><b>Datasets</b></legend>';
+									datasetList[name] = {};
+									for(var j in dataSources){
+										datasetList[name][j] = dataSources[j].name;
+										htmlOut = htmlOut + "<div><b>" + dataSources[j].name + "</b> (";
+										
+										var uploadType = dataSources[j].uploadType;
+										if(uploadType == "csv"){
+											htmlOut = htmlOut + "manual CSV upload";
+										}
+										else{
+											if(uploadType == "Symbiota (DwCA)"){
+												var guid = dataSources[j].guid;
+												htmlOut = htmlOut + 'Symbiota upload [<a href="#" onclick="cogeCheckGeorefStatus(\''+guid+'\');return false;">check status</a>]';
+											}
+										}
+										var uploadedBy = dataSources[j].uploadedBy;
+										if(uploadedBy) htmlOut = htmlOut + "; " + uploadedBy;
+
+										htmlOut = htmlOut + ")";
+										var dsDescr = dataSources[j].description;
+										if(dsDescr) htmlOut = htmlOut + ": " + dsDescr;
+										htmlOut = htmlOut + "</div>";
+										if(uploadType == "Symbiota (DwCA)"){
+											htmlOut = htmlOut + '<div id="coge-'+guid+'" style="margin-left:10px;"></div>';
+										}
+									} 
+									htmlOut = htmlOut + '</fieldset>';
+								}
+								htmlOut = htmlOut + '</div>';
+								$("#coge-commlist").html(htmlOut);
+							}
+						}
+					}
+				});
+			}
 
 			function cogeCheckGeorefStatus(id){
 				$.ajax({
@@ -261,44 +375,39 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					data: { t: "dsstatus", q: id }
 				}).done(function( response ) {
 					//{"result":{"datasource":"0a289c73-5317-45f1-9486-656597f98626","stats":{"specimens":{"total":48004,"corrected":774,"skipped":0},"localities":{"total":18876,"corrected":226,"skipped":0}}}}
-					
-				});
-			}			
-
-			function cogeGetUserCommunityList(){
-				$.ajax({
-					type: "GET",
-					url: cogeUrl,
-					crossDomain: true,
-					xhrFields: { withCredentials: true },
-					dataType: 'json',
-					data: { t: "comlist" }
-				}).done(function( response ) {
-					//{"result":[{"name":"Sandbox","description":"Feel free to join and experiment.","role":"Owner"},{"name":"TU Volunteer Georeferencing","description":"This project focuses on georeferencing selected data from FishNet and involves volunteers from the Tulane University student community.","role":"Owner"},{"name":"Empty Community","description":"Testing ONLY","role":"Owner"},{"name":"FSU","description":"Test FSU site","role":"Admin"},{"name":"Penstemon","description":"This web site will focus on georeferencing specimens of Penstemon but its purpose is to help those involved gain a better understanding of how to use collaborative georeferencing.","role":"Admin"},{"name":"FishNet 2","description":"Collaborative georeferencing of data from FishNet 2","role":"Owner"},{"name":"NR Box","description":"","role":"Owner"},{"name":"TU FishNet Service Group","description":"","role":"User"},{"name":"Engine Georeferencing","description":"","role":"User"},{"name":"SIUC FishNet","description":"Records from the SIUC fish Collections","role":"Owner"}]} 
-					//{"result":[{"name":"NR Box","description":"","role":"User"},{"name":"Phoenix","description":"General Areas around Phoenix that need coordinates","role":"Owner"}]}
 					var result = response.result;
 					if(result == "authentication required"){
-						alert("Not Authenicated");
+						alert("Authentication Required! Login may have timed out, please login back into GeoLocate website");
 					}
 					else{
-						$("#coge-communities").show();
-						var htmlOut = "";
-						for(var i in result){
-							var role = result[i].role;
-							if(role == "Owner" || role == "Admin" || role == "Reviewer"){
-								htmlOut = htmlOut + '<div style="margin:5px">';
-								var name = result[i].name;
-								htmlOut = htmlOut + '<input name="cogecomm" type="radio" value="'+name+'" />';
-								htmlOut = htmlOut + "<u>"+name+"</u>";
-								htmlOut = htmlOut + " ("+role+")";
-								var descr = result[i].description;
-								if(descr != "") htmlOut = htmlOut + ": " + descr;
-								htmlOut = htmlOut + '</div>';
-								$("#commlist-div").html(htmlOut);
+						var specStats = result.stats.specimens;
+						var localStats = result.stats.localities;
+						var htmlOut = '<div style="border:1px solid black">';
+						htmlOut = htmlOut + "<div>Specimens: total: " + specStats.total + ", corrected: " + specStats.corrected + ", skipped: " + specStats.skipped;
+						if(specStats.total == 0 && specStats.corrected == 0 && specStats.skipped == 0){
+							htmlOut = htmlOut + "<span style=\"margin-left:30px;color:orange;\">GeoLocate interaction may be required to activate data</span>";
+						}
+						htmlOut = htmlOut + "</div>";
+						htmlOut = htmlOut + "<div>Localities: total: " + specStats.total + ", corrected: " + specStats.corrected + ", skipped: " + specStats.skipped;
+						htmlOut = htmlOut + "</div></div>";
+						$("#coge-"+id).html(htmlOut);
+					}
+				});
+			}
+
+			function verifyDataSourceIdentifier(f){
+				var newProjName = $("input[name=cogename]").val();
+				if(newProjName != "" && $('input[name=cogecomm]:checked').size() > 0){
+					if($('input[name=cogecomm]:checked').val() in datasetList){
+						var projList = datasetList[$('input[name=cogecomm]:checked').val()];
+						for(var h in projList){
+							if(projList[h] == newProjName){
+								alert("Dataset name already exists for selected community");
+								return false;
 							}
 						}
 					}
-				});
+				}
 			}
 		</script>
 	</head>
@@ -648,12 +757,12 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 													provide a required identifier, an optional descriptive name, and then click the Push Data to GeoLocate button. 
 												</div>
 												<div style="margin:10px;">
-													<div id="commlist-div" style="margin:15px 0px;padding:15px;border:1px solid orange;">
+													<div id="coge-commlist" style="margin:15px 0px;padding:15px;border:1px solid orange;">
 														<span style="color:orange;">Login to GeoLocate and click check status button to list available communities</span>
 													</div>
 													<div style="margin:5px;clear:both;">
 														<div style="float:left;">Data source identifier (primary name):</div>
-														<div style="margin-left:250px;"><input name="cogename" type="text" style="width:300px" /></div>
+														<div style="margin-left:250px;"><input name="cogename" type="text" style="width:300px" onchange="verifyDataSourceIdentifier(this.form)" /></div>
 													</div>
 													<div style="margin:5px;clear:both;">
 														<div style="float:left;">Description:</div>
@@ -666,10 +775,21 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<input name="format" type="hidden" value="csv" />
 												<input name="schema" type="hidden" value="coge" />
 												<div style="margin:5px">
-													<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> 
-													<span id="coge-download" style="display:none;color:orange">Downloading data... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
+													<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" /> 
+													<span id="coge-download" style="display:none;color:orange">Creating data package... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 													<span id="coge-push2coge" style="display:none;color:orange">Pushing data to CoGe... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
-													 *In development
+													<span id="coge-importcomplete" style="display:none;color:green">
+														Success! GeoLocate action required (see message below)
+													</span>
+												</div>
+												<div style="margin-left:15px">
+													<div id="coge-dwcalink"></div>
+													<div id="coge-guid"></div>
+													<div id="coge-importstatus" style="color:orange;display:none;">
+														Data import complete! Go to GeoLocate website and open dataset within selected community, 
+														then click update button to index and integrate data into community. 
+														After processing step completes, remember to finalize the import process by clicking the save button.
+													</div>
 												</div>
 												<div style="margin:5px">
 													<input name="submitaction" type="submit" value="Download Records Locally" />

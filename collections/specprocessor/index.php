@@ -1,8 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcessorManager.php');
-include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
-include_once($serverRoot.'/classes/SpecProcessorOcr.php');
+include_once($SERVER_ROOT.'/classes/SpecProcessorManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
+include_once($SERVER_ROOT.'/classes/SpecProcessorOcr.php');
 
 header("Content-Type: text/html; charset=".$charset);
 
@@ -72,8 +72,8 @@ if($isEditor){
 <html>
 	<head>
 		<title>Specimen Processor Control Panel</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 		<script type="text/javascript" src="../../js/jquery.js"></script>
 		<script type="text/javascript" src="../../js/jquery-ui.js"></script>
@@ -202,7 +202,7 @@ if($isEditor){
 			?>
 		</div>
 		<?php
-			include($serverRoot.'/footer.php');
+			include($SERVER_ROOT.'/footer.php');
 		?>
 	</body>
 </html>
