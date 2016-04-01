@@ -1,6 +1,6 @@
 <?php
 require_once('../../config/symbini.php');
-require_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
+require_once($SERVER_ROOT.'/classes/OccurrenceAssociations.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 //Use following ONLY if login is required
@@ -12,7 +12,7 @@ $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 //Sanitation
 if(!is_numeric($collid)) $collid = 0;
 
-$assocHandler = new OccurrenceUtilities();
+$assocHandler = new OccurrenceAssociations();
 $collmeta = array();
 if($collid) $collmeta = $assocHandler->getCollectionMetadata($collid);
 
