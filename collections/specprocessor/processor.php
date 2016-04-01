@@ -88,6 +88,7 @@ $statusStr = "";
 						$imageProcessor->setCreateNewRec($_POST['createnewrec']);
 						$imageProcessor->setImgExists($_POST['imgexists']);
 						$imageProcessor->setKeepOrig(0);
+						$imageProcessor->setSkeletalFileProcessing($_POST['skeletalFileProcessing']);
 						
 						//Run process
 						$imageProcessor->batchLoadImages();

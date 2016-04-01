@@ -335,7 +335,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<b>JPG quality:</b>
 										</div>
 										<div style="float:left;"> 
-											<input name="jpgquality" type="text" style="width:50px;" value="<?php echo $specManager->getJpgQuality(); ?>" />
+											<input name="jpgcompression" type="text" style="width:50px;" value="<?php echo $specManager->getJpgQuality(); ?>" />
 											<a id="jpgcompressioninfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
@@ -565,6 +565,17 @@ if($spprId) $specManager->setProjVariables($spprId);
 													Rename image and save both<br/>
 													<input type="radio" name="imgexists" value="2" /> 
 													Copy over existing image
+												</div>
+											</div>
+										</div>
+										<div style="clear:both;">
+											<div>
+												<b>Look for and process skeletal files (allowed extensions: csv, txt, tab, dat):</b>
+												<div style="margin:5px 15px"> 
+													<input type="radio" name="skeletalFileProcessing" value="0" CHECKED /> 
+													Skip skeletal files<br/>
+													<input type="radio" name="skeletalFileProcessing" value="1" /> 
+													Process skeletal files<br/>
 												</div>
 											</div>
 										</div>

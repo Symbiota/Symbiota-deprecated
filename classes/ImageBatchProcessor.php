@@ -71,6 +71,7 @@ class ImageBatchProcessor {
 	private $lgSourceSuffix = '_lg';
 	private $keepOrig = 0;
 
+	private $skeletalFileProcessing = true;
 	private $createNewRec = true;
 	private $imgExists = 0;			// 0 = skip import, 1 = rename image and save both, 2 = copy over image
 	private $dbMetadata = 1;
@@ -325,9 +326,11 @@ class ImageBatchProcessor {
 									//but for now do nothing
 								}
 								elseif(($fileExt == ".csv" || $fileExt == ".txt" || $fileExt == ".tab" || $fileExt == ".dat")){
-									//Is skeletal file exists. Append data to database records
-									$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
-									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+									if($this->skeletalFileProcessing){
+										//Is skeletal file exists. Append data to database records
+										$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
+										if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+									}
 								}
 								elseif($fileExt==".xml") {
                                     // The loop through collArr can result in same file being processed more than
@@ -377,12 +380,13 @@ class ImageBatchProcessor {
 			$dom = new DOMDocument();
 			$dom->loadHTMLFile($this->sourcePathBase.$pathFrag);
 			$aNodes= $dom->getElementsByTagName('a');
-			$skipAnchors = array('Name','Last modified','Size','Description');
+			$skipAnchors = array('Name','Last modified','Size','Description','Parent Directory');
 			foreach( $aNodes as $aNode ) {
 				//$fileName = $aNode->getAttribute('href');
 				$fileName = trim($aNode->nodeValue);
 				if(!in_array($fileName,$skipAnchors)){
-					$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')+1));
+					$fileExt = '';
+					if(strrpos($fileName,'.')) $fileExt = strtolower(substr($fileName,strrpos($fileName,'.')+1));
 					if($fileExt){
 						if(!stripos($fileName,$this->tnSourceSuffix.'.jpg') && !stripos($fileName,$this->lgSourceSuffix.'.jpg')){
 							$this->logOrEcho("Processing File (".date('Y-m-d h:i:s A')."): ".$fileName);
@@ -397,9 +401,11 @@ class ImageBatchProcessor {
 								//but for now do nothing
 							}
 							elseif(($fileExt == "csv" || $fileExt == "txt" || $fileExt == "tab" || $fileExt == "dat")){
-								//Is skeletal file. Process and append data to database records
-								$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
-								if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+								if($this->skeletalFileProcessing){
+									//Is skeletal file. Process and append data to database records
+									$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
+									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+								}
 							}
 							elseif($fileExt=="xml") {
 								$this->processXMLFile($fileName,$pathFrag);
@@ -411,7 +417,7 @@ class ImageBatchProcessor {
 						}
 					}
 					elseif(stripos($fileName,'Parent Dir') === false){
-						echo 'New dir path: '.$this->sourcePathBase.$pathFrag.$fileName.'<br/>';
+						$this->logOrEcho('New dir path: '.$this->sourcePathBase.$pathFrag.$fileName.'<br/>');
 						if(substr($fileName,-1) != '/') $fileName .= '/';
 						$this->processHtml($pathFrag.$fileName);
 					}
@@ -804,7 +810,7 @@ class ImageBatchProcessor {
 			}
 		}
 		else{
-			$this->logOrEcho("File skipped (".$sourcePathFrag.$fileName."), unable to extract specimen identifier");
+			$this->logOrEcho("File skipped (".$sourcePathFrag.$fileName."), unable to extract specimen identifier",1);
 			return false;
 		}
 		//ob_flush();
@@ -1673,6 +1679,14 @@ class ImageBatchProcessor {
 
 	public function getKeepOrig(){
 		return $this->keepOrig;
+	}
+
+	public function setSkeletalFileProcessing($c){
+		$this->skeletalFileProcessing = $c;
+	}
+
+	public function getSkeletalFileProcessing(){
+		return $this->skeletalFileProcessing;
 	}
 	
 	public function setCreateNewRec($c){
