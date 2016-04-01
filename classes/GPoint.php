@@ -104,10 +104,11 @@ class GPoint
 	var $secondStdParallel;						// For lambert Projection
 
 	// constructor
-	function gPoint($datum='WGS 84')			// Default datum is WGS 84
+	function __construct($datum='WGS 84')			// Default datum is WGS 84
 	{
 		$this->setDatum($datum);
 	}
+	
 	function setDatum($datum){
 		if(preg_match('/nad\s*83/i',$datum)){
 			//NAD 83
