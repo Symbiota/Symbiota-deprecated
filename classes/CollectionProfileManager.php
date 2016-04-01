@@ -1,6 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceUtilities.php');
+include_once($serverRoot.'/classes/OccurrenceMaintenance.php');
 include_once($serverRoot.'/classes/UuidFactory.php');
 
 //Used by /collections/misc/collprofiles.php page
@@ -369,21 +369,21 @@ class CollectionProfileManager {
 	}
 	
 	public function updateStatistics($verbose = false){
-		$occurUtil = new OccurrenceUtilities();
+		$occurMaintenance = new OccurrenceMaintenance();
 		if($verbose){
 			echo '<ul>';
-			$occurUtil->setVerbose(true);
+			$occurMaintenance->setVerbose(true);
 			echo '<li>General cleaning in preparation for collecting stats...</li>';
 			flush();
 			ob_flush();
 		}
-		$occurUtil->generalOccurrenceCleaning($this->collid);
+		$occurMaintenance->generalOccurrenceCleaning($this->collid);
 		if($verbose){
 			echo '<li>Updating statistics...</li>';
 			flush();
 			ob_flush();
 		}
-		$occurUtil->updateCollectionStats($this->collid, true);
+		$occurMaintenance->updateCollectionStats($this->collid, true);
 		if($verbose){
 			echo '<li>Finished updating collection statistics</li>';
 			flush();
@@ -667,8 +667,8 @@ class CollectionProfileManager {
 		//echo '<li>General cleaning in preparation for collecting stats... </li>';
 		flush();
 		ob_flush();
-		$occurUtil = new OccurrenceUtilities();
-		//$occurUtil->generalOccurrenceCleaning();
+		$occurMaintenance = new OccurrenceMaintenance();
+		//$occurMaintenance->generalOccurrenceCleaning();
 		$sql = 'SELECT collid, collectionname FROM omcollections WHERE collid IN('.$collId.') ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -676,7 +676,7 @@ class CollectionProfileManager {
 			echo '<li style="margin-left:15px;">Cleaning statistics for: '.$r->collectionname.'</li>';
 			flush();
 			ob_flush();
-			$occurUtil->updateCollectionStats($r->collid, true);
+			$occurMaintenance->updateCollectionStats($r->collid, true);
 		}
 		$rs->free();
 		echo '<li>Statistics update complete!</li>';

@@ -1,23 +1,16 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/GPoint.php');
+include_once($SERVER_ROOT.'/classes/GPoint.php');
 
 class OccurrenceUtilities {
 
-	private $conn;
-	private $verbose = false;	// 0 = silent, 1 = echo as list item
-	private $errorArr = array();
-	
 	static $monthRoman = array('I'=>'01','II'=>'02','III'=>'03','IV'=>'04','V'=>'05','VI'=>'06','VII'=>'07','VIII'=>'08','IX'=>'09','X'=>'10','XI'=>'11','XII'=>'12');
 	static $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 
  	public function __construct(){
- 		$this->conn = MySQLiConnectionFactory::getCon("write");
  	}
  	
  	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
  	}
 	
 	/*
@@ -518,7 +511,6 @@ class OccurrenceUtilities {
 						$e = $m[2];
 						$n = $m[1];
 					} 
-echo $e.' '.$n.' '.$z.' '.$d.'</br>';
 					if($e && $n){
 						$llArr = OccurrenceUtilities::convertUtmToLL($e,$n,$z,$d);
 						if(isset($llArr['lat'])) $retArr['lat'] = $llArr['lat'];
@@ -550,665 +542,367 @@ echo $e.' '.$n.' '.$z.' '.$d.'</br>';
 		}
 		return $retArr;
 	}
-	
-	//Associated species parser
-	public function parseAssociatedTaxa($collid = 0){
-		if(!is_numeric($collid)){
-			echo '<div><b>FAIL ERROR: abort process</b></div>';
-			return;
-		} 
-		set_time_limit(900);
-		echo '<ul>';
-		echo '<li>Starting to parse associated species text blocks </li>';
-		ob_flush();
-		flush();
-		$sql = 'SELECT o.occid, o.associatedtaxa '.
-			'FROM omoccurrences o LEFT JOIN omoccurassociations a ON o.occid = a.occid '.
-			'WHERE (o.associatedtaxa IS NOT NULL) AND (o.associatedtaxa <> "") AND (a.occid IS NULL) ';
-		if($collid && is_numeric($collid)){
-			$sql .= 'AND (o.collid = '.$collid.') ';
-		}
-		//$sql .= ' LIMIT 100';
-		//echo $sql; exit;
-		$rs = $this->conn->query($sql);
-		echo '<li>Parsing new associated species text blocks (target count: '.$rs->num_rows.')... </li>';
-		ob_flush();
-		flush();
-		$cnt = 1;
-		while($r = $rs->fetch_object()){
-			$assocArr = $this->parseAssocSpecies($r->associatedtaxa,$r->occid);
-			if($cnt%5000 == 0) echo '<li style="margin-left:10px">'.$cnt.' specimens parsed</li>';
-			$cnt++;
-		}
-		$rs->free();
-		
-		//Populate tid field using taxa table
-		echo '<li>Populate tid field using taxa table... </li>';
-		ob_flush();
-		flush();
-		$sql2 = '';
-		if($collid){
-			$sql2 = 'UPDATE omoccurassociations a INNER JOIN taxa t ON a.verbatimsciname = t.sciname '.
-				'INNER JOIN omoccurrences o ON a.occid = o.occid '.
-				'SET a.tid = t.tid '.
-				'WHERE a.tid IS NULL AND (o.collid = '.$collid.') ';
-		}
-		else{
-			$sql2 = 'UPDATE omoccurassociations a INNER JOIN taxa t ON a.verbatimsciname = t.sciname '.
-				'SET a.tid = t.tid '.
-				'WHERE a.tid IS NULL';
-		}
-		if(!$this->conn->query($sql2)){
-			echo '<li style="margin-left:20px;">Unable to populate tid field using taxa table: '.$this->conn->error.'</li>';
-			//echo '<li style="margin-left:20px;">'.$sql2.'</li>';
-		}
 
-		//Populate tid field using taxavernaculars table
-		echo '<li>Populate tid field using taxavernaculars table... </li>';
-		ob_flush();
-		flush();
-		$sql3 = '';
-		if($collid){
-			$sql3 = 'UPDATE omoccurassociations a INNER JOIN taxavernaculars v ON a.verbatimsciname = v.vernacularname '.
-				'INNER JOIN omoccurrences o ON a.occid = o.occid '.
-				'SET a.tid = v.tid '.
-				'WHERE (a.tid IS NULL) AND (o.collid = '.$collid.') ';
+	public static function occurrenceArrayCleaning($recMap){
+		//Trim all field values
+		foreach($recMap as $k => $v){
+			$recMap[$k] = trim($v);
 		}
-		else{
-			$sql3 = 'UPDATE omoccurassociations a INNER JOIN taxavernaculars v ON a.verbatimsciname = v.vernacularname '.
-				'SET a.tid = v.tid '.
-				'WHERE a.tid IS NULL ';
-		}
-		if(!$this->conn->query($sql3)){
-			echo '<li style="margin-left:20px;">Unable to populate tid field using taxavernaculars table: '.$this->conn->error.'</li>';
-			//echo '<li style="margin-left:20px;">'.$sql3.'</li>';
-		}
-		
-		//Populate tid field by linking back to omoccurassociations table
-		//This assumes that tids are correct; in future verificationscore field can be used to select only those that have been verified
-		echo '<li>Populate tid field by linking back to omoccurassociations table... </li>';
-		ob_flush();
-		flush();
-		$sql4 = '';
-		if($collid){
-			$sql4 = 'UPDATE omoccurassociations a INNER JOIN omoccurassociations a2 ON a.verbatimsciname = a2.verbatimsciname '.
-				'INNER JOIN omoccurrences o ON a.occid = o.occid '.
-				'SET a.tid = a2.tid '.
-				'WHERE (a.tid IS NULL) AND (a2.tid IS NOT NULL) AND (o.collid = '.$collid.') ';
-		}
-		else{
-			$sql4 = 'UPDATE omoccurassociations a INNER JOIN omoccurassociations a2 ON a.verbatimsciname = a2.verbatimsciname '.
-				'SET a.tid = a2.tid '.
-				'WHERE a.tid IS NULL AND a2.tid IS NOT NULL ';
-		}
-		if(!$this->conn->query($sql4)){
-			echo '<li style="margin-left:20px;">Unable to populate tid field relinking back to omoccurassociations table: '.$this->conn->error.'</li>';
-			//echo '<li style="margin-left:20px;">'.$sql4.'</li>';
-		}
-		
-		//Lets get the harder ones
-		echo '<li>Mining database for the more difficult matches... </li>';
-		ob_flush();
-		flush();
-		$sql5 = '';
-		if($collid){
-			$sql5 = 'SELECT DISTINCT a.verbatimsciname '.
-				'FROM omoccurassociations a INNER JOIN omoccurrences o ON a.occid = o.occid '.
-				'WHERE (a.tid IS NULL) AND (o.collid = '.$collid.') ';
-		}
-		else{
-			$sql5 = 'SELECT DISTINCT verbatimsciname '.
-				'FROM omoccurassociations '.
-				'WHERE tid IS NULL ';
-		}
-		$rs5 = $this->conn->query($sql5);
-		while($r5 = $rs5->fetch_object()){
-			$verbStr = $r5->verbatimsciname;
-			$tid = $this->mineAssocSpeciesMatch($verbStr);
-			if($tid){
-				$sql5b = 'UPDATE omoccurassociations '.
-					'SET tid = '.$tid.' '.
-					'WHERE tid IS NULL AND verbatimsciname = "'.$verbStr.'"';
-				if(!$this->conn->query($sql5b)){
-					echo '<li style="margin-left:20px;">Unable to populate NULL tid field: '.$this->conn->error.'</li>';
-					//echo '<li style="margin-left:20px;">'.$sql5b.'</li>';
+		//Date cleaning
+		if(isset($recMap['eventdate']) && $recMap['eventdate']){
+			if(is_numeric($recMap['eventdate'])){
+				if($recMap['eventdate'] > 2100 && $recMap['eventdate'] < 45000){
+					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
+					$recMap['eventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['eventdate']-1,1900));
+				}
+				elseif($recMap['eventdate'] > 2200000 && $recMap['eventdate'] < 2500000){
+					//Date is in the Gregorian format
+					$dArr = explode('/',jdtogregorian($recMap['eventdate']));
+					$recMap['eventdate'] = $dArr[2].'-'.$dArr[0].'-'.$dArr[1];
+				}
+				elseif($recMap['eventdate'] > 19000000){
+					//Format: 20120101 = 2012-01-01
+					$recMap['eventdate'] = substr($recMap['eventdate'],0,4).'-'.substr($recMap['eventdate'],4,2).'-'.substr($recMap['eventdate'],6,2);
+				}
+			}
+			else{
+				//Make sure event date is a valid format or drop into verbatimEventDate
+				$dateStr = OccurrenceUtilities::formatDate($recMap['eventdate']);
+				if($dateStr){
+					if($recMap['eventdate'] != $dateStr && (!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate'])){
+						$recMap['verbatimeventdate'] = $recMap['eventdate'];
+					}
+					$recMap['eventdate'] = $dateStr;
+				}
+				else{
+					if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+						$recMap['verbatimeventdate'] = $recMap['eventdate'];
+					}
+					unset($recMap['eventdate']);
 				}
 			}
 		}
-		$rs5->free();
-		
-		echo '<li>DONE!</li>';
-		echo '</ul>';
-		ob_flush();
-		flush();
-	}
-
-	private function parseAssocSpecies($assocSpeciesStr,$occid){
-		$parseArr = array();
-		if($assocSpeciesStr){
-			//Separate associated species
-			$assocSpeciesStr = str_replace(array('&',' and ',';'),',',$assocSpeciesStr);
-			$assocArr = explode(',',$assocSpeciesStr);
-			//Add to return array
-			foreach($assocArr as $v){
-				$vStr = trim($v,'."-()[]:#\' ');
-				if(substr($vStr,-3) == ' sp') $vStr = substr($vStr,0,strlen($vStr)-3);
-				if(substr($vStr,-4) == ' spp') $vStr = substr($vStr,0,strlen($vStr)-4);
-				$vStr = preg_replace('/\s\s+/', ' ',$vStr);
-				if($vStr){
-					//If genus is abbreviated (e.g. P. ponderosa), try to get genus from previous entry 
-					if(preg_match('/^([A-Z]{1})\.{0,1}\s{1}([a-z]*)$/',$vStr,$m)){
-						//Iterate through parseArr in reverse until match is found
-						$cnt = 0;
-						for($i = (count($parseArr)-1); $i >= 0; $i--){
-							if(preg_match('/^('.$m[1].'{1}[a-z]+)\s+/',$vStr,$m2)){
-								$vStr = $m2[1].' '.$m[2];
-								//Possible code to add: verify that name is in taxa tables  
-								break;
-							}
-							if($cnt > 3) break;
-							$cnt++;
+		if(array_key_exists('latestdatecollected',$recMap) && $recMap['latestdatecollected'] && is_numeric($recMap['latestdatecollected'])){
+			if($recMap['latestdatecollected'] > 2100 && $recMap['latestdatecollected'] < 45000){
+				//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
+				$recMap['latestdatecollected'] = date('Y-m-d', mktime(0,0,0,1,$recMap['latestdatecollected']-1,1900));
+			}
+			elseif($recMap['latestdatecollected'] > 2200000 && $recMap['latestdatecollected'] < 2500000){
+				$dArr = explode('/',jdtogregorian($recMap['latestdatecollected']));
+				$recMap['latestdatecollected'] = $dArr[2].'-'.$dArr[0].'-'.$dArr[1];
+			}
+			elseif($recMap['latestdatecollected'] > 19000000){
+				$recMap['latestdatecollected'] = substr($recMap['latestdatecollected'],0,4).'-'.substr($recMap['latestdatecollected'],4,2).'-'.substr($recMap['latestdatecollected'],6,2);
+			}
+		}
+		if(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate'] && is_numeric($recMap['verbatimeventdate'])
+				&& $recMap['verbatimeventdate'] > 2100 && $recMap['verbatimeventdate'] < 45000){
+					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
+					$recMap['verbatimeventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['verbatimeventdate']-1,1900));
+		}
+		if(array_key_exists('dateidentified',$recMap) && $recMap['dateidentified'] && is_numeric($recMap['dateidentified'])
+				&& $recMap['dateidentified'] > 2100 && $recMap['dateidentified'] < 45000){
+					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
+					$recMap['dateidentified'] = date('Y-m-d', mktime(0,0,0,1,$recMap['dateidentified']-1,1900));
+		}
+		//If month, day, or year are text, avoid SQL error by converting to numeric value
+		if(array_key_exists('year',$recMap) || array_key_exists('month',$recMap) || array_key_exists('day',$recMap)){
+			$y = (array_key_exists('year',$recMap)?$recMap['year']:'00');
+			$m = (array_key_exists('month',$recMap)?$recMap['month']:'00');
+			$d = (array_key_exists('day',$recMap)?$recMap['day']:'00');
+			$vDate = trim($y.'-'.$m.'-'.$d,'- ');
+			if(isset($recMap['day']) && !is_numeric($recMap['day'])){
+				if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+					$recMap['verbatimeventdate'] = $vDate;
+				}
+				unset($recMap['day']);
+				$d = '00';
+			}
+			if(isset($recMap['year']) && !is_numeric($recMap['year'])){
+				if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+					$recMap['verbatimeventdate'] = $vDate;
+				}
+				unset($recMap['year']);
+			}
+			if(isset($recMap['month']) && $recMap['month'] && !is_numeric($recMap['month'])){
+				if(strlen($recMap['month']) > 2){
+					$monAbbr = strtolower(substr($recMap['month'],0,3));
+					if(array_key_exists($monAbbr,OccurrenceUtilities::$monthNames)){
+						$recMap['month'] = OccurrenceUtilities::$monthNames[$monAbbr];
+						$recMap['eventdate'] = OccurrenceUtilities::formatDate(trim($y.'-'.$recMap['month'].'-'.($d?$d:'00'),'- '));
+					}
+					else{
+						if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+							$recMap['verbatimeventdate'] = $vDate;
+						}
+						unset($recMap['month']);
+					}
+				}
+				else{
+					if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']) {
+						$recMap['verbatimeventdate'] = $vDate;
+					}
+					unset($recMap['month']);
+				}
+			}
+			if($vDate && (!array_key_exists('eventdate',$recMap) || !$recMap['eventdate'])){
+				$recMap['eventdate'] = OccurrenceUtilities::formatDate($vDate);
+			}
+		}
+		//eventDate NULL && verbatimEventDate NOT NULL && year NOT NULL
+		if((!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']) && array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate'] && (!array_key_exists('year',$recMap) || !$recMap['year'])){
+			$dateStr = OccurrenceUtilities::formatDate($recMap['verbatimeventdate']);
+			if($dateStr) $recMap['eventdate'] = $dateStr;
+		}
+		if((isset($recMap['recordnumberprefix']) && $recMap['recordnumberprefix']) || (isset($recMap['recordnumbersuffix']) && $recMap['recordnumbersuffix'])){
+			$recNumber = $recMap['recordnumber'];
+			if(isset($recMap['recordnumberprefix']) && $recMap['recordnumberprefix']) $recNumber = $recMap['recordnumberprefix'].'-'.$recNumber;
+			if(isset($recMap['recordnumbersuffix']) && $recMap['recordnumbersuffix']){
+				if(is_numeric($recMap['recordnumbersuffix']) && $recMap['recordnumber']) $recNumber .= '-';
+				$recNumber .= $recMap['recordnumbersuffix'];
+			}
+			$recMap['recordnumber'] = $recNumber;
+		}
+		//If lat or long are not numeric, try to make them so
+		if(array_key_exists('decimallatitude',$recMap) || array_key_exists('decimallongitude',$recMap)){
+			$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
+			$lngValue = (array_key_exists('decimallongitude',$recMap)?$recMap['decimallongitude']:'');
+			if(($latValue && !is_numeric($latValue)) || ($lngValue && !is_numeric($lngValue))){
+				$llArr = OccurrenceUtilities::parseVerbatimCoordinates(trim($latValue.' '.$lngValue),'LL');
+				if(array_key_exists('lat',$llArr) && array_key_exists('lng',$llArr)){
+					$recMap['decimallatitude'] = $llArr['lat'];
+					$recMap['decimallongitude'] = $llArr['lng'];
+				}
+				else{
+					unset($recMap['decimallatitude']);
+					unset($recMap['decimallongitude']);
+				}
+				$vcStr = '';
+				if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates']){
+					$vcStr .= $recMap['verbatimcoordinates'].'; ';
+				}
+				$vcStr .= $latValue.' '.$lngValue;
+				if(trim($vcStr)) $recMap['verbatimcoordinates'] = trim($vcStr);
+			}
+		}
+		//Transfer verbatim Lat/Long to verbatim coords
+		if(isset($recMap['verbatimlatitude']) || isset($recMap['verbatimlongitude'])){
+			if(isset($recMap['verbatimlatitude']) && isset($recMap['verbatimlongitude'])){
+				if(!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude'])){
+					if((is_numeric($recMap['verbatimlatitude']) && is_numeric($recMap['verbatimlongitude']))){
+						if($recMap['verbatimlatitude'] > -90 && $recMap['verbatimlatitude'] < 90
+								&& $recMap['verbatimlongitude'] > -180 && $recMap['verbatimlongitude'] < 180){
+									$recMap['decimallatitude'] = $recMap['verbatimlatitude'];
+									$recMap['decimallongitude'] = $recMap['verbatimlongitude'];
 						}
 					}
-					$parseArr[] = $vStr;
+					else{
+						//Attempt to extract decimal lat/long
+						$coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'],'LL');
+						if($coordArr){
+							if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+							if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
+						}
+					}
 				}
 			}
-			//Database verbatim values
-			$this->databaseAssocSpecies($parseArr,$occid);
-		}
-	}
-
-	private function databaseAssocSpecies($assocArr, $occid){
-		if($assocArr){
-			$sql = 'INSERT INTO omoccurassociations(occid, verbatimsciname, relationship) VALUES';
-			foreach($assocArr as $aStr){
-				$sql .= '('.$occid.',"'.$this->conn->real_escape_string($aStr).'","associatedSpecies"), ';
-			}
-			$sql = trim($sql,', ');
-			//echo $sql; exit;
-			if(!$this->conn->query($sql)){
-				echo '<li style="margin-left:20px;">ERROR adding assocaited values (<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>): '.$this->conn->error.'</li>';
-				//echo '<li style="margin-left:20px;">SQL: '.$sql.'</li>';
+			//Place into verbatim coord field
+			$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
+			if($vCoord) $vCoord .= '; ';
+			if(stripos($vCoord,$recMap['verbatimlatitude']) === false && stripos($vCoord,$recMap['verbatimlongitude']) === false){
+				$recMap['verbatimcoordinates'] = $vCoord.$recMap['verbatimlatitude'].', '.$recMap['verbatimlongitude'];
 			}
 		}
-	}
-	
-	private function mineAssocSpeciesMatch($verbStr){
-		$retTid = 0;
-		//Pattern: P. ponderosa
-		if(preg_match('/^([A-Z]{1})\.{0,1}\s{1}([a-z]*)$/',$verbStr,$m)){
-			$sql = 'SELECT tid, sciname '.
-				'FROM taxa '. 
-				'WHERE unitname1 LIKE "'.$m[1].'%" AND unitname2 = "'.$m[2].'" AND rankid = 220';
-			//echo $sql.'; '.$verbStr;
-			$rs = $this->conn->query($sql);
-			if($rs->num_rows == 1){
-				if($r = $rs->fetch_object()){
-					$retTid = $r->tid;
-				}
+		//Transfer DMS to verbatim coords
+		if(isset($recMap['latdeg']) && $recMap['latdeg'] && isset($recMap['lngdeg']) && $recMap['lngdeg']){
+			//Attempt to create decimal lat/long
+			if(is_numeric($recMap['latdeg']) && is_numeric($recMap['lngdeg']) && (!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude']))){
+				$latDec = $recMap['latdeg'];
+				if(isset($recMap['latmin']) && $recMap['latmin'] && is_numeric($recMap['latmin'])) $latDec += $recMap['latmin']/60;
+				if(isset($recMap['latsec']) && $recMap['latsec'] && is_numeric($recMap['latsec'])) $latDec += $recMap['latsec']/3600;
+				if(stripos($recMap['latns'],'s') === 0 && $latDec > 0) $latDec *= -1;
+				$lngDec = $recMap['lngdeg'];
+				if(isset($recMap['lngmin']) && $recMap['lngmin'] && is_numeric($recMap['lngmin'])) $lngDec += $recMap['lngmin']/60;
+				if(isset($recMap['lngsec']) && $recMap['lngsec'] && is_numeric($recMap['lngsec'])) $lngDec += $recMap['lngsec']/3600;
+				if(stripos($recMap['lngew'],'e') === 0 ) $lngDec *= -1;
+				$recMap['decimallatitude'] = round($latDec,6);
+				$recMap['decimallongitude'] = round($lngDec,6);
 			}
-			$rs->free();
+			//Place into verbatim coord field
+			$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
+			if($vCoord) $vCoord .= '; ';
+			$vCoord .= $recMap['latdeg'].'° ';
+			if(isset($recMap['latmin']) && $recMap['latmin']) $vCoord .= $recMap['latmin'].'m ';
+			if(isset($recMap['latsec']) && $recMap['latsec']) $vCoord .= $recMap['latsec'].'s ';
+			if(isset($recMap['latns'])) $vCoord .= $recMap['latns'].'; ';
+			$vCoord .= $recMap['lngdeg'].'° ';
+			if(isset($recMap['lngmin']) && $recMap['lngmin']) $vCoord .= $recMap['lngmin'].'m ';
+			if(isset($recMap['lngsec']) && $recMap['lngsec']) $vCoord .= $recMap['lngsec'].'s ';
+			if(isset($recMap['lngew'])) $vCoord .= $recMap['lngew'];
+			$recMap['verbatimcoordinates'] = $vCoord;
 		}
-		//Add code that uses Levenshtein distance matching on taxa table
-		
-		
-		//Add code that uses Levenshtein distance matching on taxavernaculars table
-
-		
-		return $retTid;
-	}
-
-	public function getParsingStats($collid){
-		$retArr = array();
-		//Get parsed count
-		$sqlZ = 'SELECT COUNT(DISTINCT o.occid) as cnt '.
-			'FROM omoccurrences o INNER JOIN omoccurassociations a ON o.occid = a.occid '.
-			'WHERE (a.relationship = "associatedSpecies") ';
-		if($collid){
-			$sqlZ .= 'AND (o.collid = '.$collid.') ';
-		}
-		$rsZ = $this->conn->query($sqlZ);
-		while($rZ = $rsZ->fetch_object()){
-			$retArr['parsed'] = $rZ->cnt;
-		}
-		$rsZ->free();
-
-		//Get unparsed count
-		$sqlA = 'SELECT count(o.occid) as cnt '.
-			'FROM omoccurrences o LEFT JOIN omoccurassociations a ON o.occid = a.occid '.
-			'WHERE (o.associatedtaxa IS NOT NULL) AND (o.associatedtaxa <> "") AND (a.occid IS NULL) ';
-		if($collid){
-			$sqlA .= 'AND (o.collid = '.$collid.') ';
-		}
-		$rsA = $this->conn->query($sqlA);
-		while($rA = $rsA->fetch_object()){
-			$retArr['unparsed'] = $rA->cnt;
-		}
-		$rsA->free();
-
-		//Get field count for parsing failures
-		$sqlB = 'SELECT count(a.occid) as cnt '.
-			'FROM omoccurrences o INNER JOIN omoccurassociations a ON o.occid = a.occid '.
-			'WHERE (a.verbatimsciname IS NOT NULL) AND (a.tid IS NULL) ';
-		if($collid){
-			$sqlB .= 'AND (o.collid = '.$collid.') ';
-		}
-		$rsB = $this->conn->query($sqlB);
-		while($rB = $rsB->fetch_object()){
-			$retArr['failed'] = $rB->cnt;
-		}
-		$rsB->free();
-
-		//Get specimen count for parsing failures
-		$sqlC = 'SELECT count(DISTINCT o.occid) as cnt '.
-			'FROM omoccurrences o INNER JOIN omoccurassociations a ON o.occid = a.occid '.
-			'WHERE (a.verbatimsciname IS NOT NULL) AND (a.tid IS NULL) ';
-		if($collid){
-			$sqlC .= 'AND (o.collid = '.$collid.') ';
-		}
-		$rsC = $this->conn->query($sqlC);
-		while($rC = $rsC->fetch_object()){
-			$retArr['failedOccur'] = $rC->cnt;
-		}
-		$rsC->free();
-		return $retArr;
-	}
-
-	//General cleaning functions 
-	public function generalOccurrenceCleaning($collId){
-		set_time_limit(600);
-		$status = true;
-
-		if($this->verbose) $this->outputMsg('Updating null families of family rank identifications... ',1);
-		$sql1 = 'SELECT occid FROM omoccurrences WHERE (family IS NULL) AND (sciname LIKE "%aceae" OR sciname LIKE "%idae")';
-		$rs1 = $this->conn->query($sql1);
-		$occidArr1 = array();
-		while($r1 = $rs1->fetch_object()){
-			$occidArr1[] = $r1->occid;
-		}
-		$rs1->free();
-		if($occidArr1){
-			$sql = 'UPDATE omoccurrences '.
-				'SET family = sciname '.
-				'WHERE occid IN('.implode(',',$occidArr1).')';
-			if(!$this->conn->query($sql)){
-				$errStr = 'WARNING: unable to update family; '.$this->conn->error;
-				$this->errorArr[] = $errStr;
-				if($this->verbose) $this->outputMsg($errStr,2);
-				$status = false;
-			}
-		}
-		unset($occidArr1);
-		
-		if($this->verbose) $this->outputMsg('Updating null scientific names of family rank identifications... ',1);
-		$sql1 = 'SELECT occid FROM omoccurrences WHERE family IS NOT NULL AND sciname IS NULL';
-		$rs1 = $this->conn->query($sql1);
-		$occidArr2 = array();
-		while($r1 = $rs1->fetch_object()){
-			$occidArr2[] = $r1->occid;
-		}
-		$rs1->free();
-		if($occidArr2){
-			$sql = 'UPDATE omoccurrences SET sciname = family WHERE occid IN('.implode(',',$occidArr2).') ';
-			if(!$this->conn->query($sql)){
-				$errStr = 'WARNING: unable to update sciname using family; '.$this->conn->error;
-				$this->errorArr[] = $errStr;
-				if($this->verbose) $this->outputMsg($errStr,2);
-				$status = false;
-			}
-		}
-		unset($occidArr2);
-		
-		if($this->verbose) $this->outputMsg('Indexing valid scientific names (e.g. populating tidinterpreted)... ',1);
-		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
-			'WHERE o.collid IN('.$collId.') AND o.TidInterpreted IS NULL';
-		$rs1 = $this->conn->query($sql1);
-		$occidArr3 = array();
-		while($r1 = $rs1->fetch_object()){
-			$occidArr3[] = $r1->occid;
-		}
-		$rs1->free();
-		if($occidArr3){
-			$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
-				'SET o.TidInterpreted = t.tid '. 
-				'WHERE o.occid IN('.implode(',',$occidArr3).') ';
-			if(!$this->conn->query($sql)){
-				$errStr = 'WARNING: unable to update tidinterpreted; '.$this->conn->error;
-				$this->errorArr[] = $errStr;
-				if($this->verbose) $this->outputMsg($errStr,2);
-				$status = false;
-			}
-		}
-		unset($occidArr3);
-		
-		if($this->verbose) $this->outputMsg('Updating and indexing occurrence images... ',1);
-		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-			'WHERE o.collid IN('.$collId.') AND (i.tid IS NULL) AND (o.tidinterpreted IS NOT NULL)';
-		$rs1 = $this->conn->query($sql1);
-		$occidArr4 = array();
-		while($r1 = $rs1->fetch_object()){
-			$occidArr4[] = $r1->occid;
-		}
-		$rs1->free();
-		if($occidArr4){
-			$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '. 
-				'SET i.tid = o.tidinterpreted '. 
-				'WHERE o.occid IN('.implode(',',$occidArr4).')';
-			if(!$this->conn->query($sql)){
-				$errStr = 'WARNING: unable to update image tid field; '.$this->conn->error;
-				$this->errorArr[] = $errStr;
-				if($this->verbose) $this->outputMsg($errStr,2);
-				$status = false;
-			}
-		}
-		unset($occidArr4);
-		
-		if($this->verbose) $this->outputMsg('Updating null families using taxonomic thesaurus... ',1);
-		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
-			'WHERE o.collid IN('.$collId.') AND (ts.taxauthid = 1) AND (ts.family IS NOT NULL) AND (o.family IS NULL)';
-		$rs1 = $this->conn->query($sql1);
-		$occidArr5 = array();
-		while($r1 = $rs1->fetch_object()){
-			$occidArr5[] = $r1->occid;
-		}
-		$rs1->free();
-		if($occidArr5){
-			$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '. 
-				'SET o.family = ts.family '. 
-				'WHERE o.occid IN('.implode(',',$occidArr5).')';
-			if(!$this->conn->query($sql)){
-				$errStr = 'WARNING: unable to update family in omoccurrence table; '.$this->conn->error;
-				$this->errorArr[] = $errStr;
-				if($this->verbose) $this->outputMsg($errStr,2);
-				$status = false;
-			}
-		}
-		unset($occidArr5);
-
-		#Updating records with null author
-		if($this->verbose) $this->outputMsg('Updating null scientific authors using taxonomic thesaurus... ',1);
-		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
-			'WHERE o.scientificNameAuthorship IS NULL AND t.author IS NOT NULL LIMIT 5000 ';
-		$rs1 = $this->conn->query($sql1);
-		$occidArr6 = array();
-		while($r1 = $rs1->fetch_object()){
-			$occidArr6[] = $r1->occid;
-		}
-		$rs1->free();
-		if($occidArr6){
-			$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '. 
-				'SET o.scientificNameAuthorship = t.author '. 
-				'WHERE (o.occid IN('.implode(',',$occidArr6).'))';
-			if(!$this->conn->query($sql)){
-				$errStr = 'WARNING: unable to update author; '.$this->conn->error;
-				$this->errorArr[] = $errStr;
-				if($this->verbose) $this->outputMsg($errStr,2);
-				$status = false;
-			}
-		}
-		unset($occidArr6);
-		
 		/*
-		if($this->verbose) $this->outputMsg('Updating georeference index... ',1);
-		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
-			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
-			'FROM omoccurrences o '.
-			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
-			'AND o.decimallongitude IS NOT NULL ';
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to update georeference index; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
-		}
-		*/
-		
-		return $status;
-	}
-	
-	//Protect Rare species data
-	public function protectRareSpecies($collid = 0){
-		$this->protectGloballyRareSpecies($collid);
-		$this->protectStateRareSpecies($collid);
-	}
-	
-	public function protectGloballyRareSpecies($collid = 0){
-		$status = true;
-		//protect globally rare species
-		if($this->verbose) $this->outputMsg('Protecting globally rare species... ',1);
-		$sensitiveArr = array();
-		$sql = 'SELECT DISTINCT ts2.tid '.
-			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
-			'WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (t.SecurityStatus > 0)';
-		$rs = $this->conn->query($sql); 
-		while($r = $rs->fetch_object()){
-			$sensitiveArr[] = $r->tid; 
-		}
-		$rs->free();
-
-		if($sensitiveArr){
-			$sql2 = 'UPDATE omoccurrences o '.
-				'SET o.LocalitySecurity = 1 '.
-				'WHERE (o.LocalitySecurity IS NULL OR o.LocalitySecurity = 0) AND (o.tidinterpreted IN('.implode(',',$sensitiveArr).'))';
-			if(!$this->conn->query($sql2)){
-				$errStr = 'WARNING: unable to protect globally rare species; '.$this->conn->error;
-				$this->errorArr[] = $errStr;
-				if($this->verbose) $this->outputMsg($errStr,2);
-				$status = false;
-			}
-		}
-		return $status;
-	}
-
-	public function protectStateRareSpecies($collid = 0){
-		$status = true;
-		//Protect state level rare species
-		if($this->verbose) $this->outputMsg('Protecting state level rare species... ',1);
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
-			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
-			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
-			'SET o.localitysecurity = 1 '.
-			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (c.type = "rarespp") '.
-			'AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
-		if($collid) $sql .= ' AND o.collid ='.$collid;
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to protect state level rare species; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
-		}
-		return $status;
-	}
-
-	//Update statistics
-	public function updateCollectionStats($collid, $full = false){
-		set_time_limit(600);
-		
-		$recordCnt = 0;
-		$georefCnt = 0;
-		$familyCnt = 0;
-		$genusCnt = 0;
-		$speciesCnt = 0;
-		if($full){
-			$statsArr = Array();
-			if($this->verbose) $this->outputMsg('Calculating specimen, georeference, family, genera, and species counts... ',1);
-			$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
-				'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(o.typeStatus) AS TypeCount, '.
-				'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
-				'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS SpecimensCountID, '.
-				'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
-				'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount '.
-				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-				'WHERE (o.collid = '.$collid.') ';
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$recordCnt = $r->SpecimenCount;
-				$georefCnt = $r->GeorefCount;
-				$familyCnt = $r->FamilyCount;
-				$genusCnt = $r->GeneraCount;
-				$speciesCnt = $r->SpeciesCount;
-				$statsArr['SpecimensCountID'] = $r->SpecimensCountID;
-				$statsArr['TotalTaxaCount'] = $r->TotalTaxaCount;
-				$statsArr['TypeCount'] = $r->TypeCount;
-			}
-			$rs->free();
-
-			if($this->verbose) $this->outputMsg('Calculating number of specimens imaged... ',1);
-			$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
-				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-				'WHERE (o.collid = '.$collid.') ';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$statsArr['imgcnt'] = $r->imgcnt;
-			}
-			$rs->free();
-
-			if($this->verbose) $this->outputMsg('Calculating genetic resources counts... ',1);
-			$sql = 'SELECT COUNT(CASE WHEN g.resourceurl LIKE "http://www.boldsystems%" THEN o.occid ELSE NULL END) AS boldcnt, '.
-				'COUNT(CASE WHEN g.resourceurl LIKE "http://www.ncbi%" THEN o.occid ELSE NULL END) AS gencnt '.
-				'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
-				'WHERE (o.collid = '.$collid.') ';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$statsArr['boldcnt'] = $r->boldcnt;
-				$statsArr['gencnt'] = $r->gencnt;
-			}
-			$rs->free();
-
-			if($this->verbose) $this->outputMsg('Calculating reference counts... ',1);
-			$sql = 'SELECT count(r.occid) as refcnt '.
-				'FROM omoccurrences o INNER JOIN referenceoccurlink r ON o.occid = r.occid '.
-				'WHERE (o.collid = '.$collid.') ';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$statsArr['refcnt'] = $r->refcnt;
-			}
-			$rs->free();
-
-			if($this->verbose) $this->outputMsg('Calculating counts per family... ',1);
-			$sql = 'SELECT o.family, COUNT(o.occid) AS SpecimensPerFamily, COUNT(o.decimalLatitude) AS GeorefSpecimensPerFamily, '.
-				'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerFamily, '.
-				'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerFamily '.
-				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-				'WHERE (o.collid = '.$collid.') '.
-				'GROUP BY o.family ';
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$family = str_replace(array('"',"'"),"",$r->family);
-				if($family){
-					$statsArr['families'][$family]['SpecimensPerFamily'] = $r->SpecimensPerFamily;
-					$statsArr['families'][$family]['GeorefSpecimensPerFamily'] = $r->GeorefSpecimensPerFamily;
-					$statsArr['families'][$family]['IDSpecimensPerFamily'] = $r->IDSpecimensPerFamily;
-					$statsArr['families'][$family]['IDGeorefSpecimensPerFamily'] = $r->IDGeorefSpecimensPerFamily;
+		 if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && (!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude']))){
+		 $coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimcoordinates']);
+		 if($coordArr){
+		 if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+		 if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
+		 }
+		 }
+		 */
+		//Convert UTM to Lat/Long
+		if((array_key_exists('utmnorthing',$recMap) && $recMap['utmnorthing']) || (array_key_exists('utmeasting',$recMap) && $recMap['utmeasting'])){
+			$no = (array_key_exists('utmnorthing',$recMap)?$recMap['utmnorthing']:'');
+			$ea = (array_key_exists('utmeasting',$recMap)?$recMap['utmeasting']:'');
+			$zo = (array_key_exists('utmzoning',$recMap)?$recMap['utmzoning']:'');
+			$da = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
+			if(!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude'])){
+				if($no && $ea && $zo){
+					//Northing, easting, and zoning all had values
+					$llArr = OccurrenceUtilities::convertUtmToLL($ea,$no,$zo,$da);
+					if(isset($llArr['lat'])) $recMap['decimallatitude'] = $llArr['lat'];
+					if(isset($llArr['lng'])) $recMap['decimallongitude'] = $llArr['lng'];
+				}
+				else{
+					//UTM was a single field which was placed in UTM northing field within uploadspectemp table
+					$coordArr = OccurrenceUtilities::parseVerbatimCoordinates(trim($zo.' '.$ea.' '.$no),'UTM');
+					if($coordArr){
+						if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+						if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
+					}
 				}
 			}
-			$rs->free();
+			$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
+			if(!($no && strpos($vCoord,$no))) $recMap['verbatimcoordinates'] = ($vCoord?$vCoord.'; ':'').$zo.' '.$ea.'E '.$no.'N';
+		}
+		//Transfer TRS to verbatim coords
+		if(isset($recMap['trstownship']) && $recMap['trstownship'] && isset($recMap['trsrange']) && $recMap['trsrange']){
+			$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
+			if($vCoord) $vCoord .= '; ';
+			$vCoord .= (stripos($recMap['trstownship'],'t') === false?'T':'').$recMap['trstownship'].' ';
+			$vCoord .= (stripos($recMap['trsrange'],'r') === false?'R':'').$recMap['trsrange'].' ';
+			if(isset($recMap['trssection'])) $vCoord .= (stripos($recMap['trssection'],'s') === false?'sec':'').$recMap['trssection'].' ';
+			if(isset($recMap['trssectiondetails'])) $vCoord .= $recMap['trssectiondetails'];
+			$recMap['verbatimcoordinates'] = trim($vCoord);
+		}
 			
-			if($this->verbose) $this->outputMsg('Calculating counts per country... ',1);
-			$sql = 'SELECT o.country, COUNT(o.occid) AS CountryCount, COUNT(o.decimalLatitude) AS GeorefSpecimensPerCountry, '.
-				'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerCountry, '.
-				'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerCountry '.
-				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-				'WHERE (o.collid = '.$collid.') '.
-				'GROUP BY o.country ';
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$country = str_replace(array('"',"'"),"",$r->country);
-				if($country){
-					$statsArr['countries'][$country]['CountryCount'] = $r->CountryCount;
-					$statsArr['countries'][$country]['GeorefSpecimensPerCountry'] = $r->GeorefSpecimensPerCountry;
-					$statsArr['countries'][$country]['IDSpecimensPerCountry'] = $r->IDSpecimensPerCountry;
-					$statsArr['countries'][$country]['IDGeorefSpecimensPerCountry'] = $r->IDGeorefSpecimensPerCountry;
+		//Check to see if evelation are valid numeric values
+		if((isset($recMap['minimumelevationinmeters']) && $recMap['minimumelevationinmeters'] && !is_numeric($recMap['minimumelevationinmeters']))
+				|| (isset($recMap['maximumelevationinmeters']) && $recMap['maximumelevationinmeters'] && !is_numeric($recMap['maximumelevationinmeters']))){
+					$vStr = (isset($recMap['verbatimelevation'])?$recMap['verbatimelevation']:'');
+					if(isset($recMap['minimumelevationinmeters']) && $recMap['minimumelevationinmeters']) $vStr .= ($vStr?'; ':'').$recMap['minimumelevationinmeters'];
+					if(isset($recMap['maximumelevationinmeters']) && $recMap['maximumelevationinmeters']) $vStr .= '-'.$recMap['maximumelevationinmeters'];
+					$recMap['verbatimelevation'] = $vStr;
+					$recMap['minimumelevationinmeters'] = '';
+					$recMap['maximumelevationinmeters'] = '';
+		}
+		//Verbatim elevation
+		if(array_key_exists('verbatimelevation',$recMap) && $recMap['verbatimelevation'] && (!array_key_exists('minimumelevationinmeters',$recMap) || !$recMap['minimumelevationinmeters'])){
+			$eArr = OccurrenceUtilities::parseVerbatimElevation($recMap['verbatimelevation']);
+			if($eArr){
+				if(array_key_exists('minelev',$eArr)){
+					$recMap['minimumelevationinmeters'] = $eArr['minelev'];
+					if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
 				}
 			}
-			$rs->free();
-
-			$returnArrJson = json_encode($statsArr);
-			$sql = 'UPDATE omcollectionstats '.
-				"SET dynamicProperties = '".$this->cleanInStr($returnArrJson)."' ".
-				'WHERE collid = '.$collid;
-			if(!$this->conn->query($sql)){
-				$errStr = 'WARNING: unable to update collection stats table [1]; '.$this->conn->error;
-				$this->errorArr[] = $errStr;
-				if($this->verbose) $this->outputMsg($errStr,2);
+		}
+		//Deal with elevation when in two fields (number and units)
+		if(isset($recMap['elevationnumber']) && $recMap['elevationnumber']){
+			$elevStr = $recMap['elevationnumber'].$recMap['elevationunits'];
+			//Try to extract meters
+			$eArr = OccurrenceUtilities::parseVerbatimElevation($elevStr);
+			if($eArr){
+				if(array_key_exists('minelev',$eArr)){
+					$recMap['minimumelevationinmeters'] = $eArr['minelev'];
+					if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
+				}
+			}
+			if(!$eArr || !stripos($elevStr,'m')){
+				$vElev = (isset($recMap['verbatimelevation'])?$recMap['verbatimelevation']:'');
+				if($vElev) $vElev .= '; ';
+				$recMap['verbatimelevation'] = $vElev.$elevStr;
 			}
 		}
-		else{
-			if($this->verbose) $this->outputMsg('Calculating specimen, georeference, family, genera, and species counts... ',1);
-			$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, COUNT(DISTINCT o.family) AS FamilyCount, '.
-				'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
-				'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount '.
-				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-				'WHERE (o.collid = '.$collid.') ';
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$recordCnt = $r->SpecimenCount;
-				$georefCnt = $r->GeorefCount;
-				$familyCnt = $r->FamilyCount;
-				$genusCnt = $r->GeneraCount;
-				$speciesCnt = $r->SpeciesCount;
-			}
+		//Concatenate collectorfamilyname and collectorinitials into recordedby
+		if(isset($recMap['collectorfamilyname']) && $recMap['collectorfamilyname'] && (!isset($recMap['recordedby']) || !$recMap['recordedby'])){
+			$recordedBy = $recMap['collectorfamilyname'];
+			if(isset($recMap['collectorinitials']) && $recMap['collectorinitials']) $recordedBy .= ', '.$recMap['collectorinitials'];
+			$recMap['recordedby'] = $recordedBy;
+			//Need to add code that maps to collector table
+		
 		}
 		
-		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.
-			',cs.speciescnt = '.$speciesCnt.', cs.datelastmodified = CURDATE() '.
-			'WHERE cs.collid = '.$collid;
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to update collection stats table [2]; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
+		if(array_key_exists("specificepithet",$recMap)){
+			if($recMap["specificepithet"] == 'sp.' || $recMap["specificepithet"] == 'sp') $recMap["specificepithet"] = '';
 		}
-	}
-	
-	//Misc support functions
-	public function getCollectionMetadata($collid){
-		$retArr = array();
-		if(is_numeric($collid)){
-			$sql = 'SELECT institutioncode, collectioncode, collectionname, colltype, managementtype '.
-				'FROM omcollections '.
-				'WHERE collid = '.$collid;
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$retArr['instcode'] = $r->institutioncode;
-				$retArr['collcode'] = $r->collectioncode;
-				$retArr['collname'] = $r->collectionname;
-				$retArr['colltype'] = $r->colltype;
-				$retArr['mantype'] = $r->managementtype;
+		if(array_key_exists("taxonrank",$recMap)){
+			$tr = strtolower($recMap["taxonrank"]);
+			if($tr == 'species' || !$recMap["specificepithet"]) $recMap["taxonrank"] = '';
+			if($tr == 'subspecies') $recMap["taxonrank"] = 'subsp.';
+			if($tr == 'variety') $recMap["taxonrank"] = 'var.';
+			if($tr == 'forma') $recMap["taxonrank"] = 'f.';
+		}
+		
+		//Populate sciname if null
+		if(array_key_exists('sciname',$recMap) && $recMap['sciname']){
+			if(substr($recMap['sciname'],-4) == ' sp.') $recMap['sciname'] = substr($recMap['sciname'],0,-4);
+			if(substr($recMap['sciname'],-3) == ' sp') $recMap['sciname'] = substr($recMap['sciname'],0,-3);
+		
+			$recMap['sciname'] = str_replace(array(' ssp. ',' ssp '),' subsp. ',$recMap['sciname']);
+			$recMap['sciname'] = str_replace(' var ',' var. ',$recMap['sciname']);
+		
+			$pattern = '/\b(cf\.|cf|aff\.|aff)\s{1}/';
+			if(preg_match($pattern,$recMap['sciname'],$m)){
+				$recMap['identificationqualifier'] = $m[1];
+				$recMap['sciname'] = preg_replace($pattern,'',$recMap['sciname']);
 			}
-			$rs->free();
-		}
-		return $retArr;
-	}
-	
-	public function setVerbose($v){
-		if($v){
-			$this->verbose = true;
 		}
 		else{
-			$this->verbose = false;
+			if(array_key_exists("genus",$recMap)){
+				//Build sciname from individual units supplied by source
+				$sciName = $recMap["genus"];
+				if(array_key_exists("specificepithet",$recMap)) $sciName .= " ".$recMap["specificepithet"];
+				if(array_key_exists("taxonrank",$recMap)) $sciName .= " ".$recMap["taxonrank"];
+				if(array_key_exists("infraspecificepithet",$recMap)) $sciName .= " ".$recMap["infraspecificepithet"];
+				$recMap['sciname'] = trim($sciName);
+			}
+			elseif(array_key_exists('scientificname',$recMap)){
+				//Clean and parse scientific name
+				$parsedArr = OccurrenceUtilities::parseScientificName($recMap['scientificname']);
+				$scinameStr = '';
+				if(array_key_exists('unitname1',$parsedArr)){
+					$scinameStr = $parsedArr['unitname1'];
+					if(!array_key_exists('genus',$recMap) || $recMap['genus']){
+						$recMap['genus'] = $parsedArr['unitname1'];
+					}
+				}
+				if(array_key_exists('unitname2',$parsedArr)){
+					$scinameStr .= ' '.$parsedArr['unitname2'];
+					if(!array_key_exists('specificepithet',$recMap) || !$recMap['specificepithet']){
+						$recMap['specificepithet'] = $parsedArr['unitname2'];
+					}
+				}
+				if(array_key_exists('unitind3',$parsedArr)){
+					$scinameStr .= ' '.$parsedArr['unitind3'];
+					if((!array_key_exists('taxonrank',$recMap) || !$recMap['taxonrank'])){
+						$recMap['taxonrank'] = $parsedArr['unitind3'];
+					}
+				}
+				if(array_key_exists('unitname3',$parsedArr)){
+					$scinameStr .= ' '.$parsedArr['unitname3'];
+					if(!array_key_exists('infraspecificepithet',$recMap) || !$recMap['infraspecificepithet']){
+						$recMap['infraspecificepithet'] = $parsedArr['unitname3'];
+					}
+				}
+				if(array_key_exists('author',$parsedArr)){
+					if(!array_key_exists('scientificnameauthorship',$recMap) || !$recMap['scientificnameauthorship']){
+						$recMap['scientificnameauthorship'] = $parsedArr['author'];
+					}
+				}
+				$recMap['sciname'] = trim($scinameStr);
+			}
 		}
-	}
-
-	public function getErrorArr(){
-		return $this->errorArr;
-	}
-
-	private function outputMsg($str, $indent = 0){
-		if($this->verbose){
-			echo '<li style="margin-left:'.($indent*10).'px;">'.$str.'</li>';
-		}
-		ob_flush();
-		flush();
-	}
-
-	private function cleanInStr($inStr){
-		$retStr = trim($inStr);
-		$retStr = preg_replace('/\s\s+/', ' ',$retStr);
-		$retStr = $this->conn->real_escape_string($retStr);
-		return $retStr;
+		return $recMap;
 	}
 }
 ?>

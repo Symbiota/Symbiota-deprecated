@@ -10,8 +10,8 @@ if(isset($serverRoot)){
 	else{
 		include_once('ImageBatchConnectionFactory.php');
 	}
-	if(file_exists($serverRoot.'/classes/OccurrenceUtilities.php')){ 
-		include_once($serverRoot.'/classes/OccurrenceUtilities.php');
+	if(file_exists($serverRoot.'/classes/OccurrenceMaintenance.php')){ 
+		include_once($serverRoot.'/classes/OccurrenceMaintenance.php');
 	}
 	if(file_exists($serverRoot.'/classes/UuidFactory.php')){ 
 		include_once($serverRoot.'/classes/UuidFactory.php');
@@ -1466,20 +1466,20 @@ class ImageBatchProcessor {
 	private function updateCollectionStats(){
 		if($this->dbMetadata){
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
-			$occurUtil = new OccurrenceUtilities();
+			$occurMain = new OccurrenceMaintenance();
 	
 			$this->logOrEcho('Cleaning house...');
 			$collString = implode(',',$this->collProcessedArr);
-			if(!$occurUtil->generalOccurrenceCleaning($collString)){
-				$errorArr = $occurUtil->getErrorArr();
+			if(!$occurMain->generalOccurrenceCleaning($collString)){
+				$errorArr = $occurMain->getErrorArr();
 				foreach($errorArr as $errorStr){
 					$this->logOrEcho($errorStr,1);
 				}
 			}
 			
 			$this->logOrEcho('Protecting sensitive species...');
-			if(!$occurUtil->protectRareSpecies()){
-				$errorArr = $occurUtil->getErrorArr();
+			if(!$occurMain->protectRareSpecies()){
+				$errorArr = $occurMain->getErrorArr();
 				foreach($errorArr as $errorStr){
 					$this->logOrEcho($errorStr,1);
 				}
@@ -1487,8 +1487,8 @@ class ImageBatchProcessor {
 			
 			$this->logOrEcho('Updating statistics...');
 			foreach($this->collProcessedArr as $collid){
-				if(!$occurUtil->updateCollectionStats($collid)){
-					$errorArr = $occurUtil->getErrorArr();
+				if(!$occurMain->updateCollectionStats($collid)){
+					$errorArr = $occurMain->getErrorArr();
 					foreach($errorArr as $errorStr){
 						$this->logOrEcho($errorStr,1);
 					}

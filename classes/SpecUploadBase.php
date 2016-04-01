@@ -1,5 +1,6 @@
 <?php
 include_once($serverRoot.'/classes/SpecUpload.php');
+include_once($serverRoot.'/classes/OccurrenceMaintenance.php');
 include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 include_once($serverRoot.'/classes/ImageCleaner.php');
 include_once($serverRoot.'/classes/UuidFactory.php');
@@ -1141,13 +1142,13 @@ class SpecUploadBase extends SpecUpload{
 		$this->conn->query('OPTIMIZE TABLE uploadimagetemp');
 		
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
-		$occurUtil = new OccurrenceUtilities();
+		$occurMain = new OccurrenceMaintenance();
 
 		$this->outputMsg('<li>Cleaning house</li>');
 		ob_flush();
 		flush();
-		if(!$occurUtil->generalOccurrenceCleaning($this->collId)){
-			$errorArr = $occurUtil->getErrorArr();
+		if(!$occurMain->generalOccurrenceCleaning($this->collId)){
+			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){
 				echo '<li style="margin-left:20px;">'.$errorStr.'</li>';
 			}
@@ -1156,8 +1157,8 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...</li>');
 		ob_flush();
 		flush();
-		if(!$occurUtil->protectRareSpecies($this->collId)){
-			$errorArr = $occurUtil->getErrorArr();
+		if(!$occurMain->protectRareSpecies($this->collId)){
+			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){
 				echo '<li style="margin-left:20px;">'.$errorStr.'</li>';
 			}
@@ -1166,8 +1167,8 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li style="margin-left:10px;">Updating statistics...</li>');
 		ob_flush();
 		flush();
-		if(!$occurUtil->updateCollectionStats($this->collId)){
-			$errorArr = $occurUtil->getErrorArr();
+		if(!$occurMain->updateCollectionStats($this->collId)){
+			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){
 				echo '<li style="margin-left:20px;">'.$errorStr.'</li>';
 			}
@@ -1219,371 +1220,14 @@ class SpecUploadBase extends SpecUpload{
 			|| (array_key_exists('locality',$recMap) && $recMap['locality'])
 			|| (array_key_exists('sciname',$recMap) && $recMap['sciname'])
 			|| (array_key_exists('scientificname',$recMap) && $recMap['scientificname'])){
-			//Trim all field values
-			foreach($recMap as $k => $v){
-				$recMap[$k] = trim($v);
-			}
+
+			$recMap = OccurrenceUtilities::occurrenceArrayCleaning($recMap);
 			//Remove institution and collection codes when they match what is in omcollections
 			if(array_key_exists('institutioncode',$recMap) && $recMap['institutioncode'] == $this->collMetadataArr["institutioncode"]){
 				unset($recMap['institutioncode']);
 			}
 			if(array_key_exists('collectioncode',$recMap) && $recMap['collectioncode'] == $this->collMetadataArr["collectioncode"]){
 				unset($recMap['collectioncode']);
-			}
-			//Date cleaning
-			if(array_key_exists('eventdate',$recMap) && $recMap['eventdate']){
-				if(is_numeric($recMap['eventdate'])){
-					if($recMap['eventdate'] > 2100 && $recMap['eventdate'] < 45000){
-						//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
-						$recMap['eventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['eventdate']-1,1900));
-					}
-					elseif($recMap['eventdate'] > 2200000 && $recMap['eventdate'] < 2500000){
-						//Date is in the Gregorian format
-						$dArr = explode('/',jdtogregorian($recMap['eventdate']));
-						$recMap['eventdate'] = $dArr[2].'-'.$dArr[0].'-'.$dArr[1];
-					}
-					elseif($recMap['eventdate'] > 19000000){
-						//Format: 20120101 = 2012-01-01 
-						$recMap['eventdate'] = substr($recMap['eventdate'],0,4).'-'.substr($recMap['eventdate'],4,2).'-'.substr($recMap['eventdate'],6,2);
-					}
-				}
-				else{
-					//Make sure event date is a valid format or drop into verbatimEventDate
-					$dateStr = OccurrenceUtilities::formatDate($recMap['eventdate']);
-					if($dateStr){
-						//if(strpos('-00',$dateStr)) $this->outputMsg($recMap['eventdate'].' => '.$dateStr."<br/>"); 
-						if($recMap['eventdate'] != $dateStr && (!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate'])){
-							$recMap['verbatimeventdate'] = $recMap['eventdate'];
-						}
-						$recMap['eventdate'] = $dateStr;
-					}
-					else{
-						if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-							$recMap['verbatimeventdate'] = $recMap['eventdate'];
-						}
-						unset($recMap['eventdate']);
-					}
-				}
-			}
-			if(array_key_exists('latestdatecollected',$recMap) && $recMap['latestdatecollected'] && is_numeric($recMap['latestdatecollected'])){
-				if($recMap['latestdatecollected'] > 2100 && $recMap['latestdatecollected'] < 45000){
-					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
-					$recMap['latestdatecollected'] = date('Y-m-d', mktime(0,0,0,1,$recMap['latestdatecollected']-1,1900));
-				}
-				elseif($recMap['latestdatecollected'] > 2200000 && $recMap['latestdatecollected'] < 2500000){
-					$dArr = explode('/',jdtogregorian($recMap['latestdatecollected']));
-					$recMap['latestdatecollected'] = $dArr[2].'-'.$dArr[0].'-'.$dArr[1];
-				}
-				elseif($recMap['latestdatecollected'] > 19000000){
-					$recMap['latestdatecollected'] = substr($recMap['latestdatecollected'],0,4).'-'.substr($recMap['latestdatecollected'],4,2).'-'.substr($recMap['latestdatecollected'],6,2);
-				}
-			}
-			if(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate'] && is_numeric($recMap['verbatimeventdate']) 
-				&& $recMap['verbatimeventdate'] > 2100 && $recMap['verbatimeventdate'] < 45000){
-					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
-					$recMap['verbatimeventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['verbatimeventdate']-1,1900));
-			}
-			if(array_key_exists('dateidentified',$recMap) && $recMap['dateidentified'] && is_numeric($recMap['dateidentified']) 
-				&& $recMap['dateidentified'] > 2100 && $recMap['dateidentified'] < 45000){
-					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
-					$recMap['dateidentified'] = date('Y-m-d', mktime(0,0,0,1,$recMap['dateidentified']-1,1900));
-			}
-			//If month, day, or year are text, avoid SQL error by converting to numeric value 
-			if(array_key_exists('year',$recMap) || array_key_exists('month',$recMap) || array_key_exists('day',$recMap)){
-				$y = (array_key_exists('year',$recMap)?$recMap['year']:'00');
-				$m = (array_key_exists('month',$recMap)?$recMap['month']:'00');
-				$d = (array_key_exists('day',$recMap)?$recMap['day']:'00');
-				$vDate = trim($y.'-'.$m.'-'.$d,'- ');
-				if(isset($recMap['day']) && !is_numeric($recMap['day'])){
-					if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-						$recMap['verbatimeventdate'] = $vDate;
-					}
-					unset($recMap['day']);
-					$d = '00';
-				}
-				if(isset($recMap['year']) && !is_numeric($recMap['year'])){
-					if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-						$recMap['verbatimeventdate'] = $vDate;
-					}
-					unset($recMap['year']);
-				}
-				if(isset($recMap['month']) && $recMap['month'] && !is_numeric($recMap['month'])){
-					if(strlen($recMap['month']) > 2){
-						$monAbbr = strtolower(substr($recMap['month'],0,3));
-						if(array_key_exists($monAbbr,OccurrenceUtilities::$monthNames)){
-							$recMap['month'] = OccurrenceUtilities::$monthNames[$monAbbr];
-							$recMap['eventdate'] = OccurrenceUtilities::formatDate(trim($y.'-'.$recMap['month'].'-'.($d?$d:'00'),'- '));
-						}
-						else{
-							if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-								$recMap['verbatimeventdate'] = $vDate;
-							}
-							unset($recMap['month']);
-						}
-					}
-					else{
-						if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']) {
-							$recMap['verbatimeventdate'] = $vDate;
-						}
-						unset($recMap['month']);
-					}
-				}
-				if($vDate && (!array_key_exists('eventdate',$recMap) || !$recMap['eventdate'])){
-					$recMap['eventdate'] = OccurrenceUtilities::formatDate($vDate);
-				}
-			}
-			//eventDate NULL && verbatimEventDate NOT NULL && year NOT NULL 
-			if((!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']) && array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate'] && (!array_key_exists('year',$recMap) || !$recMap['year'])){
-				$dateStr = OccurrenceUtilities::formatDate($recMap['verbatimeventdate']);
-				if($dateStr) $recMap['eventdate'] = $dateStr;
-			}
-			if((isset($recMap['recordnumberprefix']) && $recMap['recordnumberprefix']) || (isset($recMap['recordnumbersuffix']) && $recMap['recordnumbersuffix'])){
-				$recNumber = $recMap['recordnumber'];
-				if(isset($recMap['recordnumberprefix']) && $recMap['recordnumberprefix']) $recNumber = $recMap['recordnumberprefix'].'-'.$recNumber;
-				if(isset($recMap['recordnumbersuffix']) && $recMap['recordnumbersuffix']){
-					if(is_numeric($recMap['recordnumbersuffix']) && $recMap['recordnumber']) $recNumber .= '-';
-					$recNumber .= $recMap['recordnumbersuffix'];
-				}
-				$recMap['recordnumber'] = $recNumber;
-			}
-			//If lat or long are not numeric, try to make them so
-			if(array_key_exists('decimallatitude',$recMap) || array_key_exists('decimallongitude',$recMap)){
-				$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
-				$lngValue = (array_key_exists('decimallongitude',$recMap)?$recMap['decimallongitude']:'');
-				if(($latValue && !is_numeric($latValue)) || ($lngValue && !is_numeric($lngValue))){
-					$llArr = OccurrenceUtilities::parseVerbatimCoordinates(trim($latValue.' '.$lngValue),'LL');
-					if(array_key_exists('lat',$llArr) && array_key_exists('lng',$llArr)){
-						$recMap['decimallatitude'] = $llArr['lat'];
-						$recMap['decimallongitude'] = $llArr['lng'];
-					}
-					else{
-						unset($recMap['decimallatitude']);
-						unset($recMap['decimallongitude']);
-					}
-					$vcStr = '';
-					if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates']){
-						$vcStr .= $recMap['verbatimcoordinates'].'; ';
-					}
-					$vcStr .= $latValue.' '.$lngValue;
-					if(trim($vcStr)) $recMap['verbatimcoordinates'] = trim($vcStr);
-				}
-			}
-			//Transfer verbatim Lat/Long to verbatim coords
-			if(isset($recMap['verbatimlatitude']) || isset($recMap['verbatimlongitude'])){
-				if(isset($recMap['verbatimlatitude']) && isset($recMap['verbatimlongitude'])){
-					if(!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude'])){
-						if((is_numeric($recMap['verbatimlatitude']) && is_numeric($recMap['verbatimlongitude']))){
-							if($recMap['verbatimlatitude'] > -90 && $recMap['verbatimlatitude'] < 90 
-								&& $recMap['verbatimlongitude'] > -180 && $recMap['verbatimlongitude'] < 180){
-									$recMap['decimallatitude'] = $recMap['verbatimlatitude'];
-								$recMap['decimallongitude'] = $recMap['verbatimlongitude'];
-							}
-						}
-						else{
-							//Attempt to extract decimal lat/long
-							$coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'],'LL');
-							if($coordArr){
-								if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
-								if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
-							}
-						}
-					}
-				}
-				//Place into verbatim coord field
-				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
-				if($vCoord) $vCoord .= '; ';
-				if(stripos($vCoord,$recMap['verbatimlatitude']) === false && stripos($vCoord,$recMap['verbatimlongitude']) === false){
-					$recMap['verbatimcoordinates'] = $vCoord.$recMap['verbatimlatitude'].', '.$recMap['verbatimlongitude'];
-				}
-			}
-			//Transfer DMS to verbatim coords
-			if(isset($recMap['latdeg']) && $recMap['latdeg'] && isset($recMap['lngdeg']) && $recMap['lngdeg']){
-				//Attempt to create decimal lat/long
-				if(is_numeric($recMap['latdeg']) && is_numeric($recMap['lngdeg']) && (!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude']))){
-					$latDec = $recMap['latdeg'];
-					if(isset($recMap['latmin']) && $recMap['latmin'] && is_numeric($recMap['latmin'])) $latDec += $recMap['latmin']/60;
-					if(isset($recMap['latsec']) && $recMap['latsec'] && is_numeric($recMap['latsec'])) $latDec += $recMap['latsec']/3600;
-					if(stripos($recMap['latns'],'s') === 0 && $latDec > 0) $latDec *= -1;
-					$lngDec = $recMap['lngdeg'];
-					if(isset($recMap['lngmin']) && $recMap['lngmin'] && is_numeric($recMap['lngmin'])) $lngDec += $recMap['lngmin']/60;
-					if(isset($recMap['lngsec']) && $recMap['lngsec'] && is_numeric($recMap['lngsec'])) $lngDec += $recMap['lngsec']/3600;
-					if(stripos($recMap['lngew'],'e') === 0 ) $lngDec *= -1;
-					$recMap['decimallatitude'] = round($latDec,6);
-					$recMap['decimallongitude'] = round($lngDec,6);
-				}
-				//Place into verbatim coord field
-				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
-				if($vCoord) $vCoord .= '; ';
-				$vCoord .= $recMap['latdeg'].'° ';
-				if(isset($recMap['latmin']) && $recMap['latmin']) $vCoord .= $recMap['latmin'].'m '; 
-				if(isset($recMap['latsec']) && $recMap['latsec']) $vCoord .= $recMap['latsec'].'s ';
-				if(isset($recMap['latns'])) $vCoord .= $recMap['latns'].'; ';
-				$vCoord .= $recMap['lngdeg'].'° ';
-				if(isset($recMap['lngmin']) && $recMap['lngmin']) $vCoord .= $recMap['lngmin'].'m '; 
-				if(isset($recMap['lngsec']) && $recMap['lngsec']) $vCoord .= $recMap['lngsec'].'s ';
-				if(isset($recMap['lngew'])) $vCoord .= $recMap['lngew'];
-				$recMap['verbatimcoordinates'] = $vCoord;
-			}
-			/*
-			if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && (!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude']))){
-				$coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimcoordinates']);
-				if($coordArr){
-					if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
-					if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
-				}
-			}
-			*/
-			//Convert UTM to Lat/Long
-			if((array_key_exists('utmnorthing',$recMap) && $recMap['utmnorthing']) || (array_key_exists('utmeasting',$recMap) && $recMap['utmeasting'])){
-				$no = (array_key_exists('utmnorthing',$recMap)?$recMap['utmnorthing']:'');
-				$ea = (array_key_exists('utmeasting',$recMap)?$recMap['utmeasting']:'');
-				$zo = (array_key_exists('utmzoning',$recMap)?$recMap['utmzoning']:'');
-				$da = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
-				if(!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude'])){
-					if($no && $ea && $zo){
-						//Northing, easting, and zoning all had values
-						$llArr = OccurrenceUtilities::convertUtmToLL($ea,$no,$zo,$da);
-						if(isset($llArr['lat'])) $recMap['decimallatitude'] = $llArr['lat'];
-						if(isset($llArr['lng'])) $recMap['decimallongitude'] = $llArr['lng'];
-					}
-					else{
-						//UTM was a single field which was placed in UTM northing field within uploadspectemp table
-						$coordArr = OccurrenceUtilities::parseVerbatimCoordinates(trim($zo.' '.$ea.' '.$no),'UTM');
-						if($coordArr){
-							if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
-							if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
-						}
-					}
-				}
-				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
-				if(!($no && strpos($vCoord,$no))) $recMap['verbatimcoordinates'] = ($vCoord?$vCoord.'; ':'').$zo.' '.$ea.'E '.$no.'N';
-			}
-			//Transfer TRS to verbatim coords
-			if(isset($recMap['trstownship']) && $recMap['trstownship'] && isset($recMap['trsrange']) && $recMap['trsrange']){
-				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
-				if($vCoord) $vCoord .= '; ';
-				$vCoord .= (stripos($recMap['trstownship'],'t') === false?'T':'').$recMap['trstownship'].' ';
-				$vCoord .= (stripos($recMap['trsrange'],'r') === false?'R':'').$recMap['trsrange'].' ';
-				if(isset($recMap['trssection'])) $vCoord .= (stripos($recMap['trssection'],'s') === false?'sec':'').$recMap['trssection'].' ';
-				if(isset($recMap['trssectiondetails'])) $vCoord .= $recMap['trssectiondetails'];
-				$recMap['verbatimcoordinates'] = trim($vCoord);
-			}
-			
-			//Check to see if evelation are valid numeric values
-			if((isset($recMap['minimumelevationinmeters']) && $recMap['minimumelevationinmeters'] && !is_numeric($recMap['minimumelevationinmeters'])) 
-				|| (isset($recMap['maximumelevationinmeters']) && $recMap['maximumelevationinmeters'] && !is_numeric($recMap['maximumelevationinmeters']))){
-				$vStr = (isset($recMap['verbatimelevation'])?$recMap['verbatimelevation']:'');
-				if(isset($recMap['minimumelevationinmeters']) && $recMap['minimumelevationinmeters']) $vStr .= ($vStr?'; ':'').$recMap['minimumelevationinmeters'];
-				if(isset($recMap['maximumelevationinmeters']) && $recMap['maximumelevationinmeters']) $vStr .= '-'.$recMap['maximumelevationinmeters'];
-				$recMap['verbatimelevation'] = $vStr;
-				$recMap['minimumelevationinmeters'] = '';
-				$recMap['maximumelevationinmeters'] = '';
-			}
-			//Verbatim elevation
-			if(array_key_exists('verbatimelevation',$recMap) && $recMap['verbatimelevation'] && (!array_key_exists('minimumelevationinmeters',$recMap) || !$recMap['minimumelevationinmeters'])){
-				$eArr = OccurrenceUtilities::parseVerbatimElevation($recMap['verbatimelevation']);
-				if($eArr){
-					if(array_key_exists('minelev',$eArr)){
-						$recMap['minimumelevationinmeters'] = $eArr['minelev'];
-						if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
-					}
-				}
-			}
-			//Deal with elevation when in two fields (number and units)
-			if(isset($recMap['elevationnumber']) && $recMap['elevationnumber']){
-				$elevStr = $recMap['elevationnumber'].$recMap['elevationunits'];
-				//Try to extract meters
-				$eArr = OccurrenceUtilities::parseVerbatimElevation($elevStr);
-				if($eArr){
-					if(array_key_exists('minelev',$eArr)){
-						$recMap['minimumelevationinmeters'] = $eArr['minelev'];
-						if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
-					}
-				}
-				if(!$eArr || !stripos($elevStr,'m')){
-					$vElev = (isset($recMap['verbatimelevation'])?$recMap['verbatimelevation']:'');
-					if($vElev) $vElev .= '; ';
-					$recMap['verbatimelevation'] = $vElev.$elevStr;
-				}
-			}
-			//Concatenate collectorfamilyname and collectorinitials into recordedby
-			if(isset($recMap['collectorfamilyname']) && $recMap['collectorfamilyname'] && (!isset($recMap['recordedby']) || !$recMap['recordedby'])){
-				$recordedBy = $recMap['collectorfamilyname'];
-				if(isset($recMap['collectorinitials']) && $recMap['collectorinitials']) $recordedBy .= ', '.$recMap['collectorinitials'];
-				$recMap['recordedby'] = $recordedBy;
-				//Need to add code that maps to collector table
-				
-			}
-
-			if(array_key_exists("specificepithet",$recMap)){
-				if($recMap["specificepithet"] == 'sp.' || $recMap["specificepithet"] == 'sp') $recMap["specificepithet"] = '';
-			}
-			if(array_key_exists("taxonrank",$recMap)){
-				$tr = strtolower($recMap["taxonrank"]);
-				if($tr == 'species' || !$recMap["specificepithet"]) $recMap["taxonrank"] = '';
-				if($tr == 'subspecies') $recMap["taxonrank"] = 'subsp.';
-				if($tr == 'variety') $recMap["taxonrank"] = 'var.';
-				if($tr == 'forma') $recMap["taxonrank"] = 'f.';
-			}
-		
-			//Populate sciname if null
-			if(array_key_exists('sciname',$recMap) && $recMap['sciname']){
-				if(substr($recMap['sciname'],-4) == ' sp.') $recMap['sciname'] = substr($recMap['sciname'],0,-4);
-				if(substr($recMap['sciname'],-3) == ' sp') $recMap['sciname'] = substr($recMap['sciname'],0,-3);
-				
-				$recMap['sciname'] = str_replace(array(' ssp. ',' ssp '),' subsp. ',$recMap['sciname']);
-				$recMap['sciname'] = str_replace(' var ',' var. ',$recMap['sciname']);
-				
-				$pattern = '/\b(cf\.|cf|aff\.|aff)\s{1}/';
-				if(preg_match($pattern,$recMap['sciname'],$m)){
-					$recMap['identificationqualifier'] = $m[1];
-					$recMap['sciname'] = preg_replace($pattern,'',$recMap['sciname']);
-				} 
-			}
-			else{
-				if(array_key_exists("genus",$recMap)){
-					//Build sciname from individual units supplied by source
-					$sciName = $recMap["genus"];
-					if(array_key_exists("specificepithet",$recMap)) $sciName .= " ".$recMap["specificepithet"];
-					if(array_key_exists("taxonrank",$recMap)) $sciName .= " ".$recMap["taxonrank"];
-					if(array_key_exists("infraspecificepithet",$recMap)) $sciName .= " ".$recMap["infraspecificepithet"];
-					$recMap['sciname'] = trim($sciName);
-				}
-				elseif(array_key_exists('scientificname',$recMap)){
-					//Clean and parse scientific name
-					$parsedArr = OccurrenceUtilities::parseScientificName($recMap['scientificname']);
-					$scinameStr = '';
-					if(array_key_exists('unitname1',$parsedArr)){
-						$scinameStr = $parsedArr['unitname1'];
-						if(!array_key_exists('genus',$recMap) || $recMap['genus']){
-							$recMap['genus'] = $parsedArr['unitname1'];
-						}
-					} 
-					if(array_key_exists('unitname2',$parsedArr)){
-						$scinameStr .= ' '.$parsedArr['unitname2'];
-						if(!array_key_exists('specificepithet',$recMap) || !$recMap['specificepithet']){
-							$recMap['specificepithet'] = $parsedArr['unitname2'];
-						}
-					} 
-					if(array_key_exists('unitind3',$parsedArr)){
-						$scinameStr .= ' '.$parsedArr['unitind3'];
-						if((!array_key_exists('taxonrank',$recMap) || !$recMap['taxonrank'])){
-							$recMap['taxonrank'] = $parsedArr['unitind3'];
-						}
-					}
-					if(array_key_exists('unitname3',$parsedArr)){
-						$scinameStr .= ' '.$parsedArr['unitname3'];
-						if(!array_key_exists('infraspecificepithet',$recMap) || !$recMap['infraspecificepithet']){
-							$recMap['infraspecificepithet'] = $parsedArr['unitname3'];
-						}
-					}
-					if(array_key_exists('author',$parsedArr)){
-						if(!array_key_exists('scientificnameauthorship',$recMap) || !$recMap['scientificnameauthorship']){
-							$recMap['scientificnameauthorship'] = $parsedArr['author'];
-						}
-					}
-					$recMap['sciname'] = trim($scinameStr);
-				}
 			}
 
 			//If a DiGIR load, set dbpk value

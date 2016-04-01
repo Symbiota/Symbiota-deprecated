@@ -1,6 +1,6 @@
 <?php
-require_once($serverRoot.'/config/dbconnection.php');
-require_once($serverRoot.'/classes/OccurrenceUtilities.php');
+require_once($SERVER_ROOT.'/config/dbconnection.php');
+require_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
 
 class ImageProcessor {
 
@@ -346,20 +346,20 @@ class ImageProcessor {
 
 	private function cleanHouse($collList){
 		$this->logOrEcho('Updating collection statistics...',1);
-		$occurUtil = new OccurrenceUtilities();
+		$occurMain = new OccurrenceMaintenance();
 
 		$this->logOrEcho('General cleaning...',2);
 		$collString = implode(',',$collList);
-		if(!$occurUtil->generalOccurrenceCleaning($collString)){
-			$errorArr = $occurUtil->getErrorArr();
+		if(!$occurMain->generalOccurrenceCleaning($collString)){
+			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){
 				$this->logOrEcho($errorStr,1);
 			}
 		}
 		
 		$this->logOrEcho('Protecting sensitive species...',2);
-		if(!$occurUtil->protectRareSpecies()){
-			$errorArr = $occurUtil->getErrorArr();
+		if(!$occurMain->protectRareSpecies()){
+			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){
 				$this->logOrEcho($errorStr,1);
 			}
@@ -368,8 +368,8 @@ class ImageProcessor {
 		if($collList){
 			$this->logOrEcho('Updating collection statistics...',2);
 			foreach($collList as $collid){
-				if(!$occurUtil->updateCollectionStats($collid)){
-					$errorArr = $occurUtil->getErrorArr();
+				if(!$occurMain->updateCollectionStats($collid)){
+					$errorArr = $occurMain->getErrorArr();
 					foreach($errorArr as $errorStr){
 						$this->logOrEcho($errorStr,1);
 					}
