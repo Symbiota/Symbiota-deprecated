@@ -7,11 +7,11 @@ class OccurrenceAttributes extends Manager {
 	private $tidFilter;
 
 	public function __construct($type = 'write'){
-		$this->conn = MySQLiConnectionFactory::getCon($type);
+		parent::__construct(null, $type);
 	}
 
 	public function __destruct(){
-		if($this->conn !== false) $this->conn->close();
+		parent::__destruct();
 	}
 
 	//Edit functions

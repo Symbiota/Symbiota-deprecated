@@ -175,7 +175,7 @@ $sharedMapManager->setTaxaArr($tArr);
 						var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
 						<?php
 					}
-					echo 'var m'.$markerCnt.' = getMarker('.$spArr['latLngStr'].',"'.$displayStr.'",markerIcon,"'.$type.'","'.($spArr['tidinterpreted']?$spArr['tidinterpreted']:0).'",'.$occId.','.($clid?$clid:'0').');',"\n";
+					echo 'var m'.$markerCnt.' = getMarker('.$spArr['latLngStr'].',"'.addslashes($displayStr).'",markerIcon,"'.$type.'","'.($spArr['tidinterpreted']?$spArr['tidinterpreted']:0).'",'.$occId.','.($clid?$clid:'0').');',"\n";
 					echo 'oms.addMarker(m'.$markerCnt.');',"\n";
 					$markerCnt++;
 				}
