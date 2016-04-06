@@ -113,7 +113,11 @@ if($tid){
 		elseif($category == "imageadd"){
 			?>
 			<div style='clear:both;'>
+#ifndef NEW
 				<form enctype='multipart/form-data' action='tpeditor.php' id='imageaddform' method='post' target='_self' onsubmit='return submitAddImageForm(this);'>
+#else /* NEW */
+				<form enctype='multipart/form-data' action='tpeditor.php' id='imageaddform' method='post' target='_self' onsubmit='return submitAddForm(this);'>
+#endif /* NEW */
 					<fieldset style='margin:15px;padding:15px;width:90%;'>
 				    	<legend><b>Add a New Image</b></legend>
 						<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
@@ -124,7 +128,11 @@ if($tid){
 						    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
 								<input type='hidden' name='MAX_FILE_SIZE' value='3000000' />
 								<div>
+#ifndef NEW
 									<input name='imgfile' id='imgfile' type='file' size='70'/>
+#else /* NEW */
+									<input name='imgfile' type='file' size='70'/>
+#endif /* NEW */
 								</div>
 								<div style="margin-left:10px;">
 									<input type="checkbox" name="createlargeimg" value="1" /> Keep a large version of image, when applicable
@@ -200,6 +208,14 @@ if($tid){
 						<div style='margin-top:2px;'>
 							<b>Sort sequence:</b> 
 							<input name='sortsequence' type='text' value='' size='5' maxlength='5'>
+#ifdef NEW
+						</div>
+						<div style='margin-top:2px;'>
+							<b>Image is of:</b>  <!-- Added VMS 3/30/2016 -->
+							<input type="checkbox" name="adultFlag" value="1" /> Adult
+							<input type="checkbox" name="immatureFlag" value="1" /> Immature
+							<input type="checkbox" name="diagnosticFlag" value="1" /> Diagnostic Character
+#endif /* NEW */
 						</div>
 						<input name="tid" type="hidden" value="<?php echo $imageEditor->getTid();?>">
 						<input type="hidden" name="tabindex" value="1" />

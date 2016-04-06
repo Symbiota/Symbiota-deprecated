@@ -38,6 +38,11 @@ class ImageShared{
 	private $tid;
 	private $notes;
 	private $sortSeq;
+#ifdef NEW
+	private $adultFlag; //added VMS 3/30/2016 Image Flags
+	private $immatureFlag; //added VMS 3/30/2016 Image Flags
+	private $diagnosticFlag; //added 3/30/2016 VMS
+#endif /* NEW */
 
     // 0.9.1.14 additions
     private $sourceIdentifier;
@@ -327,6 +332,9 @@ class ImageShared{
 	}
 	
 	public function processImage($tid=0){
+#ifdef NEW
+		global $paramsArr;
+#endif /* NEW */
 
 		if(!$this->imgName){
 			$this->errArr[] = 'FATAL ERROR: Image file name null in processImage fucntion';
@@ -499,6 +507,9 @@ class ImageShared{
 	}
 	
 	public function databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid){
+#ifdef NEW
+		global $paramsArr;
+#endif /* NEW */
 		$status = true;
 		if($imgWebUrl){
 			$urlBase = $this->getUrlBase();
@@ -522,10 +533,18 @@ class ImageShared{
 				$rs1->free();
 			}
 			
+#ifndef NEW
 			//Save currently loaded record
+#else /* NEW */
+			//Save currently loaded record (Change VMS 3/30/2016)
+#endif /* NEW */
 			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
 				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, sourceIdentifier, ' .
+#ifndef NEW
                 ' rights, accessrights) '.
+#else /* NEW */
+                ' rights, accessrights, adultFlag, immatureFlag, diagnosticFlag) '.
+#endif /* NEW */
 				'VALUES ('.($tid?$tid:'NULL').',"'.$imgWebUrl.'",'.
 				($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
 				($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
@@ -538,11 +557,22 @@ class ImageShared{
 				($this->locality?'"'.$this->locality.'"':'NULL').','.
 				($this->occid?$this->occid:'NULL').','.
 				($this->notes?'"'.$this->notes.'"':'NULL').',"'.
+#ifndef NEW
 				$this->cleanInStr($GLOBALS['USERNAME']).'",'.
+#else /* NEW */
+				$this->cleanInStr($paramsArr['un']).'",'.
+#endif /* NEW */
 				($this->sortSeq?$this->sortSeq:'50').','.
 				($this->sourceIdentifier?'"'.$this->sourceIdentifier.'"':'NULL').','.
 				($this->rights?'"'.$this->rights.'"':'NULL').','.
+#ifndef NEW
 				($this->accessrights?'"'.$this->accessrights.'"':'NULL').')';
+#else /* NEW */
+				($this->accessrights?'"'.$this->accessrights.'"':'NULL').','.
+				($this->adultFlag?'"'.$this->adultFlag.'"':'NULL').','. //added 3/30/2016 VMS
+				($this->immatureFlag?'"'.$this->immatureFlag.'"':'NULL').','. //added 3/30/2016 VMS
+				($this->diagnosticFlag?'"'.$this->diagnosticFlag.'"':'NULL').')'; //added 3/30/2016 VMS
+#endif /* NEW */
 			//echo $sql; exit;
 			if($this->conn->query($sql)){
 				//Create and insert Symbiota GUID for image(UUID)
@@ -935,6 +965,20 @@ class ImageShared{
 		}
 	}
 	
+#ifdef NEW
+	public function setAdultFlag($v){ //added VMS 3/30/2016
+			$this->adultFlag = $v;
+	}
+	
+	public function setImmatureFlag($v){ //added VMS 3/30/2016
+			$this->immatureFlag = $v;
+	}
+	
+	public function setDiagnosticFlag($v){ //added VMS 3/30/2016
+			$this->diagnosticFlag = $v;
+	}
+	
+#endif /* NEW */
 	public function getErrArr(){
 		return $this->errArr;
 	}
@@ -1030,11 +1074,19 @@ class ImageShared{
 			if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
 				$x = array_change_key_case(get_headers($this->sourcePath, 1),CASE_LOWER); 
 				if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) { 
+#ifndef NEW
 					if(isset($x['content-length'][1])) $fileSize = $x['content-length'][1];
 					elseif(isset($x['content-length'])) $fileSize = $x['content-length'];
+#else /* NEW */
+					$fileSize = $x['content-length'][1]; 
+#endif /* NEW */
 				}
 	 			else { 
+#ifndef NEW
 	 				if(isset($x['content-length'])) $fileSize = $x['content-length']; 
+#else /* NEW */
+	 				$fileSize = $x['content-length']; 
+#endif /* NEW */
 	 			}
 	 			/*
 				$ch = curl_init($this->sourcePath);
@@ -1081,7 +1133,11 @@ class ImageShared{
 		if(file_exists($url) || ($localUrl && file_exists($localUrl))){
 			return true;
 	    }
+#ifndef NEW
 return true;
+#else /* NEW */
+
+#endif /* NEW */
 	    //Second check
 	    if(!$exists){
 		    // Version 4.x supported

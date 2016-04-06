@@ -1,6 +1,10 @@
 <?php
 include_once('../config/symbini.php');
+#ifndef NEW
 include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
+#else /* NEW */
+include_once $SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php';
+#endif /* NEW */
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
@@ -10,10 +14,18 @@ $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:1
 $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
+#ifdef NEW
+
+#endif /* NEW */
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
 $collManager = new OccurrenceListManager();
+#ifdef NEW
+$collManager->imageFlagIsActive = $IMAGE_FLAG_IS_ACTIVE;
+#endif /* NEW */
 $stArr = array();
+#ifndef NEW
 $specOccJson = '';
+#endif /* ! NEW */
 
 if($stArrCollJson && $stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
@@ -38,6 +50,7 @@ else{
 $stArrJson = json_encode($stArr);
 $collManager->setSearchTermsArr($stArr);
 $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Array(IID,Array(fieldName,value))
+#ifndef NEW
 if($specimenArray){
 	$specOccArr = array();
 	foreach($specimenArray as $collId => $specData){
@@ -47,6 +60,7 @@ if($specimenArray){
 	}
 	$specOccJson = json_encode($specOccArr);
 }
+#endif /* ! NEW */
 
 $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname', 
 	'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
@@ -60,7 +74,11 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources', 
 	'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
 	'verbatimelevation','language',
+#ifndef NEW
 	'labelproject','basisofrecord');
+#else /* NEW */
+	'labelproject','basisofrecord', 'taxonImages', 'adultFlag', 'immatureFlag', 'diagnosticFlag'); //changed VMS 3/30/2016
+#endif /* NEW */
 ?>
 
 <html>
@@ -116,6 +134,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			});
 		}
 		
+#ifndef NEW
 		<?php
 		if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){
 			?>
@@ -137,6 +156,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 		}
 		?>
 		
+#endif /* ! NEW */
 		function toggle(target){
 			var objDiv = document.getElementById(target);
 			if(objDiv){
@@ -164,7 +184,11 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 		}
 		
 		function openMapPU(){
+#ifndef NEW
 			window.open('../map/googlemap.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&maptype=occquery','gmap','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=1150,height=900,left=20,top=20');
+#else /* NEW */
+			window.open('../map/googlemap.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&maptype=occquery','gmap','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=950,height=700,left=20,top=20');
+#endif /* NEW */
 		}
 
 		function openIndPU(occId,clid){
@@ -176,7 +200,11 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				wWidth = document.body.offsetWidth*0.9;
 			}
 			if(wWidth > 1000) wWidth = 1000;
+#ifndef NEW
 			newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=700,left=20,top=20');
+#else /* NEW */
+			newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+#endif /* NEW */
 			if (newWindow.opener == null) newWindow.opener = self;
 			return false;
 		}
@@ -224,12 +252,17 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			</li>
 		</ul>
 		<div id="speclist">
+#ifndef NEW
 			<div style="float:right;">
 				<div class='button' style='margin:15px 15px 0px 0px;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>'>
+#else /* NEW */
+			<div class='button' style='margin:15px 15px 0px 0px;float:right;width:13px;height:13px;' title='Download Specimen Data'>
+#endif /* NEW */
 					<a href='download/index.php?usecookies=false&dltype=specimen&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>'>
 						<img src='../images/dl.png'/>
 					</a>
 				</div>
+#ifndef NEW
 				<?php
 				if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){
 					?>
@@ -240,6 +273,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				}
 				?>
 			</div>
+#endif /* ! NEW */
 			<div style='margin:10px;'>
 				<div><b><?php echo $LANG['DATASET']; ?>:</b> <?php echo $collManager->getDatasetSearchStr(); ?></div>
 				<?php 
@@ -250,6 +284,19 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					echo '<div><b>'.$LANG['SEARCH_CRITERIA'].':</b> '.$collManager->getLocalSearchStr().'</div>';
 				}
 				?>
+#ifdef NEW
+				<br>
+				<!-- Added by Vaughn M. Shirey (VMS), 3/31/2016 for image flag capabilities -->
+				<?php if($IMAGE_FLAG_IS_ACTIVE > 0){ // if image flags are set to be on (not zero)
+					echo '<b>Species Flag Key: </b><br><br>
+					<img src="general_flag.png"> Species Photos Available &nbsp
+					<img src="adult_flag.png"> Photos of Adult &nbsp
+					<img src="immature_flag.png"> Photos of Immature&nbsp
+					<img src="diagnostic_flag.png"> Photos of Diagnostic Character &nbsp <br/>
+					<img src="habitat_flag.png"> Photos of Habitat (coming soon for individual records)<br/>';
+				}
+				?>
+#endif /* NEW */
 			</div>
 			<?php 
 			$paginationStr = '<div><div style="clear:both;"><hr/></div><div style="float:left;margin:5px;">';
@@ -357,10 +404,40 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 								<div style="float:left;">
 									<a target='_blank' href='../taxa/index.php?taxon=<?php echo $fieldArr["sciname"];?>'>
 										<span style="font-style:italic;">
+#ifndef NEW
 											<?php echo $fieldArr["sciname"];?>
+#else /* NEW */
+											<?php echo $fieldArr["sciname"];
+											?>
+#endif /* NEW */
 										</span>
 									</a> 
+#ifndef NEW
 									<?php echo $fieldArr["author"]; ?>
+#else /* NEW */
+									<?php echo $fieldArr["author"]; 
+									
+									// ----------------------------------------------------------------------------------------------------------------------------------------
+                                    // Added by Vaughn M. Shirey (VMS), 3/31/2016 to handle request for displaying flags to notify users of species of which photos are
+                                    // available via occurence searches. 
+                                    // ----------------------------------------------------------------------------------------------------------------------------------------
+									
+									if($IMAGE_FLAG_IS_ACTIVE > 0){ // if image flags are set to be on (not zero)
+										//echo var_dump ($fieldArr);
+										if ($fieldArr["taxonImages"] > 0) { //if there are taxon images, show the image flag after taxon author, VMS 3/29/2016
+													echo '&nbsp &nbsp<img src="general_flag.png" style="border:none;"/>';
+													if((($fieldArr["adultFlag"])) > 0) echo '<img src="adult_flag.png" title="Images of Adults Available" style="border:none;"/>'; //if the adultflag is true, show flag
+													if((($fieldArr["immatureFlag"])) > 0) echo '<img src="immature_flag.png" title="Images of Immatures Available" style="border:none;"/>';// if the immatureflag is true, show flag
+													if((($fieldArr["diagnosticFlag"])) > 0) echo '<img src="diagnostic_flag.png" title="Images of Diagnostic Characters Available" style="border:none;"/>'; //if the diagnosticflag is true, show flag
+												}
+									}
+                                    // ----------------------------------------------------------------------------------------------------------------------------------------
+                                    // add conditionals for various types of insect photos (adult, immature, habitat), VMS 3/29/2016
+                                    // if ($fieldArr["habitatCheck"] > 0) { echo &nbsp <img src="habitat_flag.png"/>;} This applies more to occurences than species.
+                                    // ----------------------------------------------------------------------------------------------------------------------------------------
+									
+									?>
+#endif /* NEW */
 								</div>
 							</td>
 						</tr>

@@ -652,7 +652,11 @@ class OccurrenceManager{
 			$categoryArr = $occArr['cat'];
 			?>
 			<div style="float:right;margin-top:20px;">
+#ifndef NEW
 				<input type="submit" class="searchcollnextbtn" value="" title="" />
+#else /* NEW */
+				<input type="submit" class="searchcollnextbtn" value="Search Selected Collections" title="" />
+#endif /* NEW */
 			</div>
 			<table style="float:left;width:80%;">
 				<?php
@@ -787,7 +791,11 @@ class OccurrenceManager{
 				?>
 			</table>
 			<div style="float:right;margin-top:<?php echo count($collArr)*15; ?>px;">
+#ifndef NEW
 				<input type="submit" class="searchcollnextbtn" value="" title="" />
+#else /* NEW */
+				<input type="submit" class="searchcollnextbtn" value="Search Selected Collections" title="" />
+#endif /* NEW */
 			</div>
 			<?php
 		}
@@ -835,6 +843,12 @@ class OccurrenceManager{
 
 	public function getDatasetSearchStr(){
 		$retStr ="";
+#ifdef NEW
+		if(array_key_exists("clid",$this->searchTermsArr)){
+			$retStr = $this->getClidVoucherStr();
+		}
+		else{
+#endif /* NEW */
 		if(!array_key_exists('db',$this->searchTermsArr) || $this->searchTermsArr['db'] == 'all'){
 			$retStr = "All Collections";
 		}
@@ -867,6 +881,22 @@ class OccurrenceManager{
 			*/
 			$retStr = substr($retStr,2);
 		}
+#ifdef NEW
+		}
+		return $retStr;
+	}
+
+	private function getClidVoucherStr(){
+		$retStr = 'Various Voucher Projects';
+		/*
+		$sql = "SELECT projectname FROM omsurveys WHERE (surveyid IN(".str_replace(";",",",$this->searchTermsArr["surveyid"]).")) ";
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$returnStr .= " ;".$row->projectname;
+		}
+		return substr($returnStr,2);
+		*/
+#endif /* NEW */
 		return $retStr;
 	}
 
