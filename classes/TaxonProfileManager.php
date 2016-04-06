@@ -505,7 +505,6 @@ class TaxonProfileManager {
 				if($tlid != $r->tlid){
 					$tlid = $r->tlid;
 					$links[] = array('title'=>$r->title,'url'=>$r->url,'icon'=>$r->icon,'notes'=>$r->notes,'sortseq'=>$r->sortsequence);
-#ifndef NEW
 					usort($links, function($a, $b) {
 						if($a['sortseq'] == $b['sortseq']){
 							return (strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
@@ -514,7 +513,7 @@ class TaxonProfileManager {
 							return $a['sortseq'] - $b['sortseq'];
 						}
 					});
-#else /* NEW */
+
 					//usort($links, function($a, $b) {
 					//	if($a['sortseq'] == $b['sortseq']){
 					//		return (strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
@@ -523,7 +522,7 @@ class TaxonProfileManager {
 					//		return $a['sortseq'] - $b['sortseq'];
 					//	}
 					//});
-#endif /* NEW */
+
 				}
 			}
 			$result->free();

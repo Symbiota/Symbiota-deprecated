@@ -1269,7 +1269,6 @@ class OccurrenceEditorManager {
 			}
 		}
 
-#ifdef NEW
 		//Remap survey lists
 		$sql = 'UPDATE omsurveyoccurlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		if(!$this->conn->query($sql)){
@@ -1282,7 +1281,6 @@ class OccurrenceEditorManager {
 			}
 		}
 
-#endif /* NEW */
 		if(!$this->deleteOccurrence($sourceOccid)){
 			$status = false;
 		}
@@ -1849,7 +1847,7 @@ class OccurrenceEditorManager {
 		global $charset;
 		$retStr = $inStr;
 		//Get rid of curly quotes
-		$search = array("’", "‘", "`", "”", "“");
+		$search = array("ï¿½", "ï¿½", "`", "ï¿½", "ï¿½");
 		$replace = array("'", "'", "'", '"', '"');
 		$inStr= str_replace($search, $replace, $inStr);
 

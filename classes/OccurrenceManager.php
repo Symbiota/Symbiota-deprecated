@@ -843,12 +843,10 @@ class OccurrenceManager{
 
 	public function getDatasetSearchStr(){
 		$retStr ="";
-#ifdef NEW
 		if(array_key_exists("clid",$this->searchTermsArr)){
 			$retStr = $this->getClidVoucherStr();
 		}
 		else{
-#endif /* NEW */
 		if(!array_key_exists('db',$this->searchTermsArr) || $this->searchTermsArr['db'] == 'all'){
 			$retStr = "All Collections";
 		}
@@ -881,7 +879,6 @@ class OccurrenceManager{
 			*/
 			$retStr = substr($retStr,2);
 		}
-#ifdef NEW
 		}
 		return $retStr;
 	}
@@ -896,7 +893,6 @@ class OccurrenceManager{
 		}
 		return substr($returnStr,2);
 		*/
-#endif /* NEW */
 		return $retStr;
 	}
 

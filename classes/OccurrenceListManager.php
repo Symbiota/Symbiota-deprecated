@@ -1,22 +1,14 @@
 <?php
 include_once("OccurrenceManager.php");
-#ifdef NEW
 include_once('../config/symbini.php');
-//$imageFlagIsActive = $IMAGE_FLAG_IS_ACTIVE;
-#endif /* NEW */
 
 class OccurrenceListManager extends OccurrenceManager{
 
 	protected $recordCount = 0;
-#ifdef NEW
 	public $imageFlagIsActive = 0;
-#endif /* NEW */
 	
  	public function __construct(){
  		parent::__construct();
-#ifdef NEW
-		
-#endif /* NEW */
  	}
 
 	public function __destruct(){
@@ -25,14 +17,12 @@ class OccurrenceListManager extends OccurrenceManager{
 
 	public function getSpecimenMap($pageRequest,$cntPerPage){
 		global $userRights;
-#ifdef NEW
 		global $IMAGE_FLAG_IS_ACTIVE;
-#endif /* NEW */
+
 		$returnArr = Array();
 		$sqlWhere = $this->getSqlWhere();
 		if(!$this->recordCount || $this->reset){
 			$this->setRecordCnt($sqlWhere);
-#ifdef NEW
 		} // Changed VMS 3/30/2016
 		$sql = 'SELECT o.occid, o.CollID, o.institutioncode, o.collectioncode, IFNULL( o.CatalogNumber,  "" ) AS catalognumber, ' .
 		'o.family, o.sciname, o.tidinterpreted, IFNULL( o.scientificNameAuthorship,  "" ) AS author, IFNULL( o.recordedBy,  "" ) AS recordedby, ' .
@@ -48,10 +38,9 @@ class OccurrenceListManager extends OccurrenceManager{
 		$sql .= ' FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
 		
 		if($IMAGE_FLAG_IS_ACTIVE> 0){ 
-		 	$sql .= 'LEFT JOIN (SELECT tid, BIT_OR(IFNULL(adultFlag, 0)) AS adultFlag, BIT_OR(IFNULL(immatureFlag, 0)) AS immatureFlag, BIT_OR(IFNULL(diagnosticFlag, 0)) AS diagnosticFlag FROM images GROUP BY tid) i ON i.tid = o.tidinterpreted '; //left join for distinct tid from images for image flags, VMS 3/28/2016
-#endif /* NEW */
+		 	//left join for distinct tid from images for image flags, VMS 3/28/2016
+             $sql .= 'LEFT JOIN (SELECT tid, BIT_OR(IFNULL(adultFlag, 0)) AS adultFlag, BIT_OR(IFNULL(immatureFlag, 0)) AS immatureFlag, BIT_OR(IFNULL(diagnosticFlag, 0)) AS diagnosticFlag FROM images GROUP BY tid) i ON i.tid = o.tidinterpreted ';     
 		}
-#ifndef NEW
 		$sql = 'SELECT o.occid, o.CollID, o.institutioncode, o.collectioncode, IFNULL(o.CatalogNumber,"") AS catalognumber, o.family, o.sciname, o.tidinterpreted, '.
 			'IFNULL(o.scientificNameAuthorship,"") AS author, IFNULL(o.recordedBy,"") AS recordedby, IFNULL(o.recordNumber,"") AS recordnumber, '.
 			'CONCAT_WS(" to ",IFNULL(DATE_FORMAT(o.eventDate,"%d %M %Y"),""),DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),"%d %M %Y")) AS date, '.
@@ -60,9 +49,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, '.
 			'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
-#else /* NEW */
 		
-#endif /* NEW */
 		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 		$sql .= $sqlWhere;
 		$bottomLimit = ($pageRequest - 1)*$cntPerPage;
@@ -95,19 +82,15 @@ class OccurrenceListManager extends OccurrenceManager{
 			$returnArr[$collIdStr][$occId]["state"] = $row->state;
 			$returnArr[$collIdStr][$occId]["county"] = $row->county;
 			$returnArr[$collIdStr][$occId]["observeruid"] = $row->observeruid;
-#ifdef NEW
-			
-			//------------------------------------------------------------
+            
 			// Added by Vaughn M. Shirey (VMS) Image Flags
-			//------------------------------------------------------------
-			if($IMAGE_FLAG_IS_ACTIVE > 0){ //$IMAGE_FLAG_IS_ACTIVE > 0){
+			if($IMAGE_FLAG_IS_ACTIVE > 0){ 
 				$returnArr[$collIdStr][$occId]["taxonImages"] = $row->taxonImages; //throw image value to list.php for image flags, VMS 3/28/2016
 				$returnArr[$collIdStr][$occId]["adultFlag"] = $row->adultFlag;
 				$returnArr[$collIdStr][$occId]["immatureFlag"] = $row->immatureFlag;
 				$returnArr[$collIdStr][$occId]["diagnosticFlag"] = $row->diagnosticFlag; // image flags added VMS 3/30/2016
             }
 			
-#endif /* NEW */
 			$localitySecurity = $row->LocalitySecurity;
 			if(!$localitySecurity || $canReadRareSpp 
 				|| (array_key_exists("CollEditor", $userRights) && in_array($collIdStr,$userRights["CollEditor"]))
@@ -138,9 +121,6 @@ class OccurrenceListManager extends OccurrenceManager{
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
 			if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 			$sql .= $sqlWhere;
-#ifdef NEW
-			echo $imageFlagIsActive;
-#endif /* NEW */
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
