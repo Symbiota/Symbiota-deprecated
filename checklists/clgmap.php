@@ -1,19 +1,19 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $projValue = $_REQUEST['proj'];
-if(!$projValue && isset($defaultProjId)) $projValue = $defaultProjId;
-$clType = array_key_exists('cltype',$_REQUEST)?$_REQUEST['cltype']:'research';
 $target = array_key_exists('target',$_REQUEST)?$_REQUEST['target']:'checklists';
 
-$mapperObj = new ChecklistMapper($projValue);
+$clManager = new ChecklistManager();
+if(!$projValue && isset($DEFAULT_PROJ_ID)) $projValue = $DEFAULT_PROJ_ID;
+$clManager->setProj($projValue);
 
 ?>
 <html>
 	<head>
-		<title><?php echo $defaultTitle?> - Species Checklists</title>
+		<title><?php echo $DEFAULT_TITLE; ?> - Species Checklists</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false">
 		</script>
@@ -31,7 +31,7 @@ $mapperObj = new ChecklistMapper($projValue);
 				};
 
 				map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
-                <?php $mapperObj->echoChecklistPoints($clType); ?>
+                <?php $clManager->echoResearchPoints($target); ?>
                 resizeMap();
 	        }
 
@@ -83,101 +83,3 @@ $mapperObj = new ChecklistMapper($projValue);
     	<div id="map_canvas"></div>
 	</body>
 </html>
-
-<?php 
-
-class ChecklistMapper{
-    
-    private $projName;
-    private $pid;
-    private $conn; 
-
-    function __construct($projValue) {
-        $this->conn = MySQLiConnectionFactory::getCon("readonly");
-        $sql = "SELECT p.pid, p.projname FROM fmprojects p ";
-        if(is_numeric($projValue)){
-			$sql .= " WHERE p.pid = ".$this->conn->real_escape_string($projValue);
-        }
-        else{
-            $sql .= " WHERE p.projname = '".$projValue."'";
-        }
-        $result = $this->conn->query($sql);
-        if($row = $result->fetch_object()){
-            $this->pid = $row->pid;
-            $this->projName = $row->projname;
-        }
-    }
-
-     public function __destruct(){
-         if(!($this->conn === false)) $this->conn->close();
-     }
-
-    public function getProjName(){
-        return $this->projName;
-    }
-
-    public function getPid(){
-        return $this->pid;
-    }
-
-    public function echoChecklistPoints($type,$target="checklists"){
-        if($type == "research"){
-        	$this->echoResearchPoints($target);
-        }
-        elseif($type == "survey"){
-        	$this->echoSurveyPoints();
-        }
-    }
-
-    private function echoResearchPoints($target){
-    	$sql = "SELECT c.clid, c.name, c.longcentroid, c.latcentroid ".
-            "FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ". 
-            "INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-            "WHERE c.access = 'public' AND c.LongCentroid IS NOT NULL AND p.pid = ".$this->conn->real_escape_string($this->pid);
-        $result = $this->conn->query($sql);
-        while($row = $result->fetch_object()){
-            $idStr = $row->clid;
-            $nameStr = $row->name;
-            if(strpos($nameStr,'"') !== false) $nameStr = str_replace('"',"'",$nameStr);
-			echo "var point".$idStr." = new google.maps.LatLng(".$row->latcentroid.", ".$row->longcentroid.");\n";
-			echo "points.push( point".$idStr." );\n";
-			echo 'var marker'.$idStr.' = new google.maps.Marker({ position: point'.$idStr.', map: map, title: "'.$nameStr.'" });'."\n";
-			//Single click event
-			echo 'var infoWin'.$idStr.' = new google.maps.InfoWindow({ content: "<div style=\'width:300px;\'><b>'.$nameStr.'</b><br/>Double Click to open</div>" });'."\n";
-			echo "infoWins.push( infoWin".$idStr." );\n";
-			echo "google.maps.event.addListener(marker".$idStr.", 'click', function(){ closeAllInfoWins(); infoWin".$idStr.".open(map,marker".$idStr."); });\n";
-			//Double click event
-			if($target == 'keys'){
-				echo "var lStr".$idStr." = '../keys.php?cl=".$idStr."&proj=".$this->getPid()."';\n";
-			}
-			else{
-				echo "var lStr".$idStr." = 'checklist.php?cl=".$idStr."&proj=".$this->getPid()."';\n";
-			}
-			echo "google.maps.event.addListener(marker".$idStr.", 'dblclick', function(){ closeAllInfoWins(); marker".$idStr.".setAnimation(google.maps.Animation.BOUNCE); window.location.href = lStr".$idStr."; });\n";
-        }
-        $result->close();
-    }
-
-    private function echoSurveyPoints(){
-        $sql = "SELECT s.surveyid, s.projectname, s.longcentroid, s.latcentroid ".
-            "FROM omsurveys s INNER JOIN omsurveyprojlink spl ON s.surveyid = spl.surveyid ". 
-        	"WHERE s.longcentroid IS NOT NULL AND spl.pid = ".$this->conn->real_escape_string($this->pid);
-        $result = $this->conn->query($sql);
-        while($row = $result->fetch_object()){
-            $idStr = $row->surveyid;
-            $nameStr = $row->projectname;
-			echo "var point".$idStr." = new google.maps.LatLng(".$row->latcentroid.", ".$row->longcentroid.");\n";
-			echo "points.push( point".$idStr." );\n";
-			echo "var marker".$idStr." = new google.maps.Marker({ position: point".$idStr.", map: map, title: '".$nameStr."' });\n";
-			//Single click event
-			echo "var infoWin".$idStr." = new google.maps.InfoWindow({ content: '<div style=\"width:300px;\"><b>".$nameStr."</b><br/>Double Click to open</div>' });\n";
-			echo "infoWins.push( infoWin".$idStr." );\n";
-			echo "google.maps.event.addListener(marker".$idStr.", 'click', function(){ closeAllInfoWins(); infoWin".$idStr.".open(map,marker".$idStr."); });\n";
-			//Double click event
-			echo "var lStr".$idStr." = 'survey.php?surveyid=".$idStr."&proj=".$this->getPid()."';\n";
-			echo "google.maps.event.addListener(marker".$idStr.", 'dblclick', function(){ closeAllInfoWins(); marker".$idStr.".setAnimation(google.maps.Animation.BOUNCE); window.location.href = lStr".$idStr."; });\n";
-		}
-		$result->close();
-	}
-}
-?>

@@ -133,6 +133,37 @@ DROP TABLE IF EXISTS `omoccurassoctaxa`;
 ALTER TABLE `fmvouchers` 
   DROP COLUMN `Collector`;
 
+#Occurrence revisions
+CREATE TABLE `omoccurrevisions` (
+  `orid` INT NOT NULL AUTO_INCREMENT,
+  `occid` INT UNSIGNED NOT NULL,
+  `oldValues` TEXT NULL,
+  `newValues` TEXT NULL,
+  `externalSource` VARCHAR(45) NULL,
+  `externalEditor` VARCHAR(100) NULL,
+  `reviewStatus` INT NULL,
+  `appliedStatus` INT NULL,
+  `errorMessage` VARCHAR(500) NULL,
+  `uid` INT UNSIGNED NULL,
+  `externalTimestamp` DATETIME NULL,
+  `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`orid`),
+  INDEX `fk_omrevisions_occid_idx` (`occid` ASC),
+  INDEX `fk_omrevisions_uid_idx` (`uid` ASC),
+  INDEX `Index_omrevisions_applied` (`appliedStatus` ASC),
+  INDEX `Index_omrevisions_reviewed` (`reviewStatus` ASC),
+  INDEX `Index_omrevisions_source` (`externalSource` ASC),
+  INDEX `Index_omrevisions_editor` (`externalEditor` ASC),
+  CONSTRAINT `fk_omrevisions_occid`  FOREIGN KEY (`occid`)  REFERENCES `omoccurrences` (`occid`)   ON DELETE CASCADE   ON UPDATE CASCADE,
+  CONSTRAINT `fk_omrevisions_uid`    FOREIGN KEY (`uid`)    REFERENCES `users` (`uid`)   ON DELETE SET NULL   ON UPDATE CASCADE
+);
+
+
+#Remove deprecated survey tables
+DROP TABLE `omsurveyprojlink`;
+DROP TABLE `omsurveyoccurlink`;
+DROP TABLE `omsurveys`;
+
 
 #Copy over INSERT data priming statements that should have been included in original schema definition 
 INSERT IGNORE INTO `adminlanguages`(langid,langname,iso639_1) 
@@ -220,7 +251,7 @@ ALTER TABLE `taxavernaculars`
   ADD INDEX `FK_vern_lang_idx` (`langid` ASC);
 
 ALTER TABLE `taxavernaculars` 
-  ADD CONSTRAINT `FK_vern_lang`  FOREIGN KEY (`langid`)  REFERENCES `adminlanguages` (`langid`)  ON DELETE NO ACTION  ON UPDATE NO ACTION;
+  ADD CONSTRAINT `FK_vern_lang`  FOREIGN KEY (`langid`)  REFERENCES `adminlanguages` (`langid`)  ON DELETE SET NULL  ON UPDATE CASCADE;
 
 UPDATE taxavernaculars t INNER JOIN adminlanguages l ON t.language = l.langname
   SET t.langid = l.langid

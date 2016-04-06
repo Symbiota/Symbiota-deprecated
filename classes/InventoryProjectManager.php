@@ -7,7 +7,6 @@ class InventoryProjectManager {
 	private $pid;
 	private $googleUrl;
 	private $researchCoord = Array();
-	private $surveyCoord = Array();
 	private $isPublic = 1;
 	private $errorStr;
 
@@ -123,16 +122,10 @@ class InventoryProjectManager {
 		return $returnArr;
 	}
 	
-	public function getGoogleStaticMap($type){
+	public function getGoogleStaticMap(){
 		$googleUrlLocal = $this->googleUrl;
 		//$googleUrlLocal .= "&zoom=6";
-		$coordStr = '';
-		if($type == 'research'){
-			$coordStr = implode('%7C',$this->researchCoord);
-		}
-		else{
-			$coordStr = implode('%7C',$this->surveyCoord);
-		}
+		$coordStr = implode('%7C',$this->researchCoord);
 		if(!$coordStr) return ""; 
 		$googleUrlLocal .= "&markers=size:tiny%7C".$coordStr;
 		return $googleUrlLocal;

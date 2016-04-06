@@ -105,25 +105,6 @@ if($isEditable && $projSubmit){
 			var t=setTimeout(targetStr,25000);
 		}
 
-		function toggleSurveyInfoBox(anchorObj){
-			var obj = document.getElementById("surveylistpopup");
-			var pos = findPos(anchorObj);
-			var posLeft = pos[0];
-			if(posLeft > 550){
-				posLeft = 550;
-			}
-			obj.style.left = posLeft - 40;
-			obj.style.top = pos[1] + 25;
-			if(obj.style.display=="block"){
-				obj.style.display="none";
-			}
-			else {
-				obj.style.display="block";
-			}
-			var targetStr = "document.getElementById('surveylistpopup').style.display='none'";
-			var t=setTimeout(targetStr,20000);
-		}
-
 		function findPos(obj){
 			var curleft = 0; 
 			var curtop = 0;
@@ -342,7 +323,7 @@ if($isEditable && $projSubmit){
 							<span onclick="toggleResearchInfoBox(this);" title="<?php echo $LANG['QUESRESSPEC'];?>" style="cursor:pointer;">
 								<img src="../images/qmark_big.png" style="height:15px;"/>
 							</span> 
-							<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $pid;?>" title="<?php echo $LANG['MAPCHECK'];?>">
+							<a href="../checklists/clgmap.php?proj=<?php echo $pid;?>" title="<?php echo $LANG['MAPCHECK'];?>">
 								<img src='../images/world.png' style='width:14px;border:0' />
 							</a>
 						</div>
@@ -363,7 +344,7 @@ if($isEditable && $projSubmit){
 						if($gMapUrl){
 							?>
 							<div style="float:right;text-align:center;">
-								<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $pid;?>" title="Map Checklists">
+								<a href="../checklists/clgmap.php?proj=<?php echo $pid;?>" title="Map Checklists">
 									<img src="<?php echo $gMapUrl; ?>" title="<?php echo $LANG['MAPREP'];?>" alt="Map representation of checklists" />
 									<br/>
                                     <?php echo $LANG['OPENMAP'];?>

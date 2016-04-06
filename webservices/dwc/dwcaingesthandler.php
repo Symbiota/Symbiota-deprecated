@@ -16,9 +16,9 @@
 
 date_default_timezone_set('America/Phoenix');
 include_once('../../config/symbini.php');
-require_once($serverRoot.'/classes/SpecUploadBase.php');
-require_once($serverRoot.'/classes/SpecUploadFile.php');
-require_once($serverRoot.'/classes/SpecUploadDwca.php');
+require_once($SERVER_ROOT.'/classes/SpecUploadBase.php');
+require_once($SERVER_ROOT.'/classes/SpecUploadFile.php');
+require_once($SERVER_ROOT.'/classes/SpecUploadDwca.php');
 
 
 $uploadType = preg_replace("/[^0-9]/","",$_REQUEST["uploadtype"]);
@@ -80,3 +80,4 @@ if($transferCnt > 0){
 else{
 	echo 'FAILED: 0 records uploaded';
 }
+?>

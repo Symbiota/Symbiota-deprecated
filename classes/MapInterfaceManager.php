@@ -76,10 +76,7 @@ class MapInterfaceManager{
 	
 	public function getSqlWhere(){
 		$sqlWhere = "";
-		if(array_key_exists("surveyid",$this->searchTermsArr)){
-			$sqlWhere .= "AND (sol.clid IN('".$this->searchTermsArr["surveyid"]."')) ";
-		}
-		elseif(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
+		if(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
 			//Do nothing if db = all
 			if($this->searchTermsArr['db'] != 'all'){
 				if($this->searchTermsArr['db'] == 'allspec'){
@@ -546,52 +543,43 @@ class MapInterfaceManager{
 
 	private function readRequestVariables(){
 		global $clientRoot;
-		//Search will be confinded to a surveyid, collid, catid, or will remain open to all collection
-		if(array_key_exists("surveyid",$_REQUEST)){
-			//Limit by servey id 
-			$surveyidArr = $_REQUEST["surveyid"];
-			if(is_string($surveyidArr)) $surveyidArr = Array($surveyidArr); 
-		 	$surveyidStr = implode(",",$surveyidArr);
-		 	$this->searchTermsArr["surveyid"] = $surveyidStr;
+		//Search will be confinded to a collid, catid, or will remain open to all collection
+		//Limit collids and/or catids
+		$dbStr = '';
+		$this->searchTermsArr["db"] = '';
+		if(array_key_exists("db",$_REQUEST)){
+			$dbs = $_REQUEST["db"];
+			if(is_string($dbs)){
+				$dbStr = $dbs.';';
+			}
+			else{
+				$dbStr = $this->conn->real_escape_string(implode(',',array_unique($dbs))).';';
+			}
+			if(strpos($dbStr,'allspec') !== false){
+				$dbStr = 'allspec';
+			}
+			elseif(strpos($dbStr,'allobs') !== false){
+				$dbStr = 'allobs';
+			}
+			elseif(strpos($dbStr,'all') !== false){
+				$dbStr = 'all';
+			}
 		}
-		else{
-			//Limit collids and/or catids
-			$dbStr = '';
-			$this->searchTermsArr["db"] = '';
-			if(array_key_exists("db",$_REQUEST)){
-				$dbs = $_REQUEST["db"];
-				if(is_string($dbs)){
-					$dbStr = $dbs.';';
-				}
-				else{
-					$dbStr = $this->conn->real_escape_string(implode(',',array_unique($dbs))).';';
-				}
-				if(strpos($dbStr,'allspec') !== false){
-					$dbStr = 'allspec';
-				}
-				elseif(strpos($dbStr,'allobs') !== false){
-					$dbStr = 'allobs';
-				}
-				elseif(strpos($dbStr,'all') !== false){
-					$dbStr = 'all';
-				}
+		if(substr($dbStr,0,3) != 'all' && array_key_exists('cat',$_REQUEST)){
+			$catArr = array();
+			$catid = $_REQUEST['cat'];
+			if(is_string($catid)){
+				$catArr = Array($catid);
 			}
-			if(substr($dbStr,0,3) != 'all' && array_key_exists('cat',$_REQUEST)){
-				$catArr = array();
-				$catid = $_REQUEST['cat'];
-				if(is_string($catid)){
-					$catArr = Array($catid);
-				}
-				else{
-					$catArr = $catid;
-				}
-				if(!$dbStr) $dbStr = ';';
-				$dbStr .= $this->conn->real_escape_string(implode(",",$catArr));
+			else{
+				$catArr = $catid;
 			}
+			if(!$dbStr) $dbStr = ';';
+			$dbStr .= $this->conn->real_escape_string(implode(",",$catArr));
+		}
 
-			if($dbStr){
-				$this->searchTermsArr["db"] = $dbStr;
-			}
+		if($dbStr){
+			$this->searchTermsArr["db"] = $dbStr;
 		}
 		$this->searchTermsArr["taxa"] = '';
 		$this->searchTermsArr["type"] = '';
@@ -885,7 +873,7 @@ class MapInterfaceManager{
 			}
 		}
 		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
-		if((array_key_exists("surveyid",$this->searchTermsArr)) || (array_key_exists("clid",$this->searchTermsArr))) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
+		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
 		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 		$sql .= $mapWhere;
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
@@ -1275,7 +1263,7 @@ class MapInterfaceManager{
 		global $userRights, $clientRoot;
 		if($sqlWhere){
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
-			if((array_key_exists("surveyid",$this->searchTermsArr)) || (array_key_exists("clid",$this->searchTermsArr))) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
+			if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
 			if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 			$sql .= $sqlWhere;
 			if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
@@ -1310,7 +1298,7 @@ class MapInterfaceManager{
 			'o.eventdate, o.family, o.sciname, CONCAT_WS("; ",o.country, o.stateProvince, o.county) AS locality, o.DecimalLatitude, o.DecimalLongitude, '.
 			'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason '.
 			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
-		if((array_key_exists("surveyid",$this->searchTermsArr)) || (array_key_exists("clid",$this->searchTermsArr))) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
+		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
 		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 		$sql .= $mapWhere;
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
@@ -1463,7 +1451,7 @@ class MapInterfaceManager{
         $sql = 'SELECT DISTINCT t.tid, IFNULL(ts.family,o.family) AS family, IFNULL(t.sciname,o.sciname) AS sciname '.
 			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
 			'LEFT JOIN taxstatus ts ON t.tid = ts.tid ';
-		if((array_key_exists("surveyid",$this->searchTermsArr)) || (array_key_exists("clid",$this->searchTermsArr))) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
+		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
 		if(array_key_exists("polycoords",$stArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 		$sql .= $mapWhere." AND (ISNULL(ts.taxauthid) OR ts.taxauthid = 1) ";
 		$sql .= " ORDER BY family, o.sciname ";

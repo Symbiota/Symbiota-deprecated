@@ -92,8 +92,8 @@ $occManager->setOccId($occid);
 				Record first needs to be evaluated before it can be deleted from the system.
 				The evaluation ensures that the deletion of this record will not interfer with
 				the integrity of other linked data. Note that all determination and
-				comments for this occurrence will be automatically deleted. Links to images, checklist vouchers,
-				and surveys will have to be individually addressed before can be deleted.
+				comments for this occurrence will be automatically deleted. Links to images, and checklist vouchers
+				will have to be individually addressed before can be deleted.
 				<div style="margin:15px;display:block;">
 					<input name="verifydelete" type="button" value="Evaluate record for deletion" onclick="verifyDeletion(this.form);" />
 				</div>
@@ -125,22 +125,6 @@ $occManager->setOccId($occid);
 						Deleting this occurrence will remove these association.
 						You may want to first verify this action with the checklist administrators.
 						<ul id="voucherlist">
-						</ul>
-					</div>
-				</div>
-				<div id="delversurveydiv" style="margin:15px;">
-					<b>Survey Voucher Links: </b>
-					<span id="delversurspan" style="color:orange;display:none;">checking survey links...</span>
-					<div id="delsurappdiv" style="display:none;">
-						<span style="color:green;">Approved for deletion.</span>
-						No survey projects have been linked to this occurrence record.
-					</div>
-					<div id="delsurlistdiv" style="display:none;style:0px 10px 10px 10px;">
-						<span style="color:red;">Warning:</span>
-						This occurrence serves as an occurrence voucher for the following survey projects.
-						Deleting this occurrence will remove these association.
-						You may want to first verify this action with the project administrators.
-						<ul id="surveylist">
 						</ul>
 					</div>
 				</div>

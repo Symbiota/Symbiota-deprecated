@@ -204,7 +204,7 @@ function createOccurDiv(catalogNumber, occid){
 }
 
 function deleteOccurrence(occid){
-	if(imgAssocCleared && voucherAssocCleared && surveyAssocCleared){
+	if(imgAssocCleared && voucherAssocCleared){
 		var elem = document.getElementById("delapprovediv");
 		elem.style.display = "block";
 	}

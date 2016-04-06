@@ -1269,18 +1269,6 @@ class OccurrenceEditorManager {
 			}
 		}
 
-		//Remap survey lists
-		$sql = 'UPDATE omsurveyoccurlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		if(!$this->conn->query($sql)){
-			if(strpos($this->conn->error,'Duplicate') !== false){
-				$this->conn->query('DELETE FROM omsurveyoccurlink WHERE occid = '.$sourceOccid);
-			}
-			else{
-				$this->errorArr[] .= '; ERROR remapping survey links: '.$this->conn->error;
-				$status = false;
-			}
-		}
-
 		if(!$this->deleteOccurrence($sourceOccid)){
 			$status = false;
 		}

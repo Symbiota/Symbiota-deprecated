@@ -314,21 +314,6 @@ function verifyCollForm(f){
   	return formVerified;
 }
 
-function verifyOtherCatForm(f){
-	var pidElems = document.getElementsByName("pid[]");
-	for(i = 0; i < pidElems.length; i++){
-		var pidElem = pidElems[i];
-		if(pidElem.checked) return true;
-	}
-	var clidElems = document.getElementsByName("clid[]");
-	for(i = 0; i < clidElems.length; i++){
-		var clidElem = clidElems[i];
-		if(clidElem.checked) return true;
-	}
-   	alert("Please choose at least one search region!");
-	return false;
-}
-
 function checkKey(e){
 	var key;
 	if(window.event){

@@ -57,6 +57,7 @@ if($pid) $clManager->setProj($pid);
 elseif(array_key_exists("proj",$_REQUEST)) $pid = $clManager->setProj($_REQUEST['proj']);
 if($thesFilter) $clManager->setThesFilter($thesFilter);
 if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
+$clManager->setLanguage($LANG_TAG);
 if($searchCommon){
 	$showCommon = 1;
 	$clManager->setSearchCommon();

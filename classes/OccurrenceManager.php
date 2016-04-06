@@ -835,56 +835,38 @@ class OccurrenceManager{
 
 	public function getDatasetSearchStr(){
 		$retStr ="";
-		if(array_key_exists("clid",$this->searchTermsArr)){
-			$retStr = $this->getClidVoucherStr();
+		if(!array_key_exists('db',$this->searchTermsArr) || $this->searchTermsArr['db'] == 'all'){
+			$retStr = "All Collections";
+		}
+		elseif($this->searchTermsArr['db'] == 'allspec'){
+			$retStr = "All Specimen Collections";
+		}
+		elseif($this->searchTermsArr['db'] == 'allobs'){
+			$retStr = "All Observation Projects";
 		}
 		else{
-			if(!array_key_exists('db',$this->searchTermsArr) || $this->searchTermsArr['db'] == 'all'){
-				$retStr = "All Collections";
-			}
-			elseif($this->searchTermsArr['db'] == 'allspec'){
-				$retStr = "All Specimen Collections";
-			}
-			elseif($this->searchTermsArr['db'] == 'allobs'){
-				$retStr = "All Observation Projects";
-			}
-			else{
-				$cArr = explode(';',$this->searchTermsArr['db']);
-				if($cArr[0]){
-					$sql = 'SELECT collid, CONCAT_WS("-",institutioncode,collectioncode) as instcode '.
-						'FROM omcollections WHERE collid IN('.$cArr[0].') ORDER BY institutioncode,collectioncode';
-					$rs = $this->conn->query($sql);
-					while($r = $rs->fetch_object()){
-						$retStr .= '; '.$r->instcode;
-					}
-					$rs->free();
+			$cArr = explode(';',$this->searchTermsArr['db']);
+			if($cArr[0]){
+				$sql = 'SELECT collid, CONCAT_WS("-",institutioncode,collectioncode) as instcode '.
+					'FROM omcollections WHERE collid IN('.$cArr[0].') ORDER BY institutioncode,collectioncode';
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$retStr .= '; '.$r->instcode;
 				}
-				/*
-				if(isset($cArr[1]) && $cArr[1]){
-					$sql = 'SELECT ccpk, category FROM omcollcategories WHERE ccpk IN('.$cArr[1].') ORDER BY category';
-					$rs = $this->conn->query($sql);
-					while($r = $rs->fetch_object()){
-						$retStr .= '; '.$r->category;
-					}
-					$rs->free();
-				}
-				*/
-				$retStr = substr($retStr,2);
+				$rs->free();
 			}
+			/*
+			if(isset($cArr[1]) && $cArr[1]){
+				$sql = 'SELECT ccpk, category FROM omcollcategories WHERE ccpk IN('.$cArr[1].') ORDER BY category';
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$retStr .= '; '.$r->category;
+				}
+				$rs->free();
+			}
+			*/
+			$retStr = substr($retStr,2);
 		}
-		return $retStr;
-	}
-
-	private function getClidVoucherStr(){
-		$retStr = 'Various Voucher Projects';
-		/*
-		$sql = "SELECT projectname FROM omsurveys WHERE (surveyid IN(".str_replace(";",",",$this->searchTermsArr["surveyid"]).")) ";
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnStr .= " ;".$row->projectname;
-		}
-		return substr($returnStr,2);
-		*/
 		return $retStr;
 	}
 

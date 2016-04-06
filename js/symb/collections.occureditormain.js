@@ -1,7 +1,6 @@
 var pauseSubmit = false;
 var imgAssocCleared = false;
 var voucherAssocCleared = false;
-var surveyAssocCleared = false;
 var abortFormVerification = false;
 
 $(document).ready(function() {
@@ -709,10 +708,6 @@ function verifyDeletion(f){
 	//Restriction when vouchers are linked
 	document.getElementById("delvervouspan").style.display = "block";
 	verifyAssocVouchers(occId);
-	
-	//Restriction when surveys are linked
-	document.getElementById("delversurspan").style.display = "block";
-	verifyAssocSurveys(occId);
 }
 
 function verifyAssocImages(occidIn){
@@ -758,32 +753,8 @@ function verifyAssocVouchers(occidIn){
 	});
 }
 
-function verifyAssocSurveys(occidIn){
-	$.ajax({
-		type: "POST",
-		url: "rpc/getassocsurveys.php",
-		dataType: "json",
-		data: { occid: occidIn }
-	}).done(function( sList ) {
-		document.getElementById("delversurspan").style.display = "none";
-		if(sList != ''){
-			document.getElementById("delsurlistdiv").style.display = "block";
-			var strOut = "";
-			for(var key in sList){
-				strOut = strOut + "<li><a href='../../checklists/survey.php?surveyid="+key+"' target='_blank'>"+sList[key]+"</a></li>";
-			}
-			document.getElementById("surveylist").innerHTML = strOut;
-		}
-		else{
-			document.getElementById("delsurappdiv").style.display = "block";
-		}
-		surveyAssocCleared = true;
-		displayDeleteSubmit();
-	});
-}
-
 function displayDeleteSubmit(){
-	if(imgAssocCleared && voucherAssocCleared && surveyAssocCleared){
+	if(imgAssocCleared && voucherAssocCleared){
 		var elem = document.getElementById("delapprovediv");
 		elem.style.display = "block";
 	}

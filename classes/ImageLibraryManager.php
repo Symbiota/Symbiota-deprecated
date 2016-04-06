@@ -283,7 +283,7 @@ class ImageLibraryManager{
 	
 	public function readRequestVariables(){
 		global $clientRoot;
-		//Search will be confinded to a surveyid, collid, catid, or will remain open to all collection
+		//Search will be confinded to a collid, catid, or will remain open to all collection
 		//Limit collids and/or catids
 		$dbStr = '';
 		$this->searchTermsArr["db"] = '';

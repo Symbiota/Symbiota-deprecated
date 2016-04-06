@@ -48,7 +48,6 @@ FEATURES
    * Dynamic species list generated from specimens records
 * Flora/Fauna Management System
    * Static species list (local floras/faunas) 
-   * Group survey species list 
 * Interactive Identification Keys
    * Key generation for are species list within system
    * Key generator based on a point locality

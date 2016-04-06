@@ -795,16 +795,6 @@ function verifyCollForm(f){
 	return formVerified;
 }
 
-function verifyOtherCatForm(f){
-	var dbElements = document.getElementsByName("surveyid[]");
-	for(i = 0; i < dbElements.length; i++){
-		var dbElement = dbElements[i];
-		if(dbElement.checked) return true;
-	}
-	alert("Please choose at least one checkbox!");
-	return false;
-}
-
 function submitMapForm(f){
 	f.submit();
 }
