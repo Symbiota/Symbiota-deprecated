@@ -1,0 +1,1237 @@
+* { /* remove browser defaults for all elements */
+	margin: 0;
+	padding: 0;
+	font-size: 100%;
+}
+	
+body{
+	width: 80%;
+	min-width:950px;
+	margin-top: 0px;
+	padding: 0;
+	color: #333;
+	background: #E9E975;
+	font: 1em Verdana, Lucida, Helvetica, Arial, sans-serif;
+}
+
+p, td, ul, ol, li, dl, dt, dd { 
+	font: 100% Verdana, Lucida, Helvetica, Arial, sans-serif;
+}
+
+td, th { 
+	font-size: 0.9em;
+}
+
+h1 { 
+	color: #361;
+	margin: 0 0 .2em 0;
+	font-family: Verdana, Lucida, Helvetica, Arial, sans-serif;
+}
+
+h2, h3 { 
+	color: #773;
+	clear: both;
+	margin: 1em 0 .2em 0;
+	font-family: Georgia, Garamond, "Times New Roman", "Century Schoolbook L", "New Century Schoolbook", Times, serif;
+}
+
+h1 { font-size: 1.4em; font-weight: normal; word-spacing: .2em; }
+h2 { font-size: 1.25em; font-weight: normal; }
+h3 { font-size: 1.1em; font-weight: normal; }
+h4 { font-size: .9em; font-weight: normal; }
+h5 { font-size: .8em; font-weight: normal; }
+h6 { font-size: .7em; font-weight: normal; }
+
+p {font-size: .9em;}
+td p {font-size: 1em;}
+
+code, pre, tt, kbd {
+	font-family: Monaco, "Courier New", Courier, monospace;
+	font-weight: normal;
+}
+
+a {text-decoration: underline;}
+a:link {color: #250;} /* was #361 green but too pale for text */
+a:visited {color: #773;} 
+a:hover, a:focus, a:active {color: #00f;} /* standard blue */
+
+abbr, acronym {/* element has... title="gives full name of abbr" */
+	border-bottom: 1px dashed #ACBD4E; 
+	cursor: help;
+}/* IE 5 and 6 shows dotted borders as dashed */
+
+cite {font-style: normal;
+	border-bottom: 1px dotted #ACBD4E; 
+	cursor: default;
+}
+em, i {font-style: italic;}
+img {border: 0;}
+strong {font-weight: bold;}
+sup {vertical-align: super; font-size: 70%;}
+sub {vertical-align: sub; font-size: 70%;}
+dt	{font-weight: bold;}
+
+hr {
+	background: #cc0; /* For Mozilla */
+	color: #cc0; /* For IE */
+	border: none;
+	height: 1px;
+	margin: 10px 0;
+}
+
+/*Main table framework*/
+#maintable{
+	width: 100%;
+	background-color:#FFFFFF;
+	border:1px solid #333333;
+}
+
+#maintable td{
+	padding:0px;
+}
+
+td.header{
+	color:#FFFFFF;
+	background-color:#000000;
+	text-align:left;
+	padding:0px;
+	height:75px;
+}
+
+td.header a{
+
+}
+
+td.header a:hover{
+
+}
+
+td.middleleft{
+}
+
+td.middleleftnomenu{
+}
+
+td.middlecenter{
+	padding:0px;
+}
+
+td.middleright{
+}
+
+td.footer{
+}
+
+/*Left menu components*/
+div.menu {
+    float: left;
+	width: 15%;
+	height: 150px;
+	background-color: #999;
+	margin-bottom: 10px;
+    margin-top: 10px;
+	background-color:	white;
+	border:   		1px solid #CCCCFF;
+	padding-bottom:   	25px;
+	overflow:   		hidden;
+	border-radius:		0.5em 0.5em 1.5em 0.5em;
+	-moz-border-radius:	0.5em 0.5em 1.5em 0.5em;
+	-khtml-border-radius: 0.5em 0.5em 1.5em 0.5em;
+}
+
+div.menuheader{
+	background-color:   #C0C0C0;
+	font-family:   		Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size:   		13px;
+	color:   			white;
+	overflow:   		hidden;
+	text-align:   		center;
+	padding:			3px;
+	margin:			0px; 
+}
+
+div.menuheader a{
+	color: black;
+}
+
+div.menuheader a:hover {
+	color: black;
+}
+
+div.menusubheader{
+	margin: 5px 0px 0px 5px;
+}
+
+div.menusubheader a{
+	color: black;
+}
+
+div.menusubheader a:hover {
+	color: black;
+}
+
+div.menuitem {
+
+}
+
+div.menuitem a {
+	color: #669999;
+}
+
+div.menuitem a:hover {
+	color: 	#00008B;
+}
+
+/*Central div in the middle center table div */
+#innertext{
+	font-size: 14px;
+	width:75%;
+    float: left;
+	min-height:400px;
+	margin-top:8px;
+	margin-bottom:0px;
+	margin-left:20px;
+	margin-right:0px;
+}
+
+#innertext a{
+
+}
+#innertext a:hover{
+
+}
+
+div.navpath {
+	display:none;
+}
+
+ul#hor_dropdown{
+	width:auto;
+	margin:0;
+	margin-top:0px;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
+	list-style:none;
+	background-image:url(images/menu_pri_background.jpg);
+	background-repeat:repeat-x;
+	background-position:bottom;
+	background-color:#E9E975;
+	text-align:left;
+	white-space:nowrap;
+}
+ul#hor_dropdown li{		
+	padding:0;
+	height:24px;
+	margin:0;
+	display:inline;
+}
+ul#hor_dropdown li a{
+	color:#000000;
+	text-decoration:none;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
+	background-image: url(images/menu-item_divider.jpg);
+    background-repeat: no-repeat;
+    background-position: right bottom;
+}
+ul#hor_dropdown li a.selected{
+	color:#C5EAB8;
+	background-color:#37533A;
+	text-decoration:none;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
+	background-image:none;
+}
+ul#hor_dropdown li a.selected:hover{
+	color:#C5EAB8;
+	background-color:#37533A;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
+	background-image:none;
+}
+ul#hor_dropdown li a.home_selected{
+	color:#999999;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
+	background-image:none;
+}
+ul#hor_dropdown li a:hover{
+	background-color:#999999;
+	color:#FFFFFF;
+	padding-top:8px;
+	padding-bottom:10px;
+	padding-left:10px;
+	padding-right:10px;
+	background-image:none;
+}
+/* Submenu */
+ul#hor_dropdown ul {
+	position:absolute;
+	left:-9999px;
+	top:-9999px;
+	list-style-type:none;
+	background-image:url(images/menu_pri_background.jpg);
+	background-repeat:repeat-x;
+	background-position:bottom;
+	background-color:#FFFFFF;
+	z-index:1000;
+}
+ul#hor_dropdown li:hover { position:relative; }
+ul#hor_dropdown li:hover ul {
+	left:0px;
+	top:22px;
+	padding:0px;
+	z-index:1000;
+}
+
+ul#hor_dropdown li:hover ul li a {
+	padding:5px;
+	display:block;
+	text-indent:8px;
+	padding-right:8px;
+	background-image:url(images/menu_pri_background.jpg);
+	background-repeat:repeat-x;
+	background-position:bottom;
+	background-color:#FFFFFF;
+	z-index:1000;
+}
+ul#hor_dropdown li:hover ul li a:hover { background:#999999; }
+
+#sitehead {
+	min-height: 60px;
+	width: 100%;
+	color: #361; 
+	margin-bottom:0px;
+	background: #E9E975 url(images/side_line_flip.gif) right top no-repeat;
+}
+#sitehead {background-image: url(images/side_line.gif);}
+
+#breadcrumbs { /* you are here navigation */
+	min-height: 18px;
+	margin: 0 260px 0 0;
+	padding-left: .5em;
+	line-height: 1.5em;
+	font-size: .7em;
+	border-bottom: 1px solid #cc0;
+}
+
+#sitehead a:link, #sitehead a:visited {
+	color: #361; 
+	text-decoration: none;
+	}
+#sitehead a:hover, #sitehead a:focus, #sitehead a:active {
+	color: #00f; /* standard blue */
+	text-decoration: underline;
+	}
+
+#logo, #logo a, #logo img {}
+#logo {float: left;}
+#logo a {display: block;}/* needed for hover effect (see next) */
+#logo a:hover {/* yellow=F9F983, cream=F7F7AB, dd7=color for home page */
+	background-color: #F7F7AB;
+	}
+
+#headform, #partners {
+	height: 60px;
+	width: 260px;
+	float: right;
+	margin-top: -18px; /* offsets height of breadcrumbs div */
+	text-align: right;
+	color: #361;
+	}
+#partners {margin-top: 0;}
+#partners ul {margin-top: 3px;}
+#partners ul {
+	margin: 5px 35px 0 0; 
+	padding: 0; 
+	list-style: none; 
+	font-size: 11px;
+}
+#partners li {
+	margin: 0; 
+	padding: 0; 
+	line-height: 1.2em;/* cancels IE default */
+	}
+	
+#tagline {
+	margin: 0 260px 0 0; /* keeps line from overlapping right side */
+	padding: 27px 5px 0 0; /* space for the plusfungi gif */
+}
+#tagline strong { display: none; }/* vplants.org - used when printing */
+
+.access {
+	position: absolute;
+	left: -999em; /* still there for screen readers */
+	margin: 0;
+	padding: 0;
+	height: 0; /* these three rules to prevent gaps in layout. */
+	display: none;
+} 
+p, #content table, #content1 table  { 
+	margin: .2em 0 1em 0; /* to compliment that of headers */
+}
+
+.small { font-size: .8em; }/* this could be nested in p so have it more than .7em */
+p.small, dl.small { font-size: .7em; }
+
+#pagemenu ul a:visited {color: #250;}
+#pagemenu ul a:hover, #pagemenu ul a:focus, #pagemenu ul a:active {color: #00f;}
+
+.helptext { /* used in footer citation */
+	border-bottom: 1px dashed #ACBD4E; 
+	cursor: help;}
+
+#bodywrap {
+	position: relative; 
+	}/* positioning context for anything outside of content  */
+
+#wrapper1, #wrapper0 { /* 8em is left col width plus 1 gutter */
+	clear: both; 
+	border-left: 6.4em solid #360; /* left col width */
+	position: relative; /* need this for positioning of navigation */
+	padding-top: 2.5em; /* space for tab navigation */
+	/* If padding-left used here then IE reduces width of enclosed #pagemenu */
+	padding-bottom: 10px; /* bottom gutters */
+	}
+#wrapper0 {
+	border-left: .4em solid #360; /* no left menu column */
+	}
+body.withsubmenu #wrapper1 {
+	padding-top: 4em; /* space for double tab navigation */
+	}
+
+body.sidepale #wrapper1 { 
+	background: transparent url(images/side_pale.gif) right top repeat-y;
+	}
+body.sidepaleline #wrapper1 { 
+	background: transparent url(images/side_pale_line.gif) right top repeat-y;
+	}
+div#sitemenu {
+	width: 6.4em; /* left col width */
+	position: absolute;
+	top: 4px; /* match top border of #pagemenu */
+	margin-top: 1.6em; /* approximate height of #pagemenu plus a bit */
+	left: -6.4em;
+	}
+
+div#pagemenu {/* move to top of content */
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%; /* extend all the way across and fix height bug in Mozilla */
+	background: #360;
+	border-top: 4px solid #360;
+	}
+
+div#submenu { 
+	position: absolute;
+	top: 1.6em; /* put under #pagemenu */
+	left: 0;
+	}
+
+#content, #content1 {/* left gutter */
+	padding-left: 1.6em; 
+}
+
+/* A List Apart, No. 183, June 15, 2004 
+Creating Liquid Layouts with Negative Margins, by Ryan Brill */
+#content1wrap {
+    	width: 100%; 
+	float: left;
+	margin-right: -252px; /* may need extra pixel here */
+    	margin-top: 10px;
+	}
+#content1 {
+    	float: left;
+	width: 75%;
+	margin-bottom: 10px;
+	}
+#content2 {
+	float: left;
+	width: 10%; 
+	}
+
+#sitehead:after, #pagemenu:after, #wrapper0:after, #wrapper1:after, #wrapper2:after {
+	content: "."; 
+	display: block;
+	height: 0;
+	clear: both; 
+	visibility: hidden;
+	}
+
+#pagemenu ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	}
+#pagemenu ul#pageset1 {
+	float: left;
+	margin-left: .3em; /* 6.7em left column width plus an offset for first tab */
+	}
+#wrapper0 #pagemenu ul#pageset1 {
+	float: left;
+	margin-left: 6.3em; /* left column width minus border plus an offset for first tab */
+	}
+
+#pagemenu ul#pageset2 {
+	float: right;
+	}
+#pagemenu li {
+	font-size: .8em;
+	float:left;
+	white-space: nowrap;
+	margin: 1px 2px 0 0; 
+	padding: 0;
+	background: #F7F7AB url(images/tab_tr.gif) right top no-repeat;
+	}
+#pagemenu ul a, #pagemenu ul span { 
+	display: block;
+	white-space: nowrap;
+	font-weight: bold;
+	text-decoration: none; 
+	background: transparent url(images/tab_tl.gif) left top no-repeat;
+	padding: 0 10px 1px 10px;
+	line-height: 1.5em; /* controls tab height */
+	}
+body.descrip ul#pageset1 a, body.gallery ul#pageset1 a {
+	font-weight: normal;
+}
+#pagemenu li:hover {background-color: #ffd;}
+#pagemenu li a:hover {text-decoration: underline;}
+#pagemenu li.thismenu {border-bottom: 1px solid #ACBD4E;} 
+
+#pagemenu li.thispage { 
+	background-color: #fff; 
+	color: #333;
+	margin-top: 0;
+	padding-bottom: 2px;
+	} /* Removing the top margin on LI moves the current tab and its text up, while the new padding compensates, plus moves the UL up by 1 pixel revealing the background color under the other tabs to give them bottom borders.  Previously I used a negative margin-top, but IE lost the top edge of the raised tab under the border; and Opera didn't raise the other tabs.  */
+
+#submenu {
+	margin-left: 1.6em;
+	padding: 5px 0;	
+	}
+#submenu ol {
+	display: inline;
+	list-style: none;
+	font-size: .8em;
+	}
+#submenu li {
+	display: inline;
+	margin: 0;
+	padding: 0 .5em;
+	font-weight: bold;
+	border-left: 1px solid #650;
+	}
+#submenu li.first {
+	border-left: none;
+	padding-left: 0;
+	}
+#submenu a, #gomenu a {
+	text-decoration: none;
+	border-bottom: 1px dotted #361;
+	}
+div#gomenu { 
+	clear: both;
+	margin: 10px 0;
+	color: #707; /* #361 green */
+	font-size: .8em;
+	font-weight: bold;
+	}
+
+div#sitemenu ul {/* all ULs 1.5em*/
+	/* assigning width here messes up IE 5 windows.
+	Actually we only need width declared for any fly-out submenus. */
+	z-index: 5; /* bring menus on top of content that follows in html */
+	margin: 0 0 .5em 0; 
+	padding: 0; 
+	list-style: none; 
+	border-top: 1px solid #993;
+	}
+
+div#sitemenu li { 
+	position: relative;
+	margin: 0; 
+	padding: 0; /* because borders are on anchors */
+	color: #fff; 
+	 /*background-color: #360; do color here rather than UL to prevent a Netscape bug */
+	} /* don't put borders on LI when using popup menus, be nice to IE */
+
+/* set font-size on anchor instead of LI so it can't be compounded smaller in submenus */
+div#sitemenu li a, div#sitemenu li span {
+	display: block; 
+	font-size: .8em; 
+	margin: 0;
+	padding: .3em 0 .3em .7em;  /* was .3em 0 .3em .4em;  */
+	border-left: .7em solid #993; /* was .4em */
+	border-right: .1em solid #993; 
+	border-bottom: 1px solid #993;
+	color: #fff;
+	text-decoration: none;
+	line-height: 1.2em; /* MUST include em unit to prevent missing border bug in Netscape and older Firefox */
+	} 
+
+div#sitemenu ul.tools {
+	border-top: 0;
+	margin-top: 1.5em;
+	}
+div#sitemenu ul.tools li a, div#sitemenu ul.tools li span {
+	margin-bottom: 1px;
+	padding: .3em 0 .3em .8em; 
+	border: 0;
+	}
+
+
+div#sitemenu li a.start, div#sitemenu li span.start {
+	border-left-width: .2em;
+	font-weight: bold;
+	text-transform: uppercase;
+	line-height: 1.1em; /* less than this and Netscape 7 looses some borders */
+	padding-left: 22px;
+	background: #E9E975 url(images/logo_icon.gif) 0 50% no-repeat;
+	color: #361;
+	}
+
+/* span used for current html page instead of anchor link */
+div#sitemenu li span, div#sitemenu li span.start { 
+	background-color: #fff; 
+	color: #333;
+	border-right-color: #fff; 
+	}
+
+div#sitemenu .plant .start {
+	color: #250;
+	background-image: url(images/logo_icon_p.gif);
+	}
+div#sitemenu .fungus .start {
+	color: #440;
+	background-image: url(images/logo_icon_f.gif);
+	}
+
+div#sitemenu ul.plant li {
+	background-color: #250;
+	}
+div#sitemenu ul.fungus li {
+	background-color: #440; 
+	}
+
+div#sitemenu a:hover, 
+div#sitemenu a:focus, 
+div#sitemenu a:active { 
+	color: #00f; /* standard blue */
+	background-color: #ffd;
+	}
+
+.taxon {
+	font-family: Georgia, "New Century Schoolbook", Times, serif;
+	font-weight: bold;		
+	}
+.taxon .author {
+	font-size: 0.8em; 
+	font-style: normal; 
+	font-weight: normal;
+	}
+.genus, .epithet {
+	font-style: italic; 
+	/* letter-spacing: 1px; */
+	}
+.infra {
+ } /* can contain .epithet and .author */
+
+
+#floatimg {
+	display: block;
+	float: left;
+	width: 170px;
+	height: 250px;
+	border: 1px solid #cc0;
+	padding: 0;
+	margin: 5px 10px 7px 0;
+	}
+
+
+body.guide .floatimg {
+	display: block;
+	float: right;
+	padding: 0;
+	margin: 0 0 7px 10px;
+	}
+body.guide table.key {
+ width: 100%;
+	clear: both; 
+	border-left: 1px solid #440; 
+	border-bottom: 1px solid #440; 
+}
+
+body.guide table.key caption, body.guide table.key th {
+	text-align: left;
+}
+body.guide table.key .keychoice td p {
+	font-size: 0.9em;
+}
+body.plants.guide table.key .keydivision td {
+	border-top: 3px solid #250; 
+	border-bottom: 1px solid #bb0; 
+	background-color: #eec; /* #ffd; */ 
+}
+body.plants.guide table.key .keychoice td {
+	border-top: 1px solid #250; 
+}
+body.fungi.guide table.key .keydivision td {
+	border-top: 3px solid #440; 
+	border-bottom: 1px solid #bb0; 
+	background-color: #eec; /* #ffd; */ 
+}
+body.fungi.guide table.key .keychoice td {
+	border-top: 1px solid #440; 
+}
+
+body.guide table.key.blocks td {
+	border: 1px solid #250; 
+	vertical-align: top;
+}
+body.guide table.key.blocks td.empty {
+	border: 0;
+}
+body.fungi.guide table.key.blocks td {
+	border-color: #440;
+}
+body.guide table.key.blocks td div {
+	width: 300px;
+}
+
+div.plate {
+	border: 1px solid #cc0;
+	text-align: center;
+	margin: 0 0 20px 0;
+	}
+
+/* Definition lists */
+dl {
+	font-size: 0.8em;
+	margin: 0 0 10px 0;
+	}
+dl dl {
+	font-size: 1em;
+	}
+
+dt/* */ { /* Hide this from IE 5.0 (Win,Mac) but not 5.5 */
+	display: block;
+	color: #333;
+	clear: left;
+	float: left;
+	padding: 0 0.4em 0 0;
+	margin: 0;
+	}
+
+dd {
+	display: block;
+	margin: 0 0 0 1em;
+	padding: 0;
+	}
+dt, dd {
+	padding-top: 0.2em;
+	}
+dd + dd { /* CSS2 browsers, but not IE6 */
+	padding-left: 1em;
+	text-indent: -1em;
+	padding-top: 0;
+	}
+dt a, dt a:link, dt a:visited {
+	color: #333;
+	}
+dt a:hover, dt a:focus {
+	color: #00f;
+	}
+dd a, dd a:link, dd a:visited {
+	color: #250;
+	}
+dd a:hover, dd a:focus {
+	color: #00f;
+	}
+
+p.concern, p.rating {
+	font-size: 0.8em;
+	font-weight: bold;
+	margin: 0;
+	}
+.descrip p.concern, .descrip p.rating {
+	text-align: right;
+	} /* keep on left for gallery pages */
+.concern, .concern a:link, .concern a:visited {
+	color: #00b; 
+	text-decoration: none;
+	}
+.concern a:hover, .concern a:focus {
+	color: #00f; 
+	text-decoration: underline;
+	}
+.rating, .rating a:link, .rating a:visited {
+	color: #d00; 
+	text-decoration: none;
+	}
+.rating a:hover, .rating a:focus {
+	color: #00f; 
+	text-decoration: underline;
+	}
+
+.descrip dl {
+	margin: 0;
+	}
+dt.growth, dt.size {
+	display: none;
+	}
+dd.growth, dd.size {
+	display: inline;
+	margin-left: 0;
+	}
+dl#descdef dt, dl#descdef dt + dd {
+	padding-top: 0;
+	}
+dt#etym {
+	float: none;
+	} /* temp fix to prevent floating up into Notes when Notes empty. */
+dt#further, dt.refer {
+	float: none;
+	}
+dt#further + dd {
+	padding-top: 0;
+	}
+dd.refer { 
+	padding-top: 0;
+	padding-left: 1em;
+	text-indent: -1em;
+	}
+dt.namecode, dd.namecode {
+	margin-left: 0;
+	}
+dd.namecode {
+	border-bottom: 2px solid #890;
+	}
+dt.namecode, dd.namecode { 
+	font-size: xx-small;
+	voice-family: "\"}\"";
+	voice-family: inherit;
+	font-size: x-small;
+	}
+
+.box.map ul {
+	font-size: 0.9em;
+	list-style-type: disc;
+	margin: 0 10px 0 0;
+	padding: 0 0 0 30px; 
+	}
+.box.map ul ul {
+	list-style-type: circle;
+	}
+.box.map li {
+	padding: 0 0 0 1em;
+	margin: 0;
+	}
+
+#content1 ul, #content1 ol, #content ul, #content ol  { 
+	font-size: .9em;
+	padding: 0 0 0 1em; /* for bullets */ 
+	margin: 0 0 0 1em; 
+	}
+
+.floatleft {
+	display: block;
+	float: left;
+	}
+.floatright {
+	display: block;
+	float: right;
+	}
+
+.large {font-size: 1em;}
+#content1 ul.large {font-size: 1em;
+	padding: 0px;
+	margin: 0px;
+	margin-left: 10px;
+	list-style: none;
+	}
+
+#content1 ul.large li { 
+	padding: 0 0 .1em 25px; 
+	background: url(images/icon_16px.gif) 0 50% no-repeat; 
+	}
+
+
+body.prototypes td {
+	font-size: .8em;
+	}
+
+td, th { padding: .3em;}
+
+tr.odd {
+	background: #eee;
+	} 
+tr.highlight {
+	background: #fefec6;
+	} 
+tbody.rowhover tr:hover {
+	background: #FEFEC6; /* #F7F7B4; */
+	color: #000;
+	}/* the tbody element must be added to the XHTML table */
+
+table#speclist {
+	width: 100%;
+	border: 1px solid #999;
+	}
+#speclist caption {
+	font-size: .85em;
+	padding: .3em;
+	text-align: left;
+	}
+#speclist thead th {
+	border-bottom: 1px solid #999;
+	}
+#speclist th input {/* make buttons look like links */
+	border: none;
+	background: none;
+	font-weight: bold;
+	color: #361;
+	border-bottom: 1px solid #361;
+	}
+#speclist th input:hover {/* imitate link hover */
+	color: #00f;
+	border-bottom: 1px solid #00f;
+	cursor: pointer; /* hand cursor */
+	}
+#speclist th, #speclist td {
+	font-size: .8em;
+	text-align: center;
+	}
+#speclist td img {
+	margin-left: auto;
+	margin-right: auto;
+	}
+#speclist td a {
+	display: block;
+	width: 4em;
+	border: 1px solid #999;
+	line-height: 24px; /* height of cam.gif minus 2px(borders) */
+	}
+
+.selectspecs {
+	font-size: .8em;
+	float: right;
+	padding: .3em;
+	border: 1px solid #999;
+	background: #eee;
+	margin: 0;
+	}
+	
+ul#searchvars {
+	display: block;
+	list-style: none;
+	font-size: .8em;
+	margin-bottom: .5em;
+	padding: 5px;
+	background: #eee;
+	color: #555;
+	border-top: 1px solid #999;
+	border-bottom: 1px solid #999;
+	}
+#searchvars li {
+	display: inline;
+	margin: 0;
+	padding: 0 .5em;
+	border-left: 1px solid #999;
+	white-space: nowrap;
+	}
+#searchvars li.first {
+	border-left: none;
+	padding-left: 0;
+	}
+
+#searchvars li strong {
+	color: #000;
+	}
+
+.box {
+	font-size: .9em; /* scale down h3 h4 p ul */
+	width: 252px;
+	background: #FEFEC6 url(images/box2_body.gif) left bottom no-repeat;
+	margin: 15px 0;
+	padding-bottom: 1px; 
+	}/* padding forces Firefox 1.5 to keep margin bottoms of content inside box div */
+#content2 .box:first-child {margin-top: 0;}
+
+#content2 p, #content2 dl { /* any paragraphs whether in a box or not */
+	margin: 10px 10px 10px 20px;
+	}
+#content2 img + img { /* any images whether in a box or not */
+	margin-top: 10px;
+	}
+
+#content2 p {font-size: .8em; margin: 10px 8px;} 
+#bodywrap {background: url(images/side_pale_line.gif) #fff right top repeat-y;} 
+#sitefoot {background: #fff;}
+
+#content2 h6 {
+	margin: 5px 10px 5px 20px;
+	}
+
+.box h3 { 
+	margin: 0; 
+	padding: 10px 5px 5px 20px;
+	border-bottom: 1px solid #cc0;
+	background: transparent url(images/box2_head.gif) 0 0 no-repeat;
+	}
+
+.box h4 {
+	margin: 5px 0;
+	padding-left: 20px;
+	background: transparent url(images/arrow_down.gif) 4px 70% no-repeat;
+	}
+
+.box ul {
+	margin: 5px 10px 5px 0;
+	padding: 0; 
+	list-style: none;
+	}
+.box li {
+	margin: 0;
+	padding: 3px 0 3px 30px; /* left padding for wrapped lines of li */
+	}
+.box li a {
+	margin-left: -34px; /*  negative amount of li padding plus extra width of background gif */
+	padding-left: 24px; /* 24px bring link back to right */
+	}
+
+.box a {text-decoration: none;} 
+div.box:hover a {text-decoration: underline;}
+
+/* backup for non-hover browsers and tabbing */
+.box a:hover, .box a:focus, .box a:active {text-decoration: underline;}
+
+.box li a[title]:hover { /* for links that follow  */
+	background-position: 0 50%;
+	background-repeat: no-repeat;
+	}
+.box li a[title~="External"]:visited:hover { /* external visited links */
+	background-image: url(images/link_external_v.gif);
+	}
+.box li a[title~="External"]:hover { /* external links */
+	background-image: url(images/link_external.gif);
+	}
+.box li a[title~="View"]:hover { /* view internal links */
+	background-image: url(images/link_internal.gif);
+	}
+.box li a[title~="Document"]:hover { /* document links */
+	background-image: url(images/link_doc.gif);
+	}
+.box li a[title~="Word"]:hover { /* document links */
+	background-image: url(images/link_word.gif);
+	}
+.box li a[title~="Text"]:hover { /* document links */
+	background-image: url(images/link_text.gif);
+	}
+.box li a[title~="PDF"]:hover { /* document links */
+	background-image: url(images/link_pdf.gif);
+	}
+.box li a[title~="XLS"]:hover { /* document links */
+	background-image: url(images/link_xls.gif);
+	}
+.box li a[title~="XML"]:hover { /* document links */
+	background-image: url(images/link_xml.gif);
+	}
+.box li a[title~="Image"]:hover { /* document links */
+	background-image: url(images/link_image.gif);
+	}
+
+.box.imgtext {/* does not have background image so needs borders */
+	width: 250px;
+	margin-top: 0;
+	background: #fff;
+	border: 1px solid #cc0;
+	padding: 0;
+	} /* can put paragraphs before and/or after the image */
+
+#headform form {
+	position: relative; /* context for button */
+	padding: 3px 35px 0 10px;
+	}
+#headform h5 {
+	float: left;
+	text-align: left;
+	line-height: 1em;
+	font-weight: bold;
+	margin: -3px 0 0 0; 
+	padding: 3px 0 0 0;
+	}
+#headform p { 
+	font-size: .7em;
+	margin: 0; 
+	padding: 2px 0 0 0;
+	}
+#headform label {
+	}
+#headform  input.texts {
+	border: 1px solid #ACBD4E;
+	color: #333;
+	background: #FEFEC6;
+	width: 8em;
+	}
+#headform input.texts:focus { 
+	border-color: #333;
+	background: #fff; 
+	}
+#headform input.actions {
+	position: absolute;
+	bottom: 0;
+	right: 2px; 
+	width: 30px; /* Go button looks better wider than default. */
+	}
+#simpleform { 
+	font-size: 1em;
+	text-align: right;
+	color: #361;
+	margin: 15px 0;
+	}
+#simpleform p { 
+	margin: 0.6em 0; padding: 0;
+	}
+#simpleform fieldset {
+	margin: 0;
+	padding: 10px 0 10px 5px; 
+	/* background: #FEFEC6; */
+	}
+#simpleform fieldset, #simpleform legend {
+	border: 1px solid #cc0;
+	}
+#simpleform legend { 
+	background: #F7F7AB;
+	color: #361;
+	padding: 0 10px; 
+	font-weight: bold;
+	font-size: .9em;
+	}
+#simpleform label {
+	font-weight: bold; 
+	}
+
+#simpleform input.texts {
+	border: 1px solid #ACBD4E; 
+	color: #333;  
+	width: 8em; 
+	background: #ffe; 
+	}
+#simpleform input.texts:focus { 
+	border-color: #333;
+	background: #fff; 
+	}
+#simpleform input.actions {
+	padding: 0 5px;
+	}
+
+#sitefoot { 
+	/* clear: both; also need this to get border-top to show */
+	padding: 0; 
+	padding-bottom: 20px; 
+	text-align: center;
+	font-size: .8em; 
+	} /* if border-top here then doesn't show in IE 5.0 Win */
+
+ul#footmenu {
+	margin: 0 0 15px 0;
+	padding: 0;
+	color: #361;
+	background-color: #FEFEC6;
+	border-top: 1px solid #360;
+	border-bottom: 1px solid #360;
+	}
+ul#footmenu li:first-child {
+	border-left: 1px solid #360;
+	}
+ul#footmenu li {
+	display: inline;
+	}
+ul#footmenu a {
+	line-height: 1.6em;
+	display: inline;
+	padding: 0 10px;
+	border-right: 1px solid #360;
+	} 
+
+#sitefoot p { 
+	margin: 0;
+	padding: 2px 10px 4px 10px;
+	}
+
+#sitefoot a:link, #sitefoot a:visited { 
+	text-decoration: none; 
+	}
+
+div#sitefoot:hover a {text-decoration: underline;}
+
+/* backup for non-hover browsers and tabbing */
+#sitefoot a:hover, #sitefoot a:focus, #sitefoot a:active {text-decoration: underline;}
+
+#funds { 
+	border-bottom: 1px solid #ACBD4E; 
+	}
+
+body.plants #wrapper1, body.plants #wrapper0, body.plants #pagemenu, body.plants #sitefoot { 
+	border-color: #250;
+	}
+body.plants #pagemenu {
+	background: #250;
+	}
+body.fungi #wrapper1, body.fungi #wrapper0, body.fungi #pagemenu, body.fungi #sitefoot { 
+	border-color: #440;
+	}
+body.fungi #pagemenu {
+	background: #440;
+	}
+body.fungi #tagline {
+	background: transparent url(images/plusfungi2.gif) 240px 0 no-repeat;
+	}
+body.fungi #pagemenu li {
+	background-image: url(images/tab2_tr_f.gif);
+	}
+body.fungi #pagemenu ul a, body.fungi #pagemenu ul span { 
+	background-image: url(images/tab2_tl_f.gif);
+	}
+
+body.fungi .box h3 { 
+	background-image: url(images/box2_head_f.gif);
+	}
+
+/* #wrapper1 */
+body {color: #361; background: #ffb;}
+#sitehead {
+	min-height: 60px;
+	color: #361; 
+	background: #dd7 url(images/side_line.gif) right top no-repeat;
+	}
+#bodywrap {background: url(images/side_line.gif) #ffb right top repeat-y;} 
+#sitefoot {background: #ffb;}
+#tagline {padding-top: 9px; text-align: right;}
+#tagline img {display: inline; margin-right: 8px; border: 1px solid #cc0;}
+
+
+#pagemenu li.thispage {background-color: #ffb; color: #361;}
+div#sitemenu li span.start {background-color: #ffb; color: #361; border-right: 0;}
+
+h2 {margin: 0 0 .5em 0; font-size: 1.4em;}
+
+.maps a {display: inline; margin-left: 7px;}
+.maps img {border: 2px solid #cc0;}
+.maps a:link img {border-color: #361;}
+.maps a:visited img {border-color: #650;}
+.maps a:hover img, .maps a:active img, .maps a:focus img {border-color: #00f;}
+
+#sitefoot {margin-bottom: 0; padding-bottom: 50px;}

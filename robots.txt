@@ -1,0 +1,30 @@
+User-agent: *  
+
+Allow: /index.php  
+Allow: /checklists/index.php  
+Allow: /checklists/ 
+Allow: /collections/index.php  
+Allow: /collections/exsiccati/index.php  
+Allow: /collections/misc/collprofiles.php  
+Allow: /collections/misc/collectionindex.php  
+Allow: /games/index.php  
+Allow: /ident/index.php  
+Allow: /imagelib/index.php  
+Allow: /projects/index.php  
+Allow: /sitemap.php    
+
+Disallow: /checklists/tools/  
+Disallow: /checklists/rpc/  
+Disallow: /collections/rpc/  
+Disallow: /classes/  
+Disallow: /css/  
+Disallow: /docs/  
+Disallow: /ident/loadingcl.php  
+Disallow: /images/  
+Disallow: /js/  
+Disallow: /lib/  
+Disallow: /profile/  
+Disallow: /taxa/admin/  
+Disallow: /temp/  
+Disallow: /tools/    
+

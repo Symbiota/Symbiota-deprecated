@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<!-- root element -->
+<gengroup>
+
+<morph>bolete</morph>
+
+<!-- genus names in this gengroup -->
+<genera>
+ <genus>Tylopilus</genus>
+ <genus>Austroboletus</genus>
+</genera>
+
+
+<gentext>
+<p>Members of the genus <em>Tylopilus</em> are separated from the rest of the boletes by having pinkish spores. Their mature pore surfaces are often tinted pinkish, making this a fairly easy genus to identify in the field. The mushrooms are generally colored white, brown, or purplish, without the red and yellow shades so common in the genus <em>Boletus</em>.  Their caps also tend to be somewhat thicker or taller than most other boletes (<em>Tylopilus</em> means <q>swollen cap</q>). A few members of this genus are edible, but none are very popular for the table.</p>
+<p>Distinguishing between different <em>Tylopilus</em> species can be quite easy or very difficult. Many of these mushrooms have a strongly bitter flavor; tasting a small piece of the cap flesh (spit it out - don’t swallow it) will quickly let you know if you have a bitter species. Stem surface is another important character -- several of these species have distinctly reticulate stems (with a raised net-like pattern, usually on the upper part of the stem). Members of the <em>Tylopilus indecisus</em> group are hard to identify, and intermediate forms can be found; testing their cap surfaces with drops of ammonium hydroxide and measuring their spores is often necessary for correct identification.</p>
+</gentext>
+
+<similarGenera>
+ <comments>A few members of the genus <em>Austroboletus</em> are similar to <em>Tylopilus</em>, but they have pitted spores. <em>Gyroporus</em> species have brittle flesh and hollow stems.</comments>
+<!-- These are made into links -->
+ <simgens>
+  <simgen>Austroboletus</simgen>
+  <simgen>Gyroporus</simgen>
+ </simgens>
+ <links>
+  <link>
+   <linkUri/> 
+   <linkText/>
+  </link> 
+ </links>
+</similarGenera>
+
+
+
+
+
+
+
+
+
+<author>The Field Museum</author>
+<modificationDate>2006-06-11</modificationDate> 
+
+</gengroup>

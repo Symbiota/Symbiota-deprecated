@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<!-- root element -->
+<gengroup>
+
+<morph>agaric</morph>
+
+<!-- genus names in this gengroup -->
+<genera>
+ <genus>Agaricus</genus>
+ <genus>Psalliota</genus>
+</genera>
+
+
+<gentext>
+<p>The genus <em>Agaricus</em> is best known to most people as it is the common white button mushroom sold in stores.  The large brown Portabella and Crimini mushrooms are different strains of this same cultivated species.
+
+ A few members of this genus are good edibles, but others are poisonous, so great care is needed in identification.
+</p>
+<p>
+Separating the different <em>Agaricus</em> species is often difficult. Both young and mature fruitbodies are helpful to see changes in gill color, staining reactions, and ring development. Odors and differences in habitat are also important.
+</p>
+</gentext>
+
+<similarGenera>
+ <comments>The parasol mushrooms, <em>Lepiota</em> and related genera, are related to <em>Agaricus</em> but they have white or pale green spore prints.</comments>
+<!-- These are made into links -->
+ <simgens>
+  <simgen>Lepiota</simgen>
+  <simgen>Amanita</simgen>
+ </simgens>
+ <links>
+  <link>
+   <linkUri/> 
+   <linkText/>
+  </link> 
+ </links>
+</similarGenera>
+
+
+
+
+
+
+
+
+
+<author>The Field Museum</author>
+<modificationDate>2006-06-12</modificationDate> 
+
+</gengroup>

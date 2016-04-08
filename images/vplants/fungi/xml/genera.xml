@@ -1,0 +1,23 @@
+<?xml version = '1.0'?>
+
+<gengroups>
+ <gengroup>
+  <morph>disco</morph>
+  <morphText>Cup Fungus</morphText>
+  <genID>Peziza</genID>
+  <genID>Urnula</genID>
+ </gengroup>
+ <gengroup>
+  <morph>bolete</morph>
+  <morphText>Pored Mushroom</morphText>
+  <genID>Austroboletus</genID>
+  <genID>Tylopilus</genID>
+</gengroup>
+ <gengroup>
+  <morph>agaric</morph>
+  <morphText>Gilled Mushroom</morphText>
+  <genID>Agaricus</genID>
+  <genID>Lepiota</genID>
+ </gengroup>
+</gengroups>
+
