@@ -66,7 +66,7 @@ $collManager->reset();
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:10px;'>
-				<input type="submit" class="harvestparamtbtn" value="Search" title="Search Selected Collections" />
+				<input type="submit" class="harvestparamtbtn" value="" title="" />
 			</div>
 			<div>
 				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>
@@ -212,7 +212,7 @@ $collManager->reset();
 				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$collArray)) echo $collArray["eventdate2"]; ?>" title="<?php echo $LANG['TITLE_TEXT_4']; ?>" />
 			</div>
 			<div style="float:right;">
-				<input type="submit" class="harvestparamtbtn" value="Search" title="Search Selected Collections" />
+				<input type="submit" class="harvestparamtbtn" value="" title="" />
 			</div>
 			<div>
 				<h1><?php echo $LANG['SPECIMEN_HEADER']; ?></h1>
