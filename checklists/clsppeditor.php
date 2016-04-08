@@ -240,7 +240,7 @@ $clArray = $vManager->getChecklistData();
 								<div style="clear:both;margin-top:2px;">
 									<b>*</b> Note that vouchers &amp; notes will transfer to new taxon
 								</div>
-								<div style="15px">
+								<div style="margin:15px">
 									<input name='tid' type='hidden' value="<?php echo $vManager->getTid();?>" />
 									<input name='clid' type='hidden' value="<?php echo $vManager->getClid();?>" />
 									<input name="action" type="hidden" value="Rename Taxon" />
@@ -344,5 +344,3 @@ $clArray = $vManager->getChecklistData();
 		</div>
 	</body>
 </html>
-
- 

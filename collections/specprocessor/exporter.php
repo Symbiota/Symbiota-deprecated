@@ -750,7 +750,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 													<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank" onclick="startAuthMonitoring()">Login to CoGe</a></span>
 												</div>
 											</fieldset>
-											<fieldset id="coge-communities" style="display:;margin:10px;padding:10px;">
+											<fieldset id="coge-communities" style="margin:10px;padding:10px;">
 												<legend style="font-weight:bold">Available Communities</legend>
 												<div style="margin:10px;">
 													To import data into an existing geoLocate community, login to GeoLocate (see above), select the target community, 

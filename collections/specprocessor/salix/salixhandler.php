@@ -67,8 +67,6 @@ if($SYMB_UID){
 
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<div style="15px">
-			</div>
 			<?php 
 			if($isEditor){
 				$salixHanlder = new SalixUtilities();

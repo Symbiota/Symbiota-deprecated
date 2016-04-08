@@ -687,7 +687,7 @@ $imgloc = "../images/games/namegame/";
 					<td><span id="y" style="display:block">Y</span></td>
 					<td><span id="z" style="display:block">Z</span></td>
 					<td valign="center">
-						<span id="?" style="display:block" class="question"  title="Wild Card">?</span>
+						<span id="qmark" style="display:block;" class="question"  title="Wild Card">?</span>
 					</td>
 				</tr>
 			</table>

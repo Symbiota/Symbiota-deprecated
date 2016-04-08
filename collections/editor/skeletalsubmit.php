@@ -190,7 +190,7 @@ if($isEditor){
 							</div> 
 						</div> 
 						<div style="clear:both;padding:15px;">
-							<div style="float:right;left;margin:16px 30px 0px 0px;">
+							<div style="float:right;margin:16px 30px 0px 0px;">
 								<input name="clearform" type="reset" value="Clear Form" style="margin-right:40px" />
 							</div>
 							<div style="float:left;">

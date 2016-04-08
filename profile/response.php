@@ -34,7 +34,7 @@ if (!$fileExists) {
             <input type="hidden" name="annotationURI" value="<? echo $_GET['uri'] ?>"/>
             <input type="submit" value="Respond"/>
         </form>
-    <?
+    <?php
     } else if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $fp = FPNetworkFactory::getNetworkFacade();
 
