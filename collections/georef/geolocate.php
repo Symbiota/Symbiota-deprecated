@@ -63,7 +63,7 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 	</style>
 	<script type="text/javascript">
 	    function transferCoord(evt) {
-	        if(evt.origin !== "//www.museum.tulane.edu") {
+	        if(evt.origin.indexOf("museum.tulane.edu") < 0) {
 				alert("iframe url does not have permision to interact with me");
 	        }
 	        else {//alert(evt.data);
