@@ -16,28 +16,29 @@ class OccurrenceSupport {
 	}
 
 	//Comment functions
-	public function getComments($collid, $start, $limit, $tsStart, $tsEnd, $uid, $rs){
+	public function getComments($collid, $start, $limit, $tsStart, $tsEnd, $uid, $reviewStatus){
 		$retArr = array();
-		if($collid){
+		if(is_numeric($collid)){
+			if(!is_numeric($start)) $start = 0;
+			if(!is_numeric($limit)) $limit = 100;
 			$sqlBase = 'FROM omoccurcomments c INNER JOIN omoccurrences o ON c.occid = o.occid '.
 				'WHERE o.collid = '.$collid;
-			if($uid){
-				$sqlBase .= ' AND uid = '.$uid;
+			if(is_numeric($uid) && $uid){
+				$sqlBase .= ' AND c.uid = '.$uid;
 			}
-			if(is_numeric($rs)){
-				$sqlBase .= ' AND reviewstatus = '.$rs;
-			}
-			if($tsStart){
-				$tsStartStr = OccurrenceUtilities::formatDate($tsStart);
-				if($tsStartStr){
-					$sqlBase .= ' AND initialtimestamp >= '.$tsStartStr;
+			if(is_numeric($reviewStatus)){
+				if($reviewStatus == 1){
+					$sqlBase .= ' AND c.reviewstatus = 1 ';
+				}
+				elseif($reviewStatus == 2){
+					$sqlBase .= ' AND c.reviewstatus = 0 ';
 				}
 			}
-			if($tsEnd){
-				$tsEndStr = OccurrenceUtilities::formatDate($tsEnd);
-				if($tsEndStr){
-					$sqlBase .= ' AND initialtimestamp < '.$tsEndStr;
-				}
+			if(preg_match('/^\d{4}-\d{2}-\d{2}/', $tsStart)){
+				$sqlBase .= ' AND initialtimestamp >= "'.$tsStart.'"';
+			}
+			if(preg_match('/^\d{4}-\d{2}-\d{2}/', $tsEnd)){
+				$sqlBase .= ' AND initialtimestamp < "'.$tsEnd.'"';
 			}
 			//Get count
 			$sqlCnt = 'SELECT count(c.comid) as cnt '.$sqlBase;
@@ -48,16 +49,18 @@ class OccurrenceSupport {
 			$rsCnt->free();
 			
 			//Get records
-			$sql = 'SELECT c.comid, c.occid, c.comment, c.uid, c.reviewstatus, c.parentcomid, c.initialtimestamp '.$sqlBase.
+			$sql = 'SELECT c.comid, c.occid, c.comment, c.uid, c.reviewstatus, c.parentcomid, c.initialtimestamp, '.
+				'IFNULL(o.catalognumber, o.othercatalognumbers) AS catnum, o.recordedby, o.recordnumber, o.eventdate '.$sqlBase.
 				' ORDER BY initialtimestamp DESC LIMIT '.$start.','.$limit;
-			//echo $sql; exit;
+			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->comid]['str'] = $r->comment;
-				$retArr[$r->comid]['occid'] = $r->occid;
 				$retArr[$r->comid]['uid'] = $r->uid;
 				$retArr[$r->comid]['rs'] = $r->reviewstatus;
 				$retArr[$r->comid]['ts'] = $r->initialtimestamp;
+				$retArr[$r->comid]['occid'] = $r->occid;
+				$retArr[$r->comid]['occurstr'] = '<b>'.$r->catnum.'</b> <span style="margin:20px">'.$r->recordedby.' '.($r->recordnumber?' #'.$r->recordnumber:'').'</span> '.$r->eventdate;
 			}
 			$rs->free();
 		}

@@ -101,6 +101,7 @@ ALTER TABLE `omoccurassococcurrences`
   CHANGE COLUMN `aoid` `associd` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   CHANGE COLUMN `sciname` `verbatimsciname` VARCHAR(250) NULL DEFAULT NULL ,
   CHANGE COLUMN `tid` `tid` INT(11) UNSIGNED NULL DEFAULT NULL ,
+  ADD COLUMN `basisOfRecord` VARCHAR(45) NULL AFTER `identifier`,
   ADD COLUMN `createduid` INT UNSIGNED NULL AFTER `notes`,
   ADD COLUMN `datelastmodified` DATETIME NULL AFTER `createduid`,
   ADD COLUMN `modifieduid` INT UNSIGNED NULL AFTER `datelastmodified`,
