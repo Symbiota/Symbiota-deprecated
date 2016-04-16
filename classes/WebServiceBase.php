@@ -12,9 +12,20 @@ class WebServiceBase extends Manager{
 		parent::__destruct();
 	}
 
-	protected function validateSecurityKey($k){
+	public function validateSecurityKey($k){
+		if(isset($GLOBALS['SECURITY_KEY'])){
+			if($k == $GLOBALS['SECURITY_KEY']){
+				return true;
+			}
+			else{
+				$this->errorMessage = 'Security Key authentication failed';
+				return false;
+			}
+		}
+		else{
+			return true;
+		}
 		return true;
-		return false;
 	}
 }
 ?>

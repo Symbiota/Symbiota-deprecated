@@ -31,24 +31,25 @@ if(!is_numeric($occid)) $occid = 0;
 $recordID = preg_replace("/[^A-Za-z0-9\-]/","",$recordID);
 $securityKey = preg_replace("/[^A-Za-z0-9\-]/","",$securityKey);
 
-if(!$occid && !$recordID){
-	exit('{"Result":[{"Status":"ERROR","Error":"occurrence identifier is null"}]}');
-}
-if(!$dwcObj){
-	exit('{"Result":[{"Status":"ERROR","Error":"edit object is null"}]}');
-}
-if($securityKey){
-	//if(!$duManager->validateSecurityKey($securityKey)) exit('ERROR: security key validation failed!');
-}
-else{	
-	//exit("ERROR: security key is required and is null ");
-}
-
-
 $servManager = new WsOccurEditor();
+if(!$occid && !$recordID)
+	exit('{"Result":[{"Status":"FAILURE","Error":"occurrence identifier is null"}]}');
+
+if(!$dwcObj)
+	exit('{"Result":[{"Status":"FAILURE","Error":"edit object is null"}]}');
+
+if(!$servManager->validateSecurityKey($securityKey))
+	exit('ERROR: security key validation failed!');
+
 $servManager->setVerboseMode(1);
-if($occid) $servManager->setOccid($occid);
-elseif($recordID) $servManager->setRecordID($recordID);
+if($occid){
+	$servManager->setOccid($occid);
+}
+elseif($recordID){
+	if(!$servManager->setRecordID($recordID)){
+		exit('{"Result":[{"Status":"FAILURE","Error":"recordID not valid"}]}');
+	}
+}
 if($servManager->setDwcArr($dwcObj)){
 	$servManager->setEditType($editType);
 	$servManager->setSource($source);
@@ -58,6 +59,6 @@ if($servManager->setDwcArr($dwcObj)){
 	echo $servManager->applyEdit();
 }
 else{
-	echo '{"Result":[{"Status":"ERROR","Error":"dwcObj failed to validate"}]}';
+	echo '{"Result":[{"Status":"FAILURE","Error":"dwcObj failed to validate"}]}';
 }
 ?>

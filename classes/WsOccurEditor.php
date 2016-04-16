@@ -50,6 +50,7 @@ class WsOccurEditor extends WebServiceBase{
 		$rs = $this->conn->query($sql);
 		$oldValueArr = $rs->fetch_assoc();
 		$rs->free();
+		if(!$oldValueArr) return '{"Result":[{"Status":"FAILURE","Error":"Occurrence identifier not valid"}]}';
 
 		//limit to fields where new values are different than old values
 		$vettedOldValues = array();
@@ -67,20 +68,16 @@ class WsOccurEditor extends WebServiceBase{
 		if($this->source == 'geolocate'){
 			//Only edit coordinate and georeference detail field
 			//Activate only if target coordinates are null
-			if(!isset($vettedNewValues['decimallatitude'])){
-				//Abort edits because decimalLatitude IS NULL
-				if(!$vettedNewValues) return '{"Result":[{"Status":"FAILURE","Error":"decimalLatitude cannot be NULL for GeoLocate edit"}]}';
-			}
-			elseif(!isset($vettedNewValues['decimallongitude'])){
-				//Abort edits because decimalLongitude IS NULL
-				if(!$vettedNewValues) return '{"Result":[{"Status":"FAILURE","Error":"decimalLongitude cannot be NULL for GeoLocate edit"}]}';
+			if(!isset($vettedNewValues['decimallatitude']) && !isset($vettedNewValues['decimallongitude'])){
+				//Abort edits because decimalLatitude and decimalLongitude are NULL or unchanged
+				return '{"Result":[{"Status":"FAILURE","Error":"both decimalLatitude and decimalLongitude are NULL or unchanged"}]}';
 			}
 			else{
 				$approvedGeolocateFields = array('decimallatitude','decimallongitude','geodeticdatum','coordinateuncertaintyinmeters','georeferencedby',
 					'georeferenceprotocol','georeferencesources','georeferenceverificationstatus','georeferenceremarks');
 				$vettedOldValues = array_intersect_key($vettedOldValues, array_flip($approvedGeolocateFields));
 				$vettedNewValues = array_intersect_key($vettedNewValues, array_flip($approvedGeolocateFields));
-				if($vettedOldValues['decimallatitude'] || $vettedOldValues['decimallongitude']){
+				if(isset($vettedOldValues['decimallatitude']) || isset($vettedOldValues['decimallongitude'])){
 					//There is already values in the current lat/long field, thus don't apply editing in omoccurrence table
 					$appliedStatus = 0;
 				}
@@ -135,6 +132,12 @@ class WsOccurEditor extends WebServiceBase{
 			$this->occid = $r->occid;
 		}
 		$rs->free();
+		if($this->occid){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 
 	public function setDwcArr($dwcObj){
