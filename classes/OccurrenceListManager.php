@@ -80,7 +80,8 @@ class OccurrenceListManager extends OccurrenceManager{
 				$returnArr[$collIdStr][$occId]["locality"] = $securityStr.'</span>';
 			}
 		}
-		$result->close();
+		$result->free();
+		$returnArr = $this->setImages($returnArr);
 		return $returnArr;
 	}
 
@@ -95,13 +96,33 @@ class OccurrenceListManager extends OccurrenceManager{
 			if($row = $result->fetch_object()){
 				$this->recordCount = $row->cnt;
 			}
-			$result->close();
+			$result->free();
 		}
 		setCookie("collvars","reccnt:".$this->recordCount,time()+64800,($clientRoot?$clientRoot:'/'));
 	}
 
 	public function getRecordCnt(){
 		return $this->recordCount;
+	}
+	
+	private function setImages($recArr){
+		$occArr = array();
+		foreach($recArr as $collid => $oArr){
+			$occArr = array_merge($occArr,array_keys($oArr));
+		}
+		if($occArr){
+			$sql = 'SELECT o.collid, o.occid, i.thumbnailurl '.
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'WHERE o.occid IN('.implode(',',$occArr).')';
+			$rs = $this->conn->query($sql);
+			$previousOccid = 0;
+			while($r = $rs->fetch_object()){
+				if($r->occid != $previousOccid) $recArr[$r->collid][$r->occid]['img'] = $r->thumbnailurl;
+				$previousOccid = $r->occid;
+			}
+			$rs->free();
+		}
+		return $recArr;
 	}
 
 	public function getCloseTaxaMatch($name){

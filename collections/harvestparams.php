@@ -219,11 +219,8 @@ $collManager->reset();
 			</div>
 			<div>
 				<?php echo $LANG['CATALOG_NUMBER']; ?>
-                <input type="text" id="catnum" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
-			</div>
-			<div>
-				<?php echo $LANG['OTHER_CATALOG_NUMBERS']; ?>
-				<input type="text" id="othercatnum" size="32" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$collArray)) echo $collArray["othercatnum"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+                <input type="text" id="catnum" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" /> 
+                <input name="includeothercatnum" type="checkbox" value="1" checked /> <?php echo $LANG['INCLUDE_OTHER_CATNUM']?>
 			</div>
 			<div>
 				<input type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$collArray) && $collArray["typestatus"]) echo "CHECKED"; ?> /> <?php echo $LANG['TYPE']; ?>
