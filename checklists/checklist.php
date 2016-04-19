@@ -41,6 +41,7 @@ $clArray = Array();
 if($clValue || $dynClid){
 	$clArray = $clManager->getClMetaData();
 }
+$activateKey = $KEY_MOD_IS_ACTIVE;
 $showDetails = 0;
 if($clValue && $clArray["defaultSettings"]){
 	$defaultArr = json_decode($clArray["defaultSettings"], true);
@@ -52,6 +53,7 @@ if($clValue && $clArray["defaultSettings"]){
 		if(array_key_exists('dauthors',$defaultArr)){$showAuthors = $defaultArr["dauthors"];}
 		if(array_key_exists('dalpha',$defaultArr)){$showAlphaTaxa = $defaultArr["dalpha"];}
 	}
+	if(isset($defaultArr['activatekey'])) $activateKey = $defaultArr['activatekey'];
 }
 if($pid) $clManager->setProj($pid);
 elseif(array_key_exists("proj",$_REQUEST)) $pid = $clManager->setProj($_REQUEST['proj']);
@@ -201,7 +203,7 @@ if($clValue || $dynClid){
 				</a>
 			</div>
 			<?php 
-			if(($keyModIsActive === true || $keyModIsActive === 1) && !$printMode){
+			if($activateKey && !$printMode){
 				?>
 				<div style="float:left;padding:5px;">
 					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid;?>&taxon=All+Species">

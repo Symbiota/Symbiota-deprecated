@@ -34,20 +34,11 @@ $LANG['CREATENEWCOLL'] = 'Create a New Collection or Observation Profile';
 $LANG['GUIDMAP'] = 'Collection GUID Mapper';
 $LANG['SALIX'] = 'SALIX WordStat Manager';
 $LANG['IDKEYS'] = 'Identification Keys';
-$LANG['KEYMODULE'] = 'Note: The Identification Key module is deactivated within this portal.
-								However, as a Identification Key Adminitrator you have access to editing tools and
-								keys for development and testing.';
+$LANG['KEYMODULE'] = 'Note: The Identification Key module is deactivated within this portal. However, you can override by activating idividual keys within the checklist administration page.';
 $LANG['AUTHOKEY'] = 'You are authorized to access the ';
 $LANG['CHARASTATES'] = 'Characters and Character States Editor';
-$LANG['DISPLAYTESTK'] = 'Display Test Keys';
-$LANG['YAATE'] = 'You are authorized to edit Identification Keys.
-									To edit morphological characters, login and go to any key. Open the
-									morphological character editor by clicking on the
-									editing symbol to the right of Scientific Name that you wish to modify.';
-$LANG['CODINGCHARA'] = 'For coding characters in a table format, open the ';
-$LANG['MASSUPDATEED'] = 'Mass-Update Editor';
-$LANG['EDITBYINV'] = 'Editor by Inventory Project';
-$LANG['EDITBYCHECK'] = 'Editor by Checklist';
+$LANG['AUTHIDKEY'] = 'You are authorized to edit Identification Keys.';
+$LANG['CODINGCHARA'] = 'For coding characters in a table format, open the Mass-Update Editor for the following checklists';
 $LANG['NOTAUTHIDKEY'] = 'You are not authorized to edit Identification Keys';
 $LANG['IMAGES'] = 'Images';
 $LANG['SEESYMBDOC'] = 'See the Symbiota documentation on ';

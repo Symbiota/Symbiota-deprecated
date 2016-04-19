@@ -59,6 +59,7 @@ class ChecklistAdmin {
 		$defaultViewArr["dvouchers"] = array_key_exists("dvouchers",$postArr)?1:0;
 		$defaultViewArr["dauthors"] = array_key_exists("dauthors",$postArr)?1:0;
 		$defaultViewArr["dalpha"] = array_key_exists("dalpha",$postArr)?1:0;
+		$defaultViewArr["activatekey"] = array_key_exists("activatekey",$postArr)?1:0;
 		$postArr["defaultsettings"] = json_encode($defaultViewArr);
 		
 		$fieldArr = array('name'=>'s','authors'=>'s','type'=>'s','locality'=>'s','publication'=>'s','abstract'=>'s','notes'=>'s','latcentroid'=>'n',
@@ -461,17 +462,6 @@ class ChecklistAdmin {
 				$rs->free();
 			}
 		}
-		return $retArr;
-	}
-
-	public function getParentArr(){
-		$retArr = array();
-		$sql = 'SELECT c.clid, c.name FROM fmchecklists c WHERE type = "static" AND access <> "private" ORDER BY c.name';
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$retArr[$row->clid] = $row->name;
-		}
-		$rs->free();
 		return $retArr;
 	}
 

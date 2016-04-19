@@ -110,17 +110,17 @@ $smManager = new SiteMapManager();
 								<a href="profile/usertaxonomymanager.php"><?php echo $LANG['TAXINTER'];?></a>
 							</li>  
 							<li>
-								<a href="<?php echo $clientRoot; ?>/collections/misc/collmetadata.php">
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/misc/collmetadata.php">
                                     <?php echo $LANG['CREATENEWCOLL'];?>
 								</a>
 							</li>
 							<li>
-								<a href="<?php echo $clientRoot; ?>/admin/guidmapper.php">
+								<a href="<?php echo $CLIENT_ROOT; ?>/admin/guidmapper.php">
                                     <?php echo $LANG['GUIDMAP'];?>
 								</a>
 							</li>
 							<li>
-								<a href="<?php echo $clientRoot; ?>/collections/specprocessor/salix/salixhandler.php">
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/specprocessor/salix/salixhandler.php">
                                     <?php echo $LANG['SALIX'];?>
 								</a>
 							</li>
@@ -128,11 +128,11 @@ $smManager = new SiteMapManager();
 						<?php
 					}
 					
-					if($keyModIsActive || array_key_exists("KeyAdmin",$USER_RIGHTS)){ 
+					if($KEY_MOD_IS_ACTIVE || array_key_exists("KeyAdmin",$USER_RIGHTS)){ 
 						?>
 						<h3><?php echo $LANG['IDKEYS'];?></h3>
 						<?php 
-						if(!$keyModIsActive && array_key_exists("KeyAdmin",$USER_RIGHTS)){
+						if(!$KEY_MOD_IS_ACTIVE && array_key_exists("KeyAdmin",$USER_RIGHTS)){
 							?>
 							<div style="color:red;margin-left:10px;">
                                 <?php echo $LANG['KEYMODULE'];?>
@@ -145,59 +145,23 @@ $smManager = new SiteMapManager();
 							if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 								?>
 								<li>
-                                    <?php echo $LANG['AUTHOKEY'];?><a href="<?php echo $clientRoot; ?>/ident/admin/index.php"><?php echo $LANG['CHARASTATES'];?></a>
+                                    <?php echo $LANG['AUTHOKEY'];?><a href="<?php echo $CLIENT_ROOT; ?>/ident/admin/index.php"><?php echo $LANG['CHARASTATES'];?></a>
 								</li>
 								<?php 
-								if($clAdmin){
-									asort($clAdmin);
-									?>
-									<li id="testkeyhead" style="margin-left:15px;">
-										<a href="#" onclick="toggle('testkey');toggle('testkeyhead');return false;"><?php echo $LANG['DISPLAYTESTK'];?></a>
-									</li>
-									<div id="testkey" style="display:none;margin-left:15px;">
-										<?php 
-										foreach($clAdmin as $clKey => $clValue){
-											echo '<li>';
-											echo '<a href="'.$clientRoot.'/ident/key.php?cl='.$clKey.'&taxon=All+Species">'.$clValue.'</a>';
-											echo '</li>';
-										}
-										?>
-									</div>
-									<?php
-								}
 							}
 							if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("KeyAdmin",$USER_RIGHTS)){ 
 								?>
 								<li>
-                                    <?php echo $LANG['YAATE'];?>
+                                    <?php echo $LANG['AUTHIDKEY'];?>
 								</li>
 								<li>
-                                    <?php echo $LANG['CODINGCHARA'];?>
-									<a href="<?php echo $clientRoot; ?>/ident/tools/massupdate.php"><?php echo $LANG['MASSUPDATEED'];?></a><br/>
-									<?php 
-									if($projList){
-										//Show Checklists that user has explicit editing rights
-										if($clAdmin){
-											echo '<div style="margin:5px 0px 0px 10px;"><b>'.$LANG['EDITBYCHECK'].'</b></div>';
-											echo '<ul>';
-											foreach($clAdmin as $vClid => $name){
-												echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?clf=".$vClid."'>".$name."</a></li>";
-											}
-											echo '</ul>';
-										}
-										//Show projects for access to a greater scope of checklist 
-										echo '<div style="margin:5px 0px 0px 10px;"><b>'.$LANG['EDITBYINV'].'</b></div>';
-										foreach($projList as $pid => $pArr){
-											echo '<ul>';
-											echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?pid=".$pid."'>".$pArr["name"]."</a></li>";
-											echo '</ul>';
-										}
-									}
-									elseif($clList){
-										echo '<div style="margin:5px 0px 0px 10px;"><b>'.$LANG['EDITBYCHECK'].'</b></div>';
+                                    <?php 
+									//Show Checklists that user has explicit editing rights
+									if($clAdmin){
+	                                    echo $LANG['CODINGCHARA'].'<br/>'; 
 										echo '<ul>';
-										foreach($clList as $clidKey => $clName){
-											echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?clf=".$clidKey."'>".$clName."</a></li>";
+										foreach($clAdmin as $vClid => $name){
+											echo "<li><a href='".$CLIENT_ROOT."/ident/tools/massupdate.php?clid=".$vClid."'>".$name."</a></li>";
 										}
 										echo '</ul>';
 									}
@@ -253,7 +217,7 @@ $smManager = new SiteMapManager();
 								echo '<li><b>'.$LANG['LISTOFCURR'].'</b>'.$LANG['CLICKEDIT'].'</li>';
 								echo '<ul>';
 								foreach($projList as $pid => $pArr){
-									echo '<li><a href="'.$clientRoot.'/projects/index.php?pid='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
+									echo '<li><a href="'.$CLIENT_ROOT.'/projects/index.php?pid='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
 								}
 								echo '</ul>';
 							}
@@ -322,7 +286,7 @@ $smManager = new SiteMapManager();
 						<?php 
 						if($clAdmin){
 							foreach($clAdmin as $k => $v){
-								echo "<li><a href='".$clientRoot."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
+								echo "<li><a href='".$CLIENT_ROOT."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
 							}
 						}
 						else{
@@ -359,7 +323,7 @@ $smManager = new SiteMapManager();
 						if($collList = $smManager->getCollArr()){
 							foreach($collList as $k => $cArr){
 								echo '<li>';
-								echo '<a href="'.$clientRoot.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';
+								echo '<a href="'.$CLIENT_ROOT.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';
 								echo $cArr['name'];
 								echo '</a>';
 								echo '</li>';
@@ -451,7 +415,7 @@ $smManager = new SiteMapManager();
 					<?php 
 				}
 				else{
-					echo ''.$LANG['PLEASE'].' <a href="'.$clientRoot.'/profile/index.php?refurl=../sitemap.php">'.$LANG['LOGIN'].'</a>'.$LANG['TOACCESS'].'<br/>'.$LANG['CONTACTPORTAL'].'';
+					echo ''.$LANG['PLEASE'].' <a href="'.$CLIENT_ROOT.'/profile/index.php?refurl=../sitemap.php">'.$LANG['LOGIN'].'</a>'.$LANG['TOACCESS'].'<br/>'.$LANG['CONTACTPORTAL'].'';
 				}
 			?>
 			</fieldset>
