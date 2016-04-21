@@ -252,9 +252,15 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				}
 				?>
 			</div>
+			<div style='margin:10px;'>
+				<?php
+					$tableLink = 'listtabledisplay.php?usecookies=false&starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'');
+					echo "<a href='".$tableLink."'>See Results in Table View</a>";
+				?>
+			</div>
 			<?php 
 			$paginationStr = '<div><div style="clear:both;"><hr/></div><div style="float:left;margin:5px;">';
-			$lastPage = (int) ($collManager->getRecordCnt() / $cntPerPage) + 1;
+			$lastPage = (int)($collManager->getRecordCnt() / $cntPerPage) + 1;
 			$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 			$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
 			$hrefPrefix = 'list.php?usecookies=false&starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';

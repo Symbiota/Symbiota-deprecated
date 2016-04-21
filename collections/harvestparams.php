@@ -62,7 +62,9 @@ $collManager->reset();
 	<div id="innertext">
 		<h1><?php echo $LANG['PAGE_HEADER']; ?></h1>
 		<?php echo $LANG['GENERAL_TEXT_1']; ?>
-
+		<div style="margin:5px;">
+			<input type='checkbox' name='showtable' id='showtable' value='1' onchange="changeTableDisplay();" /> Show results in table view
+		</div>
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:10px;'>
