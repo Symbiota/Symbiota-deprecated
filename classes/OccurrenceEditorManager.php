@@ -134,6 +134,7 @@ class OccurrenceEditorManager {
 			if(array_key_exists('q_observeruid',$_REQUEST) && $_REQUEST['q_observeruid']) $this->qryArr['ouid'] = $_REQUEST['q_observeruid'];
 			if(array_key_exists('q_processingstatus',$_REQUEST) && $_REQUEST['q_processingstatus']) $this->qryArr['ps'] = trim($_REQUEST['q_processingstatus']);
 			if(array_key_exists('q_datelastmodified',$_REQUEST) && $_REQUEST['q_datelastmodified']) $this->qryArr['dm'] = trim($_REQUEST['q_datelastmodified']);
+			if(array_key_exists('q_exsiccatiid',$_REQUEST) && $_REQUEST['q_exsiccatiid']) $this->qryArr['exid'] = trim($_REQUEST['q_exsiccatiid']);
 			if(array_key_exists('q_dateentered',$_REQUEST) && $_REQUEST['q_dateentered']) $this->qryArr['de'] = trim($_REQUEST['q_dateentered']);
 			if(array_key_exists('q_ocrfrag',$_REQUEST) && $_REQUEST['q_ocrfrag']) $this->qryArr['ocr'] = trim($_REQUEST['q_ocrfrag']);
 			if(array_key_exists('q_imgonly',$_REQUEST) && $_REQUEST['q_imgonly']) $this->qryArr['io'] = 1;
@@ -457,6 +458,16 @@ class OccurrenceEditorManager {
 			//Used when OCR frag comes from set field within queryformcrowdsourcing
 			$sqlWhere .= 'AND (ocr.rawstr LIKE "%'.$this->qryArr['ocr'].'%") ';
 		}
+		//Exsiccati ID
+		if(array_key_exists('exid',$this->qryArr)){
+			//Used to find records linked to a specific exsiccati
+			if(is_numeric($this->qryArr['exid'])){
+				$sqlWhere .= 'AND (exn.ometid = '.$this->qryArr['exid'].') ';
+			}
+			else{
+				$sqlWhere .= 'AND (exn.ometid = "null") ';
+			}
+		}
 		//Custom search fields
 		for($x=1;$x<4;$x++){
 			$cf = (array_key_exists('cf'.$x,$this->qryArr)?$this->qryArr['cf'.$x]:'');
@@ -649,6 +660,9 @@ class OccurrenceEditorManager {
 		}
 		elseif(strpos($this->sqlWhere,'ul.username')){
 			$sql .= 'LEFT JOIN omoccuredits ome ON o.occid = ome.occid LEFT JOIN userlogin ul ON ome.uid = ul.uid ';
+		}
+		elseif(strpos($this->sqlWhere,'exn.ometid')){
+			$sql .= 'LEFT JOIN omexsiccatiocclink exocc ON o.occid = exocc.occid LEFT JOIN omexsiccatinumbers exn ON exocc.omenid = exn.omenid ';
 		}
 		elseif(array_key_exists('io',$this->qryArr)){
 			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
