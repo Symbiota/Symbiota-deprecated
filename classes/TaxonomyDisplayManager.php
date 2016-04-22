@@ -183,6 +183,13 @@ class TaxonomyDisplayManager{
 	}
 
 	private function echoTaxonArray($node,$displayFullTree){
+		global $userRights;
+		$editable = false;
+		if($userRights){
+			if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("Taxonomy",$userRights)){
+				$editable = true;
+			}
+		}
 		if($node){
 			uksort($node, array($this,"cmp"));
 			//$indent = $this->indentValue; 
@@ -209,7 +216,12 @@ class TaxonomyDisplayManager{
 				if($indent > 230) $indent -= 10;
 				//echo "<div style='margin-left:".$indent."px;'>";
 				echo "<div>".str_repeat('&nbsp;',$indent/5);
-				echo "<a href='taxonomyeditor.php?target=".$key."'>".$sciName."</a>";
+				if($editable){
+					echo "<a href='taxonomyeditor.php?target=".$key."'>".$sciName."</a>";
+				}
+				else{
+					echo "<a href='../index.php?taxon=".$key."'>".$sciName."</a>";
+				}
 				if($this->searchTaxonRank < 140 && !$displayFullTree && $taxonRankId == 140){
 					echo '<a href="taxonomydisplay.php?target='.$sciName.'">';
 					echo '<img src="../../images/tochild.png" style="width:9px;" />';
@@ -223,7 +235,12 @@ class TaxonomyDisplayManager{
 						$synName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$synName);
 						//echo "<div style='padding-left:".($indent+30)."px;'>";
 						echo "<div>".str_repeat('&nbsp;',$indent/5).str_repeat('&nbsp;',7);
-						echo "[<a href='taxonomyeditor.php?target=".$synTid."'>".$synName."</a>]";
+						if($editable){
+							echo "[<a href='taxonomyeditor.php?target=".$synTid."'>".$synName."</a>]";
+						}
+						else{
+							echo "[<a href='../index.php?taxon=".$synTid."'>".$synName."</a>]";
+						}
 						echo "</div>";
 					}
 				}

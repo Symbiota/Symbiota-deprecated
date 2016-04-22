@@ -6,8 +6,6 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../taxa/admin/taxonomydisplay.php?'.$_SERVER['QUERY_STRING']);
-
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $displayAuthor = array_key_exists('displayauthor',$_REQUEST)?$_REQUEST['displayauthor']:0;
 $displayFullTree = array_key_exists('displayfulltree',$_REQUEST)?$_REQUEST['displayfulltree']:0;
@@ -87,45 +85,36 @@ else{
 			<hr/>
 			<?php 
 		}
-		if($editable){
-			?>
-			<div style="float:right;" title="Add a New Taxon">
-				<a href="taxonomyloader.php">
-					<img style='border:0px;width:15px;' src='../../images/add.png'/>
-				</a>
-			</div>
-			<div>
-				<form id="tdform" name="tdform" action="taxonomydisplay.php" method='POST'>
-					<fieldset style="padding:10px;width:500px;">
-						<legend><b>Enter a taxon</b></legend>
-						<div>
-							<b>Taxon:</b> 
-							<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
-						</div>
-						<div style="float:right;margin:15px 80px 15px 15px;">
-							<input name="tdsubmit" type="submit" value="Display Taxon Tree"/>
-							<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
-						</div>
-						<div style="margin:15px 15px 0px 60px;">
-							<input name="displayauthor" type="checkbox" value="1" <?php echo ($displayAuthor?'checked':''); ?> /> Display authors
-						</div>
-						<div style="margin:3px 15px 15px 60px;">
-							<input name="displayfulltree" type="checkbox" value="1" <?php echo ($displayFullTree?'checked':''); ?> /> Display full tree below family 
-						</div>
-					</fieldset>
-				</form>
-			</div>
-			<?php 
-			if($target){
-				$taxonDisplayObj->getTaxa($displayFullTree);
-			}
-		}
-		else{
-			?>
-			<div style="margin:30px;font-weight:bold;font-size:120%;">
-				You do not have permission to view this page. Please contact your portal administrator
-			</div>
-			<?php 
+		?>
+		<div style="float:right;" title="Add a New Taxon">
+			<a href="taxonomyloader.php">
+				<img style='border:0px;width:15px;' src='../../images/add.png'/>
+			</a>
+		</div>
+		<div>
+			<form id="tdform" name="tdform" action="taxonomydisplay.php" method='POST'>
+				<fieldset style="padding:10px;width:500px;">
+					<legend><b>Enter a taxon</b></legend>
+					<div>
+						<b>Taxon:</b> 
+						<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
+					</div>
+					<div style="float:right;margin:15px 80px 15px 15px;">
+						<input name="tdsubmit" type="submit" value="Display Taxon Tree"/>
+						<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
+					</div>
+					<div style="margin:15px 15px 0px 60px;">
+						<input name="displayauthor" type="checkbox" value="1" <?php echo ($displayAuthor?'checked':''); ?> /> Display authors
+					</div>
+					<div style="margin:3px 15px 15px 60px;">
+						<input name="displayfulltree" type="checkbox" value="1" <?php echo ($displayFullTree?'checked':''); ?> /> Display full tree below family 
+					</div>
+				</fieldset>
+			</form>
+		</div>
+		<?php 
+		if($target){
+			$taxonDisplayObj->getTaxa($displayFullTree);
 		}
 		?>
 	</div>

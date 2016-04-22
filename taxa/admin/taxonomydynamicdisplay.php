@@ -6,8 +6,6 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../taxa/admin/taxonomydynamicdisplay.php?'.$_SERVER['QUERY_STRING']);
-
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $displayAuthor = array_key_exists('displayauthor',$_REQUEST)?$_REQUEST['displayauthor']:0;
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
@@ -30,7 +28,7 @@ if($target){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle." Taxonomy Dynamic Display: ".$taxonDisplayObj->getTargetStr(); ?></title>
+	<title><?php echo $defaultTitle." Taxonomy Explorer: ".$taxonDisplayObj->getTargetStr(); ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
@@ -102,168 +100,159 @@ else{
 			<hr/>
 			<?php 
 		}
-		if($editable){
+		?>
+		<div style="float:right;" title="Add a New Taxon">
+			<a href="taxonomyloader.php">
+				<img style='border:0px;width:15px;' src='../../images/add.png'/>
+			</a>
+		</div>
+		<div>
+			<form id="tdform" name="tdform" action="taxonomydynamicdisplay.php" method='POST'>
+				<fieldset style="padding:10px;width:500px;">
+					<legend><b>Enter a taxon</b></legend>
+					<div>
+						<b>Taxon:</b> 
+						<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
+					</div>
+					<div style="float:right;margin:15px 80px 15px 15px;">
+						<input name="tdsubmit" type="submit" value="Display Taxon Tree"/>
+						<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
+					</div>
+					<div style="margin:15px 15px 0px 60px;">
+						<input name="displayauthor" type="checkbox" value="1" <?php echo ($displayAuthor?'checked':''); ?> /> Display authors
+					</div>
+				</fieldset>
+			</form>
+		</div>
+		<div id="tree"></div>
+		<?php
+		if($target){
 			?>
-			<div style="float:right;" title="Add a New Taxon">
-				<a href="taxonomyloader.php">
-					<img style='border:0px;width:15px;' src='../../images/add.png'/>
-				</a>
-			</div>
-			<div>
-				<form id="tdform" name="tdform" action="taxonomydynamicdisplay.php" method='POST'>
-					<fieldset style="padding:10px;width:500px;">
-						<legend><b>Enter a taxon</b></legend>
-						<div>
-							<b>Taxon:</b> 
-							<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
-						</div>
-						<div style="float:right;margin:15px 80px 15px 15px;">
-							<input name="tdsubmit" type="submit" value="Display Taxon Tree"/>
-							<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
-						</div>
-						<div style="margin:15px 15px 0px 60px;">
-							<input name="displayauthor" type="checkbox" value="1" <?php echo ($displayAuthor?'checked':''); ?> /> Display authors
-						</div>
-					</fieldset>
-				</form>
-			</div>
-			<div id="tree"></div>
+			<script type="text/javascript">
+				require([
+					"dojo/window",
+					"dojo/_base/declare",
+					"dojo/dom",
+					"dojo/on",
+					"dijit/Tree",
+					"dijit/tree/ObjectStoreModel",
+					"dijit/tree/dndSource",
+					"dojo/store/JsonRest",
+					"dojo/domReady!"
+				], function(win, declare, dom, on, Tree, ObjectStoreModel, dndSource, JsonRest){
+				/*require([
+					"dojo/_base/declare", "dojo/aspect", "dojo/json", "dojo/query", "dojo/store/Memory", "dojo/store/Observable",
+					"dijit/Tree", "dijit/tree/ObjectStoreModel", "dijit/tree/dndSource", "dojo/domReady!"
+				], function(declare, aspect, json, query, Memory, Observable, Tree, ObjectStoreModel, dndSource){*/
+					// set up the store to get the tree data
+					var taxonTreeStore = new JsonRest({
+						target: "rpc/getdynamicchildren.php",
+						labelAttribute: "label",
+						getChildren: function(object){
+							return this.query({id:object.id,authors:<?php echo $displayAuthor; ?>,targetid:<?php echo $targetId; ?>}).then(function(fullObject){
+								return fullObject.children;
+							});
+						},
+						mayHaveChildren: function(object){
+							return "children" in object;
+						}
+					});
+					
+					/*aspect.around(taxonTreeStore, "put", function(originalPut){
+						return function(obj, options){
+							if(options && options.parent){
+								obj.parent = options.parent.id;
+							}
+							return originalPut.call(taxonTreeStore, obj, options);
+						}
+					});
+					
+					taxonTreeStore = new Observable(taxonTreeStore);*/
+					
+					// set up the model, assigning taxonTreeStore, and assigning method to identify leaf nodes of tree
+					var taxonTreeModel = new ObjectStoreModel({
+						store: taxonTreeStore,
+						deferItemLoadingUntilExpand: true,
+						getRoot: function(onItem){
+							this.store.query({id:"root",authors:<?php echo $displayAuthor; ?>,targetid:<?php echo $targetId; ?>}).then(onItem);
+						},
+						mayHaveChildren: function(object){
+							return "children" in object;
+						}
+					});
+					
+					var TaxonTreeNode = declare(Tree._TreeNode, {
+						_setLabelAttr: {node: "labelNode", type: "innerHTML"}
+					});
+
+					// set up the tree, assigning taxonTreeModel;
+					var taxonTree = new Tree({
+						model: taxonTreeModel,
+						showRoot: false,
+						label: "Taxa Tree",
+						//dndController: dndSource,
+						persist: false,
+						_createTreeNode: function(args){
+						   return new TaxonTreeNode(args);
+						},
+						onClick: function(item){
+							// Get the URL from the item, and navigate to it
+							location.href = item.url;
+						}
+					}, "tree");
+					
+					taxonTree.set("path", <?php echo json_encode($treePath); ?>).then(
+						function(path){
+							win.scrollIntoView(taxonTree.selectedNode.id);        
+						}
+					);
+					taxonTree.startup();
+					
+					/*taxonTree.onLoadDeferred.then(function(){
+						var parentnode = taxonTree.getNodesByItem("<?php echo $targetId; ?>");
+						var lastnodes = parentnode[0].getChildren();
+						for (i in lastnodes) {
+							if(lastnodes[i].isExpanded){
+								 taxonTree._collapseNode(lastnodes[i]);
+							}
+							lastnodes[i].makeExpandable();
+						}
+					});*/
+				});
+				
+				/*query("#add-new-child").on("click", function(){
+					// get the selected object from the tree
+					var selectedObject = taxonTree.get("selectedItems")[0];
+					if(!selectedObject){
+						return alert("No object selected");
+					}
+
+					// add a new child item
+					var childItem = {
+						name: "New child",
+						id: Math.random()
+					};
+					taxonTreeStore.put(childItem, {
+						overwrite: true,
+						parent: selectedObject
+					});
+				});
+				
+				query("#remove").on("click", function(){
+					var selectedObject = taxonTree.get("selectedItems")[0];
+					if(!selectedObject){
+						return alert("No object selected");
+					}
+					taxonTreeStore.remove(selectedObject.id);
+				});
+				
+				taxonTree.on("dblclick", function(object){
+					object.name = prompt("Enter a new name for the object");
+					taxonTreeStore.put(object);
+				}, true);*/
+				
+			</script>
 			<?php
-			if($target){
-				?>
-				<script type="text/javascript">
-					require([
-						"dojo/window",
-						"dojo/_base/declare",
-						"dojo/dom",
-						"dojo/on",
-						"dijit/Tree",
-						"dijit/tree/ObjectStoreModel",
-						"dijit/tree/dndSource",
-						"dojo/store/JsonRest",
-						"dojo/domReady!"
-					], function(win, declare, dom, on, Tree, ObjectStoreModel, dndSource, JsonRest){
-					/*require([
-						"dojo/_base/declare", "dojo/aspect", "dojo/json", "dojo/query", "dojo/store/Memory", "dojo/store/Observable",
-						"dijit/Tree", "dijit/tree/ObjectStoreModel", "dijit/tree/dndSource", "dojo/domReady!"
-					], function(declare, aspect, json, query, Memory, Observable, Tree, ObjectStoreModel, dndSource){*/
-						// set up the store to get the tree data
-						var taxonTreeStore = new JsonRest({
-							target: "rpc/getdynamicchildren.php",
-							labelAttribute: "label",
-							getChildren: function(object){
-								return this.query({id:object.id,authors:<?php echo $displayAuthor; ?>,targetid:<?php echo $targetId; ?>}).then(function(fullObject){
-									return fullObject.children;
-								});
-							},
-							mayHaveChildren: function(object){
-								return "children" in object;
-							}
-						});
-						
-						/*aspect.around(taxonTreeStore, "put", function(originalPut){
-							return function(obj, options){
-								if(options && options.parent){
-									obj.parent = options.parent.id;
-								}
-								return originalPut.call(taxonTreeStore, obj, options);
-							}
-						});
-						
-						taxonTreeStore = new Observable(taxonTreeStore);*/
-						
-						// set up the model, assigning taxonTreeStore, and assigning method to identify leaf nodes of tree
-						var taxonTreeModel = new ObjectStoreModel({
-							store: taxonTreeStore,
-							deferItemLoadingUntilExpand: true,
-							getRoot: function(onItem){
-								this.store.query({id:"root",authors:<?php echo $displayAuthor; ?>,targetid:<?php echo $targetId; ?>}).then(onItem);
-							},
-							mayHaveChildren: function(object){
-								return "children" in object;
-							}
-						});
-						
-						var TaxonTreeNode = declare(Tree._TreeNode, {
-							_setLabelAttr: {node: "labelNode", type: "innerHTML"}
-						});
-
-						// set up the tree, assigning taxonTreeModel;
-						var taxonTree = new Tree({
-							model: taxonTreeModel,
-							showRoot: false,
-							label: "Taxa Tree",
-							//dndController: dndSource,
-							persist: false,
-							_createTreeNode: function(args){
-							   return new TaxonTreeNode(args);
-							},
-							onClick: function(item){
-								// Get the URL from the item, and navigate to it
-								location.href = item.url;
-							}
-						}, "tree");
-						
-						taxonTree.set("path", <?php echo json_encode($treePath); ?>).then(
-							function(path){
-								win.scrollIntoView(taxonTree.selectedNode.id);        
-							}
-						);
-						taxonTree.startup();
-						
-						/*taxonTree.onLoadDeferred.then(function(){
-							var parentnode = taxonTree.getNodesByItem("<?php echo $targetId; ?>");
-							var lastnodes = parentnode[0].getChildren();
-							for (i in lastnodes) {
-								if(lastnodes[i].isExpanded){
-									 taxonTree._collapseNode(lastnodes[i]);
-								}
-								lastnodes[i].makeExpandable();
-							}
-						});*/
-					});
-					
-					/*query("#add-new-child").on("click", function(){
-						// get the selected object from the tree
-						var selectedObject = taxonTree.get("selectedItems")[0];
-						if(!selectedObject){
-							return alert("No object selected");
-						}
-
-						// add a new child item
-						var childItem = {
-							name: "New child",
-							id: Math.random()
-						};
-						taxonTreeStore.put(childItem, {
-							overwrite: true,
-							parent: selectedObject
-						});
-					});
-					
-					query("#remove").on("click", function(){
-						var selectedObject = taxonTree.get("selectedItems")[0];
-						if(!selectedObject){
-							return alert("No object selected");
-						}
-						taxonTreeStore.remove(selectedObject.id);
-					});
-					
-					taxonTree.on("dblclick", function(object){
-						object.name = prompt("Enter a new name for the object");
-						taxonTreeStore.put(object);
-					}, true);*/
-					
-				</script>
-				<?php
-			}
-		}
-		else{
-			?>
-			<div style="margin:30px;font-weight:bold;font-size:120%;">
-				You do not have permission to view this page. Please contact your portal administrator
-			</div>
-			<?php 
 		}
 		?>
 	</div>

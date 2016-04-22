@@ -6,13 +6,23 @@ $taxId = array_key_exists('id',$_REQUEST)?$_REQUEST['id']:0;
 $displayAuthor = array_key_exists('authors',$_REQUEST)?$_REQUEST['authors']:0;
 $targetId = array_key_exists('targetid',$_REQUEST)?$_REQUEST['targetid']:0;
 
+$editable = false;
+if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+	$editable = true;
+}
+
 $retArr = Array();
 $childArr = Array();
 if($taxId == 'root'){
 	$retArr['id'] = 'root';
 	$retArr['label'] = 'root';
 	$retArr['name'] = 'root';
-	$retArr['url'] = 'taxonomyeditor.php';
+	if($editable){
+		$retArr['url'] = 'taxonomyeditor.php';
+	}
+	else{
+		$retArr['url'] = '../index.php';
+	}
 	$retArr['children'] = Array();
 	$lowestRank = '';
 	$sql = 'SELECT MIN(t.RankId) AS RankId '.
@@ -44,7 +54,12 @@ if($taxId == 'root'){
 		$childArr[$i]['id'] = $row1->tid;
 		$childArr[$i]['label'] = $label;
 		$childArr[$i]['name'] = $sciName;
-		$childArr[$i]['url'] = 'taxonomyeditor.php?target='.$row1->tid;
+		if($editable){
+			$childArr[$i]['url'] = 'taxonomyeditor.php?target='.$row1->tid;
+		}
+		else{
+			$childArr[$i]['url'] = '../index.php?taxon='.$row1->tid;
+		}
 		$sql3 = 'SELECT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid = '.$row1->tid.' LIMIT 1 ';
 		//echo "<div>".$sql3."</div>";
 		$rs3 = $con->query($sql3);
@@ -93,14 +108,24 @@ else{
 			$retArr['id'] = $row2->tid;
 			$retArr['label'] = $label;
 			$retArr['name'] = $sciName;
-			$retArr['url'] = 'taxonomyeditor.php?target='.$row2->tid;
+			if($editable){
+				$retArr['url'] = 'taxonomyeditor.php?target='.$row2->tid;
+			}
+			else{
+				$retArr['url'] = '../index.php?taxon='.$row2->tid;
+			}
 			$retArr['children'] = Array();
 		}
 		else{
 			$childArr[$i]['id'] = $row2->tid;
 			$childArr[$i]['label'] = $label;
 			$childArr[$i]['name'] = $sciName;
-			$childArr[$i]['url'] = 'taxonomyeditor.php?target='.$row2->tid;
+			if($editable){
+				$childArr[$i]['url'] = 'taxonomyeditor.php?target='.$row2->tid;
+			}
+			else{
+				$childArr[$i]['url'] = '../index.php?taxon='.$row2->tid;
+			}
 			$sql3 = 'SELECT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid = '.$row2->tid.' LIMIT 1 ';
 			//echo "<div>".$sql3."</div>";
 			$rs3 = $con->query($sql3);
@@ -147,7 +172,12 @@ else{
 		$childArr[$i]['id'] = $row->tid;
 		$childArr[$i]['label'] = $label;
 		$childArr[$i]['name'] = $sciName;
-		$childArr[$i]['url'] = 'taxonomyeditor.php?target='.$row->tid;
+		if($editable){
+			$childArr[$i]['url'] = 'taxonomyeditor.php?target='.$row->tid;
+		}
+		else{
+			$childArr[$i]['url'] = '../index.php?taxon='.$row->tid;
+		}
 		$i++;
 	}
 	$rsSyns->free();

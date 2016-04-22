@@ -61,6 +61,12 @@ $smManager = new SiteMapManager();
 				<li><a href="imagelib/photographers.php"><?php echo $LANG['CONTRIB'];?></a></li>
 				<li><a href="misc/usagepolicy.php"><?php echo $LANG['USAGEPOLICY'];?></a></li>
 			</ul>
+			
+			<div style="margin-top:10px;"><h2><?php echo $LANG['TAXONOMY'];?></h2></div>
+			<ul>
+				<li><a href="taxa/admin/taxonomydisplay.php"><?php echo $LANG['TAXTREE'];?></a></li>
+				<li><a href="taxa/admin/taxonomydynamicdisplay.php"><?php echo $LANG['DYNTAXTREE'];?></a></li>
+			</ul>
 
 			<?php 
 			$clList = $smManager->getChecklistList((array_key_exists('ClAdmin',$USER_RIGHTS)?$USER_RIGHTS['ClAdmin']:0));
@@ -260,8 +266,6 @@ $smManager = new SiteMapManager();
 						<?php 
 						if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 							?>
-							<li><a href="taxa/admin/taxonomydisplay.php"><?php echo $LANG['TAXTREE'];?></a></li>
-							<li><a href="taxa/admin/taxonomydynamicdisplay.php"><?php echo $LANG['DYNTAXTREE'];?></a></li>
 							<li><?php echo $LANG['EDITTAXPL'];?><a href="taxa/admin/taxonomydisplay.php"><?php echo $LANG['TAXTREEVIEW'];?></a></li>
 							<li><a href="taxa/admin/taxonomyloader.php"><?php echo $LANG['ADDTAXANAME'];?></a></li>
 							<li><a href="taxa/admin/taxaloader.php"><?php echo $LANG['BATCHTAXA'];?></a></li>
