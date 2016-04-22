@@ -130,6 +130,9 @@ function resetQueryForm(f){
 	f.q_dateentered.value = "";
 	f.q_datelastmodified.value = "";
 	f.q_processingstatus.value = "";
+	if(document.getElementById("q_exsiccatiid")){
+		f.q_exsiccatiid.value = "";
+	}
 	f.q_customfield1.options[0].selected = true;
 	f.q_customtype1.options[0].selected = true;
 	f.q_customvalue1.value = "";

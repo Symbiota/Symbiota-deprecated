@@ -156,7 +156,7 @@ else{
 						?>
 						<span style="margin-left:15px" title="Enter Exsiccati ID (ometid)">
 							<b>Exsiccati ID (ometid):</b> 
-							<input type="text" name="q_exsiccatiid" value="<?php echo $qExsiccatiId; ?>" style="width:70px" onchange="" />
+							<input type="text" name="q_exsiccatiid" id="q_exsiccatiid" value="<?php echo $qExsiccatiId; ?>" style="width:70px" onchange="" />
 						</span>
 						<?php
 					}
