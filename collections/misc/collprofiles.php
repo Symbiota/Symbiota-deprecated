@@ -208,17 +208,11 @@ if($SYMB_UID){
 									<?php echo $LANG['ADD_BATCH_DETER']; ?>
 								</a>
 							</li>
-							<?php
-							if($collData['colltype'] == 'Preserved Specimens'){
-								?>
-								<li>
-									<a href="../reports/labelmanager.php?collid=<?php echo $collid; ?>">
-										<?php echo $LANG['PRINT_LABELS']; ?>
-									</a>
-								</li>
-								<?php
-							}
-							?>
+							<li>
+								<a href="../reports/labelmanager.php?collid=<?php echo $collid; ?>">
+									<?php echo $LANG['PRINT_LABELS']; ?>
+								</a>
+							</li>
 							<li>
 								<a href="../georef/batchgeoreftool.php?collid=<?php echo $collid; ?>">
 									<?php echo $LANG['BATCH_GEOREF']; ?>

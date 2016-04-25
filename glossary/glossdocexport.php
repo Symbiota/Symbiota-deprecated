@@ -5,9 +5,6 @@ require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
 header("Content-Type: text/html; charset=".$charset);
 ini_set('max_execution_time', 3600);
 
-if(session_id() == ''){
-    session_start();
-}
 $ses_id = session_id();
 
 $glosManager = new GlossaryManager();
