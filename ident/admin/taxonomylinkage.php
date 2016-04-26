@@ -1,7 +1,7 @@
 <?php 
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyCharAdmin.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/KeyCharAdmin.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $cid = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
 $langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
@@ -13,7 +13,7 @@ $tLinks = $keyManager->getTaxonRelevance();
 ?>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
     <link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" rel="stylesheet" type="text/css" />

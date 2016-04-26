@@ -1,5 +1,10 @@
 $(document).ready(function() {
-	$("#acceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
+	$("#acceptedstr").autocomplete({ 
+		source: "rpc/getacceptedsuggest.php",
+		minLength: 2, 
+		autoFocus: true 
+	});
+	
 	$("#parentname").autocomplete({
 		source: function( request, response ) {
 			$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, rhigh: $("#rankid").val() }, response );
@@ -7,7 +12,7 @@ $(document).ready(function() {
 		change: function( event, ui ) {
 			checkParentExistance(document.loaderform);
 		},
-		minLength: 3,
+		minLength: 2,
 		autoFocus: true
 	});
 });
@@ -31,43 +36,35 @@ function verifyLoadForm(f){
 		return false;
 	}
 	if(f.parenttid.value == "" && rankId > "10"){
-		checkParentExistance(document.loaderform);
-		setTimeout(function (){
-			if(f.parenttid.value != "") f.submit();
-		}, 2000);
-		return false;
+		if(!checkParentExistance(f)) return false;
 	}
+	//Verify that name doesn't already exist
+	$.ajax({
+		type: "POST",
+		url: "rpc/gettid.php",
+		async: false,
+		data: { sciname: f.sciname.value, rankid: f.rankid.value, author: f.author.value }
+	}).done(function( msg ) {
+		if(msg){
+			var sciName = document.getElementById("sciname").value;
+			alert("Taxon "+sciName+" "+f.author.value+" ("+msg+") already exists in database");
+			return false;
+		}
+		return true;
+	});
 
+	//If name is not accepted, verify accetped name
 	var accStatusObj = f.acceptstatus;
 	if(accStatusObj[0].checked == false){
-		var accStr = f.acceptedstr.value;
-		if(accStr){
-			$.ajax({
-				type: "POST",
-				url: "rpc/gettid.php",
-				data: { sciname: accStr }
-			}).done(function( msg ) {
-				if(msg){
-					f.tidaccepted.value = msg;
-					f.submit();
-				}
-				else{
-					alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
-				}
-			});
-		}
-		else{
-			alert("ERROR: Enter accepted name");
-		}
-		return false;
+		if(!checkAcceptedExistance(f)) return false;
 	}
+
 	return true;
 }
 
 function parseName(f){
 	var sciName = f.sciname.value;
 	sciName = sciName.replace(/^\s+|\s+$/g,"");
-	checkScinameExistance(sciName);
 	f.reset();
 	f.sciname.value = sciName;
 	var sciNameArr = new Array(); 
@@ -143,28 +140,6 @@ function setParent(f){
 	}
 }			
 
-function checkScinameExistance(scinameTest){
-	if(scinameTest){
-		$.ajax({
-			type: "POST",
-			url: "rpc/gettid.php",
-			data: { sciname: scinameTest }
-		}).done(function( msg ) {
-			if(msg){
-				var sciName = document.getElementById("sciname").value;
-				alert("INSERT FAILED: "+sciName+" ("+msg+")"+" already exists in database.");
-				return false;
-			}
-			else{
-				return true;
-			}
-		});
-	}
-	else{
-		return false;
-	}
-} 
-
 function acceptanceChanged(f){
 	var accStatusObj = f.acceptstatus;
 	if(accStatusObj[0].checked){
@@ -175,24 +150,58 @@ function acceptanceChanged(f){
 	}
 }
 
+function checkAcceptedExistance(f){
+	if(f.acceptedstr.value){
+		$.ajax({
+			type: "POST",
+			url: "rpc/gettid.php",
+			async: false,
+			data: { sciname: f.acceptedstr.value }
+		}).done(function( msg ) {
+			if(msg){
+				if(msg.indexOf(",") == -1){
+					f.tidaccepted.value = msg;
+					return true;
+				}
+				else{
+					alert("Accepted is matching two different names in the thesaurus. Please select taxon with the correct author.");
+					return false;
+				}
+			}
+			else{
+				alert("Accepted does not exist. Add parent to thesaurus before adding this name.");
+				return false;
+			}
+		});
+	}
+	else{
+		return false;
+	}
+}
+
 function checkParentExistance(f){
 	var parentStr = f.parentname.value;
 	if(parentStr){
 		$.ajax({
 			type: "POST",
 			url: "rpc/gettid.php",
+			async: false,
 			data: { sciname: parentStr }
 		}).done(function( msg ) {
 			if(msg){
-				f.parenttid.value = msg;
+				if(msg.indexOf(",") == -1){
+					f.parenttid.value = msg;
+					return true;
+				}
+				else{
+					alert("Parent is matching two different names in the thesaurus. Please select taxon with the correct author.");
+					return false;
+				}
 			}
 			else{
 				alert("Parent does not exist. Please first add parent to system.");
-				//document.getElementById("addparentspan").style.display = "inline";
-				//document.getElementById("addparentanchor").href = "taxonomyloader.php?target="+f.parentname.value;
 				return false;
 			}
-			return true;
 		});
 	}
 	else{

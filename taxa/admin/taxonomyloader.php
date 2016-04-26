@@ -81,7 +81,7 @@ if($isEditor){
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Taxon Rank:</div>
-						<select id="rankid" name="rankid" title="Rank ID" onchange="kingdomChanged()" style="border:inset;">
+						<select id="rankid" name="rankid" title="Rank ID" style="border:inset;">
 							<option value="">Select Taxon Rank</option>
 							<option value="0">Non-Ranked Node</option>
 							<option value="">--------------------------------</option>
@@ -110,7 +110,7 @@ if($isEditor){
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:170px;">Parent Taxon:</div>
-						<input type="text" id="parentname" name="parentname" style="width:300px;border:inset;" onchange="checkParentExistance(this.form)" />
+						<input type="text" id="parentname" name="parentname" style="width:300px;border:inset;" />
 						<span id="addparentspan" style="display:none;">
 							<a id="addparentanchor" href="taxonomyloader.php?target=" target="_blank">Add Parent</a>
 						</span>
@@ -140,7 +140,7 @@ if($isEditor){
 							</div>
 							<div id="accdiv" style="display:none;margin-top:3px;">
 								Accepted Taxon:
-								<input id="acceptedstr" name="acceptedstr" type="text" style="width:400px;border:inset;" />
+								<input id="acceptedstr" name="acceptedstr" type="text" style="width:400px;border:inset;" onchange="checkAcceptedExistance(this.form)" />
 								<input type="hidden" name="tidaccepted" /> 
 								<div style="margin-top:3px;">
 									Unacceptability Reason: 

@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class KeyCharAdmin{
 
@@ -465,14 +465,11 @@ class KeyCharAdmin{
 		return $statusStr;
 	}
 
-	public function getHeadingArr($hid=0){
+	public function getHeadingArr(){
 		$retArr = array();
 		$sql = 'SELECT hid, headingname, notes, sortsequence '.
 			'FROM kmcharheading ';
-		$sqlWhere = '';
-		if($hid) $sqlWhere .= 'AND (h.hid = '.$hid.') ';
-		if($this->langId) $sqlWhere = 'AND (langid = '.$this->langId.') ';
-		if($sqlWhere) $sql .= 'WHERE '.substr($sqlWhere,3);
+		if($this->langId) $sql .= 'WHERE (langid = '.$this->langId.') ';
 		$sql .= 'ORDER BY sortsequence,headingname';
 		//echo $sql;
 		$rs = $this->conn->query($sql);

@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyCharAdmin.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/KeyCharAdmin.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php?'.$_SERVER['QUERY_STRING']);
 
@@ -18,14 +18,14 @@ if(isset($charArr['head'])){
 }
 
 $isEditor = false;
-if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
+if($isAdmin || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
 ?>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 	<title>Character Admin</title>
     <link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
@@ -53,28 +53,13 @@ if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
 	</style>
 </head>
 <body>
-<?php
-$displayLeftMenu = (isset($ident_admin_indexMenu)?$ident_admin_indexMenu:true);
-include($serverRoot."/header.php");
-if(isset($collections_loans_indexCrumbs)){
-	if($collections_loans_indexCrumbs){
-		?>
-		<div class='navpath'>
-			<?php echo $ident_admin_indexCrumbs; ?>
-			<b>Character Management</b>
-		</div>
-		<?php 
-	}
-}
-else{
+	<?php
+	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
 		<a href='../../index.php'>Home</a> &gt;&gt; 
 		<b>Character Management</b>
 	</div>
-	<?php 
-}
-?>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
@@ -180,7 +165,7 @@ else{
 		?>
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

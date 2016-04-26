@@ -1,9 +1,9 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyCharAdmin.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/KeyCharAdmin.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$symbUid) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php');
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php');
 
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 $cid = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
@@ -66,7 +66,7 @@ if(!$cid) header('Location: index.php');
 ?>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 	<title>Character Admin</title>
     <link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
@@ -219,35 +219,25 @@ if(!$cid) header('Location: index.php');
 			}
 			return true;
 		}
+
+		function openHeadingAdmin(){
+			newWindow = window.open("headingadmin.php","headingWin","scrollbars=1,toolbar=1,resizable=1,width=800,height=600,left=50,top=50");
+			if (newWindow.opener == null) newWindow.opener = self;
+		}
 	</script>
 </head>
 <body>
 	<?php
-	$displayLeftMenu = (isset($ident_admin_indexMenu)?$ident_admin_indexMenu:true);
-	include($serverRoot."/header.php");
-	if(isset($collections_loans_indexCrumbs)){
-		if($collections_loans_indexCrumbs){
-			?>
-			<div class='navpath'>
-				<?php echo $ident_admin_indexCrumbs; ?>
-				<a href='index.php'> <b>Character Management</b></a>
-			</div>
-			<?php 
-		}
-	}
-	else{
-		?>
-		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt;&gt; 
-			<a href='index.php'> <b>Character Management</b></a>
-		</div>
-		<?php 
-	}
+	include($SERVER_ROOT."/header.php");
 	?>
+	<div class='navpath'>
+		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href='index.php'> <b>Character Management</b></a>
+	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
-		if($symbUid){
+		if($SYMB_UID){
 			if($statusStr){
 				?>
 				<hr/>
@@ -305,11 +295,13 @@ if(!$cid) header('Location: index.php');
 										<option value="">---------------------</option>
 										<?php 
 										$headingArr = $keyManager->getHeadingArr();
+										asort($headingArr);
 										foreach($headingArr as $k => $v){
 											echo '<option value="'.$k.'" '.($k==$charArr['hid']?'SELECTED':'').'>'.$v['name'].'</option>';
 										}
 										?>
-									</select>
+									</select> 
+									<a href="#" onclick="openHeadingAdmin(); return false;"><img src="../../images/edit.png" /></a>
 								</div>
 							</div>
 							<div style="padding-top:8px;clear:both;">
@@ -561,7 +553,7 @@ if(!$cid) header('Location: index.php');
 		?>
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

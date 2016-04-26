@@ -15,6 +15,7 @@ Allow: /sitemap.php
 
 Disallow: /checklists/tools/  
 Disallow: /checklists/rpc/  
+Disallow: /collections/list.php  
 Disallow: /collections/rpc/  
 Disallow: /classes/  
 Disallow: /css/  
