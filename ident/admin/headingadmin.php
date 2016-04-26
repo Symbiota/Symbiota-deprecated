@@ -133,7 +133,7 @@ $headingArr = $charManager->getHeadingArr();
 							}
 							?>
 						</ul>
-					</fieldset>';
+					</fieldset>
 					<?php 
 				}
 				else{

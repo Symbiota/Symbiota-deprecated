@@ -20,24 +20,17 @@ class KeyCharAdmin{
 	public function getCharacterArr(){
 		$retArr = array();
 		$headingArr = array();
-		$sql = 'SELECT c.hid, h.headingname, c.cid, IFNULL(cl.charname, c.charname) AS charname '.
-			'FROM kmcharacters c LEFT JOIN kmcharheading h ON c.hid = h.hid '.
-			'LEFT JOIN (SELECT cid, charname FROM kmcharacterlang WHERE langid = "'.$this->langId.'") cl ON c.cid = cl.cid '.
-			'WHERE (h.langid =  "'.$this->langId.'" OR h.langid IS NULL) '.
-			'ORDER BY h.sortsequence, h.headingname, c.sortsequence, cl.charname, c.charname';
-		//echo $sql;
+		$sql = 'SELECT c.cid, IFNULL(cl.charname, c.charname) AS charname, c.hid '.
+			'FROM kmcharacters c LEFT JOIN (SELECT cid, charname FROM kmcharacterlang WHERE langid = "'.$this->langId.'") cl ON c.cid = cl.cid '.
+			'ORDER BY c.sortsequence, cl.charname, c.charname';
+		//echo $sql; exit;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$hid = $r->hid;
-				$hName = $this->cleanOutStr($r->headingname);
-				if(!$hid) $hid = 0;
-				if(!$hName) $hName = 'Heading Not Defined';
-				$headingArr[$hid] = $hName;
+				$hid = ($r->hid?$r->hid:0);
 				$retArr[$hid][$r->cid] = $this->cleanOutStr($r->charname);
 			}
 			$rs->free();
 		}
-		$retArr['head'] = $headingArr;
 		return $retArr;
 	}
 
