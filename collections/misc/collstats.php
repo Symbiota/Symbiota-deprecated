@@ -633,14 +633,16 @@ if($action != "Update Statistics"){
 												</div>
 												<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 													<input type="hidden" name="collids" id="collids" value='<?php echo $collId; ?>' />
-													<input type="image" name="action" value="Download Stats per Coll" src="../../images/dl.png" onclick="" />
+													<input type="hidden" name="action" id="action" value='Download Stats per Coll' />
+													<input type="image" name="action" src="../../images/dl.png" onclick="" />
+													<!--input type="submit" name="action" value="Download Stats per Coll" src="../../images/dl.png" / -->
 												</div>
 											</div>
 										</form>
 									</fieldset>
 									<div style="">
 										<fieldset style="width:275px;margin:20px 0px 10px 20px;background-color:#FFFFCC;">
-											<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
+											<form name="famstatscsv" id="famstatscsv" action="collstatscsv.php" method="post" onsubmit="">
 												<div class='legend'><b>Extra Statistics</b></div>
 												<div style="margin-top:8px;">
 													<div id="showfamdist" style="float:left;display:block;" >
@@ -650,9 +652,13 @@ if($action != "Update Statistics"){
 														<a href="#" onclick="return toggleFamilyDist()">Hide Family Distribution</a>
 													</div>
 													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
-														<input type="image" name="action" value="Download Family Dist" src="../../images/dl.png" onclick="" />
+														<input type="hidden" name="action" value='Download Family Dist' />
+														<input type="image" name="action" src="../../images/dl.png" onclick="" />
 													</div>
 												</div>
+												<input type="hidden" name="famarrjson" id="famarrjson" value='<?php echo json_encode($familyArr); ?>' />
+											</form>
+											<form name="geostatscsv" id="geostatscsv" action="collstatscsv.php" method="post" onsubmit="">
 												<div style="clear:both;">
 													<div id="showgeodist" style="float:left;display:block;" >
 														<a href="#" onclick="return toggleGeoDist()">Show Geographic Distribution</a>
@@ -661,10 +667,10 @@ if($action != "Update Statistics"){
 														<a href="#" onclick="return toggleGeoDist();">Hide Geographic Distribution</a>
 													</div>
 													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
-														<input type="image" name="action" value="Download Geo Dist" src="../../images/dl.png" onclick="" />
+														<input type="hidden" name="action" value='Download Geo Dist' />
+														<input type="image" name="action" src="../../images/dl.png" onclick="" />
 													</div>
 												</div>
-												<input type="hidden" name="famarrjson" id="famarrjson" value='<?php echo json_encode($familyArr); ?>' />
 												<input type="hidden" name="geoarrjson" id="geoarrjson" value='<?php echo json_encode($countryArr); ?>' />
 											</form>
 										</fieldset>
