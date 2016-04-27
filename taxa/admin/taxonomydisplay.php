@@ -85,12 +85,16 @@ else{
 			<hr/>
 			<?php 
 		}
+		if($editable){
+			?>
+			<div style="float:right;" title="Add a New Taxon">
+				<a href="taxonomyloader.php">
+					<img style='border:0px;width:15px;' src='../../images/add.png'/>
+				</a>
+			</div>
+			<?php
+		}
 		?>
-		<div style="float:right;" title="Add a New Taxon">
-			<a href="taxonomyloader.php">
-				<img style='border:0px;width:15px;' src='../../images/add.png'/>
-			</a>
-		</div>
 		<div>
 			<form id="tdform" name="tdform" action="taxonomydisplay.php" method='POST'>
 				<fieldset style="padding:10px;width:500px;">
