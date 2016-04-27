@@ -68,14 +68,14 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
 	echo $taxa_admin_taxonomydisplayCrumbs;
-	echo " <b>Taxonomic Dynamic Tree Viewer</b>";
+	echo " <b>Taxonomy Explorer</b>";
 	echo "</div>";
 }
 if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	if($taxa_admin_taxonomydisplayCrumbs){
 		echo '<div class="navpath">';
 		echo $taxa_admin_taxonomydisplayCrumbs;
-		echo ' <b>Dynamic Taxonomic Tree Viewer</b>'; 
+		echo ' <b>Taxonomy Explorer</b>'; 
 		echo '</div>';
 	}
 }
@@ -83,7 +83,7 @@ else{
 	?>
 	<div class="navpath">
 		<a href="../../index.php">Home</a> &gt;&gt; 
-		<a href="taxaloader.php"><b>Dynamic Taxonomic Tree Viewer</b></a> 
+		<a href="taxaloader.php"><b>Taxonomy Explorer</b></a> 
 	</div>
 	<?php 
 }
