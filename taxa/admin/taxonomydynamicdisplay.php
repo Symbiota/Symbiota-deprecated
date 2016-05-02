@@ -53,7 +53,7 @@ if($target){
 		$(document).ready(function() {
 			$("#taxontarget").autocomplete({
 				source: function( request, response ) {
-					$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, taid: document.tdform.taxauthid.value }, response );
+					$.getJSON( "rpc/getdynataxasuggest.php", { term: request.term, taid: document.tdform.taxauthid.value }, response );
 				}
 			},{ minLength: 3 }
 			);
@@ -83,7 +83,7 @@ else{
 	?>
 	<div class="navpath">
 		<a href="../../index.php">Home</a> &gt;&gt; 
-		<a href="taxaloader.php"><b>Taxonomy Explorer</b></a> 
+		<a href="taxonomydynamicdisplay.php"><b>Taxonomy Explorer</b></a> 
 	</div>
 	<?php 
 }
