@@ -166,14 +166,15 @@ if($recArr){
 					<th>Catalog Number</th>
 					<th>Family</th>
 					<th>Scientific Name</th>
-					<th>Collector</th>
-					<th>Number</th>
-					<th>Event Date</th>
 					<th>Country</th>
 					<th>State/Province</th>
 					<th>County</th>
 					<th>Locality</th>
+					<th>Habitat</th>
 					<th>Elevation</th>
+					<th>Event Date</th>
+					<th>Collector</th>
+					<th>Number</th>
 				</tr>
 				<?php 
 				$recCnt = 0;
@@ -192,22 +193,26 @@ if($recArr){
 					echo '<a href="#" onclick="return openIndPU('.$id.",".($targetClid?$targetClid:"0").');">'.$id.'</a> ';
 					if($isEditor || ($SYMB_UID && $SYMB_UID == $fieldArr['observeruid'])){
 						echo '<a href="editor/occurrenceeditor.php?occid='.$id.'" target="_blank">';
-						echo '<img src="../images/edit.png" style="height:13px;" />';
+						echo '<img src="../images/edit.png" style="height:13px;" title="Edit Record" />';
 						echo '</a>';
+					}
+					if($occArr['hasImage']){
+						echo '<img src="../images/image.png" style="height:13px;margin-left:5px;" title="Has Image" />';
 					}
 					echo '</td>'."\n";
 					echo '<td>'.$occArr['collection'].'</td>'."\n";
 					echo '<td>'.$occArr['accession'].'</td>'."\n";
 					echo '<td>'.$occArr['family'].'</td>'."\n";
 					echo '<td>'.$occArr['sciname'].($occArr['author']?" ".$occArr['author']:"").'</td>'."\n";
-					echo '<td>'.$occArr['collector'].'</td>'."\n";
-					echo '<td>'.(array_key_exists("collnumber",$occArr)?$occArr['collnumber']:"").'</td>'."\n";
-					echo '<td>'.(array_key_exists("date",$occArr)?$occArr['date']:"").'</td>'."\n";
 					echo '<td>'.$occArr['country'].'</td>'."\n";
 					echo '<td>'.$occArr['state'].'</td>'."\n";
 					echo '<td>'.$occArr['county'].'</td>'."\n";
 					echo '<td>'.((strlen($occArr['locality'])>80)?substr($occArr['locality'],0,80).'...':$occArr['locality']).'</td>'."\n";
+					echo '<td>'.(array_key_exists("habitat",$occArr)?((strlen($occArr['habitat'])>80)?substr($occArr['habitat'],0,80).'...':$occArr['habitat']):"").'</td>'."\n";
 					echo '<td>'.(array_key_exists("elev",$occArr)?$occArr['elev']:"").'</td>'."\n";
+					echo '<td>'.(array_key_exists("date",$occArr)?$occArr['date']:"").'</td>'."\n";
+					echo '<td>'.$occArr['collector'].'</td>'."\n";
+					echo '<td>'.(array_key_exists("collnumber",$occArr)?$occArr['collnumber']:"").'</td>'."\n";
 					echo "</tr>\n";
 					$recCnt++;
 				}

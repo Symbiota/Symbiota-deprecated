@@ -103,13 +103,15 @@ class OccurrenceListManager extends OccurrenceManager{
 		if(!$this->recordCount || $this->reset){
 			$this->setRecordCnt($sqlWhere);
 		}
-		$sql = 'SELECT o.occid, c.CollID, CONCAT_WS(":",c.institutioncode, c.collectioncode) AS collection, IFNULL(o.CatalogNumber,"") AS catalognumber, o.family, o.sciname, o.tidinterpreted, '.
+		$sql = 'SELECT DISTINCT o.occid, c.CollID, CONCAT_WS(":",c.institutioncode, c.collectioncode) AS collection, IFNULL(o.CatalogNumber,"") AS catalognumber, o.family, o.sciname, o.tidinterpreted, '.
 			'IFNULL(o.scientificNameAuthorship,"") AS author, IFNULL(o.recordedBy,"") AS recordedby, IFNULL(o.recordNumber,"") AS recordnumber, '.
 			'o.eventDate, IFNULL(o.country,"") AS country, IFNULL(o.StateProvince,"") AS state, IFNULL(o.county,"") AS county, '.
 			'CONCAT_WS(", ",o.locality,CONCAT(ROUND(o.decimallatitude,5)," ",ROUND(o.decimallongitude,5))) AS locality, '.
-			'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, '.
-			'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid '.
-			'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid ';
+			'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, IFNULL(o.habitat,"") AS habitat, '.
+			'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid, '.
+			'CASE WHEN i.url IS NOT NULL THEN 1 ELSE NULL END AS hasImage '.
+			'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid '.
+			'LEFT JOIN images AS i ON o.occid = i.occid ';
 		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
 		$sql .= $sqlWhere;
 		$sql .= "ORDER BY ";
@@ -137,12 +139,14 @@ class OccurrenceListManager extends OccurrenceManager{
 			$returnArr[$occId]["state"] = $row->state;
 			$returnArr[$occId]["county"] = $row->county;
 			$returnArr[$occId]["observeruid"] = $row->observeruid;
+			$returnArr[$occId]["hasImage"] = $row->hasImage;
 			$localitySecurity = $row->LocalitySecurity;
 			if(!$localitySecurity || $canReadRareSpp 
 				|| (array_key_exists("CollEditor", $userRights) && in_array($collIdStr,$userRights["CollEditor"]))
 				|| (array_key_exists("RareSppReader", $userRights) && in_array($collIdStr,$userRights["RareSppReader"]))){
 				$returnArr[$occId]["locality"] = str_replace('.,',',',$row->locality);
 				$returnArr[$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
+				$returnArr[$occId]["habitat"] = $row->habitat;
 				$returnArr[$occId]["date"] = $row->eventDate;
 				$returnArr[$occId]["elev"] = $row->elev;
 			}
