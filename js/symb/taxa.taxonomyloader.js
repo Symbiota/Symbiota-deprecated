@@ -50,13 +50,18 @@ function verifyLoadForm(f){
 			alert("Taxon "+sciName+" "+f.author.value+" ("+msg+") already exists in database");
 			return false;
 		}
-		return true;
 	});
 
 	//If name is not accepted, verify accetped name
 	var accStatusObj = f.acceptstatus;
 	if(accStatusObj[0].checked == false){
-		if(!checkAcceptedExistance(f)) return false;
+		if(f.acceptedstr.value == ""){
+			alert("Accepted name needs to have a value");
+			return false
+		}
+		if(f.tidaccepted.value == "" && checkAcceptedExistance(f) == false){
+			return false;
+		}
 	}
 
 	return true;

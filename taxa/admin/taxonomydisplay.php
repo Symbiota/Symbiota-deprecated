@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TaxonomyDisplayManager.php');
+include_once($SERVER_ROOT.'/classes/TaxonomyDisplayManager.php');
 header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -12,19 +12,22 @@ $displayFullTree = array_key_exists('displayfulltree',$_REQUEST)?$_REQUEST['disp
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
 $statusStr = array_key_exists('statusstr',$_REQUEST)?$_REQUEST['statusstr']:'';
 
-$taxonDisplayObj = new TaxonomyDisplayManager($target);
+$taxonDisplayObj = new TaxonomyDisplayManager();
+$taxonDisplayObj->setTargetStr($target);
+$taxonDisplayObj->setTaxAuthId($taxAuthId);
+
 if($displayAuthor) $taxonDisplayObj->setDisplayAuthor(1);
  
 $editable = false;
-if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$editable = true;
 }
  
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle." Taxonomy Display: ".$taxonDisplayObj->getTargetStr(); ?></title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<title><?php echo $DEFAULT_TITLE." Taxonomy Display: ".$taxonDisplayObj->getTargetStr(); ?></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
@@ -48,7 +51,7 @@ if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 <body>
 <?php
 $displayLeftMenu = (isset($taxa_admin_taxonomydisplayMenu)?$taxa_admin_taxonomydisplayMenu:"true");
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
@@ -97,7 +100,7 @@ else{
 		?>
 		<div>
 			<form id="tdform" name="tdform" action="taxonomydisplay.php" method='POST'>
-				<fieldset style="padding:10px;width:500px;">
+				<fieldset style="padding:10px;width:550px;">
 					<legend><b>Enter a taxon</b></legend>
 					<div>
 						<b>Taxon:</b> 
@@ -123,7 +126,7 @@ else{
 		?>
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 
 </body>

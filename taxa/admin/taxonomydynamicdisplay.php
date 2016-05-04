@@ -11,7 +11,9 @@ $displayAuthor = array_key_exists('displayauthor',$_REQUEST)?$_REQUEST['displaya
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
 $statusStr = array_key_exists('statusstr',$_REQUEST)?$_REQUEST['statusstr']:'';
 
-$taxonDisplayObj = new TaxonomyDisplayManager($target);
+$taxonDisplayObj = new TaxonomyDisplayManager();
+$taxonDisplayObj->setTargetStr($target);
+$taxonDisplayObj->setTaxAuthId($taxAuthId);
 
 $editable = false;
 if($isAdmin || array_key_exists("Taxonomy",$userRights)){

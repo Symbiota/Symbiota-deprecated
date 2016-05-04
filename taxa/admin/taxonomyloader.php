@@ -1,17 +1,17 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/TaxonomyEditorManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$SYMB_UID) header('Location: '.$clientRoot.'/profile/index.php?refurl=../taxa/admin/taxonomyloader.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../taxa/admin/taxonomyloader.php?'.$_SERVER['QUERY_STRING']);
 
-$target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
+$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:"";
 $status = "";
 
 $loaderObj = new TaxonomyEditorManager();
  
 $isEditor = false;
-if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
 }
  
@@ -19,47 +19,32 @@ if($isEditor){
 	if(array_key_exists('sciname',$_POST)){
 		$status = $loaderObj->loadNewName($_POST);
 		if(is_int($status)){
-		 	header("Location: taxonomyeditor.php?target=".$status);
+		 	header("Location: taxonomyeditor.php?tid=".$status);
 		}
 	}
 }
- 
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Taxon Loader: </title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<title><?php echo $DEFAULT_TITLE; ?> Taxon Loader: </title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script language="javascript" src="../../js/symb/taxa.taxonomyloader.js?ver=150316"></script>
-	<script type="text/javascript">
-	</script>
+	<script src="../../js/symb/taxa.taxonomyloader.js?ver=160502"></script>
 </head>
 <body>
 <?php
-	$displayLeftMenu = (isset($taxa_admin_taxonomyloaderMenu)?$taxa_admin_taxonomyloaderMenu:"true");
-	include($serverRoot.'/header.php');
-	if(isset($taxa_admin_taxonomyloaderCrumbs)){
-		if($taxa_admin_taxonomyloaderCrumbs){
-			echo "<div class='navpath'>";
-			echo $taxa_admin_taxonomyloaderCrumbs;
-			echo " <b>Taxonomy Loader</b>";
-			echo "</div>";
-		}
-	}
-	else{
-		?>
-		<div class="navpath">
-			<a href="../../index.php">Home</a> &gt;&gt; 
-			<a href="taxonomydisplay.php">Taxonomy Tree Viewer</a> &gt;&gt; 
-			<b>Taxonomy Loader</b>
-		</div>
-		<?php 
-	}
+	$displayLeftMenu = false;
+	include($SERVER_ROOT.'/header.php');
 	?>
+	<div class="navpath">
+		<a href="../../index.php">Home</a> &gt;&gt; 
+		<a href="taxonomydisplay.php">Taxonomy Tree Viewer</a> &gt;&gt; 
+		<b>Taxonomy Loader</b>
+	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
@@ -73,7 +58,7 @@ if($isEditor){
 					<legend><b>Add New Taxon</b></legend>
 					<div>
 						<div style="float:left;width:170px;">Taxon Name:</div>
-						<input type="text" id="sciname" name="sciname" style="width:300px;border:inset;" value="<?php echo $target;?>" onchange="parseName(this.form)"/>
+						<input type="text" id="sciname" name="sciname" style="width:300px;border:inset;" value="" onchange="parseName(this.form)"/>
 					</div>
 					<div>
 						<div style="float:left;width:170px;">Author:</div>
@@ -163,7 +148,7 @@ if($isEditor){
 			</div>
 			<?php 
 		}
-		include($serverRoot.'/footer.php');
+		include($SERVER_ROOT.'/footer.php');
 		?>
 	</div>
 </body>

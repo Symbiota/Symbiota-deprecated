@@ -7,12 +7,12 @@ class TaxonomyDisplayManager{
 	private $conn;
 	private $taxaArr = Array();
 	private $targetStr = "";
-	private $searchTaxonRank = 0;
-	private $displayAuthor = 0;
+	private $taxonRank = 0;
+	private $taxAuthId = 1;
+	private $displayAuthor = false;
 	
-	function __construct($target){
+	function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
-		$this->targetStr = $this->conn->real_escape_string(trim(ucfirst($target)));
 	}
 
  	public function __destruct(){
@@ -45,28 +45,36 @@ class TaxonomyDisplayManager{
 				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
 				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted '.
 				'LEFT JOIN taxa t1 ON ts1.tid = t1.tid '.
-				'WHERE (ts.taxauthid = 1 OR ts.taxauthid IS NULL) AND (ts1.taxauthid = 1 OR ts1.taxauthid IS NULL) ';
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.' OR ts.taxauthid IS NULL) AND (ts1.taxauthid = '.$this->taxAuthId.' OR ts1.taxauthid IS NULL) ';
 			if(is_numeric($this->targetStr)){
-				$sql1 .= 'AND (t.tid IN('.implode(',',$this->targetStr).') OR (ts1.tid = '.$this->targetStr.'))';
-			}
-			elseif(strpos($this->targetStr," ")){
-				$sql1 .= 'AND ((t.sciname LIKE "'.$this->targetStr.'%") OR (t1.sciname LIKE "'.$this->targetStr.'%"))';
+				$sql1 .= 'AND (ts1.tid = '.$this->targetStr.') ';
 			}
 			else{
-				$sql1 .= 'AND ((t.sciname = "'.$this->targetStr.'") OR (t1.sciname = "'.$this->targetStr.'"))';
+				if(strpos($this->targetStr," ") && !preg_match('/^[A-Z]+[a-z]+\s[A-Z]+/', $this->targetStr)){
+					//Rankid >= species level and not will author included 
+					$sql1 .= 'AND ((t.sciname LIKE "'.$this->targetStr.'%") OR (t1.sciname LIKE "'.$this->targetStr.'%") ';
+				}
+				else{
+					$sql1 .= 'AND ((t.sciname = "'.$this->targetStr.'") OR (t1.sciname = "'.$this->targetStr.'") ';
+				}
+				//Let's include author in search by default 
+				$sql1 .= 'OR (CONCAT(t.sciname," ",t.author) = "'.$this->targetStr.'") OR (CONCAT(t1.sciname," ",t1.author) = "'.$this->targetStr.'")) ';
 			}
-			//echo "<div>".$sql1."</div>";
+			$sql1 .= 'ORDER BY t.rankid DESC ';
+			
+			//echo "<div>".$sql1."</div>"; exit;
 			$rs1 = $this->conn->query($sql1);
 			while($row1 = $rs1->fetch_object()){
 				$tid = $row1->tid;
 				$parentTid = $row1->parenttid;
+				$this->targetStr = $row1->sciname;
 				if($tid == $row1->tidaccepted || !$row1->tidaccepted){
 					$this->taxaArr[$tid]["sciname"] = $row1->sciname;
 					$this->taxaArr[$tid]["author"] = $row1->author; 
 					$this->taxaArr[$tid]["parenttid"] = $parentTid; 
 					$this->taxaArr[$tid]["rankid"] = $row1->rankid;
 					if($row1->rankid == 190) $subGenera[] = $tid;
-					$this->searchTaxonRank = $row1->rankid;
+					$this->taxonRank = $row1->rankid;
 					$taxaParentIndex[$tid] = ($parentTid?$parentTid:0);
 				}
 				else{
@@ -85,9 +93,9 @@ class TaxonomyDisplayManager{
 			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '. 
 				'INNER JOIN taxaenumtree te ON t.tid = te.tid '.
-				'WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND (te.taxauthid = 1) '.
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = ts.tidaccepted) AND (te.taxauthid = '.$this->taxAuthId.') '.
 				'AND ((te.parenttid IN('.$tidStr.')) OR (t.tid IN('.$tidStr.'))) ';
-			if($this->searchTaxonRank < 140 && !$displayFullTree) $sql2 .= "AND t.rankid <= 140 ";
+			if($this->taxonRank < 140 && !$displayFullTree) $sql2 .= "AND t.rankid <= 140 ";
 			//echo $sql2."<br>";
 			$rs2 = $this->conn->query($sql2);
 			while($row2 = $rs2->fetch_object()){
@@ -102,11 +110,11 @@ class TaxonomyDisplayManager{
 			}
 			$rs2->free();
 			
-			//Get parent taxa
+			//Get all parent taxa
 			$sql3 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid '.
 				'FROM taxa t INNER JOIN taxaenumtree te ON t.tid = te.parenttid '. 
 				'INNER JOIN taxstatus ts ON t.tid = ts.tid '. 
-				'WHERE (te.taxauthid = 1) AND (ts.taxauthid = 1) AND (te.tid IN('.$tidStr.')) ';
+				'WHERE (te.taxauthid = '.$this->taxAuthId.') AND (ts.taxauthid = '.$this->taxAuthId.') AND (te.tid IN('.$tidStr.')) ';
 			//echo $sql3."<br>";
 			$rs3 = $this->conn->query($sql3);
 			while($row3 = $rs3->fetch_object()){
@@ -125,7 +133,7 @@ class TaxonomyDisplayManager{
 			$synTidStr = implode(",",array_keys($this->taxaArr));
 			$sqlSyns = 'SELECT ts.tidaccepted, t.tid, t.sciname, t.author, t.rankid '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-				'WHERE (ts.tid <> ts.tidaccepted) AND (ts.taxauthid = 1) AND (ts.tidaccepted IN('.$synTidStr.'))';
+				'WHERE (ts.tid <> ts.tidaccepted) AND (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tidaccepted IN('.$synTidStr.'))';
 			//echo $sqlSyns;
 			$rsSyns = $this->conn->query($sqlSyns);
 			while($row = $rsSyns->fetch_object()){
@@ -143,7 +151,7 @@ class TaxonomyDisplayManager{
 			if($orphanTaxa){
 				$sqlOrphan = "SELECT t.tid, t.sciname, t.author, ts.parenttid, t.rankid ".
 					"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-					"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND (t.tid IN (".implode(",",$orphanTaxa)."))";
+					"WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = ts.tidaccepted) AND (t.tid IN (".implode(",",$orphanTaxa)."))";
 				//echo $sqlOrphan;
 				$rsOrphan = $this->conn->query($sqlOrphan);
 				while($row4 = $rsOrphan->fetch_object()){
@@ -183,17 +191,14 @@ class TaxonomyDisplayManager{
 	}
 
 	private function echoTaxonArray($node,$displayFullTree){
-		global $userRights;
-		$editable = false;
-		if($userRights){
-			if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("Taxonomy",$userRights)){
-				$editable = true;
-			}
-		}
 		if($node){
+			$editable = false;
+			if($GLOBALS['USER_RIGHTS']){
+				if($GLOBALS['IS_ADMIN'] || array_key_exists("Taxonomy",$GLOBALS['USER_RIGHTS'])){
+					$editable = true;
+				}
+			}
 			uksort($node, array($this,"cmp"));
-			//$indent = $this->indentValue; 
-			//$this->indentValue += 10;
 			foreach($node as $key => $value){
 				$sciName = "";
 				$taxonRankId = 0;
@@ -214,15 +219,14 @@ class TaxonomyDisplayManager{
 				}
 				$indent = $taxonRankId;
 				if($indent > 230) $indent -= 10;
-				//echo "<div style='margin-left:".$indent."px;'>";
 				echo "<div>".str_repeat('&nbsp;',$indent/5);
 				if($editable){
-					echo "<a href='taxonomyeditor.php?target=".$key."'>".$sciName."</a>";
+					echo "<a href='taxonomyeditor.php?tid=".$key."'>".$sciName."</a>";
 				}
 				else{
 					echo "<a href='../index.php?taxon=".$key."'>".$sciName."</a>";
 				}
-				if($this->searchTaxonRank < 140 && !$displayFullTree && $taxonRankId == 140){
+				if($this->taxonRank < 140 && !$displayFullTree && $taxonRankId == 140){
 					echo '<a href="taxonomydisplay.php?target='.$sciName.'">';
 					echo '<img src="../../images/tochild.png" style="width:9px;" />';
 					echo '</a>';
@@ -233,10 +237,9 @@ class TaxonomyDisplayManager{
 					asort($synNameArr);
 					foreach($synNameArr as $synTid => $synName){
 						$synName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$synName);
-						//echo "<div style='padding-left:".($indent+30)."px;'>";
 						echo "<div>".str_repeat('&nbsp;',$indent/5).str_repeat('&nbsp;',7);
 						if($editable){
-							echo "[<a href='taxonomyeditor.php?target=".$synTid."'>".$synName."</a>]";
+							echo "[<a href='taxonomyeditor.php?tid=".$synTid."'>".$synName."</a>]";
 						}
 						else{
 							echo "[<a href='../index.php?taxon=".$synTid."'>".$synName."</a>]";
@@ -248,7 +251,6 @@ class TaxonomyDisplayManager{
 					$this->echoTaxonArray($value,$displayFullTree);
 				}
 			}
-			//$this->indentValue -= 10;
 		}
 		else{
 			echo "<div style='margin:20px;'>No taxa found matching your search</div>";
@@ -282,12 +284,13 @@ class TaxonomyDisplayManager{
 				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
 				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted '.
 				'LEFT JOIN taxa t1 ON ts1.tid = t1.tid '.
-				'WHERE (ts.taxauthid = 1 OR ts.taxauthid IS NULL) AND (ts1.taxauthid = 1 OR ts1.taxauthid IS NULL) ';
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.' OR ts.taxauthid IS NULL) AND (ts1.taxauthid = '.$this->taxAuthId.' OR ts1.taxauthid IS NULL) ';
 			if(is_numeric($this->targetStr)){
 				$sql1 .= 'AND (t.tid IN('.implode(',',$this->targetStr).') OR (ts1.tid = '.$this->targetStr.'))';
 			}
 			else{
-				$sql1 .= 'AND ((t.sciname = "'.$this->targetStr.'") OR (t1.sciname = "'.$this->targetStr.'"))';
+				$sql1 .= 'AND ((t.sciname = "'.$this->targetStr.'") OR (t1.sciname = "'.$this->targetStr.'") '.
+					'OR (CONCAT(t.sciname," ",t.author) = "'.$this->targetStr.'") OR (CONCAT(t1.sciname," ",t1.author) = "'.$this->targetStr.'")) ';
 			}
 			//echo "<div>".$sql1."</div>";
 			$rs1 = $this->conn->query($sql1);
@@ -309,7 +312,7 @@ class TaxonomyDisplayManager{
 				$sql2 = 'SELECT t.RankId, te.parenttid, ts.tidaccepted, ts.parenttid AS par2 '.
 					'FROM (taxa t LEFT JOIN taxaenumtree te ON t.TID = te.parenttid) '.
 					'LEFT JOIN taxstatus ts ON te.parenttid = ts.tid '.
-					'WHERE te.TID = '.($acceptedTid?$acceptedTid:$tid).' AND te.taxauthid = 1 AND ts.taxauthid = 1 '.
+					'WHERE te.TID = '.($acceptedTid?$acceptedTid:$tid).' AND te.taxauthid = '.$this->taxAuthId.' AND ts.taxauthid = '.$this->taxAuthId.' '.
 					'ORDER BY t.RankId ';
 				//echo "<div>".$sql2."</div>";
 				$rs2 = $this->conn->query($sql2);
@@ -321,8 +324,8 @@ class TaxonomyDisplayManager{
 					else{
 						$sql3 = 'SELECT tid '.
 							'FROM taxstatus '.
-							'WHERE parenttid = '.$prevTid.' AND taxauthid = 1 '.
-							'AND tid IN(SELECT parenttid FROM taxaenumtree WHERE tid = '.$tid.' AND taxauthid = 1) ';
+							'WHERE parenttid = '.$prevTid.' AND taxauthid = '.$this->taxAuthId.' '.
+							'AND tid IN(SELECT parenttid FROM taxaenumtree WHERE tid = '.$tid.' AND taxauthid = '.$this->taxAuthId.') ';
 						//echo "<div>".$sql3."</div>";
 						$rs3 = $this->conn->query($sql3);
 						while($row3 = $rs3->fetch_object()){
@@ -343,9 +346,17 @@ class TaxonomyDisplayManager{
 		}
 		return $retArr;
 	}
+
+	public function setTargetStr($target){
+		$this->targetStr = $this->conn->real_escape_string(trim(ucfirst($target)));
+	}
 	
+	public function setTaxAuthId($id){
+		if(is_numeric($id)) $this->taxAuthId = $id;
+	}
+
 	public function setDisplayAuthor($display){
-		$this->displayAuthor = $display;
+		if($display) $this->displayAuthor = true;
 	}
 
 	private function cmp($a, $b){

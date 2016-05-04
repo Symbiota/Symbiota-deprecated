@@ -78,24 +78,6 @@ function submitAddForm(f){
     return true;
 }
 
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
-}
-
 function isNumeric(sText){
    	var ValidChars = "0123456789-.";
    	var IsNumber = true;
