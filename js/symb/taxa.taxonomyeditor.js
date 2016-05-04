@@ -74,52 +74,6 @@ function toggle(target){
 	}
 }
 
-function deleteAcceptedLink(tidAcc){
-	if(tidAcc == null){
-  		return;
-  	}
-	var dalXmlHttp=GetXmlHttpObject();
-	if(dalXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url="rpc/deleteacceptedlink.php";
-	url=url+"?tid="+tid;
-	url=url+"&tidaccepted="+tidAcc;
-	url=url+"&sid="+Math.random();
-	dalXmlHttp.onreadystatechange=function(){
-		if(dalXmlHttp.readyState==4 && dalXmlHttp.status==200){
-			status = dalXmlHttp.responseText;
-			if(status == "0"){
-				alert("FAILED: sorry, error while attempting to delete accepted link");
-			}
-			else{
-				document.getElementById("acclink-"+tidAcc).style.display = "none";
-			}
-		}
-	}
-	dalXmlHttp.open("POST",url,true);
-	dalXmlHttp.send(null);
-}
-
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
-}
-
 function validateTaxonEditForm(f){
 	if(f.unitname1.value.trim() == ""){
 		alert('Unitname 1 field must have a value');
@@ -149,57 +103,33 @@ function verifyChangeToNotAcceptedForm(f){
 }
 
 function submitLinkToAccepted(f){
-	//Used by more than one form
-	var testStr = f.acceptedstr.value;
-	var snXmlHttp=GetXmlHttpObject();
-	if(snXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url="rpc/gettid.php";
-	url=url+"?sciname="+testStr;
-	snXmlHttp.onreadystatechange=function(){
-		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-			var accTid = snXmlHttp.responseText;
-			if(accTid){
-				f.tidaccepted.value = accTid;
-				f.submit();
-			}
-			else{
-				alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
-			}
+	$.ajax({
+		type: "POST",
+		url: "rpc/gettid.php",
+		data: { sciname: f.acceptedstr.value }
+	}).done(function( msg ) {
+		if(msg){
+			f.tidaccepted.value = msg;
+			f.submit();
 		}
-	};
-	snXmlHttp.open("POST",url,true);
-	snXmlHttp.send(null);
+		else{
+			alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
+		}
+	});
 }
 
 function submitTaxStatusForm(f){
-	var parStr = f.parentstr.value;
-	if(parStr == null){
-  		f.submit();
-  	}
-	else{
-		var snXmlHttp=GetXmlHttpObject();
-		if(snXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url="rpc/gettid.php";
-		url=url+"?sciname="+parStr;
-		snXmlHttp.onreadystatechange=function(){
-			if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-				var parentTid = snXmlHttp.responseText;
-				if(parentTid){
-					f.parenttid.value = parentTid;
-					f.submit();
-				}
-				else{
-					alert("ERROR: Parent taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
-				}
-			}
+	$.ajax({
+		type: "POST",
+		url: "rpc/gettid.php",
+		data: { sciname: f.parentstr.value }
+	}).done(function( msg ) {
+		if(msg){
+			f.parenttid.value = msg;
+			f.submit();
 		}
-		snXmlHttp.open("POST",url,true);
-		snXmlHttp.send(null);
-	}
+		else{
+			alert("ERROR: Parent taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
+		}
+	});
 }
