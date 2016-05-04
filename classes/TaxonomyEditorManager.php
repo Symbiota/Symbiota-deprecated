@@ -232,6 +232,8 @@ class TaxonomyEditorManager{
 			'source = '.($postArr['source']?'"'.$this->cleanInStr($postArr['source']).'"':'NULL').', '.
 			'notes = '.($postArr['notes']?'"'.$this->cleanInStr($postArr['notes']).'"':'NULL').', '.
 			'securitystatus = '.(is_numeric($postArr['securitystatus'])?$postArr['securitystatus']:'0').', '.
+			'modifiedUid = '.$GLOBALS['SYMB_UID'].', '.
+			'modifiedTimeStamp = "'.date('Y-m-d H:i:s').'",'.
 			'sciname = "'.$this->cleanInStr(($postArr["unitind1"]?$postArr["unitind1"]." ":"").
 			$postArr["unitname1"].($postArr["unitind2"]?" ".$postArr["unitind2"]:"").
 			($postArr["unitname2"]?" ".$postArr["unitname2"]:"").
@@ -540,7 +542,7 @@ class TaxonomyEditorManager{
 		//Load new name into taxa table
 		$tid = 0;
 		$sqlTaxa = 'INSERT INTO taxa(sciname, author, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, '.
-			'source, notes, securitystatus) '.
+			'source, notes, securitystatus, modifiedUid, modifiedTimeStamp) '.
 			'VALUES ("'.$this->cleanInStr($dataArr['sciname']).'",'.
 			($dataArr['author']?'"'.$this->cleanInStr($dataArr['author']).'"':'NULL').','.
 			($dataArr['rankid']?$dataArr['rankid']:'NULL').','.
@@ -552,7 +554,8 @@ class TaxonomyEditorManager{
 			($dataArr['unitname3']?'"'.$this->cleanInStr($dataArr['unitname3']).'"':'NULL').','.
 			($dataArr['source']?'"'.$this->cleanInStr($dataArr['source']).'"':'NULL').','.
 			($dataArr['notes']?'"'.$this->cleanInStr($dataArr['notes']).'"':'NULL').','.
-			$this->cleanInStr($dataArr['securitystatus']).')';
+			$this->cleanInStr($dataArr['securitystatus']).','.
+			$GLOBALS['SYMB_UID'].',"'.date('Y-m-d H:i:s').'")';
 		//echo "sqlTaxa: ".$sqlTaxa;
 		if($this->conn->query($sqlTaxa)){
 			$tid = $this->conn->insert_id;

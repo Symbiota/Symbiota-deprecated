@@ -1,9 +1,9 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/TaxonomyEditorManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$SYMB_UID) header('Location: '.$clientRoot.'/profile/index.php?refurl=../taxa/admin/taxonomyloader.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../taxa/admin/taxonomyloader.php?'.$_SERVER['QUERY_STRING']);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:"";
 $status = "";
@@ -11,7 +11,7 @@ $status = "";
 $loaderObj = new TaxonomyEditorManager();
  
 $isEditor = false;
-if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
 }
  
