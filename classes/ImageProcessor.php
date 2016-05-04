@@ -173,8 +173,8 @@ class ImageProcessor {
 			if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath)){
 				if($fh = fopen($fullPath,'rb')){
 					$headerArr = fgetcsv($fh,0,',');
-					$mediaGuidIndex = array_search('MediaGUID',$headerArr);
-					$mediaMd5Index = array_search('MediaMD5',$headerArr);
+					$mediaGuidIndex = (in_array('OriginalFileName',$headerArr)?array_search('OriginalFileName',$headerArr):(in_array('idigbio:OriginalFileName',$headerArr)?array_search('idigbio:OriginalFileName',$headerArr):''));
+					$mediaMd5Index = (in_array('MediaMD5',$headerArr)?array_search('MediaMD5',$headerArr):(in_array('ac:hashValue',$headerArr)?array_search('ac:hashValue',$headerArr):''));
 					if(is_numeric($mediaGuidIndex) && is_numeric($mediaMd5Index)){
 						while(($data = fgetcsv($fh,1000,",")) !== FALSE){
 							if(preg_match($pmTerm,$data[$mediaGuidIndex],$matchArr)){
@@ -193,7 +193,7 @@ class ImageProcessor {
 							}
 							else{
 								//Output to error log file
-								$this->logOrEcho('NOTICE: file skipped File skipped, unable to extract specimen identifier ('.$data[$mediaGuidIndex].', pmTerm: '.$pmTerm.')',2);
+								$this->logOrEcho('NOTICE: File skipped, unable to extract specimen identifier ('.$data[$mediaGuidIndex].', pmTerm: '.$pmTerm.')',2);
 							}
 						}
 						$this->cleanHouse(array($this->collid));
