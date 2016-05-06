@@ -4,7 +4,7 @@ require_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
 
 class WsOccurEditor extends WebServiceBase{
 
-	private $occid;
+	private $occidArr = array();
 	private $dwcArr = array();
 	private $editType = 1;		//1 = occurrence, 2 = identification annotation...
 	private $source;
@@ -44,75 +44,133 @@ class WsOccurEditor extends WebServiceBase{
 	}
 
 	private function applyOccurrenceEdit(){
-
-		//Get current record
-		$sql = 'SELECT '.implode(',',array_keys($this->dwcArr)).' FROM omoccurrences WHERE occid = '.$this->occid;
-		$rs = $this->conn->query($sql);
-		$oldValueArr = $rs->fetch_assoc();
-		$rs->free();
-		if(!$oldValueArr) return '{"Result":[{"Status":"FAILURE","Error":"Occurrence identifier not valid"}]}';
-
-		//limit to fields where new values are different than old values
-		$vettedOldValues = array();
-		$vettedNewValues = array();
-		foreach($this->dwcArr as $symbField => $value){
-			if(array_key_exists($symbField, $oldValueArr) && $value != $oldValueArr[$symbField]){
-				$vettedOldValues[$symbField] = $oldValueArr[$symbField]; 
-				$vettedNewValues[$symbField] = $value;
+		$successArr = array();
+		$approvedGeolocateFields = array('decimallatitude','decimallongitude','geodeticdatum','coordinateuncertaintyinmeters','georeferencedby',
+			'georeferenceprotocol','georeferencesources','georeferenceverificationstatus','georeferenceremarks');
+		foreach($this->occidArr as $occid){
+			if($this->source == 'geolocate'){
+				//Set georefSource and georefBy 
+				$this->dwcArr['georeferencesources'] = 'GeoLocate (CoGe)';
+				$this->dwcArr['georeferencedby'] = $this->editor;
 			}
-		}
-		if(!$vettedNewValues) return '{"Result":[{"Status":"FAILURE","Error":"No targetted values have changed"}]}';
+			//Get current record
+			$sql = 'SELECT '.implode(',',array_keys($this->dwcArr)).' FROM omoccurrences WHERE occid = '.$occid;
+			$rs = $this->conn->query($sql);
+			$oldValueArr = $rs->fetch_assoc();
+			$rs->free();
+			if(!$oldValueArr){
+				$this->warningArr[$occid] = 'Identifier not valid';
+				continue;
+			}
+			//if(!$oldValueArr) return '{"Result":[{"Status":"FAILURE","Error":"Occurrence identifier not valid"}]}';
 		
-		$appliedStatus = 0;
-		//Custom adjustments applied per project based on source
-		if($this->source == 'geolocate'){
-			//Only edit coordinate and georeference detail field
-			//Activate only if target coordinates are null
-			if(!isset($vettedNewValues['decimallatitude']) && !isset($vettedNewValues['decimallongitude'])){
-				//Abort edits because decimalLatitude and decimalLongitude are NULL or unchanged
-				return '{"Result":[{"Status":"FAILURE","Error":"both decimalLatitude and decimalLongitude are NULL or unchanged"}]}';
+			//limit to fields where new values are different than old values
+			$vettedOldValues = array();
+			$vettedNewValues = array();
+			foreach($this->dwcArr as $symbField => $value){
+				if(array_key_exists($symbField, $oldValueArr) && $value != $oldValueArr[$symbField]){
+					$vettedOldValues[$symbField] = $oldValueArr[$symbField]; 
+					$vettedNewValues[$symbField] = $value;
+				}
 			}
-			else{
-				$approvedGeolocateFields = array('decimallatitude','decimallongitude','geodeticdatum','coordinateuncertaintyinmeters','georeferencedby',
-					'georeferenceprotocol','georeferencesources','georeferenceverificationstatus','georeferenceremarks');
-				$vettedOldValues = array_intersect_key($vettedOldValues, array_flip($approvedGeolocateFields));
-				$vettedNewValues = array_intersect_key($vettedNewValues, array_flip($approvedGeolocateFields));
-				if(isset($vettedOldValues['decimallatitude']) || isset($vettedOldValues['decimallongitude'])){
-					//There is already values in the current lat/long field, thus don't apply editing in omoccurrence table
-					$appliedStatus = 0;
+			//if(!$vettedNewValues) return '{"Result":[{"Status":"FAILURE","Error":"No targetted values have changed"}]}';
+			if(!$vettedNewValues){
+				$this->warningArr[$occid] = 'No values have changed';
+				continue;
+			}
+			
+			$appliedStatus = 0;
+			//Custom adjustments applied per project based on source
+			if($this->source == 'geolocate'){
+				//Only edit coordinate and georeference detail field
+				//Activate only if target coordinates are null
+				if((!isset($vettedNewValues['decimallatitude']) || !isset($vettedNewValues['decimallongitude'])) && !isset($vettedNewValues['georeferenceremarks'])){
+					//Abort edits because decimalLatitude and decimalLongitude are NULL or unchanged
+					//return '{"Result":[{"Status":"FAILURE","Error":"decimalLatitude, decimalLongitude, or georeferenceRemarks are NULL or unchanged"}]}';
+					$this->warningArr[$occid] = 'decimalLatitude, decimalLongitude, or georeferenceRemarks are NULL or unchanged';
+					continue;
 				}
 				else{
-					$appliedStatus = 1;
+					$vettedOldValues = array_intersect_key($vettedOldValues, array_flip($approvedGeolocateFields));
+					$vettedNewValues = array_intersect_key($vettedNewValues, array_flip($approvedGeolocateFields));
+					 
+					if(isset($vettedOldValues['decimallatitude']) || isset($vettedOldValues['decimallongitude'])){
+						//There is already values in the current lat/long field, thus don't apply editing in omoccurrence table
+						$appliedStatus = 0;
+					}
+					else{
+						$appliedStatus = 1;
+					}
 				}
 			}
-		}
 
-		//Version edits by adding into omoccurrevisions table
-		$sql2 = 'INSERT INTO omoccurrevisions(occid,oldValues,newValues,externalSource,externalEditor,reviewStatus,appliedStatus,externalTimestamp) '.
-			'VALUES('.$this->occid.',"'.$this->cleanInStr(json_encode($vettedOldValues)).'","'.$this->cleanInStr(json_encode($vettedNewValues)).'",'.
-			($this->source?'"'.$this->cleanInStr($this->source).'"':'NULL').','.($this->editor?'"'.$this->cleanInStr($this->editor).'"':'NULL').
-			',1,'.$appliedStatus.','.($this->origTimestamp?'"'.$this->origTimestamp.'"':'NULL').')';
-		//echo $sql2; exit;
-		if($this->conn->query($sql2)){
-			//By default, external edits will not be applied unless they are coming from an authorative source
-			if($appliedStatus){
-				$sqlIns = '';
-				foreach($vettedNewValues as $k => $v){
-					$sqlIns .= ', '.$k.' = "'.$this->cleanInStr($v).'" ';
-				}
-				$sql3 = 'UPDATE omoccurrences SET'.substr($sqlIns, 1).'WHERE occid = '.$this->occid;
-				//echo $sql3; exit;
-				if(!$this->conn->query($sql3)){
-					$this->logOrEcho('ERROR activating edit within occurrence table (occid: '.$this->occid.'): '.$this->conn->error);
-					return '{"Result":[{"Status":"FAILURE","Error":"ERROR activating edit within occurrence table: '.addslashes($this->conn->error).'"}]}';
+			//Abort processing if same edit by same source and editor has already been recorded
+			$newValueJson = json_encode($vettedNewValues);
+			$abort = false;
+			$sql2 = 'SELECT newvalues,externalsource,externaleditor '.
+				'FROM omoccurrevisions WHERE occid = '.$occid;
+			$rs2 = $this->conn->query($sql2);
+			while($r2 = $rs2->fetch_object()){
+				if($newValueJson == $r2->newvalues && $this->source == $r2->externalsource && $this->editor == $r2->externaleditor){
+					$abort = true;
+					break;
 				}
 			}
-			return '{"Result":[{"Status":"SUCCESS","Message":"Edits successfully submitted '.($appliedStatus?'and activated':'but not activated').'"}]}';
+			$rs2->free();
+			if($abort){
+				$this->warningArr[$occid] = 'Duplicate edit previously submitted';
+				continue;
+			}
+			
+			//Version edits by adding into omoccurrevisions table
+			$sql3 = 'INSERT INTO omoccurrevisions(occid,oldValues,newValues,externalSource,externalEditor,reviewStatus,appliedStatus,externalTimestamp) '.
+				'VALUES('.$occid.',"'.$this->cleanInStr(json_encode($vettedOldValues)).'","'.$this->cleanInStr($newValueJson).'",'.
+				($this->source?'"'.$this->cleanInStr($this->source).'"':'NULL').','.($this->editor?'"'.$this->cleanInStr($this->editor).'"':'NULL').
+				',1,'.$appliedStatus.','.($this->origTimestamp?'"'.$this->cleanInStr($this->origTimestamp).'"':'NULL').')';
+			//echo $sql2; exit;
+			if($this->conn->query($sql3)){
+				//By default, external edits will not be applied unless they are coming from an authorative source
+				if($appliedStatus){
+					$sqlIns = '';
+					foreach($vettedNewValues as $k => $v){
+						$sqlIns .= ', '.$k.' = "'.$this->cleanInStr($v).'" ';
+					}
+					$sql4 = 'UPDATE omoccurrences SET'.substr($sqlIns, 1).'WHERE occid = '.$occid;
+					//echo $sql3; exit;
+					if(!$this->conn->query($sql4)){
+						$this->logOrEcho('ERROR activating edit within occurrence table (occid: '.$occid.'): '.$this->conn->error);
+						//return '{"Result":[{"Status":"FAILURE","Error":"ERROR activating edit within occurrence table: '.addslashes($this->conn->error).'"}]}';
+						$this->warningArr[$occid] = 'ERROR activating edit: '.addslashes($this->conn->error);
+						continue;
+					}
+				}
+				//return '{"Result":[{"Status":"SUCCESS","Message":"Edits successfully submitted '.($appliedStatus?'and activated':'but not activated').'"}]}';
+				$successArr[$occid] = 'Edits submitted '.($appliedStatus?'and activated':'but NOT activated');
+			}
+			else{
+				$this->logOrEcho('ERROR updating occurrence revisions table (occid: '.$occid.'): '.$this->conn->error);
+				//return '{"Result":[{"Status":"FAILURE","Error":"ERROR updating occurrence revisions table: '.addslashes($this->conn->error).'"}]}';
+				$this->warningArr[$occid] = 'ERROR revisioning edit: '.addslashes($this->conn->error);
+			}
 		}
-		else{
-			$this->logOrEcho('ERROR updating occurrence revisions table (occid: '.$this->occid.'): '.$this->conn->error);
-			return '{"Result":[{"Status":"FAILURE","Error":"ERROR updating occurrence revisions table: '.addslashes($this->conn->error).'"}]}';
+		//Build and return result string
+		$retStr = '';
+		if($this->warningArr){
+			$errStr = '';
+			foreach($this->warningArr as $oKey => $msg){
+				$errStr .= '{"occid":"'.$oKey.'","Message":"'.$msg.'"},';
+			}
+			$retStr = '"Error":['.trim($errStr,' ,').']';
 		}
+		if($successArr){
+			$msgStr = '';
+			foreach($successArr as $oKey => $msg){
+				$msgStr .= '{"occid":"'.$oKey.'","Message":"'.$msg.'"},';
+			}
+			if($retStr) $retStr .= ',';
+			$retStr .= '"Success":['.trim($msgStr,' ,').']';
+		}
+		return '{"Result":{'.$retStr.'}}';
 	}
 
 	private function applyIdentificationEdit(){
@@ -120,24 +178,28 @@ class WsOccurEditor extends WebServiceBase{
 	}
 
 	//Setters and getters
-	public function setOccid($id){
-		if(is_numeric($id)) $this->occid = $id;
+	public function setOccid($occidStr){
+		if(preg_match('/^[\d,]+$/', $occidStr)){
+			if(strpos($occidStr, ',') !== false){
+				$this->occidArr = explode(',',$occidStr);
+			}
+			else{
+				$this->occidArr[] = $occidStr;
+			}
+		}
 	}
 	
 	public function setRecordID($guid){
+		$status = false;
 		$guid = preg_replace("/[^A-Za-z0-9\-]/","",$guid);
 		$sql = 'SELECT occid FROM guidoccurrences WHERE guid = "'.$guid.'"';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$this->occid = $r->occid;
+			$this->occidArr[] = $r->occid;
+			$status = true;
 		}
 		$rs->free();
-		if($this->occid){
-			return true;
-		}
-		else{
-			return false;
-		}
+		return $status;
 	}
 
 	public function setDwcArr($dwcObj){
@@ -172,15 +234,15 @@ class WsOccurEditor extends WebServiceBase{
 	}
 
 	public function setSource($s){ 	
-		$this->source = $this->cleanInStr($s);
+		$this->source = $s;
 	}
 
 	public function setEditor($e){
-		$this->editor = $this->cleanInStr($e);
+		$this->editor = $e;
 	}
 
 	public function setOrigTimestamp($ts){
-		$this->origTimestamp = $this->cleanInStr($ts);
+		$this->origTimestamp = $ts;
 	}
 }
 ?>
