@@ -46,16 +46,6 @@ if($formSubmit){
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../js/symb/glossary.index.js?ver=130330"></script>
-	<script type="text/javascript">
-		$(document).ready(function() {
-			$('#tabs').tabs({
-				active: <?php echo (($imageArr || $taxaList)?'2':'0'); ?>,
-				beforeLoad: function( event, ui ) {
-					$(ui.panel).html("<p>Loading...</p>");
-				}
-			});
-		});
-	</script>
 </head>
 <body>
 	<?php
@@ -106,7 +96,7 @@ if($formSubmit){
 				</div>
 				<div style="clear:both;"></div>
 				<div id="newtermdiv" style="display:none;margin-bottom:10px;">
-					<form name="termeditform" action="termdetails.php" method="post" onsubmit="return verifyNewTermForm(this.form);">
+					<form name="termaddform" action="termdetails.php" method="post" onsubmit="return verifyNewTermForm(this)">
 						<fieldset>
 							<legend><b>Add New Term</b></legend>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -117,12 +107,12 @@ if($formSubmit){
 									<input type="text" name="term" id="term" maxlength="150" style="width:350px;" value="" onchange="" title="" />
 								</div>
 							</div>
-							<div style="clear:both;padding-top:4px;float:left;">
+							<div style="clear:both;padding-top:4px;float:left;width:100%;">
 								<div style="float:left;">
 									<b>Definition: </b>
 								</div>
-								<div style="float:left;margin-left:10px;">
-									<textarea name="definition" id="definition" rows="10" maxlength="1000" style="width:450px;height:70px;resize:vertical;" ></textarea>
+								<div style="float:left;margin-left:10px;width:95%;">
+									<textarea name="definition" id="definition" rows="10" maxlength="2000" style="width:100%;height:200px;" ></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -176,7 +166,7 @@ if($formSubmit){
 			<?php
 		}
 		?>
-		<div id="tabs" style="margin:0px;margin-bottom:20px;padding:10px;">
+		<div style="margin:0px;margin-bottom:20px;padding:10px;">
 			<form name="filtertermform" action="index.php" method="post" onsubmit="return verifySearchForm(this.form);">
 				<input id="formaction" type="hidden" value="" />
 				<div style="clear:both;height:15px;">

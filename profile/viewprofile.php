@@ -221,7 +221,7 @@ if(isset($profile_viewprofileCrumbs)){
 								<legend style="font-weight:bold;">Create a New Checklist</legend>
 								<div style="margin:3px;">
 									<b>Checklist Name</b><br/>
-									<input name="name" type="text" maxlength="50" style="width:90%;" />
+									<input name="name" type="text" maxlength="100" style="width:90%;" />
 								</div>
 								<div style="margin:3px;">
 									<b>Authors</b><br/>
