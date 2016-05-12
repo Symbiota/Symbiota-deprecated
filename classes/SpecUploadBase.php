@@ -889,7 +889,7 @@ class SpecUploadBase extends SpecUpload{
 			$okToLoad = false; 
 			//Test first 5 urls to make sure they are valid. If they are, then load
 			while($r1 = $rs1->fetch_object()){
-				$mediaFile = trim(str_replace(';',',',$r1->associatedmedia),', ');
+				$mediaFile = trim(str_replace(array(';','|'),',',$r1->associatedmedia),', ');
 				$mediaArr = explode(',',$mediaFile);
 				foreach($mediaArr as $mediaUrl){
 					$mediaUrl = trim($mediaUrl);
@@ -909,12 +909,12 @@ class SpecUploadBase extends SpecUpload{
 					'SELECT trim(associatedmedia), "empty" AS url, occid, tidinterpreted, collid '.
 					'FROM uploadspectemp '.
 					'WHERE (collid = '.$this->collId.') AND (associatedmedia LIKE "http%") AND (occid IS NOT NULL) '.
-					'AND (associatedmedia NOT LIKE "%,%") AND (associatedmedia NOT LIKE "%;%")';
+					'AND (associatedmedia NOT LIKE "%,%") AND (associatedmedia NOT LIKE "%;%") AND (associatedmedia NOT LIKE "%|%")';
 				if($this->conn->query($sql2)){
 					$sql2b = 'UPDATE uploadspectemp '.
 						'SET associatedmedia = NULL '.
 						'WHERE (collid = '.$this->collId.') AND (associatedmedia LIKE "http%") AND (occid IS NOT NULL) '.
-						'AND (associatedmedia NOT LIKE "%,%") AND (associatedmedia NOT LIKE "%;%")';
+						'AND (associatedmedia NOT LIKE "%,%") AND (associatedmedia NOT LIKE "%;%") AND (associatedmedia NOT LIKE "%|%")';
 					$this->conn->query($sql2b);
 				}
 				else{
@@ -927,7 +927,7 @@ class SpecUploadBase extends SpecUpload{
 					'WHERE associatedmedia IS NOT NULL AND occid IS NOT NULL AND collid = '.$this->collId;
 				$rs3 = $this->conn->query($sql3);
 				while($r3 = $rs3->fetch_object()){
-					$mediaFile = trim(str_replace(';',',',$r3->associatedmedia),', ');
+					$mediaFile = trim(str_replace(array(';','|'),',',$r3->associatedmedia),', ');
 					$mediaArr = explode(',',$mediaFile);
 					foreach($mediaArr as $mediaUrl){
 						$mediaUrl = trim($mediaUrl);
@@ -1036,7 +1036,7 @@ class SpecUploadBase extends SpecUpload{
 			*/
 			//Reset transfer count
 			$this->setImageTransferCount();
-			$this->outputMsg('<li style="margin-left:10px;">Done! (revised count: '.$this->imageTransferCount.' images)</li> ');
+			$this->outputMsg('<li style="margin-left:10px;">Revised count: '.$this->imageTransferCount.' images</li> ');
 			ob_flush();
 			flush();
 		}
@@ -1069,7 +1069,7 @@ class SpecUploadBase extends SpecUpload{
 					'FROM uploadimagetemp '.
 					'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
 				if($this->conn->query($sql)){
-					$this->outputMsg('<li>Done! ('.$this->imageTransferCount.' images)</li> ');
+					$this->outputMsg('<li style="margin-left:10px;">'.$this->imageTransferCount.' images transferred)</li> ');
 				}
 				else{
 					$this->outputMsg('<li>FAILED! ERROR: '.$this->conn->error.'</li> ');
@@ -1104,7 +1104,7 @@ class SpecUploadBase extends SpecUpload{
 					'FROM uploadspectemp AS s LEFT JOIN omoccurassociations AS a ON s.occid = a.occid '.
 					'WHERE ISNULL(a.occid) AND s.`host` IS NOT NULL ';
 				if($this->conn->query($sql)){
-					$this->outputMsg('<li>Done! Host associations updated</li> ');
+					$this->outputMsg('<li style="margin-left:10px;">Host associations updated</li> ');
 				}
 				else{
 					$this->outputMsg('<li>FAILED! ERROR: '.$this->conn->error.'</li> ');
@@ -1241,7 +1241,7 @@ class SpecUploadBase extends SpecUpload{
 			}
 
 			//Temporarily code until Specify output UUID as occurrenceID 
-			if($this->sourceDatabaseType == 'specify' && !$recMap['occurrenceid']){
+			if($this->sourceDatabaseType == 'specify' && (!isset($recMap['occurrenceid']) || !$recMap['occurrenceid'])){
 				if(strlen($recMap['dbpk']) == 36) $recMap['occurrenceid'] = $recMap['dbpk'];
 			}
 
