@@ -329,10 +329,10 @@ if($action){
 									<p><b>Search by Tags:</b></p>
 								</div>
 								<div style="margin-top:5px;">
-									<input type='checkbox' name='imagetag' value='adult' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Images of Adults
+									<input type='checkbox' name='imagetag' value='adult' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Images of Adult Phenotype
 								</div>
 								<div style="margin-top:5px;">
-									<input type='checkbox' name='imagetag' value='immature' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Images of Immatures
+									<input type='checkbox' name='imagetag' value='immature' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Images of Immature Phenotype
 								</div>
 								<div style="margin-top:5px;">
 									<input type='checkbox' name='imagetag' value='habitat' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Images of Habitat
