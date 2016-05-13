@@ -266,7 +266,7 @@ if($action){
 					</div>
 					<div style="clear:both;margin:5 0 5 0;"><hr /></div>
 					<?php
-					/*$tagArr = $imgLibManager->getTagArr();
+					$tagArr = $imgLibManager->getTagArr();
 					if($tagArr){
 						?>
 						<div>
@@ -282,7 +282,7 @@ if($action){
 							</select>
 						</div>
 						<?php
-					}*/
+					}
 					?>
 					<div style="margin-top:5px;">
 						<div style="float:left;margin-right:8px;padding-top:8px;">
@@ -322,23 +322,6 @@ if($action){
 								</div>
 								<div style="margin-top:5px;">
 									<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Limit to Field Images Only
-								</div>
-							</td>
-							<td>
-								<div style="margin-top:5px;">
-									<p><b>Search by Tags:</b></p>
-								</div>
-								<div style="margin-top:5px;">
-									<input type='checkbox' name='imagetag' value='adult' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Images of Adult Phenotype
-								</div>
-								<div style="margin-top:5px;">
-									<input type='checkbox' name='imagetag' value='immature' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Images of Immature Phenotype
-								</div>
-								<div style="margin-top:5px;">
-									<input type='checkbox' name='imagetag' value='habitat' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Images of Habitat
-								</div>
-								<div style="margin-top:5px;">
-									<input type='checkbox' name='imagetag' value='diagnostic' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Images of Diagnostic Characters
 								</div>
 							</td>
 						</tr>
