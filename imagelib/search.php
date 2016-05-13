@@ -308,15 +308,41 @@ if($action){
 							<option value="taxalist" <?php echo ((array_key_exists("imagedisplay",$previousCriteria))&&($previousCriteria["imagedisplay"]=='taxalist')?'SELECTED ':''); ?>>Taxa List</option>
 						</select>
 					</div>
-					<div style="margin-top:5px;">
-						<input type='radio' name='imagetype' value='all' <?php if((!array_key_exists("imagetype",$previousCriteria)) || (array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'all')) echo "CHECKED"; ?> > All Images
-					</div>
-					<div style="margin-top:5px;">
-						<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Limit to Specimen Images Only
-					</div>
-					<div style="margin-top:5px;">
-						<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Limit to Field Images Only
-					</div>
+					<table>
+						<tr>
+							<td>
+								<div style="margin-top:5px;">
+									<p><b>Limit Image Type:</b></p>
+								</div>
+								<div style="margin-top:5px;">
+									<input type='radio' name='imagetype' value='all' <?php if((!array_key_exists("imagetype",$previousCriteria)) || (array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'all')) echo "CHECKED"; ?> > All Images
+								</div>
+								<div style="margin-top:5px;">
+									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Limit to Specimen Images Only
+								</div>
+								<div style="margin-top:5px;">
+									<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Limit to Field Images Only
+								</div>
+							</td>
+							<td>
+								<div style="margin-top:5px;">
+									<p><b>Search by Tags:</b></p>
+								</div>
+								<div style="margin-top:5px;">
+									<input type='checkbox' name='imagetag' value='adult' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Images of Adults
+								</div>
+								<div style="margin-top:5px;">
+									<input type='checkbox' name='imagetag' value='immature' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Images of Immatures
+								</div>
+								<div style="margin-top:5px;">
+									<input type='checkbox' name='imagetag' value='habitat' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Images of Habitat
+								</div>
+								<div style="margin-top:5px;">
+									<input type='checkbox' name='imagetag' value='diagnostic' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Images of Diagnostic Characters
+								</div>
+							</td>
+						</tr>
+					</table>
 					<div><hr></div>
 					<input id="taxastr" name="taxastr" type="hidden" value="<?php if(array_key_exists("taxastr",$previousCriteria)) echo $previousCriteria["taxastr"]; ?>" />
 					<input id="countrystr" name="countrystr" type="hidden" value="<?php if(array_key_exists("countrystr",$previousCriteria)) echo $previousCriteria["countrystr"]; ?>" />
