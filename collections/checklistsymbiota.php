@@ -10,6 +10,9 @@ $interface = array_key_exists("interface",$_REQUEST)&&$_REQUEST["interface"]?$_R
 $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
+//Sanitation
+if(!is_numeric($taxonFilter)) $taxonFilter = 1;
+
 if($stArrCollJson && $stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 	$collStArr = json_decode($stArrCollJson, true);

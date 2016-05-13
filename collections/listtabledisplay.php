@@ -11,6 +11,10 @@ $sortOrder = array_key_exists('sortorder',$_REQUEST)?$_REQUEST['sortorder']:'';
 $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
+//Sanitation
+if(!is_numeric($taxonFilter)) $taxonFilter = 1;
+if(!is_numeric($occIndex)) $occIndex = 100;
+
 $collManager = new OccurrenceListManager();
 $stArr = array();
 $specOccJson = '';
