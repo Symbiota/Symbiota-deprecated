@@ -329,7 +329,7 @@ class ImageShared{
 	public function processImage($tid=0){
 
 		if(!$this->imgName){
-			$this->errArr[] = 'FATAL ERROR: Image file name null in processImage fucntion';
+			$this->errArr[] = 'FATAL ERROR: Image file name null in processImage function';
 			//trigger_error('Image file name null in processImage function',E_USER_ERROR);
 			return false;
 		}

@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyCharAdmin.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/KeyCharAdmin.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php?'.$_SERVER['QUERY_STRING']);
 
@@ -9,29 +9,24 @@ $langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
 
 $charManager = new KeyCharAdmin();
 $charManager->setLangId($langId);
-$charArr = $charManager->getCharacterArr();
 
-$headingArr = array();
-if(isset($charArr['head'])){
-	$headingArr = $charArr['head'];
-	unset($charArr['head']);
-}
+$charArr = $charManager->getCharacterArr();
+$headingArr = $charManager->getHeadingArr();
 
 $isEditor = false;
-if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
+if($isAdmin || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
 ?>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 	<title>Character Admin</title>
     <link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript" src="../../js/symb/shared.js"></script>
 	<script type="text/javascript">
-
 		function validateNewCharForm(f){
 			if(f.charname.value == ""){
 				alert("Character name must have a value");
@@ -47,34 +42,24 @@ if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
 			}
 			return true;
 		}
+
+		function openHeadingAdmin(){
+			newWindow = window.open("headingadmin.php","headingWin","scrollbars=1,toolbar=1,resizable=1,width=800,height=600,left=50,top=50");
+			if (newWindow.opener == null) newWindow.opener = self;
+		}
 	</script>
 	<style type="text/css">
 		input{ autocomplete: off; } 
 	</style>
 </head>
 <body>
-<?php
-$displayLeftMenu = (isset($ident_admin_indexMenu)?$ident_admin_indexMenu:true);
-include($serverRoot."/header.php");
-if(isset($collections_loans_indexCrumbs)){
-	if($collections_loans_indexCrumbs){
-		?>
-		<div class='navpath'>
-			<?php echo $ident_admin_indexCrumbs; ?>
-			<b>Character Management</b>
-		</div>
-		<?php 
-	}
-}
-else{
+	<?php
+	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
 		<a href='../../index.php'>Home</a> &gt;&gt; 
 		<b>Character Management</b>
 	</div>
-	<?php 
-}
-?>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
@@ -98,10 +83,7 @@ else{
 								<div style="float:left;">
 									Type:<br />
 									<select name="chartype" style="width:180px;">
-										<option value="">------------------------</option>
 										<option value="UM">Unordered Multi-state</option>
-										<option value="IN">Integer</option>
-										<option value="RN">Real Number</option>
 									</select>
 								</div>
 								<div style="margin-left:30px;float:left;">
@@ -119,12 +101,15 @@ else{
 									<select name="hid" style="width:125px;">
 										<option value="">No Heading</option>
 										<option value="">---------------------</option>
-										<?php 
-										foreach($headingArr as $k => $v){
-											echo '<option value="'.$k.'">'.$v.'</option>';
+										<?php
+										$hArr = $headingArr;
+										asort($hArr);
+										foreach($hArr as $k => $v){
+											echo '<option value="'.$k.'">'.$v['name'].'</option>';
 										}
 										?>
-									</select>
+									</select> 
+									<a href="#" onclick="openHeadingAdmin(); return false;"><img src="../../images/edit.png" /></a>
 								</div>
 							</div>
 							<div style="padding-top:6px;clear:both;">
@@ -144,14 +129,36 @@ else{
 						<h3>Characters by Heading</h3>
 						<ul>
 							<?php 
-							foreach($charArr as $k => $charList){
+							foreach($headingArr as $hid => $hArr){
+								if(array_key_exists($hid, $charArr)){
+									?>
+									<li>
+										<a href="#" onclick="toggle('char-<?php echo $hid; ?>');return false;"><b><?php echo $hArr['name']; ?></b></a>
+										<div id="char-<?php echo $hid; ?>" style="display:block;">
+											<ul>
+												<?php 
+												$charList = $charArr[$hid];
+												foreach($charList as $cid => $charName){
+													echo '<li>';
+													echo '<a href="chardetails.php?cid='.$cid.'">'.$charName.'</a>';
+													echo '</li>';
+												}
+												?>
+											</ul>
+										</div>
+									</li>
+									<?php
+								}
+							}
+							if(array_key_exists(0, $charArr)){
+								$noHeaderArr = $charArr[0];
 								?>
 								<li>
-									<a href="#" onclick="toggle('char-<?php echo $k; ?>');"><?php echo $headingArr[$k]; ?></a>
-									<div id="char-<?php echo $k; ?>" style="display:block;">
+									<a href="#" onclick="toggle('char-0');return false;"><b>No Assigned Header</b></a>
+									<div id="char-0" style="display:block;">
 										<ul>
 											<?php 
-											foreach($charList as $cid => $charName){
+											foreach($noHeaderArr as $cid => $charName){
 												echo '<li>';
 												echo '<a href="chardetails.php?cid='.$cid.'">'.$charName.'</a>';
 												echo '</li>';
@@ -160,7 +167,7 @@ else{
 										</ul>
 									</div>
 								</li>
-								<?php 
+								<?php
 							}
 							?>
 						</ul>
@@ -180,7 +187,7 @@ else{
 		?>
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

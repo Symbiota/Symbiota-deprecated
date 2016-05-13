@@ -5,7 +5,7 @@ $qCatalogNumber=''; $qOtherCatalogNumbers='';
 $qRecordedBy=''; $qRecordNumber=''; $qEventDate=''; 
 $qRecordEnteredBy=''; $qObserverUid='';$qDateLastModified='';$qDateEntered='';
 $qProcessingStatus='';$qOrderBy='';$qOrderByDir='';
-$qImgOnly='';$qWithoutImg='';
+$qImgOnly='';$qWithoutImg='';$qExsiccatiId='';
 $qCustomField1='';$qCustomType1='';$qCustomValue1='';
 $qCustomField2='';$qCustomType2='';$qCustomValue2='';
 $qCustomField3='';$qCustomType3='';$qCustomValue3='';
@@ -21,6 +21,7 @@ if($qryArr){
 	$qProcessingStatus = (array_key_exists('ps',$qryArr)?$qryArr['ps']:'');
 	$qDateEntered = (array_key_exists('de',$qryArr)?$qryArr['de']:'');
 	$qDateLastModified = (array_key_exists('dm',$qryArr)?$qryArr['dm']:'');
+	$qExsiccatiId = (array_key_exists('exid',$qryArr)?$qryArr['exid']:'');
 	$qImgOnly = (array_key_exists('io',$qryArr)?$qryArr['io']:0);
 	$qWithoutImg = (array_key_exists('woi',$qryArr)?$qryArr['woi']:0);
 	$qCustomField1 = (array_key_exists('cf1',$qryArr)?$qryArr['cf1']:'');
@@ -142,14 +143,24 @@ else{
 						}
 						?>
 					</select>
-					<span style="margin-left:20px">
+					<span style="margin-left:8px">
 						<input name="q_imgonly" type="checkbox" value="1" <?php echo ($qImgOnly==1?'checked':''); ?> onchange="this.form.q_withoutimg.checked = false;" /> 
 						<b>With images</b>
 					</span>
-					<span style="margin-left:10px">
+					<span style="margin-left:8px">
 						<input name="q_withoutimg" type="checkbox" value="1" <?php echo ($qWithoutImg==1?'checked':''); ?> onchange="this.form.q_imgonly.checked = false;" /> 
 						<b>Without images</b>
 					</span>
+					<?php
+					if($ACTIVATE_EXSICCATI){
+						?>
+						<span style="margin-left:15px" title="Enter Exsiccati ID (ometid)">
+							<b>Exsiccati ID (ometid):</b> 
+							<input type="text" name="q_exsiccatiid" id="q_exsiccatiid" value="<?php echo $qExsiccatiId; ?>" style="width:70px" onchange="" />
+						</span>
+						<?php
+					}
+					?>
 				</div>
 				<?php
 			}

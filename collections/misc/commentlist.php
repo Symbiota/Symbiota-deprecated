@@ -1,10 +1,10 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceSupport.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceSupport.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID){
-	header('Location: '.$serverRoot.'/profile/index.php?refurl=../../collections/misc/commentlist.php?'.$_SERVER['QUERY_STRING']);
+	header('Location: '.$SERVER_ROOT.'/profile/index.php?refurl=../../collections/misc/commentlist.php?'.$_SERVER['QUERY_STRING']);
 }
 
 $collid = $_REQUEST['collid'];
@@ -13,7 +13,7 @@ $limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:100;
 $tsStart = array_key_exists('tsstart',$_POST)?$_POST['tsstart']:'';
 $tsEnd = array_key_exists('tsend',$_POST)?$_POST['tsend']:'';
 $uid = array_key_exists('uid',$_POST)?$_POST['uid']:0;
-$rs = array_key_exists('rs',$_POST)?$_POST['rs']:'';
+$rs = array_key_exists('rs',$_POST)?$_POST['rs']:1;
 
 $commentManager = new OccurrenceSupport();
 
@@ -32,13 +32,13 @@ if($SYMB_UID){
 $statusStr = '';
 $commentArr = null;
 if($isEditor){
-	if(array_key_exists('hidecomid',$_GET)){
-		if(!$commentManager->hideComment($_GET['hidecomid'])){
+	if(array_key_exists('hidecomid',$_POST)){
+		if(!$commentManager->hideComment($_POST['hidecomid'])){
 			$statusStr = $commentManager->getErrorStr();
 		}
 	}
-	elseif(array_key_exists('publiccomid',$_GET)){
-		if(!$commentManager->makeCommentPublic($_GET['publiccomid'])){
+	elseif(array_key_exists('publiccomid',$_POST)){
+		if(!$commentManager->makeCommentPublic($_POST['publiccomid'])){
 			$statusStr = $commentManager->getErrorStr();
 		}
 	}
@@ -53,20 +53,135 @@ if($isEditor){
 <html>
 	<head>
 		<title>Comments Listing</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<script type="text/javascript">
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<script>
+			function dateChanged(dateInput){
+				if(dateInput.value != ""){
+					var dateArr = parseDate(dateInput.value);
+					if(dateArr['y'] == 0){
+						alert("Unable to interpret Date. Please use the following formats: 2016-05-21, 05/21/2016, 21 May 2016, May 2016, or simply 2016");
+						return false;
+					}
+					else{
+						//Invalid format is month > 12
+						if(dateArr['m'] > 12){
+							alert("Month cannot be greater than 12. Note that the format should be YYYY-MM-DD");
+							return false;
+						}
+			
+						//Check to see if day is valid
+						if(dateArr['d'] > 28){
+							if(dateArr['d'] > 31 
+								|| (dateArr['d'] == 30 && dateArr['m'] == 2) 
+								|| (dateArr['d'] == 31 && (dateArr['m'] == 4 || dateArr['m'] == 6 || dateArr['m'] == 9 || dateArr['m'] == 11))){
+								alert("The Day (" + dateArr['d'] + ") is invalid for that month");
+								return false;
+							}
+						}
+			
+						//Enter date into date fields
+						var mStr = dateArr['m'];
+						if(mStr.length == 1){
+							mStr = "0" + mStr;
+						}
+						var dStr = dateArr['d'];
+						if(dStr.length == 1){
+							dStr = "0" + dStr;
+						}
+						dateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
+					}
+				}
+				dateInput.form.submit();
+			}
 
+			function parseDate(dateStr){
+				var y = 0;
+				var m = 0;
+				var d = 0;
+				try{
+					var mNames = new Array("jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec");
+					var validformat1 = /^\d{4}-\d{1,2}-\d{1,2}$/; //Format: yyyy-mm-dd
+					var validformat2 = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/; //Format: mm/dd/yyyy
+					var validformat3 = /^\d{1,2} \D+ \d{2,4}$/; //Format: dd mmm yyyy
+					var validformat4 = /^\D+ \d{2,4}$/; //Format: mmm yyyy
+					var validformat5 = /^\d{2,4}$/; //Format: yyyy
+					if(validformat1.test(dateStr)){
+						var dateTokens = dateStr.split("-");
+						y = dateTokens[0];
+						m = dateTokens[1];
+						d = dateTokens[2];
+					}
+					else if(validformat2.test(dateStr)){
+						var dateTokens = dateStr.split("/");
+						m = dateTokens[0];
+						d = dateTokens[1];
+						y = dateTokens[2];
+						if(y.length == 2){
+							if(y < 20){
+								y = "20" + y;
+							}
+							else{
+								y = "19" + y;
+							}
+						}
+					}
+					else if(validformat3.test(dateStr)){
+						var dateTokens = dateStr.split(" ");
+						d = dateTokens[0];
+						mText = dateTokens[1];
+						y = dateTokens[2];
+						if(y.length == 2){
+							if(y < 15){
+								y = "20" + y;
+							}
+							else{
+								y = "19" + y;
+							}
+						}
+						mText = mText.substring(0,3);
+						mText = mText.toLowerCase();
+						m = mNames.indexOf(mText)+1;
+					}
+					else if(validformat4.test(dateStr)){
+						var dateTokens = dateStr.split(" ");
+						y = dateTokens[1];
+						mText = dateTokens[0];
+						mText = mText.substring(0,3);
+						mText = mText.toLowerCase();
+						m = mNames.indexOf(mText)+1;
+						d = "00";
+					}
+					else if(validformat5.test(dateStr)){
+						y = dateStr;
+						m = "00";
+						d = "00";
+					}
+					else if(dateObj instanceof Date && dateObj != "Invalid Date"){
+						var dateObj = new Date(dateStr);
+						y = dateObj.getFullYear();
+						m = dateObj.getMonth() + 1;
+						d = dateObj.getDate();
+					}
+				}
+				catch(ex){
+				}
+				var retArr = new Array();
+				retArr["y"] = y.toString();
+				retArr["m"] = m.toString();
+				retArr["d"] = d.toString();
+				return retArr;
+			}
 		</script>
 	</head>
 	<body>
 		<?php
 		$displayLeftMenu = true;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		?>
 		<div class="navpath">
-			<a href="<?php echo $clientRoot; ?>/index.php">Home</a> &gt;&gt; 
-			<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+			<a href="<?php echo $CLIENT_ROOT; ?>/index.php">Home</a> &gt;&gt; 
+			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
 			<b>Occurrence Comment Listing</b>
 		</div>
 		<?php 
@@ -80,7 +195,7 @@ if($isEditor){
 		<div id="innertext">
 			<?php
 			if($collid){
-				$pageBar = '<b>';
+				$pageBar = '';
 				if($commentArr){
 					$recCnt = 0;
 					if(isset($commentArr['cnt'])){
@@ -88,38 +203,33 @@ if($isEditor){
 						unset($commentArr['cnt']);
 					}
 					$urlVars = 'collid='.$collid.'&limit='.$limit.'&tsstart='.$tsStart.'&tsend='.$tsEnd.'&uid='.$uid.'&rs='.$rs;
-					$pageNumber = ceil($recCnt / ($start + 1));
-					$lastPage = ceil($recCnt / $limit) + 1;
-					$startPage = ($pageNumber > 4?ceil($pageNumber - 4):1);
+					$currentPage = ($start/$limit)+1;
+					$lastPage = ceil($recCnt / $limit);
+					$startPage = $currentPage > 4?$currentPage - 4:1;
 					$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
 					$hrefPrefix = 'commentlist.php?'.$urlVars."&start=";
 					$pageBar .= "<span style='margin:5px;'>\n";
-					if($startPage > 1){
-					    $pageBar .= "<span style='margin-right:5px;'><a href='".$hrefPrefix."1'>First</a></span>";
-					    $pageBar .= "<span style='margin-right:5px;'><a href='".$hrefPrefix.(($pageNumber - 10) < 1 ?1:$pageNumber - 10)."'>&lt;&lt;</a></span>";
+					if($endPage > 1){
+					    $pageBar .= "<span style='margin-right:5px;'><a href='".$hrefPrefix."0'>First Page</a> &lt;&lt;</span>";
 						for($x = $startPage; $x <= $endPage; $x++){
-						    if($pageNumber != $x){
-						        $pageBar .= "<span style='margin-right:3px;margin-right:3px;'><a href='".$hrefPrefix.($x*$limit)."'>".$x."</a></span>";
+						    if($currentPage != $x){
+						        $pageBar .= "<span style='margin-right:3px;margin-right:3px;'><a href='".$hrefPrefix.(($x-1)*$limit)."'>".$x."</a></span>";
 						    }
 						    else{
 						        $pageBar .= "<span style='margin-right:3px;margin-right:3px;font-weight:bold;'>".$x."</span>";
 						    }
 						}
 					}
-					if($lastPage < $endPage){
-					    $pageBar .= "<span style='margin-left:5px;'><a href='".$hrefPrefix.(($pageNumber + 10) > $lastPage?($lastPage*$limit):(($pageNumber + 10)*$limit))."'>&gt;&gt;</a></span>";
-					    $pageBar .= "<span style='margin-left:5px;'><a href='".$hrefPrefix.($lastPage*$limit)."'>Last</a></span>";
+					if($lastPage > $endPage){
+					    $pageBar .= "<span style='margin-left:5px;'>&gt;&gt; <a href='".$hrefPrefix.(($lastPage-1)*$limit)."'>Last Page</a></span>";
 					}
 					$pageBar .= "</span>";
-					$pageBar .= "<span style='margin:5px;'>";
-					$beginNum = ($pageNumber - 1)*$limit + 1;
 					$endNum = $start + $limit;
 					if($endNum > $recCnt) $endNum = $recCnt;
-					$pageBar .= ($start+1)."-".$endNum." of ".$recCnt.' records';
-					$pageBar .= "</span></b>";
-					echo "<div style='clear:both;'><hr/></div>\n";
-					echo '<div style="float:left;"><b>'.count($commentArr).' Comments</b></div>';
-					echo '<div style="float:right;">'.$pageBar.'</div>';
+					$cntBar = ($start+1)."-".$endNum." of ".$recCnt.' comments';
+					echo "<div><hr/></div>\n";
+					echo '<div style="float:right;"><b>'.$pageBar.'</b></div>';
+					echo '<div><b>'.$cntBar.'</b></div>';
 					echo "<div style='clear:both;'><hr/></div>";
 				}
 				?>
@@ -128,30 +238,30 @@ if($isEditor){
 					<legend><b>Options</b></legend>
 					<form name="optionform" action="commentlist.php" method="post">
 						<div>
-							Date range: 
-							<input name="tsstart" type="text" value="<?php echo $tsStart; ?>" style="width:60px;" /> - 
-							<input name="tsend" type="text" value="<?php echo $tsEnd; ?>" style="width:60px;" />
-						</div>
-						<div>
-							User:
-							<select name="uid">
+							<select name="uid" onchange="this.form.submit()">
 								<option value="0">All Users</option> 
 								<option value="0">------------------------</option> 
 								<?php 
 									$userArr = $commentManager->getCommentUsers($collid);
-									foreach($userArr as $uid => $userStr){
-										echo '<option value="'.$uid.'">'.$userStr.'</option>';
+									foreach($userArr as $userid => $userStr){
+										echo '<option value="'.$userid.'" '.($uid==$userid?'selected':'').'>'.$userStr.'</option>';
 									}
 								?>
 							</select>
 						</div>
 						<div>
-							<input name="rs" type="radio" value="1" /> Active 
-							<input name="rs" type="radio" value="0" /> Inactivated
+							Beginning Date: 
+							<input name="tsstart" type="text" value="<?php echo $tsStart; ?>" style="width:100px;" onchange="dateChanged(this)" /><br/>
+							End Date:  
+							<input name="tsend" type="text" value="<?php echo $tsEnd; ?>" style="width:100px;" onchange="dateChanged(this)" />
+						</div>
+						<div>
+							<input name="rs" type="radio" value="1" <?php echo ($rs==1?'checked':''); ?> onchange="this.form.submit()" /> Public 
+							<input name="rs" type="radio" value="2" <?php echo ($rs==2?'checked':''); ?> onchange="this.form.submit()" /> Non-public
+							<input name="rs" type="radio" value="0" <?php echo (!$rs?'checked':''); ?> onchange="this.form.submit()" /> All
 						</div>
 						<div>
 							<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-							<input name="formsubmit" type="submit" value="Display Edits" />
 						</div>
 					</form>
 				</fieldset>
@@ -159,22 +269,13 @@ if($isEditor){
 				if($commentArr){
 					foreach($commentArr as $comid => $cArr){
 						echo '<div style="margin:15px;">';
-						echo '<div><b>'.$userArr[$cArr['uid']].'</b> <span style="color:gray;">posted '.$cArr['ts'].'</span></div>';
+						echo '<div style="margin-bottom:10px;"><a href="../individual/index.php?occid='.$cArr['occid'].'" target="_blank">'.$cArr['occurstr'].'</a></div>';
+						echo '<div><b>'.$userArr[$cArr['uid']].'</b> <span style="color:gray;">posted on '.$cArr['ts'].'</span></div>';
 						if($cArr['rs'] == 0) echo '<div style="color:red;">Comment not public, may be due to abuse report (viewable to administrators only)</div>';
 						echo '<div style="margin:10px;">'.$cArr['str'].'</div>';
-						if($cArr['rs']){
-							echo '<div><a href="commentlist.php?hidecomid='.$comid.'&start='.$start.'&'.$urlVars.'">';
-							echo 'Hide comment from public';
-							echo '</a></div>';
-						}
-						else{
-							echo '<div><a href="commentlist.php?publiccomid='.$comid.'&start='.$start.'&'.$urlVars.'">';
-							echo 'Make comment public';
-							echo '</a></div>';
-						}
 						?>
 						<div style="margin:20px;">
-							<form name="delcommentform" action="commentlist.php" method="post" onsubmit="return confirm('Are you sure you want to delete comment?')">
+							<form name="commentactionform" action="commentlist.php" method="post">
 								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 								<input name="start" type="hidden" value="<?php echo $start; ?>" />
 								<input name="limit" type="hidden" value="<?php echo $limit; ?>" />
@@ -182,8 +283,20 @@ if($isEditor){
 								<input name="tsend" type="hidden" value="<?php echo $tsEnd; ?>" />
 								<input name="uid" type="hidden" value="<?php echo $uid; ?>" />
 								<input name="rs" type="hidden" value="<?php echo $rs; ?>" />
-								<input name="delcomid" type="hidden" value="<?php echo $comid; ?>" />
-								<input name="formsubmit" type="submit" value="Delete Comment" />
+								<?php 
+								if($cArr['rs']){
+									echo '<input name="hidesubmit" type="submit" value="Hide Comment from Public" />';
+									echo '<input name="hidecomid" type="hidden" value="'.$comid.'" />';
+								}
+								else{
+									echo '<input name="publicsubmit" type="submit" value="Make comment public" />';
+									echo '<input name="publiccomid" type="hidden" value="'.$comid.'" />';
+								}
+								?>
+								<span style="margin-left:20px;">
+									<input name="delcomid" type="hidden" value="<?php echo $comid; ?>" />
+									<input name="deletesubmit" type="submit" value="Delete Comment"  onclick="return confirm('Are you sure you want to delete this comment?')" />
+								</span>
 							</form>
 						</div>
 						<?php 
@@ -203,7 +316,7 @@ if($isEditor){
 			?>
 		</div>
 		<?php
-			include($serverRoot.'/footer.php');
+			include($SERVER_ROOT.'/footer.php');
 		?>
 	</body>
 </html>

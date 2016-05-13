@@ -55,8 +55,7 @@ if($action == 'Download CSV'){
 	$dataArr = $collManager->getYearStatsDataArr($collId);
 }
 if($action == 'Download Stats per Coll'){
-	$header = array('Collection','Specimens','Georeferenced','Species ID','Families','Genera','Species','Total Taxa');
-	//$header = array('Collection','Specimens','Georeferenced','Species ID','Families','Genera','Species','Total Taxa','Types');
+	$header = array('Collection','Specimens','Georeferenced','Imaged','Species ID','Families','Genera','Species','Total Taxa','Types');
 	$fileName = 'stats_per_coll.csv';
 	$resultsTemp = $collManager->runStatistics($collId);
 	if($resultsTemp){
@@ -64,6 +63,7 @@ if($action == 'Download Stats per Coll'){
 		unset($resultsTemp['genuscnt']);
 		unset($resultsTemp['speciescnt']);
 		unset($resultsTemp['TotalTaxaCount']);
+		unset($resultsTemp['TotalImageCount']);
 		ksort($resultsTemp);
 		$i = 0;
 		foreach($resultsTemp as $k => $collArr){
@@ -71,6 +71,7 @@ if($action == 'Download Stats per Coll'){
 			$outputArr[$i]['CollectionName'] = $collArr['CollectionName'];
 			$outputArr[$i]['recordcnt'] = $collArr['recordcnt'];
 			$outputArr[$i]['georefcnt'] = $collArr['georefcnt'];
+			$outputArr[$i]['OccurrenceImageCount'] = $collArr['OccurrenceImageCount'];
 			if($collArr['dynamicProperties']){
 				$dynPropTempArr = json_decode($collArr['dynamicProperties'],true);
 				if(is_array($dynPropTempArr)){
@@ -81,25 +82,25 @@ if($action == 'Download Stats per Coll'){
 			$outputArr[$i]['genuscnt'] = $collArr['genuscnt'];
 			$outputArr[$i]['speciescnt'] = $collArr['speciescnt'];
 			$outputArr[$i]['TotalTaxaCount'] = $collArr['TotalTaxaCount'];
-			/*if($collArr['dynamicProperties']){
+			if($collArr['dynamicProperties']){
 				if(is_array($dynPropTempArr)){
 					$outputArr[$i]['TypeCount'] = $dynPropTempArr['TypeCount'];
 				}
-			}*/
+			}
 			$i++;
 		}
 	}
 }
 
 header ('Content-Type: text/csv');
-header ("Content-Disposition: attachment; filename=\"$fileName\""); 
+header ("Content-Disposition: attachment; filename=\"$fileName\"");
 
 //Write column names out to file
 if($action == 'Download Family Dist' || $action == 'Download Geo Dist'){
 	if($outputArr){
 		$outstream = fopen("php://output", "w");
 		fputcsv($outstream,$header);
-		
+
 		foreach($outputArr as $row){
 			fputcsv($outstream,$row);
 		}
@@ -113,7 +114,7 @@ if($action == 'Download Stats per Coll'){
 	if($outputArr){
 		$outstream = fopen("php://output", "w");
 		fputcsv($outstream,$header);
-		
+
 		foreach($outputArr as $row){
 			fputcsv($outstream,$row);
 		}
@@ -262,13 +263,13 @@ if($action == 'Download CSV'){
 			$outputArr[$i]['total'] = $total;
 			$i++;
 		}
-		
+
 		array_unshift($headerArr,"Institution","Object");
 		array_push($headerArr,"Total");
-		
+
 		$outstream = fopen("php://output", "w");
 		fputcsv($outstream,$headerArr);
-		
+
 		foreach($outputArr as $row){
 			fputcsv($outstream,$row);
 		}

@@ -3,6 +3,7 @@ include_once($serverRoot.'/classes/KeyManager.php');
 
 class KeyMassUpdate extends KeyManager{
 	
+	private $clid;
 	private $cid;
 	private $taxaArr = array();
 	private $stateArr = array();
@@ -50,15 +51,11 @@ class KeyMassUpdate extends KeyManager{
 		ksort($this->stateArr);
 	}
 
-	public function echoTaxaList($clidFilter, $tidFilter, $generaOnly = false){
+	public function echoTaxaList($tidFilter, $generaOnly = false){
 		$tidArr = Array();
 		
 		$sqlBase = '';
 		$sqlWhere = '';
-		if($clidFilter){
-			$sqlBase .= 'INNER JOIN fmchklsttaxalink c ON ts.tid = c.tid ';
-			$sqlWhere .= 'AND (c.clid = '.$clidFilter.') ' ;
-		}
 		if($tidFilter){
 			$sqlBase .= 'INNER JOIN taxaenumtree e ON ts.tid = e.tid ';
 			$sqlWhere .= 'AND (e.taxauthid = '.$this->taxAuthId.') AND (e.parenttid = '.$tidFilter.') ';
@@ -67,8 +64,9 @@ class KeyMassUpdate extends KeyManager{
 		if(!$generaOnly){
 			$sql = 'SELECT DISTINCT t.tid, t.sciname, ts2.parenttid '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
-				'INNER JOIN taxstatus ts2 ON t.tid = ts2.tid '.$sqlBase.
-				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (t.rankid = 220) '.$sqlWhere;
+				'INNER JOIN taxstatus ts2 ON t.tid = ts2.tid '.
+				'INNER JOIN fmchklsttaxalink c ON ts.tid = c.tid '.$sqlBase.
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (t.rankid = 220) AND (c.clid = '.$this->clid.') '.$sqlWhere;
 			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -83,9 +81,10 @@ class KeyMassUpdate extends KeyManager{
 		$sql2 = 'SELECT DISTINCT t.tid, t.sciname, ts2.parenttid, t.rankid '.
 			'FROM taxa t INNER JOIN taxaenumtree e2 ON t.tid = e2.parenttid '.
 			'INNER JOIN taxstatus ts2 ON t.tid = ts2.tid '.
-			'INNER JOIN taxstatus ts ON e2.tid = ts.tidaccepted '.$sqlBase.
+			'INNER JOIN taxstatus ts ON e2.tid = ts.tidaccepted '.
+			'INNER JOIN fmchklsttaxalink c ON ts.tid = c.tid '.$sqlBase.
 			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (e2.taxauthid = '.$this->taxAuthId.') '.
-			'AND (t.rankid <= 220) AND (t.rankid >= 140) '.$sqlWhere;
+			'AND (t.rankid <= 220) AND (t.rankid >= 140) AND (c.clid = '.$this->clid.') '.$sqlWhere;
 		//echo $sql2; exit;
 		$rs2 = $this->conn->query($sql2);
 		while($r2 = $rs2->fetch_object()){
@@ -120,8 +119,6 @@ class KeyMassUpdate extends KeyManager{
  		$this->headerStr .= '<tr><td align="right" colspan="'.(count($this->stateArr)+1).'"><input type="submit" name="action" value="Save Changes" onclick="submitAttrs()" /></td></tr>';
  		echo $this->headerStr;
 		
-		//Output data, including header every 12 times 
-		$cnt = 0;
 		foreach($famArr as $famTid => $family){
 			$this->echoTaxaRow($famTid,$family);
 			$this->processTaxa($famTid);
@@ -212,34 +209,13 @@ class KeyMassUpdate extends KeyManager{
 	}
 
 	//Setter and getters
-	public function getClQueryList($pid){
-		$retList = Array();
-		$sql = 'SELECT cl.clid, cl.name, cl.access '.
-			'FROM fmchecklists cl INNER JOIN fmchklstprojlink cpl ON cl.clid = cpl.clid ';
-		if($pid) {
-			$sql .= 'WHERE (cpl.pid = '.$pid.') AND (cl.access = "public" ';
-		}
-		else{
-			$sql .= 'WHERE (cl.access = "public" ';
-		}
-		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin'])){
-			$sql .= 'OR cl.clid IN('.implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']).')';
-		}
-		$sql .= ') ORDER BY cl.name';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			if($r->name) $retList[$r->clid] = $r->name.($r->access == 'private'?' (private)':'');
-		}
-		$rs->free();
-		return $retList;
-	}
-
 	public function getTaxaQueryList(){
 		$retArr = Array();
-		$sql = 'SELECT t.tid, t.sciname '. 
-			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE (t.rankid >= 140) AND (t.rankid < 180) AND (ts.tid = ts.tidaccepted) AND (ts.taxauthid = 1) '.
-			'ORDER BY t.rankid, t.sciname ';
+		$sql = 'SELECT DISTINCT t.tid, t.sciname '. 
+			'FROM fmchklsttaxalink c INNER JOIN taxaenumtree e ON c.tid = e.tid '.
+			'INNER JOIN taxa t ON e.parenttid = t.tid '.
+			'WHERE (c.clid = '.$this->clid.') AND (t.rankid >= 140) AND (t.rankid < 180) AND (e.taxauthid = 1) '.
+			'ORDER BY t.sciname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -251,6 +227,10 @@ class KeyMassUpdate extends KeyManager{
 
 	public function setCid($cid){
 		if(is_numeric($cid)) $this->cid = $cid;
+	}
+
+	public function setClid($clid){
+		if(is_numeric($clid)) $this->clid = $clid;
 	}
 }
 ?>

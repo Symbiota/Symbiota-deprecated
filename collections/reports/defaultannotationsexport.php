@@ -5,7 +5,6 @@ require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
 header("Content-Type: text/html; charset=".$charset);
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
-session_start();
 $ses_id = session_id();
 
 $labelManager = new OccurrenceLabel();

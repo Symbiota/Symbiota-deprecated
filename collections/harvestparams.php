@@ -33,7 +33,7 @@ $collManager->reset();
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?var=1303"></script>
+	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?var=1304"></script>
 </head>
 <body>
 
@@ -62,7 +62,9 @@ $collManager->reset();
 	<div id="innertext">
 		<h1><?php echo $LANG['PAGE_HEADER']; ?></h1>
 		<?php echo $LANG['GENERAL_TEXT_1']; ?>
-
+		<div style="margin:5px;">
+			<input type='checkbox' name='showtable' id='showtable' value='1' onchange="changeTableDisplay();" /> Show results in table view
+		</div>
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:10px;'>
@@ -219,11 +221,8 @@ $collManager->reset();
 			</div>
 			<div>
 				<?php echo $LANG['CATALOG_NUMBER']; ?>
-                <input type="text" id="catnum" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
-			</div>
-			<div>
-				<?php echo $LANG['OTHER_CATALOG_NUMBERS']; ?>
-				<input type="text" id="othercatnum" size="32" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$collArray)) echo $collArray["othercatnum"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+                <input type="text" id="catnum" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" /> 
+                <input name="includeothercatnum" type="checkbox" value="1" checked /> <?php echo $LANG['INCLUDE_OTHER_CATNUM']?>
 			</div>
 			<div>
 				<input type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$collArray) && $collArray["typestatus"]) echo "CHECKED"; ?> /> <?php echo $LANG['TYPE']; ?>

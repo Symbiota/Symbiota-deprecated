@@ -1,19 +1,19 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyMassUpdate.php');
+include_once($SERVER_ROOT.'/classes/KeyMassUpdate.php');
 header("Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/tools/massupdate.php?'.$_SERVER['QUERY_STRING']);
 
-$clFilter = array_key_exists("clf",$_REQUEST)?$_REQUEST["clf"]:''; 
+$clid = $_REQUEST['clid'];
 $taxonFilter = array_key_exists("tf",$_REQUEST)?$_REQUEST["tf"]:'';
 $generaOnly = array_key_exists("generaonly",$_POST)?$_POST["generaonly"]:0; 
 $cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:'';
 $removeAttrs = array_key_exists("r",$_REQUEST)?$_REQUEST["r"]:""; 
 $addAttrs = array_key_exists("a",$_REQUEST)?$_REQUEST["a"]:""; 
-$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:""; 
 $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
 
 $muManager = new KeyMassUpdate();
+$muManager->setClid($clid);
 if($langValue) $muManager->setLang($langValue);
 if($cidValue) $muManager->setCid($cidValue);
 
@@ -30,11 +30,10 @@ if($isEditor){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Character Mass Updater</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Character Mass Updater</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<script language="JavaScript">
-	
+	<script>
 		var addStr = ";";
 		var removeStr = ";";
 		var dataChanged = false;
@@ -44,18 +43,6 @@ if($isEditor){
 		function verifyClose() { 
 			if(dataChanged == true) { 
 				return "You will lose any unsaved data if you don't first save your changes!"; 
-			}
-		}
-
-		function submitFilterForm(inputObj){
-			var f = inputObj.form;
-			if((f.clf.value == "") && (f.tf.value == "")){
-				alert("Taxon OR checklist needs to have a defined scope ");
-				inputObj.checked = false;
-				return false;
-			}
-			else{
-				f.submit();
 			}
 		}
 
@@ -126,15 +113,21 @@ if($isEditor){
 <body>
 <?php 
 $displayLeftMenu = false;
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 ?>
 <div class='navpath'>
-	<a href='../../index.php'>Home</a> 
+	<a href="../../index.php">Home</a> &gt;&gt;
+	<a href="../../checklists/checklist.php?cl=<?php echo $clid; ?>">
+		<b>Open Checklist</b>
+	</a> &gt;&gt;
+	<a href="../key.php?cl=<?php echo $clid; ?>&taxon=All+Species">
+		<b>Open Key</b>
+	</a>
 	<?php 
 	if($cidValue){
 		?>
 		&gt;&gt;
-		<a href='massupdate.php?clf=<?php echo $clFilter.'&tf='.$taxonFilter.'&lang='.$langValue; ?>'>
+		<a href='massupdate.php?clid=<?php echo $clid.'&tf='.$taxonFilter.'&lang='.$langValue; ?>'>
 			<b>Return to Character List</b>
 		</a>
 		<?php 
@@ -144,28 +137,12 @@ include($serverRoot.'/header.php');
 <!-- This is inner text! -->
 <div id="innertext">
 	<?php
-	if($isEditor){
+	if($clid && $isEditor){
 		if(!$cidValue){
 			?>
 			<form id="filterform" action="massupdate.php" method="post" onsubmit="return verifyFilterForm(this)">
-		  		<fieldset style="padding:15px;">
-		  			<legend><b>Define Group of Taxa to Edit</b></legend>
-		  			<div style="margin: 10px 0px;">
-		  				Define checklist and/or taxon scope and then select character to be edited. The action of selecting character will submit form.   
-		  			</div>
+		  			<div style="margin: 10px 0px;">Select character to edit</div>
 		  			<div>
-						<b>Checklist:</b> 
-						<select name="clf"> 
-							<option value="">Checklist Filter Off (all taxa)</option>
-							<option value="">---------------------------------</option>
-					 		<?php 
-					 		$selectList = $muManager->getClQueryList();
-				 			foreach($selectList as $key => $value){
-				 				echo '<option value="'.$key.'" '.($key==$clFilter?'SELECTED':'').'>'.$value.'</option>';
-				 			}
-					 		?>
-				  		</select><br/>
-				  		<b>Taxon:</b>
 						<select name="tf">
 				 			<option value="">All Taxa</option>
 				 			<option value="">--------------------------</option>
@@ -190,11 +167,11 @@ include($serverRoot.'/header.php');
 						echo "<div style='margin-top:1em;font-size:125%;font-weight:bold;'>$h</div>\n";
 						ksort($charData);
 						foreach($charData as $cidKey => $charValue){
-							echo '<div> <input name="cid" type="radio" value="'.$cidKey.'" onclick="submitFilterForm(this)">'.$charValue.'</div>'."\n";
+							echo '<div> <input name="cid" type="radio" value="'.$cidKey.'" onclick="this.form.submit()">'.$charValue.'</div>'."\n";
 						}
 					}
 			 		?>
-					<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
+					<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
 					<input type="hidden" name="lang" value="<?php echo $langValue; ?>" />
 			 	</fieldset>
 			</form>
@@ -206,42 +183,25 @@ include($serverRoot.'/header.php');
 			<div><?php echo $inheritStr; ?> = character state is inherited as true from a parent taxon (genus, family, etc)</div>
 		 	<table class="styledtable" style="font-family:Arial;font-size:12px;">
 				<?php 
-				$muManager->echoTaxaList($clFilter,$taxonFilter,$generaOnly);
+				$muManager->echoTaxaList($taxonFilter,$generaOnly);
 				?>
-				<tr>
-					<td align='right' colspan='<?php echo (count($sList)+1); ?>'>
-						<input type='submit' name='action' value='Save Changes' onclick='submitAttrs();' />
-					</td>
-				</tr>
 			</table>
 			<form name="submitform" action="massupdate.php" method="post">
-				<input type='hidden' name='clf' value='<?php echo $clFilter; ?>' />
 				<input type='hidden' name='tf' value='<?php echo $taxonFilter; ?>' />
 				<input type='hidden' name='cid' value='<?php echo $cidValue; ?>' />
-				<input type='hidden' name='pid' value='<?php echo $pid; ?>' />
+				<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
 				<input type='hidden' name='lang' value='<?php echo $langValue; ?>' />
 			</form>
 			<?php
 	 	}
 	}
-	elseif(!$symbUid){
-		?>
-		<div style="font-weight:bold;font-size:120%;margin:30px;">
-			Please 
-			<a href="../../profile/index.php?refurl=<?php echo $clientRoot; ?>/ident/tools/massupdate.php">
-				LOGIN
-			</a> 
-		</div>
-		<?php 
-	}
-	else{  //Not editable or writable connection is not set
+	else{  
 		echo "<h1>You appear not to have necessary premissions to edit character data.</h1>";
 	}
 	?>
 </div>
 <?php  
-include($serverRoot.'/footer.php');
- 
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>

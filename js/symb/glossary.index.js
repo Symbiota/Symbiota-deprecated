@@ -20,14 +20,14 @@ $(document).ready(function() {
 		// don't navigate away from the field on tab when selecting an item
 		.bind( "keydown", function( event ) {
 			if ( event.keyCode === $.ui.keyCode.TAB &&
-					$( this ).data( "autocomplete" ).menu.active ) {
+					$( this ).data( "ui-autocomplete" ).menu.active ) {
 				event.preventDefault();
 			}
 		})
 		.autocomplete({
 			source: function( request, response ) {
 				$.getJSON( "rpc/languagelist.php", {
-					term: extractLast( request.term ), t: function() { return document.termeditform.language.value; }
+					term: extractLast( request.term ), t: function() { return this.value; }
 				}, response );
 			},
 			search: function() {
@@ -61,7 +61,7 @@ $(document).ready(function() {
 		// don't navigate away from the field on tab when selecting an item
 		.bind( "keydown", function( event ) {
 			if ( event.keyCode === $.ui.keyCode.TAB &&
-					$( this ).data( "autocomplete" ).menu.active ) {
+					$( this ).data( "ui-autocomplete" ).menu.active ) {
 				event.preventDefault();
 			}
 		})
@@ -102,7 +102,7 @@ $(document).ready(function() {
 		// don't navigate away from the field on tab when selecting an item
 		.bind( "keydown", function( event ) {
 			if ( event.keyCode === $.ui.keyCode.TAB &&
-					$( this ).data( "autocomplete" ).menu.active ) {
+					$( this ).data( "ui-autocomplete" ).menu.active ) {
 				event.preventDefault();
 			}
 		})
@@ -156,25 +156,18 @@ $(document).ready(function() {
 });
 
 function verifyNewTermForm(f){
-	var term = document.getElementById("term").value;
-	var language = document.getElementById("language").value;
-	if(document.getElementById("tidstr")){
-		var tid = document.getElementById("tidstr").value;
-	}
-	else{
-		var tid = document.getElementById("tid").value;
-	}
-	if(!term || !language || !tid){
+	var term = f.term.value;
+	var language = f.language.value;
+	var tid = f.tid.value;
+	if(!term || !language || (!tid && !f.taxagroup.value)){
 		alert("Please enter at least the term, language, and taxonomic group.");
 		return false;
 	}
-	if(document.getElementById("origterm")){
-		var origterm = document.getElementById("origterm").value;
-		var origlanguage = document.getElementById("origlang").value;
-		if((origterm == term) && (origlanguage == language)){
-			return true;
-		}
+
+	if(f.definition.value.length > 1998){
+		if(!confirm("Warning, your definition is close to maximum size limit and may be cut off. Are you sure the definition is completely entered?")) return false;
 	}
+	
 	var sutXmlHttp=GetXmlHttpObject();
 	if (sutXmlHttp==null){
 		alert ("Your browser does not support AJAX!");
@@ -196,21 +189,21 @@ function verifyNewTermForm(f){
 		alert("Term already exists in database in that language and for that taxonomic group.");
 		return false;
 	}
-	else{
-		return true;
-	}
+	return true;
 }
 
 function verifyTermEditForm(f){
-	var newTerm = document.getElementById("term").value;
-	var origTerm = document.getElementById("origterm").value;
-	if(newTerm.toLowerCase() == origTerm.toLowerCase()){
-		return true;
+	var term = f.term.value;
+	var language = f.language.value;
+	if(!term || !language){
+		alert("Term and language must have a value");
+		return false;
 	}
-	else{
-		var result = verifyNewTermForm(f);
-		return result;
+
+	if(f.definition.value.length > 1998){
+		if(!confirm("Warning, your definition is close to maximum size limit and may be cut off. Are you sure the definition is completely entered?")) return false;
 	}
+	return true;
 }
 
 function lookupNewsynonym(f){

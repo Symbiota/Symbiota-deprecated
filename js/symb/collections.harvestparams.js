@@ -84,6 +84,15 @@ function checkUpperLat(){
 		}
 	}
 }
+
+function changeTableDisplay(){
+	if(document.getElementById("showtable").checked==true){
+		document.harvestparams.action = "listtabledisplay.php";
+	}
+	else{
+		document.harvestparams.action = "list.php";
+	}
+}
 		
 function checkBottomLat(){
 	if(document.harvestparams.bottomlat.value != ""){

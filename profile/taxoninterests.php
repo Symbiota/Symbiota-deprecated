@@ -94,7 +94,7 @@ if (!$fileExists) {
                     <td><? echo $annotation->identifiedBy ?></td>
                 </tr>
             </table>
-            <?
+            <?php
 
             foreach ($responses as $response) {
                 if ($response->describesObject == $annotation->uri) {
@@ -117,7 +117,7 @@ if (!$fileExists) {
                             </table>
                         </li>
                     </ul>
-                <?
+                <?php
                 }
             }
         }

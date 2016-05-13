@@ -101,6 +101,7 @@ ALTER TABLE `omoccurassococcurrences`
   CHANGE COLUMN `aoid` `associd` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   CHANGE COLUMN `sciname` `verbatimsciname` VARCHAR(250) NULL DEFAULT NULL ,
   CHANGE COLUMN `tid` `tid` INT(11) UNSIGNED NULL DEFAULT NULL ,
+  ADD COLUMN `basisOfRecord` VARCHAR(45) NULL AFTER `identifier`,
   ADD COLUMN `createduid` INT UNSIGNED NULL AFTER `notes`,
   ADD COLUMN `datelastmodified` DATETIME NULL AFTER `createduid`,
   ADD COLUMN `modifieduid` INT UNSIGNED NULL AFTER `datelastmodified`,
@@ -132,6 +133,12 @@ DROP TABLE IF EXISTS `omoccurassoctaxa`;
 #Checklist changes
 ALTER TABLE `fmvouchers` 
   DROP COLUMN `Collector`;
+  
+ALTER TABLE `fmchklstprojlink` 
+  ADD COLUMN `clNameOverride` VARCHAR(100) NULL AFTER `clid`,
+  ADD COLUMN `mapChecklist` SMALLINT NULL DEFAULT 1 AFTER `clNameOverride`,
+  ADD COLUMN `notes` VARCHAR(250) NULL AFTER `mapChecklist`;
+
 
 #Occurrence revisions
 CREATE TABLE `omoccurrevisions` (
@@ -280,7 +287,7 @@ ALTER TABLE `taxa`
   DROP COLUMN `KingdomID`,
   DROP COLUMN `kingdomName`,
   DROP INDEX `sciname_unique`,
-  ADD UNIQUE INDEX `sciname_unique` (`SciName` ASC, `RankId` ASC),
+  ADD UNIQUE INDEX `sciname_unique` (`SciName` ASC, `RankId` ASC, `Author` ASC),
   ADD INDEX `sciname_index` (`SciName` ASC);
 
 ALTER TABLE `taxonunits` 
@@ -420,7 +427,7 @@ ALTER TABLE `taxadescrblock`
   
 ALTER TABLE `glossary`
 	ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`,
-	MODIFY COLUMN `definition`  varchar(1000) NULL DEFAULT NULL AFTER `term`,
+	MODIFY COLUMN `definition`  varchar(2000) NULL DEFAULT NULL AFTER `term`,
 	MODIFY COLUMN `source`  varchar(1000) NULL DEFAULT NULL AFTER `language`,
 	ADD COLUMN `translator`  varchar(250) NULL AFTER `source`,
 	ADD COLUMN `author`  varchar(250) NULL AFTER `translator`;

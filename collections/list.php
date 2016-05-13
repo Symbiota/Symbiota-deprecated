@@ -2,7 +2,7 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1; 
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
@@ -65,7 +65,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 	<title><?php echo $defaultTitle.' '.$LANG['PAGE_TITLE']; ?></title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
@@ -78,7 +78,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	<script type="text/javascript" src="../js/jquery.js?ver=20130917"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js?ver=20130917"></script>
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 		$('html').hide();
@@ -231,9 +231,10 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					</a>
 				</div>
 				<?php
+				$targetClid = $collManager->getSearchTerm("targetclid");
 				if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){
 					?>
-					<div style="cursor:pointer;margin:8px 8px 0px 0px;" onclick="addAllVouchersToCl(<?php echo $collManager->getSearchTerm("targetclid"); ?>)" title="Link All Vouchers on Page">
+					<div style="cursor:pointer;margin:8px 8px 0px 0px;" onclick="addAllVouchersToCl(<?php echo $targetTid; ?>)" title="Link All Vouchers on Page">
 						<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
 					</div>
 					<?php
@@ -251,9 +252,15 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				}
 				?>
 			</div>
+			<div style='margin:10px;'>
+				<?php
+					$tableLink = 'listtabledisplay.php?usecookies=false&starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'');
+					echo "<a href='".$tableLink."'>See Results in Table View</a>";
+				?>
+			</div>
 			<?php 
 			$paginationStr = '<div><div style="clear:both;"><hr/></div><div style="float:left;margin:5px;">';
-			$lastPage = (int) ($collManager->getRecordCnt() / $cntPerPage) + 1;
+			$lastPage = (int)($collManager->getRecordCnt() / $cntPerPage) + 1;
 			$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 			$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
 			$hrefPrefix = 'list.php?usecookies=false&starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';
@@ -291,13 +298,13 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			elseif($specimenArray){
 				$collectionArr = $collManager->getCollectionList(array_keys($specimenArray));
 				?>
-				<table id="omlisttable" cellspacing="4">
+				<table id="omlisttable">
 				<?php 
 				foreach($specimenArray as $collId => $specData){
 					$isEditor = false;
-					if($symbUid && (array_key_exists("SuperAdmin",$userRights)
-					|| (array_key_exists('CollAdmin',$userRights) && in_array($collId,$userRights['CollAdmin']))
-					|| (array_key_exists('CollEditor',$userRights) && in_array($collId,$userRights['CollEditor'])))){
+					if($SYMB_UID && ($IS_ADMIN
+					|| (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin']))
+					|| (array_key_exists('CollEditor',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollEditor'])))){
 						$isEditor = true;
 					}
 					$instCode1 = $collectionArr[$collId]['instcode'];
@@ -306,10 +313,10 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					$icon = (substr($collectionArr[$collId]['icon'],0,6)=='images'?'../':'').$collectionArr[$collId]['icon']; 
 					?>
 					<tr>
-						<td colspan='4'>
+						<td colspan='2'>
 							<h2>
 								<a href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
-									<?php echo $collectionArr[$collId]['name'];?>
+									<?php echo $collectionArr[$collId]['name']; ?>
 								</a>
 							</h2>
 							<hr />
@@ -324,9 +331,9 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 						}
 						?>
 						<tr>
-							<td rowspan="4" width='60' valign='top' align='center'>
+							<td width='60' valign='top' align='center'>
 								<a href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
-									<img align='bottom' width='30' src='<?php echo $icon; ?>' style="border:0px;" />
+									<img align='bottom' width='35px' src='<?php echo $icon; ?>' style="border:0px;" />
 								</a>
 								<div style='font-weight:bold;font-size:75%;'>
 									<?php 
@@ -335,9 +342,9 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 									?>
 								</div>
 							</td>
-							<td colspan='3'>
+							<td>
 								<?php 
-								if($isEditor || ($symbUid && $symbUid == $fieldArr['observeruid'])){ 
+								if($isEditor || ($SYMB_UID && $SYMB_UID == $fieldArr['observeruid'])){ 
 									?>
 									<div style="float:right;" title="<?php echo $LANG['OCCUR_EDIT_TITLE']; ?>">
 										<a href="editor/occurrenceeditor.php?occid=<?php echo $occId; ?>" target="_blank">
@@ -348,13 +355,24 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 								} 
 								if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){
 									?>
-									<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $occId.",".$collManager->getSearchTerm("targetclid").",".$_REQUEST["targettid"];?>)" title="<?php echo $LANG['VOUCHER_LINK_TITLE'].' '.$collManager->getClName(); ?>">
-										<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
+									<div style="float:right;" >
+										<a href="#" onclick="addVoucherToCl(<?php echo $occId.",".$targetClid.",".$_REQUEST["targettid"];?>)" title="<?php echo $LANG['VOUCHER_LINK_TITLE'].' '.$collManager->getClName(); ?>;return false;">
+											<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
+										</a>
+									</div>
+									<?php 
+								}
+								if(isset($fieldArr['img'])){
+									?>
+									<div style="float:right;margin:5px 25px">
+										<a href="#" onclick="return openIndPU(<?php echo $occId.",".($targetClid?$targetClid:"0"); ?>);">
+											<img src="<?php echo $fieldArr['img']; ?>" style="height:70px" />
+										</a>
 									</div>
 									<?php 
 								}
 								?>
-								<div style="float:left;">
+								<div style="margin:4px">
 									<a target='_blank' href='../taxa/index.php?taxon=<?php echo $fieldArr["sciname"];?>'>
 										<span style="font-style:italic;">
 											<?php echo $fieldArr["sciname"];?>
@@ -362,44 +380,36 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 									</a> 
 									<?php echo $fieldArr["author"]; ?>
 								</div>
+								<div style="margin:4px">
+									<?php 
+									echo '<span style="width:150px;">'.$fieldArr["accession"].'</span>';
+									echo '<span style="width:200px;margin-left:30px;">'.$fieldArr["collector"].'&nbsp;&nbsp;&nbsp;'.$fieldArr["collnumber"].'</span>';
+									if(isset($fieldArr["date"])) echo '<span style="margin-left:30px;">'.$fieldArr["date"].'</span>'; 
+									?>
+								</div>
+								<div style="margin:4px">
+									<?php 
+									$localStr = "";
+									if($fieldArr["country"]) $localStr .= $fieldArr["country"].", ";
+									if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
+									if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
+									if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
+									if(isset($fieldArr["elev"]) && $fieldArr["elev"]) $localStr .= $fieldArr["elev"].'m';
+									if(strlen($localStr) > 2) $localStr = trim($localStr,' ,');
+									echo $localStr; 
+									?>
+								</div>
+								<div style="margin:4px">
+									<b>
+										<a href="#" onclick="return openIndPU(<?php echo $occId.",".($targetClid?$targetClid:"0"); ?>);">
+											<?php echo $LANG['FULL_DETAILS']; ?>
+										</a>
+									</b>
+								</div>
 							</td>
 						</tr>
 						<tr>
-							<td width='20%'>
-								<?php echo $fieldArr["accession"];?>
-							</td>
-							<td>
-								<?php echo $fieldArr["collector"]."&nbsp;&nbsp;&nbsp;".(isset($fieldArr["collnumber"])?$fieldArr["collnumber"]:''); ?>
-							</td>
-							<td width='20%'>
-								<?php if(isset($fieldArr["date"])) echo $fieldArr["date"]; ?>
-							</td>
-						</tr>
-						<tr>
-							<?php 
-							$localStr = "";
-							if($fieldArr["country"]) $localStr .= $fieldArr["country"].", ";
-							if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
-							if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
-							if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
-							if(isset($fieldArr["elev"]) && $fieldArr["elev"]) $localStr .= $fieldArr["elev"].'m';
-							if(strlen($localStr) > 2) $localStr = trim($localStr,' ,');
-							?>
-							<td colspan='3'>
-								<?php echo $localStr; ?>
-							</td>
-						</tr>
-						<tr>
-							<td colspan='3'>
-								<b>
-									<a href="#" onclick="return openIndPU(<?php echo $occId.",".($collManager->getSearchTerm("targetclid")?$collManager->getSearchTerm("targetclid"):"0"); ?>);">
-										<?php echo $LANG['FULL_DETAILS']; ?>
-									</a>
-								</b>
-							</td>
-						</tr>
-						<tr>
-							<td colspan='4'>
+							<td colspan='2'>
 								<hr/>
 							</td>
 						</tr>

@@ -156,6 +156,15 @@ if($SYMB_UID){
 				<div id="controlpanel" style="clear:both;display:<?php echo ($eMode?'block':'none'); ?>;">
 					<fieldset style="padding:10px;padding-left:25px;">
 						<legend><b>Data Editor Control Panel</b></legend>
+						<fieldset style="float:right;margin:5px" title="Quick Search">
+							<legend><b>Quick Search</b></legend>
+							<b>Catalog Number</b><br/>
+							<form name="quicksearch" action="../editor/occurrenceeditor.php" method="post">
+								<input name="q_catalognumber" type="text" />
+								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+								<input name="occindex" type="hidden" value="0" />
+							</form>
+						</fieldset>
 						<ul>
 							<?php
 							if(stripos($collData['colltype'],'observation') !== false){
@@ -199,17 +208,11 @@ if($SYMB_UID){
 									<?php echo $LANG['ADD_BATCH_DETER']; ?>
 								</a>
 							</li>
-							<?php
-							if($collData['colltype'] == 'Preserved Specimens'){
-								?>
-								<li>
-									<a href="../reports/labelmanager.php?collid=<?php echo $collid; ?>">
-										<?php echo $LANG['PRINT_LABELS']; ?>
-									</a>
-								</li>
-								<?php
-							}
-							?>
+							<li>
+								<a href="../reports/labelmanager.php?collid=<?php echo $collid; ?>">
+									<?php echo $LANG['PRINT_LABELS']; ?>
+								</a>
+							</li>
 							<li>
 								<a href="../georef/batchgeoreftool.php?collid=<?php echo $collid; ?>">
 									<?php echo $LANG['BATCH_GEOREF']; ?>

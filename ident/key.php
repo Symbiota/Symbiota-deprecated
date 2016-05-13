@@ -1,21 +1,13 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/KeyDataManager.php');
+include_once($SERVER_ROOT.'/classes/KeyDataManager.php');
 include_once($SERVER_ROOT.'/content/lang/ident/key.'.$LANG_TAG.'.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
+
 $editable = false;
 if($isAdmin || array_key_exists("KeyEditor",$userRights)){
 	$editable = true;
 }
-
-$spLink = "../taxa/index.php?taxon=--SPECIES--";
-// $spLink = "http://mobot.mobot.org/cgi-bin/search_vast?name=--SPECIES--";
-$secondaryLink = "";
-$secondaryIcon = "";
-//$secondaryLink = "http://images.google.com/images?q=&#034;--SPECIES--&#034;";
-//$secondaryIcon = "../images/google.png";
-//$secondaryLink = "http://132.236.163.181/cgi-bin/dol/dol_terminal.pl?taxon_name=--SPECIES--&rank=genus&classif_id=0";
-//$secondaryIcon = "dol.org";
 
 $attrsValues = Array();
 
@@ -60,20 +52,19 @@ if($chars){
 
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?><?php echo $LANG['WEBKEY'];?>
+	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['WEBKEY'];?>
         <?php echo preg_replace('/\<[^\>]+\>/','',$dataManager->getClName()); ?></title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<meta name="keywords" content="interactive key,plants identification,<?php echo $dataManager->getClName(); ?>" />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript" src="../js/symb/ident.key.js"></script>
 </head>
 <body>
 	<?php 
 	$displayLeftMenu = (isset($ident_keyMenu)?$ident_keyMenu:true);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($ident_keyCrumbs)){
 		if($ident_keyCrumbs){
 			echo '<div class="navpath">';
@@ -117,8 +108,9 @@ if($chars){
 	
 ?>
 <div id="innertext">
+	<div style="float:right;margin:15px;" title="Edit Character Matrix"><a href="tools/massupdate.php?clid=<?php echo $clid; ?>"><img src="../images/edit.png" /><span style="font-size:70%;">CM</span></a></div>
 	<form name="keyform" id="keyform" action="key.php" method="get">
-		<table border="0" width="590">
+		<table>
 			<tr>
 			<td valign="top" width="200">
 				<div>
@@ -200,13 +192,9 @@ if($chars){
 							echo "<tr><td colspan='2'><h3 style='margin-bottom:0px;margin-top:10px;'>$family</h3></td></tr>\n";
 							natcasesort($species);
 							foreach($species as $tid => $disName){
-								$newSpLink = str_replace("--SPECIES--", $tid, $spLink)."&cl=".($dataManager->getClType()=="static"?$dataManager->getClName():"");
+								$newSpLink = '../taxa/index.php?taxon='.$tid."&cl=".($dataManager->getClType()=="static"?$dataManager->getClName():"");
 								echo "<tr><td><div style='margin:0px 5px 0px 10px;'><a href='".$newSpLink."' target='_blank'><i>$disName</i></a></div></td>\n";
 								echo "<td align='right'>\n";
-								if($secondaryIcon && $secondaryLink){
-									$newLink = str_replace("--SPECIES--", $disName, $secondaryLink);
-									echo "&nbsp;<a href='".$newLink."' target='_blank'><img src='".$secondaryIcon."' width='40' border='0' title='View Google Images'/></a>";
-								}
 								if($editable){
 									echo "<a href='tools/editor.php?tid=$tid&lang=".$defaultLang."' target='_blank'><img src='../images/edit.png' width='15px' border='0' title='".$LANG['EDITMORP']."' /></a>\n";
 								}
@@ -231,7 +219,7 @@ if($chars){
 	</form>
 </div>
 <?php
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>

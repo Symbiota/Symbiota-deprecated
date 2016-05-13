@@ -30,10 +30,12 @@ if($collId){
 		$results['GeneraCount'] = $resultsTemp['genuscnt'];
 		$results['SpeciesCount'] = $resultsTemp['speciescnt'];
 		$results['TotalTaxaCount'] = $resultsTemp['TotalTaxaCount'];
+		$results['TotalImageCount'] = $resultsTemp['TotalImageCount'];
 		unset($resultsTemp['familycnt']);
 		unset($resultsTemp['genuscnt']);
 		unset($resultsTemp['speciescnt']);
 		unset($resultsTemp['TotalTaxaCount']);
+		unset($resultsTemp['TotalImageCount']);
 		ksort($resultsTemp);
 		$c = 0;
 		foreach($resultsTemp as $k => $collArr){
@@ -48,35 +50,35 @@ if($collId){
 			else{
 				$results['SpecimenCount'] = $collArr['recordcnt'];
 			}
-			
+
 			if(array_key_exists("GeorefCount",$results)){
 				$results['GeorefCount'] = $results['GeorefCount'] + $collArr['georefcnt'];
 			}
 			else{
 				$results['GeorefCount'] = $collArr['georefcnt'];
 			}
-			
+
 			if($collArr['dynamicProperties']){
 				$dynPropTempArr = json_decode($collArr['dynamicProperties'],true);
-				
+
 				if(is_array($dynPropTempArr)){
 					$resultsTemp[$k]['speciesID'] = $dynPropTempArr['SpecimensCountID'];
 					$resultsTemp[$k]['types'] = $dynPropTempArr['TypeCount'];
-					
+
 					if(array_key_exists("SpecimensCountID",$results)){
 						$results['SpecimensCountID'] = $results['SpecimensCountID'] + $dynPropTempArr['SpecimensCountID'];
 					}
 					else{
 						$results['SpecimensCountID'] = $dynPropTempArr['SpecimensCountID'];
 					}
-					
+
 					if(array_key_exists("TypeCount",$results)){
 						$results['TypeCount'] = $results['TypeCount'] + $dynPropTempArr['TypeCount'];
 					}
 					else{
 						$results['TypeCount'] = $dynPropTempArr['TypeCount'];
 					}
-					
+
 					if(array_key_exists("families",$dynPropTempArr)){
 						$familyTempArr = $dynPropTempArr['families'];
 						foreach($familyTempArr as $k => $famArr){
@@ -95,7 +97,7 @@ if($collId){
 						}
 						ksort($familyArr, SORT_STRING | SORT_FLAG_CASE);
 					}
-					
+
 					if(array_key_exists("countries",$dynPropTempArr)){
 						$countryTempArr = $dynPropTempArr['countries'];
 						foreach($countryTempArr as $k => $countArr){
@@ -144,7 +146,7 @@ if($action != "Update Statistics"){
 					}
 					$("#tabs").tabs({<?php echo ($action == "Run Statistics"?'active: 1':''); ?>});
 				});
-				
+
 				function toggleStatsPerColl(){
 					toggleById("statspercollbox");
 					toggleById("showstatspercoll");
@@ -158,7 +160,7 @@ if($action != "Update Statistics"){
 					document.getElementById("hidefamdist").style.display="none";
 					return false;
 				}
-				
+
 				function toggleFamilyDist(){
 					toggleById("famdistbox");
 					toggleById("showfamdist");
@@ -199,7 +201,7 @@ if($action != "Update Statistics"){
 					}
 					return false;
 				}
-				
+
 				function changeCollForm(f){
 					var dbElements = document.getElementsByName("db[]");
 					var c = false;
@@ -244,7 +246,7 @@ if($action != "Update Statistics"){
 					<a href='collprofiles.php'>Collections</a> &gt;&gt;
 					<b>Collection Statistics</b>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 			<!-- This is inner text! -->
@@ -259,7 +261,7 @@ if($action != "Update Statistics"){
 						}
 						?>
 					</ul>
-					
+
 					<div id="specobsdiv">
 						<?php
 						if($specArr || $obsArr){
@@ -267,9 +269,9 @@ if($action != "Update Statistics"){
 							<form name="collections" id="collform" action="collstats.php" method="post" onsubmit="return changeCollForm(this);">
 								<div style="margin:0px 0px 10px 20px;">
 									<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
-									Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/collprofiles.php">Collections</a>
+									Select/Deselect all <a href="collprofiles.php">Collections</a>
 								</div>
-								<?php 
+								<?php
 								$collArrIndex = 0;
 								if($specArr){
 									$collCnt = 0;
@@ -332,7 +334,7 @@ if($action != "Update Statistics"){
 																		</td>
 																		<td style="padding:6px">
 																			<div class="collectiontitle">
-																				<a href = 'collprofiles.php?collid=<?php echo $collid; ?>'>
+																				<a href='collprofiles.php?collid=<?php echo $collid; ?>'>
 																					<?php
 																					$codeStr = ' ('.$collName2['instcode'];
 																					if($collName2['collcode']) $codeStr .= '-'.$collName2['collcode'];
@@ -340,7 +342,7 @@ if($action != "Update Statistics"){
 																					echo $collName2["collname"].$codeStr;
 																					?>
 																				</a>
-																				<a href = 'collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+																				<a href='collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
 																					more info
 																				</a>
 																			</div>
@@ -374,7 +376,7 @@ if($action != "Update Statistics"){
 													</td>
 													<td style="padding:6px">
 														<div class="collectiontitle">
-															<a href = 'collprofiles.php?collid=<?php echo $collid; ?>'>
+															<a href='collprofiles.php?collid=<?php echo $collid; ?>'>
 																<?php
 																$codeStr = ' ('.$cArr['instcode'];
 																if($cArr['collcode']) $codeStr .= '-'.$cArr['collcode'];
@@ -382,7 +384,7 @@ if($action != "Update Statistics"){
 																echo $cArr["collname"].$codeStr;
 																?>
 															</a>
-															<a href = 'collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+															<a href='collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
 																more info
 															</a>
 														</div>
@@ -411,7 +413,7 @@ if($action != "Update Statistics"){
 									}
 									$collArrIndex++;
 								}
-								if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; 
+								if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>';
 								if($obsArr){
 									$collCnt = 0;
 									if(isset($obsArr['cat'])){
@@ -563,7 +565,7 @@ if($action != "Update Statistics"){
 						}
 						?>
 					</div>
-					
+
 					<?php
 					if($action == "Run Statistics"){
 						?>
@@ -574,7 +576,7 @@ if($action != "Update Statistics"){
 									<div style="font-weight:bold;font-size:105%;margin:10px;">
 										<div id="colllistlabel"><a href="#" onclick="toggle('colllist');toggle('colllistlabel');">Display List of Collections Analyzed</a></div>
 										<div id="colllist" style="display:none">
-											<?php echo $collStr; ?> 
+											<?php echo $collStr; ?>
 										</div>
 									</div>
 									<fieldset style="float:left;width:400px;margin-bottom:15px;margin-right:15px;">
@@ -589,6 +591,13 @@ if($action != "Update Statistics"){
 												$percGeo = (100* ($results['GeorefCount'] / $results['SpecimenCount']));
 											}
 											echo ($results['GeorefCount']?number_format($results['GeorefCount']):0).($percGeo?" (".($percGeo>1?round($percGeo):round($percGeo,2))."%)":'')." georeferenced";
+											echo "</li>";
+											echo "<li>";
+											$percImg = '';
+											if($results['SpecimenCount'] && $results['TotalImageCount']){
+												$percImg = (100* ($results['TotalImageCount'] / $results['SpecimenCount']));
+											}
+											echo ($results['TotalImageCount']?number_format($results['TotalImageCount']):0).($percImg?" (".($percImg>1?round($percImg):round($percImg,2))."%)":'')." imaged";
 											echo "</li>";
 											echo "<li>";
 											$percId = '';
@@ -624,14 +633,16 @@ if($action != "Update Statistics"){
 												</div>
 												<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 													<input type="hidden" name="collids" id="collids" value='<?php echo $collId; ?>' />
-													<input type="image" name="action" value="Download Stats per Coll" src="../../images/dl.png" onclick="" />
+													<input type="hidden" name="action" id="action" value='Download Stats per Coll' />
+													<input type="image" name="action" src="../../images/dl.png" onclick="" />
+													<!--input type="submit" name="action" value="Download Stats per Coll" src="../../images/dl.png" / -->
 												</div>
 											</div>
 										</form>
 									</fieldset>
 									<div style="">
 										<fieldset style="width:275px;margin:20px 0px 10px 20px;background-color:#FFFFCC;">
-											<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
+											<form name="famstatscsv" id="famstatscsv" action="collstatscsv.php" method="post" onsubmit="">
 												<div class='legend'><b>Extra Statistics</b></div>
 												<div style="margin-top:8px;">
 													<div id="showfamdist" style="float:left;display:block;" >
@@ -641,9 +652,13 @@ if($action != "Update Statistics"){
 														<a href="#" onclick="return toggleFamilyDist()">Hide Family Distribution</a>
 													</div>
 													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
-														<input type="image" name="action" value="Download Family Dist" src="../../images/dl.png" onclick="" />
+														<input type="hidden" name="action" value='Download Family Dist' />
+														<input type="image" name="action" src="../../images/dl.png" onclick="" />
 													</div>
 												</div>
+												<input type="hidden" name="famarrjson" id="famarrjson" value='<?php echo json_encode($familyArr); ?>' />
+											</form>
+											<form name="geostatscsv" id="geostatscsv" action="collstatscsv.php" method="post" onsubmit="">
 												<div style="clear:both;">
 													<div id="showgeodist" style="float:left;display:block;" >
 														<a href="#" onclick="return toggleGeoDist()">Show Geographic Distribution</a>
@@ -652,10 +667,10 @@ if($action != "Update Statistics"){
 														<a href="#" onclick="return toggleGeoDist();">Hide Geographic Distribution</a>
 													</div>
 													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
-														<input type="image" name="action" value="Download Geo Dist" src="../../images/dl.png" onclick="" />
+														<input type="hidden" name="action" value='Download Geo Dist' />
+														<input type="image" name="action" src="../../images/dl.png" onclick="" />
 													</div>
 												</div>
-												<input type="hidden" name="famarrjson" id="famarrjson" value='<?php echo json_encode($familyArr); ?>' />
 												<input type="hidden" name="geoarrjson" id="geoarrjson" value='<?php echo json_encode($countryArr); ?>' />
 											</form>
 										</fieldset>
@@ -674,7 +689,7 @@ if($action != "Update Statistics"){
 									</div>
 									<div style="clear:both;"> </div>
 								</div>
-								
+
 								<fieldset id="statspercollbox" style="clear:both;margin-top:15px;width:90%;display:none;">
 									<legend><b>Statistics per Collection</b></legend>
 									<table class="styledtable" style="font-family:Arial;font-size:12px;">
@@ -682,6 +697,7 @@ if($action != "Update Statistics"){
 											<th style="text-align:center;">Collection</th>
 											<th style="text-align:center;">Specimens</th>
 											<th style="text-align:center;">Georeferenced</th>
+											<th style="text-align:center;">Imaged</th>
 											<th style="text-align:center;">Species ID</th>
 											<th style="text-align:center;">Families</th>
 											<th style="text-align:center;">Genera</th>
@@ -695,6 +711,7 @@ if($action != "Update Statistics"){
 											echo '<td>'.wordwrap($name,40,"<br />\n",true).'</td>';
 											echo '<td>'.(array_key_exists('recordcnt',$data)?$data['recordcnt']:0).'</td>';
 											echo '<td>'.(array_key_exists('georefcnt',$data)?$data['georefcnt']:0).'</td>';
+											echo '<td>'.(array_key_exists('OccurrenceImageCount',$data)?$data['OccurrenceImageCount']:0).'</td>';
 											echo '<td>'.(array_key_exists('speciesID',$data)?$data['speciesID']:0).'</td>';
 											echo '<td>'.(array_key_exists('familycnt',$data)?$data['familycnt']:0).'</td>';
 											echo '<td>'.(array_key_exists('genuscnt',$data)?$data['genuscnt']:0).'</td>';
@@ -789,7 +806,7 @@ if($action != "Update Statistics"){
 			</div>
 			<!-- end inner text -->
 			<?php
-				include($serverRoot.'/footer.php');		
+				include($serverRoot.'/footer.php');
 			?>
 		</body>
 	</html>

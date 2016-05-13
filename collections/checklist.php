@@ -24,7 +24,7 @@ if($stArrCollJson && $stArrSearchJson){
 		</a>
 	</div>
 	<?php 
-	if($keyModIsActive === true || $keyModIsActive === 1){
+	if($KEY_MOD_IS_ACTIVE){
 	?>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_KEY']; ?>'>
 			<a href='checklistsymbiota.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>

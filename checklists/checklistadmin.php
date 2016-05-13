@@ -247,19 +247,6 @@ if($clid && $isEditor){
                     <textarea name="abstract" style="width:95%" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
                 </div>
                 <div>
-                    <b><?php echo $LANG['PARCHECK'];?></b><br/>
-                    <select name="parentclid">
-                        <option value=""><?php echo $LANG['SELECTPARCHECK'];?></option>
-                        <option value="">----------------------------------</option>
-                        <?php
-                        $parArr = $clManager->getParentArr();
-                        foreach($parArr as $k => $v){
-                            echo '<option value="'.$k.'" '.($clArray['parentclid']==$k?' selected':'').'>'.$v.'</option>';
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div>
                     <b><?php echo $LANG['NOTES'];?></b><br/>
                     <input type="text" name="notes" style="width:95%" value="<?php echo $clArray["notes"]; ?>" />
                 </div>
@@ -272,14 +259,14 @@ if($clid && $isEditor){
                         <b><?php echo $LANG['LONGCENT'];?></b><br/>
                         <input id="lngdec" type="text" name="longcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
                     </div>
+                    <div style="float:left;margin:25px 3px;">
+                    	<a href="#" onclick="openMappingAid();return false;"><img src="../images/world.png" style="width:12px;" /></a>
+                    </div>
                     <div style="float:left;margin-left:15px;">
                         <b><?php echo $LANG['POINTRAD'];?></b><br/>
                         <input type="text" name="pointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
                     </div>
-                    <div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
-                        <img src="../images/world.png" style="width:12px;" />
-                    </div>
-                    <div style="float:right;margin-top:8px;margin-right:25px;">
+                    <div style="float:left;margin:8px 0px 0px 25px;">
                         <fieldset style="width:175px;">
                             <legend><b><?php echo $LANG['POLYFOOT'];?></b></legend>
                             <?php
@@ -307,43 +294,54 @@ if($clid && $isEditor){
                         </fieldset>
                     </div>
                 </div>
-                <div style="float:left;margin-top:15px;margin-right:25px;">
-                    <fieldset style="width:250px;">
-                        <legend><b><?php echo $LANG['DEFVIEWSETT'];?></b></legend>
+                <div style="clear:both;margin-top:5px;">
+                    <fieldset style="width:300px;">
+                        <legend><b><?php echo $LANG['DEFAULTDISPLAY'];?></b></legend>
                         <div>
                             <!-- Display Details: 0 = false, 1 = true  -->
-                            <input name='ddetails' id='ddetails' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["ddetails"])?"checked":""); ?> />
+                            <input name='ddetails' id='ddetails' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["ddetails"])?"checked":""); ?> /> 
                             <?php echo $LANG['SHOWDETAILS'];?>
                         </div>
                         <div>
                             <?php
                             //Display Common Names: 0 = false, 1 = true
-                            if($displayCommonNames) echo "<input id='dcommon' name='dcommon' type='checkbox' value='1' ".(($defaultArr&&$defaultArr["dcommon"])?"checked":"")."/>".$LANG['COMMON']."";
+                            if($displayCommonNames) echo "<input id='dcommon' name='dcommon' type='checkbox' value='1' ".(($defaultArr&&$defaultArr["dcommon"])?"checked":"")." /> ".$LANG['COMMON'];
                             ?>
                         </div>
                         <div>
                             <!-- Display as Images: 0 = false, 1 = true  -->
-                            <input name='dimages' id='dimages' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"checked":""); ?> onclick="showImagesDefaultChecked(this.form);" />
+                            <input name='dimages' id='dimages' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"checked":""); ?> onclick="showImagesDefaultChecked(this.form);" /> 
                             <?php echo $LANG['DISPLAYIMG'];?>
                         </div>
                         <div>
                             <!-- Display as Vouchers: 0 = false, 1 = true  -->
-                            <input name='dvouchers' id='dvouchers' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dvouchers"])?"checked":"")); ?>/>
+                            <input name='dvouchers' id='dvouchers' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dvouchers"])?"checked":"")); ?>/> 
                             <?php echo $LANG['NOTESVOUC'];?>
                         </div>
                         <div>
                             <!-- Display Taxon Authors: 0 = false, 1 = true  -->
-                            <input name='dauthors' id='dauthors' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dauthors"])?"checked":"")); ?>/>
+                            <input name='dauthors' id='dauthors' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dauthors"])?"checked":"")); ?>/> 
                             <?php echo $LANG['TAXONAUTHOR'];?>
                         </div>
                         <div>
                             <!-- Display Taxa Alphabetically: 0 = false, 1 = true  -->
-                            <input name='dalpha' id='dalpha' type='checkbox' value='1' <?php echo ($defaultArr&&$defaultArr["dalpha"]?"checked":""); ?>/>
+                            <input name='dalpha' id='dalpha' type='checkbox' value='1' <?php echo ($defaultArr&&$defaultArr["dalpha"]?"checked":""); ?> /> 
                             <?php echo $LANG['TAXONABC'];?>
+                        </div>
+                        <div>
+                            <?php 
+                            // Activate Identification key: 0 = false, 1 = true 
+                            $activateKey = $KEY_MOD_IS_ACTIVE;
+                            if(array_key_exists('activatekey', $defaultArr)){
+								$activateKey = $defaultArr["activatekey"];
+                            }
+                            ?>
+                            <input name='activatekey' type='checkbox' value='1' <?php echo ($activateKey?"checked":""); ?> /> 
+                            <?php echo $LANG['ACTIVATEKEY'];?>
                         </div>
                     </fieldset>
                 </div>
-                <div style="clear:both;float:left;margin-top:15px;">
+                <div style="clear:both;margin-top:15px;">
                     <b>Access</b><br/>
                     <select name="access">
                         <option value="private"><?php echo $LANG['PRIVATE'];?></option>

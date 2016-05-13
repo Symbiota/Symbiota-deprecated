@@ -143,7 +143,7 @@ else{
 				
 				<div id="termdetaildiv" style="">
 					<div id="termdetails" style="overflow:auto;">
-						<form name="termeditform" id="termeditform" action="termdetails.php" method="post" onsubmit="return verifyTermEditForm(this.form);">
+						<form name="termeditform" id="termeditform" action="termdetails.php" method="post" onsubmit="return verifyTermEditForm(this);">
 							<div style="clear:both;padding-top:4px;float:left;">
 								<div style="float:left;">
 									<b>Term: </b>
@@ -152,12 +152,12 @@ else{
 									<input type="text" name="term" id="term" maxlength="150" style="width:400px;" value="<?php echo $termArr['term']; ?>" onchange="" title="" />
 								</div>
 							</div>
-							<div style="clear:both;padding-top:4px;float:left;">
+							<div style="clear:both;padding-top:4px;float:left;width:100%;">
 								<div style="float:left;">
 									<b>Definition: </b>
 								</div>
-								<div style="float:left;margin-left:10px;">
-									<textarea name="definition" id="definition" rows="10" maxlength="1000" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['definition']; ?></textarea>
+								<div style="float:left;margin-left:10px;width:95%;">
+									<textarea name="definition" id="definition" rows="10" maxlength="2000" style="width:100%;height:200px;" ><?php echo $termArr['definition']; ?></textarea>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">

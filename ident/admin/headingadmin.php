@@ -1,19 +1,19 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyCharAdmin.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/KeyCharAdmin.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/headingadmin.php?'.$_SERVER['QUERY_STRING']);
 
-$hid = array_key_exists('hid',$_REQUEST)?$_REQUEST['hid']:0;
-$action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
+$hid = array_key_exists('hid',$_POST)?$_POST['hid']:0;
 $langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
+$action = array_key_exists('action',$_POST)?$_POST['action']:'';
 
 $charManager = new KeyCharAdmin();
 $charManager->setLangId($langId);
 
 $isEditor = false;
-if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
+if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
@@ -30,11 +30,10 @@ if($isEditor && $action){
 	}
 }
 $headingArr = $charManager->getHeadingArr();
-$charArr = $charManager->getCharacterArr();
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 	<title>Heading Administration</title>
     <link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
@@ -54,7 +53,7 @@ $charArr = $charManager->getCharacterArr();
 </head>
 <body>
 	<!-- This is inner text! -->
-	<div id="innertext">
+	<div style="width:700px">
 		<?php 
 		if($statusStr){
 			?>
@@ -67,12 +66,7 @@ $charArr = $charManager->getCharacterArr();
 		}
 		if($isEditor){
 			?>
-			<div style="float:right;margin:10px;">
-				<a href="#" onclick="toggle('addheadingdiv');">
-					<img src="../../images/add.png" alt="Create New Heading" />
-				</a>
-			</div>
-			<div id="addheadingdiv" style="display:none;">
+			<div id="addheadingdiv">
 				<form name="newheadingform" action="headingadmin.php" method="post" onsubmit="return validateHeadingForm(this)">
 					<fieldset>
 						<legend><b>New Heading</b></legend>
@@ -82,7 +76,7 @@ $charArr = $charManager->getCharacterArr();
 						</div>
 						<div style="padding-top:6px;">
 							<b>Notes</b><br />
-							<input type="text" name="notes" />
+							<input name="notes" type="text" style="width:500px;" />
 						</div>
 						<div style="padding-top:6px;">
 							<b>Sort Sequence</b><br />
@@ -94,67 +88,56 @@ $charArr = $charManager->getCharacterArr();
 					</fieldset>
 				</form>
 			</div>
-			<div id="headinglist">
+			<div>
 				<?php 
 				if($headingArr){
 					?>
-					<h3>Headings with Characters</h3>
-					<?php 
-					foreach($headingArr as $headingId => $headArr){
-						?>
-						<div>
-							<a href="#" onclick="toggle('heading-<?php echo $headingId; ?>');"><?php echo $headArr['name']; ?></a>
-							<a href="#" onclick="toggle('headingedit-<?php echo $headingId; ?>');"><img src="../../images/edit.png" /></a>
-							<div id="headingedit-<?php echo $headingId; ?>" style="display:none;margin:20px;">
-								<fieldset style="padding:15px;">
-									<legend><b>Heading Editor</b></legend>
-									<form name="headingeditform" action="headingadmin.php" method="post" onsubmit="return validateHeadingForm(this)">
-										<div style="margin:2px;">
-											<b>Heading Name</b><br/>
-											<input name="headingname" type="text" value="<?php echo $headArr['name']; ?>" />
-										</div>
-										<div style="margin:2px;">
-											<b>Notes</b><br/>
-											<input name="notes" type="text" value="<?php echo $headArr['notes']; ?>" />
-										</div>
-										<div style="margin:2px;">
-											<b>Sort Sequence</b><br/>
-											<input name="sortsequence" type="text" value="<?php echo $headArr['sortsequence']; ?>" />
-										</div>
-										<div>
-											<input name="hid" type="hidden" value="<?php echo $headingId; ?>" />
-											<button name="action" type="submit" value="Save">Save Edits</button>
-										</div>
-									</form>
-								</fieldset>
-								<fieldset style="padding:15px;">
-									<legend><b>Delete Heading</b></legend>
-									<form name="headingdeleteform" action="headingadmin.php" method="post">
-										<input name="hid" type="hidden" value="<?php echo $headingId; ?>" />
-										<button name="action" type="submit" value="Delete">Delete Heading</button>
-									</form>
-								</fieldset>
-							</div>
-							<div id="heading-<?php echo $headingId; ?>" style="display:none;">
-								<?php 
-								$charList = $charArr[$headingId];
-								foreach($charList as $cid => $charName){
-									?>
-									<ul>
-										<li style="margin-left:10px;">
-											<?php echo '<a href="chardetails.php?cid='.$cid.'" target="_blank">'.$charName.'</a>'; ?>
-										</li>
-									</ul>
-									<?php 
-								}
+					<fieldset>
+						<legend><b>Existing Headings</b></legend>
+						<ul>
+							<?php 
+							foreach($headingArr as $headingId => $headArr){
+								echo '<li><a href="#" onclick="toggle(\'headingedit-'.$headingId.'\');">'.$headArr['name'].' <img src="../../images/edit.png" style="width:13px" /></a></li>';
 								?>
-							</div>
-						</div>
-						<?php 
-					}
+								<div id="headingedit-<?php echo $headingId; ?>" style="display:none;margin:20px;">
+									<fieldset style="padding:15px;">
+										<legend><b>Heading Editor</b></legend>
+										<form name="headingeditform" action="headingadmin.php" method="post" onsubmit="return validateHeadingForm(this)">
+											<div style="margin:2px;">
+												<b>Heading Name</b><br/>
+												<input name="headingname" type="text" value="<?php echo $headArr['name']; ?>" style="width:400px;" />
+											</div>
+											<div style="margin:2px;">
+												<b>Notes</b><br/>
+												<input name="notes" type="text" value="<?php echo $headArr['notes']; ?>" style="width:500px;" />
+											</div>
+											<div style="margin:2px;">
+												<b>Sort Sequence</b><br/>
+												<input name="sortsequence" type="text" value="<?php echo $headArr['sortsequence']; ?>" />
+											</div>
+											<div>
+												<input name="hid" type="hidden" value="<?php echo $headingId; ?>" />
+												<button name="action" type="submit" value="Save">Save Edits</button>
+											</div>
+										</form>
+									</fieldset>
+									<fieldset style="padding:15px;">
+										<legend><b>Delete Heading</b></legend>
+										<form name="headingdeleteform" action="headingadmin.php" method="post">
+											<input name="hid" type="hidden" value="<?php echo $headingId; ?>" />
+											<button name="action" type="submit" value="Delete">Delete Heading</button>
+										</form>
+									</fieldset>
+								</div>
+								<?php 
+							}
+							?>
+						</ul>
+					</fieldset>
+					<?php 
 				}
 				else{
-					echo '<div style="font-weight:bold;font-size:120%;">There are no existing characters</div>';
+					echo '<div style="font-weight:bold;font-size:120%;">There are no existing character headings</div>';
 				}
 				?>
 			</div>

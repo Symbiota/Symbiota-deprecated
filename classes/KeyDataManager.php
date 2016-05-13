@@ -1,9 +1,5 @@
 <?php
-/*
- * Created on May 16, 2006
- * E.E.Gilbert
-*/
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class KeyDataManager {
 
@@ -63,20 +59,21 @@ class KeyDataManager {
 		$sql = "SELECT DISTINCT nt.UnitName1, ts.Family ";
 		if($this->clid && $this->clType == "static"){
 			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID ".
-				"WHERE (cltl.CLID = ".$this->clid.")";
+				"WHERE (cltl.CLID = ".$this->clid.") ";
 		}
 		else if($this->dynClid){
 			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmdyncltaxalink dcltl ON nt.TID = dcltl.TID ".
-			"WHERE (dcltl.dynclid = ".$this->dynClid.")";
+			"WHERE (dcltl.dynclid = ".$this->dynClid.") ";
 		}
 		else{
 			$sql .= "FROM (((taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) ".
 				"INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID) ".
 				"INNER JOIN fmchecklists cl ON cltl.CLID = cl.CLID) ".
 				"INNER JOIN fmchklstprojlink clpl ON cl.CLID = clpl.clid ".
-				"WHERE (clpl.pid = ".$this->pid.")";
+				"WHERE (clpl.pid = ".$this->pid.") ";
 		}
-		//echo $sql.'<br/>';
+		$sql .= 'AND (ts.taxauthid = 1)';
+		//echo $sql.'<br/>'; exit;
 		$result = $this->keyCon->query($sql);
 		while($row = $result->fetch_object()){
 			$genus = $row->UnitName1;
@@ -123,7 +120,7 @@ class KeyDataManager {
 				$this->clid = $row->CLID;
 				$this->clName = $row->Name;
 				$this->clAuthors = $row->Authors;
-				$this->clType = $row->Type;
+				$this->clType = ($row->Type?$row->Type:'static');
 				$this->dynamicSql = $row->dynamicsql;
 			}
 			$result->close();

@@ -332,7 +332,7 @@ if($isEditable && $projSubmit){
                             <?php echo $LANG['RESCHECKQUES'];?>
 						</div>
 						<?php 
-						if($keyModIsActive === true || $keyModIsActive === 1){
+						if($KEY_MOD_IS_ACTIVE){
 							?>
 							<div style="margin-left:15px;font-size:90%">
                                 <?php echo $LANG['THE'];?> <img src="../images/key.png" style="width: 12px;" alt="Golden Key Symbol" />
@@ -363,7 +363,7 @@ if($isEditable && $projSubmit){
 										<?php echo $value; ?>
 									</a> 
 									<?php 
-									if($keyModIsActive === true || $keyModIsActive === 1){
+									if($KEY_MOD_IS_ACTIVE){
 										?>
 										<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $pid; ?>&taxon=All+Species'>
 											<img style='width:12px;border:0px;' src='../images/key.png'/>

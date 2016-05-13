@@ -51,9 +51,53 @@ if($isEditor){
 				if(!navigator.cookieEnabled){
 					alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
 				}
+				
+				function split( val ) {
+					return val.split( /,\s*/ );
+				}
+				function extractLast( term ) {
+					return split( term ).pop();
+				}
+				
 				$("#tabs").tabs({
 					active: <?php echo (is_numeric($tabTarget)?$tabTarget:'0'); ?>
 				});
+				
+				$( "#taxa" )
+				// don't navigate away from the field on tab when selecting an item
+				.bind( "keydown", function( event ) {
+					if ( event.keyCode === $.ui.keyCode.TAB &&
+							$( this ).data( "autocomplete" ).menu.active ) {
+						event.preventDefault();
+					}
+				})
+				.autocomplete({
+					source: function( request, response ) {
+						$.getJSON( "../rpc/taxalist.php", {
+							term: extractLast( request.term )
+						}, response );
+					},
+					search: function() {
+						// custom minLength
+						var term = extractLast( this.value );
+						if ( term.length < 4 ) {
+							return false;
+						}
+					},
+					focus: function() {
+						// prevent value inserted on focus
+						return false;
+					},
+					select: function( event, ui ) {
+						var terms = split( this.value );
+						// remove the current input
+						terms.pop();
+						// add the selected item
+						terms.push( ui.item.value );
+						this.value = terms.join( ", " );
+						return false;
+					}
+				},{});
 			});
 			
 			function selectAll(cb){
@@ -210,6 +254,12 @@ if($isEditor){
 						<fieldset>
 							<legend><b>Define Specimen Recordset</b></legend>
 							<div style="margin:3px;">
+								<span title="Scientific name as entered in database.">
+									Scientific Name: 
+									<input type="text" name="taxa" id="taxa" size="60" value="<?php echo (array_key_exists('taxa',$_REQUEST)?$_REQUEST['taxa']:''); ?>" />
+								</span>
+							</div>
+							<div style="margin:3px;">
 								<span title="Full or last name of collector as entered in database.">
 									Collector: 
 									<input type="text" name="recordedby" style="width:150px;" value="<?php echo (array_key_exists('recordedby',$_REQUEST)?$_REQUEST['recordedby']:''); ?>" />
@@ -321,9 +371,15 @@ if($isEditor){
 													<a href="#" onclick="openIndPopup(<?php echo $occId; ?>); return false;">
 														<?php echo $recArr["c"]; ?>
 													</a>
-													<a href="#" onclick="openEditorPopup(<?php echo $occId; ?>); return false;">
-														<img src="../../images/edit.png" />
-													</a>
+													<?php
+													if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($recArr["collid"],$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($recArr["collid"],$userRights["CollEditor"]))){
+														?>
+														<a href="#" onclick="openEditorPopup(<?php echo $occId; ?>); return false;">
+															<img src="../../images/edit.png" />
+														</a>
+														<?php
+													}
+													?>
 												</td>
 												<td>
 													<?php echo $recArr["s"]; ?>

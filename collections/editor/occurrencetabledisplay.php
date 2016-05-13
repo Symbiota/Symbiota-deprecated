@@ -22,12 +22,12 @@ $collMap = array();
 $recArr = array();
 $headerMapBase = array('catalognumber' => 'Catalog Number',
 	'othercatalognumbers' => 'Other Catalog #','family' => 'Family','identificationqualifier' => 'ID Qualifier',
-	'sciname' => 'Scientific name','scientificnameauthorship'=>'Author','recordedby' => 'Collector','recordnumber' => 'Number',
+	'sciname' => 'Scientific Name','scientificnameauthorship'=>'Author','recordedby' => 'Collector','recordnumber' => 'Number',
 	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date','verbatimeventdate' => 'Verbatim Date',
 	'identificationremarks' => 'Identification Remarks','taxonremarks' => 'Taxon Remarks','identifiedby' => 'Identified By',
 	'dateidentified' => 'Date Identified', 'identificationreferences' => 'Identification References',
-	'country' => 'Country','stateprovince' => 'State/Province','county' => 'county','municipality' => 'municipality',
-	'locality' => 'locality','decimallatitude' => 'Latitude', 'decimallongitude' => 'Longitude','geodeticdatum' => 'Datum',
+	'country' => 'Country','stateprovince' => 'State/Province','county' => 'County','municipality' => 'Municipality',
+	'locality' => 'Locality','decimallatitude' => 'Latitude', 'decimallongitude' => 'Longitude','geodeticdatum' => 'Datum',
 	'coordinateuncertaintyinmeters' => 'Uncertainty In Meters','verbatimcoordinates' => 'Verbatim Coordinates',
 	'georeferencedby' => 'Georeferenced By','georeferenceprotocol' => 'Georeference Protocol','georeferencesources' => 'Georeference Sources',
 	'georeferenceverificationstatus' => 'Georef Verification Status','georeferenceremarks' => 'Georef Remarks',
@@ -36,7 +36,7 @@ $headerMapBase = array('catalognumber' => 'Catalog Number',
 	'verbatimattributes' => 'Description','lifestage' => 'Life Stage', 'sex' => 'Sex', 'individualcount' => 'Individual Count', 
 	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
-	'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
+	'disposition' => 'Disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
 	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record');
 $headMap = array();
 
@@ -103,19 +103,13 @@ if($symbUid){
 	$recArr = $occManager->getOccurMap();
 	$navStr = '<div style="float:right;">';
 	if($occIndex >= $recLimit){
-		$navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex-$recLimit).');" title="Previous '.$recLimit.' record">&lt;&lt;</a>';
-	}
-	else{
-		$navStr .= '&lt;&lt;';
+		$navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex-$recLimit).');" title="Previous '.$recLimit.' records">&lt;&lt;</a>';
 	}
 	$navStr .= ' | ';
 	$navStr .= ($occIndex+1).'-'.($qryCnt<$recLimit+$occIndex?$qryCnt:$recLimit+$occIndex).' of '.$qryCnt.' records';
 	$navStr .= ' | ';
 	if($qryCnt > ($recLimit+$occIndex)){
 		$navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+$recLimit).');" title="Next '.$recLimit.' records">&gt;&gt;</a>';
-	}
-	else{
-		$navStr .= '&gt;&gt;';
 	}
 	$navStr .= '</div>';
 }

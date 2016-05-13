@@ -1,11 +1,12 @@
 <?php
-$DEFAULT_LANG = 'en';		//Default language
+$DEFAULT_LANG = 'en';			//Default language
 $DEFAULT_PROJ_ID = 1;
 $DEFAULTCATID = 1;
 $DEFAULT_TITLE = '';
 $ADMIN_EMAIL = '';
 $CHARSET = '';					//ISO-8859-1 or UTF-8
-$PORTAL_GUID = '';
+$PORTAL_GUID = '';				//Typically a UUID
+$SECURITY_KEY = '';				//Typically a UUID used to verify access to certain web service 
 
 $CLIENT_ROOT = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
 $SERVER_ROOT = '';				//Full path to Symbiota project root folder
@@ -33,6 +34,7 @@ $NLP_SALIX_ACTIVATED = 0;
 $OCCURRENCE_MOD_IS_ACTIVE = 1;
 $FLORA_MOD_IS_ACTIVE = 1;
 $KEY_MOD_IS_ACTIVE = 1;
+
 $REQUESTED_TRACKING_IS_ACTIVE = 0;   // Allow users to request actions such as requests for images to be made for specimens
 $QUICK_HOST_ENTRY_IS_ACTIVE = 0;   // Allows quick entry for host taxa in occurrence editor
 

@@ -919,7 +919,8 @@ class TaxaUpload{
 				'SELECT DISTINCT ut.SciName, ut.RankId, ut.UnitInd1, ut.UnitName1, ut.UnitInd2, ut.UnitName2, ut.UnitInd3, '.
 				'ut.UnitName3, ut.Author, ut.Source, ut.Notes '.
 				'FROM uploadtaxa AS ut '.
-				'WHERE (ISNULL(ut.TID) AND ut.parenttid IS NOT NULL AND rankid IS NOT NULL )';
+				'WHERE (ISNULL(ut.TID) AND ut.parenttid IS NOT NULL AND rankid IS NOT NULL ) '.
+				'ORDER BY ut.RankId ASC ';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
@@ -996,6 +997,8 @@ class TaxaUpload{
 		$this->outputMsg('House cleaning... ');
 		//Something is wrong with the buildHierarchy method. Needs to be fixed. 
 		$this->buildHierarchy();
+		
+		$this->setKingdom();
 
 		//Update occurrences with new tids
 		$sql1 = 'UPDATE omoccurrences AS o LEFT JOIN taxa AS t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE ISNULL(o.TidInterpreted)';
@@ -1081,6 +1084,25 @@ class TaxaUpload{
 		else{
 			$status = false;
 			$this->errorStr = 'ERROR seeding taxaenumtree: '.$this->conn->error;
+		}
+		return $status;
+	}
+	
+	private function setKingdom(){
+		$status = true;
+		//Seed taxaenumtree table
+		$sql = 'UPDATE taxa AS t LEFT JOIN taxaenumtree AS te ON t.TID = te.tid '.
+			'LEFT JOIN taxa AS t2 ON te.parenttid = t2.TID '.
+			'LEFT JOIN taxonunits AS tu ON t2.SciName = tu.kingdomName '.
+			'SET t.kingdomName = tu.kingdomName '.
+			'WHERE te.taxauthid = '.$this->taxAuthId.' AND t2.RankId = 10 AND ISNULL(t.KingdomID) AND tu.rankid = 10 ';
+		//$this->outputMsg($sql;
+		if($this->conn->query($sql)){
+			$status = true;
+		}
+		else{
+			$status = false;
+			$this->errorStr = 'ERROR setting kingdom: '.$this->conn->error;
 		}
 		return $status;
 	}

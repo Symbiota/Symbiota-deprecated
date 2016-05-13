@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class TaxonomyEditorManager{
 
@@ -228,10 +228,12 @@ class TaxonomyEditorManager{
 			'unitind3 = '.($postArr['unitind3']?'"'.$this->cleanInStr($postArr['unitind3']).'"':'NULL').', '.
 			'unitname3 = '.($postArr['unitname3']?'"'.$this->cleanInStr($postArr['unitname3']).'"':'NULL').', '.
 			'author = '.($postArr['author']?'"'.$this->cleanInStr($postArr['author']).'"':'NULL').', '.
-			'rankid = '.($postArr['rankid']?$this->cleanInStr($postArr['rankid']):'NULL').', '.
+			'rankid = '.(is_numeric($postArr['rankid'])?$postArr['rankid']:'NULL').', '.
 			'source = '.($postArr['source']?'"'.$this->cleanInStr($postArr['source']).'"':'NULL').', '.
 			'notes = '.($postArr['notes']?'"'.$this->cleanInStr($postArr['notes']).'"':'NULL').', '.
-			'securitystatus = '.($postArr['securitystatus']!==''?$this->cleanInStr($postArr['securitystatus']):'0').', '.
+			'securitystatus = '.(is_numeric($postArr['securitystatus'])?$postArr['securitystatus']:'0').', '.
+			'modifiedUid = '.$GLOBALS['SYMB_UID'].', '.
+			'modifiedTimeStamp = "'.date('Y-m-d H:i:s').'",'.
 			'sciname = "'.$this->cleanInStr(($postArr["unitind1"]?$postArr["unitind1"]." ":"").
 			$postArr["unitname1"].($postArr["unitind2"]?" ".$postArr["unitind2"]:"").
 			($postArr["unitname2"]?" ".$postArr["unitname2"]:"").
@@ -253,15 +255,15 @@ class TaxonomyEditorManager{
 		return $statusStr;
 	}
 	
-	public function submitTaxstatusEdits($tsArr){
+	public function submitTaxStatusEdits($parentTid,$tidAccepted){
 		$status = '';
-		if(isset($tsArr["parenttid"])){
+		if(is_numeric($parentTid) && is_numeric($tidAccepted)){
 			$this->setTaxon();
 			$sql = 'UPDATE taxstatus '.
-				'SET parenttid = '.$tsArr["parenttid"].' '.
-				'WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$tsArr['tid'].') AND (tidaccepted = '.$tsArr['tidaccepted'].')';
+				'SET parenttid = '.$parentTid.' '.
+				'WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$this->tid.') AND (tidaccepted = '.$tidAccepted.')';
 			if($this->conn->query($sql)){
-				$this->rebuildHierarchy($tsArr["tid"]);
+				$this->rebuildHierarchy();
 			}
 			else{
 				$status = 'Unable to edit taxonomic placement. SQL: '.$sql; 
@@ -270,34 +272,26 @@ class TaxonomyEditorManager{
 		return $status;
 	}
 
-	public function submitSynEdits($synEditArr){
+	public function submitSynonymEdits($targetTid, $tidAccepted, $unacceptabilityReason, $notes, $sortSeq){
 		$statusStr = '';
-		$tid = $synEditArr["tid"];
-		unset($synEditArr["tid"]);
-		$tidAccepted = $synEditArr["tidaccepted"];
-		unset($synEditArr["tidaccepted"]);
-		$sql = "UPDATE taxstatus SET ";
-		$sqlSet = "";
-		foreach($synEditArr as $key => $value){
-			$sqlSet .= ",".$key." = '".$this->cleanInStr($value)."'";
-		}
-		$sql .= substr($sqlSet,1);
-		$sql .= " WHERE (taxauthid = ".$this->taxAuthId.
-			") AND tid = ".$tid." AND (tidaccepted = ".$tidAccepted.')';
-		//echo $sql;
-		if(!$this->conn->query($sql)){
-			$statusStr = 'ERROR editing taxon: '.$this->conn->error;
+		if(is_numeric($tidAccepted)){
+			$sql = 'UPDATE taxstatus SET unacceptabilityReason = '.($unacceptabilityReason?'"'.$this->cleanInStr($unacceptabilityReason).'"':'NULL').', '.
+				' notes = '.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').', sortsequence = '.(is_numeric($sortSeq)?$sortSeq:'NULL').
+				' WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$targetTid.') AND (tidaccepted = '.$tidAccepted.')';
+			//echo $sql; exit();
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR submitting synonym edits: '.$this->conn->error;
+			}
 		}
 		return $statusStr;
 	}
-	
-	public function submitAddAcceptedLink($tid, $tidAcc, $deleteOther = true){
+
+	public function submitAddAcceptedLink($tidAcc, $deleteOther = true){
 		$family = "";$parentTid = 0;
 		$statusStr = '';
-		$tid = $tid;
-		if(is_numeric($tid)){
+		if(is_numeric($tidAcc)){
 			$sqlFam = 'SELECT ts.family, ts.parenttid '.
-				'FROM taxstatus ts WHERE (ts.tid = '.$tid.') AND (ts.taxauthid = '.$this->taxAuthId.')';
+				'FROM taxstatus ts WHERE (ts.tid = '.$this->tid.') AND (ts.taxauthid = '.$this->taxAuthId.')';
 			$rs = $this->conn->query($sqlFam);
 			if($row = $rs->fetch_object()){
 				$family = $row->family;
@@ -306,21 +300,32 @@ class TaxonomyEditorManager{
 			$rs->free();
 			
 			if($deleteOther){
-				$sqlDel = "DELETE FROM taxstatus WHERE (tid = ".$tid.") AND (taxauthid = ".$this->taxAuthId.')';
+				$sqlDel = "DELETE FROM taxstatus WHERE (tid = ".$this->tid.") AND (taxauthid = ".$this->taxAuthId.')';
 				$this->conn->query($sqlDel);
 			}
 			$sql = 'INSERT INTO taxstatus (tid,tidaccepted,taxauthid,family,parenttid) '.
-				'VALUES ('.$tid.', '.$tidAcc.', '.$this->taxAuthId.','.
+				'VALUES ('.$this->tid.', '.$tidAcc.', '.$this->taxAuthId.','.
 				($family?'"'.$family.'"':"NULL").','.
 				$parentTid.') ';
 			//echo $sql;
 			if(!$this->conn->query($sql)){
-				$statusStr = 'ERROR editing taxon: '.$this->conn->error;
+				$statusStr = 'ERROR adding accepted link: '.$this->conn->error;
 			}
 		}
 		return $statusStr;
 	}
 	
+	public function removeAcceptedLink($tidAccepted){
+		$statusStr = '';
+		if(is_numeric($tidAccepted)){
+			$sql = 'DELETE FROM taxstatus WHERE (tid = '.$this->tid.') AND (tidaccepted = '.$tidAccepted.') AND (taxauthid = '.$this->taxAuthId.')';
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR removing tidAccepted link: '.$this->conn->error;
+			}
+		}
+		return $statusStr;
+	}
+
 	public function submitChangeToAccepted($tid,$tidAccepted,$switchAcceptance = true){
 		$statusStr = '';
 		if(is_numeric($tid)){
@@ -332,7 +337,7 @@ class TaxonomyEditorManager{
 				$sqlSwitch = 'UPDATE taxstatus SET tidaccepted = '.$tid.
 					' WHERE (tidaccepted = '.$tidAccepted.') AND (taxauthid = '.$this->taxAuthId.')';
 				if(!$this->conn->query($sqlSwitch)){
-					$statusStr = 'ERROR editing taxon: '.$this->conn->error;
+					$statusStr = 'ERROR changing to accepted: '.$this->conn->error;
 				}
 				
 				$this->updateDependentData($tidAccepted,$tid);
@@ -446,7 +451,8 @@ class TaxonomyEditorManager{
 		}
 	}
 
-	public function rebuildHierarchy($tid){
+	public function rebuildHierarchy($tid = 0){
+		if(!$tid) $tid = $this->tid;
 		if(!$this->rankid) $this->setTaxon();
 		//Get parent array
 		$parentArr = Array();
@@ -536,7 +542,7 @@ class TaxonomyEditorManager{
 		//Load new name into taxa table
 		$tid = 0;
 		$sqlTaxa = 'INSERT INTO taxa(sciname, author, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, '.
-			'source, notes, securitystatus) '.
+			'source, notes, securitystatus, modifiedUid, modifiedTimeStamp) '.
 			'VALUES ("'.$this->cleanInStr($dataArr['sciname']).'",'.
 			($dataArr['author']?'"'.$this->cleanInStr($dataArr['author']).'"':'NULL').','.
 			($dataArr['rankid']?$dataArr['rankid']:'NULL').','.
@@ -548,7 +554,8 @@ class TaxonomyEditorManager{
 			($dataArr['unitname3']?'"'.$this->cleanInStr($dataArr['unitname3']).'"':'NULL').','.
 			($dataArr['source']?'"'.$this->cleanInStr($dataArr['source']).'"':'NULL').','.
 			($dataArr['notes']?'"'.$this->cleanInStr($dataArr['notes']).'"':'NULL').','.
-			$this->cleanInStr($dataArr['securitystatus']).')';
+			$this->cleanInStr($dataArr['securitystatus']).','.
+			$GLOBALS['SYMB_UID'].',"'.date('Y-m-d H:i:s').'")';
 		//echo "sqlTaxa: ".$sqlTaxa;
 		if($this->conn->query($sqlTaxa)){
 			$tid = $this->conn->insert_id;
@@ -733,7 +740,7 @@ class TaxonomyEditorManager{
 	
 	public function transferResources($targetTid){
 		$statusStr = '';
-		if($targetTid){
+		if(is_numeric($targetTid)){
 			//Remap occurrence records
 			$sql ='UPDATE omoccurrences SET tidinterpreted = '.$targetTid.' WHERE tidinterpreted = '.$this->tid;
 			if(!$this->conn->query($sql)){
@@ -905,7 +912,7 @@ class TaxonomyEditorManager{
 	}
 	
 	public function setTaxAuthId($taid){
-		if($taid && is_numeric($taid)){
+		if(is_numeric($taid)){
 			$this->taxAuthId = $taid;
 		}
 	}

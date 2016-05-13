@@ -63,7 +63,7 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 	</style>
 	<script type="text/javascript">
 	    function transferCoord(evt) {
-	        if(evt.origin !== "http://www.museum.tulane.edu") {
+	        if(evt.origin.indexOf("museum.tulane.edu") < 0) {
 				alert("iframe url does not have permision to interact with me");
 	        }
 	        else {//alert(evt.data);
@@ -93,7 +93,7 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 	<div id="container">
 		<div >
 			<!--<iframe id="da-iframe" src="http://www.museum.tulane.edu/nelson/gravier2.html"></iframe>-->
-			<iframe id="Iframe1" src="http://www.museum.tulane.edu/geolocate/web/webgeoreflight.aspx?v=1&georef=run&tab=locality&<?php echo $urlVariables; ?>"></iframe>
+			<iframe id="Iframe1" src="//www.museum.tulane.edu/geolocate/web/webgeoreflight.aspx?v=1&georef=run&tab=locality&<?php echo $urlVariables; ?>"></iframe>
 		</div>
 	</div>
 </body>
