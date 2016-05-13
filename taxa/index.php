@@ -462,8 +462,7 @@ if($taxonManager->getSciName() != "unknown"){
 				$break = strpos($searchParam, " ");
 				$genus = substr($searchParam, 0, $break);
 				$species = substr($searchParam, $break);
-				echo $genus . " " . $species;
-				echo "<div style='font-size:14px;margin-left:10px'><a href='../imagelib/search.php?taxon='". $genus . "%20" . $species .">Search All Images For ". $taxonManager->getSciName() . "</a></div>"; 
+				echo "<div style='font-size:14px;margin-left:10px'><b><a href='../imagelib/search.php?taxon=".$genus."%20".$species."'>Search All Images for ".$taxonManager->getSciName()."</a></b></div>"; 
 		?>
 	<?php 
 	//Bottom line listing options
