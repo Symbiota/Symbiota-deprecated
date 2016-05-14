@@ -66,7 +66,7 @@ class ProfileManager{
 			$sql = 'SELECT u.uid, u.firstname, u.lastname '.
 				'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
 				'WHERE (ul.username = "'.$this->userName.'") ';
-			if($pwdStr) $sql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'") OR ul.password = OLD_PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
+			if($pwdStr) $sql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
 			//echo $sql;
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
@@ -192,8 +192,8 @@ class ProfileManager{
 			$editCon = $this->getConnection("write");
 			if($isSelf){
 				$sqlTest = 'SELECT ul.uid FROM userlogin ul WHERE (ul.uid = '.$this->uid.') '.
-					'AND ((ul.password = PASSWORD("'.$this->cleanInStr($oldPwd).
-					'")) OR (ul.password = OLD_PASSWORD("'.$this->cleanInStr($oldPwd).'")))';
+					'AND (ul.password = PASSWORD("'.$this->cleanInStr($oldPwd).
+					'"))';
 				$rsTest = $editCon->query($sqlTest);
 				if(!$rsTest->num_rows) return false;
 			}
