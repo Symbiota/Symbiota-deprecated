@@ -93,9 +93,9 @@ class GlossaryUpload{
 						if($field == $lang.'_definition'){
 							$index = array_search($csvField,array_keys($fieldMap));
 							$definition = $this->cleanInStr($this->encodeString($recordArr[$index]));
-							if(strlen($definition) > 1000){
+							if(strlen($definition) > 2000){
 								$definition = '';
-								$this->outputMsg('Definition for '.$term.' in '.ucfirst($lang).' is more than 1000 characters and cannot be saved.');
+								$this->outputMsg('Definition for '.$term.' in '.ucfirst($lang).' is more than 2000 characters and was set to NULL.');
 							}
 						}
 						if($field == $lang.'_source'){

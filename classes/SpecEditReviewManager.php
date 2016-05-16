@@ -1,6 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once('../../config/symbini.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class SpecEditReviewManager {
 
@@ -9,7 +8,7 @@ class SpecEditReviewManager {
 	private $collAcronym;
 
 	private $sqlBase;
-	private $appliedStatusFilter;
+	private $appliedStatusFilter = '';
 	private $reviewStatusFilter;
 	private $editorUidFilter;
 	private $queryOccidFilter;
@@ -25,7 +24,7 @@ class SpecEditReviewManager {
 	}
 	
 	public function setCollId($id){
-		if($id && is_numeric($id)){
+		if(is_numeric($id)){
 			$this->collId = $id;
 			$sql = 'SELECT collectionname, institutioncode, collectioncode FROM omcollections WHERE (collid = '.$id.')';
 			$rs = $this->conn->query($sql);
@@ -47,6 +46,7 @@ class SpecEditReviewManager {
 	public function getRecCnt(){
 		if(!$this->sqlBase) $this->setSqlBase();
 		$sql = 'SELECT COUNT(e.ocedid) AS fullcnt '.$this->sqlBase;
+		//echo $sql; exit;
 		$rsCnt = $this->conn->query($sql);
 		if($rCnt = $rsCnt->fetch_object()){
 			$recCnt = $rCnt->fullcnt;
@@ -89,8 +89,8 @@ class SpecEditReviewManager {
 			$this->sqlBase = 'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 				'INNER JOIN users u ON e.uid = u.uid '.
 				'WHERE (o.collid = '.$this->collId.') ';
-			if($this->appliedStatusFilter === 0 || $this->appliedStatusFilter == 1){
-				$this->sqlBase .= 'AND e.appliedstatus = '.$this->appliedStatusFilter.' ';
+			if($this->appliedStatusFilter !== ''){
+				$this->sqlBase .= 'AND (e.appliedstatus = '.$this->appliedStatusFilter.') ';
 			}
 			if($this->reviewStatusFilter){
 				$this->sqlBase .= 'AND (e.reviewstatus IN('.$this->reviewStatusFilter.')) ';
@@ -107,13 +107,13 @@ class SpecEditReviewManager {
 	public function applyAction($reqArr){
 		if(!array_key_exists('ocedid',$reqArr)) return;
 		$statusStr = 'SUCCESS: ';
-		$ocedidArr = $reqArr['ocedid'];
+		$ocedidStr = implode(',',$reqArr['ocedid']);
 		$applyTask = $reqArr['applytask'];
-		if($ocedidArr){
+		if($ocedidStr){
 			if($applyTask == 'apply'){
 				//Apply edits with applied status = 0
 				$sql = 'SELECT occid, fieldname, fieldvaluenew '.
-					'FROM omoccuredits WHERE appliedstatus = 0 AND (ocedid IN('.implode(',',$ocedidArr).'))';
+					'FROM omoccuredits WHERE appliedstatus = 0 AND (ocedid IN('.$ocedidStr.'))';
 				$rs = $this->conn->query($sql);
 				$eCnt=0;$oCnt=0;$lastOccid = 0;
 				while($r = $rs->fetch_object()){
@@ -123,13 +123,13 @@ class SpecEditReviewManager {
 					$eCnt++;
 					if($r->occid != $lastOccid) $oCnt++;
 				}
-				$rs->close();
+				$rs->free();
 				$statusStr .= $eCnt.' edits applied to '.$oCnt.' specimen records';
 			}
 			else{
 				//Revert edits with applied status = 1
 				$sql = 'SELECT occid, fieldname, fieldvalueold '.
-					'FROM omoccuredits WHERE appliedstatus = 1 AND (ocedid IN('.implode(',',$ocedidArr).'))';
+					'FROM omoccuredits WHERE appliedstatus = 1 AND (ocedid IN('.$ocedidStr.'))';
 				$rs = $this->conn->query($sql);
 				$oCnt=0;$lastOccid = 0;
 				while($r = $rs->fetch_object()){
@@ -138,7 +138,7 @@ class SpecEditReviewManager {
 					$this->conn->query($uSql);
 					if($r->occid != $lastOccid) $oCnt++;
 				}
-				$rs->close();
+				$rs->free();
 				$statusStr .= $oCnt.' specimen records reverted to previous values';
 			}
 			//Change status
@@ -146,8 +146,8 @@ class SpecEditReviewManager {
 			if($reqArr['rstatus']){
 				$sql .= ',reviewstatus = '.$reqArr['rstatus'];
 			}
-			$sql .= ' WHERE (ocedid IN('.implode(',',$ocedidArr).'))';
-			//echo '<div>'.$sql.'</div>';
+			$sql .= ' WHERE (ocedid IN('.$ocedidStr.'))';
+			//echo '<div>'.$sql.'</div>'; exit;
 			$this->conn->query($sql);
 		}
 		return $statusStr;
@@ -197,7 +197,7 @@ class SpecEditReviewManager {
 				echo $r['ocedid'].",".$r['occid'].",\"".$r['dbpk']."\",\"".$r['fieldname']."\",\"".$r['fieldvaluenew']."\",\"".$r['fieldvalueold']."\",\"".
 				$reviewStr."\",\"".($r['appliedstatus']?"APPLIED":"NOT APPLIED")."\",\"".$r['username']."\"\n";
 			}
-			$rs->close();
+			$rs->free();
 		}
 		else{
 			echo "Recordset is empty.\n";
@@ -229,6 +229,7 @@ class SpecEditReviewManager {
 						$row['reviewstatus']."\",\"".$row["appliedstatus"]."\",\"".$row["username"]."\",\"".
 						$row["initialtimestamp"]."\"\n";
 				}
+				$rs->free();
 			}
 			else{
 				echo "Recordset is empty.\n";
@@ -245,7 +246,7 @@ class SpecEditReviewManager {
 	}
 
 	public function setReviewStatusFilter($status){
-		if(is_numeric($status)){
+		if(preg_match('/^[,\d]+$/', $status)){
 			$this->reviewStatusFilter = $status;
 		}
 	}
@@ -285,7 +286,7 @@ class SpecEditReviewManager {
 		while($row = $result->fetch_object()){
 			$retArr[$row->uid] = $row->username;
 		}
-		$result->close();
+		$result->free();
 		asort($retArr);
 		return $retArr;
 	}

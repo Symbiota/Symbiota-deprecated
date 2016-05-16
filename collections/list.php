@@ -10,6 +10,10 @@ $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:1
 $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
+//Sanitation
+if(!is_numeric($taxonFilter)) $taxonFilter = 1;
+if(!is_numeric($cntPerPage)) $cntPerPage = 100;
+
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
 $collManager = new OccurrenceListManager();
 $stArr = array();

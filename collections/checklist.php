@@ -8,6 +8,9 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
+//Sanitation
+if(!is_numeric($taxonFilter)) $taxonFilter = 1;
+
 if($stArrCollJson && $stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 	$collStArr = json_decode($stArrCollJson, true);

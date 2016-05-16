@@ -6,9 +6,6 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-$clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
-$db = array_key_exists('db',$_REQUEST)?$_REQUEST['db']:0;
-$cat = array_key_exists('cat',$_REQUEST)?$_REQUEST['cat']:0;
 $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
