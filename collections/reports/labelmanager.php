@@ -265,11 +265,11 @@ if($isEditor){
 									<input type="text" name="recordedby" style="width:150px;" value="<?php echo (array_key_exists('recordedby',$_REQUEST)?$_REQUEST['recordedby']:''); ?>" />
 								</span>
 								<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash required), e.g.: 3700 - 3750">
-									Number(s): 
+									Record Number(s): 
 									<input type="text" name="recordnumber" style="width:150px;" value="<?php echo (array_key_exists('recordnumber',$_REQUEST)?$_REQUEST['recordnumber']:''); ?>" />
 								</span>
 								<span style="margin-left:20px;" title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
-									Identifier: 
+									Catalog Number(s): 
 									<input type="text" name="identifier" style="width:150px;" value="<?php echo (array_key_exists('identifier',$_REQUEST)?$_REQUEST['identifier']:''); ?>" />
 								</span>
 							</div>
