@@ -33,6 +33,7 @@ class ImageProcessor {
 			//Create log File
 			$logPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) == '/'?'':'/').'content/logs/';
 			if($processorType) $logPath .= $processorType.'/';
+			if(!file_exists($logPath)) mkdir($logPath);
 			if(file_exists($logPath)){
 				$logFile = $logPath.$this->collid.'_'.$this->collArr['instcode'];
 				if($this->collArr['collcode']) $logFile .= '-'.$this->collArr['collcode'];
@@ -173,27 +174,28 @@ class ImageProcessor {
 			if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath)){
 				if($fh = fopen($fullPath,'rb')){
 					$headerArr = fgetcsv($fh,0,',');
-					$mediaGuidIndex = (in_array('OriginalFileName',$headerArr)?array_search('OriginalFileName',$headerArr):(in_array('idigbio:OriginalFileName',$headerArr)?array_search('idigbio:OriginalFileName',$headerArr):''));
+					$origFileNameIndex = (in_array('OriginalFileName',$headerArr)?array_search('OriginalFileName',$headerArr):(in_array('idigbio:OriginalFileName',$headerArr)?array_search('idigbio:OriginalFileName',$headerArr):''));
 					$mediaMd5Index = (in_array('MediaMD5',$headerArr)?array_search('MediaMD5',$headerArr):(in_array('ac:hashValue',$headerArr)?array_search('ac:hashValue',$headerArr):''));
-					if(is_numeric($mediaGuidIndex) && is_numeric($mediaMd5Index)){
+					if(is_numeric($origFileNameIndex) && is_numeric($mediaMd5Index)){
 						while(($data = fgetcsv($fh,1000,",")) !== FALSE){
-							if(preg_match($pmTerm,$data[$mediaGuidIndex],$matchArr)){
+							$origFileName = basename($data[$origFileNameIndex]);
+							if(preg_match($pmTerm,$origFileName,$matchArr)){
 								if(array_key_exists(1,$matchArr) && $matchArr[1]){
 									$specPk = $matchArr[1];
-									$occid = $this->getOccid($specPk,$data[$mediaGuidIndex]);
+									$occid = $this->getOccid($specPk,$origFileName);
 									if($occid){
 										//Image hasn't been loaded, thus insert image urls into image table
 										$webUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=webview';
 										$tnUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=thumbnail';
 										$lgUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=fullsize';
 										$archiveUrl = $idigbioImageUrl;
-										$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$data[$mediaGuidIndex]);
+										$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$origFileName);
 									}
 								}
 							}
 							else{
 								//Output to error log file
-								$this->logOrEcho('NOTICE: File skipped, unable to extract specimen identifier ('.$data[$mediaGuidIndex].', pmTerm: '.$pmTerm.')',2);
+								$this->logOrEcho('NOTICE: File skipped, unable to extract specimen identifier ('.$origFileName.', pmTerm: '.$pmTerm.')',2);
 							}
 						}
 						$this->cleanHouse(array($this->collid));
@@ -203,7 +205,7 @@ class ImageProcessor {
 					}
 					else{
 						//Output to error log file
-						$this->logOrEcho('Bad input fields: '.$mediaGuidIndex.', '.$mediaMd5Index,2);
+						$this->logOrEcho('Bad input fields: '.$origFileNameIndex.', '.$mediaMd5Index,2);
 					}
 					fclose($fh);
 				}
