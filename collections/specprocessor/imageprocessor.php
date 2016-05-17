@@ -13,7 +13,7 @@ $specManager = new SpecProcessorManager();
 $specManager->setCollId($collId);
 
 $editable = false;
-if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
  	$editable = true;
 }
 
@@ -37,7 +37,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 		<script src="../../js/jquery.js" type="text/javascript"></script>
 		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 		<script src="../../js/symb/shared.js" type="text/javascript"></script>
-		<script language="javascript">
+		<script>
 			$(function() {
 				var dialogArr = new Array("speckeypattern","speckeyretrieval","sourcepath","targetpath","imgurl","webpixwidth","tnpixwidth","lgpixwidth","jpgcompression");
 				var dialogStr = "";
@@ -119,8 +119,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 						return false;
 					}
 					else if(f.targetpath.value == ""){
-						alert("Note that since target path is null, scripts will attempt to simply map to images using the Image URL base path");
-						return false;
+						alert("Since target path is null, scripts will attempt to simply map to images using the Image URL base path set in the Symbiota configuration file");
 					}
 				}
 				return true;
@@ -243,10 +242,10 @@ if($spprId) $specManager->setProjVariables($spprId);
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
 											<div id="sourcepathinfodialog">
-												Server path to folder containing source images.
-												If a URL (e.g. http://) is supplied, the web server needs to be configured to list 
-												all files within the directory, or the html output needs to list all images in anchor tags.
-												Scripts will attempt to crawl through all child directories.
+												Server path to folder containing source images. The path should be absolute and the web server (e.g. apache) should have read/write access. 
+												If a URL (e.g. http://) is supplied, the web server needs to be configured to publically list 
+												all files within the directory, or the html output can simily list all images within anchor tags.
+												In all cases, scripts will attempt to crawl through all child directories.
 											</div>
 										</div>
 									</div>
@@ -255,7 +254,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<b>Image target path:</b>
 										</div>
 										<div style="float:left;"> 
-											<input name="targetpath" type="text" style="width:400px;" value="<?php echo $specManager->getTargetPath(); ?>" />
+											<input name="targetpath" type="text" style="width:400px;" value="<?php echo ($specManager->getTargetPath()?$specManager->getTargetPath():$IMAGE_ROOT_PATH); ?>" />
 											<a id="targetpathinfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
@@ -271,7 +270,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<b>Image URL base:</b>
 										</div>
 										<div style="float:left;"> 
-											<input name="imgurl" type="text" style="width:400px;" value="<?php echo $specManager->getImgUrlBase(); ?>" />
+											<input name="imgurl" type="text" style="width:400px;" value="<?php echo ($specManager->getImgUrlBase()?$specManager->getImgUrlBase():$IMAGE_ROOT_URL); ?>" />
 											<a id="imgurlinfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
@@ -288,7 +287,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<b>Central pixel width:</b>
 										</div>
 										<div style="float:left;"> 
-											<input name="webpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getWebPixWidth(); ?>" /> 
+											<input name="webpixwidth" type="text" style="width:50px;" value="<?php echo ($specManager->getWebPixWidth()?$specManager->getWebPixWidth():$IMG_WEB_WIDTH); ?>" /> 
 											<a id="webpixwidthinfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
@@ -303,7 +302,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<b>Thumbnail pixel width:</b> 
 										</div>
 										<div style="float:left;">
-											<input name="tnpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getTnPixWidth(); ?>" /> 
+											<input name="tnpixwidth" type="text" style="width:50px;" value="<?php echo ($specManager->getTnPixWidth()?$specManager->getTnPixWidth():$IMG_TN_WIDTH); ?>" /> 
 											<a id="tnpixwidthinfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
@@ -317,7 +316,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<b>Large pixel width:</b>
 										</div>
 										<div style="float:left;"> 
-											<input name="lgpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getLgPixWidth(); ?>" /> 
+											<input name="lgpixwidth" type="text" style="width:50px;" value="<?php echo ($specManager->getLgPixWidth()?$specManager->getLgPixWidth():$IMG_LG_WIDTH); ?>" /> 
 											<a id="lgpixwidthinfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
@@ -468,7 +467,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												<b>Target folder:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getTargetPath()?$specManager->getTargetPath():$imageRootPath); ?>
+												<?php echo ($specManager->getTargetPath()?$specManager->getTargetPath():$IMAGE_ROOT_PATH); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
@@ -476,7 +475,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												<b>URL prefix:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getImgUrlBase()?$specManager->getImgUrlBase():$imageRootUrl); ?>
+												<?php echo ($specManager->getImgUrlBase()?$specManager->getImgUrlBase():$IMAGE_ROOT_URL); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
@@ -484,7 +483,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												<b>Web image width:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getWebPixWidth()?$specManager->getWebPixWidth():$imgWebWidth); ?>
+												<?php echo ($specManager->getWebPixWidth()?$specManager->getWebPixWidth():$IMG_WEB_WIDTH); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
@@ -492,7 +491,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												<b>Thumbnail width:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getTnPixWidth()?$specManager->getTnPixWidth():$imgTnWidth); ?>
+												<?php echo ($specManager->getTnPixWidth()?$specManager->getTnPixWidth():$IMG_TN_WIDTH); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
@@ -500,7 +499,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 												<b>Large image width:</b> 
 											</div>
 											<div style="float:left;"> 
-												<?php echo ($specManager->getLgPixWidth()?$specManager->getLgPixWidth():$imgLgWidth); ?>
+												<?php echo ($specManager->getLgPixWidth()?$specManager->getLgPixWidth():$IMG_LG_WIDTH); ?>
 											</div>
 										</div>
 										<div style="clear:both;">
