@@ -1,6 +1,6 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once("ImageShared.php");
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once('ImageShared.php');
 
 class ImageCleaner{
 	
@@ -21,7 +21,7 @@ class ImageCleaner{
 		$tnCnt = 0;
 		$sql = 'SELECT count(ti.imgid) AS tnCnt FROM images ti ';
 		if($collid) $sql .= 'INNER JOIN omoccurrences o ON ti.occid = o.occid ';
-		$sql .= 'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "")';
+		$sql .= 'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "" OR ti.thumbnailurl = "bad url")';
 		if($collid) $sql .= 'AND (o.collid = '.$collid.') ';
 
 		$result = $this->conn->query($sql);
@@ -40,7 +40,7 @@ class ImageCleaner{
 		$sql = 'SELECT ti.imgid, ti.url, ti.originalurl '.
 			'FROM images ti ';
 		if($collid) $sql .= 'INNER JOIN omoccurrences o ON ti.occid = o.occid ';
-		$sql .= 'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") ';
+		$sql .= 'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "" OR ti.thumbnailurl = "bad url") ';
 		if($collid) $sql .= 'AND (o.collid = '.$collid.') ';
 		//$sql .= 'LIMIT 100';
 		//echo $sql; exit;
@@ -63,6 +63,8 @@ class ImageCleaner{
 				}
 				else{
 					$this->errorStr = 'ERROR building thumbnail: '.implode('; ',$imgManager->getErrArr());
+					$errSql = 'UPDATE images SET thumbnailurl = "bad url" WHERE thumbnailurl IS NULL AND imgid = '.$imgId;
+					$this->conn->query($errSql);
 					$status = false;
 				}
 				
