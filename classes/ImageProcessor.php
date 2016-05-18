@@ -196,7 +196,7 @@ class ImageProcessor {
 										$tnUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=thumbnail';
 										$lgUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=fullsize';
 										$archiveUrl = $idigbioImageUrl;
-										//$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$origFileName);
+										$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$origFileName);
 									}
 								}
 							}
