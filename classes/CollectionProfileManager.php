@@ -1,7 +1,7 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceMaintenance.php');
-include_once($serverRoot.'/classes/UuidFactory.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
+include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 //Used by /collections/misc/collprofiles.php page
 class CollectionProfileManager {

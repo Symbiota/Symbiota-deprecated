@@ -355,7 +355,7 @@ class ImageProcessor {
 
 	private function cleanHouse($collList){
 		$this->logOrEcho('Updating collection statistics...',1);
-		$occurMain = new OccurrenceMaintenance();
+		$occurMain = new OccurrenceMaintenance($this->conn);
 
 		$this->logOrEcho('General cleaning...',2);
 		$collString = implode(',',$collList);
@@ -387,7 +387,7 @@ class ImageProcessor {
 		}
 
 		$this->logOrEcho('Populating global unique identifiers (GUIDs) for all records...',2);
-		$uuidManager = new UuidFactory();
+		$uuidManager = new UuidFactory($this->conn);
 		$uuidManager->setSilent(1);
 		$uuidManager->populateGuids();
 	}

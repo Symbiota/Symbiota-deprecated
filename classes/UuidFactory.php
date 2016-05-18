@@ -1,14 +1,19 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class UuidFactory {
 
 	private $silent = 0;
-
 	private $conn;
 
-	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+	public function __construct($con = null){
+		if($con){
+			//Inherits connection from another class
+			$this->conn = $con;
+		}
+		else{
+			$this->conn = MySQLiConnectionFactory::getCon("write");
+		}
 	}
 
 	public function __destruct(){
@@ -26,18 +31,16 @@ class UuidFactory {
 		$rs = $this->conn->query($sql);
 		$recCnt = 0;
 		if($rs->num_rows){
-			$conn = MySQLiConnectionFactory::getCon("write");
 			while($r = $rs->fetch_object()){
 				$guid = UuidFactory::getUuidV4();
 				$insSql = 'UPDATE omcollections SET collectionguid = "'.$guid.'" '.
 					'WHERE collectionguid IS NULL AND collid = '.$r->collid;
-				if(!$conn->query($insSql)){
-					$this->echoStr('ERROR: '.$conn->error);
+				if(!$this->conn->query($insSql)){
+					$this->echoStr('ERROR: '.$this->conn->error);
 				}
 				$recCnt++;
 			}
 			$rs->free();
-			if($conn !== false) $conn->close();
 		}
 		$this->echoStr("Finished: $recCnt collection records processed\n");
 		
@@ -53,19 +56,17 @@ class UuidFactory {
 		$rs = $this->conn->query($sql);
 		$recCnt = 0;
 		if($rs->num_rows){
-			$conn = MySQLiConnectionFactory::getCon("write");
 			while($r = $rs->fetch_object()){
 				$guid = UuidFactory::getUuidV4();
 				$insSql = 'INSERT INTO guidoccurrences(guid,occid) '.
 					'VALUES("'.$guid.'",'.$r->occid.')';
-				if(!$conn->query($insSql)){
-					$this->echoStr('ERROR: occur guids'.$conn->error);
+				if(!$this->conn->query($insSql)){
+					$this->echoStr('ERROR: occur guids'.$this->conn->error);
 				}
 				$recCnt++;
 				if($recCnt%1000 === 0) $this->echoStr($recCnt.' records processed');
 			}
 			$rs->free();
-			if(!($conn === false)) $conn->close();
 		}
 		$this->echoStr("Finished: $recCnt occurrence records processed\n");
 		
@@ -82,19 +83,17 @@ class UuidFactory {
 		$rs = $this->conn->query($sql);
 		$recCnt = 0;
 		if($rs->num_rows){
-			$conn = MySQLiConnectionFactory::getCon("write");
 			while($r = $rs->fetch_object()){
 				$guid = UuidFactory::getUuidV4();
 				$insSql = 'INSERT INTO guidoccurdeterminations(guid,detid) '.
 					'VALUES("'.$guid.'",'.$r->detid.')';
-				if(!$conn->query($insSql)){
-					$this->echoStr('ERROR: det guids '.$conn->error);
+				if(!$this->conn->query($insSql)){
+					$this->echoStr('ERROR: det guids '.$this->conn->error);
 				}
 				$recCnt++;
 				if($recCnt%1000 === 0) $this->echoStr($recCnt.' records processed');
 			}
 			$rs->free();
-			if(!($conn === false)) $conn->close();
 		}
 		$this->echoStr("Finished: $recCnt determination records processed\n");
 		
@@ -112,19 +111,17 @@ class UuidFactory {
 		$rs = $this->conn->query($sql);
 		$recCnt = 0;
 		if($rs->num_rows){
-			$conn = MySQLiConnectionFactory::getCon("write");
 			while($r = $rs->fetch_object()){
 				$guid = UuidFactory::getUuidV4();
 				$insSql = 'INSERT INTO guidimages(guid,imgid) '.
 					'VALUES("'.$guid.'",'.$r->imgid.')';
-				if(!$conn->query($insSql)){
-					$this->echoStr('ERROR: image guids; '.$conn->error);
+				if(!$this->conn->query($insSql)){
+					$this->echoStr('ERROR: image guids; '.$this->conn->error);
 				}
 				$recCnt++;
 				if($recCnt%1000 === 0) $this->echoStr($recCnt.' records processed');
 			}
 			$rs->free();
-			if(!($conn === false)) $conn->close();
 		}
 		$this->echoStr("Finished: $recCnt image records processed\n");
 		
@@ -133,23 +130,20 @@ class UuidFactory {
 	
 	public function getCollectionCount(){
 		$retCnt = 0;
-		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT count(c.collid) as reccnt '.
 			'FROM omcollections '.
 			'WHERE collectionguid IS NULL ';
 		//echo $sql;
-		$rs = $conn->query($sql);
+		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retCnt = $r->reccnt;
 		}
 		$rs->free();
-		if(!($conn === false)) $conn->close();
 		return $retCnt;
 	}
 
 	public function getOccurrenceCount($collId = 0){
 		$retCnt = 0;
-		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(o.occid) as reccnt '.
 			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 			'WHERE g.occid IS NULL ';
@@ -158,18 +152,16 @@ class UuidFactory {
 		//	'WHERE o.occid NOT IN (SELECT occid FROM guidoccurrences WHERE occid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
-		$rs = $conn->query($sql);
+		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retCnt = $r->reccnt;
 		}
 		$rs->free();
-		if(!($conn === false)) $conn->close();
 		return $retCnt;
 	}
 
 	public function getDeterminationCount($collId = 0){
 		$retCnt = 0;
-		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(d.detid) as reccnt '.
 			'FROM omoccurdeterminations d LEFT JOIN guidoccurdeterminations g ON d.detid = g.detid ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
@@ -181,18 +173,16 @@ class UuidFactory {
 		//$sql .= 'WHERE d.detid NOT IN (SELECT detid FROM guidoccurdeterminations WHERE detid IS NOT NULL) ';
 		//if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
-		$rs = $conn->query($sql);
+		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retCnt = $r->reccnt;
 		}
 		$rs->free();
-		if(!($conn === false)) $conn->close();
 		return $retCnt;
 	}
 
 	public function getImageCount($collId = 0){
 		$retCnt = 0;
-		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(i.imgid) as reccnt '.
 			'FROM images i LEFT JOIN guidimages g ON i.imgid = g.imgid ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
@@ -204,27 +194,24 @@ class UuidFactory {
 		//$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages WHERE imgid IS NOT NULL) ';
 		//if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
-		$rs = $conn->query($sql);
+		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retCnt = $r->reccnt;
 		}
 		$rs->free();
-		if(!($conn === false)) $conn->close();
 		return $retCnt;
 	}
 	
 	public function getCollectionName($collId){
 		$retStr = '';
-		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT CONCAT(collectionname," (",CONCAT_WS("-",institutioncode,collectioncode),")") as collname '.
 			'FROM omcollections WHERE collid = '.$collId;
 		//echo $sql;
-		$rs = $conn->query($sql);
+		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retStr = $r->collname;
 		}
 		$rs->free();
-		if(!($conn === false)) $conn->close();
 		return $retStr;
 	}
 

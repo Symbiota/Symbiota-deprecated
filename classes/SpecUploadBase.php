@@ -1,9 +1,9 @@
 <?php
-include_once($serverRoot.'/classes/SpecUpload.php');
-include_once($serverRoot.'/classes/OccurrenceMaintenance.php');
-include_once($serverRoot.'/classes/OccurrenceUtilities.php');
-include_once($serverRoot.'/classes/ImageCleaner.php');
-include_once($serverRoot.'/classes/UuidFactory.php');
+include_once($SERVER_ROOT.'/classes/SpecUpload.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
+include_once($SERVER_ROOT.'/classes/ImageCleaner.php');
+include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 class SpecUploadBase extends SpecUpload{
 
@@ -1142,7 +1142,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->conn->query('OPTIMIZE TABLE uploadimagetemp');
 		
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
-		$occurMain = new OccurrenceMaintenance();
+		$occurMain = new OccurrenceMaintenance($this->conn);
 
 		$this->outputMsg('<li>Cleaning house</li>');
 		ob_flush();

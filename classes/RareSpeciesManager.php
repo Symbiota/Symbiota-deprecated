@@ -1,6 +1,6 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceMaintenance.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
 
 class RareSpeciesManager {
     
@@ -37,7 +37,7 @@ class RareSpeciesManager {
 	 		//echo $sql;
 			$this->con->query($sql);
 			//Update specimen records
-			$occurMain = new OccurrenceMaintenance();
+			$occurMain = new OccurrenceMaintenance($this->conn);
 			$occurMain->protectGloballyRareSpecies();
 		}
 	}
@@ -55,7 +55,7 @@ class RareSpeciesManager {
 				'WHERE (t.tid = '.$tid.')';
 			//echo $sql2; exit;
 			$this->con->query($sql2);
-			$occurMain = new OccurrenceMaintenance();
+			$occurMain = new OccurrenceMaintenance($this->conn);
 			$occurMain->protectGloballyRareSpecies();
 		}
 	}

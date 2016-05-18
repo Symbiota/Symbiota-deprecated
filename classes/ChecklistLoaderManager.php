@@ -1,7 +1,7 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/TaxonomyUtilities.php');
-include_once($serverRoot.'/classes/OccurrenceMaintenance.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/TaxonomyUtilities.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
 
 class ChecklistLoaderManager {
 
@@ -134,7 +134,7 @@ class ChecklistLoaderManager {
 			}
 			fclose($fh);
 			if($cnt && $this->clMeta['type'] == 'rarespp'){
-				$occurMain = new OccurrenceMaintenance();
+				$occurMain = new OccurrenceMaintenance($this->conn);
 				$occurMain->protectStateRareSpecies();
 			}
 		}

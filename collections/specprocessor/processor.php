@@ -1,11 +1,11 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcessorManager.php');
-include_once($serverRoot.'/classes/ImageBatchProcessor.php');
-include_once($serverRoot.'/classes/ImageProcessor.php');
-include_once($serverRoot.'/classes/SpecProcessorOcr.php');
+include_once($SERVER_ROOT.'/classes/SpecProcessorManager.php');
+include_once($SERVER_ROOT.'/classes/ImageBatchProcessor.php');
+include_once($SERVER_ROOT.'/classes/ImageProcessor.php');
+include_once($SERVER_ROOT.'/classes/SpecProcessorOcr.php');
 
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/processor.php?'.$_SERVER['QUERY_STRING']);
 
@@ -22,9 +22,8 @@ $specManager = new SpecProcessorManager();
 $specManager->setCollId($collid);
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
+if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
 	$isEditor = true;
-
 }
 
 $statusStr = "";
@@ -32,13 +31,13 @@ $statusStr = "";
 <html>
 	<head>
 		<title>Specimen Processor Control Panel</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	</head>
 	<body>
 		<?php
 		$displayLeftMenu = false;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		echo '<div class="navpath">';
 		echo '<a href="../../index.php">Home</a> &gt;&gt; ';
 		echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Control Panel</a> &gt;&gt; ';
@@ -151,7 +150,7 @@ $statusStr = "";
 			<div style="font-weight:bold;font-size:120%;"><a href="index.php?collid=<?php echo $collid.'&tabindex='.$tabIndex; ?>"><b>Return to Specimen Processor</b></a></div>
 		</div>
 		<?php
-			include($serverRoot.'/footer.php');
+			include($SERVER_ROOT.'/footer.php');
 		?>
 	</body>
 </html>

@@ -6,12 +6,18 @@ class OccurrenceMaintenance {
 	private $conn;
 	private $verbose = false;	// 0 = silent, 1 = echo as list item
 	private $errorArr = array();
-	
- 	public function __construct(){
- 		$this->conn = MySQLiConnectionFactory::getCon("write");
- 	}
- 	
- 	public function __destruct(){
+
+	public function __construct($con = null){
+		if($con){
+			//Inherits connection from another class
+			$this->conn = $con;
+		}
+		else{
+			$this->conn = MySQLiConnectionFactory::getCon("write");
+		}
+	}
+
+	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
  	}
 
@@ -206,19 +212,30 @@ class OccurrenceMaintenance {
 		$status = true;
 		//Protect state level rare species
 		if($this->verbose) $this->outputMsg('Protecting state level rare species... ',1);
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+		$sql = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
 			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
 			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
-			'SET o.localitysecurity = 1 '.
 			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (c.type = "rarespp") '.
 			'AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
 		if($collid) $sql .= ' AND o.collid ='.$collid;
-		if(!$this->conn->query($sql)){
-			$errStr = 'WARNING: unable to protect state level rare species; '.$this->conn->error;
-			$this->errorArr[] = $errStr;
-			if($this->verbose) $this->outputMsg($errStr,2);
-			$status = false;
+		$rs = $this->conn->query($sql);
+		$occArr = array();
+		while($r = $rs->fetch_object()){
+			$occArr[] = $r->occid;
+		}
+		$rs->free();
+		
+		if($occArr){
+			$sql2 = 'UPDATE omoccurrences '.
+				'SET localitysecurity = 1 '.
+				'WHERE occid IN('.implode(',',$occArr).')';
+			if(!$this->conn->query($sql2)){
+				$errStr = 'WARNING: unable to protect state level rare species; '.$this->conn->error;
+				$this->errorArr[] = $errStr;
+				if($this->verbose) $this->outputMsg($errStr,2);
+				$status = false;
+			}
 		}
 		return $status;
 	}
