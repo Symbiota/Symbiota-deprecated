@@ -179,6 +179,13 @@ class ImageProcessor {
 					if(is_numeric($origFileNameIndex) && is_numeric($mediaMd5Index)){
 						while(($data = fgetcsv($fh,1000,",")) !== FALSE){
 							$origFileName = basename($data[$origFileNameIndex]);
+							//basename() function is system specific, thus following code needed to parse filename independent of source file from PC, Mac, etc 
+							if(strpos($origFileName,'/') !== false){
+								$origFileName = substr($origFileName,(strrpos($origFileName,'/')+1));
+							}
+							elseif(strpos($origFileName,'\\') !== false){
+								$origFileName = substr($origFileName,(strrpos($origFileName,'\\')+1));
+							}
 							if(preg_match($pmTerm,$origFileName,$matchArr)){
 								if(array_key_exists(1,$matchArr) && $matchArr[1]){
 									$specPk = $matchArr[1];
@@ -189,7 +196,7 @@ class ImageProcessor {
 										$tnUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=thumbnail';
 										$lgUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=fullsize';
 										$archiveUrl = $idigbioImageUrl;
-										$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$origFileName);
+										//$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$origFileName);
 									}
 								}
 							}
