@@ -1,3 +1,0 @@
-idigbio:recordID,ac:accessURI,dc:type,dc:format,idigbio:OriginalFileName,ac:hashFunction,ac:hashValue,idigbio:jsonProperties,idigbio:mediaStatus,idigbio:mediaStatusDate,idigbio:mediaStatusDetail
-f37c1d79-bccc-4d8b-94f6-eb56b82a2dd0,http://media.idigbio.org/6b5d1797958872dd152271ab5f50878b,StillImage,image/jpeg,C:\temp\images_to_load\ASU_test3\ASU0030137.jpg,md5,6b5d1797958872dd152271ab5f50878b,{},uploaded,31:02.7,
-15afbec0-2307-4c95-8629-2e44afa56a77,http://media.idigbio.org/e1a64e0fddb8c003d801f487d838d2ba,StillImage,image/jpeg,/temp/images_to_load/ASU_test3/ASU0030137a.jpg,md5,e1a64e0fddb8c003d801f487d838d2ba,{},uploaded,30:59.7,
