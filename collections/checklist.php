@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/content/lang/collections/checklist.'.$LANG_TAG.'.php
 include_once($SERVER_ROOT.'/classes/OccurrenceChecklistManager.php');
 
 $checklistManager = new OccurrenceChecklistManager();
-$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
+$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:'';
 $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
