@@ -795,6 +795,9 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 													<input name="submitaction" type="submit" value="Download Records Locally" />
 												</div>
 											</div>
+											<div style="float:right;">
+												<a href="../editor/editreviewer.php?collid=<?php echo $collid; ?>&display=2">Review and Approve Edits</a>
+											</div>
 											<div style="margin-left:20px;">
 												<b>* Default query criteria: catalogNumber and locality are NOT NULL, decimalLatitude is NULL, decimalLongitude is NULL</b>
 											</div>

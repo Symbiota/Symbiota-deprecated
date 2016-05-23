@@ -10,23 +10,24 @@ header("Content-Type: text/html; charset=".$CHARSET);
 $collid = $_REQUEST['collid'];
 $submitStr = array_key_exists('submitstr',$_REQUEST)?$_REQUEST['submitstr']:'';
 $mode = array_key_exists('mode',$_REQUEST)?$_REQUEST['mode']:'';
+$display = array_key_exists('display',$_REQUEST)?$_REQUEST['display']:'1';
 $download = array_key_exists('download',$_REQUEST)?$_REQUEST['download']:'';
 $faStatus = array_key_exists('fastatus',$_REQUEST)?$_REQUEST['fastatus']:'';
 $frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:'1,2';
-$editorUid = array_key_exists('editor',$_REQUEST)?$_REQUEST['editor']:'';
+$editor = array_key_exists('editor',$_REQUEST)?$_REQUEST['editor']:'';
 $queryOccid = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:'';
 $pageNum = array_key_exists('pagenum',$_REQUEST)?$_REQUEST['pagenum']:'0';
 $limitCnt = array_key_exists('limitcnt',$_REQUEST)?$_REQUEST['limitcnt']:'1000';
 
 $reviewManager = new SpecEditReviewManager();
 $collName = $reviewManager->setCollId($collid);
+$reviewManager->setDisplay($display);
 $reviewManager->setAppliedStatusFilter($faStatus);
 $reviewManager->setReviewStatusFilter($frStatus);
-$reviewManager->setEditorUidFilter($editorUid);
+$reviewManager->setEditorFilter($editor);
 $reviewManager->setQueryOccidFilter($queryOccid);
 $reviewManager->setPageNumber($pageNum);
 $reviewManager->setLimitNumber($limitCnt);
-
 
 $isEditor = false;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
@@ -40,7 +41,7 @@ if($isEditor){
 		exit();
 	}
 	elseif($submitStr == 'Update Selected Records'){
-		$reviewManager->applyAction($_POST);
+		$reviewManager->updateRecords($_POST);
 	}
 	elseif($submitStr == 'Delete Edits'){
 		$reviewManager->deleteEdits($_POST);
@@ -50,10 +51,11 @@ if($isEditor){
 	}
 }
 
-$recCnt = $reviewManager->getRecCnt();
+$recCnt = $reviewManager->getEditCnt();
+
 $subCnt = $limitCnt*($pageNum + 1);
 if($recCnt < ($pageNum+1)*$limitCnt) $subCnt = $recCnt - ($pageNum)*$limitCnt;  
-$navPageBase = 'editreviewer.php?collid='.$collid.'&mode='.$mode.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&editor='.$editorUid;
+$navPageBase = 'editreviewer.php?collid='.$collid.'&mode='.$mode.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&editor='.$editor;
 
 $navStr = '<div style="float:right;">';
 if($pageNum){
@@ -79,8 +81,8 @@ $navStr .= '</div>';
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<script>
-			function selectAllOcedid(cbObj){
-				var eElements = document.getElementsByName("ocedid[]");
+			function selectAllId(cbObj){
+				var eElements = document.getElementsByName("id[]");
 				for(i = 0; i < eElements.length; i++){
 					var elem = eElements[i];
 					if(cbObj.checked){
@@ -93,7 +95,7 @@ $navStr .= '</div>';
 			}
 
 			function validateEditForm(f){
-				var elements = document.getElementsByName("ocedid[]");
+				var elements = document.getElementsByName("id[]");
 				for(i = 0; i < elements.length; i++){
 					var elem = elements[i];
 					if(elem.checked) return true;
@@ -103,7 +105,7 @@ $navStr .= '</div>';
 			}
 
 			function openIndPU(occid,clid){
-				var newWindow = window.open('../individual/index.php?occid='+occid,'indspec' + occid,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=700,left=20,top=20');
+				var newWindow = window.open('../editor/occurrenceeditor.php?occid='+occid,'indspec' + occid,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=700,left=20,top=20');
 				if (newWindow.opener == null) newWindow.opener = self;
 			}
 		</script>
@@ -146,7 +148,7 @@ $navStr .= '</div>';
 								<legend><b>Filter</b></legend>
 								<div style="margin:3px;">
 									Applied Status: 
-									<select name="fastatus">
+									<select name="fastatus" onchange="this.form.submit()">
 										<option value="">All Records</option>
 										<option value="0" <?php echo ($faStatus=='0'?'SELECTED':''); ?>>Not Applied</option>
 										<option value="1" <?php echo ($faStatus=='1'?'SELECTED':''); ?>>Applied</option>
@@ -154,7 +156,7 @@ $navStr .= '</div>';
 								</div>
 								<div style="margin:3px;">
 									Review Status: 
-									<select name="frstatus">
+									<select name="frstatus" onchange="this.form.submit()">
 										<option value="0">All Records</option>
 										<option value="1,2" <?php echo ($frStatus=='1,2'?'SELECTED':''); ?>>Open/Pending</option>
 										<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>>Open Only</option>
@@ -164,26 +166,28 @@ $navStr .= '</div>';
 								</div>
 								<div style="margin:3px;">
 									Editor: 
-									<select name="editor">
+									<select name="editor" onchange="this.form.submit()">
 										<option value="">All Editors</option>
 										<option value="">----------------------</option>
 										<?php 
 										$editorArr = $reviewManager->getEditorList();
-										foreach($editorArr as $uid => $e){
-											echo '<option value="'.$uid.'" '.($editorUid==$uid?'SELECTED':'').'>'.$e.'</option>'."\n";
+										foreach($editorArr as $id => $e){
+											echo '<option value="'.$id.'" '.($editor==$id?'SELECTED':'').'>'.$e.'</option>'."\n";
 										}
 										?>
 									</select>
 								</div>
 								<div style="margin:10px;">
+									<input name="display" type="hidden" value="<?php echo $display; ?>" />
 									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-									<input name="action" type="submit" value="Filter Records" />
 								</div>
 							</fieldset>
 						</form>
 					</div>
 					<?php
 				}
+				
+//exsource,exeditor,errmsg,extstamp
 				?>
 				<form name="editform" action="editreviewer.php" method="post" onsubmit="return validateEditForm(this);" >
 					<?php 
@@ -214,8 +218,9 @@ $navStr .= '</div>';
 										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 										<input name="fastatus" type="hidden" value="<?php echo $faStatus; ?>" />
 										<input name="frstatus" type="hidden" value="<?php echo $frStatus; ?>" />
-										<input name="editor" type="hidden" value="<?php echo $editorUid; ?>" />
+										<input name="editor" type="hidden" value="<?php echo $editor; ?>" />
 										<input name="occid" type="hidden" value="<?php echo $queryOccid; ?>" />
+										<input name="display" type="hidden" value="<?php echo $display; ?>" />
 									</div>
 								</div>
 								<div style="clear:both;margin:20px 0px;">
@@ -254,114 +259,133 @@ $navStr .= '</div>';
 							<?php 
 							if($mode != 'printmode'){ 
 								?>
-								<th title="Select/Unselect All"><input name='selectall' type="checkbox" onclick="selectAllOcedid(this)" /></th>
+								<th title="Select/Unselect All"><input name='selectall' type="checkbox" onclick="selectAllId(this)" /></th>
 								<?php 
 							} 
 							?>
 							<th>Record #</th>
 							<th>Catalog Number</th>
-							<th>Field Name</th>
-							<th>Old Value</th>
-							<th>New Value</th>
 							<th>Review Status</th>
 							<th>Applied Status</th>
 							<th>Editor</th>
 							<th>Timestamp</th>
+							<th>Field Name</th>
+							<th>Old Value</th>
+							<th>New Value</th>
 						</tr>
 						<?php 
 						$editArr = $reviewManager->getEditArr();
 						if($editArr){
 							$recCnt = 0;
 							foreach($editArr as $occid => $edits){
-								foreach($edits as $ocedid => $edObj){
-									?>
-									<tr <?php echo ($recCnt%2?'class="alt"':'') ?>>
-										<?php if($mode != 'printmode'){ ?>
-											<td>
-												<input name="ocedid[]" type="checkbox" value="<?php echo $ocedid; ?>" />
-											</td>
-										<?php } ?>
-										<td>
+								foreach($edits as $ts => $edObj){
+									$fieldArr = $edObj['f'];
+									$id = $edObj['id'];
+									$fieldCnt = 0;
+									foreach($fieldArr as $fieldName => $fieldObj){
+										?>
+										<tr <?php echo ($recCnt%2?'class="alt"':'') ?>>
 											<?php 
 											if($mode != 'printmode'){ 
 												?>
-												<a href="#" onclick="openIndPU(<?php echo $occid; ?>)">
-													<?php echo $occid; ?>
-													<img src="../../images/info.png" style="border:0px;width:14px" />
-												</a>
+												<td>
+													<?php 
+													if(!$fieldCnt){
+														echo '<input name="id[]" type="checkbox" value="'.$id.'" />';
+													}
+													?>
+												</td>
 												<?php 
-											}
-											else{
-												echo $occid;
 											} 
 											?>
-										</td>
-										<td>
-											<div title="Catalog Number">
-												<?php echo $edObj['catnum']; ?>
-											</div>
-										</td>
-										<td>
-											<div title="Field Name">
-												<?php echo $edObj['fname']; ?>
-											</div>
-										</td>
-										<td>
-											<div title="Old Value">
-												<?php echo wordwrap($edObj['fvalueold'],40,"<br />\n",true); ?>
-											</div>
-										</td>
-										<td>
-											<div title="New Value">
-												<?php echo wordwrap($edObj['fvaluenew'],40,"<br />\n",true); ?>
-											</div>
-										</td>
-										<td>
-											<div title="Review Status">
-												<?php
-												$rStatus = $edObj['rstatus'];
-												if($rStatus == 1){
-													echo 'OPEN';
-												}
-												elseif($rStatus == 2){
-													echo 'PENDING';
-												}
-												elseif($rStatus == 3){
-													echo 'CLOSED';
-												}
-												else{
-													echo 'UNKNOWN';
-												}
-												?>
-											</div>
-										</td>
-										<td>
-											<div title="Applied Status">
+											<td>
 												<?php 
-												$aStatus = $edObj['astatus'];
-												if($aStatus == 1){
-													echo 'APPLIED';
-												}
-												else{
-													echo 'NOT APPLIED';
+												if(!$fieldCnt){
+													if($mode != 'printmode'){ 
+														?>
+														<a href="#" onclick="openIndPU(<?php echo $occid; ?>)">
+															<?php echo $occid; ?>
+														</a>
+														<?php 
+													}
+													else{
+														echo $occid;
+													}
 												}
 												?>
-											</div>
-										</td>
-										<td>
-											<div title="Editor">
-												<?php echo $edObj['uname']; ?>
-											</div>
-										</td>
-										<td>
-											<div title="Timestamp">
-												<?php echo $edObj['tstamp']; ?>
-											</div>
-										</td>
-									</tr>
-									<?php 
+											</td>
+											<td>
+												<div title="Catalog Number">
+													<?php if($mode != 'printmode' && !$fieldCnt) echo $edObj['catnum']; ?>
+												</div>
+											</td>
+											<td>
+												<div title="Review Status">
+													<?php
+													if(!$fieldCnt){
+														$rStatus = $edObj['rstatus'];
+														if($rStatus == 1){
+															echo 'OPEN';
+														}
+														elseif($rStatus == 2){
+															echo 'PENDING';
+														}
+														elseif($rStatus == 3){
+															echo 'CLOSED';
+														}
+														else{
+															echo 'UNKNOWN';
+														}
+													}
+													?>
+												</div>
+											</td>
+											<td>
+												<div title="Applied Status">
+													<?php 
+													if(!$fieldCnt){
+														$aStatus = $edObj['astatus'];
+														if($aStatus == 1){
+															echo 'APPLIED';
+														}
+														else{
+															echo 'NOT APPLIED';
+														}
+													}
+													?>
+												</div>
+											</td>
+											<td>
+												<div title="Editor">
+													<?php if(!$fieldCnt) echo $edObj['editor']; ?>
+												</div>
+											</td>
+											<td>
+												<div title="Timestamp">
+													<?php if(!$fieldCnt) echo $ts; ?>
+												</div>
+											</td>
+											<td>
+												<div title="Field Name">
+													<?php echo $fieldName; ?>
+												</div>
+											</td>
+											<td>
+												<div title="Old Value">
+													<?php echo wordwrap($fieldObj['old'],40,"<br />\n",true); ?>
+												</div>
+											</td>
+											<td>
+												<div title="New Value">
+													<?php echo wordwrap($fieldObj['new'],40,"<br />\n",true); ?>
+												</div>
+											</td>
+										</tr>
+										<?php
+										$fieldCnt++;
+									}
+									$recCnt++;
 								}
-								$recCnt++;
 							}
 						}
 						else{
