@@ -291,6 +291,11 @@ if($SYMB_UID){
 											</a>
 										</li>
 										<li>
+											<a href="../../admin/guidmapper.php?collid=<?php echo $collid; ?>">
+												<?php echo $LANG['GUIDMAP']; ?>
+											</a>
+										</li>
+										<li>
 											<a href="../datasets/datapublisher.php?collid=<?php echo $collid; ?>">
 	                                            <?php echo $LANG['DARWIN_CORE_PUB']; ?>
 											</a>

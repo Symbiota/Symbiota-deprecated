@@ -14,6 +14,7 @@ $dwcaManager = new DwcArchiverOccurrence();
 $includeDets = 1;
 $includeImgs = 1;
 $redactLocalities = 1;
+$recFlagArr = array();
 if($action){
 	if(!array_key_exists('dets',$_POST)){
 		$includeDets = 0;
@@ -207,6 +208,7 @@ include($serverRoot."/header.php");
 	</div>
 	<?php 
 	if($collId){
+		$recFlagArr = $dwcaManager->verifyCollRecords($collId);
 		if($action == 'Create/Refresh Darwin Core Archive'){
 			echo '<ul>';
 			$dwcaManager->setVerbose(1);
@@ -244,6 +246,38 @@ include($serverRoot."/header.php");
 			echo '<div style="margin:20px;font-weight:bold;color:red;">No data archives have been published for this collection</div>';
 		}
 		?>
+		<fieldset style="padding:5px;">
+			<legend><b>Publishing Information</b></legend>
+			<?php
+			if(!$collArr[$collId]['guidtarget']){
+				echo '<div style="margin:10px;font-weight:bold;color:red;">The GUID source has not been set for this collection. Please go to the <a href="../misc/collmetadata.php?collid='.$collId.'">Edit Metadata page</a> to set GUID source.</div>';
+			}
+			else{
+				echo '<div style="margin:10px;font-weight:bold;">The GUID source for this collection is set to '.$collArr[$collId]['guidtarget'].'</div>';
+			}
+			if($recFlagArr['nullSymUUID']){
+				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullSymUUID'].' records missing Symbiota GUID (recordID) assignments and will not be published. Please go to the <a href="../../admin/guidmapper.php?collid='.$collId.'">Collection GUID Mapper</a> to set Symbiota GUIDs.</div>';
+			}
+			if($recFlagArr['nullBasisRec']){
+				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullBasisRec'].' records missing basisOfRecord and will not be published. Please go to <a href="../editor/occurrencetabledisplay.php?q_recordedby=&q_recordnumber=&q_eventdate=&q_catalognumber=&q_othercatalognumbers=&q_observeruid=&q_recordenteredby=&q_dateentered=&q_datelastmodified=&q_processingstatus=&q_customfield1=basisOfRecord&q_customtype1=NULL&q_customvalue1=Something&q_customfield2=&q_customtype2=EQUALS&q_customvalue2=&q_customfield3=&q_customtype3=EQUALS&q_customvalue3=&collid='.$collId.'&csmode=0&occid=&occindex=0&orderby=&orderbydir=ASC">Edit Existing Occurrence Records</a> to correct this.</div>';
+			}
+			if((!$collArr[$collId]['guidtarget'] || $collArr[$collId]['guidtarget'] == 'occurrenceId') && $recFlagArr['nullOccurID']){
+				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullOccurID'].' records missing Occurrence IDs and will not be published. ';
+				if($collArr[$collId]['guidtarget'] == 'occurrenceId'){
+					echo '<span style="font-weight:normal;color:black;">As the GUID source is set to occurrenceID, those records missing this field will be excluded from the published archive.';
+				}
+				else{
+					echo '<span style="font-weight:normal;color:black;">As the GUID source is not set for this collection occurrenceID is used by default, records missing this field will be excluded from the published archive. Please use the link above to set the GUID source for this collection.';
+				}
+				echo '</div>';
+			}
+			if($collArr[$collId]['guidtarget'] == 'catalogNumber' && $recFlagArr['nullCatNum']){
+				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullCatNum'].' records missing Catalog Numbers. Since this has been selected as your GUID source these records will not be published. ';
+				echo '<span style="font-weight:normal;color:black;">As the GUID source is set to catalog number, those records missing this field will be excluded from the published archive.';
+				echo '</div>';
+			}
+			?>
+		</fieldset>
 		<form name="dwcaform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaForm(this)">
 			<fieldset style="padding:15px;margin:15px;">
 				<legend><b>Publish / Refresh DWCA File</b></legend>

@@ -37,7 +37,7 @@ class CollectionProfileManager {
 				"c.guidtarget, c.rights, c.rightsholder, c.accessrights, c.sortseq, cs.uploaddate, ".
 				"IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
 				"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt, ".
-				"cs.dynamicProperties, c.securitykey, c.collectionguid ".
+				"cs.dynamicProperties, c.securitykey, c.collectionguid, c.publishToGbif ".
 				"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
 				"LEFT JOIN institutions i ON c.iid = i.iid ".
 				"WHERE (c.collid = ".$this->collid.") ";
@@ -73,6 +73,7 @@ class CollectionProfileManager {
 				$returnArr['sortseq'] = $row->sortseq;
 				$returnArr['skey'] = $row->securitykey;
 				$returnArr['guid'] = $row->collectionguid;
+				$returnArr['publishToGbif'] = $row->publishToGbif;
 				$uDate = "";
 				if($row->uploaddate){
 					$uDate = $row->uploaddate;
@@ -168,6 +169,7 @@ class CollectionProfileManager {
 			$contact = $this->cleanInStr($postArr['contact']);
 			$email = $this->cleanInStr($postArr['email']);
 			$publicEdits = (array_key_exists('publicedits',$postArr)?$postArr['publicedits']:0);
+			$aggPublish = (array_key_exists('publishToGbif',$postArr)?$postArr['publishToGbif']:0);
 			$guidTarget = (array_key_exists('guidtarget',$postArr)?$postArr['guidtarget']:'');
 			$rights = $this->cleanInStr($postArr['rights']);
 			$rightsHolder = $this->cleanInStr($postArr['rightsholder']);
@@ -192,6 +194,7 @@ class CollectionProfileManager {
 				'latitudedecimal = '.($postArr['latitudedecimal']?$postArr['latitudedecimal']:'NULL').','.
 				'longitudedecimal = '.($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').','.
 				'publicedits = '.$publicEdits.','.
+				'publishToGbif = '.$aggPublish.','.
 				'guidtarget = '.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
 				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
@@ -246,6 +249,7 @@ class CollectionProfileManager {
 		$rightsHolder = $this->cleanInStr($postArr['rightsholder']);
 		$accessRights = $this->cleanInStr($postArr['accessrights']);
 		$publicEdits = (array_key_exists('publicedits',$postArr)?$postArr['publicedits']:0);
+		$aggPublish = (array_key_exists('publishToGbif',$postArr)?$postArr['publishToGbif']:0);
 		$guidTarget = (array_key_exists('guidtarget',$postArr)?$postArr['guidtarget']:'');
 		if($_FILES['iconfile']['name']){
 			$icon = $this->addIconImageFile();
@@ -262,7 +266,7 @@ class CollectionProfileManager {
 
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,fulldescription,homepage,'.
-			'contact,email,latitudedecimal,longitudedecimal,publicedits,guidtarget,rights,rightsholder,accessrights,icon,'.
+			'contact,email,latitudedecimal,longitudedecimal,publicedits,publishToGbif,guidtarget,rights,rightsholder,accessrights,icon,'.
 			'managementtype,colltype,collectionguid,individualurl,sortseq) '.
 			'VALUES ("'.$instCode.'",'.
 			($collCode?'"'.$collCode.'"':'NULL').',"'.
@@ -273,7 +277,7 @@ class CollectionProfileManager {
 			($email?'"'.$email.'"':'NULL').','.
 			($postArr['latitudedecimal']?$postArr['latitudedecimal']:'NULL').','.
 			($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').','.
-			$publicEdits.','.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
+			$publicEdits.','.$aggPublish.','.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 			($rights?'"'.$rights.'"':'NULL').','.
 			($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
 			($accessRights?'"'.$accessRights.'"':'NULL').','.

@@ -606,7 +606,7 @@ class DwcArchiverOccurrence{
 		if($sqlWhere){
 			$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, c.collectionguid, '.
 				'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, c.guidtarget, '.
-				'c.latitudedecimal, c.longitudedecimal, c.icon, c.managementtype, c.colltype, c.rights, c.rightsholder, c.usageterm, '.
+				'c.latitudedecimal, c.longitudedecimal, c.icon, c.managementtype, c.colltype, c.rights, c.rightsholder, c.usageterm, c.publishToGbif, '.
 				'i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country, i.phone '.
 				'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid WHERE '.$sqlWhere;
 			//echo 'SQL: '.$sql.'<br/>';
@@ -636,9 +636,32 @@ class DwcArchiverOccurrence{
 				$this->collArr[$r->collid]['postalcode'] = $r->postalcode;
 				$this->collArr[$r->collid]['country'] = $r->country;
 				$this->collArr[$r->collid]['phone'] = $r->phone;
+				$this->collArr[$r->collid]['publishToGbif'] = $r->publishToGbif;
 			}
 			$rs->free();
 		}
+	}
+	
+	public function verifyCollRecords($collId){
+		$sql = '';
+		$recArr = array();
+		$sql = 'SELECT COUNT(CASE WHEN ISNULL(o.occurrenceID) THEN o.occid ELSE NULL END) AS nullOccurID, '.
+			'COUNT(CASE WHEN ISNULL(o.basisOfRecord) THEN o.occid ELSE NULL END) AS nullBasisRec, '.
+			'COUNT(CASE WHEN ISNULL(o.catalogNumber) THEN o.occid ELSE NULL END) AS nullCatNum, '.
+			'COUNT(CASE WHEN ISNULL(g.guid) THEN o.occid ELSE NULL END) AS nullSymUUID '.
+			'FROM omoccurrences AS o LEFT JOIN guidoccurrences AS g ON o.occid = g.occid '.
+			'WHERE o.collid = '.$collId;
+		//echo 'SQL: '.$sql.'<br/>';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$recArr['nullOccurID'] = $r->nullOccurID;
+			$recArr['nullBasisRec'] = $r->nullBasisRec;
+			$recArr['nullCatNum'] = $r->nullCatNum;
+			$recArr['nullSymUUID'] = $r->nullSymUUID;
+		}
+		$rs->free();
+		
+		return $recArr;
 	}
 
 	public function getCollArr(){
@@ -1784,7 +1807,7 @@ class DwcArchiverOccurrence{
 				elseif($guidTarget == 'symbiotaUUID'){
 					$r['occurrenceID'] = $r['recordId'];
 				}
-				if($this->limitToGuids && !$r['occurrenceID']){
+				if($this->limitToGuids && (!$r['occurrenceID'] || !$r['basisOfRecord'])){
 					// Skip record because there is no occurrenceID guid
 					continue;
 				}

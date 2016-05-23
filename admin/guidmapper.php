@@ -2,6 +2,7 @@
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/UuidFactory.php');
 header("Content-Type: text/html; charset=".$charset);
+ini_set('max_execution_time', 3600);
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $action = array_key_exists("formsubmit",$_POST)?$_POST["formsubmit"]:'';

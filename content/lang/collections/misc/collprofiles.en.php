@@ -29,6 +29,7 @@ $LANG['IMPORT_SPECIMEN'] = 'Import/Update Specimen Records';
 $LANG['QUICK_FILE'] = 'Quick File Upload';
 $LANG['SKELETAL_FILE_UPLOAD'] = 'Skeletal File Upload';
 $LANG['PROCESSING_TOOLBOX'] = 'Processing Toolbox';
+$LANG['GUIDMAP'] = 'Collection GUID Mapper';
 $LANG['DARWIN_CORE_PUB'] = 'Darwin Core Archive Publishing';
 $LANG['REVIEW_SPEC_EDITS'] = 'Review/Verify General Specimen Edits';
 $LANG['DATA_CLEANING'] = 'Data Cleaning Tools';

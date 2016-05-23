@@ -29,6 +29,7 @@ $LANG['IMPORT_SPECIMEN'] = 'Importar/Actualizar Registros de Espec&iacute;menes'
 $LANG['QUICK_FILE'] = 'Carga R&aacute;pida de Archivos';
 $LANG['SKELETAL_FILE_UPLOAD'] = 'Carga Archivo Estructural';
 $LANG['PROCESSING_TOOLBOX'] = 'Caja de Herramientas de Procesamiento';
+$LANG['GUIDMAP'] = 'Collection GUID Mapper';
 $LANG['DARWIN_CORE_PUB'] = 'Publicaci&oacute;n de Archivo Darwin Core';
 $LANG['REVIEW_SPEC_EDITS'] = 'Revisar/Verificar Ediciones Generales de Espec&iacute;menes';
 $LANG['DATA_CLEANING'] = 'Herramientas de Limpieza de Datos';
