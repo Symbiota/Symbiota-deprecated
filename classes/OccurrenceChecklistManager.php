@@ -21,7 +21,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		$returnVec = Array();
 		$this->checklistTaxaCnt = 0;
 		$sql = "";
-        if(is_numeric($taxonAuthorityId)){
+        if($taxonAuthorityId && is_numeric($taxonAuthorityId)){
 			$sql = 'SELECT DISTINCT ts.family, t.sciname '.
                 'FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid) '.
                 'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid) '.
@@ -37,7 +37,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 			$sql .= $this->getSqlWhere()." AND (t.rankid > 140) AND (ts.taxauthid = 1) ";
         }
-		//echo "<div>".$sql."</div>";
+		//echo "<div>".$sql."</div>"; 
         $result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$family = strtoupper($row->family);
