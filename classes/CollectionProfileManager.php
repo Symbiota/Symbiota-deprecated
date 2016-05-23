@@ -786,6 +786,7 @@ class CollectionProfileManager {
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
+			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['unprocessedCount'] = $r->unprocessedCount;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage1Count'] = $r->stage1Count;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage2Count'] = $r->stage2Count;
@@ -802,6 +803,7 @@ class CollectionProfileManager {
 		//echo $sql2;
 		$rs = $this->conn->query($sql2);
 		while($r = $rs->fetch_object()){
+			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['imgcnt'] = $r->imgcnt;
 		}
 
@@ -817,6 +819,7 @@ class CollectionProfileManager {
 		//echo $sql2;
 		$rs = $this->conn->query($sql3);
 		while($r = $rs->fetch_object()){
+			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['georcnt'] = $r->georcnt;
 		}
 		$rs->free();
