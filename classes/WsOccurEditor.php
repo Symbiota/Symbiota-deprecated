@@ -83,7 +83,6 @@ class WsOccurEditor extends WebServiceBase{
 			//Custom adjustments applied per project based on source
 			if($this->source == 'geolocate'){
 				//Only edit coordinate and georeference detail field
-				//Activate only if target coordinates are null
 				if((!isset($vettedNewValues['decimallatitude']) || !isset($vettedNewValues['decimallongitude'])) && !isset($vettedNewValues['georeferenceremarks'])){
 					//Abort edits because decimalLatitude and decimalLongitude are NULL or unchanged
 					//return '{"Result":[{"Status":"FAILURE","Error":"decimalLatitude, decimalLongitude, or georeferenceRemarks are NULL or unchanged"}]}';
@@ -93,14 +92,17 @@ class WsOccurEditor extends WebServiceBase{
 				else{
 					$vettedOldValues = array_intersect_key($vettedOldValues, array_flip($approvedGeolocateFields));
 					$vettedNewValues = array_intersect_key($vettedNewValues, array_flip($approvedGeolocateFields));
-					 
-					if(isset($vettedOldValues['decimallatitude']) || isset($vettedOldValues['decimallongitude'])){
-						//There is already values in the current lat/long field, thus don't apply editing in omoccurrence table
+
+					//Activate only if an internal edit hasn't already been applied to any of the fields
+					$sqlTest = 'SELECT ocedid FROM omoccuredits WHERE occid = '.$occid.' AND fieldname IN("decimallatitude","decimallongitude") AND (FieldValueNew IS NOT NULL)';
+					$rsTest = $this->conn->query($sqlTest);
+					if($rsTest->num_rows){
 						$appliedStatus = 0;
 					}
 					else{
 						$appliedStatus = 1;
 					}
+					$rsTest->free();
 				}
 			}
 

@@ -152,6 +152,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					alert("You must enter a data source identifier");
 					return false;
 				}
+				$("#builddwcabutton").prop("disabled",true);
 				$("#coge-download").show();
 				$.ajax({
 					type: "POST",
@@ -775,7 +776,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<input name="format" type="hidden" value="csv" />
 												<input name="schema" type="hidden" value="coge" />
 												<div style="margin:5px">
-													<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" /> 
+													<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> 
 													<span id="coge-download" style="display:none;color:orange">Creating data package... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 													<span id="coge-push2coge" style="display:none;color:orange">Pushing data to CoGe... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 													<span id="coge-importcomplete" style="display:none;color:green">
@@ -787,7 +788,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 													<div id="coge-guid"></div>
 													<div id="coge-importstatus" style="color:orange;display:none;">
 														Data import complete! Go to GeoLocate website and open dataset within selected community, 
-														then click update button to index and integrate data into community. 
+														then click Update Cache button to index and integrate data into community. 
 														After processing step completes, remember to finalize the import process by clicking the save button.
 													</div>
 												</div>

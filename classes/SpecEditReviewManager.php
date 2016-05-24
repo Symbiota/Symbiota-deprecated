@@ -176,7 +176,7 @@ class SpecEditReviewManager extends Manager{
 	private function getRevisionSqlBase(){
 		$sqlBase = '';
 		if($this->collid){
-			$sqlBase = 'FROM omoccurRevisions r INNER JOIN omoccurrences o ON r.occid = o.occid '.
+			$sqlBase = 'FROM omoccurrevisions r INNER JOIN omoccurrences o ON r.occid = o.occid '.
 					'LEFT JOIN users u ON r.uid = u.uid '.
 					'WHERE (o.collid = '.$this->collid.') ';
 			if($this->appliedStatusFilter !== ''){
