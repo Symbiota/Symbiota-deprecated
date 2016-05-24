@@ -761,17 +761,26 @@ class CollectionProfileManager {
 
 	public function getYearStatsDataArr($collId){
 		$statArr = array();
-		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
-			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, COUNT(o.occid) AS speccnt '.
+		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, c.collectionname '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
 			'LEFT JOIN images AS i ON o.occid = i.occid '.
 			'WHERE o.collid in('.$collId.') AND ((o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < 365) OR (datediff(curdate(), i.InitialTimeStamp) < 365)) '.
-			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
+			'ORDER BY c.collectionname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$statArr[$r->collcode]['collcode'] = $r->collcode;
 			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
+		}
+		
+		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
+			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, COUNT(o.occid) AS speccnt '.
+			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
+			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < 365 '.
+			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['speccnt'] = $r->speccnt;
 		}
 		
