@@ -764,7 +764,8 @@ class CollectionProfileManager {
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
 			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, COUNT(o.occid) AS speccnt '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
-			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < 365 '.
+			'LEFT JOIN images AS i ON o.occid = i.occid '.
+			'WHERE o.collid in('.$collId.') AND ((o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < 365) OR (datediff(curdate(), i.InitialTimeStamp) < 365)) '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -786,7 +787,6 @@ class CollectionProfileManager {
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['unprocessedCount'] = $r->unprocessedCount;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage1Count'] = $r->stage1Count;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['stage2Count'] = $r->stage2Count;
@@ -803,7 +803,6 @@ class CollectionProfileManager {
 		//echo $sql2;
 		$rs = $this->conn->query($sql2);
 		while($r = $rs->fetch_object()){
-			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['imgcnt'] = $r->imgcnt;
 		}
 
@@ -819,7 +818,6 @@ class CollectionProfileManager {
 		//echo $sql2;
 		$rs = $this->conn->query($sql3);
 		while($r = $rs->fetch_object()){
-			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['georcnt'] = $r->georcnt;
 		}
 		$rs->free();
