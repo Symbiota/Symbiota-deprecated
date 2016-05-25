@@ -130,6 +130,20 @@ ALTER TABLE `omoccurassociations`
 DROP TABLE IF EXISTS `omoccurassoctaxa`;
 
 
+#lookup table for municipality
+CREATE TABLE `lkupmunicipality` (
+  `municipalityId` int NOT NULL AUTO_INCREMENT,
+  `stateId` int NOT NULL,
+  `municipalityName` varchar(100) NOT NULL,
+  `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`municipalityId`),
+  UNIQUE KEY `unique_municipality` (`stateId`,`municipalityName`),
+  KEY `fk_stateprovince` (`stateId`),
+  KEY `index_municipalityname` (`municipalityName`),
+  CONSTRAINT `lkupmunicipality_ibfk_1` FOREIGN KEY (`stateId`) REFERENCES `lkupstateprovince` (`stateId`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+
 #Checklist changes
 ALTER TABLE `fmvouchers` 
   DROP COLUMN `Collector`;
