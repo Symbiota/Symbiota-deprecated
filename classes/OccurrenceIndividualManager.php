@@ -476,19 +476,17 @@ class OccurrenceIndividualManager extends Manager{
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		if($result){
-			$cnt = 0;
 			while($r = $result->fetch_object()){
 				$k = substr($r->initialtimestamp,0,16);
 				if(!isset($retArr[$k]['editor'])){
 					$retArr[$k]['editor'] = $r->editor;
 					$retArr[$k]['ts'] = $r->initialtimestamp;
+					$retArr[$k]['reviewstatus'] = $r->reviewstatus;
+					$retArr[$k]['appliedstatus'] = $r->appliedstatus;
 				}
-				$retArr[$k][$cnt]['fieldname'] = $r->fieldname;
-				$retArr[$k][$cnt]['old'] = $r->fieldvalueold;
-				$retArr[$k][$cnt]['new'] = $r->fieldvaluenew;
-				$retArr[$k][$cnt]['reviewstatus'] = $r->reviewstatus;
-				$retArr[$k][$cnt]['appliedstatus'] = $r->appliedstatus;
-				$cnt++;
+				$retArr[$k]['edits'][$r->ocedid]['fieldname'] = $r->fieldname;
+				$retArr[$k]['edits'][$r->ocedid]['old'] = $r->fieldvalueold;
+				$retArr[$k]['edits'][$r->ocedid]['new'] = $r->fieldvaluenew;
 			}
 			$result->free();
 		}
@@ -497,7 +495,36 @@ class OccurrenceIndividualManager extends Manager{
 		}
 		return $retArr;
 	}
-	
+
+	public function getExternalEditArr(){
+		$retArr = Array();
+		$sql = 'SELECT r.orid, r.oldvalues, r.newvalues, r.externalsource, r.externaleditor, r.reviewstatus, r.appliedstatus, '.
+			'CONCAT_WS(", ",u.lastname,u.firstname) AS username, r.externaltimestamp, r.initialtimestamp '.
+			'FROM omoccurrevisions r LEFT JOIN users u ON r.uid = u.uid '.
+			'WHERE (r.occid = '.$this->occid.') ORDER BY r.initialtimestamp DESC ';
+		//echo '<div>'.$sql.'</div>';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$editor = $r->externaleditor;
+			if($r->username) $editor .= ' ('.$r->username.')';
+			$ts = $r->initialtimestamp;
+			$retArr[$ts]['editor'] = $editor;
+			$retArr[$ts]['source'] = $r->externalsource;
+			$retArr[$ts]['reviewstatus'] = $r->reviewstatus;
+			$retArr[$ts]['appliedstatus'] = $r->appliedstatus;
+
+			$oldValues = json_decode($r->oldvalues,true);
+			$newValues = json_decode($r->newvalues,true);
+			foreach($oldValues as $fieldName => $value){
+				$retArr[$ts]['edits'][$r->orid]['fieldname'] = $fieldName;
+				$retArr[$ts]['edits'][$r->orid]['old'] = $value;
+				$retArr[$ts]['edits'][$r->orid]['new'] = (isset($newValues[$fieldName])?$newValues[$fieldName]:'ERROR');
+			}
+		}
+		$rs->free();
+		return $retArr;
+	}
+
 	public function getVoucherChecklists(){
 		global $IS_ADMIN, $userRights;
 		$returnArr = Array();

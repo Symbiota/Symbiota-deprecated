@@ -980,51 +980,92 @@ header("Content-Type: text/html; charset=".$CHARSET);
 				</div>
 				<?php 
 				if($isEditor){
-					$editArr = $indManager->getEditArr();
 					?>
 					<div id="edittab">
 						<div style="padding:15px;">
 							<?php 
-							if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin'])){
+							if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin']) && in_array($collid,$USER_RIGHTS['CollEditor'])){
 								?>
 								<div style="float:right;" title="Manage Edits">
 									<a href="../editor/editreviewer.php?collid=<?php echo $collid.'&occid='.$occid; ?>"><img src="../../images/edit.png" style="border:0px;width:14px;" /></a>
 								</div>
 								<?php
 							}
-							echo '<div style="margin:15px;">';
+							echo '<div style="margin:20px 0px 30px 0px;">';
 							echo '<b>Entered By:</b> '.($occArr['recordenteredby']?$occArr['recordenteredby']:'not recorded').'<br/>';
 							echo '<b>Date entered:</b> '.($occArr['dateentered']?$occArr['dateentered']:'not recorded').'<br/>';
 							echo '<b>Date modified:</b> '.($occArr['datelastmodified']?$occArr['datelastmodified']:'not recorded').'<br/>';
 							if($occArr['modified'] && $occArr['modified'] != $occArr['datelastmodified']) echo '<b>Source date modified:</b> '.$occArr['modified'];
 							echo '</div>';
-							if($editArr){
-								foreach($editArr as $k => $eArr){
+							$editArr = $indManager->getEditArr();
+							$externalEdits = $indManager->getExternalEditArr();
+							if($editArr || $externalEdits){
+								if($editArr){
 									?>
-									<div>
-										<b>Editor:</b> <?php echo $eArr['editor']; ?>
-										<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
-									</div>
-									<?php 
-									unset($eArr['editor']);
-									unset($eArr['ts']);
-									foreach($eArr as $vArr){
-										echo '<div style="margin:15px;">';
-										echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
-										echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
-										echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
-										$reviewStr = 'OPEN';
-										if($vArr['reviewstatus'] == 2){
-											$reviewStr = 'PENDING';
+									<fieldset style="padding:20px;">
+										<legend><b>Internal Edits</b></legend>
+										<?php 
+										foreach($editArr as $k => $eArr){
+											$reviewStr = 'OPEN';
+											if($eArr['reviewstatus'] == 2) $reviewStr = 'PENDING';
+											elseif($eArr['reviewstatus'] == 3) $reviewStr = 'CLOSED';
+											?>
+											<div>
+												<b>Editor:</b> <?php echo $eArr['editor']; ?>
+												<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
+											</div>
+											<div>
+												<span><b>Applied Status:</b> <?php echo ($eArr['appliedstatus']?'applied':'not applied'); ?></span>
+												<span style="margin-left:30px;"><b>Reveiw Status:</b> <?php echo $reviewStr; ?></span>
+											</div>
+											<?php
+											$edArr = $eArr['edits'];
+											foreach($edArr as $vArr){
+												echo '<div style="margin:15px;">';
+												echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+												echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
+												echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+												echo '</div>';
+											}
+											echo '<div style="margin:15px 0px;"><hr/></div>';
 										}
-										elseif($vArr['reviewstatus'] == 3){
-											$reviewStr = 'CLOSED';
+										?>
+									</fieldset>
+									<?php
+								}
+								if($externalEdits){
+									?>
+									<fieldset style="margin-top:20px;padding:20px;">
+										<legend><b>External Edits</b></legend>
+										<?php 
+										foreach($externalEdits as $ts => $eArr){
+											$reviewStr = 'OPEN';
+											if($eArr['reviewstatus'] == 2) $reviewStr = 'PENDING';
+											elseif($eArr['reviewstatus'] == 3) $reviewStr = 'CLOSED';
+											?>
+											<div>
+												<b>Editor:</b> <?php echo $eArr['editor']; ?>
+												<span style="margin-left:30px;"><b>Date:</b> <?php echo $ts; ?></span>
+												<span style="margin-left:30px;"><b>Source:</b> <?php echo $eArr['source']; ?></span>
+											</div>
+											<div>
+												<span><b>Applied Status:</b> <?php echo ($eArr['appliedstatus']?'applied':'not applied'); ?></span>
+												<span style="margin-left:30px;"><b>Reveiw Status:</b> <?php echo $reviewStr; ?></span>
+											</div>
+											<?php
+											$edArr = $eArr['edits'];
+											foreach($edArr as $vArr){
+												echo '<div style="margin:15px;">';
+												echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+												echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
+												echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+												echo '</div>';
+											}
+											echo '<div style="margin:15px 0px;"><hr/></div>';
 										}
-										echo '<b>Applied Status:</b> '.($vArr['appliedstatus']?'applied':'not applied').'; ';
-										echo '<b>Reveiw Status:</b> '.$reviewStr;
-										echo '</div>';
-									}
-									echo '<div style="margin:15px 0px;"><hr/></div>';
+										?>
+									</fieldset>
+									<?php
 								}
 							}
 							else{
