@@ -1,14 +1,14 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/TaxonProfileManager.php');
-Header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/TaxonProfileManager.php');
+Header("Content-Type: text/html; charset=".$CHARSET);
 
 $descrDisplayLevel;
 $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1; 
 $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0;
 $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:0;
-$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang;
+$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$DEFAULT_LANG;
 $descrDisplayLevel = array_key_exists("displaylevel",$_REQUEST)?$_REQUEST["displaylevel"]:"";
 
 //if(!$projValue && !$clValue) $projValue = $defaultProjId;
@@ -52,12 +52,11 @@ if($taxonManager->getSecurityStatus() == 0){
 }
 $taxonManager->setDisplayLocality($displayLocality);
 $descr = Array();
-
 ?>
 
 <html>
 <head>
-	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
+	<title><?php echo $DEFAULT_TITLE." - ".$spDisplay; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<meta name='keywords' content='<?php echo $spDisplay; ?>' />
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
@@ -68,7 +67,7 @@ $descr = Array();
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 		var currentLevel = <?php echo ($descrDisplayLevel?$descrDisplayLevel:"1"); ?>;
@@ -81,7 +80,7 @@ $descr = Array();
 <body>
 <?php
 $displayLeftMenu = (isset($taxa_indexMenu)?$taxa_indexMenu:false);
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 if(isset($taxa_indexCrumbs)){
 	echo "<div class='navpath'>";
 	echo $taxa_indexCrumbs;
@@ -172,50 +171,56 @@ if($taxonManager->getSciName() != "unknown"){
 			<td class="desc">
 				<?php 
 				//Middle Right Section (Description section)
-				if($descriptions = $taxonManager->getDescriptions()){
+				if($descArr = $taxonManager->getDescriptions()){
 					?>
 					<div id='desctabs'>
 						<ul>
 							<?php 
 							$capCnt = 1;
-							foreach($descriptions as $k => $vArr){
-								$cap = $vArr["caption"];
-								if(!$cap) $cap = "Description #".$capCnt;
-								echo "<li><a href='#tab".$k."' class='selected'>".$cap."</a></li>\n";
-								$capCnt++;
+							foreach($descArr as $dArr){
+								foreach($dArr as $id => $vArr){
+									$cap = $vArr["caption"];
+									if(!$cap){
+										$cap = "Description #".$capCnt;
+										$capCnt++;
+									}
+									echo "<li><a href='#tab".$id."' class='selected'>".$cap."</a></li>\n";
+								}
 							}
 							?>
 						</ul>
 						<?php 
-						foreach($descriptions as $k => $vArr){
-							?>
-							<div id='tab<?php echo $k; ?>' class="sptab" style="width:94%;">
-								<?php 
-								if($vArr["source"]){
-									echo "<div id='descsource' style='float:right;'>";
-									if($vArr["url"]){
-										echo "<a href='".$vArr["url"]."' target='_blank'>";
-									}
-									echo $vArr["source"];
-									if($vArr["url"]){
-										echo "</a>";
-									}
-									echo "</div>\n";
-								}
-								$descArr = $vArr["desc"];
+						foreach($descArr as $dArr){
+							foreach($dArr as $id => $vArr){
 								?>
-								<div style='clear:both;'>
+								<div id='tab<?php echo $id; ?>' class="sptab" style="width:94%;">
 									<?php 
-									foreach($descArr as $tdsId => $stmt){
-										echo $stmt." ";
+									if($vArr["source"]){
+										echo "<div id='descsource' style='float:right;'>";
+										if($vArr["url"]){
+											echo "<a href='".$vArr["url"]."' target='_blank'>";
+										}
+										echo $vArr["source"];
+										if($vArr["url"]){
+											echo "</a>";
+										}
+										echo "</div>\n";
 									}
-									//if($this->clInfo){
-										//echo "<div id='clinfo'><b>Local Notes:</b> ".$clInfo."</div>";
-									//}
+									$descArr = $vArr["desc"];
 									?>
+									<div style='clear:both;'>
+										<?php 
+										foreach($descArr as $tdsId => $stmt){
+											echo $stmt." ";
+										}
+										//if($this->clInfo){
+											//echo "<div id='clinfo'><b>Local Notes:</b> ".$clInfo."</div>";
+										//}
+										?>
+									</div>
 								</div>
-							</div>
-							<?php 
+								<?php 
+							}
 						}
 						?>
 					</div>
@@ -229,46 +234,42 @@ if($taxonManager->getSciName() != "unknown"){
 		</tr>
 		<tr>
 			<td colspan="2">
-				<?php 
-				//Bottom Section - Pics and Map
-				//Display next 4 pics along bottom to left of map
-				$moreImages = $taxonManager->echoImages(1,4);
-				
-				//Map
-				$url = ''; $aUrl = ''; $gAnchor = '';
-				if($occurrenceModIsActive && $displayLocality){
-					$gAnchor = "openMapPopup('".$taxonManager->getTid()."',".($taxonManager->getClid()?$taxonManager->getClid():0).")";
-				}
-				if($mapSrc = $taxonManager->getMapArr()){
-					$url = array_shift($mapSrc);
-					$aUrl = $url;
-				}
-				elseif($gAnchor){
-					$url = $taxonManager->getGoogleStaticMap();
-				}
-				if($url){
-					echo '<div class="mapthumb">';
-					if($gAnchor){
-						echo '<a href="#" onclick="'.$gAnchor.';return false">';
-					}
-					elseif($aUrl){
-						echo '<a href="'.$aUrl.'">';
-					}
-					echo '<img src="'.$url.'" title="'.$spDisplay.' dot map" alt="'.$spDisplay.' dot map" />';
-					if($aUrl || $gAnchor) echo '</a>';
-					if($gAnchor) echo '<br /><a href="#" onclick="'.$gAnchor.';return false">Open Interactive Map</a>';
-					echo '</div>';
-				}
-				?>
-			</td>
-		</tr>
-		<tr>
-			<td colspan="2">
-				<div id="imgextra" style="display:none;">
+				<div id="img-div" style="height:300px;overflow:hidden;">
 					<?php 
-					//Section with extra images
-					$taxonManager->echoImages(5,0);
+					//Map
+					$url = ''; $aUrl = ''; $gAnchor = '';
+					if($occurrenceModIsActive && $displayLocality){
+						$gAnchor = "openMapPopup('".$taxonManager->getTid()."',".($taxonManager->getClid()?$taxonManager->getClid():0).")";
+					}
+					if($mapSrc = $taxonManager->getMapArr()){
+						$url = array_shift($mapSrc);
+						$aUrl = $url;
+					}
+					elseif($gAnchor){
+						$url = $taxonManager->getGoogleStaticMap();
+					}
+					if($url){
+						echo '<div class="mapthumb" style="float:right;height:250px">';
+						if($gAnchor){
+							echo '<a href="#" onclick="'.$gAnchor.';return false">';
+						}
+						elseif($aUrl){
+							echo '<a href="'.$aUrl.'">';
+						}
+						echo '<img src="'.$url.'" title="'.$spDisplay.' dot map" alt="'.$spDisplay.' dot map" />';
+						if($aUrl || $gAnchor) echo '</a>';
+						if($gAnchor) echo '<br /><a href="#" onclick="'.$gAnchor.';return false">Open Interactive Map</a>';
+						echo '</div>';
+					}
+					$taxonManager->echoImages(1);
 					?>
+				</div>
+				<div id="img-tab-div" style="display:none;border-top:2px solid gray;margin-top:2px;">
+					<a href="#" onclick="expandExtraImages();return false;">
+						<div style="background:#eee;padding:10px;border: 1px solid #ccc;width:100px;margin:auto;text-align:center">
+							More Images
+						</div>
+					</a>
 				</div>
 			</td>
 		</tr>
@@ -314,50 +315,54 @@ if($taxonManager->getSciName() != "unknown"){
 					<?php 
 				}
 				//Display description
-				if($descriptions = $taxonManager->getDescriptions()){
+				if($descriptionArr = $taxonManager->getDescriptions()){
 					?>
 					<div id="desctabs" style="margin:10px;clear:both;">
 						<ul>
 							<?php 
 							$capCnt = 1;
-							foreach($descriptions as $k => $vArr){
-								$cap = $vArr["caption"];
-								if(!$cap) $cap = "Description #".$capCnt;
-								echo "<li><a href='#tab".$k."'>".$cap."</a></li>\n";
-								$capCnt++;
+							foreach($descriptionArr as $dArr){
+								foreach($dArr as $k => $vArr){
+									$cap = $vArr["caption"];
+									if(!$cap) $cap = "Description #".$capCnt;
+									echo "<li><a href='#tab".$k."'>".$cap."</a></li>\n";
+									$capCnt++;
+								}
 							}
 							?>
 						</ul>
 						<?php 
-						foreach($descriptions as $k => $vArr){
-							?>
-							<div id='tab<?php echo $k; ?>' class='spptab' style='width:94%;'>
-								<?php 
-								if($vArr["source"]){
-									echo "<div id='descsource' style='float:right;'>";
-									if($vArr["url"]){
-										echo "<a href='".$vArr["url"]."' target='_blank'>";
-									}
-									echo $vArr["source"];
-									if($vArr["url"]){
-										echo "</a>";
-									}
-									echo "</div>\n";
-								}
-								$descArr = $vArr["desc"];
+						foreach($descriptionArr as $dArr){
+							foreach($dArr as $k => $vArr){
 								?>
-								<div style='clear:both;'>
+								<div id='tab<?php echo $k; ?>' class='spptab' style='width:94%;'>
 									<?php 
-									foreach($descArr as $tdsId => $stmt){
-										echo $stmt." ";
+									if($vArr["source"]){
+										echo "<div id='descsource' style='float:right;'>";
+										if($vArr["url"]){
+											echo "<a href='".$vArr["url"]."' target='_blank'>";
+										}
+										echo $vArr["source"];
+										if($vArr["url"]){
+											echo "</a>";
+										}
+										echo "</div>\n";
 									}
-									//if($this->clInfo){
-										//echo "<div id='clinfo'><b>Local Notes:</b> ".$clInfo."</div>";
-									//}
+									$descArr = $vArr["desc"];
 									?>
+									<div style='clear:both;'>
+										<?php 
+										foreach($descArr as $tdsId => $stmt){
+											echo $stmt." ";
+										}
+										//if($this->clInfo){
+											//echo "<div id='clinfo'><b>Local Notes:</b> ".$clInfo."</div>";
+										//}
+										?>
+									</div>
 								</div>
-							</div>
-							<?php 
+								<?php 
+							}
 						}
 						?>
 					</div>
@@ -456,13 +461,6 @@ if($taxonManager->getSciName() != "unknown"){
 	//Bottom line listing options
 	echo "<div style='margin-top:15px;text-align:center;'>";
 	if($taxonRank > 180){
-		if($taxonManager->getimageCount() > 5){
-			?>
-			<span id="moreimages">
-				<a href="#" onclick="expandExtraImages();return false;">More Images</a>
-			</span>
-			<?php 
-		}
 		if($taxonRank > 180 && $links){
 			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:toggle('links')\">Web Links</a>";
 		}
@@ -547,7 +545,7 @@ else{
 ?>
 </table>
 <?php 
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>

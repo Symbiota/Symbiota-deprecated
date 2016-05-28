@@ -15,6 +15,7 @@ class TaxonProfileManager {
 	private $familyVern;
 	private $rankId;
 	private $language;
+	private $langArr = array();
 	private $securityStatus;
 	private $displayLocality = 1;
 
@@ -310,7 +311,7 @@ class TaxonProfileManager {
 				if($vid != $row->vid){
 					$vid = $row->vid;
 					$langStr = strtolower($row->language);
-					if($this->language != $langStr){
+					if(!in_array($langStr, $this->langArr)){
 						$tempVernArr[$langStr][] = $row->VernacularName;
 					}
 					else{
@@ -322,7 +323,7 @@ class TaxonProfileManager {
 			foreach($tempVernArr as $lang => $vArr){
 				$this->vernaculars[] = '('.$lang.': '.implode(', ',$vArr).')';
 			}
-			$result->close();
+			$result->free();
 		}
 	}
  	
@@ -429,7 +430,7 @@ class TaxonProfileManager {
 		$result->close();
  	}
 
-	public function echoImages($start, $length, $useThumbnail = 1){		//length=0 => means show all images
+	public function echoImages($start, $length = 0, $useThumbnail = 1){		//length=0 => means show all images
 		$status = false;
 		if(!isset($this->imageArr)){
 			$this->setTaxaImages();
@@ -617,27 +618,31 @@ class TaxonProfileManager {
 		$descriptionsStr = '';
 		if($this->tid){
 			$descriptionsStr = "There is no description set for this taxon.";
-			$descriptions = Array();
+			$retArr = Array();
 			$sql = 'SELECT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
-				'tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
+				'tds.tdsid, tds.heading, tds.statement, tds.displayheader, tdb.language '.
 				'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid) '.
 				'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
-				'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = 1) AND (tdb.Language = "'.$this->language.'") '.
+				'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = 1) '.
 				'ORDER BY tdb.displaylevel,tds.sortsequence';
 			//echo $sql; exit;
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
-				$tdbId = $row->tdbid;
-				if(!array_key_exists($tdbId,$descriptions)){
-					$descriptions[$tdbId]["caption"] = $row->caption;
-					$descriptions[$tdbId]["source"] = $row->source;
-					$descriptions[$tdbId]["url"] = $row->sourceurl;
+				$indexKey = 0;
+				if(!in_array(strtolower($row->language), $this->langArr)){ 
+					$indexKey = 1;
 				}
-				$header = $row->displayheader && $row->heading?"<b>".$row->heading."</b>: ":"";
-				$descriptions[$tdbId]["desc"][$row->tdsid] = $header.$row->statement;
+				$tdbId = $row->tdbid;
+				if(!isset($retArr[$indexKey]) || !array_key_exists($tdbId,$retArr[$indexKey])){
+					$retArr[$indexKey][$tdbId]["caption"] = $row->caption;
+					$retArr[$indexKey][$tdbId]["source"] = $row->source;
+					$retArr[$indexKey][$tdbId]["url"] = $row->sourceurl;
+				}
+				$retArr[$indexKey][$tdbId]["desc"][$row->tdsid] = ($row->displayheader && $row->heading?"<b>".$row->heading."</b>: ":"").$row->statement;
 			}
-			$result->close();
-			return $descriptions;
+			$result->free();
+			ksort($retArr);
+			return $retArr;
 		}
 	}
 
@@ -738,18 +743,11 @@ class TaxonProfileManager {
 	
 	public function setLanguage($lang){
 		$lang = strtolower($lang);
-		if(strlen($lang) == 2){
-			if($lang == 'en') $lang = 'english';
-			if($lang == 'es') $lang = 'spanish';
-			if($lang == 'fr') $lang = 'french';
-		}
-		$this->language = $lang;
+		if($lang == 'en' || $lang == 'english') $this->langArr = array('en','english');
+		elseif($lang == 'es' || $lang == 'spanish') $this->langArr = array('es','spanish','espanol');
+		elseif($lang == 'fr' || $lang == 'french') $this->langArr =  array('fr','french');
 	}
 	
-	public function getLanguage(){
-		return $this->language;
-	}
-
 	public function getCloseTaxaMatches($testValue){
 		$retArr = array();
 		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$testValue.'")';

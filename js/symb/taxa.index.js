@@ -3,6 +3,10 @@ var imgCnt = 0;
 
 $(document).ready(function() {
 	$('#desctabs').tabs();
+
+	var imgDiv = document.getElementById("img-div");
+	if(imgDiv.scrollHeight > imgDiv.clientHeight) document.getElementById("img-tab-div").style.display = 'block'; 
+
 });
 
 function toggle(target){
@@ -87,8 +91,8 @@ function findPos(obj){
 }	
 
 function expandExtraImages(){
-	document.getElementById("moreimages").style.display = "none";
-	document.getElementById("imgextra").style.display = "block";
+	document.getElementById("img-div").style.overflow = "visible";
+	document.getElementById("img-tab-div").style.display = "none";
 }
 
 function openMapPopup(taxonVar,clid){
