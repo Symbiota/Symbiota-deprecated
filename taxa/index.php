@@ -74,7 +74,7 @@ $descr = Array();
 		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
 		var tid = <?php echo $taxonManager->getTid(); ?>
 	</script>
-	<script type="text/javascript" src="../js/symb/taxa.index.js?ver=20140619"></script>
+	<script type="text/javascript" src="../js/symb/taxa.index.js?ver=20160527"></script>
 	<script type="text/javascript" src="../js/symb/taxa.editor.js?ver=20140619"></script>
 </head>
 <body>

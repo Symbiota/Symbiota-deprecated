@@ -11,48 +11,93 @@ $occManager = new OccurrenceEditorManager();
 $occManager->setOccId($occid); 
 ?>
 <div id="admindiv">
-	<fieldset style="padding:15px;margin:10px 0px;">
-		<legend><b>Edit History</b></legend>
-		<?php
-		if($editArr = $occManager->getEditArr()){
-			if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
-				?>
-				<div style="float:right;" title="Manage Edit History">
-					<a href="../editor/editreviewer.php?collid=<?php echo $collId.'&occid='.$occid; ?>" target="_blank"><img src="../../../images/edit.png" style="border:0px;width:14px;" /></a>
-				</div>
-				<?php
-			}
-			foreach($editArr as $k => $eArr){
-				?>
-				<div>
-					<b>Editor:</b> <?php echo $eArr['editor']; ?>
-					<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
-				</div>
-				<?php
-				unset($eArr['editor']);
-				unset($eArr['ts']);
-				foreach($eArr as $vArr){
-					echo '<div style="margin:10px 15px;">';
-					echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
-					echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
-					echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+	<?php
+	$editArr = $occManager->getEditArr();
+	$externalEdits = $occManager->getExternalEditArr();
+	if($editArr || $externalEdits){
+		if($editArr){
+			?>
+			<fieldset style="padding:15px;margin:10px 0px;">
+				<legend><b>Edit History</b></legend>
+				<?php 
+				if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
+					?>
+					<div style="float:right;" title="Manage Edit History">
+						<a href="../editor/editreviewer.php?collid=<?php echo $collId.'&occid='.$occid; ?>" target="_blank"><img src="../../images/edit.png" style="border:0px;width:14px;" /></a>
+					</div>
+					<?php
+				}
+				foreach($editArr as $ts => $eArr){
 					$reviewStr = 'OPEN';
-					if($vArr['reviewstatus'] == 2){
+					if($eArr['reviewstatus'] == 2){
 						$reviewStr = 'PENDING';
 					}
-					elseif($vArr['reviewstatus'] == 3){
+					elseif($eArr['reviewstatus'] == 3){
 						$reviewStr = 'CLOSED';
 					}
-					echo 'Edit '.($vArr['appliedstatus']?'applied':'not applied').'; status '.$reviewStr;
-					echo '</div>';
+					?>
+					<div>
+						<b>Editor:</b> <?php echo $eArr['editor']; ?>
+						<span style="margin-left:30px;"><b>Date:</b> <?php echo $ts; ?></span>
+					</div>
+					<div>
+						<span><b>Applied Status:</b> <?php echo ($eArr['appliedstatus']?'applied':'not applied'); ?></span>
+						<span style="margin-left:30px;"><b>Reveiw Status:</b> <?php echo $reviewStr; ?></span>
+					</div>
+					<?php
+					$edArr = $eArr['edits'];
+					foreach($edArr as $vArr){
+						echo '<div style="margin:10px 15px;">';
+						echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+						echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
+						echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+						echo '</div>';
+					}
+					echo '<div style="margin:5px 0px;">&nbsp;</div>';
 				}
-				echo '<div style="margin:5px 0px;">&nbsp;</div>';
-			}
+				?>
+			</fieldset>
+			<?php 
 		}
-		else{
-			echo '<div style="margin:10px">No previous edits recorded</div>';
+		if($externalEdits){
+			?>
+			<fieldset style="margin-top:20px;padding:20px;">
+				<legend><b>External Edits</b></legend>
+				<?php 
+				foreach($externalEdits as $ts => $eArr){
+					$reviewStr = 'OPEN';
+					if($eArr['reviewstatus'] == 2) $reviewStr = 'PENDING';
+					elseif($eArr['reviewstatus'] == 3) $reviewStr = 'CLOSED';
+					?>
+					<div>
+						<b>Editor:</b> <?php echo $eArr['editor']; ?>
+						<span style="margin-left:30px;"><b>Date:</b> <?php echo $ts; ?></span>
+						<span style="margin-left:30px;"><b>Source:</b> <?php echo $eArr['source']; ?></span>
+					</div>
+					<div>
+						<span><b>Applied Status:</b> <?php echo ($eArr['appliedstatus']?'applied':'not applied'); ?></span>
+						<span style="margin-left:30px;"><b>Reveiw Status:</b> <?php echo $reviewStr; ?></span>
+					</div>
+					<?php
+					$edArr = $eArr['edits'];
+					foreach($edArr as $vArr){
+						echo '<div style="margin:15px;">';
+						echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+						echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
+						echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+						echo '</div>';
+					}
+					echo '<div style="margin:15px 0px;"><hr/></div>';
+				}
+				?>
+			</fieldset>
+			<?php
 		}
-		?>
+	}
+	else{
+		echo '<div style="margin:10px">No previous edits recorded</div>';
+	}
+	?>
 	</fieldset>
 	<?php 
 	$collAdminList = $occManager->getCollectionList();
