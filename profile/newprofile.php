@@ -1,12 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ProfileManager.php');
-$useRecaptcha = false;
-if(isset($RECAPTCHA_PUBLIC_KEY) && $RECAPTCHA_PUBLIC_KEY && isset($RECAPTCHA_PRIVATE_KEY) && $RECAPTCHA_PRIVATE_KEY){
-	require_once('recaptchalib.php');
-	$useRecaptcha = true;
-}
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidate');
 header('Pragma: no-cache'); // HTTP 1.0.
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -14,7 +9,6 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 $login = array_key_exists('login',$_POST)?$_POST['login']:'';
 $emailAddr = array_key_exists('emailaddr',$_POST)?$_POST['emailaddr']:'';
 $action = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:'';
-
 
 $pHandler = new ProfileManager();
 $displayStr = '';
@@ -34,14 +28,26 @@ if($emailAddr){
 }
 if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
 
+$useRecaptcha = false;
+if(isset($RECAPTCHA_PUBLIC_KEY) && $RECAPTCHA_PUBLIC_KEY && isset($RECAPTCHA_PRIVATE_KEY) && $RECAPTCHA_PRIVATE_KEY){
+	$useRecaptcha = true;
+}
+
 if($action == "Create Login"){
 	$okToCreateLogin = true;
 	if($useRecaptcha){
-		$resp = recaptcha_check_answer ($RECAPTCHA_PRIVATE_KEY, $_SERVER["REMOTE_ADDR"], $_POST["recaptcha_challenge_field"], $_POST["recaptcha_response_field"]);
-		if (!$resp->is_valid) {
-			// What happens when the CAPTCHA was entered incorrectly
+		$captcha = urlencode($_POST['g-recaptcha-response']);
+		if($captcha){
+			//Verify with Google
+			$response = json_decode(file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$RECAPTCHA_PRIVATE_KEY.'&response='.$captcha.'&remoteip='.$_SERVER['REMOTE_ADDR']), true);
+			if($response['success'] == false){
+				echo '<h2>Recaptcha verification failed</h2>';
+				$okToCreateLogin = false;
+			}
+		}
+		else{
 			$okToCreateLogin = false;
-			$displayStr = "The reCAPTCHA wasn't entered correctly. Go back and try it again. (reCAPTCHA said: " . $resp->error . ")";
+			$displayStr = '<h2>Please check the the captcha form.</h2>';
 		}
 	}
 
@@ -63,17 +69,17 @@ if($action == "Create Login"){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> - New User Profile</title>
+	<title><?php echo $DEFAULT_TITLE; ?> - New User Profile</title>
 	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
-		function checkform(f){
+		function validateform(f){
 			<?php 
 			if($useRecaptcha){
 				?>
-				if(f.recaptcha_response_field.value == ""){
-					alert("Enter the re-CAPTCHA text (red box)");
+				if(grecaptcha.getResponse() == ""){
+					alert("You must first check the reCAPTCHA checkbox (I'm not a robot)");
 					return false;
 				}
 				<?php 
@@ -124,11 +130,14 @@ if($action == "Create Login"){
 			return true;
 		}
 	</script>
+	<?php 
+	if($useRecaptcha) echo '<script src="https://www.google.com/recaptcha/api.js"></script>';
+	?>
 </head>
 <body>
 	<?php
 	$displayLeftMenu = (isset($profile_newprofileMenu)?$profile_newprofileMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($profile_newprofileCrumbs)){
 		echo "<div class='navpath'>";
 		echo $profile_newprofileCrumbs;
@@ -172,7 +181,7 @@ if($action == "Create Login"){
 	?>
 	<fieldset style='margin:10px;width:95%;'>
 		<legend><b>Login Details</b></legend>
-		<form action="newprofile.php" method="post" onsubmit="return checkform(this);">
+		<form action="newprofile.php" method="post" onsubmit="return validateform(this);">
 			<div style="margin:15px;">
 				<table cellspacing='3'>
 					<tr>
@@ -293,9 +302,7 @@ if($action == "Create Login"){
 						<td colspan="2">
 							<div style="margin:10px;">
 								<?php 
-								if($useRecaptcha){
-									echo recaptcha_get_html($RECAPTCHA_PUBLIC_KEY);
-								}
+								if($useRecaptcha) echo '<div class="g-recaptcha" data-sitekey="'.$RECAPTCHA_PUBLIC_KEY.'"></div>';
 								?>
 							</div>
 							<div style="float:right;margin:20px;">
@@ -309,7 +316,7 @@ if($action == "Create Login"){
 	</fieldset>
 	</div>
 	<?php
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>
