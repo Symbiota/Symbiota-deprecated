@@ -3,6 +3,7 @@
 .project
 .settings/org.eclipse.wst.jsdt.ui.superType.container
 .buildpath
+index.php
 config/dbconnection.php
 config/symbini.php
 css/main.css
