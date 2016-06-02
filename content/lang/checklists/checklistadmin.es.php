@@ -5,7 +5,7 @@ Language: Español (Spanish)
 ------------------
 */
 
-include_once('Checklist.en.php');
+include_once('checklist.en.php');
 
 $LANG['NAV_HOME'] = 'Inicio';
 $LANG['CHECKADMIN'] = ' Administraci&oacute;n de Listado de Comprobaci&oacute;n';
