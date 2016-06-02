@@ -6,6 +6,7 @@
 config/dbconnection.php
 config/symbini.php
 css/main.css
+css/jquery-ui.css
 css/speciesprofile.css
 footer.php
 header.php
