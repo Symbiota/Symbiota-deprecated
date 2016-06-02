@@ -1702,9 +1702,10 @@ class OccurrenceEditorManager {
 				'CONCAT_WS(", ",u.lastname,u.firstname) AS username, r.externaltimestamp, r.initialtimestamp '.
 				'FROM omoccurrevisions r LEFT JOIN users u ON r.uid = u.uid '.
 				'WHERE (r.occid = '.$this->occid.') ORDER BY r.initialtimestamp DESC ';
-		//echo '<div>'.$sql.'</div>';
+		echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
+		echo '<div>' . print_r($rs) . '</div>';
+                while($r = $rs->fetch_object()){
 			$editor = $r->externaleditor;
 			if($r->username) $editor .= ' ('.$r->username.')';
 			$ts = $r->initialtimestamp;
