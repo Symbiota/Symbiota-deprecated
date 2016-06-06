@@ -491,6 +491,10 @@ class OccurrenceEditorManager {
 				elseif($ct=='NOTNULL'){
 					$sqlWhere .= 'AND ('.$cf.' IS NOT NULL) ';
 				}
+				elseif($ct=='NOT EQUALS' && $cv){
+					if(!is_numeric($cv)) $cv = '"'.$cv.'"';
+					$sqlWhere .= 'AND ('.$cf.' <> '.$cv.') ';
+				}
 				elseif($ct=='GREATER' && $cv){
 					if(!is_numeric($cv)) $cv = '"'.$cv.'"';
 					$sqlWhere .= 'AND ('.$cf.' > '.$cv.') ';
