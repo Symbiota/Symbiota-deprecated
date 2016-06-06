@@ -289,7 +289,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			$beginNum = ($pageNumber - 1)*$cntPerPage + 1;
 			$endNum = $beginNum + $cntPerPage - 1;
 			if($endNum > $collManager->getRecordCnt()) $endNum = $collManager->getRecordCnt();
-			$pageBar .= $LANG['PAGINATION_PAGE'].' '.$pageNumber.', '.$LANG['PAGINATION_RECORDS'].$beginNum.'-'.$endNum.' '.$LANG['PAGINATION_OF'].' '.$collManager->getRecordCnt();
+			$pageBar .= $LANG['PAGINATION_PAGE'].' '.$pageNumber.', '.$LANG['PAGINATION_RECORDS'].' '.$beginNum.'-'.$endNum.' '.$LANG['PAGINATION_OF'].' '.$collManager->getRecordCnt();
 			$paginationStr .= $pageBar;
 			$paginationStr .= '</div><div style="clear:both;"><hr/></div></div>';
 			echo $paginationStr;

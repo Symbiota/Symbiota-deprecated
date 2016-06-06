@@ -6,6 +6,7 @@ class SpecEditReviewManager extends Manager{
 
 	private $collid;
 	private $collAcronym;
+	private $obsUid = 0;
 
 	private $display = 1;
 	private $appliedStatusFilter = '';
@@ -27,7 +28,8 @@ class SpecEditReviewManager extends Manager{
 	public function setCollId($id){
 		if(is_numeric($id)){
 			$this->collid = $id;
-			$sql = 'SELECT collectionname, institutioncode, collectioncode FROM omcollections WHERE (collid = '.$id.')';
+			$sql = 'SELECT collectionname, institutioncode, collectioncode, colltype '.
+				'FROM omcollections WHERE (collid = '.$id.')';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$collName = $r->collectionname.' (';
@@ -38,6 +40,7 @@ class SpecEditReviewManager extends Manager{
 					$this->collAcronym .= ':'.$r->collectioncode;
 				}
 				$collName .= ')';
+				if($r->colltype == 'General Observations') $this->obsUid = $GLOBALS['SYMB_UID'];  
 			}
 			$rs->free();
 		}
@@ -118,6 +121,9 @@ class SpecEditReviewManager extends Manager{
 			if($this->queryOccidFilter){
 				$sqlBase .= 'AND (e.occid = '.$this->queryOccidFilter.') ';
 			}
+			if($this->obsUid){
+				$sqlBase .= 'AND (o.observeruid = '.$this->obsUid.') ';
+			}
 		}
 		return $sqlBase;
 	}
@@ -195,6 +201,9 @@ class SpecEditReviewManager extends Manager{
 			}
 			if($this->queryOccidFilter){
 				$sqlBase .= 'AND (r.occid = '.$this->queryOccidFilter.') ';
+			}
+			if($this->obsUid){
+				$sqlBase .= 'AND (o.observeruid = '.$this->obsUid.') ';
 			}
 		}
 		return $sqlBase;
@@ -303,7 +312,7 @@ class SpecEditReviewManager extends Manager{
 		if(!preg_match('/^[\d,]+$/', $idStr)) return false;
 		$ocedidStr = $this->getFullOcedidStr($idStr);
 		$sql = 'DELETE FROM omoccuredits WHERE (ocedid IN('.$ocedidStr.'))';
-		//echo '<div>'.$sql.'</div>';
+		//echo '<div>'.$sql.'</div>'; exit;
 		if(!$this->conn->query($sql)){
 			$this->errorMessage = 'ERROR deleting edits: '.$this->conn->error;
 			$status = false;
@@ -339,6 +348,9 @@ class SpecEditReviewManager extends Manager{
 				$sql .= 'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 				'INNER JOIN users u ON e.uid = u.uid '.
 				'WHERE (o.collid = '.$this->collid.') AND (ocedid IN('.$idStr.')) ';
+				if($this->obsUid){
+					$sql .= 'AND (o.observeruid = '.$this->obsUid.') ';
+				}
 			}
 			$sql .= 'ORDER BY e.fieldname ASC, e.initialtimestamp DESC';
 		}
@@ -352,6 +364,9 @@ class SpecEditReviewManager extends Manager{
 				$sql .= 'FROM omoccurrevisions r INNER JOIN omoccurrences o ON r.occid = o.occid '.
 				'LEFT JOIN users u ON r.uid = u.uid '.
 				'WHERE (o.collid = '.$this->collid.') AND (r.orid IN('.$idStr.')) ';
+				if($this->obsUid){
+					$sql .= 'AND (o.observeruid = '.$this->obsUid.') ';
+				}
 			}
 			$sql .= 'ORDER BY r.initialtimestamp DESC';
 		}
@@ -468,6 +483,10 @@ class SpecEditReviewManager extends Manager{
 			$this->limitNumber = $limit;
 		}
 	}
+	
+	public function getObsUid(){
+		return $this->obsUid;
+	}
 
 	public function getEditorList(){
 		$retArr = Array();
@@ -475,14 +494,16 @@ class SpecEditReviewManager extends Manager{
 		if($this->display == 1){
 			$sql = 'SELECT DISTINCT u.uid AS id, CONCAT_WS(", ",u.lastname,u.firstname) AS name '.
 				'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
-				'INNER JOIN users u ON e.uid = u.uid '.
-				'WHERE (o.collid = '.$this->collid.') ';
+				'INNER JOIN users u ON e.uid = u.uid ';
 		}
 		else{
 			$sql = 'SELECT DISTINCT IFNULL(l.uid,r.externaleditor) as id, IFNULL(l.username,r.externaleditor) AS name '.
 					'FROM omoccurrevisions r INNER JOIN omoccurrences o ON r.occid = o.occid '.
-					'LEFT JOIN userlogin l ON r.uid = l.uid '.
-					'WHERE (o.collid = '.$this->collid.') ';
+					'LEFT JOIN userlogin l ON r.uid = l.uid ';
+		}
+		$sql .= 'WHERE (o.collid = '.$this->collid.') ';
+		if($this->obsUid){
+			$sql .= 'AND (o.observeruid = '.$this->obsUid.') ';
 		}
 		//echo $sql;
 		$result = $this->conn->query($sql);
