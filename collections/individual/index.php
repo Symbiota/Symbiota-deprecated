@@ -998,8 +998,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							if($occArr['modified'] && $occArr['modified'] != $occArr['datelastmodified']) echo '<b>Source date modified:</b> '.$occArr['modified'];
 							echo '</div>';
 							$editArr = $indManager->getEditArr();
-							$externalEdits = $indManager->getExternalEditArr();
-							if($editArr || $externalEdits){
+							//$externalEdits = $indManager->getExternalEditArr();
+							//if($editArr || $externalEdits){
+							if($editArr){
 								if($editArr){
 									?>
 									<fieldset style="padding:20px;">
@@ -1033,6 +1034,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</fieldset>
 									<?php
 								}
+								/*
 								if($externalEdits){
 									?>
 									<fieldset style="margin-top:20px;padding:20px;">
@@ -1067,6 +1069,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</fieldset>
 									<?php
 								}
+								*/
 							}
 							else{
 								echo '<div style="margin:25px 15px;"><b>Record has not been edited</b></div>';

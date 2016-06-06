@@ -13,8 +13,9 @@ $occManager->setOccId($occid);
 <div id="admindiv">
 	<?php
 	$editArr = $occManager->getEditArr();
-	$externalEdits = $occManager->getExternalEditArr();
-	if($editArr || $externalEdits){
+	//$externalEdits = $occManager->getExternalEditArr();
+	//if($editArr || $externalEdits){
+	if($editArr){
 		if($editArr){
 			?>
 			<fieldset style="padding:15px;margin:10px 0px;">
@@ -59,6 +60,7 @@ $occManager->setOccId($occid);
 			</fieldset>
 			<?php 
 		}
+		/*
 		if($externalEdits){
 			?>
 			<fieldset style="margin-top:20px;padding:20px;">
@@ -93,13 +95,11 @@ $occManager->setOccId($occid);
 			</fieldset>
 			<?php
 		}
+		*/
 	}
 	else{
 		echo '<div style="margin:10px">No previous edits recorded</div>';
 	}
-	?>
-	</fieldset>
-	<?php 
 	$collAdminList = $occManager->getCollectionList();
 	unset($collAdminList[$collId]);
 	if($collAdminList){
