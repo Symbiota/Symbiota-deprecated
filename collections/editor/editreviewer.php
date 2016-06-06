@@ -6,7 +6,7 @@ if(!$symbUid) header('Location: ../../profile/index.php?refurl=../collections/ed
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = $_REQUEST['collid'];
-$display = array_key_exists('display',$_REQUEST)?$_REQUEST['display']:'1';
+$displayMode = array_key_exists('display',$_REQUEST)?$_REQUEST['display']:'1';
 $faStatus = array_key_exists('fastatus',$_REQUEST)?$_REQUEST['fastatus']:'';
 $frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:'1,2';
 $editor = array_key_exists('editor',$_REQUEST)?$_REQUEST['editor']:'';
@@ -17,7 +17,7 @@ $printMode = (array_key_exists('printsubmit', $_POST)?true:false);
 
 $reviewManager = new SpecEditReviewManager();
 $collName = $reviewManager->setCollId($collid);
-$reviewManager->setDisplay($display);
+$reviewManager->setDisplay($displayMode);
 if(is_numeric($queryOccid)){
 	$reviewManager->setQueryOccidFilter($queryOccid);
 	$faStatus = '';
@@ -35,6 +35,9 @@ $reviewManager->setLimitNumber($limitCnt);
 $isEditor = false;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
  	$isEditor = true;
+}
+elseif($reviewManager->getObsUid()){
+	$isEditor = true;
 }
 
 $statusStr = "";
@@ -69,8 +72,8 @@ if($isEditor){
 $recCnt = $reviewManager->getEditCnt();
 
 $subCnt = $limitCnt*($pageNum + 1);
-if($recCnt < ($pageNum+1)*$limitCnt) $subCnt = $recCnt - ($pageNum)*$limitCnt;  
-$navPageBase = 'editreviewer.php?collid='.$collid.'&display='.$display.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&editor='.$editor;
+if($subCnt > $recCnt) $subCnt = $recCnt;  
+$navPageBase = 'editreviewer.php?collid='.$collid.'&display='.$displayMode.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&editor='.$editor;
 
 $navStr = '<div style="float:right;">';
 if($pageNum){
@@ -140,7 +143,12 @@ $navStr .= '</div>';
 			include($SERVER_ROOT.'/header.php');
 			echo '<div class="navpath">';
 			echo '<a href="../../index.php">Home</a> &gt;&gt; ';
-			echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
+			if($reviewManager->getObsUid()){
+				echo '<a href="../../profile/viewprofile.php?tabindex=1">Personal Specimen Management</a> &gt;&gt; ';
+			}
+			else{
+				echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
+			}
 			echo '<b>Specimen Edits Reviewer</b>';
 			echo '</div>';
 		}
@@ -160,14 +168,14 @@ $navStr .= '</div>';
 					<?php 
 				}
 				if($printMode){
-					$retToMenuStr = '<b><a href="editreviewer.php?collid='.$collid.'&display='.$display.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&pagenum='.$pageNum.'&limitcnt='.$limitCnt.'">Return to Main Page</a></b>';
+					$retToMenuStr = '<b><a href="editreviewer.php?collid='.$collid.'&display='.$displayMode.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&pagenum='.$pageNum.'&limitcnt='.$limitCnt.'">Return to Main Page</a></b>';
 					echo $retToMenuStr;
 				}
 				else{
 					?>
 					<div style="float:right;">
 						<form name="filter" action="editreviewer.php" method="post">
-							<fieldset style="width:230px;text-align:left;">
+							<fieldset style="width:300px;text-align:left;">
 								<legend><b>Filter</b></legend>
 								<div style="margin:3px;">
 									Applied Status: 
@@ -200,9 +208,21 @@ $navStr .= '</div>';
 										?>
 									</select>
 								</div>
+								<?php 
+								if($ACTIVATE_GEOLOCATE_TOOLKIT && !$reviewManager->getObsUid()){
+									?>
+									<div style="margin:3px;">
+										Editing Source: 
+										<select name="display">
+											<option value="1">Internal</option>
+											<option value="2" <?php if($displayMode == 2) echo 'SELECTED'; ?>>External (GeoLocate CoGe)</option>
+										</select>
+									</div>
+									<?php 
+								}
+								?>
 								<div style="margin:10px;">
 									<input name="submitform" type="submit" value="Update List" />
-									<input name="display" type="hidden" value="<?php echo $display; ?>" />
 									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 								</div>
 							</fieldset>
@@ -241,7 +261,7 @@ $navStr .= '</div>';
 										<input name="occid" type="hidden" value="<?php echo $queryOccid; ?>" />
 										<input name="pagenum" type="hidden" value="<?php echo $pageNum; ?>" />
 										<input name="limitcnt" type="hidden" value="<?php echo $limitCnt; ?>" />
-										<input name="display" type="hidden" value="<?php echo $display; ?>" />
+										<input name="display" type="hidden" value="<?php echo $displayMode; ?>" />
 									</div>
 								</div>
 								<div style="clear:both;margin:15px 0px;">
@@ -319,7 +339,7 @@ $navStr .= '</div>';
 												if(!$fieldCnt){
 													if(!$printMode){ 
 														?>
-														<a href="#" onclick="openIndPU(<?php echo $occid; ?>)">
+														<a href="#" onclick="openIndPU(<?php echo $occid; ?>);return false;">
 															<?php echo $occid; ?>
 														</a>
 														<?php 

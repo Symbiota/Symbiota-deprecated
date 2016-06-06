@@ -65,6 +65,11 @@ if($SYMB_UID){
 							Submit image vouchered observation
 						</a>
 					</li>
+					<li>
+						<a href="../collections/editor/editreviewer.php?display=1&collid=<?php echo $collId; ?>">
+							Review/Verify Occurrence Edits
+						</a>
+					</li>
 					<!-- 
 					<li>Import csv file</li>
 					 -->
