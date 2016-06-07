@@ -1,4 +1,5 @@
 <?php
+//BOOKMARK FILE: CivicActions
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/VoucherManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
