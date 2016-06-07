@@ -618,7 +618,7 @@ if($SYMB_UID){
 							if($iconStr){
 								if(substr($iconStr,0,6) == 'images') $iconStr = '../../'.$iconStr;
 								?>
-								<img src='<?php echo $iconStr; ?>' style='border-size:1px;height:30;width:30;' /><br/>
+								<img src='<?php echo $iconStr; ?>' style='border-size:1px;height:30px;width:30px;' /><br/>
 								<?php
 								echo $collArr['institutioncode'];
 								if($collArr['collectioncode']) echo '-'.$collArr['collectioncode'];
