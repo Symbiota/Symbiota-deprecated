@@ -1,4 +1,5 @@
 <?php
+//BOOKMARK FILE: CivicActions
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once('Manager.php');
 include_once('OccurrenceDuplicate.php');
@@ -724,7 +725,7 @@ class OccurrenceIndividualManager extends Manager{
 	}
 
 	public function setCollid($id){
-		if(is_numeric($o)){
+		if(is_numeric($id)){
 			$this->collid = $id;
 		}
 	}
