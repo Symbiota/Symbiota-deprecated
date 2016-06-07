@@ -1,4 +1,5 @@
 <?php
+//BOOKMARK FILE: CivicActions
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorDeterminations.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorImages.php');
@@ -1877,7 +1878,7 @@ class OccurrenceEditorManager {
 		global $charset;
 		$retStr = $inStr;
 		//Get rid of curly quotes
-		$search = array("’", "‘", "`", "”", "“");
+		$search = array("ï¿½", "ï¿½", "`", "ï¿½", "ï¿½");
 		$replace = array("'", "'", "'", '"', '"');
 		$inStr= str_replace($search, $replace, $inStr);
 

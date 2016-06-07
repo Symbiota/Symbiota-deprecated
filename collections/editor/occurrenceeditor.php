@@ -1,4 +1,5 @@
 <?php
+//BOOKMARK FILE: CivicActions
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
