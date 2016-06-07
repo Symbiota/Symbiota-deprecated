@@ -1,4 +1,5 @@
 <?php
+//BOOKMARK FILE: CivicActions
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorDeterminations.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorImages.php');
@@ -1937,8 +1938,8 @@ class OccurrenceEditorManager {
 		global $charset;
 		$retStr = $inStr;
 		//Get rid of curly quotes
-        //TODO the following search array should be checked - leaving as-was but I doubt this is functioning as intended
-        $search = array("í", "ë", "`", "î", "ì");
+                //TODO the following search array should be checked - leaving as-was but I doubt this is functioning as intended
+                $search = array("í", "ë", "`", "î", "ì");
 		$replace = array("'", "'", "'", '"', '"');
 		$inStr= str_replace($search, $replace, $inStr);
 
