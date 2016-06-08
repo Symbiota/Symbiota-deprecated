@@ -800,21 +800,34 @@ class SpecUploadBase extends SpecUpload{
 		//Exsiccati transfer
 		$rsTest = $this->conn->query('SHOW COLUMNS FROM uploadspectemp WHERE field = "exsiccatiIdentifier"');
 		if($rsTest->num_rows){
+			//Populate NULL exsiccatiIdentifier identifiers
+			$sqlExs1a = 'UPDATE uploadspectemp u INNER JOIN omexsiccatititles e ON u.exsiccatiTitle = e.title'.
+				'SET u.exsiccatiIdentifier = e.ometid '.
+				'WHERE u.exsiccatiIdentifier IS NULL AND (u.collid = '.$this->collId.')';
+			if(!$this->conn->query($sqlExs1a)){
+				$this->outputMsg('<li>ERROR populating NULL exsiccati identifiers (step1a): '.$this->conn->error.'</li>');
+			}
+			$sqlExs1b = 'UPDATE uploadspectemp u INNER JOIN omexsiccatititles e ON u.exsiccatiTitle = e.abbreviation'.
+				'SET u.exsiccatiIdentifier = e.ometid '.
+				'WHERE u.exsiccatiIdentifier IS NULL AND (u.collid = '.$this->collId.')';
+			if(!$this->conn->query($sqlExs1b)){
+				$this->outputMsg('<li>ERROR populating NULL exsiccati identifiers (step1b): '.$this->conn->error.'</li>');
+			}
 			//Add any new exsiccati numbers 
-			$sqlExs1 = 'INSERT INTO omexsiccatinumbers(ometid, exsnumber) '.
+			$sqlExs2 = 'INSERT INTO omexsiccatinumbers(ometid, exsnumber) '.
 				'SELECT DISTINCT u.exsiccatiIdentifier, u.exsiccatinumber '.
 				'FROM uploadspectemp u LEFT JOIN omexsiccatinumbers e ON u.exsiccatiIdentifier = e.ometid AND u.exsiccatinumber = e.exsnumber '.
 				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NOT NULL) '.
 				'AND (u.exsiccatiIdentifier IS NOT NULL) AND (u.exsiccatinumber IS NOT NULL) AND (e.exsnumber IS NULL)';
-			if(!$this->conn->query($sqlExs1)){
+			if(!$this->conn->query($sqlExs2)){
 				$this->outputMsg('<li>ERROR adding new exsiccati numbers: '.$this->conn->error.'</li>');
 			}
 			//Load exsiccati 
-			$sqlExs2 = 'INSERT IGNORE INTO omexsiccatiocclink(omenid,occid) '.
+			$sqlExs3 = 'INSERT IGNORE INTO omexsiccatiocclink(omenid,occid) '.
 				'SELECT e.omenid, u.occid '.
 				'FROM uploadspectemp u INNER JOIN omexsiccatinumbers e ON u.exsiccatiIdentifier = e.ometid AND u.exsiccatinumber = e.exsnumber '.
 				'WHERE (u.collid = '.$this->collId.') AND (e.omenid IS NOT NULL) AND (u.occid IS NOT NULL)';
-			if($this->conn->query($sqlExs2)){
+			if($this->conn->query($sqlExs3)){
 				$this->outputMsg('<li>Specimens linked to exsiccati index </li>');
 			}
 			else{
@@ -877,79 +890,43 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	private function prepareAssociatedMedia(){
-		//Check to see if we have any images to process
-		$sql1 = 'SELECT associatedmedia, tidinterpreted, occid '.
+		//parse, check, and transfer all good URLs
+		$sql = 'SELECT associatedmedia, tidinterpreted, occid '.
 			'FROM uploadspectemp '.
-			'WHERE (associatedmedia LIKE "http%") AND (occid IS NOT NULL) AND (collid = '.$this->collId.') LIMIT 5';
-		$rs1 = $this->conn->query($sql1);
-		if($rs1->num_rows){
+			'WHERE (associatedmedia IS NOT NULL) AND (occid IS NOT NULL) AND (collid = '.$this->collId.')';
+		$rs = $this->conn->query($sql);
+		if($rs->num_rows){
 			$this->outputMsg('<li>Preparing associatedMedia for image transfer...</li>');
 			ob_flush();
 			flush();
-			$okToLoad = false; 
-			//Test first 5 urls to make sure they are valid. If they are, then load
-			while($r1 = $rs1->fetch_object()){
-				$mediaFile = trim(str_replace(array(';','|'),',',$r1->associatedmedia),', ');
+			while($r = $rs->fetch_object()){
+				$mediaFile = trim(str_replace(array(';','|'),',',$r->associatedmedia),', ');
 				$mediaArr = explode(',',$mediaFile);
 				foreach($mediaArr as $mediaUrl){
 					$mediaUrl = trim($mediaUrl);
 					if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
-						if($this->urlExists($mediaUrl)){
-							$okToLoad = true;
+						if(!$this->urlExists($mediaUrl)){
+							$this->outputMsg('<li style="margin-left:20px;">Bad url: '.$mediaUrl.'</li>');
+							continue;
+						}
+						if(@exif_imagetype($mediaUrl) && exif_imagetype($mediaUrl) < 4){
+							$this->imageTransferCount++;
+							if($this->imageTransferCount%100 == 0) $this->outputMsg('<li style="margin-left:20px;">Count: '.$this->imageTransferCount.'</li>');
+							$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url,collid) '.
+								'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty",'.$this->collId.')';
+							if(!$this->conn->query($sqlInsert)){
+								$this->outputMsg('<li style="margin-left:20px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</li>');
+								//$this->outputMsg('<li style="margin-left:10px;">SQL: '.$sqlInsert.'</li>');
+							}
 						}
 						else{
-							echo '<li style="margin-left:20px;">Bad url: '.$mediaUrl.'</li>';
+							$this->outputMsg('<li style="margin-left:20px;">FAIL: not a web-ready image (JPG, GIF, PNG): <a href="'.$mediaUrl.'" target="_blank">'.$mediaUrl.'</a></li>');
 						}
 					}
 				}
 			}
-			if($okToLoad){
-				//Bulk transfer single URLs
-				$sql2 = 'INSERT INTO uploadimagetemp(originalurl,url,occid,tid,collid) '.
-					'SELECT trim(associatedmedia), "empty" AS url, occid, tidinterpreted, collid '.
-					'FROM uploadspectemp '.
-					'WHERE (collid = '.$this->collId.') AND (associatedmedia LIKE "http%") AND (occid IS NOT NULL) '.
-					'AND (associatedmedia NOT LIKE "%,%") AND (associatedmedia NOT LIKE "%;%") AND (associatedmedia NOT LIKE "%|%")';
-				if($this->conn->query($sql2)){
-					$sql2b = 'UPDATE uploadspectemp '.
-						'SET associatedmedia = NULL '.
-						'WHERE (collid = '.$this->collId.') AND (associatedmedia LIKE "http%") AND (occid IS NOT NULL) '.
-						'AND (associatedmedia NOT LIKE "%,%") AND (associatedmedia NOT LIKE "%;%") AND (associatedmedia NOT LIKE "%|%")';
-					$this->conn->query($sql2b);
-				}
-				else{
-					echo '<li style="margin-left:20px;">ERROR bulk transferring images: '.$this->conn->error.'</li>';
-				}
-				
-				//Manually transfer multiple URLs
-				$sql3 = 'SELECT associatedmedia, tidinterpreted, occid '.
-					'FROM uploadspectemp '.
-					'WHERE associatedmedia IS NOT NULL AND occid IS NOT NULL AND collid = '.$this->collId;
-				$rs3 = $this->conn->query($sql3);
-				while($r3 = $rs3->fetch_object()){
-					$mediaFile = trim(str_replace(array(';','|'),',',$r3->associatedmedia),', ');
-					$mediaArr = explode(',',$mediaFile);
-					foreach($mediaArr as $mediaUrl){
-						$mediaUrl = trim($mediaUrl);
-						if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
-							if($this->urlExists($mediaUrl)){
-								$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url,collid) '.
-									'VALUES('.$r3->occid.','.($r3->tidinterpreted?$r3->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty",'.$this->collId.')';
-								if(!$this->conn->query($sqlInsert)){
-									$this->outputMsg('<li style="margin-left:10px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</li>');
-									$this->outputMsg('<li style="margin-left:10px;">SQL: '.$sqlInsert.'</li>');
-								}
-							}
-							else{
-								echo '<li style="margin-left:20px;">Bad url: '.$mediaUrl.'</li>';
-							}
-						}
-					}
-				}
-				$rs3->free();
-			}
-		} 
-		$rs1->free();
+		}
+		$rs->free();
 	}
 
 	private function prepareImages(){
@@ -959,9 +936,9 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg('<li>Preparing images for transfer... </li>');
 			ob_flush();
 			flush();
-			//Remove images that are not JPGs 
+			//Remove images that are obviously not JPGs 
 			$sql = 'DELETE FROM uploadimagetemp '.
-				'WHERE (originalurl LIKE "%.dng") AND (collid = '.$this->collId.')';
+				'WHERE (originalurl LIKE "%.dng" OR originalurl LIKE "%.tif") AND (collid = '.$this->collId.')';
 			if($this->conn->query($sql)){
 				$this->outputMsg('<li style="margin-left:10px;">step 1 of 4... </li>');
 			}
@@ -971,6 +948,24 @@ class SpecUploadBase extends SpecUpload{
 			ob_flush();
 			flush();
 			
+			//Check dynamic URL to test if image is truely web ready (JPG, GIF, PNG)
+			$sql = 'SELECT originalurl FROM uploadimagetemp '.
+					'WHERE (originalurl NOT LIKE "%.jpg" AND originalurl NOT LIKE "%.jpeg") AND (collid = '.$this->collId.')';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				
+			}
+			$rs->free;
+
+			if($this->conn->query($sql)){
+				$this->outputMsg('<li style="margin-left:10px;">step 1 of 4... </li>');
+			}
+			else{
+				$this->outputMsg('<li style="margin-left:20px;">WARNING removing non-jpgs from uploadimagetemp: '.$this->conn->error.'</li> ');
+			}
+			ob_flush();
+			flush();
+				
 			//Update occid for images of occurrence records already in portal 
 			$sql = 'UPDATE uploadimagetemp ui INNER JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
 				'SET ui.occid = u.occid '.
@@ -1327,7 +1322,25 @@ class SpecUploadBase extends SpecUpload{
 	protected function loadImageRecord($recMap){
 		if($recMap){
 			//Import record only if required fields have data 
-			if(isset($recMap['dbpk']) && (isset($recMap['originalurl']) || isset($recMap['url']))){
+			if(isset($recMap['dbpk'])){
+				//Test images
+				$testUrl = '';
+				if(isset($recMap['originalurl']) && $recMap['originalurl']){
+					$testUrl = $recMap['originalurl'];
+				}
+				elseif(isset($recMap['url']) && $recMap['url']){
+					$testUrl = $recMap['url'];
+				}
+				else{
+					//Abort, no images avaialble
+					return false;
+				}
+				if(strtolower(substr($testUrl,-3)) != 'jpg'){
+					if(@!exif_imagetype($testUrl) || exif_imagetype($testUrl) > 4){
+						$this->outputMsg('<li style="margin-left:10px;">FAIL: not a web-ready image (JPG, GIF, PNG): <a href="'.$testUrl.'" target="_blank">'.$testUrl.'</a></li>');
+						return false;
+					}
+				}
 				if(!isset($recMap['url'])) $recMap['url'] = 'empty';
 
 				$sqlFragments = $this->getSqlFragments($recMap,$this->imageFieldMap);
@@ -1336,7 +1349,7 @@ class SpecUploadBase extends SpecUpload{
 				
 				if($this->conn->query($sql)){
 					$this->imageTransferCount++;
-					if($this->imageTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->imageTransferCount.'</li>');
+					if($this->imageTransferCount%10 == 0) $this->outputMsg('<li style="margin-left:10px;">Success count: '.$this->imageTransferCount.'</li>');
 					ob_flush();
 					flush();
 				}
