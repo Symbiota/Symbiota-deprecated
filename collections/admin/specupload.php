@@ -20,6 +20,7 @@ $importIdent = array_key_exists("importident",$_REQUEST)?true:false;
 $importImage = array_key_exists("importimage",$_REQUEST)?true:false;
 $matchCatNum = array_key_exists("matchcatnum",$_REQUEST)?true:false;
 $matchOtherCatNum = array_key_exists("matchothercatnum",$_REQUEST)?true:false;
+$verifyImages = array_key_exists("verifyimages",$_REQUEST)&&$_REQUEST['verifyimages']?true:false;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:'';
 $recStart = array_key_exists("recstart",$_REQUEST)?$_REQUEST["recstart"]:0;
@@ -33,6 +34,7 @@ if($autoMap !== true) $autoMap = false;
 if($importIdent !== true) $importIdent = false;
 if($matchCatNum !== true) $matchCatNum = false;
 if($matchOtherCatNum !== true) $matchOtherCatNum = false;
+if($verifyImages !== true) $verifyImages = false;
 if($autoMap !== true) $autoMap = false;
 if(!is_numeric($finalTransfer)) $finalTransfer = 0;
 if($dbpk) $dbpk = htmlspecialchars($dbpk);
@@ -77,6 +79,7 @@ $duManager->setUspid($uspid);
 $duManager->setUploadType($uploadType);
 $duManager->setMatchCatalogNumber($matchCatNum);
 $duManager->setMatchOtherCatalogNumbers($matchOtherCatNum);
+$duManager->setVerifyImageUrls($verifyImages);
 
 if($action == 'Automap Fields'){
 	$autoMap = true;
@@ -161,7 +164,7 @@ $duManager->loadFieldMap();
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script src="../../js/symb/shared.js" type="text/javascript"></script>
-	<script language=javascript>
+	<script>
 		function verifyFileUploadForm(f){
 			var fileName = "";
 			if(f.uploadfile || f.ulfnoverride){
@@ -427,13 +430,14 @@ $duManager->loadFieldMap();
 						?>
 					</div>
 					<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
-	 					<input type="hidden" name="collid" value="<?php echo $collid;?>" /> 
-	 					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-	 					<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
+						<input type="hidden" name="collid" value="<?php echo $collid;?>" /> 
+						<input type="hidden" name="uploadtype" value="<?php echo $uploadType; ?>" />
+						<input type="hidden" name="verifyimages" value="<?php echo ($verifyImages?'1':'0'); ?>" />
+						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 						<div style="margin:5px;"> 
 							<input type="submit" name="action" value="Transfer Records to Central Specimen Table" />
 						</div>
-		 			</form>
+					</form>
 				</fieldset>			
 				<?php
 			}
@@ -551,7 +555,7 @@ $duManager->loadFieldMap();
 										<div style="margin-left:10px;">
 											*Change ONLY if you are sure that a field other than the Core Id will better serve as the primary specimen identifier
 										</div> 
-										<div id="pkdiv" style="margin:5px 0px 0px 20px;display:none";>
+										<div id="pkdiv" style="margin:5px 0px 0px 20px;display:none">
 											<input type="submit" name="action" value="Save Primary Key" />
 										</div>
 										<div style="margin:10px;">
@@ -617,11 +621,11 @@ $duManager->loadFieldMap();
 												}
 												?>
 											</div>
-											<div>
+											<div style="margin-top:30px;">
 												<?php 
 												if($isLiveData){
 													?>
-													<div style="margin:30px 0px 10px 0px;">
+													<div style="margin:10px 0px;">
 														<input name="matchcatnum" type="checkbox" value="1" checked /> 
 														Match on Catalog Number
 													</div>
@@ -636,6 +640,10 @@ $duManager->loadFieldMap();
 													<?php 
 												}
 												?>
+												<div style="margin:10px 0px;">
+													<input name="verifyimages" type="checkbox" value="1" /> 
+													Verify image links 
+												</div>
 												<div style="margin:10px;">
 													<input type="submit" name="action" value="Start Upload" />
 													<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
@@ -697,7 +705,7 @@ $duManager->loadFieldMap();
 										}
 										?>
 									</select>
-									<div id="pkdiv" style="margin:5px 0px 0px 20px;display:<?php echo ($dbpk?"none":"block");?>";>
+									<div id="pkdiv" style="margin:5px 0px 0px 20px;display:<?php echo ($dbpk?"none":"block");?>">
 										<input type="submit" name="action" value="Save Primary Key" />
 									</div>
 								</div>
@@ -727,7 +735,7 @@ $duManager->loadFieldMap();
 										<input type="submit" name="action" value="Automap Fields" />
 									</div>
 									<hr />
-									<div id="uldiv">
+									<div id="uldiv" style="margin-top:30px;">
 										<?php 
 										if($isLiveData || $uploadType == $SKELETAL){
 											?>
@@ -753,6 +761,10 @@ $duManager->loadFieldMap();
 											<?php 
 										}
 										?>
+										<div style="margin:10px 0px;">
+											<input name="verifyimages" type="checkbox" value="1" /> 
+											Verify image links 
+										</div>
 										<div style="margin:20px;">
 											<input type="submit" name="action" value="Start Upload" />
 										</div>
