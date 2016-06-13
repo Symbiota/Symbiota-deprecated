@@ -1037,8 +1037,8 @@ class SpecUploadBase extends SpecUpload{
 				$this->setImageTransferCount();
 	
 				//Load images 
-				$sql = 'INSERT INTO images(url,thumbnailurl,originalurl,occid,tid,caption,photographer,owner,notes ) '.
-					'SELECT url,thumbnailurl,originalurl,occid,tid,caption,photographer,owner,notes '.
+				$sql = 'INSERT INTO images(url,thumbnailurl,originalurl,archiveurl,occid,tid,format,caption,photographer,owner,sourceIdentifier,notes ) '.
+					'SELECT url,thumbnailurl,originalurl,archiveurl,occid,tid,format,caption,photographer,owner,specimengui,notes '.
 					'FROM uploadimagetemp '.
 					'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
 				if($this->conn->query($sql)){
