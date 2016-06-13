@@ -805,19 +805,6 @@ class SpecUploadBase extends SpecUpload{
 		//Exsiccati transfer
 		$rsTest = $this->conn->query('SHOW COLUMNS FROM uploadspectemp WHERE field = "exsiccatiIdentifier"');
 		if($rsTest->num_rows){
-			//Populate NULL exsiccatiIdentifier identifiers
-			$sqlExs1a = 'UPDATE uploadspectemp u INNER JOIN omexsiccatititles e ON u.exsiccatiTitle = e.title'.
-				'SET u.exsiccatiIdentifier = e.ometid '.
-				'WHERE u.exsiccatiIdentifier IS NULL AND (u.collid = '.$this->collId.')';
-			if(!$this->conn->query($sqlExs1a)){
-				$this->outputMsg('<li>ERROR populating NULL exsiccati identifiers (step1a): '.$this->conn->error.'</li>');
-			}
-			$sqlExs1b = 'UPDATE uploadspectemp u INNER JOIN omexsiccatititles e ON u.exsiccatiTitle = e.abbreviation'.
-				'SET u.exsiccatiIdentifier = e.ometid '.
-				'WHERE u.exsiccatiIdentifier IS NULL AND (u.collid = '.$this->collId.')';
-			if(!$this->conn->query($sqlExs1b)){
-				$this->outputMsg('<li>ERROR populating NULL exsiccati identifiers (step1b): '.$this->conn->error.'</li>');
-			}
 			//Add any new exsiccati numbers 
 			$sqlExs2 = 'INSERT INTO omexsiccatinumbers(ometid, exsnumber) '.
 				'SELECT DISTINCT u.exsiccatiIdentifier, u.exsiccatinumber '.
@@ -928,7 +915,7 @@ class SpecUploadBase extends SpecUpload{
 							}
 						}
 						$this->imageTransferCount++;
-						if($this->imageTransferCount%100 == 0) $this->outputMsg('<li style="margin-left:20px;">Image count: '.$this->imageTransferCount.'</li>');
+						if($this->imageTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:20px;">Image count: '.$this->imageTransferCount.'</li>');
 						$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url,collid) '.
 							'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty",'.$this->collId.')';
 						if(!$this->conn->query($sqlInsert)){
@@ -1329,8 +1316,8 @@ class SpecUploadBase extends SpecUpload{
 				if(strtolower(substr($testUrl,-3)) == 'dng' || strtolower(substr($testUrl,-3)) == 'tif'){
 					return false;
 				}
-				$skipFormats = array('image/tiff','tif','tiff','image/dng','dng','image/bmp');
-				if(isset($recMap['format']) && $recMap['format'] && in_array($recMap['format'], $skipFormats)){
+				$skipFormats = array('image/tiff','image/dng','image/bmp','text/html','application/xml','application/pdf','tif','tiff','dng','html','pdf');
+				if(isset($recMap['format']) && $recMap['format'] && in_array(strtolower($recMap['format']), $skipFormats)){
 					return false;
 				}
 				if($this->verifyImageUrls){
@@ -1347,7 +1334,7 @@ class SpecUploadBase extends SpecUpload{
 				
 				if($this->conn->query($sql)){
 					$this->imageTransferCount++;
-					if($this->imageTransferCount%10 == 0) $this->outputMsg('<li style="margin-left:10px;">Success count: '.$this->imageTransferCount.'</li>');
+					if($this->imageTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Success count: '.$this->imageTransferCount.'</li>');
 					ob_flush();
 					flush();
 				}
