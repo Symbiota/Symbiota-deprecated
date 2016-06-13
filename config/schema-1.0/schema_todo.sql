@@ -153,6 +153,9 @@ ALTER TABLE `fmchklstprojlink`
   ADD COLUMN `mapChecklist` SMALLINT NULL DEFAULT 1 AFTER `clNameOverride`,
   ADD COLUMN `notes` VARCHAR(250) NULL AFTER `mapChecklist`;
 
+ALTER TABLE `fmchecklists` 
+  ADD COLUMN `politicalDivision` VARCHAR(45) NULL AFTER `Type`;
+
 
 #Occurrence revisions
 CREATE TABLE `omoccurrevisions` (
@@ -282,8 +285,8 @@ UPDATE taxavernaculars t INNER JOIN adminlanguages l ON t.language = l.langname
 #Misc
 ALTER TABLE `uploadspectemp` 
   ADD COLUMN `exsiccatiIdentifier` INT NULL AFTER `genericcolumn2`,
-  ADD COLUMN `exsiccatiTitle` INT NULL AFTER `exsiccatiIdentifier`,
   ADD COLUMN `exsiccatiNumber` VARCHAR(45) NULL AFTER `exsiccatiIdentifier`,
+  ADD COLUMN `exsiccatiNotes` VARCHAR(250) NULL AFTER `exsiccatiNumber`,
   ADD COLUMN `host`  varchar(250) NULL AFTER `substrate`;
 
 ALTER TABLE `uploadtaxa` 
@@ -323,8 +326,31 @@ ALTER TABLE `images`
 ALTER TABLE `omcollections` 
   ADD COLUMN `dwcaUrl` VARCHAR(75) NULL AFTER `publishToGbif`;
 
+ALTER TABLE `omcollections` 
+  ADD INDEX `FK_collid_iid_idx` (`iid` ASC);
+
+ALTER TABLE `omcollections` 
+  ADD CONSTRAINT `FK_collid_iid` FOREIGN KEY (`iid`) REFERENCES `institutions` (`iid`)  ON DELETE SET NULL  ON UPDATE CASCADE;
+
 ALTER TABLE `omcollectionstats` 
   CHANGE COLUMN `dynamicProperties` `dynamicProperties` TEXT NULL DEFAULT NULL ;
+
+ALTER TABLE `omcollcatlink` 
+  ADD COLUMN `isPrimary` TINYINT(1) NULL DEFAULT 1 AFTER `collid`;
+
+# Establishes many-many relationship to be used in DwC eml.xml file
+CREATE TABLE `omcollectioncontacts` (
+  `collid` INT UNSIGNED NOT NULL,
+  `uid` INT UNSIGNED NOT NULL,
+  `positionName` VARCHAR(45) NULL,
+  `role` VARCHAR(45) NULL,
+  `notes` VARCHAR(250) NULL,
+  `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`collid`, `uid`),
+  INDEX `FK_contact_uid_idx` (`uid` ASC),
+  CONSTRAINT `FK_contact_collid`   FOREIGN KEY (`collid`)   REFERENCES `omcollections` (`CollID`)   ON DELETE CASCADE   ON UPDATE CASCADE,
+  CONSTRAINT `FK_contact_uid`   FOREIGN KEY (`uid`)   REFERENCES `users` (`uid`)   ON DELETE CASCADE   ON UPDATE CASCADE);
+
 
 ALTER TABLE `omoccurrences` 
   ADD INDEX `Index_locality` (`locality`(100) ASC),
@@ -332,8 +358,10 @@ ALTER TABLE `omoccurrences`
 
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `eventID` VARCHAR(45) NULL AFTER `fieldnumber`,
+  ADD COLUMN `latestDateCollected` DATE NULL AFTER `eventDate`,
   ADD COLUMN `waterBody`  varchar(255) NULL AFTER `municipality`,
-  CHANGE COLUMN `establishmentMeans` `establishmentMeans` VARCHAR(150) NULL DEFAULT NULL ;
+  CHANGE COLUMN `establishmentMeans` `establishmentMeans` VARCHAR(150) NULL DEFAULT NULL,
+  ADD INDEX `Index_latestDateCollected` (`latestDateCollected` ASC);
 
 
 ALTER TABLE `omoccurdeterminations` 
@@ -343,46 +371,17 @@ ALTER TABLE `salixwordstats`
   ADD INDEX `INDEX_secondword` (`secondword` ASC);
 
 
-#Needed for FP functions
+ALTER TABLE `users` 
+  ADD COLUMN `guid` VARCHAR(45) NULL AFTER `accessrights`,
+  ADD COLUMN `securitykey` VARCHAR(45) NULL AFTER `guid`;
+
+
+# Needed for FP functions
 CREATE INDEX idx_taxacreated ON taxa(initialtimestamp);
 
-# Deal with state and country definitions with the rare species state lists
 
 
-
-# Event date range within omoccurrence table
-
-
-
-# Add one to many relationship between collections and institutions
-# Add one to many relationship between collection to agent
-
-
-
-#Create an occurrence type table
-
-
-
-#Add one to many relationship between collections and institutions
-
-
-
-#Add one to many relationship between collection to agent
-
-
-
-#Review pubprofile (adminpublications)
-
-
-#Collection GUID issue
-
-
-#identification key activator field
-
-
-
-
-
+# Spatial Indexing
 SET FOREIGN_KEY_CHECKS=0;
 
 TRUNCATE TABLE `omoccurpoints`;
@@ -679,4 +678,16 @@ CREATE TABLE `omoccurlithostratigraphy` (
 ALTER TABLE `omoccurrencesfulltext` 
   DROP COLUMN `collid`,
   DROP INDEX `Index_occurfull_collid` ;
+
+
+
+
+
+#Create an occurrence type table
+
+
+#Review pubprofile (adminpublications)
+
+
+#Collection GUID issue
 
