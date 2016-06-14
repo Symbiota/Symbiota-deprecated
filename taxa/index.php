@@ -118,7 +118,7 @@ if($taxonManager->getSciName() != "unknown"){
 					</a>
 				</div>
 				<?php 
-			}
+			}	
 			if($links && $links[0]['sortseq'] == 1){
 				$uStr = str_replace('--SCINAME--',urlencode($taxonManager->getSciName()),$links[0]['url']);
 				?>
@@ -167,6 +167,7 @@ if($taxonManager->getSciName() != "unknown"){
 			echo "</div>";
 		}
 		?>
+			</td>
 			</td>
 			<td class="desc">
 				<?php 
@@ -446,7 +447,7 @@ if($taxonManager->getSciName() != "unknown"){
 						}
 					}
 					?>
-						<div style='clear:both;'><hr></div>
+						<div style='clear:both;'><hr> </div>
 					</div>
 				</fieldset>
 			</td>
@@ -455,8 +456,16 @@ if($taxonManager->getSciName() != "unknown"){
 	}
 	?>
 		<tr>
-		<td colspan="2">
-	
+		<td colspan="2"> 
+		<?php 
+				$searchParam = $taxonManager->getSciName();
+				$break = strpos($searchParam, " ");
+				$genus = substr($searchParam, 0, $break);
+				$species = substr($searchParam, $break);
+				$imgCount = $taxonManager->getImageCount() - 5; 
+				echo "<div style='font-size:14px;margin-left:10px;color:#990000;'><b><a href='../imagelib/search.php?taxon=".$genus.$species."'>Search All Images for ".$taxonManager->getSciName()."</a></b><br/>"; 
+				if ($imgCount > 0) {echo "There are ". $imgCount ." more undisplayed images for this taxon.</div>";}
+		?>
 	<?php 
 	//Bottom line listing options
 	echo "<div style='margin-top:15px;text-align:center;'>";

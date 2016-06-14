@@ -3,6 +3,7 @@ include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ImageLibraryManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
+$taxonFromURL = $_GET['taxon'];
 $taxon = array_key_exists("taxon",$_REQUEST)?trim($_REQUEST["taxon"]):"";
 $target = array_key_exists("target",$_REQUEST)?trim($_REQUEST["target"]):"";
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
@@ -231,7 +232,7 @@ if($action){
 							<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'Common Names: ':'Scientific Names: '); ?>
 						</div>
 						<div id="taxabox" style="float:left;margin-bottom:10px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'none':'block'); ?>;">
-							<input id="taxa" type="text" style="width:450px;" name="taxa" value="" title="Separate multiple names w/ commas" autocomplete="off" />
+							<input id="taxa" type="text" style="width:450px;" name="taxa" value="<?php echo $taxonFromURL; ?>" title="Separate multiple names w/ commas" autocomplete="off" />
 						</div>
 						<div id="commonbox" style="float:left;margin-bottom:10px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'block':'none'); ?>;">
 							<input id="common" type="text" style="width:450px;" name="common" value="" title="Separate multiple names w/ commas" autocomplete="off" />
@@ -265,7 +266,7 @@ if($action){
 					</div>
 					<div style="clear:both;margin:5 0 5 0;"><hr /></div>
 					<?php
-					/*$tagArr = $imgLibManager->getTagArr();
+					$tagArr = $imgLibManager->getTagArr();
 					if($tagArr){
 						?>
 						<div>
@@ -281,7 +282,7 @@ if($action){
 							</select>
 						</div>
 						<?php
-					}*/
+					}
 					?>
 					<div style="margin-top:5px;">
 						<div style="float:left;margin-right:8px;padding-top:8px;">
@@ -307,15 +308,24 @@ if($action){
 							<option value="taxalist" <?php echo ((array_key_exists("imagedisplay",$previousCriteria))&&($previousCriteria["imagedisplay"]=='taxalist')?'SELECTED ':''); ?>>Taxa List</option>
 						</select>
 					</div>
-					<div style="margin-top:5px;">
-						<input type='radio' name='imagetype' value='all' <?php if((!array_key_exists("imagetype",$previousCriteria)) || (array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'all')) echo "CHECKED"; ?> > All Images
-					</div>
-					<div style="margin-top:5px;">
-						<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Limit to Specimen Images Only
-					</div>
-					<div style="margin-top:5px;">
-						<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Limit to Field Images Only
-					</div>
+					<table>
+						<tr>
+							<td>
+								<div style="margin-top:5px;">
+									<p><b>Limit Image Type:</b></p>
+								</div>
+								<div style="margin-top:5px;">
+									<input type='radio' name='imagetype' value='all' <?php if((!array_key_exists("imagetype",$previousCriteria)) || (array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'all')) echo "CHECKED"; ?> > All Images
+								</div>
+								<div style="margin-top:5px;">
+									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Limit to Specimen Images Only
+								</div>
+								<div style="margin-top:5px;">
+									<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Limit to Field Images Only
+								</div>
+							</td>
+						</tr>
+					</table>
 					<div><hr></div>
 					<input id="taxastr" name="taxastr" type="hidden" value="<?php if(array_key_exists("taxastr",$previousCriteria)) echo $previousCriteria["taxastr"]; ?>" />
 					<input id="countrystr" name="countrystr" type="hidden" value="<?php if(array_key_exists("countrystr",$previousCriteria)) echo $previousCriteria["countrystr"]; ?>" />
