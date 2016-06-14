@@ -3,7 +3,6 @@ include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ImageLibraryManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$taxonFromURL = $_GET['taxon'];
 $taxon = array_key_exists("taxon",$_REQUEST)?trim($_REQUEST["taxon"]):"";
 $target = array_key_exists("target",$_REQUEST)?trim($_REQUEST["target"]):"";
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
@@ -84,7 +83,7 @@ if($action){
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
-		var phArr = <?php echo (($previousCriteria&&$previousCriteria["phjson"])?"JSON.parse('".$previousCriteria["phjson"]."')":"new Array()"); ?>;
+		var phArr = <?php echo (isset($previousCriteria["phjson"])&&$previousCriteria["phjson"]?"JSON.parse('".$previousCriteria["phjson"]."')":"new Array()"); ?>;
 		
 		$(document).ready(function() {
 			$('#tabs').tabs({
@@ -232,7 +231,7 @@ if($action){
 							<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'Common Names: ':'Scientific Names: '); ?>
 						</div>
 						<div id="taxabox" style="float:left;margin-bottom:10px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'none':'block'); ?>;">
-							<input id="taxa" type="text" style="width:450px;" name="taxa" value="<?php echo $taxonFromURL; ?>" title="Separate multiple names w/ commas" autocomplete="off" />
+							<input id="taxa" type="text" style="width:450px;" name="taxa" value="" title="Separate multiple names w/ commas" autocomplete="off" />
 						</div>
 						<div id="commonbox" style="float:left;margin-bottom:10px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'block':'none'); ?>;">
 							<input id="common" type="text" style="width:450px;" name="common" value="" title="Separate multiple names w/ commas" autocomplete="off" />

@@ -139,35 +139,34 @@ if($taxonManager->getSciName() != "unknown"){
 					<b>Family:</b> 
 					<?php echo $taxonManager->getFamily(); ?>
 				</div>
-		<?php 
-		$vernStr = $taxonManager->getVernacularStr();
-		if($vernStr){
-			?>
-			<div id='vernaculars' style='margin-left:10px;margin-top:0.5em;font-size:130%;' title='Common Names'>
-				<?php echo $vernStr; ?>
-			</div>
-			<?php 
-		}
-		
-		$synStr = $taxonManager->getSynonymStr();
-		if($synStr){
-			echo "\t<div id='synonyms' style='margin-left:20px;margin-top:0.5em;' title='Synonyms'>[";
-			echo $synStr;
-			echo"]</div>\n";
-		}
-		
-		if(!$taxonManager->echoImages(0,1,0)){
-			echo "<div class='image' style='width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;'>";
-			if($isEditor){
-				echo "<a href='admin/tpeditor.php?category=imageadd&tid=".$taxonManager->getTid()."'><b>Add an Image</b></a>";
-			}
-			else{
-				echo "<br/><br/><br/><br/><br/><br/>Images<br/>not yet<br/>available";
-			}
-			echo "</div>";
-		}
-		?>
-			</td>
+				<?php 
+				$vernStr = $taxonManager->getVernacularStr();
+				if($vernStr){
+					?>
+					<div id='vernaculars' style='margin-left:10px;margin-top:0.5em;font-size:130%;' title='Common Names'>
+						<?php echo $vernStr; ?>
+					</div>
+					<?php 
+				}
+				
+				$synStr = $taxonManager->getSynonymStr();
+				if($synStr){
+					echo "\t<div id='synonyms' style='margin-left:20px;margin-top:0.5em;' title='Synonyms'>[";
+					echo $synStr;
+					echo"]</div>\n";
+				}
+				
+				if(!$taxonManager->echoImages(0,1,0)){
+					echo "<div class='image' style='width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;'>";
+					if($isEditor){
+						echo "<a href='admin/tpeditor.php?category=imageadd&tid=".$taxonManager->getTid()."'><b>Add an Image</b></a>";
+					}
+					else{
+						echo "<br/><br/><br/><br/><br/><br/>Images<br/>not yet<br/>available";
+					}
+					echo "</div>";
+				}
+				?>
 			</td>
 			<td class="desc">
 				<?php 
@@ -268,7 +267,8 @@ if($taxonManager->getSciName() != "unknown"){
 				<div id="img-tab-div" style="display:none;border-top:2px solid gray;margin-top:2px;">
 					<a href="#" onclick="expandExtraImages();return false;">
 						<div style="background:#eee;padding:10px;border: 1px solid #ccc;width:100px;margin:auto;text-align:center">
-							More Images
+							Click to Display<br/>
+							<?php echo $taxonManager->getImageCount(); ?> Total Images
 						</div>
 					</a>
 				</div>
@@ -455,17 +455,8 @@ if($taxonManager->getSciName() != "unknown"){
 			<?php 
 	}
 	?>
-		<tr>
-		<td colspan="2"> 
-		<?php 
-				$searchParam = $taxonManager->getSciName();
-				$break = strpos($searchParam, " ");
-				$genus = substr($searchParam, 0, $break);
-				$species = substr($searchParam, $break);
-				$imgCount = $taxonManager->getImageCount() - 5; 
-				echo "<div style='font-size:14px;margin-left:10px;color:#990000;'><b><a href='../imagelib/search.php?taxon=".$genus.$species."'>Search All Images for ".$taxonManager->getSciName()."</a></b><br/>"; 
-				if ($imgCount > 0) {echo "There are ". $imgCount ." more undisplayed images for this taxon.</div>";}
-		?>
+	<tr>
+	<td colspan="2"> 
 	<?php 
 	//Bottom line listing options
 	echo "<div style='margin-top:15px;text-align:center;'>";
@@ -481,7 +472,7 @@ if($taxonManager->getSciName() != "unknown"){
 		if($projValue) $parentLink .= "&proj=".$projValue;
 		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='".$parentLink."'>View Parent Taxon</a>";
 	}
-	echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='javascript: self.close();'>Close window</a>";
+	echo "<span style='margin-left:30px;'><a href='../imagelib/search.php?nametype=1&imagedisplay=thumbnail&taxastr=".$taxonManager->getSciName()."&submitaction=Load+Images'>Open Image Search Tool</a></span>"; 
 	echo "</div>";
 	
 	//List Web Links as a list
