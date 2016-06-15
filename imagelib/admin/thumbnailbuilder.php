@@ -55,11 +55,11 @@ $imgManager = new ImageCleaner();
 						<?php 
 						$reportArr = $imgManager->getReportArr($collid);
 						if($reportArr){
-							echo '<b>Images counts without thumbnails and/or basic web view</b>';
+							echo '<b>Images without thumbnails</b>';
 							echo '<ul>';
 							foreach($reportArr as $id => $retArr){
 								echo '<li>';
-								if($id) echo '<a href="../../collections/misc/collprofiles.php?collid='.$id.'&emode=1">';
+								if($id) echo '<a href="../../collections/misc/collprofiles.php?collid='.$id.'" target="_blank">';
 								echo $retArr['name'];
 								if($id) echo '</a>';
 								echo ': '.$retArr['cnt'].' images';
