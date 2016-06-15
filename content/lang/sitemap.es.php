@@ -32,6 +32,7 @@ $LANG['USERPERM'] = 'User Permissions';
 $LANG['TAXINTER'] = 'Taxonomic Interest User Permissions';
 $LANG['CREATENEWCOLL'] = 'Create a New Collection or Observation Profile';
 $LANG['GUIDMAP'] = 'Collection GUID Mapper';
+$LANG['THUMBNAIL_BUILDER'] = 'Thumbnail Builder Tool';
 $LANG['SALIX'] = 'SALIX WordStat Manager';
 $LANG['IDKEYS'] = 'Identification Keys';
 $LANG['KEYMODULE'] = 'Note: The Identification Key module is deactivated within this portal. However, you can override by activating idividual keys within the checklist administration page.';
