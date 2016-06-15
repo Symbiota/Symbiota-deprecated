@@ -233,22 +233,13 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		//Set target path
 		$subTargetPath = $this->collMap['institutioncode'];
 		if($this->collMap['collectioncode']) $subTargetPath .= '_'.$this->collMap['collectioncode'];
-		$subTargetPath .= '/';
-		if(!$this->occurrenceMap) $this->setOccurArr();
+		$this->getOccurMap();
 		$catNum = $this->occurrenceMap[$this->occid]['catalognumber'];
-		if($catNum){
-			$catNum = str_replace(array('/','\\',' '), '', $catNum);
-			if(preg_match('/^(\D{0,8}\d{4,})/', $catNum, $m)){
-				$catPath = substr($m[1], 0, -3);
-				if(is_numeric($catPath) && strlen($catPath)<5) $catPath = str_pad($catPath, 5, "0", STR_PAD_LEFT);
-				$subTargetPath .= $catPath.'/';
-			}
-			else{
-				$subTargetPath .= '00000/';
-			}
+		if(preg_match('/\d{4,}$/', $catNum)){
+			$subTargetPath .= '/'.substr($catNum, 0, -3).'/';
 		}
 		else{
-			$subTargetPath .= date('Ym').'/';
+			$subTargetPath .= '/'.date('Ym').'/';
 		}
 		$imgManager->setTargetPath($subTargetPath);
 
