@@ -198,19 +198,32 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		return $status;
 	}
 
-	public function remapImage($imgId, $occId){
-		$statusStr = '';
-		$sql = 'UPDATE images SET occid = '.$occId.' WHERE (imgid = '.$imgId.')';
-		if($this->conn->query($sql)){
-			$imgSql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'SET i.tid = o.tidinterpreted WHERE (i.imgid = '.$imgId.')';
-			//echo $imgSql;
-			$this->conn->query($imgSql);
+	public function remapImage($imgId, $targetOccid = 0){
+		$status = true;
+		if(!is_numeric($imgId) || !is_numeric($targetOccid)){
+			return false;
+		}
+		if($targetOccid){
+			$sql = 'UPDATE images SET occid = '.$targetOccid.' WHERE (imgid = '.$imgId.')';
+			if($this->conn->query($sql)){
+				$imgSql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+					'SET i.tid = o.tidinterpreted WHERE (i.imgid = '.$imgId.')';
+				//echo $imgSql;
+				$this->conn->query($imgSql);
+			}
+			else{
+				$this->errorArr[] = 'ERROR: Unalbe to remap image to another occurrence record. Error msg: '.$this->conn->error;
+				$status = false;
+			}
 		}
 		else{
-			$statusStr = 'ERROR: Unalbe to remap image to another occurrence record. Error msg: '.$this->conn->error;
+			$sql = 'UPDATE images SET occid = NULL WHERE (imgid = '.$imgId.')';
+			if(!$this->conn->query($sql)){
+				$this->errorArr[] = 'ERROR: Unalbe to disassociate from occurrence record. Error msg: '.$this->conn->error;
+				$status = false;
+			}
 		}
-		return $statusStr;
+		return $status;
 	}
 	
 	public function addImage($postArr){
@@ -220,8 +233,16 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		//Set target path
 		$subTargetPath = $this->collMap['institutioncode'];
 		if($this->collMap['collectioncode']) $subTargetPath .= '_'.$this->collMap['collectioncode'];
+		$this->getOccurMap();
+		$catNum = $this->occurrenceMap[$this->occid]['catalognumber'];
+		if(preg_match('/\d{4,}$/', $catNum)){
+			$subTargetPath .= '/'.substr($catNum, 0, -3).'/';
+		}
+		else{
+			$subTargetPath .= '/'.date('Ym').'/';
+		}
 		$imgManager->setTargetPath($subTargetPath);
-		
+
 		//Import large image or not
 		if(array_key_exists('nolgimage',$postArr) && $postArr['nolgimage']==1){
 			$imgManager->setMapLargeImg(false);

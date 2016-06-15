@@ -9,16 +9,16 @@ class OccurrenceEditorManager {
 
 	protected $conn;
 	protected $occid;
-	private $collId;
+	private $collId = 0;
 	protected $collMap = array();
-	private $occurrenceMap = array();
+	protected $occurrenceMap = array();
 	private $occFieldArr = array();
 	private $sqlWhere;
 	private $qryArr = array();
 	private $crowdSourceMode = 0;
 	private $exsiccatiMode = 0;
 	private $symbUid;
-	protected $errorArr = '';
+	protected $errorArr = array();
 	protected $isShareConn = false;
 
 	public function __construct($conn = null){
@@ -1805,7 +1805,8 @@ class OccurrenceEditorManager {
 
 	//Setters and getters
 	public function getErrorStr(){
-		return implode('; ',$this->errorArr);	
+		if($this->errorArr) return implode('; ',$this->errorArr);
+		else return '';	
 	}
 
 	public function getCollectionList(){
