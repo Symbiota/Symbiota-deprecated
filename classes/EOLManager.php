@@ -1,7 +1,7 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/ImageShared.php');
-include_once($serverRoot.'/classes/EOLUtilities.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/ImageShared.php');
+include_once($SERVER_ROOT.'/classes/EOLUtilities.php');
 
 class EOLManager {
 
@@ -264,59 +264,62 @@ class EOLManager {
 	private function loadImage($tid,$imageUrl,$resourceArr){
 		$status = false;
 		if($tid && $imageUrl && $resourceArr){
-			if(!in_array('MBG',$resourceArr) && !stripos($resourceArr['source'],'tropicos')){
-				//Create image derivatives
-				$this->imgManager->setTargetPath('eol');
-				if($this->imgManager->parseUrl($imageUrl)){
-					$webFullUrl = ''; $imgTnUrl = ''; $lgFullUrl = '';
-					//Start with building thumbnail
-					if($this->imgManager->createNewImage('_tn',$this->imgManager->getTnPixWidth())){
-						$imgTnUrl = $this->imgManager->getUrlBase().$this->imgManager->getImgName().'_tn.jpg';
-						//Build web image 
-						//If web image is too large, transfer to large image and create new web image
-						$fileSize = $this->imgManager->getSourceFileSize();
-						list($sourceWidth, $sourceHeight) = getimagesize($this->imgManager->getSourcePath());
-						if($fileSize > $this->imgManager->getWebFileSizeLimit() || $sourceWidth > ($this->imgManager->getWebPixWidth()*1.2)){
-							$lgFullUrl = $imageUrl;
-							//Create web image
-							if($this->imgManager->createNewImage('_web',$this->imgManager->getWebPixWidth())){
-								$webFullUrl = $this->imgManager->getUrlBase().$this->imgManager->getImgName().'_web.jpg';
-							}
-						}
-						else{
-							//Use image source image as the web image and leave original image null
-							$webFullUrl = $imageUrl;
+			//Skip some resources
+			if(isset($resourceArr['title']) && strpos($resourceArr['title'],'Discover Life') !== false) return false;
+			if(in_array('MBG',$resourceArr) && stripos($resourceArr['source'],'tropicos') !== false) return false;
+
+			//Create image derivatives
+			$this->imgManager->setTargetPath('eol/'.date('Ym').'/');
+			if($this->imgManager->parseUrl($imageUrl)){
+				$webFullUrl = ''; $imgTnUrl = ''; $lgFullUrl = '';
+				//Start with building thumbnail
+				if($this->imgManager->createNewImage('_tn',$this->imgManager->getTnPixWidth())){
+					$imgTnUrl = $this->imgManager->getUrlBase().$this->imgManager->getImgName().'_tn.jpg';
+					//Build web image 
+					//If web image is too large, transfer to large image and create new web image
+					$fileSize = $this->imgManager->getSourceFileSize();
+					list($sourceWidth, $sourceHeight) = getimagesize($this->imgManager->getSourcePath());
+					if($fileSize > $this->imgManager->getWebFileSizeLimit() || $sourceWidth > ($this->imgManager->getWebPixWidth()*1.2)){
+						$lgFullUrl = $imageUrl;
+						//Create web image
+						if($this->imgManager->createNewImage('_web',$this->imgManager->getWebPixWidth())){
+							$webFullUrl = $this->imgManager->getUrlBase().$this->imgManager->getImgName().'_web.jpg';
 						}
 					}
 					else{
-						echo '<li style="color:red;">ERROR: unable to create thumbnail image</li>';
+						//Use image source image as the web image and leave original image null
+						$webFullUrl = $imageUrl;
 					}
-	
-					//Load image
-					if($webFullUrl || $lgFullUrl){
-						if(!$webFullUrl) $webFullUrl = 'empty';
-						$sql = 'INSERT INTO images(tid,url,thumbnailurl,originalurl,photographer,caption,owner,sourceurl,copyright,rights,locality,notes,imagetype,sortsequence) '.
-						'VALUES('.$tid.',"'.$webFullUrl.'",'.
-						($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
-						($lgFullUrl?'"'.$lgFullUrl.'"':'NULL').','.
-						(isset($resourceArr['photographer'])?'"'.$resourceArr['photographer'].'"':'NULL').','.
-						(isset($resourceArr['title'])?'"'.$resourceArr['title'].'"':'NULL').','.
-						(isset($resourceArr['owner'])?'"'.$resourceArr['owner'].'"':'NULL').','.
-						(isset($resourceArr['source'])?'"'.$resourceArr['source'].'"':'NULL').','.
-						(isset($resourceArr['copyright'])?'"'.$resourceArr['copyright'].'"':'NULL').','.
-						(isset($resourceArr['rights'])?'"'.$resourceArr['rights'].'"':'NULL').','.
-						(isset($resourceArr['locality'])?'"'.$resourceArr['locality'].'"':'NULL').','.
-						(isset($resourceArr['notes'])?'"'.$resourceArr['notes'].'"':'NULL').
-						',"field image",40)';
-						if($this->conn->query($sql)){
-							echo '<li style="margin-left:10px;">Image mapped successfully</li>'."\n";
-							ob_flush();
-							flush();
-							$status = true;
-						}
-						else{
-							echo '<li style="color:red;">ERROR: unable to map image: '.$this->conn->error."</li>\n";
-						}
+				}
+				else{
+					echo '<li style="color:red;margin-left:10px">ERROR: unable to create thumbnail image</li>';
+				}
+
+				//Load image
+				if($webFullUrl || $lgFullUrl){
+					if(strlen($resourceArr['notes']) > 350) $resourceArr['notes'] = substr($resourceArr['notes'], 0, 350);
+					if(!$webFullUrl) $webFullUrl = 'empty';
+					$sql = 'INSERT INTO images(tid,url,thumbnailurl,originalurl,photographer,caption,owner,sourceurl,copyright,rights,locality,notes,imagetype,sortsequence) '.
+					'VALUES('.$tid.',"'.$webFullUrl.'",'.
+					($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
+					($lgFullUrl?'"'.$lgFullUrl.'"':'NULL').','.
+					(isset($resourceArr['photographer'])?'"'.$resourceArr['photographer'].'"':'NULL').','.
+					(isset($resourceArr['title'])?'"'.$resourceArr['title'].'"':'NULL').','.
+					(isset($resourceArr['owner'])?'"'.$resourceArr['owner'].'"':'NULL').','.
+					(isset($resourceArr['source'])?'"'.$resourceArr['source'].'"':'NULL').','.
+					(isset($resourceArr['copyright'])?'"'.$resourceArr['copyright'].'"':'NULL').','.
+					(isset($resourceArr['rights'])?'"'.$resourceArr['rights'].'"':'NULL').','.
+					(isset($resourceArr['locality'])?'"'.$resourceArr['locality'].'"':'NULL').','.
+					(isset($resourceArr['notes'])?'"'.$resourceArr['notes'].'"':'NULL').
+					',"field image",40)';
+					if($this->conn->query($sql)){
+						echo '<li style="margin-left:10px;">Image mapped successfully</li>'."\n";
+						ob_flush();
+						flush();
+						$status = true;
+					}
+					else{
+						echo '<li style="color:red;margin-left:10px">ERROR: unable to map image: '.$this->conn->error."</li>\n";
 					}
 				}
 				$this->imgManager->reset();
@@ -326,16 +329,16 @@ class EOLManager {
 	}
 	
 	private function encodeString($inStr){
-		global $charset;
+		global $CHARSET;
  		$retStr = trim($inStr);
  		if($retStr){
-			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+			if(strtolower($CHARSET) == "utf-8" || strtolower($CHARSET) == "utf8"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
-			elseif(strtolower($charset) == "iso-8859-1"){
+			elseif(strtolower($CHARSET) == "iso-8859-1"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);

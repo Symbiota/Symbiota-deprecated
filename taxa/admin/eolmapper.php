@@ -1,8 +1,7 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/EOLManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/EOLManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
@@ -21,8 +20,8 @@ $eolManager = new EOLManager();
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle." EOL Manager: "; ?></title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>"/>
+	<title><?php echo $DEFAULT_TITLE." EOL Manager: "; ?></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>"/>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script language=javascript>
@@ -31,16 +30,13 @@ $eolManager = new EOLManager();
 </head>
 <body>
 <?php
-$displayLeftMenu = (isset($taxa_admin_eoladminMenu)?$taxa_admin_eoladminMenu:"true");
-include($serverRoot.'/header.php');
-if(isset($taxa_admin_eoladminCrumbs)){
-	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt; ";
-	echo $taxa_admin_eoladminCrumbs;
-	echo " <b>Encyclopedia of Life Manager</b>";
-	echo "</div>";
-}
+$displayLeftMenu = false;
+include($SERVER_ROOT.'/header.php');
 ?>
+<div class='navpath'>";
+	<a href="../index.php">Home</a> &gt;&gt;
+	<b>Encyclopedia of Life Manager</b>
+</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<h1>Encyclopedia of Life Linkage Manager</h1>
@@ -137,7 +133,7 @@ if(isset($taxa_admin_eoladminCrumbs)){
 		?>
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>
