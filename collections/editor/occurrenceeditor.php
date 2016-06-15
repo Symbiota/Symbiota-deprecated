@@ -211,7 +211,21 @@ if($symbUid){
 				}
 			}
 			elseif($action == "Remap Image"){
-				$statusStr = $occManager->remapImage($_POST["imgid"], $_POST["occid"]);
+				if($occManager->remapImage($_POST["imgid"], $_POST["targetoccid"])){
+					$statusStr = 'SUCCESS: Image remapped to record <a href="occurrenceeditor.php?occid='.$_POST["targetoccid"].'" target="_blank">'.$_POST["targetoccid"].'</a>';
+				}
+				else{
+					$statusStr = 'ERROR linking image to new specimen: '.$occManager->getErrorStr();
+				}
+			}
+			elseif($action == "Disassociate Image"){
+				if($occManager->remapImage($_POST["imgid"])){
+					$statusStr = 'SUCCESS disassociating image <a href="../../imagelib/imgdetails.php?imgid='.$_POST["imgid"].'" target="_blank">#'.$_POST["imgid"].'</a>';
+				}
+				else{
+					$statusStr = 'ERROR disassociating image: '.$occManager->getErrorStr();
+				}
+				
 			}
 			elseif($action == "Apply Determination"){
 				$makeCurrent = 0;

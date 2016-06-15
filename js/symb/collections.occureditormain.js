@@ -1071,6 +1071,14 @@ function verifyImgDelForm(f){
 	return false;
 }
 
+function verifyImgRemapForm(f){
+	if(f.targetoccid.value == ''){
+		alert("Enter the occurrence record identifier (occid) of the occurrence record you want to transfer to");
+		return false;
+	}
+	return true;
+}
+
 //Misc
 function dwcDoc(dcTag){
 	dwcWindow=open("http://symbiota.org/docs/symbiota-occurrence-data-fields-2/#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");

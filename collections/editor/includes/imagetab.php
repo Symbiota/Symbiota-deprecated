@@ -1,8 +1,8 @@
 <?php
 include_once('../../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
-include_once($serverRoot.'/classes/OccurrenceActionManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceActionManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $occId = $_GET['occid'];
 $occIndex = $_GET['occindex'];
@@ -365,9 +365,11 @@ $specImgArr = $occManager->getImageMap();
 										<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 										<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
 										<div style="margin-left:20px;">
-											(Note: leaving unchecked removes image from database w/o removing from server)
+											(Note: leaving unchecked removes image from database without removing from server)
 										</div>
-										<input type="submit" name="submitaction" value="Delete Image" />
+										<div style="margin:10px 20px;">
+											<input type="submit" name="submitaction" value="Delete Image" />
+										</div>
 									</fieldset>
 								</form>
 								<form name="img<?php echo $imgId; ?>remapform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgRemapForm(this);">
@@ -375,17 +377,32 @@ $specImgArr = $occManager->getImageMap();
 										<legend><b>Remap to Another Specimen</b></legend>
 										<div>
 											<b>Occurrence Record #:</b> 
-											<input id="imgoccid-<?php echo $imgId; ?>" name="occid" type="text" value="" />
+											<input id="imgoccid-<?php echo $imgId; ?>" name="targetoccid" type="text" value="" />
 											<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid-<?php echo $imgId; ?>')">
 												Open Occurrence Linking Aid
 											</span>
 										</div>
-										<div style="margin-left:20px;">
-											* Leave Occurrence Record Number blank to completely remove mapping to a specimen record <br/>
+										<div style="margin:10px 20px;">
+											<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<input type="submit" name="submitaction" value="Remap Image" />
+										</div>
+									</fieldset>
+								</form>
+								<form action="occurrenceeditor.php" method="post">
+									<fieldset style="padding:15px">
+										<legend><b>Disassociate Image from all Specimen Records</b></legend>
+										<div style="margin:10px 20px;">
+											<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
+											<input name="imgid" type="hidden" value="<?php echo $imgId; ?>" />
+											<input name="occindex" type="hidden" value="<?php echo $occIndex; ?>" />
+											<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
+											<input name="submitaction" type="submit" value="Disassociate Image" />
+										</div>
+										<div>
+											* Image will only be available from Taxon Profile page 
 										</div>
 									</fieldset>
 								</form>
