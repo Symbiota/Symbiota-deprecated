@@ -249,11 +249,6 @@ if($SYMB_UID){
 									</a>
 								</li>
 								<li>
-									<a href="collprofiles.php?collid=<?php echo $collid; ?>&action=UpdateStatistics" >
-										<?php echo $LANG['UPDATE_STATS'];?>
-									</a>
-								</li>
-								<li>
 									<a href="collpermissions.php?collid=<?php echo $collid; ?>" >
 										<?php echo $LANG['MANAGE_PERMISSIONS']; ?>
 									</a>
@@ -291,11 +286,6 @@ if($SYMB_UID){
 											</a>
 										</li>
 										<li>
-											<a href="../../admin/guidmapper.php?collid=<?php echo $collid; ?>">
-												<?php echo $LANG['GUIDMAP']; ?>
-											</a>
-										</li>
-										<li>
 											<a href="../datasets/datapublisher.php?collid=<?php echo $collid; ?>">
 	                                            <?php echo $LANG['DARWIN_CORE_PUB']; ?>
 											</a>
@@ -308,11 +298,6 @@ if($SYMB_UID){
 											<?php echo $LANG['REVIEW_SPEC_EDITS']; ?>
 										</a>
 									</li>
-									<li>
-										<a href="../cleaning/occurrencecleaner.php?obsuid=0&collid=<?php echo $collid; ?>">
-	                                        <?php echo $LANG['DATA_CLEANING']; ?>
-										</a>
-									</li>
 									<?php
 								} 
 								?>
@@ -322,8 +307,37 @@ if($SYMB_UID){
 									</a>
 								</li>
 								<li>
+									<?php echo $LANG['MAINTENANCE_TASKS']; ?>
+								</li>
+								<?php 
+								if($collData['colltype'] != 'General Observations'){
+									?>
+									<li style="margin-left:10px;">
+										<a href="../cleaning/occurrencecleaner.php?obsuid=0&collid=<?php echo $collid; ?>">
+	                                        <?php echo $LANG['DATA_CLEANING']; ?>
+										</a>
+									</li>
+									<?php
+								} 
+								?>
+								<li style="margin-left:10px;">
 									<a href="#" onclick="newWindow = window.open('collbackup.php?collid=<?php echo $collid; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=400,height=200,left=20,top=20');">
 										<?php echo $LANG['BACKUP_DATA_FILE']; ?>
+									</a>
+								</li>
+								<li style="margin-left:10px;">
+									<a href="../../admin/guidmapper.php?collid=<?php echo $collid; ?>">
+										<?php echo $LANG['GUIDMAP']; ?>
+									</a>
+								</li>
+								<li style="margin-left:10px;">
+									<a href="../../imagelib/admin/thumbnailbuilder.php?collid=<?php echo $collid; ?>">
+										<?php echo $LANG['THUMBNAIL_BUILDER']; ?>
+									</a>
+								</li>
+								<li style="margin-left:10px;">
+									<a href="collprofiles.php?collid=<?php echo $collid; ?>&action=UpdateStatistics" >
+										<?php echo $LANG['UPDATE_STATS'];?>
 									</a>
 								</li>
 							</ul>

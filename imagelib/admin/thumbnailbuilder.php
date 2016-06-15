@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ImageCleaner.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ImageCleaner.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../imagelib/admin/thumbnailbuilder.php?'.$_SERVER['QUERY_STRING']);
 
@@ -12,27 +12,37 @@ $isEditor = false;
 if($IS_ADMIN){
 	$isEditor = true;
 }
+elseif($collid){
+	if(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
+		$isEditor = true;
+	}
+}
 
 $imgManager = new ImageCleaner();
 ?>
 <html>
 <head>
-<title><?php echo $defaultTitle; ?> Thumbnail Builder</title>
+<title><?php echo $DEFAULT_TITLE; ?> Thumbnail Builder</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 </head>
 <body>
 	<?php
-	$displayLeftMenu = (isset($imagelib_misc_buildthumbnailsMenu)?$imagelib_misc_buildthumbnailsMenu:"true");
-	include($serverRoot.'/header.php');
-	if(isset($imagelib_misc_buildthumbnailsCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $imagelib_misc_buildthumbnailsCrumbs;
-		echo " <b>Build Thumbnails</b>";
-		echo "</div>";
-	}
+	$displayLeftMenu = false;
+	include($SERVER_ROOT.'/header.php');
 	?> 
+	<div class="navpath">
+		<a href="../../index.php">Home</a> &gt;&gt;
+		<?php 
+		if($collid){
+			echo '<a href="../../collections/misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management Menu</a> &gt;&gt;';
+		}
+		else{
+			echo '<a href="../../sitemap.php">Sitemap</a> &gt;&gt;';
+		}
+		?>
+		<b>Thumbnail Builder</b>
+	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
@@ -42,40 +52,60 @@ $imgManager = new ImageCleaner();
 				<fieldset>
 					<legend><b>Thumbnail Builder</b></legend>
 					<div style="margin:10px;">
-						<b>Images w/o thumbnails:</b> <?php echo $imgManager->getMissingTnCount($collid); ?>
-					</div>
-					<div style="margin:10px;">
-						This function will build thumbnail images for all image records that have NULL values for the thumbnail field.
+						<?php 
+						$reportArr = $imgManager->getReportArr($collid);
+						if($reportArr){
+							echo '<b>Images without thumbnails</b>';
+							echo '<ul>';
+							foreach($reportArr as $id => $retArr){
+								echo '<li>';
+								if($id) echo '<a href="../../collections/misc/collprofiles.php?collid='.$id.'" target="_blank">';
+								echo $retArr['name'];
+								if($id) echo '</a>';
+								echo ': '.$retArr['cnt'].' images';
+								echo '</li>';
+							}
+							echo '</ul>';
+						}
+						else{
+							echo '<div style="font-weight:bold;">All images have properly mapped thumbnails. Nothing needs to be done.</div>';
+						}
+						?>
 					</div>
 					<div style="margin:15px;">
 						<?php 
 						if($action == "Build Thumbnails"){
-							echo '<div style="font-weight:bold;">Working on internal and external thumbnail images</div>';
-							echo '<ol>';
+							echo '<div style="font-weight:bold;">Starting processing...</div>';
 							$imgManager->buildThumbnailImages($collid); 
-							echo '</ol>';
 							echo '<div style="font-weight:bold;">Finished!</div>';
+							echo '<div style="margin-top:20px"><a href="thumbnailbuilder.php?collid='.$collid.'">Return to Main Menus</a></div>';
+						}
+						else{
+							if($reportArr){
+								?>
+								<form name="tnbuilderform" action="thumbnailbuilder.php" method="post">
+									<input type="hidden" name="collid" value="<?php echo $collid; ?>">
+									<input type="submit" name="action" value="Build Thumbnails">
+								</form>
+								<div style="margin:10px;">
+									* This function will build thumbnail images for all image records that have NULL values for the thumbnail field.
+								</div>
+								<?php
+							}
 						}
 						?>
-					</div>
-					<div style="margin:10px;">
-						<form name="tnbuilderform" action="thumbnailbuilder.php" method="post">
-							<input type="hidden" name="collid" value="<?php echo $collid; ?>">
-							<input type="submit" name="action" value="Build Thumbnails">
-						</form>
 					</div>
 				</fieldset>
 			</div>
 			<?php 
 		}
 		else{
-			echo '<div>You need to be a portal administrator to use this module</div>';
+			echo '<div><b>ERROR: improper permissions</b></div>';
 		}
 		?>
-			
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>
