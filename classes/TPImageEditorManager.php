@@ -115,7 +115,7 @@ class TPImageEditorManager extends TPEditorManager{
 		$imgManager->setNotes($postArr['notes']);
 		$imgManager->setSortSeq($postArr['sortsequence']);
 
-		$imgManager->setTargetPath($this->family);
+		$imgManager->setTargetPath($this->family.'/'.date('Ym').'/');
 		if($imgPath){
 			$imgManager->setMapLargeImg(true);
 			$importUrl = (array_key_exists('importurl',$postArr) && $postArr['importurl']==1?true:false);

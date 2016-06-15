@@ -140,7 +140,7 @@ class ObservationSubmitManager {
 		
 		for($i=1;$i<=3;$i++){
 			//Set parameters
-			$imgManager->setTargetPath($subTargetPath);
+			$imgManager->setTargetPath($subTargetPath.'/'.date('Ym').'/');
 			$imgManager->setMapLargeImg(false);			//Do not import large image, at least for now
 			$imgManager->setPhotographerUid($GLOBALS['SYMB_UID']);
 			$imgManager->setSortSeq(40);
