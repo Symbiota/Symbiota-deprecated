@@ -383,7 +383,13 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								?>
 								<div>
 									<b>Occurrence ID (GUID):</b> 
-									<?php echo $occArr['occurrenceid']; ?>
+									<?php
+									$resolvableGuid = false;
+									if(substr($occArr['occurrenceid'],0,4) == 'http') $resolvableGuid = true;
+									if($resolvableGuid) echo '<a href="'.$occArr['occurrenceid'].'" target="_blank">';
+									echo $occArr['occurrenceid'];
+									if($resolvableGuid) echo '</a>';
+									?>
 								</div>
 								<?php 
 							}
@@ -733,31 +739,29 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						<?php 
 						if($collMetadata['individualurl']){
 							$indUrl = '';
-							if(strpos($collMetadata['individualurl'],'--DBPK--') && $occArr['dbpk']){
+							if(strpos($collMetadata['individualurl'],'--DBPK--') !== false && $occArr['dbpk']){
 								$indUrl = str_replace('--DBPK--',$occArr['dbpk'],$collMetadata['individualurl']);
 							}
-							elseif(strpos($collMetadata['individualurl'],'--CATALOGNUMBER--') && $occArr['catalognumber']){
+							elseif(strpos($collMetadata['individualurl'],'--CATALOGNUMBER--') !== false && $occArr['catalognumber']){
 								$indUrl = str_replace('--CATALOGNUMBER--',$occArr['catalognumber'],$collMetadata['individualurl']);
 							}
-							elseif(strpos($collMetadata['individualurl'],'--OCCURRENCEID--') && $occArr['occurrenceid']){
+							elseif(strpos($collMetadata['individualurl'],'--OCCURRENCEID--') !== false && $occArr['occurrenceid']){
 								$indUrl = str_replace('--OCCURRENCEID--',$occArr['occurrenceid'],$collMetadata['individualurl']);
 							}
 							if($indUrl){
 								echo '<div style="margin-top:10px;clear:both;">';
-								echo '<b>Source:</b> <a href="'.$indUrl.'" target="_blank">';
+								echo '<b>Link to Source:</b> <a href="'.$indUrl.'" target="_blank">';
 								echo $collMetadata['institutioncode'].' #'.($occArr['catalognumber']?$occArr['catalognumber']:$occArr['dbpk']);
 								echo '</a></div>';
 							}
 						}
-						//GUID
-						echo '<div style="margin:3px 0px;"><b>Record Id:</b> '.$occArr['guid'].'</div>';
 						//Rights
 						$rightsStr = $collMetadata['rights'];
 						if($collMetadata['rights']){
 							$rightsHeading = '';
 							if(isset($rightsTerms)) $rightsHeading = array_search($rightsStr,$rightsTerms);
 							if(substr($collMetadata['rights'],0,4) == 'http'){
-								$rightsStr = '<a href="'.$rightsStr.'">'.($rightsHeading?$rightsHeading:$rightsStr).'</a>';
+								$rightsStr = '<a href="'.$rightsStr.'" target="_blank">'.($rightsHeading?$rightsHeading:$rightsStr).'</a>';
 							}
 							$rightsStr = '<div style="margin-top:2px;"><b>Usage Rights:</b> '.$rightsStr.'</div>';
 						}
@@ -778,6 +782,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							}
 							?>
 						</div>
+						<div style="margin:3px 0px;"><b>Record Id:</b> <?php echo $occArr['guid']; ?></div>
 						
 						<div style="margin-top:10px;clear:both;">
 							For additional information on this specimen, please contact: 
