@@ -126,6 +126,11 @@ $smManager = new SiteMapManager();
 								</a>
 							</li>
 							<li>
+								<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/admin/thumbnailbuilder.php">
+                                    <?php echo $LANG['THUMBNAIL_BUILDER'];?>
+								</a>
+							</li>
+							<li>
 								<a href="<?php echo $CLIENT_ROOT; ?>/collections/specprocessor/salix/salixhandler.php">
                                     <?php echo $LANG['SALIX'];?>
 								</a>

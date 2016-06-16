@@ -290,8 +290,8 @@ class ImageShared{
 		
 		//Returns file name without extension
 		return $fName;
- 	}
- 	
+	}
+
 	public function setTargetPath($subPath = ''){
 		$path = $this->imageRootPath;
 		$url = $this->imageRootUrl;
@@ -300,18 +300,9 @@ class ImageShared{
 			trigger_error('Path empty in setTargetPath method',E_USER_ERROR);
 			return false;
 		}
-		//if(!$url){
-			//$this->errArr[] = 'URL empty in setTargetPath method';
-			//trigger_error('URL empty in setTargetPath method',E_USER_ERROR);
-			//return false;
-		//}
-		if($subPath){
-			if(substr($subPath,-1) != "/") $subPath .= "/";  
-		}
-		else{
-			$subPath = 'misc/';
-		}
-		$subPath .= date('Ym').'/';
+		if(!$subPath) $subPath = 'misc/'.date('Ym').'/';
+		if(substr($subPath,-1) != '/') $subPath .= '/';  
+
 		$path .= $subPath;
 		$url .= $subPath;
 		if(!file_exists($path)){
@@ -549,7 +540,7 @@ class ImageShared{
 				$guid = UuidFactory::getUuidV4();
 				$this->activeImgId = $this->conn->insert_id;
 				if(!$this->conn->query('INSERT INTO guidimages(guid,imgid) VALUES("'.$guid.'",'.$this->activeImgId.')')) {
-					$this->errArr[] = ' (Warning: Symbiota GUID mapping failed)';
+					$this->errArr[] = ' Warning: Symbiota GUID mapping failed';
 				}
 			}
 			else{
@@ -792,7 +783,7 @@ class ImageShared{
 						$stmt->bind_param('is',$this->activeImgId,$key);
 						if(!$stmt->execute()){ 
 							$status = false;
-							$this->errArr[] = " (Warning: Failed to add image tag [$key] for $this->activeImgId.  " . $stmt->error;
+							$this->errArr[] = "Warning: Failed to add image tag [$key] for $this->activeImgId.  " . $stmt->error;
 						} 
 						$stmt->close();
 					}
@@ -936,9 +927,17 @@ class ImageShared{
 	}
 	
 	public function getErrArr(){
-		return $this->errArr;
+		$retArr = $this->errArr;
+		unset($this->errArr);
+		return $retArr;
 	}
-	
+
+	public function getErrStr(){
+		$retStr = implode('; ',$this->errArr);
+		unset($this->errArr);
+		return $retStr;
+	}
+
     // sourceIdentifier
 	public function getsourceIdentifier(){
 		return $this->sourceIdentifier;
