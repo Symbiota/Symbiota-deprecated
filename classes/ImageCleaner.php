@@ -65,7 +65,7 @@ class ImageCleaner{
 				ob_flush();
 				flush();
 			}
-			$this->buildImages($r->code,$r->collid);
+			$this->buildImages($r->code.'/',$r->collid);
 		}
 		$rs->free();
 		
@@ -104,16 +104,17 @@ class ImageCleaner{
 			$status = true;
 			$webIsEmpty = false;
 			
+			$finalPath = $targetPath;
 			if($collid){
 				$catNum = $row->catalognumber;
 				if(preg_match('/\d{4,}$/', $catNum)){
-					$targetPath .= '/'.substr($catNum, 0, -3).'/';
+					$finalPath .= substr($catNum, 0, -3).'/';
 				}
 				else{
-					$targetPath .= '/'.date('Ym').'/';
+					$finalPath .= date('Ym').'/';
 				}
 			}
-			$imgManager->setTargetPath($targetPath);
+			$imgManager->setTargetPath($finalPath);
 			
 			$imgId = $row->imgid;
 			if($this->verbose){
