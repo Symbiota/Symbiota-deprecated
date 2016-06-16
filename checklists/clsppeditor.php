@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/VoucherManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/VoucherManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
@@ -9,7 +9,7 @@ $tabIndex = array_key_exists("tabindex",$_POST)?$_POST["tabindex"]:0;
 $action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = true;
 }
 
@@ -18,12 +18,13 @@ $vManager = new VoucherManager();
 $status = "";
 $vManager->setTid($tid);
 $vManager->setClid($clid);
+$followUpAction = '';
 
 if($action == "Rename Taxon"){
 	$rareLocality = '';
 	if($_POST['cltype'] == 'rarespp') $rareLocality = $_POST['locality'];
 	$vManager->renameTaxon($_POST["renametid"],$rareLocality);
-	$action = "close";
+	$followUpAction = "removeTaxon()";
 }
 elseif($action == "Submit Checklist Edits"){
 	$eArr = Array();
@@ -34,13 +35,13 @@ elseif($action == "Submit Checklist Edits"){
 	$eArr["source"] = $_POST["source"];
 	$eArr["familyoverride"] = $_POST["familyoverride"];
 	$status = $vManager->editClData($eArr);
-	$action = "close";
+	$followUpAction = "self.close()";
 }
 elseif($action == "Delete Taxon From Checklist"){
 	$rareLocality = '';
 	if($_POST['cltype'] == 'rarespp') $rareLocality = $_POST['locality'];
 	$status = $vManager->deleteTaxon($rareLocality);
-	$action = "close";
+	$followUpAction = "removeTaxon()";
 }
 elseif($action == "Submit Voucher Edits"){
 	$status = $vManager->editVoucher($_POST["occid"],$_POST["notes"],$_POST["editornotes"]);
@@ -114,30 +115,18 @@ $clArray = $vManager->getChecklistData();
 			} 
 
 			function openPopup(urlStr,windowName){
-				var wWidth = 750;
-				try{
-					if(opener.document.getElementById('maintable').offsetWidth){
-						wWidth = opener.document.getElementById('maintable').offsetWidth*1.05;
-					}
-					else if(opener.document.body.offsetWidth){
-						wWidth = opener.document.body.offsetWidth*0.9;
-					}
-				}
-				catch(err){
-				}
-				newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=650,left=20,top=20');
+				newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width=800,height=650,left=20,top=20');
 				if (newWindow.opener == null) newWindow.opener = self;
 			}
 
-			function closeEditor(){
-				parent.opener.document.optionform.submit();
+			function removeTaxon(){
+				window.opener.$("#tid-<?php echo $tid; ?>").hide();
 				self.close();
 			}
-
 		</script>
 		<script type="text/javascript" src="../js/symb/shared.js?ver=140107"></script>
 	</head>
-	<body onload="<?php  if($action == "close" && !$status) echo "closeEditor()"; ?>" >
+	<body onload="<?php  if(!$status) echo $followUpAction; ?>" >
 		<!-- This is inner text! -->
 		<div id='innertext'>
 			<h1>
