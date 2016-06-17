@@ -1,5 +1,5 @@
 <?php 
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class PhotographerManager{
 
@@ -19,7 +19,7 @@ class PhotographerManager{
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
  			'INNER JOIN omcollections c ON o.collid = c.collid '.
  			'WHERE c.colltype = "Preserved Specimens" '.
- 			'GROUP BY c.collectionname '.
+ 			'GROUP BY c.collid '.
 			'ORDER BY c.collectionname';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -49,7 +49,7 @@ class PhotographerManager{
 		$retArr = array();
  		$sql = 'SELECT u.uid, CONCAT_WS(", ", u.lastname, u.firstname) as pname, u.email, Count(ti.imgid) AS imgcnt '.
 			'FROM users u INNER JOIN images ti ON u.uid = ti.photographeruid '.
-			'GROUP BY u.firstname, u.lastname, u.email '.
+			'GROUP BY u.uid '.
 			'ORDER BY u.lastname, u.firstname';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
