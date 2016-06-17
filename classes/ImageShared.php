@@ -309,7 +309,13 @@ class ImageShared{
 			trigger_error('Path empty in setTargetPath method',E_USER_ERROR);
 			return false;
 		}
-		if(!$subPath) $subPath = 'misc/'.date('Ym').'/';
+		if($subPath){
+			$badChars = array(' ',':','.','"',"'",'>','<','%','*','|','?');
+			$subPath = str_replace($badChars, '', $subPath);
+		}
+		else{
+			$subPath = 'misc/'.date('Ym').'/';
+		}
 		if(substr($subPath,-1) != '/') $subPath .= '/';  
 
 		$path .= $subPath;
@@ -1138,6 +1144,7 @@ class ImageShared{
 	    }
 	    //Test to see if file is an image 
 	    if(!@exif_imagetype($uri)) $exists = false;
+
 	    return $exists;
 	}	
 
