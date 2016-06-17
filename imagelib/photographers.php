@@ -1,7 +1,7 @@
 <?php 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/PhotographerManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/PhotographerManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $phUid = array_key_exists("phuid",$_REQUEST)?$_REQUEST["phuid"]:0;
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -19,7 +19,7 @@ $pManager = new PhotographerManager();
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Photographer List</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Photographer List</title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name='keywords' content='' />
@@ -29,7 +29,7 @@ $pManager = new PhotographerManager();
 
 	<?php
 	$displayLeftMenu = (isset($imagelib_photographersMenu)?$imagelib_photographersMenu:false);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	echo '<div class="navpath">';
 	if(isset($imagelib_photographersCrumbs)){
 		if($imagelib_photographersCrumbs){
@@ -164,7 +164,9 @@ $pManager = new PhotographerManager();
 			<div style="float:left">
 				<h2>Specimen Images</h2>
 				<div style="margin-left:15px">
-					<?php 
+					<?php
+					ob_flush();
+					flush();
 					$pList = $pManager->getCollectionImageList();
 					foreach($pList as $k => $cArr){
 						echo '<div>';
@@ -179,8 +181,7 @@ $pManager = new PhotographerManager();
 		?>
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>
-
