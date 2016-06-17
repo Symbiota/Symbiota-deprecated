@@ -184,7 +184,7 @@ else{
 					'decimalLatitude'=>'Decimal Latitude','decimalLongitude'=>'Decimal Longitude','geodeticDatum'=>'Geodetic Datum',
 					'coordinateUncertaintyInMeters'=>'Uncertainty (m)','verbatimCoordinates'=>'Verbatim Coordinates',
 					'georeferencedBy'=>'Georeferenced By','georeferenceProtocol'=>'Georeference Protocol','georeferenceSources'=>'Georeference Sources',
-					'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks',
+					'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks','localitySecurity'=>'Locality Security',
 					'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
 					'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','ocrFragment'=>'OCR Fragment','username'=>'Modified By','dateEntered'=>'Date Entered','basisOfRecord'=>'Basis Of Record');
 			}
