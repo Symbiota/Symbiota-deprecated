@@ -300,7 +300,13 @@ class ImageShared{
 			trigger_error('Path empty in setTargetPath method',E_USER_ERROR);
 			return false;
 		}
-		if(!$subPath) $subPath = 'misc/'.date('Ym').'/';
+		if($subPath){
+			$badChars = array(' ',':','.','"',"'",'>','<','%','*','|','?');
+			$subPath = str_replace($badChars, '', $subPath);
+		}
+		else{
+			$subPath = 'misc/'.date('Ym').'/';
+		}
 		if(substr($subPath,-1) != '/') $subPath .= '/';  
 
 		$path .= $subPath;
@@ -1057,34 +1063,34 @@ class ImageShared{
 		return $fileSize;
 	}
 
-	public function uriExists($url) {
+	public function uriExists($uri) {
 		$exists = false;
-		$localUrl = '';
-		if(substr($url,0,1) == '/'){
+
+		$secondaryUrl = '';
+		if(substr($uri,0,1) == '/'){
 			if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
-				$url = $GLOBALS['imageDomain'].$url;
+				$secondaryUrl = $GLOBALS['imageDomain'].$uri;
 			}
-			elseif($GLOBALS['imageRootUrl'] && strpos($url,$GLOBALS['imageRootUrl']) === 0){
-				$localUrl = str_replace($GLOBALS['imageRootUrl'],$GLOBALS['imageRootPath'],$url);
+			elseif($GLOBALS['imageRootUrl'] && strpos($uri,$GLOBALS['imageRootUrl']) === 0){
+				$secondaryUrl = str_replace($GLOBALS['imageRootUrl'],$GLOBALS['imageRootPath'],$uri);
 			}
 			else{
 				$urlPrefix = "http://";
 				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
 				$urlPrefix .= $_SERVER["SERVER_NAME"];
 				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
-				$url = $urlPrefix.$url;
+				$secondaryUrl = $urlPrefix.$uri;
 			}
 		}
 		
 		//First simple check
-		if(file_exists($url) || ($localUrl && file_exists($localUrl))){
+		if(file_exists($uri) || ($secondaryUrl && file_exists($secondaryUrl))){
 			return true;
 	    }
-return true;
 	    //Second check
 	    if(!$exists){
 		    // Version 4.x supported
-		    $handle   = curl_init($url);
+		    $handle   = curl_init($uri);
 		    if (false === $handle){
 				$exists = false;
 		    }
@@ -1099,11 +1105,11 @@ return true;
 	     
 	    //One last check
 	    if(!$exists){
-	    	$exists = (@fclose(@fopen($url,"r")));
+	    	$exists = (@fclose(@fopen($uri,"r")));
 	    }
 	    
 	    //Test to see if file is an image 
-	    if(!@exif_imagetype($url)) $exists = false;
+	    if(!@exif_imagetype($uri)) $exists = false;
 
 	    return $exists;
 	}	

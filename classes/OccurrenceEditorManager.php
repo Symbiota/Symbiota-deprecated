@@ -616,7 +616,7 @@ class OccurrenceEditorManager {
 		return $this->occurrenceMap;
 	}
 
-	private function setOccurArr(){
+	protected function setOccurArr(){
 		$retArr = Array();
 		$sql = 'SELECT DISTINCT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o ';
 		if($this->occid){
