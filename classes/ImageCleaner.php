@@ -95,15 +95,44 @@ class ImageCleaner{
 				'FROM images i '.
 				'WHERE (i.occid IS NULL) ';
 		}
-		$sql .= 'AND ((i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.url = "empty")) ';
-		//$sql .= 'LIMIT 2';
+		$sql .= 'AND ((i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.thumbnailurl LIKE "processing%")) '.
+			'ORDER BY RAND()';
 		//echo $sql; exit;
 		$result = $this->conn->query($sql);
 		if($this->verbose) echo '<ol style="margin-left:15px;">';
 		while($row = $result->fetch_object()){
 			$status = true;
 			$webIsEmpty = false;
-			
+			$imgId = $row->imgid;
+			if($this->verbose){
+				echo '<li>Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">'.$imgId.'</a>...</li> ';
+				ob_flush();
+				flush();
+			}
+			$this->conn->autocommit(false);
+			//Tag for updating; needed to ensure two parallel processes are not processing the same image
+			$testSql = 'SELECT thumbnailurl, url FROM images WHERE (imgid = '.$imgId.') FOR UPDATE ';
+			$textRS = $this->conn->query($testSql);
+			if($testR = $textRS->fetch_object()){
+				if(!$testR->thumbnailurl || (substr($testR->thumbnailurl,0,10) == 'processing' && $testR->thumbnailurl != 'processing '.date('Y-m-d'))){
+					$tagSql = 'UPDATE images SET thumbnailurl = "processing '.date('Y-m-d').'" '.
+						'WHERE (imgid = '.$imgId.')';
+					$this->conn->query($tagSql);
+				}
+				else{
+					//Records already processed by a parallel running process, thus go to next record
+					if($this->verbose) echo '<div style="margin-left:30px">Already being handled by a parallel running processs</div>';
+					$textRS->free();
+					$this->conn->commit();
+					$this->conn->autocommit(true);
+					continue;
+				}
+			}
+			$textRS->free();
+			$this->conn->commit();
+			$this->conn->autocommit(true);
+
+			//Build target path
 			$finalPath = $targetPath;
 			if($collid){
 				$catNum = $row->catalognumber;
@@ -124,12 +153,6 @@ class ImageCleaner{
 			}
 			$imgManager->setTargetPath($finalPath);
 			
-			$imgId = $row->imgid;
-			if($this->verbose){
-				echo '<li>Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">'.$imgId.'</a>...</li> ';
-				ob_flush();
-				flush();
-			}
 			$imgUrl = trim($row->url);
 			if((!$imgUrl || $imgUrl == 'empty') && $row->originalurl){
 				$imgUrl = trim($row->originalurl);
