@@ -2,7 +2,6 @@
 include_once($SERVER_ROOT.'/classes/SpecUpload.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
-include_once($SERVER_ROOT.'/classes/ImageCleaner.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 class SpecUploadBase extends SpecUpload{
@@ -1174,13 +1173,9 @@ class SpecUploadBase extends SpecUpload{
 		$uuidManager->populateGuids();
 
 		if($this->imageTransferCount){
-			$this->outputMsg('<li style="margin-left:10px;">Building thumbnails for '.$this->imageTransferCount.' specimen images... </li>');
+			$this->outputMsg('<li style="margin-left:10px;color:orange">WARNING: Image thumbnails likely need to be created! Do this using the <a href="../../imagelib/admin/thumbnailbuilder.php?collid='.$this->collId.'">Images Thumbnail Builder</a></li>');
 			ob_flush();
 			flush();
-			//Clean and populate null basic url and thumbnailurl fields
-			$imgManager = new ImageCleaner();
-			$imgManager->setVerbose(0);
-			$imgManager->buildThumbnailImages($this->collId);
 		}
 	}
 	
