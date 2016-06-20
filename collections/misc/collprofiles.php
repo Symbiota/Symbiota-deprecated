@@ -351,11 +351,6 @@ if($SYMB_UID){
 									</a>
 								</li>
 								<li style="margin-left:10px;">
-									<a href="../../admin/guidmapper.php?collid=<?php echo $collid; ?>">
-										<?php echo $LANG['GUIDMAP']; ?>
-									</a>
-								</li>
-								<li style="margin-left:10px;">
 									<a href="../../imagelib/admin/thumbnailbuilder.php?collid=<?php echo $collid; ?>">
 										<?php echo $LANG['THUMBNAIL_BUILDER']; ?>
 									</a>
