@@ -127,6 +127,17 @@ $(document).ready(function() {
 		}
 	});
 
+	$("#ffmunicipality").autocomplete({ 
+		source: function( request, response ) {
+			$.getJSON( "rpc/lookupMunicipality.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
+		},
+		minLength: 2,
+		autoFocus: true,
+		change: function(event, ui){
+			fieldChanged("municipality");
+		}
+	});
+
 	$("#catalognumber").keydown(function(evt){
 		var evt  = (evt) ? evt : ((event) ? event : null);
 		if ((evt.keyCode == 13)) { return false; }
