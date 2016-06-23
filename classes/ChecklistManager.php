@@ -497,19 +497,35 @@ class ChecklistManager {
 	//Checklist index page fucntions
 	public function getChecklists(){
 		$retArr = Array();
-		if($this->pid){
-			$sql = "SELECT p.pid, p.projname, c.CLID, c.Name ".
-				"FROM (fmprojects p INNER JOIN fmchklstprojlink cpl ON p.pid = cpl.pid) ".
-				"INNER JOIN fmchecklists c ON cpl.clid = c.CLID ".
-				"WHERE (p.pid = ".$this->pid.") AND (c.access = 'public' AND p.ispublic = 1) ".
-				"ORDER BY p.SortSequence, p.projname, c.SortSequence, c.Name";
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				$retArr['name'] = $this->cleanOutStr($row->projname);
-				$retArr['clid'][$row->CLID] = $this->cleanOutStr($row->Name);
+		$sql = 'SELECT p.pid, p.projname, p.ispublic, c.clid, c.name, c.access '.
+			'FROM fmchecklists c LEFT JOIN fmchklstprojlink cpl ON c.clid = cpl.clid '.
+			'LEFT JOIN fmprojects p ON cpl.pid = p.pid '.
+			'WHERE ((c.access LIKE "public%") ';
+		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin']) && $GLOBALS['USER_RIGHTS']['ClAdmin']) $sql .= 'OR (c.clid IN('.implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']).'))';
+		$sql .= ') AND ((p.pid IS NULL) OR (p.ispublic = 1) ';
+		if(isset($GLOBALS['USER_RIGHTS']['ProjAdmin']) && $GLOBALS['USER_RIGHTS']['ProjAdmin']) $sql .= 'OR (p.pid IN('.implode(',',$GLOBALS['USER_RIGHTS']['ProjAdmin']).'))';
+		$sql .= ') ';
+		if($this->pid) $sql .= 'AND (p.pid = '.$this->pid.') ';
+		$sql .= 'ORDER BY p.projname, c.Name';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			if($row->pid){
+				$pid = $row->pid;
+				$projName = $row->projname.(!$row->ispublic?' (Private)':'');
 			}
-			$rs->free();
+			else{
+				$pid = 0;
+				$projName = 'Undefinded Inventory Project';
+			}
+			$retArr[$pid]['name'] = $this->cleanOutStr($projName);
+			$retArr[$pid]['clid'][$row->clid] = $this->cleanOutStr($row->name).($row->access=='private'?' (Private)':'');
+		}
+		$rs->free();
+		if(isset($retArr[0])){
+			$tempArr = $retArr[0];
+			unset($retArr[0]);
+			$retArr[0] = $tempArr;
 		}
 		return $retArr;
 	}

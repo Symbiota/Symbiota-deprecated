@@ -355,7 +355,7 @@ class PluginsManager {
 		$html .= 'return false;}';
 		$html .= 'return true;}';
 		$html .= '</script>';
-		$html .= '<form name="quicksearch" id="quicksearch" action="'.$clientRoot.'/taxa/index.php" method="post" onsubmit="return verifyQuickSearch(this.form);">';
+		$html .= '<form name="quicksearch" id="quicksearch" action="'.$clientRoot.'/taxa/index.php" method="get" onsubmit="return verifyQuickSearch(this.form);">';
 		if($searchText){
 			$html .= '<div id="quicksearchtext" ><b>'.$searchText.'</b></div>';
 		}
