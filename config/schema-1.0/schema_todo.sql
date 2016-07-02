@@ -204,17 +204,6 @@ ALTER TABLE `omoccuredits`
   ADD COLUMN `guid` VARCHAR(45) NULL AFTER `AppliedStatus`,
   ADD UNIQUE INDEX `guid_UNIQUE` (`guid` ASC);
 
-CREATE TABLE `omcollpuboccurlink` (
-  `pubid` INT UNSIGNED NOT NULL,
-  `occid` INT UNSIGNED NOT NULL,
-  `verification` INT NOT NULL DEFAULT 0,
-  `refreshtimestamp` DATETIME NOT NULL,
-  `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
-  PRIMARY KEY (`pubid`, `occid`),
-  INDEX `FK_ompuboccid_idx` (`occid` ASC),
-  CONSTRAINT `FK_ompuboccid`  FOREIGN KEY (`occid`)  REFERENCES `omoccurrences` (`occid`)  ON DELETE CASCADE  ON UPDATE CASCADE,
-  CONSTRAINT `FK_ompubpubid`  FOREIGN KEY (`pubid`)  REFERENCES `symbseinet`.`omcollpublications` (`pubid`)  ON DELETE CASCADE  ON UPDATE CASCADE);
-
 
 #Remove deprecated survey tables
 DROP TABLE `omsurveyprojlink`;
@@ -367,9 +356,7 @@ ALTER TABLE `images`
 
 
 ALTER TABLE `omcollections` 
-  ADD COLUMN `publishToIdigbio` INT(11) AFTER `publishToGbif`,
-  ADD COLUMN `aggKeysStr` VARCHAR(1000) AFTER `publishToIdigbio`,
-  ADD COLUMN `dwcaUrl` VARCHAR(250) NULL AFTER `aggKeysStr`;
+  ADD COLUMN `dwcaUrl` VARCHAR(250) NULL AFTER `publishToGbif`;
 
 ALTER TABLE `omcollections` 
   ADD INDEX `FK_collid_iid_idx` (`iid` ASC);
@@ -380,31 +367,6 @@ ALTER TABLE `omcollections`
 ALTER TABLE `omcollectionstats`
 	MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
 	
-
-ALTER TABLE `omcollcatlink` 
-  ADD COLUMN `isPrimary` TINYINT(1) NULL DEFAULT 1 AFTER `collid`;
-
-# Establishes many-many relationship to be used in DwC eml.xml file
-CREATE TABLE `omcollectioncontacts` (
-  `collid` INT UNSIGNED NOT NULL,
-  `uid` INT UNSIGNED NOT NULL,
-  `positionName` VARCHAR(45) NULL,
-  `role` VARCHAR(45) NULL,
-  `notes` VARCHAR(250) NULL,
-  `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
-  PRIMARY KEY (`collid`, `uid`),
-  INDEX `FK_contact_uid_idx` (`uid` ASC),
-  CONSTRAINT `FK_contact_collid`   FOREIGN KEY (`collid`)   REFERENCES `omcollections` (`CollID`)   ON DELETE CASCADE   ON UPDATE CASCADE,
-  CONSTRAINT `FK_contact_uid`   FOREIGN KEY (`uid`)   REFERENCES `users` (`uid`)   ON DELETE CASCADE   ON UPDATE CASCADE);
-
-ALTER TABLE `omcollections` 
-  ADD INDEX `FK_collid_iid_idx` (`iid` ASC);
-
-ALTER TABLE `omcollections` 
-  ADD CONSTRAINT `FK_collid_iid` FOREIGN KEY (`iid`) REFERENCES `institutions` (`iid`)  ON DELETE SET NULL  ON UPDATE CASCADE;
-
-ALTER TABLE `omcollectionstats` 
-  CHANGE COLUMN `dynamicProperties` `dynamicProperties` TEXT NULL DEFAULT NULL ;
 
 ALTER TABLE `omcollcatlink` 
   ADD COLUMN `isPrimary` TINYINT(1) NULL DEFAULT 1 AFTER `collid`;
@@ -504,7 +466,9 @@ END
 
 DELIMITER ;
 
-# Glossary tables
+ALTER TABLE `taxadescrblock`
+	MODIFY COLUMN `caption`  varchar(40) NULL DEFAULT NULL AFTER `tid`;
+  
 ALTER TABLE `glossary`
 	ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`,
 	MODIFY COLUMN `definition`  varchar(2000) NULL DEFAULT NULL AFTER `term`,

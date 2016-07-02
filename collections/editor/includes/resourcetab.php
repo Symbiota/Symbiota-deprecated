@@ -19,7 +19,18 @@ $dupManager = new OccurrenceDuplicate();
 $dupClusterArr = $dupManager->getClusterArr($occid);
 $lastName = $dupManager->parseLastName($occArr['recordedby']);
 ?>
-<script type="text/javascript">
+<script>
+	function validateVoucherAddForm(f){
+		if(f.clidvoucher.value == ""){
+			alert("Select a checklist to which you want to link the voucher");
+			return false;
+		}
+		if(f.tidvoucher.value == ""){
+			alert("Voucher cannot be linked to a checklist until the taxonomic name has been resolved (e.g. name not linked to taxonomic thesaurus");
+			return false;
+		}
+		return true;
+	}
 
 	function openDupeWindow(){
 		$url = "rpc/dupelist.php?curoccid=<?php echo $occid.'&lastname='.$occArr['recordedby'].'&collnum='.$occArr['recordnumber'].'&colldate='.$occArr['eventdate']; ?>";
@@ -75,7 +86,57 @@ $lastName = $dupManager->parseLastName($occArr['recordedby']);
 	}
 </script>
 
-<div id="duplicatediv" style="width:795px;">
+<div id="voucherdiv" style="width:795px;">
+	<?php 
+	$userChecklists = $occManager->getUserChecklists();
+	$checklistArr = $occManager->getVoucherChecklists();
+	?>
+	<fieldset style="padding:20px">
+		<legend><b>Checklist Voucher Linkages</b></legend>
+		<?php 
+		if($userChecklists){
+			?>
+			<div style="float:right;margin-right:15px;">
+				<a href="#" onclick="toggle('voucheradddiv');return false;" title="Link Specimen to Checklist as Voucher" ><img src="../../images/add.png" /></a>
+			</div>
+			<div id="voucheradddiv" style="display:<?php echo ($checklistArr?'none':'block'); ?>;">
+				<form name="voucherAddForm" method="post" target="occurrenceeditor.php" onsubmit="return validateVoucherAddForm(this)">
+					<select name="clidvoucher">
+						<option value="">Select a Checklist</option>
+						<option value="">---------------------------------------------</option>
+						<?php 
+						foreach($userChecklists as $clid => $clName){
+							echo '<option value="'.$clid.'">'.$clName.'</option>';
+						}
+						?>
+					</select>
+					<input name="tidvoucher" type="hidden" value="<?php echo $occArr['tidinterpreted']; ?>" />
+					<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
+					<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
+					<input name="tabtarget" type="hidden" value="3" />
+					<input name="submitaction" type="submit" value="Link to Checklist as Voucher" />
+				</form>
+			</div>
+			<?php
+		}
+		//Display list of checklists specimen is linked to
+		if($checklistArr){
+			foreach($checklistArr as $vClid => $vClName){
+				echo '<div style="margin:3px">';
+				echo '<a href="../../checklists/checklist.php?showvouchers=1&cl='.$vClid.'" target="_blank">'.$vClName.'</a> ';
+				if(array_key_exists($vClid, $userChecklists)){
+					echo '<a href="occurrenceeditor.php?submitaction=deletevoucher&delclid='.$vClid.'&occid='.$occid.'&tabtarget=3" title="Delete voucher link" onclick="return confirm(\"Are you sure you want to remove this voucher link?\")">';
+					echo '<img src="../../images/drop.png" style="width:12px;" />';
+					echo '</a>';
+				}
+				echo '</div>';
+			}
+			echo '<div style="margin:15px 0px">* If a red X is not display to right of checklist name, you do not have editing rights for that checklist and therefore cannot remove the voucher link without contacting checklist owner';
+		}
+		?>
+	</fieldset>
+</div>
+<div id="duplicatediv" style="margin-top:20px;">
 	<fieldset>
 		<legend><b>Duplicate Specimens</b></legend>
 		<div style="float:right;margin-right:15px;">
