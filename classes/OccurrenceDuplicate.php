@@ -1,6 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 
 class OccurrenceDuplicate {
 
@@ -109,9 +109,8 @@ class OccurrenceDuplicate {
 				'FROM omoccurrences '.
 				'WHERE occid = '.$occid; 
 			$rsTitle = $this->conn->query($sqlTitle);
-			while($rTitle = $rsTitle->fetch_object()){
-				$lastName = $this->parseLastName($r2->recordedby);
-				$title = $lastnameStr.' '.$numStr.' '.$r->eventdate;
+			while($r = $rsTitle->fetch_object()){
+				$title = $this->parseLastName($r->recordedby).' '.$r->recordnumber.' '.$r->eventdate;
 			}
 			$rsTitle->free();
 			if(!$title) $title = 'Undefined Collector';
@@ -399,6 +398,40 @@ class OccurrenceDuplicate {
 		return $retArr;
 	}
 
+	//Used in dupelist.php popup used in "Linked Resource" tab in occurrence editor
+	public function getDupeList($lastName, $collNum, $collDate, $catNum, $occid, $currentOccid){
+		$retArr = array();
+		$queryTerms = array();
+		if($lastName) $queryTerms[] = 'recordedby LIKE "%'.$this->cleanInStr($lastName).'%"';
+		if($collNum) $queryTerms[] = 'recordnumber = "'.$this->cleanInStr($collNum).'"';
+		if($collDate) $queryTerms[] = 'eventdate = "'.$this->cleanInStr($collDate).'"';
+		if($catNum) $queryTerms[] = 'catalognumber = "'.$this->cleanInStr($catNum).'"';
+		if(is_numeric($occid)) $queryTerms[] = 'occid = '.$occid;
+		$sql = 'SELECT c.institutioncode, c.collectioncode, c.collectionname, o.occid, o.catalognumber, '.
+			'o.recordedby, o.recordnumber, o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.locality '.
+			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			'WHERE o.occid != '.$currentOccid;
+		if($queryTerms && is_numeric($currentOccid)){
+			$sql .= ' AND ('.implode(') AND (', $queryTerms).') ';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->occid]['collname'] = $r->collectionname.' ('.$r->institutioncode.($r->collectioncode?'-'.$r->collectioncode:'').')';
+				$retArr[$r->occid]['catalognumber'] = $r->catalognumber;
+				$retArr[$r->occid]['recordedby'] = $r->recordedby;
+				$retArr[$r->occid]['recordnumber'] = $r->recordnumber;
+				$retArr[$r->occid]['eventdate'] = $r->eventdate;
+				$retArr[$r->occid]['verbatimeventdate'] = $r->verbatimeventdate;
+				$retArr[$r->occid]['country'] = $r->country;
+				$retArr[$r->occid]['stateprovince'] = $r->stateprovince;
+				$retArr[$r->occid]['county'] = $r->county;
+				$retArr[$r->occid]['locality'] = $r->locality;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+	
 	//Ranking functions
 	private function addConsensusRecord($occArr){
 		
