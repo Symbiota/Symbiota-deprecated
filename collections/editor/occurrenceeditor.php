@@ -1,8 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
-include_once($serverRoot.'/classes/ProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
+include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 header('Access-Control-Allow-Origin: http://www.catalogueoflife.org/col/webservice');
 //header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 //header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -241,6 +241,12 @@ if($symbUid){
 				$statusStr = $occManager->editIdentificationRanking($_POST['confidenceranking'],$_POST['notes']);
 				$tabTarget = 1;
 			}
+			elseif($action == 'Link to Checklist as Voucher'){
+				$statusStr = $occManager->linkChecklistVoucher($_POST['clidvoucher'],$_POST['tidvoucher']);
+			}
+			elseif($action == 'deletevoucher'){
+				$statusStr = $occManager->deleteChecklistVoucher($_REQUEST['delclid']);
+			}
 			elseif($action == 'editgeneticsubmit'){
 				$statusStr = $occManager->editGeneticResource($_POST);
 			}
@@ -279,7 +285,7 @@ if($symbUid){
 				$occManager->setSqlWhere($occIndex);
 			}
 			else{
-				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+				setCookie('editorquery','',time()-3600,($CLIENT_ROOT?$CLIENT_ROOT:'/'));
 				$occIndex = false;
 			}
 		}
@@ -296,7 +302,7 @@ if($symbUid){
 	}
 	elseif(isset($_COOKIE["editorquery"])){
 		//Make sure query is null
-		setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+		setCookie('editorquery','',time()-3600,($CLIENT_ROOT?$CLIENT_ROOT:'/'));
 	}
 
 	if(!$goToMode){
@@ -374,8 +380,8 @@ else{
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Editor</title>
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
     <?php
     if($crowdSourceMode == 1){

@@ -182,6 +182,14 @@ CREATE TABLE `omoccurrevisions` (
   CONSTRAINT `fk_omrevisions_uid`    FOREIGN KEY (`uid`)    REFERENCES `users` (`uid`)   ON DELETE SET NULL   ON UPDATE CASCADE
 );
 
+ALTER TABLE `omoccurrevisions` 
+  ADD COLUMN `guid` VARCHAR(45) NULL AFTER `externalEditor`,
+  ADD UNIQUE INDEX `guid_UNIQUE` (`guid` ASC);
+
+ALTER TABLE `omoccuredits` 
+  ADD COLUMN `guid` VARCHAR(45) NULL AFTER `AppliedStatus`,
+  ADD UNIQUE INDEX `guid_UNIQUE` (`guid` ASC);
+
 
 #Remove deprecated survey tables
 DROP TABLE `omsurveyprojlink`;
@@ -327,7 +335,7 @@ ALTER TABLE `images`
 
 
 ALTER TABLE `omcollections` 
-  ADD COLUMN `dwcaUrl` VARCHAR(75) NULL AFTER `publishToGbif`;
+  ADD COLUMN `dwcaUrl` VARCHAR(250) NULL AFTER `publishToGbif`;
 
 ALTER TABLE `omcollections` 
   ADD INDEX `FK_collid_iid_idx` (`iid` ASC);
@@ -335,8 +343,9 @@ ALTER TABLE `omcollections`
 ALTER TABLE `omcollections` 
   ADD CONSTRAINT `FK_collid_iid` FOREIGN KEY (`iid`) REFERENCES `institutions` (`iid`)  ON DELETE SET NULL  ON UPDATE CASCADE;
 
-ALTER TABLE `omcollectionstats` 
-  CHANGE COLUMN `dynamicProperties` `dynamicProperties` TEXT NULL DEFAULT NULL ;
+ALTER TABLE `omcollectionstats`
+	MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
+	
 
 ALTER TABLE `omcollcatlink` 
   ADD COLUMN `isPrimary` TINYINT(1) NULL DEFAULT 1 AFTER `collid`;
@@ -436,9 +445,6 @@ END
 
 DELIMITER ;
 
-ALTER TABLE `omcollectionstats`
-	MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
-	
 ALTER TABLE `taxadescrblock`
 	MODIFY COLUMN `caption`  varchar(40) NULL DEFAULT NULL AFTER `tid`;
   
