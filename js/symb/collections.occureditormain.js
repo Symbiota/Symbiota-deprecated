@@ -773,53 +773,53 @@ function displayDeleteSubmit(){
 
 function eventDateChanged(eventDateInput){
 	var dateStr = eventDateInput.value;
-	if(dateStr == "") return true;
-
-	var dateArr = parseDate(dateStr);
-	if(dateArr['y'] == 0){
-		alert("Unable to interpret Date. Please use the following formats: yyyy-mm-dd, mm/dd/yyyy, or dd mmm yyyy");
-		return false;
-	}
-	else{
-		//Check to see if date is in the future 
-		try{
-			var testDate = new Date(dateArr['y'],dateArr['m']-1,dateArr['d']);
-			var today = new Date();
-			if(testDate > today){
-				alert("Was this plant really collected in the future? The date you entered has not happened yet. Please revise.");
-				return false;
-			}
-		}
-		catch(e){
-		}
-
-		//Invalid format is month > 12
-		if(dateArr['m'] > 12){
-			alert("Month cannot be greater than 12. Note that the format should be YYYY-MM-DD");
+	if(dateStr != ""){
+		var dateArr = parseDate(dateStr);
+		if(dateArr['y'] == 0){
+			alert("Unable to interpret Date. Please use the following formats: yyyy-mm-dd, mm/dd/yyyy, or dd mmm yyyy");
 			return false;
 		}
-
-		//Check to see if day is valid
-		if(dateArr['d'] > 28){
-			if(dateArr['d'] > 31 
-				|| (dateArr['d'] == 30 && dateArr['m'] == 2) 
-				|| (dateArr['d'] == 31 && (dateArr['m'] == 4 || dateArr['m'] == 6 || dateArr['m'] == 9 || dateArr['m'] == 11))){
-				alert("The Day (" + dateArr['d'] + ") is invalid for that month");
+		else{
+			//Check to see if date is in the future 
+			try{
+				var testDate = new Date(dateArr['y'],dateArr['m']-1,dateArr['d']);
+				var today = new Date();
+				if(testDate > today){
+					alert("Was this plant really collected in the future? The date you entered has not happened yet. Please revise.");
+					return false;
+				}
+			}
+			catch(e){
+			}
+	
+			//Invalid format is month > 12
+			if(dateArr['m'] > 12){
+				alert("Month cannot be greater than 12. Note that the format should be YYYY-MM-DD");
 				return false;
 			}
+	
+			//Check to see if day is valid
+			if(dateArr['d'] > 28){
+				if(dateArr['d'] > 31 
+					|| (dateArr['d'] == 30 && dateArr['m'] == 2) 
+					|| (dateArr['d'] == 31 && (dateArr['m'] == 4 || dateArr['m'] == 6 || dateArr['m'] == 9 || dateArr['m'] == 11))){
+					alert("The Day (" + dateArr['d'] + ") is invalid for that month");
+					return false;
+				}
+			}
+	
+			//Enter date into date fields
+			var mStr = dateArr['m'];
+			if(mStr.length == 1){
+				mStr = "0" + mStr;
+			}
+			var dStr = dateArr['d'];
+			if(dStr.length == 1){
+				dStr = "0" + dStr;
+			}
+			eventDateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
+			if(dateArr['y'] > 0) distributeEventDate(dateArr['y'],dateArr['m'],dateArr['d']);
 		}
-
-		//Enter date into date fields
-		var mStr = dateArr['m'];
-		if(mStr.length == 1){
-			mStr = "0" + mStr;
-		}
-		var dStr = dateArr['d'];
-		if(dStr.length == 1){
-			dStr = "0" + dStr;
-		}
-		eventDateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
-		if(dateArr['y'] > 0) distributeEventDate(dateArr['y'],dateArr['m'],dateArr['d']);
 	}
 	fieldChanged('eventdate');
 	var f = eventDateInput.form;
