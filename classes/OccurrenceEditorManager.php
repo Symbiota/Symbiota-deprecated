@@ -1144,7 +1144,7 @@ class OccurrenceEditorManager {
 		$sqlFrag = '';
 		foreach($sArr as $k => $v){
 			if(($v != '') && $tArr[$k] == ''){
-				$sqlFrag .= ','.$k.'="'.$v.'"';
+				$sqlFrag .= ','.$k.'="'.$this->cleanInStr($v).'"';
 			}
 		}
 		if($sqlFrag){
