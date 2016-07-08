@@ -437,9 +437,7 @@ if($taxonManager->getSciName() != "unknown"){
 							echo '<div class="sppmap">';
 							if(array_key_exists("map",$subArr) && $subArr["map"]){
 								echo '<div class="sppmap">';
-								echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
 								echo '<img src="'.$subArr['map'].'" title="'.$spDisplay.'" alt="'.$spDisplay.'" />';
-								echo '</a>';
 								echo '</div>';
 							}							
 							elseif($taxonManager->getRankId()>140){
