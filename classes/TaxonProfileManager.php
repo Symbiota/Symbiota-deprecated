@@ -457,7 +457,7 @@ class TaxonProfileManager {
 			if($imgObj['occid']){
 				$imgAnchor = '../collections/individual/index.php?occid='.$imgObj['occid'];
 			}
-			if($useThumbnail || ($imgUrl && strtolower(substr($imgUrl,-4)) != '.jpg')){
+			if($useThumbnail){
 				if($imgObj['thumbnailurl']){
 					$imgUrl = $imgThumbnail;
 				}

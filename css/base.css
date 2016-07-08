@@ -90,7 +90,7 @@ div.tndiv{
 	float: left;
 	text-align: center;
 	width: 165px;
-	height: 250px;
+	height: 230px;
 	page-break-before:auto;
 	page-break-inside:avoid;
 }
@@ -109,12 +109,15 @@ div.tnimg a{
 
 div.tnimg img{
 	position: absolute;
+	max-height: 160px;
+	max-width: 160px;
+	width: 		expression(this.width >= this.height ? 160: true);
+	height:		expression(this.height >= this.width ? 160: true);
 	top: -9999px;
 	bottom: -9999px;
 	left: -9999px;
 	right: -9999px;
 	margin: auto;
-	height: 100%;
 }	
 
 /* styled table */
