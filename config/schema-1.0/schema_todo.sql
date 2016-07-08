@@ -204,6 +204,17 @@ ALTER TABLE `omoccuredits`
   ADD COLUMN `guid` VARCHAR(45) NULL AFTER `AppliedStatus`,
   ADD UNIQUE INDEX `guid_UNIQUE` (`guid` ASC);
 
+CREATE TABLE `omcollpuboccurlink` (
+  `pubid` INT UNSIGNED NOT NULL,
+  `occid` INT UNSIGNED NOT NULL,
+  `verification` INT NOT NULL DEFAULT 0,
+  `refreshtimestamp` DATETIME NOT NULL,
+  `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`pubid`, `occid`),
+  INDEX `FK_ompuboccid_idx` (`occid` ASC),
+  CONSTRAINT `FK_ompuboccid`  FOREIGN KEY (`occid`)  REFERENCES `omoccurrences` (`occid`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  CONSTRAINT `FK_ompubpubid`  FOREIGN KEY (`pubid`)  REFERENCES `symbseinet`.`omcollpublications` (`pubid`)  ON DELETE CASCADE  ON UPDATE CASCADE);
+
 
 #Remove deprecated survey tables
 DROP TABLE `omsurveyprojlink`;
@@ -409,10 +420,6 @@ ALTER TABLE `users`
   ADD COLUMN `securitykey` VARCHAR(45) NULL AFTER `guid`;
 
 
-# Needed for FP functions
-CREATE INDEX idx_taxacreated ON taxa(initialtimestamp);
-
-
 
 # Spatial Indexing
 SET FOREIGN_KEY_CHECKS=0;
@@ -466,9 +473,7 @@ END
 
 DELIMITER ;
 
-ALTER TABLE `taxadescrblock`
-	MODIFY COLUMN `caption`  varchar(40) NULL DEFAULT NULL AFTER `tid`;
-  
+# Glossary tables
 ALTER TABLE `glossary`
 	ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`,
 	MODIFY COLUMN `definition`  varchar(2000) NULL DEFAULT NULL AFTER `term`,
