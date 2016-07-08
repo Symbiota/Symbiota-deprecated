@@ -71,6 +71,11 @@ class SpecUploadDwca extends SpecUploadBase{
 				$this->errorStr = 'ERROR uploading file: '.$msg;
 			}
 		}
+		else{
+			$msg = 'ERROR upload file path not defined';
+			$this->outputMsg('<li>'.$msg.'</li>');
+			$this->errorStr = $msg;
+		}
 		
 		if($this->baseFolderName && substr($this->baseFolderName,-1) != '/') $this->baseFolderName .= '/';
 		if($this->baseFolderName){

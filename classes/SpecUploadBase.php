@@ -25,7 +25,7 @@ class SpecUploadBase extends SpecUpload{
 	protected $symbFields = Array();
 	protected $identSymbFields = Array();
 	protected $imageSymbFields = Array();
-	protected $sourceDatabaseType = '';
+	private $sourceDatabaseType = '';
 
 	private $translationMap = array('accession'=>'catalognumber','accessionid'=>'catalognumber','accessionnumber'=>'catalognumber',
 		'taxonfamilyname'=>'family','scientificname'=>'sciname','species'=>'specificepithet','commonname'=>'taxonremarks',
@@ -103,6 +103,11 @@ class SpecUploadBase extends SpecUpload{
 		$skipOccurFields = array('dbpk','initialtimestamp','occid','collid','tidinterpreted','fieldnotes','coordinateprecision',
 			'verbatimcoordinatesystem','institutionid','collectionid','associatedoccurrences','datasetid','associatedreferences',
 			'previousidentifications','associatedsequences');
+		if($this->collMetadataArr['managementtype'] == 'Live Data' && $this->collMetadataArr['guidtarget'] != 'occurrenceId'){
+			//Do not import occurrenceID if dataset is a live dataset, unless occurrenceID is explicitly defined as the guidSource. 
+			//This avoids the situtation where folks are exporting data from one collection and importing into their collection along with the other collection's occurrenceID GUID, which is very bad   
+			$skipOccurFields[] = 'occurrenceid';
+		}
 		//Other to deal with/skip later: 'ownerinstitutioncode'
 		$sql = "SHOW COLUMNS FROM uploadspectemp";
 		$rs = $this->conn->query($sql);

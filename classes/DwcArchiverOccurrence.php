@@ -1078,14 +1078,15 @@ class DwcArchiverOccurrence{
 						$r['informationWithheld'] = trim($r['informationWithheld'].'; field values redacted: '.implode(', ',$protectedFields),' ;');
 					}
 				}
-				
-				//Set occurrence GUID based on GUID target
-				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
-				if($guidTarget == 'catalogNumber'){
-					$r['occurrenceID'] = $r['catalogNumber'];
-				}
-				elseif($guidTarget == 'symbiotaUUID'){
-					$r['occurrenceID'] = $r['recordId'];
+				if(!$r['occurrenceID']){
+					//Set occurrence GUID based on GUID target, but only if occurrenceID field isn't already populated
+					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
+					if($guidTarget == 'catalogNumber'){
+						$r['occurrenceID'] = $r['catalogNumber'];
+					}
+					elseif($guidTarget == 'symbiotaUUID'){
+						$r['occurrenceID'] = $r['recordId'];
+					}
 				}
 				
 				$r['recordId'] = 'urn:uuid:'.$r['recordId'];

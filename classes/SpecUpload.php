@@ -84,7 +84,7 @@ class SpecUpload{
 				elseif($uploadType == $this->DWCAUPLOAD){
 					$uploadStr = "Darwin Core Archive Upload";
 				}
-				$returnArr[$row->uspid]["title"] = $row->title." (".$uploadStr.")";
+				$returnArr[$row->uspid]["title"] = $row->title.' ('.$uploadStr.' - #'.$row->uspid.')';
 				$returnArr[$row->uspid]["uploadtype"] = $row->uploadtype;
 			}
 			$result->free();
@@ -94,7 +94,7 @@ class SpecUpload{
 
 	private function setCollInfo(){
 		if($this->collId){
-			$sql = 'SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, c.managementtype, cs.uploaddate, c.securitykey '.
+			$sql = 'SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, c.managementtype, cs.uploaddate, c.securitykey, c.guidtarget '.
 				'FROM omcollections c LEFT JOIN omcollectionstats cs ON c.collid = cs.collid '.
 				'WHERE (c.collid = '.$this->collId.')';
 			//echo $sql;
@@ -108,6 +108,7 @@ class SpecUpload{
 				$this->collMetadataArr["uploaddate"] = $dateStr;
 				$this->collMetadataArr["managementtype"] = $row->managementtype;
 				$this->collMetadataArr["securitykey"] = $row->securitykey;
+				$this->collMetadataArr["guidtarget"] = $row->guidtarget;
 			}
 			$result->free();
 		}
@@ -235,13 +236,14 @@ class SpecUpload{
 	//Profile management
     public function readUploadParameters(){
     	if($this->uspid){
-			$sql = 'SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, '.
+			$sql = 'SELECT usp.collid, usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, '.
 	    		'usp.code, usp.path, usp.pkfield, usp.querystr, usp.cleanupsp, cs.uploaddate, usp.uploadtype '.
 				'FROM uploadspecparameters usp LEFT JOIN omcollectionstats cs ON usp.collid = cs.collid '.
 	    		'WHERE (usp.uspid = '.$this->uspid.')';
 			//echo $sql;
 			$result = $this->conn->query($sql);
 	    	if($row = $result->fetch_object()){
+	    		if(!$this->collId) $this->collId = $row->collid;
 	    		$this->title = $row->title;
 	    		$this->platform = $row->Platform;
 	    		$this->server = $row->server;
@@ -374,7 +376,7 @@ class SpecUpload{
 		return $this->errorStr;
 	}
 	
-	public function setVerboseMode($vMode){
+	public function setVerboseMode($vMode, $logTitle = ''){
 		global $serverRoot;
 		if(is_numeric($vMode)){
 			$this->verboseMode = $vMode;
@@ -383,7 +385,14 @@ class SpecUpload{
 				if($serverRoot){
 					$logPath = $serverRoot;
 					if(substr($serverRoot,-1) != '/' && substr($serverRoot,-1) != '\\') $logPath .= '/';
-					$logPath .= "temp/logs/dataupload_".date('Ymd').".log";
+					$logPath .= 'temp/logs/';
+					if($logTitle){
+						$logPath .= $logTitle;
+					}
+					else{
+						$logPath .= 'dataupload';
+					}
+					$logPath .= '_'.date('Ymd').".log";
 					$this->logFH = fopen($logPath, 'a');
 					fwrite($this->logFH,"Start time: ".date('Y-m-d h:i:s A')."\n");
 				}
