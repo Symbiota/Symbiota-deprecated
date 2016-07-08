@@ -236,7 +236,7 @@ if($taxonManager->getSciName() != "unknown"){
 						$url = $taxonManager->getGoogleStaticMap();
 					}
 					if($url){
-						echo '<div class="mapthumb" style="float:right;height:250px">';
+						echo '<div class="mapthumb">';
 						if($gAnchor){
 							echo '<a href="#" onclick="'.$gAnchor.';return false">';
 						}
@@ -251,7 +251,7 @@ if($taxonManager->getSciName() != "unknown"){
 					$taxonManager->echoImages(1);
 					?>
 				</div>
-				<div id="img-tab-div" style="display:none;border-top:2px solid gray;margin-top:2px;">
+				<div id="img-tab-div" style="display:<?php echo $taxonManager->getImageCount()> 6?'block':'none';?>;border-top:2px solid gray;margin-top:2px;">
 					<a href="#" onclick="expandExtraImages();return false;">
 						<div style="background:#eee;padding:10px;border: 1px solid #ccc;width:100px;margin:auto;text-align:center">
 							<?php echo $LANG['CLICK_TO_DISPLAY'].'<br/>'.$taxonManager->getImageCount().' '.$LANG['TOTAL_IMAGES']; ?>
@@ -380,9 +380,6 @@ if($taxonManager->getSciName() != "unknown"){
 						$cnt = 0;
 						ksort($sppArr);
 						foreach($sppArr as $sciNameKey => $subArr){
-							if($cnt%5 == 0 && $cnt > 0){
-								echo "<div style='clear:both;'><hr></div>";
-							}
 							echo "<div class='spptaxon'>";
 							echo "<div style='margin-top:10px;'>";
 							echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
@@ -419,9 +416,7 @@ if($taxonManager->getSciName() != "unknown"){
 							//Display thumbnail map
 							if(array_key_exists("map",$subArr) && $subArr["map"]){
 								echo '<div class="sppmap">';
-								echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
 								echo '<img src="'.$subArr['map'].'" title="'.$spDisplay.'" alt="'.$spDisplay.'" />';
-								echo '</a>';
 								echo '</div>';
 							}							
 							elseif($taxonManager->getRankId()>140){

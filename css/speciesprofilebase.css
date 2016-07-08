@@ -8,10 +8,10 @@
 }
 
 #centralimage img{
-	max-width:	250px;
-	max-height:	250px;
-	width: 		expression(this.width >= this.height ? 250: true);
-	height:		expression(this.height >= this.width ? 250: true);
+	max-width:	450px;
+	max-height:	320px;
+	width: 		expression(this.width >= this.height ? 320: true);
+	height:		expression(this.height >= this.width ? 320: true);
 	border:		1px dotted black;
 }
 
@@ -34,17 +34,17 @@
 td.desc{
 	vertical-align:	top;
 	width:			525px;
-	height:			300px;
+	height:			330px;
 }
 
 div.sptab{
-	height:		270px;
+	height:		330px;
 	width:		480px;
 	overflow: 	auto;
 }
 
 div.spptab{
-	height:		200px;
+	height:		300px;
 	width:		500px;
 	overflow: 	auto;
 }
@@ -65,19 +65,19 @@ div.spptab{
 }
 
 div.imgthumb{
-  margin: 		2px;
-  margin-top:	5px;
-  width: 		155px;
+  margin: 		5px;
+  height:		220px;
   float:	 	left;
   text-align: 	center;
   position:		relative;
-  height:		230px;
   overflow:		hidden;
 }
 
 div.imgthumb img{
   	display: 	inline;
-  	width: 		145px;
+	max-height:	200px;
+	width: 		expression(this.width >= this.height ? 200: true);
+	height:		expression(this.height >= this.width ? 200: true);
   	margin: 	0px;
 	border:		1px dotted grey;
 }
@@ -99,9 +99,10 @@ div.imgthumb div.photographer{
 }
 
 div.mapthumb{
-  margin: 2px;
+  margin: 5px;
   border: 0px;
-  width: 165px;
+  width: 175px;
+  height: 220px;
   float: right;
   text-align: center;
 }
@@ -118,15 +119,15 @@ div.mapthumb a:hover img {
 
 div.spptaxon{
 	text-align: center;
-	width:		147px;
+	width:		170px;
 	float:	 	left;
   	border: 	1px dotted gray;
   	margin:		3px;
 }
 
 div.sppimg{
-  	width:	140px;
-  	height:	145px
+  	width:	160px;
+  	height:	150px
 }
 
 div.sppimg img{
@@ -144,9 +145,8 @@ div.sppimg img{
 div.sppmap{
   margin: 	2px;
   border: 	0px;
-  width: 	145px;
-  height:	145px;
-  float: 	right;
+  width: 	160px;
+  height:	160px;
   text-align: center;
 }
 
