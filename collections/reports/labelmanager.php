@@ -3,8 +3,8 @@ include_once('../../config/symbini.php');
 @include_once('Image/Barcode.php');
 @include_once('Image/Barcode2.php');
 
-include_once($serverRoot.'/classes/OccurrenceLabel.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceLabel.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/reports/labelmanager.php?'.$_SERVER['QUERY_STRING']);
 
@@ -16,7 +16,7 @@ $datasetManager = new OccurrenceLabel();
 $datasetManager->setCollid($collid);
 
 $reportsWritable = false;
-if(is_writable($serverRoot.'/temp/report')){
+if(is_writable($SERVER_ROOT.'/temp/report')){
 	$reportsWritable = true;
 }
 
@@ -36,17 +36,16 @@ if($isEditor){
 	}
 }
 ?>
-
 <html>
 	<head>
-	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
-		<title><?php echo $defaultTitle; ?> Specimen Label Manager</title>
+	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
+		<title><?php echo $DEFAULT_TITLE; ?> Specimen Label Manager</title>
 		<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	    <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 		<script src="../../js/jquery.js" type="text/javascript"></script>
 		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-		<script language="javascript" type="text/javascript">
+		<script type="text/javascript">
 			$(document).ready(function() {
 				if(!navigator.cookieEnabled){
 					alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
@@ -211,7 +210,7 @@ if($isEditor){
 	<body>
 	<?php
 	$displayLeftMenu = (isset($collections_reports_labelmanagerMenu)?$collections_reports_labelmanagerMenu:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
 		<a href='../../index.php'>Home</a> &gt;&gt; 
@@ -583,7 +582,7 @@ if($isEditor){
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 	</body>
 </html>
