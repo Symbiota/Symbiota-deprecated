@@ -1307,6 +1307,36 @@ class GlossaryManager{
 		return $this->glossId;
 	}
 	
+	public function getStats(){
+		/*
+		SELECT language, count(*)
+		FROM glossary
+		GROUP BY language;
+		
+		SELECT t.sciname, count(g.glossid) as cnt
+		FROM glossary g INNER JOIN glossarytermlink gp ON g.glossid = gp.glossid
+		INNER JOIN glossarytaxalink tl ON gp.glossgrpid = tl.glossgrpid
+		INNER JOIN taxa t ON tl.tid = t.tid
+		GROUP BY tl.tid;
+		
+		SELECT t.sciname, g.language, count(g.glossid) as cnt
+		FROM glossary g INNER JOIN glossarytermlink gp ON g.glossid = gp.glossid
+		INNER JOIN glossarytaxalink tl ON gp.glossgrpid = tl.glossgrpid
+		INNER JOIN taxa t ON tl.tid = t.tid
+		GROUP BY t.sciname, g.language;
+		
+		SELECT t.sciname, count(g.glossid) as cnt
+		FROM glossary g INNER JOIN glossarytermlink gp ON g.glossid = gp.glossid
+		INNER JOIN glossarytaxalink tl ON gp.glossgrpid = tl.glossgrpid
+		INNER JOIN taxa t ON tl.tid = t.tid
+		WHERE g.language = "English"
+		GROUP BY t.sciname;
+		
+		SELECT count(g.glossid)
+		FROM glossary g INNER JOIN glossaryimages i ON g.glossid = i.glossid;
+		*/
+	}
+	
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
