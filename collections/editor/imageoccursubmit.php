@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceEditorImages.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorImages.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/imageoccursubmit.php?'.$_SERVER['QUERY_STRING']);
 
 $collid  = $_REQUEST["collid"];
@@ -46,8 +46,8 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Image Submission</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Image Submission</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />	
@@ -57,14 +57,15 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 	<script src="../../js/symb/shared.js?ver=141119" type="text/javascript"></script>
 	<script type="text/javascript">
 	function validateImgOccurForm(f){
-		if(f.imgfile.value == ""){
-			alert("Please select an image file to upload");
+		if(f.imgfile.value == "" && f.imgurl.value == ""){
+			alert("Please select an image file to upload or enter a remote URL to link");
 			return false;
 		}
 		else{ 
 			var fileName = f.imgfile.value.toLowerCase();
-			if(fileName.indexOf(".jpg") == -1 && fileName.indexOf(".jpeg") == -1){
-				alert("Image file must be a JPG");
+			if(fileName == "") fileName = f.imgurl.value.toLowerCase();
+			if(fileName.indexOf(".jpg") == -1 && fileName.indexOf(".jpeg") == -1 && fileName.indexOf(".png") == -1){
+				alert("Image file must be a JPG or PNG");
 				return false;
 			}
 		}
@@ -75,7 +76,7 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 <body>
 	<?php
 	$displayLeftMenu = false;
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
@@ -193,7 +194,7 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 		?>
 	</div>
 <?php 	
-	include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>
