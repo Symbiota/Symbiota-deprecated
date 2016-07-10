@@ -192,6 +192,12 @@ function verifyFullFormSciName(){
 			$( "#tidinterpreted" ).val(data.tid);
 			$( 'input[name=family]' ).val(data.family);
 			$( 'input[name=scientificnameauthorship]' ).val(data.author);
+			if(data.rankid < 220){
+				$( 'select[name=confidenceranking]' ).val(2);
+			}
+			else{
+				$( 'select[name=confidenceranking]' ).val(8);
+			}
 			if(data.status == 1){ 
 				$( 'input[name=localitysecurity]' ).prop('checked', true);
 			}
@@ -205,6 +211,7 @@ function verifyFullFormSciName(){
 			}
 		}
 		else{
+			$( 'select[name=confidenceranking]' ).val(5);
 			alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
 		}
 	});

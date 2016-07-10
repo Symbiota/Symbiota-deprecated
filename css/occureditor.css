@@ -203,13 +203,18 @@ body{
 	width:	200px;
 }
 
+#idRankDiv{
+	float:	left;
+}
+
 #identificationQualifierDiv {
 	float:	left;
+	margin-left: 10px;
 }
 
 #familyDiv {
 	float:	left;
-	margin:	0px 60px;
+	margin-left: 10px;
 }
 
 #familyDiv input{

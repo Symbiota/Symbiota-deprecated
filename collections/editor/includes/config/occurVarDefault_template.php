@@ -31,8 +31,9 @@
 //define('DAYOFYEARLABEL','');
 //define('SCINAMELABEL','');
 //define('SCIENTIFICNAMEAUTHORSHIPLABEL','');
-//define('FAMILYLABEL','');
+//define('IDCONFIDENCELABEL','');
 //define('IDENTIFICATIONQUALIFIERLABEL','');
+//define('FAMILYLABEL','');
 //define('IDENTIFIEDBYLABEL','');
 //define('DATEIDENTIFIEDLABEL','');
 //define('IDENTIFICATIONREFERENCELABEL','');
