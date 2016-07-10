@@ -61,36 +61,13 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 			alert("Please select an image file to upload or enter a remote URL to link");
 			return false;
 		}
-		else{
-			if(f.imgfile.value != ""){
-				var fName = f.imgfile.value.toLowerCase();
-				if(fName.indexOf(".jpg") == -1 && fName.indexOf(".jpeg") == -1 && fName.indexOf(".gif") == -1 && fName.indexOf(".png") == -1){
-					alert("Image file must be a JPG, GIF, or PNG");
-					return false;
-				}
-			} 
-			else if(f.imgurl.value != ""){
-				var fileName = f.imgurl.value;
-				if(fileName.substring(0,4).toLowerCase() != 'http'){
-					alert("Image path must be a URL ("+fileName.substring(0,4).toLowerCase()+")");
-					return false
-				}
-				//Test to make sure file is correct mime type
-				$.ajax({
-					type: "POST",
-					url: "rpc/getImageMime.php",
-					async: false,
-					data: { url: fileName }
-				}).success(function( retStr ) {
-					if(retStr == "image/jpeg" || retStr == "image/gif" || retStr == "image/png"){
-						return true;
-					}
-					else{
-						alert("Image file must be a JPG, GIF, or PNG (type = "+retStr+")");
-						return false;
-					}
-				});
-			} 
+		else{ 
+			var fileName = f.imgfile.value.toLowerCase();
+			if(fileName == "") fileName = f.imgurl.value.toLowerCase();
+			if(fileName.indexOf(".jpg") == -1 && fileName.indexOf(".jpeg") == -1 && fileName.indexOf(".png") == -1){
+				alert("Image file must be a JPG or PNG");
+				return false;
+			}
 		}
 		return true;
 	}

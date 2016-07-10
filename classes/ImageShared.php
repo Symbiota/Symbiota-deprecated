@@ -246,7 +246,14 @@ class ImageShared{
 				$fName = substr($fName,$pos+1);
 			}
 		}
-		if($imgInfo){
+		//Parse extension
+		if($p = strrpos($fName,'.')){
+			if(strpos($fName,'?')) $fName = substr($fName,0,strpos($fName,'?'));
+			$this->imgExt = strtolower(substr($fName,$p));
+			$fName = substr($fName,0,$p);
+		}
+		
+		if(!$this->imgExt && $imgInfo){
 			if($imgInfo[2] == IMAGETYPE_GIF){
 				$this->imgExt = '.gif';
 				$this->format = 'image/gif';
