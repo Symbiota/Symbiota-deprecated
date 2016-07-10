@@ -1,6 +1,6 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/ImageShared.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/ImageShared.php');
 
 class ObservationSubmitManager {
 
@@ -122,6 +122,14 @@ class ObservationSubmitManager {
 				//Load images
 				if(!$this->addImages($postArr,$newOccId,$tid)){
 					$this->errArr[] = 'Observation added successfully, but images did not upload successful';
+				}
+				//Set verification status
+				if(is_numeric($postArr['confidenceranking'])){
+					$sqlVer = 'INSERT INTO omoccurverification(occid,category,ranking,uid) '.
+							'VALUES('.$newOccId.',"identification",'.$postArr['confidenceranking'].','.$GLOBALS['SYMB_UID'].')';
+					if(!$this->conn->query($sqlVer)){
+						$statusStr .= 'WARNING adding confidence ranking failed ('.$this->conn->error.') ';
+					}
 				}
 			}
 			else{
