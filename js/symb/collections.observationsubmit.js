@@ -17,8 +17,15 @@ $(document).ready(function() {
 						f.scientificnameauthorship.value = data.author;
 						f.family.value = data.family;
 						taxonValid = true;
+						if(data.rankid < 220){
+							$( 'select[name=confidenceranking]' ).val(2);
+						}
+						else{
+							$( 'select[name=confidenceranking]' ).val(8);
+						}
 					}
 					else{
+						$( 'select[name=confidenceranking]' ).val(5);
 						alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
 						f.scientificnameauthorship.value = "";
 						f.family.value = "";
