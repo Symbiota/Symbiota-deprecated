@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/classes/UuidFactory.php');
+include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 class ImageShared{
 
@@ -243,7 +243,8 @@ class ImageShared{
 			}
 		}
 		//Parse extension
-		if($p = strrpos($fName,".")){
+		if($p = strrpos($fName,'.')){
+			if(strpos($fName,'?')) $fName = substr($fName,0,strpos($fName,'?'));
 			$this->imgExt = strtolower(substr($fName,$p));
 			$fName = substr($fName,0,$p);
 		}
