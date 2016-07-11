@@ -129,6 +129,11 @@ if($SYMB_UID){
 			$statusStr = $indManager->getErrorMessage();
 		}
 	}
+	elseif($submit == "Add Voucher"){
+		if(!$indManager->linkVoucher($_POST)){
+			$statusStr = $indManager->getErrorMessage();
+		}
+	}
 	elseif($submit == "Link to Dataset"){
 		$dsid = (isset($_POST['dsid'])?$_POST['dsid']:0);
 		if(!$indManager->linkToDataset($dsid,$_POST['dsname'],$_POST['notes'],$SYMB_UID)){
