@@ -144,10 +144,41 @@ CREATE TABLE `lkupmunicipality` (
 ) ENGINE=InnoDB;
 
 
-#Checklist changes
+#Checklist voucher changes
 ALTER TABLE `fmvouchers` 
   DROP COLUMN `Collector`;
+
+ALTER TABLE `fmvouchers` 
+  DROP FOREIGN KEY `FK_vouchers_cl`;
+
+#Remove any bad double referenced occurrence vouchers within the same checklist
+CREATE TABLE `temp_voucher_delete` (
+  `clid` INT NOT NULL,
+  `occid` INT NOT NULL);
+
+INSERT INTO `temp_voucher_delete`(clid,occid)
+  SELECT CLID,occid FROM fmvouchers GROUP BY CLID, occid HAVING Count(*)>1;
+
+DELETE v.*
+FROM fmvouchers v INNER JOIN temp_voucher_delete t ON v.clid = t.clid AND v.occid = t.occid
+INNER JOIN taxstatus ts ON v.tid = ts.tid
+WHERE ts.taxauthid = 1 AND ts.tid != ts.tidaccepted;
+
+DELETE v.*
+FROM fmvouchers v INNER JOIN temp_voucher_delete t ON v.clid = t.clid AND v.occid = t.occid;
+
+DROP TABLE temp_voucher_delete;
+
+ALTER TABLE `fmvouchers` 
+  CHANGE COLUMN `TID` `TID` INT(10) UNSIGNED NULL ,
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY (`occid`, `CLID`);
+
+ALTER TABLE `fmvouchers` 
+  ADD CONSTRAINT `FK_vouchers_cl`  FOREIGN KEY (`TID` , `CLID`)  REFERENCES `fmchklsttaxalink` (`TID` , `CLID`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
   
+#Checklist changes
 ALTER TABLE `fmchklstprojlink` 
   ADD COLUMN `clNameOverride` VARCHAR(100) NULL AFTER `clid`,
   ADD COLUMN `mapChecklist` SMALLINT NULL DEFAULT 1 AFTER `clNameOverride`,
