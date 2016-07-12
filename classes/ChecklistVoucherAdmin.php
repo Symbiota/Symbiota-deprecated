@@ -421,20 +421,14 @@ class ChecklistVoucherAdmin {
 		$fieldArr = $this->getFieldArr();
 		$localitySecurityFields = $this->getLocalitySecurityArr();
 		
-		$clidStr = $this->clid;
-		if($this->childClidArr){
-			$clidStr .= ','.implode(',',$this->childClidArr);
-		}
-
-		//$sql = 'SELECT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
-		$sql = 'SELECT o.* '.
+		$sql = 'SELECT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 			'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
 			$this->getMissingTaxaSqlWhere();
 			//'ORDER BY o.family, o.sciname, c.institutioncode ';
 		//echo $sql;
-		$this->exportCsv($fileName,$sql,$fieldArr,$localitySecurityFields);
+		$this->exportCsv($fileName,$sql,$localitySecurityFields);
 	}
 
 	private function getMissingTaxaSqlWhere(){
@@ -507,13 +501,12 @@ class ChecklistVoucherAdmin {
 			$clidStr .= ','.implode(',',$this->childClidArr);
 		}
 		
-		//$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
-		$sql = 'SELECT DISTINCT o.* '.
+		$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
 			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 			'WHERE (o.occid NOT IN (SELECT occid FROM fmvouchers WHERE clid IN('.$clidStr.'))) AND ('.$this->sqlFrag.') '.
 			'AND o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
 		//echo '<div>'.$sql.'</div>';return;
-		$this->exportCsv($fileName,$sql,$fieldArr,$localitySecurityFields);
+		$this->exportCsv($fileName,$sql,$localitySecurityFields);
 	} 
 
 	public function downloadDatasetCsv(){
@@ -537,19 +530,18 @@ class ChecklistVoucherAdmin {
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
 			
-			//$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
-			$sql = 'SELECT DISTINCT o.* '.
+			$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
 				'LEFT JOIN fmvouchers v ON ctl.clid = v.clid AND ctl.tid = v.tid '.
 				'LEFT JOIN omoccurrences o ON v.occid = o.occid '.
 				'LEFT JOIN omcollections c ON o.collid = c.collid '.
 				'WHERE (ts.taxauthid = 1) AND (ctl.clid IN('.$clidStr.')) ';
-			$this->exportCsv($fileName,$sql,$fieldArr,$localitySecurityFields);
+			$this->exportCsv($fileName,$sql,$localitySecurityFields);
 		}
 	}
 
-	private function exportCsv($fileName,$sql,$fieldArr,$localitySecurityFields){
+	private function exportCsv($fileName,$sql,$localitySecurityFields){
 		//echo $sql; exit;
 		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
@@ -565,7 +557,7 @@ class ChecklistVoucherAdmin {
 			$out = fopen('php://output', 'w');
 			fputcsv($out, $headerArr);
 			while($row = $rs->fetch_assoc()){
-				$localSecurity = ($row["localitySecurity"]?$row["localitySecurity"]:0); 
+				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
 				if(!$rareSpeciesReader && $localSecurity != 1 && (!array_key_exists('RareSppReader', $GLOBALS['USER_RIGHTS']) || !in_array($row['collid'],$GLOBALS['USER_RIGHTS']['RareSppReader']))){
 					$redactStr = '';
 					foreach($localitySecurityFields as $fieldName){
@@ -573,8 +565,6 @@ class ChecklistVoucherAdmin {
 					}
 					if($redactStr) $row['informationWithheld'] = 'Fields with redacted values (e.g. rare species localities):'.trim($redactStr,', ');
 				}
-				unset($row['localitySecurity']);
-				unset($row['collid']);
 				fputcsv($out, $row);
 			}
 			$rs->free();
@@ -591,9 +581,9 @@ class ChecklistVoucherAdmin {
 			if(strlen($fileName) > 20){
 				$nameArr = explode(' ',$fileName);
 				foreach($nameArr as $k => $w){
-					if(strlen($w) > 3) $nameArr[$k] = substr($w,0,3);
+					if(strlen($w) > 3) $nameArr[$k] = substr($w,0,4);
 				}
-				$fileName = implode(',',$nameArr);
+				$fileName = implode('',$nameArr);
 			}
 		}
 		else{
