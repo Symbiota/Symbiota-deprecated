@@ -21,7 +21,7 @@ if(!$collId && $collMap) $collId = $collMap['collid'];
 $isEditor = 0;
 $occid = 0;
 if($collMap){
-	if($IS_ADMIN){
+	if($isAdmin){
 		$isEditor = 1;
 	}
 	elseif(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
@@ -125,17 +125,8 @@ if($collMap){
 						</div>
 					</div>
 					<div style="clear:both;margin-left:10px;padding:3px 0px 0px 10px;">
-						<span>ID Confidence:</span>
-						<select name="confidenceranking" onchange="fieldChanged('confidenceranking')">
-							<?php
-							$idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High - verification requested', 6 => 'Medium - insignificant material', 5 => 'Medium', 4 => 'Medium - verification requested', 3 => 'Low - insignificant material', 2 => 'Low', 1 => 'Low - ID Requested', 0 => 'ID Requested');
-							foreach($idRankArr as $rankKey => $rankText){
-								echo '<option value="'.$rankKey.'" '.($rankKey==5?'SELECTED':'').'>'.$rankKey.' - '.$rankText.'</option>';
-							}
-							?>
-						</select>
-						<span style="margin-left:15px;">Family:</span>
-						<input name="family" type="text" size="30" maxlength="50" tabindex="0" />
+						<span>Family:</span>
+						<input type="text" name="family" size="30" maxlength="50" style="" tabindex="0" value="" />
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;">
