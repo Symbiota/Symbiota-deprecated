@@ -24,12 +24,11 @@ $idRanking = $occManager->getIdentificationRanking();
 
 $specImgArr = $occManager->getImageMap();  // find out if there are images in order to show/hide the button to display/hide images.
 
-$idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High - verification requested', 6 => 'Medium - insignificant material', 5 => 'Medium', 4 => 'Medium - verification requested', 3 => 'Low - insignificant material', 2 => 'Low', 1 => 'Low - ID Requested', 0 => 'ID Requested');
 ?>
 <div id="determdiv" style="width:795px;">
 	<div style="margin:15px 0px 40px 15px;">
-		<div style="font-weight:bold;text-decoration: underline;">
-			Current Identification Confidence of Specimen
+		<div>
+			<b><u>Identification Confidence Ranking</u></b>
 			<?php
 			if($editMode < 3){ 
 				?>
@@ -51,10 +50,18 @@ $idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High -
 							<?php 
 							$currentRanking = 5;
 							if($idRanking) $currentRanking = $idRanking['ranking'];
-							foreach($idRankArr as $rankKey => $rankText){
-								echo '<option value="'.$rankKey.'" '.($currentRanking==$rankKey?'SELECTED':'').'>'.$rankKey.' - '.$rankText.'</option>';
-							}
 							?>
+							<option value="10" <?php echo ($currentRanking==10?'SELECTED':''); ?>>10 - Absolute</option>
+							<option value="9" <?php echo ($currentRanking==9?'SELECTED':''); ?>>9 - High</option>
+							<option value="8" <?php echo ($currentRanking==8?'SELECTED':''); ?>>8 - High</option>
+							<option value="7" <?php echo ($currentRanking==7?'SELECTED':''); ?>>7 - High</option>
+							<option value="6" <?php echo ($currentRanking==6?'SELECTED':''); ?>>6 - Medium</option>
+							<option value="5" <?php echo ($currentRanking==5?'SELECTED':''); ?>>5 - Medium</option>
+							<option value="4" <?php echo ($currentRanking==4?'SELECTED':''); ?>>4 - Medium</option>
+							<option value="3" <?php echo ($currentRanking==3?'SELECTED':''); ?>>3 - Low</option>
+							<option value="2" <?php echo ($currentRanking==2?'SELECTED':''); ?>>2 - Low</option>
+							<option value="1" <?php echo ($currentRanking==1?'SELECTED':''); ?>>1 - Low</option>
+							<option value="0" <?php echo ($currentRanking==0?'SELECTED':''); ?>>0 - Unlikely</option>
 						</select>
 					</div>
 					<div style='margin:3px;'>
@@ -73,10 +80,21 @@ $idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High -
 			<?php
 		} 
 		?>
-		<div id="idrankdiv" style="margin:15px;display:block">
+		<div id="idrankdiv" style="margin:15px;">
 			<?php 
 			if($idRanking){
-				echo '<div><b>Rank: </b> '.$idRanking['ranking'].' - '.$idRankArr[$idRanking['ranking']].'</div>';
+				echo '<div>';
+				echo '<b>Rank: </b> '.$idRanking['ranking'];
+				if($idRanking['ranking'] < 4){
+					echo ' - low ';
+				}
+				elseif($idRanking['ranking'] < 8){
+					echo ' - medium ';
+				}
+				elseif($idRanking['ranking'] > 7){
+					echo ' - high ';
+				}
+				echo '</div>';
 				echo '<div><b>Set by:</b> '.($idRanking['username']?$idRanking['username']:'undefined').'</div>';
 				if($idRanking['notes']) echo '<div><b>Notes:</b> '.$idRanking['notes'].'</div>';
 			}
@@ -86,7 +104,7 @@ $idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High -
 			?>
 		</div>
 	</div>
-	<div style="clear:both;">
+	<div>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend><b>Determination History</b></legend>
 			<div style="float:right;">
@@ -153,11 +171,9 @@ $idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High -
 						<div style='margin:3px;'>
 							<b>Confidence of Determination:</b> 
 							<select name="confidenceranking">
-								<?php 
-								foreach($idRankArr as $rankKey => $rankText){
-									echo '<option value="'.$rankKey.'" '.($rankKey==5?'SELECTED':'').'>'.$rankKey.' - '.$rankText.'</option>';
-								}
-								?>
+								<option value="8">High</option>
+								<option value="5" selected>Medium</option>
+								<option value="2">Low</option>
 							</select>
 						</div>
 						<div style='margin:3px;'>
@@ -180,7 +196,7 @@ $idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High -
 							<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination
 						</div>
 						<div style='margin:3px;'>
-							<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Print Queue
+							<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
 						</div>
 						<?php 
 						global $fpEnabled;
@@ -203,7 +219,10 @@ $idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High -
 							if (isset($_GET['collectioncode']))
 								echo '<input type="hidden" name="collectioncode" value="'.$_GET['collectioncode'].'" />'; 
 							?>
-							<input type="submit" name="submitaction" value="Add New Determination" />
+							
+							<div style="float:left;">
+								<input type="submit" name="submitaction" value="Add New Determination" />
+							</div>
 						</div>
 					</fieldset>
 				</form>
@@ -302,7 +321,7 @@ $idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High -
 									<input type="text" name="sortsequence" value="<?php echo $detRec['sortsequence']; ?>" style="width:40px;" />
 								</div>
 								<div style='margin:3px;'>
-									<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Print Queue
+									<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
 								</div>
 								<div style='margin:15px;'>
 									<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
