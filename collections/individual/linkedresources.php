@@ -21,23 +21,23 @@ $indManager->setOccid($occid);
 <div id='innertext' style='width:95%;min-height:400px;clear:both;background-color:white;'>
 	<fieldset style="padding:20px;margin:15px;">
 		<legend><b>Species Checklist Relationships</b></legend>
-		<?php
+		<?php 	
 		$vClArr = $indManager->getVoucherChecklists();
 		if($vClArr){
-			echo '<div style="font-weight:bold"><u>Specimen serves as voucher within the following checklist(s)</u></div>';
+			echo '<div style="font-weight:bold"><u>Specimen voucher of the following checklists</u></div>';
 			echo '<ul style="margin:15px 0px 25px 0px;">';
 			foreach($vClArr as $id => $clName){
 				echo '<li>';
 				echo '<a href="../../checklists/checklist.php?showvouchers=1&cl='.$id.'" target="_blank">'.$clName.'</a>&nbsp;&nbsp;';
 				if(isset($USER_RIGHTS['ClAdmin']) && in_array($id,$USER_RIGHTS['ClAdmin'])){
-					echo '<a href="index.php?delvouch='.$id.'&occid='.$occid.'&tabindex=3" title="Delete voucher link" onclick="return confirm(\"Are you sure you want to remove this voucher link?\")"><img src="../../images/drop.png" style="width:12px;" /></a>';
+					echo '<a href="index.php?delvouch='.$id.'&occid='.$occid.'" title="Delete voucher link" onclick="return confirm(\"Are you sure you want to remove this voucher link?\")"><img src="../../images/drop.png" style="width:12px;" /></a>';
 				}
 				echo '</li>';
 			}
 			echo '</ul>';
 		}
 		else{
-			echo '<div style="margin:25px">Specimen has not been designated as a voucher for any checklists</>';
+			echo '<h3>Specimen has not been designated as a voucher for a species checklist</h3>';
 		}
 		if($IS_ADMIN || array_key_exists("ClAdmin",$USER_RIGHTS)){
 			?>
@@ -47,36 +47,49 @@ $indManager->setOccid($occid);
 					?>
 					<fieldset style='margin-top:20px;padding:15px;'>
 						<legend><b>New Voucher Assignment</b></legend>
-						<div style='margin:10px;'>
-							<form action="index.php" method="post" onsubmit="return verifyVoucherForm(this);">
-								<div>
-									Add as voucher to checklist: 
-									<input name='occid' type='hidden' value='<?php echo $occid; ?>' />
-									<input name='vtid' type='hidden' value='<?php echo $tid; ?>' />
-									<select name='vclid'>
-						  				<option value='0'>Select a Checklist</option>
-						  				<option value='0'>--------------------------</option>
-						  				<?php 
-							  			foreach($clArr as $clKey => $clValue){
-							  				echo "<option value='".$clKey."' ".($clid==$clKey?"SELECTED":"").">$clValue</option>\n";
-										}
-										?>
-									</select>
-								</div>
-								<div style='margin:5px 0px 0px 10px;'>
-									Notes: 
-									<input name='vnotes' type='text' size='50' title='Viewable to public' />
-								</div>
-								<div style='margin:5px 0px 0px 10px;'>
-									Editor Notes: 
-									<input name='veditnotes' type='text' size='50' title="Viewable only to checklist editors" />
-								</div>
-								<div>
-									<input name="tabindex" type="hidden" value="3" />
-									<input name="formsubmit" type="submit" value="Add Voucher" />
-								</div>
-							</form>
-						</div>
+						<?php
+						if($tid){
+							?>
+							<div style='margin:10px;'>
+								<form action="../../checklists/clsppeditor.php" method="post" onsubmit="return verifyVoucherForm(this);">
+									<div>
+										Add as voucher to checklist: 
+										<input name='voccid' type='hidden' value='<?php echo $occid; ?>'>
+										<input name='tid' type='hidden' value='<?php echo $tid; ?>'>
+										<select id='clid' name='clid'>
+							  				<option value='0'>Select a Checklist</option>
+							  				<option value='0'>--------------------------</option>
+							  				<?php 
+								  			foreach($clArr as $clKey => $clValue){
+								  				echo "<option value='".$clKey."' ".($clid==$clKey?"SELECTED":"").">$clValue</option>\n";
+											}
+											?>
+										</select>
+									</div>
+									<div style='margin:5px 0px 0px 10px;'>
+										Notes: 
+										<input name='vnotes' type='text' size='50' title='Viewable to public'>
+									</div>
+									<div style='margin:5px 0px 0px 10px;'>
+										Editor Notes: 
+										<input name='veditnotes' type='text' size='50' title='Viewable only to checklist editors'>
+									</div>
+									<div>
+										<input type='submit' name='action' value='Add Voucher'>
+									</div>
+								</form>
+							</div>
+							<?php 
+						}
+						else{
+							?>
+							<div style='margin:20px;'>
+								Unable to use this specimen record as a voucher because  
+								scientific name counld not be verified in the taxonomic thesaurus (misspelled?)
+							</div>
+							<?php 
+						}
+						?>
 					</fieldset>
 					<?php
 				}
@@ -107,7 +120,7 @@ $indManager->setOccid($occid);
 				echo '<ul>'.$displayStr.'</ul>';
 			}
 			else{
-				echo '<b>Occurrence is not linked to a dataset</b>';
+				echo '<h3>Occurrence is not linked to a dataset</h3>';
 			}
 			?>	
 			<fieldset style='padding:15px;margin-top:30px;'>
@@ -143,7 +156,6 @@ $indManager->setOccid($occid);
 						<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 						<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 						<input name="clid" type="hidden" value="<?php echo $clid; ?>" />
-						<input name="tabindex" type="hidden" value="3" />
 						<input name="formsubmit" type="submit" value="Link to Dataset" />
 					</div>
 				</form>
@@ -152,4 +164,5 @@ $indManager->setOccid($occid);
 		<?php
 	} 
 	?>
+	
 </div>
