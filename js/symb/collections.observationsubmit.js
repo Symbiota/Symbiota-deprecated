@@ -1,3 +1,5 @@
+var taxonValid = false;
+
 $(document).ready(function() {
 	$("#sciname").autocomplete({ 
 		source: "rpc/getspeciessuggest.php", 
@@ -14,6 +16,7 @@ $(document).ready(function() {
 					if(data){
 						f.scientificnameauthorship.value = data.author;
 						f.family.value = data.family;
+						taxonValid = true;
 						if(data.rankid < 220){
 							$( 'select[name=confidenceranking]' ).val(2);
 						}
@@ -23,9 +26,10 @@ $(document).ready(function() {
 					}
 					else{
 						$( 'select[name=confidenceranking]' ).val(5);
-						alert("Are you sure the scientific name is spelled correctly? If so, continue and the name will be indexed into the taxonomic thesaurus in the near future.");
+						alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
 						f.scientificnameauthorship.value = "";
 						f.family.value = "";
+						taxonValid = false;
 					}
 				});
 			}
@@ -94,7 +98,6 @@ function insertLatLng(f) {
 				if(lngEW == "W") lngDec = lngDec * -1; 
 				f.decimallatitude.value = Math.round(latDec*1000000)/1000000;
 				f.decimallongitude.value = Math.round(lngDec*1000000)/1000000;
-				toggle("dmsdiv");
 			}
 		}
 		else{
@@ -109,13 +112,18 @@ function insertLatLng(f) {
 function insertElevFt(f){
 	var elev = document.getElementById("elevft").value;
 	f.minimumelevationinmeters.value = Math.round(elev*.03048)*10;
-	toggle("elevftdiv");
 }
 
 function verifyObsForm(f){
-    if(f.sciname.value == "" && f.confidenceranking.value > 2){
-		window.alert("Enter an identification (e.g. scientific name, family, order, etc) OR select an ID Confidence of 0 (ID requested)");
+    if(f.sciname.value == ""){
+		window.alert("Observation must have an identification (scientific name) assigned to it, even if it is only to family rank.");
 		return false;
+    }
+    else{
+		if(!taxonValid){
+			alert("Scientific name invalid");
+			return false;
+		}
     }
     if(f.recordedby.value == ""){
 		window.alert("Observer field must have a value.");
@@ -294,14 +302,6 @@ function verifyLngValue(f){
 		alert('Decimal longitude value should be between -180 and 180 degrees');
 	}
 	verifyCoordinates(f);
-}
-
-function verifyPoliticalUnits(f){
-	var country = f.country.value;
-	var state = f.stateprovince.value;
-	if(country && state){
-		verifyCoordinates(f);
-	}
 }
 
 function verifyCoordinates(f){

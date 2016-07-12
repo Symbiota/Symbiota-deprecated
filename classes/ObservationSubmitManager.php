@@ -32,29 +32,28 @@ class ObservationSubmitManager {
 			//Get tid for scinetific name
 			$tid = 0;
 			$localitySecurity = (array_key_exists('localitysecurity',$postArr)?1:0);
-			if($postArr['sciname']){
-				$result = $this->conn->query('SELECT tid, securitystatus FROM taxa WHERE (sciname = "'.$postArr['sciname'].'")');
-				if($row = $result->fetch_object()){
-					$tid = $row->tid;
-					if($row->securitystatus > 0) $localitySecurity = $row->securitystatus;
-					if(!$localitySecurity){
-						//Check to see if species is rare or sensitive within a state
-						$sql = 'SELECT cl.tid '.
-							'FROM fmchecklists c INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid '. 
-							'WHERE c.type = "rarespp" AND c.locality = "'.$postArr['stateprovince'].'" AND cl.tid = '.$tid;
-						$rs = $this->conn->query($sql);
-						if($rs->num_rows){
-							$localitySecurity = 1;
-						}
+			$result = $this->conn->query('SELECT tid, securitystatus FROM taxa WHERE (sciname = "'.$postArr['sciname'].'")');
+			if($row = $result->fetch_object()){
+				$tid = $row->tid;
+				if($row->securitystatus > 0) $localitySecurity = $row->securitystatus;
+				if(!$localitySecurity){
+					//Check to see if species is rare or sensitive within a state
+					$sql = 'SELECT cl.tid '.
+						'FROM fmchecklists c INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid '. 
+						'WHERE c.type = "rarespp" AND c.locality = "'.$postArr['stateprovince'].'" AND cl.tid = '.$tid;
+					$rs = $this->conn->query($sql);
+					if($rs->num_rows){
+						$localitySecurity = 1;
 					}
 				}
-				else{
-					//Abort process
-					$this->errArr[] = 'ERROR: scientific name failed, contact admin to add name to thesaurus';
-					return;
-				}
 			}
-
+			else{
+				//Abort process
+				$this->errArr[] = 'ERROR: scientific name failed, contact admin to add name to thesaurus';
+				return;
+			}
+			
+			
 			$sql = 'INSERT INTO omoccurrences(collid, basisofrecord, family, sciname, scientificname, '.
 				'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
 				'identificationReferences, recordedBy, recordNumber, '.
@@ -67,7 +66,7 @@ class ObservationSubmitManager {
 			'"'.$this->cleanInStr($postArr['sciname']).'","'.
 			$this->cleanInStr($postArr['sciname'].' '.$postArr['scientificnameauthorship']).'",'.
 			($postArr['scientificnameauthorship']?'"'.$this->cleanInStr($postArr['scientificnameauthorship']).'"':'NULL').','.
-			($tid?$tid:'NULL').','.($postArr['taxonremarks']?'"'.$this->cleanInStr($postArr['taxonremarks']).'"':'NULL').','.
+			$tid.",".($postArr['taxonremarks']?'"'.$this->cleanInStr($postArr['taxonremarks']).'"':'NULL').','.
 			($postArr['identifiedby']?'"'.$this->cleanInStr($postArr['identifiedby']).'"':'NULL').','.
 			($postArr['dateidentified']?'"'.$this->cleanInStr($postArr['dateidentified']).'"':'NULL').','.
 			($postArr['identificationreferences']?'"'.$this->cleanInStr($postArr['identificationreferences']).'"':'NULL').','.
@@ -99,28 +98,25 @@ class ObservationSubmitManager {
 				//Link observation to checklist
 				if(isset($postArr['clid'])){
 					$clid = $postArr['clid'];
-					$finalTid = 0;
-					if($tid){
-						//If synonym is already linked, get tid of linked taxon. If not, then add using current tid
-						$sql = 'SELECT cltl.tid '.
-							'FROM fmchklsttaxalink cltl INNER JOIN taxstatus ts1 ON cltl.tid = ts1.tid '.
-							'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-							'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND cltl.clid = '.$clid.' AND ts2.tid = '.$tid;
-						$rs = $this->conn->query($sql);
-						while($r = $rs->fetch_object()){
-							$finalTid = $r->tid;
-							if($finalTid == $tid) break; 
-						}
-						$rs->free();
-						if(!$finalTid){
-							$sql = 'INSERT INTO fmchklsttaxalink(tid,clid) '.
-								'VALUES('.$tid.','.$clid.')';
-							$this->conn->query($sql);
-							$finalTid = $tid;
-						}
+					$sql = 'SELECT cltl.tid '.
+						'FROM fmchklsttaxalink cltl INNER JOIN taxstatus ts1 ON cltl.tid = ts1.tid '.
+						'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+						'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND cltl.clid = '.$clid.' AND ts2.tid = '.$tid;
+					$rs = $this->conn->query($sql);
+					$clTid = 0;
+					while($r = $rs->fetch_object()){
+						$clTid = $r->tid;
+						if($clTid == $tid) break; 
 					}
-					$sql = 'INSERT INTO fmvouchers(tid,clid,occid) '.
-						'VALUES('.($finalTid?$finalTid:'NULL').','.$clid.','.$newOccId.') ';
+					$rs->free();
+					if(!$clTid){
+						$sql = 'INSERT INTO fmchklsttaxalink(tid,clid) '.
+							'VALUES('.$tid.','.$clid.')';
+						$this->conn->query($sql);
+						$clTid = $tid;
+					}
+					$sql = 'INSERT INTO fmvouchers(tid,clid,occid,collector) '.
+						'VALUES('.$clTid.','.$clid.','.$newOccId.',"") ';
 					$this->conn->query($sql);
 				}
 				//Load images
