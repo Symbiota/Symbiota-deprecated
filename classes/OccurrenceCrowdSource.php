@@ -312,7 +312,7 @@ class OccurrenceCrowdSource {
 		return $retArr;
 	}
 
-	//Reveiw functions
+	//Review functions
 	public function getReviewArr($startIndex,$limit,$uid,$rStatus){
 		$retArr = array();
 		if($this->collid || $uid){

@@ -1022,7 +1022,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											</div>
 											<div>
 												<span><b>Applied Status:</b> <?php echo ($eArr['appliedstatus']?'applied':'not applied'); ?></span>
-												<span style="margin-left:30px;"><b>Reveiw Status:</b> <?php echo $reviewStr; ?></span>
+												<span style="margin-left:30px;"><b>Review Status:</b> <?php echo $reviewStr; ?></span>
 											</div>
 											<?php
 											$edArr = $eArr['edits'];
@@ -1057,7 +1057,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											</div>
 											<div>
 												<span><b>Applied Status:</b> <?php echo ($eArr['appliedstatus']?'applied':'not applied'); ?></span>
-												<span style="margin-left:30px;"><b>Reveiw Status:</b> <?php echo $reviewStr; ?></span>
+												<span style="margin-left:30px;"><b>Review Status:</b> <?php echo $reviewStr; ?></span>
 											</div>
 											<?php
 											$edArr = $eArr['edits'];
