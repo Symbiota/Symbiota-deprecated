@@ -43,7 +43,7 @@ $occManager->setOccId($occid);
 					</div>
 					<div>
 						<span><b>Applied Status:</b> <?php echo ($eArr['appliedstatus']?'applied':'not applied'); ?></span>
-						<span style="margin-left:30px;"><b>Reveiw Status:</b> <?php echo $reviewStr; ?></span>
+						<span style="margin-left:30px;"><b>Review Status:</b> <?php echo $reviewStr; ?></span>
 					</div>
 					<?php
 					$edArr = $eArr['edits'];
@@ -78,7 +78,7 @@ $occManager->setOccId($occid);
 					</div>
 					<div>
 						<span><b>Applied Status:</b> <?php echo ($eArr['appliedstatus']?'applied':'not applied'); ?></span>
-						<span style="margin-left:30px;"><b>Reveiw Status:</b> <?php echo $reviewStr; ?></span>
+						<span style="margin-left:30px;"><b>Review Status:</b> <?php echo $reviewStr; ?></span>
 					</div>
 					<?php
 					$edArr = $eArr['edits'];

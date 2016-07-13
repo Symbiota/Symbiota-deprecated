@@ -112,7 +112,7 @@ if($isEditor){
 				<?php 
 				if($occRecArr){
 					//Review conversions before submitting
-					//Reveiws need to be limited to a few hunred 
+					//Reviews need to be limited to a few hunred 
 					//More than 100 records can be batch processed, but without review 
 					
 					?>
