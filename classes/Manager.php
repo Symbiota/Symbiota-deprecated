@@ -90,7 +90,6 @@ class Manager  {
 	}
 
 	protected function encodeString($inStr){
-		global $charset;
 		$retStr = '';
 		if($inStr){
 			$retStr = $inStr;
