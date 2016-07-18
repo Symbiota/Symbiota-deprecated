@@ -192,15 +192,15 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</div>
 								</div>
 								<div id="advfilterdiv" style="clear:both;margin-top:5px;display:<?php echo ($qSciname || $qVStatus || $qDisplayAll?'block':'none'); ?>;">
-									<div style="float:left;margin-right:15px;">
+									<div style="">
 										<b>Verification status:</b>
-										<input id="qvstatus" name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="width:175px;" />
+										<input id="qvstatus" name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="width:200px;" />
+										<span style="margin-left:15px;">
+											<b>Family/Genus:</b>
+											<input name="qsciname" type="text" value="<?php echo $qSciname; ?>" style="width:175px;" />
+										</span>
 									</div>
-									<div style="float:left;">
-										<b>Family/Genus:</b>
-										<input name="qsciname" type="text" value="<?php echo $qSciname; ?>" style="width:150px;" />
-									</div>
-									<div style="clear:both;margin-top:5px;">
+									<div style="margin-top:5px;">
 										<input name="qdisplayall" type="checkbox" value="1" <?php echo ($qDisplayAll?'checked':''); ?> />
 										Including previously georeferenced records
 									</div>
@@ -436,11 +436,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											<input name="qcountry" type="hidden" value="<?php echo $qCountry; ?>" />
 											<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
 											<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />
-											<input name="qmunicipality" type="hidden" value="<?php echo $qMunicipality; ?>" />
 											<input name="qlocality" type="hidden" value="<?php echo $qLocality; ?>" />
 											<input name="qsciname" type="hidden" value="<?php echo $qSciname; ?>" />
 											<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
-											<input name="qprocessingstatus" type="hidden" value="<?php echo $qProcessingStatus; ?>" />
 											<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
 											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										</td>
