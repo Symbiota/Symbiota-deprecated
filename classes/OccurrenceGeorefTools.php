@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class OccurrenceGeorefTools {
 
@@ -68,6 +68,12 @@ class OccurrenceGeorefTools {
 				}
 				else{
 					$orderBy .= 'municipality,';
+				}
+				if(array_key_exists('qprocessingstatus',$this->qryVars) && $this->qryVars['qprocessingstatus']){
+					$sql .= 'AND (processingstatus = "'.$this->qryVars['qprocessingstatus'].'") ';
+				}
+				else{
+					$orderBy .= 'processingstatus,';
 				}
 				if(array_key_exists('qlocality',$this->qryVars) && $this->qryVars['qlocality']){
 					$sql .= 'AND (locality LIKE "%'.$this->qryVars['qlocality'].'%") ';
@@ -192,7 +198,7 @@ class OccurrenceGeorefTools {
 	public function getCoordStatistics(){
 		$retArr = array();
 		$totalCnt = 0;
-		$sql = 'SELECT COUNT(occid) AS cnt '.
+		$sql = 'SELECT COUNT(*) AS cnt '.
 			'FROM omoccurrences '.
 			'WHERE (collid = '.$this->collId.')';
 		$rs = $this->conn->query($sql);
@@ -201,45 +207,16 @@ class OccurrenceGeorefTools {
 		}
 		$rs->free();
 
-		$sql = 'SELECT COUNT(occid) AS cnt '.
+		//Full count
+		$sql2 = 'SELECT COUNT(occid) AS cnt '.
 			'FROM omoccurrences '.
 			'WHERE (collid = '.$this->collId.') AND (decimalLatitude IS NULL) AND (georeferenceVerificationStatus IS NULL) ';
-		$k = '';
-		$limitedSql = '';
-		if($this->qryVars){
-			if(array_key_exists('qcounty',$this->qryVars)){
-				$limitedSql = 'AND county = "'.$this->qryVars['qcounty'].'" ';
-				$k = $this->qryVars['qcounty'];
+		if($rs2 = $this->conn->query($sql2)){
+			if($r2 = $rs2->fetch_object()){
+				$retArr['total'] = $r2->cnt;
+				$retArr['percent'] = round($r2->cnt*100/$totalCnt,1);
 			}
-			elseif(array_key_exists('qmunicipality',$this->qryVars)){
-				$limitedSql = 'AND municipality = "'.$this->qryVars['qmunicipality'].'" ';
-				$k = $this->qryVars['qmunicipality'];
-			}
-			elseif(array_key_exists('qstate',$this->qryVars)){
-				$limitedSql = 'AND stateprovince = "'.$this->qryVars['qstate'].'" ';
-				$k = $this->qryVars['qstate'];
-			}
-			elseif(array_key_exists('qcountry',$this->qryVars)){
-				$limitedSql = 'AND country = "'.$this->qryVars['qcountry'].'" ';
-				$k = $this->qryVars['qcountry'];
-			}
-		}
-		//Count limited to country, state, or county
-		if($k){
-			if($rs = $this->conn->query($sql.$limitedSql)){
-				if($r = $rs->fetch_object()){
-					$retArr[$k] = $r->cnt;
-				}
-				$rs->close();
-			}
-		}
-		//Full count
-		if($rs = $this->conn->query($sql)){
-			if($r = $rs->fetch_object()){
-				$retArr['Total Number'] = $r->cnt;
-				$retArr['Total Percentage'] = round($r->cnt*100/$totalCnt,1);
-			}
-			$rs->close();
+			$rs2->free();
 		}
 
 		return $retArr;
@@ -331,13 +308,14 @@ class OccurrenceGeorefTools {
 	public function getCountryArr(){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT country '.
-			'FROM omoccurrences WHERE collid = '.$this->collId.' ORDER BY country';
+			'FROM omoccurrences WHERE collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$cStr = trim($r->country);
 			if($cStr) $retArr[] = $cStr;
 		}
 		$rs->free();
+		sort($retArr);
 		return $retArr;
 	}
 
@@ -348,13 +326,13 @@ class OccurrenceGeorefTools {
 		/*if($countryStr){
 			$sql .= 'AND country = "'.$countryStr.'" ';
 		}*/
-		$sql .= 'ORDER BY stateprovince';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$sStr = trim($r->stateprovince);
 			if($sStr) $retArr[] = $sStr;
 		}
 		$rs->free();
+		sort($retArr);
 		return $retArr;
 	}
 
@@ -368,7 +346,6 @@ class OccurrenceGeorefTools {
 		if($stateStr){
 			$sql .= 'AND stateprovince = "'.$stateStr.'" ';
 		}
-		$sql .= 'ORDER BY county';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -376,6 +353,7 @@ class OccurrenceGeorefTools {
 			if($cStr) $retArr[] = $cStr;
 		}
 		$rs->free();
+		sort($retArr);
 		return $retArr;
 	}
 	
@@ -389,7 +367,6 @@ class OccurrenceGeorefTools {
 		if($stateStr){
 			$sql .= 'AND stateprovince = "'.$stateStr.'" ';
 		}
-		$sql .= 'ORDER BY municipality';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -397,6 +374,21 @@ class OccurrenceGeorefTools {
 			if($mStr) $retArr[] = $mStr;
 		}
 		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+	
+	public function getProcessingStatus(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT processingstatus '.
+			'FROM omoccurrences '.
+			'WHERE collid = '.$this->collId;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			if($r->processingstatus) $retArr[] = $r->processingstatus;
+		}
+		$rs->free();
+		sort($retArr);
 		return $retArr;
 	}
 
