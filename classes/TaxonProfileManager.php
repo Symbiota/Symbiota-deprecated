@@ -12,11 +12,14 @@ class TaxonProfileManager {
 	private $author;
 	private $parentTid;
 	private $family;
+    private $ambSyn = false;
+    private $acceptedName = false;
 	private $familyVern;
 	private $rankId;
 	private $language;
 	private $langArr = array();
-	private $securityStatus;
+    private $synTidArr = array();
+    private $securityStatus;
 	private $displayLocality = 1;
 
 	private $clName;
@@ -47,61 +50,88 @@ class TaxonProfileManager {
  	public function __destruct(){
 		if(!($this->con === null)) $this->con->close();
 	}
- 	
- 	public function setTaxon($t,$isFinal=0){
- 		$t = trim($t);
-		$sql = 'SELECT t.TID, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted '. 
-			'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID '.
-			'WHERE (ts.taxauthid = '.($this->taxAuthId?$this->taxAuthId:'1').') ';
-		if(is_numeric($t)){
-			$sql .= 'AND (t.TID = '.$this->con->real_escape_string($t).') ';
-		}
-		else{
-			$sql .= 'AND (t.SciName = "'.$this->con->real_escape_string($t).'") ';
-		}
-		//echo $sql;
-		$result = $this->con->query($sql);
-		if($row = $result->fetch_object()){
-			$this->submittedTid = $row->TID;
-			$this->submittedSciName = $row->SciName;
-			$this->submittedAuthor = $row->Author;
-			$this->family = $row->family;
-			$this->author = $row->Author;
-			$this->rankId = $row->RankId;
-			$this->parentTid = $row->ParentTID;
-			$this->securityStatus = $row->SecurityStatus;
-			
-			if($this->submittedTid == $row->TidAccepted){
-				$this->tid = $this->submittedTid;
-				$this->sciName = $this->submittedSciName;
-			}
-			else{
-				$this->tid = $row->TidAccepted;
-				$this->setAccepted();
-			}
 
-			if($this->rankId >= 140 && $this->rankId < 220){
-				//For family and genus hits
-				$this->setSppData();
-			}
-		}
-		else{
-			//Try to resolve whether author is embedded into sciname
-			$sn = '';
-			if(!$isFinal && preg_match('/^([A-Z]+[a-z]*\s+x{0,1}\s{0,1}[a-z]+)/',$t,$m)){
-				$sn = $m[1];
-				if(preg_match('/\s{1}var\.\s+([a-z]+)/',$t,$m)){
-					$sn .= ' var. '.$m[1];
-				}
-				elseif(preg_match('/\s+(s[ub]*sp\.)\s+([a-z]+)/',$t,$m)){
-					$sn .= ' '.$m[1].' '.$m[2];
-				}
-				$this->setTaxon($sn,1);
-			}
-			else{
-				$this->sciName = "unknown";
-			}
-		}
+    public function setTaxon($t,$isFinal=0){
+ 		$t = trim($t);
+        $sql = 'SELECT t.TID, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted, t2.SciName AS synName '.
+            'FROM taxstatus AS ts INNER JOIN taxa AS t ON ts.tid = t.TID '.
+            'LEFT JOIN taxa AS t2 ON ts.TidAccepted = t2.TID '.
+            'WHERE (ts.taxauthid = '.($this->taxAuthId?$this->taxAuthId:'1').') ';
+        if(is_numeric($t)){
+            $sql .= 'AND (t.TID = '.$this->con->real_escape_string($t).') ';
+        }
+        else{
+            $sql .= 'AND (t.SciName = "'.$this->con->real_escape_string($t).'") ';
+        }
+        $sql .= 'ORDER BY synName ';
+		//echo $sql;
+        $result = $this->con->query($sql);
+        if($result->num_rows > 1){
+            $this->ambSyn = true;
+            while($row = $result->fetch_object()){
+                if($row->TID == $row->TidAccepted){
+                    $this->acceptedName = true;
+                }
+                $this->submittedTid = $row->TID;
+                $this->submittedSciName = $row->SciName;
+                $this->submittedAuthor = $row->Author;
+                $this->family = $row->family;
+                $this->author = $row->Author;
+                $this->rankId = $row->RankId;
+                $this->parentTid = $row->ParentTID;
+                $this->securityStatus = $row->SecurityStatus;
+                if($row->synName != $row->SciName) {
+                    $this->synTidArr[$row->TidAccepted] = $row->synName;
+                }
+            }
+            $this->tid = $this->submittedTid;
+            $this->sciName = $this->submittedSciName;
+
+            if($this->rankId >= 140 && $this->rankId < 220){
+                //For family and genus hits
+                $this->setSppData();
+            }
+        }
+        else{
+            if ($row = $result->fetch_object()) {
+                $this->submittedTid = $row->TID;
+                $this->submittedSciName = $row->SciName;
+                $this->submittedAuthor = $row->Author;
+                $this->family = $row->family;
+                $this->author = $row->Author;
+                $this->rankId = $row->RankId;
+                $this->parentTid = $row->ParentTID;
+                $this->securityStatus = $row->SecurityStatus;
+
+                if ($this->submittedTid == $row->TidAccepted) {
+                    $this->tid = $this->submittedTid;
+                    $this->sciName = $this->submittedSciName;
+                } else {
+                    $this->tid = $row->TidAccepted;
+                    $this->setAccepted();
+                }
+
+                if ($this->rankId >= 140 && $this->rankId < 220) {
+                    //For family and genus hits
+                    $this->setSppData();
+                }
+            }
+            else{
+                //Try to resolve whether author is embedded into sciname
+                $sn = '';
+                if (!$isFinal && preg_match('/^([A-Z]+[a-z]*\s+x{0,1}\s{0,1}[a-z]+)/', $t, $m)) {
+                    $sn = $m[1];
+                    if (preg_match('/\s{1}var\.\s+([a-z]+)/', $t, $m)) {
+                        $sn .= ' var. ' . $m[1];
+                    } elseif (preg_match('/\s+(s[ub]*sp\.)\s+([a-z]+)/', $t, $m)) {
+                        $sn .= ' ' . $m[1] . ' ' . $m[2];
+                    }
+                    $this->setTaxon($sn, 1);
+                } else {
+                    $this->sciName = "unknown";
+                }
+            }
+        }
 		$result->close();
  	}
  	
@@ -657,8 +687,20 @@ class TaxonProfileManager {
  	public function getParentTid(){
  		return $this->parentTid;
  	}
- 
- 	public function isAccepted(){
+
+    public function getAmbSyn(){
+        return $this->ambSyn;
+    }
+
+    public function getAcceptance(){
+        return $this->acceptedName;
+    }
+
+    public function getSynonymArr(){
+        return $this->synTidArr;
+    }
+
+    public function isAccepted(){
  		if($this->tid == $this->submittedTid){
  			return true;
  		}

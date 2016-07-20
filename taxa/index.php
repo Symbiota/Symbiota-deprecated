@@ -22,6 +22,9 @@ if($taxonValue) {
 	$taxonManager->setTaxon($taxonValue);
 	$taxonManager->setAttributes();
 }
+$ambiguous = $taxonManager->getAmbSyn();
+$acceptedName = $taxonManager->getAcceptance();
+$synonymArr = $taxonManager->getSynonymArr();
 $spDisplay = $taxonManager->getDisplayName();
 $taxonRank = $taxonManager->getRankId();
 $links = $taxonManager->getTaxaLinks();
@@ -100,7 +103,24 @@ if($taxonManager->getSciName() != "unknown"){
 			 	}
 			 	?>
 			</div>
-			<?php 
+			<?php
+			if($ambiguous){
+				$synLinkStr = '';
+				$explanationStr = '';
+				foreach($synonymArr as $synTid => $sName){
+					$synLinkStr .= '<a href="index.php?taxon='.$synTid.'&taxauthid='.$taxAuthId.'&cl='.$clValue.'&proj='.$projValue.'&lang='.$lang.'">'.$sName.'</a>, ';
+				}
+				$synLinkStr = substr($synLinkStr,0,-2);
+				if($acceptedName){
+					$explanationStr = $LANG['AMB_ACCEPTED'];
+				}
+				else{
+					$explanationStr = $LANG['AMB_UNACCEPTED'];
+				}
+				echo "<div style='float:left;font-weight:bold;margin:10px;clear:both;'>";
+				echo $explanationStr.$synLinkStr;
+				echo '</div>';
+			}
 			if($isEditor){
 				?>
 				<div style="float:right;">
