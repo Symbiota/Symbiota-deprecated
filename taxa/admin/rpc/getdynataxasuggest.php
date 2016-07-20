@@ -10,7 +10,7 @@
 	$rankHigh = array_key_exists('rhigh',$_REQUEST)?$con->real_escape_string($_REQUEST['rhigh']):0;
 
 	$sqlWhere = '';
-	$sql = 'SELECT t.tid, t.sciname FROM taxa t ';
+	$sql = 'SELECT DISTINCT t.tid, t.sciname FROM taxa t ';
 	if($taxAuthId){
 		$sql .= 'INNER JOIN taxstatus ts ON t.tid = ts.tid ';
 		$sqlWhere .= 'AND ts.taxauthid = '.$taxAuthId.' ';
