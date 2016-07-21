@@ -56,7 +56,7 @@ class ImageCleaner{
 		else{
 			$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
 			'INNER JOIN images i ON o.occid = i.occid '.
-			'WHERE (i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.url = "empty")';
+			'WHERE (i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.url = "empty") OR (i.url LIKE "processing%")';
 		}
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -86,16 +86,16 @@ class ImageCleaner{
 
 		$sql = '';
 		if($collid){
-			$sql = 'SELECT i.imgid, i.url, i.originalurl, o.catalognumber '.
+			$sql = 'SELECT i.imgid, i.url, i.originalurl, i.thumbnailurl, o.catalognumber '.
 				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 				'WHERE (o.collid = '.$collid.') ';
 		}
 		else{
-			$sql = 'SELECT i.imgid, i.url, i.originalurl '.
+			$sql = 'SELECT i.imgid, i.url, i.originalurl, i.thumbnailurl '.
 				'FROM images i '.
 				'WHERE (i.occid IS NULL) ';
 		}
-		$sql .= 'AND ((i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.thumbnailurl LIKE "processing%")) '.
+		$sql .= 'AND ((i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.thumbnailurl LIKE "processing%") OR (i.url LIKE "processing%") OR (i.url = "empty")) '.
 			'ORDER BY RAND()';
 		//echo $sql; exit;
 		$result = $this->conn->query($sql);
@@ -114,8 +114,8 @@ class ImageCleaner{
 			$testSql = 'SELECT thumbnailurl, url FROM images WHERE (imgid = '.$imgId.') FOR UPDATE ';
 			$textRS = $this->conn->query($testSql);
 			if($testR = $textRS->fetch_object()){
-				if(!$testR->thumbnailurl || (substr($testR->thumbnailurl,0,10) == 'processing' && $testR->thumbnailurl != 'processing '.date('Y-m-d'))){
-					$tagSql = 'UPDATE images SET thumbnailurl = "processing '.date('Y-m-d').'" '.
+				if(!$testR->thumbnailurl || ($testR->url == 'empty') || (substr($testR->url,0,10) == 'processing' && $testR->url != 'processing '.date('Y-m-d'))){
+					$tagSql = 'UPDATE images SET url = "processing '.date('Y-m-d').'" '.
 						'WHERE (imgid = '.$imgId.')';
 					$this->conn->query($tagSql);
 				}
@@ -173,10 +173,7 @@ class ImageCleaner{
 					}
 				}
 				else{
-					$this->errorStr = 'ERROR building thumbnail: '.$imgManager->getErrStr();
-					$errSql = 'UPDATE images SET thumbnailurl = "bad url" WHERE thumbnailurl IS NULL AND imgid = '.$imgId;
-					$this->conn->query($errSql);
-					$status = false;
+					$imgTnUrl = $row->thumbnailurl;
 				}
 				
 				if($status && $imgTnUrl && $imgManager->uriExists($imgTnUrl)){
@@ -234,6 +231,51 @@ class ImageCleaner{
 		}
 		$result->free();
 		if($this->verbose) echo '</ol>';
+	}
+
+	//URL testing 
+	public function testByCollid($collid){
+		$sql = 'SELECT i.imgid, i.url, i.thumbnailurl, i.originalurl '.
+				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+				'WHERE o.collid IN('.$collid.')';
+		return $this->testUrls($sql);
+	}
+	
+	public function testByImgid($imgidStr){
+	
+	
+	}
+	
+	private function testUrls($sql){
+		$status = true;
+		$badUrlArr = array();
+		if(!$sql){
+			$this->errorStr = 'SQL string is NULL';
+			return false;
+		}
+		$imgManager = new ImageShared();
+		$rs = $this->conn->query($sql);
+		if($rs){
+			while($r = $rs->fetch_object()){
+				if(!$imgManager->uriExists($r->url)) $badUrlArr[$r->imgid]['url'] = $r->url;
+				if(!$imgManager->uriExists($r->thumbnailurl)) $badUrlArr[$r->imgid]['tn'] = $r->thumbnailurl;
+				if(!$imgManager->uriExists($r->originalurl)) $badUrlArr[$r->imgid]['lg'] = $r->originalurl;
+			}
+			$rs->free();
+		}
+		else{
+			$this->errorStr = 'Issue with connection or SQL: '.$sql;
+			return false;
+		}
+		//Output results (needs to be extended)
+		foreach($badUrlArr as $imgid => $badUrls){
+			echo $imgid.', ';
+			echo (isset($badUrls['url'])?$badUrls['url']:'').',';
+			echo (isset($badUrls['tn'])?$badUrls['tn']:'').',';
+			echo (isset($badUrls['lg'])?$badUrls['lg']:'').',';
+			echo '<br/>';
+		}
+		return $status;
 	}
 
 	//Setters and getters
