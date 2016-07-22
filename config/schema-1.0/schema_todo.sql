@@ -113,9 +113,9 @@ ALTER TABLE `omoccurassococcurrences`
   ADD CONSTRAINT `FK_occurassoc_occid`
     FOREIGN KEY (`occid`)   REFERENCES `omoccurrences` (`occid`)    ON DELETE CASCADE    ON UPDATE CASCADE,
   ADD CONSTRAINT `FK_occurassoc_occidassoc`
-    FOREIGN KEY (`occidassociate`)    REFERENCES `omoccurrences` (`occid`)    ON DELETE CASCADE    ON UPDATE CASCADE,
+    FOREIGN KEY (`occidassociate`)    REFERENCES `omoccurrences` (`occid`)    ON DELETE SET NULL    ON UPDATE CASCADE,
   ADD CONSTRAINT `FK_occurassoc_tid`
-    FOREIGN KEY (`tid`)  REFERENCES `taxa` (`TID`)  ON DELETE RESTRICT  ON UPDATE CASCADE,
+    FOREIGN KEY (`tid`)  REFERENCES `taxa` (`TID`)  ON DELETE SET NULL  ON UPDATE CASCADE,
   ADD CONSTRAINT `FK_occurassoc_uidmodified`
     FOREIGN KEY (`modifieduid`)  REFERENCES `users` (`uid`)  ON DELETE SET NULL  ON UPDATE CASCADE,
   ADD CONSTRAINT `FK_occurassoc_uidcreated`
