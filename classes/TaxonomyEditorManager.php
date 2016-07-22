@@ -770,6 +770,10 @@ class TaxonomyEditorManager{
 			}
 			
 			//Vouchers and checklists
+			$sql ='UPDATE IGNORE fmchklsttaxalink SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			if(!$this->conn->query($sql)){
+				$statusStr .= 'ERROR transferring checklist links ('.$this->conn->error.')<br/>';
+			}
 			$sql ='UPDATE IGNORE fmvouchers SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
 			if(!$this->conn->query($sql)){
 				$statusStr .= 'ERROR transferring vouchers ('.$this->conn->error.')<br/>';
@@ -778,11 +782,11 @@ class TaxonomyEditorManager{
 			if(!$this->conn->query($sql)){
 				$statusStr .= 'ERROR deleting leftover vouchers ('.$this->conn->error.')<br/>';
 			}
-			$sql ='UPDATE IGNORE fmchklsttaxalink SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			$sql ='DELETE FROM fmchklsttaxalink WHERE tid = '.$this->tid;
 			if(!$this->conn->query($sql)){
-				$statusStr .= 'ERROR transferring checklist links ('.$this->conn->error.')<br/>';
+				$statusStr .= 'ERROR deleting leftover checklist links ('.$this->conn->error.')<br/>';
 			}
-
+				
 			//Key descriptions
 			$sql ='UPDATE IGNORE kmdescr SET tid = '.$targetTid.' WHERE inherited IS NULL AND tid = '.$this->tid;
 			if(!$this->conn->query($sql)){
@@ -872,10 +876,10 @@ class TaxonomyEditorManager{
 
 		//Delete taxon
 		$statusStrFinal = 'SUCCESS: taxon deleted!<br/>';
-		$sql ='DELETE FROM taxstatus WHERE tid = '.$this->tid;
+		$sql ='DELETE FROM taxstatus WHERE (tid = '.$this->tid.') OR (tidaccepted = '.$this->tid.')';
 		if($this->conn->query($sql)){
 			//Delete taxon
-			$sql ='DELETE FROM taxa WHERE tid = '.$this->tid;
+			$sql ='DELETE FROM taxa WHERE (tid = '.$this->tid.')';
 			if(!$this->conn->query($sql)){
 				$statusStrFinal = 'ERROR attempting to delete taxon: '.$this->conn->error.'<br/>';
 				//Reinstate taxstatus record
