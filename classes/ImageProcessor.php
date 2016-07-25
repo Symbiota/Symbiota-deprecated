@@ -165,7 +165,7 @@ class ImageProcessor {
 	//iDigBio Image ingestion processing functions
 	public function processiDigBioOutput($pmTerm){
 		$status = '';
-		$idigbioImageUrl = 'http://media.idigbio.org/lookup/images/';
+		$idigbioImageUrl = 'http://api.idigbio.org/v2/media/';
 		$this->initProcessor('idigbio');
 		$collStr = $this->collArr['instcode'].($this->collArr['collcode']?'-'.$this->collArr['collcode']:'');
 		$this->logOrEcho('Starting image processing for '.$collStr.' ('.date('Y-m-d h:i:s A').')');
