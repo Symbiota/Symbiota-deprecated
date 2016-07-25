@@ -1937,8 +1937,7 @@ class OccurrenceEditorManager {
 		global $charset;
 		$retStr = $inStr;
 		//Get rid of curly quotes
-        //TODO the following search array should be checked - leaving as-was but I doubt this is functioning as intended
-        $search = array("í", "ë", "`", "î", "ì");
+		$search = array("�", "�", "`", "�", "�");
 		$replace = array("'", "'", "'", '"', '"');
 		$inStr= str_replace($search, $replace, $inStr);
 
