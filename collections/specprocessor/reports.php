@@ -1,7 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
-header("Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST['collid'];
