@@ -29,7 +29,7 @@ class OccurrenceEditorManager {
 		else{
 			$this->conn = MySQLiConnectionFactory::getCon("write");
 		}
-		$this->occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
+		$this->occFieldArr = array('dbpk', 'catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
 			'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 			'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
 			'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
@@ -1543,7 +1543,7 @@ class OccurrenceEditorManager {
 			'notes = '.($genArr['notes']?'"'.$this->cleanInStr($genArr['notes']).'"':'NULL').' '.
 			'WHERE idoccurgenetic = '.$genArr['genid'];
 		if(!$this->conn->query($sql)){
-			return 'ERROR editing genetic resource #'.$id.': '.$this->conn->error;
+			return 'ERROR editing genetic resource #'.$genArr['genid'].': '.$this->conn->error;
 		}
 		return 'Genetic resource editted successfully';
 	}
@@ -1914,7 +1914,7 @@ class OccurrenceEditorManager {
 		global $charset;
 		$retStr = $inStr;
 		//Get rid of curly quotes
-		$search = array("’", "‘", "`", "”", "“");
+		$search = array("ï¿½", "ï¿½", "`", "ï¿½", "ï¿½");
 		$replace = array("'", "'", "'", '"', '"');
 		$inStr= str_replace($search, $replace, $inStr);
 
