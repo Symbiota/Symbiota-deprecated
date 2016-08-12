@@ -776,10 +776,7 @@ class OccurrenceManager{
 				}
 				?>
 			</table>
-			<div style="float:right;position:absolute;top:<?php echo count($collArr)*5; ?>px;right:0px;">
-				<input type="submit" class="searchcollnextbtn" value="" title="" />
-			</div>
-			<?php 
+			<?php
 			if(count($collArr) > 40){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*15; ?>px;right:0px;">
