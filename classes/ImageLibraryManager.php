@@ -166,11 +166,12 @@ class ImageLibraryManager{
 	}
 	
 	public function outputFullMapCollArr($dbArr,$occArr,$defaultCatid = 0){
+		global $DEFAULTCATID;
 		$collCnt = 0;
 		if(isset($occArr['cat'])){
 			$catArr = $occArr['cat'];
 			?>
-			<table>
+			<table style="float:left;width:80%;">
 			<?php 
 			foreach($catArr as $catid => $catArr){
 				$name = $catArr["name"];
@@ -178,15 +179,15 @@ class ImageLibraryManager{
 				$idStr = $this->collArrIndex.'-'.$catid;
 				?>
 				<tr>
-					<td>
+					<td style="padding:6px;width:25px;">
+						<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" <?php echo ((in_array($catid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
+					</td>
+					<td style="padding:9px 5px;width:10px;">
 						<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
-							<img id="plus-<?php echo $idStr; ?>" src="../images/plus_sm.png" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus_sm.png" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
+							<img id="plus-<?php echo $idStr; ?>" src="../images/plus_sm.png" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'':'display:none;') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus_sm.png" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'display:none;':'') ?>" />
 						</a>
 					</td>
-					<td>
-						<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" <?php echo ((in_array($catid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> /> 
-					</td>
-					<td>
+					<td style="padding-top:8px;">
 			    		<span style='text-decoration:none;color:black;font-size:14px;font-weight:bold;'>
 				    		<a href = '../collections/misc/collprofiles.php?catid=<?php echo $catid; ?>' target="_blank" ><?php echo $name; ?></a>
 				    	</span>
@@ -194,8 +195,8 @@ class ImageLibraryManager{
 				</tr>
 				<tr>
 					<td colspan="3">
-						<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px 0px;">
-							<table style="margin-left:15px;">
+						<div id="cat-<?php echo $idStr; ?>" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset;">
+							<table>
 						    	<?php 
 								foreach($catArr as $collid => $collName2){
 						    		?>
@@ -241,7 +242,7 @@ class ImageLibraryManager{
 		if(isset($occArr['coll'])){
 			$collArr = $occArr['coll'];
 			?>
-			<table>
+			<table style="float:left;width:80%;">
 			<?php 
 			foreach($collArr as $collid => $cArr){
 				?>
