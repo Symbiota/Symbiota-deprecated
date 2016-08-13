@@ -115,6 +115,9 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 					else{
 						echo '<legend><b>Download Specimen Records</b></legend>';
 					}
+					if(!$stArrCollJson && !$stArrSearchJson){
+						echo '<div style="color:red;font-weight:bold;">An error occurred in retrieving your search parameters. Please redo the search and navigate back to this page.</div>';
+					}
 					?>
 					<table>
 						<?php 
@@ -224,7 +227,7 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 									<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilterCode; ?>" />
 									<input name="jsoncollstarr" type="hidden" value='<?php echo $stArrCollJson; ?>' />
 									<input name="starr" type="hidden" value='<?php echo $stArrSearchJson; ?>' />
-									<input type="submit" name="submitaction" value="Download Data" />
+									<input type="submit" name="submitaction" value="Download Data" <?php echo (!$stArrCollJson && !$stArrSearchJson?'disabled ':''); ?>/>
 								</div>
 							</td>
 						</tr>
