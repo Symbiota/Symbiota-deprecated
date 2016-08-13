@@ -149,6 +149,8 @@ class ChecklistManager {
 		//Get species list
 		$familyPrev="";$genusPrev="";$speciesPrev="";$taxonPrev="";
 		$tidReturn = Array();
+        $genusCntArr = Array();
+        $familyCntArr = Array();
 		if($this->showImages && $retLimit) $retLimit = $this->imageLimit;
 		if(!$this->basicSql) $this->setClSql();
 		$result = $this->conn->query($this->basicSql);
@@ -185,11 +187,17 @@ class ChecklistManager {
 					$this->taxaList[$tid]["author"] = $this->cleanOutStr($row->author);
 				}
     		}
-    		if($family != $familyPrev) $this->familyCount++;
-    		$familyPrev = $family;
-    		if($taxonTokens[0] != $genusPrev) $this->genusCount++;
+    		//if($family != $familyPrev) $this->familyCount++;
+            if(!in_array($family,$familyCntArr)){
+                $familyCntArr[] = $family;
+            }
+            if(!in_array($taxonTokens[0],$genusCntArr)){
+                $genusCntArr[] = $taxonTokens[0];
+            }
+    		//$familyPrev = $family;
+    		//if($taxonTokens[0] != $genusPrev) $this->genusCount++;
 			$this->filterArr[$taxonTokens[0]] = "";
-    		$genusPrev = $taxonTokens[0];
+    		//$genusPrev = $taxonTokens[0];
     		if(count($taxonTokens) > 1 && $taxonTokens[0]." ".$taxonTokens[1] != $speciesPrev){
     			$this->speciesCount++;
     			$speciesPrev = $taxonTokens[0]." ".$taxonTokens[1];
@@ -199,6 +207,8 @@ class ChecklistManager {
     		}
     		$taxonPrev = implode(" ",$taxonTokens);
 		}
+        $this->familyCount = count($familyCntArr);
+        $this->genusCount = count($genusCntArr);
 		$this->filterArr = array_keys($this->filterArr);
 		sort($this->filterArr);
 		$result->free();
