@@ -834,11 +834,37 @@ class CollectionProfileManager {
 		return $statArr;
 	}
 
+    public function getOrderStatsDataArr($collId){
+        $statsArr = Array();
+        $sql = 'SELECT t.SciName, COUNT(o.occid) AS SpecimensPerOrder, COUNT(o.decimalLatitude) AS GeorefSpecimensPerOrder, '.
+            'COUNT(CASE WHEN t2.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerOrder, '.
+            'COUNT(CASE WHEN t2.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerOrder '.
+            'FROM omoccurrences AS o LEFT JOIN taxaenumtree AS e ON o.tidinterpreted = e.tid '.
+            'LEFT JOIN taxa AS t ON e.parenttid = t.TID '.
+            'LEFT JOIN taxa AS t2 ON o.tidinterpreted = t2.TID '.
+            'WHERE (o.collid IN('.$collId.')) AND t.RankId = 100 '.
+            'GROUP BY t.SciName ';
+        $rs = $this->conn->query($sql);
+        //echo $sql;
+        while($r = $rs->fetch_object()){
+            $order = str_replace(array('"',"'"),"",$r->SciName);
+            if($order){
+                $statsArr[$order]['SpecimensPerOrder'] = $r->SpecimensPerOrder;
+                $statsArr[$order]['GeorefSpecimensPerOrder'] = $r->GeorefSpecimensPerOrder;
+                $statsArr[$order]['IDSpecimensPerOrder'] = $r->IDSpecimensPerOrder;
+                $statsArr[$order]['IDGeorefSpecimensPerOrder'] = $r->IDGeorefSpecimensPerOrder;
+            }
+        }
+        $rs->free();
+
+        return $statsArr;
+    }
+
 	private function addIconImageFile(){
 		$targetPath = $GLOBALS['SERVER_ROOT'].'/content/collicon/';
 		$urlBase = $GLOBALS['CLIENT_ROOT'].'/content/collicon/';
 		$urlPrefix = "http://";
-		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
 		$urlPrefix .= $_SERVER["SERVER_NAME"];
 		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 		$urlBase = $urlPrefix.$urlBase;
