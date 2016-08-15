@@ -71,14 +71,16 @@ function geoLocateLocality(){
 	if(!state) state = "unknown";
 	var county = encodeURIComponent(f.county.value);
 	if(!county) county = "unknown";
+	var municipality = encodeURIComponent(f.municipality.value);
+	if(!municipality) municipality = "unknown";
 	var locality = encodeURIComponent(f.locality.value);
+	if(!locality){
+		locality = country+"; "+state+"; "+county+"; "+municipality;
+	}
 	if(f.verbatimcoordinates.value) locality = locality + "; " + encodeURIComponent(f.verbatimcoordinates.value);
-	
+
 	if(!country){
 		alert("Country is blank and it is a required field for GeoLocate");
-	}
-	else if(!locality){
-		alert("Locality is blank and it is a required field for GeoLocate");
 	}
 	else{
 		geolocWindow=open("../georef/geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
