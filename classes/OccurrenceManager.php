@@ -780,8 +780,8 @@ class OccurrenceManager{
 			if(!isset($occArr['cat'])){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*5; ?>px;right:0px;">
-	-				<input type="submit" class="searchcollnextbtn" value="" title="" />
-	-			</div>
+					<input type="submit" class="searchcollnextbtn" value="" title="" />
+				</div>
 				<?php
 			}
 			if(count($collArr) > 40){
