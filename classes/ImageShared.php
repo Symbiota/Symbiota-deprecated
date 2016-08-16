@@ -36,13 +36,13 @@ class ImageShared{
 	private $locality;
 	private $occid;
 	private $tid;
-    private $sourceIdentifier;
-    private $rights;
-    private $accessRights;
-    private $copyright;
-    private $notes;
-    private $sortSeq;
-
+	private $sourceIdentifier;
+	private $rights;
+	private $accessRights;
+	private $copyright;
+	private $notes;
+	private $sortSeq;
+	
 	private $activeImgId = 0;
 	
     private $errArr = array();
@@ -134,7 +134,7 @@ class ImageShared{
 		$this->copyright = '';
 		$this->notes = '';
 		$this->sortSeq = '';
-	
+		
 		$this->activeImgId = 0;
 	
 		unset($this->errArr);
@@ -541,7 +541,7 @@ class ImageShared{
 			//Save currently loaded record
 			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, format, caption, '.
 				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, sourceIdentifier, ' .
-                ' rights, accessrights) '.
+				' rights, accessrights) '.
 				'VALUES ('.($this->tid?$this->tid:'NULL').',"'.$imgWebUrl.'",'.
 				($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
 				($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
@@ -958,41 +958,27 @@ class ImageShared{
 		}
 	}
 	
-	public function getErrArr(){
-		$retArr = $this->errArr;
-		unset($this->errArr);
-		return $retArr;
-	}
-
-	public function getErrStr(){
-		$retStr = implode('; ',$this->errArr);
-		unset($this->errArr);
-		return $retStr;
-	}
-
-    // sourceIdentifier
-	public function getsourceIdentifier(){
+	public function getSourceIdentifier(){
 		return $this->sourceIdentifier;
 	}
 	public function setSourceIdentifier($value){
-		if($this->sourceIdentifier) $this->sourceIdentifier = '; '.$this->sourceIdentifier;
-		$this->sourceIdentifier = $this->cleanInStr($value).$this->sourceIdentifier;
+		$this->sourceIdentifier = $this->cleanInStr($value);
 	}
-
+	
 	public function getRights(){
 		return $this->rights;
 	}
 	public function setRights($value){
 		$this->rights = $this->cleanInStr($value);
 	}
-
+	
 	public function getAccessRights(){
 		return $this->accessRights;
 	}
 	public function setAccessRights($value){
 		$this->accessRights = $this->cleanInStr($value);
 	}
-
+	
 	public function setCopyright($v){
 		$this->copyright = $this->cleanInStr($v);
 	}
