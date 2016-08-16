@@ -56,7 +56,7 @@ class ImageCleaner{
 		else{
 			$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
 			'INNER JOIN images i ON o.occid = i.occid '.
-			'WHERE (i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.url = "empty") OR (i.url LIKE "processing%")';
+			'WHERE (i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.thumbnailurl LIKE "processing%") OR (i.url = "empty") OR (i.url LIKE "processing%")';
 		}
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -114,7 +114,12 @@ class ImageCleaner{
 			$testSql = 'SELECT thumbnailurl, url FROM images WHERE (imgid = '.$imgId.') FOR UPDATE ';
 			$textRS = $this->conn->query($testSql);
 			if($testR = $textRS->fetch_object()){
-				if(!$testR->thumbnailurl || ($testR->url == 'empty') || (substr($testR->url,0,10) == 'processing' && $testR->url != 'processing '.date('Y-m-d'))){
+				if(!$testR->thumbnailurl || (substr($testR->thumbnailurl,0,10) == 'processing' && $testR->thumbnailurl != 'processing '.date('Y-m-d'))){
+					$tagSql = 'UPDATE images SET thumbnailurl = "processing '.date('Y-m-d').'" '.
+						'WHERE (imgid = '.$imgId.')';
+					$this->conn->query($tagSql);
+				}
+				elseif($testR->url == 'empty' || (substr($testR->url,0,10) == 'processing' && $testR->url != 'processing '.date('Y-m-d'))){
 					$tagSql = 'UPDATE images SET url = "processing '.date('Y-m-d').'" '.
 						'WHERE (imgid = '.$imgId.')';
 					$this->conn->query($tagSql);
