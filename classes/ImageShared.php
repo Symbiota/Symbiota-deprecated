@@ -406,7 +406,7 @@ class ImageShared{
 	public function createNewImage($subExt, $targetWidth, $qualityRating = 0){
 		global $useImageMagick;
 		$status = false;
-		if($this->sourcePath && $this->uriExists($this->sourcePath)){
+		if($this->sourcePath){
 			if(!$qualityRating) $qualityRating = $this->jpgCompression;
 			
 	        if($useImageMagick) {
