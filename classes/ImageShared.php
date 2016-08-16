@@ -31,18 +31,17 @@ class ImageShared{
 	private $photographer;
 	private $photographerUid;
 	private $sourceUrl;
-	private $copyright;
+	private $format;
 	private $owner;
 	private $locality;
 	private $occid;
 	private $tid;
+	private $sourceIdentifier;
+	private $rights;
+	private $accessRights;
+	private $copyright;
 	private $notes;
 	private $sortSeq;
-
-    // 0.9.1.14 additions
-    private $sourceIdentifier;
-    private $rights;
-    private $accessrights;
 	
 	private $activeImgId = 0;
 	
@@ -124,14 +123,18 @@ class ImageShared{
 		$this->photographer = '';
 		$this->photographerUid = '';
 		$this->sourceUrl = '';
-		$this->copyright = '';
+		$this->format = '';
 		$this->owner = '';
 		$this->locality = '';
 		$this->occid = '';
 		$this->tid = '';
+		$this->sourceIdentifier = '';
+		$this->rights = '';
+		$this->accessRights = '';
+		$this->copyright = '';
 		$this->notes = '';
 		$this->sortSeq = '';
-	
+		
 		$this->activeImgId = 0;
 	
 		unset($this->errArr);
@@ -252,12 +255,15 @@ class ImageShared{
 		if(!$this->imgExt && $imgInfo){
 			if($imgInfo[2] == IMAGETYPE_GIF){
 				$this->imgExt = '.gif';
+				$this->format = 'image/gif';
 			}
 			elseif($imgInfo[2] == IMAGETYPE_PNG){
 				$this->imgExt = '.png';
+				$this->format = 'image/png';
 			}
 			elseif($imgInfo[2] == IMAGETYPE_JPEG){
 				$this->imgExt = '.jpg';
+				$this->format = 'image/jpeg';
 			}
 		}
 
@@ -456,13 +462,16 @@ class ImageShared{
 			if(!$this->sourceGdImg){
 				if($this->imgExt == '.gif'){
 			   		$this->sourceGdImg = imagecreatefromgif($this->sourcePath);
+					if(!$this->format) $this->format = 'image/gif';
 				}
 				elseif($this->imgExt == '.png'){
 			   		$this->sourceGdImg = imagecreatefrompng($this->sourcePath);
+					if(!$this->format) $this->format = 'image/png';
 				}
 				else{
 					//JPG assumed
 			   		$this->sourceGdImg = imagecreatefromjpeg($this->sourcePath);
+					if(!$this->format) $this->format = 'image/jpeg';
 				}
 			}
 			
@@ -521,14 +530,15 @@ class ImageShared{
 			}
 			
 			//Save currently loaded record
-			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
+			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, format, caption, '.
 				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, sourceIdentifier, ' .
-                ' rights, accessrights) '.
-				'VALUES ('.($tid?$tid:'NULL').',"'.$imgWebUrl.'",'.
+				' rights, accessrights) '.
+				'VALUES ('.($this->tid?$this->tid:'NULL').',"'.$imgWebUrl.'",'.
 				($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
 				($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
 				($this->photographer?'"'.$this->photographer.'"':'NULL').','.
 				($this->photographerUid?$this->photographerUid:'NULL').','.
+				($this->format?'"'.$this->format.'"':'NULL').','.
 				($this->caption?'"'.$this->caption.'"':'NULL').','.
 				($this->owner?'"'.$this->owner.'"':'NULL').','.
 				($this->sourceUrl?'"'.$this->sourceUrl.'"':'NULL').','.
@@ -540,7 +550,7 @@ class ImageShared{
 				($this->sortSeq?$this->sortSeq:'50').','.
 				($this->sourceIdentifier?'"'.$this->sourceIdentifier.'"':'NULL').','.
 				($this->rights?'"'.$this->rights.'"':'NULL').','.
-				($this->accessrights?'"'.$this->accessrights.'"':'NULL').')';
+				($this->accessRights?'"'.$this->accessRights.'"':'NULL').')';
 			//echo $sql; exit;
 			if($this->conn->query($sql)){
 				//Create and insert Symbiota GUID for image(UUID)
@@ -901,10 +911,10 @@ class ImageShared{
 		return $this->targetPath;
 	}
 
-	public function setCopyright($v){
-		$this->copyright = $this->cleanInStr($v);
+	public function setFormat($v){
+		$this->format = $this->cleanInStr($v);
 	}
-
+	
 	public function setOwner($v){
 		$this->owner = $this->cleanInStr($v);
 	}
@@ -933,6 +943,31 @@ class ImageShared{
 		}
 	}
 	
+	public function getSourceIdentifier(){
+		return $this->sourceIdentifier;
+	}
+	public function setSourceIdentifier($value){
+		$this->sourceIdentifier = $this->cleanInStr($value);
+	}
+	
+	public function getRights(){
+		return $this->rights;
+	}
+	public function setRights($value){
+		$this->rights = $this->cleanInStr($value);
+	}
+	
+	public function getAccessRights(){
+		return $this->accessRights;
+	}
+	public function setAccessRights($value){
+		$this->accessRights = $this->cleanInStr($value);
+	}
+	
+	public function setCopyright($v){
+		$this->copyright = $this->cleanInStr($v);
+	}
+	
 	public function getErrArr(){
 		$retArr = $this->errArr;
 		unset($this->errArr);
@@ -943,30 +978,6 @@ class ImageShared{
 		$retStr = implode('; ',$this->errArr);
 		unset($this->errArr);
 		return $retStr;
-	}
-
-    // sourceIdentifier
-	public function getsourceIdentifier(){
-		return $this->sourceIdentifier;
-	}
-	public function setsourceIdentifier($value){
-		$this->sourceIdentifier = $this->cleanInStr($value);
-	}
-
-    // rights
-	public function getrights(){
-		return $this->rights;
-	}
-	public function setrights($value){
-		$this->rights = $this->cleanInStr($value);
-	}
-
-    // accessrights
-	public function getaccessrights(){
-		return $this->accessrights;
-	}
-	public function setaccessrights($value){
-		$this->accessrights = $this->cleanInStr($value);
 	}
 
 	//Misc functions
