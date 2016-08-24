@@ -14,6 +14,10 @@ $collManager = new CollectionProfileManager();
 if(!$collManager->setCollid($collid)) $collid = '';
 
 $isEditor = 0;
+$collPubArr = array();
+$publishGBIF = false;
+$publishIDIGBIO = false;
+
 if($IS_ADMIN){
 	$isEditor = 1;
 }
@@ -55,6 +59,15 @@ if($isEditor){
 		if(!$collManager->removeAddress($_GET['removeiid'])){
 			$statusStr = $collManager->getErrorStr();
 		}
+	}
+}
+if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
+	$collPubArr = $collManager->getCollPubArr($collid);
+	if($collPubArr[$collid]['publishToGbif']){
+		$publishGBIF = true;
+	}
+	if($collPubArr[$collid]['publishToIdigbio']){
+		$publishIDIGBIO = true;
 	}
 }
 $collData = $collManager->getCollectionData(true);
@@ -506,20 +519,32 @@ $collData = $collManager->getCollectionData(true);
 									</div>
 								</td>
 							</tr>
-							<tr>
-								<td>
-									Publish to Aggregators:
-								</td>
-								<td>
-									<input type="checkbox" name="publishToGbif" value="1" onchange="checkGUIDSource(this.form);" <?php echo ($collData && $collData['publishToGbif']?'CHECKED':''); ?> />
-									<a id="pubagginfo" href="#" onclick="return false" title="More information about Publishing to Aggregators">
-										<img src="../../images/info.png" style="width:15px;" />
-									</a>
-									<div id="pubagginfodialog">
-										If checked Darwin Core Archives published will be available to data aggregators such as iDigBio and GBIF.
-									</div>
-								</td>
-							</tr>
+							<?php
+							if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
+								?>
+								<tr>
+									<td>
+										Publish to Aggregators:
+									</td>
+									<td>
+										<div>
+											GBIF <input type="checkbox" name="publishToGbif" value="1" onchange="checkGUIDSource(this.form);" <?php echo($publishGBIF?'CHECKED':''); ?> />
+											<a id="pubagginfo" href="#" onclick="return false" title="More information about Publishing to Aggregators">
+												<img src="../../images/info.png" style="width:15px;"/>
+											</a>
+										</div>
+										<div>
+											iDigBio <input type="checkbox" name="publishToIdigbio" value="1" onchange="checkGUIDSource(this.form);" <?php echo($publishIDIGBIO?'CHECKED':''); ?> />
+										</div>
+										<div id="pubagginfodialog">
+											Check boxes to make Darwin Core Archives published from this collection
+											available to iDigBio and/or GBIF.
+										</div>
+									</td>
+								</tr>
+								<?php
+							}
+							?>
 							<tr>
 								<td>
 									Source Record URL:

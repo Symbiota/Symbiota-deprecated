@@ -46,7 +46,11 @@ $MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g.
 $GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
 $RECAPTCHA_PUBLIC_KEY = '';			//Now called site key
 $RECAPTCHA_PRIVATE_KEY = '';		//Now called secret key
-$EOL_KEY = '';						//Not required, but good to add a key if you plan to do a lot of EOL mapping 
+$EOL_KEY = '';						//Not required, but good to add a key if you plan to do a lot of EOL mapping
+
+$GBIF_USERNAME = '';                //GBIF username which portal will use to publish
+$GBIF_PASSWORD = '';                //GBIF password which portal will use to publish
+$GBIF_ORG_KEY = '';                 //GBIF organization key for organization which is hosting this portal
 
 $GLOSSARY_EXPORT_BANNER = '';		//Banner image for glossary exports. Place in images/layout folder.
 $DYN_CHECKLIST_RADIUS = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
