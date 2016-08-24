@@ -186,9 +186,9 @@ include($serverRoot. '/header.php');
 		echo '<div style="font-weight:bold;font-size:120%;">'.$collArr[$collId]['collname'].'</div>';
 		?>
 		<div style="margin:10px;">
-			Use the controls below to publically publish occurrence data within this collection as a 
-			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DWCA)</a> file.
-			A DWCA file is a single compressed ZIP file that contains one to several data files along with a meta.xml 
+			Use the controls below to publicly publish occurrence data within this collection as a
+			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
+			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
 			document that describes the content. 
 			The occurrence data file required, but identifications (determinations) and images data are optional. 
 			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a> 
@@ -201,8 +201,8 @@ include($serverRoot. '/header.php');
 		<div style="margin:10px;">
 			The following downloads are occurrence data packages from collections 
 			that have chosen to publish their complete dataset as a
-			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DWCA)</a> file.
-			A DWCA file is a single compressed ZIP file that contains one to several data files along with a meta.xml 
+			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
+			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
 			document that describes the content. 
 			The archives below contain three comma separated (CSV) files containing occurrences, identifications (determinations), and images data. 
 			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a> 
