@@ -337,7 +337,7 @@ include($serverRoot. '/header.php');
 					<?php
 				}
 				else{
-					$dataUrl = ($gbifKeyArr['datasetKey']?'http://www.gbif-uat.org/dataset/'.$gbifKeyArr['datasetKey']:'');
+					$dataUrl = ($gbifKeyArr['datasetKey']?'http://www.gbif.org/dataset/'.$gbifKeyArr['datasetKey']:'');
 					?>
 					<div style="margin:10px;">
 						<div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank" ><?php echo $dataUrl; ?></a></div>
