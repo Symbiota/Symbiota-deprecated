@@ -186,7 +186,7 @@ include($serverRoot. '/header.php');
 		echo '<div style="font-weight:bold;font-size:120%;">'.$collArr[$collId]['collname'].'</div>';
 		?>
 		<div style="margin:10px;">
-			Use the controls below to publish occurrence data within this collection as a
+			Use the controls below to publicly publish occurrence data within this collection as a
 			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
 			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
 			document that describes the content. 
