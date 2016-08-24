@@ -341,9 +341,6 @@ include($serverRoot. '/header.php');
 					?>
 					<div style="margin:10px;">
 						<div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank" ><?php echo $dataUrl; ?></a></div>
-						<div style="margin:10px;">
-							<button name="" type="button" onclick="startGbifCrawl('<?php echo $gbifKeyArr['datasetKey']; ?>');" value="">Update GBIF Records</button>
-						</div>
 					</div>
 					<?php
 				}
