@@ -61,7 +61,7 @@ if($isEditor){
 		}
 	}
 }
-if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY) && $collid){
+if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
 	$collPubArr = $collManager->getCollPubArr($collid);
 	if($collPubArr[$collid]['publishToGbif']){
 		$publishGBIF = true;

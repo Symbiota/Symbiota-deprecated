@@ -18,26 +18,16 @@ function processGbifOrgKey(){
 		if(!gbifDatasetKey){
 			gbifDatasetKey = createGbifDataset(gbifInstKey,gbifOrgKey,collName);
 		}
-		if(gbifDatasetKey){
-			if(dwcUri){
-				gbifEndpointKey = createGbifEndpoint(gbifDatasetKey, dwcUri);
-				if(gbifEndpointKey){
-					document.getElementById("aggKeysStr").value = JSON.stringify({
-						organizationKey: gbifOrgKey,
-						installationKey: gbifInstKey,
-						datasetKey: gbifDatasetKey,
-						endpointKey: gbifEndpointKey
-					});
-				}
-			}
-			else{
-				alert('Please create/refresh your Darwin Core Archive and try again.');
-				return false;
-			}
+		if(dwcUri){
+			gbifEndpointKey = createGbifEndpoint(gbifDatasetKey,dwcUri);
 		}
-		else{
-			alert('Invalid Organization Key or insufficient permissions. Please recheck your Organization Key and verify that this portal can create datasets for your organization with GBIF.');
-			return false;
+		if(gbifDatasetKey){
+			document.getElementById("gbifKeysStr").value = JSON.stringify({
+				organizationKey: gbifOrgKey,
+				installationKey: gbifInstKey,
+				datasetKey: gbifDatasetKey,
+				endpointKey: gbifEndpointKey
+			});
 		}
 		return true;
 	}
@@ -52,7 +42,7 @@ function createGbifInstallation(gbifOrgKey,collName){
 	var url = 'http://api.gbif.org/v1/installation';
 	var data = JSON.stringify({
 		organizationKey: gbifOrgKey,
-		type: "SYMBIOTA_INSTALLATION",
+		type: "HTTP_INSTALLATION",
 		title: collName
 	});
 

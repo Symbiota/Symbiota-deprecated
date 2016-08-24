@@ -20,24 +20,10 @@ $recFlagArr = array();
 $collPubArr = array();
 $publishGBIF = false;
 $publishIDIGBIO = false;
-$organizationKey = '';
-$installationKey = '';
-$datasetKey = '';
-$endpointKey = '';
-$idigbioKey = '';
-if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
-    $collPubArr = $collManager->getCollPubArr($collId);
-    if($collPubArr[$collId]['publishToGbif']){
-        $publishGBIF = true;
-    }
-    if($collPubArr[$collId]['publishToIdigbio']){
-        $publishIDIGBIO = true;
-    }
-}
+$gbifKeyArr = array();
 if($action){
 	if($action == 'Save Key'){
-		$collManager->setAggKeys($_POST['aggKeysStr']);
-        $collManager->updateAggKeys($collId);
+		$collManager->saveGbifKeyStr($_POST);
 	}
 	else{
 		if (!array_key_exists('dets', $_POST)) {
@@ -56,16 +42,16 @@ if($action){
 	}
 }
 if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
-	$installationKey = $collManager->getInstallationKey();
-    $datasetKey = $collManager->getDatasetKey();
-    $endpointKey = $collManager->getEndpointKey();
-    $idigbioKey = $collManager->getIdigbioKey();
-	if($publishIDIGBIO && !$idigbioKey){
-        $idigbioKey = $collManager->findIdigbioKey($collPubArr[$collId]['collectionguid']);
-        if($idigbioKey){
-            $collManager->updateAggKeys($collId);
-        }
-    }
+	$collPubArr = $collManager->getCollPubArr($collId);
+	if($collPubArr[$collId]['publishToGbif']){
+		$publishGBIF = true;
+	}
+	if($collPubArr[$collId]['publishToIdigbio']){
+		$publishIDIGBIO = true;
+	}
+	if($collPubArr[$collId]['gbifKeysStr']){
+		$gbifKeyArr = json_decode($collPubArr[$collId]['gbifKeysStr'],true);
+	}
 }
 
 $isEditor = 0;
@@ -257,8 +243,8 @@ include($serverRoot. '/header.php');
 			$dwcaManager->createDwcArchive();
 			$dwcaManager->writeRssFile();
 			echo '</ul>';
-			if($publishGBIF && $endpointKey){
-				$collManager->triggerGBIFCrawl($datasetKey);
+			if($publishGBIF && $gbifKeyArr && $gbifKeyArr['endpointKey']){
+				$collManager->triggerGBIFCrawl($gbifKeyArr['datasetKey']);
 			}
 		}
 		if($dwcaArr = $dwcaManager->getDwcaItems($collId)){
@@ -324,27 +310,24 @@ include($serverRoot. '/header.php');
 				echo '<span style="font-weight:normal;color:black;">As the GUID source is set to catalog number, those records missing this field will be excluded from the published archive.';
 				echo '</div>';
 			}
-			if(($publishGBIF || $publishIDIGBIO) && $dwcUri && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
-				if($publishGBIF && !$datasetKey) {
+			if($publishGBIF && $dwcUri && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
+				if(!$gbifKeyArr || !$gbifKeyArr['datasetKey']) {
 					?>
 					<div style="margin:10px;">
-						You have selected to have this collection's DwC archives published to GBIF. Please go to the
+						You have selected to have this collection's DWC archives published to GBIF. Please go to the
 						<a href="http://www.gbif.org/publishing-data/request-endorsement#/intro" target="_blank">GBIF Endorsement Request page</a> to
 						register your collection with GBIF and enter the organization key provided by GBIF below.
 						Please note that organization keys are often assigned per instituiton, so if your institution is found in the GBIF
 						Organization lookup, there is already a GBIF Organization Key assigned. The organization key is the remaining part of
-						the url after the last backslash of your institution's GBIF Data Provider page. If your collection is found,
-                        please ensure that your data is not already published in GBIF. DO NOT PUBLISH your data if there is any chance it is
-                        already published. Before activating your GBIF Organization Key in this portal, you will also need to contact GBIF and
-						request that the user: <?php echo $GBIF_USERNAME; ?> has permissions to create and edit datatsets for your organization.
+						the url after the last backslash of your institution's GBIF Data Provider page.
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
 							GBIF Organization Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>"/>
 							<input type="hidden" name="portalname" id="portalname" value='<?php echo $DEFAULT_TITLE; ?>'/>
 							<input type="hidden" name="collname" id="collname" value='<?php echo $collArr[$collId]['collname']; ?>'/>
-							<input type="hidden" name="aggKeysStr" id="aggKeysStr" value=''/>
+							<input type="hidden" name="gbifKeysStr" id="gbifKeysStr" value=''/>
 							<input type="hidden" id="gbifInstOrgKey" value='<?php echo $GBIF_ORG_KEY; ?>'/>
-							<input type="hidden" id="gbifInstKey" value='<?php echo $installationKey; ?>'/>
+							<input type="hidden" id="gbifInstKey" value='<?php echo ($gbifKeyArr?$gbifKeyArr['installationKey']:''); ?>'/>
 							<input type="hidden" id="gbifDataKey" value=''/>
 							<input type="hidden" id="gbifEndKey" value=''/>
 							<input type="hidden" name="dwcUri" id="dwcUri" value="<?php echo $dwcUri; ?>"/>
@@ -353,23 +336,17 @@ include($serverRoot. '/header.php');
 					</div>
 					<?php
 				}
-				if($publishGBIF && $datasetKey){
-                    $dataUrl = 'http://www.gbif.org/dataset/'.$datasetKey;
-                    ?>
-                    <div style="margin:10px;">
-                        <div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>"
-                                                          target="_blank"><?php echo $dataUrl; ?></a></div>
-                    </div>
-                    <?php
-                }
-                if($publishIDIGBIO && $idigbioKey){
-                    $dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
-                    ?>
-                    <div style="margin:10px;">
-                        <div><b>iDigBio Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
-                    </div>
-                    <?php
-                }
+				else{
+					$dataUrl = ($gbifKeyArr['datasetKey']?'http://www.gbif-uat.org/dataset/'.$gbifKeyArr['datasetKey']:'');
+					?>
+					<div style="margin:10px;">
+						<div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank" ><?php echo $dataUrl; ?></a></div>
+						<div style="margin:10px;">
+							<button name="" type="button" onclick="startGbifCrawl('<?php echo $gbifKeyArr['datasetKey']; ?>');" value="">Update GBIF Records</button>
+						</div>
+					</div>
+					<?php
+				}
 			}
 			?>
 		</fieldset>
