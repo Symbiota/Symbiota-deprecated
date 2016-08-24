@@ -186,11 +186,11 @@ include($serverRoot. '/header.php');
 		echo '<div style="font-weight:bold;font-size:120%;">'.$collArr[$collId]['collname'].'</div>';
 		?>
 		<div style="margin:10px;">
-			Use the controls below to publicly publish occurrence data within this collection as a
+			Use the controls below to publish occurrence data within this collection as a
 			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
 			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
 			document that describes the content. 
-			The occurrence data file required, but identifications (determinations) and images data are optional. 
+			The occurrence data file is required, but identifications (determinations) and image metadata are optional.
 			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a> 
 			exchange standard. 
 		</div>
@@ -204,9 +204,9 @@ include($serverRoot. '/header.php');
 			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
 			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
 			document that describes the content. 
-			The archives below contain three comma separated (CSV) files containing occurrences, identifications (determinations), and images data. 
+			The archives below contain three comma separated (CSV) files containing occurrences, identifications (determinations), and image metadata.
 			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a> 
-			exchange standard. The identifications and images files follow the DwC extensions for those data types. 
+			exchange standard. The identification and image files follow the DwC extensions for those data types.
 		</div>
 		<div style="margin:10px;">
 			<h3>Data Usage Policy:</h3>
@@ -314,12 +314,13 @@ include($serverRoot. '/header.php');
 				if(!$gbifKeyArr || !$gbifKeyArr['datasetKey']) {
 					?>
 					<div style="margin:10px;">
-						You have selected to have this collection's DWC archives published to GBIF. Please go to the
+						You have selected to have this collection's DwC archives published to GBIF. Please go to the
 						<a href="http://www.gbif.org/publishing-data/request-endorsement#/intro" target="_blank">GBIF Endorsement Request page</a> to
 						register your collection with GBIF and enter the organization key provided by GBIF below.
 						Please note that organization keys are often assigned per instituiton, so if your institution is found in the GBIF
 						Organization lookup, there is already a GBIF Organization Key assigned. The organization key is the remaining part of
-						the url after the last backslash of your institution's GBIF Data Provider page.
+						the url after the last backslash of your institution's GBIF Data Provider page. If your collection is found,
+                        please esnure that your data is not already published in GBIF, and DO NOT PUBLISH your data if there is any chance it is.
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
 							GBIF Organization Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>"/>
@@ -349,7 +350,7 @@ include($serverRoot. '/header.php');
 		</fieldset>
 		<form name="dwcaform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaForm(this)">
 			<fieldset style="padding:15px;margin:15px;">
-				<legend><b>Publish / Refresh DWCA File</b></legend>
+				<legend><b>Publish/Refresh DwC-A File</b></legend>
 				<!-- 
 				<div>
 					<?php 
