@@ -552,7 +552,6 @@ class CollectionProfileManager {
         $url .= ($_SERVER['HTTPS']?'https://':'http://');
         $url .= $_SERVER['HTTP_HOST'].$CLIENT_ROOT;
         $url .= '/webservices/dwc/'.$guid.'}';
-        echo $url;
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -560,7 +559,7 @@ class CollectionProfileManager {
         $returnArr = json_decode($result,true);
 
         if(isset($returnArr['items'][0]['uuid'])){
-            //$this->idigbioKey = $returnArr['items'][0]['uuid'];
+            $this->idigbioKey = $returnArr['items'][0]['uuid'];
         }
         return $this->idigbioKey;
     }
