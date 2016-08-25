@@ -552,7 +552,8 @@ class CollectionProfileManager {
         $url = 'http://search.idigbio.org/v2/search/recordsets?rsq={%22recordids%22:%22';
         $url .= ($_SERVER['HTTPS']?'https://':'http://');
         $url .= $_SERVER['HTTP_HOST'].$CLIENT_ROOT;
-        $url .= '/webservices/dwc/'.$guid.'}';
+        $url .= '/webservices/dwc/'.$guid.'%22}';
+        echo $url;
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
