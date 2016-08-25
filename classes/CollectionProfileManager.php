@@ -535,16 +535,18 @@ class CollectionProfileManager {
         $returnArr = Array();
         $sql = 'SELECT aggKeysStr '.
             'FROM omcollections '.
-            'WHERE aggKeysStr IS NOT NULL '.
-            'LIMIT 1 ';
+            'WHERE aggKeysStr IS NOT NULL ';
         //echo $sql; exit;
         $rs = $this->conn->query($sql);
         while($row = $rs->fetch_object()){
             $returnArr = json_decode($row->aggKeysStr,true);
+            if($returnArr['installationKey']){
+                return $returnArr['installationKey'];
+            }
         }
         $rs->free();
 
-        return $returnArr['installationKey'];
+        return '';
     }
 
     public function findIdigbioKey($guid){
