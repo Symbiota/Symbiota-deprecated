@@ -334,7 +334,8 @@ include($serverRoot. '/header.php');
 						Please note that organization keys are often assigned per instituiton, so if your institution is found in the GBIF
 						Organization lookup, there is already a GBIF Organization Key assigned. The organization key is the remaining part of
 						the url after the last backslash of your institution's GBIF Data Provider page. If your collection is found,
-                        please esnure that your data is not already published in GBIF, and DO NOT PUBLISH your data if there is any chance it is.
+                        please ensure that your data is not already published in GBIF. DO NOT PUBLISH your data if there is any chance it is
+                        already published.
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
 							GBIF Organization Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>"/>
@@ -351,25 +352,23 @@ include($serverRoot. '/header.php');
 					</div>
 					<?php
 				}
-				else{
-					if($publishGBIF){
-                        $dataUrl = 'http://www.gbif.org/dataset/'.$datasetKey;
-                        ?>
-                        <div style="margin:10px;">
-                            <div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>"
-                                                              target="_blank"><?php echo $dataUrl; ?></a></div>
-                        </div>
-                        <?php
-                    }
-                    if($publishIDIGBIO && $idigbioKey){
-                        $dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
-                        ?>
-                        <div style="margin:10px;">
-                            <div><b>iDigBio Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
-                        </div>
-                        <?php
-                    }
-				}
+				if($publishGBIF && $datasetKey){
+                    $dataUrl = 'http://www.gbif.org/dataset/'.$datasetKey;
+                    ?>
+                    <div style="margin:10px;">
+                        <div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>"
+                                                          target="_blank"><?php echo $dataUrl; ?></a></div>
+                    </div>
+                    <?php
+                }
+                if($publishIDIGBIO && $idigbioKey){
+                    $dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
+                    ?>
+                    <div style="margin:10px;">
+                        <div><b>iDigBio Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
+                    </div>
+                    <?php
+                }
 			}
 			?>
 		</fieldset>
