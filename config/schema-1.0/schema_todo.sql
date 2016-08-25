@@ -368,8 +368,8 @@ ALTER TABLE `images`
 
 ALTER TABLE `omcollections` 
   ADD COLUMN `publishToIdigbio` INT(11) AFTER `publishToGbif`,
-  ADD COLUMN `gbifKeysStr` VARCHAR(1000) AFTER `publishToIdigbio`,
-  ADD COLUMN `dwcaUrl` VARCHAR(250) NULL AFTER `gbifKeysStr`;
+  ADD COLUMN `aggKeysStr` VARCHAR(1000) AFTER `publishToIdigbio`,
+  ADD COLUMN `dwcaUrl` VARCHAR(250) NULL AFTER `aggKeysStr`;
 
 ALTER TABLE `omcollections` 
   ADD INDEX `FK_collid_iid_idx` (`iid` ASC);

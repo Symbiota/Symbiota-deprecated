@@ -20,10 +20,24 @@ $recFlagArr = array();
 $collPubArr = array();
 $publishGBIF = false;
 $publishIDIGBIO = false;
-$gbifKeyArr = array();
+$organizationKey = '';
+$installationKey = '';
+$datasetKey = '';
+$endpointKey = '';
+$idigbioKey = '';
+if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
+    $collPubArr = $collManager->getCollPubArr($collId);
+    if($collPubArr[$collId]['publishToGbif']){
+        $publishGBIF = true;
+    }
+    if($collPubArr[$collId]['publishToIdigbio']){
+        $publishIDIGBIO = true;
+    }
+}
 if($action){
 	if($action == 'Save Key'){
-		$collManager->saveGbifKeyStr($_POST);
+		$collManager->setAggKeys($_POST['aggKeysStr']);
+        $collManager->updateAggKeys($collId);
 	}
 	else{
 		if (!array_key_exists('dets', $_POST)) {
@@ -42,16 +56,16 @@ if($action){
 	}
 }
 if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
-	$collPubArr = $collManager->getCollPubArr($collId);
-	if($collPubArr[$collId]['publishToGbif']){
-		$publishGBIF = true;
-	}
-	if($collPubArr[$collId]['publishToIdigbio']){
-		$publishIDIGBIO = true;
-	}
-	if($collPubArr[$collId]['gbifKeysStr']){
-		$gbifKeyArr = json_decode($collPubArr[$collId]['gbifKeysStr'],true);
-	}
+	$installationKey = $collManager->getInstallationKey();
+    $datasetKey = $collManager->getDatasetKey();
+    $endpointKey = $collManager->getEndpointKey();
+    $idigbioKey = $collManager->getIdigbioKey();
+	if($publishIDIGBIO && !$idigbioKey){
+        $idigbioKey = $collManager->findIdigbioKey($collPubArr[$collId]['collectionguid']);
+        if($idigbioKey){
+            $collManager->updateAggKeys($collId);
+        }
+    }
 }
 
 $isEditor = 0;
@@ -243,8 +257,8 @@ include($serverRoot. '/header.php');
 			$dwcaManager->createDwcArchive();
 			$dwcaManager->writeRssFile();
 			echo '</ul>';
-			if($publishGBIF && $gbifKeyArr && $gbifKeyArr['endpointKey']){
-				$collManager->triggerGBIFCrawl($gbifKeyArr['datasetKey']);
+			if($publishGBIF && $endpointKey){
+				$collManager->triggerGBIFCrawl($datasetKey);
 			}
 		}
 		if($dwcaArr = $dwcaManager->getDwcaItems($collId)){
@@ -310,8 +324,8 @@ include($serverRoot. '/header.php');
 				echo '<span style="font-weight:normal;color:black;">As the GUID source is set to catalog number, those records missing this field will be excluded from the published archive.';
 				echo '</div>';
 			}
-			if($publishGBIF && $dwcUri && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
-				if(!$gbifKeyArr || !$gbifKeyArr['datasetKey']) {
+			if(($publishGBIF || $publishIDIGBIO) && $dwcUri && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
+				if($publishGBIF && !$datasetKey) {
 					?>
 					<div style="margin:10px;">
 						You have selected to have this collection's DwC archives published to GBIF. Please go to the
@@ -326,9 +340,9 @@ include($serverRoot. '/header.php');
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>"/>
 							<input type="hidden" name="portalname" id="portalname" value='<?php echo $DEFAULT_TITLE; ?>'/>
 							<input type="hidden" name="collname" id="collname" value='<?php echo $collArr[$collId]['collname']; ?>'/>
-							<input type="hidden" name="gbifKeysStr" id="gbifKeysStr" value=''/>
+							<input type="hidden" name="aggKeysStr" id="aggKeysStr" value=''/>
 							<input type="hidden" id="gbifInstOrgKey" value='<?php echo $GBIF_ORG_KEY; ?>'/>
-							<input type="hidden" id="gbifInstKey" value='<?php echo ($gbifKeyArr?$gbifKeyArr['installationKey']:''); ?>'/>
+							<input type="hidden" id="gbifInstKey" value='<?php echo $installationKey; ?>'/>
 							<input type="hidden" id="gbifDataKey" value=''/>
 							<input type="hidden" id="gbifEndKey" value=''/>
 							<input type="hidden" name="dwcUri" id="dwcUri" value="<?php echo $dwcUri; ?>"/>
@@ -338,12 +352,23 @@ include($serverRoot. '/header.php');
 					<?php
 				}
 				else{
-					$dataUrl = ($gbifKeyArr['datasetKey']?'http://www.gbif.org/dataset/'.$gbifKeyArr['datasetKey']:'');
-					?>
-					<div style="margin:10px;">
-						<div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank" ><?php echo $dataUrl; ?></a></div>
-					</div>
-					<?php
+					if($publishGBIF){
+                        $dataUrl = 'http://www.gbif.org/dataset/'.$datasetKey;
+                        ?>
+                        <div style="margin:10px;">
+                            <div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>"
+                                                              target="_blank"><?php echo $dataUrl; ?></a></div>
+                        </div>
+                        <?php
+                    }
+                    if($publishIDIGBIO && $idigbioKey){
+                        $dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
+                        ?>
+                        <div style="margin:10px;">
+                            <div><b>iDigBio Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
+                        </div>
+                        <?php
+                    }
 				}
 			}
 			?>
