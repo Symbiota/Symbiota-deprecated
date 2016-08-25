@@ -9,6 +9,11 @@ class CollectionProfileManager {
 	private $conn;
 	private $collid;
 	private $errorStr;
+    private $organizationKey;
+    private $installationKey;
+    private $datasetKey;
+    private $endpointKey;
+    private $idigbioKey;
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -158,7 +163,8 @@ class CollectionProfileManager {
 	}
 
 	public function submitCollEdits($postArr){
-		$status = true;
+        global $GBIF_USERNAME,$GBIF_PASSWORD;
+	    $status = true;
 		if($this->collid){
 			$instCode = $this->cleanInStr($postArr['institutioncode']);
 			$collCode = $this->cleanInStr($postArr['collectioncode']);
@@ -168,8 +174,8 @@ class CollectionProfileManager {
 			$contact = $this->cleanInStr($postArr['contact']);
 			$email = $this->cleanInStr($postArr['email']);
 			$publicEdits = (array_key_exists('publicedits',$postArr)?$postArr['publicedits']:0);
-			$gbifPublish = (array_key_exists('publishToGbif',$postArr)?$postArr['publishToGbif']:0);
-            $idigPublish = (array_key_exists('publishToIdigbio',$postArr)?$postArr['publishToIdigbio']:0);
+			$gbifPublish = (array_key_exists('publishToGbif',$postArr)?$postArr['publishToGbif']:'NULL');
+            $idigPublish = (array_key_exists('publishToIdigbio',$postArr)?$postArr['publishToIdigbio']:'NULL');
 			$guidTarget = (array_key_exists('guidtarget',$postArr)?$postArr['guidtarget']:'');
 			$rights = $this->cleanInStr($postArr['rights']);
 			$rightsHolder = $this->cleanInStr($postArr['rightsholder']);
@@ -192,10 +198,12 @@ class CollectionProfileManager {
 				'contact = '.($contact?'"'.$contact.'"':'NULL').','.
 				'email = '.($email?'"'.$email.'"':'NULL').','.
 				'latitudedecimal = '.($postArr['latitudedecimal']?$postArr['latitudedecimal']:'NULL').','.
-				'longitudedecimal = '.($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').','.
-				'publicedits = '.$publicEdits.','.
-                ($gbifPublish?'publishToGbif = '.$gbifPublish.',':'').
-                ($idigPublish?'publishToIdigbio = '.$idigPublish.',':'').
+				'longitudedecimal = '.($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').',';
+            if(array_key_exists('publishToIdigbio',$postArr)){
+                $sql .= 'publishToGbif = '.$gbifPublish.','.
+                    'publishToIdigbio = '.$idigPublish.',';
+            }
+            $sql .= 'publicedits = '.$publicEdits.','.
                 'guidtarget = '.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
 				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
@@ -236,23 +244,6 @@ class CollectionProfileManager {
 		}
 		return $status;
 	}
-
-    public function saveGbifKeyStr($pArr){
-        $status = true;
-        $conn = MySQLiConnectionFactory::getCon("write");
-        $sql = 'UPDATE omcollections '.
-            "SET gbifKeysStr = '".$this->cleanInStr($pArr['gbifKeysStr'])."' ".
-            'WHERE (collid = '.$pArr['collid'].')';
-        //echo $sql; exit;
-        if(!$conn->query($sql)){
-            $status = 'ERROR saving key: '.$conn->error;
-            return $status;
-        }
-
-        $conn->close();
-
-        return $status;
-    }
 
     public function submitCollAdd($postArr){
 		global $symbUid;
@@ -438,14 +429,14 @@ class CollectionProfileManager {
 
     public function batchTriggerGBIFCrawl($collIdArr){
         $collIdStr = implode(',',$collIdArr);
-        $sql = 'SELECT CollID, publishToGbif, gbifKeysStr '.
+        $sql = 'SELECT CollID, publishToGbif, aggKeysStr '.
             'FROM omcollections '.
             'WHERE CollID IN('.$collIdStr.') ';
         //echo $sql; exit;
         $rs = $this->conn->query($sql);
         while($row = $rs->fetch_object()){
             $publishGBIF = $row->publishToGbif;
-            $gbifKeyArr = $row->gbifKeysStr;
+            $gbifKeyArr = $row->aggKeysStr;
             if($publishGBIF && $gbifKeyArr){
                 $gbifKeyArr = json_decode($gbifKeyArr,true);
                 if($gbifKeyArr['endpointKey']){
@@ -456,9 +447,70 @@ class CollectionProfileManager {
         $rs->free();
     }
 
+    public function setAggKeys($aggKeyStr){
+        $aggKeyArr = json_decode($aggKeyStr,true);
+        if($aggKeyArr['organizationKey']){
+            $this->organizationKey = $aggKeyArr['organizationKey'];
+        }
+        if($aggKeyArr['installationKey']){
+            $this->installationKey = $aggKeyArr['installationKey'];
+        }
+        if($aggKeyArr['datasetKey']){
+            $this->datasetKey = $aggKeyArr['datasetKey'];
+        }
+        if($aggKeyArr['endpointKey']){
+            $this->endpointKey = $aggKeyArr['endpointKey'];
+        }
+        if($aggKeyArr['idigbioKey']){
+            $this->idigbioKey = $aggKeyArr['idigbioKey'];
+        }
+    }
+
+    public function updateAggKeys($collId){
+        $aggKeyArr = array();
+        $status = true;
+        $aggKeyArr['organizationKey'] = $this->organizationKey;
+        $aggKeyArr['installationKey'] = $this->installationKey;
+        $aggKeyArr['datasetKey'] = $this->datasetKey;
+        $aggKeyArr['endpointKey'] = $this->endpointKey;
+        $aggKeyArr['idigbioKey'] = $this->idigbioKey;
+        $aggKeyStr = json_encode($aggKeyArr);
+        $conn = MySQLiConnectionFactory::getCon("write");
+        $sql = 'UPDATE omcollections '.
+            "SET aggKeysStr = '".$aggKeyStr."' ".
+            'WHERE (collid = '.$collId.')';
+        //echo $sql; exit;
+        if(!$conn->query($sql)){
+            $status = 'ERROR saving key: '.$conn->error;
+            return $status;
+        }
+
+        $conn->close();
+
+        return $status;
+
+    }
+
+    public function getInstallationKey(){
+        return $this->installationKey;
+    }
+
+    public function getDatasetKey(){
+        return $this->datasetKey;
+    }
+
+    public function getEndpointKey(){
+        return $this->endpointKey;
+    }
+
+    public function getIdigbioKey(){
+        return $this->idigbioKey;
+    }
+
     public function getCollPubArr($collId){
         $returnArr = Array();
-        $sql = 'SELECT CollID, publishToGbif, publishToIdigbio, gbifKeysStr '.
+        $aggKeyStr = '';
+        $sql = 'SELECT CollID, publishToGbif, publishToIdigbio, aggKeysStr, collectionguid '.
             'FROM omcollections '.
             'WHERE CollID IN('.$collId.') ';
         //echo $sql; exit;
@@ -466,27 +518,51 @@ class CollectionProfileManager {
         while($row = $rs->fetch_object()){
             $returnArr[$row->CollID]['publishToGbif'] = $row->publishToGbif;
             $returnArr[$row->CollID]['publishToIdigbio'] = $row->publishToIdigbio;
-            $returnArr[$row->CollID]['gbifKeysStr'] = $row->gbifKeysStr;
+            $returnArr[$row->CollID]['collectionguid'] = $row->collectionguid;
+            $aggKeyStr = $row->aggKeysStr;
         }
         $rs->free();
+
+        if($aggKeyStr){
+            $this->setAggKeys($aggKeyStr);
+        }
 
         return $returnArr;
     }
 
     public function getGbifInstKey(){
         $returnArr = Array();
-        $sql = 'SELECT gbifKeysStr '.
+        $sql = 'SELECT aggKeysStr '.
             'FROM omcollections '.
-            'WHERE gbifKeysStr IS NOT NULL '.
+            'WHERE aggKeysStr IS NOT NULL '.
             'LIMIT 1 ';
         //echo $sql; exit;
         $rs = $this->conn->query($sql);
         while($row = $rs->fetch_object()){
-            $returnArr = json_decode($row->gbifKeysStr,true);
+            $returnArr = json_decode($row->aggKeysStr,true);
         }
         $rs->free();
 
         return $returnArr['installationKey'];
+    }
+
+    public function findIdigbioKey($guid){
+        global $CLIENT_ROOT;
+        $url = 'http://search.idigbio.org/v2/search/recordsets?rsq={%22recordids%22:%22';
+        $url .= ($_SERVER['HTTPS']?'https://':'http://');
+        $url .= $_SERVER['HTTP_HOST'].$CLIENT_ROOT;
+        $url .= '/webservices/dwc/'.$guid.'}';
+        echo $url;
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        $returnArr = json_decode($result,true);
+
+        if(isset($returnArr['items'][0]['uuid'])){
+            //$this->idigbioKey = $returnArr['items'][0]['uuid'];
+        }
+        return $this->idigbioKey;
     }
 
     public function getTaxonCounts($f=''){
