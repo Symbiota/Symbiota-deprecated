@@ -126,13 +126,15 @@ div.spptaxon{
 }
 
 div.sppimg{
-  	width:	160px;
+	margin-left: 	auto;
+	margin-right: 	auto;
+	width:	160px;
   	height:	150px
 }
 
 div.sppimg img{
-	margin-left: 	8px;
-	margin-right: 	8px;
+	margin-left: 	auto;
+	margin-right: 	auto;
 	margin-top: 	5px;
 	margin-bottom: 	5px;
   	border:			1px dotted gray;
@@ -143,18 +145,22 @@ div.sppimg img{
 }
 
 div.sppmap{
-  margin: 	2px;
-  border: 	0px;
-  width: 	160px;
-  height:	160px;
-  text-align: center;
+	margin-left: 	auto;
+	margin-right: 	auto;
+	margin: 	2px;
+	border: 	0px;
+	width: 	160px;
+	height:	160px;
+	text-align: center;
 }
 
 div.sppmap img{
-  width: 130px;
-  height:	120px;
-  margin: 0px;
-  border: 1px dotted black;
+	margin-left: 	auto;
+	margin-right: 	auto;
+	width: 130px;
+	height:	120px;
+	margin: 0px;
+	border: 1px dotted black;
 }
 
 div.sppmap a{
@@ -167,9 +173,8 @@ div.sppmap a:hover {
 
 div.spptext{
 	font-weight:		bold;
-	margin-top:			7px;
-	margin-left:		10px;
-	margin-right:		10px;
+	margin-left:		auto;
+	margin-right:		auto;
 	padding-top:		25px;
 	padding-bottom:		50px;
 	border:				1px dotted grey;
