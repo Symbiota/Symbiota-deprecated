@@ -126,7 +126,9 @@ div.spptaxon{
 }
 
 div.sppimg{
-  	width:	160px;
+	margin-left: 	auto;
+	margin-right: 	auto;
+	width:	160px;
   	height:	150px
 }
 
@@ -143,11 +145,13 @@ div.sppimg img{
 }
 
 div.sppmap{
-  margin: 	2px;
-  border: 	0px;
-  width: 	160px;
-  height:	160px;
-  text-align: center;
+	margin-left: 	auto;
+	margin-right: 	auto;
+	margin: 	2px;
+	border: 	0px;
+	width: 	160px;
+	height:	160px;
+	text-align: center;
 }
 
 div.sppmap img{

@@ -588,10 +588,7 @@ class TaxonProfileManager {
  		$maxLat = -90;
  		$minLong = 180;
  		$maxLong = -180;
- 		$latlonArr = array();
- 		if(isset($GLOBALS['MAPPING_BOUNDARIES'])){
- 			$latlonArr = explode(";",$GLOBALS['MAPPING_BOUNDARIES']);
- 		}
+ 		$latlonArr = explode(";",$GLOBALS['MAPPING_BOUNDARIES']);
 
  		$sqlBase = "SELECT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
 			"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".
@@ -634,7 +631,7 @@ class TaxonProfileManager {
 		$latDist = $maxLat - $minLat;
 		$longDist = $maxLong - $minLong;
 		
-		$googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain';
+		$googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain&sensor=false';
 		if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
 		if($latDist < 3 || $longDist < 3) {
 			$googleUrl .= "&zoom=6";
