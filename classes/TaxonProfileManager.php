@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class TaxonProfileManager {
 
@@ -232,7 +232,7 @@ class TaxonProfileManager {
 			$sql = 'SELECT t.tid, t.sciname, t.securitystatus '. 
 				'FROM taxa t INNER JOIN taxaenumtree te ON t.tid = te.tid '.
 				'INNER JOIN fmchklsttaxalink ctl ON ctl.TID = t.tid '. 
-				'WHERE (ctl.clid = '.$this->clid.')AND t.rankid = 220 AND (te.taxauthid = 1) AND (te.parenttid = '.$this->tid.')';
+				'WHERE (ctl.clid = '.$this->clid.') AND t.rankid = 220 AND (te.taxauthid = 1) AND (te.parenttid = '.$this->tid.')';
 		}
 		elseif($this->pid){
 			$sql = 'SELECT DISTINCT t.tid, t.sciname, t.securitystatus '. 
@@ -245,11 +245,11 @@ class TaxonProfileManager {
 		}
 		else{
 			$sql = 'SELECT DISTINCT t.sciname, t.tid, t.securitystatus '.
-				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tidaccepted '. 
-				'INNER JOIN taxaenumtree te ON ts.tid = te.tid '.
+				'FROM taxa t INNER JOIN taxaenumtree te ON t.tid = te.tid '.
+				'INNER JOIN taxstatus ts ON t.Tid = ts.tidaccepted '.
 				'WHERE (te.taxauthid = 1) AND (ts.taxauthid = 1) AND (t.rankid = 220) AND (te.parenttid = '.$this->tid.')';
 		}
-		//echo $sql;
+		//echo $sql; exit;
 		
 		$tids = Array();
 		$result = $this->con->query($sql);
@@ -566,8 +566,8 @@ class TaxonProfileManager {
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$imgUrl = $row->url;
-				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
-					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+				if(array_key_exists("IMAGE_DOMAIN",$GLOBALS) && substr($imgUrl,0,1)=="/"){
+					$imgUrl = $GLOBALS["IMAGE_DOMAIN"].$imgUrl;
 				}
 				$maps[] = $imgUrl;
 			}
@@ -577,8 +577,6 @@ class TaxonProfileManager {
  	}
  	
  	public function getGoogleStaticMap($tidStr = 0){
-		global $mappingBoundaries;
-		
 		if(!$tidStr){
 			$tidArr = Array($this->tid,$this->submittedTid);
 			if($this->synonyms) $tidArr = array_merge($tidArr,array_keys($this->synonyms));
@@ -590,7 +588,7 @@ class TaxonProfileManager {
  		$maxLat = -90;
  		$minLong = 180;
  		$maxLong = -180;
- 		$latlonArr = explode(";",$mappingBoundaries);
+ 		$latlonArr = explode(";",$GLOBALS['MAPPING_BOUNDARIES']);
 
  		$sqlBase = "SELECT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
 			"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".
@@ -634,7 +632,7 @@ class TaxonProfileManager {
 		$longDist = $maxLong - $minLong;
 		
 		$googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain&sensor=false';
-		if(array_key_exists('googleMapKey',$GLOBALS) && $GLOBALS['googleMapKey']) $googleUrl .= '&key='.$GLOBALS['googleMapKey'];
+		if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
 		if($latDist < 3 || $longDist < 3) {
 			$googleUrl .= "&zoom=6";
 		}
