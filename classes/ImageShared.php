@@ -36,13 +36,13 @@ class ImageShared{
 	private $locality;
 	private $occid;
 	private $tid;
-	private $sourceIdentifier;
-	private $rights;
-	private $accessRights;
-	private $copyright;
-	private $notes;
-	private $sortSeq;
-	
+    private $sourceIdentifier;
+    private $rights;
+    private $accessRights;
+    private $copyright;
+    private $notes;
+    private $sortSeq;
+
 	private $activeImgId = 0;
 	
     private $errArr = array();
@@ -134,7 +134,7 @@ class ImageShared{
 		$this->copyright = '';
 		$this->notes = '';
 		$this->sortSeq = '';
-		
+	
 		$this->activeImgId = 0;
 	
 		unset($this->errArr);
@@ -246,14 +246,7 @@ class ImageShared{
 				$fName = substr($fName,$pos+1);
 			}
 		}
-		//Parse extension
-		if($p = strrpos($fName,'.')){
-			if(strpos($fName,'?')) $fName = substr($fName,0,strpos($fName,'?'));
-			$this->imgExt = strtolower(substr($fName,$p));
-			$fName = substr($fName,0,$p);
-		}
-		
-		if(!$this->imgExt && $imgInfo){
+		if($imgInfo){
 			if($imgInfo[2] == IMAGETYPE_GIF){
 				$this->imgExt = '.gif';
 				$this->format = 'image/gif';
@@ -271,7 +264,6 @@ class ImageShared{
 		//Continue cleaning and parsing file name and extension
 		if(strpos($fName,'?')) $fName = substr($fName,0,strpos($fName,'?'));
 		if($p = strrpos($fName,'.')){
-			$this->sourceIdentifier = 'filename: '.$fName;
 			if(!$this->imgExt) $this->imgExt = strtolower(substr($fName,$p));
 			$fName = substr($fName,0,$p);
 		}
@@ -541,7 +533,7 @@ class ImageShared{
 			//Save currently loaded record
 			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, format, caption, '.
 				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, sourceIdentifier, ' .
-				' rights, accessrights) '.
+                ' rights, accessrights) '.
 				'VALUES ('.($this->tid?$this->tid:'NULL').',"'.$imgWebUrl.'",'.
 				($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
 				($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
@@ -964,21 +956,21 @@ class ImageShared{
 	public function setSourceIdentifier($value){
 		$this->sourceIdentifier = $this->cleanInStr($value);
 	}
-	
+
 	public function getRights(){
 		return $this->rights;
 	}
 	public function setRights($value){
 		$this->rights = $this->cleanInStr($value);
 	}
-	
+
 	public function getAccessRights(){
 		return $this->accessRights;
 	}
 	public function setAccessRights($value){
 		$this->accessRights = $this->cleanInStr($value);
 	}
-	
+
 	public function setCopyright($v){
 		$this->copyright = $this->cleanInStr($v);
 	}
@@ -1137,7 +1129,6 @@ class ImageShared{
 	    }
 	    //Test to see if file is an image 
 	    if(!@exif_imagetype($uri)) $exists = false;
-
 	    return $exists;
 	}	
 
