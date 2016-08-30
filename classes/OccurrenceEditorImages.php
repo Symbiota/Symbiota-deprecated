@@ -288,6 +288,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 			}
 		}
 		$imgManager->setOccid($this->occid);
+		if(isset($this->occurrenceMap[$this->occid]['tidinterpreted'])) $imgManager->setTid($this->occurrenceMap[$this->occid]['tidinterpreted']);
 		if($imgManager->processImage()){
 			$this->activeImgId = $imgManager->getActiveImgId();
 		}
