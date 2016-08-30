@@ -104,6 +104,7 @@ class TPImageEditorManager extends TPEditorManager{
 		
 		$imgPath = $postArr["filepath"];
 
+		$imgManager->setTid($this->tid);
 		$imgManager->setCaption($postArr['caption']);
 		$imgManager->setPhotographer($postArr['photographer']);
 		$imgManager->setPhotographerUid($postArr['photographeruid']);
@@ -137,7 +138,7 @@ class TPImageEditorManager extends TPEditorManager{
 				//echo implode('; ',$imgManager->getErrArr());
 			}
 		}
-		$imgManager->processImage($this->tid);
+		$imgManager->processImage();
 		if($imgManager->getErrArr()){
 			$this->errorStr = implode('<br/>',$imgManager->getErrArr());
 		}
