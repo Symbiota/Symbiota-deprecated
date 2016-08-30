@@ -1,4 +1,5 @@
 <?php
+//BOOKMARK FILE: CivicActions
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorDeterminations.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorImages.php');
@@ -1702,9 +1703,10 @@ class OccurrenceEditorManager {
 				'CONCAT_WS(", ",u.lastname,u.firstname) AS username, r.externaltimestamp, r.initialtimestamp '.
 				'FROM omoccurrevisions r LEFT JOIN users u ON r.uid = u.uid '.
 				'WHERE (r.occid = '.$this->occid.') ORDER BY r.initialtimestamp DESC ';
-		//echo '<div>'.$sql.'</div>';
+		echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
+		echo '<div>' . print_r($rs) . '</div>';
+                while($r = $rs->fetch_object()){
 			$editor = $r->externaleditor;
 			if($r->username) $editor .= ' ('.$r->username.')';
 			$ts = $r->initialtimestamp;
@@ -1914,8 +1916,8 @@ class OccurrenceEditorManager {
 		global $charset;
 		$retStr = $inStr;
 		//Get rid of curly quotes
-        //TODO the following search array should be checked - leaving as-was but I doubt this is functioning as intended
-        $search = array("í", "ë", "`", "î", "ì");
+                //TODO the following search array should be checked - leaving as-was but I doubt this is functioning as intended
+                $search = array("í", "ë", "`", "î", "ì");
 		$replace = array("'", "'", "'", '"', '"');
 		$inStr= str_replace($search, $replace, $inStr);
 

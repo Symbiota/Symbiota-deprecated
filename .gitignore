@@ -3,11 +3,14 @@
 .project
 .settings/org.eclipse.wst.jsdt.ui.superType.container
 .buildpath
+index.php
 config/dbconnection.php
 config/symbini.php
 css/main.css
+css/jquery-ui.css
 css/speciesprofile.css
 footer.php
 header.php
 leftmenu.php
 .settings/org.eclipse.php.core.prefs
+images/layout/defaultheader.jpg
