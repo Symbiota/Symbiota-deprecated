@@ -172,23 +172,36 @@ else{
 			}
 			else{
 				//CA: Bookmark
-				$advFieldArr = array('family'=>'Family','genus'=>'Genus','specificEpithet'=>'Specific Epithet','sciname'=>'Scientific Name','scientificNameAuthorship'=>'Author','identifiedBy'=>'Identified By',
-					'identificationReferences'=>'Identification References','identificationRemarks'=>'Identification Remarks','taxonRemarks'=>'Taxon Remarks',
-					'identificationQualifier'=>'Identification Qualifier','typeStatus'=>'Type Status',
-					'catalogNumber'=>'Catalog Number','otherCatalogNumbers'=>'Other Catalog Numbers',
-					'recordedBy'=>'Collector/Observer','recordNumber'=>'Collector Number','associatedCollectors'=>'Associated Collectors',
-					'verbatimEventDate'=>'Verbatim Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Notes (Occurrence Remarks)',
-					'associatedTaxa'=>'Associated Taxa','verbatimAttributes'=>'Description','reproductiveCondition'=>'Reproductive Condition',
-					'establishmentMeans'=>'Establishment Means','lifeStage'=>'Life Stage','sex'=>'Sex','preparations'=>'Preparations',
-					'individualCount'=>'Individual Count','samplingProtocol'=>'Sampling Protocol','country'=>'Country',
-					'stateProvince'=>'State/Province','county'=>'County','municipality'=>'Municipality','locality'=>'Locality',
-					'decimalLatitude'=>'Decimal Latitude','decimalLongitude'=>'Decimal Longitude','geodeticDatum'=>'Geodetic Datum',
-					'coordinateUncertaintyInMeters'=>'Uncertainty (m)','verbatimCoordinates'=>'Verbatim Coordinates',
-					'georeferencedBy'=>'Georeferenced By','georeferenceProtocol'=>'Georeference Protocol','georeferenceSources'=>'Georeference Sources',
-					'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks','localitySecurity'=>'Locality Security',
-					'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
-					'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','ocrFragment'=>'OCR Fragment','username'=>'Modified By','dateEntered'=>'Date Entered','basisOfRecord'=>'Basis Of Record','idCollaboratorIndigenous'=>'Collaborator ID','sexCollaboratorIndigenous'=>'Sex','dobCollaboratorIndigenous'=>'Date of Birth','verbatimIndigenous'=>'Verbatim Name','validIndigenous'=>'Valid Name','linkLanguageCollaboratorIndigenous'=>'Link','familyLanguageCollaboratorIndigenous'=>'Family','groupLanguageCollaboratorIndigenous'=>'Group','subgroupLanguageCollaboratorIndigenous'=>'Subgroup','villageCollaboratorIndigenous'=>'Village','municipalityCollaboratorIndigenous'=>'Municipality','stateCollaboratorIndigenousname'=>'State','countryCollaboratorIndigenousname'=>'Country','isoLanguageCollaboratorIndigenousname'=>'ISO','vernacularLexiconIndigenous'=>'Vernacular Name','glossLexiconIndigenous'=>'Gloss','parseLexiconIndigenous'=>'Parse','parentTaxaLexiconIndigenous'=>'Parent Taxonomy','siblingTaxaLexiconIndigenous'=>'Sibling Taxonomy','childTaxaLexiconIndigenous'=>'Child Taxonomy','otherTaxaUseIndigenous'=>'Other Taxonomy','typologyLexiconIndigenous'=>'Typology','semanticsLexiconIndigenous'=>'Semantics','notesLexiconIndigenous'=>'Discussion of Name','categoryUseIndigenous'=>'Category of Use','specificUseIndigenous'=>'Specific Use','partUseIndigenous'=>'Parts Used','notesUseIndigenous'=>'Discussion of Use');
-			}
+				$advFieldArr = array('associatedCollectors'=>'Associated Collectors','associatedOccurrences'=>'Associated Occurrences',
+					'associatedTaxa'=>'Associated Taxa','attributes'=>'Attributes','scientificNameAuthorship'=>'Author',
+					'basisOfRecord'=>'Basis Of Record','behavior'=>'Behavior','catalogNumber'=>'Catalog Number','recordNumber'=>'Collection Number',
+					'recordedBy'=>'Collector/Observer','coordinateUncertaintyInMeters'=>'Coordinate Uncertainty (m)','country'=>'Country',
+					'county'=>'County','cultivationStatus'=>'Cultivation Status','dataGeneralizations'=>'Data Generalizations','eventDate'=>'Date',
+					'dateEntered'=>'Date Entered','dateLastModified'=>'Date Last Modified','dbpk'=>'dbpk','decimalLatitude'=>'Decimal Latitude',
+					'decimalLongitude'=>'Decimal Longitude','maximumDepthInMeters'=>'Depth Maximum (m)','minimumDepthInMeters'=>'Depth Minimum (m)',
+					'verbatimAttributes'=>'Description','disposition'=>'Disposition','dynamicProperties'=>'Dynamic Properties',
+					'maximumElevationInMeters'=>'Elevation Maximum (m)','minimumElevationInMeters'=>'Elevation Minimum (m)',
+					'establishmentMeans'=>'Establishment Means','family'=>'Family','fieldNotes'=>'Field Notes','fieldnumber'=>'Field Number',
+					'genus'=>'Genus','geodeticDatum'=>'Geodetic Datum','georeferenceProtocol'=>'Georeference Protocol',
+					'georeferenceRemarks'=>'Georeference Remarks','georeferenceSources'=>'Georeference Sources',
+					'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferencedBy'=>'Georeferenced By','habitat'=>'Habitat',
+					'identificationQualifier'=>'Identification Qualifier','identificationReferences'=>'Identification References',
+					'identificationRemarks'=>'Identification Remarks','identifiedBy'=>'Identified By','individualCount'=>'Individual Count',
+					'informationWithheld'=>'Information Withheld','labelProject'=>'Label Project','lifeStage'=>'Life Stage','locality'=>'Locality',
+					'localitySecurity'=>'Locality Security','localitySecurityReason'=>'Locality Security Reason','locationRemarks'=>'Location Remarks',
+					'username'=>'Modified By','municipality'=>'Municipality','occurrenceRemarks'=>'Notes (Occurrence Remarks)',
+					'otherCatalogNumbers'=>'Other Catalog Numbers','ownerInstitutionCode'=>'Owner Code','preparations'=>'Preparations',
+					'reproductiveCondition'=>'Reproductive Condition','samplingEffort'=>'Sampling Effort','samplingProtocol'=>'Sampling Protocol',
+					'sciname'=>'Scientific Name','sex'=>'Sex','specificEpithet'=>'Specific Epithet','stateProvince'=>'State/Province',
+					'substrate'=>'Substrate','taxonRemarks'=>'Taxon Remarks','typeStatus'=>'Type Status','verbatimCoordinates'=>'Verbatim Coordinates',
+					'verbatimEventDate'=>'Verbatim Date','verbatimDepth'=>'Verbatim Depth','verbatimElevation'=>'Verbatim Elevation','ocrFragment'=>'OCR Fragment',
+					'verbatimIndigenousName'=>'Verbatim Name','validIndigenousName'=>'Valid Name','linkIndigenousName'=>'Link','familyLanguageIndigenousName'=>'Family',
+          'groupLanguageIndigenousName'=>'Group','subgroupLanguageIndigenousName'=>'Subgroup','villageIndigenousname'=>'Village','municipalityIndigenousname'=>'Municipality','stateIndigenousname'=>'State',
+          'countryIndigenousname'=>'Country','isoIndigenousname'=>'ISO','vernacularIndigenousName'=>'Vernacular Name','glossIndigenousName'=>'Gloss','parseIndigenousName'=>'Parse',
+          'parentTaxaIndigenousName'=>'Parent Taxonomy','siblingTaxaIndigenousName'=>'Sibling Taxonomy','childTaxaIndigenousName'=>'Child Taxonomy','otherTaxaIndigenousName'=>'Other Taxonomy','typologyNameIndigenousName'=>'Typology',
+          'semanticsNameIndigenousName'=>'Semantics','discussionNameIndigenousName'=>'Discussion of Name','categoryUseIndigenousName'=>'Category of Use','specificUseIndigenousName'=>'Specific Use',
+          'partUseIndigenousName'=>'Parts Used','discussionUseIndigenousName'=>'Discussion of Use');
+      }
 			//sort($advFieldArr);
 			?>
 			<div style="margin:2px 0px;">
