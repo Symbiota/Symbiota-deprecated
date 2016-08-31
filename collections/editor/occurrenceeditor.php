@@ -1242,7 +1242,7 @@ else{
 										</fieldset>
 										<!-- CA: Bookmark -->
 										<fieldset>
-											<legend><b>Ethnographical Information</b></legend>
+											<legend><b>Ethnobiological Information</b></legend>
 											<div style="padding:3px;">
 												<div id="verbatimIndigenousNameDiv">
 													<?php echo (defined('VERBATIMINDIGENOUSNAMELABEL')?VERBATIMINDIGENOUSNAMELABEL:'Verbatim Name'); ?>
