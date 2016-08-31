@@ -20,6 +20,7 @@ $displayQuery = 0;
 $isGenObs = 0;
 $collMap = array();
 $recArr = array();
+//CA: Bookmark
 $headerMapBase = array('dbpk' => 'dbpk','catalognumber' => 'Catalog Number',
 	'othercatalognumbers' => 'Other Catalog #','family' => 'Family','identificationqualifier' => 'ID Qualifier',
 	'sciname' => 'Scientific Name','scientificnameauthorship'=>'Author','recordedby' => 'Collector','recordnumber' => 'Number',
@@ -37,7 +38,7 @@ $headerMapBase = array('dbpk' => 'dbpk','catalognumber' => 'Catalog Number',
 	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
 	'disposition' => 'Disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
-	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record');
+	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record', 'verbatimIndigenousName' => 'Verbatim Name', 'validIndigenousName' => 'Valid Name', 'linkIndigenousName' => 'Link', 'familyLanguageIndigenousName' => 'Family', 'groupLanguageIndigenousName' => 'Group', 'subgroupLanguageIndigenousName' => 'Subgroup', 'villageIndigenousname' => 'Village', 'municipalityIndigenousname' => 'Municipality', 'stateIndigenousname' => 'State', 'countryIndigenousname' => 'Country', 'isoIndigenousname' => 'ISO', 'vernacularIndigenousName' => 'Vernacular Name', 'glossIndigenousName' => 'Gloss', 'parseIndigenousName' => 'Parse', 'parentTaxaIndigenousName' => 'Parent Taxonomy', 'siblingTaxaIndigenousName' => 'Sibling Taxonomy', 'childTaxaIndigenousName' => 'Child Taxonomy', 'otherTaxaIndigenousName' => 'Other Taxonomy', 'typologyNameIndigenousName' => 'Typology', 'semanticsNameIndigenousName' => 'Semantics', 'discussionNameIndigenousName' => 'Discussion of Name', 'categoryUseIndigenousName' => 'Category of Use', 'specificUseIndigenousName' => 'Specific Use', 'partUseIndigenousName' => 'Parts Used', 'discussionUseIndigenousName' => 'Discussion of Use');
 $headMap = array();
 
 $qryCnt = 0;

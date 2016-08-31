@@ -3688,7 +3688,7 @@ CREATE PROCEDURE updateSymbiotaSchema ()
           ADD COLUMN `municipalityIndigenousname` varchar(50) DEFAULT NULL,
           ADD COLUMN `stateIndigenousname` varchar(50) DEFAULT NULL,
           ADD COLUMN `countryIndigenousname` varchar(50) DEFAULT NULL,
-          ADD COLUMN `isoIndigenousname` varchar(5) DEFAULT NULL,\
+          ADD COLUMN `isoIndigenousname` varchar(5) DEFAULT NULL,
           ADD COLUMN `vernacularIndigenousName` varchar(100) DEFAULT NULL,
           ADD COLUMN `glossIndigenousName` varchar(100) DEFAULT NULL,
           ADD COLUMN `parseIndigenousName` varchar(100) DEFAULT NULL,
@@ -3697,11 +3697,11 @@ CREATE PROCEDURE updateSymbiotaSchema ()
           ADD COLUMN `childTaxaIndigenousName` varchar(100) DEFAULT NULL,
           ADD COLUMN `otherTaxaIndigenousName` varchar(100) DEFAULT NULL,
           ADD COLUMN `typologyNameIndigenousName` varchar(45) DEFAULT NULL COMMENT 'single term, analyzable, compound, complex',
-          ADD COLUMN `semanticsNameIndigenousName` varchar(45) DEFAULT NULL COMMENT 'animal, color, habitat, morphology, plant, sense, use, value',
-          ADD COLUMN `discussionNameIndigenousName` longtext,\
-          ADD COLUMN `categoryUseIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `specificUseIndigenousName` varchar(50) DEFAULT NULL,
-          ADD COLUMN `partUseIndigenousName` varchar(50) DEFAULT NULL,
+          ADD COLUMN `semanticsNameIndigenousName` varchar(45) DEFAULT NULL COMMENT 'animal, color, habitat, morphology, plant, sense, use, value, emotion',
+          ADD COLUMN `discussionNameIndigenousName` longtext,
+          ADD COLUMN `categoryUseIndigenousName` varchar(100) DEFAULT NULL COMMENT 'select list',
+          ADD COLUMN `specificUseIndigenousName` varchar(50) DEFAULT NULL COMMENT 'select list',
+          ADD COLUMN `partUseIndigenousName` varchar(50) DEFAULT NULL COMMENT 'entire plant, bark, flower, fruit, latex/sap/resin, leaves, leaf plant juice, roots, seeds, stems, thorns/spikes/prickles, trunk, tuber, other',
           ADD COLUMN `discussionUseIndigenousName` longtext;
         END IF;
 

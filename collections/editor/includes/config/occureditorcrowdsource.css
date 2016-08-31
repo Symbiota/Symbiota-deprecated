@@ -514,6 +514,107 @@ body{
 	display:none;
 }
 
+/*verbatimIndigenousName*/
+#verbatimIndigenousNameDiv{
+	display:none;
+}
+/*validIndigenousName*/
+#validIndigenousNameDiv{
+	display:none;
+}
+/*linkIndigenousName*/
+#linkIndigenousNameDiv{
+	display:none;
+}
+/*familyLanguageIndigenousName*/
+#familyLanguageIndigenousNameDiv{
+	display:none;
+}
+/*groupLanguageIndigenousName*/
+#groupLanguageIndigenousNameDiv{
+	display:none;
+}
+/*subgroupLanguageIndigenousName*/
+#subgroupLanguageIndigenousNameDiv{
+	display:none;
+}
+/*villageIndigenousName*/
+#villageIndigenousNameDiv{
+	display:none;
+}
+/*municipalityIndigenousName*/
+#municipalityIndigenousNameDiv{
+	display:none;
+}
+/*stateIndigenousName*/
+#stateIndigenousNameDiv{
+	display:none;
+}
+/*countryIndigenousName*/
+#countryIndigenousNameDiv{
+	display:none;
+}
+/*isoIndigenousName*/
+#isoIndigenousNameDiv{
+	display:none;
+}
+/*vernacularIndigenousName*/
+#vernacularIndigenousNameDiv{
+	display:none;
+}
+/*glossIndigenousName*/
+#glossIndigenousNameDiv{
+	display:none;
+}
+/*parseIndigenousName*/
+#parseIndigenousNameDiv{
+	display:none;
+}
+/*parentTaxaIndigenousName*/
+#parentTaxaIndigenousNameDiv{
+	display:none;
+}
+/*siblingTaxaIndigenousName*/
+#siblingTaxaIndigenousNameDiv{
+	display:none;
+}
+/*childTaxaIndigenousName*/
+#childTaxaIndigenousNameDiv{
+	display:none;
+}
+/*otherTaxaIndigenousName*/
+#otherTaxaIndigenousNameDiv{
+	display:none;
+}
+/*typologyNameIndigenousName*/
+#typologyNameIndigenousNameDiv{
+	display:none;
+}
+/*semanticsNameIndigenousName*/
+#semanticsNameIndigenousNameDiv{
+	display:none;
+}
+/*discussionNameIndigenousName*/
+#discussionNameIndigenousNameDiv{
+	display:none;
+}
+/*categoryUseIndigenousName*/
+#categoryUseIndigenousNameDiv{
+	display:none;
+}
+/*specificUseIndigenousName*/
+#specificUseIndigenousNameDiv{
+	display:none;
+}
+/*partUseIndigenousName*/
+#partUseIndigenousNameDiv{
+	display:none;
+}
+/*discussionUseIndigenousName*/
+#discussionUseIndigenousNameDiv{
+	display:none;
+}
+
 #occurrenceIdDiv{
 	display:none;
 }

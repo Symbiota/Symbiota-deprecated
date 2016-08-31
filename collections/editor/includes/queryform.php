@@ -171,6 +171,7 @@ else{
 					'recordedby'=>'Collector','recordnumber'=>'Collector Number','eventdate'=>'Collection Date');
 			}
 			else{
+				//CA: Bookmark
 				$advFieldArr = array('family'=>'Family','genus'=>'Genus','specificEpithet'=>'Specific Epithet','sciname'=>'Scientific Name','scientificNameAuthorship'=>'Author','identifiedBy'=>'Identified By',
 					'identificationReferences'=>'Identification References','identificationRemarks'=>'Identification Remarks','taxonRemarks'=>'Taxon Remarks',
 					'identificationQualifier'=>'Identification Qualifier','typeStatus'=>'Type Status',
@@ -186,7 +187,7 @@ else{
 					'georeferencedBy'=>'Georeferenced By','georeferenceProtocol'=>'Georeference Protocol','georeferenceSources'=>'Georeference Sources',
 					'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks','localitySecurity'=>'Locality Security',
 					'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
-					'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','ocrFragment'=>'OCR Fragment','username'=>'Modified By','dateEntered'=>'Date Entered','basisOfRecord'=>'Basis Of Record');
+					'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','ocrFragment'=>'OCR Fragment','username'=>'Modified By','dateEntered'=>'Date Entered','basisOfRecord'=>'Basis Of Record','verbatimIndigenousName'=>'Verbatim Name','validIndigenousName'=>'Valid Name','linkIndigenousName'=>'Link','familyLanguageIndigenousName'=>'Family','groupLanguageIndigenousName'=>'Group','subgroupLanguageIndigenousName'=>'Subgroup','villageIndigenousname'=>'Village','municipalityIndigenousname'=>'Municipality','stateIndigenousname'=>'State','countryIndigenousname'=>'Country','isoIndigenousname'=>'ISO','vernacularIndigenousName'=>'Vernacular Name','glossIndigenousName'=>'Gloss','parseIndigenousName'=>'Parse','parentTaxaIndigenousName'=>'Parent Taxonomy','siblingTaxaIndigenousName'=>'Sibling Taxonomy','childTaxaIndigenousName'=>'Child Taxonomy','otherTaxaIndigenousName'=>'Other Taxonomy','typologyNameIndigenousName'=>'Typology','semanticsNameIndigenousName'=>'Semantics','discussionNameIndigenousName'=>'Discussion of Name','categoryUseIndigenousName'=>'Category of Use','specificUseIndigenousName'=>'Specific Use','partUseIndigenousName'=>'Parts Used','discussionUseIndigenousName'=>'Discussion of Use');
 			}
 			//sort($advFieldArr);
 			?>

@@ -593,12 +593,13 @@ class ExsiccatiManager {
 
 	private function getTargetFields(){
 		$fieldArr = array();
+		//CA: Bookmark
 		$skipFields = array('occid','collid','dbpk','ownerinstitutioncode','institutionid','collectionid','datasetid','institutioncode','collectioncode',
 			'occurrenceid', 'catalognumber', 'othercatalognumbers','previousidentifications', 'taxonremarks', 'identifiedby', 'dateidentified',
 			'identificationreferences', 'identificationremarks', 'recordedbyid', 'informationwithheld', 'associatedoccurrences', 'datageneralizations',
 			'dynamicproperties', 'verbatimcoordinatesystem', 'storagelocation', 'disposition', 'genericcolumn1', 'genericcolumn2', 'modified',
 			'observeruid', 'processingstatus', 'recordenteredby', 'duplicatequantity', 'labelproject', 'dateentered', 'datelastmodified',
-			'initialtimestamp');
+			'initialtimestamp', 'verbatimIndigenousName', 'validIndigenousName', 'linkIndigenousName', 'familyLanguageIndigenousName', 'groupLanguageIndigenousName', 'subgroupLanguageIndigenousName', 'villageIndigenousname', 'municipalityIndigenousname', 'stateIndigenousname', 'countryIndigenousname', 'isoIndigenousname', 'vernacularIndigenousName', 'glossIndigenousName', 'parseIndigenousName', 'parentTaxaIndigenousName', 'siblingTaxaIndigenousName', 'childTaxaIndigenousName', 'otherTaxaIndigenousName', 'typologyNameIndigenousName', 'semanticsNameIndigenousName', 'discussionNameIndigenousName', 'categoryUseIndigenousName', 'specificUseIndigenousName', 'partUseIndigenousName', 'discussionUseIndigenousName');
 		$sql = "SHOW COLUMNS FROM uploadspectemp";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){

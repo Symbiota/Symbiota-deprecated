@@ -281,6 +281,82 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['recordId'] = 'g.guid AS recordId';
 		$occurTermArr['references'] = 'http://purl.org/dc/terms/references';
 		$occurFieldArr['references'] = '';
+		//CA: Bookmark
+		/*verbatimIndigenousName*/
+		$occurTermArr['verbatimIndigenousName'] = 'http://symbiota.org/terms/verbatimIndigenousName';
+		$occurFieldArr['verbatimIndigenousName'] = 'o.verbatimindigenousname';
+		/*validIndigenousName*/
+		$occurTermArr['validIndigenousName'] = 'http://symbiota.org/terms/validIndigenousName';
+		$occurFieldArr['validIndigenousName'] = 'o.validindigenousname';
+		/*linkIndigenousName*/
+		$occurTermArr['linkIndigenousName'] = 'http://symbiota.org/terms/linkIndigenousName';
+		$occurFieldArr['linkIndigenousName'] = 'o.linkindigenousname';
+		/*familyLanguageIndigenousName*/
+		$occurTermArr['familyLanguageIndigenousName'] = 'http://symbiota.org/terms/familyLanguageIndigenousName';
+		$occurFieldArr['familyLanguageIndigenousName'] = 'o.familylanguageindigenousname';
+		/*groupLanguageIndigenousName*/
+		$occurTermArr['groupLanguageIndigenousName'] = 'http://symbiota.org/terms/groupLanguageIndigenousName';
+		$occurFieldArr['groupLanguageIndigenousName'] = 'o.grouplanguageindigenousname';
+		/*subgroupLanguageIndigenousName*/
+		$occurTermArr['subgroupLanguageIndigenousName'] = 'http://symbiota.org/terms/subgroupLanguageIndigenousName';
+		$occurFieldArr['subgroupLanguageIndigenousName'] = 'o.subgrouplanguageindigenousname';
+		/*villageIndigenousName*/
+		$occurTermArr['villageIndigenousName'] = 'http://symbiota.org/terms/villageIndigenousName';
+		$occurFieldArr['villageIndigenousName'] = 'o.villageindigenousname';
+		/*municipalityIndigenousName*/
+		$occurTermArr['municipalityIndigenousName'] = 'http://symbiota.org/terms/municipalityIndigenousName';
+		$occurFieldArr['municipalityIndigenousName'] = 'o.municipalityindigenousname';
+		/*stateIndigenousName*/
+		$occurTermArr['stateIndigenousName'] = 'http://symbiota.org/terms/stateIndigenousName';
+		$occurFieldArr['stateIndigenousName'] = 'o.stateindigenousname';
+		/*countryIndigenousName*/
+		$occurTermArr['countryIndigenousName'] = 'http://symbiota.org/terms/countryIndigenousName';
+		$occurFieldArr['countryIndigenousName'] = 'o.countryindigenousname';
+		/*isoIndigenousName*/
+		$occurTermArr['isoIndigenousName'] = 'http://symbiota.org/terms/isoIndigenousName';
+		$occurFieldArr['isoIndigenousName'] = 'o.isoindigenousname';
+		/*vernacularIndigenousName*/
+		$occurTermArr['vernacularIndigenousName'] = 'http://symbiota.org/terms/vernacularIndigenousName';
+		$occurFieldArr['vernacularIndigenousName'] = 'o.vernacularindigenousname';
+		/*glossIndigenousName*/
+		$occurTermArr['glossIndigenousName'] = 'http://symbiota.org/terms/glossIndigenousName';
+		$occurFieldArr['glossIndigenousName'] = 'o.glossindigenousname';
+		/*parseIndigenousName*/
+		$occurTermArr['parseIndigenousName'] = 'http://symbiota.org/terms/parseIndigenousName';
+		$occurFieldArr['parseIndigenousName'] = 'o.parseindigenousname';
+		/*parentTaxaIndigenousName*/
+		$occurTermArr['parentTaxaIndigenousName'] = 'http://symbiota.org/terms/parentTaxaIndigenousName';
+		$occurFieldArr['parentTaxaIndigenousName'] = 'o.parenttaxaindigenousname';
+		/*siblingTaxaIndigenousName*/
+		$occurTermArr['siblingTaxaIndigenousName'] = 'http://symbiota.org/terms/siblingTaxaIndigenousName';
+		$occurFieldArr['siblingTaxaIndigenousName'] = 'o.siblingtaxaindigenousname';
+		/*childTaxaIndigenousName*/
+		$occurTermArr['childTaxaIndigenousName'] = 'http://symbiota.org/terms/childTaxaIndigenousName';
+		$occurFieldArr['childTaxaIndigenousName'] = 'o.childtaxaindigenousname';
+		/*otherTaxaIndigenousName*/
+		$occurTermArr['otherTaxaIndigenousName'] = 'http://symbiota.org/terms/otherTaxaIndigenousName';
+		$occurFieldArr['otherTaxaIndigenousName'] = 'o.othertaxaindigenousname';
+		/*typologyNameIndigenousName*/
+		$occurTermArr['typologyNameIndigenousName'] = 'http://symbiota.org/terms/typologyNameIndigenousName';
+		$occurFieldArr['typologyNameIndigenousName'] = 'o.typologynameindigenousname';
+		/*semanticsNameIndigenousName*/
+		$occurTermArr['semanticsNameIndigenousName'] = 'http://symbiota.org/terms/semanticsNameIndigenousName';
+		$occurFieldArr['semanticsNameIndigenousName'] = 'o.semanticsnameindigenousname';
+		/*discussionNameIndigenousName*/
+		$occurTermArr['discussionNameIndigenousName'] = 'http://symbiota.org/terms/discussionNameIndigenousName';
+		$occurFieldArr['discussionNameIndigenousName'] = 'o.discussionnameindigenousname';
+		/*categoryUseIndigenousName*/
+		$occurTermArr['categoryUseIndigenousName'] = 'http://symbiota.org/terms/categoryUseIndigenousName';
+		$occurFieldArr['categoryUseIndigenousName'] = 'o.categoryuseindigenousname';
+		/*specificUseIndigenousName*/
+		$occurTermArr['specificUseIndigenousName'] = 'http://symbiota.org/terms/specificUseIndigenousName';
+		$occurFieldArr['specificUseIndigenousName'] = 'o.specificuseindigenousname';
+		/*partUseIndigenousName*/
+		$occurTermArr['partUseIndigenousName'] = 'http://symbiota.org/terms/partUseIndigenousName';
+		$occurFieldArr['partUseIndigenousName'] = 'o.partuseindigenousname';
+		/*discussionUseIndigenousName*/
+		$occurTermArr['discussionUseIndigenousName'] = 'http://symbiota.org/terms/discussionUseIndigenousName';
+		$occurFieldArr['discussionUseIndigenousName'] = 'o.discussionuseindigenousname';
 
 		$this->occurrenceFieldArr['terms'] = $this->trimOccurrenceBySchemaType($occurTermArr);
 		$occurFieldArr = $this->trimOccurrenceBySchemaType($occurFieldArr);
