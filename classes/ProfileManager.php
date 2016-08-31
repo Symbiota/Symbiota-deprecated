@@ -726,7 +726,8 @@ class ProfileManager{
     	$fileName = $tempPath.$buFileName;
     	$specFH = fopen($fileName.'_spec.csv', "w");
     	//Output header 
-    	$headerStr = 'occid,dbpk,basisOfRecord,otherCatalogNumbers,ownerInstitutionCode, '.
+    	//CA: Bookmark
+		  $headerStr = 'occid,dbpk,basisOfRecord,otherCatalogNumbers,ownerInstitutionCode, '.
 			'family,scientificName,sciname,tidinterpreted,genus,specificEpithet,taxonRank,infraspecificEpithet,scientificNameAuthorship, '.
 			'taxonRemarks,identifiedBy,dateIdentified,identificationReferences,identificationRemarks,identificationQualifier, '.
 			'typeStatus,recordedBy,recordNumber,associatedCollectors,eventDate,year,month,day,startDayOfYear,endDayOfYear, '.
@@ -736,7 +737,7 @@ class ProfileManager{
 			'locality,localitySecurity,localitySecurityReason,decimalLatitude,decimalLongitude,geodeticDatum, '.
 			'coordinateUncertaintyInMeters,verbatimCoordinates,georeferencedBy,georeferenceProtocol,georeferenceSources, '.
 			'georeferenceVerificationStatus,georeferenceRemarks,minimumElevationInMeters,maximumElevationInMeters,verbatimElevation, '.
-			'previousIdentifications,disposition,modified,language,processingstatus,recordEnteredBy,duplicateQuantity,dateLastModified ';
+			'previousIdentifications,disposition,modified,language,processingstatus,recordEnteredBy,duplicateQuantity,dateLastModified,verbatimIndigenousName,validIndigenousName,linkIndigenousName,familyLanguageIndigenousName,groupLanguageIndigenousName,subgroupLanguageIndigenousName,villageIndigenousname,municipalityIndigenousname,stateIndigenousname,countryIndigenousname,isoIndigenousname,vernacularIndigenousName,glossIndigenousName,parseIndigenousName,parentTaxaIndigenousName,siblingTaxaIndigenousName,childTaxaIndigenousName,otherTaxaIndigenousName,typologyNameIndigenousName,semanticsNameIndigenousName,discussionNameIndigenousName,categoryUseIndigenousName,specificUseIndigenousName,partUseIndigenousName,discussionUseIndigenousName ';
 		fputcsv($specFH, explode(',',$headerStr));
 		//Query and output values
     	$sql = 'SELECT '.$headerStr.

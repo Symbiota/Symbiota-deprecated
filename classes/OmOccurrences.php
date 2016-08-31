@@ -190,7 +190,7 @@ class OmOccurrences  {
  }
 
 /*
-
+//CA: Bookmark
 CREATE TABLE `omoccurrences` (
   `occid` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `collid` int(10) unsigned NOT NULL,
@@ -290,6 +290,31 @@ CREATE TABLE `omoccurrences` (
   `labelProject` varchar(50) DEFAULT NULL,
   `dateEntered` datetime DEFAULT NULL,
   `dateLastModified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `verbatimIndigenousName` varchar(100) DEFAULT NULL,
+  `validIndigenousName` varchar(100) DEFAULT NULL,
+  `linkIndigenousName` varchar(100) DEFAULT NULL,
+  `familyLanguageIndigenousName` varchar(50) DEFAULT NULL,
+  `groupLanguageIndigenousName` varchar(50) DEFAULT NULL,
+  `subgroupLanguageIndigenousName` varchar(50) DEFAULT NULL,
+  `villageIndigenousName` varchar(50) DEFAULT NULL,
+  `municipalityIndigenousName` varchar(50) DEFAULT NULL,
+  `stateIndigenousName` varchar(50) DEFAULT NULL,
+  `countryIndigenousName` varchar(50) DEFAULT NULL,
+  `isoIndigenousName` varchar(5) DEFAULT NULL,
+  `vernacularIndigenousName` varchar(100) DEFAULT NULL,
+  `glossIndigenousName` varchar(100) DEFAULT NULL,
+  `parseIndigenousName` varchar(100) DEFAULT NULL,
+  `parentTaxaIndigenousName` varchar(100) DEFAULT NULL,
+  `siblingTaxaIndigenousName` varchar(100) DEFAULT NULL,
+  `childTaxaIndigenousName` varchar(100) DEFAULT NULL,
+  `otherTaxaIndigenousName` varchar(100) DEFAULT NULL,
+  `typologyNameIndigenousName` varchar(45) DEFAULT NULL COMMENT 'single term, analyzable, compound, complex',
+  `semanticsNameIndigenousName` varchar(45) DEFAULT NULL COMMENT 'animal, color, habitat, morphology, plant, sense, use, value, emotion',
+  `discussionNameIndigenousName` longtext,
+  `categoryUseIndigenousName` varchar(100) DEFAULT NULL COMMENT 'select list',
+  `specificUseIndigenousName` varchar(50) DEFAULT NULL COMMENT 'select list',
+  `partUseIndigenousName` varchar(50) DEFAULT NULL COMMENT 'entire plant, bark, flower, fruit, latex/sap/resin, leaves, leaf plant juice, roots, seeds, stems, thorns/spikes/prickles, trunk, tuber, other',
+  `discussionUseIndigenousName` longtext,
   PRIMARY KEY (`occid`) USING BTREE,
   UNIQUE KEY `Index_collid` (`collid`,`dbpk`),
   KEY `Index_sciname` (`sciname`),
@@ -522,6 +547,33 @@ CREATE TABLE `omoccurrences` (
    const DISPOSITION       = 'disposition';
    const GENERICCOLUMN1    = 'genericcolumn1';
    const GENERICCOLUMN2    = 'genericcolumn2';
+   //CA: Bookmark
+   //ETHNOGRAPHICAL
+   const VERBATIMINDIGENOUSNAME          = 'verbatimIndigenousName';
+   const VALIDINDIGENOUSNAME          = 'validIndigenousName';
+   const LINKINDIGENOUSNAME          = 'linkIndigenousName';
+   const FAMILYLANGUAGEINDIGENOUSNAME          = 'familyLanguageIndigenousName';
+   const GROUPLANGUAGEINDIGENOUSNAME          = 'groupLanguageIndigenousName';
+   const SUBGROUPLANGUAGEINDIGENOUSNAME          = 'subgroupLanguageIndigenousName';
+   const VILLAGEINDIGENOUSNAME          = 'villageIndigenousName';
+   const MUNICIPALITYINDIGENOUSNAME          = 'municipalityIndigenousName';
+   const STATEINDIGENOUSNAME          = 'stateIndigenousName';
+   const COUNTRYINDIGENOUSNAME          = 'countryIndigenousName';
+   const ISOINDIGENOUSNAME          = 'isoIndigenousName';
+   const VERNACULARINDIGENOUSNAME          = 'vernacularIndigenousName';
+   const GLOSSINDIGENOUSNAME          = 'glossIndigenousName';
+   const PARSEINDIGENOUSNAME          = 'parseIndigenousName';
+   const PARENTTAXAINDIGENOUSNAME          = 'parentTaxaIndigenousName';
+   const SIBLINGTAXAINDIGENOUSNAME          = 'siblingTaxaIndigenousName';
+   const CHILDTAXAINDIGENOUSNAME          = 'childTaxaIndigenousName';
+   const OTHERTAXAINDIGENOUSNAME          = 'otherTaxaIndigenousName';
+   const TYPOLOGYNAMEINDIGENOUSNAME          = 'typologyNameIndigenousName';
+   const SEMANTICSNAMEINDIGENOUSNAME          = 'semanticsNameIndigenousName';
+   const DISCUSSIONNAMEINDIGENOUSNAME          = 'discussionNameIndigenousName';
+   const CATEGORYUSEINDIGENOUSNAME          = 'categoryUseIndigenousName';
+   const SPECIFICUSEINDIGENOUSNAME          = 'specificUseIndigenousName';
+   const PARTUSEINDIGENOUSNAME          = 'partUseIndigenousName';
+   const DISCUSSIONUSEINDIGENOUSNAME          = 'discussionUseIndigenousName';
    // DateLastModified
    const MODIFIED          = 'modified';
    const LANGUAGE          = 'language';
@@ -652,6 +704,33 @@ CREATE TABLE `omoccurrences` (
   $duplicateQuantity = substr(preg_replace('/[^0-9\-\[NULL\]]/','',$_GET['duplicateQuantity']), 0, 11);
   $labelProject = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['labelProject']), 0, 20);
   $dateLastModified = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['dateLastModified']), 0, 21);
+  //CA: Bookmark
+  //ETHNOGRAPHICAL
+  $verbatimIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['verbatimIndigenousName']), 0, 100);
+  $validIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['validIndigenousName']), 0, 100);
+  $linkIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['linkIndigenousName']), 0, 100);
+  $familyLanguageIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['familyLanguageIndigenousName']), 0, 50);
+  $groupLanguageIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['groupLanguageIndigenousName']), 0, 50);;
+  $subgroupLanguageIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['subgroupLanguageIndigenousName']), 0, 50);
+  $villageIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['villageIndigenousName']), 0, 50);
+  $municipalityIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['municipalityIndigenousName']), 0, 50);
+  $stateIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['stateIndigenousName']), 0, 50);
+  $countryIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['countryIndigenousName']), 0, 50);
+  $isoIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['isoIndigenousName']), 0, 5);
+  $vernacularIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['vernacularIndigenousName']), 0, 100);
+  $glossIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['glossIndigenousName']), 0, 100);
+  $parseIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['parseIndigenousName']), 0, 100);
+  $parentTaxaIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['parentTaxaIndigenousName']), 0, 100);
+  $siblingTaxaIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['siblingTaxaIndigenousName']), 0, 100);
+  $childTaxaIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['childTaxaIndigenousName']), 0, 100);
+  $otherTaxaIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['otherTaxaIndigenousName']), 0, 100);
+  $typologyNameIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['typologyNameIndigenousName']), 0, 45);
+  $semanticsNameIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['semanticsNameIndigenousName']), 0, 45);
+  //$discussionNameIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['discussionNameIndigenousName']), 0, 255);
+  $categoryUseIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['categoryUseIndigenousName']), 0, 100);
+  $specificUseIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['specificUseIndigenousName']), 0, 50);
+  $partUseIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['partUseIndigenousName']), 0, 50);
+  //$discussionUseIndigenousName = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['discussionUseIndigenousName']), 0, 255);
 */
 
    //---------------------------------------------------------------------------
@@ -753,12 +832,38 @@ CREATE TABLE `omoccurrences` (
    private $duplicateQuantity; // INTEGER 
    private $labelProject; // YEAR 
    private $dateEntered; // TIMESTAMP 
-   private $dateLastModified; // TIMESTAMP 
-
+   private $dateLastModified; // TIMESTAMP
    private $minimumDepthInMeters;
    private $maximumDepthInMeters;
    private $verbatimDepth;
    private $storageLocation;
+    //CA: Bookmark
+    //ETHNOGRAPHIC
+    private $verbatimIndigenousName; //varchar(100)
+    private $validIndigenousName; //varchar(100)
+    private $linkIndigenousName; //varchar(100)
+    private $familyLanguageIndigenousName; //varchar(50)
+    private $groupLanguageIndigenousName; //varchar(50)
+    private $subgroupLanguageIndigenousName; //varchar(50)
+    private $villageIndigenousName; //varchar(50)
+    private $municipalityIndigenousName; //varchar(50)
+    private $stateIndigenousName; //varchar(50)
+    private $countryIndigenousName; //varchar(50)
+    private $isoIndigenousName; //varchar(5)
+    private $vernacularIndigenousName; //varchar(100)
+    private $glossIndigenousName; //varchar(100)
+    private $parseIndigenousName; //varchar(100)
+    private $parentTaxaIndigenousName; //varchar(100)
+    private $siblingTaxaIndigenousName; //varchar(100)
+    private $childTaxaIndigenousName; //varchar(100)
+    private $otherTaxaIndigenousName; //varchar(100)
+    private $typologyNameIndigenousName; //varchar(45)
+    private $semanticsNameIndigenousName; //varchar(45)
+    private $discussionNameIndigenousName; //longtext
+    private $categoryUseIndigenousName; //varchar(100)
+    private $specificUseIndigenousName; //varchar(50)
+    private $partUseIndigenousName; //varchar(50)
+    private $discussionUseIndigenousName; //longtext
 
    // No implementation in Symbiota
    public $dateSerialized;
@@ -773,11 +878,13 @@ CREATE TABLE `omoccurrences` (
    private $dirty;
    private $loaded;
    private $error;
-   const FIELDLIST = ' occid, collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, institutionID, collectionID, datasetID, institutionCode, collectionCode, family, scientificName, sciname, tidinterpreted, genus, specificEpithet, taxonRank, infraspecificEpithet, scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, behavior, reproductiveCondition, cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, previousIdentifications, disposition, genericcolumn1, genericcolumn2, modified, language, observeruid, processingstatus, recordEnteredBy, duplicateQuantity, labelProject, dateEntered, dateLastModified, minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation ';
+   //CA: Bookmark
+   const FIELDLIST = ' occid, collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, institutionID, collectionID, datasetID, institutionCode, collectionCode, family, scientificName, sciname, tidinterpreted, genus, specificEpithet, taxonRank, infraspecificEpithet, scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, behavior, reproductiveCondition, cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, previousIdentifications, disposition, genericcolumn1, genericcolumn2, modified, language, observeruid, processingstatus, recordEnteredBy, duplicateQuantity, labelProject, dateEntered, dateLastModified, minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation, verbatimIndigenousName, validIndigenousName, linkIndigenousName, familyLanguageIndigenousName, groupLanguageIndigenousName, subgroupLanguageIndigenousName, villageIndigenousName, municipalityIndigenousName, stateIndigenousName, countryIndigenousName, isoIndigenousName, vernacularIndigenousName, glossIndigenousName, parseIndigenousName, parentTaxaIndigenousName, siblingTaxaIndigenousName, childTaxaIndigenousName, otherTaxaIndigenousName, typologyNameIndigenousName, semanticsNameIndigenousName, discussionNameIndigenousName, categoryUseIndigenousName, specificUseIndigenousName, partUseIndigenousName, discussionUseIndigenousName ';
    const PKFIELDLIST = ' occid, ';
    const NUMBER_OF_PRIMARY_KEYS = 1;
    private $primaryKeyArray = array( 1 => 'occid'  ) ;
-   private $allFieldsArray = array( 0 => 'occid' , 1 => 'collid' , 2 => 'dbpk' , 3 => 'basisOfRecord' , 4 => 'occurrenceID' , 5 => 'catalogNumber' , 6 => 'otherCatalogNumbers' , 7 => 'ownerInstitutionCode' , 8 => 'institutionID' , 9 => 'collectionID' , 10 => 'datasetID' , 11 => 'institutionCode' , 12 => 'collectionCode' , 13 => 'family' , 14 => 'scientificName' , 15 => 'sciname' , 16 => 'tidinterpreted' , 17 => 'genus' , 18 => 'specificEpithet' , 19 => 'taxonRank' , 20 => 'infraspecificEpithet' , 21 => 'scientificNameAuthorship' , 22 => 'taxonRemarks' , 23 => 'identifiedBy' , 24 => 'dateIdentified' , 25 => 'identificationReferences' , 26 => 'identificationRemarks' , 27 => 'identificationQualifier' , 28 => 'typeStatus' , 29 => 'recordedBy' , 30 => 'recordNumber' , 31 => 'recordedById' , 32 => 'associatedCollectors' , 33 => 'eventDate' , 34 => 'year' , 35 => 'month' , 36 => 'day' , 37 => 'startDayOfYear' , 38 => 'endDayOfYear' , 39 => 'verbatimEventDate' , 40 => 'habitat' , 41 => 'substrate' , 42 => 'fieldNotes' , 43 => 'fieldnumber' , 44 => 'occurrenceRemarks' , 45 => 'informationWithheld' , 46 => 'dataGeneralizations' , 47 => 'associatedOccurrences' , 48 => 'associatedTaxa' , 49 => 'dynamicProperties' , 50 => 'verbatimAttributes' , 51 => 'behavior' , 52 => 'reproductiveCondition' , 53 => 'cultivationStatus' , 54 => 'establishmentMeans' , 55 => 'lifeStage' , 56 => 'sex' , 57 => 'individualCount' , 58 => 'samplingProtocol' , 101 => 'samplingEffort' , 59 => 'preparations' , 60 => 'country' , 61 => 'stateProvince' , 62 => 'county' , 63 => 'municipality' , 64 => 'locality' , 65 => 'localitySecurity' , 66 => 'localitySecurityReason' , 67 => 'decimalLatitude' , 68 => 'decimalLongitude' , 69 => 'geodeticDatum' , 70 => 'coordinateUncertaintyInMeters' , 71 => 'footprintWKT' , 72 => 'coordinatePrecision' , 73 => 'locationRemarks' , 74 => 'verbatimCoordinates' , 75 => 'verbatimCoordinateSystem' , 76 => 'georeferencedBy' , 77 => 'georeferenceProtocol' , 78 => 'georeferenceSources' , 79 => 'georeferenceVerificationStatus' , 80 => 'georeferenceRemarks' , 81 => 'minimumElevationInMeters' , 82 => 'maximumElevationInMeters' , 83 => 'verbatimElevation' , 84 => 'previousIdentifications' , 85 => 'disposition' , 86 => 'genericcolumn1' , 87 => 'genericcolumn2' , 88 => 'modified' , 89 => 'language' , 91 => 'observeruid' , 92 => 'processingstatus' , 93 => 'recordEnteredBy' , 94 => 'duplicateQuantity' , 95 => 'labelProject' , 102 =>'dateEntered' , 96 => 'dateLastModified', 97 => 'minimumDepthInMeters', 98 => 'maximumDepthInMeters', 99 => 'verbatimDepth', 100 => 'storageLocation' ) ;
+   //CA: Bookmark
+   private $allFieldsArray = array( 0 => 'occid' , 1 => 'collid' , 2 => 'dbpk' , 3 => 'basisOfRecord' , 4 => 'occurrenceID' , 5 => 'catalogNumber' , 6 => 'otherCatalogNumbers' , 7 => 'ownerInstitutionCode' , 8 => 'institutionID' , 9 => 'collectionID' , 10 => 'datasetID' , 11 => 'institutionCode' , 12 => 'collectionCode' , 13 => 'family' , 14 => 'scientificName' , 15 => 'sciname' , 16 => 'tidinterpreted' , 17 => 'genus' , 18 => 'specificEpithet' , 19 => 'taxonRank' , 20 => 'infraspecificEpithet' , 21 => 'scientificNameAuthorship' , 22 => 'taxonRemarks' , 23 => 'identifiedBy' , 24 => 'dateIdentified' , 25 => 'identificationReferences' , 26 => 'identificationRemarks' , 27 => 'identificationQualifier' , 28 => 'typeStatus' , 29 => 'recordedBy' , 30 => 'recordNumber' , 31 => 'recordedById' , 32 => 'associatedCollectors' , 33 => 'eventDate' , 34 => 'year' , 35 => 'month' , 36 => 'day' , 37 => 'startDayOfYear' , 38 => 'endDayOfYear' , 39 => 'verbatimEventDate' , 40 => 'habitat' , 41 => 'substrate' , 42 => 'fieldNotes' , 43 => 'fieldnumber' , 44 => 'occurrenceRemarks' , 45 => 'informationWithheld' , 46 => 'dataGeneralizations' , 47 => 'associatedOccurrences' , 48 => 'associatedTaxa' , 49 => 'dynamicProperties' , 50 => 'verbatimAttributes' , 51 => 'behavior' , 52 => 'reproductiveCondition' , 53 => 'cultivationStatus' , 54 => 'establishmentMeans' , 55 => 'lifeStage' , 56 => 'sex' , 57 => 'individualCount' , 58 => 'samplingProtocol' , 101 => 'samplingEffort' , 59 => 'preparations' , 60 => 'country' , 61 => 'stateProvince' , 62 => 'county' , 63 => 'municipality' , 64 => 'locality' , 65 => 'localitySecurity' , 66 => 'localitySecurityReason' , 67 => 'decimalLatitude' , 68 => 'decimalLongitude' , 69 => 'geodeticDatum' , 70 => 'coordinateUncertaintyInMeters' , 71 => 'footprintWKT' , 72 => 'coordinatePrecision' , 73 => 'locationRemarks' , 74 => 'verbatimCoordinates' , 75 => 'verbatimCoordinateSystem' , 76 => 'georeferencedBy' , 77 => 'georeferenceProtocol' , 78 => 'georeferenceSources' , 79 => 'georeferenceVerificationStatus' , 80 => 'georeferenceRemarks' , 81 => 'minimumElevationInMeters' , 82 => 'maximumElevationInMeters' , 83 => 'verbatimElevation' , 84 => 'previousIdentifications' , 85 => 'disposition' , 86 => 'genericcolumn1' , 87 => 'genericcolumn2' , 88 => 'modified' , 89 => 'language' , 91 => 'observeruid' , 92 => 'processingstatus' , 93 => 'recordEnteredBy' , 94 => 'duplicateQuantity' , 95 => 'labelProject' , 102 =>'dateEntered' , 96 => 'dateLastModified', 97 => 'minimumDepthInMeters', 98 => 'maximumDepthInMeters', 99 => 'verbatimDepth', 100 => 'storageLocation',  101 => 'verbatimIndigenousName',  102 => 'validIndigenousName',  103 => 'linkIndigenousName',  104 => 'familyLanguageIndigenousName',  105 => 'groupLanguageIndigenousName',  106 => 'subgroupLanguageIndigenousName',  107 => 'villageIndigenousName',  108 => 'municipalityIndigenousName',  109 => 'stateIndigenousName',  110 => 'countryIndigenousName',  111 => 'isoIndigenousName',  112 => 'vernacularIndigenousName',  113 => 'glossIndigenousName',  114 => 'parseIndigenousName',  115 => 'parentTaxaIndigenousName',  116 => 'siblingTaxaIndigenousName',  117 => 'childTaxaIndigenousName',  118 => 'otherTaxaIndigenousName',  119 => 'typologyNameIndigenousName',  120 => 'semanticsNameIndigenousName',  121 => 'discussionNameIndigenousName',  122 => 'categoryUseIndigenousName',  123 => 'specificUseIndigenousName',  124 => 'partUseIndigenousName',  125 => 'discussionUseIndigenousName' ) ;
    private $selectDistinctFieldsArray = array( 1 => 'collid' , 2 => 'dbpk' , 4 => 'occurrenceID' , 5 => 'catalogNumber' , 7 => 'ownerInstitutionCode' , 13 => 'family' , 15 => 'sciname' , 16 => 'tidinterpreted' , 29 => 'recordedBy' , 30 => 'recordNumber' , 31 => 'recordedById' , 33 => 'eventDate' , 60 => 'country' , 61 => 'stateProvince' , 62 => 'county' , 63 => 'municipality' , 91 => 'observeruid' , 92 => 'processingstatus'  ) ;
 
    //---------------------------------------------------------------------------
@@ -884,6 +991,33 @@ CREATE TABLE `omoccurrences` (
        $this->dirty = false;
        $this->loaded = false;
        $this->error = '';
+       //CA: Bookmark
+       //ETHNOGRAPHIC
+       $this->verbatimIndigenousName = NULL;
+       $this->validIndigenousName = NULL;
+       $this->linkIndigenousName = NULL;
+       $this->familyLanguageIndigenousName = NULL;
+       $this->groupLanguageIndigenousName = NULL;
+       $this->subgroupLanguageIndigenousName = NULL;
+       $this->villageIndigenousName = NULL;
+       $this->municipalityIndigenousName = NULL;
+       $this->stateIndigenousName = NULL;
+       $this->countryIndigenousName = NULL;
+       $this->isoIndigenousName = NULL;
+       $this->vernacularIndigenousName = NULL;
+       $this->glossIndigenousName = NULL;
+       $this->parseIndigenousName = NULL;
+       $this->parentTaxaIndigenousName = NULL;
+       $this->siblingTaxaIndigenousName = NULL;
+       $this->childTaxaIndigenousName = NULL;
+       $this->otherTaxaIndigenousName = NULL;
+       $this->typologyNameIndigenousName = NULL;
+       $this->semanticsNameIndigenousName = NULL;
+       $this->discussionNameIndigenousName = NULL;
+       $this->categoryUseIndigenousName = NULL;
+       $this->specificUseIndigenousName = NULL;
+       $this->partUseIndigenousName = NULL;
+       $this->discussionUseIndigenousName = NULL;
    }
 
    private function l_addslashes($value) {
@@ -916,7 +1050,7 @@ CREATE TABLE `omoccurrences` (
     // ******* Note: $connection must be a mysqli object.
     global $connection;
     $returnvalue = false;
-    $this->occid = null;
+    $this->occid = null;//CA: Bookmark
     if($institutionCode != NULL && $collectionCode !=NULL && $catalogNumber!=NULL) {
         $preparesql = 'SELECT occid, collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, 
         institutionID, collectionID, datasetID, institutionCode, collectionCode, family, scientificName, sciname, tidinterpreted, genus, 
@@ -930,13 +1064,14 @@ CREATE TABLE `omoccurrences` (
         verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, 
         minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, previousIdentifications, disposition, genericcolumn1, genericcolumn2, 
         modified, language, observeruid, processingstatus, recordEnteredBy, duplicateQuantity, labelProject, dateEntered, dateLastModified, 
-        minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation
+        minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation, verbatimIndigenousName, validIndigenousName, linkIndigenousName, familyLanguageIndigenousName, groupLanguageIndigenousName, subgroupLanguageIndigenousName, villageIndigenousName, municipalityIndigenousName, stateIndigenousName, countryIndigenousName, isoIndigenousName, vernacularIndigenousName, glossIndigenousName, parseIndigenousName, parentTaxaIndigenousName, siblingTaxaIndigenousName, childTaxaIndigenousName, otherTaxaIndigenousName, typologyNameIndigenousName, semanticsNameIndigenousName, discussionNameIndigenousName, categoryUseIndigenousName, specificUseIndigenousName, partUseIndigenousName, discussionUseIndigenousName
         FROM omoccurrences WHERE institutionCode = ? and collectionCode = ? and catalogNumber = ?';
    
         if ($statement = $connection->prepare($preparesql)) {
             $statement->bind_param("sss", $institutionCode, $collectionCode, $catalogNumber);
             $statement->execute();
-            $statement->bind_result($this->occid, $this->collid, $this->dbpk, $this->basisOfRecord, $this->occurrenceID, $this->catalogNumber, $this->otherCatalogNumbers, $this->ownerInstitutionCode, $this->institutionID, $this->collectionID, $this->datasetID, $this->institutionCode, $this->collectionCode, $this->family, $this->scientificName, $this->sciname, $this->tidinterpreted, $this->genus, $this->specificEpithet, $this->taxonRank, $this->infraspecificEpithet, $this->scientificNameAuthorship, $this->taxonRemarks, $this->identifiedBy, $this->dateIdentified, $this->identificationReferences, $this->identificationRemarks, $this->identificationQualifier, $this->typeStatus, $this->recordedBy, $this->recordNumber, $this->recordedById, $this->associatedCollectors, $this->eventDate, $this->year, $this->month, $this->day, $this->startDayOfYear, $this->endDayOfYear, $this->verbatimEventDate, $this->habitat, $this->substrate, $this->fieldNotes, $this->fieldnumber, $this->occurrenceRemarks, $this->informationWithheld, $this->dataGeneralizations, $this->associatedOccurrences, $this->associatedTaxa, $this->dynamicProperties, $this->verbatimAttributes, $this->behavior, $this->reproductiveCondition, $this->cultivationStatus, $this->establishmentMeans, $this->lifeStage, $this->sex, $this->individualCount, $this->samplingProtocol, $this->samplingEffort, $this->preparations, $this->country, $this->stateProvince, $this->county, $this->municipality, $this->locality, $this->localitySecurity, $this->localitySecurityReason, $this->decimalLatitude, $this->decimalLongitude, $this->geodeticDatum, $this->coordinateUncertaintyInMeters, $this->footprintWKT, $this->coordinatePrecision, $this->locationRemarks, $this->verbatimCoordinates, $this->verbatimCoordinateSystem, $this->georeferencedBy, $this->georeferenceProtocol, $this->georeferenceSources, $this->georeferenceVerificationStatus, $this->georeferenceRemarks, $this->minimumElevationInMeters, $this->maximumElevationInMeters, $this->verbatimElevation, $this->previousIdentifications, $this->disposition, $this->genericcolumn1, $this->genericcolumn2, $this->modified, $this->language, $this->observeruid, $this->processingstatus, $this->recordEnteredBy, $this->duplicateQuantity, $this->labelProject, $this->dateEntered, $this->dateLastModified, $this->minimumDepthInMeters, $this->maximumDepthInMeters, $this->verbatimDepth, $this->storageLocation
+            //CA: Bookmark
+            $statement->bind_result($this->occid, $this->collid, $this->dbpk, $this->basisOfRecord, $this->occurrenceID, $this->catalogNumber, $this->otherCatalogNumbers, $this->ownerInstitutionCode, $this->institutionID, $this->collectionID, $this->datasetID, $this->institutionCode, $this->collectionCode, $this->family, $this->scientificName, $this->sciname, $this->tidinterpreted, $this->genus, $this->specificEpithet, $this->taxonRank, $this->infraspecificEpithet, $this->scientificNameAuthorship, $this->taxonRemarks, $this->identifiedBy, $this->dateIdentified, $this->identificationReferences, $this->identificationRemarks, $this->identificationQualifier, $this->typeStatus, $this->recordedBy, $this->recordNumber, $this->recordedById, $this->associatedCollectors, $this->eventDate, $this->year, $this->month, $this->day, $this->startDayOfYear, $this->endDayOfYear, $this->verbatimEventDate, $this->habitat, $this->substrate, $this->fieldNotes, $this->fieldnumber, $this->occurrenceRemarks, $this->informationWithheld, $this->dataGeneralizations, $this->associatedOccurrences, $this->associatedTaxa, $this->dynamicProperties, $this->verbatimAttributes, $this->behavior, $this->reproductiveCondition, $this->cultivationStatus, $this->establishmentMeans, $this->lifeStage, $this->sex, $this->individualCount, $this->samplingProtocol, $this->samplingEffort, $this->preparations, $this->country, $this->stateProvince, $this->county, $this->municipality, $this->locality, $this->localitySecurity, $this->localitySecurityReason, $this->decimalLatitude, $this->decimalLongitude, $this->geodeticDatum, $this->coordinateUncertaintyInMeters, $this->footprintWKT, $this->coordinatePrecision, $this->locationRemarks, $this->verbatimCoordinates, $this->verbatimCoordinateSystem, $this->georeferencedBy, $this->georeferenceProtocol, $this->georeferenceSources, $this->georeferenceVerificationStatus, $this->georeferenceRemarks, $this->minimumElevationInMeters, $this->maximumElevationInMeters, $this->verbatimElevation, $this->previousIdentifications, $this->disposition, $this->genericcolumn1, $this->genericcolumn2, $this->modified, $this->language, $this->observeruid, $this->processingstatus, $this->recordEnteredBy, $this->duplicateQuantity, $this->labelProject, $this->dateEntered, $this->dateLastModified, $this->minimumDepthInMeters, $this->maximumDepthInMeters, $this->verbatimDepth, $this->storageLocation, $this->verbatimIndigenousName, $this->validIndigenousName, $this->linkIndigenousName, $this->familyLanguageIndigenousName, $this->groupLanguageIndigenousName, $this->subgroupLanguageIndigenousName, $this->villageIndigenousName, $this->municipalityIndigenousName, $this->stateIndigenousName, $this->countryIndigenousName, $this->isoIndigenousName, $this->vernacularIndigenousName, $this->glossIndigenousName, $this->parseIndigenousName, $this->parentTaxaIndigenousName, $this->siblingTaxaIndigenousName, $this->childTaxaIndigenousName, $this->otherTaxaIndigenousName, $this->typologyNameIndigenousName, $this->semanticsNameIndigenousName, $this->discussionNameIndigenousName, $this->categoryUseIndigenousName, $this->specificUseIndigenousName, $this->partUseIndigenousName, $this->discussionUseIndigenousName
             );
             $statement->fetch();
             if ($this->occid!=null) { 
@@ -957,11 +1092,13 @@ CREATE TABLE `omoccurrences` (
     $returnvalue = false;
     $this->occid = null;
     if($collid !=NULL && $catalogNumber!=NULL) {
-        $preparesql = 'SELECT occid, collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, institutionID, collectionID, datasetID, institutionCode, collectionCode, family, scientificName, sciname, tidinterpreted, genus, specificEpithet, taxonRank, infraspecificEpithet, scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, behavior, reproductiveCondition, cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, previousIdentifications, disposition, genericcolumn1, genericcolumn2, modified, language, observeruid, processingstatus, recordEnteredBy, duplicateQuantity, labelProject, dateEntered, dateLastModified, minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation FROM omoccurrences WHERE collid = ? and catalogNumber = ?';
+        //CA: Bookmark
+        $preparesql = 'SELECT occid, collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, institutionID, collectionID, datasetID, institutionCode, collectionCode, family, scientificName, sciname, tidinterpreted, genus, specificEpithet, taxonRank, infraspecificEpithet, scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, behavior, reproductiveCondition, cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, previousIdentifications, disposition, genericcolumn1, genericcolumn2, modified, language, observeruid, processingstatus, recordEnteredBy, duplicateQuantity, labelProject, dateEntered, dateLastModified, minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation, verbatimIndigenousName, validIndigenousName, linkIndigenousName, familyLanguageIndigenousName, groupLanguageIndigenousName, subgroupLanguageIndigenousName, villageIndigenousName, municipalityIndigenousName, stateIndigenousName, countryIndigenousName, isoIndigenousName, vernacularIndigenousName, glossIndigenousName, parseIndigenousName, parentTaxaIndigenousName, siblingTaxaIndigenousName, childTaxaIndigenousName, otherTaxaIndigenousName, typologyNameIndigenousName, semanticsNameIndigenousName, discussionNameIndigenousName, categoryUseIndigenousName, specificUseIndigenousName, partUseIndigenousName, discussionUseIndigenousName FROM omoccurrences WHERE collid = ? and catalogNumber = ?';
         if ($statement = $connection->prepare($preparesql)) {
             $statement->bind_param("ss", $collid, $catalogNumber);
             $statement->execute();
-            $statement->bind_result($this->occid, $this->collid, $this->dbpk, $this->basisOfRecord, $this->occurrenceID, $this->catalogNumber, $this->otherCatalogNumbers, $this->ownerInstitutionCode, $this->institutionID, $this->collectionID, $this->datasetID, $this->institutionCode, $this->collectionCode, $this->family, $this->scientificName, $this->sciname, $this->tidinterpreted, $this->genus, $this->specificEpithet, $this->taxonRank, $this->infraspecificEpithet, $this->scientificNameAuthorship, $this->taxonRemarks, $this->identifiedBy, $this->dateIdentified, $this->identificationReferences, $this->identificationRemarks, $this->identificationQualifier, $this->typeStatus, $this->recordedBy, $this->recordNumber, $this->recordedById, $this->associatedCollectors, $this->eventDate, $this->year, $this->month, $this->day, $this->startDayOfYear, $this->endDayOfYear, $this->verbatimEventDate, $this->habitat, $this->substrate, $this->fieldNotes, $this->fieldnumber, $this->occurrenceRemarks, $this->informationWithheld, $this->dataGeneralizations, $this->associatedOccurrences, $this->associatedTaxa, $this->dynamicProperties, $this->verbatimAttributes, $this->behavior, $this->reproductiveCondition, $this->cultivationStatus, $this->establishmentMeans, $this->lifeStage, $this->sex, $this->individualCount, $this->samplingProtocol, $this->samplingEffort, $this->preparations, $this->country, $this->stateProvince, $this->county, $this->municipality, $this->locality, $this->localitySecurity, $this->localitySecurityReason, $this->decimalLatitude, $this->decimalLongitude, $this->geodeticDatum, $this->coordinateUncertaintyInMeters, $this->footprintWKT, $this->coordinatePrecision, $this->locationRemarks, $this->verbatimCoordinates, $this->verbatimCoordinateSystem, $this->georeferencedBy, $this->georeferenceProtocol, $this->georeferenceSources, $this->georeferenceVerificationStatus, $this->georeferenceRemarks, $this->minimumElevationInMeters, $this->maximumElevationInMeters, $this->verbatimElevation, $this->previousIdentifications, $this->disposition, $this->genericcolumn1, $this->genericcolumn2, $this->modified, $this->language, $this->observeruid, $this->processingstatus, $this->recordEnteredBy, $this->duplicateQuantity, $this->labelProject, $this->dateEntered, $this->dateLastModified, $this->minimumDepthInMeters, $this->maximumDepthInMeters, $this->verbatimDepth, $this->storageLocation);
+            //CA: Bookmark
+            $statement->bind_result($this->occid, $this->collid, $this->dbpk, $this->basisOfRecord, $this->occurrenceID, $this->catalogNumber, $this->otherCatalogNumbers, $this->ownerInstitutionCode, $this->institutionID, $this->collectionID, $this->datasetID, $this->institutionCode, $this->collectionCode, $this->family, $this->scientificName, $this->sciname, $this->tidinterpreted, $this->genus, $this->specificEpithet, $this->taxonRank, $this->infraspecificEpithet, $this->scientificNameAuthorship, $this->taxonRemarks, $this->identifiedBy, $this->dateIdentified, $this->identificationReferences, $this->identificationRemarks, $this->identificationQualifier, $this->typeStatus, $this->recordedBy, $this->recordNumber, $this->recordedById, $this->associatedCollectors, $this->eventDate, $this->year, $this->month, $this->day, $this->startDayOfYear, $this->endDayOfYear, $this->verbatimEventDate, $this->habitat, $this->substrate, $this->fieldNotes, $this->fieldnumber, $this->occurrenceRemarks, $this->informationWithheld, $this->dataGeneralizations, $this->associatedOccurrences, $this->associatedTaxa, $this->dynamicProperties, $this->verbatimAttributes, $this->behavior, $this->reproductiveCondition, $this->cultivationStatus, $this->establishmentMeans, $this->lifeStage, $this->sex, $this->individualCount, $this->samplingProtocol, $this->samplingEffort, $this->preparations, $this->country, $this->stateProvince, $this->county, $this->municipality, $this->locality, $this->localitySecurity, $this->localitySecurityReason, $this->decimalLatitude, $this->decimalLongitude, $this->geodeticDatum, $this->coordinateUncertaintyInMeters, $this->footprintWKT, $this->coordinatePrecision, $this->locationRemarks, $this->verbatimCoordinates, $this->verbatimCoordinateSystem, $this->georeferencedBy, $this->georeferenceProtocol, $this->georeferenceSources, $this->georeferenceVerificationStatus, $this->georeferenceRemarks, $this->minimumElevationInMeters, $this->maximumElevationInMeters, $this->verbatimElevation, $this->previousIdentifications, $this->disposition, $this->genericcolumn1, $this->genericcolumn2, $this->modified, $this->language, $this->observeruid, $this->processingstatus, $this->recordEnteredBy, $this->duplicateQuantity, $this->labelProject, $this->dateEntered, $this->dateLastModified, $this->minimumDepthInMeters, $this->maximumDepthInMeters, $this->verbatimDepth, $this->storageLocation, $this->verbatimIndigenousName, $this->validIndigenousName, $this->linkIndigenousName, $this->familyLanguageIndigenousName, $this->groupLanguageIndigenousName, $this->subgroupLanguageIndigenousName, $this->villageIndigenousName, $this->municipalityIndigenousName, $this->stateIndigenousName, $this->countryIndigenousName, $this->isoIndigenousName, $this->vernacularIndigenousName, $this->glossIndigenousName, $this->parseIndigenousName, $this->parentTaxaIndigenousName, $this->siblingTaxaIndigenousName, $this->childTaxaIndigenousName, $this->otherTaxaIndigenousName, $this->typologyNameIndigenousName, $this->semanticsNameIndigenousName, $this->discussionNameIndigenousName, $this->categoryUseIndigenousName, $this->specificUseIndigenousName, $this->partUseIndigenousName, $this->discussionUseIndigenousName);
             $statement->fetch();
             if ($this->occid!=null) {
                 $returnvalue = true;
@@ -1257,6 +1394,33 @@ CREATE TABLE `omoccurrences` (
              if ($fieldname=='maximumDepthInMeters') { $returnvalue = $this->setmaximumDepthInMeters($value); }
              if ($fieldname=='verbatimDepth') { $returnvalue = $this->setverbatimDepth($value); }
              if ($fieldname=='storageLocation') { $returnvalue = $this->setstorageLocation($value); }
+             //CA: Bookmark
+             if ($fieldname=='verbatimIndigenousName') { $returnvalue = $this->setverbatimIndigenousName($value); }
+             if ($fieldname=='validIndigenousName') { $returnvalue = $this->setvalidIndigenousName($value); }
+             if ($fieldname=='linkIndigenousName') { $returnvalue = $this->setlinkIndigenousName($value); }
+             if ($fieldname=='familyLanguageIndigenousName') { $returnvalue = $this->setfamilyLanguageIndigenousName($value); }
+             if ($fieldname=='groupLanguageIndigenousName') { $returnvalue = $this->setgroupLanguageIndigenousName($value); }
+             if ($fieldname=='subgroupLanguageIndigenousName') { $returnvalue = $this->setsubgroupLanguageIndigenousName($value); }
+             if ($fieldname=='villageIndigenousName') { $returnvalue = $this->setvillageIndigenousName($value); }
+             if ($fieldname=='municipalityIndigenousName') { $returnvalue = $this->setmunicipalityIndigenousName($value); }
+             if ($fieldname=='stateIndigenousName') { $returnvalue = $this->setstateIndigenousName($value); }
+             if ($fieldname=='countryIndigenousName') { $returnvalue = $this->setcountryIndigenousName($value); }
+             if ($fieldname=='isoIndigenousName') { $returnvalue = $this->setisoIndigenousName($value); }
+             if ($fieldname=='vernacularIndigenousName') { $returnvalue = $this->setvernacularIndigenousName($value); }
+             if ($fieldname=='glossIndigenousName') { $returnvalue = $this->setglossIndigenousName($value); }
+             if ($fieldname=='parseIndigenousName') { $returnvalue = $this->setparseIndigenousName($value); }
+             if ($fieldname=='parentTaxaIndigenousName') { $returnvalue = $this->setparentTaxaIndigenousName($value); }
+             if ($fieldname=='siblingTaxaIndigenousName') { $returnvalue = $this->setsiblingTaxaIndigenousName($value); }
+             if ($fieldname=='childTaxaIndigenousName') { $returnvalue = $this->setchildTaxaIndigenousName($value); }
+             if ($fieldname=='otherTaxaIndigenousName') { $returnvalue = $this->setotherTaxaIndigenousName($value); }
+             if ($fieldname=='typologyNameIndigenousName') { $returnvalue = $this->settypologyNameIndigenousName($value); }
+             if ($fieldname=='semanticsNameIndigenousName') { $returnvalue = $this->setsemanticsNameIndigenousName($value); }
+             if ($fieldname=='discussionNameIndigenousName') { $returnvalue = $this->setdiscussionNameIndigenousName($value); }
+             if ($fieldname=='categoryUseIndigenousName') { $returnvalue = $this->setcategoryUseIndigenousName($value); }
+             if ($fieldname=='specificUseIndigenousName') { $returnvalue = $this->setspecificUseIndigenousName($value); }
+             if ($fieldname=='partUseIndigenousName') { $returnvalue = $this->setpartUseIndigenousName($value); }
+             if ($fieldname=='discussionUseIndigenousName') { $returnvalue = $this->setdiscussionUseIndigenousName($value); }
+
              $returnvalue = true;
           }
           catch (exception $e) { ;
@@ -1374,6 +1538,33 @@ CREATE TABLE `omoccurrences` (
              if ($fieldname=='maximumDepthInMeters') { $returnvalue = $this->getmaximumDepthInMeters(); }
              if ($fieldname=='verbatimDepth') { $returnvalue = $this->getverbatimDepth(); }
              if ($fieldname=='storageLocation') { $returnvalue = $this->getstorageLocation(); }
+            //CA: Bookmark
+            if ($fieldname=='verbatimIndigenousName') { $returnvalue = $this->getverbatimIndigenousName(); }
+            if ($fieldname=='validIndigenousName') { $returnvalue = $this->getvalidIndigenousName(); }
+            if ($fieldname=='linkIndigenousName') { $returnvalue = $this->getlinkIndigenousName(); }
+            if ($fieldname=='familyLanguageIndigenousName') { $returnvalue = $this->getfamilyLanguageIndigenousName(); }
+            if ($fieldname=='groupLanguageIndigenousName') { $returnvalue = $this->getgroupLanguageIndigenousName(); }
+            if ($fieldname=='subgroupLanguageIndigenousName') { $returnvalue = $this->getsubgroupLanguageIndigenousName(); }
+            if ($fieldname=='villageIndigenousName') { $returnvalue = $this->getvillageIndigenousName(); }
+            if ($fieldname=='municipalityIndigenousName') { $returnvalue = $this->getmunicipalityIndigenousName(); }
+            if ($fieldname=='stateIndigenousName') { $returnvalue = $this->getstateIndigenousName(); }
+            if ($fieldname=='countryIndigenousName') { $returnvalue = $this->getcountryIndigenousName(); }
+            if ($fieldname=='isoIndigenousName') { $returnvalue = $this->getisoIndigenousName(); }
+            if ($fieldname=='vernacularIndigenousName') { $returnvalue = $this->getvernacularIndigenousName(); }
+            if ($fieldname=='glossIndigenousName') { $returnvalue = $this->getglossIndigenousName(); }
+            if ($fieldname=='parseIndigenousName') { $returnvalue = $this->getparseIndigenousName(); }
+            if ($fieldname=='parentTaxaIndigenousName') { $returnvalue = $this->getparentTaxaIndigenousName(); }
+            if ($fieldname=='siblingTaxaIndigenousName') { $returnvalue = $this->getsiblingTaxaIndigenousName(); }
+            if ($fieldname=='childTaxaIndigenousName') { $returnvalue = $this->getchildTaxaIndigenousName(); }
+            if ($fieldname=='otherTaxaIndigenousName') { $returnvalue = $this->getotherTaxaIndigenousName(); }
+            if ($fieldname=='typologyNameIndigenousName') { $returnvalue = $this->gettypologyNameIndigenousName(); }
+            if ($fieldname=='semanticsNameIndigenousName') { $returnvalue = $this->getsemanticsNameIndigenousName(); }
+            if ($fieldname=='discussionNameIndigenousName') { $returnvalue = $this->getdiscussionNameIndigenousName(); }
+            if ($fieldname=='categoryUseIndigenousName') { $returnvalue = $this->getcategoryUseIndigenousName(); }
+            if ($fieldname=='specificUseIndigenousName') { $returnvalue = $this->getspecificUseIndigenousName(); }
+            if ($fieldname=='partUseIndigenousName') { $returnvalue = $this->getpartUseIndigenousName(); }
+            if ($fieldname=='discussionUseIndigenousName') { $returnvalue = $this->getdiscussionUseIndigenousName(); }
+
           }
           catch (exception $e) { ;
               $returnvalue = null;
@@ -3047,6 +3238,431 @@ CREATE TABLE `omoccurrences` (
        $this->dirty = true;
    }
 
+  //CA: Bookmark Fields
+  /*verbatimIndigenousName*/
+  public function getverbatimIndigenousName() {
+    if ($this->verbatimIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->verbatimIndigenousName));
+    }
+  }
+  public function setverbatimIndigenousName($verbatimIndigenousName) {
+    if (strlen($verbatimIndigenousName) > omoccurrences::VERBATIMINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->verbatimIndigenousName = $this->l_addslashes($verbatimIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*validIndigenousName*/
+  public function getvalidIndigenousName() {
+    if ($this->validIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->validIndigenousName));
+    }
+  }
+  public function setvalidIndigenousName($validIndigenousName) {
+    if (strlen($validIndigenousName) > omoccurrences::VALIDINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->validIndigenousName = $this->l_addslashes($validIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*linkIndigenousName*/
+  public function getlinkIndigenousName() {
+    if ($this->linkIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->linkIndigenousName));
+    }
+  }
+  public function setlinkIndigenousName($linkIndigenousName) {
+    if (strlen($linkIndigenousName) > omoccurrences::LINKINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->linkIndigenousName = $this->l_addslashes($linkIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*familyLanguageIndigenousName*/
+  public function getfamilyLanguageIndigenousName() {
+    if ($this->familyLanguageIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->familyLanguageIndigenousName));
+    }
+  }
+  public function setfamilyLanguageIndigenousName($familyLanguageIndigenousName) {
+    if (strlen($familyLanguageIndigenousName) > omoccurrences::FAMILYLANGUAGEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->familyLanguageIndigenousName = $this->l_addslashes($familyLanguageIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*groupLanguageIndigenousName*/
+  public function getgroupLanguageIndigenousName() {
+    if ($this->groupLanguageIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->groupLanguageIndigenousName));
+    }
+  }
+  public function setgroupLanguageIndigenousName($groupLanguageIndigenousName) {
+    if (strlen($groupLanguageIndigenousName) > omoccurrences::GROUPLANGUAGEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->groupLanguageIndigenousName = $this->l_addslashes($groupLanguageIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*subgroupLanguageIndigenousName*/
+  public function getsubgroupLanguageIndigenousName() {
+    if ($this->subgroupLanguageIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->subgroupLanguageIndigenousName));
+    }
+  }
+  public function setsubgroupLanguageIndigenousName($subgroupLanguageIndigenousName) {
+    if (strlen($subgroupLanguageIndigenousName) > omoccurrences::SUBGROUPLANGUAGEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->subgroupLanguageIndigenousName = $this->l_addslashes($subgroupLanguageIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*villageIndigenousName*/
+  public function getvillageIndigenousName() {
+    if ($this->villageIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->villageIndigenousName));
+    }
+  }
+  public function setvillageIndigenousName($villageIndigenousName) {
+    if (strlen($villageIndigenousName) > omoccurrences::VILLAGEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->villageIndigenousName = $this->l_addslashes($villageIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*municipalityIndigenousName*/
+  public function getmunicipalityIndigenousName() {
+    if ($this->municipalityIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->municipalityIndigenousName));
+    }
+  }
+  public function setmunicipalityIndigenousName($municipalityIndigenousName) {
+    if (strlen($municipalityIndigenousName) > omoccurrences::MUNICIPALITYINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->municipalityIndigenousName = $this->l_addslashes($municipalityIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*stateIndigenousName*/
+  public function getstateIndigenousName() {
+    if ($this->stateIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->stateIndigenousName));
+    }
+  }
+  public function setstateIndigenousName($stateIndigenousName) {
+    if (strlen($stateIndigenousName) > omoccurrences::STATEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->stateIndigenousName = $this->l_addslashes($stateIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*countryIndigenousName*/
+  public function getcountryIndigenousName() {
+    if ($this->countryIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->countryIndigenousName));
+    }
+  }
+  public function setcountryIndigenousName($countryIndigenousName) {
+    if (strlen($countryIndigenousName) > omoccurrences::COUNTRYINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->countryIndigenousName = $this->l_addslashes($countryIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*isoIndigenousName*/
+  public function getisoIndigenousName() {
+    if ($this->isoIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->isoIndigenousName));
+    }
+  }
+  public function setisoIndigenousName($isoIndigenousName) {
+    if (strlen($isoIndigenousName) > omoccurrences::ISOINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->isoIndigenousName = $this->l_addslashes($isoIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*vernacularIndigenousName*/
+  public function getvernacularIndigenousName() {
+    if ($this->vernacularIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->vernacularIndigenousName));
+    }
+  }
+  public function setvernacularIndigenousName($vernacularIndigenousName) {
+    if (strlen($vernacularIndigenousName) > omoccurrences::VERNACULARINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->vernacularIndigenousName = $this->l_addslashes($vernacularIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*glossIndigenousName*/
+  public function getglossIndigenousName() {
+    if ($this->glossIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->glossIndigenousName));
+    }
+  }
+  public function setglossIndigenousName($glossIndigenousName) {
+    if (strlen($glossIndigenousName) > omoccurrences::GLOSSINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->glossIndigenousName = $this->l_addslashes($glossIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*parseIndigenousName*/
+  public function getparseIndigenousName() {
+    if ($this->parseIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->parseIndigenousName));
+    }
+  }
+  public function setparseIndigenousName($parseIndigenousName) {
+    if (strlen($parseIndigenousName) > omoccurrences::PARSEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->parseIndigenousName = $this->l_addslashes($parseIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*parentTaxaIndigenousName*/
+  public function getparentTaxaIndigenousName() {
+    if ($this->parentTaxaIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->parentTaxaIndigenousName));
+    }
+  }
+  public function setparentTaxaIndigenousName($parentTaxaIndigenousName) {
+    if (strlen($parentTaxaIndigenousName) > omoccurrences::PARENTTAXAINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->parentTaxaIndigenousName = $this->l_addslashes($parentTaxaIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*siblingTaxaIndigenousName*/
+  public function getsiblingTaxaIndigenousName() {
+    if ($this->siblingTaxaIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->siblingTaxaIndigenousName));
+    }
+  }
+  public function setsiblingTaxaIndigenousName($siblingTaxaIndigenousName) {
+    if (strlen($siblingTaxaIndigenousName) > omoccurrences::SIBLINGTAXAINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->siblingTaxaIndigenousName = $this->l_addslashes($siblingTaxaIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*childTaxaIndigenousName*/
+  public function getchildTaxaIndigenousName() {
+    if ($this->childTaxaIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->childTaxaIndigenousName));
+    }
+  }
+  public function setchildTaxaIndigenousName($childTaxaIndigenousName) {
+    if (strlen($childTaxaIndigenousName) > omoccurrences::CHILDTAXAINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->childTaxaIndigenousName = $this->l_addslashes($childTaxaIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*otherTaxaIndigenousName*/
+  public function getotherTaxaIndigenousName() {
+    if ($this->otherTaxaIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->otherTaxaIndigenousName));
+    }
+  }
+  public function setotherTaxaIndigenousName($otherTaxaIndigenousName) {
+    if (strlen($otherTaxaIndigenousName) > omoccurrences::OTHERTAXAINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->otherTaxaIndigenousName = $this->l_addslashes($otherTaxaIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*typologyNameIndigenousName*/
+  public function gettypologyNameIndigenousName() {
+    if ($this->typologyNameIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->typologyNameIndigenousName));
+    }
+  }
+  public function settypologyNameIndigenousName($typologyNameIndigenousName) {
+    if (strlen($typologyNameIndigenousName) > omoccurrences::TYPOLOGYNAMEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->typologyNameIndigenousName = $this->l_addslashes($typologyNameIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*semanticsNameIndigenousName*/
+  public function getsemanticsNameIndigenousName() {
+    if ($this->semanticsNameIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->semanticsNameIndigenousName));
+    }
+  }
+  public function setsemanticsNameIndigenousName($semanticsNameIndigenousName) {
+    if (strlen($semanticsNameIndigenousName) > omoccurrences::SEMANTICSNAMEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->semanticsNameIndigenousName = $this->l_addslashes($semanticsNameIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*discussionNameIndigenousName*/
+  public function getdiscussionNameIndigenousName() {
+    if ($this->discussionNameIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->discussionNameIndigenousName));
+    }
+  }
+  public function setdiscussionNameIndigenousName($discussionNameIndigenousName) {
+    if (strlen($discussionNameIndigenousName) > omoccurrences::DISCUSSIONNAMEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->discussionNameIndigenousName = $this->l_addslashes($discussionNameIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*categoryUseIndigenousName*/
+  public function getcategoryUseIndigenousName() {
+    if ($this->categoryUseIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->categoryUseIndigenousName));
+    }
+  }
+  public function setcategoryUseIndigenousName($categoryUseIndigenousName) {
+    if (strlen($categoryUseIndigenousName) > omoccurrences::CATEGORYUSEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->categoryUseIndigenousName = $this->l_addslashes($categoryUseIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*specificUseIndigenousName*/
+  public function getspecificUseIndigenousName() {
+    if ($this->specificUseIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->specificUseIndigenousName));
+    }
+  }
+  public function setspecificUseIndigenousName($specificUseIndigenousName) {
+    if (strlen($specificUseIndigenousName) > omoccurrences::SPECIFICUSEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->specificUseIndigenousName = $this->l_addslashes($specificUseIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*partUseIndigenousName*/
+  public function getpartUseIndigenousName() {
+    if ($this->partUseIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->partUseIndigenousName));
+    }
+  }
+  public function setpartUseIndigenousName($partUseIndigenousName) {
+    if (strlen($partUseIndigenousName) > omoccurrences::PARTUSEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->partUseIndigenousName = $this->l_addslashes($partUseIndigenousName);
+    $this->dirty = true;
+  }
+
+
+  /*discussionUseIndigenousName*/
+  public function getdiscussionUseIndigenousName() {
+    if ($this->discussionUseIndigenousName==null) {
+      return null;
+    } else { ;
+      return trim($this->l_stripslashes($this->discussionUseIndigenousName));
+    }
+  }
+  public function setdiscussionUseIndigenousName($discussionUseIndigenousName) {
+    if (strlen($discussionUseIndigenousName) > omoccurrences::DISCUSSIONUSEINDIGENOUSNAME_SIZE) {
+      throw new Exception('Value exceeds field length.');
+    }
+    $this->discussionUseIndigenousName = $this->l_addslashes($discussionUseIndigenousName);
+    $this->dirty = true;
+  }
+
 /*taxonGuid*/
    public function gettaxonGuid() {
        // Note: Not stored to DB.
@@ -3227,6 +3843,33 @@ CREATE TABLE `omoccurrences` (
   const C_maximumDepthInMetersMYSQLI_TYPE='i';
   const C_verbatimDepthMYSQLI_TYPE='s';
   const C_storageLocationMYSQLI_TYPE='s';
+  //CA: Bookmark
+  //ETHNOGRAPHICAL
+  const C_verbatimIndigenousNameMYSQLI_TYPE='s';
+  const C_validIndigenousNameMYSQLI_TYPE='s';
+  const C_linkIndigenousNameMYSQLI_TYPE='s';
+  const C_familyLanguageIndigenousNameMYSQLI_TYPE='s';
+  const C_groupLanguageIndigenousNameMYSQLI_TYPE='s';
+  const C_subgroupLanguageIndigenousNameMYSQLI_TYPE='s';
+  const C_villageIndigenousNameMYSQLI_TYPE='s';
+  const C_municipalityIndigenousNameMYSQLI_TYPE='s';
+  const C_stateIndigenousNameMYSQLI_TYPE='s';
+  const C_countryIndigenousNameMYSQLI_TYPE='s';
+  const C_isoIndigenousNameMYSQLI_TYPE='s';
+  const C_vernacularIndigenousNameMYSQLI_TYPE='s';
+  const C_glossIndigenousNameMYSQLI_TYPE='s';
+  const C_parseIndigenousNameMYSQLI_TYPE='s';
+  const C_parentTaxaIndigenousNameMYSQLI_TYPE='s';
+  const C_siblingTaxaIndigenousNameMYSQLI_TYPE='s';
+  const C_childTaxaIndigenousNameMYSQLI_TYPE='s';
+  const C_otherTaxaIndigenousNameMYSQLI_TYPE='s';
+  const C_typologyNameIndigenousNameMYSQLI_TYPE='s';
+  const C_semanticsNameIndigenousNameMYSQLI_TYPE='s';
+  const C_discussionNameIndigenousNameMYSQLI_TYPE='s';
+  const C_categoryUseIndigenousNameMYSQLI_TYPE='s';
+  const C_specificUseIndigenousNameMYSQLI_TYPE='s';
+  const C_partUseIndigenousNameMYSQLI_TYPE='s';
+  const C_discussionUseIndigenousNameMYSQLI_TYPE='s';
 
    // function to obtain the mysqli field type character from a fieldname
    public function MySQLiFieldType($aFieldname) { 
@@ -3333,6 +3976,33 @@ CREATE TABLE `omoccurrences` (
       if ($aFieldname=='maximumDepthInMeters') { $retval = self::C_maximumDepthInMetersMYSQLI_TYPE; } 
       if ($aFieldname=='verbatimDepth') { $retval = self::C_verbatimDepthMYSQLI_TYPE; } 
       if ($aFieldname=='storageLocation') { $retval = self::C_storageLocationMYSQLI_TYPE; }
+       //CA: Bookmark
+       //ETHNOGRAPHICAL
+       if ($aFieldname=='verbatimIndigenousName') { $retval = self::C_verbatimIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='validIndigenousName') { $retval = self::C_validIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='linkIndigenousName') { $retval = self::C_linkIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='familyLanguageIndigenousName') { $retval = self::C_familyLanguageIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='groupLanguageIndigenousName') { $retval = self::C_groupLanguageIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='subgroupLanguageIndigenousName') { $retval = self::C_subgroupLanguageIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='villageIndigenousName') { $retval = self::C_villageIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='municipalityIndigenousName') { $retval = self::C_municipalityIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='stateIndigenousName') { $retval = self::C_stateIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='countryIndigenousName') { $retval = self::C_countryIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='isoIndigenousName') { $retval = self::C_isoIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='vernacularIndigenousName') { $retval = self::C_vernacularIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='glossIndigenousName') { $retval = self::C_glossIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='parseIndigenousName') { $retval = self::C_parseIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='parentTaxaIndigenousName') { $retval = self::C_parentTaxaIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='siblingTaxaIndigenousName') { $retval = self::C_siblingTaxaIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='childTaxaIndigenousName') { $retval = self::C_childTaxaIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='otherTaxaIndigenousName') { $retval = self::C_otherTaxaIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='typologyNameIndigenousName') { $retval = self::C_typologyNameIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='semanticsNameIndigenousName') { $retval = self::C_semanticsNameIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='discussionNameIndigenousName') { $retval = self::C_discussionNameIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='categoryUseIndigenousName') { $retval = self::C_categoryUseIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='specificUseIndigenousName') { $retval = self::C_specificUseIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='partUseIndigenousName') { $retval = self::C_partUseIndigenousNameMYSQLI_TYPE; }
+       if ($aFieldname=='discussionUseIndigenousName') { $retval = self::C_discussionUseIndigenousNameMYSQLI_TYPE; }
       return $retval;
    }
 
@@ -3354,12 +4024,14 @@ CREATE TABLE `omoccurrences` (
              throw new Exception($e->getMessage());
         }
         if($this->occid != NULL) {
-           $preparesql = 'SELECT occid, collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, institutionID, collectionID, datasetID, institutionCode, collectionCode, family, scientificName, sciname, tidinterpreted, genus, specificEpithet, taxonRank, infraspecificEpithet, scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, behavior, reproductiveCondition, cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, previousIdentifications, disposition, genericcolumn1, genericcolumn2, modified, language, observeruid, processingstatus, recordEnteredBy, duplicateQuantity, labelProject, dateEntered, dateLastModified, minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation FROM omoccurrences WHERE occid = ? ';
+           //CA: Bookmark
+           $preparesql = 'SELECT occid, collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, institutionID, collectionID, datasetID, institutionCode, collectionCode, family, scientificName, sciname, tidinterpreted, genus, specificEpithet, taxonRank, infraspecificEpithet, scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, behavior, reproductiveCondition, cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, previousIdentifications, disposition, genericcolumn1, genericcolumn2, modified, language, observeruid, processingstatus, recordEnteredBy, duplicateQuantity, labelProject, dateEntered, dateLastModified, minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation, verbatimIndigenousName, validIndigenousName, linkIndigenousName, familyLanguageIndigenousName, groupLanguageIndigenousName, subgroupLanguageIndigenousName, villageIndigenousName, municipalityIndigenousName, stateIndigenousName, countryIndigenousName, isoIndigenousName, vernacularIndigenousName, glossIndigenousName, parseIndigenousName, parentTaxaIndigenousName, siblingTaxaIndigenousName, childTaxaIndigenousName, otherTaxaIndigenousName, typologyNameIndigenousName, semanticsNameIndigenousName, discussionNameIndigenousName, categoryUseIndigenousName, specificUseIndigenousName, partUseIndigenousName, discussionUseIndigenousName FROM omoccurrences WHERE occid = ? ';
 
            if ($statement = $connection->prepare($preparesql)) { 
               $statement->bind_param("i", $this->occid);
               $statement->execute();
-              $statement->bind_result($this->occid, $this->collid, $this->dbpk, $this->basisOfRecord, $this->occurrenceID, $this->catalogNumber, $this->otherCatalogNumbers, $this->ownerInstitutionCode, $this->institutionID, $this->collectionID, $this->datasetID, $this->institutionCode, $this->collectionCode, $this->family, $this->scientificName, $this->sciname, $this->tidinterpreted, $this->genus, $this->specificEpithet, $this->taxonRank, $this->infraspecificEpithet, $this->scientificNameAuthorship, $this->taxonRemarks, $this->identifiedBy, $this->dateIdentified, $this->identificationReferences, $this->identificationRemarks, $this->identificationQualifier, $this->typeStatus, $this->recordedBy, $this->recordNumber, $this->recordedById, $this->associatedCollectors, $this->eventDate, $this->year, $this->month, $this->day, $this->startDayOfYear, $this->endDayOfYear, $this->verbatimEventDate, $this->habitat, $this->substrate, $this->fieldNotes, $this->fieldnumber, $this->occurrenceRemarks, $this->informationWithheld, $this->dataGeneralizations, $this->associatedOccurrences, $this->associatedTaxa, $this->dynamicProperties, $this->verbatimAttributes, $this->behavior, $this->reproductiveCondition, $this->cultivationStatus, $this->establishmentMeans, $this->lifeStage, $this->sex, $this->individualCount, $this->samplingProtocol, $this->samplingEffort, $this->preparations, $this->country, $this->stateProvince, $this->county, $this->municipality, $this->locality, $this->localitySecurity, $this->localitySecurityReason, $this->decimalLatitude, $this->decimalLongitude, $this->geodeticDatum, $this->coordinateUncertaintyInMeters, $this->footprintWKT, $this->coordinatePrecision, $this->locationRemarks, $this->verbatimCoordinates, $this->verbatimCoordinateSystem, $this->georeferencedBy, $this->georeferenceProtocol, $this->georeferenceSources, $this->georeferenceVerificationStatus, $this->georeferenceRemarks, $this->minimumElevationInMeters, $this->maximumElevationInMeters, $this->verbatimElevation, $this->previousIdentifications, $this->disposition, $this->genericcolumn1, $this->genericcolumn2, $this->modified, $this->language, $this->observeruid, $this->processingstatus, $this->recordEnteredBy, $this->duplicateQuantity, $this->labelProject, $this->dateEntered, $this->dateLastModified, $this->minimumDepthInMeters, $this->maximumDepthInMeters, $this->verbatimDepth, $this->storageLocation);
+              //CA: Bookmark
+              $statement->bind_result($this->occid, $this->collid, $this->dbpk, $this->basisOfRecord, $this->occurrenceID, $this->catalogNumber, $this->otherCatalogNumbers, $this->ownerInstitutionCode, $this->institutionID, $this->collectionID, $this->datasetID, $this->institutionCode, $this->collectionCode, $this->family, $this->scientificName, $this->sciname, $this->tidinterpreted, $this->genus, $this->specificEpithet, $this->taxonRank, $this->infraspecificEpithet, $this->scientificNameAuthorship, $this->taxonRemarks, $this->identifiedBy, $this->dateIdentified, $this->identificationReferences, $this->identificationRemarks, $this->identificationQualifier, $this->typeStatus, $this->recordedBy, $this->recordNumber, $this->recordedById, $this->associatedCollectors, $this->eventDate, $this->year, $this->month, $this->day, $this->startDayOfYear, $this->endDayOfYear, $this->verbatimEventDate, $this->habitat, $this->substrate, $this->fieldNotes, $this->fieldnumber, $this->occurrenceRemarks, $this->informationWithheld, $this->dataGeneralizations, $this->associatedOccurrences, $this->associatedTaxa, $this->dynamicProperties, $this->verbatimAttributes, $this->behavior, $this->reproductiveCondition, $this->cultivationStatus, $this->establishmentMeans, $this->lifeStage, $this->sex, $this->individualCount, $this->samplingProtocol, $this->samplingEffort, $this->preparations, $this->country, $this->stateProvince, $this->county, $this->municipality, $this->locality, $this->localitySecurity, $this->localitySecurityReason, $this->decimalLatitude, $this->decimalLongitude, $this->geodeticDatum, $this->coordinateUncertaintyInMeters, $this->footprintWKT, $this->coordinatePrecision, $this->locationRemarks, $this->verbatimCoordinates, $this->verbatimCoordinateSystem, $this->georeferencedBy, $this->georeferenceProtocol, $this->georeferenceSources, $this->georeferenceVerificationStatus, $this->georeferenceRemarks, $this->minimumElevationInMeters, $this->maximumElevationInMeters, $this->verbatimElevation, $this->previousIdentifications, $this->disposition, $this->genericcolumn1, $this->genericcolumn2, $this->modified, $this->language, $this->observeruid, $this->processingstatus, $this->recordEnteredBy, $this->duplicateQuantity, $this->labelProject, $this->dateEntered, $this->dateLastModified, $this->minimumDepthInMeters, $this->maximumDepthInMeters, $this->verbatimDepth, $this->storageLocation, $this->verbatimIndigenousName , $this->validIndigenousName , $this->linkIndigenousName , $this->familyLanguageIndigenousName , $this->groupLanguageIndigenousName , $this->subgroupLanguageIndigenousName , $this->villageIndigenousName , $this->municipalityIndigenousName , $this->stateIndigenousName , $this->countryIndigenousName , $this->isoIndigenousName , $this->vernacularIndigenousName , $this->glossIndigenousName , $this->parseIndigenousName , $this->parentTaxaIndigenousName , $this->siblingTaxaIndigenousName , $this->childTaxaIndigenousName , $this->otherTaxaIndigenousName , $this->typologyNameIndigenousName , $this->semanticsNameIndigenousName , $this->discussionNameIndigenousName , $this->categoryUseIndigenousName , $this->specificUseIndigenousName , $this->partUseIndigenousName , $this->discussionUseIndigenousName);
               $statement->fetch();
               $statement->close();
            }
@@ -3484,13 +4156,64 @@ CREATE TABLE `omoccurrences` (
             $sql .= ", maximumDepthInMeters = ? ";
             $sql .= ",  verbatimDepth = ? ";
             $sql .= ",  storageLocation = ? ";
+            //CA: Bookmark
+            $sql .= ",  verbatimIndigenousName = ? ";
+            $sql .= ",  validIndigenousName = ? ";
+            $sql .= ",  linkIndigenousName = ? ";
+            $sql .= ",  familyLanguageIndigenousName = ? ";
+            $sql .= ",  groupLanguageIndigenousName = ? ";
+            $sql .= ",  subgroupLanguageIndigenousName = ? ";
+            $sql .= ",  villageIndigenousName = ? ";
+            $sql .= ",  municipalityIndigenousName = ? ";
+            $sql .= ",  stateIndigenousName = ? ";
+            $sql .= ",  countryIndigenousName = ? ";
+            $sql .= ",  isoIndigenousName = ? ";
+            $sql .= ",  vernacularIndigenousName = ? ";
+            $sql .= ",  glossIndigenousName = ? ";
+            $sql .= ",  parseIndigenousName = ? ";
+            $sql .= ",  parentTaxaIndigenousName = ? ";
+            $sql .= ",  siblingTaxaIndigenousName = ? ";
+            $sql .= ",  childTaxaIndigenousName = ? ";
+            $sql .= ",  otherTaxaIndigenousName = ? ";
+            $sql .= ",  typologyNameIndigenousName = ? ";
+            $sql .= ",  semanticsNameIndigenousName = ? ";
+            $sql .= ",  discussionNameIndigenousName = ? ";
+            $sql .= ",  categoryUseIndigenousName = ? ";
+            $sql .= ",  specificUseIndigenousName = ? ";
+            $sql .= ",  partUseIndigenousName = ? ";
+            $sql .= ",  discussionUseIndigenousName = ? ";
 
             $sql .= "  WHERE occid = ? ";
         } else {
             $sql  = 'INSERT INTO omoccurrences ';
             $isInsert = true;
-            $sql .= '( collid ,  dbpk ,  basisOfRecord ,  occurrenceID ,  catalogNumber ,  otherCatalogNumbers ,  ownerInstitutionCode ,  institutionID ,  collectionID ,  datasetID ,  institutionCode ,  collectionCode ,  family ,  scientificName ,  sciname ,  tidinterpreted ,  genus ,  specificEpithet ,  taxonRank ,  infraspecificEpithet ,  scientificNameAuthorship ,  taxonRemarks ,  identifiedBy ,  dateIdentified ,  identificationReferences ,  identificationRemarks ,  identificationQualifier ,  typeStatus ,  recordedBy ,  recordNumber ,  recordedById ,  associatedCollectors ,  eventDate ,  year ,  month ,  day ,  startDayOfYear ,  endDayOfYear ,  verbatimEventDate ,  habitat ,  substrate ,  fieldNotes ,  fieldnumber ,  occurrenceRemarks ,  informationWithheld ,  dataGeneralizations ,  associatedOccurrences ,  associatedTaxa ,  dynamicProperties ,  verbatimAttributes ,  behavior ,  reproductiveCondition ,  cultivationStatus ,  establishmentMeans ,  lifeStage ,  sex ,  individualCount ,  samplingProtocol , samplingEffort , preparations ,  country ,  stateProvince ,  county ,  municipality ,  locality ,  localitySecurity ,  localitySecurityReason ,  decimalLatitude ,  decimalLongitude ,  geodeticDatum ,  coordinateUncertaintyInMeters ,  footprintWKT ,  coordinatePrecision ,  locationRemarks ,  verbatimCoordinates ,  verbatimCoordinateSystem ,  georeferencedBy ,  georeferenceProtocol ,  georeferenceSources ,  georeferenceVerificationStatus ,  georeferenceRemarks ,  minimumElevationInMeters ,  maximumElevationInMeters ,  verbatimElevation ,  previousIdentifications ,  disposition ,  genericcolumn1 ,  genericcolumn2 ,  modified ,  language ,  observeruid ,  processingstatus ,  recordEnteredBy ,  duplicateQuantity ,  labelProject, dateEntered, minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation) VALUES (';
+            $sql .= '( collid ,  dbpk ,  basisOfRecord ,  occurrenceID ,  catalogNumber ,  otherCatalogNumbers ,  ownerInstitutionCode ,  institutionID ,  collectionID ,  datasetID ,  institutionCode ,  collectionCode ,  family ,  scientificName ,  sciname ,  tidinterpreted ,  genus ,  specificEpithet ,  taxonRank ,  infraspecificEpithet ,  scientificNameAuthorship ,  taxonRemarks ,  identifiedBy ,  dateIdentified ,  identificationReferences ,  identificationRemarks ,  identificationQualifier ,  typeStatus ,  recordedBy ,  recordNumber ,  recordedById ,  associatedCollectors ,  eventDate ,  year ,  month ,  day ,  startDayOfYear ,  endDayOfYear ,  verbatimEventDate ,  habitat ,  substrate ,  fieldNotes ,  fieldnumber ,  occurrenceRemarks ,  informationWithheld ,  dataGeneralizations ,  associatedOccurrences ,  associatedTaxa ,  dynamicProperties ,  verbatimAttributes ,  behavior ,  reproductiveCondition ,  cultivationStatus ,  establishmentMeans ,  lifeStage ,  sex ,  individualCount ,  samplingProtocol , samplingEffort , preparations ,  country ,  stateProvince ,  county ,  municipality ,  locality ,  localitySecurity ,  localitySecurityReason ,  decimalLatitude ,  decimalLongitude ,  geodeticDatum ,  coordinateUncertaintyInMeters ,  footprintWKT ,  coordinatePrecision ,  locationRemarks ,  verbatimCoordinates ,  verbatimCoordinateSystem ,  georeferencedBy ,  georeferenceProtocol ,  georeferenceSources ,  georeferenceVerificationStatus ,  georeferenceRemarks ,  minimumElevationInMeters ,  maximumElevationInMeters ,  verbatimElevation ,  previousIdentifications ,  disposition ,  genericcolumn1 ,  genericcolumn2 ,  modified ,  language ,  observeruid ,  processingstatus ,  recordEnteredBy ,  duplicateQuantity ,  labelProject, dateEntered, minimumDepthInMeters, maximumDepthInMeters, verbatimDepth, storageLocation, verbatimIndigenousName, validIndigenousName, linkIndigenousName, familyLanguageIndigenousName, groupLanguageIndigenousName, subgroupLanguageIndigenousName, villageIndigenousname, municipalityIndigenousname, stateIndigenousname, countryIndigenousname, isoIndigenousname, vernacularIndigenousName, glossIndigenousName, parseIndigenousName, parentTaxaIndigenousName, siblingTaxaIndigenousName, childTaxaIndigenousName, otherTaxaIndigenousName, typologyNameIndigenousName, semanticsNameIndigenousName, discussionNameIndigenousName, categoryUseIndigenousName, specificUseIndigenousName, partUseIndigenousName, discussionUseIndigenousName) VALUES (';
             $sql .=  "  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
+            $sql .=  " ,  ? ";
             $sql .=  " ,  ? ";
             $sql .=  " ,  ? ";
             $sql .=  " ,  ? ";
@@ -3595,9 +4318,11 @@ CREATE TABLE `omoccurrences` (
         }   
         if ($statement = $connection->prepare($sql)) { 
            if ($this->occid!= NULL ) {
-              $statement->bind_param("issssssssssssssisssssssssssssssssiiiiissssssssssssssissssssssssssisddsisdssssssssiisssssssississiissi", $this->collid , $this->dbpk , $this->basisOfRecord , $this->occurrenceID , $this->catalogNumber , $this->otherCatalogNumbers , $this->ownerInstitutionCode , $this->institutionID , $this->collectionID , $this->datasetID , $this->institutionCode , $this->collectionCode , $this->family , $this->scientificName , $this->sciname , $this->tidinterpreted , $this->genus , $this->specificEpithet , $this->taxonRank , $this->infraspecificEpithet , $this->scientificNameAuthorship , $this->taxonRemarks , $this->identifiedBy , $this->dateIdentified , $this->identificationReferences , $this->identificationRemarks , $this->identificationQualifier , $this->typeStatus , $this->recordedBy , $this->recordNumber , $this->recordedById , $this->associatedCollectors , $this->eventDate , $this->year , $this->month , $this->day , $this->startDayOfYear , $this->endDayOfYear , $this->verbatimEventDate , $this->habitat , $this->substrate , $this->fieldNotes , $this->fieldnumber , $this->occurrenceRemarks , $this->informationWithheld , $this->dataGeneralizations , $this->associatedOccurrences , $this->associatedTaxa , $this->dynamicProperties , $this->verbatimAttributes , $this->behavior , $this->reproductiveCondition , $this->cultivationStatus , $this->establishmentMeans , $this->lifeStage , $this->sex , $this->individualCount , $this->samplingProtocol , $this->samplingEffort , $this->preparations , $this->country , $this->stateProvince , $this->county , $this->municipality , $this->locality , $this->localitySecurity , $this->localitySecurityReason , $this->decimalLatitude , $this->decimalLongitude , $this->geodeticDatum , $this->coordinateUncertaintyInMeters , $this->footprintWKT , $this->coordinatePrecision , $this->locationRemarks , $this->verbatimCoordinates , $this->verbatimCoordinateSystem , $this->georeferencedBy , $this->georeferenceProtocol , $this->georeferenceSources , $this->georeferenceVerificationStatus , $this->georeferenceRemarks , $this->minimumElevationInMeters , $this->maximumElevationInMeters , $this->verbatimElevation , $this->previousIdentifications , $this->disposition , $this->genericcolumn1 , $this->genericcolumn2 , $this->modified , $this->language , $this->observeruid , $this->processingstatus , $this->recordEnteredBy , $this->duplicateQuantity , $this->labelProject , $this->dateEntered , $this->minimumDepthInMeters , $this->maximumDepthInMeters , $this->verbatimDepth , $this->storageLocation , $this->occid );
-           } else { 
-              $statement->bind_param("issssssssssssssisssssssssssssssssiiiiissssssssssssssissssssssssssisddsisdssssssssiisssssssississiiss", $this->collid , $this->dbpk , $this->basisOfRecord , $this->occurrenceID , $this->catalogNumber , $this->otherCatalogNumbers , $this->ownerInstitutionCode , $this->institutionID , $this->collectionID , $this->datasetID , $this->institutionCode , $this->collectionCode , $this->family , $this->scientificName , $this->sciname , $this->tidinterpreted , $this->genus , $this->specificEpithet , $this->taxonRank , $this->infraspecificEpithet , $this->scientificNameAuthorship , $this->taxonRemarks , $this->identifiedBy , $this->dateIdentified , $this->identificationReferences , $this->identificationRemarks , $this->identificationQualifier , $this->typeStatus , $this->recordedBy , $this->recordNumber , $this->recordedById , $this->associatedCollectors , $this->eventDate , $this->year , $this->month , $this->day , $this->startDayOfYear , $this->endDayOfYear , $this->verbatimEventDate , $this->habitat , $this->substrate , $this->fieldNotes , $this->fieldnumber , $this->occurrenceRemarks , $this->informationWithheld , $this->dataGeneralizations , $this->associatedOccurrences , $this->associatedTaxa , $this->dynamicProperties , $this->verbatimAttributes , $this->behavior , $this->reproductiveCondition , $this->cultivationStatus , $this->establishmentMeans , $this->lifeStage , $this->sex , $this->individualCount , $this->samplingProtocol , $this->samplingEffort , $this->preparations , $this->country , $this->stateProvince , $this->county , $this->municipality , $this->locality , $this->localitySecurity , $this->localitySecurityReason , $this->decimalLatitude , $this->decimalLongitude , $this->geodeticDatum , $this->coordinateUncertaintyInMeters , $this->footprintWKT , $this->coordinatePrecision , $this->locationRemarks , $this->verbatimCoordinates , $this->verbatimCoordinateSystem , $this->georeferencedBy , $this->georeferenceProtocol , $this->georeferenceSources , $this->georeferenceVerificationStatus , $this->georeferenceRemarks , $this->minimumElevationInMeters , $this->maximumElevationInMeters , $this->verbatimElevation , $this->previousIdentifications , $this->disposition , $this->genericcolumn1 , $this->genericcolumn2 , $this->modified , $this->language , $this->observeruid , $this->processingstatus , $this->recordEnteredBy , $this->duplicateQuantity , $this->labelProject, $this->dateEntered , $this->minimumDepthInMeters , $this->maximumDepthInMeters , $this->verbatimDepth , $this->storageLocation );
+              //CA: Bookmark
+              $statement->bind_param("issssssssssssssisssssssssssssssssiiiiissssssssssssssissssssssssssisddsisdssssssssiisssssssississiissi", $this->collid , $this->dbpk , $this->basisOfRecord , $this->occurrenceID , $this->catalogNumber , $this->otherCatalogNumbers , $this->ownerInstitutionCode , $this->institutionID , $this->collectionID , $this->datasetID , $this->institutionCode , $this->collectionCode , $this->family , $this->scientificName , $this->sciname , $this->tidinterpreted , $this->genus , $this->specificEpithet , $this->taxonRank , $this->infraspecificEpithet , $this->scientificNameAuthorship , $this->taxonRemarks , $this->identifiedBy , $this->dateIdentified , $this->identificationReferences , $this->identificationRemarks , $this->identificationQualifier , $this->typeStatus , $this->recordedBy , $this->recordNumber , $this->recordedById , $this->associatedCollectors , $this->eventDate , $this->year , $this->month , $this->day , $this->startDayOfYear , $this->endDayOfYear , $this->verbatimEventDate , $this->habitat , $this->substrate , $this->fieldNotes , $this->fieldnumber , $this->occurrenceRemarks , $this->informationWithheld , $this->dataGeneralizations , $this->associatedOccurrences , $this->associatedTaxa , $this->dynamicProperties , $this->verbatimAttributes , $this->behavior , $this->reproductiveCondition , $this->cultivationStatus , $this->establishmentMeans , $this->lifeStage , $this->sex , $this->individualCount , $this->samplingProtocol , $this->samplingEffort , $this->preparations , $this->country , $this->stateProvince , $this->county , $this->municipality , $this->locality , $this->localitySecurity , $this->localitySecurityReason , $this->decimalLatitude , $this->decimalLongitude , $this->geodeticDatum , $this->coordinateUncertaintyInMeters , $this->footprintWKT , $this->coordinatePrecision , $this->locationRemarks , $this->verbatimCoordinates , $this->verbatimCoordinateSystem , $this->georeferencedBy , $this->georeferenceProtocol , $this->georeferenceSources , $this->georeferenceVerificationStatus , $this->georeferenceRemarks , $this->minimumElevationInMeters , $this->maximumElevationInMeters , $this->verbatimElevation , $this->previousIdentifications , $this->disposition , $this->genericcolumn1 , $this->genericcolumn2 , $this->modified , $this->language , $this->observeruid , $this->processingstatus , $this->recordEnteredBy , $this->duplicateQuantity , $this->labelProject , $this->dateEntered , $this->minimumDepthInMeters , $this->maximumDepthInMeters , $this->verbatimDepth , $this->storageLocation, $this->verbatimIndigenousName, $this->validIndigenousName, $this->linkIndigenousName, $this->familyLanguageIndigenousName, $this->groupLanguageIndigenousName, $this->subgroupLanguageIndigenousName, $this->villageIndigenousname, $this->municipalityIndigenousname, $this->stateIndigenousname, $this->countryIndigenousname, $this->isoIndigenousname, $this->vernacularIndigenousName, $this->glossIndigenousName, $this->parseIndigenousName, $this->parentTaxaIndigenousName, $this->siblingTaxaIndigenousName, $this->childTaxaIndigenousName, $this->otherTaxaIndigenousName, $this->typologyNameIndigenousName, $this->semanticsNameIndigenousName, $this->discussionNameIndigenousName, $this->categoryUseIndigenousName, $this->specificUseIndigenousName, $this->partUseIndigenousName, $this->discussionUseIndigenousName, $this->occid );
+           } else {
+              //CA: Bookmark
+              $statement->bind_param("issssssssssssssisssssssssssssssssiiiiissssssssssssssissssssssssssisddsisdssssssssiisssssssississiiss", $this->collid , $this->dbpk , $this->basisOfRecord , $this->occurrenceID , $this->catalogNumber , $this->otherCatalogNumbers , $this->ownerInstitutionCode , $this->institutionID , $this->collectionID , $this->datasetID , $this->institutionCode , $this->collectionCode , $this->family , $this->scientificName , $this->sciname , $this->tidinterpreted , $this->genus , $this->specificEpithet , $this->taxonRank , $this->infraspecificEpithet , $this->scientificNameAuthorship , $this->taxonRemarks , $this->identifiedBy , $this->dateIdentified , $this->identificationReferences , $this->identificationRemarks , $this->identificationQualifier , $this->typeStatus , $this->recordedBy , $this->recordNumber , $this->recordedById , $this->associatedCollectors , $this->eventDate , $this->year , $this->month , $this->day , $this->startDayOfYear , $this->endDayOfYear , $this->verbatimEventDate , $this->habitat , $this->substrate , $this->fieldNotes , $this->fieldnumber , $this->occurrenceRemarks , $this->informationWithheld , $this->dataGeneralizations , $this->associatedOccurrences , $this->associatedTaxa , $this->dynamicProperties , $this->verbatimAttributes , $this->behavior , $this->reproductiveCondition , $this->cultivationStatus , $this->establishmentMeans , $this->lifeStage , $this->sex , $this->individualCount , $this->samplingProtocol , $this->samplingEffort , $this->preparations , $this->country , $this->stateProvince , $this->county , $this->municipality , $this->locality , $this->localitySecurity , $this->localitySecurityReason , $this->decimalLatitude , $this->decimalLongitude , $this->geodeticDatum , $this->coordinateUncertaintyInMeters , $this->footprintWKT , $this->coordinatePrecision , $this->locationRemarks , $this->verbatimCoordinates , $this->verbatimCoordinateSystem , $this->georeferencedBy , $this->georeferenceProtocol , $this->georeferenceSources , $this->georeferenceVerificationStatus , $this->georeferenceRemarks , $this->minimumElevationInMeters , $this->maximumElevationInMeters , $this->verbatimElevation , $this->previousIdentifications , $this->disposition , $this->genericcolumn1 , $this->genericcolumn2 , $this->modified , $this->language , $this->observeruid , $this->processingstatus , $this->recordEnteredBy , $this->duplicateQuantity , $this->labelProject, $this->dateEntered , $this->minimumDepthInMeters , $this->maximumDepthInMeters , $this->verbatimDepth , $this->storageLocation, $this->verbatimIndigenousName, $this->validIndigenousName, $this->linkIndigenousName, $this->familyLanguageIndigenousName, $this->groupLanguageIndigenousName, $this->subgroupLanguageIndigenousName, $this->villageIndigenousname, $this->municipalityIndigenousname, $this->stateIndigenousname, $this->countryIndigenousname, $this->isoIndigenousname, $this->vernacularIndigenousName, $this->glossIndigenousName, $this->parseIndigenousName, $this->parentTaxaIndigenousName, $this->siblingTaxaIndigenousName, $this->childTaxaIndigenousName, $this->otherTaxaIndigenousName, $this->typologyNameIndigenousName, $this->semanticsNameIndigenousName, $this->discussionNameIndigenousName, $this->categoryUseIndigenousName, $this->specificUseIndigenousName, $this->partUseIndigenousName, $this->discussionUseIndigenousName );
            } 
            $statement->execute();
            $rows = $statement->affected_rows;

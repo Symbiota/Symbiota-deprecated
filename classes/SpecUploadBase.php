@@ -738,6 +738,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li>Updating existing records... </li>');
 		ob_flush();
 		flush();
+		//CA: Bookmark
 		$fieldArr = array('basisOfRecord', 'catalogNumber','otherCatalogNumbers','occurrenceid',
 			'ownerInstitutionCode','institutionID','collectionID','institutionCode','collectionCode',
 			'family','scientificName','sciname','tidinterpreted','genus','specificEpithet','datasetID','taxonRank','infraspecificEpithet',
@@ -751,7 +752,7 @@ class SpecUploadBase extends SpecUpload{
 			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','coordinatePrecision',
 			'locationRemarks','verbatimCoordinates','verbatimCoordinateSystem','georeferencedBy','georeferenceProtocol','georeferenceSources',
 			'georeferenceVerificationStatus','georeferenceRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
-			'previousIdentifications','disposition','modified','language','recordEnteredBy','labelProject','duplicateQuantity','processingStatus');
+			'previousIdentifications','disposition','modified','language','recordEnteredBy','labelProject','duplicateQuantity','processingStatus','verbatimIndigenousName','validIndigenousName','linkIndigenousName','familyLanguageIndigenousName','groupLanguageIndigenousName','subgroupLanguageIndigenousName','villageIndigenousname','municipalityIndigenousname','stateIndigenousname','countryIndigenousname','isoIndigenousname','vernacularIndigenousName','glossIndigenousName','parseIndigenousName','parentTaxaIndigenousName','siblingTaxaIndigenousName','childTaxaIndigenousName','otherTaxaIndigenousName','typologyNameIndigenousName','semanticsNameIndigenousName','discussionNameIndigenousName','categoryUseIndigenousName','specificUseIndigenousName','partUseIndigenousName','discussionUseIndigenousName');
 		//Update matching records
 		$sqlFrag = '';
 		if($this->uploadType == $this->SKELETAL){
@@ -1575,7 +1576,7 @@ class SpecUploadBase extends SpecUpload{
 		global $charset;
 		$retStr = $inStr;
 		//Get rid of curly (smart) quotes
-		$search = array("’", "‘", "`", "”", "“"); 
+		$search = array("ï¿½", "ï¿½", "`", "ï¿½", "ï¿½"); 
 		$replace = array("'", "'", "'", '"', '"'); 
 		$inStr= str_replace($search, $replace, $inStr);
 		//Get rid of UTF-8 curly smart quotes and dashes 

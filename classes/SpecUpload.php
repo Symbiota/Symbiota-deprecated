@@ -153,6 +153,7 @@ class SpecUpload{
 	public function getUploadMap($start, $limit, $searchVariables = ''){
 		$retArr = Array();
 		if($limit){
+			//CA: Bookmark
 			$occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
 				'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 				'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
@@ -165,7 +166,7 @@ class SpecUpload{
 				'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
 				'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
 				'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
-				'labelproject','basisofrecord','ownerinstitutioncode', 'processingstatus', 'recordenteredby');
+				'labelproject', 'basisofrecord', 'verbatimIndigenousName', 'validIndigenousName', 'linkIndigenousName', 'familyLanguageIndigenousName', 'groupLanguageIndigenousName', 'subgroupLanguageIndigenousName', 'villageIndigenousname', 'municipalityIndigenousname', 'stateIndigenousname', 'countryIndigenousname', 'isoIndigenousname', 'vernacularIndigenousName', 'glossIndigenousName', 'parseIndigenousName', 'parentTaxaIndigenousName', 'siblingTaxaIndigenousName', 'childTaxaIndigenousName', 'otherTaxaIndigenousName', 'typologyNameIndigenousName', 'semanticsNameIndigenousName', 'discussionNameIndigenousName', 'categoryUseIndigenousName', 'specificUseIndigenousName', 'partUseIndigenousName', 'discussionUseIndigenousName', 'ownerinstitutioncode', 'processingstatus', 'recordenteredby');
 			$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp '.
 				'WHERE collid = '.$this->collId.' ';
 			if($searchVariables){
