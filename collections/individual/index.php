@@ -713,6 +713,233 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 							</div>
 							<?php 
 						}
+						//CA: Bookmark
+						/*verbatimIndigenousName*/
+						if($occArr['verbatimindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Verbatim Name: </b>
+								<?php echo $occArr['verbatimindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*validIndigenousName*/
+						if($occArr['validindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Valid Name: </b>
+								<?php echo $occArr['validindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*linkIndigenousName*/
+						if($occArr['linkindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Link: </b>
+								<?php echo $occArr['linkindigenousname']; ?>
+							</div>
+							<?php
+						}
+
+						/*familyLanguageIndigenousName*/
+						if($occArr['familylanguageindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Family: </b>
+								<?php echo $occArr['familylanguageindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*groupLanguageIndigenousName*/
+						if($occArr['grouplanguageindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Group: </b>
+								<?php echo $occArr['grouplanguageindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*subgroupLanguageIndigenousName*/
+						if($occArr['subgrouplanguageindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Subgroup: </b>
+								<?php echo $occArr['subgrouplanguageindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*villageIndigenousName*/
+						if($occArr['villageindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Village: </b>
+								<?php echo $occArr['villageindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*municipalityIndigenousName*/
+						if($occArr['municipalityindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Municipality: </b>
+								<?php echo $occArr['municipalityindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*stateIndigenousName*/
+						if($occArr['stateindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>State: </b>
+								<?php echo $occArr['stateindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*countryIndigenousName*/
+						if($occArr['countryindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Country: </b>
+								<?php echo $occArr['countryindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*isoIndigenousName*/
+						if($occArr['isoindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>ISO: </b>
+								<?php echo $occArr['isoindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*vernacularIndigenousName*/
+						if($occArr['vernacularindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Vernacular: </b>
+								<?php echo $occArr['vernacularindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*glossIndigenousName*/
+						if($occArr['glossindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Gloss: </b>
+								<?php echo $occArr['glossindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*parseIndigenousName*/
+						if($occArr['parseindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Parse: </b>
+								<?php echo $occArr['parseindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*parentTaxaIndigenousName*/
+						if($occArr['parenttaxaindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Parent Taxonomy: </b>
+								<?php echo $occArr['parenttaxaindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*siblingTaxaIndigenousName*/
+						if($occArr['siblingtaxaindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Sibling Taxonomy: </b>
+								<?php echo $occArr['siblingtaxaindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*childTaxaIndigenousName*/
+						if($occArr['childtaxaindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Child Taxonomy: </b>
+								<?php echo $occArr['childtaxaindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*otherTaxaIndigenousName*/
+						if($occArr['othertaxaindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Other Taxonomy: </b>
+								<?php echo $occArr['othertaxaindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*typologyNameIndigenousName*/
+						if($occArr['typologynameindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Typology: </b>
+								<?php echo $occArr['typologynameindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*semanticsNameIndigenousName*/
+						if($occArr['semanticsnameindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Semantics: </b>
+								<?php echo $occArr['semanticsnameindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*discussionNameIndigenousName*/
+						if($occArr['discussionnameindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Discussion of Name: </b>
+								<?php echo $occArr['discussionnameindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*categoryUseIndigenousName*/
+						if($occArr['categoryuseindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Category of Use: </b>
+								<?php echo $occArr['categoryuseindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*specificUseIndigenousName*/
+						if($occArr['specificuseindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Specific Use: </b>
+								<?php echo $occArr['specificuseindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*partUseIndigenousName*/
+						if($occArr['partuseindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Part Used: </b>
+								<?php echo $occArr['partuseindigenousname']; ?>
+							</div>
+							<?php
+						}
+						/*discussionUseIndigenousName*/
+						if($occArr['discussionuseindigenousname']){
+							?>
+							<div style="clear:both;">
+								<b>Discussion of Use: </b>
+								<?php echo $occArr['discussionuseindigenousname']; ?>
+							</div>
+							<?php
+						}
 						?>
 						<div style="clear:both;padding:10px;">
 							<?php 

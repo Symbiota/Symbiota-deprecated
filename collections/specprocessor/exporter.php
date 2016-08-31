@@ -28,7 +28,7 @@ $isEditor = false;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
  	$isEditor = true;
 }
-
+//CA: Bookmark
 $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identifiedBy'=>'Identified By','typeStatus'=>'Type Status',
 	'catalogNumber'=>'Catalog Number','otherCatalogNumbers'=>'Other Catalog Numbers','occurrenceId'=>'Occurrence ID (GUID)',
 	'recordedBy'=>'Collector/Observer','recordNumber'=>'Collector Number','associatedCollectors'=>'Associated Collectors',
@@ -42,7 +42,9 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 	'georeferencedBy'=>'Georeferenced By','georeferenceProtocol'=>'Georeference Protocol','georeferenceSources'=>'Georeference Sources',
 	'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks',
 	'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
-	'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition');
+	'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','verbatimIndigenousName'=>'Verbatim Name','validIndigenousName'=>'Valid Name','linkIndigenousName'=>'Link Name','familyLanguageIndigenousName'=>'Family','groupLanguageIndigenousName'=>'Group','subgroupLanguageIndigenousName'=>'Subgroup','villageIndigenousName'=>'Village','municipalityIndigenousName'=>'Municipality','stateIndigenousName'=>'State','countryIndigenousName'=>'Country','isoIndigenousName'=>'ISO','vernacularIndigenousName'=>'Vernacular','glossIndigenousName'=>'Gloss','parseIndigenousName'=>'Parse','parentTaxaIndigenousName'=>'Parent Taxonomy','siblingTaxaIndigenousName'=>'Sibling Taxonomy','childTaxaIndigenousName'=>'Child Taxonomy','otherTaxaIndigenousName'=>'Other Taxonomy','typologyNameIndigenousName'=>'Typology Name','semanticsNameIndigenousName'=>'Semantics Name','discussionNameIndigenousName'=>'Discussion of Name','categoryUseIndigenousName'=>'Category Use','specificUseIndigenousName'=>'Specific Use','partUseIndigenousName'=>'Part Used','discussionUseIndigenousName'=>'Discussion Use');
+
+
 ?>
 <html>
 	<head>

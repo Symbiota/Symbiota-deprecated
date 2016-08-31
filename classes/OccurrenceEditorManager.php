@@ -30,6 +30,7 @@ class OccurrenceEditorManager {
 		else{
 			$this->conn = MySQLiConnectionFactory::getCon("write");
 		}
+		//CA: Bookmark
 		$this->occFieldArr = array('dbpk', 'catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
 			'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 			'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
@@ -42,7 +43,7 @@ class OccurrenceEditorManager {
 			'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
 			'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
 			'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2', 'labelproject', 
-			'observeruid','basisofrecord','ownerinstitutioncode','datelastmodified', 'processingstatus', 'recordenteredby', 'dateentered');
+			'observeruid','basisofrecord','ownerinstitutioncode','datelastmodified', 'processingstatus', 'recordenteredby', 'dateentered', 'verbatimIndigenousName', 'validIndigenousName', 'linkIndigenousName', 'familyLanguageIndigenousName', 'groupLanguageIndigenousName', 'subgroupLanguageIndigenousName', 'villageIndigenousname', 'municipalityIndigenousname', 'stateIndigenousname', 'countryIndigenousname', 'isoIndigenousname', 'vernacularIndigenousName', 'glossIndigenousName', 'parseIndigenousName', 'parentTaxaIndigenousName', 'siblingTaxaIndigenousName', 'childTaxaIndigenousName', 'otherTaxaIndigenousName', 'typologyNameIndigenousName', 'semanticsNameIndigenousName', 'discussionNameIndigenousName', 'categoryUseIndigenousName', 'specificUseIndigenousName', 'partUseIndigenousName', 'discussionUseIndigenousName');
 	}
 
 	public function __destruct(){
@@ -908,6 +909,7 @@ class OccurrenceEditorManager {
 	public function addOccurrence($occArr){
 		$status = "SUCCESS: new occurrence record submitted successfully ";
 		if($occArr){
+			//CA: Bookmark
 			$fieldArr = array('basisOfRecord' => 's', 'catalogNumber' => 's', 'otherCatalogNumbers' => 's', 'occurrenceid' => 's', 'ownerInstitutionCode' => 's', 
 				'family' => 's', 'sciname' => 's', 'tidinterpreted' => 'n', 'scientificNameAuthorship' => 's', 'identifiedBy' => 's', 'dateIdentified' => 's', 
 				'identificationReferences' => 's', 'identificationremarks' => 's', 'taxonRemarks' => 's', 'identificationQualifier' => 's', 'typeStatus' => 's',  
@@ -920,7 +922,7 @@ class OccurrenceEditorManager {
 				'georeferencedBy' => 's', 'georeferenceProtocol' => 's', 'georeferenceSources' => 's', 
 				'georeferenceVerificationStatus' => 's', 'georeferenceRemarks' => 's', 'minimumElevationInMeters' => 'n', 'maximumElevationInMeters' => 'n', 
 				'verbatimElevation' => 's', 'disposition' => 's', 'language' => 's', 'duplicateQuantity' => 'n', 'labelProject' => 's', 
-				'processingstatus' => 's', 'recordEnteredBy' => 's', 'observeruid' => 'n', 'dateentered' => 'd', 'genericcolumn2' => 's');
+				'processingstatus' => 's', 'recordEnteredBy' => 's', 'verbatimIndigenousName' => 's', 'validIndigenousName' => 's', 'linkIndigenousName' => 's', 'familyLanguageIndigenousName' => 's', 'groupLanguageIndigenousName' => 's', 'subgroupLanguageIndigenousName' => 's', 'villageIndigenousname' => 's', 'municipalityIndigenousname' => 's', 'stateIndigenousname' => 's', 'countryIndigenousname' => 's', 'isoIndigenousname' => 's', 'vernacularIndigenousName' => 's', 'glossIndigenousName' => 's', 'parseIndigenousName' => 's', 'parentTaxaIndigenousName' => 's', 'siblingTaxaIndigenousName' => 's', 'childTaxaIndigenousName' => 's', 'otherTaxaIndigenousName' => 's', 'typologyNameIndigenousName' => 's', 'semanticsNameIndigenousName' => 's', 'discussionNameIndigenousName' => 's', 'categoryUseIndigenousName' => 's', 'specificUseIndigenousName' => 's', 'partUseIndigenousName' => 's', 'discussionUseIndigenousName' => 's', 'observeruid' => 'n', 'dateentered' => 'd', 'genericcolumn2' => 's');
 			$sql = 'INSERT INTO omoccurrences(collid, '.implode(array_keys($fieldArr),',').') '.
 				'VALUES ('.$occArr["collid"];
 			$fieldArr = array_change_key_case($fieldArr);

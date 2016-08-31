@@ -98,6 +98,7 @@ class OccurrenceIndividualManager extends Manager{
 	}
 
 	private function loadOccurData(){
+		//CA: Bookmark
 		$sql = 'SELECT o.occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
 			'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
 			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, taxonremarks, '.
@@ -108,7 +109,7 @@ class OccurrenceIndividualManager extends Manager{
 			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
 			'georeferenceremarks, verbatimattributes, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
-			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, recordenteredby, dateentered, datelastmodified '.
+			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, recordenteredby, dateentered, datelastmodified, verbatimIndigenousName, validIndigenousName, linkIndigenousName, familyLanguageIndigenousName, groupLanguageIndigenousName, subgroupLanguageIndigenousName, villageIndigenousname, municipalityIndigenousname, stateIndigenousname, countryIndigenousname, isoIndigenousname, vernacularIndigenousName, glossIndigenousName, parseIndigenousName, parentTaxaIndigenousName, siblingTaxaIndigenousName, childTaxaIndigenousName, otherTaxaIndigenousName, typologyNameIndigenousName, semanticsNameIndigenousName, discussionNameIndigenousName, categoryUseIndigenousName, specificUseIndigenousName, partUseIndigenousName, discussionUseIndigenousName '.
 			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
 		if($this->occid){
 			$sql .= 'WHERE (o.occid = '.$this->occid.')';
