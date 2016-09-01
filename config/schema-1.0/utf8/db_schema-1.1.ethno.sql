@@ -2267,7 +2267,7 @@ CREATE TABLE IF NOT EXISTS `omoccurrences` (
 
 DROP TRIGGER IF EXISTS `omoccurrencesfulltext_insert`;
 DELIMITER ;;
-  /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `omoccurrencesfulltext_insert` AFTER INSERT ON `omoccurrences`
+  /*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `omoccurrencesfulltext_insert` AFTER INSERT ON `omoccurrences`
 FOR EACH ROW BEGIN
   INSERT INTO omoccurrencesfulltext (
     `occid`,
@@ -2295,7 +2295,7 @@ DELIMITER ;
 
 DROP TRIGGER IF EXISTS `omoccurrencesfulltext_update`;
 DELIMITER ;;
-  /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `omoccurrencesfulltext_update` AFTER UPDATE ON `omoccurrences`
+  /*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `omoccurrencesfulltext_update` AFTER UPDATE ON `omoccurrences`
 FOR EACH ROW BEGIN
   UPDATE omoccurrencesfulltext SET
     `recordedby` = NEW.`recordedby`,
@@ -2318,7 +2318,7 @@ DELIMITER ;
 
 DROP TRIGGER IF EXISTS `omoccurrencesfulltext_delete`;
 DELIMITER ;;
-  /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `omoccurrencesfulltext_delete` BEFORE DELETE ON `omoccurrences`
+  /*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `omoccurrencesfulltext_delete` BEFORE DELETE ON `omoccurrences`
 FOR EACH ROW BEGIN
   DELETE FROM omoccurrencesfulltext WHERE `occid` = OLD.`occid`;
 END */;;
@@ -2755,7 +2755,7 @@ CREATE TABLE IF NOT EXISTS `specprocessorrawlabels` (
 
 DROP TRIGGER IF EXISTS `specprocessorrawlabelsfulltext_insert`;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `specprocessorrawlabelsfulltext_insert` AFTER INSERT ON `specprocessorrawlabels`
+/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `specprocessorrawlabelsfulltext_insert` AFTER INSERT ON `specprocessorrawlabels`
 FOR EACH ROW BEGIN
   INSERT IGNORE INTO specprocessorrawlabelsfulltext (
     `prlid`,
@@ -2784,7 +2784,7 @@ DELIMITER ;
 
 DROP TRIGGER IF EXISTS `specprocessorrawlabelsfulltext_update`;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `specprocessorrawlabelsfulltext_update` AFTER UPDATE ON `specprocessorrawlabels`
+/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `specprocessorrawlabelsfulltext_update` AFTER UPDATE ON `specprocessorrawlabels`
 FOR EACH ROW BEGIN
   UPDATE specprocessorrawlabelsfulltext SET
     `imgid` = NEW.`imgid`,
@@ -2823,7 +2823,7 @@ CREATE TABLE IF NOT EXISTS `specprocessorrawlabelsfulltext` (
 
 DROP TRIGGER IF EXISTS `specprocessorrawlabelsfulltext_delete`;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `specprocessorrawlabelsfulltext_delete` BEFORE DELETE ON `specprocessorrawlabelsfulltext`
+/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `specprocessorrawlabelsfulltext_delete` BEFORE DELETE ON `specprocessorrawlabelsfulltext`
 FOR EACH ROW BEGIN
   DELETE FROM specprocessorrawlabelsfulltext WHERE `prlid` = OLD.`prlid`;
 END */;;
