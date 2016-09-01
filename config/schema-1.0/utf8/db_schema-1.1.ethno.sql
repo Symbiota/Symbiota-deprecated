@@ -2121,6 +2121,213 @@ CREATE TABLE IF NOT EXISTS `omoccurpoints` (
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
+CREATE TABLE IF NOT EXISTS `omoccurrences` (
+  `occid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `collid` int(10) unsigned NOT NULL,
+  `dbpk` varchar(150) DEFAULT NULL,
+  `basisOfRecord` varchar(32) DEFAULT 'PreservedSpecimen' COMMENT 'PreservedSpecimen, LivingSpecimen, HumanObservation',
+  `occurrenceID` varchar(255) DEFAULT NULL COMMENT 'UniqueGlobalIdentifier',
+  `catalogNumber` varchar(32) DEFAULT NULL,
+  `otherCatalogNumbers` varchar(255) DEFAULT NULL,
+  `ownerInstitutionCode` varchar(32) DEFAULT NULL,
+  `institutionID` varchar(255) DEFAULT NULL,
+  `collectionID` varchar(255) DEFAULT NULL,
+  `datasetID` varchar(255) DEFAULT NULL,
+  `institutionCode` varchar(64) DEFAULT NULL,
+  `collectionCode` varchar(64) DEFAULT NULL,
+  `family` varchar(255) DEFAULT NULL,
+  `scientificName` varchar(255) DEFAULT NULL,
+  `sciname` varchar(255) DEFAULT NULL,
+  `tidinterpreted` int(10) unsigned DEFAULT NULL,
+  `genus` varchar(255) DEFAULT NULL,
+  `specificEpithet` varchar(255) DEFAULT NULL,
+  `taxonRank` varchar(32) DEFAULT NULL,
+  `infraspecificEpithet` varchar(255) DEFAULT NULL,
+  `scientificNameAuthorship` varchar(255) DEFAULT NULL,
+  `taxonRemarks` text,
+  `identifiedBy` varchar(255) DEFAULT NULL,
+  `dateIdentified` varchar(45) DEFAULT NULL,
+  `identificationReferences` text,
+  `identificationRemarks` text,
+  `identificationQualifier` varchar(255) DEFAULT NULL COMMENT 'cf, aff, etc',
+  `typeStatus` varchar(255) DEFAULT NULL,
+  `recordedBy` varchar(255) DEFAULT NULL COMMENT 'Collector(s)',
+  `recordNumber` varchar(45) DEFAULT NULL COMMENT 'Collector Number',
+  `recordedbyid` bigint(20) DEFAULT NULL,
+  `associatedCollectors` varchar(255) DEFAULT NULL COMMENT 'not DwC',
+  `eventDate` date DEFAULT NULL,
+  `year` int(10) DEFAULT NULL,
+  `month` int(10) DEFAULT NULL,
+  `day` int(10) DEFAULT NULL,
+  `startDayOfYear` int(10) DEFAULT NULL,
+  `endDayOfYear` int(10) DEFAULT NULL,
+  `verbatimEventDate` varchar(255) DEFAULT NULL,
+  `habitat` text COMMENT 'Habitat, substrait, etc',
+  `substrate` varchar(500) DEFAULT NULL,
+  `fieldNotes` text,
+  `fieldnumber` varchar(45) DEFAULT NULL,
+  `occurrenceRemarks` text COMMENT 'General Notes',
+  `informationWithheld` varchar(250) DEFAULT NULL,
+  `dataGeneralizations` varchar(250) DEFAULT NULL,
+  `associatedOccurrences` text,
+  `associatedTaxa` text COMMENT 'Associated Species',
+  `dynamicProperties` text,
+  `verbatimAttributes` text,
+  `behavior` varchar(500) DEFAULT NULL,
+  `reproductiveCondition` varchar(255) DEFAULT NULL COMMENT 'Phenology: flowers, fruit, sterile',
+  `cultivationStatus` int(10) DEFAULT NULL COMMENT '0 = wild, 1 = cultivated',
+  `establishmentMeans` varchar(45) DEFAULT NULL COMMENT 'cultivated, invasive, escaped from captivity, wild, native',
+  `lifeStage` varchar(45) DEFAULT NULL,
+  `sex` varchar(45) DEFAULT NULL,
+  `individualCount` varchar(45) DEFAULT NULL,
+  `samplingProtocol` varchar(100) DEFAULT NULL,
+  `samplingEffort` varchar(200) DEFAULT NULL,
+  `preparations` varchar(100) DEFAULT NULL,
+  `country` varchar(64) DEFAULT NULL,
+  `stateProvince` varchar(255) DEFAULT NULL,
+  `county` varchar(255) DEFAULT NULL,
+  `municipality` varchar(255) DEFAULT NULL,
+  `locality` text,
+  `localitySecurity` int(10) DEFAULT '0' COMMENT '0 = no security; 1 = hidden locality',
+  `localitySecurityReason` varchar(100) DEFAULT NULL,
+  `decimalLatitude` double DEFAULT NULL,
+  `decimalLongitude` double DEFAULT NULL,
+  `geodeticDatum` varchar(255) DEFAULT NULL,
+  `coordinateUncertaintyInMeters` int(10) unsigned DEFAULT NULL,
+  `footprintWKT` text,
+  `coordinatePrecision` decimal(9,7) DEFAULT NULL,
+  `locationRemarks` text,
+  `verbatimCoordinates` varchar(255) DEFAULT NULL,
+  `verbatimCoordinateSystem` varchar(255) DEFAULT NULL,
+  `georeferencedBy` varchar(255) DEFAULT NULL,
+  `georeferenceProtocol` varchar(255) DEFAULT NULL,
+  `georeferenceSources` varchar(255) DEFAULT NULL,
+  `georeferenceVerificationStatus` varchar(32) DEFAULT NULL,
+  `georeferenceRemarks` varchar(255) DEFAULT NULL,
+  `minimumElevationInMeters` int(6) DEFAULT NULL,
+  `maximumElevationInMeters` int(6) DEFAULT NULL,
+  `verbatimElevation` varchar(255) DEFAULT NULL,
+  `minimumDepthInMeters` int(11) DEFAULT NULL,
+  `maximumDepthInMeters` int(11) DEFAULT NULL,
+  `verbatimDepth` varchar(50) DEFAULT NULL,
+  `previousIdentifications` text,
+  `disposition` varchar(100) DEFAULT NULL,
+  `storageLocation` varchar(100) DEFAULT NULL,
+  `genericcolumn1` varchar(100) DEFAULT NULL,
+  `genericcolumn2` varchar(100) DEFAULT NULL,
+  `modified` datetime DEFAULT NULL COMMENT 'DateLastModified',
+  `language` varchar(20) DEFAULT NULL,
+  `observeruid` int(10) unsigned DEFAULT NULL,
+  `processingstatus` varchar(45) DEFAULT NULL,
+  `recordEnteredBy` varchar(250) DEFAULT NULL,
+  `duplicateQuantity` int(10) unsigned DEFAULT NULL,
+  `labelProject` varchar(50) DEFAULT NULL,
+  `dateEntered` datetime DEFAULT NULL,
+  `dateLastModified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`occid`) USING BTREE,
+  UNIQUE KEY `Index_collid` (`collid`,`dbpk`),
+  KEY `Index_sciname` (`sciname`),
+  KEY `Index_family` (`family`),
+  KEY `Index_country` (`country`),
+  KEY `Index_state` (`stateProvince`),
+  KEY `Index_county` (`county`),
+  KEY `Index_collector` (`recordedBy`),
+  KEY `Index_gui` (`occurrenceID`),
+  KEY `Index_ownerInst` (`ownerInstitutionCode`),
+  KEY `FK_omoccurrences_tid` (`tidinterpreted`),
+  KEY `FK_omoccurrences_uid` (`observeruid`),
+  KEY `Index_municipality` (`municipality`),
+  KEY `Index_collnum` (`recordNumber`),
+  KEY `Index_catalognumber` (`catalogNumber`),
+  KEY `FK_recordedbyid` (`recordedbyid`),
+  KEY `Index_eventDate` (`eventDate`),
+  KEY `Index_occurrences_procstatus` (`processingstatus`),
+  KEY `occelevmax` (`maximumElevationInMeters`),
+  KEY `occelevmin` (`minimumElevationInMeters`),
+  KEY `Index_occurrences_cult` (`cultivationStatus`),
+  KEY `Index_occurrences_typestatus` (`typeStatus`),
+  KEY `idx_occrecordedby` (`recordedBy`),
+  KEY `Index_occurDateLastModifed` (`dateLastModified`),
+  KEY `Index_occurDateEntered` (`dateEntered`),
+  KEY `Index_occurRecordEnteredBy` (`recordEnteredBy`),
+  CONSTRAINT `FK_omoccurrences_collid` FOREIGN KEY (`collid`) REFERENCES `omcollections` (`CollID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_omoccurrences_recbyid` FOREIGN KEY (`recordedbyid`) REFERENCES `agents` (`agentid`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `FK_omoccurrences_tid` FOREIGN KEY (`tidinterpreted`) REFERENCES `taxa` (`TID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_omoccurrences_uid` FOREIGN KEY (`observeruid`) REFERENCES `users` (`uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+
+DROP TRIGGER IF EXISTS `omoccurrencesfulltext_insert`;
+DELIMITER ;;
+  /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `omoccurrencesfulltext_insert` AFTER INSERT ON `omoccurrences`
+FOR EACH ROW BEGIN
+  INSERT INTO omoccurrencesfulltext (
+    `occid`,
+    `recordedby`,
+    `locality`
+  ) VALUES (
+    NEW.`occid`,
+    NEW.`recordedby`,
+    NEW.`locality`
+  );
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+
+DROP TRIGGER IF EXISTS `omoccurrencesfulltext_update`;
+DELIMITER ;;
+  /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `omoccurrencesfulltext_update` AFTER UPDATE ON `omoccurrences`
+FOR EACH ROW BEGIN
+  UPDATE omoccurrencesfulltext SET
+    `recordedby` = NEW.`recordedby`,
+    `locality` = NEW.`locality`
+  WHERE `occid` = NEW.`occid`;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+
+DROP TRIGGER IF EXISTS `omoccurrencesfulltext_delete`;
+DELIMITER ;;
+  /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `omoccurrencesfulltext_delete` BEFORE DELETE ON `omoccurrences`
+FOR EACH ROW BEGIN
+  DELETE FROM omoccurrencesfulltext WHERE `occid` = OLD.`occid`;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
 
 --
 -- Table structure for table `omoccurrencesfulltext`
@@ -3675,37 +3882,180 @@ CREATE PROCEDURE updateSymbiotaSchema ()
 
 
       IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_NAME = 'omoccurrences' AND COLUMN_NAME = 'verbatimIndigenousName')
+      WHERE TABLE_NAME = 'omoccurrences' AND COLUMN_NAME = 'idCollaboratorIndigenous')
       THEN
         ALTER TABLE `omoccurrences`
-          ADD COLUMN `verbatimIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `validIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `linkIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `familyLanguageIndigenousName` varchar(50) DEFAULT NULL,
-          ADD COLUMN `groupLanguageIndigenousName` varchar(50) DEFAULT NULL,
-          ADD COLUMN `subgroupLanguageIndigenousName` varchar(50) DEFAULT NULL,
-          ADD COLUMN `villageIndigenousname` varchar(50) DEFAULT NULL,
-          ADD COLUMN `municipalityIndigenousname` varchar(50) DEFAULT NULL,
-          ADD COLUMN `stateIndigenousname` varchar(50) DEFAULT NULL,
-          ADD COLUMN `countryIndigenousname` varchar(50) DEFAULT NULL,
-          ADD COLUMN `isoIndigenousname` varchar(5) DEFAULT NULL,
-          ADD COLUMN `vernacularIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `glossIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `parseIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `parentTaxaIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `siblingTaxaIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `childTaxaIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `otherTaxaIndigenousName` varchar(100) DEFAULT NULL,
-          ADD COLUMN `typologyNameIndigenousName` varchar(45) DEFAULT NULL COMMENT 'single term, analyzable, compound, complex',
-          ADD COLUMN `semanticsNameIndigenousName` varchar(45) DEFAULT NULL COMMENT 'animal, color, habitat, morphology, plant, sense, use, value, emotion',
-          ADD COLUMN `discussionNameIndigenousName` longtext,
-          ADD COLUMN `categoryUseIndigenousName` varchar(100) DEFAULT NULL COMMENT 'select list',
-          ADD COLUMN `specificUseIndigenousName` varchar(50) DEFAULT NULL COMMENT 'select list',
-          ADD COLUMN `partUseIndigenousName` varchar(50) DEFAULT NULL COMMENT 'entire plant, bark, flower, fruit, latex/sap/resin, leaves, leaf plant juice, roots, seeds, stems, thorns/spikes/prickles, trunk, tuber, other',
-          ADD COLUMN `discussionUseIndigenousName` longtext;
+          ADD COLUMN `idCollaboratorIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `sexCollaboratorIndigenous` varchar(20) DEFAULT NULL,
+          ADD COLUMN `dobCollaboratorIndigenous` datetime DEFAULT NULL,
+          ADD COLUMN `verbatimIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `validIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `linkLanguageCollaboratorIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `familyLanguageCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          ADD COLUMN `groupLanguageCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          ADD COLUMN `subgroupLanguageCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          ADD COLUMN `villageCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          ADD COLUMN `municipalityCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          ADD COLUMN `stateCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          ADD COLUMN `countryCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          ADD COLUMN `isoLanguageCollaboratorIndigenous` varchar(5) DEFAULT NULL,
+          ADD COLUMN `vernacularLexiconIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `glossLexiconIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `parseLexiconIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `parentTaxaLexiconIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `siblingTaxaLexiconIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `childTaxaLexiconIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `otherTaxaUseIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `typologyLexiconIndigenous` varchar(45) DEFAULT NULL COMMENT 'single term, analyzable, compound, complex',
+          ADD COLUMN `semanticsLexiconIndigenous` varchar(45) DEFAULT NULL COMMENT 'animal, color, habitat, morphology, plant, sense, use, value, emotion',
+          ADD COLUMN `notesLexiconIndigenous` longtext,
+          ADD COLUMN `categoryUseIndigenous` varchar(100) DEFAULT NULL COMMENT 'select list',
+          ADD COLUMN `specificUseIndigenous` varchar(50) DEFAULT NULL COMMENT 'select list',
+          ADD COLUMN `partUseIndigenous` varchar(50) DEFAULT NULL COMMENT 'entire plant, bark, flower, fruit, latex/sap/resin, leaves, leaf plant juice, roots, seeds, stems, thorns/spikes/prickles, trunk, tuber, other',
+          ADD COLUMN `notesUseIndigenous` longtext;
         END IF;
 
-      --  ******* End of Schema Changes to be applied in this update
+
+
+
+      IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'omoccurrences_collaborator' AND COLUMN_NAME = 'idCollaboratorIndigenous')
+      THEN
+        --
+        -- Table structure for table `omocurrences_collaborator`
+        --
+
+        /*!40101 SET @saved_cs_client     = @@character_set_client */;
+        /*!40101 SET character_set_client = utf8 */;
+        CREATE TABLE `omoccurrences_collaborator` (
+          `uuidCollaboratorIndigenous` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `uidCollaboratorIndigenous` int(10) unsigned NOT NULL,
+          `idCollaboratorIndigenous` varchar(100) DEFAULT NULL,
+          `sexCollaboratorIndigenous` varchar(20) DEFAULT NULL,
+          `dobCollaboratorIndigenous` datetime DEFAULT NULL,
+          `verbatimIndigenous` varchar(100) DEFAULT NULL,
+          `validIndigenous` varchar(100) DEFAULT NULL,
+          `linkLanguageCollaboratorIndigenous` varchar(100) DEFAULT NULL,
+          `familyLanguageCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          `groupLanguageCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          `subgroupLanguageCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          `villageCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          `municipalityCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          `stateCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          `countryCollaboratorIndigenous` varchar(50) DEFAULT NULL,
+          `isoLanguageCollaboratorIndigenous` varchar(5) DEFAULT NULL,
+          PRIMARY KEY (`uuidCollaboratorIndigenous`) USING BTREE,
+          UNIQUE KEY `Index_uidCollaboratorIndigenous` (`uidCollaboratorIndigenous`)) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+          /*!40101 SET character_set_client = @saved_cs_client */;
+        END IF;
+
+
+
+
+      IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'omoccurrences_use' AND COLUMN_NAME = 'idUseIndigenous')
+      THEN
+        --
+        -- Table structure for table `omocurrences_use`
+        --
+
+        /*!40101 SET @saved_cs_client     = @@character_set_client */;
+        /*!40101 SET character_set_client = utf8 */;
+        CREATE TABLE `omoccurrences_use` (
+          `uuidUseIndigenous` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `idUseIndigenous` int(10) unsigned NOT NULL,
+          `categoryUseIndigenous` varchar(100) DEFAULT NULL COMMENT 'select list',
+          `specificUseIndigenous` varchar(50) DEFAULT NULL COMMENT 'select list',
+          `partUseIndigenous` varchar(50) DEFAULT NULL COMMENT 'entire plant, bark, flower, fruit, latex/sap/resin, leaves, leaf plant juice, roots, seeds, stems, thorns/spikes/prickles, trunk, tuber, other',
+          `notesUseIndigenous` longtext,
+        PRIMARY KEY (`uuidUseIndigenous`) USING BTREE,
+        UNIQUE KEY `Index_idUseIndigenous` (`idUseIndigenous`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+    /*!40101 SET character_set_client = @saved_cs_client ;
+
+        END IF;
+
+
+
+
+      IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'omoccurrences_lexicon' AND COLUMN_NAME = 'idLexiconIndigenous')
+      THEN
+
+        --
+        -- Table structure for table `omocurrences_lexicon`
+        --
+
+        /*!40101 SET @saved_cs_client     = @@character_set_client */;
+        /*!40101 SET character_set_client = utf8 */;
+        CREATE TABLE `omoccurrences_lexicon` (
+          `uuidLexiconIndigenous` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `idLexiconIndigenous` int(10) unsigned NOT NULL,
+          `vernacularLexiconIndigenous` varchar(100) DEFAULT NULL,
+          `glossLexiconIndigenous` varchar(100) DEFAULT NULL,
+          `parseLexiconIndigenous` varchar(100) DEFAULT NULL,
+          `parentTaxaLexiconIndigenous` varchar(100) DEFAULT NULL,
+          `siblingTaxaLexiconIndigenous` varchar(100) DEFAULT NULL,
+          `childTaxaLexiconIndigenous` varchar(100) DEFAULT NULL,
+          `otherTaxaUseIndigenous` varchar(100) DEFAULT NULL,
+          `typologyLexiconIndigenous` varchar(45) DEFAULT NULL COMMENT 'single term, analyzable, compound, complex',
+          `semanticsLexiconIndigenous` varchar(45) DEFAULT NULL COMMENT 'animal, color, habitat, morphology, plant, sense, use, value, emotion',
+          `notesLexiconIndigenous` longtext,
+          PRIMARY KEY (`uuidLexiconIndigenous`) USING BTREE,
+          UNIQUE KEY `Index_idLexiconIndigenous` (`idLexiconIndigenous`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+        /*!40101 SET character_set_client = @saved_cs_client ;
+      END IF;
+
+
+
+
+      IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'omoccurrences_collaborator_lexicon' AND COLUMN_NAME = 'idCollaboratorIndigenous')
+      THEN
+
+        --
+        -- Table structure for table `omocurrences_collaborator_lexicon`
+        --
+
+        /*!40101 SET @saved_cs_client     = @@character_set_client */;
+        /*!40101 SET character_set_client = utf8 */;
+        CREATE TABLE `omoccurrences_collaborator_lexicon` (
+          `uuidCollaboratorLexiconIndigenous` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `idCollaboratorIndigenous` int(10) unsigned NOT NULL,
+          `idLexiconIndigenous` int(10) unsigned NOT NULL,
+          PRIMARY KEY (`uuidCollaboratorLexiconIndigenous`) USING BTREE,
+          UNIQUE KEY `Index_uuidCollaboratorLexiconIndigenous` (`uuidCollaboratorLexiconIndigenous`),
+          KEY `FK_idCollaboratorIndigenous` (`idLexiconIndigenous`),
+          KEY `FK_idLexiconIndigenous` (`idLexiconIndigenous`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+        /*!40101 SET character_set_client = @saved_cs_client */;
+      END IF;
+
+
+
+
+      IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'omoccurrences_collaborator_use' AND COLUMN_NAME = 'idCollaboratorIndigenous')
+      THEN
+
+        --
+        -- Table structure for table `omocurrences_collaborator_use`
+        --
+
+        /*!40101 SET @saved_cs_client     = @@character_set_client */;
+        /*!40101 SET character_set_client = utf8 */;
+        CREATE TABLE `omoccurrences_collaborator_use` (
+          `uuidCollaboratorUseIndigenous` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `idCollaboratorIndigenous` int(10) unsigned NOT NULL,
+          `idUseIndigenous` int(10) unsigned NOT NULL,
+          PRIMARY KEY (`uuidCollaboratorUseIndigenous`) USING BTREE,
+          UNIQUE KEY `Index_uuidCollaboratorUseIndigenous` (`uuidCollaboratorUseIndigenous`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+        /*!40101 SET character_set_client = @saved_cs_client */;
+      END IF;
+
+--  ******* End of Schema Changes to be applied in this update
 
       COMMIT;
 
