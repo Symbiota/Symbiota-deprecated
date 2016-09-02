@@ -758,15 +758,6 @@ table {
 	margin:3px;
 	width: 30%;
 }
-#idCollaboratorIndigenousDiv input {
-	width: 95%;
-}
-#sexCollaboratorIndigenousDiv input {
-	width: 95%;
-}
-#dobCollaboratorIndigenousDiv input {
-	width: 95%;
-}
 #verbatimIndigenousDiv{
 	float:left;
 	margin:3px;
@@ -785,7 +776,6 @@ table {
 	width: 100%;
 }
 #familyLanguageCollaboratorIndigenousDiv{
-	clear: left;
 	float:left;
 	margin:3px;
 	width: 30%;
@@ -800,54 +790,32 @@ table {
 	width: 30%;
 	margin:3px;
 }
-#familyLanguageCollaboratorIndigenousDiv input {
-	width: 95%;
-}
-#groupLanguageCollaboratorIndigenousDiv input {
-	width: 95%;
-}
-#subgroupLanguageCollaboratorIndigenousDiv input {
-	width: 95%;
-}
 #villageCollaboratorIndigenousDiv{
-	width: 45%;
+	width: 30%;
+	clear: left;
 	float:left;
 	margin:3px;
 }
 #municipalityCollaboratorIndigenousDiv{
 	float:left;
 	margin:3px;
-	width: 45%;
+	width: 30%;
 }
 #stateCollaboratorIndigenousDiv{
 	float:left;
 	margin:3px;
-	width: 45%;
-}
-#countryCollaboratorIndigenousDiv input {
-	width: 95%;
-}
-#villageCollaboratorIndigenousDiv input {
-	width: 95%;
-}
-#municipalityCollaboratorIndigenousDiv input {
-	width: 95%;
-}
-#stateCollaboratorIndigenousDiv input {
-	width: 95%;
+	width: 30%;
 }
 #countryCollaboratorIndigenousDiv{
 	float:left;
+	clear: both;
 	margin:3px;
-	width: 45%;
+	width: 50%;
 }
 #isoLanguageCollaboratorIndigenousDiv{
+	clear: both;
 	float:left;
 	margin:3px;
-	width: 30%;
-}
-#isoLanguageCollaboratorIndigenousDiv input {
-	width: 95%;
 }
 #vernacularLexiconIndigenousDiv{
 	float:left;
@@ -880,43 +848,10 @@ table {
 	width: 30%;
 	margin:3px;
 }
-#parentTaxaLexiconIndigenousDiv img {
-	width: 15px;
-}
-#siblingTaxaLexiconIndigenousDiv img {
-	width: 15px;
-}
-#childTaxaLexiconIndigenousDiv img {
-	width: 15px;
-}
-#otherTaxaUseIndigenousDiv img {
-	width: 15px;
-}
-#vernacularLexiconIndigenousDiv input {
-	width: 95%;
-}
-#glossLexiconIndigenousDiv input {
-	width: 95%;
-}
-#parseLexiconIndigenousDiv input {
-	width: 95%;
-}
-#parentTaxaLexiconIndigenousDiv textarea{
-	width: 80%;
-}
-#siblingTaxaLexiconIndigenousDiv textarea{
-	width: 80%;
-}
-#childTaxaLexiconIndigenousDiv textarea{
-	width: 80%;
-}
-#otherTaxaUseIndigenousDiv{
+#OtherTaxaUseIndigenousDiv{
 	float:left;
 	margin:3px;
-	width: 100%;
-}
-#otherTaxaUseIndigenousDiv textarea{
-	width: 90%;
+	width: 30%;
 }
 #typologyLexiconIndigenousDiv{
 	float:left;
@@ -929,22 +864,15 @@ table {
 	width: 40%;
 	margin:3px;
 }
-#typologyLexiconIndigenousDiv select {
-	width: 95%;
-}
-#semanticsLexiconIndigenousDiv select {
-	width: 95%;
-}
 #notesLexiconIndigenousDiv{
 	float:left;
 	margin:3px;
 	width: 90%;
 	clear: both;
 }
-
-#notesLexiconIndigenousDiv textarea {
+#notesLexiconIndigenousDiv input{
 	width: 100%;
-	min-height: 40px !important;
+	height: 40px;
 }
 #categoryUseIndigenousDiv{
 	float:left;
@@ -957,18 +885,10 @@ table {
 	width: 30%;
 }
 #partUseIndigenousDiv{
-	float: left;
+	float:left;
+	clear: left;
 	margin:3px;
 	width: 30%;
-}
-#categoryUseIndigenousDiv input {
-	width: 95%;
-}
-#specificUseIndigenousDiv input {
-	width: 95%;
-}
-#partUseIndigenousDiv select {
-	width: 95%;
 }
 #notesUseIndigenousDiv {
 	clear: both;
@@ -976,9 +896,9 @@ table {
 	float:left;
 	margin:3px;
 }
-#notesUseIndigenousDiv textarea {
+#notesUseIndigenousDiv input {
 	width: 100%;
-	min-height: 40px !important;
+	height: 40px;
 }
 
 .clearfix {
