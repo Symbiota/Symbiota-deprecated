@@ -741,4 +741,171 @@ table {
 	font-size: 		12px;
 }
 
+/* New Fields */
+
+#idCollaboratorIndigenousDiv {
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#sexCollaboratorIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#dobCollaboratorIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#verbatimIndigenousDiv{
+	float:left;
+	margin:3px;
+}
+#validIndigenousDiv{
+	float:left;
+	margin:3px;
+}
+#linkLanguageCollaboratorIndigenousDiv{
+	clear: both;
+	float:left;
+	margin:3px;
+	width: 90%;
+}
+#linkLanguageCollaboratorIndigenousDiv input {
+	width: 100%;
+}
+#familyLanguageCollaboratorIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#groupLanguageCollaboratorIndigenousDiv{
+	float:left;
+	width: 30%;
+	margin:3px;
+}
+#subgroupLanguageCollaboratorIndigenousDiv{
+	float:left;
+	width: 30%;
+	margin:3px;
+}
+#villageCollaboratorIndigenousDiv{
+	width: 30%;
+	clear: left;
+	float:left;
+	margin:3px;
+}
+#municipalityCollaboratorIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#stateCollaboratorIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#countryCollaboratorIndigenousDiv{
+	float:left;
+	clear: both;
+	margin:3px;
+	width: 50%;
+}
+#isoLanguageCollaboratorIndigenousDiv{
+	clear: both;
+	float:left;
+	margin:3px;
+}
+#vernacularLexiconIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#glossLexiconIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#parseLexiconIndigenousDiv{
+	float:left;
+	width: 30%;
+	margin:3px;
+}
+#parentTaxaLexiconIndigenousDiv{
+	clear: left;
+	width: 30%;
+	float:left;
+	margin:3px;
+}
+#siblingTaxaLexiconIndigenousDiv{
+	float:left;
+	width: 30%;
+	margin:3px;
+}
+#childTaxaLexiconIndigenousDiv{
+	float:left;
+	width: 30%;
+	margin:3px;
+}
+#OtherTaxaUseIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#typologyLexiconIndigenousDiv{
+	float:left;
+	width: 40%;
+	clear: left;
+	margin:3px;
+}
+#semanticsLexiconIndigenousDiv{
+	float:left;
+	width: 40%;
+	margin:3px;
+}
+#notesLexiconIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 90%;
+	clear: both;
+}
+#notesLexiconIndigenousDiv input{
+	width: 100%;
+	height: 40px;
+}
+#categoryUseIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#specificUseIndigenousDiv{
+	float:left;
+	margin:3px;
+	width: 30%;
+}
+#partUseIndigenousDiv{
+	float:left;
+	clear: left;
+	margin:3px;
+	width: 30%;
+}
+#notesUseIndigenousDiv {
+	clear: both;
+	width: 90%;
+	float:left;
+	margin:3px;
+}
+#notesUseIndigenousDiv input {
+	width: 100%;
+	height: 40px;
+}
+
+.clearfix {
+	clear: both;
+	display: block;
+	float: left;
+	width: 100%;
+}
+
 
