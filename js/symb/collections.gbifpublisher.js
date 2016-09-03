@@ -42,7 +42,7 @@ function createGbifInstallation(gbifOrgKey,collName){
 	var url = 'http://api.gbif.org/v1/installation';
 	var data = JSON.stringify({
 		organizationKey: gbifOrgKey,
-		type: "HTTP_INSTALLATION",
+		type: "SYMBIOTA_INSTALLATION",
 		title: collName
 	});
 
