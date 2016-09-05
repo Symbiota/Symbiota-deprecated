@@ -72,16 +72,18 @@ function verifyPwdForm(f){
 }
 
 function verifyModifyLoginForm(f){
-    var newLogin = f.newlogin.value.replace(/\s/g, "");
-    if(newLogin == ""){
-        window.alert("New login can be null");
+    var newLogin = f.newlogin.value;
+    if(newLogin == "" || newLogin.indexOf(" ")){
+        window.alert("New login cannot be blank or contain spaces");
         return false;
     }
-    var pwd = f.newloginpwd.value.replace(/\s/g, "");
-    if(pwd == ""){
-        window.alert("Enter your password");
-        return false;
-    }
+    if(document.getElementById('newloginpwd')){
+		var pwd = document.getElementById('newloginpwd').value;
+		if(pwd == "") {
+			window.alert("Enter your password");
+			return false;
+		}
+	}
     return true;
 }
 

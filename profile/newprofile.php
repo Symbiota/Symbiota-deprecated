@@ -85,10 +85,10 @@ if($action == "Create Login"){
 				<?php 
 			}
 			?>
-			var pwd1 = f.pwd.value.replace(/\s/g, "");
-			var pwd2 = f.pwd2.value.replace(/\s/g, "");
-			if(pwd1 == "" || pwd2 == ""){
-				alert("Both password fields must contain a value.");
+			var pwd1 = f.pwd.value;
+			var pwd2 = f.pwd2.value;
+			if(pwd1 == "" || pwd2 == "" || pwd1.indexOf(" ") || pwd2.indexOf(" ")){
+				alert("Both password fields must contain a value and not iclude spaces.");
 				return false;
 			}
 			if(pwd1.length < 7){
@@ -106,12 +106,12 @@ if($action == "Create Login"){
 				window.alert("User Name must contain a value");
 				return false;
 			}
-		    if(f.login.value.instr(" ") > 0){
+		    if(f.login.value.indexOf(" ")){
 				window.alert("Login name cannot contain spaces");
 				return false;
 			}
-			if( /[^0-9A-Za-z_!@#$-+]/.test( f.login.value ) ) {
-		        alert("Login name should only contain 0-9A-Za-z_!@");
+			if( /[0-9A-Za-z_!-+]/.test( f.login.value ) ) {
+		        alert("Login name should only contain 0-9A-Za-z_!");
 		        return false;
 		    }
 			if(f.emailaddr.value.replace(/\s/g, "") == "" ){
