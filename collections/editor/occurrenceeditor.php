@@ -1258,7 +1258,7 @@ else{
                               <input type="text" name="sexcollaboratorindigenous" tabindex="122" maxlength="20" value="<?php echo array_key_exists('sexcollaboratorindigenous',$occArr)?$occArr['sexcollaboratorindigenous']:''; ?>" onchange="fieldChanged('sexcollaboratorindigenous');" />
                             </div>
                             <div id="dobCollaboratorIndigenousDiv">
-                              <?php echo (defined('DOBCOLLABORATORINDIGENOUSLABEL')?DOBCOLLABORATORINDIGENOUSLABEL:'Date of Birth'); ?>
+                              <?php echo (defined('DOBCOLLABORATORINDIGENOUSLABEL')?DOBCOLLABORATORINDIGENOUSLABEL:'Birth Year'); ?>
                               <a href="#" onclick="return dwcDoc('dobCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <input type="text" name="dobcollaboratorindigenous" tabindex="123" maxlength="50" value="<?php echo array_key_exists('dobcollaboratorindigenous',$occArr)?$occArr['dobcollaboratorindigenous']:''; ?>" onchange="fieldChanged('dobcollaboratorindigenous');" />
                             </div>
@@ -1343,18 +1343,18 @@ else{
                               <a href="#" onclick="return dwcDoc('parentTaxaLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <textarea name="parenttaxalexiconindigenous" id="parentTaxaLexiconIndigenous" tabindex="138" onchange="fieldChanged('parenttaxalexiconindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('parenttaxalexiconindigenous',$occArr)?$occArr['parenttaxalexiconindigenous']:''; ?></textarea>
 															<?php
-															if(!isset($PARENTTAXALEXICONINDIGENOUSLABEL) || $PARENTTAXALEXICONINDIGENOUSLABEL){
-																echo '<a href="#" onclick="openParentSppAid();return false;"><img src="../../images/list.png" /></a>';
-															}
+															//if(!isset($PARENTTAXALEXICONINDIGENOUSLABEL) || $PARENTTAXALEXICONINDIGENOUSLABEL){
+																//echo '<a href="#" onclick="openParentSppAid();return false;"><img src="../../images/list.png" /></a>';
+															//}
 															?>
 														</div>
                             <div id="siblingTaxaLexiconIndigenousDiv">
                               <?php echo (defined('SIBLINGTAXALEXICONINDIGENOUSLABEL')?SIBLINGTAXALEXICONINDIGENOUSLABEL:'Sibling Taxa'); ?>
                               <a href="#" onclick="return dwcDoc('siblingTaxaLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <textarea name="siblingtaxalexiconindigenous" id="siblingTaxaLexiconIndigenous" tabindex="139" onchange="fieldChanged('siblingtaxalexiconindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('siblingtaxalexiconindigenous',$occArr)?$occArr['siblingtaxalexiconindigenous']:''; ?></textarea><?php
-															if(!isset($SIBLINGTAXALEXICONINDIGENOUSLABEL) || $SIBLINGTAXALEXICONINDIGENOUSLABEL){
-																echo '<a href="#" onclick="openSiblingSppAid();return false;"><img src="../../images/list.png" /></a>';
-															}
+															//if(!isset($SIBLINGTAXALEXICONINDIGENOUSLABEL) || $SIBLINGTAXALEXICONINDIGENOUSLABEL){
+																//echo '<a href="#" onclick="openSiblingSppAid();return false;"><img src="../../images/list.png" /></a>';
+															//}
 															?>
 														</div>
                             <div id="childTaxaLexiconIndigenousDiv">
@@ -1362,9 +1362,9 @@ else{
                               <a href="#" onclick="return dwcDoc('childTaxaLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <textarea name="childtaxalexiconindigenous" id="childTaxaLexiconIndigenous" tabindex="140" onchange="fieldChanged('childtaxalexiconindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('childtaxalexiconindigenous',$occArr)?$occArr['childtaxalexiconindigenous']:''; ?></textarea>
 															<?php
-															if(!isset($CHILDTAXALEXICONINDIGENOUSLABEL) || $CHILDTAXALEXICONINDIGENOUSLABEL){
-																echo '<a href="#" onclick="openChildSppAid();return false;"><img src="../../images/list.png" /></a>';
-															}
+															//if(!isset($CHILDTAXALEXICONINDIGENOUSLABEL) || $CHILDTAXALEXICONINDIGENOUSLABEL){
+																//echo '<a href="#" onclick="openChildSppAid();return false;"><img src="../../images/list.png" /></a>';
+															//}
 															?>
 														</div>
                             <div id="typologyLexiconIndigenousDiv">
