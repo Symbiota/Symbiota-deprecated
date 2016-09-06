@@ -18,16 +18,26 @@ function processGbifOrgKey(){
 		if(!gbifDatasetKey){
 			gbifDatasetKey = createGbifDataset(gbifInstKey,gbifOrgKey,collName);
 		}
-		if(dwcUri){
-			gbifEndpointKey = createGbifEndpoint(gbifDatasetKey,dwcUri);
-		}
 		if(gbifDatasetKey){
-			document.getElementById("aggKeysStr").value = JSON.stringify({
-				organizationKey: gbifOrgKey,
-				installationKey: gbifInstKey,
-				datasetKey: gbifDatasetKey,
-				endpointKey: gbifEndpointKey
-			});
+			if(dwcUri){
+				gbifEndpointKey = createGbifEndpoint(gbifDatasetKey, dwcUri);
+				if(gbifEndpointKey){
+					document.getElementById("aggKeysStr").value = JSON.stringify({
+						organizationKey: gbifOrgKey,
+						installationKey: gbifInstKey,
+						datasetKey: gbifDatasetKey,
+						endpointKey: gbifEndpointKey
+					});
+				}
+			}
+			else{
+				alert('Please create/refresh your Darwin Core Archive and try again.');
+				return false;
+			}
+		}
+		else{
+			alert('Invalid Organization Key or insufficient permissions. Please recheck your Organization Key and verify that this portal can create datasets for your organization with GBIF.');
+			return false;
 		}
 		return true;
 	}
