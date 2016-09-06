@@ -1258,64 +1258,64 @@ else{
                               <input type="text" name="sexcollaboratorindigenous" tabindex="122" maxlength="20" value="<?php echo array_key_exists('sexcollaboratorindigenous',$occArr)?$occArr['sexcollaboratorindigenous']:''; ?>" onchange="fieldChanged('sexcollaboratorindigenous');" />
                             </div>
                             <div id="dobCollaboratorIndigenousDiv">
-                              <?php echo (defined('DOBCOLLABORATORINDIGENOUSLABEL')?DOBCOLLABORATORINDIGENOUSLABEL:'Birth Year'); ?>
+                              <?php echo (defined('DOBCOLLABORATORINDIGENOUSLABEL')?DOBCOLLABORATORINDIGENOUSLABEL:'Year of bith'); ?>
                               <a href="#" onclick="return dwcDoc('dobCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <input type="text" name="dobcollaboratorindigenous" tabindex="123" maxlength="50" value="<?php echo array_key_exists('dobcollaboratorindigenous',$occArr)?$occArr['dobcollaboratorindigenous']:''; ?>" onchange="fieldChanged('dobcollaboratorindigenous');" />
                             </div>
                             <!--<div id="verbatimIndigenousDiv">
-                              <?php echo (defined('VERBATIMINDIGENOUSLABEL')?VERBATIMINDIGENOUSLABEL:'Verbatim Name'); ?>
+                              <?php //echo (defined('VERBATIMINDIGENOUSLABEL')?VERBATIMINDIGENOUSLABEL:'Verbatim Name'); ?>
                               <a href="#" onclick="return dwcDoc('verbatimIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <input type="text" name="verbatimindigenous" tabindex="124" maxlength="100" value="<?php echo array_key_exists('verbatimindigenous',$occArr)?$occArr['verbatimindigenous']:''; ?>" onchange="fieldChanged('verbatimindigenous');" />
                             </div>
                             <div id="validIndigenousDiv">
-                              <?php echo (defined('VALIDINDIGENOUSLABEL')?VALIDINDIGENOUSLABEL:'Valid Name'); ?>
+                              <?php //echo (defined('VALIDINDIGENOUSLABEL')?VALIDINDIGENOUSLABEL:'Valid Name'); ?>
                               <a href="#" onclick="return dwcDoc('validIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <input type="text" name="validindigenous" tabindex="125" maxlength="100" value="<?php echo array_key_exists('validindigenous',$occArr)?$occArr['validindigenous']:''; ?>" onchange="fieldChanged('validindigenous');" />
                             </div>-->
-                            <div id="linkLanguageCollaboratorIndigenousDiv">
-                              <?php echo (defined('LINKLANGUAGECOLLABORATORINDIGENOUSLABEL')?LINKLANGUAGECOLLABORATORINDIGENOUSLABEL:'Link'); ?>
+														<div id="countryCollaboratorIndigenousDiv">
+															<?php echo (defined('COUNTRYCOLLABORATORINDIGENOUSLABEL')?COUNTRYCOLLABORATORINDIGENOUSLABEL:'Country'); ?>
+															<a href="#" onclick="return dwcDoc('countryCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+															<input type="text" name="countrycollaboratorindigenous" tabindex="124" maxlength="50" value="<?php echo array_key_exists('countrycollaboratorindigenous',$occArr)?$occArr['countrycollaboratorindigenous']:''; ?>" onchange="fieldChanged('countrycollaboratorindigenous');" />
+														</div>
+														<div id="stateCollaboratorIndigenousDiv">
+															<?php echo (defined('STATECOLLABORATORINDIGENOUSLABEL')?STATECOLLABORATORINDIGENOUSLABEL:'State'); ?>
+															<a href="#" onclick="return dwcDoc('stateCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+															<input type="text" name="statecollaboratorindigenous" tabindex="125" maxlength="50" value="<?php echo array_key_exists('statecollaboratorindigenous',$occArr)?$occArr['statecollaboratorindigenous']:''; ?>" onchange="fieldChanged('statecollaboratorindigenous');" />
+														</div>
+														<div id="municipalityCollaboratorIndigenousDiv">
+															<?php echo (defined('MUNICIPALITYCOLLABORATORINDIGENOUSLABEL')?MUNICIPALITYCOLLABORATORINDIGENOUSLABEL:'Municipality'); ?>
+															<a href="#" onclick="return dwcDoc('municipalityCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+															<input type="text" name="municipalitycollaboratorindigenous" tabindex="126" maxlength="50" value="<?php echo array_key_exists('municipalitycollaboratorindigenous',$occArr)?$occArr['municipalitycollaboratorindigenous']:''; ?>" onchange="fieldChanged('municipalitycollaboratorindigenous');" />
+														</div>
+														<div id="villageCollaboratorIndigenousDiv">
+															<?php echo (defined('VILLAGECOLLABORATORINDIGENOUSLABEL')?VILLAGECOLLABORATORINDIGENOUSLABEL:'Village'); ?>
+															<a href="#" onclick="return dwcDoc('villageCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+															<input type="text" name="villagecollaboratorindigenous" tabindex="127" maxlength="50" value="<?php echo array_key_exists('villagecollaboratorindigenous',$occArr)?$occArr['villagecollaboratorindigenous']:''; ?>" onchange="fieldChanged('villagecollaboratorindigenous');" />
+														</div>
+                            <!--<div id="linkLanguageCollaboratorIndigenousDiv">
+                              <?php //echo (defined('LINKLANGUAGECOLLABORATORINDIGENOUSLABEL')?LINKLANGUAGECOLLABORATORINDIGENOUSLABEL:'Link'); ?>
                               <a href="#" onclick="return dwcDoc('linkLanguageCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <input type="text" name="linklanguagecollaboratorindigenous" tabindex="126" maxlength="100" value="<?php echo array_key_exists('linklanguagecollaboratorindigenous',$occArr)?$occArr['linklanguagecollaboratorindigenous']:''; ?>" onchange="fieldChanged('linklanguagecollaboratorindigenous');" />
-                            </div>
+                            </div>-->
                             <div id="familyLanguageCollaboratorIndigenousDiv">
-                              <?php echo (defined('FAMILYLANGUAGECOLLABORATORINDIGENOUSLABEL')?FAMILYLANGUAGECOLLABORATORINDIGENOUSLABEL:'Family'); ?>
+                              <?php echo (defined('FAMILYLANGUAGECOLLABORATORINDIGENOUSLABEL')?FAMILYLANGUAGECOLLABORATORINDIGENOUSLABEL:'Language family'); ?>
                               <a href="#" onclick="return dwcDoc('familyLanguageCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <input type="text" name="familylanguagecollaboratorindigenous" tabindex="127" maxlength="50" value="<?php echo array_key_exists('familylanguagecollaboratorindigenous',$occArr)?$occArr['familylanguagecollaboratorindigenous']:''; ?>" onchange="fieldChanged('familylanguagecollaboratorindigenous');" />
                             </div>
                             <div id="groupLanguageCollaboratorIndigenousDiv">
-                              <?php echo (defined('GROUPLANGUAGECOLLABORATORINDIGENOUSLABEL')?GROUPLANGUAGECOLLABORATORINDIGENOUSLABEL:'Group'); ?>
+                              <?php echo (defined('GROUPLANGUAGECOLLABORATORINDIGENOUSLABEL')?GROUPLANGUAGECOLLABORATORINDIGENOUSLABEL:'Language group'); ?>
                               <a href="#" onclick="return dwcDoc('groupLanguageCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <input type="text" name="grouplanguagecollaboratorindigenous" tabindex="128" maxlength="50" value="<?php echo array_key_exists('grouplanguagecollaboratorindigenous',$occArr)?$occArr['grouplanguagecollaboratorindigenous']:''; ?>" onchange="fieldChanged('grouplanguagecollaboratorindigenous');" />
                             </div>
-                            <div id="subgroupLanguageCollaboratorIndigenousDiv">
-                              <?php echo (defined('SUBGROUPLANGUAGECOLLABORATORINDIGENOUSLABEL')?SUBGROUPLANGUAGECOLLABORATORINDIGENOUSLABEL:'Subgroup'); ?>
+                            <!--<div id="subgroupLanguageCollaboratorIndigenousDiv">
+                              <?php //echo (defined('SUBGROUPLANGUAGECOLLABORATORINDIGENOUSLABEL')?SUBGROUPLANGUAGECOLLABORATORINDIGENOUSLABEL:'Subgroup'); ?>
                               <a href="#" onclick="return dwcDoc('subgroupLanguageCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
                               <input type="text" name="subgrouplanguagecollaboratorindigenous" tabindex="129" maxlength="50" value="<?php echo array_key_exists('subgrouplanguagecollaboratorindigenous',$occArr)?$occArr['subgrouplanguagecollaboratorindigenous']:''; ?>" onchange="fieldChanged('subgrouplanguagecollaboratorindigenous');" />
-                            </div>
-                            <div id="villageCollaboratorIndigenousDiv">
-                              <?php echo (defined('VILLAGECOLLABORATORINDIGENOUSLABEL')?VILLAGECOLLABORATORINDIGENOUSLABEL:'Village'); ?>
-                              <a href="#" onclick="return dwcDoc('villageCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <input type="text" name="villagecollaboratorindigenous" tabindex="130" maxlength="50" value="<?php echo array_key_exists('villagecollaboratorindigenous',$occArr)?$occArr['villagecollaboratorindigenous']:''; ?>" onchange="fieldChanged('villagecollaboratorindigenous');" />
-                            </div>
-                            <div id="municipalityCollaboratorIndigenousDiv">
-                              <?php echo (defined('MUNICIPALITYCOLLABORATORINDIGENOUSLABEL')?MUNICIPALITYCOLLABORATORINDIGENOUSLABEL:'Municipality'); ?>
-                              <a href="#" onclick="return dwcDoc('municipalityCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <input type="text" name="municipalitycollaboratorindigenous" tabindex="131" maxlength="50" value="<?php echo array_key_exists('municipalitycollaboratorindigenous',$occArr)?$occArr['municipalitycollaboratorindigenous']:''; ?>" onchange="fieldChanged('municipalitycollaboratorindigenous');" />
-                            </div>
-                            <div id="stateCollaboratorIndigenousDiv">
-                              <?php echo (defined('STATECOLLABORATORINDIGENOUSLABEL')?STATECOLLABORATORINDIGENOUSLABEL:'State'); ?>
-                              <a href="#" onclick="return dwcDoc('stateCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <input type="text" name="statecollaboratorindigenous" tabindex="132" maxlength="50" value="<?php echo array_key_exists('statecollaboratorindigenous',$occArr)?$occArr['statecollaboratorindigenous']:''; ?>" onchange="fieldChanged('statecollaboratorindigenous');" />
-                            </div>
-                            <div id="countryCollaboratorIndigenousDiv">
-                              <?php echo (defined('COUNTRYCOLLABORATORINDIGENOUSLABEL')?COUNTRYCOLLABORATORINDIGENOUSLABEL:'Country'); ?>
-                              <a href="#" onclick="return dwcDoc('countryCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <input type="text" name="countrycollaboratorindigenous" tabindex="133" maxlength="50" value="<?php echo array_key_exists('countrycollaboratorindigenous',$occArr)?$occArr['countrycollaboratorindigenous']:''; ?>" onchange="fieldChanged('countrycollaboratorindigenous');" />
-                            </div>
+                            </div>-->
                             <div id="isoLanguageCollaboratorIndigenousDiv">
-                              <?php echo (defined('ISOLANGUAGECOLLABORATORINDIGENOUSLABEL')?ISOLANGUAGECOLLABORATORINDIGENOUSLABEL:'ISO'); ?>
+                              <?php echo (defined('ISOLANGUAGECOLLABORATORINDIGENOUSLABEL')?ISOLANGUAGECOLLABORATORINDIGENOUSLABEL:'Language ISO code'); ?>
                               <a href="#" onclick="return dwcDoc('isoLanguageCollaboratorIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <input type="text" name="isolanguagecollaboratorindigenous" tabindex="134" maxlength="5" value="<?php echo array_key_exists('isolanguagecollaboratorindigenous',$occArr)?$occArr['isolanguagecollaboratorindigenous']:''; ?>" onchange="fieldChanged('isolanguagecollaboratorindigenous');" />
+                              <input type="text" name="isolanguagecollaboratorindigenous" tabindex="129" maxlength="5" value="<?php echo array_key_exists('isolanguagecollaboratorindigenous',$occArr)?$occArr['isolanguagecollaboratorindigenous']:''; ?>" onchange="fieldChanged('isolanguagecollaboratorindigenous');" />
                             </div>
                           </fieldset>
                         </div>
@@ -1324,53 +1324,53 @@ else{
                           <fieldset>
                             <legend><b>Lexicon Information</b></legend>
                             <div id="vernacularLexiconIndigenousDiv">
-                              <?php echo (defined('VERNACULARLEXICONINDIGENOUSLABEL')?VERNACULARLEXICONINDIGENOUSLABEL:'Vernacular Name'); ?>
+                              <?php echo (defined('VERNACULARLEXICONINDIGENOUSLABEL')?VERNACULARLEXICONINDIGENOUSLABEL:'Vernacular name'); ?>
                               <a href="#" onclick="return dwcDoc('vernacularLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <input type="text" name="vernacularlexiconindigenous" tabindex="135" maxlength="100" value="<?php echo array_key_exists('vernacularlexiconindigenous',$occArr)?$occArr['vernacularlexiconindigenous']:''; ?>" onchange="fieldChanged('vernacularlexiconindigenous');" />
+                              <input type="text" name="vernacularlexiconindigenous" tabindex="130" maxlength="100" value="<?php echo array_key_exists('vernacularlexiconindigenous',$occArr)?$occArr['vernacularlexiconindigenous']:''; ?>" onchange="fieldChanged('vernacularlexiconindigenous');" />
                             </div>
                             <div id="parseLexiconIndigenousDiv">
                               <?php echo (defined('PARSELEXICONINDIGENOUSLABEL')?PARSELEXICONINDIGENOUSLABEL:'Parse'); ?>
                               <a href="#" onclick="return dwcDoc('parseLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-															<input type="text" name="parselexiconindigenous" tabindex="136" maxlength="100" value="<?php echo array_key_exists('parselexiconindigenous',$occArr)?$occArr['parselexiconindigenous']:''; ?>" onchange="fieldChanged('parselexiconindigenous');" />
+															<input type="text" name="parselexiconindigenous" tabindex="131" maxlength="100" value="<?php echo array_key_exists('parselexiconindigenous',$occArr)?$occArr['parselexiconindigenous']:''; ?>" onchange="fieldChanged('parselexiconindigenous');" />
                             </div>
                             <div id="glossLexiconIndigenousDiv">
                               <?php echo (defined('GLOSSLEXICONINDIGENOUSLABEL')?GLOSSLEXICONINDIGENOUSLABEL:'Gloss'); ?>
                               <a href="#" onclick="return dwcDoc('glossLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <input type="text" name="glosslexiconindigenous" tabindex="137" maxlength="100" value="<?php echo array_key_exists('glosslexiconindigenous',$occArr)?$occArr['glosslexiconindigenous']:''; ?>" onchange="fieldChanged('glosslexiconindigenous');" />
+                              <input type="text" name="glosslexiconindigenous" tabindex="132" maxlength="100" value="<?php echo array_key_exists('glosslexiconindigenous',$occArr)?$occArr['glosslexiconindigenous']:''; ?>" onchange="fieldChanged('glosslexiconindigenous');" />
                             </div>
                             <div id="parentTaxaLexiconIndigenousDiv">
-                              <?php echo (defined('PARENTTAXALEXICONINDIGENOUSLABEL')?PARENTTAXALEXICONINDIGENOUSLABEL:'Parent Taxa'); ?>
+                              <?php echo (defined('PARENTTAXALEXICONINDIGENOUSLABEL')?PARENTTAXALEXICONINDIGENOUSLABEL:'Parent taxon'); ?>
                               <a href="#" onclick="return dwcDoc('parentTaxaLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <textarea name="parenttaxalexiconindigenous" id="parentTaxaLexiconIndigenous" tabindex="138" onchange="fieldChanged('parenttaxalexiconindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('parenttaxalexiconindigenous',$occArr)?$occArr['parenttaxalexiconindigenous']:''; ?></textarea>
+                              <textarea name="parenttaxalexiconindigenous" id="parentTaxaLexiconIndigenous" tabindex="133" onchange="fieldChanged('parenttaxalexiconindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('parenttaxalexiconindigenous',$occArr)?$occArr['parenttaxalexiconindigenous']:''; ?></textarea>
 															<?php
-															//if(!isset($PARENTTAXALEXICONINDIGENOUSLABEL) || $PARENTTAXALEXICONINDIGENOUSLABEL){
-																//echo '<a href="#" onclick="openParentSppAid();return false;"><img src="../../images/list.png" /></a>';
-															//}
+															if(!isset($PARENTTAXALEXICONINDIGENOUSLABEL) || $PARENTTAXALEXICONINDIGENOUSLABEL){
+																echo '<a href="#" onclick="openParentSppAid();return false;"><img src="../../images/list.png" /></a>';
+															}
 															?>
 														</div>
                             <div id="siblingTaxaLexiconIndigenousDiv">
-                              <?php echo (defined('SIBLINGTAXALEXICONINDIGENOUSLABEL')?SIBLINGTAXALEXICONINDIGENOUSLABEL:'Sibling Taxa'); ?>
+                              <?php echo (defined('SIBLINGTAXALEXICONINDIGENOUSLABEL')?SIBLINGTAXALEXICONINDIGENOUSLABEL:'Sibling taxa'); ?>
                               <a href="#" onclick="return dwcDoc('siblingTaxaLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <textarea name="siblingtaxalexiconindigenous" id="siblingTaxaLexiconIndigenous" tabindex="139" onchange="fieldChanged('siblingtaxalexiconindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('siblingtaxalexiconindigenous',$occArr)?$occArr['siblingtaxalexiconindigenous']:''; ?></textarea><?php
-															//if(!isset($SIBLINGTAXALEXICONINDIGENOUSLABEL) || $SIBLINGTAXALEXICONINDIGENOUSLABEL){
-																//echo '<a href="#" onclick="openSiblingSppAid();return false;"><img src="../../images/list.png" /></a>';
-															//}
+                              <textarea name="siblingtaxalexiconindigenous" id="siblingTaxaLexiconIndigenous" tabindex="134" onchange="fieldChanged('siblingtaxalexiconindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('siblingtaxalexiconindigenous',$occArr)?$occArr['siblingtaxalexiconindigenous']:''; ?></textarea><?php
+															if(!isset($SIBLINGTAXALEXICONINDIGENOUSLABEL) || $SIBLINGTAXALEXICONINDIGENOUSLABEL){
+																echo '<a href="#" onclick="openSiblingSppAid();return false;"><img src="../../images/list.png" /></a>';
+															}
 															?>
 														</div>
                             <div id="childTaxaLexiconIndigenousDiv">
-                              <?php echo (defined('CHILDTAXALEXICONINDIGENOUSLABEL')?CHILDTAXALEXICONINDIGENOUSLABEL:'Child Taxa'); ?>
+                              <?php echo (defined('CHILDTAXALEXICONINDIGENOUSLABEL')?CHILDTAXALEXICONINDIGENOUSLABEL:'Child taxa'); ?>
                               <a href="#" onclick="return dwcDoc('childTaxaLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <textarea name="childtaxalexiconindigenous" id="childTaxaLexiconIndigenous" tabindex="140" onchange="fieldChanged('childtaxalexiconindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('childtaxalexiconindigenous',$occArr)?$occArr['childtaxalexiconindigenous']:''; ?></textarea>
+                              <textarea name="childtaxalexiconindigenous" id="childTaxaLexiconIndigenous" tabindex="135" onchange="fieldChanged('childtaxalexiconindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('childtaxalexiconindigenous',$occArr)?$occArr['childtaxalexiconindigenous']:''; ?></textarea>
 															<?php
-															//if(!isset($CHILDTAXALEXICONINDIGENOUSLABEL) || $CHILDTAXALEXICONINDIGENOUSLABEL){
-																//echo '<a href="#" onclick="openChildSppAid();return false;"><img src="../../images/list.png" /></a>';
-															//}
+															if(!isset($CHILDTAXALEXICONINDIGENOUSLABEL) || $CHILDTAXALEXICONINDIGENOUSLABEL){
+																echo '<a href="#" onclick="openChildSppAid();return false;"><img src="../../images/list.png" /></a>';
+															}
 															?>
 														</div>
                             <div id="typologyLexiconIndigenousDiv">
                               <?php echo (defined('TYPOLOGYLEXICONINDIGENOUSLABEL')?TYPOLOGYLEXICONINDIGENOUSLABEL:'Typology'); ?>
                               <a href="#" onclick="return dwcDoc('typologyLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <select name="typologylexiconindigenous" onchange="fieldChanged('typologylexiconindigenous');" tabindex="141" >
+                              <select name="typologylexiconindigenous" onchange="fieldChanged('typologylexiconindigenous');" tabindex="136" >
                                 <option value="">--------------</option>
                                 <option value="single" <?php if (isset($occArr['typologylexiconindigenous']) && $occArr['typologylexiconindigenous']=='single') { echo 'selected=""';} ?>>Single Term</option>
                                 <option value="analyzable" <?php if (isset($occArr['typologylexiconindigenous']) && $occArr['typologylexiconindigenous']=='analyzable') { echo 'selected=""';} ?>>Analyzable</option>
@@ -1381,7 +1381,7 @@ else{
                             <div id="semanticsLexiconIndigenousDiv">
                               <?php echo (defined('SEMANTICSLEXICONINDIGENOUSLABEL')?SEMANTICSLEXICONINDIGENOUSLABEL:'Semantics'); ?>
                               <a href="#" onclick="return dwcDoc('semanticsLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <select name="semanticslexiconindigenous" onchange="fieldChanged('semanticslexiconindigenous');" tabindex="142" >
+                              <select name="semanticslexiconindigenous" onchange="fieldChanged('semanticslexiconindigenous');" tabindex="137" >
 
                                 <option value="">--------------</option>
                                 <option value="animal" <?php if (isset($occArr['semanticslexiconindigenous']) && $occArr['semanticslexiconindigenous']=='animal') { echo 'selected=""';} ?>>Animal</option>
@@ -1395,9 +1395,9 @@ else{
                               </select>
                             </div>
                             <div id="notesLexiconIndigenousDiv">
-                              <?php echo (defined('NOTESLEXICONINDIGENOUSLABEL')?NOTESLEXICONINDIGENOUSLABEL:'Discussion of Name'); ?>
+                              <?php echo (defined('NOTESLEXICONINDIGENOUSLABEL')?NOTESLEXICONINDIGENOUSLABEL:'Discussion of name'); ?>
                               <a href="#" onclick="return dwcDoc('notesLexiconIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <textarea name="noteslexiconindigenous" tabindex="143" onchange="fieldChanged('noteslexiconindigenous');" style="..."><?php echo array_key_exists('noteslexiconindigenous',$occArr)?$occArr['noteslexiconindigenous']:''; ?></textarea>
+                              <textarea name="noteslexiconindigenous" tabindex="138" onchange="fieldChanged('noteslexiconindigenous');" style="..."><?php echo array_key_exists('noteslexiconindigenous',$occArr)?$occArr['noteslexiconindigenous']:''; ?></textarea>
 														</div>
                           </fieldset>
                         </div>
@@ -1405,30 +1405,20 @@ else{
                         <div class="clearfix">
                           <fieldset>
                             <legend><b>Use Information</b></legend>
-                            <div id="otherTaxaUseIndigenousDiv">
-                              <?php echo (defined('OTHERTAXAUSEINDIGENOUSLABEL')?OTHERTAXAUSEINDIGENOUSLABEL:'Other Taxa'); ?>
-                              <a href="#" onclick="return dwcDoc('otherTaxaUseIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <textarea name="othertaxauseindigenous" id="otherTaxaUseIndigenous" tabindex="144" onchange="fieldChanged('othertaxauseindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('othertaxauseindigenous',$occArr)?$occArr['othertaxauseindigenous']:''; ?></textarea>
-															<?php
-														  if(!isset($OTHERTAXAUSEINDIGENOUSLABEL) || $OTHERTAXAUSEINDIGENOUSLABEL){
-														  	echo '<a href="#" onclick="openOtherSppAid();return false;"><img src="../../images/list.png" /></a>';
-														  }
-															?>
-														</div>
                             <div id="categoryUseIndigenousDiv">
-                              <?php echo (defined('CATEGORYUSEINDIGENOUSLABEL')?CATEGORYUSEINDIGENOUSLABEL:'Category of Use'); ?>
+                              <?php echo (defined('CATEGORYUSEINDIGENOUSLABEL')?CATEGORYUSEINDIGENOUSLABEL:'Category of use'); ?>
                               <a href="#" onclick="return dwcDoc('categoryUseIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <input type="text" name="categoryuseindigenous" tabindex="145" maxlength="100" value="<?php echo array_key_exists('categoryuseindigenous',$occArr)?$occArr['categoryuseindigenous']:''; ?>" onchange="fieldChanged('categoryuseindigenous');" />
+                              <input type="text" name="categoryuseindigenous" tabindex="139" maxlength="100" value="<?php echo array_key_exists('categoryuseindigenous',$occArr)?$occArr['categoryuseindigenous']:''; ?>" onchange="fieldChanged('categoryuseindigenous');" />
                             </div>
                             <div id="specificUseIndigenousDiv">
-                              <?php echo (defined('SPECIFICUSEINDIGENOUSLABEL')?SPECIFICUSEINDIGENOUSLABEL:'Specific Use'); ?>
+                              <?php echo (defined('SPECIFICUSEINDIGENOUSLABEL')?SPECIFICUSEINDIGENOUSLABEL:'Specific use'); ?>
                               <a href="#" onclick="return dwcDoc('specificUseIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <input type="text" name="specificuseindigenous" tabindex="146" maxlength="50" value="<?php echo array_key_exists('specificuseindigenous',$occArr)?$occArr['specificuseindigenous']:''; ?>" onchange="fieldChanged('specificuseindigenous');" />
+                              <input type="text" name="specificuseindigenous" tabindex="140" maxlength="50" value="<?php echo array_key_exists('specificuseindigenous',$occArr)?$occArr['specificuseindigenous']:''; ?>" onchange="fieldChanged('specificuseindigenous');" />
                             </div>
                             <div id="partUseIndigenousDiv">
-                              <?php echo (defined('PARTUSEINDIGENOUSLABEL')?PARTUSEINDIGENOUSLABEL:'Part Used'); ?>
+                              <?php echo (defined('PARTUSEINDIGENOUSLABEL')?PARTUSEINDIGENOUSLABEL:'Part used'); ?>
                               <a href="#" onclick="return dwcDoc('partUseIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-                              <select name="partuseindigenous" onchange="fieldChanged('partuseindigenous');" tabindex="147" >
+                              <select name="partuseindigenous" onchange="fieldChanged('partuseindigenous');" tabindex="141" >
                                 <option value="">--------------</option>
                                 <option value="plant" <?php if (isset($occArr['partuseindigenous']) && $occArr['partuseindigenous']=='plant') { echo 'selected=""';} ?>>Whole Plant</option>
                                 <option value="bark" <?php if (isset($occArr['partuseindigenous']) && $occArr['partuseindigenous']=='bark') { echo 'selected=""';} ?>>Bark</option>
@@ -1447,10 +1437,20 @@ else{
                                 <option value="other" <?php if (isset($occArr['partuseindigenous']) && $occArr['partuseindigenous']=='other'?'SELECTED':'') ?>>Other</option>
                               </select>
                             </div>
+														<div id="otherTaxaUseIndigenousDiv">
+															<?php echo (defined('OTHERTAXAUSEINDIGENOUSLABEL')?OTHERTAXAUSEINDIGENOUSLABEL:'Other taxa'); ?>
+															<a href="#" onclick="return dwcDoc('otherTaxaUseIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+															<textarea name="othertaxauseindigenous" id="otherTaxaUseIndigenous" tabindex="142" onchange="fieldChanged('othertaxauseindigenous');" style="height:40px;resize:vertical;" ><?php echo array_key_exists('othertaxauseindigenous',$occArr)?$occArr['othertaxauseindigenous']:''; ?></textarea>
+															<?php
+															if(!isset($OTHERTAXAUSEINDIGENOUSLABEL) || $OTHERTAXAUSEINDIGENOUSLABEL){
+																echo '<a href="#" onclick="openOtherSppAid();return false;"><img src="../../images/list.png" /></a>';
+															}
+															?>
+														</div>
 														<div id="notesUseIndigenousDiv">
-															<?php echo (defined('NOTESUSEINDIGENOUSLABEL')?NOTESUSEINDIGENOUSLABEL:'Discussion of Use'); ?>
+															<?php echo (defined('NOTESUSEINDIGENOUSLABEL')?NOTESUSEINDIGENOUSLABEL:'Discussion of use'); ?>
 															<a href="#" onclick="return dwcDoc('notesUseIndigenous')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-															<textarea name="notesuseindigenous" tabindex="148" onchange="fieldChanged('notesuseindigenous');" style="height:22px;"><?php echo array_key_exists('notesuseindigenous',$occArr)?$occArr['notesuseindigenous']:''; ?></textarea>
+															<textarea name="notesuseindigenous" tabindex="143" onchange="fieldChanged('notesuseindigenous');" style="height:22px;"><?php echo array_key_exists('notesuseindigenous',$occArr)?$occArr['notesuseindigenous']:''; ?></textarea>
 														</div>
                           </fieldset>
                         </div>
