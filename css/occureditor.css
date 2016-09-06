@@ -880,6 +880,18 @@ table {
 	width: 30%;
 	margin:3px;
 }
+#parentTaxaLexiconIndigenousDiv img {
+	width: 15px;
+}
+#siblingTaxaLexiconIndigenousDiv img {
+	width: 15px;
+}
+#childTaxaLexiconIndigenousDiv img {
+	width: 15px;
+}
+#otherTaxaLexiconIndigenousDiv img {
+	width: 15px;
+}
 #vernacularLexiconIndigenousDiv input {
 	width: 95%;
 }
