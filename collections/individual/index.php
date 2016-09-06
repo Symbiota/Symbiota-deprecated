@@ -725,7 +725,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 									foreach($iArr as $imgId => $imgArr){
 										?>
 										<div style='float:left;text-align:center;padding:5px;'>
-											<a href='<?php echo $imgArr['url']; ?>' target="_blank">
+											<a href='<?php echo ($imgArr['lgurl']?$imgArr['lgurl']:$imgArr['url']); ?>' target="_blank">
 												<img border=1 width='130' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
 											</a>
 											<?php if($imgArr['lgurl']) echo '<br/><a href="'.$imgArr['lgurl'].'" target="_blank">Large Version</a>'; ?>
