@@ -2,7 +2,11 @@
  //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
- 
+
+
+
+//CA: Bookmark
+// For adding associatedTaxa and therefore the other.
 ?>
 <html>
 <head>
