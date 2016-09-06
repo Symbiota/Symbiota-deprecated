@@ -10,6 +10,8 @@ function openAssocSppAid(){
 		alert("Unable to open associated species tool, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
 	}
 }
+//CA: Bookmark
+// For adding associatedTaxa and therefore the other.
 
 function openParentSppAid(){
 	var parentWindow = open("parentsppaid.php","parentaid","resizable=0,width=550,height=150,left=20,top=20");
