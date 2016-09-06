@@ -11,6 +11,54 @@ function openAssocSppAid(){
 	}
 }
 
+function openParentSppAid(){
+	var parentWindow = open("parentsppaid.php","parentaid","resizable=0,width=550,height=150,left=20,top=20");
+	if(parentWindow != null){
+		if (parentWindow.opener == null) parentWindow.opener = self;
+		fieldChanged("parenttaxalexiconindigenous");
+		parentWindow.focus();
+	}
+	else{
+		alert("Unable to open associated species tool, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
+	}
+}
+
+function openSiblingSppAid(){
+	var siblingWindow = open("siblingsppaid.php","siblingaid","resizable=0,width=550,height=150,left=20,top=20");
+	if(siblingWindow != null){
+		if (siblingWindow.opener == null) siblingWindow.opener = self;
+		fieldChanged("siblingtaxalexiconindigenous");
+		siblingWindow.focus();
+	}
+	else{
+		alert("Unable to open associated species tool, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
+	}
+}
+
+function openChildSppAid(){
+	var childWindow = open("childsppaid.php","childaid","resizable=0,width=550,height=150,left=20,top=20");
+	if(childWindow != null){
+		if (childWindow.opener == null) childWindow.opener = self;
+		fieldChanged("childtaxalexiconindigenous");
+		childWindow.focus();
+	}
+	else{
+		alert("Unable to open associated species tool, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
+	}
+}
+
+function openOtherSppAid(){
+	var otherWindow = open("othersppaid.php","otheraid","resizable=0,width=550,height=150,left=20,top=20");
+	if(otherWindow != null){
+		if (otherWindow.opener == null) otherWindow.opener = self;
+		fieldChanged("othertaxauseindigenous");
+		otherWindow.focus();
+	}
+	else{
+		alert("Unable to open associated species tool, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
+	}
+}
+
 function toggleCoordDiv(){
 	coordObj = document.getElementById("coordAidDiv");
 	if(coordObj.style.display == "block"){

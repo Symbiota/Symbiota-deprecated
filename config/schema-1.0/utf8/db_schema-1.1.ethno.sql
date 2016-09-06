@@ -3902,10 +3902,10 @@ CREATE PROCEDURE updateSymbiotaSchema ()
           ADD COLUMN `vernacularLexiconIndigenous` varchar(100) DEFAULT NULL,
           ADD COLUMN `glossLexiconIndigenous` varchar(100) DEFAULT NULL,
           ADD COLUMN `parseLexiconIndigenous` varchar(100) DEFAULT NULL,
-          ADD COLUMN `parentTaxaLexiconIndigenous` varchar(100) DEFAULT NULL,
-          ADD COLUMN `siblingTaxaLexiconIndigenous` varchar(100) DEFAULT NULL,
-          ADD COLUMN `childTaxaLexiconIndigenous` varchar(100) DEFAULT NULL,
-          ADD COLUMN `otherTaxaUseIndigenous` varchar(100) DEFAULT NULL,
+          ADD COLUMN `parentTaxaLexiconIndigenous` text COMMENT 'Associated Species',
+          ADD COLUMN `siblingTaxaLexiconIndigenous` text COMMENT 'Associated Species',
+          ADD COLUMN `childTaxaLexiconIndigenous` text COMMENT 'Associated Species',
+          ADD COLUMN `otherTaxaUseIndigenous` text COMMENT 'Associated Species',
           ADD COLUMN `typologyLexiconIndigenous` varchar(45) DEFAULT NULL COMMENT 'single term, analyzable, compound, complex',
           ADD COLUMN `semanticsLexiconIndigenous` varchar(45) DEFAULT NULL COMMENT 'animal, color, habitat, morphology, plant, sense, use, value, emotion',
           ADD COLUMN `notesLexiconIndigenous` longtext,
@@ -4055,7 +4055,143 @@ CREATE PROCEDURE updateSymbiotaSchema ()
         /*!40101 SET character_set_client = @saved_cs_client */;
       END IF;
 
---  ******* End of Schema Changes to be applied in this update
+
+
+      IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'omoccurparenttaxa' AND COLUMN_NAME = 'parenttaxaid')
+      THEN
+
+
+      --
+      -- Table structure for table `omoccurparenttaxa`
+      --
+
+      /*!40101 SET @saved_cs_client     = @@character_set_client */;
+      /*!40101 SET character_set_client = utf8 */;
+      CREATE TABLE IF NOT EXISTS `omoccurparenttaxa` (
+        `parenttaxaid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+        `occid` int(10) unsigned NOT NULL,
+        `tid` int(10) unsigned DEFAULT NULL,
+        `verbatimstr` varchar(250) DEFAULT NULL,
+        `relationship` varchar(45) DEFAULT NULL,
+        `verificationscore` int(11) DEFAULT NULL,
+        `notes` varchar(250) DEFAULT NULL,
+        `initialtimestamp` timestamp NULL DEFAULT NULL,
+        PRIMARY KEY (`parenttaxaid`),
+        KEY `FK_parenttaxa_occid_idx` (`occid`),
+        KEY `FK_pooctaxa_tid_idx` (`tid`),
+        KEY `INDEX_verbatim_str` (`verbatimstr`),
+        CONSTRAINT `FK_parenttaxa_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        CONSTRAINT `FK_pooctaxa_tid` FOREIGN KEY (`tid`) REFERENCES `taxa` (`TID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+      /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+      END IF;
+
+
+
+      IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'omoccurchildtaxa' AND COLUMN_NAME = 'childtaxaid')
+      THEN
+
+
+        --
+        -- Table structure for table `omoccurparenttaxa`
+        --
+
+        /*!40101 SET @saved_cs_client     = @@character_set_client */;
+        /*!40101 SET character_set_client = utf8 */;
+        CREATE TABLE IF NOT EXISTS `omoccurchildtaxa` (
+          `childtaxaid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `occid` int(10) unsigned NOT NULL,
+          `tid` int(10) unsigned DEFAULT NULL,
+          `verbatimstr` varchar(250) DEFAULT NULL,
+          `relationship` varchar(45) DEFAULT NULL,
+          `verificationscore` int(11) DEFAULT NULL,
+          `notes` varchar(250) DEFAULT NULL,
+          `initialtimestamp` timestamp NULL DEFAULT NULL,
+          PRIMARY KEY (`childtaxaid`),
+          KEY `FK_childtaxa_occid_idx` (`occid`),
+          KEY `FK_cooctaxa_tid_idx` (`tid`),
+          KEY `INDEX_verbatim_str` (`verbatimstr`),
+          CONSTRAINT `FK_childtaxa_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+          CONSTRAINT `FK_cooctaxa_tid` FOREIGN KEY (`tid`) REFERENCES `taxa` (`TID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+      END IF;
+
+
+
+      IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'omoccursiblingtaxa' AND COLUMN_NAME = 'siblingtaxaid')
+      THEN
+
+
+        --
+        -- Table structure for table `omoccursiblingtaxa`
+        --
+
+        /*!40101 SET @saved_cs_client     = @@character_set_client */;
+        /*!40101 SET character_set_client = utf8 */;
+        CREATE TABLE IF NOT EXISTS `omoccursiblingtaxa` (
+          `siblingtaxaid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `occid` int(10) unsigned NOT NULL,
+          `tid` int(10) unsigned DEFAULT NULL,
+          `verbatimstr` varchar(250) DEFAULT NULL,
+          `relationship` varchar(45) DEFAULT NULL,
+          `verificationscore` int(11) DEFAULT NULL,
+          `notes` varchar(250) DEFAULT NULL,
+          `initialtimestamp` timestamp NULL DEFAULT NULL,
+          PRIMARY KEY (`siblingtaxaid`),
+          KEY `FK_siblingtaxa_occid_idx` (`occid`),
+          KEY `FK_sooctaxa_tid_idx` (`tid`),
+          KEY `INDEX_verbatim_str` (`verbatimstr`),
+          CONSTRAINT `FK_siblingtaxa_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+          CONSTRAINT `FK_sooctaxa_tid` FOREIGN KEY (`tid`) REFERENCES `taxa` (`TID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+      END IF;
+
+
+
+      IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'omoccurothertaxa' AND COLUMN_NAME = 'othertaxaid')
+      THEN
+
+
+        --
+        -- Table structure for table `omoccurothertaxa`
+        --
+
+        /*!40101 SET @saved_cs_client     = @@character_set_client */;
+        /*!40101 SET character_set_client = utf8 */;
+        CREATE TABLE IF NOT EXISTS `omoccurothertaxa` (
+          `othertaxaid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `occid` int(10) unsigned NOT NULL,
+          `tid` int(10) unsigned DEFAULT NULL,
+          `verbatimstr` varchar(250) DEFAULT NULL,
+          `relationship` varchar(45) DEFAULT NULL,
+          `verificationscore` int(11) DEFAULT NULL,
+          `notes` varchar(250) DEFAULT NULL,
+          `initialtimestamp` timestamp NULL DEFAULT NULL,
+          PRIMARY KEY (`othertaxaid`),
+          KEY `FK_othertaxa_occid_idx` (`occid`),
+          KEY `FK_oooctaxa_tid_idx` (`tid`),
+          KEY `INDEX_verbatim_str` (`verbatimstr`),
+          CONSTRAINT `FK_othertaxa_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+          CONSTRAINT `FK_oooctaxa_tid` FOREIGN KEY (`tid`) REFERENCES `taxa` (`TID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+      END IF;
+
+      --  ******* End of Schema Changes to be applied in this update
 
       COMMIT;
 
