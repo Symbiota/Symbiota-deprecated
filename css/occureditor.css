@@ -873,7 +873,7 @@ table {
 
 #notesLexiconIndigenousDiv textarea {
 	width: 100%;
-	height: 40px !important;
+	min-height: 40px !important;
 }
 #categoryUseIndigenousDiv{
 	float:left;
@@ -899,7 +899,7 @@ table {
 }
 #notesUseIndigenousDiv textarea {
 	width: 100%;
-	height: 40px !important;
+	min-height: 40px !important;
 }
 
 .clearfix {
