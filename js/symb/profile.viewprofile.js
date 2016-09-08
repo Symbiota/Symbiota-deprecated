@@ -55,12 +55,20 @@ function verifyEditProfileForm(f){
 }
 
 function verifyPwdForm(f){
-    var pwd1 = f.newpwd.value.replace(/\s/g, "");
-    var pwd2 = f.newpwd2.value.replace(/\s/g, "");
+    var pwd1 = f.newpwd.value;
+    var pwd2 = f.newpwd2.value;
     if(pwd1 == "" || pwd2 == ""){
         window.alert("Both password fields must contain a value.");
         return false;
     }
+	if(pwd1.charAt(0) == " " || pwd1.slice(-1) == " "){
+		alert("Password cannot start or end with a space, but they can include spaces within the password");
+		return false;
+	}
+	if(pwd1.length < 7){
+		alert("Password must be greater than 6 characters");
+		return false;
+	}
     if(pwd1 != pwd2){
         window.alert("Password do not match. Please enter again.");
         f.newpwd.value = "";
@@ -73,13 +81,16 @@ function verifyPwdForm(f){
 
 function verifyModifyLoginForm(f){
     var newLogin = f.newlogin.value;
-    if(newLogin == "" || newLogin.indexOf(" ")){
-        window.alert("New login cannot be blank or contain spaces");
+    if(newLogin == ""){
+        window.alert("New login must have a value");
         return false;
     }
-    if(document.getElementById('newloginpwd')){
-		var pwd = document.getElementById('newloginpwd').value;
-		if(pwd == "") {
+	if( /[^0-9A-Za-z_!@#$-+]/.test( newLogin ) ) {
+        alert("Login name should only contain 0-9A-Za-z_!@ (spaces are not allowed)");
+        return false;
+    }
+    if(f.newloginpwd){
+		if(f.newloginpwd.value == "") {
 			window.alert("Enter your password");
 			return false;
 		}
