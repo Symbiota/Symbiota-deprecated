@@ -258,8 +258,8 @@ class CollectionProfileManager {
 		$rightsHolder = $this->cleanInStr($postArr['rightsholder']);
 		$accessRights = $this->cleanInStr($postArr['accessrights']);
 		$publicEdits = (array_key_exists('publicedits',$postArr)?$postArr['publicedits']:0);
+        $gbifPublish = (array_key_exists('publishToGbif',$postArr)?$postArr['publishToGbif']:0);
         if(array_key_exists('publishToIdigbio',$postArr)){
-            $gbifPublish = (array_key_exists('publishToGbif',$postArr)?$postArr['publishToGbif']:0);
             $idigPublish = (array_key_exists('publishToIdigbio',$postArr)?$postArr['publishToIdigbio']:0);
         }
         $guidTarget = (array_key_exists('guidtarget',$postArr)?$postArr['guidtarget']:'');
@@ -278,8 +278,8 @@ class CollectionProfileManager {
 
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,fulldescription,homepage,'.
-			'contact,email,latitudedecimal,longitudedecimal,publicedits,'.
-            (array_key_exists('publishToIdigbio',$postArr)?'publishToGbif,publishToIdigbio,':'').
+			'contact,email,latitudedecimal,longitudedecimal,publicedits,publishToGbif,'.
+            (array_key_exists('publishToIdigbio',$postArr)?'publishToIdigbio,':'').
             'guidtarget,rights,rightsholder,accessrights,icon,'.
 			'managementtype,colltype,collectionguid,individualurl,sortseq) '.
 			'VALUES ("'.$instCode.'",'.
@@ -290,8 +290,7 @@ class CollectionProfileManager {
 			($contact?'"'.$contact.'"':'NULL').','.
 			($email?'"'.$email.'"':'NULL').','.
 			($postArr['latitudedecimal']?$postArr['latitudedecimal']:'NULL').','.
-			($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').','.$publicEdits.','.
-            (array_key_exists('publishToGbif',$postArr)?$gbifPublish.',':'').
+			($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').','.$publicEdits.','.$gbifPublish.','.
             (array_key_exists('publishToIdigbio',$postArr)?$idigPublish.',':'').
 			($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 			($rights?'"'.$rights.'"':'NULL').','.
