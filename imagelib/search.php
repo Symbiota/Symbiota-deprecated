@@ -333,6 +333,7 @@ if($action){
 					<input id="phuidstr" name="phuidstr" type="hidden" value="<?php if(array_key_exists("phuidstr",$previousCriteria)) echo $previousCriteria["phuidstr"]; ?>" />
 					<input id="phjson" name="phjson" type="hidden" value='<?php if(array_key_exists("phjson",$previousCriteria)) echo $previousCriteria["phjson"]; ?>' />
 					<button id="loadimages" style='float:right;' name="submitaction" type="submit" value="Load Images" >Load Images</button>
+					<div style="clear:both;"></div>
 				</div>
 				
 				<div id="collectiondiv">
