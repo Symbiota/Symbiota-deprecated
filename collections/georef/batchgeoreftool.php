@@ -436,9 +436,11 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											<input name="qcountry" type="hidden" value="<?php echo $qCountry; ?>" />
 											<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
 											<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />
+											<input name="qmunicipality" type="hidden" value="<?php echo $qMunicipality; ?>" />
 											<input name="qlocality" type="hidden" value="<?php echo $qLocality; ?>" />
 											<input name="qsciname" type="hidden" value="<?php echo $qSciname; ?>" />
 											<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
+											<input name="qprocessingstatus" type="hidden" value="<?php echo $qProcessingStatus; ?>" />
 											<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
 											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										</td>
