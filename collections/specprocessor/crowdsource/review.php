@@ -1,9 +1,9 @@
 <?php
 include_once('../../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$symbUid) header('Location: ../../../profile/index.php?refurl=../collections/specprocessor/index.php?tabindex=2&'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: ../../../profile/index.php?refurl=../collections/specprocessor/index.php?tabindex=2&'.$_SERVER['QUERY_STRING']);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $uid = array_key_exists('uid',$_REQUEST)?$_REQUEST['uid']:0;
@@ -30,8 +30,8 @@ $projArr = $csManager->getProjectDetails();
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Crowdsourcing Reviewer</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Crowdsourcing Reviewer</title>
     <link href="../../../css/base.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
     <link href="../../../css/main.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
 	<script type="text/javascript">
@@ -65,10 +65,6 @@ $projArr = $csManager->getProjectDetails();
 	</script>
 </head>
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
-	<?php 	
-	//$displayLeftMenu = false;
-	//include($serverRoot.'/header.php');
-	?>
 	<div class='navpath'>
 		<a href="../../../index.php">Home</a> &gt;&gt;
 		<a href="central.php">Source Board</a> &gt;&gt;
@@ -247,13 +243,14 @@ $projArr = $csManager->getProjectDetails();
 								?>
 							</table>
 							<div style="width:850px;">
-								<div style="float:right;">
+								<div>
 									<?php echo $navStr; ?>
 								</div>
-								<div>
+								<div style="clear:both;">
 									<?php
 									if($collid){
-										echo '<input name="action" type="submit" value="Submit Reviews" />';
+										echo '<div style="float:left"><input name="action" type="submit" value="Submit Reviews" /></div>';
+										echo '<div style="float:left; margin-left:15px"><input name="updateProcessingStatus" type="checkbox" value="1" checked /> Set Processing Status to reviewed (unchecking will leave Processing Status as set by user for each record)</div>';
 									}
 									?>
 								</div>
@@ -292,8 +289,5 @@ $projArr = $csManager->getProjectDetails();
 		}
 		?>
 	</div>
-	<?php
-	//include($serverRoot.'/footer.php');
-	?>
 </body>
 </html>
