@@ -297,7 +297,7 @@ class OccurrenceDuplicate {
 		if($lastName){
 			$sql = 'SELECT occid '.
 				'FROM omoccurrences '.
-				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") AND (recordedby LIKE "%'.$lastName.'%") AND (occid != '.$skipOccid.') ';
+				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed" OR locality IS NOT NULL) AND (recordedby LIKE "%'.$lastName.'%") AND (occid != '.$skipOccid.') ';
 			$runQry = true;
 			if($collNum){
 				if(is_numeric($collNum)){
