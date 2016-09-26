@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/DynamicChecklistManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/DynamicChecklistManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
 $interface = array_key_exists("interface",$_REQUEST)&&$_REQUEST["interface"]?$_REQUEST["interface"]:"checklist";
@@ -10,7 +10,7 @@ $dynClManager = new DynamicChecklistManager();
 
 $latCen = 41.0;
 $longCen = -95.0;
-$coorArr = explode(";",$mappingBoundaries);
+$coorArr = explode(";",$MAPPING_BOUNDARIES);
 if($coorArr && count($coorArr) == 4){
 	$latCen = ($coorArr[0] + $coorArr[2])/2;
 	$longCen = ($coorArr[1] + $coorArr[3])/2;
@@ -30,12 +30,11 @@ elseif($coordRange > 40){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> - Dynamic Checklist Generator</title>
+	<title><?php echo $DEFAULT_TITLE; ?> - Dynamic Checklist Generator</title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false">
-	</script>
+	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 
 	<script type="text/javascript">
 	    var map;

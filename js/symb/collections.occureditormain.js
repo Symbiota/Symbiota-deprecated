@@ -614,11 +614,11 @@ function verifyCoordinates(f){
 	var lngValue = f.decimallongitude.value;
 	var latValue = f.decimallatitude.value;
 	if(latValue && lngValue){
-		var url = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+latValue+","+lngValue+"&sensor=false";
+		var url = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+latValue+","+lngValue;
 		
 		$.ajax({
 			type: "GET",
-			url: "http://maps.googleapis.com/maps/api/geocode/json?sensor=false",
+			url: "http://maps.googleapis.com/maps/api/geocode/json",
 			dataType: "json",
 			data: { latlng: latValue+","+lngValue }
 		}).done(function( data ) {

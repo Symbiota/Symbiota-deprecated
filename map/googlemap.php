@@ -1,9 +1,9 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceMapManager.php');
-include_once($serverRoot.'/classes/MappingShared.php');
-include_once($serverRoot.'/classes/TaxonProfileMap.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
+include_once($SERVER_ROOT.'/classes/MappingShared.php');
+include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
@@ -46,15 +46,15 @@ elseif($mapType == 'occquery'){
 $sharedMapManager->setTaxaArr($tArr);
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> - Google Map</title>
+	<title><?php echo $DEFAULT_TITLE; ?> - Google Map</title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script src="//www.google.com/jsapi"></script>
-	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	<script type="text/javascript" src="../js/symb/markerclusterer.js?ver=260913"></script>
 	<script type="text/javascript" src="../js/symb/oms.min.js"></script>
 	<script type="text/javascript" src="../js/symb/keydragzoom.js"></script>
@@ -204,7 +204,7 @@ $sharedMapManager->setTaxaArr($tArr);
 		}
 
 		function openIndPU(occId,clid){
-			newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=700,left=20,top=20');
+			newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width=1100,height=800,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			setTimeout(function () { newWindow.focus(); }, 0.5);
 		}

@@ -15,8 +15,7 @@ $clManager->setProj($projValue);
 	<head>
 		<title><?php echo $DEFAULT_TITLE; ?> - Species Checklists</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false">
-		</script>
+		<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 		<script type="text/javascript">
 		    var map;
 		    var points = new Array();

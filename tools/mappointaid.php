@@ -19,8 +19,8 @@ if(is_numeric($latDef) && is_numeric($lngDef)){
 	$lat = $latDef; 
 	$lng = $lngDef; 
 }
-elseif($mappingBoundaries){
-	$boundaryArr = explode(";",$mappingBoundaries);
+elseif($MAPPING_BOUNDARIES){
+	$boundaryArr = explode(";",$MAPPING_BOUNDARIES);
 	$lat = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
 	$lng = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
 }
@@ -31,10 +31,9 @@ else{
 ?>
 <html>
 	<head>
-		<title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
+		<title><?php echo $DEFAULT_TITLE; ?> - Coordinate Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false">
-		</script>
+		<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	    <script type="text/javascript">
 		    var map;
 		    var currentMarker;

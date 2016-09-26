@@ -129,6 +129,11 @@ if($SYMB_UID){
 			$statusStr = $indManager->getErrorMessage();
 		}
 	}
+	elseif($submit == "Add Voucher"){
+		if(!$indManager->linkVoucher($_POST)){
+			$statusStr = $indManager->getErrorMessage();
+		}
+	}
 	elseif($submit == "Link to Dataset"){
 		$dsid = (isset($_POST['dsid'])?$_POST['dsid']:0);
 		if(!$indManager->linkToDataset($dsid,$_POST['dsname'],$_POST['notes'],$SYMB_UID)){
@@ -144,8 +149,6 @@ $dupClusterArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
 
 header("Content-Type: text/html; charset=".$CHARSET);
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 ?>
 <html>
 <head>
@@ -159,7 +162,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	<script type="text/javascript">
 		var tabIndex = <?php echo $tabIndex; ?>;
 		var map;
@@ -725,7 +728,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 									foreach($iArr as $imgId => $imgArr){
 										?>
 										<div style='float:left;text-align:center;padding:5px;'>
-											<a href='<?php echo ($imgArr['lgurl']?$imgArr['lgurl']:$imgArr['url']); ?>' target="_blank">
+											<a href='<?php echo $imgArr['url']; ?>' target="_blank">
 												<img border=1 width='130' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
 											</a>
 											<?php if($imgArr['lgurl']) echo '<br/><a href="'.$imgArr['lgurl'].'" target="_blank">Large Version</a>'; ?>

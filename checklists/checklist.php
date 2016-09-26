@@ -82,7 +82,7 @@ elseif(array_key_exists('printlist_x',$_POST)){
 }
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = true;
 	
 	//Add species to checklist
@@ -438,7 +438,12 @@ if($clValue || $dynClid){
 								<div style="text-align:center;padding:10px">
 									<div>
 										<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" target="_blank">
-											<img src="http://maps.google.com/maps/api/staticmap?size=170x170&maptype=terrain&sensor=false&markers=size:tiny|<?php echo implode('|',$coordArr); ?>" style="border:0px;" /><br/>
+											<?php 
+											$googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=170x170&maptype=terrain';
+											if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
+											$googleUrl .= '&markers=size:tiny|'.implode('|',$coordArr);
+											?>
+											<img src="<?php echo $googleUrl; ?>" style="border:0px;" /><br/>
 											Simple Map
 										</a>
 									</div>

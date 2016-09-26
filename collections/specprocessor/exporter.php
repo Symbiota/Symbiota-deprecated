@@ -560,7 +560,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 							<div style="margin:15px;">
 								This module extracts specimens that lack decimal coordinates or have coordinates that needs to be verified.
 								This download will result in a Darwin Core Archive containing a UTF-8 encoded CSV file containing 
-								only georeferencing relavent data columns for the occurrences. By default, occurrences 
+								only georeferencing relevent data columns for the occurrences. By default, occurrences 
 								will be limited to records containing locality information but no decimal coordinates. 
 								This output is particularly useful for creating data extracts that will georeferenced using external tools. 
 							</div>

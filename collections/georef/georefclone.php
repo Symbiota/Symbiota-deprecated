@@ -39,7 +39,7 @@ if($coorArr && count($coorArr) == 4){
 		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<script src="//www.google.com/jsapi"></script>
-		<script src="//maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+		<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 		<script type="text/javascript">
 			var map;
 			var infoWins = new Array();
