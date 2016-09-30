@@ -1015,7 +1015,7 @@ class ImageBatchProcessor {
 			}
 			$rs->free();
 
-			$sql1 = 'INSERT images(occid,url';
+			$sql1 = 'INSERT INTO images(occid,url';
 			$sql2 = 'VALUES ('.$occId.',"'.$webUrl.'"';
 			if($tnUrl){
 				$sql1 .= ',thumbnailurl';
@@ -1025,8 +1025,8 @@ class ImageBatchProcessor {
 				$sql1 .= ',originalurl';
 				$sql2 .= ',"'.$oUrl.'"';
 			}
-			$sql1 .= ',imagetype,owner) ';
-			$sql2 .= ',"specimen","'.$this->collArr[$this->activeCollid]['collname'].'")';
+			$sql1 .= ',imagetype,owner,format) ';
+			$sql2 .= ',"specimen","'.$this->collArr[$this->activeCollid]['collname'].'","image/jpeg")';
 			$sql = $sql1.$sql2;
 			if($sql){
 				if($this->conn->query($sql)){

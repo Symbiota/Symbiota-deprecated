@@ -332,11 +332,30 @@ class ImageProcessor {
 	private function databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$ownerStr,$sourceIdentifier){
 		$status = true;
 		if($occid){
+			$format = 'image/jpeg';
+			$testUrl = $lgUrl;
+			if(!$testUrl) $testUrl = $webUrl;
+			$imgInfo = getimagesize($testUrl);
+			if($imgInfo){
+				if($imgInfo[2] == IMAGETYPE_GIF){
+					$format = 'image/gif';
+				}
+				elseif($imgInfo[2] == IMAGETYPE_PNG){
+					$format = 'image/png';
+				}
+				elseif($imgInfo[2] == IMAGETYPE_JPEG){
+					$format = 'image/jpeg';
+				}
+				else{
+					$format = '';
+				}
+			}
+
 			//$this->logOrEcho("Preparing to load record into database",2);
-			$sql = 'INSERT images(occid,url,thumbnailurl,originalurl,archiveurl,owner,sourceIdentifier) '.
+			$sql = 'INSERT INTO images(occid,url,thumbnailurl,originalurl,archiveurl,owner,sourceIdentifier,format) '.
 				'VALUES ('.$occid.',"'.$webUrl.'",'.($tnUrl?'"'.$tnUrl.'"':'NULL').','.($lgUrl?'"'.$lgUrl.'"':'NULL').','.
 				($archiveUrl?'"'.$archiveUrl.'"':'NULL').','.($ownerStr?'"'.$this->cleanInStr($ownerStr).'"':'NULL').','.
-				($sourceIdentifier?'"'.$this->cleanInStr($sourceIdentifier).'"':'NULL').')';
+				($sourceIdentifier?'"'.$this->cleanInStr($sourceIdentifier).'"':'NULL').',"'.$format.'")';
 			if($this->conn->query($sql)){
 				//$this->logOrEcho('Image loaded into database (<a href="../individual/index.php?occid='.$occid.'" target="_blank">#'.$occid.($sourceIdentifier?'</a>: '.$sourceIdentifier:'').')',2);
 			}
