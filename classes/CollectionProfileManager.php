@@ -328,7 +328,7 @@ class CollectionProfileManager {
 	public function getAddresses(){
 		$retArr = Array();
 		if($this->collid){
-			$sql = 'SELECT i.iid, i.institutioncode, i.institutionname, i.address1, i.address2, '.
+			$sql = 'SELECT i.iid, i.institutioncode, i.institutionname, i.institutionname2, i.address1, i.address2, '.
 				'i.city, i.stateprovince, i.postalcode, i.country, i.phone, i.contact, i.email, i.url, i.notes '.
 				'FROM institutions i INNER JOIN omcollections c ON i.iid = c.iid '.
 				'WHERE (c.collid = '.$this->collid.") ";
@@ -337,6 +337,7 @@ class CollectionProfileManager {
 			while($r = $rs->fetch_object()){
 				$retArr[$r->iid]['institutioncode'] = $r->institutioncode;
 				$retArr[$r->iid]['institutionname'] = $r->institutionname;
+				$retArr[$r->iid]['institutionname2'] = $r->institutionname2;
 				$retArr[$r->iid]['address1'] = $r->address1;
 				$retArr[$r->iid]['address2'] = $r->address2;
 				$retArr[$r->iid]['city'] = $r->city;

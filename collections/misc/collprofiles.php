@@ -454,6 +454,7 @@ if($SYMB_UID){
 							echo "<div>".$addrArr["institutionname"];
 							if($editCode > 1) echo ' <a href="../admin/institutioneditor.php?emode=1&targetcollid='.$collid.'&iid='.$iid.'" title="Edit institution information"><img src="../../images/edit.png" style="width:13px;" /></a>';
 							echo '</div>';
+							if($addrArr["institutionname2"]) echo "<div>".$addrArr["institutionname2"]."</div>";
 							if($addrArr["address1"]) echo "<div>".$addrArr["address1"]."</div>";
 							if($addrArr["address2"]) echo "<div>".$addrArr["address2"]."</div>";
 							if($addrArr["city"]) echo "<div>".$addrArr["city"].", ".$addrArr["stateprovince"]."&nbsp;&nbsp;&nbsp;".$addrArr["postalcode"]."</div>";

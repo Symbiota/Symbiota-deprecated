@@ -180,7 +180,7 @@ include($serverRoot.'/header.php');
 					<fieldset style="padding:20px;">
 						<legend><b>Address Details</b></legend>
 						<div style="position:relative;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Institution Code:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -191,7 +191,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Institution Name:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -202,7 +202,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Institution Name2:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -213,7 +213,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Address:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -224,7 +224,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Address 2:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -235,7 +235,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								City:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -246,7 +246,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								State/Province:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -257,7 +257,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Postal Code:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -268,7 +268,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Country:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -279,7 +279,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Phone:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -290,7 +290,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Contact:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -301,7 +301,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Email:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -312,7 +312,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								URL:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -325,7 +325,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Notes:
 							</div>
 							<div class="editdiv" style="display:<?php echo $eMode?'none':'block'; ?>;">
@@ -426,7 +426,7 @@ include($serverRoot.'/header.php');
 					<fieldset style="padding:20px;">
 						<legend><b>Add New Institution</b></legend>
 						<div style="position:relative;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Institution Code:
 							</div>
 							<div>
@@ -434,7 +434,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Institution Name:
 							</div>
 							<div>
@@ -442,7 +442,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Institution Name2:
 							</div>
 							<div>
@@ -450,7 +450,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Address:
 							</div>
 							<div>
@@ -458,7 +458,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Address 2:
 							</div>
 							<div>
@@ -466,7 +466,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								City:
 							</div>
 							<div>
@@ -474,7 +474,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								State/Province:
 							</div>
 							<div>
@@ -482,7 +482,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Postal Code:
 							</div>
 							<div>
@@ -490,7 +490,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Country:
 							</div>
 							<div>
@@ -498,7 +498,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Phone:
 							</div>
 							<div>
@@ -506,7 +506,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Contact:
 							</div>
 							<div>
@@ -514,7 +514,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Email:
 							</div>
 							<div>
@@ -522,7 +522,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								URL:
 							</div>
 							<div>
@@ -530,7 +530,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Notes:
 							</div>
 							<div>
@@ -538,7 +538,7 @@ include($serverRoot.'/header.php');
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
-							<div style="float:left;width:110px;font-weight:bold;">
+							<div style="float:left;width:155px;font-weight:bold;">
 								Link to:
 							</div>
 							<div>
