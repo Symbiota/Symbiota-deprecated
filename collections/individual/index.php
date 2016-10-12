@@ -1103,8 +1103,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					<?php
 					ob_flush();
 					flush();
-					$rawArchArr = array();
-					//$rawArchArr = $indManager->checkArchive();
+					$rawArchArr = $indManager->checkArchive();
 					//print_r($rawArchArr);
 					if($rawArchArr && $rawArchArr['obj']){
 						$archArr = $rawArchArr['obj'];
@@ -1122,7 +1121,14 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						}
 						echo '<table class="styledtable" style="font-family:Arial;font-size:12px;"><tr><th>Field</th><th>Value</th></tr>';
 						foreach($archArr as $f => $v){
-							echo '<tr><td style="width:175px;"><b>'.$f.'</b></td><td>'.$v.'</td></tr>';
+							echo '<tr><td style="width:175px;"><b>'.$f.'</b></td><td>';
+							if(is_array($v)){
+								echo implode(', ',$v);
+							}
+							else{
+								echo $v;
+							}
+							echo '</td></tr>';
 						}
 						if($dets){
 							foreach($dets as $id => $dArr){
