@@ -231,8 +231,14 @@ class OccurrenceManager{
 			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["country"]);
 			$countryArr = explode(";",$searchStr);
 			$tempArr = Array();
-			foreach($countryArr as $value){
-				$tempArr[] = '(o.Country = "'.trim($value).'")';
+			foreach($countryArr as $k => $value){
+				if($value == 'NULL'){
+					$countryArr[$k] = 'Country IS NULL';
+					$tempArr[] = '(o.Country IS NULL)';
+				}
+				else{
+					$tempArr[] = '(o.Country = "'.trim($value).'")';
+				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
 			$this->localSearchArr[] = implode(' OR ',$countryArr);
@@ -241,8 +247,14 @@ class OccurrenceManager{
 			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["state"]);
 			$stateAr = explode(";",$searchStr);
 			$tempArr = Array();
-			foreach($stateAr as $value){
-				$tempArr[] = '(o.StateProvince = "'.trim($value).'")';
+			foreach($stateAr as $k => $value){
+				if($value == 'NULL'){
+					$tempArr[] = '(o.StateProvince IS NULL)';
+					$stateAr[$k] = 'State IS NULL';
+				}
+				else{
+					$tempArr[] = '(o.StateProvince = "'.trim($value).'")';
+				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
 			$this->localSearchArr[] = implode(' OR ',$stateAr);
@@ -251,9 +263,15 @@ class OccurrenceManager{
 			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["county"]);
 			$countyArr = explode(";",$searchStr);
 			$tempArr = Array();
-			foreach($countyArr as $value){
-				$value = trim(str_ireplace(' county',' ',$value));
-				$tempArr[] = '(o.county LIKE "'.trim($value).'%")';
+			foreach($countyArr as $k => $value){
+				if($value == 'NULL'){
+					$tempArr[] = '(o.county IS NULL)';
+					$countyArr[$k] = 'County IS NULL';
+				}
+				else{
+					$value = trim(str_ireplace(' county',' ',$value));
+					$tempArr[] = '(o.county LIKE "'.trim($value).'%")';
+				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
 			$this->localSearchArr[] = implode(' OR ',$countyArr);
@@ -262,8 +280,14 @@ class OccurrenceManager{
 			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["local"]);
 			$localArr = explode(";",$searchStr);
 			$tempArr = Array();
-			foreach($localArr as $value){
-				$tempArr[] = '(o.municipality LIKE "'.trim($value).'%" OR o.Locality LIKE "%'.trim($value).'%")';
+			foreach($localArr as $k => $value){
+				if($value == 'NULL'){
+					$tempArr[] = '(o.locality IS NULL)';
+					$localArr[$k] = 'Locality IS NULL';
+				}
+				else{
+					$tempArr[] = '(o.municipality LIKE "'.trim($value).'%" OR o.Locality LIKE "%'.trim($value).'%")';
+				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
 			$this->localSearchArr[] = implode(' OR ',$localArr);
@@ -306,8 +330,14 @@ class OccurrenceManager{
 			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["collector"]);
 			$collectorArr = explode(";",$searchStr);
 			$tempArr = Array();
-			foreach($collectorArr as $value){
-				$tempArr[] = '(o.recordedBy LIKE "%'.trim($value).'%")';
+			foreach($collectorArr as $k => $value){
+				if($value == 'NULL'){
+					$tempArr[] = '(o.recordedBy IS NULL)';
+					$collectorArr[$k] = 'Collector IS NULL';
+				}
+				else{
+					$tempArr[] = '(o.recordedBy LIKE "%'.trim($value).'%")';
+				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
 			$this->localSearchArr[] = implode(', ',$collectorArr);
@@ -354,7 +384,11 @@ class OccurrenceManager{
 					$dateArr[] = $this->searchTermsArr['eventdate2'];
 				}
 			}
-			if($eDate1 = $this->formatDate($dateArr[0])){
+			if($dateArr[0] == 'NULL'){
+				$sqlWhere .= 'AND (o.eventdate IS NULL) ';
+				$this->localSearchArr[] = 'Date IS NULL';
+			}
+			elseif($eDate1 = $this->formatDate($dateArr[0])){
 				$eDate2 = (count($dateArr)>1?$this->formatDate($dateArr[1]):'');
 				if($eDate2){
 					$sqlWhere .= 'AND (o.eventdate BETWEEN "'.$eDate1.'" AND "'.$eDate2.'") ';
@@ -370,8 +404,8 @@ class OccurrenceManager{
 						$sqlWhere .= 'AND (o.eventdate = "'.$eDate1.'") ';
 					}
 				}
+				$this->localSearchArr[] = $this->searchTermsArr['eventdate1'].(isset($this->searchTermsArr['eventdate2'])?' to '.$this->searchTermsArr['eventdate2']:'');
 			}
-			$this->localSearchArr[] = $this->searchTermsArr['eventdate1'].(isset($this->searchTermsArr['eventdate2'])?' to '.$this->searchTermsArr['eventdate2']:'');
 		}
 		if(array_key_exists('catnum',$this->searchTermsArr)){
 			$catStr = $this->searchTermsArr['catnum'];
