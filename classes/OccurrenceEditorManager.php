@@ -1070,6 +1070,22 @@ class OccurrenceEditorManager {
 				}
 				$rs->free();
 				$archiveArr['imgs'] = $imgArr;
+				//Delete images
+				if($imgArr){
+					$imgidStr = implode(',',array_keys($imgArr));
+					//Remove any OCR text blocks linked to the image
+					if(!$this->conn->query('DELETE FROM specprocessorrawlabels WHERE (imgid IN('.$imgidStr.'))')){
+						$this->errorArr[] = 'ERROR removing OCR blocks linked to images: '.$this->conn->error;
+					}
+					//Remove image tags
+					if(!$this->conn->query('DELETE FROM imagetag WHERE (imgid IN('.$imgidStr.'))')){
+						$this->errorArr[] = 'ERROR removing imageTags linked to images: '.$this->conn->error;
+					}
+					//Remove images
+					if(!$this->conn->query('DELETE FROM images WHERE (imgid IN('.$imgidStr.'))')){
+						$this->errorArr[] = 'ERROR removing image links: '.$this->conn->error;
+					}
+				}
 
 				//Archive Exsiccati info
 				$exsArr = array();
