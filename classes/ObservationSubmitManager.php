@@ -143,14 +143,14 @@ class ObservationSubmitManager {
 		return $newOccId;
 	}
 
-	public function addImages($postArr,$newOccId,$tid){
+	private function addImages($postArr,$newOccId,$tid){
 		$status = true;
 		$imgManager = new ImageShared();
 		//Set target path
 		$subTargetPath = $this->collMap['institutioncode'];
 		if($this->collMap['collectioncode']) $subTargetPath .= '_'.$this->collMap['collectioncode'];
 		
-		for($i=1;$i<=3;$i++){
+		for($i=1;$i<=5;$i++){
 			//Set parameters
 			$imgManager->setTargetPath($subTargetPath.'/'.date('Ym').'/');
 			$imgManager->setMapLargeImg(false);			//Do not import large image, at least for now
