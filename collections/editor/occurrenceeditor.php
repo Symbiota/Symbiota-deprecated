@@ -438,7 +438,7 @@ else{
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=150910"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=151120"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=150910"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=161012"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141212"></script>
 </head>
 <body>

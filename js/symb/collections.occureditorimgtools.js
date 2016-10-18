@@ -98,6 +98,7 @@ function initImgRes(){
 
 function changeImgRes(resType){
 	var imgObj = document.getElementById("activeimg-"+activeImgIndex);
+	var oldSrc = imgObj.src;
 	if(resType == 'lg'){
         document.cookie = "symbimgres=lg";
     	if(imgLgArr[activeImgIndex]){
@@ -111,6 +112,52 @@ function changeImgRes(resType){
     		imgObj.src = imgArr[activeImgIndex];
     		document.getElementById("imgresmed").checked = true;
     	}
+	}
+	if(oldSrc.indexOf("rotate=") > -1){
+		oldSrc = oldSrc.substring(0,oldSrc.indexOf('&format='));
+		oldSrc = oldSrc.substring(oldSrc.indexOf('rotate=')+7);
+		var currentSrc = imgObj.src;
+		currentSrc = currentSrc.substring(0,currentSrc.indexOf('&format='));
+		imgObj.src = currentSrc + '&rotate=' + oldSrc + '&format=jpeg';
+	}
+}
+
+function rotateiPlantImage(rotationAngle){
+	var imgObj = document.getElementById("activeimg-"+activeImgIndex);
+	var imgSrc = imgObj.src;
+	if(imgSrc.indexOf("iplantcollaborative") > -1){
+		var angle = 0;
+		imgSrc = imgSrc.substring(0,imgSrc.indexOf('&format='));
+		if(imgSrc.indexOf("rotate=") > -1){
+			var last3 = imgSrc.substr(-3);
+			if(last3 == "=90"){
+				angle = 90;
+			}
+			else if(last3 == "-90"){
+				angle = -90;
+			}
+			else if(last3 == "180"){
+				angle = 180;
+			}
+			imgSrc = imgSrc.substring(0,imgSrc.indexOf('&rotate='));
+		}
+		angle = angle + rotationAngle;
+		if(angle == -180){
+			angle = 180;
+		}
+		else if(angle == 270){
+			angle = -90;
+		}
+		if(angle == 0){
+			imgObj.src = imgSrc + "&format=jpeg";
+		}
+		else{
+			imgObj.src = imgSrc + "&rotate="+angle+"&format=jpeg";
+		}
+		
+		var img = document.getElementById("activeimg-"+activeImgIndex);
+		$(img).imagetool("option","src",imgObj.src);
+		$(img).imagetool("reset");
 	}
 }
 
