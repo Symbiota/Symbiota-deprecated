@@ -23,6 +23,7 @@ $(function() {
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgreslg" name="resradio" type="radio" onchange="changeImgRes('lg')" />High Res.</div>
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgresmed" name="resradio"  type="radio" checked onchange="changeImgRes('med')" />Med Res.</div>
 			<?php
+			reset($imgArr);
 			$imgUrl = current($imgArr); 
 			if(strpos($imgUrl['web'],'iplantcollaborative')){
 				echo '<div style="float:right;padding:0px 3px;margin:2px 20px 0px 0px;">Rotate: <a href="#" onclick="rotateiPlantImage(-90)">&nbsp;L&nbsp;</a> &lt;&gt; <a href="#" onclick="rotateiPlantImage(90)">&nbsp;R&nbsp;</a></div>';
