@@ -917,10 +917,11 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 
-	public function getYearStatsHeaderArr($collId){
+	public function getYearStatsHeaderArr($months){
 		$dateArr = array();
-		$a = 13;
-		for ($i = 0; $i < 13; $i++) {
+		$a = $months + 1;
+        $reps = $a;
+		for ($i = 0; $i < $reps; $i++) {
 			$timestamp = mktime(0, 0, 0, date('n') - $i, 1);
 			$dateArr[$a] = date('Y', $timestamp).'-'.date('n', $timestamp);
 			$a--;
@@ -930,12 +931,12 @@ class CollectionProfileManager {
 		return $dateArr;
 	}
 
-	public function getYearStatsDataArr($collId){
+	public function getYearStatsDataArr($collId,$days){
 		$statArr = array();
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, c.collectionname '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
 			'LEFT JOIN images AS i ON o.occid = i.occid '.
-			'WHERE o.collid in('.$collId.') AND ((o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < 365) OR (datediff(curdate(), i.InitialTimeStamp) < 365)) '.
+			'WHERE o.collid in('.$collId.') AND ((o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < '.$days.') OR (datediff(curdate(), i.InitialTimeStamp) < '.$days.')) '.
 			'ORDER BY c.collectionname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -947,7 +948,7 @@ class CollectionProfileManager {
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
 			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, COUNT(o.occid) AS speccnt '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
-			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < 365 '.
+			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < '.$days.' '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -962,7 +963,7 @@ class CollectionProfileManager {
 			'COUNT(CASE WHEN o.processingstatus = "stage 2" THEN o.occid ELSE NULL END) AS stage2Count, '.
 			'COUNT(CASE WHEN o.processingstatus = "stage 3" THEN o.occid ELSE NULL END) AS stage3Count '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
-			'WHERE o.collid in('.$collId.') AND o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < 365 '.
+			'WHERE o.collid in('.$collId.') AND o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < '.$days.' '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -978,7 +979,7 @@ class CollectionProfileManager {
 			'COUNT(i.imgid) AS imgcnt '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
 			'LEFT JOIN images AS i ON o.occid = i.occid '.
-			'WHERE o.collid in('.$collId.') AND datediff(curdate(), i.InitialTimeStamp) < 365 '.
+			'WHERE o.collid in('.$collId.') AND datediff(curdate(), i.InitialTimeStamp) < '.$days.' '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
 		//echo $sql2;
 		$rs = $this->conn->query($sql2);
@@ -991,7 +992,7 @@ class CollectionProfileManager {
 			'COUNT(DISTINCT e.occid) AS georcnt '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
 			'LEFT JOIN omoccuredits AS e ON o.occid = e.occid '.
-			'WHERE o.collid in('.$collId.') AND datediff(curdate(), e.InitialTimeStamp) < 365 '.
+			'WHERE o.collid in('.$collId.') AND datediff(curdate(), e.InitialTimeStamp) < '.$days.' '.
 			'AND ((e.FieldName = "decimallongitude" AND e.FieldValueNew IS NOT NULL) '.
 			'OR (e.FieldName = "decimallatitude" AND e.FieldValueNew IS NOT NULL)) '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';

@@ -7,12 +7,14 @@ ini_set('max_execution_time', 1200); //1200 seconds = 20 minutes
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
+$days = array_key_exists("days",$_REQUEST)?$_REQUEST["days"]:365;
+$months = array_key_exists("months",$_REQUEST)?$_REQUEST["months"]:12;
 
 $collManager = new CollectionProfileManager();
 
 if($collId){
-	$dateArr = $collManager->getYearStatsHeaderArr($collId);
-	$statArr = $collManager->getYearStatsDataArr($collId);
+	$dateArr = $collManager->getYearStatsHeaderArr($months);
+	$statArr = $collManager->getYearStatsDataArr($collId,$days);
 }
 ?>
 <html>
@@ -195,6 +197,8 @@ if($collId){
 				<div style='float:right;margin:15px;' title="Save CSV">
 					<form name="yearstatscsv" id="yearstatscsv" style="margin-bottom:0px" action="collstatscsv.php" method="post" onsubmit="">
 						<input type="hidden" name="collids" id="collids" value='<?php echo $collId; ?>' />
+						<input type="hidden" name="days" value="<?php echo $days; ?>" />
+						<input type="hidden" name="months" value="<?php echo $months; ?>" />
 						<input type="submit" name="action" value="Download CSV" />
 					</form>
 				</div>
