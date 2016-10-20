@@ -335,7 +335,8 @@ include($serverRoot. '/header.php');
 						Organization lookup, there is already a GBIF Organization Key assigned. The organization key is the remaining part of
 						the url after the last backslash of your institution's GBIF Data Provider page. If your collection is found,
                         please ensure that your data is not already published in GBIF. DO NOT PUBLISH your data if there is any chance it is
-                        already published.
+                        already published. Before activating your GBIF Organization Key in this portal, you will also need to contact GBIF and
+						request that the user: <?php echo $GBIF_USERNAME; ?> has permissions to create and edit datatsets for your organization.
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
 							GBIF Organization Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>"/>
