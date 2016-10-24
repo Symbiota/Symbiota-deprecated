@@ -1008,15 +1008,16 @@ class CollectionProfileManager {
 
     public function getOrderStatsDataArr($collId){
         $statsArr = Array();
-        $sql = 'SELECT t.SciName AS SciName1, t2.SciName AS SciName2, t.RankId AS RankId1, t2.RankId AS RankId2, '.
-            'COUNT(o.occid) AS SpecimensPerOrder, COUNT(o.decimalLatitude) AS GeorefSpecimensPerOrder, '.
-            'COUNT(CASE WHEN t2.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerOrder, '.
-            'COUNT(CASE WHEN t2.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerOrder '.
+        $sql = 'SELECT (CASE WHEN t.RankId = 100 THEN t.SciName WHEN t2.RankId = 100 THEN t2.SciName ELSE NULL END) AS SciName, '.
+            'COUNT(DISTINCT o.occid) AS SpecimensPerOrder, '.
+            'COUNT(DISTINCT CASE WHEN o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS GeorefSpecimensPerOrder, '.
+            'COUNT(DISTINCT CASE WHEN t2.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerOrder, '.
+            'COUNT(DISTINCT CASE WHEN t2.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerOrder '.
             'FROM omoccurrences AS o LEFT JOIN taxaenumtree AS e ON o.tidinterpreted = e.tid '.
             'LEFT JOIN taxa AS t ON e.parenttid = t.TID '.
             'LEFT JOIN taxa AS t2 ON o.tidinterpreted = t2.TID '.
             'WHERE (o.collid IN('.$collId.')) AND (t.RankId = 100 OR t2.RankId = 100) AND e.taxauthid = 1 '.
-            'GROUP BY t.SciName ';
+            'GROUP BY SciName ';
         $rs = $this->conn->query($sql);
         //echo $sql;
         while($r = $rs->fetch_object()){
