@@ -1008,18 +1008,25 @@ class CollectionProfileManager {
 
     public function getOrderStatsDataArr($collId){
         $statsArr = Array();
-        $sql = 'SELECT t.SciName, COUNT(o.occid) AS SpecimensPerOrder, COUNT(o.decimalLatitude) AS GeorefSpecimensPerOrder, '.
+        $sql = 'SELECT t.SciName AS SciName1, t2.SciName AS SciName2, t.RankId AS RankId1, t2.RankId AS RankId2, '.
+            'COUNT(o.occid) AS SpecimensPerOrder, COUNT(o.decimalLatitude) AS GeorefSpecimensPerOrder, '.
             'COUNT(CASE WHEN t2.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerOrder, '.
             'COUNT(CASE WHEN t2.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerOrder '.
             'FROM omoccurrences AS o LEFT JOIN taxaenumtree AS e ON o.tidinterpreted = e.tid '.
             'LEFT JOIN taxa AS t ON e.parenttid = t.TID '.
             'LEFT JOIN taxa AS t2 ON o.tidinterpreted = t2.TID '.
-            'WHERE (o.collid IN('.$collId.')) AND t.RankId = 100 AND e.taxauthid = 1 '.
+            'WHERE (o.collid IN('.$collId.')) AND (t.RankId = 100 OR t2.RankId = 100) AND e.taxauthid = 1 '.
             'GROUP BY t.SciName ';
         $rs = $this->conn->query($sql);
         //echo $sql;
         while($r = $rs->fetch_object()){
-            $order = str_replace(array('"',"'"),"",$r->SciName);
+            $order = '';
+            if($r->RankId1 == 100){
+                $order = str_replace(array('"',"'"),"",$r->SciName1);
+            }
+            elseif($r->RankId2 == 100){
+                $order = str_replace(array('"',"'"),"",$r->SciName2);
+            }
             if($order){
                 $statsArr[$order]['SpecimensPerOrder'] = $r->SpecimensPerOrder;
                 $statsArr[$order]['GeorefSpecimensPerOrder'] = $r->GeorefSpecimensPerOrder;
