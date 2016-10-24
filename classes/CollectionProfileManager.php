@@ -1021,13 +1021,7 @@ class CollectionProfileManager {
         $rs = $this->conn->query($sql);
         //echo $sql;
         while($r = $rs->fetch_object()){
-            $order = '';
-            if($r->RankId1 == 100){
-                $order = str_replace(array('"',"'"),"",$r->SciName1);
-            }
-            elseif($r->RankId2 == 100){
-                $order = str_replace(array('"',"'"),"",$r->SciName2);
-            }
+            $order = str_replace(array('"',"'"),"",$r->SciName);
             if($order){
                 $statsArr[$order]['SpecimensPerOrder'] = $r->SpecimensPerOrder;
                 $statsArr[$order]['GeorefSpecimensPerOrder'] = $r->GeorefSpecimensPerOrder;
