@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/classes/SpecProcessorManager.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
 include_once($SERVER_ROOT.'/classes/SpecProcessorOcr.php');
 
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
 
@@ -32,7 +32,7 @@ $specManager = new SpecProcessorManager();
 $specManager->setCollId($collid);
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
+if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
  	$isEditor = true;
 }
 
@@ -135,13 +135,20 @@ if($isEditor){
 				    <ul>
 				        <li><a href="#introdiv">Introduction</a></li>
 				        <li><a href="imageprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId.'&submitaction='.$action; ?>">Image Loading</a></li>
-				        <li><a href="crowdsource/controlpanel.php?collid=<?php echo $collid; ?>">Crowdsourcing Module</a></li>
+				        <li><a href="crowdsource/controlpanel.php?collid=<?php echo $collid; ?>">Crowdsourcing</a></li>
 				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&procstatus='.$procStatus.'&spprid='.$spprId; ?>">OCR</a></li>
 				        <!-- 
 				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">NLP</a></li>
 				         -->
 				        <li><a href="reports.php?collid=<?php echo $collid.'&menu='.(isset($_REQUEST['menu'])?$_REQUEST['menu']:''); ?>">Reports</a></li>
 				        <li><a href="exporter.php?collid=<?php echo $collid.'&displaymode='.$displayMode; ?>">Exporter</a></li>
+				        <?php 
+				        if($ACTIVATE_GEOLOCATE_TOOLKIT){
+					        ?>
+					        <li><a href="geolocate.php?collid=<?php echo $collid; ?>">GeoLocate CoGe</a></li>
+					        <?php 	
+				        }
+				        ?>
 				    </ul>
 					<div id="introdiv">
 						<h1>Specimen Processor Control Panel</h1>

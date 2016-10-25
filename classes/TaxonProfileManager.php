@@ -588,7 +588,10 @@ class TaxonProfileManager {
  		$maxLat = -90;
  		$minLong = 180;
  		$maxLong = -180;
- 		$latlonArr = explode(";",$GLOBALS['MAPPING_BOUNDARIES']);
+ 		$latlonArr = array();
+ 		if(isset($GLOBALS['MAPPING_BOUNDARIES'])){
+ 			$latlonArr = explode(";",$GLOBALS['MAPPING_BOUNDARIES']);
+ 		}
 
  		$sqlBase = "SELECT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
 			"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".

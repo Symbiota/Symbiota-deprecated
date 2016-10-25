@@ -1,8 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceDownload.php');
-include_once($serverRoot.'/classes/OccurrenceManager.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); 
 
@@ -28,7 +28,7 @@ if($schema == "backup"){
 	$collid = $_POST["collid"];
 	if($collid && is_numeric($collid)){
 		//check permissions due to sensitive localities not being redacted
-		if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])){
+		if($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
 			$dwcaHandler->setSchemaType('backup');
 			$dwcaHandler->setCharSetOut($cSet);
 			$dwcaHandler->setVerbose(0);
@@ -66,18 +66,18 @@ else{
 
 	$redactLocalities = 1;
 	$rareReaderArr = array();
-	if($IS_ADMIN || array_key_exists("CollAdmin", $userRights)){
+	if($IS_ADMIN || array_key_exists("CollAdmin", $USER_RIGHTS)){
 		$redactLocalities = 0;
 	}
-	elseif(array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+	elseif(array_key_exists("RareSppAdmin", $USER_RIGHTS) || array_key_exists("RareSppReadAll", $USER_RIGHTS)){
 		$redactLocalities = 0;
 	}
 	else{
-		if(array_key_exists('CollEditor', $userRights)){
-			$rareReaderArr = $userRights['CollEditor'];
+		if(array_key_exists('CollEditor', $USER_RIGHTS)){
+			$rareReaderArr = $USER_RIGHTS['CollEditor'];
 		}
-		if(array_key_exists('RareSppReader', $userRights)){
-			$rareReaderArr = array_unique(array_merge($rareReaderArr,$userRights['RareSppReader']));
+		if(array_key_exists('RareSppReader', $USER_RIGHTS)){
+			$rareReaderArr = array_unique(array_merge($rareReaderArr,$USER_RIGHTS['RareSppReader']));
 		}
 	}
 	if($schema == "georef"){
@@ -147,7 +147,7 @@ else{
 			$dwcaHandler->setDelimiter($format);
 			$dwcaHandler->setRedactLocalities($redactLocalities);
 			if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
-	
+				
 			if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
 				$dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
 			}
@@ -206,10 +206,10 @@ else{
 			header('Content-Type: application/zip');
 		}
 		elseif($format == 'csv'){
-			header('Content-Type: text/csv; charset='.$charset);
+			header('Content-Type: text/csv; charset='.$CHARSET);
 		}
 		else{
-			header('Content-Type: text/html; charset='.$charset);
+			header('Content-Type: text/html; charset='.$CHARSET);
 		}
 		
 		header('Content-Disposition: attachment; filename='.basename($outputFile));

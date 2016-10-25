@@ -64,20 +64,26 @@ $sharedMapManager->setTaxaArr($tArr);
 		var useLLDecimal = true;
 	    var infoWins = new Array();
 	    var puWin;
-        var minLng = 180;
-        var minLat = 90;
-        var maxLng = -180;
-        var maxLat = -90;
 		var markers = [];
 		
 		function initialize(){
 			<?php
+			$boundLatMin = -90;
+			$boundLatMax = 90;
+			$boundLngMin = -180;
+			$boundLngMax = 180;
 			$latCen = 41.0;
 			$longCen = -95.0;
-			$coorArr = explode(";",$mappingBoundaries);
-			if($coorArr && count($coorArr) == 4){
-				$latCen = ($coorArr[0] + $coorArr[2])/2;
-				$longCen = ($coorArr[1] + $coorArr[3])/2;
+			if(isset($MAPPING_BOUNDARIES)){
+				$coorArr = explode(";",$MAPPING_BOUNDARIES);
+				if($coorArr && count($coorArr) == 4){
+					$boundLatMin = $coorArr[2];
+					$boundLatMax = $coorArr[0];
+					$boundLngMin = $coorArr[3];
+					$boundLngMax = $coorArr[1];
+					$latCen = ($boundLatMax + $boundLatMin)/2;
+					$longCen = ($boundLngMax + $boundLngMin)/2;
+				}
 			}
 			?>
 	    	var dmOptions = {
@@ -196,6 +202,15 @@ $sharedMapManager->setTaxaArr($tArr);
 				<?php
 				$spCnt++;
 			}
+			if($boundLatMin > $minLat) $minLat = $boundLatMin;
+			if($boundLatMax < $maxLat) $maxLat = $boundLatMax;
+			if($boundLngMin > $minLng) $minLng = $boundLngMin;
+			if($boundLngMax < $maxLng) $maxLng = $boundLngMax;
+			//Add some padding
+			if($minLat > -80) $minLat -= 5;
+			if($maxLat < 80) $maxLat += 5;
+			if($minLng > -170) $minLng -= 5;
+			if($maxLng < 170) $maxLng += 5;
 			?>
 			var swLatLng = new google.maps.LatLng(<?php echo $minLat.','.$minLng; ?>);
 			var neLatLng = new google.maps.LatLng(<?php echo $maxLat.','.$maxLng; ?>);
