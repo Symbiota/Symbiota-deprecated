@@ -393,6 +393,7 @@ ALTER TABLE `omoccurrences`
   ADD COLUMN `latestDateCollected` DATE NULL AFTER `eventDate`,
   ADD COLUMN `waterBody`  varchar(255) NULL AFTER `municipality`,
   CHANGE COLUMN `establishmentMeans` `establishmentMeans` VARCHAR(150) NULL DEFAULT NULL,
+  CHANGE COLUMN `disposition` `disposition` varchar(250) NULL DEFAULT NULL,
   ADD INDEX `Index_latestDateCollected` (`latestDateCollected` ASC);
 
 
