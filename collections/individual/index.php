@@ -923,21 +923,21 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								echo '<div>';
 								echo '<b>'.$comArr['username'].'</b> <span style="color:gray;">posted '.$comArr['initialtimestamp'].'</span>';
 								echo '</div>';
-								if($comArr['reviewstatus'] == 0) echo '<div style="color:red;">Comment not public due to pending abuse report (viewable to administrators only)</div>';
+								if($comArr['reviewstatus'] == 0 || $comArr['reviewstatus'] == 2) echo '<div style="color:red;">Comment not public due to pending abuse report (viewable to administrators only)</div>';
 								echo '<div style="margin:10px;">'.$comArr['comment'].'</div>';
 								if($comArr['reviewstatus']){
 									if($SYMB_UID){
 										?>
-										<div><a href="index.php?repcomid=<?php echo $comId.'&occid='.$occid; ?>">Report as inappropriate or abusive</a></div>
+										<div><a href="index.php?repcomid=<?php echo $comId.'&occid='.$occid.'&tabindex='.($displayMap?2:1); ?>">Report as inappropriate or abusive</a></div>
 										<?php
 									}
 								}
 								else{
 									?>
-									<div><a href="index.php?publiccomid=<?php echo $comId.'&occid='.$occid; ?>">Make comment public</a></div>
+									<div><a href="index.php?publiccomid=<?php echo $comId.'&occid='.$occid.'&tabindex='.($displayMap?2:1); ?>">Make comment public</a></div>
 									<?php
 								}
-								if($isEditor || ($SYMB_UID && $comArr['username'] == $paramsArr['un'])){
+								if($isEditor || ($SYMB_UID && $comArr['username'] == $PARAMS_ARR['un'])){
 									?>
 									<div style="margin:20px;">
 										<form name="delcommentform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to delete comment?')">
