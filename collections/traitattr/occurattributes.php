@@ -529,5 +529,8 @@ if($traitID){
 		} 
 		?>
 		</div>
+		<?php 
+		include($SERVER_ROOT.'/footer.php');
+		?>
 	</body>
 </html>
