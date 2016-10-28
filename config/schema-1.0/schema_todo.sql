@@ -1,6 +1,6 @@
 #Specimen attribute (traits) model
 CREATE TABLE `tmtraits` (
-  `traitid` INT NOT NULL AUTO_INCREMENT,
+  `traitid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `traitname` VARCHAR(100) NOT NULL,
   `traittype` VARCHAR(2) NOT NULL DEFAULT 'UM',
   `units` VARCHAR(45) NULL,
@@ -22,8 +22,8 @@ CREATE TABLE `tmtraits` (
     FOREIGN KEY (`modifieduid`)   REFERENCES `users` (`uid`)   ON DELETE SET NULL   ON UPDATE CASCADE);
 
 CREATE TABLE `tmstates` (
-  `stateid` INT NOT NULL AUTO_INCREMENT,
-  `traitid` INT NOT NULL,
+  `stateid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `traitid` INT UNSIGNED NOT NULL,
   `statecode` VARCHAR(2) NOT NULL,
   `statename` VARCHAR(75) NOT NULL,
   `description` VARCHAR(250) NULL,
@@ -46,7 +46,7 @@ CREATE TABLE `tmstates` (
     FOREIGN KEY (`traitid`)   REFERENCES `tmtraits` (`traitid`)   ON DELETE RESTRICT   ON UPDATE CASCADE);
 
 CREATE TABLE `tmattributes` (
-  `stateid` INT NOT NULL,
+  `stateid` INT UNSIGNED NOT NULL,
   `occid` INT UNSIGNED NOT NULL,
   `modifier` VARCHAR(100) NULL,
   `xvalue` DOUBLE(15,5) NULL,
@@ -78,7 +78,7 @@ CREATE TABLE `tmattributes` (
 );
 
 CREATE TABLE `tmtraittaxalink` (
-  `traitid` INT NOT NULL,
+  `traitid` INT UNSIGNED NOT NULL,
   `tid` INT UNSIGNED NOT NULL,
   `relation` VARCHAR(45) NOT NULL DEFAULT 'include',
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
@@ -90,6 +90,20 @@ CREATE TABLE `tmtraittaxalink` (
   CONSTRAINT `FK_traittaxalink_tid`
     FOREIGN KEY (`tid`)  REFERENCES `taxa` (`TID`)  ON DELETE CASCADE  ON UPDATE CASCADE
 );
+
+CREATE TABLE `tmtraitdependencies` (
+  `traitid` INT UNSIGNED NOT NULL,
+  `parentstateid` INT UNSIGNED NOT NULL,
+  `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`traitid`, `parentstateid`),
+  INDEX `FK_tmdepend_traitid_idx` (`traitid` ASC),
+  INDEX `FK_tmdepend_stateid_idx` (`parentstateid` ASC),
+  CONSTRAINT `FK_tmdepend_traitid` 
+    FOREIGN KEY (`traitid`) REFERENCES `tmtraits` (`traitid`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  CONSTRAINT `FK_tmdepend_stateid`
+    FOREIGN KEY (`parentstateid`)  REFERENCES `tmstates` (`stateid`)  ON DELETE CASCADE  ON UPDATE CASCADE  
+);
+
 
 #Occurrence associations
 ALTER TABLE `omoccurassococcurrences` 
