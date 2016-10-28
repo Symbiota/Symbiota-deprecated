@@ -187,42 +187,49 @@ else{
 			//Output file is a flat occurrence file (not a zip file)
 			$outputFile = $dwcaHandler->getOccurrenceFile();
 		}
-		//ob_start();
-		$contentDesc = '';
-		if($schema == 'dwc'){
-			$contentDesc = 'Darwin Core ';
+		if($outputFile){
+			//ob_start();
+			$contentDesc = '';
+			if($schema == 'dwc'){
+				$contentDesc = 'Darwin Core ';
+			}
+			else{
+				$contentDesc = 'Symbiota ';
+			}
+			$contentDesc .= 'Occurrence ';
+			if($zip){
+				$contentDesc .= 'Archive ';
+			}
+			$contentDesc .= 'File';
+			header('Content-Description: '.$contentDesc);
+			
+			if($zip){
+				header('Content-Type: application/zip');
+			}
+			elseif($format == 'csv'){
+				header('Content-Type: text/csv; charset='.$CHARSET);
+			}
+			else{
+				header('Content-Type: text/html; charset='.$CHARSET);
+			}
+			
+			header('Content-Disposition: attachment; filename='.basename($outputFile));
+			header('Content-Transfer-Encoding: binary');
+			header('Expires: 0');
+			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			header('Pragma: public');
+			header('Content-Length: ' . filesize($outputFile));
+			ob_clean();
+			flush();
+			//od_end_clean();
+			readfile($outputFile);
+			unlink($outputFile);
 		}
 		else{
-			$contentDesc = 'Symbiota ';
+			header("Content-type: text/plain");
+			header("Content-Disposition: attachment; filename=NoData.txt");
+			echo 'The query failed to return records. Please modify query criteria and try again.';
 		}
-		$contentDesc .= 'Occurrence ';
-		if($zip){
-			$contentDesc .= 'Archive ';
-		}
-		$contentDesc .= 'File';
-		header('Content-Description: '.$contentDesc);
-		
-		if($zip){
-			header('Content-Type: application/zip');
-		}
-		elseif($format == 'csv'){
-			header('Content-Type: text/csv; charset='.$CHARSET);
-		}
-		else{
-			header('Content-Type: text/html; charset='.$CHARSET);
-		}
-		
-		header('Content-Disposition: attachment; filename='.basename($outputFile));
-		header('Content-Transfer-Encoding: binary');
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		header('Pragma: public');
-		header('Content-Length: ' . filesize($outputFile));
-		ob_clean();
-		flush();
-		//od_end_clean();
-		readfile($outputFile);
-		unlink($outputFile);
 	}
 }
 ?>

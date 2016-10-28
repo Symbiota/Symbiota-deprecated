@@ -74,7 +74,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 			});
 
 			function validateDownloadForm(f){
-				if(f.newrecs.checked == true && (f.processingstatus.value == "unprocessed" || f.processingstatus.value == "")){
+				if(f.newrecs && f.newrecs.checked == true && (f.processingstatus.value == "unprocessed" || f.processingstatus.value == "")){
 					alert("New records cannot have an unprocessed or undefined processing status. Please select a valid processing status.");
 					return false;
 				}
