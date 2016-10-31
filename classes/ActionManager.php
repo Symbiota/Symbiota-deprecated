@@ -299,7 +299,7 @@ class ActionManager extends Manager {
    public function getActionRequestsObj($actionrequestid) { 
       $result = null;
       $fields = "actionrequestid, fk, tablename, requesttype, uid_requestor, requestdate, requestremarks, priority, uid_fullfillor, a.state, a.resolution, statesetdate, resolutionremarks, concat(ifnull(u.firstname,''), ' ', ifnull(u.lastname,'')) as requestor, concat(ifnull(f.firstname,''), ' ', ifnull(f.lastname,'')) as fullfillor ";
-      if ($tablename==null) { 
+      if ($tablename==null) {
          if ($fk==null) { 
             $wherebit = "";
          } else {
@@ -439,11 +439,11 @@ class ActionRequest {
          $im = new ImageDetailManager($this->fk);
          $imArr = $im->getImageMetadata();         
          if (isset($imArr['sciname'])) {
-            $caption .= $imArr['sciname'];
+            $caption = $imArr['sciname'];
          } elseif (isset($imArr['caption'])) { 
-            $caption .= $imArr['caption'];
+            $caption = $imArr['caption'];
          } elseif (isset($imArr['photographer'])) { 
-            $caption .= $imArr['photographer']; 
+            $caption = $imArr['photographer'];
          } else { 
             $caption = $imArr['imagetype']; 
          }
