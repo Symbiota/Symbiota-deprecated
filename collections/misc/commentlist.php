@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceSupport.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$SYMB_UID) header('Location: '.$SERVER_ROOT.'/profile/index.php?refurl=../../collections/misc/commentlist.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../collections/misc/commentlist.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST['collid'];
 $start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
@@ -32,13 +32,25 @@ $commentArr = null;
 if($isEditor){
 	$formSubmit = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 	if($formSubmit){
-		if(!$commentManager->setReviewStatus($_POST['comid'],$_POST['reviewstatus'])){
-			$statusStr = $commentManager->getErrorStr();
+		if($formSubmit == 'Delete Comment'){
+			if(!$commentManager->deleteComment($_POST['comid'])){
+				$statusStr = $commentManager->getErrorStr();
+			}
 		}
-	}
-	elseif(array_key_exists('delcomid',$_POST)){
-		if(!$commentManager->deleteComment($_POST['comid'])){
-			$statusStr = $commentManager->getErrorStr();
+		elseif($formSubmit == 'Make comment public'){
+			if(!$commentManager->setReviewStatus($_POST['comid'],1)){
+				$statusStr = $commentManager->getErrorStr();
+			}
+		}
+		elseif($formSubmit == 'Hide Comment from Public'){
+			if(!$commentManager->setReviewStatus($_POST['comid'],2)){
+				$statusStr = $commentManager->getErrorStr();
+			}
+		}
+		elseif($formSubmit == 'Mark as reviewed'){
+			if(!$commentManager->setReviewStatus($_POST['comid'],3)){
+				$statusStr = $commentManager->getErrorStr();
+			}
 		}
 	}
 	$commentArr = $commentManager->getComments($collid, $start, $limit, $tsStart, $tsEnd, $uid, $rs);
@@ -170,7 +182,7 @@ if($isEditor){
 	</head>
 	<body>
 		<?php
-		$displayLeftMenu = true;
+		$displayLeftMenu = false;
 		include($SERVER_ROOT.'/header.php');
 		?>
 		<div class="navpath">
@@ -288,19 +300,16 @@ if($isEditor){
 								<?php 
 								if($cArr['rs']){
 									echo '<input name="formsubmit" type="submit" value="Hide Comment from Public" />';
-									echo '<input name="reviewstatus" type="hidden" value="2" />';
 								}
 								else{
 									echo '<input name="formsubmit" type="submit" value="Make comment public" />';
-									echo '<input name="reviewstatus" type="hidden" value="1" />';
 								}
 								?>
 								<span style="margin-left:20px;">
 									<input name="formsubmit" type="submit" value="Mark as reviewed" />
-									<input name="reviewstatus" type="hidden" value="3" />
 								</span>
 								<span style="margin-left:20px;">
-									<input name="delsubmit" type="submit" value="Delete Comment"  onclick="return confirm('Are you sure you want to delete this comment?')" />
+									<input name="formsubmit" type="submit" value="Delete Comment"  onclick="return confirm('Are you sure you want to delete this comment?')" />
 								</span>
 								<input name="comid" type="hidden" value="<?php echo $comid; ?>" />
 							</form>

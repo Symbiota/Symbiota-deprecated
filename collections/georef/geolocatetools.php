@@ -1,9 +1,9 @@
 <?php
-include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceGeoLocate.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once('../../config/symbini.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceGeoLocate.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$SYMB_UID) header('Location: '.$serverRoot.'/profile/index.php?refurl=../misc/generaltemplate.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../misc/generaltemplate.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST['collid'];
 $action = array_key_exists('action',$_POST)?$_POST['action']:'';
@@ -55,16 +55,16 @@ if($isEditor){
 <html>
 	<head>
 		<title>GeoLocate Batch Processes</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
-		<script src="<?php echo $clientRoot; ?>/js/jquery.js" type="text/javascript"></script>
-		<script src="<?php echo $clientRoot; ?>/js/jquery-ui.js" type="text/javascript"></script>
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
 	</head>
 	<body>
 		<?php
 		$displayLeftMenu = true;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		?>
 		<div class="navpath">
 			<a href="<?php echo $clientRoot; ?>/index.php">Home</a> &gt;&gt; 
@@ -167,7 +167,7 @@ if($isEditor){
 		?>	
 		</div>
 		<?php
-			include($serverRoot.'/footer.php');
+			include($SERVER_ROOT.'/footer.php');
 		?>
 	</body>
 </html>

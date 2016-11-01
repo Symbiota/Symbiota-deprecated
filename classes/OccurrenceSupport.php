@@ -65,7 +65,9 @@ class OccurrenceSupport {
 	public function setReviewStatus($comid,$reviewStatus){
 		$status = true;
 		if(is_numeric($comid) && is_numeric($reviewStatus)){
-			if(!$this->conn->query('UPDATE omoccurcomments SET reviewstatus = '.$reviewStatus.' WHERE comid = '.$comid)){
+			$sql = 'UPDATE omoccurcomments SET reviewstatus = '.$reviewStatus.' WHERE comid = '.$comid;
+			//echo $sql;
+			if(!$this->conn->query($sql)){
 				$statusStr = 'Public';
 				if($reviewStatus == 2) $statusStr = 'Non-public';
 				elseif($reviewStatus == 3) $statusStr = 'Reviewed';

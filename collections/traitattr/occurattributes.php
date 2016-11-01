@@ -278,7 +278,7 @@ if($traitID){
 		</script>
 		<script src="../../js/symb/shared.js?ver=151229" type="text/javascript"></script>
 	</head>
-	<body style="width:900px">
+	<body>
 		<?php
 		$displayLeftMenu = false;
 		include($SERVER_ROOT.'/header.php');
