@@ -11,63 +11,53 @@ REQUIREMENTS
      upload_max_filesize (= 2M as default) variable should be increased to 
      match expected files sizes
    * zip extension should be enabled if you plan on uploading compressed data files
-* MySQL (5.x or better, yet 5.1 or better recommended)
-* SVN Client - needed only for making use of a source code installation 
+* MariaDB or MySQL (5.1 or better)
+* GIT Client – not required though can be useful for updates from source code 
 
 
 
 INSTRUCTIONS
 ============
+http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-fauna/ 
 
-1. Download Symbiota code from SourceForge repository
-   http://sourceforge.net/scm/?type=svn&group_id=325583 
-   * Unless you are installing as a developer who plans on contributing 
-     future code to the project, you will probably want to checkout only 
-     trunk (main development line). Following command will create a folder 
-     named symbiota and checkout trunk within it: 
-     ‘svn co https://symbiota.svn.sourceforge.net/svnroot/symbiota/trunk/ portal’
+1. Download Symbiota code from GitHub repository
+   https://github.com/Symbiota/Symbiota  
+   Command line checkout: git clone https://github.com/Symbiota/Symbiota.git
 2. Install Symbiota database schema
    a. Create new database 
    b. Create read-only and read/write users for Symbiota database 
-   c. Load schema from scripts. Schema definition files are located in 
-      <SymbiotaBaseFolder>/config/schema/ and all start with db_schema. Database 
-      can be installed with ISO-8859-1 or UTF8 character set definitions. 
-      Note that source data needs to match database and website character 
-      set definitions. If your MySQL database is a pre 5.1 version, you 
-      must use the schema definitions with ver_5.0 in the name or an 
-      syntax error will be thrown.
-   d. Load Stored Procedures - Scripts located in 
-      <SymbiotaBaseFolder>/config/schema/stored_procedures-x.x.x.sql
-   e. Run database patch scripts available for upload version. 
-      Make sure to run the scripts in the correct order. 
+   c. Load databse schema from scripts. Schema definition files are  
+      located in <SymbiotaBaseFolder>/config/schema-1.0/utf-8/. By default, 
+      the database is assumed to be configured to a UTF8 character set.  
+      Run db_schema-1.0.sql to install the core table structure. 
+      From MySQL commandline: source /BaseFolderPath/config/schema-1.0/utf-8/db_schema-1.0.sql 
+   d. Run database patch scripts to bring database up to current structure. 
+      Make sure to run the scripts in the correct order 
+      (e.g. db_schema_patch_1.0.1.sql, db_schema_patch_1.0.2.sql, etc) 
 3. Configure the Symbiota Node - modify following configuration files
    a. Symbiota configuration - rename 
-      <SymbiotaBaseFolder>/config/symbini_template.php to symbini.php. 
+      /config/symbini_template.php to /config/symbini.php. 
       Modify variables within to match your project environment. See 
       Symbiota configuration help page for more information on this 
       subject.
    b. Database connection - rename 
-      <SymbiotaBaseFolder>/config/dbconnection_template.php
-      to dbconnection.php. Add readonly and read/write usernames 
-      and passwords to this file.
-   c. Homepage – rename <SymbiotaBaseFolder>/index_template.php
-      to index.php. This is your home page to which you 
-      will need to add your introductory text.
-   d. Layout - header.php, menu.php, and footer.php are used 
-      by all pages to establish uniform layout. Within <SymbiotaBaseFolder>
-      rename header_template.php, footer_template.php, and menu_template.php 
-      to header.php, footer.php, and menu.php.  
+      /config/dbconnection_template.php to /config/dbconnection.php. 
+      modify with readonly and read/write logs, passwords, and schema names.
+   c. Homepage – rename /index_template.php to index.php. This is your  
+      home page to which will need introductory text, graphics, etc.
+   d. Layout - header.php and footer.php are used by all pages to establish 
+      uniform layout. menu.php is needed if a left menu is preferred. 
+      Within the base installation folder, rename header_template.php and  
+      footer_template.php to remove _template from file name.  
       * header.php: Within file, change /images/layout/defaultheader.jpg 
         to /images/layout/header.jpg. Add your header to /images/layout/
-        folder. Change /images/layput/defaultleftstrip.gif as desired. 
+        folder. Change /images/layout/defaultleftstrip.gif as desired. 
         Establishing the header using an image is easy, yet more 
         complex header configurations are possible. 
-      * leftmenu.php: Add or remove menu items as desired. Login can be 
-        left here or put into the header file.
       * footer.php: modify as you did with header.php file.
-   e. Files for style control - Go to <SymbiotaBaseFolder>/css/ and 
-      rename main_template.css and speciesprofile_template.css to 
-      main.css and speciesprofile.css. Modify these files to match 
+   e. Files for style control - Go to /css/ and 
+      rename main_template.css and speciesprofile_template.css files 
+      removing _template from file names. Modify these files to match 
       desired style and layout for all pages. 
 
 
@@ -114,15 +104,17 @@ g. Taxon Profile support data (common names, text descriptions, etc) - to be com
 
 UPDATES
 =======
-a. Code updates - If you installed through the SourceForge SVN repository, 
-   code changes and bugs fixes can be integrated into your node on a regular 
-   basis by running an SVN update.
-   i.  Command line client: svn update 
-   ii. Shell Client (windows): Right click on folder and select SVN Update
-b. Database schema updates - Some php code updates will require the slight 
-   modifications with the MySQL database. With each new version, a file 
-   will be supplied with SQL statements that will modify the table schema 
-   as needed.  
+a. Code updates - If you installed through the GitHub using the clone command,  
+   code changes and bugs fixes can be integrated into your local checkout 
+   using the Git Desktop client of running the "git pull" command
+b. Database schema updates - Some php code updates will require database  
+   schema modifications. Schema changes can be applied by running new 
+   schema patches added since the last update (MySQL command line: 
+   source db_schema_patch_1.0.1.sql). Current Symbiota version numbers are 
+   listed at the bottom of sitemap.php page. Make sure to run the scripts 
+   in the correct order (e.g. db_schema_patch_1.0.1.sql, then 
+   db_schema_patch_1.0.2.sql, etc) 
+   
 
 
 * Automatic updates will be enabled once a stable release is made public.

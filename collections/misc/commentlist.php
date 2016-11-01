@@ -298,11 +298,11 @@ if($isEditor){
 								<input name="uid" type="hidden" value="<?php echo $uid; ?>" />
 								<input name="rs" type="hidden" value="<?php echo $rs; ?>" />
 								<?php 
-								if($cArr['rs']){
-									echo '<input name="formsubmit" type="submit" value="Hide Comment from Public" />';
+								if($cArr['rs'] == 2){
+									echo '<input name="formsubmit" type="submit" value="Make comment public" />';
 								}
 								else{
-									echo '<input name="formsubmit" type="submit" value="Make comment public" />';
+									echo '<input name="formsubmit" type="submit" value="Hide Comment from Public" />';
 								}
 								?>
 								<span style="margin-left:20px;">
