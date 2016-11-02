@@ -630,7 +630,7 @@ class CollectionProfileManager {
 				'WHERE (o.CollID = '.$this->collid.') AND (o.Country IS NOT NULL) '.
 				'GROUP BY o.Country ';
 		}
-		echo $sql; exit;
+		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$t = $row->termstr;
