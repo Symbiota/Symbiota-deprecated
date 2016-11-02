@@ -608,64 +608,40 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 
-	public function getGeographicCounts($c="",$s=""){
+	public function getGeographicCounts($country,$state){
 		$returnArr = Array();
-		$country = $this->cleanInStr($c);
-		$state = $this->cleanInStr($s);
 		$sql = '';
-		if($country){
-			$sql = 'SELECT o.stateprovince as termstr, Count(*) AS cnt '.
-				'FROM omoccurrences o '.
-				'WHERE (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.country = "'.$country.'") '.
-				'GROUP BY o.StateProvince, o.country';
-			/*
-			$sql = 'SELECT trim(o.stateprovince) as termstr, Count(*) AS cnt '.
-				'FROM omoccurrences o '.
-				'GROUP BY o.CollID, o.StateProvince, o.country '.
-				'HAVING (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.StateProvince <> "") '.
-				'AND (o.country = "'.$country.'") '.
-				'ORDER BY trim(o.StateProvince)';
-				*/
-		}
-		elseif($state){
+		if($state){
 			$sql = 'SELECT o.county as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
-				'WHERE (o.CollID = '.$this->collid.') AND (o.county IS NOT NULL) AND (o.stateprovince = "'.$state.'") '.
+				'WHERE (o.CollID = '.$this->collid.') '.($country?'AND (o.country = '.$this->cleanInStr($country).') ':'').
+				'AND (o.stateprovince = "'.$this->cleanInStr($state).'") AND (o.county IS NOT NULL) '.
 				'GROUP BY o.StateProvince, o.county';
-			/*
-			$sql = 'SELECT trim(o.county) as termstr, Count(*) AS cnt '.
+		}
+		elseif($country){
+			$sql = 'SELECT o.stateprovince as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
-				'GROUP BY o.CollID, o.StateProvince, o.county '.
-				'HAVING (o.CollID = '.$this->collid.') AND (o.county IS NOT NULL) AND (o.county <> "") '.
-				'AND (o.stateprovince = "'.$state.'") '.
-				'ORDER BY trim(o.county)';
-				*/
+				'WHERE (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.country = "'.$this->cleanInStr($country).'") '.
+				'GROUP BY o.StateProvince, o.country';
 		}
 		else{
 			$sql = 'SELECT o.country as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'WHERE (o.CollID = '.$this->collid.') AND (o.Country IS NOT NULL) '.
 				'GROUP BY o.Country ';
-			/*
-			$sql = 'SELECT trim(o.country) as termstr, Count(*) AS cnt '.
-				'FROM omoccurrences o '.
-				'GROUP BY o.CollID, o.Country '.
-				'HAVING (o.CollID = '.$this->collid.') AND o.Country IS NOT NULL AND o.Country <> "" '.
-				'ORDER BY trim(o.Country)';
-				*/
 		}
-		//echo $sql; exit;
+		echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$t = $row->termstr;
 			if($state){
-				$t = trim(str_ireplace(array(' county',' co.',' Counties'),'',$t));
+				$t = trim(str_ireplace(array(' county',' co.',' counties'),'',$t));
 			}
 			if($t){
 				$returnArr[$t] = $row->cnt;
 			}
 		}
-		$rs->close();
+		$rs->free();
 		ksort($returnArr);
 		return $returnArr;
 	}

@@ -34,7 +34,7 @@ http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-
    d. Run database patch scripts to bring database up to current structure. 
       Make sure to run the scripts in the correct order 
       (e.g. db_schema_patch_1.0.1.sql, db_schema_patch_1.0.2.sql, etc) 
-3. Configure the Symbiota Node - modify following configuration files
+3. Configure the Symbiota Portal - modify following configuration files
    a. Symbiota configuration - rename 
       /config/symbini_template.php to /config/symbini.php. 
       Modify variables within to match your project environment. See 
@@ -59,7 +59,12 @@ http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-
       rename main_template.css and speciesprofile_template.css files 
       removing _template from file names. Modify these files to match 
       desired style and layout for all pages. 
-
+4. File permissions - the web server needs write access to the following files and folders
+   - All folders in /temp/
+   - /webservices/dwc/rss.xml
+   - /collections/datasets/dwc/
+   - /content/collicon/
+   - /content/logs/
 
 
 1. Data – The general layers of data within Symbiota are: user, 

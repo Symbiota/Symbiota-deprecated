@@ -39,10 +39,65 @@ if($SYMB_UID){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
+	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData["collectionname"]:""); ?>" />
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData["collectionname"]:""); ?>" />
-	<script language=javascript>
+	<link href="../../css/jquery-ui.css" rel="Stylesheet" type="text/css" />
+	<script src="../../js/jquery.js?ver=20130917" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js?ver=20130917" type="text/javascript"></script>
+	<script>
+		function showFamilyDist(){
+			$("#famdistbox").show();
+			$("#showfamdist").hide();
+			$("#hidefamdist").show();
+
+			$("#extrageostats").hide();
+			$("#geodistbox").hide();
+			$("#showgeodist").show();
+			$("#hidegeodist").hide();
+	        event.preventDefault();
+	        $('html,body').animate({scrollTop:$("#extrastats").offset().top}, 500);
+			return false;
+		}
+
+		function hideFamilyDist(){
+			$("#famdistbox").hide();
+			$("#showfamdist").show();
+			$("#hidefamdist").hide();
+
+			$("#extrageostats").hide();
+			$("#geodistbox").hide();
+			$("#showgeodist").show();
+			$("#hidegeodist").hide();
+			return false;
+		}
+
+		function showGeoDist(){
+			$("#geodistbox").show();
+			$("#showgeodist").hide();
+			$("#hidegeodist").show();
+			$("#extrageostats").hide();
+
+			$("#famdistbox").hide();
+			$("#showfamdist").show();
+			$("#hidefamdist").hide();
+	        event.preventDefault();
+	        $('html,body').animate({scrollTop:$("#extrastats").offset().top}, 500);
+			return false;
+		}
+
+		function hideGeoDist(){
+			$("#geodistbox").hide();
+			$("#showgeodist").show();
+			$("#hidegeodist").hide();
+			$("#extrageostats").hide();
+
+			$("#famdistbox").hide();
+			$("#showfamdist").show();
+			$("#hidefamdist").hide();
+			return false;
+		}
+
 		function toggleById(target){
 			if(target != null){
 			  	var obj = document.getElementById(target);
@@ -53,28 +108,6 @@ if($SYMB_UID){
 			 		obj.style.display="none";
 			 	}
 			}
-			return false;
-		}
-
-		function toggleFamilyDist(){
-			toggleById("famdistbox");
-			toggleById("showfamdist");
-			toggleById("hidefamdist");
-
-			document.getElementById("geodistbox").style.display="none";
-			document.getElementById("showgeodist").style.display="block";
-			document.getElementById("hidegeodist").style.display="none";
-			return false;
-		}
-
-		function toggleGeoDist(){
-			toggleById("geodistbox");
-			toggleById("showgeodist");
-			toggleById("hidegeodist");
-
-			document.getElementById("famdistbox").style.display="none";
-			document.getElementById("showfamdist").style.display="block";
-			document.getElementById("hidefamdist").style.display="none";
 			return false;
 		}
 	</script>
@@ -119,8 +152,6 @@ if($SYMB_UID){
 		}
 		if($collid){
 			$extrastatsArr = Array();
-			$famArr = Array();
-			$countryArr = Array();
 			$georefPerc = 0;
 			$spidPerc = 0;
 			$imgPerc = 0;
@@ -133,12 +164,6 @@ if($SYMB_UID){
 			if($collData['dynamicProperties']){
 				$extrastatsArr = json_decode($collData['dynamicProperties'],true);
 				if(is_array($extrastatsArr)){
-					if(array_key_exists("families",$extrastatsArr)){
-						$famArr = $extrastatsArr['families'];
-					}
-					if(array_key_exists("countries",$extrastatsArr)){
-						$countryArr = $extrastatsArr['countries'];
-					}
 					if($extrastatsArr['SpecimensCountID']){
 						$spidPerc = (100*($extrastatsArr['SpecimensCountID']/$collData['recordcnt']));
 					}
@@ -493,15 +518,15 @@ if($SYMB_UID){
 			<?php
 			if($extrastatsArr){
 				?>
-				<fieldset style='margin:20px;width:300px;background-color:#FFFFCC;'>
+				<fieldset id="extrastats" style='margin:20px;width:300px;background-color:#FFFFCC;'>
 					<legend><b><?php echo $LANG['EXTRA_STATS']; ?></b></legend>
 					<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
 						<div style="">
 							<div id="showfamdist" style="float:left;display:block;" >
-								<a href="#" onclick="return toggleFamilyDist()"><?php echo $LANG['SHOW_FAMILY_DIST'];?></a>
+								<a href="#" onclick="return showFamilyDist()"><?php echo $LANG['SHOW_FAMILY_DIST'];?></a>
 							</div>
 							<div id="hidefamdist" style="float:left;display:none;" >
-								<a href="#" onclick="return toggleFamilyDist()"><?php echo $LANG['HIDE_FAMILY_DIST']; ?></a>
+								<a href="#" onclick="return hideFamilyDist()"><?php echo $LANG['HIDE_FAMILY_DIST']; ?></a>
 							</div>
 							<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 								<input type="image" name="action" value="Download Family Dist" src="../../images/dl.png" onclick="" />
@@ -509,97 +534,101 @@ if($SYMB_UID){
 						</div>
 						<div style="clear:both;">
 							<div id="showgeodist" style="float:left;display:block;" >
-								<a href="#" onclick="return toggleGeoDist()"><?php echo $LANG['SHOW_GEOG_DIST'];?></a>
+								<a href="#" onclick="return showGeoDist()"><?php echo $LANG['SHOW_GEOG_DIST'];?></a>
 							</div>
 							<div id="hidegeodist" style="float:left;display:none;" >
-								<a href="#" onclick="return toggleGeoDist()"><?php echo $LANG['HIDE_GEOG_DIST']; ?></a>
+								<a href="#" onclick="return hideGeoDist()"><?php echo $LANG['HIDE_GEOG_DIST']; ?></a>
 							</div>
 							<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
 								<input type="image" name="action" value="Download Geo Dist" src="../../images/dl.png" onclick="" />
 							</div>
 						</div>
-						<input type="hidden" name="famarrjson" id="famarrjson" value='<?php echo json_encode($famArr); ?>' />
-						<input type="hidden" name="geoarrjson" id="geoarrjson" value='<?php echo json_encode($countryArr); ?>' />
 					</form>
 				</fieldset>
 				<div style="clear:both;"> </div>
 				<?php
-			}
-			if($countryDist || $stateDist){
-				?>
-				<fieldset style="margin:20px;width:90%;">
-					<legend>
-						<b>
+				if($countryDist || $stateDist){
+					?>
+					<fieldset id="extrageostats" style="margin:20px;width:90%;">
+						<legend>
+							<b>
+								<?php
+								echo ($LANG['GEO_DIST']?$LANG['GEO_DIST']:'Geographic Distribution');
+								if($stateDist){
+									echo ' - '.$stateDist;
+								}
+								elseif($countryDist){
+									echo ' - '.$countryDist;
+								}
+								?>
+							</b>
+						</legend>
+						<div style="margin:15px;"><?php echo $LANG['CLICK_ON_SPEC_REC'];?></div>
+						<ul>
 							<?php
-							echo 'Geographic Distribution';
-							if($countryDist){
-								echo ' - '.$countryDist;
-							}
-							elseif($stateDist){
-								echo ' - '.$stateDist;
+							$distArr = $collManager->getGeographicCounts($countryDist,$stateDist);
+							foreach($distArr as $term => $cnt){
+								echo '<li>';
+								if(!$stateDist){
+									echo '<a href="collprofiles.php?sgl=1&collid='.$collid.'&country='.$countryDist.'&state='.($countryDist?$term:'').'#extrastats">';
+									echo $term;
+									echo '</a>';
+									$colTarget = ($countryDist?'state':'country');
+									echo ' (<a href="../list.php?db[]='.$collid.'&reset=1&country='.($countryDist?$countryDist:$term).'&state='.($stateDist?$stateDist:$term).'" target="_blank">'.$cnt.'</a>)';
+								}
+								else{
+									echo $term;
+									echo ' (<a href="../list.php?db[]='.$collid.'&reset=1&country='.$countryDist.'&state='.$stateDist.'&county='.$term.'" target="_blank">'.$cnt.'</a>)';
+								}
+								echo '</li>';
 							}
 							?>
-						</b>
-					</legend>
-					<div style="margin:15px;"><?php echo $LANG['CLICK_ON_SPEC_REC'];?></div>
+						</ul>
+						<?php echo $LANG['CLICKING_NAME_DISPLAY']; ?>
+					</fieldset>
+					<?php
+				}
+				$famArr = Array();
+				$countryArr = Array();
+				if(array_key_exists("families",$extrastatsArr)){
+					$famArr = $extrastatsArr['families'];
+				}
+				if(array_key_exists("countries",$extrastatsArr)){
+					$countryArr = $extrastatsArr['countries'];
+				}
+				?>
+				<fieldset id="famdistbox" style="clear:both;margin-top:15px;width:800px;display:none;">
+					<legend><b><?php echo $LANG['FAMILY_DIST']; ?></b></legend>
+					<div style="margin:15px;"><?php echo $LANG['CLICK_ON_SPEC_FAM']; ?></div>
 					<ul>
 						<?php
-						$distArr = $collManager->getGeographicCounts($countryDist,$stateDist);
-						foreach($distArr as $term => $cnt){
+						foreach($famArr as $name => $data){
 							echo '<li>';
-							$colTarget = 'county';
-							if(!$stateDist){
-								echo '<a href="collprofiles.php?sgl=1&collid='.$collid.($countryDist?'&state=':'&country=').$term.'">';
-								echo $term;
-								echo '</a>';
-								$colTarget = 'country';
-								if($countryDist) $colTarget = 'state';
-								echo ' (<a href="../list.php?db[]='.$collid.'&reset=1&'.$colTarget.'='.$term.'" target="_blank">'.$cnt.'</a>)';
-							}
-							else{
-								echo $term;
-								echo ' (<a href="../list.php?db[]='.$collid.'&reset=1&'.$colTarget.'='.$term.'" target="_blank">'.$cnt.'</a>)';
-							}
+							echo $name;
+							echo ' (<a href="../list.php?usecookies=false&db[]='.$collid.'&type=1&reset=1&taxa='.$name.'" target="_blank">'.$data['SpecimensPerFamily'].'</a>)';
 							echo '</li>';
 						}
 						?>
 					</ul>
-					<?php echo $LANG['CLICKING_NAME_DISPLAY']; ?>
+				</fieldset>
+				<fieldset id="geodistbox" style="margin-top:15px;width:800px;display:none;">
+					<legend><b><?php echo $LANG['GEOG_DIST_COUNTRIES']; ?></b></legend>
+					<div style="margin:15px;"><?php echo $LANG['CLICK_ON_SPEC_COUNTRY']; ?></div>
+					<ul>
+						<?php
+						foreach($countryArr as $name => $data){
+							echo '<li>';
+							echo '<a href="collprofiles.php?sgl=1&collid='.$collid.'&country='.$name.'#extrastats">';
+							echo $name;
+							echo '</a>';
+							echo ' (<a href="../list.php?usecookies=false&db[]='.$collid.'&reset=1&country='.$name.'" target="_blank">'.$data['CountryCount'].'</a>)';
+							echo '</li>';
+						}
+						?>
+					</ul>
 				</fieldset>
 				<?php
 			}
-			?>
-			<fieldset id="famdistbox" style="clear:both;margin-top:15px;width:800px;display:none;">
-				<legend><b><?php echo $LANG['FAMILY_DIST']; ?></b></legend>
-				<div style="margin:15px;"><?php echo $LANG['CLICK_ON_SPEC_FAM']; ?></div>
-				<ul>
-					<?php
-					foreach($famArr as $name => $data){
-						echo '<li>';
-						echo $name;
-						echo ' (<a href="../list.php?usecookies=false&db[]='.$collid.'&type=1&reset=1&taxa='.$name.'" target="_blank">'.$data['SpecimensPerFamily'].'</a>)';
-						echo '</li>';
-					}
-					?>
-				</ul>
-			</fieldset>
-			<fieldset id="geodistbox" style="margin-top:15px;width:800px;display:none;">
-				<legend><b><?php echo $LANG['GEOG_DIST_COUNTRIES']; ?></b></legend>
-				<div style="margin:15px;"><?php echo $LANG['CLICK_ON_SPEC_COUNTRY']; ?></div>
-				<ul>
-					<?php
-					foreach($countryArr as $name => $data){
-						echo '<li>';
-						echo '<a href="collprofiles.php?sgl=1&collid='.$collid.'&country='.$name.'">';
-						echo $name;
-						echo '</a>';
-						echo ' (<a href="../list.php?usecookies=false&db[]='.$collid.'&reset=1&country='.$name.'" target="_blank">'.$data['CountryCount'].'</a>)';
-						echo '</li>';
-					}
-					?>
-				</ul>
-			</fieldset>
-			<?php
 		}
 		else{
 			$collList = $collManager->getCollectionList(true);
