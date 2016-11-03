@@ -408,6 +408,8 @@ class DwcArchiverOccurrence{
 		$detFieldArr['identificationRemarks'] = 'd.identificationRemarks';
 		$detTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
 		$detFieldArr['recordId'] = 'g.guid AS recordId';
+		$detTermArr['modified'] = 'http://purl.org/dc/terms/modified';
+		$detFieldArr['modified'] = 'd.initialTimeStamp AS modified';
 
 		$this->determinationFieldArr['terms'] = $this->trimDeterminationBySchemaType($detTermArr);
 		$this->determinationFieldArr['fields'] = $this->trimDeterminationBySchemaType($detFieldArr);

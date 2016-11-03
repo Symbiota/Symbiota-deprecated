@@ -346,7 +346,7 @@ if($SYMB_UID){
 								} 
 								?>
 								<li style="margin-left:10px;">
-									<a href="#" onclick="newWindow = window.open('collbackup.php?collid=<?php echo $collid; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=400,height=200,left=20,top=20');">
+									<a href="#" onclick="newWindow = window.open('collbackup.php?collid=<?php echo $collid; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=600,height=250,left=20,top=20');">
 										<?php echo $LANG['BACKUP_DATA_FILE']; ?>
 									</a>
 								</li>
