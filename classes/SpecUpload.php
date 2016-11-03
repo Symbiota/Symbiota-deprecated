@@ -152,7 +152,7 @@ class SpecUpload{
 	//Upload Review
 	public function getUploadMap($start, $limit, $searchVariables = ''){
 		$retArr = Array();
-		if($limit){
+		if($this->collId){
 			$occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
 				'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 				'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
@@ -211,7 +211,7 @@ class SpecUpload{
 					}
 				}
 			}
-			$sql .= 'LIMIT '.$start.','.$limit;
+			if($limit) $sql .= 'LIMIT '.$start.','.$limit;
 			//echo "<div>".$sql."</div>"; exit;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_assoc()){

@@ -346,32 +346,32 @@ $duManager->loadFieldMap();
  						$reportArr = $duManager->getTransferReport();
 						echo '<div>Occurrences pending transfer: '.$reportArr['occur'];
 						if($reportArr['occur']){
-							echo ' <a href="uploadviewer.php?collid='.$collid.'" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
-							echo ' <a href="uploadcsv.php?collid='.$collid.'" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							echo ' <a href="uploadviewer.php?collid='.$collid.'" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo ' <a href="uploadcsv.php?collid='.$collid.'" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 						}
 						echo '</div>';
 						echo '<div style="margin-left:15px;">';
 						echo '<div>Records to be updated: ';
 						echo $reportArr['update'];
 						if($reportArr['update']){
-							echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
-							echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 							if($uploadType != $SKELETAL) echo '&nbsp;&nbsp;&nbsp;<span style="color:orange"><b>Caution:</b></span> incoming records will replace existing records';
 						}
 						echo '</div>';
 						echo '<div>New records: ';
 						echo $reportArr['new'];
 						if($reportArr['new']){ 
-							echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
-							echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+							echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 						}
 						echo '</div>';
 						if(isset($reportArr['matchappend']) && $reportArr['matchappend']){
 							echo '<div>Records matching on catalog number that will be appended : ';
 							echo $reportArr['matchappend'];
 							if($reportArr['matchappend']){ 
-								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=matchappend" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
-								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=matchappend" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=matchappend" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=matchappend" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 							}
 							echo '</div>';
 							echo '<div style="margin-left:15px;"><span style="color:orange;">WARNING:</span> This will result in records with duplicate catalog numbers</div>';
@@ -380,8 +380,8 @@ $duManager->loadFieldMap();
 							echo '<div>Records that will be syncronized with central database: ';
 							echo $reportArr['sync'];
 							if($reportArr['sync']){  
-								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=sync" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
-								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=sync" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=sync" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=sync" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 							}
 							echo '</div>';
 							echo '<div style="margin-left:15px;">These are typically records that have been originally processed within the portal, exported and integrated into a local management database, and then reimported and synchronized with the portal records by matching on catalog number.</div>';
@@ -391,8 +391,8 @@ $duManager->loadFieldMap();
 							echo '<div>Previous loaded records not matching incoming records: ';
 							echo $reportArr['exist'];
 							if($reportArr['exist']){  
-								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=exist" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
-								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=exist" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=exist" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=exist" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 							}
 							echo '</div>';
 							echo '<div style="margin-left:15px;">';
@@ -404,8 +404,8 @@ $duManager->loadFieldMap();
 							echo '<div style="color:red;">Records that will be removed due to NULL Primary Identifier: ';
 							echo $reportArr['nulldbpk'];
 							if($reportArr['nulldbpk']){ 
-								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
-								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 							}
 							echo '</div>';
 						}
@@ -413,8 +413,8 @@ $duManager->loadFieldMap();
 							echo '<div style="color:red;">Records that will be removed due to DUPLICATE Primary Identifier: ';
 							echo $reportArr['dupdbpk'];
 							if($reportArr['dupdbpk']){  
-								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dupdbpk" target="_blank"><img src="../../images/list.png" style="width:12px;" /></a>';
-								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dupdbpk" target="_self"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dupdbpk" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dupdbpk" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 							}
 							echo '</div>';
 						}
