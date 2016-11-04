@@ -41,8 +41,8 @@ class MappingShared{
 		return $retVar;
 	}
 	
-	public function getGeoCoords($limit=1000,$includeDescr=false,$mapWhere){
-		global $userRights, $mappingBoundaries;
+	public function getGeoCoords($mapWhere,$limit=1000,$includeDescr=false){
+		global $userRights;
 		$coordArr = Array();
 		$sql = '';
 		$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
@@ -58,9 +58,10 @@ class MappingShared{
 		}
 		$sql .= "FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
 		if(($this->searchTerms == 1) && (array_key_exists("clid",$this->searchTermsArr))) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+		if((array_key_exists("collector",$this->searchTermsArr))) $sql .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
 		$sql .= $mapWhere;
 		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
-		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+		if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
 		}
 		elseif(array_key_exists("RareSppReader",$userRights)){

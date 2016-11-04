@@ -354,6 +354,9 @@ class DwcArchiverOccurrence{
 				//Search criteria came from map search page
 				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 			}
+			if(strpos($this->conditionSql,'MATCH(f.recordedby)')){
+				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			}
 			$sql .= $this->conditionSql;
 			if($fullSql) $sql .= ' ORDER BY o.collid'; 
 			//echo '<div>'.$sql.'</div>'; exit;
@@ -446,7 +449,7 @@ class DwcArchiverOccurrence{
 				if($colName) $sqlFrag .= ', '.$colName;
 			}
 			$sql = 'SELECT '.trim($sqlFrag,', ').
-				' FROM (omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid) '.
+				' FROM omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid '.
 				'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
 				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
 				'LEFT JOIN taxa t ON d.tidinterpreted = t.tid ';
@@ -457,6 +460,9 @@ class DwcArchiverOccurrence{
 			if(strpos($this->conditionSql,'p.point')){
 				//Search criteria came from map search page
 				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
+			}
+			if(strpos($this->conditionSql,'MATCH(f.recordedby)')){
+				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			}
 			$sql .= $this->conditionSql.'AND d.appliedstatus = 1 '.
 				'ORDER BY o.collid';
@@ -540,6 +546,9 @@ class DwcArchiverOccurrence{
 				//Search criteria came from map search page
 				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 			}
+			if(strpos($this->conditionSql,'MATCH(f.recordedby)')){
+				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			}
 			$sql .= $this->conditionSql;
 			if($this->redactLocalities){
 				if($this->rareReaderArr){
@@ -550,7 +559,7 @@ class DwcArchiverOccurrence{
 				}
 			}
 		}
-		//echo $sql;
+		//echo $sql; exit;
 		return $sql;
 	}
 
@@ -644,8 +653,8 @@ class DwcArchiverOccurrence{
 			$rs->free();
 		}
 	}
-
-    public function verifyCollRecords($collId){
+	
+	public function verifyCollRecords($collId){
 		$sql = '';
 		$recArr = array();
 		$sql = 'SELECT COUNT(CASE WHEN ISNULL(o.occurrenceID) THEN o.occid ELSE NULL END) AS nullOccurID, '.
@@ -1037,6 +1046,9 @@ class DwcArchiverOccurrence{
 				if(stripos($this->conditionSql,'p.point')){
 					$sql1 .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 				}
+				if(stripos($this->conditionSql,'MATCH(f.recordedby)')){
+					$sql1 .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+				}
 				$sql1 .= $this->conditionSql;
 			}
 			$rs1 = $this->conn->query($sql1);
@@ -1360,7 +1372,7 @@ class DwcArchiverOccurrence{
 		
 		if(!$this->serverDomain){
 			$this->serverDomain = "http://";
-			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
+			if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
 			$this->serverDomain .= $_SERVER["SERVER_NAME"];
 			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
 		}
@@ -1484,17 +1496,17 @@ class DwcArchiverOccurrence{
 	 * USED BY: this class, DwcArchiverExpedition, and emlhandler.php 
 	 */
 	public function getEmlDom($emlArr = null){
-        global $RIGHTS_TERMS_DEFS;
-        $usageTermArr = Array();
+		global $RIGHTS_TERMS_DEFS;
+		$usageTermArr = Array();
+		
+		if(!$emlArr) $emlArr = $this->getEmlArr();
+		foreach($RIGHTS_TERMS_DEFS as $k => $v){
+			if($k == $emlArr['intellectualRights']){
+				$usageTermArr = $v;
+			}
+		}
 
-        if(!$emlArr) $emlArr = $this->getEmlArr();
-        foreach($RIGHTS_TERMS_DEFS as $k => $v){
-            if($k == $emlArr['intellectualRights']){
-                $usageTermArr = $v;
-            }
-        }
-
-        //Create new DOM document
+		//Create new DOM document 
 		$newDoc = new DOMDocument('1.0',$this->charSetOut);
 
 		//Add root element 
@@ -1636,7 +1648,7 @@ class DwcArchiverOccurrence{
 		if(array_key_exists('intellectualRights',$emlArr)){
 			$rightsElem = $newDoc->createElement('intellectualRights');
 			$paraElem = $newDoc->createElement('para');
-            $paraElem->appendChild($newDoc->createTextNode('To the extent possible under law, the publisher has waived all rights to these data and has dedicated them to the'));
+			$paraElem->appendChild($newDoc->createTextNode('To the extent possible under law, the publisher has waived all rights to these data and has dedicated them to the'));
             $ulinkElem = $newDoc->createElement('ulink');
             $citetitleElem = $newDoc->createElement('citetitle');
             $citetitleElem->appendChild($newDoc->createTextNode((array_key_exists('title',$usageTermArr)?$usageTermArr['title']:'')));
@@ -1789,6 +1801,9 @@ class DwcArchiverOccurrence{
 				}
 				if(stripos($this->conditionSql,'p.point')){
 					$sql1 .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
+				}
+				if(stripos($this->conditionSql,'MATCH(f.recordedby)')){
+					$sql1 .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 				}
 				$sql1 .= $this->conditionSql;
 			}

@@ -17,7 +17,6 @@ class OccurrenceListManager extends OccurrenceManager{
 	}
 
 	public function getSpecimenMap($pageRequest,$cntPerPage){
-		global $userRights;
 		$returnArr = Array();
 		$sqlWhere = $this->getSqlWhere();
 		if(!$this->recordCount || $this->reset){
@@ -32,6 +31,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
 		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+		if(strpos($sqlWhere,'MATCH(f.recordedby)')) $sql .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
 		$sql .= $sqlWhere;
 		$bottomLimit = ($pageRequest - 1)*$cntPerPage;
 		$sql .= "ORDER BY c.sortseq, c.collectionname ";
@@ -45,8 +45,8 @@ class OccurrenceListManager extends OccurrenceManager{
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		$canReadRareSpp = false;
-		if($userRights){
-			if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+		if($GLOBALS['USER_RIGHTS']){
+			if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
 				$canReadRareSpp = true;
 			}
 		}
@@ -67,8 +67,8 @@ class OccurrenceListManager extends OccurrenceManager{
 			$returnArr[$collIdStr][$occId]["observeruid"] = $row->observeruid;
 			$localitySecurity = $row->LocalitySecurity;
 			if(!$localitySecurity || $canReadRareSpp 
-				|| (array_key_exists("CollEditor", $userRights) && in_array($collIdStr,$userRights["CollEditor"]))
-				|| (array_key_exists("RareSppReader", $userRights) && in_array($collIdStr,$userRights["RareSppReader"]))){
+				|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["CollEditor"]))
+				|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
 				$returnArr[$collIdStr][$occId]["locality"] = str_replace('.,',',',$row->locality);
 				$returnArr[$collIdStr][$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
 				$returnArr[$collIdStr][$occId]["date"] = $row->date;
@@ -91,10 +91,9 @@ class OccurrenceListManager extends OccurrenceManager{
 	}
 	
 	public function getTableSpecimenMap($pageRequest,$cntPerPage){
-		global $userRights;
 		$canReadRareSpp = false;
-		if($userRights){
-			if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+		if($GLOBALS['USER_RIGHTS']){
+			if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
 				$canReadRareSpp = true;
 			}
 		}
@@ -113,6 +112,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid '.
 			'LEFT JOIN images AS i ON o.occid = i.occid ';
 		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
+		if(array_key_exists("collector",$this->searchTermsArr)) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		$sql .= $sqlWhere;
 		$sql .= "ORDER BY ";
 		if(!$canReadRareSpp){
@@ -142,8 +142,8 @@ class OccurrenceListManager extends OccurrenceManager{
 			$returnArr[$occId]["hasImage"] = $row->hasImage;
 			$localitySecurity = $row->LocalitySecurity;
 			if(!$localitySecurity || $canReadRareSpp 
-				|| (array_key_exists("CollEditor", $userRights) && in_array($collIdStr,$userRights["CollEditor"]))
-				|| (array_key_exists("RareSppReader", $userRights) && in_array($collIdStr,$userRights["RareSppReader"]))){
+				|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["CollEditor"]))
+				|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
 				$returnArr[$occId]["locality"] = str_replace('.,',',',$row->locality);
 				$returnArr[$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
 				$returnArr[$occId]["habitat"] = $row->habitat;
@@ -159,10 +159,10 @@ class OccurrenceListManager extends OccurrenceManager{
 	}
 
 	private function setRecordCnt($sqlWhere){
-		global $clientRoot;
 		if($sqlWhere){
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
 			if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+			if(strpos($sqlWhere,'MATCH(f.recordedby)')) $sql .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
 			$sql .= $sqlWhere;
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);
@@ -171,7 +171,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			}
 			$result->free();
 		}
-		setCookie("collvars","reccnt:".$this->recordCount,time()+64800,($clientRoot?$clientRoot:'/'));
+		setCookie("collvars","reccnt:".$this->recordCount,time()+64800,($GLOBALS['CLIENT_ROOT']?$GLOBALS['CLIENT_ROOT']:'/'));
 	}
 
 	public function getRecordCnt(){

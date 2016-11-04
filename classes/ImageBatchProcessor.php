@@ -206,7 +206,7 @@ class ImageBatchProcessor {
 			//Since imageDomain is set, portal is not central portal thus add portals domain to url base
 			if(substr($this->imgUrlBase,0,7) != 'http://' && substr($this->imgUrlBase,0,8) != 'https://'){
 				$urlPrefix = "http://";
-				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
 				$urlPrefix .= $_SERVER["SERVER_NAME"];
 				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 				$this->imgUrlBase = $urlPrefix.$this->imgUrlBase;
@@ -1872,7 +1872,7 @@ class ImageBatchProcessor {
 			}
 			else{
 				$urlPrefix = "http://";
-				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
 				$urlPrefix .= $_SERVER["SERVER_NAME"];
 				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 				$url = $urlPrefix.$url;

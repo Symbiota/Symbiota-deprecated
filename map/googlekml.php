@@ -26,7 +26,7 @@ $sharedMapManager->setTaxaArr($tArr);
 if($kmlFields){
 	$sharedMapManager->setFieldArr($kmlFields);
 }
-$coordArr = $sharedMapManager->getGeoCoords(0,false,$mapWhere);
+$coordArr = $sharedMapManager->getGeoCoords($mapWhere);
 
 $kmlFilePath = $sharedMapManager->writeKMLFile($coordArr);
 ?>

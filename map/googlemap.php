@@ -124,7 +124,7 @@ $sharedMapManager->setTaxaArr($tArr);
            <?php 
 			$coordExist = false;
 			$iconKeys = Array(); 
-			$coordArr = $sharedMapManager->getGeoCoords(0,false,$mapWhere);
+			$coordArr = $sharedMapManager->getGeoCoords($mapWhere);
 			$markerCnt = 0;
 			$spCnt = 1;
 			$minLng = 180;

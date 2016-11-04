@@ -1,6 +1,6 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceUtilities.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
 
 class OccurrenceManager{
 
@@ -336,7 +336,13 @@ class OccurrenceManager{
 					$collectorArr[$k] = 'Collector IS NULL';
 				}
 				else{
-					$tempArr[] = '(o.recordedBy LIKE "%'.trim($value).'%")';
+					//$tempArr[] = '(o.recordedBy LIKE "%'.trim($value).'%")';
+					$tempInnerArr = array();
+					$collValueArr = explode(" ",trim($value));
+					foreach($collValueArr as $collV){
+						$tempInnerArr[] = '(MATCH(f.recordedby) AGAINST("'.$collV.'")) ';
+					}
+					$tempArr[] = implode(' AND ', $tempInnerArr);
 				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';

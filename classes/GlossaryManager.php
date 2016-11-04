@@ -591,7 +591,7 @@ class GlossaryManager{
 			if($removeImg){
 				$imgUrl2 = '';
 				$domain = "http://";
-				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
+				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
 				$domain .= $_SERVER["SERVER_NAME"];
 				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
 				if(stripos($imgUrl,$domain) === 0){
@@ -867,7 +867,7 @@ class GlossaryManager{
 			}
 			else{
 				$urlPrefix = "http://";
-				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
 				$urlPrefix .= $_SERVER["SERVER_NAME"];
 				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 				$url = $urlPrefix.$url;
@@ -1002,7 +1002,7 @@ class GlossaryManager{
 	    //e.g. this portal is sister portal to central portal
 	 	if($GLOBALS['imageDomain']){
 			$urlPrefix = "http://";
-			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+			if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
 			$urlPrefix .= $_SERVER["SERVER_NAME"];
 			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 			$urlBase = $urlPrefix.$urlBase;

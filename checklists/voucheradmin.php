@@ -157,7 +157,7 @@ if($clid && $isEditor){
                             </div>
                             <div>
                                 <b><?php echo $LANG['COLLECTOR'];?>:</b>
-                                <input name="recordedby" type="text" value="<?php echo $termArr['recordedBy']; ?>" style="width:250px" />
+                                <input name="recordedby" type="text" value="<?php echo $termArr['recordedBy']; ?>" style="width:250px" title="Enter multiple collectors separated by semicolons" />
                             </div>
                         </td>
                         <td style="padding-left:20px;">

@@ -368,6 +368,9 @@ class OccurrenceEditorManager {
 			if(strtolower($this->qryArr['rb']) == 'is null'){
 				$sqlWhere .= 'AND (o.recordedby IS NULL) ';
 			}
+			elseif(substr($this->qryArr['rb'],0,1) == '%'){
+				$sqlWhere .= 'AND (MATCH(f.recordedby) AGAINST("'.substr($this->qryArr['rb'],1).'")) ';
+			}
 			else{
 				$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
 			}
@@ -674,6 +677,9 @@ class OccurrenceEditorManager {
 		elseif(array_key_exists('woi',$this->qryArr)){
 			$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
 		}
+		if(strpos($this->sqlWhere,'MATCH(f.recordedby)')){
+			$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+		}
 		if($this->crowdSourceMode){
 			$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
 		}
@@ -791,9 +797,6 @@ class OccurrenceEditorManager {
 						$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
 					}
 				}
-				//Temp code needed for WeDigBio data entry event, will remove or refactor afterward
-				$occArr['genericcolumn2'] = $_SERVER['REMOTE_ADDR'];
-				////////////////
 				foreach($occArr as $oField => $ov){
 					if(in_array($oField,$this->occFieldArr) && $oField != 'observeruid'){
 						$vStr = $this->cleanInStr($ov);
@@ -927,10 +930,7 @@ class OccurrenceEditorManager {
 			//if(array_key_exists('localitysecurity',$occArr) && $occArr['localitysecurity']) $occArr['localitysecurity'] = $occArr['localitysecurity'];
 			if(!isset($occArr['dateentered']) || !$occArr['dateentered']) $occArr['dateentered'] = date('Y-m-d H:i:s');
 			if(!isset($occArr['basisofrecord']) || !$occArr['basisofrecord']) $occArr['basisofrecord'] = (strpos($this->collMap['colltype'],'Observations') !== false?'HumanObservation':'PreservedSpecimen');
-			//Temp code for WeDigBio date entry event
-			$occArr['genericcolumn2'] = $_SERVER['REMOTE_ADDR'];
-			///////////////////
-
+			
 			foreach($fieldArr as $fieldStr => $fieldType){
 				$fieldValue = '';
 				if(array_key_exists($fieldStr,$occArr)) $fieldValue = $occArr[$fieldStr];
@@ -1005,6 +1005,10 @@ class OccurrenceEditorManager {
 					if(!$this->conn->query($sql1)){
 						$status .= '(WARNING adding host: '.$this->conn->error.') ';
 					}
+				}
+				
+				if(isset($occArr['confidenceranking']) && $occArr['confidenceranking']){
+					$this->editIdentificationRanking($occArr['confidenceranking'],'');
 				}
 				//Deal with checklist voucher
 				if(isset($occArr['clidvoucher']) && isset($occArr['tidinterpreted'])){
@@ -1440,6 +1444,40 @@ class OccurrenceEditorManager {
 			'associatedtaxa','basisofrecord','language','labelproject');
 		$retArr = $this->cleanOutArr(array_intersect_key($fArr,array_flip($locArr)));
 		return $retArr;
+	}
+
+	//Verification functions
+	public function getIdentificationRanking(){
+		//Get Identification ranking
+		$retArr = array();
+		$sql = 'SELECT v.ovsid, v.ranking, v.notes, l.username '.
+				'FROM omoccurverification v LEFT JOIN userlogin l ON v.uid = l.uid '.
+				'WHERE v.category = "identification" AND v.occid = '.$this->occid;
+		//echo "<div>".$sql."</div>";
+		$rs = $this->conn->query($sql);
+		//There can only be one identification ranking per specimen
+		if($r = $rs->fetch_object()){
+			$retArr['ovsid'] = $r->ovsid;
+			$retArr['ranking'] = $r->ranking;
+			$retArr['notes'] = $r->notes;
+			$retArr['username'] = $r->username;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function editIdentificationRanking($ranking,$notes=''){
+		$statusStr = '';
+		if(is_numeric($ranking)){
+			//Will be replaced if an identification ranking already exists for occurrence record
+			$sql = 'REPLACE INTO omoccurverification(occid,category,ranking,notes,uid) '.
+					'VALUES('.$this->occid.',"identification",'.$ranking.','.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.$GLOBALS['SYMB_UID'].')';
+			if(!$this->conn->query($sql)){
+				$statusStr .= 'WARNING editing/add confidence ranking failed ('.$this->conn->error.') ';
+				//echo $sql;
+			}
+		}
+		return $statusStr;
 	}
 
 	//Checklist voucher functions
@@ -1936,8 +1974,7 @@ class OccurrenceEditorManager {
 		global $charset;
 		$retStr = $inStr;
 		//Get rid of curly quotes
-        //TODO the following search array should be checked - leaving as-was but I doubt this is functioning as intended
-        $search = array("Ã­", "Ã«", "`", "Ã®", "Ã¬");
+		$search = array("’", "‘", "`", "”", "“");
 		$replace = array("'", "'", "'", '"', '"');
 		$inStr= str_replace($search, $replace, $inStr);
 

@@ -248,8 +248,8 @@ class OccurrenceDuplicate {
 		$retArr = array();
 		$lastName = $this->parseLastName($collName);
 		if($lastName && $collNum){
-			$sql = 'SELECT occid FROM omoccurrences '.
-				'WHERE (recordedby LIKE "%'.$lastName.'%") AND (recordnumber = "'.$collNum.'") AND (occid != '.$skipOccid.') ';
+			$sql = 'SELECT o.occid FROM omoccurrences o INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid '.
+				'WHERE (MATCH(f.recordedby) AGAINST("'.$lastName.'")) AND (o.recordnumber = "'.$collNum.'") AND (o.occid != '.$skipOccid.') ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -295,16 +295,17 @@ class OccurrenceDuplicate {
 		$retArr = array();
 		$lastName = $this->parseLastName($collName);
 		if($lastName){
-			$sql = 'SELECT occid '.
-				'FROM omoccurrences '.
-				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed" OR locality IS NOT NULL) AND (recordedby LIKE "%'.$lastName.'%") AND (occid != '.$skipOccid.') ';
+			$sql = 'SELECT o.occid '.
+				'FROM omoccurrences o INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid '.
+				'WHERE (o.processingstatus IS NULL OR o.processingstatus != "unprocessed" OR o.locality IS NOT NULL) '.
+				'AND (MATCH(f.recordedby) AGAINST("'.$lastName.'")) AND (o.occid != '.$skipOccid.') ';
 			$runQry = true;
 			if($collNum){
 				if(is_numeric($collNum)){
 					$nStart = $collNum - 4;
 					if($nStart < 1) $nStart = 1;
 					$nEnd = $collNum + 4;
-					$sql .= 'AND (recordnumber BETWEEN '.$nStart.' AND '.$nEnd.') ';
+					$sql .= 'AND (o.recordnumber BETWEEN '.$nStart.' AND '.$nEnd.') ';
 				}
 				elseif(preg_match('/^(\d+)-{0,1}[a-zA-Z]{1,2}$/',$collNum,$m)){
 					//ex: 123a, 123b, 123-a
@@ -312,7 +313,7 @@ class OccurrenceDuplicate {
 					$nStart = $cNum - 4;
 					if($nStart < 1) $nStart = 1;
 					$nEnd = $cNum + 4;
-					$sql .= 'AND (CAST(recordnumber AS SIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
+					$sql .= 'AND (CAST(o.recordnumber AS SIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
 				}
 				elseif(preg_match('/^(\D+-?)(\d+)-{0,1}[a-zA-Z]{0,2}$/',$collNum,$m)){
 					//RM-123, RM123
@@ -324,7 +325,7 @@ class OccurrenceDuplicate {
 					for($x=1;$x<11;$x++){
 						$rangeArr[] = $prefix.($nStart+$x);
 					}
-					$sql .= 'AND recordnumber IN("'.implode('","',$rangeArr).'") ';
+					$sql .= 'AND o.recordnumber IN("'.implode('","',$rangeArr).'") ';
 				}
 				elseif(preg_match('/^(\d{2,4}-{1})(\d+)-{0,1}[a-zA-Z]{0,2}$/',$collNum,$m)){
 					//95-123, 1995-123
@@ -336,15 +337,15 @@ class OccurrenceDuplicate {
 					for($x=1;$x<11;$x++){
 						$rangeArr[] = $prefix.($nStart+$x);
 					}
-					$sql .= 'AND recordnumber IN("'.implode('","',$rangeArr).'") ';
+					$sql .= 'AND o.recordnumber IN("'.implode('","',$rangeArr).'") ';
 				}
 				else{
 					$runQry = false;
 				}
-				if($collDate) $sql .= 'AND (eventdate = "'.$collDate.'") ';
+				if($collDate) $sql .= 'AND (o.eventdate = "'.$collDate.'") ';
 			}
 			elseif($collDate){
-				$sql .= 'AND (eventdate = "'.$collDate.'") LIMIT 10'; 
+				$sql .= 'AND (o.eventdate = "'.$collDate.'") LIMIT 10'; 
 			}
 			else{
 				$runQry = false;

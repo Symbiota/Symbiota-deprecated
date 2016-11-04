@@ -1,11 +1,10 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
 
 class OccurrenceDownload{
 	
 	private $conn;
-	private $headerArr = array();
 	private $redactLocalities = true;
 	private $rareReaderArr = array();
 	private $securityArr = array();
@@ -23,25 +22,24 @@ class OccurrenceDownload{
 	private $errorArr = array();
 
  	public function __construct(){
-		global $userRights, $isAdmin, $charset;
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
 		
 		//Set rare species variables
 		$this->securityArr = Array('locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
 			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','verbatimCoordinates',
 			'georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources','georeferenceVerificationStatus','habitat');
-		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+		if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
 			$this->redactLocalities = false;
 		}
-		if(array_key_exists('CollEditor', $userRights)){
-			$this->rareReaderArr = $userRights['CollEditor'];
+		if(array_key_exists('CollEditor', $GLOBALS['USER_RIGHTS'])){
+			$this->rareReaderArr = $GLOBALS['USER_RIGHTS']['CollEditor'];
 		}
-		if(array_key_exists('RareSppReader', $userRights)){
-			$this->rareReaderArr = array_unique(array_merge($this->rareReaderArr,$userRights['RareSppReader']));
+		if(array_key_exists('RareSppReader', $GLOBALS['USER_RIGHTS'])){
+			$this->rareReaderArr = array_unique(array_merge($this->rareReaderArr,$GLOBALS['USER_RIGHTS']['RareSppReader']));
 		}
 		
 		//Character set
-		$this->charSetSource = strtoupper($charset);
+		$this->charSetSource = strtoupper($GLOBALS['CHARSET']);
 		$this->charSetOut = $this->charSetSource;
 	}
 
@@ -56,7 +54,6 @@ class OccurrenceDownload{
 		$contentDesc = '';
 		$filePath = $this->getOutputFilePath();
 		$fileName = $this->getOutputFileName();
-		if(!$this->headerArr) $this->setHeaderArr();
 
 		if($this->schemaType == 'checklist'){
 			$contentDesc = 'Symbiota Checklist File';
@@ -137,14 +134,18 @@ class OccurrenceDownload{
 			$sql = $this->getSql();
 			$result = $this->conn->query($sql,MYSQLI_USE_RESULT);
 			if($result){
-				//Write column names out to file
-				if($this->delimiter == ","){
-					fputcsv($outstream, $this->headerArr);
-				}
-				else{
-					fwrite($outstream, implode($this->delimiter,$this->headerArr)."\n");
-				}
+				$outputHeader = true;
 				while($row = $result->fetch_assoc()){
+					if($outputHeader){
+						//Write column names out to file
+						if($this->delimiter == ","){
+							fputcsv($outstream, array_keys($row));
+						}
+						else{
+							fwrite($outstream, implode($this->delimiter, array_keys($row))."\n");
+						}
+						$outputHeader = false;
+					}
 					//$this->stripSensitiveFields($row);
 					$this->encodeArr($row);
 					if($this->delimiter == ","){
@@ -285,7 +286,7 @@ xmlwriter_end_attribute($xml_resource);
 		$channelElem->appendChild($titleElem);
 		
 		$serverDomain = "http://";
-		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $serverDomain = "https://";
+		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $serverDomain = "https://";
 		$serverDomain .= $_SERVER["SERVER_NAME"];
 		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $serverDomain .= ':'.$_SERVER["SERVER_PORT"];
 		$urlPathPrefix = '';
@@ -508,11 +509,12 @@ xmlwriter_end_attribute($xml_resource);
 		$sql = '';
 		if($this->schemaType == 'checklist'){
 			if($this->taxonFilter){
-				$sql = 'SELECT DISTINCT ts.family, t.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3, t.unitname3, t.author '.
+				$sql = 'SELECT DISTINCT ts.family, t.sciname AS scientificName, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
+					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
 					'FROM omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid '.
 					'INNER JOIN taxa t ON ts.TidAccepted = t.Tid ';
 				if(strpos($this->sqlWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+				if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 				$sql .= $this->sqlWhere.'AND t.RankId > 140 AND (ts.taxauthid = '.$this->taxonFilter.') ';
 				if($this->redactLocalities){
 					if($this->rareReaderArr){
@@ -526,9 +528,10 @@ xmlwriter_end_attribute($xml_resource);
 			}
 			else{
 				$sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3, t.unitname3, t.author '.
+					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
 					'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
 				if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+				if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 				$sql .= $this->sqlWhere.'AND o.SciName NOT LIKE "%aceae" AND o.SciName NOT LIKE "%idea" AND o.SciName NOT IN ("Plantae","Polypodiophyta") ';
 				if($this->redactLocalities){
 					if($this->rareReaderArr){
@@ -549,17 +552,19 @@ xmlwriter_end_attribute($xml_resource);
 				$sql .= 'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
 					'o.localitySecurity, o.localitySecurityReason, IFNULL(o.modified,o.datelastmodified) AS modified, '.
-					'o.processingstatus, o.collid, o.dbpk, o.occid, CONCAT("urn:uuid:",g.guid) AS guid ';
+					'o.processingStatus, o.collId, o.dbpk AS sourcePrimaryKey, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
 			}
 			else{
 				$sql .= 'o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-					'IFNULL(o.modified,o.datelastmodified) AS modified, o.occid, CONCAT("urn:uuid:",g.guid) AS guid ';
+					'IFNULL(o.modified,o.datelastmodified) AS modified, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
 			}
+				
 			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
 			if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+			if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			$this->applyConditions();
 			$sql .= $this->sqlWhere;
 			if($this->redactLocalities){
@@ -576,27 +581,6 @@ xmlwriter_end_attribute($xml_resource);
 		return $sql;
 	}
 	
-	private function setHeaderArr(){
-		if($this->schemaType == 'checklist'){
-			$this->headerArr = array('family','scientificName','genus','specificEpithet','taxonRank','infraSpecificEpithet',
-				'scientificNameAuthorship');
-		}
-		elseif($this->schemaType == 'georef'){
-			$this->headerArr = array("institutionCode","collectionCode","catalogNumber","occurrenceId","decimalLatitude","decimalLongitude",
-		 		"geodeticDatum","coordinateUncertaintyInMeters","verbatimCoordinates","georeferencedBy",
-				"georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
-				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-				"modified","symbiotaId","recordId");
-			if($this->extended){
-				$this->headerArr[] = 'localitySecurity';
-				$this->headerArr[] = 'localitySecurityReason';
-				$this->headerArr[] = 'processingstatus';
-				$this->headerArr[] = 'collId';
-				$this->headerArr[] = 'sourcePrimaryKey';
-			}
-		}
-	}
-
 	private function getOutputFilePath(){
 		$retStr = $GLOBALS['tempDirRoot'];
 		if(!$retStr){
@@ -612,9 +596,8 @@ xmlwriter_end_attribute($xml_resource);
 	}
 
 	private function getOutputFileName(){
-		global $defaultTitle;
 		$retStr = '';
-		$fileName = str_replace(Array(".",":"),"",$defaultTitle);
+		$fileName = str_replace(Array(".",":"),"",$GLOBALS['DEFAULT_TITLE']);
 		if(stripos($fileName,'the ') === 0) $fileName = substr($fileName,4);
 		if(strlen($fileName) > 15){
 			if($p = strpos($fileName,'(')) $fileName = substr($filename,0,$p);
@@ -692,7 +675,6 @@ xmlwriter_end_attribute($xml_resource);
 	
 	//Misc functions
 	private function stripSensitiveFields(&$row){
-		global $userRights;
 		if($row["localitySecurity"] == 1 && $this->redactLocalities && !in_array($row["collid"],$this->rareReaderArr)){
 			foreach($this->securityArr as $fieldName){
 				$row[$fieldName] = '[redacted]';

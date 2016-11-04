@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen"; 
 $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0; 
@@ -10,13 +10,13 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 <html>
 <head>
 	<title>Collections Search Download</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script language="javascript">
+	<script>
 		$(document).ready(function() {
 			var crumbs = document.getElementsByClassName('navpath')[0].getElementsByTagName('a');
 			for(var i = 0; i < crumbs.length; i++){
@@ -68,7 +68,7 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 <body>
 <?php
 	$displayLeftMenu = (isset($collections_download_downloadMenu)?$collections_download_downloadMenu:false);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($collections_download_downloadCrumbs)){
 		if($collections_download_downloadCrumbs){
 			?>
@@ -237,8 +237,7 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 		</div>
 	</div>
 <?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
-
 </html>

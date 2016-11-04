@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class ExsiccatiManager {
 
@@ -401,13 +401,14 @@ class ExsiccatiManager {
 				//Grab matching occid(s)
 				$sql1 = 'SELECT o.occid '.
 					'FROM omoccurrences o LEFT JOIN omexsiccatiocclink l ON o.occid = l.occid '.
+					'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid '.
 					'WHERE o.collid = '.$collId.' AND l.occid IS NULL ';
 				if($identifier){
-					$sql1 .= 'AND o.catalogNumber = '.(is_numeric($identifier)?$identifier:'"'.$identifier.'"').' ';
+					$sql1 .= 'AND (o.catalogNumber = '.(is_numeric($identifier)?$identifier:'"'.$identifier.'"').') ';
 				}
 				else{
-					$sql1 .= 'AND o.recordedby LIKE "%'.$pArr['recordedby'].'%" '.
-						'AND o.recordnumber = '.(is_numeric($pArr['recordnumber'])?$pArr['recordnumber']:'"'.$pArr['recordnumber'].'"').' ';
+					$sql1 .= 'AND (MATCH(f.recordedby) AGAINST("'.$pArr['recordedby'].'")) '.
+						'AND (o.recordnumber = '.(is_numeric($pArr['recordnumber'])?$pArr['recordnumber']:'"'.$pArr['recordnumber'].'"').') ';
 				}
 				$sql1 .= 'LIMIT 5';
 				//echo $sql1;

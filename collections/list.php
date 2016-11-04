@@ -484,6 +484,11 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				<div style='margin:10 0 0 20;'>
 					<?php echo $LANG['GOOGLE_EARTH_DESCRIPTION'];?>
 				</div>
+				<div style="margin:20px;">
+					<input name="jsoncollstarr" type="hidden" value='<?php echo $stArrCollJson; ?>' />
+					<input name="starr" type="hidden" value='<?php echo $stArrSearchJson; ?>' />
+					<button name="formsubmit" type="submit" value="<?php echo $LANG['CREATE_KML']; ?>"><?php echo $LANG['CREATE_KML']; ?></button>
+				</div>
 				<div style='margin:10 0 0 20;'>
 					<a href="#" onclick="toggle('fieldBox');">
 						<?php echo $LANG['GOOGLE_EARTH_EXTRA']; ?>
@@ -500,11 +505,6 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 							?>
 						</div>
 					</fieldset>
-				</div>
-				<div style="margin-top:8px;float:right;">
-					<input name="jsoncollstarr" type="hidden" value='<?php echo $stArrCollJson; ?>' />
-					<input name="starr" type="hidden" value='<?php echo $stArrSearchJson; ?>' />
-					<button name="formsubmit" type="submit" value="<?php echo $LANG['CREATE_KML']; ?>"><?php echo $LANG['CREATE_KML']; ?></button>
 				</div>
 			</form>
 		</div>

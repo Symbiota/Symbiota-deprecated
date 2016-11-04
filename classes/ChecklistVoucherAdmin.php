@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
  
 class ChecklistVoucherAdmin {
 
@@ -84,8 +84,8 @@ class ChecklistVoucherAdmin {
 			if(preg_match('/collid = (\d+)\D/',$this->sqlFrag,$m)){
 				$retArr['collid'] = $m[1];
 			}
-			if(preg_match('/recordedby LIKE "%([^%"]+)%"/',$this->sqlFrag,$m)){
-				$retArr['recordedBy'] = trim($m[1],' %');
+			if(preg_match_all('/AGAINST\("([^()"]+)"\)/',$this->sqlFrag,$m)){
+				$retArr['recordedBy'] = implode('; ',$m[1]);
 			}
 			if(preg_match('/ OR \(\(o.decimallatitude/',$this->sqlFrag) || preg_match('/ OR \(\(o.decimallongitude/',$this->sqlFrag)){
 				$retArr['latLngOr'] = 1;
@@ -158,13 +158,20 @@ class ChecklistVoucherAdmin {
 
 		//Limit by collector
 		if($postArr['recordedby']){
-			$sqlFrag .= 'AND (o.recordedby LIKE "%'.$this->cleanInStr($postArr['recordedby']).'%") ';
+			//$sqlFrag .= 'AND (o.recordedby LIKE "%'.$this->cleanInStr($postArr['recordedby']).'%") ';
+			$collStr = str_replace(',', ';', $postArr['recordedby']);
+			$collArr = explode(';',$collStr);
+			$tempArr = array();
+			foreach($collArr as $str){
+				$tempArr[] = '(MATCH(f.recordedby) AGAINST("'.$this->cleanInStr($str).'"))';
+			}
+			$sqlFrag .= 'AND ('.implode(' OR ', $tempArr).') ';
 		}
 
 		//Save SQL fragment
 		if($sqlFrag) $sqlFrag = trim(substr($sqlFrag,3));
 		$sql = "UPDATE fmchecklists c SET c.dynamicsql = ".($sqlFrag?"'".$sqlFrag."'":'NULL')." WHERE (c.clid = ".$this->clid.")";
-		//echo $sql;
+		//echo $sql; exit;
 		if($this->conn->query($sql)){
 			$this->sqlFrag = $sqlFrag;
 		}
@@ -246,8 +253,9 @@ class ChecklistVoucherAdmin {
 					'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 					'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
 					'INNER JOIN fmchklsttaxalink cl ON ts2.tidaccepted = cl.tid '.
-					'INNER JOIN taxa t ON cl.tid = t.tid '.
-					'WHERE ('.$this->sqlFrag.') AND (cl.clid = '.$this->clid.') AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) ';
+					'INNER JOIN taxa t ON cl.tid = t.tid ';
+				if(strpos($this->sqlFrag,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+				$sql .= 'WHERE ('.$this->sqlFrag.') AND (cl.clid = '.$this->clid.') AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) ';
 				if($includeAll == 1){
 					$sql .= 'AND cl.tid NOT IN(SELECT tid FROM fmvouchers WHERE clid IN('.$clidStr.')) ';
 				}
@@ -276,8 +284,9 @@ class ChecklistVoucherAdmin {
 					'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 					'FROM omcollections AS c INNER JOIN omoccurrences AS o ON c.collid = o.collid '.
 					'LEFT JOIN taxa AS t ON o.tidinterpreted = t.TID '.
-					'LEFT JOIN taxstatus AS ts ON t.TID = ts.tid '.
-					'WHERE ('.$this->sqlFrag.') AND ((t.RankId < 220)) '.
+					'LEFT JOIN taxstatus AS ts ON t.TID = ts.tid ';
+				if(strpos($this->sqlFrag,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+				$sql .= 'WHERE ('.$this->sqlFrag.') AND ((t.RankId < 220)) '.
 					'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE CLID IN('.$clidStr.'))) ';
 				$sql .= 'ORDER BY o.family, o.sciname LIMIT '.$startLimit.', 500';
 				//echo '<div>'.$sql.'</div>';
@@ -347,8 +356,9 @@ class ChecklistVoucherAdmin {
 			}
 			$sql = 'SELECT DISTINCT t.tid, t.sciname '.
 				'FROM omoccurrences AS o LEFT JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '.
-				'LEFT JOIN taxa AS t ON ts.tidaccepted = t.tid '.
-				'WHERE ('.$this->sqlFrag.') AND (ISNULL(o.cultivationstatus) OR o.cultivationstatus = 0) '.
+				'LEFT JOIN taxa AS t ON ts.tidaccepted = t.tid ';
+			if(strpos($this->sqlFrag,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			$sql .= 'WHERE ('.$this->sqlFrag.') AND (ISNULL(o.cultivationstatus) OR o.cultivationstatus = 0) '.
 				'AND (t.rankid IN(220,230,240,260,230)) AND (ts.taxauthid = 1) '.
 				'AND (ts.tidaccepted NOT IN(SELECT TID FROM fmchklsttaxalink WHERE clid IN('.$clidStr.'))) ';
 			//echo '<div>'.$sql.'</div>'; 
@@ -375,8 +385,9 @@ class ChecklistVoucherAdmin {
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 				'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.CollID '.
 				'LEFT JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '.
-				'LEFT JOIN taxa AS t ON ts.tidaccepted = t.TID '.
-				'WHERE ('.$this->sqlFrag.') AND (ISNULL(o.cultivationstatus) OR o.cultivationstatus = 0) '.
+				'LEFT JOIN taxa AS t ON ts.tidaccepted = t.TID ';
+			if(strpos($this->sqlFrag,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			$sql .= 'WHERE ('.$this->sqlFrag.') AND (ISNULL(o.cultivationstatus) OR o.cultivationstatus = 0) '.
 				'AND (t.rankid IN(220,230,240,260,230)) AND (ts.taxauthid = 1) '.
 				'AND (ts.tidaccepted NOT IN(SELECT TID FROM fmchklsttaxalink WHERE clid IN('.$clidStr.'))) '.
 				'LIMIT '.($limitIndex?($limitIndex*400).',':'').'400';
@@ -401,8 +412,9 @@ class ChecklistVoucherAdmin {
 		if($this->sqlFrag){
 			$sql = 'SELECT COUNT(DISTINCT ts.tidaccepted) as cnt '.
 				'FROM omoccurrences AS o LEFT JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '.
-				'LEFT JOIN taxa AS t ON ts.tidaccepted = t.TID '.
-				'WHERE ('.$this->sqlFrag.') AND (ISNULL(o.cultivationstatus) OR o.cultivationstatus = 0) '.
+				'LEFT JOIN taxa AS t ON ts.tidaccepted = t.TID ';
+			if(strpos($this->sqlFrag,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			$sql .= 'WHERE ('.$this->sqlFrag.') AND (ISNULL(o.cultivationstatus) OR o.cultivationstatus = 0) '.
 				'AND (t.rankid IN(220,230,240,260,230)) AND (ts.taxauthid = 1) '.
 				'AND (ts.tidaccepted NOT IN(SELECT TID FROM fmchklsttaxalink WHERE clid IN('.$clidStr.'))) ';
 			//echo '<div>'.$sql.'</div>'; exit;
@@ -424,8 +436,9 @@ class ChecklistVoucherAdmin {
 		$sql = 'SELECT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
-			'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
-			$this->getMissingTaxaSqlWhere();
+			'INNER JOIN taxa t ON ts.tidaccepted = t.tid ';
+		if(strpos($this->sqlFrag,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+		$sql .= $this->getMissingTaxaSqlWhere();
 			//'ORDER BY o.family, o.sciname, c.institutioncode ';
 		//echo $sql;
 		$this->exportCsv($fileName,$sql,$localitySecurityFields);
@@ -469,8 +482,9 @@ class ChecklistVoucherAdmin {
 			$sql = 'SELECT DISTINCT o.occid, IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
 				'o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
-				'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.CollID '.
-				'WHERE ('.$this->sqlFrag.') AND ISNULL(o.tidinterpreted) AND o.sciname IS NOT NULL '.
+				'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.CollID ';
+			if(strpos($this->sqlFrag,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			$sql .= 'WHERE ('.$this->sqlFrag.') AND ISNULL(o.tidinterpreted) AND o.sciname IS NOT NULL '.
 				'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid IN('.$clidStr.'))) ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
@@ -502,8 +516,9 @@ class ChecklistVoucherAdmin {
 		}
 		
 		$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
-			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-			'WHERE (o.occid NOT IN (SELECT occid FROM fmvouchers WHERE clid IN('.$clidStr.'))) AND ('.$this->sqlFrag.') '.
+			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid ';
+		if(strpos($this->sqlFrag,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+		$sql .= 'WHERE (o.occid NOT IN (SELECT occid FROM fmvouchers WHERE clid IN('.$clidStr.'))) AND ('.$this->sqlFrag.') '.
 			'AND o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
 		//echo '<div>'.$sql.'</div>';return;
 		$this->exportCsv($fileName,$sql,$localitySecurityFields);

@@ -175,7 +175,7 @@ class GamesManager {
 							else{
 								//Use local domain 
 								$domain = "http://";
-								if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
+								if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
 								$domain .= $_SERVER["HTTP_HOST"];
 								if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
 								$file = $domain.$row->url;
