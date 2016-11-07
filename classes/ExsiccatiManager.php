@@ -602,7 +602,7 @@ class ExsiccatiManager {
 		$sql = "SHOW COLUMNS FROM uploadspectemp";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$field = strtolower($r->Field);
+			$field = strtolower($rs->Field);
 			if(!in_array($field, $skipFields)){
 				$fieldArr[] = $field;
 			}
