@@ -1,5 +1,5 @@
 <?php
-include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($serverRoot.'/config/dbconnection.php');
  
 class OccurrenceCrowdSource {
 
@@ -373,9 +373,9 @@ class OccurrenceCrowdSource {
 				}
 				else{
 					$statusStr = 'ERROR submitting reviews; '.$con->error.'<br/>SQL = '.$sql;
-				} 
+				}
 			}
-			if($successArr && isset($postArr['updateProcessingStatus']) && $postArr['updateProcessingStatus']){
+			if($successArr){
 				//Change status to reviewed
 				$sql2 = 'UPDATE omoccurrences SET processingstatus = "reviewed" WHERE occid IN('.implode(',',$successArr).')';
 				$con->query($sql2);

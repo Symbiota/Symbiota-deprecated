@@ -329,7 +329,7 @@ class CollectionProfileManager {
 	public function getAddresses(){
 		$retArr = Array();
 		if($this->collid){
-			$sql = 'SELECT i.iid, i.institutioncode, i.institutionname, i.institutionname2, i.address1, i.address2, '.
+			$sql = 'SELECT i.iid, i.institutioncode, i.institutionname, i.address1, i.address2, '.
 				'i.city, i.stateprovince, i.postalcode, i.country, i.phone, i.contact, i.email, i.url, i.notes '.
 				'FROM institutions i INNER JOIN omcollections c ON i.iid = c.iid '.
 				'WHERE (c.collid = '.$this->collid.") ";
@@ -338,7 +338,6 @@ class CollectionProfileManager {
 			while($r = $rs->fetch_object()){
 				$retArr[$r->iid]['institutioncode'] = $r->institutioncode;
 				$retArr[$r->iid]['institutionname'] = $r->institutionname;
-				$retArr[$r->iid]['institutionname2'] = $r->institutionname2;
 				$retArr[$r->iid]['address1'] = $r->address1;
 				$retArr[$r->iid]['address2'] = $r->address2;
 				$retArr[$r->iid]['city'] = $r->city;
@@ -610,40 +609,64 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 
-	public function getGeographicCounts($country,$state){
+	public function getGeographicCounts($c="",$s=""){
 		$returnArr = Array();
+		$country = $this->cleanInStr($c);
+		$state = $this->cleanInStr($s);
 		$sql = '';
-		if($state){
-			$sql = 'SELECT o.county as termstr, Count(*) AS cnt '.
-				'FROM omoccurrences o '.
-				'WHERE (o.CollID = '.$this->collid.') '.($country?'AND (o.country = "'.$this->cleanInStr($country).'") ':'').
-				'AND (o.stateprovince = "'.$this->cleanInStr($state).'") AND (o.county IS NOT NULL) '.
-				'GROUP BY o.StateProvince, o.county';
-		}
-		elseif($country){
+		if($country){
 			$sql = 'SELECT o.stateprovince as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
-				'WHERE (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.country = "'.$this->cleanInStr($country).'") '.
+				'WHERE (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.country = "'.$country.'") '.
 				'GROUP BY o.StateProvince, o.country';
+			/*
+			$sql = 'SELECT trim(o.stateprovince) as termstr, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'GROUP BY o.CollID, o.StateProvince, o.country '.
+				'HAVING (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.StateProvince <> "") '.
+				'AND (o.country = "'.$country.'") '.
+				'ORDER BY trim(o.StateProvince)';
+				*/
+		}
+		elseif($state){
+			$sql = 'SELECT o.county as termstr, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'WHERE (o.CollID = '.$this->collid.') AND (o.county IS NOT NULL) AND (o.stateprovince = "'.$state.'") '.
+				'GROUP BY o.StateProvince, o.county';
+			/*
+			$sql = 'SELECT trim(o.county) as termstr, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'GROUP BY o.CollID, o.StateProvince, o.county '.
+				'HAVING (o.CollID = '.$this->collid.') AND (o.county IS NOT NULL) AND (o.county <> "") '.
+				'AND (o.stateprovince = "'.$state.'") '.
+				'ORDER BY trim(o.county)';
+				*/
 		}
 		else{
 			$sql = 'SELECT o.country as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'WHERE (o.CollID = '.$this->collid.') AND (o.Country IS NOT NULL) '.
 				'GROUP BY o.Country ';
+			/*
+			$sql = 'SELECT trim(o.country) as termstr, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'GROUP BY o.CollID, o.Country '.
+				'HAVING (o.CollID = '.$this->collid.') AND o.Country IS NOT NULL AND o.Country <> "" '.
+				'ORDER BY trim(o.Country)';
+				*/
 		}
 		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$t = $row->termstr;
 			if($state){
-				$t = trim(str_ireplace(array(' county',' co.',' counties'),'',$t));
+				$t = trim(str_ireplace(array(' county',' co.',' Counties'),'',$t));
 			}
 			if($t){
 				$returnArr[$t] = $row->cnt;
 			}
 		}
-		$rs->free();
+		$rs->close();
 		ksort($returnArr);
 		return $returnArr;
 	}
@@ -895,11 +918,10 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 
-	public function getYearStatsHeaderArr($months){
+	public function getYearStatsHeaderArr($collId){
 		$dateArr = array();
-		$a = $months + 1;
-        $reps = $a;
-		for ($i = 0; $i < $reps; $i++) {
+		$a = 13;
+		for ($i = 0; $i < 13; $i++) {
 			$timestamp = mktime(0, 0, 0, date('n') - $i, 1);
 			$dateArr[$a] = date('Y', $timestamp).'-'.date('n', $timestamp);
 			$a--;
@@ -909,12 +931,12 @@ class CollectionProfileManager {
 		return $dateArr;
 	}
 
-	public function getYearStatsDataArr($collId,$days){
+	public function getYearStatsDataArr($collId){
 		$statArr = array();
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, c.collectionname '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
 			'LEFT JOIN images AS i ON o.occid = i.occid '.
-			'WHERE o.collid in('.$collId.') AND ((o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < '.$days.') OR (datediff(curdate(), i.InitialTimeStamp) < '.$days.')) '.
+			'WHERE o.collid in('.$collId.') AND ((o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < 365) OR (datediff(curdate(), i.InitialTimeStamp) < 365)) '.
 			'ORDER BY c.collectionname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -926,7 +948,7 @@ class CollectionProfileManager {
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
 			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, COUNT(o.occid) AS speccnt '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
-			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < '.$days.' '.
+			'WHERE o.collid in('.$collId.') AND o.dateEntered IS NOT NULL AND datediff(curdate(), o.dateEntered) < 365 '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -941,7 +963,7 @@ class CollectionProfileManager {
 			'COUNT(CASE WHEN o.processingstatus = "stage 2" THEN o.occid ELSE NULL END) AS stage2Count, '.
 			'COUNT(CASE WHEN o.processingstatus = "stage 3" THEN o.occid ELSE NULL END) AS stage3Count '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
-			'WHERE o.collid in('.$collId.') AND o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < '.$days.' '.
+			'WHERE o.collid in('.$collId.') AND o.dateLastModified IS NOT NULL AND datediff(curdate(), o.dateLastModified) < 365 '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -957,7 +979,7 @@ class CollectionProfileManager {
 			'COUNT(i.imgid) AS imgcnt '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
 			'LEFT JOIN images AS i ON o.occid = i.occid '.
-			'WHERE o.collid in('.$collId.') AND datediff(curdate(), i.InitialTimeStamp) < '.$days.' '.
+			'WHERE o.collid in('.$collId.') AND datediff(curdate(), i.InitialTimeStamp) < 365 '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';
 		//echo $sql2;
 		$rs = $this->conn->query($sql2);
@@ -970,7 +992,7 @@ class CollectionProfileManager {
 			'COUNT(DISTINCT e.occid) AS georcnt '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
 			'LEFT JOIN omoccuredits AS e ON o.occid = e.occid '.
-			'WHERE o.collid in('.$collId.') AND datediff(curdate(), e.InitialTimeStamp) < '.$days.' '.
+			'WHERE o.collid in('.$collId.') AND datediff(curdate(), e.InitialTimeStamp) < 365 '.
 			'AND ((e.FieldName = "decimallongitude" AND e.FieldValueNew IS NOT NULL) '.
 			'OR (e.FieldName = "decimallatitude" AND e.FieldValueNew IS NOT NULL)) '.
 			'GROUP BY yearEntered,monthEntered,o.collid ORDER BY c.collectionname ';

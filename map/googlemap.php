@@ -1,9 +1,9 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
-include_once($SERVER_ROOT.'/classes/MappingShared.php');
-include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
-header("Content-Type: text/html; charset=".$CHARSET);
+include_once($serverRoot.'/classes/OccurrenceMapManager.php');
+include_once($serverRoot.'/classes/MappingShared.php');
+include_once($serverRoot.'/classes/TaxonProfileMap.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
@@ -46,15 +46,15 @@ elseif($mapType == 'occquery'){
 $sharedMapManager->setTaxaArr($tArr);
 
 ?>
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-	<title><?php echo $DEFAULT_TITLE; ?> - Google Map</title>
+	<title><?php echo $defaultTitle; ?> - Google Map</title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script src="//www.google.com/jsapi"></script>
-	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
 	<script type="text/javascript" src="../js/symb/markerclusterer.js?ver=260913"></script>
 	<script type="text/javascript" src="../js/symb/oms.min.js"></script>
 	<script type="text/javascript" src="../js/symb/keydragzoom.js"></script>
@@ -64,26 +64,20 @@ $sharedMapManager->setTaxaArr($tArr);
 		var useLLDecimal = true;
 	    var infoWins = new Array();
 	    var puWin;
+        var minLng = 180;
+        var minLat = 90;
+        var maxLng = -180;
+        var maxLat = -90;
 		var markers = [];
 		
 		function initialize(){
 			<?php
-			$boundLatMin = -90;
-			$boundLatMax = 90;
-			$boundLngMin = -180;
-			$boundLngMax = 180;
 			$latCen = 41.0;
 			$longCen = -95.0;
-			if(isset($MAPPING_BOUNDARIES)){
-				$coorArr = explode(";",$MAPPING_BOUNDARIES);
-				if($coorArr && count($coorArr) == 4){
-					$boundLatMin = $coorArr[2];
-					$boundLatMax = $coorArr[0];
-					$boundLngMin = $coorArr[3];
-					$boundLngMax = $coorArr[1];
-					$latCen = ($boundLatMax + $boundLatMin)/2;
-					$longCen = ($boundLngMax + $boundLngMin)/2;
-				}
+			$coorArr = explode(";",$mappingBoundaries);
+			if($coorArr && count($coorArr) == 4){
+				$latCen = ($coorArr[0] + $coorArr[2])/2;
+				$longCen = ($coorArr[1] + $coorArr[3])/2;
 			}
 			?>
 	    	var dmOptions = {
@@ -202,15 +196,6 @@ $sharedMapManager->setTaxaArr($tArr);
 				<?php
 				$spCnt++;
 			}
-			if($boundLatMin > $minLat) $minLat = $boundLatMin;
-			if($boundLatMax < $maxLat) $maxLat = $boundLatMax;
-			if($boundLngMin > $minLng) $minLng = $boundLngMin;
-			if($boundLngMax < $maxLng) $maxLng = $boundLngMax;
-			//Add some padding
-			if($minLat > -80) $minLat -= 5;
-			if($maxLat < 80) $maxLat += 5;
-			if($minLng > -170) $minLng -= 5;
-			if($maxLng < 170) $maxLng += 5;
 			?>
 			var swLatLng = new google.maps.LatLng(<?php echo $minLat.','.$minLng; ?>);
 			var neLatLng = new google.maps.LatLng(<?php echo $maxLat.','.$maxLng; ?>);
@@ -219,7 +204,7 @@ $sharedMapManager->setTaxaArr($tArr);
 		}
 
 		function openIndPU(occId,clid){
-			newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width=1100,height=800,left=20,top=20');
+			newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=700,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			setTimeout(function () { newWindow.focus(); }, 0.5);
 		}

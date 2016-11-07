@@ -214,7 +214,7 @@ if($userId != $SYMB_UID) $isSelf = false;
 				<?php 
 				if($isSelf){ 
 					?>
-					<div><b>Current Password:</b> <input name="newloginpwd" id="newloginpwd" type="password" /></div>
+					<div><b>Current Password:</b> <input name="newloginpwd" type="password" /></div>
 					<?php
 				}
 				?>

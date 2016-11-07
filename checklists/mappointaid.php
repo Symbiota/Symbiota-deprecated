@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/ChecklistAdmin.php');
-header("Content-Type: text/html; charset=".$CHARSET);
+include_once($serverRoot.'/classes/ChecklistAdmin.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $latCenter = array_key_exists("latcenter",$_REQUEST)?$_REQUEST["latcenter"]:0; 
 $lngCenter = array_key_exists("lngcenter",$_REQUEST)?$_REQUEST["lngcenter"]:0; 
@@ -12,18 +12,17 @@ $clManager = new ChecklistAdmin();
 $clManager->setClid($clid);
 
 if(!is_numeric($latCenter) || !is_numeric($lngCenter) || (!$latCenter && !$lngCenter)){
-	if(isset($MAPPING_BOUNDARIES) && $MAPPING_BOUNDARIES){
-		$boundaryArr = explode(";",$MAPPING_BOUNDARIES);
-		$latCenter = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
-		$lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
-	}
+	$boundaryArr = explode(";",$mappingBoundaries);
+	$latCenter = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
+	$lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
 }
 ?>
 <html>
 	<head>
-		<title><?php echo $DEFAULT_TITLE; ?> - Coordinate Aid</title>
+		<title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+		<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false">
+		</script>
 	    <script type="text/javascript">
 		    var map;
 		    var currentMarker;

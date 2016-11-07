@@ -18,7 +18,7 @@ $imgRes = array_key_exists('imgres',$_POST)?$_POST['imgres']:'med';
 $reviewUid = array_key_exists('reviewuid',$_POST)?$_POST['reviewuid']:0;
 $reviewDate = array_key_exists('reviewdate',$_POST)?$_POST['reviewdate']:'';
 $reviewStatus = array_key_exists('reviewstatus',$_POST)?$_POST['reviewstatus']:0;
-$start = array_key_exists('start',$_POST)?$_POST['start']:0;
+$start = array_key_exists('start',$_POST)?$_POST['start']:0;;
 
 //Sanitation
 if(!is_numeric($collid)) $collid = 0;
@@ -26,7 +26,6 @@ if(!is_numeric($traitID)) $traitID = '';
 if(!is_numeric($tidFilter)) $tidFilter = '';
 if(!is_numeric($paneX)) $paneX = '';
 if(!is_numeric($paneY)) $paneY = '';
-if(!is_numeric($start)) $start = 0;
 
 $isEditor = 0; 
 if($SYMB_UID){
@@ -46,25 +45,48 @@ if($SYMB_UID){
 
 $attrManager = new OccurrenceAttributes();
 if($tidFilter) $attrManager->setTidFilter($tidFilter);
-$attrManager->setCollid($collid);
+if($collid) $attrManager->setCollid($collid);
 
 $statusStr = '';
 if($isEditor){
 	if($submitForm == 'Save and Next'){
-		$attrManager->setTargetOccid($_POST['targetoccid']);
-		if(!$attrManager->saveAttributes($_POST,$_POST['notes'],$SYMB_UID)){
-			$statusStr = $attrManager->getErrorStr();
+		$stateID = $_POST['stateid'];
+		$targetOccid = $_POST['targetoccid'];
+		$notes = $_POST['notes'];
+		if(is_array($stateID)){
+			foreach($stateID as $id){
+				if(!$attrManager->saveAttributes($id,$targetOccid,$notes,$SYMB_UID)){
+					$statusStr = $attrManager->getErrorStr();
+				}
+			}
+		}
+		else{
+			$attrManager->saveAttributes($stateID,$targetOccid,$notes,$SYMB_UID);
 		}
 	}
-	elseif($submitForm == 'Set Status and Save'){
-		$attrManager->setTargetOccid($_POST['targetoccid']);
-		$attrManager->saveReviewStatus($traitID,$_POST);
+	if($submitForm == 'Set Status and Save'){
+		$targetOccid = $_POST['targetoccid'];
+		$stateID = $_POST['stateid'];
+		$stateIdArr = array();
+		if(is_array($stateID)){
+			$stateIdArr = $stateID;
+		}
+		else{
+			$stateIdArr[] = $stateID;
+		}
+		$currentStatusArr = explode(',',$_POST['currentstates']);
+		$addArr = array_diff($stateIdArr,$currentStatusArr);
+		$delArr = array_diff($currentStatusArr,$stateIdArr);
+		$setStatus = $_POST['setstatus'];
+		$notes = $_POST['notes'];
+		$attrManager->saveReviewStatus($traitID,$targetOccid,$setStatus,$addArr,$delArr,$notes);
 	}
 }
 $imgArr = array();
 $occid = 0;
 $catNum = '';
 if($traitID){
+	$traitArr = $attrManager->getTraitArr($traitID);
 	$imgRetArr = array();
 	if($mode == 1){
 		$imgRetArr = $attrManager->getImageUrls();
@@ -79,7 +101,6 @@ if($traitID){
 		$catNum = $imgArr['catnum'];
 		unset($imgArr['catnum']);
 		$occid = key($imgRetArr);
-		if($occid) $attrManager->setTargetOccid($occid);
 	}
 }
 ?>
@@ -260,25 +281,10 @@ if($traitID){
 
 				return true;
 			}
-
-			function traitChanged(traitID){
-				$('input[name="stateid-'+traitID+'[]"]').each(function(){
-					if(this.checked == true){
-						$("div.child-"+this.value).show();
-					}
-					else{
-						$("div.child-"+this.value).hide();
-						$("input:checkbox.child-"+this.value).each(function(){ this.checked = false; });
-						$("input:radio.child-"+this.value).each(function(){ this.checked = false; });
-					}
-				});
-				$('input[name="submitform"]').prop('disabled', false);
-			}
-
 		</script>
 		<script src="../../js/symb/shared.js?ver=151229" type="text/javascript"></script>
 	</head>
-	<body>
+	<body style="width:900px">
 		<?php
 		$displayLeftMenu = false;
 		include($SERVER_ROOT.'/header.php');
@@ -319,7 +325,6 @@ if($traitID){
 			?>
 			<div style="position:absolute;top:0px;right:10px;width:300px;">
 				<?php
-				$attrNameArr = $attrManager->getTraitNames();
 				if($mode == 1){ 
 					?>
 					<fieldset style="margin-top:25px">
@@ -335,6 +340,7 @@ if($traitID){
 									<option value="">Select Trait</option>
 									<option value="">------------------------------------</option>
 									<?php 
+									$attrNameArr = $attrManager->getTraitNames();
 									if($attrNameArr){
 										foreach($attrNameArr as $ID => $aName){
 											echo '<option value="'.$ID.'" '.($traitID==$ID?'SELECTED':'').'>'.$aName.'</option>';
@@ -372,6 +378,7 @@ if($traitID){
 									<option value="">Select Trait</option>
 									<option value="">------------------------------------</option>
 									<?php 
+									$attrNameArr = $attrManager->getTraitNames();
 									if($attrNameArr){
 										foreach($attrNameArr as $ID => $aName){
 											echo '<option value="'.$ID.'" '.($traitID==$ID?'SELECTED':'').'>'.$aName.'</option>';
@@ -420,7 +427,7 @@ if($traitID){
 								<input id="paney1" name="paney" type="hidden" value="<?php echo $paneY; ?>" />
 								<input id="imgres1" name="imgres" type="hidden" value="<?php echo $imgRes; ?>" />
 								<input name="mode" type="hidden" value="2" />
-								<input name="start" type="hidden" value="" />
+								<input name="start" type="hidden" value="<?php echo $start; ?>" />
 								<input name="submitform" type="submit" value="Get Images" />
 							</div>
 							<div>
@@ -441,15 +448,48 @@ if($traitID){
 					<?php
 				} 
 				if($imgArr){
-					$traitArr = $attrManager->getTraitArr($traitID,($mode==2?true:false));
 					?>
 					<fieldset style="margin-top:20px">
-						<legend><b>Action Panel - <?php echo $traitArr[$traitID]['name']; ?></b></legend>
+						<legend><b>Action Panel</b></legend>
 						<form name="submitform" method="post" action="occurattributes.php" onsubmit="return verifySubmitForm(this)" >
 							<div>
 								<?php 
-								$attrManager->echoFormTraits($traitID);
+								$controlType = 'checkbox';
+								if($traitArr['props']){
+									$propArr = json_decode($traitArr['props']);
+									if(isset($propArr['controlType'])) $controlType = $propArr['controlType'];
+								}
+								$attrStateArr = $attrManager->getTraitStates($traitID);
+								$attributesCoded = array();
+								$attrNotes = '';
+								if($mode == 2){
+									$attributesCoded = $attrManager->getCodedAttribute($traitID,$occid);
+									$attrNotes = $attributesCoded['notes'];
+									unset($attributesCoded['notes']);
+								}
+								if($controlType == 'checkbox'){
+									foreach($attrStateArr as $sid => $sArr){
+										echo '<div title="'.$sArr['description'].'"><input name="stateid[]" type="checkbox" value="'.$sid.'" '.(in_array($sid, $attributesCoded)?'checked':'').' /> '.$sArr['name'].'</div>';
+									}
+								}
+								elseif($controlType == 'radio'){
+									foreach($attrStateArr as $sid => $sArr){
+										echo '<div title="'.$sArr['description'].'"><input name="stateid[]" type="radio" value="'.$sid.'" '.(in_array($sid, $attributesCoded)?'checked':'').' /> '.$sArr['name'].'</div>';
+									}
+								}
+								elseif($controlType == 'select'){
+									echo '<select name="stateid">';
+									echo '<option value="">Select State</option>';
+									echo '<option value="">------------------------------</option>';
+									foreach($attrStateArr as $sid => $sArr){
+										echo '<option value="'.$sid.'" '.(in_array($sid, $attributesCoded)?'selected':'').'>'.$sArr['name'].'</option>';
+									}
+									echo '</select>';
+								}
 								?>
+							</div>
+							<div style="margin:10px 5px;">
+								Notes: <input name="notes" type="text" style="width:200px" value="<?php echo $attrNotes; ?>" /> 
 							</div>
 							<div style="margin:20px">
 								<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
@@ -475,13 +515,14 @@ if($traitID){
 										</select>
 									</div>
 									<div>
+										<input name="currentstates" type="hidden" value="<?php echo implode(',',$attributesCoded); ?>" />
 										<input name="submitform" type="submit" value="Set Status and Save" />
 									</div>
 									<?php
 								}
 								else{
 									?>
-									<input name="submitform" type="submit" value="Save and Next" disabled />
+									<input name="submitform" type="submit" value="Save and Next" />
 									<?php
 								} 
 								?>
@@ -529,8 +570,5 @@ if($traitID){
 		} 
 		?>
 		</div>
-		<?php 
-		include($SERVER_ROOT.'/footer.php');
-		?>
 	</body>
 </html>

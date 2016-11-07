@@ -85,14 +85,10 @@ if($action == "Create Login"){
 				<?php 
 			}
 			?>
-			var pwd1 = f.pwd.value;
-			var pwd2 = f.pwd2.value;
+			var pwd1 = f.pwd.value.replace(/\s/g, "");
+			var pwd2 = f.pwd2.value.replace(/\s/g, "");
 			if(pwd1 == "" || pwd2 == ""){
-				alert("Both password fields must contain a value");
-				return false;
-			}
-			if(pwd1.charAt(0) == " " || pwd1.slice(-1) == " "){
-				alert("Password cannot start or end with a space, but they can include spaces within the password");
+				alert("Both password fields must contain a value.");
 				return false;
 			}
 			if(pwd1.length < 7){
@@ -110,8 +106,12 @@ if($action == "Create Login"){
 				window.alert("User Name must contain a value");
 				return false;
 			}
+		    if(f.login.value.instr(" ") > 0){
+				window.alert("Login name cannot contain spaces");
+				return false;
+			}
 			if( /[^0-9A-Za-z_!@#$-+]/.test( f.login.value ) ) {
-		        alert("Login name should only contain 0-9A-Za-z_!@ (spaces are not allowed)");
+		        alert("Login name should only contain 0-9A-Za-z_!@");
 		        return false;
 		    }
 			if(f.emailaddr.value.replace(/\s/g, "") == "" ){
@@ -145,6 +145,7 @@ if($action == "Create Login"){
 		echo "</div>";
 	}
 	?>
+	<!-- inner text -->
 	<div id="innertext">
 	<h1>Create New Profile</h1>
 	

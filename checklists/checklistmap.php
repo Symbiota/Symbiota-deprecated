@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
-header("Content-Type: text/html; charset=".$CHARSET);
+include_once($serverRoot.'/classes/ChecklistManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $clid = $_REQUEST['clid'];
 $thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;
@@ -24,11 +24,12 @@ if($coordArr){
 ?>
 <html>
 <head>
-	<title><?php echo $DEFAULT_TITLE; ?> - Checklist Coordinate Map</title>
+	<title><?php echo $defaultTitle; ?> - Checklist Coordinate Map</title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false">
+	</script>
 	<script type="text/javascript">
 		var map;
 		var useLLDecimal = true;

@@ -449,7 +449,7 @@ class ImageShared{
 
 	private function createNewImageGD($subExt, $newWidth, $qualityRating = 0){
 		$status = false;
-		ini_set('memory_limit','512M');
+		//ini_set('memory_limit','512M');
 
 		if(!$this->sourceWidth || !$this->sourceHeight){
 			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
@@ -481,7 +481,7 @@ class ImageShared{
 				//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 				imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$this->sourceWidth,$this->sourceHeight);
 		
-				//Irrelevant of import image, output JPG 
+				//Irrelavent of import image, output JPG 
 				$targetPath = $this->targetPath.$this->imgName.$subExt.'.jpg';
 				if($qualityRating){
 					$status = imagejpeg($tmpImg, $targetPath, $qualityRating);

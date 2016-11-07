@@ -7,8 +7,6 @@ ini_set('max_execution_time', 1200); //1200 seconds = 20 minutes
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
-$days = array_key_exists("days",$_REQUEST)?$_REQUEST["days"]:365;
-$months = array_key_exists("months",$_REQUEST)?$_REQUEST["months"]:12;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 
 $collManager = new CollectionProfileManager();
@@ -559,8 +557,6 @@ if($action != "Update Statistics"){
 								?>
 								<div style="clear:both;">&nbsp;</div>
 								<input type="hidden" name="collid" id="colltxt" value="" />
-								<input type="hidden" name="days" value="<?php echo $days; ?>" />
-								<input type="hidden" name="months" value="<?php echo $months; ?>" />
 							</form>
 							<?php
 						}
@@ -684,8 +680,6 @@ if($action != "Update Statistics"){
 											<div style="">
 												<form name="yearstats" style="margin-bottom:0px" action="collyearstats.php" method="post" target="_blank" onsubmit="">
 													<input type="hidden" name="collid" id="collid" value='<?php echo $collId; ?>' />
-													<input type="hidden" name="days" value="<?php echo $days; ?>" />
-													<input type="hidden" name="months" value="<?php echo $months; ?>" />
 													<input type="submit" name="action" value="Load Stats for Past Year" />
 												</form>
 											</div>
@@ -699,13 +693,6 @@ if($action != "Update Statistics"){
 											<?php
 										}
 										?>
-										<div style="margin-top:10px;">
-											<form name="orderstats" style="margin-bottom:0px" action="collorderstats.php" method="post" target="_blank" onsubmit="">
-												<input type="hidden" name="collid" id="collid" value='<?php echo $collId; ?>' />
-												<input type="hidden" name="totalcnt" id="totalcnt" value='<?php echo $results['SpecimenCount']; ?>' />
-												<input type="submit" name="action" value="Load Order Distribution" />
-											</form>
-										</div>
 									</div>
 									<div style="clear:both;"> </div>
 								</div>

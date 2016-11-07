@@ -3,7 +3,9 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceSupport.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../collections/misc/commentlist.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID){
+	header('Location: '.$SERVER_ROOT.'/profile/index.php?refurl=../../collections/misc/commentlist.php?'.$_SERVER['QUERY_STRING']);
+}
 
 $collid = $_REQUEST['collid'];
 $start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
@@ -30,27 +32,19 @@ if($SYMB_UID){
 $statusStr = '';
 $commentArr = null;
 if($isEditor){
-	$formSubmit = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
-	if($formSubmit){
-		if($formSubmit == 'Delete Comment'){
-			if(!$commentManager->deleteComment($_POST['comid'])){
-				$statusStr = $commentManager->getErrorStr();
-			}
+	if(array_key_exists('hidecomid',$_POST)){
+		if(!$commentManager->hideComment($_POST['hidecomid'])){
+			$statusStr = $commentManager->getErrorStr();
 		}
-		elseif($formSubmit == 'Make comment public'){
-			if(!$commentManager->setReviewStatus($_POST['comid'],1)){
-				$statusStr = $commentManager->getErrorStr();
-			}
+	}
+	elseif(array_key_exists('publiccomid',$_POST)){
+		if(!$commentManager->makeCommentPublic($_POST['publiccomid'])){
+			$statusStr = $commentManager->getErrorStr();
 		}
-		elseif($formSubmit == 'Hide Comment from Public'){
-			if(!$commentManager->setReviewStatus($_POST['comid'],2)){
-				$statusStr = $commentManager->getErrorStr();
-			}
-		}
-		elseif($formSubmit == 'Mark as reviewed'){
-			if(!$commentManager->setReviewStatus($_POST['comid'],3)){
-				$statusStr = $commentManager->getErrorStr();
-			}
+	}
+	elseif(array_key_exists('delcomid',$_POST)){
+		if(!$commentManager->deleteComment($_POST['delcomid'])){
+			$statusStr = $commentManager->getErrorStr();
 		}
 	}
 	$commentArr = $commentManager->getComments($collid, $start, $limit, $tsStart, $tsEnd, $uid, $rs);
@@ -182,7 +176,7 @@ if($isEditor){
 	</head>
 	<body>
 		<?php
-		$displayLeftMenu = false;
+		$displayLeftMenu = true;
 		include($SERVER_ROOT.'/header.php');
 		?>
 		<div class="navpath">
@@ -262,9 +256,8 @@ if($isEditor){
 							<input name="tsend" type="text" value="<?php echo $tsEnd; ?>" style="width:100px;" onchange="dateChanged(this)" />
 						</div>
 						<div>
-							<input name="rs" type="radio" value="1" <?php echo ($rs==1?'checked':''); ?> onchange="this.form.submit()" /> Public <br/>
-							<input name="rs" type="radio" value="2" <?php echo ($rs==2?'checked':''); ?> onchange="this.form.submit()" /> Non-public <br/>
-							<input name="rs" type="radio" value="3" <?php echo ($rs==3?'checked':''); ?> onchange="this.form.submit()" /> Reviewed <br/>
+							<input name="rs" type="radio" value="1" <?php echo ($rs==1?'checked':''); ?> onchange="this.form.submit()" /> Public 
+							<input name="rs" type="radio" value="2" <?php echo ($rs==2?'checked':''); ?> onchange="this.form.submit()" /> Non-public
 							<input name="rs" type="radio" value="0" <?php echo (!$rs?'checked':''); ?> onchange="this.form.submit()" /> All
 						</div>
 						<div>
@@ -277,15 +270,8 @@ if($isEditor){
 					foreach($commentArr as $comid => $cArr){
 						echo '<div style="margin:15px;">';
 						echo '<div style="margin-bottom:10px;"><a href="../individual/index.php?occid='.$cArr['occid'].'" target="_blank">'.$cArr['occurstr'].'</a></div>';
-						echo '<div>';
-						echo '<b>'.$userArr[$cArr['uid']].'</b> <span style="color:gray;">posted on '.$cArr['ts'].'</span>';
-						if($cArr['rs'] == 2 || $cArr['rs'] === '0'){
-							echo '<span style="margin-left:20px;"><b>Status:</b> </span><span style="color:red;" title="viewable by administrators only)">Not Public</span>';
-						}
-						elseif($cArr['rs'] == 3){
-							echo '<span style="margin-left:20px;"><b>Status:</b> </span><span style="color:orange;">Reviewed</span>';
-						}
-						echo '</div>';
+						echo '<div><b>'.$userArr[$cArr['uid']].'</b> <span style="color:gray;">posted on '.$cArr['ts'].'</span></div>';
+						if($cArr['rs'] == 0) echo '<div style="color:red;">Comment not public, may be due to abuse report (viewable to administrators only)</div>';
 						echo '<div style="margin:10px;">'.$cArr['str'].'</div>';
 						?>
 						<div style="margin:20px;">
@@ -298,20 +284,19 @@ if($isEditor){
 								<input name="uid" type="hidden" value="<?php echo $uid; ?>" />
 								<input name="rs" type="hidden" value="<?php echo $rs; ?>" />
 								<?php 
-								if($cArr['rs'] == 2){
-									echo '<input name="formsubmit" type="submit" value="Make comment public" />';
+								if($cArr['rs']){
+									echo '<input name="hidesubmit" type="submit" value="Hide Comment from Public" />';
+									echo '<input name="hidecomid" type="hidden" value="'.$comid.'" />';
 								}
 								else{
-									echo '<input name="formsubmit" type="submit" value="Hide Comment from Public" />';
+									echo '<input name="publicsubmit" type="submit" value="Make comment public" />';
+									echo '<input name="publiccomid" type="hidden" value="'.$comid.'" />';
 								}
 								?>
 								<span style="margin-left:20px;">
-									<input name="formsubmit" type="submit" value="Mark as reviewed" />
+									<input name="delcomid" type="hidden" value="<?php echo $comid; ?>" />
+									<input name="deletesubmit" type="submit" value="Delete Comment"  onclick="return confirm('Are you sure you want to delete this comment?')" />
 								</span>
-								<span style="margin-left:20px;">
-									<input name="formsubmit" type="submit" value="Delete Comment"  onclick="return confirm('Are you sure you want to delete this comment?')" />
-								</span>
-								<input name="comid" type="hidden" value="<?php echo $comid; ?>" />
 							</form>
 						</div>
 						<?php 

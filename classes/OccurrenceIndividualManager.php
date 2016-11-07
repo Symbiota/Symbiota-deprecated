@@ -258,14 +258,13 @@ class OccurrenceIndividualManager extends Manager{
 		return $retArr;
 	}
 
-	//Occurrence comment functions
 	public function getCommentArr($isEditor){
 		$retArr = array();
 		//return $retArr;
 		$sql = 'SELECT c.comid, c.comment, u.username, c.reviewstatus, c.initialtimestamp '.
 			'FROM omoccurcomments c INNER JOIN userlogin u ON c.uid = u.uid '.
 			'WHERE (c.occid = '.$this->occid.') ';
-		if(!$isEditor) $sql .= 'AND c.reviewstatus IN(1,3) ';
+		if(!$isEditor) $sql .= 'AND c.reviewstatus = 1 ';
 		$sql .= 'ORDER BY c.initialtimestamp';
 		//echo $sql.'<br/><br/>';
 		$result = $this->conn->query($sql);
@@ -321,19 +320,19 @@ class OccurrenceIndividualManager extends Manager{
 	public function reportComment($repComId){
 		$status = true;
 		if(!is_numeric($repComId)) return false;
-		if(isset($GLOBALS['ADMIN_EMAIL'])){
+		if(array_key_exists('adminEmail',$GLOBALS)){
 			//Set Review status to supress
  			$con = MySQLiConnectionFactory::getCon("write");
-			if(!$con->query('UPDATE omoccurcomments SET reviewstatus = 2 WHERE comid = '.$repComId)){
+			if(!$con->query('UPDATE omoccurcomments SET reviewstatus = 0 WHERE comid = '.$repComId)){
 				$this->errorMessage = 'ERROR changing comment status to needing review, Err msg: '.$con->error;
 				$status = false;
 			}
 			$con->close();
 			
 			//Email to portal admin
-			$emailAddr = $GLOBALS['ADMIN_EMAIL'];
-			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/collections/individual/index.php?occid='.$this->occid.'#commenttab';
-			$subject = $GLOBALS['DEFAULT_TITLE'].' inappropriate comment reported<br/>';
+			$emailAddr = $GLOBALS['adminEmail'];
+			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'/collections/individual/index.php?tabindex=2&occid='.$this->occid;
+			$subject = $GLOBALS['defaultTitle'].' inappropriate comment reported<br/>';
 			$bodyStr = 'The following comment has been recorted as inappropriate:<br/> '.
 			'<a href="'.$comUrl.'">'.$comUrl.'</a>';
 			$headerStr = "MIME-Version: 1.0 \r\n".
@@ -364,7 +363,6 @@ class OccurrenceIndividualManager extends Manager{
 		return $status;
 	}
 
-	//Genetic functions
 	public function getGeneticArr(){
 		$retArr = array();
 		if($this->occid){

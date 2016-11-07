@@ -60,7 +60,7 @@ class KeyManager{
 		$cnt = 0;
 		$childrenStr = trim(implode(',',$this->getChildrenArr($tidStr)).','.$tidStr,' ,'); 
 		do{
-			$sql = 'INSERT IGNORE INTO kmdescr( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) '.
+			$sql = 'INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) '.
 				'SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, '.
 				'd1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent '.
 				'FROM taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID '.

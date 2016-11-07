@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-header("Content-Type: text/html; charset=".$CHARSET);
+header("Content-Type: text/html; charset=".$charset);
 
 $latDef = array_key_exists("latdef",$_REQUEST)?$_REQUEST["latdef"]:0; 
 $lngDef = array_key_exists("lngdef",$_REQUEST)?$_REQUEST["lngdef"]:0; 
@@ -16,8 +16,8 @@ if(is_numeric($latDef) && is_numeric($lngDef)){
 	$lat = $latDef; 
 	$lng = $lngDef; 
 }
-elseif($MAPPING_BOUNDARIES){
-	$boundaryArr = explode(";",$MAPPING_BOUNDARIES);
+else{
+	$boundaryArr = explode(";",$mappingBoundaries);
 	$lat = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
 	$lng = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
 }
@@ -30,7 +30,7 @@ if(is_numeric($errRad)){
 	<head>
 		<title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+		<script src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
 	    <script type="text/javascript">
 		    var map;
 		    var currentMarker;
@@ -192,7 +192,7 @@ if(is_numeric($errRad)){
 	    </script>
 	</head> 
 	<body style="background-color:#ffffff;" onload="initialize()">
-		<div>
+		<div style="">
 			<div style="margin:3px;">
 				Click on the map to capture coordinates, or move the marker. Enter a number into the Uncertainty in Meters box to create an error radius circle around the marker.
 				You can edit the error radius circle by clicking on any of its sides and dragging to the size you want.

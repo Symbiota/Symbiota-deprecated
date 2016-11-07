@@ -11,20 +11,18 @@
 		if($taxonType == 5){
 			$sql = "SELECT DISTINCT v.vernacularname AS sciname ".
 				"FROM taxavernaculars v ".
-				"WHERE v.vernacularname LIKE '%".$queryString."%' ".
-				"limit 50 ";
+				"WHERE v.vernacularname LIKE '".$queryString."%' ".
+				"ORDER BY v.vernacularname ";
 		}
 		elseif($taxonType == 4){
 			$sql = "SELECT sciname ".
 				"FROM taxa ".
-				"WHERE rankid > 20 AND rankid < 140 AND sciname LIKE '".$queryString."%' ".
-				'LIMIT 20';
+				"WHERE rankid > 20 AND rankid < 140 AND sciname LIKE '".$queryString."%' ";
 		}
 		elseif($taxonType == 2){
 			$sql = "SELECT DISTINCT family AS sciname ".
 				"FROM taxstatus ".
-				"WHERE family LIKE '".$queryString."%' ".
-				"LIMIT 20";
+				"WHERE family LIKE '".$queryString."%' ";
 		}
 		else{
 			$sql = "SELECT DISTINCT sciname ".
@@ -36,8 +34,8 @@
 			else{
 				$sql .= "AND rankid >= 140 ";
 			}
-			$sql .= 'LIMIT 20';
 		}
+		$sql .= 'LIMIT 10';
 		$result = $con->query($sql);
 		while ($row = $result->fetch_object()) {
 			$returnArr[] = htmlentities($row->sciname);

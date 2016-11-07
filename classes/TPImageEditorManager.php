@@ -114,9 +114,7 @@ class TPImageEditorManager extends TPEditorManager{
 		$imgManager->setLocality($postArr['locality']);
 		$imgManager->setOccid($postArr['occid']);
 		$imgManager->setNotes($postArr['notes']);
-		$sort = $postArr['sortsequence'];
-		if(!$sort) $sort = 40;
-		$imgManager->setSortSeq($sort);
+		$imgManager->setSortSeq($postArr['sortsequence']);
 
 		$imgManager->setTargetPath($this->family.'/'.date('Ym').'/');
 		if($imgPath){

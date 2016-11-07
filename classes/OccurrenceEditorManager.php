@@ -793,9 +793,6 @@ class OccurrenceEditorManager {
 						$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
 					}
 				}
-				//Temp code needed for WeDigBio data entry event, will remove or refactor afterward
-				$occArr['genericcolumn2'] = $_SERVER['REMOTE_ADDR'];
-				////////////////
 				foreach($occArr as $oField => $ov){
 					if(in_array($oField,$this->occFieldArr) && $oField != 'observeruid'){
 						$vStr = $this->cleanInStr($ov);
@@ -930,10 +927,7 @@ class OccurrenceEditorManager {
 			//if(array_key_exists('localitysecurity',$occArr) && $occArr['localitysecurity']) $occArr['localitysecurity'] = $occArr['localitysecurity'];
 			if(!isset($occArr['dateentered']) || !$occArr['dateentered']) $occArr['dateentered'] = date('Y-m-d H:i:s');
 			if(!isset($occArr['basisofrecord']) || !$occArr['basisofrecord']) $occArr['basisofrecord'] = (strpos($this->collMap['colltype'],'Observations') !== false?'HumanObservation':'PreservedSpecimen');
-			//Temp code for WeDigBio date entry event
-			$occArr['genericcolumn2'] = $_SERVER['REMOTE_ADDR'];
-			///////////////////
-
+			
 			foreach($fieldArr as $fieldStr => $fieldType){
 				$fieldValue = '';
 				if(array_key_exists($fieldStr,$occArr)) $fieldValue = $occArr[$fieldStr];
@@ -1079,22 +1073,6 @@ class OccurrenceEditorManager {
 				}
 				$rs->free();
 				$archiveArr['imgs'] = $imgArr;
-				//Delete images
-				if($imgArr){
-					$imgidStr = implode(',',array_keys($imgArr));
-					//Remove any OCR text blocks linked to the image
-					if(!$this->conn->query('DELETE FROM specprocessorrawlabels WHERE (imgid IN('.$imgidStr.'))')){
-						$this->errorArr[] = 'ERROR removing OCR blocks linked to images: '.$this->conn->error;
-					}
-					//Remove image tags
-					if(!$this->conn->query('DELETE FROM imagetag WHERE (imgid IN('.$imgidStr.'))')){
-						$this->errorArr[] = 'ERROR removing imageTags linked to images: '.$this->conn->error;
-					}
-					//Remove images
-					if(!$this->conn->query('DELETE FROM images WHERE (imgid IN('.$imgidStr.'))')){
-						$this->errorArr[] = 'ERROR removing image links: '.$this->conn->error;
-					}
-				}
 
 				//Archive Exsiccati info
 				$exsArr = array();

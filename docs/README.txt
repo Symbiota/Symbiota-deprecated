@@ -77,7 +77,7 @@ TROUBLESHOOTING
 DEVELOPER GUIDELINES
 ====================
 
-Anyone willing to collaborate is welcome. Please contact the authors 
+Anyone willing to collaborate is welcome. Please contact the author 
 about your plans and for SVN access:
 egbot at asu dot edu
 

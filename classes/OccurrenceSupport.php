@@ -1,6 +1,6 @@
 <?php
-include_once($SERVER_ROOT.'/config/dbconnection.php');
-include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
+include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 
 class OccurrenceSupport {
 
@@ -26,8 +26,13 @@ class OccurrenceSupport {
 			if(is_numeric($uid) && $uid){
 				$sqlBase .= ' AND c.uid = '.$uid;
 			}
-			if(is_numeric($reviewStatus) && $reviewStatus){
-				$sqlBase .= ' AND c.reviewstatus IN('.($reviewStatus==2?$reviewStatus.',0':$reviewStatus).') ';
+			if(is_numeric($reviewStatus)){
+				if($reviewStatus == 1){
+					$sqlBase .= ' AND c.reviewstatus = 1 ';
+				}
+				elseif($reviewStatus == 2){
+					$sqlBase .= ' AND c.reviewstatus = 0 ';
+				}
 			}
 			if(preg_match('/^\d{4}-\d{2}-\d{2}/', $tsStart)){
 				$sqlBase .= ' AND initialtimestamp >= "'.$tsStart.'"';
@@ -62,16 +67,23 @@ class OccurrenceSupport {
 		return $retArr;
 	}
 
-	public function setReviewStatus($comid,$reviewStatus){
+	public function hideComment($repComid){
 		$status = true;
-		if(is_numeric($comid) && is_numeric($reviewStatus)){
-			$sql = 'UPDATE omoccurcomments SET reviewstatus = '.$reviewStatus.' WHERE comid = '.$comid;
-			//echo $sql;
-			if(!$this->conn->query($sql)){
-				$statusStr = 'Public';
-				if($reviewStatus == 2) $statusStr = 'Non-public';
-				elseif($reviewStatus == 3) $statusStr = 'Reviewed';
-				$this->errorMessage = 'ERROR changing comment status to '.$statusStr.': '.$con->error;
+		//Set Review status to supress
+		if(is_numeric($repComid)){
+			if(!$this->conn->query('UPDATE omoccurcomments SET reviewstatus = 0 WHERE comid = '.$repComid)){
+				$this->errorMessage = 'ERROR hiding comment: '.$this->conn->error;
+				$status = false;
+			}
+		}
+		return $status;
+	}
+	
+	public function makeCommentPublic($comid){
+		$status = true;
+		if(is_numeric($comid)){
+			if(!$this->conn->query('UPDATE omoccurcomments SET reviewstatus = 1 WHERE comid = '.$comid)){
+				$this->errorMessage = 'ERROR making comment public: '.$con->error;
 				$status = false;
 			}
 		}

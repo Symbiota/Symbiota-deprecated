@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-header("Content-Type: text/html; charset=".$CHARSET);
+header("Content-Type: text/html; charset=".$charset);
 
 $formName = array_key_exists("formname",$_REQUEST)?$_REQUEST["formname"]:"";
 $latName = array_key_exists("latname",$_REQUEST)?$_REQUEST["latname"]:""; 
@@ -19,8 +19,8 @@ if(is_numeric($latDef) && is_numeric($lngDef)){
 	$lat = $latDef; 
 	$lng = $lngDef; 
 }
-elseif($MAPPING_BOUNDARIES){
-	$boundaryArr = explode(";",$MAPPING_BOUNDARIES);
+elseif($mappingBoundaries){
+	$boundaryArr = explode(";",$mappingBoundaries);
 	$lat = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
 	$lng = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
 }
@@ -31,9 +31,9 @@ else{
 ?>
 <html>
 	<head>
-		<title><?php echo $DEFAULT_TITLE; ?> - Coordinate Aid</title>
+		<title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+		<script src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
 	    <script type="text/javascript">
 		    var map;
 		    var currentMarker;

@@ -380,40 +380,6 @@ if($collMap){
 								<input name="notes3" type="text" style="width:275px;" />
 							</span>
 						</div>
-						<div style="width:100%;cursor:pointer;text-align:right;margin-top:-15;" onclick="toggle('img4div')" title="Add a forth Image">
-							<img src="../../images/add.png" style="width:15px;" />
-						</div>
-					</div>
-					<div id="img4div" style='padding:10px;width:700px;border:1px solid yellow;background-color:FFFF99;display:none;'>
-						<div>
-							Image 4: <input name="imgfile4" type="file" size="70" onchange="verifyImageSize(this)" />
-							<input type="button" value="Reset" onclick="document.obsform.imgfile4.value = ''">
-						</div>
-						<div style="margin:5px;">
-							Caption: 
-							<input name="caption4" type="text" style="width:200px;" />
-							<span style="margin-left:20px;">
-								Image Remarks: 
-								<input name="notes4" type="text" style="width:275px;" />
-							</span>
-						</div>
-						<div style="width:100%;cursor:pointer;text-align:right;margin-top:-15;" onclick="toggle('img5div')" title="Add a fifth Image">
-							<img src="../../images/add.png" style="width:15px;" />
-						</div>
-					</div>
-					<div id="img5div" style='padding:10px;width:700px;border:1px solid yellow;background-color:FFFF99;display:none;'>
-						<div>
-							Image 5: <input name="imgfile5" type="file" size="70" onchange="verifyImageSize(this)" />
-							<input type="button" value="Reset" onclick="document.obsform.imgfile5.value = ''">
-						</div>
-						<div style="margin:5px;">
-							Caption: 
-							<input name="caption5" type="text" style="width:200px;" />
-							<span style="margin-left:20px;">
-								Image Remarks: 
-								<input name="notes5" type="text" style="width:275px;" />
-							</span>
-						</div>
 					</div>
 					<div style="margin-left:10px;">* Uploading web-ready images recommended. Upload image size can not be greater than <?php echo ($maxUpload/1000000); ?>MB</div>
 				</fieldset>
@@ -434,5 +400,6 @@ if($collMap){
 <?php 	
 	include($SERVER_ROOT.'/footer.php');
 ?>
+
 </body>
 </html>

@@ -1,8 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
-include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
-header("Content-Type: text/html; charset=".$CHARSET);
+include_once($serverRoot.'/classes/TaxonProfileMap.php');
+include_once($serverRoot.'/classes/MapInterfaceManager.php');
+header("Content-Type: text/html; charset=".$charset);
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
 header('Expires: 0'); // Proxies.
@@ -164,7 +164,7 @@ if($coordArr && !is_numeric($coordArr)){
 	<script type="text/javascript" src="../../js/jquery.mobile-1.4.0.min.js"></script>
 	<script type="text/javascript" src="../../js/jquery-1.9.1.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui-1.10.4.js"></script>
-	<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+	<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing"></script>
 	<script type="text/javascript" src="../../js/jscolor/jscolor.js"></script>
 	<script type="text/javascript">
 		$(function() {

@@ -10,8 +10,6 @@ $famArrJson = array_key_exists("famarrjson",$_REQUEST)?$_REQUEST["famarrjson"]:'
 $orderArrJson = array_key_exists("orderarrjson",$_REQUEST)?$_REQUEST["orderarrjson"]:'';
 $geoArrJson = array_key_exists("geoarrjson",$_REQUEST)?$_REQUEST["geoarrjson"]:'';
 $collId = array_key_exists("collids",$_REQUEST)?$_REQUEST["collids"]:'';
-$days = array_key_exists("days",$_REQUEST)?$_REQUEST["days"]:365;
-$months = array_key_exists("months",$_REQUEST)?$_REQUEST["months"]:12;
 
 $collManager = new CollectionProfileManager();
 
@@ -70,8 +68,8 @@ if($action == 'Download Family Dist' || $action == 'Download Geo Dist' || $actio
 }
 if($action == 'Download CSV'){
 	$fileName = 'year_stats.csv';
-	$headerArr = $collManager->getYearStatsHeaderArr($months);
-	$dataArr = $collManager->getYearStatsDataArr($collId,$days);
+	$headerArr = $collManager->getYearStatsHeaderArr($collId);
+	$dataArr = $collManager->getYearStatsDataArr($collId);
 }
 if($action == 'Download Stats per Coll'){
 	$header = array('Collection','Specimens','Georeferenced','Imaged','Species ID','Families','Genera','Species','Total Taxa','Types');
