@@ -340,7 +340,7 @@ if($clid && $isEditor){
                                 if($nonVoucherArr = $clManager->getNonVoucheredTaxa($startPos)){
                                     foreach($nonVoucherArr as $family => $tArr){
                                         echo '<div style="font-weight:bold;">'.strtoupper($family).'</div>';
-                                        echo '<div style="margin:10px;text-decoration:italic;">';
+                                        echo '<div style="margin:10px;font-style:italic;">';
                                         foreach($tArr as $tid => $sciname){
                                             ?>
                                             <div>
