@@ -158,9 +158,7 @@ $specImgArr = $occManager->getImageMap();
 								<img src="<?php echo $imgUrl;?>" style="width:250px;" title="<?php echo $imgArr["caption"]; ?>" />
 							</a>
 							<?php 
-							if($origUrl){
-								echo "<div><a href='".$origUrl."'>Click on Image to Enlarge</a></div>";
-							}
+							echo "<div><a href='".($origUrl?$origUrl:$imgUrl)."'>Click on Image to Enlarge</a></div>";
 							?>
 						</td>
 						<td style="text-align:left;padding:10px;">
