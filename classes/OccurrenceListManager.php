@@ -18,6 +18,7 @@ class OccurrenceListManager extends OccurrenceManager{
 
 	public function getSpecimenMap($pageRequest,$cntPerPage){
 		$returnArr = Array();
+		$imageSearchArr = array();
 		$sqlWhere = $this->getSqlWhere();
 		if(!$this->recordCount || $this->reset){
 			$this->setRecordCnt($sqlWhere);
@@ -73,6 +74,7 @@ class OccurrenceListManager extends OccurrenceManager{
 				$returnArr[$collIdStr][$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
 				$returnArr[$collIdStr][$occId]["date"] = $row->date;
 				$returnArr[$collIdStr][$occId]["elev"] = $row->elev;
+				$imageSearchArr[] = $occId;
 			}
 			else{
 				$securityStr = '<span style="color:red;">Detailed locality information protected. ';
@@ -86,7 +88,19 @@ class OccurrenceListManager extends OccurrenceManager{
 			}
 		}
 		$result->free();
-		$returnArr = $this->setImages($returnArr);
+		//Set images
+		if($imageSearchArr){
+			$sql = 'SELECT o.collid, o.occid, i.thumbnailurl '.
+					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+					'WHERE o.occid IN('.implode(',',$imageSearchArr).')';
+			$rs = $this->conn->query($sql);
+			$previousOccid = 0;
+			while($r = $rs->fetch_object()){
+				if($r->occid != $previousOccid) $returnArr[$r->collid][$r->occid]['img'] = $r->thumbnailurl;
+				$previousOccid = $r->occid;
+			}
+			$rs->free();
+		}
 		return $returnArr;
 	}
 	
@@ -184,26 +198,6 @@ class OccurrenceListManager extends OccurrenceManager{
 		$this->sortOrder = $so;
 	}
 	
-	private function setImages($recArr){
-		$occArr = array();
-		foreach($recArr as $collid => $oArr){
-			$occArr = array_merge($occArr,array_keys($oArr));
-		}
-		if($occArr){
-			$sql = 'SELECT o.collid, o.occid, i.thumbnailurl '.
-				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-				'WHERE o.occid IN('.implode(',',$occArr).')';
-			$rs = $this->conn->query($sql);
-			$previousOccid = 0;
-			while($r = $rs->fetch_object()){
-				if($r->occid != $previousOccid) $recArr[$r->collid][$r->occid]['img'] = $r->thumbnailurl;
-				$previousOccid = $r->occid;
-			}
-			$rs->free();
-		}
-		return $recArr;
-	}
-
 	public function getCloseTaxaMatch($name){
 		$retArr = array();
 		$searchName = trim($name); 

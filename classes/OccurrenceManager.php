@@ -330,20 +330,23 @@ class OccurrenceManager{
 			$searchStr = str_replace("%apos;","'",$this->searchTermsArr["collector"]);
 			$collectorArr = explode(";",$searchStr);
 			$tempArr = Array();
-			foreach($collectorArr as $k => $value){
-				if($value == 'NULL'){
+			if(count($collectorArr) == 1){
+				if($collectorArr[0] == 'NULL'){
 					$tempArr[] = '(o.recordedBy IS NULL)';
-					$collectorArr[$k] = 'Collector IS NULL';
+					$collectorArr[] = 'Collector IS NULL';
 				}
 				else{
 					//$tempArr[] = '(o.recordedBy LIKE "%'.trim($value).'%")';
 					$tempInnerArr = array();
-					$collValueArr = explode(" ",trim($value));
+					$collValueArr = explode(" ",trim($collectorArr[0]));
 					foreach($collValueArr as $collV){
 						$tempInnerArr[] = '(MATCH(f.recordedby) AGAINST("'.$collV.'")) ';
 					}
 					$tempArr[] = implode(' AND ', $tempInnerArr);
 				}
+			}
+			elseif(count($collectorArr) > 1){
+				$tempArr[] = '(MATCH(f.recordedby) AGAINST("'.implode(' ',$collectorArr).'")) ';
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
 			$this->localSearchArr[] = implode(', ',$collectorArr);

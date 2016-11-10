@@ -99,6 +99,9 @@ if($SYMB_UID){
 	elseif(array_key_exists("RareSppReader",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["RareSppReader"])){
 		$displayLocality = true;
 	}
+	elseif(array_key_exists('CollAdmin',$USER_RIGHTS) || array_key_exists('CollEditor',$USER_RIGHTS)){
+		$displayLocality = true;
+	}
 	
 	//Form action submitted
 	if(array_key_exists('delvouch',$_GET) && $occid){
@@ -557,34 +560,30 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							}
 							?>
 						</div>
-						<?php 
-						$localityStr1 = $occArr['country'].', ';
-						$localityStr1 .= $occArr['stateprovince'].', ';
+						<?php
+						$localityStr1 = '';
+						if($occArr['country']) $localityStr1 .= $occArr['country'].', ';
+						if($occArr['stateprovince']) $localityStr1 .= $occArr['stateprovince'].', ';
 						if($occArr['county']) $localityStr1 .= $occArr['county'].', ';
-					  if($occArr['municipality']) $localityStr1 .= $occArr['municipality'].'.  ';
+						if($occArr['municipality']) $localityStr1 .= $occArr['municipality'].', ';
 						?>
 						<div>
 							<b>Locality:</b>
 							<?php 
-							echo $localityStr1;
 							if($displayLocality){
-								echo $occArr['locality'];
+								$localityStr1 .= $occArr['locality'];
 							}
 							else{
-								?>
-								<span style="color:red;">
-									Detailed locality information protected. 
-									<?php 
-									if($occArr['localitysecurityreason']){
-										echo $occArr['localitysecurityreason'];
-									}
-									else{
-										echo 'This is typically done to protect rare or threatened species localities.';
-									}
-									?>
-								</span>
-								<?php 
+								$localityStr1 .= '<span style="color:red;">Detailed locality information protected.'; 
+								if($occArr['localitysecurityreason']){
+									$localityStr1 .= $occArr['localitysecurityreason'];
+								}
+								else{
+									$localityStr1 .= 'This is typically done to protect rare or threatened species localities.';
+								}
+								$localityStr1 .= '</span>';
 							}
+							echo trim($localityStr1,',; ');
 							?>
 						</div>
 						<?php 
@@ -729,9 +728,12 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										?>
 										<div style='float:left;text-align:center;padding:5px;'>
 											<a href='<?php echo $imgArr['url']; ?>' target="_blank">
-												<img border=1 width='130' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
+												<img border=1 width='180' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
 											</a>
-											<?php if($imgArr['lgurl']) echo '<br/><a href="'.$imgArr['lgurl'].'" target="_blank">Large Version</a>'; ?>
+											<?php 
+											echo '<div><a href="'.$imgArr['url'].'" target="_blank">Open Medium Image</a></div>';
+											if($imgArr['lgurl']) echo '<div><a href="'.$imgArr['lgurl'].'" target="_blank">Open Large Image</a></div>';
+											?>
 										</div>
 										<?php 
 									}

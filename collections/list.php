@@ -387,7 +387,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 								<div style="margin:4px">
 									<?php 
 									echo '<span style="width:150px;">'.$fieldArr["accession"].'</span>';
-									echo '<span style="width:200px;margin-left:30px;">'.$fieldArr["collector"].'&nbsp;&nbsp;&nbsp;'.$fieldArr["collnumber"].'</span>';
+									echo '<span style="width:200px;margin-left:30px;">'.$fieldArr["collector"].'&nbsp;&nbsp;&nbsp;'.(isset($fieldArr["collnumber"])?$fieldArr["collnumber"]:'').'</span>';
 									if(isset($fieldArr["date"])) echo '<span style="margin-left:30px;">'.$fieldArr["date"].'</span>'; 
 									?>
 								</div>
