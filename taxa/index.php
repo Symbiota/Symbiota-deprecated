@@ -74,7 +74,7 @@ $descr = Array();
 		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
 		var tid = <?php echo $taxonManager->getTid(); ?>
 	</script>
-	<script type="text/javascript" src="../js/symb/taxa.index.js?ver=20160527"></script>
+	<script type="text/javascript" src="../js/symb/taxa.index.js?ver=20161110"></script>
 	<script type="text/javascript" src="../js/symb/taxa.editor.js?ver=20140619"></script>
 </head>
 <body>
@@ -464,7 +464,7 @@ if($taxonManager->getSciName() != "unknown"){
 	echo '<div style="margin-top:15px;text-align:center;">';
 	if($taxonRank > 180){
 		if($taxonRank > 180 && $links){
-			echo '<a href="" onclick="toggle(\'links\');return false;">'.$LANG['WEB_LINKS'].'</a>';
+			echo '<a href="#" onclick="toggleLinks(\'links\');return false">'.$LANG['WEB_LINKS'].'</a>';
 		}
 	}
 
@@ -479,7 +479,7 @@ if($taxonManager->getSciName() != "unknown"){
 	
 	//List Web Links as a list
 	if($taxonRank > 180 && $links){
-		echo '<div class="links" style="display:none;"><h1 style="margin-left:20px;">'.$LANG['WEB_LINKS'].'</h1><ul style="margin-left:30px;">';
+		echo '<div id="links" style="display:none;"><h1 style="margin-left:20px;">'.$LANG['WEB_LINKS'].'</h1><ul style="margin-left:30px;">';
 		foreach($links as $l){
 			$urlStr = str_replace('--SCINAME--',urlencode($taxonManager->getSciName()),$l['url']);
 			echo '<li><a href="'.$urlStr.'" target="_blank">'.$l['title'].'</a></li>';

@@ -348,6 +348,10 @@ ALTER TABLE `taxa`
   ADD UNIQUE INDEX `sciname_unique` (`SciName` ASC, `RankId` ASC, `Author` ASC),
   ADD INDEX `sciname_index` (`SciName` ASC);
 
+ALTER TABLE `taxalinks` 
+  ADD COLUMN `inherit` INT NULL DEFAULT 1 AFTER `icon`;
+
+
 # Needed for FP functions
 CREATE INDEX idx_taxacreated ON taxa(initialtimestamp);
 

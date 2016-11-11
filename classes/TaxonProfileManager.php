@@ -525,28 +525,30 @@ class TaxonProfileManager {
 		$links = Array();
 		//Get hierarchy string
 		if($this->tid){
-			//Get links
-			$sql = 'SELECT DISTINCT tl.tlid, tl.url, tl.icon, tl.title, tl.notes, tl.sortsequence '.
-				'FROM taxalinks tl LEFT JOIN taxaenumtree tn ON tl.tid = tn.parenttid '.
-				'WHERE (tn.tid  = '.$this->tid.') OR (tl.tid = '.$this->tid.') ';
+			$parArr = array($this->tid);
+			$rsPar = $this->con->query('SELECT parenttid FROM taxaenumtree WHERE tid = '.$this->tid.' AND taxauthid = 1');
+			while($rPar = $rsPar->fetch_object()){
+				$parArr[] = $rPar->parenttid;
+			}
+			$rsPar->free();
+
+			$sql = 'SELECT DISTINCT tlid, url, icon, title, notes, sortsequence '.
+				'FROM taxalinks '.
+				'WHERE (tid IN('.implode(',',$parArr).')) ';
 			//echo $sql; exit;
 			$result = $this->con->query($sql);
-			$tlid = 0;
 			while($r = $result->fetch_object()){
-				if($tlid != $r->tlid){
-					$tlid = $r->tlid;
-					$links[] = array('title'=>$r->title,'url'=>$r->url,'icon'=>$r->icon,'notes'=>$r->notes,'sortseq'=>$r->sortsequence);
-					usort($links, function($a, $b) {
-						if($a['sortseq'] == $b['sortseq']){
-							return (strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
-						}
-						else{
-							return $a['sortseq'] - $b['sortseq'];
-						}
-					});
-				}
+				$links[] = array('title' => $r->title, 'url' => $r->url, 'icon' => $r->icon, 'notes' => $r->notes, 'sortseq' => $r->sortsequence);
 			}
 			$result->free();
+			usort($links, function($a, $b) {
+				if($a['sortseq'] == $b['sortseq']){
+					return (strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
+				}
+				else{
+					return $a['sortseq'] - $b['sortseq'];
+				}
+			});
 		}
 		return $links;
 	}
