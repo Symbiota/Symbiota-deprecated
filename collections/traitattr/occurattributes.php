@@ -125,38 +125,6 @@ if($traitID){
 					,viewportWidth: <?php echo $paneX; ?>
 			        ,viewportHeight: <?php echo $paneY; ?>
 				});
-
-				$("#taxonfilter").autocomplete({ 
-					source: "rpc/getTaxonFilter.php", 
-					dataType: "json",
-					minLength: 3,
-					select: function( event, ui ) {
-						$("#tidfilter").val(ui.item.id);
-					}
-				});
-
-				$("#taxonfilter").change(function(){
-					$("#tidfilter").val("");
-					if($( this ).val() != ""){
-						$( "#filtersubmit" ).prop( "disabled", true );
-						$( "#verify-span" ).show();
-						$( "#notvalid-span" ).hide();
-						$.ajax({
-							type: "POST",
-							url: "rpc/getTaxonFilter.php",
-							data: { term: $( this ).val(), exact: 1 }
-						}).done(function( msg ) {
-							if(msg == ""){
-								$( "#notvalid-span" ).show();
-							}
-							else{
-								$("#tidfilter").val(msg[0].id);
-							}
-							$( "#filtersubmit" ).prop( "disabled", false );
-							$( "#verify-span" ).hide();
-						});
-					}
-				});
 			});
 
 			function setImgRes(){
@@ -261,21 +229,8 @@ if($traitID){
 				return true;
 			}
 
-			function traitChanged(traitID){
-				$('input[name="stateid-'+traitID+'[]"]').each(function(){
-					if(this.checked == true){
-						$("div.child-"+this.value).show();
-					}
-					else{
-						$("div.child-"+this.value).hide();
-						$("input:checkbox.child-"+this.value).each(function(){ this.checked = false; });
-						$("input:radio.child-"+this.value).each(function(){ this.checked = false; });
-					}
-				});
-				$('input[name="submitform"]').prop('disabled', false);
-			}
-
 		</script>
+		<script src="../../js/symb/collections.traitattr.js" type="text/javascript"></script>
 		<script src="../../js/symb/shared.js?ver=151229" type="text/javascript"></script>
 	</head>
 	<body>
@@ -317,7 +272,7 @@ if($traitID){
 		<?php
 		if($collid){
 			?>
-			<div style="position:absolute;top:0px;right:10px;width:300px;">
+			<div style="position:absolute;top:0px;right:0px;width:290px;">
 				<?php
 				$attrNameArr = $attrManager->getTraitNames();
 				if($mode == 1){ 
@@ -519,6 +474,9 @@ if($traitID){
 						?>
 					</div>
 					<?php
+				}
+				else{
+					echo '<div style="margin:50px;color:red;font-weight:bold;font-size:150%">No images available matching taxon search criteria</div>';
 				}
 				?>
 			</div>
