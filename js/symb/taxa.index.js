@@ -9,6 +9,21 @@ $(document).ready(function() {
 
 });
 
+function toggle(target){
+	var divObjs = document.getElementsByTagName("span");
+  	for (i = 0; i < divObjs.length; i++) {
+  		var divObj = divObjs[i];
+  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
+			if(divObj.style.display=="none"){
+				divObj.style.display="";
+			}
+		 	else {
+		 		divObj.style.display="none";
+		 	}
+		}
+	}
+}
+
 function toggleLinks(target){
 	var ele = document.getElementById(target);
 	if(ele){

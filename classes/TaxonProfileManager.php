@@ -367,8 +367,8 @@ class TaxonProfileManager {
  			$str = array_shift($this->vernaculars);
  		}
  		if($this->vernaculars){
- 			$str .= "<span class='verns' onclick=\"javascript: toggle('verns');\" style='cursor:pointer;display:inline;font-size:70%;' title='Click here to show more common names'>,&nbsp;&nbsp;more...</span>";
- 			$str .= "<span class='verns' onclick=\"javascript: toggle('verns');\" style='display:none;'>, ";
+ 			$str .= "<span class='verns' onclick=\"toggle('verns');\" style='cursor:pointer;display:inline;font-size:70%;' title='Click here to show more common names'>,&nbsp;&nbsp;more...</span>";
+ 			$str .= "<span class='verns' onclick=\"toggle('verns');\" style='display:none;'>, ";
  			$str .= implode(", ",$this->vernaculars);
  			$str .= "</span>";
  		}
@@ -412,8 +412,8 @@ class TaxonProfileManager {
 	 					$str = $value;
 	 					break;
 	 				case 1:
-	 					$str .= "<span class='syns' onclick=\"javascript: toggle('syns');\" style=\"cursor:pointer;display:inline;font-size:70%;vertical-align:sub\" title='Click here to show more synonyms'>,&nbsp;&nbsp;more</span>";
-	 					$str .= "<span class='syns' onclick=\"javascript: toggle('syns');\" style=\"display:none;\">, ".$value;
+	 					$str .= "<span class='syns' onclick=\"toggle('syns');\" style=\"cursor:pointer;display:inline;font-size:70%;vertical-align:sub\" title='Click here to show more synonyms'>,&nbsp;&nbsp;more</span>";
+	 					$str .= "<span class='syns' onclick=\"toggle('syns');\" style=\"display:none;\">, ".$value;
 	 					break;
 	 				default:
 	 					$str .= ", ".$value;
