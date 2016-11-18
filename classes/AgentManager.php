@@ -172,8 +172,64 @@ class AgentManager{
          $result = preg_replace('/ +/',' ',$result);  
        }
        return $result;
-    }    
-    
+    }
+
+    /**
+     * Method to query for and list agent names matching a provided string. Suitable for use by a web service that
+     * returns json.
+     *
+     * @param text, string to search for in the agent names, if first character
+     * is a '^', does not add wildcards to the wildcard search string.
+     *
+     * @return string list of query results as agent names, formated for html display.
+     */
+    public function agentSearch($text,$regexsearch=false) {
+        global $clientRoot;
+
+        $agents = array();
+        // attempt to recognize a request to do a regex search
+        $pattern = '/[[^$+]/';
+        if (preg_match($pattern,$text,$m)==1) {
+            $regexsearch = true;
+        }
+        // recognize if the search is to be limited to a particular atomic name field
+        $targetfield = "n.name";
+        if (preg_match('/^(familyname|firstname|middlename|namestring|yearofbirth|yearofdeath)=(.*)$/',$text,$matches)==1) {
+            $text = $matches[2];
+            $targetfield = "a.".$matches[1];
+        }
+        if ($regexsearch) {
+            $sql = "select a.agentid, a.type, prefix, firstname, middlename, familyname, suffix, namestring, yearofbirth, yearofbirthmodifier, yearofdeath, yearofdeathmodifier, living, curated, n.name, '' as score from agents a left join agentnames n on a.agentid = n.agentid where $targetfield rlike ? order by a.type desc, a.familyname asc, a.namestring asc ";
+        } else {
+            $sql = "select a.agentid, a.type, prefix, firstname, middlename, familyname, suffix, namestring, yearofbirth, yearofbirthmodifier, yearofdeath, yearofdeathmodifier, living, curated, n.name, if(n.name=?,'Exact', truncate(match (n.name) against ( ? ) , 2)) as score from agents a left join agentnames n on a.agentid = n.agentid where match (n.name) against ( ? ) or $targetfield like ? order by a.type desc, a.familyname asc, a.namestring asc ";
+        }
+        if ($statement = $this->conn->prepare($sql)) {
+            $wildtext = "%$text%";
+            if ($regexsearch) {
+                $statement->bind_param("s", $text);
+            } else {
+                $statement->bind_param("ssss", $text, $text, $text, $wildtext);
+            }
+            $statement->execute();
+            $statement->bind_result($agentid, $type, $prefix, $firstname, $middlename, $familyname, $suffix, $namestring, $yearofbirth, $yearofbirthmodifier, $yearofdeath, $yearofdeathmodifier, $living, $curated, $matchednamevariant, $score);
+            $statement->store_result();
+            $rows = $statement->num_rows;
+
+            $results = array();
+            while ($statement->fetch()) {
+
+                $agent = (object) array('prefix'=>$prefix, 'firstname'=>$firstname, 'familyname'=>$familyname, 'middlename'=>$middlename,
+                    'suffix'=>$suffix, 'namestring'=>$namestring, 'yearofbirth'=>$yearofbirth, 'yearofdeath'=>$yearofdeath);
+
+                $result = (object) array('agent'=>$agent, 'matchednamevariant'=>$matchednamevariant, 'score'=>$score);
+
+                $results[] = $result;
+            }
+        }
+
+        return $results;
+    }
+
     /**
      * Method to query for and list agent names matching a provided string.
      * 

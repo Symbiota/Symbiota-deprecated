@@ -67,7 +67,7 @@ paths:
         200:
           description: Successful response
           schema: 
-            $ref: '#/definitions/AgentList'
+            $ref: '#/definitions/Results'
           
   /agent:
     get:
@@ -85,16 +85,28 @@ paths:
         200:
           description: Successful response
           schema: 
-            $ref: '#/definitions/AgentList'
+            $ref: '#/definitions/Agent'
 
 definitions:
 
-  AgentList:
-    title: AgentList
+  Results:
+    title: Results
     type: array
     items:
-      $ref: '#/definitions/Agent'
-      
+      $ref: '#/definitions/Result'
+
+  Result:
+    title: Result
+    type: object
+    properties:
+      agent:
+        $ref: '#/definitions/Agent'
+      matchednamevariant:
+        type: string
+      score:
+        type: number
+        format: double
+
   Agent:
     title: Agent
     type: object
@@ -120,8 +132,3 @@ definitions:
         type: string
       yearofdeath:
         type: string
-      matchednamevariant:
-        type: string
-      score:
-        type: number
-        format: double
