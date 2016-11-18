@@ -1,9 +1,18 @@
 swagger: '2.0'
 
 info:
+  description: |
+    Service provides agent search functionality for SCAN.
   version: "0.0.1"
-  title: Agent Authority
-  
+  title: SCAN Agent Authority
+  contact:
+    email: lowerydb@gmail.com
+
+host: symbiota4.acis.ufl.edu
+basePath: /scan/portal/agentauth
+schemes:
+  - http
+
 paths:
   /agents:
     get:
