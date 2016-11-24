@@ -23,10 +23,10 @@ if(is_writable($SERVER_ROOT.'/temp/report')){
 $isEditor = 0;
 $occArr = array();
 $annoArr = array();
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
+if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
 	$isEditor = 1;
 }
-elseif(array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"])){
+elseif(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollEditor"])){
 	$isEditor = 1;
 }
 if($isEditor){
@@ -301,22 +301,30 @@ if($isEditor){
 										echo '<option '.($lProj==$projStr?'SELECTED':'').'>'.$projStr.'</option>'."\n";
 									} 
 									?>
-								</select><br/>
+								</select>
 								<!-- 
 								Dataset Projects: 
 								<select name="datasetproject" >
 									<option value=""></option>
 									<option value="">-------------------------</option>
-									<?php 
+									<?php
+									/*
 									$datasetProj = '';
 									if(array_key_exists('datasetproject',$_REQUEST)) $datasetProj = $_REQUEST['datasetproject'];
 									$dProjArr = $datasetManager->getDatasetProjects();
 									foreach($dProjArr as $dsid => $dsProjStr){
 										echo '<option id="'.$dsid.'" '.($datasetProj==$dsProjStr?'SELECTED':'').'>'.$dsProjStr.'</option>'."\n";
 									}
+									*/
 									?>
 								</select>
 								-->
+								<?php 
+								echo '<span style="margin-left:15px;"><input name="extendedsearch" type="checkbox" value="1" '.(array_key_exists('extendedsearch', $_POST)?'checked':'').' /></span> ';
+								if($datasetManager->getMetaDataTerm('colltype') == 'General Observations') 
+									echo 'Search outside user profile';
+								else echo 'Search within all collections';
+								?>
 							</div>
 							<div>
 								<span style="margin-left:20px;">
@@ -326,13 +334,6 @@ if($isEditor){
 								<span style="margin-left:20px;">
 									* Specimen return is limited to 400 records
 								</span>
-								<!-- 
-								<span style="margin-left:150px;">
-									<a href="#" onclick="toggle('');return false;">
-										Hints
-									</a>
-								</span>
-								-->
 							</div>
 						</fieldset>
 					</form>

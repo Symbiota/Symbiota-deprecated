@@ -20,7 +20,7 @@ class OccurrenceLabel{
 	public function queryOccurrences($postArr){
 		global $USER_RIGHTS;
 		$canReadRareSpp = false;
-		if(array_key_exists("SuperAdmin", $USER_RIGHTS) || array_key_exists("CollAdmin", $USER_RIGHTS) || array_key_exists("RareSppAdmin", $USER_RIGHTS) || array_key_exists("RareSppReadAll", $USER_RIGHTS)){
+		if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $USER_RIGHTS) || array_key_exists("RareSppAdmin", $USER_RIGHTS) || array_key_exists("RareSppReadAll", $USER_RIGHTS)){
 			$canReadRareSpp = true;
 		}
 		elseif((array_key_exists("CollEditor", $USER_RIGHTS) && in_array($this->collid,$USER_RIGHTS["CollEditor"])) || (array_key_exists("RareSppReader", $USER_RIGHTS) && in_array($this->collid,$USER_RIGHTS["RareSppReader"]))){
@@ -31,13 +31,13 @@ class OccurrenceLabel{
 			$sqlWhere = '';
 			$sqlOrderBy = '';
 			if($postArr['taxa']){
-				$sqlWhere .= 'AND (sciname = "'.$this->cleanInStr($postArr['taxa']).'") ';
+				$sqlWhere .= 'AND (o.sciname = "'.$this->cleanInStr($postArr['taxa']).'") ';
 			}
 			if($postArr['labelproject']){
-				$sqlWhere .= 'AND (labelproject = "'.$this->cleanInStr($postArr['labelproject']).'") ';
+				$sqlWhere .= 'AND (o.labelproject = "'.$this->cleanInStr($postArr['labelproject']).'") ';
 			}
 			if($postArr['recordenteredby']){
-				$sqlWhere .= 'AND (recordenteredby = "'.$this->cleanInStr($postArr['recordenteredby']).'") ';
+				$sqlWhere .= 'AND (o.recordenteredby = "'.$this->cleanInStr($postArr['recordenteredby']).'") ';
 			}
 			$date1 = $this->cleanInStr($postArr['date1']);
 			$date2 = $this->cleanInStr($postArr['date2']);
@@ -47,7 +47,7 @@ class OccurrenceLabel{
 			}
 			$dateTarget = $this->cleanInStr($postArr['datetarget']);
 			if($date1){
-				$dateField = 'dateentered';
+				$dateField = 'o.dateentered';
 				if($date2){
 					$sqlWhere .= 'AND (DATE('.$dateTarget.') BETWEEN "'.$date1.'" AND "'.$date2.'") ';
 				}
@@ -69,11 +69,11 @@ class OccurrenceLabel{
 						$term2 = trim(substr($v,$p+3));
 						if(is_numeric($term1) && is_numeric($term2)){
 							$rnIsNum = true;
-							$rnBetweenFrag[] = '(recordnumber BETWEEN '.$term1.' AND '.$term2.')';
+							$rnBetweenFrag[] = '(o.recordnumber BETWEEN '.$term1.' AND '.$term2.')';
 						}
 						else{
-							$catTerm = 'recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
-							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(recordnumber) = '.strlen($term2); 
+							$catTerm = 'o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.recordnumber) = '.strlen($term2); 
 							$rnBetweenFrag[] = '('.$catTerm.')';
 						}
 					}
@@ -86,13 +86,14 @@ class OccurrenceLabel{
 					$rnWhere .= 'OR '.implode(' OR ',$rnBetweenFrag);
 				}
 				if($rnInFrag){
-					$rnWhere .= 'OR (recordnumber IN("'.implode('","',$rnInFrag).'")) ';
+					$rnWhere .= 'OR (o.recordnumber IN("'.implode('","',$rnInFrag).'")) ';
 				}
 				$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 			}
 			if($postArr['recordedby']){
-				$sqlWhere .= 'AND (recordedby LIKE "%'.$this->cleanInStr($postArr['recordedby']).'%") ';
-				$sqlOrderBy .= ',(recordnumber'.($rnIsNum?'+1':'').')';
+				$sqlWhere .= 'AND (MATCH(f.recordedby) AGAINST("'.$this->cleanInStr($postArr['recordedby']).'")) ';
+				//$sqlWhere .= 'AND (o.recordedby LIKE "%'.$this->cleanInStr($postArr['recordedby']).'%") ';
+				$sqlOrderBy .= ',(o.recordnumber'.($rnIsNum?'+1':'').')';
 			}
 			if($postArr['identifier']){
 				$iArr = explode(',',$this->cleanInStr($postArr['identifier']));
@@ -105,11 +106,11 @@ class OccurrenceLabel{
 						$term2 = trim(substr($v,$p+3));
 						if(is_numeric($term1) && is_numeric($term2)){
 							$searchIsNum = true; 
-							$iBetweenFrag[] = '(catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
+							$iBetweenFrag[] = '(o.catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
 						}
 						else{
-							$catTerm = 'catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
-							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(catalogNumber) = '.strlen($term2); 
+							$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2); 
 							$iBetweenFrag[] = '('.$catTerm.')';
 						}
 					}
@@ -122,35 +123,40 @@ class OccurrenceLabel{
 					$iWhere .= 'OR '.implode(' OR ',$iBetweenFrag);
 				}
 				if($iInFrag){
-					$iWhere .= 'OR (catalogNumber IN("'.implode('","',$iInFrag).'")) ';
+					$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'")) ';
 				}
 				$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
-				$sqlOrderBy .= ',catalogNumber';
+				$sqlOrderBy .= ',o.catalogNumber';
 			}
-			if($sqlWhere){
-				$sql = 'SELECT occid, collid, IFNULL(duplicatequantity,1) AS q, CONCAT_WS(" ",recordedby,IFNULL(recordnumber,eventdate)) AS collector, observeruid, '.
-					'family, sciname, CONCAT_WS("; ",country, stateProvince, county, locality) AS locality, IFNULL(localitySecurity,0) AS localitySecurity '.
-					'FROM omoccurrences '.($postArr['recordedby']?'use index(Index_collector) ':'').
-					'WHERE occid IS NOT NULL '.$sqlWhere;
-				if($this->collArr['colltype'] == 'General Observations') $sql .= ' AND (observeruid = '.$GLOBALS['SYMB_UID'].') ';
-				//if($sqlOrderBy) $sql .= ' ORDER BY '.substr($sqlOrderBy,1);
-				$sql .= ' LIMIT 400';
-				//echo '<div>'.$sql.'</div>';
-				$rs = $this->conn->query($sql);
-				while($r = $rs->fetch_object()){
-					$localitySecurity = $r->localitySecurity;
-					if(!$localitySecurity || $canReadRareSpp || ($r->observeruid == $GLOBALS['SYMB_UID'])){
-						$occId = $r->occid;
-						$retArr[$occId]['collid'] = $r->collid;
-						$retArr[$occId]['q'] = $r->q;
-						$retArr[$occId]['c'] = $r->collector;
-						//$retArr[$occId]['f'] = $r->family;
-						$retArr[$occId]['s'] = $r->sciname;
-						$retArr[$occId]['l'] = $r->locality;
-					}
+			if($this->collArr['colltype'] == 'General Observations'){
+				$sqlWhere .= 'AND (o.collid = '.$this->collid.') ';
+				if(!array_key_exists('extendedsearch', $postArr)) $sqlWhere .= ' AND (o.observeruid = '.$GLOBALS['SYMB_UID'].') ';
+			}
+			elseif(!array_key_exists('extendedsearch', $postArr)){
+				$sqlWhere .= 'AND (o.collid = '.$this->collid.') ';
+			}
+			$sql = 'SELECT o.occid, o.collid, IFNULL(o.duplicatequantity,1) AS q, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, o.observeruid, '.
+				'o.family, o.sciname, CONCAT_WS("; ",o.country, o.stateProvince, o.county, o.locality) AS locality, IFNULL(o.localitySecurity,0) AS localitySecurity '.
+				'FROM omoccurrences o ';
+			if(strpos($sqlWhere, 'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			if($sqlWhere) $sql .= 'WHERE '.substr($sqlWhere, 4);
+			//if($sqlOrderBy) $sql .= ' ORDER BY '.substr($sqlOrderBy,1);
+			$sql .= ' LIMIT 400';
+			//echo '<div>'.$sql.'</div>'; exit;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$localitySecurity = $r->localitySecurity;
+				if(!$localitySecurity || $canReadRareSpp || ($r->observeruid == $GLOBALS['SYMB_UID'])){
+					$occId = $r->occid;
+					$retArr[$occId]['collid'] = $r->collid;
+					$retArr[$occId]['q'] = $r->q;
+					$retArr[$occId]['c'] = $r->collector;
+					//$retArr[$occId]['f'] = $r->family;
+					$retArr[$occId]['s'] = $r->sciname;
+					$retArr[$occId]['l'] = $r->locality;
 				}
-				$rs->free();
 			}
+			$rs->free();
 		}
 		return $retArr;
 	}
