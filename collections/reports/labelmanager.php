@@ -240,6 +240,7 @@ if($isEditor){
 				</div>
 				<?php 
 			}
+			$isGeneralObservation = (($datasetManager->getMetaDataTerm('colltype') == 'General Observations')?true:false);
 			echo '<h2>'.$datasetManager->getCollName().'</h2>';
 			?>
 			<div id="tabs" style="margin:0px;">
@@ -321,7 +322,7 @@ if($isEditor){
 								-->
 								<?php 
 								echo '<span style="margin-left:15px;"><input name="extendedsearch" type="checkbox" value="1" '.(array_key_exists('extendedsearch', $_POST)?'checked':'').' /></span> ';
-								if($datasetManager->getMetaDataTerm('colltype') == 'General Observations') 
+								if($isGeneralObservation) 
 									echo 'Search outside user profile';
 								else echo 'Search within all collections';
 								?>
@@ -372,12 +373,14 @@ if($isEditor){
 														<?php echo $recArr["c"]; ?>
 													</a>
 													<?php
-													if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($recArr["collid"],$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($recArr["collid"],$userRights["CollEditor"]))){
-														?>
-														<a href="#" onclick="openEditorPopup(<?php echo $occId; ?>); return false;">
-															<img src="../../images/edit.png" />
-														</a>
-														<?php
+													if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($recArr["collid"],$USER_RIGHTS["CollAdmin"])) || (array_key_exists("CollEditor",$USER_RIGHTS) && in_array($recArr["collid"],$USER_RIGHTS["CollEditor"]))){
+														if(!$isGeneralObservation || $recArr['uid'] == $SYMB_UID){
+															?>
+															<a href="#" onclick="openEditorPopup(<?php echo $occId; ?>); return false;">
+																<img src="../../images/edit.png" />
+															</a>
+															<?php
+														}
 													}
 													?>
 												</td>
@@ -473,7 +476,6 @@ if($isEditor){
 						?>
 					</div>
 				</div>
-				
 				<div id="annotations">
 					<div>
 						<?php 

@@ -154,6 +154,7 @@ class OccurrenceLabel{
 					//$retArr[$occId]['f'] = $r->family;
 					$retArr[$occId]['s'] = $r->sciname;
 					$retArr[$occId]['l'] = $r->locality;
+					$retArr[$occId]['uid'] = $r->observeruid;
 				}
 			}
 			$rs->free();
@@ -319,8 +320,11 @@ class OccurrenceLabel{
 			$sql = 'SELECT o.occid, d.detid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, '.
 				'CONCAT_WS(" ",d.identificationQualifier,d.sciname) AS sciname, '.
 				'CONCAT_WS(", ",d.identifiedBy,d.dateIdentified,d.identificationRemarks,d.identificationReferences) AS determination '.
-				'FROM omoccurrences AS o LEFT JOIN omoccurdeterminations AS d ON o.occid = d.occid '.
-				'WHERE o.collid = '.$this->collid.' AND d.printqueue = 1 ';
+				'FROM omoccurrences o INNER JOIN omoccurdeterminations d ON o.occid = d.occid '.
+				'WHERE (o.collid = '.$this->collid.') AND (d.printqueue = 1) ';
+			if($this->collArr['colltype'] == 'General Observations'){
+				$sql .= ' AND (o.observeruid = '.$GLOBALS['SYMB_UID'].') ';
+			}
 			$sql .= 'LIMIT 400 ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
