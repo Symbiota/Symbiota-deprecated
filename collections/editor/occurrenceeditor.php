@@ -4,8 +4,6 @@ include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Access-Control-Allow-Origin: http://www.catalogueoflife.org/col/webservice');
-//header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-//header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
 $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
@@ -436,7 +434,7 @@ else{
 
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=150910"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=160702"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=151120"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=161012"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141212"></script>
@@ -782,6 +780,20 @@ else{
 												</div>
 											</div>
 											<div style="clear:both;padding:3px 0px 0px 10px;">
+												<?php 
+												if(!$occId){
+													echo '<div id="idRankDiv">';
+													echo (defined('IDCONFIDENCELABEL')?IDCONFIDENCELABEL:'ID Confidence'); 
+													echo ' <a href="#" onclick="return dwcDoc(\'idConfidence\')"><img class="docimg" src="../../images/qmark.png" /></a> ';
+													echo '<select name="confidenceranking" onchange="fieldChanged(\'confidenceranking\')">';
+													$idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High - verification requested', 6 => 'Medium - insignificant material', 5 => 'Medium', 4 => 'Medium - verification requested', 3 => 'Low - insignificant material', 2 => 'Low', 1 => 'Low - ID Requested', 0 => 'ID Requested');
+													foreach($idRankArr as $rankKey => $rankText){
+														echo '<option value="'.$rankKey.'" '.($rankKey==5?'SELECTED':'').'>'.$rankKey.' - '.$rankText.'</option>';
+													}
+													echo '</select>';
+													echo '</div>';
+												}
+												?>
 												<div id="identificationQualifierDiv">
 													<?php echo (defined('IDENTIFICATIONQUALIFIERLABEL')?IDENTIFICATIONQUALIFIERLABEL:'ID Qualifier'); ?>
 													<a href="#" onclick="return dwcDoc('identificationQualifier')"><img class="docimg" src="../../images/qmark.png" /></a>
@@ -853,7 +865,7 @@ else{
 											<div id="localityDiv">
 												<?php echo (defined('LOCALITYLABEL')?LOCALITYLABEL:'Locality'); ?>
 												<br />
-												<input type="text" name="locality" tabindex="46" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
+												<input type="text" id="fflocality" name="locality" tabindex="46" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
 											</div>
 											<div id="localSecurityDiv">
 												<?php $hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; ?>

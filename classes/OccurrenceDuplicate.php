@@ -402,17 +402,21 @@ class OccurrenceDuplicate {
 	//Used in dupelist.php popup used in "Linked Resource" tab in occurrence editor
 	public function getDupeList($lastName, $collNum, $collDate, $catNum, $occid, $currentOccid){
 		$retArr = array();
+		if(!is_numeric($currentOccid)) return $retArr;
+
 		$queryTerms = array();
-		if($lastName) $queryTerms[] = 'recordedby LIKE "%'.$this->cleanInStr($lastName).'%"';
-		if($collNum) $queryTerms[] = 'recordnumber = "'.$this->cleanInStr($collNum).'"';
-		if($collDate) $queryTerms[] = 'eventdate = "'.$this->cleanInStr($collDate).'"';
-		if($catNum) $queryTerms[] = 'catalognumber = "'.$this->cleanInStr($catNum).'"';
-		if(is_numeric($occid)) $queryTerms[] = 'occid = '.$occid;
+		if($lastName) $queryTerms[] = 'MATCH(f.recordedby) AGAINST("'.$this->cleanInStr($lastName).'")';
+		//if($lastName) $queryTerms[] = 'recordedby LIKE "%'.$this->cleanInStr($lastName).'%"';
+		if($collNum) $queryTerms[] = 'o.recordnumber = "'.$this->cleanInStr($collNum).'"';
+		if($collDate) $queryTerms[] = 'o.eventdate = "'.$this->cleanInStr($collDate).'"';
+		if($catNum) $queryTerms[] = 'o.catalognumber = "'.$this->cleanInStr($catNum).'"';
+		if(is_numeric($occid)) $queryTerms[] = 'o.occid = '.$occid;
 		$sql = 'SELECT c.institutioncode, c.collectioncode, c.collectionname, o.occid, o.catalognumber, '.
 			'o.recordedby, o.recordnumber, o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.locality '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
-			'WHERE o.occid != '.$currentOccid;
-		if($queryTerms && is_numeric($currentOccid)){
+			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
+		if($lastName) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+		$sql .= 'WHERE o.occid != '.$currentOccid;
+		if($queryTerms){
 			$sql .= ' AND ('.implode(') AND (', $queryTerms).') ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
@@ -433,6 +437,35 @@ class OccurrenceDuplicate {
 		return $retArr;
 	}
 	
+	//Used in getLocality.php to obtain autocomplete locality data  
+	public function getDupeLocality($recordedBy, $collDate, $localFrag){
+		$retArr = array();
+		if($recordedBy && $collDate && $localFrag){
+			$locArr = Array('associatedcollectors','verbatimeventdate','country','stateprovince','county','municipality','locality',
+				'decimallatitude','decimallongitude','verbatimcoordinates','coordinateuncertaintyinmeters','geodeticdatum','minimumelevationinmeters',
+				'maximumelevationinmeters','verbatimelevation','verbatimcoordinates','georeferencedby','georeferenceprotocol','georeferencesources',
+				'georeferenceverificationstatus','georeferenceremarks','habitat','substrate','associatedtaxa');
+			$sql = 'SELECT DISTINCT o.'.implode(',o.',$locArr).
+				' FROM omoccurrences o INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid '.
+				'WHERE (MATCH(f.recordedby) AGAINST("'.$this->cleanInStr($recordedBy).'")) AND (o.eventdate = "'.$this->cleanInStr($collDate).'") '.
+				'AND (o.locality LIKE "'.$this->cleanInStr($localFrag).'%") ';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			$cnt = 0;
+			while($r = $rs->fetch_assoc()){
+				foreach($locArr as $field){
+					if($r[$field]) $retArr[$cnt][$field] = $r[$field];
+				}
+				$loc = $r['locality'];
+				if($r['decimallatitude']) $loc .= '; '.$r['decimallatitude'].' '.$r['decimallongitude'];
+				$retArr[$cnt]['value'] = $loc;
+				$cnt++;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
 	//Ranking functions
 	private function addConsensusRecord($occArr){
 		
