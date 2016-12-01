@@ -38,8 +38,7 @@ function setOrderBy(formObject){
 function detectBatchUpdateField(){
 	var fieldSelected = document.getElementById('bufieldname').value;
 	if(fieldSelected == "processingstatus"){
-		var buNewValue = '';
-		buNewValue += '<select name="bunewvalue">';
+		var buNewValue = '<select name="bunewvalue">';
 		buNewValue += '<option value="unprocessed">Unprocessed</option>';
 		buNewValue += '<option value="unprocessed/nlp">Unprocessed/NLP</option>';
 		buNewValue += '<option value="stage 1">Stage 1</option>';
@@ -52,10 +51,8 @@ function detectBatchUpdateField(){
 		buNewValue += '</select>';
 		document.getElementById("bunewvaluediv").innerHTML = buNewValue;
 	}
-	else{
-		var buNewValue = '';
-		buNewValue += '<input name="bunewvalue" type="text" value="" />';
-		document.getElementById("bunewvaluediv").innerHTML = buNewValue;
+	else if(!$("input[name='bunewvalue']").val()){
+		document.getElementById("bunewvaluediv").innerHTML = '<input name="bunewvalue" type="text" value="" />';
 	}
 }
 

@@ -1358,6 +1358,18 @@ class OccurrenceEditorManager {
 		$ov = $this->cleanInStr($oldValue);
 		$nv = $this->cleanInStr($newValue);
 		if($fn && ($ov || $nv)){
+			//Get occids (where statement can't be part of UPDATE query without error being thrown)
+			$occidArr = array();
+			$sqlOccid = 'SELECT DISTINCT o.occid FROM omoccurrences o ';
+			$this->addTableJoins($sqlOccid);
+			$sqlOccid .= $this->getBatchUpdateWhere($fn,$ov,$buMatch);
+			$rs = $this->conn->query($sqlOccid);
+			while($r = $rs->fetch_object()){
+				$occidArr[] = $r->occid;
+			}
+			$rs->free();
+			$sqlWhere = 'WHERE o.occid IN('.implode(',',$occidArr).')';
+			
 			//Strip ORDER BY and/or LIMIT fragments
 			$nvSqlFrag = '';
 			if(!$buMatch || $ov===''){
@@ -1365,26 +1377,25 @@ class OccurrenceEditorManager {
 			}
 			else{
 				//Selected "Match any part of field"
-				$nvSqlFrag = 'REPLACE(o2.'.$fn.',"'.$ov.'","'.$nv.'")';
+				$nvSqlFrag = 'REPLACE(o.'.$fn.',"'.$ov.'","'.$nv.'")';
 			}
-			//Add edits to the omoccuredit table
-			$sqlWhere = $this->getBatchUpdateWhere($fn,$ov,$buMatch);
 			
+			//Add edits to the omoccuredit table
 			$sql2 = 'INSERT INTO omoccuredits(occid,fieldName,fieldValueOld,fieldValueNew,appliedStatus,uid) '.
-				'SELECT o2.occid, "'.$fn.'" AS fieldName, IFNULL(o2.'.$fn.',"") AS oldValue, '.
+				'SELECT o.occid, "'.$fn.'" AS fieldName, IFNULL(o.'.$fn.',"") AS oldValue, '.
 				'IFNULL('.$nvSqlFrag.',"") AS newValue, 1 AS appliedStatus, '.$GLOBALS['SYMB_UID'].' AS uid '.
-				'FROM omoccurrences o2 INNER JOIN omoccurrences o ON o2.occid = o.occid ';
-			$this->addTableJoins($sql2);
+				'FROM omoccurrences o ';
+			//$this->addTableJoins($sql2);
 			$sql2 .= $sqlWhere;
 			if(!$this->conn->query($sql2)){
 				$statusStr = 'ERROR adding update to omoccuredits: '.$this->conn->error;
 			}
 
 			//Run update and apply edits
-			$sql = 'UPDATE omoccurrences o2 INNER JOIN omoccurrences o ON o2.occid = o.occid ';
-			$this->addTableJoins($sql);
-			$sql .= ' SET o2.'.$fn.' = '.$nvSqlFrag.' ';
-			$sql .= $sqlWhere;
+			$sql = 'UPDATE omoccurrences o ';
+			//$this->addTableJoins($sql);
+			$sql .= ' SET o.'.$fn.' = '.$nvSqlFrag.' '.$sqlWhere;
+			//echo $sql; exit;
 			if(!$this->conn->query($sql)){
 				$statusStr = 'ERROR applying batch update: '.$this->conn->error;
 			}
@@ -1399,7 +1410,7 @@ class OccurrenceEditorManager {
 		$ov = $this->cleanInStr($oldValue);
 
 		$sql = 'SELECT COUNT(o.occid) AS retcnt '.
-			'FROM omoccurrences o2 INNER JOIN omoccurrences o ON o2.occid = o.occid ';
+			'FROM omoccurrences o ';
 		$this->addTableJoins($sql);
 		$sql .= $this->getBatchUpdateWhere($fn,$ov,$buMatch);
 
@@ -1445,7 +1456,7 @@ class OccurrenceEditorManager {
 		$retArr = $this->cleanOutArr(array_intersect_key($fArr,array_flip($locArr)));
 		return $retArr;
 	}
-
+	
 	//Verification functions
 	public function getIdentificationRanking(){
 		//Get Identification ranking
