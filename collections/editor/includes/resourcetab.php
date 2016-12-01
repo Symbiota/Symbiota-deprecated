@@ -17,7 +17,6 @@ $genticArr = $occManager->getGeneticArr();
 
 $dupManager = new OccurrenceDuplicate();
 $dupClusterArr = $dupManager->getClusterArr($occid);
-$lastName = $dupManager->parseLastName($occArr['recordedby']);
 ?>
 <script>
 	function validateVoucherAddForm(f){
@@ -33,7 +32,7 @@ $lastName = $dupManager->parseLastName($occArr['recordedby']);
 	}
 
 	function openDupeWindow(){
-		$url = "rpc/dupelist.php?curoccid=<?php echo $occid.'&lastname='.$occArr['recordedby'].'&collnum='.$occArr['recordnumber'].'&colldate='.$occArr['eventdate']; ?>";
+		$url = "rpc/dupelist.php?curoccid=<?php echo $occid.'&recordedby='.urlencode($occArr['recordedby']).'&recordnumber='.$occArr['recordnumber'].'&eventdate='.$occArr['eventdate']; ?>";
 		dupeWindow=open($url,"dupelist","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 		if (dupeWindow.opener == null) dupeWindow.opener = self;
 	}

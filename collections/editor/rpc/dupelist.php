@@ -2,9 +2,9 @@
 include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDuplicate.php');
 
-$lastName = array_key_exists('lastname',$_REQUEST)?trim($_REQUEST['lastname']):'';
-$collNum = array_key_exists('collnum',$_REQUEST)?trim($_REQUEST['collnum']):'';
-$collDate = array_key_exists('colldate',$_REQUEST)?trim($_REQUEST['colldate']):'';
+$recordedBy = array_key_exists('recordedby',$_REQUEST)?trim(urldecode($_REQUEST['recordedby'])):'';
+$recordNumber = array_key_exists('recordnumber',$_REQUEST)?trim($_REQUEST['recordnumber']):'';
+$eventDate = array_key_exists('eventdate',$_REQUEST)?trim($_REQUEST['eventdate']):'';
 $catNum = array_key_exists('catnum',$_POST)?trim($_POST['catnum']):'';
 $queryOccid = array_key_exists('occid',$_POST)?$_POST['occid']:'';
 $currentOccid = array_key_exists('curoccid',$_REQUEST)?$_REQUEST['curoccid']:'';
@@ -13,13 +13,13 @@ $dupeTitle = array_key_exists('dupetitle',$_POST)?$_POST['dupetitle']:'';
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 
 $dupeManager = new OccurrenceDuplicate();
-$dupArr = $dupeManager->getDupeList($lastName, $collNum, $collDate, $catNum, $queryOccid, $currentOccid);
+$dupArr = $dupeManager->getDupeList($recordedBy, $recordNumber, $eventDate, $catNum, $queryOccid, $currentOccid);
 
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Duplicate Linker</title>
 	<script>
 		<?php 
 		if($action == 'Link as Duplicate'){
@@ -49,15 +49,15 @@ $dupArr = $dupeManager->getDupeList($lastName, $collNum, $collDate, $catNum, $qu
 			<form name="adddupform" method="post" action="dupelist.php" onsubmit="return validateDupeForm(this)">
 				<div style="margin:3px;">
 					<b>Last Name:</b>
-					<input name="lastname" type="text" value="<?php echo $lastName; ?>" />
+					<input name="recordedby" type="text" value="<?php echo $recordedBy; ?>" />
 				</div>
 				<div style="margin:3px;">
 					<b>Number:</b>
-					<input name="collnum" type="text" value="<?php echo $collNum; ?>" />
+					<input name="recordnumber" type="text" value="<?php echo $recordNumber; ?>" />
 				</div>
 				<div style="margin:3px;">
 					<b>Date:</b>
-					<input name="colldate" type="text" value="<?php echo $collDate; ?>" />
+					<input name="eventdate" type="text" value="<?php echo $eventDate; ?>" />
 				</div>
 				<div style="margin:3px;">
 					<b>Catalog Number:</b>

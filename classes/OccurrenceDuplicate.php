@@ -400,21 +400,21 @@ class OccurrenceDuplicate {
 	}
 
 	//Used in dupelist.php popup used in "Linked Resource" tab in occurrence editor
-	public function getDupeList($lastName, $collNum, $collDate, $catNum, $occid, $currentOccid){
+	public function getDupeList($recordedBy, $recordNumber, $eventDate, $catNum, $occid, $currentOccid){
 		$retArr = array();
 		if(!is_numeric($currentOccid)) return $retArr;
 
 		$queryTerms = array();
-		if($lastName) $queryTerms[] = 'MATCH(f.recordedby) AGAINST("'.$this->cleanInStr($lastName).'")';
-		//if($lastName) $queryTerms[] = 'recordedby LIKE "%'.$this->cleanInStr($lastName).'%"';
-		if($collNum) $queryTerms[] = 'o.recordnumber = "'.$this->cleanInStr($collNum).'"';
-		if($collDate) $queryTerms[] = 'o.eventdate = "'.$this->cleanInStr($collDate).'"';
+		if($recordedBy) $queryTerms[] = 'MATCH(f.recordedby) AGAINST("'.$this->cleanInStr($recordedBy).'")';
+		//if($recordedBy) $queryTerms[] = 'recordedby LIKE "%'.$this->cleanInStr($recordedBy).'%"';
+		if($recordNumber) $queryTerms[] = 'o.recordnumber = "'.$this->cleanInStr($recordNumber).'"';
+		if($eventDate) $queryTerms[] = 'o.eventdate = "'.$this->cleanInStr($eventDate).'"';
 		if($catNum) $queryTerms[] = 'o.catalognumber = "'.$this->cleanInStr($catNum).'"';
 		if(is_numeric($occid)) $queryTerms[] = 'o.occid = '.$occid;
 		$sql = 'SELECT c.institutioncode, c.collectioncode, c.collectionname, o.occid, o.catalognumber, '.
 			'o.recordedby, o.recordnumber, o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.locality '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
-		if($lastName) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+		if($recordedBy) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		$sql .= 'WHERE o.occid != '.$currentOccid;
 		if($queryTerms){
 			$sql .= ' AND ('.implode(') AND (', $queryTerms).') ';
