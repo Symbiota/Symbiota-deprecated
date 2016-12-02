@@ -434,7 +434,7 @@ else{
 
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=160702"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=161202"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=151120"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=161012"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141212"></script>
@@ -786,9 +786,10 @@ else{
 													echo (defined('IDCONFIDENCELABEL')?IDCONFIDENCELABEL:'ID Confidence'); 
 													echo ' <a href="#" onclick="return dwcDoc(\'idConfidence\')"><img class="docimg" src="../../images/qmark.png" /></a> ';
 													echo '<select name="confidenceranking" onchange="fieldChanged(\'confidenceranking\')">';
+													echo '<option value="">Undefined</option>';
 													$idRankArr = array(10 => 'Absolute', 9 => 'Very High', 8 => 'High', 7 => 'High - verification requested', 6 => 'Medium - insignificant material', 5 => 'Medium', 4 => 'Medium - verification requested', 3 => 'Low - insignificant material', 2 => 'Low', 1 => 'Low - ID Requested', 0 => 'ID Requested');
 													foreach($idRankArr as $rankKey => $rankText){
-														echo '<option value="'.$rankKey.'" '.($rankKey==5?'SELECTED':'').'>'.$rankKey.' - '.$rankText.'</option>';
+														echo '<option value="'.$rankKey.'">'.$rankKey.' - '.$rankText.'</option>';
 													}
 													echo '</select>';
 													echo '</div>';

@@ -107,7 +107,7 @@ $(document).ready(function() {
 	            }
 			});
 		},
-		minLength: 3,
+		minLength: 4,
 		select: function( event, ui ) {
 			var editForm = document.fullform;
 			$.each(ui.item, function(k, v) {
@@ -219,12 +219,14 @@ function verifyFullFormSciName(){
 			$( "#tidinterpreted" ).val(data.tid);
 			$( 'input[name=family]' ).val(data.family);
 			$( 'input[name=scientificnameauthorship]' ).val(data.author);
+			/*
 			if(data.rankid < 220){
 				$( 'select[name=confidenceranking]' ).val(2);
 			}
 			else{
 				$( 'select[name=confidenceranking]' ).val(8);
 			}
+			*/
 			if(data.status == 1){ 
 				$( 'input[name=localitysecurity]' ).prop('checked', true);
 			}

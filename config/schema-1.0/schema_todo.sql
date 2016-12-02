@@ -424,8 +424,7 @@ ALTER TABLE `salixwordstats`
 
 
 ALTER TABLE `users` 
-  ADD COLUMN `guid` VARCHAR(45) NULL AFTER `accessrights`,
-  ADD COLUMN `securitykey` VARCHAR(45) NULL AFTER `guid`;
+  ADD COLUMN `guid` VARCHAR(45) NULL AFTER `accessrights`;
 
 
 
