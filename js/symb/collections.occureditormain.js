@@ -5,6 +5,13 @@ var abortFormVerification = false;
 
 $(document).ready(function() {
 
+	function split( val ) {
+		return val.split( /,\s*/ );
+	}
+	function extractLast( term ) {
+		return split( term ).pop();
+	}
+
 	if(/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){
 		var ffversion=new Number(RegExp.$1);
 		if(ffversion < 7 ) alert("You are using an older version of Firefox. For best results, we recommend that you update your browser.");
@@ -164,6 +171,31 @@ $(document).ready(function() {
 			fieldChanged("municipality");
 		}
 	});
+	
+	$("textarea[name=associatedtaxa]").autocomplete({
+		source: function( request, response ) {
+			$.getJSON( "rpc/getassocspp.php", { term: extractLast( request.term ) }, response );
+		},
+		search: function() {
+			// custom minLength
+			var term = extractLast( this.value );
+			if ( term.length < 4 ) return false;
+		},
+		focus: function() {
+			// prevent value inserted on focus
+			return false;
+		},
+		select: function( event, ui ) {
+			var terms = split( this.value );
+			// remove the current input
+			terms.pop();
+			// add the selected item
+			terms.push( ui.item.value );
+			this.value = terms.join( ", " );
+			return false;
+		}
+	},{autoFocus: true});
+
 
 	$("#catalognumber").keydown(function(evt){
 		var evt  = (evt) ? evt : ((event) ? event : null);
