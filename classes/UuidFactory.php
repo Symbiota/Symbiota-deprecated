@@ -5,11 +5,13 @@ class UuidFactory {
 
 	private $silent = 0;
 	private $conn;
+	private $destructConn = true;
 
 	public function __construct($con = null){
 		if($con){
 			//Inherits connection from another class
 			$this->conn = $con;
+			$this->destructConn = false;
 		}
 		else{
 			$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -17,7 +19,7 @@ class UuidFactory {
 	}
 
 	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
+		if($this->destructConn && !($this->conn === null)) $this->conn->close();
 	}
 
 	public function populateGuids($collId = 0){

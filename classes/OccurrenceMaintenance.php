@@ -4,6 +4,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 class OccurrenceMaintenance {
 
 	private $conn;
+	private $destructConn = true;
 	private $verbose = false;	// 0 = silent, 1 = echo as list item
 	private $errorArr = array();
 
@@ -11,6 +12,7 @@ class OccurrenceMaintenance {
 		if($con){
 			//Inherits connection from another class
 			$this->conn = $con;
+			$this->destructConn = false;
 		}
 		else{
 			$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -18,7 +20,7 @@ class OccurrenceMaintenance {
 	}
 
 	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
+		if($this->destructConn && !($this->conn === null)) $this->conn->close();
  	}
 
 	//General cleaning functions 
@@ -184,16 +186,24 @@ class OccurrenceMaintenance {
 		//protect globally rare species
 		if($this->verbose) $this->outputMsg('Protecting globally rare species... ',1);
 		$sensitiveArr = array();
-		$sql = 'SELECT DISTINCT ts2.tid '.
-			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
-			'WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (t.SecurityStatus > 0)';
+		//Only protect names on list and synonym of accepted names 
+		//Get names on list
+		$sql = 'SELECT DISTINCT tid FROM taxa WHERE (SecurityStatus > 0)';
 		$rs = $this->conn->query($sql); 
 		while($r = $rs->fetch_object()){
 			$sensitiveArr[] = $r->tid; 
 		}
 		$rs->free();
-
+		//Get synonyms of names on list
+		$sql2 = 'SELECT DISTINCT ts.tid '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
+			'WHERE (ts.taxauthid = 1) AND (t.SecurityStatus > 0) AND (t.tid != ts.tid)';
+		$rs2 = $this->conn->query($sql2);
+		while($r2 = $rs2->fetch_object()){
+			$sensitiveArr[] = $r2->tid;
+		}
+		$rs2->free();
+		
 		if($sensitiveArr){
 			$sql2 = 'UPDATE omoccurrences o '.
 				'SET o.LocalitySecurity = 1 '.

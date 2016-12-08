@@ -1,35 +1,34 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/RareSpeciesManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/RareSpeciesManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $rsManager = new RareSpeciesManager();
 $submitAction = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 
 $editable = 0;
-if($isAdmin || array_key_exists("RareSppAdmin",$userRights)){
+if($IS_ADMIN || array_key_exists("RareSppAdmin",$USER_RIGHTS)){
 	$editable = 1;
 }
 if($editable){
 	if($submitAction == "addspecies"){
-		$rsManager->addSpecies($_REQUEST["tidtoadd"]);
+		$rsManager->addSpecies($_POST["tidtoadd"]);
 	}
 	elseif($submitAction == "deletespecies"){
 		$rsManager->deleteSpecies($_REQUEST["tidtodel"]);
 	}
 }
-
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title>Rare, Threatened, Sensitive Species</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
-	<script type="text/javascript" src="../../js/jquery.js"></script>
-	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script language=javascript>
+	<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />	
+	<script src="../../js/jquery.js" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
+	<script>
 		$(document).ready(function() {
 			$("#speciestoadd").autocomplete({ source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true });
 		});
@@ -69,59 +68,32 @@ if($editable){
 				return false;
 			}
 
-			vasXmlHttp=GetXmlHttpObject();
-			if (vasXmlHttp==null){
-		  		alert ("Your browser does not support AJAX!");
-		  		return false;
-		  	}
-			var url="rpc/gettid.php?sciname="+sciName;
-			vasXmlHttp.onreadystatechange=function(){
-				if(vasXmlHttp.readyState==4){
-					addTid = vasXmlHttp.responseText;
-					if(addTid == ""){
-						alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
-					}
-					else{
-						f.tidtoadd.value = addTid;
-						f.submit();
-					}
-				}
-			};
-			vasXmlHttp.open("POST",url,true);
-			vasXmlHttp.send(null);
-		} 
-
-		function GetXmlHttpObject(){
-			var xmlHttp=null;
-			try{
-				// Firefox, Opera 8.0+, Safari, IE 7.x
-		  		xmlHttp=new XMLHttpRequest();
-		  	}
-			catch (e){
-		  		// Internet Explorer
-		  		try{
-		    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-		    	}
-		  		catch(e){
-		    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-		    	}
-		  	}
-			return xmlHttp;
+			$.ajax({
+				type: "POST",
+				url: "rpc/gettid.php",
+				dataType: "json",
+				data: { sciname: sciName }
+			}).done(function( data ) {
+				f.tidtoadd.value = data;
+				f.submit();
+			}).fail(function(jqXHR){
+				alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
+			});
 		}
 	</script>
 </head>
 <body>
 <?php
-	$displayLeftMenu = (isset($collections_misc_rarespeciesMenu)?$collections_misc_rarespeciesMenu:true);
-	include($serverRoot.'/header.php');
-	if(isset($collections_misc_rarespeciesCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt;&gt; ";
-		echo $collections_misc_rarespeciesCrumbs." &gt;&gt;";
-		echo " <b>Sensitive Species for Masking Locality Details</b>";
-		echo "</div>";
-	}
-	?>
+$displayLeftMenu = (isset($collections_misc_rarespeciesMenu)?$collections_misc_rarespeciesMenu:true);
+include($SERVER_ROOT.'/header.php');
+if(isset($collections_misc_rarespeciesCrumbs)){
+	echo "<div class='navpath'>";
+	echo "<a href='../index.php'>Home</a> &gt;&gt; ";
+	echo $collections_misc_rarespeciesCrumbs." &gt;&gt;";
+	echo " <b>Sensitive Species for Masking Locality Details</b>";
+	echo "</div>";
+}
+?>
 <!-- This is inner text! -->
 <div id="innertext">
 
@@ -141,7 +113,7 @@ if($editable){
 		Rare, threatened, or sensitive status are the typical causes for protection though 
 		species that are cherished by collectors or wild harvesters may also appear on the list.
 	</div>
-<?php
+	<?php
 	if($editable){
 		?>
 		<div class="editobj" style="display:none;width:400px;">
@@ -197,7 +169,7 @@ if($editable){
 ?>
 </div>
 <?php 		
-	include($serverRoot.'/footer.php')
+	include($SERVER_ROOT.'/footer.php')
 ?>
 </body>
 </html>
