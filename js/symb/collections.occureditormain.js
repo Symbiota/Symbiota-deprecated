@@ -100,32 +100,53 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#fflocality").autocomplete({ 
-		source: function( request, response ) {
-			$.ajax( {
-				url: "rpc/getlocality.php",
-				data: { 
-					recordedby: $( "input[name=recordedby]" ).val(), 
-					eventdate: $( "input[name=eventdate]" ).val(), 
-					locality: request.term 
-				},
-				success: function( data ) {
-					response( data );
-	            }
-			});
-		},
-		minLength: 4,
-		select: function( event, ui ) {
-			var editForm = document.fullform;
-			$.each(ui.item, function(k, v) {
-				if($( "input[name="+k+"]" ).val() == ""){
-					$( "input[name="+k+"]" ).val(v);
-					$( "input[name="+k+"]" ).css("backgroundColor","lightblue");
-					fieldChanged(k);
-				}
-			});
+	var cookies = document.cookie
+	if(cookies.indexOf("localauto") > -1){
+		var cookieName = "localauto=";
+		var ca = document.cookie.split(';');
+		for(var i = 0; i <ca.length; i++) {
+			var c = ca[i];
+			while (c.charAt(0)==' ') {
+				c = c.substring(1);
+			}
+			if(c.indexOf(cookieName) == 0) {
+				if(c.substring(cookieName.length) == "1") $( 'input[name=localautodeactivated]' ).prop('checked', true);
+			}
 		}
-	});
+	}
+
+	if(localityAutoLookup){
+		$("#fflocality").autocomplete({ 
+			source: function( request, response ) {
+				$.ajax( {
+					url: "rpc/getlocality.php",
+					data: { 
+						recordedby: $( "input[name=recordedby]" ).val(), 
+						eventdate: $( "input[name=eventdate]" ).val(), 
+						locality: request.term 
+					},
+					success: function( data ) {
+						response( data );
+		            }
+				});
+			},
+			minLength: 4,
+			select: function( event, ui ) {
+				var editForm = document.fullform;
+				$.each(ui.item, function(k, v) {
+					if($( "input[name="+k+"]" ).val() == ""){
+						$( "input[name="+k+"]" ).val(v);
+						$( "input[name="+k+"]" ).css("backgroundColor","lightblue");
+						fieldChanged(k);
+					}
+				});
+			}
+		});
+		if($( "input[name=localautodeactivated]" ).is(':checked')){
+			$( "#fflocality" ).autocomplete( "option", "disabled", true );
+			$( "#fflocality" ).attr('autocomplete','on');
+		}
+	}
 
 	//Misc fields with lookups
 	$("#ffcountry").autocomplete({
@@ -259,7 +280,7 @@ function verifyFullFormSciName(){
 				$( 'select[name=confidenceranking]' ).val(8);
 			}
 			*/
-			if(data.status == 1){ 
+			if(data.status == 1){
 				$( 'input[name=localitysecurity]' ).prop('checked', true);
 			}
 			else{
@@ -292,6 +313,19 @@ function localitySecurityCheck(){
 				$( 'input[name=localitysecurity]' ).prop('checked', true);
 			}
 		});
+	}
+}
+
+function localAutoChanged(cbObj){
+	if(cbObj.checked == true){
+		$( "#fflocality" ).autocomplete( "option", "disabled", true );
+		$( "#fflocality" ).attr('autocomplete','on');
+		document.cookie = "localauto=1";
+	}
+	else{
+		$( "#fflocality" ).autocomplete( "option", "disabled", false );
+		$( "#fflocality" ).attr('autocomplete','off');
+		document.cookie = "localauto=;expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 	}
 }
 

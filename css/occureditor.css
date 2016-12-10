@@ -203,13 +203,18 @@ body{
 	width:	200px;
 }
 
+#idRankDiv{
+	float:	left;
+}
+
 #identificationQualifierDiv {
 	float:	left;
+	margin-left: 10px;
 }
 
 #familyDiv {
 	float:	left;
-	margin:	0px 60px;
+	margin-left: 10px;
 }
 
 #familyDiv input{
@@ -299,8 +304,18 @@ body{
 }
 
 #localSecurityDiv{
-	clear: both;
+	width: 	500px;
 	margin-bottom:5px;
+}
+
+#localSecurityDiv span{
+	margin-left: 40px;
+	display: none;
+}
+
+#localAutoDeactivatedDiv{
+	float:right;
+	margin-right:15px;
 }
 
 #decimalLatitudeDiv{

@@ -389,7 +389,7 @@ else{
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=20150402" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=20161209" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -412,12 +412,16 @@ else{
 		var tabTarget = <?php echo (is_numeric($tabTarget)?$tabTarget:'0'); ?>;
 		var imgArr = [];
 		var imgLgArr = [];
-		<?php
+		var localityAutoLookup = 1;
+		<?php 
 		if($imgArr){
 			foreach($imgArr as $iCnt => $iArr){
 				echo 'imgArr['.$iCnt.'] = "'.$iArr['web'].'";'."\n";
 				if(isset($iArr['lg'])) echo 'imgLgArr['.$iCnt.'] = "'.$iArr['lg'].'";'."\n";
 			}
+		}
+		if(defined('LOCALITYAUTOLOOKUP') && !LOCALITYAUTOLOOKUP){
+			echo 'localityAutoLookup = 0';
 		}
 		?>
 
@@ -432,9 +436,8 @@ else{
             });
         }
 
-
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=161202"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=161208"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=151120"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=161012"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141212"></script>
@@ -868,15 +871,23 @@ else{
 												<br />
 												<input type="text" id="fflocality" name="locality" tabindex="46" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
 											</div>
+											<?php
+											if(!defined('LOCALITYAUTOLOOKUP') || LOCALITYAUTOLOOKUP){
+												echo '<div id="localAutoDeactivatedDiv">';
+												echo '<input name="localautodeactivated" type="checkbox" value="1" onchange="localAutoChanged(this)" '.(defined('LOCALITYAUTOLOOKUP') && LOCALITYAUTOLOOKUP==2?'checked':'').' /> ';
+												echo 'Deactivate Locality Lookup</div>';
+											}
+											$hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; 
+											?>
 											<div id="localSecurityDiv">
-												<?php $hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; ?>
 												<input type="checkbox" name="localitysecurity" tabindex="0" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toggleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
 												<?php echo (defined('LOCALITYSECURITYLABEL')?LOCALITYSECURITYLABEL:'Locality Security'); ?>
-												<span id="locsecreason" style="margin-left:40px;display:<?php echo ($hasValue?'inline':'none') ?>">
+												<span id="locsecreason" style="display:<?php echo ($hasValue?'inline':'none') ?>">
 													<?php $lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:''; ?>
 													<?php echo (defined('LOCALITYSECURITYREASONLABEL')?LOCALITYSECURITYREASONLABEL:'Security Reason Override'); ?>:
 													<input type="text" name="localitysecurityreason" tabindex="0" onchange="fieldChanged('localitysecurityreason');" value="<?php echo $lsrValue; ?>" title="Leave blank for default rare, threatened, or sensitive status" />
 												</span>
+												
 											</div>
 											<div style="clear:both;">
 												<div id="decimalLatitudeDiv">
