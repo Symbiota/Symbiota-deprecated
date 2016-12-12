@@ -21,8 +21,8 @@ class OccurrenceGeorefTools {
 	public function getLocalityArr(){
 		$retArr = array();
 		if($this->collId){
-			$sql = 'SELECT occid, country, stateprovince, county, municipality, IFNULL(locality,CONCAT_WS(", ",country,stateProvince,county,municipality,verbatimcoordinates)) AS locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
-				'FROM omoccurrences WHERE (collid = '.$this->collId.') ';
+			$sql = 'SELECT occid, country, stateprovince, county, municipality, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
+				'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) AND (locality <> "") ';
 			if(!$this->qryVars || !array_key_exists('qdisplayall',$this->qryVars) || !$this->qryVars['qdisplayall']){
 				$sql .= 'AND (decimalLatitude IS NULL) ';
 			}
@@ -235,11 +235,10 @@ class OccurrenceGeorefTools {
 			$sql .= 'AND locality = "'.trim($this->cleanInStr($locality), " .").'" ';
 		}
 		if($country){
+			$country = $this->cleanInStr($country);
 			$synArr = array('usa','u.s.a', 'united states','united states of america','u.s.');
-			if(in_array($country,$synArr)){
-				$country = implode('","',$synArr);
-			}
-			$sql .= 'AND (country IN("'.$this->cleanInStr($country).'")) ';
+			if(in_array(strtolower($country),$synArr)) $country = implode('","',$synArr);
+			$sql .= 'AND (country IN("'.$country.'")) ';
 		}
 		if($state){
 			$sql .= 'AND (stateprovince = "'.$this->cleanInStr($state).'") ';

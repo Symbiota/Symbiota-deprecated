@@ -22,7 +22,7 @@ elseif($proj){
 }
 
 $isEditable = 0;
-if($isAdmin || (array_key_exists("ProjAdmin",$userRights) && in_array($pid,$userRights["ProjAdmin"]))){
+if($IS_ADMIN || (array_key_exists("ProjAdmin",$USER_RIGHTS) && in_array($pid,$USER_RIGHTS["ProjAdmin"]))){
 	$isEditable = 1;
 }
 
@@ -53,6 +53,8 @@ if($isEditable && $projSubmit){
 		$projManager->deleteChecklist($_POST['clid']);
 	}
 }
+
+$projArr = $projManager->getProjectData();
 ?>
 <html>
 <head>
@@ -66,7 +68,6 @@ if($isEditable && $projSubmit){
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
-	
 		var tabIndex = <?php echo $tabIndex; ?>;
 
 		$(document).ready(function() {
@@ -167,11 +168,11 @@ if($isEditable && $projSubmit){
 	echo "<div class='navpath'>";
 	if(isset($projects_indexCrumbs)){
 		if($projects_indexCrumbs) echo $projects_indexCrumbs.' &gt;&gt;';
-		echo '<b>'.$LANG['INVPROJ'].'</b>';
+		echo '<b><a href="index.php?pid='.$pid.'">'.$projArr['projname'].'</a></b>';
 	}
 	else{
 		echo "<a href='../index.php'>Home</a> &gt;&gt; ";
-		echo '<b>'.$LANG['INVPROJ'].'</b>';
+		echo '<b><a href="index.php?pid='.$pid.'">'.$projArr['projname'].'</a></b>';
 	}
 	echo "</div>";
 	?>
@@ -191,13 +192,11 @@ if($isEditable && $projSubmit){
 		if($pid || $newProj){
 			if($isEditable && !$newProj){
 				?>
-				<div style="float:right;cursor:pointer;" onclick="toggleById('tabs');" title="<?php echo $LANG['TOGGLEEDIT'];?>">
-					<img style="border:0px;" src="../images/edit.png"/>
+				<div style="float:right;" title="<?php echo $LANG['TOGGLEEDIT'];?>">
+					<a href="#" onclick="toggleById('tabs');return false;"><img style="border:0px;" src="../images/edit.png"/></a>
 				</div>
 				<?php 
 			}
-			$projArr = Array();
-			$projArr = $projManager->getProjectData();
 			if($projArr){
 				?>
 				<h1><?php echo $projArr["projname"]; ?></h1>

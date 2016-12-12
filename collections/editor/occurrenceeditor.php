@@ -389,7 +389,7 @@ else{
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=20161209" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=20161210" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -439,7 +439,7 @@ else{
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=161208"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=151120"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=161012"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=161212"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141212"></script>
 </head>
 <body>
@@ -924,8 +924,11 @@ else{
 												<div id="geoLocateDiv" title="GeoLocate locality">
 													<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.png"/></a>
 												</div>
-												<div id="geoToolsDiv" title="Other Coordinate Formats" >
-													<input type="button" value="Tools" onclick="toggleCoordDiv();" />
+												<div id="coordCloningDiv" title="Coordinate cloning tool" >
+													<input type="button" value="C" onclick="geoCloneTool()" />
+												</div>
+												<div id="geoToolsDiv" title="Tools for converting additional formats" >
+													<input type="button" value="F" onclick="toggleCoordDiv()" />
 												</div>
 												<div id="geodeticDatumDiv">
 													<?php echo (defined('GEODETICDATIMLABEL')?GEODETICDATIMLABEL:'Datum'); ?>

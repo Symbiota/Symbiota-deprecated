@@ -346,7 +346,7 @@ body{
 
 #googleDiv{
 	float:	left;
-	margin-top:20px;
+	margin-top:18px;
 	cursor:	pointer;
 	padding:3px;
 }
@@ -358,16 +358,23 @@ body{
 
 #geoLocateDiv{
 	float:	left;
-	margin-top:20px;
+	margin-top:18px;
 }
 
 #geoLocateDiv img{
 	width:	18px;	
 }
 
+#coordCloningDiv{
+	float:	left;
+	margin-left:2px;
+	margin-top:16px;
+}
+
 #geoToolsDiv{
 	float:	left;
-	margin-top:17px;
+	margin-left:2px;
+	margin-top:16px;
 }
 
 #coordAidDiv{
@@ -401,6 +408,7 @@ body{
 
 #geodeticDatumDiv{
 	float:	left;
+	margin-left: 2px;
 }
 
 #geodeticDatumDiv input{

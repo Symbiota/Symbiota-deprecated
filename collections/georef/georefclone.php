@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceGeorefTools.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceGeorefTools.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $country = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
 $state = array_key_exists('state',$_REQUEST)?$_REQUEST['state']:'';

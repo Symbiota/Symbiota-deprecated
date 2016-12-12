@@ -47,9 +47,9 @@ $geoManager = new OccurrenceGeorefTools();
 $geoManager->setCollId($collId);
 
 $editor = false;
-if($isAdmin
-	|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
-	|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
+if($IS_ADMIN
+	|| (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))
+	|| (array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"]))){
  	$editor = true;
 }
 

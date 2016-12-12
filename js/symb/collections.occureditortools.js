@@ -1,4 +1,3 @@
-
 function openAssocSppAid(){
 	var assocWindow = open("assocsppaid.php","assocaid","resizable=0,width=550,height=150,left=20,top=20");
 	if(assocWindow != null){
@@ -9,6 +8,18 @@ function openAssocSppAid(){
 	else{
 		alert("Unable to open associated species tool, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
 	}
+}
+
+function geoCloneTool(){
+	var f = document.fullform;
+	if(f.locality.value){
+		cloneWindow=open("../georef/georefclone.php?country="+f.country.value+"&state="+f.stateprovince.value+"&county="+f.county.value+"&locality="+f.locality.value,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=800,height=600,left=20,top=20");
+		if(cloneWindow.opener == null) cloneWindow.opener = self;
+	}
+	else{
+		alert("Locality field must have a value to use this function");
+		return false;
+	} 
 }
 
 function toggleCoordDiv(){
@@ -81,6 +92,9 @@ function geoLocateLocality(){
 
 	if(!country){
 		alert("Country is blank and it is a required field for GeoLocate");
+	}
+	else if(!locality){
+		alert("Record does not contain any verbatim locality details for GeoLocate");
 	}
 	else{
 		geolocWindow=open("../georef/geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
