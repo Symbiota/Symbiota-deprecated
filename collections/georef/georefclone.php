@@ -7,6 +7,9 @@ $country = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
 $state = array_key_exists('state',$_REQUEST)?$_REQUEST['state']:'';
 $county = array_key_exists('county',$_REQUEST)?$_REQUEST['county']:'';
 $locality = array_key_exists('locality',$_REQUEST)?$_REQUEST['locality']:'';
+$searchType = array_key_exists('searchtype',$_POST)?$_POST['searchtype']:1;
+$collType = array_key_exists('colltype',$_POST)?$_POST['colltype']:0;
+$collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $submitAction = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
 //Remove country, state, county from beginning of string
@@ -21,7 +24,7 @@ $locality = trim(preg_replace('/[\[\]\)\d\.\-,\s]*$/', '', $locality),'( ');
 
 $geoManager = new OccurrenceGeorefTools();
 
-$clones = $geoManager->getGeorefClones($locality, $country, $state, $county);
+$clones = $geoManager->getGeorefClones($locality, $country, $state, $county, $searchType, ($collType?$collid:'0'));
 
 $latCen = 41.0;
 $lngCen = -95.0;
@@ -36,8 +39,8 @@ if($coorArr && count($coorArr) == 4){
 	<head>
 		<title>Georeference Clone Tool</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<link href="<?php echo $clientRoot; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<script src="//www.google.com/jsapi"></script>
 		<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 		<script type="text/javascript">
@@ -67,9 +70,10 @@ if($coorArr && count($coorArr) == 4){
 					if($occArr['lng'] > $maxLng) $maxLng = $occArr['lng'];
 					
 					$outStr = '<div>'.$occArr['lat'].' '.$occArr['lng'].' ';
-					if($occArr['err']) $outStr .= ' (+-'.$occArr['err'].'m) ';
+					if($occArr['err']) $outStr .= ' (+-'.$occArr['err'].'m)';
 					if($occArr['georefby']) $outStr .= '<br/>Georeferenced by: '.$occArr['georefby'];
-					$outStr .= '<br/>'.$occArr['cnt'].' matching records<br/> ';
+					$outStr .= '<br/>'.$occArr['cnt'].' matching records<br/>';
+					$outStr .= $occArr['locality'].'<br/>';
 					$outStr .= "<a href='#' onclick='cloneCoord(".$occArr['lat'].','.$occArr['lng'].','.($occArr['err']?$occArr['err']:'0').")' title='Clone Coordinates'><b>Use Coordinates</b></a>";
 					$outStr .= '</div>';
 					?>
@@ -113,26 +117,70 @@ if($coorArr && count($coorArr) == 4){
 					self.close();
 					return false;
 				}
-			}			
+			}
+
+			function verifyCloneForm(f){
+				if(f.locality.value == ""){
+					alert("Locality field must have a value");
+					return false
+				}
+				if(document.getElementById("deepsearch").checked == true){
+					var locArr = f.locality.value.split(" ");
+					if(locArr.length > 4){
+						alert("Locality field cannot contain more than 4 words while doing a Deep Search. Just enter a few keywords.");
+						return false
+					}
+				}
+				return true;
+			}
 		</script>
 	</head>
 	<body style="background-color:#ffffff;" onload="initialize()">
 		<!-- This is inner text! -->
 		<div id="innertext">
+			<fieldset style="padding:10px;">
+				<legend><b>Search Form</b></legend>
+				<form name="cloneform" action="georefclone.php" method="post" onsubmit="return verifyCloneForm(this)">
+					<div>
+						Locality: 
+						<input name="locality" type="text" value="<?php echo $locality; ?>" style="width:600px" />
+					</div>
+					<div>
+						<input id="exactinput" name="searchtype" type="radio" value="1" <?php echo ($searchType=='1'?'checked':''); ?> /> Exact Match
+						<input id="wildsearch" name="searchtype" type="radio" value="2" <?php echo ($searchType=='2'?'checked':''); ?> /> Contains
+						<input id="deepsearch" name="searchtype" type="radio" value="3" <?php echo ($searchType=='3'?'checked':''); ?> /> Deep Search
+					</div>
+					<?php 
+					if($collid){
+						?>
+						<div>
+							<input name="colltype" type="radio" value="0" <?php echo ($collType?'':'checked'); ?> /> Search all collections
+							<input name="colltype" type="radio" value="1" <?php echo ($collType?'checked':''); ?> /> Target collection only
+						</div>
+						<?php 
+					}
+					?>
+					<div style="float:left;margin:5px 20px;">
+						<input name="country" type="hidden" value="<?php echo $country; ?>" />
+						<input name="state" type="hidden" value="<?php echo $state; ?>" />
+						<input name="county" type="hidden" value="<?php echo $county; ?>" />
+						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+						<input name="submitaction" type="submit" value="Search" />
+					</div>
+				</form> 
+			</fieldset>
 			<?php 
 			if($clones){
 				?>
-				<div style="margin:3px;">
-					Points below represent specimen clusters that share the exact same locality: 
-					&quot;<?php echo $locality; ?>&quot;
+				<div style="margin:3px;font-weight:bold;">
+					Click on markers to view and clone coordinates
 				</div>
 				<div id='map_canvas' style='width:750px; height:600px; clear:both;'></div>
 				<?php 
 			}
 			else{
 				?>
-				<h2>There are no clonable coordinates found for:</h2>
-				<div><?php echo $locality; ?></div>
+				<div style="margin:30px"><h2>Search failed to return specimen matches</h2></div>
 				<?php 
 			}
 			?>

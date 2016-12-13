@@ -169,11 +169,13 @@ function geoCloneTool(){
 	var selObj = document.getElementById("locallist");
 	if(selObj.selectedIndex > -1){
 		var f = document.queryform;
-		var locality = selObj.options[selObj.selectedIndex].text;
-		var country = f.qcountry.value;
-		var state = f.qstate.value;
-		var county = f.qcounty.value;
-		cloneWindow=open("georefclone.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=800,height=600,left=20,top=20");
+		var url = "georefclone.php?";
+		url = url + "locality=" + selObj.options[selObj.selectedIndex].text;
+		url = url + "&country=" + f.qcountry.value;
+		url = url + "&state=" + f.qstate.value;
+		url = url + "&county=" + f.qcounty.value;
+		url = url + "&collid=" + f.collid.value;
+		cloneWindow=open(url,"geoclonetool","resizable=1,scrollbars=1,toolbar=1,width=800,height=600,left=20,top=20");
 		if(cloneWindow.opener == null) cloneWindow.opener = self;
 	}
 	else{

@@ -81,7 +81,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 		<link type="text/css" href="<?php echo $clientRoot; ?>/css/jquery-ui.css" rel="Stylesheet" />
 		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js"></script>
 		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js"></script>
-		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=141210"></script>
+		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=161212"></script>
 	</head>
 	<body>
 		<!-- This is inner text! -->
@@ -343,7 +343,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</td>
 										<td colspan="2" style="vertical-align:middle">
 											<input id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" type="text" value="" style="width:50px;" onchange="verifyCoordUncertainty(this)" />
-											meters
 										</td>
 										<td colspan="2" style="vertical-align:middle">
 											<span style="margin-left:20px;font-weight:bold;">Datum:</span>

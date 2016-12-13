@@ -13,7 +13,13 @@ function openAssocSppAid(){
 function geoCloneTool(){
 	var f = document.fullform;
 	if(f.locality.value){
-		cloneWindow=open("../georef/georefclone.php?country="+f.country.value+"&state="+f.stateprovince.value+"&county="+f.county.value+"&locality="+f.locality.value,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=800,height=600,left=20,top=20");
+		var url = "../georef/georefclone.php?";
+		url = url + "locality=" + f.locality.value;
+		url = url + "&country=" + f.country.value;
+		url = url + "&state=" + f.stateprovince.value;
+		url = url + "&county=" + f.county.value;
+		url = url + "&collid=" + f.collid.value;
+		cloneWindow=open(url,"geoclonetool","resizable=1,scrollbars=1,toolbar=1,width=800,height=600,left=20,top=20");
 		if(cloneWindow.opener == null) cloneWindow.opener = self;
 	}
 	else{
