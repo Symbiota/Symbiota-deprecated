@@ -156,9 +156,9 @@ class OccurrenceManager{
 			foreach($this->taxaArr as $key => $valueArray){
 				if($this->taxaSearchType == 4){
 					//Class, order, or other higher rank
-					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE (sciname = '".$key."')");
+					$rs1 = $this->conn->query("SELECT ts.tidaccepted FROM taxa AS t LEFT JOIN taxstatus AS ts ON t.TID = ts.tid WHERE (t.sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
-						$sqlWhereTaxa = 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
+						$sqlWhereTaxa = 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tidaccepted.'))) ';
 					}
 				}
 				else{
