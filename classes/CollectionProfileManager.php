@@ -874,7 +874,7 @@ class CollectionProfileManager {
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount, '.
-            'COUNT(DISTINCT CASE WHEN i.occid IS NOT NULL THEN i.imgid ELSE NULL END) AS TotalImageCount, '.
+            'COUNT(DISTINCT CASE WHEN i.occid IS NOT NULL THEN i.occid ELSE NULL END) AS TotalImageCount '.
 			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
 			'LEFT JOIN images AS i ON o.occid = i.occid '.
 			'WHERE o.collid IN('.$collId.') ';
@@ -968,7 +968,7 @@ class CollectionProfileManager {
             }
         }
         $sql5 = 'SELECT c.CollID, c.CollectionName, '.
-            'COUNT(DISTINCT CASE WHEN i.occid IS NOT NULL THEN i.imgid ELSE NULL END) AS TotalImageCount ';
+            'COUNT(DISTINCT CASE WHEN i.occid IS NOT NULL THEN i.occid ELSE NULL END) AS TotalImageCount ';
         $sql5 .= $sqlFrom;
         $sql5 .= 'LEFT JOIN images AS i ON o.occid = i.occid ';
         $sql5 .= $sqlWhere;

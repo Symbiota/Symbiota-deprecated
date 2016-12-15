@@ -130,7 +130,6 @@ if($collId){
         $resultsTemp = $collManager->runStatisticsQuery($collId,$cPartentTaxon,$cCountry);
         $familyArr = $resultsTemp['families'];
         ksort($familyArr, SORT_STRING | SORT_FLAG_CASE);
-
         $countryArr = $resultsTemp['countries'];
         ksort($countryArr, SORT_STRING | SORT_FLAG_CASE);
         unset($resultsTemp['families']);
@@ -205,12 +204,6 @@ if($collId){
 
             $c++;
         }
-        $familyArr = $resultsTemp['families'];
-        ksort($familyArr, SORT_STRING | SORT_FLAG_CASE);
-
-        $countryArr = $resultsTemp['countries'];
-        ksort($countryArr, SORT_STRING | SORT_FLAG_CASE);
-
         $results['SpecimensNullLatitude'] = $results['SpecimenCount'] - $results['GeorefCount'];
     }
 	if($action == "Update Statistics"){

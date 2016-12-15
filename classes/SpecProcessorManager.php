@@ -99,38 +99,45 @@ class SpecProcessorManager {
 	}
 
 	public function addProject($addArr){
-		if($addArr['title'] == 'OCR Harvest'){
-			$this->conn->query('DELETE FROM specprocessorprojects WHERE (title = "OCR Harvest") AND (collid = '.$this->collid.')');
+		$this->conn->query('DELETE FROM specprocessorprojects WHERE (title = "OCR Harvest") AND (collid = '.$this->collid.')');
+		$sql = '';
+		if(isset($addArr['imageuploadtype'])){
+			if($addArr['imageuploadtype'] == 'idigbio'){
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
+					'VALUES('.$this->collid.',"iDigBio CSV upload","'.
+					$this->cleanInStr($addArr['speckeypattern']).'")';
+			}
+			elseif($addArr['imageuploadtype'] == 'iplant'){
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
+					'VALUES('.$this->collid.',"IPlant Image Processing","'.
+					$this->cleanInStr($addArr['speckeypattern']).'")';
+			}
+			elseif($addArr['imageuploadtype'] == 'local'){
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
+					'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
+					'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
+					$this->cleanInStr($addArr['speckeypattern']).'",'.
+					($addArr['sourcepath']?'"'.$this->cleanInStr($addArr['sourcepath']).'"':'NULL').','.
+					(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
+					(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
+					(isset($addArr['webpixwidth'])&&$addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
+					(isset($addArr['tnpixwidth'])&&$addArr['tnpixwidth']?$addArr['tnpixwidth']:'NULL').','.
+					(isset($addArr['lgpixwidth'])&&$addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
+					(isset($addArr['jpgquality'])&&$addArr['jpgquality']?$addArr['jpgquality']:'NULL').','.
+					(isset($addArr['createTnImg'])&&$addArr['createTnImg']?$addArr['createTnImg']:'NULL').','.
+					(isset($addArr['createLgImg'])&&$addArr['createLgImg']?$addArr['createLgImg']:'NULL').')';
+			}
 		}
-		if($addArr['imageuploadtype'] == 'idigbio'){
+		elseif($addArr['title'] == 'OCR Harvest' && $addArr['newprofile']){
 			$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
-				'VALUES('.$this->collid.',"iDigBio CSV upload","'.
-				$this->cleanInStr($addArr['speckeypattern']).'")';
-		}
-		elseif($addArr['imageuploadtype'] == 'iplant'){
-			$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
-				'VALUES('.$this->collid.',"IPlant Image Processing","'.
-				$this->cleanInStr($addArr['speckeypattern']).'")';
-		}
-		elseif($addArr['imageuploadtype'] == 'local'){
-			$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
-				'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 				'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
-				$this->cleanInStr($addArr['speckeypattern']).'",'.
-				($addArr['sourcepath']?'"'.$this->cleanInStr($addArr['sourcepath']).'"':'NULL').','.
-				(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
-				(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
-				(isset($addArr['webpixwidth'])&&$addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
-				(isset($addArr['tnpixwidth'])&&$addArr['tnpixwidth']?$addArr['tnpixwidth']:'NULL').','.
-				(isset($addArr['lgpixwidth'])&&$addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
-				(isset($addArr['jpgquality'])&&$addArr['jpgquality']?$addArr['jpgquality']:'NULL').','.
-				(isset($addArr['createTnImg'])&&$addArr['createTnImg']?$addArr['createTnImg']:'NULL').','.
-				(isset($addArr['createLgImg'])&&$addArr['createLgImg']?$addArr['createLgImg']:'NULL').')';
+				$this->cleanInStr($addArr['speckeypattern']).'")';
 		}
-		//echo $sql;
-		if(!$this->conn->query($sql)){
-			echo 'ERROR saving project: '.$this->conn->error;
-			//echo '<br/>SQL: '.$sql;
+		if($sql){
+			if(!$this->conn->query($sql)){
+				echo 'ERROR saving project: '.$this->conn->error;
+				//echo '<br/>SQL: '.$sql;
+			}
 		}
 	}
 
@@ -145,7 +152,7 @@ class SpecProcessorManager {
 			$sqlWhere .= 'WHERE (spprid = '.$crit.')';
 		}
 		elseif($crit == 'OCR Harvest' && $this->collid){
-			$sqlWhere .= 'WHERE (collid = '.$this->collid.') AND (title = "OCR Harvest")';
+			$sqlWhere .= 'WHERE (collid = '.$this->collid.') ';
 		}
 		if($sqlWhere){
 			$sql = 'SELECT collid, title, speckeypattern, coordx1, coordx2, coordy1, coordy2, sourcepath, targetpath, '.
@@ -153,7 +160,7 @@ class SpecProcessorManager {
 				'FROM specprocessorprojects '.$sqlWhere;
 			//echo $sql;
 			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
+			while($row = $rs->fetch_object()){
 				if(!$this->collid) $this->setCollId($row->collid); 
 				$this->title = $row->title;
 				$this->specKeyPattern = $row->speckeypattern;
@@ -180,6 +187,9 @@ class SpecProcessorManager {
 				}
 				elseif($this->title == 'IPlant Image Processing'){
 					$this->projectType = 'iplant';
+				}
+				elseif($this->title == 'OCR Harvest'){
+					break;
 				}
 			}
 			$rs->free();
