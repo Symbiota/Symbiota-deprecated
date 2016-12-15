@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spprid = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
@@ -52,7 +53,7 @@ $procManager->setProjVariables('OCR Harvest');
 		}
 
 		if(f.sourcepath.value == "" && f.ocrfile.value == ""){
-			alert("Please select an OCR source");
+			alert("Please select/enter an OCR input source file");
 			return false;
 		}
 		var fileName = f.ocrfile.value;
@@ -155,15 +156,15 @@ $procManager->setProjVariables('OCR Harvest');
 				<img src="../../images/edit.png" style="border:0px" />
 			</div>
 			<div style="margin:15px">
-				This inteface will process and load OCR text files. 
-				ABBYY FineReader (Corporate Edition) includes the ABBYY HotFolder tool that can batch process multiple specimen label images
-				to produce separate text files (.txt) containing label text. 
+				This interface will process and load OCR text files. 
+				ABBYY FineReader has the ability to OCR multiple specimen images at once and output the results as separate text files (.txt) with the same name as the images. 
+				The Corporate Edition also includes the ABBYY HotFolder tool that provides the ability to schedule batch processing jobs.
 				This tool will also upload OCR text obtained by other processes.   
 			</div>
 			<div style="margin:15px">
 				<b>Requirements:</b>
 				<ul>
-					<li>OCR files must be in a text format with a .txt extension. When using ABBYY Hotfolders, use the &quot;Create a separate document for each file&quot; and &quot;Save as: Text (*.txt)&quot; settings.</li>
+					<li>OCR files must be in a text format with a .txt extension. When using ABBYY, use the &quot;Create a separate document for each file&quot; and &quot;Save as: Text (*.txt)&quot; settings.</li>
 					<li>Files must be named using the Catalog Number</li>
 					<li>Since OCR text is linked directly to image, source image must have been previously loaded into database</li>
 					<li>If there are more than one image linked to a specimen, the full file name will be used to identify which image to link the OCR</li>
@@ -236,6 +237,7 @@ $procManager->setProjVariables('OCR Harvest');
 					<tr>
 						<td colspan="2">
 							<input name="title" type="hidden" value="OCR Harvest" />
+							<input name="newprofile" type="hidden" value="<?php echo ($procManager->getSpecKeyPattern()?'0':'1'); ?>" />
 							<input name="spprid" type="hidden" value="<?php echo $spprid; ?>" />
 							<input name="collid" type="hidden" value="<?php echo $collid; ?>" /> 
 							<input name="tabindex" type="hidden" value="3" />
