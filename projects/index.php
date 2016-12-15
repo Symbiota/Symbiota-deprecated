@@ -4,7 +4,6 @@ include_once($SERVER_ROOT.'/classes/InventoryProjectManager.php');
 include_once($SERVER_ROOT.'/content/lang/projects/index.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:""; 
 $editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
 $newProj = array_key_exists("newproj",$_REQUEST)?1:0;
@@ -13,13 +12,7 @@ $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 $statusStr = '';
 
 $projManager = new InventoryProjectManager();
-if($pid){
-	$projManager->setPid($pid);
-}
-elseif($proj){
-	$projManager->setProj($proj);
-	$pid = $projManager->getPid();
-}
+if($pid) $projManager->setPid($pid);
 
 $isEditable = 0;
 if($IS_ADMIN || (array_key_exists("ProjAdmin",$USER_RIGHTS) && in_array($pid,$USER_RIGHTS["ProjAdmin"]))){

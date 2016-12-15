@@ -70,8 +70,7 @@ class InventoryProjectManager {
 		$sql = "";
 		foreach($projArr as $field => $value){
 			if(in_array($field,$fieldArr)){
-				$v = $this->cleanInStr($value);
-				$sql .= ','.$field.' = "'.$v.'"';
+				$sql .= ','.$field.' = "'.$this->cleanInStr($value).'"';
 			}
 		}
 		$sql = 'UPDATE fmprojects SET '.substr($sql,1).' WHERE (pid = '.$this->pid.')';
@@ -85,8 +84,8 @@ class InventoryProjectManager {
 		$sql = 'INSERT INTO fmprojects(projname,managers,fulldescription,notes,ispublic,sortsequence) '.
 			'VALUES("'.$this->cleanInStr($projArr['projname']).'","'.$this->cleanInStr($projArr['managers']).'","'.
 			$this->cleanInStr($projArr['fulldescription']).'","'.
-			$this->cleanInStr($projArr['notes']).'",'.$projArr['ispublic'].','.
-			($projArr['sortsequence']?$projArr['sortsequence']:'50').')';
+			$this->cleanInStr($projArr['notes']).'",'.$this->cleanInStr($projArr['ispublic']).','.
+			(is_numeric($projArr['sortsequence'])?$projArr['sortsequence']:'50').')';
 		//echo $sql;
 		if($conn->query($sql)){
 			$this->pid = $conn->insert_id;
@@ -149,14 +148,16 @@ class InventoryProjectManager {
 	} 
 	
 	public function addManager($uid){
-		$status = true;
+		$status = false;
 		if(is_numeric($uid) && $this->pid){
 			$conn = MySQLiConnectionFactory::getCon("write");
 			$sql = 'INSERT INTO userroles(role,tablename,tablepk,uid) '.
 				'VALUES("ProjAdmin","fmprojects",'.$this->pid.','.$uid.') ';
-			if(!$conn->query($sql)){
+			if($conn->query($sql)){
+				
+			}
+			else{
 				$this->errorStr = 'ERROR adding manager: '.$conn->error;
-				$status = false;
 			}
 			if(!($conn === null)) $conn->close();
 		}
@@ -164,14 +165,16 @@ class InventoryProjectManager {
 	} 
 	
 	public function deleteManager($uid){
-		$status = true;
+		$status = false;
 		if(is_numeric($uid) && $this->pid){
 			$conn = MySQLiConnectionFactory::getCon("write");
 			$sql = 'DELETE FROM userroles '.
 				'WHERE (role = "ProjAdmin") AND (tablepk = '.$this->pid.') AND (uid = '.$uid.') ';
-			if(!$conn->query($sql)){
+			if($conn->query($sql)){
+				$status = true;
+			}
+			else{
 				$this->errorStr = 'ERROR removing manager: '.$conn->error;
-				$status = false;
 			}
 			if(!($conn === null)) $conn->close();
 		}
@@ -194,6 +197,7 @@ class InventoryProjectManager {
 	
 	//Checklist management functions
 	public function addChecklist($clid){
+		if(!is_numeric($clid)) return false; 
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO fmchklstprojlink(pid,clid) VALUES('.$this->pid.','.$clid.') ';
 		if($conn->query($sql)){
@@ -206,6 +210,7 @@ class InventoryProjectManager {
 	}
 
 	public function deleteChecklist($clid){
+		if(!is_numeric($clid)) return false; 
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'DELETE FROM fmchklstprojlink WHERE (pid = '.$this->pid.') AND (clid = '.$clid.')';
 		if($conn->query($sql)){
@@ -262,24 +267,7 @@ class InventoryProjectManager {
 	public function setPid($pid){
 		if(is_numeric($pid)) $this->pid = $pid;
 	}
-	
-	public function setProj($proj){
-		if($proj){
-			if(is_numeric($proj)){
-				$this->pid = $proj;
-			}
-			else{
-				$sql = "SELECT pid FROM fmprojects WHERE (projname = '".$proj."')";
-				$rs = $this->conn->query($sql);
-				if($row = $rs->fetch_object()){
-					$this->pid = $row->pid;
-				}
-				$rs->free();
-			}
-		}
-		return $this->pid;
-	}
-	
+
 	public function getErrorStr(){
 		return $this->errorStr;
 	}
