@@ -158,17 +158,98 @@ CREATE TABLE `lkupmunicipality` (
 ) ENGINE=InnoDB;
 
 
-#Checklist changes
+#Checklist voucher changes
 ALTER TABLE `fmvouchers` 
-  DROP COLUMN `Collector`;
+  DROP COLUMN `Collector`,
+  ADD COLUMN `preferredImage` INT NULL DEFAULT 0 AFTER `editornotes`;
+
+ALTER TABLE `fmvouchers` 
+  DROP FOREIGN KEY `FK_vouchers_cl`;
+
+#Remove any bad double referenced occurrence vouchers within the same checklist
+CREATE TABLE `temp_voucher_delete` (
+  `clid` INT NOT NULL,
+  `occid` INT NOT NULL);
+
+INSERT INTO `temp_voucher_delete`(clid,occid)
+  SELECT CLID,occid FROM fmvouchers GROUP BY CLID, occid HAVING Count(*)>1;
+
+DELETE v.*
+FROM fmvouchers v INNER JOIN temp_voucher_delete t ON v.clid = t.clid AND v.occid = t.occid
+INNER JOIN taxstatus ts ON v.tid = ts.tid
+WHERE ts.taxauthid = 1 AND ts.tid != ts.tidaccepted;
+
+DELETE v.*
+FROM fmvouchers v INNER JOIN temp_voucher_delete t ON v.clid = t.clid AND v.occid = t.occid;
+
+DROP TABLE temp_voucher_delete;
+
+ALTER TABLE `fmvouchers` 
+  CHANGE COLUMN `TID` `TID` INT(10) UNSIGNED NULL ,
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY (`occid`, `CLID`);
+
+ALTER TABLE `fmvouchers` 
+  ADD CONSTRAINT `FK_vouchers_cl`  FOREIGN KEY (`TID` , `CLID`)  REFERENCES `fmchklsttaxalink` (`TID` , `CLID`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
   
+#Checklist changes
 ALTER TABLE `fmchklstprojlink` 
   ADD COLUMN `clNameOverride` VARCHAR(100) NULL AFTER `clid`,
   ADD COLUMN `mapChecklist` SMALLINT NULL DEFAULT 1 AFTER `clNameOverride`,
   ADD COLUMN `notes` VARCHAR(250) NULL AFTER `mapChecklist`;
 
 ALTER TABLE `fmchecklists` 
-  ADD COLUMN `politicalDivision` VARCHAR(45) NULL AFTER `Type`;
+  ADD COLUMN `politicalDivision` VARCHAR(45) NULL AFTER `Type`,
+  ADD COLUMN `iconUrl` VARCHAR(150) NULL AFTER `defaultSettings`,
+  ADD COLUMN `headerUrl` VARCHAR(150) NULL AFTER `iconUrl`;
+
+ALTER TABLE `fmprojects` 
+  ADD COLUMN `iconUrl` VARCHAR(150) NULL AFTER `notes`,
+  ADD COLUMN `headerUrl` VARCHAR(150) NULL AFTER `iconUrl`,
+  ADD COLUMN `dynamicProperties` TEXT NULL AFTER `ispublic`;
+
+
+#Identification key
+ALTER TABLE `kmcharacterlang` DROP FOREIGN KEY `FK_characterlang_1`;
+ALTER TABLE `kmcharacterlang` 
+  ADD CONSTRAINT `FK_characterlang_1` FOREIGN KEY (`cid`)  REFERENCES `kmcharacters` (`cid`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
+ALTER TABLE `kmchartaxalink` 
+  DROP FOREIGN KEY `FK_chartaxalink_cid`,
+  DROP FOREIGN KEY `FK_chartaxalink_tid`;
+ALTER TABLE `kmchartaxalink` 
+  ADD CONSTRAINT `FK_chartaxalink_cid`  FOREIGN KEY (`CID`)  REFERENCES `kmcharacters` (`cid`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_chartaxalink_tid`  FOREIGN KEY (`TID`)  REFERENCES `taxa` (`TID`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
+ALTER TABLE `kmchardependance` 
+  DROP FOREIGN KEY `FK_chardependance_cid`,
+  DROP FOREIGN KEY `FK_chardependance_cs`;
+ALTER TABLE `kmchardependance` 
+  ADD CONSTRAINT `FK_chardependance_cid`  FOREIGN KEY (`CID`)  REFERENCES `kmcharacters` (`cid`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_chardependance_cs`  FOREIGN KEY (`CIDDependance` , `CSDependance`)  REFERENCES `kmcs` (`cid` , `cs`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
+ALTER TABLE `kmcsimages`
+  DROP FOREIGN KEY `FK_kscsimages_kscs`;
+ALTER TABLE `kmcsimages` 
+  ADD CONSTRAINT `FK_kscsimages_kscs`  FOREIGN KEY (`cid` , `cs`)  REFERENCES `kmcs` (`cid` , `cs`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
+ALTER TABLE `kmcs` 
+  DROP FOREIGN KEY `FK_cs_chars`;
+ALTER TABLE `kmcs` 
+  ADD CONSTRAINT `FK_cs_chars`  FOREIGN KEY (`cid`)  REFERENCES `kmcharacters` (`cid`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
+ALTER TABLE `kmcslang` 
+  DROP FOREIGN KEY `FK_cslang_1`;
+ALTER TABLE `kmcslang` 
+  ADD CONSTRAINT `FK_cslang_1`  FOREIGN KEY (`cid` , `cs`)  REFERENCES `kmcs` (`cid` , `cs`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
+ALTER TABLE `kmdescr` 
+  DROP FOREIGN KEY `FK_descr_cs`,
+  DROP FOREIGN KEY `FK_descr_tid`;
+ALTER TABLE `kmdescr` 
+  ADD CONSTRAINT `FK_descr_cs`  FOREIGN KEY (`CID` , `CS`)  REFERENCES `kmcs` (`cid` , `cs`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_descr_tid`  FOREIGN KEY (`TID`)  REFERENCES `taxa` (`TID`)  ON DELETE CASCADE  ON UPDATE CASCADE;
 
 
 #Occurrence revisions
@@ -204,6 +285,11 @@ ALTER TABLE `omoccuredits`
   ADD COLUMN `guid` VARCHAR(45) NULL AFTER `AppliedStatus`,
   ADD UNIQUE INDEX `guid_UNIQUE` (`guid` ASC);
 
+ALTER TABLE `omoccurgeoindex` 
+  DROP FOREIGN KEY `FK_specgeoindex_taxa`;
+ALTER TABLE `omoccurgeoindex` 
+  ADD CONSTRAINT `FK_specgeoindex_taxa`  FOREIGN KEY (`tid`)  REFERENCES `taxa` (`TID`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
 CREATE TABLE `omcollpuboccurlink` (
   `pubid` INT UNSIGNED NOT NULL,
   `occid` INT UNSIGNED NOT NULL,
@@ -213,7 +299,7 @@ CREATE TABLE `omcollpuboccurlink` (
   PRIMARY KEY (`pubid`, `occid`),
   INDEX `FK_ompuboccid_idx` (`occid` ASC),
   CONSTRAINT `FK_ompuboccid`  FOREIGN KEY (`occid`)  REFERENCES `omoccurrences` (`occid`)  ON DELETE CASCADE  ON UPDATE CASCADE,
-  CONSTRAINT `FK_ompubpubid`  FOREIGN KEY (`pubid`)  REFERENCES `symbseinet`.`omcollpublications` (`pubid`)  ON DELETE CASCADE  ON UPDATE CASCADE);
+  CONSTRAINT `FK_ompubpubid`  FOREIGN KEY (`pubid`)  REFERENCES `omcollpublications` (`pubid`)  ON DELETE CASCADE  ON UPDATE CASCADE);
 
 
 #Remove deprecated survey tables
@@ -224,7 +310,7 @@ DROP TABLE `omsurveys`;
 
 #Copy over INSERT data priming statements that should have been included in original schema definition 
 INSERT IGNORE INTO `adminlanguages`(langid,langname,iso639_1) 
-VALUES ('1', 'English', 'en'), ('2', 'German', 'de'), ('3', 'French', 'fr'), ('4', 'Dutch', 'nl'), ('5', 'Italian', 'it'), ('6', 'Spanish', 'es'), ('7', 'Polish', 'pl'), ('8', 'Russian', 'ru'), ('9', 'Japanese', 'ja'), ('10', 'Portuguese', 'pt'), ('11', 'Swedish', 'sv'), ('12', 'Chinese', 'zh'), ('13', 'Catalan', 'ca'), ('14', 'Ukrainian', 'uk'), ('15', 'Norwegian (Bokmï¿½l)', 'no'), ('16', 'Finnish', 'fi'), ('17', 'Vietnamese', 'vi'), ('18', 'Czech', 'cs'), ('19', 'Hungarian', 'hu'), ('20', 'Korean', 'ko'), ('21', 'Indonesian', 'id'), ('22', 'Turkish', 'tr'), ('23', 'Romanian', 'ro'), ('24', 'Persian', 'fa'), ('25', 'Arabic', 'ar'), ('26', 'Danish', 'da'), ('27', 'Esperanto', 'eo'), ('28', 'Serbian', 'sr'), ('29', 'Lithuanian', 'lt'), ('30', 'Slovak', 'sk'), ('31', 'Malay', 'ms'), ('32', 'Hebrew', 'he'), ('33', 'Bulgarian', 'bg'), ('34', 'Slovenian', 'sl'), ('35', 'Volapï¿½k', 'vo'), ('36', 'Kazakh', 'kk'), ('37', 'Waray-Waray', 'war'), ('38', 'Basque', 'eu'), ('39', 'Croatian', 'hr'), ('40', 'Hindi', 'hi'), ('41', 'Estonian', 'et'), ('42', 'Azerbaijani', 'az'), ('43', 'Galician', 'gl'), ('44', 'Simple English', 'simple'), ('45', 'Norwegian (Nynorsk)', 'nn'), ('46', 'Thai', 'th'), ('47', 'Newar / Nepal Bhasa', 'new'), ('48', 'Greek', 'el'), ('49', 'Aromanian', 'roa-rup'), ('50', 'Latin', 'la'), ('51', 'Occitan', 'oc'), ('52', 'Tagalog', 'tl'), ('53', 'Haitian', 'ht'), ('54', 'Macedonian', 'mk'), ('55', 'Georgian', 'ka'), ('56', 'Serbo-Croatian', 'sh'), ('57', 'Telugu', 'te'), ('58', 'Piedmontese', 'pms'), ('59', 'Cebuano', 'ceb'), ('60', 'Tamil', 'ta'), ('61', 'Belarusian (Taraï¿½kievica)', 'be-x-old'), ('62', 'Breton', 'br'), ('63', 'Latvian', 'lv'), ('64', 'Javanese', 'jv'), ('65', 'Albanian', 'sq'), ('66', 'Belarusian', 'be'), ('67', 'Marathi', 'mr'), ('68', 'Welsh', 'cy'), ('69', 'Luxembourgish', 'lb'), ('70', 'Icelandic', 'is'), ('71', 'Bosnian', 'bs'), ('72', 'Yoruba', 'yo'), ('73', 'Malagasy', 'mg'), ('74', 'Aragonese', 'an'), ('75', 'Bishnupriya Manipuri', 'bpy'), ('76', 'Lombard', 'lmo'), ('77', 'West Frisian', 'fy'), ('78', 'Bengali', 'bn'), ('79', 'Ido', 'io'), ('80', 'Swahili', 'sw'), ('81', 'Gujarati', 'gu'), ('82', 'Malayalam', 'ml'), ('83', 'Western Panjabi', 'pnb'), ('84', 'Afrikaans', 'af'), ('85', 'Low Saxon', 'nds'), ('86', 'Sicilian', 'scn'), ('87', 'Urdu', 'ur'), ('88', 'Kurdish', 'ku'), ('89', 'Cantonese', 'zh-yue'), ('90', 'Armenian', 'hy'), ('91', 'Quechua', 'qu'), ('92', 'Sundanese', 'su'), ('93', 'Nepali', 'ne'), ('94', 'Zazaki', 'diq'), ('95', 'Asturian', 'ast'), ('96', 'Tatar', 'tt'), ('97', 'Neapolitan', 'nap'), ('98', 'Irish', 'ga'), ('99', 'Chuvash', 'cv'), ('100', 'Samogitian', 'bat-smg'), ('101', 'Walloon', 'wa'), ('102', 'Amharic', 'am'), ('103', 'Kannada', 'kn'), ('104', 'Alemannic', 'als'), ('105', 'Buginese', 'bug'), ('106', 'Burmese', 'my'), ('107', 'Interlingua', 'ia');
+VALUES ('1', 'English', 'en'), ('2', 'German', 'de'), ('3', 'French', 'fr'), ('4', 'Dutch', 'nl'), ('5', 'Italian', 'it'), ('6', 'Spanish', 'es'), ('7', 'Polish', 'pl'), ('8', 'Russian', 'ru'), ('9', 'Japanese', 'ja'), ('10', 'Portuguese', 'pt'), ('11', 'Swedish', 'sv'), ('12', 'Chinese', 'zh'), ('13', 'Catalan', 'ca'), ('14', 'Ukrainian', 'uk'), ('15', 'Norwegian (Bokmål)', 'no'), ('16', 'Finnish', 'fi'), ('17', 'Vietnamese', 'vi'), ('18', 'Czech', 'cs'), ('19', 'Hungarian', 'hu'), ('20', 'Korean', 'ko'), ('21', 'Indonesian', 'id'), ('22', 'Turkish', 'tr'), ('23', 'Romanian', 'ro'), ('24', 'Persian', 'fa'), ('25', 'Arabic', 'ar'), ('26', 'Danish', 'da'), ('27', 'Esperanto', 'eo'), ('28', 'Serbian', 'sr'), ('29', 'Lithuanian', 'lt'), ('30', 'Slovak', 'sk'), ('31', 'Malay', 'ms'), ('32', 'Hebrew', 'he'), ('33', 'Bulgarian', 'bg'), ('34', 'Slovenian', 'sl'), ('35', 'Volapük', 'vo'), ('36', 'Kazakh', 'kk'), ('37', 'Waray-Waray', 'war'), ('38', 'Basque', 'eu'), ('39', 'Croatian', 'hr'), ('40', 'Hindi', 'hi'), ('41', 'Estonian', 'et'), ('42', 'Azerbaijani', 'az'), ('43', 'Galician', 'gl'), ('44', 'Simple English', 'simple'), ('45', 'Norwegian (Nynorsk)', 'nn'), ('46', 'Thai', 'th'), ('47', 'Newar / Nepal Bhasa', 'new'), ('48', 'Greek', 'el'), ('49', 'Aromanian', 'roa-rup'), ('50', 'Latin', 'la'), ('51', 'Occitan', 'oc'), ('52', 'Tagalog', 'tl'), ('53', 'Haitian', 'ht'), ('54', 'Macedonian', 'mk'), ('55', 'Georgian', 'ka'), ('56', 'Serbo-Croatian', 'sh'), ('57', 'Telugu', 'te'), ('58', 'Piedmontese', 'pms'), ('59', 'Cebuano', 'ceb'), ('60', 'Tamil', 'ta'), ('61', 'Belarusian (Taraškievica)', 'be-x-old'), ('62', 'Breton', 'br'), ('63', 'Latvian', 'lv'), ('64', 'Javanese', 'jv'), ('65', 'Albanian', 'sq'), ('66', 'Belarusian', 'be'), ('67', 'Marathi', 'mr'), ('68', 'Welsh', 'cy'), ('69', 'Luxembourgish', 'lb'), ('70', 'Icelandic', 'is'), ('71', 'Bosnian', 'bs'), ('72', 'Yoruba', 'yo'), ('73', 'Malagasy', 'mg'), ('74', 'Aragonese', 'an'), ('75', 'Bishnupriya Manipuri', 'bpy'), ('76', 'Lombard', 'lmo'), ('77', 'West Frisian', 'fy'), ('78', 'Bengali', 'bn'), ('79', 'Ido', 'io'), ('80', 'Swahili', 'sw'), ('81', 'Gujarati', 'gu'), ('82', 'Malayalam', 'ml'), ('83', 'Western Panjabi', 'pnb'), ('84', 'Afrikaans', 'af'), ('85', 'Low Saxon', 'nds'), ('86', 'Sicilian', 'scn'), ('87', 'Urdu', 'ur'), ('88', 'Kurdish', 'ku'), ('89', 'Cantonese', 'zh-yue'), ('90', 'Armenian', 'hy'), ('91', 'Quechua', 'qu'), ('92', 'Sundanese', 'su'), ('93', 'Nepali', 'ne'), ('94', 'Zazaki', 'diq'), ('95', 'Asturian', 'ast'), ('96', 'Tatar', 'tt'), ('97', 'Neapolitan', 'nap'), ('98', 'Irish', 'ga'), ('99', 'Chuvash', 'cv'), ('100', 'Samogitian', 'bat-smg'), ('101', 'Walloon', 'wa'), ('102', 'Amharic', 'am'), ('103', 'Kannada', 'kn'), ('104', 'Alemannic', 'als'), ('105', 'Buginese', 'bug'), ('106', 'Burmese', 'my'), ('107', 'Interlingua', 'ia');
 
 INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('HasOrganism','Image shows an organism.','Organism',0);
 INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('HasLabel','Image shows label data.','Label',10);
@@ -341,13 +427,16 @@ ALTER TABLE `uploadtaxa`
   ADD INDEX `sourceParentId_index` (`SourceParentId` ASC),
   ADD INDEX `acceptance_index` (`Acceptance` ASC);
 
+ALTER TABLE `uploadtaxa` 
+  ADD UNIQUE INDEX `UNIQUE_sciname` (`SciName` ASC, `RankId` ASC, `Author` ASC);
+
 ALTER TABLE `taxa` 
   DROP COLUMN `KingdomID`,
   DROP COLUMN `kingdomName`,
   DROP INDEX `sciname_unique`,
   ADD UNIQUE INDEX `sciname_unique` (`SciName` ASC, `RankId` ASC, `Author` ASC),
   ADD INDEX `sciname_index` (`SciName` ASC);
-
+  
 ALTER TABLE `taxalinks` 
   ADD COLUMN `inherit` INT NULL DEFAULT 1 AFTER `icon`;
 
@@ -367,8 +456,12 @@ ALTER TABLE `specprocessorprojects`
 
 ALTER TABLE `images` 
   CHANGE COLUMN `sourceIdentifier` `sourceIdentifier` VARCHAR(150) NULL DEFAULT NULL,
-  ADD COLUMN `referenceUrl` VARCHAR(255) NULL AFTER `sourceurl`;
+  ADD COLUMN `referenceUrl` VARCHAR(255) NULL AFTER `sourceurl`,
+  ADD COLUMN `dynamicProperties` TEXT NULL AFTER `sourceIdentifier`,
+  ADD COLUMN `mediaMD5` VARCHAR(45) NULL DEFAULT NULL AFTER `sourceIdentifier`;
 
+ALTER TABLE `media` 
+  ADD COLUMN `mediaMD5` VARCHAR(45) NULL AFTER `notes`;
 
 ALTER TABLE `omcollections` 
   ADD COLUMN `publishToIdigbio` INT(11) AFTER `publishToGbif`,
@@ -384,10 +477,37 @@ ALTER TABLE `omcollections`
 
 ALTER TABLE `omcollectionstats`
 	MODIFY COLUMN `dynamicProperties` longtext NULL AFTER `uploadedby`;
-	
 
 ALTER TABLE `omcollcatlink` 
   ADD COLUMN `isPrimary` TINYINT(1) NULL DEFAULT 1 AFTER `collid`;
+
+CREATE TABLE `omoccuraccessstats` (
+  `oasid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `occid` INT UNSIGNED NOT NULL,
+  `accessdate` DATE NOT NULL,
+  `cnt` INT UNSIGNED NOT NULL,
+  `accesstype` VARCHAR(45) NOT NULL,
+  `dynamicProperties` VARCHAR(250) NULL,
+  `notes` VARCHAR(250) NULL,
+  `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`oasid`),
+  UNIQUE INDEX `UNIQUE_occuraccess` (`occid` ASC, `accessdate` ASC, `accesstype` ASC),
+  CONSTRAINT `FK_occuraccess_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`)  ON DELETE CASCADE  ON UPDATE CASCADE);
+
+CREATE TABLE `omoccuraccessstatstemp` (
+  `oasid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `occid` INT UNSIGNED NOT NULL,
+  `accessdate` DATE NOT NULL,
+  `ipaddress` VARCHAR(45) NOT NULL,
+  `cnt` INT UNSIGNED NOT NULL,
+  `accesstype` VARCHAR(45) NOT NULL,
+  `dynamicProperties` VARCHAR(250) NULL,
+  `notes` VARCHAR(250) NULL,
+  `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`oasid`),
+  UNIQUE INDEX `UNIQUE_occuraccess` (`occid` ASC, `accessdate` ASC, `ipaddress` ASC, `accesstype` ASC),
+  CONSTRAINT `FK_occuraccess_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`)  ON DELETE CASCADE  ON UPDATE CASCADE);
+
 
 # Establishes many-many relationship to be used in DwC eml.xml file
 CREATE TABLE `omcollectioncontacts` (
@@ -402,19 +522,42 @@ CREATE TABLE `omcollectioncontacts` (
   CONSTRAINT `FK_contact_collid`   FOREIGN KEY (`collid`)   REFERENCES `omcollections` (`CollID`)   ON DELETE CASCADE   ON UPDATE CASCADE,
   CONSTRAINT `FK_contact_uid`   FOREIGN KEY (`uid`)   REFERENCES `users` (`uid`)   ON DELETE CASCADE   ON UPDATE CASCADE);
 
+CREATE TABLE `omoccurrencetypes` (
+  `occurtypeid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `occid` INT UNSIGNED NULL,
+  `typestatus` VARCHAR(45) NULL,
+  `typeDesignationType` VARCHAR(45) NULL,
+  `typeDesignatedBy` VARCHAR(45) NULL,
+  `scientificName` VARCHAR(250) NULL,
+  `scientificNameAuthorship` VARCHAR(45) NULL,
+  `tidinterpreted` INT UNSIGNED NULL,
+  `basionym` VARCHAR(250) NULL,
+  `refid` INT NULL,
+  `bibliographicCitation` VARCHAR(250) NULL,
+  `dynamicProperties` VARCHAR(250) NULL,
+  `notes` VARCHAR(250) NULL,
+  `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`occurtypeid`),
+  INDEX `FK_occurtype_occid_idx` (`occid` ASC),
+  INDEX `FK_occurtype_refid_idx` (`refid` ASC),
+  INDEX `FK_occurtype_tid_idx` (`tidinterpreted` ASC),
+  CONSTRAINT `FK_occurtype_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  CONSTRAINT `FK_occurtype_refid` FOREIGN KEY (`refid`) REFERENCES `referenceobject` (`refid`)  ON DELETE SET NULL  ON UPDATE CASCADE,
+  CONSTRAINT `FK_occurtype_tid` FOREIGN KEY (`tidinterpreted`) REFERENCES `taxa` (`TID`)  ON DELETE SET NULL  ON UPDATE CASCADE);
 
 ALTER TABLE `omoccurrences` 
   ADD INDEX `Index_locality` (`locality`(100) ASC),
   ADD INDEX `Index_otherCatalogNumbers` (`otherCatalogNumbers` ASC);
 
 ALTER TABLE `omoccurrences` 
+  ADD COLUMN `locationID` VARCHAR(100) NULL AFTER `preparations`,
   ADD COLUMN `eventID` VARCHAR(45) NULL AFTER `fieldnumber`,
   ADD COLUMN `latestDateCollected` DATE NULL AFTER `eventDate`,
   ADD COLUMN `waterBody`  varchar(255) NULL AFTER `municipality`,
+  ADD COLUMN `dynamicFields` TEXT NULL AFTER `labelProject`,
   CHANGE COLUMN `establishmentMeans` `establishmentMeans` VARCHAR(150) NULL DEFAULT NULL,
   CHANGE COLUMN `disposition` `disposition` varchar(250) NULL DEFAULT NULL,
   ADD INDEX `Index_latestDateCollected` (`latestDateCollected` ASC);
-
 
 ALTER TABLE `omoccurdeterminations` 
   CHANGE COLUMN `identificationRemarks` `identificationRemarks` VARCHAR(500) NULL DEFAULT NULL ;
@@ -425,7 +568,6 @@ ALTER TABLE `salixwordstats`
 
 ALTER TABLE `users` 
   ADD COLUMN `guid` VARCHAR(45) NULL AFTER `accessrights`;
-
 
 
 # Spatial Indexing
@@ -482,18 +624,21 @@ DELIMITER ;
 
 # Glossary tables
 ALTER TABLE `glossary`
-	ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`,
-	MODIFY COLUMN `definition`  varchar(2000) NULL DEFAULT NULL AFTER `term`,
-	MODIFY COLUMN `source`  varchar(1000) NULL DEFAULT NULL AFTER `language`,
-	ADD COLUMN `translator`  varchar(250) NULL AFTER `source`,
-	ADD COLUMN `author`  varchar(250) NULL AFTER `translator`;
-	
+  ADD COLUMN `resourceurl`  varchar(600) NULL AFTER `notes`,
+  MODIFY COLUMN `definition`  varchar(2000) NULL DEFAULT NULL AFTER `term`,
+  MODIFY COLUMN `source`  varchar(1000) NULL DEFAULT NULL AFTER `language`,
+  ADD COLUMN `translator`  varchar(250) NULL AFTER `source`,
+  ADD COLUMN `author`  varchar(250) NULL AFTER `translator`;
+
+ALTER TABLE `glossary` 
+  ADD INDEX `Index_glossary_lang` (`language` ASC);
+
 ALTER TABLE `glossaryimages`
-	ADD COLUMN `createdBy`  varchar(250) NULL AFTER `notes`;
+  ADD COLUMN `createdBy`  varchar(250) NULL AFTER `notes`;
 
 ALTER TABLE `glossarytaxalink` 
-	DROP FOREIGN KEY `glossarytaxalink_ibfk_1`,
-	DROP FOREIGN KEY `glossarytaxalink_ibfk_2`;
+  DROP FOREIGN KEY `glossarytaxalink_ibfk_1`,
+  DROP FOREIGN KEY `glossarytaxalink_ibfk_2`;
 	
 ALTER TABLE `glossarytermlink` DROP FOREIGN KEY `glossarytermlink_ibfk_1`;
 
@@ -525,6 +670,42 @@ CREATE TABLE `uploadglossary` (
   KEY `relatedterm_index` (`newGroupId`)
 );
 
+ALTER TABLE `glossarytaxalink` 
+  CHANGE COLUMN `glossgrpid` `glossid` INT(10) UNSIGNED NOT NULL ;
+
+ALTER TABLE `glossarytaxalink` 
+  ADD CONSTRAINT `FK_glossarytaxa_tid`  FOREIGN KEY (`tid`)  REFERENCES `taxa` (`TID`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_glossarytaxa_glossid`  FOREIGN KEY (`glossid`)  REFERENCES `glossary` (`glossid`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
+ALTER TABLE `glossaryimages` 
+  DROP FOREIGN KEY `glossaryimages_ibfk_1`;
+ALTER TABLE `glossaryimages` 
+  ADD INDEX `FK_glossaryimages_uid_idx` (`uid` ASC);
+ALTER TABLE `glossaryimages` 
+  ADD CONSTRAINT `FK_glossaryimages_glossid` FOREIGN KEY (`glossid`)  REFERENCES `glossary` (`glossid`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_glossaryimages_uid`  FOREIGN KEY (`uid`)  REFERENCES `users` (`uid`)  ON DELETE SET NULL  ON UPDATE SET NULL;
+
+ALTER TABLE `glossarysources` 
+  ADD CONSTRAINT `FK_glossarysources_tid`  FOREIGN KEY (`tid`)  REFERENCES `taxa` (`TID`)  ON DELETE RESTRICT  ON UPDATE RESTRICT;
+
+ALTER TABLE `glossary` 
+  ADD INDEX `FK_glossary_uid_idx` (`uid` ASC);
+ALTER TABLE `glossary` 
+  ADD CONSTRAINT `FK_glossary_uid`  FOREIGN KEY (`uid`)  REFERENCES `users` (`uid`)  ON DELETE SET NULL  ON UPDATE SET NULL;
+
+DELETE l.*
+FROM glossarytermlink l LEFT JOIN glossary g ON l.glossid = g.glossid
+WHERE g.glossid IS NULL;
+
+DELETE l.*
+FROM glossarytermlink l LEFT JOIN glossary g ON l.glossgrpid = g.glossid
+WHERE g.glossid IS NULL;
+
+ALTER TABLE `glossarytermlink` 
+  ADD CONSTRAINT `FK_glossarytermlink_glossid`  FOREIGN KEY (`glossid`)  REFERENCES `glossary` (`glossid`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_glossarytermlink_glossgrpid`  FOREIGN KEY (`glossgrpid`)  REFERENCES `glossary` (`glossid`)  ON DELETE CASCADE  ON UPDATE CASCADE;
+
+  
 -- Paleo Tables
 CREATE TABLE `paleochronostratigraphy` (
   `chronoId` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -724,8 +905,6 @@ ALTER TABLE `omoccurrencesfulltext`
 
 
 
-
-#Create an occurrence type table
 
 
 #Review pubprofile (adminpublications)
