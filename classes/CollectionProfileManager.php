@@ -870,12 +870,11 @@ class CollectionProfileManager {
 			$returnArr[$r->CollectionName]['TotalTaxaCount'] = $r->TotalTaxaCount;
 			$returnArr[$r->CollectionName]['OccurrenceImageCount'] = $r->OccurrenceImageCount;
 		}
-		//substract 1 from COUNT(DISTINCT IFNULL(i.occid, 0)) because it counts null as 0 Without IFNULL(i.occid, 0) the count is 0
 		$sql3 = 'SELECT COUNT(DISTINCT o.family) AS FamilyCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
 			'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount, '.
-			'COUNT(DISTINCT IFNULL(i.occid, 0))-1 AS TotalImageCount '.
+            'COUNT(DISTINCT CASE WHEN i.occid IS NOT NULL THEN i.imgid ELSE NULL END) AS TotalImageCount, '.
 			'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
 			'LEFT JOIN images AS i ON o.occid = i.occid '.
 			'WHERE o.collid IN('.$collId.') ';
@@ -892,6 +891,96 @@ class CollectionProfileManager {
 
 		return $returnArr;
 	}
+
+    public function runStatisticsQuery($collId,$taxon,$country){
+        $returnArr = Array();
+        $pTID = '';
+        $sqlFrom = 'FROM omoccurrences AS o LEFT JOIN taxa AS t ON o.tidinterpreted = t.TID '.
+            'LEFT JOIN omcollections AS c ON o.collid = c.CollID ';
+        $sqlWhere = 'WHERE o.collid IN('.$collId.') ';
+        if($taxon){
+            $sql = 'SELECT TID FROM taxa WHERE SciName = "'.$taxon.'" ';
+            $rs = $this->conn->query($sql);
+            while($r = $rs->fetch_object()){
+                $pTID = $r->TID;
+            }
+            $sqlFrom .= 'LEFT JOIN taxaenumtree AS te ON t.TID = te.tid ';
+            $sqlWhere .= 'AND te.taxauthid = 1 AND te.parenttid = '.$pTID.' ';
+        }
+        if($country){
+            $sqlWhere .= 'AND o.country = "'.$country.'"" ';
+        }
+        $sql2 = 'SELECT c.CollID, c.CollectionName, COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
+            'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(DISTINCT t.UnitName1) AS GeneraCount, COUNT(o.typeStatus) AS TypeCount, '.
+            'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS SpecimensCountID, '.
+            'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
+            'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount, '.
+            'COUNT(CASE WHEN ISNULL(o.family) THEN o.occid ELSE NULL END) AS SpecimensNullFamily, '.
+            'COUNT(CASE WHEN ISNULL(o.country) THEN o.occid ELSE NULL END) AS SpecimensNullCountry, '.
+            'COUNT(CASE WHEN ISNULL(o.decimalLatitude) THEN o.occid ELSE NULL END) AS SpecimensNullLatitude ';
+        $sql2 .= $sqlFrom.$sqlWhere;
+        $sql2 .= 'GROUP BY c.CollectionName ';
+        //echo 'sql2: '.$sql2;
+        $rs = $this->conn->query($sql2);
+        while($r = $rs->fetch_object()){
+            $returnArr[$r->CollectionName]['CollID'] = $r->CollID;
+            $returnArr[$r->CollectionName]['CollectionName'] = $r->CollectionName;
+            $returnArr[$r->CollectionName]['recordcnt'] = $r->SpecimenCount;
+            $returnArr[$r->CollectionName]['georefcnt'] = $r->GeorefCount;
+            $returnArr[$r->CollectionName]['speciesID'] = $r->SpecimensCountID;
+            $returnArr[$r->CollectionName]['familycnt'] = $r->FamilyCount;
+            $returnArr[$r->CollectionName]['genuscnt'] = $r->GeneraCount;
+            $returnArr[$r->CollectionName]['speciescnt'] = $r->SpeciesCount;
+            $returnArr[$r->CollectionName]['TotalTaxaCount'] = $r->TotalTaxaCount;
+            $returnArr[$r->CollectionName]['types'] = $r->TypeCount;
+            $returnArr[$r->CollectionName]['SpecimensNullFamily'] = $r->SpecimensNullFamily;
+            $returnArr[$r->CollectionName]['SpecimensNullCountry'] = $r->SpecimensNullCountry;
+            $returnArr[$r->CollectionName]['SpecimensNullLatitude'] = $r->SpecimensNullLatitude;
+        }
+        $sql3 = 'SELECT o.family, COUNT(o.occid) AS SpecimensPerFamily, COUNT(o.decimalLatitude) AS GeorefSpecimensPerFamily, '.
+            'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerFamily, '.
+            'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerFamily ';
+        $sql3 .= $sqlFrom.$sqlWhere;
+        $sql3 .= 'GROUP BY o.family ';
+        //echo 'sql3: '.$sql3;
+        $rs = $this->conn->query($sql3);
+        while($r = $rs->fetch_object()){
+            if($r->family){
+                $returnArr['families'][$r->family]['SpecimensPerFamily'] = $r->SpecimensPerFamily;
+                $returnArr['families'][$r->family]['GeorefSpecimensPerFamily'] = $r->GeorefSpecimensPerFamily;
+                $returnArr['families'][$r->family]['IDSpecimensPerFamily'] = $r->IDSpecimensPerFamily;
+                $returnArr['families'][$r->family]['IDGeorefSpecimensPerFamily'] = $r->IDGeorefSpecimensPerFamily;
+            }
+        }
+        $sql4 = 'SELECT o.country, COUNT(o.occid) AS CountryCount, COUNT(o.decimalLatitude) AS GeorefSpecimensPerCountry, '.
+            'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerCountry, '.
+            'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerCountry ';
+        $sql4 .= $sqlFrom.$sqlWhere;
+        $sql4 .= 'GROUP BY o.country ';
+        //echo 'sql4: '.$sql4;
+        $rs = $this->conn->query($sql4);
+        while($r = $rs->fetch_object()){
+            if($r->country){
+                $returnArr['countries'][$r->country]['CountryCount'] = $r->CountryCount;
+                $returnArr['countries'][$r->country]['GeorefSpecimensPerCountry'] = $r->GeorefSpecimensPerCountry;
+                $returnArr['countries'][$r->country]['IDSpecimensPerCountry'] = $r->IDSpecimensPerCountry;
+                $returnArr['countries'][$r->country]['IDGeorefSpecimensPerCountry'] = $r->IDGeorefSpecimensPerCountry;
+            }
+        }
+        $sql5 = 'SELECT c.CollID, c.CollectionName, '.
+            'COUNT(DISTINCT CASE WHEN i.occid IS NOT NULL THEN i.imgid ELSE NULL END) AS TotalImageCount ';
+        $sql5 .= $sqlFrom;
+        $sql5 .= 'LEFT JOIN images AS i ON o.occid = i.occid ';
+        $sql5 .= $sqlWhere;
+        //echo 'sql5: '.$sql5;
+        $rs = $this->conn->query($sql5);
+        while($r = $rs->fetch_object()){
+            $returnArr[$r->CollectionName]['OccurrenceImageCount'] = $r->TotalImageCount;
+        }
+        $rs->free();
+
+        return $returnArr;
+    }
 
 	public function getYearStatsHeaderArr($months){
 		$dateArr = array();

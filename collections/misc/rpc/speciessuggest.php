@@ -6,7 +6,7 @@
 	
 	$sql = "SELECT t.tid, t.sciname ". 
 		"FROM taxa t ".
-		"WHERE t.rankid > 180 AND t.SecurityStatus <> 2 AND t.sciname LIKE '".$queryString."%' ".
+		"WHERE t.SecurityStatus <> 2 AND t.sciname LIKE '".$queryString."%' ".
 		"ORDER BY t.sciname LIMIT 10";
 	//echo $sql;
 	$result = $con->query($sql);

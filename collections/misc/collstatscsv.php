@@ -10,6 +10,8 @@ $famArrJson = array_key_exists("famarrjson",$_REQUEST)?$_REQUEST["famarrjson"]:'
 $orderArrJson = array_key_exists("orderarrjson",$_REQUEST)?$_REQUEST["orderarrjson"]:'';
 $geoArrJson = array_key_exists("geoarrjson",$_REQUEST)?$_REQUEST["geoarrjson"]:'';
 $collId = array_key_exists("collids",$_REQUEST)?$_REQUEST["collids"]:'';
+$cPartentTaxon = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:'';
+$cCountry = array_key_exists("country",$_REQUEST)?$_REQUEST["country"]:'';
 $days = array_key_exists("days",$_REQUEST)?$_REQUEST["days"]:365;
 $months = array_key_exists("months",$_REQUEST)?$_REQUEST["months"]:12;
 
@@ -73,7 +75,7 @@ if($action == 'Download CSV'){
 	$headerArr = $collManager->getYearStatsHeaderArr($months);
 	$dataArr = $collManager->getYearStatsDataArr($collId,$days);
 }
-if($action == 'Download Stats per Coll'){
+if($action == 'Download Stats per Coll' && (!$cPartentTaxon && !$cCountry)){
 	$header = array('Collection','Specimens','Georeferenced','Imaged','Species ID','Families','Genera','Species','Total Taxa','Types');
 	$fileName = 'stats_per_coll.csv';
 	$resultsTemp = $collManager->runStatistics($collId);
@@ -109,6 +111,31 @@ if($action == 'Download Stats per Coll'){
 			$i++;
 		}
 	}
+}
+if($action == 'Download Stats per Coll' && ($cPartentTaxon || $cCountry)){
+    $header = array('Collection','Specimens','Georeferenced','Imaged','Species ID','Families','Genera','Species','Total Taxa','Types');
+    $fileName = 'stats_per_coll.csv';
+    $resultsTemp = $collManager->runStatisticsQuery($collId,$cPartentTaxon,$cCountry);
+    if($resultsTemp){
+        unset($resultsTemp['families']);
+        unset($resultsTemp['countries']);
+        ksort($resultsTemp);
+        $i = 0;
+        foreach($resultsTemp as $k => $collArr){
+            $dynPropTempArr = array();
+            $outputArr[$i]['CollectionName'] = $collArr['CollectionName'];
+            $outputArr[$i]['recordcnt'] = $collArr['recordcnt'];
+            $outputArr[$i]['georefcnt'] = $collArr['georefcnt'];
+            $outputArr[$i]['OccurrenceImageCount'] = $collArr['OccurrenceImageCount'];
+            $outputArr[$i]['SpecimensCountID'] = $collArr['speciesID'];
+            $outputArr[$i]['familycnt'] = $collArr['familycnt'];
+            $outputArr[$i]['genuscnt'] = $collArr['genuscnt'];
+            $outputArr[$i]['speciescnt'] = $collArr['speciescnt'];
+            $outputArr[$i]['TotalTaxaCount'] = $collArr['TotalTaxaCount'];
+            $outputArr[$i]['TypeCount'] = $collArr['TypeCount'];
+            $i++;
+        }
+    }
 }
 
 header ('Content-Type: text/csv');
