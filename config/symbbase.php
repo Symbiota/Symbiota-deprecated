@@ -1,9 +1,9 @@
 <?php
-session_start();
-header('Cache-control: private'); // IE 6 FIX
-
 if(!isset($CLIENT_ROOT) && isset($clientRoot)) $CLIENT_ROOT = $clientRoot; 
 if(!isset($SERVER_ROOT) && isset($serverRoot)) $SERVER_ROOT = $serverRoot;
+include_once($SERVER_ROOT.'/classes/Encryption.php');
+session_start();
+header('Cache-control: private'); // IE 6 FIX
 
 set_include_path(get_include_path() . PATH_SEPARATOR . $SERVER_ROOT . PATH_SEPARATOR . $SERVER_ROOT."/config/" . PATH_SEPARATOR . $SERVER_ROOT."/classes/");
 date_default_timezone_set('America/Phoenix');
@@ -19,7 +19,7 @@ if(substr($SERVER_ROOT,-1) == '/'){
 $PARAMS_ARR = Array();				//params => fn, uid, un   cookie(SymbiotaBase) => 'un=egbot&dn=Edward+Gilbert&uid=301'
 $USER_RIGHTS = Array();
 if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))){
-    $userValue = $_COOKIE["SymbiotaBase"];
+    $userValue = Encryption::decrypt($_COOKIE["SymbiotaBase"]);
     $userValues =	explode("&",$userValue);
     foreach($userValues as $val){
         $tok1 = strtok($val, "=");
@@ -28,7 +28,7 @@ if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))
     }
 	//Check user rights
 	if(isset($_COOKIE["SymbiotaRights"])){
-        $userRightsStr = $_COOKIE["SymbiotaRights"];
+        $userRightsStr = Encryption::decrypt($_COOKIE["SymbiotaRights"]);
 		$uRights = explode("&",$userRightsStr);
 		foreach($uRights as $v){
 			$tArr = explode("-",$v);

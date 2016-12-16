@@ -1,6 +1,7 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once("Person.php");
+include_once("Encryption.php");
 
 class ProfileManager{
 
@@ -31,10 +32,10 @@ class ProfileManager{
 		$domainName = $_SERVER['SERVER_NAME'];
 		if(!$domainName) $domainName = $_SERVER['HTTP_HOST'];
 		if($domainName == 'localhost') $domainName = false;
-		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'),$domainName,false,true);
-		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'),$domainName,false,true);
-		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
-		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
+		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
+		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
+		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'));
+		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'));
 	}
 	
 	public function setCookies(){
@@ -48,7 +49,7 @@ class ProfileManager{
 		$domainName = $_SERVER['SERVER_NAME'];
 		if(!$domainName) $domainName = $_SERVER['HTTP_HOST'];
 		if($domainName == 'localhost') $domainName = false;
-		setcookie("SymbiotaBase", $cookieStr, $cookieExpire, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'),$domainName,false,true);
+		setcookie("SymbiotaBase", Encryption::encrypt($cookieStr), $cookieExpire, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
 		//Set admin cookie
 		if($this->userRights){
 			$cookieStr = '';
@@ -56,7 +57,8 @@ class ProfileManager{
 				$vStr = implode(',',$vArr);
 				$cookieStr .= $name.($vStr?'-'.$vStr:'').'&';
 			}
-			setcookie("SymbiotaRights", trim($cookieStr,"&"), $cookieExpire, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'),$domainName,false,true);
+			$cookieStr = trim($cookieStr,"&");
+			setcookie("SymbiotaRights", Encryption::encrypt($cookieStr), $cookieExpire, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
 		}
 	}
 	
@@ -231,8 +233,8 @@ class ProfileManager{
 
 			//Send email
 			$subject = "Your password";
-			$bodyStr = "Your ".$GLOBALS["defaultTitle"]." (<a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."'>http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."</a>) password has been reset to: ".$newPassword." ";
-			$bodyStr .= "<br/><br/>After logging in, you can reset your password by clicking on <a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."/profile/viewprofile.php'>View Profile</a> link and then click the Edit Profile tab.";
+			$bodyStr = "Your ".$GLOBALS["defaultTitle"]." (<a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."'>http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."</a>) password has been reset to: ".$newPassword." ";
+			$bodyStr .= "<br/><br/>After logging in, you can reset your password by clicking on <a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."/profile/viewprofile.php'>View Profile</a> link and then click the Edit Profile tab.";
 			$bodyStr .= "<br/>If you have problems with the new password, contact the System Administrator ";
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
@@ -392,8 +394,8 @@ class ProfileManager{
 		if($loginStr){
 			//Email login
 			$subject = $GLOBALS['defaultTitle'].' Login Name';
-			$bodyStr = 'Your '.$GLOBALS['defaultTitle'].' (<a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'">http://'.
-				$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'</a>) login name is: '.$loginStr.' ';
+			$bodyStr = 'Your '.$GLOBALS['defaultTitle'].' (<a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'">http://'.
+				$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'</a>) login name is: '.$loginStr.' ';
 			$bodyStr .= "<br/>If you continue to have login issues, contact the System Administrator ";
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
@@ -784,13 +786,13 @@ class ProfileManager{
 			echo 'Done!</li> ';
 			ob_flush();
 			flush();
-			$fileUrl = str_replace($GLOBALS['serverRoot'],$GLOBALS['clientRoot'],$tempPath.$buFileName.'.zip');
+			$fileUrl = str_replace($GLOBALS['SERVER_ROOT'],$GLOBALS['CLIENT_ROOT'],$tempPath.$buFileName.'.zip');
 			$zipArchive->close();
 			unlink($fileName.'_spec.csv');
 			//unlink($fileName.'_det.csv');
 		}
 		else{
-			$fileUrl = str_replace($GLOBALS['serverRoot'],$GLOBALS['clientRoot'],$tempPath.$buFileName.'_spec.csv');
+			$fileUrl = str_replace($GLOBALS['SERVER_ROOT'],$GLOBALS['CLIENT_ROOT'],$tempPath.$buFileName.'_spec.csv');
     	}
 		return $fileUrl;
 	}
@@ -849,7 +851,7 @@ class ProfileManager{
 	}
 
 	private function getTempPath(){
-		$tPath = $GLOBALS["serverRoot"];
+		$tPath = $GLOBALS["SERVER_ROOT"];
 		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\') $tPath .= '/';
 		$tPath .= "temp/";
 		if(file_exists($tPath."downloads/")){
