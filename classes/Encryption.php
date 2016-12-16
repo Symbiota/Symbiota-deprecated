@@ -6,6 +6,7 @@ class Encryption{
 
 	public static function encrypt($plainText) {
 		if(!isset($GLOBALS['SECURITY_KEY']) || !$GLOBALS['SECURITY_KEY']) return $plainText;
+		if(!function_exists('mcrypt_get_iv_size')) return $plainText;
 		$ivSize = mcrypt_get_iv_size(self::CIPHER, self::MODE);
 		$iv = mcrypt_create_iv($ivSize, MCRYPT_DEV_URANDOM);
 		$cipherText = mcrypt_encrypt(self::CIPHER, self::getKey(), $plainText, self::MODE, $iv);
@@ -14,6 +15,7 @@ class Encryption{
 
 	public static function decrypt($cipherTextIn) {
 		if(!isset($GLOBALS['SECURITY_KEY']) || !$GLOBALS['SECURITY_KEY']) return $cipherTextIn;
+		if(!function_exists('mcrypt_get_iv_size')) return $cipherTextIn;
 		$cipherText = base64_decode($cipherTextIn);
 		if(!$cipherText) return $cipherTextIn;
 		$ivSize = mcrypt_get_iv_size(self::CIPHER, self::MODE);
