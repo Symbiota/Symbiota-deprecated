@@ -16,17 +16,18 @@ class Encryption{
 	public static function decrypt($cipherTextIn) {
 		if(!isset($GLOBALS['SECURITY_KEY']) || !$GLOBALS['SECURITY_KEY']) return $cipherTextIn;
 		if(!function_exists('mcrypt_get_iv_size')) return $cipherTextIn;
+		if(strpos($cipherTextIn,'CollEditor') !== false || strpos($cipherTextIn,'CollAdmin') !== false) return $cipherTextIn;
+		if(strpos($cipherTextIn,'uid=') !== false) return $cipherTextIn;
 		$cipherText = base64_decode($cipherTextIn);
 		if(!$cipherText) return $cipherTextIn;
 		$ivSize = mcrypt_get_iv_size(self::CIPHER, self::MODE);
-		//echo $cipherTextIn.'<br/>'.$cipherText.' ('.strlen($cipherText).') - '.$ivSize.'<br/>';
 		if(strlen($cipherText) < $ivSize) {
 			throw new Exception('Missing initialization vector');
 		}
 		$iv = substr($cipherText, 0, $ivSize);
-		$ciphertext = substr($cipherText, $ivSize);
-		$plaintext = mcrypt_decrypt(self::CIPHER, self::getKey(), $cipherText, self::MODE, $iv);
-		return rtrim($plaintext, "\0");
+		$cipherText = substr($cipherText, $ivSize);
+		$plainText = mcrypt_decrypt(self::CIPHER, self::getKey(), $cipherText, self::MODE, $iv);
+		return rtrim($plainText, "\0");
 	}
 
 	public static function getKey(){
