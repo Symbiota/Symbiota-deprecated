@@ -350,32 +350,32 @@ class OccurrenceUtilities {
 		$replace = array("'", "'", "'", '"', '"'); 
 		$inStr= str_replace($search, $replace, $inStr);
 		//Start parsing
-		if(preg_match('/(\d+)\s*-\s*(\d+)\s*meter/i',$inStr,$m)){
+		if(preg_match('/([\.\d]+)\s*-\s*([\.\d]+)\s*meter/i',$inStr,$m)){
 			$retArr['minelev'] = $m[1];
 			$retArr['maxelev'] = $m[2];
 		}
-		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*m./i',$inStr,$m)){
+		elseif(preg_match('/([\.\d]+)\s*-\s*([\.\d]+)\s*m./i',$inStr,$m)){
 			$retArr['minelev'] = $m[1];
 			$retArr['maxelev'] = $m[2];
 		}
-		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*m$/i',$inStr,$m)){
+		elseif(preg_match('/([\.\d]+)\s*-\s*([\.\d]+)\s*m$/i',$inStr,$m)){
 			$retArr['minelev'] = $m[1];
 			$retArr['maxelev'] = $m[2];
 		}
-		elseif(preg_match('/(\d+)\s*meter/i',$inStr,$m)){
+		elseif(preg_match('/([\.\d]+)\s*meter/i',$inStr,$m)){
 			$retArr['minelev'] = $m[1];
 		}
-		elseif(preg_match('/(\d+)\s*m./i',$inStr,$m)){
+		elseif(preg_match('/([\.\d]+)\s*m./i',$inStr,$m)){
 			$retArr['minelev'] = $m[1];
 		}
-		elseif(preg_match('/(\d+)\s*m$/i',$inStr,$m)){
+		elseif(preg_match('/([\.\d]+)\s*m$/i',$inStr,$m)){
 			$retArr['minelev'] = $m[1];
 		}
-		elseif(preg_match('/(\d+)[fet\']{,4}\s*-\s*(\d+)\s{,1}[f\']{1}/i',$inStr,$m)){
+		elseif(preg_match('/([\.\d]+)[fet\']{,4}\s*-\s*([\.\d]+)\s{,1}[f\']{1}/i',$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
 			$retArr['maxelev'] = (round($m[2]*.3048));
 		}
-		elseif(preg_match('/(\d+)\s*[f\']{1}/i',$inStr,$m)){
+		elseif(preg_match('/([\.\d]+)\s*[f\']{1}/i',$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
 		}
 		//Clean
