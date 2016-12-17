@@ -380,13 +380,7 @@ class ImageExplorer{
 
 	public function getCollections(){
 		$retArr = array();
-		/*
-		$sql = 'SELECT DISTINCT c.collid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode '.
-			'FROM omcollections c ';
-		*/
-		$sql = 'SELECT DISTINCT c.collid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode '.
-			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-			'INNER JOIN images i ON o.occid = i.occid ';
+        /*
         $sql = 'SELECT count(i.imgid) as ct, c.collid, c.institutioncode, c.collectioncode ' .
                ' FROM omcollections c '.
                '    LEFT JOIN omoccurrences o ON c.collid = o.collid '.
@@ -395,7 +389,14 @@ class ImageExplorer{
                '       and i.sortsequence < 500 '.
                ' GROUP BY c.collid, c.institutioncode, c.collectioncode '.
                ' HAVING count(i.imgid) > 0 ';
-		$stmt = $this->conn->prepare($sql);
+        */
+        $sql = 'SELECT count(i.imgid) as ct, c.collid, c.institutioncode, c.collectioncode ' .
+               ' FROM omcollections c '.
+               '    INNER JOIN omoccurrences o ON c.collid = o.collid '.
+               '    INNER JOIN images i ON o.occid = i.occid '. 
+               ' WHERE i.sortsequence < 500 '.
+               ' GROUP BY c.collid, c.institutioncode, c.collectioncode ';
+        $stmt = $this->conn->prepare($sql);
         if ($stmt) { 
             $stmt->bind_result($count,$collid,$instcode,$collcode);
             $stmt->execute();
