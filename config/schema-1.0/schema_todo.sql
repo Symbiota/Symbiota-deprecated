@@ -485,19 +485,6 @@ CREATE TABLE `omoccuraccessstats` (
   `oasid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `occid` INT UNSIGNED NOT NULL,
   `accessdate` DATE NOT NULL,
-  `cnt` INT UNSIGNED NOT NULL,
-  `accesstype` VARCHAR(45) NOT NULL,
-  `dynamicProperties` VARCHAR(250) NULL,
-  `notes` VARCHAR(250) NULL,
-  `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
-  PRIMARY KEY (`oasid`),
-  UNIQUE INDEX `UNIQUE_occuraccess` (`occid` ASC, `accessdate` ASC, `accesstype` ASC),
-  CONSTRAINT `FK_occuraccess_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`)  ON DELETE CASCADE  ON UPDATE CASCADE);
-
-CREATE TABLE `omoccuraccessstatstemp` (
-  `oasid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `occid` INT UNSIGNED NOT NULL,
-  `accessdate` DATE NOT NULL,
   `ipaddress` VARCHAR(45) NOT NULL,
   `cnt` INT UNSIGNED NOT NULL,
   `accesstype` VARCHAR(45) NOT NULL,
