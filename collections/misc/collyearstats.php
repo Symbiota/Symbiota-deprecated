@@ -7,8 +7,12 @@ ini_set('max_execution_time', 1200); //1200 seconds = 20 minutes
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
-$days = array_key_exists("days",$_REQUEST)?$_REQUEST["days"]:365;
-$months = array_key_exists("months",$_REQUEST)?$_REQUEST["months"]:12;
+//$days = array_key_exists("days",$_REQUEST)?$_REQUEST["days"]:365;
+//$months = array_key_exists("months",$_REQUEST)?$_REQUEST["months"]:12;
+$years = array_key_exists("years",$_REQUEST)?$_REQUEST["years"]:1;
+
+$days = 365 * $years;
+$months = 12 * $years;
 
 $collManager = new CollectionProfileManager();
 
@@ -35,7 +39,7 @@ if($collId){
 		?>
 		<div id="innertext">
 			<fieldset id="yearstatsbox" style="clear:both;margin-top:15px;width:97%;">
-				<legend><b>Past Year Totals</b></legend>
+				<legend><b>Month Totals</b></legend>
 				<table class="styledtable" style="font-family:Arial;font-size:12px;width:98%;">
 					<tr>
 						<th style="text-align:center;">Institution</th>
@@ -199,6 +203,7 @@ if($collId){
 						<input type="hidden" name="collids" id="collids" value='<?php echo $collId; ?>' />
 						<input type="hidden" name="days" value="<?php echo $days; ?>" />
 						<input type="hidden" name="months" value="<?php echo $months; ?>" />
+                        <input type="hidden" name="years" value="<?php echo $years; ?>" />
 						<input type="submit" name="action" value="Download CSV" />
 					</form>
 				</div>

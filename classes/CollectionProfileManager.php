@@ -908,7 +908,7 @@ class CollectionProfileManager {
             $sqlWhere .= 'AND te.taxauthid = 1 AND te.parenttid = '.$pTID.' ';
         }
         if($country){
-            $sqlWhere .= 'AND o.country = "'.$country.'"" ';
+            $sqlWhere .= 'AND o.country = "'.$country.'" ';
         }
         $sql2 = 'SELECT c.CollID, c.CollectionName, COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
             'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(DISTINCT t.UnitName1) AS GeneraCount, COUNT(o.typeStatus) AS TypeCount, '.
@@ -972,6 +972,7 @@ class CollectionProfileManager {
         $sql5 .= $sqlFrom;
         $sql5 .= 'LEFT JOIN images AS i ON o.occid = i.occid ';
         $sql5 .= $sqlWhere;
+        $sql5 .= 'GROUP BY c.CollectionName ';
         //echo 'sql5: '.$sql5;
         $rs = $this->conn->query($sql5);
         while($r = $rs->fetch_object()){

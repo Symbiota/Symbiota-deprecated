@@ -40,7 +40,7 @@ if($collId){
 		unset($resultsTemp['speciescnt']);
 		unset($resultsTemp['TotalTaxaCount']);
 		unset($resultsTemp['TotalImageCount']);
-		ksort($resultsTemp);
+		ksort($resultsTemp, SORT_STRING | SORT_FLAG_CASE);
 		$c = 0;
 		foreach($resultsTemp as $k => $collArr){
 			$dynPropTempArr = array();
@@ -134,7 +134,7 @@ if($collId){
         ksort($countryArr, SORT_STRING | SORT_FLAG_CASE);
         unset($resultsTemp['families']);
         unset($resultsTemp['countries']);
-        ksort($resultsTemp);
+        ksort($resultsTemp, SORT_STRING | SORT_FLAG_CASE);
         $c = 0;
         foreach($resultsTemp as $k => $collArr){
             if($c>0) $collStr .= ", ";
@@ -219,8 +219,8 @@ if($action != "Update Statistics"){
 			<title><?php echo $defaultTitle; ?> Collection Statistics</title>
 			<link rel="stylesheet" href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" />
 			<link rel="stylesheet" href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" />
-			<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
-			<script type="text/javascript" src="../../js/jquery.js"></script>
+			<link rel="stylesheet" href="../../css/jquery-ui.css" type="text/css" />
+            <script type="text/javascript" src="../../js/jquery.js"></script>
 			<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 			<script type="text/javascript" src="../../js/symb/collections.index.js"></script>
 			<script type="text/javascript">
@@ -400,10 +400,10 @@ if($action != "Update Statistics"){
                                     <fieldset style="padding:10px;padding-left:25px;">
                                         <legend><b>Record Criteria</b></legend>
                                         <div style="margin:10px;float:left;">
-                                            Parent Taxon: <input type="text" id="taxon" size="43" name="taxon" value="" />
+                                            Parent Taxon: <input type="text" id="taxon" size="43" name="taxon" value="<?php echo $cPartentTaxon; ?>" />
                                         </div>
                                         <div style="margin:10px;float:left;">
-                                            Country: <input type="text" id="country" size="43" name="country" value="" />
+                                            Country: <input type="text" id="country" size="43" name="country" value="<?php echo $cCountry; ?>" />
                                         </div>
                                     </fieldset>
                                     <?php
@@ -819,12 +819,30 @@ if($action != "Update Statistics"){
 												</div>
 												<input type="hidden" name="geoarrjson" id="geoarrjson" value='<?php echo json_encode($countryArr); ?>' />
 											</form>
+                                            <?php
+                                            if(!$cPartentTaxon && !$cCountry){
+                                                ?>
+                                                <div style="margin-top:25px;">
+                                                    <form name="orderstats" style="margin-bottom:0px"
+                                                          action="collorderstats.php" method="post" target="_blank"
+                                                          onsubmit="">
+                                                        <input type="hidden" name="collid" id="collid"
+                                                               value='<?php echo $collId; ?>'/>
+                                                        <input type="hidden" name="totalcnt" id="totalcnt"
+                                                               value='<?php echo $results['SpecimenCount']; ?>'/>
+                                                        <input type="submit" name="action" value="Load Order Distribution"/>
+                                                    </form>
+                                                </div>
+                                                <?php
+                                            }
+                                            ?>
 										</fieldset>
 										<?php
 										if(!$cPartentTaxon && !$cCountry){
                                             if ($SYMB_UID && ($IS_ADMIN || array_key_exists("CollAdmin", $USER_RIGHTS))) {
                                                 ?>
-                                                <div style="">
+                                                <fieldset id="yearstatsbox" style="width:275px;">
+                                                    <legend><b>Year Stats</b></legend>
                                                     <form name="yearstats" style="margin-bottom:0px"
                                                           action="collyearstats.php" method="post" target="_blank"
                                                           onsubmit="">
@@ -833,25 +851,16 @@ if($action != "Update Statistics"){
                                                         <input type="hidden" name="days" value="<?php echo $days; ?>"/>
                                                         <input type="hidden" name="months"
                                                                value="<?php echo $months; ?>"/>
-                                                        <input type="submit" name="action"
-                                                               value="Load Stats for Past Year"/>
+                                                        <div style="float:left;">
+                                                            Years: <input type="text" id="years" size="5" name="years" value="1" />
+                                                        </div>
+                                                        <div style="margin-left:10px;float:left;">
+                                                            <input type="submit" name="action" value="Load Stats"/>
+                                                        </div>
                                                     </form>
-                                                </div>
+                                                </fieldset>
                                                 <?php
                                             }
-                                            ?>
-                                            <div style="margin-top:10px;">
-                                                <form name="orderstats" style="margin-bottom:0px"
-                                                      action="collorderstats.php" method="post" target="_blank"
-                                                      onsubmit="">
-                                                    <input type="hidden" name="collid" id="collid"
-                                                           value='<?php echo $collId; ?>'/>
-                                                    <input type="hidden" name="totalcnt" id="totalcnt"
-                                                           value='<?php echo $results['SpecimenCount']; ?>'/>
-                                                    <input type="submit" name="action" value="Load Order Distribution"/>
-                                                </form>
-                                            </div>
-                                            <?php
                                         }
                                         ?>
 									</div>

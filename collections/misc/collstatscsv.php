@@ -12,8 +12,12 @@ $geoArrJson = array_key_exists("geoarrjson",$_REQUEST)?$_REQUEST["geoarrjson"]:'
 $collId = array_key_exists("collids",$_REQUEST)?$_REQUEST["collids"]:'';
 $cPartentTaxon = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:'';
 $cCountry = array_key_exists("country",$_REQUEST)?$_REQUEST["country"]:'';
-$days = array_key_exists("days",$_REQUEST)?$_REQUEST["days"]:365;
-$months = array_key_exists("months",$_REQUEST)?$_REQUEST["months"]:12;
+//$days = array_key_exists("days",$_REQUEST)?$_REQUEST["days"]:365;
+//$months = array_key_exists("months",$_REQUEST)?$_REQUEST["months"]:12;
+$years = array_key_exists("years",$_REQUEST)?$_REQUEST["years"]:1;
+
+$days = 365 * $years;
+$months = 12 * $years;
 
 $collManager = new CollectionProfileManager();
 
