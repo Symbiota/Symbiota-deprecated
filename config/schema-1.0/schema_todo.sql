@@ -665,7 +665,7 @@ ALTER TABLE `glossarytaxalink`
   ADD CONSTRAINT `FK_glossarytaxa_glossid`  FOREIGN KEY (`glossid`)  REFERENCES `glossary` (`glossid`)  ON DELETE CASCADE  ON UPDATE CASCADE;
 
 ALTER TABLE `glossaryimages` 
-  DROP FOREIGN KEY `glossaryimages_ibfk_1`;
+  DROP FOREIGN KEY `FK_glossaryimages_gloss`;
 ALTER TABLE `glossaryimages` 
   ADD INDEX `FK_glossaryimages_uid_idx` (`uid` ASC);
 ALTER TABLE `glossaryimages` 
