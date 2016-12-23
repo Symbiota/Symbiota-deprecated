@@ -11,6 +11,8 @@ $projSubmit = array_key_exists("projsubmit",$_REQUEST)?$_REQUEST["projsubmit"]:"
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 $statusStr = '';
 
+if(!$pid && array_key_exists("proj",$_GET) && is_numeric($_GET['proj'])) $pid = $_GET['proj'];
+
 $projManager = new InventoryProjectManager();
 if($pid) $projManager->setPid($pid);
 
