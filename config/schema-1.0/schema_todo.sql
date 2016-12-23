@@ -432,7 +432,6 @@ ALTER TABLE `uploadtaxa`
 
 ALTER TABLE `taxa` 
   DROP COLUMN `KingdomID`,
-  DROP COLUMN `kingdomName`,
   DROP INDEX `sciname_unique`,
   ADD UNIQUE INDEX `sciname_unique` (`SciName` ASC, `RankId` ASC, `Author` ASC),
   ADD INDEX `sciname_index` (`SciName` ASC);
@@ -630,7 +629,7 @@ ALTER TABLE `glossarytaxalink`
 ALTER TABLE `glossarytermlink` DROP FOREIGN KEY `glossarytermlink_ibfk_1`;
 
 CREATE TABLE `glossarysources` (
-  `tid` int(10) unsigned NOT NULL,
+  `tid` int unsigned NOT NULL,
   `contributorTerm` varchar(1000) DEFAULT NULL,
   `contributorImage` varchar(1000) DEFAULT NULL,
   `translator` varchar(1000) DEFAULT NULL,
@@ -867,7 +866,7 @@ INSERT INTO `paleochronostratigraphy` VALUES ('155', 'Phanerozoic', 'Cenozoic', 
 INSERT INTO `paleochronostratigraphy` VALUES ('156', 'Phanerozoic', 'Cenozoic', 'Quaternary', 'Holocene', null);
 
 CREATE TABLE `omoccurlithostratigraphy` (
-  `occid` int(10) unsigned NOT NULL,
+  `occid` int unsigned NOT NULL,
   `chronoId` int(10) unsigned NOT NULL,
   `Group` varchar(255) DEFAULT NULL,
   `Formation` varchar(255) DEFAULT NULL,
@@ -879,19 +878,19 @@ CREATE TABLE `omoccurlithostratigraphy` (
   INDEX `Group` (`Group`),
   INDEX `Formation` (`Formation`),
   INDEX `Member` (`Member`),
-  CONSTRAINT `FK_occurlitho_chronoid` FOREIGN KEY (`chronoId`) REFERENCES `paleochronostratigraphy` (`chronoId`) ON UPDATE CASCADE,
-  CONSTRAINT `FK_occurlitho_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`) ON UPDATE CASCADE
+  CONSTRAINT `FK_occurlitho_chronoid` FOREIGN KEY (`chronoId`) REFERENCES `paleochronostratigraphy` (`chronoId`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+  CONSTRAINT `FK_occurlitho_occid` FOREIGN KEY (`occid`) REFERENCES `omoccurrences` (`occid`) ON DELETE CASCADE  ON UPDATE CASCADE
 );
 
 CREATE TABLE `useraccesstokens` (
   `tokid` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(10) unsigned NOT NULL,
+  `uid` int unsigned NOT NULL,
   `token` varchar(50) NOT NULL,
   `device` varchar(50) NULL,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`tokid`),
   KEY `FK_useraccesstokens_uid_idx` (`uid`),
-  CONSTRAINT `FK_useraccess_uid` FOREIGN KEY (`uid`) REFERENCES `users` (`uid`) ON DELETE CASCADE
+  CONSTRAINT `FK_useraccess_uid` FOREIGN KEY (`uid`) REFERENCES `users` (`uid`) ON DELETE CASCADE  ON UPDATE CASCADE
 );
 
 
