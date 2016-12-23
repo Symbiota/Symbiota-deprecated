@@ -11,28 +11,31 @@ class Encryption{
 			return $plainText;
 			//throw new Exception("Needs a 256-bit key!");
 		}
-		$ivsize = openssl_cipher_iv_length(self::METHOD);
-		$iv = openssl_random_pseudo_bytes($ivsize);
-	
+		$ivSize = openssl_cipher_iv_length(self::METHOD);
+		$iv = openssl_random_pseudo_bytes($ivSize);
+
 		$ciphertext = openssl_encrypt($plainText, self::METHOD, $key, OPENSSL_RAW_DATA, $iv);
 	
 		return $iv . $ciphertext;
 	}
 
-	public static function decrypt($cipherText) {
-		if(!isset($GLOBALS['SECURITY_KEY']) || !$GLOBALS['SECURITY_KEY']) return $cipherText;
-		if(!function_exists('openssl_decrypt')) return $cipherText;
-		if(strpos($cipherText,'CollEditor') !== false || strpos($cipherText,'CollAdmin') !== false) return $cipherText;
-		if(strpos($cipherText,'uid=') !== false) return $cipherText;
+	public static function decrypt($cipherTextIn) {
+		if(!isset($GLOBALS['SECURITY_KEY']) || !$GLOBALS['SECURITY_KEY']) return $cipherTextIn;
+		if(!function_exists('openssl_decrypt')) return $cipherTextIn;
+		if(strpos($cipherTextIn,'CollEditor') !== false || strpos($cipherTextIn,'CollAdmin') !== false) return $cipherTextIn;
+		if(strpos($cipherTextIn,'uid=') !== false) return $cipherTextIn;
 		$key = self::getKey();
 		if (mb_strlen($key, '8bit') !== 32) {
-			return $cipherText;
+			return $cipherTextIn;
 			//throw new Exception("Needs a 256-bit key!");
 		}
 		$ivSize = openssl_cipher_iv_length(self::METHOD);
-		$iv = mb_substr($cipherText, 0, $ivSize, '8bit');
-		$cipherText = mb_substr($cipherText, $ivSize, null, '8bit');
-	
+		$iv = mb_substr($cipherTextIn, 0, $ivSize, '8bit');
+		$cipherText = mb_substr($cipherTextIn, $ivSize, null, '8bit');
+		if(!$cipherText){
+			//Work around needed if mb_string functions are prior than version 5.3
+			$cipherText = mb_substr($cipherTextIn, $ivSize);
+		}
 		return openssl_decrypt($cipherText, self::METHOD, $key, OPENSSL_RAW_DATA, $iv);
 	}
 
