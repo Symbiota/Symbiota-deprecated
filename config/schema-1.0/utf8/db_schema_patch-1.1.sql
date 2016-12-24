@@ -1,3 +1,9 @@
+ALTER TABLE `schemaversion` 
+  ADD UNIQUE INDEX `versionnumber_UNIQUE` (`versionnumber` ASC);
+
+INSERT IGNORE INTO schemaversion (versionnumber) values ("1.1");
+
+
 #Specimen attribute (traits) model
 CREATE TABLE `tmtraits` (
   `traitid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -409,12 +415,14 @@ UPDATE taxavernaculars t INNER JOIN adminlanguages l ON t.language = l.langname
 
 
 #Misc
+DELETE FROM `uploadspectemp`;
 ALTER TABLE `uploadspectemp` 
   ADD COLUMN `exsiccatiIdentifier` INT NULL AFTER `genericcolumn2`,
   ADD COLUMN `exsiccatiNumber` VARCHAR(45) NULL AFTER `exsiccatiIdentifier`,
   ADD COLUMN `exsiccatiNotes` VARCHAR(250) NULL AFTER `exsiccatiNumber`,
   ADD COLUMN `host`  varchar(250) NULL AFTER `substrate`;
 
+DELETE FROM `uploadtaxa`;
 ALTER TABLE `uploadtaxa` 
   ADD COLUMN `ErrorStatus` VARCHAR(150) NULL AFTER `Hybrid`,
   ADD COLUMN `RankName` VARCHAR(45) NULL AFTER `RankId`,
@@ -568,7 +576,8 @@ SELECT occid,Point(decimalLatitude, decimalLongitude) FROM omoccurrences WHERE d
 
 DELIMITER //
 DROP TRIGGER IF EXISTS `omoccurrencesfulltext_insert`//
-CREATE TRIGGER `omoccurrencesfulltextpoint_insert` AFTER INSERT ON `omoccurrences`
+DROP TRIGGER IF EXISTS `omoccurrencesfulltextpoint_insert`//
+CREATE TRIGGER `omoccurrences_insert` AFTER INSERT ON `omoccurrences`
 FOR EACH ROW BEGIN
 	IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
 		INSERT INTO omoccurpoints (`occid`,`point`) 
@@ -580,7 +589,8 @@ END
 //
 
 DROP TRIGGER IF EXISTS `omoccurrencesfulltext_update`//
-CREATE TRIGGER `omoccurrencesfulltextpoint_update` AFTER UPDATE ON `omoccurrences`
+DROP TRIGGER IF EXISTS `omoccurrencesfulltextpoint_update`//
+CREATE TRIGGER `omoccurrences_update` AFTER UPDATE ON `omoccurrences`
 FOR EACH ROW BEGIN
 	IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
 		IF EXISTS (SELECT `occid` FROM omoccurpoints WHERE `occid`=NEW.`occid`) THEN
@@ -599,7 +609,8 @@ END
 //
 
 DROP TRIGGER IF EXISTS `omoccurrencesfulltext_delete`//
-CREATE TRIGGER `omoccurrencesfulltextpoint_delete` BEFORE DELETE ON `omoccurrences`
+DROP TRIGGER IF EXISTS `omoccurrencesfulltextpoint_delete`//
+CREATE TRIGGER `omoccurrences_delete` BEFORE DELETE ON `omoccurrences`
 FOR EACH ROW BEGIN
 	DELETE FROM omoccurpoints WHERE `occid` = OLD.`occid`;
 	DELETE FROM omoccurrencesfulltext WHERE `occid` = OLD.`occid`;
