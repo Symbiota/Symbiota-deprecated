@@ -103,9 +103,9 @@ class SalixHandler{
 	
 	private function cleanOcrInput($ocrInput){
 		$retStr = trim($ocrInput);
-		//Get rid of curly (smart) quotes
-		$search = array("’", "‘", "`", "”", "“"); 
-		$replace = array("'", "'", "'", '"', '"'); 
+		//Get rid of Windows curly (smart) quotes
+		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
+		$replace = array("'","'",'"','"','*','-','-');
 		$retStr = str_replace($search, $replace, $retStr);
 		//Get rid of UTF-8 curly smart quotes and dashes 
 		$badwordchars=array("\xe2\x80\x98", // left single quote

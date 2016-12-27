@@ -1063,12 +1063,7 @@ class DwcArchiverOccurrence{
 		//Populate Upper Taxonomic data
 		$this->setUpperTaxonomy();
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			if(!$this->serverDomain){
-				$this->serverDomain = "http://";
-				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
-				$this->serverDomain .= $_SERVER["SERVER_NAME"];
-				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
-			}
+			if(!$this->serverDomain) $this->setServerDomain();
 			$urlPathPrefix = '';
 			if($this->serverDomain){
 				$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
@@ -1370,12 +1365,7 @@ class DwcArchiverOccurrence{
 
 	private function getEmlArr(){
 		
-		if(!$this->serverDomain){
-			$this->serverDomain = "http://";
-			if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
-			$this->serverDomain .= $_SERVER["SERVER_NAME"];
-			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
-		}
+		if(!$this->serverDomain) $this->setServerDomain();
 		$urlPathPrefix = '';
 		if($this->serverDomain){
 			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
@@ -1717,12 +1707,7 @@ class DwcArchiverOccurrence{
 		$metaElem = $newDoc->createElement('metadata');
 		$metaElem->appendChild($symbElem);
 		if($this->schemaType == 'coge' && $this->geolocateVariables){
-			if(!$this->serverDomain){
-				$this->serverDomain = "http://";
-				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
-				$this->serverDomain .= $_SERVER["SERVER_NAME"];
-				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
-			}
+			if(!$this->serverDomain) $this->setServerDomain();
 			$urlPathPrefix = '';
 			if($this->serverDomain){
 				$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
@@ -1821,12 +1806,7 @@ class DwcArchiverOccurrence{
 		
 		//echo $sql; exit;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			if(!$this->serverDomain){
-				$this->serverDomain = "http://";
-				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
-				$this->serverDomain .= $_SERVER["SERVER_NAME"];
-				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
-			}
+			if(!$this->serverDomain) $this->setServerDomain();
 			$urlPathPrefix = '';
 			if($this->serverDomain){
 				$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
@@ -1975,12 +1955,7 @@ class DwcArchiverOccurrence{
 		$sql = $this->getSqlImages();
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			
-			if(!$this->serverDomain){
-				$this->serverDomain = "http://";
-				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
-				$this->serverDomain .= $_SERVER["SERVER_NAME"];
-				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
-			}
+			if(!$this->serverDomain) $this->setServerDomain();
 			$urlPathPrefix = '';
 			if($this->serverDomain){
 				$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
@@ -2120,13 +2095,8 @@ class DwcArchiverOccurrence{
 		$titleElem = $newDoc->createElement('title');
 		$titleElem->appendChild($newDoc->createTextNode($GLOBALS['DEFAULT_TITLE'].' Darwin Core Archive rss feed'));
 		$channelElem->appendChild($titleElem);
-		
-		if(!$this->serverDomain){
-			$this->serverDomain = "http://";
-			if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
-			$this->serverDomain .= $_SERVER["SERVER_NAME"];
-			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
-		}
+
+		if(!$this->serverDomain) $this->setServerDomain();
 		$urlPathPrefix = '';
 		if($this->serverDomain){
 			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
@@ -2429,6 +2399,13 @@ class DwcArchiverOccurrence{
 	
 	public function setGeolocateVariables($geolocateArr){
 		$this->geolocateVariables = $geolocateArr;
+	}
+	
+	private function setServerDomain(){
+		$this->serverDomain = "http://";
+		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
+		$this->serverDomain .= $_SERVER["SERVER_NAME"];
+		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
 	}
 
 	private function logOrEcho($str){

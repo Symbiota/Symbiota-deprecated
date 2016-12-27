@@ -803,12 +803,12 @@ class SpecProcessorOcr{
 
 		//replace commonly misinterpreted characters
 		$replacements = array("/\." => "A.", "/-\\" => "A", "\X/" => "W", "\Y/" => "W", "`\â€˜i/" => "W", chr(96) => "'", chr(145) => "'", chr(146) => "'", 
-			"’" => "'", "“" => '"', "”" => '"', "”" => '"', chr(147) => '"', chr(148) => '"', chr(152) => '"', chr(239) => "°");
+			"ï¿½" => "'", "ï¿½" => '"', "ï¿½" => '"', "ï¿½" => '"', chr(147) => '"', chr(148) => '"', chr(152) => '"', chr(239) => "ï¿½");
 		$retStr = str_replace(array_keys($replacements), $replacements, $retStr);
 
 		//replace Is, ls and |s in latitudes and longitudes with ones
 		//replace Os in latitudes and longitudes with zeroes, Ss with 5s and Zs with 2s
-		//latitudes and longitudes can be of the types: ddd.ddddddd°, ddd° ddd.ddd' or ddd° ddd' ddd.ddd"
+		//latitudes and longitudes can be of the types: ddd.dddddddï¿½, dddï¿½ ddd.ddd' or dddï¿½ ddd' ddd.ddd"
 		$false_num_class = "[OSZl|I!\d]";//the regex class that represents numbers and characters that numbers are commonly replaced with
 		$preg_replace_callback_pattern =
 			array(
@@ -837,10 +837,10 @@ class SpecProcessorOcr{
 	private function encodeString($inStr){
 		global $charset;
 		$retStr = $inStr;
-		//Get rid of curly (smart) quotes
-		$search = array("’", "‘", "`", "”", "“"); 
-		$replace = array("'", "'", "'", '"', '"'); 
-		$inStr= str_replace($search, $replace, $inStr);
+		//Get rid of Windows curly (smart) quotes
+		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
+		$replace = array("'","'",'"','"','*','-','-');
+		$inStr = str_replace($search, $replace, $inStr);
 		//Get rid of UTF-8 curly smart quotes and dashes 
 		$badwordchars=array("\xe2\x80\x98", // left single quote
 							"\xe2\x80\x99", // right single quote
