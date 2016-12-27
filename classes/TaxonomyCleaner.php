@@ -231,7 +231,7 @@ class TaxonomyCleaner extends Manager{
 		else{
 			//Test taxon does not exists, thus lets load it
 			//Prepare taxon for loading
-			$parsedArr = $this->parseSciName($testObj['name']);
+			$parsedArr = TaxonomyUtilities::parseScientificName($testObj['name'],$this->conn);
 			if(!array_key_exists('rank',$newTaxon)){
 				//Grab taxon object from EOL or Species2000
 				

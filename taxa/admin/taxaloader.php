@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TaxaUpload.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/TaxonomyUpload.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl='.$CLIENT_ROOT.'/taxa/admin/taxaloader.php');
 ini_set('max_execution_time', 3600);
 
@@ -11,11 +11,11 @@ $ulOverride = array_key_exists("uloverride",$_REQUEST)?$_REQUEST["uloverride"]:"
 $taxAuthId = (array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:1);
 
 $isEditor = false;
-if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
-$loaderManager = new TaxaUpload();
+$loaderManager = new TaxonomyUpload();
 $loaderManager->setTaxaAuthId($taxAuthId);
 
 $status = "";
@@ -45,8 +45,8 @@ if($isEditor){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Taxa Loader</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
+	<title><?php echo $DEFAULT_TITLE; ?> Taxa Loader</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>" />
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
@@ -108,7 +108,7 @@ if($isEditor){
 <body>
 <?php
 $displayLeftMenu = (isset($taxa_admin_taxaloaderMenu)?$taxa_admin_taxaloaderMenu:false);
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 if(isset($taxa_admin_taxaloaderCrumbs)){
 	if($taxa_admin_taxaloaderCrumbs){
 		echo '<div class="navpath">';
@@ -145,7 +145,7 @@ if($isEditor){
 						<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
 						<div style="margin:10px;">
 						</div>
-						<table border="1" cellpadding="2" style="border:1px solid black">
+						<table style="border:1px solid black">
 							<tr>
 								<th>
 									Source Field
@@ -428,9 +428,7 @@ else{
 	</div>
 	<?php 
 }
-
-
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceUtilities.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
 
 class SpecProcNlpUtilities {
 
@@ -40,7 +40,6 @@ class SpecProcNlpUtilities {
 		return $dwcArr;
 	}
 
-	//Functions shared with OccurrenceUtilities
 	public static function formatDate($inStr){
 		return OccurrenceUtilities::formatDate($inStr);
 	}

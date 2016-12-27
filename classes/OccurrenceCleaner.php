@@ -3,7 +3,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/Manager.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 include_once($serverRoot.'/classes/AgentManager.php');
-include_once($serverRoot.'/classes/TaxonomyUtilities.php');
+include_once($serverRoot.'/classes/TaxonomyHarvester.php');
 
 class OccurrenceCleaner extends Manager{
 
@@ -46,18 +46,18 @@ class OccurrenceCleaner extends Manager{
 			'LIMIT '.$startIndex.','.$limit;
 		if($rs = $this->conn->query($sql)){
 			//Check name through taxonomic resources
-			$taxUtil = new  TaxonomyUtilities();
-			$taxUtil->setVerboseMode(2);
+			$taxonHarvester = new  TaxonomyHarvester();
+			$taxonHarvester->setVerboseMode(2);
 			$this->setVerboseMode(2);
 			$nameCnt = 0;
 			while($r = $rs->fetch_object()){
 				$this->logOrEcho('Resolving '.$r->sciname.($r->family?' ('.$r->family.')':'').'...');
-				$newTid = $taxUtil->addSciname($r->sciname, $r->family);
+				$newTid = $taxonHarvester->addSciname($r->sciname, $r->family);
 				if(!$newTid){
 					//Check for near match using SoundEx
 					$this->logOrEcho('Checking close matches in thesaurus...',1);
-					$closeArr = $taxUtil->getSoundexMatch($r->sciname);
-					if(!$closeArr) $closeArr = $taxUtil->getCloseMatchEpithet($r->sciname);
+					$closeArr = $taxonHarvester->getSoundexMatch($r->sciname);
+					if(!$closeArr) $closeArr = $taxonHarvester->getCloseMatchEpithet($r->sciname);
 					if($closeArr){
 						$cnt = 0;
 						foreach($closeArr as $tid => $sciname){

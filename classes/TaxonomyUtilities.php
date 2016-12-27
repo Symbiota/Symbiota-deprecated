@@ -1,583 +1,290 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/Manager.php');
-include_once($serverRoot.'/classes/OccurrenceUtilities.php');
-include_once($serverRoot.'/classes/EOLUtilities.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
-class TaxonomyUtilities extends Manager{
-
-	private $taxAuthId = 1;
-	private $kingdomName;
-	private $activeThesResources = 'eol';
-	
-	function __construct() {
-		parent::__construct(null,'write');
-	}
-	
-	function __destruct(){
-		parent::__destruct();
-	}
-
-	public function initSourceOrder(){
-		if(isset($GLOBALS['taxonThesauri']) && $GLOBALS['taxonThesauri']){
-			$this->activeThesResources = explode(',',$GLOBALS['taxonThesauri']);
-		}
-	}
-
-	public function addSciname($term, $family = ''){
-		$newTid = 0;
-		$term = trim($term);
-		if($term){
-			$taxonArr = Array();
-			if(!$this->activeThesResources){
-				$this->errorMessage = 'ERROR: Taxonomic resources not activated ';
-				return false;
-			}
-			$resourceArr = explode(',',$this->activeThesResources);
-			$attemptedResources = '';
-			foreach($resourceArr as $resStr){
-				if($resStr == 'eol'){
-					$this->logOrEcho('Checking EOL...',1);
-					$taxonArr = $this->getEolTaxonArr($term);
-					$attemptedResources .= ', eol';
-					if($this->validateTaxonArr($taxonArr)){
-						break;
-					}
-					else{
-						$this->logOrEcho('Taxon not found',1);
-						unset($taxonArr);
-						$taxonArr = array();
-					}
-				}
-				elseif($resStr == 'col'){
-					$taxonArr = $this->getColTaxonArr($term);
-					$attemptedResources .= ', col';
-				}
-				elseif($resStr == 'trop'){
-					$taxonArr = $this->getTropicosTaxonArr($term);
-					$attemptedResources .= ', trop';
-				}
-			}
-			if($taxonArr){
-				$this->logOrEcho('Taxon found',1);
-				if(!$this->kingdomName) $this->setDefaultKingdom();
-				if(!array_key_exists('parent',$taxonArr) || !$taxonArr['parent']){
-					$this->determineParents($taxonArr, $family);
-				}
-				$newTid = $this->loadNewTaxon($taxonArr);
-				if($newTid){
-					//Add Synonyms
-					if(isset($taxonArr['syns'])){
-						foreach($taxonArr['syns'] as $k => $synArr){
-							if(strpos($synArr['scientificName'],$term) !== false){
-								$taxonArr2 = OccurrenceUtilities::parseScientificName($synArr['scientificName']);
-								if($taxonArr2){
-									if(isset($taxonArr['source']) && $taxonArr['source']) $taxonArr2['source'] = $taxonArr['source'];
-									if(isset($taxonArr['synreason']) && $taxonArr['synreason']) $taxonArr2['synreason'] = $taxonArr['synreason'];
-									if(!array_key_exists('parent',$taxonArr2) || !$taxonArr2['parent']){
-										$this->determineParents($taxonArr2, $family);
-									}
-									$this->loadNewTaxon($taxonArr2,$newTid);
-								}
-								break;
-							}
-						}
-					}				
-					//Add common names
-					if(isset($taxonArr['verns'])){
-						foreach($taxonArr['verns'] as $k => $vernArr){
-							$sqlVern = 'INSERT INTO(tid,vernacularname,language) '.
-								'VALUES('.$newTid.',"'.$vernArr['vernacularName'].'","'.$vernArr['language'].'")';
-							if(!$this->conn->query($sqlVern)){
-								$this->errorMessage = 'ERROR loading vernacular '.$taxonArr['sciname'].': '.$this->conn->error;
-							}
-						}
-					}
-					$this->logOrEcho('Taxon added to taxonomic thesaurus (#'.$newTid.')',1);
-				}
-				else{
-					if($this->errorMessage) $this->logOrEcho($this->errorMessage,1);
-					exit;
-				}
-			}
-			else{
-				$this->errorMessage = 'ERROR: unable to obtain taxon object from: '.trim($attemptedResources,' ,');
-				return false;
-			}
-		} 
-		return $newTid;
-	} 
-	
-	private function validateTaxonArr($taxonArr){
-		if(!isset($taxonArr['sciname']) || !$taxonArr['sciname']){
-			//$this->errorMessage = 'ERROR: sciname not defined';
-			return false;
-		}
-		if(!isset($taxonArr['unitname1']) || !$taxonArr['unitname1']){
-			//$this->errorMessage = 'ERROR: unitname1 not defined';
-			return false;
-		}
-		if(!isset($taxonArr['rankid']) || !$taxonArr['rankid']){
-			//$this->errorMessage = 'ERROR loading '.$taxonArr['sciname'].', rankid not defined';
-			return false;
-		}
-		return true;
-	}
+class TaxonomyUtilities {
 
 	/*
-	 * INPUT: scientific name
-	 *   Example: 'Pinus ponderosa var. arizonica'
-	 * OUTPUT: array representing taxon object 
-	 *   Example: array('id' => '34554'
-	 *   				'sciname' => 'Pinus arizonica', 
-	 *   				'scientificName' => 'Pinus arizonica (Engelm.) Shaw', 
-	 *        			'unitind1' => '', 'unitname1' => 'Pinus', 'unitind2' => '', 'unitname2' => 'arizonica', 'unitind3'=>'', 'unitname3'=>'',
-	 *        			'author' => '(Engelm.) Shaw',
-	 *        			'rankid' => '220',
-	 *        			'taxonRank' => 'Species',
-	 *  				'verns' => array(array('vernacularName'=>'Arizona Ponderosa Pine','language'=>'en'), array(etc...)),
-	 *  				'syns' => array(array('scientificName'=>'Pinus ponderosa var. arizonica','reason'=>'synonym'), array(etc...)),
-	 *  				'parent' => array(	'id' => '43463',
-	 *  									'sciname' => 'Pinus',
-	 *  									'taxonRank' => 'Genus',
-	 *  									'sourceURL' => 'http://eol.org/pages/1905/hierarchy_entries/43463/overview',
-	 *  									,'parentID' => array( etc...)
-	 *  							)
-	 *        	   )
+	 * INPUT: String representing a verbatim scientific name 
+	 *        Name may have imbedded authors, cf, aff, hybrid  
+	 * OUTPUT: Array containing parsed values 
+	 *         Keys: unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier, rankid 
 	 */
-	private function getEolTaxonArr($term){
-		//Returns content for accepted name
-		$taxonArr = array();
-		$eolManager = new EOLUtilities();
-		if($eolManager->pingEOL()){
-			$eolTaxonId = 0;
-			if(is_numeric($term)) $eolTaxonId = $term;
-			if(!$eolTaxonId){
-				$searchRet = $eolManager->searchEOL($term);
-				if(isset($searchRet['id'])){
-					$searchSyns = ((strpos($searchRet['title'],$term) !== false)?false:true);
-					$taxonArr = $eolManager->getPage($searchRet['id'],$searchSyns);
-					if(isset($taxonArr['taxonConcepts'])){
-						$eolTaxonId = key($taxonArr['taxonConcepts']);
+	public static function parseScientificName($inStr, $conn = null, $rankId = 0){
+		//Converts scinetific name with author embedded into separate fields
+		$retArr = array('unitname1'=>'','unitname2'=>'','unitind3'=>'','unitname3'=>'');
+		if($inStr && is_string($inStr)){
+			//Remove underscores, common in NPS data
+			$inStr = preg_replace('/_+/',' ',$inStr);
+			//Replace misc 
+			$inStr = str_replace(array('?','*'),'',$inStr);
+			
+			if(stripos($inStr,'cf. ') !== false || stripos($inStr,'c.f. ') !== false || stripos($inStr,' cf ') !== false){
+				$retArr['identificationqualifier'] = 'cf. ';
+				$inStr = str_ireplace(array(' cf ','c.f. ','cf. '),' ',$inStr);
+			}
+			elseif(stripos($inStr,'aff. ') !== false || stripos($inStr,' aff ') !== false){
+				$retArr['identificationqualifier'] = 'aff. ';
+				$inStr = str_ireplace(array(' aff ','aff. '),' ',$inStr);
+			}
+			if(stripos($inStr,' spp.')){
+				$rankId = 180;
+				$inStr = str_ireplace(' spp.','',$inStr);
+			}
+			if(stripos($inStr,' sp.')){
+				$rankId = 180;
+				$inStr = str_ireplace(' sp.','',$inStr);
+			}
+			//Remove extra spaces
+			$inStr = preg_replace('/\s\s+/',' ',$inStr);
+			
+			$sciNameArr = explode(' ',$inStr);
+			if(count($sciNameArr)){
+				if(strtolower($sciNameArr[0]) == 'x'){
+					//Genus level hybrid
+					$retArr['unitind1'] = array_shift($sciNameArr);
+				}
+				//Genus
+				$retArr['unitname1'] = ucfirst(strtolower(array_shift($sciNameArr)));
+				if(count($sciNameArr)){
+					if(strtolower($sciNameArr[0]) == 'x'){
+						//Species level hybrid
+						$retArr['unitind2'] = array_shift($sciNameArr);
+						$retArr['unitname2'] = array_shift($sciNameArr);
+					}
+					elseif(strpos($sciNameArr[0],'.') !== false){
+						//It is assumed that Author has been reached, thus stop process 
+						$retArr['author'] = implode(' ',$sciNameArr);
+						unset($sciNameArr);
+					}
+					else{
+						if(strpos($sciNameArr[0],'(') !== false){
+							//Assumed subgenus exists, but keep a author incase an epithet does exist
+							$retArr['author'] = implode(' ',$sciNameArr);
+							array_shift($sciNameArr); 
+						}
+						//Specific Epithet
+						$retArr['unitname2'] = array_shift($sciNameArr);
+					}
+					if($retArr['unitname2'] && preg_match('/[A-Z]+/',$retArr['unitname2'])){
+						if(preg_match('/[A-Z]{1}[a-z]+/',$retArr['unitname2'])){
+							//Check to see if is term is genus author
+							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'"';
+							$con = MySQLiConnectionFactory::getCon('readonly');
+							$rs = $con->query($sql);
+							if($rs->num_rows){
+								if(isset($retArr['author'])) unset($retArr['author']);
+							}
+							else{
+								//Second word is likely author, thus assume assume author has been reach and stop process
+								$retArr['unitname2'] = '';
+								unset($sciNameArr);
+							}
+							$rs->free();
+							$con->close();
+						}
+						$retArr['unitname2'] = strtolower($retArr['unitname2']);
 					}
 				}
-				else{
-					$this->errorMessage = 'ERROR getting EOL page ID (term: '.$term.')';
-					return false;
-				}
 			}
-			if($eolTaxonId){
-				//$taxonArr = $eolManager->getHierarchyEntries($eolTaxonId);
-			}
-			if($taxonArr){
-				if(!isset($taxonArr['rankid'])){
-					$rankid = $this->getRankId($taxonArr['taxonRank']);
-					if($rankid) $taxonArr['rankid'] = $rankid;
-				}
-				if(!isset($taxonArr['source'])) $taxonArr['source'] = 'EOL - '.date('Y-m-d G:i:s');
-			}
-		}
-		else{
-			$this->errorMessage = 'EOL web services are not available ';
-			return false;
-		}
-		return $taxonArr;
-	}
-
-	public function getColTaxonArr($sciName, $resultIndex = 0){
-		$resultArr = Array();
-		$urlTemplate = "http://www.catalogueoflife.org/annual-checklist/webservice?format=php&response=full&name=";
-		$url = $urlTemplate.str_replace(" ","%20",$sciName);
-		if($fh = fopen($url, 'r')){
-			$content = "";
-			while($line = fread($fh, 1024)){
-				$content .= trim($line);
-			}
-			fclose($fh);
-			//Process return
-			$retArr = unserialize($content);
-			$numResults = $retArr['number_of_results_returned'];
-			if($numResults){
-				if($resultIndex && $resultIndex < $numResults){
-					$resultArr = $retArr['results'][$resultIndex];
+			if(isset($sciNameArr) && $sciNameArr){
+				if($rankId == 220){
+					$retArr['author'] = implode(' ',$sciNameArr);
 				}
 				else{
-					$resultArr = array_shift($retArr['results']);
+					$authorArr = array();
+					//cycles through the final terms to evaluate and extract infraspecific data
+					while($sciStr = array_shift($sciNameArr)){
+						if($sciStr == 'f.' || $sciStr == 'fo.' || $sciStr == 'fo' || $sciStr == 'forma'){
+							if($sciNameArr){
+								$retArr['unitind3'] = 'f.';
+								$retArr['unitname3'] = array_shift($sciNameArr);
+								unset($authorArr);
+								$authorArr = array();
+							}
+						}
+						elseif($sciStr == 'var.' || $sciStr == 'var'){
+							if($sciNameArr){
+								$retArr['unitind3'] = 'var.';
+								$retArr['unitname3'] = array_shift($sciNameArr);
+								unset($authorArr);
+								$authorArr = array();
+							}
+						}
+						elseif($sciStr == 'ssp.' || $sciStr == 'ssp' || $sciStr == 'subsp.' || $sciStr == 'subsp'){
+							if($sciNameArr){
+								$retArr['unitind3'] = 'subsp.';
+								$retArr['unitname3'] = array_shift($sciNameArr);
+								unset($authorArr);
+								$authorArr = array();
+							}
+						}
+						elseif(!$retArr['unitname3'] && ($rankId == 230 || preg_match('/^[a-z]+$/',$sciStr))){
+							$retArr['unitind3'] = '';
+							$retArr['unitname3'] = $sciStr;
+							unset($authorArr);
+							$authorArr = array();
+						}
+						else{
+							$authorArr[] = $sciStr;
+						}
+					}
+					$retArr['author'] = implode(' ', $authorArr);
+					//Double check to see if infraSpecificEpithet is still embedded in author due initial lack of taxonRank indicator
+					if(!$retArr['unitname3'] && $retArr['author']){
+						$arr = explode(' ',$retArr['author']);
+						$firstWord = array_shift($arr);
+						if(preg_match('/^[a-z]{2,}$/',$firstWord)){
+							$sql = 'SELECT unitind3 FROM taxa '.
+								'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$firstWord.'" ';
+							//echo $sql.'<br/>';
+							$makeConn = false;
+							if($conn === null) $makeConn = true;
+							if($makeConn) $conn = MySQLiConnectionFactory::getCon('readonly');
+							$rs = $conn->query($sql);
+							if($r = $rs->fetch_object()){
+								$retArr['unitind3'] = $r->unitind3;
+								$retArr['unitname3'] = $firstWord;
+								$retArr['author'] = implode(' ',$arr);
+							}
+							$rs->free();
+							if($makeConn) $conn->close();
+						}
+					}
 				}
 			}
-		}
-		return $resultArr;
-	}
-
-	public function getTropicosTaxonArr($sciName){
-		$urlTemplate = "";
-		$url = $urlTemplate.str_replace(" ","%20",$sciName);
-		if($fp = fopen($url, 'r')){
-			echo "<div>Reading page for ".$sciName." </div>\n";
-			$content = "";
-			while($line = fread($fp, 1024)){
-				$content .= trim($line);
+			if(array_key_exists('unitind3',$retArr) && $retArr['unitind3'] == 'ssp.'){
+				$retArr['unitind3'] == 'subsp.'; 
 			}
-			$regExp = "\<A HREF='florataxon\.aspx\?flora_id=\d+&taxon_id=(\d+)'\s+TITLE='Accepted Name' \>\<b\>".$sciName."\<\/b\>\<\/A\>";
-			if($fnaCap = preg_match_all("/".$regExp."/sU", $content, $matches)){
-				echo $matches[1][0];
-
-			
-			}
-		}
-		ob_flush();
-		flush();
-		sleep(5);
-	}
-
-	//Database functions
-	private function loadNewTaxon($taxonArr,$tidAccepted = 0){
-		/*
-		 * Default action: add accepted taxon, parents, synonyms, vernacular
-		 * Required fields: sciname, parsed units, rankid, parentTaxon, acceptedTaxon
-		 * Additional fields: author, family
-		 * Note: Accepted taxon might already be in thesaurus if taxonomic resource returns search taxon as a synonym    
-		 * Possible conflicts:
-		 * 1) parent of accepted is already in thesaurus as not accepted: parent = 180 then change parent to accepted; for all others link to parent's accepted taxon  
-		 * 2) family is not accepted: use accepted family 
-		 * 3) accepted taxon is in thesaurus as accepted: link to accepted synonym as not accepted
-		 * 4)   
-		 * synonym taxon is accepted  
-		 * 
-		 * INPUT: $taxonArr
-		 * OUPUT: $processedTaxonArr [ex: array('newtid' => '3424','taxonarr' => $taxonArr,'warnings' => array('WARNING: name is a homonym','NOTICE: author not returned'))]
-		 * 
-		 */
-		if(!$this->kingdomName){
-			//$this->errorMessage = 'ERROR loading '.$taxonArr['sciname'].', kingdomName is not set';
-			return false; 
-		}
-		$newTid = 0;
-		$parentTid = $this->getParentTid($taxonArr);
-		if(!$parentTid){
-			$this->errorMessage = 'ERROR loading '.$taxonArr['sciname'].', unable to get parentTid';
-			return false;
-		}
-		//We now have everything, now let's load
-		//Check to see sciname is in taxon table but not linked to current thesaurus
-		$sql = 'SELECT tid FROM taxa WHERE sciname = "'.$taxonArr['sciname'].'"';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$newTid = $r->tid;
-		}
-		$rs->free();
-		
-		if(!$newTid){
-			$sqlInsert = 'INSERT INTO taxa(sciname, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, rankid, source) '.
-				'VALUES("'.$taxonArr['sciname'].'",'.
-				(isset($taxonArr['unitind1']) && $taxonArr['unitind1']?'"'.$taxonArr['unitind1'].'"':'NULL').',"'.
-				$taxonArr['unitname1'].'",'.
-				(isset($taxonArr['unitind2']) && $taxonArr['unitind2']?'"'.$taxonArr['unitind2'].'"':'NULL').','.($taxonArr['unitname2']?'"'.$taxonArr['unitname2'].'"':'NULL').','.
-				($taxonArr['unitind3']?'"'.$taxonArr['unitind3'].'"':'NULL').','.($taxonArr['unitname3']?'"'.$taxonArr['unitname3'].'"':'NULL').','.
-				(isset($taxonArr['author']) && $taxonArr['author']?'"'.$taxonArr['author'].'"':'NULL').','.
-				$taxonArr['rankid'].','.($taxonArr['source']?'"'.$taxonArr['source'].'"':'NULL').')';
-			if($this->conn->query($sqlInsert)){
-				$newTid = $this->conn->insert_id;
+			//Build sciname, without author
+			$sciname = (isset($retArr['unitind1'])?$retArr['unitind1'].' ':'').$retArr['unitname1'].' ';
+			$sciname .= (isset($retArr['unitind2'])?$retArr['unitind2'].' ':'').$retArr['unitname2'].' ';
+			$sciname .= $retArr['unitind3'].' '.$retArr['unitname3'];
+			$retArr['sciname'] = trim($sciname);
+			if($rankId && is_numeric($rankId)){
+				$retArr['rankid'] = $rankId;
 			}
 			else{
-				$this->errorMessage = 'ERROR inserting '.$taxonArr['sciname'].': '.$this->conn->error;
-				$this->errorMessage .= 'SQL: '.$sqlInsert;
-				return false;
-			}
-		}
-		if($newTid){
-			if(!$tidAccepted) $tidAccepted = $newTid;
-			$sqlInsert2 = 'INSERT INTO taxstatus(tid,tidAccepted,taxAuthId,parentTid,UnacceptabilityReason) '.
-				'VALUES('.$newTid.','.$tidAccepted.','.$this->taxAuthId.','.$parentTid.','.
-				(isset($taxonArr['synreason']) && $taxonArr['synreason']?'"'.$taxonArr['synreason'].'"':'NULL').')';
-			if($this->conn->query($sqlInsert2)){
-				//Add hierarchy index
-				$sqlHier = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
-					'VALUES('.$newTid.','.$parentTid.','.$this->taxAuthId.')';
-				if(!$this->conn->query($sqlHier)){
-					$this->errorMessage = 'ERROR adding new tid to taxaenumtree (step 1): '.$this->conn->error;
-				}
-				$sqlHier2 = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
-					'SELECT '.$newTid.' AS tid, parenttid, taxauthid FROM taxaenumtree WHERE tid = '.$parentTid;
-				if(!$this->conn->query($sqlHier2)){
-					$this->errorMessage = 'ERROR adding new tid to taxaenumtree (step 2): '.$this->conn->error;
-				}
-			}
-		}
-		else{
-			$this->errorMessage = 'ERROR laoding taxon: newTid is null ';
-			return false;
-		}
-		return $newTid;
-	}
-
-	private function getRankId($rankStr){
-		$rankId = '';
-		if($rankStr){
-			$sqlRank = 'SELECT rankid FROM taxonunits WHERE rankname = "'.$rankStr.'"';
-			$rsRank = $this->conn->query($sqlRank);
-			$defaultRankId = 0;
-			while($rRank = $rsRank->fetch_object()){
-				$rankId = $rRank->rankid;
-			}
-			if(!$rankId && $defaultRankId){
-				$rankId = $defaultRankId;
-			}
-			if(!$rankId){
-				$this->warningArr[] = "Unable to determine rankid from: ".$rankStr;
-			}
-			$rsRank->free();
-		}
-		return $rankId;
-	}
-
-	private function setDefaultKingdom(){
-		$sql = 'SELECT t.sciname, COUNT(e.tid) as cnt '. 
-			'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.parenttid '.
-			'WHERE t.rankid = 10 '.
-			'GROUP BY t.sciname '.
-			'ORDER BY cnt desc';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$this->kingdomName = $r->sciname;
-		}
-		$rs->free();
-	}
-
-	private function getParentTid($taxonArr){
-		$parentTid = 0;
-		if($taxonArr && isset($taxonArr['parent'])){
-			$parentArr = $taxonArr['parent'];
-			if($parentArr && $parentArr['sciname'] != $taxonArr['sciname']){
-				$abort = true;
-				if(isset($parentArr['tid']) && is_numeric($parentArr['tid'])){
-					return $parentArr['tid'];
-				}
-				$sql = 'SELECT t.tid, t.rankid '.
-					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-					'WHERE (t.sciname = "'.$this->cleanInStr($parentArr['sciname']).'") AND (ts.taxauthid = '.$this->taxAuthId.')';
-				$rs = $this->conn->query($sql);
-				if($r = $rs->fetch_object()){
-					$parentTid = $r->tid;
-					if(isset($taxonArr['rankid']) && $r->rankid >= $taxonArr['rankid']){
-						$parentTid = 0;
-						$abort = true; 
+				if($retArr['unitname3']){
+					if($retArr['unitind3'] == 'subsp.' || !$retArr['unitind3']){
+						$retArr['rankid'] = 230;
+					}
+					elseif($retArr['unitind3'] == 'var.'){
+						$retArr['rankid'] = 240;
+					}
+					elseif($retArr['unitind3'] == 'f.'){
+						$retArr['rankid'] = 260;
 					}
 				}
-				$rs->free();
-				if(!$parentTid && !$abort){
-					$this->logOrEcho('Adding parent ('.$parentArr['sciname'].')...',1);
-					$parentTid = $this->addSciname($parentArr['sciname']);
-				}
-			}
-		}
-		return $parentTid;
-	}
-
-	private function determineParents(&$taxonArr, $family){
-		$parArr = array();
-		if($taxonArr['sciname']){
-			$parsedArr = array();
-			if(!isset($taxonArr['rankid']) || !$taxonArr['rankid']){
-				$parsedArr = $this->parseSciName($taxonArr['sciname']);
-				if($parsedArr['rankid']) $taxonArr['rankid'] = $parsedArr['rankid'];
-			}
-			if(!isset($taxonArr['unitname1']) || !$taxonArr['unitname1']){
-				if(!$parsedArr) $parsedArr = $this->parseSciName($taxonArr['sciname']);
-				if($parsedArr['unitname1']){
-					$taxonArr['unitname1'] = $parsedArr['unitname1'];
-					$taxonArr['unitname2'] = $parsedArr['unitname2'];
-				}
-			}
-			if($taxonArr['rankid']){
-				if(!$this->kingdomName) $this->setDefaultKingdom();
-				if($this->kingdomName){
-					$parArr = array(
-						'sciname' => $this->kingdomName, 
-						'taxonRank' => 'kingdom', 
-						'rankid' => '10' 
-					);
-				}
-				if($taxonArr['rankid'] > 140 && $family){
-					$sqlFam = 'SELECT tid FROM taxa '.
-						'WHERE (sciname = "'.$this->cleanInStr($family).'") AND (rankid = 140)';
-					//echo $sqlFam;
-					$rs = $this->conn->query($sqlFam);
-					if($r = $rs->fetch_object()){
-						$newParArr = array(
-							'sciname' => $family,
-							'tid' => $r->tid, 
-							'taxonRank' => 'family', 
-							'rankid' => '140',
-							'parent' => $parArr
-						);
-						$parArr = $newParArr;
+				elseif($retArr['unitname2']){
+					$retArr['rankid'] = 220;
+				} 
+				elseif($retArr['unitname1']){
+					if(substr($retArr['unitname1'],-5) == 'aceae' || substr($retArr['unitname1'],-4) == 'idae'){
+						$retArr['rankid'] = 140;
 					}
-					$rs->free();
 				}
-				if($taxonArr['rankid'] > 180){
-					$newParArr = array(
-						'sciname' => $taxonArr['unitname1'], 
-						'taxonRank' => 'genus', 
-						'rankid' => '180',
-						'parent' => $parArr
-					);
-					$parArr = $newParArr;
-				}
-				if($taxonArr['rankid'] > 220){
-					$newParArr = array(
-						'sciname' => $taxonArr['unitname1'].' '.$taxonArr['unitname2'], 
-						'taxonRank' => 'species', 
-						'rankid' => '220',
-						'parent' => $parArr
-					);
-					$parArr = $newParArr;
-				}
-			}
-		}
-		$taxonArr['parent'] = $parArr;
-	}
-
-	//Misc functions
-	public function parseSciName($scientificName,$rankId = 0){
-		//Converts scinetific name with author embedded into separate fields
-		$retArr = array();
-		$retArr = OccurrenceUtilities::parseScientificName($scientificName,$rankId);
-		return $retArr;
-	}
-
-	public function getSoundexMatch($taxonStr){
-		$retArr = array();
-		if($taxonStr){
-			$sql = 'SELECT tid, sciname FROM taxa WHERE SOUNDEX(sciname) = SOUNDEX("'.$taxonStr.'")';
-			//echo $sql;
-			if($rs = $this->conn->query($sql)){
-				while($row = $rs->fetch_object()){
-					$retArr[$row->tid] = $row->sciname;
-				}
-				$rs->free();
-			}
-		}
-		return $retArr;
-	}
-
-	public function getCloseMatchEpithet($taxonStr){
-		$retArr = array();
-		if($taxonStr){
-			$firstInitial = substr($taxonStr,0,1);
-			$secondWord = substr($taxonStr,strpos($taxonStr,' '));
-			$sql = 'SELECT tid, sciname FROM taxa WHERE (sciname LIKE "'.$firstInitial.'%'.$secondWord.'")';
-			//echo $sql;
-			if($rs = $this->conn->query($sql)){
-				while($row = $rs->fetch_object()){
-					$retArr[$row->tid] = $row->sciname;
-				}
-				$rs->free();
 			}
 		}
 		return $retArr;
 	}
 
 	//Taxonomic indexing functions
-	public function rebuildHierarchyEnumTree(){
+	public static function rebuildHierarchyEnumTree($conn){
 		$status = true;
-		if($this->conn->query('DELETE FROM taxaenumtree')){
-			$this->buildHierarchyEnumTree();
+		if($conn){ 
+			if($conn->query('DELETE FROM taxaenumtree')){
+				self::buildHierarchyEnumTree($conn);
+			}
+			else{
+				$status = 'ERROR deleting taxaenumtree prior to re-populating: '.$conn->error;
+			}
 		}
 		else{
-			$status = false;
-			$this->errorMessage = 'ERROR deleting taxaenumtree prior to re-populating: '.$this->conn->error;
+			$status = 'ERROR deleting taxaenumtree prior to re-populating: NULL connection object';
 		}
 		return $status;
 	}
 
-	public function buildHierarchyEnumTree(){
+	public static function buildHierarchyEnumTree($conn, $taxAuthId = 1){
 		set_time_limit(600);
 		$status = true;
-		//Seed taxaenumtree table
-		$sql = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
-			'SELECT DISTINCT ts.tid, ts.parenttid, ts.taxauthid '. 
-			'FROM taxstatus ts '. 
-			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND ts.tid NOT IN(SELECT tid FROM taxaenumtree WHERE taxauthid = '.$this->taxAuthId.')';
-		//echo $sql;
-		if(!$this->conn->query($sql)){
-			$status = false;
-			$this->errorMessage = 'ERROR seeding taxaenumtree: '.$this->conn->error;
-		}
-		if($status){
-			//Continue building taxaenumtree  
-			$sql2 = 'SELECT DISTINCT e.tid, ts.parenttid, ts.taxauthid '. 
-				'FROM taxaenumtree e INNER JOIN taxstatus ts ON e.parenttid = ts.tid AND e.taxauthid = ts.taxauthid '.
-				'LEFT JOIN taxaenumtree e2 ON e.tid = e2.tid AND ts.parenttid = e2.parenttid AND e.taxauthid = e2.taxauthid '.
-				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND e2.tid IS NULL';
+		if($conn){ 
+			//Seed taxaenumtree table
+			$sql = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
+				'SELECT DISTINCT ts.tid, ts.parenttid, ts.taxauthid '. 
+				'FROM taxstatus ts '. 
+				'WHERE (ts.taxauthid = '.$taxAuthId.') AND ts.tid NOT IN(SELECT tid FROM taxaenumtree WHERE taxauthid = '.$taxAuthId.')';
 			//echo $sql;
-			$cnt = 0;
-			$targetCnt = 0;
-			do{
-				if(!$this->conn->query('INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.$sql2)){
-					$status = false;
-					$this->errorMessage = 'ERROR building taxaenumtree: '.$this->conn->error;
-				}
-				$rs = $this->conn->query($sql2);
-				$targetCnt = $rs->num_rows;
-				$cnt++;
-			}while($status && $targetCnt && $cnt < 30);
+			if(!$conn->query($sql)){
+				$status = 'ERROR seeding taxaenumtree: '.$conn->error;
+			}
+			if($status == true){
+				//Continue building taxaenumtree  
+				$sql2 = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
+					'SELECT DISTINCT e.tid, ts.parenttid, ts.taxauthid '. 
+					'FROM taxaenumtree e INNER JOIN taxstatus ts ON e.parenttid = ts.tid AND e.taxauthid = ts.taxauthid '.
+					'LEFT JOIN taxaenumtree e2 ON e.tid = e2.tid AND ts.parenttid = e2.parenttid AND e.taxauthid = e2.taxauthid '.
+					'WHERE (ts.taxauthid = '.$taxAuthId.') AND (e2.tid IS NULL)';
+				//echo $sql;
+				$cnt = 0;
+				do{
+					if(!$conn->query($sql2)){
+						$status = 'ERROR building taxaenumtree: '.$conn->error;
+						break;
+					}
+					if(!$conn->affected_rows) break;
+					$cnt++;
+				}while($cnt < 30);
+			}
+		}
+		else{
+			$status = 'ERROR deleting taxaenumtree prior to re-populating: NULL connection object';
 		}
 		return $status;
 	}
-	
-	public function buildHierarchyNestedTree($taxAuthId = 1){
-		set_time_limit(1200);
-		//Get root and then build down
-		$startIndex = 1;
-		$rankId = 0;
-		$sql = 'SELECT ts.tid, t.rankid '.
-			'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
-			'WHERE ts.taxauthid = '.$taxAuthId.' AND (ts.parenttid IS NULL OR ts.parenttid = ts.tid) '.
-			'ORDER BY t.rankid ';
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				if($rankId && $rankId <> $r->rankid) break;
-				$rankId = $r->rankid;
-				$startIndex = $this->loadTaxonIntoNestedTree($r->tid, $taxAuthId, $startIndex);
+
+	public static function buildHierarchyNestedTree($conn, $taxAuthId = 1){
+		if($conn){ 
+			set_time_limit(1200);
+			//Get root and then build down
+			$startIndex = 1;
+			$rankId = 0;
+			$sql = 'SELECT ts.tid, t.rankid '.
+				'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
+				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.parenttid IS NULL OR ts.parenttid = ts.tid) '.
+				'ORDER BY t.rankid ';
+			if($rs = $conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					if($rankId && $rankId <> $r->rankid) break;
+					$rankId = $r->rankid;
+					$startIndex = self::loadTaxonIntoNestedTree($conn, $r->tid, $taxAuthId, $startIndex);
+				}
+				$rs->free();
 			}
-			$rs->close();
+		}
+		else{
+			$status = 'ERROR building hierarchy nested tree: NULL connection object';
 		}
 	}
-	
-	private function loadTaxonIntoNestedTree($tid, $taxAuthId, $startIndex){
+
+	private static function loadTaxonIntoNestedTree($conn, $tid, $taxAuthId, $startIndex){
 		$endIndex = $startIndex + 1;
 		$sql = 'SELECT tid '.
 			'FROM taxstatus '.
-			'WHERE taxauthid = '.$taxAuthId.' AND parenttid = '.$tid;
-		if($rs = $this->conn->query($sql)){
+			'WHERE (taxauthid = '.$taxAuthId.') AND (parenttid = '.$tid.')';
+		if($rs = $conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$endIndex = $this->loadTaxonIntoNestedTree($r->tid, $taxAuthId, $endIndex);
+				$endIndex = self::loadTaxonIntoNestedTree($conn, $r->tid, $taxAuthId, $endIndex);
 			}
-			$rs->close();
+			$rs->free();
 		}
 		//Load into taxanestedtree
 		$sqlInsert = 'REPLACE INTO taxanestedtree(tid,taxauthid,leftindex,rightindex) '.
 			'VALUES ('.$tid.','.$taxAuthId.','.$startIndex.','.$endIndex.')';
-		$this->conn->query($sqlInsert);
+		$conn->query($sqlInsert);
 		//Return endIndex plus one
 		$endIndex++;
 		return $endIndex;
-	}
-
-	//Setters and getters
-	public function setTaxAuthId($id){
-		if($id && is_numeric($id)){
-			$this->taxAuthId = $id;
-		}
-	}
-
-	public function setActiveThesResources($t){
-		$this->activeThesResources = $t;
-	}
-
-	public function getErrorMessage(){
-		return $this->errorMessage;
 	}
 }
 ?>

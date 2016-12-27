@@ -1,6 +1,5 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
 
 class OccurrenceSupport {
 

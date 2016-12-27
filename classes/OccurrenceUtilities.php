@@ -1,5 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/classes/GPoint.php');
+include_once($SERVER_ROOT.'/classes/TaxonomyUtilities.php');
 
 class OccurrenceUtilities {
 
@@ -48,8 +49,8 @@ class OccurrenceUtilities {
 			$d = $match[1];
 			$mStr = $match[2];
 			$y = $match[3];
-			if(array_key_exists($mStr,OccurrenceUtilities::$monthRoman)){
-				$m = OccurrenceUtilities::$monthRoman[$mStr];
+			if(array_key_exists($mStr,self::$monthRoman)){
+				$m = self::$monthRoman[$mStr];
 			}
 		}
 		elseif(preg_match('/^(\d{1,2})[\s\/-]{1}(\D{3,})\.*[\s\/-]{1}(\d{2,4})/',$dateStr,$match)){
@@ -58,8 +59,8 @@ class OccurrenceUtilities {
 			$mStr = $match[2];
 			$y = $match[3];
 			$mStr = strtolower(substr($mStr,0,3));
-			if(array_key_exists($mStr,OccurrenceUtilities::$monthNames)){
-				$m = OccurrenceUtilities::$monthNames[$mStr];
+			if(array_key_exists($mStr,self::$monthNames)){
+				$m = self::$monthNames[$mStr];
 			}
 		}
 		elseif(preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/',$dateStr,$match)){
@@ -74,7 +75,7 @@ class OccurrenceUtilities {
 			$d = $match[2];
 			$y = $match[3];
 			$mStr = strtolower(substr($mStr,0,3));
-			if(array_key_exists($mStr,OccurrenceUtilities::$monthNames)) $m = OccurrenceUtilities::$monthNames[$mStr];
+			if(array_key_exists($mStr,self::$monthNames)) $m = self::$monthNames[$mStr];
 		}
 		elseif(preg_match('/^(\d{1,2})-(\d{1,2})-(\d{2,4})/',$dateStr,$match)){
 			//Format: mm-dd-yyyy, mm-dd-yy
@@ -85,8 +86,8 @@ class OccurrenceUtilities {
 		elseif(preg_match('/^(\D{3,})\.*\s+([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
 			//Format: mmm yyyy
 			$mStr = strtolower(substr($match[1],0,3));
-			if(array_key_exists($mStr,OccurrenceUtilities::$monthNames)){
-				$m = OccurrenceUtilities::$monthNames[$mStr];
+			if(array_key_exists($mStr,self::$monthNames)){
+				$m = self::$monthNames[$mStr];
 			}
 			else{
 				$m = '00';
@@ -142,199 +143,17 @@ class OccurrenceUtilities {
 	 * OUTPUT: Array containing parsed values 
 	 *         Keys: unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier 
 	 */
-	public static function parseScientificName($inStr, $rankId = 0){
-		//Converts scinetific name with author embedded into separate fields
-		$retArr = array('unitname1'=>'','unitname2'=>'','unitind3'=>'','unitname3'=>'');
-		if($inStr && is_string($inStr)){
-			//Remove underscores, common in NPS data
-			$inStr = preg_replace('/_+/',' ',$inStr);
-			//Replace misc 
-			$inStr = str_replace(array('?','*'),'',$inStr);
-			
-			if(stripos($inStr,'cf. ') !== false || stripos($inStr,'c.f. ') !== false || stripos($inStr,' cf ') !== false){
-				$retArr['identificationqualifier'] = 'cf. ';
-				$inStr = str_ireplace(array(' cf ','c.f. ','cf. '),' ',$inStr);
-			}
-			elseif(stripos($inStr,'aff. ') !== false || stripos($inStr,' aff ') !== false){
-				$retArr['identificationqualifier'] = 'aff. ';
-				$inStr = str_ireplace(array(' aff ','aff. '),' ',$inStr);
-			}
-			if(stripos($inStr,' spp.')){
-				$rankId = 180;
-				$inStr = str_ireplace(' spp.','',$inStr);
-			}
-			if(stripos($inStr,' sp.')){
-				$rankId = 180;
-				$inStr = str_ireplace(' sp.','',$inStr);
-			}
-			//Remove extra spaces
-			$inStr = preg_replace('/\s\s+/',' ',$inStr);
-			
-			$sciNameArr = explode(' ',$inStr);
-			if(count($sciNameArr)){
-				if(strtolower($sciNameArr[0]) == 'x'){
-					//Genus level hybrid
-					$retArr['unitind1'] = array_shift($sciNameArr);
-				}
-				//Genus
-				$retArr['unitname1'] = ucfirst(strtolower(array_shift($sciNameArr)));
-				if(count($sciNameArr)){
-					if(strtolower($sciNameArr[0]) == 'x'){
-						//Species level hybrid
-						$retArr['unitind2'] = array_shift($sciNameArr);
-						$retArr['unitname2'] = array_shift($sciNameArr);
-					}
-					elseif(strpos($sciNameArr[0],'.') !== false){
-						//It is assumed that Author has been reached, thus stop process 
-						$retArr['author'] = implode(' ',$sciNameArr);
-						unset($sciNameArr);
-					}
-					else{
-						if(strpos($sciNameArr[0],'(') !== false){
-							//Assumed subgenus exists, but keep a author incase an epithet does exist
-							$retArr['author'] = implode(' ',$sciNameArr);
-							array_shift($sciNameArr); 
-						}
-						//Specific Epithet
-						$retArr['unitname2'] = array_shift($sciNameArr);
-					}
-					if($retArr['unitname2'] && preg_match('/[A-Z]+/',$retArr['unitname2'])){
-						if(preg_match('/[A-Z]{1}[a-z]+/',$retArr['unitname2'])){
-							//Check to see if is term is genus author
-							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'"';
-							$con = MySQLiConnectionFactory::getCon('readonly');
-							$rs = $con->query($sql);
-							if($rs->num_rows){
-								if(isset($retArr['author'])) unset($retArr['author']);
-							}
-							else{
-								//Second word is likely author, thus assume assume author has been reach and stop process
-								$retArr['unitname2'] = '';
-								unset($sciNameArr);
-							}
-							$rs->free();
-							$con->close();
-						}
-						$retArr['unitname2'] = strtolower($retArr['unitname2']);
-					}
-				}
-			}
-			if(isset($sciNameArr) && $sciNameArr){
-				//Assume rest is author; if that is not true, author value will be replace in following loop
-				$retArr['author'] = implode(' ',$sciNameArr);
-				if(!$rankId || $rankId > 220){
-					//cycles through the final terms to extract the last infraspecific data
-					while($sciStr = array_shift($sciNameArr)){
-						if($sciStr == 'f.' || $sciStr == 'fo.' || $sciStr == 'fo' || $sciStr == 'forma'){
-							if($sciNameArr){
-								$retArr['unitind3'] = 'f.';
-								$nextStr = array_shift($sciNameArr);
-								if($nextStr == 'var.' || $nextStr == 'ssp.' || $nextStr == 'subsp.'){
-									$retArr['unitind3'] = $nextStr;
-									$retArr['unitname3'] = array_shift($sciNameArr);
-									$retArr['author'] = implode(' ',$sciNameArr);
-								}
-								elseif(preg_match('/^[a-z]+$/',$nextStr)){
-									$retArr['unitname3'] = $nextStr;
-									$retArr['author'] = implode(' ',$sciNameArr);
-								}
-								else{
-									$retArr['unitind3'] = '';
-								}
-							}
-						}
-						elseif($sciStr == 'var.' || $sciStr == 'var'){
-							if($sciNameArr){
-								$retArr['unitind3'] = 'var.';
-								$nextStr = array_shift($sciNameArr);
-								if($nextStr == 'ssp.' || $nextStr == 'subsp.'){
-									$retArr['unitind3'] = $nextStr;
-									$retArr['unitname3'] = array_shift($sciNameArr);
-									$retArr['author'] = implode(' ',$sciNameArr);
-								}
-								elseif(preg_match('/^[a-z]+$/',$nextStr)){
-									$retArr['unitname3'] = $nextStr;
-									$retArr['author'] = implode(' ',$sciNameArr);
-								}
-								else{
-									$retArr['unitind3'] = '';
-								}
-							}
-						}
-						elseif($sciStr == 'ssp.' || $sciStr == 'ssp' || $sciStr == 'subsp.' || $sciStr == 'subsp'){
-							if($sciNameArr){
-								$retArr['unitind3'] = 'subsp.';
-								$nextStr = array_shift($sciNameArr);
-								if(preg_match('/^[a-z]+$/',$nextStr)){
-									$retArr['unitname3'] = $nextStr;
-									$retArr['author'] = implode(' ',$sciNameArr);
-								}
-								else{
-									$retArr['unitind3'] = '';
-								}
-							}
-						}
-					}
-					//Double check to see if infraSpecificEpithet is still embedded in author due initial lack of taxonRank indicator
-					if(!$retArr['unitname3'] && $retArr['author']){
-						$arr = explode(' ',$retArr['author']);
-						$firstWord = array_shift($arr);
-						if(preg_match('/^[a-z]{2,}$/',$firstWord)){
-							$sql = 'SELECT unitind3 FROM taxa '.
-								'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$firstWord.'" ';
-							//echo $sql.'<br/>';
-							$con = MySQLiConnectionFactory::getCon('readonly');
-							$rs = $con->query($sql);
-							if($r = $rs->fetch_object()){
-								$retArr['unitind3'] = $r->unitind3;
-								$retArr['unitname3'] = $firstWord;
-								$retArr['author'] = implode(' ',$arr);
-							}
-							$rs->free();
-							$con->close();
-						}
-					}
-				}
-			}
-			if(array_key_exists('unitind1',$retArr)){
-				$retArr['unitname1'] = $retArr['unitind1'].' '.$retArr['unitname1'];
-				unset($retArr['unitind1']); 
-			}
-			if(array_key_exists('unitind2',$retArr)){
-				$retArr['unitname2'] = $retArr['unitind2'].' '.$retArr['unitname2'];
-				unset($retArr['unitind2']); 
-			}
-			//Build sciname, without author
-			$retArr['sciname'] = trim($retArr['unitname1'].' '.$retArr['unitname2'].' '.$retArr['unitind3'].' '.$retArr['unitname3']);
-			if($rankId && is_numeric($rankId)){
-				$retArr['rankid'] = $rankId;
-			}
-			else{
-				if($retArr['unitname3']){
-					if($retArr['unitind3'] == 'ssp.' || !$retArr['unitind3']){
-						$retArr['rankid'] = 230;
-					}
-					elseif($retArr['unitind3'] == 'var.'){
-						$retArr['rankid'] = 240;
-					}
-					elseif($retArr['unitind3'] == 'f.'){
-						$retArr['rankid'] = 260;
-					}
-				}
-				elseif($retArr['unitname2']){
-					$retArr['rankid'] = 220;
-				} 
-				elseif($retArr['unitname1']){
-					if(substr($retArr['unitname1'],-5) == 'aceae' || substr($retArr['unitname1'],-4) == 'idae'){
-						$retArr['rankid'] = 140;
-					}
-				}
-			}
+	public static function parseScientificName($inStr, $conn = null, $rankId = 0){
+		$taxonArr = TaxonomyUtilities::parseScientificName($inStr, $conn, $rankId);
+		if(array_key_exists('unitind1',$taxonArr)){
+			$taxonArr['unitname1'] = $taxonArr['unitind1'].' '.$taxonArr['unitname1'];
+			unset($taxonArr['unitind1']);
 		}
-		else{
-			
-		} 
-		return $retArr;
+		if(array_key_exists('unitind2',$taxonArr)){
+			$taxonArr['unitname2'] = $taxonArr['unitind2'].' '.$taxonArr['unitname2'];
+			unset($taxonArr['unitind2']);
+		}
+		return $taxonArr;
 	}
 
 	/*
@@ -346,8 +165,8 @@ class OccurrenceUtilities {
 	public static function parseVerbatimElevation($inStr){
 		$retArr = array();
 		//Get rid of curly quotes
-		$search = array("’", "‘", "`", "”", "“"); 
-		$replace = array("'", "'", "'", '"', '"'); 
+		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
+		$replace = array("'","'",'"','"','*','-','-');
 		$inStr= str_replace($search, $replace, $inStr);
 		//Start parsing
 		if(preg_match('/([\.\d]+)\s*-\s*([\.\d]+)\s*meter/i',$inStr,$m)){
@@ -397,8 +216,8 @@ class OccurrenceUtilities {
 		if(strpos($inStr,' to ')) return $retArr;
 		if(strpos($inStr,' betw ')) return $retArr;
 		//Get rid of curly quotes
-		$search = array("’", "‘", "`", "”", "“"); 
-		$replace = array("'", "'", "'", '"', '"'); 
+		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
+		$replace = array("'","'",'"','"','*','-','-');
 		$inStr= str_replace($search, $replace, $inStr);
 
 		//Try to parse lat/lng
@@ -474,7 +293,7 @@ class OccurrenceUtilities {
 				$e = $m[2];
 				$n = $m[3];
 				if($n && $e && $z){
-					$llArr = OccurrenceUtilities::convertUtmToLL($e,$n,$z,$d);
+					$llArr = self::convertUtmToLL($e,$n,$z,$d);
 					if(isset($llArr['lat'])) $retArr['lat'] = $llArr['lat'];
 					if(isset($llArr['lng'])) $retArr['lng'] = $llArr['lng'];
 				}
@@ -512,7 +331,7 @@ class OccurrenceUtilities {
 						$n = $m[1];
 					} 
 					if($e && $n){
-						$llArr = OccurrenceUtilities::convertUtmToLL($e,$n,$z,$d);
+						$llArr = self::convertUtmToLL($e,$n,$z,$d);
 						if(isset($llArr['lat'])) $retArr['lat'] = $llArr['lat'];
 						if(isset($llArr['lng'])) $retArr['lng'] = $llArr['lng'];
 					}
@@ -567,7 +386,7 @@ class OccurrenceUtilities {
 			}
 			else{
 				//Make sure event date is a valid format or drop into verbatimEventDate
-				$dateStr = OccurrenceUtilities::formatDate($recMap['eventdate']);
+				$dateStr = self::formatDate($recMap['eventdate']);
 				if($dateStr){
 					if($recMap['eventdate'] != $dateStr && (!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate'])){
 						$recMap['verbatimeventdate'] = $recMap['eventdate'];
@@ -627,9 +446,9 @@ class OccurrenceUtilities {
 			if(isset($recMap['month']) && $recMap['month'] && !is_numeric($recMap['month'])){
 				if(strlen($recMap['month']) > 2){
 					$monAbbr = strtolower(substr($recMap['month'],0,3));
-					if(array_key_exists($monAbbr,OccurrenceUtilities::$monthNames)){
-						$recMap['month'] = OccurrenceUtilities::$monthNames[$monAbbr];
-						$recMap['eventdate'] = OccurrenceUtilities::formatDate(trim($y.'-'.$recMap['month'].'-'.($d?$d:'00'),'- '));
+					if(array_key_exists($monAbbr,self::$monthNames)){
+						$recMap['month'] = self::$monthNames[$monAbbr];
+						$recMap['eventdate'] = self::formatDate(trim($y.'-'.$recMap['month'].'-'.($d?$d:'00'),'- '));
 					}
 					else{
 						if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
@@ -646,12 +465,12 @@ class OccurrenceUtilities {
 				}
 			}
 			if($vDate && (!array_key_exists('eventdate',$recMap) || !$recMap['eventdate'])){
-				$recMap['eventdate'] = OccurrenceUtilities::formatDate($vDate);
+				$recMap['eventdate'] = self::formatDate($vDate);
 			}
 		}
 		//eventDate NULL && verbatimEventDate NOT NULL && year NOT NULL
 		if((!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']) && array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate'] && (!array_key_exists('year',$recMap) || !$recMap['year'])){
-			$dateStr = OccurrenceUtilities::formatDate($recMap['verbatimeventdate']);
+			$dateStr = self::formatDate($recMap['verbatimeventdate']);
 			if($dateStr) $recMap['eventdate'] = $dateStr;
 		}
 		if((isset($recMap['recordnumberprefix']) && $recMap['recordnumberprefix']) || (isset($recMap['recordnumbersuffix']) && $recMap['recordnumbersuffix'])){
@@ -668,7 +487,7 @@ class OccurrenceUtilities {
 			$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
 			$lngValue = (array_key_exists('decimallongitude',$recMap)?$recMap['decimallongitude']:'');
 			if(($latValue && !is_numeric($latValue)) || ($lngValue && !is_numeric($lngValue))){
-				$llArr = OccurrenceUtilities::parseVerbatimCoordinates(trim($latValue.' '.$lngValue),'LL');
+				$llArr = self::parseVerbatimCoordinates(trim($latValue.' '.$lngValue),'LL');
 				if(array_key_exists('lat',$llArr) && array_key_exists('lng',$llArr)){
 					$recMap['decimallatitude'] = $llArr['lat'];
 					$recMap['decimallongitude'] = $llArr['lng'];
@@ -698,7 +517,7 @@ class OccurrenceUtilities {
 					}
 					else{
 						//Attempt to extract decimal lat/long
-						$coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'],'LL');
+						$coordArr = self::parseVerbatimCoordinates($recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'],'LL');
 						if($coordArr){
 							if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
 							if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
@@ -731,11 +550,11 @@ class OccurrenceUtilities {
 			//Place into verbatim coord field
 			$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
 			if($vCoord) $vCoord .= '; ';
-			$vCoord .= $recMap['latdeg'].'° ';
+			$vCoord .= $recMap['latdeg'].chr(167).' ';
 			if(isset($recMap['latmin']) && $recMap['latmin']) $vCoord .= $recMap['latmin'].'m ';
 			if(isset($recMap['latsec']) && $recMap['latsec']) $vCoord .= $recMap['latsec'].'s ';
 			if(isset($recMap['latns'])) $vCoord .= $recMap['latns'].'; ';
-			$vCoord .= $recMap['lngdeg'].'° ';
+			$vCoord .= $recMap['lngdeg'].chr(167).' ';
 			if(isset($recMap['lngmin']) && $recMap['lngmin']) $vCoord .= $recMap['lngmin'].'m ';
 			if(isset($recMap['lngsec']) && $recMap['lngsec']) $vCoord .= $recMap['lngsec'].'s ';
 			if(isset($recMap['lngew'])) $vCoord .= $recMap['lngew'];
@@ -743,7 +562,7 @@ class OccurrenceUtilities {
 		}
 		/*
 		 if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && (!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude']))){
-		 $coordArr = OccurrenceUtilities::parseVerbatimCoordinates($recMap['verbatimcoordinates']);
+		 $coordArr = self::parseVerbatimCoordinates($recMap['verbatimcoordinates']);
 		 if($coordArr){
 		 if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
 		 if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
@@ -759,13 +578,13 @@ class OccurrenceUtilities {
 			if(!isset($recMap['decimallatitude']) || !isset($recMap['decimallongitude'])){
 				if($no && $ea && $zo){
 					//Northing, easting, and zoning all had values
-					$llArr = OccurrenceUtilities::convertUtmToLL($ea,$no,$zo,$da);
+					$llArr = self::convertUtmToLL($ea,$no,$zo,$da);
 					if(isset($llArr['lat'])) $recMap['decimallatitude'] = $llArr['lat'];
 					if(isset($llArr['lng'])) $recMap['decimallongitude'] = $llArr['lng'];
 				}
 				else{
 					//UTM was a single field which was placed in UTM northing field within uploadspectemp table
-					$coordArr = OccurrenceUtilities::parseVerbatimCoordinates(trim($zo.' '.$ea.' '.$no),'UTM');
+					$coordArr = self::parseVerbatimCoordinates(trim($zo.' '.$ea.' '.$no),'UTM');
 					if($coordArr){
 						if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
 						if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
@@ -798,7 +617,7 @@ class OccurrenceUtilities {
 		}
 		//Verbatim elevation
 		if(array_key_exists('verbatimelevation',$recMap) && $recMap['verbatimelevation'] && (!array_key_exists('minimumelevationinmeters',$recMap) || !$recMap['minimumelevationinmeters'])){
-			$eArr = OccurrenceUtilities::parseVerbatimElevation($recMap['verbatimelevation']);
+			$eArr = self::parseVerbatimElevation($recMap['verbatimelevation']);
 			if($eArr){
 				if(array_key_exists('minelev',$eArr)){
 					$recMap['minimumelevationinmeters'] = $eArr['minelev'];
@@ -810,7 +629,7 @@ class OccurrenceUtilities {
 		if(isset($recMap['elevationnumber']) && $recMap['elevationnumber']){
 			$elevStr = $recMap['elevationnumber'].$recMap['elevationunits'];
 			//Try to extract meters
-			$eArr = OccurrenceUtilities::parseVerbatimElevation($elevStr);
+			$eArr = self::parseVerbatimElevation($elevStr);
 			if($eArr){
 				if(array_key_exists('minelev',$eArr)){
 					$recMap['minimumelevationinmeters'] = $eArr['minelev'];
@@ -868,7 +687,7 @@ class OccurrenceUtilities {
 			}
 			elseif(array_key_exists('scientificname',$recMap)){
 				//Clean and parse scientific name
-				$parsedArr = OccurrenceUtilities::parseScientificName($recMap['scientificname']);
+				$parsedArr = TaxonomyUtilities::parseScientificName($recMap['scientificname']);
 				$scinameStr = '';
 				if(array_key_exists('unitname1',$parsedArr)){
 					$scinameStr = $parsedArr['unitname1'];

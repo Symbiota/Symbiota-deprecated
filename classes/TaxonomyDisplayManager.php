@@ -32,8 +32,7 @@ class TaxonomyDisplayManager{
 			echo '</div>';
 			ob_flush();
 			flush();
-			$taxMainObj = new TaxonomyUtilities();
-			$taxMainObj->buildHierarchyEnumTree();
+			TaxonomyUtilities::buildHierarchyEnumTree($this->conn,$this->taxAuthId);
 		}
 		$rsTest->free();
 		
@@ -273,8 +272,7 @@ class TaxonomyDisplayManager{
 			echo '</div>';
 			ob_flush();
 			flush();
-			$taxMainObj = new TaxonomyUtilities();
-			$taxMainObj->buildHierarchyEnumTree();
+			TaxonomyUtilities::buildHierarchyEnumTree($this->conn,$this->taxAuthId);
 		}
 		$rsTest->free();
 		

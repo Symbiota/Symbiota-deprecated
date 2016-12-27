@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/TaxonomyDisplayManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -18,11 +17,10 @@ $taxonDisplayObj->setTaxAuthId($taxAuthId);
 
 if($displayAuthor) $taxonDisplayObj->setDisplayAuthor(1);
  
-$editable = false;
+$isEditor = false;
 if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
-	$editable = true;
-}
- 
+	$isEditor = true;
+} 
 ?>
 <html>
 <head>
@@ -43,9 +41,7 @@ if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 			},{ minLength: 3 }
 			);
 
-
 		});
-		
 	</script>
 </head>
 <body>
@@ -71,7 +67,7 @@ else{
 	?>
 	<div class="navpath">
 		<a href="../../index.php">Home</a> &gt;&gt; 
-		<a href="taxaloader.php"><b>Taxonomic Tree Viewer</b></a> 
+		<a href="taxonomydisplay.php"><b>Taxonomic Tree Viewer</b></a> 
 	</div>
 	<?php 
 }
@@ -88,7 +84,7 @@ else{
 			<hr/>
 			<?php 
 		}
-		if($editable){
+		if($isEditor){
 			?>
 			<div style="float:right;" title="Add a New Taxon">
 				<a href="taxonomyloader.php">
@@ -128,7 +124,5 @@ else{
 	<?php 
 	include($SERVER_ROOT.'/footer.php');
 	?>
-
 </body>
 </html>
-
