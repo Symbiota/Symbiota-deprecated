@@ -55,7 +55,7 @@ if($target){
 		$(document).ready(function() {
 			$("#taxontarget").autocomplete({
 				source: function( request, response ) {
-					$.getJSON( "rpc/getdynataxasuggest.php", { term: request.term, taid: document.tdform.taxauthid.value }, response );
+					$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, hideauth: true, taid: document.tdform.taxauthid.value }, response );
 				}
 			},{ minLength: 3 }
 			);

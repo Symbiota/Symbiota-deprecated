@@ -5,6 +5,7 @@
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	
 	$q = $con->real_escape_string($_REQUEST['term']);
+    $hideAuth = array_key_exists('hideauth',$_REQUEST)?$con->real_escape_string($_REQUEST['hideauth']):false;
 	$taxAuthId = array_key_exists('taid',$_REQUEST)?$con->real_escape_string($_REQUEST['taid']):0;
 	$rankLimit = array_key_exists('rlimit',$_REQUEST)?$con->real_escape_string($_REQUEST['rlimit']):0;
 	$rankLow = array_key_exists('rlow',$_REQUEST)?$con->real_escape_string($_REQUEST['rlow']):0;
@@ -13,7 +14,7 @@
 	$returnArr = Array();
 	
 	$sqlWhere = '';
-	$sql = 'SELECT t.tid, t.sciname, t.author FROM taxa t ';
+	$sql = 'SELECT DISTINCT t.tid, t.sciname'.(!$hideAuth?',t.author':'').' FROM taxa t ';
 	if($taxAuthId){
 		$sql .= 'INNER JOIN taxstatus ts ON t.tid = ts.tid ';
 		$sqlWhere .= 'AND ts.taxauthid = '.$taxAuthId.' ';
@@ -39,8 +40,9 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		if($CHARSET == 'UTF-8') $returnArr[] = $row->sciname.' '.$row->author;
-		else $returnArr[] = utf8_encode($row->sciname.' '.$row->author);
+        $returnArr[] = $row->sciname.(!$hideAuth?' '.$row->author:'');
+	    //if($CHARSET == 'UTF-8') $returnArr[] = $row->sciname.' '.$row->author;
+		//else $returnArr[] = utf8_encode($row->sciname.' '.$row->author);
 	}
 	$result->free();
 	$con->close();
