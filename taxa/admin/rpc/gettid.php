@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $con = MySQLiConnectionFactory::getCon("readonly");
-$sciName = $con->real_escape_string($_POST['sciname']); 
+$sciName = $con->real_escape_string($_REQUEST['sciname']); 
 $taxAuthId = array_key_exists('taxauthid',$_POST)?$_POST['taxauthid']:0;
 $rankid = array_key_exists('rankid',$_POST)?$_POST['rankid']:0;
 $author = array_key_exists('author',$_POST)?$con->real_escape_string($_POST['author']):0;
@@ -35,6 +35,6 @@ while($row = $result->fetch_object()){
 $result->free();
 $con->close();
 
-//output the response
-echo implode(',',$retArr);
+if($retArr) echo implode(',',$retArr);
+else echo 0;
 ?>

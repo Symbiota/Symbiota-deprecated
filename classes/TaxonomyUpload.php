@@ -124,8 +124,6 @@ class TaxonomyUpload{
 				}
 				if(in_array("scinameinput",$fieldMap)){
 					//Load relavent fields into uploadtaxa table
-					//$sql = $sqlBase;
-					//$valueSql = "";
 					$inputArr = array();
 					foreach($uploadTaxaIndexArr as $recIndex => $targetField){
 						$valIn = $this->cleanInStr($this->encodeString($recordArr[$recIndex]));
@@ -142,10 +140,9 @@ class TaxonomyUpload{
 							}
 						}
 						if($valIn) $inputArr[$targetField] = $valIn;
-						//$valueSql .= ','.($valIn?'"'.$valIn.'"':'NULL');
 					}
 					if(array_key_exists('scinameinput', $inputArr)){
-						$sciArr = TaxonomyUtilities::parseScientificName($inputArr['scinameinput']);
+						$sciArr = TaxonomyUtilities::parseScientificName($inputArr['scinameinput'],$this->conn,(isset($inputArr['rankid'])?$inputArr['rankid']:0));
 						foreach($sciArr as $sciKey => $sciValue){
 							if(!array_key_exists($sciKey, $inputArr)) $inputArr[$sciKey] = $sciValue;
 						}
@@ -349,247 +346,6 @@ class TaxonomyUpload{
 	}
 
 	public function cleanUpload(){
-		$this->outputMsg('First pass removing scientific names already in system... ');
-		$sql = 'DELETE u.* FROM uploadtaxa u INNER JOIN taxa t ON u.scinameinput = t.sciname';
-		$this->conn->query($sql);
-
-		/*
-		$this->outputMsg('Parsing input scientific names... ');
-		$sspStr = 'subsp.';
-		$inSspStr = 'ssp.';
-		$sql = 'SELECT unitind3 FROM taxa WHERE rankid = 230 AND unitind3 LIKE "s%" LIMIT 1';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$sspStr = $r->unitind3;
-		}
-		$rs->free();
-		if($sspStr == 'ssp.') $inSspStr = 'subsp.';
-		
-		$this->outputMsg('Cleaning AcceptedStr... ');
-		$sql = 'UPDATE uploadtaxa SET AcceptedStr = REPLACE(AcceptedStr," '.$inSspStr.' "," '.$sspStr.' ") '.
-			'WHERE (AcceptedStr LIKE "% '.$inSspStr.' %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET AcceptedStr = REPLACE(AcceptedStr," notho'.$inSspStr.' "," '.$sspStr.' ") '.
-			'WHERE (AcceptedStr LIKE "% notho'.$inSspStr.' %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET AcceptedStr = REPLACE(AcceptedStr," var "," var. ") WHERE AcceptedStr LIKE "% var %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET AcceptedStr = REPLACE(AcceptedStr," '.substr($sspStr,0,strlen($sspStr)-1).' "," '.$sspStr.' ") '.
-			'WHERE (AcceptedStr LIKE "% '.substr($sspStr,0,strlen($sspStr)-1).' %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET AcceptedStr = REPLACE(AcceptedStr," sp.","") WHERE AcceptedStr LIKE "% sp."';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET AcceptedStr = TRIM(AcceptedStr) WHERE AcceptedStr LIKE "% " OR AcceptedStr LIKE " %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error.'... ',1);
-		}
-		$sql = 'UPDATE uploadtaxa SET AcceptedStr = REPLACE(AcceptedStr,"  "," ") WHERE AcceptedStr LIKE "%  %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error.'... ',1);
-		}
-		
-		//Value if only a Source Id was supplied
-		$sql = 'UPDATE uploadtaxa AS u LEFT JOIN uploadtaxa AS u2 ON u.sourceAcceptedId = u2.sourceId '.
-			'SET u.AcceptedStr = u2.scinameinput '.
-			'WHERE u.sourceAcceptedId IS NOT NULL AND u2.sourceId IS NOT NULL AND ISNULL(u.AcceptedStr)';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error.'... ',1);
-		}
-		*/
-		
-		//Insert into uploadtaxa table all accepted taxa not already present in scinameinput. If they turn out to be in taxa table, they will be deleted later
-		/*
-		 * Let's require existance of accepted names
-		$this->outputMsg('Appending accepted taxa not present in scinameinput... ',1);
-		$sql = 'INSERT INTO uploadtaxa(scinameinput) '.
-			'SELECT DISTINCT u.AcceptedStr '.
-			'FROM uploadtaxa u LEFT JOIN uploadtaxa ul2 ON u.AcceptedStr = ul2.scinameinput '.
-			'WHERE u.AcceptedStr IS NOT NULL AND ul2.scinameinput IS NULL';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		*/
-		/*
-		//Clean sciname field (sciname input gets cleaned later) 
-		$this->outputMsg('Cleaning sciname fields... ');
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," '.$inSspStr.' "," '.$sspStr.' ") WHERE (sciname LIKE "% '.$inSspStr.' %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," notho'.$inSspStr.' "," '.$sspStr.' ") WHERE (sciname LIKE "% notho'.$inSspStr.' %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," var "," var. ") WHERE sciname LIKE "% var %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," '.substr($sspStr,0,strlen($sspStr)-1).' "," '.$sspStr.' ") WHERE (sciname LIKE "% '.substr($sspStr,0,strlen($sspStr)-1).' %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," cf. "," ") WHERE sciname LIKE "% cf. %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," cf "," ") WHERE sciname LIKE "% cf %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," aff. "," ") WHERE sciname LIKE "% aff. %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," aff "," ") WHERE sciname LIKE "% aff %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," sp.","") WHERE sciname LIKE "% sp."';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname," sp","") WHERE sciname LIKE "% sp"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = TRIM(sciname) WHERE sciname LIKE "% " OR sciname LIKE " %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET sciname = REPLACE(sciname,"  "," ") WHERE sciname LIKE "%  %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-
-		//Clean scinameinput field
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," '.$inSspStr.' "," '.$sspStr.' ") '.
-			'WHERE (scinameinput LIKE "% '.$inSspStr.' %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," notho'.$inSspStr.' "," '.$sspStr.' ") '.
-			'WHERE (scinameinput LIKE "% notho'.$inSspStr.' %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," var "," var. ") WHERE scinameinput LIKE "% var %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," '.substr($sspStr,0,strlen($sspStr)-1).' "," '.$sspStr.' ") '.
-			'WHERE (scinameinput LIKE "% '.substr($sspStr,0,strlen($sspStr)-1).' %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," cf. "," ") WHERE scinameinput LIKE "% cf. %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," cf "," ") WHERE scinameinput LIKE "% cf %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," aff. "," ") WHERE scinameinput LIKE "% aff. %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," aff "," ") WHERE scinameinput LIKE "% aff %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," sp.","") WHERE scinameinput LIKE "% sp."';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," sp","") WHERE scinameinput LIKE "% sp"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = TRIM(scinameinput) WHERE scinameinput LIKE "% " OR scinameinput LIKE " %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput,"  "," ") WHERE scinameinput LIKE "%  %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-
-		//Parse scinameinput into unitind and unitname fields 
-		$this->outputMsg('Parse scinameinput field...');
-		$sql = 'UPDATE uploadtaxa SET unitind1 = "x" WHERE ISNULL(unitind1) AND scinameinput LIKE "x %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET unitind2 = "x" WHERE ISNULL(unitind2) AND scinameinput LIKE "% x %" AND scinameinput NOT LIKE "% % x %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET unitname1 = TRIM(substring(scinameinput,3,LOCATE(" ",scinameinput,3)-3)) '.
-			'WHERE ISNULL(unitname1) and scinameinput LIKE "x %"';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa '.
-			'SET unitname1 = TRIM(substring(scinameinput,1,LOCATE(" ",CONCAT(scinameinput," ")))) '.
-			'WHERE ISNULL(unitname1) ';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa '.
-			'SET unitname2 = TRIM(substring(scinameinput,LENGTH(CONCAT_WS(" ",unitind1, unitname1, unitind2))+2,LOCATE(" ",CONCAT(scinameinput," "),LENGTH(CONCAT_WS(" ",unitind1, unitname1, unitind2))+2)-(LENGTH(CONCAT_WS(" ",unitind1, unitname1, unitind2))+2))) '.
-			'WHERE ISNULL(unitname2)';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET unitname2 = NULL WHERE unitname2 = ""';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET unitind3 = "f.", rankid = 260 '.
-			'WHERE ISNULL(unitind3) AND (scinameinput LIKE "% f. %" OR scinameinput LIKE "% forma %") AND (ISNULL(rankid) OR rankid = 260)';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET unitind3 = "var.", rankid = 240 '.
-			'WHERE ISNULL(unitind3) AND scinameinput LIKE "% var. %" AND (ISNULL(rankid) OR rankid = 240)';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET unitind3 = "'.$sspStr.'", rankid = 230 '.
-			'WHERE ISNULL(unitind3) AND (scinameinput LIKE "% '.$sspStr.' %") AND (ISNULL(rankid) OR rankid = 230)';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa '.
-			'SET unitname3 = TRIM(SUBSTRING(scinameinput,LOCATE(unitind3,scinameinput)+LENGTH(unitind3)+1, '.
-			'LOCATE(" ",CONCAT(scinameinput," "),LOCATE(unitind3,scinameinput)+LENGTH(unitind3)+1)-LOCATE(unitind3,scinameinput)-LENGTH(unitind3))) '.
-			'WHERE ISNULL(unitname3) AND rankid > 220 ';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE IGNORE uploadtaxa '.
-			'SET sciname = scinameinput '.
-			'WHERE ISNULL(sciname) AND ((scinameinput LIKE "% x %" AND unitind3 IS NOT NULL) OR scinameinput LIKE "% % x %")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE IGNORE uploadtaxa '.
-			'SET sciname = CONCAT_WS(" ",unitind1, unitname1, unitind2, unitname2, unitind3, unitname3) '.
-			'WHERE ISNULL(sciname)';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		*/
 		
 		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceParentId = u2.sourceId '.
 			'SET u.parentstr = u2.sciname '.
@@ -688,23 +444,6 @@ class TaxonomyUpload{
 		$sql = 'DELETE FROM uploadtaxa WHERE tid IS NOT NULL';
 		//$this->conn->query($sql);
 
-		/*
-		$this->outputMsg('Set null rankid values... ');
-		$sql = 'UPDATE uploadtaxa SET rankid = 140 '.
-			'WHERE (rankid IS NULL) AND (sciname NOT LIKE "% %") AND (sciname LIKE "%aceae" || sciname LIKE "%idae")';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET rankid = 220 WHERE rankid IS NULL AND unitname1 IS NOT NULL AND unitname2 IS NOT NULL';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		$sql = 'UPDATE uploadtaxa SET rankid = 180 WHERE (rankid IS NULL) AND (unitname1 IS NOT NULL) AND (unitname2 IS NULL)';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('ERROR: '.$this->conn->error,1);
-		}
-		*/
-		
 		$this->outputMsg('Set null author values... ');
 		$sql = 'UPDATE uploadtaxa '.
 			'SET author = TRIM(SUBSTRING(scinameinput,LENGTH(sciname)+1)) '.
@@ -780,28 +519,6 @@ class TaxonomyUpload{
 			'SET up.parenttid = t.tid '.
 			'WHERE ISNULL(up.parenttid)';
 		$this->conn->query($sql);
-
-		//Load into uploadtaxa parents of genera not yet in taxa table
-		/* 
-		$defaultParent = 0;
-		$defaultParentStr = '';
-		if(!$defaultParent){
-			$sql = 'SELECT tid, sciname FROM taxa WHERE rankid <= 10';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$defaultParent = $r->tid;
-				$defaultParentStr = $r->sciname;
-			}
-			$rs->free();
-		}
-		if($defaultParent){
-			$sql = 'INSERT IGNORE INTO uploadtaxa (scinameinput, SciName, family, RankId, UnitName1, parenttid, parentstr, source) '.
-				'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.family, 140 as r, ut.parentstr,'.$defaultParent.',"'.$defaultParentStr.'",ut.source '.
-				'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
-				'WHERE ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.rankid = 180 AND ut2.sciname IS NULL';
-			$this->conn->query($sql);
-		}
-		*/
 
 		//Set acceptance to 0 where sciname <> acceptedstr
 		$sql = 'UPDATE uploadtaxa '.

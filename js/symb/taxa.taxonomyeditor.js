@@ -108,12 +108,12 @@ function submitLinkToAccepted(f){
 		url: "rpc/gettid.php",
 		data: { sciname: f.acceptedstr.value }
 	}).done(function( msg ) {
-		if(msg){
-			f.tidaccepted.value = msg;
-			f.submit();
+		if(msg == 0){
+			alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
 		}
 		else{
-			alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
+			f.tidaccepted.value = msg;
+			f.submit();
 		}
 	});
 }
@@ -124,12 +124,12 @@ function submitTaxStatusForm(f){
 		url: "rpc/gettid.php",
 		data: { sciname: f.parentstr.value }
 	}).done(function( msg ) {
-		if(msg){
-			f.parenttid.value = msg;
-			f.submit();
+		if(msg == 0){
+			alert("ERROR: Parent taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
 		}
 		else{
-			alert("ERROR: Parent taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
+			f.parenttid.value = msg;
+			f.submit();
 		}
 	});
 }

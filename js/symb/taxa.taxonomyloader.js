@@ -45,7 +45,7 @@ function verifyLoadForm(f){
 		async: false,
 		data: { sciname: f.sciname.value, rankid: f.rankid.value, author: f.author.value }
 	}).done(function( msg ) {
-		if(msg){
+		if(msg != '0'){
 			var sciName = document.getElementById("sciname").value;
 			alert("Taxon "+sciName+" "+f.author.value+" ("+msg+") already exists in database");
 			return false;
@@ -163,7 +163,11 @@ function checkAcceptedExistance(f){
 			async: false,
 			data: { sciname: f.acceptedstr.value }
 		}).done(function( msg ) {
-			if(msg){
+			if(msg == 0){
+				alert("Accepted does not exist. Add parent to thesaurus before adding this name.");
+				return false;
+			}
+			else{
 				if(msg.indexOf(",") == -1){
 					f.tidaccepted.value = msg;
 					return true;
@@ -172,10 +176,6 @@ function checkAcceptedExistance(f){
 					alert("Accepted is matching two different names in the thesaurus. Please select taxon with the correct author.");
 					return false;
 				}
-			}
-			else{
-				alert("Accepted does not exist. Add parent to thesaurus before adding this name.");
-				return false;
 			}
 		});
 	}
@@ -193,7 +193,11 @@ function checkParentExistance(f){
 			async: false,
 			data: { sciname: parentStr }
 		}).done(function( msg ) {
-			if(msg){
+			if(msg == 0){
+				alert("Parent does not exist. Please first add parent to system.");
+				return false;
+			}
+			else{
 				if(msg.indexOf(",") == -1){
 					f.parenttid.value = msg;
 					return true;
@@ -202,10 +206,6 @@ function checkParentExistance(f){
 					alert("Parent is matching two different names in the thesaurus. Please select taxon with the correct author.");
 					return false;
 				}
-			}
-			else{
-				alert("Parent does not exist. Please first add parent to system.");
-				return false;
 			}
 		});
 	}
