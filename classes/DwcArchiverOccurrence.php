@@ -590,10 +590,6 @@ class DwcArchiverOccurrence{
 		}
 	}
 	
-	public function setServerDomain($domain){
-		$this->serverDomain = $domain;
-	}
-
 	private function resetCollArr($collTarget){
 		unset($this->collArr);
 		$this->collArr = array();
@@ -2401,11 +2397,16 @@ class DwcArchiverOccurrence{
 		$this->geolocateVariables = $geolocateArr;
 	}
 	
-	private function setServerDomain(){
-		$this->serverDomain = "http://";
-		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
-		$this->serverDomain .= $_SERVER["SERVER_NAME"];
-		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+	private function setServerDomain($domain = ''){
+		if($domain){
+			$this->serverDomain = $domain;
+		}
+		elseif(!$this->serverDomain){
+			$this->serverDomain = "http://";
+			if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $this->serverDomain = "https://";
+			$this->serverDomain .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+		}
 	}
 
 	private function logOrEcho($str){
