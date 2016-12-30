@@ -55,7 +55,7 @@ if($target){
 		$(document).ready(function() {
 			$("#taxontarget").autocomplete({
 				source: function( request, response ) {
-					$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, hideauth: true, taid: document.tdform.taxauthid.value }, response );
+					$.getJSON( "../../webservices/autofillsciname.php", { term: request.term, limit: 10, hideauth: true, taid: document.tdform.taxauthid.value }, response );
 				}
 			},{ minLength: 3 }
 			);
@@ -116,7 +116,7 @@ else{
 			<form id="tdform" name="tdform" action="taxonomydynamicdisplay.php" method='POST'>
 				<fieldset style="padding:10px;width:500px;">
 					<legend><b>Enter a taxon</b></legend>
-					<div>
+                    <div>
 						<b>Taxon:</b> 
 						<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
 					</div>

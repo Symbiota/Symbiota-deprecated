@@ -43,8 +43,36 @@ $(document).ready(function() {
 		})
 		.autocomplete({
 			source: function( request, response ) {
-				$.getJSON( "../rpc/taxalist.php", {
-					term: extractLast( request.term ), t: function() { return document.mapsearchform.taxontype.value; }
+				var t = document.mapsearchform.taxontype.value;
+				var source = '';
+                var rankLow = '';
+                var rankHigh = '';
+                var rankLimit = '';
+				if(t == 5){
+                    source = '../../webservices/autofillvernacular.php';
+				}
+				else{
+                    source = '../../webservices/autofillsciname.php';
+				}
+                if(t == 4){
+                    rankLow = 21;
+                    rankHigh = 139;
+                }
+                else if(t == 2){
+                    rankLimit = 140;
+                }
+                else if(t == 3){
+                    rankLow = 141;
+                }
+                else{
+                    rankLow = 140;
+                }
+				$.getJSON( source, {
+					term: extractLast( request.term ),
+                    rlow: rankLow,
+                    rhigh: rankHigh,
+                    rlimit: rankLimit,
+                    limit: 20
 				}, response );
 			},
 			appendTo: "#taxa_autocomplete",
