@@ -4,7 +4,7 @@
  *
  * term: User inputted string for which to auto-complete.
  * hideauth (optional): Hide authority from scientific name reutrn.
- * hideprotected (required): Hide taxa flagged as sensitive from scientific name return.
+ * hideprotected (optional): Hide taxa flagged as sensitive from scientific name return.
  * taid (optional): Taxonomic thesaurus ID from which to narrow scientific name return.
  * rlimit (optional): Rank ID for which to limit scientific name return.
  * rlow (optional): Rank ID for which to be lowest limit for scientific name return. Taxa will be higher or equal to this rank.
