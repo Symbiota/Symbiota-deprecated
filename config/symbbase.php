@@ -2,6 +2,7 @@
 if(!isset($CLIENT_ROOT) && isset($clientRoot)) $CLIENT_ROOT = $clientRoot; 
 if(!isset($SERVER_ROOT) && isset($serverRoot)) $SERVER_ROOT = $serverRoot;
 include_once($SERVER_ROOT.'/classes/Encryption.php');
+include_once($SERVER_ROOT.'/classes/ProfileManager.php');
 session_start();
 header('Cache-control: private'); // IE 6 FIX
 
@@ -18,33 +19,36 @@ if(substr($SERVER_ROOT,-1) == '/'){
 //Check cookie to see if signed in
 $PARAMS_ARR = Array();				//params => fn, uid, un   cookie(SymbiotaBase) => 'un=egbot&dn=Edward+Gilbert&uid=301'
 $USER_RIGHTS = Array();
-if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))){
-    $userValue = Encryption::decrypt($_COOKIE["SymbiotaBase"]);
-    $userValues =	explode("&",$userValue);
-    foreach($userValues as $val){
-        $tok1 = strtok($val, "=");
-        $tok2 = strtok("=");
-        $PARAMS_ARR[$tok1] = $tok2;
+if((isset($_COOKIE["SymbiotaCrumb"]) && (!isset($_REQUEST['submit']) || $_REQUEST['submit'] != "logout"))){
+    $tokenArr = json_decode(Encryption::decrypt($_COOKIE["SymbiotaCrumb"]), true);
+    if($tokenArr){
+        $pHandler = new ProfileManager();
+        if($pHandler->setUserName($tokenArr[0])){
+            $pHandler->setRememberMe(true);
+            $pHandler->setToken($tokenArr[1]);
+            $pHandler->setTokenAuthSql($tokenArr[1]);
+            if(!$pHandler->authenticate()){
+                $pHandler->reset();
+            }
+        }
     }
-	//Check user rights
-	if(isset($_COOKIE["SymbiotaRights"])){
-        $userRightsStr = Encryption::decrypt($_COOKIE["SymbiotaRights"]);
-		$uRights = explode("&",$userRightsStr);
-		foreach($uRights as $v){
-			$tArr = explode("-",$v);
-			if(count($tArr) > 1){
-				if(strpos($tArr[1],',')){
-					$USER_RIGHTS[$tArr[0]] = explode(',',$tArr[1]);
-				}
-				else{
-					$USER_RIGHTS[$tArr[0]][] = $tArr[1];
-				}
-			}
-			else{
-				$USER_RIGHTS[$tArr[0]] = "";
-			}
-		}
-	}
+}
+
+if((isset($_COOKIE["SymbiotaCrumb"]) && ((isset($_REQUEST['submit']) && $_REQUEST['submit'] == "logout") || isset($_REQUEST['loginas'])))){
+    $tokenArr = json_decode(Encryption::decrypt($_COOKIE["SymbiotaCrumb"]), true);
+    if($tokenArr){
+        $pHandler = new ProfileManager();
+        $uid = $pHandler->getUid($tokenArr[0]);
+        $pHandler->deleteToken($uid,$tokenArr[1]);
+    }
+}
+
+if(isset($_SESSION['userparams'])){
+    $PARAMS_ARR = $_SESSION['userparams'];
+}
+
+if(isset($_SESSION['userrights'])){
+    $USER_RIGHTS = $_SESSION['userrights'];
 }
 
 $CSS_VERSION = 'ver=20160528';

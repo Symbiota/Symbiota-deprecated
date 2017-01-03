@@ -11,6 +11,7 @@ if(!is_numeric($userId)) $userId = 0;
 $pHandler = new ProfileManager();
 $pHandler->setUid($userId);
 $person = $pHandler->getPerson();
+$tokenCount = $pHandler->getTokenCnt();
 $isSelf = true;
 if($userId != $SYMB_UID) $isSelf = false;
 ?>
@@ -34,9 +35,10 @@ if($userId != $SYMB_UID) $isSelf = false;
 			echo '<div>User information: '.($person->getIsPublic()?'public':'private').'</div>';
 			?>
 			<div style="font-weight:bold;margin-top:10px;">
-				<div><a href="#" onclick="toggleEditingTools('profileeditdiv')">Edit Profile</a></div>
-				<div><a href="#" onclick="toggleEditingTools('pwdeditdiv')">Change Password</a></div>
-				<div><a href="#" onclick="toggleEditingTools('logineditdiv')">Change Login</a></div>
+				<div><a href="#" onclick="toggleEditingTools('profileeditdiv');return false;">Edit Profile</a></div>
+				<div><a href="#" onclick="toggleEditingTools('pwdeditdiv');return false;">Change Password</a></div>
+				<div><a href="#" onclick="toggleEditingTools('logineditdiv');return false;">Change Login</a></div>
+                <div><a href="#" onclick="toggleEditingTools('managetokensdiv');return false;">Manage Access</a></div>
 			</div>
 		</div>	
 	</div>
@@ -225,6 +227,21 @@ if($userId != $SYMB_UID) $isSelf = false;
 			</form>
 		</fieldset>
 	</div>
+    <div id="managetokensdiv" style="display:none;margin:15px;">
+        <fieldset style='padding:15px;width:500px;'>
+            <legend><b>Manage Access Tokens</b></legend>
+            <form name="cleartokenform" action="viewprofile.php" method="post" onsubmit="">
+                <div>You currently have <b><?php echo ($tokenCount?$tokenCount:0); ?></b> access tokens linked to your account.
+                    Tokens are created when you select "Remember Me" when logging in, or access the portal
+                    from an external app. If the number of access tokens you have seems high, please click on the button below to
+                    clear the tokens linked to your account.</div>
+                <div style="margin:10px">
+                    <input type="hidden" name="userid" value="<?php echo $userId;?>" />
+                    <input type="submit" name="action" value="Clear Tokens" />
+                </div>
+            </form>
+        </fieldset>
+    </div>
 	<div>
 		<div>
 			<b><u>Taxonomic Relationships</u></b> 

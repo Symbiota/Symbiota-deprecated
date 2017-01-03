@@ -105,6 +105,12 @@ if($isEditor){
 		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
 		else $tabIndex = 2;
 	}
+    elseif($action == "Clear Tokens"){
+        $statusStr = $pHandler->clearAccessTokens();
+        $person = $pHandler->getPerson();
+        if($person->getIsTaxonomyEditor()) $tabIndex = 3;
+        else $tabIndex = 2;
+    }
 	elseif($action == "Delete Profile"){
 		if($pHandler->deleteProfile($userId, $isSelf)){
 			header("Location: ../index.php");

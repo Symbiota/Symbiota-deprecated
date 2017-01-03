@@ -8,9 +8,10 @@ class ProfileManager{
 	private $rememberMe = false;
 	private $uid;
 	private $userName;
-
-	private $displayName;
+    private $displayName;
 	private $visitId;
+    private $token;
+    private $authSql;
 	private $userRights = Array();
 	private $conn;
 	private $errorStr;
@@ -34,8 +35,12 @@ class ProfileManager{
 		if($domainName == 'localhost') $domainName = false;
 		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
 		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
+        setcookie("SymbiotaCrumb", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
 		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'));
 		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'));
+        setcookie("SymbiotaCrumb", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'));
+        unset($_SESSION['userrights']);
+        unset($_SESSION['userparams']);
 	}
 	
 	public function setCookies(){
@@ -61,16 +66,33 @@ class ProfileManager{
 			setcookie("SymbiotaRights", Encryption::encrypt($cookieStr), $cookieExpire, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
 		}
 	}
+
+    public function setTokenCookie(){
+        $tokenArr = Array();
+        if(!$this->token){
+            $this->createToken();
+        }
+        if($this->token){
+            $tokenArr[] = $this->userName;
+            $tokenArr[] = $this->token;
+            $cookieExpire = time() + 60 * 60 * 24 * 30;
+            $domainName = $_SERVER['SERVER_NAME'];
+            if (!$domainName) $domainName = $_SERVER['HTTP_HOST'];
+            if ($domainName == 'localhost') $domainName = false;
+            setcookie("SymbiotaCrumb", Encryption::encrypt(json_encode($tokenArr)), $cookieExpire, ($GLOBALS["CLIENT_ROOT"] ? $GLOBALS["CLIENT_ROOT"] : '/'), $domainName, false, true);
+        }
+    }
 	
 	public function authenticate($pwdStr = ''){
 		$authStatus = false;
+        unset($_SESSION['userrights']);
+        unset($_SESSION['userparams']);
 		if($this->userName){
-			$sql = 'SELECT u.uid, u.firstname, u.lastname '.
-				'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
-				'WHERE (ul.username = "'.$this->userName.'") ';
-			if($pwdStr) $sql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
-			//echo $sql;
-			$result = $this->conn->query($sql);
+			if(!$this->authSql){
+                $this->setLoginAuthSql($pwdStr);
+            }
+		    //echo $this->authSql;
+			$result = $this->conn->query($this->authSql);
 			if($row = $result->fetch_object()){
 				$this->uid = $row->uid;
 				$this->displayName = $row->firstname;
@@ -81,8 +103,11 @@ class ProfileManager{
 				$this->userRights = array();
 				$this->reset();
 				$this->setUserRights();
-				$this->setCookies();
-				
+                $this->setUserParams();
+                if($this->rememberMe){
+                    $this->setTokenCookie();
+                }
+
 				//Update last login data
 				$conn = $this->getConnection("write");
 				$sql = 'UPDATE userlogin SET lastlogindate = NOW() WHERE (username = "'.$this->userName.'")';
@@ -185,7 +210,7 @@ class ProfileManager{
 			$editCon->close();
 		}
 		if($reset) $this->reset();
-		return $success;
+        return $success;
 	}
 
 	public function changePassword ($newPwd, $oldPwd = "", $isSelf = 0) {
@@ -805,17 +830,42 @@ class ProfileManager{
 	}
 
 	private function setUserRights(){
-		//Get Admin Rights 
-		if($this->uid){
-			$sql = 'SELECT role, tablepk FROM userroles WHERE (uid = '.$this->uid.')';
+		//Get Admin Rights
+        if($this->uid){
+			$sql = 'SELECT role, tablepk FROM userroles WHERE (uid = '.$this->uid.') ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$this->userRights[$r->role][] = $r->tablepk;
 			}
 			$rs->free();
+            $_SESSION['userrights'] = $this->userRights;
 		}
 	}
+
+    private function setUserParams(){
+        $_SESSION['userparams']['un'] = $this->userName;
+        $_SESSION['userparams']['dn'] = $this->displayName;
+        $_SESSION['userparams']['uid'] = $this->uid;
+    }
+
+    private function setLoginAuthSql($pwdStr){
+        $this->authSql = 'SELECT u.uid, u.firstname, u.lastname '.
+            'FROM users AS u INNER JOIN userlogin AS ul ON u.uid = ul.uid '.
+            'WHERE (ul.username = "'.$this->userName.'") ';
+        if($pwdStr) $this->authSql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
+    }
+
+    public function setTokenAuthSql($token){
+        $this->authSql = 'SELECT u.uid, u.firstname, u.lastname '.
+            'FROM users AS u INNER JOIN userlogin AS ul ON u.uid = ul.uid '.
+            'INNER JOIN useraccesstokens AS ut ON u.uid = ut.uid '.
+            'WHERE (ul.username = "'.$this->userName.'") AND (ut.token = "'.$token.'") ';
+    }
+
+    public function setToken($token){
+        $this->token = $token;
+    }
 	
 	public function getUserRights(){
 		return $this->userRights;
@@ -918,5 +968,164 @@ class ProfileManager{
 		}
 		return $retStr;
 	}
+
+	//OAuth2 functions
+    public function generateTokenPacket(){
+        $pkArr = Array();
+        $this->createToken();
+        if($this->token){
+            $sql = 'SELECT ul.role, ul.tablename, ul.tablepk, c.CollectionName, c.CollectionCode, c.InstitutionCode, fc.`Name`, fp.projname '.
+                'FROM userroles AS ul LEFT JOIN omcollections AS c ON ul.tablepk = c.CollID '.
+                'LEFT JOIN fmchecklists AS fc ON ul.tablepk = fc.CLID '.
+                'LEFT JOIN fmprojects AS fp ON ul.tablepk = fp.pid '.
+                'WHERE ul.uid = '.$this->uid.' ';
+            //echo $sql;
+            if($rs = $this->conn->query($sql)){
+                while($r = $rs->fetch_object()){
+                    if($r->role == 'CollAdmin' || $r->role == 'CollEditor' || $r->role == 'CollTaxon'){
+                        $pkArr['collections'][$r->role][$r->tablepk]['CollectionName'] = $r->CollectionName;
+                        $pkArr['collections'][$r->role][$r->tablepk]['CollectionCode'] = $r->CollectionCode;
+                        $pkArr['collections'][$r->role][$r->tablepk]['InstitutionCode'] = $r->InstitutionCode;
+                    }
+                    elseif($r->role == 'ClAdmin'){
+                        $pkArr['checklists'][$r->role][$r->tablepk]['ChecklistName'] = $r->Name;
+                    }
+                    elseif($r->role == 'ProjAdmin'){
+                        $pkArr['projects'][$r->role][$r->tablepk]['ProjectName'] = $r->projname;
+                    }
+                    else{
+                        $pkArr['portal'][] = $r->role;
+                    }
+                }
+                $rs->close();
+            }
+            if(in_array('SuperAdmin',$pkArr['portal'])){
+                $pkArr['collections']['CollAdmin'] = $this->getCollectionArr();
+                $pkArr['checklists']['ClAdmin'] = $this->getChecklistArr();
+                $pkArr['projects']['ProjAdmin'] = $this->getProjectArr();
+            }
+            $pkArr['uid'] = $this->uid;
+            $pkArr['token'] = $this->token;
+        }
+        return $pkArr;
+    }
+
+    public function createToken(){
+        $token = '';
+        $token = sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+            mt_rand( 0, 0xffff ),
+            mt_rand( 0, 0x0fff ) | 0x4000,
+            mt_rand( 0, 0x3fff ) | 0x8000,
+            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+        );
+        if($token){
+            $editCon = $this->getConnection('write');
+            $sql = 'INSERT INTO useraccesstokens (uid,token) '.
+                'VALUES ('.$this->uid.',"'.$token.'") ';
+            if($editCon->query($sql)){
+                $this->token = $token;
+            }
+            $editCon->close();
+        }
+    }
+
+    public function getCollectionArr(){
+        $retArr = Array();
+        $sql = 'SELECT CollID, InstitutionCode, CollectionCode, CollectionName FROM omcollections';
+        //echo $sql;
+        if($rs = $this->conn->query($sql)){
+            while($r = $rs->fetch_object()){
+                $retArr[$r->CollID]['CollectionName'] = $r->CollectionName;
+                $retArr[$r->CollID]['CollectionCode'] = $r->CollectionCode;
+                $retArr[$r->CollID]['InstitutionCode'] = $r->InstitutionCode;
+            }
+            $rs->close();
+        }
+
+        return $retArr;
+    }
+
+    public function getChecklistArr(){
+        $retArr = Array();
+        $sql = 'SELECT CLID, `Name` FROM fmchecklists';
+        //echo $sql;
+        if($rs = $this->conn->query($sql)){
+            while($r = $rs->fetch_object()){
+                $retArr[$r->CLID]['ChecklistName'] = $r->Name;
+            }
+            $rs->close();
+        }
+
+        return $retArr;
+    }
+
+    public function getProjectArr(){
+        $retArr = Array();
+        $sql = 'SELECT pid, projname FROM fmprojects';
+        //echo $sql;
+        if($rs = $this->conn->query($sql)){
+            while($r = $rs->fetch_object()){
+                $retArr[$r->pid]['ProjectName'] = $r->projname;
+            }
+            $rs->close();
+        }
+
+        return $retArr;
+    }
+
+    public function getTokenCnt(){
+        $cnt = 0;
+        $sql = 'SELECT COUNT(token) AS cnt FROM useraccesstokens WHERE uid = '.$this->uid;
+        //echo $sql;
+        $result = $this->conn->query($sql);
+        if($row = $result->fetch_object()){
+            $cnt = $row->cnt;
+            $result->close();
+        }
+        return $cnt;
+    }
+
+    public function getUid($un){
+        $uid = '';
+        $sql = 'SELECT uid FROM userlogin WHERE username = "'.$un.'"  ';
+        //echo $sql;
+        $result = $this->conn->query($sql);
+        if($row = $result->fetch_object()){
+            $uid = $row->uid;
+            $result->close();
+        }
+        return $uid;
+    }
+
+    public function deleteToken($uid,$token){
+        $statusStr = '';
+        $sql = 'DELETE FROM useraccesstokens WHERE uid = '.$uid.' AND token = "'.$token.'" ';
+        //echo $sql;
+        $editCon = $this->getConnection("write");
+        if($editCon->query($sql)){
+            $statusStr = 'Access token cleared!';
+        }
+        else{
+            $statusStr = 'ERROR clearing access token: '.$editCon->error;
+        }
+        $editCon->close();
+        return $statusStr;
+    }
+
+    public function clearAccessTokens(){
+        $statusStr = '';
+        $sql = 'DELETE FROM useraccesstokens WHERE uid = '.$this->uid;
+        //echo $sql;
+        $editCon = $this->getConnection("write");
+        if($editCon->query($sql)){
+            $statusStr = 'Access tokens cleared!';
+        }
+        else{
+            $statusStr = 'ERROR clearing access tokens: '.$editCon->error;
+        }
+        $editCon->close();
+        return $statusStr;
+    }
 } 
 ?>
