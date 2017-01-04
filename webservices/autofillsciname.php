@@ -1,5 +1,9 @@
 <?php
 /*
+ * * ****  Accepts  ********************************************
+ *
+ * POST or GET requests
+ *
  * ****  Input Variables  ********************************************
  *
  * term: User inputted string for which to auto-complete.
@@ -14,7 +18,8 @@
  * * ****  Output  ********************************************
  *
  * JSON array of scientific names.
- * Each scientific name contains subarray:
+ *
+ * Each scientific name contains a subarray with:
  *  id: Symbiota portal TID for that taxon.
  *  value: Suggested label for taxon (currently set to be same as index).
  *

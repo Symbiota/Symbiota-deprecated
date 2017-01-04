@@ -1,5 +1,9 @@
 <?php
 /*
+ * * ****  Accepts  ********************************************
+ *
+ * POST or GET requests
+ *
  * ****  Input Variables  ********************************************
  *
  * term: User inputted string for which to auto-complete.

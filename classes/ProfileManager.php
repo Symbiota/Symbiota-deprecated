@@ -830,7 +830,8 @@ class ProfileManager{
 	}
 
 	private function setUserRights(){
-		//Get Admin Rights
+        global $USER_RIGHTS;
+	    //Get Admin Rights
         if($this->uid){
 			$sql = 'SELECT role, tablepk FROM userroles WHERE (uid = '.$this->uid.') ';
 			//echo $sql;
@@ -840,13 +841,16 @@ class ProfileManager{
 			}
 			$rs->free();
             $_SESSION['userrights'] = $this->userRights;
+            $USER_RIGHTS = $_SESSION['userrights'];
 		}
 	}
 
     private function setUserParams(){
-        $_SESSION['userparams']['un'] = $this->userName;
+        global $PARAMS_ARR;
+	    $_SESSION['userparams']['un'] = $this->userName;
         $_SESSION['userparams']['dn'] = $this->displayName;
         $_SESSION['userparams']['uid'] = $this->uid;
+        $PARAMS_ARR = $_SESSION['userparams'];
     }
 
     private function setLoginAuthSql($pwdStr){
@@ -856,11 +860,11 @@ class ProfileManager{
         if($pwdStr) $this->authSql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
     }
 
-    public function setTokenAuthSql($token){
+    public function setTokenAuthSql(){
         $this->authSql = 'SELECT u.uid, u.firstname, u.lastname '.
             'FROM users AS u INNER JOIN userlogin AS ul ON u.uid = ul.uid '.
             'INNER JOIN useraccesstokens AS ut ON u.uid = ut.uid '.
-            'WHERE (ul.username = "'.$this->userName.'") AND (ut.token = "'.$token.'") ';
+            'WHERE (ul.username = "'.$this->userName.'") AND (ut.token = "'.$this->token.'") ';
     }
 
     public function setToken($token){
@@ -973,6 +977,7 @@ class ProfileManager{
     public function generateTokenPacket(){
         $pkArr = Array();
         $this->createToken();
+        $person = $this->getPerson();
         if($this->token){
             $sql = 'SELECT ul.role, ul.tablename, ul.tablepk, c.CollectionName, c.CollectionCode, c.InstitutionCode, fc.`Name`, fp.projname '.
                 'FROM userroles AS ul LEFT JOIN omcollections AS c ON ul.tablepk = c.CollID '.
@@ -1005,6 +1010,9 @@ class ProfileManager{
                 $pkArr['projects']['ProjAdmin'] = $this->getProjectArr();
             }
             $pkArr['uid'] = $this->uid;
+            $pkArr['firstname'] = $person->getFirstName();;
+            $pkArr['lastname'] = $person->getLastName();
+            $pkArr['email'] = $person->getEmail();
             $pkArr['token'] = $this->token;
         }
         return $pkArr;

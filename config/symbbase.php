@@ -26,7 +26,7 @@ if((isset($_COOKIE["SymbiotaCrumb"]) && (!isset($_REQUEST['submit']) || $_REQUES
         if($pHandler->setUserName($tokenArr[0])){
             $pHandler->setRememberMe(true);
             $pHandler->setToken($tokenArr[1]);
-            $pHandler->setTokenAuthSql($tokenArr[1]);
+            $pHandler->setTokenAuthSql();
             if(!$pHandler->authenticate()){
                 $pHandler->reset();
             }
