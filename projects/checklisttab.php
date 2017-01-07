@@ -1,17 +1,12 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/InventoryProjectManager.php');
+include_once($SERVER_ROOT.'/classes/InventoryProjectManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $pid = $_REQUEST["pid"]; 
 
 $projManager = new InventoryProjectManager();
 $projManager->setPid($pid);
-
-$isEditable = 0;
-if($isAdmin || (array_key_exists("ProjAdmin",$userRights) && in_array($pid,$userRights["ProjAdmin"]))){
-	$isEditable = 1;
-}
 
 ?>
 <div id="cltab">
@@ -29,7 +24,7 @@ if($isAdmin || (array_key_exists("ProjAdmin",$userRights) && in_array($pid,$user
 					}
 					?>
 				</select><br/>
-				<input type="hidden" name="proj" value="<?php echo $pid;?>">
+				<input type="hidden" name="pid" value="<?php echo $pid;?>">
 				<input type="submit" name="projsubmit" value="Add Checklist" />
 			</fieldset>
 		</form>
@@ -48,7 +43,7 @@ if($isAdmin || (array_key_exists("ProjAdmin",$userRights) && in_array($pid,$user
 					}
 					?>
 				</select><br/>
-				<input type="hidden" name="proj" value="<?php echo $pid;?>">
+				<input type="hidden" name="pid" value="<?php echo $pid;?>">
 				<input type="submit" name="projsubmit" value="Delete Checklist" />
 			</fieldset>
 		</form>

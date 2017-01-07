@@ -96,13 +96,13 @@ class InventoryProjectManager {
 	}
 	
 	public function getResearchChecklists(){
-		global $userRights;
+		global $USER_RIGHTS;
 		$returnArr = Array();
 		$sql = 'SELECT c.clid, c.name, c.latcentroid, c.longcentroid, c.access '.
 			'FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid '.
 			'WHERE (cpl.pid = '.$this->pid.') AND ((c.access != "private")';
-		if(array_key_exists('ClAdmin',$userRights)){
-			$sql .= ' OR (c.clid IN ('.implode(',',$userRights['ClAdmin']).'))) ';
+		if(array_key_exists('ClAdmin',$USER_RIGHTS)){
+			$sql .= ' OR (c.clid IN ('.implode(',',$USER_RIGHTS['ClAdmin']).'))) ';
 		}
 		else{
 			$sql .= ') ';
@@ -224,13 +224,13 @@ class InventoryProjectManager {
 
 	//Misc functions
 	public function getClAddArr(){
-		global $userRights;
+		global $USER_RIGHTS;
 		$returnArr = Array();
 		$sql = 'SELECT c.clid, c.name, c.access '.
 			'FROM fmchecklists c LEFT JOIN (SELECT clid FROM fmchklstprojlink WHERE (pid = '.$this->pid.')) pl ON c.clid = pl.clid '.
 			'WHERE (pl.clid IS NULL) AND (c.access = "public" ';
-		if(array_key_exists('ClAdmin',$userRights)){
-			$sql .= ' OR (c.clid IN ('.implode(',',$userRights['ClAdmin']).'))) ';
+		if(array_key_exists('ClAdmin',$USER_RIGHTS)){
+			$sql .= ' OR (c.clid IN ('.implode(',',$USER_RIGHTS['ClAdmin']).'))) ';
 		}
 		else{
 			$sql .= ') ';
