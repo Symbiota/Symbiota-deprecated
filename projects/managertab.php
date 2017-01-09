@@ -1,17 +1,12 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/InventoryProjectManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/InventoryProjectManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $pid = $_REQUEST["pid"]; 
 
 $projManager = new InventoryProjectManager();
 $projManager->setPid($pid);
-
-$isEditable = 0;
-if($isAdmin || (array_key_exists("ProjAdmin",$userRights) && in_array($pid,$userRights["ProjAdmin"]))){
-	$isEditable = 1;
-}
 
 ?>
 <div id="managertab">

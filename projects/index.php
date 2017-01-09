@@ -161,14 +161,13 @@ $projArr = $projManager->getProjectData();
 	$displayLeftMenu = (isset($projects_indexMenu)?$projects_indexMenu:"true");
 	include($SERVER_ROOT.'/header.php');
 	echo "<div class='navpath'>";
-	if(isset($projects_indexCrumbs)){
-		if($projects_indexCrumbs) echo $projects_indexCrumbs.' &gt;&gt;';
-		echo '<b><a href="index.php?pid='.$pid.'">'.$projArr['projname'].'</a></b>';
+	if(isset($projects_indexCrumbs) && $projArr){
+		if($projects_indexCrumbs) echo $projects_indexCrumbs.' &gt;&gt; ';
 	}
 	else{
 		echo "<a href='../index.php'>Home</a> &gt;&gt; ";
-		echo '<b><a href="index.php?pid='.$pid.'">'.$projArr['projname'].'</a></b>';
 	}
+	echo '<b><a href="index.php?pid='.$pid.'">'.($projArr?$projArr['projname']:'Inventory Project List').'</a></b>';
 	echo "</div>";
 	?>
 	
