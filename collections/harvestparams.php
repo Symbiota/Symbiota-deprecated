@@ -31,6 +31,19 @@ $collManager->reset();
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?var=1304"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var starrJson = '<?php echo $stArrSearchJson; ?>';
+            sessionStorage.jsoncollstarr = '<?php echo $stArrCollJson; ?>';
+            if(!starrJson && sessionStorage.jsonstarr){
+                document.resetform.starr.value = sessionStorage.jsonstarr;
+                document.resetform.jsoncollstarr.value = sessionStorage.jsoncollstarr;
+                document.resetform.submit();
+            }
+            sessionStorage.jsoncollstarr = '<?php echo $stArrCollJson; ?>';
+            //alert(sessionStorage.jsoncollstarr);
+        });
+    </script>
 </head>
 <body>
 
@@ -231,6 +244,13 @@ $collManager->reset();
 			<input type="hidden" name="usecookies" value="false" />
 			<input type="hidden" name="jsoncollstarr" value='<?php echo ($stArrCollJson?$stArrCollJson:''); ?>' />
 		</form>
+
+        <div style="display:none;">
+            <form name="resetform" id="resetform" action="harvestparams.php" method="post" onsubmit="">
+                <input type="hidden" name="jsoncollstarr" value='' />
+                <input type="hidden" name="starr" value='' />
+            </form>
+        </div>
 	</div>
 	<?php
 	include($serverRoot.'/footer.php');

@@ -9,14 +9,16 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
 $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
+$pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1;
 
 //Sanitation
 if(!is_numeric($taxonFilter)) $taxonFilter = 1;
 if(!is_numeric($cntPerPage)) $cntPerPage = 100;
 
-$pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
 $collManager = new OccurrenceListManager();
-$stArr = array();
+$collArray = Array();
+$collStArr = Array();
+$stArr = Array();
 $specOccJson = '';
 
 if($stArrCollJson && $stArrSearchJson){
@@ -30,13 +32,6 @@ elseif($stArrCollJson && !$stArrSearchJson){
 	$collStArr = json_decode($stArrCollJson, true);
 	$stArr = array_merge($collArray,$collStArr);
 	$stArrSearchJson = json_encode($collArray);
-}
-else{
-	$collArray = $collManager->getSearchTerms();
-	$collStArr = $collManager->getSearchTerms();
-	$stArr = array_merge($collArray,$collStArr);
-	$stArrSearchJson = json_encode($collArray);
-	$stArrCollJson = json_encode($collArray);
 }
 
 $stArrJson = json_encode($stArr);
@@ -87,11 +82,9 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	<script type="text/javascript">
 		$('html').hide();
 		$(document).ready(function() {
-			$('html').show();
-		});
+            $('html').show();
 
-		$(document).ready(function() {
-			$('#tabs').tabs({
+		    $('#tabs').tabs({
 				active: <?php echo $tabIndex; ?>,
 				beforeLoad: function( event, ui ) {
 					$(ui.panel).html("<p>Loading...</p>");
@@ -100,10 +93,22 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			var crumbs = document.getElementsByClassName('navpath')[0].getElementsByTagName('a');
 			for(var i = 0; i < crumbs.length; i++){
 				if (crumbs[i].getAttribute("href") == "harvestparams.php"){
-					crumbs[i].setAttribute('href','harvestparams.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
+					crumbs[i].setAttribute('href','harvestparams.php?usecookies=false');
 				}
 			}
-		});
+
+            var starrJson = <?php echo ($stArrSearchJson?"'".$stArrSearchJson."'":"''"); ?>;
+            var collJson = <?php echo ($stArrCollJson?"'".$stArrCollJson."'":"''"); ?>;
+            if(starrJson) {
+                sessionStorage.jsonstarr = '<?php echo $stArrSearchJson; ?>';
+            }
+            if((!starrJson && sessionStorage.jsonstarr) || (!collJson && sessionStorage.jsoncollstarr)){
+                document.resetform.starr.value = sessionStorage.jsonstarr;
+                document.resetform.jsoncollstarr.value = sessionStorage.jsoncollstarr;
+                document.resetform.submit();
+            }
+            sessionStorage.jsoncollstarr = '<?php echo $stArrCollJson; ?>';
+        });
 		
 		function addVoucherToCl(occidIn,clidIn,tidIn){
 			$.ajax({
@@ -267,7 +272,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			$lastPage = (int)($collManager->getRecordCnt() / $cntPerPage) + 1;
 			$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 			$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
-			$hrefPrefix = 'list.php?usecookies=false&starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';
+			$hrefPrefix = 'list.php?usecookies=false'.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';
 			$pageBar = '';
 			if($startPage > 1){
 				$pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='".$hrefPrefix."1'>".$LANG['PAGINATION_FIRST'].'</a></span>';
@@ -507,6 +512,15 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					</fieldset>
 				</div>
 			</form>
+
+            <div style="display:none;">
+                <form name="resetform" id="resetform" action="list.php?page=<?php echo $pageNumber; ?>" method="post" onsubmit="">
+                    <input type="hidden" name="jsoncollstarr" value='' />
+                    <input type="hidden" name="starr" value='' />
+                    <input type="hidden" name="taxonfilter" value='<?php echo $taxonFilter; ?>' />
+                    <input type="hidden" name="cntperpage" value='<?php echo $cntPerPage; ?>' />
+                </form>
+            </div>
 		</div>
 	</div>
 </div>
