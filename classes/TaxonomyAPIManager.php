@@ -25,7 +25,7 @@ class TaxonomyAPIManager{
         $retArr = Array();
         $sql = '';
 
- 	    $sql = 'SELECT DISTINCT t.SciName'.($this->hideAuth?'':', t.Author').', t.TID '.
+ 	    $sql = 'SELECT DISTINCT t.SciName, t.Author, t.TID '.
             'FROM taxa AS t ';
  	    if($this->taxAuthId){
             $sql .= 'INNER JOIN taxstatus AS ts ON t.tid = ts.tid ';
@@ -54,7 +54,9 @@ class TaxonomyAPIManager{
         $rs = $this->conn->query($sql);
         while ($r = $rs->fetch_object()){
             $sciName = $r->SciName.($this->hideAuth?'':' '.$r->Author);
-            $retArr[$sciName] = array('id' => $r->TID, 'value' => $sciName);
+            $retArr[$sciName]['id'] = $r->TID;
+            $retArr[$sciName]['value'] = $sciName;
+            $retArr[$sciName]['author'] = $r->Author;
         }
 
  	    return $retArr;

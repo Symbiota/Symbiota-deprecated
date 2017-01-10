@@ -72,6 +72,7 @@ $(document).ready(function() {
                     rlow: rankLow,
                     rhigh: rankHigh,
                     rlimit: rankLimit,
+                    hideauth: true,
                     limit: 20
 				}, response );
 			},

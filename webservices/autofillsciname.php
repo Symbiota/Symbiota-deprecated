@@ -7,7 +7,7 @@
  * ****  Input Variables  ********************************************
  *
  * term: User inputted string for which to auto-complete.
- * hideauth (optional): Hide authority from scientific name reutrn.
+ * hideauth (optional): Hide authority from label of scientific name reutrn.
  * hideprotected (optional): Hide taxa flagged as sensitive from scientific name return.
  * taid (optional): Taxonomic thesaurus ID from which to narrow scientific name return.
  * rlimit (optional): Rank ID for which to limit scientific name return.
@@ -22,6 +22,7 @@
  * Each scientific name contains a subarray with:
  *  id: Symbiota portal TID for that taxon.
  *  value: Suggested label for taxon (currently set to be same as index).
+ *  author: Authority for taxon.
  *
  */
 
