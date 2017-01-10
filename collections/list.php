@@ -272,7 +272,8 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			$lastPage = (int)($collManager->getRecordCnt() / $cntPerPage) + 1;
 			$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 			$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
-			$hrefPrefix = 'list.php?usecookies=false'.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';
+			$hrefPrefix = 'list.php?usecookies=false'.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'');
+            $hrefPrefix .= '&jsoncollstarr='.$stArrCollJson.'&starr='.$stArrSearchJson.'&page=';
 			$pageBar = '';
 			if($startPage > 1){
 				$pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='".$hrefPrefix."1'>".$LANG['PAGINATION_FIRST'].'</a></span>';

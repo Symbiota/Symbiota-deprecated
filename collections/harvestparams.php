@@ -40,8 +40,6 @@ $collManager->reset();
                 document.resetform.jsoncollstarr.value = sessionStorage.jsoncollstarr;
                 document.resetform.submit();
             }
-            sessionStorage.jsoncollstarr = '<?php echo $stArrCollJson; ?>';
-            //alert(sessionStorage.jsoncollstarr);
         });
     </script>
 </head>
