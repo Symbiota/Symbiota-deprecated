@@ -221,7 +221,7 @@ if($action){
 					</div>
 					<div style="margin-top:5px;">
 						<select id="taxontype" name="nametype" onchange="checkTaxonType();" >
-							<option id='sciname' value='1' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "2") echo "SELECTED"; ?> >Scientific Name</option>
+							<option id='sciname' value='2' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "2") echo "SELECTED"; ?> >Scientific Name</option>
 							<option id='commonname' value='3' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3") echo "SELECTED"; ?> >Common Name</option>
 						</select>
 						<input id="taxtp" name="taxtp" type="hidden" value="<?php echo (array_key_exists("taxtp",$previousCriteria)?$previousCriteria["taxtp"]:'2'); ?>" />
