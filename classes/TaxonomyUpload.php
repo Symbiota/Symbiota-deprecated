@@ -754,7 +754,7 @@ class TaxonomyUpload{
 		$sql3 = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '. 
 			'SELECT DISTINCT tidinterpreted, round(decimallatitude,3), round(decimallongitude,3) '. 
 			'FROM omoccurrences '.
-			'WHERE (tidinterpreted IS NOT NULL) AND (o.decimallatitude IS NOT NULL) AND (o.decimallongitude IS NOT NULL)';
+			'WHERE (tidinterpreted IS NOT NULL) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL)';
 		$this->conn->query($sql3);
 	}
 
