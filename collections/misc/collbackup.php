@@ -39,9 +39,9 @@ if($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$
 					</div>
 					<div style="float:left;height:50px">
 						<?php 
-						$cSet = str_replace('-','',strtolower($CHARSET));
+						//$cSet = str_replace('-','',strtolower($CHARSET));
 						?>
-						<input type="radio" name="cset" value="iso-8859-1" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
+						<input type="radio" name="cset" value="iso-8859-1" <?php echo (!$cSet || $cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
 						<input type="radio" name="cset" value="utf-8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
 					</div>
 					<div style="clear:both;">

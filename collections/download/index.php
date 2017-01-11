@@ -193,7 +193,8 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 							<td>
 								<div style="margin:10px 0px;">
 									<?php 
-									$cSet = strtolower($charset);
+									//$cSet = strtolower($CHARSET);
+									$cSet = 'iso-8859-1';
 									?>
 									<input type="radio" name="cset" value="iso-8859-1" <?php echo ($cSet=='iso-8859-1'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
 									<input type="radio" name="cset" value="utf-8" <?php echo ($cSet=='utf-8'?'checked':''); ?> /> UTF-8 (unicode)

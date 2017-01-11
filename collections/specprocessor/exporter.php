@@ -1,7 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
-include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -207,7 +206,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										<td>
 											<div style="margin:10px 0px;">
 												<?php 
-												$cSet = strtolower($charset);
+												//$cSet = strtolower($charset);
+												$cSet = 'iso-8859-1';
 												?>
 												<input type="radio" name="cset" value="iso-8859-1" <?php echo ($cSet=='iso-8859-1'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
 												<input type="radio" name="cset" value="utf-8" <?php echo ($cSet=='utf-8'?'checked':''); ?> /> UTF-8 (unicode)
@@ -524,7 +524,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									<td>
 										<div style="margin:10px 0px;">
 											<?php 
-											$cSet = strtolower($charset);
+											//$cSet = strtolower($charset);
+											$cSet = 'iso-8859-1';
 											?>
 											<input type="radio" name="cset" value="iso-8859-1" <?php echo ($cSet=='iso-8859-1'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
 											<input type="radio" name="cset" value="utf-8" <?php echo ($cSet=='utf-8'?'checked':''); ?> /> UTF-8 (unicode)
