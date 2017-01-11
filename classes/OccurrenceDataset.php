@@ -374,9 +374,11 @@ class OccurrenceDataset {
 			//Ouput file is a zip file
 			$includeIdent = (array_key_exists('identifications',$_POST)?1:0);
 			$dwcaHandler->setIncludeDets($includeIdent);
-			$images = (array_key_exists('images',$_POST)?1:0);
-			$dwcaHandler->setIncludeImgs($images);
-			
+			$includeImages = (array_key_exists('images',$_POST)?1:0);
+			$dwcaHandler->setIncludeImgs($includeImages);
+			$includeAttributes = (array_key_exists('attributes',$_POST)?1:0);
+			$dwcaHandler->setIncludeAttributes($includeAttributes);
+				
 			$outputFile = $dwcaHandler->createDwcArchive('webreq');
 			
 		}

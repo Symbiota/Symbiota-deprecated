@@ -1,5 +1,8 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverDetermination.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverImage.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverAttribute.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 class DwcArchiverOccurrence{
@@ -28,12 +31,12 @@ class DwcArchiverOccurrence{
 	private $occurrenceFieldArr = array();
 	private $determinationFieldArr = array();
 	private $imageFieldArr = array();
-	private $occurrenceTargetFieldArr = array();
-	private $determinationTargetFieldArr = array();
-	private $imageTargetFieldArr = array();
+	private $attributeFieldArr = array();
+	
 	private $securityArr = array();
 	private $includeDets = 1;
 	private $includeImgs = 1;
+	private $includeAttributes = 0;
 	private $redactLocalities = 1;
 	private $rareReaderArr = array();
 	private $charSetSource = '';
@@ -377,190 +380,6 @@ class DwcArchiverOccurrence{
 			$rs->free();
 		}
 		return $retStr;
-	}
-
-	private function initDeterminationArr(){
-		$detFieldArr['coreid'] = 'o.occid';
-		$detTermArr['identifiedBy'] = 'http://rs.tdwg.org/dwc/terms/identifiedBy';
-		$detFieldArr['identifiedBy'] = 'd.identifiedBy';
-		$detTermArr['identifiedByID'] = 'http://symbiota.org/terms/identifiedByID';
-		$detFieldArr['identifiedByID'] = 'd.idbyid';
-		$detTermArr['dateIdentified'] = 'http://rs.tdwg.org/dwc/terms/dateIdentified';
-		$detFieldArr['dateIdentified'] = 'd.dateIdentified';
-		$detTermArr['identificationQualifier'] = 'http://rs.tdwg.org/dwc/terms/identificationQualifier';
-		$detFieldArr['identificationQualifier'] = 'd.identificationQualifier';
-		$detTermArr['scientificName'] = 'http://rs.tdwg.org/dwc/terms/scientificName';
-		$detFieldArr['scientificName'] = 'd.sciName AS scientificName';
-		$detTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
-		$detFieldArr['tidInterpreted'] = 'd.tidinterpreted';
-		$detTermArr['identificationIsCurrent'] = 'http://symbiota.org/terms/identificationIsCurrent';
-		$detFieldArr['identificationIsCurrent'] = 'd.iscurrent';
-		$detTermArr['scientificNameAuthorship'] = 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship';
-		$detFieldArr['scientificNameAuthorship'] = 'd.scientificNameAuthorship';
-		$detTermArr['genus'] = 'http://rs.tdwg.org/dwc/terms/genus';
-		$detFieldArr['genus'] = 'CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus';
-		$detTermArr['specificEpithet'] = 'http://rs.tdwg.org/dwc/terms/specificEpithet';
-		$detFieldArr['specificEpithet'] = 'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet';
-		$detTermArr['taxonRank'] = 'http://rs.tdwg.org/dwc/terms/taxonRank';
-		$detFieldArr['taxonRank'] = 't.unitind3 AS taxonRank';
-		$detTermArr['infraspecificEpithet'] = 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet';
-		$detFieldArr['infraspecificEpithet'] = 't.unitname3 AS infraspecificEpithet';
-		$detTermArr['identificationReferences'] = 'http://rs.tdwg.org/dwc/terms/identificationReferences';
-		$detFieldArr['identificationReferences'] = 'd.identificationReferences';
-		$detTermArr['identificationRemarks'] = 'http://rs.tdwg.org/dwc/terms/identificationRemarks';
-		$detFieldArr['identificationRemarks'] = 'd.identificationRemarks';
-		$detTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
-		$detFieldArr['recordId'] = 'g.guid AS recordId';
-		$detTermArr['modified'] = 'http://purl.org/dc/terms/modified';
-		$detFieldArr['modified'] = 'd.initialTimeStamp AS modified';
-
-		$this->determinationFieldArr['terms'] = $this->trimDeterminationBySchemaType($detTermArr);
-		$this->determinationFieldArr['fields'] = $this->trimDeterminationBySchemaType($detFieldArr);
-	}
-	
-	private function trimDeterminationBySchemaType($detArr){
-		$trimArr = array();
-		if($this->schemaType == 'dwc'){
-			$trimArr = array('identifiedByID');
-			$trimArr = array('tidInterpreted');
-			$trimArr = array('identificationIsCurrent');
-		}
-		elseif($this->schemaType == 'symbiota'){
-			if(!$this->extended){
-				$trimArr = array('identifiedByID');
-				$trimArr = array('tidInterpreted');
-			}
-		}
-		elseif($this->schemaType == 'backup'){
-			$trimArr = array(); 
-		}
-		elseif($this->schemaType == 'coge'){
-			$trimArr = array(); 
-		}
-		return array_diff_key($detArr,array_flip($trimArr));
-	}
-
-	public function getSqlDeterminations(){
-		$sql = ''; 
-		$fieldArr = $this->determinationFieldArr['fields'];
-		if($fieldArr && $this->conditionSql){
-			$sqlFrag = '';
-			foreach($fieldArr as $fieldName => $colName){
-				if($colName) $sqlFrag .= ', '.$colName;
-			}
-			$sql = 'SELECT '.trim($sqlFrag,', ').
-				' FROM omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid '.
-				'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
-				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
-				'LEFT JOIN taxa t ON d.tidinterpreted = t.tid ';
-			if(strpos($this->conditionSql,'v.clid')){
-				//Search criteria came from custom search page
-				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
-			}
-			if(strpos($this->conditionSql,'p.point')){
-				//Search criteria came from map search page
-				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
-			}
-			if(strpos($this->conditionSql,'MATCH(f.recordedby)')){
-				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-			}
-			$sql .= $this->conditionSql.'AND d.appliedstatus = 1 '.
-				'ORDER BY o.collid';
-			//echo '<div>'.$sql.'</div>'; exit;
-		}
-		return $sql;
-	}
-
-	private function initImageArr(){
-		$imgFieldArr['coreid'] = 'o.occid';
-		$imgTermArr['identifier'] = 'http://purl.org/dc/terms/identifier';
-		$imgFieldArr['identifier'] = 'IFNULL(i.originalurl,i.url) as identifier';
-		$imgTermArr['accessURI'] = 'http://rs.tdwg.org/ac/terms/accessURI';
-		$imgFieldArr['accessURI'] = 'IFNULL(i.originalurl,i.url) as accessURI';
-		$imgTermArr['thumbnailAccessURI'] = 'http://rs.tdwg.org/ac/terms/thumbnailAccessURI';	
-		$imgFieldArr['thumbnailAccessURI'] = 'i.thumbnailurl as thumbnailAccessURI';
-		$imgTermArr['goodQualityAccessURI'] = 'http://rs.tdwg.org/ac/terms/goodQualityAccessURI';
-		$imgFieldArr['goodQualityAccessURI'] = 'i.url as goodQualityAccessURI';
-		$imgTermArr['rights'] = 'http://purl.org/dc/terms/rights';	
-		$imgFieldArr['rights'] = 'c.rights';
-		$imgTermArr['Owner'] = 'http://ns.adobe.com/xap/1.0/rights/Owner';	//Institution name
-		$imgFieldArr['Owner'] = 'IFNULL(c.rightsholder,CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")")) AS owner';
-		$imgTermArr['UsageTerms'] = 'http://ns.adobe.com/xap/1.0/rights/UsageTerms';	//Creative Commons BY-SA 3.0 license
-		$imgFieldArr['UsageTerms'] = 'i.copyright AS usageterms';
-		$imgTermArr['WebStatement'] = 'http://ns.adobe.com/xap/1.0/rights/WebStatement';	//http://creativecommons.org/licenses/by-nc-sa/3.0/us/
-		$imgFieldArr['WebStatement'] = 'c.accessrights AS webstatement';
-		$imgTermArr['caption'] = 'http://rs.tdwg.org/ac/terms/caption';	
-		$imgFieldArr['caption'] = 'i.caption';
-		$imgTermArr['comments'] = 'http://rs.tdwg.org/ac/terms/comments';	
-		$imgFieldArr['comments'] = 'i.notes';
-		$imgTermArr['providerManagedID'] = 'http://rs.tdwg.org/ac/terms/providerManagedID';	//GUID
-		$imgFieldArr['providerManagedID'] = 'g.guid AS providermanagedid';
-		$imgTermArr['MetadataDate'] = 'http://ns.adobe.com/xap/1.0/MetadataDate';	//timestamp
-		$imgFieldArr['MetadataDate'] = 'i.initialtimestamp AS metadatadate';
-		$imgTermArr['format'] = 'http://purl.org/dc/terms/format';		//jpg
-		$imgFieldArr['format'] = 'i.format';
-		$imgTermArr['associatedSpecimenReference'] = 'http://rs.tdwg.org/ac/terms/associatedSpecimenReference';	//reference url in portal
-		$imgFieldArr['associatedSpecimenReference'] = '';
-		$imgTermArr['type'] = 'http://purl.org/dc/terms/type';		//StillImage
-		$imgFieldArr['type'] = '';
-		$imgTermArr['subtype'] = 'http://rs.tdwg.org/ac/terms/subtype';		//Photograph
-		$imgFieldArr['subtype'] = '';
-		$imgTermArr['metadataLanguage'] = 'http://rs.tdwg.org/ac/terms/metadataLanguage';	//en
-		$imgFieldArr['metadataLanguage'] = '';
-
-		if($this->schemaType == 'backup'){
-			$imgFieldArr['rights'] = 'i.copyright';
-		}
-
-		$this->imageFieldArr['terms'] = $this->trimImageBySchemaType($imgTermArr);
-		$this->imageFieldArr['fields'] = $this->trimImageBySchemaType($imgFieldArr);
-	}
-
-	private function trimImageBySchemaType($imageArr){
-		$trimArr = array();
-		if($this->schemaType == 'backup'){
-			$trimArr = array('Owner', 'UsageTerms', 'WebStatement'); 
-		}
-		return array_diff_key($imageArr,array_flip($trimArr));
-	}
-
-	public function getSqlImages(){
-		$sql = ''; 
-		$fieldArr = $this->imageFieldArr['fields'];
-		if($fieldArr && $this->conditionSql){
-			$sqlFrag = '';
-			foreach($fieldArr as $fieldName => $colName){
-				if($colName) $sqlFrag .= ', '.$colName;
-			}
-			$sql = 'SELECT '.trim($sqlFrag,', ').
-				' FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'INNER JOIN omcollections c ON o.collid = c.collid '.
-				'INNER JOIN guidimages g ON i.imgid = g.imgid '.
-				'INNER JOIN guidoccurrences og ON o.occid = og.occid ';
-
-			if(strpos($this->conditionSql,'v.clid')){
-				//Search criteria came from custom search page
-				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
-			}
-			if(strpos($this->conditionSql,'p.point')){
-				//Search criteria came from map search page
-				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
-			}
-			if(strpos($this->conditionSql,'MATCH(f.recordedby)')){
-				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-			}
-			$sql .= $this->conditionSql;
-			if($this->redactLocalities){
-				if($this->rareReaderArr){
-					$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
-				}
-				else{
-					$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
-				}
-			}
-		}
-		//echo $sql; exit;
-		return $sql;
 	}
 
 	public function setTargetPath($tp = ''){
@@ -1059,11 +878,8 @@ class DwcArchiverOccurrence{
 		//Populate Upper Taxonomic data
 		$this->setUpperTaxonomy();
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			if(!$this->serverDomain) $this->setServerDomain();
-			$urlPathPrefix = '';
-			if($this->serverDomain){
-				$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-			}
+			$this->setServerDomain();
+			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
 			$hasRecords = false;
 			$cnt = 0;
 			while($r = $rs->fetch_assoc()){
@@ -1209,6 +1025,12 @@ class DwcArchiverOccurrence{
 				$zipArchive->addFile($this->targetPath.$this->ts.'-images'.$this->fileExt);
 				$zipArchive->renameName($this->targetPath.$this->ts.'-images'.$this->fileExt,'images'.$this->fileExt);
 			}
+			//Occurrence Attributes
+			if($this->includeAttributes){
+				$this->writeAttributeFile();
+				$zipArchive->addFile($this->targetPath.$this->ts.'-attr'.$this->fileExt);
+				$zipArchive->renameName($this->targetPath.$this->ts.'-attr'.$this->fileExt,'measurementOrFact'.$this->fileExt);
+			}
 			//Meta file
 			$this->writeMetaFile();
 			$zipArchive->addFile($this->targetPath.$this->ts.'-meta.xml');
@@ -1222,6 +1044,7 @@ class DwcArchiverOccurrence{
 			unlink($this->targetPath.$this->ts.'-occur'.$this->fileExt);
 			if($this->includeDets) unlink($this->targetPath.$this->ts.'-det'.$this->fileExt);
 			if($this->includeImgs) unlink($this->targetPath.$this->ts.'-images'.$this->fileExt);
+			if($this->includeAttributes) unlink($this->targetPath.$this->ts.'-attr'.$this->fileExt);
 			unlink($this->targetPath.$this->ts.'-meta.xml');
 			if($this->schemaType == 'dwc'){
 				rename($this->targetPath.$this->ts.'-eml.xml',$this->targetPath.str_replace('.zip','.eml',$fileName));
@@ -1293,24 +1116,24 @@ class DwcArchiverOccurrence{
 		$rootElem->appendChild($coreElem);
 
 		//Identification extension
-		$extElem1 = $newDoc->createElement('extension');
-		$extElem1->setAttribute('encoding',$this->charSetOut);
-		$extElem1->setAttribute('fieldsTerminatedBy',$this->delimiter);
-		$extElem1->setAttribute('linesTerminatedBy','\n');
-		$extElem1->setAttribute('fieldsEnclosedBy','"');
-		$extElem1->setAttribute('ignoreHeaderLines','1');
-		$extElem1->setAttribute('rowType','http://rs.tdwg.org/dwc/terms/Identification');
-
-		$filesElem1 = $newDoc->createElement('files');
-		$filesElem1->appendChild($newDoc->createElement('location','identifications'.$this->fileExt));
-		$extElem1->appendChild($filesElem1);
-		
-		$coreIdElem1 = $newDoc->createElement('coreid');
-		$coreIdElem1->setAttribute('index','0');
-		$extElem1->appendChild($coreIdElem1);
-		
-		//List identification fields
 		if($this->includeDets){
+			$extElem1 = $newDoc->createElement('extension');
+			$extElem1->setAttribute('encoding',$this->charSetOut);
+			$extElem1->setAttribute('fieldsTerminatedBy',$this->delimiter);
+			$extElem1->setAttribute('linesTerminatedBy','\n');
+			$extElem1->setAttribute('fieldsEnclosedBy','"');
+			$extElem1->setAttribute('ignoreHeaderLines','1');
+			$extElem1->setAttribute('rowType','http://rs.tdwg.org/dwc/terms/Identification');
+	
+			$filesElem1 = $newDoc->createElement('files');
+			$filesElem1->appendChild($newDoc->createElement('location','identifications'.$this->fileExt));
+			$extElem1->appendChild($filesElem1);
+			
+			$coreIdElem1 = $newDoc->createElement('coreid');
+			$coreIdElem1->setAttribute('index','0');
+			$extElem1->appendChild($coreIdElem1);
+			
+			//List identification fields
 			$detCnt = 1;
 			$termArr = $this->determinationFieldArr['terms'];
 			foreach($termArr as $k => $v){
@@ -1354,6 +1177,36 @@ class DwcArchiverOccurrence{
 			$rootElem->appendChild($extElem2);
 		}
 		
+			//Image extension
+		if($this->includeAttributes){
+			$extElem3 = $newDoc->createElement('extension');
+			$extElem3->setAttribute('encoding',$this->charSetOut);
+			$extElem3->setAttribute('fieldsTerminatedBy',$this->delimiter);
+			$extElem3->setAttribute('linesTerminatedBy','\n');
+			$extElem3->setAttribute('fieldsEnclosedBy','"');
+			$extElem3->setAttribute('ignoreHeaderLines','1');
+			$extElem3->setAttribute('rowType','http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact');
+
+			$filesElem3 = $newDoc->createElement('files');
+			$filesElem3->appendChild($newDoc->createElement('location','measurementOrFact'.$this->fileExt));
+			$extElem3->appendChild($filesElem3);
+
+			$coreIdElem3 = $newDoc->createElement('coreid');
+			$coreIdElem3->setAttribute('index','0');
+			$extElem3->appendChild($coreIdElem3);
+			
+			$mofCnt = 1;
+			$termArr = $this->attributeFieldArr['terms'];
+			foreach($termArr as $k => $v){
+				$fieldElem = $newDoc->createElement('field');
+				$fieldElem->setAttribute('index',$mofCnt);
+				$fieldElem->setAttribute('term',$v);
+				$extElem3->appendChild($fieldElem);
+				$mofCnt++;
+			}
+			$rootElem->appendChild($extElem3);
+		}
+		
 		$newDoc->save($this->targetPath.$this->ts.'-meta.xml');
 		
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
@@ -1361,11 +1214,8 @@ class DwcArchiverOccurrence{
 
 	private function getEmlArr(){
 		
-		if(!$this->serverDomain) $this->setServerDomain();
-		$urlPathPrefix = '';
-		if($this->serverDomain){
-			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-		}
+		$this->setServerDomain();
+		$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
 		$localDomain = $this->serverDomain;
 		
 		$emlArr = array();
@@ -1703,7 +1553,7 @@ class DwcArchiverOccurrence{
 		$metaElem = $newDoc->createElement('metadata');
 		$metaElem->appendChild($symbElem);
 		if($this->schemaType == 'coge' && $this->geolocateVariables){
-			if(!$this->serverDomain) $this->setServerDomain();
+			$this->setServerDomain();
 			$urlPathPrefix = '';
 			if($this->serverDomain){
 				$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
@@ -1802,11 +1652,8 @@ class DwcArchiverOccurrence{
 		
 		//echo $sql; exit;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			if(!$this->serverDomain) $this->setServerDomain();
-			$urlPathPrefix = '';
-			if($this->serverDomain){
-				$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-			}
+			$this->setServerDomain();
+			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
 			
 			while($r = $rs->fetch_assoc()){
 				//Set occurrence GUID based on GUID target
@@ -1906,13 +1753,13 @@ class DwcArchiverOccurrence{
 		}
 		
 		if(!$this->determinationFieldArr){
-			$this->initDeterminationArr();
+			$this->determinationFieldArr = DwcArchiverDetermination::getDeterminationArr($this->schemaType,$this->extended);
 		}
 		//Output header
 		$this->writeOutRecord($fh,array_keys($this->determinationFieldArr['fields']));
 		
 		//Output records
-		$sql = $this->getSqlDeterminations();
+		$sql = DwcArchiverDetermination::getSqlDeterminations($this->determinationFieldArr['fields'],$this->conditionSql);
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
 				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
@@ -1940,22 +1787,17 @@ class DwcArchiverOccurrence{
 			return false;
 		}
 
-		if(!$this->imageFieldArr){
-			$this->initImageArr();
-		}
+		if(!$this->imageFieldArr) $this->imageFieldArr = DwcArchiverImage::getImageArr($this->schemaType);
 		
 		//Output header
 		$this->writeOutRecord($fh,array_keys($this->imageFieldArr['fields']));
 		
 		//Output records
-		$sql = $this->getSqlImages();
+		$sql = DwcArchiverImage::getSqlImages($this->imageFieldArr['fields'], $this->conditionSql, $this->redactLocalities, $this->rareReaderArr);
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			
-			if(!$this->serverDomain) $this->setServerDomain();
-			$urlPathPrefix = '';
-			if($this->serverDomain){
-				$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-			}
+			$this->setServerDomain();
+			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
 			
 			$localDomain = '';
 			if(isset($GLOBALS['IMAGE_DOMAIN']) && $GLOBALS['IMAGE_DOMAIN']){
@@ -2034,7 +1876,40 @@ class DwcArchiverOccurrence{
 		
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
-	
+
+	private function writeAttributeFile(){
+		$this->logOrEcho("Creating occurrence Attributes file as MeasurementsOrFact extension (".date('h:i:s A').")... ");
+		$fh = fopen($this->targetPath.$this->ts.'-attr'.$this->fileExt, 'w');
+		if(!$fh){
+			$this->logOrEcho('ERROR establishing output file ('.$filePath.'), perhaps target folder is not readable by web server.');
+			return false;
+		}
+
+		if(!$this->attributeFieldArr) $this->attributeFieldArr = DwcArchiverAttribute::getFieldArr();
+
+		//Output header
+		$this->writeOutRecord($fh,array_keys($this->attributeFieldArr['fields']));
+
+		//Output records
+		$sql = DwcArchiverAttribute::getSql($this->attributeFieldArr['fields'],$this->conditionSql);
+		//echo $sql; exit;
+		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+			while($r = $rs->fetch_assoc()){
+				$this->encodeArr($r);
+				$this->addcslashesArr($r);
+				$this->writeOutRecord($fh,$r);
+			}
+			$rs->free();
+		}
+		else{
+			$this->logOrEcho("ERROR creating attribute (MeasurementOrFact file: ".$this->conn->error."\n");
+			$this->logOrEcho("\tSQL: ".$sql."\n");
+		}
+
+		fclose($fh);
+    	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
+	}
+
 	private function writeOutRecord($fh,$outputArr){
 		if($this->delimiter == ","){
 			fputcsv($fh, $outputArr);
@@ -2092,11 +1967,9 @@ class DwcArchiverOccurrence{
 		$titleElem->appendChild($newDoc->createTextNode($GLOBALS['DEFAULT_TITLE'].' Darwin Core Archive rss feed'));
 		$channelElem->appendChild($titleElem);
 
-		if(!$this->serverDomain) $this->setServerDomain();
-		$urlPathPrefix = '';
-		if($this->serverDomain){
-			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-		}
+		$this->setServerDomain();
+		$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
+
 		$localDomain = $this->serverDomain;
 		
 		$linkElem = $newDoc->createElement('link');
@@ -2373,6 +2246,10 @@ class DwcArchiverOccurrence{
 		$this->includeImgs = $includeImgs;
 	}
 	
+	public function setIncludeAttributes($include){
+		$this->includeAttributes = $include;
+	}
+	
 	public function setRedactLocalities($redact){
 		$this->redactLocalities = $redact;
 	}
@@ -2397,7 +2274,7 @@ class DwcArchiverOccurrence{
 		$this->geolocateVariables = $geolocateArr;
 	}
 	
-	private function setServerDomain($domain = ''){
+	public function setServerDomain($domain = ''){
 		if($domain){
 			$this->serverDomain = $domain;
 		}

@@ -84,7 +84,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 					return false;
 				}
 				if(f.fieldname.value == ""){
-					alert("A target field must be selected");
+					alert("A source field must be selected");
 					return false;
 				}
 				return true;
@@ -157,7 +157,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 							</div>
 							<div>
 								<select name="fieldname">
-									<option value="">Select Target Field (required)</option>
+									<option value="">Select Source Field (required)</option>
 									<option value="">------------------------------------</option>
 									<?php 
 									foreach($fieldArr as $k => $fName){
@@ -193,7 +193,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 							<legend><b><?php echo $fieldArr[$fieldName]; ?></b></legend>
 							<form name="miningform" method="post" action="attributemining.php" onsubmit="return verifyMiningForm(this)">
 								<div style="margin:5px;">
-									<b>Select Target Field Value(s)</b> - hold down control or shift buttons to select more than one value<br/>
+									<b>Select Source Field Value(s)</b> - hold down control or shift buttons to select more than one value<br/>
 									<select name="fieldvalue[]" size="15" multiple="multiple" style="width:100%">
 										<?php 
 										foreach($valueArr as $v){

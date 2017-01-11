@@ -476,7 +476,10 @@ if($traitID){
 					<?php
 				}
 				else{
-					echo '<div style="margin:50px;color:red;font-weight:bold;font-size:150%">No images available matching taxon search criteria</div>';
+					if($submitForm)
+						echo '<div style="margin:50px;color:red;font-weight:bold;font-size:140%">No images available matching taxon search criteria</div>';
+					else 
+						echo '<div style="margin:50px;font-weight:bold;font-size:140%">Select a trait and submit filter in the form to the right to display images that have not yet been scored</div>';
 				}
 				?>
 			</div>

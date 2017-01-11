@@ -30,6 +30,7 @@ if($collid && is_numeric($collid)){
 		$dwcaHandler->setRedactLocalities(0);
 		$dwcaHandler->setIncludeDets(0);
 		$dwcaHandler->setIncludeImgs(0);
+		$dwcaHandler->setIncludeAttributes(0);
 		$dwcaHandler->addCondition('decimallatitude','NULL');
 		$dwcaHandler->addCondition('decimallongitude','NULL');
 		$dwcaHandler->addCondition('catalognumber','NOTNULL');

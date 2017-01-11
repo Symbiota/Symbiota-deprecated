@@ -34,6 +34,7 @@ if($schema == "backup"){
 			$dwcaHandler->setVerbose(0);
 			$dwcaHandler->setIncludeDets(1);
 			$dwcaHandler->setIncludeImgs(1);
+			//$dwcaHandler->setIncludeAttributes(1);
 			$dwcaHandler->setRedactLocalities(0);
 			$dwcaHandler->setCollArr($collid);
 			
@@ -125,6 +126,7 @@ else{
 			$dwcaHandler->setRedactLocalities(0);
 			$dwcaHandler->setIncludeDets(0);
 			$dwcaHandler->setIncludeImgs(0);
+			$dwcaHandler->setIncludeAttributes(0);
 			$dwcaHandler->addCondition('decimallatitude','NULL');
 			$dwcaHandler->addCondition('decimallongitude','NULL');
 			$dwcaHandler->addCondition('catalognumber','NOTNULL');
@@ -177,9 +179,11 @@ else{
 			//Ouput file is a zip file
 			$includeIdent = (array_key_exists('identifications',$_POST)?1:0);
 			$dwcaHandler->setIncludeDets($includeIdent);
-			$images = (array_key_exists('images',$_POST)?1:0);
-			$dwcaHandler->setIncludeImgs($images);
-			
+			$includeImages = (array_key_exists('images',$_POST)?1:0);
+			$dwcaHandler->setIncludeImgs($includeImages);
+			$includeAttributes = (array_key_exists('attributes',$_POST)?1:0);
+			$dwcaHandler->setIncludeAttributes($includeAttributes);
+
 			$outputFile = $dwcaHandler->createDwcArchive('webreq');
 			
 		}
