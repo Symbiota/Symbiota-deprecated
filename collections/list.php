@@ -29,9 +29,11 @@ if($stArrCollJson && $stArrSearchJson){
 }
 elseif($stArrCollJson && !$stArrSearchJson){
 	$collArray = $collManager->getSearchTerms();
-	$collStArr = json_decode($stArrCollJson, true);
-	$stArr = array_merge($collArray,$collStArr);
-	$stArrSearchJson = json_encode($collArray);
+	if($collArray){
+        $collStArr = json_decode($stArrCollJson, true);
+        $stArr = array_merge($collArray,$collStArr);
+        $stArrSearchJson = json_encode($collArray);
+    }
 }
 
 $stArrJson = json_encode($stArr);
