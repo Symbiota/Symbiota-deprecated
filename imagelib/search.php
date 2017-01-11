@@ -24,7 +24,7 @@ $imageArr = Array();
 $taxaList = Array();
 $jsonStArr = '';
 
-if($stArrJson){
+if($stArrJson && !array_key_exists('db',$_REQUEST)){
 	$stArrJson = str_replace( "'", '"',$stArrJson);
 	$stArr = json_decode($stArrJson, true);
 }
@@ -52,7 +52,7 @@ if($action){
 			$imgLibManager->setSearchTermsArr($stArr);
 		}
 		else{
-			$imgLibManager->readRequestVariables();
+            $imgLibManager->readRequestVariables();
 			$stArr = $imgLibManager->getSearchTermsArr();
 		}
 		$sqlWhere = $imgLibManager->getSqlWhere();
@@ -342,7 +342,7 @@ if($action){
 						?>
 						<div id="specobsdiv">
 							<div style="margin:0px 0px 10px 20px;">
-								<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" checked />
+								<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
 								Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 							</div>
 							<?php 
