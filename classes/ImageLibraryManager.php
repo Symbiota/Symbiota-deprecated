@@ -487,7 +487,7 @@ class ImageLibraryManager{
 					//Class, order, or other higher rank
 					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
-						$sqlWhereTaxa = 'OR (ts.tidaccepted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
+						$sqlWhereTaxa = 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
 					}
 					if($this->taxaSearchType == 2){
 						$sqlWhereTaxa .= "OR (t.sciname LIKE '".$key."%') ";
@@ -511,7 +511,7 @@ class ImageLibraryManager{
 						}
 						if($famArr){
 							$famArr = array_unique($famArr);
-							$sqlWhereTaxa .= 'OR (ts.family IN("'.implode('","',$famArr).'")) ';
+							$sqlWhereTaxa .= 'OR (o.family IN("'.implode('","',$famArr).'")) ';
 						}
 						if(array_key_exists("scinames",$valueArray)){
 							foreach($valueArray["scinames"] as $sciName){
@@ -530,11 +530,11 @@ class ImageLibraryManager{
 							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2){
 								foreach($synArr as $synTid => $sciName){ 
 									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
-										$sqlWhereTaxa .= "OR (ts.family = '".$sciName."') ";
+										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
 									}
 								}
 							}
-							$sqlWhereTaxa .= 'OR (ts.tidaccepted IN('.implode(',',array_keys($synArr)).')) ';
+							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',array_keys($synArr)).')) ';
 						}
 					}
 				}
