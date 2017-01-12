@@ -582,7 +582,6 @@ class ImageLibraryManager{
 		$retStr = '';
 		if($sqlWhere){
 			$retStr = 'WHERE '.substr($sqlWhere,4);
-			$retStr .= " AND (ts.taxauthid = 1) ";
 		}
 		else{
 			//Make the sql valid, but return nothing
@@ -597,11 +596,10 @@ class ImageLibraryManager{
 		if(!$this->recordCount){
 			$this->setRecordCnt($taxon,$sqlWhere);
 		}
-		$sql = 'SELECT DISTINCT i.imgid, ts.tidaccepted, t.tid, t.sciname, i.url, i.thumbnailurl, i.originalurl, '.
+		$sql = 'SELECT DISTINCT i.imgid, o.tidinterpreted, t.tid, t.sciname, i.url, i.thumbnailurl, i.originalurl, '.
 			'u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as photographer, i.caption, '.
 			'o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode '.
 			'FROM images AS i LEFT JOIN taxa t ON i.tid = t.tid '.
-			'LEFT JOIN taxstatus AS ts ON t.tid = ts.tid '.
 			'LEFT JOIN users AS u ON i.photographeruid = u.uid '.
 			'LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
 			'LEFT JOIN omcollections AS c ON o.collid = c.collid ';
@@ -632,7 +630,7 @@ class ImageLibraryManager{
 		while($r = $result->fetch_object()){
 			$imgId = $r->imgid;
 			$retArr[$imgId]['imgid'] = $r->imgid;
-			$retArr[$imgId]['tidaccepted'] = $r->tidaccepted;
+			$retArr[$imgId]['tidaccepted'] = $r->tidinterpreted;
 			$retArr[$imgId]['tid'] = $r->tid;
 			$retArr[$imgId]['sciname'] = $r->sciname;
 			$retArr[$imgId]['url'] = $r->url;
@@ -657,7 +655,7 @@ class ImageLibraryManager{
 			$sql = '';
 			if(array_key_exists("imagecount",$this->searchTermsArr)&&$this->searchTermsArr["imagecount"]){
 				if($this->searchTermsArr["imagecount"] == 'taxon'){
-					$sql = "SELECT COUNT(DISTINCT ts.tidaccepted) AS cnt ";
+					$sql = "SELECT COUNT(DISTINCT o.tidinterpreted) AS cnt ";
 				}
 				elseif($this->searchTermsArr["imagecount"] == 'specimen'){
 					$sql = "SELECT COUNT(DISTINCT o.occid) AS cnt ";
@@ -670,7 +668,6 @@ class ImageLibraryManager{
 				$sql = "SELECT COUNT(i.imgid) AS cnt ";
 			}
 			$sql .= 'FROM images AS i LEFT JOIN taxa t ON i.tid = t.tid '.
-				'LEFT JOIN taxstatus AS ts ON t.tid = ts.tid '.
 				'LEFT JOIN omoccurrences AS o ON i.occid = o.occid ';
 			if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
 				$sql .= 'LEFT JOIN imagetag AS it ON i.imgid = it.imgid ';
