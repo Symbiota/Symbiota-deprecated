@@ -204,7 +204,7 @@ class OccurrenceAttributes extends Manager {
 		$sql = 'SELECT traitid, stateid, statename, description, notes, refurl '.
 			'FROM tmstates '.
 			'WHERE traitid IN('.implode(',',array_keys($this->traitArr)).') '.
-			'ORDER BY statecode, sortseq ';
+			'ORDER BY sortseq, statecode ';
 		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
