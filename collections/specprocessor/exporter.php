@@ -446,6 +446,51 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										</div> 
 									</td>
 								</tr>
+								<?php 
+								/*
+								if($traitArr = $dlManager->getAttributeTraits()){
+									?>
+									<tr>
+										<td valign="top">
+											<div style="margin:10px;">
+												<b>Occurrence Trait<br/>Filter:</b>
+											</div> 
+										</td>
+										<td>
+											<div style="margin:10px;">
+												<select name="traitid">
+													<option value="0">Select Trait</option>
+													<option value="0">--------------------------</option>
+													<?php 
+														foreach($traitArr as $traitID => $tArr){
+															echo '<option value="'.$traitID.'">'.$tArr['name'].' [ID:'.$traitID.']</option>';
+														}
+													?>
+												</select> 
+											</div>
+											<div style="margin:10px;">
+												-- or select a specific Attribute State --
+											</div>
+											<div style="margin:10px;">
+												<select name="stateid">
+													<option value="0">Select State</option>
+													<option value="0">--------------------------</option>
+													<?php 
+													foreach($traitArr as $traitID => $tArr){
+														$stateArr = $tArr['state'];
+														foreach($stateArr as $stateID => $stateName){
+															echo '<option value="'.$stateID.'">'.$tArr['name'].': '.$stateName.'</option>';
+														}
+													}
+													?>
+												</select>
+											</div>
+										</td>
+									</tr>
+									<?php 
+								}
+								*/
+								?>
 								<tr>
 									<td valign="top">
 										<div style="margin:10px;">
@@ -486,6 +531,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										<div style="margin:10px 0px;">
 											<input type="checkbox" name="identifications" value="1" onchange="extensionSelected(this)" checked /> include Determination History<br/>
 											<input type="checkbox" name="images" value="1" onchange="extensionSelected(this)" checked /> include Image Records<br/>
+											<!--  <input type="checkbox" name="attributes" value="1" onchange="extensionSelected(this)" checked /> include Occurrence Trait Attributes (MeasurementOrFact extension)<br/>  -->
 											*Output must be a compressed archive 
 										</div>
 									</td>

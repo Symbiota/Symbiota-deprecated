@@ -386,66 +386,6 @@ xmlwriter_end_attribute($xml_resource);
 		return $newDoc->saveXML();
 	}
 
-	//General setter, getters, and other configurations
-	public function setSchemaType($t){
-		$this->schemaType = $t;
-	}
-
-	public function setExtended($e){
-		$this->extended = $e;
-	}
-
-	public function setDelimiter($d){
-		if($d == 'tab' || $d == "\t"){
-			$this->delimiter = "\t";
-		}
-		elseif($d == 'csv' || $d == 'comma' || $d == ','){
-			$this->delimiter = ",";
-		}
-		else{
-			$this->delimiter = $d;
-		}
-	}
-	
-	private function getContentType(){
-		if($this->zipFile){
-			return 'application/zip; charset='.$this->charSetOut;
-		}
-		elseif($this->delimiter == 'comma' || $this->delimiter == ','){
-			return 'text/csv; charset='.$this->charSetOut;
-		}
-		else{
-			return 'text/html; charset='.$this->charSetOut;
-		}
-	}
-	
-	public function setCharSetOut($cs){
-		$cs = strtoupper($cs);
-		if($cs == 'ISO-8859-1' || $cs == 'UTF-8'){
-			$this->charSetOut = $cs;
-		}
-	}
-	
-	public function setZipFile($c){
-		$this->zipFile = $c;
-	}
-
-	public function getErrorArr(){
-		return $this->errorArr;
-	}
-	
-	public function setRedactLocalities($cond){
-		if($cond == 0 || $cond === false){
-			$this->redactLocalities = false;
-		}
-	}
-	
-	public function setTaxonFilter($filter){
-		if(is_numeric($filter)){
-			$this->taxonFilter = $filter;
-		}
-	}
-
 	public function setSqlWhere($sqlStr){
 		$this->sqlWhere = $sqlStr;
 	}
@@ -671,7 +611,81 @@ xmlwriter_end_attribute($xml_resource);
 		//Get all active processing statuses and then merge all extra statuses that may exists for one reason or another
 		return array_merge(array_intersect($templateArr,$psArr),array_diff($psArr,$templateArr));
 	}
+
+	public function getAttributeTraits(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT t.traitid, t.traitname, s.stateid, s.statename '.
+			'FROM tmtraits t INNER JOIN tmstates s ON t.traitid = s.traitid '.
+			'INNER JOIN tmattributes a ON s.stateid = a.stateid';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->traitid]['name'] = $r->traitname;
+			$retArr[$r->traitid]['state'][$r->stateid] = $r->statename;
+		}
+		$rs->free();
+		return $retArr;
+	}
 	
+	//General setter, getters, and other configurations
+	public function setSchemaType($t){
+		$this->schemaType = $t;
+	}
+
+	public function setExtended($e){
+		$this->extended = $e;
+	}
+
+	public function setDelimiter($d){
+		if($d == 'tab' || $d == "\t"){
+			$this->delimiter = "\t";
+		}
+		elseif($d == 'csv' || $d == 'comma' || $d == ','){
+			$this->delimiter = ",";
+		}
+		else{
+			$this->delimiter = $d;
+		}
+	}
+	
+	private function getContentType(){
+		if($this->zipFile){
+			return 'application/zip; charset='.$this->charSetOut;
+		}
+		elseif($this->delimiter == 'comma' || $this->delimiter == ','){
+			return 'text/csv; charset='.$this->charSetOut;
+		}
+		else{
+			return 'text/html; charset='.$this->charSetOut;
+		}
+	}
+	
+	public function setCharSetOut($cs){
+		$cs = strtoupper($cs);
+		if($cs == 'ISO-8859-1' || $cs == 'UTF-8'){
+			$this->charSetOut = $cs;
+		}
+	}
+	
+	public function setZipFile($c){
+		$this->zipFile = $c;
+	}
+
+	public function getErrorArr(){
+		return $this->errorArr;
+	}
+	
+	public function setRedactLocalities($cond){
+		if($cond == 0 || $cond === false){
+			$this->redactLocalities = false;
+		}
+	}
+	
+	public function setTaxonFilter($filter){
+		if(is_numeric($filter)){
+			$this->taxonFilter = $filter;
+		}
+	}
+
 	//Misc functions
 	private function stripSensitiveFields(&$row){
 		if($row["localitySecurity"] == 1 && $this->redactLocalities && !in_array($row["collid"],$this->rareReaderArr)){

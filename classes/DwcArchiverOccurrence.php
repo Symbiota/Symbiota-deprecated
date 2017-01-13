@@ -349,18 +349,7 @@ class DwcArchiverOccurrence{
 			$sql .= ' FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
-			if(strpos($this->conditionSql,'v.clid')){
-				//Search criteria came from custom search page
-				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
-			}
-			if(strpos($this->conditionSql,'p.point')){
-				//Search criteria came from map search page
-				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
-			}
-			if(strpos($this->conditionSql,'MATCH(f.recordedby)')){
-				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-			}
-			$sql .= $this->conditionSql;
+			$sql .= $this->addTableJoins().$this->conditionSql;
 			if($fullSql) $sql .= ' ORDER BY o.collid'; 
 			//echo '<div>'.$sql.'</div>'; exit;
 		}
@@ -498,7 +487,7 @@ class DwcArchiverOccurrence{
 	public function setCustomWhereSql($sql){
 		$this->customWhereSql = $sql;
 	}
-	
+
 	public function addCondition($field, $cond, $value = ''){
 		//Sanitation
 		$cond = strtoupper(trim($cond));
@@ -517,35 +506,43 @@ class DwcArchiverOccurrence{
 		$sqlFrag = '';
 		if($this->conditionArr){
 			foreach($this->conditionArr as $field => $condArr){
-				$sqlFrag2 = '';
-				foreach($condArr as $cond => $valueArr){
-					if($cond == 'NULL'){
-						$sqlFrag2 .= 'OR o.'.$field.' IS NULL ';
-					}
-					elseif($cond == 'NOTNULL'){
-						$sqlFrag2 .= 'OR o.'.$field.' IS NOT NULL ';
-					}
-					elseif($cond == 'EQUALS'){
-						$sqlFrag2 .= 'OR o.'.$field.' IN("'.implode('","',$valueArr).'") ';
-					}
-					else{
-						foreach($valueArr as $value){
-							if($cond == 'STARTS'){
-								$sqlFrag2 .= 'OR o.'.$field.' LIKE "'.$value.'%" ';
-							}
-							elseif($cond == 'LIKE'){ 
-								$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
-							}
-							elseif($cond == 'LESSTHAN'){ 
-								$sqlFrag2 .= 'OR o.'.$field.' < "'.$value.'" ';
-							}
-							elseif($cond == 'GREATERTHAN'){ 
-								$sqlFrag2 .= 'OR o.'.$field.' > "'.$value.'" ';
+				if($field == 'stateid'){
+					$sqlFrag .= 'AND (att.stateid = '.$condArr['EQUALS'][0].') ';
+				}
+				elseif($field == 'traitid'){
+					$sqlFrag .= 'AND (tmstates.traitid = '.$condArr['EQUALS'][0].') ';
+				}
+				else{
+					$sqlFrag2 = '';
+					foreach($condArr as $cond => $valueArr){
+						if($cond == 'NULL'){
+							$sqlFrag2 .= 'OR o.'.$field.' IS NULL ';
+						}
+						elseif($cond == 'NOTNULL'){
+							$sqlFrag2 .= 'OR o.'.$field.' IS NOT NULL ';
+						}
+						elseif($cond == 'EQUALS'){
+							$sqlFrag2 .= 'OR o.'.$field.' IN("'.implode('","',$valueArr).'") ';
+						}
+						else{
+							foreach($valueArr as $value){
+								if($cond == 'STARTS'){
+									$sqlFrag2 .= 'OR o.'.$field.' LIKE "'.$value.'%" ';
+								}
+								elseif($cond == 'LIKE'){ 
+									$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
+								}
+								elseif($cond == 'LESSTHAN'){ 
+									$sqlFrag2 .= 'OR o.'.$field.' < "'.$value.'" ';
+								}
+								elseif($cond == 'GREATERTHAN'){ 
+									$sqlFrag2 .= 'OR o.'.$field.' > "'.$value.'" ';
+								}
 							}
 						}
 					}
+					if($sqlFrag2) $sqlFrag .= 'AND ('.substr($sqlFrag2,3).') ';
 				}
-				if($sqlFrag2) $sqlFrag .= 'AND ('.substr($sqlFrag2,3).') ';
 			}
 		}
 		//Build where
@@ -568,6 +565,33 @@ class DwcArchiverOccurrence{
 				$this->conditionSql = 'WHERE '.$this->conditionSql;
 			}
 		}
+	}
+	
+	private function addTableJoins(){
+		$sql = '';
+		if($this->conditionSql){
+			if(stripos($this->conditionSql,'v.clid')){
+				//Search criteria came from custom search page
+				$sql = 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
+			}
+			if(stripos($this->conditionSql,'p.point')){
+				//Search criteria came from map search page
+				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
+			}
+			if(stripos($this->conditionSql,'MATCH(f.recordedby)')){
+				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			}
+			if(stripos($this->conditionSql,'att.stateid')){
+				//Search is limited by occurrence attribute
+				$sql .= 'INNER JOIN tmattributes att ON o.occid = att.occid ';
+			}
+			elseif(stripos($this->conditionSql,'tmstates.traitid')){
+				//Search is limited by occurrence trait
+				$sql .= 'INNER JOIN tmattributes att ON o.occid = att.occid '.
+					'INNER JOIN tmstates ON att.stateid = tmstates.stateid ';
+			}
+		}
+		return $sql;
 	}
 
     public function getAsJson() {
@@ -855,16 +879,7 @@ class DwcArchiverOccurrence{
 			//Collection array not previously primed by source  
 			$sql1 = 'SELECT DISTINCT o.collid FROM omoccurrences o ';
 			if($this->conditionSql){
-				if(stripos($this->conditionSql,'v.clid')){
-					$sql1 .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
-				}
-				if(stripos($this->conditionSql,'p.point')){
-					$sql1 .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
-				}
-				if(stripos($this->conditionSql,'MATCH(f.recordedby)')){
-					$sql1 .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-				}
-				$sql1 .= $this->conditionSql;
+				$sql1 .= $this->addTableJoins().$this->conditionSql;
 			}
 			$rs1 = $this->conn->query($sql1);
 			$collidStr = '';
@@ -1627,16 +1642,7 @@ class DwcArchiverOccurrence{
 			//Collection array not previously primed by source  
 			$sql1 = 'SELECT DISTINCT o.collid FROM omoccurrences o ';
 			if($this->conditionSql){
-				if(stripos($this->conditionSql,'v.clid')){
-					$sql1 .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
-				}
-				if(stripos($this->conditionSql,'p.point')){
-					$sql1 .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
-				}
-				if(stripos($this->conditionSql,'MATCH(f.recordedby)')){
-					$sql1 .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-				}
-				$sql1 .= $this->conditionSql;
+				$sql1 .= $this->addTableJoins().$this->conditionSql;
 			}
 			$rs1 = $this->conn->query($sql1);
 			$collidStr = '';

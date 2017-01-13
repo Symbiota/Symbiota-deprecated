@@ -168,6 +168,12 @@ else{
 				if(array_key_exists('customfield3',$_POST) && $_POST['customfield3']){
 					$dwcaHandler->addCondition($_POST['customfield3'],$_POST['customtype3'],$_POST['customvalue3']);
 				}
+				if(array_key_exists('stateid',$_POST) && $_POST['stateid']){
+					$dwcaHandler->addCondition('stateid','EQUALS',$_POST['stateid']);
+				}
+				elseif(array_key_exists('traitid',$_POST) && $_POST['traitid']){
+					$dwcaHandler->addCondition('traitid','EQUALS',$_POST['traitid']);
+				}
 				if(array_key_exists('newrecs',$_POST) && $_POST['newrecs'] == 1){
 					$dwcaHandler->addCondition('dbpk','NULL');
 					$dwcaHandler->addCondition('catalognumber','NOTNULL');
