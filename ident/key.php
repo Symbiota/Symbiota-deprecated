@@ -4,9 +4,9 @@ include_once($SERVER_ROOT.'/classes/KeyDataManager.php');
 include_once($SERVER_ROOT.'/content/lang/ident/key.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$editable = false;
-if($isAdmin || array_key_exists("KeyEditor",$userRights)){
-	$editable = true;
+$isEditor = false;
+if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS)){
+	$isEditor = true;
 }
 
 $attrsValues = Array();
@@ -35,9 +35,6 @@ if($taxonValue) $dataManager->setTaxonFilter($taxonValue);
 if($attrsValues) $dataManager->setAttrs($attrsValues);
 if($rv) $dataManager->setRelevanceValue($rv);
 
-$data = Array();
-$chars = Array();
-$taxa = Array();
 $data = $dataManager->getData();
 $chars = $data["chars"];  				//$chars = Array(HTML Strings)
 $taxa = $data["taxa"];					//$taxa  = Array(family => array(TID => DisplayName))
@@ -108,7 +105,15 @@ if($chars){
 	
 ?>
 <div id="innertext">
-	<div style="float:right;margin:15px;" title="Edit Character Matrix"><a href="tools/massupdate.php?clid=<?php echo $clid; ?>"><img src="../images/edit.png" /><span style="font-size:70%;">CM</span></a></div>
+	<?php 
+	if($isEditor){
+		?>
+		<div style="float:right;margin:15px;" title="Edit Character Matrix">
+			<a href="tools/massupdate.php?clid=<?php echo $clid; ?>"><img src="../images/edit.png" /><span style="font-size:70%;">CM</span></a>
+		</div>
+		<?php 
+	}
+	?>
 	<form name="keyform" id="keyform" action="key.php" method="get">
 		<table>
 			<tr>
@@ -166,11 +171,11 @@ if($chars){
 						<tr><td colspan='2'>
 							<h2>
 								<?php 
-								if($floraModIsActive){
+								if($FLORA_MOD_IS_ACTIVE){
 									echo "<a href='../checklists/checklist.php?cl=".$clid."&dynclid=".$dynClid."'>";
 								}
 								echo $dataManager->getClName()." ";
-								if($floraModIsActive){
+								if($FLORA_MOD_IS_ACTIVE){
 									echo "</a>";
 								}
 								?>
@@ -195,8 +200,8 @@ if($chars){
 								$newSpLink = '../taxa/index.php?taxon='.$tid."&cl=".($dataManager->getClType()=="static"?$dataManager->getClName():"");
 								echo "<tr><td><div style='margin:0px 5px 0px 10px;'><a href='".$newSpLink."' target='_blank'><i>$disName</i></a></div></td>\n";
 								echo "<td align='right'>\n";
-								if($editable){
-									echo "<a href='tools/editor.php?tid=$tid&lang=".$defaultLang."' target='_blank'><img src='../images/edit.png' width='15px' border='0' title='".$LANG['EDITMORP']."' /></a>\n";
+								if($isEditor){
+									echo "<a href='tools/editor.php?tid=$tid&lang=".$DEFAULT_LANG."' target='_blank'><img src='../images/edit.png' width='15px' border='0' title='".$LANG['EDITMORP']."' /></a>\n";
 								}
 								echo "</td></tr>\n";
 							}
