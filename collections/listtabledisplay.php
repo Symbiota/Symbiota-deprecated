@@ -71,7 +71,11 @@ if(isset($_REQUEST['db'])){
                 <?php
             }
             else{
-                echo "starrJson = sessionStorage.jsonstarr;";
+                ?>
+                if(sessionStorage.jsonstarr){
+                    starrJson = sessionStorage.jsonstarr;
+                }
+                <?php
             }
             ?>
 
@@ -94,16 +98,16 @@ if(isset($_REQUEST['db'])){
             <?php
             if(!$resetOccIndex){
                 ?>
-                if(sessionStorage.collSerchPage){
-                    tableIndex = sessionStorage.collSerchTableIndex;
+                if(sessionStorage.collSearchTableIndex){
+                    tableIndex = sessionStorage.collSearchTableIndex;
                 }
                 else{
-                    sessionStorage.collSerchTableIndex = tableIndex;
+                    sessionStorage.collSearchTableIndex = tableIndex;
                 }
                 <?php
             }
             else{
-                echo "sessionStorage.collSerchTableIndex = tableIndex;";
+                echo "sessionStorage.collSearchTableIndex = tableIndex;";
             }
             ?>
 
@@ -117,7 +121,7 @@ if(isset($_REQUEST['db'])){
             sortfield1 = document.sortform.sortfield1.value;
             sortfield2 = document.sortform.sortfield2.value;
             sortorder = document.sortform.sortorder.value;
-            sessionStorage.collSerchTableIndex = index;
+            sessionStorage.collSearchTableIndex = index;
 
             document.getElementById("tablediv").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
 
@@ -146,7 +150,7 @@ if(isset($_REQUEST['db'])){
 
         function copySearchUrl(){
             var urlPrefix = document.getElementById('urlPrefixBox').value;
-            var urlFixed = urlPrefix+'&occindex='+sessionStorage.collSerchTableIndex+'&sortfield1='+sortfield1+'&sortfield2='+sortfield2+'&sortorder='+sortorder;
+            var urlFixed = urlPrefix+'&occindex='+sessionStorage.collSearchTableIndex+'&sortfield1='+sortfield1+'&sortfield2='+sortfield2+'&sortorder='+sortorder;
             var copyBox = document.getElementById('urlFullBox');
             copyBox.value = urlFixed;
             copyBox.focus();

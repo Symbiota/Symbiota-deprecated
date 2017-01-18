@@ -12,7 +12,9 @@ $cntPerPage = 100;
 $stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 $collStArr = json_decode($stArrCollJson, true);
 $searchStArr = json_decode($stArrSearchJson, true);
-$stArr = array_merge($searchStArr,$collStArr);
+if($collStArr && $searchStArr) $stArr = array_merge($searchStArr,$collStArr);
+if(!$collStArr && $searchStArr) $stArr = $searchStArr;
+if($collStArr && !$searchStArr) $stArr = $collStArr;
 
 $collManager = new OccurrenceListManager();
 

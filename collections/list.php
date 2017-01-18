@@ -86,7 +86,11 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
                 <?php
             }
             else{
-                echo "starrJson = sessionStorage.jsonstarr;";
+                ?>
+                if(sessionStorage.jsonstarr){
+                    starrJson = sessionStorage.jsonstarr;
+                }
+                <?php
             }
             ?>
 
@@ -109,16 +113,16 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
             <?php
             if(!$resetPageNum){
                 ?>
-                if(sessionStorage.collSerchPage){
-                    listPage = sessionStorage.collSerchPage;
+                if(sessionStorage.collSearchPage){
+                    listPage = sessionStorage.collSearchPage;
                 }
                 else{
-                    sessionStorage.collSerchPage = listPage;
+                    sessionStorage.collSearchPage = listPage;
                 }
                 <?php
             }
             else{
-                echo "sessionStorage.collSerchPage = listPage;";
+                echo "sessionStorage.collSearchPage = listPage;";
             }
             ?>
 
@@ -154,7 +158,7 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
         }
 
         function changeRecordPage(page){
-            sessionStorage.collSerchPage = page;
+            sessionStorage.collSearchPage = page;
             document.getElementById("queryrecords").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
 
             //alert('rpc/changerecordpage.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+page+'&targettid=<?php //echo $targetTid; ?>');
@@ -204,7 +208,7 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
 
         function copySearchUrl(){
             var urlPrefix = document.getElementById('urlPrefixBox').value;
-            var urlFixed = urlPrefix+'&page='+sessionStorage.collSerchPage;
+            var urlFixed = urlPrefix+'&page='+sessionStorage.collSearchPage;
             var copyBox = document.getElementById('urlFullBox');
             copyBox.value = urlFixed;
             copyBox.focus();
