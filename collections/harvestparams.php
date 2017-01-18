@@ -13,6 +13,7 @@ $stArrCollJson = '';
 $stArrSearchJson = '';
 
 if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
+    echo 'yes';
     $stArr = $collManager->getSearchTerms();
     $stArrSearchJson = json_encode($stArr);
 }
@@ -56,8 +57,12 @@ if(isset($_REQUEST['db'])){
                 <?php
             }
             else{
-                echo "starrJson = sessionStorage.jsonstarr;";
-                echo "setHarvestParamsForm();";
+                ?>
+                if(sessionStorage.jsonstarr){
+                    starrJson = sessionStorage.jsonstarr;
+                    setHarvestParamsForm();
+                }
+                <?php
             }
             ?>
 
