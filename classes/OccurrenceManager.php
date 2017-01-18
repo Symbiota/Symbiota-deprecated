@@ -17,7 +17,8 @@ class OccurrenceManager{
 
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
-		$this->useCookies = (array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?0:1);
+		//$this->useCookies = (array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?0:1);
+        $this->useCookies = 0;
 		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
  			$this->reset();
  		}
@@ -25,12 +26,12 @@ class OccurrenceManager{
  			$this->readCollCookies();
  		}
  		//Read DB cookies no matter what
-		if(array_key_exists("colldbs",$_COOKIE)){
+		/*if(array_key_exists("colldbs",$_COOKIE)){
 			$this->searchTermsArr["db"] = $_COOKIE["colldbs"];
 		}
 		elseif(array_key_exists("collclid",$_COOKIE)){
 			$this->searchTermsArr["clid"] = $_COOKIE["collclid"];
-		}
+		}*/
 		$this->readRequestVariables();
  	}
 
@@ -158,7 +159,7 @@ class OccurrenceManager{
 					//Class, order, or other higher rank
 					$rs1 = $this->conn->query("SELECT ts.tidaccepted FROM taxa AS t LEFT JOIN taxstatus AS ts ON t.TID = ts.tid WHERE (t.sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
-						$sqlWhereTaxa = 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tidaccepted.'))) ';
+						$sqlWhereTaxa = 'OR ((o.sciname = "'.$key.'") OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tidaccepted.')))) ';
 					}
 				}
 				else{
@@ -899,6 +900,19 @@ class OccurrenceManager{
 	public function getLocalSearchStr(){
 		return implode("; ", $this->localSearchArr);
 	}
+
+    public function getSearchResultUrl(){
+        $url = '?';
+        $stPieces = Array();
+        foreach($this->searchTermsArr as $i => $v){
+            if($v){
+                $stPieces[] = $i.'='.$v;
+            }
+        }
+        $url .= implode("&",$stPieces);
+        $url = str_replace(' ','%20',$url);
+        return $url;
+    }
 
 	public function getTaxonAuthorityList(){
 		$taxonAuthorityList = Array();

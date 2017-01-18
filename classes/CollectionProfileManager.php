@@ -904,13 +904,12 @@ class CollectionProfileManager {
             while($r = $rs->fetch_object()){
                 $pTID = $r->TID;
             }
-            $sqlFrom .= 'LEFT JOIN taxaenumtree AS te ON t.TID = te.tid ';
-            $sqlWhere .= 'AND te.taxauthid = 1 AND te.parenttid = '.$pTID.' ';
+            $sqlWhere .= 'AND ((o.sciname = "'.$taxon.'") OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$pTID.')))) ';
         }
         if($country){
             $sqlWhere .= 'AND o.country = "'.$country.'" ';
         }
-        $sql2 = 'SELECT c.CollID, c.CollectionName, COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
+        $sql2 = 'SELECT c.CollID, c.CollectionName, COUNT(DISTINCT o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
             'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(DISTINCT t.UnitName1) AS GeneraCount, COUNT(o.typeStatus) AS TypeCount, '.
             'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS SpecimensCountID, '.
             'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.

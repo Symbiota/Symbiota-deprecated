@@ -1,67 +1,40 @@
 <?php
 include_once('../config/symbini.php'); 
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
-$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
+$targetTid = array_key_exists("targettid",$_REQUEST)?$_REQUEST["targettid"]:0;
 $occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:0;
 $sortField1 = array_key_exists('sortfield1',$_REQUEST)?$_REQUEST['sortfield1']:'collection';
 $sortField2 = array_key_exists('sortfield2',$_REQUEST)?$_REQUEST['sortfield2']:'';
 $sortOrder = array_key_exists('sortorder',$_REQUEST)?$_REQUEST['sortorder']:'';
-$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
-$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 //Sanitation
 if(!is_numeric($taxonFilter)) $taxonFilter = 1;
-if(!is_numeric($occIndex)) $occIndex = 100;
+if(!is_numeric($occIndex)) $occIndex = 0;
 
 $collManager = new OccurrenceListManager();
-$stArr = array();
-$specOccJson = '';
+$stArr = Array();
+$collArr = Array();
+$stArrSearchJson = '';
+$stArrCollJson = '';
+$resetOccIndex = false;
 $navStr = '';
+
 $sortFields = array('collection' => 'Collection','o.CatalogNumber' => 'Catalog Number','o.family' => 'Family',
 	'o.sciname' => 'Scientific Name','o.recordedBy' => 'Collector','o.recordNumber' => 'Number','o.eventDate' => 'Event Date',
 	'o.country'=>'Country','o.StateProvince' => 'State/Province','o.county' => 'County','CAST(elev AS UNSIGNED)' => 'Elevation');
 
-if($stArrCollJson && $stArrSearchJson){
-	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
-	$collStArr = json_decode($stArrCollJson, true);
-	$searchStArr = json_decode($stArrSearchJson, true);
-	$stArr = array_merge($searchStArr,$collStArr);
-}
-elseif($stArrCollJson && !$stArrSearchJson){
-	$collArray = $collManager->getSearchTerms();
-	$collStArr = json_decode($stArrCollJson, true);
-	$stArr = array_merge($collArray,$collStArr);
-	$stArrSearchJson = json_encode($collArray);
-}
-else{
-	$collArray = $collManager->getSearchTerms();
-	$collStArr = $collManager->getSearchTerms();
-	$stArr = array_merge($collArray,$collStArr);
-	$stArrSearchJson = json_encode($collArray);
-	$stArrCollJson = json_encode($collArray);
+if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
+    $stArr = $collManager->getSearchTerms();
+    $stArrSearchJson = json_encode($stArr);
+    $resetOccIndex = true;
 }
 
-$stArrJson = json_encode($stArr);
-$collManager->setSearchTermsArr($stArr);
-$collManager->setSorting($sortField1,$sortField2,$sortOrder);
-$recArr = $collManager->getTableSpecimenMap($occIndex,1000);			//Array(IID,Array(fieldName,value))
-$targetClid = $collManager->getSearchTerm("targetclid");
-if($recArr){
-	$qryCnt = $collManager->getRecordCnt();
-	$hrefPrefix = 'listtabledisplay.php?usecookies=false&starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&sortfield1='.$sortField1.'&sortfield2='.$sortField2.'&sortorder='.$sortOrder.'&occindex=';
-	$navStr = '<div style="float:right;">';
-	if($occIndex >= 1000){
-		$navStr .= "<a href='".$hrefPrefix.($occIndex-1000)."' title='Previous 1000 records'>&lt;&lt;</a>";
-	}
-	$navStr .= ' | ';
-	$navStr .= ($occIndex+1).'-'.($qryCnt<1000+$occIndex?$qryCnt:1000+$occIndex).' of '.$qryCnt.' records';
-	$navStr .= ' | ';
-	if($qryCnt > (1000+$occIndex)){
-		$navStr .= "<a href='".$hrefPrefix.($occIndex+1000)."' title='Next 1000 records'>&gt;&gt;</a>";
-	}
-	$navStr .= '</div>';
+if(isset($_REQUEST['db'])){
+    $collArr['db'] = $collManager->getSearchTerm('db');
+    $stArrCollJson = json_encode($collArr);
+    $resetOccIndex = true;
 }
 ?>
 <html>
@@ -77,16 +50,111 @@ if($recArr){
     <link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script src="../js/jquery.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui.js" type="text/javascript"></script>
+    <script src="../js/symb/collections.search.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
-	<script type="text/javascript">
-		function openIndPU(occId,clid){
-			newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width=800,height=700,left=20,top=20');
-			if (newWindow.opener == null) newWindow.opener = self;
-			return false;
-		}
-	</script>
+    <script type="text/javascript">
+        var starrJson = '';
+        var collJson = '';
+        var sortfield1 = '';
+        var sortfield2 = '';
+        var sortorder = '';
+        var tableIndex = <?php echo $occIndex; ?>;
+
+        $(document).ready(function() {
+            <?php
+            if($stArrSearchJson){
+                ?>
+                starrJson = '<?php echo $stArrSearchJson; ?>';
+                sessionStorage.jsonstarr = starrJson;
+                <?php
+            }
+            else{
+                echo "starrJson = sessionStorage.jsonstarr;";
+            }
+            ?>
+
+            <?php
+            if($stArrCollJson){
+                ?>
+                collJson = '<?php echo $stArrCollJson; ?>';
+                sessionStorage.jsoncollstarr = collJson;
+                <?php
+            }
+            else{
+                ?>
+                if(sessionStorage.jsoncollstarr){
+                    collJson = sessionStorage.jsoncollstarr;
+                }
+                <?php
+            }
+            ?>
+
+            <?php
+            if(!$resetOccIndex){
+                ?>
+                if(sessionStorage.collSerchPage){
+                    tableIndex = sessionStorage.collSerchTableIndex;
+                }
+                else{
+                    sessionStorage.collSerchTableIndex = tableIndex;
+                }
+                <?php
+            }
+            else{
+                echo "sessionStorage.collSerchTableIndex = tableIndex;";
+            }
+            ?>
+
+            document.getElementById("dllink").href = 'download/index.php?dltype=specimen&starr='+starrJson+'&jsoncollstarr='+collJson;
+            sessionStorage.collsearchtableview = true;
+
+            changeTablePage(tableIndex);
+        });
+
+        function changeTablePage(index){
+            sortfield1 = document.sortform.sortfield1.value;
+            sortfield2 = document.sortform.sortfield2.value;
+            sortorder = document.sortform.sortorder.value;
+            sessionStorage.collSerchTableIndex = index;
+
+            document.getElementById("tablediv").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
+
+            $.ajax({
+                type: "POST",
+                url: "rpc/changetablepage.php",
+                data: {
+                    starr: starrJson,
+                    jsoncollstarr: collJson,
+                    occindex: index,
+                    sortfield1: sortfield1,
+                    sortfield2: sortfield2,
+                    sortorder: sortorder,
+                    targettid: <?php echo $targetTid; ?>
+                }
+            }).done(function(msg) {
+                if(msg){
+                    var newRecordList = JSON.parse(msg);
+                    document.getElementById("tablediv").innerHTML = newRecordList;
+                }
+                else{
+                    document.getElementById("tablediv").innerHTML = "<p>An error occurred retrieving records.</p>";
+                }
+            });
+        }
+
+        function copySearchUrl(){
+            var urlPrefix = document.getElementById('urlPrefixBox').value;
+            var urlFixed = urlPrefix+'&occindex='+sessionStorage.collSerchTableIndex+'&sortfield1='+sortfield1+'&sortfield2='+sortfield2+'&sortorder='+sortorder;
+            var copyBox = document.getElementById('urlFullBox');
+            copyBox.value = urlFixed;
+            copyBox.focus();
+            copyBox.setSelectionRange(0,copyBox.value.length);
+            document.execCommand("copy");
+            copyBox.value = '';
+        }
+    </script>
 </head>
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<!-- inner text -->
@@ -94,7 +162,7 @@ if($recArr){
 		<div style="width:725px;clear:both;margin-bottom:5px;">
 			<div style="float:right;">
 				<div class='button' style='margin:15px 15px 0px 0px;width:13px;height:13px;' title='Download specimen data'>
-					<a href='download/index.php?usecookies=false&dltype=specimen&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>'>
+					<a id='dllink' href=''>
 						<img src='../images/dl.png'/>
 					</a>
 				</div>
@@ -107,7 +175,7 @@ if($recArr){
 						<select name="sortfield1">
 							<?php 
 							foreach($sortFields as $k => $v){
-								echo '<option value="'.$k.'" '.($k==$sortField1?'SELECTED':'').'>'.$v.'</option>';
+                                echo '<option value="'.$k.'" '.($k==$sortField1?'SELECTED':'').'>'.$v.'</option>';
 							}
 							?>
 						</select>
@@ -118,7 +186,7 @@ if($recArr){
 							<option value="">Select Field Name</option>
 							<?php 
 							foreach($sortFields as $k => $v){
-								echo '<option value="'.$k.'" '.($k==$sortField2?'SELECTED':'').'>'.$v.'</option>';
+                                echo '<option value="'.$k.'" '.($k==$sortField2?'SELECTED':'').'>'.$v.'</option>';
 							}
 							?>
 						</select>
@@ -126,17 +194,13 @@ if($recArr){
 					<div style="float:left;margin-left:10px;">
 						<b>Order:</b> 
 						<select name="sortorder">
-							<option value="ASC" <?php echo ($sortOrder=="ASC"?'SELECTED':''); ?>>Ascending</option>
-							<option value="DESC" <?php echo ($sortOrder=="DESC"?'SELECTED':''); ?>>Descending</option>
+                            <option value="ASC" <?php echo ($sortOrder=="ASC"?'SELECTED':''); ?>>Ascending</option>
+                            <option value="DESC" <?php echo ($sortOrder=="DESC"?'SELECTED':''); ?>>Descending</option>
 						</select>
 					</div>
 					<div style="float:right;margin-right:10px;">
-						<input name="jsoncollstarr" type="hidden" value='<?php echo $stArrCollJson; ?>' />
-						<input name="starr" type="hidden" value='<?php echo $stArrSearchJson; ?>' />
-						<input name="taxonfilter" type="hidden" value='<?php echo $taxonFilter; ?>' />
-						<input name="occindex" type="hidden" value='<?php echo $occIndex; ?>' />
-						<button name="formsubmit" type="submit" value="sortresults">Sort</button>
-					</div>
+						<button name="formsubmit" type="button" value="sortresults" onclick="changeTablePage(0);">Sort</button>
+                    </div>
 				</form>
 			</fieldset>
 		</div>
@@ -158,84 +222,9 @@ if($recArr){
 				echo '<b>Specimen Records Table</b>';
 				echo '</span>';
 			}
-			echo $navStr; ?>
+			?>
 		</div>
-		<?php 
-		if($recArr){
-			?>
-			<table class="styledtable" style="font-family:Arial;font-size:12px;">
-				<tr>
-					<th>Symbiota ID</th>
-					<th>Collection</th>
-					<th>Catalog Number</th>
-					<th>Family</th>
-					<th>Scientific Name</th>
-					<th>Country</th>
-					<th>State/Province</th>
-					<th>County</th>
-					<th>Locality</th>
-					<th>Habitat</th>
-					<th>Elevation</th>
-					<th>Event Date</th>
-					<th>Collector</th>
-					<th>Number</th>
-				</tr>
-				<?php 
-				$recCnt = 0;
-				foreach($recArr as $id => $occArr){
-					$isEditor = false;
-					if($SYMB_UID && ($IS_ADMIN
-					|| (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($occArr['collid'],$USER_RIGHTS['CollAdmin']))
-					|| (array_key_exists('CollEditor',$USER_RIGHTS) && in_array($occArr['collid'],$USER_RIGHTS['CollEditor'])))){
-						$isEditor = true;
-					}
-					if($occArr['sciname']){
-						$occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
-					}							
-					echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
-					echo '<td>';
-					echo '<a href="#" onclick="return openIndPU('.$id.",".($targetClid?$targetClid:"0").');">'.$id.'</a> ';
-					if($isEditor || ($SYMB_UID && $SYMB_UID == $fieldArr['observeruid'])){
-						echo '<a href="editor/occurrenceeditor.php?occid='.$id.'" target="_blank">';
-						echo '<img src="../images/edit.png" style="height:13px;" title="Edit Record" />';
-						echo '</a>';
-					}
-					if($occArr['hasImage']){
-						echo '<img src="../images/image.png" style="height:13px;margin-left:5px;" title="Has Image" />';
-					}
-					echo '</td>'."\n";
-					echo '<td>'.$occArr['collection'].'</td>'."\n";
-					echo '<td>'.$occArr['accession'].'</td>'."\n";
-					echo '<td>'.$occArr['family'].'</td>'."\n";
-					echo '<td>'.$occArr['sciname'].($occArr['author']?" ".$occArr['author']:"").'</td>'."\n";
-					echo '<td>'.$occArr['country'].'</td>'."\n";
-					echo '<td>'.$occArr['state'].'</td>'."\n";
-					echo '<td>'.$occArr['county'].'</td>'."\n";
-					echo '<td>'.((strlen($occArr['locality'])>80)?substr($occArr['locality'],0,80).'...':$occArr['locality']).'</td>'."\n";
-					echo '<td>'.(array_key_exists("habitat",$occArr)?((strlen($occArr['habitat'])>80)?substr($occArr['habitat'],0,80).'...':$occArr['habitat']):"").'</td>'."\n";
-					echo '<td>'.(array_key_exists("elev",$occArr)?$occArr['elev']:"").'</td>'."\n";
-					echo '<td>'.(array_key_exists("date",$occArr)?$occArr['date']:"").'</td>'."\n";
-					echo '<td>'.$occArr['collector'].'</td>'."\n";
-					echo '<td>'.(array_key_exists("collnumber",$occArr)?$occArr['collnumber']:"").'</td>'."\n";
-					echo "</tr>\n";
-					$recCnt++;
-				}
-				?>
-			</table>
-			<div style="width:790px;">
-				<?php echo $navStr; ?>
-			</div>
-			*Click on the Symbiota identifier in the first column to see Full Record Details.    
-			<?php 
-		}
-		else{
-			?>
-			<div style="font-weight:bold;font-size:120%;">
-				No records found matching the query
-			</div>
-			<?php 
-		}
-		?>
+        <div id="tablediv"></div>
 	</div>
 </body>
 </html>

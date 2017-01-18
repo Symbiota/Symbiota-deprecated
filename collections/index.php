@@ -27,10 +27,16 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 		<script src="../js/jquery.js" type="text/javascript"></script>
 		<script src="../js/jquery-ui.js" type="text/javascript"></script>
-		<script src="../js/symb/collections.index.js" type="text/javascript"></script>
+		<script src="../js/symb/collections.search.js" type="text/javascript"></script>
+        <!-- <script src="../js/symb/collections.index.js" type="text/javascript"></script> -->
 		<script type="text/javascript">
 			<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 		</script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#tabs").tabs();
+            });
+        </script>
 	</head>
 	<body>
 	
@@ -78,7 +84,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						$collManager->outputFullCollArr($obsArr);
 						?>
 						<div style="clear:both;">&nbsp;</div>
-						<input type="hidden" name="usecookies" value="false" />
 					</form>
 				</div>
 			<?php 
@@ -95,7 +100,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						$collManager->outputFullCollArr($specArr);
 						?>
 						<div style="clear:both;">&nbsp;</div>
-						<input type="hidden" name="usecookies" value="false" />
 					</form>
 				</div>
 				<?php 
@@ -112,7 +116,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						$collManager->outputFullCollArr($obsArr);
 						?>
 						<div style="clear:both;">&nbsp;</div>
-						<input type="hidden" name="usecookies" value="false" />
 					</form>
 				</div>
 				<?php 
@@ -162,7 +165,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 							<?php 
 						}
 						?>
-						<input type="hidden" name="usecookies" value="false" />
 					</form>
 				</div>
 				<?php 

@@ -22,7 +22,7 @@ if($stArrCollJson && $stArrSearchJson){
 ?>
 <div>
 	<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_TITLE']; ?>'>
-		<a href='download/index.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
+		<a href='download/index.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
 			<img width="15px" src="../images/dl.png" />
 		</a>
 	</div>
@@ -30,7 +30,7 @@ if($stArrCollJson && $stArrSearchJson){
 	if($KEY_MOD_IS_ACTIVE){
 	?>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_KEY']; ?>'>
-			<a href='checklistsymbiota.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>
+			<a href='checklistsymbiota.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>
 				<img width='15px' src='../images/key.png'/>
 			</a>
 		</div>
@@ -39,7 +39,7 @@ if($stArrCollJson && $stArrSearchJson){
 	if($floraModIsActive){
 	?>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_CHECKLIST_EXPLORER']; ?>'>
-			<a href='checklistsymbiota.php?usecookies=false&starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
+			<a href='checklistsymbiota.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
 				<img width='15px' src='../images/list.png'/>
 			</a>
 		</div>
@@ -49,26 +49,23 @@ if($stArrCollJson && $stArrSearchJson){
 	<div style='margin:10px;float:right;'>
 		<form name="changetaxonomy" id="changetaxonomy" action="list.php" method="post">
 			<?php echo $LANG['TAXONOMIC_FILTER']; ?>:
-				<select id="taxonfilter" name="taxonfilter" onchange="document.changetaxonomy.submit();">
-					<option value="0"><?php echo $LANG['RAW_DATA'];?></option>
-					<?php 
-						$taxonAuthList = $checklistManager->getTaxonAuthorityList();
-						foreach($taxonAuthList as $taCode => $taValue){
-							echo "<option value='".$taCode."' ".($taCode == $taxonFilter?"SELECTED":"").">".$taValue."</option>";
-						}
-                        ?>
-				</select>
-				<input type="hidden" name="tabindex" value="0" />
-				<input type="hidden" name="usecookies" value="false" />
-				<input type="hidden" name="jsoncollstarr" value='<?php echo ($stArrCollJson?$stArrCollJson:''); ?>' />
-				<input type="hidden" name="starr" value='<?php echo ($stArrSearchJson?$stArrSearchJson:''); ?>' />
-		</form>
+            <select id="taxonfilter" name="taxonfilter" onchange="document.changetaxonomy.submit();">
+                <option value="0"><?php echo $LANG['RAW_DATA'];?></option>
+                <?php
+                    $taxonAuthList = $checklistManager->getTaxonAuthorityList();
+                    foreach($taxonAuthList as $taCode => $taValue){
+                        echo "<option value='".$taCode."' ".($taCode == $taxonFilter?"SELECTED":"").">".$taValue."</option>";
+                    }
+                    ?>
+            </select>
+            <input type="hidden" name="tabindex" value="0" />
+        </form>
 	</div>
 	<div style="clear:both;"><hr/></div>
 	<?php
 		$checklistArr = $checklistManager->getChecklist($taxonFilter);
 		echo '<div style="font-weight:bold;font-size:125%;">'.$LANG['TAXA_COUNT'].': '.$checklistManager->getChecklistTaxaCnt().'</div>';
-		$undFamilyArray = null;
+		$undFamilyArray = Array();
 		if(array_key_exists("undefined",$checklistArr)){
 			$undFamilyArray = $checklistArr["undefined"];
 			unset($checklistArr["undefined"]); 
