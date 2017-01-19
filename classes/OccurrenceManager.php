@@ -910,6 +910,8 @@ class OccurrenceManager{
             }
         }
         $url .= implode("&",$stPieces);
+        $url = str_replace('&taxontype=','&type=',$url);
+        $url = str_replace('&usethes=','&thes=',$url);
         $url = str_replace(' ','%20',$url);
         return $url;
     }

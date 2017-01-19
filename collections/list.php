@@ -71,13 +71,6 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
         var listPage = <?php echo $pageNumber; ?>;
 
         $(document).ready(function() {
-            $('#tabs').tabs({
-				active: <?php echo $tabIndex; ?>,
-				beforeLoad: function( event, ui ) {
-					$(ui.panel).html("<p>Loading...</p>");
-				}
-			});
-
             <?php
             if($stArrSearchJson){
                 ?>
@@ -133,6 +126,13 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
 
             setQueryInfo();
             changeRecordPage(listPage);
+
+            $('#tabs').tabs({
+                active: <?php echo $tabIndex; ?>,
+                beforeLoad: function( event, ui ) {
+                    $(ui.panel).html("<p>Loading...</p>");
+                }
+            });
         });
 
         function setQueryInfo(){
