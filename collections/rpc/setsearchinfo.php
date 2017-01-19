@@ -52,8 +52,6 @@ $recordListHtml .= "<a href='".$tableLink."'>See Results in Table View</a>";
 $recordListHtml .= '</div></div>';
 $recordListHtml .= '<div style="clear:both;"></div>';
 
-$recordListHtml = utf8_encode($recordListHtml);
-
 //output the response
 echo json_encode($recordListHtml);
 ?>

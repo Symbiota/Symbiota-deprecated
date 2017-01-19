@@ -156,7 +156,6 @@ if($view == 'splist'){
 		$recordListHtml .= "<div style='margin-left:30px;'><a href='#' onclick='changeImagePage(".$onChange."); return false;'>".$value."</a></div>";
 	}
 }
-$recordListHtml = utf8_encode($recordListHtml);
 
 //output the response
 echo json_encode($recordListHtml);

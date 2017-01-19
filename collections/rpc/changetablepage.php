@@ -115,8 +115,6 @@ else{
     $recordListHtml .= '<div style="font-weight:bold;font-size:120%;">No records found matching the query</div>';
 }
 
-$recordListHtml = utf8_encode($recordListHtml);
-
 //output the response
 echo json_encode($recordListHtml);
 ?>

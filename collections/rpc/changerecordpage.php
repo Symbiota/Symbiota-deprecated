@@ -148,8 +148,6 @@ else{
     $recordListHtml .= '</div>';
 }
 
-$recordListHtml = utf8_encode($recordListHtml);
-
 //output the response
 echo json_encode($recordListHtml);
 ?>
