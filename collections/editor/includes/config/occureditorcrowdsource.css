@@ -46,23 +46,26 @@ body{
 }
 
 #otherCatalogNumbersDiv {
-	display: none;
+	float: left;
+	margin-right: 2px;
+}
+
+#otherCatalogNumbersDiv input {
+	width: 95px;
 }
 
 #recordedByDiv {
-	position: absolute;
-	top: 25px;
-	left: 25px;
+	float:left;
+	margin-right: 2px;
 }
 
 #recordedByDiv input{
-	width:	220px;
+	width:	200px;
 }
 
 #recordNumberDiv {
-	position: absolute;
-	top: 25px;
-	left: 258px;
+	float:left;
+	margin-right: 2px;
 }
 
 #recordNumberDiv input{
@@ -70,9 +73,7 @@ body{
 }
 
 #eventDateDiv {
-	position: absolute;
-	top: 25px;
-	left: 330px;
+	float:left;
 }
 
 #eventDateDiv input{
@@ -80,9 +81,9 @@ body{
 }
 
 #associatedCollectorsDiv {
-	position: absolute;
-	top: 65px;
-	left: 25px;
+	float:left;
+	margin-right: 2px;
+	margin-top:2px;
 }
 
 #associatedCollectorsDiv input {
@@ -90,9 +91,8 @@ body{
 }
 
 #dupesDiv{
-	position: absolute;
-	top: 25px;
-	left: 450px;
+	float: right;
+	margin-top: 10px; 
 }
 
 #dupeMsgDiv{
@@ -132,9 +132,8 @@ body{
 }
 
 #verbatimEventDateDiv {
-	position: absolute;
-	top: 65px;
-	left: 350px;
+	float:left;
+	margin: 2px
 }
 
 #verbatimEventDateDiv input{
@@ -151,9 +150,8 @@ body{
 }
 
 #exsDiv {
-	position: absolute;
-	top: 110px;
-	left: 25px;
+	float:left;
+	margin: 2px
 }
 
 #ometidDiv{
@@ -174,9 +172,7 @@ body{
 }
 
 #scinameDiv {
-	position: absolute;
-	top: 150px;
-	left: 25px;
+	float:left;
 }
 
 #scinameDiv input{
@@ -212,9 +208,8 @@ body{
 }
 
 #countryDiv{
-	position: absolute;
-	top: 205px;
-	left: 25px;
+	float:left;
+	margin-right: 2px;
 }
 
 #countryDiv input{
@@ -222,9 +217,8 @@ body{
 }
 
 #stateProvinceDiv{
-	position: absolute;
-	top: 205px;
-	left: 180px;
+	float:left;
+	margin-right: 2px;
 }
 
 #stateProvinceDiv input{
@@ -232,9 +226,8 @@ body{
 }
 
 #countyDiv{
-	position: absolute;
-	top: 205px;
-	left: 350px;
+	float:left;
+	margin-right: 2px;
 }
 
 #countyDiv input{
@@ -246,9 +239,8 @@ body{
 }
 
 #localityDiv{
-	position: absolute;
-	top: 245px;
-	left: 25px;
+	float:left;
+	margin-top:2px;
 }
 
 #localityDiv input{
@@ -259,10 +251,14 @@ body{
 	display:none;
 }
 
+#localAutoDeactivatedDiv{
+	display:none;
+}
+
 #decimalLatitudeDiv{
-	position: absolute;
-	top: 295px;
-	left: 25px;
+	float:left;
+	margin-right: 2px;
+	margin-top:2px;
 }
 
 #decimalLatitudeDiv input{
@@ -270,9 +266,9 @@ body{
 }
 
 #decimalLongitudeDiv{
-	position: absolute;
-	top: 295px;
-	left: 110px;
+	float:left;
+	margin-right: 2px;
+	margin-top:2px;
 }
 
 #decimalLongitudeDiv input{
@@ -280,9 +276,8 @@ body{
 }
 
 #coordinateUncertaintyInMetersDiv{
-	position: absolute;
-	top: 293px;
-	left: 200px;
+	float:left;
+	margin-right: 2px;
 }
 
 #coordinateUncertaintyInMetersDiv input{
@@ -290,9 +285,8 @@ body{
 }
 
 #googleDiv{
-	position: absolute;
-	top: 313px;
-	left: 280px;
+	float:left;
+	margin: 17px 2px 0px 2px;
 	cursor:	pointer;
 }
 
@@ -302,9 +296,8 @@ body{
 }
 
 #geoLocateDiv{
-	position: absolute;
-	top: 308px;
-	left: 300px;
+	float:left;
+	margin: 12px 2px 0px 2px;
 }
 
 #geoLocateDiv img{
@@ -312,25 +305,22 @@ body{
 }
 
 #geoToolsDiv{
-	position: absolute;
-	top: 285px;
-	left: 500px;
+	float:left;
+	margin: 12px 2px 0px 2px;
 	z-index: 10; 
 }
 
 #coordAidDiv{
 	display:	none;
-	position: absolute;
-	top: 345px;
-	left: 25px;
-	width:	95%;
-	height: 175px;
-	background-color: white;
-	z-index: 10; 
+}
+
+#coordCloningDiv{
+	display:	none;
 }
 
 #dmsAidDiv{
 	float:	left;
+	margin-top: 10px;
 	margin-left: 20px;
 	padding:	15px 10px;
 	background-color: lightyellow;
@@ -340,6 +330,7 @@ body{
 
 #utmAidDiv{
 	float:	left;
+	margin-top: 10px;
 	margin-left: 20px;
 	padding:	15px 10px;
 	background-color:	lightyellow;
@@ -357,9 +348,9 @@ body{
 }
 
 #elevationDiv{
-	position: absolute;
-	top: 345px;
-	left: 25px;
+	float: left;
+	margin-right: 2px;
+	margin-top:2px;
 }
 
 #elevationDiv input{
@@ -367,9 +358,9 @@ body{
 }
 
 #verbatimElevationDiv{
-	position: absolute;
-	top: 345px;
-	left: 175px;
+	float: left;
+	margin-right: 2px;
+	margin-top:2px;
 }
 
 #verbatimElevationDiv input{
@@ -385,13 +376,12 @@ body{
 }
 
 #verbatimCoordinatesDiv{
-	position: absolute;
-	top: 295px;
-	left: 320px;
+	float: left;
+	margin-top: 2px;
 }
 
 #verbatimCoordinatesDiv input{
-	width:	250px;
+	width:	225px;
 }
 
 #georeferencedByDiv{
@@ -419,9 +409,8 @@ body{
 }
 
 #habitatDiv{
-	position: absolute;
-	top: 395px;
-	left: 25px;
+	float: left;
+	margin-top:2px;
 	z-index: 1; 
 }
 
@@ -430,9 +419,8 @@ body{
 }
 
 #substrateDiv{
-	position: absolute;
-	top: 435px;
-	left: 25px;
+	float: left;
+	margin-top:2px;
 }
 
 #substrateDiv input{
@@ -448,9 +436,8 @@ body{
 }
 
 #occurrenceRemarksDiv{
-	position: absolute;
-	top: 475px;
-	left: 25px;
+	float: left;
+	margin-top:2px;
 }
 
 #occurrenceRemarksDiv input{
@@ -556,9 +543,7 @@ body{
 }
 
 #editButtonDiv{
-	position: absolute;
-	top: 525px;
-	left: 50px;
+	float: left;
 }
 
 /*Tabs */
@@ -567,6 +552,10 @@ body{
 }
 
 #imgTab{
+	display: none;
+}
+
+#resourceTab{
 	display: none;
 }
 

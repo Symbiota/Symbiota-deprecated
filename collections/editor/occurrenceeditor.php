@@ -384,12 +384,12 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=20150402" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=170201" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=20161210" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=20170101" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -438,8 +438,8 @@ else{
 
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=161208"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=161212"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=161012"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170101"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170101"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141212"></script>
 </head>
 <body>
@@ -653,7 +653,7 @@ else{
 													<input type="text" id="catalognumber" name="catalognumber" tabindex="2" maxlength="32" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="fieldChanged('catalognumber');<?php if(!defined('CATNUMDUPECHECK') || CATNUMDUPECHECK) echo 'searchDupesCatalogNumber(this.form,true)'; ?>" <?php if(!$isEditor || $isEditor == 3) echo 'disabled'; ?> />
 												</div>
 												<div id="otherCatalogNumbersDiv">
-													<?php echo (defined('OTHERCATALOGNUMBERSLABEL')?OTHERCATALOGNUMBERSLABEL:'Other Numbers'); ?>
+													<?php echo (defined('OTHERCATALOGNUMBERSLABEL')?OTHERCATALOGNUMBERSLABEL:'Other Cat. #s'); ?>
 													<a href="#" onclick="return dwcDoc('otherCatalogNumbers')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" name="othercatalognumbers" tabindex="4" maxlength="255" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="fieldChanged('othercatalognumbers');<?php if(defined('OTHERCATNUMDUPECHECK') && OTHERCATNUMDUPECHECK) echo 'searchDupesOtherCatalogNumbers(this.form)'; ?>" />
