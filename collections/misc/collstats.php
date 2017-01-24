@@ -395,7 +395,7 @@ if($action != "Update Statistics"){
 							?>
 							<form name="collections" id="collform" action="collstats.php" method="post" onsubmit="return changeCollForm(this);">
                                 <?php
-                                if($SYMB_UID && $IS_ADMIN){
+                                if($SYMB_UID && ($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS))){
                                     ?>
                                     <fieldset style="padding:10px;padding-left:25px;">
                                         <legend><b>Record Criteria</b></legend>
