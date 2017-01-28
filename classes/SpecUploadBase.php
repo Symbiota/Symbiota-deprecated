@@ -1246,7 +1246,7 @@ class SpecUploadBase extends SpecUpload{
 				$recMap['dbpk'] = $recMap['coreid'];
 				unset($recMap['coreid']);
 			}
-				
+
 			//Import record only if required fields have data (coreId and a scientificName)
 			if(isset($recMap['dbpk']) && $recMap['dbpk'] && (isset($recMap['sciname']) || isset($recMap['genus']))){
 	
@@ -1262,6 +1262,11 @@ class SpecUploadBase extends SpecUpload{
 						$recMap['sciname'] = trim($sciName);
 					}
 				}
+				//Remove fields that are not in the omoccurdetermination tables
+				unset($recMap['genus']);
+				unset($recMap['specificepithet']);
+				unset($recMap['taxonrank']);
+				unset($recMap['infraspecificepithet']);
 				//Try to get author, if it's not there 
 				if(!array_key_exists('scientificnameauthorship',$recMap) || !$recMap['scientificnameauthorship']){
 					//Parse scientific name to see if it has author imbedded
@@ -1272,7 +1277,7 @@ class SpecUploadBase extends SpecUpload{
 						$recMap['sciname'] = trim($parsedArr['unitname1'].' '.$parsedArr['unitname2'].' '.$parsedArr['unitind3'].' '.$parsedArr['unitname3']);
 					}
 				}
-				
+
 				$sqlFragments = $this->getSqlFragments($recMap,$this->identFieldMap);
 				if($recMap['identifiedby'] || $recMap['dateidentified']){
 					if(!$recMap['identifiedby']) $recMap['identifiedby'] = 'not specified';
