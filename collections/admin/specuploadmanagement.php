@@ -180,7 +180,7 @@ $duManager->readUploadParameters();
 			 	$profileList = $duManager->getUploadList();
 				?>
 				<form name="uploadlistform" action="specupload.php" method="post" onsubmit="return checkUploadListForm(this);">
-					<fieldset style="width:450px;">
+					<fieldset>
 						<legend style="font-weight:bold;font-size:120%;">Upload Options</legend>
 						<div style="float:right;">
 							<?php 

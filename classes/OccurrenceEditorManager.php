@@ -158,11 +158,11 @@ class OccurrenceEditorManager {
 	}
 
 	public function setSqlWhere($occIndex=0, $recLimit = 1){
-		$sqlWhere = '';
 		if ($this->qryArr==null) {
 			// supress warnings on array_key_exists(key,null) calls below
 			$this->qryArr=array();
 		}
+		$sqlWhere = '';
 		$catNumIsNum = false;
 		if(array_key_exists('cn',$this->qryArr)){
 			$idTerm = $this->qryArr['cn'];
@@ -1363,41 +1363,48 @@ class OccurrenceEditorManager {
 			$sqlOccid = 'SELECT DISTINCT o.occid FROM omoccurrences o ';
 			$this->addTableJoins($sqlOccid);
 			$sqlOccid .= $this->getBatchUpdateWhere($fn,$ov,$buMatch);
+			echo $sqlOccid.'<br/>';
 			$rs = $this->conn->query($sqlOccid);
 			while($r = $rs->fetch_object()){
 				$occidArr[] = $r->occid;
 			}
 			$rs->free();
-			$sqlWhere = 'WHERE o.occid IN('.implode(',',$occidArr).')';
-			
-			//Strip ORDER BY and/or LIMIT fragments
-			$nvSqlFrag = '';
-			if(!$buMatch || $ov===''){
-				$nvSqlFrag = ($nv===''?'NULL':'"'.$nv.'"');
+			if($occidArr){
+				$sqlWhere = 'WHERE o.occid IN('.implode(',',$occidArr).')';
+				
+				//Strip ORDER BY and/or LIMIT fragments
+				$nvSqlFrag = '';
+				if(!$buMatch || $ov===''){
+					$nvSqlFrag = ($nv===''?'NULL':'"'.$nv.'"');
+				}
+				else{
+					//Selected "Match any part of field"
+					$nvSqlFrag = 'REPLACE(o.'.$fn.',"'.$ov.'","'.$nv.'")';
+				}
+				
+				//Add edits to the omoccuredit table
+				$sql2 = 'INSERT INTO omoccuredits(occid,fieldName,fieldValueOld,fieldValueNew,appliedStatus,uid) '.
+					'SELECT o.occid, "'.$fn.'" AS fieldName, IFNULL(o.'.$fn.',"") AS oldValue, '.
+					'IFNULL('.$nvSqlFrag.',"") AS newValue, 1 AS appliedStatus, '.$GLOBALS['SYMB_UID'].' AS uid '.
+					'FROM omoccurrences o ';
+				//$this->addTableJoins($sql2);
+				$sql2 .= $sqlWhere;
+				echo $sql2.'<br/>';
+				if(!$this->conn->query($sql2)){
+					$statusStr = 'ERROR adding update to omoccuredits: '.$this->conn->error;
+				}
+	
+				//Run update and apply edits
+				$sql = 'UPDATE omoccurrences o ';
+				//$this->addTableJoins($sql);
+				$sql .= ' SET o.'.$fn.' = '.$nvSqlFrag.' '.$sqlWhere;
+				echo $sql; 
+				if(!$this->conn->query($sql)){
+					$statusStr = 'ERROR applying batch update: '.$this->conn->error;
+				}
 			}
 			else{
-				//Selected "Match any part of field"
-				$nvSqlFrag = 'REPLACE(o.'.$fn.',"'.$ov.'","'.$nv.'")';
-			}
-			
-			//Add edits to the omoccuredit table
-			$sql2 = 'INSERT INTO omoccuredits(occid,fieldName,fieldValueOld,fieldValueNew,appliedStatus,uid) '.
-				'SELECT o.occid, "'.$fn.'" AS fieldName, IFNULL(o.'.$fn.',"") AS oldValue, '.
-				'IFNULL('.$nvSqlFrag.',"") AS newValue, 1 AS appliedStatus, '.$GLOBALS['SYMB_UID'].' AS uid '.
-				'FROM omoccurrences o ';
-			//$this->addTableJoins($sql2);
-			$sql2 .= $sqlWhere;
-			if(!$this->conn->query($sql2)){
-				$statusStr = 'ERROR adding update to omoccuredits: '.$this->conn->error;
-			}
-
-			//Run update and apply edits
-			$sql = 'UPDATE omoccurrences o ';
-			//$this->addTableJoins($sql);
-			$sql .= ' SET o.'.$fn.' = '.$nvSqlFrag.' '.$sqlWhere;
-			//echo $sql; exit;
-			if(!$this->conn->query($sql)){
-				$statusStr = 'ERROR applying batch update: '.$this->conn->error;
+				$statusStr = 'ERROR applying batch update: no records match the criteria';
 			}
 		}
 		return $statusStr;
