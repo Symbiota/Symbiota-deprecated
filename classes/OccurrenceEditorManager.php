@@ -1363,7 +1363,7 @@ class OccurrenceEditorManager {
 			$sqlOccid = 'SELECT DISTINCT o.occid FROM omoccurrences o ';
 			$this->addTableJoins($sqlOccid);
 			$sqlOccid .= $this->getBatchUpdateWhere($fn,$ov,$buMatch);
-			echo $sqlOccid.'<br/>';
+			//echo $sqlOccid.'<br/>';
 			$rs = $this->conn->query($sqlOccid);
 			while($r = $rs->fetch_object()){
 				$occidArr[] = $r->occid;
@@ -1389,7 +1389,7 @@ class OccurrenceEditorManager {
 					'FROM omoccurrences o ';
 				//$this->addTableJoins($sql2);
 				$sql2 .= $sqlWhere;
-				echo $sql2.'<br/>';
+				//echo $sql2.'<br/>';
 				if(!$this->conn->query($sql2)){
 					$statusStr = 'ERROR adding update to omoccuredits: '.$this->conn->error;
 				}
@@ -1398,7 +1398,7 @@ class OccurrenceEditorManager {
 				$sql = 'UPDATE omoccurrences o ';
 				//$this->addTableJoins($sql);
 				$sql .= ' SET o.'.$fn.' = '.$nvSqlFrag.' '.$sqlWhere;
-				echo $sql; 
+				//echo $sql; 
 				if(!$this->conn->query($sql)){
 					$statusStr = 'ERROR applying batch update: '.$this->conn->error;
 				}

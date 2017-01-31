@@ -338,7 +338,7 @@ if($SYMB_UID){
 								if($collData['colltype'] != 'General Observations'){
 									?>
 									<li style="margin-left:10px;">
-										<a href="../cleaning/occurrencecleaner.php?obsuid=0&collid=<?php echo $collid; ?>">
+										<a href="../cleaning/index.php?obsuid=0&collid=<?php echo $collid; ?>">
 	                                        <?php echo $LANG['DATA_CLEANING']; ?>
 										</a>
 									</li>

@@ -1161,7 +1161,7 @@ class SpecUploadBase extends SpecUpload{
 		if($rs->num_rows){
 			$this->outputMsg('<span style="color:red;">Duplicate Catalog Numbers exist</span></li>');
 			$this->outputMsg('<li style="margin-left:10px;">');
-			$this->outputMsg('Open <a href="../cleaning/occurrencecleaner.php?collid='.$this->collId.'&action=listdupscatalog" target="_blank">Occurrence Cleaner</a> to resolve this issue');
+			$this->outputMsg('Open <a href="../cleaning/index.php?collid='.$this->collId.'&action=listdupscatalog" target="_blank">Occurrence Cleaner</a> to resolve this issue');
 			$this->outputMsg('</li>');
 		}
 		else{
