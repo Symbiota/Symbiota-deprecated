@@ -731,7 +731,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 												<img border=1 width='180' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
 											</a>
 											<?php 
-											echo '<div><a href="'.$imgArr['url'].'" target="_blank">Open Medium Image</a></div>';
+											if($imgArr['url'] != $imgArr['lgurl']) echo '<div><a href="'.$imgArr['url'].'" target="_blank">Open Medium Image</a></div>';
 											if($imgArr['lgurl']) echo '<div><a href="'.$imgArr['lgurl'].'" target="_blank">Open Large Image</a></div>';
 											?>
 										</div>

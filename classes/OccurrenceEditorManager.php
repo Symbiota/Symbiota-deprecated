@@ -1727,8 +1727,12 @@ class OccurrenceEditorManager {
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
 				$imgId = $row->imgid;
-				$imageMap[$imgId]["url"] = $row->url;
-				$imageMap[$imgId]["tnurl"] = $row->thumbnailurl;
+				$url = $row->url;
+				if($url == 'empty' && $row->originalurl) $url = $row->originalurl;
+				$tnUrl = $row->thumbnailurl;
+				if(!$tnUrl && $url) $tnUrl = $url;
+				$imageMap[$imgId]["url"] = $url; 
+				$imageMap[$imgId]["tnurl"] = $tnUrl;
 				$imageMap[$imgId]["origurl"] = $row->originalurl;
 				$imageMap[$imgId]["caption"] = $this->cleanOutStr($row->caption);
 				$imageMap[$imgId]["photographer"] = $this->cleanOutStr($row->photographer);

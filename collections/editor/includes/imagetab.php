@@ -154,11 +154,11 @@ $specImgArr = $occManager->getImageMap();
 								//$displayUrl = $tnUrl;
 							//}
 							?>
-							<a href="<?php echo ($origUrl?$origUrl:$imgUrl);?>" target="_blank">
+							<a href="<?php echo $imgUrl;?>" target="_blank">
 								<img src="<?php echo $imgUrl;?>" style="width:250px;" title="<?php echo $imgArr["caption"]; ?>" />
 							</a>
 							<?php 
-							echo '<div><a href="'.$imgUrl.'" target="_blank">Open Medium Image</a></div>';
+							if($imgUrl != $origUrl) echo '<div><a href="'.$imgUrl.'" target="_blank">Open Medium Image</a></div>';
 							if($origUrl) echo '<div><a href="'.$origUrl.'" target="_blank">Open Large Image</a></div>';
 							?>
 						</td>
