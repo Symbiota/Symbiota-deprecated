@@ -44,10 +44,10 @@ class OccurrenceUtilities {
 			$y = $match[1];
 			$m = $match[2];
 		}
-		elseif(preg_match('/^(\d{1,2}).{1}([IVX]{1,4}).{1}(\d{2,4})/',$dateStr,$match)){
+		elseif(preg_match('/^([\d-]{1,5})\.{1}([IVX]{1,4})\.{1}(\d{2,4})/i',$dateStr,$match)){
 			//Roman numerial format: dd.IV.yyyy, dd.IV.yy, dd-IV-yyyy, dd-IV-yy
 			$d = $match[1];
-			$mStr = $match[2];
+			$mStr = strtoupper($match[2]);
 			$y = $match[3];
 			if(array_key_exists($mStr,self::$monthRoman)){
 				$m = self::$monthRoman[$mStr];
@@ -468,7 +468,7 @@ class OccurrenceUtilities {
 				$recMap['eventdate'] = self::formatDate($vDate);
 			}
 		}
-		//eventDate NULL && verbatimEventDate NOT NULL && year NOT NULL
+		//eventDate IS NULL && year IS NULL && verbatimEventDate NOT NULL
 		if((!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']) && array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate'] && (!array_key_exists('year',$recMap) || !$recMap['year'])){
 			$dateStr = self::formatDate($recMap['verbatimeventdate']);
 			if($dateStr) $recMap['eventdate'] = $dateStr;
