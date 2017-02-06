@@ -189,13 +189,13 @@ if($action){
 	if(isset($imagelib_indexCrumbs)){
 		echo "<div class='navpath'>";
 		echo $imagelib_indexCrumbs;
-		echo " <b>Image Library</b>";
+		echo " <b>Image Search</b>";
 		echo "</div>";
 	}
 	else{
 		echo '<div class="navpath">';
 		echo '<a href="../index.php">Home</a> &gt;&gt; ';
-		echo '<b>Image Library</b>';
+		echo '<b>Image Search</b>';
 		echo "</div>";
 	}
 	?> 
@@ -317,10 +317,10 @@ if($action){
 									<input type='radio' name='imagetype' value='all' <?php if((!array_key_exists("imagetype",$previousCriteria)) || (array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'all')) echo "CHECKED"; ?> > All Images
 								</div>
 								<div style="margin-top:5px;">
-									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Limit to Specimen Images Only
+									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Limit to Specimen Images
 								</div>
 								<div style="margin-top:5px;">
-									<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Limit to Field Images Only
+									<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Limit to Non-Specimen Images
 								</div>
 							</td>
 						</tr>
