@@ -914,10 +914,13 @@ class SpecUploadBase extends SpecUpload{
 								continue;
 							}
 						}
+						$imgFormat = 'image/jpeg';
+						if(@exif_imagetype($mediaUrl) == 1) $imgFormat = 'image/gif';
+						if(@exif_imagetype($mediaUrl) == 3) $imgFormat = 'image/png';
 						$this->imageTransferCount++;
 						if($this->imageTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:20px;">Image count: '.$this->imageTransferCount.'</li>');
-						$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url,collid) '.
-							'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty",'.$this->collId.')';
+						$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url,format,collid) '.
+							'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty","'.$imgFormat.'",'.$this->collId.')';
 						if(!$this->conn->query($sqlInsert)){
 							$this->outputMsg('<li style="margin-left:20px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</li>');
 							//$this->outputMsg('<li style="margin-left:10px;">SQL: '.$sqlInsert.'</li>');
@@ -1322,9 +1325,22 @@ class SpecUploadBase extends SpecUpload{
 					return false;
 				}
 				$skipFormats = array('image/tiff','image/dng','image/bmp','text/html','application/xml','application/pdf','tif','tiff','dng','html','pdf');
-				if(isset($recMap['format']) && $recMap['format'] && in_array(strtolower($recMap['format']), $skipFormats)){
-					return false;
+				$imgFormat = '';
+				if(isset($recMap['format']) && $recMap['format']){
+					$imgFormat = strtolower($recMap['format']);
+					if(in_array($imgFormat, $skipFormats)) return false;
 				}
+				else{
+					if(strtolower(substr($testUrl,-3)) == 'gif') $imgFormat = 'image/gif';
+					elseif(@exif_imagetype($mediaUrl) == 1) $imgFormat = 'image/gif';
+					if(strtolower(substr($testUrl,-3)) == 'png') $imgFormat = 'image/png';
+					elseif(@exif_imagetype($mediaUrl) == 3) $imgFormat = 'image/png';
+					if(strtolower(substr($testUrl,-3)) == 'jpg') $imgFormat = 'image/jpeg';
+					elseif(strtolower(substr($testUrl,-4)) == 'jpeg') $imgFormat = 'image/jpeg';
+					elseif(@exif_imagetype($mediaUrl) == 2) $imgFormat = 'image/jpeg';
+				}
+				if($imgFormat) $recMap['format'] = $imgFormat;
+				
 				if($this->verifyImageUrls){
 					if(@!exif_imagetype($testUrl) || exif_imagetype($testUrl) > 4){
 						$this->outputMsg('<li style="margin-left:10px;">FAIL: not a web-ready image (JPG, GIF, PNG): <a href="'.$testUrl.'" target="_blank">'.$testUrl.'</a></li>');

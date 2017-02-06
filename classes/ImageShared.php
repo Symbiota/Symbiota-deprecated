@@ -916,7 +916,11 @@ class ImageShared{
 	public function setFormat($v){
 		$this->format = $this->cleanInStr($v);
 	}
-	
+
+	public function getFormat(){
+		return $this->format;
+	}
+
 	public function setOwner($v){
 		$this->owner = $this->cleanInStr($v);
 	}

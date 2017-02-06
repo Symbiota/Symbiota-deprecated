@@ -337,7 +337,9 @@ class ImageProcessor {
 	private function databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$ownerStr,$sourceIdentifier){
 		$status = true;
 		if($occid){
+			//All idigbio and iPlant iamge returns are JPG, even if input is different
 			$format = 'image/jpeg';
+			/*
 			$testUrl = $lgUrl;
 			if(!$testUrl) $testUrl = $webUrl;
 			$imgInfo = getimagesize($testUrl);
@@ -351,10 +353,8 @@ class ImageProcessor {
 				elseif($imgInfo[2] == IMAGETYPE_JPEG){
 					$format = 'image/jpeg';
 				}
-				else{
-					$format = '';
-				}
 			}
+			*/
 
 			//$this->logOrEcho("Preparing to load record into database",2);
 			$sql = 'INSERT INTO images(occid,url,thumbnailurl,originalurl,archiveurl,owner,sourceIdentifier,format) '.

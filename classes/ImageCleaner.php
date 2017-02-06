@@ -86,12 +86,12 @@ class ImageCleaner{
 
 		$sql = '';
 		if($collid){
-			$sql = 'SELECT i.imgid, i.url, i.originalurl, i.thumbnailurl, o.catalognumber '.
+			$sql = 'SELECT i.imgid, i.url, i.originalurl, i.thumbnailurl, i.format, o.catalognumber '.
 				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 				'WHERE (o.collid = '.$collid.') ';
 		}
 		else{
-			$sql = 'SELECT i.imgid, i.url, i.originalurl, i.thumbnailurl '.
+			$sql = 'SELECT i.imgid, i.url, i.originalurl, i.thumbnailurl, i.format '.
 				'FROM images i '.
 				'WHERE (i.occid IS NULL) ';
 		}
@@ -212,6 +212,9 @@ class ImageCleaner{
 					}
 					if($lgFullUrl){
 						$sql .= ',originalurl = "'.$lgFullUrl.'" ';
+					}
+					if(!$row->format && $imgManager->getFormat()){
+						$sql .= ',format = "'.$imgManager->getFormat().'" ';
 					}
 					$sql .= "WHERE ti.imgid = ".$imgId;
 					//echo $sql; 
