@@ -459,28 +459,40 @@ class DwcArchiverOccurrence{
 	}
 	
 	public function verifyCollRecords($collId){
-		$sql = '';
 		$recArr = array();
-		$sql = 'SELECT COUNT(CASE WHEN ISNULL(o.occurrenceID) THEN o.occid ELSE NULL END) AS nullOccurID, '.
-			'COUNT(CASE WHEN ISNULL(o.basisOfRecord) THEN o.occid ELSE NULL END) AS nullBasisRec, '.
-			'COUNT(CASE WHEN ISNULL(o.catalogNumber) THEN o.occid ELSE NULL END) AS nullCatNum, '.
-			'COUNT(CASE WHEN ISNULL(g.guid) THEN o.occid ELSE NULL END) AS nullSymUUID '.
-			'FROM omoccurrences AS o LEFT JOIN guidoccurrences AS g ON o.occid = g.occid '.
-			'WHERE o.collid = '.$collId;
-		//echo 'SQL: '.$sql.'<br/>';
+
+		//Get NULL basisOfRecord
+		$sql = 'SELECT COUNT(*) as cnt FROM omoccurrences WHERE basisofrecord IS NULL AND collid = '.$collId;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$recArr['nullOccurID'] = $r->nullOccurID;
-			$recArr['nullBasisRec'] = $r->nullBasisRec;
-			$recArr['nullCatNum'] = $r->nullCatNum;
-			$recArr['nullSymUUID'] = $r->nullSymUUID;
+			$recArr['nullBasisRec'] = $r->cnt;
 		}
 		$rs->free();
+
+		//Get NULL GUID counts
+		$guidTarget = $this->collArr[$collId]['guidtarget'];
+		if($guidTarget){
+			$sql = 'SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ';
+			if($guidTarget == 'symbiotaUUID'){
+				$sql .= 'LEFT JOIN guidoccurrences g ON o.occid = g.occid WHERE g.occid IS NULL ';
+			}
+			else{
+				$sql .= 'WHERE o.'.$guidTarget.' IS NULL ';
+			}
+			$sql .= 'AND o.collid = '.$collId;
+			//echo 'SQL: '.$sql.'<br/>';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$recArr['nullGUIDs'] = $r->cnt;
+			}
+			$rs->free();
+		}
 		
 		return $recArr;
 	}
 
-	public function getCollArr(){
+	public function getCollArr($id = 0){
+		if($id && isset($this->collArr[$id])) return $this->collArr[$id];
 		return $this->collArr;
 	}
 
@@ -2290,6 +2302,11 @@ class DwcArchiverOccurrence{
 			$this->serverDomain .= $_SERVER["SERVER_NAME"];
 			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $this->serverDomain .= ':'.$_SERVER["SERVER_PORT"];
 		}
+	}
+
+	public function getServerDomain(){
+		$this->setServerDomain();
+		return $this->serverDomain;
 	}
 
 	private function logOrEcho($str){

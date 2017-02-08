@@ -1,8 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
-include_once($serverRoot.'/classes/CollectionProfileManager.php');
-header('Content-Type: text/html; charset=' .$charset);
+include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/CollectionProfileManager.php');
+header('Content-Type: text/html; charset=' .$CHARSET);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $emode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
@@ -16,11 +16,9 @@ $collManager = new CollectionProfileManager();
 $includeDets = 1;
 $includeImgs = 1;
 $redactLocalities = 1;
-$recFlagArr = array();
 $collPubArr = array();
 $publishGBIF = false;
 $publishIDIGBIO = false;
-$organizationKey = '';
 $installationKey = '';
 $datasetKey = '';
 $endpointKey = '';
@@ -52,7 +50,7 @@ if($action){
 			$redactLocalities = 0;
 			$dwcaManager->setRedactLocalities(0);
 		}
-		$dwcaManager->setTargetPath($serverRoot . (substr($serverRoot, -1) == '/' ? '' : '/') . 'collections/datasets/dwc/');
+		$dwcaManager->setTargetPath($SERVER_ROOT . (substr($SERVER_ROOT, -1) == '/' ? '' : '/') . 'collections/datasets/dwc/');
 	}
 }
 if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
@@ -69,14 +67,14 @@ if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
 }
 
 $isEditor = 0;
-if($isAdmin || (array_key_exists('CollAdmin',$userRights) && in_array($collId,$userRights['CollAdmin']))){
+if($IS_ADMIN || (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin']))){
 	$isEditor = 1;
 }
 
 $collArr = array();
 if($collId){
 	$dwcaManager->setCollArr($collId);
-	$collArr = $dwcaManager->getCollArr();
+	$collArr = $dwcaManager->getCollArr($collId);
 }
 if($isEditor){
 	if(array_key_exists('colliddel',$_POST)){
@@ -86,7 +84,7 @@ if($isEditor){
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title>Darwin Core Archiver Publisher</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet">
@@ -162,7 +160,7 @@ if($isEditor){
 <body>
 <?php 
 $displayLeftMenu = (isset($collections_datasets_datapublisherMenu)?$collections_datasets_datapublisherMenu: 'true');
-include($serverRoot. '/header.php');
+include($SERVER_ROOT. '/header.php');
 ?>
 <div class='navpath'>
 	<a href="../../index.php">Home</a> &gt;&gt;
@@ -183,7 +181,7 @@ include($serverRoot. '/header.php');
 <!-- This is inner text! -->
 <div id="innertext">
 	<?php 
-	if(!$collId && $isAdmin){
+	if(!$collId && $IS_ADMIN){
 		?>
 		<div style="float:right;">
 			<a href="#" title="Display Publishing Control Panel" onclick="toggle('dwcaadmindiv')">
@@ -194,10 +192,9 @@ include($serverRoot. '/header.php');
 	} 
 	?>
 	<h1>Darwin Core Archive Publishing</h1>
-	
 	<?php 
 	if($collId){
-		echo '<div style="font-weight:bold;font-size:120%;">'.$collArr[$collId]['collname'].'</div>';
+		echo '<div style="font-weight:bold;font-size:120%;">'.$collArr['collname'].'</div>';
 		?>
 		<div style="margin:10px;">
 			Use the controls below to publish occurrence data within this collection as a
@@ -233,11 +230,9 @@ include($serverRoot. '/header.php');
 	} 
 	?>
 	<div style="margin:20px;">
-		RSS Feed: 
+		<b>RSS Feed:</b> 
 		<?php 
-		$urlPrefix = 'http://'.$_SERVER['SERVER_NAME'];
-		if($_SERVER['SERVER_PORT'] && $_SERVER['SERVER_PORT'] != 80) $urlPrefix .= ':'.$_SERVER['SERVER_PORT'];
-		$urlPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+		$urlPrefix = $dwcaManager->getServerDomain().$CLIENT_ROOT.(substr($CLIENT_ROOT,-1)=='/'?'':'/');
 		if(file_exists('../../webservices/dwc/rss.xml')){
 			$feedLink = $urlPrefix.'webservices/dwc/rss.xml';
 			echo '<a href="'.$feedLink.'" target="_blank">'.$feedLink.'</a>';
@@ -249,7 +244,6 @@ include($serverRoot. '/header.php');
 	</div>
 	<?php 
 	if($collId){
-		$recFlagArr = $dwcaManager->verifyCollRecords($collId);
 		if($action == 'Create/Refresh Darwin Core Archive'){
 			echo '<ul>';
 			$dwcaManager->setVerbose(1);
@@ -262,67 +256,62 @@ include($serverRoot. '/header.php');
 			}
 		}
 		if($dwcaArr = $dwcaManager->getDwcaItems($collId)){
-			$dwcUri = '';
-			foreach($dwcaArr as $k => $v){
-				if($v['collid'] == $collId){
-					$dwcUri = $v['link'];
-				}
-				?>
-				<div style="margin:10px;">
-					<div>
-						<b>Title:</b> <?php echo $v['title']; ?> 
-						<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
-							<input type="hidden" name="colliddel" value="<?php echo $v['collid']; ?>">
-							<input type="hidden" name="collid" value="<?php echo $v['collid']; ?>">
-							<input type="image" src="../../images/del.png" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
-						</form>
-					</div>
-					<div><b>Description:</b> <?php echo $v['description']; ?></div>
-					<?php
-					$emlLink = $urlPrefix.'collections/datasets/emlhandler.php?collid='.$collId; 
-					?>
-					<div><b>EML:</b> <a href="<?php echo $emlLink; ?>"><?php echo $emlLink; ?></a></div>
-					<div><b>Link:</b> <a href="<?php echo $v['link']; ?>"><?php echo $v['link']; ?></a></div>
-					<div><b>Type:</b> <?php echo $v['type']; ?></div>
-					<div><b>Record Type:</b> <?php echo $v['recordType']; ?></div>
-					<div><b>Publication Date:</b> <?php echo $v['pubDate']; ?></div>
+			$dArr = current($dwcaArr);
+			$dwcUri = ($dArr['collid'] == $collId?$dArr['link']:'');
+			?>
+			<div style="margin:10px;">
+				<div>
+					<b>Title:</b> <?php echo $dArr['title']; ?> 
+					<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
+						<input type="hidden" name="colliddel" value="<?php echo $dArr['collid']; ?>">
+						<input type="hidden" name="collid" value="<?php echo $dArr['collid']; ?>">
+						<input type="image" src="../../images/del.png" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
+					</form>
 				</div>
-				<?php 
-			}
+				<div><b>Description:</b> <?php echo $dArr['description']; ?></div>
+				<?php
+				$emlLink = $urlPrefix.'collections/datasets/emlhandler.php?collid='.$collId; 
+				?>
+				<div><b>EML:</b> <a href="<?php echo $emlLink; ?>"><?php echo $emlLink; ?></a></div>
+				<div><b>Link:</b> <a href="<?php echo $dArr['link']; ?>"><?php echo $dArr['link']; ?></a></div>
+				<div><b>Type:</b> <?php echo $dArr['type']; ?></div>
+				<div><b>Record Type:</b> <?php echo $dArr['recordType']; ?></div>
+				<div><b>Publication Date:</b> <?php echo $dArr['pubDate']; ?></div>
+			</div>
+			<?php 
 		}
 		else{
 			echo '<div style="margin:20px;font-weight:bold;color:red;">No data archives have been published for this collection</div>';
 		}
 		?>
-		<fieldset style="padding:5px;">
+		<fieldset style="margin:15px;padding:15px;">
 			<legend><b>Publishing Information</b></legend>
 			<?php
-			if(!$collArr[$collId]['guidtarget']){
-				echo '<div style="margin:10px;font-weight:bold;color:red;">The GUID source has not been set for this collection. Please go to the <a href="../misc/collmetadata.php?collid='.$collId.'">Edit Metadata page</a> to set GUID source.</div>';
+			$recFlagArr = $dwcaManager->verifyCollRecords($collId);
+			if($collArr['guidtarget']){
+				echo '<div style="margin:10px;"><b>GUID source:</b> '.$collArr['guidtarget'].'</div>';
+				if($recFlagArr['nullGUIDs']){
+					echo '<div style="margin:10px;">';
+					if($collArr['guidtarget'] == 'occurrenceId'){
+						echo '<b>Records missing <a href="" target="_blank">OccurrenceID GUIDs</a>:</b> '.$recFlagArr['nullGUIDs'];
+						echo ' <span style="color:red;margin-left:15px;">These records will not be published!</span> ';
+					}
+					elseif($collArr['guidtarget'] == 'catalogNumber'){
+						echo '<b>Records missing Catalog Numbers:</b> '.$recFlagArr['nullGUIDs'];
+						echo ' <span style="color:red;margin-left:15px;">These records will not be published!</span> ';
+					}
+					else{
+						echo 'Records missing Symbiota GUIDs: '.$recFlagArr['nullGUIDs'].'<br/>';
+						echo 'Please go to the <a href="../../admin/guidmapper.php?collid='.$collId.'">Collection GUID Mapper</a> to assign Symbiota GUIDs.';
+					}
+					echo '</div>';
+				}
 			}
 			else{
-				echo '<div style="margin:10px;font-weight:bold;">The GUID source for this collection is set to '.$collArr[$collId]['guidtarget'].'</div>';
-			}
-			if($recFlagArr['nullSymUUID']){
-				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullSymUUID'].' records missing Symbiota GUID (recordID) assignments and will not be published. Please go to the <a href="../../admin/guidmapper.php?collid='.$collId.'">Collection GUID Mapper</a> to set Symbiota GUIDs.</div>';
+				echo '<div style="margin:10px;font-weight:bold;color:red;">The GUID source has not been set for this collection. Please go to the <a href="../misc/collmetadata.php?collid='.$collId.'">Edit Metadata page</a> to set GUID source.</div>';
 			}
 			if($recFlagArr['nullBasisRec']){
 				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullBasisRec'].' records missing basisOfRecord and will not be published. Please go to <a href="../editor/occurrencetabledisplay.php?q_recordedby=&q_recordnumber=&q_eventdate=&q_catalognumber=&q_othercatalognumbers=&q_observeruid=&q_recordenteredby=&q_dateentered=&q_datelastmodified=&q_processingstatus=&q_customfield1=basisOfRecord&q_customtype1=NULL&q_customvalue1=Something&q_customfield2=&q_customtype2=EQUALS&q_customvalue2=&q_customfield3=&q_customtype3=EQUALS&q_customvalue3=&collid='.$collId.'&csmode=0&occid=&occindex=0&orderby=&orderbydir=ASC">Edit Existing Occurrence Records</a> to correct this.</div>';
-			}
-			if((!$collArr[$collId]['guidtarget'] || $collArr[$collId]['guidtarget'] == 'occurrenceId') && $recFlagArr['nullOccurID']){
-				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullOccurID'].' records missing Occurrence IDs and will not be published. ';
-				if($collArr[$collId]['guidtarget'] == 'occurrenceId'){
-					echo '<span style="font-weight:normal;color:black;">As the GUID source is set to occurrenceID, those records missing this field will be excluded from the published archive.';
-				}
-				else{
-					echo '<span style="font-weight:normal;color:black;">As the GUID source is not set for this collection occurrenceID is used by default, records missing this field will be excluded from the published archive. Please use the link above to set the GUID source for this collection.';
-				}
-				echo '</div>';
-			}
-			if($collArr[$collId]['guidtarget'] == 'catalogNumber' && $recFlagArr['nullCatNum']){
-				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullCatNum'].' records missing Catalog Numbers. Since this has been selected as your GUID source these records will not be published. ';
-				echo '<span style="font-weight:normal;color:black;">As the GUID source is set to catalog number, those records missing this field will be excluded from the published archive.';
-				echo '</div>';
 			}
 			if(($publishGBIF || $publishIDIGBIO) && $dwcUri && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
 				if($publishGBIF && !$datasetKey) {
@@ -341,7 +330,7 @@ include($serverRoot. '/header.php');
 							GBIF Organization Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>"/>
 							<input type="hidden" name="portalname" id="portalname" value='<?php echo $DEFAULT_TITLE; ?>'/>
-							<input type="hidden" name="collname" id="collname" value='<?php echo $collArr[$collId]['collname']; ?>'/>
+							<input type="hidden" name="collname" id="collname" value='<?php echo $collArr['collname']; ?>'/>
 							<input type="hidden" name="aggKeysStr" id="aggKeysStr" value=''/>
 							<input type="hidden" id="gbifInstOrgKey" value='<?php echo $GBIF_ORG_KEY; ?>'/>
 							<input type="hidden" id="gbifInstKey" value='<?php echo $installationKey; ?>'/>
@@ -373,33 +362,25 @@ include($serverRoot. '/header.php');
 			}
 			?>
 		</fieldset>
-		<form name="dwcaform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaForm(this)">
-			<fieldset style="padding:15px;margin:15px;">
-				<legend><b>Publish/Refresh DwC-A File</b></legend>
-				<!-- 
-				<div>
-					<?php 
-					$cSet = str_replace('-','',strtolower($charset));
-					?>
-					<input type="radio" name="cset" value="iso88591" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
-					<input type="radio" name="cset" value="utf8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
-				</div>
-				-->
+		<fieldset style="padding:15px;margin:15px;">
+			<legend><b>Publish/Refresh DwC-A File</b></legend>
+			<form name="dwcaform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaForm(this)">
 				<div>
 					<input type="checkbox" name="dets" value="1" <?php echo ($includeDets?'CHECKED':''); ?> /> Include Determination History<br/>
 					<input type="checkbox" name="imgs" value="1" <?php echo ($includeImgs?'CHECKED':''); ?> /> Include Image URLs<br/>
 					<input type="checkbox" name="redact" value="1" <?php echo ($redactLocalities?'CHECKED':''); ?> /> Redact Sensitive Localities<br/>
-					<!-- 
-					<input type="radio" name="schema" value="1" CHECKED /> Darwin Core Archive<br/>
-					<input type="radio" name="schema" value="2" /> Symbiota Archive
-					-->
 				</div>
 				<div style="clear:both;margin:10px;">
 					<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-					<input type="submit" name="formsubmit" value="Create/Refresh Darwin Core Archive" />
+					<input type="submit" name="formsubmit" value="Create/Refresh Darwin Core Archive" <?php if(!$collArr['guidtarget']) echo 'disabled'; ?> />
+					<?php 
+					if(!$collArr['guidtarget']){
+						echo '<span style="color:red;margin-left:10px;">Archive cannot be published until occurrenceID GUID source is set</span>';
+					}
+					?>
 				</div>
-				<?php 
-				if($collArr[$collId]['managementtype'] != 'Live Data' || $collArr[$collId]['guidtarget'] != 'symbiotaUUID'){
+				<?php
+				if($collArr['managementtype'] != 'Live Data' || $collArr['guidtarget'] != 'symbiotaUUID'){
 					?>
 					<div style="margin:10px;font-weight:bold">
 						NOTE: all records lacking occurrenceID GUIDs will be excluded
@@ -407,12 +388,12 @@ include($serverRoot. '/header.php');
 					<?php
 				}
 				?>
-			</fieldset>
-		</form>
+			</form>
+		</fieldset>
 		<?php
 	}
 	else{
-		if($isAdmin){
+		if($IS_ADMIN){
 			if($action == 'Create/Refresh Darwin Core Archive(s)'){
 				echo '<ul>';
 				$dwcaManager->setVerbose(1);
@@ -427,10 +408,9 @@ include($serverRoot. '/header.php');
 			<div id="dwcaadmindiv" style="margin:10px;display:<?php echo ($emode?'block':'none'); ?>;" >
 				<form name="dwcaadminform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaAdminForm(this)">
 					<fieldset style="padding:15px;">
-						<legend><b>Publish / Refresh DWCA Files</b></legend>
+						<legend><b>Publish / Refresh DwC-A Files</b></legend>
 						<div style="margin:10px;">
-							&nbsp;&nbsp;&nbsp;&nbsp;
-							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> Select/Deselect All<br/> 
+							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> Select/Deselect All<br/><br/> 
 							<?php 
 							$collArr = $dwcaManager->getCollectionList();
 							foreach($collArr as $k => $v){
@@ -438,26 +418,13 @@ include($serverRoot. '/header.php');
 							}
 							?>
 						</div>
-						<!-- 
-						<div style="margin:10px;">
-							<?php 
-							$cSet = str_replace('-','',strtolower($charset));
-							?>
-							<input type="radio" name="cset" value="iso88591" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
-							<input type="radio" name="cset" value="utf8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
-						</div>
-						-->
-						<fieldset style="margin:10px;">
-							<legend>Options</legend>
+						<fieldset style="margin:10px;padding:15px;">
+							<legend><b>Options</b></legend>
 							<input type="checkbox" name="dets" value="1" <?php echo ($includeDets?'CHECKED':''); ?> /> Include Determination History<br/>
 							<input type="checkbox" name="imgs" value="1" <?php echo ($includeImgs?'CHECKED':''); ?> /> Include Image URLs<br/>
 							<input type="checkbox" name="redact" value="1" <?php echo ($redactLocalities?'CHECKED':''); ?> /> Redact Sensitive Localities<br/>
-							<!-- 
-							<input type="radio" name="schema" value="1" CHECKED /> Darwin Core Archive<br/>
-							<input type="radio" name="schema" value="2" /> Symbiota Archive
-							-->
 						</fieldset>
-						<div style="clear:both;margin:10px;">
+						<div style="clear:both;margin:20px;">
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 							<input type="submit" name="formsubmit" value="Create/Refresh Darwin Core Archive(s)" />
 						</div>
@@ -469,7 +436,7 @@ include($serverRoot. '/header.php');
 		if($dwcaArr = $dwcaManager->getDwcaItems()){
 			?>
 			<table class="styledtable" style="font-family:Arial;font-size:12px;margin:10px;">
-				<tr><th>Code</th><th>Collection Name</th><th>DwC-Archive</th><th>Pub Date</th></tr>
+				<tr><th>Code</th><th>Collection Name</th><th>DwC-Archive</th><th>Metadata</th><th>Pub Date</th></tr>
 				<?php 
 				foreach($dwcaArr as $k => $v){ 
 					?>
@@ -481,7 +448,7 @@ include($serverRoot. '/header.php');
 							$filePath = 'dwc'.substr($v['link'],strrpos($v['link'],'/'));
 							$sizeStr = $dwcaManager->humanFilesize($filePath);
 							echo '<a href="'.$filePath.'">DwC-A ('.$sizeStr.')</a>';
-							if($isAdmin){
+							if($IS_ADMIN){
 								?>
 								<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
 									<input type="hidden" name="colliddel" value="<?php echo $v['collid']; ?>">
@@ -489,6 +456,11 @@ include($serverRoot. '/header.php');
 								</form>
 								<?php
 							}
+							?>
+						</td>
+						<td>
+							<?php 
+							echo '<a href="'.$urlPrefix.'collections/datasets/emlhandler.php?collid='.$v['collid'].'">EML</a>';
 							?>
 						</td> 
 						<td class="nowrap"><?php echo date('Y-m-d', strtotime($v['pubDate'])); ?></td>
@@ -506,7 +478,7 @@ include($serverRoot. '/header.php');
 	?>
 </div>
 <?php 
-include($serverRoot. '/footer.php');
+include($SERVER_ROOT. '/footer.php');
 ?>
 </body>
 </html>
