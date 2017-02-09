@@ -21,7 +21,7 @@ if($collid && is_numeric($collid)){
 		
 		$dwcaHandler = new DwcArchiverOccurrence();
 		$dwcaHandler->setCollArr($collid);
-		$dwcaHandler->setVerbose(0);
+		$dwcaHandler->setVerboseMode(0);
 		$dwcaHandler->addCondition('decimallatitude','NULL');
 		$dwcaHandler->addCondition('decimallongitude','NULL');
 		$dwcaHandler->addCondition('catalognumber','NOTNULL');

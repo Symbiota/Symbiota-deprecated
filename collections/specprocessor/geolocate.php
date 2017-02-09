@@ -462,7 +462,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<?php 
 												$dwcaHandler = new DwcArchiverOccurrence();
 												$dwcaHandler->setCollArr($collid);
-												$dwcaHandler->setVerbose(0);
+												$dwcaHandler->setVerboseMode(0);
 												$dwcaHandler->addCondition('decimallatitude','NULL');
 												$dwcaHandler->addCondition('decimallongitude','NULL');
 												$dwcaHandler->addCondition('locality','NOTNULL');

@@ -26,7 +26,7 @@ if($collid && is_numeric($collid)){
 		$dwcaHandler->setSchemaType('coge');
 		$dwcaHandler->setExtended(false);
 		$dwcaHandler->setDelimiter('csv');
-		$dwcaHandler->setVerbose(0);
+		$dwcaHandler->setVerboseMode(0);
 		$dwcaHandler->setRedactLocalities(0);
 		$dwcaHandler->setIncludeDets(0);
 		$dwcaHandler->setIncludeImgs(0);

@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverPublisher.php');
 	
 $collStr = $argv[1];
 $serverDomain = $argv[2];
@@ -23,14 +23,14 @@ if($argc > 3 && is_numeric($argv[3])){
 
 
 if($collStr){
-	$dwcaManager = new DwcArchiverOccurrence();
+	$dwcaManager = new DwcArchiverPublisher();
 	$dwcaManager->setIncludeDets($includeDets);
 	$dwcaManager->setIncludeImgs($includeImgs);
 	$dwcaManager->setIncludeAttributes($includeAttributes);
 	$dwcaManager->setRedactLocalities($redactLocalities);
 	$dwcaManager->setServerDomain($serverDomain);
-	$dwcaManager->setTargetPath($serverRoot.(substr($SERVER_ROOT,-1)=='/'?'':'/').'collections/datasets/dwc/');
-	$dwcaManager->setVerbose(0);
+	$dwcaManager->setTargetPath($serverRoot.(substr($SERVER_ROOT,-1)=='/'?'':'/').'content/dwca/');
+	$dwcaManager->setVerboseMode(0);
 	$collArr = explode(',',$collStr);
 	$dwcaManager->batchCreateDwca($collArr);
 }

@@ -362,7 +362,7 @@ class OccurrenceDataset {
 		$dwcaHandler->setSchemaType($schema);
 		$dwcaHandler->setExtended($extended);
 		$dwcaHandler->setDelimiter($format);
-		$dwcaHandler->setVerbose(0);
+		$dwcaHandler->setVerboseMode(0);
 		$dwcaHandler->setRedactLocalities($redactLocalities);
 		if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
 

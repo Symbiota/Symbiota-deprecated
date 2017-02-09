@@ -1,16 +1,16 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverDetermination.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverImage.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverAttribute.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
-class DwcArchiverOccurrence{
+class DwcArchiverOccurrence extends Manager{
 
-	private $conn;
 	private $ts;
 
-	private $collArr;
+	protected $collArr;
 	private $customWhereSql;
 	private $conditionSql;
  	private $conditionArr = array();
@@ -18,10 +18,7 @@ class DwcArchiverOccurrence{
 	private $upperTaxonomy = array();
 
 	private $targetPath;
-	private $serverDomain;
-
-	private $logFH;
-	private $verbose = false;
+	protected $serverDomain;
 
 	private $schemaType = 'dwc';			//dwc, symbiota, backup
 	private $limitToGuids = false;			//Limit output to only records with GUIDs
@@ -40,21 +37,20 @@ class DwcArchiverOccurrence{
 	private $redactLocalities = 1;
 	private $rareReaderArr = array();
 	private $charSetSource = '';
-	private $charSetOut = '';
+	protected $charSetOut = '';
 
 	private $geolocateVariables = array();
 	
-	public function __construct(){
-
+	public function __construct($conType='readonly'){
+		parent::__construct(null,$conType);
 		//Ensure that PHP DOMDocument class is installed
 		if(!class_exists('DOMDocument')){
 			exit('FATAL ERROR: PHP DOMDocument class is not installed, please contact your server admin');
 		}
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
 		$this->ts = time();
-		if(!$this->logFH && $this->verbose){
+		if($this->verboseMode){
 			$logFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
-			$this->logFH = fopen($logFile, 'a');
+			$this->setLogFH($logPath);
 		}
 
 		//Character set
@@ -76,10 +72,7 @@ class DwcArchiverOccurrence{
 	}
 
 	public function __destruct(){
-		if(!($this->conn === false)) $this->conn->close();
-		if($this->logFH){
-			fclose($this->logFH);
-		}
+		parent::__destruct();
 	}
 
 	private function initOccurrenceArr(){
@@ -398,12 +391,6 @@ class DwcArchiverOccurrence{
 		}
 	}
 	
-	private function resetCollArr($collTarget){
-		unset($this->collArr);
-		$this->collArr = array();
-		$this->setCollArr($collTarget);
-	}
-	
 	public function setCollArr($collTarget, $collType = ''){
 		$collTarget = $this->cleanInStr($collTarget);
 		$collType = $this->cleanInStr($collType);
@@ -456,39 +443,6 @@ class DwcArchiverOccurrence{
 			}
 			$rs->free();
 		}
-	}
-	
-	public function verifyCollRecords($collId){
-		$recArr = array();
-
-		//Get NULL basisOfRecord
-		$sql = 'SELECT COUNT(*) as cnt FROM omoccurrences WHERE basisofrecord IS NULL AND collid = '.$collId;
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$recArr['nullBasisRec'] = $r->cnt;
-		}
-		$rs->free();
-
-		//Get NULL GUID counts
-		$guidTarget = $this->collArr[$collId]['guidtarget'];
-		if($guidTarget){
-			$sql = 'SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ';
-			if($guidTarget == 'symbiotaUUID'){
-				$sql .= 'LEFT JOIN guidoccurrences g ON o.occid = g.occid WHERE g.occid IS NULL ';
-			}
-			else{
-				$sql .= 'WHERE o.'.$guidTarget.' IS NULL ';
-			}
-			$sql .= 'AND o.collid = '.$collId;
-			//echo 'SQL: '.$sql.'<br/>';
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$recArr['nullGUIDs'] = $r->cnt;
-			}
-			$rs->free();
-		}
-		
-		return $recArr;
 	}
 
 	public function getCollArr($id = 0){
@@ -1356,7 +1310,7 @@ class DwcArchiverOccurrence{
 	/* 
 	 * Input: Array containing the eml data
 	 * OUTPUT: XML String representing the EML
-	 * USED BY: this class, DwcArchiverExpedition, and emlhandler.php 
+	 * USED BY: this class, and emlhandler.php 
 	 */
 	public function getEmlDom($emlArr = null){
 		global $RIGHTS_TERMS_DEFS;
@@ -1940,212 +1894,7 @@ class DwcArchiverOccurrence{
 		}
 	}
 
-	//DWCA publishing and RSS related functions 
-	public function batchCreateDwca($collIdArr){
-		$status = false;
-		$this->logOrEcho("Starting batch process (".date('Y-m-d h:i:s A').")\n");
-		$this->logOrEcho("\n-----------------------------------------------------\n\n");
-		
-		$successArr = array();
-		foreach($collIdArr as $id){
-			//Create a separate DWCA object for each collection
-			$this->resetCollArr($id);
-			if($this->createDwcArchive()){
-				$successArr[] = $id;
-				$status = true;
-			}
-		}
-		//Reset $this->collArr with all the collections ran successfully and then rebuild the RSS feed 
-		$this->resetCollArr(implode(',',$successArr));
-		$this->writeRssFile();
-		$this->logOrEcho("Batch process finished! (".date('Y-m-d h:i:s A').") \n");
-		return $status;
-	}
-	
-	public function writeRssFile(){
-
-		$this->logOrEcho("Mapping data to RSS feed... \n");
-		
-		//Create new document and write out to target
-		$newDoc = new DOMDocument('1.0',$this->charSetOut);
-
-		//Add root element 
-		$rootElem = $newDoc->createElement('rss');
-		$rootAttr = $newDoc->createAttribute('version');
-		$rootAttr->value = '2.0';
-		$rootElem->appendChild($rootAttr);
-		$newDoc->appendChild($rootElem);
-
-		//Add Channel
-		$channelElem = $newDoc->createElement('channel');
-		$rootElem->appendChild($channelElem);
-		
-		//Add title, link, description, language
-		$titleElem = $newDoc->createElement('title');
-		$titleElem->appendChild($newDoc->createTextNode($GLOBALS['DEFAULT_TITLE'].' Darwin Core Archive rss feed'));
-		$channelElem->appendChild($titleElem);
-
-		$this->setServerDomain();
-		$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-
-		$localDomain = $this->serverDomain;
-		
-		$linkElem = $newDoc->createElement('link');
-		$linkElem->appendChild($newDoc->createTextNode($urlPathPrefix));
-		$channelElem->appendChild($linkElem);
-		$descriptionElem = $newDoc->createElement('description');
-		$descriptionElem->appendChild($newDoc->createTextNode($GLOBALS['DEFAULT_TITLE'].' Darwin Core Archive rss feed'));
-		$channelElem->appendChild($descriptionElem);
-		$languageElem = $newDoc->createElement('language','en-us');
-		$channelElem->appendChild($languageElem);
-
-		//Create new item for target archives and load into array
-		$itemArr = array();
-		foreach($this->collArr as $collId => $cArr){
-			$cArr = $this->utf8EncodeArr($cArr);
-			$itemElem = $newDoc->createElement('item');
-			$itemAttr = $newDoc->createAttribute('collid');
-			$itemAttr->value = $collId;
-			$itemElem->appendChild($itemAttr);
-			//Add title
-			$instCode = $cArr['instcode'];
-			if($cArr['collcode']) $instCode .= '-'.$cArr['collcode'];
-			$title = $instCode.' DwC-Archive';
-			$itemTitleElem = $newDoc->createElement('title');
-			$itemTitleElem->appendChild($newDoc->createTextNode($title));
-			$itemElem->appendChild($itemTitleElem);
-			//Icon
-			$imgLink = '';
-			if(substr($cArr['icon'],0,17) == 'images/collicons/'){
-				//Link is a 
-				$imgLink = $urlPathPrefix.$cArr['icon'];
-			}
-			elseif(substr($cArr['icon'],0,1) == '/'){
-				$imgLink = $localDomain.$cArr['icon'];
-			}
-			else{
-				$imgLink = $cArr['icon'];
-			}
-			$iconElem = $newDoc->createElement('image');
-			$iconElem->appendChild($newDoc->createTextNode($imgLink));
-			$itemElem->appendChild($iconElem);
-			
-			//description
-			$descTitleElem = $newDoc->createElement('description');
-			$descTitleElem->appendChild($newDoc->createTextNode('Darwin Core Archive for '.$cArr['collname']));
-			$itemElem->appendChild($descTitleElem);
-			//GUIDs
-			$guidElem = $newDoc->createElement('guid');
-			$guidElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/misc/collprofiles.php?collid='.$collId));
-			$itemElem->appendChild($guidElem);
-			$guidElem2 = $newDoc->createElement('guid');
-			$guidElem2->appendChild($newDoc->createTextNode($cArr['collectionguid']));
-			$itemElem->appendChild($guidElem2);
-			//EML file link
-			$fileNameSeed = str_replace(array(' ','"',"'"),'',$instCode).'_DwC-A';
-			
-			$emlElem = $newDoc->createElement('emllink');
-			$emlElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/datasets/dwc/'.$fileNameSeed.'.eml'));
-			$itemElem->appendChild($emlElem);
-			//type
-			$typeTitleElem = $newDoc->createElement('type','DWCA');
-			$itemElem->appendChild($typeTitleElem);
-			//recordType
-			$recTypeTitleElem = $newDoc->createElement('recordType','DWCA');
-			$itemElem->appendChild($recTypeTitleElem);
-			//link
-			$linkTitleElem = $newDoc->createElement('link');
-			$linkTitleElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/datasets/dwc/'.$fileNameSeed.'.zip'));
-			$itemElem->appendChild($linkTitleElem);
-			//pubDate
-			//$dsStat = stat($this->targetPath.$instCode.'_DwC-A.zip');
-			$pubDateTitleElem = $newDoc->createElement('pubDate');
-			$pubDateTitleElem->appendChild($newDoc->createTextNode(date("D, d M Y H:i:s")));
-			$itemElem->appendChild($pubDateTitleElem);
-			$itemArr[$title] = $itemElem;
-		}
-
-		//Add existing items
-		$rssFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'webservices/dwc/rss.xml';
-		if(file_exists($rssFile)){
-			//Get other existing DWCAs by reading and parsing current rss.xml
-			$oldDoc = new DOMDocument();
-			$oldDoc->load($rssFile);
-			$items = $oldDoc->getElementsByTagName("item");
-			foreach($items as $i){
-				//Filter out item for active collection
-				$t = $i->getElementsByTagName("title")->item(0)->nodeValue;
-				if(!array_key_exists($i->getAttribute('collid'),$this->collArr)) $itemArr[$t] = $newDoc->importNode($i,true);
-			}
-		}
-
-		//Sort and add items to channel
-		ksort($itemArr);
-		foreach($itemArr as $i){
-			$channelElem->appendChild($i);
-		}
-		
-		$newDoc->save($rssFile);
-
-		$this->logOrEcho("Done!!\n");
-	}
-	
-	public function deleteArchive($collId){
-		$rssFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'webservices/dwc/rss.xml';
-		if(!file_exists($rssFile)) return false;
-		$doc = new DOMDocument();
-		$doc->load($rssFile);
-		$cElem = $doc->getElementsByTagName("channel")->item(0);
-		$items = $cElem->getElementsByTagName("item");
-		foreach($items as $i){
-			if($i->getAttribute('collid') == $collId){
-				$link = $i->getElementsByTagName("link");
-				$nodeValue = $link->item(0)->nodeValue;
-				$filePath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/');
-				$filePath .= 'collections/datasets/dwc'.substr($nodeValue,strrpos($nodeValue,'/'));
-				unlink($filePath);
-				$emlPath = str_replace('.zip','.eml',$filePath);
-				if(file_exists($emlPath)) unlink($emlPath);
-				$cElem->removeChild($i);
-			}
-		}
-		$doc->save($rssFile);
-		return true;
-	}
-
 	//getters, setters, and misc functions
-	public function getDwcaItems($collid = 0){
-		$retArr = Array();
-		$rssFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'webservices/dwc/rss.xml';
-		if(file_exists($rssFile)){
-			$xmlDoc = new DOMDocument();
-			$xmlDoc->load($rssFile);
-			$items = $xmlDoc->getElementsByTagName("item");
-			$cnt = 0;
-			foreach($items as $i ){
-				$id = $i->getAttribute("collid");
-				if(!$collid || $collid == $id){
-					$titles = $i->getElementsByTagName("title");
-					$retArr[$cnt]['title'] = $titles->item(0)->nodeValue;
-					$descriptions = $i->getElementsByTagName("description");
-					$retArr[$cnt]['description'] = $descriptions->item(0)->nodeValue;
-					$types = $i->getElementsByTagName("type");
-					$retArr[$cnt]['type'] = $types->item(0)->nodeValue;
-					$recordTypes = $i->getElementsByTagName("recordType");
-					$retArr[$cnt]['recordType'] = $recordTypes->item(0)->nodeValue;
-					$links = $i->getElementsByTagName("link");
-					$retArr[$cnt]['link'] = $links->item(0)->nodeValue;
-					$pubDates = $i->getElementsByTagName("pubDate");
-					$retArr[$cnt]['pubDate'] = $pubDates->item(0)->nodeValue;
-					$retArr[$cnt]['collid'] = $id;
-					$cnt++;
-				}
-			}
-		}
-		$this->aasort($retArr, 'description');
-		return $retArr;
-	}
-
 	private function setUpperTaxonomy(){
 		if(!$this->upperTaxonomy){
 			$sqlOrder = 'SELECT t.sciname AS family, t2.sciname AS taxonorder '.
@@ -2190,20 +1939,6 @@ class DwcArchiverOccurrence{
 		}
 	}
 
-	private function aasort(&$array, $key){
-		$sorter = array();
-		$ret = array();
-		reset($array);
-		foreach ($array as $ii => $va) {
-			$sorter[$ii] = $va[$key];
-		}
-		asort($sorter);
-		foreach ($sorter as $ii => $va) {
-			$ret[$ii] = $array[$ii];
-		}
-		$array = $ret;
-	}
-
 	public function getCollectionList(){
 		$retArr = array();
 		$sql = 'SELECT c.collid, c.collectionname, CONCAT_WS("-",c.institutioncode,c.collectioncode) as instcode '.
@@ -2215,12 +1950,6 @@ class DwcArchiverOccurrence{
 			$retArr[$r->collid] = $r->collectionname.' ('.$r->instcode.')';
 		}
 		return $retArr;
-	}
-
-	public function setVerbose($c){
-		if($c){
-			$this->verbose = true;
-		}
 	}
 
 	public function setSchemaType($type){
@@ -2291,7 +2020,7 @@ class DwcArchiverOccurrence{
 	public function setGeolocateVariables($geolocateArr){
 		$this->geolocateVariables = $geolocateArr;
 	}
-	
+
 	public function setServerDomain($domain = ''){
 		if($domain){
 			$this->serverDomain = $domain;
@@ -2309,18 +2038,7 @@ class DwcArchiverOccurrence{
 		return $this->serverDomain;
 	}
 
-	private function logOrEcho($str){
-		if($this->verbose){
-			if($this->logFH){
-				fwrite($this->logFH,$str);
-			} 
-			echo '<li>'.$str.'</li>';
-			ob_flush();
-			flush();
-		}
-	}
-	
-	private function utf8EncodeArr($inArr){
+	protected function utf8EncodeArr($inArr){
 		$retArr = $inArr;
 		if($this->charSetSource == 'ISO-8859-1'){
 			foreach($retArr as $k => $v){
@@ -2371,22 +2089,6 @@ class DwcArchiverOccurrence{
 		foreach($arr as $k => $v){
 			if($v) $arr[$k] = addcslashes($v,"\n\r\\");
 		}
-	}
-
-	public function humanFilesize($filePath) {
-		if(!file_exists($filePath)) return '';
-		$decimals = 0;
-		$bytes = filesize($filePath);
-		$sz = 'BKMGTP';
-		$factor = floor((strlen($bytes) - 1) / 3);
-		return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
-	}
-
-	private function cleanInStr($inStr){
-		$retStr = trim($inStr);
-		$retStr = preg_replace('/\s\s+/', ' ',$retStr);
-		$retStr = $this->conn->real_escape_string($retStr);
-		return $retStr;
 	}
 }
 ?>

@@ -31,7 +31,7 @@ if($schema == "backup"){
 		if($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
 			$dwcaHandler->setSchemaType('backup');
 			$dwcaHandler->setCharSetOut($cSet);
-			$dwcaHandler->setVerbose(0);
+			$dwcaHandler->setVerboseMode(0);
 			$dwcaHandler->setIncludeDets(1);
 			$dwcaHandler->setIncludeImgs(1);
 			//$dwcaHandler->setIncludeAttributes(1);
@@ -116,7 +116,7 @@ else{
 		$dlManager->downloadData();
 	}
 	else{
-		$dwcaHandler->setVerbose(0);
+		$dwcaHandler->setVerboseMode(0);
 		if($schema == "coge"){
 			$dwcaHandler->setCollArr($_POST["collid"]);
 			$dwcaHandler->setCharSetOut('UTF-8');

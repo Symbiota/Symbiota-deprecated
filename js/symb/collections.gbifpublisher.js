@@ -77,7 +77,7 @@ function createGbifEndpoint(gbifDatasetKey,dwcUri){
 	var url = 'http://api.gbif.org/v1/dataset/'+gbifDatasetKey+'/endpoint';
 	var data = JSON.stringify({
 		type: "DWC_ARCHIVE",
-		//url: "http://symbiota4.acis.ufl.edu/scan/portal/collections/datasets/dwc/NAUF-CPMAB_DwC-A.zip"
+		//url: "http://symbiota4.acis.ufl.edu/scan/portal/content/dwca/NAUF-CPMAB_DwC-A.zip"
 		url: dwcUri
 	});
 

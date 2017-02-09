@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverPublisher.php');
 include_once($SERVER_ROOT.'/classes/CollectionProfileManager.php');
 header('Content-Type: text/html; charset=' .$CHARSET);
 
@@ -10,7 +10,7 @@ $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 $cSet = array_key_exists('cset',$_REQUEST)?$_REQUEST['cset']:'';
 $schema = array_key_exists('schema',$_REQUEST)?$_REQUEST['schema']:1;
 
-$dwcaManager = new DwcArchiverOccurrence();
+$dwcaManager = new DwcArchiverPublisher();
 $collManager = new CollectionProfileManager();
 
 $includeDets = 1;
@@ -50,7 +50,7 @@ if($action){
 			$redactLocalities = 0;
 			$dwcaManager->setRedactLocalities(0);
 		}
-		$dwcaManager->setTargetPath($SERVER_ROOT . (substr($SERVER_ROOT, -1) == '/' ? '' : '/') . 'collections/datasets/dwc/');
+		$dwcaManager->setTargetPath($SERVER_ROOT . (substr($SERVER_ROOT, -1) == '/' ? '' : '/') . 'content/dwca/');
 	}
 }
 if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
@@ -246,7 +246,7 @@ include($SERVER_ROOT. '/header.php');
 	if($collId){
 		if($action == 'Create/Refresh Darwin Core Archive'){
 			echo '<ul>';
-			$dwcaManager->setVerbose(1);
+			$dwcaManager->setVerboseMode(3);
 			$dwcaManager->setLimitToGuids(true);
 			$dwcaManager->createDwcArchive();
 			$dwcaManager->writeRssFile();
@@ -396,7 +396,7 @@ include($SERVER_ROOT. '/header.php');
 		if($IS_ADMIN){
 			if($action == 'Create/Refresh Darwin Core Archive(s)'){
 				echo '<ul>';
-				$dwcaManager->setVerbose(1);
+				$dwcaManager->setVerboseMode(3);
 				$dwcaManager->setLimitToGuids(true);
 				$dwcaManager->batchCreateDwca($_POST['coll']);
 				echo '</ul>';
@@ -445,9 +445,7 @@ include($SERVER_ROOT. '/header.php');
 						<td><?php echo substr($v['description'],24); ?></td>
 						<td class="nowrap">
 							<?php 
-							$filePath = 'dwc'.substr($v['link'],strrpos($v['link'],'/'));
-							$sizeStr = $dwcaManager->humanFilesize($filePath);
-							echo '<a href="'.$filePath.'">DwC-A ('.$sizeStr.')</a>';
+							echo '<a href="'.$v['link'].'">DwC-A ('.$dwcaManager->humanFileSize($v['link']).')</a>';
 							if($IS_ADMIN){
 								?>
 								<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">

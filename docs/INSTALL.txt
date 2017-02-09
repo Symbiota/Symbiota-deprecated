@@ -12,7 +12,7 @@ REQUIREMENTS
      match expected files sizes
    * zip extension should be enabled if you plan on uploading compressed data files
 * MariaDB or MySQL (5.1 or better)
-* GIT Client – not required though can be useful for updates from source code 
+* GIT Client - not required though can be useful for updates from source code 
 
 
 
@@ -43,7 +43,7 @@ http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-
    b. Database connection - rename 
       /config/dbconnection_template.php to /config/dbconnection.php. 
       modify with readonly and read/write logs, passwords, and schema names.
-   c. Homepage – rename /index_template.php to index.php. This is your  
+   c. Homepage - rename /index_template.php to index.php. This is your  
       home page to which will need introductory text, graphics, etc.
    d. Layout - header.php and footer.php are used by all pages to establish 
       uniform layout. menu.php is needed if a left menu is preferred. 
@@ -62,12 +62,12 @@ http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-
 4. File permissions - the web server needs write access to the following files and folders
    - All folders in /temp/
    - /webservices/dwc/rss.xml
-   - /collections/datasets/dwc/
    - /content/collicon/
+   - /content/dwca/
    - /content/logs/
 
 
-1. Data – The general layers of data within Symbiota are: user, 
+1. Data - The general layers of data within Symbiota are: user, 
    taxonomic, occurrence (specimen), images, checklist, identification 
    key, and taxon profile (common names, text descriptions, etc). 
    While user interfaces have been developed for web management of 
@@ -85,7 +85,7 @@ http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-
       table defines the taxonomic hierarchy. While multiple taxonomic thesauri 
       can be defined, one of the thesauri needs to function as the central 
       taxonomy. Names must be added in order from upper taxonomic levels to 
-      lower (e.g. kingdom, class, order… variety). Accepted names must be 
+      lower (e.g. kingdom, class, order, variety). Accepted names must be 
       loaded before non-accepted names. See Taxonomic Schema Page for more 
       details on taxonomic layout.  
       i. Names can be added one by one to the default thesaurus using: 
@@ -102,8 +102,8 @@ c. Occurrence (Specimen) Data - to be completed
    i. Loading a new collection
    ii. Establishing method for regular updates
 d. Images - to be completed
-e. Floristic data – to be completed
-f. Identification key data – to be completed
+e. Floristic data - to be completed
+f. Identification key data - to be completed
 g. Taxon Profile support data (common names, text descriptions, etc) - to be completed
 
 

@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -13,7 +13,7 @@ $includeAttributes = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:1;
 if($collid){
 	$dwcaHandler = new DwcArchiverOccurrence();
 	
-	$dwcaHandler->setVerbose(0);
+	$dwcaHandler->setVerboseMode(0);
 	$dwcaHandler->setCollArr($collid,$collType);
 	if($cond){
 		//String of cond-key/value pairs (e.g. country:USA,United States;stateprovince:Arizona,New Mexico;county-start:Pima,Eddy
