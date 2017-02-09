@@ -409,7 +409,7 @@ class DwcArchiverOccurrence extends Manager{
 		}
 		if($sqlWhere){
 			$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, c.collectionguid, '.
-				'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, c.guidtarget, '.
+				'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, c.guidtarget, c.dwcaurl, '.
 				'c.latitudedecimal, c.longitudedecimal, c.icon, c.managementtype, c.colltype, c.rights, c.rightsholder, c.usageterm, '.
 				'i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country, i.phone '.
 				'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid WHERE '.$sqlWhere;
@@ -425,6 +425,7 @@ class DwcArchiverOccurrence extends Manager{
 				$this->collArr[$r->collid]['contact'] = $r->contact;
 				$this->collArr[$r->collid]['email'] = $r->email;
 				$this->collArr[$r->collid]['guidtarget'] = $r->guidtarget;
+				$this->collArr[$r->collid]['dwcaurl'] = $r->dwcaurl;
 				$this->collArr[$r->collid]['lat'] = $r->latitudedecimal;
 				$this->collArr[$r->collid]['lng'] = $r->longitudedecimal;
 				$this->collArr[$r->collid]['icon'] = $r->icon;
@@ -1937,19 +1938,6 @@ class DwcArchiverOccurrence extends Manager{
 			}
 			$rsKing->free();
 		}
-	}
-
-	public function getCollectionList(){
-		$retArr = array();
-		$sql = 'SELECT c.collid, c.collectionname, CONCAT_WS("-",c.institutioncode,c.collectioncode) as instcode '.
-			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
-			'WHERE c.colltype = "Preserved Specimens" AND s.recordcnt > 0 '.
-			'ORDER BY c.collectionname ';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[$r->collid] = $r->collectionname.' ('.$r->instcode.')';
-		}
-		return $retArr;
 	}
 
 	public function setSchemaType($type){

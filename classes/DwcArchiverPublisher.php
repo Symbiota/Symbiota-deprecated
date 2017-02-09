@@ -50,7 +50,6 @@ class DwcArchiverPublisher extends DwcArchiverOccurrence{
 		return $recArr;
 	}
 
-	//DWCA publishing and RSS related functions 
 	public function batchCreateDwca($collIdArr){
 		$status = false;
 		$this->logOrEcho("Starting batch process (".date('Y-m-d h:i:s A').")\n");
@@ -111,11 +110,11 @@ class DwcArchiverPublisher extends DwcArchiverOccurrence{
 
 		//Create new item for target archives and load into array
 		$itemArr = array();
-		foreach($this->collArr as $collId => $cArr){
+		foreach($this->collArr as $collID => $cArr){
 			$cArr = $this->utf8EncodeArr($cArr);
 			$itemElem = $newDoc->createElement('item');
 			$itemAttr = $newDoc->createAttribute('collid');
-			$itemAttr->value = $collId;
+			$itemAttr->value = $collID;
 			$itemElem->appendChild($itemAttr);
 			//Add title
 			$instCode = $cArr['instcode'];
@@ -146,7 +145,7 @@ class DwcArchiverPublisher extends DwcArchiverOccurrence{
 			$itemElem->appendChild($descTitleElem);
 			//GUIDs
 			$guidElem = $newDoc->createElement('guid');
-			$guidElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/misc/collprofiles.php?collid='.$collId));
+			$guidElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/misc/collprofiles.php?collid='.$collID));
 			$itemElem->appendChild($guidElem);
 			$guidElem2 = $newDoc->createElement('guid');
 			$guidElem2->appendChild($newDoc->createTextNode($cArr['collectionguid']));
@@ -164,8 +163,9 @@ class DwcArchiverPublisher extends DwcArchiverOccurrence{
 			$recTypeTitleElem = $newDoc->createElement('recordType','DWCA');
 			$itemElem->appendChild($recTypeTitleElem);
 			//link
+			$archivePath = $urlPathPrefix.'content/dwca/'.$fileNameSeed.'.zip';
 			$linkTitleElem = $newDoc->createElement('link');
-			$linkTitleElem->appendChild($newDoc->createTextNode($urlPathPrefix.'content/dwca/'.$fileNameSeed.'.zip'));
+			$linkTitleElem->appendChild($newDoc->createTextNode($archivePath));
 			$itemElem->appendChild($linkTitleElem);
 			//pubDate
 			//$dsStat = stat($this->targetPath.$instCode.'_DwC-A.zip');
@@ -173,6 +173,12 @@ class DwcArchiverPublisher extends DwcArchiverOccurrence{
 			$pubDateTitleElem->appendChild($newDoc->createTextNode(date("D, d M Y H:i:s")));
 			$itemElem->appendChild($pubDateTitleElem);
 			$itemArr[$title] = $itemElem;
+			
+			//Add path to database
+			$sql = 'UPDATE omcollections SET dwcaUrl = "'.$archivePath.'" WHERE collid = '.$collID;
+			if(!$this->conn->query($sql)){
+				$this->logOrEcho('ERROR updating dwcaUrl while adding new DWCA instance: '.$this->conn->error);
+			}
 		}
 
 		//Add existing items
@@ -229,13 +235,13 @@ class DwcArchiverPublisher extends DwcArchiverOccurrence{
 		//Remove DWCA path from database
 		$sql = 'UPDATE omcollections SET dwcaUrl = NULL WHERE collid = '.$collID;
 		if(!$this->conn->query($sql)){
-			$this->errorMessage = 'ERROR nullifying dwcaUrl while removing DWCA instance';
+			$this->logOrEcho('ERROR nullifying dwcaUrl while removing DWCA instance: '.$this->conn->error);
 			return false;
 		}
 		return true;
 	}
 
-	//getters, setters, and misc functions
+	//Misc data retrival functions 
 	public function getDwcaItems($collid = 0){
 		$retArr = Array();
 		$rssFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'webservices/dwc/rss.xml';
@@ -268,6 +274,22 @@ class DwcArchiverPublisher extends DwcArchiverOccurrence{
 		return $retArr;
 	}
 
+	public function getCollectionList(){
+		$retArr = array();
+		$sql = 'SELECT c.collid, c.collectionname, CONCAT_WS("-",c.institutioncode,c.collectioncode) as instcode, c.guidtarget, c.dwcaurl '.
+				'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
+				'WHERE c.colltype = "Preserved Specimens" AND s.recordcnt > 0 '.
+				'ORDER BY c.collectionname ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->collid]['name'] = $r->collectionname.' ('.$r->instcode.')';
+			$retArr[$r->collid]['guid'] = $r->guidtarget;
+			$retArr[$r->collid]['url'] = $r->dwcaurl;
+		}
+		return $retArr;
+	}
+	
+	//Mics functions
 	private function aasort(&$array, $key){
 		$sorter = array();
 		$ret = array();
@@ -295,8 +317,10 @@ class DwcArchiverPublisher extends DwcArchiverOccurrence{
 		else { 
 			$x = @filesize($filePath); 
 		}
+		$x = round($x/1000000, 1);
+		if(!$x) $x = 0.1;
 		
-		return round($x/1000000, 1).'M ';
+		return $x.'M ';
 	}
 }
 ?>

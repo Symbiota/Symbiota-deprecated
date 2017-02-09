@@ -251,7 +251,7 @@ $duManager->readUploadParameters();
 							</div>
 							<div id="titleDiv" style="">
 								<b>Title:</b> 
-								<input name="title" type="text" value="<?php echo $duManager->getTitle(); ?>" style="width:400px;" />
+								<input name="title" type="text" value="<?php echo $duManager->getTitle(); ?>" style="width:400px;" maxlength="45" />
 							</div>
 							<div id="platformDiv" style="display:none">
 								<b>Database Platform:</b>

@@ -148,7 +148,7 @@ if($isEditor){
 			for(i = 0; i < dbElements.length; i++){
 				var dbElement = dbElements[i];
 				if(dbElement.className == cName){
-					dbElement.checked = boxesChecked;
+					if(dbElement.disabled == false) dbElement.checked = boxesChecked;
 				}
 				else{
 					dbElement.checked = false;
@@ -273,20 +273,20 @@ include($SERVER_ROOT. '/header.php');
 				$emlLink = $urlPrefix.'collections/datasets/emlhandler.php?collid='.$collId; 
 				?>
 				<div><b>EML:</b> <a href="<?php echo $emlLink; ?>"><?php echo $emlLink; ?></a></div>
-				<div><b>Link:</b> <a href="<?php echo $dArr['link']; ?>"><?php echo $dArr['link']; ?></a></div>
-				<div><b>Type:</b> <?php echo $dArr['type']; ?></div>
-				<div><b>Record Type:</b> <?php echo $dArr['recordType']; ?></div>
+				<div><b>DwC-Archive File:</b> <a href="<?php echo $dArr['link']; ?>"><?php echo $dArr['link']; ?></a></div>
 				<div><b>Publication Date:</b> <?php echo $dArr['pubDate']; ?></div>
 			</div>
 			<?php 
 		}
 		else{
-			echo '<div style="margin:20px;font-weight:bold;color:red;">No data archives have been published for this collection</div>';
+			echo '<div style="margin:20px;font-weight:bold;color:orange;">No data archives have been published for this collection</div>';
 		}
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend><b>Publishing Information</b></legend>
 			<?php
+			//Data integrity checks
+			$blockSubmitMsg = '';
 			$recFlagArr = $dwcaManager->verifyCollRecords($collId);
 			if($collArr['guidtarget']){
 				echo '<div style="margin:10px;"><b>GUID source:</b> '.$collArr['guidtarget'].'</div>';
@@ -306,9 +306,14 @@ include($SERVER_ROOT. '/header.php');
 					}
 					echo '</div>';
 				}
+				if($collArr['dwcaurl'] && !strpos($collArr['dwcaurl'],$_SERVER["SERVER_NAME"])){
+					$baseUrl = substr($collArr['dwcaurl'],0,strpos($collArr['dwcaurl'],'/content')).'/collections/datasets/datapublisher.php';
+					$blockSubmitMsg = 'Already published on sister portal (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>) ';
+				}
 			}
 			else{
 				echo '<div style="margin:10px;font-weight:bold;color:red;">The GUID source has not been set for this collection. Please go to the <a href="../misc/collmetadata.php?collid='.$collId.'">Edit Metadata page</a> to set GUID source.</div>';
+				$blockSubmitMsg = 'Archive cannot be published until occurrenceID GUID source is set<br/>';
 			}
 			if($recFlagArr['nullBasisRec']){
 				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullBasisRec'].' records missing basisOfRecord and will not be published. Please go to <a href="../editor/occurrencetabledisplay.php?q_recordedby=&q_recordnumber=&q_eventdate=&q_catalognumber=&q_othercatalognumbers=&q_observeruid=&q_recordenteredby=&q_dateentered=&q_datelastmodified=&q_processingstatus=&q_customfield1=basisOfRecord&q_customtype1=NULL&q_customvalue1=Something&q_customfield2=&q_customtype2=EQUALS&q_customvalue2=&q_customfield3=&q_customtype3=EQUALS&q_customvalue3=&collid='.$collId.'&csmode=0&occid=&occindex=0&orderby=&orderbydir=ASC">Edit Existing Occurrence Records</a> to correct this.</div>';
@@ -372,10 +377,10 @@ include($SERVER_ROOT. '/header.php');
 				</div>
 				<div style="clear:both;margin:10px;">
 					<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-					<input type="submit" name="formsubmit" value="Create/Refresh Darwin Core Archive" <?php if(!$collArr['guidtarget']) echo 'disabled'; ?> />
+					<input type="submit" name="formsubmit" value="Create/Refresh Darwin Core Archive" <?php if($blockSubmitMsg) echo 'disabled'; ?> />
 					<?php 
-					if(!$collArr['guidtarget']){
-						echo '<span style="color:red;margin-left:10px;">Archive cannot be published until occurrenceID GUID source is set</span>';
+					if($blockSubmitMsg){
+						echo '<span style="color:red;margin-left:10px;">'.$blockSubmitMsg.'</span>';
 					}
 					?>
 				</div>
@@ -414,7 +419,18 @@ include($SERVER_ROOT. '/header.php');
 							<?php 
 							$collArr = $dwcaManager->getCollectionList();
 							foreach($collArr as $k => $v){
-								echo '<input name="coll[]" type="checkbox" value="'.$k.'" />'.$v.'<br/>';
+								$errMsg = '';
+								if(!$v['guid']){ 
+									$errMsg = 'Missing GUID source';
+								}
+								elseif($v['url'] && !strpos($v['url'],$_SERVER["SERVER_NAME"])){ 
+									$baseUrl = substr($v['url'],0,strpos($v['url'],'/content')).'/collections/datasets/datapublisher.php';
+									$errMsg = 'Already published on different domain (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>)';
+								}
+								echo '<input name="coll[]" type="checkbox" value="'.$k.'" '.($errMsg?'DISABLED':'').' />';
+								echo '<a href="../misc/collprofiles.php?collid='.$k.'" target="_blank">'.$v['name'].'</a>';
+								if($errMsg) echo '<span style="color:red;margin-left:15px;">'.$errMsg.'</span>';
+								echo '<br/>';
 							}
 							?>
 						</div>
@@ -470,13 +486,13 @@ include($SERVER_ROOT. '/header.php');
 			<?php 
 		}
 		else{
-			echo '<div style="margin:10px;font-weight:bold;color:red;">No data archives have been published for this collection</div>';
+			echo '<div style="margin:10px;font-weight:bold;">There are no publishable collections</div>';
 		}
 	}
 	?>
 </div>
 <?php 
-include($SERVER_ROOT. '/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>
