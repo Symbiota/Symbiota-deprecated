@@ -4,15 +4,15 @@
 	$returnArr = Array();
 	$queryString = $con->real_escape_string($_REQUEST['term']);
 	
-	$sql = "SELECT t.tid, t.sciname ". 
-		"FROM taxa t ".
-		"WHERE t.SecurityStatus <> 2 AND t.sciname LIKE '".$queryString."%' ".
-		"ORDER BY t.sciname LIMIT 10";
+	$sql = 'SELECT tid, sciname '. 
+		'FROM taxa '.
+		'WHERE rankid > 219 AND sciname LIKE "'.$queryString.'%" ';
 	//echo $sql;
-	$result = $con->query($sql);
-	while ($row = $result->fetch_object()) {
+	$rs = $con->query($sql);
+	while ($row = $rs->fetch_object()) {
        	$returnArr[] = $row->sciname;
 	}
+	$rs->free();
 	$con->close();
 	echo json_encode($returnArr);
 ?>
