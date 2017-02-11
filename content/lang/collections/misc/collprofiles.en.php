@@ -56,9 +56,7 @@ $LANG['SHOW_GEOG_DIST'] = 'Show Geographic Distribution';
 $LANG['HIDE_GEOG_DIST'] = 'Hide Geographic Distribution';
 $LANG['GEO_DIST'] = 'Geographic Distribution';
 $LANG['CLICK_ON_SPEC_REC'] = 'Click on the specimen record counts within the parenthesis to return the records for that term';
-$LANG['CLICKING_NAME_DISPLAY'] = '*Clicking on name in list will display distributions within';
 $LANG['FAMILY_DIST'] = 'Family Distribution';
 $LANG['CLICK_ON_SPEC_FAM'] = 'Click on the specimen record counts within the parenthesis to return the records for that family';
 $LANG['GEOG_DIST_COUNTRIES'] = 'Geographic Distribution - Countries';
-$LANG['CLICK_ON_SPEC_COUNTRY'] = 'Click on the specimen record counts within the parenthesis to return the records for that country';
 ?>

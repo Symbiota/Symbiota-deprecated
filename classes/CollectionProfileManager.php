@@ -608,8 +608,8 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 
-	public function getGeographicCounts($country,$state){
-		$returnArr = Array();
+	public function getGeographyStats($country,$state){
+		$retArr = Array();
 		$sql = '';
 		if($state){
 			$sql = 'SELECT o.county as termstr, Count(*) AS cnt '.
@@ -637,13 +637,25 @@ class CollectionProfileManager {
 			if($state){
 				$t = trim(str_ireplace(array(' county',' co.',' counties'),'',$t));
 			}
-			if($t){
-				$returnArr[$t] = $row->cnt;
-			}
+			//if($country) $t = ucwords(strtolower($t));
+			if($t) $retArr[$t] = $row->cnt;
 		}
 		$rs->free();
-		ksort($returnArr);
-		return $returnArr;
+		ksort($retArr);
+		return $retArr;
+	}
+
+	public function getTaxonomyStats(){
+		$retArr = Array();
+		$sql = 'SELECT family, count(*) as cnt FROM omoccurrences o  WHERE o.family IS NOT NULL AND collid = '.$this->collid.' GROUP BY family';
+		//echo $sql; exit;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[ucwords($r->family)] = $r->cnt;
+		}
+		$rs->free();
+		//ksort($retArr);
+		return $retArr;
 	}
 
 	public function getInstitutionArr(){

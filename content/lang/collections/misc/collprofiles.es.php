@@ -1,7 +1,7 @@
 <?php
 /*
 ------------------
-Language: Español (Spanish)
+Language: EspaÃ±ol (Spanish)
 ------------------
 */
 
@@ -56,9 +56,7 @@ $LANG['SHOW_GEOG_DIST'] = 'Mostrar Distribuci&oacute;n Geogr&aacute;fica';
 $LANG['HIDE_GEOG_DIST'] = 'Ocultar Distribuci&oacute;n Geogr&aacute;fica';
 $LANG['GEO_DIST'] = 'Distribuci&oacute;n Geogr&aacute;fica';
 $LANG['CLICK_ON_SPEC_REC'] = 'Haga clic en los recuentos de registros de espec&iacute;menes dentro de los par&eacute;ntesis para mostrar los registros para ese t&eacute;rmino';
-$LANG['CLICKING_NAME_DISPLAY'] = '*Al hacer clic en el nombre en la lista mostrar&aacute; distribuciones dentro';
 $LANG['FAMILY_DIST'] = 'Distribuci&oacute;n de la Familia';
 $LANG['CLICK_ON_SPEC_FAM'] = 'Haga clic en los recuentos de registros de espec&iacute;menes dentro de los par&eacute;ntesis para mostrar los registros para esa familia';
 $LANG['GEOG_DIST_COUNTRIES'] = 'Distribuci&oacute;n Geogr&aacute;fica - Pa&iacute;ses';
-$LANG['CLICK_ON_SPEC_COUNTRY'] = 'Haga clic en los recuentos de registros de espec&iacute;menes dentro de los par&eacute;ntesis para mostrar los registros para ese pa&iacute;s';
 ?>
