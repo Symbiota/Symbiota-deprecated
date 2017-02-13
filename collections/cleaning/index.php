@@ -48,32 +48,59 @@ if($collMap['colltype'] == 'General Observations'){
 		if($isEditor){
 			echo '<h2>'.$collMap['collectionname'].' ('.$collMap['code'].')</h2>';
 			?>
-			<ul>
-				<li><b>Duplicate Record Search</b></li>
-				<ul>
-					<?php
-					if($collMap['colltype'] != 'General Observations'){
-						?>
-						<li>
-							<a href="duplicatesearch.php?collid=<?php echo $collid; ?>&action=listdupscatalog">
-								Search based on <b>Catalog Numbers</b>
-							</a>
-						</li>
-						<li>
-							<a href="duplicatesearch.php?collid=<?php echo $collid; ?>&action=listdupsothercatalog">
-								Search based on <b>Other Catalog Numbers</b>
-							</a>
-						</li>
-						<?php
-					}
+			<h3>Duplicate Records</h3>
+			<div>
+				These tools will assist in searching this collection of records for duplicate records of the same specimen. 
+				If duplicate records exist, this feature offers the ability to merge record values, images, 
+				and data relationships into a single record.
+			</div>
+			<ul style="margin-bottom: 30px">
+				<?php
+				if($collMap['colltype'] != 'General Observations'){
 					?>
 					<li>
-						<a href="duplicatesearch.php?collid=<?php echo $collid; ?>&action=listdupsrecordedby">
-							Search based on <b>Collector/Observer and numbers</b>
+						<a href="duplicatesearch.php?collid=<?php echo $collid; ?>&action=listdupscatalog">
+							Search based on <b>Catalog Numbers</b>
 						</a>
 					</li>
-				</ul>
-				<li><b><a href="politicalunits.php?collid=<?php echo $collid; ?>">Political Geography Cleaning Tools</a></b></li>
+					<li>
+						<a href="duplicatesearch.php?collid=<?php echo $collid; ?>&action=listdupsothercatalog">
+							Search based on <b>Other Catalog Numbers</b>
+						</a>
+					</li>
+					<?php
+				}
+				?>
+				<li>
+					<a href="duplicatesearch.php?collid=<?php echo $collid; ?>&action=listdupsrecordedby">
+						Search based on <b>Collector/Observer and numbers</b>
+					</a>
+				</li>
+			</ul>
+			<h3>Political Geography </h3>
+			<div>
+				These tools help standardize country, state/province, and county designations. 
+				They are also useful for locating and correcting misspelled geographical political units, 
+				and even mismatched units, such as a state designation that does not match the wrong country.    
+			</div>
+			<ul style="margin-bottom: 30px">
+				<li><b><a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&stat=geography#geographystats" target="_blank">Geographic Distributions</a></b></li>
+				<li><b><a href="politicalunits.php?collid=<?php echo $collid; ?>">Geography Cleaning Tools</a></b></li>
+			</ul>
+			<h3>Taxonomy and Identification</h3>
+			<div>
+				These tools are meant to aid in locating and fixing taxonomic errors and inconsistancies. 
+			</div>
+			<ul style="margin-bottom: 30px">
+				<li><b><a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&stat=taxonomy#taxonomystats" target="_blank">Taxonomic Distributions</a></b></li>
+				<li><b>Non-verified taxa:</b> <?php echo $cleanManager->getBadTaxaCount(); ?></li>
+				<?php
+				if($cleanManager->hasDuplicateClusters()){
+					echo '<li><a href="../datasets/duplicatemanager.php?collid='.$collid.'&dupedepth=3&action=listdupeconflicts" target="_blank">';
+					echo '<b>Duplicate specimens with potentially conflicted identifications </b>';
+					echo '</a></li>';
+				}
+				?>
 			</ul>
 			<?php
 		}

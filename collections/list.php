@@ -24,13 +24,13 @@ $resetPageNum = false;
 if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
     $stArr = $collManager->getSearchTerms();
     $stArrSearchJson = json_encode($stArr);
-    if(!$_REQUEST['page']) $resetPageNum = true;
+    if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
 }
 
 if(isset($_REQUEST['db'])){
     $collArr['db'] = $_REQUEST['db'];
     $stArrCollJson = json_encode($collArr);
-    if(!$_REQUEST['page']) $resetPageNum = true;
+    if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
 }
 
 $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',

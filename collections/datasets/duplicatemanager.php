@@ -4,6 +4,7 @@ include_once($serverRoot.'/classes/OccurrenceDuplicate.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$dupeDepth = array_key_exists('dupedepth',$_REQUEST)?$_REQUEST['dupedepth']:0;
 $start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
 $limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:1000;
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
@@ -141,7 +142,7 @@ if($isEditor && $formSubmit){
 						</a>
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
-						<a href="duplicatemanager.php?collid=<?php echo $collId; ?>&action=listdupeconflicts">
+						<a href="duplicatemanager.php?collid=<?php echo $collId; ?>&dupedepth=2&action=listdupeconflicts">
 							List linked duplicate clusters with conflicted identifications 
 						</a>
 					</div>
@@ -164,7 +165,7 @@ if($isEditor && $formSubmit){
 					<?php 
 				}
 				elseif($action == 'listdupes' || $action == 'listdupeconflicts'){
-					$clusterArr = $dupManager->getDuplicateClusterList($collId, $action == 'listdupes'?0:1,$start,$limit);
+					$clusterArr = $dupManager->getDuplicateClusterList($collId, $dupeDepth, $start, $limit);
 					$totalCnt = $clusterArr['cnt'];
 					unset($clusterArr['cnt']);
 					if($clusterArr){
@@ -272,7 +273,7 @@ if($isEditor && $formSubmit){
 						echo $paginationStr;
 					}
 					else{
-						 echo '<div><b>No Duplicate Clusters Exist</b></div>';
+						 echo '<div><b>No Duplicate Clusters match the request. We suggest returning to Duplicate cluster main menu and batch building duplicate clusters</b></div>';
 					}
 				}
 				?>

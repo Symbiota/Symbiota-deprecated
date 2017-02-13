@@ -441,21 +441,21 @@ if($SYMB_UID){
 				<div style="clear:both;margin-top:5px;">
 					<div style="font-weight:bold;"><?php echo $LANG['COLL_STATISTICS']; ?></div>
 					<ul style="margin-top:5px;">
-						<li><?php echo $collData["recordcnt"].' '.$LANG['SPECIMEN_RECORDS'];?></li>
-						<li><?php echo ($collData['georefcnt']?$collData['georefcnt']:0).($georefPerc?" (".($georefPerc>1?round($georefPerc):round($georefPerc,2))."%)":'');?> georeferenced</li>
+						<li><?php echo number_format($collData["recordcnt"]).' '.$LANG['SPECIMEN_RECORDS'];?></li>
+						<li><?php echo ($collData['georefcnt']?number_format($collData['georefcnt']):0).($georefPerc?" (".($georefPerc>1?round($georefPerc):round($georefPerc,2))."%)":'');?> georeferenced</li>
 						<?php
-						if($extrastatsArr&&$extrastatsArr['imgcnt']) echo '<li>'.($extrastatsArr['imgcnt']?$extrastatsArr['imgcnt']:0).($imgPerc?" (".($imgPerc>1?round($imgPerc):round($imgPerc,2))."%)":'').' with images</li>';
-						if($extrastatsArr&&$extrastatsArr['gencnt']) echo '<li>'.$extrastatsArr['gencnt'].' GenBank references</li>';
-						if($extrastatsArr&&$extrastatsArr['boldcnt']) echo '<li>'.$extrastatsArr['boldcnt'].' BOLD references</li>';
-						if($extrastatsArr&&$extrastatsArr['refcnt']) echo '<li>'.$extrastatsArr['refcnt'].' publication references</li>';
-						if($extrastatsArr&&$extrastatsArr['SpecimensCountID']) echo '<li>'.($extrastatsArr['SpecimensCountID']?$extrastatsArr['SpecimensCountID']:0).($spidPerc?" (".($spidPerc>1?round($spidPerc):round($spidPerc,2))."%)":'').' identified to species</li>';
+						if($extrastatsArr&&$extrastatsArr['imgcnt']) echo '<li>'.($extrastatsArr['imgcnt']?number_format($extrastatsArr['imgcnt']):0).($imgPerc?" (".($imgPerc>1?round($imgPerc):round($imgPerc,2))."%)":'').' with images</li>';
+						if($extrastatsArr&&$extrastatsArr['gencnt']) echo '<li>'.number_format($extrastatsArr['gencnt']).' GenBank references</li>';
+						if($extrastatsArr&&$extrastatsArr['boldcnt']) echo '<li>'.number_format($extrastatsArr['boldcnt']).' BOLD references</li>';
+						if($extrastatsArr&&$extrastatsArr['refcnt']) echo '<li>'.number_format($extrastatsArr['refcnt']).' publication references</li>';
+						if($extrastatsArr&&$extrastatsArr['SpecimensCountID']) echo '<li>'.($extrastatsArr['SpecimensCountID']?number_format($extrastatsArr['SpecimensCountID']):0).($spidPerc?" (".($spidPerc>1?round($spidPerc):round($spidPerc,2))."%)":'').' identified to species</li>';
 						?>
-						<li><?php echo $collData["familycnt"].' '.$LANG['FAMILIES'];?></li>
-						<li><?php echo $collData["genuscnt"].' '.$LANG['GENERA'];?></li>
-						<li><?php echo $collData["speciescnt"].' '.$LANG['SPECIES'];?></li>
+						<li><?php echo number_format($collData["familycnt"]).' '.$LANG['FAMILIES'];?></li>
+						<li><?php echo number_format($collData["genuscnt"]).' '.$LANG['GENERA'];?></li>
+						<li><?php echo number_format($collData["speciescnt"]).' '.$LANG['SPECIES'];?></li>
 						<?php
-						if($extrastatsArr&&$extrastatsArr['TotalTaxaCount']) echo '<li>'.$extrastatsArr['TotalTaxaCount'].' total taxa (including subsp. and var.)</li>';
-						//if($extrastatsArr&&$extrastatsArr['TypeCount']) echo '<li>'.$extrastatsArr['TypeCount'].' type specimens</li>';
+						if($extrastatsArr&&$extrastatsArr['TotalTaxaCount']) echo '<li>'.number_format($extrastatsArr['TotalTaxaCount']).' total taxa (including subsp. and var.)</li>';
+						//if($extrastatsArr&&$extrastatsArr['TypeCount']) echo '<li>'.number_format($extrastatsArr['TypeCount']).' type specimens</li>';
 						?>
 					</ul>
 				</div>

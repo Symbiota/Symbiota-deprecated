@@ -118,6 +118,16 @@ class OccurrenceCleaner extends Manager{
 		return $status;
 	}
 
+	public function hasDuplicateClusters(){
+		$retStatus = false;
+		$sql = 'SELECT o.occid '.
+			'FROM omoccurrences o INNER JOIN omoccurduplicatelink d ON o.occid = d.occid ';
+		$rs = $this->conn->query($sql);
+		if($rs->num_rows) $retStatus = true;
+		$rs->free();
+		return $retStatus;
+	}
+
 	//Search and resolve duplicate specimen records 
 	public function getDuplicateCatalogNumber($type,$start,$limit = 500){
 		//Search is not available for personal specimen management

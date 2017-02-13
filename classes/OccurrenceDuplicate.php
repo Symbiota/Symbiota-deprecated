@@ -508,23 +508,42 @@ class OccurrenceDuplicate {
 	} 
 
 	//Batch functions
-	public function getDuplicateClusterList($collid, $limitToConflicts,$start,$limit){
+	public function getDuplicateClusterList($collid, $dupeDepth, $start, $limit){
 		$retArr = array();
 		if($collid){
 			//Grab clusters
 			$sqlPrefix = 'SELECT DISTINCT d.duplicateid, d.title, d.description, d.notes ';
 			$sqlSuffix = '';
-			if($limitToConflicts){
+			if($dupeDepth == 1){
 				$sqlSuffix = 'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl1 ON d.duplicateid = dl1.duplicateid '.
 					'INNER JOIN omoccurrences o ON dl1.occid = o.occid '.
 					'INNER JOIN omoccurduplicatelink dl2 ON d.duplicateid = dl2.duplicateid '.
 					'INNER JOIN omoccurrences o2 ON dl2.occid = o2.occid '.
 					'WHERE o.collid = '.$collid.($this->obsUid?' AND o.observeruid = '.$this->obsUid:'').' AND o.tidinterpreted <> o2.tidinterpreted ';
 			}
+			elseif($dupeDepth == 2){
+				$sqlSuffix = 'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl1 ON d.duplicateid = dl1.duplicateid '.
+					'INNER JOIN omoccurrences o ON dl1.occid = o.occid '.
+					'INNER JOIN omoccurduplicatelink dl2 ON d.duplicateid = dl2.duplicateid '.
+					'INNER JOIN omoccurrences o2 ON dl2.occid = o2.occid '.
+					'WHERE o.collid = '.$collid.($this->obsUid?' AND o.observeruid = '.$this->obsUid:'').' AND o.tidinterpreted <> o2.tidinterpreted '.
+					'AND o2.dateidentified IS NOT NULL ';
+					
+			}
+			elseif($dupeDepth == 3){
+				$sqlSuffix = 'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl1 ON d.duplicateid = dl1.duplicateid '.
+					'INNER JOIN omoccurrences o ON dl1.occid = o.occid '.
+					'INNER JOIN omoccurduplicatelink dl2 ON d.duplicateid = dl2.duplicateid '.
+					'INNER JOIN omoccurrences o2 ON dl2.occid = o2.occid '.
+					'INNER JOIN omoccurdeterminations i ON o2.occid = i.occid '.
+					'WHERE o.collid = '.$collid.($this->obsUid?' AND o.observeruid = '.$this->obsUid:'').' AND o.tidinterpreted <> o2.tidinterpreted '.
+					'AND o2.dateidentified IS NOT NULL ';
+					
+			}
 			else{
 				$sqlSuffix = 'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl ON d.duplicateid = dl.duplicateid '.
 					'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
-					'WHERE o.collid = '.$collid.($this->obsUid?' AND o.observeruid = '.$this->obsUid:'').' ';
+					'WHERE o.collid = '.$collid.($this->obsUid?' AND o.observeruid = '.$this->obsUid:'').' AND o2.dateidentified IS NOT NULL';
 			}
 			//Get total counts
 			$totalCnt = 0;
@@ -535,7 +554,7 @@ class OccurrenceDuplicate {
 			$rsCnt->free();
 			
 			$sql = $sqlPrefix.$sqlSuffix.' ORDER BY o.recordedby,o.recordnumber LIMIT '.$start.','.$limit;
-			//echo 'sql: '.$sql;
+			//echo 'sql: '.$sql; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->duplicateid]['title'] = $r->title;

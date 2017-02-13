@@ -1,9 +1,7 @@
 <?php
-include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/misc/collprofiles.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/CollectionProfileManager.php');
 
-$collid = ((array_key_exists("collid",$_REQUEST) && is_numeric($_REQUEST["collid"]))?$_REQUEST["collid"]:0);
 $statDisplay = array_key_exists('stat',$_REQUEST)?$_REQUEST['stat']:'';
 
 if($statDisplay == 'geography'){
@@ -36,7 +34,7 @@ if($statDisplay == 'geography'){
 					if(!$stateDist) echo '<a href="collprofiles.php?collid='.$collid.'&stat=geography&country='.$countryTerm.'&state='.$stateTerm.'#geographystats">';
 					echo $term;
 					if(!$stateDist) echo '</a>';
-					echo ' (<a href="../list.php?db='.$collid.';&reset=1&country='.$countryTerm.'&state='.$stateTerm.'" target="_blank">'.$cnt.'</a>)';
+					echo ' (<a href="../list.php?db='.$collid.'&reset=1&country='.$countryTerm.'&state='.$stateTerm.'" target="_blank">'.$cnt.'</a>)';
 					echo '</li>';
 				}
 				?>
@@ -59,7 +57,7 @@ elseif($statDisplay == 'taxonomy'){
 				foreach($famArr as $name => $cnt){
 					echo '<li>';
 					echo $name;
-					echo ' (<a href="../list.php?db='.$collid.';&type=1&reset=1&taxa='.$name.'" target="_blank">'.$cnt.'</a>)';
+					echo ' (<a href="../list.php?db='.$collid.'&type=1&reset=1&taxa='.$name.'" target="_blank">'.$cnt.'</a>)';
 					echo '</li>';
 				}
 				?>
