@@ -36,7 +36,7 @@ if($statDisplay == 'geography'){
 					if(!$stateDist) echo '<a href="collprofiles.php?collid='.$collid.'&stat=geography&country='.$countryTerm.'&state='.$stateTerm.'#geographystats">';
 					echo $term;
 					if(!$stateDist) echo '</a>';
-					echo ' (<a href="../list.php?db[]='.$collid.'&reset=1&country='.$countryTerm.'&state='.$stateTerm.'" target="_blank">'.$cnt.'</a>)';
+					echo ' (<a href="../list.php?db='.$collid.';&reset=1&country='.$countryTerm.'&state='.$stateTerm.'" target="_blank">'.$cnt.'</a>)';
 					echo '</li>';
 				}
 				?>
@@ -59,7 +59,7 @@ elseif($statDisplay == 'taxonomy'){
 				foreach($famArr as $name => $cnt){
 					echo '<li>';
 					echo $name;
-					echo ' (<a href="../list.php?usecookies=false&db[]='.$collid.'&type=1&reset=1&taxa='.$name.'" target="_blank">'.$cnt.'</a>)';
+					echo ' (<a href="../list.php?db='.$collid.';&type=1&reset=1&taxa='.$name.'" target="_blank">'.$cnt.'</a>)';
 					echo '</li>';
 				}
 				?>
