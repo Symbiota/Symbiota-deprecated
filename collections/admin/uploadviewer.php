@@ -86,7 +86,7 @@ if($SYMB_UID){
 				echo '<h2>'.$collMap['name'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 			}
 			//Setup header map
-			$recArr = $uploadManager->getUploadMap(($recLimit*$pageIndex),$recLimit,$searchVar);
+			$recArr = $uploadManager->getUploadData(($recLimit*$pageIndex),$recLimit,$searchVar);
 			if($recArr){
 				//Check to see which headers have values
 				$headerArr = array();

@@ -150,10 +150,55 @@ class SpecUpload{
 	}
 
 	//Upload Review
-	public function getUploadMap($start, $limit, $searchVariables = ''){
+	public function exportUploadData($searchVariables){
 		$retArr = Array();
 		if($this->collId){
-			$occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
+			if(!$searchVariables) $searchVariables = 'TOTAL_TRANSFER';
+			$fileName = $searchVariables.'_'.$this->collId.'_'.'upload.csv';
+			
+			header ('Content-Type: text/csv');
+			header ('Content-Disposition: attachment; filename="'.$fileName.'"');
+			$outstream = fopen("php://output", "w");
+			$outputHeader = true;
+
+			$sql = $this->getUploadSql($searchVariables) ;
+			//echo "<div>".$sql."</div>"; exit;
+			$rs = $this->conn->query($sql);
+			if($rs->num_rows){
+				while($r = $rs->fetch_assoc()){
+					if($outputHeader){
+						fputcsv($outstream,array_keys($r));
+						$outputHeader = false;
+					}
+					fputcsv($outstream,$r);
+				}
+			}
+			else{
+				echo "Recordset is empty.\n";
+			}
+			$rs->free();
+		}
+		fclose($outstream);
+		return $retArr;
+	}
+
+	public function getUploadData($start, $limit, $searchVariables = ''){
+		$retArr = Array();
+		if($this->collId){
+			$sql = $this->getUploadSql($searchVariables) ;
+			if($limit) $sql .= 'LIMIT '.$start.','.$limit;
+			//echo "<div>".$sql."</div>"; exit;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_assoc()){
+				$retArr[] = array_change_key_case($row);
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	private function getUploadSql($searchVariables){
+		$occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
 				'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 				'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
 				'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
@@ -166,60 +211,52 @@ class SpecUpload{
 				'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
 				'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
 				'labelproject','basisofrecord','ownerinstitutioncode', 'processingstatus', 'recordenteredby');
-			$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp '.
+		$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp '.
 				'WHERE collid = '.$this->collId.' ';
-			if($searchVariables){
-				if($searchVariables == 'matchappend'){
-					$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
+		if($searchVariables){
+			if($searchVariables == 'matchappend'){
+				$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
 						'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.collid = o.collid '.
 						'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
-				}
-				elseif($searchVariables == 'sync'){
-					$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
+			}
+			elseif($searchVariables == 'sync'){
+				$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
 						'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 						'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
 						'AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) ';
-				}
-				elseif($searchVariables == 'exist'){
-					$sql = 'SELECT DISTINCT o.dbpk, o.'.implode(',o.',$occFieldArr).' '.
+			}
+			elseif($searchVariables == 'exist'){
+				$sql = 'SELECT DISTINCT o.dbpk, o.'.implode(',o.',$occFieldArr).' '.
 						'FROM omoccurrences o LEFT JOIN uploadspectemp u  ON (o.occid = u.occid) '.
 						'WHERE (o.collid = '.$this->collId.') AND (u.occid IS NULL) ';
-				}
-				elseif($searchVariables == 'dupdbpk'){
-					$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' FROM uploadspectemp u WHERE u.dbpk IN('.
+			}
+			elseif($searchVariables == 'dupdbpk'){
+				$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' FROM uploadspectemp u WHERE u.dbpk IN('.
 						'SELECT dbpk FROM uploadspectemp '.
 						'GROUP BY dbpk, collid, basisofrecord '.
 						'HAVING (Count(*)>1) AND (collid = '.$this->collId.')) ';
-				}
-				else{
-					$varArr = explode(';',$searchVariables);
-					foreach($varArr as $varStr){
-						if(strpos($varStr,':')){
-							$vArr = explode(':',$varStr);
-							$sql .= 'AND '.$vArr[0];
-							switch($vArr[1]){
-								case "ISNULL":
-									$sql .= ' IS NULL ';
-									break;
-								case "ISNOTNULL":
-									$sql .= ' IS NOT NULL ';
-									break;
-								default:
-									$sql .= ' = "'.$vArr[1].'" ';
-							}
+			}
+			else{
+				$varArr = explode(';',$searchVariables);
+				foreach($varArr as $varStr){
+					if(strpos($varStr,':')){
+						$vArr = explode(':',$varStr);
+						$sql .= 'AND '.$vArr[0];
+						switch($vArr[1]){
+							case "ISNULL":
+								$sql .= ' IS NULL ';
+								break;
+							case "ISNOTNULL":
+								$sql .= ' IS NOT NULL ';
+								break;
+							default:
+								$sql .= ' = "'.$vArr[1].'" ';
 						}
 					}
 				}
 			}
-			if($limit) $sql .= 'LIMIT '.$start.','.$limit;
-			//echo "<div>".$sql."</div>"; exit;
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_assoc()){
-				$retArr[] = array_change_key_case($row);
-			}
-			$rs->free();
 		}
-		return $retArr;
+		return $sql;
 	}
 
 	public function getUploadCount(){
