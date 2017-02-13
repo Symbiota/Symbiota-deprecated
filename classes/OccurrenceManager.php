@@ -1323,28 +1323,30 @@ class OccurrenceManager{
 			}
 			$rs2->free();
 
-			//Get synonym that are different than target
-			$sql3 = 'SELECT DISTINCT t.tid, t.sciname '.
-				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tidaccepted IN('.implode('',$accArr).')) ';
-			$rs3 = $this->conn->query($sql3);
-			while($r3 = $rs3->fetch_object()){
-				if(!in_array($r3->tid,$targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
-			}
-			$rs3->free();
+			if($accArr){
+                //Get synonym that are different than target
+                $sql3 = 'SELECT DISTINCT t.tid, t.sciname ' .
+                    'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
+                    'WHERE (ts.taxauthid = ' . $taxAuthId . ') AND (ts.tidaccepted IN(' . implode('', $accArr) . ')) ';
+                $rs3 = $this->conn->query($sql3);
+                while ($r3 = $rs3->fetch_object()) {
+                    if (!in_array($r3->tid, $targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
+                }
+                $rs3->free();
 
-			//If rank is 220, get synonyms of accepted children
-			if($rankId == 220){
-				$sql4 = 'SELECT DISTINCT t.tid, t.sciname '.
-					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-					'WHERE (ts.parenttid IN('.implode('',$accArr).')) AND (ts.taxauthid = '.$taxAuthId.') '.
-					'AND (ts.TidAccepted = ts.tid)';
-				$rs4 = $this->conn->query($sql4);
-				while($r4 = $rs4->fetch_object()){
-					$synArr[$r4->tid] = $r4->sciname;
-				}
-				$rs4->free();
-			}
+                //If rank is 220, get synonyms of accepted children
+                if ($rankId == 220) {
+                    $sql4 = 'SELECT DISTINCT t.tid, t.sciname ' .
+                        'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
+                        'WHERE (ts.parenttid IN(' . implode('', $accArr) . ')) AND (ts.taxauthid = ' . $taxAuthId . ') ' .
+                        'AND (ts.TidAccepted = ts.tid)';
+                    $rs4 = $this->conn->query($sql4);
+                    while ($r4 = $rs4->fetch_object()) {
+                        $synArr[$r4->tid] = $r4->sciname;
+                    }
+                    $rs4->free();
+                }
+            }
 		}
 		return $synArr;
 	}
