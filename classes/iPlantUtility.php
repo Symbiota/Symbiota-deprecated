@@ -5,9 +5,10 @@
 
 $test = FALSE;
 if ($test) { 
-   $file = 'file://data.iplantcollaborative.org/iplant/home/shared/NEVP/HUH/2014-01-17-190012/NEBC00485241.dng';
+   //$file = 'file://data.iplantcollaborative.org/iplant/home/shared/NEVP/HUH/2014-01-17-190012/NEBC00485241.dng';
+   $file = 'file://data.bisque.cyverse.org/iplant/home/shared/NEVP/HUH/2014-01-17-190012/NEBC00485241.dng';
    // expected result values are: 
-   // uri=http://bisque.iplantcollaborative.org/data_service/image/4976710
+   // uri=https://bisque.cyverse.org/data_service/image/4976710
    // resource_uniq = 00-CiMyDXbqTSF8pL6mPgfswW
    // filter=value=irods://data.iplantcollaborative.org/iplant/home/shared/NEVP/HUH/2014-01-17-190012/NEBC00485241.dng
    $filter = str_replace('/','\/',$file);
@@ -40,7 +41,7 @@ class BisqueResult {
    public $value;
 
 /* Example response document 
-<resource uri="http://bisque.iplantcollaborative.org/data_service/image?tag_query=filename:IMG_0046.dng"><image created="2013-10-16T05:45:14.361834" name="IMG_0046.dng" owner="http://bisque.iplantcollaborative.org/data_service/user/4892555" permission="published" resource_uniq="yKWNDWG6heD2QFWnHES4fF" ts="2013-10-16T05:45:14.361834" uri="http://bisque.iplantcollaborative.org/data_service/image/4892591" value="irods://data.iplantcollaborative.org/iplant/home/shared/NEVP/BRU/IMG_0046.dng"/></resource>
+<resource uri="https://bisque.cyverse.org/data_service/image?tag_query=filename:IMG_0046.dng"><image created="2013-10-16T05:45:14.361834" name="IMG_0046.dng" owner="https://bisque.cyverse.org/data_service/user/4892555" permission="published" resource_uniq="yKWNDWG6heD2QFWnHES4fF" ts="2013-10-16T05:45:14.361834" uri="https://bisque.cyverse.org/data_service/image/4892591" value="irods://data.iplantcollaborative.org/iplant/home/shared/NEVP/BRU/IMG_0046.dng"/></resource>
 
 */
 
@@ -69,7 +70,8 @@ function getiPlantID($inputFilename,$irodsPath){
     // strip path, if any from filename
     $filename = preg_replace('/^.+[\\\\\\/]/', '', $inputFilename);
     // query bisque for a metadata document on the resource using the filename.
-    $url = "http://bisque.iplantcollaborative.org/data_service/image?tag_query=filename:".$filename;
+    $url = "https://bisque.cyverse.org/data_service/image?tag_query=filename:".$filename;
+    //$url = "http://bisque.iplantcollaborative.org/data_service/image?tag_query=filename:".$filename;
     $contents = @file_get_contents($url);
     if ($contents!==FALSE) { 
         // parse the returned document
@@ -103,5 +105,4 @@ function getiPlantID($inputFilename,$irodsPath){
     }
     return $result;  
 }
-
 ?>

@@ -199,18 +199,18 @@ class SpecUpload{
 
 	private function getUploadSql($searchVariables){
 		$occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
-				'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
-				'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
-				'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
-				'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
-				'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
-				'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
-				'country', 'stateprovince', 'county', 'municipality', 'locality', 'localitysecurity', 'localitysecurityreason',
-				'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 'footprintwkt',
-				'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
-				'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
-				'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
-				'labelproject','basisofrecord','ownerinstitutioncode', 'processingstatus', 'recordenteredby');
+			'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
+			'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
+			'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
+			'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
+			'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
+			'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
+			'country', 'stateprovince', 'county', 'municipality', 'locality', 'localitysecurity', 'localitysecurityreason',
+			'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 'footprintwkt',
+			'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
+			'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
+			'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
+			'labelproject','basisofrecord','ownerinstitutioncode', 'processingstatus', 'recordenteredby');
 		$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp '.
 				'WHERE collid = '.$this->collId.' ';
 		if($searchVariables){
