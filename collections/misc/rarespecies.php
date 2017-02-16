@@ -9,6 +9,11 @@ $searchTaxon = array_key_exists("searchtaxon",$_POST)?$_POST["searchtaxon"]:'';
 $isEditor = 0;
 if($IS_ADMIN || array_key_exists("RareSppAdmin",$USER_RIGHTS)){
 	$isEditor = 1;
+}
+
+$rsManager = new RareSpeciesManager($isEditor?'write':'readonly');
+
+if($isEditor){
 	if($submitAction == "addspecies"){
 		$rsManager->addSpecies($_POST["tidtoadd"]);
 	}
@@ -16,7 +21,6 @@ if($IS_ADMIN || array_key_exists("RareSppAdmin",$USER_RIGHTS)){
 		$rsManager->deleteSpecies($_REQUEST["tidtodel"]);
 	}
 }
-$rsManager = new RareSpeciesManager($isEditor?'write':'readonly');
 if($searchTaxon) $rsManager->setSearchTaxon($searchTaxon);
 ?>
 <html>
