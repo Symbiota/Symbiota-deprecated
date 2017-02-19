@@ -282,8 +282,11 @@ if($imgArr){
 				?>
 				<tr>
 					<td style="width:50%;text-align:center;padding:10px;">
+						<?php 
+						if($imgUrl == 'empty' && $origUrl) $imgUrl = $origUrl;
+						?>
 						<a href="<?php echo $imgUrl;?>">
-							<img src="<?php echo $imgUrl;?>" style="width:90%;" />
+							<img src="<?php echo $imgUrl;?>" style="width:300px;" />
 						</a>
 						<?php 
 						if($origUrl){
