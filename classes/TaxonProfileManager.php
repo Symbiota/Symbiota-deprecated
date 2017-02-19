@@ -439,7 +439,7 @@ class TaxonProfileManager {
 		$rs1->close();
 
 		$tidStr = implode(",",$tidArr);
-		$sql = 'SELECT t.sciname, ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ti.occid, '.
+		$sql = 'SELECT t.sciname, ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.caption, ti.occid, '.
 			'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
 			'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
 			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
@@ -450,8 +450,12 @@ class TaxonProfileManager {
 		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
-			$this->imageArr[$row->imgid]["url"] = $row->url;
-			$this->imageArr[$row->imgid]["thumbnailurl"] = $row->thumbnailurl;
+			$imgUrl = $row->url;
+			if($imgUrl == 'empty' && $row->originalurl) $imgUrl = $row->originalurl; 
+			$tnUrl = $row->thumbnailurl;
+			if(!$tnUrl && $imgUrl) $tnUrl = $imgUrl;
+			$this->imageArr[$row->imgid]["url"] = $imgUrl;
+			$this->imageArr[$row->imgid]["thumbnailurl"] = $tnUrl;
 			$this->imageArr[$row->imgid]["photographer"] = $row->photographer;
 			$this->imageArr[$row->imgid]["caption"] = $row->caption;
 			$this->imageArr[$row->imgid]["occid"] = $row->occid;
