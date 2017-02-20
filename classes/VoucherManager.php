@@ -285,8 +285,8 @@ class VoucherManager {
 			$notes = $this->cleanInStr($row->Notes);
 			$editNotes = $this->cleanInStr($row->editnotes);
 			
-			$sqlInsert = 'INSERT INTO fmvouchers ( occid, TID, CLID, Collector, Notes, editornotes ) '.
-				'VALUES ('.$occId.','.$row->tid.','.$row->clid.',"","'.
+			$sqlInsert = 'INSERT INTO fmvouchers ( occid, TID, CLID, Notes, editornotes ) '.
+				'VALUES ('.$occId.','.$row->tid.','.$row->clid.',"'.
 				$notes.'","'.$editNotes.'") ';
 			//echo "<div>".$sqlInsert."</div>";
 			if(!$this->conn->query($sqlInsert)){

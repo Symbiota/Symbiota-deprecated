@@ -649,8 +649,8 @@ class ChecklistVoucherAdmin {
 				$taxa = $r->tid;
 			}
 		}
-		$sql = 'INSERT INTO fmvouchers(clid,tid,occid,collector) '.
-			'VALUES ('.$this->clid.','.$taxa.','.$occid.',"")';
+		$sql = 'INSERT INTO fmvouchers(clid,tid,occid) '.
+			'VALUES ('.$this->clid.','.$taxa.','.$occid.')';
 		if($this->conn->query($sql)){
 			return 1;
 		}
@@ -706,7 +706,7 @@ class ChecklistVoucherAdmin {
 					}
 				}
 				//Link Vouchers
-				$sql = 'INSERT INTO fmvouchers(clid,occid,tid,collector) VALUES ('.$this->clid.','.$occid.','.$tid.',"")';
+				$sql = 'INSERT INTO fmvouchers(clid,occid,tid) VALUES ('.$this->clid.','.$occid.','.$tid.')';
 				if(!$this->conn->query($sql)){
 					trigger_error('Unable to link taxon voucher; '.$this->conn->error,E_USER_WARNING);
 				}
