@@ -58,7 +58,7 @@ $smManager = new SiteMapManager();
 			<div style="margin-top:10px;"><h2><?php echo $LANG['IMGLIB'];?></h2></div>
 			<ul>
 				<li><a href="imagelib/index.php"><?php echo $LANG['IMGLIB'];?></a></li>
-				<li><a href="imagelib/photographers.php"><?php echo $LANG['CONTRIB'];?></a></li>
+				<li><a href="imagelib/contributors.php"><?php echo $LANG['CONTRIB'];?></a></li>
 				<li><a href="misc/usagepolicy.php"><?php echo $LANG['USAGEPOLICY'];?></a></li>
 			</ul>
 			

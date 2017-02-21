@@ -17,7 +17,7 @@ if($stArrJson){
 
 $imgLibManager = new ImageLibraryManager();
 $imgLibManager->setSearchTermsArr($stArr);
-$sqlWhere = $imgLibManager->getSqlWhere();
+$imgLibManager->setSqlWhere();
 
 $recordListHtml = '';
 if($view == 'thumb'){
@@ -26,7 +26,7 @@ if($view == 'thumb'){
 		$recordListHtml .= "<div style='margin-left:20px;margin-bottom:10px;font-weight:bold;'><a href='#' onclick='changeImagePage(".$topOnChange."); return false;'>Return to species list</a></div>";
 	}
 	
-	$imageArr = $imgLibManager->getImageArr($taxon,$pageNumber,$cntPerPage,$sqlWhere);
+	$imageArr = $imgLibManager->getImageArr($taxon,$pageNumber,$cntPerPage);
 	$recordCnt = $imgLibManager->getRecordCnt();
 	
 	$lastPage = (int) ($recordCnt / $cntPerPage) + 1;
@@ -99,15 +99,17 @@ if($view == 'thumb'){
 				if($imgArr['tid']) $recordListHtml .= '</a>';
 				$recordListHtml .= '<br />';
 			}
-			if($imgArr['stateprovince']) $recordListHtml .= $imgArr['stateprovince'] . "<br />";
 			if($imgArr['catalognumber']){
 				$recordListHtml .= '<a href="#" onclick="openIndPU('.$imgArr['occid'].');return false;">';
 				$recordListHtml .= $imgArr['instcode'] . ": " . $imgArr['catalognumber'];
 				$recordListHtml .= '</a>';
 			}
-			elseif($imgArr['photographer']){
-				$recordListHtml .= $imgArr['photographer'].'<br />';
+			elseif($imgArr['lastname']){
+				$pName = $imgArr['firstname'].' '.$imgArr['lastname'];
+				if(strlen($pName) < 20) $recordListHtml .= $pName.'<br />';
+				else $recordListHtml .= $imgArr['lastname'].'<br />';
 			}
+			//if($imgArr['stateprovince']) $recordListHtml .= $imgArr['stateprovince'] . "<br />";
 			$recordListHtml .= '</div>';
 			$recordListHtml .= '</div>';
 		}
@@ -125,7 +127,7 @@ if($view == 'thumb'){
 	}
 }
 if($view == 'famlist'){
-	$taxaList = $imgLibManager->getFamilyList($sqlWhere);
+	$taxaList = $imgLibManager->getFamilyList();
 	
 	$recordListHtml .= "<div style='margin-left:20px;margin-bottom:20px;font-weight:bold;'>Select a family to see genera list.</div>";
 	foreach($taxaList as $value){
@@ -135,7 +137,7 @@ if($view == 'famlist'){
 	}
 }
 if($view == 'genlist'){
-	$taxaList = $imgLibManager->getGenusList($taxon,$sqlWhere);
+	$taxaList = $imgLibManager->getGenusList($taxon);
 	
 	$topOnChange = '"","famlist",starr,1';
 	$recordListHtml .= "<div style='margin-left:20px;margin-bottom:10px;font-weight:bold;'><a href='#' onclick='changeImagePage(".$topOnChange."); return false;'>Return to family list</a></div>";
@@ -146,7 +148,7 @@ if($view == 'genlist'){
 	}
 }
 if($view == 'splist'){
-	$taxaList = $imgLibManager->getSpeciesList($taxon,$sqlWhere);
+	$taxaList = $imgLibManager->getSpeciesList($taxon);
 	
 	$topOnChange = 'selectedFamily,"genlist",starr,1';
 	$recordListHtml .= "<div style='margin-left:20px;margin-bottom:10px;font-weight:bold;'><a href='#' onclick='changeImagePage(".$topOnChange."); return false;'>Return to genera list</a></div>";

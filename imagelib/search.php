@@ -1,7 +1,7 @@
 <?php 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ImageLibraryManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ImageLibraryManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $taxon = array_key_exists("taxon",$_REQUEST)?trim($_REQUEST["taxon"]):"";
 $target = array_key_exists("target",$_REQUEST)?trim($_REQUEST["target"]):"";
@@ -55,12 +55,12 @@ if($action){
             $imgLibManager->readRequestVariables();
 			$stArr = $imgLibManager->getSearchTermsArr();
 		}
-		$sqlWhere = $imgLibManager->getSqlWhere();
+		$imgLibManager->setSqlWhere();
 		if($view == 'thumbnail'){
-			$imageArr = $imgLibManager->getImageArr($taxon,$pageNumber,$cntPerPage,$sqlWhere);
+			$imageArr = $imgLibManager->getImageArr($taxon,$pageNumber,$cntPerPage);
 		}
 		if($view == 'taxalist'){
-			$taxaList = $imgLibManager->getFamilyList($sqlWhere);
+			$taxaList = $imgLibManager->getFamilyList();
 		}
 		$recordCnt = $imgLibManager->getRecordCnt();
 		$jsonStArr = json_encode($stArr);
@@ -80,7 +80,7 @@ if($action){
 	<script src="../js/symb/images.index.js" type="text/javascript"></script>
 	<meta name='keywords' content='' />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 		var phArr = <?php echo (isset($previousCriteria["phjson"])&&$previousCriteria["phjson"]?"JSON.parse('".$previousCriteria["phjson"]."')":"new Array()"); ?>;
@@ -185,7 +185,7 @@ if($action){
 
 	<?php
 	$displayLeftMenu = (isset($imagelib_indexMenu)?$imagelib_indexMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($imagelib_indexCrumbs)){
 		echo "<div class='navpath'>";
 		echo $imagelib_indexCrumbs;
@@ -343,7 +343,7 @@ if($action){
 						<div id="specobsdiv">
 							<div style="margin:0px 0px 10px 20px;">
 								<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" <?php echo ((!$dbArr || in_array('all',$dbArr))?'checked':''); ?>/>
-								Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+								Select/Deselect all <a href="<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php">Collections</a>
 							</div>
 							<?php 
 							if($specArr){
@@ -443,15 +443,18 @@ if($action){
 											if($imgArr['tid']) echo '</a>';
 											echo '<br />';
 										}
-										if($imgArr['stateprovince']) echo $imgArr['stateprovince'] . "<br />";
 										if($imgArr['catalognumber']){
 											echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');return false;">';
-											echo $imgArr['instcode'] . ": " . $imgArr['catalognumber'];
+											if(strpos($imgArr['catalognumber'], $imgArr['instcode']) !== 0) echo $imgArr['instcode'] . ": ";
+											echo $imgArr['catalognumber'];
 											echo '</a>';
 										}
-										elseif($imgArr['photographer']){
-											echo $imgArr['photographer'].'<br />';
+										elseif($imgArr['lastname']){
+											$pName = $imgArr['firstname'].' '.$imgArr['lastname'];
+											if(strlen($pName) < 20) echo $pName.'<br />';
+											else echo $imgArr['lastname'].'<br />';
 										}
+										//if($imgArr['stateprovince']) echo $imgArr['stateprovince'] . "<br />";
 										?>
 									</div>
 								</div>
@@ -484,7 +487,7 @@ if($action){
 		</div>
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

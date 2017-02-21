@@ -1,13 +1,13 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot . '/classes/PhotographerManager.php');
+include_once($serverRoot . '/classes/ImageLibraryManager.php');
 include_once($serverRoot . '/classes/ImageExplorer.php');
 @header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"";
 
-$pManager = new PhotographerManager();
+$pManager = new ImageLibraryManager();
 $imageExplorer = new ImageExplorer();
 
 ?>

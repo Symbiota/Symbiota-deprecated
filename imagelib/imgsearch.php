@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot . '/classes/PhotographerManager.php');
-include_once($serverRoot . '/classes/ImageExplorer.php');
+include_once($SERVER_ROOT . '/classes/ImageLibraryManager.php');
+include_once($SERVER_ROOT . '/classes/ImageExplorer.php');
 header("Content-Type: text/html; charset=" . $charset);
 
 $phUid = array_key_exists("phuid", $_REQUEST) ? $_REQUEST["phuid"] : 0;
@@ -10,13 +10,13 @@ $limitStart = array_key_exists("lstart", $_REQUEST) ? $_REQUEST["lstart"] : 0;
 $limitNum = array_key_exists("lnum", $_REQUEST) ? $_REQUEST["lnum"] : 100;
 $imgCnt = array_key_exists("imgcnt", $_REQUEST) ? $_REQUEST["imgcnt"] : 0;
 
-$pManager = new PhotographerManager();
+$pManager = new ImageLibraryManager();
 $imageExplorer = new ImageExplorer();
 
 ?>
 <html>
 <head>
-    <title><?php echo $defaultTitle; ?> Image Search</title>
+    <title><?php echo $DEFAULT_TITLE; ?> Image Search</title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="../js/jquery.js"></script>
@@ -215,7 +215,7 @@ $imageExplorer = new ImageExplorer();
 
 <?php
 $displayLeftMenu = (isset($imagelib_photographersMenu) ? $imagelib_photographersMenu : false);
-include($serverRoot . '/header.php');
+include($SERVER_ROOT . '/header.php');
 echo '<div class="navpath">';
 echo '<a href="../index.php">Home</a> &gt;&gt; ';
 echo '<a href="index.php">Browse Images</a> &gt;&gt; ';
@@ -232,7 +232,7 @@ echo "</div>";
 
 </div>
 <?php
-include($serverRoot . '/footer.php');
+include($SERVER_ROOT . '/footer.php');
 ?>
 <div class="modal"></div>
 </body>

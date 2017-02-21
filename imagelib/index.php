@@ -67,13 +67,10 @@ $imgLibManager = new ImageLibraryManager();
 					<a href="../misc/usagepolicy.php#images">Image Copyright Policy</a>
 				</div>
 				<div>
-					<a href="photographers.php">Contributing Photographers</a>
+					<a href="contributors.php">Image Contributors</a>
 				</div>
 				<div>
-					<a href="search.php">Image Search (ver 1)</a>
-				</div>
-				<div>
-					<a href="imgsearch.php">Image Search (ver 2)</a>
+					<a href="search.php">Image Search</a>
 				</div>
 			</div>
 		</div>
