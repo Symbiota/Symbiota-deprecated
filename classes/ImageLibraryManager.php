@@ -505,7 +505,6 @@ class ImageLibraryManager{
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)&&$this->searchTermsArr["taxa"]){
-			$sqlWhereTaxa = "";
 			$useThes = (array_key_exists("usethes",$this->searchTermsArr)?$this->searchTermsArr["usethes"]:0);
 			$this->taxaSearchType = $this->searchTermsArr["taxontype"];
 			$taxaArr = explode(";",trim($this->searchTermsArr["taxa"]));
@@ -525,23 +524,28 @@ class ImageLibraryManager{
 			}
 
 			//Build sql
+			$sqlWhereTaxa = "";
 			foreach($this->taxaArr as $key => $valueArray){
 				if($this->taxaSearchType == 2){
-					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE (sciname = '".$key."')");
+					$rs1 = $this->conn->query("SELECT tid, rankid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
-						$sqlWhereTaxa = 'OR (i.tid IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
+						if($r1->rankid < 180){
+							$sqlWhereTaxa = 'OR (i.tid IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
+						}
 					}
-					$sqlWhereTaxa .= "OR (t.sciname LIKE '".$key."%') ";
-					//Look for synonyms
-					if(array_key_exists("synonyms",$valueArray)){
-						$synArr = $valueArray["synonyms"];
-						if($synArr){
-							foreach($synArr as $synTid => $sciName){ 
-								if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
-									$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
+					if(!$sqlWhereTaxa){
+						$sqlWhereTaxa = "OR (t.sciname LIKE '".$key."%') ";
+						//Look for synonyms
+						if(array_key_exists("synonyms",$valueArray)){
+							$synArr = $valueArray["synonyms"];
+							if($synArr){
+								foreach($synArr as $synTid => $sciName){ 
+									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
+										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
+									}
 								}
+								$sqlWhereTaxa .= 'OR (i.tid IN('.implode(',',array_keys($synArr)).')) ';
 							}
-							$sqlWhereTaxa .= 'OR (i.tid IN('.implode(',',array_keys($synArr)).')) ';
 						}
 					}
 				}
