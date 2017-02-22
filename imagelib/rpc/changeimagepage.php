@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ImageLibraryManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ImageLibraryManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $taxon = array_key_exists("taxon",$_REQUEST)?trim($_REQUEST["taxon"]):"";
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
@@ -17,16 +17,13 @@ if($stArrJson){
 
 $imgLibManager = new ImageLibraryManager();
 $imgLibManager->setSearchTermsArr($stArr);
-$imgLibManager->setSqlWhere();
 
 $recordListHtml = '';
 if($view == 'thumb'){
-	if($taxon){
-		$topOnChange = '"'.$taxon.'","splist",starr,1';
-		$recordListHtml .= "<div style='margin-left:20px;margin-bottom:10px;font-weight:bold;'><a href='#' onclick='changeImagePage(".$topOnChange."); return false;'>Return to species list</a></div>";
-	}
 	
-	$imageArr = $imgLibManager->getImageArr($taxon,$pageNumber,$cntPerPage);
+	$imgLibManager->setTaxon($taxon);
+	$imgLibManager->setSqlWhere();
+	$imageArr = $imgLibManager->getImageArr($pageNumber,$cntPerPage);
 	$recordCnt = $imgLibManager->getRecordCnt();
 	
 	$lastPage = (int) ($recordCnt / $cntPerPage) + 1;
@@ -126,7 +123,8 @@ if($view == 'thumb'){
 		$recordListHtml .= '</div>';
 	}
 }
-if($view == 'famlist'){
+elseif($view == 'famlist'){
+	$imgLibManager->setSqlWhere();
 	$taxaList = $imgLibManager->getFamilyList();
 	
 	$recordListHtml .= "<div style='margin-left:20px;margin-bottom:20px;font-weight:bold;'>Select a family to see genera list.</div>";
@@ -136,7 +134,8 @@ if($view == 'famlist'){
 		$recordListHtml .= "<div style='margin-left:30px;'><a href='#' onclick='changeFamily(".$famChange.");changeImagePage(".$onChange."); return false;'>".strtoupper($value)."</a></div>";
 	}
 }
-if($view == 'genlist'){
+elseif($view == 'genlist'){
+	$imgLibManager->setSqlWhere();
 	$taxaList = $imgLibManager->getGenusList($taxon);
 	
 	$topOnChange = '"","famlist",starr,1';
@@ -147,7 +146,8 @@ if($view == 'genlist'){
 		$recordListHtml .= "<div style='margin-left:30px;'><a href='#' onclick='changeImagePage(".$onChange."); return false;'>".$value."</a></div>";
 	}
 }
-if($view == 'splist'){
+elseif($view == 'splist'){
+	$imgLibManager->setSqlWhere();
 	$taxaList = $imgLibManager->getSpeciesList($taxon);
 	
 	$topOnChange = 'selectedFamily,"genlist",starr,1';

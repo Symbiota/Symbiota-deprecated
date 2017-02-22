@@ -33,7 +33,7 @@ $pManager = new ImageLibraryManager();
 				foreach($pList as $uid => $pArr){
 					echo '<div>';
 					$phLink = 'search.php?imagedisplay=thumbnail&imagetype=all&phuidstr='.$uid.'&phjson=[{'.urlencode('"name":"'.$pArr['fullname'].'","id":"'.$uid.'"').'}]&submitaction=Load Images';
-					echo '<a href="'.$phLink.'" target="_blank">'.$pArr['name'].'</a> ('.$pArr['imgcnt'].')</div>';
+					echo '<a href="'.$phLink.'">'.$pArr['name'].'</a> ('.$pArr['imgcnt'].')</div>';
 				}
 				?>
 			</div>
@@ -49,7 +49,7 @@ $pManager = new ImageLibraryManager();
 				foreach($specList as $k => $cArr){
 					echo '<div>';
 					$phLink = 'search.php?nametype=2&taxtp=2&imagecount=all&imagedisplay=thumbnail&imagetype=all&submitaction=Load%20Images&db[]='.$k.'&usecookies=false';
-					echo '<a href="'.$phLink.'" target="_blank">'.$cArr['name'].'</a> ('.$cArr['imgcnt'].')</div>';
+					echo '<a href="'.$phLink.'">'.$cArr['name'].'</a> ('.$cArr['imgcnt'].')</div>';
 				}
 				?>
 			</div>
@@ -60,7 +60,7 @@ $pManager = new ImageLibraryManager();
 				foreach($obsList as $k => $cArr){
 					echo '<div>';
 					$phLink = 'search.php?nametype=2&taxtp=2&imagecount=all&imagedisplay=thumbnail&imagetype=all&submitaction=Load%20Images&db[]='.$k.'&usecookies=false';
-					echo '<a href="'.$phLink.'" target="_blank">'.$cArr['name'].'</a> ('.$cArr['imgcnt'].')</div>';
+					echo '<a href="'.$phLink.'">'.$cArr['name'].'</a> ('.$cArr['imgcnt'].')</div>';
 				}
 				?>
 			</div>

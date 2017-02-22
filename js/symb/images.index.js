@@ -13,6 +13,9 @@ $(document).ready(function() {
 			},
 			formatItem: function (data) {
 				return data.name;
+			},
+			onSelect: function (){
+				$("#imagedisplay").val("thumbnail");
 			}
 		}
 	});
@@ -134,22 +137,11 @@ function submitImageForm(){
 	}*/
 }
 
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-		xmlHttp=new XMLHttpRequest();
+function imageDisplayChanged(f){
+	if(f.imagedisplay.value == "taxalist" && $('#taxa').manifest('values') != ""){
+		f.imagedisplay.value = "thumbnail";
+		alert("Only the thumbnail display is allowed when searching for a scientific name");
 	}
-	catch (e){
-		// Internet Explorer
-		try{
-			xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-		}
-		catch(e){
-			xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-		}
-	}
-	return xmlHttp;
 }
 
 function toggle(target){
@@ -178,7 +170,6 @@ function checkTaxonType(){
 			for (i = 0; i < vals.length; i++) {
 				$('#common').manifest('remove', i);
 			}
-			document.getElementById('taxanamelabel').innerHTML = 'Scientific Names: ';
 			document.getElementById('thesdiv').style.display = "block";
 			document.getElementById('commonbox').style.display = "none";
 			document.getElementById('taxabox').style.display = "block";
@@ -194,7 +185,6 @@ function checkTaxonType(){
 			}
 			document.getElementById('commonbox').style.display = "block";
 			document.getElementById('taxabox').style.display = "none";
-			document.getElementById('taxanamelabel').innerHTML = 'Common Names: ';
 			document.getElementById('thesdiv').style.display = "none";
 			document.getElementById('thes').checked = false;
 			document.getElementById('taxtp').value = newtaxontype;
@@ -368,30 +358,30 @@ function openImagePopup(imageId){
 	return false;
 }
 
-function changeImagePage(taxon,display,starr,page){
+function changeImagePage(taxonIn,viewIn,starrIn,pageIn){
 	document.getElementById("imagebox").innerHTML = "<p>Loading...</p>";
 	
-	var sutXmlHttp=GetXmlHttpObject();
-	if (sutXmlHttp==null){
-		alert ("Your browser does not support AJAX!");
-		return;
-	}
-	var url="rpc/changeimagepage.php?starr="+starr+"&page="+page+"&view="+display+"&taxon="+taxon;
-	
-	sutXmlHttp.onreadystatechange=function(){
-		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
-			var newImageList = JSON.parse(sutXmlHttp.responseText);
+	$.ajax( {
+		url: "rpc/changeimagepage.php",
+		method: "POST",
+		data: { 
+			starr: starrIn, 
+			page: pageIn, 
+			view: viewIn,
+			taxon: taxonIn
+		},
+		success: function( data ) {
+			var newImageList = JSON.parse(data);
 			document.getElementById("imagebox").innerHTML = newImageList;
-			if(display == 'thumb'){
+			if(viewIn == 'thumb'){
 				document.getElementById("imagetab").innerHTML = 'Images';
 			}
 			else{
 				document.getElementById("imagetab").innerHTML = 'Taxa List';
 			}
-		}
-	};
-	sutXmlHttp.open("POST",url,true);
-	sutXmlHttp.send(null);
+        }
+	});
+
 }
 
 function changeFamily(taxon){

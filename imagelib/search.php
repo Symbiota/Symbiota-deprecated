@@ -3,7 +3,6 @@ include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ImageLibraryManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$taxon = array_key_exists("taxon",$_REQUEST)?trim($_REQUEST["taxon"]):"";
 $target = array_key_exists("target",$_REQUEST)?trim($_REQUEST["target"]):"";
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1;
@@ -57,7 +56,7 @@ if($action){
 		}
 		$imgLibManager->setSqlWhere();
 		if($view == 'thumbnail'){
-			$imageArr = $imgLibManager->getImageArr($taxon,$pageNumber,$cntPerPage);
+			$imageArr = $imgLibManager->getImageArr($pageNumber,$cntPerPage);
 		}
 		if($view == 'taxalist'){
 			$taxaList = $imgLibManager->getFamilyList();
@@ -77,7 +76,7 @@ if($action){
 	<script src="../js/jquery-ui.js" type="text/javascript"></script>
 	<script src="../js/jquery.manifest.js" type="text/javascript"></script>
 	<script src="../js/jquery.marcopolo.js" type="text/javascript"></script>
-	<script src="../js/symb/images.index.js" type="text/javascript"></script>
+	<script src="../js/symb/images.index.js?ver=20170220" type="text/javascript"></script>
 	<meta name='keywords' content='' />
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
@@ -195,6 +194,7 @@ if($action){
 	else{
 		echo '<div class="navpath">';
 		echo '<a href="../index.php">Home</a> &gt;&gt; ';
+		echo '<a href="contributors.php">Image Contributors</a> &gt;&gt; ';
 		echo '<b>Image Search</b>';
 		echo "</div>";
 	}
@@ -216,24 +216,21 @@ if($action){
 			
 			<form name="imagesearchform" id="imagesearchform" action="search.php" method="get" onsubmit="return submitImageForm();">
 				<div id="criteriadiv">
-					<div id="thesdiv" style="display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'none':'block'); ?>;" >
+					<div id="thesdiv" style="margin-left:160px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'none':'block'); ?>;" >
 						<input type='checkbox' id='thes' name='thes' value='1' <?php if(array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"]) echo "CHECKED"; ?> >Include Synonyms
 					</div>
-					<div style="margin-top:5px;">
-						<select id="taxontype" name="nametype" onchange="checkTaxonType();" >
-							<option id='sciname' value='2' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "2") echo "SELECTED"; ?> >Scientific Name</option>
-							<option id='commonname' value='3' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3") echo "SELECTED"; ?> >Common Name</option>
-						</select>
-						<input id="taxtp" name="taxtp" type="hidden" value="<?php echo (array_key_exists("taxtp",$previousCriteria)?$previousCriteria["taxtp"]:'2'); ?>" />
-					</div>
-					<div style="clear:both;margin-top:5px;">
-						<div id="taxanamelabel" style="float:left;margin-right:8px;padding-top:8px;">
-							<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'Common Names: ':'Scientific Names: '); ?>
+					<div style="clear:both;">
+						<div style="float:left;">
+							<select id="taxontype" name="nametype" onchange="checkTaxonType();" style="padding:5px;margin:5px 10px;">
+								<option id='sciname' value='2' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "2") echo "SELECTED"; ?> >Scientific Name</option>
+								<option id='commonname' value='3' <?php if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3") echo "SELECTED"; ?> >Common Name</option>
+							</select>
+							<input id="taxtp" name="taxtp" type="hidden" value="<?php echo (array_key_exists("taxtp",$previousCriteria)?$previousCriteria["taxtp"]:'2'); ?>" />
 						</div>
 						<div id="taxabox" style="float:left;margin-bottom:10px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'none':'block'); ?>;">
 							<input id="taxa" type="text" style="width:450px;" name="taxa" value="" title="Separate multiple names w/ commas" autocomplete="off" />
 						</div>
-						<div id="commonbox" style="float:left;margin-bottom:10px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'block':'none'); ?>;">
+						<div id="commonbox" style="margin-bottom:10px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'block':'none'); ?>;">
 							<input id="common" type="text" style="width:450px;" name="common" value="" title="Separate multiple names w/ commas" autocomplete="off" />
 						</div>
 					</div>
@@ -302,7 +299,7 @@ if($action){
 					</div>
 					<div style="margin-top:5px;">
 						Image Display: 
-						<select id="imagedisplay" name="imagedisplay">
+						<select id="imagedisplay" name="imagedisplay" onchange="imageDisplayChanged(this.form)">
 							<option value="thumbnail" <?php echo ((array_key_exists("imagedisplay",$previousCriteria))&&($previousCriteria["imagedisplay"]=='thumbnail')?'SELECTED ':''); ?>>Thumbnails</option>
 							<option value="taxalist" <?php echo ((array_key_exists("imagedisplay",$previousCriteria))&&($previousCriteria["imagedisplay"]=='taxalist')?'SELECTED ':''); ?>>Taxa List</option>
 						</select>

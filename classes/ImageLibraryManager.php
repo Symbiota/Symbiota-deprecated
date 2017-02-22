@@ -389,32 +389,19 @@ class ImageLibraryManager{
 					while($row = $rs->fetch_object()){
 						$taxaStr = $row->sciname;
 					}
-					$rs->close();
+					$rs->free();
 				}
 				else{
 					$taxaStr = str_replace(",",";",$taxa);
 					$taxaArr = explode(";",$taxaStr);
 					foreach($taxaArr as $key => $sciName){
 						$snStr = trim($sciName);
-						if($searchType != 5) $snStr = ucfirst($snStr);
+						$snStr = ucfirst($snStr);
 						$taxaArr[$key] = $snStr;
 					}
 					$taxaStr = implode(";",$taxaArr);
 				}
-				$collTaxa = "taxa:".$taxaStr;
 				$this->searchTermsArr["taxa"] = $taxaStr;
-				$useThes = array_key_exists("thes",$_REQUEST)?$this->cleanInStr($_REQUEST["thes"]):0; 
-				if($useThes){
-					$collTaxa .= "&usethes:true";
-					$this->searchTermsArr["usethes"] = true;
-				}
-				else{
-					$this->searchTermsArr["usethes"] = false;
-				}
-				if($searchType){
-					$collTaxa .= "&taxontype:".$searchType;
-					$this->searchTermsArr["taxontype"] = $searchType;
-				}
 			}
 		}
 		$this->searchTermsArr["country"] = '';
@@ -483,7 +470,15 @@ class ImageLibraryManager{
 			}
 		}
 	}
-	
+
+	public function setTaxon($taxon){
+		if($taxon){
+			$this->searchTermsArr["taxontype"] = 2;
+			$this->searchTermsArr["usethes"] = 1;
+			$this->searchTermsArr["taxa"] = $taxon;
+		}
+	}
+
 	public function setSqlWhere(){
 		$sqlWhere = "";
 		if(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
@@ -534,7 +529,7 @@ class ImageLibraryManager{
 				if($this->taxaSearchType == 2){
 					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
-						$sqlWhereTaxa = 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
+						$sqlWhereTaxa = 'OR (i.tid IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND parenttid IN('.$r1->tid.'))) ';
 					}
 					$sqlWhereTaxa .= "OR (t.sciname LIKE '".$key."%') ";
 					//Look for synonyms
@@ -546,7 +541,7 @@ class ImageLibraryManager{
 									$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
 								}
 							}
-							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',array_keys($synArr)).')) ';
+							$sqlWhereTaxa .= 'OR (i.tid IN('.implode(',',array_keys($synArr)).')) ';
 						}
 					}
 				}
@@ -626,29 +621,43 @@ class ImageLibraryManager{
 		}
 	}
 	
-	public function getImageArr($taxon,$pageRequest,$cntPerPage){
+	public function getImageArr($pageRequest,$cntPerPage){
 		$retArr = Array();
 		if(!$this->recordCount){
-			$this->setRecordCnt($taxon);
+			$this->setRecordCnt();
 		}
 		$sql = 'SELECT DISTINCT i.imgid, o.tidinterpreted, t.tid, t.sciname, i.url, i.thumbnailurl, i.originalurl, '.
 			'u.uid, u.lastname, u.firstname, i.caption, '.
 			'o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode '.
-			'FROM images AS i LEFT JOIN taxa t ON i.tid = t.tid '.
-			'LEFT JOIN users AS u ON i.photographeruid = u.uid '.
-			'LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-			'LEFT JOIN omcollections AS c ON o.collid = c.collid ';
+			'FROM images i ';
+		if(isset($this->searchTermsArr["taxa"]) && $this->searchTermsArr["taxa"]){
+			//Query variables include a taxon search, thus use an INNER JOIN since its faster
+			$sql .= 'INNER JOIN taxa t ON i.tid = t.tid ';
+		}
+		else{
+			$sql .= 'LEFT JOIN taxa t ON i.tid = t.tid ';
+		}
+		if(isset($this->searchTermsArr["phuid"]) && $this->searchTermsArr["phuid"]){
+			$sql .= 'INNER JOIN users u ON i.photographeruid = u.uid ';
+		}
+		else{
+			$sql .= 'LEFT JOIN users u ON i.photographeruid = u.uid ';
+		}
+		if($this->searchTermsArr["imagetype"] == 'specimenonly'){
+			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid '.
+				'INNER JOIN omcollections c ON o.collid = c.collid ';
+		}
+		else{
+			$sql .= 'LEFT JOIN omoccurrences o ON i.occid = o.occid '.
+				'LEFT JOIN omcollections c ON o.collid = c.collid ';
+		}
 		if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
-			$sql .= 'LEFT JOIN imagetag AS it ON i.imgid = it.imgid ';
+			$sql .= 'INNER JOIN imagetag AS it ON i.imgid = it.imgid ';
 		}
 		if(array_key_exists("keywords",$this->searchTermsArr)&&$this->searchTermsArr["keywords"]){
-			$sql .= 'LEFT JOIN imagekeywords AS ik ON i.imgid = ik.imgid ';
+			$sql .= 'INNER JOIN imagekeywords AS ik ON i.imgid = ik.imgid ';
 		}
 		$sql .= $this->sqlWhere;
-		if($taxon){
-			$taxon = $this->cleanInStr($taxon);
-			$sql .= "AND (t.SciName LIKE '".$taxon."%') ";
-		}
 		if(array_key_exists("imagecount",$this->searchTermsArr)&&$this->searchTermsArr["imagecount"]){
 			if($this->searchTermsArr["imagecount"] == 'taxon'){
 				$sql .= 'GROUP BY ts.tidaccepted ';
@@ -685,7 +694,7 @@ class ImageLibraryManager{
 		//return $sql;
 	}
 
-	private function setRecordCnt($taxon){
+	private function setRecordCnt(){
 		if($this->sqlWhere){
 			$sql = '';
 			if(array_key_exists("imagecount",$this->searchTermsArr)&&$this->searchTermsArr["imagecount"]){
@@ -711,10 +720,6 @@ class ImageLibraryManager{
 				$sql .= 'LEFT JOIN imagekeywords AS ik ON i.imgid = ik.imgid ';
 			}
 			$sql .= $this->sqlWhere;
-			if($taxon){
-				$taxon = $this->cleanInStr($taxon);
-				$sql .= "AND (t.SciName LIKE '".$taxon."%') ";
-			}
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
