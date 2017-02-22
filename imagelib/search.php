@@ -314,10 +314,13 @@ if($action){
 									<input type='radio' name='imagetype' value='all' <?php if((!array_key_exists("imagetype",$previousCriteria)) || (array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'all')) echo "CHECKED"; ?> > All Images
 								</div>
 								<div style="margin-top:5px;">
-									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Limit to Specimen Images
+									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Specimen Images 
 								</div>
 								<div style="margin-top:5px;">
-									<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Limit to Non-Specimen Images
+									<input type='radio' name='imagetype' value='observationonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'observationonly') echo "CHECKED"; ?> > Image Vouchered Observations
+								</div>
+								<div style="margin-top:5px;">
+									<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Field Images (lacking specific locality details)
 								</div>
 							</td>
 						</tr>
@@ -329,7 +332,7 @@ if($action){
 					<input id="keywordstr" name="keywordstr" type="hidden" value="<?php if(array_key_exists("keywordstr",$previousCriteria)) echo $previousCriteria["keywordstr"]; ?>" />
 					<input id="phuidstr" name="phuidstr" type="hidden" value="<?php if(array_key_exists("phuidstr",$previousCriteria)) echo $previousCriteria["phuidstr"]; ?>" />
 					<input id="phjson" name="phjson" type="hidden" value='<?php if(array_key_exists("phjson",$previousCriteria)) echo $previousCriteria["phjson"]; ?>' />
-					<button id="loadimages" style='float:right;' name="submitaction" type="submit" value="Load Images" >Load Images</button>
+					<button id="loadimages" style='margin: 20px' name="submitaction" type="submit" value="Load Images" >Load Images</button>
 					<div style="clear:both;"></div>
 				</div>
 				
@@ -372,36 +375,34 @@ if($action){
 						if($imageArr){
 							$lastPage = (int) ($recordCnt / $cntPerPage) + 1;
 							$startPage = ($pageNumber > 4?$pageNumber - 4:1);
-							if($lastPage > $startPage){
-								$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
-								$onclick = 'changeImagePage("","thumb",starr,';
-								$hrefPrefix = "<a href='#' onclick='".$onclick;
-								$pageBar = '<div style="float:left" >';
-								if($startPage > 1){
-									$pageBar .= "<span class='pagination' style='margin-right:5px;'>".$hrefPrefix."1); return false;'>First</a></span>";
-									$pageBar .= "<span class='pagination' style='margin-right:5px;'>".$hrefPrefix.(($pageNumber - 10) < 1 ?1:$pageNumber - 10)."); return false;'>&lt;&lt;</a></span>";
-								}
-								for($x = $startPage; $x <= $endPage; $x++){
-									if($pageNumber != $x){
-										$pageBar .= "<span class='pagination' style='margin-right:3px;'>".$hrefPrefix.$x."); return false;'>".$x."</a></span>";
-									}
-									else{
-										$pageBar .= "<span class='pagination' style='margin-right:3px;font-weight:bold;'>".$x."</span>";
-									}
-								}
-								if(($lastPage - $startPage) >= 10){
-									$pageBar .= "<span class='pagination' style='margin-left:5px;'>".$hrefPrefix.(($pageNumber + 10) > $lastPage?$lastPage:($pageNumber + 10))."); return false;'>&gt;&gt;</a></span>";
-									$pageBar .= "<span class='pagination' style='margin-left:5px;'>".$hrefPrefix.$lastPage."); return false;'>Last</a></span>";
-								}
-								$pageBar .= "</div><div style='float:right;margin-top:4px;margin-bottom:8px;'>";
-								$beginNum = ($pageNumber - 1)*$cntPerPage + 1;
-								$endNum = $beginNum + $cntPerPage - 1;
-								if($endNum > $recordCnt) $endNum = $recordCnt;
-								$pageBar .= "Page ".$pageNumber.", records ".$beginNum."-".$endNum." of ".$recordCnt."</div>";
-								$paginationStr = $pageBar;
-								echo '<div style="width:100%;">'.$paginationStr.'</div>';
-								echo '<div style="clear:both;margin:5 0 5 0;"><hr /></div>';
+							$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
+							$onclick = 'changeImagePage("","thumb",starr,';
+							$hrefPrefix = "<a href='#' onclick='".$onclick;
+							$pageBar = '<div style="float:left" >';
+							if($startPage > 1){
+								$pageBar .= "<span class='pagination' style='margin-right:5px;'>".$hrefPrefix."1); return false;'>First</a></span>";
+								$pageBar .= "<span class='pagination' style='margin-right:5px;'>".$hrefPrefix.(($pageNumber - 10) < 1 ?1:$pageNumber - 10)."); return false;'>&lt;&lt;</a></span>";
 							}
+							for($x = $startPage; $x <= $endPage; $x++){
+								if($pageNumber != $x){
+									$pageBar .= "<span class='pagination' style='margin-right:3px;'>".$hrefPrefix.$x."); return false;'>".$x."</a></span>";
+								}
+								else{
+									$pageBar .= "<span class='pagination' style='margin-right:3px;font-weight:bold;'>".$x."</span>";
+								}
+							}
+							if(($lastPage - $startPage) >= 10){
+								$pageBar .= "<span class='pagination' style='margin-left:5px;'>".$hrefPrefix.(($pageNumber + 10) > $lastPage?$lastPage:($pageNumber + 10))."); return false;'>&gt;&gt;</a></span>";
+								$pageBar .= "<span class='pagination' style='margin-left:5px;'>".$hrefPrefix.$lastPage."); return false;'>Last</a></span>";
+							}
+							$pageBar .= "</div><div style='float:right;margin-top:4px;margin-bottom:8px;'>";
+							$beginNum = ($pageNumber - 1)*$cntPerPage + 1;
+							$endNum = $beginNum + $cntPerPage - 1;
+							if($endNum > $recordCnt) $endNum = $recordCnt;
+							$pageBar .= "Page ".$pageNumber.", records ".$beginNum."-".$endNum." of ".$recordCnt."</div>";
+							$paginationStr = $pageBar;
+							echo '<div style="width:100%;">'.$paginationStr.'</div>';
+							echo '<div style="clear:both;margin:5 0 5 0;"><hr /></div>';
 							echo '<div style="width:98%;margin-left:auto;margin-right:auto;">';
 							foreach($imageArr as $imgArr){
 								$imgId = $imgArr['imgid'];

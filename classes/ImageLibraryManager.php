@@ -8,8 +8,6 @@ class ImageLibraryManager{
 	private $conn;
 	private $taxaArr = Array();
 	private $collArrIndex = 0;
-	private $searchTerms = 0;
-	private $taxaSearchType;
 	private $sqlWhere = '';
 	
 	function __construct() {
@@ -506,14 +504,14 @@ class ImageLibraryManager{
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)&&$this->searchTermsArr["taxa"]){
 			$useThes = (array_key_exists("usethes",$this->searchTermsArr)?$this->searchTermsArr["usethes"]:0);
-			$this->taxaSearchType = $this->searchTermsArr["taxontype"];
+			$taxaSearchType = $this->searchTermsArr["taxontype"];
 			$taxaArr = explode(";",trim($this->searchTermsArr["taxa"]));
 			//Set scientific name
 			$this->taxaArr = Array();
 			foreach($taxaArr as $sName){
 				$this->taxaArr[trim($sName)] = Array();
 			}
-			if($this->taxaSearchType == 3){
+			if($taxaSearchType == 3){
 				//Common name search
 				$this->setSciNamesByVerns();
 			}
@@ -526,7 +524,7 @@ class ImageLibraryManager{
 			//Build sql
 			$sqlWhereTaxa = "";
 			foreach($this->taxaArr as $key => $valueArray){
-				if($this->taxaSearchType == 2){
+				if($taxaSearchType == 2){
 					$rs1 = $this->conn->query("SELECT tid, rankid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
 						if($r1->rankid < 180){
@@ -608,11 +606,14 @@ class ImageLibraryManager{
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 		}
-		if(array_key_exists("imagetype",$this->searchTermsArr)&&$this->searchTermsArr["imagetype"]){
+		if(array_key_exists("imagetype",$this->searchTermsArr) && $this->searchTermsArr["imagetype"]){
 			if($this->searchTermsArr["imagetype"] == 'specimenonly'){
-				$sqlWhere .= 'AND (i.occid IS NOT NULL) ';
+				$sqlWhere .= 'AND (i.occid IS NOT NULL) AND (c.colltype = "Preserved Specimens") ';
 			}
-			if($this->searchTermsArr["imagetype"] == 'fieldonly'){
+			elseif($this->searchTermsArr["imagetype"] == 'observationonly'){
+				$sqlWhere .= 'AND (i.occid IS NOT NULL) AND (c.colltype != "Preserved Specimens") ';
+			}
+			elseif($this->searchTermsArr["imagetype"] == 'fieldonly'){
 				$sqlWhere .= 'AND (i.occid IS NULL) ';
 			}
 		}
@@ -632,35 +633,8 @@ class ImageLibraryManager{
 		}
 		$sql = 'SELECT DISTINCT i.imgid, o.tidinterpreted, t.tid, t.sciname, i.url, i.thumbnailurl, i.originalurl, '.
 			'u.uid, u.lastname, u.firstname, i.caption, '.
-			'o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode '.
-			'FROM images i ';
-		if(isset($this->searchTermsArr["taxa"]) && $this->searchTermsArr["taxa"]){
-			//Query variables include a taxon search, thus use an INNER JOIN since its faster
-			$sql .= 'INNER JOIN taxa t ON i.tid = t.tid ';
-		}
-		else{
-			$sql .= 'LEFT JOIN taxa t ON i.tid = t.tid ';
-		}
-		if(isset($this->searchTermsArr["phuid"]) && $this->searchTermsArr["phuid"]){
-			$sql .= 'INNER JOIN users u ON i.photographeruid = u.uid ';
-		}
-		else{
-			$sql .= 'LEFT JOIN users u ON i.photographeruid = u.uid ';
-		}
-		if($this->searchTermsArr["imagetype"] == 'specimenonly'){
-			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'INNER JOIN omcollections c ON o.collid = c.collid ';
-		}
-		else{
-			$sql .= 'LEFT JOIN omoccurrences o ON i.occid = o.occid '.
-				'LEFT JOIN omcollections c ON o.collid = c.collid ';
-		}
-		if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
-			$sql .= 'INNER JOIN imagetag AS it ON i.imgid = it.imgid ';
-		}
-		if(array_key_exists("keywords",$this->searchTermsArr)&&$this->searchTermsArr["keywords"]){
-			$sql .= 'INNER JOIN imagekeywords AS ik ON i.imgid = ik.imgid ';
-		}
+			'o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode ';
+		$sql .= $this->getSqlBase();
 		$sql .= $this->sqlWhere;
 		if(array_key_exists("imagecount",$this->searchTermsArr)&&$this->searchTermsArr["imagecount"]){
 			if($this->searchTermsArr["imagecount"] == 'taxon'){
@@ -715,14 +689,7 @@ class ImageLibraryManager{
 			else{
 				$sql = "SELECT COUNT(i.imgid) AS cnt ";
 			}
-			$sql .= 'FROM images AS i LEFT JOIN taxa t ON i.tid = t.tid '.
-				'LEFT JOIN omoccurrences AS o ON i.occid = o.occid ';
-			if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
-				$sql .= 'LEFT JOIN imagetag AS it ON i.imgid = it.imgid ';
-			}
-			if(array_key_exists("keywords",$this->searchTermsArr)&&$this->searchTermsArr["keywords"]){
-				$sql .= 'LEFT JOIN imagekeywords AS ik ON i.imgid = ik.imgid ';
-			}
+			$sql .= $this->getSqlBase(false);
 			$sql .= $this->sqlWhere;
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);
@@ -731,6 +698,40 @@ class ImageLibraryManager{
 			}
 			$result->free();
 		}
+	}
+	
+	private function getSqlBase($full = true){
+		$sql = 'FROM images i ';
+		if(isset($this->searchTermsArr["taxa"]) && $this->searchTermsArr["taxa"]){
+			//Query variables include a taxon search, thus use an INNER JOIN since its faster
+			$sql .= 'INNER JOIN taxa t ON i.tid = t.tid ';
+		}
+		else{
+			$sql .= 'LEFT JOIN taxa t ON i.tid = t.tid ';
+		}
+		if($full){
+			if(isset($this->searchTermsArr["phuid"]) && $this->searchTermsArr["phuid"]){
+				$sql .= 'INNER JOIN users u ON i.photographeruid = u.uid ';
+			}
+			else{
+				$sql .= 'LEFT JOIN users u ON i.photographeruid = u.uid ';
+			}
+		}
+		if($this->searchTermsArr["imagetype"] == 'specimenonly' || $this->searchTermsArr["imagetype"] == 'observationonly'){
+			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid '.
+				'INNER JOIN omcollections c ON o.collid = c.collid ';
+		}
+		else{
+			$sql .= 'LEFT JOIN omoccurrences o ON i.occid = o.occid ';
+			if($full) $sql .= 'LEFT JOIN omcollections c ON o.collid = c.collid ';
+		}
+		if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
+			$sql .= 'INNER JOIN imagetag it ON i.imgid = it.imgid ';
+		}
+		if(array_key_exists("keywords",$this->searchTermsArr)&&$this->searchTermsArr["keywords"]){
+			$sql .= 'INNER JOIN imagekeywords ik ON i.imgid = ik.imgid ';
+		}
+		return $sql;
 	}
 
 	private function setSciNamesByVerns(){
@@ -868,7 +869,6 @@ class ImageLibraryManager{
 	
 	public function setSearchTermsArr($stArr){
     	$this->searchTermsArr = $stArr;
-		$this->searchTerms = 1;
     }
 	
 	public function getSearchTermsArr(){
