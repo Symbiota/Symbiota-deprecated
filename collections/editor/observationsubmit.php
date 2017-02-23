@@ -52,9 +52,10 @@ if($collMap){
 		echo 'var maxUpload = '.$maxUpload.";\n";
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/jquery.js"></script>
-	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.observationsubmit.js"></script>
+	<script src="../../js/jquery.js" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
+	<script src="../../js/symb/collections.coordinateValidation.js" type="text/javascript"></script>
+	<script src="../../js/symb/collections.observationsubmit.js?ver=170222" type="text/javascript"></script>
 </head>
 <body>
 

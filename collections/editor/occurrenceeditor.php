@@ -437,7 +437,8 @@ else{
         }
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=161208"></script>
+	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=170222"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170101"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170101"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=141212"></script>
