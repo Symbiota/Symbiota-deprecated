@@ -720,7 +720,262 @@ class OccurrenceCleaner extends Manager{
 			'AND country IN("USA","United States") AND (stateprovince IS NOT NULL) ';
 		return $retStr;
 	}
+
+	//Coordinate field verifier
+	public function getCoordStats(){
+		$retArr = array();
+		//Get count georeferenced
+		$sql = 'SELECT count(*) AS cnt '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL)';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['coord'] = $r->cnt;
+		}
+		$rs->free();
+
+		//Get count not georeferenced
+		$sql = 'SELECT count(*) AS cnt '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NULL) AND (decimallongitude IS NULL)';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['noCoord'] = $r->cnt;
+		}
+		$rs->free();
+
+		//Count not georeferenced with verbatimCoordinates info
+		$sql = 'SELECT count(*) AS cnt '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NULL) AND (decimallongitude IS NULL) AND (verbatimcoordinates IS NOT NULL)';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['noCoord_verbatim'] = $r->cnt;
+		}
+		$rs->free();
+
+		//Count not georeferenced without verbatimCoordinates info
+		$sql = 'SELECT count(*) AS cnt '.
+				'FROM omoccurrences '.
+				'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NULL) AND (decimallongitude IS NULL) AND (verbatimcoordinates IS NULL)';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['noCoord_noVerbatim'] = $r->cnt;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function getUnverifiedByCountry(){
+		$retArr = array();
+		$sql = 'SELECT country, count(occid) AS cnt '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND country IS NOT NULL '.
+			'AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "coordinate")) '.
+			'GROUP BY country';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->country] = $r->cnt;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function verifyCoordAgainstPolitical($queryCountry){
+		echo '<ul>';
+		echo '<li>Starting coordinate crawl...</li>';
+		$sql = 'SELECT occid, country, stateprovince, county, decimallatitude, decimallongitude '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND (country = "'.$queryCountry.'") '.
+			'AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "coordinate")) '.
+			'LIMIT 5';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			echo '<li>Checking occurrence <a href="../editor/occurrenceeditor.php?occid='.$r->occid.'" target="_blank">'.$r->occid.'</a>...</li>';
+			$googleUnits = $this->callGoogleApi($r->decimallatitude, $r->decimallongitude);
+			$ranking = 0;
+			$protocolStr = '';
+			if($this->countryUnitsEqual($googleUnits['country'],$r->country)){
+				$ranking = 2;
+				$protocolStr = 'GoogleApiMatch:countryEqual';
+				if($this->unitsEqual($googleUnits['state'], $r->stateprovince)){
+					$ranking = 5;
+					$protocolStr = 'GoogleApiMatch:stateEqual';
+					if($this->countyUnitsEqual($googleUnits['county'], $r->county)){
+						$ranking = 7;
+						$protocolStr = 'GoogleApiMatch:countyEqual';
+					}
+					else{
+						echo '<li style="margin-left:15px;">County not equal (source: '.$r->county.'; Google value: '.$googleUnits['county'].')</li>';
+					}
+				}
+				else{
+					echo '<li style="margin-left:15px;">State/Province not equal (source: '.$r->stateprovince.'; Google value: '.$googleUnits['state'].')</li>';
+				}
+			}
+			else{
+				echo '<li style="margin-left:15px;">Country not equal (source: '.$r->country.'; Google value: '.$googleUnits['country'].')</li>';
+			}
+			if($ranking){
+				$this->setVerification($r->occid, 'coordinate', $ranking, $protocolStr);
+				echo '<li style="margin-left:15px;">Verification status set (rank: '.$ranking.', '.$protocolStr.')</li>';
+			}
+			else{
+				echo '<li style="margin-left:15px;">Unable to set verification status</li>';
+			}
+		}
+		$rs->free();
+	}
 	
+	private function callGoogleApi($lat, $lng){
+		$retArr = array();
+		$apiUrl = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false';
+		$apiUrl .= '&latlng='.$lat.','.$lng;
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		//curl_setopt($curl, CURLOPT_HEADER, 0);
+		curl_setopt($curl, CURLOPT_URL, $apiUrl);
+		
+		$data = curl_exec($curl);
+		curl_close($curl);
+	
+		//Extract country, state, and county from results
+		$dataObj = json_decode($data);
+		$retArr['status'] = $dataObj->status;
+		if($dataObj->status == "OK"){
+			$rs = $dataObj->results[0];
+			if($rs->address_components){
+				$compArr = $rs->address_components;
+				foreach($compArr as $compObj){
+					if($compObj->long_name && $compObj->types){
+						$longName = $compObj->long_name;
+						$types = $compObj->types;
+						if($types[0] == "country"){
+							$retArr['country'] = $longName;
+						}
+						elseif($types[0] == "administrative_area_level_1"){
+							$retArr['state'] = $longName;
+						}
+						elseif($types[0] == "administrative_area_level_2"){
+							$retArr['county'] = $longName;
+						}
+					}
+				}
+			}
+		}
+		else{
+			echo '<li style="margin-left:15px;">Unable to get return from Google API (status: '.$dataObj->status.')</li>';
+		}
+		return $retArr;
+	}
+
+	private function unitsEqual($googleTerm, $dbTerm){
+		$googleTerm = strtolower(trim($googleTerm));
+		$dbTerm = strtolower(trim($dbTerm));
+		
+		if($googleTerm == $dbTerm) return true;
+		return false;
+	}
+
+	private function countryUnitsEqual($countryGoogle,$countryDb){
+
+		if($this->unitsEqual($countryGoogle,$countryDb)) return true;
+
+		$countryGoogle = strtolower(trim($countryGoogle));
+		$countryDb = strtolower(trim($countryDb));
+		
+		$synonymArr = array();
+		$synonymArr[] = array('united states','usa','united states of america','u.s.a.');
+		
+		foreach($synonymArr as $synArr){
+			if(in_array($countryGoogle, $synArr)){
+				if(in_array($countryDb, $synArr)) return true;
+			}
+		}
+		return false;
+	}
+
+	private function countyUnitsEqual($countyGoogle,$countyDb){
+		$countyGoogle = strtolower(trim($countyGoogle));
+		$countyDb = strtolower(trim($countyDb));
+
+		$countyGoogle = trim(str_replace(array('county','parish'), '', $countyGoogle));
+		if(strpos($countyDb,$countyGoogle) !== false) return true; 
+
+		return false;
+	}
+
+	private function setVerification($occid, $category, $ranking, $protocol = '', $source = '', $notes = ''){
+		$sql = 'INSERT INTO omoccurverification(occid, category, ranking, protocol, source, notes, uid) '.
+			'VALUES('.$occid.',"'.$category.'",'.$ranking.','.
+			($protocol?'"'.$protocol.'"':'NULL').','.
+			($source?'"'.$source.'"':'NULL').','.
+			($notes?'"'.$notes.'"':'NULL').','.
+			$GLOBALS['SYMB_UID'].')';
+		if(!$this->conn->query($sql)){
+			$this->errorMessage = 'ERROR thrown setting occurrence verification: '.$this->conn->error;
+			echo '<li style="margin-left:15px;">'.$this->errorMessage.'</li>';
+		}
+	}
+
+	//General ranking functions
+	public function getCategoryList(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT category '.
+			'FROM omoccurverification '.
+			'WHERE (collid = '.$this->collid.')';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[] = $r->category;
+		}
+		$rs->free();
+		sort($retArr);
+		return $retArr;
+	}
+
+	public function getRankingStats($category){
+		$retArr = array();
+		$category = $this->cleanInStr($category);
+		$sql = 'SELECT category, ranking, count(*) as cnt '.
+			'FROM omoccurverification '.
+			'WHERE category = "'.$category.'" '.
+			'GROUP BY category, ranking';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->category][$r->ranking] = $r->cnt;
+		}
+		$rs->free();
+		if($category){
+			//Get unranked count
+			$sql = 'SELECT count(occid) AS cnt '.
+				'FROM omoccurrences '.
+				'WHERE (collid = '.$this->collid.') AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "'.$category.'"))';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$retArr[$category]['none'] = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function getOccurList($category, $ceilingRank, $floorRank = 0){
+		$retArr = array();
+		if(is_numeric($ceilingRank) && is_numeric($floorRank)){
+			$sql = 'SELECT ovsid, occid, category, ranking, protocol, source, uid, notes, initialtimestamp '.
+				'FROM omoccurverification '.
+				'WHERE (collid = '.$this->collid.') AND (category = "'.$this->cleanInStr($category).'") '.
+				'AND (ranking BETWEEN '.$floorRank.' AND '.$ceilingRank.')';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+	
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+	
+	//General field updater
 	public function updateField($fieldName, $oldValue, $newValue, $conditionArr = null){
 		if(is_numeric($this->collid) && $fieldName && $newValue){
 			$editorManager = new OccurrenceEditorManager($this->conn);
