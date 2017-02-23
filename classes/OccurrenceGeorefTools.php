@@ -139,17 +139,17 @@ class OccurrenceGeorefTools {
 					$this->addOccurEdits('georeferencedby',$geoRefArr['georeferencedby'],$localStr);
 					$sql = 'UPDATE omoccurrences '.
 						'SET decimallatitude = '.$geoRefArr['decimallatitude'].', decimallongitude = '.$geoRefArr['decimallongitude'].
-						',georeferencedBy = "'.$geoRefArr['georeferencedby'].' ('.date('Y-m-d H:i:s').')'.'"';
+						',georeferencedBy = "'.$geoRefArr['georeferencedby'].' ('.date('Y-m-d H:i:s').')'.'" ';
 					if($geoRefArr['georeferenceverificationstatus']){
-						$sql .= ',georeferenceverificationstatus = "'.$geoRefArr['georeferenceverificationstatus'].'"';
+						$sql .= ',georeferenceverificationstatus = "'.$geoRefArr['georeferenceverificationstatus'].'" ';
 						$this->addOccurEdits('georeferenceverificationstatus',$geoRefArr['georeferenceverificationstatus'],$localStr);
 					}
 					if($geoRefArr['georeferencesources']){
-						$sql .= ',georeferencesources = "'.$geoRefArr['georeferencesources'].'"';
+						$sql .= ',georeferencesources = "'.$geoRefArr['georeferencesources'].'" ';
 						$this->addOccurEdits('georeferencesources',$geoRefArr['georeferencesources'],$localStr);
 					}
 					if($geoRefArr['georeferenceremarks']){
-						$sql .= ',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$geoRefArr['georeferenceremarks'].'")';
+						$sql .= ',georeferenceremarks = "'.$geoRefArr['georeferenceremarks'].'" ';
 						$this->addOccurEdits('georeferenceremarks',$geoRefArr['georeferenceremarks'],$localStr);
 					}
 					if($geoRefArr['coordinateuncertaintyinmeters']){
@@ -157,19 +157,19 @@ class OccurrenceGeorefTools {
 						$this->addOccurEdits('coordinateuncertaintyinmeters',$geoRefArr['coordinateuncertaintyinmeters'],$localStr);
 					}
 					if($geoRefArr['footprintwkt']){
-						$sql .= ',footprintwkt = "'.$geoRefArr['footprintwkt'].'"';
+						$sql .= ',footprintwkt = "'.$geoRefArr['footprintwkt'].'" ';
 						$this->addOccurEdits('footprintwkt',$geoRefArr['footprintwkt'],$localStr);
 					}
 					if($geoRefArr['geodeticdatum']){
-						$sql .= ', geodeticdatum = "'.$geoRefArr['geodeticdatum'].'"';
+						$sql .= ', geodeticdatum = "'.$geoRefArr['geodeticdatum'].'" ';
 						$this->addOccurEdits('geodeticdatum',$geoRefArr['geodeticdatum'],$localStr);
 					}
 					if($geoRefArr['maximumelevationinmeters']){
-						$sql .= ',maximumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['maximumelevationinmeters'].',maximumelevationinmeters)';
+						$sql .= ',maximumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['maximumelevationinmeters'].',maximumelevationinmeters) ';
 						$this->addOccurEdits('maximumelevationinmeters',$geoRefArr['maximumelevationinmeters'],$localStr);
 					}
 					if($geoRefArr['minimumelevationinmeters']){
-						$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['minimumelevationinmeters'].',minimumelevationinmeters)';
+						$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['minimumelevationinmeters'].',minimumelevationinmeters) ';
 						$this->addOccurEdits('minimumelevationinmeters',$geoRefArr['minimumelevationinmeters'],$localStr);
 					}
 					$sql .= ' WHERE (collid = '.$this->collId.') AND (occid IN('.$localStr.'))';
