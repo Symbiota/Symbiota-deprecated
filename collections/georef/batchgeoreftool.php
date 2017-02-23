@@ -451,10 +451,10 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</td>
 									</tr>
 								</table>
-								<div>Note: Existing data within following georeference field will be replaced with incoming data. 
+								<div>Note: Existing data within following georeference fields will be replaced with incoming data. 
 								However, elevation data will only be added when the target fields are null. 
-								No elevational incoming elevation data will be replaced existing data. 
-								Georeference fields to be replaced: decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, geodeticdatum, 
+								No incoming data will replace existing elevational data. 
+								Georeference fields that will be replaced: decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, geodeticdatum, 
 								footprintwkt, georeferencedby, georeferenceRemarks, georeferenceSources, georeferenceVerificationStatus </div>
 							</div>
 						</form>
