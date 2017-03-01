@@ -1,7 +1,7 @@
 <?php 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ImageLibraryManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ImageLibraryManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $taxon = array_key_exists("taxon",$_REQUEST)?trim($_REQUEST["taxon"]):"";
 $target = array_key_exists("target",$_REQUEST)?trim($_REQUEST["target"]):"";
@@ -10,16 +10,15 @@ $imgLibManager = new ImageLibraryManager();
 ?>
 <html>
 <head>
-<title><?php echo $defaultTitle; ?> Image Library</title>
+<title><?php echo $DEFAULT_TITLE; ?> Image Library</title>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name='keywords' content='' />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 </head>
 <body>
-
 	<?php
 	$displayLeftMenu = (isset($imagelib_indexMenu)?$imagelib_indexMenu:"true");
 	include($serverRoot.'/header.php');
@@ -54,15 +53,15 @@ $imgLibManager = new ImageLibraryManager();
 		</div>
 		<div style="float:right;width:250px;">
 			<div style="margin:10px 0px 0px 0px;">
-				<form name='searchform1' action='index.php' method='post'>
-					<fieldset style="background-color:#FFFFCC;padding:0px 10px 10px 10px;">
+				<form name="searchform1" action="index.php" method="post">
+					<fieldset style="background-color:#FFFFCC;padding:10px;">
 						<legend style="font-weight:bold;">Scientific Name Search</legend>
-						<input type='text' name='taxon' title='Enter family, genus, or scientific name'>
-						<input name='submit' value='Search' type='submit'>
+						<input type="text" name="taxon" value="<?php echo $taxon; ?>" title="Enter family, genus, or scientific name" />
+						<input name="submit" value="Search" type="submit">
 					</fieldset>
 				</form>
 			</div>
-			<div style='font-weight:bold;margin:15px 10px 0px 20px;'>
+			<div style="font-weight:bold;margin:15px 10px 0px 20px;">
 				<div>
 					<a href="../misc/usagepolicy.php#images">Image Copyright Policy</a>
 				</div>
@@ -86,7 +85,7 @@ $imgLibManager = new ImageLibraryManager();
 			}
 			elseif($target == "species"){
 				echo "<div style='margin-left:20px;margin-top:20px;margin-bottom:20px;font-weight:bold;'>Select a species to access available images.</div>";
-				$taxaList = $imgLibManager->getSpeciesList("");
+				$taxaList = $imgLibManager->getSpeciesList();
 				foreach($taxaList as $key => $value){
 					echo "<div style='margin-left:30px;font-style:italic;'>";
 					echo "<a href='../taxa/index.php?taxon=".$key."' target='_blank'>".$value."</a>";
@@ -112,7 +111,7 @@ $imgLibManager = new ImageLibraryManager();
 	?>
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

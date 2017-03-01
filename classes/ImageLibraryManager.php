@@ -1,5 +1,5 @@
 <?php 
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class ImageLibraryManager{
 
@@ -78,21 +78,21 @@ class ImageLibraryManager{
 	}
 	
 	public function getSpeciesList($taxon = ''){
-		$returnArray = Array();
-		$taxon = trim($taxon);
-		if(strpos($taxon,' ')){
-			$taxonArr = explode(' ',$taxon);
-			$taxon = $taxonArr[0];
+		$retArr = Array();
+		$tidArr = Array();
+		if($taxon){
+			$taxon = $this->cleanInStr($taxon);
+			if(strpos($taxon, ' ')) $tidArr = array_keys($this->getSynonyms($taxon));
 		}
 		$sql = 'SELECT DISTINCT t.tid, t.SciName '.
 			'FROM images i INNER JOIN taxa t ON i.tid = t.tid '.
 			'INNER JOIN taxstatus AS ts ON t.tid = ts.tid '.
-			'LEFT JOIN omoccurrences AS o ON i.occid = o.occid ';
+			'LEFT JOIN omoccurrences o ON i.occid = o.occid ';
 		if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
-			$sql .= 'INNER JOIN imagetag AS it ON i.imgid = it.imgid ';
+			$sql .= 'INNER JOIN imagetag it ON i.imgid = it.imgid ';
 		}
 		if(array_key_exists("keywords",$this->searchTermsArr)&&$this->searchTermsArr["keywords"]){
-			$sql .= 'INNER JOIN imagekeywords AS ik ON i.imgid = ik.imgid ';
+			$sql .= 'INNER JOIN imagekeywords ik ON i.imgid = ik.imgid ';
 		}
 		if($this->sqlWhere){
 			$sql .= $this->sqlWhere.' AND ';
@@ -100,18 +100,20 @@ class ImageLibraryManager{
 		else{
 			$sql .= 'WHERE ';
 		}
-		$sql .= '(i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId >= 220) AND (ts.Family Is Not Null) ';
-		if($taxon){
-			$taxon = $this->cleanInStr($taxon);
+		$sql .= '(i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId > 219) ';
+		if($tidArr){
+			$sql .= 'AND ((t.SciName LIKE "'.$taxon.'%") OR (t.tid IN('.implode(',', $tidArr).'))) ';
+		}
+		elseif($taxon){
 			$sql .= "AND ((t.SciName LIKE '".$taxon."%') OR (ts.family = '".$taxon."')) ";
 		}
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			$returnArray[$row->tid] = $row->SciName;
+			$retArr[$row->tid] = $row->SciName;
 	    }
 	    $result->free();
-    	asort($returnArray);
-	    return $returnArray;
+    	asort($retArr);
+	    return $retArr;
 	}
 	
 	//Image contributor listings

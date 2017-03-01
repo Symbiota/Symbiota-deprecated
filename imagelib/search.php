@@ -217,7 +217,7 @@ if($action){
 			<form name="imagesearchform" id="imagesearchform" action="search.php" method="get" onsubmit="return submitImageForm();">
 				<div id="criteriadiv">
 					<div id="thesdiv" style="margin-left:160px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'none':'block'); ?>;" >
-						<input type='checkbox' id='thes' name='thes' value='1' <?php if(array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"]) echo "CHECKED"; ?> >Include Synonyms
+						<input type='checkbox' id='thes' name='thes' value='1' <?php if(!$action || (array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"])) echo "CHECKED"; ?> >Include Synonyms
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;">
