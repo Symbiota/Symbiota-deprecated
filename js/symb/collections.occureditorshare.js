@@ -28,11 +28,13 @@ function submitQueryTable(f){
 }
 
 function setOrderBy(formObject){
+	/*
 	if(formObject.value != ""){
 		var inputName = formObject.name;
 		inputName.substring(2)
 		if(formObject.form.orderby.value == "") formObject.form.orderby.value = inputName.substring(2);
 	}
+	*/
 }
 
 function detectBatchUpdateField(){

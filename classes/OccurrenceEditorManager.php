@@ -544,7 +544,7 @@ class OccurrenceEditorManager {
 					$sqlOrderBy = 'catalogNumber';
 				}
 			}
-			if($orderBy == "othercatalognumbers"){
+			elseif($orderBy == "othercatalognumbers"){
 				if($otherCatNumIsNum){
 					$sqlOrderBy = 'othercatalognumbers+1';
 				}
