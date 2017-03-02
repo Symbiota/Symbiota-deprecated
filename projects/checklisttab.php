@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/InventoryProjectManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $pid = $_REQUEST["pid"]; 
 
@@ -12,7 +12,7 @@ $projManager->setPid($pid);
 <div id="cltab">
 	<div style="margin:10px;">
 		<form name='claddform' action='index.php' method='post' onsubmit="return validateChecklistForm(this)">
-			<fieldset style="padding:15px;background-color:#FFF380;">
+			<fieldset class="form-color">
 				<legend><b>Add a Checklist</b></legend>
 				<select name="clid" style="width:450px;">
 					<option value="">Select Checklist to Add</option>
@@ -31,7 +31,7 @@ $projManager->setPid($pid);
 	</div>
 	<div style="margin:10px;">
 		<form name='cldeleteform' action='index.php' method='post' onsubmit="return validateChecklistForm(this)">
-			<fieldset style="padding:15px;background-color:#FFF380;">
+			<fieldset class="form-color">
 				<legend><b>Delete a Checklist</b></legend>
 				<select name="clid" style="width:450px;">
 					<option value="">Select Checklist to Delete</option>

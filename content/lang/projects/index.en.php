@@ -13,10 +13,12 @@ $LANG['CHECKMANAG'] = 'Checklist Management';
 $LANG['MANAG'] = 'Managers';
 $LANG['DESCRIP'] = 'Description';
 $LANG['NOTES'] = 'Notes';
+$LANG['ACCESS'] = 'Access';
 $LANG['PUBLIC'] = 'Public';
 $LANG['PRIVATE'] = 'Private';
 $LANG['SORTSEQ'] = 'Sort Sequence';
 $LANG['SUBMITEDIT'] = 'Submit Edits';
+$LANG['SUBMITDELETE'] = 'Delete Project';
 $LANG['PROJNAME'] = 'Project Name';
 $LANG['RESCHECK'] = 'Research Checklists';
 $LANG['RESCHECKQUES'] = 'Research checklists are pre-compiled by biologists.
@@ -38,8 +40,6 @@ $LANG['CHARLONG'] = 'characters long';
 $LANG['SELECTCHECKPULL'] = 'Choose a checklist from the pull-down';
 $LANG['CHOOSEUSER'] = 'Choose a user from the pull-down';
 $LANG['ADDNEWPR'] = 'Add New Project';
-$LANG['SUCINVPROJ'] = 'Success: Inventory Project created! To add checklists to the project, open the editing pane by '.
-    'clicking on editing symbol to the far right of project name and then select the Checklist Management tab.';
 $LANG['TOGGLEEDIT'] = 'Toggle Editing Functions';
 $LANG['MAPREP'] = 'Map representation of checklists';
 ?>

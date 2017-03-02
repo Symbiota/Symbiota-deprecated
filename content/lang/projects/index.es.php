@@ -1,7 +1,7 @@
 <?php
 /*
 ------------------
-Language: Español (Spanish)
+Language: Espaï¿½ol (Spanish)
 ------------------
 */
 
@@ -13,14 +13,16 @@ $LANG['CHECKMANAG'] = 'Administraci&oacute;n de Listados de Comprobaci&oacute;n'
 $LANG['MANAG'] = 'Administradores';
 $LANG['DESCRIP'] = 'Descripci&oacute;n';
 $LANG['NOTES'] = 'Notas';
+$LANG['ACCESS'] = 'Acceso';
 $LANG['PUBLIC'] = 'P&uacute;blico';
 $LANG['PRIVATE'] = 'Privado';
 $LANG['SORTSEQ'] = 'Secuencia de Ordenamiento';
 $LANG['SUBMITEDIT'] = 'Someter Cambios';
+$LANG['SUBMITDELETE'] = 'Borrar proyecto';
 $LANG['PROJNAME'] = 'Nombre del Proyecto';
 $LANG['RESCHECK'] = 'Listados de Comprobaci&oacute;n de Investigaci&oacute;n';
 $LANG['RESCHECKQUES'] = 'Los Listados de Comprobaci&oacute;n de Investigaci&oacute;n son pre-compilados por bi&oacute;logos. Este es un m&eacute;todo muy controlado para la construcci&oacute;n de un listado de especies, lo que permite a espec&iacute;menes espec&iacute;ficos vincularse con los nombres de las especies dentro del listado de comprobaci&oacute;n y as&iacute; servir como comprobantes (vouchers). Los espec&iacute;menes vouchers son la prueba de que las especies ocurren actualmente en una &aacute;rea determinada. Si hubiese alguna duda, alguien puede inspeccionar estos espec&iacute;menes para Comprobaci&oacute;n &oacute; anotar la identificaci&oacute;n correcta cuando sea necesario.';
-$LANG['QUESRESSPEC'] = '¿Que es un Listado de Especies de Investigaci&oacute;n?';
+$LANG['QUESRESSPEC'] = '&iquest;Que es un Listado de Especies de Investigaci&oacute;n?';
 $LANG['MAPCHECK'] = 'Mapeo de Listados de Comprobaci&oacute;n';
 $LANG['CHECKMANAG'] = 'Administraci&oacute;n de Listados de Comprobaci&oacute;n';
 $LANG['OPENMAP'] = 'Click para abrir Mapa';
@@ -34,8 +36,6 @@ $LANG['CHARLONG'] = 'caracteres';
 $LANG['SELECTCHECKPULL'] = 'Elija un listado de comprobaci&oacute;n desde la lista desplegable';
 $LANG['CHOOSEUSER'] = 'Elija un usuario desde la lista desplegable';
 $LANG['ADDNEWPR'] = 'Ingresar un Proyecto Nuevo';
-$LANG['SUCINVPROJ'] = '&Eacute;xito: Se ha creado el Proyecto de Inventario! Para ingresar listados de comprobaci&oacute;n al proyecto, abre el panel de edici&oacute;n haciendo '.
-    'clic sobre el s&iacute;mbolo de edici&oacute;n en el extremo derecho del nombre del proyecto y seleccione la ficha Administraci&oacute;n de Listados de Comprobaci&oacute;n.';
 $LANG['TOGGLEEDIT'] = 'Intercambia Funciones de Edici&oacute;n';
 $LANG['MAPREP'] = 'Mapea representaci&oacute;n de listados de comprobaci&oacute;n';
 ?>

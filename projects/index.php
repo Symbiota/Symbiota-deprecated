@@ -7,29 +7,35 @@ header("Content-Type: text/html; charset=".$CHARSET);
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:""; 
 $editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
 $newProj = array_key_exists("newproj",$_REQUEST)?1:0;
-$projSubmit = array_key_exists("projsubmit",$_REQUEST)?$_REQUEST["projsubmit"]:""; 
+$projSubmit = array_key_exists("projsubmit",$_REQUEST)?$_REQUEST["projsubmit"]:'';
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 $statusStr = '';
 
 if(!$pid && array_key_exists("proj",$_GET) && is_numeric($_GET['proj'])) $pid = $_GET['proj'];
 
-$projManager = new InventoryProjectManager();
+$projManager = new InventoryProjectManager($projSubmit?'write':'readonly');
 if($pid) $projManager->setPid($pid);
 
-$isEditable = 0;
+$isEditor = 0;
 if($IS_ADMIN || (array_key_exists("ProjAdmin",$USER_RIGHTS) && in_array($pid,$USER_RIGHTS["ProjAdmin"]))){
-	$isEditable = 1;
+	$isEditor = 1;
 }
 
-if($isEditable && $projSubmit){
+if($isEditor && $projSubmit){
 	if($projSubmit == 'addnewproj'){
 		$pid = $projManager->addNewProject($_POST);
-		if($pid){
-            $statusStr = $LANG['SUCINVPROJ'];
-		}
+		if(!$pid) $statusStr = $projManager->getErrorStr();
 	}
 	elseif($projSubmit == 'subedit'){
 		$projManager->submitProjEdits($_POST);
+	}
+	elseif($projSubmit == 'subdelete'){
+		if($projManager->deleteProject($_POST['pid'])){
+			$pid = 0;
+		}
+		else{
+			$statusStr = $projManager->getErrorStr();
+		}
 	}
 	elseif($projSubmit == 'deluid'){
 		if(!$projManager->deleteManager($_GET['uid'])){
@@ -50,6 +56,13 @@ if($isEditable && $projSubmit){
 }
 
 $projArr = $projManager->getProjectData();
+$researchList = $projManager->getResearchChecklists();
+$managerArr = $projManager->getManagers();
+if(!$researchList && !$editMode){
+	$editMode = 1;
+	$tabIndex = 2;
+	if(!$managerArr) $tabIndex = 1;
+}
 ?>
 <html>
 <head>
@@ -155,6 +168,9 @@ $projArr = $projManager->getProjectData();
 			return true;
 		}
 	</script>
+	<style>
+		fieldset.form-color{background-color:#FFF380;margin:15px;padding:20px;}
+	</style>
 </head>
 <body>
 	<?php
@@ -177,14 +193,14 @@ $projArr = $projManager->getProjectData();
 		if($statusStr){
 			?>
 			<hr/>
-			<div style="margin:20px;font-weight:bold;color:<?php echo (stripos($statusStr,'success')!==false?'green':'red');?>;">
+			<div style="margin:20px;font-weight:bold;color:<?php echo (stripos($statusStr,'error')!==false?'red':'green');?>;">
 				<?php echo $statusStr; ?>
 			</div>
 			<hr/>
 			<?php 
 		}
 		if($pid || $newProj){
-			if($isEditable && !$newProj){
+			if($isEditor && !$newProj){
 				?>
 				<div style="float:right;" title="<?php echo $LANG['TOGGLEEDIT'];?>">
 					<a href="#" onclick="toggleById('tabs');return false;"><img style="border:0px;" src="../images/edit.png"/></a>
@@ -208,12 +224,12 @@ $projArr = $projManager->getProjectData();
 				</div>
 				<?php 
 			}
-			if($isEditable){ 
+			if($isEditor){ 
 				?>
-				<div id="tabs" style="height:500px;margin:10px;display:<?php echo ($newProj||$editMode?'block':'none'); ?>;">
-				    <ul>
-				        <li><a href="#mdtab"><span><?php echo $LANG['METADATA'];?></span></a></li>
-				        <?php
+				<div id="tabs" style="height:550px;margin:10px;display:<?php echo ($newProj||$editMode?'block':'none'); ?>;">
+					<ul>
+						<li><a href="#mdtab"><span><?php echo $LANG['METADATA'];?></span></a></li>
+						<?php
 						if($pid){
 							?>
 							<li><a href="managertab.php?pid=<?php echo $pid; ?>"><span><?php echo $LANG['INVMANAG'];?></span></a></li>
@@ -221,15 +237,15 @@ $projArr = $projManager->getProjectData();
 							<?php
 						}
 						?>
-				    </ul>
+					</ul>
 					<div id="mdtab">
-						<fieldset style="background-color:#FFF380;">
+						<fieldset class="form-color">
 							<legend><b><?php echo ($newProj?'Add New':'Edit'); ?> Project</b></legend>
 							<form name='projeditorform' action='index.php' method='post' onsubmit="return validateProjectForm(this)">
 								<table style="width:100%;">
 									<tr>
 										<td>
-                                            <?php echo $LANG['PROJNAME'];?>:
+											<?php echo $LANG['PROJNAME'];?>:
 										</td>
 										<td>
 											<input type="text" name="projname" value="<?php if($projArr) echo $projArr["projname"]; ?>" style="width:95%;"/>
@@ -237,7 +253,7 @@ $projArr = $projManager->getProjectData();
 									</tr>	
 									<tr>
 										<td>
-                                            <?php echo $LANG['MANAG'];?>:
+											<?php echo $LANG['MANAG'];?>:
 										</td>
 										<td>
 											<input type="text" name="managers" value="<?php if($projArr) echo $projArr["managers"]; ?>" style="width:95%;"/>
@@ -245,7 +261,7 @@ $projArr = $projManager->getProjectData();
 									</tr>	
 									<tr>
 										<td>
-                                            <?php echo $LANG['DESCRIP'];?>:
+											<?php echo $LANG['DESCRIP'];?>:
 										</td>
 										<td>
 											<textarea rows="8" cols="45" name="fulldescription" maxlength="2000" style="width:95%"><?php if($projArr) echo $projArr["fulldescription"];?></textarea>
@@ -253,7 +269,7 @@ $projArr = $projManager->getProjectData();
 									</tr>	
 									<tr>
 										<td>
-                                            <?php echo $LANG['NOTES'];?>:
+											<?php echo $LANG['NOTES'];?>:
 										</td>
 										<td>
 											<input type="text" name="notes" value="<?php if($projArr) echo $projArr["notes"];?>" style="width:95%;"/>
@@ -261,7 +277,7 @@ $projArr = $projManager->getProjectData();
 									</tr>	
 									<tr>
 										<td>
-                                            <?php echo $LANG['PUBLIC'];?>:
+											<?php echo $LANG['ACCESS'];?>:
 										</td>
 										<td>
 											<select name="ispublic">
@@ -269,15 +285,17 @@ $projArr = $projManager->getProjectData();
 												<option value="1" <?php echo ($projArr&&$projArr['ispublic']?'SELECTED':''); ?>><?php echo $LANG['PUBLIC'];?></option>
 											</select>
 										</td>
-									</tr>	
+									</tr>
+									<!-- 
 									<tr>
 										<td>
-                                            <?php echo $LANG['SORTSEQ'];?>:
+											<?php echo $LANG['SORTSEQ'];?>:
 										</td>
 										<td>
 											<input type="text" name="sortsequence" value="<?php if($projArr) echo $projArr["sortsequence"];?>" style="width:40;"/>
 										</td>
-									</tr>	
+									</tr>
+									-->	
 									<tr>
 										<td colspan="2">
 											<div style="margin:15px;">
@@ -285,13 +303,13 @@ $projArr = $projManager->getProjectData();
 												if($newProj){
 													?>
 													<input type="submit" name="submit" value="<?php echo $LANG['ADDNEWPR'];?>" />
-                                                    <input type="hidden" name="projsubmit" value="addnewproj" />
+													<input type="hidden" name="projsubmit" value="addnewproj" />
 													<?php
 												}
 												else{
 													?>
-													<input type="hidden" name="proj" value="<?php echo $pid;?>">
-                                                    <input type="hidden" name="projsubmit" value="subedit" />
+													<input type="hidden" name="pid" value="<?php echo $pid;?>">
+													<input type="hidden" name="projsubmit" value="subedit" />
 													<input type="submit" name="submit" value="<?php echo $LANG['SUBMITEDIT'];?>" />
 													<?php 
 												}
@@ -302,18 +320,42 @@ $projArr = $projManager->getProjectData();
 								</table>
 							</form>
 						</fieldset>
+						<?php 
+						if($pid){
+							?>
+							<fieldset class="form-color">
+								<legend><b>Delete Project</b></legend>
+								<form action="index.php" method="post" onsubmit="return confirm('Warning: Action cannot be undone! Are you sure you want to delete this inventory Project?')">
+									<input type="hidden" name="pid" value="<?php echo $pid;?>">
+									<input type="hidden" name="projsubmit" value="subdelete" />
+									<?php 
+									echo '<input type="submit" name="submit" value="'.$LANG['SUBMITDELETE'].'" '.((count($managerArr)>1 || $researchList)?'disabled':'').' />';
+									echo '<div style="margin:10px;color:orange">';
+									if(count($managerArr) > 1){
+										echo 'Inventory project cannot be deleted until all other managers are removed as project managers';
+									}
+									elseif($researchList){
+										echo 'Inventory project cannot be deleted until all checklists are removed from the project';
+									}
+									echo '</div>';
+									?>
+								</form>
+							</fieldset>
+							<?php
+						}
+						?>
 					</div>
 				</div>
 				<?php 
 			}
 			if($pid){
 				?>
-		        <div style="margin:20px;">
-		            <?php
-					if($researchList = $projManager->getResearchChecklists()){
+				<div style="margin:20px;">
+					<?php
+					if($researchList){
 						?>
 						<div style="font-weight:bold;font-size:130%;">
-                            <?php echo $LANG['RESCHECK'];?>
+							<?php echo $LANG['RESCHECK'];?>
 							<span onclick="toggleResearchInfoBox(this);" title="<?php echo $LANG['QUESRESSPEC'];?>" style="cursor:pointer;">
 								<img src="../images/qmark_big.png" style="height:15px;"/>
 							</span> 
@@ -323,14 +365,14 @@ $projArr = $projManager->getProjectData();
 						</div>
 						<div id="researchlistpopup" class="genericpopup" style="display:none;">
 							<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-                            <?php echo $LANG['RESCHECKQUES'];?>
+							<?php echo $LANG['RESCHECKQUES'];?>
 						</div>
 						<?php 
 						if($KEY_MOD_IS_ACTIVE){
 							?>
 							<div style="margin-left:15px;font-size:90%">
-                                <?php echo $LANG['THE'];?> <img src="../images/key.png" style="width: 12px;" alt="Golden Key Symbol" />
-                                <?php echo $LANG['SYMBOLOPEN'];?>.
+								<?php echo $LANG['THE'];?> <img src="../images/key.png" style="width: 12px;" alt="Golden Key Symbol" />
+								<?php echo $LANG['SYMBOLOPEN'];?>.
 							</div>
 							<?php
 						}
@@ -341,7 +383,7 @@ $projArr = $projManager->getProjectData();
 								<a href="../checklists/clgmap.php?proj=<?php echo $pid;?>" title="Map Checklists">
 									<img src="<?php echo $gMapUrl; ?>" title="<?php echo $LANG['MAPREP'];?>" alt="Map representation of checklists" />
 									<br/>
-                                    <?php echo $LANG['OPENMAP'];?>
+									<?php echo $LANG['OPENMAP'];?>
 								</a>
 							</div>
 							<?php
