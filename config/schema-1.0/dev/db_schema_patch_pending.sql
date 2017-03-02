@@ -5,6 +5,9 @@ ALTER TABLE `uploadtaxa`
   DROP INDEX `UNIQUE_sciname` ,
   ADD UNIQUE INDEX `UNIQUE_sciname` (`SciName` ASC, `RankId` ASC, `Author` ASC, `AcceptedStr` ASC);
 
+ALTER TABLE `omoccurrences`
+  CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL;
+
 
 #Occurrence Trait/Attribute adjustments
 	#Add measurementID (GUID) to tmattribute table 
