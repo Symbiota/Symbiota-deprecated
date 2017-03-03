@@ -568,7 +568,7 @@ class OccurrenceDuplicate {
 			$rs->free();
 			if($retArr){
 				//Grab occurrences for each cluster
-				$sql = 'SELECT dl.duplicateid, o.occid, IFNULL(IFNULL(o.occurrenceid,o.catalognumber),othercatalognumbers) AS identifier, '.
+				$sql = 'SELECT dl.duplicateid, o.occid, IFNULL(IFNULL(o.catalognumber,othercatalognumbers),"Undefined Identifier") AS identifier, '.
 					'o.sciname, o.tidinterpreted, o.recordedby, o.recordnumber, CONCAT_WS(":",c.institutioncode ,c.collectioncode) as code, '.
 					'o.identifiedby, o.dateidentified '.
 					'FROM omoccurduplicatelink dl INNER JOIN omoccurrences o ON dl.occid = o.occid '.
@@ -578,7 +578,7 @@ class OccurrenceDuplicate {
 				$rs = $this->conn->query($sql);
 				while($r = $rs->fetch_object()){
 					$idStr = $r->identifier;
-					if(is_numeric($idStr)) $idStr = $r->code.':'.$idStr;
+					if(is_numeric($idStr) || $idStr == 'Undefined Identifier') $idStr = $r->code.':'.$idStr;
 					if(!$idStr) $idStr = $r->code.':'.'undefined';
 					$retArr[$r->duplicateid][$r->occid]['id'] = $idStr;
 					$retArr[$r->duplicateid][$r->occid]['sciname'] = $r->sciname;
