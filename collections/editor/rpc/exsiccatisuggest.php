@@ -5,7 +5,7 @@
 	$queryString = $con->real_escape_string($_REQUEST['term']);
 
 	$sql = 'SELECT DISTINCT ometid, title, abbreviation FROM omexsiccatititles '.
-		'WHERE title LIKE "%'.$queryString.'%" OR abbreviation LIKE "%'.$queryString.'%"';
+		'WHERE title LIKE "%'.$queryString.'%" OR abbreviation LIKE "%'.$queryString.'%" ORDER BY title';
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($r = $result->fetch_object()) {

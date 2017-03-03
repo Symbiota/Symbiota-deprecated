@@ -21,7 +21,7 @@ if($qryArr){
 	$qProcessingStatus = (array_key_exists('ps',$qryArr)?$qryArr['ps']:'');
 	$qDateEntered = (array_key_exists('de',$qryArr)?$qryArr['de']:'');
 	$qDateLastModified = (array_key_exists('dm',$qryArr)?$qryArr['dm']:'');
-	$qExsiccatiId = (array_key_exists('exid',$qryArr)?$qryArr['exid']:'');
+	$qExsiccatiId = (array_key_exists('exsid',$qryArr)?$qryArr['exsid']:'');
 	$qImgOnly = (array_key_exists('io',$qryArr)?$qryArr['io']:0);
 	$qWithoutImg = (array_key_exists('woi',$qryArr)?$qryArr['woi']:0);
 	$qCustomField1 = (array_key_exists('cf1',$qryArr)?$qryArr['cf1']:'');
@@ -37,6 +37,7 @@ if($qryArr){
 	$qOrderBy = (array_key_exists('orderby',$qryArr)?$qryArr['orderby']:'');
 	$qOrderByDir = (array_key_exists('orderbydir',$qryArr)?$qryArr['orderbydir']:'');
 }
+
 //Set processing status  
 $processingStatusArr = array();
 if(isset($PROCESSINGSTATUS) && $PROCESSINGSTATUS){
@@ -151,18 +152,26 @@ else{
 						<input name="q_withoutimg" type="checkbox" value="1" <?php echo ($qWithoutImg==1?'checked':''); ?> onchange="this.form.q_imgonly.checked = false;" /> 
 						<b>Without images</b>
 					</span>
-					<?php
-					if($ACTIVATE_EXSICCATI){
-						?>
-						<span style="margin-left:15px" title="Enter Exsiccati ID (ometid)">
-							<b>Exsiccati ID (ometid):</b> 
-							<input type="text" name="q_exsiccatiid" id="q_exsiccatiid" value="<?php echo $qExsiccatiId; ?>" style="width:70px" onchange="" />
-						</span>
-						<?php
-					}
-					?>
 				</div>
 				<?php
+				if($ACTIVATE_EXSICCATI){
+					if($exsList = $occManager->getExsiccatiList()){
+						?>
+						<div style="margin:2px;" title="Enter Exsiccati Title">
+							<b>Exsiccati Title:</b>
+							<select name="q_exsiccatiid">
+								<option value=""></option> 
+								<option value="">-------------------------</option> 
+								<?php 
+								foreach($exsList as $exsID => $exsTitle){
+									echo '<option value="'.$exsID.'" '.($qExsiccatiId==$exsID?'SELECTED':'').'>'.$exsTitle.'</option>';
+								}
+								?>
+							</select>
+						</div>
+						<?php
+					}
+				}
 			}
 			$advFieldArr = array();
 			if($crowdSourceMode){
