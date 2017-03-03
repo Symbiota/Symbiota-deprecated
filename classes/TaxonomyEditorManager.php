@@ -1019,7 +1019,7 @@ class TaxonomyEditorManager{
 		$retArr = array();
 		if($this->tid){
 			$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta INNER JOIN taxstatus ts ON ta.taxauthid = ts.taxauthid ".
-				"WHERE ta.isactive = 1 AND (ts.tid = ".$this->tid.") AND ta.taxauthid = 1 ORDER BY ta.taxauthid ";
+				"WHERE ta.isactive = 1 AND (ts.tid = ".$this->tid.") ORDER BY ta.taxauthid ";
 			$rs = $this->conn->query($sql); 
 			while($row = $rs->fetch_object()){
 				$retArr[$row->taxauthid] = $row->name;
