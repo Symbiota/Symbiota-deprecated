@@ -122,12 +122,12 @@ class ImageProcessor {
 										*/
 										$guid = $i['resource_uniq'];
 										if($occid = $this->getOccid($specPk,$guid,$fileName)){
-											$webUrl = $iPlantImageUrl.$guid.'?resize=1250&format=jpeg';
-											$tnUrl = $iPlantImageUrl.$guid.'?thumbnail=200,200';
-											$lgUrl = $iPlantImageUrl.$guid.'?resize=4000&format=jpeg';
-											$archiveUrl = $iPlantImageUrl.$guid;
+											$baseUrl = $iPlantImageUrl.$guid;
+											$webUrl = $baseUrl.'?resize=1250&format=jpeg';
+											$tnUrl = $baseUrl.'?thumbnail=200,200';
+											$lgUrl = $baseUrl.'?resize=4000&format=jpeg';
 											
-											$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$guid.'; filename: '.$fileName);
+											$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$baseUrl,$this->collArr['collname'],$guid.'; filename: '.$fileName);
 											//$this->logOrEcho("Image processed successfully (".date('Y-m-d h:i:s A').")!",2);
 										}
 									}
@@ -193,11 +193,11 @@ class ImageProcessor {
 										$occid = $this->getOccid($specPk,$origFileName);
 										if($occid){
 											//Image hasn't been loaded, thus insert image urls into image table
-											$webUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=webview';
-											$tnUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=thumbnail';
-											$lgUrl = $idigbioImageUrl.$data[$mediaMd5Index].'?size=fullsize';
-											$archiveUrl = $idigbioImageUrl;
-											$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$this->collArr['collname'],$origFileName);
+											$baseUrl = $idigbioImageUrl.$data[$mediaMd5Index];
+											$webUrl = $baseUrl.'?size=webview';
+											$tnUrl = $baseUrl.'?size=thumbnail';
+											$lgUrl = $baseUrl.'?size=fullsize';
+											$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$baseUrl,$this->collArr['collname'],$origFileName);
 										}
 									}
 								}
