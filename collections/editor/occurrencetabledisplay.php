@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:1000;
@@ -43,19 +43,19 @@ $headMap = array();
 $qryCnt = 0;
 $statusStr = '';
 
-if($symbUid){
+if($SYMB_UID){
 	//Set variables
-	$occManager->setSymbUid($symbUid); 
+	$occManager->setSymbUid($SYMB_UID); 
 	$occManager->setCollId($collId);
 	$collMap = $occManager->getCollMap();
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
 
 	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
 	if(!$isEditor){
 		if($isGenObs){ 
-			if(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+			if(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"])){
 				//Approved General Observation editors can add records
 				$isEditor = 2;
 			}
@@ -63,7 +63,7 @@ if($symbUid){
 				//Lets assume that Edits where submitted and they remain on same specimen, user is still approved
 				 $isEditor = 2;
 			}
-			elseif($occManager->getObserverUid() == $symbUid){
+			elseif($occManager->getObserverUid() == $SYMB_UID){
 				//User can only edit their own records
 				$isEditor = 2;
 			}
@@ -119,8 +119,8 @@ else{
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Table View</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Table View</title>
     <style type="text/css">
 		table.styledtable td {
 		    white-space: nowrap;
@@ -130,7 +130,7 @@ else{
     <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?cacherefresh=<?php echo time(); ?>"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?var=201703"></script>
 </head>
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<!-- inner text -->
@@ -351,9 +351,5 @@ else{
 		}
 		?>
 	</div>
-<?php 	
-//include($serverRoot.'/footer.php');
-?>
-
 </body>
 </html>
