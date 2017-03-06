@@ -26,14 +26,14 @@ if($qryArr){
 	$qWithoutImg = (array_key_exists('woi',$qryArr)?$qryArr['woi']:0);
 	$qCustomField1 = (array_key_exists('cf1',$qryArr)?$qryArr['cf1']:'');
 	$qCustomType1 = (array_key_exists('ct1',$qryArr)?$qryArr['ct1']:'');
-	$qCustomValue1 = (array_key_exists('cv1',$qryArr)?$qryArr['cv1']:'');
+	$qCustomValue1 = (array_key_exists('cv1',$qryArr)?htmlentities($qryArr['cv1']):'');
 	$qCustomField2 = (array_key_exists('cf2',$qryArr)?$qryArr['cf2']:'');
 	$qCustomType2 = (array_key_exists('ct2',$qryArr)?$qryArr['ct2']:'');
-	$qCustomValue2 = (array_key_exists('cv2',$qryArr)?$qryArr['cv2']:'');
+	$qCustomValue2 = (array_key_exists('cv2',$qryArr)?htmlentities($qryArr['cv2']):'');
 	$qCustomField3 = (array_key_exists('cf3',$qryArr)?$qryArr['cf3']:'');
 	$qCustomType3 = (array_key_exists('ct3',$qryArr)?$qryArr['ct3']:'');
-	$qCustomValue3 = (array_key_exists('cv3',$qryArr)?$qryArr['cv3']:'');
-	$qOcrFrag = (array_key_exists('ocr',$qryArr)?$qryArr['ocr']:'');
+	$qCustomValue3 = (array_key_exists('cv3',$qryArr)?htmlentities($qryArr['cv3']):'');
+	$qOcrFrag = (array_key_exists('ocr',$qryArr)?htmlentities($qryArr['ocr']):'');
 	$qOrderBy = (array_key_exists('orderby',$qryArr)?$qryArr['orderby']:'');
 	$qOrderByDir = (array_key_exists('orderbydir',$qryArr)?$qryArr['orderbydir']:'');
 }

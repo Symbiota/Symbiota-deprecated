@@ -983,7 +983,6 @@ class OccurrenceCleaner extends Manager{
 			if($conditionArr){
 				$cnt = 2;
 				foreach($conditionArr as $k => $v){
-					echo 'value: '.$v.'<br/>';
 					$qryArr['cf'.$cnt] = $k;
 					if($v == '--ISNULL--'){
 						$qryArr['ct'.$cnt] = 'NULL';
@@ -991,7 +990,7 @@ class OccurrenceCleaner extends Manager{
 					}
 					else{
 						$qryArr['ct'.$cnt] = 'EQUALS';
-						$qryArr['cv'.$cnt] = $this->cleanInStr($v);
+						$qryArr['cv'.$cnt] = $v;
 					}
 					$cnt++;
 					if($cnt > 4) break;
