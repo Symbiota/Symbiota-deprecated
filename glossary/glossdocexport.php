@@ -1,13 +1,12 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/GlossaryManager.php');
-require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/GlossaryManager.php');
+require_once($SERVER_ROOT.'/classes/PhpWord/Autoloader.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 3600);
 
 $ses_id = session_id();
 
-$glosManager = new GlossaryManager();
 use PhpOffice\PhpWord\Autoloader;
 use PhpOffice\PhpWord\Settings;
 Autoloader::register();
@@ -21,77 +20,12 @@ $definitions = array_key_exists('definitions',$_POST)?$_POST['definitions']:'';
 $images = array_key_exists('images',$_POST)?$_POST['images']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
-$exportEngine = '';
-$exportExtension = '';
-$exportEngine = 'Word2007';
-$exportExtension = 'docx';
 $fileName = '';
-$transExportArr = array();
-$sciName = '';
-$translationArr = array();
-$referencesArr = array();
-$contributorsArr = array();
-
-$citationFormat = '';
-$citationFormat .= $defaultTitle.'. '.date('Y').'. '; 
-$citationFormat .= 'http//:'.$_SERVER['HTTP_HOST'].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'index.php. '; 
+$citationFormat = $DEFAULT_TITLE.'. '.date('Y').'. '; 
+$citationFormat .= 'http//:'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.(substr($CLIENT_ROOT,-1)=='/'?'':'/').'index.php. '; 
 $citationFormat .= 'Accessed on '.date('F d').'. ';
 
-if($translations){
-	if(in_array($language,$translations)){
-		$newTrans = array();
-		foreach($translations as $trans){
-			if($trans != $language){
-				$newTrans[] = $trans;
-			}
-		}
-		$translations = $newTrans;
-	}
-}
-
-if($exportType == 'translation'){
-	$transExportArr = $glosManager->getTransExportArr($language,$taxon,$translations,$definitions);
-	if($transExportArr){
-		$sciName = $transExportArr['glossSciName'];
-		$translationArr = $transExportArr['glossTranslations'];
-		$referencesArr = $transExportArr['references'];
-		$contributorsArr = $transExportArr['contributors'];
-		$imgcontributorsArr = $transExportArr['imgcontributors'];
-		unset($transExportArr['glossSciName']);
-		unset($transExportArr['glossTranslations']);
-		unset($transExportArr['references']);
-		unset($transExportArr['contributors']);
-		unset($transExportArr['imgcontributors']);
-		ksort($referencesArr);
-		ksort($contributorsArr);
-		ksort($imgcontributorsArr);
-		ksort($transExportArr, SORT_STRING | SORT_FLAG_CASE);
-		$fileName = $sciName.'_TranslationTable';
-	}
-}
-if($exportType == 'singlelanguage'){
-	$singleExportArr = $glosManager->getSingleExportArr($language,$taxon,$images);
-	if($singleExportArr){
-		$sciName = $singleExportArr['glossSciName'];
-		$referencesArr = $singleExportArr['references'];
-		$contributorsArr = $singleExportArr['contributors'];
-		$imgcontributorsArr = $singleExportArr['imgcontributors'];
-		unset($singleExportArr['glossSciName']);
-		unset($singleExportArr['references']);
-		unset($singleExportArr['contributors']);
-		unset($singleExportArr['imgcontributors']);
-		ksort($referencesArr);
-		ksort($contributorsArr);
-		ksort($imgcontributorsArr);
-		ksort($singleExportArr, SORT_STRING | SORT_FLAG_CASE);
-		$fileName = $sciName.'_SingleLanguage';
-	}
-}
-
-$fileName = str_replace(" ","_",$fileName);
-
 $phpWord = new \PhpOffice\PhpWord\PhpWord();
-
 $phpWord->addParagraphStyle('titlePara', array('align'=>'center','lineHeight'=>1.0,'spaceBefore'=>0,'spaceAfter'=>0,'keepNext'=>true));
 $phpWord->addFontStyle('titleFont', array('bold'=>true,'size'=>16,'name'=>'Microsoft Sans Serif'));
 $phpWord->addParagraphStyle('transTermPara', array('align'=>'left','lineHeight'=>1.0,'spaceBefore'=>0,'spaceAfter'=>0,'keepNext'=>true));
@@ -99,6 +33,7 @@ $phpWord->addFontStyle('transTermTopicNodefFont', array('bold'=>true,'size'=>15,
 $phpWord->addFontStyle('transTermTopicDefFont', array('bold'=>true,'size'=>14,'name'=>'Microsoft Sans Serif'));
 $phpWord->addParagraphStyle('transDefPara', array('align'=>'left','lineHeight'=>1.0,'indent'=>0.78125,'spaceBefore'=>0,'spaceAfter'=>0,'keepNext'=>true));
 $phpWord->addParagraphStyle('transDefList', array('align'=>'left','lineHeight'=>1.0,'indent'=>0.78125,'spaceBefore'=>0,'spaceAfter'=>0,'keepNext'=>true));
+$phpWord->addFontStyle('transTableHeaderNodeFont', array('bold'=>false,'size'=>12,'underline'=>'single','name'=>'Microsoft Sans Serif','color'=>'000000'));
 $phpWord->addFontStyle('transMainTermNodefFont', array('bold'=>false,'size'=>12,'name'=>'Microsoft Sans Serif','color'=>'21304B'));
 $phpWord->addFontStyle('transTransTermNodefFont', array('bold'=>false,'size'=>12,'name'=>'Microsoft Sans Serif','color'=>'000000'));
 $phpWord->addFontStyle('transMainTermDefFont', array('bold'=>true,'size'=>12,'name'=>'Microsoft Sans Serif','color'=>'21304B'));
@@ -111,142 +46,136 @@ $nodefCellStyle = array('valign'=>'center','width'=>2520,'borderSize'=>0,'border
 $imageCellStyle = array('valign'=>'top','width'=>2520,'borderSize'=>0,'borderColor'=>'ffffff');
 
 $section = $phpWord->addSection(array('pageSizeW'=>12240,'pageSizeH'=>15840,'marginLeft'=>1080,'marginRight'=>1080,'marginTop'=>1080,'marginBottom'=>1080,'headerHeight'=>100,'footerHeight'=>0));
-if($exportType == 'translation' && $transExportArr){
-	$header = $section->addHeader();
-	$header->addPreserveText($sciName.' - p.{PAGE} '.date("Y-m-d"),null,array('align'=>'right'));
-	$textrun = $section->addTextRun('titlePara');
-	if($GLOSSARY_EXPORT_BANNER){
-		$textrun->addImage('http://'.$_SERVER['HTTP_HOST'].'/'.$clientRoot.'/images/layout/'.$GLOSSARY_EXPORT_BANNER,array('width'=>500,'align'=>'center'));
-		$textrun->addTextBreak(1);
-	}
-	$textrun->addText(htmlspecialchars('Translation Table for '.$sciName),'titleFont');
-	$textrun->addTextBreak(1);
-	if($definitions == 'nodef'){
-		$textrun = $section->addTextRun('transTermPara');
-		$textrun->addText(htmlspecialchars($language),'transTermTopicNodefFont');
-		foreach($translations as $trans){
-			$textrun->addText(htmlspecialchars('-'.$trans),'transTermTopicNodefFont');
+$glosManager = new GlossaryManager(); 
+if($exportType == 'translation'){
+	$exportArr = $glosManager->getExportArr($language,$taxon,0,$translations,$definitions);
+	if(in_array($language,$translations)){
+		foreach($translations as $k => $trans){
+			if($trans == $language) unset($translations[$k]);
 		}
-		$textrun->addText(htmlspecialchars(' Terms'),'transTermTopicNodefFont');
+	}
+	if($exportArr){
+		$metaArr = $exportArr['meta'];
+		unset($exportArr['meta']);
+
+		//ksort($exportArr, SORT_STRING | SORT_FLAG_CASE);
+		$fileName = $metaArr['sciname'].'_TranslationTable';
+	
+		$header = $section->addHeader();
+		$header->addPreserveText($metaArr['sciname'].' - p.{PAGE} '.date("Y-m-d"),null,array('align'=>'right'));
+		$textrun = $section->addTextRun('titlePara');
+		if($GLOSSARY_BANNER){
+			$serverDomain = "http://";
+			if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $serverDomain = "https://";
+			$serverDomain .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+			$textrun->addImage($serverDomain.$CLIENT_ROOT.'/images/layout/'.$GLOSSARY_BANNER,array('width'=>500,'align'=>'center'));
+			$textrun->addTextBreak(1);
+		}
+		$textrun->addText(htmlspecialchars('Translation Table for '.$metaArr['sciname']),'titleFont');
 		$textrun->addTextBreak(1);
-		$table = $section->addTable('exportTable');
-		foreach($transExportArr as $transEx => $transExArr){
-			$termGrpId = $transExArr['glossgrpid'];
+		if($definitions == 'nodef'){
+			$table = $section->addTable('exportTable');
 			$table->addRow();
 			$cell = $table->addCell(2520,$nodefCellStyle);
 			$textrun = $cell->addTextRun('transTermPara');
-			$textrun->addText(htmlspecialchars($transExArr['term']),'transMainTermNodefFont');
+			$textrun->addText(htmlspecialchars($language),'transTableHeaderNodeFont');
 			foreach($translations as $trans){
 				$cell = $table->addCell(2520,$nodefCellStyle);
 				$textrun = $cell->addTextRun('transTermPara');
-				if(array_key_exists($termGrpId,$translationArr) && array_key_exists($trans,$translationArr[$termGrpId])){
-					$textrun->addText(htmlspecialchars($translationArr[$termGrpId][$trans]['term']),'transTransTermNodefFont');
-				}
-				else{
-					$textrun->addText(htmlspecialchars('[No Translation]'),'transTransTermNodefFont');
-				}
+				$textrun->addText(htmlspecialchars($trans),'transTableHeaderNodeFont');
 			}
-		}
-		if($referencesArr){
-			$section->addTextBreak(1);
-			$textrun = $section->addTextRun('titlePara');
-			$textrun->addText(htmlspecialchars('References'),'transTransTermDefFont');
-			foreach($referencesArr as $ref){
-				$listItemRun = $section->addListItemRun(0,null,'transDefList');
-				$listItemRun->addText(htmlspecialchars($ref),'transDefTextFont');
-			}
-		}
-		if($contributorsArr){
-			$section->addTextBreak(1);
-			$textrun = $section->addTextRun('titlePara');
-			$textrun->addText(htmlspecialchars('Contributors'),'transTransTermDefFont');
-			foreach($contributorsArr as $cont){
-				$listItemRun = $section->addListItemRun(0,null,'transDefList');
-				$listItemRun->addText(htmlspecialchars($cont),'transDefTextFont');
-			}
-		}
-		$section->addTextBreak(1);
-		$textrun = $section->addTextRun('titlePara');
-		$textrun->addText(htmlspecialchars('How to Cite Us'),'transTransTermDefFont');
-		$textrun = $section->addTextRun('transTermPara');
-		$textrun->addText(htmlspecialchars($citationFormat),'transTransTermNodefFont');
-	}
-	else{
-		$textrun = $section->addTextRun('transTermPara');
-		$textrun->addText(htmlspecialchars($language),'transTermTopicDefFont');
-		foreach($translations as $trans){
-			$textrun->addText(htmlspecialchars('-'.$trans),'transTermTopicDefFont');
-		}
-		$textrun->addText(htmlspecialchars(' Terms'),'transTermTopicDefFont');
-		$textrun = $section->addTextRun('transDefPara');
-		$textrun->addText(htmlspecialchars($language),'transTermTopicDefFont');
-		if($definitions == 'alldef'){
-			foreach($translations as $trans){
-				$textrun->addText(htmlspecialchars(' - '.$trans),'transTermTopicDefFont');
-			}
-		}
-		$textrun->addText(htmlspecialchars(' Definition'),'transTermTopicDefFont');
-		$textrun->addTextBreak(1);
-		foreach($transExportArr as $transEx => $transExArr){
-			$termGrpId = $transExArr['glossgrpid'];
-			$textrun = $section->addTextRun('transTermPara');
-			$textrun->addText(htmlspecialchars($transExArr['term']),'transMainTermDefFont');
-			foreach($translations as $trans){
-				if(array_key_exists($termGrpId,$translationArr) && array_key_exists($trans,$translationArr[$termGrpId])){
-					$textrun->addText(htmlspecialchars(' - '.$translationArr[$termGrpId][$trans]['term']),'transTransTermDefFont');
-				}
-				else{
-					$textrun->addText(htmlspecialchars(' - [No Translation]'),'transTransTermDefFont');
-				}
-			}
-			if($definitions == 'onedef'){
-				if($transExArr['definition']){
-					$textrun = $section->addTextRun('transDefPara');
-					$textrun->addText(htmlspecialchars($transExArr['definition']),'transDefTextFont');
-					$section->addTextBreak(1);
-				}
-			}
-			if($definitions == 'alldef'){
-				$listItemRun = $section->addListItemRun(0,null,'transDefList');
-				if($transExArr['definition']){
-					$listItemRun->addText(htmlspecialchars($transExArr['definition']),'transDefTextFont');
-				}
-				else{
-					$listItemRun->addText(htmlspecialchars('[No Definition]'),'transDefTextFont');
-				}
+			foreach($exportArr as $glossId => $glossArr){
+				$table->addRow();
+				$cell = $table->addCell(2520,$nodefCellStyle);
+				$textrun = $cell->addTextRun('transTermPara');
+				$textrun->addText(htmlspecialchars($glossArr['term']),'transMainTermNodefFont');
 				foreach($translations as $trans){
+					$cell = $table->addCell(2520,$nodefCellStyle);
+					$textrun = $cell->addTextRun('transTermPara');
+					$termStr = '[No Translation]';
+					if(array_key_exists('trans', $glossArr)){
+						if(array_key_exists($trans,$glossArr['trans'])){
+							$termStr = $glossArr['trans'][$trans]['term'];
+						}
+					}
+					$textrun->addText(htmlspecialchars($termStr),'transTransTermNodefFont');
+				}
+			}
+		}
+		else{
+			$textrun->addTextBreak(1);
+			foreach($exportArr as $glossId => $glossArr){
+				$textrun = $section->addTextRun('transTermPara');
+				$textrun->addText(htmlspecialchars($glossArr['term']),'transMainTermDefFont');
+				foreach($translations as $trans){
+					$termStr = '[No Translation]';
+					if(array_key_exists('trans', $glossArr)){
+						if(array_key_exists($trans,$glossArr['trans'])){
+							$termStr = $glossArr['trans'][$trans]['term'];
+						}
+					}
+					$textrun->addText(htmlspecialchars(' ('.$trans.': '.$termStr.')'),'transTransTermNodefFont');
+				}
+				if($definitions == 'onedef'){
+					if($glossArr['definition']){
+						$textrun = $section->addTextRun('transDefPara');
+						$textrun->addText(htmlspecialchars($glossArr['definition']),'transDefTextFont');
+						$section->addTextBreak(1);
+					}
+				}
+				elseif($definitions == 'alldef'){
 					$listItemRun = $section->addListItemRun(0,null,'transDefList');
-					if(array_key_exists($termGrpId,$translationArr) && array_key_exists($trans,$translationArr[$termGrpId])){
-						$listItemRun->addText(htmlspecialchars($translationArr[$termGrpId][$trans]['definition']),'transDefTextFont');
+					if($glossArr['definition']){
+						$listItemRun->addText(htmlspecialchars($glossArr['definition']),'transDefTextFont');
 					}
 					else{
 						$listItemRun->addText(htmlspecialchars('[No Definition]'),'transDefTextFont');
 					}
+					foreach($translations as $trans){
+						$listItemRun = $section->addListItemRun(0,null,'transDefList');
+
+						if(array_key_exists('trans', $glossArr)){
+							if(array_key_exists($trans,$glossArr['trans'])){
+								$listItemRun->addText(htmlspecialchars($glossArr['trans'][$trans]['definition']),'transDefTextFont');
+							}
+						}
+						else{
+							$listItemRun->addText(htmlspecialchars('[No Definition]'),'transDefTextFont');
+						}
+					}
+					$section->addTextBreak(1);
 				}
-				$section->addTextBreak(1);
 			}
 		}
-		if($referencesArr){
+		if(isset($metaArr['references'])){
+			$section->addTextBreak(1);
 			$textrun = $section->addTextRun('titlePara');
 			$textrun->addText(htmlspecialchars('References'),'transTransTermDefFont');
+			$referencesArr = $metaArr['references'];
+			ksort($referencesArr);
 			foreach($referencesArr as $ref){
 				$listItemRun = $section->addListItemRun(0,null,'transDefList');
 				$listItemRun->addText(htmlspecialchars($ref),'transDefTextFont');
 			}
 		}
-		if($contributorsArr){
+		if(isset($metaArr['contributors'])){
 			$section->addTextBreak(1);
 			$textrun = $section->addTextRun('titlePara');
 			$textrun->addText(htmlspecialchars('Contributors'),'transTransTermDefFont');
+			$contributorsArr = $metaArr['contributors'];
+			ksort($contributorsArr);
 			foreach($contributorsArr as $cont){
 				$listItemRun = $section->addListItemRun(0,null,'transDefList');
 				$listItemRun->addText(htmlspecialchars($cont),'transDefTextFont');
 			}
 		}
-		if($imgcontributorsArr){
+		if(isset($metaArr['imgcontributors'])){
 			$section->addTextBreak(1);
 			$textrun = $section->addTextRun('titlePara');
 			$textrun->addText(htmlspecialchars('Image Contributors'),'transTransTermDefFont');
+			$imgcontributorsArr = $metaArr['imgcontributors'];
+			ksort($imgcontributorsArr);
 			foreach($imgcontributorsArr as $cont){
 				$listItemRun = $section->addListItemRun(0,null,'transDefList');
 				$listItemRun->addText(htmlspecialchars($cont),'transDefTextFont');
@@ -259,109 +188,132 @@ if($exportType == 'translation' && $transExportArr){
 		$textrun->addText(htmlspecialchars($citationFormat),'transTransTermNodefFont');
 	}
 }
-if($exportType == 'singlelanguage' && $singleExportArr){
-	$header = $section->addHeader();
-	$header->addPreserveText($sciName.' - p.{PAGE} '.date("Y-m-d"),null,array('align'=>'right'));
-	$textrun = $section->addTextRun('titlePara');
-	if($GLOSSARY_EXPORT_BANNER){
-		$textrun->addImage('http://'.$_SERVER['HTTP_HOST'].'/'.$clientRoot.'/images/layout/'.$GLOSSARY_EXPORT_BANNER,array('width'=>500,'align'=>'center'));
-		$textrun->addTextBreak(1);
-	}
-	$textrun->addText(htmlspecialchars('Single Language Glossary for '.$sciName),'titleFont');
-	$textrun->addTextBreak(1);
-	foreach($singleExportArr as $singleEx => $singleExArr){
-		$textrun = $section->addTextRun('transTermPara');
-		$textrun->addText(htmlspecialchars($singleExArr['term']),'transMainTermDefFont');
-		if($singleExArr['definition']){
-			$textrun = $section->addTextRun('transDefPara');
-			$textrun->addText(htmlspecialchars($singleExArr['definition']),'transDefTextFont');
-		}
-		if(!$images || ($images && !array_key_exists('images',$singleExArr))){
+elseif($exportType == 'singlelanguage'){
+	$exportArr = $glosManager->getExportArr($language,$taxon,$images);
+	if($exportArr){
+		$metaArr = $exportArr['meta'];
+		unset($exportArr['meta']);
+		//ksort($exportArr, SORT_STRING | SORT_FLAG_CASE);
+		$fileName = $metaArr['sciname'].'_SingleLanguage';
+	
+		$header = $section->addHeader();
+		$header->addPreserveText($metaArr['sciname'].' - p.{PAGE} '.date("Y-m-d"),null,array('align'=>'right'));
+		$textrun = $section->addTextRun('titlePara');
+		if($GLOSSARY_BANNER){
+			$serverDomain = "http://";
+			if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $serverDomain = "https://";
+			$serverDomain .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+			$textrun->addImage($serverDomain.$CLIENT_ROOT.'/images/layout/'.$GLOSSARY_BANNER,array('width'=>500,'align'=>'center'));
 			$textrun->addTextBreak(1);
 		}
-		if($images && array_key_exists('images',$singleExArr)){
-			$imageArr = $singleExArr['images'];
-			$table = $section->addTable('exportTable');
-			foreach($imageArr as $img => $imgArr){
-				$imgSrc = $imgArr["url"];
-				if(substr($imgSrc,0,1)=="/"){
-					if(array_key_exists("imageDomain",$GLOBALS) && $GLOBALS["imageDomain"]){
-						$imgSrc = $GLOBALS["imageDomain"].$imgSrc;
+		$textrun->addText(htmlspecialchars('Single Language Glossary for '.$metaArr['sciname']),'titleFont');
+		$textrun->addTextBreak(1);
+		foreach($exportArr as $singleEx => $singleExArr){
+			$textrun = $section->addTextRun('transTermPara');
+			$textrun->addText(htmlspecialchars($singleExArr['term']),'transMainTermDefFont');
+			if($singleExArr['definition']){
+				$textrun = $section->addTextRun('transDefPara');
+				$textrun->addText(htmlspecialchars($singleExArr['definition']),'transDefTextFont');
+			}
+			if(!$images || ($images && !array_key_exists('images',$singleExArr))){
+				$textrun->addTextBreak(1);
+			}
+			if($images && array_key_exists('images',$singleExArr)){
+				$imageArr = $singleExArr['images'];
+				$table = $section->addTable('exportTable');
+				foreach($imageArr as $img => $imgArr){
+					$imgSrc = $imgArr["url"];
+					if(substr($imgSrc,0,1)=="/"){
+						if(array_key_exists("imageDomain",$GLOBALS) && $GLOBALS["imageDomain"]){
+							$imgSrc = $GLOBALS["imageDomain"].$imgSrc;
+						}
+						else{
+							$imgSrc = 'http://'.$_SERVER['HTTP_HOST'].$imgSrc;
+						}
 					}
-					else{
-						$imgSrc = 'http://'.$_SERVER['HTTP_HOST'].$imgSrc;
-					}
-				}
-				$table->addRow();
-				$cell = $table->addCell(4125,$imageCellStyle);
-				$textrun = $cell->addTextRun('transDefPara');
-				$imgSize = array();
-				@$imgSize = getimagesize($imgSrc);
-				if($imgSize){
-					$width = $imgSize[0];
-					$height = $imgSize[1];
-					if($width > $height){
-						$textrun->addImage($imgSrc,array('width'=>220));
-					}
-					else{
-						$textrun->addImage($imgSrc,array('height'=>220));
-					}
-					$cell = $table->addCell(5625,$imageCellStyle);
-					$textrun = $cell->addTextRun('transTermPara');
-					if($imgArr["createdBy"]){
-						$textrun->addText(htmlspecialchars('Image courtesy of: '),'transTransTermDefFont');
-						$textrun->addText(htmlspecialchars($imgArr["createdBy"]),'transDefTextFont');
-						$textrun->addTextBreak(2);
-					}
-					if($imgArr["structures"]){
-						$textrun->addText(htmlspecialchars('Structures: '),'transTransTermDefFont');
-						$textrun->addText(htmlspecialchars($imgArr["structures"]),'transDefTextFont');
-						$textrun->addTextBreak(2);
-					}
-					if($imgArr["notes"]){
-						$textrun->addText(htmlspecialchars('Notes: '),'transTransTermDefFont');
-						$textrun->addText(htmlspecialchars($imgArr["notes"]),'transDefTextFont');
+					$table->addRow();
+					$cell = $table->addCell(4125,$imageCellStyle);
+					$textrun = $cell->addTextRun('transDefPara');
+					$imgSize = array();
+					@$imgSize = getimagesize($imgSrc);
+					if($imgSize){
+						$width = $imgSize[0];
+						$height = $imgSize[1];
+						if($width > $height){
+							$targetWidth = $width;
+							if($width > 230) $targetWidth = 230;
+							$textrun->addImage($imgSrc,array('width'=>$targetWidth));
+						}
+						else{
+							$targetHeight = $height;
+							if($height > 170) $targetHeight = 170;
+							$textrun->addImage($imgSrc,array('height'=>$targetHeight));
+						}
+						$cell = $table->addCell(5625,$imageCellStyle);
+						$textrun = $cell->addTextRun('transTermPara');
+						if($imgArr["createdBy"]){
+							$textrun->addText(htmlspecialchars('Image courtesy of: '),'transTransTermDefFont');
+							$textrun->addText(htmlspecialchars($imgArr["createdBy"]),'transDefTextFont');
+							$textrun->addTextBreak(2);
+						}
+						if($imgArr["structures"]){
+							$textrun->addText(htmlspecialchars('Structures: '),'transTransTermDefFont');
+							$textrun->addText(htmlspecialchars($imgArr["structures"]),'transDefTextFont');
+							$textrun->addTextBreak(2);
+						}
+						if($imgArr["notes"]){
+							$textrun->addText(htmlspecialchars('Notes: '),'transTransTermDefFont');
+							$textrun->addText(htmlspecialchars($imgArr["notes"]),'transDefTextFont');
+						}
 					}
 				}
 			}
 		}
-	}
-	if($referencesArr){
+		if(isset($metaArr['references'])){
+			$section->addTextBreak(1);
+			$textrun = $section->addTextRun('titlePara');
+			$textrun->addText(htmlspecialchars('References'),'transTransTermDefFont');
+			$referencesArr = $metaArr['references'];
+			ksort($referencesArr);
+			foreach($referencesArr as $ref){
+				$listItemRun = $section->addListItemRun(0,null,'transDefList');
+				$listItemRun->addText(htmlspecialchars($ref),'transDefTextFont');
+			}
+		}
+		if(isset($metaArr['contributors'])){
+			$section->addTextBreak(1);
+			$textrun = $section->addTextRun('titlePara');
+			$textrun->addText(htmlspecialchars('Contributors'),'transTransTermDefFont');
+			$contributorsArr = $metaArr['contributors'];
+			ksort($contributorsArr);
+			foreach($contributorsArr as $cont){
+				$listItemRun = $section->addListItemRun(0,null,'transDefList');
+				$listItemRun->addText(htmlspecialchars($cont),'transDefTextFont');
+			}
+		}
+		if(isset($metaArr['imgcontributors'])){
+			$section->addTextBreak(1);
+			$textrun = $section->addTextRun('titlePara');
+			$textrun->addText(htmlspecialchars('Image Contributors'),'transTransTermDefFont');
+			$imgcontributorsArr = $metaArr['imgcontributors'];
+			ksort($imgcontributorsArr);
+			foreach($imgcontributorsArr as $cont){
+				$listItemRun = $section->addListItemRun(0,null,'transDefList');
+				$listItemRun->addText(htmlspecialchars($cont),'transDefTextFont');
+			}
+		}
 		$section->addTextBreak(1);
 		$textrun = $section->addTextRun('titlePara');
-		$textrun->addText(htmlspecialchars('References'),'transTransTermDefFont');
-		foreach($referencesArr as $ref){
-			$listItemRun = $section->addListItemRun(0,null,'transDefList');
-			$listItemRun->addText(htmlspecialchars($ref),'transDefTextFont');
-		}
+		$textrun->addText(htmlspecialchars('How to Cite Us'),'transTransTermDefFont');
+		$textrun = $section->addTextRun('transTermPara');
+		$textrun->addText(htmlspecialchars($citationFormat),'transTransTermNodefFont');
 	}
-	if($contributorsArr){
-		$section->addTextBreak(1);
-		$textrun = $section->addTextRun('titlePara');
-		$textrun->addText(htmlspecialchars('Contributors'),'transTransTermDefFont');
-		foreach($contributorsArr as $cont){
-			$listItemRun = $section->addListItemRun(0,null,'transDefList');
-			$listItemRun->addText(htmlspecialchars($cont),'transDefTextFont');
-		}
-	}
-	if($imgcontributorsArr){
-		$section->addTextBreak(1);
-		$textrun = $section->addTextRun('titlePara');
-		$textrun->addText(htmlspecialchars('Image Contributors'),'transTransTermDefFont');
-		foreach($imgcontributorsArr as $cont){
-			$listItemRun = $section->addListItemRun(0,null,'transDefList');
-			$listItemRun->addText(htmlspecialchars($cont),'transDefTextFont');
-		}
-	}
-	$section->addTextBreak(1);
-	$textrun = $section->addTextRun('titlePara');
-	$textrun->addText(htmlspecialchars('How to Cite Us'),'transTransTermDefFont');
-	$textrun = $section->addTextRun('transTermPara');
-	$textrun->addText(htmlspecialchars($citationFormat),'transTransTermNodefFont');
 }
 
-$targetFile = $serverRoot.'/temp/report/'.$fileName.'.'.$exportExtension;
-$phpWord->save($targetFile, $exportEngine);
+$fileName = str_replace(" ","_",$fileName);
+$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.docx';
+$phpWord->save($targetFile, 'Word2007');
 
 header('Content-Description: File Transfer');
 header('Content-type: application/force-download');
