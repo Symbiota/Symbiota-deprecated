@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php'); 
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -17,6 +18,7 @@ if(!is_numeric($start)) $start = 0;
 if(!is_numeric($limit)) $limit = 0;
 
 $cleanManager = new OccurrenceCleaner();
+if($SOLR_MODE) $solrManager = new SOLRManager();
 if($collid) $cleanManager->setCollId($collid);
 $collMap = $cleanManager->getCollMap();
 
@@ -185,6 +187,7 @@ elseif($action == 'listdupsrecordedby'){
 						}
 					}
 					$cleanManager->mergeDupeArr($dupArr);
+                    if($SOLR_MODE) $solrManager->updateSOLR();
 					?>
 					<li>Done!</li>
 				</ul>

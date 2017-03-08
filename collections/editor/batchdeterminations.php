@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/batchdeterminations.php?'.$_SERVER['QUERY_STRING']);
@@ -10,6 +11,7 @@ $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $occManager = new OccurrenceEditorDeterminations();
+if($SOLR_MODE) $solrManager = new SOLRManager();
 
 $occManager->setCollId($collid);
 $occManager->getCollMap();
@@ -37,6 +39,7 @@ if($isEditor){
 			$occManager->addDetermination($_REQUEST,$isEditor);
 		}
 		$catTBody = $occManager->getBulkDetRows($collid,'','',$occStr);
+        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 	if($formSubmit == 'Adjust Nomenclature'){
 		$occidArr = $_REQUEST['occid'];
@@ -46,6 +49,7 @@ if($isEditor){
 			$occManager->addNomAdjustment($_REQUEST,$isEditor);
 		}
 		$nomTBody = $occManager->getBulkDetRows($collid,'','',$occStr);
+        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 }
 ?>

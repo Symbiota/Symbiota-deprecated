@@ -316,7 +316,7 @@ function addVoucherToCl(occidIn,clidIn,tidIn){
 
 function openIndPU(occId,clid){
     var wWidth = 900;
-    if(document.getElementById('maintable').offsetWidth){
+    if(document.getElementById('maintable')){
         wWidth = document.getElementById('maintable').offsetWidth*1.05;
     }
     else if(document.body.offsetWidth){

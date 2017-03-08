@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/occurdataentry.php?'.$_SERVER['QUERY_STRING']);
 
@@ -9,6 +10,7 @@ $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
 $occManager = new OccurrenceEditorManager();
+if($SOLR_MODE) $solrManager = new SOLRManager();
 
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 
@@ -35,6 +37,7 @@ if($SYMB_UID){
 	if($isEditor){
 		if($action == 'Add Record'){
 			$statusStr = $occManager->addOccurrence($_POST);
+            if($SOLR_MODE) $solrManager->updateSOLR();
 		}
 	}
 }

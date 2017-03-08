@@ -15,10 +15,10 @@ class OccurrenceDownload{
 	private $zipFile = false;
  	private $sqlWhere = '';
  	private $conditionArr = array();
-
-	private $taxonFilter;
-	
-	private $errorArr = array();
+    private $taxonFilter;
+    private $errorArr = array();
+    private $tidArr = array();
+    private $occArr = array();
 
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
@@ -445,43 +445,64 @@ xmlwriter_end_attribute($xml_resource);
 	}
 
 	private function getSql(){
-		$sql = '';
+        global $SOLR_MODE;
+	    $sql = '';
 		if($this->schemaType == 'checklist'){
-			if($this->taxonFilter){
-				$sql = 'SELECT DISTINCT ts.family, t.sciname AS scientificName, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
-					'FROM omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid '.
-					'INNER JOIN taxa t ON ts.TidAccepted = t.Tid ';
-				if(strpos($this->sqlWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
-				if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-				$sql .= $this->sqlWhere.'AND t.RankId > 140 AND (ts.taxauthid = '.$this->taxonFilter.') ';
-				if($this->redactLocalities){
-					if($this->rareReaderArr){
-						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
-					}
-					else{
-						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
-					}
-				}
-				$sql .= 'ORDER BY ts.family, t.SciName ';
-			}
-			else{
-				$sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
-					'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
-				if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
-				if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-				$sql .= $this->sqlWhere.'AND o.SciName NOT LIKE "%aceae" AND o.SciName NOT LIKE "%idea" AND o.SciName NOT IN ("Plantae","Polypodiophyta") ';
-				if($this->redactLocalities){
-					if($this->rareReaderArr){
-						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
-					}
-					else{
-						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
-					}
-				}
-				$sql .= 'ORDER BY IFNULL(o.family,"not entered"), o.SciName ';
-			}
+            if($SOLR_MODE && ($this->tidArr || $this->occArr)){
+                if($this->taxonFilter){
+                    $tidStr = implode(',',$this->tidArr);
+                    $sql = 'SELECT DISTINCT ts.family, t.sciname AS scientificName, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
+                        'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
+                        'FROM taxstatus AS ts INNER JOIN taxa AS t ON ts.TidAccepted = t.Tid '.
+                        'WHERE ts.tid IN('.$tidStr.') AND (ts.taxauthid = '.$this->taxonFilter.') '.
+                        'ORDER BY ts.family, t.SciName ';
+                }
+                else{
+                    $occStr = implode(',',$this->occArr);
+                    $sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
+                        'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
+                        'FROM omoccurrences AS o LEFT JOIN taxa AS t ON o.tidinterpreted = t.tid '.
+                        'WHERE o.occid IN('.$occStr.') AND o.sciname IS NOT NULL '.
+                        'ORDER BY IFNULL(o.family,"not entered"), o.sciname ';
+                }
+            }
+            else{
+                if($this->taxonFilter){
+                    $sql = 'SELECT DISTINCT ts.family, t.sciname AS scientificName, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
+                        'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
+                        'FROM omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid '.
+                        'INNER JOIN taxa t ON ts.TidAccepted = t.Tid ';
+                    if(strpos($this->sqlWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+                    if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+                    $sql .= $this->sqlWhere.'AND t.RankId > 140 AND (ts.taxauthid = '.$this->taxonFilter.') ';
+                    if($this->redactLocalities){
+                        if($this->rareReaderArr){
+                            $sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
+                        }
+                        else{
+                            $sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
+                        }
+                    }
+                    $sql .= 'ORDER BY ts.family, t.SciName ';
+                }
+                else{
+                    $sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
+                        'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
+                        'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
+                    if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+                    if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+                    $sql .= $this->sqlWhere.'AND o.SciName NOT LIKE "%aceae" AND o.SciName NOT LIKE "%idea" AND o.SciName NOT IN ("Plantae","Polypodiophyta") ';
+                    if($this->redactLocalities){
+                        if($this->rareReaderArr){
+                            $sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
+                        }
+                        else{
+                            $sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
+                        }
+                    }
+                    $sql .= 'ORDER BY IFNULL(o.family,"not entered"), o.SciName ';
+                }
+            }
 		}
 		elseif($this->schemaType == 'georef'){
 			$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
@@ -505,7 +526,13 @@ xmlwriter_end_attribute($xml_resource);
 			if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 			if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			$this->applyConditions();
-			$sql .= $this->sqlWhere;
+            if($SOLR_MODE && $this->occArr){
+                $occStr = implode(',',$this->occArr);
+                $sql .= 'WHERE o.occid IN('.$occStr.') ';
+            }
+            else{
+                $sql .= $this->sqlWhere;
+            }
 			if($this->redactLocalities){
 				if($this->rareReaderArr){
 					$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
@@ -685,6 +712,18 @@ xmlwriter_end_attribute($xml_resource);
 			$this->taxonFilter = $filter;
 		}
 	}
+
+    public function setTidArr($tidArr){
+        if(is_array($tidArr)){
+            $this->tidArr = $tidArr;
+        }
+    }
+
+    public function setOccArr($occArr){
+        if(is_array($occArr)){
+            $this->occArr = $occArr;
+        }
+    }
 
 	//Misc functions
 	private function stripSensitiveFields(&$row){

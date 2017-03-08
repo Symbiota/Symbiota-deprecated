@@ -2,6 +2,7 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/checklist.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceChecklistManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 $checklistManager = new OccurrenceChecklistManager();
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:'';
@@ -11,14 +12,37 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 //Sanitation
 if(!is_numeric($taxonFilter)) $taxonFilter = 1;
 
+$checklistArr = Array();
+$taxaCnt = 0;
+
+$solrManager = new SOLRManager();
+$checklistManager = new OccurrenceChecklistManager();
+
 if($stArrCollJson && $stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 	$collStArr = json_decode($stArrCollJson, true);
 	$searchStArr = json_decode($stArrSearchJson, true);
 	$stArr = array_merge($searchStArr,$collStArr);
-	$checklistManager->setSearchTermsArr($stArr);
-}
 
+    if($SOLR_MODE){
+        $solrManager->setSearchTermsArr($stArr);
+        $solrArr = $solrManager->getTaxaArr();
+        if($taxonFilter && is_numeric($taxonFilter)){
+            $tidArr = $solrManager->getSOLRTidList($solrArr);
+            $checklistArr = $checklistManager->getTidChecklist($tidArr,$taxonFilter);
+            $taxaCnt = $checklistManager->getChecklistTaxaCnt();
+        }
+        else{
+            $checklistArr = $solrManager->translateSOLRTaxaList($solrArr);
+            $taxaCnt = $solrManager->getChecklistTaxaCnt();
+        }
+    }
+    else{
+        $checklistManager->setSearchTermsArr($stArr);
+        $checklistArr = $checklistManager->getChecklist($taxonFilter);
+        $taxaCnt = $checklistManager->getChecklistTaxaCnt();
+    }
+}
 ?>
 <div>
 	<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_TITLE']; ?>'>
@@ -36,7 +60,7 @@ if($stArrCollJson && $stArrSearchJson){
 		</div>
 	<?php 
 	}
-	if($floraModIsActive){
+	if($FLORA_MOD_IS_ACTIVE){
 	?>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_CHECKLIST_EXPLORER']; ?>'>
 			<a href='checklistsymbiota.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
@@ -63,8 +87,7 @@ if($stArrCollJson && $stArrSearchJson){
 	</div>
 	<div style="clear:both;"><hr/></div>
 	<?php
-		$checklistArr = $checklistManager->getChecklist($taxonFilter);
-		echo '<div style="font-weight:bold;font-size:125%;">'.$LANG['TAXA_COUNT'].': '.$checklistManager->getChecklistTaxaCnt().'</div>';
+		echo '<div style="font-weight:bold;font-size:125%;">'.$LANG['TAXA_COUNT'].': '.$taxaCnt.'</div>';
 		$undFamilyArray = Array();
 		if(array_key_exists("undefined",$checklistArr)){
 			$undFamilyArray = $checklistArr["undefined"];

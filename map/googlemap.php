@@ -3,6 +3,7 @@ include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
 include_once($SERVER_ROOT.'/classes/MappingShared.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
@@ -14,6 +15,7 @@ $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncoll
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 $sharedMapManager = new MappingShared();
+$solrManager = new SOLRManager();
 
 $sharedMapManager->setFieldArr(0);
 
@@ -41,12 +43,19 @@ elseif($mapType == 'occquery'){
 	$tArr = $occurMapManager->getTaxaArr();
 	$stArr = $occurMapManager->getSearchTermsArr();
 	$sharedMapManager->setSearchTermsArr($stArr);
+    if($SOLR_MODE) $solrManager->setSearchTermsArr($stArr);
 }
 
-$sharedMapManager->setTaxaArr($tArr);
-
+if($SOLR_MODE){
+    $solrManager->setTaxaArr($tArr);
+    $solrArr = $solrManager->getGeoArr();
+    $coordArr = $solrManager->translateSOLRGeoTaxaList($solrArr);
+}
+else{
+    $sharedMapManager->setTaxaArr($tArr);
+    $coordArr = $sharedMapManager->getGeoCoords($mapWhere);
+}
 ?>
-<!DOCTYPE html>
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> - Google Map</title>
@@ -124,7 +133,6 @@ $sharedMapManager->setTaxaArr($tArr);
            <?php 
 			$coordExist = false;
 			$iconKeys = Array(); 
-			$coordArr = $sharedMapManager->getGeoCoords($mapWhere);
 			$markerCnt = 0;
 			$spCnt = 1;
 			$minLng = 180;
@@ -317,7 +325,7 @@ $sharedMapManager->setTaxaArr($tArr);
 		
 	</script>
 </head>
-<body style="background-color:#ffffff;width:100%" onload="initialize()">
+<body style="background-color:#ffffff;width:100%" onload="initialize();">
 	<?php
 	//echo json_encode($coordArr);
 	if(!$coordExist){ //no results

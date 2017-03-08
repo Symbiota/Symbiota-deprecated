@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecEditReviewManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 if(!$symbUid) header('Location: ../../profile/index.php?refurl=../collections/editor/editreviewer.php?'.$_SERVER['QUERY_STRING']);
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -16,6 +17,7 @@ $limitCnt = array_key_exists('limitcnt',$_REQUEST)?$_REQUEST['limitcnt']:'1000';
 $printMode = (array_key_exists('printsubmit', $_POST)?true:false);
 
 $reviewManager = new SpecEditReviewManager();
+if($SOLR_MODE) $solrManager = new SOLRManager();
 $collName = $reviewManager->setCollId($collid);
 $reviewManager->setDisplay($displayMode);
 if(is_numeric($queryOccid)){
@@ -46,10 +48,12 @@ if($isEditor){
 		if(!$reviewManager->updateRecords($_POST)){
 			$statusStr = '<br>'.implode('</br><br>',$reviewManager->getWarningArr()).'</br>';
 		}
+        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 	elseif(array_key_exists('delsubmit', $_POST)){
 		$idStr = implode(',',$_POST['id']);
 		$reviewManager->deleteEdits($idStr);
+        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 	elseif(array_key_exists('dlsubmit', $_POST)){
 		$idStr = implode(',',$_POST['id']);

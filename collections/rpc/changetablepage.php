@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 $stArrCollJson = $_REQUEST["jsoncollstarr"];
 $stArrSearchJson = $_REQUEST["starr"];
@@ -18,12 +19,20 @@ if($collStArr && $searchStArr) $stArr = array_merge($searchStArr,$collStArr);
 if(!$collStArr && $searchStArr) $stArr = $searchStArr;
 if($collStArr && !$searchStArr) $stArr = $collStArr;
 
-$collManager = new OccurrenceListManager();
+if($SOLR_MODE){
+    $collManager = new SOLRManager();
+    $collManager->setSearchTermsArr($stArr);
+    $collManager->setSorting($sortField1,$sortField2,$sortOrder);
+    $solrArr = $collManager->getRecordArr($occIndex,1000);
+    $recArr = $collManager->translateSOLRRecList($solrArr);
+}
+else{
+    $collManager = new OccurrenceListManager();
+    $collManager->setSearchTermsArr($stArr);
+    $collManager->setSorting($sortField1,$sortField2,$sortOrder);
+    $recArr = $collManager->getRecordArr($occIndex,1000);
+}
 
-$stArrJson = json_encode($stArr);
-$collManager->setSearchTermsArr($stArr);
-$collManager->setSorting($sortField1,$sortField2,$sortOrder);
-$recArr = $collManager->getTableSpecimenMap($occIndex,1000);
 $targetClid = $collManager->getSearchTerm("targetclid");
 
 $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/collections/listtabledisplay.php';
@@ -73,9 +82,9 @@ if($recArr){
                 || (array_key_exists('CollEditor',$USER_RIGHTS) && in_array($occArr['collid'],$USER_RIGHTS['CollEditor'])))){
             $isEditor = true;
         }
-        if($occArr['sciname']){
-            $occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
-        }
+        $collection = $occArr['institutioncode'];
+        if($occArr['collectioncode']) $collection .= ':'.$occArr['collectioncode'];
+        if($occArr['sciname']) $occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
         $recordListHtml .= "<tr ".($recCnt%2?'class="alt"':'').">\n";
         $recordListHtml .= '<td>';
         $recordListHtml .= '<a href="#" onclick="return openIndPU('.$id.",".($targetClid?$targetClid:"0").');">'.$id.'</a> ';
@@ -84,11 +93,11 @@ if($recArr){
             $recordListHtml .= '<img src="../images/edit.png" style="height:13px;" title="Edit Record" />';
             $recordListHtml .= '</a>';
         }
-        if($occArr['hasImage']){
+        if(isset($occArr['img'])){
             $recordListHtml .= '<img src="../images/image.png" style="height:13px;margin-left:5px;" title="Has Image" />';
         }
         $recordListHtml .= '</td>'."\n";
-        $recordListHtml .= '<td>'.$occArr['collection'].'</td>'."\n";
+        $recordListHtml .= '<td>'.$collection.'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['accession'].'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['family'].'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['sciname'].($occArr['author']?" ".$occArr['author']:"").'</td>'."\n";
@@ -96,7 +105,7 @@ if($recArr){
         $recordListHtml .= '<td>'.$occArr['state'].'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['county'].'</td>'."\n";
         $recordListHtml .= '<td>'.((strlen($occArr['locality'])>80)?substr($occArr['locality'],0,80).'...':$occArr['locality']).'</td>'."\n";
-        $recordListHtml .= '<td>'.(array_key_exists("habitat",$occArr)?((strlen($occArr['habitat'])>80)?substr($occArr['habitat'],0,80).'...':$occArr['habitat']):"").'</td>'."\n";
+        $recordListHtml .= '<td>'.((strlen($occArr['habitat'])>80)?substr($occArr['habitat'],0,80).'...':$occArr['habitat']).'</td>'."\n";
         $recordListHtml .= '<td>'.(array_key_exists("elev",$occArr)?$occArr['elev']:"").'</td>'."\n";
         $recordListHtml .= '<td>'.(array_key_exists("date",$occArr)?$occArr['date']:"").'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['collector'].'</td>'."\n";

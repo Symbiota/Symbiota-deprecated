@@ -1,0 +1,129 @@
+<dataConfig>
+    <dataSource type="JdbcDataSource"
+                driver="com.mysql.jdbc.Driver"
+                url="jdbc:mysql://[Database Host Name]/[Database Name]"
+                batchSize="-1"
+                user="[Database Read Only User Name]"
+                password="[Database Read Only Password]" />
+    <document>
+        <entity name="omoccurrences"
+                query="SELECT o.occid, o.collid, o.catalogNumber, o.otherCatalogNumbers, o.family, o.sciname, o.tidinterpreted,
+                    CONCAT_WS('-',IFNULL(o.family,'not entered'),o.sciname) AS familyscinamecode,
+                    o.scientificNameAuthorship, o.identifiedBy, o.dateIdentified, o.typeStatus, o.recordedBy, o.recordNumber,
+                    CASE WHEN o.eventdate NOT LIKE '%-00%' THEN DATE_FORMAT(o.eventdate,'%Y-%m-%dT%TZ') ELSE NULL END AS eventDate,
+                    CONCAT_WS(' to ',IFNULL(DATE_FORMAT(o.eventDate,'%d %M %Y'),''),DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),'%d %M %Y')) AS displayDate,
+                    o.`year`, o.`month`, o.`day`, o.startDayOfYear, o.endDayOfYear, o.habitat, o.associatedTaxa,
+                    o.cultivationStatus, o.`country`, o.stateProvince, o.`county`, o.municipality, o.locality,
+                    o.localitySecurity, o.localitySecurityReason, o.decimalLatitude, o.decimalLongitude,
+                    CONCAT('POINT(',o.decimalLongitude,' ',o.decimalLatitude,')') as pointLocation, o.minimumElevationInMeters,
+                    o.maximumElevationInMeters, o.observeruid, o.processingstatus, o.recordEnteredBy, o.labelProject,
+                    DATE_FORMAT(o.dateEntered,'%Y-%m-%dT%TZ') AS dateEntered, DATE_FORMAT(o.dateLastModified,'%Y-%m-%dT%TZ') AS dateLastModified,
+                    c.InstitutionCode, c.CollectionCode, c.CollectionName, c.icon, c.CollType, c.SortSeq
+                    FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid"
+                deltaImportQuery="SELECT o.occid, o.collid, o.catalogNumber, o.otherCatalogNumbers, o.family, o.sciname, o.tidinterpreted,
+                    CONCAT_WS('-',IFNULL(o.family,'not entered'),o.sciname) AS familyscinamecode,
+                    o.scientificNameAuthorship, o.identifiedBy, o.dateIdentified, o.typeStatus, o.recordedBy, o.recordNumber,
+                    CASE WHEN o.eventdate NOT LIKE '%-00%' THEN DATE_FORMAT(o.eventdate,'%Y-%m-%dT%TZ') ELSE NULL END AS eventDate,
+                    CONCAT_WS(' to ',IFNULL(DATE_FORMAT(o.eventDate,'%d %M %Y'),''),DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),'%d %M %Y')) AS displayDate,
+                    o.`year`, o.`month`, o.`day`, o.startDayOfYear, o.endDayOfYear, o.habitat, o.associatedTaxa,
+                    o.cultivationStatus, o.`country`, o.stateProvince, o.`county`, o.municipality, o.locality,
+                    o.localitySecurity, o.localitySecurityReason, o.decimalLatitude, o.decimalLongitude,
+                    CONCAT('POINT(',o.decimalLongitude,' ',o.decimalLatitude,')') as pointLocation, o.minimumElevationInMeters,
+                    o.maximumElevationInMeters, o.observeruid, o.processingstatus, o.recordEnteredBy, o.labelProject,
+                    DATE_FORMAT(o.dateEntered,'%Y-%m-%dT%TZ') AS dateEntered, DATE_FORMAT(o.dateLastModified,'%Y-%m-%dT%TZ') AS dateLastModified,
+                    c.InstitutionCode, c.CollectionCode, c.CollectionName, c.icon, c.CollType, c.SortSeq
+                    FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid
+                    WHERE o.occid = '${dih.delta.occid}'"
+                deltaQuery="SELECT o.occid FROM omoccurrences AS o LEFT JOIN images AS i ON o.occid = i.occid
+                    WHERE (o.dateLastModified > CONVERT_TZ('${dih.last_index_time}','+00:00','-06:00')) OR (i.InitialTimeStamp > CONVERT_TZ('${dih.last_index_time}','+00:00','-06:00'))">
+                <field column="occid" name="id"/>
+                <field column="occid" name="occid"/>
+                <field column="collid" name="collid"/>
+                <field column="catalogNumber" name="catalogNumber"/>
+                <field column="otherCatalogNumbers" name="otherCatalogNumbers"/>
+                <field column="family" name="family"/>
+                <field column="sciname" name="sciname"/>
+                <field column="tidinterpreted" name="tidinterpreted"/>
+                <field column="familyscinamecode" name="familyscinamecode"/>
+                <field column="scientificNameAuthorship" name="scientificNameAuthorship"/>
+                <field column="identifiedBy" name="identifiedBy"/>
+                <field column="dateIdentified" name="dateIdentified"/>
+                <field column="typeStatus" name="typeStatus"/>
+                <field column="recordedBy" name="recordedBy"/>
+                <field column="recordNumber" name="recordNumber"/>
+                <field column="eventDate" name="eventDate"/>
+                <field column="displayDate" name="displayDate"/>
+                <field column="year" name="coll_year"/>
+                <field column="month" name="coll_month"/>
+                <field column="day" name="coll_day"/>
+                <field column="startDayOfYear" name="startDayOfYear"/>
+                <field column="endDayOfYear" name="endDayOfYear"/>
+                <field column="habitat" name="habitat"/>
+                <field column="associatedTaxa" name="associatedTaxa"/>
+                <field column="cultivationStatus" name="cultivationStatus"/>
+                <field column="country" name="country"/>
+                <field column="StateProvince" name="StateProvince"/>
+                <field column="county" name="county"/>
+                <field column="municipality" name="municipality"/>
+                <field column="locality" name="locality"/>
+                <field column="localitySecurity" name="localitySecurity"/>
+                <field column="localitySecurityReason" name="localitySecurityReason"/>
+                <field column="decimalLatitude" name="decimalLatitude"/>
+                <field column="decimalLongitude" name="decimalLongitude"/>
+                <field column="pointLocation" name="geo"/>
+                <field column="minimumElevationInMeters" name="minimumElevationInMeters"/>
+                <field column="maximumElevationInMeters" name="maximumElevationInMeters"/>
+                <field column="observeruid" name="observeruid"/>
+                <field column="processingstatus" name="processingstatus"/>
+                <field column="recordEnteredBy" name="recordEnteredBy"/>
+                <field column="labelProject" name="labelProject"/>
+                <field column="dateEntered" name="dateEntered"/>
+                <field column="dateLastModified" name="dateLastModified"/>
+                <field column="InstitutionCode" name="InstitutionCode"/>
+                <field column="CollectionCode" name="CollectionCode"/>
+                <field column="CollectionName" name="CollectionName"/>
+                <field column="icon" name="collicon"/>
+                <field column="CollType" name="CollType"/>
+                <field column="SortSeq" name="SortSeq"/>
+                <entity name="images_inner"
+                  query="SELECT imgid, url, thumbnailurl, originalurl, photographeruid, caption, DATE_FORMAT(InitialTimeStamp,'%Y-%m-%dT%TZ') AS InitialTimeStamp FROM images WHERE occid ='${omoccurrences.occid}'">
+                  <field column="imgid" name="imgid"/>
+                  <field column="url" name="url"/>
+                  <field column="thumbnailurl" name="thumbnailurl"/>
+                  <field column="originalurl" name="originalurl"/>
+                  <field column="photographeruid" name="photographeruid"/>
+                  <field column="caption" name="caption"/>
+                  <field column="InitialTimeStamp" name="img_created"/>
+                </entity>
+                <entity name="clid_inner"
+                  query="SELECT CLID FROM fmvouchers WHERE occid ='${omoccurrences.occid}'">
+                  <field column="CLID" name="CLID"/>
+                </entity>
+                <entity name="edit_inner"
+                  query="SELECT DISTINCT CASE WHEN (e.FieldName = 'decimallatitude' OR e.FieldName = 'decimallongitude') THEN DATE_FORMAT(e.initialtimestamp,'%Y-%m-%dT%TZ') ELSE NULL END AS georefDate
+                      FROM omoccuredits AS e WHERE e.occid ='${omoccurrences.occid}'">
+                  <field column="georefDate" name="georefDate"/>
+                </entity>
+                <entity name="taxa_inner"
+                  query="SELECT t.RankId, t.UnitName1, t.SciName, ts.family, ts.tidaccepted FROM taxa AS t LEFT JOIN taxstatus AS ts ON t.TID = ts.tid WHERE t.TID ='${omoccurrences.tidinterpreted}'">
+                  <field column="RankId" name="RankId"/>
+                  <field column="UnitName1" name="UnitName1"/>
+                  <field column="SciName" name="accSciName"/>
+                  <field column="family" name="accFamily"/>
+                  <field column="tidaccepted" name="tidaccepted"/>
+                </entity>
+                <entity name="parenttaxa_inner"
+                  query="SELECT te.parenttid FROM taxaenumtree AS te WHERE te.tid ='${omoccurrences.tidinterpreted}'">
+                  <field column="parenttid" name="parenttid"/>
+                </entity>
+                <entity name="syntaxa_inner"
+                  query="SELECT ts.tid FROM taxstatus AS ts WHERE ts.tidaccepted ='${omoccurrences.tidinterpreted}' AND ts.taxauthid = 1">
+                  <field column="tid" name="syntid"/>
+                </entity>
+                <entity name="vernacular_inner"
+                  query="SELECT VernacularName FROM taxavernaculars WHERE tid ='${omoccurrences.tidinterpreted}'">
+                  <field column="VernacularName" name="vernaculars"/>
+                </entity>
+        </entity>
+    </document>
+</dataConfig>

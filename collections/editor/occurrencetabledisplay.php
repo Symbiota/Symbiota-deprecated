@@ -1,7 +1,8 @@
 <?php
 include_once('../../config/symbini.php'); 
-include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
-header("Content-Type: text/html; charset=".$CHARSET);
+include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:1000;
@@ -14,6 +15,7 @@ $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'
 $occManager = new OccurrenceEditorManager();
 
 if($crowdSourceMode) $occManager->setCrowdSourceMode(1);
+if($SOLR_MODE) $solrManager = new SOLRManager();
 
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
 $displayQuery = 0;
@@ -45,7 +47,7 @@ $statusStr = '';
 
 if($SYMB_UID){
 	//Set variables
-	$occManager->setSymbUid($SYMB_UID); 
+	$occManager->setSymbUid($SYMB_UID);
 	$occManager->setCollId($collId);
 	$collMap = $occManager->getCollMap();
 	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
@@ -82,6 +84,7 @@ if($SYMB_UID){
 		}
 		$occManager->setSqlWhere();
 		$statusStr = $occManager->batchUpdateField($_POST['bufieldname'],$_POST['buoldvalue'],$_POST['bunewvalue'],$_POST['bumatch']);
+        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 
 	if($ouid){

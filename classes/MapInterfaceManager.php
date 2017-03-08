@@ -546,7 +546,6 @@ class MapInterfaceManager{
 		//Search will be confinded to a collid, catid, or will remain open to all collection
 		//Limit collids and/or catids
 		$dbStr = '';
-		$this->searchTermsArr["db"] = '';
 		if(array_key_exists("db",$_REQUEST)){
 			$dbs = $_REQUEST["db"];
 			if(is_string($dbs)){
@@ -581,8 +580,6 @@ class MapInterfaceManager{
 		if($dbStr){
 			$this->searchTermsArr["db"] = $dbStr;
 		}
-		$this->searchTermsArr["taxa"] = '';
-		$this->searchTermsArr["type"] = '';
 		if(array_key_exists("taxa",$_REQUEST)){
 			$taxa = $this->conn->real_escape_string($_REQUEST["taxa"]);
 			$searchType = array_key_exists("type",$_REQUEST)?$this->conn->real_escape_string($_REQUEST["type"]):1;
@@ -624,32 +621,34 @@ class MapInterfaceManager{
 					$this->searchTermsArr["taxontype"] = $searchType;
 				}
 			}
+            else{
+                unset($this->searchTermsArr["taxa"]);
+            }
 		}
-		$this->searchTermsArr["checklistname"] = '';
 		if(array_key_exists("checklistname",$_REQUEST)){
 			$this->searchTermsArr["checklistname"] = $this->conn->real_escape_string($_REQUEST["checklistname"]);
 		}
-		$this->searchTermsArr["clid"] = '';
 		if(array_key_exists("clid",$_REQUEST)){
-			$this->searchTermsArr["clid"] = $this->conn->real_escape_string($_REQUEST["clid"]);
+            $clid = $this->conn->real_escape_string($_REQUEST["clid"]);
+            if($clid){
+                $this->searchTermsArr["clid"] = $this->conn->real_escape_string($_REQUEST["clid"]);
+            }
+            else{
+                unset($this->searchTermsArr["clid"]);
+            }
 		}
-		$this->searchTermsArr["gridSizeSetting"] = '';
 		if(array_key_exists("gridSizeSetting",$_REQUEST)){
 			$this->searchTermsArr["gridSizeSetting"] = $this->conn->real_escape_string($_REQUEST["gridSizeSetting"]);
 		}
-		$this->searchTermsArr["minClusterSetting"] = '';
 		if(array_key_exists("minClusterSetting",$_REQUEST)){
 			$this->searchTermsArr["minClusterSetting"] = $this->conn->real_escape_string($_REQUEST["minClusterSetting"]);
 		}
-		$this->searchTermsArr["clusterSwitch"] = '';
 		if(array_key_exists("clusterSwitch",$_REQUEST)){
 			$this->searchTermsArr["clusterSwitch"] = $this->conn->real_escape_string($_REQUEST["clusterSwitch"]);
 		}
-		$this->searchTermsArr["recordlimit"] = '';
 		if(array_key_exists("recordlimit",$_REQUEST)){
 			$this->searchTermsArr["recordlimit"] = $this->conn->real_escape_string($_REQUEST["recordlimit"]);
 		}
-		$this->searchTermsArr["country"] = '';
 		if(array_key_exists("country",$_REQUEST)){
 			$country = $this->conn->real_escape_string($_REQUEST["country"]);
 			if($country){
@@ -662,16 +661,14 @@ class MapInterfaceManager{
 				}
 				$this->searchTermsArr["country"] = $str;
 			}
-		}
-		$this->searchTermsArr["state"] = '';
+        }
 		if(array_key_exists("state",$_REQUEST)){
 			$state = $this->conn->real_escape_string($_REQUEST["state"]);
 			if($state){
 				$str = str_replace(",",";",$state);
 				$this->searchTermsArr["state"] = $str;
 			}
-		}
-		$this->searchTermsArr["county"] = '';
+        }
 		if(array_key_exists("county",$_REQUEST)){
 			$county = $this->conn->real_escape_string($_REQUEST["county"]);
 			$county = str_ireplace(" Co.","",$county);
@@ -681,7 +678,6 @@ class MapInterfaceManager{
 				$this->searchTermsArr["county"] = $str;
 			}
 		}
-		$this->searchTermsArr["local"] = '';
 		if(array_key_exists("local",$_REQUEST)){
 			$local = $this->conn->real_escape_string(trim($_REQUEST["local"]));
 			if($local){
@@ -689,7 +685,6 @@ class MapInterfaceManager{
 				$this->searchTermsArr["local"] = $str;
 			}
 		}
-		$this->searchTermsArr["collector"] = '';
 		if(array_key_exists("collector",$_REQUEST)){
 			$collector = $this->conn->real_escape_string(trim($_REQUEST["collector"]));
 			if($collector){
@@ -697,7 +692,6 @@ class MapInterfaceManager{
 				$this->searchTermsArr["collector"] = $str;
 			}
 		}
-		$this->searchTermsArr["collnum"] = '';
 		if(array_key_exists("collnum",$_REQUEST)){
 			$collNum = $this->conn->real_escape_string(trim($_REQUEST["collnum"]));
 			if($collNum){
@@ -705,8 +699,6 @@ class MapInterfaceManager{
 				$this->searchTermsArr["collnum"] = $str;
 			}
 		}
-		$this->searchTermsArr["eventdate1"] = '';
-		$this->searchTermsArr["eventdate2"] = '';
 		if(array_key_exists("eventdate1",$_REQUEST)){
 			if($eventDate = $this->conn->real_escape_string(trim($_REQUEST["eventdate1"]))){
 				$this->searchTermsArr["eventdate1"] = $eventDate;
@@ -719,7 +711,6 @@ class MapInterfaceManager{
 				}
 			}
 		}
-		$this->searchTermsArr["catnum"] = '';
 		if(array_key_exists("catnum",$_REQUEST)){
 			$catNum = $this->conn->real_escape_string(trim($_REQUEST["catnum"]));
 			if($catNum){
@@ -727,7 +718,6 @@ class MapInterfaceManager{
 				$this->searchTermsArr["catnum"] = $str;
 			}
 		}
-		$this->searchTermsArr["othercatnum"] = '';
 		if(array_key_exists("othercatnum",$_REQUEST)){
 			$otherCatNum = $this->conn->real_escape_string(trim($_REQUEST["othercatnum"]));
 			if($otherCatNum){
@@ -735,14 +725,12 @@ class MapInterfaceManager{
 				$this->searchTermsArr["othercatnum"] = $str;
 			}
 		}
-		$this->searchTermsArr["typestatus"] = '';
 		if(array_key_exists("typestatus",$_REQUEST)){
 			$typestatus = $_REQUEST["typestatus"];
 			if($typestatus){
 				$this->searchTermsArr["typestatus"] = true;
 			}
 		}
-		$this->searchTermsArr["hasimages"] = '';
 		if(array_key_exists("hasimages",$_REQUEST)){
 			$hasimages = $_REQUEST["hasimages"];
 			if($hasimages){
@@ -750,56 +738,62 @@ class MapInterfaceManager{
 			}
 		}
 		$latLongArr = Array();
-		$this->searchTermsArr["upperlat"] = '';
-		$this->searchTermsArr["bottomlat"] = '';
-		$this->searchTermsArr["leftlong"] = '';
-		$this->searchTermsArr["rightlong"] = '';
 		if(array_key_exists("upperlat",$_REQUEST)){
 			$upperLat = $this->conn->real_escape_string($_REQUEST["upperlat"]);
-			$this->searchTermsArr["upperlat"] = $_REQUEST["upperlat"];
-			if($upperLat || $upperLat === "0") $latLongArr[] = $upperLat;
-		
-			$bottomlat = $this->conn->real_escape_string($_REQUEST["bottomlat"]);
-			$this->searchTermsArr["bottomlat"] = $_REQUEST["bottomlat"];
-			if($bottomlat || $bottomlat === "0") $latLongArr[] = $bottomlat;
-		
-			$leftLong = $this->conn->real_escape_string($_REQUEST["leftlong"]);
-			$this->searchTermsArr["leftlong"] = $_REQUEST["leftlong"];
-			if($leftLong || $leftLong === "0") $latLongArr[] = $leftLong;
-		
-			$rightlong = $this->conn->real_escape_string($_REQUEST["rightlong"]);
-			$this->searchTermsArr["rightlong"] = $_REQUEST["rightlong"];
-			if($rightlong || $rightlong === "0") $latLongArr[] = $rightlong;
+			if($upperLat){
+                $this->searchTermsArr["upperlat"] = $_REQUEST["upperlat"];
+                if($upperLat || $upperLat === "0") $latLongArr[] = $upperLat;
 
-			if(count($latLongArr) == 4){
-				$this->searchTermsArr["llbound"] = implode(";",$latLongArr);
-			}
+                $bottomlat = $this->conn->real_escape_string($_REQUEST["bottomlat"]);
+                $this->searchTermsArr["bottomlat"] = $_REQUEST["bottomlat"];
+                if($bottomlat || $bottomlat === "0") $latLongArr[] = $bottomlat;
+
+                $leftLong = $this->conn->real_escape_string($_REQUEST["leftlong"]);
+                $this->searchTermsArr["leftlong"] = $_REQUEST["leftlong"];
+                if($leftLong || $leftLong === "0") $latLongArr[] = $leftLong;
+
+                $rightlong = $this->conn->real_escape_string($_REQUEST["rightlong"]);
+                $this->searchTermsArr["rightlong"] = $_REQUEST["rightlong"];
+                if($rightlong || $rightlong === "0") $latLongArr[] = $rightlong;
+
+                if(count($latLongArr) == 4){
+                    $this->searchTermsArr["llbound"] = implode(";",$latLongArr);
+                }
+            }
+            else{
+                unset($this->searchTermsArr["upperlat"]);
+                unset($this->searchTermsArr["bottomlat"]);
+                unset($this->searchTermsArr["leftlong"]);
+                unset($this->searchTermsArr["rightlong"]);
+            }
 		}
-		$this->searchTermsArr["pointlat"] = '';
-		$this->searchTermsArr["pointlong"] = '';
-		$this->searchTermsArr["radius"] = '';
 		if(array_key_exists("pointlat",$_REQUEST)){
 			$pointLat = $this->conn->real_escape_string($_REQUEST["pointlat"]);
-			$this->searchTermsArr["pointlat"] = $_REQUEST["pointlat"];
-			if($pointLat || $pointLat === "0") $latLongArr[] = $pointLat;
-			
-			$pointLong = $this->conn->real_escape_string($_REQUEST["pointlong"]);
-			$this->searchTermsArr["pointlong"] = $_REQUEST["pointlong"];
-			if($pointLong || $pointLong === "0") $latLongArr[] = $pointLong;
-		
-			$radius = $this->conn->real_escape_string($_REQUEST["radius"]);
-			$this->searchTermsArr["radius"] = $_REQUEST["radius"];
-			if($radius) $latLongArr[] = $radius;
-			if(count($latLongArr) == 3){
-				$this->searchTermsArr["llpoint"] = implode(";",$latLongArr);
-			}
+			if($pointLat){
+                $this->searchTermsArr["pointlat"] = $_REQUEST["pointlat"];
+                if($pointLat || $pointLat === "0") $latLongArr[] = $pointLat;
+
+                $pointLong = $this->conn->real_escape_string($_REQUEST["pointlong"]);
+                $this->searchTermsArr["pointlong"] = $_REQUEST["pointlong"];
+                if($pointLong || $pointLong === "0") $latLongArr[] = $pointLong;
+
+                $radius = $this->conn->real_escape_string($_REQUEST["radius"]);
+                $this->searchTermsArr["radius"] = $_REQUEST["radius"];
+                if($radius) $latLongArr[] = $radius;
+                if(count($latLongArr) == 3){
+                    $this->searchTermsArr["llpoint"] = implode(";",$latLongArr);
+                }
+            }
+            else{
+                unset($this->searchTermsArr["pointlat"]);
+                unset($this->searchTermsArr["pointlong"]);
+                unset($this->searchTermsArr["radius"]);
+            }
 		}
-		$this->searchTermsArr["poly_array"] = '';
 		if(array_key_exists("poly_array",$_REQUEST)){
 			$jsonPolyArr = $_REQUEST["poly_array"];
 			if($jsonPolyArr){
-				$this->searchTermsArr["polycoords"] = $jsonPolyArr;
-				$this->searchTermsArr["poly_array"] = $jsonPolyArr;
+				$this->searchTermsArr["polycoords"] = substr(json_encode($jsonPolyArr),1,-1);
 			}
 		}
 
@@ -857,7 +851,7 @@ class MapInterfaceManager{
 		//return $sql;
 	}
 	
-	public function getCollGeoCoords($limit=1000,$includeDescr=false,$mapWhere,$recLimit){
+	public function getCollGeoCoords($mapWhere,$pageRequest,$cntPerPage){
 		global $userRights, $mappingBoundaries;
 		$coordArr = Array();
 		$sql = '';
@@ -872,9 +866,9 @@ class MapInterfaceManager{
 				$sql .= ", o.".$v." ";
 			}
 		}
-		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
-		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
-		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
+		$sql .= "FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid ";
+        if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
+		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints AS p ON o.occid = p.occid ";
 		$sql .= $mapWhere;
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
@@ -885,54 +879,55 @@ class MapInterfaceManager{
 		else{
 			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
 		}
-		//$sql .= " LIMIT 5000";
+		if($pageRequest && $cntPerPage){
+            $sql .= "LIMIT ".$pageRequest.",".$cntPerPage;
+        }
 		$collMapper = Array();
 		$collMapper["undefined"] = "undefined";
 		$usedColors = Array();
+        $color = 'e69e67';
 		//echo json_encode($this->taxaArr);
-		foreach($this->collArr as $key => $valueArr){
-			$color = 'e69e67';
-			$coordArr[$key] = Array("color" => $color);
-			$collMapper[$key] = $key;
-		}
 		//echo "<div>SQL: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		$recCnt = 0;
 		while($row = $result->fetch_object()){
-			if($result->num_rows <= $recLimit){
-				if(($row->DecimalLongitude <= 180 && $row->DecimalLongitude >= -180) && ($row->DecimalLatitude <= 90 && $row->DecimalLatitude >= -90)){
-					$occId = $row->occid;
-					$collName = $row->CollectionName;
-					$latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
-					if(!array_key_exists($collName,$collMapper)) $collName = "undefined"; 
-					$coordArr[$collMapper[$collName]][$occId]["latLngStr"] = $latLngStr;
-					$coordArr[$collMapper[$collName]][$occId]["collid"] = $this->xmlentities($row->collid);
-					if($row->tidinterpreted){
-						$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
-					}
-					else{
-						$tidcode = strtolower(str_replace( " ", "",$row->sciname));
-						$tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
-						$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
-					}
-					$coordArr[$collMapper[$collName]][$occId]["identifier"] = $this->xmlentities($row->identifier);
-					$coordArr[$collMapper[$collName]][$occId]["institutioncode"] = $this->xmlentities($row->institutioncode);
-					$coordArr[$collMapper[$collName]][$occId]["collectioncode"] = $this->xmlentities($row->collectioncode);
-					$coordArr[$collMapper[$collName]][$occId]["catalognumber"] = $this->xmlentities($row->catalognumber);
-					$coordArr[$collMapper[$collName]][$occId]["othercatalognumbers"] = $this->xmlentities($row->othercatalognumbers);
-					if($includeDescr){
-						$coordArr[$collMapper[$collName]][$occId]["descr"] = $this->xmlentities($row->descr);
-					}
-					if($this->fieldArr){
-						foreach($this->fieldArr as $k => $v){
-							$coordArr[$collMapper[$collName]][$occId][$v] = $this->xmlentities($row->$v);
-						}
-					}
-				}
-			}
-			else{
-				$recCnt = $result->num_rows;
-			}
+			if(($row->DecimalLongitude <= 180 && $row->DecimalLongitude >= -180) && ($row->DecimalLatitude <= 90 && $row->DecimalLatitude >= -90)){
+                $occId = $row->occid;
+                $collName = $row->CollectionName;
+                $family = $row->family;
+                $latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
+                $coordArr[$collName][$occId]["latLngStr"] = $latLngStr;
+                $coordArr[$collName][$occId]["collid"] = $this->xmlentities($row->collid);
+                if($row->tidinterpreted){
+                    $coordArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
+                }
+                else{
+                    $tidcode = strtolower(str_replace( " ", "",$row->sciname));
+                    $tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
+                    $coordArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
+                }
+                if($family){
+                    $coordArr[$collName][$occId]["family"] = strtoupper($family);
+                }
+                else{
+                    $coordArr[$collName][$occId]["family"] = 'undefined';
+                }
+                $coordArr[$collName][$occId]["sciname"] = $row->sciname;
+                $coordArr[$collName][$occId]["identifier"] = $this->xmlentities($row->identifier);
+                $coordArr[$collName][$occId]["institutioncode"] = $this->xmlentities($row->institutioncode);
+                $coordArr[$collName][$occId]["collectioncode"] = $this->xmlentities($row->collectioncode);
+                $coordArr[$collName][$occId]["catalognumber"] = $this->xmlentities($row->catalognumber);
+                $coordArr[$collName][$occId]["othercatalognumbers"] = $this->xmlentities($row->othercatalognumbers);
+                $coordArr[$collName]["color"] = $color;
+                if($includeDescr){
+                    $coordArr[$collName][$occId]["descr"] = $this->xmlentities($row->descr);
+                }
+                if($this->fieldArr){
+                    foreach($this->fieldArr as $k => $v){
+                        $coordArr[$collName][$occId][$v] = $this->xmlentities($row->$v);
+                    }
+                }
+            }
 		}
 		if(array_key_exists("undefined",$coordArr)){
 			$coordArr["undefined"]["color"] = $color;
@@ -1259,7 +1254,7 @@ class MapInterfaceManager{
 		$this->collArrIndex++;
 	}
 	
-	private function setRecordCnt($sqlWhere){
+	public function setRecordCnt($sqlWhere){
 		global $userRights, $clientRoot;
 		if($sqlWhere){
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
@@ -1481,6 +1476,10 @@ class MapInterfaceManager{
 	public function getChecklistTaxaCnt(){
 		return $this->checklistTaxaCnt;
 	}
+
+    public function getCollArr(){
+        return $this->collArr;
+    }
 
 	private function getSynonyms($searchTarget,$taxAuthId = 1){
 		$synArr = array();

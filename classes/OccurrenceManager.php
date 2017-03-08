@@ -501,7 +501,7 @@ class OccurrenceManager{
 		return $retStr;
 	}
 
-	private function formatDate($inDate){
+    protected function formatDate($inDate){
 		$retDate = OccurrenceUtilities::formatDate($inDate);
 		return $retDate;
 	}

@@ -1,7 +1,8 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/MapInterfaceManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
@@ -17,11 +18,20 @@ if($selArrJson){
 	$selections = json_decode($selArrJson, true);
 }
 
-$mapManager = new MapInterfaceManager();
-$mapManager->setSearchTermsArr($stArr);
-$mapWhere = $mapManager->getSqlWhere();
-$occArr = $mapManager->getMapSpecimenArr($pageNumber,$cntPerPage,$mapWhere);
-$recordCnt = $mapManager->getRecordCnt();
+if($SOLR_MODE){
+    $mapManager = new SOLRManager();
+    $mapManager->setSearchTermsArr($stArr);
+    $solrArr = $mapManager->getGeoArr($pageNumber,$cntPerPage);
+    $occArr = $mapManager->translateSOLRMapRecList($solrArr);
+    $recordCnt = $mapManager->getRecordCnt();
+}
+else{
+    $mapManager = new MapInterfaceManager();
+    $mapManager->setSearchTermsArr($stArr);
+    $mapWhere = $mapManager->getSqlWhere();
+    $occArr = $mapManager->getMapSpecimenArr($pageNumber,$cntPerPage,$mapWhere);
+    $recordCnt = $mapManager->getRecordCnt();
+}
 
 $pageOccids = array_keys($occArr);
 if($selections){

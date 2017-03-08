@@ -33,8 +33,10 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 		</script>
         <script type="text/javascript">
+            $('html').hide();
             $(document).ready(function() {
                 $("#tabs").tabs();
+                $('html').show();
             });
         </script>
 	</head>
@@ -60,7 +62,8 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<div id="tabs" style="margin:0px;">
+        <div id="hiddendiv" style="display:none;">12345678</div>
+        <div id="tabs" style="margin:0px;">
 			<ul>
 				<?php 
 				if($specArr && $obsArr) echo '<li><a href="#specobsdiv">'.$LANG['TAB_1'].'</a></li>';
