@@ -19,7 +19,7 @@ Steps for configuring Apache SOLR:
     and copy this file into [SOLR BASE DIRECTORY]/server/solr-webapp/webapp/WEB-INF/lib.
 
 6) Start your SOLR installation and run the following command to create a new SOLR core for your Symbiota installation
-    replacing CORE_NAME with the name you wish to refer to this core:
+    replacing CORE_NAME with the name you wish to use for this core:
     bin/solr create -c CORE_NAME
 
 7) Stop your SOLR installation.
@@ -65,7 +65,7 @@ Steps for configuring Apache SOLR:
 
     -Save your edits.
 
-11) Stop your SOLR installation. Go to the SOLR admin panel at http://localhost:8983/solr/ and select your new Symbiota
+11) Start your SOLR installation. Go to the SOLR admin panel at http://localhost:8983/solr/ and select your new Symbiota
     core in the Core Selector drop down. Click on DataImport and then click the Execute button to initiate a full import.
     Note that this step may take a significant amount of time to complete depending on the size of your Symbiota database.
     You can click on the Refresh Status button to refresh the status information of your import. This step can also be
