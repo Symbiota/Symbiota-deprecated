@@ -4,8 +4,7 @@ if you are using an older version of SOLR.
 
 Steps for configuring Apache SOLR:
 
-1) Download Apache SOLR from http://lucene.apache.org/solr/ and install on your server. Once installed and
-    started, the SOLR admin panel can be accessed at http://localhost:8983/solr/. Do not start SOLR until step 6.
+1) Download Apache SOLR from http://lucene.apache.org/solr/ and install on your server. Do not start SOLR at this time.
 
 2) Create a directory named lib in [SOLR BASE DIRECTORY]/contrib/dataimporthandler of your SOLR installation.
 
@@ -69,7 +68,7 @@ Steps for configuring Apache SOLR:
     core in the Core Selector drop down. Click on DataImport and then click the Execute button to initiate a full import.
     Note that this step may take a significant amount of time to complete depending on the size of your Symbiota database.
     You can click on the Refresh Status button to refresh the status information of your import. This step can also be
-    through the command line.
+    accomplished through the command line.
 
 12) Once the full import is complete, edit the [SYMBIOTA BASE DIRECTORY]/config/symbini.php file of your Symbiota installation:
 
