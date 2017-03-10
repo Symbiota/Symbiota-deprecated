@@ -97,12 +97,15 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				$coordRankingArr = $cleanManager->getRankingStats('coordinate');
 				$rankArr = current($coordRankingArr);
 				echo '<table class="styledtable">';
-				echo '<tr><th>Ranking</th><th>Count</th></tr>';
-				foreach($rankArr as $rank => $cnt){
-					echo '<tr>';
-					echo '<td>'.$rank.'</td>';
-					echo '<td>'.$cnt.'</td>';
-					echo '</tr>';
+				echo '<tr><th>Ranking</th><th>Protocol</th><th>Count</th></tr>';
+				foreach($rankArr as $rank => $protocolArr){
+					foreach($protocolArr as $protocolStr => $cnt){
+						echo '<tr>';
+						echo '<td>'.$rank.'</td>';
+						echo '<td>'.$protocolStr.'</td>';
+						echo '<td>'.$cnt.'</td>';
+						echo '</tr>';
+					}
 				}
 				echo '</table>';
 				?>

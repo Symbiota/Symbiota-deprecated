@@ -113,7 +113,6 @@ if($collMap['colltype'] == 'General Observations'){
 			<div style="margin:0px 0px 40px 15px;">
 				<div>
 					These tools are to aid collection managers in verifying, ranking, and managing coordinate information associated with occurrence records. 
-					Certain tools will assist in locating coordinates that might be in error and provide links to tools available to resolve errors.	 
 				</div>
 				<div style="margin:15px 0px;color:orange">
 					-- IN DEVELOPMENT - more to come soon --
@@ -148,8 +147,7 @@ if($collMap['colltype'] == 'General Observations'){
 							</a>
 						</li>
 						<li>
-							<!-- <a href="coordinatevalidator.php?collid=<?php echo $collid; ?>">Check coordinates against political boundaries</a>  -->
-							Check coordinates against political boundaries... WILL BE ACTIVATED SOON
+							<a href="coordinatevalidator.php?collid=<?php echo $collid; ?>">Check coordinates against political boundaries</a> 
 						</li>
 					</ul>
 				</fieldset>
@@ -159,12 +157,15 @@ if($collMap['colltype'] == 'General Observations'){
 					$coordRankingArr = $cleanManager->getRankingStats('coordinate');
 					$rankArr = current($coordRankingArr);
 					echo '<table class="styledtable">';
-					echo '<tr><th>Ranking</th><th>Count</th></tr>';
-					foreach($rankArr as $rank => $cnt){
-						echo '<tr>';
-						echo '<td>'.$rank.'</td>';
-						echo '<td>'.$cnt.'</td>';
-						echo '</tr>';
+					echo '<tr><th>Ranking</th><th>Protocol</th><th>Count</th></tr>';
+					foreach($rankArr as $rank => $protocolArr){
+						foreach($protocolArr as $protocol => $cnt){
+							echo '<tr>';
+							echo '<td>'.$rank.'</td>';
+							echo '<td>'.$protocol.'</td>';
+							echo '<td>'.$cnt.'</td>';
+							echo '</tr>';
+						}
 					}
 					echo '</table>';
 					?>
@@ -208,14 +209,17 @@ if($collMap['colltype'] == 'General Observations'){
 					<div style="font-weight:bold">Ranking Statistics</div>
 					<?php 
 					$idRankingArr = $cleanManager->getRankingStats('identification');
-					$rankArr = current($coordRankingArr);
+					$rankArr = current($idRankingArr);
 					echo '<table class="styledtable">';
-					echo '<tr><th>Ranking</th><th>Count</th></tr>';
-					foreach($rankArr as $rank => $cnt){
-						echo '<tr>';
-						echo '<td>'.$rank.'</td>';
-						echo '<td>'.$cnt.'</td>';
-						echo '</tr>';
+					echo '<tr><th>Ranking</th><th>Protocol</th><th>Count</th></tr>';
+					foreach($rankArr as $rank => $protocolArr){
+						foreach($protocolArr as $protocol => $cnt){
+							echo '<tr>';
+							echo '<td>'.$rank.'</td>';
+							echo '<td>'.$protocol.'</td>';
+							echo '<td>'.$cnt.'</td>';
+							echo '</tr>';
+						}
 					}
 					echo '</table>';
 					?>

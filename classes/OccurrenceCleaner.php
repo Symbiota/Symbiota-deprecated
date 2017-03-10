@@ -788,7 +788,7 @@ class OccurrenceCleaner extends Manager{
 			'FROM omoccurrences '.
 			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND (country = "'.$queryCountry.'") '.
 			'AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "coordinate")) '.
-			'LIMIT 5';
+			'LIMIT 500';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			echo '<li>Checking occurrence <a href="../editor/occurrenceeditor.php?occid='.$r->occid.'" target="_blank">'.$r->occid.'</a>...</li>';
@@ -801,12 +801,14 @@ class OccurrenceCleaner extends Manager{
 				if($this->unitsEqual($googleUnits['state'], $r->stateprovince)){
 					$ranking = 5;
 					$protocolStr = 'GoogleApiMatch:stateEqual';
-					if($this->countyUnitsEqual($googleUnits['county'], $r->county)){
-						$ranking = 7;
-						$protocolStr = 'GoogleApiMatch:countyEqual';
-					}
-					else{
-						echo '<li style="margin-left:15px;">County not equal (source: '.$r->county.'; Google value: '.$googleUnits['county'].')</li>';
+					if(isset($googleUnits['county'])){
+						if($this->countyUnitsEqual($googleUnits['county'], $r->county)){
+							$ranking = 7;
+							$protocolStr = 'GoogleApiMatch:countyEqual';
+						}
+						else{
+							echo '<li style="margin-left:15px;">County not equal (source: '.$r->county.'; Google value: '.$googleUnits['county'].')</li>';
+						}
 					}
 				}
 				else{
@@ -936,13 +938,13 @@ class OccurrenceCleaner extends Manager{
 	public function getRankingStats($category){
 		$retArr = array();
 		$category = $this->cleanInStr($category);
-		$sql = 'SELECT category, ranking, count(*) as cnt '.
+		$sql = 'SELECT category, ranking, protocol, count(*) as cnt '.
 			'FROM omoccurverification '.
 			'WHERE category = "'.$category.'" '.
-			'GROUP BY category, ranking';
+			'GROUP BY category, ranking,protocol';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->category][$r->ranking] = $r->cnt;
+			$retArr[$r->category][$r->ranking][$r->protocol] = $r->cnt;
 		}
 		$rs->free();
 		if($category){
@@ -952,7 +954,7 @@ class OccurrenceCleaner extends Manager{
 				'WHERE (collid = '.$this->collid.') AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "'.$category.'"))';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
-				$retArr[$category]['none'] = $r->cnt;
+				$retArr[$category]['unranked'][''] = $r->cnt;
 			}
 			$rs->free();
 		}
