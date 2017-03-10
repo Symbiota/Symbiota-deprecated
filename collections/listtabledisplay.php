@@ -140,7 +140,7 @@ if(isset($_REQUEST['db'])){
             }).done(function(msg) {
                 if(msg){
                     //var newRecordList = JSON.parse(msg);
-                    document.getElementById("tablediv").innerHTML = newRecordList;
+                    //document.getElementById("tablediv").innerHTML = newRecordList;
                     document.getElementById("tablediv").innerHTML = msg;
                 }
                 else{
