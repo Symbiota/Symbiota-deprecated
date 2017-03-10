@@ -10,7 +10,6 @@ $sortField2 = array_key_exists('sortfield2',$_REQUEST)?$_REQUEST['sortfield2']:'
 $sortOrder = array_key_exists('sortorder',$_REQUEST)?$_REQUEST['sortorder']:'';
 
 //Sanitation
-if(!is_numeric($taxonFilter)) $taxonFilter = 1;
 if(!is_numeric($occIndex)) $occIndex = 0;
 
 $collManager = new OccurrenceListManager();
@@ -140,8 +139,9 @@ if(isset($_REQUEST['db'])){
                 }
             }).done(function(msg) {
                 if(msg){
-                    var newRecordList = JSON.parse(msg);
+                    //var newRecordList = JSON.parse(msg);
                     document.getElementById("tablediv").innerHTML = newRecordList;
+                    document.getElementById("tablediv").innerHTML = msg;
                 }
                 else{
                     document.getElementById("tablediv").innerHTML = "<p>An error occurred retrieving records.</p>";

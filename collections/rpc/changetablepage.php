@@ -123,7 +123,7 @@ if($recArr){
 else{
     $recordListHtml .= '<div style="font-weight:bold;font-size:120%;">No records found matching the query</div>';
 }
-
 //output the response
-echo json_encode($recordListHtml);
+echo $recordListHtml;
+//echo json_encode($recordListHtml);
 ?>
