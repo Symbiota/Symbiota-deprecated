@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $occId = $_GET['occid'];
 $occIndex = $_GET['occindex'];
@@ -221,7 +221,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 							?>
 							
 							<div style="float:left;">
-								<input type="submit" name="submitaction" value="Add New Determination" />
+								<input type="submit" name="submitaction" value="Submit Determination" />
 							</div>
 						</div>
 					</fieldset>

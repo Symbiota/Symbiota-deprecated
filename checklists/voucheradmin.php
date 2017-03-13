@@ -1,8 +1,8 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ChecklistVoucherAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 include_once($SERVER_ROOT.'/content/lang/checklists/voucheradmin.'.$LANG_TAG.'.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../profile/index.php?refurl=../checklists/voucheradmin.php?'.$_SERVER['QUERY_STRING']);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
@@ -19,7 +19,7 @@ $clManager->setClid($clid);
 
 $statusStr = "";
 $isEditor = 0;
-if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
     $isEditor = 1;
 
     if($action == "SaveSearch"){
@@ -39,8 +39,8 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
-    <title><?php echo $defaultTitle; ?> <?php echo $LANG['CHECKADMIN'];?></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
+    <title><?php echo $DEFAULT_TITLE; ?> <?php echo $LANG['CHECKADMIN'];?></title>
     <link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
@@ -59,7 +59,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 <body>
 <?php
 $displayLeftMenu = false;
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 ?>
 <div class="navpath">
     <a href="../index.php"><?php echo $LANG['NAV_HOME']?></a> &gt;&gt;
@@ -402,7 +402,7 @@ else{
 ?>
 </div>
 <?php
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html> 

@@ -133,7 +133,8 @@ if($symbUid){
 	}
 	if($isEditor){
 		//Available to full editors and taxon editors
-		if($action == "Add New Determination"){
+		if($action == "Submit Determination"){
+			//Adding a new determination
 			$statusStr = $occManager->addDetermination($_POST,$isEditor);
             if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
@@ -460,10 +461,10 @@ else{
         }
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js?ver=170310"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=170222"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170101"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170101"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170310"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=170302"></script>
 </head>
 <body>
