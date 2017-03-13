@@ -439,7 +439,7 @@ if($clValue || $dynClid){
 									<div>
 										<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" target="_blank">
 											<?php 
-											$googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=170x170&maptype=terrain';
+											$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=170x170&maptype=terrain';
 											if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
 											$googleUrl .= '&markers=size:tiny|'.implode('|',$coordArr);
 											?>

@@ -4,11 +4,10 @@ function verifyCoordinates(f){
 	var lngValue = f.decimallongitude.value;
 	var latValue = f.decimallatitude.value;
 	if(latValue && lngValue){
-		var url = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+latValue+","+lngValue+"&sensor=false";
 		
 		$.ajax({
 			type: "GET",
-			url: "http://maps.googleapis.com/maps/api/geocode/json?sensor=false",
+			url: "//maps.googleapis.com/maps/api/geocode/json?sensor=false",
 			dataType: "json",
 			data: { latlng: latValue+","+lngValue }
 		}).done(function( data ) {

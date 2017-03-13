@@ -831,7 +831,7 @@ class OccurrenceCleaner extends Manager{
 	
 	private function callGoogleApi($lat, $lng){
 		$retArr = array();
-		$apiUrl = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false';
+		$apiUrl = '//maps.googleapis.com/maps/api/geocode/json?sensor=false';
 		$apiUrl .= '&latlng='.$lat.','.$lng;
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
