@@ -25,7 +25,7 @@ $(function() {
 			<?php
 			reset($imgArr);
 			$imgUrl = current($imgArr); 
-			if(strpos($imgUrl['web'],'iplantcollaborative')){
+			if(strpos($imgUrl['web'],'bisque.cyverse')){
 				echo '<div style="float:right;padding:0px 3px;margin:2px 20px 0px 0px;">Rotate: <a href="#" onclick="rotateiPlantImage(-90)">&nbsp;L&nbsp;</a> &lt;&gt; <a href="#" onclick="rotateiPlantImage(90)">&nbsp;R&nbsp;</a></div>';
 			}
 			?>
