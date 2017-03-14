@@ -233,7 +233,7 @@ class ChecklistManager {
 						//Collector string is too big, thus reduce
 						$strPos = strpos($collector,';');
 						if(!$strPos) $strPos = strpos($collector,',');
-						if(!$strPos) $strPos = strpos($collector,' ');
+						if(!$strPos) $strPos = strpos($collector,' ',10);
 						if($strPos) $collector = substr($collector,0,$strPos).'...';
 					}
 					if($row->recordnumber) $collector .= ' '.$row->recordnumber;
