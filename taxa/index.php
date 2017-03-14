@@ -179,7 +179,21 @@ if($taxonManager->getSciName() != "unknown"){
 				<?php 
 				//Middle Right Section (Description section)
 				if($descArr = $taxonManager->getDescriptions()){
-					?>
+                    if(isset($PORTAL_TAXA_DESC)){
+                        $tempArr = array();
+                        $descIndex = 0;
+                        foreach($descArr as $dArr){
+                            foreach($dArr as $id => $vArr){
+                                if($vArr["caption"] == $PORTAL_TAXA_DESC){
+                                    $tempArr = $descArr[$descIndex][$id];
+                                    unset($descArr[$descIndex][$id]);
+                                }
+                            }
+                            array_unshift($descArr[$descIndex],$tempArr);
+                            $descIndex++;
+                        }
+                    }
+				    ?>
 					<div id="desctabs">
 						<ul>
 							<?php 
