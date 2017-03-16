@@ -253,6 +253,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
         var mouseoutTimeout = '';
         var zoomToPoint = <?php echo ($queryShape?'false':'true'); ?>;
         var pointBounds = new google.maps.LatLngBounds();
+        var occArr = [];
 
         function showWorking(){
             $('#loadingOverlay').popup('show');
@@ -688,71 +689,87 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                 }
                 fndGrps.push(fndGrpCnt);
                 delete pArr[key]['color'];
-
-                for(var occ in pArr[key]){
-                    var family = '';
-                    var tidinterpreted = pArr[key][occ]['tidinterpreted'];
-                    var sciname = pArr[key][occ]['sciname'];
-                    var scinameStr = pArr[key][occ]['namestring'];
-                    var tempArr = [];
-                    var tempArr = [];
-                    if(tidArr[scinameStr]){
-                        if(tidArr[scinameStr].indexOf(grpCnt) > -1){
-                            tempArr = tidArr[scinameStr];
+                for(var occ in pArr[key]) {
+                    if(occArr.indexOf(occ) < 0){
+                        var family = '';
+                        var tidinterpreted = pArr[key][occ]['tidinterpreted'];
+                        var sciname = pArr[key][occ]['sciname'];
+                        var scinameStr = pArr[key][occ]['namestring'];
+                        var tempArr = [];
+                        var tempArr = [];
+                        if (tidArr[scinameStr]) {
+                            if (tidArr[scinameStr].indexOf(grpCnt) > -1) {
+                                tempArr = tidArr[scinameStr];
+                            }
                         }
-                    }
-                    tempArr.push(grpCnt);
-                    tidArr[scinameStr] = tempArr;
-                    if(pArr[key][occ]['sciname']){
-                        sciname = pArr[key][occ]['sciname'];
-                    }
-                    if(sciname){
-                        var tempFamArr = [];
-                        var tempScinameArr = [];
-                        family = pArr[key][occ]['family'];
-                        if((familyNameArr.indexOf(family) < 0) && (family != 'undefined')){
-                            familyNameArr.push(family);
+                        tempArr.push(grpCnt);
+                        tidArr[scinameStr] = tempArr;
+                        if (pArr[key][occ]['sciname']) {
+                            sciname = pArr[key][occ]['sciname'];
                         }
-                        if(taxaArr[family]){
-                            tempFamArr = taxaArr[family];
-                            tempScinameArr = taxaArr[family]['sciname_arr'];
+                        if (sciname) {
+                            var tempFamArr = [];
+                            var tempScinameArr = [];
+                            family = pArr[key][occ]['family'];
+                            if ((familyNameArr.indexOf(family) < 0) && (family != 'undefined')) {
+                                familyNameArr.push(family);
+                            }
+                            if (taxaArr[family]) {
+                                tempFamArr = taxaArr[family];
+                                tempScinameArr = taxaArr[family]['sciname_arr'];
+                            }
+                            if (keyTidArr.indexOf(scinameStr) < 0) {
+                                tempScinameArr.push(sciname);
+                                keyTidArr.push(scinameStr);
+                                taxaCnt++;
+                            }
+                            tempFamArr[sciname] = scinameStr;
+                            taxaArr[family] = tempFamArr;
+                            taxaArr[family]['sciname_arr'] = tempScinameArr;
+                            buildTaxaKeyPiece(scinameStr, tidinterpreted, sciname);
+                            var llArr = pArr[key][occ]['latLngStr'].split(',');
+                            var spStr = '';
+                            var titleStr = pArr[key][occ]['latLngStr'];
+                            var type = '';
+                            var displayStr = pArr[key][occ]['identifier'];
+                            var iconColorStr = '#' + iconColor;
+                            if (genObs.indexOf(pArr[key][occ]['collid']) > -1) {
+                                type = 'obs';
+                                var markerIcon = {
+                                    path: "m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",
+                                    fillColor: iconColorStr,
+                                    fillOpacity: 1,
+                                    scale: 1,
+                                    strokeColor: "#000000",
+                                    strokeWeight: 1
+                                };
+                            }
+                            else {
+                                type = 'spec';
+                                var markerIcon = {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    fillColor: iconColorStr,
+                                    fillOpacity: 1,
+                                    scale: 7,
+                                    strokeColor: "#000000",
+                                    strokeWeight: 1
+                                };
+                            }
+                            markerArr[occ] = getMarker(llArr[0], llArr[1], displayStr, iconColor, markerIcon, type, scinameStr, occ, 0);
+                            addMarkerListners(markerArr[occ]);
+                            oms.addMarker(markerArr[occ]);
+                            var markerPos = markerArr[occ].getPosition();
+                            pointBounds.extend(markerPos);
+                            if (grpArr[fndGrpCnt]) {
+                                var tempArr = grpArr[fndGrpCnt];
+                            }
+                            else {
+                                var tempArr = [];
+                            }
+                            tempArr.push(markerArr[occ]);
+                            grpArr[fndGrpCnt] = tempArr;
                         }
-                        if(keyTidArr.indexOf(scinameStr) < 0){
-                            tempScinameArr.push(sciname);
-                            keyTidArr.push(scinameStr);
-                            taxaCnt++;
-                        }
-                        tempFamArr[sciname] = scinameStr;
-                        taxaArr[family] = tempFamArr;
-                        taxaArr[family]['sciname_arr'] = tempScinameArr;
-                        buildTaxaKeyPiece(scinameStr,tidinterpreted,sciname);
-                        var llArr = pArr[key][occ]['latLngStr'].split(',');
-                        var spStr = '';
-                        var titleStr = pArr[key][occ]['latLngStr'];
-                        var type = '';
-                        var displayStr = pArr[key][occ]['identifier'];
-                        var iconColorStr = '#'+iconColor;
-                        if(genObs.indexOf(pArr[key][occ]['collid']) > -1){
-                            type = 'obs';
-                            var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:iconColorStr,fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
-                        }
-                        else{
-                            type = 'spec';
-                            var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:iconColorStr,fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
-                        }
-                        markerArr[occ] = getMarker(llArr[0],llArr[1],displayStr,iconColor,markerIcon,type,scinameStr,occ,0);
-                        addMarkerListners(markerArr[occ]);
-                        oms.addMarker(markerArr[occ]);
-                        var markerPos = markerArr[occ].getPosition();
-                        pointBounds.extend(markerPos);
-                        if(grpArr[fndGrpCnt]){
-                            var tempArr = grpArr[fndGrpCnt];
-                        }
-                        else{
-                            var tempArr = [];
-                        }
-                        tempArr.push(markerArr[occ]);
-                        grpArr[fndGrpCnt] = tempArr;
+                        occArr.push(occ);
                     }
                 }
 
@@ -1765,7 +1782,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
 </div>
 <div id='map' style='width:100%;height:100%;'></div>
 <div id="loadingOverlay" data-role="popup" style="width:100%;position:relative;">
-    <div style="width:100px;height:100px;position:absolute;top:50%;left:50%;margin-top:-50px;margin-left:-50px;">
+    <div id="loadingImage" style="width:100px;height:100px;position:absolute;top:50%;left:50%;margin-top:-50px;margin-left:-50px;">
         <img style="border:0px;width:100px;height:100px;" src="../../images/ajax-loader.gif" />
     </div>
 </div>
