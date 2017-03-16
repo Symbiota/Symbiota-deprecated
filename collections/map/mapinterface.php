@@ -1273,7 +1273,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                     callLazyLoader();
                 }
                 else if(confirm("Your search produced "+result+" results. Loading this many points can cause significant delays in loading the map. Are you sure you would like to continue?")){
-                    document.getElementById("recordlimit").value = result;
+                    //document.getElementById("recordlimit").value = result;
                     //refreshClustering();
                     callLazyLoader();
                 }
