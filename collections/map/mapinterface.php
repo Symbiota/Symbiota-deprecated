@@ -252,6 +252,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
         var mouseoverTimeout = '';
         var mouseoutTimeout = '';
         var zoomToPoint = <?php echo ($queryShape?'false':'true'); ?>;
+        var pointBounds = new google.maps.LatLngBounds();
 
         function showWorking(){
             $('#loadingOverlay').popup('show');
@@ -638,6 +639,10 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
             buildCollKey();
             buildTaxaKey();
             jscolor.init();
+            if(zoomToPoint){
+                map.fitBounds(pointBounds);
+                map.panToBounds(pointBounds);
+            }
             setTimeout(function() {
                 hideWorking();
             }, 500);
@@ -668,7 +673,6 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
         }
 
         function processPoints(pArr){
-            var pointBounds = new google.maps.LatLngBounds();
             var fndGrps = [];
             for(var key in pArr) {
                 var iconColor = pArr[key]['color'];
@@ -775,11 +779,6 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
 
                 grpCnt++;
             }
-
-            if(zoomToPoint){
-                map.fitBounds(pointBounds);
-                map.panToBounds(pointBounds);
-            }
         }
 
         function buildCollKeyPiece(key,iconColor){
@@ -826,25 +825,29 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
             familyNameArr.sort();
             for(var i=0,l=familyNameArr.length;i<l;i++){
                 tempArr = taxaArr[familyNameArr[i]]['sciname_arr'];
-                tempArr.sort();
-                keyHTML += "<div style='margin-left:5px;'><h3 style='margin-top:8px;margin-bottom:5px;'>"+familyNameArr[i]+"</h3></div>";
-                keyHTML += "<div style='display:table;'>";
-                for(var s=0,w=tempArr.length;s<w;s++){
-                    var tidCode = taxaArr[familyNameArr[i]][tempArr[s]];
-                    if(taxaKeyArr[tidCode]) keyHTML += taxaKeyArr[tidCode];
+                if(tempArr.length > 0){
+                    tempArr.sort();
+                    keyHTML += "<div style='margin-left:5px;'><h3 style='margin-top:8px;margin-bottom:5px;'>" + familyNameArr[i] + "</h3></div>";
+                    keyHTML += "<div style='display:table;'>";
+                    for(var s = 0, w = tempArr.length; s < w; s++){
+                        var tidCode = taxaArr[familyNameArr[i]][tempArr[s]];
+                        if (taxaKeyArr[tidCode]) keyHTML += taxaKeyArr[tidCode];
+                    }
+                    keyHTML += "</div>";
                 }
-                keyHTML += "</div>";
             }
             if(taxaArr['undefined']){
                 tempArr = taxaArr['undefined']['sciname_arr'];
-                tempArr.sort();
-                keyHTML += "<div style='margin-left:5px;'><h3 style='margin-top:8px;margin-bottom:5px;'>Family Not Defined</h3></div>";
-                keyHTML += "<div style='display:table;'>";
-                for(var s=0,w=tempArr.length;s<w;s++){
-                    var tidCode = taxaArr[familyNameArr[i]][tempArr[s]];
-                    keyHTML += taxaKeyArr[tidCode];
+                if(tempArr.length > 0){
+                    tempArr.sort();
+                    keyHTML += "<div style='margin-left:5px;'><h3 style='margin-top:8px;margin-bottom:5px;'>Family Not Defined</h3></div>";
+                    keyHTML += "<div style='display:table;'>";
+                    for(var s = 0, w = tempArr.length; s < w; s++){
+                        var tidCode = taxaArr[familyNameArr[i]][tempArr[s]];
+                        keyHTML += taxaKeyArr[tidCode];
+                    }
+                    keyHTML += "</div>";
                 }
-                keyHTML += "</div>";
             }
             document.getElementById("taxasymbologykeysbox").innerHTML = keyHTML;
         }
