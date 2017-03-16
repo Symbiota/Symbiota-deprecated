@@ -183,7 +183,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                 color:'white'
             });
 
-            showWorking();
+            //showWorking();
         });
     </script>
     <script type="text/javascript" src="../../js/symb/collections.mapinterface.js?ver=13"></script>
@@ -577,7 +577,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                 }
             }
             else{
-                hideWorking();
+                //hideWorking();
             }
         }
 
@@ -645,7 +645,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                 map.panToBounds(pointBounds);
             }
             setTimeout(function() {
-                hideWorking();
+                //hideWorking();
             }, 500);
         }
 
@@ -1295,13 +1295,13 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                     callLazyLoader();
                 }
                 else{
-                    hideWorking();
+                    //hideWorking();
                     return;
                 }
             }
             else{
                 alert("Your search produced "+result+" results which exceeds the maximum of 15000, please refine your search more.");
-                hideWorking();
+                //hideWorking();
             }
         }
 
