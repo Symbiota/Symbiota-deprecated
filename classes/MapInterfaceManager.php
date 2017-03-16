@@ -847,11 +847,9 @@ class MapInterfaceManager{
 			$this->collArr[$collName] = Array();
 		}
 		$result->close();
-		
-		//return $sql;
 	}
-	
-	public function getCollGeoCoords($mapWhere,$pageRequest,$cntPerPage){
+
+    public function getCollGeoCoords($mapWhere,$pageRequest,$cntPerPage){
 		global $userRights, $mappingBoundaries;
 		$coordArr = Array();
 		$sql = '';
@@ -898,17 +896,10 @@ class MapInterfaceManager{
                 $latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
                 $coordArr[$collName][$occId]["latLngStr"] = $latLngStr;
                 $coordArr[$collName][$occId]["collid"] = $this->xmlentities($row->collid);
-                /*if($row->tidinterpreted){
-                    $coordArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
-                }
-                else{
-                    $tidcode = strtolower(str_replace( " ", "",$row->sciname));
-                    $tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
-                    $coordArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
-                }*/
                 $tidcode = strtolower(str_replace( " ", "",$row->sciname));
                 $tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
-                $coordArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
+                $coordArr[$collName][$occId]["namestring"] = $this->xmlentities($tidcode);
+                $coordArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
                 if($family){
                     $coordArr[$collName][$occId]["family"] = strtoupper($family);
                 }
