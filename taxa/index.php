@@ -488,7 +488,8 @@ if($taxonManager->getSciName() != "unknown"){
 		if($projValue) $parentLink .= "&proj=".$projValue;
 		echo '<a href="'.$parentLink.'" style="margin-left:30px;">'.$LANG['VIEW_PARENT'].'</a>';
 	}
-	echo "<a href='../imagelib/search.php?nametype=1&imagedisplay=thumbnail&taxastr=".$taxonManager->getSciName()."&submitaction=Load+Images' style='margin-left:30px;'>Open Image Search Tool</a>"; 
+	//Search tool failing to open properly; will debug shortly  
+	//echo "<a href='../imagelib/search.php?nametype=1&imagedisplay=thumbnail&taxastr=".$taxonManager->getSciName()."&submitaction=Load+Images' style='margin-left:30px;'>Open Image Search Tool</a>"; 
 	echo "</div>";
 	
 	//List Web Links as a list

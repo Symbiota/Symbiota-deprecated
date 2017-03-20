@@ -60,136 +60,143 @@ class TaxonomyUpload{
 		$this->outputMsg('Starting Upload',0);
 		$this->conn->query("DELETE FROM uploadtaxa");
 		$this->conn->query("OPTIMIZE TABLE uploadtaxa");
-		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r') or die("Can't open file");
-		$headerArr = fgetcsv($fh);
-		$uploadTaxaFieldArr = $this->getUploadTaxaFieldArr();
-		$taxonUnitArr = $this->getTaxonUnitArr();
-		$uploadTaxaIndexArr = array();		//Array of index values associated with uploadtaxa table; array(index => targetName)
-		$taxonUnitIndexArr = array();		//Array of index values associated with taxonunits table;
-		foreach($headerArr as $k => $sourceName){
-			$sourceName = trim(strtolower($sourceName));
-			if(array_key_exists($sourceName,$fieldMap)){
-				$targetName = $fieldMap[$sourceName];
-				if(in_array($targetName,$uploadTaxaFieldArr)){
-					//Is a taxa table target field 
-					$uploadTaxaIndexArr[$k] = $targetName;
-				}
-				if($targetName == 'unitname1') $targetName = 'genus';
-				if(in_array($targetName,$taxonUnitArr)){
-					$taxonUnitIndexArr[$k] = array_search($targetName,$taxonUnitArr);  //array(recIndex => rankid)
+		if(($fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r')) !== FALSE){
+			$headerArr = fgetcsv($fh);
+			$uploadTaxaFieldArr = $this->getUploadTaxaFieldArr();
+			$taxonUnitArr = $this->getTaxonUnitArr();
+			$uploadTaxaIndexArr = array();		//Array of index values associated with uploadtaxa table; array(index => targetName)
+			$taxonUnitIndexArr = array();		//Array of index values associated with taxonunits table;
+			foreach($headerArr as $k => $sourceName){
+				$sourceName = trim(strtolower($sourceName));
+				if(array_key_exists($sourceName,$fieldMap)){
+					$targetName = $fieldMap[$sourceName];
+					if(in_array($targetName,$uploadTaxaFieldArr)){
+						//Is a taxa table target field 
+						$uploadTaxaIndexArr[$k] = $targetName;
+					}
+					if($targetName == 'unitname1') $targetName = 'genus';
+					if(in_array($targetName,$taxonUnitArr)){
+						$taxonUnitIndexArr[$k] = array_search($targetName,$taxonUnitArr);  //array(recIndex => rankid)
+					}
 				}
 			}
-		}
-		$parentIndex = 0; 
-		if(!in_array('parentstr',$uploadTaxaIndexArr)){
-			$parentIndex = max(array_keys($uploadTaxaIndexArr))+1;
-			$uploadTaxaIndexArr[$parentIndex] = 'parentstr';
-		}
-		$familyIndex = 0; 
-		if(in_array('family',$fieldMap)) $familyIndex = array_search(array_search('family',$fieldMap),$headerArr);
-		//scinameinput field is required
-		if(in_array("scinameinput",$fieldMap) || count($taxonUnitIndexArr) > 2){
-			$recordCnt = 1;
-			asort($taxonUnitIndexArr);
-			$childParentArr = array();		//array(taxon => array('p'=>parentStr,'r'=>rankid)
-			//$this->conn->query('SET autocommit=0');
-			//$this->conn->query('SET unique_checks=0');
-			//$this->conn->query('SET foreign_key_checks=0');
-			//$sqlBase = "INSERT INTO uploadtaxa(".implode(",",$uploadTaxaIndexArr).") ";
-			while($recordArr = fgetcsv($fh)){
-				//Load taxonunits fields into Array which will be loaded into taxon table at the end
-				$parentStr = '';
-				foreach($taxonUnitIndexArr as $index => $rankId){
-					$taxonStr = $recordArr[$index];
-					if($taxonStr){
-						if(!array_key_exists($taxonStr,$childParentArr)){
-							if($rankId == 10){
-								//For kingdom taxa, parents are themselves
-								$childParentArr[$taxonStr]['p'] = $taxonStr;
-								$childParentArr[$taxonStr]['r'] = $rankId;
-							}
-							elseif($parentStr){
-								$childParentArr[$taxonStr]['p'] = $parentStr;
-								$childParentArr[$taxonStr]['r'] = $rankId;
-								if($rankId > 140 && $familyIndex && $recordArr[$familyIndex]){
-									$childParentArr[$taxonStr]['f'] = $recordArr[$familyIndex];
+			$parentIndex = 0; 
+			if(!in_array('parentstr',$uploadTaxaIndexArr)){
+				$parentIndex = max(array_keys($uploadTaxaIndexArr))+1;
+				$uploadTaxaIndexArr[$parentIndex] = 'parentstr';
+			}
+			$familyIndex = 0; 
+			if(in_array('family',$fieldMap)) $familyIndex = array_search(array_search('family',$fieldMap),$headerArr);
+			//scinameinput field is required
+			if(in_array("scinameinput",$fieldMap) || count($taxonUnitIndexArr) > 2){
+				$recordCnt = 1;
+				asort($taxonUnitIndexArr);
+				$childParentArr = array();		//array(taxon => array('p'=>parentStr,'r'=>rankid)
+				//$this->conn->query('SET autocommit=0');
+				//$this->conn->query('SET unique_checks=0');
+				//$this->conn->query('SET foreign_key_checks=0');
+				//$sqlBase = "INSERT INTO uploadtaxa(".implode(",",$uploadTaxaIndexArr).") ";
+				while($recordArr = fgetcsv($fh)){
+					//Load taxonunits fields into Array which will be loaded into taxon table at the end
+					$parentStr = '';
+					foreach($taxonUnitIndexArr as $index => $rankId){
+						$taxonStr = $recordArr[$index];
+						if($taxonStr){
+							if(!array_key_exists($taxonStr,$childParentArr)){
+								if($rankId == 10){
+									//For kingdom taxa, parents are themselves
+									$childParentArr[$taxonStr]['p'] = $taxonStr;
+									$childParentArr[$taxonStr]['r'] = $rankId;
+								}
+								elseif($parentStr){
+									$childParentArr[$taxonStr]['p'] = $parentStr;
+									$childParentArr[$taxonStr]['r'] = $rankId;
+									if($rankId > 140 && $familyIndex && $recordArr[$familyIndex]){
+										$childParentArr[$taxonStr]['f'] = $recordArr[$familyIndex];
+									}
 								}
 							}
+							$parentStr = $taxonStr;
 						}
-						$parentStr = $taxonStr;
 					}
-				}
-				if($parentIndex){
-					$recordArr[$parentIndex] = 'PENDING:'.$parentStr;  
-				}
-				if(in_array("scinameinput",$fieldMap)){
-					//Load relavent fields into uploadtaxa table
-					$inputArr = array();
-					foreach($uploadTaxaIndexArr as $recIndex => $targetField){
-						$valIn = $this->cleanInStr($this->encodeString($recordArr[$recIndex]));
-						if($targetField == 'acceptance' && !is_numeric($valIn)){
-							$valInTest = strtolower($valIn);
-							if($valInTest == 'accepted' || $valInTest == 'valid'){
-								$valIn = 1;
+					if($parentIndex){
+						$recordArr[$parentIndex] = 'PENDING:'.$parentStr;  
+					}
+					if(in_array("scinameinput",$fieldMap)){
+						//Load relavent fields into uploadtaxa table
+						$inputArr = array();
+						foreach($uploadTaxaIndexArr as $recIndex => $targetField){
+							$valIn = $this->cleanInStr($this->encodeString($recordArr[$recIndex]));
+							if($targetField == 'acceptance' && !is_numeric($valIn)){
+								$valInTest = strtolower($valIn);
+								if($valInTest == 'accepted' || $valInTest == 'valid'){
+									$valIn = 1;
+								}
+								elseif($valInTest == 'not accepted' || $valInTest == 'synonym'){
+									$valIn = 0;
+								}
+								else{
+									$valIn = '';
+								}
 							}
-							elseif($valInTest == 'not accepted' || $valInTest == 'synonym'){
-								$valIn = 0;
+							if($valIn) $inputArr[$targetField] = $valIn;
+						}
+						if(array_key_exists('scinameinput', $inputArr)){
+							$sciArr = TaxonomyUtilities::parseScientificName($inputArr['scinameinput'],$this->conn,(isset($inputArr['rankid'])?$inputArr['rankid']:0));
+							foreach($sciArr as $sciKey => $sciValue){
+								if(!array_key_exists($sciKey, $inputArr)) $inputArr[$sciKey] = $sciValue;
+							}
+							$sql1 = ''; $sql2 = '';
+							unset($inputArr['identificationqualifier']);
+							foreach($inputArr as $k => $v){
+								$sql1 .= ','.$k;
+								$inValue = $this->cleanInStr($v);
+								$sql2 .= ','.($inValue?'"'.$inValue.'"':'NULL');
+							}
+							$sql = 'INSERT INTO uploadtaxa('.substr($sql1,1).') VALUES('.substr($sql2,1).')';
+							//echo "<div>".$sql."</div>";
+							if($this->conn->query($sql)){
+								if($recordCnt%1000 == 0){
+									$this->outputMsg('Upload count: '.$recordCnt,1);
+									ob_flush();
+									flush();
+								}
 							}
 							else{
-								$valIn = '';
+								$this->outputMsg('ERROR loading taxon: '.$this->conn->error);
 							}
 						}
-						if($valIn) $inputArr[$targetField] = $valIn;
+						unset($inputArr);
 					}
-					if(array_key_exists('scinameinput', $inputArr)){
-						$sciArr = TaxonomyUtilities::parseScientificName($inputArr['scinameinput'],$this->conn,(isset($inputArr['rankid'])?$inputArr['rankid']:0));
-						foreach($sciArr as $sciKey => $sciValue){
-							if(!array_key_exists($sciKey, $inputArr)) $inputArr[$sciKey] = $sciValue;
-						}
-						$sql1 = ''; $sql2 = '';
-						foreach($inputArr as $k => $v){
-							$sql1 .= ','.$k;
-							$inValue = $this->cleanInStr($v);
-							$sql2 .= ','.($inValue?'"'.$inValue.'"':'NULL');
-						}
-						$sql = 'INSERT INTO uploadtaxa('.substr($sql1,1).') VALUES('.substr($sql2,1).')';
-						//echo "<div>".$sql."</div>";
-						if($this->conn->query($sql)){
-							if($recordCnt%1000 == 0){
-								$this->outputMsg('Upload count: '.$recordCnt,1);
-								ob_flush();
-								flush();
-							}
-						}
-						else{
-							$this->outputMsg('ERROR loading taxon: '.$this->conn->error);
-						}
+					$recordCnt++;
+				}
+				//$this->conn->query('COMMIT');
+				//$this->conn->query('SET autocommit=1');
+				//$this->conn->query('SET unique_checks=1');
+				//$this->conn->query('SET foreign_key_checks=1');
+				
+				//Process and load taxon units data ($childParentArr)
+				foreach($childParentArr as $taxon => $tArr){
+					$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput,rankid,parentstr,family,acceptance) '.
+						'VALUES ("'.$taxon.'",'.$tArr['r'].',"'.$tArr['p'].'",'.(array_key_exists('f',$tArr)?'"'.$tArr['f'].'"':'NULL').',1)';
+					if(!$this->conn->query($sql)){
+						$this->outputMsg('ERROR loading taxonunit: '.$this->conn->error);
 					}
-					unset($inputArr);
 				}
-				$recordCnt++;
+				$this->outputMsg($recordCnt.' taxon records pre-processed');
+				$this->removeUploadFile();
 			}
-			//$this->conn->query('COMMIT');
-			//$this->conn->query('SET autocommit=1');
-			//$this->conn->query('SET unique_checks=1');
-			//$this->conn->query('SET foreign_key_checks=1');
-			
-			//Process and load taxon units data ($childParentArr)
-			foreach($childParentArr as $taxon => $tArr){
-				$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput,rankid,parentstr,family,acceptance) '.
-					'VALUES ("'.$taxon.'",'.$tArr['r'].',"'.$tArr['p'].'",'.(array_key_exists('f',$tArr)?'"'.$tArr['f'].'"':'NULL').',1)';
-				if(!$this->conn->query($sql)){
-					$this->outputMsg('ERROR loading taxonunit: '.$this->conn->error);
-				}
+			else{
+				$this->outputMsg('ERROR: Scientific name is not mapped to &quot;scinameinput&quot;');
 			}
-			$this->outputMsg($recordCnt.' taxon records pre-processed');
-			$this->removeUploadFile();
+			fclose($fh);
+			$this->setUploadCount();
 		}
 		else{
-			$this->outputMsg('ERROR: Scientific name is not mapped to &quot;scinameinput&quot;');
+			echo 'ERROR thrown opening input file: '.$this->uploadTargetPath.$this->uploadFileName.'<br/>';
+			if(!is_writable($this->uploadTargetPath)) echo '<b>Target upload path is not writable. File permissions need to be adjusted</b>';
+			exit;
 		}
-		fclose($fh);
-		$this->setUploadCount();
 	}
 
 	public function loadItisFile(){
@@ -199,69 +206,75 @@ class TaxonomyUpload{
 		$authArr = array();
 		$this->conn->query('DELETE FROM uploadtaxa');
 		$this->conn->query('OPTIMIZE TABLE uploadtaxa');
-		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r') or die("Can't open file");
-		$this->outputMsg('Taxa file uploaded and successfully opened');
-		
-		//First run through file and grab and store Authors, Synonyms, and Vernaculars
-		$delimtStr = "";
-		$this->outputMsg('Harvesting authors, synonyms, and vernaculars');
-		while($record = fgets($fh)){
-			if(!$delimtStr){
-				$delimtStr = "|";
-				if(!strpos($record,"|") && strpos($record,",")){
-					$delimtStr = ",";
+		if(($fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r')) !== FALSE){
+			$this->outputMsg('Taxa file uploaded and successfully opened');
+			
+			//First run through file and grab and store Authors, Synonyms, and Vernaculars
+			$delimtStr = "";
+			$this->outputMsg('Harvesting authors, synonyms, and vernaculars');
+			while($record = fgets($fh)){
+				if(!$delimtStr){
+					$delimtStr = "|";
+					if(!strpos($record,"|") && strpos($record,",")){
+						$delimtStr = ",";
+					}
+				}
+				if(substr($record,4) != '[TU]'){
+					$recordArr = explode($delimtStr,$record);
+					$this->cleanInArr($recordArr);
+					$this->encodeArr($recordArr);
+					if($recordArr[0] == "[SY]"){
+						$extraArr[$recordArr[2]]['s'] = $recordArr[3];
+					}
+					elseif($recordArr[0] == "[TA]"){
+						$authArr[$recordArr[1]] = $recordArr[2];
+					}
+					elseif($recordArr[0] == "[VR]"){
+						$extraArr[$recordArr[4]]['v'] = $recordArr[3];
+						$extraArr[$recordArr[4]]['l'] = $recordArr[5];
+					}
 				}
 			}
-			if(substr($record,4) != '[TU]'){
+			if($authArr){
+				$this->outputMsg('Authors mapped');
+			}
+			if($extraArr){
+				$this->outputMsg('Synonyms and Vernaculars mapped');
+			}
+	
+			//Load taxa records
+			$this->outputMsg('Harvest and loading Taxa... ');
+			$recordCnt = 0;
+			rewind($fh);
+			
+			$this->conn->query('SET autocommit=0');
+			$this->conn->query('SET unique_checks=0');
+			$this->conn->query('SET foreign_key_checks=0');
+			while($record = fgets($fh)){
 				$recordArr = explode($delimtStr,$record);
-				$this->cleanInArr($recordArr);
-				$this->encodeArr($recordArr);
-				if($recordArr[0] == "[SY]"){
-					$extraArr[$recordArr[2]]['s'] = $recordArr[3];
-				}
-				elseif($recordArr[0] == "[TA]"){
-					$authArr[$recordArr[1]] = $recordArr[2];
-				}
-				elseif($recordArr[0] == "[VR]"){
-					$extraArr[$recordArr[4]]['v'] = $recordArr[3];
-					$extraArr[$recordArr[4]]['l'] = $recordArr[5];
+				if($recordArr[0] == "[TU]"){
+					$this->cleanInArr($recordArr);
+					$this->encodeArr($recordArr);
+					$this->loadItisTaxonUnit($recordArr,$extraArr,$authArr);
+					$recordCnt++;
 				}
 			}
+			$this->deleteIllegalHomonyms();
+			$this->conn->query('COMMIT');
+			$this->conn->query('SET autocommit=1');
+			$this->conn->query('SET unique_checks=1');
+			$this->conn->query('SET foreign_key_checks=1');
+			
+			$this->outputMsg($recordCnt.' records loaded');
+			fclose($fh);
+			$this->setUploadCount();
+			$this->removeUploadFile();
 		}
-		if($authArr){
-			$this->outputMsg('Authors mapped');
+		else{
+			echo 'ERROR thrown opening input file: '.$this->uploadTargetPath.$this->uploadFileName.'<br/>';
+			if(!is_writable($this->uploadTargetPath)) echo '<b>Target upload path is not writable. File permissions need to be adjusted</b>';
+			exit;
 		}
-		if($extraArr){
-			$this->outputMsg('Synonyms and Vernaculars mapped');
-		}
-
-		//Load taxa records
-		$this->outputMsg('Harvest and loading Taxa... ');
-		$recordCnt = 0;
-		rewind($fh);
-		
-		$this->conn->query('SET autocommit=0');
-		$this->conn->query('SET unique_checks=0');
-		$this->conn->query('SET foreign_key_checks=0');
-		while($record = fgets($fh)){
-			$recordArr = explode($delimtStr,$record);
-			if($recordArr[0] == "[TU]"){
-				$this->cleanInArr($recordArr);
-				$this->encodeArr($recordArr);
-				$this->loadItisTaxonUnit($recordArr,$extraArr,$authArr);
-				$recordCnt++;
-			}
-		}
-		$this->deleteIllegalHomonyms();
-		$this->conn->query('COMMIT');
-		$this->conn->query('SET autocommit=1');
-		$this->conn->query('SET unique_checks=1');
-		$this->conn->query('SET foreign_key_checks=1');
-		
-		$this->outputMsg($recordCnt.' records loaded');
-		fclose($fh);
-		$this->setUploadCount();
-		$this->removeUploadFile();
 	}
 
 	private function loadItisTaxonUnit($tuArr,$extraArr,$authArr){
@@ -894,16 +907,22 @@ class TaxonomyUpload{
 
 	public function getSourceArr(){
 		$sourceArr = array();
-		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r') or die("Can't open file");
-		$headerArr = fgetcsv($fh);
-		foreach($headerArr as $field){
-			$fieldStr = strtolower(TRIM($field));
-			if($fieldStr){
-				$sourceArr[] = $fieldStr;
+		if(($fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r')) !== FALSE){
+			$headerArr = fgetcsv($fh);
+			foreach($headerArr as $field){
+				$fieldStr = strtolower(TRIM($field));
+				if($fieldStr){
+					$sourceArr[] = $fieldStr;
+				}
+				else{
+					break;
+				}
 			}
-			else{
-				break;
-			}
+		}
+		else{
+			echo 'ERROR thrown opening input file: '.$this->uploadTargetPath.$this->uploadFileName.'<br/>';
+			if(!is_writable($this->uploadTargetPath)) echo '<b>Target upload path is not writable. File permissions need to be adjusted</b>';
+			exit;
 		}
 		return $sourceArr;
 	}
