@@ -248,7 +248,7 @@ if(!$researchList && !$editMode){
 											<?php echo $LANG['PROJNAME'];?>:
 										</td>
 										<td>
-											<input type="text" name="projname" value="<?php if($projArr) echo $projArr["projname"]; ?>" style="width:95%;"/>
+											<input type="text" name="projname" value="<?php if($projArr) echo htmlentities($projArr["projname"]); ?>" style="width:95%;"/>
 										</td>
 									</tr>	
 									<tr>
@@ -256,7 +256,7 @@ if(!$researchList && !$editMode){
 											<?php echo $LANG['MANAG'];?>:
 										</td>
 										<td>
-											<input type="text" name="managers" value="<?php if($projArr) echo $projArr["managers"]; ?>" style="width:95%;"/>
+											<input type="text" name="managers" value="<?php if($projArr) echo htmlentities($projArr["managers"]); ?>" style="width:95%;"/>
 										</td>
 									</tr>	
 									<tr>
@@ -264,7 +264,7 @@ if(!$researchList && !$editMode){
 											<?php echo $LANG['DESCRIP'];?>:
 										</td>
 										<td>
-											<textarea rows="8" cols="45" name="fulldescription" maxlength="2000" style="width:95%"><?php if($projArr) echo $projArr["fulldescription"];?></textarea>
+											<textarea rows="8" cols="45" name="fulldescription" maxlength="2000" style="width:95%"><?php if($projArr) echo htmlentities($projArr["fulldescription"]);?></textarea>
 										</td>
 									</tr>	
 									<tr>
@@ -272,7 +272,7 @@ if(!$researchList && !$editMode){
 											<?php echo $LANG['NOTES'];?>:
 										</td>
 										<td>
-											<input type="text" name="notes" value="<?php if($projArr) echo $projArr["notes"];?>" style="width:95%;"/>
+											<input type="text" name="notes" value="<?php if($projArr) echo htmlentities($projArr["notes"]);?>" style="width:95%;"/>
 										</td>
 									</tr>	
 									<tr>
