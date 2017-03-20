@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ChecklistLoaderManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ChecklistLoaderManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../checklists/tools/checklistloader.php?'.$_SERVER['QUERY_STRING']);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
@@ -15,15 +15,13 @@ $clLoaderManager->setClid($clid);
 $clMeta = $clLoaderManager->getChecklistMetadata();
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = true;
-}
-if($isEditor){
 }
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Species Checklist Loader</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Species Checklist Loader</title>
 	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
@@ -47,30 +45,23 @@ if($isEditor){
 		}
 	</script>
 </head>
-
 <body>
-
 	<?php
 	$displayLeftMenu = true;
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class='navpath'>
 		<a href='../../index.php'>Home</a> &gt;&gt;
 		<?php 
-		if($pid) echo '<a href="'.$clientRoot.'/projects/index.php?pid='.$pid.'">';
+		if($pid) echo '<a href="'.$CLIENT_ROOT.'/projects/index.php?pid='.$pid.'">';
 		echo '<a href="../checklist.php?cl='.$clid.'&pid='.$pid.'">Return to Checklist</a> &gt;&gt; '; 
 		?> 
 		<a href="checklistloader.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><b>Checklists Loader</b></a>
 	</div>
-	<?php 
-	if($statusStr = $clLoaderManager->getErrorStr()){
-		echo '<div style="margin:30px;font-size:110%;font-weight:bold;color:red;">'.$statusStr.'</div>';
-	}
-	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<h1>
-			<a href="<?php echo $clientRoot."/checklists/checklist.php?cl=".$clid.'&pid='.$pid; ?>">
+			<a href="<?php echo $CLIENT_ROOT."/checklists/checklist.php?cl=".$clid.'&pid='.$pid; ?>">
 				<?php echo $clMeta['name']; ?>
 			</a>
 		</h1>
@@ -86,8 +77,16 @@ if($isEditor){
 							<li>Loading checklist...</li>
 							<?php 
 							$cnt = $clLoaderManager->uploadCsvList($hasHeader,$thesId);
-							$errorArr = $clLoaderManager->getErrorArr();
+							$statusStr = $clLoaderManager->getErrorStr();
+							if(!$cnt && $statusStr){
+								echo '<div style="margin:20px;font-weight:bold;">';
+								echo '<div style="font-size:110%;color:red;">'.$statusStr.'</div>';
+								echo '<div><a href="checklistloader.php?clid='.$clid.'&pid='.$pid.'">Return to Loader</a> and make sure the input file matches requirements within instructions</div>';
+								echo '</div>';
+								exit;
+							}
 							$probCnt = count($clLoaderManager->getProblemTaxa());
+							$errorArr = $clLoaderManager->getErrorArr();
 							?>
 							<li>Upload status...</li>
 							<li style="margin-left:10px;">Taxa successfully loaded: <?php echo $cnt; ?></li>
@@ -101,7 +100,6 @@ if($isEditor){
 							$clLoaderManager->resolveProblemTaxa();
 							echo '</fieldset>';
 						}
-						//General errors 
 						if($errorArr){
 							?>
 							<fieldset style="padding:20px;">
@@ -181,7 +179,7 @@ if($isEditor){
 
 	</div>
 	<?php
-		include($serverRoot.'/footer.php');
+		include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

@@ -41,7 +41,6 @@ class ChecklistLoaderManager {
 		else{
 			$headerArr["sciname"] = 0;
 		}
-		
 		if(array_key_exists("sciname",$headerArr)){
 			$cnt = 0;
 			ob_flush();
