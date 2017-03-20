@@ -73,7 +73,7 @@ class ImageBatchProcessor {
 
 	private $skeletalFileProcessing = true;
 	private $createNewRec = true;
-	private $imgExists = 0;			// 0 = skip import, 1 = rename image and save both, 2 = copy over image
+	private $imgExists = 0;			// 0 = skip import, 1 = rename image and save both, 2 = replace image
 	private $dbMetadata = 1;
 	private $processUsingImageMagick = 0;
 
@@ -581,7 +581,7 @@ class ImageBatchProcessor {
 					//Check to see if image already exists at target, if so, delete or rename target
 					if(file_exists($targetPath.$targetFileName)){
 						if($this->imgExists == 2){
-							//Copy over image (ie remove old images)
+							//Replace image (ie remove old images)
 							unlink($targetPath.$targetFileName);
 							if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg")){
 								unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg");
@@ -625,7 +625,7 @@ class ImageBatchProcessor {
 						}
 						$rs->free();
 						if($recExists){
-							$this->logOrEcho("NOTICE: image import skipped because image file already exists ",1);
+							$this->logOrEcho("NOTICE: image import skipped because specimen record already exists ",1);
 							return false;
 						}
 					}
@@ -989,23 +989,20 @@ class ImageBatchProcessor {
 					}
 					if($this->conn->query('DELETE FROM images WHERE imgid = '.$r->imgid)){
 						//Remove images
-						if(substr($r->url,0,1) == '/'){
-							$wFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->url);
-							if(file_exists($wFile)){
-								unlink($wFile);
-							}
+						$urlPath = current(parse_url($r->url, PHP_URL_PATH));
+						if($urlPath && strpos($urlPath, $this->imgUrlBase) === 0){
+							$wFile = str_replace($this->imgUrlBase,$this->targetPathBase,$urlPath);
+							if(file_exists($wFile) && is_writable($wFile)) unlink($wFile);
 						}
-						if($tnUrl != $r->thumbnailurl && substr($r->thumbnailurl,0,1) == '/'){
-							$tnFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->thumbnailurl);
-							if(file_exists($tnFile)){
-								unlink($tnFile);
-							}
-						} 
-						if($oUrl != $r->originalurl && substr($r->originalurl,0,1) == '/'){
-							$oFile = str_replace($this->imgUrlBase,$this->targetPathBase,$r->originalurl);
-							if(file_exists($oFile)){
-								unlink($oFile);
-							}
+						$urlTnPath = current(parse_url($r->thumbnailurl, PHP_URL_PATH));
+						if($urlTnPath && strpos($urlTnPath, $this->imgUrlBase) === 0){
+							$wFile = str_replace($this->imgUrlBase,$this->targetPathBase,$urlTnPath);
+							if(file_exists($wFile) && is_writable($wFile)) unlink($wFile);
+						}
+						$urlLgPath = current(parse_url($r->url, PHP_URL_PATH));
+						if($urlLgPath && strpos($urlLgPath, $this->imgUrlBase) === 0){
+							$wFile = str_replace($this->imgUrlBase,$this->targetPathBase,$urlLgPath);
+							if(file_exists($wFile) && is_writable($wFile)) unlink($wFile);
 						}
 					}
 					else{

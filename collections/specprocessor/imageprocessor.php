@@ -562,7 +562,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 													<input type="radio" name="imgexists" value="1" /> 
 													Rename image and save both<br/>
 													<input type="radio" name="imgexists" value="2" /> 
-													Copy over existing image
+													Replace existing image
 												</div>
 											</div>
 										</div>
