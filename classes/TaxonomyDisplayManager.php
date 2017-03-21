@@ -1,6 +1,6 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/TaxonomyUtilities.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/TaxonomyUtilities.php');
 
 class TaxonomyDisplayManager{
 
@@ -10,6 +10,8 @@ class TaxonomyDisplayManager{
 	private $taxonRank = 0;
 	private $taxAuthId = 1;
 	private $displayAuthor = false;
+	private $displayFullTree = false;
+	private $displaySubGenera = false;
 	
 	function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -18,28 +20,18 @@ class TaxonomyDisplayManager{
  	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
 	}
- 	
-	public function getTaxa($displayFullTree = false){
-		//Temporary code: check to make sure taxaenumtree is populated
-		//This code can be removed somewhere down the line
-		$sqlTest = 'SELECT tid FROM taxaenumtree LIMIT 1';
-		$rsTest = $this->conn->query($sqlTest);
-		if(!$rsTest->num_rows){
-			echo '<div style="color:red;margin:30px;">';
-			echo 'NOTICE: Building new taxonomic hierarchy table (taxaenumtree).<br/>';
-			echo 'This may take a few minutes, but only needs to be done once.<br/>';
-			echo 'Do not terminate this process early.';
-			echo '</div>';
-			ob_flush();
-			flush();
-			TaxonomyUtilities::buildHierarchyEnumTree($this->conn,$this->taxAuthId);
-		}
-		$rsTest->free();
+
+	public function displayTaxonomyHierarchy(){
+		$hierarchyArr = $this->setTaxa();
+		$this->echoTaxonArray($hierarchyArr);
+	}
+
+	private function setTaxa(){
+		$this->primeTaxaEnumTree();
 		
-		//Get target taxa (we don't want children and parents of non-accepted taxa, so we'll get those later) 
+		$subGenera = array();
 		$taxaParentIndex = Array();
 		if($this->targetStr){
-			$subGenera = array();
 			$sql1 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid, ts.tidaccepted '.
 				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
 				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted '.
@@ -94,7 +86,7 @@ class TaxonomyDisplayManager{
 				'INNER JOIN taxaenumtree te ON t.tid = te.tid '.
 				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = ts.tidaccepted) AND (te.taxauthid = '.$this->taxAuthId.') '.
 				'AND ((te.parenttid IN('.$tidStr.')) OR (t.tid IN('.$tidStr.'))) ';
-			if($this->taxonRank < 140 && !$displayFullTree) $sql2 .= "AND t.rankid <= 140 ";
+			if($this->taxonRank < 140 && !$this->displayFullTree) $sql2 .= "AND t.rankid <= 140 ";
 			//echo $sql2."<br>";
 			$rs2 = $this->conn->query($sql2);
 			while($row2 = $rs2->fetch_object()){
@@ -181,15 +173,27 @@ class TaxonomyDisplayManager{
 			}
 			//Adjust scientific name display for subgenera
 			foreach($subGenera as $subTid){
-				$genusDisplay = $this->taxaArr[$this->taxaArr[$subTid]['parenttid']]['sciname'];
-				$subGenusDisplay = $genusDisplay.' ('.$this->taxaArr[$subTid]['sciname'].')';
-				$this->taxaArr[$subTid]['sciname'] = $subGenusDisplay;
+				if(!strpos($this->taxaArr[$subTid]['sciname'],'(')){
+					$genusDisplay = $this->taxaArr[$this->taxaArr[$subTid]['parenttid']]['sciname'];
+					$subGenusDisplay = $genusDisplay.' ('.$this->taxaArr[$subTid]['sciname'].')';
+					$this->taxaArr[$subTid]['sciname'] = $subGenusDisplay;
+				}
+			}
+			//Add subgenera designation to species name
+			if($this->displaySubGenera && $subGenera){
+				foreach($this->taxaArr as $tid => $tArr){
+					if(in_array($tArr['parenttid'], $subGenera)){
+						$sn = $this->taxaArr[$tid]['sciname'];
+						$pos = strpos($sn, ' ', 2);
+						if($pos) $this->taxaArr[$tid]['sciname'] = $this->taxaArr[$tArr['parenttid']]['sciname'].' '.trim(substr($sn, $pos));
+					}
+				}
 			}
 		}
-		$this->echoTaxonArray($hierarchyArr,$displayFullTree);
+		return $hierarchyArr;
 	}
 
-	private function echoTaxonArray($node,$displayFullTree){
+	private function echoTaxonArray($node){
 		if($node){
 			$editable = false;
 			if($GLOBALS['USER_RIGHTS']){
@@ -220,12 +224,12 @@ class TaxonomyDisplayManager{
 				if($indent > 230) $indent -= 10;
 				echo "<div>".str_repeat('&nbsp;',$indent/5);
 				if($editable){
-					echo "<a href='taxonomyeditor.php?tid=".$key."'>".$sciName."</a>";
+					echo '<a href="taxonomyeditor.php?tid='.$key.'" target="_blank">'.$sciName.'</a>';
 				}
 				else{
-					echo "<a href='../index.php?taxon=".$key."'>".$sciName."</a>";
+					echo '<a href="../index.php?taxon="'.$key.'" target="_blank">'.$sciName.'</a>';
 				}
-				if($this->taxonRank < 140 && !$displayFullTree && $taxonRankId == 140){
+				if($this->taxonRank < 140 && !$this->displayFullTree && $taxonRankId == 140){
 					echo '<a href="taxonomydisplay.php?target='.$sciName.'">';
 					echo '<img src="../../images/tochild.png" style="width:9px;" />';
 					echo '</a>';
@@ -247,7 +251,7 @@ class TaxonomyDisplayManager{
 					}
 				}
 				if(is_array($value)){
-					$this->echoTaxonArray($value,$displayFullTree);
+					$this->echoTaxonArray($value,$this->displayFullTree);
 				}
 			}
 		}
@@ -258,26 +262,12 @@ class TaxonomyDisplayManager{
 	
 	public function getDynamicTreePath(){
 		$retArr = Array();
-		$tid = '';
-		$acceptedTid = '';
-		//Temporary code: check to make sure taxaenumtree is populated
-		//This code can be removed somewhere down the line
-		$sqlTest = 'SELECT tid FROM taxaenumtree LIMIT 1';
-		$rsTest = $this->conn->query($sqlTest);
-		if(!$rsTest->num_rows){
-			echo '<div style="color:red;margin:30px;">';
-			echo 'NOTICE: Building new taxonomic hierarchy table (taxaenumtree).<br/>';
-			echo 'This may take a few minutes, but only needs to be done once.<br/>';
-			echo 'Do not terminate this process early.';
-			echo '</div>';
-			ob_flush();
-			flush();
-			TaxonomyUtilities::buildHierarchyEnumTree($this->conn,$this->taxAuthId);
-		}
-		$rsTest->free();
+		$this->primeTaxaEnumTree();
 		
 		//Get target taxa (we don't want children and parents of non-accepted taxa, so we'll get those later) 
 		if($this->targetStr){
+			$tid = '';
+			$acceptedTid = '';
 			$sql1 = 'SELECT DISTINCT t.tid, ts.tidaccepted '.
 				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
 				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted '.
@@ -308,8 +298,8 @@ class TaxonomyDisplayManager{
 				$prevTid = '';
 				$retArr[0] = 'root';
 				$sql2 = 'SELECT t.RankId, te.parenttid, ts.tidaccepted, ts.parenttid AS par2 '.
-					'FROM (taxa t LEFT JOIN taxaenumtree te ON t.TID = te.parenttid) '.
-					'LEFT JOIN taxstatus ts ON te.parenttid = ts.tid '.
+					'FROM taxa t INNER JOIN taxaenumtree te ON t.TID = te.parenttid '.
+					'INNER JOIN taxstatus ts ON te.parenttid = ts.tid '.
 					'WHERE te.TID = '.($acceptedTid?$acceptedTid:$tid).' AND te.taxauthid = '.$this->taxAuthId.' AND ts.taxauthid = '.$this->taxAuthId.' '.
 					'ORDER BY t.RankId ';
 				//echo "<div>".$sql2."</div>";
@@ -345,6 +335,24 @@ class TaxonomyDisplayManager{
 		return $retArr;
 	}
 
+	private function primeTaxaEnumTree(){
+		//Temporary code: check to make sure taxaenumtree is populated
+		//This code can be removed somewhere down the line
+		$sql = 'SELECT tid FROM taxaenumtree LIMIT 1';
+		$rs = $this->conn->query($sql);
+		if(!$rs->num_rows){
+			echo '<div style="color:red;margin:30px;">';
+			echo 'NOTICE: Building new taxonomic hierarchy table (taxaenumtree).<br/>';
+			echo 'This may take a few minutes, but only needs to be done once.<br/>';
+			echo 'Do not terminate this process early.';
+			echo '</div>';
+			ob_flush();
+			flush();
+			TaxonomyUtilities::buildHierarchyEnumTree($this->conn,$this->taxAuthId);
+		}
+		$rs->free();
+	}
+
 	public function setTargetStr($target){
 		$this->targetStr = $this->conn->real_escape_string(trim(ucfirst($target)));
 	}
@@ -355,6 +363,14 @@ class TaxonomyDisplayManager{
 
 	public function setDisplayAuthor($display){
 		if($display) $this->displayAuthor = true;
+	}
+
+	public function setDisplayFullTree($displayTree){
+		if($displayTree) $this->displayFullTree = true;
+	}
+
+	public function setDisplaySubGenera($displaySubg){
+		if($displaySubg) $this->displaySubGenera = true;
 	}
 
 	private function cmp($a, $b){

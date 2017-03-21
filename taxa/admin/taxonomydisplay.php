@@ -8,15 +8,17 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $displayAuthor = array_key_exists('displayauthor',$_REQUEST)?$_REQUEST['displayauthor']:0;
 $displayFullTree = array_key_exists('displayfulltree',$_REQUEST)?$_REQUEST['displayfulltree']:0;
+$displaySubGenera = array_key_exists('displaysubgenera',$_REQUEST)?$_REQUEST['displaysubgenera']:0;
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
 $statusStr = array_key_exists('statusstr',$_REQUEST)?$_REQUEST['statusstr']:'';
 
 $taxonDisplayObj = new TaxonomyDisplayManager();
 $taxonDisplayObj->setTargetStr($target);
 $taxonDisplayObj->setTaxAuthId($taxAuthId);
+$taxonDisplayObj->setDisplayAuthor($displayAuthor);
+$taxonDisplayObj->setDisplayFullTree($displayFullTree);
+$taxonDisplayObj->setDisplaySubGenera($displaySubGenera);
 
-if($displayAuthor) $taxonDisplayObj->setDisplayAuthor(1);
- 
 $isEditor = false;
 if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
@@ -109,15 +111,18 @@ else{
 					<div style="margin:15px 15px 0px 60px;">
 						<input name="displayauthor" type="checkbox" value="1" <?php echo ($displayAuthor?'checked':''); ?> /> Display authors
 					</div>
-					<div style="margin:3px 15px 15px 60px;">
+					<div style="margin:3px 15px 0px 60px;">
 						<input name="displayfulltree" type="checkbox" value="1" <?php echo ($displayFullTree?'checked':''); ?> /> Display full tree below family 
+					</div>
+					<div style="margin:3px 15px 15px 60px;">
+						<input name="displaysubgenera" type="checkbox" value="1" <?php echo ($displaySubGenera?'checked':''); ?> /> Display species with subgenera 
 					</div>
 				</fieldset>
 			</form>
 		</div>
 		<?php 
 		if($target){
-			$taxonDisplayObj->getTaxa($displayFullTree);
+			$taxonDisplayObj->displayTaxonomyHierarchy();
 		}
 		?>
 	</div>
