@@ -652,35 +652,52 @@ class TaxonProfileManager {
  	}
 
 	public function getDescriptions(){
-		$descriptionsStr = '';
+		$retArr = Array();
 		if($this->tid){
-			$descriptionsStr = "There is no description set for this taxon.";
-			$retArr = Array();
-			$sql = 'SELECT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
+			$sql = 'SELECT ts.tid, tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
 				'tds.tdsid, tds.heading, tds.statement, tds.displayheader, tdb.language '.
-				'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid) '.
+				'FROM taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid '.
 				'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
 				'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = 1) '.
 				'ORDER BY tdb.displaylevel,tds.sortsequence';
 			//echo $sql; exit;
 			$result = $this->con->query($sql);
-			while($row = $result->fetch_object()){
-				$indexKey = 0;
-				if(!in_array(strtolower($row->language), $this->langArr)){ 
-					$indexKey = 1;
-				}
-				$tdbId = $row->tdbid;
-				if(!isset($retArr[$indexKey]) || !array_key_exists($tdbId,$retArr[$indexKey])){
-					$retArr[$indexKey][$tdbId]["caption"] = $row->caption;
-					$retArr[$indexKey][$tdbId]["source"] = $row->source;
-					$retArr[$indexKey][$tdbId]["url"] = $row->sourceurl;
-				}
-				$retArr[$indexKey][$tdbId]["desc"][$row->tdsid] = ($row->displayheader && $row->heading?"<b>".$row->heading."</b>: ":"").$row->statement;
-			}
+			$rsArr = $result->fetch_all(MYSQLI_ASSOC);
 			$result->free();
+			
+			//Get descriptions associated with accepted name only
+			$usedCaptionArr = array();
+			foreach($rsArr as $n => $rowArr){
+				if($rowArr['tid'] == $this->tid){
+					$retArr = $this->loadDescriptionArr($rowArr, $retArr);
+					$usedCaptionArr[] = $rowArr['caption'];
+				}
+			}
+			//Then add description linked to synonyms ONLY if one doesn't exist with same caption
+			reset($rsArr);
+			foreach($rsArr as $n => $rowArr){
+				if($rowArr['tid'] != $this->tid && !in_array($rowArr['caption'], $usedCaptionArr)){
+					$retArr = $this->loadDescriptionArr($rowArr, $retArr);
+				}
+			}
+				
 			ksort($retArr);
-			return $retArr;
 		}
+		return $retArr;
+	}
+	
+	private function loadDescriptionArr($rowArr,$retArr){
+		$indexKey = 0;
+		if(!in_array(strtolower($rowArr['language']), $this->langArr)){
+			$indexKey = 1;
+		}
+		if(!isset($retArr[$indexKey]) || !array_key_exists($rowArr['tdbid'],$retArr[$indexKey])){
+			$retArr[$indexKey][$rowArr['tdbid']]["caption"] = $rowArr['caption'];
+			$retArr[$indexKey][$rowArr['tdbid']]["source"] = $rowArr['source'];
+			$retArr[$indexKey][$rowArr['tdbid']]["url"] = $rowArr['sourceurl'];
+		}
+		$retArr[$indexKey][$rowArr['tdbid']]["desc"][$rowArr['tdsid']] = ($rowArr['displayheader'] && $rowArr['heading']?"<b>".$rowArr['heading']."</b>: ":"").$rowArr['statement'];
+		return $retArr;
 	}
 
 	public function getFamily(){
