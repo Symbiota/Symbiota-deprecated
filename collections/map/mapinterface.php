@@ -613,11 +613,11 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                     if(recTot > 0){
                         recArr = returnArr['recarr'];
                         processPoints(recArr);
-                        recordsFound = false;
                         jsonRecReturn = '';
                     }
                     else{
                         alert('There were no records matching your query.');
+                        recordsFound = false;
                         break;
                     }
                 }
@@ -629,9 +629,11 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                 index = index + 1000;
             }
             while(processed < recTot);
-            setTimeout(function() {
-                afterEffects();
-            }, 500);
+            if(recordsFound){
+                setTimeout(function() {
+                    afterEffects();
+                }, 500);
+            }
         }
 
         function afterEffects(){
@@ -651,7 +653,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
 
         function getPointArr(index){
             //alert('rpc/maplazyloader.php?starr='+starr+'&index='+index+'&reccnt=<?php //echo $recordCnt; ?>&maptype=<?php //echo $mapType; ?>');
-
+            recordsFound = false;
             $.ajax({
                 type: "POST",
                 url: "rpc/maplazyloader.php",
