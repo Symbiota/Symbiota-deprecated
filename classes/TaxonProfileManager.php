@@ -654,6 +654,7 @@ class TaxonProfileManager {
 	public function getDescriptions(){
 		$retArr = Array();
 		if($this->tid){
+			$rsArr = array();
 			$sql = 'SELECT ts.tid, tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
 				'tds.tdsid, tds.heading, tds.statement, tds.displayheader, tdb.language '.
 				'FROM taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid '.
@@ -661,9 +662,11 @@ class TaxonProfileManager {
 				'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = 1) '.
 				'ORDER BY tdb.displaylevel,tds.sortsequence';
 			//echo $sql; exit;
-			$result = $this->con->query($sql);
-			$rsArr = $result->fetch_all(MYSQLI_ASSOC);
-			$result->free();
+			$rs = $this->con->query($sql);
+			while($r = $rs->fetch_assoc()){
+				$rsArr[] = $r;
+			}
+			$rs->free();
 			
 			//Get descriptions associated with accepted name only
 			$usedCaptionArr = array();
