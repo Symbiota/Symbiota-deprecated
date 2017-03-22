@@ -893,13 +893,14 @@ class MapInterfaceManager{
                 $occId = $row->occid;
                 $collName = $row->CollectionName;
                 $family = $row->family;
+                $tidInterpreted = $this->xmlentities($row->tidinterpreted);
                 $latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
                 $coordArr[$collName][$occId]["latLngStr"] = $latLngStr;
                 $coordArr[$collName][$occId]["collid"] = $this->xmlentities($row->collid);
-                $tidcode = strtolower(str_replace( " ", "",$row->sciname));
+                $tidcode = strtolower(str_replace( " ", "",$tidInterpreted.$row->sciname));
                 $tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
                 $coordArr[$collName][$occId]["namestring"] = $this->xmlentities($tidcode);
-                $coordArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
+                $coordArr[$collName][$occId]["tidinterpreted"] = $tidInterpreted;
                 if($family){
                     $coordArr[$collName][$occId]["family"] = strtoupper($family);
                 }

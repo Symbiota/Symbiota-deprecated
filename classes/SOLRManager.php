@@ -332,6 +332,7 @@ class SOLRManager extends OccurrenceManager{
             if((($decLong <= 180 && $decLong >= -180) && ($decLat <= 90 && $decLat >= -90)) && ($canReadRareSpp || !$localitySecurity)){
                 $occId = $k['occid'];
                 $collName = $k['CollectionName'];
+                $tidInterpreted = (isset($k['tidinterpreted'])?$this->xmlentities($k['tidinterpreted']):'');
                 $identifier = (isset($k['recordedBy'])?$k['recordedBy']:'');
                 $identifier .= ((isset($k['recordNumber']) || isset($k['displayDate']))?' ':'');
                 $identifier .= ((isset($k['recordNumber']) && !isset($k['displayDate']))?$k['recordNumber']:'');
@@ -339,10 +340,10 @@ class SOLRManager extends OccurrenceManager{
                 $latLngStr = $decLat.",".$decLong;
                 $returnArr[$collName][$occId]["latLngStr"] = $latLngStr;
                 $returnArr[$collName][$occId]["collid"] = $collid;
-                $tidcode = strtolower(str_replace(" ","",$k['sciname']));
+                $tidcode = strtolower(str_replace(" ","",$tidInterpreted.$k['sciname']));
                 $tidcode = preg_replace("/[^A-Za-z0-9 ]/","",$tidcode);
                 $returnArr[$collName][$occId]["namestring"] = $this->xmlentities($tidcode);
-                $returnArr[$collName][$occId]["tidinterpreted"] = (isset($k['tidinterpreted'])?$this->xmlentities($k['tidinterpreted']):'');
+                $returnArr[$collName][$occId]["tidinterpreted"] = $tidInterpreted;
                 $returnArr[$collName][$occId]["family"] = (isset($k['accFamily'])?$this->xmlentities($k['accFamily']):(isset($k['family'])?$this->xmlentities($k['family']):''));
                 if($returnArr[$collName][$occId]["family"]){
                     $returnArr[$collName][$occId]["family"] = strtoupper($returnArr[$collName][$occId]["family"]);
