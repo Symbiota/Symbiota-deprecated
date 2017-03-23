@@ -3,6 +3,7 @@ var imgCnt = 0;
 
 $(document).ready(function() {
 	$('#desctabs').tabs();
+	$("#desctabs").show();
 
 	var imgDiv = document.getElementById("img-div");
 	if(imgDiv.scrollHeight > imgDiv.clientHeight) document.getElementById("img-tab-div").style.display = 'block'; 

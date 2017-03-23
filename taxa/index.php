@@ -74,7 +74,7 @@ $descr = Array();
 		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
 		var tid = <?php echo $taxonManager->getTid(); ?>
 	</script>
-	<script src="../js/symb/taxa.index.js?ver=20161118" type="text/javascript"></script>
+	<script src="../js/symb/taxa.index.js?ver=20170302" type="text/javascript"></script>
 	<script src="../js/symb/taxa.editor.js?ver=20140619" type="text/javascript"></script>
 </head>
 <body>
@@ -194,8 +194,8 @@ if($taxonManager->getSciName() != "unknown"){
                         }
                     }
 				    ?>
-					<div id="desctabs">
-						<ul>
+					<div id="desctabs" class="ui-tabs" style="display:none">
+						<ul class="ui-tabs-nav">
 							<?php 
 							$capCnt = 1;
 							foreach($descArr as $dArr){
@@ -337,7 +337,7 @@ if($taxonManager->getSciName() != "unknown"){
 				}
 				if($descriptionArr = $taxonManager->getDescriptions()){
 					?>
-					<div id="desctabs" style="margin:10px;clear:both;">
+					<div id="desctabs" class="ui-tabs" style="display:none;margin:10px;clear:both;">
 						<ul>
 							<?php 
 							$capCnt = 1;
