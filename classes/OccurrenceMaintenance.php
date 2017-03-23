@@ -208,7 +208,7 @@ class OccurrenceMaintenance {
 		if($sensitiveArr){
 			$sql2 = 'UPDATE omoccurrences o '.
 				'SET o.LocalitySecurity = 1 '.
-				'WHERE (o.LocalitySecurity IS NULL OR o.LocalitySecurity = 0) AND (o.tidinterpreted IN('.implode(',',$sensitiveArr).'))';
+				'WHERE (o.LocalitySecurity IS NULL OR o.LocalitySecurity = 0) AND (o.localitySecurityReason IS NULL) AND (o.tidinterpreted IN('.implode(',',$sensitiveArr).'))';
 			if(!$this->conn->query($sql2)){
 				$errStr = 'WARNING: unable to protect globally rare species; '.$this->conn->error;
 				$this->errorArr[] = $errStr;
@@ -227,7 +227,7 @@ class OccurrenceMaintenance {
 			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
 			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
-			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (c.type = "rarespp") '.
+			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (o.localitySecurityReason IS NULL) AND (c.type = "rarespp") '.
 			'AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
 		if($collid) $sql .= ' AND o.collid ='.$collid;
 		$rs = $this->conn->query($sql);

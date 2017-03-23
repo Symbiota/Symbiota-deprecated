@@ -248,7 +248,7 @@ class TaxonomyEditorManager{
 		//If SecurityStatus was changed, set security status within omoccurrence table 
 		if($postArr['securitystatus'] != $_REQUEST['securitystatusstart']){
 			if(is_numeric($postArr['securitystatus'])){
-				$sql2 = 'UPDATE omoccurrences SET localitysecurity = '.$postArr['securitystatus'].' WHERE (tidinterpreted = '.$this->tid.')';
+				$sql2 = 'UPDATE omoccurrences SET localitysecurity = '.$postArr['securitystatus'].' WHERE (tidinterpreted = '.$this->tid.') AND (localitySecurityReason IS NULL)';
 				$this->conn->query($sql2);
 			}
 		}

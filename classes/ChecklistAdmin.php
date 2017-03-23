@@ -92,7 +92,7 @@ class ChecklistAdmin {
 						'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 						'INNER JOIN fmchklsttaxalink cl ON ts2.tid = cl.tid '.
 						'SET o.localitysecurity = 1 '.
-						'WHERE (cl.clid = '.$this->clid.') AND (o.stateprovince = "'.$postArr['locality'].'") '.
+						'WHERE (cl.clid = '.$this->clid.') AND (o.stateprovince = "'.$postArr['locality'].'") AND (o.localitySecurityReason IS NULL) '.
 						'AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
 					if(!$this->conn->query($sql)){
 						$statusStr = 'Error updating rare state species: '.$this->conn->error;
@@ -255,8 +255,8 @@ class ChecklistAdmin {
 					$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
 						'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 						'SET o.localitysecurity = 1 '.
-						'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) '.
-						'AND (o.stateprovince = "'.$state.'") AND (ts2.tid = '.$dataArr['tid'].')';
+						'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (o.localitySecurityReason IS NULL) '.
+						'AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (o.stateprovince = "'.$state.'") AND (ts2.tid = '.$dataArr['tid'].')';
 					//echo $sqlRare; exit;
 					$this->conn->query($sqlRare);
 				}
