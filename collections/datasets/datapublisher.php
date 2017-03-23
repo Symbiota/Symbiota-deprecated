@@ -324,15 +324,15 @@ include($SERVER_ROOT. '/header.php');
 					<div style="margin:10px;">
 						You have selected to have this collection's DwC archives published to GBIF. Please go to the
 						<a href="http://www.gbif.org/publishing-data/request-endorsement#/intro" target="_blank">GBIF Endorsement Request page</a> to
-						register your collection with GBIF and enter the organization key provided by GBIF below.
-						Please note that organization keys are often assigned per instituiton, so if your institution is found in the GBIF
-						Organization lookup, there is already a GBIF Organization Key assigned. The organization key is the remaining part of
-						the url after the last backslash of your institution's GBIF Data Provider page. If your collection is found,
+						register your collection with GBIF and enter the key provided by GBIF below. If your collection is found in the
+                        <a href="http://www.gbif.org/publishing-data/request-endorsement#/eoi/lookup" target="_blank">GBIF Organization lookup</a>,
+						there is already a GBIF Key assigned. The key is the remaining part of
+						the url after the last backslash of your collection's GBIF Data Provider page. If your collection is found,
                         please ensure that your data is not already published in GBIF. DO NOT PUBLISH your data if there is any chance it is
-                        already published. Before activating your GBIF Organization Key in this portal, you will also need to contact GBIF and
-						request that the user: <?php echo $GBIF_USERNAME; ?> has permissions to create and edit datatsets for your organization.
+                        already published. Before activating your GBIF Key in this portal, you will also need to contact GBIF and
+                        request that the user: <b><?php echo $GBIF_USERNAME; ?></b> has permissions to create and edit datatsets for your collection.
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
-							GBIF Organization Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
+							GBIF Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>"/>
 							<input type="hidden" name="portalname" id="portalname" value='<?php echo $DEFAULT_TITLE; ?>'/>
 							<input type="hidden" name="collname" id="collname" value='<?php echo $collArr['collname']; ?>'/>
