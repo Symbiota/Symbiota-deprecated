@@ -187,10 +187,10 @@ if($taxonManager->getSciName() != "unknown"){
                                 if($vArr["caption"] == $PORTAL_TAXA_DESC){
                                     $tempArr = $descArr[$descIndex][$id];
                                     unset($descArr[$descIndex][$id]);
+                                    array_unshift($descArr[$descIndex],$tempArr);
+                                    $descIndex++;
                                 }
                             }
-                            array_unshift($descArr[$descIndex],$tempArr);
-                            $descIndex++;
                         }
                     }
 				    ?>
