@@ -1939,10 +1939,11 @@ class OccurrenceEditorManager {
 				'FROM omexsiccatititles t INNER JOIN omexsiccatinumbers n ON t.ometid = n.ometid '.
 				'INNER JOIN omexsiccatiocclink l ON n.omenid = l.omenid '.
 				'INNER JOIN omoccurrences o ON l.occid = o.occid '.
-				'WHERE (o.collid = '.$this->collId.')';
+				'WHERE (o.collid = '.$this->collId.') '.
+                'ORDER BY t.title ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr[$r->ometid] = $r->title.' ['.$r->abbreviation.']';
+				$retArr[$r->ometid] = $r->title.($r->abbreviation?' ['.$r->abbreviation.']':'');
 			}
 			$rs->free();
 		}
