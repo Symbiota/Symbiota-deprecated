@@ -930,27 +930,32 @@ function changeTaxonomy(starr,f){
 
 function changeRecordPage(starr,page){
     document.getElementById("queryrecords").innerHTML = "<p>Loading...</p>";
+    getRecords(starr,page);
+}
 
+function getRecords(starr,page){
     //alert("rpc/changemaprecordpage.php?starr="+starr+"&selected="+JSON.stringify(selections)+"&page="+page);
 
-    $.ajax({
-        type: "POST",
-        url: "rpc/changemaprecordpage.php",
-        async: false,
-        data: {
-            starr: starr,
-            selected: JSON.stringify(selections),
-            page: page
-        }
-    }).done(function(msg) {
-        if(msg){
-            var newMapRecordList = JSON.parse(msg);
-            document.getElementById("queryrecords").innerHTML = newMapRecordList;
-        }
-        else{
-            return;
-        }
-    });
+    setTimeout(function(){
+        $.ajax({
+            type: "POST",
+            url: "rpc/changemaprecordpage.php",
+            async: false,
+            data: {
+                starr: starr,
+                selected: JSON.stringify(selections),
+                page: page
+            }
+        }).done(function(msg) {
+            if(msg){
+                var newMapRecordList = JSON.parse(msg);
+                document.getElementById("queryrecords").innerHTML = newMapRecordList;
+            }
+            else{
+                return;
+            }
+        });
+    },5)
 }
 
 function removeSelectionRecord(sel){

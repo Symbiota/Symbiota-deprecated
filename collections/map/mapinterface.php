@@ -186,7 +186,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
             //showWorking();
         });
     </script>
-    <script type="text/javascript" src="../../js/symb/collections.mapinterface.js?ver=13"></script>
+    <script type="text/javascript" src="../../js/symb/collections.mapinterface.js?ver=16"></script>
     <script type="text/javascript" src="../../js/symb/markerclusterer.js?ver=260913"></script>
     <script type="text/javascript" src="../../js/symb/oms.min.js"></script>
     <script type="text/javascript" src="../../js/symb/keydragzoom.js"></script>

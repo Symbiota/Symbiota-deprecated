@@ -254,8 +254,9 @@ class MapInterfaceManager{
 			$this->localSearchArr[] = "Point radius: ".$pointArr[0].", ".$pointArr[1].", within ".$pointArr[2]." miles";
 		}
 		if(array_key_exists("polycoords",$this->searchTermsArr)){
-			$coordArr = json_decode($this->searchTermsArr["polycoords"], true);
-			if($coordArr){
+			$polyStr = str_replace("\\","",$this->searchTermsArr["polycoords"]);
+            $coordArr = json_decode($polyStr, true);
+            if($coordArr){
 				$coordStr = '';
 				$coordStr = 'Polygon((';
 				$keys = array();
