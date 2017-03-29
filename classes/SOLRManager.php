@@ -851,6 +851,18 @@ class SOLRManager extends OccurrenceManager{
         return $retStr;
     }
 
+    public function getCloseTaxaMatch($name){
+        $retArr = array();
+        $searchName = trim($name);
+        $sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$searchName.'") AND sciname != "'.$searchName.'"';
+        if($rs = $this->conn->query($sql)){
+            while($r = $rs->fetch_object()){
+                $retArr[] = $r->sciname;
+            }
+        }
+        return $retArr;
+    }
+
     private function xmlentities($string){
         return str_replace(array ('&','"',"'",'<','>','?'),array ('&amp;','&quot;','&apos;','&lt;','&gt;','&apos;'),$string);
     }
