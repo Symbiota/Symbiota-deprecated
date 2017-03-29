@@ -1,6 +1,5 @@
 <?php 
 include_once('../../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/SpecUploadBase.php');
 include_once($SERVER_ROOT.'/classes/SpecUploadDirect.php');
 include_once($SERVER_ROOT.'/classes/SpecUploadDigir.php');
 include_once($SERVER_ROOT.'/classes/SpecUploadFile.php');
@@ -21,6 +20,7 @@ $importImage = array_key_exists("importimage",$_REQUEST)?true:false;
 $matchCatNum = array_key_exists("matchcatnum",$_REQUEST)?true:false;
 $matchOtherCatNum = array_key_exists("matchothercatnum",$_REQUEST)?true:false;
 $verifyImages = array_key_exists("verifyimages",$_REQUEST)&&$_REQUEST['verifyimages']?true:false;
+$processingStatus = array_key_exists("processingstatus",$_REQUEST)?$_REQUEST['processingstatus']:'';
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:'';
 $recStart = array_key_exists("recstart",$_REQUEST)?$_REQUEST["recstart"]:0;
@@ -35,6 +35,7 @@ if($importIdent !== true) $importIdent = false;
 if($matchCatNum !== true) $matchCatNum = false;
 if($matchOtherCatNum !== true) $matchOtherCatNum = false;
 if($verifyImages !== true) $verifyImages = false;
+if(!preg_match('/^[a-zA-Z0-9\s_]+$/',$processingStatus)) $processingStatus = '';
 if($autoMap !== true) $autoMap = false;
 if(!is_numeric($finalTransfer)) $finalTransfer = 0;
 if($dbpk) $dbpk = htmlspecialchars($dbpk);
@@ -80,6 +81,7 @@ $duManager->setUploadType($uploadType);
 $duManager->setMatchCatalogNumber($matchCatNum);
 $duManager->setMatchOtherCatalogNumbers($matchOtherCatNum);
 $duManager->setVerifyImageUrls($verifyImages);
+$duManager->setProcessingStatus($processingStatus);
 
 if($action == 'Automap Fields'){
 	$autoMap = true;
@@ -433,6 +435,7 @@ $duManager->loadFieldMap();
 						<input type="hidden" name="collid" value="<?php echo $collid;?>" /> 
 						<input type="hidden" name="uploadtype" value="<?php echo $uploadType; ?>" />
 						<input type="hidden" name="verifyimages" value="<?php echo ($verifyImages?'1':'0'); ?>" />
+						<input type="hidden" name="processingstatus" value="<?php echo $processingStatus;?>" /> 
 						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 						<div style="margin:5px;"> 
 							<input type="submit" name="action" value="Transfer Records to Central Specimen Table" />
@@ -533,6 +536,9 @@ $duManager->loadFieldMap();
 						<?php
 					}
 				}
+				$processingList = array("unprocessed"=>"Unprocessed","stage 1"=>"Stage 1","stage 2"=>"Stage 2","stage 3"=>"Stage 3",
+					"pending review"=>"Pending Review","expert required"=>"Expert Required",
+					"reviewed"=>"Reviewed","closed"=>"Closed");
 				if($ulPath && $uploadType == $DWCAUPLOAD){
 					//Data has been uploaded and it's a DWCA upload type
 					if($duManager->analyzeUpload()){
@@ -625,15 +631,15 @@ $duManager->loadFieldMap();
 												<?php 
 												if($isLiveData){
 													?>
-													<div style="margin:10px 0px;">
+													<div>
 														<input name="matchcatnum" type="checkbox" value="1" checked /> 
 														Match on Catalog Number
 													</div>
-													<div style="margin:10px 0px;">
+													<div>
 														<input name="matchothercatnum" type="checkbox" value="1" /> 
 														Match on Other Catalog Numbers  
 													</div>
-													<ul style="margin:10px 0px;">
+													<ul style="margin-top:2px">
 														<li><?php echo $recReplaceMsg; ?></li>
 														<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarily on other catalog numbers</li>
 													</ul>
@@ -643,6 +649,18 @@ $duManager->loadFieldMap();
 												<div style="margin:10px 0px;">
 													<input name="verifyimages" type="checkbox" value="1" /> 
 													Verify image links 
+												</div>
+												<div style="margin:10px 0px;">
+													Processing Status:
+													<select name="processingstatus">
+														<option value="">Leave as is / Do not set</option>
+														<option value="">--------------------------</option>
+														<?php 
+														foreach($processingList as $ps){
+															echo '<option value="'.$ps.'">'.ucwords($ps).'</option>';
+														}
+														?>
+													</select>  
 												</div>
 												<div style="margin:10px;">
 													<input type="submit" name="action" value="Start Upload" />
@@ -739,15 +757,15 @@ $duManager->loadFieldMap();
 										<?php 
 										if($isLiveData || $uploadType == $SKELETAL){
 											?>
-											<div style="margin:10px 0px;">
+											<div>
 												<input name="matchcatnum" type="checkbox" value="1" checked <?php echo ($uploadType == $SKELETAL?'DISABLED':''); ?> /> 
 												Match on Catalog Number
 											</div>
-											<div style="margin:10px 0px;">
+											<div>
 												<input name="matchothercatnum" type="checkbox" value="1" /> 
 												Match on Other Catalog Numbers  
 											</div>
-											<ul style="margin:10px 0px;">
+											<ul style="margin-top:2px">
 												<?php 
 												if($uploadType == $SKELETAL){
 													echo '<li>Incoming skeletal data will be appended only if targeted field is empty</li>';
@@ -763,7 +781,19 @@ $duManager->loadFieldMap();
 										?>
 										<div style="margin:10px 0px;">
 											<input name="verifyimages" type="checkbox" value="1" /> 
-											Verify image links 
+											Verify image links from associatedMedia field
+										</div>
+										<div style="margin:10px 0px;">
+											Processing Status:
+											<select name="processingstatus">
+												<option value="">Leave as is / Do not set</option>
+												<option value="">--------------------------</option>
+												<?php 
+												foreach($processingList as $ps){
+													echo '<option value="'.$ps.'">'.ucwords($ps).'</option>';
+												}
+												?>
+											</select>  
 										</div>
 										<div style="margin:20px;">
 											<input type="submit" name="action" value="Start Upload" />

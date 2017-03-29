@@ -14,6 +14,7 @@ class SpecUploadBase extends SpecUpload{
 	private $matchCatalogNumber = 1;
 	private $matchOtherCatalogNumbers = 0;
 	private $verifyImageUrls = false;
+	private $processingStatus = '';
 	protected $uploadTargetPath;
 
 	protected $sourceArr = Array();
@@ -753,19 +754,20 @@ class SpecUploadBase extends SpecUpload{
 			'georeferenceVerificationStatus','georeferenceRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
 			'previousIdentifications','disposition','modified','language','recordEnteredBy','labelProject','duplicateQuantity','processingStatus');
 		//Update matching records
-		$sqlFrag = '';
-		if($this->uploadType == $this->SKELETAL){
-			foreach($fieldArr as $v){
-				$sqlFrag .= 'o.'.$v.' = IFNULL(o.'.$v.',u.'.$v.'), ';
+		$sqlFragArr = array();
+		foreach($fieldArr as $v){
+			if($v == 'processingStatus' && $this->processingStatus){
+				$sqlFragArr[$v] = 'o.processingStatus = u.'.$v;
+			}
+			elseif($this->uploadType == $this->SKELETAL){
+				$sqlFragArr[$v] = 'o.'.$v.' = IFNULL(o.'.$v.',u.'.$v.')';
+			}
+			else{
+				$sqlFragArr[$v] = 'o.'.$v.' = u.'.$v;
 			}
 		}
-		else{
-			foreach($fieldArr as $v){
-				$sqlFrag .= 'o.'.$v.' = u.'.$v.', ';
-			}
-		}
-		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid SET '.trim($sqlFrag,' ,').
-			' WHERE (u.collid = '.$this->collId.')';
+		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
+			'SET '.implode(',',$sqlFragArr).' WHERE (u.collid = '.$this->collId.')';
 		//echo '<div>'.$sql.'</div>'; exit;
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('<li style="margin-left:10px">FAILED! ERROR: '.$this->conn->error.'</li> ');
@@ -1191,6 +1193,7 @@ class SpecUploadBase extends SpecUpload{
 		//Only import record if at least one of the minimal fields have data 
 		if((array_key_exists('dbpk',$recMap) && $recMap['dbpk'])
 			|| (array_key_exists('catalognumber',$recMap) && $recMap['catalognumber'])
+			|| (array_key_exists('othercatalognumbers',$recMap) && $recMap['othercatalognumbers'])
 			|| (array_key_exists('recordedby',$recMap) && $recMap['recordedby'])
 			|| (array_key_exists('eventdate',$recMap) && $recMap['eventdate'])
 			|| (array_key_exists('locality',$recMap) && $recMap['locality'])
@@ -1214,6 +1217,11 @@ class SpecUploadBase extends SpecUpload{
 			//Do some cleaning on the dbpk; remove leading and trailing whitespaces and convert multiple spaces to a single space
 			if(array_key_exists('dbpk',$recMap)){
 				$recMap['dbpk'] = trim(preg_replace('/\s\s+/',' ',$recMap['dbpk']));
+			}
+			
+			//Set processingStatus to value defined by loader
+			if($this->processingStatus){
+				$recMap['processingstatus'] = $this->processingStatus;
 			}
 
 			//Temporarily code until Specify output UUID as occurrenceID 
@@ -1552,6 +1560,10 @@ class SpecUploadBase extends SpecUpload{
 
 	public function setVerifyImageUrls($v){
 		$this->verifyImageUrls = $v;
+	}
+
+	public function setProcessingStatus($s){
+		$this->processingStatus = $s;
 	}
 
 	public function setSourceDatabaseType($type){

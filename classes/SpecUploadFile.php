@@ -1,4 +1,5 @@
 <?php
+include_once($SERVER_ROOT.'/classes/SpecUploadBase.php');
 class SpecUploadFile extends SpecUploadBase{
 	
 	private $ulFileName;
@@ -107,8 +108,6 @@ class SpecUploadFile extends SpecUploadBase{
 				}
 				$goodToLoad = true;
 				if($this->uploadType == $this->SKELETAL){
-					//$recMap['processingstatus'] = 'unprocessed';
-					if(!array_key_exists('processingstatus',$recMap) || !$recMap['processingstatus']) $recMap['processingstatus'] = 'unprocessed';
 					if(!array_key_exists('catalognumber',$recMap) || !$recMap['catalognumber']) $goodToLoad = false;
 				}
 				if($goodToLoad) $this->loadRecord($recMap);
