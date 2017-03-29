@@ -242,73 +242,6 @@ class SOLRManager extends OccurrenceManager{
     }
 
 
-    /*public function translateSOLRGeoCollList($sArr){
-        $returnArr = Array();
-        $collMapper = Array();
-        $collMapper["undefined"] = "undefined";
-        $cnt = 0;
-        $color = 'e69e67';
-        foreach($sArr as $k){
-            $canReadRareSpp = false;
-            $collid = $this->xmlentities($k['collid']);
-            $localitySecurity = $k['localitySecurity'];
-            if($GLOBALS['USER_RIGHTS']){
-                if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin",$GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin",$GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll",$GLOBALS['USER_RIGHTS'])){
-                    $canReadRareSpp = true;
-                }
-                elseif(array_key_exists("RareSppReader",$userRights) && in_array($collid,$GLOBALS['USER_RIGHTS']["RareSppReader"])){
-                    $canReadRareSpp = true;
-                }
-            }
-            $decLat = $k['decimalLatitude'];
-            $decLong = $k['decimalLongitude'];
-            if((($decLong <= 180 && $decLong >= -180) && ($decLat <= 90 && $decLat >= -90)) && ($canReadRareSpp || !$localitySecurity)){
-                $occId = $k['occid'];
-                $collName = $k['CollectionName'];
-                $identifier = (isset($k['recordedBy'])?$k['recordedBy']:'');
-                $identifier .= ((isset($k['recordNumber']) || isset($k['displayDate']))?' ':'');
-                $identifier .= ((isset($k['recordNumber']) && !isset($k['displayDate']))?$k['recordNumber']:'');
-                $identifier .= ((!isset($k['recordNumber']) && isset($k['displayDate']))?$k['displayDate']:'');
-                $latLngStr = $decLat.",".$decLong;
-                $returnArr[$collName][$occId]["latLngStr"] = $latLngStr;
-                $returnArr[$collName][$occId]["collid"] = $collid;
-                /*if(isset($k['tidinterpreted']) && $k['tidinterpreted']){
-                    $returnArr[$collName][$occId]["tidinterpreted"] = $k['tidinterpreted'];
-                }
-                else{
-                    $tidcode = strtolower(str_replace( " ", "",$k['sciname']));
-                    $tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
-                    $returnArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
-                }*/
-                /*$tidcode = strtolower(str_replace(" ","",$k['sciname']));
-                $tidcode = preg_replace("/[^A-Za-z0-9 ]/","",$tidcode);
-                $returnArr[$collName][$occId]["namestring"] = $this->xmlentities($tidcode);
-                $returnArr[$collName][$occId]["tidinterpreted"] = (isset($k['tidinterpreted'])?$this->xmlentities($k['tidinterpreted']):'');
-                $returnArr[$collName][$occId]["family"] = (isset($k['accFamily'])?$this->xmlentities($k['accFamily']):(isset($k['family'])?$this->xmlentities($k['family']):''));
-                if($returnArr[$collName][$occId]["family"]){
-                    $returnArr[$collName][$occId]["family"] = strtoupper($returnArr[$collName][$occId]["family"]);
-                }
-                else{
-                    $returnArr[$collName][$occId]["family"] = 'undefined';
-                }
-                $returnArr[$collName][$occId]["sciname"] = (isset($k['sciname'])?$k['sciname']:'');
-                $returnArr[$collName][$occId]["identifier"] = $this->xmlentities($identifier);
-                $returnArr[$collName][$occId]["institutioncode"] = $this->xmlentities($k['InstitutionCode']);
-                $returnArr[$collName][$occId]["collectioncode"] = $this->xmlentities($k['CollectionCode']);
-                $returnArr[$collName][$occId]["catalognumber"] = $this->xmlentities($k['catalogNumber']);
-                $returnArr[$collName][$occId]["othercatalognumbers"] = $this->xmlentities($k['otherCatalogNumbers']);
-                $returnArr[$collName]["color"] = $color;
-            }
-        }
-        if(isset($returnArr['undefined'])){
-            $returnArr["undefined"]["color"] = $color;
-        }
-
-        return $returnArr;
-    }*/
-
-
-
     public function translateSOLRGeoCollList($sArr){
         $returnArr = Array();
         $collMapper = Array();
@@ -525,7 +458,7 @@ class SOLRManager extends OccurrenceManager{
             }
         }
         else{
-            $needsUpdate = true;
+            $this->resetSOLRInfoFile();
         }
 
         return $needsUpdate;
