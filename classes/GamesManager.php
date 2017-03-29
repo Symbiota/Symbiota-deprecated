@@ -124,7 +124,9 @@ class GamesManager {
 				$tidArr = Array();
 				$sql = 'SELECT l.TID, COUNT(i.imgid) AS cnt '. 
 					'FROM fmchklsttaxalink l INNER JOIN images AS i ON l.TID = i.tid '.
-					'WHERE i.tid IS NOT NULL AND ISNULL(i.occid) AND l.CLID IN('.$clid.') '. 
+					'LEFT JOIN omoccurrences o ON i.occid = o.occid '.
+					'LEFT JOIN omcollections c ON o.collid = c.collid '.
+					'WHERE (l.CLID IN('.$clid.')) AND (i.occid IS NULL OR c.CollType LIKE "%Observations") '.
 					'GROUP BY l.TID';
 				//echo '<div>'.$sql.'</div>';
 				$rs = $this->conn->query($sql);
@@ -158,8 +160,9 @@ class GamesManager {
 					
 					$files = Array();
 					$sql3 = 'SELECT i.url '.
-						'FROM images AS i '.
-						'WHERE ISNULL(i.occid) AND i.tid = '.$randTaxa.' '.
+						'FROM images i LEFT JOIN omoccurrences o ON i.occid = o.occid '.
+						'LEFT JOIN omcollections c ON o.collid = c.collid '.
+						'WHERE (i.tid = '.$randTaxa.') AND (i.occid IS NULL OR c.CollType LIKE "%Observations") '.
 						'ORDER BY i.sortsequence ';
 					//echo '<div>'.$sql.'</div>';
 					$cnt = 1;
