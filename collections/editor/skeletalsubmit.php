@@ -158,6 +158,7 @@ if($isEditor){
 									<option>stage 2</option>
 									<option>stage 3</option>
 									<option>expert required</option>
+									<option>pending review-nfn</option>
 									<option>pending review</option>
 									<option>reviewed</option>
 									<option>closed</option>

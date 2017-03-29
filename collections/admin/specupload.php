@@ -537,7 +537,7 @@ $duManager->loadFieldMap();
 					}
 				}
 				$processingList = array("unprocessed"=>"Unprocessed","stage 1"=>"Stage 1","stage 2"=>"Stage 2","stage 3"=>"Stage 3",
-					"pending review"=>"Pending Review","expert required"=>"Expert Required",
+					"pending review"=>"Pending Review","expert required"=>"Expert Required","pending review-nfn"=>"Pending Review-NfN",
 					"reviewed"=>"Reviewed","closed"=>"Closed");
 				if($ulPath && $uploadType == $DWCAUPLOAD){
 					//Data has been uploaded and it's a DWCA upload type
