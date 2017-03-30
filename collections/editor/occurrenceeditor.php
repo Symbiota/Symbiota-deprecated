@@ -462,7 +462,7 @@ else{
 
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js?ver=170310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=170222"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=170330"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170101"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170310"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=170302"></script>
@@ -902,17 +902,22 @@ else{
 												echo '<input name="localautodeactivated" type="checkbox" value="1" onchange="localAutoChanged(this)" '.(defined('LOCALITYAUTOLOOKUP') && LOCALITYAUTOLOOKUP==2?'checked':'').' /> ';
 												echo 'Deactivate Locality Lookup</div>';
 											}
-											$hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; 
+											$lsHasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; 
+											$lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:'';
 											?>
 											<div id="localSecurityDiv">
-												<input type="checkbox" name="localitysecurity" tabindex="0" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toggleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
-												<?php echo (defined('LOCALITYSECURITYLABEL')?LOCALITYSECURITYLABEL:'Locality Security'); ?>
-												<span id="locsecreason" style="display:<?php echo ($hasValue?'inline':'none') ?>">
-													<?php $lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:''; ?>
-													<?php echo (defined('LOCALITYSECURITYREASONLABEL')?LOCALITYSECURITYREASONLABEL:'Security Reason Override'); ?>:
-													<input type="text" name="localitysecurityreason" tabindex="0" onchange="fieldChanged('localitysecurityreason');" value="<?php echo $lsrValue; ?>" title="Leave blank for default rare, threatened, or sensitive status" />
-												</span>
-												
+												<div style="float:left;">
+													<input type="checkbox" name="localitysecurity" tabindex="0" value="1" <?php echo $lsHasValue?"CHECKED":""; ?> onchange="localitySecurityChanged(this.form);" title="Hide Locality Data from General Public" />
+													<?php echo (defined('LOCALITYSECURITYLABEL')?LOCALITYSECURITYLABEL:'Locality Security'); ?>
+													<a href="#" onclick="return dwcDoc('localitySecurity')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+												</div>
+												<div id="locsecreason" style="margin-left:5px;border:2px solid gray;float:left;display:<?php echo ($lsrValue?'inline':'none') ?>;padding:3px">
+													<div ><input name="lockLocalitySecurity" type="checkbox" onchange="securityLockChanged(this)"  <?php echo ($lsrValue?'checked':'') ?> /> Lock Security Setting</div>
+													<?php 
+													echo (defined('LOCALITYSECURITYREASONLABEL')?LOCALITYSECURITYREASONLABEL:'Reason'); 
+													?>:
+													<input type="text" name="localitysecurityreason" tabindex="0" onchange="localitySecurityReasonChanged();" value="<?php echo $lsrValue; ?>" title="Entering any text will lock security status on or off; leave blank to accept default security status" />
+												</div>
 											</div>
 											<div style="clear:both;">
 												<div id="decimalLatitudeDiv">
