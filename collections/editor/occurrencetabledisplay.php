@@ -98,9 +98,9 @@ if($SYMB_UID){
 		$occManager->setSqlWhere($occIndex,$recLimit);
 		$qryCnt = $occManager->getQueryRecordCount(1);
 	}
-	elseif(isset($_COOKIE["editorquery"])){
+	elseif(isset($_SESSION['editorquery'])){
 		//Make sure query is null
-		setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+		unset($_SESSION['editorquery']);
 	}
 	
 	$recArr = $occManager->getOccurMap();
@@ -181,7 +181,7 @@ else{
 				$headerMap = array_intersect_key($headerMapBase, $headerArr);
 			}
 			if($isEditor == 1 || $isGenObs){
-				$buFieldName = (array_key_exists('bufieldname',$_GET)?$_GET['bufieldname']:'');
+				$buFieldName = (array_key_exists('bufieldname',$_REQUEST)?$_REQUEST['bufieldname']:'');
 				?>
 				<div id="batchupdatediv" style="width:600px;clear:both;display:<?php echo ($buFieldName?'block':'none'); ?>;">
 					<form name="batchupdateform" action="occurrencetabledisplay.php" method="post" onsubmit="return false;">

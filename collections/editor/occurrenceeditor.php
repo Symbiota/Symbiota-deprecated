@@ -307,7 +307,7 @@ if($symbUid){
 				$occManager->setSqlWhere($occIndex);
 			}
 			else{
-				setCookie('editorquery','',time()-3600,($CLIENT_ROOT?$CLIENT_ROOT:'/'));
+				unset($_SESSION['editorquery']);
 				$occIndex = false;
 			}
 		}
@@ -322,9 +322,9 @@ if($symbUid){
 			$qryCnt = $occManager->getQueryRecordCount();
 		}
 	}
-	elseif(isset($_COOKIE["editorquery"])){
-		//Make sure query is null
-		setCookie('editorquery','',time()-3600,($CLIENT_ROOT?$CLIENT_ROOT:'/'));
+	elseif(isset($_SESSION['editorquery'])){
+		//Make sure query variables are null
+		unset($_SESSION['editorquery']);
 	}
 
 	if(!$goToMode){
