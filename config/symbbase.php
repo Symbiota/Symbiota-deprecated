@@ -18,7 +18,7 @@ if(substr($SERVER_ROOT,-1) == '/'){
 }
 
 //Check cookie to see if signed in
-$PARAMS_ARR = Array();				//params => fn, uid, un   cookie(SymbiotaBase) => 'un=egbot&dn=Edward+Gilbert&uid=301'
+$PARAMS_ARR = Array();				//params => 'un=egbot&dn=Edward+Gilbert&uid=301'
 $USER_RIGHTS = Array();
 if((isset($_COOKIE["SymbiotaCrumb"]) && (!isset($_REQUEST['submit']) || $_REQUEST['submit'] != "logout"))){
     $tokenArr = json_decode(Encryption::decrypt($_COOKIE["SymbiotaCrumb"]), true);
