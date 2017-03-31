@@ -46,7 +46,7 @@ elseif($mapType == 'occquery'){
     if($SOLR_MODE) $solrManager->setSearchTermsArr($stArr);
 }
 
-if($SOLR_MODE){
+/*if($SOLR_MODE){
     $solrManager->setTaxaArr($tArr);
     $solrArr = $solrManager->getGeoArr();
     $coordArr = $solrManager->translateSOLRGeoTaxaList($solrArr);
@@ -54,7 +54,11 @@ if($SOLR_MODE){
 else{
     $sharedMapManager->setTaxaArr($tArr);
     $coordArr = $sharedMapManager->getGeoCoords($mapWhere);
-}
+}*/
+
+$sharedMapManager->setTaxaArr($tArr);
+$coordArr = $sharedMapManager->getGeoCoords($mapWhere);
+
 ?>
 <html>
 <head>

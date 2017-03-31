@@ -186,7 +186,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
             //showWorking();
         });
     </script>
-    <script type="text/javascript" src="../../js/symb/collections.mapinterface.js?ver=16"></script>
+    <script type="text/javascript" src="../../js/symb/collections.mapinterface.js?ver=17"></script>
     <script type="text/javascript" src="../../js/symb/markerclusterer.js?ver=260913"></script>
     <script type="text/javascript" src="../../js/symb/oms.min.js"></script>
     <script type="text/javascript" src="../../js/symb/keydragzoom.js"></script>
@@ -194,13 +194,13 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
     <script type="text/javascript">
         <?php
         if($symbUid){
-            ?>
-            $(window).bind("load", function() {
-                loadRecordsetList('<?php echo $symbUid; ?>',"loadlist");
-            });
+        ?>
+        $(window).bind("load", function() {
+            loadRecordsetList('<?php echo $symbUid; ?>',"loadlist");
+        });
 
-            var uid = <?php echo $symbUid; ?>;
-            <?php
+        var uid = <?php echo $symbUid; ?>;
+        <?php
         }
         ?>
 
@@ -298,9 +298,9 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                 text: newTitle,
                 <?php
                 if($clusterOff=="y"){
-                    ?>
-                    map: map,
-                    <?php
+                ?>
+                map: map,
+                <?php
                 }
                 ?>
                 icon: newIcon,
@@ -400,9 +400,9 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                         google.maps.drawing.OverlayType.CIRCLE
                         <?php
                         if($spatial){
-                            ?>
-                            ,google.maps.drawing.OverlayType.POLYGON
-                            <?php
+                        ?>
+                        ,google.maps.drawing.OverlayType.POLYGON
+                        <?php
                         }
                         ?>
                     ]
@@ -566,19 +566,28 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
             //google.maps.event.addListener(map, 'click', clearSelection);
             google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', deleteSelectedShape);
 
-            <?php echo ($queryShape?$queryShape:''); ?>
+            <?php
+            echo ($queryShape?$queryShape:'');
 
-            if(starr){
-                if(<?php echo $recordCnt; ?> > 0){
-                    checkHighResult(<?php echo $recordCnt; ?>);
+            if(!$SOLR_MODE){
+                ?>
+                if(starr){
+                    if(<?php echo $recordCnt; ?> > 0){
+                        checkHighResult(<?php echo $recordCnt; ?>);
+                    }
+                else{
+                        alert('There were no records matching your query.');
+                    }
                 }
                 else{
-                    callLazyLoader();
+                    //hideWorking();
                 }
+                <?php
             }
             else{
-                //hideWorking();
+                echo 'if(starr) callLazyLoader();';
             }
+            ?>
         }
 
         function callLazyLoader(){
@@ -604,6 +613,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
             var recTot = 0;
             var processed = 0;
             var index = 0;
+            var verifyTotal = true;
 
             do{
                 getPointArr(index);
@@ -611,6 +621,21 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                     returnArr = JSON.parse(jsonRecReturn);
                     recTot = returnArr['rectot'];
                     if(recTot > 0){
+                        <?php
+                        if($SOLR_MODE){
+                            ?>
+                            if(verifyTotal && recTot > 10000){
+                                if(confirm("Your search produced "+recTot+" results. Loading this many points can cause significant delays in loading the map. Are you sure you would like to continue?")){
+                                    verifyTotal = false;
+                                }
+                                else{
+                                    zoomToPoint = false;
+                                    break;
+                                }
+                            }
+                            <?php
+                        }
+                        ?>
                         recArr = returnArr['recarr'];
                         processPoints(recArr);
                         jsonRecReturn = '';
@@ -1305,6 +1330,36 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                 alert("Your search produced "+result+" results which exceeds the maximum of 15000, please refine your search more.");
                 //hideWorking();
             }
+        }
+
+        function changeRecordPage(starr,page){
+            document.getElementById("queryrecords").innerHTML = "<p>Loading...</p>";
+            getRecords(starr,page);
+        }
+
+        function getRecords(starr,page){
+            //alert("rpc/changemaprecordpage.php?starr="+starr+"&selected="+JSON.stringify(selections)+"&page="+page);
+
+            setTimeout(function(){
+                $.ajax({
+                    type: "POST",
+                    url: "rpc/changemaprecordpage.php",
+                    async: false,
+                    data: {
+                        starr: starr,
+                        selected: JSON.stringify(selections),
+                        page: page
+                    }
+                }).done(function(msg) {
+                    if(msg){
+                        var newMapRecordList = JSON.parse(msg);
+                        document.getElementById("queryrecords").innerHTML = newMapRecordList;
+                    }
+                    else{
+                        return;
+                    }
+                });
+            },5)
         }
 
         <?php echo ($GEOLOCATION?"google.maps.event.addDomListener(window, 'load', getCoords);":""); ?>

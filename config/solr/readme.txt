@@ -52,16 +52,40 @@ Steps for configuring Apache SOLR:
 
     *Note paths in the following edits may vary depending on your SOLR installation.
 
-    -After the following line (line 85 on SOLR 6.2.1):
+    -Edit the following lines:
 
+        <lib dir="${solr.install.dir:../../../..}/contrib/extraction/lib" regex=".*\.jar" />
+        <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-cell-\d.*\.jar" />
+
+        <lib dir="${solr.install.dir:../../../..}/contrib/clustering/lib/" regex=".*\.jar" />
+        <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-clustering-\d.*\.jar" />
+
+        <lib dir="${solr.install.dir:../../../..}/contrib/langid/lib/" regex=".*\.jar" />
+        <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-langid-\d.*\.jar" />
+
+        <lib dir="${solr.install.dir:../../../..}/contrib/velocity/lib" regex=".*\.jar" />
         <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-velocity-\d.*\.jar" />
 
-    -Add the following lines matching the directory paths to those in the lines before it:
+    -To the following, replacing [SOLR BASE DIRECTORY] with the base path of your SOLR installation:
 
-        <lib dir="${solr.install.dir:../../../..}/contrib/dataimporthandler/lib" regex=".*\.jar" />
-        <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-dataimporthandler-.*\.jar" />
+        <lib dir="[SOLR BASE DIRECTORY]/contrib/extraction/lib" regex=".*\.jar" />
+        <lib dir="[SOLR BASE DIRECTORY]/dist/" regex="solr-cell-\d.*\.jar" />
 
-    -In the Request Handlers section (line 726 on SOLR 6.2.1), add the following lines:
+        <lib dir="[SOLR BASE DIRECTORY]/contrib/clustering/lib/" regex=".*\.jar" />
+        <lib dir="[SOLR BASE DIRECTORY]/dist/" regex="solr-clustering-\d.*\.jar" />
+
+        <lib dir="[SOLR BASE DIRECTORY]/contrib/langid/lib/" regex=".*\.jar" />
+        <lib dir="[SOLR BASE DIRECTORY]/dist/" regex="solr-langid-\d.*\.jar" />
+
+        <lib dir="[SOLR BASE DIRECTORY]/contrib/velocity/lib" regex=".*\.jar" />
+        <lib dir="[SOLR BASE DIRECTORY]/dist/" regex="solr-velocity-\d.*\.jar" />
+
+    -Below the last line, Add the following lines, replacing [SOLR BASE DIRECTORY] with the base path of your SOLR installation:
+
+        <lib dir="[SOLR BASE DIRECTORY]/contrib/dataimporthandler/lib" regex=".*\.jar" />
+        <lib dir="[SOLR BASE DIRECTORY]/dist/" regex="solr-dataimporthandler-.*\.jar" />
+
+    -In the Request Handlers section, add the following lines:
 
         <requestHandler name="/dataimport" class="org.apache.solr.handler.dataimport.DataImportHandler">
             <lst name="defaults">
@@ -71,10 +95,25 @@ Steps for configuring Apache SOLR:
 
     -Save your edits.
 
-8) Copy the files data-config.xml and schema.xml from [SYMBIOTA BASE DIRECTORY]/config/solr to
+8) Delete the file managed-schema from the [SOLR DATA DIRECTORY]/[CORE_NAME]/conf directory.
+
+    **QUICK START INSTRUCTIONS FOR LINUX SYSTEMS**
+
+    *DELETE managed-schema FILE
+    $ sudo rm [SOLR DATA DIRECTORY]/[CORE_NAME]/conf/managed-schema
+
+9) Copy the files data-config.xml and schema.xml from [SYMBIOTA BASE DIRECTORY]/config/solr to
     [SOLR DATA DIRECTORY]/[CORE_NAME]/conf.
 
-9) Edit the file [SOLR DATA DIRECTORY]/[CORE_NAME]/conf/data-config.xml:
+10) On Linux systems, set the owner and group of these two files to solr.
+
+    **QUICK START INSTRUCTIONS FOR LINUX SYSTEMS**
+
+    *SET OWNER AND GROUP TO solr
+    $ sudo chown solr:solr [SOLR DATA DIRECTORY]/[CORE_NAME]/conf/data-config.xml
+    $ sudo chown solr:solr [SOLR DATA DIRECTORY]/[CORE_NAME]/conf/schema.xml
+
+11) Edit the file [SOLR DATA DIRECTORY]/[CORE_NAME]/conf/data-config.xml:
 
     -On line 4, change [Database Host Name] to the host name of your Symbiota database.
 
@@ -88,7 +127,7 @@ Steps for configuring Apache SOLR:
 
     -Save your edits.
 
-10) Start your SOLR installation. Go to the SOLR admin panel at http://localhost:8983/solr/ and select your new Symbiota
+12) Start your SOLR installation. Go to the SOLR admin panel at http://localhost:8983/solr/ and select your new Symbiota
     core in the Core Selector drop down. Click on DataImport and then click the Execute button to initiate a full import.
     Note that this step may take a significant amount of time to complete depending on the size of your Symbiota database.
     You can click on the Refresh Status button to refresh the status information of your import.
@@ -98,7 +137,7 @@ Steps for configuring Apache SOLR:
     *INITIATE A FULL IMPORT
     $ curl "http://localhost:8983/solr/[CORE_NAME]/dataimport?command=full-import"
 
-11) Once the full import is complete, edit the [SYMBIOTA BASE DIRECTORY]/config/symbini.php file of your Symbiota installation:
+13) Once the full import is complete, edit the [SYMBIOTA BASE DIRECTORY]/config/symbini.php file of your Symbiota installation:
 
     -Either locate or add the line:
         $SOLR_URL = '';
@@ -114,7 +153,7 @@ Steps for configuring Apache SOLR:
         in your SOLR core without the need for a full import. Deleted records or images will only be updated in the core
         through a full import however, so if your portal has frequent record or image deletions, set this to a lower setting,
         if not, set this value to a higher setting.
-        e.g.: $SOLR_FULL_IMPORT_INTERVAL = 12;
+        e.g.: $SOLR_FULL_IMPORT_INTERVAL = 24;
 
     -Save your edits.
 

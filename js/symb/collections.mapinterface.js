@@ -928,7 +928,7 @@ function changeTaxonomy(starr,f){
 	sutXmlHttp.send(null);
 }
 
-function changeRecordPage(starr,page){
+/*function changeRecordPage(starr,page){
     document.getElementById("queryrecords").innerHTML = "<p>Loading...</p>";
     getRecords(starr,page);
 }
@@ -956,7 +956,7 @@ function getRecords(starr,page){
             }
         });
     },5)
-}
+}*/
 
 function removeSelectionRecord(sel){
 	var selDivId = "sel"+sel;
