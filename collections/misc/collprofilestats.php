@@ -30,11 +30,12 @@ if($statDisplay == 'geography'){
 				foreach($distArr as $term => $cnt){
 					$countryTerm = ($countryDist?$countryDist:$term);
 					$stateTerm = ($countryDist?($stateDist?$stateDist:$term):'');
+					$countyTerm = ($countryDist && $stateDist?$term:'');
 					echo '<li>';
 					if(!$stateDist) echo '<a href="collprofiles.php?collid='.$collid.'&stat=geography&country='.$countryTerm.'&state='.$stateTerm.'#geographystats">';
 					echo $term;
 					if(!$stateDist) echo '</a>';
-					echo ' (<a href="../list.php?db='.$collid.'&reset=1&country='.$countryTerm.'&state='.$stateTerm.'" target="_blank">'.$cnt.'</a>)';
+					echo ' (<a href="../list.php?db='.$collid.'&reset=1&country='.$countryTerm.'&state='.$stateTerm.'&county='.$countyTerm.'" target="_blank">'.$cnt.'</a>)';
 					echo '</li>';
 				}
 				?>
