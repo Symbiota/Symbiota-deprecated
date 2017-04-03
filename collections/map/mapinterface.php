@@ -651,7 +651,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                     break;
                 }
                 processed = processed + 1000;
-                index = index + 1000;
+                index++;
             }
             while(processed < recTot);
             if(recordsFound){

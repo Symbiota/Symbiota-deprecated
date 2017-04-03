@@ -124,9 +124,10 @@ class SOLRManager extends OccurrenceManager{
         $solrURLsuf = '';
         $this->setSpatial();
         $solrWhere = $this->getSOLRWhere();
+        if($pageRequest > 0) $bottomLimit = ($pageRequest - 1)*$cntPerPage;
         //$solrURLpre = $SOLR_URL.'/select?q=*:*&fq={!geofilt sfield=geo}&pt=35.389049966911664,-109.27001953125&d=5';
         $solrURLpre = $SOLR_URL.'/select?';
-        $solrURLsuf = '&rows='.$cntPerPage.'&start='.$pageRequest;
+        $solrURLsuf = '&rows='.$cntPerPage.'&start='.($bottomLimit?$bottomLimit:'0');
         $solrURLsuf .= '&fl=occid,recordedBy,recordNumber,displayDate,sciname,family,accFamily,tidinterpreted,decimalLatitude,decimalLongitude,'.
             'localitySecurity,locality,collid,catalogNumber,otherCatalogNumbers,InstitutionCode,CollectionCode,CollectionName&wt=json';
         $solrURL = $solrURLpre.$solrWhere.$solrURLsuf;
