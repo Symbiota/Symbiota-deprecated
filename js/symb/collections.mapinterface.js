@@ -885,7 +885,7 @@ function prepSelectionKml(f){
 }
 
 function openPopup(urlStr){
-	wWidth = opener.document.body.offsetWidth*0.95;
+	wWidth = document.body.offsetWidth*0.90;
 	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
