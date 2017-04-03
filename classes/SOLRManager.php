@@ -151,7 +151,7 @@ class SOLRManager extends OccurrenceManager{
             $occId = $k['occid'];
             $collId = $k['collid'];
             $locality = (isset($k['locality'])?$k['locality'][0]:'');
-            $locality .= (isset($k['DecimalLatitude'])?', '.round((float)$k['DecimalLatitude'],5).(isset($k['DecimalLongitude'])?' '.round((float)$k['DecimalLongitude'],5):''):'');
+            $locality .= (isset($k['decimalLatitude'])?', '.round((float)$k['decimalLatitude'],5).(isset($k['decimalLongitude'])?' '.round((float)$k['decimalLongitude'],5):''):'');
             $elev = (isset($k['minimumElevationInMeters'])?$k['minimumElevationInMeters']:'');
             $elev .= (isset($k['minimumElevationInMeters']) && isset($k['maximumElevationInMeters'])?' - ':'');
             $elev .= (isset($k['maximumElevationInMeters'])?$k['maximumElevationInMeters']:'');
@@ -211,7 +211,7 @@ class SOLRManager extends OccurrenceManager{
             $occId = $k['occid'];
             $collId = $k['collid'];
             $locality = (isset($k['locality'])?$k['locality'][0]:'');
-            $locality .= (isset($k['DecimalLatitude'])?', '.round((float)$k['DecimalLatitude'],5).(isset($k['DecimalLongitude'])?' '.round((float)$k['DecimalLongitude'],5):''):'');
+            $locality .= (isset($k['decimalLatitude'])?', '.round((float)$k['decimalLatitude'],5).(isset($k['decimalLongitude'])?' '.round((float)$k['decimalLongitude'],5):''):'');
             $localitySecurity = (isset($k['LocalitySecurity'])?$k['LocalitySecurity']:0);
             $returnArr[$occId]["i"] = (isset($k['InstitutionCode'])?$k['InstitutionCode']:'');
             $returnArr[$occId]["cat"] = (isset($k['catalogNumber'])?$k['catalogNumber']:'');
@@ -219,8 +219,8 @@ class SOLRManager extends OccurrenceManager{
             $returnArr[$occId]["e"] = (isset($k['displayDate'])?$k['displayDate']:'');
             $returnArr[$occId]["f"] = (isset($k['family'])?$k['family']:'');
             $returnArr[$occId]["s"] = (isset($k['sciname'])?$k['sciname']:'');
-            $returnArr[$occId]["lat"] = (isset($k['DecimalLatitude'])?$k['DecimalLatitude']:'');
-            $returnArr[$occId]["lon"] = (isset($k['DecimalLatitude'])?$k['DecimalLatitude']:'');
+            $returnArr[$occId]["lat"] = (isset($k['decimalLatitude'])?$k['decimalLatitude']:'');
+            $returnArr[$occId]["lon"] = (isset($k['decimalLongitude'])?$k['decimalLongitude']:'');
             if(!$localitySecurity || $canReadRareSpp
                 || (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collId,$GLOBALS['USER_RIGHTS']["CollEditor"]))
                 || (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($collId,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){

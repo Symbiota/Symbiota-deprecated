@@ -480,7 +480,9 @@ function openOccidInfoBox(label,lat,lon){
 }
 
 function closeOccidInfoBox(){
-	ibLabel.close();
+	if(ibLabel){
+        ibLabel.close();
+	}
 }
 
 function generateRandColor(){
