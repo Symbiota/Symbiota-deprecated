@@ -1,0 +1,76 @@
+<?php
+/*
+ * * ****  Accepts  ********************************************
+ *
+ * POST requests
+ *
+ * ****  Input Variables  ********************************************
+ *
+ * un: Username for user.
+ * token: Access token for user.
+ * collid: Collection ID for occurrence record.
+ * occid (optional): occid of occurrence record – if blank, must have catnum.
+ * catnum (optional): Catalog number or other catalog number of occurrence record – if blank, must have occid.
+ * sciname (optional): Scientific name of specimen.
+ * caption (optional): Caption for the image.
+ * notes (optional): Notes for the image.
+ * imgfile: The image file.
+ *
+ * * ****  Output  ********************************************
+ *
+ * ERROR or SUCCESS messages.
+ *
+ */
+
+include_once('../config/symbini.php');
+include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceAPIManager.php');
+
+$un = array_key_exists('un',$_POST)?$_POST['un']:'';
+$token = array_key_exists('token',$_POST)?$_POST['token']:'';
+$collid = array_key_exists('collid',$_POST)?$_POST['collid']:0;
+$occid = array_key_exists('occid',$_POST)?$_POST['occid']:0;
+$catnum = array_key_exists('catnum',$_POST)?$_POST['catnum']:'';
+
+$pHandler = new ProfileManager();
+$qHandler = new OccurrenceAPIManager();
+$occManager = new OccurrenceEditorImages();
+$authenticated = false;
+$isEditor = false;
+
+if($_FILES){
+    if($un && $token){
+        if($pHandler->setUserName($un)){
+            $pHandler->setToken($token);
+            $pHandler->setTokenAuthSql();
+            $authenticated = $pHandler->authenticate();
+        }
+    }
+
+    if($authenticated){
+        if($collid){
+            if($occid || $catnum){
+                $isEditor = $qHandler->validateEditor($collid);
+                if($isEditor){
+                    $qHandler->processImageUpload($_POST);
+                }
+                else{
+                    echo 'ERROR: User does not have permission to upload images for this collection';
+                }
+            }
+            else{
+                echo 'ERROR: Missing occid or catnum';
+            }
+        }
+        else{
+            echo 'ERROR: Missing collid';
+        }
+    }
+    else{
+        echo 'ERROR: Could not authenticate user';
+    }
+}
+else{
+    echo 'ERROR: Missing image file';
+}
+?>

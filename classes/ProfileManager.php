@@ -818,11 +818,12 @@ class ProfileManager{
 	}
 
     private function setUserParams(){
-        global $PARAMS_ARR;
+        global $PARAMS_ARR, $GLOBALS;
 	    $_SESSION['userparams']['un'] = $this->userName;
         $_SESSION['userparams']['dn'] = $this->displayName;
         $_SESSION['userparams']['uid'] = $this->uid;
         $PARAMS_ARR = $_SESSION['userparams'];
+        $GLOBALS['USERNAME'] = $this->userName;
     }
 
     public function setTokenAuthSql(){
