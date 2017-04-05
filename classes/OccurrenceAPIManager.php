@@ -106,6 +106,9 @@ class OccurrenceAPIManager{
             $occManager->setSymbUid($PARAMS_ARR["uid"]);
             $occManager->setOccId($occId);
             $occManager->setCollId($pArr["collid"]);
+            if($pArr["sciname"] && $pArr["determiner"]){
+                $this->processImageUploadDetermination($occId,$pArr);
+            }
             $iArr = array(
                 "photographeruid" => $PARAMS_ARR["uid"],
                 "occid" => $occId,
@@ -122,6 +125,70 @@ class OccurrenceAPIManager{
         else{
             echo 'ERROR: Could not determine occid from catnum';
         }
+    }
+
+    public function processImageUploadDetermination($occId,$pArr){
+        $prevDet = '';
+        $detTidAccepted = 0;
+        $detFamily = '';
+        $detSciNameAuthor = '';
+        $sciname = $pArr["sciname"];
+        $determiner = $pArr["determiner"];
+        $detacc = $pArr["detacc"];
+        $prevDet = $this->checkCurrentDetermination($occId);
+        if($prevDet != $sciname){
+            $sql = 'SELECT ts.tidaccepted, ts.family, t.Author '.
+                'FROM taxa AS t LEFT JOIN taxstatus AS ts ON t.TID = ts.tid '.
+                'LEFT JOIN taxauthority AS ta ON ts.taxauthid = ta.taxauthid '.
+                'WHERE t.SciName = "'.$sciname.'" AND ta.isprimary = 1 ';
+            //echo "<div>Sql: ".$sql."</div>";
+            $result = $this->conn->query($sql);
+            while($row = $result->fetch_object()){
+                $detTidAccepted = $row->tidaccepted;
+                $detFamily = $row->family;
+                $detSciNameAuthor = $row->Author;
+            }
+            $result->free();
+            $occManager = new OccurrenceEditorDeterminations();
+            $occManager->setSymbUid($PARAMS_ARR["uid"]);
+            $occManager->setOccId($occId);
+            $occManager->setCollId($pArr["collid"]);
+            $iArr = array(
+                "identificationqualifier" => "",
+                "sciname" => $sciname,
+                "tidtoadd" => $detTidAccepted,
+                "family" => $detFamily,
+                "scientificnameauthorship" => $detSciNameAuthor,
+                "confidenceranking" => 5,
+                "identifiedby" => $pArr['determiner'],
+                "dateidentified" => date('m-d-Y'),
+                "identificationreferences" => "",
+                "identificationremarks" => $pArr['detacc'],
+                "makecurrent" => 1,
+                "occid" => $occId
+            );
+            $occManager->addDetermination($iArr,1);
+            if($SOLR_MODE){
+                $solrManager = new SOLRManager();
+                $solrManager->updateSOLR();
+            }
+            echo 'SUCCESS: New determination added';
+        }
+    }
+
+    public function checkCurrentDetermination($occId){
+        $prevDet = '';
+        $sql = 'SELECT sciname '.
+            'FROM omoccurrences '.
+            'WHERE occid = '.$occId.' ';
+        //echo "<div>Sql: ".$sql."</div>";
+        $result = $this->conn->query($sql);
+        while($row = $result->fetch_object()){
+            $prevDet = $row->sciname;
+        }
+        $result->free();
+
+        return $prevDet;
     }
 
     public function validateEditor($collid){

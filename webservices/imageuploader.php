@@ -11,7 +11,9 @@
  * collid: Collection ID for occurrence record.
  * occid (optional): occid of occurrence record – if blank, must have catnum.
  * catnum (optional): Catalog number or other catalog number of occurrence record – if blank, must have occid.
- * sciname (optional): Scientific name of specimen.
+ * sciname (optional): Scientific name of specimen. NOTE BOTH sciname AND determiner REQUIRED TO APPLY NEW DETERMINATION.
+ * determiner (optional): Name of person or automated process which identified the specimen/image. NOTE BOTH sciname AND determiner REQUIRED TO APPLY NEW DETERMINATION.
+ * detacc (optional): Percent accuracy of identification for automated identifications.
  * caption (optional): Caption for the image.
  * notes (optional): Notes for the image.
  * imgfile: The image file.
