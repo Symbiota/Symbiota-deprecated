@@ -97,8 +97,24 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->identSourceArr = $this->metaArr['ident']['fields'];
 				}
 				if(isset($this->metaArr['image']['fields'])){
-					$this->imageSourceArr = $this->metaArr['image']['fields'];
-				}
+                    $typeField = 0;
+                    $rightsField = 0;
+                    foreach($this->metaArr['image']['fields'] as $k => $v){
+                        if(strtolower($v) == 'type'){
+                            if(!$typeField) $this->imageSourceArr[$k] = strtolower($v);
+                            else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
+                            $typeField++;
+                        }
+                        elseif(strtolower($v) == 'rights'){
+                            if(!$rightsField) $this->imageSourceArr[$k] = strtolower($v);
+                            else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
+                            $rightsField++;
+                        }
+                        else {
+                            $this->imageSourceArr[$k] = strtolower($v);
+                        }
+                    }
+                }
 			}
 			$status = true;
 		}
@@ -436,8 +452,24 @@ class SpecUploadDwca extends SpecUploadBase{
 						$this->outputMsg('<li>Loading image extension... </li>');
 						//Set source array
 						foreach($this->metaArr['image']['fields'] as $k => $v){
-							$this->imageSourceArr[$k] = strtolower($v);
-						}
+                            $typeField = 0;
+                            $rightsField = 0;
+                            foreach($this->metaArr['image']['fields'] as $k => $v){
+                                if(strtolower($v) == 'type'){
+                                    if(!$typeField) $this->imageSourceArr[$k] = strtolower($v);
+                                    else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
+                                    $typeField++;
+                                }
+                                elseif(strtolower($v) == 'rights'){
+                                    if(!$rightsField) $this->imageSourceArr[$k] = strtolower($v);
+                                    else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
+                                    $rightsField++;
+                                }
+                                else {
+                                    $this->imageSourceArr[$k] = strtolower($v);
+                                }
+                            }
+                        }
 						$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
 						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
 					}
