@@ -387,6 +387,7 @@ if($symbUid){
 				if($imgUrlPrefix && substr($lgUrl,0,4) != 'http') $lgUrl = $imgUrlPrefix.$lgUrl;
 				$imgArr[$imgCnt]['lg'] = $lgUrl;
 			}
+			if(isset($i2['error'])) $imgArr[$imgCnt]['error'] = $i2['error'];
 			$imgCnt++;
 		}
 		$fragArr = $occManager->getRawTextFragments();

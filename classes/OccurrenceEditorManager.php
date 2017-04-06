@@ -1696,7 +1696,7 @@ class OccurrenceEditorManager {
 		$imageMap = Array();
 		if($this->occid){
 			$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
-				'sourceurl, copyright, notes, occid, username, sortsequence '.
+				'sourceurl, copyright, notes, occid, username, sortsequence, initialtimestamp '.
 				'FROM images '.
 				'WHERE (occid = '.$this->occid.') ORDER BY sortsequence';
 			//echo $sql;
@@ -1715,6 +1715,13 @@ class OccurrenceEditorManager {
 				$imageMap[$imgId]["occid"] = $row->occid;
 				$imageMap[$imgId]["username"] = $this->cleanOutStr($row->username);
 				$imageMap[$imgId]["sortseq"] = $row->sortsequence;
+				if(strpos($row->originalurl,'api.idigbio.org')){
+					if(strtotime($row->initialtimestamp) > strtotime('-2 days')){
+						//Is a recent iDigBio media server import, check to see if image dirivatives have been made
+						$headerArr = get_headers($row->originalurl,1);
+						if($headerArr['Content-Type'] == 'image/svg+xml') $imageMap[$imgId]['error'] = 'NOTICE: iDigBio image derivatives not yet available, it may take upto 24 hours before image processing is complete';
+					}
+				}
 			}
 			$result->free();
 		}

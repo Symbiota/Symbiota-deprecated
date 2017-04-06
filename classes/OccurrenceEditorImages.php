@@ -297,9 +297,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$status = $imgManager->insertImageTags($postArr);
 		
 		//Get errors and warnings
-		if($imgManager->getErrArr()) {
-			$this->errorStr = implode('<br/>',$imgManager->getErrArr());
-		}
+		$this->errorStr = $imgManager->getErrStr();
 		return $status;
 	}
 	
