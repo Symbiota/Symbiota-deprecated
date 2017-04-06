@@ -429,7 +429,7 @@ class SOLRManager extends OccurrenceManager{
         global $SOLR_URL;
 	    $needsFullUpdate = $this->checkLastSOLRUpdate();
         $command = ($needsFullUpdate?'full-import':'delta-import');
-        file_get_contents($SOLR_URL.'/dataimport?command='.$command);
+        file_get_contents($SOLR_URL.'/dataimport?command='.$command).'&clean=false';
         if($needsFullUpdate){
             $this->resetSOLRInfoFile();
         }
