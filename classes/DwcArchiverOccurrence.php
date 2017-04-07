@@ -1466,7 +1466,7 @@ class DwcArchiverOccurrence extends Manager{
 		if(array_key_exists('intellectualRights',$emlArr)){
 			$rightsElem = $newDoc->createElement('intellectualRights');
 			$paraElem = $newDoc->createElement('para');
-			$paraElem->appendChild($newDoc->createTextNode('To the extent possible under law, the publisher has waived all rights to these data and has dedicated them to the'));
+			$paraElem->appendChild($newDoc->createTextNode('To the extent possible under law, the publisher has waived all rights to these data and has dedicated them to the '));
             $ulinkElem = $newDoc->createElement('ulink');
             $citetitleElem = $newDoc->createElement('citetitle');
             $citetitleElem->appendChild($newDoc->createTextNode((array_key_exists('title',$usageTermArr)?$usageTermArr['title']:'')));

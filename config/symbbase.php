@@ -52,7 +52,7 @@ if(isset($_SESSION['userrights'])){
     $USER_RIGHTS = $_SESSION['userrights'];
 }
 
-$CSS_VERSION = 'ver=20160528';
+$CSS_VERSION = 'ver=201703';
 $USER_DISPLAY_NAME = (array_key_exists("dn",$PARAMS_ARR)?$PARAMS_ARR["dn"]:"");
 $USERNAME = (array_key_exists("un",$PARAMS_ARR)?$PARAMS_ARR["un"]:0);
 $SYMB_UID = (array_key_exists("uid",$PARAMS_ARR)?$PARAMS_ARR["uid"]:0);
@@ -158,15 +158,25 @@ $RIGHTS_TERMS_DEFS = array(
         'url' => 'https://creativecommons.org/publicdomain/zero/1.0/legalcode',
         'def' => 'Users can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission.'
     ),
-    'http://creativecommons.org/licenses/by/4.0/' => array(
+    'http://creativecommons.org/licenses/by/3.0/' => array(
+        'title' => 'CC BY (Attribution)',
+        'url' => 'http://creativecommons.org/licenses/by/3.0/legalcode',
+        'def' => 'Users can copy, redistribute the material in any medium or format, remix, transform, and build upon the material for any purpose, even commercially. The licensor cannot revoke these freedoms as long as you follow the license terms.'
+    ),
+	'http://creativecommons.org/licenses/by-nc/3.0/' => array(
+        'title' => 'CC BY-NC (Attribution-Non-Commercial)',
+        'url' => 'http://creativecommons.org/licenses/by-nc/3.0/legalcode',
+        'def' => 'Users can copy, redistribute the material in any medium or format, remix, transform, and build upon the material. The licensor cannot revoke these freedoms as long as you follow the license terms.'
+    ),
+	'http://creativecommons.org/licenses/by/4.0/' => array(
         'title' => 'CC BY (Attribution)',
         'url' => 'http://creativecommons.org/licenses/by/4.0/legalcode',
-        'def' => 'Users can copy, redistribute the material in any medium or format, remix, transform, and build upon the material for any purpose, even commercially.'
+        'def' => 'Users can copy, redistribute the material in any medium or format, remix, transform, and build upon the material for any purpose, even commercially. The licensor cannot revoke these freedoms as long as you follow the license terms.'
     ),
-    'http://creativecommons.org/licenses/by-nc/4.0/' => array(
+	'http://creativecommons.org/licenses/by-nc/4.0/' => array(
         'title' => 'CC BY-NC (Attribution-Non-Commercial)',
         'url' => 'http://creativecommons.org/licenses/by-nc/4.0/legalcode',
-        'def' => 'Users can copy, redistribute the material in any medium or format, remix, transform, and build upon the material.'
+        'def' => 'Users can copy, redistribute the material in any medium or format, remix, transform, and build upon the material. The licensor cannot revoke these freedoms as long as you follow the license terms.'
     )
 );
 ?>
