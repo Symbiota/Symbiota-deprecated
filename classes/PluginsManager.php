@@ -337,7 +337,8 @@ class PluginsManager {
 		$html .= 'source: function( request, response ) {';
 		$html .= '$.getJSON( "'.$clientRoot.'/collections/rpc/taxalist.php", {';
 		$html .= 'term: extractLast( request.term ), t: function() { return document.quicksearch.taxon.value; }}, response );},';
-		$html .= 'search: function() {';
+		$html .= 'appendTo: "#quicksearchdiv",';
+        $html .= 'search: function() {';
 		$html .= 'var term = extractLast( this.value );';
 		$html .= 'if ( term.length < 4 ) {';
 		$html .= 'return false;}},';
