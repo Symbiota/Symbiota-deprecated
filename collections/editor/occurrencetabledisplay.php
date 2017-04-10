@@ -98,9 +98,9 @@ if($SYMB_UID){
 		$occManager->setSqlWhere($occIndex,$recLimit);
 		$qryCnt = $occManager->getQueryRecordCount(1);
 	}
-	elseif(isset($_COOKIE["editorquery"])){
+	elseif(isset($_SESSION['editorquery'])){
 		//Make sure query is null
-		setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+		unset($_SESSION['editorquery']);
 	}
 	
 	$recArr = $occManager->getOccurMap();
@@ -181,7 +181,7 @@ else{
 				$headerMap = array_intersect_key($headerMapBase, $headerArr);
 			}
 			if($isEditor == 1 || $isGenObs){
-				$buFieldName = (array_key_exists('bufieldname',$_GET)?$_GET['bufieldname']:'');
+				$buFieldName = (array_key_exists('bufieldname',$_REQUEST)?$_REQUEST['bufieldname']:'');
 				?>
 				<div id="batchupdatediv" style="width:600px;clear:both;display:<?php echo ($buFieldName?'block':'none'); ?>;">
 					<form name="batchupdateform" action="occurrencetabledisplay.php" method="post" onsubmit="return false;">
@@ -216,6 +216,7 @@ else{
 												<option value="stage 1" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='stage 1'?'SELECTED':''); ?>>Stage 1</option>
 												<option value="stage 2" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='stage 2'?'SELECTED':''); ?>>Stage 2</option>
 												<option value="stage 3" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='stage 3'?'SELECTED':''); ?>>Stage 3</option>
+												<option value="pending review-nfn" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='pending review-nfn'?'SELECTED':''); ?>>Pending Review-NfN</option>
 												<option value="pending review" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='pending review'?'SELECTED':''); ?>>Pending Review</option>
 												<option value="expert required" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='expert required'?'SELECTED':''); ?>>Expert Required</option>
 												<option value="reviewed" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='reviewed'?'SELECTED':''); ?>>Reviewed</option>

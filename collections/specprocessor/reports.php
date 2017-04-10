@@ -45,7 +45,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 					</tr>
 					<?php 
 					if($userStats = $procManager->getUserStats()){
-						$orderArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed','empty status');
+						$orderArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review-nfn','pending review','expert required','reviewed','closed','empty status');
 						foreach($userStats as $username => $psArr){
 							$eUrlInner = $eUrl.'&q_recordenteredby='.$username.str_replace(array('&q_recordenteredby='),'',$urlBase); 
 							$beUrlInner = $beUrl.'&q_recordenteredby='.$username.'&bufieldname=processingstatus'.str_replace(array('&q_recordenteredby='),'',$urlBase);

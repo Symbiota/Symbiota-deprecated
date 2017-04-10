@@ -20,6 +20,7 @@ $solrManager = new SOLRManager();
 $sharedMapManager->setFieldArr(0);
 
 $mapWhere = '';
+$stArr = Array();
 $genObs = $sharedMapManager->getGenObsInfo();
 
 if($mapType == 'taxa'){
@@ -30,6 +31,7 @@ if($mapType == 'taxa'){
 	$mapWhere = $taxaMapManager->getTaxaSqlWhere();
 	$tArr = $taxaMapManager->getTaxaArr();
 	$sharedMapManager->setTaxaArr($tArr);
+    $sharedMapManager->setSearchTermsArr($stArr);
 }
 elseif($mapType == 'occquery'){
 	$occurMapManager = new OccurrenceMapManager();
@@ -38,7 +40,7 @@ elseif($mapType == 'occquery'){
 		$searchStArr = json_decode($stArrSearchJson, true);
 		$stArr = array_merge($searchStArr,$collStArr);
 		$occurMapManager->setSearchTermsArr($stArr);
-	}
+    }
 	$mapWhere = $occurMapManager->getOccurSqlWhere();
 	$tArr = $occurMapManager->getTaxaArr();
 	$stArr = $occurMapManager->getSearchTermsArr();
@@ -46,7 +48,7 @@ elseif($mapType == 'occquery'){
     if($SOLR_MODE) $solrManager->setSearchTermsArr($stArr);
 }
 
-if($SOLR_MODE){
+/*if($SOLR_MODE){
     $solrManager->setTaxaArr($tArr);
     $solrArr = $solrManager->getGeoArr();
     $coordArr = $solrManager->translateSOLRGeoTaxaList($solrArr);
@@ -54,7 +56,11 @@ if($SOLR_MODE){
 else{
     $sharedMapManager->setTaxaArr($tArr);
     $coordArr = $sharedMapManager->getGeoCoords($mapWhere);
-}
+}*/
+
+$sharedMapManager->setTaxaArr($tArr);
+$coordArr = $sharedMapManager->getGeoCoords($mapWhere);
+
 ?>
 <html>
 <head>

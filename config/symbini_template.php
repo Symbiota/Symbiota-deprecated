@@ -10,15 +10,15 @@ $SECURITY_KEY = '';				//Typically a UUID used to verify access to certain web s
 
 $CLIENT_ROOT = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
 $SERVER_ROOT = '';				//Full path to Symbiota project root folder
-$TEMP_DIR_ROOT = '';				//Must be writable by Apache; will use system default if not specified  
-$LOG_PATH = '';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified 
+$TEMP_DIR_ROOT = $SERVER_ROOT.'/temp';				//Must be writable by Apache; will use system default if not specified  
+$LOG_PATH = $SERVER_ROOT.'/content/logs';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified 
 
 //the root for the image directory
 $IMAGE_DOMAIN = '';				//Domain path to images, if different from portal 
 $IMAGE_ROOT_URL = '';				//URL path to images
 $IMAGE_ROOT_PATH = '';			//Writable path to images, especially needed for downloading images
 
-//Pixel witdth of web images
+//Pixel width of web images
 $IMG_WEB_WIDTH = 1400;
 $IMG_TN_WIDTH = 200;
 $IMG_LG_WIDTH = 3200;

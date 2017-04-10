@@ -41,6 +41,11 @@ $(function() {
 					<div>
 						<img id="activeimg-<?php echo $imgCnt; ?>" src="<?php echo $iUrl; ?>" style="width:400px;height:400px" />
 					</div>
+					<?php 
+					if(array_key_exists('error', $iArr)){
+						echo '<div style="font-weight:bold;color:red">'.$iArr['error'].'</div>';
+					}
+					?>
 					<div style="width:100%;clear:both;">
 						<div style="float:left;">
 							<input type="button" value="OCR Image" onclick="ocrImage(this,<?php echo $imgId.','.$imgCnt; ?>);" />

@@ -1,6 +1,8 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 class OccurrenceAPIManager{
 
@@ -46,7 +48,7 @@ class OccurrenceAPIManager{
         $result = $this->conn->query($sql);
         $canReadRareSpp = false;
         if($USER_RIGHTS){
-            if(array_key_exists("SuperAdmin",$USER_RIGHTS) || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
+            if(array_key_exists("SuperAdmin",$USER_RIGHTS) || array_key_exists("CollAdmin", $USER_RIGHTS) || array_key_exists("RareSppAdmin", $USER_RIGHTS) || array_key_exists("RareSppReadAll", $USER_RIGHTS)){
                 $canReadRareSpp = true;
             }
         }
@@ -93,6 +95,130 @@ class OccurrenceAPIManager{
         $result->free();
 
         return $returnArr;
+    }
+
+    public function processImageUpload($pArr){
+        global $PARAMS_ARR;
+        $occId = 0;
+        $occId = ($pArr["occid"]?$pArr["occid"]:$this->getOccFromCatNum($pArr["collid"],$pArr["catnum"]));
+        if($occId){
+            $occManager = new OccurrenceEditorImages();
+            $occManager->setSymbUid($PARAMS_ARR["uid"]);
+            $occManager->setOccId($occId);
+            $occManager->setCollId($pArr["collid"]);
+            if($pArr["sciname"] && $pArr["determiner"]){
+                $this->processImageUploadDetermination($occId,$pArr);
+            }
+            $iArr = array(
+                "photographeruid" => $PARAMS_ARR["uid"],
+                "occid" => $occId,
+                "caption" => $pArr['caption'],
+                "notes" => $pArr['notes']
+            );
+            $occManager->addImage($iArr);
+            if($SOLR_MODE){
+                $solrManager = new SOLRManager();
+                $solrManager->updateSOLR();
+            }
+            echo 'SUCCESS: Image uploaded';
+        }
+        else{
+            echo 'ERROR: Could not determine occid from catnum';
+        }
+    }
+
+    public function processImageUploadDetermination($occId,$pArr){
+        $prevDet = '';
+        $detTidAccepted = 0;
+        $detFamily = '';
+        $detSciNameAuthor = '';
+        $sciname = $pArr["sciname"];
+        $determiner = $pArr["determiner"];
+        $detacc = $pArr["detacc"];
+        $prevDet = $this->checkCurrentDetermination($occId);
+        if($prevDet != $sciname){
+            $sql = 'SELECT ts.tidaccepted, ts.family, t.Author '.
+                'FROM taxa AS t LEFT JOIN taxstatus AS ts ON t.TID = ts.tid '.
+                'LEFT JOIN taxauthority AS ta ON ts.taxauthid = ta.taxauthid '.
+                'WHERE t.SciName = "'.$sciname.'" AND ta.isprimary = 1 ';
+            //echo "<div>Sql: ".$sql."</div>";
+            $result = $this->conn->query($sql);
+            while($row = $result->fetch_object()){
+                $detTidAccepted = $row->tidaccepted;
+                $detFamily = $row->family;
+                $detSciNameAuthor = $row->Author;
+            }
+            $result->free();
+            $occManager = new OccurrenceEditorDeterminations();
+            $occManager->setSymbUid($PARAMS_ARR["uid"]);
+            $occManager->setOccId($occId);
+            $occManager->setCollId($pArr["collid"]);
+            $iArr = array(
+                "identificationqualifier" => "",
+                "sciname" => $sciname,
+                "tidtoadd" => $detTidAccepted,
+                "family" => $detFamily,
+                "scientificnameauthorship" => $detSciNameAuthor,
+                "confidenceranking" => 5,
+                "identifiedby" => $pArr['determiner'],
+                "dateidentified" => date('m-d-Y'),
+                "identificationreferences" => "",
+                "identificationremarks" => $pArr['detacc'],
+                "makecurrent" => 1,
+                "occid" => $occId
+            );
+            $occManager->addDetermination($iArr,1);
+            if($SOLR_MODE){
+                $solrManager = new SOLRManager();
+                $solrManager->updateSOLR();
+            }
+            echo 'SUCCESS: New determination added';
+        }
+    }
+
+    public function checkCurrentDetermination($occId){
+        $prevDet = '';
+        $sql = 'SELECT sciname '.
+            'FROM omoccurrences '.
+            'WHERE occid = '.$occId.' ';
+        //echo "<div>Sql: ".$sql."</div>";
+        $result = $this->conn->query($sql);
+        while($row = $result->fetch_object()){
+            $prevDet = $row->sciname;
+        }
+        $result->free();
+
+        return $prevDet;
+    }
+
+    public function validateEditor($collid){
+        global $USER_RIGHTS;
+        $isEditor = false;
+        if(array_key_exists("SuperAdmin",$USER_RIGHTS) || ($collid && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
+            $isEditor = true;
+        }
+        elseif($collid && array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollEditor"])){
+            $isEditor = true;
+        }
+
+        return $isEditor;
+    }
+
+    public function getOccFromCatNum($collid,$catnum){
+        $occId = 0;
+        $sql = 'SELECT o.occid '.
+            'FROM omoccurrences AS o '.
+            'WHERE o.collid = '.$collid.' AND (o.catalogNumber = "'.$catnum.'") ';
+        //echo "<div>Sql: ".$sql."</div>";
+        $result = $this->conn->query($sql);
+        while($row = $result->fetch_object()){
+            if($result->num_rows == 1) {
+                $occId = $row->occid;
+            }
+        }
+        $result->free();
+
+        return $occId;
     }
 
 	public function setCollID($val){

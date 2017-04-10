@@ -254,8 +254,9 @@ class MapInterfaceManager{
 			$this->localSearchArr[] = "Point radius: ".$pointArr[0].", ".$pointArr[1].", within ".$pointArr[2]." miles";
 		}
 		if(array_key_exists("polycoords",$this->searchTermsArr)){
-			$coordArr = json_decode($this->searchTermsArr["polycoords"], true);
-			if($coordArr){
+			$polyStr = str_replace("\\","",$this->searchTermsArr["polycoords"]);
+            $coordArr = json_decode($polyStr, true);
+            if($coordArr){
 				$coordStr = '';
 				$coordStr = 'Polygon((';
 				$keys = array();
@@ -856,9 +857,6 @@ class MapInterfaceManager{
 		$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
 			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, '.
 			'o.othercatalognumbers, c.institutioncode, c.collectioncode, c.CollectionName ';
-		if($includeDescr){
-			$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
-		}
 		if($this->fieldArr){
 			foreach($this->fieldArr as $k => $v){
 				$sql .= ", o.".$v." ";
@@ -914,9 +912,6 @@ class MapInterfaceManager{
                 $coordArr[$collName][$occId]["catalognumber"] = $this->xmlentities($row->catalognumber);
                 $coordArr[$collName][$occId]["othercatalognumbers"] = $this->xmlentities($row->othercatalognumbers);
                 $coordArr[$collName]["color"] = $color;
-                if($includeDescr){
-                    $coordArr[$collName][$occId]["descr"] = $this->xmlentities($row->descr);
-                }
                 if($this->fieldArr){
                     foreach($this->fieldArr as $k => $v){
                         $coordArr[$collName][$occId][$v] = $this->xmlentities($row->$v);
@@ -928,10 +923,6 @@ class MapInterfaceManager{
 			$coordArr["undefined"]["color"] = $color;
 		}
 		$result->close();
-		
-		if($recCnt > $recLimit){
-			$coordArr = $recCnt;
-		}
 		
 		return $coordArr;
 		//return $sql;

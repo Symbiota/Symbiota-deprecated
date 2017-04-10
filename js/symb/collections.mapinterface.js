@@ -480,7 +480,9 @@ function openOccidInfoBox(label,lat,lon){
 }
 
 function closeOccidInfoBox(){
-	ibLabel.close();
+	if(ibLabel){
+        ibLabel.close();
+	}
 }
 
 function generateRandColor(){
@@ -883,7 +885,7 @@ function prepSelectionKml(f){
 }
 
 function openPopup(urlStr){
-	wWidth = opener.document.body.offsetWidth*0.95;
+	wWidth = document.body.offsetWidth*0.90;
 	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
@@ -928,30 +930,35 @@ function changeTaxonomy(starr,f){
 	sutXmlHttp.send(null);
 }
 
-function changeRecordPage(starr,page){
+/*function changeRecordPage(starr,page){
     document.getElementById("queryrecords").innerHTML = "<p>Loading...</p>";
+    getRecords(starr,page);
+}
 
+function getRecords(starr,page){
     //alert("rpc/changemaprecordpage.php?starr="+starr+"&selected="+JSON.stringify(selections)+"&page="+page);
 
-    $.ajax({
-        type: "POST",
-        url: "rpc/changemaprecordpage.php",
-        async: false,
-        data: {
-            starr: starr,
-            selected: JSON.stringify(selections),
-            page: page
-        }
-    }).done(function(msg) {
-        if(msg){
-            var newMapRecordList = JSON.parse(msg);
-            document.getElementById("queryrecords").innerHTML = newMapRecordList;
-        }
-        else{
-            return;
-        }
-    });
-}
+    setTimeout(function(){
+        $.ajax({
+            type: "POST",
+            url: "rpc/changemaprecordpage.php",
+            async: false,
+            data: {
+                starr: starr,
+                selected: JSON.stringify(selections),
+                page: page
+            }
+        }).done(function(msg) {
+            if(msg){
+                var newMapRecordList = JSON.parse(msg);
+                document.getElementById("queryrecords").innerHTML = newMapRecordList;
+            }
+            else{
+                return;
+            }
+        });
+    },5)
+}*/
 
 function removeSelectionRecord(sel){
 	var selDivId = "sel"+sel;

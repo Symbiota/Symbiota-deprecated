@@ -1,4 +1,6 @@
 <?php
+include_once($SERVER_ROOT.'/classes/SpecUploadBase.php');
+
 class SpecUploadDirect extends SpecUploadBase {
 
  	public function __construct(){

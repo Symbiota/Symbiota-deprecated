@@ -35,7 +35,7 @@ class PermissionsManager{
 		$returnArr = Array();
 		if(is_numeric($uid)){
 			$sql = "SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.city, u.state, ".
-				"u.zip, u.country, u.email, u.url, u.notes, ul.username, ul.lastlogindate ".
+				"u.zip, u.country, u.email, u.url, u.notes, ul.username, IFNULL(ul.lastlogindate,ul.initialTimestamp) AS lastlogindate ".
 				"FROM users u LEFT JOIN userlogin ul ON u.uid = ul.uid ".
 				"WHERE (u.uid = ".$uid.')';
 			//echo "<div>$sql</div>";

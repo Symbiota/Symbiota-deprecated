@@ -120,7 +120,7 @@ class OccurrenceEditorManager {
 		global $clientRoot;
 		if($overrideQry){
 			$this->qryArr = $overrideQry;
-			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+			unset($_SESSION['editorquery']);
 		}
 		elseif(array_key_exists('q_catalognumber',$_REQUEST) || array_key_exists('q_identifier',$_REQUEST)){
 			//Need to keep q_identifier in code until LBCC croudsourcing Drupal site is no longer active 
@@ -146,10 +146,10 @@ class OccurrenceEditorManager {
 			}
 			if(array_key_exists('orderby',$_REQUEST)) $this->qryArr['orderby'] = trim($_REQUEST['orderby']);
 			if(array_key_exists('orderbydir',$_REQUEST)) $this->qryArr['orderbydir'] = trim($_REQUEST['orderbydir']);
-			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+			unset($_SESSION['editorquery']);
 		}
-		elseif(isset($_COOKIE["editorquery"])){
-			$this->qryArr = json_decode($_COOKIE["editorquery"],true);
+		elseif(isset($_SESSION['editorquery'])){
+			$this->qryArr = json_decode($_SESSION['editorquery'],true);
 		}
 	}
 
@@ -583,7 +583,7 @@ class OccurrenceEditorManager {
 			}
 			$rs->free();
 			$this->qryArr['rc'] = (int)$recCnt;
-			setCookie('editorquery',json_encode($this->qryArr),0,($clientRoot?$clientRoot:'/'));
+			$_SESSION['editorquery'] = json_encode($this->qryArr);
 		}
 		return $recCnt;
 	}
@@ -1696,7 +1696,7 @@ class OccurrenceEditorManager {
 		$imageMap = Array();
 		if($this->occid){
 			$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
-				'sourceurl, copyright, notes, occid, username, sortsequence '.
+				'sourceurl, copyright, notes, occid, username, sortsequence, initialtimestamp '.
 				'FROM images '.
 				'WHERE (occid = '.$this->occid.') ORDER BY sortsequence';
 			//echo $sql;
@@ -1715,6 +1715,13 @@ class OccurrenceEditorManager {
 				$imageMap[$imgId]["occid"] = $row->occid;
 				$imageMap[$imgId]["username"] = $this->cleanOutStr($row->username);
 				$imageMap[$imgId]["sortseq"] = $row->sortsequence;
+				if(strpos($row->originalurl,'api.idigbio.org')){
+					if(strtotime($row->initialtimestamp) > strtotime('-2 days')){
+						//Is a recent iDigBio media server import, check to see if image dirivatives have been made
+						$headerArr = get_headers($row->originalurl,1);
+						if($headerArr['Content-Type'] == 'image/svg+xml') $imageMap[$imgId]['error'] = 'NOTICE: iDigBio image derivatives not yet available, it may take upto 24 hours before image processing is complete';
+					}
+				}
 			}
 			$result->free();
 		}

@@ -124,9 +124,10 @@ class SOLRManager extends OccurrenceManager{
         $solrURLsuf = '';
         $this->setSpatial();
         $solrWhere = $this->getSOLRWhere();
+        if($pageRequest > 0) $bottomLimit = ($pageRequest - 1)*$cntPerPage;
         //$solrURLpre = $SOLR_URL.'/select?q=*:*&fq={!geofilt sfield=geo}&pt=35.389049966911664,-109.27001953125&d=5';
         $solrURLpre = $SOLR_URL.'/select?';
-        $solrURLsuf = '&rows='.$cntPerPage.'&start='.$pageRequest;
+        $solrURLsuf = '&rows='.$cntPerPage.'&start='.($bottomLimit?$bottomLimit:'0');
         $solrURLsuf .= '&fl=occid,recordedBy,recordNumber,displayDate,sciname,family,accFamily,tidinterpreted,decimalLatitude,decimalLongitude,'.
             'localitySecurity,locality,collid,catalogNumber,otherCatalogNumbers,InstitutionCode,CollectionCode,CollectionName&wt=json';
         $solrURL = $solrURLpre.$solrWhere.$solrURLsuf;
@@ -151,7 +152,7 @@ class SOLRManager extends OccurrenceManager{
             $occId = $k['occid'];
             $collId = $k['collid'];
             $locality = (isset($k['locality'])?$k['locality'][0]:'');
-            $locality .= (isset($k['DecimalLatitude'])?', '.round((float)$k['DecimalLatitude'],5).(isset($k['DecimalLongitude'])?' '.round((float)$k['DecimalLongitude'],5):''):'');
+            $locality .= (isset($k['decimalLatitude'])?', '.round((float)$k['decimalLatitude'],5).(isset($k['decimalLongitude'])?' '.round((float)$k['decimalLongitude'],5):''):'');
             $elev = (isset($k['minimumElevationInMeters'])?$k['minimumElevationInMeters']:'');
             $elev .= (isset($k['minimumElevationInMeters']) && isset($k['maximumElevationInMeters'])?' - ':'');
             $elev .= (isset($k['maximumElevationInMeters'])?$k['maximumElevationInMeters']:'');
@@ -211,7 +212,7 @@ class SOLRManager extends OccurrenceManager{
             $occId = $k['occid'];
             $collId = $k['collid'];
             $locality = (isset($k['locality'])?$k['locality'][0]:'');
-            $locality .= (isset($k['DecimalLatitude'])?', '.round((float)$k['DecimalLatitude'],5).(isset($k['DecimalLongitude'])?' '.round((float)$k['DecimalLongitude'],5):''):'');
+            $locality .= (isset($k['decimalLatitude'])?', '.round((float)$k['decimalLatitude'],5).(isset($k['decimalLongitude'])?' '.round((float)$k['decimalLongitude'],5):''):'');
             $localitySecurity = (isset($k['LocalitySecurity'])?$k['LocalitySecurity']:0);
             $returnArr[$occId]["i"] = (isset($k['InstitutionCode'])?$k['InstitutionCode']:'');
             $returnArr[$occId]["cat"] = (isset($k['catalogNumber'])?$k['catalogNumber']:'');
@@ -219,8 +220,8 @@ class SOLRManager extends OccurrenceManager{
             $returnArr[$occId]["e"] = (isset($k['displayDate'])?$k['displayDate']:'');
             $returnArr[$occId]["f"] = (isset($k['family'])?$k['family']:'');
             $returnArr[$occId]["s"] = (isset($k['sciname'])?$k['sciname']:'');
-            $returnArr[$occId]["lat"] = (isset($k['DecimalLatitude'])?$k['DecimalLatitude']:'');
-            $returnArr[$occId]["lon"] = (isset($k['DecimalLatitude'])?$k['DecimalLatitude']:'');
+            $returnArr[$occId]["lat"] = (isset($k['decimalLatitude'])?$k['decimalLatitude']:'');
+            $returnArr[$occId]["lon"] = (isset($k['decimalLongitude'])?$k['decimalLongitude']:'');
             if(!$localitySecurity || $canReadRareSpp
                 || (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collId,$GLOBALS['USER_RIGHTS']["CollEditor"]))
                 || (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($collId,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
@@ -240,73 +241,6 @@ class SOLRManager extends OccurrenceManager{
 
         return $returnArr;
     }
-
-
-    /*public function translateSOLRGeoCollList($sArr){
-        $returnArr = Array();
-        $collMapper = Array();
-        $collMapper["undefined"] = "undefined";
-        $cnt = 0;
-        $color = 'e69e67';
-        foreach($sArr as $k){
-            $canReadRareSpp = false;
-            $collid = $this->xmlentities($k['collid']);
-            $localitySecurity = $k['localitySecurity'];
-            if($GLOBALS['USER_RIGHTS']){
-                if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin",$GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin",$GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll",$GLOBALS['USER_RIGHTS'])){
-                    $canReadRareSpp = true;
-                }
-                elseif(array_key_exists("RareSppReader",$userRights) && in_array($collid,$GLOBALS['USER_RIGHTS']["RareSppReader"])){
-                    $canReadRareSpp = true;
-                }
-            }
-            $decLat = $k['decimalLatitude'];
-            $decLong = $k['decimalLongitude'];
-            if((($decLong <= 180 && $decLong >= -180) && ($decLat <= 90 && $decLat >= -90)) && ($canReadRareSpp || !$localitySecurity)){
-                $occId = $k['occid'];
-                $collName = $k['CollectionName'];
-                $identifier = (isset($k['recordedBy'])?$k['recordedBy']:'');
-                $identifier .= ((isset($k['recordNumber']) || isset($k['displayDate']))?' ':'');
-                $identifier .= ((isset($k['recordNumber']) && !isset($k['displayDate']))?$k['recordNumber']:'');
-                $identifier .= ((!isset($k['recordNumber']) && isset($k['displayDate']))?$k['displayDate']:'');
-                $latLngStr = $decLat.",".$decLong;
-                $returnArr[$collName][$occId]["latLngStr"] = $latLngStr;
-                $returnArr[$collName][$occId]["collid"] = $collid;
-                /*if(isset($k['tidinterpreted']) && $k['tidinterpreted']){
-                    $returnArr[$collName][$occId]["tidinterpreted"] = $k['tidinterpreted'];
-                }
-                else{
-                    $tidcode = strtolower(str_replace( " ", "",$k['sciname']));
-                    $tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
-                    $returnArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
-                }*/
-                /*$tidcode = strtolower(str_replace(" ","",$k['sciname']));
-                $tidcode = preg_replace("/[^A-Za-z0-9 ]/","",$tidcode);
-                $returnArr[$collName][$occId]["namestring"] = $this->xmlentities($tidcode);
-                $returnArr[$collName][$occId]["tidinterpreted"] = (isset($k['tidinterpreted'])?$this->xmlentities($k['tidinterpreted']):'');
-                $returnArr[$collName][$occId]["family"] = (isset($k['accFamily'])?$this->xmlentities($k['accFamily']):(isset($k['family'])?$this->xmlentities($k['family']):''));
-                if($returnArr[$collName][$occId]["family"]){
-                    $returnArr[$collName][$occId]["family"] = strtoupper($returnArr[$collName][$occId]["family"]);
-                }
-                else{
-                    $returnArr[$collName][$occId]["family"] = 'undefined';
-                }
-                $returnArr[$collName][$occId]["sciname"] = (isset($k['sciname'])?$k['sciname']:'');
-                $returnArr[$collName][$occId]["identifier"] = $this->xmlentities($identifier);
-                $returnArr[$collName][$occId]["institutioncode"] = $this->xmlentities($k['InstitutionCode']);
-                $returnArr[$collName][$occId]["collectioncode"] = $this->xmlentities($k['CollectionCode']);
-                $returnArr[$collName][$occId]["catalognumber"] = $this->xmlentities($k['catalogNumber']);
-                $returnArr[$collName][$occId]["othercatalognumbers"] = $this->xmlentities($k['otherCatalogNumbers']);
-                $returnArr[$collName]["color"] = $color;
-            }
-        }
-        if(isset($returnArr['undefined'])){
-            $returnArr["undefined"]["color"] = $color;
-        }
-
-        return $returnArr;
-    }*/
-
 
 
     public function translateSOLRGeoCollList($sArr){
@@ -495,7 +429,7 @@ class SOLRManager extends OccurrenceManager{
         global $SOLR_URL;
 	    $needsFullUpdate = $this->checkLastSOLRUpdate();
         $command = ($needsFullUpdate?'full-import':'delta-import');
-        file_get_contents($SOLR_URL.'/dataimport?command='.$command);
+        file_get_contents($SOLR_URL.'/dataimport?command='.$command.'&clean=false');
         if($needsFullUpdate){
             $this->resetSOLRInfoFile();
         }
@@ -525,7 +459,7 @@ class SOLRManager extends OccurrenceManager{
             }
         }
         else{
-            $needsUpdate = true;
+            $this->resetSOLRInfoFile();
         }
 
         return $needsUpdate;
@@ -916,6 +850,18 @@ class SOLRManager extends OccurrenceManager{
         }
         //echo $retStr; exit;
         return $retStr;
+    }
+
+    public function getCloseTaxaMatch($name){
+        $retArr = array();
+        $searchName = trim($name);
+        $sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$searchName.'") AND sciname != "'.$searchName.'"';
+        if($rs = $this->conn->query($sql)){
+            while($r = $rs->fetch_object()){
+                $retArr[] = $r->sciname;
+            }
+        }
+        return $retArr;
     }
 
     private function xmlentities($string){

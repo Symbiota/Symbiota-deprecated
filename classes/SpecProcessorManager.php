@@ -276,7 +276,7 @@ class SpecProcessorManager {
 			}
 			$rs->free();
 			//Load into $retArr in a specific order
-			$statusArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed','empty status');
+			$statusArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review-nfn','pending review','expert required','reviewed','closed','empty status');
 			foreach($statusArr as $v){
 				if(array_key_exists($v,$psArr)){
 					$retArr[$v] = $psArr[$v];

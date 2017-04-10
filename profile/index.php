@@ -64,8 +64,7 @@ if($action == "logout"){
 	header("Location: ../index.php");
 }
 elseif($action == "Login"){
-	$password = trim($_POST["password"]);
-	if($pHandler->authenticate($password)){
+	if($pHandler->authenticate($_POST["password"])){
 		if(!$refUrl || (strtolower(substr($refUrl,0,4)) == 'http') || strpos($refUrl,'newprofile.php')){
 			header("Location: ../index.php");
 		}

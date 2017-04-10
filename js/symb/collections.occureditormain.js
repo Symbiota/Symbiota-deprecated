@@ -1124,14 +1124,29 @@ function openOccurrenceSearch(target) {
 	if (occWindow.opener == null) occWindow.opener = self;
 }
 
-function toggleLocSecReason(f){
-	var lsrObj = document.getElementById("locsecreason");
-	if(f.localitysecurity.checked){
-		lsrObj.style.display = "inline";
+function localitySecurityChanged(f){
+	fieldChanged('localitysecurity');
+	$("#locsecreason").show();
+}
+
+function localitySecurityReasonChanged(){
+	fieldChanged('localitysecurityreason');
+	if($("input[name=localitysecurityreason]").val() == ''){
+		$("input[name=lockLocalitySecurity]").prop('checked', false);
 	}
 	else{
-		lsrObj.style.display = "none";
+		$("input[name=lockLocalitySecurity]").prop('checked', true);
 	}
+}
+
+function securityLockChanged(cb){
+	if(cb.checked == true){
+		if($("input[name=localitysecurityreason]").val() == '') $("input[name=localitysecurityreason]").val("<Security Setting Locked>");
+	}
+	else{
+		$("input[name=localitysecurityreason]").val("")
+	}
+	fieldChanged('localitysecurityreason');
 }
 
 function autoProcessingStatusChanged(selectObj){

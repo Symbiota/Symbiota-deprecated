@@ -9,13 +9,11 @@ class ProfileManager{
 	private $uid;
 	private $userName;
     private $displayName;
-	private $visitId;
     private $token;
     private $authSql;
-	private $userRights = Array();
 	private $conn;
 	private $errorStr;
-	
+
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 	}
@@ -29,59 +27,14 @@ class ProfileManager{
 	}
 	
 	public function reset(){
-		//Delete cookies
 		$domainName = $_SERVER['SERVER_NAME'];
 		if(!$domainName) $domainName = $_SERVER['HTTP_HOST'];
 		if($domainName == 'localhost') $domainName = false;
-		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
-		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
         setcookie("SymbiotaCrumb", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
-		setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'));
-		setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'));
         setcookie("SymbiotaCrumb", "", time() - 3600, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'));
         unset($_SESSION['userrights']);
         unset($_SESSION['userparams']);
 	}
-	
-	public function setCookies(){
-		$cookieStr = "un=".$this->userName;
-		$cookieStr .= "&dn=".$this->displayName;
-		$cookieStr .= "&uid=".$this->uid;
-		$cookieExpire = 0;
-		if($this->rememberMe){
-			$cookieExpire = time()+60*60*24*30;
-		}
-		$domainName = $_SERVER['SERVER_NAME'];
-		if(!$domainName) $domainName = $_SERVER['HTTP_HOST'];
-		if($domainName == 'localhost') $domainName = false;
-		setcookie("SymbiotaBase", Encryption::encrypt($cookieStr), $cookieExpire, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
-		//Set admin cookie
-		if($this->userRights){
-			$cookieStr = '';
-			foreach($this->userRights as $name => $vArr){
-				$vStr = implode(',',$vArr);
-				$cookieStr .= $name.($vStr?'-'.$vStr:'').'&';
-			}
-			$cookieStr = trim($cookieStr,"&");
-			setcookie("SymbiotaRights", Encryption::encrypt($cookieStr), $cookieExpire, ($GLOBALS["CLIENT_ROOT"]?$GLOBALS["CLIENT_ROOT"]:'/'),$domainName,false,true);
-		}
-	}
-
-    public function setTokenCookie(){
-        $tokenArr = Array();
-        if(!$this->token){
-            $this->createToken();
-        }
-        if($this->token){
-            $tokenArr[] = $this->userName;
-            $tokenArr[] = $this->token;
-            $cookieExpire = time() + 60 * 60 * 24 * 30;
-            $domainName = $_SERVER['SERVER_NAME'];
-            if (!$domainName) $domainName = $_SERVER['HTTP_HOST'];
-            if ($domainName == 'localhost') $domainName = false;
-            setcookie("SymbiotaCrumb", Encryption::encrypt(json_encode($tokenArr)), $cookieExpire, ($GLOBALS["CLIENT_ROOT"] ? $GLOBALS["CLIENT_ROOT"] : '/'), $domainName, false, true);
-        }
-    }
 	
 	public function authenticate($pwdStr = ''){
 		$authStatus = false;
@@ -89,7 +42,10 @@ class ProfileManager{
         unset($_SESSION['userparams']);
 		if($this->userName){
 			if(!$this->authSql){
-                $this->setLoginAuthSql($pwdStr);
+                $this->authSql = 'SELECT u.uid, u.firstname, u.lastname '.
+               		'FROM users AS u INNER JOIN userlogin AS ul ON u.uid = ul.uid '.
+               		'WHERE (ul.username = "'.$this->userName.'") ';
+                if($pwdStr) $this->authSql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
             }
 		    //echo $this->authSql;
 			$result = $this->conn->query($this->authSql);
@@ -100,7 +56,6 @@ class ProfileManager{
 				if(strlen($this->displayName) > 15) $this->displayName = substr($this->displayName,0,10).'...';
 				
 				$authStatus = true;
-				$this->userRights = array();
 				$this->reset();
 				$this->setUserRights();
                 $this->setUserParams();
@@ -117,6 +72,22 @@ class ProfileManager{
 		}
 		return $authStatus;
 	}
+
+    private function setTokenCookie(){
+        $tokenArr = Array();
+        if(!$this->token){
+            $this->createToken();
+        }
+        if($this->token){
+            $tokenArr[] = $this->userName;
+            $tokenArr[] = $this->token;
+            $cookieExpire = time() + 60 * 60 * 24 * 30;
+            $domainName = $_SERVER['SERVER_NAME'];
+            if (!$domainName) $domainName = $_SERVER['HTTP_HOST'];
+            if ($domainName == 'localhost') $domainName = false;
+            setcookie("SymbiotaCrumb", Encryption::encrypt(json_encode($tokenArr)), $cookieExpire, ($GLOBALS["CLIENT_ROOT"] ? $GLOBALS["CLIENT_ROOT"] : '/'), $domainName, false, true);
+        }
+    }
 	
 	public function getPerson(){
 		$sqlStr = "SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.department, ".
@@ -391,7 +362,7 @@ class ProfileManager{
 				$this->userName = $person->getUserName();
 				$this->displayName = $person->getFirstName();
 				$this->reset();
-				$this->setCookies();
+				$this->authenticate();
 			}
 			else{
 				$this->errorStr = 'FAILED: Unable to create user.<div style="margin-left:55px;">Please contact system administrator for assistance.</div>';
@@ -833,31 +804,26 @@ class ProfileManager{
         global $USER_RIGHTS;
 	    //Get Admin Rights
         if($this->uid){
+        	$userRights = array();
 			$sql = 'SELECT role, tablepk FROM userroles WHERE (uid = '.$this->uid.') ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$this->userRights[$r->role][] = $r->tablepk;
+				$userRights[$r->role][] = $r->tablepk;
 			}
 			$rs->free();
-            $_SESSION['userrights'] = $this->userRights;
-            $USER_RIGHTS = $_SESSION['userrights'];
+            $_SESSION['userrights'] = $userRights;
+            $USER_RIGHTS = $userRights;
 		}
 	}
 
     private function setUserParams(){
-        global $PARAMS_ARR;
+        global $PARAMS_ARR, $GLOBALS;
 	    $_SESSION['userparams']['un'] = $this->userName;
         $_SESSION['userparams']['dn'] = $this->displayName;
         $_SESSION['userparams']['uid'] = $this->uid;
         $PARAMS_ARR = $_SESSION['userparams'];
-    }
-
-    private function setLoginAuthSql($pwdStr){
-        $this->authSql = 'SELECT u.uid, u.firstname, u.lastname '.
-            'FROM users AS u INNER JOIN userlogin AS ul ON u.uid = ul.uid '.
-            'WHERE (ul.username = "'.$this->userName.'") ';
-        if($pwdStr) $this->authSql .= 'AND (ul.password = PASSWORD("'.$this->cleanInStr($pwdStr).'")) ';
+        $GLOBALS['USERNAME'] = $this->userName;
     }
 
     public function setTokenAuthSql(){
@@ -871,9 +837,6 @@ class ProfileManager{
         $this->token = $token;
     }
 	
-	public function getUserRights(){
-		return $this->userRights;
-	}
 	public function setRememberMe($test){
 		$this->rememberMe = $test;
 	}

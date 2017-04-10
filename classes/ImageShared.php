@@ -988,12 +988,14 @@ class ImageShared{
 	public function getErrArr(){
 		$retArr = $this->errArr;
 		unset($this->errArr);
+		$this->errArr = array();
 		return $retArr;
 	}
 
 	public function getErrStr(){
 		$retStr = implode('; ',$this->errArr);
 		unset($this->errArr);
+		$this->errArr = array();
 		return $retStr;
 	}
 

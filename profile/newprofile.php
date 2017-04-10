@@ -54,7 +54,7 @@ if($action == "Create Login"){
 	if($okToCreateLogin){
 		if($pHandler->checkLogin($emailAddr)){
 			if($pHandler->register($_POST)){
-				header("Location: viewprofile.php");
+				header("Location: ../index.php");
 			}
 			else{
 				$displayStr = 'FAILED: Unable to create user.<div style="margin-left:55px;">Please contact system administrator for assistance.</div>';

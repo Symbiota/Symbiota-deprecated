@@ -44,11 +44,11 @@ if(isset($PROCESSINGSTATUS) && $PROCESSINGSTATUS){
 	$processingStatusArr = $PROCESSINGSTATUS;
 }
 else{
-	$processingStatusArr = array('unprocessed','unprocessed/NLP','stage 1','stage 2','stage 3','pending review','expert required','reviewed','closed');
+	$processingStatusArr = array('unprocessed','unprocessed/NLP','stage 1','stage 2','stage 3','pending review-nfn','pending review','expert required','reviewed','closed');
 }
 ?>
 <div id="querydiv" style="clear:both;width:790px;display:<?php echo ($displayQuery?'block':'none'); ?>;">
-	<form name="queryform" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get" onsubmit="return verifyQueryForm(this)">
+	<form name="queryform" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="return verifyQueryForm(this)">
 		<fieldset style="padding:5px;">
 			<legend><b>Record Search Form</b></legend>
 			<?php 
