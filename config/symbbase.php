@@ -52,7 +52,7 @@ if(isset($_SESSION['userrights'])){
     $USER_RIGHTS = $_SESSION['userrights'];
 }
 
-$CSS_VERSION = 'ver=201703';
+$CSS_VERSION = '20170409';
 $USER_DISPLAY_NAME = (array_key_exists("dn",$PARAMS_ARR)?$PARAMS_ARR["dn"]:"");
 $USERNAME = (array_key_exists("un",$PARAMS_ARR)?$PARAMS_ARR["un"]:0);
 $SYMB_UID = (array_key_exists("uid",$PARAMS_ARR)?$PARAMS_ARR["uid"]:0);
