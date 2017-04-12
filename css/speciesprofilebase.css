@@ -1,5 +1,266 @@
 #innertable{
-	width:			815px;
+	width:			100%;
+	display:		table;
+	margin:			0 auto;
+}
+
+#toprow{
+	width:			100%;
+	display:		table-row;
+	clear:			both;
+}
+
+#middlerow{
+	width:			100%;
+	display:		table;
+	clear:			both;
+}
+
+#leftcolumn{
+	display:		table-cell;
+}
+
+#leftcolumn.species{
+	width:			300px;
+}
+
+#leftcolumn.genus{
+	width:			250px;
+}
+
+#leftcolumn.higher{
+	width:			250px;
+}
+
+#rightcolumn{
+	display:		table-cell;
+	vertical-align:	top;
+	width:			525px;
+}
+
+#bottomrow{
+	width:			100%;
+	display:		table-row;
+	clear:			both;
+}
+
+#footerrow{
+	width:			100%;
+	display:		block;
+	margin-top:		10px;
+	text-align:		center;
+	clear:			both;
+}
+
+#scinameheader{
+	display:		block;
+}
+
+#scinameheader.species{
+	float: 			left;
+	font-size:		16px;
+	margin-left:	10px;
+	margin-bottom:	0;
+}
+
+#scinameheader.genus{
+	font-size:		16px;
+	margin-left:	10px;
+}
+
+#scinameheader.higher{
+	font-size:		16px;
+	margin-left:	10px;
+}
+
+#sciname.species{
+	font-weight:	bold;
+	color:			#990000;
+}
+
+#sciname.genus{
+	font-weight:	bold;
+	margin-top:		15px;
+	margin-left:	10px;
+}
+
+#sciname.higher{
+	font-weight:	bold;
+	margin-top:		15px;
+	margin-left:	10px;
+}
+
+#parenttaxonicon{
+	border:			0;
+	margin:			0;
+	height:			10px;
+}
+
+#redirectedfrom{
+	font-size:		90%;
+	margin-left: 	25px;
+}
+
+#ambiguous{
+	display:		block;
+	float:			left;
+	font-weight:	bold;
+	clear:			both;
+}
+
+#editbutton{
+	float: 			right;
+	width:			16px;
+	margin:			0;
+	padding:		0;
+}
+
+#editicon{
+	border:			0;
+}
+
+#weblinks{
+	margin-left: 	25px;
+	margin-top: 	0;
+	clear: 			both;
+}
+
+#family.species{
+	display:		block;
+	margin-left:	25px;
+}
+
+#family.genus{
+	display:		block;
+	margin-top:		3px;
+	margin-left:	20px;
+}
+
+#family.higher{
+	display:		block;
+	margin-top:		3px;
+	margin-left:	20px;
+}
+
+#project{
+	display:		block;
+	margin-top:		3px;
+	margin-left:	20px;
+}
+
+#vernaculars{
+	display:		block;
+	margin-left:	10px;
+	margin-top:		0.5em;
+	font-size:		130%;
+}
+
+#synonyms{
+	display:		block;
+	margin-left:	20px;
+	margin-top:		0.5em;
+}
+
+#nocentralimage{
+	display:		block;
+	width:			260px;
+	height:			260px;
+	border-style:	solid;
+	margin-top:		5px;
+	margin-left:	20px;
+	text-align:		center;
+}
+
+#desctabs{
+	height:			400px;
+}
+
+#desctabs.species{
+	display:		none;
+}
+
+#desctabs.genus{
+	display:		none;
+	margin:			10px;
+	clear:			both;
+}
+
+#desctabs.higher{
+	display:		none;
+	margin:			10px;
+	clear:			both;
+}
+
+#nodesc{
+	display:		block;
+	margin:			70px 0px 20px 50px;
+}
+
+#img-div{
+	height:			300px;
+	overflow:		hidden;
+}
+
+#img-tab-div{
+	border-top:		2px solid gray;
+	margin-top:		2px;
+}
+
+#img-tab-expand{
+	background:		#eee;
+	padding:		10px;
+	border:			1px solid #ccc;
+	width:			100px;
+	margin:			auto;
+	text-align:		center;
+}
+
+#imagebox{
+	padding:		10px 2px 10px 2px;
+}
+
+#spptaxonbox{
+	margin-top:		10px;
+}
+
+#imgphotographer{
+	text-align:		right;
+	position:		relative;
+	top:			-26px;
+	left:			5px;
+}
+
+.parentlink{
+	margin-left:		30px;
+}
+
+#links{
+	width:				200px;
+	margin:				auto;
+}
+
+#linksbanner{
+	margin-left:		20px;
+}
+
+#linkslist{
+	margin-left:		10px;
+}
+
+#notfoundbox{
+	display:		block;
+	margin-top:		45px;
+	margin-left:	20px;
+}
+
+#suggestionbox{
+	margin-left:	15px;
+	font-weight:	bold;
+	font-size:		120%;
+}
+
+#suggestionlist{
+	margin-left:	25px;
 }
 
 #centralimage{
@@ -31,27 +292,22 @@
 }
 
 /*Text Description*/
-td.desc{
-	vertical-align:	top;
-	width:			525px;
-	height:			330px;
-}
-
 div.sptab{
 	height:		330px;
-	width:		480px;
+	width:		94%;
 	overflow: 	auto;
 }
 
 div.spptab{
-	height:		300px;
-	width:		500px;
+	height:		330px;
+	width:		94%;
 	overflow: 	auto;
 }
 
 #descsource{
 	text-align:	right;
 	width:		400px;
+	float:		right;
 	padding:	10px 20px 10px 10px;
 }
 
@@ -118,18 +374,20 @@ div.mapthumb a:hover img {
 }
 
 div.spptaxon{
-	text-align: center;
-	width:		170px;
-	float:	 	left;
-  	border: 	1px dotted gray;
-  	margin:		3px;
+	text-align: 	center;
+	width:			170px;
+	height:			300px;
+	float:	 		left;
+  	border: 		1px dotted gray;
+  	margin:			3px;
 }
 
 div.sppimg{
 	margin-left: 	auto;
 	margin-right: 	auto;
-	width:	160px;
-  	height:	150px
+	width:			160px;
+  	height:			150px;
+	overflow:		hidden;
 }
 
 div.sppimg img{
@@ -175,8 +433,17 @@ div.spptext{
 	font-weight:		bold;
 	margin-left:		auto;
 	margin-right:		auto;
+	margin-top:			7px;
 	padding-top:		25px;
 	padding-bottom:		50px;
 	border:				1px dotted grey;
   	width:				125px;
+}
+
+.clear{
+	clear:				both;
+}
+
+.taxonimage{
+	z-index:			-1;
 }
