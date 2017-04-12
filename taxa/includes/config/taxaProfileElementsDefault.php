@@ -13,9 +13,9 @@ ob_start();
 if($taxonRank > 180){
     ?>
     <div id="scinameheader" class="<?php echo $styleClass; ?>">
-    <span id="sciname" class="<?php echo $styleClass; ?>">
-        <i><?php echo $spDisplay; ?></i>
-    </span>
+        <span id="sciname" class="<?php echo $styleClass; ?>">
+            <i><?php echo $spDisplay; ?></i>
+        </span>
         <?php echo $taxonManager->getAuthor(); ?>
         <?php
         $parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClid()."&proj=".$projValue."&taxauthid=".$taxAuthId;
@@ -40,7 +40,7 @@ else{
         $displayName .= '<img id="parenttaxonicon" src="../images/toparent.png" title="Go to Parent" />';
         $displayName .= '</a>';
     }
-    echo "<div id='sciname' class='<?php echo $styleClass; ?>' >$displayName</div>\n";
+    echo "<div id='sciname' class='<?php echo $styleClass; ?>' >$displayName</div>";
     ?>
     </div>
     <?php
@@ -177,7 +177,7 @@ if($descArr = $taxonManager->getDescriptions()){
                     }
                     $descArr = $vArr["desc"];
                     ?>
-                    <div class="clear">
+                    <div style="clear:both;">
                         <?php
                         foreach($descArr as $tdsId => $stmt){
                             echo $stmt." ";
