@@ -64,7 +64,7 @@ if($schema == "backup"){
 			$dwcaHandler->setVerboseMode(0);
 			$dwcaHandler->setIncludeDets(1);
 			$dwcaHandler->setIncludeImgs(1);
-			//$dwcaHandler->setIncludeAttributes(1);
+			$dwcaHandler->setIncludeAttributes(1);
 			$dwcaHandler->setRedactLocalities(0);
 			$dwcaHandler->setCollArr($collid);
 			

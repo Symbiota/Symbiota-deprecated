@@ -474,10 +474,10 @@ class DwcArchiverOccurrence extends Manager{
 		if($this->conditionArr){
 			foreach($this->conditionArr as $field => $condArr){
 				if($field == 'stateid'){
-					$sqlFrag .= 'AND (att.stateid = '.$condArr['EQUALS'][0].') ';
+					$sqlFrag .= 'AND (a.stateid = '.$condArr['EQUALS'][0].') ';
 				}
 				elseif($field == 'traitid'){
-					$sqlFrag .= 'AND (tmstates.traitid = '.$condArr['EQUALS'][0].') ';
+					$sqlFrag .= 'AND (s.traitid = '.$condArr['EQUALS'][0].') ';
 				}
 				else{
 					$sqlFrag2 = '';
@@ -548,14 +548,14 @@ class DwcArchiverOccurrence extends Manager{
 			if(stripos($this->conditionSql,'MATCH(f.recordedby)')){
 				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			}
-			if(stripos($this->conditionSql,'att.stateid')){
+			if(stripos($this->conditionSql,'a.stateid')){
 				//Search is limited by occurrence attribute
-				$sql .= 'INNER JOIN tmattributes att ON o.occid = att.occid ';
+				$sql .= 'INNER JOIN tmattributes a ON o.occid = a.occid ';
 			}
-			elseif(stripos($this->conditionSql,'tmstates.traitid')){
+			elseif(stripos($this->conditionSql,'s.traitid')){
 				//Search is limited by occurrence trait
-				$sql .= 'INNER JOIN tmattributes att ON o.occid = att.occid '.
-					'INNER JOIN tmstates ON att.stateid = tmstates.stateid ';
+				$sql .= 'INNER JOIN tmattributes a ON o.occid = a.occid '.
+					'INNER JOIN tmstates s ON a.stateid = s.stateid ';
 			}
 		}
 		return $sql;
@@ -1159,7 +1159,7 @@ class DwcArchiverOccurrence extends Manager{
 			$rootElem->appendChild($extElem2);
 		}
 		
-			//Image extension
+		//MeasurementOrFact extension
 		if($this->includeAttributes){
 			$extElem3 = $newDoc->createElement('extension');
 			$extElem3->setAttribute('encoding',$this->charSetOut);
@@ -1893,6 +1893,41 @@ class DwcArchiverOccurrence extends Manager{
 			}
 			fwrite($fh, implode($this->delimiter,$outputArr)."\n");
 		}
+	}
+
+	protected function deleteArchive($collID){
+		//Remove archive instance from RSS feed 
+		$rssFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'webservices/dwc/rss.xml';
+		if(!file_exists($rssFile)) return false;
+		$doc = new DOMDocument();
+		$doc->load($rssFile);
+		$cElem = $doc->getElementsByTagName("channel")->item(0);
+		$items = $cElem->getElementsByTagName("item");
+		foreach($items as $i){
+			if($i->getAttribute('collid') == $collID){
+				$link = $i->getElementsByTagName("link");
+				$nodeValue = $link->item(0)->nodeValue;
+				$filePath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/');
+				$filePath1 = $filePath.'content/dwca'.substr($nodeValue,strrpos($nodeValue,'/'));
+				if(file_exists($filePath1)) unlink($filePath1);
+				$emlPath1 = str_replace('.zip','.eml',$filePath1);
+				if(file_exists($emlPath1)) unlink($emlPath1);
+				//Following lines temporarly needed to support previous versions 
+				$filePath2 = $filePath.'collections/datasets/dwc'.substr($nodeValue,strrpos($nodeValue,'/'));
+				if(file_exists($filePath2)) unlink($filePath2);
+				$emlPath2 = str_replace('.zip','.eml',$filePath2);
+				if(file_exists($emlPath2)) unlink($emlPath2);
+				$cElem->removeChild($i);
+			}
+		}
+		$doc->save($rssFile);
+		//Remove DWCA path from database
+		$sql = 'UPDATE omcollections SET dwcaUrl = NULL WHERE collid = '.$collID;
+		if(!$this->conn->query($sql)){
+			$this->logOrEcho('ERROR nullifying dwcaUrl while removing DWCA instance: '.$this->conn->error);
+			return false;
+		}
+		return true;
 	}
 
 	//getters, setters, and misc functions

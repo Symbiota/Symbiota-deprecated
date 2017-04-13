@@ -206,41 +206,6 @@ class DwcArchiverPublisher extends DwcArchiverOccurrence{
 		$this->logOrEcho("Done!!\n");
 	}
 
-	public function deleteArchive($collID){
-		//Remove archive instance from RSS feed 
-		$rssFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'webservices/dwc/rss.xml';
-		if(!file_exists($rssFile)) return false;
-		$doc = new DOMDocument();
-		$doc->load($rssFile);
-		$cElem = $doc->getElementsByTagName("channel")->item(0);
-		$items = $cElem->getElementsByTagName("item");
-		foreach($items as $i){
-			if($i->getAttribute('collid') == $collID){
-				$link = $i->getElementsByTagName("link");
-				$nodeValue = $link->item(0)->nodeValue;
-				$filePath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/');
-				$filePath1 = $filePath.'content/dwca'.substr($nodeValue,strrpos($nodeValue,'/'));
-				if(file_exists($filePath1)) unlink($filePath1);
-				$emlPath1 = str_replace('.zip','.eml',$filePath1);
-				if(file_exists($emlPath1)) unlink($emlPath1);
-				//Following lines temporarly needed to support previous versions 
-				$filePath2 = $filePath.'collections/datasets/dwc'.substr($nodeValue,strrpos($nodeValue,'/'));
-				if(file_exists($filePath2)) unlink($filePath2);
-				$emlPath2 = str_replace('.zip','.eml',$filePath2);
-				if(file_exists($emlPath2)) unlink($emlPath2);
-				$cElem->removeChild($i);
-			}
-		}
-		$doc->save($rssFile);
-		//Remove DWCA path from database
-		$sql = 'UPDATE omcollections SET dwcaUrl = NULL WHERE collid = '.$collID;
-		if(!$this->conn->query($sql)){
-			$this->logOrEcho('ERROR nullifying dwcaUrl while removing DWCA instance: '.$this->conn->error);
-			return false;
-		}
-		return true;
-	}
-
 	//Misc data retrival functions 
 	public function getDwcaItems($collid = 0){
 		$retArr = Array();
