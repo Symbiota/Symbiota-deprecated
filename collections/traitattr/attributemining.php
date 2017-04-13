@@ -68,7 +68,7 @@ if($isEditor){
 				}
 			}
 			if($stateIDArr && $fieldValueArr){
-				if(!$attrManager->submitBatchAttributes($traitID, $stateIDArr, $fieldName, $fieldValueArr, $_POST['notes'])){
+				if(!$attrManager->submitBatchAttributes($traitID, $fieldName, $tidFilter, $stateIDArr, $fieldValueArr, $_POST['notes'])){
 					$statusStr = $attrManager->getErrorMessage();
 				}
 			}

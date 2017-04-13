@@ -468,18 +468,10 @@ class OccurrenceAttributes extends Manager {
 	public function getFieldValueArr($traitID, $fieldName, $tidFilter, $stringFilter){
 		$retArr = array();
 		if(is_numeric($traitID)){
-			$sql = 'SELECT o.'.$fieldName.', count(*) AS cnt FROM omoccurrences o ';
-			$sqlWhere = 'WHERE (o.'.$fieldName.' IS NOT NULL) AND (o.occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.')) ';
-			if($tidFilter){
-				$sql .= 'INNER JOIN taxaenumtree e ON o.tidinterpreted = e.tid ';
-				$sqlWhere .= 'AND (e.taxauthid = 1) AND (e.parenttid = '.$tidFilter.' OR o.tidinterpreted = '.$tidFilter.') ';
-			}
-			if($stringFilter){
-				$sqlWhere .= 'AND (o.'.$fieldName.' LIKE "%'.$this->cleanInStr($stringFilter).'%") ';
-			}
-			if($this->collidStr != 'all') $sqlWhere .= 'AND (o.collid IN('.$this->collidStr.')) ';
-			$sql = $sql.$sqlWhere.'GROUP BY o.'.$fieldName;
-			//echo $sql; exit;
+			$sql = 'SELECT o.'.$fieldName.', count(DISTINCT o.occid) AS cnt FROM omoccurrences o '.
+				$this->getMiningSqlFrag($traitID, $fieldName, $tidFilter, $stringFilter).
+				'GROUP BY o.'.$fieldName;
+			//echo $sql; 
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_assoc()){
 				if($r[$fieldName]) $retArr[] = $r[$fieldName].' - ['.$r['cnt'].']';
@@ -490,7 +482,7 @@ class OccurrenceAttributes extends Manager {
 		return $retArr;
 	}
 
-	public function submitBatchAttributes($traitID, $stateIDArr, $fieldName, $fieldValueArr, $notes){
+	public function submitBatchAttributes($traitID, $fieldName, $tidFilter, $stateIDArr, $fieldValueArr, $notes){
 		set_time_limit(1800);
 		$status = true;
 		$fieldArr = array();
@@ -502,10 +494,10 @@ class OccurrenceAttributes extends Manager {
 		}
 		if($fieldArr){
 			$occArr = array();
-			$sql = 'SELECT occid FROM omoccurrences '.
-				'WHERE ('.$this->cleanInStr($fieldName).' IN("'.implode('","',$fieldArr).'")) '.
-				'AND (occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.')) ';
-			if($this->collidStr != 'all') $sql .= 'AND (collid IN('.$this->collidStr.')) ';
+			$sql = 'SELECT DISTINCT occid FROM omoccurrences o '.
+				$this->getMiningSqlFrag($traitID, $fieldName, $tidFilter).
+				'AND ('.$this->cleanInStr($fieldName).' IN("'.implode('","',$fieldArr).'")) ';
+			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$occArr[] = $r->occid;
@@ -515,10 +507,10 @@ class OccurrenceAttributes extends Manager {
 				if(is_numeric($stateID)){
 					$sql = '';
 					foreach($occArr as $occid){
-						$sql .= ',('.$stateID.','.$occid.','.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.$GLOBALS['SYMB_UID'].')';
+						$sql .= ',('.$stateID.','.$occid.','.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').',"Field mining: ".$this->cleanInStr($fieldName),'.$GLOBALS['SYMB_UID'].')';
 					}
 					if($sql){
-						$sql = 'INSERT INTO tmattributes(stateid,occid,notes,createduid) VALUES'.substr($sql,1);
+						$sql = 'INSERT INTO tmattributes(stateid,occid,notes,source,createduid) VALUES'.substr($sql,1);
 						if(!$this->conn->query($sql)){
 							$this->errorMessage .= 'ERROR saving batch occurrence attributes: '.$this->conn->error.'; ';
 							$status = false;
@@ -528,6 +520,25 @@ class OccurrenceAttributes extends Manager {
 			}
 		}
 		return $status;
+	}
+	
+	private function getMiningSqlFrag($traitID, $fieldName, $tidFilter, $stringFilter = ''){
+		$sql = '';
+		if($tidFilter){
+			$sql = 'INNER JOIN taxaenumtree e ON o.tidinterpreted = e.tid ';
+		}
+		$sql .= 'WHERE (o.'.$fieldName.' IS NOT NULL) '.
+			'AND (o.occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.')) ';
+		if($tidFilter){
+			$sql .= 'AND (e.taxauthid = 1) AND (e.parenttid = '.$tidFilter.' OR o.tidinterpreted = '.$tidFilter.') ';
+		}
+		if($this->collidStr != 'all'){
+			$sql .= 'AND (o.collid IN('.$this->collidStr.')) ';
+		}
+		if($stringFilter){
+			$sql .= 'AND (o.'.$fieldName.' LIKE "%'.$this->cleanInStr($stringFilter).'%") ';
+		}
+		return $sql;
 	}
 
 	//Setters, getters, and misc get functions
