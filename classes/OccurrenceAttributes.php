@@ -474,7 +474,7 @@ class OccurrenceAttributes extends Manager {
 			//echo $sql; 
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_assoc()){
-				if($r[$fieldName]) $retArr[] = $r[$fieldName].' - ['.$r['cnt'].']';
+				if($r[$fieldName]) $retArr[] = strtolower($r[$fieldName]).' - ['.$r['cnt'].']';
 			}
 			$rs->free();
 			sort($retArr);
@@ -497,35 +497,42 @@ class OccurrenceAttributes extends Manager {
 			$sql = 'SELECT DISTINCT occid FROM omoccurrences o '.
 				$this->getMiningSqlFrag($traitID, $fieldName, $tidFilter).
 				'AND ('.$this->cleanInStr($fieldName).' IN("'.implode('","',$fieldArr).'")) ';
-			//echo $sql; exit;
+			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$occArr[] = $r->occid;
 			}
 			$rs->free();
+			$occidChuckArr = array_chunk($occArr, '100000');
 			foreach($stateIDArr as $stateID){
 				if(is_numeric($stateID)){
-					$sql = '';
-					foreach($occArr as $occid){
-						$sql .= ',('.$stateID.','.$occid.')';
-					}
-					if($sql){
-						$sql = 'INSERT INTO tmattributes(stateid,occid) VALUES'.substr($sql,1);
-						if(!$this->conn->query($sql)){
-							$this->errorMessage .= 'ERROR saving batch occurrence attributes: '.$this->conn->error.'; ';
-							$status = false;
+					foreach($occidChuckArr as $oArr){
+						$sql = '';
+						foreach($oArr as $occid){
+							$sql .= ',('.$stateID.','.$occid.')';
+						}
+						if($sql){
+							$sql = 'INSERT INTO tmattributes(stateid,occid) VALUES'.substr($sql,1);
+							if(!$this->conn->query($sql)){
+								$this->errorMessage .= 'ERROR saving batch occurrence attributes: '.$this->conn->error.'; ';
+								$status = false;
+							}
 						}
 					}
 				}
 			}
 			//Add notes, source, and editor uid
-			$sqlUpdate = 'UPDATE tmattributes '.
-				'SET source = "Field mining: '.$this->cleanInStr($fieldName).'", createduid = '.$GLOBALS['SYMB_UID'];
-			if($notes) $sqlUpdate .= ', notes = "'.$this->cleanInStr($notes).'" ';
-			$sqlUpdate .= 'WHERE stateid IN('.implode(',',$stateIDArr).') AND occid IN('.implode(',',$occArr).')';
-			if(!$this->conn->query($sqlUpdate)){
-				$this->errorMessage .= 'ERROR saving batch occurrence attributes(2): '.$this->conn->error.'; ';
-				$status = false;
+			$occidChuckArr = array_chunk($occArr, '200000');
+			foreach($occidChuckArr as $oArr){
+				$sqlUpdate = 'UPDATE tmattributes '.
+					'SET source = "Field mining: '.$this->cleanInStr($fieldName).'", createduid = '.$GLOBALS['SYMB_UID'];
+				if($notes) $sqlUpdate .= ', notes = "'.$this->cleanInStr($notes).'"';
+				$sqlUpdate .= ' WHERE stateid IN('.implode(',',$stateIDArr).') AND occid IN('.implode(',',$oArr).')';
+				//echo $sqlUpdate;
+				if(!$this->conn->query($sqlUpdate)){
+					$this->errorMessage .= 'ERROR saving batch occurrence attributes(2): '.$this->conn->error.'; ';
+					$status = false;
+				}
 			}
 		}
 		return $status;
