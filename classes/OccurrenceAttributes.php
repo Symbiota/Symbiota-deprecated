@@ -507,16 +507,25 @@ class OccurrenceAttributes extends Manager {
 				if(is_numeric($stateID)){
 					$sql = '';
 					foreach($occArr as $occid){
-						$sql .= ',('.$stateID.','.$occid.','.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').',"Field mining: ".$this->cleanInStr($fieldName),'.$GLOBALS['SYMB_UID'].')';
+						$sql .= ',('.$stateID.','.$occid.')';
 					}
 					if($sql){
-						$sql = 'INSERT INTO tmattributes(stateid,occid,notes,source,createduid) VALUES'.substr($sql,1);
+						$sql = 'INSERT INTO tmattributes(stateid,occid) VALUES'.substr($sql,1);
 						if(!$this->conn->query($sql)){
 							$this->errorMessage .= 'ERROR saving batch occurrence attributes: '.$this->conn->error.'; ';
 							$status = false;
 						}
 					}
 				}
+			}
+			//Add notes, source, and editor uid
+			$sqlUpdate = 'UPDATE tmattributes '.
+				'SET source = "Field mining: '.$this->cleanInStr($fieldName).'", createduid = '.$GLOBALS['SYMB_UID'];
+			if($notes) $sqlUpdate .= ', notes = "'.$this->cleanInStr($notes).'" ';
+			$sqlUpdate .= 'WHERE stateid IN('.implode(',',$stateIDArr).') AND occid IN('.implode(',',$occArr).')';
+			if(!$this->conn->query($sqlUpdate)){
+				$this->errorMessage .= 'ERROR saving batch occurrence attributes(2): '.$this->conn->error.'; ';
+				$status = false;
 			}
 		}
 		return $status;
