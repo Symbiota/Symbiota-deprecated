@@ -272,7 +272,7 @@ if($traitID){
 		<?php
 		if($collid){
 			?>
-			<div style="position:absolute;top:0px;right:0px;width:290px;">
+			<div style="float:right;width:290px;">
 				<?php
 				$attrNameArr = $attrManager->getTraitNames();
 				if($mode == 1){ 

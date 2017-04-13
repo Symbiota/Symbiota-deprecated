@@ -3,7 +3,7 @@ include_once($SERVER_ROOT.'/classes/Manager.php');
 
 class OccurrenceAttributes extends Manager {
 
-	private $collid;
+	private $collidStr = 0;
 	private $tidFilter;
 	private $traitArr = array();
 	private $targetOccid = 0;
@@ -55,7 +55,7 @@ class OccurrenceAttributes extends Manager {
 	//Get data functions
 	public function getImageUrls(){
 		$retArr = array();
-		if($this->collid){
+		if($this->collidStr){
 			if(!$this->sqlBody) $this->setSqlBody();
 			$sql = 'SELECT i.occid, IFNULL(o.catalognumber, o.othercatalognumbers) AS catnum '.
 				$this->sqlBody.
@@ -88,7 +88,7 @@ class OccurrenceAttributes extends Manager {
 	
 	public function getSpecimenCount(){
 		$retCnt = 0;
-		if($this->collid){
+		if($this->collidStr){
 			if(!$this->sqlBody) $this->setSqlBody();
 			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.$this->sqlBody;
 			if($this->tidFilter){
@@ -107,7 +107,7 @@ class OccurrenceAttributes extends Manager {
 	private function setSqlBody(){
 		$this->sqlBody = 'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 			'LEFT JOIN tmattributes a ON i.occid = a.occid '.
-			'WHERE (a.occid IS NULL) AND (o.collid = '.$this->collid.') ';
+			'WHERE (a.occid IS NULL) AND (o.collid = '.$this->collidStr.') ';
 		if($this->tidFilter){
 			//Get Synonyms
 			$tidArr = array();
@@ -123,7 +123,7 @@ class OccurrenceAttributes extends Manager {
 				'INNER JOIN taxaenumtree e ON i.tid = e.tid '.
 				'LEFT JOIN tmattributes a ON i.occid = a.occid '.
 				'WHERE (e.parenttid IN('.$this->tidFilter.') OR e.tid IN('.implode(',',$tidArr).')) '.
-				'AND (a.occid IS NULL) AND (o.collid = '.$this->collid.') AND (e.taxauthid = 1) ';
+				'AND (a.occid IS NULL) AND (o.collid = '.$this->collidStr.') AND (e.taxauthid = 1) ';
 		}
 	}
 
@@ -204,7 +204,7 @@ class OccurrenceAttributes extends Manager {
 		$sql = 'SELECT traitid, stateid, statename, description, notes, refurl '.
 			'FROM tmstates '.
 			'WHERE traitid IN('.implode(',',array_keys($this->traitArr)).') '.
-			'ORDER BY sortseq, statecode ';
+			'ORDER BY traitid, sortseq, statecode ';
 		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -313,7 +313,7 @@ class OccurrenceAttributes extends Manager {
 		if($reviewUid && !is_numeric($reviewUid)) return false;
 		if($reviewStatus && !is_numeric($reviewStatus)) return false;
 		if($reviewDate && !preg_match('/^\d{4}-\d{2}-\d{2}$/',$reviewDate)) return false;
-		if(is_numeric($traitID) && $this->collid){
+		if(is_numeric($traitID) && $this->collidStr){
 			$targetOccid = 0;
 			//$traitID is required
 			$sql1 = 'SELECT DISTINCT o.occid, IFNULL(o.catalognumber, o.othercatalognumbers) AS catnum '.
@@ -346,7 +346,7 @@ class OccurrenceAttributes extends Manager {
 		if($reviewUid && !is_numeric($reviewUid)) return false;
 		if($reviewStatus && !is_numeric($reviewStatus)) return false;
 		if($reviewDate && !preg_match('/^\d{4}-\d{2}-\d{2}$/',$reviewDate)) return false;
-		if(is_numeric($traitID) && $this->collid){
+		if(is_numeric($traitID) && $this->collidStr){
 			//$traitID is required
 			$sql = 'SELECT COUNT(DISTINCT o.occid) as cnt '.
 				$this->getReviewSqlBase($traitID, $reviewUid, $reviewDate, $reviewStatus);
@@ -364,7 +364,7 @@ class OccurrenceAttributes extends Manager {
 		$sqlFrag = 'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 			'INNER JOIN tmattributes a ON i.occid = a.occid '.
 			'INNER JOIN tmstates s ON a.stateid = s.stateid '. 
-			'WHERE (s.traitid = '.$traitID.') AND (o.collid = '.$this->collid.') ';
+			'WHERE (s.traitid = '.$traitID.') AND (o.collid = '.$this->collidStr.') ';
 		if($reviewUid){
 			$sqlFrag .= 'AND (a.createduid = '.$reviewUid.') ';
 		}
@@ -442,7 +442,7 @@ class OccurrenceAttributes extends Manager {
 			'FROM tmattributes a INNER JOIN users u ON a.createduid = u.uid '.
 			'INNER JOIN userlogin l ON u.uid = l.uid '.
 			'INNER JOIN omoccurrences o ON a.occid = o.occid '.
-			'WHERE o.collid = '.$this->collid.' ORDER BY u.lastname, u.firstname';
+			'WHERE o.collid = '.$this->collidStr.' ORDER BY u.lastname, u.firstname';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->uid] = $r->lastname.($r->firstname?', '.$r->firstname:'').' ('.$r->username.')';
@@ -455,7 +455,7 @@ class OccurrenceAttributes extends Manager {
 		$retArr = array();
 		$sql = 'SELECT DISTINCT DATE(a.initialtimestamp) as d '.
 			'FROM tmattributes a INNER JOIN omoccurrences o ON a.occid = o.occid '.
-			'WHERE o.collid = '.$this->collid.' ORDER BY a.initialtimestamp DESC';
+			'WHERE o.collid = '.$this->collidStr.' ORDER BY a.initialtimestamp DESC';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[] = $r->d;
@@ -469,8 +469,7 @@ class OccurrenceAttributes extends Manager {
 		$retArr = array();
 		if(is_numeric($traitID)){
 			$sql = 'SELECT o.'.$fieldName.', count(*) AS cnt FROM omoccurrences o ';
-			$sqlWhere = 'WHERE (o.collid = '.$this->collid.') AND (o.'.$fieldName.' IS NOT NULL) '.
-				'AND (o.occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.')) ';
+			$sqlWhere = 'WHERE (o.'.$fieldName.' IS NOT NULL) AND (o.occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.')) ';
 			if($tidFilter){
 				$sql .= 'INNER JOIN taxaenumtree e ON o.tidinterpreted = e.tid ';
 				$sqlWhere .= 'AND (e.taxauthid = 1) AND (e.parenttid = '.$tidFilter.' OR o.tidinterpreted = '.$tidFilter.') ';
@@ -478,8 +477,9 @@ class OccurrenceAttributes extends Manager {
 			if($stringFilter){
 				$sqlWhere .= 'AND (o.'.$fieldName.' LIKE "%'.$this->cleanInStr($stringFilter).'%") ';
 			}
+			if($this->collidStr != 'all') $sqlWhere .= 'AND (o.collid IN('.$this->collidStr.')) ';
 			$sql = $sql.$sqlWhere.'GROUP BY o.'.$fieldName;
-			//echo $sql;
+			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_assoc()){
 				if($r[$fieldName]) $retArr[] = $r[$fieldName].' - ['.$r['cnt'].']';
@@ -491,29 +491,34 @@ class OccurrenceAttributes extends Manager {
 	}
 
 	public function submitBatchAttributes($traitID, $stateIDArr, $fieldName, $fieldValueArr, $notes){
+		set_time_limit(1800);
 		$status = true;
+		$fieldArr = array();
 		foreach($fieldValueArr as $fieldValue){
-			unset($occidArr);
 			if(preg_match('/(.+) - \[\d+\]$/',$fieldValue,$m)){
 				$fieldValue = $m[1];
 			}
-			$occidArr = array();
+			$fieldArr[] = $this->conn->real_escape_string($fieldValue);
+		}
+		if($fieldArr){
+			$occArr = array();
 			$sql = 'SELECT occid FROM omoccurrences '.
-				'WHERE (collid = '.$this->collid.') AND ('.$this->cleanInStr($fieldName).' = "'.$this->conn->real_escape_string($fieldValue).'") '.
+				'WHERE ('.$this->cleanInStr($fieldName).' IN("'.implode('","',$fieldArr).'")) '.
 				'AND (occid NOT IN(SELECT t.occid FROM tmattributes t INNER JOIN tmstates s ON t.stateid = s.stateid WHERE s.traitid = '.$traitID.')) ';
-			//echo $sql.'<br/>';
+			if($this->collidStr != 'all') $sql .= 'AND (collid IN('.$this->collidStr.')) ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$occidArr[] = $r->occid;
+				$occArr[] = $r->occid;
 			}
 			$rs->free();
-			//Apply traits to targetted specimens
 			foreach($stateIDArr as $stateID){
 				if(is_numeric($stateID)){
-					foreach($occidArr as $occid){
-						$sql = 'INSERT INTO tmattributes(stateid,occid,notes,createduid) '.
-							'VALUES('.$stateID.','.$occid.','.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.$GLOBALS['SYMB_UID'].')';
-						//echo $sql.'<br/>';
+					$sql = '';
+					foreach($occArr as $occid){
+						$sql .= ',('.$stateID.','.$occid.','.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.$GLOBALS['SYMB_UID'].')';
+					}
+					if($sql){
+						$sql = 'INSERT INTO tmattributes(stateid,occid,notes,createduid) VALUES'.substr($sql,1);
 						if(!$this->conn->query($sql)){
 							$this->errorMessage .= 'ERROR saving batch occurrence attributes: '.$this->conn->error.'; ';
 							$status = false;
@@ -525,10 +530,22 @@ class OccurrenceAttributes extends Manager {
 		return $status;
 	}
 
-	//Setters and getters
-	public function setCollid($collid){
-		if(is_numeric($collid)){
-			$this->collid = $collid;
+	//Setters, getters, and misc get functions
+	public function getCollectionList($collArr){
+		$retArr = array();
+		$sql = 'SELECT collid, collectionname, CONCAT_WS("-",institutioncode,collectioncode) as instcode FROM omcollections ';
+		if($collArr) $sql .= 'WHERE collid IN('.implode(',',$collArr).')';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->collid] = $r->collectionname.' ('.$r->instcode.')';
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function setCollid($idStr){
+		if(preg_match('/^[0-9,al]+$/', $idStr)){
+			$this->collidStr = $idStr;
 		}
 	}
 
