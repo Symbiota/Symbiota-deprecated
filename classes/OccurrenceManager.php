@@ -652,7 +652,7 @@ class OccurrenceManager{
 			$categoryArr = $occArr['cat'];
 			?>
 			<div style="float:right;margin-top:20px;">
-				<input type="submit" class="searchcollnextbtn" value="" title="" />
+				<input type="submit" class="nextbtn searchcollnextbtn" value="Next >"  />
 			</div>
 			<table style="float:left;width:80%;">
 				<?php
@@ -790,14 +790,14 @@ class OccurrenceManager{
 			if(!isset($occArr['cat'])){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*5; ?>px;right:0px;">
-					<input type="submit" class="searchcollnextbtn" value="" title="" />
+					<input type="submit" class="nextbtn searchcollnextbtn" value="Next >" />
 				</div>
 				<?php
 			}
 			if(count($collArr) > 40){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*15; ?>px;right:0px;">
-					<input type="submit" class="searchcollnextbtn" value="" title="" />
+					<input type="submit" class="nextbtn searchcollnextbtn" value="Next >" />
 				</div>
 				<?php
 			}

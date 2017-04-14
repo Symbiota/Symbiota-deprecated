@@ -26,8 +26,8 @@ if(isset($_REQUEST['db'])){
 <html>
 <head>
     <title><?php echo $defaultTitle.' '.$LANG['PAGE_TITLE']; ?></title>
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
@@ -136,9 +136,6 @@ if(isset($_REQUEST['db'])){
 
 	<div id="innertext">
 		<h1><?php echo $LANG['PAGE_HEADER']; ?></h1>
-        <div style='float:right;margin:10px;'>
-            <button type="button" id="resetform" onclick='resetHarvestParamsForm();'>Reset Form</button>
-        </div>
 		<?php echo $LANG['GENERAL_TEXT_1']; ?>
         <div style="margin:5px;">
 			<input type='checkbox' name='showtable' id='showtable' value='1' onchange="changeTableDisplay();" /> Show results in table view
@@ -146,7 +143,8 @@ if(isset($_REQUEST['db'])){
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:10px;'>
-				<input type="submit" class="harvestparamtbtn" value="" title="" />
+				<div style="margin-bottom:20px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['NEXT_BUTTON'])?$LANG['NEXT_BUTTON']:'Next >'; ?>" /></div>
+				<div><button type="button" class="resetbtn" onclick='resetHarvestParamsForm(this.form);'><?php echo isset($LANG['RESET_BUTTON'])?$LANG['RESET_BUTTON']:'Reset Form'; ?></button></div>
 			</div>
 			<div>
 				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>
@@ -272,7 +270,7 @@ if(isset($_REQUEST['db'])){
 				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="" title="<?php echo $LANG['TITLE_TEXT_4']; ?>" />
 			</div>
 			<div style="float:right;">
-				<input type="submit" class="harvestparamtbtn" value="" title="" />
+				<input type="submit" class="nextbtn" value="Next >" />
 			</div>
 			<div>
 				<h1><?php echo $LANG['SPECIMEN_HEADER']; ?></h1>
