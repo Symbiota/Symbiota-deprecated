@@ -8,7 +8,6 @@
 <html>
 	<head>
 		<title>Page</title>
-		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" />
 	</head>
 	<body>
 		<?php

@@ -37,8 +37,7 @@ if($SYMB_UID){
 <head>
 	<title><?php echo $DEFAULT_TITLE." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
 	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData["collectionname"]:""); ?>" />
-	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" rel="Stylesheet" type="text/css" />
 	<script src="../../js/jquery.js?ver=20130917" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js?ver=20130917" type="text/javascript"></script>

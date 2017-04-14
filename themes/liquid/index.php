@@ -6,8 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
 <html>
 <head>
 	<title><?php echo $defaultTitle?> Home</title>
-	<link href="css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<meta name='keywords' content='' />
 	<script type="text/javascript">
 		<?php include_once('config/googleanalytics.php'); ?>

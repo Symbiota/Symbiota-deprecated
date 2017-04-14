@@ -100,8 +100,7 @@ $navStr .= '</div>';
 <html>
 	<head>
 		<title>Specimen Edit Reviewer</title>
-		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<script>
 			function selectAllId(cbObj){
 				var eElements = document.getElementsByName("id[]");

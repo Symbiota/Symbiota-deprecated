@@ -22,8 +22,7 @@ $eolManager = new EOLManager();
 <head>
 	<title><?php echo $DEFAULT_TITLE." EOL Manager: "; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>"/>
-	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<script language=javascript>
 
 	</script>

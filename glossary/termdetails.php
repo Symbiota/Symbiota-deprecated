@@ -96,8 +96,7 @@ if($glossId){
 <html>
 <head>
     <title><?php echo $DEFAULT_TITLE; ?> Glossary Management</title>
-    <link href="../css/base.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
-    <link href="../css/main.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
+    <link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
 	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
 	<style type="text/css">
 		#tabs a{

@@ -13,8 +13,7 @@ $verifyPathsObj = new VerifyPaths();
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Verify Image Paths</title>
-	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 </head>
 <body>
 	<?php

@@ -9,8 +9,7 @@ $unkDisplayManager = new UnknownDisplayManager();
 <html>
 <head>
 <title><?php echo $defaultTitle; ?> - Unknown Display</title>
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link rel="stylesheet" href="../css/speciesprofile.css" type="text/css"/>
 	<meta name='keywords' content='' />
 </head>
