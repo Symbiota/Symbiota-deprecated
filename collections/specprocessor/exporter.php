@@ -447,7 +447,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									</td>
 								</tr>
 								<?php 
-								if($traitArr = $dlManager->getAttributeTraits()){
+								if($traitArr = $dlManager->getAttributeTraits($collid)){
 									?>
 									<tr>
 										<td valign="top">
@@ -457,9 +457,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										</td>
 										<td>
 											<div style="margin:10px;">
-												<select name="traitid">
-													<option value="0">Select Trait</option>
-													<option value="0">--------------------------</option>
+												<select name="traitid[]" multiple>
 													<?php 
 														foreach($traitArr as $traitID => $tArr){
 															echo '<option value="'.$traitID.'">'.$tArr['name'].' [ID:'.$traitID.']</option>';
@@ -468,12 +466,10 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												</select> 
 											</div>
 											<div style="margin:10px;">
-												-- or select a specific Attribute State --
+												-- OR select a specific Attribute State --
 											</div>
 											<div style="margin:10px;">
-												<select name="stateid">
-													<option value="0">Select State</option>
-													<option value="0">--------------------------</option>
+												<select name="stateid[]" multiple>
 													<?php 
 													foreach($traitArr as $traitID => $tArr){
 														$stateArr = $tArr['state'];
@@ -483,6 +479,9 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 													}
 													?>
 												</select>
+											</div>
+											<div style="">
+												* Hold down the control (ctrl) or command button to select multiple options
 											</div>
 										</td>
 									</tr>

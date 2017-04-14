@@ -464,7 +464,12 @@ class DwcArchiverOccurrence extends Manager{
 		if($field){
 			if(!$cond) $cond = 'EQUALS';
 			if($value || ($cond == 'NULL' || $cond == 'NOTNULL')){
-				$this->conditionArr[$field][$cond][] = $this->cleanInStr($value);
+				if(is_array($value)){
+					$this->conditionArr[$field][$cond] = $this->cleanInArray($value);
+				}
+				else{
+					$this->conditionArr[$field][$cond][] = $this->cleanInStr($value);
+				}
 			}
 		}
 	}
@@ -474,10 +479,10 @@ class DwcArchiverOccurrence extends Manager{
 		if($this->conditionArr){
 			foreach($this->conditionArr as $field => $condArr){
 				if($field == 'stateid'){
-					$sqlFrag .= 'AND (a.stateid = '.$condArr['EQUALS'][0].') ';
+					$sqlFrag .= 'AND (a.stateid IN('.implode(',',$condArr['EQUALS']).')) ';
 				}
 				elseif($field == 'traitid'){
-					$sqlFrag .= 'AND (s.traitid = '.$condArr['EQUALS'][0].') ';
+					$sqlFrag .= 'AND (s.traitid IN('.implode(',',$condArr['EQUALS']).')) ';
 				}
 				else{
 					$sqlFrag2 = '';

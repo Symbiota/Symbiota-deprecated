@@ -639,11 +639,13 @@ xmlwriter_end_attribute($xml_resource);
 		return array_merge(array_intersect($templateArr,$psArr),array_diff($psArr,$templateArr));
 	}
 
-	public function getAttributeTraits(){
+	public function getAttributeTraits($collid = ''){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT t.traitid, t.traitname, s.stateid, s.statename '.
 			'FROM tmtraits t INNER JOIN tmstates s ON t.traitid = s.traitid '.
-			'INNER JOIN tmattributes a ON s.stateid = a.stateid';
+			'INNER JOIN tmattributes a ON s.stateid = a.stateid '.
+			'INNER JOIN omoccurrences o ON a.occid = o.occid ';
+		if($collid) $sql .= 'WHERE o.collid = '.$collid;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->traitid]['name'] = $r->traitname;
