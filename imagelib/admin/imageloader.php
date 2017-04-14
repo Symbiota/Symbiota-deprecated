@@ -33,6 +33,7 @@ if($isEditor){
 	<title><?php echo $defaultTitle; ?> Image Loader</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function verifyUploadForm(f){
 			return true;

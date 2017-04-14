@@ -101,6 +101,7 @@ $navStr .= '</div>';
 	<head>
 		<title>Specimen Edit Reviewer</title>
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<script>
 			function selectAllId(cbObj){
 				var eElements = document.getElementsByName("id[]");

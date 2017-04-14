@@ -7,6 +7,7 @@
 <html>
 	<head>
 		<title>Page</title>
+		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" />
 	</head>
 	<body>
 		<?php
