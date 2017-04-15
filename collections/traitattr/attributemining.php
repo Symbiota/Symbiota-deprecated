@@ -179,28 +179,26 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 		<div id="innertext">
 			<?php 
 			if($collid){
+				if($collid == 'all'){
+					echo '<h2 class="heading">Searching All Collections</h2>';
+				}
+				elseif(is_numeric($collid)){
+					echo '<h2 class="heading">'.$collArr[$collid].'</h2>';
+				}
+				else{
+					$collIdArr = explode(',',$collid);
+					echo '<fieldset>';
+					echo '<legend style="font-weight:bold;font-size:130%"><a href="#" style="" onclick="toggleCollections()">Searching '.count($collIdArr).' Collections</a></legend>';
+					echo '<div id="collDiv" style="display:none;padding:10px;">';
+					foreach($collIdArr as $id){
+						echo '<div>'.$collArr[$id].'</div>';
+					}
+					echo '</div>';
+					echo '<div id="displayDiv" style="margin:0px 20px"><a href="#" onclick="toggleCollections()">click to display collection list</a></div>';
+					echo '</fieldset>';
+				}
 				?>
 				<div style="width:500px;">
-					<?php
-					if($collid == 'all'){
-						echo '<h2 class="heading">Searching All Collections</h2>';
-					}
-					elseif(is_numeric($collid)){
-						echo '<h2 class="heading">'.$collArr[$collid].'</h2>';
-					}
-					else{
-						$collIdArr = explode(',',$collid);
-						echo '<fieldset>';
-						echo '<legend style="font-weight:bold;font-size:130%"><a href="#" style="" onclick="toggleCollections()">Searching '.count($collIdArr).' Collections</a></legend>';
-						echo '<div id="collDiv" style="display:none;padding:10px;">';
-						foreach($collIdArr as $id){
-							echo '<div>'.$collArr[$id].'</div>';
-						}
-						echo '</div>';
-						echo '<div id="displayDiv" style="margin:0px 20px"><a href="#" onclick="toggleCollections()">click to display collection list</a></div>';
-						echo '</fieldset>';
-					}
-					?>
 					<fieldset style="margin:15px;padding:15px;">
 						<legend><b>Filter</b></legend>
 						<form name="filterform" method="post" action="attributemining.php" onsubmit="return verifyFilterForm(this)" >

@@ -142,8 +142,8 @@ if(isset($_REQUEST['db'])){
 		</div>
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
-			<div style='float:right;margin:10px;'>
-				<div style="margin-bottom:20px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['NEXT_BUTTON'])?$LANG['NEXT_BUTTON']:'Next >'; ?>" /></div>
+			<div style='float:right;margin:5px 10px;'>
+				<div style="margin-bottom:10px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['NEXT_BUTTON'])?$LANG['NEXT_BUTTON']:'Next >'; ?>" /></div>
 				<div><button type="button" class="resetbtn" onclick='resetHarvestParamsForm(this.form);'><?php echo isset($LANG['RESET_BUTTON'])?$LANG['RESET_BUTTON']:'Reset Form'; ?></button></div>
 			</div>
 			<div>

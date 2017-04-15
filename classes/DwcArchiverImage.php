@@ -77,6 +77,15 @@ class DwcArchiverImage{
 			if(strpos($conditionSql,'MATCH(f.recordedby)')){
 				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			}
+			if(stripos($conditionSql,'a.stateid')){
+				//Search is limited by occurrence attribute
+				$sql .= 'INNER JOIN tmattributes a ON o.occid = a.occid ';
+			}
+			elseif(stripos($conditionSql,'s.traitid')){
+				//Search is limited by occurrence trait
+				$sql .= 'INNER JOIN tmattributes a ON o.occid = a.occid '.
+					'INNER JOIN tmstates s ON a.stateid = s.stateid ';
+			}
 			$sql .= $conditionSql;
 			if($redactLocalities){
 				if($rareReaderArr){
