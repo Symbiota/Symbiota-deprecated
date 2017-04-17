@@ -76,15 +76,15 @@ if($action){
 	<script src="../js/jquery-ui.js" type="text/javascript"></script>
 	<script src="../js/jquery.manifest.js" type="text/javascript"></script>
 	<script src="../js/jquery.marcopolo.js" type="text/javascript"></script>
-	<script src="../js/symb/images.index.js?ver=20170220" type="text/javascript"></script>
+	<script src="../js/symb/images.index.js?ver=20170417" type="text/javascript"></script>
 	<meta name='keywords' content='' />
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 		var phArr = <?php echo (isset($previousCriteria["phjson"])&&$previousCriteria["phjson"]?"JSON.parse('".$previousCriteria["phjson"]."')":"new Array()"); ?>;
-		
-		$(document).ready(function() {
+
+        jQuery(document).ready(function($) {
 			$('#tabs').tabs({
 				active: <?php echo (($imageArr || $taxaList)?'2':'0'); ?>,
 				beforeLoad: function( event, ui ) {
