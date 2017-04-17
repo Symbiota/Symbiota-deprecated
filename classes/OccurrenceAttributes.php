@@ -482,7 +482,7 @@ class OccurrenceAttributes extends Manager {
 		return $retArr;
 	}
 
-	public function submitBatchAttributes($traitID, $fieldName, $tidFilter, $stateIDArr, $fieldValueArr, $notes){
+	public function submitBatchAttributes($traitID, $fieldName, $tidFilter, $stateIDArr, $fieldValueArr, $notes, $reviewStatus){
 		set_time_limit(1800);
 		$status = true;
 		$fieldArr = array();
@@ -527,6 +527,7 @@ class OccurrenceAttributes extends Manager {
 				$sqlUpdate = 'UPDATE tmattributes '.
 					'SET source = "Field mining: '.$this->cleanInStr($fieldName).'", createduid = '.$GLOBALS['SYMB_UID'];
 				if($notes) $sqlUpdate .= ', notes = "'.$this->cleanInStr($notes).'"';
+				if(is_numeric($reviewStatus)) $sqlUpdate .= ', statuscode = "'.$this->cleanInStr($reviewStatus).'"';
 				$sqlUpdate .= ' WHERE stateid IN('.implode(',',$stateIDArr).') AND occid IN('.implode(',',$oArr).')';
 				//echo $sqlUpdate;
 				if(!$this->conn->query($sqlUpdate)){

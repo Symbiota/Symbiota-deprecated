@@ -68,7 +68,7 @@ if($isEditor){
 				}
 			}
 			if($stateIDArr && $fieldValueArr){
-				if(!$attrManager->submitBatchAttributes($traitID, $fieldName, $tidFilter, $stateIDArr, $fieldValueArr, $_POST['notes'])){
+				if(!$attrManager->submitBatchAttributes($traitID, $fieldName, $tidFilter, $stateIDArr, $fieldValueArr, $_POST['notes'],$_POST['reviewstatus'])){
 					$statusStr = $attrManager->getErrorMessage();
 				}
 			}
@@ -266,13 +266,19 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 										?>
 									</select>
 								</div>
-								<div style="margin:5px;">
+								<div>
 									<?php 
 									$traitArr = $attrManager->getTraitArr($traitID,false);
 									$attrManager->echoFormTraits($traitID);
 									?>
 								</div>
-								<div style="margin:5px;">
+								<div style="margin: 5px">
+									Status: <select name="reviewstatus">
+										<option value="0">----------------------</option>
+										<option value="5">Expert Needed</option>
+									</select>
+								</div>
+								<div style="margin:15px;">
 									<input name="stringfilter" type="hidden" value="<?php echo $stringFilter; ?>" />
 									<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
 									<input name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
