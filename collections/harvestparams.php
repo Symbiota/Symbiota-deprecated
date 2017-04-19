@@ -143,8 +143,8 @@ if(isset($_REQUEST['db'])){
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm()">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:5px 10px;'>
-				<div style="margin-bottom:10px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['NEXT_BUTTON'])?$LANG['NEXT_BUTTON']:'Next >'; ?>" /></div>
-				<div><button type="button" class="resetbtn" onclick='resetHarvestParamsForm(this.form);'><?php echo isset($LANG['RESET_BUTTON'])?$LANG['RESET_BUTTON']:'Reset Form'; ?></button></div>
+				<div style="margin-bottom:10px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" /></div>
+				<div><button type="button" class="resetbtn" onclick='resetHarvestParamsForm(this.form);'><?php echo isset($LANG['BUTTON_RESET'])?$LANG['BUTTON_RESET']:'Reset Form'; ?></button></div>
 			</div>
 			<div>
 				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>
@@ -270,7 +270,7 @@ if(isset($_REQUEST['db'])){
 				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="" title="<?php echo $LANG['TITLE_TEXT_4']; ?>" />
 			</div>
 			<div style="float:right;">
-				<input type="submit" class="nextbtn" value="Next >" />
+				<input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
 			</div>
 			<div>
 				<h1><?php echo $LANG['SPECIMEN_HEADER']; ?></h1>
