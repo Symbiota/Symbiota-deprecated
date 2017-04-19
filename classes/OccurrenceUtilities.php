@@ -543,7 +543,10 @@ class OccurrenceUtilities {
 				$lngDec = $recMap['lngdeg'];
 				if(isset($recMap['lngmin']) && $recMap['lngmin'] && is_numeric($recMap['lngmin'])) $lngDec += $recMap['lngmin']/60;
 				if(isset($recMap['lngsec']) && $recMap['lngsec'] && is_numeric($recMap['lngsec'])) $lngDec += $recMap['lngsec']/3600;
-				if(stripos($recMap['lngew'],'e') === 0 ) $lngDec *= -1;
+				if(stripos($recMap['lngew'],'w') === 0  && $lngDec > 0) $lngDec *= -1;
+				if($lngDec > 0){
+					if(in_array(strtolower($recMap['country']), array('usa','united states','canada','mexico','panama'))) $lngDec *= -1;
+				}
 				$recMap['decimallatitude'] = round($latDec,6);
 				$recMap['decimallongitude'] = round($lngDec,6);
 			}
