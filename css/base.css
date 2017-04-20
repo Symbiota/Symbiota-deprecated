@@ -176,6 +176,47 @@ div.button:hover {
 	border:	1px inset #A0A0A0;
 }
 
+/*Dynamic Key module*/
+#keytable{
+
+}
+
+#keycharcolumn{
+	vertical-align:	top;
+	width:	30%;
+}
+
+#keymidcolumn {
+	width:	20px;
+	background-image: url(../images/layout/brown_hor_strip.gif);
+}
+
+#keytaxacolumn{
+	vertical-align:	top;
+	width:	65%;
+}
+
+.charHeading{
+
+}
+
+.characterStateName{
+
+}
+
+.dynam{
+
+}
+
+.dynamlang{
+	margin-top:0.5em;
+	font-weight: bold;
+}
+
+.dynamopt{
+
+}
+
 /* misc page specific items */
 #cloptiondiv{
 	margin:		5px;

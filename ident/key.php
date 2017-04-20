@@ -115,106 +115,106 @@ if($chars){
 	}
 	?>
 	<form name="keyform" id="keyform" action="key.php" method="get">
-		<table>
+		<table id="keytable">
 			<tr>
-			<td valign="top" width="200">
-				<div>
-					<div style="font-weight:bold; margin-top:0.5em;"><?php echo $LANG['TAXON'];?>:</div>
-					<select name="taxon">
-				  		<?php  
-			  				echo "<option value='All Species'>".$LANG['SELECTTAX']."</option>\n";
-				  			$selectList = Array();
-				  			$selectList = $dataManager->getTaxaFilterList();
-				  			foreach($selectList as $value){
-				  				$selectStr = ($value==$taxonValue?"SELECTED":"");
-				  				echo "<option $selectStr>$value</option>\n";
-				  			}
-				  		?>
-				  	</select>
-				</div>
-				<div style='font-weight:bold; margin-top:0.5em;'>
-					<input type="hidden" id="cl" name="cl" value="<?php echo $clid; ?>" />
-					<input type="hidden" id="dynclid" name="dynclid" value="<?php echo $dynClid; ?>" />
-					<input type="hidden" id="proj" name="proj" value="<?php echo $projValue; ?>" />
-					<input type="hidden" id="rv" name="rv" value="<?php echo $dataManager->getRelevanceValue(); ?>" />
-				    <input type="submit" name="submitbutton" id="submitbutton" value="<?php echo $LANG['DISPRESSPEC'];?>"/>
-				</div>
-		  		<hr size="2" />
-			  		
-		  		<?php
-				//echo "<div style=''>Relevance value: <input name='rv' type='text' size='3' title='Only characters with > ".($rv*100)."% relevance to the active spp. list will be displayed.' value='".$dataManager->getRelevanceValue()."'></div>";
-				//List char Data with selected states checked
-		  		if(count($languages) > 1){
-					echo "<div id=langlist style='margin:0.5em;'>Languages: <select name='lang' onchange='setLang(this);'>\n";
-					foreach($languages as $l){
-						echo "<option value='".$l."' ".($defaultLang == $l?"SELECTED":"").">$l</option>\n";
-					}
-					echo "</select></div>\n";
-		  		}
-                echo "<div style='margin:5px'>".$LANG['DISPLAY'].": <select name='displaymode' onchange='javascript: document.forms[0].submit();'><option value='0'>".$LANG['SCINAME']."</option><option value='1'".($displayMode?" SELECTED":"").">".$LANG['COMMON']."</option></select></div>";
-		  		if($chars){
-					//echo "<div id='showall' class='dynamControl' style='display:none'><a href='#' onclick='javascript: toggleAll();'>Show All Characters</a></div>\n";
-					//echo "<div class='dynamControl' style='display:block'><a href='#' onclick='javascript: toggleAll();'>Hide Advanced Characters</a></div>\n";
-					foreach($chars as $key => $htmlStrings){
-						echo $htmlStrings."\n";
-		  		  	}
-		  		}
-		  		?>
-			</td>
-			<td width="20" style="background-image:url(../images/layout/brown_hor_strip.gif);">&nbsp;</td>
-			<td valign="top">
-				<?php
-				//List taxa by family/sci name
-				if(($clid && $taxonValue) || $dynClid){
-					?>
-					<table border='0' width='300px'>
-						<tr><td colspan='2'>
-							<h2>
-								<?php 
-								if($FLORA_MOD_IS_ACTIVE){
-									echo "<a href='../checklists/checklist.php?cl=".$clid."&dynclid=".$dynClid."'>";
-								}
-								echo $dataManager->getClName()." ";
-								if($FLORA_MOD_IS_ACTIVE){
-									echo "</a>";
-								}
-								?>
-							</h2>
-							<?php 
-							if(!$dynClid) echo "<div>".$dataManager->getClAuthors()."</div>";
-							?>
-						</td></tr>
-						<?php 
-						$count = $dataManager->getTaxaCount();
-					  	if($count > 0){
-					  		echo "<tr><td colspan='2'>".$LANG['SPECCOUNT'].": ".$count."</td></tr>\n";
-					  	}
-					  	else{
-								echo "<tr><td colspan='2'>".$LANG['NOMATCHING']."</td></tr>\n";
-					  	} 
-						ksort($taxa);
-					  	foreach($taxa as $family => $species){
-							echo "<tr><td colspan='2'><h3 style='margin-bottom:0px;margin-top:10px;'>$family</h3></td></tr>\n";
-							natcasesort($species);
-							foreach($species as $tid => $disName){
-								$newSpLink = '../taxa/index.php?taxon='.$tid."&cl=".($dataManager->getClType()=="static"?$dataManager->getClName():"");
-								echo "<tr><td><div style='margin:0px 5px 0px 10px;'><a href='".$newSpLink."' target='_blank'><i>$disName</i></a></div></td>\n";
-								echo "<td align='right'>\n";
-								if($isEditor){
-									echo "<a href='tools/editor.php?tid=$tid&lang=".$DEFAULT_LANG."' target='_blank'><img src='../images/edit.png' width='15px' border='0' title='".$LANG['EDITMORP']."' /></a>\n";
-								}
-								echo "</td></tr>\n";
-							}
-						}
-						?>
-					</table>
-					<?php 
-				}
-				else{
-					echo $dataManager->getIntroHtml();
-				}
-				?>
-			</td>
+                <td id="keycharcolumn">
+                    <div>
+                        <div style="font-weight:bold;margin-top:0.5em;"><?php echo $LANG['TAXON'];?>:</div>
+                        <select name="taxon">
+                            <?php
+                                echo "<option value='All Species'>".$LANG['SELECTTAX']."</option>\n";
+                                $selectList = Array();
+                                $selectList = $dataManager->getTaxaFilterList();
+                                foreach($selectList as $value){
+                                    $selectStr = ($value==$taxonValue?"SELECTED":"");
+                                    echo "<option $selectStr>$value</option>\n";
+                                }
+                            ?>
+                        </select>
+                    </div>
+                    <div style='font-weight:bold; margin-top:0.5em;'>
+                        <input type="hidden" id="cl" name="cl" value="<?php echo $clid; ?>" />
+                        <input type="hidden" id="dynclid" name="dynclid" value="<?php echo $dynClid; ?>" />
+                        <input type="hidden" id="proj" name="proj" value="<?php echo $projValue; ?>" />
+                        <input type="hidden" id="rv" name="rv" value="<?php echo $dataManager->getRelevanceValue(); ?>" />
+                        <input type="submit" name="submitbutton" id="submitbutton" value="<?php echo $LANG['DISPRESSPEC'];?>"/>
+                    </div>
+                    <hr size="2" />
+
+                    <?php
+                    //echo "<div style=''>Relevance value: <input name='rv' type='text' size='3' title='Only characters with > ".($rv*100)."% relevance to the active spp. list will be displayed.' value='".$dataManager->getRelevanceValue()."'></div>";
+                    //List char Data with selected states checked
+                    if(count($languages) > 1){
+                        echo "<div id='langlist' style='margin:0.5em;'>Languages: <select name='lang' onchange='setLang(this);'>\n";
+                        foreach($languages as $l){
+                            echo "<option value='".$l."' ".($defaultLang == $l?"SELECTED":"").">$l</option>\n";
+                        }
+                        echo "</select></div>\n";
+                    }
+                    echo "<div style='margin:5px'>".$LANG['DISPLAY'].": <select name='displaymode' onchange='javascript: document.forms[0].submit();'><option value='0'>".$LANG['SCINAME']."</option><option value='1'".($displayMode?" SELECTED":"").">".$LANG['COMMON']."</option></select></div>";
+                    if($chars){
+                        //echo "<div id='showall' class='dynamControl' style='display:none'><a href='#' onclick='javascript: toggleAll();'>Show All Characters</a></div>\n";
+                        //echo "<div class='dynamControl' style='display:block'><a href='#' onclick='javascript: toggleAll();'>Hide Advanced Characters</a></div>\n";
+                        foreach($chars as $key => $htmlStrings){
+                            echo $htmlStrings."\n";
+                        }
+                    }
+                    ?>
+                </td>
+                <td id="keymidcolumn"></td>
+                <td id="keytaxacolumn">
+                    <?php
+                    //List taxa by family/sci name
+                    if(($clid && $taxonValue) || $dynClid){
+                        ?>
+                        <table border='0' width='300px'>
+                            <tr><td colspan='2'>
+                                <h2>
+                                    <?php
+                                    if($FLORA_MOD_IS_ACTIVE){
+                                        echo "<a href='../checklists/checklist.php?cl=".$clid."&dynclid=".$dynClid."'>";
+                                    }
+                                    echo $dataManager->getClName()." ";
+                                    if($FLORA_MOD_IS_ACTIVE){
+                                        echo "</a>";
+                                    }
+                                    ?>
+                                </h2>
+                                <?php
+                                if(!$dynClid) echo "<div>".$dataManager->getClAuthors()."</div>";
+                                ?>
+                            </td></tr>
+                            <?php
+                            $count = $dataManager->getTaxaCount();
+                            if($count > 0){
+                                echo "<tr><td colspan='2'>".$LANG['SPECCOUNT'].": ".$count."</td></tr>\n";
+                            }
+                            else{
+                                    echo "<tr><td colspan='2'>".$LANG['NOMATCHING']."</td></tr>\n";
+                            }
+                            ksort($taxa);
+                            foreach($taxa as $family => $species){
+                                echo "<tr><td colspan='2'><h3 style='margin-bottom:0px;margin-top:10px;'>$family</h3></td></tr>\n";
+                                natcasesort($species);
+                                foreach($species as $tid => $disName){
+                                    $newSpLink = '../taxa/index.php?taxon='.$tid."&cl=".($dataManager->getClType()=="static"?$dataManager->getClName():"");
+                                    echo "<tr><td><div style='margin:0px 5px 0px 10px;'><a href='".$newSpLink."' target='_blank'><i>$disName</i></a></div></td>\n";
+                                    echo "<td align='right'>\n";
+                                    if($isEditor){
+                                        echo "<a href='tools/editor.php?tid=$tid&lang=".$DEFAULT_LANG."' target='_blank'><img src='../images/edit.png' width='15px' border='0' title='".$LANG['EDITMORP']."' /></a>\n";
+                                    }
+                                    echo "</td></tr>\n";
+                                }
+                            }
+                            ?>
+                        </table>
+                        <?php
+                    }
+                    else{
+                        echo $dataManager->getIntroHtml();
+                    }
+                    ?>
+                </td>
 			</tr>
 		</table>
 		<?php 
