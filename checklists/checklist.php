@@ -249,7 +249,9 @@ if($clValue || $dynClid){
 				</div>
 				<?php 
 				if($clArray["publication"]){
-					echo "<div><span style='font-weight:bold;'>".$LANG['PUBLICATION']."</span>".$clArray["publication"]."</div>";
+					$pubStr = $clArray["publication"];
+					if(substr($pubStr,0,4)=='http' && !strpos($pubStr,' ')) $pubStr = '<a href="'.$pubStr.'" target="_blank">'.$pubStr."</a>";
+					echo "<div><span style='font-weight:bold;'>".(isset($LANG['CITATION'])?$LANG['CITATION']:'Citation').":</span> ".$pubStr."</div>";
 				}
 			}
 		

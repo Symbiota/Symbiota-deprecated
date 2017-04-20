@@ -645,14 +645,14 @@ class OccurrenceManager{
 	}
 
 	public function outputFullCollArr($occArr){
-		global $DEFAULTCATID;
+		global $DEFAULTCATID, $LANG;
 		$collCnt = 0;
 		echo '<div style="position:relative">';
 		if(isset($occArr['cat'])){
 			$categoryArr = $occArr['cat'];
 			?>
 			<div style="float:right;margin-top:20px;">
-				<input type="submit" class="nextbtn searchcollnextbtn" value="Next >"  />
+				<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>"  />
 			</div>
 			<table style="float:left;width:80%;">
 				<?php
@@ -790,14 +790,14 @@ class OccurrenceManager{
 			if(!isset($occArr['cat'])){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*5; ?>px;right:0px;">
-					<input type="submit" class="nextbtn searchcollnextbtn" value="Next >" />
+					<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
 				</div>
 				<?php
 			}
 			if(count($collArr) > 40){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*15; ?>px;right:0px;">
-					<input type="submit" class="nextbtn searchcollnextbtn" value="Next >" />
+					<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
 				</div>
 				<?php
 			}

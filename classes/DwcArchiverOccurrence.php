@@ -1900,7 +1900,7 @@ class DwcArchiverOccurrence extends Manager{
 		}
 	}
 
-	protected function deleteArchive($collID){
+	public function deleteArchive($collID){
 		//Remove archive instance from RSS feed 
 		$rssFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'webservices/dwc/rss.xml';
 		if(!file_exists($rssFile)) return false;

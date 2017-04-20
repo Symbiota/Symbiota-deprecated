@@ -53,7 +53,7 @@ if($isEditor){
 	if($submitForm == 'Save and Next'){
 		$attrManager->setTargetOccid($_POST['targetoccid']);
 		if(!$attrManager->saveAttributes($_POST,$_POST['notes'],$SYMB_UID)){
-			$statusStr = $attrManager->getErrorStr();
+			$statusStr = $attrManager->getErrorMessage();
 		}
 	}
 	elseif($submitForm == 'Set Status and Save'){
@@ -406,6 +406,26 @@ if($traitID){
 								$attrManager->echoFormTraits($traitID);
 								?>
 							</div>
+							<div style="margin-left:5;">
+								Status: 
+								<select name="setstatus">
+									<?php
+									if($mode == 2){
+										?>
+										<option value="0">Not reviewed</option>
+										<option value="5">Expert Needed</option>
+										<option value="10" selected>Reviewed</option>
+										<?php
+									}
+									else{
+										?>
+										<option value="0">---------------</option>
+										<option value="5">Expert Needed</option>
+										<?php
+									} 
+									?>
+								</select>
+							</div>
 							<div style="margin:20px">
 								<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
 								<input name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
@@ -419,27 +439,7 @@ if($traitID){
 								<input name="reviewuid" type="hidden" value="<?php echo $reviewUid; ?>" /> 
 								<input name="reviewdate" type="hidden" value="<?php echo $reviewDate; ?>" /> 
 								<input name="reviewstatus" type="hidden" value="<?php echo $reviewStatus; ?>" /> 
-								<?php
-								if($mode == 2){
-									?>
-									<div style="margin-bottom:5px;">
-										<select name="setstatus">
-											<option value="0">Not reviewed</option>
-											<option value="5">Expert Needed</option>
-											<option value="10" selected>Reviewed</option>
-										</select>
-									</div>
-									<div>
-										<input name="submitform" type="submit" value="Set Status and Save" />
-									</div>
-									<?php
-								}
-								else{
-									?>
-									<input name="submitform" type="submit" value="Save and Next" disabled />
-									<?php
-								} 
-								?>
+								<input name="submitform" type="submit" value="<?php echo ($mode == 2?'Set Status and Save':'Save and Next') ?>" disabled />
 							</div>
 						</form>
 					</fieldset>
