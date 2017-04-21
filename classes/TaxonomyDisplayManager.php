@@ -12,9 +12,16 @@ class TaxonomyDisplayManager{
 	private $displayAuthor = false;
 	private $displayFullTree = false;
 	private $displaySubGenera = false;
+	private $isEditor = false;
 	
 	function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		if($GLOBALS['USER_RIGHTS']){
+			if($GLOBALS['IS_ADMIN'] || array_key_exists("Taxonomy",$GLOBALS['USER_RIGHTS'])){
+				$this->isEditor = true;
+			}
+		}
+		
 	}
 
  	public function __destruct(){
@@ -195,12 +202,6 @@ class TaxonomyDisplayManager{
 
 	private function echoTaxonArray($node){
 		if($node){
-			$editable = false;
-			if($GLOBALS['USER_RIGHTS']){
-				if($GLOBALS['IS_ADMIN'] || array_key_exists("Taxonomy",$GLOBALS['USER_RIGHTS'])){
-					$editable = true;
-				}
-			}
 			uksort($node, array($this,"cmp"));
 			foreach($node as $key => $value){
 				$sciName = "";
@@ -223,35 +224,35 @@ class TaxonomyDisplayManager{
 				$indent = $taxonRankId;
 				if($indent > 230) $indent -= 10;
 				echo "<div>".str_repeat('&nbsp;',$indent/5);
-				if($editable){
+				if($this->isEditor){
 					echo '<a href="taxonomyeditor.php?tid='.$key.'" target="_blank">'.$sciName.'</a>';
 				}
 				else{
-					echo '<a href="../index.php?taxon="'.$key.'" target="_blank">'.$sciName.'</a>';
+					echo '<a href="../index.php?taxon='.$key.'" target="_blank">'.$sciName.'</a>';
 				}
 				if($this->taxonRank < 140 && !$this->displayFullTree && $taxonRankId == 140){
 					echo '<a href="taxonomydisplay.php?target='.$sciName.'">';
 					echo '<img src="../../images/tochild.png" style="width:9px;" />';
 					echo '</a>';
 				}
-				echo "</div>";
+				echo '</div>';
 				if(array_key_exists($key,$this->taxaArr) && array_key_exists("synonyms",$this->taxaArr[$key])){
 					$synNameArr = $this->taxaArr[$key]["synonyms"];
 					asort($synNameArr);
 					foreach($synNameArr as $synTid => $synName){
 						$synName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$synName);
-						echo "<div>".str_repeat('&nbsp;',$indent/5).str_repeat('&nbsp;',7);
-						if($editable){
-							echo "[<a href='taxonomyeditor.php?tid=".$synTid."'>".$synName."</a>]";
+						echo '<div>'.str_repeat('&nbsp;',$indent/5).str_repeat('&nbsp;',7);
+						if($this->isEditor){
+							echo '[<a href="taxonomyeditor.php?tid='.$synTid.'" target="_blank">'.$synName.'</a>]';
 						}
 						else{
-							echo "[<a href='../index.php?taxon=".$synTid."'>".$synName."</a>]";
+							echo '[<a href="../index.php?taxon='.$synTid.'" target="_blank">'.$synName.'</a>]';
 						}
-						echo "</div>";
+						echo '</div>';
 					}
 				}
 				if(is_array($value)){
-					$this->echoTaxonArray($value,$this->displayFullTree);
+					$this->echoTaxonArray($value);
 				}
 			}
 		}
