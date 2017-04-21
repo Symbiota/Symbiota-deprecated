@@ -121,7 +121,7 @@ $smManager = new SiteMapManager();
 								</a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/admin/guidmapper.php">
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/admin/guidmapper.php">
                                     <?php echo $LANG['GUIDMAP'];?>
 								</a>
 							</li>

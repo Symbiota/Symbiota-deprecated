@@ -302,7 +302,7 @@ include($SERVER_ROOT. '/header.php');
 					}
 					else{
 						echo 'Records missing Symbiota GUIDs: '.$recFlagArr['nullGUIDs'].'<br/>';
-						echo 'Please go to the <a href="../../admin/guidmapper.php?collid='.$collId.'">Collection GUID Mapper</a> to assign Symbiota GUIDs.';
+						echo 'Please go to the <a href="../admin/guidmapper.php?collid='.$collId.'">Collection GUID Mapper</a> to assign Symbiota GUIDs.';
 					}
 					echo '</div>';
 				}
