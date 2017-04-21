@@ -10,9 +10,13 @@ class OccurrenceCleaner extends Manager{
 	private $collid;
 	private $obsUid;
 	private $featureCount = 0;
+	private $googleApi;
 
 	public function __construct(){
 		parent::__construct(null,'write');
+		$urlPrefix = 'http://';
+		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+		$this->googleApi = $urlPrefix.'maps.googleapis.com/maps/api/geocode/json?sensor=false';
 	}
 
 	public function __destruct(){
@@ -795,28 +799,41 @@ class OccurrenceCleaner extends Manager{
 			$googleUnits = $this->callGoogleApi($r->decimallatitude, $r->decimallongitude);
 			$ranking = 0;
 			$protocolStr = '';
-			if($this->countryUnitsEqual($googleUnits['country'],$r->country)){
-				$ranking = 2;
-				$protocolStr = 'GoogleApiMatch:countryEqual';
-				if($this->unitsEqual($googleUnits['state'], $r->stateprovince)){
-					$ranking = 5;
-					$protocolStr = 'GoogleApiMatch:stateEqual';
-					if(isset($googleUnits['county'])){
-						if($this->countyUnitsEqual($googleUnits['county'], $r->county)){
-							$ranking = 7;
-							$protocolStr = 'GoogleApiMatch:countyEqual';
+			if(isset($googleUnits['country'])){
+				if($this->countryUnitsEqual($googleUnits['country'],$r->country)){
+					$ranking = 2;
+					$protocolStr = 'GoogleApiMatch:countryEqual';
+					if(isset($googleUnits['state'])){
+						if($this->unitsEqual($googleUnits['state'], $r->stateprovince)){
+							$ranking = 5;
+							$protocolStr = 'GoogleApiMatch:stateEqual';
+							if(isset($googleUnits['county'])){
+								if($this->countyUnitsEqual($googleUnits['county'], $r->county)){
+									$ranking = 7;
+									$protocolStr = 'GoogleApiMatch:countyEqual';
+								}
+								else{
+									echo '<li style="margin-left:15px;">County not equal (source: '.$r->county.'; Google value: '.$googleUnits['county'].')</li>';
+								}
+							}
+							else{
+								echo '<li style="margin-left:15px;">County not provided by Google</li>';
+							}
 						}
 						else{
-							echo '<li style="margin-left:15px;">County not equal (source: '.$r->county.'; Google value: '.$googleUnits['county'].')</li>';
+							echo '<li style="margin-left:15px;">State/Province not equal (source: '.$r->stateprovince.'; Google value: '.$googleUnits['state'].')</li>';
 						}
+					}
+					else{
+						echo '<li style="margin-left:15px;">State/Province not provided by Google</li>';
 					}
 				}
 				else{
-					echo '<li style="margin-left:15px;">State/Province not equal (source: '.$r->stateprovince.'; Google value: '.$googleUnits['state'].')</li>';
+					echo '<li style="margin-left:15px;">Country not equal (source: '.$r->country.'; Google value: '.$googleUnits['country'].')</li>';
 				}
 			}
 			else{
-				echo '<li style="margin-left:15px;">Country not equal (source: '.$r->country.'; Google value: '.$googleUnits['country'].')</li>';
+				echo '<li style="margin-left:15px;">Country not provided by Google</li>';
 			}
 			if($ranking){
 				$this->setVerification($r->occid, 'coordinate', $ranking, $protocolStr);
@@ -825,14 +842,15 @@ class OccurrenceCleaner extends Manager{
 			else{
 				echo '<li style="margin-left:15px;">Unable to set verification status</li>';
 			}
+			flush();
+			ob_flush();
 		}
 		$rs->free();
 	}
 	
 	private function callGoogleApi($lat, $lng){
 		$retArr = array();
-		$apiUrl = '//maps.googleapis.com/maps/api/geocode/json?sensor=false';
-		$apiUrl .= '&latlng='.$lat.','.$lng;
+		$apiUrl = $this->googleApi.'&latlng='.$lat.','.$lng;
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		//curl_setopt($curl, CURLOPT_HEADER, 0);
