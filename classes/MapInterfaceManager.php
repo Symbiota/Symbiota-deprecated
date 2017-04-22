@@ -77,7 +77,6 @@ class MapInterfaceManager{
 	public function getSqlWhere(){
 		$sqlWhere = "";
 		if(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
-			//Do nothing if db = all
 			if($this->searchTermsArr['db'] != 'all'){
 				if($this->searchTermsArr['db'] == 'allspec'){
 					$sqlWhere .= 'AND (o.collid IN(SELECT collid FROM omcollections WHERE colltype = "Preserved Specimens")) ';
@@ -97,6 +96,9 @@ class MapInterfaceManager{
 					$sqlWhere .= 'AND ('.$dbStr.') ';
 				}
 			}
+			else{
+                $sqlWhere .= 'AND (o.collid IS NOT NULL) ';
+            }
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)&&$this->searchTermsArr["taxa"]){

@@ -194,13 +194,13 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
     <script type="text/javascript">
         <?php
         if($symbUid){
-        ?>
-        $(window).bind("load", function() {
-            loadRecordsetList('<?php echo $symbUid; ?>',"loadlist");
-        });
+            ?>
+            $(window).bind("load", function() {
+                loadRecordsetList('<?php echo $symbUid; ?>',"loadlist");
+            });
 
-        var uid = <?php echo $symbUid; ?>;
-        <?php
+            var uid = <?php echo $symbUid; ?>;
+            <?php
         }
         ?>
 
@@ -298,9 +298,9 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                 text: newTitle,
                 <?php
                 if($clusterOff=="y"){
-                ?>
-                map: map,
-                <?php
+                    ?>
+                    map: map,
+                    <?php
                 }
                 ?>
                 icon: newIcon,
@@ -575,7 +575,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                     if(<?php echo $recordCnt; ?> > 0){
                         checkHighResult(<?php echo $recordCnt; ?>);
                     }
-                else{
+                    else{
                         alert('There were no records matching your query.');
                     }
                 }
