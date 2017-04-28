@@ -796,9 +796,9 @@ class SOLRManager extends OccurrenceManager{
                 $catWhere .= 'OR '.implode(' OR ',$betweenFrag);
             }
             if($inFrag){
-                $catWhere .= 'OR (catalogNumber:('.implode(' ',$inFrag).')) ';
+                $catWhere .= 'OR (catalogNumber:("'.implode(' ',$inFrag).'")) ';
                 if($includeOtherCatNum){
-                    $catWhere .= 'OR (otherCatalogNumbers:('.implode(' ',$inFrag).')) ';
+                    $catWhere .= 'OR (otherCatalogNumbers:("'.implode(' ',$inFrag).'")) ';
                 }
             }
             $solrWhere .= 'AND ('.substr($catWhere,3).') ';
