@@ -90,7 +90,7 @@ if($chars){
 			}
 		}
 		elseif($clid){
-			echo '<a href="'.$clientRoot.'/checklists/checklist.php?cl='.$clid.'">';
+			echo '<a href="'.$clientRoot.'/checklists/checklist.php?cl='.$clid.'&proj='.$projValue.'">';
 			echo 'Checklist: '.$dataManager->getClName();
 			echo '</a> &gt;&gt; ';
 		}
@@ -172,7 +172,7 @@ if($chars){
                                 <h2>
                                     <?php
                                     if($FLORA_MOD_IS_ACTIVE){
-                                        echo "<a href='../checklists/checklist.php?cl=".$clid."&dynclid=".$dynClid."'>";
+                                        echo '<a href="../checklists/checklist.php?cl='.$clid.'&dynclid='.$dynClid.'&proj='.$projValue.'">';
                                     }
                                     echo $dataManager->getClName()." ";
                                     if($FLORA_MOD_IS_ACTIVE){
