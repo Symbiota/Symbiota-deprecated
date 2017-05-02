@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ChecklistVoucherAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
@@ -11,7 +11,7 @@ $vManager = new ChecklistVoucherAdmin();
 $vManager->setClid($clid);
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = true;
 }
 

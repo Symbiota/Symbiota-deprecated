@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ChecklistVoucherAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
@@ -10,9 +10,10 @@ $startIndex = array_key_exists("start",$_REQUEST)?$_REQUEST["start"]:0;
 
 $vManager = new ChecklistVoucherAdmin();
 $vManager->setClid($clid);
+$vManager->setCollectionVariables();
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = true;
 }
 //Get records
@@ -70,7 +71,7 @@ else{
 				?>
 				<div style="clear:both;margin:10px;">
 					Listed below are specimens identified to a species not found in the checklist. Use the form to add the
-					names and link the vouchers as a batch action. Specimens are displayed in batches of 1000.
+					names and link the vouchers as a batch action.
 				</div>
 				<form name="batchmissingform" method="post" action="voucheradmin.php" onsubmit="return validateBatchMissingForm(this.form);">
 					<table class="styledtable" style="font-family:Arial;font-size:12px;">
