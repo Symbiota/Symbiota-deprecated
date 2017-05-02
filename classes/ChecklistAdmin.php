@@ -294,9 +294,10 @@ class ChecklistAdmin {
 	//Editor management
 	public function getEditors(){
 		$editorArr = array();
-		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as uname '.
+		$sql = 'SELECT u.uid, CONCAT(CONCAT_WS(", ",u.lastname,u.firstname)," (",l.username,")") as uname '.
 			'FROM userroles ur INNER JOIN users u ON ur.uid = u.uid '.
-			'WHERE (ur.role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$this->clid.') '.
+			'INNER JOIN userlogin l ON u.uid = l.uid '.
+			'WHERE (ur.role = "ClAdmin") AND (ur.tablename = "fmchecklists") AND (ur.tablepk = '.$this->clid.') '.
 			'ORDER BY u.lastname,u.firstname';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
@@ -306,21 +307,6 @@ class ChecklistAdmin {
 			}
 			$rs->free();
 		}
-		
-		//Remove once userroles table is full integrated
-		/* 
-		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as uname '.
-			'FROM userpermissions up INNER JOIN users u ON up.uid = u.uid '.
-			'WHERE up.pname = "ClAdmin-'.$this->clid.'" ORDER BY u.lastname,u.firstname';
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$uName = $r->uname;
-				if(strlen($uName) > 60) $uName = substr($uName,0,60);
-				$editorArr[$r->uid] = $r->uname;
-			}
-			$rs->free();
-		}
-		*/
 		return $editorArr;
 	}
 
@@ -332,13 +318,6 @@ class ChecklistAdmin {
 			if(!$this->conn->query($sql)){
 				$statusStr = 'ERROR: unable to add editor; SQL: '.$this->conn->error;
 			}
-			/*
-			$sql = 'INSERT INTO userpermissions(uid,pname) '.
-				'VALUES('.$u.',"ClAdmin-'.$this->clid.'")';
-			if(!$this->conn->query($sql)){
-				$statusStr = 'ERROR: unable to add editor; SQL: '.$this->conn->error;
-			}
-			*/
 		}
 		return $statusStr;
 	}
@@ -350,13 +329,6 @@ class ChecklistAdmin {
 		if(!$this->conn->query($sql)){
 			$statusStr = 'ERROR: unable to remove editor; SQL: '.$this->conn->error;
 		}
-		/*
-		$sql = 'DELETE FROM userpermissions '.
-			'WHERE uid = '.$u.' AND pname = "ClAdmin-'.$this->clid.'"';
-		if(!$this->conn->query($sql)){
-			$statusStr = 'ERROR: unable to remove editor; SQL: '.$this->conn->error;
-		}
-		*/
 		return $statusStr;
 	}
 
@@ -404,8 +376,8 @@ class ChecklistAdmin {
 	
 	public function getUserList(){
 		$returnArr = Array();
-		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS uname '.
-			'FROM users u '.
+		$sql = 'SELECT u.uid, CONCAT(CONCAT_WS(", ",u.lastname,u.firstname)," (",l.username,")") AS uname '. 
+			'FROM users u INNER JOIN userlogin l ON u.uid = l.uid '.
 			'ORDER BY u.lastname,u.firstname';
 		//echo $sql;
 		$rs = $this->conn->query($sql);

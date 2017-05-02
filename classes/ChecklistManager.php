@@ -537,10 +537,14 @@ class ChecklistManager {
 	}
 
 	public function echoResearchPoints($target){
-		$sql = "SELECT c.clid, c.name, c.longcentroid, c.latcentroid ".
-				"FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ".
-				"INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-				"WHERE c.access = 'public' AND c.LongCentroid IS NOT NULL AND p.pid = ".$this->pid;
+		$clCluster = '';
+		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin'])) {
+			$clCluster = $GLOBALS['USER_RIGHTS']['ClAdmin'];
+		}
+		$sql = 'SELECT c.clid, c.name, c.longcentroid, c.latcentroid '.
+			'FROM fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid '.
+			'INNER JOIN fmprojects p ON cpl.pid = p.pid '.
+			'WHERE (c.access = "public"'.($clCluster?' OR c.clid IN('.implode(',',$clCluster).')':'').') AND (c.LongCentroid IS NOT NULL) AND (p.pid = '.$this->pid.')';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$idStr = $row->clid;
@@ -564,7 +568,6 @@ class ChecklistManager {
 		$result->free();
 	}
 
-	
 	//Setters and getters
     public function setThesFilter($filt){
 		$this->thesFilter = $filt;
