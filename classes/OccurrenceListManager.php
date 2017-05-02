@@ -39,10 +39,8 @@ class OccurrenceListManager extends OccurrenceManager{
             'CONCAT_WS(", ",o.locality,CONCAT(ROUND(o.decimallatitude,5)," ",ROUND(o.decimallongitude,5))) AS locality, '.
             'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, IFNULL(o.habitat,"") AS habitat, '.
             'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid '.
-            'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid ';
-        if(array_key_exists("clid",$this->searchTermsArr)) $sql .= 'LEFT JOIN fmvouchers AS v ON o.occid = v.occid ';
-        if(array_key_exists("collector",$this->searchTermsArr)) $sql .= 'INNER JOIN omoccurrencesfulltext AS f ON o.occid = f.occid ';
-        $sql .= $sqlWhere;
+            'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid '.
+        	$this->setTableJoins($sqlWhere).$sqlWhere;
         if($this->sortField1 || $this->sortField2 || $this->sortOrder){
             $sortFields = array('Collection' => 'collection','Catalog Number' => 'o.CatalogNumber','Family' => 'o.family',
                 'Scientific Name' => 'o.sciname','Collector' => 'o.recordedBy','Number' => 'o.recordNumber','Event Date' => 'o.eventDate',
@@ -124,10 +122,7 @@ class OccurrenceListManager extends OccurrenceManager{
 
 	private function setRecordCnt($sqlWhere){
 		if($sqlWhere){
-			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
-			if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
-			if(strpos($sqlWhere,'MATCH(f.recordedby)')) $sql .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
-			$sql .= $sqlWhere;
+			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ".$this->setTableJoins($sqlWhere).$sqlWhere;
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
@@ -136,6 +131,13 @@ class OccurrenceListManager extends OccurrenceManager{
 			$result->free();
 		}
 		setCookie("collvars","reccnt:".$this->recordCount,time()+64800,($GLOBALS['CLIENT_ROOT']?$GLOBALS['CLIENT_ROOT']:'/'));
+	}
+
+	private function setTableJoins($sqlWhere){
+		$sqlJoin = '';
+		if(array_key_exists("clid",$this->searchTermsArr)) $sqlJoin .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+		if(strpos($sqlWhere,'MATCH(f.recordedby)')) $sqlJoin .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
+		return $sqlJoin;
 	}
 
     public function getRecordCnt(){

@@ -1,6 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
 class OccurrenceManager{
 
@@ -474,19 +475,14 @@ class OccurrenceManager{
 		}
 		if(array_key_exists("targetclid",$this->searchTermsArr)){
 			$clid = $this->searchTermsArr["targetclid"];
-			$clSql = "";
-			if($clid){
-				$sql = 'SELECT dynamicsql, name FROM fmchecklists WHERE (clid = '.$clid.')';
-				$result = $this->conn->query($sql);
-				if($row = $result->fetch_object()){
-					$clSql = $row->dynamicsql;
-					$this->clName = $row->name;
-				}
-				$result->free();
-				if($clSql){
-					$sqlWhere .= "AND (".$clSql.") ";
-					$this->localSearchArr[] = "SQL: ".$clSql;
-				}
+			if(is_numeric($clid)){
+				$voucherManager = new ChecklistVoucherAdmin($this->conn);
+				$voucherManager->setClid($clid);
+				$voucherManager->setCollectionVariables();
+				$this->clName = $voucherManager->getClName();
+				$sqlWhere .= 'AND ('.$voucherManager->getSqlFrag().') '.
+					'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid = '.$clid.')) ';
+				$this->localSearchArr[] = $voucherManager->getQueryVariableStr();
 			}
 		}
 		$retStr = '';
@@ -495,12 +491,12 @@ class OccurrenceManager{
 		}
 		else{
 			//Make the sql valid, but return nothing
-			$retStr = 'WHERE o.collid = -1 ';
+			$retStr = 'WHERE o.occid IS NULL ';
 		}
 		//echo $retStr; exit;
 		return $retStr;
 	}
-
+	
     protected function formatDate($inDate){
 		$retDate = OccurrenceUtilities::formatDate($inDate);
 		return $retDate;
