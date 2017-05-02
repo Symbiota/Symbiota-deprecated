@@ -156,5 +156,5 @@ else{
 }
 
 //output the response
-echo json_encode($recordListHtml);
+echo $recordListHtml;
 ?>
