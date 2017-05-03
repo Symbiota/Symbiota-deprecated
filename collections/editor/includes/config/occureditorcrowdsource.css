@@ -149,6 +149,10 @@ body{
 	display:none;
 }
 
+#endDateDiv {
+	display:none;
+}
+
 #exsDiv {
 	float:left;
 	margin: 2px
@@ -526,6 +530,10 @@ body{
 }
 
 #duplicateQuantityDiv{
+	display:none;
+}
+
+#dataGeneralizationsDiv{
 	display:none;
 }
 

@@ -29,6 +29,7 @@
 //define('VERBATIMEVENTDATELABEL','');
 //define('YYYYMMDDLABEL','');
 //define('DAYOFYEARLABEL','');
+//define('ENDDATELABEL','');
 //define('SCINAMELABEL','');
 //define('SCIENTIFICNAMEAUTHORSHIPLABEL','');
 //define('FAMILYLABEL','');
@@ -82,5 +83,6 @@
 //define('LABELPROJECTLABEL','');
 //define('DUPLICATEQUALITYCOUNTLABEL','');
 //define('PROCESSINGSTATUSLABEL','');
+//define('DATAGENERALIZATIONSLABEL','');
 
 ?>

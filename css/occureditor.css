@@ -165,6 +165,16 @@ body{
 	width:	40px;
 }
 
+#endDateDiv {
+	float:	left;
+	margin-left: 25px;
+	font-weight: bold;
+}
+
+#endDateDiv input{
+	width:	90px;
+}
+
 #exsDiv {
 	clear: both;
 }
@@ -727,6 +737,15 @@ body{
 
 #duplicateQuantityDiv input{
 	width:35px;
+}
+
+#dataGeneralizationsDiv{
+	float:left;
+	margin:3px;
+}
+
+#dataGeneralizationsDiv input{
+	width: 500px;
 }
 
 #processingStatusDiv{

@@ -35,7 +35,7 @@ class OccurrenceEditorManager {
 			'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
 			'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
 			'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
-			'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
+			'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations','datageneralizations',
 			'country', 'stateprovince', 'county', 'municipality', 'locality', 'localitysecurity', 'localitysecurityreason',
 			'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 'footprintwkt',
 			'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',

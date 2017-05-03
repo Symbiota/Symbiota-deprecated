@@ -409,12 +409,12 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=170201" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=20170503" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=20170101" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=20170503" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -463,7 +463,7 @@ else{
 
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js?ver=170310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=170330"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=20170503"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170101"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170310"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=170302"></script>
@@ -764,6 +764,10 @@ else{
 													<input type="text" name="startdayofyear" tabindex="24" value="<?php echo array_key_exists('startdayofyear',$occArr)?$occArr['startdayofyear']:''; ?>" onchange="inputIsNumeric(this, 'Start Day of Year');fieldChanged('startdayofyear');" title="Start Day of Year" /> -
 													<input type="text" name="enddayofyear" tabindex="26" value="<?php echo array_key_exists('enddayofyear',$occArr)?$occArr['enddayofyear']:''; ?>" onchange="inputIsNumeric(this, 'End Day of Year');fieldChanged('enddayofyear');" title="End Day of Year" />
 												</div>
+                                                <div id="endDateDiv">
+                                                    <?php echo (defined('ENDDATELABEL')?ENDDATELABEL:'Calculate End Day of Year'); ?>:
+                                                    <input type="text" id="endDate" value="" onchange="endDateChanged();" />
+                                                </div>
 											</div>
 											<?php
 											if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI){
@@ -1271,6 +1275,10 @@ else{
 														?>
 													</select>
 												</div>
+                                                <div id="dataGeneralizationsDiv" title="aka data generalizations">
+                                                    <?php echo (defined('DATAGENERALIZATIONSLABEL')?DATAGENERALIZATIONSLABEL:'Data Generalizations'); ?><br/>
+                                                    <input type="text" name="datageneralizations" tabindex="121" value="<?php echo array_key_exists('datageneralizations',$occArr)?$occArr['datageneralizations']:''; ?>" onchange="fieldChanged('datageneralizations');" />
+                                                </div>
 											</div>
 											<?php
 											if($occId){
