@@ -634,7 +634,7 @@ class TaxonomyEditorManager{
 			$sql3 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
 				"SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) ".
 				"FROM omoccurrences o ".
-				"WHERE (o.tidinterpreted = ".$tid.") AND o.cultivationStatus <> 1 AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
+				"WHERE (o.tidinterpreted = ".$tid.") AND (o.cultivationStatus IS NULL OR o.cultivationStatus <> 1) AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
 			$this->conn->query($sql3);
 		}
 		else{

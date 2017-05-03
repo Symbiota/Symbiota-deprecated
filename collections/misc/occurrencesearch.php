@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceSupport.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceSupport.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $targetId = $_REQUEST["targetid"];
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -24,8 +24,8 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Search Page</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Search Page</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />	
@@ -58,16 +58,15 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 		    else{
 				$.ajax({
 					type: "POST",
-					url: "../editor/rpc/occuradd.php",
-					data: { 
-						collid: f.collid.value 
-					}
-				}).done(function( retStr ) {
-					if(isNumeric(retStr)){
-						updateParentForm(retStr);
+					url: "../editor/rpc/occurAddData.php",
+					dataType: "json",
+					data: { collid: f.collid.value }
+				}).done(function( retObj ) {
+					if(retObj.status == "true"){
+						updateParentForm(retObj.occid);
 					}
 					else{
-						alert("Unable to create new record due to unknown error ("+retStr+"). Contact portal administrator");
+						alert("Unable to create new record due to error ("+retObj.error+"). Contact portal administrator");
 					}
 				});
 		    }
