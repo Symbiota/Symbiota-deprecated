@@ -39,6 +39,7 @@ class OmOccurDeterminations {
         //$supportedVersions[] = '0.9.1.15';
         $supportedVersions[] = '0.9.1.16';
         $supportedVersions[] = '1.0';
+        $supportedVersions[] = '1.1';
         
         // Find the most recently applied version number
         $preparesql = "select versionnumber from schemaversion order by dateapplied desc limit 1;";
@@ -92,7 +93,7 @@ class OmOccurDeterminations {
    const SCIENTIFICNAMEAUTHORSHIP_SIZE = 100; //100
    const IDENTIFICATIONQUALIFIER_SIZE = 45; //45
    const IDENTIFICATIONREFERENCES_SIZE = 255; //255
-   const IDENTIFICATIONREMARKS_SIZE = 255; //255
+   const IDENTIFICATIONREMARKS_SIZE = 500; //500
    const SORTSEQUENCE_SIZE    = 11; //INTEGER
    const INITIALTIMESTAMP_SIZE = 21; //TIMESTAMP
    const ISCURRENT_SIZE       = 2; // INT(2)
@@ -148,7 +149,7 @@ class OmOccurDeterminations {
   $scientificNameAuthorship = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['scientificNameAuthorship']), 0, 100);
   $identificationQualifier = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['identificationQualifier']), 0, 45);
   $identificationReferences = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['identificationReferences']), 0, 255);
-  $identificationRemarks = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['identificationRemarks']), 0, 255);
+  $identificationRemarks = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['identificationRemarks']), 0, 500);
   $sortsequence = substr(preg_replace('/[^0-9\-\[NULL\]]/','',$_GET['sortsequence']), 0, 11);
   $initialtimestamp = substr(preg_replace('/[^A-Za-z0-9\.\.\ \[NULL\]]/','',$_GET['initialtimestamp']), 0, 21);
 */
@@ -164,7 +165,7 @@ class OmOccurDeterminations {
    private $scientificNameAuthorship; // VARCHAR(100) 
    private $identificationQualifier; // VARCHAR(45) 
    private $identificationReferences; // VARCHAR(255) 
-   private $identificationRemarks; // VARCHAR(255) 
+   private $identificationRemarks; // VARCHAR(500) 
    private $sortsequence; // INTEGER 
    private $initialtimestamp; // TIMESTAMP 
    private $idbyid;
