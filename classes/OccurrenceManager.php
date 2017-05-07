@@ -1066,6 +1066,16 @@ class OccurrenceManager{
 		if(array_key_exists("state",$_REQUEST)){
 			$state = $this->conn->real_escape_string($this->cleanSearchQuotes($_REQUEST["state"]));
 			if($state){
+				if(strlen($state) == 2 && (!isset($this->searchTermsArr["country"]) || stripos($this->searchTermsArr["country"],'USA') !== false)){
+					$sql = 'SELECT s.statename, c.countryname '.
+						'FROM lkupstateprovince s INNER JOIN lkupcountry c ON s.countryid = c.countryid '.
+						'WHERE c.countryname IN("USA","United States") AND (s.abbrev = "'.$state.'")';
+					$rs = $this->conn->query($sql);
+					if($r = $rs->fetch_object()){
+						$state = $r->statename;
+					}
+					$rs->free();
+				}
 				$str = str_replace(",",";",$state);
 				$searchArr[] = "state:".$str;
 				$this->searchTermsArr["state"] = $str;

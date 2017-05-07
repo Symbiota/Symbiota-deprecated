@@ -364,7 +364,13 @@ function setHarvestParamsForm(){
     if(!stArr['usethes']){document.harvestparams.thes.checked = false;}
     if(stArr['taxontype']){document.harvestparams.type.value = stArr['taxontype'];}
     if(stArr['taxa']){document.harvestparams.taxa.value = stArr['taxa'];}
-    if(stArr['country']){document.harvestparams.country.value = stArr['country'];}
+    if(stArr['country']){
+    	countryStr = stArr['country'];
+    	countryArr = countryStr.split(";");
+    	if(countryArr.indexOf('USA') > -1 || countryArr.indexOf('usa') > -1) countryStr = countryArr[0];
+    	//if(countryStr.indexOf('United States') > -1) countryStr = 'United States';
+    	document.harvestparams.country.value = countryStr;
+    }
     if(stArr['state']){document.harvestparams.state.value = stArr['state'];}
     if(stArr['county']){document.harvestparams.county.value = stArr['county'];}
     if(stArr['local']){document.harvestparams.local.value = stArr['local'];}
