@@ -42,7 +42,7 @@ class SpecUpload{
 	}
 	
 	public function setCollId($id){
-		if($id && is_numeric($id)){
+		if(is_numeric($id)){
 			$this->collId = $id;
 			$this->setCollInfo();
 		}
@@ -218,29 +218,29 @@ class SpecUpload{
 			'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
 			'labelproject','basisofrecord','ownerinstitutioncode', 'processingstatus', 'recordenteredby');
 		$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp '.
-				'WHERE collid = '.$this->collId.' ';
+				'WHERE collid IN('.$this->collId.') ';
 		if($searchVariables){
 			if($searchVariables == 'matchappend'){
 				$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
 						'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.collid = o.collid '.
-						'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
+						'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
 			}
 			elseif($searchVariables == 'sync'){
 				$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
 						'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-						'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
+						'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
 						'AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) ';
 			}
 			elseif($searchVariables == 'exist'){
 				$sql = 'SELECT DISTINCT o.dbpk, o.'.implode(',o.',$occFieldArr).' '.
 						'FROM omoccurrences o LEFT JOIN uploadspectemp u  ON (o.occid = u.occid) '.
-						'WHERE (o.collid = '.$this->collId.') AND (u.occid IS NULL) ';
+						'WHERE (o.collid IN('.$this->collId.')) AND (u.occid IS NULL) ';
 			}
 			elseif($searchVariables == 'dupdbpk'){
 				$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' FROM uploadspectemp u WHERE u.dbpk IN('.
 						'SELECT dbpk FROM uploadspectemp '.
 						'GROUP BY dbpk, collid, basisofrecord '.
-						'HAVING (Count(*)>1) AND (collid = '.$this->collId.')) ';
+						'HAVING (Count(*)>1) AND (collid IN('.$this->collId.'))) ';
 			}
 			else{
 				$varArr = explode(';',$searchVariables);
@@ -268,7 +268,7 @@ class SpecUpload{
 	public function getUploadCount(){
 		$cnt = 0;
 		if($this->collId){
-			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE collid = '.$this->collId;
+			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid IN('.$this->collId.'))';
 			$rs = $this->conn->query($sql);
 			$rs->num_rows;
 			$rs->free();

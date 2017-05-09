@@ -82,10 +82,9 @@ class SpecUploadFile extends SpecUploadBase{
 	}
 
 	public function echoNfnFieldMap(){
-		$translationMap = array('subject_references'=>'tempfield01','recordid'=>'tempfield02','subject_recordid'=>'tempfield02','subject_catalognumber'=>'catalognumber',
-			'subject_institutioncode'=>'institutioncode','subject_collectioncode'=>'collectioncode','subject_scientificname'=>'sciname','collectedby'=>'recordedby',
-			'collectornumber'=>'recordnumber','subject_country'=>'country','subject_stateprovince'=>'stateprovince','subject_county'=>'county','location'=>'locality',
-			'habitatdescription'=>'habitat');
+		$translationMap = array('subject_references'=>'tempfield01','recordid'=>'tempfield02','subject_recordid'=>'tempfield02',
+			'subject_institutioncode'=>'institutioncode','subject_collectioncode'=>'collectioncode','collectedby'=>'recordedby',
+			'collectornumber'=>'recordnumber','location'=>'locality','habitatdescription'=>'habitat');
 		foreach($this->symbFields as $fieldName){
 			$translationMap[$fieldName] = $fieldName;
 		}
@@ -168,7 +167,7 @@ class SpecUploadFile extends SpecUploadBase{
 			if($this->uploadType == $this->NFNUPLOAD){
 				//Identify identifier column (recordID GUID in tempfield02, or occid = tempfield01)
 				$this->nfnIdentifier = 'url';
-				$testSql = 'SELECT tempfield01, tempfield02 FROM uploadspectemp WHERE tempfield02 IS NOT NULL AND collid = '.$this->collId.' LIMIT 1';
+				$testSql = 'SELECT tempfield01, tempfield02 FROM uploadspectemp WHERE tempfield02 IS NOT NULL AND collid IN('.$this->collId.') LIMIT 1';
 				$testRS = $this->conn->query($testSql);
 				if($testRow = $testRS->fetch_object()){
 					if(strlen($testRow->tempfield02) == 45 || strlen($testRow->tempfield02) == 36) $this->nfnIdentifier = 'uuid';
@@ -185,7 +184,7 @@ class SpecUploadFile extends SpecUploadBase{
 					}
 					$sqlB = 'UPDATE uploadspectemp u INNER JOIN guidoccurrences g ON u.tempfield02 = g.guid '.
 						'SET u.occid = g.occid '.
-						'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL)';
+						'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL)';
 					if(!$this->conn->query($sqlB)){
 						$this->outputMsg('<li>ERROR populating occid from recordID GUID</li>');
 					}
@@ -194,17 +193,17 @@ class SpecUploadFile extends SpecUploadBase{
 					//Convert Symbiota reference url to occid
 					$convSql = 'UPDATE uploadspectemp '.
 						'SET occid = substring_index(tempfield01,"=",-1) '.
-						'WHERE (collid = '.$this->collId.') AND (occid IS NULL)';
+						'WHERE (collid IN('.$this->collId.')) AND (occid IS NULL)';
 					if(!$this->conn->query($convSql)){
-						$this->outputMsg('<li>ERROR: update to extract occid from subject_references field</li>');
+						$this->outputMsg('<li>ERROR update to extract occid from subject_references field</li>');
 					}
 				}
 				//Unlink records that were illegally linked to another collection
 				$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
 					'SET u.occid = NULL '.
-					'WHERE (u.collid = '.$this->collId.') AND (o.collid != '.$this->collId.')';
+					'WHERE (u.collid IN('.$this->collId.')) AND (o.collid NOT IN('.$this->collId.'))';
 				if(!$this->conn->query($sql)){
-					$this->outputMsg('<li>ERROR: unlinking bad records</li>');
+					$this->outputMsg('<li>ERROR unlinking bad records</li>');
 				}
 			}
 

@@ -408,11 +408,11 @@ class SpecUploadBase extends SpecUpload{
  	protected function prepUploadData(){
 	 	//First, delete all records in uploadspectemp and uploadimagetemp table associated with this collection
 		$this->outputMsg('<li>Clearing staging tables</li>');
- 		$sqlDel1 = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
+ 		$sqlDel1 = 'DELETE FROM uploadspectemp WHERE (collid IN('.$this->collId.'))';
 		$this->conn->query($sqlDel1);
-		$sqlDel2 = "DELETE FROM uploaddetermtemp WHERE (collid = ".$this->collId.')';
+		$sqlDel2 = 'DELETE FROM uploaddetermtemp WHERE (collid IN('.$this->collId.'))';
 		$this->conn->query($sqlDel2);
-		$sqlDel3 = "DELETE FROM uploadimagetemp WHERE (collid = ".$this->collId.')';
+		$sqlDel3 = 'DELETE FROM uploadimagetemp WHERE (collid IN('.$this->collId.'))';
 		$this->conn->query($sqlDel3);
  	}
  	
@@ -450,7 +450,7 @@ class SpecUploadBase extends SpecUpload{
 			flush();
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid '.
-				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND (u.dbpk IS NOT NULL) AND (o.dbpk IS NOT NULL)';
+				'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.dbpk IS NOT NULL) AND (o.dbpk IS NOT NULL)';
 			$this->conn->query($sql);
 		}
 		
@@ -475,7 +475,7 @@ class SpecUploadBase extends SpecUpload{
 				//Match records based on Catalog Number 
 				$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 					'SET u.occid = o.occid '.
-					'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) ';
+					'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) ';
 				if(!$this->conn->query($sql)){
 					$this->outputMsg('<li><span style="color:red;">Warning: unable to match on catalog number: '.$this->conn->error.'</span></li>');
 				}
@@ -484,7 +484,7 @@ class SpecUploadBase extends SpecUpload{
 				//Match records based on other Catalog Numbers fields 
 				$sql2 = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.otherCatalogNumbers = o.otherCatalogNumbers) AND (u.collid = o.collid) '.
 					'SET u.occid = o.occid '.
-					'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.othercatalogNumbers IS NOT NULL) AND (o.othercatalogNumbers IS NOT NULL) ';
+					'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.othercatalogNumbers IS NOT NULL) AND (o.othercatalogNumbers IS NOT NULL) ';
 				if(!$this->conn->query($sql2)){
 					$this->outputMsg('<li><span style="color:red;">Warning: unable to match on other catalog numbers: '.$this->conn->error.'</span></li>');
 				}
@@ -504,32 +504,32 @@ class SpecUploadBase extends SpecUpload{
 		flush();
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.year = YEAR(u.eventDate) '.
-			'WHERE u.collid = '.$this->collId.' AND u.eventDate IS NOT NULL AND u.year IS NULL';
+			'WHERE (u.collid IN('.$this->collId.')) AND (u.eventDate IS NOT NULL) AND (u.year IS NULL)';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.month = MONTH(u.eventDate) '.
-			'WHERE u.collid = '.$this->collId.' AND u.month IS NULL AND u.eventDate IS NOT NULL';
+			'WHERE (u.collid IN('.$this->collId.')) AND (u.month IS NULL) AND (u.eventDate IS NOT NULL)';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.day = DAY(u.eventDate) '.
-			'WHERE u.collid = '.$this->collId.' AND u.day IS NULL AND u.eventDate IS NOT NULL';
+			'WHERE u.collid IN('.$this->collId.') AND u.day IS NULL AND u.eventDate IS NOT NULL';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.startDayOfYear = DAYOFYEAR(u.eventDate) '.
-			'WHERE u.collid = '.$this->collId.' AND u.startDayOfYear IS NULL AND u.eventDate IS NOT NULL';
+			'WHERE u.collid IN('.$this->collId.') AND u.startDayOfYear IS NULL AND u.eventDate IS NOT NULL';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.endDayOfYear = DAYOFYEAR(u.LatestDateCollected) '.
-			'WHERE u.collid = '.$this->collId.' AND u.endDayOfYear IS NULL AND u.LatestDateCollected IS NOT NULL';
+			'WHERE u.collid IN('.$this->collId.') AND u.endDayOfYear IS NULL AND u.LatestDateCollected IS NOT NULL';
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE IGNORE uploadspectemp u '.
 			'SET u.eventDate = CONCAT_WS("-",LPAD(u.year,4,"19"),IFNULL(LPAD(u.month,2,"0"),"00"),IFNULL(LPAD(u.day,2,"0"),"00")) '.
-			'WHERE u.eventDate IS NULL AND u.year > 1300 AND u.year < 2020 AND collid = '.$this->collId;
+			'WHERE (u.eventDate IS NULL) AND (u.year > 1300) AND (u.year < 2020) AND (collid = IN('.$this->collId.'))';
 		$this->conn->query($sql);
 		
 		$this->outputMsg('<li style="margin-left:10px;">Cleaning country and state/province ...</li>');
@@ -538,29 +538,29 @@ class SpecUploadBase extends SpecUpload{
 		//Convert country abbreviations to full spellings
 		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupcountry c ON u.country = c.iso3 '.
 			'SET u.country = c.countryName '.
-			'WHERE u.collid = '.$this->collId;
+			'WHERE (u.collid IN('.$this->collId.'))';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupcountry c ON u.country = c.iso '.
 			'SET u.country = c.countryName '.
-			'WHERE u.collid = '.$this->collId;
+			'WHERE u.collid IN('.$this->collId.')';
 		$this->conn->query($sql);
 
 		//Convert state abbreviations to full spellings
 		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupstateprovince s ON u.stateProvince = s.abbrev '.
 			'SET u.stateProvince = s.stateName '.
-			'WHERE u.collid = '.$this->collId;
+			'WHERE u.collid IN('.$this->collId.')';
 		$this->conn->query($sql);
 
 		//Fill null country with state matches 
 		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupstateprovince s ON u.stateprovince = s.statename '.
 			'INNER JOIN lkupcountry c ON s.countryid = c.countryid '.
 			'SET u.country = c.countryName '.
-			'WHERE u.country IS NULL AND c.countryname = "United States" AND u.collid = '.$this->collId;
+			'WHERE u.country IS NULL AND c.countryname = "United States" AND u.collid IN('.$this->collId.')';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupstateprovince s ON u.stateprovince = s.statename '.
 			'INNER JOIN lkupcountry c ON s.countryid = c.countryid '.
 			'SET u.country = c.countryName '.
-			'WHERE u.country IS NULL AND u.collid = '.$this->collId;
+			'WHERE u.country IS NULL AND u.collid IN('.$this->collId.')';
 		$this->conn->query($sql);
 
 		$this->outputMsg('<li style="margin-left:10px;">Cleaning coordinates...</li>');
@@ -568,24 +568,24 @@ class SpecUploadBase extends SpecUpload{
 		flush();
 		$sql = 'UPDATE uploadspectemp '.
 			'SET DecimalLongitude = -1*DecimalLongitude '.
-			'WHERE DecimalLongitude > 0 AND (Country = "USA" OR Country = "United States" OR Country = "U.S.A." OR Country = "Canada" OR Country = "Mexico") AND collid = '.$this->collId;
+			'WHERE DecimalLongitude > 0 AND (Country = "USA" OR Country = "United States" OR Country = "U.S.A." OR Country = "Canada" OR Country = "Mexico") AND collid IN('.$this->collId.')';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET DecimalLatitude = NULL, DecimalLongitude = NULL '.
-			'WHERE DecimalLatitude = 0 AND DecimalLongitude = 0 AND collid = '.$this->collId;
+			'WHERE DecimalLatitude = 0 AND DecimalLongitude = 0 AND collid IN('.$this->collId.')';
 		$this->conn->query($sql);
 
 		//Move illegal coordinates to verbatim
 		$sql = 'UPDATE uploadspectemp '.
 			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude) '.
-			'WHERE verbatimcoordinates IS NULL AND collid = '.$this->collId.
-			' AND (DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180)';
+			'WHERE verbatimcoordinates IS NULL AND collid IN('.$this->collId.') '.
+			'AND (DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180)';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET DecimalLatitude = NULL, DecimalLongitude = NULL '.
-			'WHERE collid = '.$this->collId.' AND (DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180)';
+			'WHERE collid IN('.$this->collId.') AND (DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180)';
 		$this->conn->query($sql);
 
 		
@@ -617,7 +617,7 @@ class SpecUploadBase extends SpecUpload{
 		//Append image counts from Associated Media
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM uploadspectemp '.
-			'WHERE (associatedMedia IS NOT NULL) AND (collid = '.$this->collId.')';
+			'WHERE (associatedMedia IS NOT NULL) AND (collid IN('.$this->collId.'))';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$cnt = (isset($reportArr['image'])?$reportArr['image']:0) + $r->cnt;
@@ -628,7 +628,7 @@ class SpecUploadBase extends SpecUpload{
 		//Number of new specimen records
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM uploadspectemp '.
-			'WHERE (occid IS NULL) AND (collid = '.$this->collId.')';
+			'WHERE (occid IS NULL) AND (collid IN('.$this->collId.'))';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$reportArr['new'] = $r->cnt;
@@ -638,7 +638,7 @@ class SpecUploadBase extends SpecUpload{
 		//Number of matching records that will be updated
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM uploadspectemp '.
-			'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
+			'WHERE (occid IS NOT NULL) AND (collid IN('.$this->collId.'))';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$reportArr['update'] = $r->cnt;
@@ -649,7 +649,7 @@ class SpecUploadBase extends SpecUpload{
 			//Records that can be matched on Catalog Number, but will be appended 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.collid = o.collid '.
-				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
+				'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['matchappend'] = $r->cnt;
@@ -661,7 +661,7 @@ class SpecUploadBase extends SpecUpload{
 			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
+				'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
 				'AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL)';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
@@ -672,7 +672,7 @@ class SpecUploadBase extends SpecUpload{
 			//Records already in portal that won't match with an incoming record 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM omoccurrences o LEFT JOIN uploadspectemp u  ON (o.occid = u.occid) '.
-				'WHERE (o.collid = '.$this->collId.') AND (u.occid IS NULL)';
+				'WHERE (o.collid IN('.$this->collId.')) AND (u.occid IS NULL)';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['exist'] = $r->cnt;
@@ -683,7 +683,7 @@ class SpecUploadBase extends SpecUpload{
 		if($this->uploadType != $this->SKELETAL && ($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate')){
 			//Look for null dbpk
 			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp '.
-				'WHERE (dbpk IS NULL) AND (collid = '.$this->collId.')';
+				'WHERE (dbpk IS NULL) AND (collid IN('.$this->collId.'))';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['nulldbpk'] = $r->cnt;
@@ -693,7 +693,7 @@ class SpecUploadBase extends SpecUpload{
 			//Look for duplicate dbpk
 			$sql = 'SELECT dbpk FROM uploadspectemp '.
 				'GROUP BY dbpk, collid, basisofrecord '.
-				'HAVING (Count(*)>1) AND (collid = '.$this->collId.')';
+				'HAVING (Count(*)>1) AND (collid IN('.$this->collId.'))';
 			$rs = $this->conn->query($sql);
 			$reportArr['dupdbpk'] = $rs->num_rows;
 			$rs->free();
@@ -705,7 +705,7 @@ class SpecUploadBase extends SpecUpload{
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
 				'INNER JOIN omcollections c ON o.collid = c.collid '.
 				'WHERE (u.institutioncode != IFNULL(o.institutioncode,c.institutioncode) OR u.collectioncode != IFNULL(o.collectioncode,c.collectioncode)) '.
-				'AND (c.collid = '.$this->collId.')';
+				'AND (c.collid IN('.$this->collId.'))';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$reportArr['nfnbadcodes'] = $r->cnt;
@@ -736,7 +736,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li>Starting Stage 2 cleaning</li>');
 		if($this->uploadType == $this->NFNUPLOAD){
 			//Remove specimens without links back to source
-			$sql = 'DELETE FROM uploadspectemp WHERE (occid IS NULL) AND (collid = '.$this->collId.')';
+			$sql = 'DELETE FROM uploadspectemp WHERE (occid IS NULL) AND (collid IN('.$this->collId.'))';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('<li style="margin-left:10px"><span style="color:red;">ERROR</span> deleting specimens ('.$this->conn->error.')</li>');
 			}
@@ -749,7 +749,7 @@ class SpecUploadBase extends SpecUpload{
 				flush();
 				$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 					'SET u.occid = o.occid, o.dbpk = u.dbpk '.
-					'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) ';
+					'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) ';
 				$this->conn->query($sql);
 			}
 			
@@ -757,7 +757,7 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg('<li style="margin-left:10px;">Remove NULL dbpk values...</li>');
 				ob_flush();
 				flush();
-				$sql = 'DELETE FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collId;
+				$sql = 'DELETE FROM uploadspectemp WHERE (dbpk IS NULL) AND (collid IN('.$this->collId.'))';
 				$this->conn->query($sql);
 				
 				$this->outputMsg('<li style="margin-left:10px;">Remove duplicate dbpk values...</li>');
@@ -765,8 +765,8 @@ class SpecUploadBase extends SpecUpload{
 				flush();
 				$sql = 'DELETE u.* '.
 					'FROM uploadspectemp u INNER JOIN (SELECT dbpk FROM uploadspectemp '.
-					'GROUP BY dbpk, collid HAVING Count(*)>1 AND collid = '.$this->collId.') t2 ON u.dbpk = t2.dbpk '.
-					'WHERE collid = '.$this->collId;
+					'GROUP BY dbpk, collid HAVING Count(*)>1 AND collid IN('.$this->collId.')) t2 ON u.dbpk = t2.dbpk '.
+					'WHERE collid IN('.$this->collId.')';
 				if(!$this->conn->query($sql)){
 					$this->outputMsg('<li style="margin-left:10px"><span style="color:red;">ERROR</span> ('.$this->conn->error.')</li>');
 				}
@@ -814,7 +814,7 @@ class SpecUploadBase extends SpecUpload{
 			}
 		}
 		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
-			'SET '.implode(',',$sqlFragArr).' WHERE (u.collid = '.$this->collId.')';
+			'SET '.implode(',',$sqlFragArr).' WHERE (u.collid IN('.$this->collId.'))';
 		//echo '<div>'.$sql.'</div>'; exit;
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('<li style="margin-left:10px">FAILED! ERROR: '.$this->conn->error.'</li> ');
@@ -826,7 +826,7 @@ class SpecUploadBase extends SpecUpload{
 			flush();
 			$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, dateentered, '.implode(', ',$fieldArr).' ) '.
 				'SELECT u.collid, u.dbpk, "'.date('Y-m-d H:i:s').'", u.'.implode(', u.',$fieldArr).' FROM uploadspectemp u '.
-				'WHERE u.occid IS NULL AND u.collid = '.$this->collId.'';
+				'WHERE u.occid IS NULL AND u.collid IN('.$this->collId.')';
 			//echo '<div>'.$sql.'</div>'; exit;
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('<li>FAILED! ERROR: '.$this->conn->error.'</li> ');
@@ -840,14 +840,14 @@ class SpecUploadBase extends SpecUpload{
 			//Update occid by matching dbpk 
 			$sqlOcc1 = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid '.
-				'WHERE (u.occid IS NULL) AND (u.dbpk IS NOT NULL) AND (o.dbpk IS NOT NULL) AND (u.collid = '.$this->collId.')';
+				'WHERE (u.occid IS NULL) AND (u.dbpk IS NOT NULL) AND (o.dbpk IS NOT NULL) AND (u.collid IN('.$this->collId.'))';
 			if(!$this->conn->query($sqlOcc1)){
 				$this->outputMsg('<li>ERROR updating occid after occurrence insert: '.$this->conn->error.'</li>');
 			}
 			//Update occid by linking catalognumbers
 			$sqlOcc2 = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid '.
-				'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) ';
+				'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) ';
 			if(!$this->conn->query($sqlOcc2)){
 				$this->outputMsg('<li>ERROR updating occid (2nd step) after occurrence insert: '.$this->conn->error.'</li>');
 			}
@@ -859,7 +859,7 @@ class SpecUploadBase extends SpecUpload{
 				$sqlExs2 = 'INSERT INTO omexsiccatinumbers(ometid, exsnumber) '.
 					'SELECT DISTINCT u.exsiccatiIdentifier, u.exsiccatinumber '.
 					'FROM uploadspectemp u LEFT JOIN omexsiccatinumbers e ON u.exsiccatiIdentifier = e.ometid AND u.exsiccatinumber = e.exsnumber '.
-					'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NOT NULL) '.
+					'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NOT NULL) '.
 					'AND (u.exsiccatiIdentifier IS NOT NULL) AND (u.exsiccatinumber IS NOT NULL) AND (e.exsnumber IS NULL)';
 				if(!$this->conn->query($sqlExs2)){
 					$this->outputMsg('<li>ERROR adding new exsiccati numbers: '.$this->conn->error.'</li>');
@@ -868,7 +868,7 @@ class SpecUploadBase extends SpecUpload{
 				$sqlExs3 = 'INSERT IGNORE INTO omexsiccatiocclink(omenid,occid) '.
 					'SELECT e.omenid, u.occid '.
 					'FROM uploadspectemp u INNER JOIN omexsiccatinumbers e ON u.exsiccatiIdentifier = e.ometid AND u.exsiccatinumber = e.exsnumber '.
-					'WHERE (u.collid = '.$this->collId.') AND (e.omenid IS NOT NULL) AND (u.occid IS NOT NULL)';
+					'WHERE (u.collid IN('.$this->collId.')) AND (e.omenid IS NOT NULL) AND (u.occid IS NOT NULL)';
 				if($this->conn->query($sqlExs3)){
 					$this->outputMsg('<li>Specimens linked to exsiccati index </li>');
 				}
@@ -922,7 +922,7 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	protected function transferIdentificationHistory(){
-		$sql = 'SELECT count(*) AS cnt FROM uploaddetermtemp WHERE (collid = '.$this->collId.')';
+		$sql = 'SELECT count(*) AS cnt FROM uploaddetermtemp WHERE (collid IN('.$this->collId.'))';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			if($r->cnt){
@@ -933,7 +933,7 @@ class SpecUploadBase extends SpecUpload{
 				//Update occid for determinations of occurrence records already in portal 
 				$sql = 'UPDATE uploaddetermtemp ud INNER JOIN uploadspectemp u ON ud.collid = u.collid AND ud.dbpk = u.dbpk '.
 					'SET ud.occid = u.occid '.
-					'WHERE (ud.occid IS NULL) AND (u.occid IS NOT NULL) AND (ud.collid = '.$this->collId.')';
+					'WHERE (ud.occid IS NULL) AND (u.occid IS NOT NULL) AND (ud.collid IN('.$this->collId.'))';
 				if(!$this->conn->query($sql)){
 					$this->outputMsg('<li style="margin-left:20px;">WARNING updating occids within uploaddetermtemp: '.$this->conn->error.'</li> ');
 				}
@@ -941,7 +941,7 @@ class SpecUploadBase extends SpecUpload{
 				//Delete already existing determinations
 				$sqlDel = 'DELETE u.* '.
 					'FROM uploaddetermtemp u INNER JOIN omoccurdeterminations d ON u.occid = d.occid '.
-					'WHERE (u.collid = '.$this->collId.') '.
+					'WHERE (u.collid IN('.$this->collId.')) '.
 					'AND (d.sciname = u.sciname) AND (d.identifiedBy = u.identifiedBy) AND (d.dateIdentified = u.dateIdentified)';
 				$this->conn->query($sqlDel);
 		
@@ -951,12 +951,12 @@ class SpecUploadBase extends SpecUpload{
 					'SELECT u.occid, u.sciname, u.scientificNameAuthorship, u.identifiedBy, u.dateIdentified, '.
 					'u.identificationQualifier, u.iscurrent, u.identificationReferences, u.identificationRemarks, sourceIdentifier '.
 					'FROM uploaddetermtemp u '.
-					'WHERE u.occid IS NOT NULL AND (u.collid = '.$this->collId.')';
+					'WHERE u.occid IS NOT NULL AND (u.collid IN('.$this->collId.'))';
 				if($this->conn->query($sql)){
 					//Delete all determinations
 					$sqlDel = 'DELETE * '.
 						'FROM uploaddetermtemp '.
-						'WHERE (collid = '.$this->collId.')';
+						'WHERE (collid IN('.$this->collId.'))';
 					$this->conn->query($sqlDel);
 				}
 				else{
@@ -971,7 +971,7 @@ class SpecUploadBase extends SpecUpload{
 		//parse, check, and transfer all good URLs
 		$sql = 'SELECT associatedmedia, tidinterpreted, occid '.
 			'FROM uploadspectemp '.
-			'WHERE (associatedmedia IS NOT NULL) AND (occid IS NOT NULL) AND (collid = '.$this->collId.')';
+			'WHERE (associatedmedia IS NOT NULL) AND (occid IS NOT NULL) AND (collid IN('.$this->collId.'))';
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
 			$this->outputMsg('<li>Preparing associatedMedia for image transfer...</li>');
@@ -1186,23 +1186,23 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li>Transfer process complete</li>');
 
 		//Update uploaddate 
-		$sql = 'UPDATE omcollectionstats SET uploaddate = CURDATE() WHERE collid = '.$this->collId;
+		$sql = 'UPDATE omcollectionstats SET uploaddate = CURDATE() WHERE collid IN('.$this->collId.')';
 		$this->conn->query($sql);
 		
 		//Remove records from occurrence temp table (uploadspectemp)
-		$sql = 'DELETE FROM uploadspectemp WHERE (collid = '.$this->collId.') OR (initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY))';
+		$sql = 'DELETE FROM uploadspectemp WHERE (collid IN('.$this->collId.')) OR (initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY))';
 		$this->conn->query($sql);
 		//Optimize table to reset indexes
 		$this->conn->query('OPTIMIZE TABLE uploadspectemp');
 		
 		//Remove records from determination temp table (uploaddetermtemp)
-		$sql = 'DELETE FROM uploaddetermtemp WHERE (collid = '.$this->collId.') OR (initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY))';
+		$sql = 'DELETE FROM uploaddetermtemp WHERE (collid IN('.$this->collId.')) OR (initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY))';
 		$this->conn->query($sql);
 		//Optimize table to reset indexes
 		$this->conn->query('OPTIMIZE TABLE uploaddetermtemp');
 		
 		//Remove records from image temp table (uploadimagetemp)
-		$sql = 'DELETE FROM uploadimagetemp WHERE (collid = '.$this->collId.') OR (initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY))';
+		$sql = 'DELETE FROM uploadimagetemp WHERE (collid IN('.$this->collId.')) OR (initialtimestamp < DATE_SUB(CURDATE(),INTERVAL 3 DAY))';
 		$this->conn->query($sql);
 		//Optimize table to reset indexes
 		$this->conn->query('OPTIMIZE TABLE uploadimagetemp');
@@ -1245,7 +1245,7 @@ class SpecUploadBase extends SpecUpload{
 		ob_flush();
 		flush();
 		$sql = 'SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '.
-			'HAVING Count(*)>1 AND collid = '.$this->collId.' AND catalognumber IS NOT NULL';
+			'HAVING Count(*)>1 AND collid IN('.$this->collId.') AND catalognumber IS NOT NULL';
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
 			$this->outputMsg('<span style="color:red;">Duplicate Catalog Numbers exist</span></li>');
@@ -1563,7 +1563,7 @@ class SpecUploadBase extends SpecUpload{
 	
 	private function setTransferCount(){
 		if($this->collId){
-			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = '.$this->collId.') ';
+			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid IN('.$this->collId.')) ';
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->transferCount = $row->cnt;
@@ -1580,7 +1580,7 @@ class SpecUploadBase extends SpecUpload{
 	private function setIdentTransferCount(){
 		if($this->collId){
 			$sql = 'SELECT count(*) AS cnt FROM uploaddetermtemp '.
-				'WHERE (collid = '.$this->collId.')';
+				'WHERE (collid IN('.$this->collId.'))';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
@@ -1597,7 +1597,7 @@ class SpecUploadBase extends SpecUpload{
 	
 	private function setImageTransferCount(){
 		if($this->collId){
-			$sql = 'SELECT count(*) AS cnt FROM uploadimagetemp WHERE (collid = '.$this->collId.')';
+			$sql = 'SELECT count(*) AS cnt FROM uploadimagetemp WHERE (collid IN('.$this->collId.'))';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$this->imageTransferCount = $r->cnt;

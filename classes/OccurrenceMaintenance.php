@@ -229,7 +229,7 @@ class OccurrenceMaintenance {
 			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
 			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (o.localitySecurityReason IS NULL) AND (c.type = "rarespp") '.
 			'AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
-		if($collid) $sql .= ' AND o.collid ='.$collid;
+		if($collid) $sql .= ' AND o.collid IN('.$collid.') ';
 		$rs = $this->conn->query($sql);
 		$occArr = array();
 		while($r = $rs->fetch_object()){
@@ -271,7 +271,7 @@ class OccurrenceMaintenance {
 				'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount, '.
 				'COUNT(DISTINCT CASE WHEN t.RankId >= 220 THEN t.SciName ELSE NULL END) AS TotalTaxaCount '.
 				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-				'WHERE (o.collid = '.$collid.') ';
+				'WHERE (o.collid IN('.$collid.')) ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$recordCnt = $r->SpecimenCount;
@@ -288,7 +288,7 @@ class OccurrenceMaintenance {
 			if($this->verbose) $this->outputMsg('Calculating number of specimens imaged... ',1);
 			$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-				'WHERE (o.collid = '.$collid.') ';
+				'WHERE (o.collid IN('.$collid.')) ';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$statsArr['imgcnt'] = $r->imgcnt;
@@ -299,7 +299,7 @@ class OccurrenceMaintenance {
 			$sql = 'SELECT COUNT(CASE WHEN g.resourceurl LIKE "http://www.boldsystems%" THEN o.occid ELSE NULL END) AS boldcnt, '.
 				'COUNT(CASE WHEN g.resourceurl LIKE "http://www.ncbi%" THEN o.occid ELSE NULL END) AS gencnt '.
 				'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
-				'WHERE (o.collid = '.$collid.') ';
+				'WHERE (o.collid IN('.$collid.')) ';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$statsArr['boldcnt'] = $r->boldcnt;
@@ -310,7 +310,7 @@ class OccurrenceMaintenance {
 			if($this->verbose) $this->outputMsg('Calculating reference counts... ',1);
 			$sql = 'SELECT count(r.occid) as refcnt '.
 				'FROM omoccurrences o INNER JOIN referenceoccurlink r ON o.occid = r.occid '.
-				'WHERE (o.collid = '.$collid.') ';
+				'WHERE (o.collid IN('.$collid.')) ';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$statsArr['refcnt'] = $r->refcnt;
@@ -322,7 +322,7 @@ class OccurrenceMaintenance {
 				'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerFamily, '.
 				'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerFamily '.
 				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-				'WHERE (o.collid = '.$collid.') '.
+				'WHERE (o.collid IN('.$collid.')) '.
 				'GROUP BY o.family ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -341,7 +341,7 @@ class OccurrenceMaintenance {
 				'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerCountry, '.
 				'COUNT(CASE WHEN t.RankId >= 220 AND o.decimalLatitude IS NOT NULL THEN o.occid ELSE NULL END) AS IDGeorefSpecimensPerCountry '.
 				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-				'WHERE (o.collid = '.$collid.') '.
+				'WHERE (o.collid IN('.$collid.')) '.
 				'GROUP BY o.country ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -358,7 +358,7 @@ class OccurrenceMaintenance {
 			$returnArrJson = json_encode($statsArr);
 			$sql = 'UPDATE omcollectionstats '.
 				"SET dynamicProperties = '".$this->cleanInStr($returnArrJson)."' ".
-				'WHERE collid = '.$collid;
+				'WHERE collid IN('.$collid.') ';
 			if(!$this->conn->query($sql)){
 				$errStr = 'WARNING: unable to update collection stats table [1]; '.$this->conn->error;
 				$this->errorArr[] = $errStr;
@@ -371,7 +371,7 @@ class OccurrenceMaintenance {
 				'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
 				'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount '.
 				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-				'WHERE (o.collid = '.$collid.') ';
+				'WHERE (o.collid IN('.$collid.')) ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$recordCnt = $r->SpecimenCount;
@@ -385,7 +385,7 @@ class OccurrenceMaintenance {
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.
 			',cs.speciescnt = '.$speciesCnt.', cs.datelastmodified = CURDATE() '.
-			'WHERE cs.collid = '.$collid;
+			'WHERE cs.collid IN('.$collid.')';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update collection stats table [2]; '.$this->conn->error;
 			$this->errorArr[] = $errStr;
