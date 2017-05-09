@@ -42,7 +42,7 @@ if($dbpk) $dbpk = htmlspecialchars($dbpk);
 if(!is_numeric($recStart)) $recStart = 0;
 if(!is_numeric($recLimit)) $recLimit = 1000;
 
-$DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5;$DWCAUPLOAD = 6;$SKELETAL = 7;
+$DIRECTUPLOAD = 1; $DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5; $DWCAUPLOAD = 6; $SKELETAL = 7; $IPTUPLOAD = 8; $NFNUPLOAD = 9;
 
 if(strpos($uspid,'-')){
 	$tok = explode('-',$uspid);
@@ -59,7 +59,7 @@ elseif($uploadType == $DIGIRUPLOAD){
 	$duManager->setSearchStart($recStart);
 	$duManager->setSearchLimit($recLimit);
 }
-elseif($uploadType == $FILEUPLOAD){
+elseif($uploadType == $FILEUPLOAD || $uploadType == $NFNUPLOAD){
 	$duManager = new SpecUploadFile();
 	$duManager->setUploadFileName($ulPath);
 }
@@ -68,7 +68,7 @@ elseif($uploadType == $SKELETAL){
 	$duManager->setUploadFileName($ulPath);
 	$matchCatNum = true;
 }
-elseif($uploadType == $DWCAUPLOAD){
+elseif($uploadType == $DWCAUPLOAD || $uploadType == $IPTUPLOAD){
 	$duManager = new SpecUploadDwca();
 	$duManager->setBaseFolderName($ulPath);
 	$duManager->setIncludeIdentificationHistory($importIdent);
@@ -358,16 +358,24 @@ $duManager->loadFieldMap();
 						if($reportArr['update']){
 							echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
 							echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
-							if($uploadType != $SKELETAL) echo '&nbsp;&nbsp;&nbsp;<span style="color:orange"><b>Caution:</b></span> incoming records will replace existing records';
+							if($uploadType != $SKELETAL && $uploadType != $NFNUPLOAD) 
+								echo '&nbsp;&nbsp;&nbsp;<span style="color:orange"><b>Caution:</b></span> incoming records will replace existing records';
 						}
 						echo '</div>';
-						echo '<div>New records: ';
-						echo $reportArr['new'];
-						if($reportArr['new']){ 
-							echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
-							echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+						if($uploadType != $NFNUPLOAD || $reportArr['new']){
+							if($uploadType == $NFNUPLOAD) echo '<div>Illegal records to be deleted: ';
+							else echo '<div>New records: ';
+							echo $reportArr['new'];
+							if($reportArr['new']){ 
+								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							}
+							echo '</div>';
+							if($uploadType == $NFNUPLOAD) echo '<div style="margin-left:15px;color:orange">- Either you lack permissions to load these records into target collection(s), or you are loading records into a different portal than the original data source';
 						}
-						echo '</div>';
+						if($uploadType == $NFNUPLOAD && isset($reportArr['nfnbadcodes']) && $reportArr['nfnbadcodes']){
+							echo '<div>Illegal records to be deleted (unmatched institution codes): '.$reportArr['nfnbadcodes'].' - this might be an indicator that records are being loaded into a different portal than the original data source</div>';
+						}
 						if(isset($reportArr['matchappend']) && $reportArr['matchappend']){
 							echo '<div>Records matching on catalog number that will be appended : ';
 							echo $reportArr['matchappend'];
@@ -494,7 +502,7 @@ $duManager->loadFieldMap();
 			}
 			else{
 				//Upload type is direct, file, or DWCA 
-				if(!$ulPath && ($uploadType == $FILEUPLOAD || $uploadType == $SKELETAL || $uploadType == $DWCAUPLOAD)){
+				if(!$ulPath && ($uploadType == $FILEUPLOAD || $uploadType == $SKELETAL || $uploadType == $NFNUPLOAD || $uploadType == $DWCAUPLOAD || $uploadType == $IPTUPLOAD)){
 					//Need to upload data for file and DWCA uploads
 					$ulPath = $duManager->uploadFile();
 					if(!$ulPath){
@@ -539,7 +547,7 @@ $duManager->loadFieldMap();
 				$processingList = array("unprocessed"=>"Unprocessed","stage 1"=>"Stage 1","stage 2"=>"Stage 2","stage 3"=>"Stage 3",
 					"pending review"=>"Pending Review","expert required"=>"Expert Required","pending review-nfn"=>"Pending Review-NfN",
 					"reviewed"=>"Reviewed","closed"=>"Closed");
-				if($ulPath && $uploadType == $DWCAUPLOAD){
+				if($ulPath && ($uploadType == $DWCAUPLOAD || $uploadType == $IPTUPLOAD)){
 					//Data has been uploaded and it's a DWCA upload type
 					if($duManager->analyzeUpload()){
 						$metaArr = $duManager->getMetaArr();
@@ -685,6 +693,43 @@ $duManager->loadFieldMap();
 							echo '<div style="font-weight:bold;">Unknown error analyzing upload</div>';
 						}
 					}
+				}
+				elseif($uploadType == $NFNUPLOAD && $ulPath){
+					$duManager->analyzeUpload();
+					?>
+					<form name="filemappingform" action="specupload.php" method="post" onsubmit="return verifyMappingForm(this)">
+						<fieldset style="width:95%;">
+							<legend style="font-weight:bold;font-size:120%;">Notes from Nature File Upload</legend>
+							<table class="styledtable">
+								<tr><th>Source Field</th><th>Target Field</th></tr>
+								<?php 
+								$duManager->echoNfnFieldMap();
+								?>
+							</table>
+							<div style="margin:10px 0px;">
+								Processing Status:
+								<select name="processingstatus">
+									<option value="">Leave as is / Do not set</option>
+									<option value="">--------------------------</option>
+									<?php 
+									foreach($processingList as $ps){
+										echo '<option value="'.$ps.'">'.ucwords($ps).'</option>';
+									}
+									?>
+								</select>  
+							</div>
+							<div style="margin:20px;">
+								<input type="submit" name="action" value="Start Upload" />
+							</div>
+						</fieldset>
+						<input name="matchcatnum" type="hidden" value="0" /> 
+						<input name="matchothercatnum" type="hidden" value="0" /> 
+						<input name="uspid" type="hidden" value="<?php echo $uspid;?>" />
+						<input name="collid" type="hidden" value="<?php echo $collid;?>" />
+						<input name="uploadtype" type="hidden" value="<?php echo $uploadType;?>" />
+						<input name="ulpath" type="hidden" value="<?php echo $ulPath;?>" />
+					</form>
+					<?php
 				}
 				elseif($uploadType == $DIRECTUPLOAD || (($uploadType == $FILEUPLOAD || $uploadType == $SKELETAL) && $ulPath)){
 					$duManager->analyzeUpload();

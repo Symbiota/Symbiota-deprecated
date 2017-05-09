@@ -28,7 +28,7 @@ class SpecUpload{
 	private $logFH;
 	protected $errorStr;
 
-	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6, $SKELETAL = 7;
+	protected $DIRECTUPLOAD = 1, $DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6, $SKELETAL = 7, $IPTUPLOAD = 8, $NFNUPLOAD = 9;
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -78,11 +78,17 @@ class SpecUpload{
 				elseif($uploadType == $this->SKELETAL){
 					$uploadStr = "Skeletal File Upload";
 				}
+				elseif($uploadType == $this->NFNUPLOAD){
+					$uploadStr = "NfN File Upload";
+				}
 				elseif($uploadType == $this->STOREDPROCEDURE){
 					$uploadStr = "Stored Procedure";
 				}
 				elseif($uploadType == $this->DWCAUPLOAD){
 					$uploadStr = "Darwin Core Archive Upload";
+				}
+				elseif($uploadType == $this->IPTUPLOAD){
+					$uploadStr = "IPT Resource";
 				}
 				$returnArr[$row->uspid]["title"] = $row->title.' ('.$uploadStr.' - #'.$row->uspid.')';
 				$returnArr[$row->uspid]["uploadtype"] = $row->uploadtype;

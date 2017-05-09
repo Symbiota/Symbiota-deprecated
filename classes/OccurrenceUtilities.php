@@ -5,8 +5,8 @@ include_once($SERVER_ROOT.'/classes/TaxonomyUtilities.php');
 class OccurrenceUtilities {
 
 	static $monthRoman = array('I'=>'01','II'=>'02','III'=>'03','IV'=>'04','V'=>'05','VI'=>'06','VII'=>'07','VIII'=>'08','IX'=>'09','X'=>'10','XI'=>'11','XII'=>'12');
-	static $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
-		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
+	static $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04','may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08',
+		'aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 
  	public function __construct(){
  	}
@@ -426,43 +426,42 @@ class OccurrenceUtilities {
 		}
 		//If month, day, or year are text, avoid SQL error by converting to numeric value
 		if(array_key_exists('year',$recMap) || array_key_exists('month',$recMap) || array_key_exists('day',$recMap)){
-			$y = (array_key_exists('year',$recMap)?$recMap['year']:'00');
-			$m = (array_key_exists('month',$recMap)?$recMap['month']:'00');
-			$d = (array_key_exists('day',$recMap)?$recMap['day']:'00');
+			$y = (array_key_exists('year',$recMap)?$recMap['year']:'');
+			$m = (array_key_exists('month',$recMap)?$recMap['month']:'');
+			$d = (array_key_exists('day',$recMap)?$recMap['day']:'');
 			$vDate = trim($y.'-'.$m.'-'.$d,'- ');
-			if(isset($recMap['day']) && !is_numeric($recMap['day'])){
-				if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-					$recMap['verbatimeventdate'] = $vDate;
-				}
+			if(isset($recMap['day']) && $recMap['day'] && !is_numeric($recMap['day'])){
 				unset($recMap['day']);
 				$d = '00';
 			}
 			if(isset($recMap['year']) && !is_numeric($recMap['year'])){
-				if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-					$recMap['verbatimeventdate'] = $vDate;
-				}
 				unset($recMap['year']);
 			}
 			if(isset($recMap['month']) && $recMap['month'] && !is_numeric($recMap['month'])){
-				if(strlen($recMap['month']) > 2){
+				if(!is_numeric($recMap['month'])){
 					$monAbbr = strtolower(substr($recMap['month'],0,3));
-					if(array_key_exists($monAbbr,self::$monthNames)){
+					if(preg_match('/^[IVX]{1-4}$/',$recMap['month'])){
+						$vDate = $d.'-'.$recMap['month'].'-'.$y;
+						$recMap['month'] = self::$monthRoman[$recMap['month']];
+						$recMap['eventdate'] = self::formatDate($y.'-'.$recMap['month'].'-'.($d?$d:'00'));
+					}
+					elseif(preg_match('/^\D{3,}$/',$recMap['month']) && array_key_exists($monAbbr,self::$monthNames)){
+						$vDate = $d.' '.$recMap['month'].' '.$y;
 						$recMap['month'] = self::$monthNames[$monAbbr];
+						$recMap['eventdate'] = self::formatDate($y.'-'.$recMap['month'].'-'.($d?$d:'00'));
+					}
+					elseif(preg_match('/^(\d{1,2})\s-\s(\D{3,10})$/',$recMap['month'],$m)){
+						$recMap['month'] = $m[1];
 						$recMap['eventdate'] = self::formatDate(trim($y.'-'.$recMap['month'].'-'.($d?$d:'00'),'- '));
+						$vDate = $d.' '.$m[2].' '.$y;
 					}
 					else{
-						if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-							$recMap['verbatimeventdate'] = $vDate;
-						}
 						unset($recMap['month']);
 					}
 				}
-				else{
-					if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']) {
-						$recMap['verbatimeventdate'] = $vDate;
-					}
-					unset($recMap['month']);
-				}
+			}
+			if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+				$recMap['verbatimeventdate'] = $vDate;
 			}
 			if($vDate && (!array_key_exists('eventdate',$recMap) || !$recMap['eventdate'])){
 				$recMap['eventdate'] = self::formatDate($vDate);
