@@ -1,7 +1,7 @@
 <?php
 /*
 ------------------
-Language: Español (Spanish)
+Language: Espaï¿½ol (Spanish)
 ------------------
 */
 
@@ -16,6 +16,7 @@ $LANG['EXSICC'] = 'Exsiccati Index';
 $LANG['DARWINCORE'] = 'Darwin Core Archives';
 $LANG['PUBDATA'] = ' - published datasets of selected collections';
 $LANG['IMGLIB'] = 'Image Library';
+$LANG['IMAGE_SEARCH'] = 'Interactive Search Tool';
 $LANG['CONTRIB'] = 'Contributing Photographers';
 $LANG['USAGEPOLICY'] = 'Usage Policy and Copyright Information';
 $LANG['RARESPEC'] = 'Rare Species';
