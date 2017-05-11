@@ -1,21 +1,29 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $retArr = Array();
 $con = MySQLiConnectionFactory::getCon("readonly");
+
 $queryString = $con->real_escape_string($_REQUEST['term']);
-$sql = 'SELECT tid, sciname '. 
-	'FROM taxa '.
-	'WHERE rankid > 140 AND sciname LIKE "'.$queryString.'%" ';
+$taxLevel = (isset($_REQUEST['level'])?$con->real_escape_string($_REQUEST['level']):'low');
+
+$sql = 'SELECT tid, sciname FROM taxa WHERE sciname LIKE "'.$queryString.'%" ';
+if($taxLevel == 'low'){
+	$sql .= 'AND rankid > 179';
+}
+else{
+	$sql .= 'AND rankid < 180';
+}
 //echo $sql;
 $result = $con->query($sql);
 while ($r = $result->fetch_object()) {
-	$retArr[] = '"id": '.$r->tid.', "value":"'.str_replace('"',"''",$r->sciname).'"';
+	$retArr[$r->tid]['id'] = $r->tid;
+	$retArr[$r->tid]['value'] = $r->sciname;
 }
 $result->free();
 $con->close();
 
-if($retArr) echo '[{'.implode('},{',$retArr).'}]';
+echo json_encode($retArr);
 ?>

@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class DynamicChecklistManager {
 
@@ -111,18 +111,7 @@ class DynamicChecklistManager {
 				
 			}
 		}
-
 		return $dynPK;
-	}
-	
-	public function getFilterTaxa(){
-		$retArr = Array();
-		$sql = "SELECT t.tid, t.sciname FROM taxa t WHERE t.rankid <= 140 ORDER BY t.sciname ";
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$retArr[$row->tid] = $row->sciname;
-		}
-		return $retArr;
 	}
 	
 	public function removeOldChecklists(){

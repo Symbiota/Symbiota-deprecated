@@ -1,10 +1,11 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/DynamicChecklistManager.php');
-header("Content-Type: text/html; charset=".$CHARSET);
+header('Content-Type: text/html; charset='.$CHARSET);
 
-$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
-$interface = array_key_exists("interface",$_REQUEST)&&$_REQUEST["interface"]?$_REQUEST["interface"]:"checklist";
+$tid = array_key_exists('tid',$_REQUEST)?$_REQUEST['tid']:0;
+$taxa = array_key_exists('taxa',$_REQUEST)?$_REQUEST['taxa']:'';
+$interface = array_key_exists('interface',$_REQUEST)&&$_REQUEST['interface']?$_REQUEST['interface']:'checklist';
 
 $dynClManager = new DynamicChecklistManager();
 
@@ -33,6 +34,9 @@ elseif($coordRange > 40){
 	<title><?php echo $DEFAULT_TITLE; ?> - Dynamic Checklist Generator</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<script src="../js/jquery.js" type="text/javascript"></script>
+	<script src="../js/jquery-ui.js" type="text/javascript"></script>
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 
@@ -41,7 +45,23 @@ elseif($coordRange > 40){
 	    var currentMarker;
 	  	var zoomLevel = 5;
 	  	var submitCoord = false;
-	  	
+
+        $(document).ready(function() {
+        	$( "#taxa" ).autocomplete({
+        		source: function( request, response ) {
+        			$.getJSON( "rpc/speciessuggest.php", { term: request.term, level: 'high' }, response );
+        		},
+        		minLength: 2,
+        		autoFocus: true,
+        		select: function( event, ui ) {
+        			if(ui.item){
+        				$( "#tid" ).val(ui.item.id);
+        			}
+				}
+        	});
+			
+        });
+
 	    function initialize(){
 	    	var dmLatLng = new google.maps.LatLng(<?php echo $latCen.",".$longCen; ?>);
 	    	var dmOptions = {
@@ -90,7 +110,7 @@ elseif($coordRange > 40){
 <body style="background-color:#ffffff;" onload="initialize()">
 	<?php 
 		$displayLeftMenu = false;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		if(isset($checklists_dynamicmapCrumbs)){
 			if($checklists_dynamicmapCrumbs){
 				echo "<div class='navpath'>";
@@ -125,7 +145,6 @@ elseif($coordRange > 40){
 					Less Details
 				</span>
 			</div>
-			
 			<div style="margin-top:5px;">
 				<form name="mapForm" action="dynamicchecklist.php" method="post" onsubmit="return checkForm();">
 					<div style="float:left;width:300px;">
@@ -142,15 +161,8 @@ elseif($coordRange > 40){
 					</div>
 					<div style="float:left;">
 						<div style="margin-right:35px;">
-							<select name="tid">
-								<option value="0">Taxon Filter (optional)</option>
-								<?php 
-								$taxaArr = $dynClManager->getFilterTaxa();
-								foreach($taxaArr as $k => $sciname){
-									echo "<option value='".$k."' ".($k==$tid?"SELECTED":"").">".$sciname."</option>";
-								}
-								?>
-							</select>
+							<b>Taxon Filter:</b> <input id="taxa" name="taxa" type="text" value="<?php echo $taxa; ?>" />
+							<input id="tid" name="tid" type="hidden" value="<?php echo $tid; ?>" />
 						</div>
 						<div> 
 							<b>Radius:</b> 
@@ -166,8 +178,7 @@ elseif($coordRange > 40){
 			<div id='map_canvas' style='width:95%; height:650px; clear:both;'></div>
 		</div>
 	<?php
-	 	include_once($serverRoot.'/footer.php');
+ 	include_once($SERVER_ROOT.'/footer.php');
 	?>
-
 </body>
 </html>
