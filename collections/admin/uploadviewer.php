@@ -29,7 +29,7 @@ $headerMapBase = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Oc
 	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
 	'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
-	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record');
+	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record','occid' => 'targetRecord (occid)');
 if($collMap['managementtype'] == 'Snapshot'){
 	$headerMapBase['dbpk'] = 'Source Identifier';
 }
@@ -86,7 +86,7 @@ if($SYMB_UID){
 				echo '<h2>'.$collMap['name'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 			}
 			//Setup header map
-			$recArr = $uploadManager->getUploadData(($recLimit*$pageIndex),$recLimit,$searchVar);
+			$recArr = $uploadManager->getPendingImportData(($recLimit*$pageIndex),$recLimit,$searchVar);
 			if($recArr){
 				//Check to see which headers have values
 				$headerArr = array();
@@ -120,6 +120,7 @@ if($SYMB_UID){
 								$displayStr = substr($displayStr,0,60).'...';
 							}
 							if(!$displayStr) $displayStr = '&nbsp;';
+							if($displayStr) $displayStr = '<a href="../editor/occurrenceeditor.php?occid='.$displayStr.'" target="_blank">'.$displayStr.'</a>';
 							echo '<td>'.$displayStr.'</td>'."\n";
 						}
 						echo "</tr>\n";

@@ -29,21 +29,6 @@ class SpecUploadBase extends SpecUpload{
 	protected $imageSymbFields = Array();
 	private $sourceDatabaseType = '';
 
-	private $translationMap = array('accession'=>'catalognumber','accessionid'=>'catalognumber','accessionnumber'=>'catalognumber',
-		'taxonfamilyname'=>'family','scientificname'=>'sciname','species'=>'specificepithet','commonname'=>'taxonremarks',
-		'observer'=>'recordedby','collector'=>'recordedby','primarycollector'=>'recordedby','field:collector'=>'recordedby',
-		'collectornumber'=>'recordnumber','collectionnumber'=>'recordnumber','field:collectorfieldnumber'=>'recordnumber',
-		'datecollected'=>'eventdate','date'=>'eventdate','collectiondate'=>'eventdate','observedon'=>'eventdate','dateobserved'=>'eventdate',
-		'cf' => 'identificationqualifier','detby'=>'identifiedby','determinor'=>'identifiedby','determinationdate'=>'dateidentified',
-		'placestatename'=>'stateprovince','state'=>'stateprovince','placecountyname'=>'county','municipiocounty'=>'county','field:localitydescription'=>'locality', 
-		'latitude'=>'verbatimlatitude','longitude'=>'verbatimlongitude','elevationmeters'=>'minimumelevationinmeters','field:associatedspecies'=>'associatedtaxa',
-		'specimennotes'=>'occurrenceremarks','notes'=>'occurrenceremarks','generalnotes'=>'occurrenceremarks',
-		'plantdescription'=>'verbatimattributes','description'=>'verbatimattributes','field:habitat'=>'habitat');
-	private $identTranslationMap = array('scientificname'=>'sciname','detby'=>'identifiedby','determinor'=>'identifiedby',
-		'determinationdate'=>'dateidentified','notes'=>'identificationremarks','cf' => 'identificationqualifier');
-	private $imageTranslationMap = array('accessuri'=>'originalurl','thumbnailaccessuri'=>'thumbnailurl',
-		'goodqualityaccessuri'=>'url','creator'=>'owner');
-
 	function __construct() {
 		parent::__construct();
 		set_time_limit(7200);
@@ -240,30 +225,37 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	public function echoFieldMapTable($autoMap, $mode){
+		
 		$prefix = '';
-		$fieldMap = array();
-		$symbFields = array();
-		$sourceArr = array();
-		$translationMap = array();
+		$fieldMap = $this->fieldMap;
+		$symbFields = $this->symbFields;
+		$sourceArr = $this->sourceArr;
+		$translationMap = array('accession'=>'catalognumber','accessionid'=>'catalognumber','accessionnumber'=>'catalognumber',
+				'taxonfamilyname'=>'family','scientificname'=>'sciname','species'=>'specificepithet','commonname'=>'taxonremarks',
+				'observer'=>'recordedby','collector'=>'recordedby','primarycollector'=>'recordedby','field:collector'=>'recordedby','collectedby'=>'recordedby',
+				'collectornumber'=>'recordnumber','collectionnumber'=>'recordnumber','field:collectorfieldnumber'=>'recordnumber',
+				'datecollected'=>'eventdate','date'=>'eventdate','collectiondate'=>'eventdate','observedon'=>'eventdate','dateobserved'=>'eventdate',
+				'cf' => 'identificationqualifier','detby'=>'identifiedby','determinor'=>'identifiedby','determinationdate'=>'dateidentified',
+				'placestatename'=>'stateprovince','state'=>'stateprovince','placecountyname'=>'county','municipiocounty'=>'county',
+				'location'=>'locality','field:localitydescription'=>'locality','latitude'=>'verbatimlatitude','longitude'=>'verbatimlongitude',
+				'elevationmeters'=>'minimumelevationinmeters','field:associatedspecies'=>'associatedtaxa',
+				'specimennotes'=>'occurrenceremarks','notes'=>'occurrenceremarks','generalnotes'=>'occurrenceremarks',
+				'plantdescription'=>'verbatimattributes','description'=>'verbatimattributes','field:habitat'=>'habitat','habitatdescription'=>'habitat',
+				'subject_references'=>'tempfield01','subject_recordid'=>'tempfield02');
 		if($mode == 'ident'){
 			$prefix = 'ID-';
 			$fieldMap = $this->identFieldMap;
 			$symbFields = $this->identSymbFields;
 			$sourceArr = $this->identSourceArr;
-			$translationMap = $this->identTranslationMap;
+			$translationMap = array('scientificname'=>'sciname','detby'=>'identifiedby','determinor'=>'identifiedby',
+				'determinationdate'=>'dateidentified','notes'=>'identificationremarks','cf' => 'identificationqualifier');
 		}
 		elseif($mode == 'image'){
 			$prefix = 'IM-';
 			$fieldMap = $this->imageFieldMap;
 			$symbFields = $this->imageSymbFields;
 			$sourceArr = $this->imageSourceArr;
-			$translationMap = $this->imageTranslationMap;
-		}
-		else{
-			$fieldMap = $this->fieldMap;
-			$symbFields = $this->symbFields;
-			$sourceArr = $this->sourceArr;
-			$translationMap = $this->translationMap;
+			$translationMap = array('accessuri'=>'originalurl','thumbnailaccessuri'=>'thumbnailurl','goodqualityaccessuri'=>'url','creator'=>'owner');
 		}
 		
 		//Build a Source => Symbiota field Map
@@ -272,15 +264,25 @@ class SpecUploadBase extends SpecUpload{
 			if($symbField != 'dbpk') $sourceSymbArr[$fArr["field"]] = $symbField;
 		}
 
+		if($this->uploadType == $this->NFNUPLOAD && !in_array('subject_references', $this->sourceArr) && !in_array('recordid', $this->sourceArr)){
+			echo '<div style="color:red">ERROR: input field does not contain proper identifier field (e.g. subject_references, recordID)</div>';
+			return;
+		}
 		//Output table rows for source data
-		echo '<table class="styledtable" style="font-family:Arial;font-size:12px;">';
+		echo '<table class="styledtable" style="width:600px;font-family:Arial;font-size:12px;">';
 		echo '<tr><th>Source Field</th><th>Target Field</th></tr>'."\n";
 		sort($symbFields);
 		$autoMapArr = Array();
 		foreach($sourceArr as $fieldName){
-			if($fieldName != 'coreid'){
-				$diplayFieldName = $fieldName;
-				$fieldName = strtolower($fieldName);
+			if($fieldName == 'coreid') continue;
+			$diplayFieldName = $fieldName;
+			$fieldName = trim(strtolower($fieldName));
+			if($this->uploadType == $this->NFNUPLOAD && ($fieldName == 'subject_recordid' || $fieldName == 'subject_references')){
+				echo '<input type="hidden" name="sf[]" value="'.$fieldName.'" />';
+				echo '<input type="hidden" name="tf[]" value="'.$translationMap[$fieldName].'" />';
+			}
+			else{
+				if($this->uploadType == $this->NFNUPLOAD && substr($fieldName,0,8) == 'subject_') continue;
 				$isAutoMapped = false;
 				$tranlatedFieldName = str_replace(array('_',' ','.'),'',$fieldName);
 				if($autoMap){
@@ -349,8 +351,11 @@ class SpecUploadBase extends SpecUpload{
 		}
 	}
 
-	public function saveFieldMap(){
+	public function saveFieldMap($newTitle = ''){
 		$statusStr = '';
+		if(!$this->uspid && $newTitle){
+			$this->uspid = $this->createUploadProfile(array('uploadtype'=>$this->uploadType,'title'=>$newTitle));
+		}
 		if($this->uspid){
 			$this->deleteFieldMap();
 			$sqlInsert = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
@@ -699,20 +704,6 @@ class SpecUploadBase extends SpecUpload{
 			$rs->free();
 		}
 		
-		if($this->uploadType == $this->NFNUPLOAD && $this->nfnIdentifier = 'url'){
-			//Get number of reports where the institution and collection codes don't match input codes (indication of loading onto wrong portal)
-			$sql = 'SELECT COUNT(o. occid) as cnt '.
-				'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
-				'INNER JOIN omcollections c ON o.collid = c.collid '.
-				'WHERE (u.institutioncode != IFNULL(o.institutioncode,c.institutioncode) OR u.collectioncode != IFNULL(o.collectioncode,c.collectioncode)) '.
-				'AND (c.collid IN('.$this->collId.'))';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$reportArr['nfnbadcodes'] = $r->cnt;
-			}
-			$rs->free();
-		}
-		
 		return $reportArr;
 	}
 
@@ -912,7 +903,7 @@ class SpecUploadBase extends SpecUpload{
 			//Load into revisions table
 			foreach($editArr as $appliedStatus => $eArr){
 				$sql = 'INSERT INTO omoccurrevisions(occid, oldValues, newValues, externalSource, reviewStatus, appliedStatus) '.
-					'VALUES('.$r->occid.',"'.json_encode($eArr['old']).'","'.json_encode($eArr['new']).'","NfN Expedition",0,'.$appliedStatus.')';
+					'VALUES('.$r['occid'].',"'.json_encode($eArr['old']).'","'.json_encode($eArr['new']).'","NfN Expedition",0,'.$appliedStatus.')';
 				if($this->conn->query($sql)){
 					$this->outputMsg('<li>ERROR adding edit revision ('.$this->conn->error.')</li>');
 				}
@@ -1267,7 +1258,7 @@ class SpecUploadBase extends SpecUpload{
 		$uuidManager->populateGuids();
 
 		if($this->imageTransferCount){
-			$this->outputMsg('<li style="margin-left:10px;color:orange">WARNING: Image thumbnails likely need to be created! Do this using the <a href="../../imagelib/admin/thumbnailbuilder.php?collid='.$this->collId.'">Images Thumbnail Builder</a></li>');
+			$this->outputMsg('<li style="margin-left:10px;color:orange">WARNING: Image thumbnails may need to be created using the <a href="../../imagelib/admin/thumbnailbuilder.php?collid='.$this->collId.'">Images Thumbnail Builder</a></li>');
 			ob_flush();
 			flush();
 		}
@@ -1275,62 +1266,52 @@ class SpecUploadBase extends SpecUpload{
 	
 	protected function loadRecord($recMap){
 		//Only import record if at least one of the minimal fields have data 
-		if((array_key_exists('dbpk',$recMap) && $recMap['dbpk'])
-			|| (array_key_exists('catalognumber',$recMap) && $recMap['catalognumber'])
-			|| (array_key_exists('othercatalognumbers',$recMap) && $recMap['othercatalognumbers'])
-			|| (array_key_exists('recordedby',$recMap) && $recMap['recordedby'])
-			|| (array_key_exists('eventdate',$recMap) && $recMap['eventdate'])
-			|| (array_key_exists('locality',$recMap) && $recMap['locality'])
-			|| (array_key_exists('sciname',$recMap) && $recMap['sciname'])
-			|| (array_key_exists('scientificname',$recMap) && $recMap['scientificname'])){
+		$recMap = OccurrenceUtilities::occurrenceArrayCleaning($recMap);
+		//Remove institution and collection codes when they match what is in omcollections
+		if(array_key_exists('institutioncode',$recMap) && $recMap['institutioncode'] == $this->collMetadataArr["institutioncode"]){
+			unset($recMap['institutioncode']);
+		}
+		if(array_key_exists('collectioncode',$recMap) && $recMap['collectioncode'] == $this->collMetadataArr["collectioncode"]){
+			unset($recMap['collectioncode']);
+		}
 
-			$recMap = OccurrenceUtilities::occurrenceArrayCleaning($recMap);
-			//Remove institution and collection codes when they match what is in omcollections
-			if(array_key_exists('institutioncode',$recMap) && $recMap['institutioncode'] == $this->collMetadataArr["institutioncode"]){
-				unset($recMap['institutioncode']);
-			}
-			if(array_key_exists('collectioncode',$recMap) && $recMap['collectioncode'] == $this->collMetadataArr["collectioncode"]){
-				unset($recMap['collectioncode']);
-			}
+		//If a DiGIR load, set dbpk value
+		if($this->pKField && array_key_exists($this->pKField,$recMap) && !array_key_exists('dbpk',$recMap)){
+			$recMap['dbpk'] = $recMap[$this->pKField];
+		}
+		
+		//Do some cleaning on the dbpk; remove leading and trailing whitespaces and convert multiple spaces to a single space
+		if(array_key_exists('dbpk',$recMap)){
+			$recMap['dbpk'] = trim(preg_replace('/\s\s+/',' ',$recMap['dbpk']));
+		}
+		
+		//Set processingStatus to value defined by loader
+		if($this->processingStatus){
+			$recMap['processingstatus'] = $this->processingStatus;
+		}
 
-			//If a DiGIR load, set dbpk value
-			if($this->pKField && array_key_exists($this->pKField,$recMap) && !array_key_exists('dbpk',$recMap)){
-				$recMap['dbpk'] = $recMap[$this->pKField];
-			}
-			
-			//Do some cleaning on the dbpk; remove leading and trailing whitespaces and convert multiple spaces to a single space
-			if(array_key_exists('dbpk',$recMap)){
-				$recMap['dbpk'] = trim(preg_replace('/\s\s+/',' ',$recMap['dbpk']));
-			}
-			
-			//Set processingStatus to value defined by loader
-			if($this->processingStatus){
-				$recMap['processingstatus'] = $this->processingStatus;
-			}
+		//Temporarily code until Specify output UUID as occurrenceID 
+		if($this->sourceDatabaseType == 'specify' && (!isset($recMap['occurrenceid']) || !$recMap['occurrenceid'])){
+			if(strlen($recMap['dbpk']) == 36) $recMap['occurrenceid'] = $recMap['dbpk'];
+		}
 
-			//Temporarily code until Specify output UUID as occurrenceID 
-			if($this->sourceDatabaseType == 'specify' && (!isset($recMap['occurrenceid']) || !$recMap['occurrenceid'])){
-				if(strlen($recMap['dbpk']) == 36) $recMap['occurrenceid'] = $recMap['dbpk'];
-			}
-
-			$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
-			$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].') '.
-				'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
-			//echo "<div>SQL: ".$sql."</div>";
-			if($this->conn->query($sql)){
-				$this->transferCount++;
-				if($this->transferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->transferCount.'</li>');
-				ob_flush();
-				flush();
-				//$this->outputMsg("<li>");
-				//$this->outputMsg("Appending/Replacing observation #".$this->transferCount.": SUCCESS");
-				//$this->outputMsg("</li>");
-			}
-			else{
-				$this->outputMsg("<li>FAILED adding record #".$this->transferCount."</li>");
-				$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
-				$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
-			}
+		$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
+		$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].') '.
+			'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
+		//echo "<div>SQL: ".$sql."</div>";
+		if($this->conn->query($sql)){
+			$this->transferCount++;
+			if($this->transferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->transferCount.'</li>');
+			ob_flush();
+			flush();
+			//$this->outputMsg("<li>");
+			//$this->outputMsg("Appending/Replacing observation #".$this->transferCount.": SUCCESS");
+			//$this->outputMsg("</li>");
+		}
+		else{
+			$this->outputMsg("<li>FAILED adding record #".$this->transferCount."</li>");
+			$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
+			$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
 		}
 	}
 

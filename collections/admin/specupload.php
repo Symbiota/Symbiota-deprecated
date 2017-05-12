@@ -11,7 +11,7 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/a
 
 $collid = $_REQUEST["collid"];
 $uploadType = $_REQUEST["uploadtype"];
-$uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
+$uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:'';
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $autoMap = array_key_exists("automap",$_POST)?true:false;
 $ulPath = array_key_exists("ulpath",$_REQUEST)?$_REQUEST["ulpath"]:"";
@@ -182,8 +182,13 @@ $duManager->loadFieldMap();
 				}
 				else{
 					var ext = fileName.split('.').pop();
-					if(ext != 'csv' && ext != 'CSV' && ext != 'zip' && ext != 'ZIP' && ext != 'txt' && ext != 'TXT' && ext != 'tab' && ext != 'tab'){
-						alert("File must be comma separated (.csv), tab delimited (.txt or .tab), or a ZIP file (.zip)");
+					if(ext == 'csv' || ext == 'CSV') return true;
+					else if(ext == 'zip' || ext == 'ZIP') return true;
+					else if(ext == 'txt' || ext == 'TXT') return true;
+					else if(ext == 'tab' || ext == 'tab') return true;
+					else if(fileName.substring(0,4) == 'http') return true;
+					else{
+						alert("File must be comma separated (.csv), tab delimited (.txt or .tab), ZIP file (.zip), or a URL to an IPT Resource");
 						return false;
 					}
 				}
@@ -286,6 +291,14 @@ $duManager->loadFieldMap();
 			return true;
 		}
 
+		function verifySaveMapping(f){
+			if(f.uspid.value != '' && f.profiletitle.value == ""){
+				alert("You must enter a title to create a new upload profile");
+				return false;
+			}
+			return true;
+		}
+
 		function pkChanged(selObj){
 			document.getElementById('pkdiv').style.display='block';
 			document.getElementById('mdiv').style.display='none';
@@ -300,7 +313,7 @@ $duManager->loadFieldMap();
 	if(isset($collections_admin_specuploadCrumbs)){
 		if($collections_admin_specuploadCrumbs){
 			?>
-			<div class="navpath" style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen';  ?>">
+			<div class="navpath">
 				<a href="../../index.php">Home</a> &gt;&gt;
 				<?php echo $collections_admin_specuploadCrumbs; ?>
 				<b>Specimen Loader</b> 
@@ -310,7 +323,7 @@ $duManager->loadFieldMap();
 	}
 	else{
 		?>
-		<div class="navpath" style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen';  ?>">
+		<div class="navpath">
 			<a href="../../index.php">Home</a> &gt;&gt; 
 			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Panel</a> &gt;&gt; 
 			<a href="specuploadmanagement.php?collid=<?php echo $collid; ?>">List of Upload Profiles</a> &gt;&gt; 
@@ -320,7 +333,7 @@ $duManager->loadFieldMap();
 	}
 ?> 
 <!-- This is inner text! -->
-<div id="innertext" style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen';  ?>">
+<div id="innertext">
 	<h1>Data Upload Module</h1>
 	<?php
 	if($statusStr){
@@ -342,7 +355,7 @@ $duManager->loadFieldMap();
 			if($duManager->getTransferCount() && !$finalTransfer){
 				?>
  				<fieldset style="margin:15px;">
- 					<legend><b>Final transfer</b></legend>
+ 					<legend style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen'; ?>"><b>Final transfer</b></legend>
  					<div style="margin:5px;">
  						<?php 
  						$reportArr = $duManager->getTransferReport();
@@ -363,18 +376,15 @@ $duManager->loadFieldMap();
 						}
 						echo '</div>';
 						if($uploadType != $NFNUPLOAD || $reportArr['new']){
-							if($uploadType == $NFNUPLOAD) echo '<div>Illegal records to be deleted: ';
+							if($uploadType == $NFNUPLOAD) echo '<div>Mismatched records: ';
 							else echo '<div>New records: ';
 							echo $reportArr['new'];
 							if($reportArr['new']){ 
 								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
 								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								if($uploadType == $NFNUPLOAD) echo '<span style="margin-left:15px;color:orange">&gt;&gt; Records failed to link to records within this collection and will be skipped</span>';
 							}
 							echo '</div>';
-							if($uploadType == $NFNUPLOAD) echo '<div style="margin-left:15px;color:orange">- Either you lack permissions to load these records into target collection(s), or you are loading records into a different portal than the original data source';
-						}
-						if($uploadType == $NFNUPLOAD && isset($reportArr['nfnbadcodes']) && $reportArr['nfnbadcodes']){
-							echo '<div>Illegal records to be deleted (unmatched institution codes): '.$reportArr['nfnbadcodes'].' - this might be an indicator that records are being loaded into a different portal than the original data source</div>';
 						}
 						if(isset($reportArr['matchappend']) && $reportArr['matchappend']){
 							echo '<div>Records matching on catalog number that will be appended : ';
@@ -386,47 +396,49 @@ $duManager->loadFieldMap();
 							echo '</div>';
 							echo '<div style="margin-left:15px;"><span style="color:orange;">WARNING:</span> This will result in records with duplicate catalog numbers</div>';
 						}
-						if(isset($reportArr['sync']) && $reportArr['sync']){
-							echo '<div>Records that will be syncronized with central database: ';
-							echo $reportArr['sync'];
-							if($reportArr['sync']){  
-								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=sync" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
-								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=sync" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+						if($uploadType != $NFNUPLOAD && $uploadType != $SKELETAL){
+							if(isset($reportArr['sync']) && $reportArr['sync']){
+								echo '<div>Records that will be syncronized with central database: ';
+								echo $reportArr['sync'];
+								if($reportArr['sync']){  
+									echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=sync" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+									echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=sync" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								}
+								echo '</div>';
+								echo '<div style="margin-left:15px;">These are typically records that have been originally processed within the portal, exported and integrated into a local management database, and then reimported and synchronized with the portal records by matching on catalog number.</div>';
+								echo '<div style="margin-left:15px;"><span style="color:orange;">WARNING:</span> Incoming records will replace portal records by matching on catalog numbers. Make sure incoming records are the most up to date!</div>';
 							}
-							echo '</div>';
-							echo '<div style="margin-left:15px;">These are typically records that have been originally processed within the portal, exported and integrated into a local management database, and then reimported and synchronized with the portal records by matching on catalog number.</div>';
-							echo '<div style="margin-left:15px;"><span style="color:orange;">WARNING:</span> Incoming records will replace portal records by matching on catalog numbers. Make sure incoming records are the most up to date!</div>';
-						}
-						if(isset($reportArr['exist']) && $reportArr['exist']){
-							echo '<div>Previous loaded records not matching incoming records: ';
-							echo $reportArr['exist'];
-							if($reportArr['exist']){  
-								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=exist" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
-								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=exist" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							if(isset($reportArr['exist']) && $reportArr['exist']){
+								echo '<div>Previous loaded records not matching incoming records: ';
+								echo $reportArr['exist'];
+								if($reportArr['exist']){  
+									echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=exist" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+									echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=exist" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								}
+								echo '</div>';
+								echo '<div style="margin-left:15px;">';
+								echo 'Note: If you are doing a partial upload, this is expected. ';
+								echo 'If you are doing a full data refresh, these may be records that were deleted within your local database but not within the portal.';
+								echo '</div>';
 							}
-							echo '</div>';
-							echo '<div style="margin-left:15px;">';
-							echo 'Note: If you are doing a partial upload, this is expected. ';
-							echo 'If you are doing a full data refresh, these may be records that were deleted within your local database but not within the portal.';
-							echo '</div>';
-						}
-						if(isset($reportArr['nulldbpk']) && $reportArr['nulldbpk']){
-							echo '<div style="color:red;">Records that will be removed due to NULL Primary Identifier: ';
-							echo $reportArr['nulldbpk'];
-							if($reportArr['nulldbpk']){ 
-								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
-								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							if(isset($reportArr['nulldbpk']) && $reportArr['nulldbpk']){
+								echo '<div style="color:red;">Records that will be removed due to NULL Primary Identifier: ';
+								echo $reportArr['nulldbpk'];
+								if($reportArr['nulldbpk']){ 
+									echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+									echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dbpk:ISNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								}
+								echo '</div>';
 							}
-							echo '</div>';
-						}
-						if(isset($reportArr['dupdbpk']) && $reportArr['dupdbpk']){
-							echo '<div style="color:red;">Records that will be removed due to DUPLICATE Primary Identifier: ';
-							echo $reportArr['dupdbpk'];
-							if($reportArr['dupdbpk']){  
-								echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dupdbpk" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
-								echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dupdbpk" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+							if(isset($reportArr['dupdbpk']) && $reportArr['dupdbpk']){
+								echo '<div style="color:red;">Records that will be removed due to DUPLICATE Primary Identifier: ';
+								echo $reportArr['dupdbpk'];
+								if($reportArr['dupdbpk']){  
+									echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=dupdbpk" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
+									echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=dupdbpk" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+								}
+								echo '</div>';
 							}
-							echo '</div>';
 						}
 						echo '</div>';
 						//Extensions
@@ -501,6 +513,14 @@ $duManager->loadFieldMap();
 				<?php
 			}
 			else{
+				$uploadTitle = $duManager->getTitle();
+				if(!$uploadTitle){
+					if($uploadType == $DWCAUPLOAD) $uploadTitle = 'Manual DwC-Archive Import';
+					elseif($uploadType == $IPTUPLOAD) $uploadTitle = 'IPT/DwC-A Provider Import';
+					elseif($uploadType == $SKELETAL) $uploadTitle = 'Skeletal File Import';
+					elseif($uploadType == $FILEUPLOAD) $uploadTitle = 'Delimited Text File Import';
+					elseif($uploadType == $NFNUPLOAD) $uploadTitle = 'Notes from Natural Import';
+				}
 				//Upload type is direct, file, or DWCA 
 				if(!$ulPath && ($uploadType == $FILEUPLOAD || $uploadType == $SKELETAL || $uploadType == $NFNUPLOAD || $uploadType == $DWCAUPLOAD || $uploadType == $IPTUPLOAD)){
 					//Need to upload data for file and DWCA uploads
@@ -510,22 +530,45 @@ $duManager->loadFieldMap();
 						?>
 						<form name="fileuploadform" action="specupload.php" method="post" enctype="multipart/form-data" onsubmit="return verifyFileUploadForm(this)">
 							<fieldset style="width:95%;">
-								<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?> (Step 1)</legend>
+								<legend style="font-weight:bold;font-size:120%;<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen'; ?>"><?php echo $uploadTitle;?>: Identify Data Source</legend>
 								<div>
 									<div style="margin:10px">
-										<div class="ulfnoptions">
-											<input name="uploadfile" type="file" size="50" onchange="this.form.ulfnoverride.value = ''" />
+										<?php
+										$pathLabel = 'IPT Resource URL';
+										if($uploadType != $IPTUPLOAD){
+											$pathLabel = 'Resource Path or URL';
+											?>
+											<div>
+												<input name="uploadfile" type="file" size="50" onchange="this.form.ulfnoverride.value = ''" />
+											</div>
+											<?php 
+										}
+										?>
+										<div class="ulfnoptions" style="display:<?php echo ($uploadType!=$IPTUPLOAD?'none':''); ?>;margin:15px 0px">
+											<b><?php echo $pathLabel; ?>:</b> 
+											<input name="ulfnoverride" type="text" size="70" /><br/>
+											<?php 
+											if($uploadType != $IPTUPLOAD){
+												echo '* This option is for pointing to a data file that was manually uploaded to a server. '.
+													'This option offers a workaround for importing files that are larger than what is allowed by '.
+													'server upload limitations (e.g. PHP configuration limits).';
+											}
+											?>
 										</div>
-										<div class="ulfnoptions" style="display:none;">
-											<b>Full File Path:</b> 
-											<input name="ulfnoverride" type="text" size="50" /><br/>
-											* This option is for manual upload of a data file. 
-											Enter full path to data file located on working server.
-										</div>
+										<?php 
+										if($uploadType != $IPTUPLOAD){
+											?>
+											<div class="ulfnoptions">
+												<a href="#" onclick="toggle('ulfnoptions');return false;">Display Additional Options</a>
+											</div>
+											<?php
+										}
+										?>
 									</div>
 									<div style="margin:10px;">
 										<?php 
-										if(!$uspid) echo '<input name="automap" type="checkbox" value="1" CHECKED /> <b>Automap fields</b><br/>';
+										if(!$uspid && $uploadType != $NFNUPLOAD) 
+											echo '<input name="automap" type="checkbox" value="1" CHECKED /> <b>Automap fields</b><br/>';
 										?>
 									</div>
 									<div style="margin:10px;">
@@ -534,9 +577,6 @@ $duManager->loadFieldMap();
 										<input name="collid" type="hidden" value="<?php echo $collid;?>" />
 										<input name="uploadtype" type="hidden" value="<?php echo $uploadType;?>" />
 										<input name="MAX_FILE_SIZE" type="hidden" value="100000000" />
-									</div>
-									<div style="float:right;">
-										<a href="#" onclick="toggle('ulfnoptions');return false;">Toggle Manual Upload Option</a>
 									</div>
 								</div>
 							</fieldset>
@@ -555,23 +595,16 @@ $duManager->loadFieldMap();
 							?>
 							<form name="dwcauploadform" action="specupload.php" method="post" onsubmit="return verifyMappingForm(this)">
 								<fieldset style="width:95%;">
-									<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?></legend>
+									<legend style="font-weight:bold;font-size:120%;"><?php echo $uploadTitle.': Field Mapping';?></legend>
 									<div style="margin:10px;">
 										<b>Source Unique Identifier / Primary Key (required): </b>
 										<?php
 										$dbpk = $duManager->getDbpk();
+										$dbpkTitle = 'Core ID';
+										if($dbpk == 'catalognumber') $dbpkTitle = 'Catalog Number';
+										elseif($dbpk == 'occurrenceid') $dbpkTitle = 'Occurrence ID';
+										echo $dbpkTitle;
 										?>
-										<select name="dbpk" onchange="pkChanged(this);">
-											<option value="id">core id</option>
-											<option value="catalognumber" <?php if($dbpk == 'catalognumber') echo 'SELECTED'; ?>>catalogNumber</option>
-											<option value="occurrenceid" <?php if($dbpk == 'occurrenceid') echo 'SELECTED'; ?>>occurrenceId</option>
-										</select>
-										<div style="margin-left:10px;">
-											*Change ONLY if you are sure that a field other than the Core Id will better serve as the primary specimen identifier
-										</div> 
-										<div id="pkdiv" style="margin:5px 0px 0px 20px;display:none">
-											<input type="submit" name="action" value="Save Primary Key" />
-										</div>
 										<div style="margin:10px;">
 											<div>
 												<input name="importspec" value="1" type="checkbox" checked /> 
@@ -581,10 +614,6 @@ $duManager->loadFieldMap();
 												<?php $duManager->echoFieldMapTable(true,'occur'); ?>
 												<div>
 													* Mappings that are not yet saved are displayed in Yellow
-												</div>
-												<div style="margin:10px;">
-													<input type="submit" name="action" value="Reset Field Mapping" />
-													<input type="submit" name="action" value="Save Mapping" />
 												</div>
 											</div>
 											<div>
@@ -598,9 +627,6 @@ $duManager->loadFieldMap();
 														<?php $duManager->echoFieldMapTable(true,'ident'); ?>
 														<div>
 															* Mappings that are not yet saved are displayed in Yellow
-														</div>
-														<div style="margin:10px;">
-															<input type="submit" name="action" value="Save Mapping" />
 														</div>
 													</div>
 													<?php 
@@ -623,10 +649,6 @@ $duManager->loadFieldMap();
 														<div>
 															* Mappings that are not yet saved are displayed in Yellow
 														</div>
-														<div style="margin:10px;">
-															<input type="submit" name="action" value="Save Mapping" />
-														</div>
-														
 													</div>
 													<?php 
 												}
@@ -634,6 +656,14 @@ $duManager->loadFieldMap();
 													echo '(not present in DwC-Archive)';
 												}
 												?>
+											</div>
+											<div style="margin:10px 0px;">
+												<?php 
+												if($uspid) echo '<input type="submit" name="action" value="Reset Field Mapping" />';
+												echo '<input type="submit" name="action" value="Save Mapping" onclick="return verifySaveMapping(this.form)" />';
+												if(!$uspid) echo ' New profile title: <input type="text" name="profiletitle" />';
+												?>
+												
 											</div>
 											<div style="margin-top:30px;">
 												<?php 
@@ -698,14 +728,11 @@ $duManager->loadFieldMap();
 					$duManager->analyzeUpload();
 					?>
 					<form name="filemappingform" action="specupload.php" method="post" onsubmit="return verifyMappingForm(this)">
-						<fieldset style="width:95%;">
-							<legend style="font-weight:bold;font-size:120%;">Notes from Nature File Upload</legend>
-							<table class="styledtable">
-								<tr><th>Source Field</th><th>Target Field</th></tr>
-								<?php 
-								$duManager->echoNfnFieldMap();
-								?>
-							</table>
+						<fieldset style="width:95%;padding:15px">
+							<legend style="font-weight:bold;font-size:120%;">Notes from Nature File Import</legend>
+							<?php 
+							$duManager->echoFieldMapTable(true, 'spec')
+							?>
 							<div style="margin:10px 0px;">
 								Processing Status:
 								<select name="processingstatus">
@@ -736,18 +763,7 @@ $duManager->loadFieldMap();
 					?>
 					<form name="filemappingform" action="specupload.php" method="post" onsubmit="return verifyMappingForm(this)">
 						<fieldset style="width:95%;">
-							<?php 
-							$titleStr = $duManager->getTitle();
-							if(!$titleStr){
-								if($uploadType == $SKELETAL){
-									$titleStr = 'Skeletal File Upload';
-								}
-								elseif($uploadType == $FILEUPLOAD){
-									$titleStr = 'Quick File Upload';
-								}
-							}
-							?>
-							<legend style="font-weight:bold;font-size:120%;"><?php echo $titleStr; ?></legend>
+							<legend style="font-weight:bold;font-size:120%;<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen'; ?>"><?php echo $uploadTitle; ?></legend>
 							<?php 
 							if(!$isLiveData && $uploadType != $SKELETAL){
 								//Primary key field is required and must be mapped 
@@ -847,7 +863,7 @@ $duManager->loadFieldMap();
 									<?php 
 									if($uploadType == $SKELETAL){
 										?>
-										<div style="margin:15px;">
+										<div style="margin:15px;background-color:lightgreen;">
 											Skeletal Files consist of stub data that is easy to capture in bulk during the imaging process. 
 											This data is used to seed new records to which images are linked. 
 											Skeletal fields typically collected include filed by or current scientific name, country, state/province, and sometimes county, though any supported field can be included. 

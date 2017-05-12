@@ -28,16 +28,31 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 }
 if($isEditor){
 	if($action == "Save Edits"){
-		$statusStr = $duManager->editUploadProfile();
-		$action = "";
+		if($duManager->editUploadProfile($_POST)){
+			$statusStr = 'SUCCESS: Edits to import profile have been applied';
+		}
+		else{
+			$statusStr = $duManager->getErrorStr();
+		}
+		$action = '';
 	}
 	elseif($action == "Create Profile"){
-		$statusStr = $duManager->addUploadProfile();
-		$action = "";
+		if($duManager->createUploadProfile($_POST)){
+			$statusStr = 'SUCCESS: New upload profile added';
+		}
+		else{
+			$statusStr = $duManager->getErrorStr();
+		}
+		$action = '';
 	}
 	elseif($action == "Delete Profile"){
-		$statusStr = $duManager->deleteUploadProfile($uspid);
-		$action = "";
+		if($duManager->deleteUploadProfile($uspid)){
+			$statusStr = 'SUCCESS: Upload Profile Deleted';
+		}
+		else{
+			$statusStr = $duManager->getErrorStr();
+		}
+		$action = '';
 	}
 }
 $duManager->readUploadParameters();

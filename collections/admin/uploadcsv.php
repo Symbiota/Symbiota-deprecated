@@ -12,6 +12,6 @@ $uploadManager->setCollId($collid);
 if($SYMB_UID){
 	//Set variables
 	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
-		$recArr = $uploadManager->exportUploadData($searchVar);
+		$recArr = $uploadManager->exportPendingImport($searchVar);
 	}
 }

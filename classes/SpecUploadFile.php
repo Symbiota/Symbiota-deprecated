@@ -81,47 +81,12 @@ class SpecUploadFile extends SpecUploadBase{
 		}
 	}
 
-	public function echoNfnFieldMap(){
-		$translationMap = array('subject_references'=>'tempfield01','recordid'=>'tempfield02','subject_recordid'=>'tempfield02',
-			'subject_institutioncode'=>'institutioncode','subject_collectioncode'=>'collectioncode','collectedby'=>'recordedby',
-			'collectornumber'=>'recordnumber','location'=>'locality','habitatdescription'=>'habitat');
-		foreach($this->symbFields as $fieldName){
-			$translationMap[$fieldName] = $fieldName;
-		}
-
-		if(!in_array('subject_references', $this->sourceArr) && !in_array('recordid', $this->sourceArr)){
-			echo '<div style="color:red">ERROR: input field does not contain proper identifier field (e.g. subject_references, recordID)</div>';
-			return;
-		}
-		//Temporary code needed until they remove county mapped twice 
-		if(in_array('county', $this->sourceArr) && in_array('subject_county', $this->sourceArr)){
-			unset($translationMap['county']);
-		}
-		//Output table rows for source data
-		foreach($this->sourceArr as $fieldName){
-			$alterFieldName = trim(strtolower($fieldName));
-			echo '<tr><td style="padding:2px;">';
-			echo $fieldName;
-			echo '<input type="hidden" name="sf[]" value="'.$alterFieldName.'" />';
-			echo '</td><td>';
-			if(array_key_exists($alterFieldName, $translationMap)){
-				echo $translationMap[$alterFieldName];
-				echo '<input type="hidden" name="tf[]" value="'.$translationMap[$alterFieldName].'" />';
-			}
-			else{
-				echo '<span style="color:red">unmapped</span>';
-				echo '<input type="hidden" name="tf[]" value="unmapped" />';
-			}
-			echo "</tr>\n";
-		}
-	}
-
 	public function uploadData($finalTransfer){
 		if($this->ulFileName){
 			set_time_limit(7200);
 		 	ini_set("max_input_time",240);
 
-			$this->outputMsg('<li>Initiating data upload for file: '.$this->ulFileName.'</li>');
+			$this->outputMsg('<li>Initiating import from: '.$this->ulFileName.'</li>');
 		 	//First, delete all records in uploadspectemp table associated with this collection
 			$this->prepUploadData();
 			
@@ -133,29 +98,27 @@ class SpecUploadFile extends SpecUploadBase{
 			//Grab data 
 			$this->transferCount = 0;
 			$this->outputMsg('<li>Beginning to load records...</li>',1);
-			if(array_key_exists('catalognumber',$this->fieldMap)){
-				while($recordArr = $this->getRecordArr($fh)){
-					$recMap = Array();
-					foreach($this->fieldMap as $symbField => $sMap){
-						$indexArr = array_keys($headerArr,$sMap['field']);
-						$index = array_shift($indexArr);
-						if(array_key_exists($index,$recordArr)){
-							$valueStr = $recordArr[$index];
-							//If value is enclosed by quotes, remove quotes
-							if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
-								$valueStr = substr($valueStr,1,strlen($valueStr)-2);
-							}
-							$recMap[$symbField] = $valueStr;
+			while($recordArr = $this->getRecordArr($fh)){
+				$recMap = Array();
+				foreach($this->fieldMap as $symbField => $sMap){
+					$indexArr = array_keys($headerArr,$sMap['field']);
+					$index = array_shift($indexArr);
+					if(array_key_exists($index,$recordArr)){
+						$valueStr = $recordArr[$index];
+						//If value is enclosed by quotes, remove quotes
+						if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
+							$valueStr = substr($valueStr,1,strlen($valueStr)-2);
 						}
+						$recMap[$symbField] = $valueStr;
 					}
-					if($this->uploadType == $this->SKELETAL && !$recMap['catalognumber']){
-						//Skip loading record
-						unset($recMap);
-						continue;  
-					}
-					$this->loadRecord($recMap);
-					unset($recMap);
 				}
+				if($this->uploadType == $this->SKELETAL && !$recMap['catalognumber']){
+					//Skip loading record
+					unset($recMap);
+					continue;  
+				}
+				$this->loadRecord($recMap);
+				unset($recMap);
 			}
 			fclose($fh);
 
@@ -176,7 +139,6 @@ class SpecUploadFile extends SpecUploadBase{
 					}
 				}
 				$testRS->free();
-				
 				if($this->nfnIdentifier == 'uuid'){
 					$sqlA = 'UPDATE uploadspectemp SET tempfield02 = substring(tempfield02,10) WHERE tempfield02 LIKE "urn:uuid:%"';
 					if(!$this->conn->query($sqlA)){
@@ -199,9 +161,9 @@ class SpecUploadFile extends SpecUploadBase{
 					}
 				}
 				//Unlink records that were illegally linked to another collection
-				$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
+				$sql = 'UPDATE uploadspectemp u LEFT JOIN omoccurrences o ON u.occid = o.occid '.
 					'SET u.occid = NULL '.
-					'WHERE (u.collid IN('.$this->collId.')) AND (o.collid NOT IN('.$this->collId.'))';
+					'WHERE (u.collid IN('.$this->collId.')) AND (o.collid NOT IN('.$this->collId.') OR o.collid IS NULL)';
 				if(!$this->conn->query($sql)){
 					$this->outputMsg('<li>ERROR unlinking bad records</li>');
 				}
