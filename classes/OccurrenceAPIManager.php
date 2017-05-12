@@ -123,7 +123,7 @@ class OccurrenceAPIManager{
             echo 'SUCCESS: Image uploaded';
         }
         else{
-            echo 'ERROR: Could not determine occid from catnum';
+            echo 'ERROR: Could not locate record';
         }
     }
 
@@ -214,6 +214,9 @@ class OccurrenceAPIManager{
         while($row = $result->fetch_object()){
             if($result->num_rows == 1) {
                 $occId = $row->occid;
+            }
+            else{
+                exit('ERROR: Multiple records with catalog number');
             }
         }
         $result->free();
