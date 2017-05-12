@@ -867,6 +867,18 @@ class ProfileManager{
 		return true;
 	}
 
+    public function getUserName($uId){
+        $un = '';
+        $sql = 'SELECT username FROM userlogin WHERE uid = '.$uId.' ';
+        //echo $sql;
+        $rs = $this->conn->query($sql);
+        while($r = $rs->fetch_object()){
+            $un = $r->username;
+        }
+        $rs->free();
+        return $un;
+    }
+
 	private function getTempPath(){
 		$tPath = $GLOBALS["SERVER_ROOT"];
 		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\') $tPath .= '/';
