@@ -41,8 +41,13 @@ $qHandler = new OccurrenceAPIManager();
 $occManager = new OccurrenceEditorImages();
 $authenticated = false;
 $isEditor = false;
+$size = Array();
 
 if($_FILES){
+    @$size = getimagesize($_FILES['imgfile']['tmp_name']);
+}
+
+if($size){
     if(!$un && $uId){
         $un = $pHandler->getUserName($uId);
     }
