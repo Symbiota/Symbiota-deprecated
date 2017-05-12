@@ -271,8 +271,8 @@ class DwcArchiverOccurrence extends Manager{
 		$occurFieldArr['rightsHolder'] = 'c.rightsHolder';
 		$occurTermArr['accessRights'] = 'http://purl.org/dc/terms/accessRights';
 		$occurFieldArr['accessRights'] = 'c.accessRights';
-		$occurTermArr['sourcePrimaryKey'] = 'http://symbiota.org/terms/sourcePrimaryKey'; 
-		$occurFieldArr['sourcePrimaryKey'] = 'o.dbpk'; 
+		$occurTermArr['sourcePrimaryKey-dbpk'] = 'http://symbiota.org/terms/sourcePrimaryKey'; 
+		$occurFieldArr['sourcePrimaryKey-dbpk'] = 'o.dbpk'; 
 		$occurTermArr['collId'] = 'http://symbiota.org/terms/collId'; 
 		$occurFieldArr['collId'] = 'c.collid'; 
 		$occurTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
@@ -295,7 +295,7 @@ class DwcArchiverOccurrence extends Manager{
 		if($this->schemaType == 'dwc'){
 			$trimArr = array('tidInterpreted','recordedByID','associatedCollectors','substrate','verbatimAttributes','cultivationStatus',
 				'localitySecurityReason','genericcolumn1','genericcolumn2','storageLocation','observerUid','processingStatus',
-				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey');
+				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey-dbpk');
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));
 		}
 		elseif($this->schemaType == 'symbiota'){
