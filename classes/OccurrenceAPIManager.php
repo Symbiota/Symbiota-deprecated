@@ -99,10 +99,10 @@ class OccurrenceAPIManager{
 
     public function processImageUpload($pArr){
         global $PARAMS_ARR;
+        $occManager = new OccurrenceEditorImages();
         $occId = 0;
         $occId = ($pArr["occid"]?$pArr["occid"]:$this->getOccFromCatNum($pArr["collid"],$pArr["catnum"]));
         if($occId){
-            $occManager = new OccurrenceEditorImages();
             $occManager->setSymbUid($PARAMS_ARR["uid"]);
             $occManager->setOccId($occId);
             $occManager->setCollId($pArr["collid"]);
@@ -123,7 +123,9 @@ class OccurrenceAPIManager{
             echo 'SUCCESS: Image uploaded';
         }
         else{
-            echo 'ERROR: Could not locate record';
+            $pArr["catalognumber"] = $pArr["catnum"];
+            $occManager->addImageOccurrence($pArr);
+            echo 'SUCCESS: Record created and image uploaded';
         }
     }
 
