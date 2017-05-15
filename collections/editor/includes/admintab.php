@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $occid = $_GET['occid'];
 $occIndex = $_GET['occindex'];
@@ -13,13 +13,12 @@ $occManager->setOccId($occid);
 <div id="admindiv">
 	<?php
 	$editArr = $occManager->getEditArr();
-	//$externalEdits = $occManager->getExternalEditArr();
-	//if($editArr || $externalEdits){
-	if($editArr){
+	$externalEdits = $occManager->getExternalEditArr();
+	if($editArr || $externalEdits){
 		if($editArr){
 			?>
 			<fieldset style="padding:15px;margin:10px 0px;">
-				<legend><b>Edit History</b></legend>
+				<legend><b>History of Internal Edits</b></legend>
 				<?php 
 				if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
 					?>
@@ -60,11 +59,10 @@ $occManager->setOccId($occid);
 			</fieldset>
 			<?php 
 		}
-		/*
 		if($externalEdits){
 			?>
 			<fieldset style="margin-top:20px;padding:20px;">
-				<legend><b>External Edits</b></legend>
+				<legend><b>History of External Edits</b></legend>
 				<?php 
 				foreach($externalEdits as $ts => $eArr){
 					$reviewStr = 'OPEN';
@@ -82,9 +80,9 @@ $occManager->setOccId($occid);
 					</div>
 					<?php
 					$edArr = $eArr['edits'];
-					foreach($edArr as $vArr){
+					foreach($edArr as $fieldName => $vArr){
 						echo '<div style="margin:15px;">';
-						echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+						echo '<b>Field:</b> '.$fieldName.'<br/>';
 						echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
 						echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
 						echo '</div>';
@@ -95,7 +93,6 @@ $occManager->setOccId($occid);
 			</fieldset>
 			<?php
 		}
-		*/
 	}
 	else{
 		echo '<div style="margin:10px">No previous edits recorded</div>';

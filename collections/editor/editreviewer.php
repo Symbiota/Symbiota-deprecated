@@ -213,13 +213,13 @@ $navStr .= '</div>';
 									</select>
 								</div>
 								<?php 
-								if($ACTIVATE_GEOLOCATE_TOOLKIT && !$reviewManager->getObsUid()){
+								if($reviewManager->hasRevisionRecords() && !$reviewManager->getObsUid()){
 									?>
 									<div style="margin:3px;">
 										Editing Source: 
 										<select name="display">
 											<option value="1">Internal</option>
-											<option value="2" <?php if($displayMode == 2) echo 'SELECTED'; ?>>External (GeoLocate CoGe)</option>
+											<option value="2" <?php if($displayMode == 2) echo 'SELECTED'; ?>>External</option>
 										</select>
 									</div>
 									<?php 

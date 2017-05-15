@@ -438,9 +438,8 @@ class OccurrenceIndividualManager extends Manager{
 			$oldValues = json_decode($r->oldvalues,true);
 			$newValues = json_decode($r->newvalues,true);
 			foreach($oldValues as $fieldName => $value){
-				$retArr[$ts]['edits'][$r->orid]['fieldname'] = $fieldName;
-				$retArr[$ts]['edits'][$r->orid]['old'] = $value;
-				$retArr[$ts]['edits'][$r->orid]['new'] = (isset($newValues[$fieldName])?$newValues[$fieldName]:'ERROR');
+				$retArr[$ts]['edits'][$fieldName]['old'] = $value;
+				$retArr[$ts]['edits'][$fieldName]['new'] = (isset($newValues[$fieldName])?$newValues[$fieldName]:'ERROR');
 			}
 		}
 		$rs->free();

@@ -1010,9 +1010,8 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							if($occArr['modified'] && $occArr['modified'] != $occArr['datelastmodified']) echo '<b>Source date modified:</b> '.$occArr['modified'];
 							echo '</div>';
 							$editArr = $indManager->getEditArr();
-							//$externalEdits = $indManager->getExternalEditArr();
-							//if($editArr || $externalEdits){
-							if($editArr){
+							$externalEdits = $indManager->getExternalEditArr();
+							if($editArr || $externalEdits){
 								if($editArr){
 									?>
 									<fieldset style="padding:20px;">
@@ -1046,7 +1045,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</fieldset>
 									<?php
 								}
-								/*
 								if($externalEdits){
 									?>
 									<fieldset style="margin-top:20px;padding:20px;">
@@ -1068,9 +1066,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											</div>
 											<?php
 											$edArr = $eArr['edits'];
-											foreach($edArr as $vArr){
+											foreach($edArr as $fieldName => $vArr){
 												echo '<div style="margin:15px;">';
-												echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+												echo '<b>Field:</b> '.$fieldName.'<br/>';
 												echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
 												echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
 												echo '</div>';
@@ -1081,7 +1079,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</fieldset>
 									<?php
 								}
-								*/
 							}
 							else{
 								echo '<div style="margin:25px 15px;"><b>Record has not been edited</b></div>';

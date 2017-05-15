@@ -443,7 +443,7 @@ class SpecEditReviewManager extends Manager{
 		return implode(',',$ocedidArr);
 	}
 	
-	//Setters and getters
+	//Setters, getters, misc functions
 	public function setDisplay($d){
 		if(is_numeric($d)){
 			$this->display = $d;
@@ -513,6 +513,17 @@ class SpecEditReviewManager extends Manager{
 		$result->free();
 		asort($retArr);
 		return $retArr;
+	}
+	
+	public function hasRevisionRecords(){
+		$status = false;
+		$sql = 'SELECT orid FROM omoccurrevisions LIMIT 1';
+		$result = $this->conn->query($sql);
+		if($row = $result->fetch_object()){
+			$status = true;
+		}
+		$result->free();
+		return $status;
 	}
 }
 ?> 
