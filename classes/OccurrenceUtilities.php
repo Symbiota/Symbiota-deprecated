@@ -450,7 +450,7 @@ class OccurrenceUtilities {
 						$recMap['month'] = self::$monthNames[$monAbbr];
 						$recMap['eventdate'] = self::formatDate($y.'-'.$recMap['month'].'-'.($d?$d:'00'));
 					}
-					elseif(preg_match('/^(\d{1,2})\s-\s(\D{3,10})$/',$recMap['month'],$m)){
+					elseif(preg_match('/^(\d{1,2})\s{0,1}-\s{0,1}(\D{3,10})$/',$recMap['month'],$m)){
 						$recMap['month'] = $m[1];
 						$recMap['eventdate'] = self::formatDate(trim($y.'-'.$recMap['month'].'-'.($d?$d:'00'),'- '));
 						$vDate = $d.' '.$m[2].' '.$y;
