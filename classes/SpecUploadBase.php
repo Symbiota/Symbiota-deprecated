@@ -877,10 +877,19 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	private function versionOccurrenceEdits(){
-		$nfnFieldArr = array('catalognumber','sciname','eventdate','verbatimeventdate','recordedby','recordnumber','habitat','country','stateprovince','county','locality');
+		$nfnFieldArr = array();
+		$occArr = array();
+		$sql = "SHOW COLUMNS FROM omoccurrences";
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$field = strtolower($row->Field);
+			if(in_array($field, $this->symbFields)) $nfnFieldArr[] = $field;
+		}
+		$rs->free();
+		
 		$sqlFrag = '';
 		foreach($nfnFieldArr as $field){
-			$sqlFrag .= ',o.'.$field.',u.'.$field.' as old_'.$field;
+			$sqlFrag .= ',u.'.$field.',o.'.$field.' as old_'.$field;
 		}
 		$sql = 'SELECT o.occid'.$sqlFrag.' FROM omoccurrences o INNER JOIN uploadspectemp u ON o.occid = u.occid '.
 			'WHERE o.collid IN('.$this->collId.') AND u.collid IN('.$this->collId.')';
@@ -903,9 +912,9 @@ class SpecUploadBase extends SpecUpload{
 			//Load into revisions table
 			foreach($editArr as $appliedStatus => $eArr){
 				$sql = 'INSERT INTO omoccurrevisions(occid, oldValues, newValues, externalSource, reviewStatus, appliedStatus) '.
-					'VALUES('.$r['occid'].',"'.json_encode($eArr['old']).'","'.json_encode($eArr['new']).'","NfN Expedition",0,'.$appliedStatus.')';
-				if($this->conn->query($sql)){
-					$this->outputMsg('<li>ERROR adding edit revision ('.$this->conn->error.')</li>');
+					'VALUES('.$r['occid'].',"'.$this->cleanInStr(json_encode($eArr['old'])).'","'.$this->cleanInStr(json_encode($eArr['new'])).'","Notes from Nature Expedition",1,'.$appliedStatus.')';
+				if(!$this->conn->query($sql)){
+					$this->outputMsg('<li style="margin-left:10px;">ERROR adding edit revision ('.$this->conn->error.')</li>');
 				}
 			}
 		}

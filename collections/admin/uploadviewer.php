@@ -110,17 +110,19 @@ if($SYMB_UID){
 					<?php 
 					$cnt = 0;
 					foreach($recArr as $id => $occArr){
-						if($occArr['sciname']){
-							$occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
-						}							
+						if($occArr['sciname']) $occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
 						echo "<tr ".($cnt%2?'class="alt"':'').">\n";
 						foreach($headerMap as $k => $v){
 							$displayStr = $occArr[$k];
 							if(strlen($displayStr) > 60){
 								$displayStr = substr($displayStr,0,60).'...';
 							}
-							if(!$displayStr) $displayStr = '&nbsp;';
-							if($displayStr) $displayStr = '<a href="../editor/occurrenceeditor.php?occid='.$displayStr.'" target="_blank">'.$displayStr.'</a>';
+							if($displayStr) {
+								if($k == 'occid') $displayStr = '<a href="../editor/occurrenceeditor.php?occid='.$displayStr.'" target="_blank">'.$displayStr.'</a>';
+							}
+							else{
+								$displayStr = '&nbsp;';
+							}
 							echo '<td>'.$displayStr.'</td>'."\n";
 						}
 						echo "</tr>\n";
