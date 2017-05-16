@@ -1305,22 +1305,24 @@ class SpecUploadBase extends SpecUpload{
 		}
 
 		$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
-		$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].') '.
-			'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
-		//echo "<div>SQL: ".$sql."</div>";
-		if($this->conn->query($sql)){
-			$this->transferCount++;
-			if($this->transferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->transferCount.'</li>');
-			ob_flush();
-			flush();
-			//$this->outputMsg("<li>");
-			//$this->outputMsg("Appending/Replacing observation #".$this->transferCount.": SUCCESS");
-			//$this->outputMsg("</li>");
-		}
-		else{
-			$this->outputMsg("<li>FAILED adding record #".$this->transferCount."</li>");
-			$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
-			$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
+		if($sqlFragments){
+			$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].') '.
+				'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
+			//echo "<div>SQL: ".$sql."</div>";
+			if($this->conn->query($sql)){
+				$this->transferCount++;
+				if($this->transferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->transferCount.'</li>');
+				ob_flush();
+				flush();
+				//$this->outputMsg("<li>");
+				//$this->outputMsg("Appending/Replacing observation #".$this->transferCount.": SUCCESS");
+				//$this->outputMsg("</li>");
+			}
+			else{
+				$this->outputMsg("<li>FAILED adding record #".$this->transferCount."</li>");
+				$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
+				$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
+			}
 		}
 	}
 
@@ -1364,23 +1366,25 @@ class SpecUploadBase extends SpecUpload{
 				}
 
 				$sqlFragments = $this->getSqlFragments($recMap,$this->identFieldMap);
-				if($recMap['identifiedby'] || $recMap['dateidentified']){
-					if(!$recMap['identifiedby']) $recMap['identifiedby'] = 'not specified';
-					if(!$recMap['dateidentified']) $recMap['dateidentified'] = 'not specified';
-					$sql = 'INSERT INTO uploaddetermtemp(collid'.$sqlFragments['fieldstr'].') '.
-						'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
-					//echo "<div>SQL: ".$sql."</div>"; exit;
-					
-					if($this->conn->query($sql)){
-						$this->identTransferCount++;
-						if($this->identTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->identTransferCount.'</li>');
-						ob_flush();
-						flush();
-					}
-					else{
-						$this->outputMsg("<li>FAILED adding identification history record #".$this->identTransferCount."</li>");
-						$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
-						$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
+				if($sqlFragments){
+					if($recMap['identifiedby'] || $recMap['dateidentified']){
+						if(!$recMap['identifiedby']) $recMap['identifiedby'] = 'not specified';
+						if(!$recMap['dateidentified']) $recMap['dateidentified'] = 'not specified';
+						$sql = 'INSERT INTO uploaddetermtemp(collid'.$sqlFragments['fieldstr'].') '.
+							'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
+						//echo "<div>SQL: ".$sql."</div>"; exit;
+						
+						if($this->conn->query($sql)){
+							$this->identTransferCount++;
+							if($this->identTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->identTransferCount.'</li>');
+							ob_flush();
+							flush();
+						}
+						else{
+							$this->outputMsg("<li>FAILED adding identification history record #".$this->identTransferCount."</li>");
+							$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
+							$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
+						}
 					}
 				}
 			}
@@ -1432,25 +1436,27 @@ class SpecUploadBase extends SpecUpload{
 				if(!isset($recMap['url'])) $recMap['url'] = 'empty';
 
 				$sqlFragments = $this->getSqlFragments($recMap,$this->imageFieldMap);
-				$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
-					'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
-				
-				if($this->conn->query($sql)){
-					$this->imageTransferCount++;
-					if($this->imageTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Success count: '.$this->imageTransferCount.'</li>');
-					ob_flush();
-					flush();
-				}
-				else{
-					$this->outputMsg("<li>FAILED adding image record #".$this->imageTransferCount."</li>");
-					$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
-					$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
+				if($sqlFragments){
+					$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
+						'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
+					if($this->conn->query($sql)){
+						$this->imageTransferCount++;
+						if($this->imageTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Success count: '.$this->imageTransferCount.'</li>');
+						ob_flush();
+						flush();
+					}
+					else{
+						$this->outputMsg("<li>FAILED adding image record #".$this->imageTransferCount."</li>");
+						$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
+						$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
+					}
 				}
 			}
 		}
 	}
 
 	private function getSqlFragments($recMap,$fieldMap){
+		$hasValue = false;
 		$sqlFields = '';
 		$sqlValues = '';
 		foreach($recMap as $symbField => $valueStr){
@@ -1458,6 +1464,7 @@ class SpecUploadBase extends SpecUpload{
 				$sqlFields .= ','.$symbField;
 				$valueStr = $this->encodeString($valueStr);
 				$valueStr = $this->cleanInStr($valueStr);
+				if($valueStr) $hasValue = true;
 				//Load data
 				$type = '';
 				$size = 0;
@@ -1543,6 +1550,7 @@ class SpecUploadBase extends SpecUpload{
 				}
 			}
 		}
+		if(!$hasValue) return false;
 		return array('fieldstr' => $sqlFields,'valuestr' => $sqlValues);
 	}
 
