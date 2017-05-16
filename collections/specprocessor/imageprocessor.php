@@ -60,6 +60,8 @@ if($spprId) $specManager->setProjVariables($spprId);
 				if(uploadType == 'local'){
 					document.getElementById('titlerow').style.display = "block";
 					document.getElementById('sourcepathrow').style.display = "block";
+					document.getElementById('sourcePathInfoIplant').style.display = "none";
+					document.getElementById('sourcePathInfoOther').style.display = "block";
 					document.getElementById('targetpathrow').style.display = "block";
 					document.getElementById('urlbaserow').style.display = "block";
 					document.getElementById('centralwidthrow').style.display = "block";
@@ -69,9 +71,23 @@ if($spprId) $specManager->setProjVariables($spprId);
 					document.getElementById('thumbnailrow').style.display = "block";
 					document.getElementById('largeimagerow').style.display = "block";
 				}
-				if(uploadType == 'idigbio' || uploadType == 'iplant'){
+				else if(uploadType == 'idigbio'){
 					document.getElementById('titlerow').style.display = "none";
 					document.getElementById('sourcepathrow').style.display = "none";
+					document.getElementById('targetpathrow').style.display = "none";
+					document.getElementById('urlbaserow').style.display = "none";
+					document.getElementById('centralwidthrow').style.display = "none";
+					document.getElementById('thumbwidthrow').style.display = "none";
+					document.getElementById('largewidthrow').style.display = "none";
+					document.getElementById('jpgqualityrow').style.display = "none";
+					document.getElementById('thumbnailrow').style.display = "none";
+					document.getElementById('largeimagerow').style.display = "none";
+				}
+				else if(uploadType == 'iplant'){
+					document.getElementById('titlerow').style.display = "none";
+					document.getElementById('sourcepathrow').style.display = "block";
+					document.getElementById('sourcePathInfoIplant').style.display = "block";
+					document.getElementById('sourcePathInfoOther').style.display = "none";
 					document.getElementById('targetpathrow').style.display = "none";
 					document.getElementById('urlbaserow').style.display = "none";
 					document.getElementById('centralwidthrow').style.display = "none";
@@ -229,7 +245,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 									</div>
 								</div>
 								<?php
-								if($projectType != 'idigbio' && $projectType != 'iplant'){ 
+								if($projectType != 'idigbio'){ 
 									?>
 									<div id="sourcepathrow" style="clear:both;">
 										<div style="width:180px;float:left;">
@@ -241,13 +257,31 @@ if($spprId) $specManager->setProjVariables($spprId);
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
 											<div id="sourcepathinfodialog">
-												Server path to folder containing source images. The path should be absolute and the web server (e.g. apache) should have read/write access. 
-												If a URL (e.g. http://) is supplied, the web server needs to be configured to publically list 
-												all files within the directory, or the html output can simily list all images within anchor tags.
-												In all cases, scripts will attempt to crawl through all child directories.
+												<div id="sourcePathInfoIplant" style="display:<?php echo ($projectType == 'iplant'?'block':'none'); ?>">
+													iPlant server path to source images. The path should be accessible to the iPlant Data Service API.
+													Scripts will crawl through all child directories within the target.
+													Instances of --INSTITUTION_CODE-- and --COLLECTION_CODE-- will be dynamically replaced with 
+													the institution and collection codes stored within collections metadata setup. For instance, 
+													/home/shared/sernec/--INSTITUTION_CODE--/ would target /home/shared/sernec/xyc/ for the XYZ collection.
+													Contact portal manager for more details.
+													Leave blank to use default path:  
+													<?php
+													echo (isset($IPLANT_IMAGE_IMPORT_PATH)?$IPLANT_IMAGE_IMPORT_PATH:'Not Activated');
+													?>
+												</div>
+												<div id="sourcePathInfoOther" style="display:<?php echo ($projectType == 'iplant'?'none':'block'); ?>">
+													Server path or URL to source image location. Server paths should be absolute and writable to web server (e.g. apache). 
+													If a URL (e.g. http://) is supplied, the web server needs to be configured to publically list 
+													all files within the directory, or the html output can simply list all images within anchor tags.
+													In all cases, scripts will attempt to crawl through all child directories.
+												</div>
 											</div>
 										</div>
 									</div>
+									<?php
+								}
+								if($projectType != 'idigbio' && $projectType != 'iplant'){ 
+									?>
 									<div id="targetpathrow" style="clear:both;">
 										<div style="width:180px;float:left;">
 											<b>Image target path:</b>
@@ -371,8 +405,8 @@ if($spprId) $specManager->setProjVariables($spprId);
 									<?php
 								} 
 								?>
-								<div style="clear:both;margin:25px 15px;">
-									<div>
+								<div style="clear:both;padding:25px 15px;">
+									<div style="">
 										<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
 										<input name="tabindex" type="hidden" value="1" />
@@ -451,16 +485,22 @@ if($spprId) $specManager->setProjVariables($spprId);
 										</div>
 									</div>
 									<?php
-									if($projectType != 'idigbio' && $projectType != 'iplant'){ 
+									if($projectType != 'idigbio'){ 
 										?>
 										<div style="clear:both;">
 											<div style="width:200px;float:left;">
-												<b>Source folder:</b>
+												<b>Source path:</b>
 											</div>
 											<div style="float:left;"> 
-												<?php echo $specManager->getSourcePath(); ?>
+												<?php 
+												echo '<input name="sourcepath" type="text" value="'.$specManager->getSourcePathDefault().'" style="width:400px;" />';
+												?>
 											</div>
 										</div>
+										<?php
+									}
+									if($projectType != 'idigbio' && $projectType != 'iplant'){ 
+										?>
 										<div style="clear:both;">
 											<div style="width:200px;float:left;">
 												<b>Target folder:</b> 

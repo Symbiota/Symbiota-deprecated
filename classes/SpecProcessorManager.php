@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class SpecProcessorManager {
 
@@ -7,6 +7,8 @@ class SpecProcessorManager {
 	protected $collid = 0;
 	protected $title;
 	protected $collectionName;
+	protected $institutionCode;
+	protected $collectionCode;
 	protected $projectType;
 	protected $managementType;
 	protected $specKeyPattern;
@@ -50,10 +52,13 @@ class SpecProcessorManager {
 	public function setCollId($id){
 		$this->collid = $id;
 		if($this->collid && is_numeric($this->collid) && !$this->collectionName){
-			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE (collid = '.$this->collid.')';
+			$sql = 'SELECT collid, collectionname, institutioncode, collectioncode, managementtype '.
+				'FROM omcollections WHERE (collid = '.$this->collid.')';
 			if($rs = $this->conn->query($sql)){
 				if($row = $rs->fetch_object()){
 					$this->collectionName = $row->collectionname;
+					$this->institutionCode = $row->institutioncode;
+					$this->collectionCode = $row->collectioncode;
 					$this->managementType = $row->managementtype;
 				}
 				else{
@@ -590,6 +595,16 @@ class SpecProcessorManager {
 
 	public function getSourcePath(){
 		return $this->sourcePath;
+	}
+
+	public function getSourcePathDefault(){
+		$sourcePath = $this->sourcePath;
+		if(!$sourcePath && $this->projectType == 'iplant' && $GLOBALS['IPLANT_IMAGE_IMPORT_PATH']){
+			$sourcePath = $GLOBALS['IPLANT_IMAGE_IMPORT_PATH'];
+			if(strpos($sourcePath, '--INSTITUTION_CODE--')) $sourcePath = str_replace('--INSTITUTION_CODE--', $this->institutionCode, $sourcePath);
+			if(strpos($sourcePath, '--COLLECTION_CODE--')) $sourcePath = str_replace('--COLLECTION_CODE--', $this->collectionCode, $sourcePath);
+		}
+		return $sourcePath;
 	}
 
 	public function setTargetPath($p){

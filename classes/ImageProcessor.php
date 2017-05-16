@@ -68,12 +68,21 @@ class ImageProcessor {
 	}
 
 	//iPlant functions
-	public function processIPlantImages($pmTerm, $lastRunDate){
+	public function processIPlantImages($pmTerm, $lastRunDate, $iPlantSourcePath){
 		set_time_limit(1000);
 		if($this->collid){
-			$this->initProcessor('iplant');
 			$iPlantDataUrl = 'https://bisque.cyverse.org/data_service/'; 
 			$iPlantImageUrl = 'https://bisque.cyverse.org/image_service/image/';
+			if(!$iPlantSourcePath && array_key_exists('IPLANT_IMAGE_IMPORT_PATH', $GLOBALS)) $iPlantSourcePath = $GLOBALS['IPLANT_IMAGE_IMPORT_PATH'];
+			if($iPlantSourcePath){
+				if(strpos($iPlantSourcePath, '--INSTITUTION_CODE--')) $iPlantSourcePath = str_replace('--INSTITUTION_CODE--', $this->collArr['instcode'], $iPlantSourcePath);
+				if(strpos($iPlantSourcePath, '--COLLECTION_CODE--')) $iPlantSourcePath = str_replace('--COLLECTION_CODE--', $this->collArr['collcode'], $iPlantSourcePath);
+			}
+			else{
+				echo '<div style="color:red">iPlant image import path (IPLANT_IMAGE_IMPORT_PATH) not set within symbini configuration file</div>';
+				return false;
+			}
+			$this->initProcessor('iplant');
 			$collStr = $this->collArr['instcode'].($this->collArr['collcode']?'-'.$this->collArr['collcode']:'');
 			$this->logOrEcho('Starting image processing: '.$collStr.' ('.date('Y-m-d h:i:s A').')');
 			
@@ -92,7 +101,7 @@ class ImageProcessor {
 			//Get start date
 			if(!$lastRunDate || !preg_match('/^\d{4}-\d{2}-\d{2}$/',$lastRunDate)) $lastRunDate = '2015-04-01';
 			while(strtotime($lastRunDate) < strtotime('now')){
-				$url = $iPlantDataUrl.'image?value=*home/shared/sernec/'.$this->collArr['instcode'].'/*&tag_query=upload_datetime:'.$lastRunDate.'*';
+				$url = $iPlantDataUrl.'image?value=*'.$iPlantSourcePath.'*&tag_query=upload_datetime:'.$lastRunDate.'*';
 				$contents = @file_get_contents($url);
 				//check if response is received from iPlant
 				if(!empty($http_response_header)) {

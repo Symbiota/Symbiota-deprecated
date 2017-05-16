@@ -59,7 +59,8 @@ $statusStr = "";
 						$imageProcessor->setCollid($collid);
 						$imageProcessor->setSpprid($spprid);
 						$runDate = $_POST['startdate'];
-						$imageProcessor->processIPlantImages($specManager->getSpecKeyPattern(), $runDate);
+						$iPlantTargetPath = (array_key_exists('sourcepath', $_POST)?$_POST['sourcepath']:'');
+						$imageProcessor->processIPlantImages($specManager->getSpecKeyPattern(), $runDate, $iPlantTargetPath);
 						echo '</ul>';
 					}
 					else{
