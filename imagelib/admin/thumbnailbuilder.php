@@ -7,6 +7,7 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../imagelib/admi
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:"";
+$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:"";
 
 $isEditor = false;
 if($IS_ADMIN){
@@ -19,6 +20,8 @@ elseif($collid){
 }
 
 $imgManager = new ImageCleaner();
+$imgManager->setCollid($collid);
+$imgManager->setTid($tid);
 ?>
 <html>
 <head>
@@ -53,15 +56,17 @@ $imgManager = new ImageCleaner();
 					<legend><b>Thumbnail Builder</b></legend>
 					<div style="margin:10px;">
 						<?php 
-						$reportArr = $imgManager->getReportArr($collid);
+						if(!$action) $imgManager->resetProcessing();
+						$reportArr = $imgManager->getReportArr();
 						if($reportArr){
-							echo '<b>Images counts without thumbnails and/or basic web view</b>';
+							echo '<b>Images counts without thumbnails and/or basic web image display</b>';
+							if($tid) echo '<div style="margin:5px 25px">Taxa Filter: '.$imgManager->getSciname().' (tid: '.$tid.')</div>';
 							echo '<ul>';
 							foreach($reportArr as $id => $retArr){
 								echo '<li>';
-								if($id) echo '<a href="../../collections/misc/collprofiles.php?collid='.$id.'&emode=1">';
+								echo '<a href="thumbnailbuilder.php?collid='.$id.'&tid='.$tid.'&action=none">';
 								echo $retArr['name'];
-								if($id) echo '</a>';
+								echo '</a>';
 								echo ': '.$retArr['cnt'].' images';
 								echo '</li>';
 							}
@@ -72,19 +77,20 @@ $imgManager = new ImageCleaner();
 						}
 						?>
 					</div>
-					<div style="margin:15px;">
+					<div style="margin:25px 10px;">
 						<?php 
 						if($action == "Build Thumbnails"){
-							echo '<div style="font-weight:bold;">Starting processing...</div>';
-							$imgManager->buildThumbnailImages($collid); 
+							echo '<div style="font-weight:bold;">Start processing...</div>';
+							$imgManager->buildThumbnailImages(); 
 							echo '<div style="font-weight:bold;">Finished!</div>';
-							echo '<div style="margin-top:20px"><a href="thumbnailbuilder.php?collid='.$collid.'">Return to Main Menus</a></div>';
+							echo '<div style="margin-top:20px"><a href="thumbnailbuilder.php?collid='.$collid.'&tid='.$tid.'&action=none">Return to Main Menus</a></div>';
 						}
 						else{
 							if($reportArr){
 								?>
 								<form name="tnbuilderform" action="thumbnailbuilder.php" method="post">
 									<input type="hidden" name="collid" value="<?php echo $collid; ?>">
+									<input type="hidden" name="tid" value="<?php echo $tid; ?>">
 									<input type="submit" name="action" value="Build Thumbnails">
 								</form>
 								<div style="margin:10px;">
