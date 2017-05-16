@@ -70,8 +70,13 @@ class ImageProcessor {
 	}
 
 	//iPlant functions
-	public function processIPlantImages($pmTerm, $lastRunDate, $iPlantSourcePath){
+	public function processIPlantImages($pmTerm, $postArr){
 		set_time_limit(1000);
+		$lastRunDate = $postArr['startdate'];
+		$iPlantSourcePath = (array_key_exists('sourcepath', $postArr)?$postArr['sourcepath']:'');
+		$this->matchCatalogNumber = (array_key_exists('matchcatalognumber', $postArr)?true:false);
+		$this->matchOtherCatalogNumbers = (array_key_exists('matchothercatalognumbers', $postArr)?true:false);
+
 		if($this->collid){
 			$iPlantDataUrl = 'https://bisque.cyverse.org/data_service/'; 
 			$iPlantImageUrl = 'https://bisque.cyverse.org/image_service/image/';
@@ -126,11 +131,7 @@ class ImageProcessor {
 								if(preg_match($pmTerm,$fileName,$matchArr)){
 									if(array_key_exists(1,$matchArr) && $matchArr[1]){
 										$specPk = $matchArr[1];
-										/*
-										if(isset($cArr['pattreplace'])){ 				
-											$specPk = preg_replace($cArr['pattreplace'],$cArr['replacestr'],$specPk);
-										}
-										*/
+										if($postArr['patternreplace']) $specPk = preg_replace($postArr['patternreplace'],$postArr['replacestr'],$specPk);
 										$guid = $i['resource_uniq'];
 										if($occid = $this->getOccid($specPk,$guid,$fileName)){
 											$baseUrl = $iPlantImageUrl.$guid;
@@ -174,8 +175,10 @@ class ImageProcessor {
 	}
 
 	//iDigBio Image ingestion processing functions
-	public function processiDigBioOutput($pmTerm){
+	public function processiDigBioOutput($pmTerm,$postArr){
 		$status = '';
+		$this->matchCatalogNumber = (array_key_exists('matchcatalognumber', $postArr)?1:0);
+		$this->matchOtherCatalogNumbers = (array_key_exists('matchothercatalognumbers', $postArr)?1:0);
 		$idigbioImageUrl = 'https://api.idigbio.org/v2/media/';
 		$this->initProcessor('idigbio');
 		$collStr = $this->collArr['instcode'].($this->collArr['collcode']?'-'.$this->collArr['collcode']:'');
@@ -201,6 +204,7 @@ class ImageProcessor {
 								if(preg_match($pmTerm,$origFileName,$matchArr)){
 									if(array_key_exists(1,$matchArr) && $matchArr[1]){
 										$specPk = $matchArr[1];
+										if($postArr['patternreplace']) $specPk = preg_replace($postArr['patternreplace'],$postArr['replacestr'],$specPk);
 										$occid = $this->getOccid($specPk,$origFileName);
 										if($occid){
 											//Image hasn't been loaded, thus insert image urls into image table

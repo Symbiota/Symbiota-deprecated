@@ -58,11 +58,7 @@ $statusStr = "";
 						$imageProcessor->setLogMode(3);
 						$imageProcessor->setCollid($collid);
 						$imageProcessor->setSpprid($spprid);
-						$imageProcessor->setMatchCatalogNumber((array_key_exists('matchcatalognumber', $_POST)?1:0));
-						$imageProcessor->setMatchOtherCatalogNumbers((array_key_exists('matchothercatalognumbers', $_POST)?1:0));
-						$runDate = $_POST['startdate'];
-						$iPlantTargetPath = (array_key_exists('sourcepath', $_POST)?$_POST['sourcepath']:'');
-						$imageProcessor->processIPlantImages($specManager->getSpecKeyPattern(), $runDate, $iPlantTargetPath);
+						$imageProcessor->processIPlantImages($specManager->getSpecKeyPattern(), $_POST);
 						echo '</ul>';
 					}
 					else{
@@ -71,7 +67,7 @@ $statusStr = "";
 		
 						$imageProcessor->setLogMode(1);
 						$imageProcessor->initProcessor();
-						$imageProcessor->setCollArr(array($collid => array('pmterm' => $specManager->getSpecKeyPattern())));
+						$imageProcessor->setCollArr(array($collid => array('pmterm' => $specManager->getSpecKeyPattern(),'prpatt' => $specManager->getPatternReplace(),'prrepl' => $specManager->getReplaceStr())));
 						$imageProcessor->setMatchCatalogNumber((array_key_exists('matchcatalognumber', $_POST)?1:0));
 						$imageProcessor->setMatchOtherCatalogNumbers((array_key_exists('matchothercatalognumbers', $_POST)?1:0));
 						$imageProcessor->setDbMetadata(1);
@@ -105,10 +101,8 @@ $statusStr = "";
 					echo '<ul>';
 					$imageProcessor->setLogMode(3);
 					$imageProcessor->setSpprid($spprid);
-					$imageProcessor->setMatchCatalogNumber((array_key_exists('matchcatalognumber', $_POST)?1:0));
-					$imageProcessor->setMatchOtherCatalogNumbers((array_key_exists('matchothercatalognumbers', $_POST)?1:0));
 					$imageProcessor->setCollid($collid);
-					$imageProcessor->processiDigBioOutput($specManager->getSpecKeyPattern());
+					$imageProcessor->processiDigBioOutput($specManager->getSpecKeyPattern(),$_POST);
 					echo '</ul>';
 					
 				}

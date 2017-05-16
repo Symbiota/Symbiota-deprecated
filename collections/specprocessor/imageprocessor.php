@@ -39,7 +39,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 		<script src="../../js/symb/shared.js" type="text/javascript"></script>
 		<script>
 			$(function() {
-				var dialogArr = new Array("speckeypattern","speckeyretrieval","sourcepath","targetpath","imgurl","webpixwidth","tnpixwidth","lgpixwidth","jpgcompression");
+				var dialogArr = new Array("speckeypattern","patternreplace","replacestr","sourcepath","targetpath","imgurl","webpixwidth","tnpixwidth","lgpixwidth","jpgcompression");
 				var dialogStr = "";
 				for(i=0;i<dialogArr.length;i++){
 					dialogStr = dialogArr[i]+"info";
@@ -66,11 +66,15 @@ if($spprId) $specManager->setProjVariables($spprId);
 				else if(uploadType == 'idigbio'){
 					$("div.profileDiv").hide();
 					$("#specKeyPatternDiv").show();
+					$("#patternReplaceDiv").show();
+					$("#replaceStrDiv").show();
 					if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
 				}
 				else if(uploadType == 'iplant'){
 					$("div.profileDiv").hide();
 					$("#specKeyPatternDiv").show();
+					$("#patternReplaceDiv").show();
+					$("#replaceStrDiv").show();
 					$("#sourcePathDiv").show();
 					$("#sourcePathInfoIplant").show();
 					if($("[name='sourcepath']").val() == "") $("[name='sourcepath']").val("-- Use Default Path --");
@@ -122,6 +126,8 @@ if($spprId) $specManager->setProjVariables($spprId);
 						alert("Since target path is null, scripts will attempt to simply map to images using the Image URL base path set in the Symbiota configuration file");
 					}
 				}
+				if($("[name='patternreplace']").val() == "-- Optional --") $("[name='patternreplace']").val("");
+				if($("[name='replacestr']").val() == "-- Optional --") $("[name='replacestr']").val("");
 				if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
 				return true;
 			}
@@ -199,7 +205,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<select name="imageuploadtype" id="imageuploadtype" style="width:300px;" onchange="uploadTypeChanged()" <?php echo ($spprId?'DISABLED':'');?>>
 												<option value="">----------------------</option>
 												<option value="local">Local Image Mapping</option>
-												<option value="idigbio">iDigBio CSV Upload</option>
+												<option value="idigbio">iDigBio Media Ingestion Report</option>
 												<option value="iplant">iPlant Image Harvest</option>
 											</select>
 										</div>
@@ -229,6 +235,36 @@ if($spprId) $specManager->setProjVariables($spprId);
 											For example, regular expression /^(WIS-L-\d{7})\D*/ will extract catalog number WIS-L-0001234 
 											from image file named WIS-L-0001234_a.jpg. For more information on creating regular expressions,
 											Google &quot;Regular Expression PHP Tutorial&quot;
+										</div>
+									</div>
+								</div>
+								<div id="patternReplaceDiv" class="profileDiv" style="display:<?php echo ($projectType?'block':'none'); ?>">
+									<div style="width:180px;float:left;">
+										<b>Replacement term:</b> 
+									</div>
+									<div style="float:left;">
+										<input name="patternreplace" type="text" style="width:300px;" value="<?php echo ($specManager->getPatternReplace()?$specManager->getPatternReplace():'-- Optional --'); ?>" />
+										<a id="patternreplaceinfo" href="#" onclick="return false" title="More Information">
+											<img src="../../images/info.png" style="width:15px;" />
+										</a>
+										<div id="patternreplaceinfodialog">
+											Optional regular expression for match on Catalog Number to be replaced with replacement term.
+											Example 1: expression replace term = '/^/' combined with replace string = 'barcode-' will convert 0001234 => barcode-0001234. 
+											Example 2: expression replace term = '/XYZ-/' combined with empty replace string will convert XYZ-0001234 => 0001234.
+										</div>
+									</div>
+								</div>
+								<div id="replaceStrDiv" class="profileDiv" style="display:<?php echo ($projectType?'block':'none'); ?>">
+									<div style="width:180px;float:left;">
+										<b>Replacement string:</b> 
+									</div>
+									<div style="float:left;">
+										<input name="replacestr" type="text" style="width:300px;" value="<?php echo ($specManager->getReplaceStr()?$specManager->getReplaceStr():'-- Optional --'); ?>" />
+										<a id="replacestrinfo" href="#" onclick="return false" title="More Information">
+											<img src="../../images/info.png" style="width:15px;" />
+										</a>
+										<div id="replacestrinfodialog">
+											Optional replacement string to apply for Expression replacement term matches on catalogNumber.
 										</div>
 									</div>
 								</div>
@@ -427,7 +463,6 @@ if($spprId) $specManager->setProjVariables($spprId);
 										<div style="font-weight:bold;">Select iDigBio Image Appliance output file</div>
 										<div style="" title="Upload output file created by iDigBio Image Upload Appliance here.">
 											<input type='hidden' name='MAX_FILE_SIZE' value='20000000' />
-											<input type='hidden' name='speckeypattern' value='<?php echo $specManager->getSpecKeyPattern();?>' />
 											<input name='idigbiofile' id='idigbiofile' type='file' size='70' value="Choose image alliance output file" />
 										</div>
 										<?php
@@ -460,6 +495,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 										</div>
 										<div style="float:left;"> 
 											<?php echo $specManager->getSpecKeyPattern(); ?>
+											<input type='hidden' name='speckeypattern' value='<?php echo $specManager->getSpecKeyPattern();?>' />
 										</div>
 									</div>
 									<div style="clear:both;">
@@ -469,6 +505,26 @@ if($spprId) $specManager->setProjVariables($spprId);
 										<div style="float:left;">
 											<input name="matchcatalognumber" type="checkbox" value="1" checked /> Catalog Number 
 											<input name="matchothercatalognumbers" type="checkbox" value="1" style="margin-left:30px;" /> Other Catalog Numbers
+										</div>
+									</div>
+									<div style="margin-top:10px;clear:both;">
+										<div style="width:200px;float:left;">
+											<b>Replacement term:</b> 
+										</div>
+										<div style="float:left;"> 
+											<?php echo $specManager->getPatternReplace(); ?>
+											<input type='hidden' name='patternreplace' value='<?php echo $specManager->getPatternReplace();?>' />
+										</div>
+									</div>
+									<div style="margin-top:10px;clear:both;">
+										<div style="width:200px;float:left;">
+											<b>Replacement string:</b> 
+										</div>
+										<div style="float:left;"> 
+											<?php 
+											echo str_replace(' ', '&lt;space&gt;', $specManager->getReplaceStr());
+											?>
+											<input type='hidden' name='replacestr' value='<?php echo $specManager->getReplaceStr(); ?>' />
 										</div>
 									</div>
 									<?php

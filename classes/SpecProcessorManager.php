@@ -86,6 +86,9 @@ class SpecProcessorManager {
 					if(is_numeric($v)){
 						$sqlFrag .= ','.$k.' = '.$this->cleanInStr($v);
 					}
+					elseif($k == 'replacestr'){
+						$sqlFrag .= ','.$k.' = "'.$this->conn->real_escape_string($v).'"';
+					}
 					elseif($v){
 						$sqlFrag .= ','.$k.' = "'.$this->cleanInStr($v).'"';
 					}
@@ -110,20 +113,26 @@ class SpecProcessorManager {
 			$sourcePath = $addArr['sourcepath'];
 			if($sourcePath == '-- Use Default Path --') $sourcePath = '';
 			if($addArr['imageuploadtype'] == 'idigbio'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath) '.
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,sourcepath) '.
 					'VALUES('.$this->collid.',"iDigBio CSV upload","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
+					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
+					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
 					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
 			elseif($addArr['imageuploadtype'] == 'iplant'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath) '.
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,sourcepath) '.
 					'VALUES('.$this->collid.',"IPlant Image Processing","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
+					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
+					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
 					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
 			elseif($addArr['imageuploadtype'] == 'local'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,sourcepath,targetpath,'.
 					'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 					'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
 					$this->cleanInStr($addArr['speckeypattern']).'",'.
+					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
+					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
 					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').','.
 					(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
 					(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
@@ -162,7 +171,7 @@ class SpecProcessorManager {
 			$sqlWhere .= 'WHERE (collid = '.$this->collid.') ';
 		}
 		if($sqlWhere){
-			$sql = 'SELECT collid, title, speckeypattern, coordx1, coordx2, coordy1, coordy2, sourcepath, targetpath, '.
+			$sql = 'SELECT collid, title, speckeypattern, patternreplace, replacestr,coordx1, coordx2, coordy1, coordy2, sourcepath, targetpath, '.
 				'imgurl, webpixwidth, tnpixwidth, lgpixwidth, jpgcompression, createtnimg, createlgimg, source '.
 				'FROM specprocessorprojects '.$sqlWhere;
 			//echo $sql;
@@ -171,8 +180,8 @@ class SpecProcessorManager {
 				if(!$this->collid) $this->setCollId($row->collid); 
 				$this->title = $row->title;
 				$this->specKeyPattern = $row->speckeypattern;
-				//$this->patternReplace = $row->patternreplace;
-				//$this->replaceStr = $row->replacestr;
+				$this->patternReplace = $row->patternreplace;
+				$this->replaceStr = $row->replacestr;
 				$this->coordX1 = $row->coordx1;
 				$this->coordX2 = $row->coordx2;
 				$this->coordY1 = $row->coordy1;
