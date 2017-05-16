@@ -107,22 +107,24 @@ class SpecProcessorManager {
 		$this->conn->query('DELETE FROM specprocessorprojects WHERE (title = "OCR Harvest") AND (collid = '.$this->collid.')');
 		$sql = '';
 		if(isset($addArr['imageuploadtype'])){
+			$sourcePath = $addArr['sourcepath'];
+			if($sourcePath == '-- Use Default Path --') $sourcePath = '';
 			if($addArr['imageuploadtype'] == 'idigbio'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
-					'VALUES('.$this->collid.',"iDigBio CSV upload","'.
-					$this->cleanInStr($addArr['speckeypattern']).'")';
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath) '.
+					'VALUES('.$this->collid.',"iDigBio CSV upload","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
+					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
 			elseif($addArr['imageuploadtype'] == 'iplant'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
-					'VALUES('.$this->collid.',"IPlant Image Processing","'.
-					$this->cleanInStr($addArr['speckeypattern']).'")';
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath) '.
+					'VALUES('.$this->collid.',"IPlant Image Processing","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
+					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
 			elseif($addArr['imageuploadtype'] == 'local'){
 				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
 					'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 					'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
 					$this->cleanInStr($addArr['speckeypattern']).'",'.
-					($addArr['sourcepath']?'"'.$this->cleanInStr($addArr['sourcepath']).'"':'NULL').','.
+					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').','.
 					(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
 					(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
 					(isset($addArr['webpixwidth'])&&$addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.

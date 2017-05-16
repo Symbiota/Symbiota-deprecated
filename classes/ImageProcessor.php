@@ -9,6 +9,8 @@ class ImageProcessor {
 	private $collid = 0;
 	private $sprid;
 	private $collArr;
+	private $matchCatalogNumber = true;
+	private $matchOtherCatalogNumbers = false;
 
 	private $logMode = 0;		//0 = silent, 1 = html, 2 = log file, 3 = both html & log
 	private $logFH;
@@ -247,14 +249,24 @@ class ImageProcessor {
 		$occid = 0;
 		if($this->collid){
 			//Check to see if record with pk already exists
-			$sql = 'SELECT occid FROM omoccurrences '.
-				'WHERE (catalognumber IN("'.$specPk.'"'.(substr($specPk,0,1)=='0'?',"'.ltrim($specPk,'0 ').'"':'').')) '.
-				'AND (collid = '.$this->collid.')';
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				$occid = $row->occid;
+			if($this->matchCatalogNumber){
+				$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$this->collid.') '.
+					'AND (catalognumber IN("'.$specPk.'"'.(substr($specPk,0,1)=='0'?',"'.ltrim($specPk,'0 ').'"':'').')) ';
+				$rs = $this->conn->query($sql);
+				if($row = $rs->fetch_object()){
+					$occid = $row->occid;
+				}
+				$rs->free();
 			}
-			$rs->free();
+			if(!$occid && $this->matchOtherCatalogNumbers){
+				$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$this->collid.') '.
+					'AND (othercatalognumbers IN("'.$specPk.'"'.(substr($specPk,0,1)=='0'?',"'.ltrim($specPk,'0 ').'"':'').')) ';
+				$rs = $this->conn->query($sql);
+				if($row = $rs->fetch_object()){
+					$occid = $row->occid;
+				}
+				$rs->free();
+			}
 			if($occid){
 				$occLink = '<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
 				if($fileName){
@@ -329,7 +341,7 @@ class ImageProcessor {
 			}
 			else{
 				//Records does not exist, create a new one to which image will be linked
-				$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber,processingstatus,dateentered) '.
+				$sql2 = 'INSERT INTO omoccurrences(collid,'.($this->matchCatalogNumber?'catalognumber':'othercatalognumbers').',processingstatus,dateentered) '.
 					'VALUES('.$this->collid.',"'.$specPk.'","unprocessed","'.date('Y-m-d H:i:s').'")';
 				if($this->conn->query($sql2)){
 					$occid = $this->conn->insert_id;
@@ -462,6 +474,16 @@ class ImageProcessor {
 		if(is_numeric($spprid)){
 			$this->spprid = $spprid;
 		}
+	}
+
+	public function setMatchCatalogNumber($b){
+		if($b) $this->matchCatalogNumber = true;
+		else $this->matchCatalogNumber = false;
+	}
+
+	public function setMatchOtherCatalogNumbers($b){
+		if($b) $this->matchOtherCatalogNumbers = true;
+		else $this->matchOtherCatalogNumbers = false;
 	}
 
 	public function setLogMode($c){
