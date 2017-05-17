@@ -338,17 +338,29 @@ class OccurrenceManager{
 					$collectorArr[] = 'Collector IS NULL';
 				}
 				else{
-					//$tempArr[] = '(o.recordedBy LIKE "%'.trim($value).'%")';
 					$tempInnerArr = array();
 					$collValueArr = explode(" ",trim($collectorArr[0]));
 					foreach($collValueArr as $collV){
-						$tempInnerArr[] = '(MATCH(f.recordedby) AGAINST("'.$collV.'")) ';
+						if(strlen($collV) < 4 || strtolower($collV) == 'best'){
+							//Need to avoid FULLTEXT stopwords interfering with return
+							$tempInnerArr[] = '(o.recordedBy LIKE "%'.$collV.'%")';
+						}
+						else{
+							$tempInnerArr[] = '(MATCH(f.recordedby) AGAINST("'.$collV.'")) ';
+						}
 					}
 					$tempArr[] = implode(' AND ', $tempInnerArr);
 				}
 			}
 			elseif(count($collectorArr) > 1){
-				$tempArr[] = '(MATCH(f.recordedby) AGAINST("'.implode(' ',$collectorArr).'")) ';
+				$collStr = current($collectorArr);
+				if(strlen($collStr) < 4 || strtolower($collStr) == 'best'){
+					//Need to avoid FULLTEXT stopwords interfering with return
+					$tempInnerArr[] = '(o.recordedBy LIKE "%'.$collStr.'%")';
+				}
+				else{
+					$tempArr[] = '(MATCH(f.recordedby) AGAINST("'.$collStr.'")) ';
+				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
 			$this->localSearchArr[] = implode(', ',$collectorArr);

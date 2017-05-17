@@ -91,8 +91,14 @@ class OccurrenceLabel{
 				$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 			}
 			if($postArr['recordedby']){
-				$sqlWhere .= 'AND (MATCH(f.recordedby) AGAINST("'.$this->cleanInStr($postArr['recordedby']).'")) ';
-				//$sqlWhere .= 'AND (o.recordedby LIKE "%'.$this->cleanInStr($postArr['recordedby']).'%") ';
+				$recordedBy = $this->cleanInStr($postArr['recordedby']);
+				if(strlen($recordedBy) < 4 || strtolower($recordedBy) == 'best'){
+					//Need to avoid FULLTEXT stopwords interfering with return
+					$sqlWhere .= 'AND (o.recordedby LIKE "%'.$recordedBy.'%") ';
+				}
+				else{
+					$sqlWhere .= 'AND (MATCH(f.recordedby) AGAINST("'.$recordedBy.'")) ';
+				}
 				$sqlOrderBy .= ',(o.recordnumber'.($rnIsNum?'+1':'').')';
 			}
 			if($postArr['identifier']){

@@ -369,7 +369,14 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND (o.recordedby IS NULL) ';
 			}
 			elseif(substr($this->qryArr['rb'],0,1) == '%'){
-				$sqlWhere .= 'AND (MATCH(f.recordedby) AGAINST("'.$this->cleanInStr(substr($this->qryArr['rb'],1)).'")) ';
+				$collStr = $this->cleanInStr(substr($this->qryArr['rb'],1));
+				if(strlen($collStr) < 4 || strtolower($collStr) == 'best'){
+					//Need to avoid FULLTEXT stopwords interfering with return
+					$sqlWhere .= 'AND (o.recordedby LIKE "%'.$collStr.'%") ';
+				}
+				else{
+					$sqlWhere .= 'AND (MATCH(f.recordedby) AGAINST("'.$collStr.'")) ';
+				}
 			}
 			else{
 				$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->cleanInStr($this->qryArr['rb']).'%") ';
