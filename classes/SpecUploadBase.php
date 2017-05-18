@@ -899,7 +899,7 @@ class SpecUploadBase extends SpecUpload{
 			$notAppliedArr = array();
 			foreach($nfnFieldArr as $field){
 				if($r[$field] && $r['old_'.$field] != $r[$field]){
-					if($r['old_'.$field]){
+					if($r['old_'.$field] && $field != 'processingstatus'){
 						$editArr[0]['old'][$field] = $r['old_'.$field];
 						$editArr[0]['new'][$field] = $r[$field];
 					}

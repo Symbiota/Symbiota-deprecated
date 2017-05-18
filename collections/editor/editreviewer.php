@@ -330,20 +330,20 @@ $navStr .= '</div>';
 								foreach($editArr2 as $id => $editArr3){
 									foreach($editArr3 as $appliedStatus => $edObj){
 										$fieldArr = $edObj['f'];
-										$fieldCnt = 0;
+										$displayAll = true;
 										foreach($fieldArr as $fieldName => $fieldObj){
 											?>
 											<tr <?php echo ($recCnt%2?'class="alt"':'') ?>>
 												<td>
 													<?php 
-													if(!$fieldCnt){
+													if($displayAll){
 														echo '<input name="id[]" type="checkbox" value="'.$id.'" />';
 													}
 													?>
 												</td>
 												<td>
 													<?php 
-													if(!$fieldCnt){
+													if($displayAll){
 														?>
 														<a href="#" onclick="openIndPU(<?php echo $occid; ?>);return false;">
 															<?php echo $occid; ?>
@@ -354,13 +354,13 @@ $navStr .= '</div>';
 												</td>
 												<td>
 													<div title="Catalog Number">
-														<?php if(!$fieldCnt) echo $edObj['catnum']; ?>
+														<?php if($displayAll) echo $edObj['catnum']; ?>
 													</div>
 												</td>
 												<td>
 													<div title="Review Status">
 														<?php
-														if(!$fieldCnt){
+														if($displayAll){
 															$rStatus = $edObj['rstatus'];
 															if($rStatus == 1){
 																echo 'OPEN';
@@ -381,7 +381,7 @@ $navStr .= '</div>';
 												<td>
 													<div title="Applied Status">
 														<?php 
-														if(!$fieldCnt){
+														if($displayAll){
 															if($appliedStatus == 1){
 																echo 'APPLIED';
 															}
@@ -394,12 +394,22 @@ $navStr .= '</div>';
 												</td>
 												<td>
 													<div title="Editor">
-														<?php if(!$fieldCnt) echo $edObj['editor']; ?>
+														<?php 
+														
+														if($displayAll){
+															$editorStr = $edObj['editor'];
+															if($displayMode == 2){
+																if(!$editorStr) $editorStr = $edObj['exeditor'];
+																if($edObj['exsource']) $editorStr = $edObj['exsource'].($editorStr?': '.$editorStr:''); 
+															}
+															echo $editorStr;
+														}
+														?>
 													</div>
 												</td>
 												<td>
 													<div title="Timestamp">
-														<?php if(!$fieldCnt) echo $edObj['ts']; ?>
+														<?php if($displayAll) echo $edObj['ts']; ?>
 													</div>
 												</td>
 												<td>
@@ -419,7 +429,7 @@ $navStr .= '</div>';
 												</td>
 											</tr>
 											<?php
-											$fieldCnt++;
+											$displayAll = false;
 										}
 									}
 									$recCnt++;

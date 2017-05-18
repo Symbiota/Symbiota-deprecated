@@ -271,7 +271,7 @@ class DwcArchiverOccurrence extends Manager{
 		$occurFieldArr['rightsHolder'] = 'c.rightsHolder';
 		$occurTermArr['accessRights'] = 'http://purl.org/dc/terms/accessRights';
 		$occurFieldArr['accessRights'] = 'c.accessRights';
-		$occurTermArr['sourcePrimaryKey-dbpk'] = 'http://symbiota.org/terms/sourcePrimaryKey'; 
+		$occurTermArr['sourcePrimaryKey-dbpk'] = 'http://symbiota.org/terms/sourcePrimaryKey-dbpk';
 		$occurFieldArr['sourcePrimaryKey-dbpk'] = 'o.dbpk'; 
 		$occurTermArr['collId'] = 'http://symbiota.org/terms/collId'; 
 		$occurFieldArr['collId'] = 'c.collid'; 
