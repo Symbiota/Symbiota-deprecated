@@ -37,7 +37,10 @@ class OccurrenceManager{
  	}
 
 	public function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
+ 		if(!($this->conn === false)){
+ 			$this->conn->close();
+ 			$this->conn = null;
+ 		}
 	}
 
 	protected function getConnection($conType = "readonly"){

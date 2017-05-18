@@ -613,7 +613,7 @@ $duManager->loadFieldMap();
 											<div id="dwcaOccurDiv" style="display:none;margin:20px;">
 												<?php $duManager->echoFieldMapTable(true,'occur'); ?>
 												<div>
-													* Mappings that are not yet saved are displayed in Yellow
+													* Unverified mappings are displayed in yellow
 												</div>
 											</div>
 											<div>
@@ -626,7 +626,7 @@ $duManager->loadFieldMap();
 													<div id="dwcaIdentDiv" style="display:none;margin:20px;">
 														<?php $duManager->echoFieldMapTable(true,'ident'); ?>
 														<div>
-															* Mappings that are not yet saved are displayed in Yellow
+															* Unverified mappings are displayed in yellow
 														</div>
 													</div>
 													<?php 
@@ -647,7 +647,7 @@ $duManager->loadFieldMap();
 													<div id="dwcaImgDiv" style="display:none;margin:20px;">
 														<?php $duManager->echoFieldMapTable(true,'image'); ?>
 														<div>
-															* Mappings that are not yet saved are displayed in Yellow
+															* Unverified mappings are displayed in yellow
 														</div>
 													</div>
 													<?php 
@@ -795,7 +795,7 @@ $duManager->loadFieldMap();
 								<div id="mdiv">
 									<?php $duManager->echoFieldMapTable($autoMap,'spec'); ?>
 									<div>
-										* Mappings that are not yet saved are displayed in Yellow<br/>
+										* Unverified mappings are displayed in yellow<br/>
 										* To learn more about mapping to Symbiota fields (and Darwin Core): 
 										<div style="margin-left:15px;">
 											<a href="http://symbiota.org/docs/wp-content/uploads/SymbiotaOccurrenceFields.pdf" target="_blank">SymbiotaOccurrenceFields.pdf</a><br/>
