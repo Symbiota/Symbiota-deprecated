@@ -21,7 +21,10 @@ class OccurrenceMaintenance {
 	}
 
 	public function __destruct(){
-		if($this->destructConn && !($this->conn === null)) $this->conn->close();
+		if($this->destructConn && !($this->conn === null)){
+			$this->conn->close();
+			$this->conn = null;
+		}
  	}
 
 	//General cleaning functions 

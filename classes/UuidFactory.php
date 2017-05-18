@@ -19,7 +19,10 @@ class UuidFactory {
 	}
 
 	public function __destruct(){
-		if($this->destructConn && !($this->conn === null)) $this->conn->close();
+		if($this->destructConn && !($this->conn === null)){
+			$this->conn->close();
+			$this->conn = null;
+		}
 	}
 
 	public function populateGuids($collId = 0){

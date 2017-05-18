@@ -20,6 +20,7 @@ class ProfileManager{
 
  	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
+		$this->conn = null;
 	}
 	
 	private function getConnection($type){

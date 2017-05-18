@@ -32,6 +32,7 @@ if((isset($_COOKIE["SymbiotaCrumb"]) && (!isset($_REQUEST['submit']) || $_REQUES
                 $pHandler->reset();
             }
         }
+        $pHandler->__destruct();
     }
 }
 
@@ -41,6 +42,7 @@ if((isset($_COOKIE["SymbiotaCrumb"]) && ((isset($_REQUEST['submit']) && $_REQUES
         $pHandler = new ProfileManager();
         $uid = $pHandler->getUid($tokenArr[0]);
         $pHandler->deleteToken($uid,$tokenArr[1]);
+        $pHandler->__destruct();
     }
 }
 

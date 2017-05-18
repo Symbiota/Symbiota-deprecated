@@ -36,6 +36,7 @@ class SpecUploadDirect extends SpecUploadBase {
 				echo '<div style="font-weight:bold;margin:15px;">ERROR: '.$sourceConn->error.'</div>';
 				return false;
 			}
+			$sourceConn->close();
 		}
 		return false;
 	}
