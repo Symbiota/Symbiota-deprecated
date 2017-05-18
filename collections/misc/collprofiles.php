@@ -231,14 +231,14 @@ if($SYMB_UID){
 											<?php echo (isset($LANG['IMPORT_SPECIMEN'])?$LANG['IMPORT_SPECIMEN']:'Import/Update Specimen Records'); ?>
 										</a>
 									</li>
-									<li class="importItem" style="margin-left:10px;display:none">
-										<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collid; ?>">
-											<?php echo (isset($LANG['TEXT_FILE_IMPORT'])?$LANG['TEXT_FILE_IMPORT']:'Text File Import'); ?>
-										</a>
-									</li>
 									<li class="importItem" style="margin-left:10px;display:none;">
 										<a href="../admin/specupload.php?uploadtype=7&collid=<?php echo $collid; ?>">
 											<?php echo (isset($LANG['SKELETAL_FILE_IMPORT'])?$LANG['SKELETAL_FILE_IMPORT']:'Skeletal File Import'); ?>
+										</a>
+									</li>
+									<li class="importItem" style="margin-left:10px;display:none">
+										<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['TEXT_FILE_IMPORT'])?$LANG['TEXT_FILE_IMPORT']:'Text File Import'); ?>
 										</a>
 									</li>
 									<li class="importItem" style="margin-left:10px;display:none;">
@@ -259,6 +259,11 @@ if($SYMB_UID){
 									<li class="importItem" style="margin-left:10px;display:none;">
 										<a href="../admin/specuploadmanagement.php?collid=<?php echo $collid; ?>">
 											<?php echo (isset($LANG['IMPORT_PROFILES'])?$LANG['IMPORT_PROFILES']:'Saved Import Profiles'); ?>
+										</a>
+									</li>
+									<li class="importItem" style="margin-left:10px;display:none;">
+										<a href="../admin/specuploadmanagement.php?action=addprofile&collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['CREATE_PROFILE'])?$LANG['CREATE_PROFILE']:'Create a new Import Profile'); ?>
 										</a>
 									</li>
 									<?php 

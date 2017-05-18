@@ -343,7 +343,7 @@ class SpecUpload{
 			(isset($profileArr['password'])&&$profileArr['password']?'"'.$this->cleanInStr($profileArr['password']).'"':'NULL').','.
 			(isset($profileArr['schemaname'])&&$profileArr['schemaname']?'"'.$this->cleanInStr($profileArr['schemaname']).'"':'NULL').','.
 			(isset($profileArr['cleanupsp'])&&$profileArr['cleanupsp']?'"'.$this->cleanInStr($profileArr['cleanupsp']).'"':'NULL').','.
-			(isset($profileArr['querystr'])&&$profileArr['querystr']?'"'.$this->cleanInStr($profileArr['querystr']).'"':'NULL').'")';
+			(isset($profileArr['querystr'])&&$profileArr['querystr']?'"'.$this->cleanInStr($profileArr['querystr']).'"':'NULL').')';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			return $this->conn->insert_id;
