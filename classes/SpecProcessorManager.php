@@ -113,26 +113,29 @@ class SpecProcessorManager {
 			$sourcePath = $addArr['sourcepath'];
 			if($sourcePath == '-- Use Default Path --') $sourcePath = '';
 			if($addArr['imageuploadtype'] == 'idigbio'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,sourcepath) '.
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath) '.
 					'VALUES('.$this->collid.',"iDigBio CSV upload","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
 					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
 					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
+					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
 					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
 			elseif($addArr['imageuploadtype'] == 'iplant'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,sourcepath) '.
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath) '.
 					'VALUES('.$this->collid.',"IPlant Image Processing","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
 					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
 					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
+					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
 					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
 			elseif($addArr['imageuploadtype'] == 'local'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,sourcepath,targetpath,'.
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath,targetpath,'.
 					'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 					'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
 					$this->cleanInStr($addArr['speckeypattern']).'",'.
 					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
 					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
+					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
 					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').','.
 					(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
 					(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
@@ -206,6 +209,9 @@ class SpecProcessorManager {
 				}
 				elseif($this->title == 'OCR Harvest'){
 					break;
+				}
+				else{
+					$this->projectType = 'local';
 				}
 			}
 			$rs->free();
@@ -497,9 +503,8 @@ class SpecProcessorManager {
 	public function getLogListing(){
 		$retArr = array();
 		if($this->collid){
-			$logPath = $this->logPath;
-			if($this->projectType) $logPath .= $this->projectType.'/';
-			if($fh = opendir($logPath)){
+			$logPathFrag = ($this->projectType == 'local'?'imgProccessing':$this->projectType).'/';
+			if($fh = opendir($this->logPath.$logPathFrag)){
 				while($fileName = readdir($fh)){
 					if(strpos($fileName,$this->collid.'_') === 0){
 						$retArr[] = $fileName;
@@ -526,6 +531,14 @@ class SpecProcessorManager {
 
 	public function getCollectionName(){
 		return $this->collectionName;
+	}
+
+	public function getInstitutionCode(){
+		return $this->institutionCode;
+	}
+
+	public function getCollectionCode(){
+		return $this->collectionCode;
 	}
 
 	public function setProjectType($t){
@@ -725,6 +738,10 @@ class SpecProcessorManager {
 
  	public function getUseImageMagick(){
  		return $this->processUsingImageMagick;
+ 	}
+ 	
+ 	public function getConn(){
+ 		return $this->conn;
  	}
  	
  	//Misc functions

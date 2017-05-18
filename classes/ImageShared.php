@@ -71,8 +71,16 @@ class ImageShared{
 		}
 
  	}
- 	
-    public function checkSchema() {
+
+	public function __destruct(){
+		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
+		if(!($this->conn === null)){
+			$this->conn->close();
+			$this->conn = null;
+		}
+	}
+
+ 	public function checkSchema() {
         $result = false;
 
         /*****  Warning: Do not override this check in order to supress error messages.
@@ -88,6 +96,7 @@ class ImageShared{
         $supportedVersions[] = '0.9.1.15';
         $supportedVersions[] = '0.9.1.16';
         $supportedVersions[] = '1.0';
+        $supportedVersions[] = '1.1';
         
         // Find the most recently applied version number
         $preparesql = "select versionnumber from schemaversion order by dateapplied desc limit 1;";
@@ -102,11 +111,6 @@ class ImageShared{
        return $result;
     }
 
- 	public function __destruct(){
-		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
-		if(!($this->conn === null)) $this->conn->close();
- 	}
- 	
  	public function reset(){
  		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
  		$this->sourceGdImg = null;

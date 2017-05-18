@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecProcessorManager.php');
-include_once($SERVER_ROOT.'/classes/ImageBatchProcessor.php');
+include_once($SERVER_ROOT.'/classes/ImageLocalProcessor.php');
 include_once($SERVER_ROOT.'/classes/ImageProcessor.php');
 include_once($SERVER_ROOT.'/classes/SpecProcessorOcr.php');
 
@@ -53,7 +53,7 @@ $statusStr = "";
 				$specManager->setProjVariables($spprid);
 				if($action == 'Process Images'){
 					if($specManager->getProjectType() == 'iplant'){
-						$imageProcessor = new ImageProcessor();
+						$imageProcessor = new ImageProcessor($specManager->getConn());
 						echo '<ul>';
 						$imageProcessor->setLogMode(3);
 						$imageProcessor->setCollid($collid);
@@ -63,10 +63,15 @@ $statusStr = "";
 					}
 					else{
 						echo '<div style="padding:15px;">'."\n";
-						$imageProcessor = new ImageBatchProcessor();
+						$imageProcessor = new ImageLocalProcessor();
 		
-						$imageProcessor->setLogMode(1);
-						$imageProcessor->initProcessor();
+						$imageProcessor->setLogMode(3);
+						$logPath = $SERVER_ROOT.(substr($SERVER_ROOT,-1) == '/'?'':'/').'content/logs/imgProccessing';
+						if(!file_exists($logPath)) mkdir($logPath);
+						$imageProcessor->setLogPath($logPath);
+						$logFile = $collid.'_'.$specManager->getInstitutionCode();
+						if($specManager->getCollectionCode()) $logFile .= '-'.$specManager->getCollectionCode();
+						$imageProcessor->initProcessor($logFile);
 						$imageProcessor->setCollArr(array($collid => array('pmterm' => $specManager->getSpecKeyPattern(),'prpatt' => $specManager->getPatternReplace(),'prrepl' => $specManager->getReplaceStr())));
 						$imageProcessor->setMatchCatalogNumber((array_key_exists('matchcatalognumber', $_POST)?1:0));
 						$imageProcessor->setMatchOtherCatalogNumbers((array_key_exists('matchothercatalognumbers', $_POST)?1:0));
@@ -97,7 +102,7 @@ $statusStr = "";
 				}
 				elseif($action == 'Process Output File'){
 					//Process iDigBio Image ingestion appliance ouput file 
-					$imageProcessor = new ImageProcessor();
+					$imageProcessor = new ImageProcessor($specManager->getConn());
 					echo '<ul>';
 					$imageProcessor->setLogMode(3);
 					$imageProcessor->setSpprid($spprid);

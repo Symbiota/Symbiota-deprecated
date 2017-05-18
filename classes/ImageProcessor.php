@@ -14,15 +14,23 @@ class ImageProcessor {
 
 	private $logMode = 0;		//0 = silent, 1 = html, 2 = log file, 3 = both html & log
 	private $logFH;
+	private $destructConn = true;
 
-	function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('write');
-		if($this->conn === false) exit("ABORT: Image upload aborted: Unable to establish connection to database");
+	function __construct($con = null){
+		if($con){
+			//Inherits connection from another class
+			$this->conn = $con;
+			$this->destructConn = false;
+		}
+		else{
+			$this->conn = MySQLiConnectionFactory::getCon('write');
+			if($this->conn === false) exit("ABORT: Image upload aborted: Unable to establish connection to database");
+		}
 	}
 
 	function __destruct(){
 		//Close connection
-		if(!($this->conn === false)) $this->conn->close();
+		if($this->destructConn && !($this->conn === false)) $this->conn->close();
 
 		//Close log file
 		if($this->logFH) fclose($this->logFH);
@@ -39,7 +47,7 @@ class ImageProcessor {
 			if(file_exists($logPath)){
 				$logFile = $logPath.$this->collid.'_'.$this->collArr['instcode'];
 				if($this->collArr['collcode']) $logFile .= '-'.$this->collArr['collcode'];
-				$logFile .= '_'.date('Y-m-d').".log";
+				$logFile .= '_'.date('Y-m-d').'.log';
 				$this->logFH = fopen($logFile, 'a');
 			}
 			else{
@@ -167,9 +175,6 @@ class ImageProcessor {
 			}
 			$this->cleanHouse(array($this->collid));
 			$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
-			$this->logOrEcho('--------------------------------------------------------------------');
-			$this->logOrEcho(' ');
-			$this->logOrEcho(' ');
 		}
 		return true;
 	}
@@ -227,8 +232,6 @@ class ImageProcessor {
 						}
 						$this->cleanHouse(array($this->collid));
 						$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').")");
-						$this->logOrEcho('--------------------------------------------------------------------');
-						$this->logOrEcho(' ');
 					}
 					else{
 						//Output to error log file
@@ -406,6 +409,7 @@ class ImageProcessor {
 		$this->logOrEcho('Updating collection statistics...',1);
 		$occurMain = new OccurrenceMaintenance($this->conn);
 
+		/*
 		$this->logOrEcho('General cleaning...',2);
 		$collString = implode(',',$collList);
 		if(!$occurMain->generalOccurrenceCleaning($collString)){
@@ -414,7 +418,6 @@ class ImageProcessor {
 				$this->logOrEcho($errorStr,1);
 			}
 		}
-		
 		$this->logOrEcho('Protecting sensitive species...',2);
 		if(!$occurMain->protectRareSpecies()){
 			$errorArr = $occurMain->getErrorArr();
@@ -422,7 +425,7 @@ class ImageProcessor {
 				$this->logOrEcho($errorStr,1);
 			}
 		}
-
+		*/
 		if($collList){
 			$this->logOrEcho('Updating collection statistics...',2);
 			foreach($collList as $collid){
@@ -434,11 +437,13 @@ class ImageProcessor {
 				}
 			}
 		}
+		$occurMain->__destruct();
 
 		$this->logOrEcho('Populating global unique identifiers (GUIDs) for all records...',2);
 		$uuidManager = new UuidFactory($this->conn);
 		$uuidManager->setSilent(1);
 		$uuidManager->populateGuids();
+		$uuidManager->__destruct();
 	}
 
 	private function updateLastRunDate($date){

@@ -57,7 +57,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 			});
 
 			function uploadTypeChanged(){
-				var uploadType = document.getElementById('imageuploadtype').value;
+				var uploadType = document.getElementById('projecttype').value;
 				if(uploadType == 'local'){
 					$("div.profileDiv").show();
 					$("#sourcePathInfoIplant").hide();
@@ -85,7 +85,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 			}
 
 			function validateProjectForm(f){
-				if(f.imageuploadtype.value == ""){
+				if(f.projecttype.value == ""){
 					alert("Image Mapping/Import type must be selected");
 					return false;
 				}
@@ -93,7 +93,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 					alert("Pattern matching term must have a value");
 					return false;
 				}
-				if(f.imageuploadtype.value == 'local'){
+				if(f.projecttype.value == 'local'){
 					if(!isNumeric(f.webpixwidth.value)){
 						alert("Central image pixel width can only be a numeric value");
 						return false;
@@ -122,13 +122,10 @@ if($spprId) $specManager->setProjVariables($spprId);
 						alert("Image URL base must have a value");
 						return false;
 					}
-					else if(f.targetpath.value == ""){
-						alert("Since target path is null, scripts will attempt to simply map to images using the Image URL base path set in the Symbiota configuration file");
-					}
 				}
-				if($("[name='patternreplace']").val() == "-- Optional --") $("[name='patternreplace']").val("");
-				if($("[name='replacestr']").val() == "-- Optional --") $("[name='replacestr']").val("");
-				if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
+				if(f.patternreplace.value == "-- Optional --") f.patternreplace.value = "";
+				if(f.replacestr.value == "-- Optional --") f.replacestr.value = "";
+				if(f.sourcepath.value == "-- Use Default Path --") f.sourcepath.value = "";
 				return true;
 			}
 			
@@ -181,7 +178,6 @@ if($spprId) $specManager->setProjVariables($spprId);
 			if($SYMB_UID){
 				if($collId){
 					$projectType = $specManager->getProjectType();
-					if($spprId && !$projectType) $projectType = 'local';
 					?>
 					<div id="editdiv" style="display:<?php echo ($spprId||$specProjects?'none':'block'); ?>;position:relative;">
 						<form name="editproj" action="index.php" method="post" onsubmit="return validateProjectForm(this);">
@@ -193,6 +189,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 									<div style="position:absolute;top:10px;right:10px;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Close Editor">
 										<img src="../../images/edit.png" style="border:0px" />
 									</div>
+									<input name="projecttype" type="hidden" value="<?php echo $projectType; ?>" />
 									<?php
 								}
 								else{
@@ -202,7 +199,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<b>Image Mapping Type:</b>
 										</div>
 										<div style="float:left;">
-											<select name="imageuploadtype" id="imageuploadtype" style="width:300px;" onchange="uploadTypeChanged()" <?php echo ($spprId?'DISABLED':'');?>>
+											<select name="projecttype" id="projecttype" style="width:300px;" onchange="uploadTypeChanged()" <?php echo ($spprId?'DISABLED':'');?>>
 												<option value="">----------------------</option>
 												<option value="local">Local Image Mapping</option>
 												<option value="idigbio">iDigBio Media Ingestion Report</option>
@@ -536,7 +533,8 @@ if($spprId) $specManager->setProjVariables($spprId);
 											</div>
 											<div style="float:left;"> 
 												<?php 
-												echo '<input name="sourcepath" type="text" value="'.$specManager->getSourcePathDefault().'" style="width:400px;" />';
+												echo '<input name="sourcepath" type="hidden" value="'.$specManager->getSourcePathDefault().'" />';
+												echo $specManager->getSourcePathDefault();
 												?>
 											</div>
 										</div>
@@ -675,7 +673,7 @@ if($spprId) $specManager->setProjVariables($spprId);
 											<legend><b>Log Files</b></legend>
 											<?php 
 											$logArr = $specManager->getLogListing();
-											$logPath = '../../content/logs/'.$specManager->getProjectType().'/';
+											$logPath = '../../content/logs/'.($projectType == 'local'?'imgProccessing':$projectType).'/';
 											if($logArr){
 												foreach($logArr as $logFile){
 													echo '<div><a href="'.$logPath.$logFile.'" target="_blank">'.$logFile.'</a></div>';
