@@ -528,7 +528,7 @@ class OccurrenceUtilities {
 			$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
 			if($vCoord) $vCoord .= '; ';
 			if(stripos($vCoord,$recMap['verbatimlatitude']) === false && stripos($vCoord,$recMap['verbatimlongitude']) === false){
-				$recMap['verbatimcoordinates'] = $vCoord.$recMap['verbatimlatitude'].', '.$recMap['verbatimlongitude'];
+				$recMap['verbatimcoordinates'] = trim($vCoord.$recMap['verbatimlatitude'].', '.$recMap['verbatimlongitude'],' ,;');
 			}
 		}
 		//Transfer DMS to verbatim coords
