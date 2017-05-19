@@ -364,6 +364,10 @@ class SpecUpload{
 	}
 
 	//Setter and getters
+	public function getUspid(){
+		return $this->uspid;
+	}
+	
 	public function getTitle(){
 		return $this->title;
 	}
@@ -457,6 +461,8 @@ class SpecUpload{
 	protected function outputMsg($str, $indent = 0){
 		if($this->verboseMode == 1){
 			echo $str;
+			ob_flush();
+			flush();
 		}
 		elseif($this->verboseMode == 2){
 			if($this->logFH) fwrite($this->logFH,($indent?str_repeat("\t",$indent):'').strip_tags($str)."\n");

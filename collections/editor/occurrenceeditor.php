@@ -1422,8 +1422,11 @@ else{
 				echo 'Check with your server administrator to check on options for importing larger images. ';
 				echo 'Use the back button to return to previous page and try to upload a smaller image </div>';
 			}
+			elseif(!$collId && !$occId){
+				echo '<h2>ERROR: collection and occurrence identifiers are NULL</h2>';
+			}
 			elseif(!$isEditor){
-				echo '<h2>You are not authorized to add occurrence records</h2>';
+				echo '<h2>ERROR: you are not authorized to add occurrence records</h2>';
 			}
 		}
 		?>

@@ -92,11 +92,6 @@ $isEditor = 0;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
 	$isEditor = 1;
 }
-if($isEditor){
- 	if($action == "Save Primary Key"){
- 		$statusStr = $duManager->savePrimaryKey($dbpk);
- 	}
-}
 $duManager->readUploadParameters();
 
 $isLiveData = false;
@@ -153,7 +148,8 @@ if(array_key_exists("sf",$_POST)){
 		}
 	}
 	if($action == "Save Mapping"){
-		$statusStr = $duManager->saveFieldMap();
+		$statusStr = $duManager->saveFieldMap(array_key_exists('profiletitle',$_POST)?$_POST['profiletitle']:'');
+		if(!$uspid) $uspid = $duManager->getUspid();
 	}
 }
 $duManager->loadFieldMap();
@@ -165,6 +161,9 @@ $duManager->loadFieldMap();
 	<title><?php echo $DEFAULT_TITLE; ?> Specimen Uploader</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<script src="../../js/jquery.js" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script src="../../js/symb/shared.js" type="text/javascript"></script>
 	<script>
 		function verifyFileUploadForm(f){
@@ -292,17 +291,23 @@ $duManager->loadFieldMap();
 		}
 
 		function verifySaveMapping(f){
-			if(f.uspid.value != '' && f.profiletitle.value == ""){
-				alert("You must enter a title to create a new upload profile");
+			if(f.uspid.value == "" && f.profiletitle.value == ""){
+				$("#newProfileNameDiv").show();
+				alert("Enter a profile name and click the Save Map button to create a new Upload Profile");
 				return false;
 			}
 			return true;
 		}
 
 		function pkChanged(selObj){
-			document.getElementById('pkdiv').style.display='block';
-			document.getElementById('mdiv').style.display='none';
-			document.getElementById('uldiv').style.display='none';
+			if(selObj.value){
+				$("#mdiv").show();
+				//$("#uldiv").show();
+			}
+			else{
+				$("#mdiv").hide();
+				//$("#uldiv").show();
+			}
 		}
 	</script>
 </head>
@@ -597,7 +602,7 @@ $duManager->loadFieldMap();
 								<fieldset style="width:95%;">
 									<legend style="font-weight:bold;font-size:120%;"><?php echo $uploadTitle.': Field Mapping';?></legend>
 									<div style="margin:10px;">
-										<b>Source Unique Identifier / Primary Key (required): </b>
+										<b>Source Unique Identifier / Primary Key (<span style="color:red">required</span>): </b>
 										<?php
 										$dbpk = $duManager->getDbpk();
 										$dbpkTitle = 'Core ID';
@@ -660,8 +665,8 @@ $duManager->loadFieldMap();
 											<div style="margin:10px 0px;">
 												<?php 
 												if($uspid) echo '<input type="submit" name="action" value="Reset Field Mapping" />';
-												echo '<input type="submit" name="action" value="Save Mapping" onclick="return verifySaveMapping(this.form)" />';
-												if(!$uspid) echo ' New profile title: <input type="text" name="profiletitle" />';
+												echo '<input type="submit" name="action" value="Save Mapping" onclick="return verifySaveMapping(this.form)" style="margin-left:5px" />';
+												if(!$uspid) echo ' <span id="newProfileNameDiv" style="margin-left:15px;color:orange;display:none">New profile title: <input type="text" name="profiletitle" style="width:300px" /></span>';
 												?>
 												
 											</div>
@@ -769,14 +774,13 @@ $duManager->loadFieldMap();
 								//Primary key field is required and must be mapped 
 								?>
 								<div style="margin:20px;">
-									<b>Source Unique Identifier / Primary Key (required): </b>
+									<b>Source Unique Identifier / Primary Key (<span style="color:red">required</span>): </b>
 									<?php
 									$dbpk = $duManager->getDbpk();
 									$dbpkOptions = $duManager->getDbpkOptions();
 									?>
-									<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged(this);">
+									<select name="dbpk" onchange="pkChanged(this);">
 										<option value="">Select Source Primary Key</option>
-										<option value="">Delete Primary Key</option>
 										<option value="">----------------------------------</option>
 										<?php 
 										foreach($dbpkOptions as $f){
@@ -784,106 +788,99 @@ $duManager->loadFieldMap();
 										}
 										?>
 									</select>
-									<div id="pkdiv" style="margin:5px 0px 0px 20px;display:<?php echo ($dbpk?"none":"block");?>">
-										<input type="submit" name="action" value="Save Primary Key" />
-									</div>
 								</div>
 								<?php 
 							}
-							if(($dbpk && in_array($dbpk,$dbpkOptions)) || $isLiveData || $uploadType == $SKELETAL){
-								?>
-								<div id="mdiv">
-									<?php $duManager->echoFieldMapTable($autoMap,'spec'); ?>
-									<div>
-										* Unverified mappings are displayed in yellow<br/>
-										* To learn more about mapping to Symbiota fields (and Darwin Core): 
-										<div style="margin-left:15px;">
-											<a href="http://symbiota.org/docs/wp-content/uploads/SymbiotaOccurrenceFields.pdf" target="_blank">SymbiotaOccurrenceFields.pdf</a><br/>
-											<a href="http://symbiota.org/docs/symbiota-introduction/loading-specimen-data/" target="_blank">Loading Data into Symbiota</a>
-										</div>
+							?>
+							<div id="mdiv" style="display:<?php echo (!$isLiveData && $uploadType != $SKELETAL?'none':'block'); ?>">
+								<?php $duManager->echoFieldMapTable($autoMap,'spec'); ?>
+								<div>
+									* Unverified mappings are displayed in yellow<br/>
+									* To learn more about mapping to Symbiota fields (and Darwin Core): 
+									<div style="margin-left:15px;">
+										<a href="http://symbiota.org/docs/wp-content/uploads/SymbiotaOccurrenceFields.pdf" target="_blank">SymbiotaOccurrenceFields.pdf</a><br/>
+										<a href="http://symbiota.org/docs/symbiota-introduction/loading-specimen-data/" target="_blank">Loading Data into Symbiota</a>
 									</div>
-									<div style="margin:10px;">
-										<?php 
-										if($uspid){
-											?>
-											<input type="submit" name="action" value="Delete Field Mapping" />
-											<?php 
-										}
-										?>
-										<input type="submit" name="action" value="<?php echo ($uspid?'Save':'Verify') ?> Mapping" />
-										<input type="submit" name="action" value="Automap Fields" />
-									</div>
-									<hr />
-									<div id="uldiv" style="margin-top:30px;">
-										<?php 
-										if($isLiveData || $uploadType == $SKELETAL){
-											?>
-											<div>
-												<input name="matchcatnum" type="checkbox" value="1" checked <?php echo ($uploadType == $SKELETAL?'DISABLED':''); ?> /> 
-												Match on Catalog Number
-											</div>
-											<div>
-												<input name="matchothercatnum" type="checkbox" value="1" /> 
-												Match on Other Catalog Numbers  
-											</div>
-											<ul style="margin-top:2px">
-												<?php 
-												if($uploadType == $SKELETAL){
-													echo '<li>Incoming skeletal data will be appended only if targeted field is empty</li>';
-												}
-												else{
-													echo '<li>'.$recReplaceMsg.'</li>';
-												}
-												?>
-												<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarily on other catalog numbers</li>
-											</ul>
-											<?php 
-										}
-										?>
-										<div style="margin:10px 0px;">
-											<input name="verifyimages" type="checkbox" value="1" /> 
-											Verify image links from associatedMedia field
-										</div>
-										<div style="margin:10px 0px;">
-											Processing Status:
-											<select name="processingstatus">
-												<option value="">Leave as is / Do not set</option>
-												<option value="">--------------------------</option>
-												<?php 
-												foreach($processingList as $ps){
-													echo '<option value="'.$ps.'">'.ucwords($ps).'</option>';
-												}
-												?>
-											</select>  
-										</div>
-										<div style="margin:20px;">
-											<input type="submit" name="action" value="Start Upload" />
-										</div>
-									</div>
+								</div>
+								<div style="margin:10px;">
 									<?php 
-									if($uploadType == $SKELETAL){
+									if($uspid){
 										?>
-										<div style="margin:15px;background-color:lightgreen;">
-											Skeletal Files consist of stub data that is easy to capture in bulk during the imaging process. 
-											This data is used to seed new records to which images are linked. 
-											Skeletal fields typically collected include filed by or current scientific name, country, state/province, and sometimes county, though any supported field can be included. 
-											Skeletal file uploads are similar to regular uploads though differ in several ways.
-											<ul>
-												<li>General file uploads typically consist of full records, while skeletal uploads will almost always be an annotated record with data for only a few selected fields</li>
-												<li>The catalog number field is required for skeletal file uploads since this field is used to find matches on images or existing records</li>
-												<li>In cases where a record already exists, a general file upload will completely replace the existing record with the data in the new record. 
-												On the other hand, a skeletal upload will augment the existing record only with new field data. 
-												Fields are only added if data does not already exist within the target field.</li>
-												<li>If a record DOES NOT already exist, a new record will be created in both cases, but only the skeletal record will be tagged as unprocessed</li>
-											</ul>
-										</div>
+										<input type="submit" name="action" value="Delete Field Mapping" />
 										<?php 
 									}
 									?>
+									<input type="submit" name="action" value="<?php echo ($uspid?'Save':'Verify') ?> Mapping" />
+									<input type="submit" name="action" value="Automap Fields" />
+								</div>
+								<hr />
+								<div id="uldiv" style="margin-top:30px;">
+									<?php 
+									if($isLiveData || $uploadType == $SKELETAL){
+										?>
+										<div>
+											<input name="matchcatnum" type="checkbox" value="1" checked <?php echo ($uploadType == $SKELETAL?'DISABLED':''); ?> /> 
+											Match on Catalog Number
+										</div>
+										<div>
+											<input name="matchothercatnum" type="checkbox" value="1" /> 
+											Match on Other Catalog Numbers  
+										</div>
+										<ul style="margin-top:2px">
+											<?php 
+											if($uploadType == $SKELETAL){
+												echo '<li>Incoming skeletal data will be appended only if targeted field is empty</li>';
+											}
+											else{
+												echo '<li>'.$recReplaceMsg.'</li>';
+											}
+											?>
+											<li>If both checkboxes are selected, matches will first be made on catalog numbers and secondarily on other catalog numbers</li>
+										</ul>
+										<?php 
+									}
+									?>
+									<div style="margin:10px 0px;">
+										<input name="verifyimages" type="checkbox" value="1" /> 
+										Verify image links from associatedMedia field
+									</div>
+									<div style="margin:10px 0px;">
+										Processing Status:
+										<select name="processingstatus">
+											<option value="">Leave as is / Do not set</option>
+											<option value="">--------------------------</option>
+											<?php 
+											foreach($processingList as $ps){
+												echo '<option value="'.$ps.'">'.ucwords($ps).'</option>';
+											}
+											?>
+										</select>  
+									</div>
+									<div style="margin:20px;">
+										<input type="submit" name="action" value="Start Upload" />
+									</div>
 								</div>
 								<?php 
-							} 
-							?>
+								if($uploadType == $SKELETAL){
+									?>
+									<div style="margin:15px;background-color:lightgreen;">
+										Skeletal Files consist of stub data that is easy to capture in bulk during the imaging process. 
+										This data is used to seed new records to which images are linked. 
+										Skeletal fields typically collected include filed by or current scientific name, country, state/province, and sometimes county, though any supported field can be included. 
+										Skeletal file uploads are similar to regular uploads though differ in several ways.
+										<ul>
+											<li>General file uploads typically consist of full records, while skeletal uploads will almost always be an annotated record with data for only a few selected fields</li>
+											<li>The catalog number field is required for skeletal file uploads since this field is used to find matches on images or existing records</li>
+											<li>In cases where a record already exists, a general file upload will completely replace the existing record with the data in the new record. 
+											On the other hand, a skeletal upload will augment the existing record only with new field data. 
+											Fields are only added if data does not already exist within the target field.</li>
+											<li>If a record DOES NOT already exist, a new record will be created in both cases, but only the skeletal record will be tagged as unprocessed</li>
+										</ul>
+									</div>
+									<?php 
+								}
+								?>
+							</div>
 						</fieldset>
 						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 						<input type="hidden" name="collid" value="<?php echo $collid;?>" />

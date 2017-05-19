@@ -339,35 +339,22 @@ class SpecUploadBase extends SpecUpload{
 		*/
 	}
 
-	public function savePrimaryKey($dbpk){
-		if($this->uspid){
-			$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") AND symbspecfield = 'dbpk'";
-			$this->conn->query($sql);
-			if($dbpk){
-				$sql2 = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ".
-					"VALUES (".$this->uspid.",'dbpk','".$dbpk."')";
-				$this->conn->query($sql2);
-			}
-		}
-	}
-
 	public function saveFieldMap($newTitle = ''){
 		$statusStr = '';
 		if(!$this->uspid && $newTitle){
 			$this->uspid = $this->createUploadProfile(array('uploadtype'=>$this->uploadType,'title'=>$newTitle));
+			$this->readUploadParameters();
 		}
 		if($this->uspid){
 			$this->deleteFieldMap();
 			$sqlInsert = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
 			$sqlValues = "VALUES (".$this->uspid;
 			foreach($this->fieldMap as $k => $v){
-				if($k != "dbpk"){
-					$sourceField = $v["field"];
-					$sql = $sqlInsert.$sqlValues.",'".$k."','".$sourceField."')";
-					//echo "<div>".$sql."</div>";
-					if(!$this->conn->query($sql)){
-						$statusStr = 'ERROR saving field map: '.$this->conn->error;
-					}
+				$sourceField = $v["field"];
+				$sql = $sqlInsert.$sqlValues.",'".$k."','".$sourceField."')";
+				//echo "<div>".$sql."</div>";
+				if(!$this->conn->query($sql)){
+					$statusStr = 'ERROR saving field map: '.$this->conn->error;
 				}
 			}
 			//Save identification field map
@@ -397,7 +384,7 @@ class SpecUploadBase extends SpecUpload{
 	public function deleteFieldMap(){
 		$statusStr = '';
 		if($this->uspid){
-			$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") AND symbspecfield <> 'dbpk' ";
+			$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") ";
 			//echo "<div>$sql</div>";
 			if(!$this->conn->query($sql)){
 				$statusStr = 'ERROR deleting field map: '.$this->conn->error;
@@ -927,8 +914,6 @@ class SpecUploadBase extends SpecUpload{
 		if($r = $rs->fetch_object()){
 			if($r->cnt){
 				$this->outputMsg('<li>Transferring Determination History...</li>');
-				ob_flush();
-				flush();
 	
 				//Update occid for determinations of occurrence records already in portal 
 				$sql = 'UPDATE uploaddetermtemp ud INNER JOIN uploadspectemp u ON ud.collid = u.collid AND ud.dbpk = u.dbpk '.
@@ -975,43 +960,12 @@ class SpecUploadBase extends SpecUpload{
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
 			$this->outputMsg('<li>Preparing associatedMedia for image transfer...</li>');
-			ob_flush();
-			flush();
 			while($r = $rs->fetch_object()){
-				$mediaFile = trim(str_replace(array(';','|'),',',$r->associatedmedia),', ');
-				$mediaArr = explode(',',$mediaFile);
+				$mediaArr = explode(',',trim(str_replace(array(';','|'),',',$r->associatedmedia),', '));
 				foreach($mediaArr as $mediaUrl){
 					$mediaUrl = trim($mediaUrl);
-					if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
-						if(strtolower(substr($mediaUrl,-3)) == 'dng' || strtolower(substr($mediaUrl,-3)) == 'tif'){
-							continue;
-						}
-						if($this->verifyImageUrls){
-							if(!$this->urlExists($mediaUrl)){
-								$this->outputMsg('<li style="margin-left:20px;">Bad url: '.$mediaUrl.'</li>');
-								ob_flush();
-								flush();
-								continue;
-							}
-							if(@!exif_imagetype($mediaUrl) || exif_imagetype($mediaUrl) > 4){
-								$this->outputMsg('<li style="margin-left:20px;">FAIL: not a web-ready image (JPG, GIF, PNG): <a href="'.$mediaUrl.'" target="_blank">'.$mediaUrl.'</a></li>');
-								ob_flush();
-								flush();
-								continue;
-							}
-						}
-						$imgFormat = 'image/jpeg';
-						if(@exif_imagetype($mediaUrl) == 1) $imgFormat = 'image/gif';
-						if(@exif_imagetype($mediaUrl) == 3) $imgFormat = 'image/png';
-						$this->imageTransferCount++;
-						if($this->imageTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:20px;">Image count: '.$this->imageTransferCount.'</li>');
-						$sqlInsert = 'INSERT INTO uploadimagetemp(occid,tid,originalurl,url,format,collid) '.
-							'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","empty","'.$imgFormat.'",'.$this->collId.')';
-						if(!$this->conn->query($sqlInsert)){
-							$this->outputMsg('<li style="margin-left:20px;">ERROR loading image into uploadimagetemp: '.$this->conn->error.'</li>');
-							//$this->outputMsg('<li style="margin-left:10px;">SQL: '.$sqlInsert.'</li>');
-						}
-					}
+					if(strpos($mediaUrl,'"')) continue;
+					$this->loadImageRecord(array('occid'=>$r->occid,'tid'=>($r->tidinterpreted?$r->tidinterpreted:''),'originalurl'=>$mediaUrl,'url'=>'empty'));
 				}
 			}
 		}
@@ -1135,13 +1089,11 @@ class SpecUploadBase extends SpecUpload{
 					'FROM uploadimagetemp '.
 					'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
 				if($this->conn->query($sql)){
-					$this->outputMsg('<li style="margin-left:10px;">'.$this->imageTransferCount.' images transferred)</li> ');
+					$this->outputMsg('<li style="margin-left:10px;">'.$this->imageTransferCount.' images transferred</li> ');
 				}
 				else{
 					$this->outputMsg('<li>FAILED! ERROR: '.$this->conn->error.'</li> ');
 				}
-				ob_flush();
-				flush();
 			}
 		}
 		$rs->free();
@@ -1393,63 +1345,63 @@ class SpecUploadBase extends SpecUpload{
 
 	protected function loadImageRecord($recMap){
 		if($recMap){
-			//Import record only if required fields have data 
-			if(isset($recMap['dbpk'])){
-				//Test images
-				$testUrl = '';
-				if(isset($recMap['originalurl']) && $recMap['originalurl']){
-					$testUrl = $recMap['originalurl'];
+			//Test images
+			$testUrl = '';
+			if(isset($recMap['originalurl']) && $recMap['originalurl']){
+				$testUrl = $recMap['originalurl'];
+			}
+			elseif(isset($recMap['url']) && $recMap['url']){
+				$testUrl = $recMap['url'];
+			}
+			else{
+				//Abort, no images avaialble
+				return false;
+			}
+			if(strtolower(substr($testUrl,-4)) == '.dng' || strtolower(substr($testUrl,-4)) == '.tif'){
+				return false;
+			}
+			$skipFormats = array('image/tiff','image/dng','image/bmp','text/html','application/xml','application/pdf','tif','tiff','dng','html','pdf');
+			$allowedFormats = array('image/jpeg','image/gif','image/png');
+			$imgFormat = '';
+			if(isset($recMap['format']) && $recMap['format']){
+				$imgFormat = strtolower($recMap['format']);
+				if(in_array($imgFormat, $skipFormats)) return false;
+			}
+			else{
+				$urlTail = strtolower(substr($testUrl,-4));
+				if($urlTail == '.gif') $imgFormat = 'image/gif';
+				if($urlTail == '.png') $imgFormat = 'image/png';
+				if($urlTail == '.jpg') $imgFormat = 'image/jpeg';
+				elseif($urlTail == 'jpeg') $imgFormat = 'image/jpeg';
+				if(!$imgFormat){
+					$imgFormat = $this->getMimeType($testUrl);
+					if(!in_array(strtolower($imgFormat), $allowedFormats)) return false;
 				}
-				elseif(isset($recMap['url']) && $recMap['url']){
-					$testUrl = $recMap['url'];
-				}
-				else{
-					//Abort, no images avaialble
+			}
+			if($imgFormat) $recMap['format'] = $imgFormat;
+			
+			if($this->verifyImageUrls){
+				if(!$this->urlExists($testUrl)){
+					$this->outputMsg('<li style="margin-left:20px;">Bad url: '.$testUrl.'</li>');
 					return false;
 				}
-				if(strtolower(substr($testUrl,-3)) == 'dng' || strtolower(substr($testUrl,-3)) == 'tif'){
-					return false;
-				}
-				$skipFormats = array('image/tiff','image/dng','image/bmp','text/html','application/xml','application/pdf','tif','tiff','dng','html','pdf');
-				$imgFormat = '';
-				if(isset($recMap['format']) && $recMap['format']){
-					$imgFormat = strtolower($recMap['format']);
-					if(in_array($imgFormat, $skipFormats)) return false;
-				}
-				else{
-					if(strtolower(substr($testUrl,-3)) == 'gif') $imgFormat = 'image/gif';
-					elseif(@exif_imagetype($mediaUrl) == 1) $imgFormat = 'image/gif';
-					if(strtolower(substr($testUrl,-3)) == 'png') $imgFormat = 'image/png';
-					elseif(@exif_imagetype($mediaUrl) == 3) $imgFormat = 'image/png';
-					if(strtolower(substr($testUrl,-3)) == 'jpg') $imgFormat = 'image/jpeg';
-					elseif(strtolower(substr($testUrl,-4)) == 'jpeg') $imgFormat = 'image/jpeg';
-					elseif(@exif_imagetype($mediaUrl) == 2) $imgFormat = 'image/jpeg';
-				}
-				if($imgFormat) $recMap['format'] = $imgFormat;
-				
-				if($this->verifyImageUrls){
-					if(@!exif_imagetype($testUrl) || exif_imagetype($testUrl) > 4){
-						$this->outputMsg('<li style="margin-left:10px;">FAIL: not a web-ready image (JPG, GIF, PNG): <a href="'.$testUrl.'" target="_blank">'.$testUrl.'</a></li>');
-						return false;
-					}
-				}
-				if(!isset($recMap['url'])) $recMap['url'] = 'empty';
+			}
+			if(!isset($recMap['url'])) $recMap['url'] = 'empty';
 
-				$sqlFragments = $this->getSqlFragments($recMap,$this->imageFieldMap);
-				if($sqlFragments){
-					$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
-						'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
-					if($this->conn->query($sql)){
-						$this->imageTransferCount++;
-						if($this->imageTransferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Success count: '.$this->imageTransferCount.'</li>');
-						ob_flush();
-						flush();
-					}
-					else{
-						$this->outputMsg("<li>FAILED adding image record #".$this->imageTransferCount."</li>");
-						$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
-						$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
-					}
+			$sqlFragments = $this->getSqlFragments($recMap,$this->imageFieldMap);
+			if($sqlFragments){
+				$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
+					'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
+				if($this->conn->query($sql)){
+					$this->imageTransferCount++;
+					$repInt = 1000;
+					if($this->verifyImageUrls) $repInt = 100;
+					if($this->imageTransferCount%$repInt == 0) $this->outputMsg('<li style="margin-left:10px;">Success count: '.$this->imageTransferCount.'</li>');
+				}
+				else{
+					$this->outputMsg("<li>FAILED adding image record #".$this->imageTransferCount."</li>");
+					$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
+					$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
 				}
 			}
 		}
@@ -1653,32 +1605,44 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	//Misc functions
-	protected function urlExists($url) {
-		$exists = false;
+	private function getMimeType($url){
 		if(!strstr($url, "http")){
 	        $url = "http://".$url;
 	    }
-	    if(file_exists($url)){
+	    $handle = curl_init($url);
+	    curl_setopt($handle, CURLOPT_HEADER, true);
+		curl_setopt($handle, CURLOPT_NOBODY, true);
+	    curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true );
+		curl_exec($handle);
+	    
+		return curl_getinfo($handle, CURLINFO_CONTENT_TYPE);
+	}
+	
+	protected function urlExists($url) {
+		$exists = false;
+		if(!strstr($url, "http")){
+			$url = "http://".$url;
+		}
+    	if(function_exists('curl_init')){
+	    	// Version 4.x supported
+		    $handle   = curl_init($url);
+			if (false === $handle){
+				$exists = false;
+		    }
+		    curl_setopt($handle, CURLOPT_HEADER, false);
+		    curl_setopt($handle, CURLOPT_FAILONERROR, true);
+		    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
+		    curl_setopt($handle, CURLOPT_NOBODY, true);
+		    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
+		    $exists = curl_exec($handle);
+		    curl_close($handle);
+		}
+		
+		if(!$exists && file_exists($url)){
 			$exists = true;
-	    }
+		}
 
-	    if(!$exists){
-	    	if(function_exists('curl_init')){
-		    	// Version 4.x supported
-			    $handle   = curl_init($url);
-			    if (false === $handle){
-					$exists = false;
-			    }
-			    curl_setopt($handle, CURLOPT_HEADER, false);
-			    curl_setopt($handle, CURLOPT_FAILONERROR, true);  // this works
-			    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
-			    curl_setopt($handle, CURLOPT_NOBODY, true);
-			    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
-			    $exists = curl_exec($handle);
-			    curl_close($handle);
-	    	}
-	    }
-	     
 		//One more  check
 	    if(!$exists){
 	    	$exists = (@fclose(@fopen($url,"r")));

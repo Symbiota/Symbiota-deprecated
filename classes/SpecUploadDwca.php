@@ -123,7 +123,14 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 		else{
 			$err = $zip->getStatusString();
-			if(!$err) $err = 'target path is likely not a valid zip file';
+			if(!$err){
+				if($this->uploadType == $this->IPTUPLOAD){
+					$err = 'target path does not appear to be a valid IPT instance';
+				}
+				else{
+					$err = 'Upload file or target path does not lead to a valid zip file';
+				}
+			}
 			$this->outputMsg('<li>ERROR unpacking archive file: '.$err.'</li>');
 			$this->errorStr = 'ERROR unpacking archive file: '.$err;
 			$status = false;
