@@ -99,7 +99,7 @@ if($duManager->getCollInfo("managementtype") == 'Live Data') $isLiveData = true;
 
 //Grab field mapping, if mapping form was submitted
 if(array_key_exists("sf",$_POST)){
-	if($action == "Delete Field Mapping" || $action == "Reset Field Mapping"){
+	if($action == "Reset Field Mapping"){
 		$statusStr = $duManager->deleteFieldMap();
 	}
 	else{
@@ -791,8 +791,12 @@ $duManager->loadFieldMap();
 								</div>
 								<?php 
 							}
+							$displayStr = 'block';
+							if(!$isLiveData) $displayStr = 'none';
+							if($uploadType == $SKELETAL) $displayStr = 'block';
+							if($dbpk) $displayStr = 'block';
 							?>
-							<div id="mdiv" style="display:<?php echo (!$isLiveData && $uploadType != $SKELETAL?'none':'block'); ?>">
+							<div id="mdiv" style="display:<?php echo $displayStr; ?>">
 								<?php $duManager->echoFieldMapTable($autoMap,'spec'); ?>
 								<div>
 									* Unverified mappings are displayed in yellow<br/>
@@ -806,12 +810,16 @@ $duManager->loadFieldMap();
 									<?php 
 									if($uspid){
 										?>
-										<input type="submit" name="action" value="Delete Field Mapping" />
+										<input type="submit" name="action" value="Reset Field Mapping" />
 										<?php 
 									}
 									?>
-									<input type="submit" name="action" value="<?php echo ($uspid?'Save':'Verify') ?> Mapping" />
 									<input type="submit" name="action" value="Automap Fields" />
+									<input type="submit" name="action" value="Verify Mapping" />
+									<input type="submit" name="action" value="Save Mapping" onclick="return verifySaveMapping(this.form)" />
+									<span id="newProfileNameDiv" style="margin-left:15px;color:red;display:none">
+										New profile title: <input type="text" name="profiletitle" style="width:300px" />
+									</span>
 								</div>
 								<hr />
 								<div id="uldiv" style="margin-top:30px;">
