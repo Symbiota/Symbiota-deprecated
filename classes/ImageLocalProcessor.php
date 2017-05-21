@@ -1930,7 +1930,7 @@ class ImageLocalProcessor {
 	}
 
 	protected function logOrEcho($str,$indent = 0){
-		if($this->logMode > 2){
+		if($this->logMode > 1){
 			if($this->logFH){
 				if($indent) $str = "\t".$str;
 				fwrite($this->logFH,$str."\n");
