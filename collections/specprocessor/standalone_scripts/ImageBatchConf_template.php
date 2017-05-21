@@ -1,11 +1,12 @@
 <?php 
 //Variables needing security
 
-//Server root is generally needed since scripts may be run from outside of folder (including crontab runs)
-//This is the path base folder of portal (e.g. trunk)
+//Server root is needed if scripts are to be run from outside current directory (folder)
+//Leave empty if scripts are triggered from within Symbiota strcuture 
+//This is the path to the base folder of the Symbiota portal 
 $serverRoot = '';
 
-//Base folder containing herbarium folder ; read access needed
+//Path to folder containing source images; read access needed at minimum, write access to remove processed images
 $sourcePathBase = '';
 //Folder where images are to be placed; write access needed
 $targetPathBase = '';
@@ -14,16 +15,17 @@ $targetPathBase = '';
 //Only needed if scripts are run on an exteral server
 $imgUrlBase = '';
 
-//Title (e.g. CNALH) and Path to where log files will be placed
+//Log title and Path to where log files will be placed
 $logTitle = '';
 $logProcessorPath = $sourcePathBase.'/logs';
-//0 = silent, 1 = html, 2 = log file
+//0 = silent, 1 = html, 2 = log file, 3 = html and log file
 $logMode = 2;
 
-//If record matching PK is not found, should a new blank record be created?
+//If record matching record identifier is not found, should a new blank record be created?
 $createNewRec = true;
 
 //Weather to copyover images with matching names (includes path) or rename new image and keep both
+// 0 = skip import, 1 = rename image and save both, 2 = replace image
 $imgExists = 2;
 
 $webPixWidth = 1400;
@@ -31,10 +33,6 @@ $tnPixWidth = 200;
 $lgPixWidth = 3600;
 $webFileSizeLimit = 300000;
 $lgFileSizeLimit = 3000000;
-
-//Whether to use ImageMagick for creating thumbnails and web images. ImageMagick must be installed on server.
-// 0 = use GD library (default), 1 = use ImageMagick
-$useImageMagickBatch = 0;
 
 //Value between 0 and 100
 $jpgQuality = 80;

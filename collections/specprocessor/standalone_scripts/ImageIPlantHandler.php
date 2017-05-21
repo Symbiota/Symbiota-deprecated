@@ -1,6 +1,6 @@
 <?php
 require_once('../../../config/symbini.php');
-require_once($serverRoot.'/classes/ImageProcessor.php');
+require_once($SERVER_ROOT.'/classes/ImageProcessor.php');
 
 $imageProcessor = new ImageProcessor();
 

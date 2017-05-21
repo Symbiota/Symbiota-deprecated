@@ -1,7 +1,9 @@
 <?php
-include_once($SERVER_ROOT.'/config/dbconnection.php');
-include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
-include_once($SERVER_ROOT.'/classes/UuidFactory.php');
+if(isset($SERVER_ROOT) && $SERVER_ROOT){
+	include_once($SERVER_ROOT.'/config/dbconnection.php');
+	include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
+	include_once($SERVER_ROOT.'/classes/UuidFactory.php');
+}
 
 class ImageLocalProcessor {
 
@@ -1936,8 +1938,8 @@ class ImageLocalProcessor {
 		}
 		if($this->logMode == 1 || $this->logMode == 3){
 			echo '<li '.($indent?'style="margin-left:'.($indent*15).'px"':'').'>'.$str."</li>\n";
-			ob_flush();
-			flush();
+			@ob_flush();
+			@flush();
 		}
 	}
 }
