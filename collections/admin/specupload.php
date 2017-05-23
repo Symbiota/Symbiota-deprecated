@@ -451,7 +451,7 @@ $duManager->loadFieldMap();
 							echo '<div>Identification histories pending transfer: '.$reportArr['ident'].'</div>';
 						}
 						if(isset($reportArr['image'])){
-							echo '<div>Images pending transfer: '.$reportArr['image'].'</div>';
+							echo '<div>Records with images: '.$reportArr['image'].'</div>';
 						}
 						
 						?>
