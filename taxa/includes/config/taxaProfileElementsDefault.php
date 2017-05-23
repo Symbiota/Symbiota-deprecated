@@ -257,7 +257,7 @@ ob_start();
         echo "<legend>";
         echo $LANG['SPECIES_WITHIN'].' <b>'.$taxonManager->getClName().'</b>&nbsp;&nbsp;';
         if($taxonManager->getParentClid()){
-            echo '<a href="index.php?taxon=$taxonValue&cl='.$taxonManager->getParentClid().'&taxauthid='.$taxAuthId.'" title="'.$LANG['GO_TO'].' '.$taxonManager->getParentName().' '.$LANG['CHECKLIST'].'"><img id="parenttaxonicon" src="../images/toparent.png" title="Go to Parent" /></a>';
+            echo '<a href="index.php?taxon='.$taxonValue.'&cl='.$taxonManager->getParentClid().'&taxauthid='.$taxAuthId.'" title="'.$LANG['GO_TO'].' '.$taxonManager->getParentName().' '.$LANG['CHECKLIST'].'"><img id="parenttaxonicon" src="../images/toparent.png" title="Go to Parent" /></a>';
         }
         echo "</legend>";
     }
