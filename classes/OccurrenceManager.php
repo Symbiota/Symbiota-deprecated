@@ -1,6 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
 class OccurrenceManager{
 
@@ -36,7 +37,10 @@ class OccurrenceManager{
  	}
 
 	public function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
+ 		if(!($this->conn === false)){
+ 			$this->conn->close();
+ 			$this->conn = null;
+ 		}
 	}
 
 	protected function getConnection($conType = "readonly"){
@@ -337,17 +341,29 @@ class OccurrenceManager{
 					$collectorArr[] = 'Collector IS NULL';
 				}
 				else{
-					//$tempArr[] = '(o.recordedBy LIKE "%'.trim($value).'%")';
 					$tempInnerArr = array();
 					$collValueArr = explode(" ",trim($collectorArr[0]));
 					foreach($collValueArr as $collV){
-						$tempInnerArr[] = '(MATCH(f.recordedby) AGAINST("'.$collV.'")) ';
+						if(strlen($collV) < 4 || strtolower($collV) == 'best'){
+							//Need to avoid FULLTEXT stopwords interfering with return
+							$tempInnerArr[] = '(o.recordedBy LIKE "%'.$collV.'%")';
+						}
+						else{
+							$tempInnerArr[] = '(MATCH(f.recordedby) AGAINST("'.$collV.'")) ';
+						}
 					}
 					$tempArr[] = implode(' AND ', $tempInnerArr);
 				}
 			}
 			elseif(count($collectorArr) > 1){
-				$tempArr[] = '(MATCH(f.recordedby) AGAINST("'.implode(' ',$collectorArr).'")) ';
+				$collStr = current($collectorArr);
+				if(strlen($collStr) < 4 || strtolower($collStr) == 'best'){
+					//Need to avoid FULLTEXT stopwords interfering with return
+					$tempInnerArr[] = '(o.recordedBy LIKE "%'.$collStr.'%")';
+				}
+				else{
+					$tempArr[] = '(MATCH(f.recordedby) AGAINST("'.$collStr.'")) ';
+				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
 			$this->localSearchArr[] = implode(', ',$collectorArr);
@@ -474,19 +490,14 @@ class OccurrenceManager{
 		}
 		if(array_key_exists("targetclid",$this->searchTermsArr)){
 			$clid = $this->searchTermsArr["targetclid"];
-			$clSql = "";
-			if($clid){
-				$sql = 'SELECT dynamicsql, name FROM fmchecklists WHERE (clid = '.$clid.')';
-				$result = $this->conn->query($sql);
-				if($row = $result->fetch_object()){
-					$clSql = $row->dynamicsql;
-					$this->clName = $row->name;
-				}
-				$result->free();
-				if($clSql){
-					$sqlWhere .= "AND (".$clSql.") ";
-					$this->localSearchArr[] = "SQL: ".$clSql;
-				}
+			if(is_numeric($clid)){
+				$voucherManager = new ChecklistVoucherAdmin($this->conn);
+				$voucherManager->setClid($clid);
+				$voucherManager->setCollectionVariables();
+				$this->clName = $voucherManager->getClName();
+				$sqlWhere .= 'AND ('.$voucherManager->getSqlFrag().') '.
+					'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid = '.$clid.')) ';
+				$this->localSearchArr[] = $voucherManager->getQueryVariableStr();
 			}
 		}
 		$retStr = '';
@@ -495,13 +506,13 @@ class OccurrenceManager{
 		}
 		else{
 			//Make the sql valid, but return nothing
-			$retStr = 'WHERE o.collid = -1 ';
+			$retStr = 'WHERE o.occid IS NULL ';
 		}
 		//echo $retStr; exit;
 		return $retStr;
 	}
-
-	private function formatDate($inDate){
+	
+    protected function formatDate($inDate){
 		$retDate = OccurrenceUtilities::formatDate($inDate);
 		return $retDate;
 	}
@@ -645,14 +656,14 @@ class OccurrenceManager{
 	}
 
 	public function outputFullCollArr($occArr){
-		global $DEFAULTCATID;
+		global $DEFAULTCATID, $LANG;
 		$collCnt = 0;
 		echo '<div style="position:relative">';
 		if(isset($occArr['cat'])){
 			$categoryArr = $occArr['cat'];
 			?>
 			<div style="float:right;margin-top:20px;">
-				<input type="submit" class="searchcollnextbtn" value="" title="" />
+				<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>"  />
 			</div>
 			<table style="float:left;width:80%;">
 				<?php
@@ -790,14 +801,14 @@ class OccurrenceManager{
 			if(!isset($occArr['cat'])){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*5; ?>px;right:0px;">
-					<input type="submit" class="searchcollnextbtn" value="" title="" />
+					<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
 				</div>
 				<?php
 			}
 			if(count($collArr) > 40){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*15; ?>px;right:0px;">
-					<input type="submit" class="searchcollnextbtn" value="" title="" />
+					<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
 				</div>
 				<?php
 			}
@@ -1070,6 +1081,16 @@ class OccurrenceManager{
 		if(array_key_exists("state",$_REQUEST)){
 			$state = $this->conn->real_escape_string($this->cleanSearchQuotes($_REQUEST["state"]));
 			if($state){
+				if(strlen($state) == 2 && (!isset($this->searchTermsArr["country"]) || stripos($this->searchTermsArr["country"],'USA') !== false)){
+					$sql = 'SELECT s.statename, c.countryname '.
+						'FROM lkupstateprovince s INNER JOIN lkupcountry c ON s.countryid = c.countryid '.
+						'WHERE c.countryname IN("USA","United States") AND (s.abbrev = "'.$state.'")';
+					$rs = $this->conn->query($sql);
+					if($r = $rs->fetch_object()){
+						$state = $r->statename;
+					}
+					$rs->free();
+				}
 				$str = str_replace(",",";",$state);
 				$searchArr[] = "state:".$str;
 				$this->searchTermsArr["state"] = $str;

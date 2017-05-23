@@ -429,18 +429,16 @@ class OccurrenceIndividualManager extends Manager{
 		while($r = $rs->fetch_object()){
 			$editor = $r->externaleditor;
 			if($r->username) $editor .= ' ('.$r->username.')';
-			$ts = $r->initialtimestamp;
-			$retArr[$ts]['editor'] = $editor;
-			$retArr[$ts]['source'] = $r->externalsource;
-			$retArr[$ts]['reviewstatus'] = $r->reviewstatus;
-			$retArr[$ts]['appliedstatus'] = $r->appliedstatus;
-
+			$retArr[$r->orid][$r->appliedstatus]['editor'] = $editor;
+			$retArr[$r->orid][$r->appliedstatus]['source'] = $r->externalsource;
+			$retArr[$r->orid][$r->appliedstatus]['reviewstatus'] = $r->reviewstatus;
+			$retArr[$r->orid][$r->appliedstatus]['ts'] = $r->initialtimestamp;
+				
 			$oldValues = json_decode($r->oldvalues,true);
 			$newValues = json_decode($r->newvalues,true);
 			foreach($oldValues as $fieldName => $value){
-				$retArr[$ts]['edits'][$r->orid]['fieldname'] = $fieldName;
-				$retArr[$ts]['edits'][$r->orid]['old'] = $value;
-				$retArr[$ts]['edits'][$r->orid]['new'] = (isset($newValues[$fieldName])?$newValues[$fieldName]:'ERROR');
+				$retArr[$r->orid][$r->appliedstatus]['edits'][$fieldName]['old'] = $value;
+				$retArr[$r->orid][$r->appliedstatus]['edits'][$fieldName]['new'] = (isset($newValues[$fieldName])?$newValues[$fieldName]:'ERROR');
 			}
 		}
 		$rs->free();

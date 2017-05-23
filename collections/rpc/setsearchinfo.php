@@ -3,13 +3,14 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 
-$stArrCollJson = $_REQUEST["jsoncollstarr"];
-$stArrSearchJson = $_REQUEST["starr"];
+$stArrCollJson = isset($_REQUEST["jsoncollstarr"])?$_REQUEST["jsoncollstarr"]:'';
+$stArrSearchJson = isset($_REQUEST["starr"])?$_REQUEST["starr"]:'';
 $targetTid = $_REQUEST["targettid"];
 
 $stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 $collStArr = json_decode($stArrCollJson, true);
 $searchStArr = json_decode($stArrSearchJson, true);
+$stArr = array();
 if($collStArr && $searchStArr) $stArr = array_merge($searchStArr,$collStArr);
 if(!$collStArr && $searchStArr) $stArr = $searchStArr;
 if($collStArr && !$searchStArr) $stArr = $collStArr;
@@ -53,5 +54,5 @@ $recordListHtml .= '</div></div>';
 $recordListHtml .= '<div style="clear:both;"></div>';
 
 //output the response
-echo json_encode($recordListHtml);
+echo $recordListHtml;
 ?>

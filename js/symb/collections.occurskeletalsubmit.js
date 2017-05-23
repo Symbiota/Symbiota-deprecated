@@ -83,7 +83,7 @@ function verifySciName(){
 			}
 		}
 		else{
-			alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
+            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor.");
 		}
 	});
 }
@@ -128,10 +128,20 @@ function submitDefaultForm(f){
 	}
 
 	if(continueSubmit && $( "#fcatalognumber" ).val() != ""){
+		/*
+		url = 'rpc/occurAddData.php?sciname='+$( "#fsciname" ).val()+'&scientificnameauthorship='+$( "#fscientificnameauthorship" ).val()+'&family='+$( "#ffamily" ).val()+'&localitysecurity='+($( "#flocalitysecurity" ).prop('checked')?"1":"0");
+		url = url + '&country='+$( "#fcountry" ).val()+'&stateprovince='+$( "#fstateprovince" ).val()+'&county='+$( "#fcounty" ).val();
+		url = url + '&processingstatus='+$( "#fprocessingstatus" ).val()+'&recordedby='+$( "#frecordedby" ).val()+'&recordnumber='+$( "#frecordnumber" ).val(); 
+		url = url + '&eventdate='+$( "#feventdate" ).val()+'&language='+$( "#flanguage" ).val()+'&othercatalognumbers='+$( "#fothercatalognumbers" ).val();
+		url = url + '&catalognumber='+$( "#fcatalognumber" ).val()+'&collid='+$( "#fcollid" ).val()+'&addaction='+$( "input[name=addaction]:checked" ).val();
+		alert(url);
+		*/
+
 		//Add new occurrence 
 		$.ajax({
 			type: "POST",
-			url: "rpc/occuradd.php",
+			url: "rpc/occurAddData.php",
+			dataType: "json",
 			data: { 
 				sciname: $( "#fsciname" ).val(), 
 				scientificnameauthorship: $( "#fscientificnameauthorship" ).val(), 
@@ -147,27 +157,34 @@ function submitDefaultForm(f){
 				language: $( "#flanguage" ).val(), 
 				othercatalognumbers: $( "#fothercatalognumbers" ).val(),
 				catalognumber: $( "#fcatalognumber" ).val(),
-				collid: $( "#fcollid" ).val()
+				collid: $( "#fcollid" ).val(),
+				addaction: $( "input[name=addaction]:checked" ).val()
 			}
-		}).done(function( retStr ) {
-			if(isNumeric(retStr)){
-				var newDiv = createOccurDiv($( "#fcatalognumber" ).val(), retStr);
+		}).done(function( retObj ) {
+			if(retObj.status == "true"){
+				var newDiv = createOccurDiv($( "#fcatalognumber" ).val(), retObj.occid, retObj.action);
 
 				var listElem = document.getElementById("occurlistdiv");
-				//listElem.appendChild(newDiv);
 				listElem.insertBefore(newDiv,listElem.childNodes[0]);
 
 				incrementCount();
 				catalognumber: $( "#fcatalognumber" ).val("");
 				othercatalognumbers: $( "#fothercatalognumbers" ).val("");
 			}
-			else if(retStr.substring(0,6) == "dupcat"){
-				if(confirm("Another record exists with the same catalog number, which is not allowed. Do you want to view the other record(s)?")){
-					openEditPopup(retStr.substring(7));
-				}
-			}
 			else{
-				alert(retStr);
+				if(retObj.error){
+					if(retObj.error == 'dupeCatalogNumber'){
+						if(confirm("Another record exists with the same catalog number, which is set as not allowed within options. Do you want to view the other record(s)?")){
+							openEditPopup(retObj.occid);
+						}
+					}
+					else{
+						alert(retObj.error);
+					}
+				}
+				else{
+					alert('Failed: unknown error');
+				}
 			}
 		});
 	}
@@ -176,7 +193,7 @@ function submitDefaultForm(f){
 	return false;
 }
 
-function createOccurDiv(catalogNumber, occid){
+function createOccurDiv(catalogNumber, occid, action){
 
 	var newAnchor = document.createElement('a');
 	newAnchor.setAttribute("id", "a-"+occid);
@@ -199,6 +216,12 @@ function createOccurDiv(catalogNumber, occid){
 	newDiv.setAttribute("id", "o-"+occid);
 	newDiv.appendChild(newAnchor);
 	newDiv.appendChild(newAnchor2);
+	if(action == "update"){
+		var newSpan = document.createElement("span");
+		var spanText = document.createTextNode(" (update of existing record)");
+		newSpan.appendChild(spanText);
+		newDiv.appendChild(newSpan);
+	}
 
 	return newDiv;
 }

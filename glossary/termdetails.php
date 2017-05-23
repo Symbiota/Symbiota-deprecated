@@ -1,37 +1,32 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/GlossaryManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/GlossaryManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
+
+if(!$SYMB_UID) header('Location: ../profile/index.php?refurl='.$CLIENT_ROOT.'/glossary/termdetails.php?'.$_SERVER['QUERY_STRING']);
 
 $glossId = array_key_exists('glossid',$_REQUEST)?$_REQUEST['glossid']:0;
-$glossgrpId = array_key_exists('glossgrpid',$_REQUEST)?$_REQUEST['glossgrpid']:0;
 $glimgId = array_key_exists('glimgid',$_REQUEST)?$_REQUEST['glimgid']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $isEditor = false;
-if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
-$glosManager = new GlossaryManager();
-$termArr = array();
-$termImgArr = array();
-$termGrpArr = array();
-$synonymArr = array();
-$translationArr = array();
-$termTaxaArr = array();
-$tidArr = array();
 $tidStr = '';
 $hasImages = false;
 
+$glosManager = new GlossaryManager();
+$glosManager->setGlossId($glossId);
+
+$closeWindow = false;
 $statusStr = '';
 if($formSubmit){
-	if($formSubmit == 'Create Term'){
-		$statusStr = $glosManager->createTerm($_POST,1);
-		$glossId = $glosManager->getTermId();
-	}
-	elseif($formSubmit == 'Edit Term'){
-		$statusStr = $glosManager->editTerm($_POST);
+	if($formSubmit == 'Edit Term'){
+		if(!$glosManager->editTerm($_POST)){
+			$statusStr = $glosManager->getErrorStr();
+		}
 	}
 	elseif($formSubmit == 'Submit New Image'){
 		$statusStr = $glosManager->addImage($_POST);
@@ -40,50 +35,69 @@ if($formSubmit){
 		$statusStr = $glosManager->editImageData($_POST);
 	}
 	elseif($formSubmit == 'Delete Image'){
-		$statusStr = $glosManager->deleteImage($glimgId,1);
+		$statusStr = $glosManager->deleteImage($glimgId);
 	}
-	elseif($formSubmit == 'Add Relation'){
-		$statusStr = $glosManager->addRelation($_POST);
+	elseif($formSubmit == 'Link Translation'){
+		if(!$glosManager->linkTranslation($_POST['relglossid'])){
+			$statusStr = $glosManager->getErrorStr();
+		}
+		$glosManager->setGlossId($glossId);
 	}
-	elseif($formSubmit == 'Remove Relation'){
-		$glosManager->removeRelation($_POST);
+	elseif($formSubmit == 'Link Related Term'){
+		if(!$glosManager->linkRelation($_POST['relglossid'],$_POST['relationship'])){
+			$statusStr = $glosManager->getErrorStr();
+		}
+		$glosManager->setGlossId($glossId);
 	}
-	elseif($formSubmit == 'Add Syn Relation'){
-		$statusStr = $glosManager->addSynRelation($_POST);
+	elseif($formSubmit == 'Remove Translation'){
+		if(!$glosManager->removeRelation($_POST['gltlinkid'],$_POST['relglossid'])){
+			$statusStr = $glosManager->getErrorStr();
+		}
+		$glosManager->setGlossId($glossId);
 	}
-	elseif($formSubmit == 'Remove Syn Relation'){
-		$glosManager->removeSynRelation($_POST);
+	elseif($formSubmit == 'Remove Synonym'){
+		if(!$glosManager->removeRelation($_POST['gltlinkid'],$_POST['relglossid'])){
+			$statusStr = $glosManager->getErrorStr();
+		}
+		$glosManager->setGlossId($glossId);
+	}
+	elseif($formSubmit == 'Unlink Related Term'){
+		if(!$glosManager->removeRelation($_POST['gltlinkid'])){
+			$statusStr = $glosManager->getErrorStr();
+		}
 	}
 	elseif($formSubmit == 'Add Taxa Group'){
-		$glosManager->setGrpTaxaLink($_POST['tid'],$_POST['glossgrpid']);
+		if(!$glosManager->addGroupTaxaLink($_POST['tid'])){
+			$statusStr = $glosManager->getErrorStr();
+		}
 	}
 	elseif($formSubmit == 'Delete Taxa Group'){
-		$glosManager->deleteGrpTaxaLink($_POST['glossgrpid'],$_POST['tid']);
+		if(!$glosManager->deleteGroupTaxaLink($_POST['tid'])){
+			$statusStr = $glosManager->getErrorStr();
+		}
+	}
+	elseif($formSubmit == 'Delete Term'){
+		if($glosManager->deleteTerm($_POST)){
+			$glossId = 0;
+			$closeWindow = true;
+		}
+		else{
+			$statusStr = $glosManager->getErrorStr();
+		}
 	}
 }
 
 if($glossId){
-	$termArr = $glosManager->getTermArr($glossId);
-	$glossgrpId = $termArr['glossgrpid'];
-	$termTaxaArr = $glosManager->getTermTaxaArr($glossgrpId);
-	$termGrpArr = $glosManager->getGrpArr($glossId,$glossgrpId,$termArr['language']);
-	if(array_key_exists('synonym',$termGrpArr)){
-		$synonymArr = $termGrpArr['synonym'];
-	}
-	if(array_key_exists('translation',$termGrpArr)){
-		$translationArr = $termGrpArr['translation'];
-	}
-	$termImgArr = $glosManager->getImgArr($glossgrpId);
-}
-else{
-	header("Location: index.php");
+	$termArr = $glosManager->getTermArr();
+	$taxaArr = $glosManager->getTermTaxaArr();
+	$termImgArr = $glosManager->getImgArr();
 }
 ?>
 <html>
 <head>
-    <title><?php echo $defaultTitle; ?> Glossary Management</title>
-    <link href="../css/base.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
-    <link href="../css/main.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
+    <title><?php echo $DEFAULT_TITLE; ?> Glossary Management</title>
+    <link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
+    <link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" type="text/css" />
 	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
 	<style type="text/css">
 		#tabs a{
@@ -95,18 +109,74 @@ else{
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../js/symb/glossary.index.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			<?php 
+			if($closeWindow){
+				echo 'window.opener.searchform.submit();';
+				echo 'self.close();';
+			}
+			?>
+		});
+
+		function verifyTermEditForm(f){
+			if(!f.term.value || !f.language.value){
+				alert("Term and language must have a value");
+				return false;
+			}
+	
+			if(f.definition.value.length > 1998){
+				if(!confirm("Warning, your definition is close to maximum size limit and may be cut off. Are you sure the definition is completely entered?")) return false;
+			}
+			return true;
+		}
+	
+		function verifyRelLinkForm(f){
+			if(!f.relglossid.value){
+				alert("Please select a related term");
+				return false;
+			}
+			return true;
+		}
+	
+		function verifyTransLinkForm(f){
+			if(!f.relglossid.value){
+				alert("Please select a translation term");
+				return false;
+			}
+			return true;
+		}
+	
+		function verifyNewImageForm(f){
+			if(!document.getElementById("imgfile").files[0] && document.getElementById("imgurl").value == ""){
+				alert("Please either upload an image or enter the url of an existing image.");
+				return false;
+			}
+			return true;
+		}
+	
+		function verifyImageEditForm(f){
+			if(document.getElementById("editurl").value == ""){
+				document.getElementById("editurl").value = document.getElementById("oldurl").value;
+				alert("Please enter a url for the image to save.");
+				return false;
+			}
+			return true;
+		}
+	</script>
 </head>
 <body>
 	<?php
+	/*
 	$displayLeftMenu = (isset($glossary_indexMenu)?$glossary_indexMenu:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	if(isset($glossary_indexCrumbs)){
 		if($glossary_indexCrumbs){
 			?>
 			<div class='navpath'>
 				<a href='../index.php'>Home</a> &gt;&gt; 
 				<?php echo $glossary_indexCrumbs; ?>
-				<a href='index.php?language=<?php echo $termArr['language']; ?>'> <b>Glossary Management</b></a>
+				<a href='index.php?language=<?php echo $glosManager->getTermLanguage(); ?>'> <b>Glossary Management</b></a>
 			</div>
 			<?php 
 		}
@@ -115,18 +185,19 @@ else{
 		?>
 		<div class='navpath'>
 			<a href='../index.php'>Home</a> &gt;&gt; 
-			<a href='index.php?language=<?php echo $termArr['language']; ?>'> <b>Glossary Management</b></a>
+			<a href='index.php?language=<?php echo $glosManager->getTermLanguage(); ?>'> <b>Glossary Management</b></a>
 		</div>
 		<?php 
 	}
+	*/
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
-		if($isEditor){
+		if($glossId && $isEditor){
 			if($statusStr){
 				?>
-				<div style="margin:15px;color:red;">
+				<div style="margin:15px;color:<?php echo (strpos($statusStr, 'SUCCESS') !== false?'green':'red'); ?>;">
 					<?php echo $statusStr; ?>
 				</div>
 				<?php 
@@ -135,7 +206,7 @@ else{
 			<div id="tabs" style="margin:0px;">
 				<ul>
 					<li><a href="#termdetaildiv">Details</a></li>
-					<li><a href="#termsyndiv">Synonyms</a></li>
+					<li><a href="#termrelateddiv">Related Terms</a></li>
 					<li><a href="#termtransdiv">Translations</a></li>
 					<li><a href="#termimagediv">Images</a></li>
 					<li><a href="#termadmindiv">Admin</a></li>
@@ -165,7 +236,19 @@ else{
 									<b>Language: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<input type="text" name="language" id="language" maxlength="45" style="width:200px;" value="<?php echo $termArr['language']; ?>" onchange="" title="" />
+									<select id="langSelect" name="language">
+										<?php 
+										$langArr = $glosManager->getLanguageArr('all');
+										foreach($langArr as $langStr ){
+											echo '<option '.($glosManager->getTermLanguage()==$langStr?'SELECTED':'').'>'.$langStr.'</option>';
+										}
+										?>
+									</select> 
+									<a href="#" onclick="toggle('addLangDiv');return false;"><img src="../images/add.png" /></a>&nbsp;&nbsp;
+								</div>
+								<div id="addLangDiv" style="float:left;display:none">
+									<input name="newlang" type="text" maxlength="45" style="width:200px;" /> 
+									<button onclick="addNewLang(this.form);return false;">Add language</button>
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -173,7 +256,7 @@ else{
 									<b>Author: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<input type="text" name="author" id="author" maxlength="250" style="width:500px;" value="<?php echo $termArr['author']; ?>" onchange="" title="" />
+									<input name="author" type="text" maxlength="250" style="width:500px;" value="<?php echo $termArr['author']; ?>" onchange="" title="" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -181,7 +264,7 @@ else{
 									<b>Translator: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<input type="text" name="translator" id="translator" maxlength="250" style="width:500px;" value="<?php echo $termArr['translator']; ?>" onchange="" title="" />
+									<input name="translator" type="text" maxlength="250" style="width:500px;" value="<?php echo $termArr['translator']; ?>" onchange="" title="" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -189,7 +272,7 @@ else{
 									<b>Source: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<textarea name="source" id="source" rows="10" maxlength="1000" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['source']; ?></textarea>
+									<input name="source" type="text" maxlength="1000" style="width:500px;" value="<?php echo $termArr['source']; ?>" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -197,7 +280,7 @@ else{
 									<b>Notes: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<textarea name="notes" id="notes" rows="10" maxlength="250" style="width:380px;height:40px;resize:vertical;" ><?php echo $termArr['notes']; ?></textarea>
+									<input name="notes" type="text" maxlength="250" style="width:380px;" value="<?php echo $termArr['notes']; ?>" />
 								</div>
 							</div>
 							<div style="clear:both;padding-top:4px;float:left;">
@@ -205,316 +288,292 @@ else{
 									<b>Resource URL: </b>
 								</div>
 								<div style="float:left;margin-left:10px;">
-									<textarea name="resourceurl" id="resourceurl" rows="10" maxlength="600" style="width:500px;height:70px;resize:vertical;" ><?php echo $termArr['resourceurl']; ?></textarea>
+									<input name="resourceurl" type="text" maxlength="600" style="width:600px;" value="<?php echo $termArr['resourceurl']; ?>" />
 								</div>
 							</div>
-							<div style="clear:both;padding-top:8px;float:right;">
+							<div style="clear:both;padding:20px;">
 								<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
-								<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 								<input id="origterm" type="hidden" value="<?php echo $termArr['term']; ?>" />
-								<input id="origlang" type="hidden" value="<?php echo $termArr['language']; ?>" />
+								<input id="origlang" type="hidden" value="<?php echo $glosManager->getTermLanguage(); ?>" />
 								<button name="formsubmit" type="submit" value="Edit Term">Save Edits</button>
 							</div>
 						</form>
 						<div style="clear:both;height:15px;"></div>
 						<fieldset style='clear:both;padding:8px;margin-bottom:10px;'>
 							<legend><b>Taxonomic Groups</b></legend>
-							<form name="taxaaddform" id="taxaaddform" action="termdetails.php" method="post" onsubmit="">
-								<div style="float:left;">
-									<b>Add Taxonomic Group: </b>
-								</div>
-								<div style="float:left;margin-left:10px;">
-									<input type="text" name="taxagroup" id="taxagroup" maxlength="45" style="width:250px;" value="" onchange="" title="" />
-									<input name="tid" id="tid" type="hidden" value="" />
-								</div>
-								<div style="float:right;">
-									<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
-									<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
-									<button name="formsubmit" type="submit" value="Add Taxa Group">Add Group</button>
-								</div>
-							</form>
-							<div style="float:left;clear:both;cursor:pointer;" onclick="" title="Taxa Groups">
-								<?php
-								$taxaCnt = count($termTaxaArr);
-								foreach($termTaxaArr as $taxId => $tArr){
-									$tidArr[] = $tArr['tid'];
-									echo '<form name="taxadelform" id="'.$tArr['SciName'].'" action="termdetails.php" style="margin-top:0px;margin-bottom:0px;" method="post" onsubmit="">';
-									echo $tArr['SciName'];
-									if($taxaCnt > 1){
+							<div style="clear:both;" onclick="" title="Taxa Groups">
+								<ul>
+									<?php
+									foreach($taxaArr as $taxId => $sciname){
+										echo '<li><form name="taxadelform" id="'.$sciname.'" action="termdetails.php" style="margin-top:0px;margin-bottom:0px;" method="post">';
+										echo $sciname;
 										echo '<input style="margin-left:15px;" type="image" src="../images/del.png" title="Delete Taxa Group">';
 										echo '<input name="glossid" type="hidden" value="'.$glossId.'" />';
-										echo '<input name="glossgrpid" type="hidden" value="'.$glossgrpId.'" />';
-										echo '<input name="tid" type="hidden" value="'.$tArr['tid'].'" />';
+										echo '<input name="tid" type="hidden" value="'.$taxId.'" />';
 										echo '<input name="formsubmit" type="hidden" value="Delete Taxa Group" />';
+										echo '</form></li>';
 									}
-									echo '</form>';
-								}
-								$tidStr = implode(',',$tidArr);
-								?>
+									?>
+								</ul>
 							</div>
-							<input id="tidstr" type="hidden" value="<?php echo $tidStr; ?>" />
+							<div style="clear:both;margin:10px">
+								<form name="taxaaddform" id="taxaaddform" action="termdetails.php" method="post" onsubmit="">
+									<div style="float:left;">
+										<b>Add Taxonomic Group: </b>
+									</div>
+									<div style="float:left;margin-left:10px;">
+										<input type="text" name="taxagroup" id="taxagroup" maxlength="45" style="width:250px;" value="" onchange="" title="" />
+										<input name="tid" id="tid" type="hidden" value="" />
+									</div>
+									<div style="float:left;margin-left:10px;">
+										<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
+										<button name="formsubmit" type="submit" value="Add Taxa Group">Add Group</button>
+									</div>
+								</form>
+							</div>
 						</fieldset>
 					</div>
 				</div>
-				
-				<div id="termsyndiv" style="">
-					<div style="margin:10px;float:right;cursor:pointer;<?php echo (!$synonymArr?'display:none;':''); ?>" onclick="toggle('addsyndiv');" title="Add a New Synonym">
+				<div id="termrelateddiv">
+					<?php 
+					$synonymArr = $glosManager->getSynonyms();
+					$otherRelationshipsArr = $glosManager->getOtherRelatedTerms();
+					?>
+					<div style="margin:10px;float:right;cursor:pointer;<?php echo (!$synonymArr||$otherRelationshipsArr?'display:none;':''); ?>" onclick="toggle('addsyndiv');" title="Add a New Synonym">
 						<img style="border:0px;width:12px;" src="../images/add.png" />
 					</div>
-					<div id="addsyndiv" style="margin-bottom:10px;<?php echo ($synonymArr?'display:none;':''); ?>;">
-						<form name="synnewform" action="termdetails.php#termsyndiv" method="post" onsubmit="return verifyNewSynForm(this.form);">
-							<fieldset style="padding:15px">
-								<legend><b>Add a New Synonym</b></legend>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Term: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<input type="text" name="term" id="newsynterm" maxlength="150" style="width:400px;" value="" onchange="lookupNewsynonym(this.form);" title="" />
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Definition: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<textarea name="definition" id="newsyndefinition" rows="10" maxlength="1000" style="width:380px;height:70px;resize:vertical;" DISABLED></textarea>
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Author: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<input type="text" name="author" id="newsynauthor" maxlength="250" style="width:500px;" value="" onchange="" title="" DISABLED />
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Translator: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<input type="text" name="translator" id="newsyntranslator" maxlength="250" style="width:500px;" value="" onchange="" title="" DISABLED />
+					<div id="addsyndiv" style="margin-bottom:10px;<?php echo ($synonymArr||$otherRelationshipsArr?'display:none;':''); ?>;">
+						<form name="relnewform" action="termdetails.php#termrelateddiv" method="post" onsubmit="return verifyRelLinkForm(this);">
+							<fieldset style="padding:25px">
+								<legend><b>Link A Related Term</b></legend>
+								<div style="clear:both;padding-top:4px;">
+									<div style="">
+										<b>This term</b> 
+										<select name="relationship">
+											<option value="synonym">is Synonym Of</option>
+											<option value="subClassOf">is Subclass of... (Child of...)</option>
+											<option value="superClassOf">is Superclass of... (Parent of...)</option>
+											<option value="hasPart">has Part...</option>
+											<option value="partOf">is Part of...</option>
+										</select> 
+										<select name="relglossid">
+											<option value=''>Select Related Term</option>
+											<option value=''>------------------------</option>
+											<?php 
+											$relList = $glosManager->getTermList('related',$glosManager->getTermLanguage());
+											unset($relList[$glossId]);
+											$relList = array_diff_key($relList, $synonymArr, $otherRelationshipsArr);
+											foreach($relList as $relId => $relName){
+												echo '<option value="'.$relId.'">'.$relName.'</option>';
+											}
+											?>
+										</select> 
+										<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
+										<button name="formsubmit" type="submit" value="Link Related Term">Link Related Term</button>
 									</div>
 								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Source: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<input type="text" name="source" id="newsynsource" maxlength="1000" style="width:200px;" value="" onchange="" title="" DISABLED />
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Notes: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<textarea name="notes" id="newsynnotes" rows="10" maxlength="250" style="width:380px;height:40px;resize:vertical;" DISABLED></textarea>
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Resource URL: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<textarea name="resourceurl" id="newsynresourceurl" rows="10" maxlength="600" style="width:500px;height:70px;resize:vertical;" DISABLED></textarea>
-									</div>
-								</div>
-								<div style="clear:both;padding-top:8px;float:right;">
-									<input name="sglossid" type="hidden" value="<?php echo $glossId; ?>" />
-									<input name="glossid" id="synglossid" type="hidden" value="" />
-									<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
-									<input name="relglossgrpid" id="newsynglossgrpid" type="hidden" value="" />
-									<input name="language" id="newsynlanguage" type="hidden" value="<?php echo $termArr['language']; ?>" />
-									<input name="tid" id="newsyntid" type="hidden" value="<?php echo $tidStr; ?>" />
-									<input id="synorigterm" type="hidden" value="<?php echo $termArr['term']; ?>" />
-									<button name="formsubmit" type="submit" value="Add Syn Relation">Add Synonym</button>
+								<div style="clear:both;"></div>
+								<div style="clear:both;margin:30px 10px;">
+									<div style="margin:3px">Or add a <a href="addterm.php?relationship=synonym&relglossid=<?php echo $glossId.'&rellanguage='.$glosManager->getTermLanguage(); ?>">New Synonym</a> that is not yet in the system</div>
 								</div>
 							</fieldset>
 						</form>
 					</div>
 					<?php
 					if($synonymArr){
-						foreach($synonymArr as $synId => $synArr){
+						?>
+						<fieldset style='clear:both;padding:15px;margin-bottom:10px;'>
+							<legend><b>Synonyms</b></legend>
+							<?php 
+							foreach($synonymArr as $synGlossId => $synArr){
+								?>
+								<div style="margin:15px;padding:10px;border:1px solid gray">
+									<?php
+									$disableRemoveSyn = false;
+									$removeSynTitle = 'Remove Synonym';
+									if($synGlossId == $glosManager->getGlossGroupId()){
+										$removeSynTitle = 'Root term cannot be removed! Instead, go to root term and then remove other relations.';
+										$disableRemoveSyn = true;
+									}
+									?>
+									<div style="float:right;margin:5px;" title="<?php echo $removeSynTitle; ?>">
+										<form name="syndelform" action="termdetails.php#termrelateddiv" method="post" onsubmit="<?php if($disableRemoveSyn) echo 'return false'; ?>">
+											<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
+											<input name="gltlinkid" type="hidden" value="<?php echo $synArr['gltlinkid']; ?>" />
+											<input name="relglossid" type="hidden" value="<?php echo $synGlossId; ?>" />
+											<input type="image" name="formsubmit" src='../images/del.png' value="Remove Synonym" style="width:12px" <?php if($disableRemoveSyn) echo 'disabled'; ?>>
+										</form>
+									</div>
+									<div style="float:right;margin:5px;cursor:pointer;" title="Edit Term">
+										<a href="termdetails.php?glossid=<?php echo $synGlossId; ?>">
+											<img style="border:0px;width:12px;" src="../images/edit.png" />
+										</a>
+									</div>
+									<div style='' >
+										<b>Term:</b> 
+										<?php echo $synArr['term']; ?>
+									</div>
+									<div style='margin-top:8px;' >
+										<b>Definition:</b> 
+										<?php echo $synArr['definition']; ?>
+									</div>
+									<div style='margin-top:8px;' >
+										<b>Source:</b> 
+										<?php echo $synArr['source']; ?>
+									</div>
+								</div>
+								<?php
+							}
 							?>
-							<fieldset style='clear:both;padding:8px;margin-bottom:10px;'>
-								<div style="float:right;margin-right:15px;cursor:pointer;" onclick="" title="Remove Synonym">
-									<form name="syndelform" action="termdetails.php#termsyndiv" method="post" onsubmit="">
-										<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
-										<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
-										<input name="gltlinkid" type="hidden" value="<?php echo $synArr['gltlinkid']; ?>" />
-										<input name="relglossid" type="hidden" value="<?php echo $synArr['glossid']; ?>" />
-										<input type="image" name="formsubmit" src='../images/del.png'  value="Remove Syn Relation" title="Remove Synonym">
-									</form>
-								</div>
-								<div style="float:right;margin-right:10px;cursor:pointer;" onclick="" title="Edit Term">
-									<a href="termdetails.php?glossid=<?php echo $synArr['glossid']; ?>" onclick="">
-										<img style="border:0px;width:12px;" src="../images/edit.png" />
-									</a>
-								</div>
-								<div style='' >
-									<b>Term:</b> 
-									<?php echo $synArr['term']; ?>
-								</div>
-								<div style='margin-top:8px;' >
-									<b>Definition:</b> 
-									<?php echo $synArr['definition']; ?>
-								</div>
-								<div style='margin-top:8px;' >
-									<b>Language:</b> 
-									<?php echo $synArr['language']; ?>
-								</div>
-								<div style='margin-top:8px;' >
-									<b>Source:</b> 
-									<?php echo $synArr['source']; ?>
-								</div>
-							</fieldset>
-							<?php
-						}
+						</fieldset>	
+						<?php
 					}
-					else{
-						echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are no synonyms for this term.</div></div>';
+					//Other relationships (superclass, subclass, partOf, hasPart)
+					if($otherRelationshipsArr){
+						?>
+						<fieldset style='clear:both;padding:15px;margin-bottom:10px;'>
+							<legend><b>Other Relationships</b></legend>
+							<?php 
+							foreach($otherRelationshipsArr as $relType => $relTypeArr){
+								$relStr = 'is related to';
+								if($relType == 'partOf') $relStr = 'is part of';
+								elseif($relType == 'hasPart') $relStr = 'has part';
+								elseif($relType == 'subClassOf') $relStr = 'is subclass of (child of)';
+								elseif($relType == 'superClassOf') $relStr = 'is superclass of (parent of)';
+								foreach($relTypeArr as $relGlossId => $relArr){
+									$disableRemoveRel = false;
+									$removeRelTitle = 'Unlink Related Term';
+									if($relGlossId == $glosManager->getGlossGroupId()){
+										$removeRelTitle = 'Root term cannot be removed! Instead, go to root term and then remove other relations.';
+										$disableRemoveRel = true;
+									}
+									?>
+									<div style="margin:15px;padding:10px;border:1px solid gray">
+										<div style="float:right;margin:5px;" title="<?php echo $removeRelTitle; ?>">
+											<form name="reldelform" action="termdetails.php#termrelateddiv" method="post" onsubmit="<?php if($disableRemoveRel) echo 'return false'; ?>">
+												<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
+												<input name="gltlinkid" type="hidden" value="<?php echo $relArr['gltlinkid']; ?>" />
+												<input name="relglossid" type="hidden" value="<?php echo $relGlossId; ?>" />
+												<input type="image" name="formsubmit" src='../images/del.png' value="Unlink Related Term" style="width:13px" <?php if($disableRemoveRel) echo 'disabled'; ?>>
+											</form>
+										</div>
+										<div style="float:right;margin:5px;" title="Edit Term">
+											<a href="termdetails.php?glossid=<?php echo $relGlossId; ?>">
+												<img style="border:0px;width:12px;" src="../images/edit.png" />
+											</a>
+										</div>
+										<div>
+											Current term <?php echo $relStr.': <b>'.$relArr['term'].'</b>'; ?>
+										</div>
+										<div style='clear:both;margin-top:3px;' >
+											<b>Definition:</b> 
+											<?php echo $relArr['definition']; ?>
+										</div>
+									</div>
+									<?php
+								}
+							}
+							?>
+						</fieldset>	
+						<?php 
 					}
 					?>
 				</div>
-				
 				<div id="termtransdiv" style="">
+					<?php 
+					$translationArr = $glosManager->getTranslations();
+					?>
 					<div style="margin:10px;float:right;cursor:pointer;<?php echo (!$translationArr?'display:none;':''); ?>" onclick="toggle('addtransdiv');" title="Add a New Translation">
 						<img style="border:0px;width:12px;" src="../images/add.png" />
 					</div>
 					<div id="addtransdiv" style="margin-bottom:10px;<?php echo ($translationArr?'display:none;':''); ?>;">
-						<form name="transnewform" action="termdetails.php#termtransdiv" method="post" onsubmit="return verifyNewTransForm(this.form);">
-							<fieldset style="padding:15px">
-								<legend><b>Add a New Translation</b></legend>
+						<form name="translinkform" action="termdetails.php#termtransdiv" method="post" onsubmit="return verifyTransLinkForm(this);">
+							<fieldset style="padding:25px">
+								<legend><b>Link a Translation</b></legend>
 								<div style="clear:both;padding-top:4px;float:left;">
 									<div style="float:left;">
-										<b>Language: </b>
+										<b>Link an existing term: </b>
 									</div>
 									<div style="float:left;margin-left:10px;">
-										<input type="text" name="language" id="newtranslanguage" maxlength="45" style="width:200px;" value="" onchange="lookupNewtranslation(this.form);" title="" />
+										<select name="relglossid">
+											<option value=''>Select Translation Term</option>
+											<option value=''>------------------------</option>
+											<?php 
+											$transList = $glosManager->getTermList('translation',$glosManager->getTermLanguage());
+											$transList = array_diff_key($transList, $translationArr);
+											foreach($transList as $transId => $transName){
+												echo '<option value="'.$transId.'">'.$transName.'</option>';
+											}
+											?>
+										</select>
+									</div>
+									<div style="float:left;margin-left:30px;">
+										<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
+										<button name="formsubmit" type="submit" value="Link Translation">Link Translation</button>
 									</div>
 								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Term: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<input type="text" name="term" id="newtransterm" maxlength="150" style="width:400px;" value="" onchange="lookupNewtranslation(this.form);" title="" />
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Definition: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<textarea name="definition" id="newtransdefinition" rows="10" maxlength="1000" style="width:380px;height:70px;resize:vertical;" DISABLED></textarea>
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Author: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<input type="text" name="author" id="newtransauthor" maxlength="250" style="width:500px;" value="" onchange="" title="" DISABLED />
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Translator: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<input type="text" name="translator" id="newtranstranslator" maxlength="250" style="width:500px;" value="" onchange="" title="" DISABLED />
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Source: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<input type="text" name="source" id="newtranssource" maxlength="1000" style="width:200px;" value="" onchange="" title="" DISABLED />
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Notes: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<textarea name="notes" id="newtransnotes" rows="10" maxlength="250" style="width:380px;height:40px;resize:vertical;" DISABLED></textarea>
-									</div>
-								</div>
-								<div style="clear:both;padding-top:4px;float:left;">
-									<div style="float:left;">
-										<b>Resource URL: </b>
-									</div>
-									<div style="float:left;margin-left:10px;">
-										<textarea name="resourceurl" id="newtransresourceurl" rows="10" maxlength="600" style="width:500px;height:70px;resize:vertical;" DISABLED></textarea>
-									</div>
-								</div>
-								<div style="clear:both;padding-top:8px;float:right;">
-									<input name="glossid" type="hidden" value="<?php echo $glossgrpId; ?>" />
-									<input name="relglossid" id="transglossid" type="hidden" value="" />
-									<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
-									<input name="relglossgrpid" id="newtransglossgrpid" type="hidden" value="" />
-									<input name="tid" id="newtranstid" type="hidden" value="<?php echo $tidStr; ?>" />
-									<input id="transoriglanguage" type="hidden" value="<?php echo $termArr['language']; ?>" />
-									<button name="formsubmit" type="submit" value="Add Relation">Add Translation</button>
+								<div style="clear:both;"></div>
+								<div style="clear:both;margin: 30px 10px;">
+									Or add a <a href="addterm.php?relationship=translation&relglossid=<?php echo $glossId.'&rellanguage='.$glosManager->getTermLanguage(); ?>">New Translation</a> to this term
 								</div>
 							</fieldset>
 						</form>
 					</div>
-					<?php
-					if($translationArr){
-						foreach($translationArr as $transId => $transArr){
-							?>
-							<fieldset style='clear:both;padding:8px;margin-bottom:10px;'>
-								<div style="float:right;margin-right:15px;cursor:pointer;" onclick="" title="Remove Translation">
-									<form name="transdelform" action="termdetails.php#termtransdiv" method="post" onsubmit="">
-										<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
-										<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
-										<input name="gltlinkid" type="hidden" value="<?php echo $transArr['gltlinkid']; ?>" />
-										<input name="relglossid" type="hidden" value="<?php echo $transArr['glossid']; ?>" />
-										<input type="image" name="formsubmit" src='../images/del.png'  value="Remove Relation" title="Remove Translation">
-									</form>
+					<div style="padding-top:15px">
+						<?php
+						if($translationArr){
+							foreach($translationArr as $transGlossId => $transArr){
+								?>
+								<div style="width:95%;margin:15px;padding:10px;border:1px solid gray">
+									<?php
+									if($transArr['gltlinkid'] && $transGlossId != $glosManager->getGlossGroupId()){
+										?>
+										<div style="float:right;margin:5px;" title="Remove Translation">
+											<form name="transdelform" action="termdetails.php#termtransdiv" method="post">
+												<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
+												<input name="gltlinkid" type="hidden" value="<?php echo $transArr['gltlinkid']; ?>" />
+												<input name="relglossid" type="hidden" value="<?php echo $transGlossId; ?>" />
+												<input type="image" name="formsubmit" src='../images/del.png' value="Remove Translation" style="width:13px;">
+											</form>
+										</div>
+										<?php 
+									}
+									?>
+									<div style="float:right;margin:5px;" title="Edit Term Data">
+										<a href="termdetails.php?glossid=<?php echo $transGlossId; ?>">
+											<img style="border:0px;width:12px;" src="../images/edit.png" />
+										</a>
+									</div>
+									<div>
+										<b>Term:</b> 
+										<?php echo $transArr['term']; ?>
+									</div>
+									<div style='margin-top:8px;' >
+										<b>Definition:</b> 
+										<?php echo $transArr['definition']; ?>
+									</div>
+									<div style='margin-top:8px;' >
+										<b>Language:</b> 
+										<?php echo $transArr['language']; ?>
+									</div>
+									<div style='margin-top:8px;' >
+										<b>Source:</b> 
+										<?php echo $transArr['source']; ?>
+									</div>
 								</div>
-								<div style="float:right;margin-right:10px;cursor:pointer;" onclick="" title="Edit Term Data">
-									<a href="termdetails.php?glossid=<?php echo $transArr['glossid']; ?>" onclick="">
-										<img style="border:0px;width:12px;" src="../images/edit.png" />
-									</a>
-								</div>
-								<div style='' >
-									<b>Term:</b> 
-									<?php echo $transArr['term']; ?>
-								</div>
-								<div style='margin-top:8px;' >
-									<b>Definition:</b> 
-									<?php echo $transArr['definition']; ?>
-								</div>
-								<div style='margin-top:8px;' >
-									<b>Language:</b> 
-									<?php echo $transArr['language']; ?>
-								</div>
-								<div style='margin-top:8px;' >
-									<b>Source:</b> 
-									<?php echo $transArr['source']; ?>
-								</div>
-							</fieldset>
-							<?php
+								<?php
+							}
 						}
-					}
-					else{
-						echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are no translations for this term.</div></div>';
-					}
-					?>
+						?>
+					</div>
 				</div>
-				
 				<div id="termimagediv" style="min-height:300px;">
 					<div id="imagediv" style="">
 						<div style="margin:10px;float:right;cursor:pointer;<?php echo (!$termImgArr?'display:none;':''); ?>" onclick="toggle('addimgdiv');" title="Add a New Image">
 							<img style="border:0px;width:12px;" src="../images/add.png" />
 						</div>
 						<div id="addimgdiv" style="<?php echo ($termImgArr?'display:none;':''); ?>;">
-							<form name="imgnewform" action="termdetails.php#termimagediv" method="post" enctype="multipart/form-data" onsubmit="return verifyNewImageForm(this.form);">
+							<form name="imgnewform" action="termdetails.php#termimagediv" method="post" enctype="multipart/form-data" onsubmit="return verifyNewImageForm(this);">
 								<fieldset style="padding:15px">
 									<legend><b>Add a New Image</b></legend>
 									<div style='padding:15px;border:1px solid yellow;background-color:FFFF99;'>
@@ -572,7 +631,6 @@ else{
 									</div>
 									<div style="clear:both;padding-top:8px;float:right;">
 										<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
-										<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 										<input type="submit" name="formsubmit" value="Submit New Image" />
 									</div>
 								</fieldset>
@@ -637,7 +695,7 @@ else{
 											</div>
 										</div>
 										<div id="img<?php echo $imgId; ?>editdiv" style="display:none;clear:both;">
-											<form name="img<?php echo $imgId; ?>editform" action="termdetails.php" method="post" onsubmit="return verifyImageEditForm(this.form);">
+											<form name="img<?php echo $imgId; ?>editform" action="termdetails.php" method="post" onsubmit="return verifyImageEditForm(this);">
 												<fieldset style="">
 													<legend><b>Edit Image Data</b></legend>
 													<div style="clear:both;">
@@ -676,7 +734,6 @@ else{
 														?>
 														<div style="padding-top:8px;float:right;">
 															<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
-															<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
 															<input type="hidden" name="glimgid" value="<?php echo $imgId; ?>" />
 															<input type="submit" name="formsubmit" value="Save Image Edits" />
 														</div>
@@ -694,7 +751,7 @@ else{
 				</div>
 				
 				<div id="termadmindiv" style="">
-					<form name="deltermform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this term?')">
+					<form name="deltermform" action="termdetails.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this term?')">
 						<fieldset style="width:350px;margin:20px;padding:20px;">
 							<legend><b>Delete Term</b></legend>
 							<?php
@@ -706,8 +763,6 @@ else{
 							?>
 							<input name="formsubmit" type="submit" value="Delete Term" <?php if($hasImages) echo 'DISABLED'; ?> />
 							<input name="glossid" type="hidden" value="<?php echo $glossId; ?>" />
-							<input name="glossgrpid" type="hidden" value="<?php echo $glossgrpId; ?>" />
-							<input name="language" type="hidden" value="<?php echo $termArr['language']; ?>" />
 						</fieldset>
 					</form>
 				</div>
@@ -715,17 +770,12 @@ else{
 			<?php 
 		}
 		else{
-			if(!$symbUid){
-				header("Location: ../profile/index.php?refurl=../glossary/termdetails.php?glossid=".$glossId);
-			}
-			else{
-				echo '<h2>You do not have permissions to edit glossary data, please contact system administrator</h2>';
-			}
+			echo '<h2>Permissions or data error, please contact system administrator</h2>';
 		}
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	//include($SERVER_ROOT."/footer.php");
 	?>
 </body>
 </html>

@@ -56,6 +56,7 @@ if (!$testImg->checkSchema()) {
    echo "[Warning: classes/ImageShared.php does not support the Symbiota schema version.]\n";
    $uptodate = false;
 }
+$testImg->__destruct();
 if (!$uptodate) { 
    echo "[Warning: Ingest of data may fail.  Contact a Symbiota developer.]\n";
 }

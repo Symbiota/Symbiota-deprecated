@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php'); 
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -17,6 +18,7 @@ if(!is_numeric($start)) $start = 0;
 if(!is_numeric($limit)) $limit = 0;
 
 $cleanManager = new OccurrenceCleaner();
+if($SOLR_MODE) $solrManager = new SOLRManager();
 if($collid) $cleanManager->setCollId($collid);
 $collMap = $cleanManager->getCollMap();
 
@@ -49,8 +51,8 @@ elseif($action == 'listdupsrecordedby'){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Cleaner</title>
-	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-    <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
     <style type="text/css">
 		table.styledtable td { white-space: nowrap; }
     </style>
@@ -185,6 +187,7 @@ elseif($action == 'listdupsrecordedby'){
 						}
 					}
 					$cleanManager->mergeDupeArr($dupArr);
+                    if($SOLR_MODE) $solrManager->updateSOLR();
 					?>
 					<li>Done!</li>
 				</ul>

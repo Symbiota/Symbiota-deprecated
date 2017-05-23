@@ -35,7 +35,7 @@ class OccurrenceEditorManager {
 			'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
 			'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
 			'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
-			'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
+			'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations','datageneralizations',
 			'country', 'stateprovince', 'county', 'municipality', 'locality', 'localitysecurity', 'localitysecurityreason',
 			'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 'footprintwkt',
 			'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
@@ -120,7 +120,7 @@ class OccurrenceEditorManager {
 		global $clientRoot;
 		if($overrideQry){
 			$this->qryArr = $overrideQry;
-			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+			unset($_SESSION['editorquery']);
 		}
 		elseif(array_key_exists('q_catalognumber',$_REQUEST) || array_key_exists('q_identifier',$_REQUEST)){
 			//Need to keep q_identifier in code until LBCC croudsourcing Drupal site is no longer active 
@@ -131,10 +131,10 @@ class OccurrenceEditorManager {
 			if(array_key_exists('q_recordnumber',$_REQUEST) && $_REQUEST['q_recordnumber']) $this->qryArr['rn'] = trim($_REQUEST['q_recordnumber']);
 			if(array_key_exists('q_eventdate',$_REQUEST) && $_REQUEST['q_eventdate']) $this->qryArr['ed'] = trim($_REQUEST['q_eventdate']);
 			if(array_key_exists('q_recordenteredby',$_REQUEST) && $_REQUEST['q_recordenteredby']) $this->qryArr['eb'] = trim($_REQUEST['q_recordenteredby']);
-			if(array_key_exists('q_observeruid',$_REQUEST) && $_REQUEST['q_observeruid']) $this->qryArr['ouid'] = $_REQUEST['q_observeruid'];
+			if(array_key_exists('q_observeruid',$_REQUEST) && is_numeric($_REQUEST['q_observeruid'])) $this->qryArr['ouid'] = $_REQUEST['q_observeruid'];
 			if(array_key_exists('q_processingstatus',$_REQUEST) && $_REQUEST['q_processingstatus']) $this->qryArr['ps'] = trim($_REQUEST['q_processingstatus']);
 			if(array_key_exists('q_datelastmodified',$_REQUEST) && $_REQUEST['q_datelastmodified']) $this->qryArr['dm'] = trim($_REQUEST['q_datelastmodified']);
-			if(array_key_exists('q_exsiccatiid',$_REQUEST) && $_REQUEST['q_exsiccatiid']) $this->qryArr['exsid'] = trim($_REQUEST['q_exsiccatiid']);
+			if(array_key_exists('q_exsiccatiid',$_REQUEST) && is_numeric($_REQUEST['q_exsiccatiid'])) $this->qryArr['exsid'] = $_REQUEST['q_exsiccatiid'];
 			if(array_key_exists('q_dateentered',$_REQUEST) && $_REQUEST['q_dateentered']) $this->qryArr['de'] = trim($_REQUEST['q_dateentered']);
 			if(array_key_exists('q_ocrfrag',$_REQUEST) && $_REQUEST['q_ocrfrag']) $this->qryArr['ocr'] = trim($_REQUEST['q_ocrfrag']);
 			if(array_key_exists('q_imgonly',$_REQUEST) && $_REQUEST['q_imgonly']) $this->qryArr['io'] = 1;
@@ -146,10 +146,10 @@ class OccurrenceEditorManager {
 			}
 			if(array_key_exists('orderby',$_REQUEST)) $this->qryArr['orderby'] = trim($_REQUEST['orderby']);
 			if(array_key_exists('orderbydir',$_REQUEST)) $this->qryArr['orderbydir'] = trim($_REQUEST['orderbydir']);
-			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+			unset($_SESSION['editorquery']);
 		}
-		elseif(isset($_COOKIE["editorquery"])){
-			$this->qryArr = json_decode($_COOKIE["editorquery"],true);
+		elseif(isset($_SESSION['editorquery'])){
+			$this->qryArr = json_decode($_SESSION['editorquery'],true);
 		}
 	}
 
@@ -185,8 +185,8 @@ class OccurrenceEditorManager {
 						$v = str_ireplace(array('>',' and ','<'),array('',' - ',''),$v);
 					}
 					if($p = strpos($v,' - ')){
-						$term1 = trim(substr($v,0,$p));
-						$term2 = trim(substr($v,$p+3));
+						$term1 = $this->cleanInStr(substr($v,0,$p));
+						$term2 = $this->cleanInStr(substr($v,$p+3));
 						if(is_numeric($term1) && is_numeric($term2)){
 							$catNumIsNum = true;
 							if($isOccid){
@@ -203,7 +203,7 @@ class OccurrenceEditorManager {
 						}
 					}
 					else{
-						$vStr = trim($v);
+						$vStr = $this->cleanInStr($v);
 						if(is_numeric($vStr)){
 							if($iInFrag){
 								//Only tag as numeric if there are more than one term (if not, it doesn't match what the sort order is)
@@ -259,7 +259,7 @@ class OccurrenceEditorManager {
 				$ocnBetweenFrag = array();
 				$ocnInFrag = array();
 				foreach($ocnArr as $v){
-					$v = trim($v);
+					$v = $this->cleanInStr($v);
 					if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$v)){
 						//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
 						$v = str_ireplace(array('>',' and ','<'),array('',' - ',''),$v);
@@ -320,7 +320,7 @@ class OccurrenceEditorManager {
 				$rnBetweenFrag = array();
 				$rnInFrag = array();
 				foreach($rnArr as $v){
-					$v = trim($v);
+					$v = $this->cleanInStr($v);
 					if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$v)){
 						//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
 						$v = str_ireplace(array('>',' and ','<'),array('',' - ',''),$v);
@@ -369,10 +369,17 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND (o.recordedby IS NULL) ';
 			}
 			elseif(substr($this->qryArr['rb'],0,1) == '%'){
-				$sqlWhere .= 'AND (MATCH(f.recordedby) AGAINST("'.substr($this->qryArr['rb'],1).'")) ';
+				$collStr = $this->cleanInStr(substr($this->qryArr['rb'],1));
+				if(strlen($collStr) < 4 || strtolower($collStr) == 'best'){
+					//Need to avoid FULLTEXT stopwords interfering with return
+					$sqlWhere .= 'AND (o.recordedby LIKE "%'.$collStr.'%") ';
+				}
+				else{
+					$sqlWhere .= 'AND (MATCH(f.recordedby) AGAINST("'.$collStr.'")) ';
+				}
 			}
 			else{
-				$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
+				$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->cleanInStr($this->qryArr['rb']).'%") ';
 			}
 		}
 		//eventDate: collection date
@@ -381,7 +388,7 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND (o.eventdate IS NULL) ';
 			}
 			else{
-				$edv = trim($this->qryArr['ed']);
+				$edv = $this->cleanInStr($this->qryArr['ed']);
 				if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$edv)){
 					//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
 					$edv = str_ireplace(array('>',' and ','<'),array('',' - ',''),$edv);
@@ -403,14 +410,14 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND (o.recordEnteredBy IS NULL) ';
 			}
 			else{
-				$sqlWhere .= 'AND (o.recordEnteredBy = "'.$this->qryArr['eb'].'") ';
+				$sqlWhere .= 'AND (o.recordEnteredBy = "'.$this->cleanInStr($this->qryArr['eb']).'") ';
 			}
 		}
-		if(array_key_exists('ouid',$this->qryArr)){
+		if(array_key_exists('ouid',$this->qryArr) && is_numeric($this->qryArr['ouid'])){
 			$sqlWhere .= 'AND (o.observeruid = '.$this->qryArr['ouid'].') ';
 		}
 		if(array_key_exists('de',$this->qryArr)){
-			$de = trim($this->qryArr['de']);
+			$de = $this->cleanInStr($this->qryArr['de']);
 			if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$de)){
 				//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
 				$de = str_ireplace(array('>',' and ','<'),array('',' - ',''),$de);
@@ -427,7 +434,7 @@ class OccurrenceEditorManager {
 			}
 		}
 		if(array_key_exists('dm',$this->qryArr)){
-			$dm = trim($this->qryArr['dm']);
+			$dm = $this->cleanInStr($this->qryArr['dm']);
 			if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$dm)){
 				//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
 				$dm = str_ireplace(array('>',' and ','<'),array('',' - ',''),$dm);
@@ -449,7 +456,7 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND (o.processingstatus IS NULL) ';
 			}
 			else{
-				$sqlWhere .= 'AND (o.processingstatus LIKE "'.$this->qryArr['ps'].'%") ';
+				$sqlWhere .= 'AND (o.processingstatus LIKE "'.$this->cleanInStr($this->qryArr['ps']).'%") ';
 			}
 		}
 		//Without images
@@ -459,7 +466,7 @@ class OccurrenceEditorManager {
 		//OCR
 		if(array_key_exists('ocr',$this->qryArr)){
 			//Used when OCR frag comes from set field within queryformcrowdsourcing
-			$sqlWhere .= 'AND (ocr.rawstr LIKE "%'.$this->qryArr['ocr'].'%") ';
+			$sqlWhere .= 'AND (ocr.rawstr LIKE "%'.$this->cleanInStr($this->qryArr['ocr']).'%") ';
 		}
 		//Exsiccati ID
 		if(array_key_exists('exsid',$this->qryArr) && is_numeric($this->qryArr['exsid'])){
@@ -468,9 +475,9 @@ class OccurrenceEditorManager {
 		}
 		//Custom search fields
 		for($x=1;$x<4;$x++){
-			$cf = (array_key_exists('cf'.$x,$this->qryArr)?$this->qryArr['cf'.$x]:'');
-			$ct = (array_key_exists('ct'.$x,$this->qryArr)?$this->qryArr['ct'.$x]:'');
-			$cv = (array_key_exists('cv'.$x,$this->qryArr)?$this->qryArr['cv'.$x]:'');
+			$cf = (array_key_exists('cf'.$x,$this->qryArr)?$this->cleanInStr($this->qryArr['cf'.$x]):'');
+			$ct = (array_key_exists('ct'.$x,$this->qryArr)?$this->cleanInStr($this->qryArr['ct'.$x]):'');
+			$cv = (array_key_exists('cv'.$x,$this->qryArr)?$this->cleanInStr($this->qryArr['cv'.$x]):'');
 			if($cf){
 				if($cf == 'ocrFragment'){
 					//Used when OCR frag comes from custom field search within basic query form
@@ -530,7 +537,7 @@ class OccurrenceEditorManager {
 
 		if(isset($this->qryArr['orderby'])){
 			$sqlOrderBy = '';
-			$orderBy = $this->qryArr['orderby'];
+			$orderBy = $this->cleanInStr($this->qryArr['orderby']);
 			if($orderBy == "catalognumber"){
 				if($catNumIsNum){
 					$sqlOrderBy = 'catalogNumber+1';
@@ -568,25 +575,6 @@ class OccurrenceEditorManager {
 		if($this->sqlWhere){
 			$sql = 'SELECT COUNT(DISTINCT o.occid) AS reccnt FROM omoccurrences o ';
 			$this->addTableJoins($sql);
-			/*
-			if(strpos($sqlWhere,'ocr.rawstr')){
-				if(strpos($sqlWhere,'ocr.rawstr IS NULL')){
-					$sql .= 'LEFT JOIN images i ON o.occid = i.occid LEFT JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
-				}
-				else{
-					$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
-				}
-			}
-			elseif(array_key_exists('io',$this->qryArr)){
-				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
-			}
-			elseif(array_key_exists('woi',$this->qryArr)){
-				$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
-			}
-			if($this->crowdSourceMode){
-				$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
-			}
-			*/
 			$sqlWhere = $this->sqlWhere;
 			if($obPos = strpos($sqlWhere,' ORDER BY')){
 				$sqlWhere = substr($sqlWhere,0,$obPos);
@@ -602,7 +590,7 @@ class OccurrenceEditorManager {
 			}
 			$rs->free();
 			$this->qryArr['rc'] = (int)$recCnt;
-			setCookie('editorquery',json_encode($this->qryArr),0,($clientRoot?$clientRoot:'/'));
+			$_SESSION['editorquery'] = json_encode($this->qryArr);
 		}
 		return $recCnt;
 	}
@@ -1393,7 +1381,7 @@ class OccurrenceEditorManager {
 				$sql = 'UPDATE omoccurrences o ';
 				//$this->addTableJoins($sql);
 				$sql .= ' SET o.'.$fn.' = '.$nvSqlFrag.' '.$sqlWhere;
-				//echo $sql; 
+				//echo $sql; exit; 
 				if(!$this->conn->query($sql)){
 					$statusStr = 'ERROR applying batch update: '.$this->conn->error;
 				}
@@ -1715,7 +1703,7 @@ class OccurrenceEditorManager {
 		$imageMap = Array();
 		if($this->occid){
 			$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
-				'sourceurl, copyright, notes, occid, username, sortsequence '.
+				'sourceurl, copyright, notes, occid, username, sortsequence, initialtimestamp '.
 				'FROM images '.
 				'WHERE (occid = '.$this->occid.') ORDER BY sortsequence';
 			//echo $sql;
@@ -1734,6 +1722,13 @@ class OccurrenceEditorManager {
 				$imageMap[$imgId]["occid"] = $row->occid;
 				$imageMap[$imgId]["username"] = $this->cleanOutStr($row->username);
 				$imageMap[$imgId]["sortseq"] = $row->sortsequence;
+				if(strpos($row->originalurl,'api.idigbio.org')){
+					if(strtotime($row->initialtimestamp) > strtotime('-2 days')){
+						//Is a recent iDigBio media server import, check to see if image dirivatives have been made
+						$headerArr = get_headers($row->originalurl,1);
+						if($headerArr['Content-Type'] == 'image/svg+xml') $imageMap[$imgId]['error'] = 'NOTICE: iDigBio image derivatives not yet available, it may take upto 24 hours before image processing is complete';
+					}
+				}
 			}
 			$result->free();
 		}
@@ -1780,18 +1775,16 @@ class OccurrenceEditorManager {
 		while($r = $rs->fetch_object()){
 			$editor = $r->externaleditor;
 			if($r->username) $editor .= ' ('.$r->username.')';
-			$ts = $r->initialtimestamp;
-			$retArr[$ts]['editor'] = $editor;
-			$retArr[$ts]['source'] = $r->externalsource;
-			$retArr[$ts]['reviewstatus'] = $r->reviewstatus;
-			$retArr[$ts]['appliedstatus'] = $r->appliedstatus;
+			$retArr[$r->orid][$r->appliedstatus]['editor'] = $editor;
+			$retArr[$r->orid][$r->appliedstatus]['source'] = $r->externalsource;
+			$retArr[$r->orid][$r->appliedstatus]['reviewstatus'] = $r->reviewstatus;
+			$retArr[$r->orid][$r->appliedstatus]['ts'] = $r->initialtimestamp;
 	
 			$oldValues = json_decode($r->oldvalues,true);
 			$newValues = json_decode($r->newvalues,true);
 			foreach($oldValues as $fieldName => $value){
-				$retArr[$ts]['edits'][$r->orid]['fieldname'] = $fieldName;
-				$retArr[$ts]['edits'][$r->orid]['old'] = $value;
-				$retArr[$ts]['edits'][$r->orid]['new'] = (isset($newValues[$fieldName])?$newValues[$fieldName]:'ERROR');
+				$retArr[$r->orid][$r->appliedstatus]['edits'][$fieldName]['old'] = $value;
+				$retArr[$r->orid][$r->appliedstatus]['edits'][$fieldName]['new'] = (isset($newValues[$fieldName])?$newValues[$fieldName]:'ERROR');
 			}
 		}
 		$rs->free();
@@ -1958,10 +1951,11 @@ class OccurrenceEditorManager {
 				'FROM omexsiccatititles t INNER JOIN omexsiccatinumbers n ON t.ometid = n.ometid '.
 				'INNER JOIN omexsiccatiocclink l ON n.omenid = l.omenid '.
 				'INNER JOIN omoccurrences o ON l.occid = o.occid '.
-				'WHERE (o.collid = '.$this->collId.')';
+				'WHERE (o.collid = '.$this->collId.') '.
+                'ORDER BY t.title ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr[$r->ometid] = $r->title.' ['.$r->abbreviation.']';
+				$retArr[$r->ometid] = $r->title.($r->abbreviation?' ['.$r->abbreviation.']':'');
 			}
 			$rs->free();
 		}

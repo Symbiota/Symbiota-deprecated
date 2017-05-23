@@ -46,8 +46,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 <html>
 	<head>
 		<title>Occurrence Export Manager</title>
-		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 		<script src="../../js/jquery.js" type="text/javascript"></script>
 		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
@@ -447,8 +447,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									</td>
 								</tr>
 								<?php 
-								/*
-								if($traitArr = $dlManager->getAttributeTraits()){
+								if($traitArr = $dlManager->getAttributeTraits($collid)){
 									?>
 									<tr>
 										<td valign="top">
@@ -458,9 +457,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										</td>
 										<td>
 											<div style="margin:10px;">
-												<select name="traitid">
-													<option value="0">Select Trait</option>
-													<option value="0">--------------------------</option>
+												<select name="traitid[]" multiple>
 													<?php 
 														foreach($traitArr as $traitID => $tArr){
 															echo '<option value="'.$traitID.'">'.$tArr['name'].' [ID:'.$traitID.']</option>';
@@ -469,12 +466,10 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												</select> 
 											</div>
 											<div style="margin:10px;">
-												-- or select a specific Attribute State --
+												-- OR select a specific Attribute State --
 											</div>
 											<div style="margin:10px;">
-												<select name="stateid">
-													<option value="0">Select State</option>
-													<option value="0">--------------------------</option>
+												<select name="stateid[]" multiple>
 													<?php 
 													foreach($traitArr as $traitID => $tArr){
 														$stateArr = $tArr['state'];
@@ -485,11 +480,13 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 													?>
 												</select>
 											</div>
+											<div style="">
+												* Hold down the control (ctrl) or command button to select multiple options
+											</div>
 										</td>
 									</tr>
 									<?php 
 								}
-								*/
 								?>
 								<tr>
 									<td valign="top">
@@ -531,7 +528,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										<div style="margin:10px 0px;">
 											<input type="checkbox" name="identifications" value="1" onchange="extensionSelected(this)" checked /> include Determination History<br/>
 											<input type="checkbox" name="images" value="1" onchange="extensionSelected(this)" checked /> include Image Records<br/>
-											<!--  <input type="checkbox" name="attributes" value="1" onchange="extensionSelected(this)" checked /> include Occurrence Trait Attributes (MeasurementOrFact extension)<br/>  -->
+											<input type="checkbox" name="attributes" value="1" onchange="extensionSelected(this)" checked /> include Occurrence Trait Attributes (MeasurementOrFact extension)<br/>
 											*Output must be a compressed archive 
 										</div>
 									</td>

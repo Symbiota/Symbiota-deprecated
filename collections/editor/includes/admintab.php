@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $occid = $_GET['occid'];
 $occIndex = $_GET['occindex'];
@@ -13,13 +13,12 @@ $occManager->setOccId($occid);
 <div id="admindiv">
 	<?php
 	$editArr = $occManager->getEditArr();
-	//$externalEdits = $occManager->getExternalEditArr();
-	//if($editArr || $externalEdits){
-	if($editArr){
+	$externalEdits = $occManager->getExternalEditArr();
+	if($editArr || $externalEdits){
 		if($editArr){
 			?>
 			<fieldset style="padding:15px;margin:10px 0px;">
-				<legend><b>Edit History</b></legend>
+				<legend><b>History of Internal Edits</b></legend>
 				<?php 
 				if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
 					?>
@@ -60,42 +59,42 @@ $occManager->setOccId($occid);
 			</fieldset>
 			<?php 
 		}
-		/*
 		if($externalEdits){
 			?>
 			<fieldset style="margin-top:20px;padding:20px;">
-				<legend><b>External Edits</b></legend>
+				<legend><b>History of External Edits</b></legend>
 				<?php 
-				foreach($externalEdits as $ts => $eArr){
-					$reviewStr = 'OPEN';
-					if($eArr['reviewstatus'] == 2) $reviewStr = 'PENDING';
-					elseif($eArr['reviewstatus'] == 3) $reviewStr = 'CLOSED';
-					?>
-					<div>
-						<b>Editor:</b> <?php echo $eArr['editor']; ?>
-						<span style="margin-left:30px;"><b>Date:</b> <?php echo $ts; ?></span>
-						<span style="margin-left:30px;"><b>Source:</b> <?php echo $eArr['source']; ?></span>
-					</div>
-					<div>
-						<span><b>Applied Status:</b> <?php echo ($eArr['appliedstatus']?'applied':'not applied'); ?></span>
-						<span style="margin-left:30px;"><b>Review Status:</b> <?php echo $reviewStr; ?></span>
-					</div>
-					<?php
-					$edArr = $eArr['edits'];
-					foreach($edArr as $vArr){
-						echo '<div style="margin:15px;">';
-						echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
-						echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
-						echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
-						echo '</div>';
+				foreach($externalEdits as $orid => $eArr){
+					foreach($eArr as $appliedStatus => $eArr2){
+						$reviewStr = 'OPEN';
+						if($eArr2['reviewstatus'] == 2) $reviewStr = 'PENDING';
+						elseif($eArr2['reviewstatus'] == 3) $reviewStr = 'CLOSED';
+						?>
+						<div>
+							<b>Editor:</b> <?php echo $eArr2['editor']; ?>
+							<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr2['ts']; ?></span>
+							<span style="margin-left:30px;"><b>Source:</b> <?php echo $eArr2['source']; ?></span>
+						</div>
+						<div>
+							<span><b>Applied Status:</b> <?php echo ($appliedStatus?'applied':'not applied'); ?></span>
+							<span style="margin-left:30px;"><b>Review Status:</b> <?php echo $reviewStr; ?></span>
+						</div>
+						<?php
+						$edArr = $eArr2['edits'];
+						foreach($edArr as $fieldName => $vArr){
+							echo '<div style="margin:15px;">';
+							echo '<b>Field:</b> '.$fieldName.'<br/>';
+							echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
+							echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+							echo '</div>';
+						}
+						echo '<div style="margin:15px 0px;"><hr/></div>';
 					}
-					echo '<div style="margin:15px 0px;"><hr/></div>';
 				}
 				?>
 			</fieldset>
 			<?php
 		}
-		*/
 	}
 	else{
 		echo '<div style="margin:10px">No previous edits recorded</div>';

@@ -71,8 +71,16 @@ class ImageShared{
 		}
 
  	}
- 	
-    public function checkSchema() {
+
+	public function __destruct(){
+		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
+		if(!($this->conn === null)){
+			$this->conn->close();
+			$this->conn = null;
+		}
+	}
+
+ 	public function checkSchema() {
         $result = false;
 
         /*****  Warning: Do not override this check in order to supress error messages.
@@ -88,6 +96,7 @@ class ImageShared{
         $supportedVersions[] = '0.9.1.15';
         $supportedVersions[] = '0.9.1.16';
         $supportedVersions[] = '1.0';
+        $supportedVersions[] = '1.1';
         
         // Find the most recently applied version number
         $preparesql = "select versionnumber from schemaversion order by dateapplied desc limit 1;";
@@ -102,11 +111,6 @@ class ImageShared{
        return $result;
     }
 
- 	public function __destruct(){
-		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
-		if(!($this->conn === null)) $this->conn->close();
- 	}
- 	
  	public function reset(){
  		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
  		$this->sourceGdImg = null;
@@ -333,8 +337,7 @@ class ImageShared{
 	}
 	
 	public function processImage(){
-
-		if(!$this->imgName){
+        if(!$this->imgName){
 			$this->errArr[] = 'FATAL ERROR: Image file name null in processImage function';
 			//trigger_error('Image file name null in processImage function',E_USER_ERROR);
 			return false;
@@ -358,7 +361,7 @@ class ImageShared{
 		$imgLgUrl = "";
 		if($this->mapLargeImg){
 			if($this->sourceWidth > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
-				//Source image is wide enough can serve as large image, or it's too large to serve as basic web image
+                //Source image is wide enough can serve as large image, or it's too large to serve as basic web image
 				if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://') {
 					$imgLgUrl = $this->sourcePath;
 				}
@@ -380,23 +383,28 @@ class ImageShared{
 
 		//Create web url
 		$imgWebUrl = '';
-		if($this->sourceWidth < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
-			//Image width and file size is small enough to serve as web image
-			if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
-				if(copy($this->sourcePath, $this->targetPath.$this->imgName.$this->imgExt)){
-					$imgWebUrl = $this->imgName.$this->imgExt;
-				}
-			}
-			else{
-				$imgWebUrl = $this->imgName.$this->imgExt;
-			}
-		}
-		else{
-			//Image width or file size is too large
-			$newWidth = ($this->sourceWidth<($this->webPixWidth*1.2)?$this->sourceWidth:$this->webPixWidth);
-			$this->createNewImage('',$newWidth);
-			$imgWebUrl = $this->imgName.'.jpg';
-		}
+        if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://'){
+            $imgWebUrl = $this->sourcePath;
+        }
+		if(!$imgWebUrl){
+            if($this->sourceWidth < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
+                //Image width and file size is small enough to serve as web image
+                if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
+                    if(copy($this->sourcePath, $this->targetPath.$this->imgName.$this->imgExt)){
+                        $imgWebUrl = $this->imgName.$this->imgExt;
+                    }
+                }
+                else{
+                    $imgWebUrl = $this->imgName.$this->imgExt;
+                }
+            }
+            else{
+                //Image width or file size is too large
+                $newWidth = ($this->sourceWidth<($this->webPixWidth*1.2)?$this->sourceWidth:$this->webPixWidth);
+                $this->createNewImage('',$newWidth);
+                $imgWebUrl = $this->imgName.'.jpg';
+            }
+        }
 
 		$status = true;
 		if($imgWebUrl){
@@ -984,12 +992,14 @@ class ImageShared{
 	public function getErrArr(){
 		$retArr = $this->errArr;
 		unset($this->errArr);
+		$this->errArr = array();
 		return $retArr;
 	}
 
 	public function getErrStr(){
 		$retStr = implode('; ',$this->errArr);
 		unset($this->errArr);
+		$this->errArr = array();
 		return $retStr;
 	}
 
@@ -1109,7 +1119,7 @@ class ImageShared{
 		}
 		
 		//First simple check
-		if(file_exists($uri) || ($secondaryUrl && file_exists($secondaryUrl))){
+        if(file_exists($uri) || is_array(getimagesize($uri)) || ($secondaryUrl && file_exists($secondaryUrl))){
 			return true;
 	    }
 	    //Second check
@@ -1135,7 +1145,7 @@ class ImageShared{
 	    }
 	    //Test to see if file is an image 
 	    if(!@exif_imagetype($uri)) $exists = false;
-	    return $exists;
+        return $exists;
 	}	
 
 	private function cleanInStr($str){

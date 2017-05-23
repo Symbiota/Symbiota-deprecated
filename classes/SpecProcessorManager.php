@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class SpecProcessorManager {
 
@@ -7,6 +7,8 @@ class SpecProcessorManager {
 	protected $collid = 0;
 	protected $title;
 	protected $collectionName;
+	protected $institutionCode;
+	protected $collectionCode;
 	protected $projectType;
 	protected $managementType;
 	protected $specKeyPattern;
@@ -50,10 +52,13 @@ class SpecProcessorManager {
 	public function setCollId($id){
 		$this->collid = $id;
 		if($this->collid && is_numeric($this->collid) && !$this->collectionName){
-			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE (collid = '.$this->collid.')';
+			$sql = 'SELECT collid, collectionname, institutioncode, collectioncode, managementtype '.
+				'FROM omcollections WHERE (collid = '.$this->collid.')';
 			if($rs = $this->conn->query($sql)){
 				if($row = $rs->fetch_object()){
 					$this->collectionName = $row->collectionname;
+					$this->institutionCode = $row->institutioncode;
+					$this->collectionCode = $row->collectioncode;
 					$this->managementType = $row->managementtype;
 				}
 				else{
@@ -81,6 +86,9 @@ class SpecProcessorManager {
 					if(is_numeric($v)){
 						$sqlFrag .= ','.$k.' = '.$this->cleanInStr($v);
 					}
+					elseif($k == 'replacestr'){
+						$sqlFrag .= ','.$k.' = "'.$this->conn->real_escape_string($v).'"';
+					}
 					elseif($v){
 						$sqlFrag .= ','.$k.' = "'.$this->cleanInStr($v).'"';
 					}
@@ -102,22 +110,33 @@ class SpecProcessorManager {
 		$this->conn->query('DELETE FROM specprocessorprojects WHERE (title = "OCR Harvest") AND (collid = '.$this->collid.')');
 		$sql = '';
 		if(isset($addArr['imageuploadtype'])){
+			$sourcePath = $addArr['sourcepath'];
+			if($sourcePath == '-- Use Default Path --') $sourcePath = '';
 			if($addArr['imageuploadtype'] == 'idigbio'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
-					'VALUES('.$this->collid.',"iDigBio CSV upload","'.
-					$this->cleanInStr($addArr['speckeypattern']).'")';
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath) '.
+					'VALUES('.$this->collid.',"iDigBio CSV upload","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
+					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
+					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
+					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
+					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
 			elseif($addArr['imageuploadtype'] == 'iplant'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern) '.
-					'VALUES('.$this->collid.',"IPlant Image Processing","'.
-					$this->cleanInStr($addArr['speckeypattern']).'")';
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath) '.
+					'VALUES('.$this->collid.',"IPlant Image Processing","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
+					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
+					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
+					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
+					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
 			elseif($addArr['imageuploadtype'] == 'local'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
+				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath,targetpath,'.
 					'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 					'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
 					$this->cleanInStr($addArr['speckeypattern']).'",'.
-					($addArr['sourcepath']?'"'.$this->cleanInStr($addArr['sourcepath']).'"':'NULL').','.
+					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
+					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
+					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
+					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').','.
 					(isset($addArr['targetpath'])&&$addArr['targetpath']?'"'.$this->cleanInStr($addArr['targetpath']).'"':'NULL').','.
 					(isset($addArr['imgurl'])&&$addArr['imgurl']?'"'.$addArr['imgurl'].'"':'NULL').','.
 					(isset($addArr['webpixwidth'])&&$addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
@@ -155,7 +174,7 @@ class SpecProcessorManager {
 			$sqlWhere .= 'WHERE (collid = '.$this->collid.') ';
 		}
 		if($sqlWhere){
-			$sql = 'SELECT collid, title, speckeypattern, coordx1, coordx2, coordy1, coordy2, sourcepath, targetpath, '.
+			$sql = 'SELECT collid, title, speckeypattern, patternreplace, replacestr,coordx1, coordx2, coordy1, coordy2, sourcepath, targetpath, '.
 				'imgurl, webpixwidth, tnpixwidth, lgpixwidth, jpgcompression, createtnimg, createlgimg, source '.
 				'FROM specprocessorprojects '.$sqlWhere;
 			//echo $sql;
@@ -164,8 +183,8 @@ class SpecProcessorManager {
 				if(!$this->collid) $this->setCollId($row->collid); 
 				$this->title = $row->title;
 				$this->specKeyPattern = $row->speckeypattern;
-				//$this->patternReplace = $row->patternreplace;
-				//$this->replaceStr = $row->replacestr;
+				$this->patternReplace = $row->patternreplace;
+				$this->replaceStr = $row->replacestr;
 				$this->coordX1 = $row->coordx1;
 				$this->coordX2 = $row->coordx2;
 				$this->coordY1 = $row->coordy1;
@@ -190,6 +209,9 @@ class SpecProcessorManager {
 				}
 				elseif($this->title == 'OCR Harvest'){
 					break;
+				}
+				else{
+					$this->projectType = 'local';
 				}
 			}
 			$rs->free();
@@ -276,7 +298,7 @@ class SpecProcessorManager {
 			}
 			$rs->free();
 			//Load into $retArr in a specific order
-			$statusArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed','empty status');
+			$statusArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review-nfn','pending review','expert required','reviewed','closed','empty status');
 			foreach($statusArr as $v){
 				if(array_key_exists($v,$psArr)){
 					$retArr[$v] = $psArr[$v];
@@ -481,9 +503,8 @@ class SpecProcessorManager {
 	public function getLogListing(){
 		$retArr = array();
 		if($this->collid){
-			$logPath = $this->logPath;
-			if($this->projectType) $logPath .= $this->projectType.'/';
-			if($fh = opendir($logPath)){
+			$logPathFrag = ($this->projectType == 'local'?'imgProccessing':$this->projectType).'/';
+			if($fh = opendir($this->logPath.$logPathFrag)){
 				while($fileName = readdir($fh)){
 					if(strpos($fileName,$this->collid.'_') === 0){
 						$retArr[] = $fileName;
@@ -510,6 +531,14 @@ class SpecProcessorManager {
 
 	public function getCollectionName(){
 		return $this->collectionName;
+	}
+
+	public function getInstitutionCode(){
+		return $this->institutionCode;
+	}
+
+	public function getCollectionCode(){
+		return $this->collectionCode;
 	}
 
 	public function setProjectType($t){
@@ -590,6 +619,16 @@ class SpecProcessorManager {
 
 	public function getSourcePath(){
 		return $this->sourcePath;
+	}
+
+	public function getSourcePathDefault(){
+		$sourcePath = $this->sourcePath;
+		if(!$sourcePath && $this->projectType == 'iplant' && $GLOBALS['IPLANT_IMAGE_IMPORT_PATH']){
+			$sourcePath = $GLOBALS['IPLANT_IMAGE_IMPORT_PATH'];
+			if(strpos($sourcePath, '--INSTITUTION_CODE--')) $sourcePath = str_replace('--INSTITUTION_CODE--', $this->institutionCode, $sourcePath);
+			if(strpos($sourcePath, '--COLLECTION_CODE--')) $sourcePath = str_replace('--COLLECTION_CODE--', $this->collectionCode, $sourcePath);
+		}
+		return $sourcePath;
 	}
 
 	public function setTargetPath($p){
@@ -699,6 +738,10 @@ class SpecProcessorManager {
 
  	public function getUseImageMagick(){
  		return $this->processUsingImageMagick;
+ 	}
+ 	
+ 	public function getConn(){
+ 		return $this->conn;
  	}
  	
  	//Misc functions

@@ -64,8 +64,7 @@ if($action == "logout"){
 	header("Location: ../index.php");
 }
 elseif($action == "Login"){
-	$password = trim($_POST["password"]);
-	if($pHandler->authenticate($password)){
+	if($pHandler->authenticate($_POST["password"])){
 		if(!$refUrl || (strtolower(substr($refUrl,0,4)) == 'http') || strpos($refUrl,'newprofile.php')){
 			header("Location: ../index.php");
 		}
@@ -99,8 +98,8 @@ else{
 <head>
 	<title><?php echo $defaultTitle; ?> Login</title>
 	<meta http-equiv="X-Frame-Options" content="deny">
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		if(!navigator.cookieEnabled){
 			alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");

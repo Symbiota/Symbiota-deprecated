@@ -544,10 +544,10 @@ ALTER TABLE `omoccurrences`
   ADD INDEX `Index_otherCatalogNumbers` (`otherCatalogNumbers` ASC);
 
 ALTER TABLE `omoccurrences` 
+  ADD COLUMN `waterBody`  varchar(255) NULL AFTER `preparations`,
   ADD COLUMN `locationID` VARCHAR(100) NULL AFTER `preparations`,
   ADD COLUMN `eventID` VARCHAR(45) NULL AFTER `fieldnumber`,
   ADD COLUMN `latestDateCollected` DATE NULL AFTER `eventDate`,
-  ADD COLUMN `waterBody`  varchar(255) NULL AFTER `municipality`,
   ADD COLUMN `dynamicFields` TEXT NULL AFTER `labelProject`,
   CHANGE COLUMN `establishmentMeans` `establishmentMeans` VARCHAR(150) NULL DEFAULT NULL,
   CHANGE COLUMN `disposition` `disposition` varchar(250) NULL DEFAULT NULL,

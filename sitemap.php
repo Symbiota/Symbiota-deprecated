@@ -10,8 +10,8 @@ $smManager = new SiteMapManager();
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['SITEMAP'];?></title>
-	<link href="css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function submitTaxaNoImgForm(f){
 			if(f.clid.value != ""){
@@ -58,6 +58,7 @@ $smManager = new SiteMapManager();
 			<div style="margin-top:10px;"><h2><?php echo $LANG['IMGLIB'];?></h2></div>
 			<ul>
 				<li><a href="imagelib/index.php"><?php echo $LANG['IMGLIB'];?></a></li>
+				<li><a href="imagelib/search.php"><?php echo ($LANG['IMAGE_SEARCH']?$LANG['IMAGE_SEARCH']:'Interactive Search Tool'); ?></a></li>
 				<li><a href="imagelib/contributors.php"><?php echo $LANG['CONTRIB'];?></a></li>
 				<li><a href="misc/usagepolicy.php"><?php echo $LANG['USAGEPOLICY'];?></a></li>
 			</ul>
@@ -121,7 +122,7 @@ $smManager = new SiteMapManager();
 								</a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/admin/guidmapper.php">
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/admin/guidmapper.php">
                                     <?php echo $LANG['GUIDMAP'];?>
 								</a>
 							</li>

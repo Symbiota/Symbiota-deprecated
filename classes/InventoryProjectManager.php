@@ -29,9 +29,9 @@ class InventoryProjectManager {
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$projId = $row->pid;
-			$returnArr[$projId]["projname"] = $this->cleanOutStr($row->projname);
-			$returnArr[$projId]["managers"] = $this->cleanOutStr($row->managers);
-			$returnArr[$projId]["descr"] = $this->cleanOutStr($row->fulldescription);
+			$returnArr[$projId]["projname"] = $row->projname;
+			$returnArr[$projId]["managers"] = $row->managers;
+			$returnArr[$projId]["descr"] = $row->fulldescription;
 		}
 		$rs->free();
 		return $returnArr;
@@ -47,10 +47,10 @@ class InventoryProjectManager {
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->pid = $row->pid;
-				$returnArr['projname'] = $this->cleanOutStr($row->projname);
-				$returnArr['managers'] = $this->cleanOutStr($row->managers);
-				$returnArr['fulldescription'] = $this->cleanOutStr($row->fulldescription);
-				$returnArr['notes'] = $this->cleanOutStr($row->notes);
+				$returnArr['projname'] = $row->projname;
+				$returnArr['managers'] = $row->managers;
+				$returnArr['fulldescription'] = $row->fulldescription;
+				$returnArr['notes'] = $row->notes;
 				$returnArr['occurrencesearch'] = $row->occurrencesearch;
 				$returnArr['ispublic'] = $row->ispublic;
 				$returnArr['sortsequence'] = $row->sortsequence;
@@ -124,7 +124,7 @@ class InventoryProjectManager {
 			$rs = $this->conn->query($sql);
 			$cnt = 0;
 			while($row = $rs->fetch_object()){
-				$retArr[$row->clid] = $this->cleanOutStr($row->name).($row->access == 'private'?' <span title="Viewable only to editors">(private)</span>':'');
+				$retArr[$row->clid] = $row->name.($row->access == 'private'?' <span title="Viewable only to editors">(private)</span>':'');
 				if($cnt < 50 && $row->latcentroid){
 					$this->researchCoord[] = $row->latcentroid.','.$row->longcentroid;
 				}
@@ -234,7 +234,7 @@ class InventoryProjectManager {
 
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $this->cleanOutStr($row->name).($row->access == 'private'?' (private)':'');
+			$returnArr[$row->clid] = $row->name.($row->access == 'private'?' (private)':'');
 		}
 		$rs->free();
 		return $returnArr;
@@ -248,7 +248,7 @@ class InventoryProjectManager {
 			'ORDER BY name';
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $this->cleanOutStr($row->name);
+			$returnArr[$row->clid] = $row->name;
 		}
 		$rs->free();
 		return $returnArr;
@@ -268,13 +268,6 @@ class InventoryProjectManager {
 	}
 
 	//Misc functions
- 	private function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		//$newStr = str_replace(array(chr(10),chr(11),chr(13)),' ',$newStr);

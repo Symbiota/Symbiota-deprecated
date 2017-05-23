@@ -125,7 +125,7 @@ function changeImgRes(resType){
 function rotateiPlantImage(rotationAngle){
 	var imgObj = document.getElementById("activeimg-"+activeImgIndex);
 	var imgSrc = imgObj.src;
-	if(imgSrc.indexOf("iplantcollaborative") > -1){
+	if(imgSrc.indexOf("bisque.cyverse") > -1){
 		var angle = 0;
 		imgSrc = imgSrc.substring(0,imgSrc.indexOf('&format='));
 		if(imgSrc.indexOf("rotate=") > -1){

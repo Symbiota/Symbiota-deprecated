@@ -3,6 +3,7 @@ var imgCnt = 0;
 
 $(document).ready(function() {
 	$('#desctabs').tabs();
+	$("#desctabs").show();
 
 	var imgDiv = document.getElementById("img-div");
 	if(imgDiv.scrollHeight > imgDiv.clientHeight) document.getElementById("img-tab-div").style.display = 'block'; 
@@ -28,11 +29,11 @@ function toggleLinks(target){
 	var ele = document.getElementById(target);
 	if(ele){
 		if(ele.style.display=="none"){
-			ele.style.display="";
-  		}
+			ele.style.display="block";
+        }
 	 	else {
 	 		ele.style.display="none";
-	 	}
+        }
 	}
 	event.preventDefault();
 	$('html,body').animate({scrollTop:$("#"+target).offset().top}, 500);

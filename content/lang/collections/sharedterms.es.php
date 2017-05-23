@@ -1,7 +1,7 @@
 <?php 
 /*
 ------------------
-Language: Español (Spanish)
+Language: Espaï¿½ol (Spanish)
 ------------------
 */
  
@@ -14,4 +14,7 @@ $LANG['NAV_SEARCH'] = 'Criterios de BÃºsqueda';
 $LANG['TAB_CHECKLIST'] = 'Listado de Especies';
 $LANG['TAB_OCCURRENCES'] = 'Registros de Ocurrencia';
 $LANG['TAB_MAP'] = 'Mapas';
+
+$LANG['BUTTON_NEXT'] = 'Proxima >';
+$LANG['BUTTON_RESET'] = 'Restablecer';
 ?>

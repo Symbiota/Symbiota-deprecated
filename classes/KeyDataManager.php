@@ -253,13 +253,13 @@ class KeyDataManager {
 					$headingID = $row->hid;
 					$charName = $row->CharName;
 					$charDescr = $row->chardescr;
-					if($charDescr) $charName = "<span title='".$charDescr."'>".$charName."</span>";
+					if($charDescr) $charName = "<span class='charHeading' title='".$charDescr."'>".$charName."</span>";
 					$url = $row->helpurl;
 					if($url) $charName .= " <a href='$url' border='0' target='_blank'><img src='../images/info.png' width='12' border='0'></a>";
 					$cs = $row->CS;
 					$charStateName = $row->CharStateName;
 					$csDescr = $row->csdescr;
-					if($csDescr) $charStateName = "<span title='".$csDescr."'>".$charStateName."</span>";
+					if($csDescr) $charStateName = "<span class='characterStateName' title='".$csDescr."'>".$charStateName."</span>";
 					$diffRank = false;
 					if($row->DifficultyRank && $row->DifficultyRank > 1 && !array_key_exists($charCID,$this->charArr)) $diffRank = true;
 	
@@ -268,14 +268,14 @@ class KeyDataManager {
 	
 					//Set CharName within the $stateArray, if not yet set
 					if(!array_key_exists($headingID, $headingArray) || !array_key_exists($charCID, $headingArray[$headingID]) || !array_key_exists("CharNames", $headingArray[$headingID][$charCID]) || !array_key_exists($language, $headingArray[$headingID][$charCID]["CharNames"])){
-						$headingArray[$headingID][$charCID]["CharNames"][$language] = "<div".($diffRank?" style='display:none;' class='dynam'":" style='display:;'")."><span lang='".$language."'".
-							($language==$this->lang?" style='display:;margin-top:0.5em;'":" style='display:none;margin-top:0.5em;'").">&nbsp;&nbsp;<b>$charName</b></span></div>";
+						$headingArray[$headingID][$charCID]["CharNames"][$language] = "<div class='dynam'".($diffRank?" style='display:none;' ":" style='display:;'")."><span class='dynamlang' lang='".$language."'".
+							($language==$this->lang?" style='display:;'":" style='display:none;'").">&nbsp;&nbsp;".$charName."</span></div>";
 					}
 	
 					$checked = "";
 					if($this->charArr && array_key_exists($charCID,$this->charArr) && in_array($cs,$this->charArr[$charCID])) $checked = "checked";
 					if(!array_key_exists($headingID,$headingArray) || !array_key_exists($charCID,$headingArray[$headingID]) || !array_key_exists($cs,$headingArray[$headingID][$charCID]) || !$headingArray[$headingID][$charCID][$cs]["ROOT"]){
-						$headingArray[$headingID][$charCID][$cs]["ROOT"] = "<div".//($diffRank?" style='display:none;' class='dynam'":" style='display:;'").
+						$headingArray[$headingID][$charCID][$cs]["ROOT"] = "<div class='dynamopt'".//($diffRank?" style='display:none;' class='dynam'":" style='display:;'").
 							">&nbsp;&nbsp;<input type='checkbox' name='attr[]' id='cb".$charCID."-".$cs."' value='".$charCID."-".$cs."' $checked onclick='javascript: document.keyform.submit();'>";
 					}
 	

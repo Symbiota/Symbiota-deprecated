@@ -1,5 +1,5 @@
 <?php
-require_once($serverRoot.'/config/dbconnection.php');
+require_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class SpecUpload{
 
@@ -28,7 +28,7 @@ class SpecUpload{
 	private $logFH;
 	protected $errorStr;
 
-	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6, $SKELETAL = 7;
+	protected $DIRECTUPLOAD = 1, $DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6, $SKELETAL = 7, $IPTUPLOAD = 8, $NFNUPLOAD = 9;
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -42,7 +42,7 @@ class SpecUpload{
 	}
 	
 	public function setCollId($id){
-		if($id && is_numeric($id)){
+		if(is_numeric($id)){
 			$this->collId = $id;
 			$this->setCollInfo();
 		}
@@ -78,11 +78,17 @@ class SpecUpload{
 				elseif($uploadType == $this->SKELETAL){
 					$uploadStr = "Skeletal File Upload";
 				}
+				elseif($uploadType == $this->NFNUPLOAD){
+					$uploadStr = "NfN File Upload";
+				}
 				elseif($uploadType == $this->STOREDPROCEDURE){
 					$uploadStr = "Stored Procedure";
 				}
 				elseif($uploadType == $this->DWCAUPLOAD){
 					$uploadStr = "Darwin Core Archive Upload";
+				}
+				elseif($uploadType == $this->IPTUPLOAD){
+					$uploadStr = "IPT Resource";
 				}
 				$returnArr[$row->uspid]["title"] = $row->title.' ('.$uploadStr.' - #'.$row->uspid.')';
 				$returnArr[$row->uspid]["uploadtype"] = $row->uploadtype;
@@ -149,8 +155,8 @@ class SpecUpload{
 		return false;
 	}
 
-	//Upload Review
-	public function exportUploadData($searchVariables){
+	//Review or import data
+	public function exportPendingImport($searchVariables){
 		$retArr = Array();
 		if($this->collId){
 			if(!$searchVariables) $searchVariables = 'TOTAL_TRANSFER';
@@ -161,7 +167,7 @@ class SpecUpload{
 			$outstream = fopen("php://output", "w");
 			$outputHeader = true;
 
-			$sql = $this->getUploadSql($searchVariables) ;
+			$sql = $this->getPendingImportSql($searchVariables) ;
 			//echo "<div>".$sql."</div>"; exit;
 			$rs = $this->conn->query($sql);
 			if($rs->num_rows){
@@ -182,10 +188,10 @@ class SpecUpload{
 		return $retArr;
 	}
 
-	public function getUploadData($start, $limit, $searchVariables = ''){
+	public function getPendingImportData($start, $limit, $searchVariables = ''){
 		$retArr = Array();
 		if($this->collId){
-			$sql = $this->getUploadSql($searchVariables) ;
+			$sql = $this->getPendingImportSql($searchVariables) ;
 			if($limit) $sql .= 'LIMIT '.$start.','.$limit;
 			//echo "<div>".$sql."</div>"; exit;
 			$rs = $this->conn->query($sql);
@@ -197,7 +203,7 @@ class SpecUpload{
 		return $retArr;
 	}
 
-	private function getUploadSql($searchVariables){
+	private function getPendingImportSql($searchVariables){
 		$occFieldArr = array('catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
 			'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 			'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
@@ -211,30 +217,30 @@ class SpecUpload{
 			'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
 			'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
 			'labelproject','basisofrecord','ownerinstitutioncode', 'processingstatus', 'recordenteredby');
-		$sql = 'SELECT dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp '.
-				'WHERE collid = '.$this->collId.' ';
+		$sql = 'SELECT occid, dbpk, '.implode(',',$occFieldArr).' FROM uploadspectemp '.
+				'WHERE collid IN('.$this->collId.') ';
 		if($searchVariables){
 			if($searchVariables == 'matchappend'){
-				$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
+				$sql = 'SELECT DISTINCT u.occid, u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
 						'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.collid = o.collid '.
-						'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
+						'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
 			}
 			elseif($searchVariables == 'sync'){
-				$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
+				$sql = 'SELECT DISTINCT u.occid, u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
 						'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-						'WHERE (u.collid = '.$this->collId.') AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
+						'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
 						'AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) ';
 			}
 			elseif($searchVariables == 'exist'){
-				$sql = 'SELECT DISTINCT o.dbpk, o.'.implode(',o.',$occFieldArr).' '.
+				$sql = 'SELECT DISTINCT o.occid, o.dbpk, o.'.implode(',o.',$occFieldArr).' '.
 						'FROM omoccurrences o LEFT JOIN uploadspectemp u  ON (o.occid = u.occid) '.
-						'WHERE (o.collid = '.$this->collId.') AND (u.occid IS NULL) ';
+						'WHERE (o.collid IN('.$this->collId.')) AND (u.occid IS NULL) ';
 			}
 			elseif($searchVariables == 'dupdbpk'){
-				$sql = 'SELECT DISTINCT u.dbpk, u.'.implode(',u.',$occFieldArr).' FROM uploadspectemp u WHERE u.dbpk IN('.
+				$sql = 'SELECT DISTINCT u.occid, u.dbpk, u.'.implode(',u.',$occFieldArr).' FROM uploadspectemp u WHERE u.dbpk IN('.
 						'SELECT dbpk FROM uploadspectemp '.
 						'GROUP BY dbpk, collid, basisofrecord '.
-						'HAVING (Count(*)>1) AND (collid = '.$this->collId.')) ';
+						'HAVING (Count(*)>1) AND (collid IN('.$this->collId.'))) ';
 			}
 			else{
 				$varArr = explode(';',$searchVariables);
@@ -262,7 +268,7 @@ class SpecUpload{
 	public function getUploadCount(){
 		$cnt = 0;
 		if($this->collId){
-			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE collid = '.$this->collId;
+			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid IN('.$this->collId.'))';
 			$rs = $this->conn->query($sql);
 			$rs->num_rows;
 			$rs->free();
@@ -301,52 +307,67 @@ class SpecUpload{
     	}
     }
 
-    public function editUploadProfile(){
-		$sql = 'UPDATE uploadspecparameters SET title = "'.$this->cleanInStr($_REQUEST['title']).'"'.
-			', platform = '.($_REQUEST['platform']?'"'.$_REQUEST['platform'].'"':'NULL').
-			', server = '.($_REQUEST['server']?'"'.$_REQUEST['server'].'"':'NULL').
-			', port = '.($_REQUEST['port']?$_REQUEST['port']:'NULL').
-			', username = '.($_REQUEST['username']?'"'.$_REQUEST['username'].'"':'NULL').
-			', password = '.($_REQUEST['password']?'"'.$_REQUEST['password'].'"':'NULL').
-			', schemaname = '.($_REQUEST['schemaname']?'"'.$_REQUEST['schemaname'].'"':'NULL').
-			', code = '.($_REQUEST['code']?'"'.$_REQUEST['code'].'"':'NULL').
-			', path = '.($_REQUEST['path']?'"'.$_REQUEST['path'].'"':'NULL').
-			', pkfield = '.($_REQUEST['pkfield']?'"'.$_REQUEST['pkfield'].'"':'NULL').
-			', querystr = '.($_REQUEST['querystr']?'"'.$this->cleanInStr($_REQUEST['querystr']).'"':'NULL').
-			', cleanupsp = '.($_REQUEST['cleanupsp']?'"'.$_REQUEST['cleanupsp'].'"':'NULL').' '.
+    public function editUploadProfile($profileArr){
+    	$sql = 'UPDATE uploadspecparameters SET title = "'.$this->cleanInStr($profileArr['title']).'"'.
+			', platform = '.($profileArr['platform']?'"'.$profileArr['platform'].'"':'NULL').
+			', server = '.($profileArr['server']?'"'.$profileArr['server'].'"':'NULL').
+			', port = '.($profileArr['port']?$profileArr['port']:'NULL').
+			', username = '.($profileArr['username']?'"'.$profileArr['username'].'"':'NULL').
+			', password = '.($profileArr['password']?'"'.$profileArr['password'].'"':'NULL').
+			', schemaname = '.($profileArr['schemaname']?'"'.$profileArr['schemaname'].'"':'NULL').
+			', code = '.($profileArr['code']?'"'.$profileArr['code'].'"':'NULL').
+			', path = '.($profileArr['path']?'"'.$profileArr['path'].'"':'NULL').
+			', pkfield = '.($profileArr['pkfield']?'"'.$profileArr['pkfield'].'"':'NULL').
+			', querystr = '.($profileArr['querystr']?'"'.$this->cleanInStr($profileArr['querystr']).'"':'NULL').
+			', cleanupsp = '.($profileArr['cleanupsp']?'"'.$profileArr['cleanupsp'].'"':'NULL').' '.
 			'WHERE (uspid = '.$this->uspid.')';
 		//echo $sql;
 		if(!$this->conn->query($sql)){
-			return "<div>Error Editing Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
+			$this->errorStr = "<div>Error Editing Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
+			return false;
 		}
-		return 'SUCCESS: Upload profile edited successfully';
+		return true;
 	}
 
-    public function addUploadProfile(){
+    public function createUploadProfile($profileArr){
 		$sql = 'INSERT INTO uploadspecparameters(collid, uploadtype, title, platform, server, port, code, path, '.
-			'pkfield, username, password, schemaname, cleanupsp, querystr) VALUES ('.
-			$this->collId.','.$_REQUEST['uploadtype'].',"'.$this->cleanInStr($_REQUEST['title']).'","'.$_REQUEST['platform'].'","'.
-			$_REQUEST['server'].'",'.($_REQUEST['port']?$_REQUEST['port']:'NULL').',"'.$_REQUEST['code'].
-			'","'.$_REQUEST['path'].'","'.$_REQUEST['pkfield'].'","'.$_REQUEST['username'].
-			'","'.$_REQUEST['password'].'","'.$_REQUEST['schemaname'].'","'.$_REQUEST['cleanupsp'].'","'.
-			$this->cleanInStr($_REQUEST['querystr']).'")';
+			'pkfield, username, password, schemaname, cleanupsp, querystr) VALUES ('.$this->collId.','.
+			$profileArr['uploadtype'].',"'.$this->cleanInStr($profileArr['title']).'",'.
+			(isset($profileArr['platform'])&&$profileArr['platform']?'"'.$this->cleanInStr($profileArr['platform']).'"':'NULL').','.
+			(isset($profileArr['server'])&&$profileArr['platform']?'"'.$this->cleanInStr($profileArr['server']).'"':'NULL').','.
+			(isset($profileArr['port'])&&is_numeric($profileArr['port'])?$profileArr['port']:'NULL').','.
+			(isset($profileArr['code'])&&$profileArr['code']?'"'.$this->cleanInStr($profileArr['code']).'"':'NULL').','.
+			(isset($profileArr['path'])&&$profileArr['path']?'"'.$this->cleanInStr($profileArr['path']).'"':'NULL').','.
+			(isset($profileArr['pkfield'])&&$profileArr['pkfield']?'"'.$this->cleanInStr($profileArr['pkfield']).'"':'NULL').','.
+			(isset($profileArr['username'])&&$profileArr['username']?'"'.$this->cleanInStr($profileArr['username']).'"':'NULL').','.
+			(isset($profileArr['password'])&&$profileArr['password']?'"'.$this->cleanInStr($profileArr['password']).'"':'NULL').','.
+			(isset($profileArr['schemaname'])&&$profileArr['schemaname']?'"'.$this->cleanInStr($profileArr['schemaname']).'"':'NULL').','.
+			(isset($profileArr['cleanupsp'])&&$profileArr['cleanupsp']?'"'.$this->cleanInStr($profileArr['cleanupsp']).'"':'NULL').','.
+			(isset($profileArr['querystr'])&&$profileArr['querystr']?'"'.$this->cleanInStr($profileArr['querystr']).'"':'NULL').')';
 		//echo $sql;
-		if(!$this->conn->query($sql)){
-			return '<div>Error Adding Upload Parameters: '.$this->conn->error.'</div><div style="margin-left:10px;">SQL: '.$sql.'</div>';
+		if($this->conn->query($sql)){
+			return $this->conn->insert_id;
 		}
-		return 'SUCCESS: New upload profile added';
+		else{
+			$this->errorStr = '<div>Error Adding Upload Parameters: '.$this->conn->error.'</div><div style="margin-left:10px;">SQL: '.$sql.'</div>';
+			return false;
+		}
 	}
 
     public function deleteUploadProfile($uspid){
 		$sql = 'DELETE FROM uploadspecparameters WHERE (uspid = '.$uspid.')';
-		//echo $sql;
 		if(!$this->conn->query($sql)){
-			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
+			$this->errorStr = '<div>Error Adding Upload Parameters: '.$this->conn->error.'</div><div>'.$sql.'</div>';
+			return false;
 		}
-		return "SUCCESS: Upload Profile Deleted";
+		return true;
 	}
 
 	//Setter and getters
+	public function getUspid(){
+		return $this->uspid;
+	}
+	
 	public function getTitle(){
 		return $this->title;
 	}
@@ -440,6 +461,8 @@ class SpecUpload{
 	protected function outputMsg($str, $indent = 0){
 		if($this->verboseMode == 1){
 			echo $str;
+			ob_flush();
+			flush();
 		}
 		elseif($this->verboseMode == 2){
 			if($this->logFH) fwrite($this->logFH,($indent?str_repeat("\t",$indent):'').strip_tags($str)."\n");

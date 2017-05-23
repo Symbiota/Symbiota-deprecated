@@ -56,7 +56,7 @@ class RareSpeciesManager {
 				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN taxa t ON ts2.tid = t.tid '.
 				'SET o.LocalitySecurity = 0 '.
-				'WHERE (t.tid = '.$tid.')';
+				'WHERE (t.tid = '.$tid.') AND (o.localitySecurityReason IS NULL) ';
 			//echo $sql2; exit;
 			$this->conn->query($sql2);
 			$occurMain = new OccurrenceMaintenance($this->conn);

@@ -1,4 +1,5 @@
 <?php
+include_once($SERVER_ROOT.'/classes/SpecUploadBase.php');
 class SpecUploadDigir extends SpecUploadBase {
 
 	//Search variables

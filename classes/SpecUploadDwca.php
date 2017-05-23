@@ -1,4 +1,5 @@
 <?php
+include_once($SERVER_ROOT.'/classes/SpecUploadBase.php');
 class SpecUploadDwca extends SpecUploadBase{
 	
 	private $baseFolderName;
@@ -24,31 +25,26 @@ class SpecUploadDwca extends SpecUploadBase{
 		mkdir($this->uploadTargetPath.$localFolder);
 		$fullPath = $this->uploadTargetPath.$localFolder.'/dwca.zip';
 		
+		if(array_key_exists('ulfnoverride',$_POST) && $_POST['ulfnoverride'] && !$this->path){
+			$this->path = $_POST['ulfnoverride'];
+		}
+		
 		if($this->path){
-			//DWCA path is stored in the upload profile definition
-			//If they incorrectly mapped to the IPT instance, adjust to point to the Archive file 
-			if(strpos($this->path,'/resource.do')){
-				$this->path = str_replace('/resource.do','/archive.do',$this->path);
+			if($this->uploadType == $this->IPTUPLOAD){
+				//If IPT resource URL was provided, adjust ULR to point to the Archive file 
+				if(strpos($this->path,'/resource.do')){
+					$this->path = str_replace('/resource.do','/archive.do',$this->path);
+				}
+				elseif(strpos($this->path,'/resource?')){
+					$this->path = str_replace('/resource','/archive.do',$this->path);
+				}
 			}
-			elseif(strpos($this->path,'/resource?')){
-				$this->path = str_replace('/resource','/archive.do',$this->path);
-			} 
 			if(copy($this->path,$fullPath)){
 				$this->baseFolderName = $localFolder;
 			}
 			else{
 				$this->outputMsg('<li>ERROR: unable to upload file (path: '.$fullPath.') </li>');
 				$this->errorStr = 'ERROR: unable to upload file (path: '.$fullPath.')';
-			}
-		}
-		elseif(array_key_exists('ulfnoverride',$_POST) && $_POST['ulfnoverride']){
-			//File was physcially placed on server where Apache can read the file
-			if(copy($_POST["ulfnoverride"],$fullPath)){
-				$this->baseFolderName = $localFolder;
-			}
-			else{
-				$this->outputMsg('<li>ERROR moving locally placed file, are you sure that path is correct? (path: '.$_POST["ulfnoverride"].') </li>');
-				$this->errorStr = 'ERROR moving locally placed file, are you sure that path is correct?';
 			}
 		}
 		elseif(array_key_exists("uploadfile",$_FILES)){
@@ -71,11 +67,6 @@ class SpecUploadDwca extends SpecUploadBase{
 				$this->errorStr = 'ERROR uploading file: '.$msg;
 			}
 		}
-		else{
-			$msg = 'ERROR upload file path not defined';
-			$this->outputMsg('<li>'.$msg.'</li>');
-			$this->errorStr = $msg;
-		}
 		
 		if($this->baseFolderName && substr($this->baseFolderName,-1) != '/') $this->baseFolderName .= '/';
 		if($this->baseFolderName){
@@ -96,8 +87,24 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->identSourceArr = $this->metaArr['ident']['fields'];
 				}
 				if(isset($this->metaArr['image']['fields'])){
-					$this->imageSourceArr = $this->metaArr['image']['fields'];
-				}
+                    $typeField = 0;
+                    $rightsField = 0;
+                    foreach($this->metaArr['image']['fields'] as $k => $v){
+                        if(strtolower($v) == 'type'){
+                            if(!$typeField) $this->imageSourceArr[$k] = strtolower($v);
+                            else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
+                            $typeField++;
+                        }
+                        elseif(strtolower($v) == 'rights'){
+                            if(!$rightsField) $this->imageSourceArr[$k] = strtolower($v);
+                            else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
+                            $rightsField++;
+                        }
+                        else {
+                            $this->imageSourceArr[$k] = strtolower($v);
+                        }
+                    }
+                }
 			}
 			$status = true;
 		}
@@ -116,7 +123,14 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 		else{
 			$err = $zip->getStatusString();
-			if(!$err) $err = 'target path is likely not a valid zip file';
+			if(!$err){
+				if($this->uploadType == $this->IPTUPLOAD){
+					$err = 'target path does not appear to be a valid IPT instance';
+				}
+				else{
+					$err = 'Upload file or target path does not lead to a valid zip file';
+				}
+			}
 			$this->outputMsg('<li>ERROR unpacking archive file: '.$err.'</li>');
 			$this->errorStr = 'ERROR unpacking archive file: '.$err;
 			$status = false;
@@ -435,8 +449,24 @@ class SpecUploadDwca extends SpecUploadBase{
 						$this->outputMsg('<li>Loading image extension... </li>');
 						//Set source array
 						foreach($this->metaArr['image']['fields'] as $k => $v){
-							$this->imageSourceArr[$k] = strtolower($v);
-						}
+                            $typeField = 0;
+                            $rightsField = 0;
+                            foreach($this->metaArr['image']['fields'] as $k => $v){
+                                if(strtolower($v) == 'type'){
+                                    if(!$typeField) $this->imageSourceArr[$k] = strtolower($v);
+                                    else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
+                                    $typeField++;
+                                }
+                                elseif(strtolower($v) == 'rights'){
+                                    if(!$rightsField) $this->imageSourceArr[$k] = strtolower($v);
+                                    else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
+                                    $rightsField++;
+                                }
+                                else {
+                                    $this->imageSourceArr[$k] = strtolower($v);
+                                }
+                            }
+                        }
 						$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
 						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
 					}

@@ -1,4 +1,6 @@
 <?php
+include_once($SERVER_ROOT.'/classes/SpecUploadBase.php');
+
 class SpecUploadDirect extends SpecUploadBase {
 
  	public function __construct(){
@@ -34,6 +36,7 @@ class SpecUploadDirect extends SpecUploadBase {
 				echo '<div style="font-weight:bold;margin:15px;">ERROR: '.$sourceConn->error.'</div>';
 				return false;
 			}
+			$sourceConn->close();
 		}
 		return false;
 	}

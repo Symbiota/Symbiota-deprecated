@@ -51,9 +51,9 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
-	<title><?php echo $defaultTitle.' '.$LANG['PAGE_TITLE']; ?></title>
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<style type="text/css">
 		.ui-tabs .ui-tabs-nav li { width:32%; }
@@ -145,11 +145,11 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
                     starr: starrJson,
                     jsoncollstarr: collJson,
                     targettid: <?php echo $targetTid; ?>
-                }
+                },
+                dataType: "html"
             }).done(function(msg) {
                 if(msg){
-                    var queryInfo = JSON.parse(msg);
-                    document.getElementById("queryrecordsinfo").innerHTML = queryInfo;
+                    document.getElementById("queryrecordsinfo").innerHTML = msg;
                 }
                 else{
                     document.getElementById("queryrecords").innerHTML = "<p>An error occurred retrieving search information.</p>";
@@ -171,40 +171,30 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
                     jsoncollstarr: collJson,
                     targettid: <?php echo $targetTid; ?>,
                     page: page
-                }
+                },
+                dataType: "html"
             }).done(function(msg) {
-                if(msg){
-                    var newRecordList = JSON.parse(msg);
-                    document.getElementById("queryrecords").innerHTML = newRecordList;
-                }
-                else{
-                    document.getElementById("queryrecords").innerHTML = "<p>An error occurred retrieving records.</p>";
-                }
+                if(!msg) msg = "<p>An error occurred retrieving records.</p>";
+                document.getElementById("queryrecords").innerHTML = msg;
             });
         }
 
-        <?php
-		if($collManager->getClName() && $targetTid){
-			?>
-			function addAllVouchersToCl(clidIn){
-                var occJson = document.getElementById("specoccjson").value;
+		function addAllVouchersToCl(clidIn){
+			var occJson = document.getElementById("specoccjson").value;
 
-			    $.ajax({
-					type: "POST",
-					url: "rpc/addallvouchers.php",
-					data: { clid: clidIn, jsonOccArr: occJson, tid: <?php echo ($targetTid?$targetTid:'0'); ?> }
-				}).done(function( msg ) {
-					if(msg == "1"){
-						alert("Success! All vouchers added to checklist.");
-					}
-					else{
-						alert(msg);
-					}
-				});
-			}
-			<?php
+			$.ajax({
+				type: "POST",
+				url: "rpc/addallvouchers.php",
+				data: { clid: clidIn, jsonOccArr: occJson, tid: <?php echo ($targetTid?$targetTid:'0'); ?> }
+			}).done(function( msg ) {
+				if(msg == "1"){
+					alert("Success! All vouchers added to checklist.");
+				}
+				else{
+					alert(msg);
+				}
+			});
 		}
-		?>
 
         function copySearchUrl(){
             var urlPrefix = document.getElementById('urlPrefixBox').value;

@@ -2,25 +2,18 @@
 date_default_timezone_set('America/Phoenix');
 
 require_once('ImageBatchConf.php');
-if(isset($serverRoot)) { 
-	if(file_exists($serverRoot.'/config/symbini.php')){
-		include_once($serverRoot.'/config/symbini.php');
-	}
-	if(file_exists($serverRoot.'/collections/specprocessor/standalone_scripts/ImageBatchConnectionFactory.php')) { 
-		include_once($serverRoot.'/collections/specprocessor/standalone_scripts/ImageBatchConnectionFactory.php');
-	}
-	if(file_exists($serverRoot.'/classes/ImageBatchProcessor.php')) { 
-		require_once($serverRoot.'/classes/ImageBatchProcessor.php');
-	}
+if(file_exists('../../../config/symbini.php')){
+	include_once('../../../config/symbini.php');
+	require_once($SERVER_ROOT.'/classes/ImageBatchProcessor.php');
+}
+elseif(isset($serverRoot) && $serverRoot){ 
+	include_once($serverRoot.'/config/symbini.php');
+	include_once($serverRoot.'/collections/specprocessor/standalone_scripts/ImageBatchConnectionFactory.php');
+	require_once($serverRoot.'/classes/ImageBatchProcessor.php');
 }
 else{
-	include_once('../../../config/symbini.php');
-	if(file_exists('ImageBatchConnectionFactory.php')) { 
-		include_once('ImageBatchConnectionFactory.php');
-	}
-	if(file_exists('ImageBatchProcessor.php')){
-		require_once('ImageBatchProcessor.php');
-	}
+	include_once('ImageBatchConnectionFactory.php');
+	require_once('ImageBatchProcessor.php');
 }
 
 //-------------------------------------------------------------------------------------------//
@@ -46,7 +39,6 @@ if($lgPixWidth) $imageProcessor->setLgPixWidth($lgPixWidth);
 if($webFileSizeLimit) $imageProcessor->setWebFileSizeLimit($webFileSizeLimit);
 if($lgFileSizeLimit) $imageProcessor->setLgFileSizeLimit($lgFileSizeLimit);
 $imageProcessor->setJpgQuality($jpgQuality);
-$imageProcessor->setUseImageMagick($useImageMagickBatch);
 
 if(isset($webImg) && $webImg) $imageProcessor->setWebImg($webImg);
 elseif(isset($createWebImg) && $createWebImg) $imageProcessor->setCreateWebImg($createWebImg);

@@ -9,18 +9,28 @@ class ImageProcessor {
 	private $collid = 0;
 	private $sprid;
 	private $collArr;
+	private $matchCatalogNumber = true;
+	private $matchOtherCatalogNumbers = false;
 
 	private $logMode = 0;		//0 = silent, 1 = html, 2 = log file, 3 = both html & log
 	private $logFH;
+	private $destructConn = true;
 
-	function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('write');
-		if($this->conn === false) exit("ABORT: Image upload aborted: Unable to establish connection to database");
+	function __construct($con = null){
+		if($con){
+			//Inherits connection from another class
+			$this->conn = $con;
+			$this->destructConn = false;
+		}
+		else{
+			$this->conn = MySQLiConnectionFactory::getCon('write');
+			if($this->conn === false) exit("ABORT: Image upload aborted: Unable to establish connection to database");
+		}
 	}
 
 	function __destruct(){
 		//Close connection
-		if(!($this->conn === false)) $this->conn->close();
+		if($this->destructConn && !($this->conn === false)) $this->conn->close();
 
 		//Close log file
 		if($this->logFH) fclose($this->logFH);
@@ -37,7 +47,7 @@ class ImageProcessor {
 			if(file_exists($logPath)){
 				$logFile = $logPath.$this->collid.'_'.$this->collArr['instcode'];
 				if($this->collArr['collcode']) $logFile .= '-'.$this->collArr['collcode'];
-				$logFile .= '_'.date('Y-m-d').".log";
+				$logFile .= '_'.date('Y-m-d').'.log';
 				$this->logFH = fopen($logFile, 'a');
 			}
 			else{
@@ -68,12 +78,26 @@ class ImageProcessor {
 	}
 
 	//iPlant functions
-	public function processIPlantImages($pmTerm, $lastRunDate){
+	public function processIPlantImages($pmTerm, $postArr){
 		set_time_limit(1000);
+		$lastRunDate = $postArr['startdate'];
+		$iPlantSourcePath = (array_key_exists('sourcepath', $postArr)?$postArr['sourcepath']:'');
+		$this->matchCatalogNumber = (array_key_exists('matchcatalognumber', $postArr)?true:false);
+		$this->matchOtherCatalogNumbers = (array_key_exists('matchothercatalognumbers', $postArr)?true:false);
+
 		if($this->collid){
-			$this->initProcessor('iplant');
 			$iPlantDataUrl = 'https://bisque.cyverse.org/data_service/'; 
 			$iPlantImageUrl = 'https://bisque.cyverse.org/image_service/image/';
+			if(!$iPlantSourcePath && array_key_exists('IPLANT_IMAGE_IMPORT_PATH', $GLOBALS)) $iPlantSourcePath = $GLOBALS['IPLANT_IMAGE_IMPORT_PATH'];
+			if($iPlantSourcePath){
+				if(strpos($iPlantSourcePath, '--INSTITUTION_CODE--')) $iPlantSourcePath = str_replace('--INSTITUTION_CODE--', $this->collArr['instcode'], $iPlantSourcePath);
+				if(strpos($iPlantSourcePath, '--COLLECTION_CODE--')) $iPlantSourcePath = str_replace('--COLLECTION_CODE--', $this->collArr['collcode'], $iPlantSourcePath);
+			}
+			else{
+				echo '<div style="color:red">iPlant image import path (IPLANT_IMAGE_IMPORT_PATH) not set within symbini configuration file</div>';
+				return false;
+			}
+			$this->initProcessor('iplant');
 			$collStr = $this->collArr['instcode'].($this->collArr['collcode']?'-'.$this->collArr['collcode']:'');
 			$this->logOrEcho('Starting image processing: '.$collStr.' ('.date('Y-m-d h:i:s A').')');
 			
@@ -92,7 +116,7 @@ class ImageProcessor {
 			//Get start date
 			if(!$lastRunDate || !preg_match('/^\d{4}-\d{2}-\d{2}$/',$lastRunDate)) $lastRunDate = '2015-04-01';
 			while(strtotime($lastRunDate) < strtotime('now')){
-				$url = $iPlantDataUrl.'image?value=*home/shared/sernec/'.$this->collArr['instcode'].'/*&tag_query=upload_datetime:'.$lastRunDate.'*';
+				$url = $iPlantDataUrl.'image?value=*'.$iPlantSourcePath.'*&tag_query=upload_datetime:'.$lastRunDate.'*';
 				$contents = @file_get_contents($url);
 				//check if response is received from iPlant
 				if(!empty($http_response_header)) {
@@ -115,11 +139,7 @@ class ImageProcessor {
 								if(preg_match($pmTerm,$fileName,$matchArr)){
 									if(array_key_exists(1,$matchArr) && $matchArr[1]){
 										$specPk = $matchArr[1];
-										/*
-										if(isset($cArr['pattreplace'])){ 				
-											$specPk = preg_replace($cArr['pattreplace'],$cArr['replacestr'],$specPk);
-										}
-										*/
+										if($postArr['patternreplace']) $specPk = preg_replace($postArr['patternreplace'],$postArr['replacestr'],$specPk);
 										$guid = $i['resource_uniq'];
 										if($occid = $this->getOccid($specPk,$guid,$fileName)){
 											$baseUrl = $iPlantImageUrl.$guid;
@@ -155,16 +175,15 @@ class ImageProcessor {
 			}
 			$this->cleanHouse(array($this->collid));
 			$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
-			$this->logOrEcho('--------------------------------------------------------------------');
-			$this->logOrEcho(' ');
-			$this->logOrEcho(' ');
 		}
 		return true;
 	}
 
 	//iDigBio Image ingestion processing functions
-	public function processiDigBioOutput($pmTerm){
+	public function processiDigBioOutput($pmTerm,$postArr){
 		$status = '';
+		$this->matchCatalogNumber = (array_key_exists('matchcatalognumber', $postArr)?1:0);
+		$this->matchOtherCatalogNumbers = (array_key_exists('matchothercatalognumbers', $postArr)?1:0);
 		$idigbioImageUrl = 'https://api.idigbio.org/v2/media/';
 		$this->initProcessor('idigbio');
 		$collStr = $this->collArr['instcode'].($this->collArr['collcode']?'-'.$this->collArr['collcode']:'');
@@ -190,6 +209,7 @@ class ImageProcessor {
 								if(preg_match($pmTerm,$origFileName,$matchArr)){
 									if(array_key_exists(1,$matchArr) && $matchArr[1]){
 										$specPk = $matchArr[1];
+										if($postArr['patternreplace']) $specPk = preg_replace($postArr['patternreplace'],$postArr['replacestr'],$specPk);
 										$occid = $this->getOccid($specPk,$origFileName);
 										if($occid){
 											//Image hasn't been loaded, thus insert image urls into image table
@@ -212,8 +232,6 @@ class ImageProcessor {
 						}
 						$this->cleanHouse(array($this->collid));
 						$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').")");
-						$this->logOrEcho('--------------------------------------------------------------------');
-						$this->logOrEcho(' ');
 					}
 					else{
 						//Output to error log file
@@ -238,14 +256,24 @@ class ImageProcessor {
 		$occid = 0;
 		if($this->collid){
 			//Check to see if record with pk already exists
-			$sql = 'SELECT occid FROM omoccurrences '.
-				'WHERE (catalognumber IN("'.$specPk.'"'.(substr($specPk,0,1)=='0'?',"'.ltrim($specPk,'0 ').'"':'').')) '.
-				'AND (collid = '.$this->collid.')';
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				$occid = $row->occid;
+			if($this->matchCatalogNumber){
+				$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$this->collid.') '.
+					'AND (catalognumber IN("'.$specPk.'"'.(substr($specPk,0,1)=='0'?',"'.ltrim($specPk,'0 ').'"':'').')) ';
+				$rs = $this->conn->query($sql);
+				if($row = $rs->fetch_object()){
+					$occid = $row->occid;
+				}
+				$rs->free();
 			}
-			$rs->free();
+			if(!$occid && $this->matchOtherCatalogNumbers){
+				$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$this->collid.') '.
+					'AND (othercatalognumbers IN("'.$specPk.'"'.(substr($specPk,0,1)=='0'?',"'.ltrim($specPk,'0 ').'"':'').')) ';
+				$rs = $this->conn->query($sql);
+				if($row = $rs->fetch_object()){
+					$occid = $row->occid;
+				}
+				$rs->free();
+			}
 			if($occid){
 				$occLink = '<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
 				if($fileName){
@@ -320,7 +348,7 @@ class ImageProcessor {
 			}
 			else{
 				//Records does not exist, create a new one to which image will be linked
-				$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber,processingstatus,dateentered) '.
+				$sql2 = 'INSERT INTO omoccurrences(collid,'.($this->matchCatalogNumber?'catalognumber':'othercatalognumbers').',processingstatus,dateentered) '.
 					'VALUES('.$this->collid.',"'.$specPk.'","unprocessed","'.date('Y-m-d H:i:s').'")';
 				if($this->conn->query($sql2)){
 					$occid = $this->conn->insert_id;
@@ -381,6 +409,7 @@ class ImageProcessor {
 		$this->logOrEcho('Updating collection statistics...',1);
 		$occurMain = new OccurrenceMaintenance($this->conn);
 
+		/*
 		$this->logOrEcho('General cleaning...',2);
 		$collString = implode(',',$collList);
 		if(!$occurMain->generalOccurrenceCleaning($collString)){
@@ -389,7 +418,6 @@ class ImageProcessor {
 				$this->logOrEcho($errorStr,1);
 			}
 		}
-		
 		$this->logOrEcho('Protecting sensitive species...',2);
 		if(!$occurMain->protectRareSpecies()){
 			$errorArr = $occurMain->getErrorArr();
@@ -397,7 +425,7 @@ class ImageProcessor {
 				$this->logOrEcho($errorStr,1);
 			}
 		}
-
+		*/
 		if($collList){
 			$this->logOrEcho('Updating collection statistics...',2);
 			foreach($collList as $collid){
@@ -409,11 +437,13 @@ class ImageProcessor {
 				}
 			}
 		}
+		$occurMain->__destruct();
 
 		$this->logOrEcho('Populating global unique identifiers (GUIDs) for all records...',2);
 		$uuidManager = new UuidFactory($this->conn);
 		$uuidManager->setSilent(1);
 		$uuidManager->populateGuids();
+		$uuidManager->__destruct();
 	}
 
 	private function updateLastRunDate($date){
@@ -453,6 +483,16 @@ class ImageProcessor {
 		if(is_numeric($spprid)){
 			$this->spprid = $spprid;
 		}
+	}
+
+	public function setMatchCatalogNumber($b){
+		if($b) $this->matchCatalogNumber = true;
+		else $this->matchCatalogNumber = false;
+	}
+
+	public function setMatchOtherCatalogNumbers($b){
+		if($b) $this->matchOtherCatalogNumbers = true;
+		else $this->matchOtherCatalogNumbers = false;
 	}
 
 	public function setLogMode($c){

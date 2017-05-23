@@ -10,9 +10,13 @@ class OccurrenceCleaner extends Manager{
 	private $collid;
 	private $obsUid;
 	private $featureCount = 0;
+	private $googleApi;
 
 	public function __construct(){
 		parent::__construct(null,'write');
+		$urlPrefix = 'http://';
+		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+		$this->googleApi = $urlPrefix.'maps.googleapis.com/maps/api/geocode/json?sensor=false';
 	}
 
 	public function __destruct(){
@@ -788,33 +792,48 @@ class OccurrenceCleaner extends Manager{
 			'FROM omoccurrences '.
 			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND (country = "'.$queryCountry.'") '.
 			'AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "coordinate")) '.
-			'LIMIT 5';
+			'LIMIT 500';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			echo '<li>Checking occurrence <a href="../editor/occurrenceeditor.php?occid='.$r->occid.'" target="_blank">'.$r->occid.'</a>...</li>';
 			$googleUnits = $this->callGoogleApi($r->decimallatitude, $r->decimallongitude);
 			$ranking = 0;
 			$protocolStr = '';
-			if($this->countryUnitsEqual($googleUnits['country'],$r->country)){
-				$ranking = 2;
-				$protocolStr = 'GoogleApiMatch:countryEqual';
-				if($this->unitsEqual($googleUnits['state'], $r->stateprovince)){
-					$ranking = 5;
-					$protocolStr = 'GoogleApiMatch:stateEqual';
-					if($this->countyUnitsEqual($googleUnits['county'], $r->county)){
-						$ranking = 7;
-						$protocolStr = 'GoogleApiMatch:countyEqual';
+			if(isset($googleUnits['country'])){
+				if($this->countryUnitsEqual($googleUnits['country'],$r->country)){
+					$ranking = 2;
+					$protocolStr = 'GoogleApiMatch:countryEqual';
+					if(isset($googleUnits['state'])){
+						if($this->unitsEqual($googleUnits['state'], $r->stateprovince)){
+							$ranking = 5;
+							$protocolStr = 'GoogleApiMatch:stateEqual';
+							if(isset($googleUnits['county'])){
+								if($this->countyUnitsEqual($googleUnits['county'], $r->county)){
+									$ranking = 7;
+									$protocolStr = 'GoogleApiMatch:countyEqual';
+								}
+								else{
+									echo '<li style="margin-left:15px;">County not equal (source: '.$r->county.'; Google value: '.$googleUnits['county'].')</li>';
+								}
+							}
+							else{
+								echo '<li style="margin-left:15px;">County not provided by Google</li>';
+							}
+						}
+						else{
+							echo '<li style="margin-left:15px;">State/Province not equal (source: '.$r->stateprovince.'; Google value: '.$googleUnits['state'].')</li>';
+						}
 					}
 					else{
-						echo '<li style="margin-left:15px;">County not equal (source: '.$r->county.'; Google value: '.$googleUnits['county'].')</li>';
+						echo '<li style="margin-left:15px;">State/Province not provided by Google</li>';
 					}
 				}
 				else{
-					echo '<li style="margin-left:15px;">State/Province not equal (source: '.$r->stateprovince.'; Google value: '.$googleUnits['state'].')</li>';
+					echo '<li style="margin-left:15px;">Country not equal (source: '.$r->country.'; Google value: '.$googleUnits['country'].')</li>';
 				}
 			}
 			else{
-				echo '<li style="margin-left:15px;">Country not equal (source: '.$r->country.'; Google value: '.$googleUnits['country'].')</li>';
+				echo '<li style="margin-left:15px;">Country not provided by Google</li>';
 			}
 			if($ranking){
 				$this->setVerification($r->occid, 'coordinate', $ranking, $protocolStr);
@@ -823,14 +842,15 @@ class OccurrenceCleaner extends Manager{
 			else{
 				echo '<li style="margin-left:15px;">Unable to set verification status</li>';
 			}
+			flush();
+			ob_flush();
 		}
 		$rs->free();
 	}
 	
 	private function callGoogleApi($lat, $lng){
 		$retArr = array();
-		$apiUrl = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false';
-		$apiUrl .= '&latlng='.$lat.','.$lng;
+		$apiUrl = $this->googleApi.'&latlng='.$lat.','.$lng;
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		//curl_setopt($curl, CURLOPT_HEADER, 0);
@@ -936,13 +956,13 @@ class OccurrenceCleaner extends Manager{
 	public function getRankingStats($category){
 		$retArr = array();
 		$category = $this->cleanInStr($category);
-		$sql = 'SELECT category, ranking, count(*) as cnt '.
+		$sql = 'SELECT category, ranking, protocol, count(*) as cnt '.
 			'FROM omoccurverification '.
 			'WHERE category = "'.$category.'" '.
-			'GROUP BY category, ranking';
+			'GROUP BY category, ranking,protocol';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->category][$r->ranking] = $r->cnt;
+			$retArr[$r->category][$r->ranking][$r->protocol] = $r->cnt;
 		}
 		$rs->free();
 		if($category){
@@ -952,7 +972,7 @@ class OccurrenceCleaner extends Manager{
 				'WHERE (collid = '.$this->collid.') AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "'.$category.'"))';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
-				$retArr[$category]['none'] = $r->cnt;
+				$retArr[$category]['unranked'][''] = $r->cnt;
 			}
 			$rs->free();
 		}
@@ -983,7 +1003,6 @@ class OccurrenceCleaner extends Manager{
 			if($conditionArr){
 				$cnt = 2;
 				foreach($conditionArr as $k => $v){
-					echo 'value: '.$v.'<br/>';
 					$qryArr['cf'.$cnt] = $k;
 					if($v == '--ISNULL--'){
 						$qryArr['ct'.$cnt] = 'NULL';
@@ -991,7 +1010,7 @@ class OccurrenceCleaner extends Manager{
 					}
 					else{
 						$qryArr['ct'.$cnt] = 'EQUALS';
-						$qryArr['cv'.$cnt] = $this->cleanInStr($v);
+						$qryArr['cv'.$cnt] = $v;
 					}
 					$cnt++;
 					if($cnt > 4) break;

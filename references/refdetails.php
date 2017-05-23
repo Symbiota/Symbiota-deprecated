@@ -75,8 +75,8 @@ header("Content-Type: text/html; charset=".$charset);
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 	<title><?php echo $defaultTitle; ?> Reference Management</title>
-    <link href="../css/base.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
-    <link href="../css/main.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
+    <link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
+    <link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" type="text/css" />
 	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
 	<style type="text/css">
 		#tabs a{

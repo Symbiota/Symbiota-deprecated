@@ -25,7 +25,7 @@ $(function() {
 			<?php
 			reset($imgArr);
 			$imgUrl = current($imgArr); 
-			if(strpos($imgUrl['web'],'iplantcollaborative')){
+			if(strpos($imgUrl['web'],'bisque.cyverse')){
 				echo '<div style="float:right;padding:0px 3px;margin:2px 20px 0px 0px;">Rotate: <a href="#" onclick="rotateiPlantImage(-90)">&nbsp;L&nbsp;</a> &lt;&gt; <a href="#" onclick="rotateiPlantImage(90)">&nbsp;R&nbsp;</a></div>';
 			}
 			?>
@@ -41,6 +41,11 @@ $(function() {
 					<div>
 						<img id="activeimg-<?php echo $imgCnt; ?>" src="<?php echo $iUrl; ?>" style="width:400px;height:400px" />
 					</div>
+					<?php 
+					if(array_key_exists('error', $iArr)){
+						echo '<div style="font-weight:bold;color:red">'.$iArr['error'].'</div>';
+					}
+					?>
 					<div style="width:100%;clear:both;">
 						<div style="float:left;">
 							<input type="button" value="OCR Image" onclick="ocrImage(this,<?php echo $imgId.','.$imgCnt; ?>);" />

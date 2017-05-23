@@ -1,8 +1,9 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/SpecEditReviewManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceEditReview.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
-if(!$symbUid) header('Location: ../../profile/index.php?refurl=../collections/editor/editreviewer.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/editreviewer.php?'.$_SERVER['QUERY_STRING']);
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = $_REQUEST['collid'];
@@ -13,9 +14,8 @@ $editor = array_key_exists('editor',$_REQUEST)?$_REQUEST['editor']:'';
 $queryOccid = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:'';
 $pageNum = array_key_exists('pagenum',$_REQUEST)?$_REQUEST['pagenum']:'0';
 $limitCnt = array_key_exists('limitcnt',$_REQUEST)?$_REQUEST['limitcnt']:'1000';
-$printMode = (array_key_exists('printsubmit', $_POST)?true:false);
 
-$reviewManager = new SpecEditReviewManager();
+$reviewManager = new OccurrenceEditReview();
 $collName = $reviewManager->setCollId($collid);
 $reviewManager->setDisplay($displayMode);
 if(is_numeric($queryOccid)){
@@ -46,10 +46,18 @@ if($isEditor){
 		if(!$reviewManager->updateRecords($_POST)){
 			$statusStr = '<br>'.implode('</br><br>',$reviewManager->getWarningArr()).'</br>';
 		}
+		if($SOLR_MODE){
+			$solrManager = new SOLRManager();
+			$solrManager->updateSOLR();
+		}
 	}
 	elseif(array_key_exists('delsubmit', $_POST)){
 		$idStr = implode(',',$_POST['id']);
 		$reviewManager->deleteEdits($idStr);
+        if($SOLR_MODE){
+        	$solrManager = new SOLRManager();
+        	$solrManager->updateSOLR();
+        }
 	}
 	elseif(array_key_exists('dlsubmit', $_POST)){
 		$idStr = implode(',',$_POST['id']);
@@ -75,7 +83,7 @@ $subCnt = $limitCnt*($pageNum + 1);
 if($subCnt > $recCnt) $subCnt = $recCnt;  
 $navPageBase = 'editreviewer.php?collid='.$collid.'&display='.$displayMode.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&editor='.$editor;
 
-$navStr = '<div style="float:right;">';
+$navStr = '<div class="navbarDiv" style="float:right;">';
 if($pageNum){
 	$navStr .= '<a href="'.$navPageBase.'&pagenum='.($pageNum-1).'&limitcnt='.$limitCnt.'" title="Previous '.$limitCnt.' records">&lt;&lt;</a>';
 }
@@ -96,8 +104,11 @@ $navStr .= '</div>';
 <html>
 	<head>
 		<title>Specimen Edit Reviewer</title>
-		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
 		<script>
 			function selectAllId(cbObj){
 				var eElements = document.getElementsByName("id[]");
@@ -129,6 +140,27 @@ $navStr .= '</div>';
 				 return false;
 			}
 
+			function printFriendlyMode(status){
+				if(status){
+					$(".navpath").hide();
+					$(".header").hide();
+					$(".navbarDiv").hide();
+					$(".returnDiv").show();
+					$("#filterDiv").hide();
+					$("#actionDiv").hide();
+					$(".footer").hide();
+				}
+				else{
+					$(".navpath").show();
+					$(".header").show();
+					$(".navbarDiv").show();
+					$(".returnDiv").hide();
+					$("#filterDiv").show();
+					$("#actionDiv").show();
+					$(".footer").show();
+				}
+			}
+
 			function openIndPU(occid,clid){
 				var newWindow = window.open('../editor/occurrenceeditor.php?occid='+occid,'indspec' + occid,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=700,left=20,top=20');
 				if (newWindow.opener == null) newWindow.opener = self;
@@ -138,20 +170,18 @@ $navStr .= '</div>';
 	</head>
 	<body>
 		<?php
-		if(!$printMode){
-			$displayLeftMenu = false;
-			include($SERVER_ROOT.'/header.php');
-			echo '<div class="navpath">';
-			echo '<a href="../../index.php">Home</a> &gt;&gt; ';
-			if($reviewManager->getObsUid()){
-				echo '<a href="../../profile/viewprofile.php?tabindex=1">Personal Specimen Management</a> &gt;&gt; ';
-			}
-			else{
-				echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
-			}
-			echo '<b>Specimen Edits Reviewer</b>';
-			echo '</div>';
+		$displayLeftMenu = false;
+		include($SERVER_ROOT.'/header.php');
+		echo '<div class="navpath">';
+		echo '<a href="../../index.php">Home</a> &gt;&gt; ';
+		if($reviewManager->getObsUid()){
+			echo '<a href="../../profile/viewprofile.php?tabindex=1">Personal Specimen Management</a> &gt;&gt; ';
 		}
+		else{
+			echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
+		}
+		echo '<b>Specimen Edits Reviewer</b>';
+		echo '</div>';
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
@@ -167,138 +197,121 @@ $navStr .= '</div>';
 					</div>
 					<?php 
 				}
-				if($printMode){
-					$retToMenuStr = '<b><a href="editreviewer.php?collid='.$collid.'&display='.$displayMode.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&pagenum='.$pageNum.'&limitcnt='.$limitCnt.'">Return to Main Page</a></b>';
-					echo $retToMenuStr;
-				}
-				else{
-					?>
-					<div style="float:right;">
-						<form name="filter" action="editreviewer.php" method="post">
-							<fieldset style="width:300px;text-align:left;">
-								<legend><b>Filter</b></legend>
+				$retToMenuStr = '<div class="returnDiv" style="display:none"><b><a href="#" onclick="printFriendlyMode(false)">Exit Print Mode</a></b></div>';
+				echo $retToMenuStr;
+				?>
+				<div id="filterDiv" style="float:right;">
+					<form name="filter" action="editreviewer.php" method="post">
+						<fieldset style="width:300px;text-align:left;">
+							<legend><b>Filter</b></legend>
+							<div style="margin:3px;">
+								Applied Status: 
+								<select name="fastatus" onchange="this.form.submit()">
+									<option value="">All Records</option>
+									<option value="0" <?php echo ($faStatus=='0'?'SELECTED':''); ?>>Not Applied</option>
+									<option value="1" <?php echo ($faStatus=='1'?'SELECTED':''); ?>>Applied</option>
+								</select>
+							</div>
+							<div style="margin:3px;">
+								Review Status: 
+								<select name="frstatus" onchange="this.form.submit()">
+									<option value="0">All Records</option>
+									<option value="1,2" <?php echo ($frStatus=='1,2'?'SELECTED':''); ?>>Open/Pending</option>
+									<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>>Open Only</option>
+									<option value="2" <?php echo ($frStatus=='2'?'SELECTED':''); ?>>Pending Only</option>
+									<option value="3" <?php echo ($frStatus=='3'?'SELECTED':''); ?>>Closed</option>
+								</select>
+							</div>
+							<div style="margin:3px;">
+								Editor: 
+								<select name="editor" onchange="this.form.submit()">
+									<option value="">All Editors</option>
+									<option value="">----------------------</option>
+									<?php 
+									$editorArr = $reviewManager->getEditorList();
+									foreach($editorArr as $id => $e){
+										echo '<option value="'.$id.'" '.($editor==$id?'SELECTED':'').'>'.$e.'</option>'."\n";
+									}
+									?>
+								</select>
+							</div>
+							<?php 
+							if($reviewManager->hasRevisionRecords() && !$reviewManager->getObsUid()){
+								?>
 								<div style="margin:3px;">
-									Applied Status: 
-									<select name="fastatus">
-										<option value="">All Records</option>
-										<option value="0" <?php echo ($faStatus=='0'?'SELECTED':''); ?>>Not Applied</option>
-										<option value="1" <?php echo ($faStatus=='1'?'SELECTED':''); ?>>Applied</option>
-									</select>
-								</div>
-								<div style="margin:3px;">
-									Review Status: 
-									<select name="frstatus">
-										<option value="0">All Records</option>
-										<option value="1,2" <?php echo ($frStatus=='1,2'?'SELECTED':''); ?>>Open/Pending</option>
-										<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>>Open Only</option>
-										<option value="2" <?php echo ($frStatus=='2'?'SELECTED':''); ?>>Pending Only</option>
-										<option value="3" <?php echo ($frStatus=='3'?'SELECTED':''); ?>>Closed</option>
-									</select>
-								</div>
-								<div style="margin:3px;">
-									Editor: 
-									<select name="editor">
-										<option value="">All Editors</option>
-										<option value="">----------------------</option>
-										<?php 
-										$editorArr = $reviewManager->getEditorList();
-										foreach($editorArr as $id => $e){
-											echo '<option value="'.$id.'" '.($editor==$id?'SELECTED':'').'>'.$e.'</option>'."\n";
-										}
-										?>
+									Editing Source: 
+									<select name="display" onchange="this.form.submit()">
+										<option value="1">Internal</option>
+										<option value="2" <?php if($displayMode == 2) echo 'SELECTED'; ?>>External</option>
 									</select>
 								</div>
 								<?php 
-								if($ACTIVATE_GEOLOCATE_TOOLKIT && !$reviewManager->getObsUid()){
-									?>
-									<div style="margin:3px;">
-										Editing Source: 
-										<select name="display">
-											<option value="1">Internal</option>
-											<option value="2" <?php if($displayMode == 2) echo 'SELECTED'; ?>>External (GeoLocate CoGe)</option>
-										</select>
-									</div>
-									<?php 
-								}
-								?>
-								<div style="margin:10px;">
-									<input name="submitform" type="submit" value="Update List" />
-									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+							}
+							?>
+							<div style="margin:10px;">
+								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<form name="editform" action="editreviewer.php" method="post" >
+					<div id="actionDiv" style="margin:10px;float:left;">
+						<fieldset>
+							<legend><b>Action Panel</b></legend>
+							<div style="margin:10px 10px;">
+								<div style="float:left;margin-bottom:10px;">
+									<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits<br/>
+									<input name="applytask" type="radio" value="revert" title="Revert Edits" />Revert Edits
 								</div>
-							</fieldset>
-						</form>
+								<div style="float:left;margin-left:30px;">
+									<b>Review Status:</b>
+									<select name="rstatus">
+										<option value="0">LEAVE AS IS</option>
+										<option value="1">OPEN</option>
+										<option value="2">PENDING</option>
+										<option value="3">CLOSED</option>
+									</select>
+								</div>
+								<div style="clear:both;margin:15px 5px;">
+									<input name="updatesubmit" type="submit" value="Update Selected Records" onclick="return validateEditForm(this.form);" />
+									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+									<input name="fastatus" type="hidden" value="<?php echo $faStatus; ?>" />
+									<input name="frstatus" type="hidden" value="<?php echo $frStatus; ?>" />
+									<input name="editor" type="hidden" value="<?php echo $editor; ?>" />
+									<input name="occid" type="hidden" value="<?php echo $queryOccid; ?>" />
+									<input name="pagenum" type="hidden" value="<?php echo $pageNum; ?>" />
+									<input name="limitcnt" type="hidden" value="<?php echo $limitCnt; ?>" />
+									<input name="display" type="hidden" value="<?php echo $displayMode; ?>" />
+								</div>
+							</div>
+							<div style="clear:both;margin:15px 0px;">
+								<hr/>
+								<a href="#" onclick="toggle('additional')"><b>Additional Actions</b></a>
+							</div>
+							<div id="additional" style="display:none">
+								<div style="margin:10px 15px;">
+									<input name="delsubmit" type="submit" value="Delete Selected Edits" onclick="return validateDelete(this.form)" />
+									<div style="margin:5px 0px 10px 10px;">* Permanently clear selected edit from versioning history. Warning: this action can not be undone!</div>
+								</div>
+								<div style="margin:5px 0px 10px 15px;">
+									<input name="dlsubmit" type="submit" value="Download Selected Records" onclick="return validateEditForm(this.form);" />
+								</div>
+								<div style="margin:5px 0px 10px 15px;">
+									<input name="dlallsubmit" type="submit" value="Download All Records" />
+									<div style="margin:5px 0px 10px 10px;">* Based on search parameters in Filter Pane to the right</div>
+								</div>
+								<div style="margin:10px 15px;">
+									<input name="printsubmit" type="button" value="Print Friendly Page" onclick="printFriendlyMode(true)" />
+								</div>
+							</div>
+						</fieldset>
 					</div>
 					<?php
-				}
-				?>
-				<form name="editform" action="editreviewer.php" method="post" >
-					<?php 
-					if(!$printMode){
-						?>
-						<div style="margin:10px;float:left;">
-							<fieldset>
-								<legend><b>Action Panel</b></legend>
-								<div style="margin:10px 10px;">
-									<div style="float:left;margin-bottom:10px;">
-										<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits<br/>
-										<input name="applytask" type="radio" value="revert" title="Revert Edits" />Revert Edits
-									</div>
-									<div style="float:left;margin-left:30px;">
-										<b>Review Status:</b>
-										<select name="rstatus">
-											<option value="0">LEAVE AS IS</option>
-											<option value="1">OPEN</option>
-											<option value="2">PENDING</option>
-											<option value="3">CLOSED</option>
-										</select>
-									</div>
-									<div style="clear:both;margin:15px 5px;">
-										<input name="updatesubmit" type="submit" value="Update Selected Records" onclick="return validateEditForm(this.form);" />
-										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-										<input name="fastatus" type="hidden" value="<?php echo $faStatus; ?>" />
-										<input name="frstatus" type="hidden" value="<?php echo $frStatus; ?>" />
-										<input name="editor" type="hidden" value="<?php echo $editor; ?>" />
-										<input name="occid" type="hidden" value="<?php echo $queryOccid; ?>" />
-										<input name="pagenum" type="hidden" value="<?php echo $pageNum; ?>" />
-										<input name="limitcnt" type="hidden" value="<?php echo $limitCnt; ?>" />
-										<input name="display" type="hidden" value="<?php echo $displayMode; ?>" />
-									</div>
-								</div>
-								<div style="clear:both;margin:15px 0px;">
-									<hr/>
-									<a href="#" onclick="toggle('additional')"><b>Additional Actions</b></a>
-								</div>
-								<div id="additional" style="display:none">
-									<div style="margin:10px 15px;">
-										<input name="delsubmit" type="submit" value="Delete Selected Edits" onclick="return validateDelete(this.form)" />
-										<div style="margin:5px 0px 10px 10px;">* Permanently clear selected edit from versioning history. Warning: this action can not be undone!</div>
-									</div>
-									<div style="margin:5px 0px 10px 15px;">
-										<input name="dlsubmit" type="submit" value="Download Selected Records" onclick="return validateEditForm(this.form);" />
-									</div>
-									<div style="margin:5px 0px 10px 15px;">
-										<input name="dlallsubmit" type="submit" value="Download All Records" />
-										<div style="margin:5px 0px 10px 10px;">* Based on search parameters in Filter Pane to the right</div>
-									</div>
-									<div style="margin:10px 15px;">
-										<input name="printsubmit" type="submit" value="Print Friendly Page" />
-									</div>
-								</div>
-							</fieldset>
-						</div>
-						<?php
-					}
 					echo '<div style="clear:both">'.$navStr.'</div>'; 
 					?>
-					<table class="styledtable" style="font-family:Arial;font-size:12px;<?php if($printMode) echo "width:90%;"; ?>">
+					<table class="styledtable" style="font-family:Arial;font-size:12px;">
 						<tr>
-							<?php 
-							if(!$printMode){ 
-								?>
-								<th title="Select/Unselect All"><input name='selectall' type="checkbox" onclick="selectAllId(this)" /></th>
-								<?php 
-							} 
-							?>
+							<th title="Select/Unselect All"><input name='selectall' type="checkbox" onclick="selectAllId(this)" /></th>
 							<th>Record #</th>
 							<th>Catalog Number</th>
 							<th>Review Status</th>
@@ -313,112 +326,111 @@ $navStr .= '</div>';
 						$editArr = $reviewManager->getEditArr();
 						if($editArr){
 							$recCnt = 0;
-							foreach($editArr as $occid => $edits){
-								foreach($edits as $ts => $edObj){
-									$fieldArr = $edObj['f'];
-									$id = $edObj['id'];
-									$fieldCnt = 0;
-									foreach($fieldArr as $fieldName => $fieldObj){
-										?>
-										<tr <?php echo ($recCnt%2?'class="alt"':'') ?>>
-											<?php 
-											if(!$printMode){ 
-												?>
+							foreach($editArr as $occid => $editArr2){
+								foreach($editArr2 as $id => $editArr3){
+									foreach($editArr3 as $appliedStatus => $edObj){
+										$fieldArr = $edObj['f'];
+										$displayAll = true;
+										foreach($fieldArr as $fieldName => $fieldObj){
+											?>
+											<tr <?php echo ($recCnt%2?'class="alt"':'') ?>>
 												<td>
 													<?php 
-													if(!$fieldCnt){
+													if($displayAll){
 														echo '<input name="id[]" type="checkbox" value="'.$id.'" />';
 													}
 													?>
 												</td>
-												<?php 
-											} 
-											?>
-											<td>
-												<?php 
-												if(!$fieldCnt){
-													if(!$printMode){ 
+												<td>
+													<?php 
+													if($displayAll){
 														?>
 														<a href="#" onclick="openIndPU(<?php echo $occid; ?>);return false;">
 															<?php echo $occid; ?>
 														</a>
 														<?php 
 													}
-													else{
-														echo $occid;
-													}
-												}
-												?>
-											</td>
-											<td>
-												<div title="Catalog Number">
-													<?php if(!$printMode && !$fieldCnt) echo $edObj['catnum']; ?>
-												</div>
-											</td>
-											<td>
-												<div title="Review Status">
-													<?php
-													if(!$fieldCnt){
-														$rStatus = $edObj['rstatus'];
-														if($rStatus == 1){
-															echo 'OPEN';
-														}
-														elseif($rStatus == 2){
-															echo 'PENDING';
-														}
-														elseif($rStatus == 3){
-															echo 'CLOSED';
-														}
-														else{
-															echo 'UNKNOWN';
-														}
-													}
 													?>
-												</div>
-											</td>
-											<td>
-												<div title="Applied Status">
-													<?php 
-													if(!$fieldCnt){
-														$aStatus = $edObj['astatus'];
-														if($aStatus == 1){
-															echo 'APPLIED';
+												</td>
+												<td>
+													<div title="Catalog Number">
+														<?php if($displayAll) echo $edObj['catnum']; ?>
+													</div>
+												</td>
+												<td>
+													<div title="Review Status">
+														<?php
+														if($displayAll){
+															$rStatus = $edObj['rstatus'];
+															if($rStatus == 1){
+																echo 'OPEN';
+															}
+															elseif($rStatus == 2){
+																echo 'PENDING';
+															}
+															elseif($rStatus == 3){
+																echo 'CLOSED';
+															}
+															else{
+																echo 'UNKNOWN';
+															}
 														}
-														else{
-															echo 'NOT APPLIED';
+														?>
+													</div>
+												</td>
+												<td>
+													<div title="Applied Status">
+														<?php 
+														if($displayAll){
+															if($appliedStatus == 1){
+																echo 'APPLIED';
+															}
+															else{
+																echo 'NOT APPLIED';
+															}
 														}
-													}
-													?>
-												</div>
-											</td>
-											<td>
-												<div title="Editor">
-													<?php if(!$fieldCnt) echo $edObj['editor']; ?>
-												</div>
-											</td>
-											<td>
-												<div title="Timestamp">
-													<?php if(!$fieldCnt) echo $ts; ?>
-												</div>
-											</td>
-											<td>
-												<div title="Field Name">
-													<?php echo $fieldName; ?>
-												</div>
-											</td>
-											<td>
-												<div title="Old Value">
-													<?php echo wordwrap($fieldObj['old'],40,"<br />\n",true); ?>
-												</div>
-											</td>
-											<td>
-												<div title="New Value">
-													<?php echo wordwrap($fieldObj['new'],40,"<br />\n",true); ?>
-												</div>
-											</td>
-										</tr>
-										<?php
-										$fieldCnt++;
+														?>
+													</div>
+												</td>
+												<td>
+													<div title="Editor">
+														<?php 
+														
+														if($displayAll){
+															$editorStr = $edObj['editor'];
+															if($displayMode == 2){
+																if(!$editorStr) $editorStr = $edObj['exeditor'];
+																if($edObj['exsource']) $editorStr = $edObj['exsource'].($editorStr?': '.$editorStr:''); 
+															}
+															echo $editorStr;
+														}
+														?>
+													</div>
+												</td>
+												<td>
+													<div title="Timestamp">
+														<?php if($displayAll) echo $edObj['ts']; ?>
+													</div>
+												</td>
+												<td>
+													<div title="Field Name">
+														<?php echo $fieldName; ?>
+													</div>
+												</td>
+												<td>
+													<div title="Old Value">
+														<?php echo wordwrap($fieldObj['old'],40,"<br />\n",true); ?>
+													</div>
+												</td>
+												<td>
+													<div title="New Value">
+														<?php echo wordwrap($fieldObj['new'],40,"<br />\n",true); ?>
+													</div>
+												</td>
+											</tr>
+											<?php
+											$displayAll = false;
+										}
 									}
 									$recCnt++;
 								}
@@ -436,12 +448,8 @@ $navStr .= '</div>';
 						?>
 					</table>
 					<?php 
-					if($printMode){
-						echo $retToMenuStr;
-					}
-					else{
-						echo $navStr; 
-					}
+					echo $retToMenuStr;
+					echo $navStr; 
 					?>
 				</form>
 				<?php 
@@ -451,6 +459,6 @@ $navStr .= '</div>';
 			}
 			?>
 		</div>
-		<?php if(!$printMode) include($SERVER_ROOT.'/footer.php');?>
+		<?php include($SERVER_ROOT.'/footer.php');?>
 	</body>
 </html>

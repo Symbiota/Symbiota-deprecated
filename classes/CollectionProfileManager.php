@@ -634,11 +634,13 @@ class CollectionProfileManager {
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$t = $row->termstr;
+			$cnt = $row->cnt;
 			if($state){
 				$t = trim(str_ireplace(array(' county',' co.',' counties'),'',$t));
+				if(array_key_exists($t, $retArr)) $cnt = $cnt + $retArr[$t];
 			}
 			//if($country) $t = ucwords(strtolower($t));
-			if($t) $retArr[$t] = $row->cnt;
+			if($t) $retArr[$t] = $cnt;
 		}
 		$rs->free();
 		ksort($retArr);

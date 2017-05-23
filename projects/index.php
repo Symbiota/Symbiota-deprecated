@@ -67,8 +67,8 @@ if(!$researchList && !$editMode){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['INVPROJ'];?></title>
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
@@ -248,7 +248,7 @@ if(!$researchList && !$editMode){
 											<?php echo $LANG['PROJNAME'];?>:
 										</td>
 										<td>
-											<input type="text" name="projname" value="<?php if($projArr) echo $projArr["projname"]; ?>" style="width:95%;"/>
+											<input type="text" name="projname" value="<?php if($projArr) echo htmlentities($projArr["projname"]); ?>" style="width:95%;"/>
 										</td>
 									</tr>	
 									<tr>
@@ -256,7 +256,7 @@ if(!$researchList && !$editMode){
 											<?php echo $LANG['MANAG'];?>:
 										</td>
 										<td>
-											<input type="text" name="managers" value="<?php if($projArr) echo $projArr["managers"]; ?>" style="width:95%;"/>
+											<input type="text" name="managers" value="<?php if($projArr) echo htmlentities($projArr["managers"]); ?>" style="width:95%;"/>
 										</td>
 									</tr>	
 									<tr>
@@ -264,7 +264,7 @@ if(!$researchList && !$editMode){
 											<?php echo $LANG['DESCRIP'];?>:
 										</td>
 										<td>
-											<textarea rows="8" cols="45" name="fulldescription" maxlength="2000" style="width:95%"><?php if($projArr) echo $projArr["fulldescription"];?></textarea>
+											<textarea rows="8" cols="45" name="fulldescription" maxlength="2000" style="width:95%"><?php if($projArr) echo htmlentities($projArr["fulldescription"]);?></textarea>
 										</td>
 									</tr>	
 									<tr>
@@ -272,7 +272,7 @@ if(!$researchList && !$editMode){
 											<?php echo $LANG['NOTES'];?>:
 										</td>
 										<td>
-											<input type="text" name="notes" value="<?php if($projArr) echo $projArr["notes"];?>" style="width:95%;"/>
+											<input type="text" name="notes" value="<?php if($projArr) echo htmlentities($projArr["notes"]);?>" style="width:95%;"/>
 										</td>
 									</tr>	
 									<tr>

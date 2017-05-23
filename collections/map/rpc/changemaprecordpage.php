@@ -1,7 +1,8 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/MapInterfaceManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
@@ -17,11 +18,20 @@ if($selArrJson){
 	$selections = json_decode($selArrJson, true);
 }
 
-$mapManager = new MapInterfaceManager();
-$mapManager->setSearchTermsArr($stArr);
-$mapWhere = $mapManager->getSqlWhere();
-$occArr = $mapManager->getMapSpecimenArr($pageNumber,$cntPerPage,$mapWhere);
-$recordCnt = $mapManager->getRecordCnt();
+if($SOLR_MODE){
+    $mapManager = new SOLRManager();
+    $mapManager->setSearchTermsArr($stArr);
+    $solrArr = $mapManager->getGeoArr($pageNumber,$cntPerPage);
+    $occArr = $mapManager->translateSOLRMapRecList($solrArr);
+    $recordCnt = $mapManager->getRecordCnt();
+}
+else{
+    $mapManager = new MapInterfaceManager();
+    $mapManager->setSearchTermsArr($stArr);
+    $mapWhere = $mapManager->getSqlWhere();
+    $occArr = $mapManager->getMapSpecimenArr($pageNumber,$cntPerPage,$mapWhere);
+    $recordCnt = $mapManager->getRecordCnt();
+}
 
 $pageOccids = array_keys($occArr);
 if($selections){
@@ -93,7 +103,7 @@ if($occArr){
 		$recordListHtml .= '</td>';
 		$recordListHtml .= '<td id="cat'.$occId.'" >'.wordwrap($recArr["cat"], 7, "<br />\n", true).'</td>';
 		$recordListHtml .= '<td id="label'.$occId.'" >';
-		$recordListHtml .= '<a href="#" onmouseover="openOccidInfoBox('.$infoBoxLabel.','.$recArr["lat"].','.$recArr["lon"].');" onmouseout="closeOccidInfoBox();" onclick="openIndPopup('.$occId.'); return false;">'.wordwrap($recArr["c"], 12, "<br />\n", true).'</a>';
+		$recordListHtml .= '<a href="#" onmouseover="openOccidInfoBox('.$infoBoxLabel.','.$recArr["lat"].','.$recArr["lon"].');" onmouseout="closeOccidInfoBox();" onclick="openIndPopup('.$occId.'); return false;">'.($recArr["c"]?wordwrap($recArr["c"], 12, "<br />\n", true):"Not available").'</a>';
 		$recordListHtml .= '</td>';
 		$recordListHtml .= '<td id="e'.$occId.'" >'.wordwrap($recArr["e"], 10, "<br />\n", true).'</td>';
 		$recordListHtml .= '<td id="s'.$occId.'" >'.wordwrap($recArr["s"], 12, "<br />\n", true).'</td>';

@@ -22,8 +22,8 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 		<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
-		<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 		<script src="../js/jquery.js" type="text/javascript"></script>
 		<script src="../js/jquery-ui.js" type="text/javascript"></script>
@@ -33,8 +33,10 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 		</script>
         <script type="text/javascript">
+            $('html').hide();
             $(document).ready(function() {
                 $("#tabs").tabs();
+                $('html').show();
             });
         </script>
 	</head>
@@ -60,7 +62,8 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<div id="tabs" style="margin:0px;">
+        <div id="hiddendiv" style="display:none;">12345678</div>
+        <div id="tabs" style="margin:0px;">
 			<ul>
 				<?php 
 				if($specArr && $obsArr) echo '<li><a href="#specobsdiv">'.$LANG['TAB_1'].'</a></li>';
@@ -132,7 +135,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 							<fieldset style="margin:10px;padding:10px;">
 								<legend style="font-weight:bold;"><?php echo $catTitle; ?></legend>
 								<div style="margin:0px 15px;float:right;">
-									<input type="submit" class="searchcollnextbtn" value="" title="" />
+									<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
 								</div>
 								<?php
 								$projTitleArr = $otherCatArr['titles'][$catPid]['proj'];

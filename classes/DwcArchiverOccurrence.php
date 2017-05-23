@@ -271,8 +271,8 @@ class DwcArchiverOccurrence extends Manager{
 		$occurFieldArr['rightsHolder'] = 'c.rightsHolder';
 		$occurTermArr['accessRights'] = 'http://purl.org/dc/terms/accessRights';
 		$occurFieldArr['accessRights'] = 'c.accessRights';
-		$occurTermArr['sourcePrimaryKey'] = 'http://symbiota.org/terms/sourcePrimaryKey'; 
-		$occurFieldArr['sourcePrimaryKey'] = 'o.dbpk'; 
+		$occurTermArr['sourcePrimaryKey-dbpk'] = 'http://symbiota.org/terms/sourcePrimaryKey-dbpk';
+		$occurFieldArr['sourcePrimaryKey-dbpk'] = 'o.dbpk'; 
 		$occurTermArr['collId'] = 'http://symbiota.org/terms/collId'; 
 		$occurFieldArr['collId'] = 'c.collid'; 
 		$occurTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
@@ -295,7 +295,7 @@ class DwcArchiverOccurrence extends Manager{
 		if($this->schemaType == 'dwc'){
 			$trimArr = array('tidInterpreted','recordedByID','associatedCollectors','substrate','verbatimAttributes','cultivationStatus',
 				'localitySecurityReason','genericcolumn1','genericcolumn2','storageLocation','observerUid','processingStatus',
-				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey');
+				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey-dbpk');
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));
 		}
 		elseif($this->schemaType == 'symbiota'){
@@ -464,7 +464,12 @@ class DwcArchiverOccurrence extends Manager{
 		if($field){
 			if(!$cond) $cond = 'EQUALS';
 			if($value || ($cond == 'NULL' || $cond == 'NOTNULL')){
-				$this->conditionArr[$field][$cond][] = $this->cleanInStr($value);
+				if(is_array($value)){
+					$this->conditionArr[$field][$cond] = $this->cleanInArray($value);
+				}
+				else{
+					$this->conditionArr[$field][$cond][] = $this->cleanInStr($value);
+				}
 			}
 		}
 	}
@@ -474,10 +479,10 @@ class DwcArchiverOccurrence extends Manager{
 		if($this->conditionArr){
 			foreach($this->conditionArr as $field => $condArr){
 				if($field == 'stateid'){
-					$sqlFrag .= 'AND (att.stateid = '.$condArr['EQUALS'][0].') ';
+					$sqlFrag .= 'AND (a.stateid IN('.implode(',',$condArr['EQUALS']).')) ';
 				}
 				elseif($field == 'traitid'){
-					$sqlFrag .= 'AND (tmstates.traitid = '.$condArr['EQUALS'][0].') ';
+					$sqlFrag .= 'AND (s.traitid IN('.implode(',',$condArr['EQUALS']).')) ';
 				}
 				else{
 					$sqlFrag2 = '';
@@ -548,14 +553,14 @@ class DwcArchiverOccurrence extends Manager{
 			if(stripos($this->conditionSql,'MATCH(f.recordedby)')){
 				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			}
-			if(stripos($this->conditionSql,'att.stateid')){
+			if(stripos($this->conditionSql,'a.stateid')){
 				//Search is limited by occurrence attribute
-				$sql .= 'INNER JOIN tmattributes att ON o.occid = att.occid ';
+				$sql .= 'INNER JOIN tmattributes a ON o.occid = a.occid ';
 			}
-			elseif(stripos($this->conditionSql,'tmstates.traitid')){
+			elseif(stripos($this->conditionSql,'s.traitid')){
 				//Search is limited by occurrence trait
-				$sql .= 'INNER JOIN tmattributes att ON o.occid = att.occid '.
-					'INNER JOIN tmstates ON att.stateid = tmstates.stateid ';
+				$sql .= 'INNER JOIN tmattributes a ON o.occid = a.occid '.
+					'INNER JOIN tmstates s ON a.stateid = s.stateid ';
 			}
 		}
 		return $sql;
@@ -1159,7 +1164,7 @@ class DwcArchiverOccurrence extends Manager{
 			$rootElem->appendChild($extElem2);
 		}
 		
-			//Image extension
+		//MeasurementOrFact extension
 		if($this->includeAttributes){
 			$extElem3 = $newDoc->createElement('extension');
 			$extElem3->setAttribute('encoding',$this->charSetOut);
@@ -1466,7 +1471,7 @@ class DwcArchiverOccurrence extends Manager{
 		if(array_key_exists('intellectualRights',$emlArr)){
 			$rightsElem = $newDoc->createElement('intellectualRights');
 			$paraElem = $newDoc->createElement('para');
-			$paraElem->appendChild($newDoc->createTextNode('To the extent possible under law, the publisher has waived all rights to these data and has dedicated them to the'));
+			$paraElem->appendChild($newDoc->createTextNode('To the extent possible under law, the publisher has waived all rights to these data and has dedicated them to the '));
             $ulinkElem = $newDoc->createElement('ulink');
             $citetitleElem = $newDoc->createElement('citetitle');
             $citetitleElem->appendChild($newDoc->createTextNode((array_key_exists('title',$usageTermArr)?$usageTermArr['title']:'')));
@@ -1893,6 +1898,41 @@ class DwcArchiverOccurrence extends Manager{
 			}
 			fwrite($fh, implode($this->delimiter,$outputArr)."\n");
 		}
+	}
+
+	public function deleteArchive($collID){
+		//Remove archive instance from RSS feed 
+		$rssFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'webservices/dwc/rss.xml';
+		if(!file_exists($rssFile)) return false;
+		$doc = new DOMDocument();
+		$doc->load($rssFile);
+		$cElem = $doc->getElementsByTagName("channel")->item(0);
+		$items = $cElem->getElementsByTagName("item");
+		foreach($items as $i){
+			if($i->getAttribute('collid') == $collID){
+				$link = $i->getElementsByTagName("link");
+				$nodeValue = $link->item(0)->nodeValue;
+				$filePath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/');
+				$filePath1 = $filePath.'content/dwca'.substr($nodeValue,strrpos($nodeValue,'/'));
+				if(file_exists($filePath1)) unlink($filePath1);
+				$emlPath1 = str_replace('.zip','.eml',$filePath1);
+				if(file_exists($emlPath1)) unlink($emlPath1);
+				//Following lines temporarly needed to support previous versions 
+				$filePath2 = $filePath.'collections/datasets/dwc'.substr($nodeValue,strrpos($nodeValue,'/'));
+				if(file_exists($filePath2)) unlink($filePath2);
+				$emlPath2 = str_replace('.zip','.eml',$filePath2);
+				if(file_exists($emlPath2)) unlink($emlPath2);
+				$cElem->removeChild($i);
+			}
+		}
+		$doc->save($rssFile);
+		//Remove DWCA path from database
+		$sql = 'UPDATE omcollections SET dwcaUrl = NULL WHERE collid = '.$collID;
+		if(!$this->conn->query($sql)){
+			$this->logOrEcho('ERROR nullifying dwcaUrl while removing DWCA instance: '.$this->conn->error);
+			return false;
+		}
+		return true;
 	}
 
 	//getters, setters, and misc functions

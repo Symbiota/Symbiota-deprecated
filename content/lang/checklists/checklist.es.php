@@ -1,7 +1,7 @@
 <?php
 /*
 ------------------
-Language: Español (Spanish)
+Language: Espaï¿½ol (Spanish)
 ------------------
 */
 
@@ -11,7 +11,7 @@ $LANG['FLASH'] = 'Examen con fichas';
 $LANG['AUTHORS'] = 'Autores: ';
 $LANG['MOREDETS'] = 'Mas Detalles';
 $LANG['LESSDETS'] = 'Menos Detalles';
-$LANG['PUBLICATION'] = 'Publicaci&oacute;n: ';
+$LANG['CITATION'] = 'Publicaci&oacute;n';
 $LANG['OPTIONS'] = 'Opciones';
 $LANG['SEARCH'] = 'Buscar:';
 $LANG['COMMON'] = ' Nombres Comunes';

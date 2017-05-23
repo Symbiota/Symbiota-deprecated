@@ -37,8 +37,8 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Coordinate Validator</title>
-	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-    <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 	</script>
 	<style type="text/css">
@@ -97,12 +97,15 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				$coordRankingArr = $cleanManager->getRankingStats('coordinate');
 				$rankArr = current($coordRankingArr);
 				echo '<table class="styledtable">';
-				echo '<tr><th>Ranking</th><th>Count</th></tr>';
-				foreach($rankArr as $rank => $cnt){
-					echo '<tr>';
-					echo '<td>'.$rank.'</td>';
-					echo '<td>'.$cnt.'</td>';
-					echo '</tr>';
+				echo '<tr><th>Ranking</th><th>Protocol</th><th>Count</th></tr>';
+				foreach($rankArr as $rank => $protocolArr){
+					foreach($protocolArr as $protocolStr => $cnt){
+						echo '<tr>';
+						echo '<td>'.$rank.'</td>';
+						echo '<td>'.$protocolStr.'</td>';
+						echo '<td>'.$cnt.'</td>';
+						echo '</tr>';
+					}
 				}
 				echo '</table>';
 				?>

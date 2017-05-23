@@ -54,7 +54,7 @@ if($action == "Create Login"){
 	if($okToCreateLogin){
 		if($pHandler->checkLogin($emailAddr)){
 			if($pHandler->register($_POST)){
-				header("Location: viewprofile.php");
+				header("Location: ../index.php");
 			}
 			else{
 				$displayStr = 'FAILED: Unable to create user.<div style="margin-left:55px;">Please contact system administrator for assistance.</div>';
@@ -71,8 +71,8 @@ if($action == "Create Login"){
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> - New User Profile</title>
 	<meta http-equiv="X-Frame-Options" content="deny">
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function validateform(f){
 			<?php 

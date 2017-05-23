@@ -29,7 +29,7 @@ $headerMapBase = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Oc
 	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
 	'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
-	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record');
+	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record','occid' => 'targetRecord (occid)');
 if($collMap['managementtype'] == 'Snapshot'){
 	$headerMapBase['dbpk'] = 'Source Identifier';
 }
@@ -74,8 +74,8 @@ if($SYMB_UID){
 		    white-space: nowrap;
 		}
     </style>
-	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-    <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 </head>
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<!-- inner text -->
@@ -86,7 +86,7 @@ if($SYMB_UID){
 				echo '<h2>'.$collMap['name'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 			}
 			//Setup header map
-			$recArr = $uploadManager->getUploadData(($recLimit*$pageIndex),$recLimit,$searchVar);
+			$recArr = $uploadManager->getPendingImportData(($recLimit*$pageIndex),$recLimit,$searchVar);
 			if($recArr){
 				//Check to see which headers have values
 				$headerArr = array();
@@ -110,16 +110,19 @@ if($SYMB_UID){
 					<?php 
 					$cnt = 0;
 					foreach($recArr as $id => $occArr){
-						if($occArr['sciname']){
-							$occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
-						}							
+						if($occArr['sciname']) $occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
 						echo "<tr ".($cnt%2?'class="alt"':'').">\n";
 						foreach($headerMap as $k => $v){
 							$displayStr = $occArr[$k];
 							if(strlen($displayStr) > 60){
 								$displayStr = substr($displayStr,0,60).'...';
 							}
-							if(!$displayStr) $displayStr = '&nbsp;';
+							if($displayStr) {
+								if($k == 'occid') $displayStr = '<a href="../editor/occurrenceeditor.php?occid='.$displayStr.'" target="_blank">'.$displayStr.'</a>';
+							}
+							else{
+								$displayStr = '&nbsp;';
+							}
 							echo '<td>'.$displayStr.'</td>'."\n";
 						}
 						echo "</tr>\n";

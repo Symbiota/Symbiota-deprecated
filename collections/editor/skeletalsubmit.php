@@ -26,22 +26,17 @@ if($collid){
 		$isEditor = 1;
 	}
 }
-if($isEditor){
-	if($action == ''){
-
-	}
-}
 ?>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Skeletal Record Submission</title>
-	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-    <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />	
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occurskeletalsubmit.js?ver=150516" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occurskeletalsubmit.js?ver=170502" type="text/javascript"></script>
 	<script src="../../js/symb/shared.js?ver=150324" type="text/javascript"></script>
 </head>
 <body>
@@ -69,44 +64,59 @@ if($isEditor){
 					<b>Skeletal Data</b> 
 					<a id="optionimgspan" href="#" onclick="showOptions()"><img src="../../images/list.png" style="width:12px;" title="Display Options" /></a>
 					<a id="hidespan" href="#" style="display:none;" onclick="hideOptions()">Hide</a>
-					<a href="#" onclick="toggle('descriptiondiv')"><img src="../../images/info.png" style="width:12px;" title="Descrition of Tool" /></a>
+					<a href="#" onclick="toggle('descriptiondiv')"><img src="../../images/info.png" style="width:12px;" title="Description of Tool" /></a>
 				</legend>
 				<div id="descriptiondiv" style="display:none;margin:10px;width:80%">
-					This page is typically used to enter skeletal records into the system during the imaging process. Since collections are 
-					commonly organized by scientific name, country, and state, it takes little extra effort for imaging teams to 
-					collect this information while they are imaging specimens. The imaging team enters the basic collection 
-					information shared by the batch of specimens being processed, and then each time they scan a barcode into the catalog 
-					number field, a record is added to the system only containing the catalog number and the skeletal data. 
-					More complete data can be entered by clicking on the catalog number, or a more common workflow is to process the full label 
-					data directly from the image of the specimen label at a later stage. An image can be uploaded by clicking on the image 
-					symbol to the right of the catalog number. However, projects that store their images on remote image servers will 
-					typically have separate workflows for batch processing images. Contact your project / portal manager to find out 
-					the preferred way to load specimen images.
+					<div style="margin-bottom:5px">
+						This page is typically used to enter skeletal records into the system during the imaging process. Since collections are 
+						commonly organized by scientific name, country, and state, it takes little extra effort for imaging teams to 
+						collect this information while they are imaging specimens. The imaging team enters the basic collection 
+						information shared by the batch of specimens being processed, and then each time they scan a barcode into the catalog 
+						number field, a record is added to the system primed with the catalog number and skeletal data. 
+					</div>
+					<div style="margin-bottom:5px">
+						More complete data can be entered by clicking on the catalog number, but the recommended workflow is to process the full label 
+						data directly from the image of the specimen label at a later stage. An image can also be uploaded by clicking on the image 
+						symbol to the right of the catalog number, but images typically need to be adjusted before they are ready for upload (e.g. resized, light balanced). 
+						Furthermore, projects that store their images on remote image servers will 
+						typically require separate workflows for batch processing images. Contact your project / portal manager to find out 
+						the preferred way to load specimen images.
+					</div>
+					<div>
+						Click the Display Option symbol located above scientific name to adjust field display and preferred action when a record 
+						already exists for a catalog number. By default, a new record will not be created if the catalog number already exists. 
+						However, a secondary option is available that will append skeletal data into empty fields of existing records. 
+						Skeletal data will not copy over existing field values.
+					</div>
  				</div>
-				<div id="optiondiv" style="display:none;position:absolute;background-color:white;">
-					<fieldset>
-						<legend><b>Display Options</b></legend>
-						<input type="checkbox" onclick="toggle('authordiv')" CHECKED /> Author<br/> 
-						<input type="checkbox" onclick="toggle('familydiv')" CHECKED /> Family<br/> 
-						<input type="checkbox" onclick="toggle('localitysecuritydiv')" CHECKED /> Locality Security<br/> 
-						<input type="checkbox" onclick="toggle('countrydiv')" /> Country<br/>
-						<input type="checkbox" onclick="toggle('statediv')" CHECKED /> State / Province<br/>
-						<input type="checkbox" onclick="toggle('countydiv')" CHECKED /> County / Parish<br/>
-						<input type="checkbox" onclick="toggle('processingstatusdiv')" /> Processing Status<br/>
-						<input type="checkbox" onclick="toggle('othercatalognumbersdiv')" /> Other Catalog Numbers<br/>
-						<input type="checkbox" onclick="toggle('recordedbydiv')" /> Collector<br/>
-						<input type="checkbox" onclick="toggle('recordnumberdiv')" /> Collector Number<br/>
-						<input type="checkbox" onclick="toggle('eventdatediv')" /> Collection Date<br/>
-						<input type="checkbox" onclick="toggle('languagediv')" /> Language<br/>
-					</fieldset> 
-				</div>
-				<div style="position:absolute;background-color:white;top:10px;right:10px;">
-					Session: <label id="minutes">00</label>:<label id="seconds">00</label><br/>
-					Count: <label id="count">0</label><br/>
-					Rate: <label id="rate">0</label> per hour
-				</div>
-				<div>
-					<form id="defaultform" name="defaultform" action="skeletalsubmit.php" method="post" autocomplete="off" onsubmit="return submitDefaultForm(this)">
+				<form id="defaultform" name="defaultform" action="skeletalsubmit.php" method="post" autocomplete="off" onsubmit="return submitDefaultForm(this)">
+					<div id="optiondiv" style="display:none;position:absolute;background-color:white;">
+						<fieldset>
+							<legend><b>Options</b></legend>
+							<div style="font-weight:bold">Field Display:</div>
+							<input type="checkbox" onclick="toggle('authordiv')" CHECKED /> Author<br/> 
+							<input type="checkbox" onclick="toggle('familydiv')" CHECKED /> Family<br/> 
+							<input type="checkbox" onclick="toggle('localitysecuritydiv')" CHECKED /> Locality Security<br/> 
+							<input type="checkbox" onclick="toggle('countrydiv')" /> Country<br/>
+							<input type="checkbox" onclick="toggle('statediv')" CHECKED /> State / Province<br/>
+							<input type="checkbox" onclick="toggle('countydiv')" CHECKED /> County / Parish<br/>
+							<input type="checkbox" onclick="toggle('processingstatusdiv')" /> Processing Status<br/>
+							<input type="checkbox" onclick="toggle('othercatalognumbersdiv')" /> Other Catalog Numbers<br/>
+							<input type="checkbox" onclick="toggle('recordedbydiv')" /> Collector<br/>
+							<input type="checkbox" onclick="toggle('recordnumberdiv')" /> Collector Number<br/>
+							<input type="checkbox" onclick="toggle('eventdatediv')" /> Collection Date<br/>
+							<input type="checkbox" onclick="toggle('languagediv')" /> Language<br/>
+							<div style="font-weight:bold">Catalog Number Match Action:</div>
+							<input name="addaction" type="radio" value="1" checked /> Restrict entry if record exists <br/>
+							<input name="addaction" type="radio" value="2" /> Append values to existing records
+						</fieldset> 
+					</div>
+					<div style="position:absolute;background-color:white;top:10px;right:10px;">
+						Session: <label id="minutes">00</label>:<label id="seconds">00</label><br/>
+						Count: <label id="count">0</label><br/>
+						Rate: <label id="rate">0</label> per hour
+					</div>
+					<div>
 						<div style="">
 							<div id="scinamediv" style="float:left"> 
 								<b>Scientific Name:</b> 
@@ -158,6 +168,7 @@ if($isEditor){
 									<option>stage 2</option>
 									<option>stage 3</option>
 									<option>expert required</option>
+									<option>pending review-nfn</option>
 									<option>pending review</option>
 									<option>reviewed</option>
 									<option>closed</option>
@@ -206,8 +217,8 @@ if($isEditor){
 								<input name="recordsubmit" type="submit" value="Add Record" />
 							</div>
 						</div> 
-					</form>
-				</div>
+					</div>
+				</form>
 			</fieldset>
 			<fieldset style="padding:15px;">
 				<legend><b>Records</b></legend>

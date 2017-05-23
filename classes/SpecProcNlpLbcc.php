@@ -25,6 +25,7 @@ class SpecProcNlpLbcc {
 			$results = array();
 			$labelInfo = $this->getLabelInfo($rawStr, $this->collId);
 			if($labelInfo) {
+
 				$recordedBy = "";
 				$recordedById = "";
 				$recordNumber = "";
@@ -4687,7 +4688,7 @@ class SpecProcNlpLbcc {
 		return array();
 	}
 
-    
+
 	private function processCollectorQueryResult($r2, $lName, $fName, $mName) {//echo "\nInput to processCollectorQueryResult:\nlName: ".$lName."\nfName: ".$fName."\nmName: ".$mName,"\n";
 		$firstName = $r2->firstName;
 		$middleInitial = $r2->middleName;

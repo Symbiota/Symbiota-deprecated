@@ -1,8 +1,8 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/PermissionsManager.php');
-include_once($serverRoot.'/classes/ProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/PermissionsManager.php');
+include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $loginAs = array_key_exists("loginas",$_REQUEST)?trim($_REQUEST["loginas"]):"";
 $searchTerm = array_key_exists("searchterm",$_REQUEST)?trim($_REQUEST["searchterm"]):"";
@@ -11,7 +11,7 @@ $delRole = array_key_exists("delrole",$_REQUEST)?$_REQUEST["delrole"]:"";
 $tablePk = array_key_exists("tablepk",$_REQUEST)?$_REQUEST["tablepk"]:"";
 
 $userManager = new PermissionsManager();
-if($isAdmin){
+if($IS_ADMIN){
 	if($loginAs){
 		$pHandler = new ProfileManager();
 		$pHandler->setUserName($loginAs);
@@ -37,17 +37,17 @@ if($isAdmin){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> User Management</title>
+	<title><?php echo $DEFAULT_TITLE; ?> User Management</title>
 	<meta http-equiv="X-Frame-Options" content="deny">
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 </head>
 
 <body>
 
 	<?php
 	$displayLeftMenu = (isset($profile_usermanagementMenu)?$profile_usermanagementMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($profile_usermanagementCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -77,7 +77,7 @@ if($isAdmin){
 			</div>
 		</div>
 		<?php 
-		if($isAdmin){
+		if($IS_ADMIN){
 			if($userId){
 				$user = $userManager->getUser($userId);
 				?>
@@ -252,7 +252,7 @@ if($isAdmin){
 								echo "<ul>";
 								foreach($collList as $k => $v){
 									$cName = '';
-									echo '<li><span title="'.$v['aby'].'">'.$v['name'].'</span>';
+									echo '<li><span title="'.$v['aby'].'"><a href="../collections/misc/collprofiles.php?collid='.$k.'" target="_blank">'.$v['name'].'</a></span>';
 									echo "<a href='usermanagement.php?delrole=CollAdmin&tablepk=$k&userid=$userId'>";
 									echo "<img src='../images/del.png' style='border:0px;width:15px;' title='Delete permission' />";
 									echo "</a></li>";
@@ -265,7 +265,7 @@ if($isAdmin){
 								$collList = $userPermissions["CollEditor"];
 								echo "<ul>";
 								foreach($collList as $k => $v){
-									echo '<li><span title="'.$v['aby'].'">'.$v['name'].'</span>';
+									echo '<li><span title="'.$v['aby'].'"><a href="../collections/misc/collprofiles.php?collid='.$k.'" target="_blank">'.$v['name'].'</a></span>';
 									echo "<a href='usermanagement.php?delrole=CollEditor&tablepk=$k&userid=$userId'>";
 									echo "<img src='../images/del.png' style='border:0px;width:15px;' title='Delete permission' />";
 									echo "</a></li>";
@@ -327,7 +327,7 @@ if($isAdmin){
 											$name = '&lt;resource deleted&gt;';
 											if(isset($v['name'])) $name = $v['name'];
 											echo '<li>';
-											echo '<a href="../checklists/checklist.php?cl='.$k.'">';
+											echo '<a href="../checklists/checklist.php?cl='.$k.'" target="_blank">';
 											echo '<span title="'.$v['aby'].'">'.$name.'</span>';
 											echo '</a>';
 											echo "<a href='usermanagement.php?delrole=ClAdmin&tablepk=$k&userid=$userId'>";
@@ -348,7 +348,7 @@ if($isAdmin){
 						echo "<h3 style='margin:20px;'>No permissions have to been assigned to this user</h3>";
 					}
 					?>
-					<form name="addpermissions" action="usermanagement.php" method="post"/>
+					<form name="addpermissions" action="usermanagement.php" method="post">
 						<fieldset style="margin-top:10px;-color:#FFFFCC;padding:0px 10px 10px 10px;">
 							<legend style="font-weight:bold;">Assign New Permissions</legend>
 							<div style="margin:5px;">
@@ -569,7 +569,7 @@ if($isAdmin){
 		?>
 	</div>
 	<?php
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?> 
 
 </body>

@@ -5,6 +5,8 @@ include_once('ImageShared.php');
 class ImageCleaner{
 	
 	private $conn;
+	private $collid;
+	private $tidArr = array();
 	private $verbose = 1;
 	private $errorStr;
 
@@ -17,15 +19,18 @@ class ImageCleaner{
 		if($this->conn) $this->conn->close();
 	}
 
-	public function getReportArr($collid = 0){
+	public function getReportArr(){
 		$retArr = array();
-		$sql = 'SELECT c.collid, CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, c.collectionname, count(i.imgid) AS cnt '. 
+		
+		$sql = 'SELECT c.collid, CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, c.collectionname, count(DISTINCT i.imgid) AS cnt '. 
 			'FROM images i LEFT JOIN omoccurrences o ON i.occid = o.occid '.
-			'LEFT JOIN omcollections c ON o.collid = c.collid '.
-			'WHERE ((i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.url = "empty")) ';
-		if($collid) $sql .= 'AND (c.collid = '.$collid.') ';
-		$sql .= 'GROUP BY c.collid ORDER BY c.collectionname';
-
+			'LEFT JOIN omcollections c ON o.collid = c.collid ';
+		if($this->tidArr){
+			$sql .= 'INNER JOIN taxaenumtree e ON i.tid = e.tid ';
+		}
+		$sql .= $this->getSqlWhere().
+			'GROUP BY c.collid ORDER BY c.collectionname';
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$id = $r->collid;
@@ -46,57 +51,54 @@ class ImageCleaner{
 		return $retArr;
 	}
 
-	public function buildThumbnailImages($collid = 0){
+	public function buildThumbnailImages(){
 		//Process images linked to collections
-		$sql = 'SELECT DISTINCT c.collid, CONCAT_WS("_",c.institutioncode, c.collectioncode) AS code, c.collectionname '.
-			'FROM omcollections c ';
-		if($collid){
-			$sql .= 'WHERE c.collid = '.$collid;
+		if($this->collid){
+			$sql = 'SELECT DISTINCT c.collid, CONCAT_WS("_",c.institutioncode, c.collectioncode) AS code, c.collectionname '.
+				'FROM omcollections c '.
+				'WHERE c.collid = '.$this->collid;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				if($this->verbose){
+					echo '<ul><li>Processing Collection: '.$r->collectionname.'</li></ul>';
+					ob_flush();
+					flush();
+				}
+				$this->collid = $r->collid;
+				$this->buildImages($r->code.'/');
+			}
+			$rs->free();
 		}
 		else{
-			$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
-			'INNER JOIN images i ON o.occid = i.occid '.
-			'WHERE (i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.thumbnailurl LIKE "processing%") OR (i.url = "empty") OR (i.url LIKE "processing%")';
-		}
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
 			if($this->verbose){
-				echo '<ul><li>Processing Collection: '.$r->collectionname.'</li></ul>';
-				ob_flush();
-				flush();
-			}
-			$this->buildImages($r->code.'/',$r->collid);
-		}
-		$rs->free();
-		
-		if(!$collid){
-			//Check for images that are NOT associated with a collection
-			if($this->verbose){
-				echo '<ul><li>Processing field images (not linked to specimens)</li></ul>';
+				if($this->tidArr){
+					echo '<ul><li>Processing images for taxon #'.$this->tidArr[0].'</li></ul>';
+				}
+				else{
+					echo '<ul><li>Processing field images (not linked to specimens)</li></ul>';
+				}
 				ob_flush();
 				flush();
 			}
 			$this->buildImages('misc/'.date('Ym').'/');
 		}
 	}
-	
-	private function buildImages($targetPath, $collid = 0){
+
+	private function buildImages($targetPath){
 		ini_set('memory_limit','512M');
 		$imgManager = new ImageShared();
 
-		$sql = '';
-		if($collid){
-			$sql = 'SELECT i.imgid, i.url, i.originalurl, i.thumbnailurl, i.format, o.catalognumber '.
-				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'WHERE (o.collid = '.$collid.') ';
+		$sql = 'SELECT DISTINCT i.imgid, i.url, i.originalurl, i.thumbnailurl, i.format ';
+		if($this->collid){
+			$sql .= ', o.catalognumber FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid ';
 		}
 		else{
-			$sql = 'SELECT i.imgid, i.url, i.originalurl, i.thumbnailurl, i.format '.
-				'FROM images i '.
-				'WHERE (i.occid IS NULL) ';
+			$sql .= 'FROM images i ';
 		}
-		$sql .= 'AND ((i.thumbnailurl IS NULL) OR (i.thumbnailurl = "") OR (i.thumbnailurl = "bad url") OR (i.thumbnailurl LIKE "processing%") OR (i.url LIKE "processing%") OR (i.url = "empty")) '.
-			'ORDER BY RAND()';
+		if($this->tidArr){
+			$sql .= 'INNER JOIN taxaenumtree e ON i.tid = e.tid ';
+		}
+		$sql .= $this->getSqlWhere().'ORDER BY RAND()';
 		//echo $sql; exit;
 		$result = $this->conn->query($sql);
 		if($this->verbose) echo '<ol style="margin-left:15px;">';
@@ -139,7 +141,7 @@ class ImageCleaner{
 
 			//Build target path
 			$finalPath = $targetPath;
-			if($collid){
+			if($this->collid){
 				$catNum = $row->catalognumber;
 				if($catNum){
 					$catNum = str_replace(array('/','\\',' '), '', $catNum);
@@ -241,11 +243,28 @@ class ImageCleaner{
 		if($this->verbose) echo '</ol>';
 	}
 
+	private function getSqlWhere(){
+		$sql = 'WHERE ((i.thumbnailurl IS NULL) OR (i.url = "empty")) ';
+		if($this->collid) $sql .= 'AND (o.collid = '.$this->collid.') ';
+		elseif($this->collid === '0') $sql .= 'AND (i.occid IS NULL) ';
+		if($this->tidArr) $sql .= 'AND (e.taxauthid = 1) AND (i.tid IN('.implode(',',$this->tidArr).') OR e.parenttid IN('.implode(',',$this->tidArr).')) ';
+		return $sql;
+	}
+
+	public function resetProcessing(){
+		$sqlTN = 'UPDATE images SET thumbnailurl = NULL '.
+			'WHERE (thumbnailurl = "") OR (thumbnailurl = "bad url") OR (thumbnailurl LIKE "processing %" AND thumbnailurl != "processing '.date('Y-m-d').'") ';
+		$this->conn->query($sqlTN);
+		$sqlWeb = 'UPDATE images SET url = "empty" '.
+			'WHERE (url = "") OR (url LIKE "processing %" AND url != "processing '.date('Y-m-d').'") ';
+		$this->conn->query($sqlWeb);
+	}
+
 	//URL testing 
-	public function testByCollid($collid){
+	public function testByCollid(){
 		$sql = 'SELECT i.imgid, i.url, i.thumbnailurl, i.originalurl '.
-				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'WHERE o.collid IN('.$collid.')';
+			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+			'WHERE o.collid IN('.$this->collid.')';
 		return $this->testUrls($sql);
 	}
 	
@@ -287,6 +306,39 @@ class ImageCleaner{
 	}
 
 	//Setters and getters
+	public function setCollid($id){
+		if(is_numeric($id)){
+			$this->collid = $id;
+		}
+	}
+	
+	public function setTid($id){
+		if(is_numeric($id)){
+			$this->tidArr[] = $id;
+			$sql = 'SELECT DISTINCT ts.tid '.
+				'FROM taxstatus ts INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
+				'WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = '.$id.')';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				if($r->tid != $id) $this->tidArr[] = $r->tid;
+			}
+			$rs->free();
+		}
+	}
+	
+	public function getSciname(){
+		$sciname = '';
+		if($this->tidArr){
+			$sql = 'SELECT sciname FROM taxa WHERE (tid = '.$this->tidArr[0].')';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$sciname = $r->sciname;
+			}
+			$rs->free();
+		}
+		return $sciname;
+	}
+	
 	public function setVerbose($verb){
 		$this->verbose = $verb;
 	}

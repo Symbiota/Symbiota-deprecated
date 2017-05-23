@@ -37,8 +37,8 @@ if($SYMB_UID){
 <head>
 	<title><?php echo $DEFAULT_TITLE." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
 	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData["collectionname"]:""); ?>" />
-	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" rel="Stylesheet" type="text/css" />
 	<script src="../../js/jquery.js?ver=20130917" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js?ver=20130917" type="text/javascript"></script>
@@ -227,24 +227,43 @@ if($SYMB_UID){
 								if($collData['colltype'] != 'General Observations'){
 									?>
 									<li>
-										<a href="../admin/specuploadmanagement.php?collid=<?php echo $collid; ?>">
-											<?php echo $LANG['IMPORT_SPECIMEN']; ?>
+										<a href="#" onclick="$('li.importItem').show(); return false;" >
+											<?php echo (isset($LANG['IMPORT_SPECIMEN'])?$LANG['IMPORT_SPECIMEN']:'Import/Update Specimen Records'); ?>
 										</a>
 									</li>
-									<?php
-									if($collData['managementtype'] == 'Live Data'){
-										?>
-										<li style="margin-left:10px;">
-											<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collid; ?>">
-												<?php echo $LANG['QUICK_FILE']; ?>
-											</a>
-										</li>
-										<?php
-									}
-									?>
-									<li style="margin-left:10px;">
+									<li class="importItem" style="margin-left:10px;display:none;">
 										<a href="../admin/specupload.php?uploadtype=7&collid=<?php echo $collid; ?>">
-											<?php echo $LANG['SKELETAL_FILE_UPLOAD']; ?>
+											<?php echo (isset($LANG['SKELETAL_FILE_IMPORT'])?$LANG['SKELETAL_FILE_IMPORT']:'Skeletal File Import'); ?>
+										</a>
+									</li>
+									<li class="importItem" style="margin-left:10px;display:none">
+										<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['TEXT_FILE_IMPORT'])?$LANG['TEXT_FILE_IMPORT']:'Text File Import'); ?>
+										</a>
+									</li>
+									<li class="importItem" style="margin-left:10px;display:none;">
+										<a href="../admin/specupload.php?uploadtype=6&collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['DWCA_IMPORT'])?$LANG['DWCA_IMPORT']:'DwC-Archive Import'); ?>
+										</a>
+									</li>
+									<li class="importItem" style="margin-left:10px;display:none;">
+										<a href="../admin/specupload.php?uploadtype=8&collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['IPT_IMPORT'])?$LANG['IPT_IMPORT']:'IPT Import'); ?>
+										</a>
+									</li>
+									<li class="importItem" style="margin-left:10px;display:none;">
+										<a href="../admin/specupload.php?uploadtype=9&collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['NFN_IMPORT'])?$LANG['NFN_IMPORT']:'Notes from Nature Import'); ?>
+										</a>
+									</li>
+									<li class="importItem" style="margin-left:10px;display:none;">
+										<a href="../admin/specuploadmanagement.php?collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['IMPORT_PROFILES'])?$LANG['IMPORT_PROFILES']:'Saved Import Profiles'); ?>
+										</a>
+									</li>
+									<li class="importItem" style="margin-left:10px;display:none;">
+										<a href="../admin/specuploadmanagement.php?action=addprofile&collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['CREATE_PROFILE'])?$LANG['CREATE_PROFILE']:'Create a new Import Profile'); ?>
 										</a>
 									</li>
 									<?php 

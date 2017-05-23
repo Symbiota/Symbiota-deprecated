@@ -46,6 +46,7 @@ function detectBatchUpdateField(){
 		buNewValue += '<option value="stage 1">Stage 1</option>';
 		buNewValue += '<option value="stage 2">Stage 2</option>';
 		buNewValue += '<option value="stage 3">Stage 3</option>';
+		buNewValue += '<option value="pending review-nfn">Pending Review-NfN</option>';
 		buNewValue += '<option value="pending review">Pending Review</option>';
 		buNewValue += '<option value="expert required">Expert Required</option>';
 		buNewValue += '<option value="reviewed">Reviewed</option>';

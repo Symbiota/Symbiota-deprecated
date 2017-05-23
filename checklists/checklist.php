@@ -111,8 +111,8 @@ if($clValue || $dynClid){
 <head>
 	<meta charset="<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['RESCHECK'];?><?php echo $clManager->getClName(); ?></title>
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
@@ -249,7 +249,9 @@ if($clValue || $dynClid){
 				</div>
 				<?php 
 				if($clArray["publication"]){
-					echo "<div><span style='font-weight:bold;'>".$LANG['PUBLICATION']."</span>".$clArray["publication"]."</div>";
+					$pubStr = $clArray["publication"];
+					if(substr($pubStr,0,4)=='http' && !strpos($pubStr,' ')) $pubStr = '<a href="'.$pubStr.'" target="_blank">'.$pubStr."</a>";
+					echo "<div><span style='font-weight:bold;'>".(isset($LANG['CITATION'])?$LANG['CITATION']:'Citation').":</span> ".$pubStr."</div>";
 				}
 			}
 		
@@ -439,7 +441,7 @@ if($clValue || $dynClid){
 									<div>
 										<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" target="_blank">
 											<?php 
-											$googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=170x170&maptype=terrain';
+											$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=170x170&maptype=terrain';
 											if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
 											$googleUrl .= '&markers=size:tiny|'.implode('|',$coordArr);
 											?>

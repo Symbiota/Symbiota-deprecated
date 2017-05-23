@@ -176,6 +176,47 @@ div.button:hover {
 	border:	1px inset #A0A0A0;
 }
 
+/*Dynamic Key module*/
+#keytable{
+
+}
+
+#keycharcolumn{
+	vertical-align:	top;
+	width:	30%;
+}
+
+#keymidcolumn {
+	width:	20px;
+	background-image: url(../images/layout/brown_hor_strip.gif);
+}
+
+#keytaxacolumn{
+	vertical-align:	top;
+	width:	65%;
+}
+
+.charHeading{
+
+}
+
+.characterStateName{
+
+}
+
+.dynam{
+
+}
+
+.dynamlang{
+	margin-top:0.5em;
+	font-weight: bold;
+}
+
+.dynamopt{
+
+}
+
 /* misc page specific items */
 #cloptiondiv{
 	margin:		5px;
@@ -268,36 +309,34 @@ div.genericpopup{
 	border:					black solid 3px;
 }
 
-.searchcollnextbtn {
-	background: url(../images/next.png);
-    border: 0;
-    display: block;
+.nextbtn {
+	font-weight: bold,
+	background-color: #c0c0c0;
+	border-color: #999;
+    color: black;
 	width: 90px;
-	height: 56px;
+	padding: 6px 10px;
+	border-radius: 5px;
 }
 
-.searchcollnextbtn:hover {
-	background: url(../images/next_rollover.png);
-    border: 0;
-    display: block;
-	width: 90px;
-	height: 56px;
+.nextbtn:hover {
+	background: #e5f1fd;
+	color: black;
 }
 
-.harvestparamtbtn {
-	background: url(../images/search.png);
-    border: 1px solid gray;
-    display: block;
+.resetbtn {
+	font-weight: bold,
+	background-color: #c0c0c0;
+	border-color: #999;
+    color: black;
 	width: 90px;
-	height: 56px;
+	padding: 4px 6px;
+	border-radius: 5px;
 }
 
-.harvestparamtbtn:hover {
-	background: url(../images/search_rollover.png);
-    border: 1px solid gray;
-    display: block;
-	width: 90px;
-	height: 56px;
+.resetbtn:hover {
+	background-color: #e5f1fd;
+    color: black;
 }
 
 /* JQuery Manifest alterations */

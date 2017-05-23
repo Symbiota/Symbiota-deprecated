@@ -23,7 +23,7 @@ if($type=='selection' || $type=='dsselectionquery'){
 if($type=='fullquery'){
 	$mapManager->setSearchTermsArr($stArr);
 	$mapWhere = $mapManager->getSqlWhere();
-	$coordArr = $mapManager->getCollGeoCoords(0,false,$mapWhere,$limit);
+	$coordArr = $mapManager->getCollGeoCoords($mapWhere,0,0);
 }
 
 $kmlFilePath = $mapManager->writeKMLFile($coordArr);

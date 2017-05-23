@@ -14,4 +14,7 @@ $LANG['NAV_SEARCH'] = 'Search Criteria';
 $LANG['TAB_CHECKLIST'] = 'Species List';
 $LANG['TAB_OCCURRENCES'] = 'Occurrence Records';
 $LANG['TAB_MAP'] = 'Maps';
+
+$LANG['BUTTON_NEXT'] = 'Search >';
+$LANG['BUTTON_RESET'] = 'Reset Form';
 ?>

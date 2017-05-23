@@ -10,19 +10,20 @@ $SECURITY_KEY = '';				//Typically a UUID used to verify access to certain web s
 
 $CLIENT_ROOT = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
 $SERVER_ROOT = '';				//Full path to Symbiota project root folder
-$TEMP_DIR_ROOT = '';				//Must be writable by Apache; will use system default if not specified  
-$LOG_PATH = '';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified 
+$TEMP_DIR_ROOT = $SERVER_ROOT.'/temp';				//Must be writable by Apache; will use system default if not specified  
+$LOG_PATH = $SERVER_ROOT.'/content/logs';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified 
 
 //the root for the image directory
 $IMAGE_DOMAIN = '';				//Domain path to images, if different from portal 
 $IMAGE_ROOT_URL = '';				//URL path to images
 $IMAGE_ROOT_PATH = '';			//Writable path to images, especially needed for downloading images
 
-//Pixel witdth of web images
+//Pixel width of web images
 $IMG_WEB_WIDTH = 1400;
 $IMG_TN_WIDTH = 200;
 $IMG_LG_WIDTH = 3200;
 $IMG_FILE_SIZE_LIMIT = 300000;		//Files above this size limit and still within pixel width limits will still be resaved w/ some compression  
+$IPLANT_IMAGE_IMPORT_PATH = '';		//Path used to map/import images uploaded to the iPlant image server (e.g. /home/shared/project-name/--INSTITUTION_CODE--/, the --INSTITUTION_CODE-- text will be replaced with collection's institution code) 
 
 //Specimen Label and Batch Image Processor variables
 //$USE_IMAGE_MAGICK = 0;		//1 = ImageMagick resize images, given that it's installed (faster, less memory intensive)
@@ -36,33 +37,44 @@ $FLORA_MOD_IS_ACTIVE = 1;
 $KEY_MOD_IS_ACTIVE = 1;
 
 $REQUESTED_TRACKING_IS_ACTIVE = 0;   // Allow users to request actions such as requests for images to be made for specimens
-$QUICK_HOST_ENTRY_IS_ACTIVE = 0;   // Allows quick entry for host taxa in occurrence editor
+
+//Configurations for GeoServer integration
+$GEOSERVER_URL = '';   // URL for Geoserver instance serving map data for this portal
+$GEOSERVER_RECORD_LAYER = '';   // Name of Geoserver layer containing occurrence point data for this portal
+
+//Configurations for Apache SOLR integration
+$SOLR_URL = '';   // URL for SOLR instance indexing data for this portal
+$SOLR_FULL_IMPORT_INTERVAL = 0;   // Number of hours between full imports of SOLR index.
+
+//Configurations for publishing to GBIF
+$GBIF_USERNAME = '';                //GBIF username which portal will use to publish
+$GBIF_PASSWORD = '';                //GBIF password which portal will use to publish
+$GBIF_ORG_KEY = '';                 //GBIF organization key for organization which is hosting this portal
 
 $FP_ENABLED = 0;				//Enable Filtered-Push modules
 
 //Misc variables
 $GOOGLE_MAP_KEY = '';				//Needed for Google Map; get from Google 
 $MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
+$ACTIVATE_GEOLOCATION = false;			//Activates HTML5 geolocation services in Map Search
 $GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
 $RECAPTCHA_PUBLIC_KEY = '';			//Now called site key
 $RECAPTCHA_PRIVATE_KEY = '';		//Now called secret key
 $EOL_KEY = '';						//Not required, but good to add a key if you plan to do a lot of EOL mapping
-
-$GBIF_USERNAME = '';                //GBIF username which portal will use to publish
-$GBIF_PASSWORD = '';                //GBIF password which portal will use to publish
-$GBIF_ORG_KEY = '';                 //GBIF organization key for organization which is hosting this portal
-
+$QUICK_HOST_ENTRY_IS_ACTIVE = 0;   // Allows quick entry for host taxa in occurrence editor
+$PORTAL_TAXA_DESC = '';		//Preferred taxa descriptions for the portal.
 $GLOSSARY_EXPORT_BANNER = '';		//Banner image for glossary exports. Place in images/layout folder.
 $DYN_CHECKLIST_RADIUS = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $DISPLAY_COMMON_NAMES = 1;			//Display common names in species profile page and checklists displays
 $ACTIVATE_EXSICCATI = 0;			//Activates exsiccati fields within data entry pages; adding link to exsiccati search tools to portal menu is recommended
-$ACTIVATE_GEOLOCATE_TOOLKIT = 0;	//Activates GeoLocate Toolkit located within Exporter tab within Processing Toolkit menu item 
+$ACTIVATE_GEOLOCATE_TOOLKIT = 0;	//Activates GeoLocate Toolkit located within the Processing Toolkit menu items 
 
 $RIGHTS_TERMS = array(
 	'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
 	'CC BY (Attribution)' => 'http://creativecommons.org/licenses/by/4.0/',
 	'CC BY-NC (Attribution-Non-Commercial)' => 'http://creativecommons.org/licenses/by-nc/4.0/'
 );
+$CSS_VERSION_LOCAL = '20170414';		//Changing this variable will force a refresh of main.css styles within users browser cache for all pages
 
 //set terms for reproductiveCondition drop-down menu
 //$REPRODUCTIVE_CONDITION_TERMS = array("term1", "term2", "term3", "term4", "term5", "etc..");

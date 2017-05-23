@@ -40,8 +40,8 @@ if($isEditor){
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 		<title><?php echo $DEFAULT_TITLE; ?> Specimen Label Manager</title>
-		<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	    <link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 		<script src="../../js/jquery.js" type="text/javascript"></script>
 		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
@@ -254,31 +254,31 @@ if($isEditor){
 						<fieldset>
 							<legend><b>Define Specimen Recordset</b></legend>
 							<div style="margin:3px;">
-								<span title="Scientific name as entered in database.">
+								<div title="Scientific name as entered in database.">
 									Scientific Name: 
 									<input type="text" name="taxa" id="taxa" size="60" value="<?php echo (array_key_exists('taxa',$_REQUEST)?$_REQUEST['taxa']:''); ?>" />
-								</span>
+								</div>
 							</div>
-							<div style="margin:3px;">
-								<span title="Full or last name of collector as entered in database.">
+							<div style="margin:3px;clear:both;">
+								<div style="float:left;" title="Full or last name of collector as entered in database.">
 									Collector: 
 									<input type="text" name="recordedby" style="width:150px;" value="<?php echo (array_key_exists('recordedby',$_REQUEST)?$_REQUEST['recordedby']:''); ?>" />
-								</span>
-								<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash required), e.g.: 3700 - 3750">
+								</div>
+								<div style="float:left;margin-left:20px;" title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 									Record Number(s): 
 									<input type="text" name="recordnumber" style="width:150px;" value="<?php echo (array_key_exists('recordnumber',$_REQUEST)?$_REQUEST['recordnumber']:''); ?>" />
-								</span>
-								<span style="margin-left:20px;" title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
+								</div>
+								<div style="float:left;margin-left:20px;" title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 									Catalog Number(s): 
 									<input type="text" name="identifier" style="width:150px;" value="<?php echo (array_key_exists('identifier',$_REQUEST)?$_REQUEST['identifier']:''); ?>" />
-								</span>
+								</div>
 							</div>
-							<div style="margin:3px;">
-								<span>
+							<div style="margin:3px;clear:both;">
+								<div style="float:left;">
 									Entered by: 
 									<input type="text" name="recordenteredby" value="<?php echo (array_key_exists('recordenteredby',$_REQUEST)?$_REQUEST['recordenteredby']:''); ?>" style="width:100px;" title="login name of data entry person" />
-								</span>
-								<span style="margin-left:20px;" title="">
+								</div>
+								<div style="margin-left:20px;float:left;" title="">
 									Date range: 
 									<input type="text" name="date1" style="width:100px;" value="<?php echo (array_key_exists('date1',$_REQUEST)?$_REQUEST['date1']:''); ?>" onchange="validateDateFields(this.form)" /> to 
 									<input type="text" name="date2" style="width:100px;" value="<?php echo (array_key_exists('date2',$_REQUEST)?$_REQUEST['date2']:''); ?>" onchange="validateDateFields(this.form)" />
@@ -287,9 +287,9 @@ if($isEditor){
 										<option value="datelastmodified" <?php echo (isset($_POST['datetarget']) && $_POST['datetarget'] == 'datelastmodified'?'SELECTED':''); ?>>Date Modified</option>
 										<option value="eventdate"<?php echo (isset($_POST['datetarget']) && $_POST['datetarget'] == 'eventdate'?'SELECTED':''); ?>>Date Collected</option>
 									</select>
-								</span>
+								</div>
 							</div>
-							<div style="margin:3px;">
+							<div style="margin:3px;clear:both;">
 								Label Projects: 
 								<select name="labelproject" >
 									<option value=""></option>
@@ -327,18 +327,18 @@ if($isEditor){
 								else echo 'Search within all collections';
 								?>
 							</div>
-							<div>
-								<span style="margin-left:20px;">
+							<div style="clear:both;">
+								<div style="margin-left:20px;float:left;">
 									<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
 									<input type="submit" name="submitaction" value="Filter Specimen Records" />
-								</span>
-								<span style="margin-left:20px;">
+								</div>
+								<div style="margin-left:20px;float:left;">
 									* Specimen return is limited to 400 records
-								</span>
+								</div>
 							</div>
 						</fieldset>
 					</form>
-					<div>
+					<div style="clear:both;">
 						<?php 
 						if($action == "Filter Specimen Records"){
 							if($occArr){

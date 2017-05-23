@@ -401,14 +401,20 @@ class ExsiccatiManager {
 				//Grab matching occid(s)
 				$sql1 = 'SELECT o.occid '.
 					'FROM omoccurrences o LEFT JOIN omexsiccatiocclink l ON o.occid = l.occid '.
-					'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid '.
+					'LEFT JOIN omoccurrencesfulltext f ON o.occid = f.occid '.
 					'WHERE o.collid = '.$collId.' AND l.occid IS NULL ';
 				if($identifier){
 					$sql1 .= 'AND (o.catalogNumber = '.(is_numeric($identifier)?$identifier:'"'.$identifier.'"').') ';
 				}
 				else{
-					$sql1 .= 'AND (MATCH(f.recordedby) AGAINST("'.$pArr['recordedby'].'")) '.
-						'AND (o.recordnumber = '.(is_numeric($pArr['recordnumber'])?$pArr['recordnumber']:'"'.$pArr['recordnumber'].'"').') ';
+					if(strlen($pArr['recordedby']) < 4 || strtolower($pArr['recordedby']) == 'best'){
+						//Need to avoid FULLTEXT stopwords interfering with return
+						$sql1 .= 'AND (o.recordedby LIKE "%'.$pArr['recordedby'].'%")';
+					}
+					else{
+						$sql1 .= 'AND (MATCH(f.recordedby) AGAINST("'.$pArr['recordedby'].'")) ';
+					}
+					$sql1 .= 'AND (o.recordnumber = '.(is_numeric($pArr['recordnumber'])?$pArr['recordnumber']:'"'.$pArr['recordnumber'].'"').') ';
 				}
 				$sql1 .= 'LIMIT 5';
 				//echo $sql1;

@@ -4,7 +4,7 @@ $(document).ready(function() {
 });
 
 
-$(document).ready(function() {
+jQuery(document).ready(function($) {
 	$('#taxa').manifest({
 		marcoPolo: {
 			url: 'rpc/imagesearchautofill.php',

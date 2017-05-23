@@ -312,21 +312,6 @@ function checkRecordLimit(f) {
 	}
 }
 
-function checkHighResult(result) {
-	if (result <= 50000) {
-		if(confirm("Your search produced "+result+" results which exceeds the Record Limit set in the Search Criteria. Would you like to resubmit the search form with a higher Record Limit to accommodate all of the results? Please note that increasing the record limit can cause delays in the map loading.")){
-			document.getElementById("recordlimit").value = result;
-			refreshClustering();
-		}
-		else{
-			return;
-		}
-	}
-	else{
-		alert("Your search produced "+result+" results which exceeds the maximum of 50000, please refine your search more.");
-	}
-}
-
 function updateRadius(){
 	var radiusUnits = document.getElementById("radiusunits").value;
 	var radiusInMiles = document.getElementById("radiustemp").value;
@@ -459,7 +444,7 @@ function openIndPU(occId,clid){
 	}
 	catch(err){
 	}
-	newWindow = window.open('../individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+	newWindow = window.open('../individual/index.php?occid='+occId+'&clid='+clid+',indspec' + occId+',scrollbars=1,toolbar=1,resizable=1,width='+wWidth+',height=600,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	setTimeout(function () { newWindow.focus(); }, 0.5);
 }
@@ -495,7 +480,9 @@ function openOccidInfoBox(label,lat,lon){
 }
 
 function closeOccidInfoBox(){
-	ibLabel.close();
+	if(ibLabel){
+        ibLabel.close();
+	}
 }
 
 function generateRandColor(){
@@ -506,13 +493,6 @@ function generateRandColor(){
 	var z1 = z.substring(0,y);
 	hexColor = z1 + x;
 	return hexColor;
-}
-
-Array.prototype.contains = function ( needle ) {
-   for (i in this) {
-       if (this[i] == needle) return true;
-   }
-   return false;
 }
 
 function changeKeyColor(v,markers){
@@ -591,7 +571,7 @@ function findSelections(c){
 		}
 		var selectedbox = document.getElementById("selectedpoints");
 		selectedbox.value = c.value;
-		google.maps.event.trigger(selectedbox, 'change');
+		selectPoints();
 	}
 	else if(c.checked == false){
 		var activeTab = $('#tabs2').tabs("option","active");
@@ -601,7 +581,7 @@ function findSelections(c){
 		removeSelectionRecord(c.value);
 		var deselectedbox = document.getElementById("deselectedpoints");
 		deselectedbox.value = c.value;
-		google.maps.event.trigger(deselectedbox, 'change');
+		deselectPoints();
 	}
 }
 
@@ -615,7 +595,7 @@ function findDsSelections(c){
 		}
 		var selectedbox = document.getElementById("selecteddspoints");
 		selectedbox.value = c.value;
-		google.maps.event.trigger(selectedbox, 'change');
+		selectDSPoints();
 	}
 	else if(c.checked == false){
 		var activeTab = $('#tabs3').tabs("option","active");
@@ -624,7 +604,7 @@ function findDsSelections(c){
 		}
 		var deselectedbox = document.getElementById("deselecteddspoints");
 		deselectedbox.value = c.value;
-		google.maps.event.trigger(deselectedbox, 'change');
+		deselectDSPoints();
 	}
 }
 
@@ -905,7 +885,7 @@ function prepSelectionKml(f){
 }
 
 function openPopup(urlStr){
-	wWidth = opener.document.body.offsetWidth*0.95;
+	wWidth = document.body.offsetWidth*0.90;
 	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
@@ -950,26 +930,35 @@ function changeTaxonomy(starr,f){
 	sutXmlHttp.send(null);
 }
 
-function changeRecordPage(starr,page){
-	document.getElementById("queryrecords").innerHTML = "<p>Loading...</p>";
-	
-	var sutXmlHttp=GetXmlHttpObject();
-	if (sutXmlHttp==null){
-		alert ("Your browser does not support AJAX!");
-		return;
-	}
-	var selectionsArr = JSON.stringify(selections);
-	var url="rpc/changemaprecordpage.php?starr="+starr+"&selected="+selectionsArr+"&page="+page;
-	
-	sutXmlHttp.onreadystatechange=function(){
-		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
-			var newMapRecordList = JSON.parse(sutXmlHttp.responseText);
-			document.getElementById("queryrecords").innerHTML = newMapRecordList;
-		}
-	};
-	sutXmlHttp.open("POST",url,true);
-	sutXmlHttp.send(null);
+/*function changeRecordPage(starr,page){
+    document.getElementById("queryrecords").innerHTML = "<p>Loading...</p>";
+    getRecords(starr,page);
 }
+
+function getRecords(starr,page){
+    //alert("rpc/changemaprecordpage.php?starr="+starr+"&selected="+JSON.stringify(selections)+"&page="+page);
+
+    setTimeout(function(){
+        $.ajax({
+            type: "POST",
+            url: "rpc/changemaprecordpage.php",
+            async: false,
+            data: {
+                starr: starr,
+                selected: JSON.stringify(selections),
+                page: page
+            }
+        }).done(function(msg) {
+            if(msg){
+                var newMapRecordList = JSON.parse(msg);
+                document.getElementById("queryrecords").innerHTML = newMapRecordList;
+            }
+            else{
+                return;
+            }
+        });
+    },5)
+}*/
 
 function removeSelectionRecord(sel){
 	var selDivId = "sel"+sel;
@@ -989,7 +978,7 @@ function findUncheckedSelections(c){
 		}
 		var deselectedbox = document.getElementById("deselectedpoints");
 		deselectedbox.value = occid;
-		google.maps.event.trigger(deselectedbox, 'change');
+		deselectPoints();
 		adjustSelectionsTab();
 	}
 }

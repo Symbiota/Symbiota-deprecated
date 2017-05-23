@@ -1,12 +1,10 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/GlossaryManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/GlossaryManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $glossId = array_key_exists('glossid',$_REQUEST)?$_REQUEST['glossid']:0;
-$glossgrpId = array_key_exists('glossgrpid',$_REQUEST)?$_REQUEST['glossgrpid']:0;
 $glimgId = array_key_exists('glimgid',$_REQUEST)?$_REQUEST['glimgid']:0;
-$tId = array_key_exists('tid',$_REQUEST)?$_REQUEST['tid']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $isEditor = false;
@@ -17,95 +15,53 @@ if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
 $glosManager = new GlossaryManager();
 $termArr = array();
 $termImgArr = array();
-$termGrpArr = array();
-$synonymArr = array();
-$translationArr = array();
-$sourceArr = array();
-$synonymStr = '';
-$translationStr = '';
-
+$redirectStr = '';
 if($glossId){
-	$termArr = $glosManager->getTermArr($glossId);
-	$sciName = $glosManager->getSciName($tId);
-	$glossgrpId = $termArr['glossgrpid'];
-	$termGrpArr = $glosManager->getGrpArr($glossId,$glossgrpId,$termArr['language']);
-	if(isset($glossary_indexBanner)){
-		$sourceArr = $glosManager->getTaxonSources($tId);
-	}
-	if(array_key_exists('synonym',$termGrpArr)){
-		$synonymArr = $termGrpArr['synonym'];
-		if($synonymArr){
-			$synonymStr = "<div style='margin-top:8px;' ><b>Synonyms:</b>";
-			$i = 0;
-			$cnt = count($synonymArr);
-			foreach($synonymArr as $synId => $synArr){
-				$onClick = "leaveTermPopup('termdetails.php?glossid=".$synArr['glossid']."'); return false;";
-				$synonymStr .= ' '.$synArr['term'];
-				if($isEditor){
-					$synonymStr .= ' <a href="#" onclick="'.$onClick.'" target="_blank">';
-					$synonymStr .= '<img style="border:0px;width:12px;" src="../images/edit.png" /></a>';
-				}
-				if($i < ($cnt - 1)){
-					$synonymStr .= ',';
-				}
-				$i++;
-			}
-			$synonymStr .= "</div>";
+	$glosManager->setGlossId($glossId);
+	$termArr = $glosManager->getTermArr();
+	$synonymArr = $glosManager->getSynonyms();
+	if(!$termArr['definition'] && $synonymArr){
+		$newID = '';
+		foreach($synonymArr as $sID => $sArr){
+			$newID = $sID;
+			if($sArr['definition']) break;
+		}
+		if($newID){
+			$redirectStr = 'redirected from '.$termArr['term'];
+			$glossId = $newID;
+			$glosManager->setGlossId($newID);
+			$termArr = $glosManager->getTermArr();
+			$synonymArr = $glosManager->getSynonyms();
 		}
 	}
-	if(array_key_exists('translation',$termGrpArr)){
-		$translationArr = $termGrpArr['translation'];
-		if($translationArr){
-			$translationStr = "<div style='margin-top:8px;' ><b>Translations:</b>";
-			$i = 0;
-			$cnt = count($translationArr);
-			foreach($translationArr as $transId => $transArr){
-				$onClick = "leaveTermPopup('termdetails.php?glossid=".$transArr['glossid']."'); return false;";
-				$translationStr .= ' '.$transArr['term'];
-				$translationStr .= ' ('.$transArr['language'].')';
-				if($isEditor){
-					$translationStr .= ' <a href="#" onclick="'.$onClick.'" target="_blank">';
-					$translationStr .= '<img style="border:0px;width:12px;" src="../images/edit.png" /></a>';
-				}
-				if($i < ($cnt - 1)){
-					$translationStr .= ',';
-				}
-				$i++;
-			}
-			$translationStr .= "</div>";
-		}
-	}
-	$termImgArr = $glosManager->getImgArr($glossgrpId);
-}
-else{
-	header("Location: index.php");
+	$termImgArr = $glosManager->getImgArr();
 }
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Glossary Term Information</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Glossary Term Information</title>
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
-    <link href="../css/main.css?<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
+    <link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" type="text/css" />
 	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../js/symb/glossary.index.js"></script>
 </head>
 
-<body style="overflow-x:hidden;overflow-y:auto;width:625px;margin-left:auto;margin-right:auto;">
+<body style="overflow-x:hidden;overflow-y:auto;width:700px;margin-left:auto;margin-right:auto;">
+	<script type="text/javascript">
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
+	</script>
 	<!-- This is inner text! -->
-	<div id="innertext" style="width:625px;margin-left:0px;margin-right:0px;">
-		<div id="tabs" style="padding:10px;width:600px;margin:0px;">
-			<div style="clear:both;width:600px;margin-bottom:5px;font-size:12px;">
-				<?php echo $sciName; ?>
-			</div>
-			<div style="clear:both;width:600px;">
+	<div id="innertext" style="width:680px;margin-left:0px;margin-right:0px;">
+		<div id="tabs" style="padding:10px;margin:0px;">
+			<div style="clear:both;">
 				<?php
 				if($isEditor){
 					?>
-					<div style="float:right;margin-right:15px;cursor:pointer;" onclick="" title="Edit Term Data">
-						<a href="#" onclick="leaveTermPopup('termdetails.php?glossid=<?php echo $glossId;?>'); return false;" target="_blank">
+					<div style="float:right;margin-right:15px;" title="Edit Term Data">
+						<a href="termdetails.php?glossid=<?php echo $glossId;?>" onclick="self.resizeTo(1250, 900);">
 							<img style="border:0px;width:12px;" src="../images/edit.png" />
 						</a>
 					</div>
@@ -113,16 +69,14 @@ else{
 				}
 				?>
 				<div style="float:left;">
-					<span style="font-size:18px;font-weight:bold;">
-						<?php echo $termArr['term']; ?>
-					</span>
+						<?php echo '<span style="font-size:18px;font-weight:bold;">'.$termArr['term'].'</span> '.$redirectStr; ?>
 				</div>
 			</div>
-			<div style="clear:both;width:600px;">
-				<div id="terminfo" style="float:left;<?php echo ($termImgArr?'width:300px;':''); ?>padding:10px;">
+			<div style="clear:both;width:670px;">
+				<div id="terminfo" style="float:left;width:<?php echo ($termImgArr?'380':'670'); ?>px;padding:10px;">
 					<div style="clear:both;">
 						<div style='' >
-							<div style='margin-top:8px;' >
+							<div style='margin-top:8px;width:95%' >
 								<b>Definition:</b> 
 								<?php echo $termArr['definition']; ?>
 							</div>
@@ -143,11 +97,43 @@ else{
 								</div>
 								<?php
 							}
-							if($synonymStr){
-								echo $synonymStr;
+							if($synonymArr){
+								echo '<div style="margin-top:8px;" ><b>Synonyms:</b> ';
+								$i = 0;
+								foreach($synonymArr as $synGlossId => $synArr){
+									if($i) echo ', ';
+									echo '<a href="individual.php?glossid='.$synGlossId.'">'.$synArr['term'].'</a>';
+									$i++;
+								}
+								echo '</div>';
 							}
-							if($translationStr){
-								echo $translationStr;
+							$translationArr = $glosManager->getTranslations();
+							if($translationArr){
+								echo '<div style="margin-top:8px;" ><b>Translations:</b> ';
+								$i = 0;
+								foreach($translationArr as $transGlossId => $transArr){
+									if($i) echo ', ';
+									echo '<a href="individual.php?glossid='.$transGlossId.'">'.$transArr['term'].'</a> ('.$transArr['language'].')';
+									$i++;
+								}
+								echo '</div>';
+							}
+							$otherRelationshipsArr = $glosManager->getOtherRelatedTerms();
+							if($otherRelationshipsArr){
+								echo '<div style="margin-top:8px;" ><b>Other Related Terms:</b> ';
+								$delimter = '';
+								foreach($otherRelationshipsArr as $relType => $relTypeArr){
+									$relStr = '';
+									if($relType == 'partOf') $relStr = 'has part';
+									elseif($relType == 'hasPart') $relStr = 'part of';
+									elseif($relType == 'subClassOf') $relStr = 'superclass or parent term';
+									elseif($relType == 'superClassOf') $relStr = 'subclass or child term';
+									foreach($relTypeArr as $relGlossId => $relArr){
+										echo $delimter.'<a href="individual.php?glossid='.$relGlossId.'">'.$relArr['term'].'</a> ('.$relStr.')';
+										$delimter = ', ';
+									}
+								}
+								echo '</div>';
 							}
 							if($termArr['notes']){
 								?>
@@ -182,62 +168,19 @@ else{
 							}
 							?>
 						</div>
-						
-						<?php
-						if(isset($glossary_indexBanner)){
-							if($sourceArr){
-								?>
-								<div id="sourcetoggle" style="float:right;clear:both;margin-top:8px;margin-bottom:8px;">
-									<div style="font-size:12px;" onclick="toggle('sourcesdiv');return false;">
-										<a href="#">Show Sources for <?php echo $sciName; ?></a>
-									</div>
-								</div>
-								<div id="sourcesdiv" style="display:none;clear:both;">
-									<?php
-									if($sourceArr['contributorTerm']){
-										?>
-										<div style="">
-											<b>Term and Definition contributed by:</b> <?php echo $sourceArr['contributorTerm']; ?>
-										</div>
-										<?php
-									}
-									if($sourceArr['contributorImage'] && $termImgArr){
-										?>
-										<div style="margin-top:8px;">
-											<b>Image contributed by:</b> <?php echo $sourceArr['contributorImage']; ?>
-										</div>
-										<?php
-									}
-									if($sourceArr['translator'] && $translationStr){
-										?>
-										<div style="margin-top:8px;">
-											<b>Translation by:</b> <?php echo $sourceArr['translator']; ?>
-										</div>
-										<?php
-									}
-									if($sourceArr['additionalSources'] && ($translationStr || $termImgArr)){
-										?>
-										<div style="margin-top:8px;">
-											<b>Translation and/or image were also sourced from the following references:</b> <?php echo $sourceArr['additionalSources']; ?>
-										</div>
-										<?php
-									}
-									?>
-								</div>
-								<?php
-							}
-						}
-						if(!$isEditor){
-							?>
-							<div style="clear:both;margin-bottom:10px;margin-top:12px;font-size:12px;">
-								<a href="mailto:<?php echo $adminEmail; ?>" target="_top">Comment or suggest an addition, correction, or change</a>
-							</div>
+						<div style="clear:both;margin:15px 0px;">
+							<b>Relevant Taxa:</b> 
 							<?php
-						}
-						?>
+							$sourceArr = $glosManager->getTaxonSources();
+							foreach($sourceArr as $tid => $arr){
+								echo '<div style="margin-left:20px">';
+								echo $arr['sciname'].' [<a href="#" onclick="toggle(\''.$tid.'-sourcesdiv\');return false;"><span style="font-size:90%">show sources</span></a>]';
+								echo '</div>';
+							}
+							?>
+						</div>
 					</div>
 				</div>
-				
 				<?php
 				if($termImgArr){
 					?>
@@ -245,18 +188,35 @@ else{
 						<?php
 						foreach($termImgArr as $imgId => $imgArr){
 							$imgUrl = $imgArr["url"];
-							if(array_key_exists("imageDomain",$GLOBALS)){
-								if(substr($imgUrl,0,1)=="/"){
+							if(substr($imgUrl,0,1)=="/"){
+								if(array_key_exists("imageDomain",$GLOBALS) && $GLOBALS["imageDomain"]){
 									$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 								}
-							}			
-							$displayUrl = $imgUrl;
+								else{
+									$urlPrefix = "http://";
+									if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+									$urlPrefix .= $_SERVER["SERVER_NAME"];
+									if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+									$imgUrl = $urlPrefix.$imgUrl;
+								}
+							}
 							?>
 							<fieldset style='clear:both;border:0px;padding:0px;margin-top:10px;'>
 								<div style='width:250px;'>
-									<a href='<?php echo $imgArr['url']; ?>' target="_blank">
-										<img border=1 style="width:250px;" src='<?php echo $displayUrl; ?>' title='<?php echo $imgArr['structures']; ?>'/>
-									</a>
+									<?php 
+									$imgWidth = 0;
+									$imgHeight = 0;
+									$size = getimagesize($imgUrl);
+									if($size[0] > 240){
+										$imgWidth = 240;
+										$imgHeight = 0;
+									}
+									if($size[0] < 245 && $size[1] > 500){
+										$imgWidth = 0;
+										$imgHeight = 500;
+									}
+									?>
+									<img src='<?php echo $imgUrl; ?>' style="margin:auto;display:block;border:1px;<?php echo ($imgWidth?'width:'.$imgWidth.'px;':'').($imgHeight?'height:'.$imgHeight.'px;':''); ?>" title='<?php echo $imgArr['structures']; ?>'/>
 								</div>
 								<div style='width:250px;'>
 									<?php
@@ -289,6 +249,46 @@ else{
 							<?php
 						}
 						?>
+					</div>
+					<?php
+				}
+				foreach($sourceArr as $tid => $arr){
+					?>
+					<div id="<?php echo $tid; ?>-sourcesdiv" style="display:none;margin-top:20px">
+						<fieldset style="margin:10px; padding:10px;background-color:white;">
+							<legend><b>Contributors for <?php echo $arr['sciname']; ?></b></legend>
+							<?php
+							if($arr['contributorTerm']){
+								?>
+								<div style="">
+									<b>Term and Definition contributed by:</b> <?php echo $arr['contributorTerm']; ?>
+								</div>
+								<?php
+							}
+							if($arr['contributorImage'] && $termImgArr){
+								?>
+								<div style="margin-top:8px;">
+									<b>Image contributed by:</b> <?php echo $arr['contributorImage']; ?>
+								</div>
+								<?php
+							}
+							if($arr['translator'] && $translationArr){
+								?>
+								<div style="margin-top:8px;">
+									<b>Translation by:</b> <?php echo $arr['translator']; ?>
+								</div>
+								<?php
+							}
+							if($arr['additionalSources'] && ($translationArr || $termImgArr)){
+								?>
+								<div style="margin-top:8px;">
+									<b>Translation and/or image were also sourced from the following references:</b> <?php echo $arr['additionalSources']; ?>
+								</div>
+								<?php
+							}
+							?>
+						</fieldset>
+						<div style="clear:both">&nbsp;</div>
 					</div>
 					<?php
 				}

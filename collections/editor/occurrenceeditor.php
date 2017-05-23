@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Access-Control-Allow-Origin: http://www.catalogueoflife.org/col/webservice');
 
@@ -32,6 +33,8 @@ else{
 if($crowdSourceMode){
 	$occManager->setCrowdSourceMode(1);
 }
+
+if($SOLR_MODE) $solrManager = new SOLRManager();
 
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 $displayQuery = 0;
@@ -111,6 +114,7 @@ if($symbUid){
 	}
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_POST,($crowdSourceMode?1:$isEditor));
+        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 	if($isEditor == 1 || $isEditor == 2 || $crowdSourceMode){
 		if($action == 'Save OCR'){
@@ -129,16 +133,20 @@ if($symbUid){
 	}
 	if($isEditor){
 		//Available to full editors and taxon editors
-		if($action == "Add New Determination"){
+		if($action == "Submit Determination"){
+			//Adding a new determination
 			$statusStr = $occManager->addDetermination($_POST,$isEditor);
+            if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
 		}
 		elseif($action == "Submit Determination Edits"){
 			$statusStr = $occManager->editDetermination($_POST);
+            if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
 		}
 		elseif($action == "Delete Determination"){
 			$statusStr = $occManager->deleteDetermination($_POST['detid']);
+            if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
 		}
 		//Only full editors can perform following actions
@@ -156,6 +164,7 @@ if($symbUid){
 						//Stay on record and get $occId
 						$occId = $occManager->getOccId();
 					}
+                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = $occManager->getErrorStr();
@@ -165,6 +174,7 @@ if($symbUid){
 				if($occManager->deleteOccurrence($occId)){
 					$occId = 0;
 					$occManager->setOccId(0);
+                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = $occManager->getErrorStr();
@@ -179,6 +189,7 @@ if($symbUid){
 							$collId = $transferCollid;
 							$collMap = $occManager->getCollMap();
 						}
+                        if($SOLR_MODE) $solrManager->updateSOLR();
 					}
 					else{
 						$statusStr = $occManager->getErrorStr();
@@ -187,11 +198,13 @@ if($symbUid){
 			}
 			elseif($action == "Submit Image Edits"){
 				$statusStr = $occManager->editImage($_POST);
+                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 2;
 			}
 			elseif($action == "Submit New Image"){
 				if($occManager->addImage($_POST)){
 					$statusStr = 'Image added successfully';
+                    if($SOLR_MODE) $solrManager->updateSOLR();
 					$tabTarget = 2;
 				}
 				if($occManager->getErrorStr()){
@@ -202,6 +215,7 @@ if($symbUid){
 				$removeImg = (array_key_exists("removeimg",$_POST)?$_POST["removeimg"]:0);
 				if($occManager->deleteImage($_POST["imgid"], $removeImg)){
 					$statusStr = 'Image deleted successfully';
+                    if($SOLR_MODE) $solrManager->updateSOLR();
 					$tabTarget = 2;
 				}
 				else{
@@ -211,6 +225,7 @@ if($symbUid){
 			elseif($action == "Remap Image"){
 				if($occManager->remapImage($_POST["imgid"], $_POST["targetoccid"])){
 					$statusStr = 'SUCCESS: Image remapped to record <a href="occurrenceeditor.php?occid='.$_POST["targetoccid"].'" target="_blank">'.$_POST["targetoccid"].'</a>';
+                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = 'ERROR linking image to new specimen: '.$occManager->getErrorStr();
@@ -219,6 +234,7 @@ if($symbUid){
 			elseif($action == "Disassociate Image"){
 				if($occManager->remapImage($_POST["imgid"])){
 					$statusStr = 'SUCCESS disassociating image <a href="../../imagelib/imgdetails.php?imgid='.$_POST["imgid"].'" target="_blank">#'.$_POST["imgid"].'</a>';
+                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = 'ERROR disassociating image: '.$occManager->getErrorStr();
@@ -229,30 +245,38 @@ if($symbUid){
 				$makeCurrent = 0;
 				if(array_key_exists('makecurrent',$_POST)) $makeCurrent = 1;
 				$statusStr = $occManager->applyDetermination($_POST['detid'],$makeCurrent);
+                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 1;
 			}
 			elseif($action == "Make Determination Current"){
 				$statusStr = $occManager->makeDeterminationCurrent($_POST['detid']);
+                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 1;
 			}
 			elseif($action == "Submit Verification Edits"){
 				$statusStr = $occManager->editIdentificationRanking($_POST['confidenceranking'],$_POST['notes']);
+                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 1;
 			}
 			elseif($action == 'Link to Checklist as Voucher'){
 				$statusStr = $occManager->linkChecklistVoucher($_POST['clidvoucher'],$_POST['tidvoucher']);
+                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'deletevoucher'){
 				$statusStr = $occManager->deleteChecklistVoucher($_REQUEST['delclid']);
+                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'editgeneticsubmit'){
 				$statusStr = $occManager->editGeneticResource($_POST);
+                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'deletegeneticsubmit'){
 				$statusStr = $occManager->deleteGeneticResource($_POST['genid']);
+                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'addgeneticsubmit'){
 				$statusStr = $occManager->addGeneticResource($_POST);
+                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 		}
 	}
@@ -283,7 +307,7 @@ if($symbUid){
 				$occManager->setSqlWhere($occIndex);
 			}
 			else{
-				setCookie('editorquery','',time()-3600,($CLIENT_ROOT?$CLIENT_ROOT:'/'));
+				unset($_SESSION['editorquery']);
 				$occIndex = false;
 			}
 		}
@@ -298,9 +322,9 @@ if($symbUid){
 			$qryCnt = $occManager->getQueryRecordCount();
 		}
 	}
-	elseif(isset($_COOKIE["editorquery"])){
-		//Make sure query is null
-		setCookie('editorquery','',time()-3600,($CLIENT_ROOT?$CLIENT_ROOT:'/'));
+	elseif(isset($_SESSION['editorquery'])){
+		//Make sure query variables are null
+		unset($_SESSION['editorquery']);
 	}
 
 	if(!$goToMode){
@@ -363,6 +387,7 @@ if($symbUid){
 				if($imgUrlPrefix && substr($lgUrl,0,4) != 'http') $lgUrl = $imgUrlPrefix.$lgUrl;
 				$imgArr[$imgCnt]['lg'] = $lgUrl;
 			}
+			if(isset($i2['error'])) $imgArr[$imgCnt]['error'] = $i2['error'];
 			$imgCnt++;
 		}
 		$fragArr = $occManager->getRawTextFragments();
@@ -384,12 +409,12 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=170201" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=20170503" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=20170101" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=20170503" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -437,10 +462,10 @@ else{
         }
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=170222"></script>
+	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js?ver=170310"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=20170503"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170101"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170101"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170310"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=170302"></script>
 </head>
 <body>
@@ -739,6 +764,10 @@ else{
 													<input type="text" name="startdayofyear" tabindex="24" value="<?php echo array_key_exists('startdayofyear',$occArr)?$occArr['startdayofyear']:''; ?>" onchange="inputIsNumeric(this, 'Start Day of Year');fieldChanged('startdayofyear');" title="Start Day of Year" /> -
 													<input type="text" name="enddayofyear" tabindex="26" value="<?php echo array_key_exists('enddayofyear',$occArr)?$occArr['enddayofyear']:''; ?>" onchange="inputIsNumeric(this, 'End Day of Year');fieldChanged('enddayofyear');" title="End Day of Year" />
 												</div>
+                                                <div id="endDateDiv">
+                                                    <?php echo (defined('ENDDATELABEL')?ENDDATELABEL:'Calculate End Day of Year'); ?>:
+                                                    <input type="text" id="endDate" value="" onchange="endDateChanged();" />
+                                                </div>
 											</div>
 											<?php
 											if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI){
@@ -878,17 +907,22 @@ else{
 												echo '<input name="localautodeactivated" type="checkbox" value="1" onchange="localAutoChanged(this)" '.(defined('LOCALITYAUTOLOOKUP') && LOCALITYAUTOLOOKUP==2?'checked':'').' /> ';
 												echo 'Deactivate Locality Lookup</div>';
 											}
-											$hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; 
+											$lsHasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; 
+											$lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:'';
 											?>
 											<div id="localSecurityDiv">
-												<input type="checkbox" name="localitysecurity" tabindex="0" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toggleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
-												<?php echo (defined('LOCALITYSECURITYLABEL')?LOCALITYSECURITYLABEL:'Locality Security'); ?>
-												<span id="locsecreason" style="display:<?php echo ($hasValue?'inline':'none') ?>">
-													<?php $lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:''; ?>
-													<?php echo (defined('LOCALITYSECURITYREASONLABEL')?LOCALITYSECURITYREASONLABEL:'Security Reason Override'); ?>:
-													<input type="text" name="localitysecurityreason" tabindex="0" onchange="fieldChanged('localitysecurityreason');" value="<?php echo $lsrValue; ?>" title="Leave blank for default rare, threatened, or sensitive status" />
-												</span>
-												
+												<div style="float:left;">
+													<input type="checkbox" name="localitysecurity" tabindex="0" value="1" <?php echo $lsHasValue?"CHECKED":""; ?> onchange="localitySecurityChanged(this.form);" title="Hide Locality Data from General Public" />
+													<?php echo (defined('LOCALITYSECURITYLABEL')?LOCALITYSECURITYLABEL:'Locality Security'); ?>
+													<a href="#" onclick="return dwcDoc('localitySecurity')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+												</div>
+												<div id="locsecreason" style="margin-left:5px;border:2px solid gray;float:left;display:<?php echo ($lsrValue?'inline':'none') ?>;padding:3px">
+													<div ><input name="lockLocalitySecurity" type="checkbox" onchange="securityLockChanged(this)"  <?php echo ($lsrValue?'checked':'') ?> /> Lock Security Setting</div>
+													<?php 
+													echo (defined('LOCALITYSECURITYREASONLABEL')?LOCALITYSECURITYREASONLABEL:'Reason'); 
+													?>:
+													<input type="text" name="localitysecurityreason" tabindex="0" onchange="localitySecurityReasonChanged();" value="<?php echo $lsrValue; ?>" title="Entering any text will lock security status on or off; leave blank to accept default security status" />
+												</div>
 											</div>
 											<div style="clear:both;">
 												<div id="decimalLatitudeDiv">
@@ -1241,6 +1275,10 @@ else{
 														?>
 													</select>
 												</div>
+                                                <div id="dataGeneralizationsDiv" title="aka data generalizations">
+                                                    <?php echo (defined('DATAGENERALIZATIONSLABEL')?DATAGENERALIZATIONSLABEL:'Data Generalizations'); ?><br/>
+                                                    <input type="text" name="datageneralizations" tabindex="121" value="<?php echo array_key_exists('datageneralizations',$occArr)?$occArr['datageneralizations']:''; ?>" onchange="fieldChanged('datageneralizations');" />
+                                                </div>
 											</div>
 											<?php
 											if($occId){
@@ -1384,8 +1422,11 @@ else{
 				echo 'Check with your server administrator to check on options for importing larger images. ';
 				echo 'Use the back button to return to previous page and try to upload a smaller image </div>';
 			}
+			elseif(!$collId && !$occId){
+				echo '<h2>ERROR: collection and occurrence identifiers are NULL</h2>';
+			}
 			elseif(!$isEditor){
-				echo '<h2>You are not authorized to add occurrence records</h2>';
+				echo '<h2>ERROR: you are not authorized to add occurrence records</h2>';
 			}
 		}
 		?>

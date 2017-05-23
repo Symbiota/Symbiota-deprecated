@@ -649,7 +649,7 @@ function verifyLoanDetSciName(f){
 			f.tidtoadd.value = data.tid;
 		}
 		else{
-			alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
+            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor.");
 			f.scientificnameauthorship.value = "";
 			f.family.value = "";
 			f.tidtoadd.value = "";

@@ -25,8 +25,8 @@ if($coordArr){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> - Checklist Coordinate Map</title>
-	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	<script type="text/javascript">
@@ -75,19 +75,8 @@ if($coordArr){
         }
 
 		function openIndPU(occId){
-			var wWidth = 900;
-			try{
-				if(opener.document.getElementById('maintable').offsetWidth){
-					wWidth = opener.document.getElementById('maintable').offsetWidth*1.05;
-				}
-				else if(opener.document.body.offsetWidth){
-					wWidth = opener.document.body.offsetWidth*0.9;
-				}
-			}
-			catch(err){
-			}
 			if(puWin != null) puWin.close();
-			var puWin = window.open('../collections/individual/index.php?occid='+occId,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			var puWin = window.open('../collections/individual/index.php?occid='+occId,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width=900,height=600,left=20,top=20');
 			if(puWin.opener == null) puWin.opener = self;
 			setTimeout(function () { puWin.focus(); }, 0.5);
 			return false;

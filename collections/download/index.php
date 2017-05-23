@@ -11,8 +11,8 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 <head>
 	<title>Collections Search Download</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
-	<link href="../../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
@@ -85,7 +85,7 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 			<a href="../../index.php">Home</a> &gt; 
 			<a href="../index.php">Collections</a> &gt; 
 			<a href="../harvestparams.php">Search Criteria</a> &gt; 
-			<a href="../list.php">Occurrence Listing</a> &gt; 
+			<a href="../list.php">Specimen Records</a> &gt;
 			<b>Specimen Download</b>
 		</div>
 		<?php 
@@ -226,7 +226,7 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 									}
 									?>
 									<input name="publicsearch" type="hidden" value="1" />
-									<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilterCode; ?>" />
+									<input name="taxonFilterCode" type="hidden" value="<?php echo $taxonFilterCode; ?>" />
 									<input name="jsoncollstarr" type="hidden" value='<?php echo $stArrCollJson; ?>' />
 									<input name="starr" type="hidden" value='<?php echo $stArrSearchJson; ?>' />
 									<input type="submit" name="submitaction" value="Download Data" <?php echo (!$stArrCollJson && !$stArrSearchJson?'disabled ':''); ?>/>
