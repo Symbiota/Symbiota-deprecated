@@ -295,7 +295,7 @@ if(isset($profile_viewprofileCrumbs)){
 									</fieldset>
 								</div>
 								<div style="clear:both;margin:3px;">
-									<b>Parent Checklist:</b><br/>
+									<b>More Inclusive Reference Checklist:</b><br/>
 									<select name="parentclid">
 										<option value="">None Selected</option>
 										<option value="">----------------------------------</option>

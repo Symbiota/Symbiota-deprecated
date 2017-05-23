@@ -342,7 +342,25 @@ class ChecklistAdmin {
 	public function getClName(){
 		return $this->clName;
 	}
-	
+
+	public function getReferenceChecklists(){
+		$retArr = array();
+		$sql = 'SELECT clid, name FROM fmchecklists WHERE access = "public" ';
+		$clArr = array();
+		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin'])){
+			$clidStr = implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']);
+			if($clidStr) $sql .= 'OR clid IN('.$clidStr.') ';
+		}
+		$sql .= 'ORDER BY name';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$retArr[$row->clid] = $row->name;
+		}
+		$rs->close();
+		return $retArr;
+	}
+
 	//Get list data
 	public function getPoints($tid){
 		$retArr = array();
