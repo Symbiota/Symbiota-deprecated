@@ -16,6 +16,7 @@ if($collId){
 	$orderArr = $collManager->getOrderStatsDataArr($collId);
 	ksort($orderArr, SORT_STRING | SORT_FLAG_CASE);
 }
+$_SESSION['statsOrderArr'] = $orderArr;
 ?>
 <html>
 	<head>
@@ -73,7 +74,6 @@ if($collId){
 				<div style='float:left;margin-left:25px;margin-top:10px;width:16px;height:16px;padding:2px;' title="Save CSV">
 					<form name="orderstatscsv" id="orderstatscsv" action="collstatscsv.php" method="post" onsubmit="">
 						<input type="hidden" name="action" value='Download Order Dist' />
-						<input type="hidden" name="orderarrjson" id="orderarrjson" value='<?php echo json_encode($orderArr); ?>' />
 						<input type="image" name="action" src="../../images/dl.png" onclick="" />
 					</form>
 				</div>

@@ -210,6 +210,8 @@ if($collId){
 		$collManager->batchUpdateStatistics($collId);
 		echo '<script type="text/javascript">window.location="collstats.php?collid='.$collId.'"</script>';
 	}
+    $_SESSION['statsFamilyArr'] = $familyArr;
+    $_SESSION['statsCountryArr'] = $countryArr;
 }
 if($action != "Update Statistics"){
 	?>
@@ -802,7 +804,6 @@ if($action != "Update Statistics"){
 														<input type="image" name="action" src="../../images/dl.png" onclick="" />
 													</div>
 												</div>
-												<input type="hidden" name="famarrjson" id="famarrjson" value='<?php echo json_encode($familyArr); ?>' />
 											</form>
 											<form name="geostatscsv" id="geostatscsv" action="collstatscsv.php" method="post" onsubmit="">
 												<div style="clear:both;">
@@ -817,7 +818,6 @@ if($action != "Update Statistics"){
 														<input type="image" name="action" src="../../images/dl.png" onclick="" />
 													</div>
 												</div>
-												<input type="hidden" name="geoarrjson" id="geoarrjson" value='<?php echo json_encode($countryArr); ?>' />
 											</form>
                                             <?php
                                             if(!$cPartentTaxon && !$cCountry){
