@@ -21,10 +21,14 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
     $isEditor = 1;
 
     //Submit checklist MetaData edits
-    if($action == "SubmitChange"){
+    if($action == "SubmitEdit"){
         $clManager->editMetaData($_POST);
         header('Location: checklist.php?cl='.$clid.'&pid='.$pid);
     }
+	elseif($action == "SubmitAdd"){
+		$newClid = $clManager->createChecklist($_POST);
+		header("Location: checklist.php?cl=".$newClid."&emode=1");
+	}
     elseif($action == 'DeleteCheck'){
         $statusStr = $clManager->deleteChecklist($_POST['delclid']);
         if($statusStr === true) header('Location: ../index.php');

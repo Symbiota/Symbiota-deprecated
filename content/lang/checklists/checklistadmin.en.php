@@ -68,6 +68,7 @@ $LANG['REMOVEEDITPRIVCONFIRM'] = 'Are you sure you want to remove editing rights
 $LANG['MASSUPDATEED'] = 'Edit Checklist Details';
 $LANG['ADDEDITOR'] = 'Add Editor';
 $LANG['DELETECHECK'] = 'Delete Checklist';
-$LANG['SUBMITCHANG'] = 'Submit Changes';
+$LANG['EDITCHECKLIST'] = 'Save Edits';
+$LANG['ADDCHECKLIST'] = 'Create Checklist';
 $LANG['DELETETHISU'] = 'Delete this user';
 ?>

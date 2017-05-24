@@ -28,48 +28,6 @@ function openPointAid(latDef,lngDef) {
     if(pointWindow.opener == null) pointWindow.opener = self;
 }
 
-function validateMetadataForm(f){
-	if(f.latcentroid.value != ""){
-		if(f.longcentroid.value == ""){
-			alert("If longitude has a value, latitude must also have a value");
-			return false;
-		}
-		if(!isNumeric(f.latcentroid.value)){
-			alert("Latitude must be strictly numeric (decimal format: e.g. 34.2343)");
-			return false;
-		}
-		if(Math.abs(f.latcentroid.value) > 90){
-			alert("Latitude values can not be greater than 90 or less than -90.");
-			return false;
-		} 
-	} 
-	if(f.longcentroid.value != ""){
-		if(f.latcentroid.value == ""){
-			alert("If latitude has a value, longitude must also have a value");
-			return false;
-		}
-		if(!isNumeric(f.longcentroid.value)){
-			alert("Longitude must be strictly numeric (decimal format: e.g. -112.2343)");
-			return false;
-		}
-		if(Math.abs(f.longcentroid.value) > 180){
-			alert("Longitude values can not be greater than 180 or less than -180.");
-			return false;
-		}
-	} 
-	if(!isNumeric(f.pointradiusmeters.value)){
-		alert("Point radius must be a numeric value only");
-		return false;
-	}
-	if(f.type){ 
-		if(f.type.value == "rarespp" && f.locality.value == ""){
-			alert("Rare species checklists must have a state value entered into the locality field");
-			return false;
-		}
-	}
-	return true;
-}
-
 function togglePoint(f){
 	var objDiv = document.getElementById('pointlldiv');
 	if(objDiv){
