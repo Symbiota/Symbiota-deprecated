@@ -6,7 +6,8 @@ ALTER TABLE `uploadtaxa`
   ADD UNIQUE INDEX `UNIQUE_sciname` (`SciName` ASC, `RankId` ASC, `Author` ASC, `AcceptedStr` ASC);
 
 ALTER TABLE `omoccurrences`
-  CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL;
+  CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL,
+  DROP INDEX `idx_occrecordedby`;
 
 
 #Occurrence Trait/Attribute adjustments
@@ -18,7 +19,9 @@ ALTER TABLE `omoccurrences`
 	#Add exportHeader for state name
 
 
+
 #Review pubprofile (adminpublications)
+
 
 
 #Collection GUID issue
