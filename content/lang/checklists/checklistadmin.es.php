@@ -69,5 +69,6 @@ $LANG['MASSUPDATEED'] = 'Editar Detalles del Listado de Comprobaci&oacute;n';
 $LANG['ADDEDITOR'] = 'Agregar Editor';
 $LANG['DELETECHECK'] = 'Borrar Listado de Comprobaci&oacute;n';
 $LANG['EDITCHECKLIST'] = 'Someter Cambios';
+$LANG['ADDCHECKLIST'] = 'Crear Lista Nueva';
 $LANG['DELETETHISU'] = 'Borrar este usuario';
 ?>
