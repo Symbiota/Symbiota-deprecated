@@ -109,10 +109,10 @@ class SpecProcessorManager {
 	public function addProject($addArr){
 		$this->conn->query('DELETE FROM specprocessorprojects WHERE (title = "OCR Harvest") AND (collid = '.$this->collid.')');
 		$sql = '';
-		if(isset($addArr['imageuploadtype'])){
+		if(isset($addArr['projecttype'])){
 			$sourcePath = $addArr['sourcepath'];
 			if($sourcePath == '-- Use Default Path --') $sourcePath = '';
-			if($addArr['imageuploadtype'] == 'idigbio'){
+			if($addArr['projecttype'] == 'idigbio'){
 				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath) '.
 					'VALUES('.$this->collid.',"iDigBio CSV upload","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
 					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
@@ -120,7 +120,7 @@ class SpecProcessorManager {
 					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
 					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
-			elseif($addArr['imageuploadtype'] == 'iplant'){
+			elseif($addArr['projecttype'] == 'iplant'){
 				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath) '.
 					'VALUES('.$this->collid.',"IPlant Image Processing","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
 					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
@@ -128,7 +128,7 @@ class SpecProcessorManager {
 					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
 					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
 			}
-			elseif($addArr['imageuploadtype'] == 'local'){
+			elseif($addArr['projecttype'] == 'local'){
 				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath,targetpath,'.
 					'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 					'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
