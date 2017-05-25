@@ -427,41 +427,43 @@ class TaxonProfileManager {
  	
 	private function setTaxaImages(){
 		$this->imageArr = array();
-		$tidArr = Array($this->tid);
-		$sql1 = 'SELECT DISTINCT ts.tid '. 
-			'FROM taxstatus ts INNER JOIN taxaenumtree tn ON ts.tid = tn.tid '.
-			'WHERE tn.taxauthid = 1 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
-			'AND tn.parenttid = '.$this->tid;
-		$rs1 = $this->con->query($sql1);
-		while($r1 = $rs1->fetch_object()){
-			$tidArr[] = $r1->tid;
+		if($this->tid){
+			$tidArr = Array($this->tid);
+			$sql1 = 'SELECT DISTINCT ts.tid '. 
+				'FROM taxstatus ts INNER JOIN taxaenumtree tn ON ts.tid = tn.tid '.
+				'WHERE tn.taxauthid = 1 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
+				'AND tn.parenttid = '.$this->tid;
+			$rs1 = $this->con->query($sql1);
+			while($r1 = $rs1->fetch_object()){
+				$tidArr[] = $r1->tid;
+			}
+			$rs1->free();
+	
+			$tidStr = implode(",",$tidArr);
+			$sql = 'SELECT t.sciname, ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.caption, ti.occid, '.
+				'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
+				'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
+				'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
+				'INNER JOIN taxa t ON ti.tid = t.tid '.
+				'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND ti.SortSequence < 500 ';
+			if(!$this->displayLocality) $sql .= 'AND ti.occid IS NULL ';
+			$sql .= 'ORDER BY ti.sortsequence ';
+			//echo $sql;
+			$result = $this->con->query($sql);
+			while($row = $result->fetch_object()){
+				$imgUrl = $row->url;
+				if($imgUrl == 'empty' && $row->originalurl) $imgUrl = $row->originalurl; 
+				$tnUrl = $row->thumbnailurl;
+				if(!$tnUrl && $imgUrl) $tnUrl = $imgUrl;
+				$this->imageArr[$row->imgid]["url"] = $imgUrl;
+				$this->imageArr[$row->imgid]["thumbnailurl"] = $tnUrl;
+				$this->imageArr[$row->imgid]["photographer"] = $row->photographer;
+				$this->imageArr[$row->imgid]["caption"] = $row->caption;
+				$this->imageArr[$row->imgid]["occid"] = $row->occid;
+				$this->imageArr[$row->imgid]["sciname"] = $row->sciname;
+			}
+			$result->free();
 		}
-		$rs1->close();
-
-		$tidStr = implode(",",$tidArr);
-		$sql = 'SELECT t.sciname, ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.caption, ti.occid, '.
-			'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
-			'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
-			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
-			'INNER JOIN taxa t ON ti.tid = t.tid '.
-			'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND ti.SortSequence < 500 ';
-		if(!$this->displayLocality) $sql .= 'AND ti.occid IS NULL ';
-		$sql .= 'ORDER BY ti.sortsequence ';
-		//echo $sql;
-		$result = $this->con->query($sql);
-		while($row = $result->fetch_object()){
-			$imgUrl = $row->url;
-			if($imgUrl == 'empty' && $row->originalurl) $imgUrl = $row->originalurl; 
-			$tnUrl = $row->thumbnailurl;
-			if(!$tnUrl && $imgUrl) $tnUrl = $imgUrl;
-			$this->imageArr[$row->imgid]["url"] = $imgUrl;
-			$this->imageArr[$row->imgid]["thumbnailurl"] = $tnUrl;
-			$this->imageArr[$row->imgid]["photographer"] = $row->photographer;
-			$this->imageArr[$row->imgid]["caption"] = $row->caption;
-			$this->imageArr[$row->imgid]["occid"] = $row->occid;
-			$this->imageArr[$row->imgid]["sciname"] = $row->sciname;
-		}
-		$result->close();
  	}
 
 	public function echoImages($start, $length = 0, $useThumbnail = 1){		//length=0 => means show all images
@@ -562,7 +564,7 @@ class TaxonProfileManager {
  		if(!$tidStr){
 			$tidArr = Array($this->tid,$this->submittedTid);
 			if($this->synonyms) $tidArr = array_merge($tidArr,array_keys($this->synonyms));
-			$tidStr = implode(",",$tidArr);
+			$tidStr = trim(implode(",",$tidArr),' ,');
  		}
 		if($tidStr){
 			$sql = 'SELECT tm.url, t.sciname '.
@@ -586,44 +588,32 @@ class TaxonProfileManager {
 		if(!$tidStr){
 			$tidArr = Array($this->tid,$this->submittedTid);
 			if($this->synonyms) $tidArr = array_merge($tidArr,array_keys($this->synonyms));
-			$tidStr = implode(",",$tidArr);
+			$tidStr = trim(implode(",",$tidArr),' ,');
 		}
- 		
- 		$mapArr = Array();
- 		$minLat = 90;
- 		$maxLat = -90;
- 		$minLong = 180;
- 		$maxLong = -180;
- 		$latlonArr = array();
- 		if(isset($GLOBALS['MAPPING_BOUNDARIES'])){
- 			$latlonArr = explode(";",$GLOBALS['MAPPING_BOUNDARIES']);
- 		}
 
- 		$sqlBase = "SELECT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
-			"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".
-			"WHERE (gi.tid IN ($tidStr)) ";
- 		$sql = $sqlBase;
-		if(count($latlonArr)==4){
-			$sql .= "AND (gi.DecimalLatitude BETWEEN ".$latlonArr[2]." AND ".$latlonArr[0].") ".
-				"AND (gi.DecimalLongitude BETWEEN ".$latlonArr[3]." AND ".$latlonArr[1].") ";
-		}
-		$sql .= "ORDER BY RAND() LIMIT 50";
-		//echo "<div>".$sql."</div>"; exit;
-		$result = $this->con->query($sql);
- 		$sciName = "";
-		while($row = $result->fetch_object()){
-			$sciName = ucfirst(strtolower(trim($row->sciname)));
-			$lat = round($row->DecimalLatitude,2);
-			if($lat < $minLat) $minLat = $lat;
-			if($lat > $maxLat) $maxLat = $lat;
- 			$long = round($row->DecimalLongitude,2);
-			if($long < $minLong) $minLong = $long;
-			if($long > $maxLong) $maxLong = $long;
- 			$mapArr[] = $lat.",".$long;
-		}
-		$result->free();
-		if(!$mapArr && $latlonArr){
-			$result = $this->con->query($sqlBase."LIMIT 50");
+		$mapArr = Array();
+		if($tidStr){
+	 		$minLat = 90;
+	 		$maxLat = -90;
+	 		$minLong = 180;
+	 		$maxLong = -180;
+	 		$latlonArr = array();
+	 		if(isset($GLOBALS['MAPPING_BOUNDARIES'])){
+	 			$latlonArr = explode(";",$GLOBALS['MAPPING_BOUNDARIES']);
+	 		}
+	
+	 		$sqlBase = "SELECT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
+				"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".
+				"WHERE (gi.tid IN ($tidStr)) ";
+	 		$sql = $sqlBase;
+			if(count($latlonArr)==4){
+				$sql .= "AND (gi.DecimalLatitude BETWEEN ".$latlonArr[2]." AND ".$latlonArr[0].") ".
+					"AND (gi.DecimalLongitude BETWEEN ".$latlonArr[3]." AND ".$latlonArr[1].") ";
+			}
+			$sql .= "ORDER BY RAND() LIMIT 50";
+			//echo "<div>".$sql."</div>"; exit;
+			$result = $this->con->query($sql);
+	 		$sciName = "";
 			while($row = $result->fetch_object()){
 				$sciName = ucfirst(strtolower(trim($row->sciname)));
 				$lat = round($row->DecimalLatitude,2);
@@ -635,15 +625,29 @@ class TaxonProfileManager {
 	 			$mapArr[] = $lat.",".$long;
 			}
 			$result->free();
-		}
-		if(!$mapArr) return 0;
-		$latDist = $maxLat - $minLat;
-		$longDist = $maxLong - $minLong;
-		
-		$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain';
-		if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
-		if($latDist < 3 || $longDist < 3) {
-			$googleUrl .= "&zoom=6";
+			if(!$mapArr && $latlonArr){
+				$result = $this->con->query($sqlBase."LIMIT 50");
+				while($row = $result->fetch_object()){
+					$sciName = ucfirst(strtolower(trim($row->sciname)));
+					$lat = round($row->DecimalLatitude,2);
+					if($lat < $minLat) $minLat = $lat;
+					if($lat > $maxLat) $maxLat = $lat;
+		 			$long = round($row->DecimalLongitude,2);
+					if($long < $minLong) $minLong = $long;
+					if($long > $maxLong) $maxLong = $long;
+		 			$mapArr[] = $lat.",".$long;
+				}
+				$result->free();
+			}
+			if(!$mapArr) return 0;
+			$latDist = $maxLat - $minLat;
+			$longDist = $maxLong - $minLong;
+			
+			$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain';
+			if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
+			if($latDist < 3 || $longDist < 3) {
+				$googleUrl .= "&zoom=6";
+			}
 		}
 		$coordStr = implode("|",$mapArr);
 		if(!$coordStr) return ""; 
