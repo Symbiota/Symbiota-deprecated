@@ -86,25 +86,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				if(isset($this->metaArr['ident']['fields'])){
 					$this->identSourceArr = $this->metaArr['ident']['fields'];
 				}
-				if(isset($this->metaArr['image']['fields'])){
-                    $typeField = 0;
-                    $rightsField = 0;
-                    foreach($this->metaArr['image']['fields'] as $k => $v){
-                        if(strtolower($v) == 'type'){
-                            if(!$typeField) $this->imageSourceArr[$k] = strtolower($v);
-                            else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
-                            $typeField++;
-                        }
-                        elseif(strtolower($v) == 'rights'){
-                            if(!$rightsField) $this->imageSourceArr[$k] = strtolower($v);
-                            else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
-                            $rightsField++;
-                        }
-                        else {
-                            $this->imageSourceArr[$k] = strtolower($v);
-                        }
-                    }
-                }
+				$this->setImageSourceArr();
 			}
 			$status = true;
 		}
@@ -447,26 +429,7 @@ class SpecUploadDwca extends SpecUploadBase{
 					//Upload images
 					if($this->includeImages){
 						$this->outputMsg('<li>Loading image extension... </li>');
-						//Set source array
-						foreach($this->metaArr['image']['fields'] as $k => $v){
-                            $typeField = 0;
-                            $rightsField = 0;
-                            foreach($this->metaArr['image']['fields'] as $k => $v){
-                                if(strtolower($v) == 'type'){
-                                    if(!$typeField) $this->imageSourceArr[$k] = strtolower($v);
-                                    else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
-                                    $typeField++;
-                                }
-                                elseif(strtolower($v) == 'rights'){
-                                    if(!$rightsField) $this->imageSourceArr[$k] = strtolower($v);
-                                    else $this->imageSourceArr[$k] = 'dcterms:'.strtolower($v);
-                                    $rightsField++;
-                                }
-                                else {
-                                    $this->imageSourceArr[$k] = strtolower($v);
-                                }
-                            }
-                        }
+						$this->setImageSourceArr();
 						$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
 						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
 					}
@@ -497,7 +460,18 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 		return true;
 	}
-	
+
+	private function setImageSourceArr(){
+		if(isset($this->metaArr['image']['fields'])){
+			foreach($this->metaArr['image']['fields'] as $k => $v){
+				$v = strtolower($v);
+				$prefixStr = '';
+				if(in_array($v, $this->imageSourceArr)) $prefixStr = 'dcterms:';
+				$this->imageSourceArr[$k] = $prefixStr.$v;
+			}
+		}
+	}
+
 	private function removeFiles($baseDir,$pathFrag = ''){
 		//First remove files
 		$dirPath = $baseDir.$pathFrag;
