@@ -1,8 +1,8 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/GamesManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/GamesManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
 $dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
@@ -21,11 +21,11 @@ $sciArr = array();
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Flash Cards</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Flash Cards</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 		var imageArr = new Array();
@@ -138,14 +138,20 @@ $sciArr = array();
 
 <body onload="init();">
 <?php
-	$displayLeftMenu = (isset($checklists_flashcardsMenu)?$checklists_flashcardsMenu:"true");
-	include($serverRoot.'/header.php');
-	if(isset($checklists_flashcardsCrumbs)){
-		echo "<div class='navpath'>";
+	$displayLeftMenu = (isset($checklists_flashcardsMenu)?$checklists_flashcardsMenu:'true');
+	include($SERVER_ROOT.'/header.php');
+	echo '<div class="navpath">';
+	echo '<a href="../index.php">Home</a> &gt;&gt; ';
+	if(isset($checklists_flashcardsCrumbs) && $checklists_flashcardsCrumbs){
 		echo $checklists_flashcardsCrumbs;
-		echo " <b>".$defaultTitle." Flashcard</b>";
-		echo "</div>";
 	}
+	else{
+		echo '<a href="../checklists/checklist.php?cl='.$clid.'">';
+		echo $fcManager->getClName();
+		echo '</a> &gt;&gt; ';
+	}
+	echo ' <b>Flashcard Game</b>';
+	echo '</div>';
 	?>
 	<!-- This is inner text! -->
 	<div id='innertext'>
@@ -221,7 +227,7 @@ $sciArr = array();
 		</div>
 	</div>
 	<?php
-		include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

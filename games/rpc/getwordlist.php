@@ -1,11 +1,13 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 $con = MySQLiConnectionFactory::getCon("readonly");
 
-$clid = array_key_exists('clid',$_REQUEST)?$con->real_escape_string($_REQUEST['clid']):"";
-$dynClid = array_key_exists('dynclid',$_REQUEST)?$con->real_escape_string($_REQUEST['dynclid']):"";
+$clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:"";
+if($clid && !is_numeric($clid)) $clid = 0;
+$dynClid = array_key_exists('dynclid',$_REQUEST)?$_REQUEST['dynclid']:"";
+if($dynClid && !is_numeric($dynClid)) $dynClid = 0;
 
 $linkQuery = '';
 if($clid){
@@ -27,6 +29,7 @@ if($linkQuery){
 	while($linkArray = $linkResult->fetch_assoc()){
 		$retStr .= ",\n[\"".$linkArray['sciname']."\",\"".$linkArray['family']."\"]";
 	}
+	$linkResult->free();
 	echo "mainList=[".substr($retStr,1)."\n]";
 }
 $con->close();

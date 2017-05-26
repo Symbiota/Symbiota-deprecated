@@ -21,7 +21,7 @@ $ootdGameTitle = "Organism of the Day ";
 $ootdGameType = "plant"; 
 //---------------------------DO NOT CHANGE BELOW HERE-----------------------------
 
-include_once($serverRoot.'/classes/GamesManager.php');
+include_once($SERVER_ROOT.'/classes/GamesManager.php');
 $gameManager = new GamesManager();
 $gameInfo = $gameManager->setOOTD($oodID,$ootdGameChecklist);
 ?>
@@ -29,11 +29,11 @@ $gameInfo = $gameManager->setOOTD($oodID,$ootdGameChecklist);
 	<div style="font-size:130%;font-weight:bold;">
 		<?php echo $ootdGameTitle; ?>
 	</div>
-	<a href="<?php echo $clientRoot; ?>/games/ootd/index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">
-		<img src="<?php echo $clientRoot; ?>/temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg" style="width:250px;border:0px;" />
+	<a href="<?php echo $CLIENT_ROOT; ?>/games/ootd/index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">
+		<img src="<?php echo $CLIENT_ROOT; ?>/temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg" style="width:250px;border:0px;" />
 	</a><br/>
 	<b>What is this <?php echo $ootdGameType; ?>?</b><br/>
-	<a href="<?php echo $clientRoot; ?>/games/ootd/index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">
+	<a href="<?php echo $CLIENT_ROOT; ?>/games/ootd/index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">
 		Click here to test your knowledge
 	</a>
 </div>

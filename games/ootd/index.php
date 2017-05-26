@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/GamesManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/GamesManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0;
 $submitAction = array_key_exists("submitaction",$_POST)?$_POST["submitaction"]:'';
@@ -86,7 +86,7 @@ if($submitAction){
 
 	<?php
 	$displayLeftMenu = (isset($indexMenu)?$indexMenu:"true");
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	?> 
 	<!-- This is inner text! -->
 	<div id="innertext" style="">
@@ -327,7 +327,7 @@ if($submitAction){
 	</div>
 
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?> 
 </body>
 </html>

@@ -1,7 +1,6 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/GamesManager.php');
+include_once($SERVER_ROOT.'/classes/GamesManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0;
@@ -11,11 +10,11 @@ $clArr = $gameManager->getChecklistArr($pid);
  ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Games</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Games</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 		function checkForm(f){
@@ -32,13 +31,13 @@ $clArr = $gameManager->getChecklistArr($pid);
 
 	<?php
 	$displayLeftMenu = (isset($games_indexMenu)?$games_indexMenu:"true");
-	include('../header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($gamess_indexCrumbs)){
 		?>
 		<div class="navpath">
 			<a href="../index.php">Home</a> &gt; 
 			<?php echo $games_indexCrumbs;?>
-			<b><?php echo $defaultTitle; ?> Games</b> 
+			<b><?php echo $DEFAULT_TITLE; ?> Games</b> 
 		</div>
 		<?php 
 	}
@@ -46,7 +45,7 @@ $clArr = $gameManager->getChecklistArr($pid);
 	
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<h1><?php echo $defaultTitle; ?> Games</h1>
+		<h1><?php echo $DEFAULT_TITLE; ?> Games</h1>
 		
 		<div style='margin:10px;'>
 			Games are designed to provide a fun interface for exploring the species found 
@@ -107,8 +106,7 @@ $clArr = $gameManager->getChecklistArr($pid);
 	</div>
 	<!-- This ends inner text! -->
 	<?php
-	include('../footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
-
 </body>
 </html>
