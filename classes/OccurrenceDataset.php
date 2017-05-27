@@ -1,6 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+include_once($serverRoot.'/classes/DwcArchiverCore.php');
 
 class OccurrenceDataset {
 
@@ -357,7 +357,7 @@ class OccurrenceDataset {
 				$rareReaderArr = array_unique(array_merge($rareReaderArr,$userRights['RareSppReader']));
 			}
 		}
-		$dwcaHandler = new DwcArchiverOccurrence();
+		$dwcaHandler = new DwcArchiverCore();
 		$dwcaHandler->setCharSetOut($cSet);
 		$dwcaHandler->setSchemaType($schema);
 		$dwcaHandler->setExtended($extended);

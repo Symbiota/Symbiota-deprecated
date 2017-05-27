@@ -1,7 +1,7 @@
 <?php
-include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 
-class DwcArchiverPublisher extends DwcArchiverOccurrence{
+class DwcArchiverPublisher extends DwcArchiverCore{
 
 	public function __construct(){
 		parent::__construct('write');

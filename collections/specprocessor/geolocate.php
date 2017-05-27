@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
-include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -460,7 +460,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 											<div>
 												<b>Match Count:</b> 
 												<?php 
-												$dwcaHandler = new DwcArchiverOccurrence();
+												$dwcaHandler = new DwcArchiverCore();
 												$dwcaHandler->setCollArr($collid);
 												$dwcaHandler->setVerboseMode(0);
 												$dwcaHandler->addCondition('decimallatitude','NULL');

@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceIndividualManager.php');
-include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 include_once($SERVER_ROOT.'/classes/RdfUtility.php');
 
 $occid = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
@@ -52,21 +52,21 @@ $accept = RdfUtility::parseHTTPAcceptHeader($_SERVER['HTTP_ACCEPT']);
 while (!$done && list($key, $mediarange) = each($accept)) {
     if ($mediarange=='text/turtle' || $format == 'turtle') {
        Header("Content-Type: text/turtle; charset=".$CHARSET);
-       $dwcManager = new DwcArchiverOccurrence();
+       $dwcManager = new DwcArchiverCore();
        $dwcManager->setCustomWhereSql(" o.occid = $occid ");
        echo $dwcManager->getAsTurtle();
        $done = TRUE;
     }
     if ($mediarange=='application/rdf+xml' || $format == 'rdf') {
        Header("Content-Type: application/rdf+xml; charset=".$CHARSET);
-       $dwcManager = new DwcArchiverOccurrence();
+       $dwcManager = new DwcArchiverCore();
        $dwcManager->setCustomWhereSql(" o.occid = $occid ");
        echo $dwcManager->getAsRdfXml();
        $done = TRUE;
     }
     if ($mediarange=='application/json' || $format == 'json') {
        Header("Content-Type: application/json; charset=".$CHARSET);
-       $dwcManager = new DwcArchiverOccurrence();
+       $dwcManager = new DwcArchiverCore();
        $dwcManager->setCustomWhereSql(" o.occid = $occid ");
        echo $dwcManager->getAsJson();
        $done = TRUE;
