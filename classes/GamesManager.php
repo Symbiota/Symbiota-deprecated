@@ -38,7 +38,8 @@ class GamesManager {
 		$rs->free();
 		return $retArr;
 	}
-	
+
+	//Organism of the day game 
 	public function setOOTD($oodID,$clid){
 		global $SERVER_ROOT;
 		//Sanitation: $clid variable cound be a single checklist or a collection of clid separated by commas
@@ -182,6 +183,7 @@ class GamesManager {
 		return $infoArr;
 	}
 	
+	//Flashcard functions
 	public function getFlashcardImages(){
 		//Get species list
 		$retArr = Array();
@@ -329,6 +331,35 @@ class GamesManager {
 		}
 	}
 
+	public function getNameGameWordList(){
+		$retArr = array();
+		$sql = '';
+		if($this->clid){
+			$this->setClidStr();
+			$sql = 'SELECT DISTINCT IFNULL(cl.familyoverride,ts.family) AS family, CONCAT_WS(" ",t.unitind1,t.unitname1,t.unitind2,t.unitname2) AS sciname '.
+				'FROM fmchklsttaxalink cl INNER JOIN taxa t ON cl.tid = t.tid '.
+				'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'WHERE cl.clid IN('.$this->clidStr.') AND ts.taxauthid = 1 ORDER BY RAND() LIMIT 25';
+		}
+		elseif($this->dynClid){
+			$sql = 'SELECT DISTINCT ts.family, CONCAT_WS(" ",t.unitind1,t.unitname1,t.unitind2,t.unitname2) AS sciname '.
+				'FROM fmdyncltaxalink cl INNER JOIN taxa t ON cl.tid = t.tid '.
+				'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'WHERE cl.dynclid = '.$this->dynClid.' AND ts.taxauthid = 1 ORDER BY RAND() LIMIT 25';
+		}
+		//echo $sql.'<br/><br/>';
+		if($sql){
+			$rs = $this->conn->query($sql);
+			$retStr = "";
+			while($r = $rs->fetch_object()){
+				$retArr[] = array($r->sciname,$r->family);
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	//Misc functions
 	private function setClidStr(){
 		$clidArr = array($this->clid);
 		$sqlBase = 'SELECT clidchild FROM fmchklstchildren WHERE clid IN(';

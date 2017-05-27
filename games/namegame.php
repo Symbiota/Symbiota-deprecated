@@ -26,6 +26,9 @@ $imgloc = "../images/games/namegame/";
 	<title><?php echo $DEFAULT_TITLE; ?> Name Game</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<script src="../js/jquery.js" type="text/javascript"></script>
+	<script src="../js/jquery-ui.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
@@ -54,45 +57,20 @@ $imgloc = "../images/games/namegame/";
 		} 
 
 		//CHANGE WORDLIST SCRIPT
-		function getXMLHTTP() { //fuction to return the xml http object
-			var xmlhttp=false;	
-			try{
-				xmlhttp=new XMLHttpRequest();
-			}
-			catch(e){		
-				try{			
-					xmlhttp= new ActiveXObject("Microsoft.XMLHTTP");
+		function getWordList(){
+			$.ajax({
+				method: "POST",
+				url: "rpc/getwordlist.php",
+				dataType: "json",
+				data: {
+					clid : <?php echo $clid; ?>,
+					dynclid: <?php echo $dynClid; ?> 
+				},
+				success: function(data) {
+					mainList = data;
+					generate();
 				}
-				catch(e){
-					try{
-						xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-					}
-					catch(e1){
-						xmlhttp=false;
-					}
-				}
-			}
-			return xmlhttp;
-		}
-			
-		function getWordList(strURL, referer){ 
-			var req = getXMLHTTP();
-			if(req){
-				req.onreadystatechange = function(){
-					if (req.readyState == 4){
-						// only if "OK"
-						if (req.status == 200){
-							eval(req.responseText);
-							generate();
-						} 
-						else{
-							alert("There was a problem while using XMLHTTP:\n" + req.statusText);
-						}
-					}				
-				}			
-				req.open("GET", strURL, true);
-				req.send(null);
-			}
+			});
 		}
 		
 		function openPopup(urlStr,windowName){
@@ -177,7 +155,7 @@ $imgloc = "../images/games/namegame/";
 					tds[i].getElementsByTagName("span")[0].onclick=function(){wildCard();};
 				}
 			}
-			getWordList('rpc/getwordlist.php?<?php echo $clid?'clid='.$clid:'dynclid='.$dynClid; ?>', 'newlist');
+			getWordList();
 			generate();
 		}
 
@@ -253,7 +231,7 @@ $imgloc = "../images/games/namegame/";
 			if(wordCount==selectedNums.length){ 
 				// generate random list 
 				// Does this when you run out of words in current list
-				getWordList('rpc/getwordlist.php?<?php echo $clid?'clid='.$clid:'dynclid='.$dynClid; ?>', 'reloadlist');
+				getWordList();
 				return;
 			}
 			
