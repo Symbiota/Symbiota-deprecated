@@ -343,45 +343,6 @@ class ChecklistVoucherAdmin {
 		return $retArr;
 	}
 
-	public function getConflictVouchers(){
-		$retArr = Array();
-		$clidStr = $this->clid;
-		if($this->childClidArr){
-			$clidStr .= ','.implode(',',$this->childClidArr);
-		}
-		$sql = 'SELECT DISTINCT t.tid, v.clid, t.sciname AS listid, o.recordedby, o.recordnumber, o.sciname, o.identifiedby, o.dateidentified, o.occid '.
-			'FROM taxstatus ts1 INNER JOIN omoccurrences o ON ts1.tid = o.tidinterpreted '. 
-			'INNER JOIN fmvouchers v ON o.occid = v.occid '. 
-			'INNER JOIN taxstatus ts2 ON v.tid = ts2.tid '. 
-			'INNER JOIN taxa t ON v.tid = t.tid '. 
-			'INNER JOIN taxstatus ts3 ON ts1.tidaccepted = ts3.tid '. 
-			'WHERE (v.clid IN('.$clidStr.')) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tidaccepted <> ts2.tidaccepted '.
-			'AND ts1.parenttid <> ts2.tidaccepted AND v.tid <> o.tidinterpreted AND ts3.parenttid <> v.tid '.
-			'ORDER BY t.sciname ';
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		$cnt = 0;
-		while($row = $rs->fetch_object()){
-			$clSciname = $row->listid;
-			$voucherSciname = $row->sciname;
-			//if(str_replace($voucherSciname)) continue;
-			$retArr[$cnt]['tid'] = $row->tid;
-			$retArr[$cnt]['clid'] = $row->clid;
-			$retArr[$cnt]['occid'] = $row->occid;
-			$retArr[$cnt]['listid'] = $clSciname;
-			$collStr = $row->recordedby;
-			if($row->recordnumber) $collStr .= ' ('.$row->recordnumber.')';
-			$retArr[$cnt]['recordnumber'] = $this->cleanOutStr($collStr);
-			$retArr[$cnt]['specid'] = $this->cleanOutStr($voucherSciname);
-			$idBy = $row->identifiedby;
-			if($row->dateidentified) $idBy .= ' ('.$this->cleanOutStr($row->dateidentified).')';
-			$retArr[$cnt]['identifiedby'] = $this->cleanOutStr($idBy);
-			$cnt++;
-		}
-		$rs->free();
-		return $retArr;
-	}
-
 	public function getMissingTaxa(){
 		$retArr = Array();
 		if($sqlFrag = $this->getSqlFrag()){
@@ -429,6 +390,81 @@ class ChecklistVoucherAdmin {
 			$rsB->free();
 		}
 		return $retArr;
+	}
+
+	public function getConflictVouchers(){
+		$retArr = Array();
+		$clidStr = $this->clid;
+		if($this->childClidArr){
+			$clidStr .= ','.implode(',',$this->childClidArr);
+		}
+		$sql = 'SELECT DISTINCT t.tid, v.clid, t.sciname AS listid, o.recordedby, o.recordnumber, o.sciname, o.identifiedby, o.dateidentified, o.occid '.
+				'FROM taxstatus ts1 INNER JOIN omoccurrences o ON ts1.tid = o.tidinterpreted '.
+				'INNER JOIN fmvouchers v ON o.occid = v.occid '.
+				'INNER JOIN taxstatus ts2 ON v.tid = ts2.tid '.
+				'INNER JOIN taxa t ON v.tid = t.tid '.
+				'INNER JOIN taxstatus ts3 ON ts1.tidaccepted = ts3.tid '.
+				'WHERE (v.clid IN('.$clidStr.')) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tidaccepted <> ts2.tidaccepted '.
+				'AND ts1.parenttid <> ts2.tidaccepted AND v.tid <> o.tidinterpreted AND ts3.parenttid <> v.tid '.
+				'ORDER BY t.sciname ';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		$cnt = 0;
+		while($row = $rs->fetch_object()){
+			$clSciname = $row->listid;
+			$voucherSciname = $row->sciname;
+			//if(str_replace($voucherSciname)) continue;
+			$retArr[$cnt]['tid'] = $row->tid;
+			$retArr[$cnt]['clid'] = $row->clid;
+			$retArr[$cnt]['occid'] = $row->occid;
+			$retArr[$cnt]['listid'] = $clSciname;
+			$collStr = $row->recordedby;
+			if($row->recordnumber) $collStr .= ' ('.$row->recordnumber.')';
+			$retArr[$cnt]['recordnumber'] = $this->cleanOutStr($collStr);
+			$retArr[$cnt]['specid'] = $this->cleanOutStr($voucherSciname);
+			$idBy = $row->identifiedby;
+			if($row->dateidentified) $idBy .= ' ('.$this->cleanOutStr($row->dateidentified).')';
+			$retArr[$cnt]['identifiedby'] = $this->cleanOutStr($idBy);
+			$cnt++;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function batchAdjustChecklist($postArr){
+		$occidArr = $postArr['occid'];
+		foreach($occidArr as $occid){
+			//Get checklist tid
+			$tidChecklist = 0;
+			$sql = 'SELECT tid FROM fmvouchers WHERE (clid = '.$this->clid.') AND (occid = '.$occid.')';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$tidChecklist = $r->tid;
+			}
+			$rs->free();
+			//Get voucher tid 
+			$tidVoucher = 0;
+			$sql1 = 'SELECT tidinterpreted FROM omoccurrences WHERE (occid = '.$occid.')';
+			$rs1 = $this->conn->query($sql1);
+			if($r1 = $rs1->fetch_object()){
+				$tidVoucher = $r1->tidinterpreted;
+			}
+			$rs1->free();
+			//Make sure 
+			$sql2 = 'INSERT IGNORE INTO fmchklsttaxalink(tid, clid, morphospecies, familyoverride, habitat, abundance, notes, explicitExclude, source, internalnotes, dynamicProperties) '.
+				'SELECT '.$tidVoucher.' as tid, c.clid, c.morphospecies, c.familyoverride, c.habitat, c.abundance, c.notes, c.explicitExclude, c.source, c.internalnotes, c.dynamicProperties '.
+				'FROM fmchklsttaxalink c INNER JOIN fmvouchers v ON c.tid = v.tid AND c.clid = v.clid '.
+				'WHERE (c.clid = '.$this->clid.') AND (v.occid = '.$occid.')';
+			$this->conn->query($sql2);
+			//Transfer voucher to new name
+			$sql3 = 'UPDATE fmvouchers SET tid = '.$tidVoucher.' WHERE (clid = '.$this->clid.') AND (occid = '.$occid.')';
+			$this->conn->query($sql3);
+			if(array_key_exists('removeOldIn',$postArr)){
+				$sql4 = 'DELETE c.* FROM fmchklsttaxalink c LEFT JOIN fmvouchers v ON c.clid = v.clid AND c.tid = v.tid '.
+					'WHERE (c.clid = '.$this->clid.') AND (c.tid = '.$tidChecklist.') AND (v.clid IS NULL)';
+				$this->conn->query($sql4);
+			}
+		}
 	}
 
 	//Export functions used within voucherreporthandler.php

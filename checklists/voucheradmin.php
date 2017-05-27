@@ -20,7 +20,6 @@ $statusStr = "";
 $isEditor = 0;
 if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = 1;
-
 	if($action == "SaveSearch"){
 		$statusStr = $clManager->saveQueryVariables($_POST);
 	}
@@ -32,6 +31,9 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 	}
 	elseif($action == 'Add Taxa and Vouchers'){
 		$clManager->linkTaxaVouchers($_POST['occids'],(array_key_exists('usecurrent',$_POST)?$_POST['usecurrent']:0));
+	}
+	elseif($action == 'resolveconflicts'){
+		$clManager->batchAdjustChecklist($_POST);
 	}
 }
 ?>
