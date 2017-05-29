@@ -100,7 +100,7 @@ class SpecUpload{
 
 	private function setCollInfo(){
 		if($this->collId){
-			$sql = 'SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, c.managementtype, cs.uploaddate, c.securitykey, c.guidtarget '.
+			$sql = 'SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, c.colltype, c.managementtype, cs.uploaddate, c.securitykey, c.guidtarget '.
 				'FROM omcollections c LEFT JOIN omcollectionstats cs ON c.collid = cs.collid '.
 				'WHERE (c.collid = '.$this->collId.')';
 			//echo $sql;
@@ -112,6 +112,7 @@ class SpecUpload{
 				$this->collMetadataArr["collectioncode"] = $row->collectioncode;
 				$dateStr = ($row->uploaddate?date("d F Y g:i:s", strtotime($row->uploaddate)):"");
 				$this->collMetadataArr["uploaddate"] = $dateStr;
+				$this->collMetadataArr["colltype"] = $row->colltype;
 				$this->collMetadataArr["managementtype"] = $row->managementtype;
 				$this->collMetadataArr["securitykey"] = $row->securitykey;
 				$this->collMetadataArr["guidtarget"] = $row->guidtarget;
