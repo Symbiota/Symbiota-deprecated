@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverPublisher.php');
-include_once($SERVER_ROOT.'/classes/CollectionProfileManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
 header('Content-Type: text/html; charset=' .$CHARSET);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -11,7 +11,7 @@ $cSet = array_key_exists('cset',$_REQUEST)?$_REQUEST['cset']:'';
 $schema = array_key_exists('schema',$_REQUEST)?$_REQUEST['schema']:1;
 
 $dwcaManager = new DwcArchiverPublisher();
-$collManager = new CollectionProfileManager();
+$collManager = new OccurrenceCollectionProfile();
 
 $includeDets = 1;
 $includeImgs = 1;

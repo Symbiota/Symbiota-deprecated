@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/CollectionProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 1200); //1200 seconds = 20 minutes
 
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
@@ -13,7 +13,7 @@ $days = array_key_exists("days",$_REQUEST)?$_REQUEST["days"]:365;
 $months = array_key_exists("months",$_REQUEST)?$_REQUEST["months"]:12;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 
-$collManager = new CollectionProfileManager();
+$collManager = new OccurrenceCollectionProfile();
 
 //if($collId) $collManager->setCollectionId($collId);
 $collList = $collManager->getStatCollectionList($catId);
@@ -218,7 +218,7 @@ if($action != "Update Statistics"){
 	<html>
 		<head>
 			<meta name="keywords" content="Natural history collections statistics" />
-			<title><?php echo $defaultTitle; ?> Collection Statistics</title>
+			<title><?php echo $DEFAULT_TITLE; ?> Collection Statistics</title>
 			<link rel="stylesheet" href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" />
 			<link rel="stylesheet" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" />
 			<link rel="stylesheet" href="../../css/jquery-ui.css" type="text/css" />
@@ -358,7 +358,7 @@ if($action != "Update Statistics"){
 		<body>
 			<?php
 			$displayLeftMenu = (isset($collections_misc_collstatsMenu)?$collections_misc_collstatsMenu:false);
-			include($serverRoot.'/header.php');
+			include($SERVER_ROOT.'/header.php');
 			if(isset($collections_misc_collstatsCrumbs)){
 				if($collections_misc_collstatsCrumbs){
 					echo "<div class='navpath'>";
@@ -983,7 +983,7 @@ if($action != "Update Statistics"){
 			</div>
 			<!-- end inner text -->
 			<?php
-				include($serverRoot.'/footer.php');
+				include($SERVER_ROOT.'/footer.php');
 			?>
 		</body>
 	</html>

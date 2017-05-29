@@ -1,8 +1,8 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/CollectionProfileManager.php');
+include_once($serverRoot.'/classes/OccurrenceCollectionProfile.php');
 
-$collManager = new CollectionProfileManager();
+$collManager = new OccurrenceCollectionProfile();
 
 $GBIFInstKey = $collManager->getGbifInstKey();
 

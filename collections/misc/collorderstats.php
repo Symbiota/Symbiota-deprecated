@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/CollectionProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 1200); //1200 seconds = 20 minutes
 
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
@@ -9,7 +9,7 @@ if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $totalCnt = array_key_exists("totalcnt",$_REQUEST)?$_REQUEST["totalcnt"]:0;
 
-$collManager = new CollectionProfileManager();
+$collManager = new OccurrenceCollectionProfile();
 $orderArr = Array();
 
 if($collId){
@@ -21,7 +21,7 @@ $_SESSION['statsOrderArr'] = $orderArr;
 <html>
 	<head>
 		<meta name="keywords" content="Natural history collections yearly statistics" />
-		<title><?php echo $defaultTitle; ?> Order Distribution</title>
+		<title><?php echo $DEFAULT_TITLE; ?> Order Distribution</title>
 		<link rel="stylesheet" href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" />
 		<link rel="stylesheet" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
@@ -32,7 +32,7 @@ $_SESSION['statsOrderArr'] = $orderArr;
 	<body>
 		<?php
 		$displayLeftMenu = (isset($collections_misc_collstatsMenu)?$collections_misc_collstatsMenu:false);
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		?>
 		<div id="innertext">
 			<fieldset id="orderdistbox" style="clear:both;margin-top:15px;width:800px;">
@@ -81,7 +81,7 @@ $_SESSION['statsOrderArr'] = $orderArr;
 		</div>
 		<!-- end inner text -->
 		<?php
-			include($serverRoot.'/footer.php');		
+			include($SERVER_ROOT.'/footer.php');		
 		?>
 	</body>
 </html>

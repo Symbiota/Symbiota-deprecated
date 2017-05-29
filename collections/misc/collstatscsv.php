@@ -1,9 +1,8 @@
 <?php
-//error_reporting(E_ALL);
 ini_set('max_execution_time', 1200); //1200 seconds = 20 minutes
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/CollectionProfileManager.php');
-include_once($serverRoot.'/classes/OccurrenceManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
 $collId = array_key_exists("collids",$_REQUEST)?$_REQUEST["collids"]:'';
@@ -20,7 +19,7 @@ $ordArr = isset($_SESSION['statsOrderArr'])?$_SESSION['statsOrderArr']:Array();
 $days = 365 * $years;
 $months = 12 * $years;
 
-$collManager = new CollectionProfileManager();
+$collManager = new OccurrenceCollectionProfile();
 
 $fileName = '';
 $outputArr = array();
