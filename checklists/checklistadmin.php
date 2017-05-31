@@ -14,9 +14,14 @@ $clManager = new ChecklistAdmin();
 if(!$clid && isset($_POST['delclid'])) $clid = $_POST['delclid'];
 $clManager->setClid($clid);
 
+if($action == "SubmitAdd"){
+	//Anyone with a login can create a checklist 
+	$newClid = $clManager->createChecklist($_POST);
+	header("Location: checklist.php?cl=".$newClid."&emode=1");
+}
+
 $statusStr = "";
 $isEditor = 0;
-
 if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
     $isEditor = 1;
 
@@ -25,10 +30,6 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
         $clManager->editMetaData($_POST);
         header('Location: checklist.php?cl='.$clid.'&pid='.$pid);
     }
-	elseif($action == "SubmitAdd"){
-		$newClid = $clManager->createChecklist($_POST);
-		header("Location: checklist.php?cl=".$newClid."&emode=1");
-	}
     elseif($action == 'DeleteCheck'){
         $statusStr = $clManager->deleteChecklist($_POST['delclid']);
         if($statusStr === true) header('Location: ../index.php');
