@@ -20,6 +20,10 @@ if(isset($clArray["defaultSettings"]) && $clArray["defaultSettings"]){
 ?>
 <script type="text/javascript">
 	function validateChecklistForm(f){
+		if(f.name.value == ""){
+			alert("Checklist name field must have a value");
+			return false;
+		}
 		if(f.latcentroid.value != ""){
 			if(f.longcentroid.value == ""){
 				alert("If latitude has a value, longitude must also have a value");
@@ -60,6 +64,17 @@ if(isset($clArray["defaultSettings"]) && $clArray["defaultSettings"]){
 		}
 		return true;
 	}
+
+	function openMappingAid() {
+		mapWindow=open("../tools/mappointaid.php?formname=editclmatadata&latname=latcentroid&longname=longcentroid","mapaid","resizable=0,width=800,height=700,left=20,top=20");
+	    if(mapWindow.opener == null) mapWindow.opener = self;
+	}
+
+	function openMappingPolyAid() {
+		mapWindow=open("../tools/mappolyaid.php?formname=editclmatadata&latname=latcentroid&longname=longcentroid","mapaid","resizable=0,width=800,height=700,left=20,top=20");
+	    if(mapWindow.opener == null) mapWindow.opener = self;
+	}
+
 </script>
 <?php
 if(!$clid){
@@ -73,7 +88,7 @@ if(!$clid){
 <div id="checklistDiv" style="display:<?php echo ($clid?'block':'none'); ?>;">
 	<form id="checklisteditform" action="<?php echo $CLIENT_ROOT; ?>/checklists/checklistadmin.php" method="post" name="editclmatadata" onsubmit="return validateChecklistForm(this)">
 		<fieldset style="margin:15px;padding:10px;">
-			<legend><b><?php echo $LANG['EDITCHECKDET'];?></b></legend>
+			<legend><b><?php echo ($clid?$LANG['EDITCHECKDET']:$LANG['CREATECHECKDET']); ?></b></legend>
 			<div>
 				<b><?php echo $LANG['CHECKNAME'];?></b><br/>
 				<input type="text" name="name" style="width:95%" value="<?php echo $clManager->getClName();?>" />
@@ -277,8 +292,8 @@ if(!$clid){
 			?>
 			<div style="margin:10px;">
 				<div>You have no personal checklists</div>
-				<div>
-					<a href="#" onclick="toggle('claddformdiv')">Create a New Checklist</a>
+				<div style="margin-top:5px">
+					<a href="#" onclick="toggle('checklistDiv')">Click here to create a new checklist</a>
 				</div>
 			</div>
 			<?php 

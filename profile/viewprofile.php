@@ -28,11 +28,10 @@ if(isset($SYMB_UID) && $SYMB_UID){
 }
 if(!$userId) header('Location: index.php?refurl=viewprofile.php');
 
-$statusStr = "";
-
 $pHandler = new ProfileManager();
 $pHandler->setUid($userId);
 
+$statusStr = "";
 $person = null;
 if($isEditor){
 	// ******************************  editing a profile  ************************************//
@@ -135,7 +134,7 @@ if($isEditor){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> - View User Profile</title>
+	<title><?php echo $DEFAULT_TITLE; ?> - View User Profile</title>
 	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
@@ -152,13 +151,13 @@ if($isEditor){
 			theme_advanced_buttons3 : ""
 		});
 	</script>
-	<script type="text/javascript" src="../js/symb/profile.viewprofile.js?ver=20151202"></script>
+	<script type="text/javascript" src="../js/symb/profile.viewprofile.js?ver=20170530"></script>
 	<script type="text/javascript" src="../js/symb/shared.js"></script>
 </head>
 <body>
 <?php
 $displayLeftMenu = (isset($profile_viewprofileMenu)?$profile_viewprofileMenu:"true");
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 if(isset($profile_viewprofileCrumbs)){
 	echo "<div class='navpath'>";
 	echo $profile_viewprofileCrumbs;
@@ -213,8 +212,7 @@ if(isset($profile_viewprofileCrumbs)){
 	?>
 	</div>
 <?php
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
-
 </body>
 </html>

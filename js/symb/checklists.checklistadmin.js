@@ -12,16 +12,6 @@ $(document).ready(function() {
 	});
 });
 
-function openMappingAid() {
-	mapWindow=open("../tools/mappointaid.php?formname=editclmatadata&latname=latcentroid&longname=longcentroid","mapaid","resizable=0,width=800,height=700,left=20,top=20");
-    if(mapWindow.opener == null) mapWindow.opener = self;
-}
-
-function openMappingPolyAid() {
-	mapWindow=open("../tools/mappolyaid.php?formname=editclmatadata&latname=latcentroid&longname=longcentroid","mapaid","resizable=0,width=800,height=700,left=20,top=20");
-    if(mapWindow.opener == null) mapWindow.opener = self;
-}
-
 function openPointAid(latDef,lngDef) {
 	var tid = document.pointaddform.pointtid.value;
 	pointWindow=open("mappointaid.php?latcenter="+latDef+"&lngcenter="+lngDef+"&tid="+tid,"pointaid","resizable=0,width=800,height=700,left=20,top=20");

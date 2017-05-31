@@ -58,7 +58,6 @@ if($clArray["defaultSettings"]){
 
 $voucherProjects = $clManager->getVoucherProjects();
 ?>
-
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
@@ -81,7 +80,7 @@ $voucherProjects = $clManager->getVoucherProjects();
         });
     </script>
     <script type="text/javascript" src="../js/symb/shared.js"></script>
-    <script type="text/javascript" src="../js/symb/checklists.checklistadmin.js?ver=20151202"></script>
+    <script type="text/javascript" src="../js/symb/checklists.checklistadmin.js?ver=20170530"></script>
 </head>
 
 <body>
