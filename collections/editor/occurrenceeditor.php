@@ -48,9 +48,9 @@ $qryCnt = false;
 $statusStr = '';
 $navStr = '';
 
-if($symbUid){
+if($SYMB_UID){
 	//Set variables
-	$occManager->setSymbUid($symbUid);
+	$occManager->setSymbUid($SYMB_UID);
 	$occManager->setOccId($occId);
 	$occManager->setCollId($collId);
 	$collMap = $occManager->getCollMap();
@@ -60,9 +60,9 @@ if($symbUid){
 
 	//Bring in config variables
 	if($isGenObs){
-		if(file_exists('includes/config/occurVarGenObs'.$symbUid.'.php')){
+		if(file_exists('includes/config/occurVarGenObs'.$SYMB_UID.'.php')){
 			//Specific to particular collection
-			include('includes/config/occurVarGenObs'.$symbUid.'.php');
+			include('includes/config/occurVarGenObs'.$SYMB_UID.'.php');
 		}
 		elseif(file_exists('includes/config/occurVarGenObsDefault.php')){
 			//Specific to Default values for portal
@@ -98,7 +98,7 @@ if($symbUid){
 				//Lets assume that Edits where submitted and they remain on same specimen, user is still approved
 				 $isEditor = 2;
 			}
-			elseif($occManager->getObserverUid() == $symbUid){
+			elseif($occManager->getObserverUid() == $SYMB_UID){
 				//Users can edit their own records
 				$isEditor = 2;
 			}
@@ -409,12 +409,12 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=20170503" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=20170530" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=20170503" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=20170530" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -601,7 +601,7 @@ else{
 									if($occId && $isEditor){
 										// Get symbiota user email as the annotator email (for fp)
 										$pHandler = new ProfileManager();
-										$pHandler->setUid($symbUid);
+										$pHandler->setUid($SYMB_UID);
 										$person = $pHandler->getPerson();
 										$userEmail = ($person?$person->getEmail():'');
 
@@ -1181,7 +1181,7 @@ else{
 										</fieldset>
 										<fieldset>
 											<legend><b>Curation</b></legend>
-											<div style="padding:3px;">
+											<div style="padding:3px;clear:both;">
 												<div id="typeStatusDiv">
 													<?php echo (defined('TYPESTATUSLABEL')?TYPESTATUSLABEL:'Type Status'); ?>
 													<a href="#" onclick="return dwcDoc('typeStatus')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
@@ -1201,11 +1201,6 @@ else{
 													<?php echo (defined('FIELDNUMBERLABEL')?FIELDNUMBERLABEL:'Field Number'); ?>
 													<a href="#" onclick="return dwcDoc('fieldnumber')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
 													<input type="text" name="fieldnumber" tabindex="107" maxlength="45" value="<?php echo array_key_exists('fieldnumber',$occArr)?$occArr['fieldnumber']:''; ?>" onchange="fieldChanged('fieldnumber');" />
-												</div>
-												<div id="ownerInstitutionCodeDiv" title="If different than institution code">
-													<?php echo (defined('OWNERSHIPCODELABEL')?OWNERSHIPCODELABEL:'Owner Code'); ?>
-													<a href="#" onclick="return dwcDoc('ownerInstitutionCode')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-													<input type="text" name="ownerinstitutioncode" tabindex="108" maxlength="32" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
 												</div>
 												<div id="basisOfRecordDiv">
 													<?php echo (defined('BASISOFRECORDLABEL')?BASISOFRECORDLABEL:'Basis of Record'); ?>
@@ -1251,6 +1246,23 @@ else{
 												<div id="duplicateQuantityDiv" title="aka label quantity">
 													<?php echo (defined('DUPLICATEQUALITYCOUNTLABEL')?DUPLICATEQUALITYCOUNTLABEL:'Dupe Count'); ?><br/>
 													<input type="text" name="duplicatequantity" tabindex="116" value="<?php echo array_key_exists('duplicatequantity',$occArr)?$occArr['duplicatequantity']:''; ?>" onchange="fieldChanged('duplicatequantity');" />
+												</div>
+											</div>
+											<div style="padding:3px;clear:both;">
+												<div id="institutionCodeDiv" title="Overrides institution code set within collection's metadata form">
+													<?php echo (defined('INSTITUTIONCODELABEL')?INSTITUTIONCODELABEL:'Institution Code (override)'); ?>
+													<a href="#" onclick="return dwcDoc('institutionCode')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+													<input type="text" name="institutioncode" tabindex="116" maxlength="32" value="<?php echo array_key_exists('institutioncode',$occArr)?$occArr['institutioncode']:''; ?>" onchange="fieldChanged('institutioncode');" />
+												</div>
+												<div id="collectionCodeDiv" title="Overrides collection code set within collection's metadata form">
+													<?php echo (defined('COLLECTIONCODELABEL')?COLLECTIONCODELABEL:'Collection Code (override)'); ?>
+													<a href="#" onclick="return dwcDoc('collectionCode')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+													<input type="text" name="collectioncode" tabindex="117" maxlength="32" value="<?php echo array_key_exists('collectioncode',$occArr)?$occArr['collectioncode']:''; ?>" onchange="fieldChanged('collectioncode');" />
+												</div>
+												<div id="ownerInstitutionCodeDiv" title="If different than institution code">
+													<?php echo (defined('OWNERINSTITUTIONCODELABEL')?OWNERINSTITUTIONCODELABEL:'Owner Code (override)'); ?>
+													<a href="#" onclick="return dwcDoc('ownerInstitutionCode')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+													<input type="text" name="ownerinstitutioncode" tabindex="118" maxlength="32" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
 												</div>
 												<div id="processingStatusDiv">
 													<?php echo (defined('PROCESSINGSTATUSLABEL')?PROCESSINGSTATUSLABEL:'Processing Status'); ?><br/>
@@ -1312,7 +1324,7 @@ else{
 										<div style="padding:10px;">
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-											<input type="hidden" name="observeruid" value="<?php echo $symbUid; ?>" />
+											<input type="hidden" name="observeruid" value="<?php echo $SYMB_UID; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<input type="hidden" name="linkdupe" value="" />
 											<?php

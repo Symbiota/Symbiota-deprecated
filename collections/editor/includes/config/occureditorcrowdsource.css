@@ -513,6 +513,14 @@ body{
 	display:none;
 }
 
+#institutionCodeDiv{
+	display:none;
+}
+
+#collectionCodeDiv{
+	display:none;
+}
+
 #ownerInstitutionCodeDiv{
 	display:none;
 }

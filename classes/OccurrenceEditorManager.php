@@ -41,7 +41,8 @@ class OccurrenceEditorManager {
 			'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
 			'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
 			'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2', 'labelproject', 
-			'observeruid','basisofrecord','ownerinstitutioncode','datelastmodified', 'processingstatus', 'recordenteredby', 'dateentered');
+			'observeruid','basisofrecord','institutioncode','collectioncode','ownerinstitutioncode','datelastmodified', 'processingstatus', 
+			'recordenteredby', 'dateentered');
 	}
 
 	public function __destruct(){
@@ -628,8 +629,11 @@ class OccurrenceEditorManager {
 				}
 			}
 			$rs->free();
-			if(!$this->occid && $retArr && count($retArr) == 1){
-				$this->occid = $occid;
+			if($retArr && count($retArr) == 1){
+				if(!$this->occid) $this->occid = $occid;
+				if(!$retArr[$occid]['institutioncode']) $retArr[$occid]['institutioncode'] = $this->collMap['institutioncode'];
+				if(!$retArr[$occid]['collectioncode']) $retArr[$occid]['collectioncode'] = $this->collMap['collectioncode'];
+				if(!$retArr[$occid]['ownerinstitutioncode']) $retArr[$occid]['ownerinstitutioncode'] = $this->collMap['institutioncode'];
 			}
 			$this->occurrenceMap = $this->cleanOutArr($retArr);
 			if($this->occid){
@@ -780,6 +784,9 @@ class OccurrenceEditorManager {
 						$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
 					}
 				}
+				if(isset($occArr['institutioncode']) && $occArr['institutioncode'] == $this->collMap['institutioncode']) $occArr['institutioncode'] = '';
+				if(isset($occArr['collectioncode']) && $occArr['collectioncode'] == $this->collMap['collectioncode']) $occArr['collectioncode'] = '';
+				if(isset($occArr['ownerinstitutioncode']) && $occArr['ownerinstitutioncode'] == $this->collMap['institutioncode']) $occArr['ownerinstitutioncode'] = '';
 				foreach($occArr as $oField => $ov){
 					if(in_array($oField,$this->occFieldArr) && $oField != 'observeruid'){
 						$vStr = $this->cleanInStr($ov);
@@ -893,7 +900,8 @@ class OccurrenceEditorManager {
 	public function addOccurrence($occArr){
 		$status = "SUCCESS: new occurrence record submitted successfully ";
 		if($occArr){
-			$fieldArr = array('basisOfRecord' => 's', 'catalogNumber' => 's', 'otherCatalogNumbers' => 's', 'occurrenceid' => 's', 'ownerInstitutionCode' => 's', 
+			$fieldArr = array('basisOfRecord' => 's', 'catalogNumber' => 's', 'otherCatalogNumbers' => 's', 'occurrenceid' => 's', 
+				'ownerInstitutionCode' => 's', 'institutionCode' => 's', 'collectionCode' => 's', 
 				'family' => 's', 'sciname' => 's', 'tidinterpreted' => 'n', 'scientificNameAuthorship' => 's', 'identifiedBy' => 's', 'dateIdentified' => 's', 
 				'identificationReferences' => 's', 'identificationremarks' => 's', 'taxonRemarks' => 's', 'identificationQualifier' => 's', 'typeStatus' => 's',  
 				'recordedBy' => 's', 'recordNumber' => 's', 'associatedCollectors' => 's', 'eventDate' => 'd', 'year' => 'n', 'month' => 'n', 'day' => 'n', 'startDayOfYear' => 'n', 'endDayOfYear' => 'n', 
@@ -913,7 +921,9 @@ class OccurrenceEditorManager {
 			//if(array_key_exists('localitysecurity',$occArr) && $occArr['localitysecurity']) $occArr['localitysecurity'] = $occArr['localitysecurity'];
 			if(!isset($occArr['dateentered']) || !$occArr['dateentered']) $occArr['dateentered'] = date('Y-m-d H:i:s');
 			if(!isset($occArr['basisofrecord']) || !$occArr['basisofrecord']) $occArr['basisofrecord'] = (strpos($this->collMap['colltype'],'Observations') !== false?'HumanObservation':'PreservedSpecimen');
-			
+			if(isset($occArr['institutionCode']) && $occArr['institutionCode'] == $this->collMap['institutioncode']) $occArr['institutionCode'] = '';
+			if(isset($occArr['collectionCode']) && $occArr['collectionCode'] == $this->collMap['collectioncode']) $occArr['collectionCode'] = '';
+
 			foreach($fieldArr as $fieldStr => $fieldType){
 				$fieldValue = '';
 				if(array_key_exists($fieldStr,$occArr)) $fieldValue = $occArr[$fieldStr];

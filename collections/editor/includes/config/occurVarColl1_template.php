@@ -77,7 +77,7 @@
 //define('DISPOSITIONLABEL','');
 //define('OCCURRENCEIDLABEL','');
 //define('FIELDNUMBERLABEL','');
-//define('OWNERSHIPCODELABEL','');
+//define('OWNERINSTITUTIONCODELABEL','');
 //define('BASISOFRECORDLABEL','');
 //define('LANGUAGELABEL','');
 //define('LABELPROJECTLABEL','');
