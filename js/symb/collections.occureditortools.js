@@ -19,7 +19,7 @@ function geoCloneTool(){
 		url = url + "&state=" + f.stateprovince.value;
 		url = url + "&county=" + f.county.value;
 		url = url + "&collid=" + f.collid.value;
-		cloneWindow=open(url,"geoclonetool","resizable=1,scrollbars=1,toolbar=1,width=800,height=600,left=20,top=20");
+		cloneWindow=open(url,"geoclonetool","resizable=1,scrollbars=1,toolbar=1,width=1000,height=600,left=20,top=20");
 		if(cloneWindow.opener == null) cloneWindow.opener = self;
 	}
 	else{
