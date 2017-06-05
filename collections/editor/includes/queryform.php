@@ -159,7 +159,7 @@ else{
 						?>
 						<div style="margin:2px;" title="Enter Exsiccati Title">
 							<b>Exsiccati Title:</b>
-							<select name="q_exsiccatiid">
+							<select name="q_exsiccatiid" style="width:650px">
 								<option value=""></option> 
 								<option value="">-------------------------</option> 
 								<?php 

@@ -652,13 +652,13 @@ class OccurrenceEditorManager {
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
 			}
 		}
-		elseif(strpos($this->sqlWhere,'ul.username')){
+		if(strpos($this->sqlWhere,'ul.username')){
 			$sql .= 'LEFT JOIN omoccuredits ome ON o.occid = ome.occid LEFT JOIN userlogin ul ON ome.uid = ul.uid ';
 		}
-		elseif(strpos($this->sqlWhere,'exn.ometid')){
+		if(strpos($this->sqlWhere,'exn.ometid')){
 			$sql .= 'INNER JOIN omexsiccatiocclink exocc ON o.occid = exocc.occid INNER JOIN omexsiccatinumbers exn ON exocc.omenid = exn.omenid ';
 		}
-		elseif(array_key_exists('io',$this->qryArr)){
+		if(array_key_exists('io',$this->qryArr)){
 			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
 		}
 		elseif(array_key_exists('woi',$this->qryArr)){
