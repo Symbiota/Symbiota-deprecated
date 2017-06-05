@@ -34,7 +34,7 @@ function toggleCoordDiv(){
 		coordObj.style.display = "none";
 	}
 	else{
-		document.getElementById("locExtraDiv").style.display = "block";
+		document.getElementById("georefExtraDiv").style.display = "block";
 		coordObj.style.display = "block";
 	}
 }
@@ -112,7 +112,7 @@ function geoLocateLocality(){
 }
 
 function geoLocateUpdateCoord(latValue,lngValue,coordErrValue, footprintWKT){
-	document.getElementById("locExtraDiv").style.display = "block";
+	document.getElementById("georefExtraDiv").style.display = "block";
 
 	var f = document.fullform;
 	f.decimallatitude.value = latValue;

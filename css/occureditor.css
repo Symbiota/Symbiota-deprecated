@@ -310,7 +310,7 @@ body{
 }
 
 #localityDiv input{
-	width: 99%;
+	width: 97%;
 }
 
 #localSecurityDiv{
@@ -326,6 +326,19 @@ body{
 #localAutoDeactivatedDiv{
 	float:right;
 	margin-right:15px;
+}
+
+#localityExtraDiv{
+	clear:	both;
+}
+
+#locationRemarksDiv{
+	clear:	both;
+	margin:	4px 0px 2px 0px;
+}
+
+#locationRemarksDiv input{
+	width: 99%;
 }
 
 #decimalLatitudeDiv{
@@ -472,13 +485,13 @@ body{
 	width:	130px;
 }
 
-#locExtraToggleDiv{
+#georefExtraToggleDiv{
 	float:left;
 	margin:15px 5px;
 	cursor:pointer;
 }
 
-#locExtraDiv{
+#georefExtraDiv{
 	display:none;
 	position:relative;
 	clear:both;

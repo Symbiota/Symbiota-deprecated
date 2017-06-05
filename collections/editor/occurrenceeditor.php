@@ -409,21 +409,21 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=20170531" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=170601" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=20170531" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=170601" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
-				echo '<link href="includes/config/'.$cssVal.'?ver=150106" type="text/css" rel="stylesheet" id="editorCssLink" />';
+				echo '<link href="includes/config/'.$cssVal.'?ver=170601" type="text/css" rel="stylesheet" id="editorCssLink" />';
 			}
 		}
 		if(isset($JSARR)){
 			foreach($JSARR as $jsVal){
-				echo '<script src="includes/config/'.$jsVal.'?ver=150106" type="text/javascript"></script>';
+				echo '<script src="includes/config/'.$jsVal.'?ver=170601" type="text/javascript"></script>';
 			}
 		}
 	}
@@ -877,29 +877,49 @@ else{
 											<div style="clear:both;">
 												<div id="countryDiv">
 													<?php echo (defined('COUNTRYLABEL')?COUNTRYLABEL:'Country'); ?>
+													<a href="#" onclick="return dwcDoc('country')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffcountry" name="country" tabindex="40" value="<?php echo array_key_exists('country',$occArr)?$occArr['country']:''; ?>" onchange="fieldChanged('country');" />
 												</div>
 												<div id="stateProvinceDiv">
 													<?php echo (defined('STATEPROVINCELABEL')?STATEPROVINCELABEL:'State/Province'); ?>
+													<a href="#" onclick="return dwcDoc('stateProvince')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffstate" name="stateprovince" tabindex="42" value="<?php echo array_key_exists('stateprovince',$occArr)?$occArr['stateprovince']:''; ?>" onchange="stateProvinceChanged(this.value)" />
 												</div>
 												<div id="countyDiv">
 													<?php echo (defined('COUNTYLABEL')?COUNTYLABEL:'County'); ?>
+													<a href="#" onclick="return dwcDoc('county')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffcounty" name="county" tabindex="44" value="<?php echo array_key_exists('county',$occArr)?$occArr['county']:''; ?>" onchange="fieldChanged('county');" />
 												</div>
 												<div id="municipalityDiv">
 													<?php echo (defined('MUNICIPALITYLABEL')?MUNICIPALITYLABEL:'Municipality'); ?>
+													<a href="#" onclick="return dwcDoc('municipality')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffmunicipality" name="municipality" tabindex="45" value="<?php echo array_key_exists('municipality',$occArr)?$occArr['municipality']:''; ?>" onchange="fieldChanged('municipality');" />
 												</div>
 											</div>
 											<div id="localityDiv">
 												<?php echo (defined('LOCALITYLABEL')?LOCALITYLABEL:'Locality'); ?>
+												<a href="#" onclick="return dwcDoc('locality')"><img class="docimg" src="../../images/qmark.png" /></a>
 												<br />
 												<input type="text" id="fflocality" name="locality" tabindex="46" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
+												<a id="localityExtraToggle" onclick="toggle('localityExtraDiv');">
+													<img src="../../images/editplus.png" style="width:15px;" />
+												</a>
+											</div>
+											<?php
+											$localityExtraDiv = 'none';
+											if(array_key_exists("locationremarks",$occArr) && $occArr["locationremarks"]) $localityExtraDiv = "block";
+											?>
+											<div id="localityExtraDiv" style="display:<?php echo $localityExtraDiv; ?>">
+												<div id="locationRemarksDiv">
+													<?php echo (defined('LOCATIONREMARKSLABEL')?LOCATIONREMARKSLABEL:'Location Remarks'); ?>
+													<a href="#" onclick="return dwcDoc('locationRemarks')"><img class="docimg" src="../../images/qmark.png" /></a>
+													<br/>
+													<input type="text" id="locationremarks" name="locationremarks" value="<?php echo array_key_exists('locationremarks',$occArr)?$occArr['locationremarks']:''; ?>" onchange="fieldChanged('locationremarks');" />
+												</div>
 											</div>
 											<?php
 											if(!defined('LOCALITYAUTOLOOKUP') || LOCALITYAUTOLOOKUP){
@@ -976,7 +996,8 @@ else{
 														<a href="#" onclick="parseVerbatimCoordinates(document.fullform,1);return false">&lt;&lt;</a>
 													</div>
 													<div style="float:left;">
-														<?php echo (defined('VERBATIMCOORDINATES')?VERBATIMCOORDINATES:'Verbatim Coordinates'); ?>
+														<?php echo (defined('VERBATIMCOORDINATESLABEL')?VERBATIMCOORDINATESLABEL:'Verbatim Coordinates'); ?>
+														<a href="#" onclick="return dwcDoc('verbatimCoordinates')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="verbatimcoordinates" tabindex="57" maxlength="255" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="verbatimCoordinatesChanged(this.form);" title="" />
 													</div>
@@ -985,6 +1006,7 @@ else{
 											<div style="clear:both;">
 												<div id="elevationDiv">
 													<?php echo (defined('ELEVATIONINMETERSLABEL')?ELEVATIONINMETERSLABEL:'Elevation in Meters'); ?>
+													<a href="#" onclick="return dwcDoc('minimumElevationInMeters')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" name="minimumelevationinmeters" tabindex="58" maxlength="6" value="<?php echo array_key_exists('minimumelevationinmeters',$occArr)?$occArr['minimumelevationinmeters']:''; ?>" onchange="minimumElevationInMetersChanged(this.form);" title="Minumum Elevation In Meters" /> -
 													<input type="text" name="maximumelevationinmeters" tabindex="60" maxlength="6" value="<?php echo array_key_exists('maximumelevationinmeters',$occArr)?$occArr['maximumelevationinmeters']:''; ?>" onchange="maximumElevationInMetersChanged(this.form);" title="Maximum Elevation In Meters" />
@@ -994,54 +1016,57 @@ else{
 														<a href="#" onclick="parseVerbatimElevation(document.fullform);return false">&lt;&lt;</a>
 													</div>
 													<div style="float:left;">
-														<?php echo (defined('VERBATIMELEVATION')?VERBATIMELEVATION:'Verbatim Elevation'); ?>
+														<?php echo (defined('VERBATIMELEVATIONLABEL')?VERBATIMELEVATIONLABEL:'Verbatim Elevation'); ?>
+														<a href="#" onclick="return dwcDoc('verbatimElevation')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="verbatimelevation" tabindex="61" maxlength="255" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="verbatimElevationChanged(this.form);" />
 													</div>
 												</div>
 												<div id="depthDiv">
 													<?php echo (defined('DEPTHINMETERSLABEL')?DEPTHINMETERSLABEL:'Depth in Meters'); ?>
+													<a href="#" onclick="return dwcDoc('minimumDepthInMeters')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" name="minimumdepthinmeters" tabindex="63" maxlength="6" value="<?php echo array_key_exists('minimumdepthinmeters',$occArr)?$occArr['minimumdepthinmeters']:''; ?>" onchange="minimumDepthInMetersChanged(this.form);" title="Minumum Depth In Meters" /> -
 													<input type="text" name="maximumdepthinmeters" tabindex="64" maxlength="6" value="<?php echo array_key_exists('maximumdepthinmeters',$occArr)?$occArr['maximumdepthinmeters']:''; ?>" onchange="maximumDepthInMetersChanged(this.form);" title="Depth In Meters" />
 												</div>
 												<div id="verbatimDepthDiv">
 													<div style="float:left;">
-														<?php echo (defined('VERBATIMDEPTH')?VERBATIMDEPTH:'Verbatim Depth'); ?>
+														<?php echo (defined('VERBATIMDEPTHLABEL')?VERBATIMDEPTHLABEL:'Verbatim Depth'); ?>
+														<a href="#" onclick="return dwcDoc('verbatimDepth')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="verbatimdepth" tabindex="65" maxlength="255" value="<?php echo array_key_exists('verbatimdepth',$occArr)?$occArr['verbatimdepth']:''; ?>" onchange="fieldChanged('verbatimdepth');" />
 													</div>
 												</div>
-												<div id="locExtraToggleDiv" onclick="toggle('locExtraDiv');">
+												<div id="georefExtraToggleDiv" onclick="toggle('georefExtraDiv');">
 													<img src="../../images/editplus.png" style="width:15px;" />
 												</div>
 											</div>
 											<?php
 											include_once('includes/geotools.php');
-											$locExtraDiv = 'display:';
+											$georefExtraDiv = 'display:';
 											if(array_key_exists("georeferencedby",$occArr) && $occArr["georeferencedby"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("footprintwkt",$occArr) && $occArr["footprintwkt"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("georeferenceprotocol",$occArr) && $occArr["georeferenceprotocol"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("georeferencesources",$occArr) && $occArr["georeferencesources"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("georeferenceverificationstatus",$occArr) && $occArr["georeferenceverificationstatus"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("georeferenceremarks",$occArr) && $occArr["georeferenceremarks"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											?>
-											<div id="locExtraDiv" style="<?php echo $locExtraDiv; ?>;">
+											<div id="georefExtraDiv" style="<?php echo $georefExtraDiv; ?>;">
 												<div style="clear:both;">
 													<div id="georeferencedByDiv">
-														<?php echo (defined('GEOREFERENCEDBY')?GEOREFERENCEDBY:'Georeferenced By'); ?>
+														<?php echo (defined('GEOREFERENCEDBYLABEL')?GEOREFERENCEDBYLABEL:'Georeferenced By'); ?>
 														<br/>
 														<input type="text" name="georeferencedby" tabindex="66" maxlength="255" value="<?php echo array_key_exists('georeferencedby',$occArr)?$occArr['georeferencedby']:''; ?>" onchange="fieldChanged('georeferencedby');" />
 													</div>
@@ -1084,11 +1109,15 @@ else{
 										<fieldset>
 											<legend><b>Misc</b></legend>
 											<div id="habitatDiv">
-												<?php echo (defined('HABITATLABEL')?HABITATLABEL:'Habitat'); ?><br/>
+												<?php echo (defined('HABITATLABEL')?HABITATLABEL:'Habitat'); ?>
+												<a href="#" onclick="return dwcDoc('habitat')"><img class="docimg" src="../../images/qmark.png" /></a>
+												<br/>
 												<input type="text" name="habitat" tabindex="80" value="<?php echo array_key_exists('habitat',$occArr)?$occArr['habitat']:''; ?>" onchange="fieldChanged('habitat');" />
 											</div>
 											<div id="substrateDiv">
-												<?php echo (defined('SUBSTRATELABEL')?SUBSTRATELABEL:'Substrate'); ?><br/>
+												<?php echo (defined('SUBSTRATELABEL')?SUBSTRATELABEL:'Substrate'); ?>
+												<a href="#" onclick="return dwcDoc('substrate')"><img class="docimg" src="../../images/qmark.png" /></a>
+												<br/>
 												<input type="text" name="substrate" tabindex="82" maxlength="500" value="<?php echo array_key_exists('substrate',$occArr)?$occArr['substrate']:''; ?>" onchange="fieldChanged('substrate');" />
 											</div>
 											<?php
@@ -1104,7 +1133,9 @@ else{
 											}
 											?>
 											<div id="associatedTaxaDiv">
-												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?><br/>
+												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?>
+												<a href="#" onclick="return dwcDoc('associatedTaxa')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
+												<br/>
 												<textarea name="associatedtaxa" tabindex="84" onchange="fieldChanged('associatedtaxa');" style="height:22px;"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea>
 												<?php
 												if(!isset($ACTIVATEASSOCTAXAAID) || $ACTIVATEASSOCTAXAAID){
@@ -1113,11 +1144,15 @@ else{
 												?>
 											</div>
 											<div id="verbatimAttributesDiv">
-												<?php echo (defined('VERBATIMATTRIBUTESLABEL')?VERBATIMATTRIBUTESLABEL:'Description'); ?><br/>
+												<?php echo (defined('VERBATIMATTRIBUTESLABEL')?VERBATIMATTRIBUTESLABEL:'Description'); ?>
+												<a href="#" onclick="return dwcDoc('verbatimAttributes')"><img class="docimg" src="../../images/qmark.png" /></a>
+												<br/>
 												<input type="text" name="verbatimattributes" tabindex="86" value="<?php echo array_key_exists('verbatimattributes',$occArr)?$occArr['verbatimattributes']:''; ?>" onchange="fieldChanged('verbatimattributes');" />
 											</div>
 											<div id="occurrenceRemarksDiv">
-												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Notes (Occurrence Remarks)'); ?><br/>
+												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Notes (Occurrence Remarks)'); ?>
+												<a href="#" onclick="return dwcDoc('occurrenceRemarks')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
+												<br/>
 												<input type="text" name="occurrenceremarks" tabindex="88" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
 												<span id="dynPropToggleSpan" onclick="toggle('dynamicPropertiesDiv');">
 													<img src="../../images/editplus.png" />
