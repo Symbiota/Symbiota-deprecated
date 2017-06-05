@@ -371,6 +371,26 @@ body{
 	width:	150px;
 }
 
+#depthDiv{
+	float: left;
+	margin-right: 2px;
+	margin-top:2px;
+}
+
+#depthDiv input{
+	width:55px;
+}
+
+#verbatimDepthDiv{
+	float: left;
+	margin-right: 2px;
+	margin-top:2px;
+}
+
+#verbatimDepthDiv input{
+	width:	150px;
+}
+
 #locExtraToggleDiv{
 	display:none;
 }

@@ -438,6 +438,22 @@ function parseVerbatimElevation(f){
 	}
 }
 
+function minimumDepthInMetersChanged(f){
+	if(!isNumeric(f.minimumdepthinmeters.value)){
+		alert("Depth values must be numeric only");
+		return false;
+	}
+	fieldChanged('minimumdepthinmeters');
+}
+
+function maximumDepthInMetersChanged(f){
+	if(!isNumeric(f.maximumdepthinmeters.value)){
+		alert("Depth values must be numeric only");
+		return false;
+	}
+	fieldChanged('maximumdepthinmeters');
+}
+
 function verbatimCoordinatesChanged(f){
 	if(!f.decimallatitude.value){
 		parseVerbatimCoordinates(f,0);
