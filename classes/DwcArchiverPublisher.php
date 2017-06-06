@@ -239,12 +239,15 @@ class DwcArchiverPublisher extends DwcArchiverCore{
 		return $retArr;
 	}
 
-	public function getCollectionList(){
+	public function getCollectionList($catID){
 		$retArr = array();
-		$sql = 'SELECT c.collid, c.collectionname, CONCAT_WS("-",c.institutioncode,c.collectioncode) as instcode, c.guidtarget, c.dwcaurl '.
-				'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
-				'WHERE c.colltype = "Preserved Specimens" AND s.recordcnt > 0 '.
-				'ORDER BY c.collectionname ';
+		if($catID && !is_numeric($catID)) return $retArr;
+		$sql = 'SELECT c.collid, c.collectionname, CONCAT_WS("-",c.institutioncode,c.collectioncode) as instcode, c.guidtarget, c.dwcaurl, c.managementtype '.
+			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
+			'LEFT JOIN omcollcatlink l ON c.collid = l.collid '.
+			'WHERE (c.colltype = "Preserved Specimens") AND (s.recordcnt > 0) ';
+		if($catID) $sql .= 'AND (l.ccpk = '.$catID.') ';
+		$sql .= 'ORDER BY c.collectionname';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->collid]['name'] = $r->collectionname.' ('.$r->instcode.')';
@@ -253,7 +256,32 @@ class DwcArchiverPublisher extends DwcArchiverCore{
 		}
 		return $retArr;
 	}
-	
+
+	public function getAdditionalDWCA($catID){
+		$retArr = array();
+		if(!$catID || !is_numeric($catID)) return $retArr;
+		$sql = 'SELECT substring_index(c.dwcaurl,"/content/",1)  as portalDomain, count(c.collid) as cnt '.
+			'FROM omcollections c LEFT JOIN omcollcatlink l ON c.collid = l.collid '.
+			'WHERE (c.colltype = "Preserved Specimens") AND (c.dwcaurl IS NOT NULL) AND (l.ccpk IS NULL OR l.ccpk != '.$catID.') '.
+			'GROUP BY portalDomain';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->portalDomain] = $r->cnt;
+		}
+		return $retArr;
+	}
+
+	public function getCategoryName($catID){
+		$retStr = '';
+		$sql = 'SELECT ccpk, category FROM omcollcategories WHERE (ccpk = '.$catID.')';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$retStr = $r->category;
+		}
+		$rs->free();
+		return $retStr;
+	}
+
 	//Mics functions
 	private function aasort(&$array, $key){
 		$sorter = array();

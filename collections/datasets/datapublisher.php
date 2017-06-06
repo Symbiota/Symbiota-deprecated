@@ -398,6 +398,7 @@ include($SERVER_ROOT. '/header.php');
 		<?php
 	}
 	else{
+		$catTitle = $dwcaManager->getCategoryName($DEFAULTCATID);
 		if($IS_ADMIN){
 			if($action == 'Create/Refresh Darwin Core Archive(s)'){
 				echo '<ul>';
@@ -413,12 +414,12 @@ include($SERVER_ROOT. '/header.php');
 			<div id="dwcaadmindiv" style="margin:10px;display:<?php echo ($emode?'block':'none'); ?>;" >
 				<form name="dwcaadminform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaAdminForm(this)">
 					<fieldset style="padding:15px;">
-						<legend><b>Publish / Refresh DwC-A Files</b></legend>
+						<legend><b>Publish / Refresh <?php echo $dwcaManager->getCategoryName($DEFAULTCATID); ?> DwC-A Files</b></legend>
 						<div style="margin:10px;">
 							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> Select/Deselect All<br/><br/> 
 							<?php 
-							$collArr = $dwcaManager->getCollectionList();
-							foreach($collArr as $k => $v){
+							$collList = $dwcaManager->getCollectionList($DEFAULTCATID);
+							foreach($collList as $k => $v){
 								$errMsg = '';
 								if(!$v['guid']){ 
 									$errMsg = 'Missing GUID source';
@@ -450,6 +451,7 @@ include($SERVER_ROOT. '/header.php');
 			<?php 
 		}
 		if($dwcaArr = $dwcaManager->getDwcaItems()){
+			if($catTitle) echo '<div style="font-weight:bold;font-size:140%;margin:50px 0px 15px 0px;">'.$catTitle.' DwC-Archive Files</div>';
 			?>
 			<table class="styledtable" style="font-family:Arial;font-size:12px;margin:10px;">
 				<tr><th>Code</th><th>Collection Name</th><th>DwC-Archive</th><th>Metadata</th><th>Pub Date</th></tr>
@@ -487,6 +489,16 @@ include($SERVER_ROOT. '/header.php');
 		}
 		else{
 			echo '<div style="margin:10px;font-weight:bold;">There are no publishable collections</div>';
+		}
+		if($DEFAULTCATID){
+			if($addDwca = $dwcaManager->getAdditionalDWCA($DEFAULTCATID)){
+				echo '<div style="font-weight:bold;font-size:140%;margin:50px 0px 15px 0px;">Additional Data Sources within the Portal Network</div>';
+				echo '<ul>';
+				foreach($addDwca as $url => $cnt){
+					echo '<li><a href="'.$url.'/collections/datasets/datapublisher.php">'.$url.'/collections/datasets/datapublisher.php</a> - '.$cnt.' Archives</li>';
+				}
+				echo '</ul>';
+			}
 		}
 	}
 	?>
