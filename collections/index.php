@@ -82,9 +82,9 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
 						<?php 
-						$collManager->outputFullCollArr($specArr); 
+						$collManager->outputFullCollArr($specArr, $catId); 
 						if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; 
-						$collManager->outputFullCollArr($obsArr);
+						$collManager->outputFullCollArr($obsArr, $catId);
 						?>
 						<div style="clear:both;">&nbsp;</div>
 					</form>
@@ -100,7 +100,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
 						<?php
-						$collManager->outputFullCollArr($specArr);
+						$collManager->outputFullCollArr($specArr, $catId);
 						?>
 						<div style="clear:both;">&nbsp;</div>
 					</form>
@@ -116,7 +116,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
 						<?php
-						$collManager->outputFullCollArr($obsArr);
+						$collManager->outputFullCollArr($obsArr, $catId);
 						?>
 						<div style="clear:both;">&nbsp;</div>
 					</form>

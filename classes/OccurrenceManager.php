@@ -655,8 +655,9 @@ class OccurrenceManager{
 		return $retArr;
 	}
 
-	public function outputFullCollArr($occArr){
+	public function outputFullCollArr($occArr, $targetCatID = 0){
 		global $DEFAULTCATID, $LANG;
+		if(!$targetCatID && $DEFAULTCATID) $targetCatID = $DEFAULTCATID;
 		$collCnt = 0;
 		echo '<div style="position:relative">';
 		if(isset($occArr['cat'])){
@@ -691,7 +692,7 @@ class OccurrenceManager{
 						</td>
 						<td style="padding:9px 5px;width:10px;">
 							<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
-								<img id="plus-<?php echo $idStr; ?>" src="../images/plus_sm.png" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'':'display:none;') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus_sm.png" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'display:none;':'') ?>" />
+								<img id="plus-<?php echo $idStr; ?>" src="../images/plus_sm.png" style="<?php echo ($targetCatID != $catid?'':'display:none;') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus_sm.png" style="<?php echo ($targetCatID != $catid?'display:none;':'') ?>" />
 							</a>
 						</td>
 						<td style="padding-top:8px;">
@@ -704,7 +705,7 @@ class OccurrenceManager{
 					</tr>
 					<tr>
 						<td colspan="4">
-							<div id="cat-<?php echo $idStr; ?>" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset">
+							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($targetCatID != $catid?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset">
 								<table>
 									<?php
 									foreach($catArr as $collid => $collName2){
