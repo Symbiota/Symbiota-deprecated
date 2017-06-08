@@ -43,24 +43,25 @@ $lgImg = 1;				// 1 = import source, 2 = map to source, 3 = import large version
 
 $keepOrig = 1;
 
-//0 = write image metadata to file; 
+//0 = write image metadata to file; if email contact is added to collArr array, file will be emailed after processing  
 //1 = write metadata to a Symbiota database (connection variables must be set)
 $dbMetadata = 1;
 
 /**
  * Array of parameters for collections to process.
- * collid => array( 
+ * collArr => array( 
+ *     'sourcePathFrag' => 'asu/lichens/'	// optional path fragment appended to $sourcePathBase that is specific to particular collection. Not typcially needed.  
  *     'pmterm' => '/A(\d{8})\D+/', 		// regular expression to match collectionCode and catalogNumber in filename, first backreference is used as the catalogNumber. 
  *     'prpatt' => '/^/',           		// optional regular expression for match on catalogNumber to be replaced with prrepl. 
  *     'prrepl' => 'barcode-',       		// optional replacement to apply for prpatt matches on catalogNumber.
  *     										// given above description, 'A01234567.jpg' will yield catalogNumber = 'barcode-01234567'
- *     'sourcePathFrag' => 'asu/lichens/'	// optional path fragment appended to $sourcePathBase that is specific to particular collection. Not typcially needed.  
+ *     'email' => 'collectionManager@asu.edu'
  * )
  * 
  */
 
 $collArr = array(
-	1 => array('sourcePathFrag' => 'abc/lichens', 'pmterm' => '/^ABC(\d{8})\D*/'),
+	1 => array('sourcePathFrag' => 'abc/lichens', 'pmterm' => '/^ABC(\d{8})\D*/', 'email' => 'collectionmanager@abc.edu'),
 	2 => array('sourcePathFrag' => 'def/vasc/', 'pmterm' => '/^DEF(\d{8})\D*/')
 );
 ?>
