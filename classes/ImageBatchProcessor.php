@@ -28,8 +28,8 @@ elseif(isset($serverRoot) && $serverRoot){
 }
 else{
 	//Files reside in same folder and script is run from within the folder
-	if (file_exists('/classes/ImageLocalProcessor.php')) { 
-		@require_once('/classes/ImageLocalProcessor.php');
+	if(file_exists('ImageLocalProcessor.php')) { 
+		@require_once('ImageLocalProcessor.php');
 	}
 	if(file_exists('SpecProcessorGPI.php')) { 
 		@require_once('SpecProcessorGPI.php');
@@ -43,16 +43,6 @@ class ImageBatchProcessor extends ImageLocalProcessor {
 
 	function __construct(){
 		parent::__construct();
-		if($this->dbMetadata && !$this->conn){
-			//Collection wasn't set within parent class, thus let's try setting via script connection class
-			if(class_exists('ImageBatchConnectionFactory')){
-				$this->conn = ImageBatchConnectionFactory::getCon('write');
-			}
-			if(!$this->conn){
-				$this->logOrEcho("Image upload aborted: Unable to establish connection to ".$collName." database");
-				exit("ABORT: Image upload aborted: Unable to establish connection to ".$collName." database");
-			}
-		}
 	}
 
 	function __destruct(){

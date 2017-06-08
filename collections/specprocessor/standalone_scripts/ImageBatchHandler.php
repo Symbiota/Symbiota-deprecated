@@ -12,7 +12,7 @@ elseif(isset($serverRoot) && $serverRoot){
 	require_once($serverRoot.'/classes/ImageBatchProcessor.php');
 }
 else{
-	include_once('ImageBatchConnectionFactory.php');
+	@include_once('ImageBatchConnectionFactory.php');
 	require_once('ImageBatchProcessor.php');
 }
 
@@ -24,10 +24,8 @@ if(isset($silent) && $silent) $logMode = 2;
 $imageProcessor->setLogMode($logMode);
 if(!$logProcessorPath && $logPath) $logProcessorPath = $logPath;
 $imageProcessor->setLogPath($logProcessorPath);
-$imageProcessor->initProcessor($logTitle);
 
 //Set remaining variables
-$imageProcessor->setCollArr($collArr);
 $imageProcessor->setDbMetadata($dbMetadata);
 $imageProcessor->setSourcePathBase($sourcePathBase);
 $imageProcessor->setTargetPathBase($targetPathBase);
@@ -50,6 +48,9 @@ $imageProcessor->setKeepOrig($keepOrig);
 $imageProcessor->setCreateNewRec($createNewRec);
 if(isset($imgExists)) $imageProcessor->setImgExists($imgExists);
 elseif(isset($copyOverImg)) $imageProcessor->setCopyOverImg($copyOverImg);
+
+$imageProcessor->initProcessor($logTitle);
+$imageProcessor->setCollArr($collArr);
 
 //Run process
 $imageProcessor->batchLoadImages();

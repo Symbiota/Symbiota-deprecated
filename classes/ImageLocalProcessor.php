@@ -67,10 +67,6 @@ class ImageLocalProcessor {
 	function __construct(){
 		ini_set('memory_limit','1024M');
 		ini_set('auto_detect_line_endings', true);
-		if($this->dbMetadata){
-			//Set collection
-			$this->conn = MySQLiConnectionFactory::getCon('write');
-		}
 		//Use deaults located within symbini, if they are available
 		//Will be replaced by values within configuration file, if they are set 
 		if(isset($GLOBALS['imgWebWidth']) && $GLOBALS['imgWebWidth']) $this->webPixWidth = $GLOBALS['imgWebWidth'];
@@ -109,6 +105,19 @@ class ImageLocalProcessor {
 			}
 			else{
 				echo 'ERROR creating Log file; path not found: '.$this->logPath."\n";
+			}
+		}
+		if($this->dbMetadata){
+			//Set collection
+			if(class_exists('MySQLiConnectionFactory')){
+				$this->conn = MySQLiConnectionFactory::getCon('write');
+			}
+			elseif(class_exists('ImageBatchConnectionFactory')){
+				$this->conn = ImageBatchConnectionFactory::getCon('write');
+			}
+			if(!$this->conn){
+				$this->logOrEcho("Image upload aborted: Unable to establish connection to ".$collName." database");
+				exit("ABORT: Image upload aborted: Unable to establish connection to ".$collName." database");
 			}
 		}
 	}
@@ -179,14 +188,16 @@ class ImageLocalProcessor {
 		$projProcessed = array();
 		foreach($this->collArr as $collid => $cArr){
 			$this->activeCollid = $collid;
-			$collStr = str_replace(' ','',$cArr['instcode'].($cArr['collcode']?'_'.$cArr['collcode']:''));
+			$collStr = '';
+			if(isset($cArr['instcode'])) $collStr = str_replace(' ','',$cArr['instcode'].($cArr['collcode']?'_'.$cArr['collcode']:''));
+			if(!$collStr) $collStr = str_replace('/', '_', $cArr['sourcePathFrag']);
 
 			if(!$this->dbMetadata){
 				//Create output file
-				$mdFileName = $this->logPath.$collStr.'_urldata_'.time().'.csv';
+				$mdFileName = $this->logPath.$collStr.'_imagedata_'.date('Y-m-d_H-i-s').'.csv';
 				$this->mdOutputFH = fopen($mdFileName, 'w');
 				//Establish the header
-				fwrite($this->mdOutputFH, '"collid","dbpk","url","thumbnailurl","originalurl"'."\n");
+				fwrite($this->mdOutputFH, '"collid","catalogNumber","url","thumbnailurl","originalurl"'."\n");
 				if($this->mdOutputFH){
 					$this->logOrEcho("Image Metadata written out to CSV file: '".$mdFileName."' (same folder as script)");
 				}
