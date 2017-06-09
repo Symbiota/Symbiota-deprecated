@@ -1503,35 +1503,31 @@ class ImageLocalProcessor {
 
 			$separator = md5(time());
 			$eol = "\r\n";
-			
+
 			$headers = 'MIME-Version: 1.0 '.$eol.
-				'Content-type: text/html; charset=iso-8859-1 '.$eol.
 				'Content-Type: multipart/mixed; boundary="'.$separator.'"'.$eol;
-				'To: '.$email.$eol;
-			//if(array_key_exists("ADMIN_EMAIL",$GLOBALS)) $headers .= 'From: Admin <'.$GLOBALS["ADMIN_EMAIL"].'> '.$eol;
-			$headers .= "Content-Transfer-Encoding: 7bit" . $eol;
-			$headers .= "This is a MIME encoded message." . $eol;
-				
-			$body = "--" . $separator . $eol;
-			$body .= "Content-Type: text/plain; charset=\"iso-8859-1\"" . $eol;
-			$body .= "Content-Transfer-Encoding: 8bit" . $eol;
-			$body .= 'Images in the attached file have been processed and are ready to be uploaded into your collection. '.
-				'This can be done using the image loading tools located in the Processing Tools (see link below).';
-			$url = 'http://swbiodiversity.org/seinet//collections/misc/specprocessor/index.php?tabindex=1&collid='.$this->activeCollid;
-			$body = '<a href="'.$url.'">'.$url.'</a>';
-			$body .= "<br/>If you have problems with the new password, contact the System Administrator: ";
+				'To: '.$email.$eol.
+				'From: Admin <seinetAdmin@asu.edu> '.$eol.
+				'Content-Transfer-Encoding: 8bit'.$eol.
+				'This is a MIME encoded message.'.$eol;
+
+			$url = 'http://swbiodiversity.org/seinet/collections/misc/specprocessor/index.php?tabindex=1&collid='.$this->activeCollid;
+			$body = "--".$separator.$eol.
+				'Content-Type: text/html; charset=iso-8859-1'.$eol.
+				'Content-Transfer-Encoding: 8bit'.$eol.
+				'Images in the attached file have been processed and are ready to be uploaded into your collection. '.
+				'This can be done using the image loading tools located in the Processing Tools (see link below).'.
+				'<a href="'.$url.'">'.$url.'</a>'.
+				'<br/>If you have problems with the new password, contact the System Administrator ';
 
 			//Add attachment 
-			$body .= "--" . $separator . $eol;
 			$fname = substr(strrchr($mdFileName, "/"), 1);
 			$data = file_get_contents($mdFileName);
-			$content_id = sprintf("%09d", crc32($fname)) . strrchr($email, "@");
-			$body .= 'Content-Type: '.mime_content_type($mdFileName).'; name="'.$fname.'"'.$eol.
+			$body .= "--" . $separator . $eol.
+				'Content-Type: application/octet-stream; name="'.$fname.'"'.$eol.
 				'Content-Transfer-Encoding: base64'.$eol.
-				'Content-ID: <'.$content_id.'>'.$eol.
 				'Content-Disposition: attachment'.$eol.
-				'filename="'.$fname.'"'.$eol.
-				chunk_split( base64_encode($data), 68, "\n").$eol.
+				chunk_split( base64_encode($data)).$eol.
 				'--'.$separator.'--';
 
 			if(!mail($email,$subject,$body,$headers)){
