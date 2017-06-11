@@ -384,9 +384,15 @@ class ImageProcessor {
 						}
 						else{
 							//Create new occurrence record to link image
-							$this->conn->query('INSERT INTO omoccurrences(collid,catalognumber) VALUES('.$this->collid.',"'.$catalogNumber.'")');
-							$occArr[] = $this->conn->insert_id;
-							echo '<li style="margin-left:10px">Unable to find record with matching catalogNumber; new occurrence record created</li>';
+							$sqlIns = 'INSERT INTO omoccurrences(collid,catalognumber,processingstatus,dateentered) '.
+								'VALUES('.$this->collid.',"'.$catalogNumber.'","unprocessed",now())';
+							if($this->conn->query($sqlIns)){
+								$occArr[] = $this->conn->insert_id;
+								echo '<li style="margin-left:10px">Unable to find record with matching catalogNumber; new occurrence record created</li>';
+							}
+							else{
+								echo '<li style="margin-left:10px">ERROR creating new occurrence record: '.$this->conn->error.'</li>';
+							}
 						}
 						foreach($occArr as $occid){
 							//Load image URLs
