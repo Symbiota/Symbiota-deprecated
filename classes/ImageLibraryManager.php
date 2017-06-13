@@ -14,7 +14,6 @@ class ImageLibraryManager{
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 		if(array_key_exists('TID_FOCUS', $GLOBALS) && preg_match('/^[\d,]+$/', $GLOBALS['TID_FOCUS'])){
-			echo 'here';
 			$this->tidFocus = $GLOBALS['TID_FOCUS'];
 		}
 	}
@@ -112,8 +111,12 @@ class ImageLibraryManager{
 		$rs->free();
 		//Get image counts
 		$sql = 'SELECT o.collid, COUNT(i.imgid) AS imgcnt '.
-			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-			'GROUP BY o.collid ';
+			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid ';
+		if($this->tidFocus){
+			$sql .= 'INNER JOIN taxaenumtree e ON i.tid = e.tid '.
+				'WHERE (e.parenttid IN('.$this->tidFocus.')) AND (e.taxauthid = 1) ';
+		}
+		$sql .= 'GROUP BY o.collid ';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$stagingArr[$row->collid]['imgcnt'] = $row->imgcnt;
@@ -133,9 +136,13 @@ class ImageLibraryManager{
 	public function getPhotographerList(){
 		$retArr = array();
 		$sql = 'SELECT u.uid, CONCAT_WS(", ", u.lastname, u.firstname) as pname, CONCAT_WS(", ", u.firstname, u.lastname) as fullname, u.email, Count(ti.imgid) AS imgcnt '.
-				'FROM users u INNER JOIN images ti ON u.uid = ti.photographeruid '.
-				'GROUP BY u.uid '.
-				'ORDER BY u.lastname, u.firstname';
+			'FROM users u INNER JOIN images ti ON u.uid = ti.photographeruid ';
+		if($this->tidFocus){
+			$sql .= 'INNER JOIN taxaenumtree e ON ti.tid = e.tid '.
+				'WHERE (e.parenttid IN('.$this->tidFocus.')) AND (e.taxauthid = 1) ';
+		}
+		$sql .= 'GROUP BY u.uid '.
+			'ORDER BY u.lastname, u.firstname';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$retArr[$row->uid]['name'] = $row->pname;
@@ -561,6 +568,10 @@ class ImageLibraryManager{
 			}
 			$sqlWhere .= "AND (".substr($sqlWhereTaxa,3).") ";
 		}
+		elseif($this->tidFocus){
+			$sqlWhere .= 'AND (e.parenttid IN('.$this->tidFocus.')) AND (e.taxauthid = 1) ';
+		}
+		
 		if(array_key_exists("country",$this->searchTermsArr)&&$this->searchTermsArr["country"]){
 			$countryArr = explode(";",$this->searchTermsArr["country"]);
 			$tempArr = Array();
@@ -607,7 +618,7 @@ class ImageLibraryManager{
 		}
 		else{
 			//Make the sql valid, but return nothing
-			$this->sqlWhere = 'WHERE o.collid = -1 ';
+			//$this->sqlWhere = 'WHERE o.collid = -1 ';
 		}
 	}
 	
@@ -692,6 +703,7 @@ class ImageLibraryManager{
 			$sql .= 'INNER JOIN taxa t ON i.tid = t.tid ';
 		}
 		else{
+			if($this->tidFocus) $sql .= 'INNER JOIN taxaenumtree e ON i.tid = e.tid ';
 			$sql .= 'LEFT JOIN taxa t ON i.tid = t.tid ';
 		}
 		if($full){
