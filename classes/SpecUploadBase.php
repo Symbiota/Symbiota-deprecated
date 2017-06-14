@@ -1285,6 +1285,21 @@ class SpecUploadBase extends SpecUpload{
 					return false;
 				}
 			}
+			
+			if(strpos($testUrl,'inaturalist.org')){
+				//Special processing for iNaturalist imports
+				if(strpos($testUrl,'/original.')){
+					$recMap['originalurl'] = $testUrl;
+					$recMap['url'] = str_replace('/original.', '/medium.', $testUrl);
+					$recMap['thumbnailurl'] = str_replace('/original.', '/small.', $testUrl);
+				}
+				elseif(strpos($testUrl,'/medium.')){
+					$recMap['url'] = $testUrl;
+					$recMap['thumbnailurl'] = str_replace('/medium.', '/small.', $testUrl);
+					$recMap['originalurl'] = str_replace('/medium.', '/original.', $testUrl);
+				}
+			}
+
 			if(!isset($recMap['url'])) $recMap['url'] = 'empty';
 
 			$sqlFragments = $this->getSqlFragments($recMap,$this->imageFieldMap);
