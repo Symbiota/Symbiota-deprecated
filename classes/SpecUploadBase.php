@@ -900,7 +900,7 @@ class SpecUploadBase extends SpecUpload{
 		//parse, check, and transfer all good URLs
 		$sql = 'SELECT associatedmedia, tidinterpreted, occid '.
 			'FROM uploadspectemp '.
-			'WHERE (associatedmedia IS NOT NULL) AND (occid IS NOT NULL) AND (collid IN('.$this->collId.'))';
+			'WHERE (associatedmedia IS NOT NULL) AND (collid IN('.$this->collId.'))';
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
 			$this->outputMsg('<li>Preparing associatedMedia for image transfer...</li>');
@@ -1062,7 +1062,7 @@ class SpecUploadBase extends SpecUpload{
 
 	protected function finalCleanup(){
 		$this->outputMsg('<li>Transfer process complete</li>');
-
+		
 		//Update uploaddate 
 		$sql = 'UPDATE omcollectionstats SET uploaddate = CURDATE() WHERE collid IN('.$this->collId.')';
 		$this->conn->query($sql);
@@ -1255,7 +1255,7 @@ class SpecUploadBase extends SpecUpload{
 				//Abort, no images avaialble
 				return false;
 			}
-			if(strtolower(substr($testUrl,-4)) == '.dng' || strtolower(substr($testUrl,-4)) == '.tif'){
+			if(stripos($testUrl,'.dng') || stripos($testUrl,'.tif')){
 				return false;
 			}
 			$skipFormats = array('image/tiff','image/dng','image/bmp','text/html','application/xml','application/pdf','tif','tiff','dng','html','pdf');
@@ -1266,11 +1266,12 @@ class SpecUploadBase extends SpecUpload{
 				if(in_array($imgFormat, $skipFormats)) return false;
 			}
 			else{
-				$urlTail = strtolower(substr($testUrl,-4));
-				if($urlTail == '.gif') $imgFormat = 'image/gif';
-				if($urlTail == '.png') $imgFormat = 'image/png';
-				if($urlTail == '.jpg') $imgFormat = 'image/jpeg';
-				elseif($urlTail == 'jpeg') $imgFormat = 'image/jpeg';
+				$ext = strtolower(substr(strrchr($testUrl, '.'), 1));
+				if(strpos($testUrl,'?')) $ext = substr($ext, 0, strpos($ext,'?'));
+				if($ext== 'gif') $imgFormat = 'image/gif';
+				if($ext== 'png') $imgFormat = 'image/png';
+				if($ext== 'jpg') $imgFormat = 'image/jpeg';
+				elseif($ext== 'jpeg') $imgFormat = 'image/jpeg';
 				if(!$imgFormat){
 					$imgFormat = $this->getMimeType($testUrl);
 					if(!in_array(strtolower($imgFormat), $allowedFormats)) return false;
