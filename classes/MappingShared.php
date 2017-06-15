@@ -36,7 +36,7 @@ class MappingShared{
 			while($r = $rs->fetch_object()){
 				$retVar = $r->collid;
 			}
-			$rs->close();
+			$rs->free();
 		}
 		return $retVar;
 	}
@@ -60,7 +60,7 @@ class MappingShared{
 		if(($this->searchTerms == 1) && (array_key_exists("clid",$this->searchTermsArr))) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 		if((array_key_exists("collector",$this->searchTermsArr))) $sql .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
 		$sql .= $mapWhere;
-		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
+		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL) AND (o.coordinateUncertaintyInMeters IS NULL OR o.coordinateUncertaintyInMeters < 20000) ";
 		if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
 		}
@@ -70,9 +70,11 @@ class MappingShared{
 		else{
 			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
 		}
-		if($limit){
-			//$sql .= " LIMIT 1000";
+		/*
+		if($limit && is_numeric($limit)){
+			$sql .= " LIMIT ".$limit;
 		}
+		*/
 		$taxaMapper = Array();
 		$taxaMapper["undefined"] = "undefined";
 		$cnt = 0;
@@ -136,7 +138,7 @@ class MappingShared{
 		if(array_key_exists("undefined",$coordArr)){
 			$coordArr["undefined"]["color"] = $this->iconColors[7];
 		}
-		$result->close();
+		$result->free();
 		
 		return $coordArr;
 		//return $sql;
