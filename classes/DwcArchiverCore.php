@@ -80,6 +80,7 @@ class DwcArchiverCore extends Manager{
 		$retStr = 0;
 		$this->applyConditions();
 		$sql = DwcArchiverOccurrence::getSqlOccurrences($this->occurrenceFieldArr['fields'],$this->conditionSql,$this->getTableJoins(),false);
+		if($this->schemaType != 'backup') $sql .= ' LIMIT 1000000';
 		if($sql){
 			$sql = 'SELECT COUNT(o.occid) as cnt '.$sql;
 			//echo $sql; exit;
@@ -130,7 +131,8 @@ class DwcArchiverCore extends Manager{
 			$sqlWhere = '(c.colltype = "Observations" OR c.colltype = "General Observations") ';
 		}
 		if($collTarget){
-			$sqlWhere .= ($sqlWhere?'AND ':'').'(c.collid IN('.$collTarget.')) ';
+			$this->addCondition('collid', 'EQUALS', $collTarget);
+			if($collTarget != 'all') $sqlWhere .= ($sqlWhere?'AND ':'').'(c.collid IN('.$collTarget.')) ';
 		}
 		else{
 			//Don't limit by collection id 
@@ -203,6 +205,21 @@ class DwcArchiverCore extends Manager{
 	}
 
 	private function applyConditions(){
+		$this->conditionSql = '';
+		if($this->customWhereSql){
+			$this->conditionSql = $this->customWhereSql.' ';
+		}
+		if(array_key_exists('collid', $this->conditionArr) && $this->conditionArr['collid']){
+			if($this->conditionArr['collid']['EQUALS'][0] != 'all'){
+				$this->conditionSql .= 'AND (o.collid IN('.$this->conditionArr['collid']['EQUALS'][0].')) ';
+			}
+			unset($this->conditionArr['collid']);
+		}
+		else{
+			if($this->collArr && (!$this->conditionSql || !stripos($this->conditionSql,'collid in('))){
+				$this->conditionSql .= 'AND (o.collid IN('.implode(',',array_keys($this->collArr)).')) ';
+			}
+		}
 		$sqlFrag = '';
 		if($this->conditionArr){
 			foreach($this->conditionArr as $field => $condArr){
@@ -244,14 +261,6 @@ class DwcArchiverCore extends Manager{
 					if($sqlFrag2) $sqlFrag .= 'AND ('.substr($sqlFrag2,3).') ';
 				}
 			}
-		}
-		//Build where
-		$this->conditionSql = '';
-		if($this->customWhereSql){
-			$this->conditionSql = $this->customWhereSql.' ';
-		}
-		if($this->collArr && (!$this->conditionSql || !stripos($this->conditionSql,'collid in('))){
-			$this->conditionSql .= 'AND (o.collid IN('.implode(',',array_keys($this->collArr)).')) ';
 		}
 		if($sqlFrag){
 			$this->conditionSql .= $sqlFrag;
@@ -569,6 +578,7 @@ class DwcArchiverCore extends Manager{
 		$this->applyConditions();
 		$sql = DwcArchiverOccurrence::getSqlOccurrences($this->occurrenceFieldArr['fields'],$this->conditionSql,$this->getTableJoins());
 		if(!$sql) return false;
+		$sql .= ' LIMIT 1000000';
 		$fieldArr = $this->occurrenceFieldArr['fields'];
 		if($this->schemaType == 'dwc'){
 			unset($fieldArr['localitySecurity']);
@@ -1312,6 +1322,8 @@ class DwcArchiverCore extends Manager{
 		$this->applyConditions();
 		$sql = DwcArchiverOccurrence::getSqlOccurrences($this->occurrenceFieldArr['fields'],$this->conditionSql,$this->getTableJoins());
 		if(!$sql) return false;
+		if($this->schemaType != 'backup') $sql .= ' LIMIT 1000000';
+		
 		//Output header
 		$fieldArr = $this->occurrenceFieldArr['fields'];
 		if($this->schemaType == 'dwc'){

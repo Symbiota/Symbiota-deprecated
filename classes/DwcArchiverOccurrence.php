@@ -268,7 +268,7 @@ class DwcArchiverOccurrence{
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
 			$sql .= $tableJoinStr.$conditionSql;
-			if($fullSql) $sql .= ' ORDER BY o.collid'; 
+			if($fullSql) $sql .= ' ORDER BY o.collid '; 
 			//echo '<div>'.$sql.'</div>'; exit;
 		}
 		return $sql;
