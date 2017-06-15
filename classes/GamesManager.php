@@ -91,7 +91,7 @@ class GamesManager {
 				
 				$tidArr = Array();
 				$sql = 'SELECT l.TID, COUNT(i.imgid) AS cnt '. 
-					'FROM fmchklsttaxalink l INNER JOIN images AS i ON l.TID = i.tid '.
+					'FROM fmchklsttaxalink l INNER JOIN images i ON l.TID = i.tid '.
 					'LEFT JOIN omoccurrences o ON i.occid = o.occid '.
 					'LEFT JOIN omcollections c ON o.collid = c.collid '.
 					'WHERE (l.CLID IN('.$clid.')) AND (i.occid IS NULL OR c.CollType LIKE "%Observations") '.
@@ -128,9 +128,8 @@ class GamesManager {
 					
 					$files = Array();
 					$sql3 = 'SELECT i.url '.
-						'FROM images i LEFT JOIN omoccurrences o ON i.occid = o.occid '.
-						'LEFT JOIN omcollections c ON o.collid = c.collid '.
-						'WHERE (i.tid = '.$randTaxa.') AND (i.occid IS NULL OR c.CollType LIKE "%Observations") '.
+						'FROM images i '.
+						'WHERE (i.tid = '.$randTaxa.') '.
 						'ORDER BY i.sortsequence ';
 					//echo '<div>'.$sql.'</div>';
 					$cnt = 1;
@@ -156,10 +155,9 @@ class GamesManager {
 							$file = $row->url;
 						}
 						$newfile = $SERVER_ROOT.'/temp/ootd/'.$oodID.'_organism300_'.$cnt.'.jpg';
-						$newfilepath = '../../temp/ootd/'.$oodID.'_organism300_'.$cnt.'.jpg';
 						if(fopen($file, "r")){
 							copy($file, $newfile);
-							$files[] = $newfilepath;
+							$files[] = '../../temp/ootd/'.$oodID.'_organism300_'.$cnt.'.jpg';
 							$cnt++;
 						}
 					}

@@ -15,6 +15,10 @@ $clArr = $gameManager->getChecklistArr($pid);
 
 $gameInfo = $gameManager->setOOTD($oodID,$ootdGameChecklist);
 $imageArr = $gameInfo['images'];
+$cacheRefresh = date('Ydm');
+foreach($imageArr as $k => $imgValue){
+	$imageArr[$k] = $imgValue.'?ver='.$cacheRefresh;
+}
 
 if($submitAction){
 	$scinameAnswerArr = explode(' ',trim($_POST['sciname_answer']));
@@ -103,7 +107,7 @@ if($submitAction){
 					<div class = "dailypicture" align = "center">
 						<div>
 							<div style="vertical-align:middle;">
-								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
+								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg?ver=<?php echo $cacheRefresh; ?>" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
 							</div><br />
 							<a href="javascript:chgImg(-1)">Previous</a> &nbsp;|&nbsp;
 							<a href="javascript:chgImg(1)">Next</a>
