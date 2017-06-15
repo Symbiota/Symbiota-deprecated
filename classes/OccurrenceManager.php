@@ -657,10 +657,10 @@ class OccurrenceManager{
 
 	public function outputFullCollArr($occArr, $targetCatID = 0){
 		global $DEFAULTCATID, $LANG;
-		if(!$targetCatID && $DEFAULTCATID) $targetCatID = $DEFAULTCATID;
-		$collCnt = 0;
+        if(!$targetCatID && $DEFAULTCATID) $targetCatID = $DEFAULTCATID;
+        $collCnt = 0;
 		echo '<div style="position:relative">';
-		if(isset($occArr['cat'])){
+        if(isset($occArr['cat'])){
 			$categoryArr = $occArr['cat'];
 			?>
 			<div style="float:right;margin-top:20px;">
@@ -705,7 +705,7 @@ class OccurrenceManager{
 					</tr>
 					<tr>
 						<td colspan="4">
-							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($targetCatID != $catid?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset">
+							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($targetCatID && $targetCatID != $catid?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset">
 								<table>
 									<?php
 									foreach($catArr as $collid => $collName2){
