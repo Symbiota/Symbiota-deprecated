@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
 include_once($SERVER_ROOT.'/classes/MappingShared.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
@@ -34,16 +34,16 @@ if($mapType == 'taxa'){
     $sharedMapManager->setSearchTermsArr($stArr);
 }
 elseif($mapType == 'occquery'){
-	$occurMapManager = new OccurrenceMapManager();
+	$occurManager = new OccurrenceManager();
 	if($stArrCollJson && $stArrSearchJson){
 		$collStArr = json_decode($stArrCollJson, true);
 		$searchStArr = json_decode($stArrSearchJson, true);
 		$stArr = array_merge($searchStArr,$collStArr);
-		$occurMapManager->setSearchTermsArr($stArr);
+		$occurManager->setSearchTermsArr($stArr);
     }
-	$mapWhere = $occurMapManager->getOccurSqlWhere();
-	$tArr = $occurMapManager->getTaxaArr();
-	$stArr = $occurMapManager->getSearchTermsArr();
+    $mapWhere = $occurManager->getSqlWhere();
+	$tArr = $occurManager->getTaxaArr();
+	$stArr = $occurManager->getSearchTermsArr();
 	$sharedMapManager->setSearchTermsArr($stArr);
     if($SOLR_MODE) $solrManager->setSearchTermsArr($stArr);
 }

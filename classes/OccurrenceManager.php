@@ -1373,6 +1373,7 @@ class OccurrenceManager{
 		return $synArr;
 	}
 
+	//Setters and getters
 	public function getUseCookies(){
 		return $this->useCookies;
 	}
@@ -1384,7 +1385,16 @@ class OccurrenceManager{
 	public function setSearchTermsArr($stArr){
 		if($stArr) $this->searchTermsArr = $stArr;
 	}
+
+	public function getSearchTermsArr(){
+		return $this->searchTermsArr;
+	}
 	
+	public function getTaxaArr(){
+		return $this->taxaArr;
+	}
+
+	//misc functions
 	protected function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
