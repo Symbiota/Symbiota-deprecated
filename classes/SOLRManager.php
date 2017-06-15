@@ -172,6 +172,7 @@ class SOLRManager extends OccurrenceManager{
             $returnArr[$occId]["state"] = (isset($k['StateProvince'])?$k['StateProvince']:'');
             $returnArr[$occId]["county"] = (isset($k['county'])?$k['county']:'');
             $returnArr[$occId]["observeruid"] = (isset($k['observeruid'])?$k['observeruid']:'');
+            $localitySecurity = (isset($k['localitySecurity'])?$k['localitySecurity']:false);
             if(!$localitySecurity || $canReadRareSpp
                 || (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collId,$GLOBALS['USER_RIGHTS']["CollEditor"]))
                 || (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($collId,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
