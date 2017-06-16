@@ -273,7 +273,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					}
 					else{
 						$("#coge-communities").show();
-						coge-fieldDiv
 						var htmlOut = "";
 						for(var i in result){
 							var role = result[i].role;
