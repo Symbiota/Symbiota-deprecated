@@ -1,31 +1,16 @@
 User-agent: *  
 
-Allow: /index.php  
-Allow: /checklists/index.php  
-Allow: /checklists/ 
-Allow: /collections/index.php  
-Allow: /collections/exsiccati/index.php  
-Allow: /collections/misc/collprofiles.php  
-Allow: /collections/misc/collectionindex.php  
-Allow: /games/index.php  
-Allow: /ident/index.php  
-Allow: /imagelib/index.php  
-Allow: /projects/index.php  
-Allow: /sitemap.php    
-
-Disallow: /checklists/tools/  
-Disallow: /checklists/rpc/  
-Disallow: /collections/list.php  
-Disallow: /collections/rpc/  
-Disallow: /classes/  
-Disallow: /css/  
-Disallow: /docs/  
-Disallow: /ident/loadingcl.php  
-Disallow: /images/  
-Disallow: /js/  
-Disallow: /lib/  
-Disallow: /profile/  
-Disallow: /taxa/admin/  
-Disallow: /temp/  
-Disallow: /tools/    
-
+Allow: /portal/index.php  
+Allow: /portal/checklists/index.php  
+Allow: /portal/collections/index.php  
+Allow: /portal/collections/exsiccati/index.php  
+Allow: /portal/collections/misc/collprofiles.php  
+Allow: /portal/collections/misc/collectionindex.php  
+Allow: /portal/games/index.php  
+Allow: /portal/ident/index.php  
+Allow: /portal/imagelib/index.php  
+Allow: /portal/projects/index.php  
+Allow: /portal/sitemap.php    
+  
+Disallow: /portal/collections/list.php  
+Disallow: /portal/ident/loadingcl.php  

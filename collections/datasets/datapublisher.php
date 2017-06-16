@@ -398,7 +398,8 @@ include($SERVER_ROOT. '/header.php');
 		<?php
 	}
 	else{
-		$catTitle = $dwcaManager->getCategoryName($DEFAULTCATID);
+		$catID = (isset($DEFAULTCATID)?$DEFAULTCATID:0);
+		$catTitle = $dwcaManager->getCategoryName($catID);
 		if($IS_ADMIN){
 			if($action == 'Create/Refresh Darwin Core Archive(s)'){
 				echo '<ul>';
@@ -414,11 +415,11 @@ include($SERVER_ROOT. '/header.php');
 			<div id="dwcaadmindiv" style="margin:10px;display:<?php echo ($emode?'block':'none'); ?>;" >
 				<form name="dwcaadminform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaAdminForm(this)">
 					<fieldset style="padding:15px;">
-						<legend><b>Publish / Refresh <?php echo $dwcaManager->getCategoryName($DEFAULTCATID); ?> DwC-A Files</b></legend>
+						<legend><b>Publish / Refresh <?php echo $catTitle; ?> DwC-A Files</b></legend>
 						<div style="margin:10px;">
 							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> Select/Deselect All<br/><br/> 
 							<?php 
-							$collList = $dwcaManager->getCollectionList($DEFAULTCATID);
+							$collList = $dwcaManager->getCollectionList($catID);
 							foreach($collList as $k => $v){
 								$errMsg = '';
 								if(!$v['guid']){ 
@@ -490,8 +491,8 @@ include($SERVER_ROOT. '/header.php');
 		else{
 			echo '<div style="margin:10px;font-weight:bold;">There are no publishable collections</div>';
 		}
-		if($DEFAULTCATID){
-			if($addDwca = $dwcaManager->getAdditionalDWCA($DEFAULTCATID)){
+		if($catID){
+			if($addDwca = $dwcaManager->getAdditionalDWCA($catID)){
 				echo '<div style="font-weight:bold;font-size:140%;margin:50px 0px 15px 0px;">Additional Data Sources within the Portal Network</div>';
 				echo '<ul>';
 				foreach($addDwca as $url => $cnt){

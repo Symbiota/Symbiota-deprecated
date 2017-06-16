@@ -273,12 +273,14 @@ class DwcArchiverPublisher extends DwcArchiverCore{
 
 	public function getCategoryName($catID){
 		$retStr = '';
-		$sql = 'SELECT ccpk, category FROM omcollcategories WHERE (ccpk = '.$catID.')';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$retStr = $r->category;
+		if($catID){
+			$sql = 'SELECT ccpk, category FROM omcollcategories WHERE (ccpk = '.$catID.')';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$retStr = $r->category;
+			}
+			$rs->free();
 		}
-		$rs->free();
 		return $retStr;
 	}
 
