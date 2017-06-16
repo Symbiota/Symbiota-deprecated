@@ -277,45 +277,45 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						var htmlOut = "";
 						for(var i in result){
 							var role = result[i].role;
-							if(role == "Owner" || role == "Admin" || role == "Reviewer"){
-								htmlOut = htmlOut + '<div style="margin:5px">';
-								var name = result[i].name;
-								htmlOut = htmlOut + '<input name="cogecomm" type="radio" value="'+name+'" onclick="verifyDataSourceIdentifier(this.form)" />';
-								htmlOut = htmlOut + "<u>"+name+"</u>";
-								htmlOut = htmlOut + " (" + role + ")";
-								var descr = result[i].description;
-								if(descr) htmlOut = htmlOut + ": " + descr;
-								var dataSources = result[i].dataSources;
-								if(dataSources){
-									htmlOut = htmlOut + '<fieldset style="margin:0px 30px;padding:10px"><legend><b>Datasets</b></legend>';
-									datasetList[name] = {};
-									for(var j in dataSources){
-										datasetList[name][j] = dataSources[j].name;
-										htmlOut = htmlOut + "<div><b>" + dataSources[j].name + "</b> (";
-										
-										var uploadType = dataSources[j].uploadType;
-										if(uploadType == "csv"){
-											htmlOut = htmlOut + "manual CSV upload";
-										}
-										else{
-											if(uploadType == "Symbiota (DwCA)"){
-												var guid = dataSources[j].guid;
-												htmlOut = htmlOut + 'Symbiota upload [<a href="#" onclick="cogeCheckGeorefStatus(\''+guid+'\');return false;">check status</a>]';
-											}
-										}
-										var uploadedBy = dataSources[j].uploadedBy;
-										if(uploadedBy) htmlOut = htmlOut + "; " + uploadedBy;
-
-										htmlOut = htmlOut + ")";
-										var dsDescr = dataSources[j].description;
-										if(dsDescr) htmlOut = htmlOut + ": " + dsDescr;
-										htmlOut = htmlOut + "</div>";
+							htmlOut = htmlOut + '<div style="margin:5px">';
+							var name = result[i].name;
+							var subText = 'onclick="verifyDataSourceIdentifier(this.form)"';
+							if(role == "Owner" || role == "Admin" || role == "Reviewer") subText = 'title="You are not able to submit datasets with User level permissions. Contact the GeoLocate project administrator to adjust your permissions" disabled';
+							htmlOut = htmlOut + '<input name="cogecomm" type="radio" value="'+name+'" ' + subText + ' />';
+							htmlOut = htmlOut + "<u>"+name+"</u>";
+							htmlOut = htmlOut + " (" + role + ")";
+							var descr = result[i].description;
+							if(descr) htmlOut = htmlOut + ": " + descr;
+							var dataSources = result[i].dataSources;
+							if(dataSources){
+								htmlOut = htmlOut + '<fieldset style="margin:0px 30px;padding:10px"><legend><b>Datasets</b></legend>';
+								datasetList[name] = {};
+								for(var j in dataSources){
+									datasetList[name][j] = dataSources[j].name;
+									htmlOut = htmlOut + "<div><b>" + dataSources[j].name + "</b> (";
+									
+									var uploadType = dataSources[j].uploadType;
+									if(uploadType == "csv"){
+										htmlOut = htmlOut + "manual CSV upload";
+									}
+									else{
 										if(uploadType == "Symbiota (DwCA)"){
-											htmlOut = htmlOut + '<div id="coge-'+guid+'" style="margin-left:10px;"></div>';
+											var guid = dataSources[j].guid;
+											htmlOut = htmlOut + 'Symbiota upload [<a href="#" onclick="cogeCheckGeorefStatus(\''+guid+'\');return false;">check status</a>]';
 										}
-									} 
-									htmlOut = htmlOut + '</fieldset>';
-								}
+									}
+									var uploadedBy = dataSources[j].uploadedBy;
+									if(uploadedBy) htmlOut = htmlOut + "; " + uploadedBy;
+
+									htmlOut = htmlOut + ")";
+									var dsDescr = dataSources[j].description;
+									if(dsDescr) htmlOut = htmlOut + ": " + dsDescr;
+									htmlOut = htmlOut + "</div>";
+									if(uploadType == "Symbiota (DwCA)"){
+										htmlOut = htmlOut + '<div id="coge-'+guid+'" style="margin-left:10px;"></div>';
+									}
+								} 
+								htmlOut = htmlOut + '</fieldset>';
 								htmlOut = htmlOut + '</div>';
 							}
 						}
