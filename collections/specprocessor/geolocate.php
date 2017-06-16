@@ -317,9 +317,10 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									htmlOut = htmlOut + '</fieldset>';
 								}
 								htmlOut = htmlOut + '</div>';
-								$("#coge-commlist").html(htmlOut);
 							}
 						}
+						if(htmlOut == "") htmlOut = "<div>There appears to be no projects currently associated with your GeoLocate user profile</div>";
+						$("#coge-commlist").html(htmlOut);
 					}
 				});
 			}
