@@ -81,7 +81,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						clearInterval(t);
 						$("#coge-status").css('color', 'green');
 						$("#coge-status").html("Connected");
-						$("#builddwcabutton").prop("disabled",false);
 						cogeGetUserCommunityList();
 					}
 				}).fail(function(jqXHR, textStatus, errorThrown ){
@@ -274,13 +273,18 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					}
 					else{
 						$("#coge-communities").show();
+						coge-fieldDiv
 						var htmlOut = "";
 						for(var i in result){
 							var role = result[i].role;
 							htmlOut = htmlOut + '<div style="margin:5px">';
 							var name = result[i].name;
-							var subText = 'onclick="verifyDataSourceIdentifier(this.form)"';
-							if(role == "Owner" || role == "Admin" || role == "Reviewer") subText = 'title="You are not able to submit datasets with User level permissions. Contact the GeoLocate project administrator to adjust your permissions" disabled';
+							var subText = 'title="You are not able to submit datasets with User level permissions. Contact the GeoLocate project administrator to adjust your permissions" disabled';
+							if(role == "Owner" || role == "Admin" || role == "Reviewer"){
+								subText = 'onclick="verifyDataSourceIdentifier(this.form)"';
+								$("#builddwcabutton").prop("disabled",false);
+								$("#coge-fieldDiv").show();
+							}
 							htmlOut = htmlOut + '<input name="cogecomm" type="radio" value="'+name+'" ' + subText + ' />';
 							htmlOut = htmlOut + "<u>"+name+"</u>";
 							htmlOut = htmlOut + " (" + role + ")";
@@ -489,13 +493,15 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<div id="coge-commlist" style="margin:15px 0px;padding:15px;border:1px solid orange;">
 													<span style="color:orange;">Login to GeoLocate and click check status button to list available communities</span>
 												</div>
-												<div style="margin:5px;clear:both;">
-													<div style="float:left;">Data source identifier (primary name):</div>
-													<div style="margin-left:250px;"><input name="cogename" type="text" style="width:300px" onchange="verifyDataSourceIdentifier(this.form)" /></div>
-												</div>
-												<div style="margin:5px;clear:both;">
-													<div style="float:left;">Description:</div>
-													<div style="margin-left:250px;"><input name="cogedescr" type="text" style="width:300px" /></div>
+												<div id="coge-fieldDiv" style="display:none">
+													<div style="margin:5px;clear:both;">
+														<div style="float:left;">Data source identifier (primary name):</div>
+														<div style="margin-left:250px;"><input name="cogename" type="text" style="width:300px" onchange="verifyDataSourceIdentifier(this.form)" /></div>
+													</div>
+													<div style="margin:5px;clear:both;">
+														<div style="float:left;">Description:</div>
+														<div style="margin-left:250px;"><input name="cogedescr" type="text" style="width:300px" /></div>
+													</div>
 												</div>
 											</div>
 										</fieldset>
