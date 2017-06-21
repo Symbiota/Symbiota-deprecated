@@ -166,6 +166,7 @@ $duManager->loadFieldMap();
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script src="../../js/symb/shared.js" type="text/javascript"></script>
 	<script>
+
 		function verifyFileUploadForm(f){
 			var fileName = "";
 			if(f.uploadfile || f.ulfnoverride){
@@ -193,6 +194,27 @@ $duManager->loadFieldMap();
 				}
 			}
 			return true;
+		}
+
+		function verifyImageSize(inputObj){
+			inputObj.form.ulfnoverride.value = ''
+			if (!window.FileReader) {
+				//alert("The file API isn't supported on this browser yet.");
+				return;
+			}
+
+			<?php 
+			$maxUpload = ini_get('upload_max_filesize');
+			$maxUpload = str_replace("M", "000000", $maxUpload);
+			if($maxUpload > 100000000) $maxUpload = 100000000;
+			echo 'var maxUpload = '.$maxUpload.";\n";
+			?>
+			var file = inputObj.files[0];
+			if(file.size > maxUpload){
+				var msg = "Import file "+file.name+" ("+Math.round(file.size/100000)/10+"MB) is larger than is allowed (current limit: "+(maxUpload/1000000)+"MB).";
+				if(file.name.slice(-3) != "zip") msg = msg + " Note that import file size can be reduced by compressing within a zip file. ";
+				alert(msg);
+		    }
 		}
 
 		function verifyMappingForm(f){
@@ -544,7 +566,7 @@ $duManager->loadFieldMap();
 											$pathLabel = 'Resource Path or URL';
 											?>
 											<div>
-												<input name="uploadfile" type="file" size="50" onchange="this.form.ulfnoverride.value = ''" />
+												<input name="uploadfile" type="file" size="50" onchange="verifyImageSize(this)" />
 											</div>
 											<?php 
 										}
