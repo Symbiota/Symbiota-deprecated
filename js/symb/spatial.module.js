@@ -1655,7 +1655,7 @@ function setLayersTable(){
             }catch(e){
                 return false;
             }
-            if(layerArr){
+            if(layerArr.length > 0){
                 layersExist = true;
                 for(i in layerArr){
                     buildLayerTableRow(layerArr[i],false);
