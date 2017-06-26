@@ -44,7 +44,7 @@ $dbArr = Array();
     <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/stream.js" type="text/javascript"></script> -->
     <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/shapefile.js?ver=2" type="text/javascript"></script> -->
     <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script> -->
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=123" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=124" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();

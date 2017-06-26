@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/classes/SpatialModuleManager.php');
 
 $spatialManager = new SpatialModuleManager();
 $layersArr = Array();
-if(isset($GEOSERVER_URL) && isset($GEOSERVER_LAYER_WORKSPACE)){
+if(isset($GEOSERVER_URL) && isset($GEOSERVER_LAYER_WORKSPACE) && $GEOSERVER_URL && $GEOSERVER_LAYER_WORKSPACE){
     $layersArr = $spatialManager->getLayersArr();
 }
 echo json_encode($layersArr);

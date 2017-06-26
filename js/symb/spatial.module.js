@@ -1649,14 +1649,20 @@ function setLayersTable(){
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
-            var layerArr = [];
+            var layerArr;
             var jsonReturn = false;
             try{
                 layerArr = JSON.parse(http.responseText);
             }catch(e){
                 return false;
             }
-            if(layerArr){
+            for(i in layerArr){
+                if(String(layerArr[i])){
+                    jsonReturn = true;
+                    break;
+                }
+            }
+            if(jsonReturn){
                 layersExist = true;
                 for(i in layerArr){
                     buildLayerTableRow(layerArr[i],false);
