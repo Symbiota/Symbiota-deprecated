@@ -1650,12 +1650,13 @@ function setLayersTable(){
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             var layerArr = [];
+            var jsonReturn = false;
             try{
                 layerArr = JSON.parse(http.responseText);
             }catch(e){
                 return false;
             }
-            if(layerArr.length > 0){
+            if(layerArr){
                 layersExist = true;
                 for(i in layerArr){
                     buildLayerTableRow(layerArr[i],false);
@@ -1848,7 +1849,7 @@ function toggleUploadLayer(c){
     }
     else{
         layersArr[layer].setVisible(false);
-        removeLayerToSelList(layerID);
+        removeLayerToSelList(c.value);
     }
 }
 
