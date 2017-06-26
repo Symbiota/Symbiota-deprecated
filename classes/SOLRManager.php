@@ -7,6 +7,7 @@ class SOLRManager extends OccurrenceManager{
 	protected $sortField1 = '';
 	protected $sortField2 = '';
 	protected $sortOrder = '';
+    protected $qStr = '';
     protected $spatial = false;
     private $checklistTaxaCnt = 0;
     private $iconColors = Array();
@@ -132,6 +133,28 @@ class SOLRManager extends OccurrenceManager{
             'localitySecurity,locality,collid,catalogNumber,otherCatalogNumbers,InstitutionCode,CollectionCode,CollectionName&wt=json';
         $solrURL = $solrURLpre.$solrWhere.$solrURLsuf;
         //echo str_replace(' ','%20',$solrURL);
+        $solrArrJson = file_get_contents(str_replace(' ','%20',$solrURL));
+        $solrArr = json_decode($solrArrJson, true);
+        $this->recordCount = $solrArr['response']['numFound'];
+        $returnArr = $solrArr['response']['docs'];
+
+        return $returnArr;
+    }
+
+    public function getGeoCollArr(){
+        global $SOLR_URL;
+        $returnArr = Array();
+        $solrURL = '';
+        $solrURLpre = '';
+        $solrURLsuf = '';
+        $this->setSpatial();
+        $solrWhere = ($this->qStr?$this->qStr:$this->getSOLRWhere());
+        $solrURLpre = $SOLR_URL.'/select?';
+        $solrURLsuf = '&rows='.$cntPerPage.'&start='.($bottomLimit?$bottomLimit:'0');
+        $solrURLsuf .= '&fl=occid,recordedBy,recordNumber,displayDate,sciname,family,accFamily,tidinterpreted,decimalLatitude,decimalLongitude,'.
+            'localitySecurity,locality,collid,catalogNumber,otherCatalogNumbers,InstitutionCode,CollectionCode,CollectionName&wt=json';
+        $solrURL = $solrURLpre.$solrWhere.$solrURLsuf;
+        echo str_replace(' ','%20',$solrURL);
         $solrArrJson = file_get_contents(str_replace(' ','%20',$solrURL));
         $solrArr = json_decode($solrArrJson, true);
         $this->recordCount = $solrArr['response']['numFound'];
@@ -420,6 +443,10 @@ class SOLRManager extends OccurrenceManager{
         $this->spatial = true;
     }
 
+    public function setQStr($str){
+        $this->qStr = $str;
+    }
+
     public function setSorting($sf1,$sf2,$so){
         $this->sortField1 = $sf1;
         $this->sortField2 = $sf2;
@@ -524,10 +551,8 @@ class SOLRManager extends OccurrenceManager{
                 //Common name search
                 $this->setSciNamesByVerns();
             }
-            else{
-                if($useThes){
-                    $this->setSynonyms();
-                }
+            elseif($useThes){
+                $this->setSynonyms();
             }
 
             //Build sql

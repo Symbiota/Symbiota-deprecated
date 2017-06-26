@@ -677,7 +677,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
         }
 
         function getPointArr(index){
-            //alert('rpc/maplazyloader.php?starr='+starr+'&index='+index+'&reccnt=<?php //echo $recordCnt; ?>&maptype=<?php //echo $mapType; ?>');
+            //console.log('rpc/maplazyloader.php?starr='+starr+'&index='+index+'&reccnt=<?php echo $recordCnt; ?>&maptype=<?php echo $mapType; ?>');
             recordsFound = false;
             $.ajax({
                 type: "POST",

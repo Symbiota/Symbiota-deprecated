@@ -633,7 +633,7 @@
                autoIndex="true"
                validationRule="repairBuffer0"
                geo="true"
-               distErrPct="0.025"
+               distErrPct="0.0"
                maxDistErr="0.001"
                distanceUnits="kilometers" />
 
