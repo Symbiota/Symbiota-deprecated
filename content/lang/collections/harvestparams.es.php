@@ -51,7 +51,7 @@ $LANG['TITLE_TEXT_3'] = 'Fecha determinada o fecha de inicio del período';
 $LANG['TITLE_TEXT_4'] = 'Fecha final del per&iacute;odo; dejar en blanco si busca para una fecha determinada';
 $LANG['SPECIMEN_HEADER'] = 'Catálogo de la Colección:';
 $LANG['CATALOG_NUMBER'] = 'Número de Catálogo:';
-$LANG['INCLUDE_OTHER_CATNUM'] = 'Includa todos números de catálogo';
+$LANG['INCLUDE_OTHER_CATNUM'] = 'Includa todos números de catálogo y GUIDs';
 $LANG['TYPE'] = 'Limitar Solamente a Ejemplares Tipo';
 $LANG['HAS_IMAGE'] = 'Limitar Solamente a Ejemplares con Imágenes';
 
