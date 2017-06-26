@@ -93,7 +93,7 @@ $layersArr = $spatialManager->getLayersArr();
                         <ul>
                             <li><a class="tabtitle" href="#searchcriteria">Criteria</a></li>
                             <li><a class="tabtitle" href="#searchcollections">Collections</a></li>
-                            <li><a class="tabtitle" href="#maptools">Map Tools</a></li>
+                            <!-- <li><a class="tabtitle" href="#maptools">Map Tools</a></li> -->
                         </ul>
                         <div id="searchcollections">
                             <div class="mapinterface">
@@ -218,7 +218,7 @@ $layersArr = $spatialManager->getLayersArr();
                                 <div><hr></div>
                             </div>
                         </div>
-                        <div id="maptools">
+                        <!-- <div id="maptools">
                             <div id="toollist">
                                 <ul>
                                     <li><a href='#' onclick='return false;'>tool1</a></li>
@@ -226,7 +226,7 @@ $layersArr = $spatialManager->getLayersArr();
                                     <li><a href='#' onclick='return false;'>tool3</a></li>
                                 </ul>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
 
                     <h3 id="recordsHeader" class="tabtitle" style="display:none;">Records and Taxa</h3>
@@ -746,7 +746,7 @@ $layersArr = $spatialManager->getLayersArr();
         projection: 'EPSG:3857',
         minZoom: 3,
         maxZoom: 19,
-        center: ol.proj.transform([-101.30445, 40.59032], 'EPSG:4326', 'EPSG:3857'),
+        center: ol.proj.transform([-111.64808, 35.19397], 'EPSG:4326', 'EPSG:3857'),
     });
 
     var map = new ol.Map({
