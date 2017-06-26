@@ -1055,7 +1055,7 @@ function hideCluster(cluster){
 
 function imagePostFunction(image, src) {
     var img = image.getImage();
-    if (typeof window.btoa === 'function') {
+    if(typeof window.btoa === 'function'){
         var xhr = new XMLHttpRequest();
         var dataEntries = src.split("&");
         var url;
@@ -1423,11 +1423,11 @@ function processPointSelection(cluster){
 
 function refreshLayerOrder(){
     var layerCount = map.getLayers().getArray().length;
-    layersArr['dragdrop1'].setZIndex(layerCount-6);
-    layersArr['dragdrop2'].setZIndex(layerCount-5);
-    layersArr['dragdrop3'].setZIndex(layerCount-4);
-    layersArr['select'].setZIndex(layerCount-3);
-    layersArr['pointi'].setZIndex(layerCount-2);
+    layersArr['dragdrop1'].setZIndex(layerCount-5);
+    layersArr['dragdrop2'].setZIndex(layerCount-4);
+    layersArr['dragdrop3'].setZIndex(layerCount-3);
+    layersArr['select'].setZIndex(layerCount-2);
+    //layersArr['pointi'].setZIndex(layerCount-2);
     layersArr['pointv'].setZIndex(layerCount-1);
     layersArr['spider'].setZIndex(layerCount);
 }
@@ -1650,7 +1650,11 @@ function setLayersTable(){
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             var layerArr = [];
-            layerArr = JSON.parse(http.responseText);
+            try{
+                layerArr = JSON.parse(http.responseText);
+            }catch(e){
+                return false;
+            }
             if(layerArr){
                 layersExist = true;
                 for(i in layerArr){

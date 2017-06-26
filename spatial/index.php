@@ -18,9 +18,6 @@ $specArr = (isset($collList['spec'])?$collList['spec']:null);
 $obsArr = (isset($collList['obs'])?$collList['obs']:null);
 
 $dbArr = Array();
-$layersArr = Array();
-
-$layersArr = $spatialManager->getLayersArr();
 ?>
 <html>
 <head>
@@ -47,7 +44,7 @@ $layersArr = $spatialManager->getLayersArr();
     <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/stream.js" type="text/javascript"></script> -->
     <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/shapefile.js?ver=2" type="text/javascript"></script> -->
     <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script> -->
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=118" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=121" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -548,7 +545,7 @@ $layersArr = $spatialManager->getLayersArr();
         source: blankdragdropsource
     });
 
-    var pointimagesource = new ol.source.ImageWMS({
+    /*var pointimagesource = new ol.source.ImageWMS({
         url: '<?php echo $GEOSERVER_URL; ?>/<?php echo $GEOSERVER_OCC_WORKSPACE; ?>/wms',
         params: {
             'LAYERS':'<?php echo $GEOSERVER_OCC_WORKSPACE; ?>:<?php echo $GEOSERVER_OCC_LAYER; ?>',
@@ -562,7 +559,7 @@ $layersArr = $spatialManager->getLayersArr();
     });
     var pointimagelayer = new ol.layer.Image({
         source: pointimagesource
-    });
+    });*/
 
     var spiderLayer = new ol.layer.Vector({
         source: new ol.source.Vector({
@@ -577,7 +574,7 @@ $layersArr = $spatialManager->getLayersArr();
     layersArr['dragdrop3'] = dragdroplayer3;
     layersArr['select'] = selectlayer;
     layersArr['pointv'] = pointvectorlayer;
-    layersArr['pointi'] = pointimagelayer;
+    //layersArr['pointi'] = pointimagelayer;
     layersArr['spider'] = spiderLayer;
 
     var zoomslider = new ol.control.ZoomSlider();
@@ -761,7 +758,7 @@ $layersArr = $spatialManager->getLayersArr();
             layersArr['dragdrop2'],
             layersArr['dragdrop3'],
             layersArr['select'],
-            layersArr['pointi'],
+            //layersArr['pointi'],
             layersArr['pointv'],
             layersArr['spider']
         ],
