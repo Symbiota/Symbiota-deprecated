@@ -172,6 +172,10 @@ class OccurrenceGeorefTools {
 						$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['minimumelevationinmeters'].',minimumelevationinmeters) ';
 						$this->addOccurEdits('minimumelevationinmeters',$geoRefArr['minimumelevationinmeters'],$localStr);
 					}
+					if($geoRefArr['processingstatus']){
+						$sql .= ',processingstatus = "'.$geoRefArr['processingstatus'].'" ';
+						$this->addOccurEdits('processingstatus',$geoRefArr['processingstatus'],$localStr);
+					}
 					$sql .= ' WHERE (collid = '.$this->collId.') AND (occid IN('.$localStr.'))';
 					//echo $sql; exit;
 					if(!$this->conn->query($sql)){

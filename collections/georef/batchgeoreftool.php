@@ -430,7 +430,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</td>
 									</tr>
 									<tr>
-										<td colspan="6">
+										<td colspan="3">
 											<input name="submitaction" type="submit" value="Update Coordinates" />
 											<span id="workingspan" style="display:none;">
 												<img src="../../images/workingcircle.gif" />
@@ -446,15 +446,29 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
 											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										</td>
-										<td align="right">
-											<div style="margin:10px;">
-												Georeferenced by:
-												<input name="georeferencedby" type="text" value="<?php echo $paramsArr['un']; ?>" readonly />
-											</div>
+										<td colspan="4">
+											<b>Processing status: </b>
+											<select name="processingstatus">
+												<option value="">Leave as is</option>
+												<option value="unprocessed">Unprocessed</option>
+												<option value="unprocessed/NLP">unprocessed/NLP</option>
+												<option value="stage 1">Stage 1</option>
+												<option value="stage 2">Stage 2</option>
+												<option value="stage 3">Stage 3</option>
+												<option value="pending review-nfn">Pending Review-NfN</option>
+												<option value="pending review">Pending Review</option>
+												<option value="expert required">Expert Required</option>
+												<option value="reviewed">Reviewed</option>
+												<option value="closed">Closed</option>
+											</select>
+											<span style="margin-left:20px;font-size:80%">
+												Georefer by:
+												<input name="georeferencedby" type="text" value="<?php echo $paramsArr['un']; ?>" style="width:75px" readonly />
+											</span>
 										</td>
 									</tr>
 								</table>
-								<div>Note: Existing data within following georeference fields will be replaced with incoming data. 
+								<div style="margin-top:15px">Note: Existing data within following georeference fields will be replaced with incoming data. 
 								However, elevation data will only be added when the target fields are null. 
 								No incoming data will replace existing elevational data. 
 								Georeference fields that will be replaced: decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, geodeticdatum, 
