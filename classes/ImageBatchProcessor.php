@@ -14,11 +14,14 @@ elseif(isset($serverRoot) && $serverRoot){
 	if (file_exists($serverRoot.'/classes/ImageLocalProcessor.php')) { 
 		@require_once($serverRoot.'/classes/ImageLocalProcessor.php');
 	}
+}
+if(isset($serverRoot) && $serverRoot){
 	// Check for the symbiota class files used herein for parsing 
 	// batch files of xml formatted strucutured data.
 	// Fail gracefully if they aren't available.
 	// Note also that class_exists() is checked for before
 	// invocation of these parsers in processFolder().
+	echo 'path: '.$serverRoot.'/classes/SpecProcessorGPI.php';
 	if (file_exists($serverRoot.'/classes/SpecProcessorGPI.php')) { 
 		@require_once($serverRoot.'/classes/SpecProcessorGPI.php');
 	}
