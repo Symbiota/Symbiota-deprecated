@@ -44,7 +44,7 @@ $dbArr = Array();
     <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/stream.js" type="text/javascript"></script> -->
     <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/shapefile.js?ver=2" type="text/javascript"></script> -->
     <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script> -->
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=124" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=125" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -592,7 +592,7 @@ $dbArr = Array();
     var selectInteraction = new ol.interaction.Select({
         layers: [layersArr['select']],
         condition: function(evt) {
-            if(evt.type == 'click' && activeLayer == 'Shapes'){
+            if(evt.type == 'click' && activeLayer == 'select'){
                 return true;
             }
             else{
@@ -712,7 +712,7 @@ $dbArr = Array();
         return false;*/
     }
 
-    function editLayers(c){
+    function editLayers(c,title){
         var layer = c.value;
         if(c.checked == true){
             var layerName = '<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>:'+layer;
@@ -728,7 +728,7 @@ $dbArr = Array();
             layersArr[layer].setOpacity(0.3);
             map.addLayer(layersArr[layer]);
             refreshLayerOrder();
-            addLayerToSelList(layer);
+            addLayerToSelList(layer,title);
         }
         else{
             map.removeLayer(layersArr[layer]);
@@ -814,12 +814,14 @@ $dbArr = Array();
     });
 
     dragAndDropInteraction.on('addfeatures', function(event) {
-        var fileType = event.file.name.split('.').pop();
+        var filename = event.file.name.split('.');
+        var fileType = filename.pop();
+        filename = filename.join("");
         if(fileType == 'geojson' || fileType == 'kml'){
             if(setDragDropTarget()){
                 var infoArr = [];
-                infoArr['Name'] = '';
-                infoArr['Title'] = event.file.name;
+                infoArr['Name'] = dragDropTarget;
+                infoArr['Title'] = filename;
                 infoArr['Abstract'] = '';
                 infoArr['DefaultCRS'] = '';
                 var sourceIndex = dragDropTarget+'Source';
@@ -919,13 +921,18 @@ $dbArr = Array();
             var featureCnt = selectsource.getFeatures().length;
             if(featureCnt > 0){
                 if(!shapeActive){
-                    addLayerToSelList('Shapes');
+                    var infoArr = [];
+                    infoArr['Name'] = 'select';
+                    infoArr['Title'] = 'Shapes';
+                    infoArr['Abstract'] = '';
+                    infoArr['DefaultCRS'] = '';
+                    buildLayerTableRow(infoArr,true);
                     shapeActive = true;
                 }
             }
             else{
                 if(shapeActive){
-                    removeLayerToSelList('Shapes');
+                    removeLayerToSelList('select');
                     shapeActive = false;
                 }
             }
@@ -986,7 +993,7 @@ $dbArr = Array();
         if(evt.originalEvent.altKey){
             var layerIndex = activeLayer+"Source";
             var viewResolution = /** @type {number} */ (mapView.getResolution());
-            if(activeLayer != 'none' && activeLayer != 'Shapes' && activeLayer != 'Points' && activeLayer != 'dragdrop1' && activeLayer != 'dragdrop2' && activeLayer != 'dragdrop3'){
+            if(activeLayer != 'none' && activeLayer != 'select' && activeLayer != 'Points' && activeLayer != 'dragdrop1' && activeLayer != 'dragdrop2' && activeLayer != 'dragdrop3'){
                 var url = layersArr[layerIndex].getGetFeatureInfoUrl(evt.coordinate,viewResolution,'EPSG:3857',{'INFO_FORMAT':'application/json'});
                 if (url) {
                     $.ajax({
@@ -1012,28 +1019,30 @@ $dbArr = Array();
             else if(activeLayer == 'dragdrop1' || activeLayer == 'dragdrop2' || activeLayer == 'dragdrop3'){
                 var infoHTML = '';
                 var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                    return feature;
-                }, null, function(layer) {
-                    return (layer === layersArr[activeLayer]);
-                });
-                var properties = feature.getKeys();
-                for(i in properties){
-                    if(String(properties[i]) != 'geometry'){
-                        infoHTML += '<b>'+properties[i]+':</b> '+feature.get(properties[i])+'<br />';
+                    if(layer === layersArr[activeLayer]){
+                        return feature;
                     }
+                });
+                if(feature){
+                    var properties = feature.getKeys();
+                    for(i in properties){
+                        if(String(properties[i]) != 'geometry'){
+                            infoHTML += '<b>'+properties[i]+':</b> '+feature.get(properties[i])+'<br />';
+                        }
+                    }
+                    popupcontent.innerHTML = infoHTML;
+                    popupoverlay.setPosition(evt.coordinate);
                 }
-                popupcontent.innerHTML = infoHTML;
-                popupoverlay.setPosition(evt.coordinate);
             }
             else if(activeLayer == 'Points'){
                 var infoHTML = '';
                 var clickedFeatures = [];
-                map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                    if(feature.get('features') || feature.get('occid')){
-                        clickedFeatures.push(feature);
+                map.forEachFeatureAtPixel(evt.pixel, function(feature, layer){
+                    if(layer === layersArr['spider'] || layer === layersArr['pointv']){
+                        if(feature.get('features') || feature.get('occid')){
+                            clickedFeatures.push(feature);
+                        }
                     }
-                }, null, function(layer) {
-                    return (layer === layersArr['spider'] || layer === layersArr['pointv']);
                 });
                 if(clickedFeatures.length == 1 && clickedFeatures[0].get('features').length == 1){
                     var iFeature = (clusterPoints?clickedFeatures[0].get('features')[0]:clickedFeatures[0]);
@@ -1068,7 +1077,7 @@ $dbArr = Array();
 
     map.on('dblclick', function(evt) {
         var layerIndex = activeLayer+"Source";
-        if(activeLayer != 'none' && activeLayer != 'Shapes' && activeLayer != 'Points'){
+        if(activeLayer != 'none' && activeLayer != 'select' && activeLayer != 'Points'){
             if(activeLayer == 'dragdrop1' || activeLayer == 'dragdrop2' || activeLayer == 'dragdrop3'){
                 map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
                     selectsource.addFeature(feature);

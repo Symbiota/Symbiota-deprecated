@@ -81,10 +81,10 @@ $(document).ready(function() {
         },{});
 });
 
-function addLayerToSelList(layer){
+function addLayerToSelList(layer,title){
     var selectionList = document.getElementById("selectlayerselect").innerHTML;
     var optionId = "lsel-"+layer;
-    var newOption = '<option id="lsel-'+optionId+'" value="'+layer+'">'+layer+'</option>';
+    var newOption = '<option id="lsel-'+optionId+'" value="'+layer+'">'+title+'</option>';
     selectionList += newOption;
     document.getElementById("selectlayerselect").innerHTML = selectionList;
     document.getElementById("selectlayerselect").value = layer;
@@ -191,14 +191,15 @@ function buildCQLString(){
     //console.log(cqlString);
 }
 
-function buildLayerTableRow(lArr,upload){
+function buildLayerTableRow(lArr,removable){
     var layerList = '';
     var trfragment = '';
-    var layerID = (upload?dragDropTarget:lArr['Name']);
+    var layerID = lArr['Name'];
     var divid = "lay-"+layerID;
     if(!document.getElementById(divid)){
         trfragment += '<td style="width:30px;">';
-        trfragment += '<input type="checkbox" value="'+layerID+'" onchange="'+(upload?'toggleUploadLayer(this);':'editLayers(this);')+'" '+(upload?'checked ':'')+'/>';
+        var onchange = (removable?"toggleUploadLayer(this,'"+lArr['Title']+"');":"editLayers(this,'"+lArr['Title']+"');");
+        trfragment += '<input type="checkbox" value="'+layerID+'" onchange="'+onchange+'" '+(removable?'checked ':'')+'/>';
         trfragment += '</td>';
         trfragment += '<td style="width:150px;">';
         trfragment += '<b>'+lArr['Title']+'</b>';
@@ -210,8 +211,8 @@ function buildLayerTableRow(lArr,upload){
         trfragment += '';
         trfragment += '</td>';
         trfragment += '<td style="width:50px;">';
-        if(upload){
-            var onclick = "removeUploadLayer('"+dragDropTarget+"');";
+        if(removable){
+            var onclick = "removeUserLayer('"+layerID+"');";
             trfragment += '<input type="image" style="margin-left:5px;" src="../images/del.png" onclick="'+onclick+'" title="Remove layer">';
         }
         trfragment += '</td>';
@@ -220,7 +221,7 @@ function buildLayerTableRow(lArr,upload){
     var newLayerRow = layerTable.insertRow();
     newLayerRow.id = 'lay-'+layerID;
     newLayerRow.innerHTML = trfragment;
-    if(upload) addLayerToSelList(dragDropTarget);
+    if(removable) addLayerToSelList(layerID,lArr['Title']);
 }
 
 function buildQueryStrings(){
@@ -384,7 +385,12 @@ function changeDraw() {
             typeSelect.value = 'None';
             map.removeInteraction(draw);
             if(!shapeActive){
-                addLayerToSelList('Shapes');
+                var infoArr = [];
+                infoArr['Name'] = 'select';
+                infoArr['Title'] = 'Shapes';
+                infoArr['Abstract'] = '';
+                infoArr['DefaultCRS'] = '';
+                buildLayerTableRow(infoArr,true);
                 shapeActive = true;
             }
         });
@@ -1135,7 +1141,7 @@ function loadPoints(){
                 $("#accordion").accordion("option","active",1);
                 selectInteraction.getFeatures().clear();
                 if(!pointActive){
-                    addLayerToSelList('Points');
+                    addLayerToSelList('Points','Points');
                     pointActive = true;
                 }
             }
@@ -1464,16 +1470,21 @@ function removeSelectionRecord(sel){
     }
 }
 
-function removeUploadLayer(layerID){
+function removeUserLayer(layerID){
     var layerDivId = "lay-"+layerID;
     if(document.getElementById(layerDivId)){
         var layerDiv = document.getElementById(layerDivId);
         layerDiv.parentNode.removeChild(layerDiv);
     }
-    layersArr[layerID].setSource(blankdragdropsource);
-    if(layerID == 'dragdrop1') dragDrop1 = false;
-    else if(layerID == 'dragdrop2') dragDrop2 = false;
-    else if(layerID == 'dragdrop3') dragDrop3 = false;
+    if(layerID == 'select'){
+        layersArr[layerID].getSource().clear(true);
+    }
+    else{
+        layersArr[layerID].setSource(blankdragdropsource);
+        if(layerID == 'dragdrop1') dragDrop1 = false;
+        else if(layerID == 'dragdrop2') dragDrop2 = false;
+        else if(layerID == 'dragdrop3') dragDrop3 = false;
+    }
     removeLayerToSelList(layerID);
     toggleLayerController();
 }
@@ -1847,11 +1858,11 @@ function toggleLayerController(layerID){
     }
 }
 
-function toggleUploadLayer(c){
+function toggleUploadLayer(c,title){
     var layer = c.value;
     if(c.checked == true){
         layersArr[layer].setVisible(true);
-        addLayerToSelList(c.value);
+        addLayerToSelList(c.value,title);
     }
     else{
         layersArr[layer].setVisible(false);
