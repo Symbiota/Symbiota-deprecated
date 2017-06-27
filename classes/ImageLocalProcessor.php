@@ -415,21 +415,23 @@ class ImageLocalProcessor {
 	private function processXMLFile($fileName,$pathFrag='') { 
 		if ($this->serverRoot) {
 			$foundSchema = false;
-			$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
-			if($xml->read()) {
+			$xmlReader = new XMLReader();
+			$xmlReader->open($this->sourcePathBase.$pathFrag.$fileName);
+			//$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
+			if($xmlReader->read()) {
 				// $this->logOrEcho($fileName." first node: ". $xml->name);
-				if ($xml->name=="DataSet") {
-					$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
+				if ($xmlReader->name=="DataSet") {
+					//$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
 					$lapischema = $this->serverRoot . "/collections/admin/schemas/lapi_schema_v2.xsd";
-					$xml->setParserProperty(XMLReader::VALIDATE, true);
+					$xmlReader->setParserProperty(XMLReader::VALIDATE, true);
 					if (file_exists($lapischema)) { 
-						$isLapi = $xml->setSchema($lapischema);
+						$isLapi = $xmlReader->setSchema($lapischema);
 					} 
 					else { 
 						$this->logOrEcho("ERROR: Can't find $lapischema",1);
 					}
 					// $this->logOrEcho($fileName." valid lapi xml:" . $xml->isValid() . " [" . $isLapi .  "]");
-					if ($xml->isValid() && $isLapi) {
+					if ($xmlReader->isValid() && $isLapi) {
 						// File complies with the Aluka/LAPI/GPI schema
 						$this->logOrEcho('Processing GPI batch file: '.$pathFrag.$fileName);
 						if (class_exists('GPIProcessor')) { 
@@ -446,13 +448,13 @@ class ImageLocalProcessor {
 						}
 					}
 				}
-				elseif ($xml->name=="rdf:RDF") { 
+				elseif ($xmlReader->name=="rdf:RDF") { 
 					// $this->logOrEcho($fileName." has oa:" . $xml->lookupNamespace("oa"));
 					// $this->logOrEcho($fileName." has oad:" . $xml->lookupNamespace("oad"));
 					// $this->logOrEcho($fileName." has dwcFP:" . $xml->lookupNamespace("dwcFP"));
-					$hasAnnotation = $xml->lookupNamespace("oa");
-					$hasDataAnnotation = $xml->lookupNamespace("oad");
-					$hasdwcFP = $xml->lookupNamespace("dwcFP");
+					$hasAnnotation = $xmlReader->lookupNamespace("oa");
+					$hasDataAnnotation = $xmlReader->lookupNamespace("oad");
+					$hasdwcFP = $xmlReader->lookupNamespace("dwcFP");
 					// Note: contra the PHP xmlreader documentation, lookupNamespace
 					// returns the namespace string not a boolean.
 					if ($hasAnnotation && $hasDataAnnotation && $hasdwcFP) {
@@ -472,7 +474,7 @@ class ImageLocalProcessor {
 						}
 					}
 				}
-				$xml->close();
+				$xmlReader->close();
 				if ($foundSchema>0) { 
 					$this->logOrEcho("Proccessed $pathFrag$fileName, records: $result->recordcount, success: $result->successcount, failures: $result->failurecount, inserts: $result->insertcount, updates: $result->updatecount.");
 					if ($result->imagefailurecount>0) {

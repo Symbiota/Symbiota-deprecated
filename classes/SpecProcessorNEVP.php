@@ -668,15 +668,15 @@ class NEVPProcessor {
               break;
         }  
   
-        if (!in_array($parser,$depth)) { 
-          $depth[$parser] = 0;
+        if (!in_array((int) $parser,$depth)) { 
+          $depth[(int) $parser] = 0;
         }
-        $depth[$parser]++;
+        $depth[(int) $parser]++;
     }
     
     function endElement($parser, $name) {
         global $depth, $currentOcc, $currentId, $currentDate, $result, $currentAnnotator, $currentAnnotation, $currentMedia, $currentAP,$currentSerializer, $currentDocument;
-        $depth[$parser]--;
+        $depth[(int) $parser]--;
         
         switch ($name) { 
            case "DWCFP:OCCURRENCE":
