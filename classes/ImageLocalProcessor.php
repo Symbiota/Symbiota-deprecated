@@ -776,7 +776,7 @@ class ImageLocalProcessor {
 					$this->logOrEcho("Image processed successfully (".date('Y-m-d h:i:s A').")!",1);
 				}
 				else{
-					$this->logOrEcho("File skipped (".$sourcePathFrag.$fileName."), unable to obtain dimentions of original image");
+					$this->logOrEcho("File skipped (".$sourcePathFrag.$fileName."), unable to obtain dimensions of original image");
 					return false;
 				}
 			}

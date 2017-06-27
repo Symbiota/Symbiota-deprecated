@@ -475,6 +475,13 @@ class OccurrenceManager{
 				$catWhere .= 'OR (o.catalogNumber IN("'.implode('","',$inFrag).'")) ';
 				if($includeOtherCatNum){
 					$catWhere .= 'OR (o.othercatalognumbers IN("'.implode('","',$inFrag).'")) ';
+					if(strlen($inFrag[0]) == 36){
+						$guidOccid = $this->queryRecordID($inFrag);
+						if($guidOccid){
+							$catWhere .= 'OR (o.occid IN('.implode(',',$guidOccid).')) ';
+							$catWhere .= 'OR (o.occurrenceID IN("'.implode('","',$inFrag).'")) ';
+						}
+					}
 				}
 			}
 			$sqlWhere .= 'AND ('.substr($catWhere,3).') ';
@@ -510,6 +517,19 @@ class OccurrenceManager{
 		}
 		//echo $retStr; exit;
 		return $retStr;
+	}
+	
+	private function queryRecordID($idArr){
+		$retArr = array();
+		if($idArr){
+			$sql = 'SELECT occid FROM guidoccurrences WHERE guid IN("'.implode('","', $idArr).'")';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[] = $r->occid;
+			}
+			$rs->free();
+		}
+		return $retArr;
 	}
 	
     protected function formatDate($inDate){
