@@ -8,7 +8,10 @@ function cogeCheckAuthentication(){
 	//$("#cogeStatus").html("");
 	$("#coge-status").css('color', 'orange');
 	$("#coge-status").html("Checking status...");
+	$("#coge-importcomplete").hide();
 	$("#coge-importstatus").html("");
+	$("#coge-dwcalink").html("");
+	$("#coge-guid").html("");
 	$("input[name=cogename]").val("");
 	$("input[name=cogedescr]").val("");
 	

@@ -205,6 +205,9 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 											<div style="margin:5px">
 												<input name="submitaction" type="submit" value="Download Records Locally" />
 											</div>
+											<div style="margin:5px">
+												<input name="resetbutton" type="button" value="Reset Page" onclick="cogeCheckAuthentication(); return false;" />
+											</div>
 										</div>
 										<div style="float:right;">
 											<a href="../editor/editreviewer.php?collid=<?php echo $collid; ?>&display=2">Review and Approve Edits</a>
