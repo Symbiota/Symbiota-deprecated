@@ -8,7 +8,10 @@ function cogeCheckAuthentication(){
 	//$("#cogeStatus").html("");
 	$("#coge-status").css('color', 'orange');
 	$("#coge-status").html("Checking status...");
-
+	$("#coge-importstatus").html("");
+	$("input[name=cogename]").val("");
+	$("input[name=cogedescr]").val("");
+	
 	$.ajax({
 		type: "GET",
 		url: cogeUrl,
@@ -30,10 +33,10 @@ function cogeCheckAuthentication(){
 			cogeGetUserCommunityList();
 		}
 	}).fail(function(jqXHR, textStatus, errorThrown ){
+		clearInterval(t);
 		$("#coge-status").html("Unauthorized");
 		$("#coge-status").css("color", "red");
 		alert( "ERROR: it may be that GeoLocate has not been configured to automatically accept files from this Symbiota portal. Please contact your portal adminstrator to setup automated GeoLocate submissions. " );
-		clearInterval(t);
 	});
 }
 
@@ -265,8 +268,8 @@ function cogeGetUserCommunityList(){
 						}
 					} 
 					htmlOut = htmlOut + '</fieldset>';
-					htmlOut = htmlOut + '</div>';
 				}
+				htmlOut = htmlOut + '</div>';
 			}
 			if(htmlOut == "") htmlOut = "<div>There appears to be no projects currently associated with your GeoLocate user profile</div>";
 			$("#coge-commlist").html(htmlOut);
@@ -297,8 +300,8 @@ function cogeCheckGeorefStatus(id){
 				htmlOut = htmlOut + "<span style=\"margin-left:30px;color:orange;\">GeoLocate interaction may be required to activate data</span>";
 			}
 			htmlOut = htmlOut + "</div>";
-			htmlOut = htmlOut + "<div>Localities: total: " + specStats.total + ", corrected: " + specStats.corrected + ", skipped: " + specStats.skipped;
-			htmlOut = htmlOut + "</div></div>";
+			htmlOut = htmlOut + "<div>Localities: total: " + specStats.total + ", corrected: " + specStats.corrected + ", skipped: " + specStats.skipped + "</div>";
+			htmlOut = htmlOut + "</div>";
 			$("#coge-"+id).html(htmlOut);
 		}
 	});
@@ -306,7 +309,7 @@ function cogeCheckGeorefStatus(id){
 
 function verifyDataSourceIdentifier(f){
 	var newProjName = $("input[name=cogename]").val();
-	if(newProjName != "" && $('input[name=cogecomm]:checked').size() > 0){
+	if(newProjName != "" && $('input[name=cogecomm]:checked').length > 0){
 		if($('input[name=cogecomm]:checked').val() in datasetList){
 			var projList = datasetList[$('input[name=cogecomm]:checked').val()];
 			for(var h in projList){
