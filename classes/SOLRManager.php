@@ -141,6 +141,25 @@ class SOLRManager extends OccurrenceManager{
         return $returnArr;
     }
 
+    public function checkQuerySecurity($q){
+        $canReadRareSpp = false;
+        if($GLOBALS['USER_RIGHTS']){
+            if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
+                $canReadRareSpp = true;
+            }
+        }
+        if(!$canReadRareSpp){
+            if($q == '*:*'){
+                $q = '(-localitySecurity:1)';
+            }
+            else{
+                $q .= ' AND (-localitySecurity:1)';
+            }
+        }
+
+        return $q;
+    }
+
     public function translateSOLRRecList($sArr){
         $returnArr = Array();
         $canReadRareSpp = false;

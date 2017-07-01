@@ -216,12 +216,16 @@ function buildLayerTableRow(lArr,removable){
             trfragment += '<input type="image" style="margin-left:5px;" src="../images/del.png" onclick="'+onclick+'" title="Remove layer">';
         }
         trfragment += '</td>';
+        var layerTable = document.getElementById("layercontroltable");
+        var newLayerRow = layerTable.insertRow();
+        newLayerRow.id = 'lay-'+layerID;
+        newLayerRow.innerHTML = trfragment;
+        if(removable) addLayerToSelList(layerID,lArr['Title']);
     }
-    var layerTable = document.getElementById("layercontroltable");
-    var newLayerRow = layerTable.insertRow();
-    newLayerRow.id = 'lay-'+layerID;
-    newLayerRow.innerHTML = trfragment;
-    if(removable) addLayerToSelList(layerID,lArr['Title']);
+    else{
+        document.getElementById("selectlayerselect").value = layerID;
+        setActiveLayer();
+    }
 }
 
 function buildQueryStrings(){
@@ -254,16 +258,20 @@ function buildSOLRQString(){
         }
         tempqStr = tempqStr.substr(5,tempqStr.length);
         tempqStr += ' AND (decimalLatitude:[* TO *] AND decimalLongitude:[* TO *] AND sciname:[* TO *])';
+        document.getElementById("dh-q").value = tempqStr;
         newsolrqString += tempqStr;
     }
     else{
+        document.getElementById("dh-q").value = '*:*';
         newsolrqString += '*:*';
     }
+
     if(solrgeoqArr.length > 0){
         for(i in solrgeoqArr){
             tempfqStr += ' OR geo:'+solrgeoqArr[i];
         }
         tempfqStr = tempfqStr.substr(4,tempfqStr.length);
+        document.getElementById("dh-fq").value = tempfqStr;
         newsolrqString += '&fq='+tempfqStr;
     }
 }
@@ -334,19 +342,22 @@ function changeBaseMap(){
     var baseLayer = map.getLayers().getArray()[0];
     if(selection == 'worldtopo'){
         blsource = new ol.source.XYZ({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+            crossOrigin: 'anonymous'
         });
     }
     if(selection == 'openstreet'){blsource = new ol.source.OSM();}
     if(selection == 'blackwhite'){blsource = new ol.source.Stamen({layer: 'toner'});}
     if(selection == 'worldimagery'){
         blsource = new ol.source.XYZ({
-            url: 'http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            url: 'http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            crossOrigin: 'anonymous'
         });
     }
     if(selection == 'ocean'){
         blsource = new ol.source.XYZ({
-            url: 'http://services.arcgisonline.com/arcgis/rest/services/Ocean_Basemap/MapServer/tile/{z}/{y}/{x}'
+            url: 'http://services.arcgisonline.com/arcgis/rest/services/Ocean_Basemap/MapServer/tile/{z}/{y}/{x}',
+            crossOrigin: 'anonymous'
         });
     }
     if(selection == 'ngstopo'){
@@ -354,7 +365,8 @@ function changeBaseMap(){
     }
     if(selection == 'natgeoworld'){
         blsource = new ol.source.XYZ({
-            url: 'http://services.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}'
+            url: 'http://services.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',
+            crossOrigin: 'anonymous'
         });
     }
     if(selection == 'esristreet'){
@@ -393,9 +405,17 @@ function changeDraw() {
                 buildLayerTableRow(infoArr,true);
                 shapeActive = true;
             }
+            else{
+                document.getElementById("selectlayerselect").value = 'select';
+                setActiveLayer();
+            }
+            draw = '';
         });
 
         map.addInteraction(draw);
+    }
+    else{
+        draw = '';
     }
 }
 
@@ -478,6 +498,26 @@ function clearTaxaSymbology(){
 
 function closeOccidInfoBox(){
     finderpopupcloser.onclick();
+}
+
+function exportMapPNG(){
+    map.once('postcompose', function(event) {
+        var canvas = event.context.canvas;
+        if (navigator.msSaveBlob) {
+            navigator.msSaveBlob(canvas.msToBlob(), 'map.png');
+        } else {
+            canvas.toBlob(function(blob) {
+                saveAs(blob, 'map.png');
+            });
+        }
+    });
+    map.renderSync();
+}
+
+function extensionSelected(obj){
+    if(obj.checked == true){
+        document.getElementById('csvzip').checked = true;
+    }
 }
 
 function findOccCluster(occid){
@@ -626,6 +666,17 @@ function getCollectionParams(){
     else{
         return true;
     }
+}
+
+function getDateTimeString(){
+    var now = new Date();
+    var dateTimeString = now.getFullYear().toString();
+    dateTimeString += (((now.getMonth()+1) < 10)?'0':'')+(now.getMonth()+1).toString();
+    dateTimeString += ((now.getDate() < 10)?'0':'')+now.getDate().toString();
+    dateTimeString += ((now.getHours() < 10)?'0':'')+now.getHours().toString();
+    dateTimeString += ((now.getMinutes() < 10)?'0':'')+now.getMinutes().toString();
+    dateTimeString += ((now.getSeconds() < 10)?'0':'')+now.getSeconds().toString();
+    return dateTimeString;
 }
 
 function getDragDropStyle(feature, resolution) {
@@ -804,6 +855,7 @@ function getSOLRRecCnt(occ,callback){
         if(http.readyState == 4 && http.status == 200) {
             var resArr = JSON.parse(http.responseText);
             solrRecCnt = resArr['response']['numFound'];
+            document.getElementById("dh-rows").value = solrRecCnt;
             callback(1);
         }
     };
@@ -1104,7 +1156,7 @@ function lazyLoadPoints(index,callback){
     if(index > 1) startindex = (index - 1)*lazyLoadCnt;
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
-    var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&wt=geojson';
+    var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&fl='+SOLRFields+'&wt=geojson';
     //console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -1141,14 +1193,19 @@ function loadPoints(){
                 $("#accordion").accordion("option","active",1);
                 selectInteraction.getFeatures().clear();
                 if(!pointActive){
-                    addLayerToSelList('Points','Points');
+                    var infoArr = [];
+                    infoArr['Name'] = 'pointv';
+                    infoArr['Title'] = 'Points';
+                    infoArr['Abstract'] = '';
+                    infoArr['DefaultCRS'] = '';
+                    buildLayerTableRow(infoArr,true);
                     pointActive = true;
                 }
             }
             else{
                 setRecordsTab();
                 if(pointActive){
-                    removeLayerToSelList('Points');
+                    removeLayerToSelList('pointv');
                     pointActive = false;
                 }
                 alert('There were no records matching your query.');
@@ -1252,7 +1309,7 @@ function prepareTaxaData(callback){
             taxaArr = JSON.parse(http.responseText);
             callback(1);
         }
-    }
+    };
     http.send(params);
 }
 
@@ -1349,6 +1406,35 @@ function prepareTaxaParams(callback){
     }
 }
 
+function prepCsvControlForm(){
+    if (document.getElementById('csvschemasymb').checked) var schema = document.getElementById('csvschemasymb').value;
+    if (document.getElementById('csvschemadwc').checked) var schema = document.getElementById('csvschemadwc').value;
+    if (document.getElementById('csvformatcsv').checked) var format = document.getElementById('csvformatcsv').value;
+    if (document.getElementById('csvformattab').checked) var format = document.getElementById('csvformattab').value;
+    if (document.getElementById('csvcsetiso').checked) var cset = document.getElementById('csvcsetiso').value;
+    if (document.getElementById('csvcsetutf').checked) var cset = document.getElementById('csvcsetutf').value;
+    document.getElementById("schemacsv").value = schema;
+    document.getElementById("dh-filename").value = document.getElementById("dh-filename").value+'.'+schema;
+    if(document.getElementById("csvidentifications").checked==true){
+        document.getElementById("identificationscsv").value = 1;
+    }
+    if(document.getElementById("csvimages").checked==true){
+        document.getElementById("imagescsv").value = 1;
+    }
+    document.getElementById("formatcsv").value = format;
+    document.getElementById("csetcsv").value = cset;
+    if(document.getElementById("csvzip").checked==true){
+        document.getElementById("zipcsv").value = 1;
+        document.getElementById("dh-type").value = 'zip';
+        document.getElementById("dh-contentType").value = 'application/zip';
+    }
+    else{
+        document.getElementById("dh-contentType").value = 'text/csv; charset='+cset;
+    }
+    $("#csvoptions").popup("hide");
+    document.getElementById("datadownloadform").submit();
+}
+
 function primeSymbologyData(features){
     for(f in features) {
         var color = 'e69e67';
@@ -1407,6 +1493,45 @@ function processCheckSelection(c){
         removeSelectionRecord(Number(c.value));
     }
     adjustSelectionsTab();
+}
+
+function processDownloadRequest(selection){
+    document.getElementById("dh-fl").value = '';
+    document.getElementById("dh-type").value = '';
+    document.getElementById("dh-filename").value = '';
+    document.getElementById("dh-contentType").value = '';
+    document.getElementById("dh-selections").value = '';
+    var dlType = (selection?document.getElementById("selectdownloadselect").value:document.getElementById("querydownloadselect").value);
+    var dateTimeString = getDateTimeString();
+    if(dlType){
+        var filename = 'spatialdata_'+dateTimeString;
+        var contentType = '';
+        if(dlType == 'kml') contentType = 'application/vnd.google-earth.kml+xml';
+        else if(dlType == 'geojson') contentType = 'application/vnd.geo+json';
+        else if(dlType == 'gpx') contentType = 'application/gpx+xml';
+        document.getElementById("dh-type").value = dlType;
+        document.getElementById("dh-filename").value = filename;
+        document.getElementById("dh-contentType").value = contentType;
+        if(selection) document.getElementById("dh-selections").value = selections.join();
+        if(!selection && dlType == 'csv'){
+            document.getElementById("dh-fl").value = 'occid';
+        }
+        else{
+            document.getElementById("dh-fl").value = SOLRFields;
+        }
+        if(dlType == 'csv'){
+            $("#csvoptions").popup("show");
+        }
+        else if(dlType == 'kml' || dlType == 'geojson' || dlType == 'gpx'){
+            document.getElementById("datadownloadform").submit();
+        }
+        else if(dlType == 'png'){
+            exportMapPNG();
+        }
+    }
+    else{
+        alert('Please select a download type.')
+    }
 }
 
 function processPointSelection(cluster){
@@ -1478,6 +1603,15 @@ function removeUserLayer(layerID){
     }
     if(layerID == 'select'){
         layersArr[layerID].getSource().clear(true);
+        shapeActive = false;
+    }
+    else if(layerID == 'pointv'){
+        clearSelections();
+        adjustSelectionsTab();
+        layersArr[layerID].getSource().clear(true);
+        $('#criteriatab').tabs({active: 0});
+        $("#accordion").accordion("option","active",0);
+        pointActive = false;
     }
     else{
         layersArr[layerID].setSource(blankdragdropsource);
@@ -1510,6 +1644,24 @@ function resetSymbology(){
     layersArr['pointv'].getSource().changed();
     document.getElementById("symbolizeReset1").disabled = false;
     document.getElementById("symbolizeReset2").disabled = false;
+}
+
+function saveKeyImage(){
+    var keyElement = (mapSymbology == 'coll'?document.getElementById("collSymbologyKey"):document.getElementById("taxasymbologykeysbox"));
+    var keyClone = keyElement.cloneNode(true);
+    document.body.appendChild(keyClone);
+    html2canvas(keyClone).then(function(canvas) {
+        if (navigator.msSaveBlob) {
+            navigator.msSaveBlob(canvas.msToBlob(),'mapkey.png');
+        }
+        else {
+            canvas.toBlob(function(blob) {
+                saveAs(blob,'mapkey.png');
+            });
+        }
+        document.body.removeChild(keyClone);
+        keyClone = '';
+    });
 }
 
 function selectAll(cb){
@@ -1567,7 +1719,8 @@ function setBaseLayerSource(urlTemplate){
             origin: ol.extent.getTopLeft(projectionExtent),
             resolutions: resolutions,
             tileSize: 512
-        })
+        }),
+        crossOrigin: 'anonymous'
     });
 }
 
@@ -2007,6 +2160,13 @@ function writeWfsWktString(type,geocoords) {
     }
 
     return wktStr;
+}
+
+function zipSelected(obj){
+    if(obj.checked == false){
+        document.getElementById("csvimages").checked = false;
+        document.getElementById("csvidentifications").checked = false;
+    }
 }
 
 function zoomToSelections(){

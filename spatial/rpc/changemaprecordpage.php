@@ -14,13 +14,16 @@ $recordCnt = array_key_exists("rows",$_REQUEST)?$_REQUEST["rows"]:0;
 $selections = Array();
 $allSelected = false;
 
+$solrManager = new SOLRManager();
+
+$q = $solrManager->checkQuerySecurity($q);
+
 $qStr = 'q='.$q.'&fq='.$fq;
 
 if($selArrJson){
     $selections = json_decode($selArrJson, true);
 }
 
-$solrManager = new SOLRManager();
 $solrManager->setQStr($qStr);
 $solrArr = $solrManager->getGeoArr($pageNumber,$cntPerPage);
 $occArr = $solrManager->translateSOLRMapRecList($solrArr);
@@ -67,9 +70,6 @@ if($lastPage > $startPage){
 	$recordListHtml = '<div>';
 	$recordListHtml .= $paginationStr;
 	$recordListHtml .= '</div>';
-}
-else{
-	$recordListHtml .= "<div style='clear:both;margin:5 0 5 0;'><hr /></div>";
 }
 if($occArr){
 	$recordListHtml .= '<form name="selectform" id="selectform" action="" method="post" onsubmit="" target="_blank">';

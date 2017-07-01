@@ -1,6 +1,5 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
 include_once($SERVER_ROOT.'/classes/SpatialModuleManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
@@ -40,11 +39,13 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.popupoverlay.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/ol-symbiota-ext.js?ver=2" type="text/javascript"></script>
     <script src="https://npmcdn.com/@turf/turf/turf.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/jscolor/jscolor.js?ver=5" type="text/javascript"></script>
-    <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/stream.js" type="text/javascript"></script> -->
-    <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/shapefile.js?ver=2" type="text/javascript"></script> -->
-    <!-- <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script> -->
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=125" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jscolor/jscolor.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/stream.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/shapefile.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=132" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -69,6 +70,10 @@ $dbArr = Array();
                 }
             });
             $('#addLayers').popup({
+                transition: 'all 0.3s',
+                scrolllock: true
+            });
+            $('#csvoptions').popup({
                 transition: 'all 0.3s',
                 scrolllock: true
             });
@@ -235,8 +240,8 @@ $dbArr = Array();
                             <li style="display:none;" id="selectionstab" ><a href='#selectionslist'>Selections</a></li>
                         </ul>
                         <div id="symbology" style="">
-                            <div style="height:40px;margin-bottom:15px;">
-                                <div style="float:left;">
+                            <div style="margin-bottom:15px;">
+                                <div style="float:left;margin-top:20px;">
                                     <div>
                                         <svg xmlns="http://www.w3.org/2000/svg" style="height:15px;width:15px;margin-bottom:-2px;">">
                                             <g>
@@ -259,10 +264,13 @@ $dbArr = Array();
                                     <div style="margin-top:5px;">
                                         <button data-role="none" id="randomColorColl" name="randomColorColl" onclick='autoColorColl();' >Auto Color</button>
                                     </div>
+                                    <div style="margin-top:5px;">
+                                        <button data-role="none" id="saveCollKeyImage" name="saveCollKeyImage" onclick='saveKeyImage();' >Save Image</button>
+                                    </div>
                                 </div>
                             </div>
                             <div style="margin:5 0 5 0;clear:both;"><hr /></div>
-                            <div style="" >
+                            <div id="collSymbologyKey" style="background-color:white;">
                                 <div style="margin-top:8px;">
                                     <div style="display:table;">
                                         <div id="symbologykeysbox"></div>
@@ -271,27 +279,32 @@ $dbArr = Array();
                             </div>
                         </div>
                         <div id="queryrecordsdiv" style="">
-                            <div style="height:25px;margin-top:-5px;">
-                                <div>
-                                    <div style="float:left;">
-                                        <button data-role="none" id="fullquerycsvbut" onclick='openCsvOptions("fullquery");' >Download CSV file</button>
+                            <div style="margin-top:-10px;margin-right:10px;">
+                                <fieldset style="border:1px solid black;height:50px;width:360px;margin-left:-10px;padding-top:3px;">
+                                    <legend><b>Download</b></legend>
+                                    <div style="height:25px;width:330px;margin-left:auto;margin-right:auto;">
+                                        <div style="float:left;">
+                                            <select data-role="none" id="querydownloadselect">
+                                                <option value="">Download Type</option>
+                                                <option value="csv">CSV</option>
+                                                <option value="kml">KML</option>
+                                                <option value="geojson">GeoJSON</option>
+                                                <option value="gpx">GPX</option>
+                                                <option value="png">Map PNG Image</option>
+                                            </select>
+                                        </div>
+                                        <div style="float:right;">
+                                            <button data-role="none" name="submitaction" type="button" onclick='processDownloadRequest(false);' >Download</button>
+                                        </div>
+                                        <div id="downloadlink"></div>
                                     </div>
-                                    <div style="float:right;">
-                                        <form name="fullquerykmlform" id="fullquerykmlform" action="kmlmanager.php" method="post" style="margin-bottom:0px;" onsubmit="">
-                                            <input data-role="none" name="selectionskml" id="selectionskml" type="hidden" value="" />
-                                            <input data-role="none" name="starrkml" id="starrselectionkml" type="hidden" value="" />
-                                            <input data-role="none" name="kmltype" id="kmltype" type="hidden" value="fullquery" />
-                                            <input data-role="none" name="kmlreclimit" id="kmlreclimit" type="hidden" value="<?php //echo $recLimit; ?>" />
-                                            <button data-role="none" name="submitaction" type="button" onclick='prepSelectionKml(this.form);' >Download KML file</button>
-                                        </form>
-                                    </div>
-                                </div>
+                                </fieldset>
                             </div>
                             <div id="queryrecords" style=""></div>
                         </div>
                         <div id="maptaxalist" >
-                            <div style="height:40px;margin-bottom:15px;">
-                                <div style="float:left;">
+                            <div style="margin-bottom:15px;">
+                                <div style="float:left;margin-top:20px;">
                                     <div>
                                         <svg xmlns="http://www.w3.org/2000/svg" style="height:15px;width:15px;margin-bottom:-2px;">">
                                             <g>
@@ -314,33 +327,52 @@ $dbArr = Array();
                                     <div style="margin-top:5px;">
                                         <button data-role="none" id="randomColorTaxa" name="randomColorTaxa" onclick='autoColorTaxa();' >Auto Color</button>
                                     </div>
+                                    <div style="margin-top:5px;">
+                                        <button data-role="none" id="saveTaxaKeyImage" name="saveTaxaKeyImage" onclick='saveKeyImage();' >Save Image</button>
+                                    </div>
                                 </div>
                             </div>
                             <div style="margin:5 0 5 0;clear:both;"><hr /></div>
                             <div style='font-weight:bold;'>Taxa Count: <span id="taxaCountNum">0</span></div>
-                            <div id="taxasymbologykeysbox"></div>
+                            <div id="taxasymbologykeysbox" style="background-color:white;"></div>
                         </div>
 
                         <div id="selectionslist" style="">
-                            <div style="height:65px;margin-bottom:15px;">
-                                <div style="float:left;">
-                                    <div>
-                                        <button data-role="none" id="clearselectionsbut" onclick='clearSelections();' >Clear Selections</button>
-                                    </div>
-                                    <div style="margin-top:5px;margin-bottom:5px;">
-                                        <button data-role="none" id="selectioncsvbut" onclick='openCsvOptions("selection");' >Download CSV file</button>
-                                    </div>
+                            <div>
+                                <div style="margin-top:-10px;margin-right:10px;">
+                                    <fieldset style="border:1px solid black;height:50px;width:360px;margin-left:-10px;padding-top:3px;">
+                                        <legend><b>Download</b></legend>
+                                        <div style="height:25px;width:330px;margin-left:auto;margin-right:auto;">
+                                            <div style="float:left;">
+                                                <select data-role="none" id="selectdownloadselect">
+                                                    <option value="">Download Type</option>
+                                                    <option value="csv">CSV</option>
+                                                    <option value="kml">KML</option>
+                                                    <option value="geojson">GeoJSON</option>
+                                                    <option value="gpx">GPX</option>
+                                                </select>
+                                            </div>
+                                            <div style="float:right;">
+                                                <button data-role="none" name="submitaction" type="button" onclick='processDownloadRequest(true);' >Download</button>
+                                            </div>
+                                        </div>
+                                    </fieldset>
                                 </div>
-                                <div id="" style='margin-right:15px;float:right;' >
-                                    <div>
-                                        <button data-role="none" id="zoomtoselectionsbut" onclick='zoomToSelections();' >Zoom to Selections</button>
+
+                                <div style="margin-top:10px;">
+                                    <div style="float:left;">
+                                        <div>
+                                            <button data-role="none" id="clearselectionsbut" onclick='clearSelections();' >Clear Selections</button>
+                                        </div>
                                     </div>
-                                    <div style="margin-top:5px;">
-                                        <button data-role="none" name="submitaction" type="button" onclick='prepSelectionKml(this.form);' >Download KML file</button>
+                                    <div id="" style='margin-right:15px;float:right;' >
+                                        <div>
+                                            <button data-role="none" id="zoomtoselectionsbut" onclick='zoomToSelections();' >Zoom to Selections</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div style="margin:5 0 5 0;clear:both;"><hr /></div>
+                            <div style="clear:both;height:10px;"></div>
                             <table class="styledtable" style="font-family:Arial;font-size:12px;margin-left:-15px;">
                                 <thead>
                                 <tr>
@@ -463,6 +495,12 @@ $dbArr = Array();
     var dragDrop2 = false;
     var dragDrop3 = false;
     var dragDropTarget = '';
+    var droppedShapefile = '';
+    var droppedDBF = '';
+    var SOLRFields = 'occid,collid,catalogNumber,otherCatalogNumbers,family,sciname,tidinterpreted,scientificNameAuthorship,identifiedBy,' +
+        'dateIdentified,typeStatus,recordedBy,recordNumber,eventDate,displayDate,coll_year,coll_month,coll_day,habitat,associatedTaxa,' +
+        'cultivationStatus,country,StateProvince,county,municipality,locality,localitySecurity,localitySecurityReason,geo,minimumElevationInMeters,' +
+        'maximumElevationInMeters,labelProject,InstitutionCode,CollectionCode,CollectionName,CollType,thumbnailurl';
 
     var popupcontainer = document.getElementById('popup');
     var popupcontent = document.getElementById('popup-content');
@@ -520,7 +558,8 @@ $dbArr = Array();
 
     var baselayer = new ol.layer.Tile({
         source: new ol.source.XYZ({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+            crossOrigin: 'anonymous'
         })
     });
 
@@ -604,7 +643,7 @@ $dbArr = Array();
     var pointInteraction = new ol.interaction.Select({
         layers: [layersArr['pointv'],layersArr['spider']],
         condition: function(evt) {
-            if(evt.type == 'click' && activeLayer == 'Points' && !evt.originalEvent.altKey){
+            if(evt.type == 'click' && activeLayer == 'pointv' && !evt.originalEvent.altKey){
                 if(spiderCluster){
                     var spiderclick = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                         if(feature && layer === layersArr['spider']){
@@ -690,28 +729,6 @@ $dbArr = Array();
         })
     };
 
-    function openCsvOptions(type){
-        /*document.getElementById("typecsv").value = type;
-        if(type=='dsselectionquery'){
-            if(dsselections.length!=0){
-                var jsonSelections = JSON.stringify(dsselections);
-            }
-            else{
-                alert("Please select records from the dataset to create CSV file.");
-                return;
-            }
-        }
-        else{
-            var jsonSelections = JSON.stringify(selections);
-        }
-        document.getElementById("selectionscsv").value = jsonSelections;
-        document.getElementById("starrcsv").value = starr;
-        var urlStr = 'csvoptions.php?dltype=specimen';
-        newWindow = window.open(urlStr,'popup','scrollbars=0,toolbar=1,resizable=1,width=650,height=650');
-        if (newWindow.opener == null) newWindow.opener = self;
-        return false;*/
-    }
-
     function editLayers(c,title){
         var layer = c.value;
         if(c.checked == true){
@@ -720,7 +737,8 @@ $dbArr = Array();
             layersArr[layerSourceName] = new ol.source.ImageWMS({
                 url: '<?php echo $GEOSERVER_URL; ?>/<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>/wms',
                 params: {'LAYERS':layerName},
-                serverType: 'geoserver'
+                serverType: 'geoserver',
+                crossOrigin: 'anonymous'
             });
             layersArr[layer] = new ol.layer.Image({
                 source: layersArr[layerSourceName]
@@ -743,7 +761,7 @@ $dbArr = Array();
         projection: 'EPSG:3857',
         minZoom: 3,
         maxZoom: 19,
-        center: ol.proj.transform([-111.64808, 35.19397], 'EPSG:4326', 'EPSG:3857'),
+        center: ol.proj.transform([-100.91413, 40.54555], 'EPSG:4326', 'EPSG:3857'),
     });
 
     var map = new ol.Map({
@@ -817,26 +835,70 @@ $dbArr = Array();
         var filename = event.file.name.split('.');
         var fileType = filename.pop();
         filename = filename.join("");
-        if(fileType == 'geojson' || fileType == 'kml'){
-            if(setDragDropTarget()){
-                var infoArr = [];
-                infoArr['Name'] = dragDropTarget;
-                infoArr['Title'] = filename;
-                infoArr['Abstract'] = '';
-                infoArr['DefaultCRS'] = '';
-                var sourceIndex = dragDropTarget+'Source';
-                layersArr[sourceIndex] = new ol.source.Vector({
-                    features: event.features
-                });
-                layersArr[dragDropTarget].setStyle(getDragDropStyle);
-                layersArr[dragDropTarget].setSource(layersArr[sourceIndex]);
-                buildLayerTableRow(infoArr,true);
-                map.getView().fit(layersArr[sourceIndex].getExtent());
-                toggleLayerController();
+        if(fileType == 'geojson' || fileType == 'kml' || fileType == 'shp' || fileType == 'dbf'){
+            if(fileType == 'geojson' || fileType == 'kml'){
+                if(setDragDropTarget()){
+                    var infoArr = [];
+                    infoArr['Name'] = dragDropTarget;
+                    infoArr['Title'] = filename;
+                    infoArr['Abstract'] = '';
+                    infoArr['DefaultCRS'] = '';
+                    var sourceIndex = dragDropTarget+'Source';
+                    layersArr[sourceIndex] = new ol.source.Vector({
+                        features: event.features
+                    });
+                    layersArr[dragDropTarget].setStyle(getDragDropStyle);
+                    layersArr[dragDropTarget].setSource(layersArr[sourceIndex]);
+                    buildLayerTableRow(infoArr,true);
+                    map.getView().fit(layersArr[sourceIndex].getExtent());
+                    toggleLayerController();
+                }
+            }
+            else if(fileType == 'shp' || fileType == 'dbf'){
+                var dbfURL = '';
+                if(fileType == 'shp'){
+                    droppedShapefile = window.URL.createObjectURL(event.file);
+                }
+                if(fileType == 'dbf'){
+                    droppedDBF = window.URL.createObjectURL(event.file);
+                }
+                if(fileType == 'shp'){
+                    if(setDragDropTarget()){
+                        setTimeout(function() {
+                            if(droppedShapefile && droppedDBF) alert('both!');
+                            shapefile = new Shapefile({
+                                shp: droppedShapefile,
+                                dbf: droppedDBF
+                            },function (data){
+                                var infoArr = [];
+                                infoArr['Name'] = dragDropTarget;
+                                infoArr['Title'] = filename;
+                                infoArr['Abstract'] = '';
+                                infoArr['DefaultCRS'] = '';
+                                var sourceIndex = dragDropTarget+'Source';
+                                var format = new ol.format.GeoJSON();
+                                var res = map.getView().getResolution();
+                                var features = format.readFeatures(data.geojson, {
+                                    featureProjection: 'EPSG:3857'
+                                });
+                                layersArr[sourceIndex] = new ol.source.Vector({
+                                    features: features
+                                });
+                                layersArr[dragDropTarget].setStyle(getDragDropStyle);
+                                layersArr[dragDropTarget].setSource(layersArr[sourceIndex]);
+                                buildLayerTableRow(infoArr,true);
+                                map.getView().fit(layersArr[sourceIndex].getExtent());
+                                toggleLayerController();
+                                droppedShapefile = '';
+                                droppedDBF = '';
+                            });
+                        },500);
+                    }
+                }
             }
         }
         else{
-            alert('The drag and drop file loading only supports GeoJSON and kml file formats.');
+            alert('The drag and drop file loading only supports GeoJSON, kml, and shp file formats.');
         }
     });
 
@@ -929,6 +991,10 @@ $dbArr = Array();
                     buildLayerTableRow(infoArr,true);
                     shapeActive = true;
                 }
+                else{
+                    document.getElementById("selectlayerselect").value = 'select';
+                    setActiveLayer();
+                }
             }
             else{
                 if(shapeActive){
@@ -993,7 +1059,7 @@ $dbArr = Array();
         if(evt.originalEvent.altKey){
             var layerIndex = activeLayer+"Source";
             var viewResolution = /** @type {number} */ (mapView.getResolution());
-            if(activeLayer != 'none' && activeLayer != 'select' && activeLayer != 'Points' && activeLayer != 'dragdrop1' && activeLayer != 'dragdrop2' && activeLayer != 'dragdrop3'){
+            if(activeLayer != 'none' && activeLayer != 'select' && activeLayer != 'pointv' && activeLayer != 'dragdrop1' && activeLayer != 'dragdrop2' && activeLayer != 'dragdrop3'){
                 var url = layersArr[layerIndex].getGetFeatureInfoUrl(evt.coordinate,viewResolution,'EPSG:3857',{'INFO_FORMAT':'application/json'});
                 if (url) {
                     $.ajax({
@@ -1034,7 +1100,7 @@ $dbArr = Array();
                     popupoverlay.setPosition(evt.coordinate);
                 }
             }
-            else if(activeLayer == 'Points'){
+            else if(activeLayer == 'pointv'){
                 var infoHTML = '';
                 var clickedFeatures = [];
                 map.forEachFeatureAtPixel(evt.pixel, function(feature, layer){
@@ -1077,7 +1143,7 @@ $dbArr = Array();
 
     map.on('dblclick', function(evt) {
         var layerIndex = activeLayer+"Source";
-        if(activeLayer != 'none' && activeLayer != 'select' && activeLayer != 'Points'){
+        if(activeLayer != 'none' && activeLayer != 'select' && activeLayer != 'pointv'){
             if(activeLayer == 'dragdrop1' || activeLayer == 'dragdrop2' || activeLayer == 'dragdrop3'){
                 map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
                     selectsource.addFeature(feature);
@@ -1120,14 +1186,28 @@ $dbArr = Array();
     changeDraw();
 </script>
 
-<!-- Add Layers -->
-<div id="addLayers" data-role="popup" class="well" style="width:600px;height:90%;">
-    <a class="boxclose addLayers_close" id="boxclose"></a>
-    <div style="height:100%;overflow-y: scroll;padding:30px;">
-        <table id='layercontroltable' class="styledtable" style="font-family:Arial;font-size:12px;margin-left:-15px;width:530px;">
-            <tbody id="layerselecttbody"></tbody>
-        </table>
-    </div>
+<?php include_once('includes/layercontroller.php'); ?>
+
+<?php include_once('includes/csvoptions.php'); ?>
+
+<!-- Data Download Form -->
+<div style="display:none;">
+    <form name="datadownloadform" id="datadownloadform" action="rpc/datadownloader.php" method="post">
+        <input id="dh-q" name="dh-q"  type="hidden" value="" />
+        <input id="dh-fq" name="dh-fq" type="hidden" value="" />
+        <input id="dh-fl" name="dh-fl" type="hidden" value="" />
+        <input id="dh-rows" name="dh-rows" type="hidden" value="" />
+        <input id="dh-type" name="dh-type" type="hidden" value="" />
+        <input id="dh-filename" name="dh-filename" type="hidden" value="" />
+        <input id="dh-contentType" name="dh-contentType" type="hidden" value="" />
+        <input id="dh-selections" name="dh-selections" type="hidden" value="" />
+        <input id="schemacsv" name="schemacsv" type="hidden" value="" />
+        <input id="identificationscsv" name="identificationscsv" type="hidden" value="" />
+        <input id="imagescsv" name="imagescsv" type="hidden" value="" />
+        <input id="formatcsv" name="formatcsv" type="hidden" value="" />
+        <input id="zipcsv" name="zipcsv" type="hidden" value="" />
+        <input id="csetcsv" name="csetcsv" type="hidden" value="" />
+    </form>
 </div>
 </body>
 </html>
