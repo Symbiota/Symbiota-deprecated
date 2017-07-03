@@ -43,7 +43,6 @@
 	height:80px;
 	z-index: 3;
 	font-family: Arial;
-	font-size: smaller;
 	-moz-border-radius: 5 ! important;
 	border: 1px 1px 0 0;
 	background-color: #3c668d;
@@ -62,11 +61,10 @@
 	left: -50%;
 	padding: 5px;
 	display: block;
-	width: 320px;
+	width: 400px;
 	height:90px;
 	z-index: 3;
 	font-family: Arial;
-	font-size: smaller;
 	-moz-border-radius: 5 ! important;
 	border: 1px 1px 0 0;
 	background-color: #3c668d;
@@ -75,22 +73,23 @@
 
 #drawcontrol {
 	float: left;
-	width: 140px;
+	width: 115px;
 	height:30px;
 	z-index: 3;
 }
 
 #selectcontrol {
-	float: right;
-	width: 170px;
+	float: left;
+	width: 380px;
 	height:30px;
 	z-index: 3;
 }
 
 #basecontrol {
 	float: left;
-	width: 230px;
+	width: 270px;
 	height:30px;
+	margin-left: 5px;
 	z-index: 3;
 }
 
@@ -109,11 +108,11 @@
 }
 
 #selectlayerselect {
-	width: 90px;
+	width: 240px;
 }
 
 .maptext, .maptext a{
-	margin-right: 10px;
+	margin-right: 5px;
 	color: white;
 }
 

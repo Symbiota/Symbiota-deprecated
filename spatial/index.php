@@ -29,7 +29,7 @@ $dbArr = Array();
     <link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui_accordian.css" type="text/css" rel="stylesheet" />
     <link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
     <link href="<?php echo $CLIENT_ROOT; ?>/css/ol.css" type="text/css" rel="stylesheet" />
-    <link href="<?php echo $CLIENT_ROOT; ?>/css/spatialbase.css?ver=2" type="text/css" rel="stylesheet" />
+    <link href="<?php echo $CLIENT_ROOT; ?>/css/spatialbase.css?ver=5" type="text/css" rel="stylesheet" />
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-1.10.2.min.js" type="text/javascript"></script>
@@ -45,7 +45,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=132" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=140" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -74,6 +74,14 @@ $dbArr = Array();
                 scrolllock: true
             });
             $('#csvoptions').popup({
+                transition: 'all 0.3s',
+                scrolllock: true
+            });
+            $('#mapsettings').popup({
+                transition: 'all 0.3s',
+                scrolllock: true
+            });
+            $('#maptools').popup({
                 transition: 'all 0.3s',
                 scrolllock: true
             });
@@ -417,20 +425,13 @@ $dbArr = Array();
 <div id="maptoolcontainer">
     <div id="maptoolbox">
         <div id="drawcontrol">
-            <span class="maptext">Draw Tool</span>
+            <span class="maptext">Draw</span>
             <select id="drawselect">
                 <option value="None">None</option>
                 <option value="Polygon">Polygon</option>
                 <option value="Circle">Circle</option>
             </select>
         </div>
-        <div id="selectcontrol">
-            <span class="maptext">Active Layer</span>
-            <select id="selectlayerselect" onchange="setActiveLayer();">
-                <option id="lsel-none" value="none">None</option>
-            </select>
-        </div>
-        <div style="clear:both;"></div>
         <div id="basecontrol">
             <span class="maptext">Base Layer</span>
             <select data-role="none" id="base-map" onchange="changeBaseMap();">
@@ -444,12 +445,25 @@ $dbArr = Array();
                 <option value="esristreet">ESRI StreetMap World</option>
             </select>
         </div>
-        <div id="layerControllerLink" style="display:none;">
-            <span class="maptext"><a class="addLayers_open" href="#addLayers">Edit Layers</a></span>
+        <div style="clear:both;"></div>
+        <div id="selectcontrol">
+            <span class="maptext">Active Layer</span>
+            <select id="selectlayerselect" onchange="setActiveLayer();">
+                <option id="lsel-none" value="none">None</option>
+            </select>
         </div>
         <div style="clear:both;"></div>
-        <div id="clustercontrol">
-            <span class="maptext"><input data-role="none" type='checkbox' name='clusterswitch' id='clusterswitch' onchange="changeClusterSetting();" value='1' checked>Cluster Points</span>
+        <div id="settingsLink" style="margin-left:22px;float:left;">
+            <span class="maptext"><a class="mapsettings_open" href="#mapsettings"><b>Settings</b></a></span>
+        </div>
+        <div id="toolsLink" style="margin-left:22px;float:left;">
+            <span class="maptext"><a class="maptools_open" href="#maptools"><b>Tools</b></a></span>
+        </div>
+        <div id="layerControllerLink" style="margin-left:22px;float:left;display:none;">
+            <span class="maptext"><a class="addLayers_open" href="#addLayers"><b>Layers</b></a></span>
+        </div>
+        <div id="deleteSelections" style="margin-left:60px;float:left;">
+            <button data-role="none" type="button" onclick='deleteSelections();' >Delete Shapes</button>
         </div>
     </div>
 </div>
@@ -474,13 +488,18 @@ $dbArr = Array();
     var geoCallOut = false;
     var solrRecCnt = 0;
     var draw;
+    var clustersource;
     var taxaArr = [];
     var taxontype = '';
     var thes = false;
     var loadVectorPoints = true;
     var taxaCnt = 0;
     var lazyLoadCnt = 5000;
+    var clusterDistance = 50;
     var clusterPoints = true;
+    var showHeatMap = false;
+    var heatMapRadius = 5;
+    var heatMapBlur = 15;
     var mapSymbology = 'coll';
     var clusterKey = 'CollectionName';
     var maxFeatureCount;
@@ -501,177 +520,6 @@ $dbArr = Array();
         'dateIdentified,typeStatus,recordedBy,recordNumber,eventDate,displayDate,coll_year,coll_month,coll_day,habitat,associatedTaxa,' +
         'cultivationStatus,country,StateProvince,county,municipality,locality,localitySecurity,localitySecurityReason,geo,minimumElevationInMeters,' +
         'maximumElevationInMeters,labelProject,InstitutionCode,CollectionCode,CollectionName,CollType,thumbnailurl';
-
-    var popupcontainer = document.getElementById('popup');
-    var popupcontent = document.getElementById('popup-content');
-    var popupcloser = document.getElementById('popup-closer');
-
-    var popupoverlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ ({
-        element: popupcontainer,
-        autoPan: true,
-        autoPanAnimation: {
-            duration: 250
-        }
-    }));
-
-    popupcloser.onclick = function() {
-        popupoverlay.setPosition(undefined);
-        popupcloser.blur();
-        return false;
-    };
-
-    var finderpopupcontainer = document.getElementById('finderpopup');
-    var finderpopupcontent = document.getElementById('finderpopup-content');
-    var finderpopupcloser = document.getElementById('finderpopup-closer');
-
-    var finderpopupoverlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ ({
-        element: finderpopupcontainer,
-        autoPan: true,
-        autoPanAnimation: {
-            duration: 250
-        }
-    }));
-
-    finderpopupcloser.onclick = function() {
-        finderpopupoverlay.setPosition(undefined);
-        finderpopupcloser.blur();
-        return false;
-    };
-
-    var mapProjection = new ol.proj.Projection({
-        code: 'EPSG:3857'
-    });
-
-    var wgs84Projection = new ol.proj.Projection({
-        code: 'EPSG:4326',
-        units: 'degrees'
-    });
-
-    var projection = ol.proj.get('EPSG:4326');
-    var projectionExtent = projection.getExtent();
-    var tileSize = 512;
-    var maxResolution = ol.extent.getWidth(projectionExtent) / (tileSize * 2);
-    var resolutions = new Array(16);
-    for (var z = 0; z < 16; ++z) {
-        resolutions[z] = maxResolution / Math.pow(2, z);
-    }
-
-    var baselayer = new ol.layer.Tile({
-        source: new ol.source.XYZ({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-            crossOrigin: 'anonymous'
-        })
-    });
-
-    var selectsource = new ol.source.Vector({wrapX: false});
-    var selectlayer = new ol.layer.Vector({
-        source: selectsource
-    });
-
-    var pointvectorsource = new ol.source.Vector({wrapX: false});
-    var pointvectorlayer = new ol.layer.Vector({
-        source: pointvectorsource
-    });
-
-    var blankdragdropsource = new ol.source.Vector({wrapX: false});
-    var dragdroplayer1 = new ol.layer.Vector({
-        source: blankdragdropsource
-    });
-    var dragdroplayer2 = new ol.layer.Vector({
-        source: blankdragdropsource
-    });
-    var dragdroplayer3 = new ol.layer.Vector({
-        source: blankdragdropsource
-    });
-
-    /*var pointimagesource = new ol.source.ImageWMS({
-        url: '<?php echo $GEOSERVER_URL; ?>/<?php echo $GEOSERVER_OCC_WORKSPACE; ?>/wms',
-        params: {
-            'LAYERS':'<?php echo $GEOSERVER_OCC_WORKSPACE; ?>:<?php echo $GEOSERVER_OCC_LAYER; ?>',
-            'CRS':'EPSG:4326',
-            'CQL_FILTER':cqlString
-        },
-        serverType: 'geoserver',
-        imageLoadFunction: function(image, src) {
-            imagePostFunction(image, src);
-        }
-    });
-    var pointimagelayer = new ol.layer.Image({
-        source: pointimagesource
-    });*/
-
-    var spiderLayer = new ol.layer.Vector({
-        source: new ol.source.Vector({
-            features: new ol.Collection(),
-            useSpatialIndex: true
-        })
-    });
-
-    layersArr['base'] = baselayer;
-    layersArr['dragdrop1'] = dragdroplayer1;
-    layersArr['dragdrop2'] = dragdroplayer2;
-    layersArr['dragdrop3'] = dragdroplayer3;
-    layersArr['select'] = selectlayer;
-    layersArr['pointv'] = pointvectorlayer;
-    //layersArr['pointi'] = pointimagelayer;
-    layersArr['spider'] = spiderLayer;
-
-    var zoomslider = new ol.control.ZoomSlider();
-    var scaleLineControl_us = new ol.control.ScaleLine({target: document.getElementById('mapscale_us'),units: 'us'});
-    var scaleLineControl_metric = new ol.control.ScaleLine({target: document.getElementById('mapscale_metric'),units: 'metric'});
-    var dragAndDropInteraction = new ol.interaction.DragAndDrop({
-        formatConstructors: [
-            ol.format.GPX,
-            ol.format.GeoJSON,
-            ol.format.IGC,
-            ol.format.KML,
-            ol.format.TopoJSON
-        ]
-    });
-    var selectInteraction = new ol.interaction.Select({
-        layers: [layersArr['select']],
-        condition: function(evt) {
-            if(evt.type == 'click' && activeLayer == 'select'){
-                return true;
-            }
-            else{
-                return false;
-            }
-        },
-        toggleCondition: ol.events.condition.click
-    });
-    var pointInteraction = new ol.interaction.Select({
-        layers: [layersArr['pointv'],layersArr['spider']],
-        condition: function(evt) {
-            if(evt.type == 'click' && activeLayer == 'pointv' && !evt.originalEvent.altKey){
-                if(spiderCluster){
-                    var spiderclick = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                        if(feature && layer === layersArr['spider']){
-                            return feature;
-                        }
-                    });
-                    if(!spiderclick){
-                        layersArr['spider'].getSource().clear();
-                        for(i in hiddenClusters){
-                            showCluster(hiddenClusters[i]);
-                        }
-                        hiddenClusters = [];
-                        spiderCluster = '';
-                        layersArr['pointv'].getSource().changed();
-                    }
-                }
-                return true;
-            }
-            else{
-                return false;
-            }
-        },
-        toggleCondition: ol.events.condition.click,
-        multi: true,
-        hitTolerance: 2,
-        style: getPointStyle
-    });
-
     var dragDropStyle = {
         'Point': new ol.style.Style({
             image: new ol.style.Circle({
@@ -729,6 +577,183 @@ $dbArr = Array();
         })
     };
 
+    var popupcontainer = document.getElementById('popup');
+    var popupcontent = document.getElementById('popup-content');
+    var popupcloser = document.getElementById('popup-closer');
+    var finderpopupcontainer = document.getElementById('finderpopup');
+    var finderpopupcontent = document.getElementById('finderpopup-content');
+    var finderpopupcloser = document.getElementById('finderpopup-closer');
+    var typeSelect = document.getElementById('drawselect');
+
+    var popupoverlay = new ol.Overlay({
+        element: popupcontainer,
+        autoPan: true,
+        autoPanAnimation: {
+            duration: 250
+        }
+    });
+
+    popupcloser.onclick = function() {
+        popupoverlay.setPosition(undefined);
+        popupcloser.blur();
+        return false;
+    };
+
+    var finderpopupoverlay = new ol.Overlay({
+        element: finderpopupcontainer,
+        autoPan: true,
+        autoPanAnimation: {
+            duration: 250
+        }
+    });
+
+    finderpopupcloser.onclick = function(){
+        finderpopupoverlay.setPosition(undefined);
+        finderpopupcloser.blur();
+        return false;
+    };
+
+    var mapProjection = new ol.proj.Projection({
+        code: 'EPSG:3857'
+    });
+
+    var wgs84Projection = new ol.proj.Projection({
+        code: 'EPSG:4326',
+        units: 'degrees'
+    });
+
+    var projection = ol.proj.get('EPSG:4326');
+    var projectionExtent = projection.getExtent();
+    var tileSize = 512;
+    var maxResolution = ol.extent.getWidth(projectionExtent) / (tileSize * 2);
+    var resolutions = new Array(16);
+    for (var z = 0; z < 16; ++z) {
+        resolutions[z] = maxResolution / Math.pow(2, z);
+    }
+
+    var baselayer = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+            crossOrigin: 'anonymous'
+        })
+    });
+
+    var selectsource = new ol.source.Vector({wrapX: false});
+    var selectlayer = new ol.layer.Vector({
+        source: selectsource
+    });
+
+    var pointvectorsource = new ol.source.Vector({wrapX: false});
+    var pointvectorlayer = new ol.layer.Vector({
+        source: pointvectorsource
+    });
+
+    var heatmaplayer = new ol.layer.Heatmap({
+        source: pointvectorsource,
+        weight: function(feature){
+            return 1;
+        },
+        gradient: ['#00f','#0ff','#0f0','#ff0','#f00'],
+        blur: parseInt(heatMapBlur, 10),
+        radius: parseInt(heatMapRadius, 10),
+        visible: false
+    });
+
+    var blankdragdropsource = new ol.source.Vector({wrapX: false});
+    var dragdroplayer1 = new ol.layer.Vector({
+        source: blankdragdropsource
+    });
+    var dragdroplayer2 = new ol.layer.Vector({
+        source: blankdragdropsource
+    });
+    var dragdroplayer3 = new ol.layer.Vector({
+        source: blankdragdropsource
+    });
+
+    /*var pointimagesource = new ol.source.ImageWMS({
+        url: '<?php echo $GEOSERVER_URL; ?>/<?php echo $GEOSERVER_OCC_WORKSPACE; ?>/wms',
+        params: {
+            'LAYERS':'<?php echo $GEOSERVER_OCC_WORKSPACE; ?>:<?php echo $GEOSERVER_OCC_LAYER; ?>',
+            'CRS':'EPSG:4326',
+            'CQL_FILTER':cqlString
+        },
+        serverType: 'geoserver',
+        imageLoadFunction: function(image, src) {
+            imagePostFunction(image, src);
+        }
+    });
+    var pointimagelayer = new ol.layer.Image({
+        source: pointimagesource
+    });*/
+
+    var spiderLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: new ol.Collection(),
+            useSpatialIndex: true
+        })
+    });
+
+    layersArr['base'] = baselayer;
+    layersArr['dragdrop1'] = dragdroplayer1;
+    layersArr['dragdrop2'] = dragdroplayer2;
+    layersArr['dragdrop3'] = dragdroplayer3;
+    layersArr['select'] = selectlayer;
+    layersArr['pointv'] = pointvectorlayer;
+    layersArr['heat'] = heatmaplayer;
+    //layersArr['pointi'] = pointimagelayer;
+    layersArr['spider'] = spiderLayer;
+
+    var zoomslider = new ol.control.ZoomSlider();
+    var scaleLineControl_us = new ol.control.ScaleLine({target: document.getElementById('mapscale_us'),units: 'us'});
+    var scaleLineControl_metric = new ol.control.ScaleLine({target: document.getElementById('mapscale_metric'),units: 'metric'});
+    var dragAndDropInteraction = new ol.interaction.DragAndDrop({
+        formatConstructors: [
+            ol.format.GPX,
+            ol.format.GeoJSON,
+            ol.format.IGC,
+            ol.format.KML,
+            ol.format.TopoJSON
+        ]
+    });
+    var selectInteraction = new ol.interaction.Select({
+        layers: [layersArr['select']],
+        condition: function(evt) {
+            return (evt.type == 'click' && activeLayer == 'select' && !evt.originalEvent.altKey);
+        },
+        toggleCondition: ol.events.condition.click
+    });
+    var pointInteraction = new ol.interaction.Select({
+        layers: [layersArr['pointv'],layersArr['spider']],
+        condition: function(evt) {
+            if(evt.type == 'click' && activeLayer == 'pointv' && !evt.originalEvent.altKey){
+                if(spiderCluster){
+                    var spiderclick = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                        if(feature && layer === layersArr['spider']){
+                            return feature;
+                        }
+                    });
+                    if(!spiderclick){
+                        layersArr['spider'].getSource().clear();
+                        for(i in hiddenClusters){
+                            showCluster(hiddenClusters[i]);
+                        }
+                        hiddenClusters = [];
+                        spiderCluster = '';
+                        layersArr['pointv'].getSource().changed();
+                    }
+                }
+                return true;
+            }
+            else{
+                return false;
+            }
+        },
+        toggleCondition: ol.events.condition.click,
+        multi: true,
+        hitTolerance: 2,
+        style: getPointStyle
+    });
+
     function editLayers(c,title){
         var layer = c.value;
         if(c.checked == true){
@@ -754,8 +779,6 @@ $dbArr = Array();
         }
     }
 
-    var typeSelect = document.getElementById('drawselect');
-
     var mapView = new ol.View({
         zoom: 7,
         projection: 'EPSG:3857',
@@ -778,21 +801,11 @@ $dbArr = Array();
             layersArr['select'],
             //layersArr['pointi'],
             layersArr['pointv'],
+            layersArr['heat'],
             layersArr['spider']
         ],
         overlays: [popupoverlay,finderpopupoverlay]
     });
-
-    var coordFormat = function(){
-        return(function(coord1){
-            mouseCoords = coord1;
-            if(coord1[0] < -180){coord1[0] = coord1[0] + 360};
-            if(coord1[0] > 180){coord1[0] = coord1[0] - 360};
-            var template = 'Lat: {y} Lon: {x}';
-            var coord2 = [coord1[1], coord1[0]];
-            return ol.coordinate.format(coord1,template,5);
-        });
-    };
 
     var mousePositionControl = new ol.control.MousePosition({
         coordinateFormat: coordFormat(),
@@ -991,10 +1004,6 @@ $dbArr = Array();
                     buildLayerTableRow(infoArr,true);
                     shapeActive = true;
                 }
-                else{
-                    document.getElementById("selectlayerselect").value = 'select';
-                    setActiveLayer();
-                }
             }
             else{
                 if(shapeActive){
@@ -1036,8 +1045,8 @@ $dbArr = Array();
             }
         });
 
-        var clustersource = new ol.source.PropertyCluster({
-            distance: 50,
+        clustersource = new ol.source.PropertyCluster({
+            distance: clusterDistance,
             source: pointvectorsource,
             clusterkey: clusterKey,
             indexkey: 'occid',
@@ -1052,6 +1061,10 @@ $dbArr = Array();
         }
         else{
             layersArr['pointv'].setSource(pointvectorsource);
+        }
+        layersArr['heat'].setSource(pointvectorsource);
+        if(showHeatMap){
+            layersArr['heat'].setVisible(true);
         }
     }
 
@@ -1082,7 +1095,7 @@ $dbArr = Array();
                     });
                 }
             }
-            else if(activeLayer == 'dragdrop1' || activeLayer == 'dragdrop2' || activeLayer == 'dragdrop3'){
+            else if(activeLayer == 'dragdrop1' || activeLayer == 'dragdrop2' || activeLayer == 'dragdrop3' || activeLayer == 'select'){
                 var infoHTML = '';
                 var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
                     if(layer === layersArr[activeLayer]){
@@ -1096,8 +1109,10 @@ $dbArr = Array();
                             infoHTML += '<b>'+properties[i]+':</b> '+feature.get(properties[i])+'<br />';
                         }
                     }
-                    popupcontent.innerHTML = infoHTML;
-                    popupoverlay.setPosition(evt.coordinate);
+                    if(infoHTML){
+                        popupcontent.innerHTML = infoHTML;
+                        popupoverlay.setPosition(evt.coordinate);
+                    }
                 }
             }
             else if(activeLayer == 'pointv'){
@@ -1146,9 +1161,9 @@ $dbArr = Array();
         if(activeLayer != 'none' && activeLayer != 'select' && activeLayer != 'pointv'){
             if(activeLayer == 'dragdrop1' || activeLayer == 'dragdrop2' || activeLayer == 'dragdrop3'){
                 map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                    selectsource.addFeature(feature);
-                }, null, function(layer) {
-                    return (layer === layersArr[activeLayer]);
+                    if(layer === layersArr[activeLayer]){
+                        selectsource.addFeature(feature);
+                    }
                 });
             }
             else{
@@ -1185,6 +1200,33 @@ $dbArr = Array();
 
     changeDraw();
 </script>
+
+<!-- Map Settings -->
+<div id="mapsettings" data-role="popup" class="well" style="width:600px;height:90%;font-size:14px;">
+    <a class="boxclose mapsettings_close" id="boxclose"></a>
+    <h2>Map Settings</h2>
+    <div style="margin-top:5px;">
+        <b>Cluster Points</b> <input data-role="none" type='checkbox' name='clusterswitch' id='clusterswitch' onchange="changeClusterSetting();" value='1' checked>
+    </div>
+    <div style="margin-top:5px;">
+        <b>Cluster Distance</b> <input data-role="none" type="text" id="setclusterdistance" style="width:50px;" name="setclusterdistance" value="50" onchange="changeClusterDistance();" />
+    </div>
+    <div style="margin-top:5px;">
+        <b>Heat Map Radius</b> <input data-role="none" id="heatmapradius" type="range" min="1" max="50" step="1" value="5" onchange="changeHeatMapRadius();"/>
+    </div>
+    <div style="margin-top:5px;">
+        <b>Heat Map Blur</b> <input data-role="none" id="heatmapblur" type="range" min="1" max="50" step="1" value="15" onchange="changeHeatMapBlur();"/>
+    </div>
+</div>
+
+<!-- Map Tools -->
+<div id="maptools" data-role="popup" class="well" style="width:600px;height:90%;">
+    <a class="boxclose maptools_close" id="boxclose"></a>
+    <h2>Tools</h2>
+    <div style="margin-top:5px;">
+        <b>Display Heat Map</b> <input data-role="none" type='checkbox' name='heatmapswitch' id='heatmapswitch' onchange="toggleHeatMap();" value='1' >
+    </div>
+</div>
 
 <?php include_once('includes/layercontroller.php'); ?>
 

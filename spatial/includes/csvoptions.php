@@ -1,7 +1,7 @@
 <!-- CSV Options -->
 <div id="csvoptions" data-role="popup" class="well" style="width:600px;height:80%;">
 	<a class="boxclose csvoptions_close" id="boxclose"></a>
-	<h2>Data Usage Guidelines</h2>
+	<h2>Download CSV Data</h2>
 	<div style="margin:15px;width:550px;">
 		By downloading data, the user confirms that he/she has read and agrees with the general
 		<a href="../misc/usagepolicy.php#images" target="_blank">data usage terms</a>.

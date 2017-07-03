@@ -82,13 +82,19 @@ $(document).ready(function() {
 });
 
 function addLayerToSelList(layer,title){
+    var origValue = document.getElementById("selectlayerselect").value;
     var selectionList = document.getElementById("selectlayerselect").innerHTML;
     var optionId = "lsel-"+layer;
     var newOption = '<option id="lsel-'+optionId+'" value="'+layer+'">'+title+'</option>';
     selectionList += newOption;
     document.getElementById("selectlayerselect").innerHTML = selectionList;
-    document.getElementById("selectlayerselect").value = layer;
-    setActiveLayer();
+    if(layer != 'select'){
+        document.getElementById("selectlayerselect").value = layer;
+        setActiveLayer();
+    }
+    else{
+        document.getElementById("selectlayerselect").value = origValue;
+    }
 }
 
 function adjustSelectionsTab(){
@@ -375,8 +381,19 @@ function changeBaseMap(){
     baseLayer.setSource(blsource);
 }
 
+function changeClusterDistance(){
+    clusterDistance = document.getElementById("setclusterdistance").value;
+    clustersource.setDistance(clusterDistance);
+}
+
 function changeClusterSetting(){
     clusterPoints = document.getElementById("clusterswitch").checked;
+    if(clusterPoints){
+        layersArr['pointv'].setSource(clustersource);
+    }
+    else{
+        layersArr['pointv'].setSource(pointvectorsource);
+    }
 }
 
 function changeCollColor(color,key){
@@ -404,6 +421,8 @@ function changeDraw() {
                 infoArr['DefaultCRS'] = '';
                 buildLayerTableRow(infoArr,true);
                 shapeActive = true;
+                document.getElementById("selectlayerselect").value = 'select';
+                setActiveLayer();
             }
             else{
                 document.getElementById("selectlayerselect").value = 'select';
@@ -417,6 +436,16 @@ function changeDraw() {
     else{
         draw = '';
     }
+}
+
+function changeHeatMapBlur(){
+    heatMapBlur = document.getElementById("heatmapblur").value;
+    layersArr['heat'].setBlur(parseInt(heatMapBlur, 10));
+}
+
+function changeHeatMapRadius(){
+    heatMapRadius = document.getElementById("heatmapradius").value;
+    layersArr['heat'].setRadius(parseInt(heatMapRadius, 10));
 }
 
 function changeMapSymbology(symbology){
@@ -498,6 +527,27 @@ function clearTaxaSymbology(){
 
 function closeOccidInfoBox(){
     finderpopupcloser.onclick();
+}
+
+function coordFormat(){
+    return(function(coord1){
+        mouseCoords = coord1;
+        if(coord1[0] < -180){coord1[0] = coord1[0] + 360};
+        if(coord1[0] > 180){coord1[0] = coord1[0] - 360};
+        var template = 'Lat: {y} Lon: {x}';
+        var coord2 = [coord1[1], coord1[0]];
+        return ol.coordinate.format(coord1,template,5);
+    });
+}
+
+function deleteSelections(){
+    selectInteraction.getFeatures().forEach(function(feature){
+        layersArr['select'].getSource().removeFeature(feature);
+    });
+    selectInteraction.getFeatures().clear();
+    if(layersArr['select'].getSource().getFeatures().length < 1){
+        removeUserLayer('select');
+    }
 }
 
 function exportMapPNG(){
@@ -1187,7 +1237,7 @@ function loadPoints(){
                 else{
                     loadPointWMSLayer();
                 }
-                cleanSelectionsLayer();
+                //cleanSelectionsLayer();
                 changeRecordPage(1);
                 $('#recordstab').tabs({active: 1});
                 $("#accordion").accordion("option","active",1);
@@ -1429,6 +1479,8 @@ function prepCsvControlForm(){
         document.getElementById("dh-contentType").value = 'application/zip';
     }
     else{
+        document.getElementById("zipcsv").value = false;
+        document.getElementById("dh-type").value = 'csv';
         document.getElementById("dh-contentType").value = 'text/csv; charset='+cset;
     }
     $("#csvoptions").popup("hide");
@@ -1554,12 +1606,13 @@ function processPointSelection(cluster){
 
 function refreshLayerOrder(){
     var layerCount = map.getLayers().getArray().length;
-    layersArr['dragdrop1'].setZIndex(layerCount-5);
-    layersArr['dragdrop2'].setZIndex(layerCount-4);
-    layersArr['dragdrop3'].setZIndex(layerCount-3);
-    layersArr['select'].setZIndex(layerCount-2);
+    layersArr['dragdrop1'].setZIndex(layerCount-6);
+    layersArr['dragdrop2'].setZIndex(layerCount-5);
+    layersArr['dragdrop3'].setZIndex(layerCount-4);
+    layersArr['select'].setZIndex(layerCount-3);
     //layersArr['pointi'].setZIndex(layerCount-2);
-    layersArr['pointv'].setZIndex(layerCount-1);
+    layersArr['pointv'].setZIndex(layerCount-2);
+    layersArr['heat'].setZIndex(layerCount-1);
     layersArr['spider'].setZIndex(layerCount);
 }
 
@@ -1608,7 +1661,11 @@ function removeUserLayer(layerID){
     else if(layerID == 'pointv'){
         clearSelections();
         adjustSelectionsTab();
-        layersArr[layerID].getSource().clear(true);
+        pointvectorsource.clear(true);
+        layersArr['pointv'].setSource(pointvectorsource);
+        layersArr['heat'].setSource(pointvectorsource);
+        layersArr['heat'].setVisible(false);
+        clustersource = '';
         $('#criteriatab').tabs({active: 0});
         $("#accordion").accordion("option","active",0);
         pointActive = false;
@@ -1619,7 +1676,9 @@ function removeUserLayer(layerID){
         else if(layerID == 'dragdrop2') dragDrop2 = false;
         else if(layerID == 'dragdrop3') dragDrop3 = false;
     }
+    document.getElementById("selectlayerselect").value = 'none';
     removeLayerToSelList(layerID);
+    setActiveLayer();
     toggleLayerController();
 }
 
@@ -1728,56 +1787,58 @@ function setClusterSymbol(feature) {
     var style = '';
     var stroke = '';
     var selected = false;
-    var size = feature.get('features').length;
-    if(size > 1){
-        var features = feature.get('features');
-        if(selections.length > 0){
-            var clusterindex = feature.get('identifiers');
-            for(i in selections){
-                if(clusterindex.indexOf(selections[i]) !== -1) selected = true;
+    if(feature.get('features')){
+        var size = feature.get('features').length;
+        if(size > 1){
+            var features = feature.get('features');
+            if(selections.length > 0){
+                var clusterindex = feature.get('identifiers');
+                for(i in selections){
+                    if(clusterindex.indexOf(selections[i]) !== -1) selected = true;
+                }
             }
-        }
-        var clusterindex = feature.get('identifiers');
-        var cKey = feature.get('clusterkey');
-        if(mapSymbology == 'coll'){
-            var hexcolor = '#'+collSymbology[cKey]['color'];
-        }
-        else if(mapSymbology == 'taxa'){
-            var hexcolor = '#'+taxaSymbology[cKey]['color'];
-        }
-        var colorArr = hexToRgb(hexcolor);
-        if(size < 10) var radius = 10;
-        else if(size < 100) var radius = 15;
-        else if(size < 1000) var radius = 20;
-        else if(size < 10000) var radius = 25;
-        else if(size < 100000) var radius = 30;
-        else var radius = 35;
+            var clusterindex = feature.get('identifiers');
+            var cKey = feature.get('clusterkey');
+            if(mapSymbology == 'coll'){
+                var hexcolor = '#'+collSymbology[cKey]['color'];
+            }
+            else if(mapSymbology == 'taxa'){
+                var hexcolor = '#'+taxaSymbology[cKey]['color'];
+            }
+            var colorArr = hexToRgb(hexcolor);
+            if(size < 10) var radius = 10;
+            else if(size < 100) var radius = 15;
+            else if(size < 1000) var radius = 20;
+            else if(size < 10000) var radius = 25;
+            else if(size < 100000) var radius = 30;
+            else var radius = 35;
 
-        if(selected) stroke = new ol.style.Stroke({color: '#10D8E6', width: 2});
+            if(selected) stroke = new ol.style.Stroke({color: '#10D8E6', width: 2});
 
-        style = new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: radius,
-                stroke: stroke,
-                fill: new ol.style.Fill({
-                    color: [colorArr['r'],colorArr['g'],colorArr['b'],0.8]
-                })
-            }),
-            text: new ol.style.Text({
-                text: size.toString(),
-                fill: new ol.style.Fill({
-                    color: '#fff'
+            style = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: radius,
+                    stroke: stroke,
+                    fill: new ol.style.Fill({
+                        color: [colorArr['r'],colorArr['g'],colorArr['b'],0.8]
+                    })
                 }),
-                stroke: new ol.style.Stroke({
-                    color: 'rgba(0, 0, 0, 0.6)',
-                    width: 3
+                text: new ol.style.Text({
+                    text: size.toString(),
+                    fill: new ol.style.Fill({
+                        color: '#fff'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(0, 0, 0, 0.6)',
+                        width: 3
+                    })
                 })
-            })
-        });
-    }
-    else{
-        var originalFeature = feature.get('features')[0];
-        style = setSymbol(originalFeature);
+            });
+        }
+        else{
+            var originalFeature = feature.get('features')[0];
+            style = setSymbol(originalFeature);
+        }
     }
     return style;
 }
@@ -2001,6 +2062,18 @@ function toggleCat(catid){
     toggle("cat-"+catid);
 }
 
+function toggleHeatMap(){
+    showHeatMap = document.getElementById("heatmapswitch").checked;
+    if(showHeatMap){
+        layersArr['pointv'].setVisible(false);
+        layersArr['heat'].setVisible(true);
+    }
+    else{
+        layersArr['heat'].setVisible(false);
+        layersArr['pointv'].setVisible(true);
+    }
+}
+
 function toggleLayerController(layerID){
     if(!layersExist && !dragDrop1 && !dragDrop2 && !dragDrop3){
         $('#addLayers').popup('hide');
@@ -2013,6 +2086,7 @@ function toggleLayerController(layerID){
 
 function toggleUploadLayer(c,title){
     var layer = c.value;
+    if(layer == 'pointv' && showHeatMap) layer = 'heat';
     if(c.checked == true){
         layersArr[layer].setVisible(true);
         addLayerToSelList(c.value,title);
