@@ -362,7 +362,6 @@ if($action){
 					}
 					?>
 					<div style="clear:both;"></div>
-					<input type="hidden" name="usecookies" value="false" />
 				</div>
 			</form>
 			

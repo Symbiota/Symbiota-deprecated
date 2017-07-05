@@ -48,7 +48,7 @@ $pManager = new ImageLibraryManager();
 				$specList = $collList['coll'];
 				foreach($specList as $k => $cArr){
 					echo '<div>';
-					$phLink = 'search.php?nametype=2&taxtp=2&imagecount=all&imagedisplay=thumbnail&imagetype=all&submitaction=Load%20Images&db[]='.$k.'&usecookies=false';
+					$phLink = 'search.php?nametype=2&taxtp=2&imagecount=all&imagedisplay=thumbnail&imagetype=all&submitaction=Load%20Images&db[]='.$k;
 					echo '<a href="'.$phLink.'">'.$cArr['name'].'</a> ('.$cArr['imgcnt'].')</div>';
 				}
 				?>
@@ -59,7 +59,7 @@ $pManager = new ImageLibraryManager();
 				$obsList = $collList['obs'];
 				foreach($obsList as $k => $cArr){
 					echo '<div>';
-					$phLink = 'search.php?nametype=2&taxtp=2&imagecount=all&imagedisplay=thumbnail&imagetype=all&submitaction=Load%20Images&db[]='.$k.'&usecookies=false';
+					$phLink = 'search.php?nametype=2&taxtp=2&imagecount=all&imagedisplay=thumbnail&imagetype=all&submitaction=Load%20Images&db[]='.$k;
 					echo '<a href="'.$phLink.'">'.$cArr['name'].'</a> ('.$cArr['imgcnt'].')</div>';
 				}
 				?>
