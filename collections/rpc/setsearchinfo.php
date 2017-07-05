@@ -15,7 +15,7 @@ if($collStArr && $searchStArr) $stArr = array_merge($searchStArr,$collStArr);
 if(!$collStArr && $searchStArr) $stArr = $searchStArr;
 if($collStArr && !$searchStArr) $stArr = $collStArr;
 
-$collManager = new OccurrenceListManager();
+$collManager = new OccurrenceListManager(false);
 
 $collManager->setSearchTermsArr($stArr);
 $collManager->getSqlWhere();
@@ -36,11 +36,11 @@ if($collManager->getClName() && $targetTid){
 }
 $recordListHtml .= '</div><div style="margin:5px;">';
 $recordListHtml .= '<div><b>'.$LANG['DATASET'].':</b> '.$collManager->getDatasetSearchStr().'</div>';
-if($collManager->getTaxaSearchStr()){
-    $recordListHtml .= '<div><b>'.$LANG['TAXA'].':</b> '.$collManager->getTaxaSearchStr().'</div>';
+if($taxaSearchStr = $collManager->getTaxaSearchStr()){
+	$recordListHtml .= '<div><b>'.$LANG['TAXA'].':</b> '.$taxaSearchStr.'</div>';
 }
-if($collManager->getLocalSearchStr()){
-    $recordListHtml .= '<div><b>'.$LANG['SEARCH_CRITERIA'].':</b> '.$collManager->getLocalSearchStr().'</div>';
+if($localSearchStr = $collManager->getLocalSearchStr()){
+	$recordListHtml .= '<div><b>'.$LANG['SEARCH_CRITERIA'].':</b> '.$localSearchStr.'</div>';
 }
 $recordListHtml .= '<textarea id="urlPrefixBox" style="position:absolute;left:-9999px;top:-9999px">'.$urlPrefix.$collManager->getSearchResultUrl().'</textarea>';
 $recordListHtml .= '<textarea id="urlFullBox" style="position:absolute;left:-9999px;top:-9999px"></textarea>';

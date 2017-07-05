@@ -24,7 +24,7 @@ if($SOLR_MODE){
     $specimenArray = $collManager->translateSOLRRecList($solrArr);
 }
 else{
-    $collManager = new OccurrenceListManager();
+    $collManager = new OccurrenceListManager(false);
     $collManager->setSearchTermsArr($stArr);
     $specimenArray = $collManager->getRecordArr($pageNumber,$cntPerPage);
 }

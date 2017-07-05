@@ -32,22 +32,7 @@ if(isset($_REQUEST['db'])){
     $stArrCollJson = json_encode($collArr);
     if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
 }
-
-$occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
-	'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
-	'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
-	'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
-	'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
-	'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans', 
-	'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
-	'country', 'stateprovince', 'county', 'municipality', 'locality',
-	'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 
-	'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources', 
-	'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
-	'verbatimelevation','language',
-	'labelproject','basisofrecord');
 ?>
-
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
@@ -115,7 +100,7 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
                 <?php
             }
             else{
-                echo "sessionStorage.collSearchPage = listPage;";
+                echo "sessionStorage.collSearchPage = listPage;\n";
             }
             ?>
 
@@ -148,12 +133,8 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
                 },
                 dataType: "html"
             }).done(function(msg) {
-                if(msg){
-                    document.getElementById("queryrecordsinfo").innerHTML = msg;
-                }
-                else{
-                    document.getElementById("queryrecords").innerHTML = "<p>An error occurred retrieving search information.</p>";
-                }
+                if(!msg) msg = "<p>An error occurred retrieving search information.</p>";
+                document.getElementById("queryrecordsinfo").innerHTML = msg;
             });
         }
 
@@ -291,6 +272,19 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
 					<fieldset>
 						<div style="width:600px;">
 							<?php 
+							$occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
+								'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
+								'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
+								'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
+								'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
+								'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
+								'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
+								'country', 'stateprovince', 'county', 'municipality', 'locality',
+								'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters',
+								'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
+								'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
+								'verbatimelevation','language',
+								'labelproject','basisofrecord');
 							foreach($occFieldArr as $k => $v){
 								echo '<div style="float:left;margin-right:5px;">';
 								echo '<input type="checkbox" name="kmlFields[]" value="'.$v.'" />'.$v.'</div>';

@@ -8,8 +8,8 @@ class OccurrenceListManager extends OccurrenceManager{
 	protected $sortField2 = '';
 	protected $sortOrder = '';
 	
- 	public function __construct(){
- 		parent::__construct();
+	public function __construct($readVariables = true){
+		parent::__construct($readVariables);
  	}
 
 	public function __destruct(){

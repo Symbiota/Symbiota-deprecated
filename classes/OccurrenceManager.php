@@ -15,10 +15,10 @@ class OccurrenceManager{
 	private $collArrIndex = 0;
 	private $occurSearchProjectExists = 0;
 
- 	public function __construct(){
+ 	public function __construct($readVariables = true){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
 		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"])  $this->reset();
-		$this->readRequestVariables();
+		if($readVariables) $this->readRequestVariables();
  	}
 
 	public function __destruct(){
@@ -36,9 +36,6 @@ class OccurrenceManager{
 		global $clientRoot;
 		$domainName = $_SERVER['HTTP_HOST'];
 		if(!$domainName) $domainName = $_SERVER['SERVER_NAME'];
-		setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
-		setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
-		setCookie("collvars","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
  		$this->reset = 1;
 		if(isset($this->searchTermsArr['db']) || isset($this->searchTermsArr['oic'])){
 			//reset all other search terms except maintain the db terms
@@ -933,7 +930,6 @@ class OccurrenceManager{
 			//Since checklist vouchers are being searched, clear colldbs
 			$domainName = $_SERVER['HTTP_HOST'];
 			if(!$domainName) $domainName = $_SERVER['SERVER_NAME'];
-			setCookie("colldbs","",time()-3600,($clientRoot?$clientRoot:'/'),$domainName,false,true);
 		}
 		elseif(array_key_exists("db",$_REQUEST)){
 			//Limit collids and/or catids
