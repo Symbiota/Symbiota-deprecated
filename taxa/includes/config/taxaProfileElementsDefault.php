@@ -69,7 +69,7 @@ $ambiguousDiv = ob_get_clean();
 
 ob_start();
 if($links && $links[0]['sortseq'] == 1){
-    $uStr = str_replace('--SCINAME--',urlencode($taxonManager->getSciName()),$links[0]['url']);
+    $uStr = str_replace('--SCINAME--',rawurlencode($taxonManager->getSciName()),$links[0]['url']);
     ?>
     <div id="weblinks">
         <?php echo $LANG['GO_TO']; ?> <a href="<?php echo $uStr; ?>" target="_blank"><?php echo $links[0]['title']; ?></a>...
@@ -344,7 +344,7 @@ echo "</div>";
 if($taxonRank > 180 && $links){
     echo '<div id="links" style="display:none;"><h1 id="linksbanner">'.$LANG['WEB_LINKS'].'</h1><ul id="linkslist">';
     foreach($links as $l){
-        $urlStr = str_replace('--SCINAME--',urlencode($taxonManager->getSciName()),$l['url']);
+        $urlStr = str_replace('--SCINAME--',rawurlencode($taxonManager->getSciName()),$l['url']);
         echo '<li><a href="'.$urlStr.'" target="_blank">'.$l['title'].'</a></li>';
         if($l['notes']) echo ' '.$l['notes'];
     }
