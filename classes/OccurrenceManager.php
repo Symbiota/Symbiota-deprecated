@@ -10,7 +10,6 @@ class OccurrenceManager{
 	private $taxaSearchType;
 	protected $searchTermsArr = Array();
 	protected $localSearchArr = Array();
-	protected $useCookies = 1;
 	protected $reset = 0;
 	private $clName;
 	private $collArrIndex = 0;
@@ -18,21 +17,7 @@ class OccurrenceManager{
 
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
-		//$this->useCookies = (array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?0:1);
-        $this->useCookies = 0;
-		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
- 			$this->reset();
- 		}
- 		if($this->useCookies && !$this->reset){
- 			$this->readCollCookies();
- 		}
- 		//Read DB cookies no matter what
-		/*if(array_key_exists("colldbs",$_COOKIE)){
-			$this->searchTermsArr["db"] = $_COOKIE["colldbs"];
-		}
-		elseif(array_key_exists("collclid",$_COOKIE)){
-			$this->searchTermsArr["clid"] = $_COOKIE["collclid"];
-		}*/
+		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"])  $this->reset();
 		$this->readRequestVariables();
  	}
 
@@ -64,35 +49,6 @@ class OccurrenceManager{
 			unset($this->searchTermsArr);
 			if($dbsTemp) $this->searchTermsArr["db"] = $dbsTemp;
 			if($clidTemp) $this->searchTermsArr["clid"] = $clidTemp;
-		}
-	}
-
-	private function readCollCookies(){
-		if($_COOKIE){
-			if(array_key_exists("colltaxa",$_COOKIE)){
-				$collTaxa = $_COOKIE["colltaxa"];
-				$taxaArr = explode("&",$collTaxa);
-				foreach($taxaArr as $value){
-					$this->searchTermsArr[substr($value,0,strpos($value,":"))] = substr($value,strpos($value,":")+1);
-				}
-			}
-			if(array_key_exists("collsearch",$_COOKIE)){
-				$collSearch = $_COOKIE["collsearch"];
-				$searArr = explode("&",$collSearch);
-				foreach($searArr as $value){
-					$this->searchTermsArr[substr($value,0,strpos($value,":"))] = substr($value,strpos($value,":")+1);
-				}
-			}
-			if(array_key_exists("collvars",$_COOKIE)){
-				$collVarStr = $_COOKIE["collvars"];
-				$varsArr = explode("&",$collVarStr);
-				foreach($varsArr as $value){
-					if(strpos($value,"reccnt") === 0){
-						$this->recordCount = substr($value,strpos($value,":")+1);
-					}
-				}
-			}
-			//return $this->searchTermsArr;
 		}
 	}
 
@@ -973,7 +929,6 @@ class OccurrenceManager{
 			else{
 				$clidStr = $this->conn->real_escape_string(implode(',',array_unique($clidIn)));
 			}
-		 	if($this->useCookies) setCookie("collclid",$clidStr,0,($clientRoot?$clientRoot:'/'));
 			$this->searchTermsArr["clid"] = $clidStr;
 			//Since checklist vouchers are being searched, clear colldbs
 			$domainName = $_SERVER['HTTP_HOST'];
@@ -1015,15 +970,8 @@ class OccurrenceManager{
 			}
 
 			if($dbStr){
-				if($this->useCookies){ 
-					$domainName = $_SERVER['HTTP_HOST'];
-					if(!$domainName) $domainName = $_SERVER['SERVER_NAME'];
-					setCookie("colldbs",$dbStr,0,($clientRoot?$clientRoot:'/'),$domainName,false,true);
-				}
 				$this->searchTermsArr["db"] = $dbStr;
 			}
-			//Since coll IDs are being searched, clear checklist voucher ids
-			setCookie("collclid","",time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
 			$taxa = $this->conn->real_escape_string($_REQUEST["taxa"]);
@@ -1064,10 +1012,8 @@ class OccurrenceManager{
 					$collTaxa .= "&taxontype:".$searchType;
 					$this->searchTermsArr["taxontype"] = $searchType;
 				}
-				if($this->useCookies) setCookie("colltaxa",$collTaxa,0,($clientRoot?$clientRoot:'/'));
 			}
 			else{
-				if($this->useCookies) setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'));
 				unset($this->searchTermsArr["taxa"]);
 			}
 		}
@@ -1308,14 +1254,6 @@ class OccurrenceManager{
 				$searchFieldsActivated = true;
 			}
 		}
-		
-		$searchStr = implode("&",$searchArr);
-		if($searchStr){
-			if($this->useCookies) setCookie("collsearch",$searchStr,0,($clientRoot?$clientRoot:'/'));
-		}
-		elseif($searchFieldsActivated){
-			if($this->useCookies) setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'));
-		}
 	}
 
 	//Misc return functions
@@ -1394,10 +1332,6 @@ class OccurrenceManager{
 	}
 
 	//Setters and getters
-	public function getUseCookies(){
-		return $this->useCookies;
-	}
-
 	public function getClName(){
 		return $this->clName;
 	}

@@ -6,7 +6,6 @@ class MapInterfaceManager{
 	protected $conn;
 	protected $searchTermsArr = Array();
 	protected $localSearchArr = Array();
-	protected $useCookies = 1;
 	protected $reset = 0;
 	protected $dynamicClid;
 	protected $recordCount = 0;
