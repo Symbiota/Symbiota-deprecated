@@ -198,11 +198,12 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 					echo '</fieldset>';
 				}
 				?>
-				<div style="width:500px;">
+				<div style="width:650px;">
 					<fieldset style="margin:15px;padding:15px;">
-						<legend><b>Filter</b></legend>
+						<legend><b>Harvesting Filter</b></legend>
 						<form name="filterform" method="post" action="attributemining.php" onsubmit="return verifyFilterForm(this)" >
 							<div>
+								<b>Occurrence trait: </b>
 								<select name="traitid">
 									<option value="">Select Target Trait (required)</option>
 									<option value="">------------------------------------</option>
@@ -220,6 +221,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								</select>
 							</div>
 							<div>
+								<b>Verbatim text source: </b>
 								<select name="fieldname">
 									<option value="">Select Source Field (required)</option>
 									<option value="">------------------------------------</option>
@@ -231,7 +233,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								</select>
 							</div>
 							<div>
-								<b>Limit Term (optional):</b> 
+								<b>Filter by text (optional):</b> 
 								<input name="stringfilter" type="text" value="<?php echo $stringFilter; ?>" />
 							</div>
 							<div style="float:right;margin-right:20px">
@@ -239,7 +241,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								<input id="filtersubmit" name="submitform" type="submit" value="Get Field Values" />
 							</div>
 							<div>
-								<b>Taxon (optional): </b>
+								<b>Filter by taxon (optional): </b>
 								<input id="taxonfilter" name="taxonfilter" type="text" value="<?php echo $taxonFilter; ?>" /> 
 								<input id="tidfilter" name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
 								<span id="verify-span" style="display:none;font-weight:bold;color:green;">verifying taxonomy...</span>
