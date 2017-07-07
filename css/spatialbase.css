@@ -49,6 +49,10 @@
 	opacity: 0.85;
 }
 
+.ui-rangeSlider-label .ui-rangeSlider-leftLabel {
+	display: none;
+}
+
 #maptoolcontainer {
 	position: absolute;
 	top: 10px;
@@ -287,4 +291,81 @@ a.boxclose{
 .ui-tabs a{
 	font-weight: normal;
 	color: black;
+}
+
+#sliderdiv{
+	pointer-events:none;
+}
+
+#sliderdiv .ui-widget-header {
+	overflow: hidden;
+	background: #68a1d6;
+	height: 30px;
+	margin:0;
+	-moz-border-radius: 4px;
+	cursor: none;
+	-webkit-box-shadow: inset 0 2px 6px RGBA(0,0,0,0.5);
+	-moz-box-shadow: inset 0 2px 6px RGBA(0,0,0,0.5);
+	box-shadow: inset 0 2px 6px RGBA(0,0,0,0.5);
+}
+
+#sliderdiv .ui-corner-all {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+}
+
+#sliderdiv .ui-slider .ui-slider-range {
+	position: absolute;
+	z-index: 1;
+	font-size: .7em;
+	display: block;
+	border: 0;
+	background-position: 0 0;
+}
+
+#sliderdiv .ui-slider-horizontal .ui-slider-range {
+	top: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+#custom-handle-min, #custom-handle-max {
+	background: transparent;
+	border: 0px;
+	cursor:col-resize;
+	position: absolute;
+	display: block;
+	z-index:99;
+	pointer-events: auto;
+}
+
+.custom-label {
+	background: #67707F;
+	background: -moz-linear-gradient(top, #67707F 0%, #888DA0 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#67707F), color-stop(100%,#888DA0));
+	padding: 5px 10px;
+	width: 94px;
+	height: 30px;
+	position: relative;
+	top: -39px;
+	left: -40px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	color:white;
+	font-size:12px;
+}
+.label-arrow {
+	width: 30px;
+	height: 15px;
+	position: relative;
+	top: -40px;
+	left: -8px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	border-left: 15px solid transparent;
+	border-right: 15px solid transparent;
+	border-top: 15px solid #888DA0;
+
 }

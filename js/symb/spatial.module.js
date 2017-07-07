@@ -389,7 +389,8 @@ function changeClusterDistance(){
 function changeClusterSetting(){
     clusterPoints = document.getElementById("clusterswitch").checked;
     if(clusterPoints){
-        layersArr['pointv'].setSource(clustersource);
+        removeDateSlider();
+        loadPointWFSLayer(0);
     }
     else{
         layersArr['pointv'].setSource(pointvectorsource);
@@ -495,6 +496,15 @@ function changeTaxaColor(color,tidcode){
     layersArr['pointv'].getSource().changed();
 }
 
+function checkDateSliderType(){
+    if(dateSliderActive){
+        document.body.removeChild(sliderdiv);
+        sliderdiv = '';
+        var dual = document.getElementById("dsdualtype").checked;
+        createDateSlider(dual);
+    }
+}
+
 function cleanSelectionsLayer(){
     var selLayerFeatures = layersArr['select'].getSource().getFeatures();
     var currentlySelected = selectInteraction.getFeatures().getArray();
@@ -506,10 +516,15 @@ function cleanSelectionsLayer(){
 }
 
 function clearSelections(){
-    for(i in selections){
-        removeSelectionRecord(Number(selections[i]));
-    }
+    var selpoints = selections;
     selections = [];
+    for(i in selpoints){
+        if(!clusterPoints){
+            var point = findOccPoint(selpoints[i]);
+            var style = setSymbol(point);
+            point.setStyle(style);
+        }
+    }
     layersArr['pointv'].getSource().changed();
     adjustSelectionsTab();
     document.getElementById("selectiontbody").innerHTML = '';
@@ -538,6 +553,87 @@ function coordFormat(){
         var coord2 = [coord1[1], coord1[0]];
         return ol.coordinate.format(coord1,template,5);
     });
+}
+
+function createDateSlider(dual){
+    if(dsOldestDate && dsNewestDate){
+        sliderdiv = document.createElement('div');
+        sliderdiv.setAttribute("id","sliderdiv");
+        sliderdiv.setAttribute("style","width:calc(95% - 250px);height:30px;bottom:10px;left:50px;display:block;position:absolute;z-index:3;");
+        var minhandlediv = document.createElement('div');
+        minhandlediv.setAttribute("id","custom-handle-min");
+        minhandlediv.setAttribute("class","ui-slider-handle");
+        var minlabeldiv = document.createElement('div');
+        minlabeldiv.setAttribute("id","custom-label-min");
+        minlabeldiv.setAttribute("class","custom-label");
+        var minlabelArrowdiv = document.createElement('div');
+        minlabelArrowdiv.setAttribute("id","custom-label-min-arrow");
+        minlabelArrowdiv.setAttribute("class","label-arrow");
+        minhandlediv.appendChild(minlabeldiv);
+        minhandlediv.appendChild(minlabelArrowdiv);
+        sliderdiv.appendChild(minhandlediv);
+        var maxhandlediv = document.createElement('div');
+        maxhandlediv.setAttribute("id","custom-handle-max");
+        maxhandlediv.setAttribute("class","ui-slider-handle");
+        var maxlabeldiv = document.createElement('div');
+        maxlabeldiv.setAttribute("id","custom-label-max");
+        maxlabeldiv.setAttribute("class","custom-label");
+        maxhandlediv.appendChild(maxlabeldiv);
+        var maxlabelArrowdiv = document.createElement('div');
+        maxlabelArrowdiv.setAttribute("class","label-arrow");
+        maxhandlediv.appendChild(maxlabeldiv);
+        maxhandlediv.appendChild(maxlabelArrowdiv);
+        sliderdiv.appendChild(maxhandlediv);
+        document.body.appendChild(sliderdiv);
+
+        var minDate = dsOldestDate;
+        var maxDate = dsNewestDate;
+        tsOldestDate = dsOldestDate;
+        tsNewestDate = dsNewestDate;
+        minDate = minDate.getTime();
+        maxDate = maxDate.getTime();
+
+        var minhandle = $("#custom-handle-min");
+        var maxhandle = $("#custom-handle-max");
+        $("#sliderdiv").slider({
+            range: true,
+            min: minDate,
+            max: maxDate,
+            values: [minDate,maxDate],
+            create: function() {
+                if(dual){
+                    var mintextbox = $("#custom-label-min");
+                    var hMinDate = new Date(minDate);
+                    var minDateStr = getISOStrFromDateObj(hMinDate);
+                    mintextbox.text(minDateStr);
+                }
+                var maxtextbox = $("#custom-label-max");
+                var hMaxDate = new Date(maxDate);
+                var maxDateStr = getISOStrFromDateObj(hMaxDate);
+                maxtextbox.text(maxDateStr);
+            },
+            //step: 7 * 24 * 60 * 60 * 1000,
+            step: 1000 * 60 * 60 * 24,
+            slide: function(event, ui) {
+                if(dual){
+                    var mintextbox = $("#custom-label-min");
+                    tsOldestDate = new Date(ui.values[0]);
+                    var minDateStr = getISOStrFromDateObj(tsOldestDate);
+                    mintextbox.text(minDateStr);
+                }
+                var maxtextbox = $("#custom-label-max");
+                tsNewestDate = new Date(ui.values[1]);
+                var maxDateStr = getISOStrFromDateObj(tsNewestDate);
+                maxtextbox.text(maxDateStr);
+                layersArr['pointv'].getSource().changed();
+            }
+        });
+        if(!dual){
+            document.getElementById("custom-handle-min").style.display = 'none';
+            document.getElementById("custom-handle-min").style.position = 'absolute';
+            document.getElementById("custom-handle-min").style.left = '-9999px';
+        }
+    }
 }
 
 function deleteSelections(){
@@ -760,10 +856,13 @@ function getGeographyParams(vector){
                     for (e in polyCoords) {
                         for (i in polyCoords[e]) {
                             var ring = turf.lineString(polyCoords[e][i]);
-                            //alert(ring.geometry.coordinates.length);
+                            //console.log('start multipolygon length: '+ring.geometry.coordinates.length);
                             //ring = turf.simplify(ring, 0.000001, true);
+                            if(ring.geometry.coordinates.length > 10){
+                                ring = turf.simplify(ring, 0.001, true);
+                            }
                             ring = turf.simplify(ring, 0.001, true);
-                            //alert(ring.geometry.coordinates.length);
+                            //console.log('end multipolygon length: '+ring.geometry.coordinates.length);
                             polyCoords[e][i] = ring.geometry.coordinates;
                         }
                     }
@@ -772,10 +871,12 @@ function getGeographyParams(vector){
                 if (geoType == 'Polygon') {
                     for (i in polyCoords) {
                         var ring = turf.lineString(polyCoords[i]);
-                        //alert(ring.geometry.coordinates.length);
+                        //console.log('start polygon length: '+ring.geometry.coordinates.length);
                         //ring = turf.simplify(ring, 0.000001, true);
-                        ring = turf.simplify(ring, 0.001, true);
-                        //alert(ring.geometry.coordinates.length);
+                        if(ring.geometry.coordinates.length > 10){
+                            ring = turf.simplify(ring, 0.001, true);
+                        }
+                        //console.log('end polygon length: '+ring.geometry.coordinates.length);
                         polyCoords[i] = ring.geometry.coordinates;
                     }
                     var turfSimple = turf.polygon(polyCoords);
@@ -829,6 +930,14 @@ function getGeographyParams(vector){
         }
     });
     finishGetGeographyParams();
+}
+
+function getISOStrFromDateObj(dObj){
+    var dYear = dObj.getFullYear();
+    var dMonth = ((dObj.getMonth() + 1) > 9?(dObj.getMonth() + 1):'0'+(dObj.getMonth() + 1));
+    var dDay = (dObj.getDate() > 9?dObj.getDate():'0'+dObj.getDate());
+
+    return dYear+'-'+dMonth+'-'+dDay;
 }
 
 function getPointInfoArr(cluster){
@@ -1149,16 +1258,16 @@ function hexToRgb(hex) {
     } : null;
 }
 
-function hideCluster(cluster){
+function hideFeature(feature){
     var invisibleStyle = new ol.style.Style({
         image: new ol.style.Circle({
-            radius: cluster.get('radius'),
+            radius: feature.get('radius'),
             fill: new ol.style.Fill({
                 color: 'rgba(255, 255, 255, 0.01)'
             })
         })
     });
-    cluster.setStyle(invisibleStyle);
+    feature.setStyle(invisibleStyle);
 }
 
 function imagePostFunction(image, src) {
@@ -1225,6 +1334,9 @@ function loadPoints(){
     collSymbology = [];
     taxaSymbology = [];
     selections = [];
+    dsOldestDate = '';
+    dsNewestDate = '';
+    removeDateSlider();
     cqlString = newcqlString;
     solrqString = newsolrqString;
     if(newsolrqString){
@@ -1488,13 +1600,31 @@ function prepCsvControlForm(){
 }
 
 function primeSymbologyData(features){
+    var currentDate = new Date();
     for(f in features) {
+        if(features[f].get('coll_year')){
+            var fyear = Number(features[f].get('coll_year'));
+            if(fyear.toString().length == 4 && fyear > 1500){
+                var fmonth = (features[f].get('coll_month')?Number(features[f].get('coll_month')):1);
+                var fday = (features[f].get('coll_day')?Number(features[f].get('coll_day')):1);
+                var fDate = new Date();
+                fDate.setFullYear(fyear, fmonth - 1, fday);
+                if(currentDate > fDate){
+                    if(!dsOldestDate || (fDate < dsOldestDate)){
+                        dsOldestDate = fDate;
+                    }
+                    if(!dsNewestDate || (fDate > dsNewestDate)){
+                        dsNewestDate = fDate;
+                    }
+                }
+            }
+        }
         var color = 'e69e67';
         var collName = features[f].get('CollectionName');
         var collid = features[f].get('collid');
         var tidinterpreted = features[f].get('tidinterpreted');
         var sciname = features[f].get('sciname');
-        var family = features[f].get('family');
+        var family = (features[f].get('accFamily')?features[f].get('accFamily'):features[f].get('family'));
         if(family){
             family = family.toUpperCase();
         }
@@ -1586,12 +1716,12 @@ function processDownloadRequest(selection){
     }
 }
 
-function processPointSelection(cluster){
-    var feature = (cluster.get('features')?cluster.get('features')[0]:cluster);
+function processPointSelection(sFeature){
+    var feature = (sFeature.get('features')?sFeature.get('features')[0]:sFeature);
     var occid = Number(feature.get('occid'));
     if(selections.indexOf(occid) < 0){
         selections.push(occid);
-        var infoArr = getPointInfoArr(cluster);
+        var infoArr = getPointInfoArr(sFeature);
         updateSelections(occid,infoArr);
     }
     else{
@@ -1599,8 +1729,8 @@ function processPointSelection(cluster){
         selections.splice(index, 1);
         removeSelectionRecord(occid);
     }
-    var style = (clusterPoints?setClusterSymbol(cluster):setSymbol(cluster));
-    cluster.setStyle(style);
+    var style = (sFeature.get('features')?setClusterSymbol(sFeature):setSymbol(sFeature));
+    sFeature.setStyle(style);
     adjustSelectionsTab();
 }
 
@@ -1614,6 +1744,16 @@ function refreshLayerOrder(){
     layersArr['pointv'].setZIndex(layerCount-2);
     layersArr['heat'].setZIndex(layerCount-1);
     layersArr['spider'].setZIndex(layerCount);
+}
+
+function removeDateSlider(){
+    if(document.getElementById("sliderdiv")){
+        document.body.removeChild(sliderdiv);
+        sliderdiv = '';
+        document.getElementById("datesliderswitch").checked = false;
+        dateSliderActive = false;
+    }
+    layersArr['pointv'].getSource().changed();
 }
 
 function removeLayerToSelList(layer){
@@ -1655,13 +1795,15 @@ function removeUserLayer(layerID){
         layerDiv.parentNode.removeChild(layerDiv);
     }
     if(layerID == 'select'){
+        selectInteraction.getFeatures().clear();
         layersArr[layerID].getSource().clear(true);
         shapeActive = false;
     }
     else if(layerID == 'pointv'){
         clearSelections();
         adjustSelectionsTab();
-        pointvectorsource.clear(true);
+        removeDateSlider();
+        pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         layersArr['heat'].setSource(pointvectorsource);
         layersArr['heat'].setVisible(false);
@@ -1679,7 +1821,7 @@ function removeUserLayer(layerID){
     document.getElementById("selectlayerselect").value = 'none';
     removeLayerToSelList(layerID);
     setActiveLayer();
-    toggleLayerController();
+    toggleLayerTable();
 }
 
 function resetMainSymbology(){
@@ -1888,13 +2030,12 @@ function setLayersTable(){
                 }
             }
             if(jsonReturn){
-                layersExist = true;
                 for(i in layerArr){
                     buildLayerTableRow(layerArr[i],false);
                 }
-                toggleLayerController();
             }
         }
+        toggleLayerTable();
     };
     http.send();
 }
@@ -1923,6 +2064,10 @@ function setSpatialParamBox(){
 }
 
 function setSymbol(feature){
+    var showPoint = true;
+    if(dateSliderActive && !clusterPoints){
+        showPoint = validateFeatureDate(feature);
+    }
     var style = '';
     var stroke = '';
     var selected = false;
@@ -1939,10 +2084,15 @@ function setSymbol(feature){
         var color = '#'+taxaSymbology[cKey]['color'];
     }
 
-    if(selected) stroke = new ol.style.Stroke({color: '#10D8E6', width: 2});
-    else stroke = new ol.style.Stroke({color: 'black', width: 1});
-
-    var fill = new ol.style.Fill({color: color});
+    if(showPoint){
+        if(selected) stroke = new ol.style.Stroke({color: '#10D8E6', width: 2});
+        else stroke = new ol.style.Stroke({color: 'black', width: 1});
+        var fill = new ol.style.Fill({color: color});
+    }
+    else{
+        stroke = new ol.style.Stroke({color: 'rgba(255, 255, 255, 0.01)', width: 0});
+        var fill = new ol.style.Fill({color: 'rgba(255, 255, 255, 0.01)'});
+    }
 
     if(recType.toLowerCase().indexOf('observation') !== -1){
         style = new ol.style.Style({
@@ -1967,9 +2117,14 @@ function setSymbol(feature){
     return style;
 }
 
-function showCluster(cluster){
-    var clusterStyle = setClusterSymbol(cluster);
-    cluster.setStyle(clusterStyle);
+function showFeature(feature){
+    if(feature.get('features')){
+        var featureStyle = setClusterSymbol(feature);
+    }
+    else{
+        var featureStyle = setSymbol(feature);
+    }
+    feature.setStyle(featureStyle);
 }
 
 function spiderifyPoints(features){
@@ -1977,11 +2132,16 @@ function spiderifyPoints(features){
     var spiderFeatures = [];
     for(f in features){
         var feature = features[f];
-        hideCluster(feature);
+        hideFeature(feature);
         hiddenClusters.push(feature);
-        var addFeatures = feature.get('features');
-        for(f in addFeatures){
-            spiderFeatures.push(addFeatures[f]);
+        if(feature.get('features')){
+            var addFeatures = feature.get('features');
+            for(f in addFeatures){
+                spiderFeatures.push(addFeatures[f]);
+            }
+        }
+        else{
+            spiderFeatures.push(feature);
         }
     }
 
@@ -2062,6 +2222,31 @@ function toggleCat(catid){
     toggle("cat-"+catid);
 }
 
+function toggleDateSlider(){
+    dateSliderActive = document.getElementById("datesliderswitch").checked;
+    if(dateSliderActive){
+        if(!clusterPoints){
+            if(dsOldestDate && dsNewestDate){
+                if(dsOldestDate != dsNewestDate){
+                    var dual = document.getElementById("dsdualtype").checked;
+                    createDateSlider(dual);
+                }
+                else{
+                    alert('The current records on the map do not have a range of dates for the Date Slider to populate.');
+                }
+            }
+        }
+        else{
+            document.getElementById("datesliderswitch").checked = false;
+            dateSliderActive = false;
+            alert('The Date Slider cannot be displayed while points are set to cluster. Please turn off clustering in the Settings panel to display the Date Slider.');
+        }
+    }
+    else{
+        removeDateSlider();
+    }
+}
+
 function toggleHeatMap(){
     showHeatMap = document.getElementById("heatmapswitch").checked;
     if(showHeatMap){
@@ -2074,13 +2259,16 @@ function toggleHeatMap(){
     }
 }
 
-function toggleLayerController(layerID){
-    if(!layersExist && !dragDrop1 && !dragDrop2 && !dragDrop3){
-        $('#addLayers').popup('hide');
-        document.getElementById("layerControllerLink").style.display = "none";
+function toggleLayerTable(layerID){
+    var tableRows = document.getElementById("layercontroltable").rows.length;
+    if(tableRows > 0){
+        document.getElementById("nolayermessage").style.display = "none";
+        document.getElementById("layercontroltable").style.display = "block";
     }
     else{
-        document.getElementById("layerControllerLink").style.display = "block";
+        $('#addLayers').popup('hide');
+        document.getElementById("nolayermessage").style.display = "block";
+        document.getElementById("layercontroltable").style.display = "none";
     }
 }
 
@@ -2118,14 +2306,14 @@ function updateSelections(seloccid,infoArr){
     var divid = "sel"+seloccid;
     var trid = "tr"+seloccid;
     if(infoArr){
-        selcat = wordwrap(infoArr['catalognumber'], 7, '<br />\n');
+        selcat = infoArr['catalognumber'];
         var mouseOverLabel = "openOccidInfoBox("+seloccid+",'"+infoArr['collector']+"');";
         var labelHTML = '<a href="#" onmouseover="'+mouseOverLabel+'" onmouseout="closeOccidInfoBox();" onclick="openIndPopup('+seloccid+'); return false;">';
-        labelHTML += wordwrap(infoArr['collector'], 12, '<br />\n');
+        labelHTML += infoArr['collector'];
         labelHTML += '</a>';
         sellabel = labelHTML;
-        sele = wordwrap(infoArr['eventdate'], 10, '<br />\n');
-        sels = wordwrap(infoArr['sciname'], 12, '<br />\n');
+        sele = infoArr['eventdate'];
+        sels = infoArr['sciname'];
     }
     else if(document.getElementById(trid)){
         var catid = "cat"+seloccid;
@@ -2153,6 +2341,23 @@ function updateSelections(seloccid,infoArr){
         selectionList += trfragment;
     }
     document.getElementById("selectiontbody").innerHTML = selectionList;
+}
+
+function validateFeatureDate(feature){
+    var valid = false;
+    if(feature.get('coll_year')){
+        var fyear = Number(feature.get('coll_year'));
+        if(fyear.toString().length == 4 && fyear > 1500){
+            var fmonth = (feature.get('coll_month')?Number(feature.get('coll_month')):1);
+            var fday = (feature.get('coll_day')?Number(feature.get('coll_day')):1);
+            var fDate = new Date();
+            fDate.setFullYear(fyear, fmonth - 1, fday);
+            if(fDate > tsOldestDate && fDate < tsNewestDate){
+                valid = true;
+            }
+        }
+    }
+    return valid;
 }
 
 function verifyCollForm(){
@@ -2190,15 +2395,6 @@ function verifyCollForm(){
         }
     }
     return formVerified;
-}
-
-function wordwrap(str,width,brk,cut){
-    brk = brk || 'n';
-    width = width || 75;
-    cut = cut || false;
-    if(!str) return str;
-    var regex = '.{1,'+width+'}(\s|$)'+(cut?'|.{'+width+'}|.+$':'|\S+?(\s|$)');
-    return str.match(RegExp(regex,'g')).join(brk);
 }
 
 function writeWfsWktString(type,geocoords) {
