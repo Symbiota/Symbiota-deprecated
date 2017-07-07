@@ -32,7 +32,9 @@ if(isset($_REQUEST['db'])){
     $stArrCollJson = json_encode($collArr);
     if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
 }
+
 ?>
+
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
@@ -109,54 +111,35 @@ if(isset($_REQUEST['db'])){
             document.getElementById("kmldlcolljson").value = collJson;
             document.getElementById("kmldlstjson").value = starrJson;
 
-            setQueryInfo();
-            changeRecordPage(listPage);
+            setOccurrenceList(listPage);
+        });
+
+        function setOccurrenceList(listPage){
+            sessionStorage.collSearchPage = listPage;
+            document.getElementById("queryrecords").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
+            <?php 
+			//echo "alert('rpc/getoccurrencelist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+listPage+'&targettid=".$targetTid."');";
+            ?>
+            $.ajax({
+                type: "POST",
+                url: "rpc/getoccurrencelist.php",
+                data: {
+                    starr: starrJson,
+                    jsoncollstarr: collJson,
+                    targettid: <?php echo $targetTid; ?>,
+                    page: listPage
+                },
+                dataType: "html"
+            }).done(function(msg) {
+                if(!msg) msg = "<p>An error occurred retrieving records.</p>";
+                document.getElementById("queryrecords").innerHTML = msg;
+            });
 
             $('#tabs').tabs({
                 active: <?php echo $tabIndex; ?>,
                 beforeLoad: function( event, ui ) {
                     $(ui.panel).html("<p>Loading...</p>");
                 }
-            });
-        });
-
-        function setQueryInfo(){
-            //alert('rpc/setsearchinfo.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&targettid=<?php //echo $targetTid; ?>');
-
-            $.ajax({
-                type: "POST",
-                url: "rpc/setsearchinfo.php",
-                data: {
-                    starr: starrJson,
-                    jsoncollstarr: collJson,
-                    targettid: <?php echo $targetTid; ?>
-                },
-                dataType: "html"
-            }).done(function(msg) {
-                if(!msg) msg = "<p>An error occurred retrieving search information.</p>";
-                document.getElementById("queryrecordsinfo").innerHTML = msg;
-            });
-        }
-
-        function changeRecordPage(page){
-            sessionStorage.collSearchPage = page;
-            document.getElementById("queryrecords").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
-
-            //alert('rpc/changerecordpage.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+page+'&targettid=<?php //echo $targetTid; ?>');
-
-            $.ajax({
-                type: "POST",
-                url: "rpc/changerecordpage.php",
-                data: {
-                    starr: starrJson,
-                    jsoncollstarr: collJson,
-                    targettid: <?php echo $targetTid; ?>,
-                    page: page
-                },
-                dataType: "html"
-            }).done(function(msg) {
-                if(!msg) msg = "<p>An error occurred retrieving records.</p>";
-                document.getElementById("queryrecords").innerHTML = msg;
             });
         }
 
@@ -231,8 +214,6 @@ if(isset($_REQUEST['db'])){
 			</li>
 		</ul>
 		<div id="speclist">
-            <div id="queryrecordsinfo"></div>
-
             <div id="queryrecords"></div>
 		</div>
 		<div id="maps" style="min-height:400px;margin-bottom:10px;">
