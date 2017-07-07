@@ -306,9 +306,13 @@ include($SERVER_ROOT. '/header.php');
 					}
 					echo '</div>';
 				}
-				if($collArr['dwcaurl'] && !strpos($collArr['dwcaurl'],$_SERVER["SERVER_NAME"])){
-					$baseUrl = substr($collArr['dwcaurl'],0,strpos($collArr['dwcaurl'],'/content')).'/collections/datasets/datapublisher.php';
-					$blockSubmitMsg = 'Already published on sister portal (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>) ';
+				if($collArr['dwcaurl']){
+					$serverName = $_SERVER["SERVER_NAME"];
+					if(substr($serverName, 0, 4) == 'www.') $serverName = substr($serverName, 4);
+					if(!strpos($collArr['dwcaurl'],$serverName)){
+						$baseUrl = substr($collArr['dwcaurl'],0,strpos($collArr['dwcaurl'],'/content')).'/collections/datasets/datapublisher.php';
+						$blockSubmitMsg = 'Already published on sister portal (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>) ';
+					}
 				}
 			}
 			else{
