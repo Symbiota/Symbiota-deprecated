@@ -203,7 +203,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 						<legend><b>Harvesting Filter</b></legend>
 						<form name="filterform" method="post" action="attributemining.php" onsubmit="return verifyFilterForm(this)" >
 							<div>
-								<b>Occurrence trait: </b>
+								Occurrence trait: 
 								<select name="traitid">
 									<option value="">Select Target Trait (required)</option>
 									<option value="">------------------------------------</option>
@@ -221,7 +221,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								</select>
 							</div>
 							<div>
-								<b>Verbatim text source: </b>
+								Verbatim text source: 
 								<select name="fieldname">
 									<option value="">Select Source Field (required)</option>
 									<option value="">------------------------------------</option>
@@ -233,7 +233,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								</select>
 							</div>
 							<div>
-								<b>Filter by text (optional):</b> 
+								Filter by text (optional): 
 								<input name="stringfilter" type="text" value="<?php echo $stringFilter; ?>" />
 							</div>
 							<div style="float:right;margin-right:20px">
@@ -241,7 +241,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								<input id="filtersubmit" name="submitform" type="submit" value="Get Field Values" />
 							</div>
 							<div>
-								<b>Filter by taxon (optional): </b>
+								Filter by taxon (optional): 
 								<input id="taxonfilter" name="taxonfilter" type="text" value="<?php echo $taxonFilter; ?>" /> 
 								<input id="tidfilter" name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
 								<span id="verify-span" style="display:none;font-weight:bold;color:green;">verifying taxonomy...</span>
