@@ -112,6 +112,12 @@ if(isset($_REQUEST['db'])){
             document.getElementById("kmldlstjson").value = starrJson;
 
             setOccurrenceList(listPage);
+            $('#tabs').tabs({
+                active: <?php echo $tabIndex; ?>,
+                beforeLoad: function( event, ui ) {
+                    $(ui.panel).html("<p>Loading...</p>");
+                }
+            });
         });
 
         function setOccurrenceList(listPage){
@@ -133,13 +139,6 @@ if(isset($_REQUEST['db'])){
             }).done(function(msg) {
                 if(!msg) msg = "<p>An error occurred retrieving records.</p>";
                 document.getElementById("queryrecords").innerHTML = msg;
-            });
-
-            $('#tabs').tabs({
-                active: <?php echo $tabIndex; ?>,
-                beforeLoad: function( event, ui ) {
-                    $(ui.panel).html("<p>Loading...</p>");
-                }
             });
         }
 
