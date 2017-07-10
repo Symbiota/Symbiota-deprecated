@@ -415,52 +415,50 @@ class ImageLocalProcessor {
 	private function processXMLFile($fileName,$pathFrag='') { 
 		if ($this->serverRoot) {
 			$foundSchema = false;
-			$xmlReader = new XMLReader();
-			$xmlReader->open($this->sourcePathBase.$pathFrag.$fileName);
-			//$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
-			if($xmlReader->read()) {
+			$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
+			if($xml->read()) {
 				// $this->logOrEcho($fileName." first node: ". $xml->name);
-				if ($xmlReader->name=="DataSet") {
-					//$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
+				if ($xml->name=="DataSet") {
+					$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
 					$lapischema = $this->serverRoot . "/collections/admin/schemas/lapi_schema_v2.xsd";
-					$xmlReader->setParserProperty(XMLReader::VALIDATE, true);
-					if (file_exists($lapischema)) { 
-						$isLapi = $xmlReader->setSchema($lapischema);
-					} 
-					else { 
+					$xml->setParserProperty(XMLReader::VALIDATE, true);
+					if (file_exists($lapischema)) {
+						$isLapi = $xml->setSchema($lapischema);
+					}
+					else {
 						$this->logOrEcho("ERROR: Can't find $lapischema",1);
 					}
 					// $this->logOrEcho($fileName." valid lapi xml:" . $xml->isValid() . " [" . $isLapi .  "]");
-					if ($xmlReader->isValid() && $isLapi) {
+					if ($xml->isValid() && $isLapi) {
 						// File complies with the Aluka/LAPI/GPI schema
 						$this->logOrEcho('Processing GPI batch file: '.$pathFrag.$fileName);
-						if (class_exists('GPIProcessor')) { 
+						if (class_exists('GPIProcessor')) {
 							$processor = new GPIProcessor();
 							$result = $processor->process($this->sourcePathBase.$pathFrag.$fileName);
 							$foundSchema = $result->couldparse;
 							if (!$foundSchema || $result->failurecount>0) {
 								$this->logOrEcho("ERROR: Errors processing $fileName: $result->errors.",1);
 							}
-						} 
-						else { 
+						}
+						else {
 							// fail gracefully if this instalation isn't configured with this parser.
 							$this->logOrEcho("ERROR: SpecProcessorGPI.php not available.",1);
 						}
 					}
 				}
-				elseif ($xmlReader->name=="rdf:RDF") { 
+				elseif ($xml->name=="rdf:RDF") {
 					// $this->logOrEcho($fileName." has oa:" . $xml->lookupNamespace("oa"));
 					// $this->logOrEcho($fileName." has oad:" . $xml->lookupNamespace("oad"));
 					// $this->logOrEcho($fileName." has dwcFP:" . $xml->lookupNamespace("dwcFP"));
-					$hasAnnotation = $xmlReader->lookupNamespace("oa");
-					$hasDataAnnotation = $xmlReader->lookupNamespace("oad");
-					$hasdwcFP = $xmlReader->lookupNamespace("dwcFP");
+					$hasAnnotation = $xml->lookupNamespace("oa");
+					$hasDataAnnotation = $xml->lookupNamespace("oad");
+					$hasdwcFP = $xml->lookupNamespace("dwcFP");
 					// Note: contra the PHP xmlreader documentation, lookupNamespace
 					// returns the namespace string not a boolean.
 					if ($hasAnnotation && $hasDataAnnotation && $hasdwcFP) {
 						// File is likely an annotation containing DarwinCore data.
 						$this->logOrEcho('Processing RDF/XML annotation file: '.$pathFrag.$fileName);
-						if (class_exists('NEVPProcessor')) { 
+						if (class_exists('NEVPProcessor')) {
 							$processor = new NEVPProcessor();
 							$result = $processor->process($this->sourcePathBase.$pathFrag.$fileName);
 							$foundSchema = $result->couldparse;
@@ -468,14 +466,14 @@ class ImageLocalProcessor {
 								$this->logOrEcho("ERROR: Errors processing $fileName: $result->errors.",1);
 							}
 						}
-						else { 
+						else {
 							// fail gracefully if this instalation isn't configured with this parser.
 							$this->logOrEcho("ERROR: SpecProcessorNEVP.php not available.",1);
 						}
 					}
 				}
-				$xmlReader->close();
-				if ($foundSchema>0) { 
+				$xml->close();
+				if ($foundSchema>0) {
 					$this->logOrEcho("Proccessed $pathFrag$fileName, records: $result->recordcount, success: $result->successcount, failures: $result->failurecount, inserts: $result->insertcount, updates: $result->updatecount.");
 					if ($result->imagefailurecount>0) {
 						$this->logOrEcho("ERROR: not moving (".$fileName."), image failure count " . $result->imagefailurecount . " greater than zero.",1);
@@ -490,19 +488,19 @@ class ImageLocalProcessor {
 							if(!rename($oldFile,$this->targetPathBase.$this->targetPathFrag.'orig_xml/'.$newFileName)){
 								$this->logOrEcho("ERROR: unable to move (".$oldFile." =>".$newFileName.") ",1);
 							}
-						 } 
-						 else {
+						}
+						else {
 							if(!unlink($oldFile)){
 								$this->logOrEcho("ERROR: unable to delete file (".$oldFile.") ",1);
 							}
 						}
 					}
-				} 
-				else { 
+				}
+				else {
 					$this->logOrEcho("ERROR: Unable to match ".$pathFrag.$fileName." to a known schema.",1);
 				}
-			} 
-			else { 
+			}
+			else {
 				$this->logOrEcho("ERROR: XMLReader couldn't read ".$pathFrag.$fileName,1);
 			}
 		}
@@ -1458,6 +1456,7 @@ class ImageLocalProcessor {
 	}
 	
 	private function updateCollectionStats(){
+exit;
 		if($this->dbMetadata){
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
 			$occurMain = new OccurrenceMaintenance($this->conn);
