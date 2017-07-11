@@ -47,6 +47,7 @@ class ImageLocalProcessor {
 	private $logFH;
 	private $mdOutputFH;
 	private $logPath;
+	private $errorMessage;
 	
 	private $sourceGdImg;
 	private $sourceImagickImg;
@@ -256,7 +257,12 @@ class ImageLocalProcessor {
 				$this->processHtml($sourcePathFrag);
 			}
 			else{
-				$this->processFolder($sourcePathFrag);
+				if(!$this->processFolder($sourcePathFrag)){
+					if($this->errorMessage == 'abort'){
+						$this->errorMessage = '';
+						continue;
+					}
+				}
 			}
 			if(!$this->dbMetadata){
 				if($this->mdOutputFH) fclose($this->mdOutputFH);
@@ -290,6 +296,9 @@ class ImageLocalProcessor {
 								if($fileExt == ".jpg"){
 									if($this->processImageFile($fileName,$pathFrag)){
 										if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+									}
+									else{
+										if($this->errorMessage == 'abort') return false;
 									}
 								}
 								elseif($fileExt == ".tif"){
@@ -365,6 +374,9 @@ class ImageLocalProcessor {
 							if($fileExt == "jpg"){
 								if($this->processImageFile($fileName,$pathFrag)){
 									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+								}
+								else{
+									if($this->errorMessage == 'abort') return false;
 								}
 							}
 							elseif($fileExt == "tif"){
@@ -516,6 +528,7 @@ class ImageLocalProcessor {
 			if($this->dbMetadata){
 				$occId = $this->getOccId($specPk);
 			}
+			$fileName = rawurlencode($fileName);
 			$fileNameExt = '.jpg';
 			$fileNameBase = $fileName;
 			if($p = strrpos($fileName,'.')){
@@ -776,7 +789,7 @@ class ImageLocalProcessor {
 					$this->logOrEcho("Image processed successfully (".date('Y-m-d h:i:s A').")!",1);
 				}
 				else{
-					$this->logOrEcho("File skipped (".$sourcePathFrag.$fileName."), unable to obtain dimensions of original image");
+					$this->logOrEcho("File skipped (".$sourcePath.$fileName."), unable to obtain dimensions of original image",1);
 					return false;
 				}
 			}
@@ -873,12 +886,14 @@ class ImageLocalProcessor {
 		if(isset($this->collArr[$this->activeCollid]['pmterm'])){
 			$pmTerm = $this->collArr[$this->activeCollid]['pmterm'];
 			if(substr($pmTerm,0,1) != '/' || stripos(substr($pmTerm,-3),'/') === false){
-				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing forward slashes delimiting the term: ".$pmTerm);
-				exit;
+				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing forward slashes delimiting the term: ".$pmTerm,1);
+				$this->errorMessage = 'abort';
+				return false;
 			}
 			if(!strpos($pmTerm,'(') || !strpos($pmTerm,')')){
-				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing capture term: ".$pmTerm);
-				exit;
+				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing capture term: ".$pmTerm,1);
+				$this->errorMessage = 'abort';
+				return false;
 			}
 			if(preg_match($pmTerm,$str,$matchArr)){
 				if(array_key_exists(1,$matchArr) && $matchArr[1]){

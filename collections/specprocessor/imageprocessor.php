@@ -54,12 +54,15 @@ if($spprid) $specManager->setProjVariables($spprid);
 				if(uploadType == 'local'){
 					$("div.profileDiv").show();
 					$("#sourcePathInfoIplant").hide();
+					$("#chooseFileDiv").hide();
 					if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
+					$("#profileEditSubmit").val("Save Profile");
 					$("#submitDiv").show();
 				}
 				else if(uploadType == 'file'){
 					$("div.profileDiv").hide();
 					$("#chooseFileDiv").show();
+					$("#profileEditSubmit").val("Analyze Image Data File");
 					$("#submitDiv").show();
 				}
 				else if(uploadType == 'idigbio'){
@@ -68,6 +71,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 					$("#patternReplaceDiv").show();
 					$("#replaceStrDiv").show();
 					if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
+					$("#profileEditSubmit").val("Save Profile");
 					$("#submitDiv").show();
 				}
 				else if(uploadType == 'iplant'){
@@ -78,6 +82,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 					$("#sourcePathDiv").show();
 					$("#sourcePathInfoIplant").show();
 					if($("[name='sourcepath']").val() == "") $("[name='sourcepath']").val("-- Use Default Path --");
+					$("#profileEditSubmit").val("Save Profile");
 					$("#submitDiv").show();
 				}
 				else{
@@ -90,9 +95,15 @@ if($spprid) $specManager->setProjVariables($spprid);
 					alert("Image Mapping/Import type must be selected");
 					return false;
 				}
-				if(f.projecttype.value != 'file' && f.speckeypattern.value == ""){
-					alert("Pattern matching term must have a value");
-					return false;
+				if(f.projecttype.value != 'file'){
+					if(f.speckeypattern.value == ""){
+						alert("Pattern matching term must have a value");
+						return false;
+					}
+					if(f.speckeypattern.value.indexOf("(") < 0 || f.speckeypattern.value.indexOf(")") < 0){
+						alert("Catalog portion of pattern matching term must be enclosed in parenthesis");
+						return false;
+					}
 				}
 				if(f.projecttype.value == 'file' && f.uploadfile.value == ""){
 					alert("Select a CSV file to upload");
@@ -498,7 +509,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 										<input name="spprid" type="hidden" value="<?php echo $spprid; ?>" />
 										<input name="collid" type="hidden" value="<?php echo $collid; ?>" /> 
 										<input name="tabindex" type="hidden" value="1" />
-										<input name="submitaction" type="submit" value="<?php echo ($spprid?'Save':'Initiate'); ?> Profile" />
+										<input id="profileEditSubmit" name="submitaction" type="submit" value="Save Profile" />
 									</div>
 								</fieldset>
 							</form>

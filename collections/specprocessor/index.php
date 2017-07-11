@@ -39,17 +39,19 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 $fileName = '';
 $statusStr = '';
 if($isEditor){
-	if($action == 'Initiate Profile'){
+	if($action == 'Analyze Image Data File'){
 		if($_POST['projecttype'] == 'file'){
 			$imgProcessor = new ImageProcessor();
 			$fileName = $imgProcessor->loadImageFile();
 		}
+	}
+	elseif($action == 'Save Profile'){
+		if($_POST['spprid']){
+			$specManager->editProject($_POST);
+		}
 		else{
 			$specManager->addProject($_POST);
 		}
-	}
-	elseif($action == 'Save Profile'){
-		$specManager->editProject($_POST);
 	}
 	elseif($action == 'Delete Profile'){
 		$specManager->deleteProject($_POST['sppriddel']);
