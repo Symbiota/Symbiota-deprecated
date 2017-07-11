@@ -266,7 +266,16 @@ class DwcArchiverPublisher extends DwcArchiverCore{
 			'GROUP BY portalDomain';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->portalDomain] = $r->cnt;
+			$domainName = parse_url($r->portalDomain, PHP_URL_HOST);
+			if(substr($domainName,0,4) == 'www.') $domainName = substr($domainName,4);
+			if(isset($retArr[$domainName])){
+				$retArr[$domainName]['cnt'] += $r->cnt;
+				if(strpos($retArr[$domainName]['url'],'/www.') && !strpos($r->portalDomain,'/www.')) $retArr[$domainName]['url'] = $r->portalDomain;
+			}
+			else{
+				$retArr[$domainName]['cnt'] = $r->cnt;
+				$retArr[$domainName]['url'] = $r->portalDomain;
+			}
 		}
 		return $retArr;
 	}

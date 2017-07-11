@@ -97,7 +97,7 @@
 				if you are considering making specimens, remember collecting normally requires 
 				permission of the landowner and, in the case of rare and endangered plants, 
 				additional permits may be required. It is best to coordinate such efforts with a 
-				regional institution that manages a publically accessable collection.
+				regional institution that manages a publically accessible collection.
 			</div> 
 		</div>
 		<?php

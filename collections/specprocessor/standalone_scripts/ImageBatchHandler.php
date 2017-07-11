@@ -5,10 +5,11 @@ require_once('ImageBatchConf.php');
 if(file_exists('../../../config/symbini.php')){
 	include_once('../../../config/symbini.php');
 	require_once($SERVER_ROOT.'/classes/ImageBatchProcessor.php');
+	if(!$serverRoot) $serverRoot = $SERVER_ROOT;
 }
 elseif(isset($serverRoot) && $serverRoot){ 
 	include_once($serverRoot.'/config/symbini.php');
-	include_once($serverRoot.'/collections/specprocessor/standalone_scripts/ImageBatchConnectionFactory.php');
+	@include_once($serverRoot.'/collections/specprocessor/standalone_scripts/ImageBatchConnectionFactory.php');
 	require_once($serverRoot.'/classes/ImageBatchProcessor.php');
 }
 else{

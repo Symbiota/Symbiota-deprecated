@@ -534,30 +534,6 @@ class OccurrenceManager{
 				if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
 			}
 		}
-		/*
-		foreach($this->taxaArr as $key => $value){
-			if(array_key_exists("scinames",$value) && !in_array("no records",$value["scinames"])){
-				$this->taxaArr = $value["scinames"];
-				foreach($this->taxaArr as $sciname){
-					$sql = "call ReturnSynonyms('".$sciname."',1)";
-					$result = $this->conn->query($sql);
-					while($row = $result->fetch_object()){
-						$this->taxaArr[$key]["synonyms"][] = $row->sciname;
-					}
-					$result->close();
-				}
-			}
-			else{
-				$sql = "call ReturnSynonyms('".$key."',1)";
-				$result = $this->conn->query($sql);
-				while($row = $result->fetch_object()){
-					$this->taxaArr[$key]["synonyms"][] = $row->sciname;
-				}
-				$result->close();
-				$this->conn->next_result();
-			}
-		}
-		*/
 	}
 
 	public function getFullCollectionList($catId = ''){
