@@ -442,10 +442,10 @@ class TaxonProfileManager {
 			$tidStr = implode(",",$tidArr);
 			$sql = 'SELECT t.sciname, ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.caption, ti.occid, '.
 				'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
-				'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
+				'FROM images ti LEFT JOIN users u ON ti.photographeruid = u.uid '.
 				'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
 				'INNER JOIN taxa t ON ti.tid = t.tid '.
-				'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND ti.SortSequence < 500 ';
+				'WHERE ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.') AND ti.SortSequence < 500 AND ti.thumbnailurl IS NOT NULL ';
 			if(!$this->displayLocality) $sql .= 'AND ti.occid IS NULL ';
 			$sql .= 'ORDER BY ti.sortsequence ';
 			//echo $sql;
@@ -453,10 +453,8 @@ class TaxonProfileManager {
 			while($row = $result->fetch_object()){
 				$imgUrl = $row->url;
 				if($imgUrl == 'empty' && $row->originalurl) $imgUrl = $row->originalurl; 
-				$tnUrl = $row->thumbnailurl;
-				if(!$tnUrl && $imgUrl) $tnUrl = $imgUrl;
 				$this->imageArr[$row->imgid]["url"] = $imgUrl;
-				$this->imageArr[$row->imgid]["thumbnailurl"] = $tnUrl;
+				$this->imageArr[$row->imgid]["thumbnailurl"] = $row->thumbnailurl;
 				$this->imageArr[$row->imgid]["photographer"] = $row->photographer;
 				$this->imageArr[$row->imgid]["caption"] = $row->caption;
 				$this->imageArr[$row->imgid]["occid"] = $row->occid;
