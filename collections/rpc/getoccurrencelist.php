@@ -13,11 +13,8 @@ $cntPerPage = 100;
 
 $stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 $collStArr = json_decode($stArrCollJson, true);
-$searchStArr = json_decode($stArrSearchJson, true);
-$stArr = array();
-if($collStArr && $searchStArr) $stArr = array_merge($searchStArr,$collStArr);
-if(!$collStArr && $searchStArr) $stArr = $searchStArr;
-if($collStArr && !$searchStArr) $stArr = $collStArr;
+$stArr= json_decode($stArrSearchJson, true);
+if($collStArr) $stArr = array_merge($stArr,$collStArr);
 
 $collManager = null;
 $occurArr = array();
@@ -105,7 +102,6 @@ if($occurArr){
 	foreach($occurArr as $occid => $fieldArr){
 		$collId = $fieldArr["collid"];
 		$specOccArr[] = $occid;
-		$icon = '';
 		if($collId != $prevCollid){
 			$prevCollid = $collId;
 			$isEditor = false;
@@ -114,14 +110,16 @@ if($occurArr){
 			}
 			$instCode = $fieldArr["institutioncode"];
 			if($fieldArr["collectioncode"]) $instCode .= ":".$fieldArr["collectioncode"];
-			if($fieldArr["collicon"]) $icon = (substr($fieldArr["collicon"],0,6)=='images'?'../':'').$fieldArr["collicon"];
 			$htmlStr .= '<tr><td colspan="2"><h2>';
 			$htmlStr .= '<a href="misc/collprofiles.php?collid='.$collId.'">'.$fieldArr["collectionname"].'</a>';
 			$htmlStr .= '</h2><hr /></td></tr>';
 		}
 		$htmlStr .= '<tr><td width="60" valign="top" align="center">';
 		$htmlStr .= '<a href="misc/collprofiles.php?collid='.$collId.'&acronym='.$fieldArr["institutioncode"].'">';
-		if($icon) $htmlStr .= '<img align="bottom" src="'.$icon.'" style="width:35px;border:0px;" />';
+		if($fieldArr["collicon"]){
+			$icon = (substr($fieldArr["collicon"],0,6)=='images'?'../':'').$fieldArr["collicon"];
+			$htmlStr .= '<img align="bottom" src="'.$icon.'" style="width:35px;border:0px;" />';
+		}
 		$htmlStr .= '</a>';
 		$htmlStr .= '<div style="font-weight:bold;font-size:75%;">';
 		$htmlStr .= $instCode;
