@@ -1036,6 +1036,7 @@ function getTextParams(){
     var othercatnumval = document.getElementById("othercatnum").value.trim();
     var typestatus = document.getElementById("typestatus").checked;
     var hasimages = document.getElementById("hasimages").checked;
+    var hasgenetic = document.getElementById("hasgenetic").checked;
 
     if(countryval){
         var countryvals = countryval.split(',');
@@ -1245,6 +1246,14 @@ function getTextParams(){
         cqlfrag = '('+hasimagesCqlString+')';
         cqlArr.push(cqlfrag);
         solrqfrag = '('+hasimagesSolrqString+')';
+        solrqArr.push(solrqfrag);
+    }
+    if(hasgenetic){
+        var hasgeneticCqlString = "resourcename LIKE '_%'";
+        var hasgeneticSolrqString = "(resourcename:[* TO *])";
+        cqlfrag = '('+hasgeneticCqlString+')';
+        cqlArr.push(cqlfrag);
+        solrqfrag = '('+hasgeneticSolrqString+')';
         solrqArr.push(solrqfrag);
     }
 }

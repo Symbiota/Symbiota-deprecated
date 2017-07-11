@@ -835,6 +835,10 @@ class SOLRManager extends OccurrenceManager{
             $solrWhere .= 'AND (imgid:[* TO *]) ';
             $this->localSearchArr[] = 'has images';
         }
+        if(array_key_exists("hasgenetic",$this->searchTermsArr)){
+            $solrWhere .= 'AND (resourcename:[* TO *]) ';
+            $this->localSearchArr[] = 'has genetic data';
+        }
         if(array_key_exists("llpoint",$this->searchTermsArr)){
             $pointArr = explode(";",$this->searchTermsArr["llpoint"]);
             $radius = $pointArr[2]*1.6214;

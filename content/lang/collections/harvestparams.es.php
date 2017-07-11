@@ -1,7 +1,7 @@
 <?php 
 /*
 ------------------
-Language: Espa�ol (Spanish)
+Language: Espa�ol (Spanish)
 ------------------
 */
  
@@ -54,6 +54,7 @@ $LANG['CATALOG_NUMBER'] = 'Número de Catálogo:';
 $LANG['INCLUDE_OTHER_CATNUM'] = 'Includa todos números de catálogo y GUIDs';
 $LANG['TYPE'] = 'Limitar Solamente a Ejemplares Tipo';
 $LANG['HAS_IMAGE'] = 'Limitar Solamente a Ejemplares con Imágenes';
+$LANG['HAS_GENETIC'] = 'Limit to Specimens with Genetic Data Only';
 
 //Following used in mapboundingbox.php
 $LANG['MBB_TITLE'] = 'Mapeador de Coordenadas'; 

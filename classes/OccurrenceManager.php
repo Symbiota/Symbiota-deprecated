@@ -448,6 +448,10 @@ class OccurrenceManager{
 			$sqlWhere .= "AND (o.occid IN(SELECT occid FROM images)) ";
 			$this->localSearchArr[] = 'has images';
 		}
+        if(array_key_exists("hasgenetic",$this->searchTermsArr)){
+            $sqlWhere .= "AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ";
+            $this->localSearchArr[] = 'has genetic data';
+        }
 		if(array_key_exists("targetclid",$this->searchTermsArr)){
 			$clid = $this->searchTermsArr["targetclid"];
 			if(is_numeric($clid)){
@@ -1176,6 +1180,17 @@ class OccurrenceManager{
 			}
 			$searchFieldsActivated = true;
 		}
+        if(array_key_exists("hasgenetic",$_REQUEST)){
+            $hasgenetic = $_REQUEST["hasgenetic"];
+            if($hasgenetic){
+                $searchArr[] = "hasgenetic:".$hasgenetic;
+                $this->searchTermsArr["hasgenetic"] = true;
+            }
+            else{
+                unset($this->searchTermsArr["hasgenetic"]);
+            }
+            $searchFieldsActivated = true;
+        }
 		if(array_key_exists("targetclid",$_REQUEST) && is_numeric($_REQUEST['targetclid'])){
 			$searchArr[] = "targetclid:".$_REQUEST["targetclid"];
 			$this->searchTermsArr["targetclid"] = $_REQUEST["targetclid"];

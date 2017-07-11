@@ -406,6 +406,10 @@ class MapInterfaceManager{
 			$sqlWhere .= 'AND (o.occid IN(SELECT occid FROM images)) ';
 			$this->localSearchArr[] = 'has images';
 		}
+        if(array_key_exists('hasgenetic',$this->searchTermsArr)&&$this->searchTermsArr["hasgenetic"]){
+            $sqlWhere .= 'AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ';
+            $this->localSearchArr[] = 'has genetic data';
+        }
 		$retStr = '';
 		if($sqlWhere){
 			$retStr = 'WHERE '.substr($sqlWhere,4);
@@ -739,6 +743,12 @@ class MapInterfaceManager{
 				$this->searchTermsArr["hasimages"] = true;
 			}
 		}
+        if(array_key_exists("hasgenetic",$_REQUEST)){
+            $hasgenetic = $_REQUEST["hasgenetic"];
+            if($hasgenetic){
+                $this->searchTermsArr["hasgenetic"] = true;
+            }
+        }
 		$latLongArr = Array();
 		if(array_key_exists("upperlat",$_REQUEST)){
 			$upperLat = $this->conn->real_escape_string($_REQUEST["upperlat"]);
@@ -836,7 +846,7 @@ class MapInterfaceManager{
 		$sql = '';
 		$sql = 'SELECT c.CollID, c.CollectionName '.
 			'FROM omcollections AS c ';
-		if($stArr['db'] != 'all'){
+		if($stArr['db'] && $stArr['db'] != 'all'){
 			$dbArr = explode(';',$stArr["db"]);
 			$dbStr = '';
 			$sql .= 'WHERE (c.collid IN('.trim($dbArr[0]).')) ';

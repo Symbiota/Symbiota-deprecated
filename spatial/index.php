@@ -230,6 +230,9 @@ $dbArr = Array();
                                 <div style="margin-top:5px;">
                                     <input data-role="none" type='checkbox' name='hasimages' id='hasimages' value='1' onchange="buildQueryStrings();"> Limit to Specimens with Images Only
                                 </div>
+                                <div style="margin-top:5px;">
+                                    <input data-role="none" type='checkbox' name='hasgenetic' id='hasgenetic' value='1' onchange="buildQueryStrings();"> Limit to Specimens with Genetic Data Only
+                                </div>
                                 <div><hr></div>
                             </div>
                         </div>

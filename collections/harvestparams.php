@@ -31,7 +31,7 @@ if(isset($_REQUEST['db'])){
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=1"></script> 
+    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=2"></script>
     <script type="text/javascript">
         var starrJson = '';
 
@@ -236,6 +236,9 @@ if(isset($_REQUEST['db'])){
 			<div>
 				<input type='checkbox' name='hasimages' value='1' /> <?php echo $LANG['HAS_IMAGE']; ?>
 			</div>
+            <div>
+                <input type='checkbox' name='hasgenetic' value='1' /> <?php echo $LANG['HAS_GENETIC']; ?>
+            </div>
 			<input type="hidden" name="reset" value="1" />
 		</form>
     </div>

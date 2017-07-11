@@ -123,7 +123,7 @@ if($mapType && $mapType == 'taxa'){
     //returns $this->taxaArr
     $tArr = $taxaMapManager->getTaxaArr();
 }
-elseif($stArr || ($mapType && $mapType == 'occquery')){
+elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
     if($stArr){
         $mapManager->setSearchTermsArr($stArr);
     }
@@ -1554,6 +1554,9 @@ elseif($stArr || ($mapType && $mapType == 'occquery')){
                                 </div>
                                 <div style="margin-top:5px;">
                                     <input data-role="none" type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$previousCriteria) && $previousCriteria["hasimages"]) echo "CHECKED"; ?> > Limit to Specimens with Images Only
+                                </div>
+                                <div style="margin-top:5px;">
+                                    <input data-role="none" type='checkbox' name='hasgenetic' value='1' <?php if(array_key_exists("hasgenetic",$previousCriteria) && $previousCriteria["hasgenetic"]) echo "CHECKED"; ?> > Limit to Specimens with Genetic Data Only
                                 </div>
                                 <div><hr></div>
                                 <input type="hidden" name="reset" value="1" />

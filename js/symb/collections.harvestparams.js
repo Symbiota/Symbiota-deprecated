@@ -216,6 +216,7 @@ function setHarvestParamsForm(){
     //if(!stArr['othercatnum']){document.harvestparams.includeothercatnum.checked = false;}
     if(stArr['typestatus']){document.harvestparams.typestatus.checked = true;}
     if(stArr['hasimages']){document.harvestparams.hasimages.checked = true;}
+    if(stArr['hasgenetic']){document.harvestparams.hasgenetic.checked = true;}
     if(sessionStorage.collsearchtableview){
         document.getElementById('showtable').checked = true;
         changeTableDisplay();
