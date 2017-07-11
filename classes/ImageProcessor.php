@@ -542,7 +542,7 @@ class ImageProcessor {
 			/*
 			$testUrl = $lgUrl;
 			if(!$testUrl) $testUrl = $webUrl;
-			$imgInfo = getimagesize($testUrl);
+			$imgInfo = getimagesize(str_replace(' ', '%20', $testUrl));
 			if($imgInfo){
 				if($imgInfo[2] == IMAGETYPE_GIF){
 					$format = 'image/gif';

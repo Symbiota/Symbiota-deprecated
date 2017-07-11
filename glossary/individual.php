@@ -206,7 +206,7 @@ if($glossId){
 									<?php 
 									$imgWidth = 0;
 									$imgHeight = 0;
-									$size = getimagesize($imgUrl);
+									$size = getimagesize(str_replace(' ', '%20', $imgUrl));
 									if($size[0] > 240){
 										$imgWidth = 240;
 										$imgHeight = 0;

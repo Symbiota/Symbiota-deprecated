@@ -278,7 +278,7 @@ class EOLManager {
 					//Build web image 
 					//If web image is too large, transfer to large image and create new web image
 					$fileSize = $this->imgManager->getSourceFileSize();
-					list($sourceWidth, $sourceHeight) = getimagesize($this->imgManager->getSourcePath());
+					list($sourceWidth, $sourceHeight) = getimagesize(str_replace(' ', '%20', $this->imgManager->getSourcePath()));
 					if($fileSize > $this->imgManager->getWebFileSizeLimit() || $sourceWidth > ($this->imgManager->getWebPixWidth()*1.2)){
 						$lgFullUrl = $imageUrl;
 						//Create web image

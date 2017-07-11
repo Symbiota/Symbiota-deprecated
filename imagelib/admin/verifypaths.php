@@ -154,7 +154,7 @@ class VerifyPaths{
 		$maxHeight = 300;
 		if(file_exists($filePath)){
 			if(!file_exists($newThumbnailPath)){
-	        	list($sourceWidth, $sourceHeight, $imageType) = getimagesize($filePath);
+				list($sourceWidth, $sourceHeight, $imageType) = getimagesize(str_replace(' ', '%20', $filePath));
 	        	$newWidth = $idealWidth;
 	        	$newHeight = round($sourceHeight*($idealWidth/$sourceWidth));
 	        	if($newHeight > $maxHeight){

@@ -133,8 +133,7 @@ class PluginsManager {
 						else{
 							$file = $row->url;
 						}
-						$size = array();
-						@$size = getimagesize($file);
+						@$size = getimagesize(str_replace(' ', '%20', $file));
 						if($size){
 							$width = $size[0];
 							$height = $size[1];
@@ -174,7 +173,7 @@ class PluginsManager {
 						$file = $row->url;
 					}
 					if(fopen($file, "r")){
-						if($size = getimagesize($file)){
+						if($size = getimagesize(str_replace(' ', '%20', $file))){
 							$width = $size[0];
 							$height = $size[1];
 							$files[$imgId]['url'] = $file;
