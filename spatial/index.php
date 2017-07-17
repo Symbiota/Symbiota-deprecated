@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=160" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=165" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -784,10 +784,13 @@ $dbArr = Array();
             var layerName = '<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>:'+layer;
             var layerSourceName = layer+'Source';
             layersArr[layerSourceName] = new ol.source.ImageWMS({
-                url: '<?php echo $GEOSERVER_URL; ?>/<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>/wms',
+                url: 'rpc/GeoServerConnector.php',
                 params: {'LAYERS':layerName},
                 serverType: 'geoserver',
-                crossOrigin: 'anonymous'
+                crossOrigin: 'anonymous',
+                imageLoadFunction: function(image, src) {
+                    imagePostFunction(image, src);
+                }
             });
             layersArr[layer] = new ol.layer.Image({
                 source: layersArr[layerSourceName]
@@ -1128,8 +1131,8 @@ $dbArr = Array();
                     }).done(function(msg) {
                         if(msg){
                             var infoHTML = '';
-                            var infoArr = msg['features'][0];
-                            var propArr = infoArr['properties'];
+                            var infoArr = JSON.parse(msg);
+                            var propArr = infoArr['features'][0]['properties'];
                             //infoHTML += '<b>id:</b> '+infoArr['id']+'<br />';
                             //infoHTML += '<b>geometry:</b> '+infoArr['geometry']+'<br />';
                             for(var key in propArr){
@@ -1211,25 +1214,23 @@ $dbArr = Array();
                 }
             }
         }
-    });
-
-    map.on('dblclick', function(evt) {
-        var layerIndex = activeLayer+"Source";
-        if(activeLayer != 'none' && activeLayer != 'select' && activeLayer != 'pointv'){
-            if(activeLayer == 'dragdrop1' || activeLayer == 'dragdrop2' || activeLayer == 'dragdrop3'){
-                map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                    if(layer === layersArr[activeLayer]){
-                        selectsource.addFeature(feature);
-                    }
-                });
-            }
-            else{
-                var viewResolution = /** @type {number} */ (mapView.getResolution());
-                var url = layersArr[layerIndex].getGetFeatureInfoUrl(evt.coordinate, viewResolution, 'EPSG:3857', {'INFO_FORMAT': 'application/json'});
-                selectObjectFromID(url, activeLayer);
+        else{
+            var layerIndex = activeLayer+"Source";
+            if(activeLayer != 'none' && activeLayer != 'select' && activeLayer != 'pointv'){
+                if(activeLayer == 'dragdrop1' || activeLayer == 'dragdrop2' || activeLayer == 'dragdrop3'){
+                    map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+                        if(layer === layersArr[activeLayer]){
+                            selectsource.addFeature(feature);
+                        }
+                    });
+                }
+                else{
+                    var viewResolution = /** @type {number} */ (mapView.getResolution());
+                    var url = layersArr[layerIndex].getGetFeatureInfoUrl(evt.coordinate, viewResolution, 'EPSG:3857', {'INFO_FORMAT': 'application/json'});
+                    selectObjectFromID(url, activeLayer);
+                }
             }
         }
-        return false;
     });
 
     function selectObjectFromID(url,selectLayer){
@@ -1239,9 +1240,9 @@ $dbArr = Array();
             async: true
         }).done(function(msg) {
             if(msg){
-                var infoArr = msg['features'][0];
-                var objID = infoArr['id'];
-                var url = '<?php echo $GEOSERVER_URL; ?>/<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>:'+selectLayer+'&featureid='+objID+'&outputFormat=application/json&srsname=EPSG:3857';
+                var infoArr = JSON.parse(msg);
+                var objID = infoArr['features'][0]['id'];
+                var url = 'rpc/GeoServerConnector.php?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&typename=<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>:'+selectLayer+'&featureid='+objID+'&outputFormat=application/json&srsname=EPSG:3857';
                 $.get( url, function( data ) {
                     var features = new ol.format.GeoJSON().readFeatures(data);
                     selectsource.addFeatures(features);
