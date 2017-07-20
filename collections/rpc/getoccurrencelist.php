@@ -14,7 +14,8 @@ $cntPerPage = 100;
 $stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 $collStArr = json_decode($stArrCollJson, true);
 $stArr= json_decode($stArrSearchJson, true);
-if($collStArr) $stArr = array_merge($stArr,$collStArr);
+if($collStArr && $stArr) $stArr = array_merge($stArr,$collStArr);
+if($collStArr && !$stArr) $stArr = $collStArr;
 
 $collManager = null;
 $occurArr = array();
