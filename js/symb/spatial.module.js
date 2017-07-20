@@ -1076,7 +1076,7 @@ function getTextParams(){
             if(countyCqlString) countyCqlString += " OR ";
             if(countySolrqString) countySolrqString += " OR ";
             countyCqlString += "(county LIKE '"+countyvals[i]+"%')";
-            countySolrqString += "(county:"+countyvals[i].replace(" ","\ ")+"*)";
+            countySolrqString += "(county:"+countyvals[i].replace(" ","\\ ")+"*)";
         }
         cqlfrag = '('+countyCqlString+')';
         cqlArr.push(cqlfrag);
@@ -1100,7 +1100,7 @@ function getTextParams(){
                     if(templocalityCqlString) templocalityCqlString += " AND ";
                     if(templocalitySolrqString) templocalitySolrqString += " AND ";
                     templocalityCqlString += "locality LIKE '%"+vals[i]+"%'";
-                    templocalitySolrqString += '((municipality:'+vals[i].replace(" ","\ ")+'*) OR (locality:*'+vals[i].replace(" ","\ ")+'*))';
+                    templocalitySolrqString += '((municipality:'+vals[i].replace(" ","\\ ")+'*) OR (locality:*'+vals[i].replace(" ","\\ ")+'*))';
                 }
                 localityCqlString += templocalityCqlString;
                 localitySolrqString += templocalitySolrqString;
@@ -1123,12 +1123,12 @@ function getTextParams(){
         var collectorSolrqString = '';
         if(collectorvals.length == 1){
             collectorCqlString = "(recordedBy LIKE '%"+collectorvals[0]+"%')";
-            collectorSolrqString = '(recordedBy:*'+collectorvals[0].replace(" ","\ ")+'*)';
+            collectorSolrqString = '(recordedBy:*'+collectorvals[0].replace(" ","\\ ")+'*)';
         }
         else if(collectorvals.length > 1){
             for (i in collectorvals){
                 collectorCqlString += " OR (recordedBy LIKE '%"+collectorvals[i]+"%')";
-                collectorSolrqString += ' OR (recordedBy:*'+collectorvals[i].replace(" ","\ ")+'*)';
+                collectorSolrqString += ' OR (recordedBy:*'+collectorvals[i].replace(" ","\\ ")+'*)';
             }
             collectorCqlString = collectorCqlString.substr(4,collectorCqlString.length);
             collectorSolrqString = collectorSolrqString.substr(4,collectorSolrqString.length);
@@ -1526,7 +1526,7 @@ function prepareTaxaParams(callback){
                                 scinameArr = taxaArr[i]["scinames"];
                                 if(scinameArr.length > 0){
                                     for (s in scinameArr){
-                                        taxaSolrqString += " OR (sciname:"+scinameArr[s].replace(" ","\ ")+"*)";
+                                        taxaSolrqString += " OR ((sciname:"+scinameArr[s].replace(" ","\\ ")+") OR (sciname:"+scinameArr[s].replace(" ","\\ ")+"\\ *))";
                                         taxaCqlString += " OR sciname LIKE '"+scinameArr[s]+"%'";
                                     }
                                 }
@@ -1538,7 +1538,7 @@ function prepareTaxaParams(callback){
                                 taxaCqlString += " OR family = '"+i+"'";
                             }
                             if((taxontype == 3 || taxontype == 1) && ((i.substr(i.length - 5) != "aceae") || (i.substr(i.length - 4) != "idae"))){
-                                taxaSolrqString += " OR (sciname:"+i.replace(" ","\ ")+"*)";
+                                taxaSolrqString += " OR ((sciname:"+i.replace(" ","\\ ")+") OR (sciname:"+i.replace(" ","\\ ")+"\\ *))";
                                 taxaCqlString += " OR sciname LIKE '"+i+"%'";
                             }
                         }

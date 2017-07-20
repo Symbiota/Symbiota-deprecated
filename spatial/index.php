@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=172" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=174" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -777,7 +777,7 @@ $dbArr = Array();
     var mapView = new ol.View({
         zoom: <?php echo $mapZoom; ?>,
         projection: 'EPSG:3857',
-        minZoom: 3,
+        minZoom: 2.5,
         maxZoom: 19,
         center: ol.proj.transform(<?php echo $mapCenter; ?>, 'EPSG:4326', 'EPSG:3857'),
     });

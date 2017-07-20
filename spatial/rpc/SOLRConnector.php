@@ -20,6 +20,12 @@ if($pArr["wt"] == 'geojson'){
     $pArr["omitHeader"] = 'true';
 }
 
+/*$testURL = $SOLR_URL.'/select?';
+foreach($pArr as $key => $value){
+    $testURL .= $key.'='.$value.'&';
+}
+echo substr($testURL, 0, -1);*/
+
 $headers = array(
     'Content-Type: application/x-www-form-urlencoded',
     'Accept: application/json',
