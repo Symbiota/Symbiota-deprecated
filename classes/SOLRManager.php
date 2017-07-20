@@ -150,10 +150,10 @@ class SOLRManager extends OccurrenceManager{
         }
         if(!$canReadRareSpp){
             if($q == '*:*'){
-                $q = '(-localitySecurity:1)';
+                $q = '(localitySecurity:0)';
             }
             else{
-                $q .= ' AND (-localitySecurity:1)';
+                $q .= ' AND (localitySecurity:0)';
             }
         }
 

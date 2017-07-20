@@ -148,7 +148,7 @@
     <field name="county" type="string" indexed="true" stored="true"/>
     <field name="municipality" type="string" indexed="true" stored="true"/>
     <field name="locality" type="text_general" indexed="true" stored="true"/>
-    <field name="localitySecurity" type="int" indexed="true" stored="true"/>
+    <field name="localitySecurity" type="int" default="0" indexed="true" stored="true"/>
     <field name="localitySecurityReason" type="string" indexed="true" stored="true"/>
     <field name="decimalLatitude" type="double" indexed="true" stored="true"/>
     <field name="decimalLongitude" type="double" indexed="true" stored="true"/>
