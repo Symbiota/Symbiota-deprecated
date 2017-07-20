@@ -1349,6 +1349,8 @@ function loadPoints(){
     cqlString = newcqlString;
     solrqString = newsolrqString;
     if(newsolrqString){
+        pointvectorsource = new ol.source.Vector({wrapX: false});
+        layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
             if(solrRecCnt){
                 setRecordsTab();
@@ -1749,7 +1751,6 @@ function refreshLayerOrder(){
     layersArr['dragdrop2'].setZIndex(layerCount-5);
     layersArr['dragdrop3'].setZIndex(layerCount-4);
     layersArr['select'].setZIndex(layerCount-3);
-    //layersArr['pointi'].setZIndex(layerCount-2);
     layersArr['pointv'].setZIndex(layerCount-2);
     layersArr['heat'].setZIndex(layerCount-1);
     layersArr['spider'].setZIndex(layerCount);
@@ -1968,13 +1969,17 @@ function setClusterSymbol(feature) {
 
             style = new ol.style.Style({
                 image: new ol.style.Circle({
+                    opacity: 1,
+                    scale: 1,
                     radius: radius,
                     stroke: stroke,
                     fill: new ol.style.Fill({
                         color: [colorArr['r'],colorArr['g'],colorArr['b'],0.8]
-                    })
+                    }),
+                    atlasManager: atlasManager
                 }),
                 text: new ol.style.Text({
+                    scale: 1,
                     text: size.toString(),
                     fill: new ol.style.Fill({
                         color: '#fff'
@@ -2106,19 +2111,25 @@ function setSymbol(feature){
     if(recType.toLowerCase().indexOf('observation') !== -1){
         style = new ol.style.Style({
             image: new ol.style.RegularShape({
+                opacity: 1,
+                scale: 1,
                 fill: fill,
                 stroke: stroke,
                 points: 3,
-                radius: 7
+                radius: 7,
+                atlasManager: atlasManager
             })
         });
     }
     else{
         style = new ol.style.Style({
             image: new ol.style.Circle({
+                opacity: 1,
+                scale: 1,
                 radius: 7,
                 fill: fill,
-                stroke: stroke
+                stroke: stroke,
+                atlasManager: atlasManager
             })
         });
     }
