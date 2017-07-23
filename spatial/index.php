@@ -42,7 +42,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-1.9.1.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui-1.10.4.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.popupoverlay.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/ol-symbiota-ext.js?ver=2" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/ol-symbiota-ext.js?ver=4" type="text/javascript"></script>
     <script src="https://npmcdn.com/@turf/turf/turf.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jscolor/jscolor.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/stream.js" type="text/javascript"></script>
@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=165" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=174" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -172,14 +172,6 @@ $dbArr = Array();
                                     </div>
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
-                                <!-- <div id="checklistSearch0">
-                                    <div id="checklist_autocomplete" >
-                                        Checklist:
-                                        <input data-role="none" type="text" id="checklistname" style="width:275px;" name="checklistname" value="" title="" />
-                                        <input id="clid" name="clid" type="hidden"  value="" />
-                                    </div>
-                                </div>
-                                <div><hr></div> -->
                                 <div>
                                     Country: <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="" onchange="buildQueryStrings();" title="Separate multiple terms w/ commas" />
                                 </div>
@@ -236,15 +228,6 @@ $dbArr = Array();
                                 <div><hr></div>
                             </div>
                         </div>
-                        <!-- <div id="maptools">
-                            <div id="toollist">
-                                <ul>
-                                    <li><a href='#' onclick='return false;'>tool1</a></li>
-                                    <li><a href='#' onclick='return false;'>tool2</a></li>
-                                    <li><a href='#' onclick='return false;'>tool3</a></li>
-                                </ul>
-                            </div>
-                        </div> -->
                     </div>
 
                     <h3 id="recordsHeader" class="tabtitle" style="display:none;">Records and Taxa</h3>
@@ -502,7 +485,7 @@ $dbArr = Array();
     var thes = false;
     var loadVectorPoints = true;
     var taxaCnt = 0;
-    var lazyLoadCnt = 5000;
+    var lazyLoadCnt = 20000;
     var clusterDistance = 50;
     var clusterPoints = true;
     var showHeatMap = false;
@@ -644,6 +627,8 @@ $dbArr = Array();
         resolutions[z] = maxResolution / Math.pow(2, z);
     }
 
+    var atlasManager = new ol.style.AtlasManager();
+
     var baselayer = new ol.layer.Tile({
         source: new ol.source.XYZ({
             url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
@@ -690,22 +675,6 @@ $dbArr = Array();
         source: blankdragdropsource
     });
 
-    /*var pointimagesource = new ol.source.ImageWMS({
-        url: '<?php echo $GEOSERVER_URL; ?>/<?php echo $GEOSERVER_OCC_WORKSPACE; ?>/wms',
-        params: {
-            'LAYERS':'<?php echo $GEOSERVER_OCC_WORKSPACE; ?>:<?php echo $GEOSERVER_OCC_LAYER; ?>',
-            'CRS':'EPSG:4326',
-            'CQL_FILTER':cqlString
-        },
-        serverType: 'geoserver',
-        imageLoadFunction: function(image, src) {
-            imagePostFunction(image, src);
-        }
-    });
-    var pointimagelayer = new ol.layer.Image({
-        source: pointimagesource
-    });*/
-
     var spiderLayer = new ol.layer.Vector({
         source: new ol.source.Vector({
             features: new ol.Collection(),
@@ -720,7 +689,6 @@ $dbArr = Array();
     layersArr['select'] = selectlayer;
     layersArr['pointv'] = pointvectorlayer;
     layersArr['heat'] = heatmaplayer;
-    //layersArr['pointi'] = pointimagelayer;
     layersArr['spider'] = spiderLayer;
 
     var zoomslider = new ol.control.ZoomSlider();
@@ -809,7 +777,7 @@ $dbArr = Array();
     var mapView = new ol.View({
         zoom: <?php echo $mapZoom; ?>,
         projection: 'EPSG:3857',
-        minZoom: 3,
+        minZoom: 2.5,
         maxZoom: 19,
         center: ol.proj.transform(<?php echo $mapCenter; ?>, 'EPSG:4326', 'EPSG:3857'),
     });
@@ -826,12 +794,12 @@ $dbArr = Array();
             layersArr['dragdrop2'],
             layersArr['dragdrop3'],
             layersArr['select'],
-            //layersArr['pointi'],
             layersArr['pointv'],
             layersArr['heat'],
             layersArr['spider']
         ],
-        overlays: [popupoverlay,finderpopupoverlay]
+        overlays: [popupoverlay,finderpopupoverlay],
+        renderer: 'webgl'
     });
 
     var mousePositionControl = new ol.control.MousePosition({
@@ -1052,15 +1020,6 @@ $dbArr = Array();
             }
         }
     });
-
-    function loadPointWMSLayer(){
-        //console.log(cqlString);
-        layersArr['pointi'].getSource().updateParams({
-            'LAYERS':'<?php echo $GEOSERVER_OCC_WORKSPACE; ?>:<?php echo $GEOSERVER_OCC_LAYER; ?>',
-            'CRS':'EPSG:4326',
-            'CQL_FILTER':cqlString
-        });
-    }
 
     function loadPointWFSLayer(index){
         pointvectorsource = new ol.source.Vector({
