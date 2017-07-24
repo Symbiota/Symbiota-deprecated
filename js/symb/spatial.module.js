@@ -648,10 +648,11 @@ function deleteSelections(){
 
 function exportMapPNG(){
     map.once('postcompose', function(event) {
-        var canvas = event.context.canvas;
+        var canvas = document.getElementsByTagName('canvas').item(0);
         if (navigator.msSaveBlob) {
             navigator.msSaveBlob(canvas.msToBlob(), 'map.png');
-        } else {
+        }
+        else{
             canvas.toBlob(function(blob) {
                 saveAs(blob, 'map.png');
             });
