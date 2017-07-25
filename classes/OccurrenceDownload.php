@@ -1,6 +1,5 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-
 class OccurrenceDownload{
 	
 	private $conn;
@@ -13,20 +12,18 @@ class OccurrenceDownload{
 	private $charSetSource = '';
 	private $charSetOut = '';
 	private $zipFile = false;
- 	private $sqlWhere = '';
- 	private $conditionArr = array();
-    private $taxonFilter;
-    private $errorArr = array();
-    private $tidArr = array();
-    private $occArr = array();
-
- 	public function __construct(){
+	private $sqlWhere = '';
+	private $conditionArr = array();
+	private $taxonFilter;
+	
+	private $errorArr = array();
+	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
 		
 		//Set rare species variables
 		$this->securityArr = Array('locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
-			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','verbatimCoordinates',
-			'georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources','georeferenceVerificationStatus','habitat');
+				'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','verbatimCoordinates',
+				'georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources','georeferenceVerificationStatus','habitat');
 		if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
 			$this->redactLocalities = false;
 		}
@@ -41,19 +38,16 @@ class OccurrenceDownload{
 		$this->charSetSource = strtoupper($GLOBALS['CHARSET']);
 		$this->charSetOut = $this->charSetSource;
 	}
-
 	public function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
+		if(!($this->conn === false)) $this->conn->close();
 		//if($this->zipArchive) $this->zipArchive->close();
 	}
-
 	public function downloadData(){
 		$archiveFile = '';
 		$outstream = null;
 		$contentDesc = '';
 		$filePath = $this->getOutputFilePath();
 		$fileName = $this->getOutputFileName();
-
 		if($this->schemaType == 'checklist'){
 			$contentDesc = 'Symbiota Checklist File';
 		}
@@ -163,94 +157,84 @@ class OccurrenceDownload{
 		}
 		return $recCnt;
 	}
-
-/*
+	/*
 	 private function writeXmlFile($sql){
-		//$this->downloadPath .= ".xml";
-		//$this->downloadUrl .= ".xml";
-		
-		header("Content-Type: text/html/force-download");
-		header("Content-Disposition: attachment; filename='symbiotadownload".time().".xml'");
-		$out = new XMLWriter();
-		$out->openURI('php://output');
-		$out->xmlwriter_start_document("1.0","ISO-8859-1");
-		
-		
-		
-		<?xml version="1.0" encoding="UTF-8"?>
-
-$xw->startElementNS('ns0', 'approvePOrderResponse', 
-	'http://PhpRESTAppLib/POrderApprovalHtIF');
-
-<SimpleDarwinRecordSet
- xmlns="http://rs.tdwg.org/dwc/dwcrecord/"
- xmlns:dc="http://purl.org/dc/terms/"
- xmlns:dwc="http://rs.tdwg.org/dwc/terms/"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://rs.tdwg.org/dwc/dwcrecord/ http://rs.tdwg.org/dwc/xsd/tdwg_dwc_simple.xsd">
- <SimpleDarwinRecord>
-  <dc:type>Taxon</dc:type>
-		
-xmlwriter_start_attribute($xml_resource , 'access_year');
-xmlwriter_write_attribute($xml_resource, 'access_year' , '2008');
-xmlwriter_end_attribute($xml_resource);
-
-		
-
-		StreamResult sr = new StreamResult(this.downloadPath);
-			SAXTransformerFactory tf = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
-
-			TransformerHandler th = tf.newTransformerHandler();
-			Transformer t = th.getTransformer();
-			t.setOutputProperty(OutputKeys.ENCODING,"ISO-8859-1");
-			th.setResult(sr);
-			th.startDocument();
-
-			AttributesImpl ai = new AttributesImpl();
-			ai.clear();
-			th.startElement("","","Document",ai);
-			th.startElement("","","Specimens",ai);
-
-			Statement st = con.createStatement();
-			rs = st.executeQuery(sql);
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int columnCnt = rsmd.getColumnCount();
-			while(rs.next()){
-				ai.clear();
-				th.startElement("","","SpecimenRecord",ai);
-				for(int x = 1;x <= columnCnt;++x){
-					String columnName = rsmd.getColumnName(x);
-					if(this.isAdmin || rs.getInt("LocalitySecurity") == 1 || !this.securityColumns.contains(columnName) || (this.userRights != null && this.userRights.contains(rs.getString("CollectionCode")))){
-						String outStr = rs.getString(x);
-						if(outStr != null && !outStr.equals("")){
-							char[] charArr = outStr.toCharArray();
-							ai.clear();
-							th.startElement("","",columnName,ai);
-							th.characters(charArr,0,charArr.length);
-							th.endElement("","",columnName);
-						}
-					}
-				}
-				th.endElement("","","SpecimenRecord");
-			}
-
-			th.endElement("","","Specimens");
-			th.endElement("","","Document");
-			th.endDocument();
-			st.close();
-			rs.close();
-		}
-		catch(SQLException sqle){
-			System.out.println("DownloadCollections: writeXmlFile: sqle = " + sqle);
-			System.out.println("SQL: " + sql);
-		}
-		catch(Exception e){
-			System.out.println("DownloadCollections: writeXmlFile: e = " + e);
-		}
-		this.closeConnection();
-		$result->close();
-	}*/
-
+	 //$this->downloadPath .= ".xml";
+	 //$this->downloadUrl .= ".xml";
+	 
+	 header("Content-Type: text/html/force-download");
+	 header("Content-Disposition: attachment; filename='symbiotadownload".time().".xml'");
+	 $out = new XMLWriter();
+	 $out->openURI('php://output');
+	 $out->xmlwriter_start_document("1.0","ISO-8859-1");
+	 
+	 
+	 
+	 <?xml version="1.0" encoding="UTF-8"?>
+	 $xw->startElementNS('ns0', 'approvePOrderResponse',
+	 'http://PhpRESTAppLib/POrderApprovalHtIF');
+	 <SimpleDarwinRecordSet
+	 xmlns="http://rs.tdwg.org/dwc/dwcrecord/"
+	 xmlns:dc="http://purl.org/dc/terms/"
+	 xmlns:dwc="http://rs.tdwg.org/dwc/terms/"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://rs.tdwg.org/dwc/dwcrecord/ http://rs.tdwg.org/dwc/xsd/tdwg_dwc_simple.xsd">
+	 <SimpleDarwinRecord>
+	 <dc:type>Taxon</dc:type>
+	 
+	 xmlwriter_start_attribute($xml_resource , 'access_year');
+	 xmlwriter_write_attribute($xml_resource, 'access_year' , '2008');
+	 xmlwriter_end_attribute($xml_resource);
+	 
+	 StreamResult sr = new StreamResult(this.downloadPath);
+	 SAXTransformerFactory tf = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
+	 TransformerHandler th = tf.newTransformerHandler();
+	 Transformer t = th.getTransformer();
+	 t.setOutputProperty(OutputKeys.ENCODING,"ISO-8859-1");
+	 th.setResult(sr);
+	 th.startDocument();
+	 AttributesImpl ai = new AttributesImpl();
+	 ai.clear();
+	 th.startElement("","","Document",ai);
+	 th.startElement("","","Specimens",ai);
+	 Statement st = con.createStatement();
+	 rs = st.executeQuery(sql);
+	 ResultSetMetaData rsmd = rs.getMetaData();
+	 int columnCnt = rsmd.getColumnCount();
+	 while(rs.next()){
+	 ai.clear();
+	 th.startElement("","","SpecimenRecord",ai);
+	 for(int x = 1;x <= columnCnt;++x){
+	 String columnName = rsmd.getColumnName(x);
+	 if(this.isAdmin || rs.getInt("LocalitySecurity") == 1 || !this.securityColumns.contains(columnName) || (this.userRights != null && this.userRights.contains(rs.getString("CollectionCode")))){
+	 String outStr = rs.getString(x);
+	 if(outStr != null && !outStr.equals("")){
+	 char[] charArr = outStr.toCharArray();
+	 ai.clear();
+	 th.startElement("","",columnName,ai);
+	 th.characters(charArr,0,charArr.length);
+	 th.endElement("","",columnName);
+	 }
+	 }
+	 }
+	 th.endElement("","","SpecimenRecord");
+	 }
+	 th.endElement("","","Specimens");
+	 th.endElement("","","Document");
+	 th.endDocument();
+	 st.close();
+	 rs.close();
+	 }
+	 catch(SQLException sqle){
+	 System.out.println("DownloadCollections: writeXmlFile: sqle = " + sqle);
+	 System.out.println("SQL: " + sql);
+	 }
+	 catch(Exception e){
+	 System.out.println("DownloadCollections: writeXmlFile: e = " + e);
+	 }
+	 this.closeConnection();
+	 $result->close();
+	 }*/
 	//Return latest activity
 	public function getDataEntryActivity($format='rss',$days=0, $limit=0){
 		//format: rss, json
@@ -262,19 +246,16 @@ xmlwriter_end_attribute($xml_resource);
 			return $this->getDataEntryXML($days,$limit);
 		}
 	}
-
 	private function getDataEntryXML($days, $limit){
 		
 		//Create new document and write out to target
 		$newDoc = new DOMDocument('1.0',$this->charSetOut);
-
-		//Add root element 
+		//Add root element
 		$rootElem = $newDoc->createElement('rss');
 		$rootAttr = $newDoc->createAttribute('version');
 		$rootAttr->value = '2.0';
 		$rootElem->appendChild($rootAttr);
 		$newDoc->appendChild($rootElem);
-
 		//Add Channel
 		$channelElem = $newDoc->createElement('channel');
 		$rootElem->appendChild($channelElem);
@@ -301,17 +282,16 @@ xmlwriter_end_attribute($xml_resource);
 		$channelElem->appendChild($descriptionElem);
 		$languageElem = $newDoc->createElement('language','en-us');
 		$channelElem->appendChild($languageElem);
-
 		//Create new item for target archives and load into array
-		$sql = 'SELECT o.occid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode, c.collectionname, g.guid, c.guidtarget, '. 
-			'o.occurrenceid, o.catalognumber, o.sciname, o.recordedby, o.recordnumber, IFNULL(CAST(o.eventdate AS CHAR),o.verbatimeventdate) as eventdate, '. 
-			'o.decimallatitude, o.decimallongitude, o.datelastmodified, o.recordenteredby, o.genericcolumn2, '. 
-			'IFNULL(i.thumbnailurl,i.url) AS thumbnailurl, o.processingstatus '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
-			'INNER JOIN images i ON o.occid = i.occid '.
-			'INNER JOIN guidoccurrences g ON o.occid = g.occid '. 
-			'WHERE c.colltype = "Preserved Specimens" '.
-			'AND o.processingstatus IN("pending review","reviewed", "closed") AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) ';
+		$sql = 'SELECT o.occid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode, c.collectionname, g.guid, c.guidtarget, '.
+				'o.occurrenceid, o.catalognumber, o.sciname, o.recordedby, o.recordnumber, IFNULL(CAST(o.eventdate AS CHAR),o.verbatimeventdate) as eventdate, '.
+				'o.decimallatitude, o.decimallongitude, o.datelastmodified, o.recordenteredby, o.genericcolumn2, '.
+				'IFNULL(i.thumbnailurl,i.url) AS thumbnailurl, o.processingstatus '.
+				'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+				'INNER JOIN images i ON o.occid = i.occid '.
+				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
+				'WHERE c.colltype = "Preserved Specimens" '.
+				'AND o.processingstatus IN("pending review","reviewed", "closed") AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) ';
 		if($days && is_numeric($days)) $sql .= 'AND (o.datelastmodified > DATE_SUB(NOW(), INTERVAL '.$days.' DAY)) ';
 		$sql .= 'ORDER BY o.datelastmodified DESC ';
 		if(!$days && !$limit) $limit = '100';
@@ -326,10 +306,8 @@ xmlwriter_end_attribute($xml_resource);
 			$titleStr = $r->sciname.' - '.$r->recordedby.' '.($r->recordnumber?'#'.$r->recordnumber:'');
 			$itemTitleElem->appendChild($newDoc->createTextNode($titleStr));
 			$itemElem->appendChild($itemTitleElem);
-
 			$collLinkElem = $newDoc->createElement('collectionName',$r->collectionname.' ('.$r->instcode.')');
 			$itemElem->appendChild($collLinkElem);
-
 			$catalogLinkElem = $newDoc->createElement('catalogNumber',$r->catalognumber);
 			$itemElem->appendChild($catalogLinkElem);
 			
@@ -382,14 +360,11 @@ xmlwriter_end_attribute($xml_resource);
 				//<decimalLongitudeTranscribing>Transcription Long</decimalLongitudeTranscribing>
 			}
 		}
-
 		return $newDoc->saveXML();
 	}
-
 	public function setSqlWhere($sqlStr){
 		$this->sqlWhere = $sqlStr;
 	}
-
 	public function addCondition($field, $cond, $value = ''){
 		if($field){
 			if(!trim($cond)) $cond = 'EQUALS';
@@ -398,7 +373,6 @@ xmlwriter_end_attribute($xml_resource);
 			}
 		}
 	}
-
 	private function applyConditions(){
 		$sqlFrag = '';
 		if($this->conditionArr){
@@ -419,7 +393,7 @@ xmlwriter_end_attribute($xml_resource);
 							if($cond == 'STARTS'){
 								$sqlFrag2 .= 'OR o.'.$field.' LIKE "'.$value.'%" ';
 							}
-							elseif($cond == 'LIKE'){ 
+							elseif($cond == 'LIKE'){
 								$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
 							}
 						}
@@ -434,7 +408,7 @@ xmlwriter_end_attribute($xml_resource);
 			$this->sqlWhere .= $sqlFrag;
 		}
 		if($this->sqlWhere){
-			//Make sure it starts with WHERE 
+			//Make sure it starts with WHERE
 			if(substr($this->sqlWhere,0,4) == 'AND '){
 				$this->sqlWhere = 'WHERE'.substr($this->sqlWhere,3);
 			}
@@ -443,96 +417,68 @@ xmlwriter_end_attribute($xml_resource);
 			}
 		}
 	}
-
 	private function getSql(){
-        global $SOLR_MODE;
-	    $sql = '';
+		$sql = '';
 		if($this->schemaType == 'checklist'){
-            if($SOLR_MODE && ($this->tidArr || $this->occArr)){
-                if($this->taxonFilter){
-                    $tidStr = implode(',',$this->tidArr);
-                    $sql = 'SELECT DISTINCT ts.family, t.sciname AS scientificName, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-                        'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
-                        'FROM taxstatus AS ts INNER JOIN taxa AS t ON ts.TidAccepted = t.Tid '.
-                        'WHERE ts.tid IN('.$tidStr.') AND (ts.taxauthid = '.$this->taxonFilter.') '.
-                        'ORDER BY ts.family, t.SciName ';
-                }
-                else{
-                    $occStr = implode(',',$this->occArr);
-                    $sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-                        'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
-                        'FROM omoccurrences AS o LEFT JOIN taxa AS t ON o.tidinterpreted = t.tid '.
-                        'WHERE o.occid IN('.$occStr.') AND o.sciname IS NOT NULL '.
-                        'ORDER BY IFNULL(o.family,"not entered"), o.sciname ';
-                }
-            }
-            else{
-                if($this->taxonFilter){
-                    $sql = 'SELECT DISTINCT ts.family, t.sciname AS scientificName, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-                        'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
-                        'FROM omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid '.
-                        'INNER JOIN taxa t ON ts.TidAccepted = t.Tid ';
-                    if(strpos($this->sqlWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
-                    if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-                    $sql .= $this->sqlWhere.'AND t.RankId > 140 AND (ts.taxauthid = '.$this->taxonFilter.') ';
-                    if($this->redactLocalities){
-                        if($this->rareReaderArr){
-                            $sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
-                        }
-                        else{
-                            $sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
-                        }
-                    }
-                    $sql .= 'ORDER BY ts.family, t.SciName ';
-                }
-                else{
-                    $sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-                        'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
-                        'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
-                    if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
-                    if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-                    $sql .= $this->sqlWhere.'AND o.SciName NOT LIKE "%aceae" AND o.SciName NOT LIKE "%idea" AND o.SciName NOT IN ("Plantae","Polypodiophyta") ';
-                    if($this->redactLocalities){
-                        if($this->rareReaderArr){
-                            $sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
-                        }
-                        else{
-                            $sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
-                        }
-                    }
-                    $sql .= 'ORDER BY IFNULL(o.family,"not entered"), o.SciName ';
-                }
-            }
+			if($this->taxonFilter){
+				$sql = 'SELECT DISTINCT ts.family, t.sciname AS scientificName, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
+						'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
+						'FROM omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid '.
+						'INNER JOIN taxa t ON ts.TidAccepted = t.Tid ';
+				if(strpos($this->sqlWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+				if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+				$sql .= $this->sqlWhere.'AND t.RankId > 140 AND (ts.taxauthid = '.$this->taxonFilter.') ';
+				if($this->redactLocalities){
+					if($this->rareReaderArr){
+						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
+					}
+					else{
+						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
+					}
+				}
+				$sql .= 'ORDER BY ts.family, t.SciName ';
+			}
+			else{
+				$sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
+						'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
+						'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
+				if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+				if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+				$sql .= $this->sqlWhere.'AND o.SciName NOT LIKE "%aceae" AND o.SciName NOT LIKE "%idea" AND o.SciName NOT IN ("Plantae","Polypodiophyta") ';
+				if($this->redactLocalities){
+					if($this->rareReaderArr){
+						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
+					}
+					else{
+						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
+					}
+				}
+				$sql .= 'ORDER BY IFNULL(o.family,"not entered"), o.SciName ';
+			}
 		}
 		elseif($this->schemaType == 'georef'){
 			$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
-				'o.catalogNumber, o.occurrenceId, o.decimalLatitude, o.decimalLongitude, '.
-				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.verbatimCoordinates, ';
+					'o.catalogNumber, o.occurrenceId, o.decimalLatitude, o.decimalLongitude, '.
+					'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.verbatimCoordinates, ';
 			if($this->extended){
 				$sql .= 'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
-					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-					'o.localitySecurity, o.localitySecurityReason, IFNULL(o.modified,o.datelastmodified) AS modified, '.
-					'o.processingStatus, o.collId, o.dbpk AS sourcePrimaryKey, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
+						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
+						'o.localitySecurity, o.localitySecurityReason, IFNULL(o.modified,o.datelastmodified) AS modified, '.
+						'o.processingStatus, o.collId, o.dbpk AS sourcePrimaryKey, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
 			}
 			else{
 				$sql .= 'o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
-					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-					'IFNULL(o.modified,o.datelastmodified) AS modified, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
+						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
+						'IFNULL(o.modified,o.datelastmodified) AS modified, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
 			}
-				
+			
 			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
-				'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
+					'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
+					'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
 			if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 			if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			$this->applyConditions();
-            if($SOLR_MODE && $this->occArr){
-                $occStr = implode(',',$this->occArr);
-                $sql .= 'WHERE o.occid IN('.$occStr.') ';
-            }
-            else{
-                $sql .= $this->sqlWhere;
-            }
+			$sql .= $this->sqlWhere;
 			if($this->redactLocalities){
 				if($this->rareReaderArr){
 					$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
@@ -608,8 +554,8 @@ xmlwriter_end_attribute($xml_resource);
 		$retArr = array();
 		if(is_numeric($collid)){
 			$sql = 'SELECT institutioncode, collectioncode, collectionname, managementtype '.
-				'FROM omcollections '.
-				'WHERE collid = '.$collid;
+					'FROM omcollections '.
+					'WHERE collid = '.$collid;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$retArr['instcode'] = $r->institutioncode;
@@ -714,19 +660,6 @@ xmlwriter_end_attribute($xml_resource);
 			$this->taxonFilter = $filter;
 		}
 	}
-
-    public function setTidArr($tidArr){
-        if(is_array($tidArr)){
-            $this->tidArr = $tidArr;
-        }
-    }
-
-    public function setOccArr($occArr){
-        if(is_array($occArr)){
-            $this->occArr = $occArr;
-        }
-    }
-
 	//Misc functions
 	private function stripSensitiveFields(&$row){
 		if($row["localitySecurity"] == 1 && $this->redactLocalities && !in_array($row["collid"],$this->rareReaderArr)){
@@ -735,7 +668,6 @@ xmlwriter_end_attribute($xml_resource);
 			}
 		}
 	}
-
 	private function encodeArr(&$inArr){
 		if($this->charSetSource && $this->charSetOut != $this->charSetSource){
 			foreach($inArr as $k => $v){
@@ -743,7 +675,6 @@ xmlwriter_end_attribute($xml_resource);
 			}
 		}
 	}
-
 	private function encodeStr($inStr){
 		$retStr = $inStr;
 		if($this->charSetSource){
@@ -762,7 +693,6 @@ xmlwriter_end_attribute($xml_resource);
 		}
 		return $retStr;
 	}
-
 	private function cleanInStr($inStr){
 		$retStr = trim($inStr);
 		$retStr = preg_replace('/\s\s+/', ' ',$retStr);

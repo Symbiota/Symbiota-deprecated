@@ -2,7 +2,6 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 $stArrCollJson = isset($_REQUEST["jsoncollstarr"])?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = isset($_REQUEST["starr"])?$_REQUEST["starr"]:'';
@@ -19,18 +18,10 @@ if($collStArr && !$stArr) $stArr = $collStArr;
 
 $collManager = null;
 $occurArr = array();
-if(isset($SOLR_MODE) && $SOLR_MODE){
-	$collManager = new SOLRManager();
-	$collManager->setSearchTermsArr($stArr);
-	$solrArr = $collManager->getRecordArr($pageNumber,$cntPerPage);
-	$occurArr = $collManager->translateSOLRRecList($solrArr);
-}
-else{
-	$collManager = new OccurrenceListManager(false);
-	$collManager->setSearchTermsArr($stArr);
-	//$collManager->getSqlWhere();
-	$occurArr = $collManager->getRecordArr($pageNumber,$cntPerPage);
-}
+$collManager = new OccurrenceListManager(false);
+$collManager->setSearchTermsArr($stArr);
+//$collManager->getSqlWhere();
+$occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 
 //Add search details
 $htmlStr = '<div style="float:right;">';

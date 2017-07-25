@@ -2,46 +2,24 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/checklist.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceChecklistManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
-$checklistManager = new OccurrenceChecklistManager();
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:'';
-$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
+$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
+echo 'starr: '.$stArrSearchJson;
+echo 'jsoncollstarr: '.$stArrCollJson;
 
 //Sanitation
 if(!is_numeric($taxonFilter)) $taxonFilter = 1;
 
-$checklistArr = Array();
-$taxaCnt = 0;
-
-$solrManager = new SOLRManager();
 $checklistManager = new OccurrenceChecklistManager();
 
-if($stArrCollJson && $stArrSearchJson){
+if($stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 	$collStArr = json_decode($stArrCollJson, true);
-	$searchStArr = json_decode($stArrSearchJson, true);
-	$stArr = array_merge($searchStArr,$collStArr);
-
-    if($SOLR_MODE){
-        $solrManager->setSearchTermsArr($stArr);
-        $solrArr = $solrManager->getTaxaArr();
-        if($taxonFilter && is_numeric($taxonFilter)){
-            $tidArr = $solrManager->getSOLRTidList($solrArr);
-            $checklistArr = $checklistManager->getTidChecklist($tidArr,$taxonFilter);
-            $taxaCnt = $checklistManager->getChecklistTaxaCnt();
-        }
-        else{
-            $checklistArr = $solrManager->translateSOLRTaxaList($solrArr);
-            $taxaCnt = $solrManager->getChecklistTaxaCnt();
-        }
-    }
-    else{
-        $checklistManager->setSearchTermsArr($stArr);
-        $checklistArr = $checklistManager->getChecklist($taxonFilter);
-        $taxaCnt = $checklistManager->getChecklistTaxaCnt();
-    }
+	$stArr= json_decode($stArrSearchJson, true);
+	if($collStArr) $stArr = array_merge($stArr,$collStArr);
+    $checklistManager->setSearchTermsArr($stArr);
 }
 ?>
 <div>
@@ -73,7 +51,7 @@ if($stArrCollJson && $stArrSearchJson){
 	<div style='margin:10px;float:right;'>
 		<form name="changetaxonomy" id="changetaxonomy" action="list.php" method="post">
 			<?php echo $LANG['TAXONOMIC_FILTER']; ?>:
-            <select id="taxonfilter" name="taxonfilter" onchange="document.changetaxonomy.submit();">
+            <select id="taxonfilter" name="taxonfilter" onchange="this.form.submit();">
                 <option value="0"><?php echo $LANG['RAW_DATA'];?></option>
                 <?php
                     $taxonAuthList = $checklistManager->getTaxonAuthorityList();
@@ -83,11 +61,14 @@ if($stArrCollJson && $stArrSearchJson){
                     ?>
             </select>
             <input type="hidden" name="tabindex" value="0" />
+            <input type="hidden" name="starr" value='<?php echo $stArrSearchJson; ?>' />
+            <input type="hidden" name="jsoncollstarr" value='<?php echo $stArrCollJson; ?>' />
         </form>
 	</div>
 	<div style="clear:both;"><hr/></div>
-	<?php
-		echo '<div style="font-weight:bold;font-size:125%;">'.$LANG['TAXA_COUNT'].': '.$taxaCnt.'</div>';
+		<?php
+		$checklistArr = $checklistManager->getChecklist($taxonFilter);
+		echo '<div style="font-weight:bold;font-size:125%;">'.$LANG['TAXA_COUNT'].': '.$checklistManager->getChecklistTaxaCnt().'</div>';
 		$undFamilyArray = Array();
 		if(array_key_exists("undefined",$checklistArr)){
 			$undFamilyArray = $checklistArr["undefined"];

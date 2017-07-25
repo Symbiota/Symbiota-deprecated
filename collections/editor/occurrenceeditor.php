@@ -2,7 +2,6 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Access-Control-Allow-Origin: http://www.catalogueoflife.org/col/webservice');
 
@@ -33,8 +32,6 @@ else{
 if($crowdSourceMode){
 	$occManager->setCrowdSourceMode(1);
 }
-
-if($SOLR_MODE) $solrManager = new SOLRManager();
 
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 $displayQuery = 0;
@@ -114,7 +111,6 @@ if($SYMB_UID){
 	}
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_POST,($crowdSourceMode?1:$isEditor));
-        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 	if($isEditor == 1 || $isEditor == 2 || $crowdSourceMode){
 		if($action == 'Save OCR'){
@@ -136,17 +132,14 @@ if($SYMB_UID){
 		if($action == "Submit Determination"){
 			//Adding a new determination
 			$statusStr = $occManager->addDetermination($_POST,$isEditor);
-            if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
 		}
 		elseif($action == "Submit Determination Edits"){
 			$statusStr = $occManager->editDetermination($_POST);
-            if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
 		}
 		elseif($action == "Delete Determination"){
 			$statusStr = $occManager->deleteDetermination($_POST['detid']);
-            if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
 		}
 		//Only full editors can perform following actions
@@ -164,7 +157,6 @@ if($SYMB_UID){
 						//Stay on record and get $occId
 						$occId = $occManager->getOccId();
 					}
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = $occManager->getErrorStr();
@@ -174,7 +166,6 @@ if($SYMB_UID){
 				if($occManager->deleteOccurrence($occId)){
 					$occId = 0;
 					$occManager->setOccId(0);
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = $occManager->getErrorStr();
@@ -189,7 +180,6 @@ if($SYMB_UID){
 							$collId = $transferCollid;
 							$collMap = $occManager->getCollMap();
 						}
-                        if($SOLR_MODE) $solrManager->updateSOLR();
 					}
 					else{
 						$statusStr = $occManager->getErrorStr();
@@ -198,13 +188,11 @@ if($SYMB_UID){
 			}
 			elseif($action == "Submit Image Edits"){
 				$statusStr = $occManager->editImage($_POST);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 2;
 			}
 			elseif($action == "Submit New Image"){
 				if($occManager->addImage($_POST)){
 					$statusStr = 'Image added successfully';
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 					$tabTarget = 2;
 				}
 				if($occManager->getErrorStr()){
@@ -215,7 +203,6 @@ if($SYMB_UID){
 				$removeImg = (array_key_exists("removeimg",$_POST)?$_POST["removeimg"]:0);
 				if($occManager->deleteImage($_POST["imgid"], $removeImg)){
 					$statusStr = 'Image deleted successfully';
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 					$tabTarget = 2;
 				}
 				else{
@@ -225,7 +212,6 @@ if($SYMB_UID){
 			elseif($action == "Remap Image"){
 				if($occManager->remapImage($_POST["imgid"], $_POST["targetoccid"])){
 					$statusStr = 'SUCCESS: Image remapped to record <a href="occurrenceeditor.php?occid='.$_POST["targetoccid"].'" target="_blank">'.$_POST["targetoccid"].'</a>';
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = 'ERROR linking image to new specimen: '.$occManager->getErrorStr();
@@ -234,7 +220,6 @@ if($SYMB_UID){
 			elseif($action == "Disassociate Image"){
 				if($occManager->remapImage($_POST["imgid"])){
 					$statusStr = 'SUCCESS disassociating image <a href="../../imagelib/imgdetails.php?imgid='.$_POST["imgid"].'" target="_blank">#'.$_POST["imgid"].'</a>';
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = 'ERROR disassociating image: '.$occManager->getErrorStr();
@@ -245,38 +230,30 @@ if($SYMB_UID){
 				$makeCurrent = 0;
 				if(array_key_exists('makecurrent',$_POST)) $makeCurrent = 1;
 				$statusStr = $occManager->applyDetermination($_POST['detid'],$makeCurrent);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 1;
 			}
 			elseif($action == "Make Determination Current"){
 				$statusStr = $occManager->makeDeterminationCurrent($_POST['detid']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 1;
 			}
 			elseif($action == "Submit Verification Edits"){
 				$statusStr = $occManager->editIdentificationRanking($_POST['confidenceranking'],$_POST['notes']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 1;
 			}
 			elseif($action == 'Link to Checklist as Voucher'){
 				$statusStr = $occManager->linkChecklistVoucher($_POST['clidvoucher'],$_POST['tidvoucher']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'deletevoucher'){
 				$statusStr = $occManager->deleteChecklistVoucher($_REQUEST['delclid']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'editgeneticsubmit'){
 				$statusStr = $occManager->editGeneticResource($_POST);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'deletegeneticsubmit'){
 				$statusStr = $occManager->deleteGeneticResource($_POST['genid']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'addgeneticsubmit'){
 				$statusStr = $occManager->addGeneticResource($_POST);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 		}
 	}

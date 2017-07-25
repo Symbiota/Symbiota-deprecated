@@ -28,6 +28,3 @@ if($type=='fullquery'){
 
 $kmlFilePath = $mapManager->writeKMLFile($coordArr);
 ?>
-
-
-   

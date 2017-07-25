@@ -1324,7 +1324,7 @@ class OccurrenceManager{
 	}
 	
 	public function setSearchTermsArr($stArr){
-		if($stArr) $this->searchTermsArr = $stArr;
+		if($stArr && !$this->searchTermsArr) $this->searchTermsArr = $stArr;
 	}
 
 	public function getSearchTermsArr(){

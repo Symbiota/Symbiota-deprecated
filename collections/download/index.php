@@ -85,8 +85,8 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 			<a href="../../index.php">Home</a> &gt; 
 			<a href="../index.php">Collections</a> &gt; 
 			<a href="../harvestparams.php">Search Criteria</a> &gt; 
-			<a href="../list.php">Specimen Records</a> &gt;
-			<b>Specimen Download</b>
+			<a href="../list.php">Occurrence Record Listing</a> &gt;
+			<b>Occurrence Record Download</b>
 		</div>
 		<?php 
 	}

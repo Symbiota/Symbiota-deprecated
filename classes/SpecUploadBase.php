@@ -991,6 +991,7 @@ class SpecUploadBase extends SpecUpload{
 			//Reset transfer count
 			$this->setImageTransferCount();
 			$this->outputMsg('<li style="margin-left:10px;">Revised count: '.$this->imageTransferCount.' images</li> ');
+			exit;
 		}
 		$rs->free();
 	}

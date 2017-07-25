@@ -1,7 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorImages.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/imageoccursubmit.php?'.$_SERVER['QUERY_STRING']);
 
@@ -9,7 +8,6 @@ $collid  = $_REQUEST["collid"];
 $action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 
 $occurManager = new OccurrenceEditorImages();
-if($SOLR_MODE) $solrManager = new SOLRManager();
 $occurManager->setCollid($collid);
 $collMap = $occurManager->getCollMap();
 
@@ -30,7 +28,6 @@ if($isEditor){
 	if($action == 'Submit Occurrence'){
 		if($occurManager->addImageOccurrence($_POST)){
 			$occid = $occurManager->getOccid();
-            if($SOLR_MODE) $solrManager->updateSOLR();
 			if($occid) $statusStr = 'New record has been created: <a href="occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
 		}
 		else{

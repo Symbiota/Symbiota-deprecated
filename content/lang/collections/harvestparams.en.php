@@ -12,6 +12,7 @@ $LANG['PAGE_HEADER'] = 'Enter Search Parameters';
 $LANG['GENERAL_TEXT_1'] = 'Fill in one or more of the following query criteria and click &quot;Search&quot; to view your results.';
 $LANG['TAXON_HEADER'] = 'Taxonomic Criteria:';
 $LANG['GENERAL_TEXT_2'] = 'Include Synonyms from Taxonomic Thesaurus';
+$LANG['SELECT_1-0'] = 'All Taxon Levels';
 $LANG['SELECT_1-1'] = 'Family or Scientific Name';
 $LANG['SELECT_1-2'] = 'Family only';
 $LANG['SELECT_1-3'] = 'Scientific Name only';

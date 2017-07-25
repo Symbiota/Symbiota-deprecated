@@ -2,18 +2,18 @@
 include_once('OccurrenceManager.php');
 
 class OccurrenceChecklistManager extends OccurrenceManager{
-	
+
 	private $checklistTaxaCnt = 0;
 
- 	public function __construct(){
- 		parent::__construct();
- 	}
-
-	public function __destruct(){
- 		parent::__destruct();
+	public function __construct(){
+		parent::__construct();
 	}
 
- 	public function getChecklistTaxaCnt(){
+	public function __destruct(){
+		parent::__destruct();
+	}
+
+	public function getChecklistTaxaCnt(){
 		return $this->checklistTaxaCnt;
 	}
 
@@ -127,7 +127,6 @@ class OccurrenceChecklistManager extends OccurrenceManager{
             }
 			//echo "sqlTaxaInsert: ".$sqlTaxaInsert;
 			$conn->query($sqlTaxaInsert);
-
 			//Delete checklists that are greater than one week old
 			$conn->query('DELETE FROM fmdynamicchecklists WHERE expiration < now()'); 
 		}

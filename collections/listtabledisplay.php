@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $targetTid = array_key_exists("targettid",$_REQUEST)?$_REQUEST["targettid"]:0;
-$occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:1;
+$occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:0;
 $sortField1 = array_key_exists('sortfield1',$_REQUEST)?$_REQUEST['sortfield1']:'collection';
 $sortField2 = array_key_exists('sortfield2',$_REQUEST)?$_REQUEST['sortfield2']:'';
 $sortOrder = array_key_exists('sortorder',$_REQUEST)?$_REQUEST['sortorder']:'';
@@ -20,8 +20,9 @@ $stArrCollJson = '';
 $resetOccIndex = false;
 $navStr = '';
 
-$sortFields = array('Collection','Catalog Number','Family','Scientific Name','Collector','Number','Event Date',
-	'Country','State/Province','County','Elevation');
+$sortFields = array('collection' => 'Collection','o.CatalogNumber' => 'Catalog Number','o.family' => 'Family',
+	'o.sciname' => 'Scientific Name','o.recordedBy' => 'Collector','o.recordNumber' => 'Number','o.eventDate' => 'Event Date',
+	'o.country'=>'Country','o.StateProvince' => 'State/Province','o.county' => 'County','CAST(elev AS UNSIGNED)' => 'Elevation');
 
 if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
     $stArr = $collManager->getSearchTerms();
@@ -179,8 +180,8 @@ if(isset($_REQUEST['db'])){
 						<b>Sort By:</b> 
 						<select name="sortfield1">
 							<?php 
-							foreach($sortFields as $k){
-                                echo '<option value="'.$k.'" '.($k==$sortField1?'SELECTED':'').'>'.$k.'</option>';
+							foreach($sortFields as $k => $v){
+								echo '<option value="'.$k.'" '.($k==$sortField1?'SELECTED':'').'>'.$v.'</option>';
 							}
 							?>
 						</select>
@@ -190,8 +191,8 @@ if(isset($_REQUEST['db'])){
 						<select name="sortfield2">
 							<option value="">Select Field Name</option>
 							<?php 
-							foreach($sortFields as $k){
-                                echo '<option value="'.$k.'" '.($k==$sortField2?'SELECTED':'').'>'.$k.'</option>';
+							foreach($sortFields as $k => $v){
+								echo '<option value="'.$k.'" '.($k==$sortField2?'SELECTED':'').'>'.$v.'</option>';
 							}
 							?>
 						</select>
@@ -204,7 +205,7 @@ if(isset($_REQUEST['db'])){
 						</select>
 					</div>
 					<div style="float:right;margin-right:10px;">
-						<button name="formsubmit" type="button" value="sortresults" onclick="changeTablePage(1);">Sort</button>
+						<button name="formsubmit" type="button" value="sortresults" onclick="changeTablePage(0);">Sort</button>
                     </div>
 				</form>
 			</fieldset>

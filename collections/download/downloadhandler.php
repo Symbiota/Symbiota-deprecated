@@ -3,23 +3,17 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-ini_set('max_execution_time', 300); //180 seconds = 5 minutes
 
 $schema = array_key_exists("schema",$_POST)?$_POST["schema"]:"symbiota"; 
 $cSet = array_key_exists("cset",$_POST)?$_POST["cset"]:'';
-$taxonFilterCode = array_key_exists("taxonFilterCode",$_POST)?$_POST["taxonFilterCode"]:0;
 $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 $dlManager = new OccurrenceDownload();
 $dwcaHandler = new DwcArchiverCore();
 $occurManager = new OccurrenceManager();
-$solrManager = new SOLRManager();
-
-$occWhereStr = '';
 
 if($stArrCollJson && $stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
@@ -27,35 +21,10 @@ if($stArrCollJson && $stArrSearchJson){
 	$searchStArr = json_decode($stArrSearchJson, true);
 	$stArr = array_merge($searchStArr,$collStArr);
 	$occurManager->setSearchTermsArr($stArr);
-
-    if($SOLR_MODE){
-        $solrManager->setSearchTermsArr($stArr);
-        if($schema == 'checklist'){
-            if($taxonFilterCode){
-                $solrArr = $solrManager->getTaxaArr();
-                $tidArr = $solrManager->getSOLRTidList($solrArr);
-                $dlManager->setTidArr($tidArr);
-            }
-            else{
-                $occArr = $solrManager->getOccArr();
-                $dlManager->setOccArr($occArr);
-            }
-        }
-        elseif($schema == 'georef'){
-            $occArr = $solrManager->getOccArr(true);
-            $dlManager->setOccArr($occArr);
-        }
-        elseif(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
-            $occArr = $solrManager->getOccArr();
-            if($occArr){
-                $occWhereStr = 'WHERE o.occid IN('.implode(',',$occArr).') ';
-            }
-        }
-    }
 }
 
 if($schema == "backup"){
-    $collid = $_POST["collid"];
+	$collid = $_POST["collid"];
 	if($collid && is_numeric($collid)){
 		//check permissions due to sensitive localities not being redacted
 		if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
@@ -141,7 +110,7 @@ else{
 		$dlManager->setCharSetOut($cSet);
 		$dlManager->setDelimiter($format);
 		$dlManager->setZipFile($zip);
-		$dlManager->setTaxonFilter($taxonFilterCode);
+		$dlManager->setTaxonFilter(array_key_exists("taxonFilterCode",$_POST)?$_POST["taxonFilterCode"]:0);
 		$dlManager->downloadData();
 	}
 	else{
@@ -180,12 +149,7 @@ else{
 			if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
 				
 			if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
-                if($SOLR_MODE && $occWhereStr){
-                    $dwcaHandler->setCustomWhereSql($occWhereStr);
-                }
-                else{
-                    $dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
-                }
+				$dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
 			}
 			else{
 				//Request is coming from exporter.php for collection manager tools

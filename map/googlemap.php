@@ -3,7 +3,6 @@ include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
 include_once($SERVER_ROOT.'/classes/MappingShared.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
@@ -15,7 +14,6 @@ $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncoll
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 $sharedMapManager = new MappingShared();
-$solrManager = new SOLRManager();
 
 $sharedMapManager->setFieldArr(0);
 
@@ -45,22 +43,9 @@ elseif($mapType == 'occquery'){
 	$tArr = $occurManager->getTaxaArr();
 	$stArr = $occurManager->getSearchTermsArr();
 	$sharedMapManager->setSearchTermsArr($stArr);
-    if($SOLR_MODE) $solrManager->setSearchTermsArr($stArr);
 }
-
-/*if($SOLR_MODE){
-    $solrManager->setTaxaArr($tArr);
-    $solrArr = $solrManager->getGeoArr();
-    $coordArr = $solrManager->translateSOLRGeoTaxaList($solrArr);
-}
-else{
-    $sharedMapManager->setTaxaArr($tArr);
-    $coordArr = $sharedMapManager->getGeoCoords($mapWhere);
-}*/
 
 $sharedMapManager->setTaxaArr($tArr);
-$coordArr = $sharedMapManager->getGeoCoords($mapWhere);
-
 ?>
 <html>
 <head>
@@ -145,7 +130,8 @@ $coordArr = $sharedMapManager->getGeoCoords($mapWhere);
         	$minLat = 90;
         	$maxLng = -180;
         	$maxLat = -90;
-			foreach($coordArr as $sciName => $valueArr){
+        	$coordArr = $sharedMapManager->getGeoCoords($mapWhere);
+        	foreach($coordArr as $sciName => $valueArr){
 				?>
 				markers = [];
 				<?php

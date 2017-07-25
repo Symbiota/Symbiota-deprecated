@@ -2,7 +2,6 @@
 //TODO: add code to automatically select hide locality details when taxon/state match name on list
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ObservationSubmitManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/observatoinsubmit.php?'.$_SERVER['QUERY_STRING']);
 
@@ -15,7 +14,6 @@ $recordedBy = array_key_exists("recordedby",$_REQUEST)?$_REQUEST["recordedby"]:0
 if(!is_numeric($clid)) $clid = 0;
 
 $obsManager = new ObservationSubmitManager();
-if($SOLR_MODE) $solrManager = new SOLRManager();
 $obsManager->setCollid($collId);
 $collMap = $obsManager->getCollMap(); 
 if(!$collId && $collMap) $collId = $collMap['collid']; 
@@ -34,7 +32,6 @@ if($collMap){
 	}
 	if($isEditor && $action == "Submit Observation"){
 		$occid = $obsManager->addObservation($_POST);
-        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 	if(!$recordedBy) $recordedBy = $obsManager->getUserName();
 }

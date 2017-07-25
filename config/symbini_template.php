@@ -38,14 +38,6 @@ $KEY_MOD_IS_ACTIVE = 1;
 
 $REQUESTED_TRACKING_IS_ACTIVE = 0;   // Allow users to request actions such as requests for images to be made for specimens
 
-//Configurations for GeoServer integration
-$GEOSERVER_URL = '';   // URL for Geoserver instance serving map data for this portal
-$GEOSERVER_RECORD_LAYER = '';   // Name of Geoserver layer containing occurrence point data for this portal
-
-//Configurations for Apache SOLR integration
-$SOLR_URL = '';   // URL for SOLR instance indexing data for this portal
-$SOLR_FULL_IMPORT_INTERVAL = 0;   // Number of hours between full imports of SOLR index.
-
 //Configurations for publishing to GBIF
 $GBIF_USERNAME = '';                //GBIF username which portal will use to publish
 $GBIF_PASSWORD = '';                //GBIF password which portal will use to publish
@@ -56,8 +48,6 @@ $FP_ENABLED = 0;					//Enable Filtered-Push modules
 //Misc variables
 $GOOGLE_MAP_KEY = '';				//Needed for Google Map; get from Google 
 $MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
-$SPATIAL_INITIAL_CENTER = '';	    //Initial map center for Spatial Module. Default: '[-110.90713, 32.21976]'
-$SPATIAL_INITIAL_ZOOM = '';			//Initial zoom for Spatial Module. Default: 7
 $ACTIVATE_GEOLOCATION = false;			//Activates HTML5 geolocation services in Map Search
 $GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
 $RECAPTCHA_PUBLIC_KEY = '';			//Now called site key

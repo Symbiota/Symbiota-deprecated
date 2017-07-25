@@ -9,16 +9,14 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 $targetTid = array_key_exists("targettid",$_REQUEST)?$_REQUEST["targettid"]:0;
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1;
+$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
+$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
 
 //Sanitation
 if(!is_numeric($taxonFilter)) $taxonFilter = 1;
 if(!is_numeric($cntPerPage)) $cntPerPage = 100;
 
 $collManager = new OccurrenceListManager();
-$stArr = Array();
-$collArr = Array();
-$stArrSearchJson = '';
-$stArrCollJson = '';
 $resetPageNum = false;
 
 if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages']) || isset($_REQUEST['hasgenetic'])){
@@ -32,7 +30,6 @@ if(isset($_REQUEST['db'])){
     $stArrCollJson = json_encode($collArr);
     if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
 }
-
 ?>
 
 <html>
@@ -68,7 +65,8 @@ if(isset($_REQUEST['db'])){
             else{
                 ?>
                 if(sessionStorage.jsonstarr){
-                    starrJson = sessionStorage.jsonstarr;
+                    //starrJson = sessionStorage.jsonstarr;
+                    window.location = "list.php?starr="+sessionStorage.jsonstarr+"&jsoncollstarr="+sessionStorage.jsoncollstarr+"&tabindex=<?php echo $tabIndex ?>";
                 }
                 <?php
             }
@@ -106,10 +104,10 @@ if(isset($_REQUEST['db'])){
             }
             ?>
 
-            document.getElementById("taxatablink").href = 'checklist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&taxonfilter=<?php echo $taxonFilter; ?>';
-            document.getElementById("mapdllink").href = 'download/index.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&dltype=georef';
-            document.getElementById("kmldlcolljson").value = collJson;
-            document.getElementById("kmldlstjson").value = starrJson;
+            //document.getElementById("taxatablink").href = 'checklist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&taxonfilter=<?php echo $taxonFilter; ?>';
+            //document.getElementById("mapdllink").href = 'download/index.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&dltype=georef';
+            //document.getElementById("kmldlcolljson").value = collJson;
+            //document.getElementById("kmldlstjson").value = starrJson;
 
             setOccurrenceList(listPage);
             $('#tabs').tabs({
@@ -197,7 +195,7 @@ if(isset($_REQUEST['db'])){
 	<div id="tabs" style="width:95%;">
 		<ul>
 			<li>
-				<a id='taxatablink' href=''>
+				<a id="taxatablink" href='<?php echo 'checklist.php?starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.'&taxonfilter='.$taxonFilter; ?>'>
 					<span><?php echo $LANG['TAB_CHECKLIST']; ?></span>
 				</a>
 			</li>
@@ -217,7 +215,7 @@ if(isset($_REQUEST['db'])){
 		</div>
 		<div id="maps" style="min-height:400px;margin-bottom:10px;">
 			<div class="button" style="margin-top:20px;float:right;width:13px;height:13px;" title="<?php echo $LANG['MAP_DOWNLOAD']; ?>">
-				<a id='mapdllink' href=''><img src="../images/dl.png"/></a>
+				<a id="mapdllink" href="<?php echo 'download/index.php?starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.'&dltype=georef'; ?>"><img src="../images/dl.png"/></a>
 			</div>
 			<div style='margin-top:10px;'>
 				<h2><?php echo $LANG['GOOGLE_MAP_HEADER']; ?></h2>
@@ -239,8 +237,8 @@ if(isset($_REQUEST['db'])){
 					<?php echo $LANG['GOOGLE_EARTH_DESCRIPTION'];?>
 				</div>
 				<div style="margin:20px;">
-					<input name="jsoncollstarr" id="kmldlcolljson" type="hidden" value='' />
-					<input name="starr" id="kmldlstjson" type="hidden" value='' />
+					<input name="jsoncollstarr" id="kmldlcolljson" type="hidden" value="<?php echo $stArrCollJson; ?>" />
+					<input name="starr" id="kmldlstjson" type="hidden" value="<?php echo $stArrSearchJson; ?>" />
 					<button name="formsubmit" type="submit" value="<?php echo $LANG['CREATE_KML']; ?>"><?php echo $LANG['CREATE_KML']; ?></button>
 				</div>
 				<div style='margin:10 0 0 20;'>

@@ -139,6 +139,10 @@ function checkHarvestparamsForm(frm){
         alert("Please fill in at least one search parameter!");
         return false;
     }
+    
+    if(frm.db.value == "" && sessionStorage.jsonstarr){
+    	frm.db.value = sessionStorage.jsonstarr;
+    }
 
     if(frm.upperlat.value != '' || frm.bottomlat.value != '' || frm.leftlong.value != '' || frm.rightlong.value != ''){
         // if Lat/Long field is filled in, they all should have a value!

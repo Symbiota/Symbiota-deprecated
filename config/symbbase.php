@@ -59,7 +59,6 @@ $USER_DISPLAY_NAME = (array_key_exists("dn",$PARAMS_ARR)?$PARAMS_ARR["dn"]:"");
 $USERNAME = (array_key_exists("un",$PARAMS_ARR)?$PARAMS_ARR["un"]:0);
 $SYMB_UID = (array_key_exists("uid",$PARAMS_ARR)?$PARAMS_ARR["uid"]:0);
 $IS_ADMIN = (array_key_exists("SuperAdmin",$USER_RIGHTS)?1:0);
-$SOLR_MODE = ((isset($SOLR_URL) && $SOLR_URL)?true:false);
 $GEOLOCATION = ((isset($ACTIVATE_GEOLOCATION) && $ACTIVATE_GEOLOCATION)?true:false);
 //Can get rid of following once all parameters are remapped to constants
 $paramsArr = $PARAMS_ARR;

@@ -1,7 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceGeorefTools.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 if(!$SYMB_UID) header('Location: ../profile/index.php?refurl=../collections/georef/batchgeoreftool.php?'.$_SERVER['QUERY_STRING']);
 
@@ -45,7 +44,6 @@ if(!$georeferenceSources) $georeferenceSources = 'georef batch tool '.date('Y-m-
 if(!$georeferenceVerificationStatus) $georeferenceVerificationStatus = 'reviewed - high confidence';
 
 $geoManager = new OccurrenceGeorefTools();
-if($SOLR_MODE) $solrManager = new SOLRManager();
 $geoManager->setCollId($collId);
 
 $editor = false;
@@ -69,7 +67,6 @@ if($editor && $submitAction){
 	if($qProcessingStatus) $geoManager->setQueryVariables('qprocessingstatus',$qProcessingStatus);
 	if($submitAction == 'Update Coordinates'){
 		$statusStr = $geoManager->updateCoordinates($_POST);
-        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 	$localArr = $geoManager->getLocalityArr();
 }

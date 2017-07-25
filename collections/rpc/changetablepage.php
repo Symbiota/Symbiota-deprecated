@@ -2,7 +2,6 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 $stArrCollJson = $_REQUEST["jsoncollstarr"];
 $stArrSearchJson = $_REQUEST["starr"];
@@ -19,19 +18,10 @@ if($collStArr && $searchStArr) $stArr = array_merge($searchStArr,$collStArr);
 if(!$collStArr && $searchStArr) $stArr = $searchStArr;
 if($collStArr && !$searchStArr) $stArr = $collStArr;
 
-if($SOLR_MODE){
-    $collManager = new SOLRManager();
-    $collManager->setSearchTermsArr($stArr);
-    $collManager->setSorting($sortField1,$sortField2,$sortOrder);
-    $solrArr = $collManager->getRecordArr($occIndex,1000);
-    $recArr = $collManager->translateSOLRRecList($solrArr);
-}
-else{
-    $collManager = new OccurrenceListManager(false);
-    $collManager->setSearchTermsArr($stArr);
-    $collManager->setSorting($sortField1,$sortField2,$sortOrder);
-    $recArr = $collManager->getRecordArr($occIndex,1000);
-}
+$collManager = new OccurrenceListManager(false);
+$collManager->setSearchTermsArr($stArr);
+$collManager->setSorting($sortField1,$sortField2,$sortOrder);
+$recArr = $collManager->getRecordArr($occIndex,1000);
 
 $targetClid = $collManager->getSearchTerm("targetclid");
 
