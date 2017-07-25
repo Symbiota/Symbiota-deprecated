@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -11,7 +11,7 @@ $includeImgs = array_key_exists("imgs",$_REQUEST)?$_REQUEST["imgs"]:1;
 $includeAttributes = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:1;
 
 if($collid){
-	$dwcaHandler = new DwcArchiverOccurrence();
+	$dwcaHandler = new DwcArchiverCore();
 	
 	$dwcaHandler->setVerboseMode(0);
 	$dwcaHandler->setCollArr($collid,$collType);
@@ -79,6 +79,6 @@ else{
 	header('Expires: 0');
 	header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 	header('Pragma: public');
-	echo 'Error: collectoin identifier is not defined';
+	echo 'Error: collection identifier is not defined';
 }
 ?>

@@ -730,7 +730,7 @@ class GlossaryManager{
 
 		//Get image dimensions
 		if(!$this->sourceWidth || !$this->sourceHeight){
-			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize(str_replace(' ', '%20', $this->sourcePath));
 		}
 		//Get image file size
 		$fileSize = $this->getSourceFileSize();
@@ -825,7 +825,7 @@ class GlossaryManager{
 		$imgInfo = null;
 		if(strtolower(substr($fPath,0,7)) == 'http://' || strtolower(substr($fPath,0,8)) == 'https://'){
 			//Image is URL 
-			$imgInfo = getimagesize($fPath);
+			$imgInfo = getimagesize(str_replace(' ', '%20', $fPath));
 			list($this->sourceWidth, $this->sourceHeight) = $imgInfo;
 		
 			if($pos = strrpos($fName,'/')){
@@ -1006,7 +1006,7 @@ class GlossaryManager{
 		ini_set('memory_limit','512M');
 
 		if(!$this->sourceWidth || !$this->sourceHeight){
-			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize(str_replace(' ', '%20', $this->sourcePath));
 		}
 		if($this->sourceWidth){
 			$newHeight = round($this->sourceHeight*($newWidth/$this->sourceWidth));

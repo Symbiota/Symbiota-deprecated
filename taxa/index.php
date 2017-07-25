@@ -33,7 +33,7 @@ $synStr = $taxonManager->getSynonymStr();
 if($links){
 	foreach($links as $linkKey => $linkUrl){
 		if($linkUrl['title'] == 'REDIRECT'){
-			$locUrl = str_replace('--SCINAME--',urlencode($taxonManager->getSciName()),$linkUrl['url']);
+			$locUrl = str_replace('--SCINAME--',rawurlencode($taxonManager->getSciName()),$linkUrl['url']);
 			header('Location: '.$locUrl);
 			exit;
 		}

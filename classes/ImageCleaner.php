@@ -187,7 +187,7 @@ class ImageCleaner{
 					$webFullUrl = '';
 					$lgFullUrl = '';
 					//If web image is too large, transfer to large image and create new web image
-					list($sourceWidth, $sourceHeight) = getimagesize($imgManager->getSourcePath());
+					list($sourceWidth, $sourceHeight) = getimagesize(str_replace(' ', '%20', $imgManager->getSourcePath()));
 					if(!$webIsEmpty && !$row->originalurl){
 						$fileSize = $imgManager->getSourceFileSize();
 						if($fileSize > $imgManager->getWebFileSizeLimit() || $sourceWidth > ($imgManager->getWebPixWidth()*1.2)){

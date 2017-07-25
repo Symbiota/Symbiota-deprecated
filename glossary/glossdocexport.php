@@ -235,8 +235,7 @@ elseif($exportType == 'singlelanguage'){
 					$table->addRow();
 					$cell = $table->addCell(4125,$imageCellStyle);
 					$textrun = $cell->addTextRun('transDefPara');
-					$imgSize = array();
-					@$imgSize = getimagesize($imgSrc);
+					@$imgSize = getimagesize(str_replace(' ', '%20', $imgSrc));
 					if($imgSize){
 						$width = $imgSize[0];
 						$height = $imgSize[1];

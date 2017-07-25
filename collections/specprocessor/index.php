@@ -3,6 +3,7 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecProcessorManager.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
 include_once($SERVER_ROOT.'/classes/SpecProcessorOcr.php');
+include_once($SERVER_ROOT.'/classes/ImageProcessor.php');
 
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -14,7 +15,6 @@ $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
 //NLP and OCR variables
 $spNlpId = array_key_exists('spnlpid',$_REQUEST)?$_REQUEST['spnlpid']:0;
 $procStatus = array_key_exists('procstatus',$_REQUEST)?$_REQUEST['procstatus']:'unprocessed';
-
 $displayMode = array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode']:0;
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 
@@ -36,13 +36,22 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
  	$isEditor = true;
 }
 
-$statusStr = "";
+$fileName = '';
+$statusStr = '';
 if($isEditor){
-	if($action == 'Add New Profile'){
-		$specManager->addProject($_POST);
+	if($action == 'Analyze Image Data File'){
+		if($_POST['projecttype'] == 'file'){
+			$imgProcessor = new ImageProcessor();
+			$fileName = $imgProcessor->loadImageFile();
+		}
 	}
 	elseif($action == 'Save Profile'){
-		$specManager->editProject($_POST);
+		if($_POST['spprid']){
+			$specManager->editProject($_POST);
+		}
+		else{
+			$specManager->addProject($_POST);
+		}
 	}
 	elseif($action == 'Delete Profile'){
 		$specManager->deleteProject($_POST['sppriddel']);
@@ -74,10 +83,10 @@ if($isEditor){
 		<title>Specimen Processor Control Panel</title>
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-		<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
-		<script type="text/javascript" src="../../js/jquery.js"></script>
-		<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-		<script type="text/javascript" src="../../js/symb/shared.js?ver=131106"></script>
+		<link href="../../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />	
+		<script src="../../js/jquery-3.2.1.min.js" type="text/javascript"></script>
+		<script src="../../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
+		<script src="../../js/symb/shared.js?ver=131106" type="text/javascript"></script>
 		<script>
 			$(document).ready(function() {
 				$('#tabs').tabs({
@@ -134,7 +143,7 @@ if($isEditor){
 				<div id="tabs" class="taxondisplaydiv">
 				    <ul>
 				        <li><a href="#introdiv">Introduction</a></li>
-				        <li><a href="imageprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId.'&submitaction='.$action; ?>">Image Loading</a></li>
+				        <li><a href="imageprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId.'&submitaction='.$action.'&filename='.$fileName; ?>">Image Loading</a></li>
 				        <li><a href="crowdsource/controlpanel.php?collid=<?php echo $collid; ?>">Crowdsourcing</a></li>
 				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&procstatus='.$procStatus.'&spprid='.$spprId; ?>">OCR</a></li>
 				        <!-- 

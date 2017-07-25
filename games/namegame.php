@@ -1,8 +1,7 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/GamesManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/GamesManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $clName = (array_key_exists('listname',$_REQUEST)?$_REQUEST['listname']:"");
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:"";
@@ -11,10 +10,10 @@ $dynClid = array_key_exists('dynclid',$_REQUEST)?$_REQUEST['dynclid']:"";
 if(!$clName){
 	$gameManager = new GamesManager();
 	if($clid){
-		$gameManager->setChecklist($clid);
+		$gameManager->setClid($id);
 	}
 	elseif($dynClid){
-		$gameManager->setDynChecklist($dynClid);
+		$gameManager->setDynClid($dynClid);
 	}
 	$clName = $gameManager->getClName();
 }
@@ -24,11 +23,14 @@ $imgloc = "../images/games/namegame/";
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Name Game</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Name Game</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<script src="../js/jquery.js" type="text/javascript"></script>
+	<script src="../js/jquery-ui.js" type="text/javascript"></script>
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<style type="text/css">
 		.lettertable{border:1px solid #000000;border-spacing:3px;}
@@ -41,7 +43,7 @@ $imgloc = "../images/games/namegame/";
 		.question{font-size:30px}
 		#rw{margin-left:auto;margin-right:auto}
 	</style>
-	<script language="javascript"> 
+	<script> 
 		//COLLAPSE MENU
 		function toggle(divID, linkID) {
 			var ele = document.getElementById(divID);
@@ -55,45 +57,20 @@ $imgloc = "../images/games/namegame/";
 		} 
 
 		//CHANGE WORDLIST SCRIPT
-		function getXMLHTTP() { //fuction to return the xml http object
-			var xmlhttp=false;	
-			try{
-				xmlhttp=new XMLHttpRequest();
-			}
-			catch(e){		
-				try{			
-					xmlhttp= new ActiveXObject("Microsoft.XMLHTTP");
+		function getWordList(){
+			$.ajax({
+				method: "POST",
+				url: "rpc/getwordlist.php",
+				dataType: "json",
+				data: {
+					clid : <?php echo $clid; ?>,
+					dynclid: <?php echo $dynClid; ?> 
+				},
+				success: function(data) {
+					mainList = data;
+					generate();
 				}
-				catch(e){
-					try{
-						xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-					}
-					catch(e1){
-						xmlhttp=false;
-					}
-				}
-			}
-			return xmlhttp;
-		}
-			
-		function getWordList(strURL, referer){ 
-			var req = getXMLHTTP();
-			if(req){
-				req.onreadystatechange = function(){
-					if (req.readyState == 4){
-						// only if "OK"
-						if (req.status == 200){
-							eval(req.responseText);
-							generate();
-						} 
-						else{
-							alert("There was a problem while using XMLHTTP:\n" + req.statusText);
-						}
-					}				
-				}			
-				req.open("GET", strURL, true);
-				req.send(null);
-			}
+			});
 		}
 		
 		function openPopup(urlStr,windowName){
@@ -178,7 +155,7 @@ $imgloc = "../images/games/namegame/";
 					tds[i].getElementsByTagName("span")[0].onclick=function(){wildCard();};
 				}
 			}
-			getWordList('rpc/getwordlist.php?<?php echo $clid?'clid='.$clid:'dynclid='.$dynClid; ?>', 'newlist');
+			getWordList();
 			generate();
 		}
 
@@ -254,7 +231,7 @@ $imgloc = "../images/games/namegame/";
 			if(wordCount==selectedNums.length){ 
 				// generate random list 
 				// Does this when you run out of words in current list
-				getWordList('rpc/getwordlist.php?<?php echo $clid?'clid='.$clid:'dynclid='.$dynClid; ?>', 'reloadlist');
+				getWordList();
 				return;
 			}
 			
@@ -582,21 +559,25 @@ $imgloc = "../images/games/namegame/";
 
 	<?php
 	$displayLeftMenu = (isset($games_namegameMenu)?$games_namegameMenu:"true");
-	include('../header.php');
-	if(isset($games_namegameCrumbs)){
-		?>
-		<div class="navpath">
-			<?php echo $games_namegameCrumbs;?>
-			<b>Name Game</b> 
-		</div>
-		<?php 
+	include($SERVER_ROOT.'/header.php');
+	echo '<div class="navpath">';
+	echo '<a href="../index.php">Home</a> &gt;&gt; ';
+	if(isset($games_namegameCrumbs) && $games_namegameCrumbs){
+		echo $games_namegameCrumbs;
 	}
+	else{
+		echo '<a href="../checklists/checklist.php?cl='.$clid.'">';
+		echo $clName;
+		echo '</a> &gt;&gt; ';
+	}
+	echo ' <b>Name Game</b>';
+	echo '</div>';
 	?>
 	
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<div style="width:100%;text-align:center;">
-			<h1><?php echo $defaultTitle; ?> Name Game</h1>
+			<h1><?php echo $DEFAULT_TITLE; ?> Name Game</h1>
 		</div>
 		<div style="width:100%;text-align:center;margin:10px;">
 			I am thinking of a species found within the following checklist: <b><?php echo $clName;?></b><br/> 
@@ -709,7 +690,7 @@ $imgloc = "../images/games/namegame/";
 	</div>
 	<!-- This ends inner text! -->
 	<?php
-	include('../footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

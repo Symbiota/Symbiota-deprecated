@@ -1,11 +1,11 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+include_once($serverRoot.'/classes/DwcArchiverCore.php');
 
 $collId = $_REQUEST["collid"];
 
 if($collId && is_numeric($collId)){
-	$dwcaManager = new DwcArchiverOccurrence();
+	$dwcaManager = new DwcArchiverCore();
 	$dwcaManager->setCollArr($collId);
 	$collArr = $dwcaManager->getCollArr();
 	

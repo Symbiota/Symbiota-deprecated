@@ -159,7 +159,7 @@ else{
 						?>
 						<div style="margin:2px;" title="Enter Exsiccati Title">
 							<b>Exsiccati Title:</b>
-							<select name="q_exsiccatiid">
+							<select name="q_exsiccatiid" style="width:650px">
 								<option value=""></option> 
 								<option value="">-------------------------</option> 
 								<?php 
@@ -182,7 +182,7 @@ else{
 			else{
 				$advFieldArr = array('associatedCollectors'=>'Associated Collectors','associatedOccurrences'=>'Associated Occurrences',
 					'associatedTaxa'=>'Associated Taxa','attributes'=>'Attributes','scientificNameAuthorship'=>'Author',
-					'basisOfRecord'=>'Basis Of Record','behavior'=>'Behavior','catalogNumber'=>'Catalog Number','recordNumber'=>'Collection Number',
+					'basisOfRecord'=>'Basis Of Record','behavior'=>'Behavior','catalogNumber'=>'Catalog Number','collectionCode'=>'Collection Code (override)','recordNumber'=>'Collection Number',
 					'recordedBy'=>'Collector/Observer','coordinateUncertaintyInMeters'=>'Coordinate Uncertainty (m)','country'=>'Country',
 					'county'=>'County','cultivationStatus'=>'Cultivation Status','dataGeneralizations'=>'Data Generalizations','eventDate'=>'Date',
 					'dateEntered'=>'Date Entered','dateLastModified'=>'Date Last Modified','dbpk'=>'dbpk','decimalLatitude'=>'Decimal Latitude',
@@ -195,14 +195,15 @@ else{
 					'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferencedBy'=>'Georeferenced By','habitat'=>'Habitat',
 					'identificationQualifier'=>'Identification Qualifier','identificationReferences'=>'Identification References',
 					'identificationRemarks'=>'Identification Remarks','identifiedBy'=>'Identified By','individualCount'=>'Individual Count',
-					'informationWithheld'=>'Information Withheld','labelProject'=>'Label Project','lifeStage'=>'Life Stage','locality'=>'Locality',
+					'informationWithheld'=>'Information Withheld','institutionCode'=>'Institution Code (override)','labelProject'=>'Label Project',
+					'lifeStage'=>'Life Stage','locality'=>'Locality',
 					'localitySecurity'=>'Locality Security','localitySecurityReason'=>'Locality Security Reason','locationRemarks'=>'Location Remarks',
-					'username'=>'Modified By','municipality'=>'Municipality','occurrenceRemarks'=>'Notes (Occurrence Remarks)',
+					'username'=>'Modified By','municipality'=>'Municipality','occurrenceRemarks'=>'Notes (Occurrence Remarks)','ocrFragment'=>'OCR Fragment',
 					'otherCatalogNumbers'=>'Other Catalog Numbers','ownerInstitutionCode'=>'Owner Code','preparations'=>'Preparations',
 					'reproductiveCondition'=>'Reproductive Condition','samplingEffort'=>'Sampling Effort','samplingProtocol'=>'Sampling Protocol',
 					'sciname'=>'Scientific Name','sex'=>'Sex','specificEpithet'=>'Specific Epithet','stateProvince'=>'State/Province',
 					'substrate'=>'Substrate','taxonRemarks'=>'Taxon Remarks','typeStatus'=>'Type Status','verbatimCoordinates'=>'Verbatim Coordinates',
-					'verbatimEventDate'=>'Verbatim Date','verbatimDepth'=>'Verbatim Depth','verbatimElevation'=>'Verbatim Elevation','ocrFragment'=>'OCR Fragment');
+					'verbatimEventDate'=>'Verbatim Date','verbatimDepth'=>'Verbatim Depth','verbatimElevation'=>'Verbatim Elevation');
 			}
 			//sort($advFieldArr);
 			?>

@@ -182,17 +182,11 @@ if($clValue || $dynClid){
 							<img style="border:0px;height:15px;" src="../images/editvoucher.png" />
 						</a>
 					</span>
-					<?php
-					if(!$showImages){
-						?>
-						<span style="" onclick="toggle('editspp');return false;">
-							<a href="#" title="Edit Species List">
-								<img style="border:0px;height:15px;" src="../images/editspp.png" />
-							</a>
-						</span>
-						<?php
-					}
-					?>
+					<span style="" onclick="toggle('editspp');return false;">
+						<a href="#" title="Edit Species List">
+							<img style="border:0px;height:15px;" src="../images/editspp.png" />
+						</a>
+					</span>
 				</div>
 				<?php 
 			}

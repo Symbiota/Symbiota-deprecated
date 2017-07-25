@@ -39,9 +39,10 @@ class OccurrenceEditorManager {
 			'country', 'stateprovince', 'county', 'municipality', 'locality', 'localitysecurity', 'localitysecurityreason',
 			'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 'footprintwkt',
 			'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
-			'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
-			'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2', 'labelproject', 
-			'observeruid','basisofrecord','ownerinstitutioncode','datelastmodified', 'processingstatus', 'recordenteredby', 'dateentered');
+			'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters','verbatimelevation',
+			'minimumdepthinmeters', 'maximumdepthinmeters', 'verbatimdepth', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2', 
+			'labelproject','observeruid','basisofrecord','institutioncode','collectioncode','ownerinstitutioncode','datelastmodified', 'processingstatus', 
+			'recordenteredby', 'dateentered');
 	}
 
 	public function __destruct(){
@@ -628,8 +629,11 @@ class OccurrenceEditorManager {
 				}
 			}
 			$rs->free();
-			if(!$this->occid && $retArr && count($retArr) == 1){
-				$this->occid = $occid;
+			if($retArr && count($retArr) == 1){
+				if(!$this->occid) $this->occid = $occid;
+				if(!$retArr[$occid]['institutioncode']) $retArr[$occid]['institutioncode'] = $this->collMap['institutioncode'];
+				if(!$retArr[$occid]['collectioncode']) $retArr[$occid]['collectioncode'] = $this->collMap['collectioncode'];
+				if(!$retArr[$occid]['ownerinstitutioncode']) $retArr[$occid]['ownerinstitutioncode'] = $this->collMap['institutioncode'];
 			}
 			$this->occurrenceMap = $this->cleanOutArr($retArr);
 			if($this->occid){
@@ -648,13 +652,13 @@ class OccurrenceEditorManager {
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
 			}
 		}
-		elseif(strpos($this->sqlWhere,'ul.username')){
+		if(strpos($this->sqlWhere,'ul.username')){
 			$sql .= 'LEFT JOIN omoccuredits ome ON o.occid = ome.occid LEFT JOIN userlogin ul ON ome.uid = ul.uid ';
 		}
-		elseif(strpos($this->sqlWhere,'exn.ometid')){
+		if(strpos($this->sqlWhere,'exn.ometid')){
 			$sql .= 'INNER JOIN omexsiccatiocclink exocc ON o.occid = exocc.occid INNER JOIN omexsiccatinumbers exn ON exocc.omenid = exn.omenid ';
 		}
-		elseif(array_key_exists('io',$this->qryArr)){
+		if(array_key_exists('io',$this->qryArr)){
 			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
 		}
 		elseif(array_key_exists('woi',$this->qryArr)){
@@ -780,6 +784,9 @@ class OccurrenceEditorManager {
 						$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
 					}
 				}
+				if(isset($occArr['institutioncode']) && $occArr['institutioncode'] == $this->collMap['institutioncode']) $occArr['institutioncode'] = '';
+				if(isset($occArr['collectioncode']) && $occArr['collectioncode'] == $this->collMap['collectioncode']) $occArr['collectioncode'] = '';
+				if(isset($occArr['ownerinstitutioncode']) && $occArr['ownerinstitutioncode'] == $this->collMap['institutioncode']) $occArr['ownerinstitutioncode'] = '';
 				foreach($occArr as $oField => $ov){
 					if(in_array($oField,$this->occFieldArr) && $oField != 'observeruid'){
 						$vStr = $this->cleanInStr($ov);
@@ -893,7 +900,8 @@ class OccurrenceEditorManager {
 	public function addOccurrence($occArr){
 		$status = "SUCCESS: new occurrence record submitted successfully ";
 		if($occArr){
-			$fieldArr = array('basisOfRecord' => 's', 'catalogNumber' => 's', 'otherCatalogNumbers' => 's', 'occurrenceid' => 's', 'ownerInstitutionCode' => 's', 
+			$fieldArr = array('basisOfRecord' => 's', 'catalogNumber' => 's', 'otherCatalogNumbers' => 's', 'occurrenceid' => 's', 
+				'ownerInstitutionCode' => 's', 'institutionCode' => 's', 'collectionCode' => 's', 
 				'family' => 's', 'sciname' => 's', 'tidinterpreted' => 'n', 'scientificNameAuthorship' => 's', 'identifiedBy' => 's', 'dateIdentified' => 's', 
 				'identificationReferences' => 's', 'identificationremarks' => 's', 'taxonRemarks' => 's', 'identificationQualifier' => 's', 'typeStatus' => 's',  
 				'recordedBy' => 's', 'recordNumber' => 's', 'associatedCollectors' => 's', 'eventDate' => 'd', 'year' => 'n', 'month' => 'n', 'day' => 'n', 'startDayOfYear' => 'n', 'endDayOfYear' => 'n', 
@@ -901,11 +909,11 @@ class OccurrenceEditorManager {
 				'dynamicProperties' => 's', 'reproductiveCondition' => 's', 'cultivationStatus' => 's', 'establishmentMeans' => 's', 
 				'lifestage' => 's', 'sex' => 's', 'individualcount' => 's', 'samplingprotocol' => 's', 'preparations' => 's', 
 				'country' => 's', 'stateProvince' => 's', 'county' => 's', 'municipality' => 's', 'locality' => 's', 'localitySecurity' => 'n', 'localitysecurityreason' => 's',  
-				'decimalLatitude' => 'n', 'decimalLongitude' => 'n', 'geodeticDatum' => 's', 'coordinateUncertaintyInMeters' => 'n', 'verbatimCoordinates' => 's', 'footprintwkt' => 's', 
-				'georeferencedBy' => 's', 'georeferenceProtocol' => 's', 'georeferenceSources' => 's', 
-				'georeferenceVerificationStatus' => 's', 'georeferenceRemarks' => 's', 'minimumElevationInMeters' => 'n', 'maximumElevationInMeters' => 'n', 
-				'verbatimElevation' => 's', 'disposition' => 's', 'language' => 's', 'duplicateQuantity' => 'n', 'labelProject' => 's', 
-				'processingstatus' => 's', 'recordEnteredBy' => 's', 'observeruid' => 'n', 'dateentered' => 'd', 'genericcolumn2' => 's');
+				'locationRemarks' => 'n', 'decimalLatitude' => 'n', 'decimalLongitude' => 'n', 'geodeticDatum' => 's', 'coordinateUncertaintyInMeters' => 'n', 'verbatimCoordinates' => 's', 
+				'footprintwkt' => 's', 'georeferencedBy' => 's', 'georeferenceProtocol' => 's', 'georeferenceSources' => 's', 'georeferenceVerificationStatus' => 's',  
+				'georeferenceRemarks' => 's', 'minimumElevationInMeters' => 'n', 'maximumElevationInMeters' => 'n','verbatimElevation' => 's',
+				'minimumDepthInMeters' => 'n', 'maximumDepthInMeters' => 'n', 'verbatimDepth' => 's','disposition' => 's', 'language' => 's', 'duplicateQuantity' => 'n',
+				'labelProject' => 's','processingstatus' => 's', 'recordEnteredBy' => 's', 'observeruid' => 'n', 'dateentered' => 'd', 'genericcolumn2' => 's');
 			$sql = 'INSERT INTO omoccurrences(collid, '.implode(array_keys($fieldArr),',').') '.
 				'VALUES ('.$occArr["collid"];
 			$fieldArr = array_change_key_case($fieldArr);
@@ -913,7 +921,9 @@ class OccurrenceEditorManager {
 			//if(array_key_exists('localitysecurity',$occArr) && $occArr['localitysecurity']) $occArr['localitysecurity'] = $occArr['localitysecurity'];
 			if(!isset($occArr['dateentered']) || !$occArr['dateentered']) $occArr['dateentered'] = date('Y-m-d H:i:s');
 			if(!isset($occArr['basisofrecord']) || !$occArr['basisofrecord']) $occArr['basisofrecord'] = (strpos($this->collMap['colltype'],'Observations') !== false?'HumanObservation':'PreservedSpecimen');
-			
+			if(isset($occArr['institutionCode']) && $occArr['institutionCode'] == $this->collMap['institutioncode']) $occArr['institutionCode'] = '';
+			if(isset($occArr['collectionCode']) && $occArr['collectionCode'] == $this->collMap['collectioncode']) $occArr['collectionCode'] = '';
+
 			foreach($fieldArr as $fieldStr => $fieldType){
 				$fieldValue = '';
 				if(array_key_exists($fieldStr,$occArr)) $fieldValue = $occArr[$fieldStr];
@@ -1438,10 +1448,10 @@ class OccurrenceEditorManager {
 	public function carryOverValues($fArr){
 		$locArr = Array('recordedby','associatedcollectors','eventdate','verbatimeventdate','month','day','year',
 			'startdayofyear','enddayofyear','country','stateprovince','county','municipality','locality','decimallatitude','decimallongitude',
-			'verbatimcoordinates','coordinateuncertaintyinmeters','footprintwkt','geodeticdatum','minimumelevationinmeters',
-			'maximumelevationinmeters','verbatimelevation','verbatimcoordinates','georeferencedby','georeferenceprotocol',
-			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','substrate',
-			'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
+			'verbatimcoordinates','coordinateuncertaintyinmeters','footprintwkt','geodeticdatum','georeferencedby','georeferenceprotocol',
+			'georeferencesources','georeferenceverificationstatus','georeferenceremarks',
+			'minimumelevationinmeters','maximumelevationinmeters','verbatimelevation','minimumdepthinmeters','maximumdepthinmeters','verbatimdepth',
+			'habitat','substrate','lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
 			'associatedtaxa','basisofrecord','language','labelproject');
 		$retArr = $this->cleanOutArr(array_intersect_key($fArr,array_flip($locArr)));
 		return $retArr;

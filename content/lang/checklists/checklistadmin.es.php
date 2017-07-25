@@ -25,6 +25,7 @@ $LANG['REMOVEUSERCHECK'] = 'Antes de que una lista de comprobaci&oacute;n se pue
 							Las asignaciones del proyecto de inventario s&oacute;lo pueden ser eliminados por el administrador activo del proyecto o un administrador del sistema. ';
 $LANG['WARNINGNOUN'] = 'ADVERTENCIA: La acci&oacute;n no se puede deshacer.';
 $LANG['CONFIRMDELETE'] = '¿Est&aacute; seguro de que desea eliminar permanentemente el Listado de Comprobaci&oacute;n? ¡Esta acci&oacute;n no se puede deshacer!';
+$LANG['CREATECHECKDET'] = 'Crear Nueva Lista';
 $LANG['EDITCHECKDET'] = 'Editar detalles del Listado de Comprobaci&oacute;n';
 $LANG['CHECKNAME'] = 'Nombre del Listado de Comprobaci&oacute;n';
 $LANG['CHECKTYPE'] = 'Tipo de Listado de Comprobaci&oacute;n';
@@ -68,6 +69,7 @@ $LANG['REMOVEEDITPRIVCONFIRM'] = '¿Est&aacute; seguro de que desea eliminar los
 $LANG['MASSUPDATEED'] = 'Editar Detalles del Listado de Comprobaci&oacute;n';
 $LANG['ADDEDITOR'] = 'Agregar Editor';
 $LANG['DELETECHECK'] = 'Borrar Listado de Comprobaci&oacute;n';
-$LANG['SUBMITCHANG'] = 'Someter Cambios';
+$LANG['EDITCHECKLIST'] = 'Someter Cambios';
+$LANG['ADDCHECKLIST'] = 'Crear Lista Nueva';
 $LANG['DELETETHISU'] = 'Borrar este usuario';
 ?>

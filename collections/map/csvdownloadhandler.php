@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceDownload.php');
 include_once($serverRoot.'/classes/OccurrenceManager.php');
 include_once($serverRoot.'/classes/MapInterfaceManager.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+include_once($serverRoot.'/classes/DwcArchiverCore.php');
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); 
 
@@ -39,7 +39,7 @@ else{
 }
 	
 //Is an occurrence download 
-$dwcaHandler = new DwcArchiverOccurrence();
+$dwcaHandler = new DwcArchiverCore();
 $dwcaHandler->setCharSetOut($cSet);
 $dwcaHandler->setSchemaType($schema);
 $dwcaHandler->setExtended($extended);

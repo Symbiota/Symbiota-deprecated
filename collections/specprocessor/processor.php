@@ -26,6 +26,19 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 	$isEditor = true;
 }
 
+if($action == 'dlnoimg'){
+	$specManager->downloadReportData($action);
+	exit;
+}
+elseif($action == 'unprocnoimg'){
+	$specManager->downloadReportData($action);
+	exit;
+}
+elseif($action == 'noskel'){
+	$specManager->downloadReportData($action);
+	exit;
+}
+
 $statusStr = "";
 ?>
 <html>
@@ -111,6 +124,15 @@ $statusStr = "";
 					echo '</ul>';
 					
 				}
+				elseif($action == 'Load Image Data'){
+					//Process csv file with remote image urls
+					$imageProcessor = new ImageProcessor($specManager->getConn());
+					echo '<ul>';
+					$imageProcessor->setLogMode(3);
+					$imageProcessor->setCollid($collid);
+					$imageProcessor->loadFileData($_POST);
+					echo '</ul>';
+				}
 				elseif($action == 'Run Batch OCR'){
 					$ocrManager = new SpecProcessorOcr();
 					$ocrManager->setVerbose(2);
@@ -127,18 +149,6 @@ $statusStr = "";
 					echo '<ul>';
 					$ocrManager->harvestOcrText($_POST);
 					echo '</ul>';
-				}
-				elseif($action == 'dlnoimg'){
-					$specManager->downloadReportData($action);
-					exit;
-				}
-				elseif($action == 'unprocnoimg'){
-					$specManager->downloadReportData($action);
-					exit;
-				}
-				elseif($action == 'noskel'){
-					$specManager->downloadReportData($action);
-					exit;
 				}
 				if($statusStr){ 
 					?>

@@ -7,6 +7,7 @@ class SOLRManager extends OccurrenceManager{
 	protected $sortField1 = '';
 	protected $sortField2 = '';
 	protected $sortOrder = '';
+    protected $qStr = '';
     protected $spatial = false;
     private $checklistTaxaCnt = 0;
     private $iconColors = Array();
@@ -123,7 +124,7 @@ class SOLRManager extends OccurrenceManager{
         $solrURLpre = '';
         $solrURLsuf = '';
         $this->setSpatial();
-        $solrWhere = $this->getSOLRWhere();
+        $solrWhere = ($this->qStr?$this->qStr:$this->getSOLRWhere());
         if($pageRequest > 0) $bottomLimit = ($pageRequest - 1)*$cntPerPage;
         //$solrURLpre = $SOLR_URL.'/select?q=*:*&fq={!geofilt sfield=geo}&pt=35.389049966911664,-109.27001953125&d=5';
         $solrURLpre = $SOLR_URL.'/select?';
@@ -138,6 +139,25 @@ class SOLRManager extends OccurrenceManager{
         $returnArr = $solrArr['response']['docs'];
 
         return $returnArr;
+    }
+
+    public function checkQuerySecurity($q){
+        $canReadRareSpp = false;
+        if($GLOBALS['USER_RIGHTS']){
+            if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
+                $canReadRareSpp = true;
+            }
+        }
+        if(!$canReadRareSpp){
+            if($q == '*:*'){
+                $q = '(localitySecurity:0)';
+            }
+            else{
+                $q .= ' AND (localitySecurity:0)';
+            }
+        }
+
+        return $q;
     }
 
     public function translateSOLRRecList($sArr){
@@ -172,6 +192,7 @@ class SOLRManager extends OccurrenceManager{
             $returnArr[$occId]["state"] = (isset($k['StateProvince'])?$k['StateProvince']:'');
             $returnArr[$occId]["county"] = (isset($k['county'])?$k['county']:'');
             $returnArr[$occId]["observeruid"] = (isset($k['observeruid'])?$k['observeruid']:'');
+            $localitySecurity = (isset($k['localitySecurity'])?$k['localitySecurity']:false);
             if(!$localitySecurity || $canReadRareSpp
                 || (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collId,$GLOBALS['USER_RIGHTS']["CollEditor"]))
                 || (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($collId,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
@@ -419,6 +440,10 @@ class SOLRManager extends OccurrenceManager{
         $this->spatial = true;
     }
 
+    public function setQStr($str){
+        $this->qStr = $str;
+    }
+
     public function setSorting($sf1,$sf2,$so){
         $this->sortField1 = $sf1;
         $this->sortField2 = $sf2;
@@ -523,10 +548,8 @@ class SOLRManager extends OccurrenceManager{
                 //Common name search
                 $this->setSciNamesByVerns();
             }
-            else{
-                if($useThes){
-                    $this->setSynonyms();
-                }
+            elseif($useThes){
+                $this->setSynonyms();
             }
 
             //Build sql
@@ -811,6 +834,10 @@ class SOLRManager extends OccurrenceManager{
         if(array_key_exists("hasimages",$this->searchTermsArr)){
             $solrWhere .= 'AND (imgid:[* TO *]) ';
             $this->localSearchArr[] = 'has images';
+        }
+        if(array_key_exists("hasgenetic",$this->searchTermsArr)){
+            $solrWhere .= 'AND (resourcename:[* TO *]) ';
+            $this->localSearchArr[] = 'has genetic data';
         }
         if(array_key_exists("llpoint",$this->searchTermsArr)){
             $pointArr = explode(";",$this->searchTermsArr["llpoint"]);

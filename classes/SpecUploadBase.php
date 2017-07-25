@@ -900,7 +900,7 @@ class SpecUploadBase extends SpecUpload{
 		//parse, check, and transfer all good URLs
 		$sql = 'SELECT associatedmedia, tidinterpreted, occid '.
 			'FROM uploadspectemp '.
-			'WHERE (associatedmedia IS NOT NULL) AND (occid IS NOT NULL) AND (collid IN('.$this->collId.'))';
+			'WHERE (associatedmedia IS NOT NULL) AND (collid IN('.$this->collId.'))';
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
 			$this->outputMsg('<li>Preparing associatedMedia for image transfer...</li>');
@@ -963,7 +963,7 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg('<li style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</li> ');
 			}
 			$sql = 'DELETE u.* FROM uploadimagetemp u INNER JOIN images i ON u.occid = i.occid '.
-				'WHERE (u.collid = '.$this->collId.') AND (u.url = i.url)';
+				'WHERE (u.collid = '.$this->collId.') AND (u.url = i.url) AND (i.url != "") AND (i.url != "empty")';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('<li style="margin-left:20px;">ERROR deleting uploadimagetemp records with matching originalurls: '.$this->conn->error.'</li> ');
 			}
@@ -1062,7 +1062,7 @@ class SpecUploadBase extends SpecUpload{
 
 	protected function finalCleanup(){
 		$this->outputMsg('<li>Transfer process complete</li>');
-
+		
 		//Update uploaddate 
 		$sql = 'UPDATE omcollectionstats SET uploaddate = CURDATE() WHERE collid IN('.$this->collId.')';
 		$this->conn->query($sql);
@@ -1151,6 +1151,10 @@ class SpecUploadBase extends SpecUpload{
 		//Temporarily code until Specify output UUID as occurrenceID 
 		if($this->sourceDatabaseType == 'specify' && (!isset($recMap['occurrenceid']) || !$recMap['occurrenceid'])){
 			if(strlen($recMap['dbpk']) == 36) $recMap['occurrenceid'] = $recMap['dbpk'];
+		}
+
+		if(!array_key_exists('basisofrecord',$recMap) || !$recMap['basisofrecord']){
+			$recMap['basisofrecord'] = ($this->collMetadataArr["colltype"]=="Preserved Specimens"?'PreservedSpecimen':'HumanObservation');
 		}
 
 		$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
@@ -1251,7 +1255,7 @@ class SpecUploadBase extends SpecUpload{
 				//Abort, no images avaialble
 				return false;
 			}
-			if(strtolower(substr($testUrl,-4)) == '.dng' || strtolower(substr($testUrl,-4)) == '.tif'){
+			if(stripos($testUrl,'.dng') || stripos($testUrl,'.tif')){
 				return false;
 			}
 			$skipFormats = array('image/tiff','image/dng','image/bmp','text/html','application/xml','application/pdf','tif','tiff','dng','html','pdf');
@@ -1262,11 +1266,12 @@ class SpecUploadBase extends SpecUpload{
 				if(in_array($imgFormat, $skipFormats)) return false;
 			}
 			else{
-				$urlTail = strtolower(substr($testUrl,-4));
-				if($urlTail == '.gif') $imgFormat = 'image/gif';
-				if($urlTail == '.png') $imgFormat = 'image/png';
-				if($urlTail == '.jpg') $imgFormat = 'image/jpeg';
-				elseif($urlTail == 'jpeg') $imgFormat = 'image/jpeg';
+				$ext = strtolower(substr(strrchr($testUrl, '.'), 1));
+				if(strpos($testUrl,'?')) $ext = substr($ext, 0, strpos($ext,'?'));
+				if($ext== 'gif') $imgFormat = 'image/gif';
+				if($ext== 'png') $imgFormat = 'image/png';
+				if($ext== 'jpg') $imgFormat = 'image/jpeg';
+				elseif($ext== 'jpeg') $imgFormat = 'image/jpeg';
 				if(!$imgFormat){
 					$imgFormat = $this->getMimeType($testUrl);
 					if(!in_array(strtolower($imgFormat), $allowedFormats)) return false;
@@ -1280,6 +1285,21 @@ class SpecUploadBase extends SpecUpload{
 					return false;
 				}
 			}
+			
+			if(strpos($testUrl,'inaturalist.org')){
+				//Special processing for iNaturalist imports
+				if(strpos($testUrl,'/original.')){
+					$recMap['originalurl'] = $testUrl;
+					$recMap['url'] = str_replace('/original.', '/medium.', $testUrl);
+					$recMap['thumbnailurl'] = str_replace('/original.', '/small.', $testUrl);
+				}
+				elseif(strpos($testUrl,'/medium.')){
+					$recMap['url'] = $testUrl;
+					$recMap['thumbnailurl'] = str_replace('/medium.', '/small.', $testUrl);
+					$recMap['originalurl'] = str_replace('/medium.', '/original.', $testUrl);
+				}
+			}
+
 			if(!isset($recMap['url'])) $recMap['url'] = 'empty';
 
 			$sqlFragments = $this->getSqlFragments($recMap,$this->imageFieldMap);

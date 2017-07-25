@@ -2,7 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
-include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
@@ -15,7 +15,7 @@ $stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncoll
 $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 $dlManager = new OccurrenceDownload();
-$dwcaHandler = new DwcArchiverOccurrence();
+$dwcaHandler = new DwcArchiverCore();
 $occurManager = new OccurrenceManager();
 $solrManager = new SOLRManager();
 

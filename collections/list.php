@@ -21,7 +21,7 @@ $stArrSearchJson = '';
 $stArrCollJson = '';
 $resetPageNum = false;
 
-if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
+if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages']) || isset($_REQUEST['hasgenetic'])){
     $stArr = $collManager->getSearchTerms();
     $stArrSearchJson = json_encode($stArr);
     if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
@@ -33,19 +33,6 @@ if(isset($_REQUEST['db'])){
     if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
 }
 
-$occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
-	'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
-	'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
-	'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
-	'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
-	'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans', 
-	'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
-	'country', 'stateprovince', 'county', 'municipality', 'locality',
-	'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 
-	'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources', 
-	'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
-	'verbatimelevation','language',
-	'labelproject','basisofrecord');
 ?>
 
 <html>
@@ -115,7 +102,7 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
                 <?php
             }
             else{
-                echo "sessionStorage.collSearchPage = listPage;";
+                echo "sessionStorage.collSearchPage = listPage;\n";
             }
             ?>
 
@@ -124,9 +111,7 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
             document.getElementById("kmldlcolljson").value = collJson;
             document.getElementById("kmldlstjson").value = starrJson;
 
-            setQueryInfo();
-            changeRecordPage(listPage);
-
+            setOccurrenceList(listPage);
             $('#tabs').tabs({
                 active: <?php echo $tabIndex; ?>,
                 beforeLoad: function( event, ui ) {
@@ -135,42 +120,20 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
             });
         });
 
-        function setQueryInfo(){
-            //alert('rpc/setsearchinfo.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&targettid=<?php //echo $targetTid; ?>');
-
-            $.ajax({
-                type: "POST",
-                url: "rpc/setsearchinfo.php",
-                data: {
-                    starr: starrJson,
-                    jsoncollstarr: collJson,
-                    targettid: <?php echo $targetTid; ?>
-                },
-                dataType: "html"
-            }).done(function(msg) {
-                if(msg){
-                    document.getElementById("queryrecordsinfo").innerHTML = msg;
-                }
-                else{
-                    document.getElementById("queryrecords").innerHTML = "<p>An error occurred retrieving search information.</p>";
-                }
-            });
-        }
-
-        function changeRecordPage(page){
-            sessionStorage.collSearchPage = page;
+        function setOccurrenceList(listPage){
+            sessionStorage.collSearchPage = listPage;
             document.getElementById("queryrecords").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
-
-            //alert('rpc/changerecordpage.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+page+'&targettid=<?php //echo $targetTid; ?>');
-
+            <?php 
+			//echo "alert('rpc/getoccurrencelist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+listPage+'&targettid=".$targetTid."');";
+            ?>
             $.ajax({
                 type: "POST",
-                url: "rpc/changerecordpage.php",
+                url: "rpc/getoccurrencelist.php",
                 data: {
                     starr: starrJson,
                     jsoncollstarr: collJson,
                     targettid: <?php echo $targetTid; ?>,
-                    page: page
+                    page: listPage
                 },
                 dataType: "html"
             }).done(function(msg) {
@@ -250,8 +213,6 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
 			</li>
 		</ul>
 		<div id="speclist">
-            <div id="queryrecordsinfo"></div>
-
             <div id="queryrecords"></div>
 		</div>
 		<div id="maps" style="min-height:400px;margin-bottom:10px;">
@@ -291,6 +252,19 @@ $occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
 					<fieldset>
 						<div style="width:600px;">
 							<?php 
+							$occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
+								'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
+								'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
+								'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
+								'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
+								'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
+								'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
+								'country', 'stateprovince', 'county', 'municipality', 'locality',
+								'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters',
+								'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
+								'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
+								'verbatimelevation','language',
+								'labelproject','basisofrecord');
 							foreach($occFieldArr as $k => $v){
 								echo '<div style="float:left;margin-right:5px;">';
 								echo '<input type="checkbox" name="kmlFields[]" value="'.$v.'" />'.$v.'</div>';

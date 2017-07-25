@@ -17,7 +17,6 @@ $obsArr = (isset($collList['obs'])?$collList['obs']:null);
 
 $otherCatArr = $collManager->getOccurVoucherProjects();
 ?>
-
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
@@ -27,18 +26,10 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 		<script src="../js/jquery.js" type="text/javascript"></script>
 		<script src="../js/jquery-ui.js" type="text/javascript"></script>
-		<script src="../js/symb/collections.search.js" type="text/javascript"></script>
-        <!-- <script src="../js/symb/collections.index.js" type="text/javascript"></script> -->
+		<script src="../js/symb/collections.index.js?ver=1" type="text/javascript"></script> 
 		<script type="text/javascript">
 			<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 		</script>
-        <script type="text/javascript">
-            $('html').hide();
-            $(document).ready(function() {
-                $("#tabs").tabs();
-                $('html').show();
-            });
-        </script>
 	</head>
 	<body>
 	
@@ -82,9 +73,9 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
 						<?php 
-						$collManager->outputFullCollArr($specArr); 
+						$collManager->outputFullCollArr($specArr, $catId); 
 						if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; 
-						$collManager->outputFullCollArr($obsArr);
+						$collManager->outputFullCollArr($obsArr, $catId);
 						?>
 						<div style="clear:both;">&nbsp;</div>
 					</form>
@@ -100,7 +91,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
 						<?php
-						$collManager->outputFullCollArr($specArr);
+						$collManager->outputFullCollArr($specArr, $catId);
 						?>
 						<div style="clear:both;">&nbsp;</div>
 					</form>
@@ -116,7 +107,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
 						<?php
-						$collManager->outputFullCollArr($obsArr);
+						$collManager->outputFullCollArr($obsArr, $catId);
 						?>
 						<div style="clear:both;">&nbsp;</div>
 					</form>

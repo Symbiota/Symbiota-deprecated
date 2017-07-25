@@ -39,10 +39,10 @@ if($_REQUEST || $stArr){
 
 $dbArr = Array();
 if(array_key_exists('db',$_REQUEST)){
-	$dbArr = $previousCriteria["db"];
+	$dbArr = $_REQUEST["db"];
 }
 elseif(array_key_exists('db',$previousCriteria)){
-	$dbArr = explode(';',$previousCriteria["db"]);
+    $dbArr = explode(';',$previousCriteria["db"]);
 }
 
 if($action){
@@ -76,7 +76,7 @@ if($action){
 	<script src="../js/jquery-ui.js" type="text/javascript"></script>
 	<script src="../js/jquery.manifest.js" type="text/javascript"></script>
 	<script src="../js/jquery.marcopolo.js" type="text/javascript"></script>
-	<script src="../js/symb/images.index.js?ver=20170417" type="text/javascript"></script>
+	<script src="../js/symb/images.index.js?ver=20170711" type="text/javascript"></script>
 	<meta name='keywords' content='' />
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
@@ -362,7 +362,6 @@ if($action){
 					}
 					?>
 					<div style="clear:both;"></div>
-					<input type="hidden" name="usecookies" value="false" />
 				</div>
 			</form>
 			

@@ -9,7 +9,6 @@ $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 $startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
-$sqlFrag = array_key_exists("sqlfrag",$_REQUEST)?$_REQUEST["sqlfrag"]:"";
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 
 $displayMode = (array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode']:0);
@@ -21,18 +20,20 @@ $statusStr = "";
 $isEditor = 0;
 if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = 1;
-
 	if($action == "SaveSearch"){
 		$statusStr = $clManager->saveQueryVariables($_POST);
 	}
-	elseif($action == 'DeleteSql'){
-		$statusStr = $clManager->deleteSql();
+	elseif($action == 'DeleteVariables'){
+		$statusStr = $clManager->deleteQueryVariables();
 	}
 	elseif($action == 'Add Vouchers'){
 		$clManager->linkVouchers($_POST['occids']);
 	}
 	elseif($action == 'Add Taxa and Vouchers'){
 		$clManager->linkTaxaVouchers($_POST['occids'],(array_key_exists('usecurrent',$_POST)?$_POST['usecurrent']:0));
+	}
+	elseif($action == 'resolveconflicts'){
+		$clManager->batchAdjustChecklist($_POST);
 	}
 }
 ?>
@@ -200,10 +201,10 @@ if($clid && $isEditor){
 			?>
 			<fieldset>
 				<legend><b><?php echo $LANG['REMOVESEARCH'];?></b></legend>
-				<form name="sqldeleteform" action="voucheradmin.php" method="post" onsubmit="return confirm('Are you sure you want to delete current SQL statement?');">
+				<form name="sqldeleteform" action="voucheradmin.php" method="post" onsubmit="return confirm('Are you sure you want to delete query variables?');">
 					<div style="margin:20px">
-						<input type="submit" name="submit" value="<?php echo $LANG['DELETESQL'];?>" />
-						<input type="hidden" name="submitaction" value="DeleteSql" />
+						<input type="submit" name="submit" value="<?php echo $LANG['DELETEVARIABLES'];?>" />
+						<input type="hidden" name="submitaction" value="DeleteVariables" />
 					</div>
 					<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
 					<input type="hidden" name="pid" value="<?php echo $pid; ?>" />

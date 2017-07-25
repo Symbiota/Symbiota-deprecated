@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/GamesManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/GamesManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0;
 $submitAction = array_key_exists("submitaction",$_POST)?$_POST["submitaction"]:'';
@@ -15,6 +15,10 @@ $clArr = $gameManager->getChecklistArr($pid);
 
 $gameInfo = $gameManager->setOOTD($oodID,$ootdGameChecklist);
 $imageArr = $gameInfo['images'];
+$cacheRefresh = date('Ydm');
+foreach($imageArr as $k => $imgValue){
+	$imageArr[$k] = $imgValue.'?ver='.$cacheRefresh;
+}
 
 if($submitAction){
 	$scinameAnswerArr = explode(' ',trim($_POST['sciname_answer']));
@@ -86,7 +90,7 @@ if($submitAction){
 
 	<?php
 	$displayLeftMenu = (isset($indexMenu)?$indexMenu:"true");
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	?> 
 	<!-- This is inner text! -->
 	<div id="innertext" style="">
@@ -103,7 +107,7 @@ if($submitAction){
 					<div class = "dailypicture" align = "center">
 						<div>
 							<div style="vertical-align:middle;">
-								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
+								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg?ver=<?php echo $cacheRefresh; ?>" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
 							</div><br />
 							<a href="javascript:chgImg(-1)">Previous</a> &nbsp;|&nbsp;
 							<a href="javascript:chgImg(1)">Next</a>
@@ -327,7 +331,7 @@ if($submitAction){
 	</div>
 
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?> 
 </body>
 </html>

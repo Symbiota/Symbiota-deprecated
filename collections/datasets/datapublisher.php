@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverPublisher.php');
-include_once($SERVER_ROOT.'/classes/CollectionProfileManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
 header('Content-Type: text/html; charset=' .$CHARSET);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -11,7 +11,7 @@ $cSet = array_key_exists('cset',$_REQUEST)?$_REQUEST['cset']:'';
 $schema = array_key_exists('schema',$_REQUEST)?$_REQUEST['schema']:1;
 
 $dwcaManager = new DwcArchiverPublisher();
-$collManager = new CollectionProfileManager();
+$collManager = new OccurrenceCollectionProfile();
 
 $includeDets = 1;
 $includeImgs = 1;
@@ -306,9 +306,13 @@ include($SERVER_ROOT. '/header.php');
 					}
 					echo '</div>';
 				}
-				if($collArr['dwcaurl'] && !strpos($collArr['dwcaurl'],$_SERVER["SERVER_NAME"])){
-					$baseUrl = substr($collArr['dwcaurl'],0,strpos($collArr['dwcaurl'],'/content')).'/collections/datasets/datapublisher.php';
-					$blockSubmitMsg = 'Already published on sister portal (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>) ';
+				if($collArr['dwcaurl']){
+					$serverName = $_SERVER["SERVER_NAME"];
+					if(substr($serverName, 0, 4) == 'www.') $serverName = substr($serverName, 4);
+					if(!strpos($collArr['dwcaurl'],$serverName)){
+						$baseUrl = substr($collArr['dwcaurl'],0,strpos($collArr['dwcaurl'],'/content')).'/collections/datasets/datapublisher.php';
+						$blockSubmitMsg = 'Already published on sister portal (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>) ';
+					}
 				}
 			}
 			else{
@@ -398,6 +402,8 @@ include($SERVER_ROOT. '/header.php');
 		<?php
 	}
 	else{
+		$catID = (isset($DEFAULTCATID)?$DEFAULTCATID:0);
+		$catTitle = $dwcaManager->getCategoryName($catID);
 		if($IS_ADMIN){
 			if($action == 'Create/Refresh Darwin Core Archive(s)'){
 				echo '<ul>';
@@ -413,17 +419,17 @@ include($SERVER_ROOT. '/header.php');
 			<div id="dwcaadmindiv" style="margin:10px;display:<?php echo ($emode?'block':'none'); ?>;" >
 				<form name="dwcaadminform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaAdminForm(this)">
 					<fieldset style="padding:15px;">
-						<legend><b>Publish / Refresh DwC-A Files</b></legend>
+						<legend><b>Publish / Refresh <?php echo $catTitle; ?> DwC-A Files</b></legend>
 						<div style="margin:10px;">
 							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> Select/Deselect All<br/><br/> 
 							<?php 
-							$collArr = $dwcaManager->getCollectionList();
-							foreach($collArr as $k => $v){
+							$collList = $dwcaManager->getCollectionList($catID);
+							foreach($collList as $k => $v){
 								$errMsg = '';
 								if(!$v['guid']){ 
 									$errMsg = 'Missing GUID source';
 								}
-								elseif($v['url'] && !strpos($v['url'],$_SERVER["SERVER_NAME"])){ 
+								elseif($v['url'] && !strpos($v['url'],str_replace('www.', '', $_SERVER["SERVER_NAME"]))){ 
 									$baseUrl = substr($v['url'],0,strpos($v['url'],'/content')).'/collections/datasets/datapublisher.php';
 									$errMsg = 'Already published on different domain (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>)';
 								}
@@ -450,6 +456,7 @@ include($SERVER_ROOT. '/header.php');
 			<?php 
 		}
 		if($dwcaArr = $dwcaManager->getDwcaItems()){
+			if($catTitle) echo '<div style="font-weight:bold;font-size:140%;margin:50px 0px 15px 0px;">'.$catTitle.' DwC-Archive Files</div>';
 			?>
 			<table class="styledtable" style="font-family:Arial;font-size:12px;margin:10px;">
 				<tr><th>Code</th><th>Collection Name</th><th>DwC-Archive</th><th>Metadata</th><th>Pub Date</th></tr>
@@ -487,6 +494,16 @@ include($SERVER_ROOT. '/header.php');
 		}
 		else{
 			echo '<div style="margin:10px;font-weight:bold;">There are no publishable collections</div>';
+		}
+		if($catID){
+			if($addDwca = $dwcaManager->getAdditionalDWCA($catID)){
+				echo '<div style="font-weight:bold;font-size:140%;margin:50px 0px 15px 0px;">Additional Data Sources within the Portal Network</div>';
+				echo '<ul>';
+				foreach($addDwca as $domanName => $domainArr){
+					echo '<li><a href="'.$domainArr['url'].'/collections/datasets/datapublisher.php'.'" target="_blank">http://'.$domanName.'</a> - '.$domainArr['cnt'].' Archives</li>';
+				}
+				echo '</ul>';
+			}
 		}
 	}
 	?>

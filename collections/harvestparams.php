@@ -31,23 +31,16 @@ if(isset($_REQUEST['db'])){
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/symb/collections.search.js?ver=1"></script>
-    <!-- <script type="text/javascript" src="../js/symb/collections.harvestparams.js?var=1304"></script> -->
+    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=2"></script>
     <script type="text/javascript">
         var starrJson = '';
-        var collJson = '';
 
         $(document).ready(function() {
             <?php
             if($stArrCollJson){
-                ?>
-                collJson = '<?php echo $stArrCollJson; ?>';
-                sessionStorage.jsoncollstarr = collJson;
-                <?php
+                echo "sessionStorage.jsoncollstarr = '".$stArrCollJson."';\n";
             }
-            ?>
 
-            <?php
             if($stArrSearchJson){
                 ?>
                 starrJson = '<?php echo $stArrSearchJson; ?>';
@@ -64,49 +57,6 @@ if(isset($_REQUEST['db'])){
                 <?php
             }
             ?>
-
-            function split( val ) {
-                return val.split( /,\s*/ );
-            }
-            function extractLast( term ) {
-                return split( term ).pop();
-            }
-
-            $( "#taxa" )
-            // don't navigate away from the field on tab when selecting an item
-                .bind( "keydown", function( event ) {
-                    if ( event.keyCode === $.ui.keyCode.TAB &&
-                        $( this ).data( "autocomplete" ).menu.active ) {
-                        event.preventDefault();
-                    }
-                })
-                .autocomplete({
-                    source: function( request, response ) {
-                        $.getJSON( "rpc/taxalist.php", {
-                            term: extractLast( request.term ), t: function() { return document.harvestparams.taxontype.value; }
-                        }, response );
-                    },
-                    search: function() {
-                        // custom minLength
-                        var term = extractLast( this.value );
-                        if ( term.length < 4 ) {
-                            return false;
-                        }
-                    },
-                    focus: function() {
-                        // prevent value inserted on focus
-                        return false;
-                    },
-                    select: function( event, ui ) {
-                        var terms = split( this.value );
-                        // remove the current input
-                        terms.pop();
-                        // add the selected item
-                        terms.push( ui.item.value );
-                        this.value = terms.join( ", " );
-                        return false;
-                    }
-                },{});
         });
     </script>
 </head>
@@ -140,7 +90,7 @@ if(isset($_REQUEST['db'])){
         <div style="margin:5px;">
 			<input type='checkbox' name='showtable' id='showtable' value='1' onchange="changeTableDisplay();" /> Show results in table view
 		</div>
-		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm()">
+		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm(this)">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:5px 10px;'>
 				<div style="margin-bottom:10px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" /></div>
@@ -153,11 +103,11 @@ if(isset($_REQUEST['db'])){
 			<div id="taxonSearch0">
 				<div>
 					<select id="taxontype" name="type">
-						<option id='familysciname' value='1'><?php echo $LANG['SELECT_1-1']; ?></option>
-						<option id='family' value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
-						<option id='sciname' value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
-						<option id='highertaxon' value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
-						<option id='commonname' value='5'><?php echo $LANG['SELECT_1-5']; ?></option>
+						<option value='1'><?php echo $LANG['SELECT_1-1']; ?></option>
+						<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
+						<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
+						<option value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
+						<option value='5'><?php echo $LANG['SELECT_1-5']; ?></option>
 					</select>:
 					<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 				</div>
@@ -286,6 +236,9 @@ if(isset($_REQUEST['db'])){
 			<div>
 				<input type='checkbox' name='hasimages' value='1' /> <?php echo $LANG['HAS_IMAGE']; ?>
 			</div>
+            <div>
+                <input type='checkbox' name='hasgenetic' value='1' /> <?php echo $LANG['HAS_GENETIC']; ?>
+            </div>
 			<input type="hidden" name="reset" value="1" />
 		</form>
     </div>

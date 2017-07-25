@@ -140,8 +140,6 @@
     <field name="coll_year" type="int" indexed="true" stored="true"/>
     <field name="coll_month" type="int" indexed="true" stored="true"/>
     <field name="coll_day" type="int" indexed="true" stored="true"/>
-    <field name="startDayOfYear" type="int" indexed="true" stored="true"/>
-    <field name="endDayOfYear" type="int" indexed="true" stored="true"/>
     <field name="habitat" type="text_general" indexed="true" stored="true"/>
     <field name="associatedTaxa" type="text_general" indexed="true" stored="true"/>
     <field name="cultivationStatus" type="int" indexed="true" stored="true"/>
@@ -150,7 +148,7 @@
     <field name="county" type="string" indexed="true" stored="true"/>
     <field name="municipality" type="string" indexed="true" stored="true"/>
     <field name="locality" type="text_general" indexed="true" stored="true"/>
-    <field name="localitySecurity" type="int" indexed="true" stored="true"/>
+    <field name="localitySecurity" type="int" default="0" indexed="true" stored="true"/>
     <field name="localitySecurityReason" type="string" indexed="true" stored="true"/>
     <field name="decimalLatitude" type="double" indexed="true" stored="true"/>
     <field name="decimalLongitude" type="double" indexed="true" stored="true"/>
@@ -158,11 +156,6 @@
     <field name="minimumElevationInMeters" type="int" indexed="true" stored="true"/>
     <field name="maximumElevationInMeters" type="int" indexed="true" stored="true"/>
     <field name="observeruid" type="int" indexed="true" stored="true"/>
-    <field name="processingstatus" type="string" indexed="true" stored="true"/>
-    <field name="recordEnteredBy" type="string" indexed="true" stored="true"/>
-    <field name="labelProject" type="string" indexed="true" stored="true"/>
-    <field name="dateEntered" type="tdate" indexed="true" stored="true"/>
-    <field name="dateLastModified" type="tdate" indexed="true" stored="true"/>
     <field name="InstitutionCode" type="string" indexed="true" stored="true"/>
     <field name="CollectionCode" type="string" indexed="true" stored="true"/>
     <field name="CollectionName" type="string" indexed="true" stored="true"/>
@@ -170,22 +163,11 @@
     <field name="CollType" type="string" indexed="true" stored="true"/>
     <field name="SortSeq" type="int" indexed="true" stored="true"/>
     <field name="imgid" type="int" indexed="true" stored="true" multiValued="true" />
-    <field name="url" type="text_general" indexed="true" stored="true" multiValued="true" />
     <field name="thumbnailurl" type="text_general" indexed="true" stored="true" multiValued="true" />
-    <field name="originalurl" type="text_general" indexed="true" stored="true" multiValued="true" />
-    <field name="photographeruid" type="int" indexed="true" stored="true" multiValued="true" />
-    <field name="caption" type="string" indexed="true" stored="true" multiValued="true" />
-    <field name="img_created" type="tdate" indexed="true" stored="true" multiValued="true" />
+    <field name="resourcename" type="string" indexed="true" stored="true" multiValued="true" />
     <field name="CLID" type="int" indexed="true" stored="true" multiValued="true" />
-    <field name="georefDate" type="tdate" indexed="true" stored="true" multiValued="true" />
-    <field name="RankId" type="int" indexed="true" stored="true"/>
-    <field name="UnitName1" type="string" indexed="true" stored="true"/>
-    <field name="accSciName" type="string" indexed="true" stored="true"/>
     <field name="accFamily" type="string" indexed="true" stored="true"/>
-    <field name="tidaccepted" type="int" indexed="true" stored="true"/>
     <field name="parenttid" type="int" indexed="true" stored="true" multiValued="true" />
-    <field name="syntid" type="int" indexed="true" stored="true" multiValued="true" />
-    <field name="vernaculars" type="string" indexed="true" stored="true" multiValued="true" />
 
     <!-- Only enabled in the "schemaless" data-driven example (assuming the client
          does not know what fields may be searched) because it's very expensive to index everything twice. -->
@@ -633,7 +615,7 @@
                autoIndex="true"
                validationRule="repairBuffer0"
                geo="true"
-               distErrPct="0.025"
+               distErrPct="0.0"
                maxDistErr="0.001"
                distanceUnits="kilometers" />
 

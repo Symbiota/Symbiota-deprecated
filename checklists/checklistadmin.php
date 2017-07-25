@@ -7,7 +7,6 @@ if(!$SYMB_UID) header('Location: ../profile/index.php?refurl=../checklists/check
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
-$startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 
@@ -15,14 +14,19 @@ $clManager = new ChecklistAdmin();
 if(!$clid && isset($_POST['delclid'])) $clid = $_POST['delclid'];
 $clManager->setClid($clid);
 
+if($action == "SubmitAdd"){
+	//Anyone with a login can create a checklist 
+	$newClid = $clManager->createChecklist($_POST);
+	header("Location: checklist.php?cl=".$newClid."&emode=1");
+}
+
 $statusStr = "";
 $isEditor = 0;
-
 if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
     $isEditor = 1;
 
     //Submit checklist MetaData edits
-    if($action == "SubmitChange"){
+    if($action == "SubmitEdit"){
         $clManager->editMetaData($_POST);
         header('Location: checklist.php?cl='.$clid.'&pid='.$pid);
     }
@@ -54,7 +58,6 @@ if($clArray["defaultSettings"]){
 
 $voucherProjects = $clManager->getVoucherProjects();
 ?>
-
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
@@ -77,7 +80,7 @@ $voucherProjects = $clManager->getVoucherProjects();
         });
     </script>
     <script type="text/javascript" src="../js/symb/shared.js"></script>
-    <script type="text/javascript" src="../js/symb/checklists.checklistadmin.js?ver=20151202"></script>
+    <script type="text/javascript" src="../js/symb/checklists.checklistadmin.js?ver=20170530"></script>
 </head>
 
 <body>
@@ -114,9 +117,9 @@ if($clid && $isEditor){
     <div id="tabs" style="margin:10px;">
     <ul>
         <li><a href="#admintab"><span><?php echo $LANG['ADMIN'];?></span></a></li>
-        <li><a href="#desctab"><span><?php echo $LANG['DESCRIPTION'];?></span></a></li>
+        <li><a href="checklistadminmeta.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><span><?php echo $LANG['DESCRIPTION'];?></span></a></li>
         <!-- 			        <li><a href="#pointtab"><span>Non-vouchered Points</span></a></li> -->
-        <li><a href="checklistadminchildren.php?clid=<?php echo $clid.'&pid='.$pid.'&start='.$startPos; ?>"><span><?php echo $LANG['RELATEDCHECK'];?></span></a></li>
+        <li><a href="checklistadminchildren.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><span><?php echo $LANG['RELATEDCHECK'];?></span></a></li>
         <?php
         if($voucherProjects){
             ?>
@@ -208,156 +211,6 @@ if($clid && $isEditor){
                 </form>
             </div>
         </div>
-    </div>
-    <div id="desctab">
-        <form id="checklisteditform" action="checklistadmin.php" method="post" name="editclmatadata" onsubmit="return validateMetadataForm(this)">
-            <fieldset style="margin:15px;padding:10px;">
-                <legend><b><?php echo $LANG['EDITCHECKDET'];?></b></legend>
-                <div>
-                    <b><?php echo $LANG['CHECKNAME'];?></b><br/>
-                    <input type="text" name="name" style="width:95%" value="<?php echo $clManager->getClName();?>" />
-                </div>
-                <div>
-                    <b><?php echo $LANG['AUTHORS'];?></b><br/>
-                    <input type="text" name="authors" style="width:95%" value="<?php echo $clArray["authors"]; ?>" />
-                </div>
-                <?php
-                if(isset($GLOBALS['USER_RIGHTS']['RareSppAdmin']) || $IS_ADMIN){
-                    ?>
-                    <div>
-                        <b><?php echo $LANG['CHECKTYPE'];?></b><br/>
-                        <select name="type">
-                            <option value="static"><?php echo $LANG['GENCHECK'];?></option>
-                            <option value="rarespp" <?php echo ($clArray["type"]=='rarespp'?'SELECTED':'') ?>><?php echo $LANG['RARETHREAT'];?></option>
-                        </select>
-                    </div>
-                <?php
-                }
-                ?>
-                <div>
-                    <b><?php echo $LANG['LOC'];?></b><br/>
-                    <input type="text" name="locality" style="width:95%" value="<?php echo $clArray["locality"]; ?>" />
-                </div>
-                <div>
-                    <b><?php echo $LANG['CITATION'];?></b><br/>
-                    <input type="text" name="publication" style="width:95%" value="<?php echo $clArray["publication"]; ?>" />
-                </div>
-                <div>
-                    <b><?php echo $LANG['ABSTRACT'];?></b><br/>
-                    <textarea name="abstract" style="width:95%" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
-                </div>
-                <div>
-                    <b><?php echo $LANG['NOTES'];?></b><br/>
-                    <input type="text" name="notes" style="width:95%" value="<?php echo $clArray["notes"]; ?>" />
-                </div>
-                <div style="width:100%;">
-                    <div style="float:left;">
-                        <b><?php echo $LANG['LATCENT'];?></b><br/>
-                        <input id="latdec" type="text" name="latcentroid" style="width:110px;" value="<?php echo $clArray["latcentroid"]; ?>" />
-                    </div>
-                    <div style="float:left;margin-left:15px;">
-                        <b><?php echo $LANG['LONGCENT'];?></b><br/>
-                        <input id="lngdec" type="text" name="longcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
-                    </div>
-                    <div style="float:left;margin:25px 3px;">
-                    	<a href="#" onclick="openMappingAid();return false;"><img src="../images/world.png" style="width:12px;" /></a>
-                    </div>
-                    <div style="float:left;margin-left:15px;">
-                        <b><?php echo $LANG['POINTRAD'];?></b><br/>
-                        <input type="text" name="pointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
-                    </div>
-                    <div style="float:left;margin:8px 0px 0px 25px;">
-                        <fieldset style="width:175px;">
-                            <legend><b><?php echo $LANG['POLYFOOT'];?></b></legend>
-                            <?php
-                            if($clArray&&$clArray["footprintWKT"]){
-                                ?>
-                                <div id="polyexistsbox" style="display:block;clear:both;">
-                                    <b><?php echo $LANG['POLYFOOTSAVE'];?></b>
-                                </div>
-                            <?php
-                            }
-                            else{
-                                ?>
-                                <div id="polycreatebox" style="display:block;clear:both;">
-                                    <b><?php echo $LANG['CREATEPOLYFOOT'];?></b>
-                                </div>
-                            <?php
-                            }
-                            ?>
-                            <div id="polysavebox" style="display:none;clear:both;">
-                                <b><?php echo $LANG['POLYFOOTRDYSAVE'];?></b>
-                            </div>
-                            <div style="float:right;margin:8px 0px 0px 10px;cursor:pointer;" onclick="openMappingPolyAid();">
-                                <img src="../images/world.png" style="width:12px;" />
-                            </div>
-                        </fieldset>
-                    </div>
-                </div>
-                <div style="clear:both;margin-top:5px;">
-                    <fieldset style="width:300px;">
-                        <legend><b><?php echo $LANG['DEFAULTDISPLAY'];?></b></legend>
-                        <div>
-                            <!-- Display Details: 0 = false, 1 = true  -->
-                            <input name='ddetails' id='ddetails' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["ddetails"])?"checked":""); ?> /> 
-                            <?php echo $LANG['SHOWDETAILS'];?>
-                        </div>
-                        <div>
-                            <?php
-                            //Display Common Names: 0 = false, 1 = true
-                            if($displayCommonNames) echo "<input id='dcommon' name='dcommon' type='checkbox' value='1' ".(($defaultArr&&$defaultArr["dcommon"])?"checked":"")." /> ".$LANG['COMMON'];
-                            ?>
-                        </div>
-                        <div>
-                            <!-- Display as Images: 0 = false, 1 = true  -->
-                            <input name='dimages' id='dimages' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"checked":""); ?> onclick="showImagesDefaultChecked(this.form);" /> 
-                            <?php echo $LANG['DISPLAYIMG'];?>
-                        </div>
-                        <div>
-                            <!-- Display as Vouchers: 0 = false, 1 = true  -->
-                            <input name='dvouchers' id='dvouchers' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dvouchers"])?"checked":"")); ?>/> 
-                            <?php echo $LANG['NOTESVOUC'];?>
-                        </div>
-                        <div>
-                            <!-- Display Taxon Authors: 0 = false, 1 = true  -->
-                            <input name='dauthors' id='dauthors' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"disabled":(($defaultArr&&$defaultArr["dauthors"])?"checked":"")); ?>/> 
-                            <?php echo $LANG['TAXONAUTHOR'];?>
-                        </div>
-                        <div>
-                            <!-- Display Taxa Alphabetically: 0 = false, 1 = true  -->
-                            <input name='dalpha' id='dalpha' type='checkbox' value='1' <?php echo ($defaultArr&&$defaultArr["dalpha"]?"checked":""); ?> /> 
-                            <?php echo $LANG['TAXONABC'];?>
-                        </div>
-                        <div>
-                            <?php 
-                            // Activate Identification key: 0 = false, 1 = true 
-                            $activateKey = $KEY_MOD_IS_ACTIVE;
-                            if(array_key_exists('activatekey', $defaultArr)){
-								$activateKey = $defaultArr["activatekey"];
-                            }
-                            ?>
-                            <input name='activatekey' type='checkbox' value='1' <?php echo ($activateKey?"checked":""); ?> /> 
-                            <?php echo $LANG['ACTIVATEKEY'];?>
-                        </div>
-                    </fieldset>
-                </div>
-                <div style="clear:both;margin-top:15px;">
-                    <b>Access</b><br/>
-                    <select name="access">
-                        <option value="private"><?php echo $LANG['PRIVATE'];?></option>
-                        <option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>><?php echo $LANG['PUBLIC'];?></option>
-                    </select>
-                </div>
-                <div style="clear:both;float:left;margin-top:15px;">
-                    <input type='submit' name='submit' id='editsubmit' value='<?php echo $LANG['SUBMITCHANG'];?>' />
-                    <input type="hidden" name="submitaction" value="SubmitChange" />
-                </div>
-                <input type="hidden" id="footprintWKT" name="footprintWKT" value='<?php echo $clArray["footprintWKT"]; ?>' />
-                <input type="hidden" name="tabindex" value="1" />
-                <input type='hidden' name='clid' value='<?php echo $clid; ?>' />
-                <input type="hidden" name="pid" value="<?php echo $pid; ?>" />
-            </fieldset>
-        </form>
     </div>
     <!--
 				<div id="pointtab">

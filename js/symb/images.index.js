@@ -127,14 +127,7 @@ function submitImageForm(){
 		document.getElementById('phuidstr').value = '';
 		document.getElementById('phjson').value = '';
 	}
-	return true;
-	/*if(criteria){
-		return true;
-	}
-	else{
-		alert("Please specify either a scientific name, common name, photographer, or keyword for which you would like to search images for.");
-		return false;
-	}*/
+	return verifyCollForm(document.getElementById('imagesearchform'));
 }
 
 function imageDisplayChanged(f){
@@ -269,11 +262,12 @@ function verifyCollForm(f){
 	for(var h=0;h<f.length;h++){
 		if(f.elements[h].name == "db[]" && f.elements[h].checked){
 			formVerified = true;
-			break;
+		}
+		else{
+            document.getElementById("dballcb").checked = false;
 		}
 		if(f.elements[h].name == "cat[]" && f.elements[h].checked){
 			formVerified = true;
-			break;
 		}
 	}
 	if(!formVerified){

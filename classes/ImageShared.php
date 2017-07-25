@@ -243,7 +243,7 @@ class ImageShared{
 		$imgInfo = null;
 		if(strtolower(substr($fPath,0,7)) == 'http://' || strtolower(substr($fPath,0,8)) == 'https://'){
 			//Image is URL 
-			$imgInfo = getimagesize($fPath);
+			$imgInfo = getimagesize(str_replace(' ', '%20', $fPath));
 			list($this->sourceWidth, $this->sourceHeight) = $imgInfo;
 		
 			if($pos = strrpos($fName,'/')){
@@ -352,7 +352,7 @@ class ImageShared{
 
 		//Get image dimensions
 		if(!$this->sourceWidth || !$this->sourceHeight){
-			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize(str_replace(' ', '%20', $this->sourcePath));
 		}
 		//Get image file size
 		$fileSize = $this->getSourceFileSize();
@@ -461,7 +461,7 @@ class ImageShared{
 		ini_set('memory_limit','512M');
 
 		if(!$this->sourceWidth || !$this->sourceHeight){
-			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize(str_replace(' ', '%20', $this->sourcePath));
 		}
 		if($this->sourceWidth){
 			$newHeight = round($this->sourceHeight*($newWidth/$this->sourceWidth));
@@ -1119,7 +1119,7 @@ class ImageShared{
 		}
 		
 		//First simple check
-        if(file_exists($uri) || is_array(getimagesize($uri)) || ($secondaryUrl && file_exists($secondaryUrl))){
+		if(file_exists($uri) || is_array(getimagesize(str_replace(' ', '%20', $uri))) || ($secondaryUrl && file_exists($secondaryUrl))){
 			return true;
 	    }
 	    //Second check

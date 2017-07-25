@@ -25,6 +25,7 @@ $LANG['REMOVEUSERCHECK'] = 'Before a checklist can be deleted, all editors (exce
 							Inventory project assignments can only be removed by active managers of the project or a system administrator. ';
 $LANG['WARNINGNOUN'] = 'WARNING: Action cannot be undone.';
 $LANG['CONFIRMDELETE'] = 'Are you sure you want to permanently remove checklist? This action cannot be undone!';
+$LANG['CREATECHECKDET'] = 'Create New Checklist';
 $LANG['EDITCHECKDET'] = 'Edit Checklist Details';
 $LANG['CHECKNAME'] = 'Checklist Name';
 $LANG['CHECKTYPE'] = 'Checklist Type';
@@ -68,6 +69,7 @@ $LANG['REMOVEEDITPRIVCONFIRM'] = 'Are you sure you want to remove editing rights
 $LANG['MASSUPDATEED'] = 'Edit Checklist Details';
 $LANG['ADDEDITOR'] = 'Add Editor';
 $LANG['DELETECHECK'] = 'Delete Checklist';
-$LANG['SUBMITCHANG'] = 'Submit Changes';
+$LANG['EDITCHECKLIST'] = 'Save Edits';
+$LANG['ADDCHECKLIST'] = 'Create Checklist';
 $LANG['DELETETHISU'] = 'Delete this user';
 ?>

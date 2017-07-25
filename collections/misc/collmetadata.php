@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/CollectionProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/misc/collmetadata.php?'.$_SERVER['QUERY_STRING']);
 
@@ -10,7 +10,7 @@ $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 
 $statusStr = '';
 
-$collManager = new CollectionProfileManager();
+$collManager = new OccurrenceCollectionProfile();
 if(!$collManager->setCollid($collid)) $collid = '';
 
 $isEditor = 0;
@@ -22,11 +22,7 @@ if($IS_ADMIN){
 	$isEditor = 1;
 }
 elseif($collid){
-	if(array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])){
-		$isEditor = 1;
-		$isAdmin = 1;
-	}
-	elseif(array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"])){
+	if(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
 		$isEditor = 1;
 	}
 }
@@ -80,7 +76,7 @@ $collData = $collManager->getCollectionData(true);
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script language=javascript>
+	<script>
 
 		$(function() {
 			var dialogArr = new Array("instcode","collcode","pedits","pubagg","rights","rightsholder","accessrights","guid","colltype","management","icon","collectionguid","sourceurl","sort");
@@ -246,7 +242,7 @@ $collData = $collManager->getCollectionData(true);
 <body>
 	<?php
 	$displayLeftMenu = (isset($collections_misc_collmetadataMenu)?$collections_misc_collmetadataMenu:true);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	echo '<div class="navpath">';
 	if(isset($collections_misc_collmetadataCrumbs)){
 		if($collections_misc_collmetadataCrumbs){
@@ -602,7 +598,7 @@ $collData = $collManager->getCollectionData(true);
 								</td>
 							</tr>
 							<?php 
-							if($isAdmin){ 
+							if($IS_ADMIN){ 
 								?>
 								<tr>
 									<td>
@@ -817,7 +813,7 @@ $collData = $collManager->getCollectionData(true);
 		?>
 	</div>
 	<?php
-		include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

@@ -1,5 +1,6 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once('ProfileManager.php');
 
 class ChecklistAdmin {
 
@@ -48,7 +49,59 @@ class ChecklistAdmin {
 		}
 		return $retArr;
 	}
+
+	public function createChecklist($postArr){
+		$sqlInsert = "";
+		$sqlValues = "";
+		$defaultViewArr = Array();
+		$defaultViewArr["ddetails"] = array_key_exists("ddetails",$postArr)?1:0;
+		$defaultViewArr["dcommon"] = array_key_exists("dcommon",$postArr)?1:0;
+		$defaultViewArr["dimages"] = array_key_exists("dimages",$postArr)?1:0;
+		$defaultViewArr["dvouchers"] = array_key_exists("dvouchers",$postArr)?1:0;
+		$defaultViewArr["dauthors"] = array_key_exists("dauthors",$postArr)?1:0;
+		$defaultViewArr["dalpha"] = array_key_exists("dalpha",$postArr)?1:0;
+		$defaultViewArr["activatekey"] = array_key_exists("activatekey",$postArr)?1:0;
+		if($defaultViewArr) $postArr["defaultsettings"] = json_encode($defaultViewArr);
+		
+		$fieldArr = array('name'=>'s','authors'=>'s','type'=>'s','locality'=>'s','publication'=>'s','abstract'=>'s','notes'=>'s','latcentroid'=>'n',
+				'longcentroid'=>'n','pointradiusmeters'=>'n','footprintWKT'=>'s','parentclid'=>'n','access'=>'s','uid'=>'n','defaultsettings'=>'s');
+		
+		foreach($fieldArr as $fieldName => $fieldType){
+			$sqlInsert .= ','.$fieldName;
+			$v = $this->cleanInStr($postArr[$fieldName]);
+			if($fieldName != 'abstract') $v = strip_tags($v, '<i><u><b><a>');
+			if($v){
+				if($fieldType == 's'){
+					$sqlValues .= ',"'.$v.'"';
+				}
+				else{
+					if(is_numeric($v)){
+						$sqlValues .= ','.$v;
+					}
+					else{
+						$sqlValues .= ',NULL';
+					}
+				}
+			}
+			else{
+				$sqlValues .= ',NULL';
+			}
+		}
+		$sql = "INSERT INTO fmchecklists (".substr($sqlInsert,1).") VALUES (".substr($sqlValues,1).")";
 	
+		$newClId = 0;
+		if($this->conn->query($sql)){
+			$newClId = $this->conn->insert_id;
+			//Set permissions to allow creater to be an editor
+			$this->conn->query('INSERT INTO userroles (uid, role, tablename, tablepk) VALUES('.$GLOBALS["SYMB_UID"].',"ClAdmin","fmchecklists",'.$newClId.') ');
+			//$this->conn->query("INSERT INTO userpermissions (uid, pname) VALUES(".$GLOBALS["symbUid"].",'ClAdmin-".$newClId."') ");
+			$newPManager = new ProfileManager();
+			$newPManager->setUserName($GLOBALS['USERNAME']);
+			$newPManager->authenticate();
+		}
+		return $newClId;
+	}
+
 	public function editMetaData($postArr){
 		$statusStr = '';
 		$setSql = "";
@@ -60,7 +113,7 @@ class ChecklistAdmin {
 		$defaultViewArr["dauthors"] = array_key_exists("dauthors",$postArr)?1:0;
 		$defaultViewArr["dalpha"] = array_key_exists("dalpha",$postArr)?1:0;
 		$defaultViewArr["activatekey"] = array_key_exists("activatekey",$postArr)?1:0;
-		$postArr["defaultsettings"] = json_encode($defaultViewArr);
+		if($defaultViewArr) $postArr["defaultsettings"] = json_encode($defaultViewArr);
 		
 		$fieldArr = array('name'=>'s','authors'=>'s','type'=>'s','locality'=>'s','publication'=>'s','abstract'=>'s','notes'=>'s','latcentroid'=>'n',
 			'longcentroid'=>'n','pointradiusmeters'=>'n','footprintWKT'=>'s','parentclid'=>'n','access'=>'s','defaultsettings'=>'s');
@@ -107,7 +160,6 @@ class ChecklistAdmin {
 	}
 
 	public function deleteChecklist($delClid){
-		global $symbUid;
 		$statusStr = true;
 		$sql1 = 'SELECT uid FROM userroles '.
 			'WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = "'.$delClid.'") AND uid <> '.$GLOBALS['SYMB_UID'];
@@ -342,7 +394,25 @@ class ChecklistAdmin {
 	public function getClName(){
 		return $this->clName;
 	}
-	
+
+	public function getReferenceChecklists(){
+		$retArr = array();
+		$sql = 'SELECT clid, name FROM fmchecklists WHERE access = "public" ';
+		$clArr = array();
+		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin'])){
+			$clidStr = implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']);
+			if($clidStr) $sql .= 'OR clid IN('.$clidStr.') ';
+		}
+		$sql .= 'ORDER BY name';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$retArr[$row->clid] = $row->name;
+		}
+		$rs->close();
+		return $retArr;
+	}
+
 	//Get list data
 	public function getPoints($tid){
 		$retArr = array();
@@ -435,6 +505,49 @@ class ChecklistAdmin {
 			}
 		}
 		return $retArr;
+	}
+
+	public function getManagementLists($uid){
+		$returnArr = Array();
+		if(is_numeric($uid)){
+			//Get project and checklist IDs from userpermissions
+			$clStr = '';
+			$projStr = '';
+			$sql = 'SELECT role,tablepk FROM userroles '.
+				'WHERE (uid = '.$uid.') AND (role = "ClAdmin" OR role = "ProjAdmin") ';
+			//$sql = 'SELECT pname FROM userpermissions '.
+			//	'WHERE (uid = '.$uid.') AND (pname LIKE "ClAdmin-%" OR pname LIKE "ProjAdmin-%") ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				if($r->role == 'ClAdmin') $clStr .= ','.$r->tablepk;
+				if($r->role == 'ProjAdmin') $projStr .= ','.$r->tablepk;
+			}
+			$rs->free();
+			if($clStr){
+				//Get checklists
+				$sql = 'SELECT clid, name FROM fmchecklists '.
+						'WHERE (clid IN('.substr($clStr,1).')) '.
+						'ORDER BY name';
+				$rs = $this->conn->query($sql);
+				while($row = $rs->fetch_object()){
+					$returnArr['cl'][$row->clid] = $row->name;
+				}
+				$rs->free();
+			}
+			if($projStr){
+				//Get projects
+				$sql = 'SELECT pid, projname '.
+						'FROM fmprojects '.
+						'WHERE (pid IN('.substr($projStr,1).')) '.
+						'ORDER BY projname';
+				$rs = $this->conn->query($sql);
+				while($row = $rs->fetch_object()){
+					$returnArr['proj'][$row->pid] = $row->projname;
+				}
+				$rs->free();
+			}
+		}
+		return $returnArr;
 	}
 
 	private function cleanOutStr($str){

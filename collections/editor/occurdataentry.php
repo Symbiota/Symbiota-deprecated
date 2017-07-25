@@ -254,33 +254,33 @@ if($SYMB_UID){
 										<input type="text" name="verbatimelevation" tabindex="62" maxlength="255" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="verbatimElevationChanged(this.form);" title="" />
 									</div>
 								</div>
-								<div id="locExtraToggleDiv" onclick="toggle('locExtraDiv');">
+								<div id="georefExtraToggleDiv" onclick="toggle('georefExtraDiv');">
 									<img src="../../images/editplus.png" style="width:15px;" />
 								</div>
 							</div>
 							<?php
 							include_once('includes/geotools.php');
-							$locExtraDiv = 'display:';
+							$georefExtraDiv = 'display:';
 							if(array_key_exists("georeferencedby",$occArr) && $occArr["georeferencedby"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("footprintwkt",$occArr) && $occArr["footprintwkt"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("georeferenceprotocol",$occArr) && $occArr["georeferenceprotocol"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("georeferencesources",$occArr) && $occArr["georeferencesources"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("georeferenceverificationstatus",$occArr) && $occArr["georeferenceverificationstatus"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("georeferenceremarks",$occArr) && $occArr["georeferenceremarks"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							?>
-							<div id="locExtraDiv" style="<?php echo $locExtraDiv; ?>;">
+							<div id="georefExtraDiv" style="<?php echo $georefExtraDiv; ?>;">
 								<div style="clear:both;">
 									<div id="georeferencedByDiv">
 										<?php echo (defined('GEOREFERENCEDBY')?GEOREFERENCEDBY:'Georeferenced By'); ?>

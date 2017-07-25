@@ -47,6 +47,7 @@ class ImageLocalProcessor {
 	private $logFH;
 	private $mdOutputFH;
 	private $logPath;
+	private $errorMessage;
 	
 	private $sourceGdImg;
 	private $sourceImagickImg;
@@ -67,10 +68,6 @@ class ImageLocalProcessor {
 	function __construct(){
 		ini_set('memory_limit','1024M');
 		ini_set('auto_detect_line_endings', true);
-		if($this->dbMetadata){
-			//Set collection
-			$this->conn = MySQLiConnectionFactory::getCon('write');
-		}
 		//Use deaults located within symbini, if they are available
 		//Will be replaced by values within configuration file, if they are set 
 		if(isset($GLOBALS['imgWebWidth']) && $GLOBALS['imgWebWidth']) $this->webPixWidth = $GLOBALS['imgWebWidth'];
@@ -85,7 +82,7 @@ class ImageLocalProcessor {
 			if(!($this->conn === false)) $this->conn->close();
 		}
 		else{
-			if($this->mdOutputFH) fclose($this->mdOutputFH);
+			
 		}
 		
 		//Close log file
@@ -109,6 +106,19 @@ class ImageLocalProcessor {
 			}
 			else{
 				echo 'ERROR creating Log file; path not found: '.$this->logPath."\n";
+			}
+		}
+		if($this->dbMetadata){
+			//Set collection
+			if(class_exists('MySQLiConnectionFactory')){
+				$this->conn = MySQLiConnectionFactory::getCon('write');
+			}
+			elseif(class_exists('ImageBatchConnectionFactory')){
+				$this->conn = ImageBatchConnectionFactory::getCon('write');
+			}
+			if(!$this->conn){
+				$this->logOrEcho("Image upload aborted: Unable to establish connection to ".$collName." database");
+				exit("ABORT: Image upload aborted: Unable to establish connection to ".$collName." database");
 			}
 		}
 	}
@@ -179,14 +189,17 @@ class ImageLocalProcessor {
 		$projProcessed = array();
 		foreach($this->collArr as $collid => $cArr){
 			$this->activeCollid = $collid;
-			$collStr = str_replace(' ','',$cArr['instcode'].($cArr['collcode']?'_'.$cArr['collcode']:''));
+			$collStr = '';
+			if(isset($cArr['instcode'])) $collStr = str_replace(' ','',$cArr['instcode'].($cArr['collcode']?'_'.$cArr['collcode']:''));
+			if(!$collStr) $collStr = str_replace('/', '_', $cArr['sourcePathFrag']);
 
+			$mdFileName = '';
 			if(!$this->dbMetadata){
 				//Create output file
-				$mdFileName = $this->logPath.$collStr.'_urldata_'.time().'.csv';
+				$mdFileName = $this->logPath.$collStr.'_imagedata_'.date('Y-m-d').'_'.time().'.csv';
 				$this->mdOutputFH = fopen($mdFileName, 'w');
 				//Establish the header
-				fwrite($this->mdOutputFH, '"collid","dbpk","url","thumbnailurl","originalurl"'."\n");
+				fwrite($this->mdOutputFH, '"collid","catalogNumber","url","thumbnailurl","originalurl"'."\n");
 				if($this->mdOutputFH){
 					$this->logOrEcho("Image Metadata written out to CSV file: '".$mdFileName."' (same folder as script)");
 				}
@@ -244,7 +257,16 @@ class ImageLocalProcessor {
 				$this->processHtml($sourcePathFrag);
 			}
 			else{
-				$this->processFolder($sourcePathFrag);
+				if(!$this->processFolder($sourcePathFrag)){
+					if($this->errorMessage == 'abort'){
+						$this->errorMessage = '';
+						continue;
+					}
+				}
+			}
+			if(!$this->dbMetadata){
+				if($this->mdOutputFH) fclose($this->mdOutputFH);
+				if(array_key_exists('email', $cArr) && $cArr['email']) $this->sendMetadata($cArr['email'],$mdFileName);
 			}
 			$this->logOrEcho('Done uploading '.$sourcePathFrag.' ('.date('Y-m-d h:i:s A').')');
 		}
@@ -274,6 +296,9 @@ class ImageLocalProcessor {
 								if($fileExt == ".jpg"){
 									if($this->processImageFile($fileName,$pathFrag)){
 										if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+									}
+									else{
+										if($this->errorMessage == 'abort') return false;
 									}
 								}
 								elseif($fileExt == ".tif"){
@@ -350,6 +375,9 @@ class ImageLocalProcessor {
 								if($this->processImageFile($fileName,$pathFrag)){
 									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
 								}
+								else{
+									if($this->errorMessage == 'abort') return false;
+								}
 							}
 							elseif($fileExt == "tif"){
 								$this->logOrEcho("ERROR: File skipped, TIFFs image files are not a supported: ".$fileName,1);
@@ -406,31 +434,31 @@ class ImageLocalProcessor {
 					$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
 					$lapischema = $this->serverRoot . "/collections/admin/schemas/lapi_schema_v2.xsd";
 					$xml->setParserProperty(XMLReader::VALIDATE, true);
-					if (file_exists($lapischema)) { 
+					if (file_exists($lapischema)) {
 						$isLapi = $xml->setSchema($lapischema);
-					} 
-					else { 
+					}
+					else {
 						$this->logOrEcho("ERROR: Can't find $lapischema",1);
 					}
 					// $this->logOrEcho($fileName." valid lapi xml:" . $xml->isValid() . " [" . $isLapi .  "]");
 					if ($xml->isValid() && $isLapi) {
 						// File complies with the Aluka/LAPI/GPI schema
 						$this->logOrEcho('Processing GPI batch file: '.$pathFrag.$fileName);
-						if (class_exists('GPIProcessor')) { 
+						if (class_exists('GPIProcessor')) {
 							$processor = new GPIProcessor();
 							$result = $processor->process($this->sourcePathBase.$pathFrag.$fileName);
 							$foundSchema = $result->couldparse;
 							if (!$foundSchema || $result->failurecount>0) {
 								$this->logOrEcho("ERROR: Errors processing $fileName: $result->errors.",1);
 							}
-						} 
-						else { 
+						}
+						else {
 							// fail gracefully if this instalation isn't configured with this parser.
 							$this->logOrEcho("ERROR: SpecProcessorGPI.php not available.",1);
 						}
 					}
 				}
-				elseif ($xml->name=="rdf:RDF") { 
+				elseif ($xml->name=="rdf:RDF") {
 					// $this->logOrEcho($fileName." has oa:" . $xml->lookupNamespace("oa"));
 					// $this->logOrEcho($fileName." has oad:" . $xml->lookupNamespace("oad"));
 					// $this->logOrEcho($fileName." has dwcFP:" . $xml->lookupNamespace("dwcFP"));
@@ -442,7 +470,7 @@ class ImageLocalProcessor {
 					if ($hasAnnotation && $hasDataAnnotation && $hasdwcFP) {
 						// File is likely an annotation containing DarwinCore data.
 						$this->logOrEcho('Processing RDF/XML annotation file: '.$pathFrag.$fileName);
-						if (class_exists('NEVPProcessor')) { 
+						if (class_exists('NEVPProcessor')) {
 							$processor = new NEVPProcessor();
 							$result = $processor->process($this->sourcePathBase.$pathFrag.$fileName);
 							$foundSchema = $result->couldparse;
@@ -450,14 +478,14 @@ class ImageLocalProcessor {
 								$this->logOrEcho("ERROR: Errors processing $fileName: $result->errors.",1);
 							}
 						}
-						else { 
+						else {
 							// fail gracefully if this instalation isn't configured with this parser.
 							$this->logOrEcho("ERROR: SpecProcessorNEVP.php not available.",1);
 						}
 					}
 				}
 				$xml->close();
-				if ($foundSchema>0) { 
+				if ($foundSchema>0) {
 					$this->logOrEcho("Proccessed $pathFrag$fileName, records: $result->recordcount, success: $result->successcount, failures: $result->failurecount, inserts: $result->insertcount, updates: $result->updatecount.");
 					if ($result->imagefailurecount>0) {
 						$this->logOrEcho("ERROR: not moving (".$fileName."), image failure count " . $result->imagefailurecount . " greater than zero.",1);
@@ -472,19 +500,19 @@ class ImageLocalProcessor {
 							if(!rename($oldFile,$this->targetPathBase.$this->targetPathFrag.'orig_xml/'.$newFileName)){
 								$this->logOrEcho("ERROR: unable to move (".$oldFile." =>".$newFileName.") ",1);
 							}
-						 } 
-						 else {
+						}
+						else {
 							if(!unlink($oldFile)){
 								$this->logOrEcho("ERROR: unable to delete file (".$oldFile.") ",1);
 							}
 						}
 					}
-				} 
-				else { 
+				}
+				else {
 					$this->logOrEcho("ERROR: Unable to match ".$pathFrag.$fileName." to a known schema.",1);
 				}
-			} 
-			else { 
+			}
+			else {
 				$this->logOrEcho("ERROR: XMLReader couldn't read ".$pathFrag.$fileName,1);
 			}
 		}
@@ -500,6 +528,7 @@ class ImageLocalProcessor {
 			if($this->dbMetadata){
 				$occId = $this->getOccId($specPk);
 			}
+			$fileName = rawurlencode($fileName);
 			$fileNameExt = '.jpg';
 			$fileNameBase = $fileName;
 			if($p = strrpos($fileName,'.')){
@@ -760,7 +789,7 @@ class ImageLocalProcessor {
 					$this->logOrEcho("Image processed successfully (".date('Y-m-d h:i:s A').")!",1);
 				}
 				else{
-					$this->logOrEcho("File skipped (".$sourcePathFrag.$fileName."), unable to obtain dimentions of original image");
+					$this->logOrEcho("File skipped (".$sourcePath.$fileName."), unable to obtain dimensions of original image",1);
 					return false;
 				}
 			}
@@ -857,12 +886,14 @@ class ImageLocalProcessor {
 		if(isset($this->collArr[$this->activeCollid]['pmterm'])){
 			$pmTerm = $this->collArr[$this->activeCollid]['pmterm'];
 			if(substr($pmTerm,0,1) != '/' || stripos(substr($pmTerm,-3),'/') === false){
-				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing forward slashes delimiting the term: ".$pmTerm);
-				exit;
+				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing forward slashes delimiting the term: ".$pmTerm,1);
+				$this->errorMessage = 'abort';
+				return false;
 			}
 			if(!strpos($pmTerm,'(') || !strpos($pmTerm,')')){
-				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing capture term: ".$pmTerm);
-				exit;
+				$this->logOrEcho("PROCESS ABORTED: Regular Expression term illegal due to missing capture term: ".$pmTerm,1);
+				$this->errorMessage = 'abort';
+				return false;
 			}
 			if(preg_match($pmTerm,$str,$matchArr)){
 				if(array_key_exists(1,$matchArr) && $matchArr[1]){
@@ -1440,6 +1471,7 @@ class ImageLocalProcessor {
 	}
 	
 	private function updateCollectionStats(){
+exit;
 		if($this->dbMetadata){
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
 			$occurMain = new OccurrenceMaintenance($this->conn);
@@ -1479,6 +1511,46 @@ class ImageLocalProcessor {
 			$uuidManager->__destruct();
 		}
 		$this->logOrEcho("Stats update completed");
+	}
+
+	private function sendMetadata($email,$mdFileName){
+		if($email && $mdFileName){
+			$subject = 'Images processed on '.date('Y-m-d');
+
+			$separator = md5(time());
+			$eol = "\r\n";
+
+			$headers = 'MIME-Version: 1.0 '.$eol.
+				'Content-Type: multipart/mixed; boundary="'.$separator.'"'.$eol;
+				'To: '.$email.$eol.
+				'From: Admin <seinetAdmin@asu.edu> '.$eol.
+				'Content-Transfer-Encoding: 8bit'.$eol.
+				'This is a MIME encoded message.'.$eol;
+
+			$url = 'http://swbiodiversity.org/seinet/collections/misc/specprocessor/index.php?tabindex=1&collid='.$this->activeCollid;
+			$body = "--".$separator.$eol.
+				'Content-Type: text/html; charset=iso-8859-1'.$eol.
+				'Content-Transfer-Encoding: 8bit'.$eol.
+				'Images in the attached file have been processed and are ready to be uploaded into your collection. '.
+				'This can be done using the image loading tools located in the Processing Tools (see link below).'.
+				'<a href="'.$url.'">'.$url.'</a>'.
+				'<br/>If you have problems with the new password, contact the System Administrator ';
+
+			//Add attachment 
+			$fname = substr(strrchr($mdFileName, "/"), 1);
+			$data = file_get_contents($mdFileName);
+			$body .= "--" . $separator . $eol.
+				'Content-Type: application/octet-stream; name="'.$fname.'"'.$eol.
+				'Content-Transfer-Encoding: base64'.$eol.
+				'Content-Disposition: attachment'.$eol.
+				chunk_split( base64_encode($data)).$eol.
+				'--'.$separator.'--';
+
+			if(!mail($email,$subject,$body,$headers)){
+				echo 'Mail send ... ERROR!';
+				print_r( error_get_last() );
+			}
+		}
 	}
 
 	//Set and Get functions

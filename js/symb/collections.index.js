@@ -1,16 +1,7 @@
 $('html').hide();
 $(document).ready(function() {
-	$('html').show();
-});
-
-
-$(document).ready(function() {
-	if(!navigator.cookieEnabled){
-		alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
-	}
-
-	$("#tabs").tabs();
-
+    $("#tabs").tabs();
+    $('html').show();
 	//document.collections.onkeydown = checkKey;
 });
 

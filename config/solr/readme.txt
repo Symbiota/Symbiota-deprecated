@@ -2,7 +2,7 @@ The following is a walk-through in configuring Apache SOLR to work with your Sym
 SOLR support in Symbiota was developed using Apache SOLR 6.2.1. Additional configurations may be required
 if you are using an older version of SOLR.
 
-Steps for configuring Apache SOLR:
+Steps for installing and configuring Apache SOLR:
 
 1) Download Apache SOLR from http://lucene.apache.org/solr/ and install on your server.
 

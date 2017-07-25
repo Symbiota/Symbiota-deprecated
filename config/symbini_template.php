@@ -3,6 +3,7 @@ $DEFAULT_LANG = 'en';			//Default language
 $DEFAULT_PROJ_ID = 1;
 $DEFAULTCATID = 1;
 $DEFAULT_TITLE = '';
+$TID_FOCUS = '';
 $ADMIN_EMAIL = '';
 $CHARSET = '';					//ISO-8859-1 or UTF-8
 $PORTAL_GUID = '';				//Typically a UUID
@@ -25,7 +26,6 @@ $IMG_LG_WIDTH = 3200;
 $IMG_FILE_SIZE_LIMIT = 300000;		//Files above this size limit and still within pixel width limits will still be resaved w/ some compression  
 $IPLANT_IMAGE_IMPORT_PATH = '';		//Path used to map/import images uploaded to the iPlant image server (e.g. /home/shared/project-name/--INSTITUTION_CODE--/, the --INSTITUTION_CODE-- text will be replaced with collection's institution code) 
 
-//Specimen Label and Batch Image Processor variables
 //$USE_IMAGE_MAGICK = 0;		//1 = ImageMagick resize images, given that it's installed (faster, less memory intensive)
 $TESSERACT_PATH = ''; 			//Needed for OCR function in the occurrence editor page
 $NLP_LBCC_ACTIVATED = 0;
@@ -51,18 +51,20 @@ $GBIF_USERNAME = '';                //GBIF username which portal will use to pub
 $GBIF_PASSWORD = '';                //GBIF password which portal will use to publish
 $GBIF_ORG_KEY = '';                 //GBIF organization key for organization which is hosting this portal
 
-$FP_ENABLED = 0;				//Enable Filtered-Push modules
+$FP_ENABLED = 0;					//Enable Filtered-Push modules
 
 //Misc variables
 $GOOGLE_MAP_KEY = '';				//Needed for Google Map; get from Google 
 $MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
+$SPATIAL_INITIAL_CENTER = '';	    //Initial map center for Spatial Module. Default: '[-110.90713, 32.21976]'
+$SPATIAL_INITIAL_ZOOM = '';			//Initial zoom for Spatial Module. Default: 7
 $ACTIVATE_GEOLOCATION = false;			//Activates HTML5 geolocation services in Map Search
 $GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
 $RECAPTCHA_PUBLIC_KEY = '';			//Now called site key
 $RECAPTCHA_PRIVATE_KEY = '';		//Now called secret key
 $EOL_KEY = '';						//Not required, but good to add a key if you plan to do a lot of EOL mapping
 $QUICK_HOST_ENTRY_IS_ACTIVE = 0;   // Allows quick entry for host taxa in occurrence editor
-$PORTAL_TAXA_DESC = '';		//Preferred taxa descriptions for the portal.
+$PORTAL_TAXA_DESC = '';				//Preferred taxa descriptions for the portal.
 $GLOSSARY_EXPORT_BANNER = '';		//Banner image for glossary exports. Place in images/layout folder.
 $DYN_CHECKLIST_RADIUS = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $DISPLAY_COMMON_NAMES = 1;			//Display common names in species profile page and checklists displays

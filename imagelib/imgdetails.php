@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ImageDetailManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ImageDetailManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
  
 $imgId = $_REQUEST["imgid"];
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
@@ -9,9 +9,10 @@ $eMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0;
 
 $imgManager = new ImageDetailManager($imgId,($action?'write':'readonly'));
 
+$imgArr = $imgManager->getImageMetadata($imgId);
 $isEditor = false;
-if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
-	$isEditor = true;
+if($IS_ADMIN || $imgArr["username"] == $paramsArr['un'] || ($imgArr["photographeruid"] && $imgArr["photographeruid"] == $SYMB_UID)){
+		$isEditor = true;
 }
  
 $status = "";
@@ -32,9 +33,9 @@ if($isEditor){
 			header( 'Location: ../taxa/admin/tpeditor.php?tid='.$status.'&tabindex=1' );
 		}
 	}
+	$imgArr = $imgManager->getImageMetadata($imgId);
 }
 
-$imgArr = $imgManager->getImageMetadata($imgId);
 if($imgArr){
 	$imgUrl = $imgArr["url"];
 	$origUrl = $imgArr["originalurl"];
@@ -56,21 +57,21 @@ if($imgArr){
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<?php
 	if($imgArr){
 		?>
 		<meta property="og:title" content="<?php echo $imgArr["sciname"]; ?>"/>
-		<meta property="og:site_name" content="<?php echo $defaultTitle; ?>"/>
+		<meta property="og:site_name" content="<?php echo $DEFAULT_TITLE; ?>"/>
 		<meta property="og:image" content="<?php echo $metaUrl; ?>"/>
 		<meta name="twitter:card" content="photo" data-dynamic="true" />
 		<meta name="twitter:title" content="<?php echo $imgArr["sciname"]; ?>" />
 		<meta name="twitter:image" content="<?php echo $metaUrl; ?>" />
-		<meta name="twitter:url" content="<?php echo 'http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/imagelib/imgdetails.php?imgid='.$imgId; ?>" />
+		<meta name="twitter:url" content="<?php echo 'http://'.$_SERVER['SERVER_NAME'].$CLIENT_ROOT.'/imagelib/imgdetails.php?imgid='.$imgId; ?>" />
 		<?php
 	}
 	?>
-	<title><?php echo $defaultTitle." Image Details: #".$imgId; ?></title>
+	<title><?php echo $DEFAULT_TITLE." Image Details: #".$imgId; ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
@@ -92,7 +93,7 @@ if($imgArr){
 	</script>
 	<?php
 	$displayLeftMenu = (isset($taxa_imgdetailsMenu)?$taxa_imgdetailsMenu:false);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($taxa_imgdetailsCrumbs)){
 		echo "<div class='navpath'>";
 		echo $taxa_imgdetailsCrumbs;
@@ -107,7 +108,7 @@ if($imgArr){
 			?>
 			<div style="width:100%;float:right;clear:both;margin-top:10px;">
 				<div style="float:right;">
-					<a class="twitter-share-button" data-text="<?php echo $imgArr["sciname"]; ?>" href="https://twitter.com/share" data-url="<?php echo $_SERVER['HTTP_HOST'].$clientRoot.'/imagelib/imgdetails.php?imgid='.$imgId; ?>">Tweet</a>
+					<a class="twitter-share-button" data-text="<?php echo $imgArr["sciname"]; ?>" href="https://twitter.com/share" data-url="<?php echo $_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/imagelib/imgdetails.php?imgid='.$imgId; ?>">Tweet</a>
 					<script>
 						window.twttr=(function(d,s,id){
 							var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};
@@ -254,26 +255,19 @@ if($imgArr){
 									</div>
 							    </fieldset>
 							</form>
-							
-							<?php 
-							if($isAdmin || $imgArr["username"] == $paramsArr['un'] || (!$imgArr["photographeruid"] && $symbUid == $imgArr["photographeruid"])){
-								?>
-								<form name="deleteform" action="imgdetails.php" method="post" target="_self" onsubmit="return window.confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.');">
-									<fieldset style="margin:5px 0px 5px 5px;">
-								    	<legend><b>Authorized to Remove this Image</b></legend>
-										<input name="imgid" type="hidden" value="<?php echo $imgId; ?>" />
-										<div style="margin-top:2px;">
-											<input type="submit" name="submitaction" id="submit" value="Delete Image"/>
-										</div>
-										<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
-										<div style="margin-left:20px;color:red;">
-											(Note: if box is checked, image will be permanently deleted from server, as well as from database)
-										</div>
-							    	</fieldset>
-							    </form>
-						    	<?php 
-							}
-							?>
+							<form name="deleteform" action="imgdetails.php" method="post" target="_self" onsubmit="return window.confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.');">
+								<fieldset style="margin:5px 0px 5px 5px;">
+							    	<legend><b>Authorized to Remove this Image</b></legend>
+									<input name="imgid" type="hidden" value="<?php echo $imgId; ?>" />
+									<div style="margin-top:2px;">
+										<input type="submit" name="submitaction" id="submit" value="Delete Image"/>
+									</div>
+									<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
+									<div style="margin-left:20px;color:red;">
+										(Note: if box is checked, image will be permanently deleted from server, as well as from database)
+									</div>
+						    	</fieldset>
+						    </form>
 						</div>
 					</td>
 					</tr>
@@ -359,7 +353,7 @@ if($imgArr){
 							Do you see an error or have a comment about this image? <br/>If so, send email to: 
 							<?php 
 							$emailSubject = $defaultTitle.' Image #'.$imgId;
-							$emailBody = 'Image being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/imagelib/imgdetails.php?imgid='.$imgId;
+							$emailBody = 'Image being referenced: http://'.$_SERVER['SERVER_NAME'].$CLIENT_ROOT.'/imagelib/imgdetails.php?imgid='.$imgId;
 							$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
 							?>
 							<a href="mailto:<?php echo $adminEmail.'?'.$emailRef; ?>">
@@ -377,10 +371,8 @@ if($imgArr){
 		} 
 		?>
 	</div>
-
 <?php 
-include($serverRoot.'/footer.php');
-
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>

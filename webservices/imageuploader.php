@@ -44,7 +44,7 @@ $isEditor = false;
 $size = Array();
 
 if($_FILES){
-    @$size = getimagesize($_FILES['imgfile']['tmp_name']);
+	@$size = getimagesize(str_replace(' ', '%20', $_FILES['imgfile']['tmp_name']));
 }
 
 if($size){

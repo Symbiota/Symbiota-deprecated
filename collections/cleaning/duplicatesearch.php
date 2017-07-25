@@ -33,13 +33,13 @@ if($collMap['colltype'] == 'General Observations'){
 	$cleanManager->setObsUid($SYMB_UID);
 }
 
-if($action == 'listdupscatalog') $limit = 500;
-
 $dupArr = array();
 if($action == 'listdupscatalog'){
+	$limit = 1000;
 	$dupArr = $cleanManager->getDuplicateCatalogNumber('cat',$start,$limit);
 }
 if($action == 'listdupsothercatalog'){
+	$limit = 1000;
 	$dupArr = $cleanManager->getDuplicateCatalogNumber('other',$start,$limit);
 }
 elseif($action == 'listdupsrecordedby'){

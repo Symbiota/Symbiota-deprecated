@@ -28,18 +28,23 @@ class SpecUploadFile extends SpecUploadBase{
 					$fullPath = $this->uploadTargetPath.$this->ulFileName;
 					//If a zip file, unpackage and assume that first and/or only file is the occurrrence file
 					if(substr($fullPath,-4) == ".zip"){
+						$this->ulFileName = '';
 						$zipFilePath = $fullPath;
 						$zip = new ZipArchive;
 						$res = $zip->open($fullPath);
 						if($res === TRUE) {
 							for($i = 0; $i < $zip->numFiles; $i++) {
-								$this->ulFileName = $zip->getNameIndex($i);
-								if(strtolower(substr($this->ulFileName,-4)) == '.csv'){
-									if($this->uploadType != $this->NFNUPLOAD || stripos($this->ulFileName,'.reconcile.')){
-										$zip->extractTo($this->uploadTargetPath,$zip->getNameIndex($i));
-										$zip->close();
-										unlink($zipFilePath);
-										break;
+								$fileName = $zip->getNameIndex($i);
+								if(substr($fileName,0,2) != '._'){
+									$ext = strtolower(substr(strrchr($fileName, '.'), 1));
+									if($ext == 'csv' || $ext == 'txt'){
+										if($this->uploadType != $this->NFNUPLOAD || stripos($fileName,'.reconcile.')){
+											$this->ulFileName = $fileName;
+											$zip->extractTo($this->uploadTargetPath,$fileName);
+											$zip->close();
+											unlink($zipFilePath);
+											break;
+										}
 									}
 								}
 							}
