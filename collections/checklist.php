@@ -18,10 +18,10 @@ $taxaCnt = 0;
 $solrManager = new SOLRManager();
 $checklistManager = new OccurrenceChecklistManager();
 
-if($stArrCollJson && $stArrSearchJson){
+if($stArrCollJson || $stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
-	$collStArr = json_decode($stArrCollJson, true);
-	$searchStArr = json_decode($stArrSearchJson, true);
+	$collStArr = ($stArrCollJson?json_decode($stArrCollJson, true):Array());
+	$searchStArr = ($stArrSearchJson?json_decode($stArrSearchJson, true):Array());
 	$stArr = array_merge($searchStArr,$collStArr);
 
     if($SOLR_MODE){
@@ -45,7 +45,7 @@ if($stArrCollJson && $stArrSearchJson){
 }
 ?>
 <div>
-	<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_TITLE']; ?>'>
+    <div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_TITLE']; ?>'>
 		<a href='download/index.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
 			<img width="15px" src="../images/dl.png" />
 		</a>
