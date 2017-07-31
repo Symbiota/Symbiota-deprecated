@@ -131,17 +131,13 @@ function updateRadius(){
     document.getElementById("radius").value = radiusInMiles;
 }
 
-function checkHarvestparamsForm(frm){
+function checkHarvestParamsForm(frm){
     //make sure they have filled out at least one field.
     if((frm.taxa.value == '') && (frm.country.value == '') && (frm.state.value == '') && (frm.county.value == '') &&
         (frm.locality.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') &&
         (frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate.value == '')){
         alert("Please fill in at least one search parameter!");
         return false;
-    }
-    
-    if(frm.db.value == "" && sessionStorage.jsonstarr){
-    	frm.db.value = sessionStorage.jsonstarr;
     }
 
     if(frm.upperlat.value != '' || frm.bottomlat.value != '' || frm.leftlong.value != '' || frm.rightlong.value != ''){
@@ -182,49 +178,65 @@ function checkHarvestparamsForm(frm){
 }
 
 function setHarvestParamsForm(){
-    var stArr = JSON.parse(starrJson);
-    if(!stArr['usethes']){document.harvestparams.thes.checked = false;}
-    if(stArr['taxontype']){document.harvestparams.type.value = stArr['taxontype'];}
-    if(stArr['taxa']){document.harvestparams.taxa.value = stArr['taxa'];}
-    if(stArr['country']){
-    	countryStr = stArr['country'];
-    	countryArr = countryStr.split(";");
-    	if(countryArr.indexOf('USA') > -1 || countryArr.indexOf('usa') > -1) countryStr = countryArr[0];
-    	//if(countryStr.indexOf('United States') > -1) countryStr = 'United States';
-    	document.harvestparams.country.value = countryStr;
-    }
-    if(stArr['state']){document.harvestparams.state.value = stArr['state'];}
-    if(stArr['county']){document.harvestparams.county.value = stArr['county'];}
-    if(stArr['local']){document.harvestparams.local.value = stArr['local'];}
-    if(stArr['elevlow']){document.harvestparams.elevlow.value = stArr['elevlow'];}
-    if(stArr['elevhigh']){document.harvestparams.elevhigh.value = stArr['elevhigh'];}
-    if(stArr['llbound']){
-        var coordArr = stArr['llbound'].split(';');
-        document.harvestparams.upperlat.value = coordArr[0];
-        document.harvestparams.bottomlat.value = coordArr[1];
-        document.harvestparams.leftlong.value = coordArr[2];
-        document.harvestparams.rightlong.value = coordArr[3];
-    }
-    if(stArr['llpoint']){
-        var coordArr = stArr['llpoint'].split(';');
-        document.harvestparams.pointlat.value = coordArr[0];
-        document.harvestparams.pointlong.value = coordArr[1];
-        document.harvestparams.radiustemp.value = coordArr[2];
-        document.harvestparams.radius.value = coordArr[2]*0.6214;
-    }
-    if(stArr['collector']){document.harvestparams.collector.value = stArr['collector'];}
-    if(stArr['collnum']){document.harvestparams.collnum.value = stArr['collnum'];}
-    if(stArr['eventdate1']){document.harvestparams.eventdate1.value = stArr['eventdate1'];}
-    if(stArr['eventdate2']){document.harvestparams.eventdate2.value = stArr['eventdate2'];}
-    if(stArr['catnum']){document.harvestparams.catnum.value = stArr['catnum'];}
-    //if(!stArr['othercatnum']){document.harvestparams.includeothercatnum.checked = false;}
-    if(stArr['typestatus']){document.harvestparams.typestatus.checked = true;}
-    if(stArr['hasimages']){document.harvestparams.hasimages.checked = true;}
-    if(stArr['hasgenetic']){document.harvestparams.hasgenetic.checked = true;}
-    if(sessionStorage.collsearchtableview){
-        document.getElementById('showtable').checked = true;
-        changeTableDisplay();
-    }
+	if(sessionStorage.querystr){
+	    var urlVar = parseUrlVariables(sessionStorage.querystr);
+	    var frm = document.harvestparams;
+	    if(!urlVar.usethes){frm.thes.checked = false;}
+	    if(urlVar.taxontype){frm.type.value = urlVar.taxontype;}
+	    if(urlVar.taxa){frm.taxa.value = urlVar.taxa;}
+	    if(urlVar.country){
+	    	countryStr = urlVar.country;
+	    	countryArr = countryStr.split(";");
+	    	if(countryArr.indexOf('USA') > -1 || countryArr.indexOf('usa') > -1) countryStr = countryArr[0];
+	    	//if(countryStr.indexOf('United States') > -1) countryStr = 'United States';
+	    	frm.country.value = countryStr;
+	    }
+	    if(urlVar.state){frm.state.value = urlVar.state;}
+	    if(urlVar.county){frm.county.value = urlVar.county;}
+	    if(urlVar.local){frm.local.value = urlVar.local;}
+	    if(urlVar.elevlow){frm.elevlow.value = urlVar.elevlow;}
+	    if(urlVar.elevhigh){frm.elevhigh.value = urlVar.elevhigh;}
+	    if(urlVar.llbound){
+	        var coordArr = urlVar.llbound.split(';');
+	        frm.upperlat.value = coordArr[0];
+	        frm.bottomlat.value = coordArr[1];
+	        frm.leftlong.value = coordArr[2];
+	        frm.rightlong.value = coordArr[3];
+	    }
+	    if(urlVar.llpoint){
+	        var coordArr = urlVar.llpoint.split(';');
+	        frm.pointlat.value = coordArr[0];
+	        frm.pointlong.value = coordArr[1];
+	        frm.radiustemp.value = coordArr[2];
+	        frm.radius.value = coordArr[2]*0.6214;
+	    }
+	    if(urlVar.collector){frm.collector.value = urlVar.collector;}
+	    if(urlVar.collnum){frm.collnum.value = urlVar.collnum;}
+	    if(urlVar.eventdate1){frm.eventdate1.value = urlVar.eventdate1;}
+	    if(urlVar.eventdate2){frm.eventdate2.value = urlVar.eventdate2;}
+	    if(urlVar.catnum){frm.catnum.value = urlVar.catnum;}
+	    //if(!urlVar.othercatnum){frm.includeothercatnum.checked = false;}
+	    if(urlVar.typestatus){frm.typestatus.checked = true;}
+	    if(urlVar.hasimages){frm.hasimages.checked = true;}
+	    if(urlVar.hasgenetic){frm.hasgenetic.checked = true;}
+	    if(sessionStorage.collsearchtableview){
+	        document.getElementById('showtable').checked = true;
+	        changeTableDisplay();
+	    }
+	}
+}
+
+function parseUrlVariables(varStr) {
+	var result = {};
+	varStr.split("&").forEach(function(part) {
+		if(!part) return;
+		part = part.split("+").join(" "); 
+		var eq = part.indexOf("=");
+		var key = eq>-1 ? part.substr(0,eq) : part;
+		var val = eq>-1 ? decodeURIComponent(part.substr(eq+1)) : "";
+		result[key] = val;
+	});
+	return result;
 }
 
 function resetHarvestParamsForm(f){
@@ -260,7 +272,7 @@ function resetHarvestParamsForm(f){
 	f.includeothercatnum.checked = true;
 	f.typestatus.checked = false;
 	f.hasimages.checked = false;
-    sessionStorage.removeItem('jsonstarr');
+    sessionStorage.removeItem('searchvar');
     document.getElementById('showtable').checked = false;
     changeTableDisplay();
 }

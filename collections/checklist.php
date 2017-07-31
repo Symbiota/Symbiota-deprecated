@@ -4,27 +4,18 @@ include_once($SERVER_ROOT.'/content/lang/collections/checklist.'.$LANG_TAG.'.php
 include_once($SERVER_ROOT.'/classes/OccurrenceChecklistManager.php');
 
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:'';
-$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
-$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
-echo 'starr: '.$stArrSearchJson;
-echo 'jsoncollstarr: '.$stArrCollJson;
 
 //Sanitation
 if(!is_numeric($taxonFilter)) $taxonFilter = 1;
 
 $checklistManager = new OccurrenceChecklistManager();
+$searchVar = $checklistManager->getSearchTermStr();
+$searchVarEncoded = urlencode($searchVar);
 
-if($stArrSearchJson){
-	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
-	$collStArr = json_decode($stArrCollJson, true);
-	$stArr= json_decode($stArrSearchJson, true);
-	if($collStArr) $stArr = array_merge($stArr,$collStArr);
-    $checklistManager->setSearchTermsArr($stArr);
-}
 ?>
 <div>
 	<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_TITLE']; ?>'>
-		<a href='download/index.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
+		<a href='download/index.php?searchvar=<?php echo $searchVarEncoded; ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
 			<img width="15px" src="../images/dl.png" />
 		</a>
 	</div>
@@ -32,7 +23,7 @@ if($stArrSearchJson){
 	if($KEY_MOD_IS_ACTIVE){
 	?>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_KEY']; ?>'>
-			<a href='checklistsymbiota.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>
+			<a href='checklistsymbiota.php?searchvar=<?php echo $searchVarEncoded; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>
 				<img width='15px' src='../images/key.png'/>
 			</a>
 		</div>
@@ -41,7 +32,7 @@ if($stArrSearchJson){
 	if($FLORA_MOD_IS_ACTIVE){
 	?>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_CHECKLIST_EXPLORER']; ?>'>
-			<a href='checklistsymbiota.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
+			<a href='checklistsymbiota.php?searchvar=<?php echo $searchVarEncoded; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
 				<img width='15px' src='../images/list.png'/>
 			</a>
 		</div>
@@ -51,19 +42,18 @@ if($stArrSearchJson){
 	<div style='margin:10px;float:right;'>
 		<form name="changetaxonomy" id="changetaxonomy" action="list.php" method="post">
 			<?php echo $LANG['TAXONOMIC_FILTER']; ?>:
-            <select id="taxonfilter" name="taxonfilter" onchange="this.form.submit();">
-                <option value="0"><?php echo $LANG['RAW_DATA'];?></option>
-                <?php
-                    $taxonAuthList = $checklistManager->getTaxonAuthorityList();
-                    foreach($taxonAuthList as $taCode => $taValue){
-                        echo "<option value='".$taCode."' ".($taCode == $taxonFilter?"SELECTED":"").">".$taValue."</option>";
-                    }
-                    ?>
-            </select>
-            <input type="hidden" name="tabindex" value="0" />
-            <input type="hidden" name="starr" value='<?php echo $stArrSearchJson; ?>' />
-            <input type="hidden" name="jsoncollstarr" value='<?php echo $stArrCollJson; ?>' />
-        </form>
+			<select id="taxonfilter" name="taxonfilter" onchange="this.form.submit();">
+				<option value="0"><?php echo $LANG['RAW_DATA'];?></option>
+				<?php
+					$taxonAuthList = $checklistManager->getTaxonAuthorityList();
+					foreach($taxonAuthList as $taCode => $taValue){
+						echo "<option value='".$taCode."' ".($taCode == $taxonFilter?"SELECTED":"").">".$taValue."</option>";
+					}
+					?>
+			</select>
+			<input name="tabindex" type="hidden" value="0" />
+			<input name="searchvar" type="hidden" value='<?php echo $searchVar; ?>' />
+		</form>
 	</div>
 	<div style="clear:both;"><hr/></div>
 		<?php

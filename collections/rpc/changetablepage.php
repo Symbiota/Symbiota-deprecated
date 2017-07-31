@@ -7,9 +7,6 @@ $stArrCollJson = $_REQUEST["jsoncollstarr"];
 $stArrSearchJson = $_REQUEST["starr"];
 $targetTid = $_REQUEST["targettid"];
 $occIndex = $_REQUEST['occindex'];
-$sortField1 = $_REQUEST['sortfield1'];
-$sortField2 = $_REQUEST['sortfield2'];
-$sortOrder = $_REQUEST['sortorder'];
 
 $stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 $collStArr = json_decode($stArrCollJson, true);
@@ -20,7 +17,8 @@ if($collStArr && !$searchStArr) $stArr = $collStArr;
 
 $collManager = new OccurrenceListManager(false);
 $collManager->setSearchTermsArr($stArr);
-$collManager->setSorting($sortField1,$sortField2,$sortOrder);
+$collManager->addSort($_REQUEST['sortfield1'], $_REQUEST['sortorder']);
+if($_REQUEST['sortfield2']) $collManager->addSort($_REQUEST['sortfield2'], $_REQUEST['sortorder']);
 $recArr = $collManager->getRecordArr($occIndex,1000);
 
 $targetClid = $collManager->getSearchTerm("targetclid");
@@ -72,13 +70,13 @@ if($recArr){
                 || (array_key_exists('CollEditor',$USER_RIGHTS) && in_array($occArr['collid'],$USER_RIGHTS['CollEditor'])))){
             $isEditor = true;
         }
-        $collection = $occArr['institutioncode'];
-        if($occArr['collectioncode']) $collection .= ':'.$occArr['collectioncode'];
+        $collection = $occArr['instcode'];
+        if($occArr['collcode']) $collection .= ':'.$occArr['collcode'];
         if($occArr['sciname']) $occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
         $recordListHtml .= "<tr ".($recCnt%2?'class="alt"':'').">\n";
         $recordListHtml .= '<td>';
         $recordListHtml .= '<a href="#" onclick="return openIndPU('.$id.",".($targetClid?$targetClid:"0").');">'.$id.'</a> ';
-        if($isEditor || ($SYMB_UID && $SYMB_UID == $fieldArr['observeruid'])){
+        if($isEditor || ($SYMB_UID && $SYMB_UID == $occArr['obsuid'])){
             $recordListHtml .= '<a href="editor/occurrenceeditor.php?occid='.$id.'" target="_blank">';
             $recordListHtml .= '<img src="../images/edit.png" style="height:13px;" title="Edit Record" />';
             $recordListHtml .= '</a>';
@@ -88,7 +86,7 @@ if($recArr){
         }
         $recordListHtml .= '</td>'."\n";
         $recordListHtml .= '<td>'.$collection.'</td>'."\n";
-        $recordListHtml .= '<td>'.$occArr['accession'].'</td>'."\n";
+        $recordListHtml .= '<td>'.$occArr['catnum'].'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['family'].'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['sciname'].($occArr['author']?" ".$occArr['author']:"").'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['country'].'</td>'."\n";
@@ -99,7 +97,7 @@ if($recArr){
         $recordListHtml .= '<td>'.(array_key_exists("elev",$occArr)?$occArr['elev']:"").'</td>'."\n";
         $recordListHtml .= '<td>'.(array_key_exists("date",$occArr)?$occArr['date']:"").'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['collector'].'</td>'."\n";
-        $recordListHtml .= '<td>'.(array_key_exists("collnumber",$occArr)?$occArr['collnumber']:"").'</td>'."\n";
+        $recordListHtml .= '<td>'.(array_key_exists("collnum",$occArr)?$occArr['collnum']:"").'</td>'."\n";
         $recordListHtml .= "</tr>\n";
         $recCnt++;
     }

@@ -2,69 +2,42 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $collManager = new OccurrenceManager();
-$collArr = Array();
-$stArr = Array();
-$stArrCollJson = '';
-$stArrSearchJson = '';
-
-if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
-    $stArr = $collManager->getSearchTerms();
-    $stArrSearchJson = json_encode($stArr);
-}
-
-if(isset($_REQUEST['db'])){
-    $collArr['db'] = $collManager->getSearchTerm('db');
-    $stArrCollJson = json_encode($collArr);
-}
+$searchVar = $collManager->getSearchTermStr();
 ?>
 
 <html>
 <head>
-    <title><?php echo $defaultTitle.' '.$LANG['PAGE_TITLE']; ?></title>
+	<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=3"></script> 
-    <script type="text/javascript">
-        var starrJson = '';
+	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=4"></script> 
+	<script type="text/javascript">
 
-        $(document).ready(function() {
-            <?php
-            if($stArrCollJson){
-                echo "sessionStorage.jsoncollstarr = '".$stArrCollJson."';\n";
-            }
-
-            if($stArrSearchJson){
-                ?>
-                starrJson = '<?php echo $stArrSearchJson; ?>';
-                sessionStorage.jsonstarr = starrJson;
-                setHarvestParamsForm();
-                <?php
-            }
-            else{
-                ?>
-                if(sessionStorage.jsonstarr){
-                    starrJson = sessionStorage.jsonstarr;
-                    setHarvestParamsForm();
-                }
-                <?php
-            }
-            ?>
-        });
-    </script>
+		$(document).ready(function() {
+			<?php
+			if($searchVar){
+				?>
+				sessionStorage.querystr = "<?php echo $searchVar; ?>";
+				<?php
+			}
+			?>
+			setHarvestParamsForm();
+		});
+	</script>
 </head>
 <body>
 
 <?php
 	$displayLeftMenu = (isset($collections_harvestparamsMenu)?$collections_harvestparamsMenu:false);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($collections_harvestparamsCrumbs)){
 		if($collections_harvestparamsCrumbs){
 			echo '<div class="navpath">';
@@ -87,10 +60,10 @@ if(isset($_REQUEST['db'])){
 	<div id="innertext">
 		<h1><?php echo $LANG['PAGE_HEADER']; ?></h1>
 		<?php echo $LANG['GENERAL_TEXT_1']; ?>
-        <div style="margin:5px;">
+		<div style="margin:5px;">
 			<input type='checkbox' name='showtable' id='showtable' value='1' onchange="changeTableDisplay();" /> Show results in table view
 		</div>
-		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm(this)">
+		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestParamsForm(this)">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:5px 10px;'>
 				<div style="margin-bottom:10px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" /></div>
@@ -103,6 +76,7 @@ if(isset($_REQUEST['db'])){
 			<div id="taxonSearch0">
 				<div>
 					<select id="taxontype" name="type">
+						<!--  <option value='0'><?php echo $LANG['SELECT_1-0']; ?></option>  -->
 						<option value='1'><?php echo $LANG['SELECT_1-1']; ?></option>
 						<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
 						<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
@@ -227,8 +201,8 @@ if(isset($_REQUEST['db'])){
 			</div>
 			<div>
 				<?php echo $LANG['CATALOG_NUMBER']; ?>
-                <input type="text" id="catnum" size="32" name="catnum" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
-                <input name="includeothercatnum" type="checkbox" value="1" checked /> <?php echo $LANG['INCLUDE_OTHER_CATNUM']?>
+				<input type="text" id="catnum" size="32" name="catnum" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+				<input name="includeothercatnum" type="checkbox" value="1" checked /> <?php echo $LANG['INCLUDE_OTHER_CATNUM']?>
 			</div>
 			<div>
 				<input type='checkbox' name='typestatus' value='1' /> <?php echo $LANG['TYPE']; ?>
@@ -236,17 +210,17 @@ if(isset($_REQUEST['db'])){
 			<div>
 				<input type='checkbox' name='hasimages' value='1' /> <?php echo $LANG['HAS_IMAGE']; ?>
 			</div>
-            <div>
-                <input type='checkbox' name='hasgenetic' value='1' /> <?php echo $LANG['HAS_GENETIC']; ?>
-            </div>
+			<div>
+				<input type='checkbox' name='hasgenetic' value='1' /> <?php echo $LANG['HAS_GENETIC']; ?>
+			</div>
 			<div>
 				<input type="hidden" name="reset" value="1" />
 				<input type="hidden" name="db" value="<?php echo $collManager->getSearchTerm('db'); ?>" />
 			</div>
 		</form>
-    </div>
+	</div>
 	<?php
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

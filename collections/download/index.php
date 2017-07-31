@@ -3,9 +3,8 @@ include_once('../../config/symbini.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen"; 
-$taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0; 
-$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
-$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
+$taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0;
+$searchVar = $_REQUEST['searchvar'];
 ?>
 <html>
 <head>
@@ -18,18 +17,6 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script>
 		$(document).ready(function() {
-			var crumbs = document.getElementsByClassName('navpath')[0].getElementsByTagName('a');
-			for(var i = 0; i < crumbs.length; i++){
-				if (crumbs[i].getAttribute("href") == "../list.php"){
-					crumbs[i].setAttribute('href','../list.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
-				}
-				if (crumbs[i].getAttribute("href") == "../harvestparams.php"){
-					crumbs[i].setAttribute('href','../harvestparams.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>');
-				}
-			}
-		});
-		
-		$(function() {
 			var dialogArr = new Array("schemanative","schemadwc");
 			var dialogStr = "";
 			for(i=0;i<dialogArr.length;i++){
@@ -44,7 +31,16 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 					$( "#"+this.id+"dialog" ).dialog( "open" );
 				});
 			}
-	
+
+			<?php
+			if(!$searchVar){
+				?>
+				if(sessionStorage.querystr){
+					window.location = "index.php?"+sessionStorage.querystr;
+				}
+				<?php
+			}
+			?>
 		});
 
 		function extensionSelected(obj){
@@ -82,10 +78,10 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 	else{
 		?>
 		<div class="navpath">
-			<a href="../../index.php">Home</a> &gt; 
-			<a href="../index.php">Collections</a> &gt; 
-			<a href="../harvestparams.php">Search Criteria</a> &gt; 
-			<a href="../list.php">Occurrence Record Listing</a> &gt;
+			<a href="../../index.php">Home</a> &gt;&gt; 
+			<a href="../index.php">Collections</a> &gt;&gt; 
+			<a href="../harvestparams.php">Search Criteria</a> &gt;&gt; 
+			<a href="../list.php?<?php echo $searchVar; ?>">Occurrence Record Listing</a> &gt;&gt;
 			<b>Occurrence Record Download</b>
 		</div>
 		<?php 
@@ -114,9 +110,6 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 					}
 					else{
 						echo '<legend><b>Download Specimen Records</b></legend>';
-					}
-					if(!$stArrCollJson && !$stArrSearchJson){
-						echo '<div style="color:red;font-weight:bold;">An error occurred in retrieving your search parameters. Please redo the search and navigate back to this page.</div>';
 					}
 					?>
 					<table>
@@ -227,9 +220,8 @@ $stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 									?>
 									<input name="publicsearch" type="hidden" value="1" />
 									<input name="taxonFilterCode" type="hidden" value="<?php echo $taxonFilterCode; ?>" />
-									<input name="jsoncollstarr" type="hidden" value='<?php echo $stArrCollJson; ?>' />
-									<input name="starr" type="hidden" value='<?php echo $stArrSearchJson; ?>' />
-									<input type="submit" name="submitaction" value="Download Data" <?php echo (!$stArrCollJson && !$stArrSearchJson?'disabled ':''); ?>/>
+									<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+									<input type="submit" name="submitaction" value="Download Data" />
 								</div>
 							</td>
 						</tr>

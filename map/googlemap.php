@@ -10,15 +10,11 @@ $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
 $mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
 $gridSize = array_key_exists('gridSizeSetting',$_REQUEST)?$_REQUEST['gridSizeSetting']:10;
 $minClusterSize = array_key_exists('minClusterSetting',$_REQUEST)?$_REQUEST['minClusterSetting']:50;
-$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
-$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 $sharedMapManager = new MappingShared();
-
 $sharedMapManager->setFieldArr(0);
 
 $mapWhere = '';
-$stArr = Array();
 $genObs = $sharedMapManager->getGenObsInfo();
 
 if($mapType == 'taxa'){
@@ -29,17 +25,11 @@ if($mapType == 'taxa'){
 	$mapWhere = $taxaMapManager->getTaxaSqlWhere();
 	$tArr = $taxaMapManager->getTaxaArr();
 	$sharedMapManager->setTaxaArr($tArr);
-    $sharedMapManager->setSearchTermsArr($stArr);
+	$sharedMapManager->setSearchTermsArr($stArr);
 }
 elseif($mapType == 'occquery'){
 	$occurManager = new OccurrenceManager();
-	if($stArrCollJson && $stArrSearchJson){
-		$collStArr = json_decode($stArrCollJson, true);
-		$searchStArr = json_decode($stArrSearchJson, true);
-		$stArr = array_merge($searchStArr,$collStArr);
-		$occurManager->setSearchTermsArr($stArr);
-    }
-    $mapWhere = $occurManager->getSqlWhere();
+	$mapWhere = $occurManager->getSqlWhere();
 	$tArr = $occurManager->getTaxaArr();
 	$stArr = $occurManager->getSearchTermsArr();
 	$sharedMapManager->setSearchTermsArr($stArr);
@@ -388,7 +378,7 @@ $sharedMapManager->setTaxaArr($tArr);
 									Longitude decimal: <input name='lng' id='lng' size='10' type='text' /> eg: -112.38
 								</div>
 								<div style='font-size:80%;margin-top:5px;'>
-									<a href='#' onclick='javascript: toggleLatLongDivs();'>Enter in D:M:S format</a>
+									<a href='#' onclick='toggleLatLongDivs();'>Enter in D:M:S format</a>
 								</div>
 							</div>
 							<div class='latlongdiv' style='display:none;'>

@@ -3,31 +3,18 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
-header("Cache-Control: no-cache, must-revalidate");
-header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 $schema = array_key_exists("schema",$_POST)?$_POST["schema"]:"symbiota"; 
 $cSet = array_key_exists("cset",$_POST)?$_POST["cset"]:'';
-$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
-$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
-$dlManager = new OccurrenceDownload();
-$dwcaHandler = new DwcArchiverCore();
 $occurManager = new OccurrenceManager();
-
-if($stArrCollJson && $stArrSearchJson){
-	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
-	$collStArr = json_decode($stArrCollJson, true);
-	$searchStArr = json_decode($stArrSearchJson, true);
-	$stArr = array_merge($searchStArr,$collStArr);
-	$occurManager->setSearchTermsArr($stArr);
-}
 
 if($schema == "backup"){
 	$collid = $_POST["collid"];
 	if($collid && is_numeric($collid)){
 		//check permissions due to sensitive localities not being redacted
 		if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
+			$dwcaHandler = new DwcArchiverCore();
 			$dwcaHandler->setSchemaType('backup');
 			$dwcaHandler->setCharSetOut($cSet);
 			$dwcaHandler->setVerboseMode(0);
@@ -81,6 +68,7 @@ else{
 		}
 	}
 	if($schema == "georef"){
+		$dlManager = new OccurrenceDownload();
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
 		}
@@ -103,6 +91,7 @@ else{
 		$dlManager->downloadData();
 	}
 	elseif($schema == 'checklist'){
+		$dlManager = new OccurrenceDownload();
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
 		}
@@ -114,6 +103,7 @@ else{
 		$dlManager->downloadData();
 	}
 	else{
+		$dwcaHandler = new DwcArchiverCore();
 		$dwcaHandler->setVerboseMode(0);
 		if($schema == "coge"){
 			$dwcaHandler->setCollArr($_POST["collid"]);
