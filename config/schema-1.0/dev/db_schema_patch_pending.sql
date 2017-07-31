@@ -8,6 +8,9 @@ ALTER TABLE `uploadtaxa`
 ALTER TABLE `uploadspectemp` 
   CHANGE COLUMN `basisOfRecord` `basisOfRecord` VARCHAR(32) NULL DEFAULT NULL COMMENT 'PreservedSpecimen, LivingSpecimen, HumanObservation' ;
 
+ALTER TABLE `images` 
+  ADD INDEX `Index_images_datelastmod` (`InitialTimeStamp` ASC);
+
 ALTER TABLE `omoccurrences`
   CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL,
   DROP INDEX `idx_occrecordedby`;
