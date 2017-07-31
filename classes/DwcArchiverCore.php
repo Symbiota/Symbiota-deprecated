@@ -1065,7 +1065,7 @@ class DwcArchiverCore extends Manager{
 		
 		if(!$emlArr) $emlArr = $this->getEmlArr();
 		foreach($RIGHTS_TERMS_DEFS as $k => $v){
-			if($k == $emlArr['intellectualRights']){
+			if($k == $emlArr['collMetadata'][1]['intellectualRights']){
 				$usageTermArr = $v;
 			}
 		}

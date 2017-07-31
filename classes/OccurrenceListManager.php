@@ -33,7 +33,6 @@ class OccurrenceListManager extends OccurrenceManager{
             'CONCAT_WS(":",c.institutioncode, c.collectioncode) AS collection, '.
             'IFNULL(o.CatalogNumber,"") AS catalognumber, o.family, o.sciname, o.tidinterpreted, '.
             'CONCAT_WS(" to ",IFNULL(DATE_FORMAT(o.eventDate,"%d %M %Y"),""),DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),"%d %M %Y")) AS date, '.
-            'o.eventDate, IFNULL(o.country,"") AS country, IFNULL(o.StateProvince,"") AS state, IFNULL(o.county,"") AS county, '.
             'IFNULL(o.scientificNameAuthorship,"") AS author, IFNULL(o.recordedBy,"") AS recordedby, IFNULL(o.recordNumber,"") AS recordnumber, '.
             'o.eventDate, IFNULL(o.country,"") AS country, IFNULL(o.StateProvince,"") AS state, IFNULL(o.county,"") AS county, '.
             'CONCAT_WS(", ",o.locality,CONCAT(ROUND(o.decimallatitude,5)," ",ROUND(o.decimallongitude,5))) AS locality, '.
@@ -158,6 +157,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			while($r = $rs->fetch_object()){
 				$retArr[] = $r->sciname;
 			}
+			$rs->free();
 		}
 		return $retArr;
 	}
