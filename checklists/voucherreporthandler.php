@@ -21,5 +21,7 @@ elseif($rType == 'fullcsv'){
 elseif($rType == 'fullvoucherscsv'){
 	$vManager->downloadVoucherCsv();
 }
-
+elseif($rType == 'vouchersonlycsv'){
+	$vManager->downloadVoucherOnlyCsv();
+}
 ?>

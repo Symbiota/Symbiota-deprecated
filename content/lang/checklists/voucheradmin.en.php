@@ -47,6 +47,7 @@ $LANG['ALLTAXACONTAINVOUCH'] = 'All taxa contain voucher links';
 $LANG['FULLSPECLIST'] = 'Full species list (CSV)';
 $LANG['FULLPRINT'] = 'Full species list (Print Friendly)';
 $LANG['FULLSPECLISTVOUCHER'] = 'Full species list with vouchers (CSV)';
+$LANG['VOUCHERONLY'] = 'Occurrence vouchers only (CSV)';
 $LANG['FULLPRINTVOUCHER'] = 'Full species list with vouchers (Print Friendly)';
 $LANG['SPECMISSINGTITLE'] = 'Possible species additions based on specimen vouchers';
 $LANG['SPECMISSTAXA'] = 'Specimens of taxa missing from checklist (CSV)';
