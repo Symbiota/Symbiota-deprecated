@@ -421,21 +421,21 @@ class ChecklistManager {
 		header ("Content-Disposition: attachment; filename=\"$fileName\"");
 		$this->showAuthors = 1;
 		if($taxaArr = $this->getTaxaList(1,0)){
-			echo "Family,ScientificName,ScientificNameAuthorship,";
-			if($this->showCommon) echo "CommonName,";
-			echo "TaxonId\n";
+			$fh = fopen('php://output', 'w');
+			$headerArr = array('Family','ScientificName','ScientificNameAuthorship');
+			if($this->showCommon) $headerArr[] = 'CommonName';
+			$headerArr[] = 'Notes';
+			$headerArr[] = 'TaxonId';
+			fputcsv($fh,$headerArr);
 			foreach($taxaArr as $tid => $tArr){
-				echo '"'.$tArr['family'].'","'.$tArr['sciname'].'","'.$tArr['author'].'"';
-				if($this->showCommon){
-					if(array_key_exists('vern',$tArr)){
-						echo ',"'.$tArr['vern'].'"';
-					}
-					else{
-						echo ',""';
-					}
-				}
-				echo ',"'.$tid.'"'."\n";
+				unset($outArr);
+				$outArr = array($tArr['family'],$tArr['sciname'],$tArr['author']);
+				if($this->showCommon) $outArr[] = (array_key_exists('vern',$tArr)?$tArr['vern']:'');
+				$outArr[] = (array_key_exists('notes',$tArr)?strip_tags($tArr['notes']):'');
+				$outArr[] = $tid;
+				fputcsv($fh,$outArr);
 			}
+			fclose($fh);
 		}
 		else{
 			echo "Recordset is empty.\n";
