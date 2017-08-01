@@ -372,6 +372,7 @@ if($clid && $isEditor){
 						<li><a href="voucherreporthandler.php?rtype=fullcsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLIST'];?></a></li>
 						<li><a href="checklist.php?printmode=1&showvouchers=0&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINT'];?></a></li>
 						<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLISTVOUCHER'];?></a></li>
+						<li><a href="voucherreporthandler.php?rtype=vouchersonlycsv&clid=<?php echo $clid; ?>"><?php echo $LANG['VOUCHERONLY'];?></a></li>
 						<li><a href="checklist.php?printmode=1&showvouchers=1&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINTVOUCHER'];?></a></li>
 						<li><?php echo $LANG['SPECMISSINGTITLE'];?></li>
 					</ul>

@@ -606,7 +606,36 @@ class ChecklistVoucherAdmin {
 			$this->exportCsv($fileName,$sql,$localitySecurityFields);
 		}
 	}
-	
+
+	public function downloadVoucherOnlyCsv(){
+		if($this->clid){
+			$fileName = $this->getExportFileName();
+			
+			$fieldArr = $this->getOccurrenceFieldArr();
+			$fieldArr[0] = 'o.family';
+			$fieldArr[1] = 'o.sciName AS scientificName';
+			$fieldArr[] = 'o.scientificNameAuthorship';
+			array_unshift($fieldArr, 't.sciname AS scientificName_checklist');
+			array_unshift($fieldArr, 't.tid AS taxonID');
+			
+			$localitySecurityFields = $this->getLocalitySecurityArr();
+			
+			$clidStr = $this->clid;
+			if($this->childClidArr){
+				$clidStr .= ','.implode(',',$this->childClidArr);
+			}
+			
+			$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
+				'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
+				'INNER JOIN fmvouchers v ON ctl.clid = v.clid AND ctl.tid = v.tid '.
+				'INNER JOIN omoccurrences o ON v.occid = o.occid '.
+				'LEFT JOIN omcollections c ON o.collid = c.collid '.
+				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
+				'WHERE (ctl.clid IN('.$clidStr.')) ';
+			$this->exportCsv($fileName,$sql,$localitySecurityFields);
+		}
+	}
+
 	private function exportCsv($fileName,$sql,$localitySecurityFields = null){
 		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
