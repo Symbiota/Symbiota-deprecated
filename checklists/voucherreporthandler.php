@@ -15,8 +15,11 @@ if($rType == 'missingoccurcsv'){
 elseif($rType == 'problemtaxacsv'){
 	$vManager->exportProblemTaxaCsv();
 }
+elseif($rType == 'fullcsv'){
+	$vManager->downloadChecklistCsv();
+}
 elseif($rType == 'fullvoucherscsv'){
-	$vManager->downloadDatasetCsv();
+	$vManager->downloadVoucherCsv();
 }
 
 ?>

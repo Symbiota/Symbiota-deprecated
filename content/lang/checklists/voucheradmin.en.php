@@ -44,8 +44,11 @@ $LANG['NOVOUCHLOCA'] = 'No vouchers located';
 $LANG['LISTEDBELOWARESPECINSTRUC'] = 'Listed below are species from the checklist that do not have linked specimen vouchers. Click on name to use the search statement above to dynamically query the occurrence dataset for 
 possible voucher specimens. Use the pulldown to the right to display the specimens in a table format.';
 $LANG['ALLTAXACONTAINVOUCH'] = 'All taxa contain voucher links';
-$LANG['FULLSPECLIST'] = 'Full species list with vouchers (CSV)';
-$LANG['FULLPRINT'] = 'Full species list with vouchers (Print Friendly)';
+$LANG['FULLSPECLIST'] = 'Full species list (CSV)';
+$LANG['FULLPRINT'] = 'Full species list (Print Friendly)';
+$LANG['FULLSPECLISTVOUCHER'] = 'Full species list with vouchers (CSV)';
+$LANG['FULLPRINTVOUCHER'] = 'Full species list with vouchers (Print Friendly)';
+$LANG['SPECMISSINGTITLE'] = 'Possible species additions based on specimen vouchers';
 $LANG['SPECMISSTAXA'] = 'Specimens of taxa missing from checklist (CSV)';
 $LANG['SPECMISSPELLED'] = 'Specimens with misspelled, illegal, and problematic scientific names (CSV)';
 $LANG['CHECKIDNOTSET'] = 'Checklist identifier not set';
