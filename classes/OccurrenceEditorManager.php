@@ -645,24 +645,27 @@ class OccurrenceEditorManager {
 
 	private function addTableJoins(&$sql){
 		if(strpos($this->sqlWhere,'ocr.rawstr')){
-			if(strpos($this->sqlWhere,'ocr.rawstr IS NULL')){
+			if(strpos($this->sqlWhere,'ocr.rawstr IS NULL') && array_key_exists('io',$this->qryArr)){
+				$sql .= 'INNER JOIN images i ON o.occid = i.occid LEFT JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+			}
+			elseif(strpos($this->sqlWhere,'ocr.rawstr IS NULL')){
 				$sql .= 'LEFT JOIN images i ON o.occid = i.occid LEFT JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
 			}
 			else{
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
 			}
 		}
+		elseif(array_key_exists('io',$this->qryArr)){
+			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+		}
+		elseif(array_key_exists('woi',$this->qryArr)){
+			$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
+		}
 		if(strpos($this->sqlWhere,'ul.username')){
 			$sql .= 'LEFT JOIN omoccuredits ome ON o.occid = ome.occid LEFT JOIN userlogin ul ON ome.uid = ul.uid ';
 		}
 		if(strpos($this->sqlWhere,'exn.ometid')){
 			$sql .= 'INNER JOIN omexsiccatiocclink exocc ON o.occid = exocc.occid INNER JOIN omexsiccatinumbers exn ON exocc.omenid = exn.omenid ';
-		}
-		if(array_key_exists('io',$this->qryArr)){
-			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
-		}
-		elseif(array_key_exists('woi',$this->qryArr)){
-			$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
 		}
 		if(strpos($this->sqlWhere,'MATCH(f.recordedby)')){
 			$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
