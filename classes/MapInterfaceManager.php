@@ -74,7 +74,6 @@ class MapInterfaceManager{
 	public function getSqlWhere(){
 		$sqlWhere = "";
 		if(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
-			//Do nothing if db = all
 			if($this->searchTermsArr['db'] != 'all'){
 				if($this->searchTermsArr['db'] == 'allspec'){
 					$sqlWhere .= 'AND (o.collid IN(SELECT collid FROM omcollections WHERE colltype = "Preserved Specimens")) ';
@@ -94,6 +93,9 @@ class MapInterfaceManager{
 					$sqlWhere .= 'AND ('.$dbStr.') ';
 				}
 			}
+			else{
+                $sqlWhere .= 'AND (o.collid IS NOT NULL) ';
+            }
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)&&$this->searchTermsArr["taxa"]){
@@ -250,8 +252,9 @@ class MapInterfaceManager{
 			$this->localSearchArr[] = "Point radius: ".$pointArr[0].", ".$pointArr[1].", within ".$pointArr[2]." miles";
 		}
 		if(array_key_exists("polycoords",$this->searchTermsArr)){
-			$coordArr = json_decode($this->searchTermsArr["polycoords"], true);
-			if($coordArr){
+			$polyStr = str_replace("\\","",$this->searchTermsArr["polycoords"]);
+            $coordArr = json_decode($polyStr, true);
+            if($coordArr){
 				$coordStr = '';
 				$coordStr = 'Polygon((';
 				$keys = array();
@@ -400,6 +403,10 @@ class MapInterfaceManager{
 			$sqlWhere .= 'AND (o.occid IN(SELECT occid FROM images)) ';
 			$this->localSearchArr[] = 'has images';
 		}
+        if(array_key_exists('hasgenetic',$this->searchTermsArr)&&$this->searchTermsArr["hasgenetic"]){
+            $sqlWhere .= 'AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ';
+            $this->localSearchArr[] = 'has genetic data';
+        }
 		$retStr = '';
 		if($sqlWhere){
 			$retStr = 'WHERE '.substr($sqlWhere,4);
@@ -731,6 +738,12 @@ class MapInterfaceManager{
 				$this->searchTermsArr["hasimages"] = true;
 			}
 		}
+        if(array_key_exists("hasgenetic",$_REQUEST)){
+            $hasgenetic = $_REQUEST["hasgenetic"];
+            if($hasgenetic){
+                $this->searchTermsArr["hasgenetic"] = true;
+            }
+        }
 		$latLongArr = Array();
 		if(array_key_exists("upperlat",$_REQUEST)){
 			$upperLat = $this->conn->real_escape_string($_REQUEST["upperlat"]);
@@ -820,7 +833,7 @@ class MapInterfaceManager{
 		$sql = '';
 		$sql = 'SELECT c.CollID, c.CollectionName '.
 			'FROM omcollections AS c ';
-		if($stArr['db'] != 'all'){
+		if($stArr['db'] && $stArr['db'] != 'all'){
 			$dbArr = explode(';',$stArr["db"]);
 			$dbStr = '';
 			$sql .= 'WHERE (c.collid IN('.trim($dbArr[0]).')) ';
@@ -833,11 +846,8 @@ class MapInterfaceManager{
 			$this->collArr[$collName] = Array();
 		}
 		$result->close();
-		
-		//return $sql;
 	}
-	
-	public function getCollGeoCoords($mapWhere,$pageRequest,$cntPerPage){
+    public function getCollGeoCoords($mapWhere,$pageRequest,$cntPerPage){
 		global $userRights, $mappingBoundaries;
 		$coordArr = Array();
 		$sql = '';
@@ -878,17 +888,14 @@ class MapInterfaceManager{
                 $occId = $row->occid;
                 $collName = $row->CollectionName;
                 $family = $row->family;
+                $tidInterpreted = $this->xmlentities($row->tidinterpreted);
                 $latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
                 $coordArr[$collName][$occId]["latLngStr"] = $latLngStr;
                 $coordArr[$collName][$occId]["collid"] = $this->xmlentities($row->collid);
-                if($row->tidinterpreted){
-                    $coordArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($row->tidinterpreted);
-                }
-                else{
-                    $tidcode = strtolower(str_replace( " ", "",$row->sciname));
-                    $tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
-                    $coordArr[$collName][$occId]["tidinterpreted"] = $this->xmlentities($tidcode);
-                }
+                $tidcode = strtolower(str_replace( " ", "",$tidInterpreted.$row->sciname));
+                $tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
+                $coordArr[$collName][$occId]["namestring"] = $this->xmlentities($tidcode);
+                $coordArr[$collName][$occId]["tidinterpreted"] = $tidInterpreted;
                 if($family){
                     $coordArr[$collName][$occId]["family"] = strtoupper($family);
                 }
@@ -912,11 +919,7 @@ class MapInterfaceManager{
 		if(array_key_exists("undefined",$coordArr)){
 			$coordArr["undefined"]["color"] = $color;
 		}
-		$result->free();
-		
-		if($recCnt > $recLimit){
-			$coordArr = $recCnt;
-		}
+		$result->close();
 		
 		return $coordArr;
 		//return $sql;
@@ -1287,7 +1290,7 @@ class MapInterfaceManager{
 		$bottomLimit = ($pageRequest - 1)*$cntPerPage;
 		$sql .= "ORDER BY o.sciname, o.eventdate ";
 		$sql .= "LIMIT ".$bottomLimit.",".$cntPerPage;
-		echo "<div>Spec sql: ".$sql."</div>"; exit;
+		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		$canReadRareSpp = false;
 		if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
