@@ -137,7 +137,7 @@ function geoLocateLocality(){
 		var country = encodeURIComponent(f.qcountry.value);
 		var state = encodeURIComponent(f.qstate.value);
 		var county = encodeURIComponent(f.qcounty.value);
-		geolocWindow=open("geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
+		geolocWindow=open("geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=0,width=1050,height=700,left=20,top=20");
 		if(geolocWindow.opener == null) geolocWindow.opener = self;
 	}
 	else{
@@ -175,7 +175,7 @@ function geoCloneTool(){
 		url = url + "&state=" + f.qstate.value;
 		url = url + "&county=" + f.qcounty.value;
 		url = url + "&collid=" + f.collid.value;
-		cloneWindow=open(url,"geoclonetool","resizable=1,scrollbars=1,toolbar=1,width=800,height=600,left=20,top=20");
+		cloneWindow=open(url,"geoclonetool","resizable=1,scrollbars=1,toolbar=0,width=800,height=600,left=20,top=20");
 		if(cloneWindow.opener == null) cloneWindow.opener = self;
 	}
 	else{
@@ -307,7 +307,7 @@ function openFirstRecSet(){
 	var selObj = document.getElementById("locallist");
 	if(selObj.selectedIndex > -1){
 		var occidStr = selObj.options[selObj.selectedIndex].value;
-		occWindow=open("../editor/occurrenceeditor.php?collid="+collId+"&q_catalognumber=occid"+occidStr+"&occindex=0","occsearch","resizable=1,scrollbars=1,toolbar=1,width=950,height=700,left=20,top=20");
+		occWindow=open("../editor/occurrenceeditor.php?collid="+collId+"&q_catalognumber=occid"+occidStr+"&occindex=0","occsearch","resizable=1,scrollbars=1,toolbar=0,width=950,height=700,left=20,top=20");
 		if(occWindow.opener == null) occWindow.opener = self;
 	}
 	else{

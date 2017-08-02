@@ -70,7 +70,7 @@ function openIndividualPopup(occid){
 }
 
 function openPopup(urlStr,windowName){
-	newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=800,left=400,top=40');
+	newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=0,resizable=1,width=1000,height=800,left=400,top=40');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }

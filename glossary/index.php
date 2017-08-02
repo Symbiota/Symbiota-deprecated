@@ -106,13 +106,13 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 
 		function openNewTermPopup(glossid,relation){
 			var urlStr = 'addterm.php?rellanguage=<?php echo $language.'&taxatid='.$tid.'&taxaname='.$taxonName; ?>';
-			newWindow = window.open(urlStr,'addnewpopup','toolbar=1,status=1,scrollbars=1,width=1250,height=900,left=20,top=20');
+			newWindow = window.open(urlStr,'addnewpopup','toolbar=0,status=1,scrollbars=1,width=1250,height=900,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
 
 		function openTermPopup(glossid){
 			var urlStr = 'individual.php?glossid='+glossid;
-			newWindow = window.open(urlStr,'popup','toolbar=1,status=1,scrollbars=1,width=800,height=750,left=20,top=20');
+			newWindow = window.open(urlStr,'popup','toolbar=0,status=1,scrollbars=1,width=800,height=750,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			return false;
 		}

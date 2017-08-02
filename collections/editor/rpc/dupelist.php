@@ -37,7 +37,7 @@ $dupArr = $dupeManager->getDupeList($recordedBy, $recordNumber, $eventDate, $cat
 
 		function openIndWindow(occid){
 			$url = "../../individual/index.php?occid="+occid;
-			indWindow=open($url,"indlist","resizable=1,scrollbars=1,toolbar=1,width=1000,height=800,left=100,top=100");
+			indWindow=open($url,"indlist","resizable=1,scrollbars=1,toolbar=0,width=1000,height=800,left=100,top=100");
 		}
 	</script>
 </head>

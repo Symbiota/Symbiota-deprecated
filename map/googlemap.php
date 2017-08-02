@@ -207,7 +207,7 @@ $sharedMapManager->setTaxaArr($tArr);
 		}
 
 		function openIndPU(occId,clid){
-			newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width=1100,height=800,left=20,top=20');
+			newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=0,resizable=1,width=1100,height=800,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			setTimeout(function () { newWindow.focus(); }, 0.5);
 		}

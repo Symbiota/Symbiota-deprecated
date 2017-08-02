@@ -33,7 +33,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 
 	function openDupeWindow(){
 		$url = "rpc/dupelist.php?curoccid=<?php echo $occid.'&recordedby='.urlencode($occArr['recordedby']).'&recordnumber='.$occArr['recordnumber'].'&eventdate='.$occArr['eventdate']; ?>";
-		dupeWindow=open($url,"dupelist","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+		dupeWindow=open($url,"dupelist","resizable=1,scrollbars=1,toolbar=0,width=900,height=600,left=20,top=20");
 		if (dupeWindow.opener == null) dupeWindow.opener = self;
 	}
 
@@ -56,7 +56,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 	}
 
 	function openIndividual(target) {
-		occWindow=open("../individual/index.php?occid="+target,"occdisplay","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+		occWindow=open("../individual/index.php?occid="+target,"occdisplay","resizable=1,scrollbars=1,toolbar=0,width=900,height=600,left=20,top=20");
 		if (occWindow.opener == null) occWindow.opener = self;
 	}
 

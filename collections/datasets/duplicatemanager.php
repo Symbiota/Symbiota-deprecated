@@ -60,7 +60,7 @@ if($isEditor && $formSubmit){
 		}
 
 		function openOccurPopup(occid) {
-			occWindow=open("../individual/index.php?occid="+occid,"occwin"+occid,"resizable=1,scrollbars=1,toolbar=1,width=750,height=600,left=20,top=20");
+			occWindow=open("../individual/index.php?occid="+occid,"occwin"+occid,"resizable=1,scrollbars=1,toolbar=0,width=750,height=600,left=20,top=20");
 			if(occWindow.opener == null) occWindow.opener = self;
 		}
 

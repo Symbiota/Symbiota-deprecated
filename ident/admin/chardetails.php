@@ -221,7 +221,7 @@ if(!$cid) header('Location: index.php');
 		}
 
 		function openHeadingAdmin(){
-			newWindow = window.open("headingadmin.php","headingWin","scrollbars=1,toolbar=1,resizable=1,width=800,height=600,left=50,top=50");
+			newWindow = window.open("headingadmin.php","headingWin","scrollbars=1,toolbar=0,resizable=1,width=800,height=600,left=50,top=50");
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
 	</script>

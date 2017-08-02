@@ -233,7 +233,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 		}
 
 		function openIndividual(target) {
-			occWindow=open("index.php?occid="+target,"occdisplay","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+			occWindow=open("index.php?occid="+target,"occdisplay","resizable=1,scrollbars=1,toolbar=0,width=900,height=600,left=20,top=20");
 			if (occWindow.opener == null) occWindow.opener = self;
 		}
 

@@ -74,7 +74,7 @@ if($SYMB_UID){
 					<li>Import csv file</li>
 					 -->
 					<li>
-						<a href="#" onclick="newWindow = window.open('personalspecbackup.php?collid=<?php echo $collId; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=400,height=200,left=20,top=20');">
+						<a href="#" onclick="newWindow = window.open('personalspecbackup.php?collid=<?php echo $collId; ?>','bucollid','scrollbars=1,toolbar=0,resizable=1,width=400,height=200,left=20,top=20');">
 							Backup file download (CSV extract)
 						</a>
 					</li>

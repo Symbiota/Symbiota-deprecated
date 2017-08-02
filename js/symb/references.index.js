@@ -275,7 +275,7 @@ function deleteRefLink(table,field,type,id){
 
 function openNewAuthorWindow(){
 	var urlStr = 'authoreditor.php?refid='+refid+'&addauth=1';
-	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width=470,height=300');
+	newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=0,resizable=1,width=470,height=300');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }

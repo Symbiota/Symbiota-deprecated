@@ -319,7 +319,7 @@ function openIndPU(occId,clid){
 		wWidth = document.body.offsetWidth*0.9;
 	}
 	if(wWidth > 1000) wWidth = 1000;
-	newWindow = window.open('../collections/individual/index.php?occid='+occId,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+	newWindow = window.open('../collections/individual/index.php?occid='+occId,'indspec' + occId,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }
@@ -333,7 +333,7 @@ function openTaxonPopup(tid){
 		wWidth = document.body.offsetWidth*0.9;
 	}
 	if(wWidth > 1000) wWidth = 1000;
-	newWindow = window.open("../taxa/index.php?taxon="+tid,'taxon'+tid,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=700,left=20,top=20');
+	newWindow = window.open("../taxa/index.php?taxon="+tid,'taxon'+tid,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=700,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }
@@ -347,7 +347,7 @@ function openImagePopup(imageId){
 		wWidth = document.body.offsetWidth*0.9;
 	}
 	if(wWidth > 1000) wWidth = 1000;
-	newWindow = window.open("imgdetails.php?imgid="+imageId,'image'+imageId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+	newWindow = window.open("imgdetails.php?imgid="+imageId,'image'+imageId,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }

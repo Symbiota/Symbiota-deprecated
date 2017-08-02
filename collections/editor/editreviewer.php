@@ -153,7 +153,7 @@ $navStr .= '</div>';
 			}
 
 			function openIndPU(occid,clid){
-				var newWindow = window.open('../editor/occurrenceeditor.php?occid='+occid,'indspec' + occid,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=700,left=20,top=20');
+				var newWindow = window.open('../editor/occurrenceeditor.php?occid='+occid,'indspec' + occid,'scrollbars=1,toolbar=0,resizable=1,width=1000,height=700,left=20,top=20');
 				if (newWindow.opener == null) newWindow.opener = self;
 			}
 		</script>

@@ -19,7 +19,7 @@ function geoCloneTool(){
 		url = url + "&state=" + f.stateprovince.value;
 		url = url + "&county=" + f.county.value;
 		url = url + "&collid=" + f.collid.value;
-		cloneWindow=open(url,"geoclonetool","resizable=1,scrollbars=1,toolbar=1,width=1000,height=600,left=20,top=20");
+		cloneWindow=open(url,"geoclonetool","resizable=1,scrollbars=1,toolbar=0,width=1000,height=600,left=20,top=20");
 		if(cloneWindow.opener == null) cloneWindow.opener = self;
 	}
 	else{
@@ -103,7 +103,7 @@ function geoLocateLocality(){
 		alert("Record does not contain any verbatim locality details for GeoLocate");
 	}
 	else{
-		geolocWindow=open("../georef/geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
+		geolocWindow=open("../georef/geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=0,width=1050,height=700,left=20,top=20");
 		if(geolocWindow.opener == null){
 			geolocWindow.opener = self;
 		}
@@ -338,7 +338,7 @@ function searchDupesCatalogNumber(f,verbose){
 		}).done(function( msg ) {
 			if(msg){
 				if(confirm("Record(s) of same catalog number already exists. Do you want to view this record?")){
-					var occWindow=open("dupesearch.php?occidquery=catnu:"+msg+"&collid="+f.collid.value+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+					var occWindow=open("dupesearch.php?occidquery=catnu:"+msg+"&collid="+f.collid.value+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=0,width=900,height=600,left=20,top=20");
 					if(occWindow != null){
 						if (occWindow.opener == null) occWindow.opener = self;
 						occWindow.focus();
@@ -383,7 +383,7 @@ function searchDupesOtherCatalogNumbers(f){
 		}).done(function( msg ) {
 			if(msg.length > 6){
 				if(confirm("Record(s) using the same identifier already exists. Do you want to view this record?")){
-					var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+f.occid.value,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+					var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+f.occid.value,"occsearch","resizable=1,scrollbars=1,toolbar=0,width=900,height=600,left=20,top=20");
 					if(occWindow != null){
 						if (occWindow.opener == null) occWindow.opener = self;
 						occWindow.focus();
@@ -434,7 +434,7 @@ function searchDupes(f,silent){
 		data: { cname: cNameIn, cnum: cNumIn, cdate: cDateIn, ometid: ometidIn, exsnumber: exsNumberIn, curoccid: currOccidIn }
 	}).done(function( msg ) {
 		if(msg){
-			var dupOccWindow = open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+currOccidIn,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+			var dupOccWindow = open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+currOccidIn,"occsearch","resizable=1,scrollbars=1,toolbar=0,width=900,height=600,left=20,top=20");
 			if(dupOccWindow != null){
 				if(dupOccWindow.opener == null) dupOccWindow.opener = self;
 				dupOccWindow.focus();
