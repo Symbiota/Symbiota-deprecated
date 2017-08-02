@@ -2,7 +2,7 @@
 /*
  * Used by automatic nightly process and by the occurrence editor (/collections/editor/occurrenceeditor.php)
  */
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class SpecProcessorOcr{
 
@@ -16,6 +16,7 @@ class SpecProcessorOcr{
 	private $cropW = 1;
 	private $cropH = 1;
 
+	private $collid;
 	private $specKeyPattern;
 	private $ocrSource;
 	
@@ -224,9 +225,11 @@ class SpecProcessorOcr{
 		}
 	}
 
+	// OCR upload functions 
 	public function harvestOcrText($postArr){
 		$status = true;
 		set_time_limit(3600);
+		$this->collid = $postArr['collid'];
 		$this->ocrSource = $postArr['ocrsource'];
 		$this->specKeyPattern = $postArr['speckeypattern'];
 		if(!$this->specKeyPattern){
@@ -403,21 +406,43 @@ class SpecProcessorOcr{
 			if($catNumber){
 				//Grab image primary key (imgid)
 				$imgArr = array();
-				$sql = 'SELECT i.imgid, i.url '.
+				$sql = 'SELECT i.imgid, IFNULL(i.originalurl,i.url) AS url '.
 					'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-					'WHERE (o.catalognumber = "'.$this->cleanInStr($catNumber).'")';
+					'WHERE (o.collid = '.$this->collid.') AND (o.catalognumber = "'.$this->cleanInStr($catNumber).'")';
 				$rs = $this->conn->query($sql);
 				while($r = $rs->fetch_object()){
 					$imgArr[$r->imgid] = $r->url;
 				}
 				$rs->free();
+				if(!$imgArr){
+					$fileBaseName = basename($sourcePath.$fileName, ".txt");
+					if(strlen($fileBaseName)>4){
+						$sql = 'SELECT i.imgid, IFNULL(i.originalurl,i.url) AS url '.
+							'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+							'WHERE (o.collid = '.$this->collid.') AND ((o.orginalurl LIKE "%/'.$this->cleanInStr($fileBaseName).'.jpg") OR (o.url LIKE "%/'.$this->cleanInStr($fileBaseName).'.jpg"))';
+						$rs = $this->conn->query($sql);
+						while($r = $rs->fetch_object()){
+							$imgArr[$r->imgid] = $r->url;
+						}
+						$rs->free();
+					}
+				}
 				if($imgArr){
 					$imgId = key($imgArr);
 					if(count($imgArr) > 1){
-						$fileBaseName = basename($sourcePath.$fileName, ".php");
+						// By default will link to first image, unless there is another image with exact name as OCR file
+						$fileBaseName = basename($sourcePath.$fileName, ".txt");
+						$imgIdOverride = '';
 						foreach($imgArr as $k => $v){
-							if(stripos($v,'/'.$fileBaseName.'.')) $imgId = $k;
-						} 
+							if(stripos($v,'/'.$fileBaseName.'.') || stripos($v,'/'.$fileBaseName.'_lg.')){
+								$imgIdOverride= $k;
+								break;
+							}
+							elseif(stripos($v,'/'.$fileBaseName.'_')){
+								$imgIdOverride= $k;
+							}
+						}
+						if($imgIdOverride) $imgId = $imgIdOverride;
 					}
 					//Process and database OCR string
 					if($this->databaseRawStr($imgId,$rawStr,'',$this->ocrSource.': '.date('Y-m-d'))){
