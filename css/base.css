@@ -311,11 +311,11 @@ div.genericpopup{
 
 .nextbtn {
 	font-weight: bold,
-	background-color: #c0c0c0;
+	background-color: #dddddd;
 	border-color: #999;
     color: black;
-	width: 90px;
-	padding: 6px 10px;
+	width: 110px;
+	padding: 5px 8px;
 	border-radius: 5px;
 }
 

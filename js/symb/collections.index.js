@@ -1,7 +1,12 @@
-$('html').hide();
 $(document).ready(function() {
-    $("#tabs").tabs();
-    $('html').show();
+	$('#tabs').tabs({
+		select: function(event, ui) {
+			return true;
+		},
+		beforeLoad: function( event, ui ) {
+			$(ui.panel).html("<p>Loading...</p>");
+		}
+	});
 	//document.collections.onkeydown = checkKey;
 });
 

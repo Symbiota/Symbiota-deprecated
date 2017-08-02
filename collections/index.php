@@ -23,10 +23,10 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
 		<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-		<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
-		<script src="../js/jquery.js" type="text/javascript"></script>
-		<script src="../js/jquery-ui.js" type="text/javascript"></script>
-		<script src="../js/symb/collections.index.js?ver=1" type="text/javascript"></script> 
+		<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
+		<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
+		<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
+		<script src="../js/symb/collections.index.js?ver=2" type="text/javascript"></script> 
 		<script type="text/javascript">
 			<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 		</script>

@@ -14,29 +14,38 @@ $searchVarEncoded = urlencode($searchVar);
 
 ?>
 <div>
-	<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_TITLE']; ?>'>
-		<a href='download/index.php?searchvar=<?php echo $searchVarEncoded; ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
-			<img width="15px" src="../images/dl.png" />
-		</a>
-	</div>
+	<form action="download/index.php" method="get" style="float:right">
+		<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_TITLE']; ?>">
+			<img src="../images/dl2.png" style="width:15px" />
+		</button>
+		<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+		<input name="dltype" type="hidden" value="checklist" />
+		<input name="taxonFilterCode" type="hidden" value="<?php echo $taxonFilter; ?>" />
+	</form>
 	<?php 
 	if($KEY_MOD_IS_ACTIVE){
-	?>
-		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_KEY']; ?>'>
-			<a href='checklistsymbiota.php?searchvar=<?php echo $searchVarEncoded; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>
-				<img width='15px' src='../images/key.png'/>
-			</a>
-		</div>
-	<?php 
+		?>
+		<form action="checklistsymbiota.php" method="get" style="float:right">
+			<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['OPEN_KEY']; ?>">
+				<img src="../images/key.png" style="width:15px" />
+			</button>
+			<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+			<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
+			<input name="interface" type="hidden" value="key" />
+		</form>
+		<?php 
 	}
 	if($FLORA_MOD_IS_ACTIVE){
-	?>
-		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_CHECKLIST_EXPLORER']; ?>'>
-			<a href='checklistsymbiota.php?searchvar=<?php echo $searchVarEncoded; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
-				<img width='15px' src='../images/list.png'/>
-			</a>
-		</div>
-	<?php
+		?>
+		<form action="checklistsymbiota.php" method="get" style="float:right">
+			<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['OPEN_CHECKLIST_EXPLORER']; ?>">
+				<img src="../images/list.png" style="width:15px" />
+			</button>
+			<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+			<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
+			<input name="interface" type="hidden" value="checklist" />
+		</form>
+		<?php
 	}
 	?>
 	<div style='margin:10px;float:right;'>

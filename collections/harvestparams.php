@@ -15,9 +15,9 @@ $searchVar = $collManager->getSearchTermStr();
 	<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
-	<script type="text/javascript" src="../js/jquery.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js"></script>
+	<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
+	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
 	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=4"></script> 
 	<script type="text/javascript">
 
@@ -60,14 +60,12 @@ $searchVar = $collManager->getSearchTermStr();
 	<div id="innertext">
 		<h1><?php echo $LANG['PAGE_HEADER']; ?></h1>
 		<?php echo $LANG['GENERAL_TEXT_1']; ?>
-		<div style="margin:5px;">
-			<input type='checkbox' name='showtable' id='showtable' value='1' onchange="changeTableDisplay();" /> Show results in table view
-		</div>
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestParamsForm(this)">
-			<div style="margin:10 0 10 0;"><hr></div>
-			<div style='float:right;margin:5px 10px;'>
-				<div style="margin-bottom:10px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" /></div>
-				<div><button type="button" class="resetbtn" onclick='resetHarvestParamsForm(this.form);'><?php echo isset($LANG['BUTTON_RESET'])?$LANG['BUTTON_RESET']:'Reset Form'; ?></button></div>
+			<div style="margin:10 0 10 0;"><hr/></div>
+			<div style='float:right;margin:-5px 10px;'>
+				<div><input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT_LIST'])?$LANG['BUTTON_NEXT_LIST']:'List Display'; ?>" /></div>
+				<div style="margin-bottom:10px"><input type="button" class="nextbtn" onclick="displayTableView(this.form)" value="<?php echo isset($LANG['BUTTON_NEXT_TABLE'])?$LANG['BUTTON_NEXT_TABLE']:'Table Display'; ?>" /></div>
+				<div><input type="reset" class="resetbtn" onclick="resetHarvestParamsForm()" value="<?php echo isset($LANG['BUTTON_RESET'])?$LANG['BUTTON_RESET']:'Reset Form'; ?>" /></div>
 			</div>
 			<div>
 				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>

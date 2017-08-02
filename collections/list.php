@@ -26,13 +26,13 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 	<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<style type="text/css">
 		.ui-tabs .ui-tabs-nav li { width:32%; }
 		.ui-tabs .ui-tabs-nav li a { margin-left:10px;}
 	</style>
-	<script type="text/javascript" src="../js/jquery.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js"></script>
+	<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
+	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
@@ -80,7 +80,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			});
 		}
 	</script>
-	<script type="text/javascript" src="../js/symb/collections.list.js?ver=5"></script>
+	<script type="text/javascript" src="../js/symb/collections.list.js?ver=7"></script>
 </head>
 <body>
 <?php
@@ -126,14 +126,19 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 		<div id="speclist">
 			<div id="queryrecords">
 				<div style="float:right;">
-					<div class="button" style="margin:15px 15px 0px 0px;width:13px;height:13px;" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
-						<a href="download/index.php?searchvar=<?php echo urlencode($searchVar); ?>&dltype=specimen"><img src="../images/dl.png"></a>
-					</div>
-					<?php
+					<form action="download/index.php" method="get" style="float:left">
+						<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
+							<img src="../images/dl2.png" style="width:15px" />
+						</button>
+						<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+						<input name="dltype" type="hidden" value="specimen" />
+					</form>
+					<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer;" onclick="copyUrl()" title="Copy URL to Clipboard"><img src="../images/link2.png" style="width:15px" /></button>
+ 					<?php
 					if($collManager->getClName() && $targetTid){
-						echo '<div style="cursor:pointer;margin:8px 8px 0px 0px;" onclick="addAllVouchersToCl('.$targetTid.')" title="Link All Vouchers on Page">';
-						echo '<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />';
-						echo '</div>';
+						?>
+						<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor:pointer;" onclick="addAllVouchersToCl(<?php echo $targetTid; ?>)" title="Link All Vouchers on Page"><img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" /></button>
+						<?php 
 					}
 					?>
 				</div>
@@ -147,14 +152,6 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 						echo '<div><b>'.$LANG['SEARCH_CRITERIA'].':</b> '.$localSearchStr.'</div>';
 					}
 					?>
-				</div>
-				<div style="clear:both;">
-					<div style="margin:5px;float:right;"><button type="button" id="copyurl" onclick="copyUrl();">Copy URL</button></div>
-					<div style="margin:5px;float:left;">
-						<?php 
-						echo '<a href="listtabledisplay.php?targettid='.$targetTid.$collManager->getSearchTermStr().'">See Results in Table View</a>';
-						?>
-					</div>
 				</div>
 				<div style="clear:both;"></div>
 				<?php 
@@ -288,9 +285,14 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			</div>
 		</div>
 		<div id="maps" style="min-height:400px;margin-bottom:10px;">
-			<div class="button" style="margin-top:20px;float:right;width:13px;height:13px;" title="<?php echo $LANG['MAP_DOWNLOAD']; ?>">
-				<a id="mapdllink" href="<?php echo 'download/index.php?searchvar='.urlencode($searchVar).'&dltype=georef'; ?>"><img src="../images/dl.png"/></a>
-			</div>
+			<form action="download/index.php" method="get" style="float:right">
+				<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
+					<img src="../images/dl2.png" style="width:15px" />
+				</button>
+				<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+				<input name="dltype" type="hidden" value="georef" />
+			</form>
+			
 			<div style='margin-top:10px;'>
 				<h2><?php echo $LANG['GOOGLE_MAP_HEADER']; ?></h2>
 			</div>

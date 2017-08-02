@@ -1,12 +1,13 @@
 <?php
 include_once('../config/symbini.php'); 
+include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $targetTid = array_key_exists("targettid",$_REQUEST)?$_REQUEST["targettid"]:0;
 $page = array_key_exists('page',$_REQUEST)?$_REQUEST['page']:1;
 $tableCount= array_key_exists('tablecount',$_REQUEST)?$_REQUEST['tablecount']:1000;
-$sortField1 = array_key_exists('sortfield1',$_REQUEST)?$_REQUEST['sortfield1']:'collection';
+$sortField1 = array_key_exists('sortfield1',$_REQUEST)?$_REQUEST['sortfield1']:'collectionname';
 $sortField2 = array_key_exists('sortfield2',$_REQUEST)?$_REQUEST['sortfield2']:'';
 $sortOrder = array_key_exists('sortorder',$_REQUEST)?$_REQUEST['sortorder']:'';
 
@@ -28,30 +29,56 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 	</style>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<script src="../js/jquery.js" type="text/javascript"></script>
-	<script src="../js/jquery-ui.js" type="text/javascript"></script>
+	<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
+	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
-		function copySearchUrl(){
-			var urlFixed = <?php echo $urlPrefix.'&page='.$page.'&sortfield1='.$sortField1.'&sortfield2='.$sortField2.'&sortorder'.$sortOrder; ?>;
-			var copyBox = document.getElementById('urlFullBox');
-			copyBox.value = urlFixed;
-			copyBox.focus();
-			copyBox.setSelectionRange(0,copyBox.value.length);
+		function copyUrl(){
+			var $temp = $("<input>");
+			$("body").append($temp);
+			$temp.val(window.location.href).select();
 			document.execCommand("copy");
-			copyBox.value = '';
+			$temp.remove();
+		}
+
+		function openIndPU(occId,clid){
+		    var wWidth = 900;
+		    if(document.getElementById('maintable')){
+		        wWidth = document.getElementById('maintable').offsetWidth*1.05;
+		    }
+		    else if(document.body.offsetWidth){
+		        wWidth = document.body.offsetWidth*0.9;
+		    }
+		    if(wWidth > 1000) wWidth = 1000;
+		    newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=700,left=20,top=20');
+		    if (newWindow.opener == null) newWindow.opener = self;
+		    return false;
+		}
+
+		function copyUrl(){
+			var $temp = $("<input>");
+			$("body").append($temp);
+			$temp.val(window.location.href).select();
+			document.execCommand("copy");
+			$temp.remove();
 		}
 	</script>
 </head>
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<div id="">
-		<div style="width:725px;clear:both;margin-bottom:5px;">
+		<div style="width:750px;margin-bottom:5px;">
 			<div style="float:right;">
-				<div class='button' style='margin:15px 15px 0px 0px;width:13px;height:13px;' title='Download specimen data'>
-					<a id="dllink" href="download/index.php?dltype=specimen&searchvar=<?php echo urlencode($searchVar); ?>"><img src="../images/dl.png" /></a>
-				</div>
+				<form action="download/index.php" method="get" style="float:left">
+					<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
+						<img src="../images/dl2.png" style="width:15px" />
+					</button>
+					<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+					<input name="dltype" type="hidden" value="specimen" />
+				</form>
+				<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor:pointer;" onclick="copyUrl()" title="Copy URL to Clipboard"><img src="../images/link2.png" style="width:15px" /></button>
 			</div>
 			<fieldset style="padding:5px;width:650px;">
 				<legend><b>Sort Results</b></legend>
@@ -60,7 +87,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 						<b>Sort By:</b> 
 						<select name="sortfield1">
 							<?php 
-							$sortFields = array('collection' => 'Collection', 'o.catalogNumber' => 'Catalog Number', 'o.family' => 'Family', 'o.sciname' => 'Scientific Name', 'o.recordedBy' => 'Collector',
+							$sortFields = array('c.collectionname' => 'Collection', 'o.catalogNumber' => 'Catalog Number', 'o.family' => 'Family', 'o.sciname' => 'Scientific Name', 'o.recordedBy' => 'Collector',
 								'o.recordNumber' => 'Number', 'o.eventDate' => 'Event Date', 'o.country' => 'Country', 'o.StateProvince' => 'State/Province', 'o.county' => 'County', 'o.minimumElevationInMeters' => 'Elevation');
 							foreach($sortFields as $k => $v){
 								echo '<option value="'.$k.'" '.($k==$sortField1?'SELECTED':'').'>'.$v.'</option>';
@@ -115,8 +142,8 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 		</div>
 		<div id="tablediv">
 			<?php
-			$collManager->addSort($_REQUEST['sortfield1'], $_REQUEST['sortorder']);
-			if($_REQUEST['sortfield2']) $collManager->addSort($_REQUEST['sortfield2'], $_REQUEST['sortorder']);
+			$collManager->addSort($sortField1, $sortOrder);
+			if($sortField2) $collManager->addSort($sortField2, $sortOrder);
 			$recArr = $collManager->getSpecimenMap($page,$tableCount);
 			
 			$targetClid = $collManager->getSearchTerm("targetclid");
@@ -137,7 +164,6 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 			if($recArr){
 				?>
 				<div style="width:790px;clear:both;margin:5px;">
-					<div style="float:left;"><button type="button" id="copyurl" onclick="copySearchUrl();">Copy URL to These Results</button></div>
 					<?php 
 					$navStr;
 					?>
@@ -207,8 +233,6 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 					?>
 				</table>
 				<div style="clear:both;height:5px;"></div>
-				<textarea id="urlPrefixBox" style="position:absolute;left:-9999px;top:-9999px"><?php echo $urlPrefix.$collManager->getSearchResultUrl(); ?></textarea>
-				<textarea id="urlFullBox" style="position:absolute;left:-9999px;top:-9999px"></textarea>
 				<div style="width:790px;"><?php echo $navStr; ?></div>
 				*Click on the Symbiota identifier in the first column to see Full Record Details.';
 				<?php 

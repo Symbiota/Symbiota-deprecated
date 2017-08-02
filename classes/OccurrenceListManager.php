@@ -31,7 +31,7 @@ class OccurrenceListManager extends OccurrenceManager{
 		$sql = 'SELECT DISTINCT o.occid, c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, '.
 			'o.catalognumber, o.family, o.sciname, o.scientificnameauthorship, o.tidinterpreted, o.recordedby, o.recordnumber, o.eventdate, o.year, o.enddayofyear, '.
 			'o.country, o.stateprovince, o.county, o.locality, o.decimallatitude, o.decimallongitude, o.localitysecurity, o.localitysecurityreason, '.
-			'o.minimumelevationinmeters, o.maximumelevationinmeters, o.observeruid '.
+			'o.habitat, o.minimumelevationinmeters, o.maximumelevationinmeters, o.observeruid '.
 			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
 		/*
 		$sql = 'SELECT DISTINCT o.occid, c.CollID, c.institutioncode, c.collectioncode, c.collectionname, c.icon, '.
@@ -53,10 +53,10 @@ class OccurrenceListManager extends OccurrenceManager{
 			$sql .= implode(',',$this->sortArr);
 		}
 		else{
-			$sql .= "ORDER BY c.sortseq, c.collectionname ";
+			$sql .= 'ORDER BY c.sortseq, c.collectionname ';
 			$pageRequest = ($pageRequest - 1)*$cntPerPage;
 		}
-		$sql .= "LIMIT ".$pageRequest.",".$cntPerPage;
+		$sql .= ' LIMIT '.$pageRequest.",".$cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -85,6 +85,7 @@ class OccurrenceListManager extends OccurrenceManager{
 					$dateStr = date('d M Y',strtotime($row->eventdate));
 					if($row->enddayofyear) $dateStr .= ' to '.date('d M Y',DateTime::createFromFormat('z Y', strval($row->enddayofyear).' '.strval($row->year)));
 					$returnArr[$row->occid]["date"] = $dateStr;
+					$returnArr[$row->occid]["habitat"] = $row->habitat;
 					$elevStr = $row->minimumelevationinmeters;
 					if($row->maximumelevationinmeters) $elevStr .= ' - '.$row->maximumelevationinmeters;
 					$returnArr[$row->occid]["elev"] = $elevStr;

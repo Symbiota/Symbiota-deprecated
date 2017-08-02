@@ -21,20 +21,6 @@ function addVoucherToCl(occidIn,clidIn,tidIn){
     });
 }
 
-function openIndPU(occId,clid){
-    var wWidth = 900;
-    if(document.getElementById('maintable')){
-        wWidth = document.getElementById('maintable').offsetWidth*1.05;
-    }
-    else if(document.body.offsetWidth){
-        wWidth = document.body.offsetWidth*0.9;
-    }
-    if(wWidth > 1000) wWidth = 1000;
-    newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=700,left=20,top=20');
-    if (newWindow.opener == null) newWindow.opener = self;
-    return false;
-}
-
 function toggleFieldBox(target){
     var objDiv = document.getElementById(target);
     if(objDiv){
@@ -59,7 +45,21 @@ function toggleFieldBox(target){
             }
         }
     }
-}	
+}
+
+function openIndPU(occId,clid){
+    var wWidth = 900;
+    if(document.getElementById('maintable')){
+        wWidth = document.getElementById('maintable').offsetWidth*1.05;
+    }
+    else if(document.body.offsetWidth){
+        wWidth = document.body.offsetWidth*0.9;
+    }
+    if(wWidth > 1000) wWidth = 1000;
+    newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=700,left=20,top=20');
+    if (newWindow.opener == null) newWindow.opener = self;
+    return false;
+}
 
 function openMapPU(){
 	var url = '../map/googlemap.php?'+sessionStorage.querystr+'&maptype=occquery';
