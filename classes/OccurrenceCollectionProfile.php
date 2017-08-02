@@ -768,11 +768,6 @@ class OccurrenceCollectionProfile {
 		//Set collection array
 		$collIdArr = array();
 		$catIdArr = array();
-		if(isset($this->searchTermsArr['db']) && array_key_exists('db',$this->searchTermsArr)){
-			$cArr = explode(';',$this->searchTermsArr['db']);
-			$collIdArr = explode(',',$cArr[0]);
-			if(isset($cArr[1])) $catIdStr = $cArr[1];
-		}
 		//Set collections
 		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, '.
 			'cat.category, cat.icon AS caticon, cat.acronym '.

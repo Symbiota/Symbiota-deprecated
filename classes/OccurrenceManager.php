@@ -434,10 +434,10 @@ class OccurrenceManager{
 			$sqlWhere .= "AND (o.occid IN(SELECT occid FROM images)) ";
 			$this->localSearchArr[] = 'has images';
 		}
-        if(array_key_exists("hasgenetic",$this->searchTermArr)){
-            $sqlWhere .= "AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ";
-            $this->localSearchArr[] = 'has genetic data';
-        }
+		if(array_key_exists("hasgenetic",$this->searchTermArr)){
+			$sqlWhere .= "AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ";
+			$this->localSearchArr[] = 'has genetic data';
+		}
 		if(array_key_exists("targetclid",$this->searchTermArr)){
 			$clid = $this->searchTermArr["targetclid"];
 			if(is_numeric($clid)){
@@ -475,7 +475,7 @@ class OccurrenceManager{
 		return $retArr;
 	}
 	
-    protected function formatDate($inDate){
+	protected function formatDate($inDate){
 		$retDate = OccurrenceUtilities::formatDate($inDate);
 		return $retDate;
 	}
@@ -603,14 +603,16 @@ class OccurrenceManager{
 
 	public function outputFullCollArr($occArr, $targetCatID = 0){
 		global $DEFAULTCATID, $LANG;
-        if(!$targetCatID && $DEFAULTCATID) $targetCatID = $DEFAULTCATID;
-        $collCnt = 0;
+		if(!$targetCatID && $DEFAULTCATID) $targetCatID = $DEFAULTCATID;
+		$buttonStr = '<button type="submit" class="ui-button ui-widget ui-corner-all">'.(isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next &gt;').'</button>';
+		//$buttonStr = '<input type="submit" class="nextbtn searchcollnextbtn" value="'.(isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >').'" />';
+		$collCnt = 0;
 		echo '<div style="position:relative">';
-        if(isset($occArr['cat'])){
+		if(isset($occArr['cat'])){
 			$categoryArr = $occArr['cat'];
 			?>
 			<div style="float:right;margin-top:20px;">
-				<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>"  />
+				<?php echo $buttonStr; ?>
 			</div>
 			<table style="float:left;width:80%;">
 				<?php
@@ -748,14 +750,14 @@ class OccurrenceManager{
 			if(!isset($occArr['cat'])){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*5; ?>px;right:0px;">
-					<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
+					<?php echo $buttonStr; ?>
 				</div>
 				<?php
 			}
 			if(count($collArr) > 40){
 				?>
 				<div style="float:right;position:absolute;top:<?php echo count($collArr)*15; ?>px;right:0px;">
-					<input type="submit" class="nextbtn searchcollnextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
+					<?php echo $buttonStr; ?>
 				</div>
 				<?php
 			}
@@ -858,21 +860,6 @@ class OccurrenceManager{
 	public function getLocalSearchStr(){
 		return implode("; ", $this->localSearchArr);
 	}
-
-    public function getSearchResultUrl(){
-        $url = '?';
-        $stPieces = Array();
-        foreach($this->searchTermArr as $i => $v){
-            if($v){
-                $stPieces[] = $i.'='.$v;
-            }
-        }
-        $url .= implode("&",$stPieces);
-        $url = str_replace('&taxontype=','&type=',$url);
-        $url = str_replace('&usethes=','&thes=',$url);
-        $url = str_replace(' ','%20',$url);
-        return $url;
-    }
 
 	public function getTaxonAuthorityList(){
 		$taxonAuthorityList = Array();
@@ -1176,17 +1163,17 @@ class OccurrenceManager{
 			}
 			$searchFieldsActivated = true;
 		}
-        if(array_key_exists("hasgenetic",$_REQUEST)){
-            $hasgenetic = $_REQUEST["hasgenetic"];
-            if($hasgenetic){
-                $searchArr[] = "hasgenetic:".$hasgenetic;
-                $this->searchTermArr["hasgenetic"] = true;
-            }
-            else{
-                unset($this->searchTermArr["hasgenetic"]);
-            }
-            $searchFieldsActivated = true;
-        }
+		if(array_key_exists("hasgenetic",$_REQUEST)){
+			$hasgenetic = $_REQUEST["hasgenetic"];
+			if($hasgenetic){
+				$searchArr[] = "hasgenetic:".$hasgenetic;
+				$this->searchTermArr["hasgenetic"] = true;
+			}
+			else{
+				unset($this->searchTermArr["hasgenetic"]);
+			}
+			$searchFieldsActivated = true;
+		}
 		if(array_key_exists("targetclid",$_REQUEST) && is_numeric($_REQUEST['targetclid'])){
 			$searchArr[] = "targetclid:".$_REQUEST["targetclid"];
 			$this->searchTermArr["targetclid"] = $_REQUEST["targetclid"];
@@ -1287,29 +1274,29 @@ class OccurrenceManager{
 			$rs2->free();
 
 			if($accArr){
-                //Get synonym that are different than target
-                $sql3 = 'SELECT DISTINCT t.tid, t.sciname ' .
-                    'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
-                    'WHERE (ts.taxauthid = ' . $taxAuthId . ') AND (ts.tidaccepted IN(' . implode('', $accArr) . ')) ';
-                $rs3 = $this->conn->query($sql3);
-                while ($r3 = $rs3->fetch_object()) {
-                    if (!in_array($r3->tid, $targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
-                }
-                $rs3->free();
+				//Get synonym that are different than target
+				$sql3 = 'SELECT DISTINCT t.tid, t.sciname ' .
+					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
+					'WHERE (ts.taxauthid = ' . $taxAuthId . ') AND (ts.tidaccepted IN(' . implode('', $accArr) . ')) ';
+				$rs3 = $this->conn->query($sql3);
+				while ($r3 = $rs3->fetch_object()) {
+					if (!in_array($r3->tid, $targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
+				}
+				$rs3->free();
 
-                //If rank is 220, get synonyms of accepted children
-                if ($rankId == 220) {
-                    $sql4 = 'SELECT DISTINCT t.tid, t.sciname ' .
-                        'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
-                        'WHERE (ts.parenttid IN(' . implode('', $accArr) . ')) AND (ts.taxauthid = ' . $taxAuthId . ') ' .
-                        'AND (ts.TidAccepted = ts.tid)';
-                    $rs4 = $this->conn->query($sql4);
-                    while ($r4 = $rs4->fetch_object()) {
-                        $synArr[$r4->tid] = $r4->sciname;
-                    }
-                    $rs4->free();
-                }
-            }
+				//If rank is 220, get synonyms of accepted children
+				if ($rankId == 220) {
+					$sql4 = 'SELECT DISTINCT t.tid, t.sciname ' .
+						'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
+						'WHERE (ts.parenttid IN(' . implode('', $accArr) . ')) AND (ts.taxauthid = ' . $taxAuthId . ') ' .
+						'AND (ts.TidAccepted = ts.tid)';
+					$rs4 = $this->conn->query($sql4);
+					while ($r4 = $rs4->fetch_object()) {
+						$synArr[$r4->tid] = $r4->sciname;
+					}
+					$rs4->free();
+				}
+			}
 		}
 		return $synArr;
 	}

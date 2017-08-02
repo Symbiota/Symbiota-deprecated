@@ -80,10 +80,14 @@ class OccurrenceListManager extends OccurrenceManager{
 				|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
 					$locStr = str_replace('.,',',',$row->locality);
 					if($row->decimallatitude && $row->decimallongitude) $locStr .= ', '.$row->decimallatitude.' '.$row->decimallongitude;
-					$returnArr[$row->occid]["locality"] = $locStr;
+					$returnArr[$row->occid]["locality"] = trim($locStr,' ,;');
 					$returnArr[$row->occid]["collnum"] = $this->cleanOutStr($row->recordnumber);
 					$dateStr = date('d M Y',strtotime($row->eventdate));
-					if($row->enddayofyear) $dateStr .= ' to '.date('d M Y',DateTime::createFromFormat('z Y', strval($row->enddayofyear).' '.strval($row->year)));
+					if($row->enddayofyear && $row->year){
+						if($d = DateTime::createFromFormat('z Y', strval($row->enddayofyear).' '.strval($row->year))){
+							$dateStr .= ' to '.$d->format('d M Y');
+						}
+					}
 					$returnArr[$row->occid]["date"] = $dateStr;
 					$returnArr[$row->occid]["habitat"] = $row->habitat;
 					$elevStr = $row->minimumelevationinmeters;

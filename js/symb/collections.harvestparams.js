@@ -126,8 +126,9 @@ function updateRadius(){
 function checkHarvestParamsForm(frm){
 	//make sure they have filled out at least one field.
 	if((frm.taxa.value == '') && (frm.country.value == '') && (frm.state.value == '') && (frm.county.value == '') &&
-		(frm.locality.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') &&
-		(frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate.value == '')){
+		(frm.local.value == '') && (frm.elevlow.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') &&
+		(frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate1.value == '') && (frm.catnum.value == '') &&
+		(frm.typestatus.checked == false) && (frm.hasimages.checked == false) && (frm.hasgenetic.checked == false)){
 		alert("Please fill in at least one search parameter!");
 		return false;
 	}

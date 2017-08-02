@@ -26,13 +26,13 @@ class OccurrenceAnnotationManager extends OccurrenceManager {
 		$join ="";
 		$sqlWhere = "";
 		// limit to current collection(s)
-		if(array_key_exists("db",$this->searchTermsArr)){
+		if(array_key_exists("db",$this->searchTermArr)){
 			$join = "left join omoccurrences o on e.occid = o.occid ";
-			if(strpos($this->searchTermsArr["db"],"all") === false){
-				$dbStr = preg_replace('/;catid:\d*/','',$this->searchTermsArr["db"]);
+			if(strpos($this->searchTermArr["db"],"all") === false){
+				$dbStr = preg_replace('/;catid:\d*/','',$this->searchTermArr["db"]);
 				$sqlWhere .= "AND (o.CollID IN(".str_replace(";",",",trim($dbStr,';')).")) ";
 			}
-			elseif(preg_match('/;catid:(\d+)/',$this->searchTermsArr["db"],$matches)){
+			elseif(preg_match('/;catid:(\d+)/',$this->searchTermArr["db"],$matches)){
 				$catId = $matches[1];
 				if($catId) $sqlWhere .= "AND (o.CollID IN(SELECT collid FROM omcollcatlink WHERE (ccpk = ".$catId."))) ";
 			}

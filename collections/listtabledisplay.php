@@ -12,7 +12,7 @@ $sortField2 = array_key_exists('sortfield2',$_REQUEST)?$_REQUEST['sortfield2']:'
 $sortOrder = array_key_exists('sortorder',$_REQUEST)?$_REQUEST['sortorder']:'';
 
 //Sanitation
-if(!is_numeric($page)) $page = 0;
+if(!is_numeric($page) || $page < 1) $page = 1;
 
 $collManager = new OccurrenceListManager();
 $searchVar = $collManager->getSearchTermStr();
@@ -73,12 +73,12 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 			<div style="float:right;">
 				<form action="download/index.php" method="get" style="float:left">
 					<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
-						<img src="../images/dl2.png" style="width:15px" />
+						<img src="../images/dl2.png" style="width:13px" />
 					</button>
 					<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
 					<input name="dltype" type="hidden" value="specimen" />
 				</form>
-				<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor:pointer;" onclick="copyUrl()" title="Copy URL to Clipboard"><img src="../images/link2.png" style="width:15px" /></button>
+				<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor:pointer;" onclick="copyUrl()" title="Copy URL to Clipboard"><img src="../images/link2.png" style="width:13px" /></button>
 			</div>
 			<fieldset style="padding:5px;width:650px;">
 				<legend><b>Sort Results</b></legend>
@@ -120,54 +120,57 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 				</form>
 			</fieldset>
 		</div>
+		<?php 
+		$collManager->addSort($sortField1, $sortOrder);
+		if($sortField2) $collManager->addSort($sortField2, $sortOrder);
+		$recArr = $collManager->getSpecimenMap((($page-1)*$tableCount), $tableCount);
+		
+		$targetClid = $collManager->getSearchTerm("targetclid");
+		
+		$qryCnt = $collManager->getRecordCnt();
+		$navStr = '<div style="float:right;">';
+		if($page > 1){
+			$navStr .= '<a href="listtabledisplay.php?'.$searchVar.'&page='.($page-1).'" title="Previous '.$tableCount.' records">&lt;&lt;</a>';
+		}
+		$navStr .= ' | ';
+		$navStr .= ($page==1?1:(($page-1)*$tableCount)).'-'.($qryCnt<$tableCount*$page?$qryCnt:$tableCount*$page).' of '.$qryCnt.' records';
+		$navStr .= ' | ';
+		if($qryCnt > ($page*$tableCount)){
+			$navStr .= '<a href="listtabledisplay.php?'.$searchVar.'&page='.($page+1).'" title="Next '.$tableCount.' records">&gt;&gt;</a>';
+		}
+		$navStr .= '</div>';
+		?>
 		<div style="width:790px;clear:both;">
-			<?php
-			if(isset($collections_listCrumbs)){
-				if($collections_listCrumbs){
+			<div style="float:right">
+				<?php 
+				echo $navStr;
+				?>
+			</div>
+			<div>
+				<?php
+				if(isset($collections_listCrumbs)){
+					if($collections_listCrumbs){
+						echo '<span class="navpath">';
+						echo $collections_listCrumbs.' &gt;&gt; ';
+						echo ' <b>Specimen Records Table</b>';
+						echo '</span>';
+					}
+				}
+				else{
 					echo '<span class="navpath">';
-					echo $collections_listCrumbs.' &gt;&gt; ';
-					echo ' <b>Specimen Records Table</b>';
+					echo '<a href="../index.php">Home</a> &gt;&gt; ';
+					echo '<a href="index.php">Collections</a> &gt;&gt; ';
+					echo '<a href="harvestparams.php?'.$searchVar.'">Search Criteria</a> &gt;&gt; ';
+					echo '<b>Specimen Records Table</b>';
 					echo '</span>';
 				}
-			}
-			else{
-				echo '<span class="navpath">';
-				echo '<a href="../index.php">Home</a> &gt;&gt; ';
-				echo '<a href="index.php">Collections</a> &gt;&gt; ';
-				echo '<a href="harvestparams.php?'.$searchVar.'">Search Criteria</a> &gt;&gt; ';
-				echo '<b>Specimen Records Table</b>';
-				echo '</span>';
-			}
-			?>
+				?>
+			</div>
 		</div>
 		<div id="tablediv">
 			<?php
-			$collManager->addSort($sortField1, $sortOrder);
-			if($sortField2) $collManager->addSort($sortField2, $sortOrder);
-			$recArr = $collManager->getSpecimenMap($page,$tableCount);
-			
-			$targetClid = $collManager->getSearchTerm("targetclid");
-			
-			$qryCnt = $collManager->getRecordCnt();
-			$navStr = '<div style="float:right;">';
-			if($page >= $tableCount){
-				$navStr .= '<a href="listtabledisplay.php?'.$searchVar.'&page='.($page-$tableCount).'" title="Previous '.$tableCount.' records">&lt;&lt;</a>';
-			}
-			$navStr .= ' | ';
-			$navStr .= ($page+1).'-'.($qryCnt<$tableCount+$page?$qryCnt:$tableCount+$page).' of '.$qryCnt.' records';
-			$navStr .= ' | ';
-			if($qryCnt > ($tableCount+$page)){
-				$navStr .= '<a href="listtabledisplay.php?'.$searchVar.'&page='.($page+$tableCount).'" title="Next '.$tableCount.' records">&gt;&gt;</a>';
-			}
-			$navStr .= '</div>';
-			
 			if($recArr){
 				?>
-				<div style="width:790px;clear:both;margin:5px;">
-					<?php 
-					$navStr;
-					?>
-				</div>
 				<div style="clear:both;height:5px;"></div>
 				<table class="styledtable" style="font-family:Arial;font-size:12px;">
 					<tr>

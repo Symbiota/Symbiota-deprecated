@@ -63,9 +63,9 @@ $searchVar = $collManager->getSearchTermStr();
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestParamsForm(this)">
 			<div style="margin:10 0 10 0;"><hr/></div>
 			<div style='float:right;margin:-5px 10px;'>
-				<div><input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT_LIST'])?$LANG['BUTTON_NEXT_LIST']:'List Display'; ?>" /></div>
-				<div style="margin-bottom:10px"><input type="button" class="nextbtn" onclick="displayTableView(this.form)" value="<?php echo isset($LANG['BUTTON_NEXT_TABLE'])?$LANG['BUTTON_NEXT_TABLE']:'Table Display'; ?>" /></div>
-				<div><input type="reset" class="resetbtn" onclick="resetHarvestParamsForm()" value="<?php echo isset($LANG['BUTTON_RESET'])?$LANG['BUTTON_RESET']:'Reset Form'; ?>" /></div>
+				<div><button type="submit" class="ui-button ui-widget ui-corner-all"><?php echo isset($LANG['BUTTON_NEXT_LIST'])?$LANG['BUTTON_NEXT_LIST']:'List Display'; ?></button></div>
+				<div style="margin-bottom:10px"><button type="button" class="ui-button ui-widget ui-corner-all" onclick="displayTableView(this.form)"><?php echo isset($LANG['BUTTON_NEXT_TABLE'])?$LANG['BUTTON_NEXT_TABLE']:'Table Display'; ?></button></div>
+				<div><button type="reset" class="ui-button ui-widget ui-corner-all" style="padding:3px 10px;" onclick="resetHarvestParamsForm()"><?php echo isset($LANG['BUTTON_RESET'])?$LANG['BUTTON_RESET']:'Reset Form'; ?></button></div>
 			</div>
 			<div>
 				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>
@@ -192,7 +192,8 @@ $searchVar = $collManager->getSearchTermStr();
 				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="" title="<?php echo $LANG['TITLE_TEXT_4']; ?>" />
 			</div>
 			<div style="float:right;">
-				<input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
+				<div><button type="submit" class="ui-button ui-widget ui-corner-all"><?php echo isset($LANG['BUTTON_NEXT_LIST'])?$LANG['BUTTON_NEXT_LIST']:'List Display'; ?></button></div>
+				<div style="margin-bottom:10px"><button type="button" class="ui-button ui-widget ui-corner-all" onclick="displayTableView(this.form)"><?php echo isset($LANG['BUTTON_NEXT_TABLE'])?$LANG['BUTTON_NEXT_TABLE']:'Table Display'; ?></button></div>
 			</div>
 			<div>
 				<h1><?php echo $LANG['SPECIMEN_HEADER']; ?></h1>

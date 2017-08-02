@@ -1287,7 +1287,7 @@ class MapInterfaceManager{
 		$bottomLimit = ($pageRequest - 1)*$cntPerPage;
 		$sql .= "ORDER BY o.sciname, o.eventdate ";
 		$sql .= "LIMIT ".$bottomLimit.",".$cntPerPage;
-		//echo "<div>Spec sql: ".$sql."</div>";
+		echo "<div>Spec sql: ".$sql."</div>"; exit;
 		$result = $this->conn->query($sql);
 		$canReadRareSpp = false;
 		if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){

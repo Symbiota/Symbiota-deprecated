@@ -331,7 +331,7 @@ div.genericpopup{
     color: black;
 	width: 90px;
 	padding: 4px 6px;
-	border-radius: 5px;
+	border-radius: 2px;
 }
 
 .resetbtn:hover {
