@@ -1,12 +1,9 @@
-function copySearchUrl(){
-	var urlPrefix = document.getElementById('urlPrefixBox').value;
-	var urlFixed = urlPrefix+'&page='+sessionStorage.collSearchPage;
-	var copyBox = document.getElementById('urlFullBox');
-	copyBox.value = urlFixed;
-	copyBox.focus();
-	copyBox.setSelectionRange(0,copyBox.value.length);
+function copyUrl(){
+	var $temp = $("<input>");
+	$("body").append($temp);
+	$temp.val(window.location.href).select();
 	document.execCommand("copy");
-	copyBox.value = '';
+	$temp.remove();
 }
 
 function addVoucherToCl(occidIn,clidIn,tidIn){

@@ -31,8 +31,6 @@ elseif($mapType == 'occquery'){
 	$occurManager = new OccurrenceManager();
 	$mapWhere = $occurManager->getSqlWhere();
 	$tArr = $occurManager->getTaxaArr();
-	$stArr = $occurManager->getSearchTermsArr();
-	$sharedMapManager->setSearchTermsArr($stArr);
 }
 
 $sharedMapManager->setTaxaArr($tArr);

@@ -11,8 +11,6 @@ $sharedMapManager = new MappingShared();
 
 $mapWhere = $occurManager->getSqlWhere();
 $tArr = $occurManager->getTaxaArr();
-$stArr = $occurManager->getSearchTermsArr();
-$sharedMapManager->setSearchTermsArr($stArr);
 $sharedMapManager->setTaxaArr($tArr);
 if($kmlFields){
 	$sharedMapManager->setFieldArr($kmlFields);

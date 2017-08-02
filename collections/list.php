@@ -4,18 +4,21 @@ include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1; 
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
 $targetTid = array_key_exists("targettid",$_REQUEST)?$_REQUEST["targettid"]:'';
+$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1;
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1;
 
 //Sanitation
 if(!is_numeric($taxonFilter)) $taxonFilter = 1;
+if(!is_numeric($tabIndex)) $tabIndex= 1;
 if(!is_numeric($cntPerPage)) $cntPerPage = 100;
+if(!is_numeric($pageNumber)) $pageNumber = 1;
 
 $collManager = new OccurrenceListManager();
 $searchVar = $collManager->getSearchTermStr();
+$occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 ?>
 <html>
 <head>
@@ -28,13 +31,13 @@ $searchVar = $collManager->getSearchTermStr();
 		.ui-tabs .ui-tabs-nav li { width:32%; }
 		.ui-tabs .ui-tabs-nav li a { margin-left:10px;}
 	</style>
-	<script type="text/javascript" src="../js/jquery.js?ver=20130917"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js?ver=20130917"></script>
-	<script type="text/javascript" src="../js/symb/collections.list.js"></script>
+	<script type="text/javascript" src="../js/jquery.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
+		var urlQueryStr = "<?php echo $searchVar.'&page='.$pageNumber; ?>";
 
 		$(document).ready(function() {
 			<?php
@@ -76,7 +79,8 @@ $searchVar = $collManager->getSearchTermStr();
 				}
 			});
 		}
-		</script>
+	</script>
+	<script type="text/javascript" src="../js/symb/collections.list.js?ver=5"></script>
 </head>
 <body>
 <?php
@@ -143,16 +147,9 @@ $searchVar = $collManager->getSearchTermStr();
 						echo '<div><b>'.$LANG['SEARCH_CRITERIA'].':</b> '.$localSearchStr.'</div>';
 					}
 					?>
-					<textarea id="urlPrefixBox" style="position:absolute;left:-9999px;top:-9999px">
-						<?php 
-						echo (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/collections/list.php';
-						echo $collManager->getSearchResultUrl();
-						?>
-					</textarea>
-					<textarea id="urlFullBox" style="position:absolute;left:-9999px;top:-9999px"></textarea>
 				</div>
 				<div style="clear:both;">
-					<div style="margin:5px;float:right;"><button type="button" id="copyurl" onclick="copySearchUrl();">Copy URL to These Results</button></div>
+					<div style="margin:5px;float:right;"><button type="button" id="copyurl" onclick="copyUrl();">Copy URL</button></div>
 					<div style="margin:5px;float:left;">
 						<?php 
 						echo '<a href="listtabledisplay.php?targettid='.$targetTid.$collManager->getSearchTermStr().'">See Results in Table View</a>';
@@ -164,24 +161,24 @@ $searchVar = $collManager->getSearchTermStr();
 				//Add pagination
 				$paginationStr = '<div><div style="clear:both;"><hr/></div><div style="float:left;margin:5px;">';
 				$lastPage = (int)($collManager->getRecordCnt() / $cntPerPage) + 1;
-				$startPage = ($pageNumber > 4?$pageNumber - 4:1);
-				$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
+				$startPage = ($pageNumber > 5?$pageNumber - 5:1);
+				$endPage = ($lastPage > $startPage + 10?$startPage + 10:$lastPage);
 				$pageBar = '';
 				if($startPage > 1){
 					$pageBar .= '<span class="pagination" style="margin-right:5px;"><a href="list.php?'.$searchVar.'" >'.$LANG['PAGINATION_FIRST'].'</a></span>';
-					$pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='' onclick='setOccurrenceList(".(($pageNumber - 10) < 1?1:$pageNumber - 10).");return false;'>&lt;&lt;</a></span>";
+					$pageBar .= '<span class="pagination" style="margin-right:5px;"><a href="list.php?'.$searchVar.'&page='.(($pageNumber - 10) < 1?1:$pageNumber - 10).'">&lt;&lt;</a></span>';
 				}
 				for($x = $startPage; $x <= $endPage; $x++){
 					if($pageNumber != $x){
-						$pageBar .= "<span class='pagination' style='margin-right:3px;margin-right:3px;'><a href='' onclick='setOccurrenceList(".$x.");return false;'>".$x."</a></span>";
+						$pageBar .= '<span class="pagination" style="margin-right:3px;margin-right:3px;"><a href="list.php?'.$searchVar.'&page='.$x.'">'.$x.'</a></span>';
 					}
 					else{
-						$pageBar .= "<span class='pagination' style='margin-right:3px;margin-right:3px;font-weight:bold;'>".$x."</span>";
+						$pageBar .= '<span class="pagination" style="margin-right:3px;margin-right:3px;font-weight:bold;">'.$x.'</span>';
 					}
 				}
 				if(($lastPage - $startPage) >= 10){
-					$pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='' onclick='setOccurrenceList(".(($pageNumber + 10) > $lastPage?$lastPage:($pageNumber + 10)).");return false;'>&gt;&gt;</a></span>";
-					$pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='' onclick='setOccurrenceList(".$lastPage.");return false;'>Last</a></span>";
+					$pageBar .= '<span class="pagination" style="margin-left:5px;"><a href="list.php?'.$searchVar.'&page='.(($pageNumber + 10) > $lastPage?$lastPage:($pageNumber + 10)).'">&gt;&gt;</a></span>';
+					$pageBar .= '<span class="pagination" style="margin-left:5px;"><a href="list.php?'.$searchVar.'&page='.$lastPage.'">Last</a></span>';
 				}
 				$pageBar .= '</div><div style="float:right;margin:5px;">';
 				$beginNum = ($pageNumber - 1)*$cntPerPage + 1;
@@ -193,7 +190,6 @@ $searchVar = $collManager->getSearchTermStr();
 				echo $paginationStr;
 
 				//Add search return
-				$occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 				if($occurArr){
 					echo '<table id="omlisttable">';
 					$prevCollid = 0;
@@ -293,7 +289,7 @@ $searchVar = $collManager->getSearchTermStr();
 		</div>
 		<div id="maps" style="min-height:400px;margin-bottom:10px;">
 			<div class="button" style="margin-top:20px;float:right;width:13px;height:13px;" title="<?php echo $LANG['MAP_DOWNLOAD']; ?>">
-				<a id="mapdllink" href="<?php echo 'download/index.php?'.$searchVar.'&dltype=georef'; ?>"><img src="../images/dl.png"/></a>
+				<a id="mapdllink" href="<?php echo 'download/index.php?searchvar='.urlencode($searchVar).'&dltype=georef'; ?>"><img src="../images/dl.png"/></a>
 			</div>
 			<div style='margin-top:10px;'>
 				<h2><?php echo $LANG['GOOGLE_MAP_HEADER']; ?></h2>
@@ -315,7 +311,7 @@ $searchVar = $collManager->getSearchTermStr();
 					<?php echo $LANG['GOOGLE_EARTH_DESCRIPTION'];?>
 				</div>
 				<div style="margin:20px;">
-					<input name="searchvar" type="hidden" value="<?php echo urlencode($searchVar); ?>" />
+					<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
 					<button name="formsubmit" type="submit" value="<?php echo $LANG['CREATE_KML']; ?>"><?php echo $LANG['CREATE_KML']; ?></button>
 				</div>
 				<div style='margin:10 0 0 20;'>

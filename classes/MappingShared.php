@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class MappingShared{
 	
@@ -8,7 +8,6 @@ class MappingShared{
 	private $taxaArr = Array();
 	private $fieldArr = Array();
 	private $sqlWhere;
-	private $searchTerms = 0;
 
     public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
@@ -57,8 +56,8 @@ class MappingShared{
 			}
 		}
 		$sql .= "FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
-		if(($this->searchTerms == 1) && (array_key_exists("clid",$this->searchTermsArr))) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
-		if((array_key_exists("collector",$this->searchTermsArr))) $sql .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
+		if(strpos($mapWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+		if(strpos($mapWhere,'MATCH(f.recordedby)')) $sql.= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		$sql .= $mapWhere;
 		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL) AND (o.coordinateUncertaintyInMeters IS NULL OR o.coordinateUncertaintyInMeters < 20000) ";
 		if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
@@ -222,11 +221,6 @@ class MappingShared{
 	
 	public function setFieldArr($fArr){
     	$this->fieldArr = $fArr;
-    }
-	
-	public function setSearchTermsArr($stArr){
-    	$this->searchTermsArr = $stArr;
-		$this->searchTerms = 1;
     }
 }
 ?>
