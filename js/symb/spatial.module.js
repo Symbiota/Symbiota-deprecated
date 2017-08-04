@@ -215,10 +215,10 @@ function buildLayerTableRow(lArr,removable){
         var onchange = (removable?"toggleUploadLayer(this,'"+lArr['Title']+"');":addLayerFunction+"(this,'"+lArr['Title']+"');");
         trfragment += '<input type="checkbox" value="'+layerID+'" onchange="'+onchange+'" '+(removable?'checked ':'')+'/>';
         trfragment += '</td>';
-        trfragment += '<td style="width:150px;">';
+        trfragment += '<td style="width:170px;">';
         trfragment += '<b>'+lArr['Title']+'</b>';
         trfragment += '</td>';
-        trfragment += '<td style="width:250px;">';
+        trfragment += '<td style="width:330px;">';
         trfragment += lArr['Abstract'];
         trfragment += '</td>';
         trfragment += '<td style="width:50px;background-color:black">';
