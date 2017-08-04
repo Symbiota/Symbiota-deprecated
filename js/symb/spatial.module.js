@@ -201,10 +201,18 @@ function buildLayerTableRow(lArr,removable){
     var layerList = '';
     var trfragment = '';
     var layerID = lArr['Name'];
+    var layerType = lArr['layerType'];
+    if(layerType != 'vector'){
+        var infoArr = [];
+        infoArr['id'] = layerID;
+        infoArr['title'] = lArr['Title'];
+        rasterLayers.push(infoArr);
+    }
+    var addLayerFunction = (layerType == 'vector'?'editVectorLayers':'editRasterLayers');
     var divid = "lay-"+layerID;
     if(!document.getElementById(divid)){
         trfragment += '<td style="width:30px;">';
-        var onchange = (removable?"toggleUploadLayer(this,'"+lArr['Title']+"');":"editLayers(this,'"+lArr['Title']+"');");
+        var onchange = (removable?"toggleUploadLayer(this,'"+lArr['Title']+"');":addLayerFunction+"(this,'"+lArr['Title']+"');");
         trfragment += '<input type="checkbox" value="'+layerID+'" onchange="'+onchange+'" '+(removable?'checked ':'')+'/>';
         trfragment += '</td>';
         trfragment += '<td style="width:150px;">';
@@ -213,8 +221,8 @@ function buildLayerTableRow(lArr,removable){
         trfragment += '<td style="width:250px;">';
         trfragment += lArr['Abstract'];
         trfragment += '</td>';
-        trfragment += '<td style="width:50px;">';
-        trfragment += '';
+        trfragment += '<td style="width:50px;background-color:black">';
+        trfragment += '<img src="../images/'+(layerType == 'vector'?'button_wfs.png':'button_wms.png')+'" style="width:20px;margin-left:8px;">';
         trfragment += '</td>';
         trfragment += '<td style="width:50px;">';
         if(removable){
@@ -252,6 +260,32 @@ function buildQueryStrings(){
             }
         });
     }
+}
+
+function buildRasterCalcDropDown(){
+    var selectionList = '<option value="">Select Layer</option>';
+    overlayLayers.sort();
+    for(l in overlayLayers){
+        var newOption = '<option value="'+overlayLayers[l]['id']+'">'+overlayLayers[l]['id']+'</option>';
+        selectionList += newOption;
+    }
+    document.getElementById("rastcalcoverlay1").innerHTML = selectionList;
+    document.getElementById("rastcalcoverlay2").innerHTML = selectionList;
+}
+
+function buildReclassifyDropDown(){
+    var selectionList = '<option value="">Select Layer</option>';
+    for(i in rasterLayers){
+        var newOption = '<option value="'+rasterLayers[i]['id']+'">'+rasterLayers[i]['title']+'</option>';
+        selectionList += newOption;
+    }
+    if(overlayLayers.length > 0){
+        for(l in overlayLayers){
+            var newOption = '<option value="'+overlayLayers[l]['id']+'">'+overlayLayers[l]['id']+'</option>';
+            selectionList += newOption;
+        }
+    }
+    document.getElementById("reclassifysourcelayer").innerHTML = selectionList;
 }
 
 function buildSOLRQString(){
@@ -340,6 +374,16 @@ function buildTaxaKeyPiece(key,family,tidinterpreted,sciname){
         taxaKeyArr[family] = [];
     }
     taxaKeyArr[family][key] = keyHTML;
+}
+
+function buildVectorizeDropDown(){
+    var selectionList = '<option value="">Select Layer</option>';
+    vectorizeLayers.sort();
+    for(l in vectorizeLayers){
+        var newOption = '<option value="'+vectorizeLayers[l]+'">'+vectorizeLayers[l]+'</option>';
+        selectionList += newOption;
+    }
+    document.getElementById("vectorizesourcelayer").innerHTML = selectionList;
 }
 
 function changeBaseMap(){
@@ -505,6 +549,52 @@ function checkDateSliderType(){
     }
 }
 
+function checkObjectNotEmpty(obj){
+    for(var i in obj){
+        if(obj[i]) return true;
+    }
+    return false;
+}
+
+function checkReclassifyForm(){
+    var rasterLayer = document.getElementById("reclassifysourcelayer").value;
+    var outputName = document.getElementById("reclassifyOutputName").value;
+    var rasterMinVal = document.getElementById("reclassifyRasterMin").value;
+    var rasterMaxVal = document.getElementById("reclassifyRasterMax").value;
+    var colorVal = document.getElementById("reclassifyColorVal").value;
+    var newVal = document.getElementById("reclassifyNewVal").value;
+    if(rasterLayer == "") alert("Please select a raster layer to reclassify.");
+    else if(outputName == "") alert("Please enter a name for the output overlay.");
+    else if(layersArr[outputName]) alert("The name for the output you entered is already being used by another layer. Please enter a different name.");
+    else if(colorVal == "FFFFFF") alert("Please select a color other than white for this overlay.");
+    else if(rasterMinVal == "" || rasterMaxVal == "" || newVal == "") alert("Please enter a min and max value for the raster and a new value to reclassify.");
+    else if(isNaN(rasterMinVal) || isNaN(rasterMaxVal) || isNaN(newVal)) alert("Please enter only numbers for the min, max, and new values.");
+    else{
+        $("#reclassifytool").popup("hide");
+        reclassifyRaster();
+    }
+}
+
+function checkVectorizeForm(){
+    var rasterLayer = document.getElementById("vectorizesourcelayer").value;
+    if(rasterLayer == "") alert("Please select an overlay layer to vectorize.");
+    else{
+        $("#vectorizeoverlaytool").popup("hide");
+        vectorizeRaster();
+    }
+}
+
+function checkVectorizeOverlayToolOpen(){
+    var featureCnt = selectsource.getFeatures().length;
+    if(selectInteraction.getFeatures().getArray().length == 1){
+        $("#maptools").popup("hide");
+        $("#vectorizeoverlaytool").popup("show");
+    }
+    else{
+        alert('You must have one, and only one, polygon selected from your shapes layer to define vectorize boundaries.')
+    }
+}
+
 function cleanSelectionsLayer(){
     var selLayerFeatures = layersArr['select'].getSource().getFeatures();
     var currentlySelected = selectInteraction.getFeatures().getArray();
@@ -513,6 +603,14 @@ function cleanSelectionsLayer(){
             layersArr['select'].getSource().removeFeature(selLayerFeatures[i]);
         }
     }
+}
+
+function clearReclassifyForm() {
+    document.getElementById("reclassifysourcelayer").selectedIndex = 0;
+    document.getElementById("reclassifyOutputName").value = "";
+    var tableDiv = document.getElementById("reclassifyTableDiv");
+    tableDiv.removeChild(tableDiv.childNodes[0]);
+    setReclassifyTable();
 }
 
 function clearSelections(){
@@ -646,6 +744,38 @@ function deleteSelections(){
     }
 }
 
+function downloadShapesLayer(){
+    var dlType = document.getElementById("shapesdownloadselect").value;
+    var format = '';
+    if(dlType == ''){
+        alert('Please select a download format.');
+        return;
+    }
+    else if(dlType == 'kml'){
+        var format = new ol.format.KML();
+        var filetype = 'application/vnd.google-earth.kml+xml';
+    }
+    else if(dlType == 'geojson'){
+        var format = new ol.format.GeoJSON();
+        var filetype = 'application/vnd.geo+json';
+    }
+    var features = layersArr['select'].getSource().getFeatures();
+    var exportStr = format.writeFeatures(features,{'dataProjection': wgs84Projection, 'featureProjection': mapProjection});
+    var filename = 'shapes.'+dlType;
+    var blob = new Blob([exportStr], {type: filetype});
+    if(window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveBlob(blob, filename);
+    }
+    else{
+        var elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(blob);
+        elem.download = filename;
+        document.body.appendChild(elem);
+        elem.click();
+        document.body.removeChild(elem);
+    }
+}
+
 function exportMapPNG(){
     map.once('postcompose', function(event) {
         var canvas = document.getElementsByTagName('canvas').item(0);
@@ -776,6 +906,104 @@ function generateRandColor(){
     var z1 = z.substring(0,y);
     hexColor = z1 + x;
     return hexColor;
+}
+
+function generateReclassifySLD(valueArr,layername){
+    var sldContent = '';
+    sldContent += '<?xml version="1.0" encoding="UTF-8"?>';
+    sldContent += '<StyledLayerDescriptor version="1.0.0" ';
+    sldContent += 'xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd" ';
+    sldContent += 'xmlns="http://www.opengis.net/sld" ';
+    sldContent += 'xmlns:ogc="http://www.opengis.net/ogc" ';
+    sldContent += 'xmlns:xlink="http://www.w3.org/1999/xlink" ';
+    sldContent += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">';
+    sldContent += '<NamedLayer>';
+    sldContent += '<Name>'+layername+'</Name>';
+    sldContent += '<UserStyle>';
+    sldContent += '<FeatureTypeStyle>';
+    sldContent += '<Rule>';
+    sldContent += '<Name>reclassify_style</Name>';
+    sldContent += '<RasterSymbolizer>';
+    sldContent += '<Opacity>1.0</Opacity>';
+    sldContent += '<ColorMap type="intervals">';
+    sldContent += '<ColorMapEntry color="#FFFFFF" quantity="'+valueArr['rasmin']+'"/>';
+    sldContent += '<ColorMapEntry color="#'+valueArr['color']+'" quantity="'+valueArr['rasmax']+'"/>';
+    sldContent += '</ColorMap>';
+    sldContent += '</RasterSymbolizer>';
+    sldContent += '</Rule>';
+    sldContent += '</FeatureTypeStyle>';
+    sldContent += '</UserStyle>';
+    sldContent += '</NamedLayer>';
+    sldContent += '</StyledLayerDescriptor>';
+    return sldContent;
+}
+
+function generateWPSPolyExtractXML(valueArr,layername,geojsonstr){
+    var xmlContent = '';
+    xmlContent += '<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" ';
+    xmlContent += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wps/1.0.0" ';
+    xmlContent += 'xmlns:wfs="http://www.opengis.net/wfs" xmlns:wps="http://www.opengis.net/wps/1.0.0" ';
+    xmlContent += 'xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" ';
+    xmlContent += 'xmlns:ogc="http://www.opengis.net/ogc" xmlns:wcs="http://www.opengis.net/wcs/1.1.1" ';
+    xmlContent += 'xmlns:xlink="http://www.w3.org/1999/xlink" ';
+    xmlContent += 'xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">';
+    xmlContent += '<ows:Identifier>ras:PolygonExtraction</ows:Identifier>';
+    xmlContent += '<wps:DataInputs>';
+    xmlContent += '<wps:Input>';
+    xmlContent += '<ows:Identifier>data</ows:Identifier>';
+    xmlContent += '<wps:Reference mimeType="image/tiff" xlink:href="http://geoserver/wcs" method="POST">';
+    xmlContent += '<wps:Body>';
+    xmlContent += '<wcs:GetCoverage service="WCS" version="1.1.1">';
+    xmlContent += '<ows:Identifier>'+layername+'</ows:Identifier>';
+    xmlContent += '<wcs:DomainSubset>';
+    xmlContent += '<ows:BoundingBox crs="http://www.opengis.net/gml/srs/epsg.xml#4326">';
+    xmlContent += '<ows:LowerCorner>-180.0 -90.0</ows:LowerCorner>';
+    xmlContent += '<ows:UpperCorner>180.0 90.0</ows:UpperCorner>';
+    xmlContent += '</ows:BoundingBox>';
+    xmlContent += '</wcs:DomainSubset>';
+    xmlContent += '<wcs:Output format="image/tiff"/>';
+    xmlContent += '</wcs:GetCoverage>';
+    xmlContent += '</wps:Body>';
+    xmlContent += '</wps:Reference>';
+    xmlContent += '</wps:Input>';
+    xmlContent += '<wps:Input>';
+    xmlContent += '<ows:Identifier>band</ows:Identifier>';
+    xmlContent += '<wps:Data>';
+    xmlContent += '<wps:LiteralData>0</wps:LiteralData>';
+    xmlContent += '</wps:Data>';
+    xmlContent += '</wps:Input>';
+    xmlContent += '<wps:Input>';
+    xmlContent += '<ows:Identifier>insideEdges</ows:Identifier>';
+    xmlContent += '<wps:Data>';
+    xmlContent += '<wps:LiteralData>0</wps:LiteralData>';
+    xmlContent += '</wps:Data>';
+    xmlContent += '</wps:Input>';
+    xmlContent += '<wps:Input>';
+    xmlContent += '<ows:Identifier>roi</ows:Identifier>';
+    xmlContent += '<wps:Data>';
+    xmlContent += '<wps:ComplexData mimeType="application/json"><![CDATA['+geojsonstr+']]></wps:ComplexData>';
+    xmlContent += '</wps:Data>';
+    xmlContent += '</wps:Input>';
+    xmlContent += '<wps:Input>';
+    xmlContent += '<ows:Identifier>nodata</ows:Identifier>';
+    xmlContent += '<wps:Data>';
+    xmlContent += '<wps:LiteralData>0</wps:LiteralData>';
+    xmlContent += '</wps:Data>';
+    xmlContent += '</wps:Input>';
+    xmlContent += '<wps:Input>';
+    xmlContent += '<ows:Identifier>ranges</ows:Identifier>';
+    xmlContent += '<wps:Data>';
+    xmlContent += '<wps:LiteralData>('+valueArr['rasmin']+';'+valueArr['rasmax']+')</wps:LiteralData>';
+    xmlContent += '</wps:Data>';
+    xmlContent += '</wps:Input>';
+    xmlContent += '</wps:DataInputs>';
+    xmlContent += '<wps:ResponseForm>';
+    xmlContent += '<wps:RawDataOutput mimeType="application/json">';
+    xmlContent += '<ows:Identifier>result</ows:Identifier>';
+    xmlContent += '</wps:RawDataOutput>';
+    xmlContent += '</wps:ResponseForm>';
+    xmlContent += '</wps:Execute>';
+    return xmlContent;
 }
 
 function getCollectionParams(){
@@ -1770,8 +1998,7 @@ function removeDateSlider(){
 function removeLayerToSelList(layer){
     var selectobject = document.getElementById("selectlayerselect");
     for (var i=0; i<selectobject.length; i++){
-        if(selectobject.options[i].value == layer)
-            selectobject.remove(i);
+        if(selectobject.options[i].value == layer) selectobject.remove(i);
     }
     setActiveLayer();
 }
@@ -1822,6 +2049,20 @@ function removeUserLayer(layerID){
         $('#criteriatab').tabs({active: 0});
         $("#accordion").accordion("option","active",0);
         pointActive = false;
+    }
+    else if(overlayLayers[layerID]){
+        var layerTileSourceName = layerID+'Source';
+        var layerRasterSourceName = layerID+'RasterSource';
+        layersArr[layerTileSourceName] = '';
+        layersArr[layerRasterSourceName] = '';
+        layersArr[layerID].setVisible(false);
+        var index = overlayLayers.indexOf(layerID);
+        overlayLayers.splice(index, 1);
+        if(vectorizeLayers[layerID]){
+            var vecindex = vectorizeLayers.indexOf(layerID);
+            vectorizeLayers.splice(vecindex, 1);
+        }
+        setRasterTools();
     }
     else{
         layersArr[layerID].setSource(blankdragdropsource);
@@ -2048,11 +2289,113 @@ function setLayersTable(){
                 for(i in layerArr){
                     buildLayerTableRow(layerArr[i],false);
                 }
+                if(rasterLayers.length > 0) setRasterTools();
             }
         }
         toggleLayerTable();
     };
     http.send();
+}
+
+function setRasterTools(){
+    document.getElementById("reclassifytoollink").style.display = 'block';
+    document.getElementById("reclassifyOutputName").value = "";
+    buildReclassifyDropDown();
+    document.getElementById("reclassifysourcelayer").selectedIndex = 0;
+    setReclassifyTable();
+    /*if(checkObjectNotEmpty(overlayLayers)){
+        document.getElementById("rastercalctoollink").style.display = 'block';
+        buildRasterCalcDropDown();
+    }
+    else{
+        document.getElementById("rastercalctoollink").style.display = 'none';
+    }*/
+    if(checkObjectNotEmpty(vectorizeLayers)){
+        document.getElementById("vectorizeoverlaytoollink").style.display = 'block';
+        buildVectorizeDropDown();
+        document.getElementById("vectorizesourcelayer").selectedIndex = 0;
+    }
+    else{
+        document.getElementById("vectorizeoverlaytoollink").style.display = 'none';
+    }
+}
+
+function setReclassifyTable(){
+    if(document.getElementById("reclassifytable")){
+        var currentTable = document.getElementById("reclassifytable");
+        currentTable.parentNode.removeChild(currentTable);
+    }
+    var newTable = document.createElement('table');
+    newTable.setAttribute("id","reclassifytable");
+    newTable.setAttribute("class","styledtable");
+    newTable.setAttribute("style","font-family:Arial;font-size:12px;margin-top:15px;margin-left:auto;margin-right:auto;width:330px;");
+    var newTHead = document.createElement('thead');
+    var newTHeadRow = document.createElement('tr');
+    var newTHeadHead1 = document.createElement('th');
+    newTHeadHead1.setAttribute("style","text-align:center;");
+    newTHeadHead1.innerHTML = "Raster Min Value";
+    newTHeadRow.appendChild(newTHeadHead1);
+    var newTHeadHead1 = document.createElement('th');
+    newTHeadHead1.setAttribute("style","text-align:center;");
+    newTHeadHead1.innerHTML = "Raster Max Value";
+    newTHeadRow.appendChild(newTHeadHead1);
+    var newTHeadHead2 = document.createElement('th');
+    newTHeadHead2.setAttribute("style","text-align:center;");
+    newTHeadHead2.innerHTML = "Color";
+    newTHeadRow.appendChild(newTHeadHead2);
+    var newTHeadHead3 = document.createElement('th');
+    newTHeadHead3.setAttribute("style","text-align:center;");
+    newTHeadHead3.innerHTML = "Reclassify Value";
+    newTHeadRow.appendChild(newTHeadHead3);
+    newTHead.appendChild(newTHeadRow);
+    newTable.appendChild(newTHead);
+    var newTBody = document.createElement('tbody');
+    newTBody.setAttribute("id","reclassifyTBody");
+    var newRow = document.createElement('tr');
+    var newRastValCell = document.createElement('td');
+    newRastValCell.setAttribute("style","width:150px;");
+    var newRastValInput = document.createElement('input');
+    newRastValInput.setAttribute("data-role","none");
+    newRastValInput.setAttribute("type","text");
+    newRastValInput.setAttribute("id","reclassifyRasterMin");
+    newRastValInput.setAttribute("style","width:150px;margin-left:10px;");
+    newRastValInput.setAttribute("value","");
+    newRastValCell.appendChild(newRastValInput);
+    newRow.appendChild(newRastValCell);
+    var newRastValCell = document.createElement('td');
+    newRastValCell.setAttribute("style","width:150px;");
+    var newRastValInput = document.createElement('input');
+    newRastValInput.setAttribute("data-role","none");
+    newRastValInput.setAttribute("type","text");
+    newRastValInput.setAttribute("id","reclassifyRasterMax");
+    newRastValInput.setAttribute("style","width:150px;margin-left:10px;");
+    newRastValInput.setAttribute("value","");
+    newRastValCell.appendChild(newRastValInput);
+    newRow.appendChild(newRastValCell);
+    var newColorValCell = document.createElement('td');
+    newColorValCell.setAttribute("style","width:30px;");
+    var newColorValInput = document.createElement('input');
+    newColorValInput.setAttribute("data-role","none");
+    newColorValInput.setAttribute("id","reclassifyColorVal");
+    newColorValInput.setAttribute("class","color");
+    newColorValInput.setAttribute("style","cursor:pointer;border:1px black solid;height:20px;width:20px;margin-left:5px;margin-bottom:-2px;font-size:0px;");
+    newColorValInput.setAttribute("value","FFFFFF");
+    newColorValCell.appendChild(newColorValInput);
+    newRow.appendChild(newColorValCell);
+    var newNewValCell = document.createElement('td');
+    newNewValCell.setAttribute("style","width:150px;");
+    var newNewValInput = document.createElement('input');
+    newNewValInput.setAttribute("data-role","none");
+    newNewValInput.setAttribute("type","text");
+    newNewValInput.setAttribute("id","reclassifyNewVal");
+    newNewValInput.setAttribute("style","width:150px;margin-left:10px;");
+    newNewValInput.setAttribute("value","");
+    newNewValCell.appendChild(newNewValInput);
+    newRow.appendChild(newNewValCell);
+    newTBody.appendChild(newRow);
+    newTable.appendChild(newTBody);
+    document.getElementById("reclassifyTableDiv").appendChild(newTable);
+    jscolor.init();
 }
 
 function setRecordsTab(){

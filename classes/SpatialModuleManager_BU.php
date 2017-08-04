@@ -60,7 +60,7 @@ class SpatialModuleManager{
         return $retArr;
     }
 
-    public function getLayersArr(){
+	public function getLayersArr(){
         global $GEOSERVER_URL, $GEOSERVER_LAYER_WORKSPACE;
         $url = $GEOSERVER_URL.'/wms?service=wms&version=2.0.0&request=GetCapabilities';
         $xml = simplexml_load_file($url);

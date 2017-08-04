@@ -357,7 +357,7 @@ var jscolor = {
 		this.pickerBorderColor = 'ThreeDHighlight ThreeDShadow ThreeDShadow ThreeDHighlight'; // CSS color
 		this.pickerInset = 1; // px
 		this.pickerInsetColor = 'ThreeDShadow ThreeDHighlight ThreeDHighlight ThreeDShadow'; // CSS color
-		this.pickerZIndex = 10000;
+		this.pickerZIndex = 1000000;
 
 
 		for(var p in prop) {
