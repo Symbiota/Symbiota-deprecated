@@ -957,18 +957,15 @@ class OccurrenceManager{
 					}
 					$taxaStr = implode(";",$taxaArr);
 				}
-				$collTaxa = "taxa:".$taxaStr;
 				$this->searchTermArr["taxa"] = $taxaStr;
-				$useThes = array_key_exists("thes",$_REQUEST)?$this->conn->real_escape_string($_REQUEST["thes"]):0;
+				$useThes = array_key_exists("usethes",$_REQUEST)&&$_REQUEST["usethes"]==1?1:0;
 				if($useThes){
-					$collTaxa .= "&usethes:true";
-					$this->searchTermArr["usethes"] = true;
+					$this->searchTermArr["usethes"] = "1";
 				}
 				else{
-					$this->searchTermArr["usethes"] = false;
+					$this->searchTermArr["usethes"] = "0";
 				}
 				if($searchType){
-					$collTaxa .= "&taxontype:".$searchType;
 					$this->searchTermArr["taxontype"] = $searchType;
 				}
 			}

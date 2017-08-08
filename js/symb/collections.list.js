@@ -1,7 +1,11 @@
 function copyUrl(){
 	var $temp = $("<input>");
 	$("body").append($temp);
-	$temp.val(window.location.href).select();
+	var activeLink = window.location.href;
+	if(activeLink.substring(activeLink.length - 3) == "php"){
+		activeLink = activeLink + "?" + sessionStorage.querystr;
+	}
+	$temp.val(activeLink).select();
 	document.execCommand("copy");
 	$temp.remove();
 }

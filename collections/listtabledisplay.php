@@ -35,37 +35,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
-	<script type="text/javascript">
-		function copyUrl(){
-			var $temp = $("<input>");
-			$("body").append($temp);
-			$temp.val(window.location.href).select();
-			document.execCommand("copy");
-			$temp.remove();
-		}
-
-		function openIndPU(occId,clid){
-		    var wWidth = 900;
-		    if(document.getElementById('maintable')){
-		        wWidth = document.getElementById('maintable').offsetWidth*1.05;
-		    }
-		    else if(document.body.offsetWidth){
-		        wWidth = document.body.offsetWidth*0.9;
-		    }
-		    if(wWidth > 1000) wWidth = 1000;
-		    newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=700,left=20,top=20');
-		    if (newWindow.opener == null) newWindow.opener = self;
-		    return false;
-		}
-
-		function copyUrl(){
-			var $temp = $("<input>");
-			$("body").append($temp);
-			$temp.val(window.location.href).select();
-			document.execCommand("copy");
-			$temp.remove();
-		}
-	</script>
+	<script src="../js/symb/collections.list.js?ver=5f" type="text/javascript"></script>
 </head>
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<div id="">
@@ -121,6 +91,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 			</fieldset>
 		</div>
 		<?php 
+		$searchVar .= '&sortfield1='.$sortField1.'&sortfield2='.$sortField2.'&sortorder='.$sortOrder;
 		$collManager->addSort($sortField1, $sortOrder);
 		if($sortField2) $collManager->addSort($sortField2, $sortOrder);
 		$recArr = $collManager->getSpecimenMap((($page-1)*$tableCount), $tableCount);
@@ -160,7 +131,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 					echo '<span class="navpath">';
 					echo '<a href="../index.php">Home</a> &gt;&gt; ';
 					echo '<a href="index.php">Collections</a> &gt;&gt; ';
-					echo '<a href="harvestparams.php?'.$searchVar.'">Search Criteria</a> &gt;&gt; ';
+					echo '<a href="harvestparams.php">Search Criteria</a> &gt;&gt; ';
 					echo '<b>Specimen Records Table</b>';
 					echo '</span>';
 				}

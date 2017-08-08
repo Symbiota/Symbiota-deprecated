@@ -174,7 +174,8 @@ function setHarvestParamsForm(){
 	if(sessionStorage.querystr){
 		var urlVar = parseUrlVariables(sessionStorage.querystr);
 		var frm = document.harvestparams;
-		if(!urlVar.usethes){frm.thes.checked = false;}
+		
+		if(typeof urlVar.usethes === 'undefined' || urlVar.usethes == "" || urlVar.usethes == "0"){frm.usethes.checked = false;}
 		if(urlVar.taxontype){frm.type.value = urlVar.taxontype;}
 		if(urlVar.taxa){frm.taxa.value = urlVar.taxa;}
 		if(urlVar.country){
@@ -209,9 +210,9 @@ function setHarvestParamsForm(){
 		if(urlVar.eventdate2){frm.eventdate2.value = urlVar.eventdate2;}
 		if(urlVar.catnum){frm.catnum.value = urlVar.catnum;}
 		//if(!urlVar.othercatnum){frm.includeothercatnum.checked = false;}
-		if(urlVar.typestatus){frm.typestatus.checked = true;}
-		if(urlVar.hasimages){frm.hasimages.checked = true;}
-		if(urlVar.hasgenetic){frm.hasgenetic.checked = true;}
+		if(typeof urlVar.typestatus !== 'undefined'){frm.typestatus.checked = true;}
+		if(typeof urlVar.hasimages !== 'undefined'){frm.hasimages.checked = true;}
+		if(typeof urlVar.hasgenetic !== 'undefined'){frm.hasgenetic.checked = true;}
 	}
 }
 

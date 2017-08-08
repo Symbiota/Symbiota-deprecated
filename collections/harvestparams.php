@@ -18,7 +18,7 @@ $searchVar = $collManager->getSearchTermStr();
 	<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
-	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=4"></script> 
+	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=3i"></script> 
 	<script type="text/javascript">
 
 		$(document).ready(function() {
@@ -69,7 +69,7 @@ $searchVar = $collManager->getSearchTermStr();
 			</div>
 			<div>
 				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>
-				<span style="margin-left:5px;"><input type='checkbox' name='thes' value='1' CHECKED /><?php echo $LANG['GENERAL_TEXT_2']; ?></SPAN>
+				<span style="margin-left:5px;"><input type='checkbox' name='usethes' value='1' CHECKED /><?php echo $LANG['GENERAL_TEXT_2']; ?></SPAN>
 			</div>
 			<div id="taxonSearch0">
 				<div>
