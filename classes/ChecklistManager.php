@@ -194,14 +194,14 @@ class ChecklistManager {
                 $genusCntArr[] = $taxonTokens[0];
             }
 			$this->filterArr[$taxonTokens[0]] = "";
-    		if(count($taxonTokens) > 1 && $taxonTokens[0]." ".$taxonTokens[1] != $speciesPrev){
+    		if(count($taxonTokens) == 2 && $taxonTokens[0]." ".$taxonTokens[1] != $speciesPrev){
     			$this->speciesCount++;
     			$speciesPrev = $taxonTokens[0]." ".$taxonTokens[1];
     		}
-    		if(!$taxonPrev || strpos($sciName,$taxonPrev) === false){
+    		if(!$taxonPrev || implode(" ",$taxonTokens) != $taxonPrev){
     			$this->taxaCount++;
     		}
-    		$taxonPrev = implode(" ",$taxonTokens);
+            $taxonPrev = implode(" ",$taxonTokens);
 		}
         $this->familyCount = count($familyCntArr);
         $this->genusCount = count($genusCntArr);
@@ -449,14 +449,14 @@ class ChecklistManager {
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
 			if($this->thesFilter){
-				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
+				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '.
 					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
 					'INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid '.
 			  		'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (ctl.clid IN ('.$clidStr.')) ';
 			}
 			else{
-				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
+				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '.
 					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
 					'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
