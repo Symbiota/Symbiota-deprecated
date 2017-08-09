@@ -59,6 +59,7 @@ $MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g.
 $SPATIAL_INITIAL_CENTER = '';	    //Initial map center for Spatial Module. Default: '[-110.90713, 32.21976]'
 $SPATIAL_INITIAL_ZOOM = '';			//Initial zoom for Spatial Module. Default: 7
 $ACTIVATE_GEOLOCATION = false;			//Activates HTML5 geolocation services in Map Search
+$GEOREFERENCE_POLITICAL_DIVISIONS = false;			//Allow Batch Georeference module to georeference records without locality description, but with county
 $GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
 $RECAPTCHA_PUBLIC_KEY = '';			//Now called site key
 $RECAPTCHA_PRIVATE_KEY = '';		//Now called secret key

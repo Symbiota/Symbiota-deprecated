@@ -19,10 +19,17 @@ class OccurrenceGeorefTools {
 	}
 
 	public function getLocalityArr(){
-		$retArr = array();
+        global $BROADGEOREFERENCE;
+	    $retArr = array();
 		if($this->collId){
-			$sql = 'SELECT occid, country, stateprovince, county, municipality, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
-				'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) AND (locality <> "") ';
+		    if($BROADGEOREFERENCE){
+                $sql = 'SELECT occid, country, stateprovince, county, municipality, IFNULL(locality,CONCAT_WS(", ",country,stateProvince,county,municipality,verbatimcoordinates)) AS locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
+                    'FROM omoccurrences WHERE (collid = '.$this->collId.') ';
+            }
+            else{
+                $sql = 'SELECT occid, country, stateprovince, county, municipality, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
+                    'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) AND (locality <> "") ';
+            }
 			if(!$this->qryVars || !array_key_exists('qdisplayall',$this->qryVars) || !$this->qryVars['qdisplayall']){
 				$sql .= 'AND (decimalLatitude IS NULL) ';
 			}

@@ -61,6 +61,7 @@ $SYMB_UID = (array_key_exists("uid",$PARAMS_ARR)?$PARAMS_ARR["uid"]:0);
 $IS_ADMIN = (array_key_exists("SuperAdmin",$USER_RIGHTS)?1:0);
 $SOLR_MODE = ((isset($SOLR_URL) && $SOLR_URL)?true:false);
 $GEOLOCATION = ((isset($ACTIVATE_GEOLOCATION) && $ACTIVATE_GEOLOCATION)?true:false);
+$BROADGEOREFERENCE = ((isset($GEOREFERENCE_POLITICAL_DIVISIONS) && $GEOREFERENCE_POLITICAL_DIVISIONS)?true:false);
 //Can get rid of following once all parameters are remapped to constants
 $paramsArr = $PARAMS_ARR;
 $userRights = $USER_RIGHTS;
