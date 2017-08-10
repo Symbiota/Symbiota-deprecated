@@ -419,7 +419,7 @@ class SpecProcessorOcr{
 					if(strlen($fileBaseName)>4){
 						$sql = 'SELECT i.imgid, IFNULL(i.originalurl,i.url) AS url '.
 							'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-							'WHERE (o.collid = '.$this->collid.') AND ((o.orginalurl LIKE "%/'.$this->cleanInStr($fileBaseName).'.jpg") OR (o.url LIKE "%/'.$this->cleanInStr($fileBaseName).'.jpg"))';
+							'WHERE (o.collid = '.$this->collid.') AND ((i.originalurl LIKE "%/'.$this->cleanInStr($fileBaseName).'.jpg") OR (i.url LIKE "%/'.$this->cleanInStr($fileBaseName).'.jpg"))';
 						$rs = $this->conn->query($sql);
 						while($r = $rs->fetch_object()){
 							$imgArr[$r->imgid] = $r->url;
