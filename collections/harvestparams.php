@@ -9,7 +9,6 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 $collManager = new OccurrenceManager();
 $searchVar = $collManager->getSearchTermStr();
 ?>
-
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
@@ -18,9 +17,8 @@ $searchVar = $collManager->getSearchTermStr();
 	<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
-	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=3i"></script> 
+	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=1a"></script> 
 	<script type="text/javascript">
-
 		$(document).ready(function() {
 			<?php
 			if($searchVar){
@@ -74,10 +72,10 @@ $searchVar = $collManager->getSearchTermStr();
 			<div id="taxonSearch0">
 				<div>
 					<select id="taxontype" name="type">
-						<!--  <option value='0'><?php echo $LANG['SELECT_1-0']; ?></option>  -->
+						<option value='0'><?php echo $LANG['SELECT_1-0']; ?></option>
 						<option value='1'><?php echo $LANG['SELECT_1-1']; ?></option>
-						<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
 						<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
+						<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
 						<option value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
 						<option value='5'><?php echo $LANG['SELECT_1-5']; ?></option>
 					</select>:

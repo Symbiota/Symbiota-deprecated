@@ -175,7 +175,7 @@ function setHarvestParamsForm(){
 		var urlVar = parseUrlVariables(sessionStorage.querystr);
 		var frm = document.harvestparams;
 		
-		if(typeof urlVar.usethes === 'undefined' || urlVar.usethes == "" || urlVar.usethes == "0"){frm.usethes.checked = false;}
+		if(typeof urlVar.usethes !== 'undefined' && (urlVar.usethes == "" || urlVar.usethes == "0")){frm.usethes.checked = false;}
 		if(urlVar.taxontype){frm.type.value = urlVar.taxontype;}
 		if(urlVar.taxa){frm.taxa.value = urlVar.taxa;}
 		if(urlVar.country){
