@@ -1464,6 +1464,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                                                 <option id='sciname' value='3' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
                                                 <option id='highertaxon' value='4' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "4") echo "SELECTED"; ?> >Higher Taxonomy</option>
                                                 <option id='commonname' value='5' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "5") echo "SELECTED"; ?> >Common Name</option>
+												<option id='anyname' value='6' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "6") echo "SELECTED"; ?> >Any Name</option>
                                             </select>
                                         </div>
                                         <div style="margin-top:5px;">

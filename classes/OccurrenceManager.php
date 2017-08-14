@@ -2,11 +2,10 @@
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
 include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
+include_once($SERVER_ROOT.'/classes/SearchManager.php');
 
-class OccurrenceManager{
+class OccurrenceManager extends SearchManager {
 
-	protected $conn;
-	protected $taxaArr = Array();
 	protected $searchTermArr = Array();
 	protected $localSearchArr = Array();
 	protected $reset = 0;
@@ -15,16 +14,13 @@ class OccurrenceManager{
 	private $occurSearchProjectExists = 0;
 
  	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
-		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"])  $this->reset();
+ 	    parent::__construct();
+ 	    if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"])  $this->reset();
 		$this->readRequestVariables();
  	}
 
 	public function __destruct(){
- 		if(!($this->conn === false)){
- 			$this->conn->close();
- 			$this->conn = null;
- 		}
+	    parent::__destruct();
 	}
 
 	protected function getConnection($conType = "readonly"){
@@ -76,50 +72,16 @@ class OccurrenceManager{
 		}
 
 		if(array_key_exists("taxa",$this->searchTermArr)){
-			$sqlWhereTaxa = "";
-			$useThes = (array_key_exists("usethes",$this->searchTermArr)?$this->searchTermArr["usethes"]:0);
-			$taxonSearchType= $this->searchTermArr["taxontype"];
-			$taxaArr = explode(";",trim($this->searchTermArr["taxa"]));
-			//Set scientific name
-			$this->taxaArr = Array();
-			foreach($taxaArr as $sName){
-				$this->taxaArr[trim($sName)] = Array();
-			}
-			//If not set, determine taxon search type
-			if($taxonSearchType == 5){
-				//Common name search
-				$this->setSciNamesByVerns();
-			}
-			else{
-				if(!$taxonSearchType){
-					$sql = 'SELECT sciname, tid, rankid FROM taxa WHERE sciname IN("'.implode('","',array_keys($this->taxaArr)).'")';
-					$rs = $this->conn->query($sql);
-					while($r = $rs->fetch_object()){
-						$this->taxaArr[$r->sciname]['tid'] = $r->tid;
-						$this->taxaArr[$r->sciname]['rankid'] = $r->rankid;
-						if($r->rankid == 140){
-							//$taxaSearchType = 2;
-							$this->taxaArr[$r->sciname]['taxontype'] = 2;
-						}elseif($r->rankid > 179){
-							//$taxaSearchType = 3;
-							$this->taxaArr[$r->sciname]['taxontype'] = 3;
-						}elseif($r->rankid < 180){
-							//$taxaSearchType = 4;
-							$this->taxaArr[$r->sciname]['taxontype'] = 4;
-						}
-					}
-					$rs->free();
-				}
-				if($useThes){
-					$this->setSynonyms();
-				}
-			}
+		    $useThes           = (array_key_exists("usethes",$this->searchTermArr)?$this->searchTermArr["usethes"]:0);
+		    $baseSearchType    = $this->searchTermArr["taxontype"];
+		    $taxaSearchTerms   = explode(";",trim($this->searchTermArr["taxa"]));
+		    $this->setTaxaArr($useThes,$baseSearchType,$taxaSearchTerms);
 
 			//Build sql
+			$sqlWhereTaxa = "";
 			foreach($this->taxaArr as $key => $valueArray){
-				$tempTaxonType = $taxonSearchType;
-				if(isset($valueArray['taxontype'])) $tempTaxonType = $valueArray['taxontype'];
-				if($tempTaxonType== 4){
+			    $tempTaxonType = $valueArray['taxontype'];
+				if($tempTaxonType== TaxaSearchType::HIGHER_TAXONOMY){
 					//Class, order, or other higher rank
 					if(isset($valueArray['tid'])){
 						$rs1 = $this->conn->query('SELECT tidaccepted FROM taxstatus WHERE (tid = '.$valueArray['tid'].')');
@@ -129,7 +91,7 @@ class OccurrenceManager{
 					}
 				}
 				else{
-					if($tempTaxonType== 5){
+					if($tempTaxonType== TaxaSearchType::COMMON_NAME){
 						//Common name search
 						$famArr = array();
 						if(array_key_exists("families",$valueArray)){
@@ -157,17 +119,17 @@ class OccurrenceManager{
 						//echo $sqlWhereTaxa; exit;
 					}
 					else{
-						if($tempTaxonType== 2 || ($tempTaxonType== 1 && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){
+						if($tempTaxonType== TaxaSearchType::FAMILY_ONLY || ($tempTaxonType== TaxaSearchType::FAMILY_GENUS_OR_SPECIES && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){
 							$sqlWhereTaxa .= "OR (o.family = '".$key."') ";
 						}
-						if($tempTaxonType== 3 || ($tempTaxonType== 1 && strtolower(substr($key,-5)) != "aceae" && strtolower(substr($key,-4)) != "idae")){
+						if($tempTaxonType== TaxaSearchType::SPECIES_NAME_ONLY || ($tempTaxonType== TaxaSearchType::FAMILY_GENUS_OR_SPECIES && strtolower(substr($key,-5)) != "aceae" && strtolower(substr($key,-4)) != "idae")){
 							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$key."%') ";
 						}
 					}
 					if(array_key_exists("synonyms",$valueArray)){
 						$synArr = $valueArray["synonyms"];
 						if($synArr){
-							if($tempTaxonType== 1 || $tempTaxonType== 2 || $tempTaxonType== 5){
+							if($tempTaxonType== TaxaSearchType::FAMILY_GENUS_OR_SPECIES || $tempTaxonType== TaxaSearchType::FAMILY_ONLY || $tempTaxonType== TaxaSearchType::COMMON_NAME){
 								foreach($synArr as $synTid => $sciName){
 									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
 										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
@@ -178,10 +140,10 @@ class OccurrenceManager{
 						}
 						/*
 						foreach($synArr as $sciName){
-							if($taxaSearchType == 1 || $taxaSearchType == 2 || $taxaSearchType == 5){
+							if($taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES || $taxaSearchType == TaxaSearchType::FAMILY_ONLY || $taxaSearchType == TaxaSearchType::COMMON_NAME){
 								$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
 							}
-							if($taxaSearchType == 2){
+							if($taxaSearchType == TaxaSearchType::FAMILY_ONLY){
 								$sqlWhereTaxa .= "OR (o.sciname = '".$sciName."') ";
 							}
 							else{
@@ -504,52 +466,6 @@ class OccurrenceManager{
 		return $retDate;
 	}
 
-	protected function setSciNamesByVerns(){
-		$sql = "SELECT DISTINCT v.VernacularName, t.tid, t.sciname, ts.family, t.rankid ".
-			"FROM (taxstatus ts INNER JOIN taxavernaculars v ON ts.TID = v.TID) ".
-			"INNER JOIN taxa t ON t.TID = ts.tidaccepted ";
-		$whereStr = "";
-		foreach($this->taxaArr as $key => $value){
-			$whereStr .= "OR v.VernacularName = '".$key."' ";
-		}
-		$sql .= "WHERE (ts.taxauthid = 1) AND (".substr($whereStr,3).") ORDER BY t.rankid LIMIT 20";
-		//echo "<div>sql: ".$sql."</div>";
-		$result = $this->conn->query($sql);
-		if($result->num_rows){
-			while($row = $result->fetch_object()){
-				$vernName = strtolower($row->VernacularName);
-				if($row->rankid < 140){
-					$this->taxaArr[$vernName]["tid"][] = $row->tid;
-				}
-				elseif($row->rankid == 140){
-					$this->taxaArr[$vernName]["families"][] = $row->sciname;
-				}
-				else{
-					$this->taxaArr[$vernName]["scinames"][] = $row->sciname;
-				}
-			}
-		}
-		else{
-			$this->taxaArr["no records"]["scinames"][] = "no records";
-		}
-		$result->free();
-	}
-
-	protected function setSynonyms(){
-		foreach($this->taxaArr as $key => $value){
-			if(array_key_exists("scinames",$value)){
-				if(!in_array("no records",$value["scinames"])){
-					$synArr = $this->getSynonyms($value["scinames"]);
-					if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
-				}
-			}
-			else{
-				$synArr = $this->getSynonyms($key);
-				if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
-			}
-		}
-	}
-
 	protected function setTableJoins($sqlWhere){
 		$sqlJoin = '';
 		if(array_key_exists("clid",$this->searchTermArr)) $sqlJoin .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
@@ -869,7 +785,8 @@ class OccurrenceManager{
 	public function getTaxaSearchStr(){
 		$returnArr = Array();
 		foreach($this->taxaArr as $taxonName => $taxonArr){
-			$str = $taxonName;
+		    $str = TaxaSearchType::anyNameSearchTag($taxonArr["taxontype"]).": ";
+			$str .= $taxonName;
 			if(array_key_exists("sciname",$taxonArr)){
 				$str .= " => ".implode(",",$taxonArr["sciname"]);
 			}
@@ -1246,80 +1163,6 @@ class OccurrenceManager{
 	}
 
 	//Misc return functions
-	private function getSynonyms($searchTarget,$taxAuthId = 1){
-		$synArr = array();
-		$targetTidArr = array();
-		$searchStr = '';
-		if(is_array($searchTarget)){
-			if(is_numeric(current($searchTarget))){
-				$targetTidArr = $searchTarget;
-			}
-			else{
-				$searchStr = implode('","',$searchTarget);
-			}
-		}
-		else{
-			if(is_numeric($searchTarget)){
-				$targetTidArr[] = $searchTarget;
-			}
-			else{
-				$searchStr = $searchTarget;
-			}
-		}
-		if($searchStr){
-			//Input is a string, thus get tids
-			$sql1 = 'SELECT tid FROM taxa WHERE sciname IN("'.$searchStr.'")';
-			$rs1 = $this->conn->query($sql1);
-			while($r1 = $rs1->fetch_object()){
-				$targetTidArr[] = $r1->tid;
-			}
-			$rs1->free();
-		}
-
-		if($targetTidArr){
-			//Get acceptd names
-			$accArr = array();
-			$rankId = 0;
-			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.rankid '.
-				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.TidAccepted '.
-				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tid IN('.implode(',',$targetTidArr).')) ';
-			$rs2 = $this->conn->query($sql2);
-			while($r2 = $rs2->fetch_object()){
-				$accArr[] = $r2->tid;
-				$rankId = $r2->rankid;
-				//Put in synonym array if not target
-				if(!in_array($r2->tid,$targetTidArr)) $synArr[$r2->tid] = $r2->sciname;
-			}
-			$rs2->free();
-
-			if($accArr){
-				//Get synonym that are different than target
-				$sql3 = 'SELECT DISTINCT t.tid, t.sciname ' .
-					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
-					'WHERE (ts.taxauthid = ' . $taxAuthId . ') AND (ts.tidaccepted IN(' . implode('', $accArr) . ')) ';
-				$rs3 = $this->conn->query($sql3);
-				while ($r3 = $rs3->fetch_object()) {
-					if (!in_array($r3->tid, $targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
-				}
-				$rs3->free();
-
-				//If rank is 220, get synonyms of accepted children
-				if ($rankId == 220) {
-					$sql4 = 'SELECT DISTINCT t.tid, t.sciname ' .
-						'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
-						'WHERE (ts.parenttid IN(' . implode('', $accArr) . ')) AND (ts.taxauthid = ' . $taxAuthId . ') ' .
-						'AND (ts.TidAccepted = ts.tid)';
-					$rs4 = $this->conn->query($sql4);
-					while ($r4 = $rs4->fetch_object()) {
-						$synArr[$r4->tid] = $r4->sciname;
-					}
-					$rs4->free();
-				}
-			}
-		}
-		return $synArr;
-	}
-
 	//Setters and getters
 	public function getClName(){
 		return $this->clName;
@@ -1366,11 +1209,5 @@ class OccurrenceManager{
 		return $newStr;
 	}
 
-	protected function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
 }
 ?>

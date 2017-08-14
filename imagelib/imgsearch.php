@@ -34,8 +34,14 @@ $imageExplorer = new ImageExplorer();
     <!--<![endif]-->
 
     <style>
-        .VS-interface.ui-autocomplete li {
-            width: 230em;
+        /* VisualSearch (VS) works hard to autosize the width.
+         * Unfortunately, it, or jquery-ui.autocomplete has a problem with computing the initial width.
+         * The first rendering of the autocomplete box is not wide enough.  Then, once a 2nd letter is
+         * hit and the box is updated, the autowidth seems to work.
+         * as a workaround, a min-width is set here.
+         */
+        .VS-interface.ui-autocomplete {
+            min-width: 400px;
         }
 
         /* Start by setting display:none to make this hidden.
