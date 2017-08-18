@@ -65,6 +65,9 @@ if(!$IS_ADMIN){
 					echo 'var oArr = new Array();'."\n";
 					$tempOcc = array_change_key_case($oArr);
 					unset($tempOcc['occid']);
+					unset($tempOcc['institutioncode']);
+					unset($tempOcc['collectioncode']);
+					unset($tempOcc['ownerinstitutioncode']);
 					unset($tempOcc['catalognumber']);
 					unset($tempOcc['othercatalognumbers']);
 					if($dupeType == 'event'){
