@@ -1,6 +1,7 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/GPoint.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
+include_once($SERVER_ROOT.'/classes/GPoint.php');
 
 class OccurrenceAssociations extends Manager {
 

@@ -52,7 +52,7 @@ class EOLUtilities {
 		if($sciName){
 			$retArr['searchTaxon'] = $sciName;
 			$url = 'http://eol.org/api/search/1.0.json?q='.str_replace(" ","%20",$sciName).'&page=1&exact=true';
-			//echo $url.'<br/>';
+			//echo $url.'<br/>'; exit;
 			if($fh = fopen($url, 'r')){
 				$content = "";
 				while($line = fread($fh, 1024)){
@@ -87,7 +87,7 @@ class EOLUtilities {
 		$taxonArr = Array();
 		$url = 'http://eol.org/api/pages/1.0/'.$id.'.json?images=0&videos=0&sounds=0&maps=0&text=0&iucn=false&subjects=overview&licenses=all&details=true';
 		$url .= '&common_names='.($includeCommonNames?'true':'false').'&synonyms='.($includeSynonyms?'true':'false').'&references=false&vetted=0&cache_ttl=';
-		//echo $url.'<br/>';
+		//echo $url.'<br/>'; exit;
 		if($fh = fopen($url, 'r')){
 			$content = "";
 			while($line = fread($fh, 1024)){
@@ -115,10 +115,14 @@ class EOLUtilities {
 			//Add synonyms
 			if($includeSynonyms && isset($eolObj->synonyms)){
 				$cnt = 0;
+				$uniqueList = array();
 				foreach($eolObj->synonyms as $synObj){
-					$taxonArr['syns'][$cnt]['scientificName'] = $synObj->synonym;
-					if(isset($synObj->relationship)) $taxonArr['syns'][$cnt]['synreason'] = $synObj->relationship;
-					$cnt++;
+					if(!in_array($synObj->synonym, $uniqueList)){
+						$uniqueList[] = $synObj->synonym;
+						$taxonArr['syns'][$cnt]['scientificName'] = $synObj->synonym;
+						if(isset($synObj->relationship)) $taxonArr['syns'][$cnt]['synreason'] = $synObj->relationship;
+						$cnt++;
+					}
 				}
 			}
 			//Add vernaculars
@@ -129,8 +133,6 @@ class EOLUtilities {
 					}
 				}
 			}
-			
-			
 		}
 		else{
 			$this->errorStr = 'ERROR opening EOL page url: '.$url;
