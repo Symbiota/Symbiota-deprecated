@@ -32,9 +32,7 @@ class TaxonomyCleaner extends Manager{
 	public function getBadTaxaCount(){
 		$retCnt = 0;
 		if($this->collid){
-			$sql = 'SELECT COUNT(DISTINCT sciname) AS taxacnt '.
-				'FROM omoccurrences '.
-				'WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) ';
+			$sql = 'SELECT COUNT(DISTINCT sciname) AS taxacnt '.$this->getSqlFragment();
 			//echo $sql;
 			if($rs = $this->conn->query($sql)){
 				if($row = $rs->fetch_object()){
@@ -45,14 +43,29 @@ class TaxonomyCleaner extends Manager{
 		}
 		return $retCnt;
 	}
-	
+
+	public function getBadSpecimenCount(){
+		$retCnt = 0;
+		if($this->collid){
+			$sql = 'SELECT COUNT(*) AS cnt '.$this->getSqlFragment();
+			//echo $sql;
+			if($rs = $this->conn->query($sql)){
+				if($row = $rs->fetch_object()){
+					$retCnt = $row->cnt;
+				}
+				$rs->free();
+			}
+		}
+		return $retCnt;
+	}
+
 	public function analyzeTaxa($startIndex = 0, $limit = 50){
 		//set_time_limit(500);
-		$status = true;
+		$startAdjustment = 0;
 		$this->logOrEcho("Starting taxa check ");
 		$sql = 'SELECT DISTINCT sciname, family, count(*) as cnt '.
 			'FROM omoccurrences '.
-			'WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname = "Alnus viridis crispa") '.
+			'WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname NOT LIKE "% x %") '.
 			'GROUP BY sciname, family ORDER BY sciname LIMIT '.$startIndex.','.$limit;
 		if($rs = $this->conn->query($sql)){
 			//Check name through taxonomic resources
@@ -72,6 +85,7 @@ class TaxonomyCleaner extends Manager{
 					$taxaAdded= true;
 					if($taxonHarvester->isFullyResolved()){
 						$manualCheck = false;
+						++$startAdjustment;
 					}
 					else{
 						$this->logOrEcho('Taxon not fully resolved...',1);
@@ -98,10 +112,15 @@ class TaxonomyCleaner extends Manager{
 			if($taxaAdded) $this->indexOccurrenceTaxa();
 		}
 		
-		$this->logOrEcho("Done with taxa check ");
-		return $status;
+		$this->logOrEcho("<b>Done with taxa check </b>");
+		return $startAdjustment;
 	}
 	
+	private function getSqlFragment(){
+		$sql = 'FROM omoccurrences WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname NOT LIKE "% x %") '; 
+		return $sql;
+	}
+
 	private function indexOccurrenceTaxa(){
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.

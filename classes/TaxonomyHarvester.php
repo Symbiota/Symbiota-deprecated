@@ -56,7 +56,7 @@ class TaxonomyHarvester extends Manager{
 		}
 		elseif($this->activeTaxonomicAuthority == 'worms'){
 			$this->logOrEcho('Checking <b>WoRMS</b>...',1);
-			$newTid= $this->getWormsTaxonArr($term);
+			$newTid= $this->addWormsTaxon($term);
 		}
 		elseif($this->activeTaxonomicAuthority == 'tropicos'){
 			$this->logOrEcho('Checking <b>TROPICOS</b>...',1);
@@ -125,7 +125,7 @@ class TaxonomyHarvester extends Manager{
 				if($baseArr['name_status'] == 'synonym' && isset($baseArr['accepted_name'])){
 					$synArr = $this->getColNode($baseArr);
 					$synArr['acceptanceReason'] = 'synonym';
-					$baseArr = $this->addColTaxon('',$baseArr['accepted_name']['id']);
+					$this->addColTaxon('',$baseArr['accepted_name']['id']);
 				}
 				$taxonArr = $this->getColNode($baseArr);
 				if($synArr) $taxonArr['syns'][] = $synArr;
@@ -148,8 +148,6 @@ class TaxonomyHarvester extends Manager{
 			if($taxonArr) $this->logOrEcho('Taxon found within Catalog of Life',1);
 			else $this->logOrEcho('Taxon not found within Catalog of Life',1);
 		}
-print_r($taxonArr);
-echo '<br/>';
 		return $this->loadNewTaxon($taxonArr);
 	}
 	
@@ -169,6 +167,31 @@ echo '<br/>';
 		if(isset($nodeArr['source_database'])) $taxonArr['source'] = $nodeArr['source_database'];
 		if(isset($nodeArr['source_database_url'])) $taxonArr['sourceURL'] = $nodeArr['source_database_url'];
 		return $taxonArr;
+	}
+
+	private function addWormsTaxon($sciName){
+		$newTid = 0;
+		//Get ID 
+		$url = 'http://www.marinespecies.org/rest/AphiaIDByName/'.str_replace(" ","%20",$sciName).'?marine_only=false';
+		if($fh = fopen($url, 'r')){
+			$content = "";
+			while($line = fread($fh, 1024)){
+				$content .= trim($line);
+			}
+			fclose($fh);
+			$id = $content;
+			//Get species content
+			if($id){
+				$url = 'http://www.marinespecies.org/rest/AphiaRecordByAphiaID/282074';
+			}
+			else{
+				$this->logOrEcho('Taxon not found within WoRMS',1);
+			}
+		}
+		else{
+			$this->logOrEcho('ERROR: unable to connect to WoRMS web services ('.$url.')',1);
+		}
+		return $newTid;
 	}
 
 	private function addTropicosTaxon($sciName){
@@ -290,9 +313,10 @@ echo '<br/>';
 		elseif(isset($nodeArr['RankAbbreviation'])){
 			$taxonArr['taxonRank'] = $nodeArr['RankAbbreviation'];
 		}
+		if(isset($taxonArr['taxonRank'])) $taxonArr['rankid'] = $this->getRankId($taxonArr);
 		if(isset($nodeArr['Genus'])) $taxonArr['unitname1'] = $nodeArr['Genus'];
 		if(isset($nodeArr['SpeciesEpithet'])) $taxonArr['unitname2'] = $nodeArr['SpeciesEpithet'];
-		if(isset($nodeArr['OtherEpithet'])){
+		if(isset($taxonArr['unitname2']) && isset($nodeArr['OtherEpithet'])){
 			$taxonArr['unitname3'] = $nodeArr['OtherEpithet'];
 			if($this->kingdomName != 'Animalia'){
 				if($taxonArr['rankid'] == 230) $taxonArr['unitind3'] = 'subsp.';
@@ -301,6 +325,7 @@ echo '<br/>';
 			}
 		}
 		if(isset($nodeArr['source'])) $taxonArr['source'] = $nodeArr['source'];
+		if(!isset($taxonArr['unitname1']) && !strpos($taxonArr['sciname'],' ')) $taxonArr['unitname1'] = $taxonArr['sciname'];
 		return $taxonArr;
 	}
 
@@ -682,7 +707,7 @@ echo '<br/>';
 				
 				if(!$retArr){
 					//Look for matches based on same edithet but different genus
-					$sql = 'SELECT tid, sciname FROM taxa WHERE (sciname LIKE "'.substr($unitname1,0,1).'% '.$unitname2.'") ORDER BY sciname';
+					$sql = 'SELECT tid, sciname FROM taxa WHERE (sciname LIKE "'.substr($unitname1,0,2).'% '.$unitname2.'") ORDER BY sciname';
 					//echo $sql;
 					$rs = $this->conn->query($sql);
 					while($row = $rs->fetch_object()){

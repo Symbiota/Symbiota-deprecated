@@ -6,9 +6,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/cleaning/taxonomycleaner.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST["collid"];
-$start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
-$limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:30;
-
+$start = array_key_exists('start',$_POST)?$_POST['start']:0;
+$limit = array_key_exists('limit',$_POST)?$_POST['limit']:20;
+$action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 $cleanManager = new TaxonomyCleaner();
 $cleanManager->setCollId($collid);
 $collMap = $cleanManager->getCollMap();
@@ -25,6 +25,8 @@ else{
 	}
 }
 
+$badTaxaCount = $cleanManager->getBadTaxaCount();
+$badSpecimenCount = $cleanManager->getBadSpecimenCount();
 ?>
 <html>
 	<head>
@@ -87,43 +89,36 @@ else{
 					?>
 					<h1><?php echo $collMap['collectionname'].' ('.$collMap['code'].')'; ?></h1>
 					<div style="margin:20px;">
-						This module is designed to aid in cleaning scientific names within a collection. 
-						Web services will be used to attempt to resolve names that are not mapped to the taxonomic thesaurus.   
-					</div>
-					<div style="margin:20px;">
-						Number of scientific names not indexed to taxonomic thesaurus : <b><?php echo $cleanManager->getBadTaxaCount(); ?></b>
-					</div>
-					<div style="margin:20px;">
-						<?php 
-						$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
-						if(!$action){
-							?>
-							<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
-								<fieldset>
-									<legend><b>Main Menu</b></legend>
-									<div style="margin-left:15px;">Start index: 
-										<input name="index" type="text" value="0" style="width:25px;" />
-										(<?php echo $limit; ?> names at a time)
-									</div> 
-									<div style="margin:20px">
-										<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
-										<input type="submit" name="submitaction" value="Analyze Names" />
-									</div>								
-								</fieldset>
-							</form>
-							<?php
-						}
-						elseif($action == 'Analyze Names'){
+						<?php
+						$startAdjustment = 0;
+						if($action){
 							echo '<ul>';
-							$cleanManager->analyzeTaxa($start, $limit);
+							$startAdjustment = $cleanManager->analyzeTaxa($start, $limit);
 							echo '</ul>';
-							echo '<div>';
-							echo '<div style="margin:10px;"><a href="taxonomycleaner.php?collid='.$collid.'">Return to Main Menu</a></div>';
-							echo '<div style="margin:10px;"><a href="taxonomycleaner.php?collid='.$collid.'&start='.($start+$limit).'&submitaction=Analyze%20Names">Continue analyzing next '.$limit.' records</a></div>';
 						}
 						?>
+						<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
+							<fieldset style="padding:20px;">
+								<legend><b>Main Menu</b></legend>
+								<div style="margin-bottom:5px;">
+									Number of scientific names not indexed to taxonomic thesaurus: <b><?php echo $badTaxaCount; ?></b>
+								</div>
+								<div style="margin-bottom:15px;">
+									Number of specimens not indexed to taxonomic thesaurus: <b><?php echo $badSpecimenCount; ?></b>
+								</div>
+								<div style="margin-bottom:15px;">
+									Processing limit: <input name="limit" type="text" value="<?php echo $limit; ?>" />
+								</div>
+								<div style="margin:10px">
+									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+									<input name="start" type="hidden" value="<?php echo $start+$limit-$startAdjustment; ?>" />
+									<button name="submitaction" type="submit" value="submitaction" >Analyze Taxonomic Names</button>
+									<button name="submitaction" type="submit" value="submitaction" onclick="this.form.start.value = 0" >Restart from Beginning</button>
+								</div>								
+							</fieldset>
+						</form>
 					</div>
-					<?php 
+					<?php
 				}
 				else{
 					?>
