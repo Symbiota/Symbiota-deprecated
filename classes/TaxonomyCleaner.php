@@ -1,10 +1,12 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/Manager.php');
-include_once($serverRoot.'/classes/TaxonomyUtilities.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
+include_once($SERVER_ROOT.'/classes/TaxonomyUtilities.php');
+include_once($SERVER_ROOT.'/classes/TaxonomyHarvester.php');
 
 class TaxonomyCleaner extends Manager{
 
+	private $collid;
 	private $taxAuthId = 1;
 	private $testValidity = 1;
 	private $testTaxonomy = 1;
@@ -13,15 +15,128 @@ class TaxonomyCleaner extends Manager{
 	
 	public function __construct(){
 		parent::__construct(null,'write');
-		set_time_limit(500);
-		$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/taxonomyVerification_".date('Y-m-d').".log";
+	}
+
+	function __destruct(){
+		parent::__destruct();
+	}
+	
+	public function initiateLog(){
+		$logFile = '../../temp/logs/taxonomyVerification_'.date('Y-m-d').'.log';
 		$this->setLogFH($logFile);
 		$this->logOrEcho("Taxa Verification process starts (".date('Y-m-d h:i:s A').")");
 		$this->logOrEcho("-----------------------------------------------------\n");
 	}
 
-	function __destruct(){
-		parent::__destruct();
+	//Occurrence taxon name cleaning functions
+	public function getBadTaxaCount(){
+		$retCnt = 0;
+		if($this->collid){
+			$sql = 'SELECT COUNT(DISTINCT sciname) AS taxacnt '.
+				'FROM omoccurrences '.
+				'WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) ';
+			//echo $sql;
+			if($rs = $this->conn->query($sql)){
+				if($row = $rs->fetch_object()){
+					$retCnt = $row->taxacnt;
+				}
+				$rs->free();
+			}
+		}
+		return $retCnt;
+	}
+	
+	public function analyzeTaxa($startIndex = 0, $limit = 50){
+		//set_time_limit(500);
+		$status = true;
+		$this->logOrEcho("Starting taxa check ");
+		$sql = 'SELECT DISTINCT sciname, family, count(*) as cnt '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname = "Alnus viridis crispa") '.
+			'GROUP BY sciname, family ORDER BY sciname LIMIT '.$startIndex.','.$limit;
+		if($rs = $this->conn->query($sql)){
+			//Check name through taxonomic resources
+			$taxonHarvester = new  TaxonomyHarvester();
+			$taxonHarvester->setVerboseMode(2);
+			$this->setVerboseMode(2);
+			$taxaAdded = false;
+			$itemCnt = 0;
+			while($r = $rs->fetch_object()){
+				$editLink = '[<span onclick="openPopup(\''.$GLOBALS['CLIENT_ROOT'].
+					'/collections/editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=sciname&q_customtype1=EQUALS&q_customvalue1='.$r->sciname.'&collid='.
+					$this->collid.'\')" style="cursor:pointer">'.$r->cnt.' specimens <img src="../../images/edit.png" style="width:12px;" /></span>]...';
+				$this->logOrEcho('<b>Resolving <i>'.$r->sciname.'</b>'.($r->family?' ('.$r->family.')':'').'</b> '.$editLink);
+				if($r->family) $taxonHarvester->setDefaultFamily($r->sciname);
+				$manualCheck = true;
+				if($taxonHarvester->processSciname($r->sciname, $r->family)){
+					$taxaAdded= true;
+					if($taxonHarvester->isFullyResolved()){
+						$manualCheck = false;
+					}
+					else{
+						$this->logOrEcho('Taxon not fully resolved...',1);
+					}
+				}
+				if($manualCheck){
+					//Check for near match using SoundEx
+					$this->logOrEcho('Checking close matches in thesaurus...',1);
+					if($matchArr = $taxonHarvester->getCloseMatch($r->sciname)){
+						foreach($matchArr as $tid => $sciname){
+							$echoStr = '<i>'.$sciname.'</i> =&gt;<a href="#" onclick="return remappTaxon(\''.$r->sciname.'\','.$tid.',\''.$sciname.'\','.$itemCnt.')" style="color:blue"> remap to this taxon</a><span id="remapSpan-'.$itemCnt.'"></span>';
+							$this->logOrEcho($echoStr,2);
+							$itemCnt++;
+						}
+					}
+					else{
+						$this->logOrEcho('No close matches found',1);
+					}
+				}
+				flush();
+				ob_flush();
+			}
+			$rs->free();
+			if($taxaAdded) $this->indexOccurrenceTaxa();
+		}
+		
+		$this->logOrEcho("Done with taxa check ");
+		return $status;
+	}
+	
+	private function indexOccurrenceTaxa(){
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
+			'SET o.tidinterpreted = t.tid '.
+			'WHERE o.tidinterpreted IS NULL';
+		if(!$this->conn->query($sql)){
+			$this->logOrEcho('ERROR linking new data to occurrences: '.$this->conn->error);
+		}
+	}
+	
+	public function remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname){
+		$status = false;
+		if(is_numeric($collid) && $oldSciname && is_numeric($tid) && $newSciname){
+			$oldSciname = $this->cleanInStr($oldSciname);
+			$newSciname = $this->cleanInStr($newSciname);
+			//Version edit in edits table
+			$sql1 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
+				'SELECT occid, "sciname", "'.$newSciname.'", sciname, '.$GLOBALS['SYMB_UID'].', 1, 1 '.
+				'FROM omoccurrences WHERE collid = '.$collid.' AND sciname = "'.$oldSciname.'"';
+			if($this->conn->query($sql1)){
+				//Update occurrence table
+				$sql2 = 'UPDATE omoccurrences '.
+					'SET tidinterpreted = '.$tid.', sciname = "'.$newSciname.'" '.
+					'WHERE (collid = '.$collid.') AND (sciname = "'.$oldSciname.'") AND (tidinterpreted IS NULL)';
+				if($this->conn->query($sql2)){
+					$status = true;
+				}
+				else{
+					echo $sql2;
+				}
+			}
+			else{
+				echo $sql1;
+			}
+		}
+		return $status;
 	}
 
 	//Taxonomic thesaurus verifications
@@ -89,7 +204,7 @@ class TaxonomyCleaner extends Manager{
 					$this->logOrEcho('Taxon not found', 1);
 				}
 			}
-			$rs->close();
+			$rs->free();
 		}
 		else{
 			$this->logOrEcho('ERROR: unable query unaccepted taxa',1);
@@ -164,7 +279,7 @@ class TaxonomyCleaner extends Manager{
 							if($r = $rs->fetch_object()){
 								$systemAccName = $r->sciname;
 							}
-							$rs->close();
+							$rs->free();
 							$accObj = $externalTaxonObj['accepted_name'];
 							if($accObj['name'] != $systemAccName){
 								//Remap to external name
@@ -320,9 +435,37 @@ class TaxonomyCleaner extends Manager{
 		}
 	}
 
+	//Misc fucntions
+	public function getCollMap(){
+		$retArr = Array();
+		if($this->collid){
+			$sql = 'SELECT CONCAT_WS("-",c.institutioncode, c.collectioncode) AS code, c.collectionname, '.
+					'c.icon, c.colltype, c.managementtype '.
+					'FROM omcollections c '.
+					'WHERE (c.collid = '.$this->collid.') ';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$retArr['code'] = $row->code;
+				$retArr['collectionname'] = $row->collectionname;
+				$retArr['icon'] = $row->icon;
+				$retArr['colltype'] = $row->colltype;
+				$retArr['managementtype'] = $row->managementtype;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
 	//Setters and getters
 	public function setTaxAuthId($id){
 		if(is_numeric($id)) $this->taxAuthId = $id;
+	}
+
+	public function setCollId($collid){
+		if(is_numeric($collid)){
+			$this->collid = $collid;
+		}
 	}
 }
 ?>
