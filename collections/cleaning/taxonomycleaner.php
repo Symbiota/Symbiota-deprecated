@@ -66,26 +66,13 @@ $badSpecimenCount = $cleanManager->getBadSpecimenCount();
 		<?php
 		$displayLeftMenu = (isset($taxa_admin_taxonomycleanerMenu)?$taxa_admin_taxonomycleanerMenu:'true');
 		include($SERVER_ROOT.'/header.php');
-		if(isset($taxa_admin_taxonomycleanerCrumbs)){
-			if($taxa_admin_taxonomycleanerCrumbs){
-				?>
-				<div class='navpath'>
-					<?php echo $taxa_admin_taxonomycleanerCrumbs; ?>
-					<b>Taxonomic Name Cleaner</b>
-				</div>
-				<?php 
-			}
-		}
-		else{
-			?>
-			<div class='navpath'>
-				<a href="../../index.php">Home</a> &gt;&gt;
-				<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
-				<b>Taxonomic Name Cleaner</b>
-			</div>
-			<?php 
-		}
 		?>
+		<div class='navpath'>
+			<a href="../../index.php">Home</a> &gt;&gt;
+			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Menu</a> &gt;&gt;
+			<a href="index.php?collid=<?php echo $collid; ?>&emode=1">Data Cleaning Menu</a> &gt;&gt;
+			<b>Taxonomic Name Cleaner</b>
+		</div>
 		<!-- inner text block -->
 		<div id="innertext">
 			<?php 
@@ -105,11 +92,11 @@ $badSpecimenCount = $cleanManager->getBadSpecimenCount();
 						<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
 							<fieldset style="padding:20px;">
 								<legend><b>Main Menu</b></legend>
-								<div style="margin-bottom:5px;">
-									Number of scientific names not indexed to taxonomic thesaurus: <b><?php echo $badTaxaCount; ?></b>
-								</div>
 								<div style="margin-bottom:15px;">
-									Number of specimens not indexed to taxonomic thesaurus: <b><?php echo $badSpecimenCount; ?></b>
+									<b>Specimens</b> not indexed to central taxonomic thesaurus: <b><?php echo $badSpecimenCount; ?></b>
+								</div>
+								<div style="margin-bottom:5px;">
+									<b>Scientific names</b> not indexed to central taxonomic thesaurus: <b><?php echo $badTaxaCount; ?></b>
 								</div>
 								<div style="margin-bottom:15px;">
 									Processing limit: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:30px" />

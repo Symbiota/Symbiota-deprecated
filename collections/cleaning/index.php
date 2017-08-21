@@ -180,11 +180,11 @@ if($collMap['colltype'] == 'General Observations'){
 				<fieldset style="margin:10px 0px;padding:5px;width:450px">
 					<legend style="font-weight:bold">Statistics and Action panel</legend>
 					<ul>
-						<li><a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&stat=taxonomy#taxonomystats" target="_blank">Taxonomic Distributions...</a></li>
 						<li><a href="taxonomycleaner.php?collid=<?php echo $collid; ?>">Analyze taxonomic names...</a></li>
+						<li><a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&stat=taxonomy#taxonomystats">Taxonomic Distributions...</a></li>
 						<?php
 						if($cleanManager->hasDuplicateClusters()){
-							echo '<li><a href="../datasets/duplicatemanager.php?collid='.$collid.'&dupedepth=3&action=listdupeconflicts" target="_blank">';
+							echo '<li><a href="../datasets/duplicatemanager.php?collid='.$collid.'&dupedepth=3&action=listdupeconflicts">';
 							echo 'Duplicate specimens with potential identification conflicts...';
 							echo '</a></li>';
 						}
