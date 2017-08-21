@@ -35,6 +35,11 @@ $badSpecimenCount = $cleanManager->getBadSpecimenCount();
 		<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<script src="../../js/jquery-3.2.1.min.js" type="text/javascript"></script>
 		<script>
+			$( document ).ready(function() {
+				$(".displayOnLoad").show();
+				$(".hideOnLoad").hide();
+			});
+
 			function remappTaxon(oldName,targetTid,newName,msgCode){
 				$.ajax({
 					type: "POST",
@@ -107,7 +112,7 @@ $badSpecimenCount = $cleanManager->getBadSpecimenCount();
 									Number of specimens not indexed to taxonomic thesaurus: <b><?php echo $badSpecimenCount; ?></b>
 								</div>
 								<div style="margin-bottom:15px;">
-									Processing limit: <input name="limit" type="text" value="<?php echo $limit; ?>" />
+									Processing limit: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:30px" />
 								</div>
 								<div style="margin:10px">
 									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />

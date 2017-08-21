@@ -77,11 +77,11 @@ class TaxonomyCleaner extends Manager{
 			while($r = $rs->fetch_object()){
 				$editLink = '[<span onclick="openPopup(\''.$GLOBALS['CLIENT_ROOT'].
 					'/collections/editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=sciname&q_customtype1=EQUALS&q_customvalue1='.$r->sciname.'&collid='.
-					$this->collid.'\')" style="cursor:pointer">'.$r->cnt.' specimens <img src="../../images/edit.png" style="width:12px;" /></span>]...';
+					$this->collid.'\')" style="cursor:pointer">'.$r->cnt.' specimens <img src="../../images/edit.png" style="width:12px;" /></span>]';
 				$this->logOrEcho('<b>Resolving <i>'.$r->sciname.'</b>'.($r->family?' ('.$r->family.')':'').'</b> '.$editLink);
 				if($r->family) $taxonHarvester->setDefaultFamily($r->sciname);
 				$manualCheck = true;
-				if($taxonHarvester->processSciname($r->sciname, $r->family)){
+				if($taxonHarvester->processSciname($r->sciname)){
 					$taxaAdded= true;
 					if($taxonHarvester->isFullyResolved()){
 						$manualCheck = false;
@@ -96,7 +96,8 @@ class TaxonomyCleaner extends Manager{
 					$this->logOrEcho('Checking close matches in thesaurus...',1);
 					if($matchArr = $taxonHarvester->getCloseMatch($r->sciname)){
 						foreach($matchArr as $tid => $sciname){
-							$echoStr = '<i>'.$sciname.'</i> =&gt;<a href="#" onclick="return remappTaxon(\''.$r->sciname.'\','.$tid.',\''.$sciname.'\','.$itemCnt.')" style="color:blue"> remap to this taxon</a><span id="remapSpan-'.$itemCnt.'"></span>';
+							$echoStr = '<i>'.$sciname.'</i> =&gt; <span class="hideOnLoad">wait for page to finish loading...</span><span class="displayOnLoad" style="display:none"><a href="#" onclick="return remappTaxon(\''.
+								$r->sciname.'\','.$tid.',\''.$sciname.'\','.$itemCnt.')" style="color:blue"> remap to this taxon</a><span id="remapSpan-'.$itemCnt.'"></span></span>';
 							$this->logOrEcho($echoStr,2);
 							$itemCnt++;
 						}
