@@ -3,7 +3,6 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/Manager.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/AgentManager.php');
-include_once($SERVER_ROOT.'/classes/TaxonomyHarvester.php');
 
 class OccurrenceCleaner extends Manager{
 
@@ -21,115 +20,6 @@ class OccurrenceCleaner extends Manager{
 
 	public function __destruct(){
 		parent::__destruct();
-	}
-
-	//Taxon name cleaning functions
-	public function getBadTaxaCount(){
-		$retCnt = 0;
-		if($this->collid){
-			$sql = 'SELECT COUNT(DISTINCT sciname) AS taxacnt '.
-				'FROM omoccurrences '.
-				'WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname != "") ';
-			//echo $sql;
-			if($rs = $this->conn->query($sql)){
-				if($row = $rs->fetch_object()){
-					$retCnt = $row->taxacnt;
-				}
-				$rs->free();
-			}
-		}
-		return $retCnt;
-	}
-
-	public function analyzeTaxa($startIndex = 0, $limit = 50){
-		$status = true;
-		$this->logOrEcho("Starting taxa check ");
-		$sql = 'SELECT DISTINCT sciname, family '.
-			'FROM omoccurrences '.
-			'WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname != "") '.
-			'ORDER BY sciname '.
-			'LIMIT '.$startIndex.','.$limit;
-		if($rs = $this->conn->query($sql)){
-			//Check name through taxonomic resources
-			$taxonHarvester = new  TaxonomyHarvester();
-			$taxonHarvester->setVerboseMode(2);
-			$this->setVerboseMode(2);
-			$nameCnt = 0;
-			while($r = $rs->fetch_object()){
-				$this->logOrEcho('Resolving '.$r->sciname.($r->family?' ('.$r->family.')':'').'...');
-				$newTid = $taxonHarvester->addSciname($r->sciname, $r->family);
-				if(!$newTid){
-					//Check for near match using SoundEx
-					$this->logOrEcho('Checking close matches in thesaurus...',1);
-					$closeArr = $taxonHarvester->getSoundexMatch($r->sciname);
-					if(!$closeArr) $closeArr = $taxonHarvester->getCloseMatchEpithet($r->sciname);
-					if($closeArr){
-						$cnt = 0;
-						foreach($closeArr as $tid => $sciname){
-							$echoStr = '<i>'.$sciname.'</i> =&gt;<a href="#" onclick="remappTaxon(\''.$r->sciname.'\','.$tid.',\''.$sciname.'\')"> remap to this taxon</a>';
-							$this->logOrEcho($echoStr,2);
-							$cnt++;
-						}
-					}
-					else{
-						$this->logOrEcho('No close matches found',1);
-					}
-				}
-				$nameCnt++;
-			}
-			$rs->free();
-		}
-		$this->linkNewTaxa();
-
-		$this->logOrEcho("Done with taxa check ");
-		return $status;
-	}
-	
-	private function linkNewTaxa(){
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
-			'SET o.tidinterpreted = t.tid '.
-			'WHERE o.tidinterpreted IS NULL';
-		if(!$this->conn->query($sql)){
-			$this->logOrEcho('ERROR linking new data to occurrences: '.$this->conn->error);
-		}
-	}
-
-	public function remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname){
-		$status = false;
-		if(is_numeric($collid) && $oldSciname && is_numeric($tid) && $newSciname){
-			$oldSciname = $this->cleanInStr($oldSciname);
-			$newSciname = $this->cleanInStr($newSciname);
-			//Version edit in edits table 
-			$sql1 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
-				'SELECT occid, "sciname", "'.$newSciname.'", sciname, '.$GLOBALS['SYMB_UID'].', 1, 1 '.
-				'FROM omoccurrences WHERE collid = '.$collid.' AND sciname = "'.$oldSciname.'"'; 
-			if($this->conn->query($sql1)){
-				//Update occurrence table
-				$sql2 = 'UPDATE omoccurrences '.
-					'SET tidinterpreted = '.$tid.', sciname = "'.$newSciname.'" '.
-					'WHERE collid = '.$collid.' AND sciname = "'.$oldSciname.'"';
-				if($this->conn->query($sql2)){
-					$status = true;
-				}
-				else{
-					echo $sql2;
-				}
-			}
-			else{
-				echo $sql1;
-			}
-		}
-		return $status;
-	}
-
-	public function hasDuplicateClusters(){
-		$retStatus = false;
-		$sql = 'SELECT o.occid '.
-			'FROM omoccurrences o INNER JOIN omoccurduplicatelink d ON o.occid = d.occid ';
-		$rs = $this->conn->query($sql);
-		if($rs->num_rows) $retStatus = true;
-		$rs->free();
-		return $retStatus;
 	}
 
 	//Search and resolve duplicate specimen records 
@@ -287,7 +177,17 @@ class OccurrenceCleaner extends Manager{
 		}
 		return $status;
 	}
-	
+
+	public function hasDuplicateClusters(){
+		$retStatus = false;
+		$sql = 'SELECT o.occid '.
+				'FROM omoccurrences o INNER JOIN omoccurduplicatelink d ON o.occid = d.occid ';
+		$rs = $this->conn->query($sql);
+		if($rs->num_rows) $retStatus = true;
+		$rs->free();
+		return $retStatus;
+	}
+
     /** Populate omoccurrences.recordedbyid using data from omoccurrences.recordedby.
      */
 	public function indexCollectors(){
