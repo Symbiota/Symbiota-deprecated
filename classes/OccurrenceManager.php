@@ -875,7 +875,7 @@ class OccurrenceManager extends SearchManager {
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
 			$taxa = $this->cleanInStr($_REQUEST["taxa"]);
-			$searchType = ((array_key_exists("type",$_REQUEST) && is_numeric($_REQUEST["type"]))?$_REQUEST["type"]:0);
+			$searchType = ((array_key_exists("taxontype",$_REQUEST) && is_numeric($_REQUEST["taxontype"]))?$_REQUEST["taxontype"]:0);
 			if($taxa){
 				$taxaStr = "";
 				if(is_numeric($taxa)){
