@@ -80,22 +80,23 @@ class SearchManager {
             }
             $this->taxaArr[$taxaSearchTerm] = array();
             $this->taxaArr[$taxaSearchTerm]['taxontype'] = $taxaSearchType;
-            if (($baseSearchType != TaxaSearchType::ANY_NAME   ) &&
-                ($taxaSearchType != TaxaSearchType::COMMON_NAME)   ) {
-                $sql = 'SELECT sciname, tid, rankid FROM taxa WHERE sciname IN("'.implode('","',array_keys($this->taxaArr)).'")';
-                $rs = $this->conn->query($sql);
-                while($r = $rs->fetch_object()){
-                    $this->taxaArr[$r->sciname]['tid'] = $r->tid;
-                    $this->taxaArr[$r->sciname]['rankid'] = $r->rankid;
-                    if($r->rankid == 140){
-                        $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::FAMILY_ONLY;
-                    }elseif($r->rankid > 179){
-                        $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::SPECIES_NAME_ONLY;
-                    }elseif($r->rankid < 180){
-                        $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::HIGHER_TAXONOMY;
+            if ($taxaSearchType != TaxaSearchType::COMMON_NAME) {
+                if ($baseSearchType != TaxaSearchType::ANY_NAME) {
+                    $sql = 'SELECT sciname, tid, rankid FROM taxa WHERE sciname IN("'.implode('","',array_keys($this->taxaArr)).'")';
+                    $rs = $this->conn->query($sql);
+                    while($r = $rs->fetch_object()){
+                        $this->taxaArr[$r->sciname]['tid'] = $r->tid;
+                        $this->taxaArr[$r->sciname]['rankid'] = $r->rankid;
+                        if($r->rankid == 140){
+                            $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::FAMILY_ONLY;
+                        }elseif($r->rankid > 179){
+                            $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::SPECIES_NAME_ONLY;
+                        }elseif($r->rankid < 180){
+                            $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::HIGHER_TAXONOMY;
+                        }
                     }
+                    $rs->free();
                 }
-                $rs->free();
                 if ($useThes) {
                     $this->setSynonymsFor($taxaSearchTerm);
                 }
