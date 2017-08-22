@@ -1,5 +1,4 @@
 <?php
-include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
 include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 include_once($SERVER_ROOT.'/classes/SearchManager.php');
