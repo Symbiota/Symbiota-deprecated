@@ -457,7 +457,7 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND (o.processingstatus IS NULL) ';
 			}
 			else{
-				$sqlWhere .= 'AND (o.processingstatus LIKE "'.$this->cleanInStr($this->qryArr['ps']).'%") ';
+				$sqlWhere .= 'AND (o.processingstatus = "'.$this->cleanInStr($this->qryArr['ps']).'") ';
 			}
 		}
 		//Without images
