@@ -1,16 +1,14 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-class MapInterfaceManager{
+include_once($serverRoot.'/classes/SearchManager.php');
+class MapInterfaceManager extends SearchManager {
 	
-	protected $conn;
 	protected $searchTermsArr = Array();
 	protected $localSearchArr = Array();
 	protected $reset = 0;
 	protected $dynamicClid;
 	protected $recordCount = 0;
-	private $taxaArr = Array();
 	private $collArr = Array();
-	private $taxaSearchType;
 	private $clName;
 	private $collArrIndex = 0;
 	private $iconColors = Array();
@@ -20,8 +18,8 @@ class MapInterfaceManager{
 	private $searchTerms = 0;
 	
     public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon('readonly');
-    	$this->googleIconArr = array('pushpin/ylw-pushpin','pushpin/blue-pushpin','pushpin/grn-pushpin','pushpin/ltblu-pushpin',
+        parent::__construct();
+        $this->googleIconArr = array('pushpin/ylw-pushpin','pushpin/blue-pushpin','pushpin/grn-pushpin','pushpin/ltblu-pushpin',
 			'pushpin/pink-pushpin','pushpin/purple-pushpin', 'pushpin/red-pushpin','pushpin/wht-pushpin','paddle/blu-blank',
 			'paddle/grn-blank','paddle/ltblu-blank','paddle/pink-blank','paddle/wht-blank','paddle/blu-diamond','paddle/grn-diamond',
 			'paddle/ltblu-diamond','paddle/pink-diamond','paddle/ylw-diamond','paddle/wht-diamond','paddle/red-diamond','paddle/purple-diamond',
@@ -31,10 +29,10 @@ class MapInterfaceManager{
 			'paddle/ltblu-stars','paddle/pink-stars','paddle/ylw-stars','paddle/wht-stars','paddle/red-stars','paddle/purple-stars');
 		$this->readRequestVariables();
     }
-	public function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
-	}
-	
+    public function __destruct(){
+        parent::__destruct();
+    }
+    
 	protected function getConnection($conType = "readonly"){
 		return MySQLiConnectionFactory::getCon($conType);
 	}
@@ -99,27 +97,16 @@ class MapInterfaceManager{
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)&&$this->searchTermsArr["taxa"]){
-			$sqlWhereTaxa = "";
-			$useThes = (array_key_exists("usethes",$this->searchTermsArr)?$this->searchTermsArr["usethes"]:0);
-			$this->taxaSearchType = $this->searchTermsArr["taxontype"];
-			$taxaArr = explode(";",trim($this->searchTermsArr["taxa"]));
-			//Set scientific name
-			$this->taxaArr = Array();
-			foreach($taxaArr as $sName){
-				$this->taxaArr[trim($sName)] = Array();
-			}
-			if($this->taxaSearchType == 5){
-				//Common name search
-				$this->setSciNamesByVerns();
-			}
-			else{
-				if($useThes){ 
-					$this->setSynonyms();
-				}
-			}
+			$useThes           = (array_key_exists("usethes",$this->searchTermsArr)?$this->searchTermsArr["usethes"]:0);
+			$baseSearchType    = $this->searchTermsArr["taxontype"];
+			$taxaSearchTerms   = explode(";",trim($this->searchTermsArr["taxa"]));
+			$this->setTaxaArr($useThes,$baseSearchType,$taxaSearchTerms);
+			
 			//Build sql
+			$sqlWhereTaxa = "";
 			foreach($this->taxaArr as $key => $valueArray){
-				if($this->taxaSearchType == 4){
+			    $taxaSearchType = $valueArray['taxontype'];
+			    if($taxaSearchType == TaxaSearchType::HIGHER_TAXONOMY){
 					//Class, order, or other higher rank
 					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
@@ -127,7 +114,7 @@ class MapInterfaceManager{
 					}
 				}
 				else{
-					if($this->taxaSearchType == 5){
+				    if($taxaSearchType == TaxaSearchType::COMMON_NAME){
 						$famArr = array();
 						if(array_key_exists("families",$valueArray)){
 							$famArr = $valueArray["families"];
@@ -153,17 +140,17 @@ class MapInterfaceManager{
 						}
 					}
 					else{
-						if($this->taxaSearchType == 2 || ($this->taxaSearchType == 1 && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){
+						if($taxaSearchType == TaxaSearchType::FAMILY_ONLY || ($taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){
 							$sqlWhereTaxa .= "OR (o.family = '".$key."') ";
 						}
-						if($this->taxaSearchType == 3 || ($this->taxaSearchType == 1 && strtolower(substr($key,-5)) != "aceae" && strtolower(substr($key,-4)) != "idae")){
+						if($taxaSearchType == TaxaSearchType::SPECIES_NAME_ONLY || ($taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES && strtolower(substr($key,-5)) != "aceae" && strtolower(substr($key,-4)) != "idae")){
 							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$key."%') ";
 						}
 					}
 					if(array_key_exists("synonyms",$valueArray)){
 						$synArr = $valueArray["synonyms"];
 						if($synArr){
-							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 5){
+							if($taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES || $taxaSearchType == TaxaSearchType::FAMILY_ONLY || $taxaSearchType == TaxaSearchType::COMMON_NAME){
 								foreach($synArr as $synTid => $sciName){ 
 									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
 										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
@@ -175,10 +162,10 @@ class MapInterfaceManager{
 						/*
 						$synArr = $valueArray["synonyms"];
 						foreach($synArr as $sciName){ 
-							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 5){
+							if($this->taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES || $this->taxaSearchType == TaxaSearchType::FAMILY_ONLY || $this->taxaSearchType == TaxaSearchType::COMMON_NAME) {
 								$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
 							}
-							if($this->taxaSearchType == 2){
+							if($this->taxaSearchType == TaxaSearchType::FAMILY_ONLY) {
 								$sqlWhereTaxa .= "OR (o.sciname = '".$sciName."') ";
 							}
 							else{
@@ -418,52 +405,6 @@ class MapInterfaceManager{
 		}
 		return $retStr; 
 	}
-	
-	protected function setSciNamesByVerns(){
-        $sql = "SELECT DISTINCT v.VernacularName, t.tid, t.sciname, ts.family, t.rankid ".
-            "FROM (taxstatus ts LEFT JOIN taxavernaculars v ON ts.TID = v.TID) ".
-            "LEFT JOIN taxa t ON t.TID = ts.tidaccepted ";
-    	$whereStr = "";
-		foreach($this->taxaArr as $key => $value){
-			$whereStr .= "OR v.VernacularName = '".$key."' ";
-		}
-		$sql .= "WHERE (ts.taxauthid = 1) AND (".substr($whereStr,3).") ORDER BY t.rankid LIMIT 20";
-		//echo "<div>sql: ".$sql."</div>";
-		$result = $this->conn->query($sql);
-		if($result->num_rows){
-			while($row = $result->fetch_object()){
-				$vernName = strtolower($row->VernacularName);
-				if($row->rankid < 140){
-					$this->taxaArr[$vernName]["tid"][] = $row->tid;
-				}
-				elseif($row->rankid == 140){
-					$this->taxaArr[$vernName]["families"][] = $row->sciname;
-				}
-				else{
-					$this->taxaArr[$vernName]["scinames"][] = $row->sciname;
-				}
-			}
-		}
-		else{
-			$this->taxaArr["no records"]["scinames"][] = "no records";
-		}
-		$result->close();
-    }
-    
-    protected function setSynonyms(){
-		foreach($this->taxaArr as $key => $value){
-			if(array_key_exists("scinames",$value)){
-				if(!in_array("no records",$value["scinames"])){
-					$synArr = $this->getSynonyms($value["scinames"]);
-					if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
-				}
-			}
-			else{
-				$synArr = $this->getSynonyms($key);
-				if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
-			}
-		}
-    }
 	
 	public function getFullCollectionList($catId = ""){
 		$retArr = array();
@@ -805,13 +746,7 @@ class MapInterfaceManager{
 		//$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
-	protected function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-	
+
     public function getGenObsInfo(){
 		$retVar = array();
 		$sql = 'SELECT collid, CollType '.
@@ -1461,77 +1396,6 @@ class MapInterfaceManager{
     public function getCollArr(){
         return $this->collArr;
     }
-	private function getSynonyms($searchTarget,$taxAuthId = 1){
-		$synArr = array();
-		$targetTidArr = array();
-		$searchStr = '';
-		if(is_array($searchTarget)){
-			if(is_numeric(current($searchTarget))){
-				$targetTidArr = $searchTarget;
-			}
-			else{
-				$searchStr = implode('","',$searchTarget);
-			}
-		}
-		else{
-			if(is_numeric($searchTarget)){
-				$targetTidArr[] = $searchTarget;
-			}
-			else{
-				$searchStr = $searchTarget;
-			}
-		}
-		if($searchStr){
-			//Input is a string, thus get tids
-			$sql1 = 'SELECT tid FROM taxa WHERE sciname IN("'.$searchStr.'")';
-			$rs1 = $this->conn->query($sql1);
-			while($r1 = $rs1->fetch_object()){
-				$targetTidArr[] = $r1->tid;
-			}
-			$rs1->free();
-		}
-		if($targetTidArr){
-			//Get acceptd names
-			$accArr = array();
-			$rankId = 0;
-			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.rankid '.
-				'FROM taxa t LEFT JOIN taxstatus ts ON t.Tid = ts.TidAccepted '.
-				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tid IN('.implode(',',$targetTidArr).')) ';
-			$rs2 = $this->conn->query($sql2);
-			while($r2 = $rs2->fetch_object()){
-				$accArr[] = $r2->tid;
-				$rankId = $r2->rankid;
-				//Put in synonym array if not target
-				if(!in_array($r2->tid,$targetTidArr)) $synArr[$r2->tid] = $r2->sciname;
-			}
-			$rs2->free();
-	
-			//Get synonym that are different than target
-			$sql3 = 'SELECT DISTINCT t.tid, t.sciname '.
-				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
-				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tidaccepted IN('.implode('',$accArr).')) ';
-			$rs3 = $this->conn->query($sql3);
-			while($r3 = $rs3->fetch_object()){
-				if(!in_array($r3->tid,$targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
-			}
-			$rs3->free();
-	
-			//If rank is 220, get synonyms of accepted children
-			if($rankId == 220){
-				$sql4 = 'SELECT DISTINCT t.tid, t.sciname '.
-					'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
-					'WHERE (ts.parenttid IN('.implode('',$accArr).')) AND (ts.taxauthid = '.$taxAuthId.') '.
-					'AND (ts.TidAccepted = ts.tid)';
-				$rs4 = $this->conn->query($sql4);
-				while($r4 = $rs4->fetch_object()){
-					$synArr[$r4->tid] = $r4->sciname;
-				}
-				$rs4->free();
-			}
-		}
-		return $synArr;
-	}
-	
 	public function getGpxText($seloccids){
 		global $defaultTitle;
 		$seloccids = preg_match('#\[(.*?)\]#', $seloccids, $match);

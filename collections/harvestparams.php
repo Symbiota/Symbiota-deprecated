@@ -78,6 +78,7 @@ $searchVar = $collManager->getSearchTermStr();
 						<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
 						<option value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
 						<option value='5'><?php echo $LANG['SELECT_1-5']; ?></option>
+						<option value='6'><?php echo $LANG['SELECT_1-6']; ?></option>
 					</select>:
 					<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 				</div>

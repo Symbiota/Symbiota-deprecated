@@ -37,9 +37,15 @@ $(document).ready(function() {
 		// don't navigate away from the field on tab when selecting an item
 		.bind( "keydown", function( event ) {
 			if ( event.keyCode === $.ui.keyCode.TAB &&
-					$( this ).data( "autocomplete" ).menu.active ) {
+				$(this).autocomplete('widget').is(':visible')) {
+				$(this).trigger("select");
 				event.preventDefault();
 			}
+		})
+		.bind( "blur", function( event ) {
+			var keyEvent = $.Event("keydown");
+			keyEvent.keyCode = $.ui.keyCode.ENTER;
+			$(this).trigger(keyEvent);
 		})
 		.autocomplete({
 			source: function( request, response ) {
@@ -48,8 +54,11 @@ $(document).ready(function() {
                 var rankLow = '';
                 var rankHigh = '';
                 var rankLimit = '';
-				if(t == 5){
-                    source = '../../webservices/autofillvernacular.php';
+				if(t == 6){
+					source = '../../webservices/autofillanyname.php';
+				}
+				else if(t == 5){
+					source = '../../webservices/autofillvernacular.php';
 				}
 				else{
                     source = '../../webservices/autofillsciname.php';
@@ -76,6 +85,7 @@ $(document).ready(function() {
                     limit: 20
 				}, response );
 			},
+			autoFocus: true,
 			appendTo: "#taxa_autocomplete",
 			search: function() {
 				// custom minLength

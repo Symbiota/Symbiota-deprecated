@@ -1,25 +1,24 @@
 <?php 
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/SearchManager.php');
 
-class ImageLibraryManager{
+class ImageLibraryManager extends SearchManager {
 
-	private $searchTermsArr = Array();
-	private $recordCount = 0;
-	private $conn;
-	private $taxaArr = Array();
+    private $searchTermsArr = Array();
+    private $recordCount = 0;
 	private $tidFocus;
 	private $collArrIndex = 0;
 	private $sqlWhere = '';
 
 	function __construct() {
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
-		if(array_key_exists('TID_FOCUS', $GLOBALS) && preg_match('/^[\d,]+$/', $GLOBALS['TID_FOCUS'])){
+	    parent::__construct();
+	    if(array_key_exists('TID_FOCUS', $GLOBALS) && preg_match('/^[\d,]+$/', $GLOBALS['TID_FOCUS'])){
 			$this->tidFocus = $GLOBALS['TID_FOCUS'];
 		}
 	}
 
 	function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
+	    parent::__destruct();
 	}
 
  	public function getFamilyList(){
@@ -492,28 +491,16 @@ class ImageLibraryManager{
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)&&$this->searchTermsArr["taxa"]){
-			$useThes = (array_key_exists("usethes",$this->searchTermsArr)?$this->searchTermsArr["usethes"]:0);
-			$taxaSearchType = $this->searchTermsArr["taxontype"];
-			$taxaArr = explode(";",trim($this->searchTermsArr["taxa"]));
-			//Set scientific name
-			$this->taxaArr = Array();
-			foreach($taxaArr as $sName){
-				$this->taxaArr[trim($sName)] = Array();
-			}
-			if($taxaSearchType == 3){
-				//Common name search
-				$this->setSciNamesByVerns();
-			}
-			else{
-				if($useThes){ 
-					$this->setSynonyms();
-				}
-			}
+		    $useThes           = (array_key_exists("usethes",$this->searchTermsArr)?$this->searchTermsArr["usethes"]:0);
+		    $baseSearchType    = $this->searchTermsArr["taxontype"];
+		    $taxaSearchTerms   = explode(";",trim($this->searchTermsArr["taxa"]));
+		    $this->setTaxaArr($useThes,$baseSearchType,$taxaSearchTerms);
 
 			//Build sql
 			$sqlWhereTaxa = "";
 			foreach($this->taxaArr as $key => $valueArray){
-				if($taxaSearchType == 2){
+			    $taxaSearchType = $valueArray['taxontype'];
+				if($taxaSearchType == TaxaSearchType::FAMILY_ONLY){
 					$rs1 = $this->conn->query("SELECT tid, rankid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
 						if($r1->rankid < 180){
@@ -728,126 +715,6 @@ class ImageLibraryManager{
 		return $sql;
 	}
 
-	private function setSciNamesByVerns(){
-        $sql = "SELECT DISTINCT v.VernacularName, t.tid, t.sciname, ts.family, t.rankid ".
-            "FROM (taxstatus ts INNER JOIN taxavernaculars v ON ts.TID = v.TID) ".
-            "INNER JOIN taxa t ON t.TID = ts.tidaccepted ";
-    	$whereStr = "";
-		foreach($this->taxaArr as $key => $value){
-			$whereStr .= "OR v.VernacularName = '".$key."' ";
-		}
-		$sql .= "WHERE (ts.taxauthid = 1) AND (".substr($whereStr,3).") ORDER BY t.rankid LIMIT 20";
-		//echo "<div>sql: ".$sql."</div>";
-		$result = $this->conn->query($sql);
-		if($result->num_rows){
-			while($row = $result->fetch_object()){
-				$vernName = strtolower($row->VernacularName);
-				if($row->rankid < 140){
-					$this->taxaArr[$vernName]["tid"][] = $row->tid;
-				}
-				elseif($row->rankid == 140){
-					$this->taxaArr[$vernName]["families"][] = $row->sciname;
-				}
-				else{
-					$this->taxaArr[$vernName]["scinames"][] = $row->sciname;
-				}
-			}
-		}
-		else{
-			$this->taxaArr["no records"]["scinames"][] = "no records";
-		}
-		$result->free();
-    }
-	
-	private function setSynonyms(){
-		foreach($this->taxaArr as $key => $value){
-			if(array_key_exists("scinames",$value)){
-				if(!in_array("no records",$value["scinames"])){
-					$synArr = $this->getSynonyms($value["scinames"]);
-					if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
-				}
-			}
-			else{
-				$synArr = $this->getSynonyms($key);
-				if($synArr) $this->taxaArr[$key]["synonyms"] = $synArr;
-			}
-		}
-    }
-    
-    private function getSynonyms($searchTarget,$taxAuthId = 1){
-    	$synArr = array();
-    	$targetTidArr = array();
-    	$searchStr = '';
-    	if(is_array($searchTarget)){
-    		if(is_numeric(current($searchTarget))){
-    			$targetTidArr = $searchTarget;
-    		}
-    		else{
-    			$searchStr = implode('","',$searchTarget);
-    		}
-    	}
-    	else{
-    		if(is_numeric($searchTarget)){
-    			$targetTidArr[] = $searchTarget;
-    		}
-    		else{
-    			$searchStr = $searchTarget;
-    		}
-    	}
-    	if($searchStr){
-    		//Input is a string, thus get tids
-    		$sql1 = 'SELECT tid FROM taxa WHERE sciname IN("'.$searchStr.'")';
-    		$rs1 = $this->conn->query($sql1);
-    		while($r1 = $rs1->fetch_object()){
-    			$targetTidArr[] = $r1->tid;
-    		}
-    		$rs1->free();
-    	}
-    
-    	if($targetTidArr){
-    		//Get acceptd names
-    		$accArr = array();
-    		$rankId = 0;
-    		$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.rankid '.
-    				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.TidAccepted '.
-    				'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tid IN('.implode(',',$targetTidArr).')) ';
-    		$rs2 = $this->conn->query($sql2);
-    		while($r2 = $rs2->fetch_object()){
-    			$accArr[] = $r2->tid;
-    			$rankId = $r2->rankid;
-    			//Put in synonym array if not target
-    			if(!in_array($r2->tid,$targetTidArr)) $synArr[$r2->tid] = $r2->sciname;
-    		}
-    		$rs2->free();
-    
-    		if($accArr){
-    			//Get synonym that are different than target
-    			$sql3 = 'SELECT DISTINCT t.tid, t.sciname ' .
-    					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
-    					'WHERE (ts.taxauthid = ' . $taxAuthId . ') AND (ts.tidaccepted IN(' . implode('', $accArr) . ')) ';
-    			$rs3 = $this->conn->query($sql3);
-    			while ($r3 = $rs3->fetch_object()) {
-    				if (!in_array($r3->tid, $targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
-    			}
-    			$rs3->free();
-    
-    			//If rank is 220, get synonyms of accepted children
-    			if ($rankId == 220) {
-    				$sql4 = 'SELECT DISTINCT t.tid, t.sciname ' .
-    						'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ' .
-    						'WHERE (ts.parenttid IN(' . implode('', $accArr) . ')) AND (ts.taxauthid = ' . $taxAuthId . ') ' .
-    						'AND (ts.TidAccepted = ts.tid)';
-    				$rs4 = $this->conn->query($sql4);
-    				while ($r4 = $rs4->fetch_object()) {
-    					$synArr[$r4->tid] = $r4->sciname;
-    				}
-    				$rs4->free();
-    			}
-    		}
-    	}
-    	return $synArr;
-    }
-	
 	public function getTagArr(){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT keyvalue '. 
@@ -871,13 +738,6 @@ class ImageLibraryManager{
 	
 	public function getRecordCnt(){
 		return $this->recordCount;
-	}
-
-	private function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
 	}
 }
 ?>
