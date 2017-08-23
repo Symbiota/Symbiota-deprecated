@@ -5,7 +5,7 @@ class WordCloud{
 	
 	private $conn;
 	private $frequencyArr = array();
-	private $commonWordArr = array();
+	private $commonWordArr = array(); 
 	
 	//custom parameters
 	private $displayedWordCount;

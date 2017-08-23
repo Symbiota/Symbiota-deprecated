@@ -98,6 +98,7 @@ class TaxonomyHarvester extends Manager{
 		$tid = 0;
 		if($sciName){
 			$url = 'http://webservice.catalogueoflife.org/col/webservice?response=full&format=json&name='.str_replace(" ","%20",$sciName);
+			//echo $url.'<br/>';
 			$content = $this->getContentString($url);
 			$resultArr = json_decode($content,true);
 			$numResults = $resultArr['number_of_results_returned'];
@@ -138,8 +139,8 @@ class TaxonomyHarvester extends Manager{
 				$tidAccepted = $this->addColTaxonById($baseArr['accepted_name']['id']);
 			}
 			$taxonArr = $this->getColNode($baseArr);
-			if($originalSearchStr && !strpos($originalSearchStr,' ') && $taxonArr['rankid'] > 219){
-				//Abort because searc return contains a shild of the search term
+			if($originalSearchStr && $originalSearchStr != $taxonArr['sciname']){
+				//Abort because search return contains a child of the search term
 				return false;
 			}
 			//Get parent
@@ -163,7 +164,7 @@ class TaxonomyHarvester extends Manager{
 					$parentArr = $this->getParentArr($taxonArr);
 					$parentTid = $this->addColTaxon($parentArr['sciname']);
 					if(!$parentTid){
-						//Bad return from COL, thus lets jsut add as accepted for now
+						//Bad return from COL, thus lets just add as accepted for now
 						$taxonArr['family'] = $this->getColFamily($baseArr);
 						$this->buildTaxonArr($parentArr);
 						$parentTid = $this->loadNewTaxon($parentArr);
@@ -651,8 +652,8 @@ class TaxonomyHarvester extends Manager{
 		if(isset($taxonArr['taxonRank']) && $taxonArr['taxonRank']){
 			$rankArr = array('biota' => 1, 'organism' => 1, 'kingdom' => 10, 'subkingdom' => 20, 'division' => 30, 'phylum' => 30, 'subdivision' => 40, 'subphylum' => 40, 'superclass' => 50, 'supercl.' => 50,
 				'class' => 60, 'cl.' => 60, 'subclass' => 70, 'subcl.' => 70, 'superorder' => 90, 'superord.' => 90, 'order' => 100, 'ord.' => 100, 'suborder' => 110, 'subord.' => 110, 
-				'family' => 140, 'fam.' => 140, 'subfamily' => 150, 'tribe' => 160, 'subtribe' => 170, 'genus' => 180, 'gen.' => 180,
-				'subgenus' => 190, 'section' => 200, 'subsection' => 210, 'species' => 220, 'sp.' => 220, 'subspecies' => 230, 'ssp.' => 230, 'subsp.' => 230,
+				'superfamily' => 130, 'family' => 140, 'fam.' => 140, 'subfamily' => 150, 'tribe' => 160, 'subtribe' => 170, 'genus' => 180, 'gen.' => 180,
+				'subgenus' => 190, 'section' => 200, 'subsection' => 210, 'species' => 220, 'sp.' => 220, 'subspecies' => 230, 'ssp.' => 230, 'subsp.' => 230, 'infraspecies' => 230,
 				'variety' => 240, 'var.' => 240, 'morph' => 240, 'subvariety' => 250, 'form' => 260, 'f.' => 260, 'subform' => 270, 'cultivated' => 300);
 			if(array_key_exists($taxonArr['taxonRank'], $rankArr)){
 				$rankid = $rankArr[$taxonArr['taxonRank']];
