@@ -5,7 +5,7 @@ include_once($serverRoot.'/classes/ProfileManager.php');
 class UserTaxonomy {
 
 	private $conn;
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}

@@ -18,3 +18,5 @@
 /robots.txt
 .settings/org.eclipse.php.core.prefs
 /index.php
+.settings/org.eclipse.wst.common.project.facet.core.xml
+*.prefs

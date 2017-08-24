@@ -17,11 +17,11 @@ class TPImageEditorManager extends TPEditorManager{
 		set_time_limit(120);
 		ini_set("max_input_time",120);
  	}
- 	
+
  	public function __destruct(){
  		parent::__destruct();
  	}
- 
+
 	public function getImages(){
 		$imageArr = Array();
 		$tidArr = Array($this->tid);
