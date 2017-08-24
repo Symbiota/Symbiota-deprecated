@@ -78,24 +78,26 @@ class SearchManager {
                     $taxaSearchType = TaxaSearchType::SCIENTIFIC_NAME;
                 }
             }
+            $taxaSearchTerm = str_replace("\\'","'",$taxaSearchTerm);
             $this->taxaArr[$taxaSearchTerm] = array();
             $this->taxaArr[$taxaSearchTerm]['taxontype'] = $taxaSearchType;
-            if (($baseSearchType != TaxaSearchType::ANY_NAME   ) &&
-                ($taxaSearchType != TaxaSearchType::COMMON_NAME)   ) {
-                $sql = 'SELECT sciname, tid, rankid FROM taxa WHERE sciname IN("'.implode('","',array_keys($this->taxaArr)).'")';
-                $rs = $this->conn->query($sql);
-                while($r = $rs->fetch_object()){
-                    $this->taxaArr[$r->sciname]['tid'] = $r->tid;
-                    $this->taxaArr[$r->sciname]['rankid'] = $r->rankid;
-                    if($r->rankid == 140){
-                        $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::FAMILY_ONLY;
-                    }elseif($r->rankid > 179){
-                        $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::SPECIES_NAME_ONLY;
-                    }elseif($r->rankid < 180){
-                        $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::HIGHER_TAXONOMY;
+            if ($taxaSearchType != TaxaSearchType::COMMON_NAME) {
+                if ($baseSearchType != TaxaSearchType::ANY_NAME) {
+                    $sql = 'SELECT sciname, tid, rankid FROM taxa WHERE sciname IN("'.implode('","',array_keys($this->taxaArr)).'")';
+                    $rs = $this->conn->query($sql);
+                    while($r = $rs->fetch_object()){
+                        $this->taxaArr[$r->sciname]['tid'] = $r->tid;
+                        $this->taxaArr[$r->sciname]['rankid'] = $r->rankid;
+                        if($r->rankid == 140){
+                            $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::FAMILY_ONLY;
+                        }elseif($r->rankid > 179){
+                            $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::SPECIES_NAME_ONLY;
+                        }elseif($r->rankid < 180){
+                            $this->taxaArr[$r->sciname]['taxontype'] = TaxaSearchType::HIGHER_TAXONOMY;
+                        }
                     }
+                    $rs->free();
                 }
-                $rs->free();
                 if ($useThes) {
                     $this->setSynonymsFor($taxaSearchTerm);
                 }
@@ -109,7 +111,7 @@ class SearchManager {
             "FROM (taxstatus ts INNER JOIN taxavernaculars v ON ts.TID = v.TID) ".
             "INNER JOIN taxa t ON t.TID = ts.tidaccepted ";
         $whereStr = "";
-        foreach($this->taxaArr as $key => $value){                                             // mbaenrm
+        foreach($this->taxaArr as $key => $value){
             if ($value['taxontype'] == TaxaSearchType::COMMON_NAME) {
                 $whereStr .= "OR v.VernacularName = '".$key."' ";
             }
@@ -118,26 +120,28 @@ class SearchManager {
             $sql .= "WHERE (ts.taxauthid = 1) AND (".substr($whereStr,3).") ORDER BY t.rankid LIMIT 20";
             //echo "<div>sql: ".$sql."</div>";
             $result = $this->conn->query($sql);
-            if($result->num_rows){
-                while($row = $result->fetch_object()){
-                  //$vernName = strtolower($row->VernacularName);
-                    $vernName = $row->VernacularName;
-                    if($row->rankid < 140){
-                        $this->taxaArr[$vernName]["tid"][] = $row->tid;
-                    }
-                    elseif($row->rankid == 140){
-                        $this->taxaArr[$vernName]["families"][] = $row->sciname;
-                    }
-                    else{
-                        $this->taxaArr[$vernName]["scinames"][] = $row->sciname;
+            if($result){
+                if($result->num_rows){
+                    while($row = $result->fetch_object()){
+                      //$vernName = strtolower($row->VernacularName);
+                        $vernName = $row->VernacularName;
+                        if($row->rankid < 140){
+                            $this->taxaArr[$vernName]["tid"][] = $row->tid;
+                        }
+                        elseif($row->rankid == 140){
+                            $this->taxaArr[$vernName]["families"][] = $row->sciname;
+                        }
+                        else{
+                            $this->taxaArr[$vernName]["scinames"][] = $row->sciname;
+                        }
                     }
                 }
+                $result->close();
             }
             else{
                 $this->taxaArr["no records"]["scinames"][] = "no records";
                 $this->taxaArr["no records"]["taxontype"][] = TaxaSearchType::COMMON_NAME;
             }
-            $result->close();
         }
     }
     

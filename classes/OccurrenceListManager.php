@@ -59,54 +59,56 @@ class OccurrenceListManager extends OccurrenceManager{
 		$sql .= ' LIMIT '.$pageRequest.",".$cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$returnArr[$row->occid]['collid'] = $row->collid;
-			$returnArr[$row->occid]['instcode'] = $row->institutioncode;
-			$returnArr[$row->occid]['collcode'] = $row->collectioncode;
-			$returnArr[$row->occid]['collname'] = $row->collectionname;
-			$returnArr[$row->occid]['icon'] = $row->icon;
-			$returnArr[$row->occid]["catnum"] = $row->catalognumber;
-			$returnArr[$row->occid]["family"] = $row->family;
-			$returnArr[$row->occid]["sciname"] = $row->sciname;
-			$returnArr[$row->occid]["tid"] = $row->tidinterpreted;
-			$returnArr[$row->occid]["author"] = $this->cleanOutStr($row->scientificnameauthorship);
-			$returnArr[$row->occid]["collector"] = $row->recordedby;
-			$returnArr[$row->occid]["country"] = $row->country;
-			$returnArr[$row->occid]["state"] = $row->stateprovince;
-			$returnArr[$row->occid]["county"] = $row->county;
-			$returnArr[$row->occid]["obsuid"] = $row->observeruid;
-			if(!$row->localitysecurity|| $canReadRareSpp 
-				|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["CollEditor"]))
-				|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
-					$locStr = str_replace('.,',',',$row->locality);
-					if($row->decimallatitude && $row->decimallongitude) $locStr .= ', '.$row->decimallatitude.' '.$row->decimallongitude;
-					$returnArr[$row->occid]["locality"] = trim($locStr,' ,;');
-					$returnArr[$row->occid]["collnum"] = $this->cleanOutStr($row->recordnumber);
-					$dateStr = date('d M Y',strtotime($row->eventdate));
-					if($row->enddayofyear && $row->year){
-						if($d = DateTime::createFromFormat('z Y', strval($row->enddayofyear).' '.strval($row->year))){
-							$dateStr .= ' to '.$d->format('d M Y');
-						}
-					}
-					$returnArr[$row->occid]["date"] = $dateStr;
-					$returnArr[$row->occid]["habitat"] = $row->habitat;
-					$elevStr = $row->minimumelevationinmeters;
-					if($row->maximumelevationinmeters) $elevStr .= ' - '.$row->maximumelevationinmeters;
-					$returnArr[$row->occid]["elev"] = $elevStr;
-					$occArr[] = $row->occid;
-			}
-			else{
-				$securityStr = '<span style="color:red;">Detailed locality information protected. ';
-				if($row->localitysecurityreason){
-					$securityStr .= $row->localitysecurityreason;
-				}
-				else{
-					$securityStr .= 'This is typically done to protect rare or threatened species localities.';
-				}
-				$returnArr[$row->occid]["locality"] = $securityStr.'</span>';
-			}
+		if($result){
+    		while($row = $result->fetch_object()){
+    			$returnArr[$row->occid]['collid'] = $row->collid;
+    			$returnArr[$row->occid]['instcode'] = $row->institutioncode;
+    			$returnArr[$row->occid]['collcode'] = $row->collectioncode;
+    			$returnArr[$row->occid]['collname'] = $row->collectionname;
+    			$returnArr[$row->occid]['icon'] = $row->icon;
+    			$returnArr[$row->occid]["catnum"] = $row->catalognumber;
+    			$returnArr[$row->occid]["family"] = $row->family;
+    			$returnArr[$row->occid]["sciname"] = $row->sciname;
+    			$returnArr[$row->occid]["tid"] = $row->tidinterpreted;
+    			$returnArr[$row->occid]["author"] = $this->cleanOutStr($row->scientificnameauthorship);
+    			$returnArr[$row->occid]["collector"] = $row->recordedby;
+    			$returnArr[$row->occid]["country"] = $row->country;
+    			$returnArr[$row->occid]["state"] = $row->stateprovince;
+    			$returnArr[$row->occid]["county"] = $row->county;
+    			$returnArr[$row->occid]["obsuid"] = $row->observeruid;
+    			if(!$row->localitysecurity|| $canReadRareSpp 
+    				|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["CollEditor"]))
+    				|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
+    					$locStr = str_replace('.,',',',$row->locality);
+    					if($row->decimallatitude && $row->decimallongitude) $locStr .= ', '.$row->decimallatitude.' '.$row->decimallongitude;
+    					$returnArr[$row->occid]["locality"] = trim($locStr,' ,;');
+    					$returnArr[$row->occid]["collnum"] = $this->cleanOutStr($row->recordnumber);
+    					$dateStr = date('d M Y',strtotime($row->eventdate));
+    					if($row->enddayofyear && $row->year){
+    						if($d = DateTime::createFromFormat('z Y', strval($row->enddayofyear).' '.strval($row->year))){
+    							$dateStr .= ' to '.$d->format('d M Y');
+    						}
+    					}
+    					$returnArr[$row->occid]["date"] = $dateStr;
+    					$returnArr[$row->occid]["habitat"] = $row->habitat;
+    					$elevStr = $row->minimumelevationinmeters;
+    					if($row->maximumelevationinmeters) $elevStr .= ' - '.$row->maximumelevationinmeters;
+    					$returnArr[$row->occid]["elev"] = $elevStr;
+    					$occArr[] = $row->occid;
+    			}
+    			else{
+    				$securityStr = '<span style="color:red;">Detailed locality information protected. ';
+    				if($row->localitysecurityreason){
+    					$securityStr .= $row->localitysecurityreason;
+    				}
+    				else{
+    					$securityStr .= 'This is typically done to protect rare or threatened species localities.';
+    				}
+    				$returnArr[$row->occid]["locality"] = $securityStr.'</span>';
+    			}
+    		}
+    		$result->free();
 		}
-		$result->free();
 		//Set images
 		if($occArr){
 			$sql = 'SELECT o.collid, o.occid, i.thumbnailurl '.
@@ -128,10 +130,12 @@ class OccurrenceListManager extends OccurrenceManager{
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ".$this->setTableJoins($sqlWhere).$sqlWhere;
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);
-			if($row = $result->fetch_object()){
-				$this->recordCount = $row->cnt;
+			if($result){
+			    if($row = $result->fetch_object()){
+    				$this->recordCount = $row->cnt;
+			    }
+			    $result->free();
 			}
-			$result->free();
 		}
 	}
 
