@@ -1,7 +1,7 @@
 <?php 
 /*
 ------------------
-Language: Español (Spanish)
+Language: Espaï¿½ol (Spanish)
 ------------------
 */
 
