@@ -1257,6 +1257,21 @@ class GlossaryManager{
 	//Misc data retrival functions
 	public function getStats(){
 		/*
+		
+		// Report output for csv export
+		SELECT g.term, g.definition, g.language, GROUP_CONCAT(t.sciname) as sciname, syn.term as syn
+		FROM glossary g LEFT JOIN glossarytermlink te ON g.glossid = te.glossid
+		LEFT JOIN glossarytaxalink tl ON te.glossgrpid = tl.glossid
+		LEFT JOIN taxa t ON tl.tid = t.tid
+		LEFT JOIN (SELECT te.glossgrpid, g.term
+		FROM glossarytermlink te INNER JOIN glossary g ON te.glossid = g.glossid
+		WHERE te.relationshipType = "synonym") syn ON g.glossid = syn.glossgrpid
+		GROUP BY g.language, g.term
+		LIMIT 10000000;
+
+		
+		 
+		
 		SELECT language, count(*)
 		FROM glossary
 		GROUP BY language;
