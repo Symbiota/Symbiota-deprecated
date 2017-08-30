@@ -693,7 +693,7 @@ class OccurrenceCollectionProfile {
 	public function getBasicStats(){
 		$retArr = array();
 		if($this->collid){
-			$sql = 'SELECT uploaddate, recordcnt, georefcnt, familycnt, genuscnt, speciescnt, dynamicProperties FROM omcollectionstats ';
+			$sql = 'SELECT uploaddate, recordcnt, georefcnt, familycnt, genuscnt, speciescnt, dynamicProperties FROM omcollectionstats WHERE collid = '.$this->collid;
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$uDate = "";
