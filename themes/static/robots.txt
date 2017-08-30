@@ -6,7 +6,6 @@ Allow: /checklists/
 Allow: /collections/index.php  
 Allow: /collections/exsiccati/index.php  
 Allow: /collections/misc/collprofiles.php  
-Allow: /collections/misc/collectionindex.php  
 Allow: /games/index.php  
 Allow: /ident/index.php  
 Allow: /imagelib/index.php  

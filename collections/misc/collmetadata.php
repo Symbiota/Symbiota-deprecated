@@ -66,7 +66,8 @@ if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY) && $co
 		$publishIDIGBIO = true;
 	}
 }
-$collData = $collManager->getCollectionData(true);
+$collData = current($collManager->getCollectionMetadata());
+$collManager->cleanOutArr($collData);
 ?>
 <html>
 <head>
@@ -377,8 +378,8 @@ $collData = $collManager->getCollectionData(true);
 								</td>
 							</tr>
 							<?php 
-							$collCatArr = $collManager->getCategoryArr();
-							if($collCatArr){
+							$fullCatArr = $collManager->getCategoryArr();
+							if($fullCatArr){
 								?>
 								<tr>
 									<td>
@@ -389,8 +390,9 @@ $collData = $collManager->getCollectionData(true);
 											<option value="">No Category</option>
 											<option value="">-------------------------------------------</option>
 											<?php 
-											foreach($collCatArr as $ccpk => $category){
-												echo '<option value="'.$ccpk.'" '.($collid && $ccpk==$collData['ccpk']?'SELECTED':'').'>'.$category.'</option>';
+											$catArr = $collManager->getCollectionCategories();
+											foreach($fullCatArr as $ccpk => $category){
+												echo '<option value="'.$ccpk.'" '.($collid && array_key_exists($ccpk, $catArr)?'SELECTED':'').'>'.$category.'</option>';
 											}
 											?>
 										</select>
@@ -743,40 +745,33 @@ $collData = $collManager->getCollectionData(true);
 				<fieldset style="background-color:#FFF380;">
 					<legend><b>Mailing Address</b></legend>
 					<?php
-					$instArr = $collManager->getAddresses();
-					if($instArr){
-						//Edit or remove address
-						$cnt = 0;
-						foreach($instArr as $iid => $iArr){
-							?>
-							<div style="margin:25px;">
-								<?php 
-								echo '<div>';
-								echo $iArr['institutionname'].($iArr['institutioncode']?' ('.$iArr['institutioncode'].')':'');
-								?>
-								<a href="../admin/institutioneditor.php?emode=1&targetcollid=<?php echo $collid.'&iid='.$iid; ?>" title="Edit institution address">
-									<img src="../../images/edit.png" style="width:14px;" />
-								</a>
-								<a href="collmetadata.php?collid=<?php echo $collid.'&removeiid='.$iid; ?>" title="Unlink institution address">
-									<img src="../../images/drop.png" style="width:14px;" />
-								</a>
-								<?php 
-								echo '</div>';
-								if($iArr['address1']) echo '<div>'.$iArr['address1'].'</div>';
-								if($iArr['address2']) echo '<div>'.$iArr['address2'].'</div>';
-								if($iArr['city'] || $iArr['stateprovince']) echo '<div>'.$iArr['city'].', '.$iArr['stateprovince'].' '.$iArr['postalcode'].'</div>';
-								if($iArr['country']) echo '<div>'.$iArr['country'].'</div>';
-								if($iArr['phone']) echo '<div>'.$iArr['phone'].'</div>';
-								if($iArr['contact']) echo '<div>'.$iArr['contact'].'</div>';
-								if($iArr['email']) echo '<div>'.$iArr['email'].'</div>';
-								if($iArr['url']) echo '<div><a href="'.$iArr['url'].'">'.$iArr['url'].'</a></div>';
-								if($iArr['notes']) echo '<div>'.$iArr['notes'].'</div>';
-								?>
-							</div>
+					if($instArr = $collManager->getAddress()){
+						?>
+						<div style="margin:25px;">
 							<?php 
-							if($cnt) echo '<hr/>';
-							$cnt++;
-						}
+							echo '<div>';
+							echo $instArr['institutionname'].($instArr['institutioncode']?' ('.$instArr['institutioncode'].')':'');
+							?>
+							<a href="../admin/institutioneditor.php?emode=1&targetcollid=<?php echo $collid.'&iid='.$instArr['iid']; ?>" title="Edit institution address">
+								<img src="../../images/edit.png" style="width:14px;" />
+							</a>
+							<a href="collmetadata.php?collid=<?php echo $collid.'&removeiid='.$instArr['iid']; ?>" title="Unlink institution address">
+								<img src="../../images/drop.png" style="width:14px;" />
+							</a>
+							<?php 
+							echo '</div>';
+							if($instArr['address1']) echo '<div>'.$instArr['address1'].'</div>';
+							if($instArr['address2']) echo '<div>'.$instArr['address2'].'</div>';
+							if($instArr['city'] || $instArr['stateprovince']) echo '<div>'.$instArr['city'].', '.$instArr['stateprovince'].' '.$instArr['postalcode'].'</div>';
+							if($instArr['country']) echo '<div>'.$instArr['country'].'</div>';
+							if($instArr['phone']) echo '<div>'.$instArr['phone'].'</div>';
+							if($instArr['contact']) echo '<div>'.$instArr['contact'].'</div>';
+							if($instArr['email']) echo '<div>'.$instArr['email'].'</div>';
+							if($instArr['url']) echo '<div><a href="'.$instArr['url'].'">'.$instArr['url'].'</a></div>';
+							if($instArr['notes']) echo '<div>'.$instArr['notes'].'</div>';
+							?>
+						</div>
+						<?php 
 					}
 					else{
 						//Link new institution
