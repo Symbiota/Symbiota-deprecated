@@ -6,8 +6,8 @@ Language: English
 */
 
 $LANG['COLLECTION_DETAILS'] = 'Select a collection to see full details.';
-$LANG['CONTACT'] = 'Contact:';
-$LANG['HOMEPAGE'] = 'Home Page:';
+$LANG['CONTACT'] = 'Contact';
+$LANG['HOMEPAGE'] = 'Home Page';
 $LANG['MORE_INFO'] = 'More Information';
 $LANG['COLLECTION_SEARCH'] = 'Collection Search Page';
 $LANG['UPDATE_STATISTICS'] = 'Updating statistics related to this collection...';
@@ -41,14 +41,14 @@ $LANG['BACKUP_DATA_FILE'] = 'Download Backup Data File';
 $LANG['GUIDMAP'] = 'Collection GUID Mapper';
 $LANG['THUMBNAIL_BUILDER'] = 'Thumbnail Builder Tool';
 $LANG['UPDATE_STATS'] = 'Update Statistics';
-$LANG['COLLECTION_TYPE'] = 'Collection Type:';
-$LANG['MANAGEMENT'] = 'Management:';
-$LANG['LAST_UPDATE'] = 'Last Update:';
-$LANG['GLOBAL_UNIQUE_ID'] = 'Global Unique Identifier:';
-$LANG['USAGE_RIGHTS'] = 'Usage Rights:';
-$LANG['RIGHTS_HOLDER'] = 'Rights Holder:';
-$LANG['ACCESS_RIGHTS'] = 'Access Rights:';
-$LANG['COLL_STATISTICS'] = 'Collection Statistics:';
+$LANG['COLLECTION_TYPE'] = 'Collection Type';
+$LANG['MANAGEMENT'] = 'Management';
+$LANG['LAST_UPDATE'] = 'Last Update';
+$LANG['GLOBAL_UNIQUE_ID'] = 'Global Unique Identifier';
+$LANG['USAGE_RIGHTS'] = 'Usage Rights';
+$LANG['RIGHTS_HOLDER'] = 'Rights Holder';
+$LANG['ACCESS_RIGHTS'] = 'Access Rights';
+$LANG['COLL_STATISTICS'] = 'Collection Statistics';
 $LANG['SPECIMEN_RECORDS'] = 'specimen records';
 $LANG['FAMILIES'] = 'families';
 $LANG['GENERA'] = 'genera';

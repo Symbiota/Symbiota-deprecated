@@ -6,8 +6,8 @@ Language: Español (Spanish)
 */
 
 $LANG['COLLECTION_DETAILS'] = 'Seleccione una colecci&oacute;n para ver todos los detalles.';
-$LANG['CONTACT'] = 'Contacto:';
-$LANG['HOMEPAGE'] = 'Sitio Web:';
+$LANG['CONTACT'] = 'Contacto';
+$LANG['HOMEPAGE'] = 'Sitio Web';
 $LANG['MORE_INFO'] = 'M&aacute;s Informaci&oacute;n';
 $LANG['COLLECTION_SEARCH'] = 'P&aacute;gina de B&uacute;squeda de Colecci&oacute;n';
 $LANG['UPDATE_STATISTICS'] = 'Actualizando las estad&iacute;sticas relacionadas con esta colecci&oacute;n...';
@@ -41,14 +41,14 @@ $LANG['BACKUP_DATA_FILE'] = 'Descargar Archivo de Respaldo de Datos';
 $LANG['GUIDMAP'] = 'Mapeador de GUIDs';
 $LANG['THUMBNAIL_BUILDER'] = 'Herramientas de Limpieza las miniaturas';
 $LANG['UPDATE_STATS'] = 'Actualizar Estad&iacute;sticas';
-$LANG['COLLECTION_TYPE'] = 'Tipo de Colecci&oacute;n:';
-$LANG['MANAGEMENT'] = 'Administraci&oacute;n:';
-$LANG['LAST_UPDATE'] = '&uacute;ltima Actualizaci&oacute;n:';
-$LANG['GLOBAL_UNIQUE_ID'] = 'Identificador &uacute;nico Global:';
-$LANG['USAGE_RIGHTS'] = 'Derechos de Uso:';
-$LANG['RIGHTS_HOLDER'] = 'Propietario de Derechos:';
-$LANG['ACCESS_RIGHTS'] = 'Derechos de Acceso:';
-$LANG['COLL_STATISTICS'] = 'Estad&iacute;sticas de Colecci&oacute;n:';
+$LANG['COLLECTION_TYPE'] = 'Tipo de Colecci&oacute;n';
+$LANG['MANAGEMENT'] = 'Administraci&oacute;n';
+$LANG['LAST_UPDATE'] = '&uacute;ltima Actualizaci&oacute;n';
+$LANG['GLOBAL_UNIQUE_ID'] = 'Identificador &uacute;nico Global';
+$LANG['USAGE_RIGHTS'] = 'Derechos de Uso';
+$LANG['RIGHTS_HOLDER'] = 'Propietario de Derechos';
+$LANG['ACCESS_RIGHTS'] = 'Derechos de Acceso';
+$LANG['COLL_STATISTICS'] = 'Estad&iacute;sticas de Colecci&oacute;n';
 $LANG['SPECIMEN_RECORDS'] = 'registros de espec&iacute;menes';
 $LANG['FAMILIES'] = 'familias';
 $LANG['GENERA'] = 'g&eacute;neros';

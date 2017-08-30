@@ -5,7 +5,6 @@ Allow: /portal/checklists/index.php
 Allow: /portal/collections/index.php  
 Allow: /portal/collections/exsiccati/index.php  
 Allow: /portal/collections/misc/collprofiles.php  
-Allow: /portal/collections/misc/collectionindex.php  
 Allow: /portal/games/index.php  
 Allow: /portal/ident/index.php  
 Allow: /portal/imagelib/index.php  

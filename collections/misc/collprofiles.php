@@ -15,7 +15,7 @@ if($eMode && !$SYMB_UID){
 $collManager = new OccurrenceCollectionProfile();
 if(!$collManager->setCollid($collid)) $collid = '';
 
-$collData = $collManager->getCollectionData();
+$collData = $collManager->getCollectionMetadata();
 
 $editCode = 0;		//0 = no permissions; 1 = CollEditor; 2 = CollAdmin; 3 = SuperAdmin
 if($SYMB_UID){
@@ -31,12 +31,11 @@ if($SYMB_UID){
 		}
 	}
 }
-
 ?>
 <html>
 <head>
-	<title><?php echo $DEFAULT_TITLE." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
-	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData["collectionname"]:""); ?>" />
+	<title><?php echo $DEFAULT_TITLE." ".($collid?$collData[$collid]["collectionname"]:"") ; ?> Collection Profiles</title>
+	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData[$collid]["collectionname"]:""); ?>" />
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" rel="Stylesheet" type="text/css" />
@@ -45,13 +44,13 @@ if($SYMB_UID){
 	<script>
 		function toggleById(target){
 			if(target != null){
-			  	var obj = document.getElementById(target);
+				var obj = document.getElementById(target);
 				if(obj.style.display=="none" || obj.style.display==""){
 					obj.style.display="block";
 				}
-			 	else {
-			 		obj.style.display="none";
-			 	}
+				else {
+					obj.style.display="none";
+				}
 			}
 			return false;
 		}
@@ -66,13 +65,13 @@ if($SYMB_UID){
 		if($collections_misc_collprofilesCrumbs){
 			echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
 			echo $collections_misc_collprofilesCrumbs.' &gt;&gt; ';
-			echo "<b>".($collData?$collData["collectionname"]:"Collection Profiles")." Details</b>";
+			echo "<b>".($collid?$collData[$collid]["collectionname"]:"Collection Profiles")." Details</b>";
 		}
 	}
 	else{
 		echo '<a href="../../index.php">Home</a> &gt;&gt; ';
 		echo '<a href="../index.php">'.$LANG['COLLECTION_SEARCH'].'</a> &gt;&gt; ';
-		echo "<b>".($collData?$collData["collectionname"]:"Collection Profiles")." Details</b>";
+		echo "<b>".($collid?$collData[$collid]["collectionname"]:"Collection Profiles")." Details</b>";
 	}
 	echo "</div>";
 	?>
@@ -85,7 +84,6 @@ if($SYMB_UID){
 				echo '<h2> '.$LANG['UPDATE_STATISTICS'].'</h2>';
 				$collManager->updateStatistics(true);
 				echo '<hr/>';
-				$collData = $collManager->getCollectionData();
 			}
 		}
 		if($editCode > 0 && $collid){
@@ -96,27 +94,7 @@ if($SYMB_UID){
 			<?php
 		}
 		if($collid){
-			$extrastatsArr = Array();
-			$georefPerc = 0;
-			$spidPerc = 0;
-			$imgPerc = 0;
-			if($collData['georefcnt']&&$collData['recordcnt']){
-				$georefPerc = (100*($collData['georefcnt']/$collData['recordcnt']));
-			}
-			else{
-				$georefPerc = 0;
-			}
-			if($collData['dynamicProperties']){
-				$extrastatsArr = json_decode($collData['dynamicProperties'],true);
-				if(is_array($extrastatsArr)){
-					if($extrastatsArr['SpecimensCountID']){
-						$spidPerc = (100*($extrastatsArr['SpecimensCountID']/$collData['recordcnt']));
-					}
-					if($extrastatsArr['imgcnt']){
-						$imgPerc = (100*($extrastatsArr['imgcnt']/$collData['recordcnt']));
-					}
-				}
-			}
+			$collData = $collData[$collid];
 			$codeStr = ' ('.$collData['institutioncode'];
 			if($collData['collectioncode']) $codeStr .= '-'.$collData['collectioncode'];
 			$codeStr .= ')';
@@ -334,114 +312,16 @@ if($SYMB_UID){
 			}
 			?>
 			<div style='margin:10px;'>
-				<div>
-					<?php echo $collData["fulldescription"]; ?>
-				</div>
-				<div style='margin-top:5px;'>
-					<?php echo '<b>'.$LANG['CONTACT'].'</b> '.$collData["contact"].($collData["email"]?" (".str_replace("@","&#64;",$collData["email"]).")":"");?>
-				</div>
-				<?php
-				if($collData["homepage"]){
+				<?php 
+				echo $collManager->getMetadataHtml($collData, $LANG);
+				if($addrArr = $collManager->getAddress()){
 					?>
 					<div style="margin-top:5px;">
-						<b><?php echo $LANG['HOMEPAGE']; ?></b>
-						<a href="<?php echo $collData["homepage"]; ?>" target="_blank">
-							<?php echo $collData["homepage"]; ?>
-						</a>
-					</div>
-					<?php
-				}
-				?>
-				<div style="margin-top:5px;">
-					<?php
-					echo '<b>'.$LANG['COLLECTION_TYPE'].' </b>';
-					if($collData['colltype']){
-						echo $collData['colltype'];
-					}
-					?>
-				</div>
-				<div style="margin-top:5px;">
-					<?php
-					echo '<b>'.$LANG['MANAGEMENT'].' </b>';
-					if($collData['managementtype'] == 'Live Data'){
-						echo 'Live Data managed directly within data portal';
-					}
-					else{
-						if($collData['managementtype'] == 'Aggregate'){
-							echo 'Data harvested from a data aggregator';
-						}
-						else{
-							echo 'Data snapshot of local collection database ';
-						}
-						echo '<div style="margin-top:5px;"><b>'.$LANG['LAST_UPDATE'].'</b> '.$collData['uploaddate'].'</div>';
-					}
-					?>
-				</div>
-				<?php
-				if(stripos($collData['managementtype'],'live') !== false){
-					?>
-					<div style="margin-top:5px;">
-						<?php
-						echo '<b>'.$LANG['GLOBAL_UNIQUE_ID'].' </b>';
-						echo ($collid?$collData['guid']:'');
-						?>
-					</div>
-					<?php
-				}
-				?>
-				<div style="margin-top:5px;">
-					<?php
-					echo '<b>'.$LANG['USAGE_RIGHTS'].'</b> ';
-					if($collid && $collData['rights']){
-						$rights = $collData['rights'];
-						$rightsUrl = '';
-						if(substr($rights,0,4) == 'http'){
-							$rightsUrl = $rights;
-							if($rightsTerms){
-								if($rightsArr = array_keys($rightsTerms,$rights)){
-									$rights = current($rightsArr);
-								}
-							}
-						}
-						if($rightsUrl) echo '<a href="'.$rightsUrl.'" target="_blank">';
-						echo $rights;
-						if($rightsUrl) echo '</a>';
-					}
-					elseif(file_exists('../../misc/usagepolicy.php')){
-						echo '<a href="../../misc/usagepolicy.php" target="_blank">default policy</a>';
-					}
-					?>
-				</div>
- 				<?php
- 				if($collid && $collData['rightsholder']){
- 					?>
-					<div style="margin-top:5px;">
-						<?php
-						echo '<b>'.$LANG['RIGHTS_HOLDER'].'</b> ';
-						echo $collData['rightsholder'];
-						?>
-					</div>
- 					<?php
- 				}
- 				if($collid && $collData['accessrights']){
- 					?>
-					<div style="margin-top:5px;">
-						<?php
-						echo '<b>'.$LANG['ACCESS_RIGHTS'].'</b> ';
-						echo $collData['accessrights'];
-						?>
-					</div>
- 					<?php
- 				}
- 				$addrArresses = $collManager->getAddresses();
- 				if($addrArresses){
- 					foreach($addrArresses as $iid => $addrArr){
-	 					?>
-						<div style="font-weight:bold;margin-top:5px;">Address:</div>
-						<div style="margin-top:5px;">
+						<div style="float:left;font-weight:bold;">Address:</div>
+						<div style="float:left;margin-left:10px;">
 							<?php
 							echo "<div>".$addrArr["institutionname"];
-							if($editCode > 1) echo ' <a href="../admin/institutioneditor.php?emode=1&targetcollid='.$collid.'&iid='.$iid.'" title="Edit institution information"><img src="../../images/edit.png" style="width:13px;" /></a>';
+							if($editCode > 1) echo ' <a href="../admin/institutioneditor.php?emode=1&targetcollid='.$collid.'&iid='.$addrArr['iid'].'" title="Edit institution information"><img src="../../images/edit.png" style="width:13px;" /></a>';
 							echo '</div>';
 							if($addrArr["institutionname2"]) echo "<div>".$addrArr["institutionname2"]."</div>";
 							if($addrArr["address1"]) echo "<div>".$addrArr["address1"]."</div>";
@@ -453,25 +333,47 @@ if($SYMB_UID){
 							if($addrArr["notes"]) echo "<div>".$addrArr["notes"]."</div>";
 							?>
 						</div>
-						<?php
- 					}
- 				}
- 				?>
+					</div>
+					<?php
+				}
+				//Collection Statistics 
+				$statsArr = $collManager->getBasicStats();
+				$extrastatsArr = Array();
+				$georefPerc = 0;
+				if($statsArr['georefcnt']&&$statsArr['recordcnt']){
+					$georefPerc = (100*($statsArr['georefcnt']/$statsArr['recordcnt']));
+				}
+				$spidPerc = 0;
+				$imgPerc = 0;
+				if($statsArr['dynamicProperties']){
+					$extrastatsArr = json_decode($statsArr['dynamicProperties'],true);
+					if(is_array($extrastatsArr)){
+						if($extrastatsArr['SpecimensCountID']){
+							$spidPerc = (100*($extrastatsArr['SpecimensCountID']/$statsArr['recordcnt']));
+						}
+						if($extrastatsArr['imgcnt']){
+							$imgPerc = (100*($extrastatsArr['imgcnt']/$statsArr['recordcnt']));
+						}
+					}
+				}
+				?>
 				<div style="clear:both;margin-top:5px;">
 					<div style="font-weight:bold;"><?php echo $LANG['COLL_STATISTICS']; ?></div>
 					<ul style="margin-top:5px;">
-						<li><?php echo number_format($collData["recordcnt"]).' '.$LANG['SPECIMEN_RECORDS'];?></li>
-						<li><?php echo ($collData['georefcnt']?number_format($collData['georefcnt']):0).($georefPerc?" (".($georefPerc>1?round($georefPerc):round($georefPerc,2))."%)":'');?> georeferenced</li>
+						<li><?php echo number_format($statsArr["recordcnt"]).' '.$LANG['SPECIMEN_RECORDS'];?></li>
+						<li><?php echo ($statsArr['georefcnt']?number_format($statsArr['georefcnt']):0).($georefPerc?" (".($georefPerc>1?round($georefPerc):round($georefPerc,2))."%)":'');?> georeferenced</li>
 						<?php
-						if($extrastatsArr&&$extrastatsArr['imgcnt']) echo '<li>'.($extrastatsArr['imgcnt']?number_format($extrastatsArr['imgcnt']):0).($imgPerc?" (".($imgPerc>1?round($imgPerc):round($imgPerc,2))."%)":'').' with images</li>';
-						if($extrastatsArr&&$extrastatsArr['gencnt']) echo '<li>'.number_format($extrastatsArr['gencnt']).' GenBank references</li>';
-						if($extrastatsArr&&$extrastatsArr['boldcnt']) echo '<li>'.number_format($extrastatsArr['boldcnt']).' BOLD references</li>';
-						if($extrastatsArr&&$extrastatsArr['refcnt']) echo '<li>'.number_format($extrastatsArr['refcnt']).' publication references</li>';
-						if($extrastatsArr&&$extrastatsArr['SpecimensCountID']) echo '<li>'.($extrastatsArr['SpecimensCountID']?number_format($extrastatsArr['SpecimensCountID']):0).($spidPerc?" (".($spidPerc>1?round($spidPerc):round($spidPerc,2))."%)":'').' identified to species</li>';
+						if($extrastatsArr){
+							if($extrastatsArr['imgcnt']) echo '<li>'.number_format($extrastatsArr['imgcnt']).($imgPerc?" (".($imgPerc>1?round($imgPerc):round($imgPerc,2))."%)":'').' with images</li>';
+							if($extrastatsArr['gencnt']) echo '<li>'.number_format($extrastatsArr['gencnt']).' GenBank references</li>';
+							if($extrastatsArr['boldcnt']) echo '<li>'.number_format($extrastatsArr['boldcnt']).' BOLD references</li>';
+							if($extrastatsArr['refcnt']) echo '<li>'.number_format($extrastatsArr['refcnt']).' publication references</li>';
+							if($extrastatsArr['SpecimensCountID']) echo '<li>'.number_format($extrastatsArr['SpecimensCountID']).($spidPerc?" (".($spidPerc>1?round($spidPerc):round($spidPerc,2))."%)":'').' identified to species</li>';
+						}
 						?>
-						<li><?php echo number_format($collData["familycnt"]).' '.$LANG['FAMILIES'];?></li>
-						<li><?php echo number_format($collData["genuscnt"]).' '.$LANG['GENERA'];?></li>
-						<li><?php echo number_format($collData["speciescnt"]).' '.$LANG['SPECIES'];?></li>
+						<li><?php echo number_format($statsArr["familycnt"]).' '.$LANG['FAMILIES'];?></li>
+						<li><?php echo number_format($statsArr["genuscnt"]).' '.$LANG['GENERA'];?></li>
+						<li><?php echo number_format($statsArr["speciescnt"]).' '.$LANG['SPECIES'];?></li>
 						<?php
 						if($extrastatsArr&&$extrastatsArr['TotalTaxaCount']) echo '<li>'.number_format($extrastatsArr['TotalTaxaCount']).' total taxa (including subsp. and var.)</li>';
 						//if($extrastatsArr&&$extrastatsArr['TypeCount']) echo '<li>'.number_format($extrastatsArr['TypeCount']).' type specimens</li>';
@@ -492,7 +394,6 @@ if($SYMB_UID){
 			include('collprofilestats.php');
 		}
 		else{
-			$collList = $collManager->getCollectionList(true);
 			?>
 			<h1><?php echo $DEFAULT_TITLE; ?> Collections </h1>
 			<div style='margin:10px;clear:both;'>
@@ -500,7 +401,7 @@ if($SYMB_UID){
 			</div>
 			<table style='margin:10px;'>
 				<?php
-				foreach($collList as $cId => $collArr){
+				foreach($collData as $cid => $collArr){
 					?>
 					<tr>
 						<td style='text-align:center;vertical-align:top;'>
@@ -518,25 +419,17 @@ if($SYMB_UID){
 						</td>
 						<td>
 							<h3>
-								<a href='collprofiles.php?collid=<?php echo $cId;?>'>
+								<a href='collprofiles.php?collid=<?php echo $cid;?>'>
 									<?php echo $collArr['collectionname']; ?>
 								</a>
 							</h3>
 							<div style='margin:10px;'>
-								<div><?php echo $collArr['fulldescription']; ?></div>
-								<div style='margin-top:5px;'>
-									<b><?php echo $LANG['CONTACT']; ?></b>
-									<?php echo $collArr['contact'].' ('.str_replace('@','&#64;',$collArr['email']).')';?>
-								</div>
-								<div style='margin-top:5px'>
-									<b><?php echo $LANG['HOMEPAGE']; ?></b>
-									<a href="<?php echo $collArr['homepage']; ?>" target="_blank">
-										<?php echo $collArr['homepage']; ?>
-									</a>
-								</div>
+								<?php 
+								echo $collManager->getMetadataHtml($collArr, $LANG);
+								?>
 							</div>
 							<div style='margin:5px 0px 15px 10px;'>
-								<a href='collprofiles.php?collid=<?php echo $cId; ?>'><?php echo $LANG['MORE_INFO']; ?></a>
+								<a href='collprofiles.php?collid=<?php echo $cid; ?>'><?php echo $LANG['MORE_INFO']; ?></a>
 							</div>
 						</td>
 					</tr>
