@@ -340,7 +340,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
             }
 
             var dmOptions = {
-                zoom: <?php echo $GOOGLE_MAP_ZOOM; ?>,
+                zoom: <?php echo (isset($GOOGLE_MAP_ZOOM) && $GOOGLE_MAP_ZOOM?$GOOGLE_MAP_ZOOM:'6'); ?>,
                 center: pos,
                 mapTypeId: google.maps.MapTypeId.TERRAIN,
                 mapTypeControl: true,
