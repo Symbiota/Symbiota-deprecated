@@ -79,7 +79,7 @@ class EOLManager {
 	private function queryEolIdentifier($tid, $sciName, $makePrimaryLink){
 		$retStatus = false;
 		$url = 'http://eol.org/api/search/1.0.json?q='.urlencode($sciName);
-		if(isset($GLOBALS['EOL_KEY']) && $GLOBALS['EOL_KEY']) $url .= '?key='.$GLOBALS['EOL_KEY'];
+		if(isset($GLOBALS['EOL_KEY']) && $GLOBALS['EOL_KEY']) $url .= '&key='.$GLOBALS['EOL_KEY'];
 		if($fh = fopen($url, 'r')){
 			echo '<li>Reading identifier for '.$sciName.' (tid: <a href="../index.php?taxon='.$tid.'" target="_blank">'.$tid.'</a>)... ';
 			$content = '';
