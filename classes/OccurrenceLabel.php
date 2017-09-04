@@ -144,7 +144,9 @@ class OccurrenceLabel{
 			$sql = 'SELECT o.occid, o.collid, IFNULL(o.duplicatequantity,1) AS q, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, o.observeruid, '.
 				'o.family, o.sciname, CONCAT_WS("; ",o.country, o.stateProvince, o.county, o.locality) AS locality, IFNULL(o.localitySecurity,0) AS localitySecurity '.
 				'FROM omoccurrences o ';
-			if(strpos($sqlWhere, 'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
+				$sql.= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			}
 			if($sqlWhere) $sql .= 'WHERE '.substr($sqlWhere, 4);
 			//if($sqlOrderBy) $sql .= ' ORDER BY '.substr($sqlOrderBy,1);
 			$sql .= ' LIMIT 400';

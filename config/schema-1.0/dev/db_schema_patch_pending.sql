@@ -15,6 +15,10 @@ ALTER TABLE `omoccurrences`
   CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL,
   DROP INDEX `idx_occrecordedby`;
 
+REPLACE omoccurrencesfulltext(occid,locality,recordedby) 
+  SELECT occid, CONCAT_WS("; ", municipality, locality), recordedby
+  FROM omoccurrences;
+
 
 #Occurrence Trait/Attribute adjustments
 	#Add measurementID (GUID) to tmattribute table 

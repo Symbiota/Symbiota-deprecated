@@ -57,7 +57,7 @@ class MappingShared{
 		}
 		$sql .= "FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
 		if(strpos($mapWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
-		if(strpos($mapWhere,'MATCH(f.recordedby)')) $sql.= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+		if(strpos($mapWhere,'MATCH(f.recordedby)') || strpos($mapWhere,'MATCH(f.locality)')) $sql.= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		$sql .= $mapWhere;
 		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL) AND (o.coordinateUncertaintyInMeters IS NULL OR o.coordinateUncertaintyInMeters < 20000) ";
 		if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){

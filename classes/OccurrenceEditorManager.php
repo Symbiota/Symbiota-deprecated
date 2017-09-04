@@ -667,8 +667,8 @@ class OccurrenceEditorManager {
 		if(strpos($this->sqlWhere,'exn.ometid')){
 			$sql .= 'INNER JOIN omexsiccatiocclink exocc ON o.occid = exocc.occid INNER JOIN omexsiccatinumbers exn ON exocc.omenid = exn.omenid ';
 		}
-		if(strpos($this->sqlWhere,'MATCH(f.recordedby)')){
-			$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+		if(strpos($this->sqlWhere,'MATCH(f.recordedby)') || strpos($this->sqlWhere,'MATCH(f.locality)')){
+			$sql.= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		}
 		if($this->crowdSourceMode){
 			$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';

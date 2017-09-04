@@ -425,8 +425,7 @@ class OccurrenceDownload{
 						'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
 						'FROM omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid '.
 						'INNER JOIN taxa t ON ts.TidAccepted = t.Tid ';
-				if(strpos($this->sqlWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
-				if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+				$sql .= $this->setTableJoins($this->sqlWhere);
 				$sql .= $this->sqlWhere.'AND t.RankId > 140 AND (ts.taxauthid = '.$this->taxonFilter.') ';
 				if($this->redactLocalities){
 					if($this->rareReaderArr){
@@ -442,8 +441,7 @@ class OccurrenceDownload{
 				$sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
 						'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
 						'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
-				if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
-				if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+				$sql .= $this->setTableJoins($this->sqlWhere);
 				$sql .= $this->sqlWhere.'AND o.SciName NOT LIKE "%aceae" AND o.SciName NOT LIKE "%idea" AND o.SciName NOT IN ("Plantae","Polypodiophyta") ';
 				if($this->redactLocalities){
 					if($this->rareReaderArr){
@@ -475,8 +473,7 @@ class OccurrenceDownload{
 			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 					'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 					'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
-			if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
-			if(strpos($this->sqlWhere,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			$sql .= $this->setTableJoins($this->sqlWhere);
 			$this->applyConditions();
 			$sql .= $this->sqlWhere;
 			if($this->redactLocalities){
@@ -492,7 +489,16 @@ class OccurrenceDownload{
 		//echo $sql; exit;
 		return $sql;
 	}
-	
+
+	private function setTableJoins($sqlWhere){
+		$sqlJoin = '';
+		if(strpos($sqlWhere,'v.clid')) $sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
+			$sqlJoin .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+		}
+		return $sqlJoin;
+	}
+
 	private function getOutputFilePath(){
 		$retStr = $GLOBALS['tempDirRoot'];
 		if(!$retStr){

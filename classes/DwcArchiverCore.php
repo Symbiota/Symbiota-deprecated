@@ -288,7 +288,7 @@ class DwcArchiverCore extends Manager{
 				//Search criteria came from map search page
 				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 			}
-			if(stripos($this->conditionSql,'MATCH(f.recordedby)')){
+			if(strpos($this->conditionSql,'MATCH(f.recordedby)') || strpos($this->conditionSql,'MATCH(f.locality)')){
 				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			}
 			if(stripos($this->conditionSql,'a.stateid')){
