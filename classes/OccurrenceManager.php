@@ -239,12 +239,18 @@ class OccurrenceManager{
 			$localArr = explode(";",$searchStr);
 			$tempArr = Array();
 			foreach($localArr as $k => $value){
+				$value = trim($value);
 				if($value == 'NULL'){
 					$tempArr[] = '(o.locality IS NULL)';
 					$localArr[$k] = 'Locality IS NULL';
 				}
 				else{
-					$tempArr[] = '(o.municipality LIKE "'.trim($value).'%" OR o.Locality LIKE "%'.trim($value).'%")';
+					if(strlen($value) < 4 || strtolower($value) == 'best'){
+						$tempArr[] = '(o.municipality LIKE "'.trim($value).'%" OR o.Locality LIKE "%'.trim($value).'%")';
+					}
+					else{
+						$tempArr[] = '(MATCH(f.locality) AGAINST(\'"'.$value.'"\' IN BOOLEAN MODE)) ';
+					}
 				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
@@ -492,6 +498,15 @@ class OccurrenceManager{
     protected function formatDate($inDate){
 		$retDate = OccurrenceUtilities::formatDate($inDate);
 		return $retDate;
+	}
+
+	protected function setTableJoins($sqlWhere){
+		$sqlJoin = '';
+		if(array_key_exists("clid",$this->searchTermsArr)) $sqlJoin .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
+			$sqlJoin .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
+		}
+		return $sqlJoin;
 	}
 
 	protected function setSciNamesByVerns(){

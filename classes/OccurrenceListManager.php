@@ -132,13 +132,6 @@ class OccurrenceListManager extends OccurrenceManager{
 		setCookie("collvars","reccnt:".$this->recordCount,time()+64800,($GLOBALS['CLIENT_ROOT']?$GLOBALS['CLIENT_ROOT']:'/'));
 	}
 
-	private function setTableJoins($sqlWhere){
-		$sqlJoin = '';
-		if(array_key_exists("clid",$this->searchTermsArr)) $sqlJoin .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
-		if(strpos($sqlWhere,'MATCH(f.recordedby)')) $sqlJoin .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
-		return $sqlJoin;
-	}
-
     public function getRecordCnt(){
 		return $this->recordCount;
 	}
