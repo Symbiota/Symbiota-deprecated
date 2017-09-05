@@ -5,7 +5,7 @@ Language: Español (Spanish)
 ------------------
 */
 
-$LANG['COLLECTION_DETAILS'] = 'Seleccione una colecci&oacute;n para ver todos los detalles.';
+$LANG['RSS_FEED'] = 'RSS Feed';
 $LANG['CONTACT'] = 'Contacto';
 $LANG['HOMEPAGE'] = 'Sitio Web';
 $LANG['MORE_INFO'] = 'M&aacute;s Informaci&oacute;n';
