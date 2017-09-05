@@ -45,10 +45,12 @@ $smManager = new SiteMapManager();
 				<li><a href="collections/misc/collprofiles.php"><?php echo $LANG['COLLECTIONS'];?></a><?php echo $LANG['LISTOFCOLL'];?></li>
 				<li><a href="collections/misc/collstats.php"><?php echo $LANG['COLLSTATS'];?></a></li>
 				<li><a href="collections/exsiccati/index.php"><?php echo $LANG['EXSICC'];?></a></li>
-				<li><a href="collections/datasets/datapublisher.php"><?php echo $LANG['DARWINCORE'];?></a><?php echo $LANG['PUBDATA'];?></li>
+				<li><?php echo (isset($LANG['DATA_PUBLISHING'])?$LANG['DATA_PUBLISHING']:'Data Publishing');?></li>
+				<li style="margin-left:15px"><a href="collections/datasets/rsshandler.php" target="_blank"><?php echo $LANG['COLLECTIONS_RSS'];?></a></li>
+				<li style="margin-left:15px"><a href="collections/datasets/datapublisher.php"><?php echo $LANG['DARWINCORE'];?></a><?php echo $LANG['PUBDATA'];?></li>
 				<?php 
 				if(file_exists('webservices/dwc/rss.xml')){
-					echo '<li style="margin-left:15px;"><a href="webservices/dwc/rss.xml">'.$LANG['RSS'].'</a></li>';
+					echo '<li style="margin-left:15px;"><a href="webservices/dwc/rss.xml" target="_blank">'.$LANG['RSS'].'</a></li>';
 				}
 				?>
 				<li><a href="collections/misc/rarespecies.php"><?php echo $LANG['RARESPEC'];?></a><?php echo $LANG['LISTOFTAXA'];?></li>

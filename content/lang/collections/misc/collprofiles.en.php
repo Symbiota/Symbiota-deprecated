@@ -5,7 +5,7 @@ Language: English
 ------------------
 */
 
-$LANG['COLLECTION_DETAILS'] = 'Select a collection to see full details.';
+$LANG['RSS_FEED'] = 'RSS Feed';
 $LANG['CONTACT'] = 'Contact';
 $LANG['HOMEPAGE'] = 'Home Page';
 $LANG['MORE_INFO'] = 'More Information';
