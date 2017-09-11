@@ -51,6 +51,7 @@ function detectBatchUpdateField(){
 		buNewValue += '<option value="expert required">Expert Required</option>';
 		buNewValue += '<option value="reviewed">Reviewed</option>';
 		buNewValue += '<option value="closed">Closed</option>';
+		buNewValue += '<option value="">No Set Status</option>';
 		buNewValue += '</select>';
 		document.getElementById("bunewvaluediv").innerHTML = buNewValue;
 	}
