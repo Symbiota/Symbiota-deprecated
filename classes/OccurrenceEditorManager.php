@@ -1368,7 +1368,7 @@ class OccurrenceEditorManager {
 			if($occidArr){
 				$sqlWhere = 'WHERE o.occid IN('.implode(',',$occidArr).')';
 				
-				//Strip ORDER BY and/or LIMIT fragments
+				//Set full replace or replace fragment
 				$nvSqlFrag = '';
 				if(!$buMatch || $ov===''){
 					$nvSqlFrag = ($nv===''?'NULL':'"'.$nv.'"');

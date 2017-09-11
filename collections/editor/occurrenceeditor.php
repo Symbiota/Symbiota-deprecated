@@ -1329,7 +1329,7 @@ else{
 																echo '<option value="'.$keyOut.'" '.($pStatus==$keyOut?'SELECTED':'').'>'.ucwords($v).'</option>';
 															}
 														}
-														if(!in_array($pStatus,$processingStatusArr)){
+														if($pStatus && $pStatus != 'isnull' && !in_array($pStatus,$processingStatusArr)){
 															echo '<option value="'.$pStatus.'" SELECTED>'.$pStatus.'</option>';
 														}
 														?>
