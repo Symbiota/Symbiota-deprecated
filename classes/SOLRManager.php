@@ -809,9 +809,6 @@ class SOLRManager extends OccurrenceManager{
                 else{
                     $vStr = trim($v);
                     $inFrag[] = $vStr;
-                    if(is_numeric($vStr) && substr($vStr,0,1) == '0'){
-                        $inFrag[] = ltrim($vStr,0);
-                    }
                 }
             }
             $catWhere = '';
