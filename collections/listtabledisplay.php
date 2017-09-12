@@ -30,7 +30,7 @@ if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['s
 }
 
 if(isset($_REQUEST['db'])){
-    $collArr['db'] = $collManager->getSearchTerm('db');
+    $collArr['db'] = $_REQUEST['db'];
     $stArrCollJson = json_encode($collArr);
     $resetOccIndex = true;
 }
