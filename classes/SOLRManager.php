@@ -667,12 +667,22 @@ class SOLRManager extends OccurrenceManager{
             $localArr = explode(";",$searchStr);
             $tempArr = Array();
             foreach($localArr as $k => $value){
-                if($value == 'NULL'){
-                    $tempArr[] = '-locality:["" TO *]';
-                    $localArr[$k] = 'Locality IS NULL';
+                if(strpos($value,' ')){
+                    $wordArr = explode(" ",$value);
+                    $tempStrArr = Array();
+                    foreach($wordArr as $w => $word){
+                        $tempStrArr[] = '((municipality:'.trim($word).'*) OR (locality:*'.trim($word).'*))';
+                    }
+                    $tempArr[] = '('.implode(' AND ',$tempStrArr).')';
                 }
                 else{
-                    $tempArr[] = '((municipality:'.str_replace(' ','\ ',trim($value)).'*) OR (locality:*'.str_replace(' ','\ ',trim($value)).'*))';
+                    if($value == 'NULL'){
+                        $tempArr[] = '-locality:["" TO *]';
+                        $localArr[$k] = 'Locality IS NULL';
+                    }
+                    else{
+                        $tempArr[] = '((municipality:'.trim($value).'*) OR (locality:*'.trim($value).'*))';
+                    }
                 }
             }
             $solrWhere .= 'AND ('.implode(' OR ',$tempArr).') ';

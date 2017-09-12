@@ -124,7 +124,7 @@ if(isset($_REQUEST['db'])){
             sessionStorage.collSearchPage = listPage;
             document.getElementById("queryrecords").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
             <?php 
-			//echo "alert('rpc/getoccurrencelist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+listPage+'&targettid=".$targetTid."');";
+			//echo "console.log('rpc/getoccurrencelist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+listPage+'&targettid=".$targetTid."');";
             ?>
             $.ajax({
                 type: "POST",
