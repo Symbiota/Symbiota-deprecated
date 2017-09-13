@@ -143,9 +143,12 @@ class ImageProcessor {
 										$guid = $i['resource_uniq'];
 										if($occid = $this->getOccid($specPk,$guid,$fileName)){
 											$baseUrl = $iPlantImageUrl.$guid;
-											$webUrl = $baseUrl.'?resize=1250&format=jpeg';
-											$tnUrl = $baseUrl.'?thumbnail=200,200';
-											$lgUrl = $baseUrl.'?resize=4000&format=jpeg';
+											$webUrl = $baseUrl.'/resize:1250/format:jpeg';
+											$tnUrl = $baseUrl.'/thumbnail:200,200';
+											$lgUrl = $baseUrl.'/resize:4000/format:jpeg';
+											//$webUrl = $baseUrl.'?resize=1250&format=jpeg';
+											//$tnUrl = $baseUrl.'?thumbnail=200,200';
+											//$lgUrl = $baseUrl.'?resize=4000&format=jpeg';
 											
 											$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$baseUrl,$this->collArr['collname'],$guid.'; filename: '.$fileName);
 											//$this->logOrEcho("Image processed successfully (".date('Y-m-d h:i:s A').")!",2);
