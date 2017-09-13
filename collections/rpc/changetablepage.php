@@ -45,7 +45,7 @@ if($occIndex >= 1000){
     $navStr .= "<a href='' title='Previous 1000 records' onclick='changeTablePage(".($occIndex-1000).");return false;'>&lt;&lt;</a>";
 }
 $navStr .= ' | ';
-$navStr .= ($occIndex+1).'-'.($qryCnt<1000+$occIndex?$qryCnt:1000+$occIndex).' of '.$qryCnt.' records';
+$navStr .= ($occIndex < 1?$occIndex+1:$occIndex).'-'.($qryCnt<1000+$occIndex?$qryCnt:1000+$occIndex).' of '.$qryCnt.' records';
 $navStr .= ' | ';
 if($qryCnt > (1000+$occIndex)){
     $navStr .= "<a href='' title='Next 1000 records' onclick='changeTablePage(".($occIndex+1000).");return false;'>&gt;&gt;</a>";
@@ -55,7 +55,9 @@ $navStr .= '</div>';
 if($recArr){
     $recordListHtml .= '<div style="width:790px;clear:both;margin:5px;">';
     $recordListHtml .= '<div style="float:left;"><button type="button" id="copyurl" onclick="copySearchUrl();">Copy URL to These Results</button></div>';
-    $recordListHtml .= $navStr;
+    if($qryCnt > 1){
+        $recordListHtml .= $navStr;
+    }
     $recordListHtml .= '</div>';
     $recordListHtml .= '<div style="clear:both;height:5px;"></div>';
     $recordListHtml .= '<table class="styledtable" style="font-family:Arial;font-size:12px;"><tr>';
@@ -117,7 +119,9 @@ if($recArr){
     $recordListHtml .= '<div style="clear:both;height:5px;"></div>';
     $recordListHtml .= '<textarea id="urlPrefixBox" style="position:absolute;left:-9999px;top:-9999px">'.$urlPrefix.$collManager->getSearchResultUrl().'</textarea>';
     $recordListHtml .= '<textarea id="urlFullBox" style="position:absolute;left:-9999px;top:-9999px"></textarea>';
-    $recordListHtml .= '<div style="width:790px;">'.$navStr.'</div>';
+    if($qryCnt > 1){
+        $recordListHtml .= '<div style="width:790px;">'.$navStr.'</div>';
+    }
     $recordListHtml .= '*Click on the Symbiota identifier in the first column to see Full Record Details.';
 }
 else{

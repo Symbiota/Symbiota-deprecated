@@ -1329,7 +1329,7 @@ function getTextParams(){
                     if(templocalityCqlString) templocalityCqlString += " AND ";
                     if(templocalitySolrqString) templocalitySolrqString += " AND ";
                     templocalityCqlString += "locality LIKE '%"+vals[i]+"%'";
-                    templocalitySolrqString += '((municipality:'+vals[i].replace(" ","\\ ")+'*) OR (locality:*'+vals[i].replace(" ","\\ ")+'*))';
+                    templocalitySolrqString += '((municipality:'+vals[i]+'*) OR (locality:*'+vals[i]+'*))';
                 }
                 localityCqlString += templocalityCqlString;
                 localitySolrqString += templocalitySolrqString;
