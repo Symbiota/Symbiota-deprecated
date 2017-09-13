@@ -35,7 +35,7 @@ if($importIdent !== true) $importIdent = false;
 if($matchCatNum !== true) $matchCatNum = false;
 if($matchOtherCatNum !== true) $matchOtherCatNum = false;
 if($verifyImages !== true) $verifyImages = false;
-if(!preg_match('/^[a-zA-Z0-9\s_]+$/',$processingStatus)) $processingStatus = '';
+if(!preg_match('/^[a-zA-Z0-9\s_-]+$/',$processingStatus)) $processingStatus = '';
 if($autoMap !== true) $autoMap = false;
 if(!is_numeric($finalTransfer)) $finalTransfer = 0;
 if($dbpk) $dbpk = htmlspecialchars($dbpk);
