@@ -732,7 +732,7 @@ class SpecUploadBase extends SpecUpload{
 		$sqlFragArr = array();
 		foreach($fieldArr as $v){
 			if($v == 'processingStatus' && $this->processingStatus){
-				$sqlFragArr[$v] = 'o.processingStatus = u.'.$v;
+				$sqlFragArr[$v] = 'o.processingStatus = u.processingStatus';
 			}
 			elseif($this->uploadType == $this->SKELETAL || $this->uploadType == $this->NFNUPLOAD){
 				$sqlFragArr[$v] = 'o.'.$v.' = IFNULL(o.'.$v.',u.'.$v.')';
