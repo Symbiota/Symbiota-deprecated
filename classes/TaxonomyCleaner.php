@@ -122,6 +122,70 @@ class TaxonomyCleaner extends Manager{
 		return $sql;
 	}
 
+	public function deepIndexTaxa(){
+		$this->setVerboseMode(2);
+		$this->indexOccurrenceTaxa();
+		
+		$this->logOrEcho('Indexing names ending in &quot;sp.&quot;...');
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON SUBSTRING(o.sciname,1, CHAR_LENGTH(o.sciname) - 4) = t.sciname '.
+			'SET o.tidinterpreted = t.tid '.
+			'WHERE o.sciname LIKE "% sp." AND o.tidinterpreted IS NULL';
+		if($this->conn->query($sql)){
+			$this->logOrEcho($this->conn->affected_rows.' occurrences mapped',1);
+		}
+		flush();
+		ob_flush();
+		
+		$this->logOrEcho('Indexing names containing &quot;spp.&quot;...');
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," spp.","") = t.sciname '.
+				'SET o.tidinterpreted = t.tid '.
+				'WHERE o.sciname LIKE "% spp.%" AND o.tidinterpreted IS NULL';
+		if($this->conn->query($sql)){
+			$this->logOrEcho($this->conn->affected_rows.' occurrences mapped',1);
+		}
+		flush();
+		ob_flush();
+		
+		$this->logOrEcho('Indexing names containing &quot;cf.&quot;...');
+		$cnt = 0;
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," cf. "," ") = t.sciname '.
+			'SET o.tidinterpreted = t.tid '.
+			'WHERE o.sciname LIKE "% cf. %" AND o.tidinterpreted IS NULL';
+		if($this->conn->query($sql)){
+			$cnt = $this->conn->affected_rows;
+		}
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," cf "," ") = t.sciname '.
+				'SET o.tidinterpreted = t.tid '.
+				'WHERE o.sciname LIKE "% cf %" AND o.tidinterpreted IS NULL';
+		if($this->conn->query($sql)){
+			$cnt += $this->conn->affected_rows;
+			$this->logOrEcho($cnt.' occurrences mapped',1);
+		}
+		flush();
+		ob_flush();
+		
+		$this->logOrEcho('Indexing names containing &quot;aff.&quot;...');
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," aff. "," ") = t.sciname '.
+			'SET o.tidinterpreted = t.tid '.
+			'WHERE o.sciname LIKE "% aff. %" AND o.tidinterpreted IS NULL';
+		if($this->conn->query($sql)){
+			$this->logOrEcho($this->conn->affected_rows.' occurrences mapped',1);
+		}
+		flush();
+		ob_flush();
+		
+		$this->logOrEcho('Indexing names containing &quot;group&quot; statements...');
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," group"," ") = t.sciname '.
+			'SET o.tidinterpreted = t.tid '.
+			'WHERE o.sciname LIKE "% group%" AND o.tidinterpreted IS NULL';
+		if($this->conn->query($sql)){
+			$this->logOrEcho($this->conn->affected_rows.' occurrences mapped',1);
+		}
+		flush();
+		ob_flush();
+		
+	}
+
 	private function indexOccurrenceTaxa(){
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.

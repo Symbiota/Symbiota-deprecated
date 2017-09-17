@@ -83,32 +83,58 @@ $badSpecimenCount = $cleanManager->getBadSpecimenCount();
 					<div style="margin:20px;">
 						<?php
 						$startAdjustment = 0;
-						if($action){
+						if($action == 'deepindex'){
+							$cleanManager->deepIndexTaxa();
+						}
+						elseif($action){
 							echo '<ul>';
 							$startAdjustment = $cleanManager->analyzeTaxa($start, $limit);
 							echo '</ul>';
 						}
 						?>
-						<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
-							<fieldset style="padding:20px;">
-								<legend><b>Main Menu</b></legend>
+					</div>
+					<div style="margin:20px;">
+						<fieldset style="padding:20px;">
+							<legend><b>Action Menu</b></legend>
+							<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
 								<div style="margin-bottom:15px;">
-									<b>Specimens</b> not indexed to central taxonomic thesaurus: <b><?php echo $badSpecimenCount; ?></b>
+									<b>Specimen records not indexed to central taxonomic thesaurus</b>
+									<div style="margin-left:10px;">
+										<u>Specimens</u>: <?php echo $badSpecimenCount; ?><br/>
+										<u>Scientific names</u>: <?php echo $badTaxaCount; ?>
+									</div>
 								</div>
-								<div style="margin-bottom:5px;">
-									<b>Scientific names</b> not indexed to central taxonomic thesaurus: <b><?php echo $badTaxaCount; ?></b>
+								<hr/>
+								<div style="margin:20px 10px">
+									<div style="margin:10px 0px">
+										Following tool will crawl through unindexed names and attempt to resolve name discrepancies
+									</div>
+									<div style="margin:10px;">
+										<div style="margin-bottom:5px;">
+											Processing limit: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:30px" />
+										</div>
+										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+										<input name="start" type="hidden" value="<?php echo $start+$limit-$startAdjustment; ?>" />
+										<button name="submitaction" type="submit" value="submitaction" ><?php echo ($start?'Continue Analying Name':'Analyze Taxonomic Names'); ?></button>
+										<div style="margin-top:10px;">
+											<button name="submitaction" type="submit" value="submitaction" onclick="this.form.start.value = 0" >Restart from Beginning</button>
+										</div>
+									</div>
 								</div>
-								<div style="margin-bottom:15px;">
-									Processing limit: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:30px" />
-								</div>
-								<div style="margin:10px">
-									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-									<input name="start" type="hidden" value="<?php echo $start+$limit-$startAdjustment; ?>" />
-									<button name="submitaction" type="submit" value="submitaction" >Analyze Taxonomic Names</button>
-									<button name="submitaction" type="submit" value="submitaction" onclick="this.form.start.value = 0" >Restart from Beginning</button>
+							</form>
+							<hr/>
+							<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
+								<div style="margin:20px 10px">
+									<div style="margin:10px 0px">
+										Following tool will run a set of algorithms that will run names through several filters to improve linkages to taxonomic thesaurus 
+									</div>
+									<div style="margin:10px">
+										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+										<button name="submitaction" type="submit" value="deepindex">Deep Index Specimen Taxa</button>
+									</div>
 								</div>								
-							</fieldset>
-						</form>
+							</form>
+						</fieldset>
 					</div>
 					<?php
 				}
