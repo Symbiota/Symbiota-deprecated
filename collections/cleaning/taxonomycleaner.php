@@ -24,9 +24,6 @@ else{
 		}
 	}
 }
-
-$badTaxaCount = $cleanManager->getBadTaxaCount();
-$badSpecimenCount = $cleanManager->getBadSpecimenCount();
 ?>
 <html>
 	<head>
@@ -91,6 +88,9 @@ $badSpecimenCount = $cleanManager->getBadSpecimenCount();
 							$startAdjustment = $cleanManager->analyzeTaxa($start, $limit);
 							echo '</ul>';
 						}
+
+						$badTaxaCount = $cleanManager->getBadTaxaCount();
+						$badSpecimenCount = $cleanManager->getBadSpecimenCount();
 						?>
 					</div>
 					<div style="margin:20px;">

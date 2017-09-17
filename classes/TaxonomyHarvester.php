@@ -459,18 +459,17 @@ class TaxonomyHarvester extends Manager{
 				}
 				if(!isset($taxonArr['source'])) $taxonArr['source'] = 'EOL - '.date('Y-m-d G:i:s');
 			}
-			else{
-				$this->logOrEcho('ERROR: taxon not found within EOL (term: '.$term.')',1);
-				return false;
-			}
 		}
 		else{
-			//$this->logOrEcho('EOL web services are not available ',1);
+			$this->logOrEcho('EOL web services are not available ',1);
 			return false;
 		}
 		//Process taxonomic name
 		if($taxonArr) $this->logOrEcho('Taxon found within Encyclopedia of Life',1);
-		else $this->logOrEcho('Taxon not found within Encyclopedia of Life',1);
+		else{
+			$this->logOrEcho('Taxon not found within Encyclopedia of Life (term: '.$term.')',1);
+			return false;
+		}
 		return $this->loadNewTaxon($taxonArr);
 	}
 
@@ -478,6 +477,7 @@ class TaxonomyHarvester extends Manager{
 		$contentStr = false;
 		if($url){
 			if($fh = fopen($url, 'r')){
+				stream_set_timeout($fh, 10);
 				while($line = fread($fh, 1024)){
 					$contentStr .= trim($line);
 				}
