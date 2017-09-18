@@ -77,7 +77,7 @@
                 <field column="CollType" name="CollType"/>
                 <field column="SortSeq" name="SortSeq"/>
                 <entity name="images_inner"
-                  query="SELECT imgid, thumbnailurl FROM images WHERE occid ='${omoccurrences.occid}'">
+                  query="SELECT imgid, thumbnailurl FROM images WHERE occid ='${omoccurrences.occid}' ORDER BY sortsequence">
                   <field column="imgid" name="imgid"/>
                   <field column="thumbnailurl" name="thumbnailurl"/>
                 </entity>

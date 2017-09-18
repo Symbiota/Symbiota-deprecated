@@ -107,7 +107,8 @@ class OccurrenceListManager extends OccurrenceManager{
         if($imageSearchArr){
             $sql = 'SELECT o.collid, o.occid, i.thumbnailurl '.
                 'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-                'WHERE o.occid IN('.implode(',',$imageSearchArr).')';
+                'WHERE o.occid IN('.implode(',',$imageSearchArr).') '.
+                'ORDER BY o.occid, i.sortsequence';
             $rs = $this->conn->query($sql);
             $previousOccid = 0;
             while($r = $rs->fetch_object()){
