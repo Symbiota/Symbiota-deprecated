@@ -4,6 +4,8 @@ include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $targetTid = array_key_exists("targettid",$_REQUEST)?$_REQUEST["targettid"]:0;
+$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
+$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 $occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:1;
 $sortField1 = array_key_exists('sortfield1',$_REQUEST)?$_REQUEST['sortfield1']:'collection';
 $sortField2 = array_key_exists('sortfield2',$_REQUEST)?$_REQUEST['sortfield2']:'';
@@ -15,24 +17,31 @@ if(!is_numeric($occIndex)) $occIndex = 0;
 $collManager = new OccurrenceListManager();
 $stArr = Array();
 $collArr = Array();
-$stArrSearchJson = '';
-$stArrCollJson = '';
 $resetOccIndex = false;
 $navStr = '';
 
 $sortFields = array('Collection','Catalog Number','Family','Scientific Name','Collector','Number','Event Date',
 	'Country','State/Province','County','Elevation');
 
-if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
-    $stArr = $collManager->getSearchTerms();
-    $stArrSearchJson = json_encode($stArr);
-    $resetOccIndex = true;
+if($stArrCollJson || $stArrSearchJson){
+    $stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
+    $collStArr = json_decode($stArrCollJson, true);
+    $searchStArr = json_decode($stArrSearchJson, true);
+    if($collStArr && $searchStArr) $stArr = array_merge($searchStArr,$collStArr);
+    if(!$collStArr && $searchStArr) $stArr = $searchStArr;
+    if($collStArr && !$searchStArr) $stArr = $collStArr;
 }
-
-if(isset($_REQUEST['db'])){
-    $collArr['db'] = $_REQUEST['db'];
-    $stArrCollJson = json_encode($collArr);
-    $resetOccIndex = true;
+else{
+    if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['state']) || isset($_REQUEST['county']) || isset($_REQUEST['local']) || isset($_REQUEST['elevlow']) || isset($_REQUEST['elevhigh']) || isset($_REQUEST['upperlat']) || isset($_REQUEST['pointlat']) || isset($_REQUEST['collector']) || isset($_REQUEST['collnum']) || isset($_REQUEST['eventdate1']) || isset($_REQUEST['eventdate2']) || isset($_REQUEST['catnum']) || isset($_REQUEST['typestatus']) || isset($_REQUEST['hasimages'])){
+        $stArr = $collManager->getSearchTerms();
+        $stArrSearchJson = json_encode($stArr);
+        $resetOccIndex = true;
+    }
+    if(isset($_REQUEST['db'])){
+        $collArr['db'] = $_REQUEST['db'];
+        $stArrCollJson = json_encode($collArr);
+        $resetOccIndex = true;
+    }
 }
 ?>
 <html>
@@ -123,7 +132,7 @@ if(isset($_REQUEST['db'])){
 
             document.getElementById("tablediv").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
 
-            //alert('rpc/changetablepage.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&occindex='+index+'&sortfield1='+sortfield1+'&sortfield2='+sortfield2+'&sortorder='+sortorder+'&targettid=<?php //echo $targetTid; ?>');
+            //console.log('rpc/changetablepage.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&occindex='+index+'&sortfield1='+sortfield1+'&sortfield2='+sortfield2+'&sortorder='+sortorder+'&targettid=<?php echo $targetTid; ?>');
 
             $.ajax({
                 type: "POST",

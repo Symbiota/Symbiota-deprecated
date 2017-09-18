@@ -41,14 +41,14 @@ $recordListHtml = '';
 
 $qryCnt = $collManager->getRecordCnt();
 $navStr = '<div style="float:right;">';
-if($occIndex >= 1000){
-    $navStr .= "<a href='' title='Previous 1000 records' onclick='changeTablePage(".($occIndex-1000).");return false;'>&lt;&lt;</a>";
+if(($occIndex*1000) > 1000){
+    $navStr .= "<a href='' title='Previous 1000 records' onclick='changeTablePage(".($occIndex-1).");return false;'>&lt;&lt;</a>";
 }
 $navStr .= ' | ';
-$navStr .= ($occIndex < 1?$occIndex+1:$occIndex).'-'.($qryCnt<1000+$occIndex?$qryCnt:1000+$occIndex).' of '.$qryCnt.' records';
+$navStr .= ($occIndex <= 1?1:(($occIndex-1)*1000)+1).'-'.($qryCnt<1000+$occIndex?$qryCnt:(($occIndex-1)*1000)+1000).' of '.$qryCnt.' records';
 $navStr .= ' | ';
 if($qryCnt > (1000+$occIndex)){
-    $navStr .= "<a href='' title='Next 1000 records' onclick='changeTablePage(".($occIndex+1000).");return false;'>&gt;&gt;</a>";
+    $navStr .= "<a href='' title='Next 1000 records' onclick='changeTablePage(".($occIndex+1).");return false;'>&gt;&gt;</a>";
 }
 $navStr .= '</div>';
 
