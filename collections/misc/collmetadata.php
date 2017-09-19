@@ -98,8 +98,8 @@ $collManager->cleanOutArr($collData);
 		});
 	
 		function openMappingAid() {
-		    mapWindow=open("../../tools/mappointaid.php?formname=colleditform&latname=latitudedecimal&longname=longitudedecimal","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
-		    if (mapWindow.opener == null) mapWindow.opener = self;
+			mapWindow=open("../../tools/mappointaid.php?formname=colleditform&latname=latitudedecimal&longname=longitudedecimal","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+			if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
 		function verifyCollEditForm(f){
@@ -234,7 +234,7 @@ $collManager->cleanOutArr($collData);
 				if(ValidChars.indexOf(Char) == -1){
 					IsNumber = false;
 					break;
-		      	}
+			  	}
 		   	}
 			return IsNumber;
 		}
@@ -517,34 +517,36 @@ $collManager->cleanOutArr($collData);
 									</div>
 								</td>
 							</tr>
-                            <tr>
-                                <td>
-                                    Publish to Aggregators:
-                                </td>
-                                <td>
-                                    <?php
-                                    if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)) {
-                                        ?>
-                                        <div>
-                                            GBIF <input type="checkbox" name="publishToGbif" value="1"
-                                                        onchange="checkGUIDSource(this.form);" <?php echo($publishGBIF ? 'CHECKED' : ''); ?> />
-                                            <a id="pubagginfo" href="#" onclick="return false"
-                                               title="More information about Publishing to Aggregators">
-                                                <img src="../../images/info.png" style="width:15px;"/>
-                                            </a>
-                                        </div>
-                                        <?php
-                                    }
-                                    ?>
-                                    <div>
-                                        iDigBio <input type="checkbox" name="publishToIdigbio" value="1" onchange="checkGUIDSource(this.form);" <?php echo($publishIDIGBIO?'CHECKED':''); ?> />
-                                    </div>
-                                    <div id="pubagginfodialog">
-                                        Check boxes to make Darwin Core Archives published from this collection
-                                        available to iDigBio and/or GBIF (if activated in this portal).
-                                    </div>
-                                </td>
-                            </tr>
+							<?php
+							if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)) {
+								?>
+								<tr>
+									<td>
+										Publish to Aggregators:
+									</td>
+									<td>
+										<div>
+											GBIF <input type="checkbox" name="publishToGbif" value="1"
+														onchange="checkGUIDSource(this.form);" <?php echo($publishGBIF ? 'CHECKED' : ''); ?> />
+											<a id="pubagginfo" href="#" onclick="return false"
+											   title="More information about Publishing to Aggregators">
+												<img src="../../images/info.png" style="width:15px;"/>
+											</a>
+										</div>
+										<!-- 
+										<div>
+											iDigBio <input type="checkbox" name="publishToIdigbio" value="1" onchange="checkGUIDSource(this.form);" <?php echo($publishIDIGBIO?'CHECKED':''); ?> />
+										</div>
+										<div id="pubagginfodialog">
+											Check boxes to make Darwin Core Archives published from this collection
+											available to iDigBio and/or GBIF (if activated in this portal).
+										</div>
+										 -->
+									</td>
+								</tr>
+								<?php
+							}
+							?>
 							<tr>
 								<td>
 									Source Record URL:
@@ -623,7 +625,7 @@ $collManager->cleanOutArr($collData);
 											collections are typically used by field researchers to manage their collection data and print labels 
 											prior to depositing the physical material within a collection. Even though personal collections 
 											are represented by a physical sample, they are classified as &quot;observations&quot; until the 
-											physical material is deposited within a publicly available collection with active curation.     
+											physical material is deposited within a publicly available collection with active curation.	 
 										</div>
 									</td>
 								</tr>
