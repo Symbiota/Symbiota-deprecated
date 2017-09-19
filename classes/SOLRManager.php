@@ -92,6 +92,7 @@ class SOLRManager extends OccurrenceManager{
             $sortArr = Array();
             $sortFields = array('Collection' => 'CollectionName','Catalog Number' => 'catalogNumber','Family' => 'family',
                 'Scientific Name' => 'sciname','Collector' => 'recordedBy','Number' => 'recordNumber','Event Date' => 'eventDate',
+                'Individual Count' => 'individualCount','Life Stage' => 'lifeStage','Sex' => 'sex',
                 'Country' => 'country','State/Province' => 'StateProvince','County' => 'county','Elevation' => 'minimumElevationInMeters');
             if($this->sortField1) $this->sortField1 = $sortFields[$this->sortField1];
             if($this->sortField2) $this->sortField2 = $sortFields[$this->sortField2];
@@ -192,6 +193,9 @@ class SOLRManager extends OccurrenceManager{
             $returnArr[$occId]["state"] = (isset($k['StateProvince'])?$k['StateProvince']:'');
             $returnArr[$occId]["county"] = (isset($k['county'])?$k['county']:'');
             $returnArr[$occId]["observeruid"] = (isset($k['observeruid'])?$k['observeruid']:'');
+            $returnArr[$occId]["individualCount"] = (isset($k['individualCount'])?$k['individualCount']:'');
+            $returnArr[$occId]["lifeStage"] = (isset($k['lifeStage'])?$k['lifeStage']:'');
+            $returnArr[$occId]["sex"] = (isset($k['sex'])?$k['sex']:'');
             $localitySecurity = (isset($k['localitySecurity'])?$k['localitySecurity']:false);
             if(!$localitySecurity || $canReadRareSpp
                 || (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collId,$GLOBALS['USER_RIGHTS']["CollEditor"]))

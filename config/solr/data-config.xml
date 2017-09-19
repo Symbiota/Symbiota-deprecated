@@ -16,7 +16,7 @@
                     o.cultivationStatus, o.`country`, o.stateProvince, o.`county`, o.municipality, o.locality,
                     o.localitySecurity, o.localitySecurityReason, o.decimalLatitude, o.decimalLongitude,
                     CONCAT('POINT(',o.decimalLongitude,' ',o.decimalLatitude,')') as pointLocation, o.minimumElevationInMeters,
-                    o.maximumElevationInMeters, o.observeruid,
+                    o.maximumElevationInMeters, o.observeruid, o.lifeStage, o.sex, o.individualCount,
                     c.InstitutionCode, c.CollectionCode, c.CollectionName, c.icon, c.CollType, c.SortSeq
                     FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid"
                 deltaImportQuery="SELECT o.occid, o.collid, o.catalogNumber, o.otherCatalogNumbers, o.family, o.sciname, o.tidinterpreted,
@@ -28,7 +28,7 @@
                     o.cultivationStatus, o.`country`, o.stateProvince, o.`county`, o.municipality, o.locality,
                     o.localitySecurity, o.localitySecurityReason, o.decimalLatitude, o.decimalLongitude,
                     CONCAT('POINT(',o.decimalLongitude,' ',o.decimalLatitude,')') as pointLocation, o.minimumElevationInMeters,
-                    o.maximumElevationInMeters, o.observeruid,
+                    o.maximumElevationInMeters, o.observeruid, o.lifeStage, o.sex, o.individualCount,
                     c.InstitutionCode, c.CollectionCode, c.CollectionName, c.icon, c.CollType, c.SortSeq
                     FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid
                     WHERE o.occid = '${dih.delta.occid}'"
@@ -70,6 +70,9 @@
                 <field column="minimumElevationInMeters" name="minimumElevationInMeters"/>
                 <field column="maximumElevationInMeters" name="maximumElevationInMeters"/>
                 <field column="observeruid" name="observeruid"/>
+                <field column="lifeStage" name="lifeStage"/>
+                <field column="sex" name="sex"/>
+                <field column="individualCount" name="individualCount"/>
                 <field column="InstitutionCode" name="InstitutionCode"/>
                 <field column="CollectionCode" name="CollectionCode"/>
                 <field column="CollectionName" name="CollectionName"/>

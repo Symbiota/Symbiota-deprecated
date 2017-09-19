@@ -75,6 +75,9 @@ if($recArr){
     $recordListHtml .= '<th>Event Date</th>';
     $recordListHtml .= '<th>Collector</th>';
     $recordListHtml .= '<th>Number</th>';
+    $recordListHtml .= '<th>Individual Count</th>';
+    $recordListHtml .= '<th>Life Stage</th>';
+    $recordListHtml .= '<th>Sex</th>';
     $recordListHtml .= '</tr>';
     $recCnt = 0;
     foreach($recArr as $id => $occArr){
@@ -112,6 +115,9 @@ if($recArr){
         $recordListHtml .= '<td>'.(array_key_exists("date",$occArr)?$occArr['date']:"").'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['collector'].'</td>'."\n";
         $recordListHtml .= '<td>'.(array_key_exists("collnumber",$occArr)?$occArr['collnumber']:"").'</td>'."\n";
+        $recordListHtml .= '<td>'.(array_key_exists("individualCount",$occArr)?$occArr['individualCount']:"").'</td>'."\n";
+        $recordListHtml .= '<td>'.(array_key_exists("lifeStage",$occArr)?$occArr['lifeStage']:"").'</td>'."\n";
+        $recordListHtml .= '<td>'.(array_key_exists("sex",$occArr)?$occArr['sex']:"").'</td>'."\n";
         $recordListHtml .= "</tr>\n";
         $recCnt++;
     }

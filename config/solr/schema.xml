@@ -156,6 +156,9 @@
     <field name="minimumElevationInMeters" type="int" indexed="true" stored="true"/>
     <field name="maximumElevationInMeters" type="int" indexed="true" stored="true"/>
     <field name="observeruid" type="int" indexed="true" stored="true"/>
+    <field name="lifeStage" type="string" indexed="true" stored="true"/>
+    <field name="sex" type="string" indexed="true" stored="true"/>
+    <field name="individualCount" type="string" indexed="true" stored="true"/>
     <field name="InstitutionCode" type="string" indexed="true" stored="true"/>
     <field name="CollectionCode" type="string" indexed="true" stored="true"/>
     <field name="CollectionName" type="string" indexed="true" stored="true"/>

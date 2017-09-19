@@ -20,8 +20,8 @@ $collArr = Array();
 $resetOccIndex = false;
 $navStr = '';
 
-$sortFields = array('Collection','Catalog Number','Family','Scientific Name','Collector','Number','Event Date',
-	'Country','State/Province','County','Elevation');
+$sortFields = array('Catalog Number','Collection','Collector','Country','County','Elevation','Event Date',
+    'Family','Individual Count','Life Stage','Number','Scientific Name','Sex','State/Province');
 
 if($stArrCollJson || $stArrSearchJson){
     $stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
