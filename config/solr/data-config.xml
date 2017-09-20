@@ -85,8 +85,10 @@
                   <field column="thumbnailurl" name="thumbnailurl"/>
                 </entity>
                 <entity name="genetic_inner"
-                  query="SELECT resourcename FROM omoccurgenetic WHERE occid ='${omoccurrences.occid}'">
+                  query="SELECT identifier, resourcename, locus FROM omoccurgenetic WHERE occid ='${omoccurrences.occid}'">
+                  <field column="identifier" name="genidentifier"/>
                   <field column="resourcename" name="resourcename"/>
+                  <field column="locus" name="locus"/>
                 </entity>
                 <entity name="clid_inner"
                   query="SELECT CLID FROM fmvouchers WHERE occid ='${omoccurrences.occid}'">
