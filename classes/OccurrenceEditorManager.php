@@ -16,6 +16,7 @@ class OccurrenceEditorManager {
 	private $sqlWhere;
     private $occIndex;
     private $recLimit;
+    private $orderByStr;
     private $qryArr = array();
 	private $crowdSourceMode = 0;
 	private $exsiccatiMode = 0;
@@ -125,6 +126,10 @@ class OccurrenceEditorManager {
 
     public function setRecLimit($recLimit){
         $this->recLimit = $recLimit;
+    }
+
+    public function setOrderByStr($orderByStr){
+        $this->orderByStr = $orderByStr;
     }
 
     public function setQueryVariables($overrideQry = false){
@@ -571,8 +576,8 @@ class OccurrenceEditorManager {
 			else{
 				$sqlOrderBy = $orderBy;
 			}
-			if($sqlOrderBy) $sqlWhere .= 'ORDER BY (o2.'.$sqlOrderBy.') '.$this->qryArr['orderbydir'].' ';
-		}
+			if($sqlOrderBy) $this->setOrderByStr($sqlOrderBy);
+        }
 
         $this->setOccIndex($occIndex);
         $this->setRecLimit($recLimit);
@@ -588,10 +593,7 @@ class OccurrenceEditorManager {
 			$sql = 'SELECT COUNT(DISTINCT o2.occid) AS reccnt FROM omoccurrences o2 ';
             $sql = $this->addTableJoins($sql);
 			$sqlWhere = $this->sqlWhere;
-            if($obPos = strpos($sqlWhere,' ORDER BY')){
-				$sqlWhere = substr($sqlWhere,0,$obPos);
-			}
-			$sql .= $sqlWhere;
+            $sql .= $sqlWhere;
 			//echo '<div>'.$sql.'</div>'; exit;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
@@ -627,6 +629,7 @@ class OccurrenceEditorManager {
 			$sql = $this->addTableJoins($sql);
             $sql .= $this->sqlWhere;
             $sql .= ') AS a ON o.occid = a.occid ';
+            if($this->orderByStr) $sql .= 'ORDER BY (o.'.$this->orderByStr.') '.$this->qryArr['orderbydir'].' ';
             $sql .= 'LIMIT '.($this->occIndex>0?$this->occIndex.',':'').$this->recLimit;
 		}
 		if($sql){
@@ -1440,13 +1443,7 @@ class OccurrenceEditorManager {
 
 	private function getBatchUpdateWhere($fn,$ov,$buMatch){
 		$sql = '';
-		//Add where and strip ORDER BY and/or LIMIT fragments
-		if(strpos($this->sqlWhere,'ORDER BY')){
-			$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
-		}
-		else{
-			$sql .= $this->sqlWhere;
-		}
+		$sql .= $this->sqlWhere;
 		
 		if(!$buMatch || $ov===''){
 			$sql .= ' AND (o2.'.$fn.' '.($ov===''?'IS NULL':'= "'.$ov.'"').') ';
