@@ -318,32 +318,32 @@ else{
 				<span style="margin-left:10px;">
 					<b>Sort by:</b> 
 					<select name="orderby">
-						<option value=""></option>
+						<option value="">Select Sort Field</option>
+                        <option value="catalognumber" <?php echo ($qOrderBy=='catalognumber'?'SELECTED':''); ?>>Catalog Number</option>
 						<option value="recordedby" <?php echo ($qOrderBy=='recordedby'?'SELECTED':''); ?>>Collector</option>
+                        <option value="country" <?php echo ($qOrderBy=='country'?'SELECTED':''); ?>>Country</option>
+                        <option value="county" <?php echo ($qOrderBy=='county'?'SELECTED':''); ?>>County</option>
+                        <option value="eventdate" <?php echo ($qOrderBy=='eventdate'?'SELECTED':''); ?>>Date</option>
+                        <option value="dateentered" <?php echo ($qOrderBy=='dateentered'?'SELECTED':''); ?>>Date Entered</option>
+                        <option value="datelastmodified" <?php echo ($qOrderBy=='datelastmodified'?'SELECTED':''); ?>>Date Last modified</option>
+                        <option value="decimallatitude" <?php echo ($qOrderBy=='decimallatitude'?'SELECTED':''); ?>>Decimal Latitude</option>
+                        <option value="decimallongitude" <?php echo ($qOrderBy=='decimallongitude'?'SELECTED':''); ?>>Decimal Longitude</option>
+                        <option value="maximumelevationinmeters" <?php echo ($qOrderBy=='maximumelevationinmeters'?'SELECTED':''); ?>>Elevation Maximum</option>
+                        <option value="minimumelevationinmeters" <?php echo ($qOrderBy=='minimumelevationinmeters'?'SELECTED':''); ?>>Elevation Minimum</option>
+                        <option value="recordenteredby" <?php echo ($qOrderBy=='recordenteredby'?'SELECTED':''); ?>>Entered By</option>
+                        <option value="family" <?php echo ($qOrderBy=='family'?'SELECTED':''); ?>>Family</option>
+                        <option value="locality" <?php echo ($qOrderBy=='locality'?'SELECTED':''); ?>>Locality</option>
+                        <option value="municipality" <?php echo ($qOrderBy=='municipality'?'SELECTED':''); ?>>Municipality</option>
 						<option value="recordnumber" <?php echo ($qOrderBy=='recordnumber'?'SELECTED':''); ?>>Number</option>
-						<option value="eventdate" <?php echo ($qOrderBy=='eventdate'?'SELECTED':''); ?>>Date</option>
-						<option value="catalognumber" <?php echo ($qOrderBy=='catalognumber'?'SELECTED':''); ?>>Catalog Number</option>
-						<option value="recordenteredby" <?php echo ($qOrderBy=='recordenteredby'?'SELECTED':''); ?>>Entered By</option>
-						<option value="dateentered" <?php echo ($qOrderBy=='dateentered'?'SELECTED':''); ?>>Date Entered</option>
-						<option value="datelastmodified" <?php echo ($qOrderBy=='datelastmodified'?'SELECTED':''); ?>>Date Last modified</option>
 						<option value="processingstatus" <?php echo ($qOrderBy=='processingstatus'?'SELECTED':''); ?>>Processing Status</option>
 						<option value="sciname" <?php echo ($qOrderBy=='sciname'?'SELECTED':''); ?>>Scientific Name</option>
-						<option value="family" <?php echo ($qOrderBy=='family'?'SELECTED':''); ?>>Family</option>
-						<option value="country" <?php echo ($qOrderBy=='country'?'SELECTED':''); ?>>Country</option>
 						<option value="stateprovince" <?php echo ($qOrderBy=='stateprovince'?'SELECTED':''); ?>>State / Province</option>
-						<option value="county" <?php echo ($qOrderBy=='county'?'SELECTED':''); ?>>County</option>
-						<option value="municipality" <?php echo ($qOrderBy=='municipality'?'SELECTED':''); ?>>Municipality</option>
-						<option value="locality" <?php echo ($qOrderBy=='locality'?'SELECTED':''); ?>>Locality</option>
-						<option value="decimallatitude" <?php echo ($qOrderBy=='decimallatitude'?'SELECTED':''); ?>>Decimal Latitude</option>
-						<option value="decimallongitude" <?php echo ($qOrderBy=='decimallongitude'?'SELECTED':''); ?>>Decimal Longitude</option>
-						<option value="minimumelevationinmeters" <?php echo ($qOrderBy=='minimumelevationinmeters'?'SELECTED':''); ?>>Elevation Minimum</option>
-						<option value="maximumelevationinmeters" <?php echo ($qOrderBy=='maximumelevationinmeters'?'SELECTED':''); ?>>Elevation Maximum</option>
 					</select>
 				</span>
 				<span>
 					<select name="orderbydir">
-						<option value="ASC">ascending</option>
-						<option value="DESC" <?php echo ($qOrderByDir=='DESC'?'SELECTED':''); ?>>descending</option>
+						<option value="ASC">Ascending</option>
+						<option value="DESC" <?php echo ($qOrderByDir=='DESC'?'SELECTED':''); ?>>Descending</option>
 					</select>
 				</span>
 			</div>
