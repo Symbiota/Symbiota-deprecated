@@ -625,7 +625,7 @@ class OccurrenceEditorManager {
 				$sql .= 'use index(Index_collector) ';
 			}
 			*/
-            $sql .= 'JOIN (SELECT o2.occid FROM omoccurrences o2 ';
+            $sql .= 'INNER JOIN (SELECT o2.occid FROM omoccurrences o2 ';
 			$sql = $this->addTableJoins($sql);
             $sql .= $this->sqlWhere;
             $sql .= ') AS a ON o.occid = a.occid ';
