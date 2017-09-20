@@ -1372,7 +1372,7 @@ class OccurrenceEditorManager {
 		if($fn && ($ov || $nv)){
 			//Get occids (where statement can't be part of UPDATE query without error being thrown)
 			$occidArr = array();
-			$sqlOccid = 'SELECT DISTINCT o.occid FROM omoccurrences o2 ';
+			$sqlOccid = 'SELECT DISTINCT o2.occid FROM omoccurrences o2 ';
             $sqlOccid = $this->addTableJoins($sqlOccid);
 			$sqlOccid .= $this->getBatchUpdateWhere($fn,$ov,$buMatch);
 			//echo $sqlOccid.'<br/>';
@@ -1428,7 +1428,7 @@ class OccurrenceEditorManager {
 		$fn = $this->cleanInStr($fieldName);
 		$ov = $this->cleanInStr($oldValue);
 
-		$sql = 'SELECT COUNT(o.occid) AS retcnt '.
+		$sql = 'SELECT COUNT(o2.occid) AS retcnt '.
 			'FROM omoccurrences o2 ';
         $sql = $this->addTableJoins($sql);
 		$sql .= $this->getBatchUpdateWhere($fn,$ov,$buMatch);
