@@ -621,7 +621,7 @@ class OccurrenceCleaner extends Manager{
 	private function getNullCountyNotLocalitySqlFrag(){
 		$retStr = 'FROM omoccurrences '.
 			'WHERE (collid = '.$this->collid.') AND (county IS NULL) AND (locality IS NOT NULL) '.
-			'AND country IN("USA","United States") AND (stateprovince IS NOT NULL) ';
+			'AND country IN("USA","United States") AND (stateprovince IS NOT NULL) AND (stateprovince NOT IN("District Of Columbia","DC")) ';
 		return $retStr;
 	}
 
