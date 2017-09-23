@@ -120,6 +120,7 @@ class TaxonomyHarvester extends Manager{
 		$tid = 0;
 		if($id){
 			$url = 'http://webservice.catalogueoflife.org/col/webservice?response=full&format=json&id='.$id;
+			//echo $url.'<br/>';
 			$content = $this->getContentString($url);
 			$resultArr = json_decode($content,true);
 			$tid = $this->addColTaxonByResult($resultArr);
@@ -134,6 +135,9 @@ class TaxonomyHarvester extends Manager{
 		$taxonArr = array();
 		if($resultArr){
 			$baseArr = $resultArr['results'][0];
+			if(!$baseArr){
+				return 0;
+			}
 			$tidAccepted = 0;
 			if($baseArr['name_status'] == 'synonym' && isset($baseArr['accepted_name'])){
 				$tidAccepted = $this->addColTaxonById($baseArr['accepted_name']['id']);
@@ -150,15 +154,19 @@ class TaxonomyHarvester extends Manager{
 			else{
 				$parentTid = 0;
 				if(isset($baseArr['classification'])){
-					$taxonArr['parent'] = $this->getColNode(array_pop($baseArr['classification']));
-					if(isset($taxonArr['parent']['sciname'])){
-						$parentTid = $this->getTid($taxonArr['parent']);
-						if(!$parentTid){
-							if(isset($taxonArr['parent']['id'])){
-								$parentTid = $this->addColTaxonById($taxonArr['parent']['id']);
+					$parentArr = array();
+					do{
+						$parentArr = $this->getColNode(array_pop($baseArr['classification']));
+						if(isset($parentArr['sciname'])){
+							$parentTid = $this->getTid($parentArr);
+							if(!$parentTid){
+								if(isset($parentArr['id'])){
+									$parentTid = $this->addColTaxonById($parentArr['id']);
+								}
 							}
 						}
-					}
+					}while(!$parentTid && $baseArr['classification']);
+					if($parentArr) $taxonArr['parent'] = $parentArr;
 				}
 				else{
 					$parentArr = $this->getParentArr($taxonArr);
