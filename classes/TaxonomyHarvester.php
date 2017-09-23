@@ -666,19 +666,21 @@ class TaxonomyHarvester extends Manager{
 
 	private function setRankId(&$taxonArr){
 		$rankid = 0;
+		$rankArr = array('biota' => 1, 'organism' => 1, 'kingdom' => 10, 'subkingdom' => 20, 'division' => 30, 'phylum' => 30, 'subdivision' => 40, 'subphylum' => 40, 'superclass' => 50, 'supercl.' => 50,
+			'class' => 60, 'cl.' => 60, 'subclass' => 70, 'subcl.' => 70, 'superorder' => 90, 'superord.' => 90, 'order' => 100, 'ord.' => 100, 'suborder' => 110, 'subord.' => 110,
+			'superfamily' => 130, 'family' => 140, 'fam.' => 140, 'subfamily' => 150, 'tribe' => 160, 'subtribe' => 170, 'genus' => 180, 'gen.' => 180,
+			'subgenus' => 190, 'section' => 200, 'subsection' => 210, 'species' => 220, 'sp.' => 220, 'subspecies' => 230, 'ssp.' => 230, 'subsp.' => 230, 'infraspecies' => 230,
+			'variety' => 240, 'var.' => 240, 'morph' => 240, 'subvariety' => 250, 'form' => 260, 'f.' => 260, 'subform' => 270, 'cultivated' => 300);
 		if(isset($taxonArr['taxonRank']) && $taxonArr['taxonRank']){
-			$rankArr = array('biota' => 1, 'organism' => 1, 'kingdom' => 10, 'subkingdom' => 20, 'division' => 30, 'phylum' => 30, 'subdivision' => 40, 'subphylum' => 40, 'superclass' => 50, 'supercl.' => 50,
-				'class' => 60, 'cl.' => 60, 'subclass' => 70, 'subcl.' => 70, 'superorder' => 90, 'superord.' => 90, 'order' => 100, 'ord.' => 100, 'suborder' => 110, 'subord.' => 110, 
-				'superfamily' => 130, 'family' => 140, 'fam.' => 140, 'subfamily' => 150, 'tribe' => 160, 'subtribe' => 170, 'genus' => 180, 'gen.' => 180,
-				'subgenus' => 190, 'section' => 200, 'subsection' => 210, 'species' => 220, 'sp.' => 220, 'subspecies' => 230, 'ssp.' => 230, 'subsp.' => 230, 'infraspecies' => 230,
-				'variety' => 240, 'var.' => 240, 'morph' => 240, 'subvariety' => 250, 'form' => 260, 'f.' => 260, 'subform' => 270, 'cultivated' => 300);
-			if(array_key_exists($taxonArr['taxonRank'], $rankArr)){
-				$rankid = $rankArr[$taxonArr['taxonRank']];
+			$taxonRank = strtolower($taxonArr['taxonRank']);
+			if(array_key_exists($taxonRank, $rankArr)){
+				$rankid = $rankArr[$taxonRank];
 			}
 		}
 		if(!$rankid && isset($taxonArr['unitind3']) && $taxonArr['unitind3']){
-			if(array_key_exists($taxonArr['unitind3'], $rankArr)){
-				$rankid = $rankArr[$taxonArr['unitind3']];
+			$unitInd3 = strtolower($taxonArr['unitind3']);
+			if(array_key_exists($unitInd3, $rankArr)){
+				$rankid = $rankArr[$unitInd3];
 			}
 		}
 		if(!$rankid && isset($taxonArr['taxonRank']) && $taxonArr['taxonRank']){
