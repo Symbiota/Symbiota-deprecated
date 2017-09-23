@@ -1,5 +1,8 @@
 sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 5571,10,Plantae,Plantae,,5571,Plantae,1
+1,10,Monera,Monera,,1,Monera,1
+2,10,Protista,Protista,,2,Protista,1
+3,10,Chromista,Chromista,,3,Chromista,1
 5569,20,Tracheobionta,Tracheobionta,,5571,Plantae,1
 234069,20,Tracheophytes,Tracheophytes,,5571,Plantae,1
 5561,30,Equisetophyta,Equisetophyta,,5569,Tracheobionta,1
@@ -21,38 +24,17 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 164428,30,Chlorophyta,Chlorophyta,,5571,Plantae,1
 164449,30,Rhodophyta,Rhodophyta,,5571,Plantae,1
 164451,30,Streptophyta,Streptophyta,,5571,Plantae,1
-164528,30,Cyanobacteria,Cyanobacteria,,164526,Bacteria,1
-164529,30,Euglenozoa,Euglenozoa,,164527,Protozoa,1
+164528,30,Cyanobacteria,Cyanobacteria,,164526,Monera,1
+164529,30,Euglenozoa,Euglenozoa,,164527,Protista,1
 164530,30,Heterokontophyta,Heterokontophyta,,164525,Chromista,1
 234342,30,Spermatophyta,Spermatophyta,,234069,Tracheophytes,1
-234108,35,unnamed clade 31,unnamed clade 31,,5570,Magnoliophyta,1
-234309,35,Anita Grade clade 1,Anita Grade clade 1,,5570,Magnoliophyta,1
-234347,35,unnamed clade 33,unnamed clade 33,,5570,Magnoliophyta,1
-234371,35,Anita Grade clade 2,Anita Grade clade 2,,5570,Magnoliophyta,1
-234377,35,unnamed clade 35,unnamed clade 35,,5570,Magnoliophyta,1
-234388,35,unnamed clade 39a,unnamed clade 39a,,5570,Magnoliophyta,1
-234389,35,unnamed clade 39b,unnamed clade 39b,,5570,Magnoliophyta,1
+234309,35,AnitaGradeClade1,AnitaGradeClade1,,5570,Magnoliophyta,1
+234371,35,AnitaGradeClade2,AnitaGradeClade2,,5570,Magnoliophyta,1
 16404,40,Anthocerotae,Anthocerotae,,32073,Anthocerotophyta,1
 16629,40,Musci,Musci,,16600,Bryophyta,1
 16634,40,Hepaticae,Hepaticae,,16602,Hepatophyta,1
 234393,45,Monocots,Monocots,,5570,Magnoliophyta,1
-234394,45,unnamed clade 41,unnamed clade 41,,5570,Magnoliophyta,1
 234401,45,Eudicots,Eudicots,,5570,Magnoliophyta,1
-234402,45,unnamed clade 45a,unnamed clade 45a,,234393,Monocots,1
-234403,45,unnamed clade 45b,unnamed clade 45b,,234393,Monocots,1
-234404,45,unnamed clade 55,unnamed clade 55,,5570,Magnoliophyta,1
-234408,45,unnamed clade 47a,unnamed clade 47a,,234393,Monocots,1
-234409,45,unnamed clade 47b,unnamed clade 47b,,234393,Monocots,1
-234410,45,unnamed clade 57a,unnamed clade 57a,,234401,Eudicots,1
-234411,45,unnamed clade 57b,unnamed clade 57b,,234401,Eudicots,1
-234413,45,unnamed clade 49a,unnamed clade 49a,,234393,Monocots,1
-234414,45,unnamed clade 49b,unnamed clade 49b,,234393,Monocots,1
-234415,45,unnamed clade 59a,unnamed clade 59a,,234401,Eudicots,1
-234416,45,unnamed clade 59b,unnamed clade 59b,,234401,Eudicots,1
-234420,45,unnamed clade 51a,unnamed clade 51a,,234393,Monocots,1
-234421,45,unnamed clade 51b,unnamed clade 51b,,234393,Monocots,1
-234428,45,unnamed clade 53a,unnamed clade 53a,,234393,Monocots,1
-234429,45,unnamed clade 53b,unnamed clade 53b,,234393,Monocots,1
 5544,60,Equisetopsida,Equisetopsida,,5561,Equisetophyta,1
 5545,60,Filicopsida,Filicopsida,,5562,Pteridophyta,1
 5546,60,Lycopodiopsida,Lycopodiopsida,,5563,Lycopodiophyta,1
@@ -91,14 +73,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 164534,60,Xanthophyceae,Xanthophyceae,,164530,Heterokontophyta,1
 233265,60,Marattiopsida,Marattiopsida,,5562,Pteridophyta,1
 233657,60,Polypodiopsida,Polypodiopsida,,5562,Pteridophyta,1
-234422,65,unnamed clade 61a,unnamed clade 61a,,234401,Eudicots,1
-234423,65,unnamed clade 61b,unnamed clade 61b,,234401,Eudicots,1
-234430,65,unnamed clade 63a,unnamed clade 63a,,234401,Eudicots,1
-234431,65,unnamed clade 63b,unnamed clade 63b,,234401,Eudicots,1
-234435,65,Core Eudicots,Core Eudicots,,234401,Eudicots,1
-234437,65,unnamed clade 65,unnamed clade 65,,234401,Eudicots,1
-234443,65,unnamed clade 67a,unnamed clade 67a,,234435,Core Eudicots,1
-234444,65,unnamed clade 67b,unnamed clade 67b,,234435,Core Eudicots,1
+234435,65,CoreEudicots,CoreEudicots,,234401,Eudicots,1
 5549,70,Zingiberidae,Zingiberidae,,5566,Liliopsida,1
 5550,70,Asteridae,Asteridae,,5567,Magnoliopsida,1
 5551,70,Alismatidae,Alismatidae,,5566,Liliopsida,1
@@ -118,27 +93,11 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 16812,70,Andreaeidae,Andreaeidae,,16700,Andreaeopsida,1
 16814,70,Bryidae,Bryidae,,16698,Bryopsida,1
 234392,75,Magnoliids,Magnoliids,,5570,Magnoliophyta,1
-234395,75,unnamed clade 87,unnamed clade 87,,5570,Magnoliophyta,1
 234434,75,Commelinids,Commelinids,,234393,Monocots,1
-234438,75,unnamed clade 97,unnamed clade 97,,234393,Monocots,1
-234449,75,unnamed clade 77a,unnamed clade 77a,,234435,Core Eudicots,1
-234450,75,unnamed clade 77b,unnamed clade 77b,,234435,Core Eudicots,1
-234451,75,unnamed clade 71a,unnamed clade 71a,,234435,Core Eudicots,1
-234452,75,unnamed clade 71b,unnamed clade 71b,,234435,Core Eudicots,1
-234453,75,unnamed clade 79a,unnamed clade 79a,,234435,Core Eudicots,1
-234454,75,unnamed clade 79b,unnamed clade 79b,,234435,Core Eudicots,1
-234458,75,Asterids,Asterids,,234435,Core Eudicots,1
-234459,75,unnamed clade 73a,unnamed clade 73a,,234435,Core Eudicots,1
-234460,75,unnamed clade 73b,unnamed clade 73b,,234435,Core Eudicots,1
-234461,75,unnamed clade 81,unnamed clade 81,,234435,Core Eudicots,1
-234466,75,Rosids,Rosids,,234435,Core Eudicots,1
-234468,75,unnamed clade 75,unnamed clade 75,,234435,Core Eudicots,1
-234469,75,unnamed clade 83a,unnamed clade 83a,,234458,Asterids,1
-234470,75,unnamed clade 83b,unnamed clade 83b,,234458,Asterids,1
+234458,75,Asterids,Asterids,,234435,CoreEudicots,1
+234466,75,Rosids,Rosids,,234435,CoreEudicots,1
 234473,75,Fabids,Fabids,,234466,Rosids,1
 234475,75,Malvids,Malvids,,234466,Rosids,1
-234476,75,unnamed clade 85a,unnamed clade 85a,,234458,Asterids,1
-234477,75,unnamed clade 85b,unnamed clade 85b,,234458,Asterids,1
 234481,75,Campanulids,Campanulids,,234458,Asterids,1
 234485,75,Lamiids,Lamiids,,234458,Asterids,1
 5477,100,Campanulales,Campanulales,,5550,Asteridae,1
@@ -179,7 +138,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 5512,100,Ephedrales,Ephedrales,,5553,Gnetopsida,1
 5513,100,Piperales,Piperales,,234392,Magnoliids,1
 5514,100,Aristolochiales,Aristolochiales,,5554,Magnoliidae,1
-5515,100,Nymphaeales,Nymphaeales,,234309,Anita Grade clade 1,1
+5515,100,Nymphaeales,Nymphaeales,,234309,AnitaGradeClade1,1
 5516,100,Ranunculales,Ranunculales,,234401,Eudicots,1
 5517,100,Plantaginales,Plantaginales,,5550,Asteridae,1
 5518,100,Scrophulariales,Scrophulariales,,5550,Asteridae,1
@@ -187,7 +146,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 5520,100,Myrtales,Myrtales,,234475,Malvids,1
 5521,100,Papaverales,Papaverales,,5554,Magnoliidae,1
 5522,100,Cornales,Cornales,,234458,Asterids,1
-5523,100,Santalales,Santalales,,234435,Core Eudicots,1
+5523,100,Santalales,Santalales,,234435,CoreEudicots,1
 5524,100,Rafflesiales,Rafflesiales,,5555,Rosidae,1
 5525,100,Celastrales,Celastrales,,234473,Fabids,1
 5526,100,Polygonales,Polygonales,,5557,Caryophyllidae,1
@@ -198,7 +157,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 5531,100,Fagales,Fagales,,234473,Fabids,1
 5532,100,Typhales,Typhales,,5552,Commelinidae,1
 5533,100,Bromeliales,Bromeliales,,5549,Zingiberidae,1
-5534,100,Caryophyllales,Caryophyllales,,234435,Core Eudicots,1
+5534,100,Caryophyllales,Caryophyllales,,234435,CoreEudicots,1
 5535,100,Arecales,Arecales,,234434,Commelinids,1
 5536,100,Euphorbiales,Euphorbiales,,5555,Rosidae,1
 5537,100,Arales,Arales,,5558,Arecidae,1
@@ -235,7 +194,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 16572,100,Batales,Batales,,5560,Dilleniidae,1
 16573,100,Umbellales,Umbellales,,5560,Dilleniidae,1
 16574,100,Sarraceniales,Sarraceniales,,5560,Dilleniidae,1
-16575,100,Dilleniales,Dilleniales,,234435,Core Eudicots,1
+16575,100,Dilleniales,Dilleniales,,234435,CoreEudicots,1
 16576,100,Lecythidales,Lecythidales,,5560,Dilleniidae,1
 16577,100,Nepenthales,Nepenthales,,5560,Dilleniidae,1
 16612,100,Trochodendrales,Trochodendrales,,234401,Eudicots,1
@@ -340,15 +299,14 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 164545,100,Synechococcales,Synechococcales,,164532,Cyanophyceae,1
 164546,100,Tribonematales,Tribonematales,,164534,Xanthophyceae,1
 164547,100,Vaucheriales,Vaucheriales,,164534,Xanthophyceae,1
-233088,100,incertae sedis sedis,incertae sedis,,164454,Trebouxiophyceae,1
 234315,100,Cyatheales,Cyatheales,,233657,Polypodiopsida,1
 234320,100,Gleicheniales,Gleicheniales,,233657,Polypodiopsida,1
 234322,100,Hymenophyllales,Hymenophyllales,,233657,Polypodiopsida,1
 234334,100,Osmundales,Osmundales,,233657,Polypodiopsida,1
 234339,100,Salviniales,Salviniales,,233657,Polypodiopsida,1
 234340,100,Schizaeales,Schizaeales,,233657,Polypodiopsida,1
-234370,100,Amborellales,Amborellales,,234309,Anita Grade clade 1,1
-234385,100,Austrobaileyales,Austrobaileyales,,234371,Anita Grade clade 2,1
+234370,100,Amborellales,Amborellales,,234309,AnitaGradeClade1,1
+234385,100,Austrobaileyales,Austrobaileyales,,234371,AnitaGradeClade2,1
 234399,100,Canellales,Canellales,,234392,Magnoliids,1
 234400,100,Chloranthales,Chloranthales,,5570,Magnoliophyta,1
 234406,100,Acorales,Acorales,,234393,Monocots,1
@@ -356,10 +314,10 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 234427,100,Dioscoreales,Dioscoreales,,234393,Monocots,1
 234441,100,Buxales,Buxales,,234401,Eudicots,1
 234442,100,Poales,Poales,,234434,Commelinids,1
-234448,100,Gunnerales,Gunnerales,,234435,Core Eudicots,1
-234465,100,Berberidopsidales,Berberidopsidales,,234435,Core Eudicots,1
-234467,100,Saxifragales,Saxifragales,,234435,Core Eudicots,1
-234478,100,Vitales,Vitales,,234435,Core Eudicots,1
+234448,100,Gunnerales,Gunnerales,,234435,CoreEudicots,1
+234465,100,Berberidopsidales,Berberidopsidales,,234435,CoreEudicots,1
+234467,100,Saxifragales,Saxifragales,,234435,CoreEudicots,1
+234478,100,Vitales,Vitales,,234435,CoreEudicots,1
 234480,100,Brassicales,Brassicales,,234475,Malvids,1
 234482,100,Crossosomatales,Crossosomatales,,234475,Malvids,1
 234483,100,Cucurbitales,Cucurbitales,,234473,Fabids,1
@@ -560,7 +518,6 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 16371,140,Cycadaceae,Cycadaceae,,16370,Cycadales,1
 16372,140,Brunoniaceae,Brunoniaceae,,5477,Campanulales,1
 16373,140,Goodeniaceae,Goodeniaceae,,5505,Asterales,1
-16374,140,Stylidiceae,Stylidiceae,,5477,Campanulales,1
 16375,140,Sphenocleaceae,Sphenocleaceae,,5489,Solanales,1
 16376,140,Pentaphragmataceae,Pentaphragmataceae,,5477,Campanulales,1
 16377,140,Burmanniaceae,Burmanniaceae,,234427,Dioscoreales,1
@@ -749,7 +706,6 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 16597,140,Elaeocarpaceae,Elaeocarpaceae,,234487,Oxalidales,1
 16598,140,Scytopetalaceae,Scytopetalaceae,,5543,Malvales,1
 16599,140,Bombacaceae,Bombacaceae,,5543,Malvales,1
-16606,140,Undetermined,Undetermined,,5571,Plantae,1
 16616,140,Calyceraceae,Calyceraceae,,5505,Asterales,1
 16617,140,Schisandraceae,Schisandraceae,,234385,Austrobaileyales,1
 16618,140,Illiciaceae,Illiciaceae,,16470,Illiciales,1
@@ -1011,7 +967,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 16985,140,Fabroniaceae,Fabroniaceae,,16827,Hypnales,1
 16986,140,Entodontaceae,Entodontaceae,,16827,Hypnales,1
 16987,140,Amblystegiaceae,Amblystegiaceae,,16827,Hypnales,1
-16988,140,Phyllogoniceae,Phyllogoniceae,,16832,Isobryales,1
+16988,140,Phyllogoniaceae,Phyllogoniaceae,,16832,Isobryales,1
 16989,140,Fontinalaceae,Fontinalaceae,,16832,Isobryales,1
 16990,140,Hydropogonaceae,Hydropogonaceae,,16832,Isobryales,1
 16991,140,Wardiaceae,Wardiaceae,,16832,Isobryales,1
@@ -1084,7 +1040,6 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 154831,140,Metaxyaceae,Metaxyaceae,,234315,Cyatheales,1
 154923,140,Montiniaceae,Montiniaceae,,5489,Solanales,1
 155244,140,Penaeaceae,Penaeaceae,,5571,Plantae,1
-155770,140,Pteridophyte,Pteridophyte,,5571,Plantae,1
 156455,140,Stylidiaceae,Stylidiaceae,,5505,Asterales,1
 156500,140,Tecophilaceae,Tecophilaceae,,5571,Plantae,1
 156638,140,Trilliaceae,Trilliaceae,,5571,Plantae,1
@@ -1150,7 +1105,6 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 164571,140,Tribonemataceae,Tribonemataceae,,164546,Tribonematales,1
 164572,140,Vaucheriaceae,Vaucheriaceae,,164547,Vaucheriales,1
 165373,140,Nothofagaceae,Nothofagaceae,,5531,Fagales,1
-166953,140,Polyporaceae,Polyporaceae,,166952,Polyporales,1
 167085,140,Woodsiaceae,Woodsiaceae,Herter,5488,Polypodiales,1
 167300,140,Sciadopityaceae,Sciadopityaceae,Luerss.,5487,Pinales,1
 167567,140,Tetrachondraceae,Tetrachondraceae,Wettstein   ,5500,Lamiales,1
@@ -1165,7 +1119,6 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 232554,140,Cervantesiaceae,Cervantesiaceae,,5523,Santalales,1
 232585,140,Chlorococcaceae,Chlorococcaceae,,164458,Chlorococcales,1
 232627,140,Colchicaceae,Colchicaceae,,5538,Liliales,1
-232644,140,Corydalis aqua-gelidae aqua-gelidae,Corydalis aqua-gelidae,,5571,Plantae,1
 232653,140,Coulaceae,Coulaceae,,5523,Santalales,1
 232707,140,Cytinaceae,Cytinaceae,,5543,Malvales,1
 232800,140,Doryanthaceae,Doryanthaceae,,164408,Asparagales,1
