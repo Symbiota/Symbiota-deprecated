@@ -12,7 +12,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 127140,60,Eurotiomycetes,Eurotiomycetes,Tehler ex O. E. Eriksson & K. Winka,127110,Pezizomycotina,1
 127289,60,Arthoniomycetes,Arthoniomycetes,O.E. Erikss & Winka,127110,Pezizomycotina,1
 127292,60,Lichinomycetes,Lichinomycetes,"Reeb, Lutzoni & Cl. Roux",127110,Pezizomycotina,1
-127348,60,"Lecanoromycetes, orders incertae sedis","Lecanoromycetes,",,127138,Lecanoromycetes,1
+127348,60,Lecanoromycetes,Lecanoromycetes,,127138,Lecanoromycetes,1
 127042,70,Leotiomycetidae,Leotiomycetidae,,127041,Leotiomycetes,1
 127112,70,Xylariomycetidae,Xylariomycetidae,O.E. Erikss & Winka,127111,Sordariomycetes,1
 127141,70,Chaetothyriomycetidae,Chaetothyriomycetidae,Doweld,127140,Eurotiomycetes,1
@@ -60,9 +60,9 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 127309,100,Botryosphaeriales,Botryosphaeriales,"C. L. Schoch, Crous & Shoemaker",127136,Dothideomycetes,1
 127317,100,Microascales,Microascales,Luttr. ex Benny & Kimbr.,127314,Hypocreomycetidae,1
 127323,100,Trypetheliales,Trypetheliales,"Leucking, Aptroot & Sipman",127136,Dothideomycetes,1
-127330,100,Candelariales,Candelariales,"Miadl., Lutzoni & Lumbsch",127348,"Lecanoromycetes, orders incertae sedis",1
+127330,100,Candelariales,Candelariales,"Miadl., Lutzoni & Lumbsch",127348,Lecanoromycetes,1
 127349,100,Umbilicariales,Umbilicariales,"Lumbsch, Hestmark & Lutzoni",127138,Lecanoromycetes,1
-127350,100,"Lecanoromycetidae, families incertae sedis","Lecanoromycetidae,",,127302,Lecanoromycetidae,1
+127350,100,Lecanoromycetidae,Lecanoromycetidae,,127302,Lecanoromycetidae,1
 127369,100,Diaporthales,Diaporthales,Nannf.,127111,Sordariomycetes,1
 127396,100,Mytilinidiales,Mytilinidiales,"Boehm, C. L. Schoch & Spatafora*",127136,Dothideomycetes,1
 128269,100,Trichosphaeriales,Trichosphaeriales,M.E. Barr,126976,Incertae sedis,1
@@ -99,7 +99,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 51725,140,Alectoriaceae,Alectoriaceae,,51671,Lecanorales,1
 51726,140,Arctomiaceae,Arctomiaceae,Th. Fr.,127300,Ostropomycetidae,1
 51728,140,Biatorellaceae,Biatorellaceae,M. Choisy ex Hafellner & Casares-Porcel,51671,Lecanorales,1
-51729,140,Brigantiaceae,Brigantiaceae,Hafellner & Bellem.,127350,"Lecanoromycetidae, families incertae sedis",1
+51729,140,Brigantiaceae,Brigantiaceae,Hafellner & Bellem.,127350,Lecanoromycetidae,1
 51730,140,Candelariaceae,Candelariaceae,Hakul.,127330,Candelariales,1
 51731,140,Catillariaceae,Catillariaceae,Hafellner,51671,Lecanorales,1
 51732,140,Cladoniaceae,Cladoniaceae,Zenker,51671,Lecanorales,1
@@ -113,12 +113,12 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 51740,140,Heppiaceae,Heppiaceae,Zahlbr.,51673,Lichinales,1
 51741,140,Hymeneliaceae,Hymeneliaceae,Korb.,127300,Ostropomycetidae,1
 51742,140,Lecanoraceae,Lecanoraceae,Korb.,51671,Lecanorales,1
-51743,140,Lecideaceae,Lecideaceae,Chevall.,127350,"Lecanoromycetidae, families incertae sedis",1
+51743,140,Lecideaceae,Lecideaceae,Chevall.,127350,Lecanoromycetidae,1
 51744,140,Letrouitiaceae,Letrouitiaceae,Bellem. & Hafellner,51685,Teloschistales,1
 51745,140,Megalosporaceae,Megalosporaceae,Vezda ex Hafellner & Bellem.,51685,Teloschistales,1
 51746,140,Micareaceae,Micareaceae,,51671,Lecanorales,1
 51747,140,Mycoblastaceae,Mycoblastaceae,Hafellner,51671,Lecanorales,1
-51748,140,Ophioparmaceae,Ophioparmaceae,R. W. Rogers & Hafellner,127350,"Lecanoromycetidae, families incertae sedis",1
+51748,140,Ophioparmaceae,Ophioparmaceae,R. W. Rogers & Hafellner,127350,Lecanoromycetidae,1
 51749,140,Pannariaceae,Pannariaceae,Tuck.,127303,Collematineae,1
 51750,140,Parmeliaceae,Parmeliaceae,Zenker,51671,Lecanorales,1
 51751,140,Pertusariaceae,Pertusariaceae,Korb. ex Korb.,51680,Pertusariales,1
@@ -126,7 +126,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 51753,140,Pilocarpaceae,Pilocarpaceae,Zahlbr.,51671,Lecanorales,1
 51755,140,Psoraceae,Psoraceae,Zahlbr.,51671,Lecanorales,1
 51756,140,Ramalinaceae,Ramalinaceae,C. Agardh,51671,Lecanorales,1
-51757,140,Rhizocarpaceae,Rhizocarpaceae,M. Choisy ex Hafellner,127350,"Lecanoromycetidae, families incertae sedis",1
+51757,140,Rhizocarpaceae,Rhizocarpaceae,M. Choisy ex Hafellner,127350,Lecanoromycetidae,1
 51759,140,Schaereriaceae,Schaereriaceae,Hafellner,51671,Lecanorales,1
 51760,140,Stereocaulaceae,Stereocaulaceae,Chevall.,51671,Lecanorales,1
 51761,140,Trapeliaceae,Trapeliaceae,M. Choisy ex Hertel,127291,Baeomycetales,1
@@ -156,7 +156,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 51785,140,Trichotheliaceae,Trichotheliaceae,,51683,Pyrenulales,1
 51786,140,Trypetheliaceae,Trypetheliaceae,Zenker,127323,Trypetheliales,1
 51787,140,Strigulaceae,Strigulaceae,Zahlbr.,127141,Chaetothyriomycetidae,1
-51788,140,Fuscideaceae,Fuscideaceae,Hafellner,127350,"Lecanoromycetidae, families incertae sedis",1
+51788,140,Fuscideaceae,Fuscideaceae,Hafellner,127350,Lecanoromycetidae,1
 51789,140,Teloschistaceae,Teloschistaceae,Zahlbr.,51685,Teloschistales,1
 51790,140,Adelococcaceae,Adelococcaceae,Triebel,51686,Verrucariales,1
 51791,140,Verrucariaceae,Verrucariaceae,Zenker,51686,Verrucariales,1
@@ -184,7 +184,7 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 127143,140,Herpotrichiellaceae,Herpotrichiellaceae,Munk,127142,Chaetothyriales,1
 127277,140,Ochrolechiaceae,Ochrolechiaceae,R. C. Harris ex Lumbsch & I. Schmitt,51680,Pertusariales,1
 127287,140,Hygrophoraceae,Hygrophoraceae,Lotsy,51687,Agaricales,1
-127293,140,Ropalosporaceae,Ropalosporaceae,Hafellner,127350,"Lecanoromycetidae, families incertae sedis",1
+127293,140,Ropalosporaceae,Ropalosporaceae,Hafellner,127350,Lecanoromycetidae,1
 127306,140,Thelocarpaceae,Thelocarpaceae,Zukal,127305,Thelebolales,1
 127307,140,Obryzaceae,Obryzaceae,Korb.,127111,Sordariomycetes,1
 127308,140,Anamylopsoraceae,Anamylopsoraceae,Lumbsch & Lunke,127291,Baeomycetales,1
@@ -203,8 +203,8 @@ sourceid,rankid,sciname,unitname1,author,sourceparentid,parentstr,acceptance
 127329,140,Hyaloscyphaceae,Hyaloscyphaceae,Nannf.,127043,Helotiales,1
 127331,140,Porinaceae,Porinaceae,Reichenb.,51677,Ostropales,1
 127332,140,Megasporaceae,Megasporaceae,"Lumbsch, Feige & K. Schmitz",51680,Pertusariales,1
-127346,140,"Lecanoromycetes, genera incertae sedis","Lecanoromycetes, genera incertae sedis",,127138,Lecanoromycetes,1
-127347,140,"Lecanorales, genera incertae sedis","Lecanorales,",,51671,Lecanorales,1
+127346,140,Lecanoromycetes,Lecanoromycetes,,127138,Lecanoromycetes,1
+127347,140,Lecanorales,Lecanorales,,51671,Lecanorales,1
 127351,140,Megalariaceae,Megalariaceae,,51671,Lecanorales,1
 127360,140,Aspidotheliaceae,Aspidotheliaceae,Rasenen ex J. C. David & D. Hawksw.,51658,Ascomycota,1
 127367,140,Nectriaceae,Nectriaceae,Tul. & C. Tul.,51670,Hypocreales,1
