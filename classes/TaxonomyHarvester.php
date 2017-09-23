@@ -103,8 +103,8 @@ class TaxonomyHarvester extends Manager{
 			$resultArr = json_decode($content,true);
 			$numResults = $resultArr['number_of_results_returned'];
 			if($numResults){
-				$tid = $this->addColTaxonByResult($resultArr, $sciName);
 				$this->logOrEcho('Taxon found within Catalog of Life',1);
+				$tid = $this->addColTaxonByResult($resultArr, $sciName);
 			}
 			else{
 				$this->logOrEcho('Taxon not found within Catalog of Life',1);
@@ -454,7 +454,16 @@ class TaxonomyHarvester extends Manager{
 				if(isset($taxonArr['taxonConcepts'])){
 					if($taxonConceptId = key($taxonArr['taxonConcepts'])){
 						$conceptArr = $eolManager->getHierarchyEntries($taxonConceptId);
-						if(isset($conceptArr['parent'])) $taxonArr['parent'] = $conceptArr['parent'];
+						if(isset($conceptArr['parent'])){
+							$parentTid = $this->getTid($conceptArr['parent']);
+							if(!$parentTid){
+								$parentTid = $this->addEolTaxon($conceptArr['parent']['sciname']);
+							}
+							if($parentTid){
+								$conceptArr['parent']['tid'] = $parentTid;
+								$taxonArr['parent'] = $conceptArr['parent'];
+							}
+						}
 					}
 				}
 				if(!isset($taxonArr['source'])) $taxonArr['source'] = 'EOL - '.date('Y-m-d G:i:s');
@@ -467,7 +476,7 @@ class TaxonomyHarvester extends Manager{
 		//Process taxonomic name
 		if($taxonArr) $this->logOrEcho('Taxon found within Encyclopedia of Life',1);
 		else{
-			$this->logOrEcho('Taxon not found within Encyclopedia of Life (term: '.$term.')',1);
+			$this->logOrEcho('Taxon not found within Encyclopedia of Life',1);
 			return false;
 		}
 		return $this->loadNewTaxon($taxonArr);
@@ -597,8 +606,17 @@ class TaxonomyHarvester extends Manager{
 			foreach($taxonArr['syns'] as $k => $synArr){
 				if($synArr){
 					if(isset($taxonArr['source']) && $taxonArr['source'] && (!isset($synArr['source']) || !$synArr['source'])) $synArr['source'] = $taxonArr['source'];
-					if(isset($taxonArr['acceptanceReason']) && $taxonArr['acceptanceReason'] && (!isset($synArr['acceptanceReason']) || !$synArr['acceptanceReason'])) $synArr['acceptanceReason'] = $taxonArr['acceptanceReason'];
-					$this->loadNewTaxon($synArr,$newTid);
+					$acceptanceReason = '';
+					if(isset($taxonArr['acceptanceReason']) && $taxonArr['acceptanceReason']) $acceptanceReason = $taxonArr['acceptanceReason'];
+					if(isset($synArr['synreason']) && $synArr['synreason']) $acceptanceReason = $synArr['synreason'];
+					if($acceptanceReason == 'misspelling'){
+						$this->logOrEcho('Name not added because it is marked as a misspelling',1);
+						$this->fullyResolved = false;
+					}
+					else{
+						if($acceptanceReason && (!isset($synArr['acceptanceReason']) || !$synArr['acceptanceReason'])) $synArr['acceptanceReason'] = $taxonArr['acceptanceReason'];
+						$this->loadNewTaxon($synArr,$newTid);
+					}
 				}
 			}
 		}
@@ -612,7 +630,6 @@ class TaxonomyHarvester extends Manager{
 				}
 			}
 		}
-		if(isset($taxonArr['unitname3']) && $taxonArr['unitname3']) $this->fullyResolved = false;
 		return $newTid;
 	}
 
@@ -912,7 +929,7 @@ class TaxonomyHarvester extends Manager{
 	public function setDefaultFamily($familyStr){
 		$this->defaultFamily = $this->cleanInStr($familyStr);
 	}
-	
+
 	public function isFullyResolved(){
 		return $this->fullyResolved;
 	}
