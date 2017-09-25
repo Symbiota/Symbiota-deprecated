@@ -29,7 +29,7 @@ class SpecProcessorManager {
 	protected $lgMaxFileSize = 3000000;
 	protected $webImg = 1;
 	protected $createTnImg = 1;
-	protected $createLgImg = 1;
+	protected $createLgImg = 2;
 	protected $lastRunDate = '';
 	
 	protected $dbMetadata = 1;			//Only used when run as a standalone script
@@ -142,9 +142,9 @@ class SpecProcessorManager {
 					(isset($addArr['webpixwidth'])&&$addArr['webpixwidth']?$addArr['webpixwidth']:'NULL').','.
 					(isset($addArr['tnpixwidth'])&&$addArr['tnpixwidth']?$addArr['tnpixwidth']:'NULL').','.
 					(isset($addArr['lgpixwidth'])&&$addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
-					(isset($addArr['jpgquality'])&&$addArr['jpgquality']?$addArr['jpgquality']:'NULL').','.
-					(isset($addArr['createTnImg'])&&$addArr['createTnImg']?$addArr['createTnImg']:'NULL').','.
-					(isset($addArr['createLgImg'])&&$addArr['createLgImg']?$addArr['createLgImg']:'NULL').')';
+					(isset($addArr['jpgcompression'])&&$addArr['jpgcompression']?$addArr['jpgcompression']:'NULL').','.
+					(isset($addArr['createtnimg'])&&$addArr['createtnimg']?$addArr['createtnimg']:'NULL').','.
+					(isset($addArr['createlgimg'])&&$addArr['createlgimg']?$addArr['createlgimg']:'NULL').')';
 			}
 		}
 		elseif($addArr['title'] == 'OCR Harvest' && $addArr['newprofile']){
@@ -504,10 +504,12 @@ class SpecProcessorManager {
 		$retArr = array();
 		if($this->collid){
 			$logPathFrag = ($this->projectType == 'local'?'imgProccessing':$this->projectType).'/';
-			if($fh = opendir($this->logPath.$logPathFrag)){
-				while($fileName = readdir($fh)){
-					if(strpos($fileName,$this->collid.'_') === 0){
-						$retArr[] = $fileName;
+			if(file_exists($this->logPath.$logPathFrag)){
+				if($fh = opendir($this->logPath.$logPathFrag)){
+					while($fileName = readdir($fh)){
+						if(strpos($fileName,$this->collid.'_') === 0){
+							$retArr[] = $fileName;
+						}
 					}
 				}
 			}

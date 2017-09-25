@@ -528,6 +528,7 @@ class ImageLocalProcessor {
 			if($this->dbMetadata){
 				$occId = $this->getOccId($specPk);
 			}
+			$targetFileName = str_replace(' ','_',$fileName);
 			$fileName = rawurlencode($fileName);
 			$fileNameExt = '.jpg';
 			$fileNameBase = $fileName;
@@ -561,7 +562,6 @@ class ImageLocalProcessor {
 						$this->logOrEcho("ERROR: unable to create new folder (".$targetPath.") ");
 					}
 				}
-				$targetFileName = $fileName;
 				if($this->webImg == 1 || $this->webImg == 2){
 					//Check to see if image already exists at target, if so, delete or rename target
 					if(file_exists($targetPath.$targetFileName)){
@@ -584,8 +584,9 @@ class ImageLocalProcessor {
 						elseif($this->imgExists == 1){
 							//Rename image before saving
 							$cnt = 1;
+							$tempFileName = $targetFileName;
 							while(file_exists($targetPath.$targetFileName)){
-								$targetFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fileName);
+								$targetFileName = str_ireplace(".jpg","_".$cnt.".jpg",$tempFileName);
 								$cnt++;
 							}
 						}
@@ -604,7 +605,7 @@ class ImageLocalProcessor {
 							'FROM images WHERE (occid = '.$occId.') ';
 						$rs = $this->conn->query($sql);
 						while($r = $rs->fetch_object()){
-							if(stripos($r->url,$fileName)){
+							if(stripos($r->url,$fileName) || stripos($r->url,str_replace('%20', '_', $fileName)) || stripos($r->url,str_replace('%20', ' ', $fileName))){
 								$recExists = 1;
 							}
 						}
@@ -631,7 +632,7 @@ class ImageLocalProcessor {
 					} 
 					else { 
 						$fileSize = @filesize($sourcePath.$fileName);
-					} 
+					}
 					
 					//$this->logOrEcho("Loading image (".date('Y-m-d h:i:s A').")",1);
 					//ob_flush();
@@ -1471,7 +1472,6 @@ class ImageLocalProcessor {
 	}
 	
 	private function updateCollectionStats(){
-exit;
 		if($this->dbMetadata){
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
 			$occurMain = new OccurrenceMaintenance($this->conn);
