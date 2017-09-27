@@ -294,7 +294,7 @@ if($SYMB_UID){
 								</li>
 								<li style="margin-left:10px;">
 									<a href="../../imagelib/admin/thumbnailbuilder.php?collid=<?php echo $collid; ?>">
-										<?php echo $LANG['THUMBNAIL_BUILDER']; ?>
+										<?php echo $LANG['THUMBNAIL_MAINTENANCE']; ?>
 									</a>
 								</li>
 								<li style="margin-left:10px;">

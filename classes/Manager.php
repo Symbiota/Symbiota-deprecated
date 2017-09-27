@@ -34,7 +34,7 @@ class Manager  {
 		$this->logFH = fopen($logPath, 'a');
 	}
 
-	protected function logOrEcho($str, $indexLevel=0){
+	protected function logOrEcho($str, $indexLevel=0, $tag = 'li'){
 		//verboseMode: 0 = silent, 1 = log, 2 = out to screen, 3 = both
 		if($this->verboseMode){
 			if($this->verboseMode == 3 || $this->verboseMode == 1){
@@ -43,7 +43,7 @@ class Manager  {
 				} 
 			}
 			if($this->verboseMode == 3 || $this->verboseMode == 2){
-				echo '<li style="'.($indexLevel?'margin-left:'.($indexLevel*15).'px':'').'">'.$str.'</li>';
+				echo '<'.$tag.' style="'.($indexLevel?'margin-left:'.($indexLevel*15).'px':'').'">'.$str.'</'.$tag.'>';
 				ob_flush();
 				flush();
 			}

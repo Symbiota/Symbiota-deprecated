@@ -413,7 +413,7 @@ class ImageShared{
 		return $status;
 	}
 
-	public function createNewImage($subExt, $targetWidth, $qualityRating = 0){
+	public function createNewImage($subExt, $targetWidth, $qualityRating = 0, $targetPathOverride = ''){
 		global $useImageMagick;
 		$status = false;
 		if($this->sourcePath){
@@ -421,11 +421,11 @@ class ImageShared{
 			
 	        if($useImageMagick) {
 				// Use ImageMagick to resize images 
-				$status = $this->createNewImageImagick($subExt,$targetWidth,$qualityRating);
+	        	$status = $this->createNewImageImagick($subExt,$targetWidth,$qualityRating,$targetPathOverride);
 			} 
 			elseif(extension_loaded('gd') && function_exists('gd_info')) {
 				// GD is installed and working 
-				$status = $this->createNewImageGD($subExt,$targetWidth,$qualityRating);
+				$status = $this->createNewImageGD($subExt,$targetWidth,$qualityRating,$targetPathOverride);
 			}
 			else{
 				// Neither ImageMagick nor GD are installed 
@@ -438,8 +438,9 @@ class ImageShared{
 		return $status;
 	}
 	
-	private function createNewImageImagick($subExt,$newWidth,$qualityRating = 0){
-		$targetPath = $this->targetPath.$this->imgName.$subExt.$this->imgExt;
+	private function createNewImageImagick($subExt,$newWidth,$qualityRating,$targetPathOverride){
+		$targetPath = $targetPathOverride;
+		if(!$targetPath) $targetPath = $this->targetPath.$this->imgName.$subExt.$this->imgExt;
 		$ct;
 		if($newWidth < 300){
 			$ct = system('convert '.$this->sourcePath.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
@@ -456,7 +457,7 @@ class ImageShared{
 		return false;
 	}
 
-	private function createNewImageGD($subExt, $newWidth, $qualityRating = 0){
+	private function createNewImageGD($subExt, $newWidth, $qualityRating, $targetPathOverride){
 		$status = false;
 		ini_set('memory_limit','512M');
 
@@ -491,7 +492,8 @@ class ImageShared{
 				imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$this->sourceWidth,$this->sourceHeight);
 		
 				//Irrelevant of import image, output JPG 
-				$targetPath = $this->targetPath.$this->imgName.$subExt.'.jpg';
+				$targetPath = $targetPathOverride;
+				if(!$targetPath) $targetPath = $this->targetPath.$this->imgName.$subExt.'.jpg';
 				if($qualityRating){
 					$status = imagejpeg($tmpImg, $targetPath, $qualityRating);
 				}
@@ -1119,24 +1121,21 @@ class ImageShared{
 		}
 		
 		//First simple check
-		if(file_exists($uri) || is_array(getimagesize(str_replace(' ', '%20', $uri))) || ($secondaryUrl && file_exists($secondaryUrl))){
+		if(($secondaryUrl && file_exists($secondaryUrl)) || file_exists($uri) || is_array(getimagesize(str_replace(' ', '%20', $uri)))){
 			return true;
 	    }
 	    //Second check
 	    if(!$exists){
-		    // Version 4.x supported
-		    $handle   = curl_init($uri);
-		    if (false === $handle){
-				$exists = false;
-		    }
-		    curl_setopt($handle, CURLOPT_HEADER, false);
-		    curl_setopt($handle, CURLOPT_FAILONERROR, true); 
-		    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
-		    curl_setopt($handle, CURLOPT_NOBODY, true);
-		    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
-		    curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true);
-		    $exists = curl_exec($handle);
-		    curl_close($handle);
+	    	$ch = curl_init($uri);
+	    	curl_setopt($ch, CURLOPT_NOBODY, true);
+	    	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	    	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+	    	curl_setopt($ch, CURLOPT_USERAGENT,"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1) Gecko/20061204 Firefox/2.0.0.1" );
+	    	curl_exec($ch);
+	    	$retCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	    	// $retcode >= 400 -> not found, $retcode = 200, found.
+	    	if($retCode < 400) $exists = true;
+	    	curl_close($ch);
 	    }
 	     
 	    //One last check
