@@ -1,24 +1,23 @@
 <?php
-include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once('Manager.php');
 include_once('ImageShared.php');
 
-class ImageCleaner{
+class ImageCleaner extends Manager{
 	
-	private $conn;
 	private $collid;
 	private $tidArr = array();
-	private $verbose = 1;
-	private $errorStr;
 
 	function __construct() {
+		parent::__construct(null,'write');
+		$this->verboseMode = 2;
 		set_time_limit(2000);
-		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
 
 	function __destruct(){
-		if($this->conn) $this->conn->close();
+		parent::__destruct();
 	}
 
+	//Thumbnail building tools
 	public function getReportArr(){
 		$retArr = array();
 		
@@ -59,35 +58,25 @@ class ImageCleaner{
 				'WHERE c.collid = '.$this->collid;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				if($this->verbose){
-					echo '<ul><li>Processing Collection: '.$r->collectionname.'</li></ul>';
-					ob_flush();
-					flush();
-				}
+				$this->logOrEcho('Processing Collection: '.$r->collectionname,0,'div');
 				$this->collid = $r->collid;
 				$this->buildImages($r->code.'/');
 			}
 			$rs->free();
 		}
 		else{
-			if($this->verbose){
-				if($this->tidArr){
-					echo '<ul><li>Processing images for taxon #'.$this->tidArr[0].'</li></ul>';
-				}
-				else{
-					echo '<ul><li>Processing field images (not linked to specimens)</li></ul>';
-				}
-				ob_flush();
-				flush();
+			if($this->tidArr){
+				$this->logOrEcho('Processing images for taxon #'.$this->tidArr[0],0,'div');
+			}
+			else{
+				$this->logOrEcho('Processing field images (not linked to specimens)',0,'div');
 			}
 			$this->buildImages('misc/'.date('Ym').'/');
 		}
 	}
 
 	private function buildImages($targetPath){
-		ini_set('memory_limit','512M');
 		$imgManager = new ImageShared();
-
 		$sql = 'SELECT DISTINCT i.imgid, i.url, i.originalurl, i.thumbnailurl, i.format ';
 		if($this->collid){
 			$sql .= ', o.catalognumber FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid ';
@@ -101,16 +90,13 @@ class ImageCleaner{
 		$sql .= $this->getSqlWhere().'ORDER BY RAND()';
 		//echo $sql; exit;
 		$result = $this->conn->query($sql);
-		if($this->verbose) echo '<ol style="margin-left:15px;">';
+		$cnt = 1;
+		if($this->verboseMode > 1) echo '<ul style="margin-left:15px;">';
 		while($row = $result->fetch_object()){
 			$status = true;
 			$webIsEmpty = false;
 			$imgId = $row->imgid;
-			if($this->verbose){
-				echo '<li>Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">'.$imgId.'</a>...</li> ';
-				ob_flush();
-				flush();
-			}
+			$this->logOrEcho($cnt.': Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">'.$imgId.'</a>...');
 			$this->conn->autocommit(false);
 			//Tag for updating; needed to ensure two parallel processes are not processing the same image
 			$testSql = 'SELECT thumbnailurl, url FROM images WHERE (imgid = '.$imgId.') FOR UPDATE ';
@@ -128,7 +114,7 @@ class ImageCleaner{
 				}
 				else{
 					//Records already processed by a parallel running process, thus go to next record
-					if($this->verbose) echo '<div style="margin-left:30px">Already being handled by a parallel running processs</div>';
+					$this->logOrEcho('Already being handled by a parallel running processs',1);
 					$textRS->free();
 					$this->conn->commit();
 					$this->conn->autocommit(true);
@@ -173,7 +159,7 @@ class ImageCleaner{
 						$imgTnUrl = $imgManager->getUrlBase().$imgManager->getImgName().'_tn.jpg';
 					}
 					else{
-						$this->errorStr = 'ERROR building thumbnail: '.$imgManager->getErrStr();
+						$this->errorMessage = 'ERROR building thumbnail: '.$imgManager->getErrStr();
 						$errSql = 'UPDATE images SET thumbnailurl = "bad url" WHERE thumbnailurl IS NULL AND imgid = '.$imgId;
 						$this->conn->query($errSql);
 						$status = false;
@@ -221,26 +207,23 @@ class ImageCleaner{
 					$sql .= "WHERE ti.imgid = ".$imgId;
 					//echo $sql; 
 					if(!$this->conn->query($sql)){
-						$this->errorStr = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
-						if($this->verbose) echo '<div style="margin-left:30px">'.$this->errorStr.'</div>';
+						$this->errorMessage = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
+						$this->logOrEcho($this->errorMessage,1);
 						$status = false;
 					}
 				}
 				$imgManager->reset();
 			}
 			else{
-				$this->errorStr = 'ERROR: unable to parse source image ('.$imgUrl.')';
-				if($this->verbose) echo '<div style="margin-left:30px">'.$this->errorStr.'</div>';
+				$this->errorMessage= 'ERROR: unable to parse source image ('.$imgUrl.')';
+				//$this->logOrEcho($this->errorMessage,1);
 				$status = false;
 			}
-			if($this->verbose && !$status){
-				echo $this->errorStr.'</li>';
-			}
-			ob_flush();
-			flush();
+			if(!$status) $this->logOrEcho($this->errorMessage,1);
+			$cnt++;
 		}
 		$result->free();
-		if($this->verbose) echo '</ol>';
+		if($this->verboseMode > 1) echo '</ul>';
 	}
 
 	private function getSqlWhere(){
@@ -260,6 +243,174 @@ class ImageCleaner{
 		$this->conn->query($sqlWeb);
 	}
 
+	//Test and refresh image thumbnails for remote images
+	public function getRemoteImageCnt($postArr){
+		$retCnt = 0;
+		if($this->collid){
+			$sql = 'SELECT COUNT(i.imgid) AS cnt '.$this->getRemoteImageSql($postArr);
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retCnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $retCnt;
+	}
+
+	public function hasRemoteImages(){
+		$retBool = false;
+		$domain = $_SERVER['HTTP_HOST'];
+		$sql = 'SELECT i.imgid '.
+			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+			'WHERE (o.collid = '.$this->collid.') AND (i.thumbnailurl LIKE "%'.$domain.'/%" OR i.thumbnailurl LIKE "/%") '.
+			'AND IFNULL(i.originalurl,url) LIKE "http%" AND (IFNULL(i.originalurl,url) NOT LIKE "%'.$domain.'/%") '.
+			'LIMIT 1';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$retBool = true;
+		}
+		$rs->free();
+		return $retBool;
+	}
+
+	public function refreshThumbnails($postArr){
+		$imgManager = new ImageShared();
+		$sql = 'SELECT o.occid, o.catalognumber, i.imgid, i.url, i.thumbnailurl, i.originalurl '.$this->getRemoteImageSql($postArr);
+		//echo $sql.'<br/>'; 
+		$rs = $this->conn->query($sql);
+		$cnt = 1;
+		while($r = $rs->fetch_object()){
+			$startTime = time();
+			$sourceUrl = '';
+			$originalIsBase = true;
+			if($r->originalurl){
+				$sourceUrl = $r->originalurl;
+			}
+			else{
+				$sourceUrl = $r->url;
+				$originalIsBase = false;
+			}
+			$this->logOrEcho($cnt.'. Rebuilding thumbnail: <a href="../imgdetails.php?imgid='.$r->imgid.'" target="_blank">'.$r->imgid.'</a> [cat#: '.$r->catalognumber.']...',0,'div');
+			$tnUrlUpdate = '';
+			$webUrlUpdate = '';
+			$thumbnailUrl = $r->thumbnailurl;
+			if(substr($thumbnailUrl, 0, 4) == 'http'){
+				$thumbnailUrl = parse_url($thumbnailUrl, PHP_URL_PATH);
+			}
+			$tsSource = $this->getRemoteModifiedTime($sourceUrl);
+			if(strpos($thumbnailUrl, $GLOBALS['IMAGE_ROOT_URL']) === 0){
+				$tnPath = $GLOBALS['IMAGE_ROOT_PATH'].substr($thumbnailUrl,strlen($GLOBALS['IMAGE_ROOT_URL']));
+				if($p = strpos($tnPath,'?')) $tnPath = substr($tnPath,0,$p);
+				if(is_writable($tnPath)){
+					$tsThumbnail = filemtime($tnPath);
+					//echo 'orig file modified: '.date ("Y-m-d H:i:s.", $tsSource).'<br/>';
+					//echo 'tn file modified: '.date ("Y-m-d H:i:s.", $tsThumbnail).'<br/>';
+					if($tsSource > $tsThumbnail){
+						if($imgManager->parseUrl($sourceUrl)){
+							unlink($tnPath);
+							if($imgManager->createNewImage('',$imgManager->getTnPixWidth(),70,$tnPath)){
+								$tnUrlUpdate = $r->thumbnailurl;
+								$this->logOrEcho('Thumbnail rebuilt and refreshed',1);
+							}
+							if($originalIsBase){
+								$webUrl = $r->url;
+								if(substr($webUrl, 0, 4) == 'http'){
+									$webUrl = parse_url($webUrl, PHP_URL_PATH);
+								}
+								if(strpos($webUrl, $GLOBALS['IMAGE_ROOT_URL']) === 0){
+									$webPath = $GLOBALS['IMAGE_ROOT_PATH'].substr($webUrl,strlen($GLOBALS['IMAGE_ROOT_URL']));
+									if($p = strpos($webPath,'?')) $webPath = substr($webPath,0,$p);
+									if(is_writable($webPath)){
+										//echo 'web file modified: '.date ("Y-m-d H:i:s.", filemtime($webPath)).'<br/>';
+										$tsWeb = filemtime($webPath);
+										if($tsSource > $tsWeb){
+											unlink($webPath);
+											if($imgManager->createNewImage('',$imgManager->getWebPixWidth(),0,$webPath)){
+												$webUrlUpdate = $r->url;
+												$this->logOrEcho('Basic web image rebuilt and refreshed',1);
+											}
+										}
+									}
+									else{
+										$this->logOrEcho('Unable to rebuild basic web image: image file not writable',1);
+									}
+								}
+							}
+						}
+					}
+					else{
+						$this->logOrEcho('Image derivatives are newer than source file: image rebuild skipped',1);
+					}
+				}
+				else{
+					$this->logOrEcho('ERROR rebuilding thumbnail: image file not writable',1);
+				}
+			}
+			if($tnUrlUpdate) $this->updateImageRecord($r->imgid, $tnUrlUpdate, $webUrlUpdate);
+			$imgManager->reset();
+			$cnt++;
+		}
+		$rs->free();
+		if($cnt == 1) $this->logOrEcho('<b>There are no images that match set criteria</b>',0,'div');
+	}
+
+	private function getRemoteImageSql($postArr){
+		$domain = $_SERVER['HTTP_HOST'];
+		$sql = 'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+			'WHERE (o.collid = '.$this->collid.') AND (i.thumbnailurl LIKE "%'.$domain.'/%" OR i.thumbnailurl LIKE "/%") '.
+			'AND IFNULL(i.originalurl,url) LIKE "http%" AND IFNULL(i.originalurl,url) NOT LIKE "%'.$domain.'/%" ';
+		if(array_key_exists('catNumHigh', $postArr) && $postArr['catNumHigh']){
+			// Catalog numbers are given as a range
+			if(is_numeric($postArr['catNumLow']) && is_numeric($postArr['catNumHigh'])){
+				$sql .= 'AND (o.catalognumber BETWEEN '.$postArr['catNumLow'].' AND '.$postArr['catNumHigh'].') ';
+			}
+			else{
+				$sql .= 'AND (o.catalognumber BETWEEN "'.$postArr['catNumLow'].'" AND "'.$postArr['catNumHigh'].'") ';
+			}
+		}
+		elseif(array_key_exists('catNumLow', $postArr) && $postArr['catNumLow']){
+			// Catalog numbers are given as a single value
+			$sql .= 'AND (o.catalognumber = "'.$postArr['catNumLow'].'") ';
+		}
+		elseif(array_key_exists('catNumList', $postArr) && $postArr['catNumList']){
+			$catNumList = preg_replace('/\s+/','","',str_replace(array("\r\n","\r","\n",','),' ',trim($postArr['catNumList'])));
+			if($catNumList) $sql .= 'AND (o.catalognumber IN("'.$catNumList.'")) ';
+		}
+		return $sql;
+	}
+
+	private function getRemoteModifiedTime($filePath){
+		$curl = curl_init($filePath);
+		//Fetch only the header
+		curl_setopt($curl, CURLOPT_NOBODY, true);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		// attempt to retrieve the modification date
+		curl_setopt($curl, CURLOPT_FILETIME, true);
+		
+		$curlResult = curl_exec($curl);
+		
+		if($curlResult === false){
+			$this->logOrEcho('ERROR retrieving modified date of original image file: '.curl_error($curl),1);
+			return false;
+		}
+		
+		$ts = curl_getinfo($curl, CURLINFO_FILETIME);
+		if($ts != -1) return $ts;
+		return false;
+	}
+
+	private function updateImageRecord($imgid, $tnUrl, $webUrl){
+		$verTag = date('ymd');
+		$sql = 'UPDATE images SET thumbnailurl = "'.$tnUrl.'?ver='.$verTag.'" ';
+		if($webUrl) $sql .= ', url = "'.$webUrl.'?ver='.$verTag.'" ';
+		$sql .= 'WHERE (imgid = '.$imgid.')';
+		if(!$this->conn->query($sql)){
+			$this->logOrEcho('ERROR updating image record: '.$this->conn->error);
+		}
+	}
+
 	//URL testing 
 	public function testByCollid(){
 		$sql = 'SELECT i.imgid, i.url, i.thumbnailurl, i.originalurl '.
@@ -269,15 +420,15 @@ class ImageCleaner{
 	}
 	
 	public function testByImgid($imgidStr){
-	
-	
+		
+		
 	}
 	
 	private function testUrls($sql){
 		$status = true;
 		$badUrlArr = array();
 		if(!$sql){
-			$this->errorStr = 'SQL string is NULL';
+			$this->errorMessage= 'SQL string is NULL';
 			return false;
 		}
 		$imgManager = new ImageShared();
@@ -291,7 +442,7 @@ class ImageCleaner{
 			$rs->free();
 		}
 		else{
-			$this->errorStr = 'Issue with connection or SQL: '.$sql;
+			$this->errorMessage= 'Issue with connection or SQL: '.$sql;
 			return false;
 		}
 		//Output results (needs to be extended)
@@ -337,14 +488,6 @@ class ImageCleaner{
 			$rs->free();
 		}
 		return $sciname;
-	}
-	
-	public function setVerbose($verb){
-		$this->verbose = $verb;
-	}
-	
-	public function getErrorStr(){
-		return $this->errorStr;
 	}
 }
 ?>

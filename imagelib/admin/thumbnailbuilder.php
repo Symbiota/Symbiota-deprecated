@@ -22,6 +22,8 @@ elseif($collid){
 $imgManager = new ImageCleaner();
 $imgManager->setCollid($collid);
 $imgManager->setTid($tid);
+
+$remoteImageCnt = $imgManager->getRemoteImageCnt($_POST);
 ?>
 <html>
 <head>
@@ -50,16 +52,28 @@ $imgManager->setTid($tid);
 	<div id="innertext">
 		<?php 
 		if($isEditor){
+			if($action){
+				echo '<div style="font-weight:bold;">Start processing...</div>';
+				if($action == 'Build Thumbnails'){
+					$imgManager->buildThumbnailImages();
+				}
+				elseif($action == 'Refresh Thumbnails'){
+					echo '<div>Number of images to be refreshed: '.$remoteImageCnt.'</div>';
+					$imgManager->refreshThumbnails($_POST);
+				}
+				echo '<div style="font-weight:bold;">Finished!</div>';
+				echo '<div style="margin-top:20px"><a href="thumbnailbuilder.php?collid='.$collid.'&tid='.$tid.'&action=none">Return to Main Menus</a></div>';
+			}
 			?>
 			<div style="margin:10px;">
-				<fieldset>
+				<fieldset style="padding:15px">
 					<legend><b>Thumbnail Builder</b></legend>
-					<div style="margin:10px;">
+					<div>
 						<?php 
 						if(!$action) $imgManager->resetProcessing();
 						$reportArr = $imgManager->getReportArr();
 						if($reportArr){
-							echo '<b>Images counts without thumbnails and/or basic web image display</b>';
+							echo '<b>Images counts without thumbnails and/or basic web image display</b> - This function will build thumbnail images for all occurrence images mapped from an external server.';
 							if($tid) echo '<div style="margin:5px 25px">Taxa Filter: '.$imgManager->getSciname().' (tid: '.$tid.')</div>';
 							echo '<ul>';
 							foreach($reportArr as $id => $retArr){
@@ -77,33 +91,56 @@ $imgManager->setTid($tid);
 						}
 						?>
 					</div>
-					<div style="margin:25px 10px;">
+					<div style="margin:15px;">
 						<?php 
-						if($action == "Build Thumbnails"){
-							echo '<div style="font-weight:bold;">Start processing...</div>';
-							$imgManager->buildThumbnailImages(); 
-							echo '<div style="font-weight:bold;">Finished!</div>';
-							echo '<div style="margin-top:20px"><a href="thumbnailbuilder.php?collid='.$collid.'&tid='.$tid.'&action=none">Return to Main Menus</a></div>';
-						}
-						else{
-							if($reportArr){
-								?>
+						if($reportArr){
+							?>
+							<div style="margin:10px;">
 								<form name="tnbuilderform" action="thumbnailbuilder.php" method="post">
-									<input type="hidden" name="collid" value="<?php echo $collid; ?>">
-									<input type="hidden" name="tid" value="<?php echo $tid; ?>">
-									<input type="submit" name="action" value="Build Thumbnails">
+									<input name="collid" type="hidden" value="<?php echo $collid; ?>">
+									<input name="tid" type="hidden" value="<?php echo $tid; ?>">
+									<input name="action" type="submit" value="Build Thumbnails">
 								</form>
-								<div style="margin:10px;">
-									* This function will build thumbnail images for all image records that have NULL values for the thumbnail field.
-								</div>
-								<?php
-							}
+							</div>
+							<?php
 						}
 						?>
 					</div>
 				</fieldset>
 			</div>
-			<?php 
+			<?php
+			if($collid){
+				if($imgManager->hasRemoteImages()){
+					?>
+					<div style="margin:30px 10px;">
+						<fieldset style="padding:15px">
+							<legend><b>Thumbnail Re-Mapper</b></legend>
+							<form name="tnrebuildform" action="thumbnailbuilder.php" method="post">
+								<div style="margin-bottom:20px;">
+									This tool will iterate through the remotely mapped images and refresh locally stored image derivatives that are older than remote source image.   
+								</div>
+								<div style="margin-bottom:10px;">
+									Number images pending refresh: <?php echo $remoteImageCnt; ?>
+								</div>
+								<div style="margin-bottom:10px;">
+									Catalog Number Range: <input name="catNumLow" type="text" value="<?php echo (isset($_POST['catNumLow'])?$_POST['catNumLow']:''); ?>" /> - 
+									<input name="catNumHigh" type="text" value="<?php echo (isset($_POST['catNumHigh'])?$_POST['catNumHigh']:''); ?>" />
+								</div>
+								<div style="margin-bottom:10px;vertical-align:top;height:90px">
+									<div style="float:left">Catalog Number List: </div>
+									<div style="margin-left:5px;float:left"><textarea name="catNumList" rows="5" cols="50"><?php echo (isset($_POST['catNumList'])?$_POST['catNumList']:''); ?></textarea></div>
+								</div>
+								<div style="margin:20px;clear:both">
+									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+									<input name="action" type="submit" value="Refresh Thumbnails" />
+									<input type="reset" value="Reset" />
+								</div>
+							</form>
+						</fieldset>
+					</div>
+					<?php
+				}
+			}
 		}
 		else{
 			echo '<div><b>ERROR: improper permissions</b></div>';
