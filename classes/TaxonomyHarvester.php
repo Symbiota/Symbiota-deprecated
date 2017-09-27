@@ -103,8 +103,8 @@ class TaxonomyHarvester extends Manager{
 			$resultArr = json_decode($content,true);
 			$numResults = $resultArr['number_of_results_returned'];
 			if($numResults){
-				$tid = $this->addColTaxonByResult($resultArr, $sciName);
 				$this->logOrEcho('Taxon found within Catalog of Life',1);
+				$tid = $this->addColTaxonByResult($resultArr, $sciName);
 			}
 			else{
 				$this->logOrEcho('Taxon not found within Catalog of Life',1);
@@ -120,6 +120,7 @@ class TaxonomyHarvester extends Manager{
 		$tid = 0;
 		if($id){
 			$url = 'http://webservice.catalogueoflife.org/col/webservice?response=full&format=json&id='.$id;
+			//echo $url.'<br/>';
 			$content = $this->getContentString($url);
 			$resultArr = json_decode($content,true);
 			$tid = $this->addColTaxonByResult($resultArr);
@@ -134,6 +135,9 @@ class TaxonomyHarvester extends Manager{
 		$taxonArr = array();
 		if($resultArr){
 			$baseArr = $resultArr['results'][0];
+			if(!$baseArr){
+				return 0;
+			}
 			$tidAccepted = 0;
 			if($baseArr['name_status'] == 'synonym' && isset($baseArr['accepted_name'])){
 				$tidAccepted = $this->addColTaxonById($baseArr['accepted_name']['id']);
@@ -150,15 +154,19 @@ class TaxonomyHarvester extends Manager{
 			else{
 				$parentTid = 0;
 				if(isset($baseArr['classification'])){
-					$taxonArr['parent'] = $this->getColNode(array_pop($baseArr['classification']));
-					if(isset($taxonArr['parent']['sciname'])){
-						$parentTid = $this->getTid($taxonArr['parent']);
-						if(!$parentTid){
-							if(isset($taxonArr['parent']['id'])){
-								$parentTid = $this->addColTaxonById($taxonArr['parent']['id']);
+					$parentArr = array();
+					do{
+						$parentArr = $this->getColNode(array_pop($baseArr['classification']));
+						if(isset($parentArr['sciname'])){
+							$parentTid = $this->getTid($parentArr);
+							if(!$parentTid){
+								if(isset($parentArr['id'])){
+									$parentTid = $this->addColTaxonById($parentArr['id']);
+								}
 							}
 						}
-					}
+					}while(!$parentTid && $baseArr['classification']);
+					if($parentArr) $taxonArr['parent'] = $parentArr;
 				}
 				else{
 					$parentArr = $this->getParentArr($taxonArr);
@@ -454,7 +462,16 @@ class TaxonomyHarvester extends Manager{
 				if(isset($taxonArr['taxonConcepts'])){
 					if($taxonConceptId = key($taxonArr['taxonConcepts'])){
 						$conceptArr = $eolManager->getHierarchyEntries($taxonConceptId);
-						if(isset($conceptArr['parent'])) $taxonArr['parent'] = $conceptArr['parent'];
+						if(isset($conceptArr['parent'])){
+							$parentTid = $this->getTid($conceptArr['parent']);
+							if(!$parentTid){
+								$parentTid = $this->addEolTaxon($conceptArr['parent']['sciname']);
+							}
+							if($parentTid){
+								$conceptArr['parent']['tid'] = $parentTid;
+								$taxonArr['parent'] = $conceptArr['parent'];
+							}
+						}
 					}
 				}
 				if(!isset($taxonArr['source'])) $taxonArr['source'] = 'EOL - '.date('Y-m-d G:i:s');
@@ -467,7 +484,7 @@ class TaxonomyHarvester extends Manager{
 		//Process taxonomic name
 		if($taxonArr) $this->logOrEcho('Taxon found within Encyclopedia of Life',1);
 		else{
-			$this->logOrEcho('Taxon not found within Encyclopedia of Life (term: '.$term.')',1);
+			$this->logOrEcho('Taxon not found within Encyclopedia of Life',1);
 			return false;
 		}
 		return $this->loadNewTaxon($taxonArr);
@@ -597,8 +614,17 @@ class TaxonomyHarvester extends Manager{
 			foreach($taxonArr['syns'] as $k => $synArr){
 				if($synArr){
 					if(isset($taxonArr['source']) && $taxonArr['source'] && (!isset($synArr['source']) || !$synArr['source'])) $synArr['source'] = $taxonArr['source'];
-					if(isset($taxonArr['acceptanceReason']) && $taxonArr['acceptanceReason'] && (!isset($synArr['acceptanceReason']) || !$synArr['acceptanceReason'])) $synArr['acceptanceReason'] = $taxonArr['acceptanceReason'];
-					$this->loadNewTaxon($synArr,$newTid);
+					$acceptanceReason = '';
+					if(isset($taxonArr['acceptanceReason']) && $taxonArr['acceptanceReason']) $acceptanceReason = $taxonArr['acceptanceReason'];
+					if(isset($synArr['synreason']) && $synArr['synreason']) $acceptanceReason = $synArr['synreason'];
+					if($acceptanceReason == 'misspelling'){
+						$this->logOrEcho('Name not added because it is marked as a misspelling',1);
+						$this->fullyResolved = false;
+					}
+					else{
+						if($acceptanceReason && (!isset($synArr['acceptanceReason']) || !$synArr['acceptanceReason'])) $synArr['acceptanceReason'] = $taxonArr['acceptanceReason'];
+						$this->loadNewTaxon($synArr,$newTid);
+					}
 				}
 			}
 		}
@@ -612,7 +638,6 @@ class TaxonomyHarvester extends Manager{
 				}
 			}
 		}
-		if(isset($taxonArr['unitname3']) && $taxonArr['unitname3']) $this->fullyResolved = false;
 		return $newTid;
 	}
 
@@ -649,19 +674,21 @@ class TaxonomyHarvester extends Manager{
 
 	private function setRankId(&$taxonArr){
 		$rankid = 0;
+		$rankArr = array('biota' => 1, 'organism' => 1, 'kingdom' => 10, 'subkingdom' => 20, 'division' => 30, 'phylum' => 30, 'subdivision' => 40, 'subphylum' => 40, 'superclass' => 50, 'supercl.' => 50,
+			'class' => 60, 'cl.' => 60, 'subclass' => 70, 'subcl.' => 70, 'superorder' => 90, 'superord.' => 90, 'order' => 100, 'ord.' => 100, 'suborder' => 110, 'subord.' => 110,
+			'superfamily' => 130, 'family' => 140, 'fam.' => 140, 'subfamily' => 150, 'tribe' => 160, 'subtribe' => 170, 'genus' => 180, 'gen.' => 180,
+			'subgenus' => 190, 'section' => 200, 'subsection' => 210, 'species' => 220, 'sp.' => 220, 'subspecies' => 230, 'ssp.' => 230, 'subsp.' => 230, 'infraspecies' => 230,
+			'variety' => 240, 'var.' => 240, 'morph' => 240, 'subvariety' => 250, 'form' => 260, 'f.' => 260, 'subform' => 270, 'cultivated' => 300);
 		if(isset($taxonArr['taxonRank']) && $taxonArr['taxonRank']){
-			$rankArr = array('biota' => 1, 'organism' => 1, 'kingdom' => 10, 'subkingdom' => 20, 'division' => 30, 'phylum' => 30, 'subdivision' => 40, 'subphylum' => 40, 'superclass' => 50, 'supercl.' => 50,
-				'class' => 60, 'cl.' => 60, 'subclass' => 70, 'subcl.' => 70, 'superorder' => 90, 'superord.' => 90, 'order' => 100, 'ord.' => 100, 'suborder' => 110, 'subord.' => 110, 
-				'superfamily' => 130, 'family' => 140, 'fam.' => 140, 'subfamily' => 150, 'tribe' => 160, 'subtribe' => 170, 'genus' => 180, 'gen.' => 180,
-				'subgenus' => 190, 'section' => 200, 'subsection' => 210, 'species' => 220, 'sp.' => 220, 'subspecies' => 230, 'ssp.' => 230, 'subsp.' => 230, 'infraspecies' => 230,
-				'variety' => 240, 'var.' => 240, 'morph' => 240, 'subvariety' => 250, 'form' => 260, 'f.' => 260, 'subform' => 270, 'cultivated' => 300);
-			if(array_key_exists($taxonArr['taxonRank'], $rankArr)){
-				$rankid = $rankArr[$taxonArr['taxonRank']];
+			$taxonRank = strtolower($taxonArr['taxonRank']);
+			if(array_key_exists($taxonRank, $rankArr)){
+				$rankid = $rankArr[$taxonRank];
 			}
 		}
 		if(!$rankid && isset($taxonArr['unitind3']) && $taxonArr['unitind3']){
-			if(array_key_exists($taxonArr['unitind3'], $rankArr)){
-				$rankid = $rankArr[$taxonArr['unitind3']];
+			$unitInd3 = strtolower($taxonArr['unitind3']);
+			if(array_key_exists($unitInd3, $rankArr)){
+				$rankid = $rankArr[$unitInd3];
 			}
 		}
 		if(!$rankid && isset($taxonArr['taxonRank']) && $taxonArr['taxonRank']){
@@ -912,7 +939,7 @@ class TaxonomyHarvester extends Manager{
 	public function setDefaultFamily($familyStr){
 		$this->defaultFamily = $this->cleanInStr($familyStr);
 	}
-	
+
 	public function isFullyResolved(){
 		return $this->fullyResolved;
 	}

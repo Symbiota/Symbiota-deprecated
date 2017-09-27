@@ -73,12 +73,12 @@ class TaxonomyCleaner extends Manager{
 			$taxonHarvester->setVerboseMode(2);
 			$this->setVerboseMode(2);
 			$taxaAdded = false;
-			$itemCnt = 0;
+			$itemCnt = 1;
 			while($r = $rs->fetch_object()){
 				$editLink = '[<span onclick="openPopup(\''.$GLOBALS['CLIENT_ROOT'].
 					'/collections/editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=sciname&q_customtype1=EQUALS&q_customvalue1='.$r->sciname.'&collid='.
 					$this->collid.'\')" style="cursor:pointer">'.$r->cnt.' specimens <img src="../../images/edit.png" style="width:12px;" /></span>]';
-				$this->logOrEcho('Resolving: <b><i>'.$r->sciname.'</i></b>'.($r->family?' ('.$r->family.')':'').'</b> '.$editLink);
+				$this->logOrEcho('Resolving #'.$itemCnt.': <b><i>'.$r->sciname.'</i></b>'.($r->family?' ('.$r->family.')':'').'</b> '.$editLink);
 				if($r->family) $taxonHarvester->setDefaultFamily($r->sciname);
 				$manualCheck = true;
 				if($taxonHarvester->processSciname($r->sciname)){
@@ -104,13 +104,13 @@ class TaxonomyCleaner extends Manager{
 							$echoStr = '<i>'.$scinameDisplay.'</i> =&gt; <span class="hideOnLoad">wait for page to finish loading...</span><span class="displayOnLoad" style="display:none"><a href="#" onclick="return remappTaxon(\''.
 								$r->sciname.'\','.$tid.',\''.$sciname.'\','.$itemCnt.')" style="color:blue"> remap to this taxon</a><span id="remapSpan-'.$itemCnt.'"></span></span>';
 							$this->logOrEcho($echoStr,2);
-							$itemCnt++;
 						}
 					}
 					else{
 						$this->logOrEcho('No close matches found',1);
 					}
 				}
+				$itemCnt++;
 				flush();
 				ob_flush();
 			}
@@ -130,13 +130,34 @@ class TaxonomyCleaner extends Manager{
 	public function deepIndexTaxa(){
 		$this->setVerboseMode(2);
 		$this->indexOccurrenceTaxa();
+
+		$this->logOrEcho('Indexing names based on mathcing trinomials...');
+		$trinCnt = 0;
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = CONCAT_WS(" ",t.unitname1,t.unitname2,t.unitname3) '.
+				'SET o.sciname = t.sciname, o.tidinterpreted = t.tid '.
+				'WHERE t.rankid = 230 AND o.sciname LIKE "% % %" AND o.tidinterpreted IS NULL';
+		if($this->conn->query($sql)){
+			$trinCnt = $this->conn->affected_rows;
+		}
+		flush();
+		ob_flush();
+		
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = CONCAT_WS(" ",t.unitname1,t.unitname2,t.unitname3) '.
+				'SET o.sciname = t.sciname, o.tidinterpreted = t.tid '.
+				'WHERE t.rankid = 240 AND o.sciname LIKE "% % %" AND o.tidinterpreted IS NULL';
+		if($this->conn->query($sql)){
+			$trinCnt += $this->conn->affected_rows;
+			$this->logOrEcho($trinCnt.' occurrence records mapped',1);
+		}
+		flush();
+		ob_flush();
 		
 		$this->logOrEcho('Indexing names ending in &quot;sp.&quot;...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON SUBSTRING(o.sciname,1, CHAR_LENGTH(o.sciname) - 4) = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
 			'WHERE o.sciname LIKE "% sp." AND o.tidinterpreted IS NULL';
 		if($this->conn->query($sql)){
-			$this->logOrEcho($this->conn->affected_rows.' occurrences mapped',1);
+			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
 		flush();
 		ob_flush();
@@ -146,7 +167,7 @@ class TaxonomyCleaner extends Manager{
 				'SET o.tidinterpreted = t.tid '.
 				'WHERE o.sciname LIKE "% spp.%" AND o.tidinterpreted IS NULL';
 		if($this->conn->query($sql)){
-			$this->logOrEcho($this->conn->affected_rows.' occurrences mapped',1);
+			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
 		flush();
 		ob_flush();
@@ -164,7 +185,7 @@ class TaxonomyCleaner extends Manager{
 				'WHERE o.sciname LIKE "% cf %" AND o.tidinterpreted IS NULL';
 		if($this->conn->query($sql)){
 			$cnt += $this->conn->affected_rows;
-			$this->logOrEcho($cnt.' occurrences mapped',1);
+			$this->logOrEcho($cnt.' occurrence records mapped',1);
 		}
 		flush();
 		ob_flush();
@@ -174,7 +195,7 @@ class TaxonomyCleaner extends Manager{
 			'SET o.tidinterpreted = t.tid '.
 			'WHERE o.sciname LIKE "% aff. %" AND o.tidinterpreted IS NULL';
 		if($this->conn->query($sql)){
-			$this->logOrEcho($this->conn->affected_rows.' occurrences mapped',1);
+			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
 		flush();
 		ob_flush();
@@ -184,7 +205,7 @@ class TaxonomyCleaner extends Manager{
 			'SET o.tidinterpreted = t.tid '.
 			'WHERE o.sciname LIKE "% group%" AND o.tidinterpreted IS NULL';
 		if($this->conn->query($sql)){
-			$this->logOrEcho($this->conn->affected_rows.' occurrences mapped',1);
+			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
 		flush();
 		ob_flush();
@@ -192,12 +213,18 @@ class TaxonomyCleaner extends Manager{
 	}
 
 	private function indexOccurrenceTaxa(){
+		$this->logOrEcho('Indexing names based on exact matches...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
 			'WHERE o.tidinterpreted IS NULL';
-		if(!$this->conn->query($sql)){
+		if($this->conn->query($sql)){
+			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
+		}
+		else{
 			$this->logOrEcho('ERROR linking new data to occurrences: '.$this->conn->error);
 		}
+		flush();
+		ob_flush();
 	}
 	
 	public function remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname){
