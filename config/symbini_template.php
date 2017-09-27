@@ -65,6 +65,7 @@ $GOOGLE_ANALYTICS_KEY = '';			//Needed for setting up Google Analytics
 $RECAPTCHA_PUBLIC_KEY = '';			//Now called site key
 $RECAPTCHA_PRIVATE_KEY = '';		//Now called secret key
 $EOL_KEY = '';						//Not required, but good to add a key if you plan to do a lot of EOL mapping
+$TAXONOMIC_AUTHORITIES = array('COL'=>'','WoRMS'=>'');		//List of taxonomic authority APIs to use in data cleaning and thesaurus building tools, concatenated with commas and order by preference; E.g.: array('COL'=>'','WoRMS'=>'','TROPICOS'=>'','EOL'=>'')
 $QUICK_HOST_ENTRY_IS_ACTIVE = 0;   // Allows quick entry for host taxa in occurrence editor
 $PORTAL_TAXA_DESC = '';				//Preferred taxa descriptions for the portal.
 $GLOSSARY_EXPORT_BANNER = '';		//Banner image for glossary exports. Place in images/layout folder.
