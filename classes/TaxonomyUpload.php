@@ -540,12 +540,16 @@ class TaxonomyUpload{
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa '.
 			'SET acceptance = 1 '.
-			'WHERE (acceptedstr IS NULL) AND (TidAccepted IS NULL)';
+			'WHERE (ISNULL(acceptedstr)) AND (ISNULL(TidAccepted))';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa '.
 			'SET acceptance = 1 '.
-			'WHERE (sciname IS NULL) AND (sciname = acceptedstr)';
+			'WHERE (ISNULL(sciname)) AND (sciname = acceptedstr)';
 		$this->conn->query($sql);
+        $sql = 'UPDATE uploadtaxa AS u LEFT JOIN taxonunits AS t ON u.RankName = t.rankname '.
+            'SET u.RankId = t.rankid '.
+            'WHERE (ISNULL(u.RankId)) AND (t.rankid IS NOT NULL)';
+        $this->conn->query($sql);
 		$this->outputMsg('Done processing taxa');
 	}
 
@@ -749,25 +753,25 @@ class TaxonomyUpload{
 		}while($loopCnt < 30);
 
 		$this->outputMsg('House cleaning... ');
-		TaxonomyUtilities::buildHierarchyEnumTree($this->conn, $this->taxAuthId); 
+		TaxonomyUtilities::buildHierarchyEnumTree($this->conn, $this->taxAuthId);
 		
 		//$this->setKingdom();
 
 		//Update occurrences with new tids
-		$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE (o.TidInterpreted IS NULL)';
+		$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE (ISNULL(o.TidInterpreted))';
 		$this->conn->query($sql1);
 		
 		//Update occurrence images with new tids
 		$sql2 = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 			'SET i.tid = o.TidInterpreted '.
-			'WHERE (i.tid IS NULL) AND (o.TidInterpreted IS NOT NULL)';
+			'WHERE (ISNULL(i.tid)) AND (o.TidInterpreted IS NOT NULL)';
 		$this->conn->query($sql2);
 		
 		//Update geo lookup table 
 		$sql3 = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '. 
 			'SELECT DISTINCT tidinterpreted, round(decimallatitude,3), round(decimallongitude,3) '. 
 			'FROM omoccurrences '.
-			'WHERE (tidinterpreted IS NOT NULL) AND (cultivationStatus IS NULL OR cultivationStatus <> 1) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL)';
+			'WHERE (tidinterpreted IS NOT NULL) AND (ISNULL(cultivationStatus) OR cultivationStatus <> 1) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL)';
 		$this->conn->query($sql3);
 	}
 
