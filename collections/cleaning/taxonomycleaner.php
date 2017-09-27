@@ -80,15 +80,17 @@ else{
 					<div style="margin:20px;">
 						<?php
 						$startAdjustment = 0;
-						if($action == 'deepindex'){
-							$cleanManager->deepIndexTaxa();
+						if($action){
+							if($action == 'deepindex'){
+								$cleanManager->deepIndexTaxa();
+							}
+							else{
+								echo '<ul>';
+								$startAdjustment = $cleanManager->analyzeTaxa($start, $limit);
+								echo '</ul>';
+								$start += $limit-$startAdjustment;
+							}
 						}
-						elseif($action){
-							echo '<ul>';
-							$startAdjustment = $cleanManager->analyzeTaxa($start, $limit);
-							echo '</ul>';
-						}
-
 						$badTaxaCount = $cleanManager->getBadTaxaCount();
 						$badSpecimenCount = $cleanManager->getBadSpecimenCount();
 						?>
@@ -114,11 +116,17 @@ else{
 											Processing limit: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:30px" />
 										</div>
 										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-										<input name="start" type="hidden" value="<?php echo $start+$limit-$startAdjustment; ?>" />
-										<button name="submitaction" type="submit" value="submitaction" ><?php echo ($start?'Continue Analying Name':'Analyze Taxonomic Names'); ?></button>
-										<div style="margin-top:10px;">
-											<button name="submitaction" type="submit" value="submitaction" onclick="this.form.start.value = 0" >Restart from Beginning</button>
-										</div>
+										<input name="start" type="hidden" value="<?php echo $start; ?>" />
+										<button name="submitaction" type="submit" value="submitaction" ><?php echo ($start?'Continue Analyzing Names':'Analyze Taxonomic Names'); ?></button>
+										<?php
+										if($start){
+											?>
+											<div style="margin-top:10px;">
+												<button name="submitaction" type="submit" value="submitaction" onclick="this.form.start.value = 0" >Restart from Beginning</button>
+											</div>
+											<?php
+										}
+										?>
 									</div>
 								</div>
 							</form>
