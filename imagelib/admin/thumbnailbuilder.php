@@ -30,6 +30,13 @@ $remoteImageCnt = $imgManager->getRemoteImageCnt($_POST);
 <title><?php echo $DEFAULT_TITLE; ?> Thumbnail Builder</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<script type="text/javascript">
+		function resetRebuildForm(f){
+			f.catNumLow.value = "";
+			f.catNumHigh.value = "";
+			f.catNumList.value = "";
+		}
+	</script>
 </head>
 <body>
 	<?php
@@ -62,7 +69,6 @@ $remoteImageCnt = $imgManager->getRemoteImageCnt($_POST);
 					$imgManager->refreshThumbnails($_POST);
 				}
 				echo '<div style="font-weight:bold;">Finished!</div>';
-				echo '<div style="margin-top:20px"><a href="thumbnailbuilder.php?collid='.$collid.'&tid='.$tid.'&action=none">Return to Main Menus</a></div>';
 			}
 			?>
 			<div style="margin:10px;">
@@ -70,7 +76,7 @@ $remoteImageCnt = $imgManager->getRemoteImageCnt($_POST);
 					<legend><b>Thumbnail Builder</b></legend>
 					<div>
 						<?php 
-						if(!$action) $imgManager->resetProcessing();
+						//if(!$action) $imgManager->resetProcessing();
 						$reportArr = $imgManager->getReportArr();
 						if($reportArr){
 							echo '<b>Images counts without thumbnails and/or basic web image display</b> - This function will build thumbnail images for all occurrence images mapped from an external server.';
@@ -133,7 +139,7 @@ $remoteImageCnt = $imgManager->getRemoteImageCnt($_POST);
 								<div style="margin:20px;clear:both">
 									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 									<input name="action" type="submit" value="Refresh Thumbnails" />
-									<input type="reset" value="Reset" />
+									<input type="button" value="Reset" onclick="resetRebuildForm(this.form)" />
 								</div>
 							</form>
 						</fieldset>
