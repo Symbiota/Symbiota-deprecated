@@ -425,7 +425,7 @@ class TaxonProfileManager {
  		return $str;
  	}
  	
-	private function setTaxaImages($length){
+	private function setTaxaImages(){
 		$this->imageArr = array();
 		if($this->tid){
 			$tidArr = Array($this->tid);
@@ -447,8 +447,7 @@ class TaxonProfileManager {
 				'INNER JOIN taxa t ON ti.tid = t.tid '.
 				'WHERE ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.') AND ti.SortSequence < 500 AND ti.thumbnailurl IS NOT NULL ';
 			if(!$this->displayLocality) $sql .= 'AND ti.occid IS NULL ';
-			$sql .= 'ORDER BY ti.sortsequence ';
-			if($length) $sql .= 'LIMIT '.$length.' ';
+			$sql .= 'ORDER BY ti.sortsequence LIMIT 100 ';
 			//echo $sql;
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
@@ -468,7 +467,7 @@ class TaxonProfileManager {
 	public function echoImages($start, $length = 0, $useThumbnail = 1){		//length=0 => means show all images
 		$status = false;
 		if(!isset($this->imageArr)){
-			$this->setTaxaImages($length);
+			$this->setTaxaImages();
 		}
 		if(!$this->imageArr || count($this->imageArr) < $start) return false;
 		$trueLength = ($length&&count($this->imageArr)>$length+$start?$length:count($this->imageArr)-$start);
