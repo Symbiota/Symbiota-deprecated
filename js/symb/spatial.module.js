@@ -248,18 +248,17 @@ function buildQueryStrings(){
     solrgeoqArr = [];
     newcqlString = '';
     newsolrqString = '';
-    if(getCollectionParams()){
-        prepareTaxaParams(function(res){
-            getTextParams();
-            getGeographyParams(loadVectorPoints);
-            if(cqlArr.length > 0){
-                buildCQLString();
-            }
-            if(solrqArr.length > 0 || solrgeoqArr.length > 0){
-                buildSOLRQString();
-            }
-        });
-    }
+    getCollectionParams();
+    prepareTaxaParams(function(res){
+        getTextParams();
+        getGeographyParams(loadVectorPoints);
+        if(cqlArr.length > 0){
+            buildCQLString();
+        }
+        if(solrqArr.length > 0 || solrgeoqArr.length > 0){
+            buildSOLRQString();
+        }
+    });
 }
 
 function buildRasterCalcDropDown(){
