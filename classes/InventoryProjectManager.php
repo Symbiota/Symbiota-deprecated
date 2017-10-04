@@ -47,10 +47,10 @@ class InventoryProjectManager {
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->pid = $row->pid;
-				$returnArr['projname'] = $row->projname;
-				$returnArr['managers'] = $row->managers;
-				$returnArr['fulldescription'] = $row->fulldescription;
-				$returnArr['notes'] = $row->notes;
+				$returnArr['projname'] = htmlspecialchars($row->projname, ENT_QUOTES);
+				$returnArr['managers'] = htmlspecialchars($row->managers, ENT_QUOTES);
+				$returnArr['fulldescription'] = htmlspecialchars($row->fulldescription, ENT_QUOTES);
+				$returnArr['notes'] = htmlspecialchars($row->notes, ENT_QUOTES);
 				$returnArr['occurrencesearch'] = $row->occurrencesearch;
 				$returnArr['ispublic'] = $row->ispublic;
 				$returnArr['sortsequence'] = $row->sortsequence;
