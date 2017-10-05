@@ -8,6 +8,15 @@ $collid = ((array_key_exists("collid",$_REQUEST) && is_numeric($_REQUEST["collid
 $action = array_key_exists("action",$_REQUEST)?htmlspecialchars($_REQUEST["action"]):"";
 $eMode = array_key_exists('emode',$_REQUEST)?htmlspecialchars($_REQUEST['emode']):0;
 
+if($eMode && !$SYMB_UID){
+	header('Location: ../../profile/index.php?refurl=../collections/misc/collprofiles.php?'.$_SERVER['QUERY_STRING']);
+}
+
+$collManager = new OccurrenceCollectionProfile();
+if(!$collManager->setCollid($collid)) $collid = '';
+
+$collData = $collManager->getCollectionMetadata();
+
 $collPubArr = array();
 $publishGBIF = false;
 $publishIDIGBIO = false;
@@ -30,15 +39,6 @@ if($collid && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_
         }
     }
 }
-
-if($eMode && !$SYMB_UID){
-	header('Location: ../../profile/index.php?refurl=../collections/misc/collprofiles.php?'.$_SERVER['QUERY_STRING']);
-}
-
-$collManager = new OccurrenceCollectionProfile();
-if(!$collManager->setCollid($collid)) $collid = '';
-
-$collData = $collManager->getCollectionMetadata();
 
 $editCode = 0;		//0 = no permissions; 1 = CollEditor; 2 = CollAdmin; 3 = SuperAdmin
 if($SYMB_UID){
@@ -340,7 +340,7 @@ if($SYMB_UID){
                 if($publishGBIF && $datasetKey){
                     $dataUrl = 'http://www.gbif.org/dataset/'.$datasetKey;
                     ?>
-                    <div style="margin:10px;">
+                    <div style="margin-top:5px;">
                         <div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>"
                                                           target="_blank"><?php echo $dataUrl; ?></a></div>
                     </div>
@@ -349,7 +349,7 @@ if($SYMB_UID){
                 if($publishIDIGBIO && $idigbioKey){
                     $dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
                     ?>
-                    <div style="margin:10px;">
+                    <div style="margin-top:5px;">
                         <div><b>iDigBio Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
                     </div>
                     <?php
