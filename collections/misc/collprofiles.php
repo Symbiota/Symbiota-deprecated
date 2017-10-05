@@ -8,6 +8,29 @@ $collid = ((array_key_exists("collid",$_REQUEST) && is_numeric($_REQUEST["collid
 $action = array_key_exists("action",$_REQUEST)?htmlspecialchars($_REQUEST["action"]):"";
 $eMode = array_key_exists('emode',$_REQUEST)?htmlspecialchars($_REQUEST['emode']):0;
 
+$collPubArr = array();
+$publishGBIF = false;
+$publishIDIGBIO = false;
+if($collid && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
+    $collPubArr = $collManager->getCollPubArr($collid);
+    if($collPubArr[$collid]['publishToGbif']){
+        $publishGBIF = true;
+    }
+    if($collPubArr[$collid]['publishToIdigbio']){
+        $publishIDIGBIO = true;
+    }
+    $installationKey = $collManager->getInstallationKey();
+    $datasetKey = $collManager->getDatasetKey();
+    $endpointKey = $collManager->getEndpointKey();
+    $idigbioKey = $collManager->getIdigbioKey();
+    if($publishIDIGBIO && !$idigbioKey){
+        $idigbioKey = $collManager->findIdigbioKey($collPubArr[$collid]['collectionguid']);
+        if($idigbioKey){
+            $collManager->updateAggKeys($collid);
+        }
+    }
+}
+
 if($eMode && !$SYMB_UID){
 	header('Location: ../../profile/index.php?refurl=../collections/misc/collprofiles.php?'.$_SERVER['QUERY_STRING']);
 }
@@ -314,7 +337,24 @@ if($SYMB_UID){
 			<div style='margin:10px;'>
 				<?php 
 				echo $collManager->getMetadataHtml($collData, $LANG);
-				if($addrArr = $collManager->getAddress()){
+                if($publishGBIF && $datasetKey){
+                    $dataUrl = 'http://www.gbif.org/dataset/'.$datasetKey;
+                    ?>
+                    <div style="margin:10px;">
+                        <div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>"
+                                                          target="_blank"><?php echo $dataUrl; ?></a></div>
+                    </div>
+                    <?php
+                }
+                if($publishIDIGBIO && $idigbioKey){
+                    $dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
+                    ?>
+                    <div style="margin:10px;">
+                        <div><b>iDigBio Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
+                    </div>
+                    <?php
+                }
+                if($addrArr = $collManager->getAddress()){
 					?>
 					<div style="margin-top:5px;">
 						<div style="float:left;font-weight:bold;">Address:</div>
