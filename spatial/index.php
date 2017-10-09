@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=196" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=202" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -1094,8 +1094,13 @@ $dbArr = Array();
                     infoArr['Abstract'] = '';
                     infoArr['DefaultCRS'] = '';
                     var sourceIndex = dragDropTarget+'Source';
+                    var features = event.features;
+                    if(fileType == 'kml'){
+                        var geoJSONFormat = new ol.format.GeoJSON();
+                        features = geoJSONFormat.readFeatures(geoJSONFormat.writeFeatures(features));
+                    }
                     layersArr[sourceIndex] = new ol.source.Vector({
-                        features: event.features
+                        features: features
                     });
                     layersArr[dragDropTarget].setStyle(getDragDropStyle);
                     layersArr[dragDropTarget].setSource(layersArr[sourceIndex]);

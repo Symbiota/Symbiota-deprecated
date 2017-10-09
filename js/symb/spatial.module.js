@@ -52,6 +52,7 @@ $(document).ready(function() {
                 else{
                     rankLow = 140;
                 }
+                //console.log('term: '+request.term+'rlow: '+rankLow+'rhigh: '+rankHigh+'rlimit: '+rankLimit);
                 $.getJSON( source, {
                     term: extractLast( request.term ),
                     rlow: rankLow,
@@ -760,6 +761,12 @@ function downloadShapesLayer(){
     }
     var features = layersArr['select'].getSource().getFeatures();
     var exportStr = format.writeFeatures(features,{'dataProjection': wgs84Projection, 'featureProjection': mapProjection});
+    if(dlType == 'kml'){
+        exportStr = exportStr.replace(/<kml xmlns="http:\/\/www.opengis.net\/kml\/2.2" xmlns:gx="http:\/\/www.google.com\/kml\/ext\/2.2" xmlns:xsi="http:\/\/www.w3.org\/2001\/XMLSchema-instance" xsi:schemaLocation="http:\/\/www.opengis.net\/kml\/2.2 https:\/\/developers.google.com\/kml\/schema\/kml22gx.xsd">/g,'<kml xmlns="http://www.opengis.net/kml/2.2"><Document id="root_doc"><Folder><name>shapes_export</name>');
+        exportStr = exportStr.replace(/<Placemark>/g,'<Placemark><Style><LineStyle><color>ff000000</color><width>1</width></LineStyle><PolyStyle><color>4DAAAAAA</color><fill>1</fill></PolyStyle></Style>');
+        exportStr = exportStr.replace(/<Polygon>/g,'<Polygon><altitudeMode>clampToGround</altitudeMode>');
+        exportStr = exportStr.replace(/<\/kml>/g,'</Folder></Document></kml>');
+    }
     var filename = 'shapes.'+dlType;
     var blob = new Blob([exportStr], {type: filetype});
     if(window.navigator.msSaveOrOpenBlob) {
