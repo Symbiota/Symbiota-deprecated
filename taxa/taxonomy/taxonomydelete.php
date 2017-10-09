@@ -54,7 +54,7 @@ $verifyArr = $taxonEditorObj->verifyDeleteTaxon();
 				$childArr = $verifyArr['child'];
 				echo '<div style="color:red;">Warning: children taxa exist for this taxon. They must be remapped before this taxon can be removed</div>';
 				foreach($childArr as $childTid => $childSciname){
-					echo '<div style="margin:3px 10px;"><a href="taxonomyeditor.php?tid='.$childTid.'" target="_blank">'.$childSciname.'</a></div>';
+					echo '<div style="margin:3px 10px;"><a href="taxoneditor.php?tid='.$childTid.'" target="_blank">'.$childSciname.'</a></div>';
 				} 
 			}
 			else{
@@ -73,7 +73,7 @@ $verifyArr = $taxonEditorObj->verifyDeleteTaxon();
 				$synArr = $verifyArr['syn'];
 				echo '<div style="color:red;">Warning: synonym links exist for this taxon. They must be remapped before this taxon can be removed</div>';
 				foreach($synArr as $synTid => $synSciname){
-					echo '<div style="margin:3px 10px;"><a href="taxonomyeditor.php?tid='.$synTid.'" target="_blank">'.$synSciname.'</a></div>';
+					echo '<div style="margin:3px 10px;"><a href="taxoneditor.php?tid='.$synTid.'" target="_blank">'.$synSciname.'</a></div>';
 				}
 			}
 			else{
@@ -259,7 +259,7 @@ $verifyArr = $taxonEditorObj->verifyDeleteTaxon();
 	<div style="margin:15px;">
 		<fieldset style="padding:15px;">
 			<legend><b>Remap Resources to Another Taxon</b></legend>
-			<form name="remaptaxonform" method="post" action="taxonomyeditor.php">
+			<form name="remaptaxonform" method="post" action="taxoneditor.php">
 				<div style="margin-bottom:5px;">
 					Target taxon: 
 					<input id="remapvalue" name="remapvalue" type="text" value="" style="width:300px;" /><br/>
@@ -279,7 +279,7 @@ $verifyArr = $taxonEditorObj->verifyDeleteTaxon();
 			<legend><b>Delete Taxon and Existing Resources</b></legend>
 			<div style="margin:10px 0px;">
 			</div>
-			<form name="deletetaxonform" method="post" action="taxonomyeditor.php" onsubmit="return confirm('Are you sure you want to delete this taxon? Action can not be undone!')">
+			<form name="deletetaxonform" method="post" action="taxoneditor.php" onsubmit="return confirm('Are you sure you want to delete this taxon? Action can not be undone!')">
 				<?php
 				$deactivateStr = '';
 				if(array_key_exists('child',$verifyArr)) $deactivateStr = 'disabled';

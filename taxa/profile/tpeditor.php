@@ -374,7 +374,7 @@ if($editable && $action){
 					<h2>You must be logged in and authorized to taxon data.</h2>
 					<h3>
 						<?php 
-							echo "Click <a href='".$clientRoot."/profile/index.php?tid=".$tEditor->getTid()."&refurl=".$clientRoot."/taxa/admin/tpeditor.php'>here</a> to login";
+							echo "Click <a href='".$clientRoot."/profile/index.php?tid=".$tEditor->getTid()."&refurl=".$clientRoot."/taxa/profile/tpeditor.php'>here</a> to login";
 						?>
 					</h3>
 				</div>

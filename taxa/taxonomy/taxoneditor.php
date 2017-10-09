@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/TaxonomyEditorManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../taxa/admin/taxonomyeditor.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../taxa/taxonomy/taxoneditor.php?'.$_SERVER['QUERY_STRING']);
 
 $submitAction = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
@@ -145,7 +145,7 @@ if($editable){
 					<div style="float:right;cursor:pointer;" onclick="toggleEditFields()" title="Toggle Taxon Editing Functions">
 						<img style='border:0px;' src='../../images/edit.png'/>
 					</div>
-					<form id="taxoneditform" name="taxoneditform" action="taxonomyeditor.php" method="post" onsubmit="return validateTaxonEditForm(this)">
+					<form id="taxoneditform" name="taxoneditform" action="taxoneditor.php" method="post" onsubmit="return validateTaxonEditForm(this)">
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">UnitName1: </div>
 							<div class="editfield">
@@ -279,7 +279,7 @@ if($editable){
 					<fieldset style="width:95%;">
 						<legend><b>Taxonomic Placement</b></legend>
 						<div style="padding:3px 7px;margin:-12px -10px 5px 0px;float:right;">
-							<form name="taxauthidform" action="taxonomyeditor.php" method="post">
+							<form name="taxauthidform" action="taxoneditor.php" method="post">
 								<select name="taxauthid" onchange="this.form.submit()">
 									<option value="1">Default Taxonomy</option>
 									<option value="1">----------------------------</option>
@@ -315,7 +315,7 @@ if($editable){
 							</span>
 						</div>
 						<div style="clear:both;margin:10px;">
-							<form name="taxstatusform" action="taxonomyeditor.php" method="post">
+							<form name="taxstatusform" action="taxoneditor.php" method="post">
 								<div style="float:right;">
 									<a href="" onclick="toggle('tsedit');return false;">
 										<img style='border:0px;' src='../../images/edit.png'/>
@@ -371,9 +371,9 @@ if($editable){
 									echo "<ul>\n";
 									foreach($acceptedArr as $tidAccepted => $linkedTaxonArr){
 										echo "<li id='acclink-".$tidAccepted."'>\n";
-										echo "<a href='taxonomyeditor.php?tid=".$tidAccepted."&taxauthid=".$taxAuthId."'><i>".$linkedTaxonArr["sciname"]."</i></a> ".$linkedTaxonArr["author"]."\n";
+										echo "<a href='taxoneditor.php?tid=".$tidAccepted."&taxauthid=".$taxAuthId."'><i>".$linkedTaxonArr["sciname"]."</i></a> ".$linkedTaxonArr["author"]."\n";
 										if(count($acceptedArr)>1){
-											echo '<span class="acceptedits" style="display:none;"><a href="taxonomyeditor.php?tabindex=1&tid='.$tid.'&deltidaccepted='.$tidAccepted.'&taxauthid='.$taxAuthId.'">';
+											echo '<span class="acceptedits" style="display:none;"><a href="taxoneditor.php?tabindex=1&tid='.$tid.'&deltidaccepted='.$tidAccepted.'&taxauthid='.$taxAuthId.'">';
 											echo '<img style="border:0px;width:12px;" src="../../images/del.png" />';
 											echo '</a></span>';
 										}
@@ -392,7 +392,7 @@ if($editable){
 								}
 								?>
 								<div class="acceptedits" style="display:none;">
-									<form id="accepteditsform" name="accepteditsform" action="taxonomyeditor.php" method="post" onsubmit="return verifyAcceptEditsForm(this);" >
+									<form id="accepteditsform" name="accepteditsform" action="taxoneditor.php" method="post" onsubmit="return verifyAcceptEditsForm(this);" >
 										<fieldset style="width:380px;margin:20px;">
 											<legend><b>Link to Another Accepted Name</b></legend>
 											<div>
@@ -415,7 +415,7 @@ if($editable){
 									<?php 
 									if($acceptedArr && count($acceptedArr)==1){ 
 										?>
-										<form id="changetoacceptedform" name="changetoacceptedform" action="taxonomyeditor.php" method="post">
+										<form id="changetoacceptedform" name="changetoacceptedform" action="taxoneditor.php" method="post">
 											<fieldset style="width:350px;margin:20px;">
 												<legend><b>Change to Accepted</b></legend>
 												<div>
@@ -452,7 +452,7 @@ if($editable){
 								if($synonymArr){
 									foreach($synonymArr as $tidSyn => $synArr){
 										echo '<li> ';
-										echo '<a href="taxonomyeditor.php?tid='.$tidSyn.'&taxauthid='.$taxAuthId.'"><i>'.$synArr['sciname'].'</i></a> '.$synArr['author'].' ';
+										echo '<a href="taxoneditor.php?tid='.$tidSyn.'&taxauthid='.$taxAuthId.'"><i>'.$synArr['sciname'].'</i></a> '.$synArr['author'].' ';
 										echo '<a href="#" onclick="toggle(\'syn-'.$tidSyn.'\');">';
 										echo '<img style="border:0px;width:10px;" src="../../images/edit.png" />';
 										echo '</a>';
@@ -472,7 +472,7 @@ if($editable){
 										?>
 										<fieldset id="syn-<?php echo $tidSyn;?>" style="display:none;">
 											<legend><b>Synonym Link Editor</b></legend>
-											<form id="synform-<?php echo $tidSyn;?>" name="synform-<?php echo $tidSyn;?>" action="taxonomyeditor.php" method="post">
+											<form id="synform-<?php echo $tidSyn;?>" name="synform-<?php echo $tidSyn;?>" action="taxoneditor.php" method="post">
 												<div style="clear:both;">
 													<div style="float:left;width:200px;font-weight:bold;">Unacceptability Reason:</div>
 													<div>
@@ -513,7 +513,7 @@ if($editable){
 								}
 								?>
 								<div id="tonotaccepted" style="display:none;">
-									<form id="changetonotacceptedform" name="changetonotacceptedform" action="taxonomyeditor.php" method="post" onsubmit="return verifyChangeToNotAcceptedForm(this);">
+									<form id="changetonotacceptedform" name="changetonotacceptedform" action="taxoneditor.php" method="post" onsubmit="return verifyChangeToNotAcceptedForm(this);">
 										<fieldset style="width:90%px;">
 											<legend><b>Change to Not Accepted</b></legend>
 											<div style="margin:5px;">
@@ -552,7 +552,7 @@ if($editable){
 					<fieldset style="width:420px;padding:25px;">
 						<legend><b>Quick Query Taxonomic Hierarchy</b></legend>
 						<div style="float:right;" title="Rebuild Hierarchy">
-							<form name="updatehierarchyform" action="taxonomyeditor.php" method="post">
+							<form name="updatehierarchyform" action="taxoneditor.php" method="post">
 								<input type="hidden" name="tid" value="<?php echo $taxonEditorObj->getTid(); ?>"/>
 								<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>">
 								<input type="hidden" name="submitaction" value="updatehierarchy" />
@@ -565,12 +565,12 @@ if($editable){
 							$indent = 0;
 							foreach($hierarchyArr as $hierTid => $hierSciname){
 								echo '<div style="margin-left:'.$indent.'px;">';
-								echo '<a href="taxonomyeditor.php?tid='.$hierTid.'">'.$hierSciname.'</a>';
+								echo '<a href="taxoneditor.php?tid='.$hierTid.'">'.$hierSciname.'</a>';
 								echo "</div>\n";
 								$indent += 10;
 							}
 							echo '<div style="margin-left:'.$indent.'px;">';
-							echo '<a href="taxonomyeditor.php?tid='.$taxonEditorObj->getTid().'">'.$taxonEditorObj->getSciName().'</a>';
+							echo '<a href="taxoneditor.php?tid='.$taxonEditorObj->getTid().'">'.$taxonEditorObj->getSciName().'</a>';
 							echo "</div>\n";
 						}
 						else{

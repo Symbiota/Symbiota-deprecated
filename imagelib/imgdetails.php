@@ -19,18 +19,18 @@ $status = "";
 if($isEditor){
 	if($action == "Submit Image Edits"){
 		$status = $imgManager->editImage($_POST);
-		if(is_numeric($status)) header( 'Location: ../taxa/admin/tpeditor.php?tid='.$status.'&tabindex=1' );
+		if(is_numeric($status)) header( 'Location: ../taxa/profile/tpeditor.php?tid='.$status.'&tabindex=1' );
 	}
 	elseif($action == "Transfer Image"){
 		$imgManager->changeTaxon($_REQUEST["targettid"],$_REQUEST["sourcetid"]);
-		header( 'Location: ../taxa/admin/tpeditor.php?tid='.$_REQUEST["targettid"].'&tabindex=1' );
+		header( 'Location: ../taxa/profile/tpeditor.php?tid='.$_REQUEST["targettid"].'&tabindex=1' );
 	}
 	elseif($action == "Delete Image"){
 		$imgDel = $_REQUEST["imgid"];
 		$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
 		$status = $imgManager->deleteImage($imgDel, $removeImg);
 		if(is_numeric($status)){
-			header( 'Location: ../taxa/admin/tpeditor.php?tid='.$status.'&tabindex=1' );
+			header( 'Location: ../profile//tpeditor.php?tid='.$status.'&tabindex=1' );
 		}
 	}
 	$imgArr = $imgManager->getImageMetadata($imgId);

@@ -249,7 +249,7 @@ $status = "";
 			else{
 				?>
 				<div style="font-weight:bold;">
-					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/taxa/admin/taxonomycleaner.php?collid=<?php echo $collId; ?>'>login</a>!
+					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/taxa/taxonomy/taxonomycleaner.php?collid=<?php echo $collId; ?>'>login</a>!
 				</div>
 				<?php 
 			}

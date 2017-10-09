@@ -18,7 +18,7 @@ if($taxId == 'root'){
 	$retArr['label'] = 'root';
 	$retArr['name'] = 'root';
 	if($editable){
-		$retArr['url'] = 'taxonomyeditor.php';
+		$retArr['url'] = 'taxoneditor.php';
 	}
 	else{
 		$retArr['url'] = '../index.php';
@@ -56,7 +56,7 @@ if($taxId == 'root'){
 		$childArr[$i]['label'] = $label;
 		$childArr[$i]['name'] = $sciName;
 		if($editable){
-			$childArr[$i]['url'] = 'taxonomyeditor.php?tid='.$row1->tid;
+			$childArr[$i]['url'] = 'taxoneditor.php?tid='.$row1->tid;
 		}
 		else{
 			$childArr[$i]['url'] = '../index.php?taxon='.$row1->tid;
@@ -111,7 +111,7 @@ else{
 			$retArr['label'] = $label;
 			$retArr['name'] = $sciName;
 			if($editable){
-				$retArr['url'] = 'taxonomyeditor.php?tid='.$row2->tid;
+				$retArr['url'] = 'taxoneditor.php?tid='.$row2->tid;
 			}
 			else{
 				$retArr['url'] = '../index.php?taxon='.$row2->tid;
@@ -123,7 +123,7 @@ else{
 			$childArr[$i]['label'] = $label;
 			$childArr[$i]['name'] = $sciName;
 			if($editable){
-				$childArr[$i]['url'] = 'taxonomyeditor.php?tid='.$row2->tid;
+				$childArr[$i]['url'] = 'taxoneditor.php?tid='.$row2->tid;
 			}
 			else{
 				$childArr[$i]['url'] = '../index.php?taxon='.$row2->tid;
@@ -176,7 +176,7 @@ else{
 		$childArr[$i]['label'] = $label;
 		$childArr[$i]['name'] = $sciName;
 		if($editable){
-			$childArr[$i]['url'] = 'taxonomyeditor.php?tid='.$row->tid;
+			$childArr[$i]['url'] = 'taxoneditor.php?tid='.$row->tid;
 		}
 		else{
 			$childArr[$i]['url'] = '../index.php?taxon='.$row->tid;

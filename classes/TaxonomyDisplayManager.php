@@ -225,7 +225,7 @@ class TaxonomyDisplayManager{
 				if($indent > 230) $indent -= 10;
 				echo "<div>".str_repeat('&nbsp;',$indent/5);
 				if($this->isEditor){
-					echo '<a href="taxonomyeditor.php?tid='.$key.'" target="_blank">'.$sciName.'</a>';
+					echo '<a href="taxoneditor.php?tid='.$key.'" target="_blank">'.$sciName.'</a>';
 				}
 				else{
 					echo '<a href="../index.php?taxon='.$key.'" target="_blank">'.$sciName.'</a>';
@@ -243,7 +243,7 @@ class TaxonomyDisplayManager{
 						$synName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$synName);
 						echo '<div>'.str_repeat('&nbsp;',$indent/5).str_repeat('&nbsp;',7);
 						if($this->isEditor){
-							echo '[<a href="taxonomyeditor.php?tid='.$synTid.'" target="_blank">'.$synName.'</a>]';
+							echo '[<a href="taxoneditor.php?tid='.$synTid.'" target="_blank">'.$synName.'</a>]';
 						}
 						else{
 							echo '[<a href="../index.php?taxon='.$synTid.'" target="_blank">'.$synName.'</a>]';

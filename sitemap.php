@@ -67,8 +67,8 @@ $smManager = new SiteMapManager();
 			
 			<div style="margin-top:10px;"><h2><?php echo $LANG['TAXONOMY'];?></h2></div>
 			<ul>
-				<li><a href="taxa/admin/taxonomydisplay.php"><?php echo $LANG['TAXTREE'];?></a></li>
-				<li><a href="taxa/admin/taxonomydynamicdisplay.php"><?php echo $LANG['DYNTAXTREE'];?></a></li>
+				<li><a href="taxa/taxonomy/taxonomydisplay.php"><?php echo $LANG['TAXTREE'];?></a></li>
+				<li><a href="taxa/taxonomy/taxonomydynamicdisplay.php"><?php echo $LANG['DYNTAXTREE'];?></a></li>
 			</ul>
 
 			<?php 
@@ -204,7 +204,7 @@ $smManager = new SiteMapManager();
 						if($IS_ADMIN || array_key_exists('TaxonProfile',$USER_RIGHTS)){ 
 							?>
 							<li>
-								<a href="taxa/admin/tpeditor.php?tabindex=1" target="_blank">
+								<a href="taxa/profile/tpeditor.php?tabindex=1" target="_blank">
                                     <?php echo $LANG['BASICFIELD'];?>
 								</a>
 							</li>
@@ -253,11 +253,11 @@ $smManager = new SiteMapManager();
                             <?php echo $LANG['THEFOLLOWINGSPEC'];?>
 						</div>
 						<ul>
-							<li><a href="taxa/admin/tpeditor.php?taxon="><?php echo $LANG['SYN_COM'];?></a></li>
-							<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=4"><?php echo $LANG['TEXTDESC'];?></a></li>
-							<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=1"><?php echo $LANG['EDITIMG'];?></a></li>
-							<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imagequicksort&tabindex=2"><?php echo $LANG['IMGSORTORD'];?></a></li>
-							<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imageadd&tabindex=3"><?php echo $LANG['ADDNEWIMG'];?></a></li>
+							<li><a href="taxa/profile/tpeditor.php?taxon="><?php echo $LANG['SYN_COM'];?></a></li>
+							<li><a href="taxa/profile/tpeditor.php?taxon=&tabindex=4"><?php echo $LANG['TEXTDESC'];?></a></li>
+							<li><a href="taxa/profile/tpeditor.php?taxon=&tabindex=1"><?php echo $LANG['EDITIMG'];?></a></li>
+							<li style="margin-left:15px;"><a href="taxa/profile/tpeditor.php?taxon=&category=imagequicksort&tabindex=2"><?php echo $LANG['IMGSORTORD'];?></a></li>
+							<li style="margin-left:15px;"><a href="taxa/profile/tpeditor.php?taxon=&category=imageadd&tabindex=3"><?php echo $LANG['ADDNEWIMG'];?></a></li>
 						</ul>
 						<?php 
 					}
@@ -274,13 +274,13 @@ $smManager = new SiteMapManager();
 						<?php 
 						if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 							?>
-							<li><?php echo $LANG['EDITTAXPL'];?><a href="taxa/admin/taxonomydisplay.php"><?php echo $LANG['TAXTREEVIEW'];?></a></li>
-							<li><a href="taxa/admin/taxonomyloader.php"><?php echo $LANG['ADDTAXANAME'];?></a></li>
-							<li><a href="taxa/admin/taxaloader.php"><?php echo $LANG['BATCHTAXA'];?></a></li>
+							<li><?php echo $LANG['EDITTAXPL'];?><a href="taxa/taxonomy/taxonomydisplay.php"><?php echo $LANG['TAXTREEVIEW'];?></a></li>
+							<li><a href="taxa/taxonomy/taxonomyloader.php"><?php echo $LANG['ADDTAXANAME'];?></a></li>
+							<li><a href="taxa/taxonomy/taxaloader.php"><?php echo $LANG['BATCHTAXA'];?></a></li>
 							<?php 
 							if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 								?>
-								<li><a href="taxa/admin/eolmapper.php"><?php echo $LANG['EOLLINK'];?></a></li>
+								<li><a href="taxa/profile/eolmapper.php"><?php echo $LANG['EOLLINK'];?></a></li>
 								<?php 
 							}
 						}

@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/TaxonomyEditorManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../taxa/admin/taxonomyloader.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../taxa/taxonomy/taxonomyloader.php?'.$_SERVER['QUERY_STRING']);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:"";
 $status = "";
@@ -19,7 +19,7 @@ if($isEditor){
 	if(array_key_exists('sciname',$_POST)){
 		$status = $loaderObj->loadNewName($_POST);
 		if(is_int($status)){
-		 	header("Location: taxonomyeditor.php?tid=".$status);
+		 	header("Location: taxoneditor.php?tid=".$status);
 		}
 	}
 }

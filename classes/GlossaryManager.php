@@ -675,7 +675,6 @@ class GlossaryManager{
 				if(substr($imgDelPath,0,4) != 'http'){
 					if(!unlink($imgDelPath)){
 						$this->errArr[] = 'WARNING: Deleted records from database successfully but FAILED to delete image from server (path: '.$imgDelPath.')';
-						//$status .= '<br/>Return to <a href="../taxa/admin/tpeditor.php?tid='.$tid.'&tabindex=1">Taxon Editor</a>';
 					}
 				}
 				

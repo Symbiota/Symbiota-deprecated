@@ -89,8 +89,8 @@ http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-
       loaded before non-accepted names. See Taxonomic Schema Page for more 
       details on taxonomic layout.  
       i. Names can be added one by one to the default thesaurus using: 
-         /taxa/admin/taxonomyloader.php. Once entered, taxon names and 
-         ranking can be edited via: /taxa/admin/taxonomydisplay.php 
+         /taxa/taxonomy/taxonomyloader.php. Once entered, taxon names and 
+         ranking can be edited via: /taxa/taxonomy/taxonomydisplay.php 
       ii. Batch Loader - Multiple names can be loaded from a flat, 
          tab-delimited text file. See instructions on the Batch Taxon 
          Loader for detailed instructions. See instructions on the 

@@ -130,7 +130,7 @@ if($collid){
 							if($IS_ADMIN || isset($USER_RIGHTS['Taxonomy'])){ 
 								?>
 								<div style="float:left;padding:2px 3px;">
-									<a href="../../taxa/admin/taxonomyloader.php" target="_blank">
+									<a href="../../taxa/taxonomy/taxonomyloader.php" target="_blank">
 										<img src="../../images/add.png" style="width:14px;" title="Add new name to taxonomic thesaurus" />
 									</a>
 								</div>

@@ -2,7 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/TaxonomyHarvester.php');
 
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../taxa/admin/taxonomymaintenance.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../taxa/taxonomy/taxonomymaintenance.php?'.$_SERVER['QUERY_STRING']);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 
