@@ -721,7 +721,7 @@ class TaxonomyHarvester extends Manager{
 		if(!is_array($taxonArr)) return;
 		$parArr = array();
 		if($taxonArr['sciname']){
-			if($taxonArr['rankid']){
+			if(isset($taxonArr['rankid']) && $taxonArr['rankid']){
 				if(!$this->kingdomTid) $this->setDefaultKingdom();
 				if($this->kingdomName){
 					//Set this as default parent
