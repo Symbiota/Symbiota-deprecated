@@ -847,9 +847,7 @@ class OccurrenceManager extends SearchManager {
 			$dbStr = '';
 			$dbs = $_REQUEST["db"];
 			if(is_string($dbs)){
-				if(is_numeric($dbs) || $dbs == 'allspec' || $dbs == 'allobs' || $dbs == 'all'){
-					$dbStr = $dbs.';';
-				}
+				$dbStr = $this->cleanInStr($dbs).';';
 			}
 			else{
 				$dbStr = $this->cleanInStr(implode(',',array_unique($dbs))).';';
@@ -1181,7 +1179,7 @@ class OccurrenceManager extends SearchManager {
 
 	public function getSearchTerm($k){
 		if($k && isset($this->searchTermArr[$k])){
-			return $this->searchTermArr[$k];
+			return trim($this->searchTermArr[$k],' ;');
 		}
 		return '';
 	}
