@@ -73,12 +73,13 @@ class TaxonomyCleaner extends Manager{
 			$taxonHarvester->setVerboseMode(2);
 			$this->setVerboseMode(2);
 			$taxaAdded = false;
-			$itemCnt = 1;
+			$taxaCnt = 1;
+			$itemCnt = 0;
 			while($r = $rs->fetch_object()){
 				$editLink = '[<span onclick="openPopup(\''.$GLOBALS['CLIENT_ROOT'].
 					'/collections/editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=sciname&q_customtype1=EQUALS&q_customvalue1='.$r->sciname.'&collid='.
 					$this->collid.'\')" style="cursor:pointer">'.$r->cnt.' specimens <img src="../../images/edit.png" style="width:12px;" /></span>]';
-				$this->logOrEcho('Resolving #'.$itemCnt.': <b><i>'.$r->sciname.'</i></b>'.($r->family?' ('.$r->family.')':'').'</b> '.$editLink);
+				$this->logOrEcho('Resolving #'.$taxaCnt.': <b><i>'.$r->sciname.'</i></b>'.($r->family?' ('.$r->family.')':'').'</b> '.$editLink);
 				if($r->family) $taxonHarvester->setDefaultFamily($r->sciname);
 				$manualCheck = true;
 				if($taxonHarvester->processSciname($r->sciname)){
@@ -101,16 +102,17 @@ class TaxonomyCleaner extends Manager{
 							foreach($scinameTokens as $str){
 								$scinameDisplay = str_replace($str,'<b>'.$str.'</b>', $scinameDisplay);
 							}
-							$echoStr = '<i>'.$scinameDisplay.'</i> =&gt; <span class="hideOnLoad">wait for page to finish loading...</span><span class="displayOnLoad" style="display:none"><a href="#" onclick="return remappTaxon(\''.
-								$r->sciname.'\','.$tid.',\''.$sciname.'\','.$itemCnt.')" style="color:blue"> remap to this taxon</a><span id="remapSpan-'.$itemCnt.'"></span></span>';
+							$echoStr = '<i>'.$scinameDisplay.'</i> =&gt; <span class="hideOnLoad">wait for page to finish loading...</span><span class="displayOnLoad" style="display:none">'.
+								'<a href="#" onclick="return remappTaxon(\''.$r->sciname.'\','.$tid.',\''.$sciname.'\','.$itemCnt.')" style="color:blue"> remap to this taxon</a><span id="remapSpan-'.$itemCnt.'"></span></span>';
 							$this->logOrEcho($echoStr,2);
+							$itemCnt++;
 						}
 					}
 					else{
 						$this->logOrEcho('No close matches found',1);
 					}
 				}
-				$itemCnt++;
+				$taxaCnt++;
 				flush();
 				ob_flush();
 			}
@@ -129,13 +131,33 @@ class TaxonomyCleaner extends Manager{
 
 	public function deepIndexTaxa(){
 		$this->setVerboseMode(2);
+		$this->logOrEcho('Cleaning leading and trialing spaces...');
+		$sql = 'UPDATE omoccurrences '.
+			'SET sciname = trim(sciname) '.
+			'WHERE (o.collid = '.$this->collid.') AND (tidinterpreted is NULL) AND (sciname LIKE " %" OR sciname LIKE "% ")';
+		if($this->conn->query($sql)){
+			$this->logOrEcho($this->conn->affected_rows.' occurrence records cleaned',1);
+		}
+		flush();
+		ob_flush();
+		
+		$this->logOrEcho('Cleaning double spaces inbedded within name...');
+		$sql = 'UPDATE omoccurrences '.
+			'SET sciname = replace(sciname, "  ", " ") '. 
+			'WHERE (o.collid = '.$this->collid.') AND (tidinterpreted is NULL) AND (sciname LIKE "%  %") ';
+		if($this->conn->query($sql)){
+			$this->logOrEcho($this->conn->affected_rows.' occurrence records cleaned',1);
+		}
+		flush();
+		ob_flush();
+		
 		$this->indexOccurrenceTaxa();
 
-		$this->logOrEcho('Indexing names based on mathcing trinomials...');
 		$trinCnt = 0;
+		$this->logOrEcho('Indexing names based on mathcing trinomials...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = CONCAT_WS(" ",t.unitname1,t.unitname2,t.unitname3) '.
-				'SET o.sciname = t.sciname, o.tidinterpreted = t.tid '.
-				'WHERE (o.collid = '.$this->collid.') AND (t.rankid = 230) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL)';
+			'SET o.sciname = t.sciname, o.tidinterpreted = t.tid '.
+			'WHERE (o.collid = '.$this->collid.') AND (t.rankid = 230) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL)';
 		if($this->conn->query($sql)){
 			$trinCnt = $this->conn->affected_rows;
 		}
@@ -143,8 +165,8 @@ class TaxonomyCleaner extends Manager{
 		ob_flush();
 		
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = CONCAT_WS(" ",t.unitname1,t.unitname2,t.unitname3) '.
-				'SET o.sciname = t.sciname, o.tidinterpreted = t.tid '.
-				'WHERE (o.collid = '.$this->collid.') AND (t.rankid = 240) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL)';
+			'SET o.sciname = t.sciname, o.tidinterpreted = t.tid '.
+			'WHERE (o.collid = '.$this->collid.') AND (t.rankid = 240) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL)';
 		if($this->conn->query($sql)){
 			$trinCnt += $this->conn->affected_rows;
 			$this->logOrEcho($trinCnt.' occurrence records mapped',1);
