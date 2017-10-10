@@ -8,6 +8,7 @@ class TaxonomyCleaner extends Manager{
 
 	private $collid;
 	private $taxAuthId = 1;
+	private $autoClean = 0;
 	private $testValidity = 1;
 	private $testTaxonomy = 1;
 	private $checkAuthor = 1;
@@ -77,33 +78,56 @@ class TaxonomyCleaner extends Manager{
 			$itemCnt = 0;
 			while($r = $rs->fetch_object()){
 				$editLink = '[<span onclick="openPopup(\''.$GLOBALS['CLIENT_ROOT'].
-					'/collections/editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=sciname&q_customtype1=EQUALS&q_customvalue1='.$r->sciname.'&collid='.
+					'/collections/editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=sciname&q_customtype1=EQUALS&q_customvalue1='.urlencode($r->sciname).'&collid='.
 					$this->collid.'\')" style="cursor:pointer">'.$r->cnt.' specimens <img src="../../images/edit.png" style="width:12px;" /></span>]';
 				$this->logOrEcho('Resolving #'.$taxaCnt.': <b><i>'.$r->sciname.'</i></b>'.($r->family?' ('.$r->family.')':'').'</b> '.$editLink);
-				if($r->family) $taxonHarvester->setDefaultFamily($r->sciname);
+				if($r->family) $taxonHarvester->setDefaultFamily($r->family);
+				$sciname = $r->sciname;
+				$tid = 0;
 				$manualCheck = true;
-				if($taxonHarvester->processSciname($r->sciname)){
-					$taxaAdded= true;
-					if($taxonHarvester->isFullyResolved()){
-						$manualCheck = false;
-						++$startAdjustment;
+				$taxonArr = TaxonomyUtilities::parseScientificName($r->sciname,$this->conn);
+				if($taxonArr && $taxonArr['sciname']){
+					$sciname= $taxonArr['sciname'];
+					if($sciname != $r->sciname){
+						$this->logOrEcho('Taxon cleaned to <b>'.$sciname.'</b>',1);
 					}
-					else{
-						$this->logOrEcho('Taxon not fully resolved...',1);
+					$tid = $taxonHarvester->getTid($taxonArr);
+					if($tid && $this->autoClean){
+						$this->remapOccurrenceTaxon($this->collid, $r->sciname, $tid, $taxonArr['sciname'], $taxonArr['author'], (isset($taxonArr['identificationqualifier'])?$taxonArr['identificationqualifier']:''));
+						$this->logOrEcho('Taxon remapped to <b>'.$sciname.'</b>',1);
+						$manualCheck = false;
+					}
+				}
+				if(!$tid){
+					if($taxonHarvester->processSciname($sciname)){
+						$taxaAdded= true;
+						if($taxonHarvester->isFullyResolved()){
+							$manualCheck = false;
+							++$startAdjustment;
+						}
+						else{
+							$this->logOrEcho('Taxon not fully resolved...',1);
+						}
 					}
 				}
 				if($manualCheck){
 					//Check for near match using SoundEx
 					$this->logOrEcho('Checking close matches in thesaurus...',1);
-					if($matchArr = $taxonHarvester->getCloseMatch($r->sciname)){
-						$scinameTokens = explode(' ', $r->sciname);
-						foreach($matchArr as $tid => $sciname){
-							$scinameDisplay = $sciname;
-							foreach($scinameTokens as $str){
-								$scinameDisplay = str_replace($str,'<b>'.$str.'</b>', $scinameDisplay);
+					if($matchArr = $taxonHarvester->getCloseMatch($sciname)){
+						$strTestArr = array();
+						for($x=1; $x <= 3; $x++){
+							if(isset($taxonArr['unitname'.$x]) && $taxonArr['unitname'.$x]) $strTestArr[] = $taxonArr['unitname'.$x];
+						}
+						foreach($matchArr as $tid => $scinameMatch){
+							$snTokens = explode(' ',$scinameMatch);
+							foreach($snTokens as $k => $v){
+								if(in_array($v, $strTestArr)) $snTokens[$k] = '<b>'.$v.'</b>';
 							}
-							$echoStr = '<i>'.$scinameDisplay.'</i> =&gt; <span class="hideOnLoad">wait for page to finish loading...</span><span class="displayOnLoad" style="display:none">'.
-								'<a href="#" onclick="return remappTaxon(\''.$r->sciname.'\','.$tid.',\''.$sciname.'\','.$itemCnt.')" style="color:blue"> remap to this taxon</a><span id="remapSpan-'.$itemCnt.'"></span></span>';
+							$authorOut = (isset($taxonArr['author'])?str_replace("'", '', $taxonArr['author']):'');
+							$idQual = (isset($taxonArr['identificationqualifier'])?str_replace("'", '', $taxonArr['identificationqualifier']):'');
+							$echoStr = '<i>'.implode(' ',$snTokens).'</i> =&gt; <span class="hideOnLoad">wait for page to finish loading...</span><span class="displayOnLoad" style="display:none">'.
+								'<a href="#" onclick="return remappTaxon(\''.$r->sciname.'\','.$tid.',\''.$scinameMatch.'\',\''.$authorOut.'\',\''.$idQual.'\','.$itemCnt.')" style="color:blue"> remap to this taxon</a>'.
+								'<span id="remapSpan-'.$itemCnt.'"></span></span>';
 							$this->logOrEcho($echoStr,2);
 							$itemCnt++;
 						}
@@ -125,7 +149,7 @@ class TaxonomyCleaner extends Manager{
 	}
 	
 	private function getSqlFragment(){
-		$sql = 'FROM omoccurrences WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname NOT LIKE "% x %") '; 
+		$sql = 'FROM omoccurrences WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname NOT LIKE "% x %") AND (sciname NOT LIKE "% × %")'; 
 		return $sql;
 	}
 
@@ -134,7 +158,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho('Cleaning leading and trialing spaces...');
 		$sql = 'UPDATE omoccurrences '.
 			'SET sciname = trim(sciname) '.
-			'WHERE (o.collid = '.$this->collid.') AND (tidinterpreted is NULL) AND (sciname LIKE " %" OR sciname LIKE "% ")';
+			'WHERE (collid = '.$this->collid.') AND (tidinterpreted is NULL) AND (sciname LIKE " %" OR sciname LIKE "% ")';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records cleaned',1);
 		}
@@ -144,33 +168,27 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho('Cleaning double spaces inbedded within name...');
 		$sql = 'UPDATE omoccurrences '.
 			'SET sciname = replace(sciname, "  ", " ") '. 
-			'WHERE (o.collid = '.$this->collid.') AND (tidinterpreted is NULL) AND (sciname LIKE "%  %") ';
+			'WHERE (collid = '.$this->collid.') AND (tidinterpreted is NULL) AND (sciname LIKE "%  %") ';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records cleaned',1);
 		}
 		flush();
 		ob_flush();
-		
+
 		$this->indexOccurrenceTaxa();
 
-		$trinCnt = 0;
-		$this->logOrEcho('Indexing names based on mathcing trinomials...');
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = CONCAT_WS(" ",t.unitname1,t.unitname2,t.unitname3) '.
-			'SET o.sciname = t.sciname, o.tidinterpreted = t.tid '.
-			'WHERE (o.collid = '.$this->collid.') AND (t.rankid = 230) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL)';
-		if($this->conn->query($sql)){
-			$trinCnt = $this->conn->affected_rows;
+		$this->logOrEcho('Indexing names based on mathcing trinomials without taxonRank designation...');
+		$triCnt = 0;
+		$sql = 'SELECT DISTINCT o.sciname, t.tid, t.sciname AS newsciname '.
+			'FROM omoccurrences o INNER JOIN taxa t ON o.sciname = CONCAT_WS(" ",t.unitname1,t.unitname2,t.unitname3) '.
+			'WHERE (o.collid = '.$this->collid.') AND (t.rankid IN(230,240)) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL) '.
+			'ORDER BY t.rankid';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$triCnt += $this->remapOccurrenceTaxon($this->collid, $r->sciname, $r->tid, $r->newsciname);
 		}
-		flush();
-		ob_flush();
-		
-		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = CONCAT_WS(" ",t.unitname1,t.unitname2,t.unitname3) '.
-			'SET o.sciname = t.sciname, o.tidinterpreted = t.tid '.
-			'WHERE (o.collid = '.$this->collid.') AND (t.rankid = 240) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL)';
-		if($this->conn->query($sql)){
-			$trinCnt += $this->conn->affected_rows;
-			$this->logOrEcho($trinCnt.' occurrence records mapped',1);
-		}
+		$rs->free();
+		$this->logOrEcho($triCnt.' occurrence records remapped',1);
 		flush();
 		ob_flush();
 		
@@ -248,32 +266,58 @@ class TaxonomyCleaner extends Manager{
 		ob_flush();
 	}
 
-	public function remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname){
-		$status = false;
+	public function remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname, $newAuthor = '', $idQualifier = ''){
+		$affectedRows = 0;
 		if(is_numeric($collid) && $oldSciname && is_numeric($tid) && $newSciname){
 			$oldSciname = $this->cleanInStr($oldSciname);
 			$newSciname = $this->cleanInStr($newSciname);
+			if($newAuthor) $newAuthor= $this->cleanInStr($newAuthor);
+			if($idQualifier) $idQualifier = $this->cleanInStr($idQualifier);
+			$sqlWhere = 'WHERE (collid = '.$collid.') AND (sciname = "'.$oldSciname.'") AND (tidinterpreted IS NULL)';
 			//Version edit in edits table
 			$sql1 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
 				'SELECT occid, "sciname", "'.$newSciname.'", sciname, '.$GLOBALS['SYMB_UID'].', 1, 1 '.
-				'FROM omoccurrences WHERE collid = '.$collid.' AND sciname = "'.$oldSciname.'"';
+				'FROM omoccurrences '.$sqlWhere;
 			if($this->conn->query($sql1)){
+				if($newAuthor){
+					$sql2 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
+						'SELECT occid, "scientificNameAuthorship" AS fieldname, "'.$newAuthor.'", IFNULL(scientificNameAuthorship,""), '.$GLOBALS['SYMB_UID'].', 1, 1 '.
+						'FROM omoccurrences '.$sqlWhere;
+					if(!$this->conn->query($sql2)){
+						$this->logOrEcho('ERROR thrown versioning of remapping of occurrence taxon (author): '.$this->conn->error,1);
+					}
+				}
+				if($idQualifier){
+					$sql3 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
+							'SELECT occid, "identificationQualifier" AS fieldname, CONCAT_WS("; ",identificationQualifier,"'.$idQualifier.'") AS idqual, '.
+						'IFNULL(identificationQualifier,""), '.$GLOBALS['SYMB_UID'].', 1, 1 '.
+						'FROM omoccurrences '.$sqlWhere;
+					if(!$this->conn->query($sql3)){
+						$this->logOrEcho('ERROR thrown versioning of remapping of occurrence taxon (idQual): '.$this->conn->error,1);
+					}
+				}
 				//Update occurrence table
-				$sql2 = 'UPDATE omoccurrences '.
-					'SET tidinterpreted = '.$tid.', sciname = "'.$newSciname.'" '.
-					'WHERE (collid = '.$collid.') AND (sciname = "'.$oldSciname.'") AND (tidinterpreted IS NULL)';
-				if($this->conn->query($sql2)){
-					$status = true;
+				$sqlFinal = 'UPDATE omoccurrences '.
+					'SET tidinterpreted = '.$tid.', sciname = "'.$newSciname.'" ';
+				if($newAuthor){
+					$sqlFinal .= ', scientificNameAuthorship = "'.$newAuthor.'" ';
+				}
+				if($idQualifier){
+					$sqlFinal .= ', identificationQualifier = CONCAT_WS("; ",identificationQualifier,"'.$idQualifier.'") ';
+				}
+				$sqlFinal .= $sqlWhere;
+				if($this->conn->query($sqlFinal)){
+					$affectedRows = $this->conn->affected_rows;
 				}
 				else{
-					echo $sql2;
+					$this->logOrEcho('ERROR thrown remapping occurrence taxon: '.$this->conn->error,1);
 				}
 			}
 			else{
-				echo $sql1;
+				$this->logOrEcho('ERROR thrown versioning of remapping of occurrence taxon (E1): '.$this->conn->error,1);
 			}
 		}
-		return $status;
+		return $affectedRows;
 	}
 
 	//Taxonomic thesaurus verifications
@@ -597,6 +641,10 @@ class TaxonomyCleaner extends Manager{
 	//Setters and getters
 	public function setTaxAuthId($id){
 		if(is_numeric($id)) $this->taxAuthId = $id;
+	}
+
+	public function setAutoClean($v){
+		if(is_numeric($v)) $this->autoClean = $v;
 	}
 
 	public function setCollId($collid){

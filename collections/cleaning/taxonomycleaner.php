@@ -6,6 +6,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/cleaning/taxonomycleaner.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST["collid"];
+$autoClean = array_key_exists('autoclean',$_POST)?$_POST['autoclean']:0;
 $start = array_key_exists('start',$_POST)?$_POST['start']:0;
 $limit = array_key_exists('limit',$_POST)?$_POST['limit']:20;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
@@ -37,12 +38,12 @@ else{
 				$(".hideOnLoad").hide();
 			});
 
-			function remappTaxon(oldName,targetTid,newName,msgCode){
+			function remappTaxon(oldName,targetTid,newName,author,idQualifier,msgCode){
 				$.ajax({
 					type: "POST",
 					url: "rpc/remaptaxon.php",
 					dataType: "json",
-					data: { collid: <?php echo $collid; ?>, oldsciname: oldName, tid: targetTid, newsciname: newName }
+					data: { collid: <?php echo $collid; ?>, oldsciname: oldName, tid: targetTid, newsciname: newName, author: author, idq: idQualifier }
 				}).done(function( res ) {
 					if(res == "1"){
 						$("#remapSpan-"+msgCode).text(" >>> Taxon remapped successfully!");
@@ -86,6 +87,7 @@ else{
 							}
 							else{
 								echo '<ul>';
+								$cleanManager->setAutoClean($autoClean);
 								$startAdjustment = $cleanManager->analyzeTaxa($start, $limit);
 								echo '</ul>';
 								$start += $limit-$startAdjustment;
@@ -115,9 +117,16 @@ else{
 										<div style="margin-bottom:5px;">
 											Processing limit: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:30px" />
 										</div>
-										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-										<input name="start" type="hidden" value="<?php echo $start; ?>" />
-										<button name="submitaction" type="submit" value="submitaction" ><?php echo ($start?'Continue Analyzing Names':'Analyze Taxonomic Names'); ?></button>
+										<div style="height:50px;">
+											<div style="">Clean and Mapping Function:</div> 
+											<div style="float:left;margin-left:15px;"><input name="autoclean" type="radio" value="0" <?php echo (!$autoClean?'checked':''); ?> /> Semi-Manual</div>
+											<div style="float:left;margin-left:10px;"><input name="autoclean" type="radio" value="1" <?php echo ($autoClean==1?'checked':''); ?> /> Fully Automatic</div>
+										</div>
+										<div style="clear:both;">
+											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+											<input name="start" type="hidden" value="<?php echo $start; ?>" />
+											<button name="submitaction" type="submit" value="submitaction" ><?php echo ($start?'Continue Analyzing Names':'Analyze Taxonomic Names'); ?></button>
+										</div>
 										<?php
 										if($start){
 											?>

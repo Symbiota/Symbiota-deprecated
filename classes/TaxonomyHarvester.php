@@ -39,6 +39,8 @@ class TaxonomyHarvester extends Manager{
 				$this->logOrEcho('ERROR: Taxonomic resources not activated ',1);
 				return false;
 			}
+			$newTid = $this->parseCleanCheck($term);
+			if($newTid) return $newTid;
 			foreach($this->taxonomicResources as $authCode=> $apiKey){
 				$this->activeTaxonomicAuthority = $authCode;
 				$newTid = $this->addSciname($term);
@@ -70,6 +72,31 @@ class TaxonomyHarvester extends Manager{
 		return $newTid;
 	}
 
+	private function parseCleanCheck($term){
+		$tid = 0;
+		$taxonArr = array('sciname' => $term);
+		$this->buildTaxonArr($taxonArr);
+		$tid = $this->getTid($taxonArr);
+		if(!$tid){
+			if(isset($taxonArr['rankid']) && $taxonArr['rankid'] > 220 && $taxonArr['unitname2'] == $taxonArr['unitname3']){
+				//Taxon is an infraspecific tautonym
+				if($parentArr = $this->getParentArr($taxonArr)){
+					if($parentTid = $this->getTid($parentArr)){
+						$taxonArr['parent']['tid'] = $parentTid;
+						$parentTidAccepted = $this->getTidAccepted($parentTid);
+						if($parentTidAccepted == $parentTid){
+							$tid = $this->loadNewTaxon($taxonArr);
+						}
+						else{
+							$tid = $this->loadNewTaxon($taxonArr,$parentTidAccepted);
+						}
+					}
+				}
+			}
+		}
+		return $tid;
+	}
+
 	/*
 	 * INPUT: scientific name
 	 *   Example: 'Pinus ponderosa var. arizonica'
@@ -87,6 +114,7 @@ class TaxonomyHarvester extends Manager{
 	 *  				'syns' => array(array('sciname'=>'Pinus ponderosa var. arizonica','acceptanceReason'=>'synonym'...), array(etc...)),
 	 *  				'parent' => array(	
 	 *  					'id' => '43463',
+	 *  					'tid' => 12345,
 	 *  					'sciname' => 'Pinus',
 	 *  					'taxonRank' => 'Genus',
 	 *  					'sourceURL' => 'http://eol.org/pages/1905/hierarchy_entries/43463/overview',
@@ -266,7 +294,7 @@ class TaxonomyHarvester extends Manager{
 			}
 		}
 		else{
-			$this->logOrEcho('Unable to get WoRMS object: '.$url2,1);
+			$this->logOrEcho('Unable to get WoRMS object: '.$url,1);
 		}
 		return $this->loadNewTaxon($taxonArr, $acceptedTid);
 	}
@@ -505,7 +533,7 @@ class TaxonomyHarvester extends Manager{
 	}
 
 	//Database functions
-	private function loadNewTaxon($taxonArr,$tidAccepted = 0){
+	private function loadNewTaxon($taxonArr, $tidAccepted = 0){
 		$newTid = 0;
 		if(!$taxonArr) return false;
 		if((!isset($taxonArr['sciname']) || !$taxonArr['sciname']) && isset($taxonArr['scientificName']) && $taxonArr['scientificName']){
@@ -594,12 +622,12 @@ class TaxonomyHarvester extends Manager{
 					//Display action message
 					$taxonDisplay = $taxonArr['sciname'];
 					if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
-						$taxonDisplay = '<a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/admin/taxonomyeditor.php?tid='.$newTid.'" target="_blank">'.$taxonArr['sciname'].'</a>';
+						$taxonDisplay = '<a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/taxonomy/taxoneditor.php?tid='.$newTid.'" target="_blank">'.$taxonArr['sciname'].'</a>';
 					}
 					$accStr = 'accepted';
 					if($tidAccepted != $newTid){
 						if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
-							$accStr = 'synonym of taxon <a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/admin/taxonomyeditor.php?tid='.$tidAccepted.'" target="_blank">#'.$tidAccepted.'</a>';
+							$accStr = 'synonym of taxon <a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/taxonomy/taxoneditor.php?tid='.$tidAccepted.'" target="_blank">#'.$tidAccepted.'</a>';
 						}
 						else{
 							$accStr = 'synonym of taxon #'.$tidAccepted;
@@ -803,7 +831,7 @@ class TaxonomyHarvester extends Manager{
 				$sql = 'SELECT tid, sciname FROM taxa '.
 					'WHERE (unitname1 = "'.$unitname1.'") AND (unitname2 = "'.$unitname2.'") AND (unitname3 = "'.$unitname3.'") '.
 					'ORDER BY sciname';
-				//echo $sql;
+				//echo $sql.'<br/>';
 				$rs = $this->conn->query($sql);
 				while($row = $rs->fetch_object()){
 					$retArr[$row->tid] = $row->sciname;
@@ -831,7 +859,7 @@ class TaxonomyHarvester extends Manager{
 					$searchStr .= ' '.substr($unitname2,0,4).'%';
 					if(count($unitname3) > 2) $searchStr .= ' '.substr($unitname3,0,5).'%';
 					$sql = 'SELECT tid, sciname FROM taxa WHERE (sciname LIKE "'.$searchStr.'") ORDER BY sciname LIMIT 15';
-					//echo $sql;
+					//echo $sql.'<br/>';
 					$rs = $this->conn->query($sql);
 					while($row = $rs->fetch_object()){
 						similar_text($taxonStr,$row->sciname,$percent);
@@ -843,7 +871,7 @@ class TaxonomyHarvester extends Manager{
 				if(!$retArr){
 					//Look for matches based on same edithet but different genus
 					$sql = 'SELECT tid, sciname FROM taxa WHERE (sciname LIKE "'.substr($unitname1,0,2).'% '.$unitname2.'") ORDER BY sciname';
-					//echo $sql;
+					//echo $sql.'<br/>';
 					$rs = $this->conn->query($sql);
 					while($row = $rs->fetch_object()){
 						$retArr[$row->tid] = $row->sciname;
@@ -856,37 +884,68 @@ class TaxonomyHarvester extends Manager{
 		return $retArr;
 	}
 
-	private function getTid($taxonArr){
+	public function getTid($taxonArr){
 		$tid = 0;
-		if($taxonArr['sciname']){
+		if(isset($taxonArr['sciname']) && $taxonArr['sciname']){
 			$sciname = $taxonArr['sciname'];
+			$tidArr = array();
+			//Get tid, author, and rankid
 			$sql = 'SELECT DISTINCT t.tid, t.author, t.rankid '.
 				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
 				'WHERE (e.taxauthid = '.$this->taxAuthId.') AND (t.sciname = "'.$this->cleanInStr($sciname).'") ';
-			if($this->kingdomTid) $sql .= 'AND (e.parenttid = '.$this->kingdomTid.')';
-			$tidArr = array();
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$tidArr[$r->tid]['author'] = $r->author;
 				$tidArr[$r->tid]['rankid'] = $r->rankid;
 			}
 			$rs->free();
+			if(!$tidArr) return 0;
+			//Check if homonyms are returned
 			if(count($tidArr) == 1){
 				$tid = key($tidArr);
 			}
-			else{
+			elseif(count($tidArr) > 1){
+				//Get parents to determine which is best
+				$sqlPar = 'SELECT DISTINCT e.tid, t.tid AS parenttid, t.sciname, t.rankid '.
+					'FROM taxaenumtree e INNER JOIN taxa t ON e.parenttid = t.tid '.
+					'WHERE (e.taxauthid = '.$this->taxAuthId.') AND (e.tid IN('.implode(',',array_keys($tidArr)).')) AND (t.rankid IN (10,140)) ';
+				$rsPar = $this->conn->query($sqlPar);
+				while($rPar = $rsPar->fetch_object()){
+					if($r->rankid == 10) $tidArr[$rPar->tid]['kingdom'] = $rPar->sciname;
+					elseif($r->rankid == 140) $tidArr[$rPar->tid]['family'] = $rPar->sciname;
+				}
+				$rsPar->free();
+				
+				//Rate each name
 				$goodArr = array();
 				//If rankid is same, then it gets a plus
 				foreach($tidArr as $t => $tArr){
+					$goodArr[$t] = 0;
 					if(isset($taxonArr['rankid']) && $taxonArr['rankid']){
 						if($tArr['rankid'] == $taxonArr['rankid']){
 							$goodArr[$t] = 1;
 						}
-						else{
-							$goodArr[$t] = 0;
+					}
+					//Gets a 2 points if family is the same
+					if(isset($tArr['family']) && $tArr['family']){
+						if(isset($taxonArr['family']) && $taxonArr['family']){
+							if(strtolower($tArr['family']) == strtolower($taxonArr['family'])){
+								$goodArr[$t] += 2;
+							}
+						}
+						elseif($this->defaultFamily){
+							if(strtolower($tArr['family']) == strtolower($this->defaultFamily)){
+								$goodArr[$t] += 2;
+							}
 						}
 					}
-					//Gets a plus if author is the same
+					//Gets a 2 points if kingdom is the same
+					if($this->kingdomName && isset($tArr['kingdom']) && $tArr['kingdom']){
+						if(strtolower($tArr['kingdom']) == strtolower($this->kingdomName)){
+							$goodArr[$t] += 2;
+						}
+					}
+					//Gets a 2 points if author is the same, 1 point if 80% similar
 					if(isset($taxonArr['author']) && $taxonArr['author']){
 						$author1 = str_replace(array(' ','.'), '', $taxonArr['author']);
 						$author2 = str_replace(array(' ','.'), '', $tArr['author']);
@@ -901,6 +960,17 @@ class TaxonomyHarvester extends Manager{
 			}
 		}
 		return $tid;
+	}
+
+	private function getTidAccepted($tid){
+		$retTid = 0;
+		$sql = 'SELECT tidaccepted FROM taxstatus WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$tid.')';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retTid = $r->tidaccepted;
+		}
+		$rs->free();
+		return $retTid;
 	}
 
 	//Setters and getters

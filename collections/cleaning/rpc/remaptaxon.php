@@ -7,11 +7,13 @@ $collid = $_REQUEST['collid'];
 $oldSciname = $_REQUEST['oldsciname'];
 $tid = $_REQUEST['tid'];
 $newSciname = $_REQUEST['newsciname'];
+$author = $_REQUEST['author'];
+$idQualifier = $_REQUEST['idq'];
 
 $status = '0';
 if($collid && $oldSciname && $tid && $newSciname){
 	$cleanerManager = new TaxonomyCleaner();
-	if($cleanerManager->remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname)){
+	if($cleanerManager->remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname, $author, $idQualifier)){
 		$status = '1';
 	}
 }
