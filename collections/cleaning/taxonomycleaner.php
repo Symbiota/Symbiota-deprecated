@@ -77,7 +77,7 @@ else{
 			if($isEditor){
 				if($collid){
 					?>
-					<h1><?php echo $collMap['collectionname'].' ('.$collMap['code'].')'; ?></h1>
+					<div style="font-weight: bold; font-size: 130%; margin-bottom: 20px"><?php echo $collMap['collectionname'].' ('.$collMap['code'].')'; ?></div>
 					<div style="margin:20px;">
 						<?php
 						$startAdjustment = 0;
