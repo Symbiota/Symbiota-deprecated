@@ -8,10 +8,10 @@
     <div style="margin-top:5px;">
         <b>Cluster Distance</b> <input data-role="none" type="text" id="setclusterdistance" style="width:50px;" name="setclusterdistance" value="50" onchange="changeClusterDistance();" />
     </div>
-    <!-- <div style="margin-top:5px;">
+    <div style="margin-top:5px;">
         <b>Heat Map Radius</b> <input data-role="none" type="text" id="heatmapradius" style="width:50px;" value="5" onchange="changeHeatMapRadius();" />
     </div>
     <div style="margin-top:5px;">
         <b>Heat Map Blur</b> <input data-role="none" type="text" id="heatmapblur" style="width:50px;" value="15" onchange="changeHeatMapBlur();" />
-    </div> -->
+    </div>
 </div>
