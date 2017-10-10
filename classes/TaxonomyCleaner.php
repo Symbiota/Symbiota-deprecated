@@ -61,7 +61,7 @@ class TaxonomyCleaner extends Manager{
 	}
 
 	public function analyzeTaxa($startIndex = 0, $limit = 50){
-		//set_time_limit(500);
+		set_time_limit(1800);
 		$startAdjustment = 0;
 		$this->logOrEcho("Starting taxa check ");
 		$sql = 'SELECT DISTINCT sciname, family, count(*) as cnt '.
