@@ -650,7 +650,7 @@ class TaxonomyHarvester extends Manager{
 						$this->fullyResolved = false;
 					}
 					else{
-						if($acceptanceReason && (!isset($synArr['acceptanceReason']) || !$synArr['acceptanceReason'])) $synArr['acceptanceReason'] = $taxonArr['acceptanceReason'];
+						if($acceptanceReason && (!isset($synArr['acceptanceReason']) || !$synArr['acceptanceReason'])) $synArr['acceptanceReason'] = $acceptanceReason;
 						$this->loadNewTaxon($synArr,$newTid);
 					}
 				}
@@ -839,19 +839,6 @@ class TaxonomyHarvester extends Manager{
 				$rs->free();
 			}
 			
-			/*
-			//Get soundex matches
-			$sql = 'SELECT tid, sciname FROM taxa WHERE SOUNDEX(sciname) = SOUNDEX("'.$taxonStr.'") ORDER BY sciname LIMIT 10';
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				if(!strpos($taxonStr,' ') || strpos($row->sciname,' ')){
-					$retArr[$row->tid] = $row->sciname;
-				}
-			}
-			$rs->free();
-			*/
-
 			if($unitname2){
 				if(!$retArr){
 					//Look for match where
@@ -878,8 +865,17 @@ class TaxonomyHarvester extends Manager{
 					}
 					$rs->free();
 				}
-	
 			}
+			//Get soundex matches
+			$sql = 'SELECT tid, sciname FROM taxa WHERE SOUNDEX(sciname) = SOUNDEX("'.$taxonStr.'") ORDER BY sciname LIMIT 5';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				if(!strpos($taxonStr,' ') || strpos($row->sciname,' ')){
+					$retArr[$row->tid] = $row->sciname;
+				}
+			}
+			$rs->free();
 		}
 		return $retArr;
 	}
