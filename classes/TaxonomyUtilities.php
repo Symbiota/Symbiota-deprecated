@@ -7,7 +7,7 @@ class TaxonomyUtilities {
 	 * INPUT: String representing a verbatim scientific name 
 	 *        Name may have imbedded authors, cf, aff, hybrid  
 	 * OUTPUT: Array containing parsed values 
-	 *         Keys: unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier, rankid 
+	 *         Keys: sciname, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier, rankid 
 	 */
 	public static function parseScientificName($inStr, $conn = null, $rankId = 0){
 		//Converts scinetific name with author embedded into separate fields
@@ -23,8 +23,8 @@ class TaxonomyUtilities {
 				$inStr = str_ireplace(array(' cf ','c.f. ','cf. '),' ',$inStr);
 			}
 			elseif(stripos($inStr,'aff. ') !== false || stripos($inStr,' aff ') !== false){
-				$retArr['identificationqualifier'] = 'aff. ';
-				$inStr = str_ireplace(array(' aff ','aff. '),' ',$inStr);
+				$retArr['identificationqualifier'] = 'aff.';
+				$inStr = trim(str_ireplace(array(' aff ','aff. '),' ',$inStr));
 			}
 			if(stripos($inStr,' spp.')){
 				$rankId = 180;
