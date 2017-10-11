@@ -11,7 +11,7 @@
         <input data-role="none" type="radio" name="dateslidertype" id="dsdualtype" value="dual" onchange="checkDateSliderType();" /> Dual
     </div>
     <div style="width:400px;margin-top:5px;">
-        <b>Export Shapes Layer</b> <select data-role="none" id="shapesdownloadselect">
+        <b>Download Shapes Layer</b> <select data-role="none" id="shapesdownloadselect">
             <option value="">Download Type</option>
             <option value="kml">KML</option>
             <option value="geojson">GeoJSON</option>
