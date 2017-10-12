@@ -257,7 +257,7 @@ class TaxonomyHarvester extends Manager{
 
 	private function addWormsTaxon($sciName){
 		$tid = 0;
-		$url = 'http://www.marinespecies.org/rest/AphiaIDByName/'.str_replace(" ","%20",$sciName).'?marine_only=false';
+		$url = 'http://www.marinespecies.org/rest/AphiaIDByName/'.urlencode($sciName).'?marine_only=false';
 		if($id = $this->getContentString($url)){
 			$tid = $this->addWormsTaxonByID($id);
 		}
@@ -268,6 +268,10 @@ class TaxonomyHarvester extends Manager{
 	}
 	
 	private function addWormsTaxonByID($id){
+		if(!is_numeric($id)){
+			$this->logOrEcho('ERROR harvesting from worms: illegal identifier',1);
+			return 0;
+		}
 		$taxonArr= Array();
 		$acceptedTid = 0;
 		$url = 'http://www.marinespecies.org/rest/AphiaRecordByAphiaID/'.$id;
@@ -528,6 +532,16 @@ class TaxonomyHarvester extends Manager{
 				}
 				fclose($fh);
 			}
+			/*
+			if(!$contentStr){
+				$statusStr = $http_response_header[0];
+				if(preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#",$statusStr, $out)){
+					if(intval($out[1]) != 200){
+						$this->logOrEcho('ERROR getting content from service ('.$statusStr.')',1);
+					}
+				}
+			}
+			*/
 		}
 		return $contentStr;
 	}

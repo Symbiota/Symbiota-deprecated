@@ -119,18 +119,21 @@ $smManager = new SiteMapManager();
 								<a href="profile/usertaxonomymanager.php"><?php echo $LANG['TAXINTER'];?></a>
 							</li>  
 							<li>
+								<a href="collections/cleaning/taxonomycleaner.php"><?php echo isset($LANG['TAXONOMIC_CLEANER'])?$LANG['TAXONOMIC_CLEANER']:'Global Taxonomic Name Cleaner'; ?></a>
+							</li>
+							<li>
 								<a href="<?php echo $CLIENT_ROOT; ?>/collections/misc/collmetadata.php">
                                     <?php echo $LANG['CREATENEWCOLL'];?>
 								</a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/collections/admin/guidmapper.php">
-                                    <?php echo $LANG['GUIDMAP'];?>
+								<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/admin/thumbnailbuilder.php">
+                                    <?php echo $LANG['THUMBNAIL_BUILDER'];?>
 								</a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/admin/thumbnailbuilder.php">
-                                    <?php echo $LANG['THUMBNAIL_BUILDER'];?>
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/admin/guidmapper.php">
+                                    <?php echo $LANG['GUIDMAP'];?>
 								</a>
 							</li>
 							<li>

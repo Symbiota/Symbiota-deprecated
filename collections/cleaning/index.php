@@ -192,7 +192,7 @@ if($collMap['colltype'] == 'General Observations'){
 					</ul>
 				</fieldset>
 			</div>
-
+			<!-- 
 			<h3>Identification</h3>
 			<div style="margin:0px 0px 40px 15px;">
 				<div>
@@ -204,7 +204,8 @@ if($collMap['colltype'] == 'General Observations'){
 				</div>
 				<div>
 					<div style="font-weight:bold">Ranking Statistics</div>
-					<?php 
+					<?php
+					/*
 					$idRankingArr = $cleanManager->getRankingStats('identification');
 					$rankArr = current($idRankingArr);
 					echo '<table class="styledtable">';
@@ -219,9 +220,11 @@ if($collMap['colltype'] == 'General Observations'){
 						}
 					}
 					echo '</table>';
+					*/
 					?>
 				</div>
 			</div>
+			 -->
 			<?php
 		}
 		else{

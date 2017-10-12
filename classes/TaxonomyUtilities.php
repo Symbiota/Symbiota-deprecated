@@ -18,7 +18,11 @@ class TaxonomyUtilities {
 			//Replace misc 
 			$inStr = str_replace(array('?','*'),'',$inStr);
 			
-			if(stripos($inStr,'cf. ') !== false || stripos($inStr,'c.f. ') !== false || stripos($inStr,' cf ') !== false){
+			if(stripos($inStr,'cfr. ') !== false || stripos($inStr,' cfr ') !== false){
+				$retArr['identificationqualifier'] = 'cf. ';
+				$inStr = str_ireplace(array(' cfr ','cfr. '),' ',$inStr);
+			}
+			elseif(stripos($inStr,'cf. ') !== false || stripos($inStr,'c.f. ') !== false || stripos($inStr,' cf ') !== false){
 				$retArr['identificationqualifier'] = 'cf. ';
 				$inStr = str_ireplace(array(' cf ','c.f. ','cf. '),' ',$inStr);
 			}
@@ -94,7 +98,8 @@ class TaxonomyUtilities {
 					$authorArr = array();
 					//cycles through the final terms to evaluate and extract infraspecific data
 					while($sciStr = array_shift($sciNameArr)){
-						if($sciStr == 'f.' || $sciStr == 'fo.' || $sciStr == 'fo' || $sciStr == 'forma'){
+						$sciStrTest = strtolower($sciStr);
+						if($sciStrTest == 'f.' || $sciStrTest == 'fo.' || $sciStrTest == 'fo' || $sciStrTest == 'forma'){
 							if($sciNameArr){
 								$retArr['unitind3'] = 'f.';
 								$retArr['unitname3'] = array_shift($sciNameArr);
@@ -102,7 +107,7 @@ class TaxonomyUtilities {
 								$authorArr = array();
 							}
 						}
-						elseif($sciStr == 'var.' || $sciStr == 'var'){
+						elseif($sciStrTest == 'var.' || $sciStrTest == 'var' || $sciStrTest == 'v.'){
 							if($sciNameArr){
 								$retArr['unitind3'] = 'var.';
 								$retArr['unitname3'] = array_shift($sciNameArr);
@@ -110,7 +115,7 @@ class TaxonomyUtilities {
 								$authorArr = array();
 							}
 						}
-						elseif($sciStr == 'ssp.' || $sciStr == 'ssp' || $sciStr == 'subsp.' || $sciStr == 'subsp'){
+						elseif($sciStrTest == 'ssp.' || $sciStrTest == 'ssp' || $sciStrTest == 'subsp.' || $sciStrTest == 'subsp' || $sciStrTest == 'sudbsp.'){
 							if($sciNameArr){
 								$retArr['unitind3'] = 'subsp.';
 								$retArr['unitname3'] = array_shift($sciNameArr);
