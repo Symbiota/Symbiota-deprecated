@@ -5,17 +5,19 @@ include_once($SERVER_ROOT.'/classes/TaxonomyCleaner.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/cleaning/taxonomycleaner.php?'.$_SERVER['QUERY_STRING']);
 
-$collid = $_REQUEST["collid"];
+$collid = array_key_exists('collid',$_REQUEST)?$_REQUEST["collid"]:0;
 $autoClean = array_key_exists('autoclean',$_POST)?$_POST['autoclean']:0;
-$start = array_key_exists('start',$_POST)?$_POST['start']:0;
+$startIndex = array_key_exists('startindex',$_POST)?$_POST['startindex']:'';
 $limit = array_key_exists('limit',$_POST)?$_POST['limit']:20;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
+
 $cleanManager = new TaxonomyCleaner();
+if(is_array($collid)) $collid = implode(',',$collid);
 $cleanManager->setCollId($collid);
 $collMap = $cleanManager->getCollMap();
 
 $isEditor = false;
-if($isAdmin){
+if($IS_ADMIN){
 	$isEditor = true;
 }
 else{
@@ -56,7 +58,29 @@ else{
 				});
 				return false;
 			}
-			
+
+			function checkSelectCollidForm(f){
+				var formVerified = false;
+				for(var h=0;h<f.length;h++){
+					if(f.elements[h].name == "collid[]" && f.elements[h].checked){
+						formVerified = true;
+						break;
+					}
+				}
+				if(!formVerified){
+					alert("Please choose at least one collection!");
+					return false;
+				}
+				return true;
+			}
+
+			function selectAllCollections(cbObj){
+				var cbStatus = cbObj.checked
+				var f = cbObj.form;
+				for(var i=0;i<f.length;i++){
+					if(f.elements[i].name == "collid[]") f.elements[i].checked = cbStatus;
+				}
+			}
 		</script>
 		<script src="../../js/symb/shared.js?ver=1" type="text/javascript"></script>
 	</head>
@@ -67,8 +91,19 @@ else{
 		?>
 		<div class='navpath'>
 			<a href="../../index.php">Home</a> &gt;&gt;
-			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Menu</a> &gt;&gt;
-			<a href="index.php?collid=<?php echo $collid; ?>&emode=1">Data Cleaning Menu</a> &gt;&gt;
+			<?php
+			if($collid && is_numeric($collid)){
+				?>
+				<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Menu</a> &gt;&gt;
+				<a href="index.php?collid=<?php echo $collid; ?>&emode=1">Data Cleaning Menu</a> &gt;&gt;
+				<?php
+			}
+			else{
+				?>
+				<a href="../../sitemap.php">Site Map</a> &gt;&gt;
+				<?php
+			}
+			?>
 			<b>Taxonomic Name Cleaner</b>
 		</div>
 		<!-- inner text block -->
@@ -77,20 +112,36 @@ else{
 			if($isEditor){
 				if($collid){
 					?>
-					<div style="font-weight: bold; font-size: 130%; margin-bottom: 20px"><?php echo $collMap['collectionname'].' ('.$collMap['code'].')'; ?></div>
+					<div style="font-weight: bold; font-size: 130%; margin-bottom: 10px">
+						<?php
+						if(is_numeric($collid)){
+							echo $collMap[$collid]['collectionname'].' ('.$collMap[$collid]['code'].')';
+						}
+						else{
+							echo 'Multiple Collection Cleaning Tool (<a href="#" onclick="$(\'#collDiv\').show()" style="color:blue;text-decoration:underline">'.count($collMap).' collections</a>)';
+						}
+						?>
+					</div>
+					<?php
+					if(count($collMap) > 1){
+						echo '<div id="collDiv" style="display:none;margin:0px 20px">';
+						foreach($collMap as $k => $vArr){
+							echo '<div>'.$vArr['collectionname'].' ('.$vArr['code'].')</div>';
+						}
+						echo '</div>';
+					}
+					?>
 					<div style="margin:20px;">
 						<?php
-						$startAdjustment = 0;
 						if($action){
 							if($action == 'deepindex'){
 								$cleanManager->deepIndexTaxa();
 							}
-							else{
+							elseif($action == 'AnalyzingNames'){
 								echo '<ul>';
 								$cleanManager->setAutoClean($autoClean);
-								$startAdjustment = $cleanManager->analyzeTaxa($start, $limit);
+								$startIndex = $cleanManager->analyzeTaxa($startIndex, $limit);
 								echo '</ul>';
-								$start += $limit-$startAdjustment;
 							}
 						}
 						$badTaxaCount = $cleanManager->getBadTaxaCount();
@@ -115,7 +166,10 @@ else{
 									</div>
 									<div style="margin:10px;">
 										<div style="margin-bottom:5px;">
-											Processing limit: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:30px" />
+											Names Processed per Run: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:40px" />
+										</div>
+										<div style="margin-bottom:5px;">
+											Start Index: <input name="startindex" type="text" value="<?php echo $startIndex; ?>" title="Enter a taxon name or letter of the alphabet to indicate where the processing should start" />
 										</div>
 										<div style="height:50px;">
 											<div style="">Clean and Mapping Function:</div> 
@@ -124,18 +178,8 @@ else{
 										</div>
 										<div style="clear:both;">
 											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-											<input name="start" type="hidden" value="<?php echo $start; ?>" />
-											<button name="submitaction" type="submit" value="submitaction" ><?php echo ($start?'Continue Analyzing Names':'Analyze Taxonomic Names'); ?></button>
+											<button name="submitaction" type="submit" value="AnalyzingNames" ><?php echo ($startIndex?'Continue Analyzing Names':'Analyze Taxonomic Names'); ?></button>
 										</div>
-										<?php
-										if($start){
-											?>
-											<div style="margin-top:10px;">
-												<button name="submitaction" type="submit" value="submitaction" onclick="this.form.start.value = 0" >Restart from Beginning</button>
-											</div>
-											<?php
-										}
-										?>
 									</div>
 								</div>
 							</form>
@@ -155,12 +199,27 @@ else{
 					</div>
 					<?php
 				}
-				else{
+				elseif($IS_ADMIN){
 					?>
-					<div style="margin:20px;font-weight:bold;font-size:120%;">
-						ERROR: Collection identifier is NULL
-					</div>
-					<?php 
+					<div style="margin:0px 0px 20px 20xp;font-weight:bold;font-size:120%;">Batch Taxonomic Cleaning Tool</div>
+					<fieldset style="padding: 15px;margin:20px;">
+						<legend><b>Collection Selector</b></legend>
+						<form name="selectcollidform" action="taxonomycleaner.php" method="post" onsubmit="return checkSelectCollidForm(this)">
+							<div><input name="selectall" type="checkbox" onclick="selectAllCollections(this);" /> Select / Unselect All</div>
+							<?php 
+							foreach($collMap as $id => $collArr){
+								echo '<div>';
+								echo '<input name="collid[]" type="checkbox" value="'.$id.'" /> ';
+								echo $collArr['collectionname'].' ('.$collArr['code'].')';
+								echo '</div>';
+							}
+							?>
+							<div style="margin: 15px">
+								<button name="submitaction" type="submit" value="EvaluateCollections">Evaluate Collections</button>
+							</div>
+						</form>
+					</fieldset>
+					<?php
 				}
 			}
 			else{

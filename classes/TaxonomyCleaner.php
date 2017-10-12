@@ -60,14 +60,14 @@ class TaxonomyCleaner extends Manager{
 		return $retCnt;
 	}
 
-	public function analyzeTaxa($startIndex = 0, $limit = 50){
+	public function analyzeTaxa($startIndex, $limit = 50){
 		set_time_limit(1800);
-		$startAdjustment = 0;
+		$endIndex = 0;
 		$this->logOrEcho("Starting taxa check ");
-		$sql = 'SELECT DISTINCT sciname, family, count(*) as cnt '.
-			$this->getSqlFragment().
-			'GROUP BY sciname, family ORDER BY sciname LIMIT '.$startIndex.','.$limit;
-		//echo $sql;
+		$sql = 'SELECT DISTINCT sciname, family, count(*) as cnt '.$this->getSqlFragment();
+		if($startIndex) $sql .= 'AND (sciname > "'.$this->cleanInStr($startIndex).'") ';
+		$sql .= 'GROUP BY sciname, family ORDER BY sciname LIMIT '.$limit;
+		//echo $sql; exit;
 		if($rs = $this->conn->query($sql)){
 			//Check name through taxonomic resources
 			$taxonHarvester = new  TaxonomyHarvester();
@@ -103,7 +103,6 @@ class TaxonomyCleaner extends Manager{
 						$taxaAdded= true;
 						if($taxonHarvester->isFullyResolved()){
 							$manualCheck = false;
-							++$startAdjustment;
 						}
 						else{
 							$this->logOrEcho('Taxon not fully resolved...',1);
@@ -137,6 +136,7 @@ class TaxonomyCleaner extends Manager{
 					}
 				}
 				$taxaCnt++;
+				$endIndex = array_shift(explode(' ',$r->sciname));
 				flush();
 				ob_flush();
 			}
@@ -145,11 +145,11 @@ class TaxonomyCleaner extends Manager{
 		}
 		
 		$this->logOrEcho("<b>Done with taxa check </b>");
-		return $startAdjustment;
+		return $endIndex;
 	}
 	
 	private function getSqlFragment(){
-		$sql = 'FROM omoccurrences WHERE (collid = '.$this->collid.') AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname NOT LIKE "% x %") AND (sciname NOT LIKE "% × %")'; 
+		$sql = 'FROM omoccurrences WHERE (collid IN('.$this->collid.')) AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname NOT LIKE "% x %") AND (sciname NOT LIKE "% × %") '; 
 		return $sql;
 	}
 
@@ -158,7 +158,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho('Cleaning leading and trialing spaces...');
 		$sql = 'UPDATE omoccurrences '.
 			'SET sciname = trim(sciname) '.
-			'WHERE (collid = '.$this->collid.') AND (tidinterpreted is NULL) AND (sciname LIKE " %" OR sciname LIKE "% ")';
+			'WHERE (collid IN('.$this->collid.')) AND (tidinterpreted is NULL) AND (sciname LIKE " %" OR sciname LIKE "% ")';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records cleaned',1);
 		}
@@ -168,7 +168,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho('Cleaning double spaces inbedded within name...');
 		$sql = 'UPDATE omoccurrences '.
 			'SET sciname = replace(sciname, "  ", " ") '. 
-			'WHERE (collid = '.$this->collid.') AND (tidinterpreted is NULL) AND (sciname LIKE "%  %") ';
+			'WHERE (collid IN('.$this->collid.')) AND (tidinterpreted is NULL) AND (sciname LIKE "%  %") ';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records cleaned',1);
 		}
@@ -181,7 +181,7 @@ class TaxonomyCleaner extends Manager{
 		$triCnt = 0;
 		$sql = 'SELECT DISTINCT o.sciname, t.tid, t.sciname AS newsciname '.
 			'FROM omoccurrences o INNER JOIN taxa t ON o.sciname = CONCAT_WS(" ",t.unitname1,t.unitname2,t.unitname3) '.
-			'WHERE (o.collid = '.$this->collid.') AND (t.rankid IN(230,240)) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL) '.
+			'WHERE (o.collid IN('.$this->collid.')) AND (t.rankid IN(230,240)) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL) '.
 			'ORDER BY t.rankid';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -195,7 +195,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho('Indexing names ending in &quot;sp.&quot;...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON SUBSTRING(o.sciname,1, CHAR_LENGTH(o.sciname) - 4) = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
-			'WHERE (o.collid = '.$this->collid.') AND (o.sciname LIKE "% sp.") AND (o.tidinterpreted IS NULL)';
+			'WHERE (o.collid IN('.$this->collid.')) AND (o.sciname LIKE "% sp.") AND (o.tidinterpreted IS NULL)';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
@@ -205,7 +205,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho('Indexing names containing &quot;spp.&quot;...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," spp.","") = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
-			'WHERE (o.collid = '.$this->collid.') AND (o.sciname LIKE "% spp.%") AND (o.tidinterpreted IS NULL)';
+			'WHERE (o.collid IN('.$this->collid.')) AND (o.sciname LIKE "% spp.%") AND (o.tidinterpreted IS NULL)';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
@@ -216,13 +216,13 @@ class TaxonomyCleaner extends Manager{
 		$cnt = 0;
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," cf. "," ") = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
-			'WHERE (o.collid = '.$this->collid.') AND (o.sciname LIKE "% cf. %") AND (o.tidinterpreted IS NULL)';
+			'WHERE (o.collid IN('.$this->collid.')) AND (o.sciname LIKE "% cf. %") AND (o.tidinterpreted IS NULL)';
 		if($this->conn->query($sql)){
 			$cnt = $this->conn->affected_rows;
 		}
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," cf "," ") = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
-			'WHERE (o.collid = '.$this->collid.') AND (o.sciname LIKE "% cf %") AND (o.tidinterpreted IS NULL)';
+			'WHERE (o.collid IN('.$this->collid.')) AND (o.sciname LIKE "% cf %") AND (o.tidinterpreted IS NULL)';
 		if($this->conn->query($sql)){
 			$cnt += $this->conn->affected_rows;
 			$this->logOrEcho($cnt.' occurrence records mapped',1);
@@ -233,7 +233,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho('Indexing names containing &quot;aff.&quot;...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," aff. "," ") = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
-			'WHERE (o.collid = '.$this->collid.') AND (o.sciname LIKE "% aff. %") AND (o.tidinterpreted IS NULL)';
+			'WHERE (o.collid IN('.$this->collid.')) AND (o.sciname LIKE "% aff. %") AND (o.tidinterpreted IS NULL)';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
@@ -243,7 +243,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho('Indexing names containing &quot;group&quot; statements...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," group"," ") = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
-			'WHERE (o.collid = '.$this->collid.') AND (o.sciname LIKE "% group%") AND (o.tidinterpreted IS NULL)';
+			'WHERE (o.collid IN('.$this->collid.')) AND (o.sciname LIKE "% group%") AND (o.tidinterpreted IS NULL)';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
@@ -255,7 +255,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho('Indexing names based on exact matches...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
-			'WHERE (o.collid = '.$this->collid.') AND (o.tidinterpreted IS NULL)';
+			'WHERE (o.collid IN('.$this->collid.')) AND (o.tidinterpreted IS NULL)';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
@@ -273,7 +273,7 @@ class TaxonomyCleaner extends Manager{
 			$newSciname = $this->cleanInStr($newSciname);
 			if($newAuthor) $newAuthor= $this->cleanInStr($newAuthor);
 			if($idQualifier) $idQualifier = $this->cleanInStr($idQualifier);
-			$sqlWhere = 'WHERE (collid = '.$collid.') AND (sciname = "'.$oldSciname.'") AND (tidinterpreted IS NULL)';
+			$sqlWhere = 'WHERE (collid IN('.$collid.')) AND (sciname = "'.$oldSciname.'") AND (tidinterpreted IS NULL)';
 			//Version edit in edits table
 			$sql1 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
 				'SELECT occid, "sciname", "'.$newSciname.'", sciname, '.$GLOBALS['SYMB_UID'].', 1, 1 '.
@@ -619,22 +619,23 @@ class TaxonomyCleaner extends Manager{
 	//Misc fucntions
 	public function getCollMap(){
 		$retArr = Array();
+		$sql = 'SELECT collid, CONCAT_WS("-",institutioncode, collectioncode) AS code, collectionname, icon, colltype, managementtype FROM omcollections ';
 		if($this->collid){
-			$sql = 'SELECT CONCAT_WS("-",c.institutioncode, c.collectioncode) AS code, c.collectionname, '.
-					'c.icon, c.colltype, c.managementtype '.
-					'FROM omcollections c '.
-					'WHERE (c.collid = '.$this->collid.') ';
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				$retArr['code'] = $row->code;
-				$retArr['collectionname'] = $row->collectionname;
-				$retArr['icon'] = $row->icon;
-				$retArr['colltype'] = $row->colltype;
-				$retArr['managementtype'] = $row->managementtype;
-			}
-			$rs->free();
+			$sql .= 'WHERE (collid IN('.$this->collid.')) ';
 		}
+		else{
+			$sql .= 'ORDER BY collectionname, collectioncode ';
+		}
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->collid]['code'] = $r->code;
+			$retArr[$r->collid]['collectionname'] = $r->collectionname;
+			$retArr[$r->collid]['icon'] = $r->icon;
+			$retArr[$r->collid]['colltype'] = $r->colltype;
+			$retArr[$r->collid]['managementtype'] = $r->managementtype;
+		}
+		$rs->free();
 		return $retArr;
 	}
 
@@ -648,7 +649,7 @@ class TaxonomyCleaner extends Manager{
 	}
 
 	public function setCollId($collid){
-		if(is_numeric($collid)){
+		if(preg_match('/^[\d,]+$/',$collid)){
 			$this->collid = $collid;
 		}
 	}
