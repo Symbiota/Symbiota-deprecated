@@ -64,79 +64,12 @@ function displayTableView(f){
 	f.submit();	
 }
 
-function checkUpperLat(){
-	if(document.harvestparams.upperlat.value != ""){
-		if(document.harvestparams.upperlat_NS.value=='N'){
-			document.harvestparams.upperlat.value = Math.abs(parseFloat(document.harvestparams.upperlat.value));
-		}
-		else{
-			document.harvestparams.upperlat.value = -1*Math.abs(parseFloat(document.harvestparams.upperlat.value));
-		}
+function cleanNumericInput(formElem){
+	if(formElem.value != ""){
+		var elemValue = Math.abs(parseFloat(formElem.value));
+		if(!elemValue) elemValue = '';
+		formElem.value = elemValue;
 	}
-}
-
-function checkBottomLat(){
-	if(document.harvestparams.bottomlat.value != ""){
-		if(document.harvestparams.bottomlat_NS.value == 'N'){
-			document.harvestparams.bottomlat.value = Math.abs(parseFloat(document.harvestparams.bottomlat.value));
-		}
-		else{
-			document.harvestparams.bottomlat.value = -1*Math.abs(parseFloat(document.harvestparams.bottomlat.value));
-		}
-	}
-}
-
-function checkRightLong(){
-	if(document.harvestparams.rightlong.value != ""){
-		if(document.harvestparams.rightlong_EW.value=='E'){
-			document.harvestparams.rightlong.value = Math.abs(parseFloat(document.harvestparams.rightlong.value));
-		}
-		else{
-			document.harvestparams.rightlong.value = -1*Math.abs(parseFloat(document.harvestparams.rightlong.value));
-		}
-	}
-}
-
-function checkLeftLong(){
-	if(document.harvestparams.leftlong.value != ""){
-		if(document.harvestparams.leftlong_EW.value=='E'){
-			document.harvestparams.leftlong.value = Math.abs(parseFloat(document.harvestparams.leftlong.value));
-		}
-		else{
-			document.harvestparams.leftlong.value = -1*Math.abs(parseFloat(document.harvestparams.leftlong.value));
-		}
-	}
-}
-
-function checkPointLat(){
-	if(document.harvestparams.pointlat.value != ""){
-		if(document.harvestparams.pointlat_NS.value=='N'){
-			document.harvestparams.pointlat.value = Math.abs(parseFloat(document.harvestparams.pointlat.value));
-		}
-		else{
-			document.harvestparams.pointlat.value = -1*Math.abs(parseFloat(document.harvestparams.pointlat.value));
-		}
-	}
-}
-
-function checkPointLong(){
-	if(document.harvestparams.pointlong.value != ""){
-		if(document.harvestparams.pointlong_EW.value=='E'){
-			document.harvestparams.pointlong.value = Math.abs(parseFloat(document.harvestparams.pointlong.value));
-		}
-		else{
-			document.harvestparams.pointlong.value = -1*Math.abs(parseFloat(document.harvestparams.pointlong.value));
-		}
-	}
-}
-
-function updateRadius(){
-	var radiusUnits = document.getElementById("radiusunits").value;
-	var radiusInMiles = document.getElementById("radiustemp").value;
-	if(radiusUnits == "km"){
-		radiusInMiles = radiusInMiles*0.6214;
-	}
-	document.getElementById("radius").value = radiusInMiles;
 }
 
 function checkHarvestParamsForm(frm){
@@ -165,11 +98,19 @@ function checkHarvestParamsForm(frm){
 			alert("Longitude values can not be greater than 180 or less than -180.");
 			return false;
 		}
-		if(parseFloat(frm.upperlat.value) < parseFloat(frm.bottomlat.value)){
+		var uLat = frm.upperlat.value;
+		if(frm.upperlat_NS.value == 'S') uLat = uLat * -1;
+		var bLat = frm.bottomlat.value;
+		if(frm.bottomlat_NS.value == 'S') bLat = bLat * -1;
+		if(uLat < bLat){
 			alert("Your northern latitude value is less then your southern latitude value. Please correct this.");
 			return false;
 		}
-		if(parseFloat(frm.leftlong.value) > parseFloat(frm.rightlong.value)){
+		var lLng = frm.leftlong.value;
+		if(frm.leftlong_EW.value == 'W') lLng = lLng * -1;
+		var rLng = frm.rightlong.value;
+		if(frm.rightlong_EW.value == 'W') rLng = rLng * -1;
+		if(lLng > rLng){
 			alert("Your western longitude value is greater then your eastern longitude value. Please correct this. Note that western hemisphere longitudes in the decimal format are negitive.");
 			return false;
 		}
@@ -208,17 +149,17 @@ function setHarvestParamsForm(){
 		if(urlVar.elevhigh){frm.elevhigh.value = urlVar.elevhigh;}
 		if(urlVar.llbound){
 			var coordArr = urlVar.llbound.split(';');
-			frm.upperlat.value = coordArr[0];
-			frm.bottomlat.value = coordArr[1];
-			frm.leftlong.value = coordArr[2];
-			frm.rightlong.value = coordArr[3];
+			frm.upperlat.value = Math.abs(parseFloat(coordArr[0]));
+			frm.bottomlat.value = Math.abs(parseFloat(coordArr[1]));
+			frm.leftlong.value = Math.abs(parseFloat(coordArr[2]));
+			frm.rightlong.value = Math.abs(parseFloat(coordArr[3]));
 		}
 		if(urlVar.llpoint){
 			var coordArr = urlVar.llpoint.split(';');
-			frm.pointlat.value = coordArr[0];
-			frm.pointlong.value = coordArr[1];
-			frm.radiustemp.value = coordArr[2];
-			frm.radius.value = coordArr[2]*0.6214;
+			frm.pointlat.value = Math.abs(parseFloat(coordArr[0]));
+			frm.pointlong.value = Math.abs(parseFloat(coordArr[1]));
+			frm.radius.value = Math.abs(parseFloat(coordArr[2]));
+			if(coordArr[4] == "mi") frm.radiusunits.value = "mi";
 		}
 		if(urlVar.collector){frm.collector.value = urlVar.collector;}
 		if(urlVar.collnum){frm.collnum.value = urlVar.collnum;}
