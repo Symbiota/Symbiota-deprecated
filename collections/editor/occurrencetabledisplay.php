@@ -197,7 +197,11 @@ else{
 										<option value="">----------------------</option>
 										<?php 
 										foreach($headerMapBase as $k => $v){
-											echo '<option value="'.$k.'" '.($buFieldName==$k?'SELECTED':'').'>'.$v.'</option>';
+											//Scientific name fields are excluded because batch updates will not update tidinterpreted index and authors
+											//Scientific name updates should happen within
+											if($k != 'scientificnameauthorship' && $k != 'sciname'){
+												echo '<option value="'.$k.'" '.($buFieldName==$k?'SELECTED':'').'>'.$v.'</option>';
+											}
 										}
 										?>
 									</select>
