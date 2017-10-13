@@ -1,5 +1,5 @@
 <?php
-include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once('Manager.php');
 
 class TaxonProfile extends Manager {
 	
@@ -61,19 +61,19 @@ class TaxonProfile extends Manager {
 			$rs->free();
 			
 			//Set acceptance, parent, and family
-			$sql2 = 'SELECT ts.family, ts.parenttid, t.tid, tid, sciname, author, rankid, securitystatus '.
+			$sql2 = 'SELECT ts.family, ts.parenttid, t.tid, t.sciname, t.author, t.rankid, t.securitystatus '.
 				'FROM taxstatus ts INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
 				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = '.$this->tid.') ';
 			//echo $sql;
 			$rs2 = $this->conn->query($sql2);
 			while($r2 = $rs2->fetch_object()){
-				$this->sciName = $r->sciname;
-				$this->author = $r->author;
-				$this->rankId = $r->rankid;
+				$this->sciName = $r2->sciname;
+				$this->author = $r2->author;
+				$this->rankId = $r2->rankid;
 				$this->family = $r2->family;
 				$this->parentTid = $r2->parenttid;
-				$this->acceptedTaxa[$r2->tidaccepted] = array('sciname'=>$r->sciname,'author'=>$r->author);
-				if($r->securitystatus > 0) $this->displayLocality = 0;
+				$this->acceptedTaxa[$r2->tid] = array('sciname'=>$r2->sciname,'author'=>$r2->author);
+				if($r2->securitystatus > 0) $this->displayLocality = 0;
 				$status = true;
 			}
 			$rs2->free();

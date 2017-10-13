@@ -26,8 +26,6 @@ if($lang) $taxonManager->setLanguage($lang);
 $tidSubmit = $tid;
 $tid = $taxonManager->setTid($tidSubmit);
 
-
-$spDisplay = $taxonManager->getDisplayName();
 $links = $taxonManager->getTaxaLinks();
 if($links){
 	foreach($links as $linkKey => $linkUrl){
@@ -55,7 +53,7 @@ $descr = Array();
 
 <html>
 <head>
-	<title><?php echo $DEFAULT_TITLE." - ".$spDisplay; ?></title>
+	<title><?php echo $DEFAULT_TITLE." - ".$taxonManager->getSciName(); ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
@@ -90,19 +88,20 @@ if($taxonManager->getSciName() != "unknown"){
 			<td colspan="2" valign="bottom" height="35px">
 			<div style='float:left;font-size:16px;margin-left:10px;'>
 				<span style='font-weight:bold;color:#990000;'>
-					<i><?php echo $spDisplay; ?></i>
+					<i><?php echo $taxonManager->getSciName(); ?></i>
 				</span> 
 				<?php echo $taxonManager->getAuthor(); ?>
 				<?php 
 				$parentLink = "index.php?tid=".$taxonManager->getParentTid()."&clid=".$clid."&pid=".$pid."&taxauthid=".$taxAuthId;
 				echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.png' title='Go to Parent' /></a>";
 			 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
-			 	if(($taxonManager->getTid() != $taxonManager->getSubmittedTid()) && $taxAuthId){
+			 	if(!$taxonManager->isAccepted()){
 			 		echo '<span style="font-size:90%;margin-left:25px;"> ('.$LANG['REDIRECT'].': <i>'.$taxonManager->getSubmittedValue('sciname').'</i>'.$taxonManager->getSubmittedValue('author').')</span>'; 
 			 	}
 			 	?>
 			</div>
 			<?php
+			/*
 			if($taxonManager->getAmbSyn()){
 				$synLinkStr = '';
 				$explanationStr = '';
@@ -121,6 +120,7 @@ if($taxonManager->getSciName() != "unknown"){
 				echo $explanationStr.$synLinkStr;
 				echo '</div>';
 			}
+			*/
 			if($isEditor){
 				?>
 				<div style="float:right;">
@@ -147,16 +147,6 @@ if($taxonManager->getSciName() != "unknown"){
 					<?php echo '<b>'.$LANG['FAMILY'].':</b> '.$taxonManager->getFamily(); ?> 
 				</div>
 				<?php 
-				$str = "";
-				if($this->vernaculars){
-					$str = array_shift($this->vernaculars);
-				}
-				if($this->vernaculars){
-					$str .= "<span class='verns' onclick=\"toggle('verns');\" style='cursor:pointer;display:inline;font-size:70%;' title='Click here to show more common names'>,&nbsp;&nbsp;more...</span>";
-					$str .= "<span class='verns' onclick=\"toggle('verns');\" style='display:none;'>, ";
-					$str .= implode(", ",$this->vernaculars);
-					$str .= "</span>";
-				}
 				if($vernArr = $taxonManager->getVernaculars()){
 					$primerArr = array();
 					if(array_key_exists($DEFAULT_LANG, $vernArr)){
@@ -241,7 +231,7 @@ if($taxonManager->getSciName() != "unknown"){
 						elseif($aUrl){
 							echo '<a href="'.$aUrl.'">';
 						}
-						echo '<img src="'.$url.'" title="'.$spDisplay.'" alt="'.$spDisplay.'" />';
+						echo '<img src="'.$url.'" title="'.$taxonManager->getSciName().'" alt="'.$taxonManager->getSciName().'" />';
 						if($aUrl || $gAnchor) echo '</a>';
 						if($gAnchor) echo '<br /><a href="#" onclick="'.$gAnchor.';return false">'.$LANG['OPEN_MAP'].'</a>';
 						echo "</div>";
@@ -265,7 +255,7 @@ if($taxonManager->getSciName() != "unknown"){
 		<tr>
 			<td style="width:250px;vertical-align:top;">
 				<?php 
-				$displayName = $spDisplay;
+				$displayName = $taxonManager->getSciName();
 				if($taxonRank == 180) $displayName = '<i>'.$displayName.'</i> spp. ';
 				if($taxonRank > 140){
 					$parentLink = "index.php?tid=".$taxonManager->getParentTid()."&clid=".$clid."&pid=".$pid."&taxauthid=".$taxAuthId;
@@ -359,7 +349,7 @@ if($taxonManager->getSciName() != "unknown"){
 							//Display thumbnail map
 							echo '<div class="sppmap">';
 							if(array_key_exists("map",$subArr) && $subArr["map"]){
-								echo '<img src="'.$subArr['map'].'" title="'.$spDisplay.'" alt="'.$spDisplay.'" />';
+								echo '<img src="'.$subArr['map'].'" title="'.$taxonManager->getSciName().'" alt="'.$taxonManager->getSciName().'" />';
 							}							
 							elseif($taxonManager->getRankId()>140){
 								echo '<div class="spptext">'.$LANG['MAP_NOT_AVAILABLE'].'</div>';
