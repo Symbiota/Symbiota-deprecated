@@ -13,18 +13,21 @@ $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$DEFAULT_LANG;
 $descrDisplayLevel = array_key_exists("displaylevel",$_REQUEST)?$_REQUEST["displaylevel"]:"";
 
 $taxonManager = new TaxonProfile();
-if($taxAuthId || $taxAuthId === "0") $taxonManager->setTaxAuthId($taxAuthId);
+if($taxAuthId) $taxonManager->setTaxAuthId($taxAuthId);
+if(!$tid && $taxonValue){
+	$tidArr = $taxonManager->taxonSearch($taxonValue);
+	$tid = key($tidArr);
+	//Need to add code that allows user to select target taxon when more than one homonym is returned
+}
+
 if($clid) $taxonManager->setClid($clid);
 if($pid) $taxonManager->setPid($pid);
 if($lang) $taxonManager->setLanguage($lang);
-if($taxonValue && !$tid) $tid = $taxonManager->getTaxon($taxonValue);
-if($tid) $taxonManager->setTid($tid);
+$tidSubmit = $tid;
+$tid = $taxonManager->setTid($tidSubmit);
 
-$ambiguous = $taxonManager->getAmbSyn();
-$acceptedName = $taxonManager->getAcceptance();
-$synonymArr = $taxonManager->getSynonymArr();
+
 $spDisplay = $taxonManager->getDisplayName();
-$taxonRank = $taxonManager->getRankId();
 $links = $taxonManager->getTaxaLinks();
 if($links){
 	foreach($links as $linkKey => $linkUrl){
@@ -45,9 +48,6 @@ if($SYMB_UID){
 	if($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$userRights)){
 		$displayLocality = 1;
 	}
-}
-if($taxonManager->getSecurityStatus() == 0){
-	$displayLocality = 1;
 }
 $taxonManager->setDisplayLocality($displayLocality);
 $descr = Array();
@@ -83,6 +83,7 @@ include($SERVER_ROOT.'/header.php');
 <table id="innertable">
 <?php 
 if($taxonManager->getSciName() != "unknown"){
+	$taxonRank = $taxonManager->getRankId();
 	if($taxonRank > 180){
 		?>
 		<tr>
@@ -97,19 +98,20 @@ if($taxonManager->getSciName() != "unknown"){
 				echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.png' title='Go to Parent' /></a>";
 			 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
 			 	if(($taxonManager->getTid() != $taxonManager->getSubmittedTid()) && $taxAuthId){
-			 		echo '<span style="font-size:90%;margin-left:25px;"> ('.$LANG['REDIRECT'].': <i>'.$taxonManager->getSubmittedSciName().'</i>)</span>'; 
+			 		echo '<span style="font-size:90%;margin-left:25px;"> ('.$LANG['REDIRECT'].': <i>'.$taxonManager->getSubmittedValue('sciname').'</i>'.$taxonManager->getSubmittedValue('author').')</span>'; 
 			 	}
 			 	?>
 			</div>
 			<?php
-			if($ambiguous){
+			if($taxonManager->getAmbSyn()){
 				$synLinkStr = '';
 				$explanationStr = '';
+				$synonymArr = $taxonManager->getSynonymArr();
 				foreach($synonymArr as $synTid => $sName){
 					$synLinkStr .= '<a href="index.php?tid='.$synTid.'&taxauthid='.$taxAuthId.'&clid='.$clid.'&pid='.$pid.'&lang='.$lang.'">'.$sName.'</a>, ';
 				}
 				$synLinkStr = substr($synLinkStr,0,-2);
-				if($acceptedName){
+				if($taxonManager->getAcceptance()){
 					$explanationStr = $LANG['AMB_ACCEPTED'];
 				}
 				else{
@@ -145,8 +147,35 @@ if($taxonManager->getSciName() != "unknown"){
 					<?php echo '<b>'.$LANG['FAMILY'].':</b> '.$taxonManager->getFamily(); ?> 
 				</div>
 				<?php 
-				$vernStr = $taxonManager->getVernacularStr();
-				if($vernStr){
+				$str = "";
+				if($this->vernaculars){
+					$str = array_shift($this->vernaculars);
+				}
+				if($this->vernaculars){
+					$str .= "<span class='verns' onclick=\"toggle('verns');\" style='cursor:pointer;display:inline;font-size:70%;' title='Click here to show more common names'>,&nbsp;&nbsp;more...</span>";
+					$str .= "<span class='verns' onclick=\"toggle('verns');\" style='display:none;'>, ";
+					$str .= implode(", ",$this->vernaculars);
+					$str .= "</span>";
+				}
+				if($vernArr = $taxonManager->getVernaculars()){
+					$primerArr = array();
+					if(array_key_exists($DEFAULT_LANG, $vernArr)){
+						$primerArr = $vernArr[$DEFAULT_LANG];
+						unset($vernArr[$DEFAULT_LANG]);
+					}
+					else{
+						$primerArr = array_shift($vernArr[$DEFAULT_LANG]);
+					}
+					$vernStr = array_shift($primerArr);
+					if($primerArr || $vernArr){
+						$spanStr .= '<a href="#" class="verns" onclick="toggle(\'verns\')" style="font-size:70%" title="Click here to show more common names">,&nbsp;&nbsp;more...</a>';
+						$spanStr .= '<span class="verns" onclick="toggle(\'verns\');" style="display:none;">';
+						$spanStr .= implode(', ',$primerArr);
+						foreach($vernArr as $langName => $vArr){
+							$spanStr .= ', ('.$langName.': '.implode(', ',$vArr).')';
+						}
+						$spanStr .= '</span>';
+					}
 					?>
 					<div id="vernaculars" style="margin-left:10px;margin-top:0.5em;font-size:130%;">
 						<?php echo $vernStr; ?>
@@ -154,11 +183,20 @@ if($taxonManager->getSciName() != "unknown"){
 					<?php 
 				}
 				
-				$synStr = $taxonManager->getSynonymStr();
-				if($synStr){
-					echo "\t<div id='synonyms' style='margin-left:20px;margin-top:0.5em;' title='".$LANG['SYNONYMS']."'>[";
+				if($synArr = $taxonManager->getSynonymStr()){
+					$primerArr = array_shift($synArr);
+					$synStr = '<i>'.$primerArr['sciname'].'</i>'.(isset($primerArr['author']) && $primerArr['author']?' '.$primerArr['author']:'');
+					if($synArr){
+						$synStr .= '<a href="#" class="syns" onclick="toggle(\'syns\')" style="font-size:70%;vertical-align:sub" title="Click here to show more synonyms">,&nbsp;&nbsp;more</a>';
+						$synStr .= '<span class="syns" onclick="toggle(\'syns\')" style="display:none">';
+						foreach($synArr as $synKey => $sArr){
+							$synStr .= ', <i>'.$sArr['sciname'].'</i> '.$sArr['author'];
+						}
+						$synStr .= '</span>';
+					}
+					echo '<div id="synonyms" style="margin-left:20px;margin-top:0.5em;" title="'.$LANG['SYNONYMS'].'">[';
 					echo $synStr;
-					echo"]</div>\n";
+					echo ']</div>';
 				}
 				
 				if(!$taxonManager->echoImages(0,1,0)){
