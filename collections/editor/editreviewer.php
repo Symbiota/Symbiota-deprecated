@@ -12,6 +12,8 @@ $faStatus = array_key_exists('fastatus',$_REQUEST)?$_REQUEST['fastatus']:'';
 $frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:'1,2';
 $editor = array_key_exists('editor',$_REQUEST)?$_REQUEST['editor']:'';
 $queryOccid = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:'';
+$startDate = array_key_exists('startdate',$_REQUEST)?$_REQUEST['startdate']:'';
+$endDate = array_key_exists('enddate',$_REQUEST)?$_REQUEST['enddate']:'';
 $pageNum = array_key_exists('pagenum',$_REQUEST)?$_REQUEST['pagenum']:'0';
 $limitCnt = array_key_exists('limitcnt',$_REQUEST)?$_REQUEST['limitcnt']:'1000';
 
@@ -28,6 +30,8 @@ else{
 	$reviewManager->setReviewStatusFilter($frStatus);
 }
 $reviewManager->setEditorFilter($editor);
+$reviewManager->setStartDateFilter($startDate);
+$reviewManager->setEndDateFilter($endDate);
 $reviewManager->setPageNumber($pageNum);
 $reviewManager->setLimitNumber($limitCnt);
 
@@ -54,10 +58,10 @@ if($isEditor){
 	elseif(array_key_exists('delsubmit', $_POST)){
 		$idStr = implode(',',$_POST['id']);
 		$reviewManager->deleteEdits($idStr);
-        if($SOLR_MODE){
-        	$solrManager = new SOLRManager();
-        	$solrManager->updateSOLR();
-        }
+		if($SOLR_MODE){
+			$solrManager = new SOLRManager();
+			$solrManager->updateSOLR();
+		}
 	}
 	elseif(array_key_exists('dlsubmit', $_POST)){
 		$idStr = implode(',',$_POST['id']);
@@ -110,6 +114,14 @@ $navStr .= '</div>';
 		<script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
 		<script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
 		<script>
+			function validateFilterForm(f){
+				if(f.startdate.value > f.enddate.value){
+					alert("Start date cannot be after end date");
+					return false;
+				}
+				return true
+			}
+
 			function selectAllId(cbObj){
 				var eElements = document.getElementsByName("id[]");
 				for(i = 0; i < eElements.length; i++){
@@ -162,7 +174,7 @@ $navStr .= '</div>';
 			}
 
 			function openIndPU(occid,clid){
-				var newWindow = window.open('../editor/occurrenceeditor.php?occid='+occid,'indspec' + occid,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=700,left=20,top=20');
+				var newWindow = window.open('../editor/occurrenceeditor.php?occid='+occid,'indspec' + occid,'scrollbars=1,toolbar=0,resizable=1,width=1000,height=700,left=20,top=20');
 				if (newWindow.opener == null) newWindow.opener = self;
 			}
 		</script>
@@ -201,12 +213,12 @@ $navStr .= '</div>';
 				echo $retToMenuStr;
 				?>
 				<div id="filterDiv" style="float:right;">
-					<form name="filter" action="editreviewer.php" method="post">
-						<fieldset style="width:300px;text-align:left;">
+					<form name="filter" action="editreviewer.php" method="post" onsubmit="return validateFilterForm(this)">
+						<fieldset style="width:375px;text-align:left;">
 							<legend><b>Filter</b></legend>
 							<div style="margin:3px;">
 								Applied Status: 
-								<select name="fastatus" onchange="this.form.submit()">
+								<select name="fastatus">
 									<option value="">All Records</option>
 									<option value="0" <?php echo ($faStatus=='0'?'SELECTED':''); ?>>Not Applied</option>
 									<option value="1" <?php echo ($faStatus=='1'?'SELECTED':''); ?>>Applied</option>
@@ -214,7 +226,7 @@ $navStr .= '</div>';
 							</div>
 							<div style="margin:3px;">
 								Review Status: 
-								<select name="frstatus" onchange="this.form.submit()">
+								<select name="frstatus">
 									<option value="0">All Records</option>
 									<option value="1,2" <?php echo ($frStatus=='1,2'?'SELECTED':''); ?>>Open/Pending</option>
 									<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>>Open Only</option>
@@ -224,7 +236,7 @@ $navStr .= '</div>';
 							</div>
 							<div style="margin:3px;">
 								Editor: 
-								<select name="editor" onchange="this.form.submit()">
+								<select name="editor">
 									<option value="">All Editors</option>
 									<option value="">----------------------</option>
 									<?php 
@@ -235,12 +247,21 @@ $navStr .= '</div>';
 									?>
 								</select>
 							</div>
+							<div style="margin:3px;">
+								Date:
+								<input name="startdate" type="date" value="<?php echo $startDate; ?>" /> to 
+								<input name="enddate" type="date" value="<?php echo $endDate; ?>" /> 
+							</div>
+							<div style="margin:10px;float:right;">
+								<button name="submitbutton" type="submit" value="submitfilter">Submit Filter</button>
+								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+							</div>
 							<?php 
 							if($reviewManager->hasRevisionRecords() && !$reviewManager->getObsUid()){
 								?>
 								<div style="margin:3px;">
 									Editing Source: 
-									<select name="display" onchange="this.form.submit()">
+									<select name="display">
 										<option value="1">Internal</option>
 										<option value="2" <?php if($displayMode == 2) echo 'SELECTED'; ?>>External</option>
 									</select>
@@ -248,9 +269,6 @@ $navStr .= '</div>';
 								<?php 
 							}
 							?>
-							<div style="margin:10px;">
-								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-							</div>
 						</fieldset>
 					</form>
 				</div>
