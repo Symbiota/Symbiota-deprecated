@@ -7,7 +7,6 @@ include_once($SERVER_ROOT.'/classes/EOLUtilities.php');
 class TaxonomyHarvester extends Manager{
 
 	private $taxonomicResources = array();
-	private $activeTaxonomicAuthority;
 	private $taxAuthId = 1;
 	private $defaultFamily;
 	private $kingdomName;
@@ -16,15 +15,6 @@ class TaxonomyHarvester extends Manager{
 
 	function __construct() {
 		parent::__construct(null,'write');
-		if(isset($GLOBALS['TAXONOMIC_AUTHORITIES']) && $GLOBALS['TAXONOMIC_AUTHORITIES']){
-			if(!is_array($GLOBALS['TAXONOMIC_AUTHORITIES'])){
-				echo 'Taxonomic authority activation list (TAXONOMIC_AUTHORITIES) not configured correctly';
-				exit;
-			}
-			foreach($GLOBALS['TAXONOMIC_AUTHORITIES'] as $name => $apiKey){
-				$this->taxonomicResources[trim(strtolower($name))] = trim($apiKey);
-			}
-		}
 	}
 
 	function __destruct(){
@@ -36,35 +26,34 @@ class TaxonomyHarvester extends Manager{
 		if($term){
 			$this->fullyResolved = true;
 			if(!$this->taxonomicResources){
-				$this->logOrEcho('ERROR: Taxonomic resources not activated ',1);
+				$this->logOrEcho('External taxonomic resource checks not activated ',1);
 				return false;
 			}
 			$newTid = $this->parseCleanCheck($term);
 			if($newTid) return $newTid;
 			foreach($this->taxonomicResources as $authCode=> $apiKey){
-				$this->activeTaxonomicAuthority = $authCode;
-				$newTid = $this->addSciname($term);
+				$newTid = $this->addSciname($term, $authCode);
 				if($newTid) return $newTid;
 			}
 		}
 	}
 
-	private function addSciname($term){
+	private function addSciname($term, $resourceKey){
 		if(!$term) return false;
 		$newTid = 0;
-		if($this->activeTaxonomicAuthority == 'col'){
+		if($resourceKey== 'col'){
 			$this->logOrEcho('Checking <b>Catalog of Life</b>...',1);
 			$newTid= $this->addColTaxon($term);
 		}
-		elseif($this->activeTaxonomicAuthority == 'worms'){
+		elseif($resourceKey== 'worms'){
 			$this->logOrEcho('Checking <b>WoRMS</b>...',1);
 			$newTid= $this->addWormsTaxon($term);
 		}
-		elseif($this->activeTaxonomicAuthority == 'tropicos'){
+		elseif($resourceKey== 'tropicos'){
 			$this->logOrEcho('Checking <b>TROPICOS</b>...',1);
 			$newTid= $this->addTropicosTaxon($term);
 		}
-		elseif($this->activeTaxonomicAuthority == 'eol'){
+		elseif($resourceKey== 'eol'){
 			$this->logOrEcho('Checking <b>EOL</b>...',1);
 			$newTid= $this->addEolTaxon($term);
 		}
@@ -1006,16 +995,22 @@ class TaxonomyHarvester extends Manager{
 		$rs->free();
 	}
 
-	public function setActiveTaxonomicAuthority($taxAuth){
-		if(!array_key_exists($taxAuth, $this->taxonomicResources)) return false;
-		$this->activeTaxonomicAuthority = $taxAuth;
-		return true;
+	public function setTaxonomicResources($resourceArr){
+		if(!$resourceArr){
+			$this->logOrEcho('ERROR: Taxonomic Authority list not defined');
+			return false;
+		}
+		if(!isset($GLOBALS['TAXONOMIC_AUTHORITIES']) || !$GLOBALS['TAXONOMIC_AUTHORITIES'] || !is_array($GLOBALS['TAXONOMIC_AUTHORITIES'])){
+			$this->logOrEcho('ERROR activating Taxonomic Authority list (TAXONOMIC_AUTHORITIES) not configured correctly');
+			return false;
+		}
+		$this->taxonomicResources = array_intersect_key(array_change_key_case($GLOBALS['TAXONOMIC_AUTHORITIES']),array_flip($resourceArr));
 	}
 
 	public function getTaxonomicResources(){
 		return $this->taxonomicResources;
 	}
-
+	
 	public function setDefaultFamily($familyStr){
 		$this->defaultFamily = $this->cleanInStr($familyStr);
 	}
