@@ -60,7 +60,7 @@ class TaxonomyCleaner extends Manager{
 		return $retCnt;
 	}
 
-	public function analyzeTaxa($startIndex, $limit = 50){
+	public function analyzeTaxa($taxResource, $startIndex, $limit = 50){
 		set_time_limit(1800);
 		$endIndex = 0;
 		$this->logOrEcho("Starting taxa check ");
@@ -71,6 +71,7 @@ class TaxonomyCleaner extends Manager{
 		if($rs = $this->conn->query($sql)){
 			//Check name through taxonomic resources
 			$taxonHarvester = new  TaxonomyHarvester();
+			$taxonHarvester->setTaxonomicResources($taxResource);
 			$taxonHarvester->setVerboseMode(2);
 			$this->setVerboseMode(2);
 			$taxaAdded = false;
@@ -638,6 +639,12 @@ class TaxonomyCleaner extends Manager{
 		}
 		$rs->free();
 		return $retArr;
+	}
+
+	public function getTaxonomicResourceList(){
+		$taArr = array('col'=>'Catalog of Life','worms'=>'World Register of Marine Species','tropicos'=>'TROPICOS','eol'=>'Encyclopedia of Life');
+		if(!isset($GLOBALS['TAXONOMIC_AUTHORITIES'])) return false;
+		return array_intersect_key($taArr,array_change_key_case($GLOBALS['TAXONOMIC_AUTHORITIES']));
 	}
 
 	//Setters and getters

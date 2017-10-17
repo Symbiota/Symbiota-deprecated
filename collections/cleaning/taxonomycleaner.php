@@ -7,6 +7,7 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/c
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST["collid"]:0;
 $autoClean = array_key_exists('autoclean',$_POST)?$_POST['autoclean']:0;
+$taxResource = array_key_exists('taxresource',$_POST)?$_POST['taxresource']:array();
 $startIndex = array_key_exists('startindex',$_POST)?$_POST['startindex']:'';
 $limit = array_key_exists('limit',$_POST)?$_POST['limit']:20;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
@@ -140,7 +141,7 @@ else{
 							elseif($action == 'AnalyzingNames'){
 								echo '<ul>';
 								$cleanManager->setAutoClean($autoClean);
-								$startIndex = $cleanManager->analyzeTaxa($startIndex, $limit);
+								$startIndex = $cleanManager->analyzeTaxa($taxResource, $startIndex, $limit);
 								echo '</ul>';
 							}
 						}
@@ -151,7 +152,7 @@ else{
 					<div style="margin:20px;">
 						<fieldset style="padding:20px;">
 							<legend><b>Action Menu</b></legend>
-							<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
+							<form name="maincleanform" action="taxonomycleaner.php" method="post">
 								<div style="margin-bottom:15px;">
 									<b>Specimen records not indexed to central taxonomic thesaurus</b>
 									<div style="margin-left:10px;">
@@ -165,6 +166,17 @@ else{
 										Following tool will crawl through unindexed names and attempt to resolve name discrepancies
 									</div>
 									<div style="margin:10px;">
+										<div style="margin-bottom:5px;">
+											<fieldset style="padding:15px;margin:10px 0px">
+												<legend><b>Taxonomic Resource</b></legend>
+												<?php 
+												$taxResourceList = $cleanManager->getTaxonomicResourceList();
+												foreach($taxResourceList as $taKey => $taValue){
+													echo '<input name="taxresource[]" type="checkbox" value="'.$taKey.'" '.(in_array($taKey,$taxResource)?'checked':'').' /> '.$taValue.'<br/>';
+												}
+												?>
+											</fieldset>
+										</div>
 										<div style="margin-bottom:5px;">
 											Names Processed per Run: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:40px" />
 										</div>
@@ -184,7 +196,7 @@ else{
 								</div>
 							</form>
 							<hr/>
-							<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
+							<form name="deepindexform" action="taxonomycleaner.php" method="post">
 								<div style="margin:20px 10px">
 									<div style="margin:10px 0px">
 										Following tool will run a set of algorithms that will run names through several filters to improve linkages to taxonomic thesaurus 
