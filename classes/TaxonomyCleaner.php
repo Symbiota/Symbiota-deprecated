@@ -136,7 +136,8 @@ class TaxonomyCleaner extends Manager{
 					}
 				}
 				$taxaCnt++;
-				$endIndex = array_shift(explode(' ',$r->sciname));
+				$scinameTokens = explode(' ',$r->sciname);
+				$endIndex = array_shift($scinameTokens);
 				flush();
 				ob_flush();
 			}
