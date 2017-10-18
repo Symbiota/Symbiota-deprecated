@@ -154,17 +154,17 @@ if($taxonManager->getSciName() != "unknown"){
 						unset($vernArr[$DEFAULT_LANG]);
 					}
 					else{
-						$primerArr = array_shift($vernArr[$DEFAULT_LANG]);
+						$primerArr = array_shift($vernArr);
 					}
 					$vernStr = array_shift($primerArr);
 					if($primerArr || $vernArr){
-						$spanStr .= '<a href="#" class="verns" onclick="toggle(\'verns\')" style="font-size:70%" title="Click here to show more common names">,&nbsp;&nbsp;more...</a>';
-						$spanStr .= '<span class="verns" onclick="toggle(\'verns\');" style="display:none;">';
-						$spanStr .= implode(', ',$primerArr);
+						$vernStr.= '<a href="#" class="verns" onclick="toggle(\'verns\')" style="font-size:70%" title="Click here to show more common names">,&nbsp;&nbsp;more...</a>';
+						$vernStr.= '<span class="verns" onclick="toggle(\'verns\');" style="display:none;">';
+						$vernStr.= implode(', ',$primerArr);
 						foreach($vernArr as $langName => $vArr){
-							$spanStr .= ', ('.$langName.': '.implode(', ',$vArr).')';
+							$vernStr.= ', ('.$langName.': '.implode(', ',$vArr).')';
 						}
-						$spanStr .= '</span>';
+						$vernStr.= '</span>';
 					}
 					?>
 					<div id="vernaculars" style="margin-left:10px;margin-top:0.5em;font-size:130%;">
@@ -173,7 +173,7 @@ if($taxonManager->getSciName() != "unknown"){
 					<?php 
 				}
 				
-				if($synArr = $taxonManager->getSynonymStr()){
+				if($synArr = $taxonManager->getSynonymArr()){
 					$primerArr = array_shift($synArr);
 					$synStr = '<i>'.$primerArr['sciname'].'</i>'.(isset($primerArr['author']) && $primerArr['author']?' '.$primerArr['author']:'');
 					if($synArr){

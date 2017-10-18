@@ -86,7 +86,7 @@ class TaxonProfile extends Manager {
 		if($this->tid){
 			$sql = 'SELECT t.tid, t.sciname, t.author '.
 				'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
-				'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tidaccepted = t.tid) AND (ts.SortSequence < 90) '.
+				'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tidaccepted != t.tid) AND (ts.SortSequence < 90) '.
 				'ORDER BY ts.SortSequence, t.SciName';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
@@ -98,29 +98,24 @@ class TaxonProfile extends Manager {
 		}
 	}
 
-	public function getSynonyms(){
-		return $this->synonymArr;
-	}
-
 	//Vernaculars
 	public function getVernaculars(){
 		$retArr = array();
 		if($this->tid){
 			$sql = 'SELECT v.vid, v.vernacularname, l.langname '.
 				'FROM taxavernaculars v INNER JOIN adminlanguages l ON v.langid = l.langid '.
-				'WHERE (ts.TID IN('.$this->tid.($this->synonymArr?','.implode(','.array_keys($this->synonymArr)):'').')) AND (v.SortSequence < 90) '.
+				'WHERE (v.TID IN('.$this->tid.($this->synonymArr?','.implode(',',array_keys($this->synonymArr)):'').')) AND (v.SortSequence < 90) '.
 				'ORDER BY v.SortSequence,v.VernacularName';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
-			$tempVernArr = array();
 			while($r = $rs->fetch_object()){
-				$this->retArr[$r->langname][$r->vid] = $r->vernacularname;
+				$retArr[$r->langname][$r->vid] = $r->vernacularname;
 			}
 			$rs->free();
 		}
 		return $retArr;
 	}
-	
+
 	//Images functions
 	private function setTaxaImages(){
 		$this->imageArr = array();
@@ -168,7 +163,6 @@ class TaxonProfile extends Manager {
 		}
 		if(!$this->imageArr || count($this->imageArr) < $start) return false;
 		$trueLength = ($length&&count($this->imageArr)>$length+$start?$length:count($this->imageArr)-$start);
-		$spDisplay = $this->getDisplayName();
 		$iArr = array_slice($this->imageArr,$start,$trueLength,true);
 		foreach($iArr as $imgId => $imgObj){
 			if($start == 0 && $trueLength == 1){
@@ -196,7 +190,7 @@ class TaxonProfile extends Manager {
 			echo '<div class="tptnimg"><a href="'.$imgAnchor.'">';
 			$titleStr = $imgObj['caption'];
 			if($imgObj['sciname'] != $this->sciName) $titleStr .= ' (linked from '.$imgObj['sciname'].')';
-			echo '<img src="'.$imgUrl.'" title="'.$titleStr.'" alt="'.$spDisplay.' image" />';
+			echo '<img src="'.$imgUrl.'" title="'.$titleStr.'" alt="'.$this->sciName.' image" />';
 			/*
 			 if($length){
 			 echo '<img src="'.$imgUrl.'" title="'.$imgObj['caption'].'" alt="'.$spDisplay.' image" />';
