@@ -102,6 +102,10 @@ class SpecUploadBase extends SpecUpload{
 			//This avoids the situtation where folks are exporting data from one collection and importing into their collection along with the other collection's occurrenceID GUID, which is very bad   
 			$skipOccurFields[] = 'occurrenceid';
 		}
+		if($this->uploadType == $this->RESTOREBACKUP){
+			unset($skipOccurFields);
+			$skipOccurFields = array();
+		}
 		//Other to deal with/skip later: 'ownerinstitutioncode'
 		$sql = "SHOW COLUMNS FROM uploadspectemp";
 		$rs = $this->conn->query($sql);
@@ -142,10 +146,14 @@ class SpecUploadBase extends SpecUpload{
 			case $this->SKELETAL:
 			case $this->DWCAUPLOAD:
 			case $this->IPTUPLOAD:
+			case $this->RESTOREBACKUP:
 			case $this->DIRECTUPLOAD:
 				//Get identification metadata
 				$skipDetFields = array('detid','occid','tidinterpreted','idbyid','appliedstatus','sortsequence','sourceidentifier','initialtimestamp');
-	
+				if($this->uploadType == $this->RESTOREBACKUP){
+					unset($skipDetFields);
+					$skipDetFields = array();
+				}
 				$rs = $this->conn->query('SHOW COLUMNS FROM uploaddetermtemp');
 				while($r = $rs->fetch_object()){
 					$field = strtolower($r->Field);
@@ -181,6 +189,10 @@ class SpecUploadBase extends SpecUpload{
 	
 				//Get image metadata
 				$skipImageFields = array('tid','photographeruid','imagetype','occid','dbpk','specimenguid','collid','username','sortsequence','initialtimestamp');
+				if($this->uploadType == $this->RESTOREBACKUP){
+					unset($skipImageFields);
+					$skipImageFields = array();
+				}
 				$rs = $this->conn->query('SHOW COLUMNS FROM uploadimagetemp');
 				while($r = $rs->fetch_object()){
 					$field = strtolower($r->Field);
@@ -562,7 +574,7 @@ class SpecUploadBase extends SpecUpload{
 		$reportArr = array();
 		$reportArr['occur'] = $this->getTransferCount();
 		//Determination history and images from DWCA files
-		if($this->uploadType == $this->DWCAUPLOAD || $this->uploadType == $this->IPTUPLOAD){
+		if($this->uploadType == $this->DWCAUPLOAD || $this->uploadType == $this->IPTUPLOAD || $this->uploadType == $this->RESTOREBACKUP){
 			if($this->includeIdentificationHistory) $reportArr['ident'] = $this->getIdentTransferCount();
 			if($this->includeImages) $reportArr['image'] = $this->getImageTransferCount();
 		}
@@ -578,9 +590,14 @@ class SpecUploadBase extends SpecUpload{
 		$rs->free();
 
 		//Number of new specimen records
-		$sql = 'SELECT count(*) AS cnt '.
+		/*
+		 $sql = 'SELECT count(*) AS cnt '.
 			'FROM uploadspectemp '.
 			'WHERE (occid IS NULL) AND (collid IN('.$this->collId.'))';
+		*/
+		$sql = 'SELECT count(*) AS cnt '.
+			'FROM uploadspectemp u LEFT JOIN omoccurrences o ON u.occid = o.occid '.
+			'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL OR o.occid IS NULL)';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$reportArr['new'] = $r->cnt;
@@ -597,7 +614,7 @@ class SpecUploadBase extends SpecUpload{
 		}
 		$rs->free();
 
-		if($this->collMetadataArr["managementtype"] == 'Live Data' && !$this->matchCatalogNumber  && !$this->matchOtherCatalogNumbers){
+		if($this->collMetadataArr["managementtype"] == 'Live Data' && !$this->matchCatalogNumber  && !$this->matchOtherCatalogNumbers && $this->uploadType != $this->RESTOREBACKUP){
 			//Records that can be matched on Catalog Number, but will be appended 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.collid = o.collid '.
@@ -609,7 +626,7 @@ class SpecUploadBase extends SpecUpload{
 			$rs->free();
 		}
 
-		if($this->uploadType != $this->SKELETAL && $this->collMetadataArr["managementtype"] == 'Snapshot'){
+		if($this->uploadType != $this->SKELETAL && $this->collMetadataArr["managementtype"] == 'Snapshot' && $this->uploadType != $this->RESTOREBACKUP){
 			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
@@ -620,7 +637,9 @@ class SpecUploadBase extends SpecUpload{
 				$reportArr['sync'] = $r->cnt;
 			}
 			$rs->free();
-
+		}
+		
+		if($this->uploadType == $this->RESTOREBACKUP || ($this->collMetadataArr["managementtype"] == 'Snapshot' && $this->uploadType != $this->SKELETAL)){
 			//Records already in portal that won't match with an incoming record 
 			$sql = 'SELECT count(o.occid) AS cnt '.
 				'FROM omoccurrences o LEFT JOIN uploadspectemp u  ON (o.occid = u.occid) '.
@@ -632,7 +651,7 @@ class SpecUploadBase extends SpecUpload{
 			$rs->free();
 		}
 
-		if($this->uploadType != $this->SKELETAL && ($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate')){
+		if($this->uploadType != $this->SKELETAL && $this->uploadType != $this->RESTOREBACKUP && ($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->collMetadataArr["managementtype"] == 'Aggregate')){
 			//Look for null dbpk
 			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp '.
 				'WHERE (dbpk IS NULL) AND (collid IN('.$this->collId.'))';
@@ -1306,6 +1325,7 @@ class SpecUploadBase extends SpecUpload{
 			if($sqlFragments){
 				$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
 					'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
+				//echo $sql.'<br/>';
 				if($this->conn->query($sql)){
 					$this->imageTransferCount++;
 					$repInt = 1000;
@@ -1425,7 +1445,7 @@ class SpecUploadBase extends SpecUpload{
 		return $this->transferCount;
 	}
 	
-	private function setTransferCount(){
+	protected function setTransferCount(){
 		if($this->collId){
 			$sql = 'SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid IN('.$this->collId.')) ';
 			$rs = $this->conn->query($sql);
@@ -1441,7 +1461,7 @@ class SpecUploadBase extends SpecUpload{
 		return $this->identTransferCount;
 	}
 	
-	private function setIdentTransferCount(){
+	protected function setIdentTransferCount(){
 		if($this->collId){
 			$sql = 'SELECT count(*) AS cnt FROM uploaddetermtemp '.
 				'WHERE (collid IN('.$this->collId.'))';
@@ -1459,7 +1479,7 @@ class SpecUploadBase extends SpecUpload{
 		return $this->imageTransferCount;
 	}
 	
-	private function setImageTransferCount(){
+	protected function setImageTransferCount(){
 		if($this->collId){
 			$sql = 'SELECT count(*) AS cnt FROM uploadimagetemp WHERE (collid IN('.$this->collId.'))';
 			$rs = $this->conn->query($sql);

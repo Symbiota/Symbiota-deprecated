@@ -292,6 +292,17 @@ if($SYMB_UID){
 										<?php echo $LANG['BACKUP_DATA_FILE']; ?>
 									</a>
 								</li>
+								<?php 
+								if($collData['managementtype'] == 'Live Data'){
+									?>
+									<li style="margin-left:10px;">
+										<a href="../admin/restorebackup.php?collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['RESTORE_BACKUP'])?$LANG['RESTORE_BACKUP']:'Restore Backup File'); ?>
+										</a>
+									</li>
+									<?php
+								}
+								?>
 								<li style="margin-left:10px;">
 									<a href="../../imagelib/admin/thumbnailbuilder.php?collid=<?php echo $collid; ?>">
 										<?php echo $LANG['THUMBNAIL_MAINTENANCE']; ?>

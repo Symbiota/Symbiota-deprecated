@@ -187,7 +187,7 @@ $navStr .= '</div>';
 		echo '</div>';
 		?>
 		<!-- This is inner text! -->
-		<div id="innertext">
+		<div id="innertext" style="min-width:1100px">
 			<?php 
 			if($collid && $isEditor){
 				?>

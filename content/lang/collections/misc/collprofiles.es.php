@@ -38,6 +38,7 @@ $LANG['DATA_CLEANING'] = 'Herramientas de Limpieza de Datos';
 $LANG['DUP_CLUSTER'] = 'Duplicar Agrupamiento';
 $LANG['MAINTENANCE_TASKS'] = 'Tareas de Mantenimiento';
 $LANG['BACKUP_DATA_FILE'] = 'Descargar Archivo de Respaldo de Datos';
+$LANG['RESTORE_BACKUP'] = 'Restaurar archivo de respaldo';
 $LANG['GUIDMAP'] = 'Mapeador de GUIDs';
 $LANG['THUMBNAIL_MAINTENANCE'] = 'Herramientas de Limpieza las miniaturas';
 $LANG['UPDATE_STATS'] = 'Actualizar Estad&iacute;sticas';

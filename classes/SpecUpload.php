@@ -28,7 +28,7 @@ class SpecUpload{
 	private $logFH;
 	protected $errorStr;
 
-	protected $DIRECTUPLOAD = 1, $DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6, $SKELETAL = 7, $IPTUPLOAD = 8, $NFNUPLOAD = 9;
+	protected $DIRECTUPLOAD = 1, $DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6, $SKELETAL = 7, $IPTUPLOAD = 8, $NFNUPLOAD = 9, $RESTOREBACKUP = 10;
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -100,7 +100,7 @@ class SpecUpload{
 
 	private function setCollInfo(){
 		if($this->collId){
-			$sql = 'SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, c.colltype, c.managementtype, cs.uploaddate, c.securitykey, c.guidtarget '.
+			$sql = 'SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.collectionguid, c.icon, c.colltype, c.managementtype, cs.uploaddate, c.securitykey, c.guidtarget '.
 				'FROM omcollections c LEFT JOIN omcollectionstats cs ON c.collid = cs.collid '.
 				'WHERE (c.collid = '.$this->collId.')';
 			//echo $sql;
@@ -110,6 +110,7 @@ class SpecUpload{
 				$this->collMetadataArr["name"] = $row->collectionname;
 				$this->collMetadataArr["institutioncode"] = $row->institutioncode;
 				$this->collMetadataArr["collectioncode"] = $row->collectioncode;
+				$this->collMetadataArr["collguid"] = $row->collectionguid;
 				$dateStr = ($row->uploaddate?date("d F Y g:i:s", strtotime($row->uploaddate)):"");
 				$this->collMetadataArr["uploaddate"] = $dateStr;
 				$this->collMetadataArr["colltype"] = $row->colltype;
@@ -223,25 +224,30 @@ class SpecUpload{
 		if($searchVariables){
 			if($searchVariables == 'matchappend'){
 				$sql = 'SELECT DISTINCT u.occid, u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
-						'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.collid = o.collid '.
-						'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
+					'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.collid = o.collid '.
+					'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber = o.catalogNumber OR u.othercatalogNumbers = o.othercatalogNumbers) ';
 			}
 			elseif($searchVariables == 'sync'){
 				$sql = 'SELECT DISTINCT u.occid, u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
-						'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-						'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
-						'AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) ';
+					'FROM uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
+					'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) '.
+					'AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) ';
+			}
+			elseif($searchVariables == 'new'){
+				$sql = 'SELECT DISTINCT u.occid, u.dbpk, u.'.implode(',u.',$occFieldArr).' '.
+					'FROM uploadspectemp u LEFT JOIN omoccurrences o ON (u.occid = o.occid) '.
+					'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL OR o.occid IS NULL) ';
 			}
 			elseif($searchVariables == 'exist'){
 				$sql = 'SELECT DISTINCT o.occid, o.dbpk, o.'.implode(',o.',$occFieldArr).' '.
-						'FROM omoccurrences o LEFT JOIN uploadspectemp u  ON (o.occid = u.occid) '.
-						'WHERE (o.collid IN('.$this->collId.')) AND (u.occid IS NULL) ';
+					'FROM omoccurrences o LEFT JOIN uploadspectemp u  ON (o.occid = u.occid) '.
+					'WHERE (o.collid IN('.$this->collId.')) AND (u.occid IS NULL) ';
 			}
 			elseif($searchVariables == 'dupdbpk'){
 				$sql = 'SELECT DISTINCT u.occid, u.dbpk, u.'.implode(',u.',$occFieldArr).' FROM uploadspectemp u WHERE u.dbpk IN('.
-						'SELECT dbpk FROM uploadspectemp '.
-						'GROUP BY dbpk, collid, basisofrecord '.
-						'HAVING (Count(*)>1) AND (collid IN('.$this->collId.'))) ';
+					'SELECT dbpk FROM uploadspectemp '.
+					'GROUP BY dbpk, collid, basisofrecord '.
+					'HAVING (Count(*)>1) AND (collid IN('.$this->collId.'))) ';
 			}
 			else{
 				$varArr = explode(';',$searchVariables);
@@ -482,5 +488,4 @@ class SpecUpload{
 		return $retStr;
 	}
 }
-
 ?>

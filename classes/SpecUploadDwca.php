@@ -77,22 +77,6 @@ class SpecUploadDwca extends SpecUploadBase{
 		return $this->baseFolderName;
 	}
 
-	public function analyzeUpload(){
-		$status = false;
-		if($this->readMetaFile()){
-			if(isset($this->metaArr['occur']['fields'])){
-				$this->sourceArr = $this->metaArr['occur']['fields'];
-				//Set identification and image source fields 
-				if(isset($this->metaArr['ident']['fields'])){
-					$this->identSourceArr = $this->metaArr['ident']['fields'];
-				}
-				$this->setImageSourceArr();
-			}
-			$status = true;
-		}
-		return $status;
-	}
-
 	private function unpackArchive(){
 		//Extract archive
 		$status = true;
@@ -120,27 +104,77 @@ class SpecUploadDwca extends SpecUploadBase{
 		$zip->close();
 		return $status;
 	}
+	
+	public function analyzeUpload(){
+		$status = false;
+		if($this->readMetaFile()){
+			if(isset($this->metaArr['occur']['fields'])){
+				$this->sourceArr = $this->metaArr['occur']['fields'];
+				//Set identification and image source fields 
+				if(isset($this->metaArr['ident']['fields'])){
+					$this->identSourceArr = $this->metaArr['ident']['fields'];
+				}
+				$this->setImageSourceArr();
+			}
+			$status = true;
+		}
+		return $status;
+	}
 
-	private function locateBaseFolder($baseDir, $pathFrag = ''){
-		//echo $baseDir.' : '.$pathFrag.'<br/>';
-		if($handle = opendir($baseDir.$pathFrag)) {
-			while(false !== ($item = readdir($handle))){
-				if($item){
-					$newPath = $baseDir.$pathFrag;
-					if(is_file($newPath.$item) || strtolower(substr($item,-4)) == '.zip'){
-						if(strtolower($item) == 'meta.xml'){
-							$this->extensionFolderName = $pathFrag;
-							break;
-						}
-					}
-					elseif(is_dir($newPath) && $item != '.' && $item != '..'){
-						$pathFrag .= $item.'/';
-						$this->locateBaseFolder($baseDir, $pathFrag);
-					}
+	public function verifyBackupFile(){
+		//File must contain eml.xml, meta.xml, occurrence.csv, image.csv, and identifications.csv
+		$this->locateBaseFolder($this->uploadTargetPath.$this->baseFolderName);
+		$dwcaDir = $this->uploadTargetPath.$this->baseFolderName.$this->extensionFolderName;
+		if(!file_exists($dwcaDir.'occurrences.csv')){
+			$this->errorStr = 'Not a valid backup file: occurrences.csv file is missing';
+			return false;
+		}
+		if(!file_exists($dwcaDir.'images.csv')){
+			$this->errorStr = 'Not a valid backup file; images.csv file is missing';
+			return false;
+		}
+		if(!file_exists($dwcaDir.'identifications.csv')){
+			$this->errorStr = 'Not a valid backup file; identifications.csv file is missing';
+			return false;
+		}
+		if(!file_exists($dwcaDir.'meta.xml')){
+			$this->errorStr = 'Not a valid backup file; meta.xml file is missing';
+			return false;
+		}
+		if(!file_exists($dwcaDir.'eml.xml')){
+			$this->errorStr = 'Not a valid backup file; eml.xml file is missing';
+			return false;
+		}
+		if(!$this->readMetaFile()){
+			$this->errorStr = 'Not a valid backup file; malformed meta.xml file';
+			return false;
+		}
+
+		//Verify that XML file matches identification of target collection
+		$warningArr = array();
+		$emlDoc = new DOMDocument();
+		$emlDoc->load($dwcaDir.'eml.xml');
+		$xpath = new DOMXpath($emlDoc);
+		
+		$nodeList = $xpath->query('//collection');
+		if(!$nodeList){
+			$warningArr[] = '<b>WARNING:</b> does NOT appear to be a valid backup file; unable to locate collection element within eml.xml';
+		}
+		if(count($nodeList) == 1){
+			if(!$nodeList[0]->hasAttribute('id') || $nodeList[0]->getAttribute('id') != $this->collId){
+				$warningArr[] = '<b>WARNING:</b> does NOT appear to be a valid backup file; collection ID not matching target collection';
+			}
+			if($this->collMetadataArr["collguid"]){
+				if(!$nodeList[0]->hasAttribute('identifier') || $nodeList[0]->getAttribute('identifier') != $this->collMetadataArr["collguid"]){
+					$warningArr[] = '<b>WARNING:</b> does NOT appear to be a valid backup file; collection GUID not matching target collection';
 				}
 			}
-			closedir($handle);
 		}
+		else{
+			$warningArr[] = '<b>WARNING:</b> does NOT appear to be a valid backup file; more than one collection element located within eml.xml';
+		}
+		if($warningArr) return $warningArr;
+		return true;
 	}
 
 	private function readMetaFile(){
@@ -331,6 +365,31 @@ class SpecUploadDwca extends SpecUploadBase{
 		return true;
 	}
 
+	private function locateBaseFolder($baseDir, $pathFrag = ''){
+		//echo $baseDir.' : '.$pathFrag.'<br/>';
+		if($handle = opendir($baseDir.$pathFrag)) {
+			while(false !== ($item = readdir($handle))){
+				if($item){
+					$newPath = $baseDir.$pathFrag;
+					if(is_file($newPath.$item) || strtolower(substr($item,-4)) == '.zip'){
+						if(strtolower($item) == 'meta.xml'){
+							$this->extensionFolderName = $pathFrag;
+							break;
+						}
+						elseif(strtolower($item) == 'eml.xml'){
+							$this->extensionFolderName = $pathFrag;
+						}
+					}
+					elseif(is_dir($newPath) && $item != '.' && $item != '..'){
+						$pathFrag .= $item.'/';
+						$this->locateBaseFolder($baseDir, $pathFrag);
+					}
+				}
+			}
+			closedir($handle);
+		}
+	}
+	
 	public function uploadData($finalTransfer){
 		global $charset;
 		$fullPath = $this->uploadTargetPath.$this->baseFolderName;
@@ -378,6 +437,10 @@ class SpecUploadDwca extends SpecUploadBase{
 					}
 					//Grab data
 					$this->transferCount = 0;
+					if($this->uploadType == $this->RESTOREBACKUP){
+						$this->fieldMap['dbpk']['field'] = 'sourceprimarykey-dbpk';
+						$this->fieldMap['occid']['field'] = 'id';
+					}
 			 		if(!isset($this->fieldMap['dbpk']['field']) || !in_array($this->fieldMap['dbpk']['field'],$this->sourceArr)){
 						$this->fieldMap['dbpk']['field'] = strtolower($this->metaArr['occur']['fields'][$id]);
 					}
@@ -418,7 +481,11 @@ class SpecUploadDwca extends SpecUploadBase{
 					//Upload identification history
 					if($this->includeIdentificationHistory){
 						$this->outputMsg('<li>Loading identification history extension... </li>');
-						//Set source array
+						if($this->uploadType == $this->RESTOREBACKUP){
+							$this->identFieldMap['occid']['field'] = 'coreid';
+							$this->identFieldMap['sciname']['field'] = 'scientificname';
+							$this->identFieldMap['initialtimestamp']['field'] = 'modified';
+						}
 						foreach($this->metaArr['ident']['fields'] as $k => $v){
 							$this->identSourceArr[$k] = strtolower($v);
 						}
@@ -430,6 +497,13 @@ class SpecUploadDwca extends SpecUploadBase{
 					if($this->includeImages){
 						$this->outputMsg('<li>Loading image extension... </li>');
 						$this->setImageSourceArr();
+						if($this->uploadType == $this->RESTOREBACKUP){
+							$this->imageFieldMap['occid']['field'] = 'coreid';
+							$this->imageFieldMap['originalurl']['field'] = 'accessuri';
+							$this->imageFieldMap['thumbnailurl']['field'] = 'thumbnailaccessuri';
+							$this->imageFieldMap['url']['field'] = 'goodqualityaccessuri';
+							$this->imageFieldMap['owner']['field'] = 'creator';
+						}
 						$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
 						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
 					}
@@ -615,6 +689,48 @@ class SpecUploadDwca extends SpecUploadBase{
 			}
 		}
 		return $recordArr;
+	}
+
+	public function cleanBackupReload(){
+		//Delete records where occid is not within target collection
+		$sql = 'SELECT count(u.occid) as cnt '.
+			'FROM uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
+			'WHERE (u.collid = '.$this->collId.') AND (o.collid != '.$this->collId.')';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$badCnt = $r->cnt;
+			if($badCnt > 0){
+				$this->outputMsg('<li style="margin-left:10px">Removing '.$badCnt.' specimen records that are identified to belong to separate collection within this portal. This is typically due to restoring a backup into the wrong collection...</li>',1);
+				$sql = 'DELETE u.* FROM uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
+					'WHERE (u.collid = '.$this->collId.') AND (o.collid != '.$this->collId.')';
+				if(!$this->conn->query($sql)){
+					$this->errorStr = '<li style="margin-left:10px">Unable to remove illegal specimens records belonging to another collection</li>';
+				}
+				$sql2 = 'DELETE u.* FROM uploaddetermtemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
+					'WHERE (u.collid = '.$this->collId.') AND (o.collid != '.$this->collId.')';
+				if(!$this->conn->query($sql2)){
+					$this->errorStr = '<li style="margin-left:10px">Unable to remove illegal determination records belonging to another collection</li>';
+				}
+				$sql3 = 'DELETE u.* FROM uploadimagetemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
+					'WHERE (u.collid = '.$this->collId.') AND (o.collid != '.$this->collId.')';
+				if(!$this->conn->query($sql3)){
+					$this->errorStr = '<li style="margin-left:10px">Unable to remove illegal image records belonging to another collection</li>';
+				}
+				$this->setTransferCount();
+				$this->setIdentTransferCount();
+				$this->setImageTransferCount();
+			}
+		}
+		$rs->free();
+		
+		//Remove occurrenceID GUIDs that already match the values in guidoccurrence table
+		$this->outputMsg('<li style="margin-left:10px">Syncronizing occurrenceID GUIDs...</li>',1);
+		$sql = 'UPDATE uploadspectemp u INNER JOIN guidoccurrences g ON u.occid = g.occid '.
+			'SET u.occurrenceID = NULL '.
+			'WHERE (u.collid = '.$this->collId.') AND (u.occurrenceID = g.guid)';
+		if(!$this->conn->query($sql)){
+			$this->errorStr = '<li style="margin-left:10px">Unable to remove duclicate GUID references</li>';
+		}
 	}
 	
 	public function setBaseFolderName($name){

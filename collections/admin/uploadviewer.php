@@ -117,12 +117,10 @@ if($SYMB_UID){
 							if(strlen($displayStr) > 60){
 								$displayStr = substr($displayStr,0,60).'...';
 							}
-							if($displayStr) {
-								if($k == 'occid') $displayStr = '<a href="../editor/occurrenceeditor.php?occid='.$displayStr.'" target="_blank">'.$displayStr.'</a>';
+							if($k == 'occid' && $displayStr && $searchVar != 'new') {
+								$displayStr = '<a href="../editor/occurrenceeditor.php?occid='.$displayStr.'" target="_blank">'.$displayStr.'</a>';
 							}
-							else{
-								$displayStr = '&nbsp;';
-							}
+							if(!$displayStr) $displayStr = '&nbsp;';
 							echo '<td>'.$displayStr.'</td>'."\n";
 						}
 						echo "</tr>\n";
