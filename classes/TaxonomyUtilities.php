@@ -16,7 +16,7 @@ class TaxonomyUtilities {
 			//Remove underscores, common in NPS data
 			$inStr = preg_replace('/_+/',' ',$inStr);
 			//Replace misc 
-			$inStr = str_replace(array('?','*'),'',$inStr);
+			$inStr = str_replace(array('?','*','"',"'"),'',$inStr);
 			
 			if(stripos($inStr,'cfr. ') !== false || stripos($inStr,' cfr ') !== false){
 				$retArr['identificationqualifier'] = 'cf. ';

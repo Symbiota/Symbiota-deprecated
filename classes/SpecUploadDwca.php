@@ -440,6 +440,7 @@ class SpecUploadDwca extends SpecUploadBase{
 					if($this->uploadType == $this->RESTOREBACKUP){
 						$this->fieldMap['dbpk']['field'] = 'sourceprimarykey-dbpk';
 						$this->fieldMap['occid']['field'] = 'id';
+						$this->fieldMap['sciname']['field'] = 'scientificname';
 					}
 			 		if(!isset($this->fieldMap['dbpk']['field']) || !in_array($this->fieldMap['dbpk']['field'],$this->sourceArr)){
 						$this->fieldMap['dbpk']['field'] = strtolower($this->metaArr['occur']['fields'][$id]);
@@ -722,7 +723,16 @@ class SpecUploadDwca extends SpecUploadBase{
 			}
 		}
 		$rs->free();
-		
+
+		//Delete tidinterpreted values that were deleted from taxa table
+		$this->outputMsg('<li style="margin-left:10px">Cleaning taxonomic thesaurus indexing...</li>',1);
+		$sql = 'UPDATE uploadspectemp u LEFT JOIN taxa t ON u.tidinterpreted = t.tid '.
+			'SET u.tidinterpreted = NULL '.
+			'WHERE (u.collid = '.$this->collId.') AND (t.tid IS NULL)';
+		if(!$this->conn->query($sql)){
+			$this->errorStr = '<li style="margin-left:10px">Unable to remove bad taxonomic index links</li>';
+		}
+
 		//Remove occurrenceID GUIDs that already match the values in guidoccurrence table
 		$this->outputMsg('<li style="margin-left:10px">Syncronizing occurrenceID GUIDs...</li>',1);
 		$sql = 'UPDATE uploadspectemp u INNER JOIN guidoccurrences g ON u.occid = g.occid '.

@@ -760,7 +760,7 @@ class SpecUploadBase extends SpecUpload{
 				$sqlFragArr[$v] = 'o.'.$v.' = u.'.$v;
 			}
 		}
-		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
+		$sql = 'UPDATE IGNORE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
 			'SET '.implode(',',$sqlFragArr).' WHERE (u.collid IN('.$this->collId.'))';
 		//echo '<div>'.$sql.'</div>'; exit;
 		if(!$this->conn->query($sql)){
