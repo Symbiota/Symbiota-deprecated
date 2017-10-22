@@ -161,11 +161,12 @@ class SpecUploadDwca extends SpecUploadBase{
 			$warningArr[] = '<b>WARNING:</b> does NOT appear to be a valid backup file; unable to locate collection element within eml.xml';
 		}
 		if(count($nodeList) == 1){
-			if(!$nodeList[0]->hasAttribute('id') || $nodeList[0]->getAttribute('id') != $this->collId){
+			$node = $nodeList->item(0);
+			if(!$node->hasAttribute('id') || $node->getAttribute('id') != $this->collId){
 				$warningArr[] = '<b>WARNING:</b> does NOT appear to be a valid backup file; collection ID not matching target collection';
 			}
 			if($this->collMetadataArr["collguid"]){
-				if(!$nodeList[0]->hasAttribute('identifier') || $nodeList[0]->getAttribute('identifier') != $this->collMetadataArr["collguid"]){
+				if(!$node->hasAttribute('identifier') || $node->getAttribute('identifier') != $this->collMetadataArr["collguid"]){
 					$warningArr[] = '<b>WARNING:</b> does NOT appear to be a valid backup file; collection GUID not matching target collection';
 				}
 			}
