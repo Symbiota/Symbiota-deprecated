@@ -66,7 +66,7 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 								<a href="<?php echo $CLIENT_ROOT; ?>/collections/index.php" ><?php echo (isset($LANG['COLLECTIONS'])?$LANG['COLLECTIONS']:'Collections'); ?></a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/collections/map/mapinterface.php" target="_blank"><?php echo (isset($LANG['MAP'])?$LANG['MAP']:'Mapa'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/map/mapinterface.php" target="_blank"><?php echo (isset($LANG['MAP'])?$LANG['MAP']:'Map'); ?></a>
 							</li>
 							<li>
 								<a href="<?php echo $CLIENT_ROOT; ?>/checklists/dynamicmap.php?interface=checklist" ><?php echo (isset($LANG['DYN_LISTS'])?$LANG['DYN_LISTS']:'Dynamic Species List'); ?></a>
