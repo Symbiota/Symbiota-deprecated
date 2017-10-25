@@ -1,19 +1,22 @@
-Copy code below into the site's home page (index.php) or any other page of interest.
-Modify main.css file to customize quick search plugin to your preferences.
-Note that this tool is dependent on target page having JQuery and jQuery-ui links already included within head tag (see index_template.php) 
- 
+Copy code below into the site's home page (index.php) or any other page of interest
+Tool is dependent on the following css and js files being included within head tag
+  
+	<link href="css/quicksearch.css" type="text/css" rel="Stylesheet" />
+	<link href="js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
+	<script src="js/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
+	<script src="js/symb/plugin.quicksearch.js" type="text/javascript"></script>
+
+
+
+Place following div where you want the query field to occur  
+Quick search style tags within custom.css can be modified file to customize quick search style
+
 <div id="quicksearchdiv">
-	<?php
-	//---------------------------QUICK SEARCH SETTINGS---------------------------------------
-	//Title text that will appear. 
-	$searchText = (isset($LANG['QSEARCH_SEARCH'])?$LANG['QSEARCH_SEARCH']:'Search Taxon'); 
-
-	//Text that will appear on search button. 
-	$buttonText = (isset($LANG['QSEARCH_SEARCH_BUTTON'])?$LANG['QSEARCH_SEARCH_BUTTON']:'Search');
-
-	//---------------------------DO NOT CHANGE BELOW HERE-----------------------------
-	include_once($SERVER_ROOT.'/classes/PluginsManager.php');
-	$pluginManager = new PluginsManager();
-	echo $pluginManager->createQuickSearch($buttonText,$searchText);
-	?>
+	<!-- -------------------------QUICK SEARCH SETTINGS--------------------------------------- -->
+	<form name="quicksearch" id="quicksearch" action="<?php echo $CLIENT_ROOT; ?>/taxa/index.php" method="get" onsubmit="return verifyQuickSearch(this);">
+		<div id="quicksearchtext" ><?php echo (isset($LANG['QSEARCH_SEARCH'])?$LANG['QSEARCH_SEARCH']:'Search Taxon'); ?></div>
+		<input type="text" name="taxon" id="quicksearchtaxon" />
+		<button name="formsubmit"  id="quicksearchbutton" type="submit" value="Search Terms"><?php echo (isset($LANG['QSEARCH_SEARCH_BUTTON'])?$LANG['QSEARCH_SEARCH_BUTTON']:'Search'); ?></button>
+	</form>
 </div>
