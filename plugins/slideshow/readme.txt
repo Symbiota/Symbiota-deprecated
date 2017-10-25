@@ -1,5 +1,9 @@
 Copy code below into the site's home page (index.php) or any other page of interest.
 Modify variable values to customize slideshow to your preferences.
+Note that this tool is dependent on target page having JQuery and jQuery-ui links already included within head tag (see index_template.php)
+Also requires addition of following line to pages <head> tag
+<script src="<?PHP echo $CLIENT_ROOT; ?>/js/jquery.slides.js"></script>
+ 
  
 <?php
 //---------------------------SLIDESHOW SETTINGS---------------------------------------
@@ -33,8 +37,7 @@ $numDays = 30;
 //---------------------------DO NOT CHANGE BELOW HERE-----------------------------
 
 ini_set('max_execution_time', 120);
-include_once($serverRoot.'/classes/PluginsManager.php');
+include_once($SERVER_ROOT.'/classes/PluginsManager.php');
 $pluginManager = new PluginsManager();
-$slideshow = $pluginManager->createSlidewhow($ssId,$numSlides,$width,$numDays,$imageType,$clId,$dayInterval,$interval);
-echo $slideshow;
+echo $pluginManager->createSlidewhow($ssId,$numSlides,$width,$numDays,$imageType,$clId,$dayInterval,$interval);
 ?>

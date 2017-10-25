@@ -9,11 +9,11 @@ class PluginsManager {
  	public function __destruct(){
 	}
 	
-	public function createSlidewhow($ssId, $numSlides, $width, $numDays, $imageType, $clid, $dayInterval, $interval=7000, $includeJQuery = true){
+	public function createSlidewhow($ssId, $numSlides, $width, $numDays, $imageType, $clid, $dayInterval, $interval=7000){
 		if($width > 800) $width = 800;
 		if($width < 275) $width = 275;
 		$this->setSlideShow($ssId,$numSlides,$numDays,$imageType,$clid,$dayInterval);
-		$showHtml = $this->getSlideshowHtml($ssId, $width, $interval, $includeJQuery);
+		$showHtml = $this->getSlideshowHtml($ssId, $width, $interval);
 		return $showHtml;
 	}
 	
@@ -209,11 +209,10 @@ class PluginsManager {
 		return $infoArr['files'];
 	}
 	
-	private function getSlideshowHtml($ssId, $width, $interval, $includeJQuery){
+	private function getSlideshowHtml($ssId, $width, $interval){
 		$clientRoot = $GLOBALS['CLIENT_ROOT'];
 		$height = $width + 50;
-		$html = '';
-		$html .= '<link rel="stylesheet" href="'.$clientRoot.'/css/slideshowstyle.css">';
+		$html = '<link rel="stylesheet" href="'.$clientRoot.'/css/slideshowstyle.css">';
 		$html .= '<style>';
 		$html .= '@font-face{';
 		$html .= "font-family:'FontAwesome';";
@@ -234,10 +233,6 @@ class PluginsManager {
 		$html .= 'background-image: url('.$clientRoot.'/css/images/pagination.png);';
 		$html .= 'background-position: 0 0;}';
 		$html .= '</style>';
-		if($includeJQuery){
-			$html .= '<script src="'.$clientRoot.'/js/jquery-1.9.1.js"></script>';
-		}
-		$html .= '<script src="'.$clientRoot.'/js/jquery.slides.js"></script>';
 		$html .= $this->getImageList($ssId, $width);
 		$html .= '<script>';
 		$html .= '$(function() {';
