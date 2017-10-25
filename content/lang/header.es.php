@@ -37,3 +37,7 @@ $LANG['MY_PROFILE'] = 'Mi Perfil';
 $LANG['LOGOUT'] = 'Finalizar Sesi&oacute;n';
 $LANG['LOGIN'] = 'iniciar Sesi&oacute;n';
 $LANG['NEW_ACCOUNT'] = 'Nueva Cuenta';
+
+//Various plugin variables
+$LANG['QSEARCH_SEARCH'] = 'B&uacute;squeda de especies';
+$LANG['QSEARCH_SEARCH_BUTTON'] = 'B&uacute;squeda';

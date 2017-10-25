@@ -189,28 +189,18 @@ ul#hor_dropdown li:hover ul li a:hover {
 }
 
 /* Quick Search Plugin */
+#quicksearchdiv{
+}
+
 #quicksearchtext{
-	margin-top:0px;
-	padding-bottom:0px;
 }
 
 #quicksearchtaxon{
-	width: 250px;
-	margin-bottom:0px;
-	padding-bottom:0px;
-	font-family: Arial, Helvetica, sans-serif;
 }
 
 #quicksearchbutton{
-	margin-left:10px;
-	margin-top:0px;
-	margin-bottom:0px;
-	padding-bottom:0px;
 }
 
 /* Slideshow Plugin */
 #slideshowcontainer{
-	border: 2px solid black;
-	border-radius:10px;
-	padding:10px;
 }

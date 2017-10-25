@@ -1,6 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
+include_once($SERVER_ROOT.'/classes/SearchManager.php');
 
 class OccurrenceSearchSupport{
 
@@ -14,10 +15,10 @@ class OccurrenceSearchSupport{
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function getTaxaSuggest($queryString, $taxonType){
+	public function getTaxaSuggest($queryString, $taxonType=1){
 		$retArr = Array();
 		$queryString = $this->cleanInStr($queryString);
-		if(!is_numeric($taxonType)) $taxonType = 0;
+		if(!is_numeric($taxonType)) $taxonType = 1;
 		if($queryString) {
 			$sql = "";
 			if($taxonType == TaxaSearchType::ANY_NAME){
