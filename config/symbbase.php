@@ -1,4 +1,5 @@
 <?php
+header('X-Frame-Options: deny'); 
 if(!isset($CLIENT_ROOT) && isset($clientRoot)) $CLIENT_ROOT = $clientRoot; 
 if(!isset($SERVER_ROOT) && isset($serverRoot)) $SERVER_ROOT = $serverRoot;
 include_once($SERVER_ROOT.'/classes/Encryption.php');
