@@ -41,19 +41,19 @@ $smManager = new SiteMapManager();
 		<div style="margin:10px;">
 			<h2><?php echo $LANG['COLLECTIONS']; ?></h2>
 			<ul>
-				<li><a href="collections/index.php"><?php echo $LANG['SEARCHENGINE'];?></a><?php echo $LANG['SEARCH_COLL'];?></li>
-				<li><a href="collections/misc/collprofiles.php"><?php echo $LANG['COLLECTIONS'];?></a><?php echo $LANG['LISTOFCOLL'];?></li>
+				<li><a href="collections/index.php"><?php echo $LANG['SEARCHENGINE'];?></a> - <?php echo $LANG['SEARCH_COLL'];?></li>
+				<li><a href="collections/misc/collprofiles.php"><?php echo $LANG['COLLECTIONS'];?></a> - <?php echo $LANG['LISTOFCOLL'];?></li>
 				<li><a href="collections/misc/collstats.php"><?php echo $LANG['COLLSTATS'];?></a></li>
 				<li><a href="collections/exsiccati/index.php"><?php echo $LANG['EXSICC'];?></a></li>
 				<li><?php echo (isset($LANG['DATA_PUBLISHING'])?$LANG['DATA_PUBLISHING']:'Data Publishing');?></li>
 				<li style="margin-left:15px"><a href="collections/datasets/rsshandler.php" target="_blank"><?php echo $LANG['COLLECTIONS_RSS'];?></a></li>
-				<li style="margin-left:15px"><a href="collections/datasets/datapublisher.php"><?php echo $LANG['DARWINCORE'];?></a><?php echo $LANG['PUBDATA'];?></li>
+				<li style="margin-left:15px"><a href="collections/datasets/datapublisher.php"><?php echo $LANG['DARWINCORE'];?></a> - <?php echo $LANG['PUBDATA'];?></li>
 				<?php 
 				if(file_exists('webservices/dwc/rss.xml')){
 					echo '<li style="margin-left:15px;"><a href="webservices/dwc/rss.xml" target="_blank">'.$LANG['RSS'].'</a></li>';
 				}
 				?>
-				<li><a href="collections/misc/rarespecies.php"><?php echo $LANG['RARESPEC'];?></a><?php echo $LANG['LISTOFTAXA'];?></li>
+				<li><a href="collections/misc/rarespecies.php"><?php echo $LANG['RARESPEC'];?></a> - <?php echo $LANG['LISTOFTAXA'];?></li>
 				
 			</ul>
 				
@@ -93,14 +93,12 @@ $smManager = new SiteMapManager();
 				<li>
 					<a href="checklists/dynamicmap.php?interface=checklist">
                         <?php echo $LANG['CHECKLIST'];?>
-					</a>
-                    <?php echo $LANG['BUILDCHECK'];?>
+					</a> - <?php echo $LANG['BUILDCHECK'];?>
 				</li>
 				<li>
 					<a href="checklists/dynamicmap.php?interface=key">
                         <?php echo $LANG['DYNAMICKEY'];?>
-					</a>
-                    <?php echo $LANG['BUILDDKEY'];?>
+					</a> - <?php echo $LANG['BUILDDKEY'];?>
 				</li>
 			</ul>
 
@@ -162,7 +160,7 @@ $smManager = new SiteMapManager();
 							if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 								?>
 								<li>
-                                    <?php echo $LANG['AUTHOKEY'];?><a href="<?php echo $CLIENT_ROOT; ?>/ident/admin/index.php"><?php echo $LANG['CHARASTATES'];?></a>
+                                    <?php echo $LANG['AUTHOKEY'];?> <a href="<?php echo $CLIENT_ROOT; ?>/ident/admin/index.php"><?php echo $LANG['CHARASTATES'];?></a>
 								</li>
 								<?php 
 							}
@@ -198,7 +196,7 @@ $smManager = new SiteMapManager();
 					?>
 					<h3><?php echo $LANG['IMAGES'];?></h3>
 					<div style="margin:10px;">
-                        <?php echo $LANG['SEESYMBDOC'];?>
+                        <?php echo $LANG['SEESYMBDOC'];?> 
 						<a href="http://symbiota.org/docs/image-submission-2/"><?php echo $LANG['IMGSUB'];?></a>
                         <?php echo $LANG['FORANOVERVIEW'];?>
 					</div>
@@ -208,7 +206,7 @@ $smManager = new SiteMapManager();
 							?>
 							<li>
 								<a href="taxa/profile/tpeditor.php?tabindex=1" target="_blank">
-                                    <?php echo $LANG['BASICFIELD'];?>
+                                    <?php echo $LANG['BASICFIELD'];?> 
 								</a>
 							</li>
 							<?php
@@ -231,7 +229,7 @@ $smManager = new SiteMapManager();
 						if($IS_ADMIN){
 							echo '<li><a href="projects/index.php?newproj=1">'.$LANG['ADDNEWPROJ'].'</a></li>';
 							if($projList){
-								echo '<li><b>'.$LANG['LISTOFCURR'].'</b>'.$LANG['CLICKEDIT'].'</li>';
+								echo '<li><b>'.$LANG['LISTOFCURR'].'</b> '.$LANG['CLICKEDIT'].'</li>';
 								echo '<ul>';
 								foreach($projList as $pid => $pArr){
 									echo '<li><a href="'.$CLIENT_ROOT.'/projects/index.php?pid='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
@@ -277,7 +275,7 @@ $smManager = new SiteMapManager();
 						<?php 
 						if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 							?>
-							<li><?php echo $LANG['EDITTAXPL'];?><a href="taxa/taxonomy/taxonomydisplay.php"><?php echo $LANG['TAXTREEVIEW'];?></a></li>
+							<li><?php echo $LANG['EDITTAXPL'];?> <a href="taxa/taxonomy/taxonomydisplay.php"><?php echo $LANG['TAXTREEVIEW'];?></a></li>
 							<li><a href="taxa/taxonomy/taxonomyloader.php"><?php echo $LANG['ADDTAXANAME'];?></a></li>
 							<li><a href="taxa/taxonomy/taxaloader.php"><?php echo $LANG['BATCHTAXA'];?></a></li>
 							<?php 
@@ -295,7 +293,7 @@ $smManager = new SiteMapManager();
 
 					<h3><?php echo $LANG['CHECKLISTS'];?></h3>
 					<div style="margin:10px;">
-                        <?php echo $LANG['TOOLSFORMANAGE'];?>
+                        <?php echo $LANG['TOOLSFORMANAGE'];?>.
 					</div>
 					<ul>
 						<?php 
@@ -315,7 +313,7 @@ $smManager = new SiteMapManager();
 						?>
 						<h3><?php echo $LANG['EXSICCATII'];?></h3>
 						<div style="margin:10px;">
-                            <?php echo $LANG['ESCMOD'];?>
+                            <?php echo $LANG['ESCMOD'];?>.
 						</div>
 						<ul>
 							<li><a href="collections/exsiccati/index.php"><?php echo $LANG['EXSICC'];?></a></li>
@@ -354,7 +352,7 @@ $smManager = new SiteMapManager();
 					<h3><?php echo $LANG['OBSERV'];?></h3>
 					<div style="margin:10px;">
                         <?php echo $LANG['PARA2'];?>
-						<a href="http://symbiota.org/docs/specimen-data-management/" target="_blank"><?php echo $LANG['SYMBDOCU'];?></a><?php echo $LANG['FORMOREINFO'];?>
+						<a href="http://symbiota.org/docs/specimen-data-management/" target="_blank"><?php echo $LANG['SYMBDOCU'];?></a> <?php echo $LANG['FORMOREINFO'];?>.
 					</div>
 					<div style="margin:10px;">
 						<?php 
@@ -430,7 +428,7 @@ $smManager = new SiteMapManager();
 					<?php 
 				}
 				else{
-					echo ''.$LANG['PLEASE'].' <a href="'.$CLIENT_ROOT.'/profile/index.php?refurl=../sitemap.php">'.$LANG['LOGIN'].'</a>'.$LANG['TOACCESS'].'<br/>'.$LANG['CONTACTPORTAL'].'';
+					echo ''.$LANG['PLEASE'].' <a href="'.$CLIENT_ROOT.'/profile/index.php?refurl=../sitemap.php">'.$LANG['LOGIN'].'</a>'.$LANG['TOACCESS'].'<br/>'.$LANG['CONTACTPORTAL'].'.';
 				}
 			?>
 			</fieldset>
@@ -438,13 +436,13 @@ $smManager = new SiteMapManager();
 			<h2><?php echo $LANG['ABOUT'];?></h2>
 			<ul>
 				<li>
-                    <?php echo $LANG['SCHEMA'];?><?php echo $smManager->getSchemaVersion(); ?>
+                    <?php echo $LANG['SCHEMA'].' '.$smManager->getSchemaVersion(); ?>
 				</li>
 			</ul>
 		</div>
 	</div>
 	<?php
-		include($SERVER_ROOT.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?> 
 </body>
 </html>
