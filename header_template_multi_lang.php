@@ -53,6 +53,11 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 							<option value="en">English</option>
 							<option value="es" <?php echo ($LANG_TAG=='es'?'SELECTED':''); ?>>Espa&ntilde;ol</option>
 						</select>
+						<?php 
+						if($IS_ADMIN){
+							echo '<a href="'.$CLIENT_ROOT.'/content/lang/admin/langmanager.php?refurl='.$_SERVER['PHP_SELF'].'"><img src="'.$CLIENT_ROOT.'/images/edit.png" style="width:12px" /></a>';
+						}
+						?>
 					</span>
 				</div>
 				<ul id="hor_dropdown">
