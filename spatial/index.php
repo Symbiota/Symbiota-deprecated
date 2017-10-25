@@ -34,7 +34,7 @@ $dbArr = Array();
     <link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui_accordian.css" type="text/css" rel="stylesheet" />
     <link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
     <link href="<?php echo $CLIENT_ROOT; ?>/css/ol.css" type="text/css" rel="stylesheet" />
-    <link href="<?php echo $CLIENT_ROOT; ?>/css/spatialbase.css?ver=11" type="text/css" rel="stylesheet" />
+    <link href="<?php echo $CLIENT_ROOT; ?>/css/spatialbase.css?ver=12" type="text/css" rel="stylesheet" />
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-1.10.2.min.js" type="text/javascript"></script>
@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=202" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=204" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -103,6 +103,13 @@ $dbArr = Array();
             $('#vectorizeoverlaytool').popup({
                 transition: 'all 0.3s',
                 scrolllock: true,
+                blur: false
+            });
+            $('#loadingOverlay').popup({
+                transition: 'all 0.3s',
+                scrolllock: true,
+                opacity:0.6,
+                color:'white',
                 blur: false
             });
         });
@@ -529,6 +536,8 @@ $dbArr = Array();
     var rasterLayers = [];
     var overlayLayers = [];
     var vectorizeLayers = [];
+    var loadingTimer;
+    var loadingComplete = false;
     var SOLRFields = 'occid,collid,catalogNumber,otherCatalogNumbers,family,sciname,tidinterpreted,scientificNameAuthorship,identifiedBy,' +
         'dateIdentified,typeStatus,recordedBy,recordNumber,eventDate,displayDate,coll_year,coll_month,coll_day,habitat,associatedTaxa,' +
         'cultivationStatus,country,StateProvince,county,municipality,locality,localitySecurity,localitySecurityReason,geo,minimumElevationInMeters,' +
@@ -1033,7 +1042,7 @@ $dbArr = Array();
             layersArr['spider']
         ],
         overlays: [popupoverlay,finderpopupoverlay],
-        renderer: 'webgl'
+        renderer: 'canvas'
     });
 
     var mousePositionControl = new ol.control.MousePosition({
@@ -1263,6 +1272,7 @@ $dbArr = Array();
     function loadPointWFSLayer(index){
         pointvectorsource = new ol.source.Vector({
             loader: function(extent, resolution, projection) {
+                showWorking();
                 var processed = 0;
                 do{
                     lazyLoadPoints(index,function(res){
@@ -1506,6 +1516,10 @@ $dbArr = Array();
         <input id="zipcsv" name="zipcsv" type="hidden" value="" />
         <input id="csetcsv" name="csetcsv" type="hidden" value="" />
     </form>
+</div>
+
+<div id="loadingOverlay" data-role="popup" style="width:100%;position:relative;">
+    <div id="loader"></div>
 </div>
 </body>
 </html>

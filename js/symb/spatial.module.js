@@ -549,6 +549,13 @@ function checkDateSliderType(){
     }
 }
 
+function checkLoading(){
+    if(loadingComplete){
+        loadingComplete = false;
+        hideWorking();
+    }
+}
+
 function checkObjectNotEmpty(obj){
     for(var i in obj){
         if(obj[i]) return true;
@@ -1514,6 +1521,10 @@ function hideFeature(feature){
     feature.setStyle(invisibleStyle);
 }
 
+function hideWorking(){
+    $('#loadingOverlay').popup('hide');
+}
+
 function imagePostFunction(image, src) {
     var img = image.getImage();
     if(typeof window.btoa === 'function'){
@@ -1556,6 +1567,7 @@ function imagePostFunction(image, src) {
 
 function lazyLoadPoints(index,callback){
     var startindex = 0;
+    loadingComplete = false;
     if(index > 1) startindex = (index - 1)*lazyLoadCnt;
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
@@ -1565,6 +1577,8 @@ function lazyLoadPoints(index,callback){
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
+            loadingComplete = true;
+            loadingTimer = setTimeout(checkLoading,10000);
             callback(http.responseText);
         }
     };
@@ -2495,6 +2509,10 @@ function showFeature(feature){
         var featureStyle = setSymbol(feature);
     }
     feature.setStyle(featureStyle);
+}
+
+function showWorking(){
+    $('#loadingOverlay').popup('show');
 }
 
 function spiderifyPoints(features){
