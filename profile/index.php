@@ -55,12 +55,11 @@ if(!is_numeric($resetPwd)) $resetPwd = 0;
 if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
 
 if($remMe) $pHandler->setRememberMe(true);
-
 if($action == "logout"){
 	$pHandler->reset();
 	header("Location: ../index.php");
 }
-elseif($action == "Login"){
+elseif($action == "login"){
 	if($pHandler->authenticate($_POST["password"])){
 		if(!$refUrl || (strtolower(substr($refUrl,0,4)) == 'http') || strpos($refUrl,'newprofile.php')){
 			header("Location: ../index.php");
