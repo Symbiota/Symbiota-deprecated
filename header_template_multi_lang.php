@@ -25,25 +25,25 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 					if($USER_DISPLAY_NAME){
 						?>
 						<span style="">
-							<?php echo (isset($LANG['WELCOME'])?$LANG['WELCOME']:'Welcome').' '.$USER_DISPLAY_NAME; ?>!
+							<?php echo (isset($LANG['H_WELCOME'])?$LANG['H_WELCOME']:'Welcome').' '.$USER_DISPLAY_NAME; ?>!
 						</span>
 						<span style="margin-left:5px;">
-							<a href="<?php echo $CLIENT_ROOT; ?>/profile/viewprofile.php"><?php echo (isset($LANG['MY_PROFILE'])?$LANG['MY_PROFILE']:'My Profile')?></a>
+							<a href="<?php echo $CLIENT_ROOT; ?>/profile/viewprofile.php"><?php echo (isset($LANG['H_MY_PROFILE'])?$LANG['H_MY_PROFILE']:'My Profile')?></a>
 						</span>
 						<span style="margin-left:5px;">
-							<a href="<?php echo $CLIENT_ROOT; ?>/profile/index.php?submit=logout"><?php echo (isset($LANG['LOGOUT'])?$LANG['LOGOUT']:'Logout')?></a>
+							<a href="<?php echo $CLIENT_ROOT; ?>/profile/index.php?submit=logout"><?php echo (isset($LANG['H_LOGOUT'])?$LANG['H_LOGOUT']:'Logout')?></a>
 						</span>
 						<?php
-						$LANG['LOGIN'] = 'Login';
-						$LANG['NEW_ACCOUNT'] = 'New Account';
+						$LANG['H_LOGIN'] = 'Login';
+						$LANG['H_NEW_ACCOUNT'] = 'New Account';
 					}
 					else{
 						?>
 						<span style="">
-							<a href="<?php echo $CLIENT_ROOT."/profile/index.php?refurl=".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>"><?php echo (isset($LANG['LOGIN'])?$LANG['LOGIN']:'Login')?></a>
+							<a href="<?php echo $CLIENT_ROOT."/profile/index.php?refurl=".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>"><?php echo (isset($LANG['H_LOGIN'])?$LANG['H_LOGIN']:'Login')?></a>
 						</span>
 						<span style="margin-left:5px;">
-							<a href="<?php echo $CLIENT_ROOT; ?>/profile/newprofile.php"><?php echo (isset($LANG['NEW_ACCOUNT'])?$LANG['NEW_ACCOUNT']:'New Account')?></a>
+							<a href="<?php echo $CLIENT_ROOT; ?>/profile/newprofile.php"><?php echo (isset($LANG['H_NEW_ACCOUNT'])?$LANG['H_NEW_ACCOUNT']:'New Account')?></a>
 						</span>
 						<?php
 					}
@@ -62,75 +62,75 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 				</div>
 				<ul id="hor_dropdown">
 					<li>
-						<a href="<?php echo $CLIENT_ROOT; ?>/index.php" ><?php echo (isset($LANG['HOME'])?$LANG['HOME']:'Home'); ?></a>
+						<a href="<?php echo $CLIENT_ROOT; ?>/index.php" ><?php echo (isset($LANG['H_HOME'])?$LANG['H_HOME']:'Home'); ?></a>
 					</li>
 					<li>
-						<a href="#" ><?php echo (isset($LANG['SEARCH'])?$LANG['SEARCH']:'Search'); ?></a>
+						<a href="#" ><?php echo (isset($LANG['H_SEARCH'])?$LANG['H_SEARCH']:'Search'); ?></a>
 						<ul>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/collections/index.php" ><?php echo (isset($LANG['COLLECTIONS'])?$LANG['COLLECTIONS']:'Collections'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/index.php" ><?php echo (isset($LANG['H_COLLECTIONS'])?$LANG['H_COLLECTIONS']:'Collections'); ?></a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/collections/map/mapinterface.php" target="_blank"><?php echo (isset($LANG['MAP'])?$LANG['MAP']:'Map'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/map/mapinterface.php" target="_blank"><?php echo (isset($LANG['H_MAP'])?$LANG['H_MAP']:'Map'); ?></a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/checklists/dynamicmap.php?interface=checklist" ><?php echo (isset($LANG['DYN_LISTS'])?$LANG['DYN_LISTS']:'Dynamic Species List'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/checklists/dynamicmap.php?interface=checklist" ><?php echo (isset($LANG['H_DYN_LISTS'])?$LANG['H_DYN_LISTS']:'Dynamic Species List'); ?></a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/taxa/admin/taxonomydynamicdisplay.php" ><?php echo (isset($LANG['TAXONOMIC_EXPLORER'])?$LANG['TAXONOMIC_EXPLORER']:'Taxonomic Explorer'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/taxa/admin/taxonomydynamicdisplay.php" ><?php echo (isset($LANG['H_TAXONOMIC_EXPLORER'])?$LANG['H_TAXONOMIC_EXPLORER']:'Taxonomic Explorer'); ?></a>
 							</li>
 						</ul>
 					</li>
 					<li>
-						<a href="#" ><?php echo (isset($LANG['IMAGES'])?$LANG['IMAGES']:'Images'); ?></a>
+						<a href="#" ><?php echo (isset($LANG['H_IMAGES'])?$LANG['H_IMAGES']:'Images'); ?></a>
 						<ul>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/index.php" ><?php echo (isset($LANG['IMAGE_BROWSER'])?$LANG['IMAGE_BROWSER']:'Image Browser'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/index.php" ><?php echo (isset($LANG['H_IMAGE_BROWSER'])?$LANG['H_IMAGE_BROWSER']:'Image Browser'); ?></a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/search.php" ><?php echo (isset($LANG['IMAGE_SEARCH'])?$LANG['IMAGE_SEARCH']:'Search Images'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/search.php" ><?php echo (isset($LANG['H_IMAGE_SEARCH'])?$LANG['H_IMAGE_SEARCH']:'Search Images'); ?></a>
 							</li>
 						</ul>
 					</li>
 					<li>
-						<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php" ><?php echo (isset($LANG['INVENTORIES'])?$LANG['INVENTORIES']:'Species Checklists'); ?></a>
+						<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php" ><?php echo (isset($LANG['H_INVENTORIES'])?$LANG['H_INVENTORIES']:'Species Checklists'); ?></a>
 						<ul>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=516"><?php echo (isset($LANG['CENTRAL_AMER'])?$LANG['CENTRAL_AMER']:'Central America'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=516"><?php echo (isset($LANG['H_CENTRAL_AMER'])?$LANG['H_CENTRAL_AMER']:'Central America'); ?></a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=517"><?php echo (isset($LANG['ECUADOR'])?$LANG['ECUADOR']:'Ecuador'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=517"><?php echo (isset($LANG['H_ECUADOR'])?$LANG['H_ECUADOR']:'Ecuador'); ?></a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=505"><?php echo (isset($LANG['SUBPOLAR'])?$LANG['SUBPOLAR']:'Subpolar Regions'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=505"><?php echo (isset($LANG['H_SUBPOLAR'])?$LANG['H_SUBPOLAR']:'Subpolar Regions'); ?></a>
 							</li>
 						</ul>
 					</li>
 					<li>
-						<a href="#" ><?php echo (isset($LANG['SYMBIOTA'])?$LANG['SYMBIOTA']:'Symbiota'); ?></a>
+						<a href="#" ><?php echo (isset($LANG['H_SYMBIOTA'])?$LANG['H_SYMBIOTA']:'Symbiota'); ?></a>
 						<ul>
 							<li>
-									<a href="http://symbiota.org/docs/" target="_blank" ><?php echo (isset($LANG['ABOUT_SYMBIOTA'])?$LANG['ABOUT_SYMBIOTA']:'About Symbiota'); ?></a>
+									<a href="http://symbiota.org/docs/" target="_blank" ><?php echo (isset($LANG['H_ABOUT_SYMBIOTA'])?$LANG['H_ABOUT_SYMBIOTA']:'About Symbiota'); ?></a>
 							</li>
 							<li>
-									<a href="http://symbiota.org/docs/symbiota-introduction/symbiota-help-pages/" target="_blank" ><?php echo (isset($LANG['HELP'])?$LANG['HELP']:'Help'); ?></a>
+									<a href="http://symbiota.org/docs/symbiota-introduction/symbiota-help-pages/" target="_blank" ><?php echo (isset($LANG['H_HELP'])?$LANG['H_HELP']:'Help'); ?></a>
 							</li>
 							<li>
-									<a href="http://symbiota.org/docs/google-group/" target="_blank" ><?php echo (isset($LANG['GOOGLE_GROUP'])?$LANG['GOOGLE_GROUP']:'Google Group'); ?></a>
+									<a href="http://symbiota.org/docs/google-group/" target="_blank" ><?php echo (isset($LANG['H_GOOGLE_GROUP'])?$LANG['H_GOOGLE_GROUP']:'Google Group'); ?></a>
 							</li>
 							<li>
-								<a href='<?php echo $CLIENT_ROOT; ?>/sitemap.php'><?php echo (isset($LANG['SITEMAP'])?$LANG['SITEMAP']:'Sitemap'); ?></a>
+								<a href='<?php echo $CLIENT_ROOT; ?>/sitemap.php'><?php echo (isset($LANG['H_SITEMAP'])?$LANG['H_SITEMAP']:'Sitemap'); ?></a>
 							</li>
 						</ul>
 					</li>
 					<li>
-						<a href="#" ><?php echo (isset($LANG['CONTACTS'])?$LANG['CONTACTS']:'Contacts'); ?></a>
+						<a href="#" ><?php echo (isset($LANG['H_CONTACTS'])?$LANG['H_CONTACTS']:'Contacts'); ?></a>
 						<ul>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php" ><?php echo (isset($LANG['PARTNERS'])?$LANG['PARTNERS']:'Partners'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php" ><?php echo (isset($LANG['H_PARTNERS'])?$LANG['H_PARTNERS']:'Partners'); ?></a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/misc/contacts.php" ><?php echo (isset($LANG['CONTACTS'])?$LANG['CONTACTS']:'Contacts'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/misc/contacts.php" ><?php echo (isset($LANG['H_CONTACTS'])?$LANG['H_CONTACTS']:'Contacts'); ?></a>
 							</li>
 						</ul>
 					</li>
