@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=204" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=208" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -536,7 +536,7 @@ $dbArr = Array();
     var rasterLayers = [];
     var overlayLayers = [];
     var vectorizeLayers = [];
-    var loadingTimer;
+    var loadingTimer = 0;
     var loadingComplete = false;
     var SOLRFields = 'occid,collid,catalogNumber,otherCatalogNumbers,family,sciname,tidinterpreted,scientificNameAuthorship,identifiedBy,' +
         'dateIdentified,typeStatus,recordedBy,recordNumber,eventDate,displayDate,coll_year,coll_month,coll_day,habitat,associatedTaxa,' +
@@ -1272,7 +1272,6 @@ $dbArr = Array();
     function loadPointWFSLayer(index){
         pointvectorsource = new ol.source.Vector({
             loader: function(extent, resolution, projection) {
-                showWorking();
                 var processed = 0;
                 do{
                     lazyLoadPoints(index,function(res){

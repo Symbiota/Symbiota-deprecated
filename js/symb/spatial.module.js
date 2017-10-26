@@ -1029,7 +1029,7 @@ function getCollectionParams(){
     for(i = 0; i < dbElements.length; i++){
         var dbElement = dbElements[i];
         if(dbElement.checked && !isNaN(dbElement.value)){
-            if(c == true) collid = collid+",";
+            if(c == true) collid = collid+" ";
             collid = collid + dbElement.value;
             c = true;
         }
@@ -1578,7 +1578,7 @@ function lazyLoadPoints(index,callback){
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             loadingComplete = true;
-            loadingTimer = setTimeout(checkLoading,10000);
+            setTimeout(checkLoading,loadingTimer);
             callback(http.responseText);
         }
     };
@@ -1598,11 +1598,12 @@ function loadPoints(){
     cqlString = newcqlString;
     solrqString = newsolrqString;
     if(newsolrqString){
+        showWorking();
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
             if(solrRecCnt){
-                setRecordsTab();
+                setLoadingTimer();
                 if(loadVectorPoints){
                     loadPointWFSLayer(0);
                 }
@@ -1610,6 +1611,7 @@ function loadPoints(){
                     loadPointWMSLayer();
                 }
                 //cleanSelectionsLayer();
+                setRecordsTab();
                 changeRecordPage(1);
                 $('#recordstab').tabs({active: 1});
                 $("#accordion").accordion("option","active",1);
@@ -1630,6 +1632,7 @@ function loadPoints(){
                     removeLayerToSelList('pointv');
                     pointActive = false;
                 }
+                hideWorking();
                 alert('There were no records matching your query.');
             }
         });
@@ -2317,6 +2320,16 @@ function setLayersTable(){
     http.send();
 }
 
+function setLoadingTimer(){
+    loadingTimer = 20000;
+    if(solrRecCnt < 200000) loadingTimer = 15000;
+    if(solrRecCnt < 150000) loadingTimer = 13000;
+    if(solrRecCnt < 100000) loadingTimer = 10000;
+    if(solrRecCnt < 50000) loadingTimer = 7000;
+    if(solrRecCnt < 10000) loadingTimer = 5000;
+    if(solrRecCnt < 5000) loadingTimer = 2000;
+}
+
 function setRasterTools(){
     document.getElementById("reclassifytoollink").style.display = 'block';
     document.getElementById("reclassifyOutputName").value = "";
@@ -2451,6 +2464,7 @@ function setSymbol(feature){
     var selected = false;
     var cKey = feature.get(clusterKey);
     var recType = feature.get('CollType');
+    if(!recType) recType = 'observation';
     if(selections.length > 0){
         var occid = feature.get('occid');
         if(selections.indexOf(occid) !== -1) selected = true;

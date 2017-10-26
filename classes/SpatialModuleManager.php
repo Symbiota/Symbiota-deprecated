@@ -199,7 +199,7 @@ class SpatialModuleManager{
                             </a>
                         </td>
                         <td>
-                            <input id="cat<?php echo $idStr; ?>Input" data-role="none" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked />
+                            <input id="cat<?php echo $idStr; ?>Input" data-role="none" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onchange="buildQueryStrings();" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked />
                         </td>
                         <td>
 			    		<span style='text-decoration:none;color:black;font-size:14px;font-weight:bold;'>
@@ -228,7 +228,7 @@ class SpatialModuleManager{
                                                 ?>
                                             </td>
                                             <td style="padding:6px">
-                                                <input name="db[]" value="<?php echo $collid; ?>" data-role="none" type="checkbox" class="cat-<?php echo $idStr; ?>" onchange="buildQueryStrings();" onclick="unselectCat('cat<?php echo $catid; ?>Input')" checked />
+                                                <input name="db[]" value="<?php echo $collid; ?>" data-role="none" type="checkbox" class="cat-<?php echo $idStr; ?>" onchange="buildQueryStrings();" onclick="unselectCat('cat<?php echo $idStr; ?>Input')" checked />
                                             </td>
                                             <td style="padding:6px">
                                                 <a href = '<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
