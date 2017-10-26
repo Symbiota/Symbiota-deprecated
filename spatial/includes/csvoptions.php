@@ -79,7 +79,7 @@
 					</td>
 					<td>
 						<div style="margin:10px 0px;">
-							<input data-role="none" type="checkbox" name="zip" id="csvzip" value="1" onchange="zipSelected(this);" checked />Compressed ZIP file<br />
+							<input data-role="none" type="checkbox" name="zip" id="csvzip" value="1" onchange="zipSelected(this);" checked /> Compressed ZIP file<br />
 						</div>
 					</td>
 				</tr>

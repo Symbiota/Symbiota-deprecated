@@ -98,7 +98,7 @@ else{
     $dwcaHandler->setCustomWhereSql($mapWhere);
 
     $outputFile = null;
-    if($zip){
+    if($fileType == 'zip'){
         $dwcaHandler->setIncludeDets($identifications);
         $dwcaHandler->setIncludeImgs($images);
         $outputFile = $dwcaHandler->createDwcArchive('webreq');
