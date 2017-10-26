@@ -35,7 +35,7 @@ if($SYMB_UID){
 		</div>
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<div style="margin:20px"><b>Source path:</b> <?php echo '<a href="'.$refUrl.'">'.$refUrl; ?>.'</a></div>
+			<div style="margin:20px"><b>Source path:</b> <?php echo '<a href="'.$refUrl.'">'.$refUrl; ?></a></div>
 			<div style="margin:20px">
 				<table class="styledtable">
 					<tr>

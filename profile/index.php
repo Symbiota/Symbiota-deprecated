@@ -1,10 +1,8 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
-header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidate');
-header('Pragma: no-cache'); // HTTP 1.0.
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/content/lang/profile/index.'.$LANG_TAG.'.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $login = array_key_exists('login',$_REQUEST)?$_REQUEST['login']:'';
 $remMe = array_key_exists("remember",$_POST)?$_POST["remember"]:'';
@@ -40,18 +38,17 @@ if(array_key_exists("refurl",$_REQUEST)){
 $pHandler = new ProfileManager();
 
 $statusStr = "";
-
 //Sanitation
 if($login){
 	if(!$pHandler->setUserName($login)){
 		$login = '';
-		$statusStr = 'Invalid login name';
+		$statusStr = (isset($LANG['INVALID_LOGIN'])?$LANG['INVALID_LOGIN']:'Invalid login name');
 	}
 }
 if($emailAddr){
 	if(!$pHandler->validateEmailAddress($emailAddr)){
 		$emailAddr = '';
-		$statusStr = 'Invalid email';
+		$statusStr = (isset($LANG['INVALID_EMAIL'])?$LANG['INVALID_EMAIL']:'Invalid email');
 	}
 }
 if(!is_numeric($resetPwd)) $resetPwd = 0;
@@ -73,13 +70,15 @@ elseif($action == "Login"){
 		}
 	}
 	else{
-		$statusStr = 'Your username or password was incorrect. Please try again.<br/> If you are unable to remember your login credentials,<br/> use the controls below to retrieve your login or reset your password.';
+		if(isset($LANG['INCORRECT'])) $statusStr = $LANG['INCORRECT'];
+		else $statusStr = 'Your username or password was incorrect. Please try again.<br/> If you are unable to remember your login credentials,<br/> use the controls below to retrieve your login or reset your password.';
 	}
 }
 elseif($action == "Retrieve Login"){
 	if($emailAddr){
 		if($pHandler->lookupUserName($emailAddr)){
-			$statusStr = "Your login name will be emailed to you.";
+			if(isset($LANG['LOGIN_EMAILED'])) $statusStr = $LANG['LOGIN_EMAILED'];
+			else $statusStr = 'Your login name will be emailed to you.';
 		}
 		else{
 			$statusStr = $pHandler->getErrorStr();
@@ -93,20 +92,27 @@ else{
 	$statusStr = $pHandler->getErrorStr();
 }
 ?>
-
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Login</title>
+	<title><?php echo $DEFAULT_TITLE.' '.(isset($LANG['LOGIN_NAME'])?$LANG['LOGIN_NAME']:'Login'); ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		if(!navigator.cookieEnabled){
-			alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
+			<?php 
+			$alertStr = 'Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.';
+			if(isset($LANG['COOKIES'])) $alertStr = $LANG['COOKIES'];
+			?>
+			alert(<?php echo $alertStr; ?>);
 		}
 	
 		function resetPassword(){
 			if(document.getElementById("login").value == ""){
-				alert("Enter your login name in the Login field and leave the password blank");
+				<?php 
+				$alertStr = 'Enter your login name in the Login field and leave the password blank';
+				if(isset($LANG['ENTER_LOGIN_NO_PWD'])) $alertStr = $LANG['ENTER_LOGIN_NO_PWD'];
+				?>
+				alert(<?php echo $alertStr; ?>);
 				return false;
 			}
 			document.getElementById("resetpwd").value = "1";
@@ -115,7 +121,11 @@ else{
 		
 		function checkCreds(){
 			if(document.getElementById("login").value == "" || document.getElementById("password").value == ""){
-				alert("Please enter your login and password.");
+				<?php 
+				$alertStr = 'Please enter your login and password';
+				if(isset($LANG['ENTER_LOGIN'])) $alertStr = $LANG['ENTER_LOGIN'];
+				?>
+				alert(<?php echo $alertStr; ?>);
 				return false;
 			}
 			return true;
@@ -126,18 +136,11 @@ else{
 <body>
 
 <?php
-$displayLeftMenu = (isset($profile_indexMenu)?$profile_indexMenu:"true");
-include($serverRoot.'/header.php');
-if(isset($profile_indexCrumbs)){
-	echo "<div class='navpath'>";
-	echo $profile_indexCrumbs;
-	echo " <b>Create New Profile</b>";
-	echo "</div>";
-}
+$displayLeftMenu = (isset($profile_indexMenu)?$profile_indexMenu:'true');
+include($SERVER_ROOT.'/header.php');
 ?>
 <!-- inner text -->
 <div id="innertext" style="padding-left:0px;margin-left:0px;">
-	
 	<?php
 	if($statusStr){
 		?>
@@ -149,48 +152,48 @@ if(isset($profile_indexCrumbs)){
 		<?php 
 	}
 	?>
-	
 	<div style="width:300px;margin-right:auto;margin-left:auto;">
 		<fieldset style='padding:25px;margin:20px;width:300px;background-color:#FFFFCC;border:2px outset #E8EEFA;'>
 			<form id="loginform" name="loginform" action="index.php" onsubmit="return checkCreds();" method="post">
 				<div style="margin: 10px;font-weight:bold;">
-					Login:&nbsp;&nbsp;&nbsp;<input id="login" name="login" value="<?php echo $login; ?>" style="border-style:inset;" />
+					<?php echo (isset($LANG['LOGIN_NAME'])?$LANG['LOGIN_NAME']:'Login'); ?>:&nbsp;&nbsp;&nbsp;<input id="login" name="login" value="<?php echo $login; ?>" style="border-style:inset;" />
 				</div>
 				<div style="margin:10px;font-weight:bold;">
-					Password:&nbsp;&nbsp;<input type="password" id="password" name="password"  style="border-style:inset;" autocomplete="off" />
+					<?php echo (isset($LANG['PASSWORD'])?$LANG['PASSWORD']:"Password"); ?>: 
+					<input type="password" id="password" name="password"  style="border-style:inset;" autocomplete="off" />
 				</div>
 				<div style="margin:10px">
 					<input type="checkbox" value='1' name="remember" >
-					Remember me on this computer
+					<?php echo (isset($LANG['REMEMBER'])?$LANG['REMEMBER']:'Remember me on this computer'); ?>
 				</div>
 				<div style="margin-right:10px;float:right;">
 					<input type="hidden" name="refurl" value="<?php echo $refUrl; ?>" />
 					<input type="hidden" id="resetpwd" name="resetpwd" value="">
-					<input type="submit" value="Login" name="action">
+					<button name="action" type="submit" value="login"><?php echo (isset($LANG['LOGIN_NAME'])?$LANG['LOGIN_NAME']:'Login'); ?></button>
 				</div>
 			</form>
 		</fieldset>
 		<div style="width:300px;text-align:center;margin:20px;">
 			<div style="font-weight:bold;">
-				Don't have an Account?
+				<?php echo (isset($LANG['NO_ACCOUNT'])?$LANG['NO_ACCOUNT']:"Don't have an Account?"); ?>
 			</div>
 			<div style="">
-				<a href="newprofile.php?refurl=<?php echo $refUrl; ?>">Create an account now</a>
+				<a href="newprofile.php?refurl=<?php echo $refUrl; ?>"><?php echo (isset($LANG['CREATE_ACCOUNT'])?$LANG['CREATE_ACCOUNT']:'Create an account'); ?></a>
 			</div>
 			<div style="font-weight:bold;margin-top:5px">
-				Can't remember your password?
+				<?php echo (isset($LANG['REMEMBER_PWD'])?$LANG['REMEMBER_PWD']:"Can't Remember your password?"); ?>
 			</div>
-			<div style="color:blue;cursor:pointer;" onclick="resetPassword();">Reset Password</div>
+			<div style="color:blue;cursor:pointer;" onclick="resetPassword();"><?php echo (isset($LANG['REST_PWD'])?$LANG['REST_PWD']:'Reset Password'); ?></div>
 			<div style="font-weight:bold;margin-top:5px">
-				Can't Remember Login Name?
+				<?php echo (isset($LANG['REMEMBER_LOGIN'])?$LANG['REMEMBER_LOGIN']:"Can't Remember Login Name?"); ?>
 			</div>
 			<div>
-				<div style="color:blue;cursor:pointer;" onclick="toggle('emaildiv');">Retrieve Login</div>
+				<div><a href="#" onclick="toggle('emaildiv');"><?php echo (isset($LANG['RETRIEVE'])?$LANG['RETRIEVE']:'Retrieve Login'); ?></a></div>
 				<div id="emaildiv" style="display:none;margin:10px 0px 10px 40px;">
 					<fieldset style="padding:10px;">
 						<form id="retrieveloginform" name="retrieveloginform" action="index.php" method="post">
-							<div>Your Email: <input type="text" name="emailaddr" /></div>
-							<div><input type="submit" name="action" value="Retrieve Login"/></div>
+							<div><?php echo (isset($LANG['YOUR_EMAIL'])?$LANG['YOUR_EMAIL']:'Your Email'); ?>: <input type="text" name="emailaddr" /></div>
+							<div><button name="action" type="submit" value="Retrieve Login"><?php echo (isset($LANG['RETRIEVE'])?$LANG['RETRIEVE']:'Retrieve Login'); ?></button></div>
 						</form>
 					</fieldset>
 				</div>
@@ -198,6 +201,6 @@ if(isset($profile_indexCrumbs)){
 		</div>
 	</div>
 </div>
-<?php include($serverRoot.'/footer.php'); ?>
+<?php include($SERVER_ROOT.'/footer.php'); ?>
 </body>
 </html>	

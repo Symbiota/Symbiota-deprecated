@@ -5,7 +5,7 @@ Language: Espa�ol (Spanish)
 ------------------
 */
 
-$LANG['SITEMAP'] = 'Site Map';
+$LANG['SITEMAP'] = 'Mapa del Sitio';
 $LANG['HOME'] = 'Home';
 $LANG['COLLECTIONS'] = 'Collections';
 $LANG['SEARCHENGINE'] = 'Search Engine';
