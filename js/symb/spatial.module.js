@@ -540,6 +540,25 @@ function changeTaxaColor(color,tidcode){
     layersArr['pointv'].getSource().changed();
 }
 
+function checkBufferForm(){
+    var bufferSize = document.getElementById("bufferSize").value;
+    if(bufferSize == '' || isNaN(bufferSize)) alert("Please enter a number for the buffer size.");
+    else{
+        $("#buffertool").popup("hide");
+        createBuffers();
+    }
+}
+
+function checkBufferToolOpen(){
+    if(selectInteraction.getFeatures().getArray().length >= 1){
+        $("#maptools").popup("hide");
+        $("#buffertool").popup("show");
+    }
+    else{
+        alert('You must have at least one shape selected in your Shapes layer to use the Buffer Tool.')
+    }
+}
+
 function checkDateSliderType(){
     if(dateSliderActive){
         document.body.removeChild(sliderdiv);
@@ -569,13 +588,12 @@ function checkReclassifyForm(){
     var rasterMinVal = document.getElementById("reclassifyRasterMin").value;
     var rasterMaxVal = document.getElementById("reclassifyRasterMax").value;
     var colorVal = document.getElementById("reclassifyColorVal").value;
-    var newVal = document.getElementById("reclassifyNewVal").value;
     if(rasterLayer == "") alert("Please select a raster layer to reclassify.");
     else if(outputName == "") alert("Please enter a name for the output overlay.");
     else if(layersArr[outputName]) alert("The name for the output you entered is already being used by another layer. Please enter a different name.");
     else if(colorVal == "FFFFFF") alert("Please select a color other than white for this overlay.");
-    else if(rasterMinVal == "" || rasterMaxVal == "" || newVal == "") alert("Please enter a min and max value for the raster and a new value to reclassify.");
-    else if(isNaN(rasterMinVal) || isNaN(rasterMaxVal) || isNaN(newVal)) alert("Please enter only numbers for the min, max, and new values.");
+    else if(rasterMinVal == "" || rasterMaxVal == "") alert("Please enter a min and max value for the raster to reclassify.");
+    else if(isNaN(rasterMinVal) || isNaN(rasterMaxVal)) alert("Please enter only numbers for the min and max values.");
     else{
         $("#reclassifytool").popup("hide");
         reclassifyRaster();
@@ -592,7 +610,6 @@ function checkVectorizeForm(){
 }
 
 function checkVectorizeOverlayToolOpen(){
-    var featureCnt = selectsource.getFeatures().length;
     if(selectInteraction.getFeatures().getArray().length == 1){
         $("#maptools").popup("hide");
         $("#vectorizeoverlaytool").popup("show");
@@ -658,6 +675,57 @@ function coordFormat(){
         var coord2 = [coord1[1], coord1[0]];
         return ol.coordinate.format(coord1,template,5);
     });
+}
+
+function createBuffers(){
+    var bufferSize = document.getElementById("bufferSize").value;
+    selectInteraction.getFeatures().forEach(function(feature){
+        if(feature){
+            var selectedClone = feature.clone();
+            var geoType = selectedClone.getGeometry().getType();
+            var wktFormat = new ol.format.WKT();
+            var geoJSONFormat = new ol.format.GeoJSON();
+            if(geoType == 'Circle'){
+                var center = selectedClone.getGeometry().getCenter();
+                var radius = selectedClone.getGeometry().getRadius();
+                var edgeCoordinate = [center[0] + radius, center[1]];
+                var wgs84Sphere = new ol.Sphere(6378137);
+                var groundRadius = wgs84Sphere.haversineDistance(
+                    ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326'),
+                    ol.proj.transform(edgeCoordinate, 'EPSG:3857', 'EPSG:4326')
+                );
+                groundRadius = groundRadius/1000;
+                var selectiongeometry = selectedClone.getGeometry();
+                var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
+                var centerPoint = fixedselectgeometry.getCenter();
+                bufferSize = Number(bufferSize) + Number(groundRadius);
+                var turfFeature = turf.point(centerPoint);
+            }
+            else{
+                var selectiongeometry = selectedClone.getGeometry();
+                var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
+                var geojsonStr = geoJSONFormat.writeGeometry(fixedselectgeometry);
+                var featCoords = JSON.parse(geojsonStr).coordinates;
+                if(geoType == 'Point'){
+                    var turfFeature = turf.point(featCoords);
+                }
+                else if(geoType == 'LineString'){
+                    var turfFeature = turf.lineString(featCoords);
+                }
+                else if(geoType == 'Polygon'){
+                    var turfFeature = turf.polygon(featCoords);
+                }
+                else if(geoType == 'MultiPolygon'){
+                    var turfFeature = turf.multiPolygon(featCoords);
+                }
+            }
+            var buffered = turf.buffer(turfFeature,bufferSize,'kilometers');
+            var buffpoly = geoJSONFormat.readFeature(buffered);
+            buffpoly.getGeometry().transform(wgs84Projection,mapProjection);
+            selectsource.addFeature(buffpoly);
+        }
+    });
+    document.getElementById("bufferSize").value = '';
 }
 
 function createDateSlider(dual){
@@ -2376,10 +2444,6 @@ function setReclassifyTable(){
     newTHeadHead2.setAttribute("style","text-align:center;");
     newTHeadHead2.innerHTML = "Color";
     newTHeadRow.appendChild(newTHeadHead2);
-    var newTHeadHead3 = document.createElement('th');
-    newTHeadHead3.setAttribute("style","text-align:center;");
-    newTHeadHead3.innerHTML = "Reclassify Value";
-    newTHeadRow.appendChild(newTHeadHead3);
     newTHead.appendChild(newTHeadRow);
     newTable.appendChild(newTHead);
     var newTBody = document.createElement('tbody');
@@ -2415,16 +2479,6 @@ function setReclassifyTable(){
     newColorValInput.setAttribute("value","FFFFFF");
     newColorValCell.appendChild(newColorValInput);
     newRow.appendChild(newColorValCell);
-    var newNewValCell = document.createElement('td');
-    newNewValCell.setAttribute("style","width:150px;");
-    var newNewValInput = document.createElement('input');
-    newNewValInput.setAttribute("data-role","none");
-    newNewValInput.setAttribute("type","text");
-    newNewValInput.setAttribute("id","reclassifyNewVal");
-    newNewValInput.setAttribute("style","width:150px;margin-left:10px;");
-    newNewValInput.setAttribute("value","");
-    newNewValCell.appendChild(newNewValInput);
-    newRow.appendChild(newNewValCell);
     newTBody.appendChild(newRow);
     newTable.appendChild(newTBody);
     document.getElementById("reclassifyTableDiv").appendChild(newTable);

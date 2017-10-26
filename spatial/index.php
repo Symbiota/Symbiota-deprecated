@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=209" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=210" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -89,6 +89,11 @@ $dbArr = Array();
             $('#maptools').popup({
                 transition: 'all 0.3s',
                 scrolllock: true
+            });
+            $('#buffertool').popup({
+                transition: 'all 0.3s',
+                scrolllock: true,
+                blur: false
             });
             $('#reclassifytool').popup({
                 transition: 'all 0.3s',
@@ -442,6 +447,8 @@ $dbArr = Array();
                 <option value="None">None</option>
                 <option value="Polygon">Polygon</option>
                 <option value="Circle">Circle</option>
+                <option value="LineString">Line</option>
+                <option value="Point">Point</option>
             </select>
         </div>
         <div id="basecontrol">
@@ -921,7 +928,6 @@ $dbArr = Array();
         overlayLayers[outputName]['values']['rasmin'] = document.getElementById('reclassifyRasterMin').value;
         overlayLayers[outputName]['values']['rasmax'] = document.getElementById('reclassifyRasterMax').value;
         overlayLayers[outputName]['values']['color'] = document.getElementById('reclassifyColorVal').value;
-        overlayLayers[outputName]['values']['newval'] = document.getElementById('reclassifyNewVal').value;
 
         var layerName = '<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>:'+rasterLayer;
         var layerTileSourceName = outputName+'Source';
@@ -940,27 +946,22 @@ $dbArr = Array();
             sources: [layersArr[layerTileSourceName]],
             operationType: 'pixel',
             operation: function (pixels, data) {
-                var value = data.reclassVal;
                 var inputPixel = pixels[0];
                 if((inputPixel[0] && inputPixel[1] && inputPixel[2])){
                     var pixr = inputPixel[0];
                     var pixg = inputPixel[1];
                     var pixb = inputPixel[2];
                     if(pixr == 255 && pixg == 255 && pixb == 255){
-                        return [0, 0, 0, 0, 0];
+                        return [0, 0, 0, 0];
                     }
                     else if(pixr == 0 && pixg == 0 && pixb == 0){
-                        return [0, 0, 0, 0, 0];
+                        return [0, 0, 0, 0];
                     }
                     else{
-                        inputPixel[4] = value;
                         return inputPixel;
                     }
                 }
-                return [0, 0, 0, 0, 0];
-            },
-            beforeoperations: function(event) {
-                event.data['reclassVal'] = overlayLayers[outputName]['values']['newval'];
+                return [0, 0, 0, 0];
             }
         });
         layersArr[outputName] = new ol.layer.Image({
@@ -1490,6 +1491,8 @@ $dbArr = Array();
 <?php include_once('includes/layercontroller.php'); ?>
 
 <?php include_once('includes/csvoptions.php'); ?>
+
+<?php include_once('includes/buffertool.php'); ?>
 
 <?php include_once('includes/reclassifytool.php'); ?>
 

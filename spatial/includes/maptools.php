@@ -18,6 +18,9 @@
         </select>
         <button data-role="none" style="margin-left:10px;" type="button" onclick='downloadShapesLayer();' >Download</button>
     </div>
+    <div id="buffertoollink" style="margin-top:5px;">
+        <a class="" onclick="checkBufferToolOpen();" href="#"><b>Buffer Tool</b></a>
+    </div>
     <div id="reclassifytoollink" style="margin-top:5px;display:none;">
         <a class="maptools_close reclassifytool_open" href="#"><b>Reclassify Tool</b></a>
     </div>
