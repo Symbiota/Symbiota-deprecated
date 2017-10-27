@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=210" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=211" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -70,6 +70,11 @@ $dbArr = Array();
                 }
             });
             $('#recordstab').tabs({
+                beforeLoad: function( event, ui ) {
+                    $(ui.panel).html("<p>Loading...</p>");
+                }
+            });
+            $('#polycalculatortab').tabs({
                 beforeLoad: function( event, ui ) {
                     $(ui.panel).html("<p>Loading...</p>");
                 }
@@ -170,8 +175,6 @@ $dbArr = Array();
                         </div>
                         <div id="searchcriteria">
                             <div name="spatialcriteriasearchform" id="spatialcriteriasearchform">
-
-
                                 <div style="height:25px;">
                                     <div style="float:right;">
                                         <button data-role="none" type=button id="resetform" name="resetform" onclick='window.open("index.php", "_self");' >Reset</button>
@@ -411,7 +414,29 @@ $dbArr = Array();
                                 <tbody id="selectiontbody"></tbody>
                             </table>
                         </div>
+                    </div>
 
+                    <h3 class="tabtitle">Shapes Calculator</h3>
+                    <div id="polycalculatortab" style="width:379px;padding:0px;">
+                        <div style="padding:10px">
+                            <div style="height:25px;">
+                                <div style="float:right;">
+                                    Total area of selected shapes <input data-role="none" type="text" id="polyarea" style="width:100px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="0" disabled /> sq/km
+                                </div>
+                            </div>
+                            <div style="margin:5 0 5 0;"><hr /></div>
+                            <!-- <div style="margin-top:10px;">
+                                <button data-role="none" id="" name="" onclick='' >Difference</button> Finds the difference between two polygons by clipping the second polygon from the first.
+                            </div>
+                            <div style="margin:5 0 5 0;"><hr /></div>
+                            <div style="margin-top:10px;">
+                                <button data-role="none" id="" name="" onclick='' >Intersect</button> Takes two polygons and finds their intersection.
+                            </div>
+                            <div style="margin:5 0 5 0;"><hr /></div>
+                            <div style="margin-top:10px;">
+                                <button data-role="none" id="" name="" onclick='' >Union</button> Takes two or more polygons and returns a combined polygon. If the input polygons are not contiguous, this function returns a MultiPolygon feature.
+                            </div> -->
+                        </div>
                     </div>
 
                 </div>
@@ -808,6 +833,7 @@ $dbArr = Array();
     }
 
     function vectorizeRaster(){
+        showWorking();
         var overlay = document.getElementById("vectorizesourcelayer").value;
         var overlaySource = overlayLayers[overlay]['source'];
         var overlayName = '<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>:'+overlay;
@@ -831,6 +857,7 @@ $dbArr = Array();
                 });
                 selectsource.addFeatures(features);
             }
+            hideWorking();
         };
         http.send(params);
     }

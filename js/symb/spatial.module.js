@@ -1147,6 +1147,7 @@ function getDragDropStyle(feature, resolution) {
 
 function getGeographyParams(vector){
     tempcqlArr = [];
+    var totalArea = 0;
     selectInteraction.getFeatures().forEach(function(feature){
         var cqlfrag = '';
         var solrqfrag = '';
@@ -1163,6 +1164,10 @@ function getGeographyParams(vector){
                 var geojsonStr = geoJSONFormat.writeGeometry(fixedselectgeometry);
                 var polyCoords = JSON.parse(geojsonStr).coordinates;
                 if (geoType == 'MultiPolygon') {
+                    var areaFeat = turf.multiPolygon(polyCoords);
+                    var area = turf.area(areaFeat);
+                    var area_km = area/1000/1000;
+                    totalArea = totalArea + area_km;
                     for (e in polyCoords) {
                         for (i in polyCoords[e]) {
                             var ring = turf.lineString(polyCoords[e][i]);
@@ -1179,6 +1184,10 @@ function getGeographyParams(vector){
                     var turfSimple = turf.multiPolygon(polyCoords);
                 }
                 if (geoType == 'Polygon') {
+                    var areaFeat = turf.polygon(polyCoords);
+                    var area = turf.area(areaFeat);
+                    var area_km = area/1000/1000;
+                    totalArea = totalArea + area_km;
                     for (i in polyCoords) {
                         var ring = turf.lineString(polyCoords[i]);
                         //console.log('start polygon length: '+ring.geometry.coordinates.length);
@@ -1219,6 +1228,8 @@ function getGeographyParams(vector){
                     ol.proj.transform(edgeCoordinate, 'EPSG:3857', 'EPSG:4326')
                 );
                 groundRadius = groundRadius/1000;
+                var circleArea = Math.PI*groundRadius*groundRadius;
+                totalArea = totalArea + circleArea;
                 var fixedcenter = ol.proj.transform(center,'EPSG:3857','EPSG:4326');
                 geoSolrqString = '{!geofilt sfield=geo pt='+fixedcenter[1]+','+fixedcenter[0]+' d='+groundRadius+'}';
                 solrqfrag = geoSolrqString;
@@ -1239,6 +1250,12 @@ function getGeographyParams(vector){
             }
         }
     });
+    if(totalArea === 0){
+        document.getElementById("polyarea").value = totalArea;
+    }
+    else{
+        document.getElementById("polyarea").value = totalArea.toFixed(2);
+    }
     finishGetGeographyParams();
 }
 
