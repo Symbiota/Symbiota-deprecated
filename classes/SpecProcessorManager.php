@@ -72,7 +72,7 @@ class SpecProcessorManager {
 		}
 	}
 
-	//Project Functions (create, edit, delete, etc)
+	//Project management functions (create, edit, delete, etc)
 	//Functions not needed for standalone scripts
 	public function editProject($editArr){
 		if(is_numeric($editArr['spprid'])){
@@ -239,18 +239,85 @@ class SpecProcessorManager {
 		return $projArr;
 	}
 	
+	//OCR related counts
+	public function getSpecWithImage($procStatus = ''){
+		//Count of specimens with images but no OCR
+		$cnt = 0;
+		if($this->collid){
+			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
+					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+					'WHERE (o.collid = '.$this->collid.') ';
+			if($procStatus){
+				if($procStatus == 'null'){
+					$sql .= 'AND processingstatus IS NULL';
+				}
+				else{
+					$sql .= 'AND processingstatus = "'.$this->cleanInStr($procStatus).'"';
+				}
+			}
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$cnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $cnt;
+	}
+	
+	public function getSpecNoOcr($procStatus = ''){
+		//Count of specimens with images but no OCR
+		$cnt = 0;
+		if($this->collid){
+			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
+					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+					'LEFT JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
+					'WHERE o.collid = '.$this->collid.' AND r.imgid IS NULL ';
+			if($procStatus){
+				if($procStatus == 'null'){
+					$sql .= 'AND processingstatus IS NULL';
+				}
+				else{
+					$sql .= 'AND processingstatus = "'.$this->cleanInStr($procStatus).'"';
+				}
+			}
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$cnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $cnt;
+	}
+	
+	public function getProcessingStatusList(){
+		$retArr = array();
+		if($this->collid){
+			$sql = 'SELECT DISTINCT processingstatus '.
+				'FROM omoccurrences '.
+				'WHERE collid = '.$this->collid;
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				if($r->processingstatus) $retArr[] = $r->processingstatus;
+			}
+			$rs->free();
+			sort($retArr);
+		}
+		return $retArr;
+	}
+
 	//Report functions
 	public function getProcessingStats(){
 		$retArr = array();
 		$retArr['total'] = $this->getTotalCount();
-		$retArr['ps'] = $this->getProcessingStatusCounts();
+		$retArr['ps'] = $this->getProcessingStatusCountArr();
 		$retArr['noimg'] = $this->getSpecNoImageCount();
 		$retArr['unprocnoimg'] = $this->getUnprocSpecNoImage();
 		$retArr['noskel'] = $this->getSpecNoSkel();
 		return $retArr;
 	}
 
-	public function getTotalCount(){
+	private function getTotalCount(){
 		$totalCnt = 0;
 		if($this->collid){
 			//Get processing status counts
@@ -284,7 +351,7 @@ class SpecProcessorManager {
 		return $cnt;
 	}
 	
-	public function getProcessingStatusCounts(){
+	private function getProcessingStatusCountArr(){
 		$retArr = array();
 		if($this->collid){
 			//Get processing status counts
@@ -312,8 +379,8 @@ class SpecProcessorManager {
 		}
 		return $retArr;
 	}
-	
-	public function getSpecNoImageCount(){
+
+	private function getSpecNoImageCount(){
 		//Count specimens without images
 		$cnt = 0;
 		if($this->collid){
@@ -345,7 +412,7 @@ class SpecProcessorManager {
 		return $cnt;
 	}
 
-	public function getSpecNoSkel(){
+	private function getSpecNoSkel(){
 		//Count unprocessed specimens without skeletal data
 		$cnt = 0;
 		if($this->collid){
@@ -362,74 +429,90 @@ class SpecProcessorManager {
 		return $cnt;
 	}
 
-	//OCR related counts
-	public function getSpecWithImage($procStatus = ''){
-		//Count of specimens with images but no OCR
-		$cnt = 0;
-		if($this->collid){
-			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
-				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-				'WHERE (o.collid = '.$this->collid.') ';
-			if($procStatus){
-				if($procStatus == 'null'){
-					$sql .= 'AND processingstatus IS NULL';
-				}
-				else{
-					$sql .= 'AND processingstatus = "'.$this->cleanInStr($procStatus).'"';
-				}
-			}
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$cnt = $r->cnt;
-			}
-			$rs->free();
-		}
-		return $cnt;
-	}
-
-	public function getSpecNoOcr($procStatus = ''){
-		//Count of specimens with images but no OCR
-		$cnt = 0;
-		if($this->collid){
-			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
-				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-				'LEFT JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
-				'WHERE o.collid = '.$this->collid.' AND r.imgid IS NULL ';
-			if($procStatus){
-				if($procStatus == 'null'){
-					$sql .= 'AND processingstatus IS NULL';
-				}
-				else{
-					$sql .= 'AND processingstatus = "'.$this->cleanInStr($procStatus).'"';
-				}
-			}
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$cnt = $r->cnt;
-			}
-			$rs->free();
-		}
-		return $cnt;
-	}
-
- 	public function getProcessingStatusList(){
+	//Detailed user stats
+	public function getUserList(){
 		$retArr = array();
-		if($this->collid){
-			$sql = 'SELECT DISTINCT o.processingstatus '.
-				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-				'WHERE o.collid = '.$this->collid;
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				if($r->processingstatus) $retArr[] = $r->processingstatus;
-			}
-			$rs->free();
-			sort($retArr);
+		$sql = 'SELECT DISTINCT u.uid, u.username '.
+			'FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid '.
+			'INNER JOIN userlogin u ON e.uid = u.uid '.
+			'WHERE (o.collid = '.$this->collid.') '.
+			'ORDER BY u.username';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->uid] = $r->username;
 		}
+		$rs->free();
+		//asort($retArr);
 		return $retArr;
- 	}
+	}
 
- 	//Misc stats
+	public function getFullStatReport($getArr){
+		$retArr = array();
+		$startDate = (preg_match('/^[\d-]+$/', $getArr['startdate'])?$getArr['startdate']:'');
+		$endDate = (preg_match('/^[\d-]+$/', $getArr['enddate'])?$getArr['enddate']:'');
+		$uid = (is_numeric($getArr['uid'])?$getArr['uid']:'');
+		$interval = $getArr['interval'];
+		$processingStatus = $this->cleanInStr($getArr['processingstatus']);
+
+		$dateFormat = '';
+		$dfgb = '';
+		if($interval == 'hour'){
+			$dateFormat = '%Y-%m-%d %Hhr, %W';
+			$dfgb = '%Y-%m-%d %H';
+		}
+		elseif($interval == 'day'){
+			$dateFormat= '%Y-%m-%d, %W';
+			$dfgb = '%Y-%m-%d';
+		}
+		elseif($interval == 'week'){
+			$dateFormat= '%Y-%m week %U';
+			$dfgb = '%Y-%m-%U';
+		}
+		elseif($interval == 'month'){
+			$dateFormat= '%Y-%m';
+			$dfgb = '%Y-%m';
+		}
+		$sql = 'SELECT DATE_FORMAT(e.initialtimestamp, "'.$dateFormat.'") AS timestr ';
+		$sql .= ', u.username';
+		if($processingStatus != 'IGNORE') $sql .= ', o.processingstatus';
+		$sql .= ', count(DISTINCT o.occid) AS cnt FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid ';
+		$sql .= 'INNER JOIN userlogin u ON e.uid = u.uid ';
+		$sql .= 'WHERE (o.collid = '.$this->collid.') ';
+		if($startDate && $endDate){
+			$sql .= 'AND (e.initialtimestamp BETWEEN "'.$startDate.'" AND "'.$endDate.'") ';
+		}
+		elseif($startDate){
+			$sql .= 'AND (DATE(e.initialtimestamp) > "'.$startDate.'") ';
+		}
+		elseif($endDate){
+			$sql .= 'AND (DATE(e.initialtimestamp) < "'.$endDate.'") ';
+		}
+		if($uid){
+			$sql .= 'AND (e.uid = '.$uid.') ';
+		}
+		if($processingStatus && $processingStatus != 'IGNORE'){
+			if($processingStatus == 'ISNULL'){
+				$sql .= 'AND (o.processingstatus IS NULL) ';
+			}
+			else{
+				$sql .= 'AND (o.processingstatus = "'.$processingStatus.'") ';
+			}
+		}
+		$sql .= 'GROUP BY DATE_FORMAT(e.initialtimestamp, "'.$dfgb.'")';
+		$sql .= ',u.username ';
+		if($processingStatus != 'IGNORE') $sql .= ',o.processingstatus ';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$psStr = 'SKIP';
+			if($processingStatus != 'IGNORE') $psStr = $r->processingstatus;
+			$retArr[$r->timestr][$r->username][$psStr] = $r->cnt;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+ 	//Misc Stats functions
 	public function downloadReportData($target){
 		$fileName = 'SymbSpecNoImages_'.time().'.csv';
 		header ('Content-Type: text/csv; charset='.$GLOBALS['charset']);
@@ -466,24 +549,6 @@ class SpecProcessorManager {
         if($result) $result->close();
 	}
 
-	public function getUserStats(){
-		$retArr = array();
-		if($this->collid){
-			//Processing scores by user
-			$sql = 'SELECT recordenteredby, processingstatus, COUNT(occid) as cnt '.
-				'FROM omoccurrences '.
-				'WHERE recordenteredby IS NOT NULL AND collid = '.$this->collid.' '.
-				'GROUP BY recordenteredby, processingstatus ';
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$retArr[$r->recordenteredby][strtolower($r->processingstatus)] = $r->cnt;
-			}
-			$rs->free();
-		}
-		return $retArr;
-	}
-	
 	public function getIssues(){
 		$retArr = array();
 		if($this->collid){
