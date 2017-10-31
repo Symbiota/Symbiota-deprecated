@@ -10,17 +10,6 @@
         <input data-role="none" type="radio" name="dateslidertype" id="dssingletype" value="single" onchange="checkDateSliderType();" checked /> Single
         <input data-role="none" type="radio" name="dateslidertype" id="dsdualtype" value="dual" onchange="checkDateSliderType();" /> Dual
     </div>
-    <div style="width:400px;margin-top:5px;">
-        <b>Download Shapes Layer</b> <select data-role="none" id="shapesdownloadselect">
-            <option value="">Download Type</option>
-            <option value="kml">KML</option>
-            <option value="geojson">GeoJSON</option>
-        </select>
-        <button data-role="none" style="margin-left:10px;" type="button" onclick='downloadShapesLayer();' >Download</button>
-    </div>
-    <div id="buffertoollink" style="margin-top:5px;">
-        <a class="" onclick="checkBufferToolOpen();" href="#"><b>Buffer Tool</b></a>
-    </div>
     <div id="reclassifytoollink" style="margin-top:5px;display:none;">
         <a class="maptools_close reclassifytool_open" href="#"><b>Reclassify Tool</b></a>
     </div>
@@ -28,6 +17,6 @@
         <a class="maptools_close rastercalctool_open" href="#"><b>Raster Overlay Calculator</b></a>
     </div> -->
     <div id="vectorizeoverlaytoollink" style="margin-top:5px;display:none;">
-        <a class="" onclick="checkVectorizeOverlayToolOpen();" href="#"><b>Vectorize Overlay Tool</b></a>
+        <a class="" onclick="checkVectorizeOverlayToolOpen();" href="#"><b>Vectorize Tool</b></a>
     </div>
 </div>

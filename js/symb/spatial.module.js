@@ -540,25 +540,6 @@ function changeTaxaColor(color,tidcode){
     layersArr['pointv'].getSource().changed();
 }
 
-function checkBufferForm(){
-    var bufferSize = document.getElementById("bufferSize").value;
-    if(bufferSize == '' || isNaN(bufferSize)) alert("Please enter a number for the buffer size.");
-    else{
-        $("#buffertool").popup("hide");
-        createBuffers();
-    }
-}
-
-function checkBufferToolOpen(){
-    if(selectInteraction.getFeatures().getArray().length >= 1){
-        $("#maptools").popup("hide");
-        $("#buffertool").popup("show");
-    }
-    else{
-        alert('You must have at least one shape selected in your Shapes layer to use the Buffer Tool.')
-    }
-}
-
 function checkDateSliderType(){
     if(dateSliderActive){
         document.body.removeChild(sliderdiv);
@@ -679,29 +660,13 @@ function coordFormat(){
 
 function createBuffers(){
     var bufferSize = document.getElementById("bufferSize").value;
-    selectInteraction.getFeatures().forEach(function(feature){
-        if(feature){
-            var selectedClone = feature.clone();
-            var geoType = selectedClone.getGeometry().getType();
-            var wktFormat = new ol.format.WKT();
-            var geoJSONFormat = new ol.format.GeoJSON();
-            if(geoType == 'Circle'){
-                var center = selectedClone.getGeometry().getCenter();
-                var radius = selectedClone.getGeometry().getRadius();
-                var edgeCoordinate = [center[0] + radius, center[1]];
-                var wgs84Sphere = new ol.Sphere(6378137);
-                var groundRadius = wgs84Sphere.haversineDistance(
-                    ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326'),
-                    ol.proj.transform(edgeCoordinate, 'EPSG:3857', 'EPSG:4326')
-                );
-                groundRadius = groundRadius/1000;
-                var selectiongeometry = selectedClone.getGeometry();
-                var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
-                var centerPoint = fixedselectgeometry.getCenter();
-                bufferSize = Number(bufferSize) + Number(groundRadius);
-                var turfFeature = turf.point(centerPoint);
-            }
-            else{
+    if(bufferSize == '' || isNaN(bufferSize)) alert("Please enter a number for the buffer size.");
+    else if(selectInteraction.getFeatures().getArray().length >= 1){
+        selectInteraction.getFeatures().forEach(function(feature){
+            if(feature){
+                var selectedClone = feature.clone();
+                var geoType = selectedClone.getGeometry().getType();
+                var geoJSONFormat = new ol.format.GeoJSON();
                 var selectiongeometry = selectedClone.getGeometry();
                 var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
                 var geojsonStr = geoJSONFormat.writeGeometry(fixedselectgeometry);
@@ -718,14 +683,22 @@ function createBuffers(){
                 else if(geoType == 'MultiPolygon'){
                     var turfFeature = turf.multiPolygon(featCoords);
                 }
+                else if(geoType == 'Circle'){
+                    var center = fixedselectgeometry.getCenter();
+                    var radius = fixedselectgeometry.getRadius();
+                    var turfFeature = turf.circle(center,radius,200,'degrees');
+                }
+                var buffered = turf.buffer(turfFeature,bufferSize,'kilometers');
+                var buffpoly = geoJSONFormat.readFeature(buffered);
+                buffpoly.getGeometry().transform(wgs84Projection,mapProjection);
+                selectsource.addFeature(buffpoly);
             }
-            var buffered = turf.buffer(turfFeature,bufferSize,'kilometers');
-            var buffpoly = geoJSONFormat.readFeature(buffered);
-            buffpoly.getGeometry().transform(wgs84Projection,mapProjection);
-            selectsource.addFeature(buffpoly);
-        }
-    });
-    document.getElementById("bufferSize").value = '';
+        });
+        document.getElementById("bufferSize").value = '';
+    }
+    else{
+        alert('You must have at least one shape selected in your Shapes layer to create a buffer polygon.');
+    }
 }
 
 function createDateSlider(dual){
@@ -806,6 +779,152 @@ function createDateSlider(dual){
             document.getElementById("custom-handle-min").style.position = 'absolute';
             document.getElementById("custom-handle-min").style.left = '-9999px';
         }
+    }
+}
+
+function createPolyDifference(){
+    var shapeCount = 0;
+    selectInteraction.getFeatures().forEach(function(feature){
+        var selectedClone = feature.clone();
+        var geoType = selectedClone.getGeometry().getType();
+        if(geoType == 'Polygon' || geoType == 'MultiPolygon' || geoType == 'Circle'){
+            shapeCount++;
+        }
+    });
+    if(shapeCount == 2){
+        var features = [];
+        var geoJSONFormat = new ol.format.GeoJSON();
+        selectInteraction.getFeatures().forEach(function(feature){
+            if(feature){
+                var selectedClone = feature.clone();
+                var geoType = selectedClone.getGeometry().getType();
+                var selectiongeometry = selectedClone.getGeometry();
+                var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
+                var geojsonStr = geoJSONFormat.writeGeometry(fixedselectgeometry);
+                var featCoords = JSON.parse(geojsonStr).coordinates;
+                if(geoType == 'Polygon'){
+                    features.push(turf.polygon(featCoords));
+                }
+                else if(geoType == 'MultiPolygon'){
+                    features.push(turf.multiPolygon(featCoords));
+                }
+                else if(geoType == 'Circle'){
+                    var center = fixedselectgeometry.getCenter();
+                    var radius = fixedselectgeometry.getRadius();
+                    features.push(turf.circle(center,radius,200,'degrees'));
+                }
+            }
+        });
+        var difference = turf.difference(features[0],features[1]);
+        if(difference){
+            var diffpoly = geoJSONFormat.readFeature(difference);
+            diffpoly.getGeometry().transform(wgs84Projection,mapProjection);
+            selectsource.addFeature(diffpoly);
+        }
+    }
+    else{
+        alert('You must have two polygons or circles, and only two polygons or circles, selected in your Shapes layer to find the difference.');
+    }
+}
+
+function createPolyIntersect(){
+    var shapeCount = 0;
+    selectInteraction.getFeatures().forEach(function(feature){
+        var selectedClone = feature.clone();
+        var geoType = selectedClone.getGeometry().getType();
+        if(geoType == 'Polygon' || geoType == 'MultiPolygon' || geoType == 'Circle'){
+            shapeCount++;
+        }
+    });
+    if(shapeCount == 2){
+        var features = [];
+        var geoJSONFormat = new ol.format.GeoJSON();
+        selectInteraction.getFeatures().forEach(function(feature){
+            if(feature){
+                var selectedClone = feature.clone();
+                var geoType = selectedClone.getGeometry().getType();
+                var selectiongeometry = selectedClone.getGeometry();
+                var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
+                var geojsonStr = geoJSONFormat.writeGeometry(fixedselectgeometry);
+                var featCoords = JSON.parse(geojsonStr).coordinates;
+                if(geoType == 'Polygon'){
+                    features.push(turf.polygon(featCoords));
+                }
+                else if(geoType == 'MultiPolygon'){
+                    features.push(turf.multiPolygon(featCoords));
+                }
+                else if(geoType == 'Circle'){
+                    var center = fixedselectgeometry.getCenter();
+                    var radius = fixedselectgeometry.getRadius();
+                    features.push(turf.circle(center,radius,200,'degrees'));
+                }
+            }
+        });
+        var intersection = turf.intersect(features[0],features[1]);
+        if(intersection){
+            var interpoly = geoJSONFormat.readFeature(intersection);
+            interpoly.getGeometry().transform(wgs84Projection,mapProjection);
+            selectsource.addFeature(interpoly);
+        }
+        else{
+            alert('The two selected shapes do not intersect.');
+        }
+    }
+    else{
+        alert('You must have two polygons or circles, and only two polygons or circles, selected in your Shapes layer to find the intersect.');
+    }
+}
+
+function createPolyUnion(){
+    var shapeCount = 0;
+    selectInteraction.getFeatures().forEach(function(feature){
+        var selectedClone = feature.clone();
+        var geoType = selectedClone.getGeometry().getType();
+        if(geoType == 'Polygon' || geoType == 'MultiPolygon' || geoType == 'Circle'){
+            shapeCount++;
+        }
+    });
+    if(shapeCount > 1){
+        var features = [];
+        var geoJSONFormat = new ol.format.GeoJSON();
+        selectInteraction.getFeatures().forEach(function(feature){
+            if(feature){
+                var selectedClone = feature.clone();
+                var geoType = selectedClone.getGeometry().getType();
+                var selectiongeometry = selectedClone.getGeometry();
+                var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
+                var geojsonStr = geoJSONFormat.writeGeometry(fixedselectgeometry);
+                var featCoords = JSON.parse(geojsonStr).coordinates;
+                if(geoType == 'Polygon'){
+                    features.push(turf.polygon(featCoords));
+                }
+                else if(geoType == 'MultiPolygon'){
+                    features.push(turf.multiPolygon(featCoords));
+                }
+                else if(geoType == 'Circle'){
+                    var center = fixedselectgeometry.getCenter();
+                    var radius = fixedselectgeometry.getRadius();
+                    features.push(turf.circle(center,radius,200,'degrees'));
+                }
+            }
+        });
+        var union = turf.union(features[0],features[1]);
+        for (f in features){
+            if(f > 1){
+                union = turf.union(union,features[f]);
+            }
+        }
+        if(union){
+            deleteSelections();
+            var unionpoly = geoJSONFormat.readFeature(union);
+            unionpoly.getGeometry().transform(wgs84Projection,mapProjection);
+            selectsource.addFeature(unionpoly);
+            document.getElementById("selectlayerselect").value = 'select';
+            setActiveLayer();
+        }
+    }
+    else{
+        alert('You must have at least two polygons or circles selected in your Shapes layer to find the union.');
     }
 }
 

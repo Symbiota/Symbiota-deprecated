@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=211" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=214" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -94,11 +94,6 @@ $dbArr = Array();
             $('#maptools').popup({
                 transition: 'all 0.3s',
                 scrolllock: true
-            });
-            $('#buffertool').popup({
-                transition: 'all 0.3s',
-                scrolllock: true,
-                blur: false
             });
             $('#reclassifytool').popup({
                 transition: 'all 0.3s',
@@ -416,26 +411,51 @@ $dbArr = Array();
                         </div>
                     </div>
 
-                    <h3 class="tabtitle">Shapes Calculator</h3>
+                    <h3 class="tabtitle">Shapes</h3>
                     <div id="polycalculatortab" style="width:379px;padding:0px;">
                         <div style="padding:10px">
-                            <div style="height:25px;">
+                            <div style="height:50px;">
                                 <div style="float:right;">
-                                    Total area of selected shapes <input data-role="none" type="text" id="polyarea" style="width:100px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="0" disabled /> sq/km
+                                    Total area of selected shapes (sq/km)
+                                </div>
+                                <div style="float:right;margin-top:5px;">
+                                    <input data-role="none" type="text" id="polyarea" style="width:250px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="0" disabled />
                                 </div>
                             </div>
                             <div style="margin:5 0 5 0;"><hr /></div>
+                            <div style="margin-top:10px;">
+                                <b>Download Shapes</b> <select data-role="none" id="shapesdownloadselect">
+                                    <option value="">Download Type</option>
+                                    <option value="kml">KML</option>
+                                    <option value="geojson">GeoJSON</option>
+                                </select>
+                                <button data-role="none" style="margin-left:5px;" type="button" onclick='downloadShapesLayer();' >Download</button>
+                            </div>
+                            <div style="margin:5 0 5 0;"><hr /></div>
+                            <div style="margin-top:10px;">
+                                <button data-role="none" id="" name="" onclick="createBuffers();" >Buffer</button> Creates buffer polygon of <input data-role="none" type="text" id="bufferSize" style="width:50px;" value="" /> km around selected features.
+                            </div>
+                            <div style="margin:5 0 5 0;"><hr /></div>
+                            <div style="margin-top:10px;">
+                                <button data-role="none" id="" name="" onclick="createPolyDifference();" >Difference</button> Returns a new polygon with the area of the polygon or circle selected first, exluding the area of the polygon or circle selected second.
+                            </div>
+                            <div style="margin:5 0 5 0;"><hr /></div>
+                            <div style="margin-top:10px;">
+                                <button data-role="none" id="" name="" onclick="createPolyIntersect();" >Intersect</button> Returns a new polygon with the area overlapping of both selected polygons or circles.
+                            </div>
+                            <div style="margin:5 0 5 0;"><hr /></div>
+                            <div style="margin-top:10px;">
+                                <button data-role="none" id="" name="" onclick="createPolyUnion();" >Union</button> Returns a new polygon with the combined area of two or more selected polygons or circles. *Note new polygon will replace all selected shapes.
+                            </div>
+                            <div style="margin:5 0 5 0;"><hr /></div>
                             <!-- <div style="margin-top:10px;">
-                                <button data-role="none" id="" name="" onclick='' >Difference</button> Finds the difference between two polygons by clipping the second polygon from the first.
+                                <button data-role="none" id="" name="" onclick="" >Concave</button> Takes a set of points and returns a concave hull polygon.
                             </div>
                             <div style="margin:5 0 5 0;"><hr /></div>
                             <div style="margin-top:10px;">
-                                <button data-role="none" id="" name="" onclick='' >Intersect</button> Takes two polygons and finds their intersection.
+                                <button data-role="none" id="" name="" onclick="" >Convex</button> Takes a set of points and returns a convex hull polygon.
                             </div>
-                            <div style="margin:5 0 5 0;"><hr /></div>
-                            <div style="margin-top:10px;">
-                                <button data-role="none" id="" name="" onclick='' >Union</button> Takes two or more polygons and returns a combined polygon. If the input polygons are not contiguous, this function returns a MultiPolygon feature.
-                            </div> -->
+                            <div style="margin:5 0 5 0;"><hr /></div> -->
                         </div>
                     </div>
 
@@ -852,6 +872,7 @@ $dbArr = Array();
         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         http.onreadystatechange = function() {
             if(http.readyState == 4 && http.status == 200) {
+                //console.log(http.responseText);
                 var features = geoJSONFormat.readFeatures(http.responseText, {
                     featureProjection: 'EPSG:3857'
                 });
@@ -1518,8 +1539,6 @@ $dbArr = Array();
 <?php include_once('includes/layercontroller.php'); ?>
 
 <?php include_once('includes/csvoptions.php'); ?>
-
-<?php include_once('includes/buffertool.php'); ?>
 
 <?php include_once('includes/reclassifytool.php'); ?>
 
