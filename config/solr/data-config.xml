@@ -90,6 +90,11 @@
                   <field column="resourcename" name="resourcename"/>
                   <field column="locus" name="locus"/>
                 </entity>
+                <entity name="associations_inner"
+                  query="SELECT relationship, verbatimsciname FROM omoccurassociations WHERE occid ='${omoccurrences.occid}'">
+                  <field column="relationship" name="assocrelationship"/>
+                  <field column="verbatimsciname" name="assocverbatimsciname"/>
+                </entity>
                 <entity name="clid_inner"
                   query="SELECT CLID FROM fmvouchers WHERE occid ='${omoccurrences.occid}'">
                   <field column="CLID" name="CLID"/>

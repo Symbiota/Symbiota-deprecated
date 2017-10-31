@@ -170,6 +170,8 @@
     <field name="genidentifier" type="string" indexed="true" stored="true" multiValued="true" />
     <field name="resourcename" type="string" indexed="true" stored="true" multiValued="true" />
     <field name="locus" type="string" indexed="true" stored="true" multiValued="true" />
+    <field name="assocrelationship" type="string" indexed="true" stored="true" multiValued="true" />
+    <field name="assocverbatimsciname" type="string" indexed="true" stored="true" multiValued="true" />
     <field name="CLID" type="int" indexed="true" stored="true" multiValued="true" />
     <field name="accFamily" type="string" indexed="true" stored="true"/>
     <field name="parenttid" type="int" indexed="true" stored="true" multiValued="true" />
