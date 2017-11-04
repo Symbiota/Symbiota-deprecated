@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=214" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=217" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -75,6 +75,11 @@ $dbArr = Array();
                 }
             });
             $('#polycalculatortab').tabs({
+                beforeLoad: function( event, ui ) {
+                    $(ui.panel).html("<p>Loading...</p>");
+                }
+            });
+            $('#pointscalculatortab').tabs({
                 beforeLoad: function( event, ui ) {
                     $(ui.panel).html("<p>Loading...</p>");
                 }
@@ -433,29 +438,46 @@ $dbArr = Array();
                             </div>
                             <div style="margin:5 0 5 0;"><hr /></div>
                             <div style="margin-top:10px;">
-                                <button data-role="none" id="" name="" onclick="createBuffers();" >Buffer</button> Creates buffer polygon of <input data-role="none" type="text" id="bufferSize" style="width:50px;" value="" /> km around selected features.
+                                <button data-role="none" onclick="createBuffers();" >Buffer</button> Creates buffer polygon of <input data-role="none" type="text" id="bufferSize" style="width:50px;" value="" /> km around selected features.
                             </div>
                             <div style="margin:5 0 5 0;"><hr /></div>
                             <div style="margin-top:10px;">
-                                <button data-role="none" id="" name="" onclick="createPolyDifference();" >Difference</button> Returns a new polygon with the area of the polygon or circle selected first, exluding the area of the polygon or circle selected second.
+                                <button data-role="none" onclick="createPolyDifference();" >Difference</button> Returns a new polygon with the area of the polygon or circle selected first, exluding the area of the polygon or circle selected second.
                             </div>
                             <div style="margin:5 0 5 0;"><hr /></div>
                             <div style="margin-top:10px;">
-                                <button data-role="none" id="" name="" onclick="createPolyIntersect();" >Intersect</button> Returns a new polygon with the area overlapping of both selected polygons or circles.
+                                <button data-role="none" onclick="createPolyIntersect();" >Intersect</button> Returns a new polygon with the area overlapping of both selected polygons or circles.
                             </div>
                             <div style="margin:5 0 5 0;"><hr /></div>
                             <div style="margin-top:10px;">
-                                <button data-role="none" id="" name="" onclick="createPolyUnion();" >Union</button> Returns a new polygon with the combined area of two or more selected polygons or circles. *Note new polygon will replace all selected shapes.
+                                <button data-role="none" onclick="createPolyUnion();" >Union</button> Returns a new polygon with the combined area of two or more selected polygons or circles. *Note new polygon will replace all selected shapes.
                             </div>
                             <div style="margin:5 0 5 0;"><hr /></div>
-                            <!-- <div style="margin-top:10px;">
-                                <button data-role="none" id="" name="" onclick="" >Concave</button> Takes a set of points and returns a concave hull polygon.
+                        </div>
+                    </div>
+
+                    <h3 class="tabtitle">Points</h3>
+                    <div id="pointscalculatortab" style="width:379px;padding:0px;">
+                        <div id="pointToolsNoneDiv" style="padding:10px;margin-top:10px;display:block;">
+                            There are no points loaded on the map.
+                        </div>
+                        <div id="pointToolsDiv" style="padding:10px;display:none;">
+                            <div style="">
+                                <button data-role="none" onclick="createConcavePoly();" >Concave Hull Polygon</button> Creates a concave hull polygon or multipolygon for
+                                <select data-role="none" id="concavepolysource" style="margin-top:3px;" onchange="checkPointToolSource('concavepolysource');">
+                                    <option value="all">all</option>
+                                    <option value="selected">selected</option>
+                                </select> points with a maximum edge length of <input data-role="none" type="text" id="concaveMaxEdgeSize" style="width:75px;margin-top:3px;" value="" /> kilometers.
                             </div>
                             <div style="margin:5 0 5 0;"><hr /></div>
                             <div style="margin-top:10px;">
-                                <button data-role="none" id="" name="" onclick="" >Convex</button> Takes a set of points and returns a convex hull polygon.
+                                <button data-role="none" onclick="createConvexPoly();" >Convex Hull Polygon</button> Creates a convex hull polygon for
+                                <select data-role="none" id="convexpolysource" style="margin-top:3px;" onchange="checkPointToolSource('convexpolysource');">
+                                    <option value="all">all</option>
+                                    <option value="selected">selected</option>
+                                </select> points.
                             </div>
-                            <div style="margin:5 0 5 0;"><hr /></div> -->
+                            <div style="margin:5 0 5 0;"><hr /></div>
                         </div>
                     </div>
 
@@ -954,7 +976,6 @@ $dbArr = Array();
         infoArr['Abstract'] = '';
         infoArr['DefaultCRS'] = '';
         buildLayerTableRow(infoArr,true);
-        setRasterTools();
     }
 
     function clearRasterCalcForm() {
@@ -1026,7 +1047,6 @@ $dbArr = Array();
         infoArr['DefaultCRS'] = '';
         buildLayerTableRow(infoArr,true);
         vectorizeLayers[outputName] = outputName;
-        setRasterTools();
     }
 
     function editRasterLayers(c,title){
@@ -1493,7 +1513,12 @@ $dbArr = Array();
                 if(activeLayer == 'dragdrop1' || activeLayer == 'dragdrop2' || activeLayer == 'dragdrop3'){
                     map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
                         if(layer === layersArr[activeLayer]){
-                            selectsource.addFeature(feature);
+                            try{
+                                selectsource.addFeature(feature);
+                            }
+                            catch(e){
+                                alert('Feature has already been added to Shapes layer.');
+                            }
                         }
                     });
                 }

@@ -563,6 +563,13 @@ function checkObjectNotEmpty(obj){
     return false;
 }
 
+function checkPointToolSource(selector){
+    if(!(selections.length >= 3)){
+        document.getElementById(selector).value = 'all';
+        alert('There must be at least 3 selected points on the map.');
+    }
+}
+
 function checkReclassifyForm(){
     var rasterLayer = document.getElementById("reclassifysourcelayer").value;
     var outputName = document.getElementById("reclassifyOutputName").value;
@@ -581,6 +588,20 @@ function checkReclassifyForm(){
     }
 }
 
+function checkReclassifyToolOpen(){
+    if(rasterLayers.length > 0){
+        document.getElementById("reclassifyOutputName").value = "";
+        buildReclassifyDropDown();
+        document.getElementById("reclassifysourcelayer").selectedIndex = 0;
+        setReclassifyTable();
+        $("#maptools").popup("hide");
+        $("#reclassifytool").popup("show");
+    }
+    else{
+        alert('There are no raster layers available.')
+    }
+}
+
 function checkVectorizeForm(){
     var rasterLayer = document.getElementById("vectorizesourcelayer").value;
     if(rasterLayer == "") alert("Please select an overlay layer to vectorize.");
@@ -591,12 +612,14 @@ function checkVectorizeForm(){
 }
 
 function checkVectorizeOverlayToolOpen(){
-    if(selectInteraction.getFeatures().getArray().length == 1){
+    if(checkObjectNotEmpty(vectorizeLayers) && selectInteraction.getFeatures().getArray().length == 1){
+        buildVectorizeDropDown();
+        document.getElementById("vectorizesourcelayer").selectedIndex = 0;
         $("#maptools").popup("hide");
         $("#vectorizeoverlaytool").popup("show");
     }
     else{
-        alert('You must have one, and only one, polygon selected from your shapes layer to define vectorize boundaries.')
+        alert('To use this tool, you must first use the Reclassify Tool to create at least one reclassified raster layer and have one, and only one, polygon selected from your Shapes layer to define the vectorize boundaries.')
     }
 }
 
@@ -699,6 +722,81 @@ function createBuffers(){
     else{
         alert('You must have at least one shape selected in your Shapes layer to create a buffer polygon.');
     }
+}
+
+function createConcavePoly(){
+    var source = document.getElementById('concavepolysource').value;
+    var maxEdge = document.getElementById('concaveMaxEdgeSize').value;
+    var features = [];
+    var geoJSONFormat = new ol.format.GeoJSON();
+    if(maxEdge != '' && !isNaN(maxEdge) && maxEdge > 0){
+        if(source == 'all'){
+            features = getTurfPointFeaturesetAll();
+        }
+        else if(source == 'selected'){
+            if(selections.length >= 3){
+                features = getTurfPointFeaturesetSelected();
+            }
+            else{
+                document.getElementById('concavepolysource').value = 'all';
+                alert('There must be at least 3 selected points on the map. Please either select more points or re-run this tool for all points.');
+                return;
+            }
+        }
+        if(features){
+            var concavepoly = '';
+            try{
+                concavepoly = turf.concave(features,Number(maxEdge),'kilometers');
+            }
+            catch(e){
+                alert('Concave polygon was not able to be calculated. Perhaps try using a larger value for the maximum edge length.');
+            }
+            if(concavepoly){
+                var cnvepoly = geoJSONFormat.readFeature(concavepoly);
+                cnvepoly.getGeometry().transform(wgs84Projection,mapProjection);
+                selectsource.addFeature(cnvepoly);
+            }
+        }
+        else{
+            alert('There must be at least 3 points on the map to calculate polygon.');
+        }
+        document.getElementById('concavepolysource').value = 'all';
+        document.getElementById('concaveMaxEdgeSize').value = '';
+    }
+    else{
+        alert('Please enter a number for the maximum edge size.');
+    }
+}
+
+function createConvexPoly(){
+    var source = document.getElementById('convexpolysource').value;
+    var features = [];
+    var geoJSONFormat = new ol.format.GeoJSON();
+    if(source == 'all'){
+        features = getTurfPointFeaturesetAll();
+    }
+    else if(source == 'selected'){
+        if(selections.length >= 3){
+            features = getTurfPointFeaturesetSelected();
+        }
+        else{
+            document.getElementById('convexpolysource').value = 'all';
+            alert('There must be at least 3 selected points on the map. Please either select more points or re-run this tool for all points.');
+            return;
+        }
+    }
+    if(features){
+        var convexpoly = turf.convex(features);
+        if(convexpoly){
+            var cnvxpoly = geoJSONFormat.readFeature(convexpoly);
+            cnvxpoly.getGeometry().transform(wgs84Projection,mapProjection);
+            selectsource.addFeature(cnvxpoly);
+        }
+    }
+    else{
+        alert('There must be at least 3 points on the map to calculate polygon.');
+    }
+    document.getElementById('convexpolysource').value = 'all';
 }
 
 function createDateSlider(dual){
@@ -1704,6 +1802,73 @@ function getTextParams(){
     }
 }
 
+function getTurfPointFeaturesetAll(){
+    var turfFeatureArr = [];
+    var geoJSONFormat = new ol.format.GeoJSON();
+    if(clusterPoints){
+        var clusters = layersArr['pointv'].getSource().getFeatures();
+        for(c in clusters){
+            var cFeatures = clusters[c].get('features');
+            for (f in cFeatures) {
+                var selectedClone = cFeatures[f].clone();
+                var selectiongeometry = selectedClone.getGeometry();
+                var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
+                var geojsonStr = geoJSONFormat.writeGeometry(fixedselectgeometry);
+                var pntCoords = JSON.parse(geojsonStr).coordinates;
+                turfFeatureArr.push(turf.point(pntCoords));
+            }
+        }
+    }
+    else{
+        var features = layersArr['pointv'].getSource().getFeatures();
+        for(f in features){
+            var selectedClone = features[f].clone();
+            var selectiongeometry = selectedClone.getGeometry();
+            var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
+            var geojsonStr = geoJSONFormat.writeGeometry(fixedselectgeometry);
+            var pntCoords = JSON.parse(geojsonStr).coordinates;
+            turfFeatureArr.push(turf.point(pntCoords));
+        }
+    }
+    if(turfFeatureArr.length >= 3){
+        var turfCollection = turf.featureCollection(turfFeatureArr);
+        return turfCollection;
+    }
+    else{
+        return false;
+    }
+}
+
+function getTurfPointFeaturesetSelected(){
+    var turfFeatureArr = [];
+    var geoJSONFormat = new ol.format.GeoJSON();
+    for(i in selections){
+        var point = '';
+        if(clusterPoints){
+            var cluster = findOccCluster(selections[i]);
+            point = findOccPointInCluster(cluster,selections[i]);
+        }
+        else{
+            point = findOccPoint(selections[i]);
+        }
+        if(point){
+            var selectedClone = point.clone();
+            var selectiongeometry = selectedClone.getGeometry();
+            var fixedselectgeometry = selectiongeometry.transform(mapProjection,wgs84Projection);
+            var geojsonStr = geoJSONFormat.writeGeometry(fixedselectgeometry);
+            var pntCoords = JSON.parse(geojsonStr).coordinates;
+            turfFeatureArr.push(turf.point(pntCoords));
+        }
+    }
+    if(turfFeatureArr.length >= 3){
+        var turfCollection = turf.featureCollection(turfFeatureArr);
+        return turfCollection;
+    }
+    else{
+        return false;
+    }
+}
+
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
@@ -2289,7 +2454,6 @@ function removeUserLayer(layerID){
             var vecindex = vectorizeLayers.indexOf(layerID);
             vectorizeLayers.splice(vecindex, 1);
         }
-        setRasterTools();
     }
     else{
         layersArr[layerID].setSource(blankdragdropsource);
@@ -2516,7 +2680,6 @@ function setLayersTable(){
                 for(i in layerArr){
                     buildLayerTableRow(layerArr[i],false);
                 }
-                if(rasterLayers.length > 0) setRasterTools();
             }
         }
         toggleLayerTable();
@@ -2532,29 +2695,6 @@ function setLoadingTimer(){
     if(solrRecCnt < 50000) loadingTimer = 7000;
     if(solrRecCnt < 10000) loadingTimer = 5000;
     if(solrRecCnt < 5000) loadingTimer = 2000;
-}
-
-function setRasterTools(){
-    document.getElementById("reclassifytoollink").style.display = 'block';
-    document.getElementById("reclassifyOutputName").value = "";
-    buildReclassifyDropDown();
-    document.getElementById("reclassifysourcelayer").selectedIndex = 0;
-    setReclassifyTable();
-    /*if(checkObjectNotEmpty(overlayLayers)){
-        document.getElementById("rastercalctoollink").style.display = 'block';
-        buildRasterCalcDropDown();
-    }
-    else{
-        document.getElementById("rastercalctoollink").style.display = 'none';
-    }*/
-    if(checkObjectNotEmpty(vectorizeLayers)){
-        document.getElementById("vectorizeoverlaytoollink").style.display = 'block';
-        buildVectorizeDropDown();
-        document.getElementById("vectorizesourcelayer").selectedIndex = 0;
-    }
-    else{
-        document.getElementById("vectorizeoverlaytoollink").style.display = 'none';
-    }
 }
 
 function setReclassifyTable(){
@@ -2625,10 +2765,14 @@ function setRecordsTab(){
     if(solrRecCnt > 0){
         document.getElementById("recordsHeader").style.display = "block";
         document.getElementById("recordstab").style.display = "block";
+        document.getElementById("pointToolsNoneDiv").style.display = "none";
+        document.getElementById("pointToolsDiv").style.display = "block";
     }
     else{
         document.getElementById("recordsHeader").style.display = "none";
         document.getElementById("recordstab").style.display = "none";
+        document.getElementById("pointToolsNoneDiv").style.display = "block";
+        document.getElementById("pointToolsDiv").style.display = "none";
     }
 }
 

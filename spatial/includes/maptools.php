@@ -10,13 +10,13 @@
         <input data-role="none" type="radio" name="dateslidertype" id="dssingletype" value="single" onchange="checkDateSliderType();" checked /> Single
         <input data-role="none" type="radio" name="dateslidertype" id="dsdualtype" value="dual" onchange="checkDateSliderType();" /> Dual
     </div>
-    <div id="reclassifytoollink" style="margin-top:5px;display:none;">
-        <a class="maptools_close reclassifytool_open" href="#"><b>Reclassify Tool</b></a>
+    <div id="reclassifytoollink" style="margin-top:5px;">
+        <a class="" onclick="checkReclassifyToolOpen();" href="#"><b>Reclassify Tool</b></a>
     </div>
     <!-- <div id="rastercalctoollink" style="margin-top:5px;display:none;">
         <a class="maptools_close rastercalctool_open" href="#"><b>Raster Overlay Calculator</b></a>
     </div> -->
-    <div id="vectorizeoverlaytoollink" style="margin-top:5px;display:none;">
+    <div id="vectorizeoverlaytoollink" style="margin-top:5px;">
         <a class="" onclick="checkVectorizeOverlayToolOpen();" href="#"><b>Vectorize Tool</b></a>
     </div>
 </div>
