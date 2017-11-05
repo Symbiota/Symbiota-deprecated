@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=217" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=219" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -419,7 +419,7 @@ $dbArr = Array();
                     <h3 class="tabtitle">Shapes</h3>
                     <div id="polycalculatortab" style="width:379px;padding:0px;">
                         <div style="padding:10px">
-                            <div style="height:50px;">
+                            <div style="height:45px;">
                                 <div style="float:right;">
                                     Total area of selected shapes (sq/km)
                                 </div>
@@ -594,6 +594,7 @@ $dbArr = Array();
     var shapeActive = false;
     var pointActive = false;
     var spiderCluster;
+    var spiderFeature;
     var hiddenClusters = [];
     var dragDrop1 = false;
     var dragDrop2 = false;
@@ -803,6 +804,7 @@ $dbArr = Array();
             ol.format.TopoJSON
         ]
     });
+
     var selectInteraction = new ol.interaction.Select({
         layers: [layersArr['select']],
         condition: function(evt) {
@@ -810,12 +812,14 @@ $dbArr = Array();
         },
         toggleCondition: ol.events.condition.click
     });
+
     var pointInteraction = new ol.interaction.Select({
         layers: [layersArr['pointv'],layersArr['spider']],
         condition: function(evt) {
             if(evt.type == 'click' && activeLayer == 'pointv' && !evt.originalEvent.altKey){
                 if(spiderCluster){
                     var spiderclick = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                        spiderFeature = feature;
                         if(feature && layer === layersArr['spider']){
                             return feature;
                         }
@@ -830,7 +834,8 @@ $dbArr = Array();
                             showFeature(hiddenClusters[i]);
                         }
                         hiddenClusters = [];
-                        spiderCluster = '';
+                        spiderCluster = false;
+                        spiderFeature = '';
                         layersArr['pointv'].getSource().changed();
                     }
                 }
@@ -1278,19 +1283,24 @@ $dbArr = Array();
                 }
             }
             else {
-                if (newfeatures.length > 1) {
-                    for (n in newfeatures) {
-                        var nfeature = newfeatures[n];
-                        pointInteraction.getFeatures().remove(nfeature);
+                if (newfeatures.length > 1 && !spiderFeature) {
+                    pointInteraction.getFeatures().clear();
+                    if(!spiderCluster){
+                        spiderifyPoints(newfeatures);
                     }
-                    spiderifyPoints(newfeatures);
                 }
                 else {
-                    var newfeature = newfeatures[0];
-                    pointInteraction.getFeatures().remove(newfeature);
+                    if(spiderFeature){
+                        var newfeature = spiderFeature;
+                        spiderFeature = '';
+                    }
+                    else{
+                        var newfeature = newfeatures[0];
+                    }
+                    pointInteraction.getFeatures().clear();
                     if (newfeature.get('features')) {
                         var clusterCnt = newfeatures[0].get('features').length;
-                        if (clusterCnt > 1) {
+                        if (clusterCnt > 1 && !spiderCluster) {
                             spiderifyPoints(newfeatures);
                         }
                         else {

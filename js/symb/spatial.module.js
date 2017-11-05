@@ -2865,6 +2865,7 @@ function showWorking(){
 
 function spiderifyPoints(features){
     spiderCluster = 1;
+    spiderFeature = '';
     var spiderFeatures = [];
     for(f in features){
         var feature = features[f];
@@ -2889,10 +2890,10 @@ function spiderifyPoints(features){
     var r = pix * 12 * (0.5 + spiderFeatures.length / 4);
     if (spiderFeatures.length <= 10){
         var max = Math.min(spiderFeatures.length, 10);
-        for(i=0; i<max; i++){
+        for(i in spiderFeatures){
             var a = 2*Math.PI*i/max;
             if (max==2 || max == 4) a += Math.PI/4;
-            var p = [ center[0]+r*Math.sin(a), center[1]+r*Math.cos(a) ];
+            var p = [center[0]+r*Math.sin(a), center[1]+r*Math.cos(a)];
             var cf = new ol.Feature({
                 'features':[spiderFeatures[i]],
                 geometry: new ol.geom.Point(p)
@@ -2909,12 +2910,12 @@ function spiderifyPoints(features){
         var features = new Array();
         var links = new Array();
         var max = Math.min (60, spiderFeatures.length);
-        for(i=0; i<max; i++){
+        for(i in spiderFeatures){
             r = d/2 + d*a/(2*Math.PI);
             a = a + (d+0.1)/r;
             var dx = pix*r*Math.sin(a)
             var dy = pix*r*Math.cos(a)
-            var p = [ center[0]+dx, center[1]+dy ];
+            var p = [center[0]+dx, center[1]+dy];
             var cf = new ol.Feature({
                 'features':[spiderFeatures[i]],
                 geometry: new ol.geom.Point(p)
