@@ -149,7 +149,7 @@ if($isEditor){
 				        <!-- 
 				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">NLP</a></li>
 				         -->
-				        <li><a href="reports.php?collid=<?php echo $collid.'&menu='.(isset($_REQUEST['menu'])?$_REQUEST['menu']:''); ?>">Reports</a></li>
+				        <li><a href="reports.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reports</a></li>
 				        <li><a href="exporter.php?collid=<?php echo $collid.'&displaymode='.$displayMode; ?>">Exporter</a></li>
 				        <?php 
 				        if($ACTIVATE_GEOLOCATE_TOOLKIT){

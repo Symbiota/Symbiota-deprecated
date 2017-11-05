@@ -292,9 +292,9 @@ class SpecProcessorManager {
 	public function getProcessingStatusList(){
 		$retArr = array();
 		if($this->collid){
-			$sql = 'SELECT DISTINCT o.processingstatus '.
-					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-					'WHERE o.collid = '.$this->collid;
+			$sql = 'SELECT DISTINCT processingstatus '.
+				'FROM omoccurrences '.
+				'WHERE collid = '.$this->collid;
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -432,48 +432,84 @@ class SpecProcessorManager {
 	//Detailed user stats
 	public function getUserList(){
 		$retArr = array();
-		$sql = 'SELECT DISTNCT e.uid, u.username '.
+		$sql = 'SELECT DISTINCT u.uid, u.username '.
 			'FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid '.
-			'INNER JOIN userlogin u ON u.uid = u.uid '.
-			'WHERE (o.collid = '.$this->collid.')';
+			'INNER JOIN userlogin u ON e.uid = u.uid '.
+			'WHERE (o.collid = '.$this->collid.') '.
+			'ORDER BY u.username';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->collid] = $r->username;
+			$retArr[$r->uid] = $r->username;
+		}
+		$rs->free();
+		//asort($retArr);
+		return $retArr;
+	}
+
+	public function getFullStatReport($getArr){
+		$retArr = array();
+		$startDate = (preg_match('/^[\d-]+$/', $getArr['startdate'])?$getArr['startdate']:'');
+		$endDate = (preg_match('/^[\d-]+$/', $getArr['enddate'])?$getArr['enddate']:'');
+		$uid = (is_numeric($getArr['uid'])?$getArr['uid']:'');
+		$interval = $getArr['interval'];
+		$processingStatus = $this->cleanInStr($getArr['processingstatus']);
+
+		$dateFormat = '';
+		$dfgb = '';
+		if($interval == 'hour'){
+			$dateFormat = '%Y-%m-%d %Hhr, %W';
+			$dfgb = '%Y-%m-%d %H';
+		}
+		elseif($interval == 'day'){
+			$dateFormat= '%Y-%m-%d, %W';
+			$dfgb = '%Y-%m-%d';
+		}
+		elseif($interval == 'week'){
+			$dateFormat= '%Y-%m week %U';
+			$dfgb = '%Y-%m-%U';
+		}
+		elseif($interval == 'month'){
+			$dateFormat= '%Y-%m';
+			$dfgb = '%Y-%m';
+		}
+		$sql = 'SELECT DATE_FORMAT(e.initialtimestamp, "'.$dateFormat.'") AS timestr ';
+		$sql .= ', u.username';
+		if($processingStatus != 'IGNORE') $sql .= ', o.processingstatus';
+		$sql .= ', count(DISTINCT o.occid) AS cnt FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid ';
+		$sql .= 'INNER JOIN userlogin u ON e.uid = u.uid ';
+		$sql .= 'WHERE (o.collid = '.$this->collid.') ';
+		if($startDate && $endDate){
+			$sql .= 'AND (e.initialtimestamp BETWEEN "'.$startDate.'" AND "'.$endDate.'") ';
+		}
+		elseif($startDate){
+			$sql .= 'AND (DATE(e.initialtimestamp) > "'.$startDate.'") ';
+		}
+		elseif($endDate){
+			$sql .= 'AND (DATE(e.initialtimestamp) < "'.$endDate.'") ';
+		}
+		if($uid){
+			$sql .= 'AND (e.uid = '.$uid.') ';
+		}
+		if($processingStatus && $processingStatus != 'IGNORE'){
+			if($processingStatus == 'ISNULL'){
+				$sql .= 'AND (o.processingstatus IS NULL) ';
+			}
+			else{
+				$sql .= 'AND (o.processingstatus = "'.$processingStatus.'") ';
+			}
+		}
+		$sql .= 'GROUP BY DATE_FORMAT(e.initialtimestamp, "'.$dfgb.'")';
+		$sql .= ',u.username ';
+		if($processingStatus != 'IGNORE') $sql .= ',o.processingstatus ';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$psStr = 'SKIP';
+			if($processingStatus != 'IGNORE') $psStr = $r->processingstatus;
+			$retArr[$r->timestr][$r->username][$psStr] = $r->cnt;
 		}
 		$rs->free();
 		return $retArr;
-	}
-	
-	public function miscSqlStatements(){
-		/*
-		# List progress by month
-		SELECT month(e.initialtimestamp) AS monthStr, count(DISTINCT o.occid) AS cnt
-		FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid
-		WHERE o.collid = 277 AND e.initialtimestamp > "2017-01-01"
-		GROUP BY month(e.initialtimestamp);
-		
-		# List progress by user per month
-		SELECT month(e.initialtimestamp) AS monthStr, CONCAT_WS(", ", u.lastname, u.firstname) as user, count(DISTINCT o.occid) AS cnt
-		FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid
-		INNER JOIN users u ON e.uid = u.uid
-		WHERE o.collid = 277 AND e.initialtimestamp > "2017-01-01"
-		GROUP BY month(e.initialtimestamp), u.lastname;
-		
-		# List progress by user per day
-		SELECT day(e.initialtimestamp) AS dayStr, CONCAT_WS(", ", u.lastname, u.firstname) as user, count(DISTINCT o.occid) AS cnt
-		FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid
-		INNER JOIN users u ON e.uid = u.uid
-		WHERE o.collid = 277 AND e.initialtimestamp between "2017-09-01" AND "2017-10-01"
-		GROUP BY day(e.initialtimestamp), u.lastname;
-		
-		# List progress by by user per hour
-		SELECT hour(e.initialtimestamp) AS day, CONCAT_WS(", ", u.lastname, u.firstname) as user, count(DISTINCT o.occid) AS cnt,
-		count(e.ocedid) as fieldCnt
-		FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid
-		INNER JOIN users u ON e.uid = u.uid
-		WHERE o.collid = 277 AND e.initialtimestamp between "2017-09-01" AND "2017-10-01" AND day(e.initialtimestamp) = 25
-		GROUP BY hour(e.initialtimestamp), u.lastname;
-		*/
 	}
 
  	//Misc Stats functions
@@ -513,24 +549,6 @@ class SpecProcessorManager {
         if($result) $result->close();
 	}
 
-	public function getUserStats(){
-		$retArr = array();
-		if($this->collid){
-			//Processing scores by user
-			$sql = 'SELECT recordenteredby, processingstatus, COUNT(occid) as cnt '.
-				'FROM omoccurrences '.
-				'WHERE recordenteredby IS NOT NULL AND collid = '.$this->collid.' '.
-				'GROUP BY recordenteredby, processingstatus ';
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$retArr[$r->recordenteredby][strtolower($r->processingstatus)] = $r->cnt;
-			}
-			$rs->free();
-		}
-		return $retArr;
-	}
-	
 	public function getIssues(){
 		$retArr = array();
 		if($this->collid){

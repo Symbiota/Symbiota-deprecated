@@ -5,6 +5,7 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/s
 
 $collid = $_REQUEST['collid'];
 $menu = array_key_exists('menu',$_REQUEST)&&$_REQUEST['menu']?$_REQUEST['menu']:0;
+$formAction = array_key_exists('formaction',$_REQUEST)?$_REQUEST['formaction']:0;
 
 $procManager = new SpecProcessorManager();
 $procManager->setCollId($collid);
@@ -18,9 +19,9 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 <div id="innertext" style="background-color:white;">
 	<?php 
 	if($isEditor){
-		$reportTypes = array(0 => 'General Stats', 1 => 'User Stats', 2 => 'Possible Issues', 3 => 'User Stats - Old');
+		$reportTypes = array(0 => 'General Stats', 1 => 'User Stats', 2 => 'Possible Issues');
 		?>
-		<form name="filterForm" action="index.php" method="post">
+		<form name="filterForm" action="index.php" method="get">
 			<b>Report Type:</b> 
 			<select name="menu" onchange="this.form.submit()">
 				<?php 
@@ -130,26 +131,101 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 				<?php 
 			}
 			elseif($menu == 1){
+				$uid = (isset($_GET['uid'])?$_GET['uid']:'');
+				$interval= (isset($_GET['interval'])?$_GET['interval']:'day');
+				$startDate = (isset($_GET['startdate'])?$_GET['startdate']:'');
+				$endDate = (isset($_GET['enddate'])?$_GET['enddate']:'');
+				$processingStatus = (isset($_GET['processingstatus'])?$_GET['processingstatus']:'IGNORE');
 				?>
-				<fieldset>
-					<legend><b>User Stats Filter</b></legend>
-					<form name="userStatsFilterForm" method="post" action="index.php">
-						<select name="uid">
-							<option value="0">Show all users</option>
+				<fieldset style="padding:15px;width:400px">
+					<legend><b>Filter</b></legend>
+					<form name="userStatsFilterForm" method="get" action="index.php">
+						<div style="margin:2px">
+							Editors: 
+							<select name="uid">
+								<option value="0">Show all users</option>
+								<?php 
+								$userArr = $procManager->getUserList();
+								foreach($userArr as $id => $uname){
+									echo '<option value="'.$id.'" '.($uid==$id?'SELECTED':'').'>'.$uname.'</option>';
+								}
+								?>
+							</select>
+						</div>
+						<div style="margin:2px">
+							Interval: 
+							<select name="interval">
+								<option value="hour" <?php echo ($interval=='hour'?'SELECTED':''); ?>>Hour</option>
+								<option value="day" <?php echo ($interval=='day'?'SELECTED':''); ?>>Day</option>
+								<option value="week" <?php echo ($interval=='week'?'SELECTED':''); ?>>Week</option>
+								<option value="month" <?php echo ($interval=='month'?'SELECTED':''); ?>>Month</option>
+							</select>
+						</div>
+						<div style="margin:2px">
+							Date: <input name="startdate" type="date" value="<?php echo $startDate; ?>" /> 
+							to <input name="enddate" type="date" value="<?php echo (isset($_GET['enddate'])?$_GET['enddate']:''); ?>" />
+						</div>
+						<div style="margin:2px">
+							Processing Status: 
+							<select name="processingstatus">
+								<option value="0">Show all</option>
+								<option value="IGNORE" <?php echo ($processingStatus=='IGNORE'?'SELECTED':''); ?>>Ignore Processing Status</option>
+								<option value="IGNORE">-----------------------</option>
+								<option value="ISNULL" <?php echo ($processingStatus=='ISNULL'?'SELECTED':''); ?>>Processing Status Not Set</option>
+								<?php 
+								$psArr = $procManager->getProcessingStatusList();
+								foreach($psArr as $psValue){
+									echo '<option value="'.$psValue.'" '.($processingStatus==$psValue?'SELECTED':'').'>'.$psValue.'</option>';
+								}
+								?>
+							</select>
+						</div>
+						<div style="float:right;margin-top:25px;">
 							<?php 
-							$userArr = $procManager->getUserList();
-							foreach($userArr as $id => $uname){
-								echo '<option value="'.$id.'">'.$uname.'<option>';
-							}
+							$editReviewUrl = '../editor/editreviewer.php?collid='.$collid.'&editor='.$uid.'&startdate='.$startDate.'&enddate='.$endDate;
+							echo '<a href="'.$editReviewUrl.'" target="_blank">Visit Edit Reviewer</a>';
 							?>
-						</select>
-						
-						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-						<input name="menu" type="hidden" value="1" />
-						<input name="tabindex" type="hidden" value="<?php echo $tabIndex; ?>" />
+						</div>
+						<div style="margin-top:15px">
+							<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+							<input name="menu" type="hidden" value="1" />
+							<input name="tabindex" type="hidden" value="<?php echo $tabIndex; ?>" />
+							<button name="formaction" type="submit" value="displayReport">Display Report</button>
+						</div>
 					</form>
 				</fieldset>
-				<?php 
+				<?php
+				if($formAction && $formAction == 'displayReport'){
+					echo '<table class="styledtable" style="width:500px">';
+					echo '<tr><th>Time Period</th>';
+					echo '<th>User</th>';
+					if($processingStatus!='IGNORE') echo '<th>Processing Status</th>';
+					echo '<th>Counts</th></tr>';
+					$repArr = $procManager->getFullStatReport($_GET);
+					if($repArr){
+						$orderArr = array('SKIP','unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review-nfn','pending review','expert required','reviewed','closed','');
+						//$editReviewUrl = '../editor/editreviewer.php?collid='.$collid.'&editor='.$uid.'&startdate='.$startDate.'&enddate='.$endDate;
+						foreach($repArr as $t => $arr2){
+							foreach($arr2 as $u => $arr3){
+								foreach($orderArr as $o){
+									if(array_key_exists($o, $arr3)){
+										echo '<tr><td>'.$t.'</td>';
+										echo '<td>'.$u.'</td>';
+										if($o != 'SKIP') echo '<td>'.$o.'</td>';
+										//echo '<td>'.$arr3[$o].' <a href="'.$editReviewUrl.'" target="_blank" style="float:right;"><img src="../../images/edit.png" style="width:13px" /></a></td>';
+										echo '<td>'.$arr3[$o].'</td>';
+										echo '</tr>';
+										if($o == 'SKIP') break;
+									}
+								}
+							}
+						}
+					}
+					else{
+						echo '<div style="font-weight:bold">No Records Returned</div>';
+					}
+					echo '</table>';
+				}
 			}
 			elseif($menu == 2){
 				//Possible issues
@@ -168,72 +244,6 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 					echo '<div><b>No issues identified</b></div>';
 				}
 				echo '</div>';
-			}
-			elseif($menu == 3){
-				//User Stats - old
-				?>
-				<div style="margin:15px 0px 25px 15px;">
-					<table class="styledtable" style="font-family:Arial;font-size:12px;width:500px;">
-						<tr>
-							<th>User</th>
-							<th>Processing Status</th>
-							<th>Count</th>
-						</tr>
-						<?php 
-						if($userStats = $procManager->getUserStats()){
-							$orderArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review-nfn','pending review','expert required','reviewed','closed','empty status');
-							foreach($userStats as $username => $psArr){
-								$eUrlInner = $eUrl.'&q_recordenteredby='.$username.$urlBase; 
-								$beUrlInner = $beUrl.'&q_recordenteredby='.$username.'&bufieldname=processingstatus'.$urlBase;
-								foreach($orderArr as $ps){
-									if(array_key_exists($ps,$psArr)){
-										echo '<tr>';
-										echo '<td>'.$username.'</td>';
-										echo '<td>'.$ps.'</td>';
-										echo '<td>';
-										echo $psArr[$ps];
-										if($psArr[$ps]){
-											$eUrlInner2 = $eUrlInner.'&q_processingstatus='.$ps;
-											$beUrlInner2 = $beUrlInner.'&q_processingstatus='.$ps.'&buoldvalue='.$ps;
-											echo '<span style="margin-left:10px;"><a href="'.$eUrlInner2.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
-											echo '<span style="margin-left:10px;"><a href="'.$beUrlInner2.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
-										}
-										echo '</td>';
-										echo '</tr>';
-										unset($psArr[$ps]);
-									}
-								}
-								foreach($psArr as $pStatus => $cnt){
-									if($pStatus){
-										$eUrlInner3 = $eUrlInner.'&q_processingstatus='.$pStatus;
-										$beUrlInner3 = $beUrlInner.'&q_processingstatus='.$pStatus.'&buoldvalue='.$pStatus;
-									}
-									else{
-										$eUrlInner3 = $eUrlInner.'&q_processingstatus=isnull';
-										$beUrlInner3 = $beUrlInner.'&q_processingstatus=isnull';
-										$pStatus = 'Not Set';
-									}
-									echo '<tr>';
-									echo '<td>'.$username.'</td>';
-									echo '<td>'.$pStatus.'</td>';
-									echo '<td>';
-									echo $cnt;
-									if($cnt){
-										echo '<span style="margin-left:10px;"><a href="'.$eUrlInner3.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
-										echo '<span style="margin-left:10px;"><a href="'.$beUrlInner3.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
-									}
-									echo '</td>';
-									echo '</tr>';
-								}
-							}
-						}
-						else{
-							echo '<tr><td colspan="5">No records processed</td></tr>';
-						}
-						?>
-					</table>
-				</div>
-				<?php 
 			}
 			?>
 		</fieldset>
