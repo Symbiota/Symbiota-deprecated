@@ -278,7 +278,8 @@ class DwcArchiverCore extends Manager{
 	}
 	
 	private function getTableJoins(){
-		$sql = '';
+        global $QUICK_HOST_ENTRY_IS_ACTIVE;
+	    $sql = '';
 		if($this->conditionSql){
 			if(stripos($this->conditionSql,'v.clid')){
 				//Search criteria came from custom search page
@@ -288,6 +289,10 @@ class DwcArchiverCore extends Manager{
 				//Search criteria came from map search page
 				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 			}
+            if($QUICK_HOST_ENTRY_IS_ACTIVE){
+                //Search criteria includes host
+                $sql .= 'LEFT JOIN omoccurassociations oas ON o.occid = oas.occid ';
+            }
 			if(strpos($this->conditionSql,'MATCH(f.recordedby)') || strpos($this->conditionSql,'MATCH(f.locality)')){
 				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			}

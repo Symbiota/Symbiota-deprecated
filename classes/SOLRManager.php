@@ -192,6 +192,7 @@ class SOLRManager extends OccurrenceManager{
             $returnArr[$occId]["country"] = (isset($k['country'])?$k['country']:'');
             $returnArr[$occId]["state"] = (isset($k['StateProvince'])?$k['StateProvince']:'');
             $returnArr[$occId]["county"] = (isset($k['county'])?$k['county']:'');
+            $returnArr[$occId]["assochost"] = (isset($k['assocverbatimsciname'])?$k['assocverbatimsciname'][0]:'');
             $returnArr[$occId]["observeruid"] = (isset($k['observeruid'])?$k['observeruid']:'');
             $returnArr[$occId]["individualCount"] = (isset($k['individualCount'])?$k['individualCount']:'');
             $returnArr[$occId]["lifeStage"] = (isset($k['lifeStage'])?$k['lifeStage']:'');
@@ -699,6 +700,22 @@ class SOLRManager extends OccurrenceManager{
             if (array_key_exists("elevhigh",$this->searchTermsArr))  { $elevhigh = $this->searchTermsArr["elevhigh"]; }
             $solrWhere .= 'AND ((minimumElevationInMeters:['.$elevlow.' TO *] AND maximumElevationInMeters:[* TO '.$elevhigh.']) OR '.
                 '(-maximumElevationInMeters:["" TO *] AND minimumElevationInMeters:['.$elevlow.' TO *] AND minimumElevationInMeters:[* TO '.$elevhigh.']))';
+        }
+        if(array_key_exists("assochost",$this->searchTermsArr)){
+            $searchStr = str_replace("%apos;","'",$this->searchTermsArr["assochost"]);
+            $hostAr = explode(";",$searchStr);
+            $tempArr = Array();
+            foreach($hostAr as $k => $value){
+                if($value == 'NULL'){
+                    $tempArr[] = '((assocrelationship:"host") AND (-assocverbatimsciname:["" TO *]))';
+                    $hostAr[$k] = 'Host IS NULL';
+                }
+                else{
+                    $tempArr[] = '((assocrelationship:"host") AND (assocverbatimsciname:*'.str_replace(' ','\ ',trim($value)).'*))';
+                }
+            }
+            $solrWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
+            $this->localSearchArr[] = implode(' OR ',$hostAr);
         }
         if(array_key_exists("llbound",$this->searchTermsArr)){
             $llboundArr = explode(";",$this->searchTermsArr["llbound"]);

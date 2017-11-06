@@ -71,6 +71,7 @@ if($recArr){
     $recordListHtml .= '<th>County</th>';
     $recordListHtml .= '<th>Locality</th>';
     $recordListHtml .= '<th>Habitat</th>';
+    if($QUICK_HOST_ENTRY_IS_ACTIVE) $recordListHtml .= '<th>Host</th>';
     $recordListHtml .= '<th>Elevation</th>';
     $recordListHtml .= '<th>Event Date</th>';
     $recordListHtml .= '<th>Collector</th>';
@@ -111,6 +112,14 @@ if($recArr){
         $recordListHtml .= '<td>'.$occArr['county'].'</td>'."\n";
         $recordListHtml .= '<td>'.((strlen($occArr['locality'])>80)?substr($occArr['locality'],0,80).'...':$occArr['locality']).'</td>'."\n";
         $recordListHtml .= '<td>'.((strlen($occArr['habitat'])>80)?substr($occArr['habitat'],0,80).'...':$occArr['habitat']).'</td>'."\n";
+        if($QUICK_HOST_ENTRY_IS_ACTIVE){
+            if(array_key_exists('assochost',$occArr)){
+                $recordListHtml .= '<td>'.((strlen($occArr['assochost'])>80)?substr($occArr['assochost'],0,80).'...':$occArr['assochost']).'</td>'."\n";
+            }
+            else{
+                $recordListHtml .= '<td></td>'."\n";
+            }
+        }
         $recordListHtml .= '<td>'.(array_key_exists("elev",$occArr)?$occArr['elev']:"").'</td>'."\n";
         $recordListHtml .= '<td>'.(array_key_exists("date",$occArr)?$occArr['date']:"").'</td>'."\n";
         $recordListHtml .= '<td>'.$occArr['collector'].'</td>'."\n";

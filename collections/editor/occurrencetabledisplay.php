@@ -36,7 +36,7 @@ $headerMapBase = array('dbpk' => 'dbpk','institutioncode'=>'Institution Code (ov
 	'georeferenceverificationstatus' => 'Georef Verification Status','georeferenceremarks' => 'Georef Remarks',
 	'minimumelevationinmeters' => 'Elev. Min. (m)','maximumelevationinmeters' => 'Elev. Max. (m)','verbatimelevation' => 'Verbatim Elev.',
 	'minimumdepthinmeters' => 'Depth. Min. (m)','maximumdepthinmeters' => 'Depth. Max. (m)','verbatimdepth' => 'Verbatim Depth',
-	'habitat' => 'Habitat','substrate' => 'Substrate','occurrenceremarks' => 'Notes (Occurrence Remarks)','associatedtaxa' => 'Associated Taxa',
+	'habitat' => 'Habitat','verbatimsciname' => 'Host','substrate' => 'Substrate','occurrenceremarks' => 'Notes (Occurrence Remarks)','associatedtaxa' => 'Associated Taxa',
 	'verbatimattributes' => 'Description','lifestage' => 'Life Stage', 'sex' => 'Sex', 'individualcount' => 'Individual Count', 
 	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
@@ -199,7 +199,7 @@ else{
 										foreach($headerMapBase as $k => $v){
 											//Scientific name fields are excluded because batch updates will not update tidinterpreted index and authors
 											//Scientific name updates should happen within
-											if($k != 'scientificnameauthorship' && $k != 'sciname'){
+											if($k != 'scientificnameauthorship' && $k != 'sciname' && $k != 'verbatimsciname'){
 												echo '<option value="'.$k.'" '.($buFieldName==$k?'SELECTED':'').'>'.$v.'</option>';
 											}
 										}

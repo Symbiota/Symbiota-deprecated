@@ -2,7 +2,8 @@
 class DwcArchiverOccurrence{
 
 	public static function getOccurrenceArr($schemaType, $extended){
-		$occurFieldArr['id'] = 'o.occid';
+        global $QUICK_HOST_ENTRY_IS_ACTIVE;
+	    $occurFieldArr['id'] = 'o.occid';
 		$occurTermArr['institutionCode'] = 'http://rs.tdwg.org/dwc/terms/institutionCode';
 		$occurFieldArr['institutionCode'] = 'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode';
 		$occurTermArr['collectionCode'] = 'http://rs.tdwg.org/dwc/terms/collectionCode';
@@ -87,7 +88,11 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['habitat'] = 'o.habitat';
 		$occurTermArr['substrate'] = 'http://symbiota.org/terms/substrate';
 		$occurFieldArr['substrate'] = 'o.substrate';
-		$occurTermArr['verbatimAttributes'] = 'http://symbiota.org/terms/verbatimAttributes';
+		if($QUICK_HOST_ENTRY_IS_ACTIVE){
+            $occurTermArr['host'] = 'http://symbiota.org/terms/host';
+            $occurFieldArr['host'] = 'oas.verbatimsciname';
+        }
+        $occurTermArr['verbatimAttributes'] = 'http://symbiota.org/terms/verbatimAttributes';
 		$occurFieldArr['verbatimAttributes'] = 'o.verbatimAttributes';
 		$occurTermArr['fieldNumber'] = 'http://rs.tdwg.org/dwc/terms/fieldNumber';
 		$occurFieldArr['fieldNumber'] = 'o.fieldNumber';
@@ -222,7 +227,7 @@ class DwcArchiverOccurrence{
 		if($schemaType == 'dwc'){
 			$trimArr = array('tidInterpreted','recordedByID','associatedCollectors','substrate','verbatimAttributes','cultivationStatus',
 				'localitySecurityReason','genericcolumn1','genericcolumn2','storageLocation','observerUid','processingStatus',
-				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey-dbpk');
+				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey-dbpk','host');
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));
 		}
 		elseif($schemaType == 'symbiota'){

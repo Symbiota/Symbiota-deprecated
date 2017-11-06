@@ -667,6 +667,16 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								<?php 
 							}
 						}
+						if($QUICK_HOST_ENTRY_IS_ACTIVE){
+                            if($occArr['verbatimsciname']){
+                                ?>
+                                <div style="clear:both;">
+                                    <b>Host:</b>
+                                    <?php echo $occArr['verbatimsciname']; ?>
+                                </div>
+                                <?php
+                            }
+                        }
 						if($occArr['verbatimattributes']){ 
 							?>
 							<div style="clear:both;">

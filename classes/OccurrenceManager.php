@@ -267,6 +267,22 @@ class OccurrenceManager{
 						 "	  ( maximumElevationInMeters is null AND minimumElevationInMeters >= $elevlow AND minimumElevationInMeters <= $elevhigh ) ".
 						 "	) ";
 		}
+        if(array_key_exists("assochost",$this->searchTermsArr)){
+            $searchStr = str_replace("%apos;","'",$this->searchTermsArr["assochost"]);
+            $hostAr = explode(";",$searchStr);
+            $tempArr = Array();
+            foreach($hostAr as $k => $value){
+                if($value == 'NULL'){
+                    $tempArr[] = '(o.StateProvince IS NULL)';
+                    $hostAr[$k] = 'Host IS NULL';
+                }
+                else{
+                    $tempArr[] = '(oas.relationship = "host" AND oas.verbatimsciname LIKE "%'.trim($value).'%")';
+                }
+            }
+            $sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
+            $this->localSearchArr[] = implode(' OR ',$hostAr);
+        }
 		if(array_key_exists("llbound",$this->searchTermsArr)){
 			$llboundArr = explode(";",$this->searchTermsArr["llbound"]);
 			if(count($llboundArr) == 4){
@@ -503,6 +519,7 @@ class OccurrenceManager{
 	protected function setTableJoins($sqlWhere){
 		$sqlJoin = '';
 		if(array_key_exists("clid",$this->searchTermsArr)) $sqlJoin .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+        if(array_key_exists("assochost",$this->searchTermsArr)) $sqlJoin .= "INNER JOIN omoccurassociations AS oas ON o.occid = oas.occid ";
 		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
 			$sqlJoin .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
 		}
@@ -1112,6 +1129,18 @@ class OccurrenceManager{
 				$searchFieldsActivated = true;
 			}
 		}
+        if(array_key_exists("assochost",$_REQUEST)){
+            $assocHost = $this->cleanInStr($this->cleanSearchQuotes($_REQUEST["assochost"]));
+            if($assocHost){
+                $str = str_replace(",",";",$assocHost);
+                $searchArr[] = "host:".$str;
+                $this->searchTermsArr["assochost"] = $str;
+            }
+            else{
+                unset($this->searchTermsArr["assochost"]);
+            }
+            $searchFieldsActivated = true;
+        }
 		if(array_key_exists("collector",$_REQUEST)){
 			$collector = $this->cleanInStr($this->cleanSearchQuotes($_REQUEST["collector"]));
 			if($collector){

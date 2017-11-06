@@ -31,7 +31,7 @@ if(isset($_REQUEST['db'])){
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=2"></script>
+    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=3"></script>
     <script type="text/javascript">
         var starrJson = '';
 
@@ -132,6 +132,15 @@ if(isset($_REQUEST['db'])){
 				<?php echo $LANG['ELEV_INPUT_1']; ?> <input type="text" id="elevlow" size="10" name="elevlow" value="" /> <?php echo $LANG['ELEV_INPUT_2']; ?>
 				<input type="text" id="elevhigh" size="10" name="elevhigh" value="" />
 			</div>
+            <?php
+            if($QUICK_HOST_ENTRY_IS_ACTIVE) {
+                ?>
+                <div>
+                    <?php echo $LANG['ASSOC_HOST_INPUT']; ?> <input type="text" id="assochost" size="43" name="assochost" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+                </div>
+                <?php
+            }
+            ?>
 			<div style="margin:10 0 10 0;">
 				<hr>
 				<h1><?php echo $LANG['LAT_LNG_HEADER']; ?></h1>

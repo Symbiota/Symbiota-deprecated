@@ -153,6 +153,7 @@ if($occurArr){
 		if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
 		if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
 		if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
+        if(isset($fieldArr["assochost"]) && $fieldArr["assochost"]) $localStr .= $fieldArr["assochost"].", ";
 		if(isset($fieldArr["elev"]) && $fieldArr["elev"]) $localStr .= $fieldArr["elev"].'m';
 		if(strlen($localStr) > 2) $localStr = trim($localStr,' ,');
 		$htmlStr .= $localStr;

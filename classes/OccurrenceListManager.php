@@ -38,9 +38,9 @@ class OccurrenceListManager extends OccurrenceManager{
             'CONCAT_WS(", ",o.locality,CONCAT(ROUND(o.decimallatitude,5)," ",ROUND(o.decimallongitude,5))) AS locality, '.
             'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, IFNULL(o.habitat,"") AS habitat, '.
             'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid, '.
-            'o.individualCount, o.lifeStage, o.sex '.
-            'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid '.
-        	$this->setTableJoins($sqlWhere).$sqlWhere;
+            'o.individualCount, o.lifeStage, o.sex';
+        $sql .= (array_key_exists("assochost",$this->searchTermsArr)?', oas.verbatimsciname ':' ');
+        $sql .= 'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid '.$this->setTableJoins($sqlWhere).$sqlWhere;
         if($this->sortField1 || $this->sortField2 || $this->sortOrder){
             $sortFields = array('Collection' => 'collection','Catalog Number' => 'o.CatalogNumber','Family' => 'o.family',
                 'Scientific Name' => 'o.sciname','Collector' => 'o.recordedBy','Number' => 'o.recordNumber','Event Date' => 'o.eventDate',
@@ -80,6 +80,7 @@ class OccurrenceListManager extends OccurrenceManager{
             $returnArr[$occId]["country"] = $row->country;
             $returnArr[$occId]["state"] = $row->state;
             $returnArr[$occId]["county"] = $row->county;
+            if(array_key_exists("assochost",$this->searchTermsArr)) $returnArr[$occId]["assochost"] = $row->verbatimsciname;
             $returnArr[$occId]["observeruid"] = $row->observeruid;
             $returnArr[$occId]["individualCount"] = $row->individualCount;
             $returnArr[$occId]["lifeStage"] = $row->lifeStage;

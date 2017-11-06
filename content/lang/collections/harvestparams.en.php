@@ -25,6 +25,7 @@ $LANG['COUNTY_INPUT'] = 'County:';
 $LANG['LOCALITY_INPUT'] = 'Locality:';
 $LANG['ELEV_INPUT_1'] = 'Elevation:';
 $LANG['ELEV_INPUT_2'] = 'to';
+$LANG['ASSOC_HOST_INPUT'] = 'Host:';
 $LANG['LAT_LNG_HEADER'] = 'Latitude and Longitude:';
 $LANG['LL_BOUND_TEXT'] = 'Bounding box coordinates in decimal degrees';
 $LANG['LL_BOUND_NLAT'] = 'Northern Latitude:';

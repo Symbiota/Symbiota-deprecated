@@ -503,6 +503,10 @@ class OccurrenceEditorManager {
 					//Used when Modified By comes from custom field search within basic query form
 					$cf = 'ul.username';
 				}
+                elseif($cf == 'verbatimsciname'){
+                    //Used when Host comes from custom field search within basic query form
+                    $cf = 'oas.verbatimsciname';
+                }
 				else{
 					$cf = 'o2.'.$cf;
 				}
@@ -543,6 +547,9 @@ class OccurrenceEditorManager {
 				elseif($cv){
 					$sqlWhere .= 'AND ('.$cf.' = "'.$cv.'") ';
 				}
+                if($cf == 'oas.verbatimsciname'){
+                    $sqlWhere .= 'AND (oas.relationship = "host") ';
+                }
 			}
 		}
 		if($this->crowdSourceMode){
@@ -615,7 +622,14 @@ class OccurrenceEditorManager {
 
 	protected function setOccurArr(){
 		$retArr = Array();
-		$sql = 'SELECT DISTINCT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o ';
+		$sql = 'SELECT DISTINCT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr);
+        if($this->sqlWhere && strpos($this->sqlWhere,'oas.verbatimsciname') !== false){
+            $sql .= ', oas.verbatimsciname';
+        }
+        $sql .= ' FROM omoccurrences o ';
+        if($this->sqlWhere && strpos($this->sqlWhere,'oas.verbatimsciname') !== false){
+            $sql .= 'LEFT JOIN omoccurassociations oas ON o.occid = oas.occid ';
+        }
 		if($this->occid){
 			$sql .= 'WHERE (o.occid = '.$this->occid.')';
 		}
@@ -678,6 +692,9 @@ class OccurrenceEditorManager {
 		if(strpos($this->sqlWhere,'ul.username')){
 			$sql .= 'LEFT JOIN omoccuredits ome ON o2.occid = ome.occid LEFT JOIN userlogin ul ON ome.uid = ul.uid ';
 		}
+        if(strpos($this->sqlWhere,'oas.verbatimsciname')){
+            $sql .= 'LEFT JOIN omoccurassociations oas ON o2.occid = oas.occid ';
+        }
 		if(strpos($this->sqlWhere,'exn.ometid')){
 			$sql .= 'INNER JOIN omexsiccatiocclink exocc ON o2.occid = exocc.occid INNER JOIN omexsiccatinumbers exn ON exocc.omenid = exn.omenid ';
 		}

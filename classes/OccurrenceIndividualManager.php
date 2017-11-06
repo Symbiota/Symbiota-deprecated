@@ -97,18 +97,21 @@ class OccurrenceIndividualManager extends Manager{
 	}
 
 	private function loadOccurData(){
-		$sql = 'SELECT o.occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
-			'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
-			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, taxonremarks, '.
-			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, '.
-			'DATE_FORMAT(eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
-			'verbatimeventdate, country, stateprovince, county, municipality, locality, '.
-			'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, localitysecurity, localitysecurityreason, '.
-			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
-			'georeferenceremarks, verbatimattributes, '.
-			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
-			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, recordenteredby, dateentered, datelastmodified '.
-			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
+        global $QUICK_HOST_ENTRY_IS_ACTIVE;
+	    $sql = 'SELECT o.occid, collid, o.institutioncode AS secondaryinstcode, o.collectioncode AS secondarycollcode, '.
+			'o.occurrenceid, o.catalognumber, o.occurrenceremarks, o.tidinterpreted, o.family, o.sciname, '.
+			'o.scientificnameauthorship, o.identificationqualifier, o.identificationremarks, o.identificationreferences, o.taxonremarks, '.
+			'o.identifiedby, o.dateidentified, o.recordedby, o.associatedcollectors, o.recordnumber, '.
+			'DATE_FORMAT(o.eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(o.eventDate),o.enddayofyear),"%d %M %Y") AS eventdateend, '.
+			'o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, '.
+			'o.minimumelevationinmeters, o.maximumelevationinmeters, o.verbatimelevation, o.localitysecurity, o.localitysecurityreason, '.
+			'o.decimallatitude, o.decimallongitude, o.geodeticdatum, o.coordinateuncertaintyinmeters, o.verbatimcoordinates, '.
+			'o.georeferenceremarks, o.verbatimattributes, '.
+			'o.typestatus, o.dbpk, o.habitat, o.substrate, o.associatedtaxa, o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, '.
+			'o.ownerinstitutioncode, o.othercatalognumbers, o.disposition, o.modified, o.observeruid, g.guid, o.recordenteredby, o.dateentered, o.datelastmodified';
+        $sql .= ($QUICK_HOST_ENTRY_IS_ACTIVE?', oas.verbatimsciname ':' ');
+        $sql .= 'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
+        $sql .= ($QUICK_HOST_ENTRY_IS_ACTIVE?'LEFT JOIN omoccurassociations oas ON o.occid = oas.occid ':'');
 		if($this->occid){
 			$sql .= 'WHERE (o.occid = '.$this->occid.')';
 		}
@@ -118,6 +121,7 @@ class OccurrenceIndividualManager extends Manager{
 		else{
 			trigger_error('Specimen identifier is null or invalid; '.$this->conn->error,E_USER_ERROR);
 		}
+		if($QUICK_HOST_ENTRY_IS_ACTIVE) $sql .= ' AND (oas.relationship = "host")';
 
 		if($result = $this->conn->query($sql)){
 			if($this->occArr = $result->fetch_assoc()){
