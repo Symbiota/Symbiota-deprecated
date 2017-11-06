@@ -625,12 +625,12 @@ class TaxonomyHarvester extends Manager{
 					//Display action message
 					$taxonDisplay = $taxonArr['sciname'];
 					if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
-						$taxonDisplay = '<a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/taxonomy/taxoneditor.php?tid='.$newTid.'" target="_blank">'.$taxonArr['sciname'].'</a>';
+						$taxonDisplay = '<a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/admin/taxonomyeditor.php?tid='.$newTid.'" target="_blank">'.$taxonArr['sciname'].'</a>';
 					}
 					$accStr = 'accepted';
 					if($tidAccepted != $newTid){
 						if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
-							$accStr = 'synonym of taxon <a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/taxonomy/taxoneditor.php?tid='.$tidAccepted.'" target="_blank">#'.$tidAccepted.'</a>';
+							$accStr = 'synonym of taxon <a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/admin/taxonomyeditor.php?tid='.$tidAccepted.'" target="_blank">#'.$tidAccepted.'</a>';
 						}
 						else{
 							$accStr = 'synonym of taxon #'.$tidAccepted;
