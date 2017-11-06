@@ -1106,7 +1106,15 @@ function findOccCluster(occid){
 }
 
 function findOccClusterPosition(occid){
-    if(clusterPoints){
+    if(spiderCluster){
+        var spiderPoints = layersArr['spider'].getSource().getFeatures();
+        for(p in spiderPoints){
+            if(spiderPoints[p].get('features')[0].get('occid') == Number(occid)){
+                return spiderPoints[p].getGeometry().getCoordinates();
+            }
+        }
+    }
+    else if(clusterPoints){
         var clusters = layersArr['pointv'].getSource().getFeatures();
         for(c in clusters){
             var clusterindex = clusters[c].get('identifiers');
@@ -2406,6 +2414,15 @@ function removeSelection(c){
         var index = selections.indexOf(Number(c.value));
         selections.splice(index, 1);
         layersArr['pointv'].getSource().changed();
+        if(spiderCluster){
+            var spiderFeatures = layersArr['spider'].getSource().getFeatures();
+            for(f in spiderFeatures){
+                if(spiderFeatures[f].get('features')[0].get('occid') == Number(c.value)){
+                    var style = (spiderFeatures[f].get('features')?setClusterSymbol(spiderFeatures[f]):setSymbol(spiderFeatures[f]));
+                    spiderFeatures[f].setStyle(style);
+                }
+            }
+        }
         adjustSelectionsTab();
     }
 }

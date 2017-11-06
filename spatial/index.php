@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=219" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=220" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -596,6 +596,7 @@ $dbArr = Array();
     var spiderCluster;
     var spiderFeature;
     var hiddenClusters = [];
+    var clickedFeatures = [];
     var dragDrop1 = false;
     var dragDrop2 = false;
     var dragDrop3 = false;
@@ -816,30 +817,47 @@ $dbArr = Array();
     var pointInteraction = new ol.interaction.Select({
         layers: [layersArr['pointv'],layersArr['spider']],
         condition: function(evt) {
-            if(evt.type == 'click' && activeLayer == 'pointv' && !evt.originalEvent.altKey){
-                if(spiderCluster){
-                    var spiderclick = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                        spiderFeature = feature;
-                        if(feature && layer === layersArr['spider']){
-                            return feature;
+            if(evt.type == 'click' && activeLayer == 'pointv'){
+                if(!evt.originalEvent.altKey){
+                    if(spiderCluster){
+                        var spiderclick = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                            spiderFeature = feature;
+                            if(feature && layer === layersArr['spider']){
+                                return feature;
+                            }
+                        });
+                        if(!spiderclick){
+                            var blankSource = new ol.source.Vector({
+                                features: new ol.Collection(),
+                                useSpatialIndex: true
+                            });
+                            layersArr['spider'].setSource(blankSource);
+                            for(i in hiddenClusters){
+                                showFeature(hiddenClusters[i]);
+                            }
+                            hiddenClusters = [];
+                            spiderCluster = false;
+                            spiderFeature = '';
+                            layersArr['pointv'].getSource().changed();
+                        }
+                    }
+                    return true;
+                }
+                else if(evt.originalEvent.altKey){
+                    map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                        if(feature){
+                            if(spiderCluster && layer === layersArr['spider']){
+                                clickedFeatures.push(feature);
+                                return feature;
+                            }
+                            else if(layer === layersArr['pointv']){
+                                clickedFeatures.push(feature);
+                                return feature;
+                            }
                         }
                     });
-                    if(!spiderclick){
-                        var blankSource = new ol.source.Vector({
-                            features: new ol.Collection(),
-                            useSpatialIndex: true
-                        });
-                        layersArr['spider'].setSource(blankSource);
-                        for(i in hiddenClusters){
-                            showFeature(hiddenClusters[i]);
-                        }
-                        hiddenClusters = [];
-                        spiderCluster = false;
-                        spiderFeature = '';
-                        layersArr['pointv'].getSource().changed();
-                    }
+                    return false;
                 }
-                return true;
             }
             else{
                 return false;
@@ -1150,6 +1168,8 @@ $dbArr = Array();
 
     map.getView().on('change:resolution', function(event) {
         if(spiderCluster){
+            var source = layersArr['spider'].getSource();
+            source.clear();
             var blankSource = new ol.source.Vector({
                 features: new ol.Collection(),
                 useSpatialIndex: true
@@ -1469,27 +1489,23 @@ $dbArr = Array();
             }
             else if(activeLayer == 'pointv'){
                 var infoHTML = '';
-                var clickedFeatures = [];
-                var singleFeature = false;
-                map.forEachFeatureAtPixel(evt.pixel, function(feature, layer){
-                    if(layer === layersArr['spider'] || layer === layersArr['pointv']){
-                        if(feature.get('features') || feature.get('occid')){
-                            clickedFeatures.push(feature);
-                        }
-                    }
-                });
+                var targetFeature = '';
+                var iFeature = '';
                 if(clickedFeatures.length == 1){
-                    if(clusterPoints){
-                        if(clickedFeatures[0].get('features') && clickedFeatures[0].get('features').length == 1){
-                            singleFeature = true;
-                        }
+                    targetFeature = clickedFeatures[0];
+                }
+                if(targetFeature){
+                    if(clusterPoints && targetFeature.get('features').length == 1){
+                        iFeature = targetFeature.get('features')[0];
                     }
-                    else{
-                        singleFeature = true;
+                    else if(!clusterPoints){
+                        iFeature = targetFeature;
                     }
                 }
-                if(singleFeature){
-                    var iFeature = (clusterPoints?clickedFeatures[0].get('features')[0]:clickedFeatures[0]);
+                else{
+                    return;
+                }
+                if(iFeature){
                     infoHTML += '<b>occid:</b> '+iFeature.get('occid')+'<br />';
                     infoHTML += '<b>CollectionName:</b> '+(iFeature.get('CollectionName')?iFeature.get('CollectionName'):'')+'<br />';
                     infoHTML += '<b>catalogNumber:</b> '+(iFeature.get('catalogNumber')?iFeature.get('catalogNumber'):'')+'<br />';
@@ -1512,9 +1528,10 @@ $dbArr = Array();
                     popupcontent.innerHTML = infoHTML;
                     popupoverlay.setPosition(evt.coordinate);
                 }
-                else if(clickedFeatures.length > 1 || clickedFeatures[0].get('features').length > 1){
-                    alert('You clicked on multiple points. Info window can only display data for a single point.')
+                else{
+                    alert('You clicked on multiple points. The info window can only display data for a single point.');
                 }
+                clickedFeatures = [];
             }
         }
         else{
