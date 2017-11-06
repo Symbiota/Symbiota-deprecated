@@ -19,7 +19,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 <div id="innertext" style="background-color:white;">
 	<?php 
 	if($isEditor){
-		$reportTypes = array(0 => 'General Stats', 1 => 'User Stats', 2 => 'Possible Issues', 3 => 'User Stats - Old');
+		$reportTypes = array(0 => 'General Stats', 1 => 'User Stats', 2 => 'Possible Issues');
 		?>
 		<form name="filterForm" action="index.php" method="get">
 			<b>Report Type:</b> 
@@ -196,7 +196,6 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 				</fieldset>
 				<?php
 				if($formAction && $formAction == 'displayReport'){
-					$orderArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review-nfn','pending review','expert required','reviewed','closed','empty status');
 					echo '<table class="styledtable" style="width:500px">';
 					echo '<tr><th>Time Period</th>';
 					echo '<th>User</th>';
