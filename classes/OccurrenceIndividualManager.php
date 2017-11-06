@@ -121,7 +121,7 @@ class OccurrenceIndividualManager extends Manager{
 		else{
 			trigger_error('Specimen identifier is null or invalid; '.$this->conn->error,E_USER_ERROR);
 		}
-		if($QUICK_HOST_ENTRY_IS_ACTIVE) $sql .= ' AND (oas.relationship = "host")';
+		if($QUICK_HOST_ENTRY_IS_ACTIVE) $sql .= ' AND (oas.relationship = "host" OR (ISNULL(oas.relationship) AND ISNULL(oas.verbatimsciname))) ';
 
 		if($result = $this->conn->query($sql)){
 			if($this->occArr = $result->fetch_assoc()){
