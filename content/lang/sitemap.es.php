@@ -7,7 +7,7 @@ Language: Espa�ol (Spanish)
 
 $LANG['SITEMAP'] = 'Mapa del Sitio';
 $LANG['HOME'] = 'Inicio';
-$LANG['COLLECTIONS'] = Colecciones;
+$LANG['COLLECTIONS'] = 'Colecciones';
 $LANG['SEARCHENGINE'] = 'B&uacute;squeda';
 $LANG['SEARCH_COLL'] = 'B&uacute;squeda de colecciones';
 $LANG['LISTOFCOLL'] = 'Listado de colecciones participando en el proyecto';
@@ -87,7 +87,6 @@ Cualquier usuario puede ver o navegar el &iacute;ndice de exsiccati (listado aba
 No es posible aunque anadir o modificar el titulo del exsiccati o de la serie,
 por lo menos el usuario tiene que ser administrador para una colecci&oacute;n especifica para tener estos derechos';
 $LANG['NOTEDITCHECK'] = 'Usted no esta autorizado/a para editar ninguna de las listas de especies.';
-$LANG['COLLECTIONS'] = Colecciones;
 $LANG['PARA1'] = 'Herramientas para manejar datos espec&iacute;ficos para una colecci&oacute;n particular est&aacute;n disponibles por la pagina del perfil de esta colecci&oacute;n.
 Hacer clic en el nombre en el listado abajo va a llevarse directamente a la pagina principal de esta colecci&oacute;n.
 Alternativamente se puede acceder esta pagina es por el clic del nombre de la colecci&oacute;n desde de la pagina de b&uacute;squeda.

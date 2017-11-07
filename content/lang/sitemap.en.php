@@ -87,7 +87,6 @@ $LANG['ESCMOD'] = 'The Exsiccati module is activated for this portal.
 					However, to add or modify exsiccati titles or series,
 					the user must be an administrator for at least one collection';
 $LANG['NOTEDITCHECK'] = 'You are not authorized to edit any of the Checklists';
-$LANG['COLLECTIONS'] = 'Collections';
 $LANG['PARA1'] = 'Tools for managing data specific to a particular collection are available through the collection&#39;s profile page.
 					Clicking on a collection name in the list below will take you to this page for that given collection.
 					An additional method to reach this page is by clicking on the collection name within the specimen search engine.
