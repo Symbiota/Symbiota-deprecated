@@ -153,4 +153,3 @@ if($isEditor){
 	</div>
 </body>
 </html>
-

@@ -171,10 +171,11 @@ class OccurrenceSupport {
 		'identificationRemarks','identificationQualifier','typeStatus','recordedBy','recordNumber','associatedCollectors','eventDate',
 		'year','month','day','verbatimEventDate','habitat','substrate','fieldnumber','occurrenceRemarks','informationWithheld',
 		'associatedOccurrences','associatedTaxa','dynamicProperties','verbatimAttributes','behavior','reproductiveCondition','cultivationStatus',
-		'establishmentMeans','lifeStage','sex','individualCount','samplingProtocol','samplingEffort','preparations','country','stateProvince',
+		'establishmentMeans','lifeStage','sex','individualCount','preparations','country','stateProvince',
 		'county','municipality','locality','decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','locationRemarks',
 		'verbatimCoordinates','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation','minimumDepthInMeters',
 		'maximumDepthInMeters','verbatimDepth','dateEntered','dateLastModified');
+		//,'samplingProtocol','samplingEffort'
 		$fileName = 'specimenOutput_'.time().'.csv';
 		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');

@@ -350,6 +350,7 @@ if($isEditor){
 						</fieldset>
 					</form>
 				</div>
+				<!-- 
 				<div>
 					<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return verifyItisUploadForm(this)">
 						<fieldset style="width:90%;">
@@ -389,6 +390,7 @@ if($isEditor){
 						</fieldset>
 					</form>
 				</div>
+				-->				
 				<div>
 					<form name="analyzeform" action="taxaloader.php" method="post">
 						<fieldset style="width:90%;">
