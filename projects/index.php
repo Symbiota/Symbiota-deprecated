@@ -264,7 +264,7 @@ if(!$researchList && !$editMode){
 											<?php echo $LANG['DESCRIP'];?>:
 										</td>
 										<td>
-											<textarea rows="8" cols="45" name="fulldescription" maxlength="2000" style="width:95%"><?php if($projArr) echo htmlspecialchars($projArr["fulldescription"]);?></textarea>
+											<textarea rows="8" cols="45" name="fulldescription" maxlength="5000" style="width:95%"><?php if($projArr) echo htmlspecialchars($projArr["fulldescription"]);?></textarea>
 										</td>
 									</tr>	
 									<tr>

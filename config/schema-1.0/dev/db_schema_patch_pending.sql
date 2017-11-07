@@ -1,4 +1,7 @@
-INSERT IGNORE INTO schemaversion (versionnumber) values ("1.1.1");
+INSERT IGNORE INTO schemaversion (versionnumber) values ("1.2");
+
+ALTER TABLE `fmprojects` 
+  CHANGE COLUMN `fulldescription` `fulldescription` VARCHAR(5000) NULL DEFAULT NULL ;
 
 
 ALTER TABLE `uploadtaxa` 
