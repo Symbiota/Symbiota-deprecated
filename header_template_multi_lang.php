@@ -7,6 +7,10 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 	.header2 { font-family: 'Playfair Display SC', serif; font-size: 24px; margin: 0px 10px 10px 30px; }
 </style>
 <script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/symb/base.js?ver=171023"></script> 
+<script type="text/javascript">
+	//Uncomment following line to support toggling of database content containing DIVs with lang classes in form of: <div class="lang en">Content in English</div><div class="lang es">Content in Spanish</div>
+	//setLanguageDiv();
+</script>
 <table id="maintable" cellspacing="0">
 	<tr>
 		<td class="header" colspan="3">
