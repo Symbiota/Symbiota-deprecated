@@ -547,7 +547,7 @@ class OccurrenceEditorManager {
 				elseif($cv){
 					$sqlWhere .= 'AND ('.$cf.' = "'.$cv.'") ';
 				}
-                if($cf == 'oas.verbatimsciname'){
+                if($cf == 'oas.verbatimsciname' && $ct != 'NULL'){
                     $sqlWhere .= 'AND (oas.relationship = "host") ';
                 }
 			}

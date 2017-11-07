@@ -1162,7 +1162,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						echo '</table>';
 					}
 					else{
-						echo 'Unable to located record within archive';
+						echo 'Unable to locate record within archive';
 					}
 					?>
 				</div>
