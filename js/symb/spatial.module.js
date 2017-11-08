@@ -445,6 +445,13 @@ function changeCollColor(color,key){
     changeMapSymbology('coll');
     collSymbology[key]['color'] = color;
     layersArr['pointv'].getSource().changed();
+    if(spiderCluster){
+        var spiderFeatures = layersArr['spider'].getSource().getFeatures();
+        for(f in spiderFeatures){
+            var style = (spiderFeatures[f].get('features')?setClusterSymbol(spiderFeatures[f]):setSymbol(spiderFeatures[f]));
+            spiderFeatures[f].setStyle(style);
+        }
+    }
 }
 
 function changeDraw() {
@@ -494,6 +501,23 @@ function changeHeatMapRadius(){
 }
 
 function changeMapSymbology(symbology){
+    if(symbology != mapSymbology){
+        if(spiderCluster){
+            var source = layersArr['spider'].getSource();
+            source.clear();
+            var blankSource = new ol.source.Vector({
+                features: new ol.Collection(),
+                useSpatialIndex: true
+            });
+            layersArr['spider'].setSource(blankSource);
+            for(i in hiddenClusters){
+                showFeature(hiddenClusters[i]);
+            }
+            hiddenClusters = [];
+            spiderCluster = '';
+            layersArr['pointv'].getSource().changed();
+        }
+    }
     if(symbology == 'coll'){
         if(mapSymbology == 'taxa'){
             clearTaxaSymbology();
@@ -2503,6 +2527,13 @@ function resetSymbology(){
         buildCollKeyPiece(i);
     }
     layersArr['pointv'].getSource().changed();
+    if(spiderCluster){
+        var spiderFeatures = layersArr['spider'].getSource().getFeatures();
+        for(f in spiderFeatures){
+            var style = (spiderFeatures[f].get('features')?setClusterSymbol(spiderFeatures[f]):setSymbol(spiderFeatures[f]));
+            spiderFeatures[f].setStyle(style);
+        }
+    }
     document.getElementById("symbolizeReset1").disabled = false;
     document.getElementById("symbolizeReset2").disabled = false;
 }
