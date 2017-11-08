@@ -74,12 +74,7 @@ $dbArr = Array();
                     $(ui.panel).html("<p>Loading...</p>");
                 }
             });
-            $('#polycalculatortab').tabs({
-                beforeLoad: function( event, ui ) {
-                    $(ui.panel).html("<p>Loading...</p>");
-                }
-            });
-            $('#pointscalculatortab').tabs({
+            $('#vectortoolstab').tabs({
                 beforeLoad: function( event, ui ) {
                     $(ui.panel).html("<p>Loading...</p>");
                 }
@@ -140,7 +135,6 @@ $dbArr = Array();
                         <ul>
                             <li><a class="tabtitle" href="#searchcriteria">Criteria</a></li>
                             <li><a class="tabtitle" href="#searchcollections">Collections</a></li>
-                            <!-- <li><a class="tabtitle" href="#maptools">Map Tools</a></li> -->
                         </ul>
                         <div id="searchcollections">
                             <div class="mapinterface">
@@ -416,68 +410,73 @@ $dbArr = Array();
                         </div>
                     </div>
 
-                    <h3 class="tabtitle">Shapes</h3>
-                    <div id="polycalculatortab" style="width:379px;padding:0px;">
-                        <div style="padding:10px">
-                            <div style="height:45px;">
-                                <div style="float:right;">
-                                    Total area of selected shapes (sq/km)
+                    <h3 class="tabtitle">Vector Tools</h3>
+                    <div id="vectortoolstab" style="width:379px;padding:0px;">
+                        <ul>
+                            <li><a class="tabtitle" href="#polycalculatortab">Shapes</a></li>
+                            <li><a class="tabtitle" href="#pointscalculatortab">Points</a></li>
+                        </ul>
+                        <div id="polycalculatortab" style="width:379px;padding:0px;">
+                            <div style="padding:10px">
+                                <div style="height:45px;">
+                                    <div style="float:right;">
+                                        Total area of selected shapes (sq/km)
+                                    </div>
+                                    <div style="float:right;margin-top:5px;">
+                                        <input data-role="none" type="text" id="polyarea" style="width:250px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="0" disabled />
+                                    </div>
                                 </div>
-                                <div style="float:right;margin-top:5px;">
-                                    <input data-role="none" type="text" id="polyarea" style="width:250px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="0" disabled />
+                                <div style="margin:5 0 5 0;"><hr /></div>
+                                <div style="margin-top:10px;">
+                                    <b>Download Shapes</b> <select data-role="none" id="shapesdownloadselect">
+                                        <option value="">Download Type</option>
+                                        <option value="kml">KML</option>
+                                        <option value="geojson">GeoJSON</option>
+                                    </select>
+                                    <button data-role="none" style="margin-left:5px;" type="button" onclick='downloadShapesLayer();' >Download</button>
                                 </div>
+                                <div style="margin:5 0 5 0;"><hr /></div>
+                                <div style="margin-top:10px;">
+                                    <button data-role="none" onclick="createBuffers();" >Buffer</button> Creates buffer polygon of <input data-role="none" type="text" id="bufferSize" style="width:50px;" value="" /> km around selected features.
+                                </div>
+                                <div style="margin:5 0 5 0;"><hr /></div>
+                                <div style="margin-top:10px;">
+                                    <button data-role="none" onclick="createPolyDifference();" >Difference</button> Returns a new polygon with the area of the polygon or circle selected first, exluding the area of the polygon or circle selected second.
+                                </div>
+                                <div style="margin:5 0 5 0;"><hr /></div>
+                                <div style="margin-top:10px;">
+                                    <button data-role="none" onclick="createPolyIntersect();" >Intersect</button> Returns a new polygon with the area overlapping of both selected polygons or circles.
+                                </div>
+                                <div style="margin:5 0 5 0;"><hr /></div>
+                                <div style="margin-top:10px;">
+                                    <button data-role="none" onclick="createPolyUnion();" >Union</button> Returns a new polygon with the combined area of two or more selected polygons or circles. *Note new polygon will replace all selected shapes.
+                                </div>
+                                <div style="margin:5 0 5 0;"><hr /></div>
                             </div>
-                            <div style="margin:5 0 5 0;"><hr /></div>
-                            <div style="margin-top:10px;">
-                                <b>Download Shapes</b> <select data-role="none" id="shapesdownloadselect">
-                                    <option value="">Download Type</option>
-                                    <option value="kml">KML</option>
-                                    <option value="geojson">GeoJSON</option>
-                                </select>
-                                <button data-role="none" style="margin-left:5px;" type="button" onclick='downloadShapesLayer();' >Download</button>
-                            </div>
-                            <div style="margin:5 0 5 0;"><hr /></div>
-                            <div style="margin-top:10px;">
-                                <button data-role="none" onclick="createBuffers();" >Buffer</button> Creates buffer polygon of <input data-role="none" type="text" id="bufferSize" style="width:50px;" value="" /> km around selected features.
-                            </div>
-                            <div style="margin:5 0 5 0;"><hr /></div>
-                            <div style="margin-top:10px;">
-                                <button data-role="none" onclick="createPolyDifference();" >Difference</button> Returns a new polygon with the area of the polygon or circle selected first, exluding the area of the polygon or circle selected second.
-                            </div>
-                            <div style="margin:5 0 5 0;"><hr /></div>
-                            <div style="margin-top:10px;">
-                                <button data-role="none" onclick="createPolyIntersect();" >Intersect</button> Returns a new polygon with the area overlapping of both selected polygons or circles.
-                            </div>
-                            <div style="margin:5 0 5 0;"><hr /></div>
-                            <div style="margin-top:10px;">
-                                <button data-role="none" onclick="createPolyUnion();" >Union</button> Returns a new polygon with the combined area of two or more selected polygons or circles. *Note new polygon will replace all selected shapes.
-                            </div>
-                            <div style="margin:5 0 5 0;"><hr /></div>
                         </div>
-                    </div>
 
-                    <h3 class="tabtitle">Points</h3>
-                    <div id="pointscalculatortab" style="width:379px;padding:0px;">
-                        <div id="pointToolsNoneDiv" style="padding:10px;margin-top:10px;display:block;">
-                            There are no points loaded on the map.
-                        </div>
-                        <div id="pointToolsDiv" style="padding:10px;display:none;">
-                            <div style="">
-                                <button data-role="none" onclick="createConcavePoly();" >Concave Hull Polygon</button> Creates a concave hull polygon or multipolygon for
-                                <select data-role="none" id="concavepolysource" style="margin-top:3px;" onchange="checkPointToolSource('concavepolysource');">
-                                    <option value="all">all</option>
-                                    <option value="selected">selected</option>
-                                </select> points with a maximum edge length of <input data-role="none" type="text" id="concaveMaxEdgeSize" style="width:75px;margin-top:3px;" value="" /> kilometers.
+                        <div id="pointscalculatortab" style="width:379px;padding:0px;">
+                            <div id="pointToolsNoneDiv" style="padding:10px;margin-top:10px;display:block;">
+                                There are no points loaded on the map.
                             </div>
-                            <div style="margin:5 0 5 0;"><hr /></div>
-                            <div style="margin-top:10px;">
-                                <button data-role="none" onclick="createConvexPoly();" >Convex Hull Polygon</button> Creates a convex hull polygon for
-                                <select data-role="none" id="convexpolysource" style="margin-top:3px;" onchange="checkPointToolSource('convexpolysource');">
-                                    <option value="all">all</option>
-                                    <option value="selected">selected</option>
-                                </select> points.
+                            <div id="pointToolsDiv" style="padding:10px;display:none;">
+                                <div style="">
+                                    <button data-role="none" onclick="createConcavePoly();" >Concave Hull Polygon</button> Creates a concave hull polygon or multipolygon for
+                                    <select data-role="none" id="concavepolysource" style="margin-top:3px;" onchange="checkPointToolSource('concavepolysource');">
+                                        <option value="all">all</option>
+                                        <option value="selected">selected</option>
+                                    </select> points with a maximum edge length of <input data-role="none" type="text" id="concaveMaxEdgeSize" style="width:75px;margin-top:3px;" value="" /> kilometers.
+                                </div>
+                                <div style="margin:5 0 5 0;"><hr /></div>
+                                <div style="margin-top:10px;">
+                                    <button data-role="none" onclick="createConvexPoly();" >Convex Hull Polygon</button> Creates a convex hull polygon for
+                                    <select data-role="none" id="convexpolysource" style="margin-top:3px;" onchange="checkPointToolSource('convexpolysource');">
+                                        <option value="all">all</option>
+                                        <option value="selected">selected</option>
+                                    </select> points.
+                                </div>
+                                <div style="margin:5 0 5 0;"><hr /></div>
                             </div>
-                            <div style="margin:5 0 5 0;"><hr /></div>
                         </div>
                     </div>
 
