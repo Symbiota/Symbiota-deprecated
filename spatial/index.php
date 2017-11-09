@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=221" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=227" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -282,13 +282,13 @@ $dbArr = Array();
                                 </div>
                                 <div id="symbolizeResetButt" style='float:right;margin-bottom:5px;' >
                                     <div>
-                                        <button data-role="none" id="symbolizeReset1" name="symbolizeReset1" onclick='resetSymbology();' >Reset Symbology</button>
+                                        <button data-role="none" id="symbolizeReset1" onclick='resetSymbology();' >Reset Symbology</button>
                                     </div>
                                     <div style="margin-top:5px;">
-                                        <button data-role="none" id="randomColorColl" name="randomColorColl" onclick='autoColorColl();' >Auto Color</button>
+                                        <button data-role="none" id="randomColorColl" onclick='autoColorColl();' >Auto Color</button>
                                     </div>
                                     <div style="margin-top:5px;">
-                                        <button data-role="none" id="saveCollKeyImage" name="saveCollKeyImage" onclick='saveKeyImage();' >Save Image</button>
+                                        <button data-role="none" id="saveCollKeyImage" onclick='saveKeyImage();' >Save Image</button>
                                     </div>
                                 </div>
                             </div>
@@ -344,18 +344,24 @@ $dbArr = Array();
                                 </div>
                                 <div id="symbolizeResetButt" style='float:right;margin-bottom:5px;' >
                                     <div>
-                                        <button data-role="none" id="symbolizeReset2" name="symbolizeReset2" onclick='resetSymbology();' >Reset Symbology</button>
+                                        <button data-role="none" id="symbolizeReset2" onclick='resetSymbology();' >Reset Symbology</button>
                                     </div>
                                     <div style="margin-top:5px;">
-                                        <button data-role="none" id="randomColorTaxa" name="randomColorTaxa" onclick='autoColorTaxa();' >Auto Color</button>
+                                        <button data-role="none" id="randomColorTaxa" onclick='autoColorTaxa();' >Auto Color</button>
                                     </div>
                                     <div style="margin-top:5px;">
-                                        <button data-role="none" id="saveTaxaKeyImage" name="saveTaxaKeyImage" onclick='saveKeyImage();' >Save Image</button>
+                                        <button data-role="none" id="saveTaxaKeyImage" onclick='saveKeyImage();' >Save Image</button>
                                     </div>
                                 </div>
                             </div>
                             <div style="margin:5 0 5 0;clear:both;"><hr /></div>
-                            <div style='font-weight:bold;'>Taxa Count: <span id="taxaCountNum">0</span></div>
+                            <div style="margin-bottom:30px;">
+                                <div style='font-weight:bold;float:left;margin-bottom:5px;'>Taxa Count: <span id="taxaCountNum">0</span></div>
+                                <div style="float:right;margin-bottom:5px;">
+                                    <button data-role="none" id="taxacsvdownload" onclick="exportTaxaCSV();" >Download CSV</button>
+                                </div>
+                            </div>
+                            <div style="margin:5 0 5 0;clear:both;"><hr /></div>
                             <div id="taxasymbologykeysbox" style="background-color:white;"></div>
                         </div>
 

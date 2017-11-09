@@ -302,8 +302,8 @@ function buildSOLRQString(){
         newsolrqString += tempqStr;
     }
     else{
-        document.getElementById("dh-q").value = '*:*';
-        newsolrqString += '*:*';
+        document.getElementById("dh-q").value = '(sciname:[* TO *])';
+        newsolrqString += '(sciname:[* TO *])';
     }
 
     if(solrgeoqArr.length > 0){
@@ -1113,6 +1113,32 @@ function exportMapPNG(){
     map.renderSync();
 }
 
+function exportTaxaCSV(){
+    var csvContent = '';
+    csvContent = '"ScientificName","Family","RecordCount"'+"\n";
+    var sortedTaxa = arrayIndexSort(taxaSymbology).sort();
+    for(i in sortedTaxa){
+        var family = taxaSymbology[sortedTaxa[i]]['family'].toLowerCase();
+        family = family.charAt(0).toUpperCase()+family.slice(1);
+        var row = taxaSymbology[sortedTaxa[i]]['sciname']+','+family+','+taxaSymbology[sortedTaxa[i]]['count']+"\n";
+        csvContent += row;
+    }
+    var filename = 'taxa_list.csv';
+    var filetype = 'text/csv; charset=utf-8';
+    var blob = new Blob([csvContent], {type: filetype});
+    if(window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveBlob(blob,filename);
+    }
+    else{
+        var elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(blob);
+        elem.download = filename;
+        document.body.appendChild(elem);
+        elem.click();
+        document.body.removeChild(elem);
+    }
+}
+
 function extensionSelected(obj){
     if(obj.checked == true){
         document.getElementById('csvzip').checked = true;
@@ -1418,17 +1444,13 @@ function getGeographyParams(vector){
                     var area_km = area/1000/1000;
                     totalArea = totalArea + area_km;
                     for (e in polyCoords) {
-                        for (i in polyCoords[e]) {
-                            var ring = turf.lineString(polyCoords[e][i]);
-                            //console.log('start multipolygon length: '+ring.geometry.coordinates.length);
-                            //ring = turf.simplify(ring, 0.000001, true);
-                            if(ring.geometry.coordinates.length > 10){
-                                ring = turf.simplify(ring, 0.001, true);
-                            }
-                            ring = turf.simplify(ring, 0.001, true);
-                            //console.log('end multipolygon length: '+ring.geometry.coordinates.length);
-                            polyCoords[e][i] = ring.geometry.coordinates;
+                        var singlePoly = turf.polygon(polyCoords[e]);
+                        //console.log('start multipolygon length: '+singlePoly.geometry.coordinates.length);
+                        if(singlePoly.geometry.coordinates.length > 10){
+                            singlePoly = turf.simplify(singlePoly, 0.001, true);
                         }
+                        //console.log('end multipolygon length: '+singlePoly.geometry.coordinates.length);
+                        polyCoords[e] = singlePoly.geometry.coordinates;
                     }
                     var turfSimple = turf.multiPolygon(polyCoords);
                 }
@@ -1437,16 +1459,12 @@ function getGeographyParams(vector){
                     var area = turf.area(areaFeat);
                     var area_km = area/1000/1000;
                     totalArea = totalArea + area_km;
-                    for (i in polyCoords) {
-                        var ring = turf.lineString(polyCoords[i]);
-                        //console.log('start polygon length: '+ring.geometry.coordinates.length);
-                        //ring = turf.simplify(ring, 0.000001, true);
-                        if(ring.geometry.coordinates.length > 10){
-                            ring = turf.simplify(ring, 0.001, true);
-                        }
-                        //console.log('end polygon length: '+ring.geometry.coordinates.length);
-                        polyCoords[i] = ring.geometry.coordinates;
+                    //console.log('start multipolygon length: '+areaFeat.geometry.coordinates.length);
+                    if(areaFeat.geometry.coordinates.length > 10){
+                        areaFeat = turf.simplify(areaFeat, 0.001, true);
                     }
+                    //console.log('end multipolygon length: '+areaFeat.geometry.coordinates.length);
+                    polyCoords = areaFeat.geometry.coordinates;
                     var turfSimple = turf.polygon(polyCoords);
                 }
                 var polySimple = geoJSONFormat.readFeature(turfSimple,{featureProjection:'EPSG:3857'});
@@ -2311,6 +2329,10 @@ function primeSymbologyData(features){
             taxaSymbology[namestring]['tidinterpreted'] = tidinterpreted;
             taxaSymbology[namestring]['family'] = family;
             taxaSymbology[namestring]['color'] = color;
+            taxaSymbology[namestring]['count'] = 1;
+        }
+        else{
+            taxaSymbology[namestring]['count'] = taxaSymbology[namestring]['count'] + 1;
         }
         features[f].set('namestring',namestring,true);
     }
