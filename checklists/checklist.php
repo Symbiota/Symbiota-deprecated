@@ -122,7 +122,7 @@ if($clValue || $dynClid){
 	<script type="text/javascript">
 		<?php if($clid) echo 'var clid = '.$clid.';'; ?>
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=201606"></script>
+	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=2017096"></script>
 	<style type="text/css">
 		#sddm{margin:0;padding:0;z-index:30;}
 		#sddm:hover {background-color:#EAEBD8;}
@@ -289,91 +289,93 @@ if($clValue || $dynClid){
 					?>
 					<!-- Option box -->
 					<div id="cloptiondiv">
-						<form name="optionform" action="checklist.php" method="post">
-							<fieldset style="background-color:white;padding-bottom:10px;">
-							    <legend><b><?php echo $LANG['OPTIONS'];?></b></legend>
-								<!-- Taxon Filter option -->
-							    <div id="taxonfilterdiv" title="Filter species list by family or genus">
-							    	<div>
-							    		<b><?php echo $LANG['SEARCH'];?></b>
-										<input type="text" id="taxonfilter" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" />
-									</div>
-									<div>
-										<div style="margin-left:10px;">
-											<?php 
-												if($displayCommonNames){
-													echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/>".$LANG['COMMON']."<br/>";
-												}
-											?>
-											<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/><?php echo $LANG['SYNON'];?>
+						<div style="height: 288px">
+							<form name="optionform" action="checklist.php" method="post">
+								<fieldset style="background-color:white;padding-bottom:10px;">
+								    <legend><b><?php echo $LANG['OPTIONS'];?></b></legend>
+									<!-- Taxon Filter option -->
+								    <div id="taxonfilterdiv" title="Filter species list by family or genus">
+								    	<div>
+								    		<b><?php echo $LANG['SEARCH'];?></b>
+											<input type="text" id="taxonfilter" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" />
+										</div>
+										<div>
+											<div style="margin-left:10px;">
+												<?php 
+													if($displayCommonNames){
+														echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/>".$LANG['COMMON']."<br/>";
+													}
+												?>
+												<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/><?php echo $LANG['SYNON'];?>
+											</div>
 										</div>
 									</div>
-								</div>
-							    <!-- Thesaurus Filter -->
-							    <div>
-							    	<b><?php echo $LANG['FILTER'];?></b><br/>
-							    	<select name='thesfilter'>
-										<option value='0'><?php echo $LANG['OGCHECK'];?></option>
+								    <!-- Thesaurus Filter -->
+								    <div>
+								    	<b><?php echo $LANG['FILTER'];?></b><br/>
+								    	<select name='thesfilter'>
+											<option value='0'><?php echo $LANG['OGCHECK'];?></option>
+											<?php 
+												$taxonAuthList = Array();
+												$taxonAuthList = $clManager->getTaxonAuthorityList();
+												foreach($taxonAuthList as $taCode => $taValue){
+													echo "<option value='".$taCode."'".($taCode == $clManager->getThesFilter()?" selected":"").">".$taValue."</option>\n";
+												}
+											?>
+										</select>
+									</div>
+									<div>
 										<?php 
-											$taxonAuthList = Array();
-											$taxonAuthList = $clManager->getTaxonAuthorityList();
-											foreach($taxonAuthList as $taCode => $taValue){
-												echo "<option value='".$taCode."'".($taCode == $clManager->getThesFilter()?" selected":"").">".$taValue."</option>\n";
-											}
+											//Display Common Names: 0 = false, 1 = true 
+										    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/>".$LANG['COMMON']."";
 										?>
-									</select>
-								</div>
-								<div>
-									<?php 
-										//Display Common Names: 0 = false, 1 = true 
-									    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/>".$LANG['COMMON']."";
-									?>
-								</div>
-								<div>
-									<!-- Display as Images: 0 = false, 1 = true  --> 
-								    <input name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this.form);" />
-                                    <?php echo $LANG['DISPLAYIMG'];?>
-								</div>
-								<?php if($clValue){ ?>
-									<div style='display:<?php echo ($showImages?"none":"block");?>' id="showvouchersdiv">
-										<!-- Display as Vouchers: 0 = false, 1 = true  --> 
-									    <input name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/>
-                                        <?php echo $LANG['NOTESVOUC'];?>
 									</div>
-								<?php } ?>
-								<div style='display:<?php echo ($showImages?"none":"block");?>' id="showauthorsdiv">
-									<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
-								    <input name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/>
-                                    <?php echo $LANG['TAXONAUT'];?>
-								</div>
-								<div style='' id="showalphataxadiv">
-									<!-- Display Taxa Alphabetically: 0 = false, 1 = true  --> 
-								    <input name='showalphataxa' type='checkbox' value='1' <?php echo ($showAlphaTaxa?"checked":""); ?>/>
-                                    <?php echo $LANG['TAXONABC'];?>
-								</div>
-								<div style="margin:5px 0px 0px 5px;">
-									<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
-									<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
-									<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
-									<input type='hidden' name='defaultoverride' value='1' />
-									<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
-									<input type="submit" name="submitaction" value="Rebuild List" onclick="changeOptionFormAction('checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>','_self');" />
-									<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Download Checklist">
-										<input type="image" name="dllist" value="Download List" src="../images/dl.png" onclick="changeOptionFormAction('checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>','_self');" />
+									<div>
+										<!-- Display as Images: 0 = false, 1 = true  --> 
+									    <input name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this.form);" />
+	                                    <?php echo $LANG['DISPLAYIMG'];?>
 									</div>
-									<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Print in Browser">
-										<input type="image" name="printlist" value="Print List" src="../images/print.png" onclick="changeOptionFormAction('checklist.php','_blank');" />
+									<?php if($clValue){ ?>
+										<div style='display:<?php echo ($showImages?"none":"block");?>' id="showvouchersdiv">
+											<!-- Display as Vouchers: 0 = false, 1 = true  --> 
+										    <input name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/>
+	                                        <?php echo $LANG['NOTESVOUC'];?>
+										</div>
+									<?php } ?>
+									<div style='display:<?php echo ($showImages?"none":"block");?>' id="showauthorsdiv">
+										<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
+									    <input name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/>
+	                                    <?php echo $LANG['TAXONAUT'];?>
 									</div>
-									<div class="button" id="wordicondiv" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;<?php echo ($showImages?'display:none;':''); ?>' title="Export to DOCX">
-										<input type="image" name="exportdoc" value="Export to DOCX" src="../images/wordicon.png" onclick="changeOptionFormAction('defaultchecklistexport.php','_self');" />
+									<div style='' id="showalphataxadiv">
+										<!-- Display Taxa Alphabetically: 0 = false, 1 = true  --> 
+									    <input name='showalphataxa' type='checkbox' value='1' <?php echo ($showAlphaTaxa?"checked":""); ?>/>
+	                                    <?php echo $LANG['TAXONABC'];?>
 									</div>
-								</div>
-							</fieldset>
-						</form>
+									<div style="margin:5px 0px 0px 5px;">
+										<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
+										<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
+										<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
+										<input type='hidden' name='defaultoverride' value='1' />
+										<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
+										<input type="submit" name="submitaction" value="Rebuild List" onclick="changeOptionFormAction('checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>','_self');" />
+										<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Download Checklist">
+											<input type="image" name="dllist" value="Download List" src="../images/dl.png" onclick="changeOptionFormAction('checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>','_self');" />
+										</div>
+										<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Print in Browser">
+											<input type="image" name="printlist" value="Print List" src="../images/print.png" onclick="changeOptionFormAction('checklist.php','_blank');" />
+										</div>
+										<div class="button" id="wordicondiv" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;<?php echo ($showImages?'display:none;':''); ?>' title="Export to DOCX">
+											<input type="image" name="exportdoc" value="Export to DOCX" src="../images/wordicon.png" onclick="changeOptionFormAction('defaultchecklistexport.php','_self');" />
+										</div>
+									</div>
+								</fieldset>
+							</form>
+						</div>
 						<?php 
 						if($clValue && $isEditor){
 							?>
-							<div class="editspp" style="display:<?php echo ($editMode?'block':'none'); ?>;width:250px;margin-top:10px;">
+							<div class="editspp" style="display:<?php echo ($editMode?'block':'none'); ?>;width:250px;height:460px">
 								<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 									<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 										<legend><b><?php echo $LANG['NEWSPECIES'];?></b></legend>
@@ -508,7 +510,6 @@ if($clValue || $dynClid){
 					}
 					$prevfam = ''; 
 					if($showImages){
-						echo '<div style="clear:both;">&nbsp;</div>';
 						foreach($taxaArray as $tid => $sppArr){
 							$family = $sppArr['family'];
 							$tu = (array_key_exists('tnurl',$sppArr)?$sppArr['tnurl']:'');
@@ -539,6 +540,15 @@ if($clValue || $dynClid){
 									if(!$printMode) echo '<a href="'.$spUrl.'" target="_blank">'; 
 									echo '<b>'.$sppArr['sciname'].'</b>';
 									if(!$printMode) echo '</a>';
+									if(!$printMode){
+										?>
+										<span class="editspp" style="display:<?php echo ($editMode?'inline':'none'); ?>;">
+											<a href="#" onclick="return openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clid; ?>','editorwindow');">
+												<img src='../images/edit.png' style='width:13px;' title='edit details' />
+											</a>
+										</span>
+										<?php
+									}
 									if(array_key_exists('vern',$sppArr)){
 										echo "<div style='font-weight:bold;'>".$sppArr["vern"]."</div>";
 									}
