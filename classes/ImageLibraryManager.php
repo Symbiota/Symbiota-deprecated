@@ -1,28 +1,29 @@
 <?php 
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/SearchManager.php');
+include_once($SERVER_ROOT.'/classes/SearchManager.php');
 
 class ImageLibraryManager extends SearchManager {
 
-    private $searchTermsArr = Array();
-    private $recordCount = 0;
+	private $searchTermsArr = Array();
+	private $recordCount = 0;
 	private $tidFocus;
 	private $collArrIndex = 0;
 	private $sqlWhere = '';
 
 	function __construct() {
-	    parent::__construct();
-	    if(array_key_exists('TID_FOCUS', $GLOBALS) && preg_match('/^[\d,]+$/', $GLOBALS['TID_FOCUS'])){
+		parent::__construct();
+		if(array_key_exists('TID_FOCUS', $GLOBALS) && preg_match('/^[\d,]+$/', $GLOBALS['TID_FOCUS'])){
 			$this->tidFocus = $GLOBALS['TID_FOCUS'];
 		}
 	}
 
 	function __destruct(){
-	    parent::__destruct();
+		parent::__destruct();
 	}
 
- 	public function getFamilyList(){
- 		$returnArray = Array();
+	//Image browser functions
+	public function getFamilyList(){
+		$returnArray = Array();
 		$sql = 'SELECT DISTINCT ts.Family ';
 		$sql .= $this->getImageSql();
 		$sql .= 'AND (ts.Family Is Not Null) ';
@@ -30,9 +31,9 @@ class ImageLibraryManager extends SearchManager {
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$returnArray[] = $row->Family;
-    	}
-    	$result->free();
-    	sort($returnArray);
+		}
+		$result->free();
+		sort($returnArray);
 		return $returnArray;
 	}
 
@@ -70,10 +71,10 @@ class ImageLibraryManager extends SearchManager {
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$retArr[$row->tid] = $row->SciName;
-	    }
-	    $result->free();
-    	asort($retArr);
-	    return $retArr;
+		}
+		$result->free();
+		asort($retArr);
+		return $retArr;
 	}
 	
 	private function getImageSql(){
@@ -226,19 +227,19 @@ class ImageLibraryManager extends SearchManager {
 						</a>
 					</td>
 					<td style="padding-top:8px;">
-			    		<span style='text-decoration:none;color:black;font-size:14px;font-weight:bold;'>
-				    		<a href = '../collections/misc/collprofiles.php?catid=<?php echo $catid; ?>' target="_blank" ><?php echo $name; ?></a>
-				    	</span>
+						<span style='text-decoration:none;color:black;font-size:14px;font-weight:bold;'>
+							<a href = '../collections/misc/collprofiles.php?catid=<?php echo $catid; ?>' target="_blank" ><?php echo $name; ?></a>
+						</span>
 					</td>
 				</tr>
 				<tr>
 					<td colspan="3">
 						<div id="cat-<?php echo $idStr; ?>" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset;">
 							<table>
-						    	<?php 
+								<?php 
 								foreach($catArr as $collid => $collName2){
-						    		?>
-						    		<tr>
+									?>
+									<tr>
 										<td>
 											<?php 
 											if($collName2["icon"]){
@@ -247,27 +248,27 @@ class ImageLibraryManager extends SearchManager {
 												<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
 													<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
 												</a>
-										    	<?php
+												<?php
 											}
-										    ?>
+											?>
 										</td>
 										<td style="padding:6px">
-								    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> /> 
+											<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> /> 
 										</td>
 										<td style="padding:6px">
-								    		<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
-								    			<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
-								    		</a>
-								    		<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
-								    			more info
-								    		</a>
+											<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
+												<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
+											</a>
+											<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
+												more info
+											</a>
 										</td>
 									</tr>
-						    		<?php 
-					    			$collCnt++; 
-						    	}
-						    	?>
-						    </table>
+									<?php 
+									$collCnt++; 
+								}
+								?>
+							</table>
 						</div>
 					</td>
 				</tr>
@@ -293,22 +294,22 @@ class ImageLibraryManager extends SearchManager {
 							<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
 								<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
 							</a>
-					    	<?php
+							<?php
 						}
-					    ?>
-					    &nbsp;
+						?>
+						&nbsp;
 					</td>
 					<td style="padding:6px;">
-			    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> /> 
+						<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> /> 
 					</td>
 					<td style="padding:6px">
-			    		<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
-			    			<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
-			    		</a>
-			    		<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
-			    			more info
-			    		</a>
-				    </td>
+						<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
+							<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
+						</a>
+						<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
+							more info
+						</a>
+					</td>
 				</tr>
 				<?php
 				$collCnt++;
@@ -393,28 +394,6 @@ class ImageLibraryManager extends SearchManager {
 				$this->searchTermsArr["taxa"] = $taxaStr;
 			}
 		}
-		$this->searchTermsArr["country"] = '';
-		if(array_key_exists("countrystr",$_REQUEST)){
-			$country = $this->cleanInStr($_REQUEST["countrystr"]);
-			if($country){
-				$str = str_replace(",",";",$country);
-				if(stripos($str, "USA") !== false && stripos($str, "United States") === false){
-					$str .= ";United States";
-				}
-				elseif(stripos($str, "United States") !== false && stripos($str, "USA") === false){
-					$str .= ";USA";
-				}
-				$this->searchTermsArr["country"] = $str;
-			}
-		}
-		$this->searchTermsArr["state"] = '';
-		if(array_key_exists("statestr",$_REQUEST)){
-			$state = $this->cleanInStr($_REQUEST["statestr"]);
-			if($state){
-				$str = str_replace(",",";",$state);
-				$this->searchTermsArr["state"] = $str;
-			}
-		}
 		$this->searchTermsArr["phuid"] = '';
 		if(array_key_exists("phuidstr",$_REQUEST)){
 			$phuid = $this->cleanInStr($_REQUEST["phuidstr"]);
@@ -442,13 +421,6 @@ class ImageLibraryManager extends SearchManager {
 			$imagecount = $this->cleanInStr($_REQUEST["imagecount"]);
 			if($imagecount){
 				$this->searchTermsArr["imagecount"] = $imagecount;
-			}
-		}
-		$this->searchTermsArr["imagedisplay"] = '';
-		if(array_key_exists("imagedisplay",$_REQUEST)){
-			$imagedisplay = $this->cleanInStr($_REQUEST["imagedisplay"]);
-			if($imagedisplay){
-				$this->searchTermsArr["imagedisplay"] = $imagedisplay;
 			}
 		}
 		$this->searchTermsArr["imagetype"] = '';
@@ -489,17 +461,16 @@ class ImageLibraryManager extends SearchManager {
 				}
 			}
 		}
-		
-		if(array_key_exists("taxa",$this->searchTermsArr)&&$this->searchTermsArr["taxa"]){
-		    $useThes           = (array_key_exists("usethes",$this->searchTermsArr)?$this->searchTermsArr["usethes"]:0);
-		    $baseSearchType    = $this->searchTermsArr["taxontype"];
-		    $taxaSearchTerms   = explode(";",trim($this->searchTermsArr["taxa"]));
-		    $this->setTaxaArr($useThes,$baseSearchType,$taxaSearchTerms);
 
-			//Build sql
+		if(array_key_exists("taxa",$this->searchTermsArr)&&$this->searchTermsArr["taxa"]){
+			$useThes		   = (array_key_exists("usethes",$this->searchTermsArr)?$this->searchTermsArr["usethes"]:0);
+			$baseSearchType	= $this->searchTermsArr["taxontype"];
+			$taxaSearchTerms   = explode(";",trim($this->searchTermsArr["taxa"]));
+			$this->setTaxaArr($useThes,$baseSearchType,$taxaSearchTerms);
+
 			$sqlWhereTaxa = "";
 			foreach($this->taxaArr as $key => $valueArray){
-			    $taxaSearchType = $valueArray['taxontype'];
+				$taxaSearchType = $valueArray['taxontype'];
 				if($taxaSearchType == TaxaSearchType::FAMILY_ONLY){
 					$rs1 = $this->conn->query("SELECT tid, rankid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
@@ -524,7 +495,7 @@ class ImageLibraryManager extends SearchManager {
 					}
 				}
 				else{
-					//Is a common name search
+					//Common name search
 					$famArr = array();
 					if(array_key_exists("families",$valueArray)){
 						$famArr = $valueArray["families"];
@@ -554,23 +525,6 @@ class ImageLibraryManager extends SearchManager {
 		}
 		elseif($this->tidFocus){
 			$sqlWhere .= 'AND (e.parenttid IN('.$this->tidFocus.')) AND (e.taxauthid = 1) ';
-		}
-		
-		if(array_key_exists("country",$this->searchTermsArr)&&$this->searchTermsArr["country"]){
-			$countryArr = explode(";",$this->searchTermsArr["country"]);
-			$tempArr = Array();
-			foreach($countryArr as $value){
-				$tempArr[] = "(o.Country = '".trim($value)."')";
-			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
-		}
-		if(array_key_exists("state",$this->searchTermsArr)&&$this->searchTermsArr["state"]){
-			$stateAr = explode(";",$this->searchTermsArr["state"]);
-			$tempArr = Array();
-			foreach($stateAr as $value){
-				$tempArr[] = "(o.StateProvince LIKE '".trim($value)."%')";
-			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 		}
 		if(array_key_exists("phuid",$this->searchTermsArr)&&$this->searchTermsArr["phuid"]){
 			$sqlWhere .= "AND (i.photographeruid IN(".$this->searchTermsArr["phuid"].")) ";
@@ -671,7 +625,7 @@ class ImageLibraryManager extends SearchManager {
 			}
 			$sql .= $this->getSqlBase(false);
 			$sql .= $this->sqlWhere;
-			//echo "<div>Count sql: ".$sql."</div>";
+			echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->recordCount = $row->cnt;
@@ -715,26 +669,71 @@ class ImageLibraryManager extends SearchManager {
 		return $sql;
 	}
 
+	//Listing functions
+	public function getTaxaSuggest($queryString, $type = 'sciname'){
+		$retArr = array();
+		$sql = '';
+		if($type == 'sciname'){
+			$sql = 'SELECT tid, sciname FROM taxa WHERE sciname LIKE "'.$queryString.'%" LIMIT 10';
+		}
+		else{
+			$sql = 'SELECT tid, vernacularname FROM taxavernaculars WHERE VernacularName LIKE "'.$queryString.'%" LIMIT 10 ';
+		}
+		$rs = $con->query($sql);
+		while ($r = $rs->fetch_object()) {
+			$retArr[$r->tid] = htmlentities($r->sciname);
+		}
+		$rs->free();
+		return $retArr;
+	}
+	
+	public function getPhotographerSuggest($queryString){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT u.uid, CONCAT_WS(" ",u.firstname,u.lastname) AS fullname '.
+			'FROM images i INNER JOIN users u ON i.photographeruid = u.uid '.
+			'WHERE u.firstname LIKE "'.$queryString.'%" OR u.lastname LIKE "'.$queryString.'%" '.
+			'ORDER BY fullname LIMIT 10 ';
+		$rs = $this->conn->query($sql);
+		while ($r = $rs->fetch_object()) {
+			$retArr[$r->uid] = htmlentities($r->fullname);
+		}
+		$rs->free();
+		return $retArr;
+	}
+
 	public function getTagArr(){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT keyvalue '. 
-			'FROM imagetag '.
-			'ORDER BY keyvalue ';
+		$sql = 'SELECT DISTINCT keyvalue FROM imagetag ORDER BY keyvalue ';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[] = $r->keyvalue;
 			}
 		}
+		$rs->free();
 		return $retArr;
 	}
 	
+	public function getKeywordSuggest($queryString){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT keyword FROM imagekeywords WHERE keyword LIKE "'.$queryString.'%" LIMIT 10 ';
+		$rs = $this->conn->query($sql);
+		$i = 0;
+		while ($r = $rs->fetch_object()) {
+			$retArr[$i]['name'] = htmlentities($r->keyword);
+			$i++;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	//Setters and getters
 	public function setSearchTermsArr($stArr){
-    	$this->searchTermsArr = $stArr;
-    }
+		$this->searchTermsArr = $stArr;
+	}
 	
 	public function getSearchTermsArr(){
-    	return $this->searchTermsArr;
-    }
+		return $this->searchTermsArr;
+	}
 	
 	public function getRecordCnt(){
 		return $this->recordCount;

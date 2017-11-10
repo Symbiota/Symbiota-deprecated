@@ -30,30 +30,6 @@
 				$i++;
 			}
 		}
-		if($type == "country"){
-			$sql = "SELECT DISTINCT country ".
-				"FROM omoccurrences ".
-				"WHERE country LIKE '".$queryString."%' ".
-				"LIMIT 10 ";
-			$result = $con->query($sql);
-			$i = 0;
-			while ($row = $result->fetch_object()) {
-				$returnArr[$i]['name'] = htmlentities($row->country);
-				$i++;
-			}
-		}
-		if($type == "state"){
-			$sql = "SELECT DISTINCT stateProvince ".
-				"FROM omoccurrences ".
-				"WHERE stateProvince LIKE '".$queryString."%' ".
-				"LIMIT 10 ";
-			$result = $con->query($sql);
-			$i = 0;
-			while ($row = $result->fetch_object()) {
-				$returnArr[$i]['name'] = htmlentities($row->stateProvince);
-				$i++;
-			}
-		}
 		if($type == "photographer"){
 			$retArrRow = Array();
 			$sql = "SELECT DISTINCT u.uid, CONCAT_WS(' ',u.firstname,u.lastname) AS fullname ".

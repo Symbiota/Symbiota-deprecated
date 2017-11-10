@@ -32,7 +32,7 @@ $(document).ready(function() {
 				}, response );
 				this.autocomplete_stage = 0;
 			},$('#taxa')[0]),
-			autoFocus: true,
+			//autoFocus: true,
 			search: function() {
 				// custom minLength
 				this.autocomplete_stage = 2;
@@ -133,7 +133,7 @@ function setHarvestParamsForm(){
 		var frm = document.harvestparams;
 		
 		if(typeof urlVar.usethes !== 'undefined' && (urlVar.usethes == "" || urlVar.usethes == "0")){frm.usethes.checked = false;}
-		if(urlVar.taxontype){frm.type.value = urlVar.taxontype;}
+		if(urlVar.taxontype){frm.taxontype.value = urlVar.taxontype;}
 		if(urlVar.taxa){frm.taxa.value = urlVar.taxa;}
 		if(urlVar.country){
 			countryStr = urlVar.country;

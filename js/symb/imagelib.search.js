@@ -13,9 +13,6 @@ jQuery(document).ready(function($) {
 			},
 			formatItem: function (data) {
 				return data.name;
-			},
-			onSelect: function (){
-				$("#imagedisplay").val("thumbnail");
 			}
 		}
 	});
@@ -25,30 +22,6 @@ jQuery(document).ready(function($) {
 			url: 'rpc/imagesearchautofill.php',
 			data: {
 				t: 'common'
-			},
-			formatItem: function (data) {
-				return data.name;
-			}
-		}
-	});
-	
-	$('#country').manifest({
-		marcoPolo: {
-			url: 'rpc/imagesearchautofill.php',
-			data: {
-				t: 'country'
-			},
-			formatItem: function (data) {
-				return data.name;
-			}
-		}
-	});
-	
-	$('#state').manifest({
-		marcoPolo: {
-			url: 'rpc/imagesearchautofill.php',
-			data: {
-				t: 'state'
 			},
 			formatItem: function (data) {
 				return data.name;
@@ -70,71 +43,7 @@ jQuery(document).ready(function($) {
 });
 
 function submitImageForm(){
-	var taxavals = $('#taxa').manifest('values');
-	var commonvals = $('#common').manifest('values');
-	var countryvals = $('#country').manifest('values');
-	var statevals = $('#state').manifest('values');
-	var keywordsvals = $('#keywords').manifest('values');
-	var criteria = 0;
-	if(taxavals.length > 0){
-		var taxastr = taxavals.join();
-		document.getElementById('taxastr').value = taxastr;
-		criteria = 1;
-	}
-	else if(commonvals.length > 0){
-		var taxastr = commonvals.join();
-		document.getElementById('taxastr').value = taxastr;
-		criteria = 1;
-	}
-	else{
-		document.getElementById('taxastr').value = '';
-	}
-	if(countryvals.length > 0){
-		var countrystr = countryvals.join();
-		document.getElementById('countrystr').value = countrystr;
-		criteria = 1;
-	}
-	else{
-		document.getElementById('countrystr').value = '';
-	}
-	if(statevals.length > 0){
-		var statestr = statevals.join();
-		document.getElementById('statestr').value = statestr;
-		criteria = 1;
-	}
-	else{
-		document.getElementById('statestr').value = '';
-	}
-	if(keywordsvals.length > 0){
-		var keywordstr = keywordsvals.join();
-		document.getElementById('keywordstr').value = keywordstr;
-		criteria = 1;
-	}
-	else{
-		document.getElementById('keywordstr').value = '';
-	}
-	if(phArr.length > 0){
-		var phids = [];
-		for(i = 0; i < phArr.length; i++){
-			phids.push(phArr[i].id);
-		}
-		var phidstr = phids.join();
-		document.getElementById('phuidstr').value = phidstr;
-		document.getElementById('phjson').value = JSON.stringify(phArr);
-		criteria = 1;
-	}
-	else{
-		document.getElementById('phuidstr').value = '';
-		document.getElementById('phjson').value = '';
-	}
 	return verifyCollForm(document.getElementById('imagesearchform'));
-}
-
-function imageDisplayChanged(f){
-	if(f.imagedisplay.value == "taxalist" && $('#taxa').manifest('values') != ""){
-		f.imagedisplay.value = "thumbnail";
-		alert("Only the thumbnail display is allowed when searching for a scientific name");
-	}
 }
 
 function toggle(target){
@@ -151,38 +60,6 @@ function toggle(target){
 	 	else {
 	 		ele.style.display="none";
 	 	}
-	}
-}
-
-function checkTaxonType(){
-	var newtaxontype = document.getElementById('taxontype').value;
-	var oldtaxontype = document.getElementById('taxtp').value;
-	if(newtaxontype==1||newtaxontype==2){
-		if(oldtaxontype==3){
-			var vals = $('#common').manifest('values');
-			for (i = 0; i < vals.length; i++) {
-				$('#common').manifest('remove', i);
-			}
-			document.getElementById('thesdiv').style.display = "block";
-			document.getElementById('commonbox').style.display = "none";
-			document.getElementById('taxabox').style.display = "block";
-			document.getElementById('taxtp').value = newtaxontype;
-		}
-	
-	}
-	if(newtaxontype==3){
-		if(oldtaxontype==1||oldtaxontype==2){
-			var vals = $('#taxa').manifest('values');
-			for (i = 0; i < vals.length; i++) {
-				$('#taxa').manifest('remove', i);
-			}
-			document.getElementById('commonbox').style.display = "block";
-			document.getElementById('taxabox').style.display = "none";
-			document.getElementById('thesdiv').style.display = "none";
-			document.getElementById('thes').checked = false;
-			document.getElementById('taxtp').value = newtaxontype;
-		}
-	
 	}
 }
 
@@ -350,34 +227,4 @@ function openImagePopup(imageId){
 	newWindow = window.open("imgdetails.php?imgid="+imageId,'image'+imageId,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
-}
-
-function changeImagePage(taxonIn,viewIn,starrIn,pageIn){
-	document.getElementById("imagebox").innerHTML = "<p>Loading...</p>";
-	
-	$.ajax( {
-		url: "rpc/changeimagepage.php",
-		method: "POST",
-		data: { 
-			starr: starrIn, 
-			page: pageIn, 
-			view: viewIn,
-			taxon: taxonIn
-		},
-		success: function( data ) {
-			var newImageList = JSON.parse(data);
-			document.getElementById("imagebox").innerHTML = newImageList;
-			if(viewIn == 'thumb'){
-				document.getElementById("imagetab").innerHTML = 'Images';
-			}
-			else{
-				document.getElementById("imagetab").innerHTML = 'Taxa List';
-			}
-        }
-	});
-
-}
-
-function changeFamily(taxon){
-	selectedFamily = taxon;
 }
