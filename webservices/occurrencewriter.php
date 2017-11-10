@@ -15,7 +15,7 @@
 
 date_default_timezone_set('America/Phoenix');
 include_once('../config/symbini.php');
-require_once($SERVER_ROOT.'/classes/WsOccurEditor.php');
+require_once($SERVER_ROOT.'/classes/APIOccurEditor.php');
 
 $occid = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
 $recordID = array_key_exists('recordid',$_REQUEST)?$_REQUEST['recordid']:'';
@@ -31,7 +31,7 @@ if(!preg_match('/^[\d,]+$/', $occid)) $occid = 0;
 $recordID = preg_replace("/[^A-Za-z0-9\-]/","",$recordID);
 $securityKey = preg_replace("/[^A-Za-z0-9\-]/","",$securityKey);
 
-$servManager = new WsOccurEditor();
+$servManager = new APIOccurEditor();
 if(!$occid && !$recordID)
 	exit('{"Result":{"Failure":[{"Message":"Occurrence identifier is null"}]}}');
 	

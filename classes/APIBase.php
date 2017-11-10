@@ -1,9 +1,9 @@
 <?php
 require_once($SERVER_ROOT.'/classes/Manager.php');
 
-class WebServiceBase extends Manager{
+class APIBase extends Manager{
 
-	function __construct($id,$conType) {
+	function __construct($id=null,$conType=null) {
 		parent::__construct($id,$conType);
 		$this->setLogFH('../content/logs/occurrenceWriter_'.date('Ymd').'.log');
 	}

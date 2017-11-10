@@ -1,8 +1,8 @@
 <?php
-require_once($SERVER_ROOT.'/classes/WebServiceBase.php');
+require_once($SERVER_ROOT.'/classes/APIBase.php');
 require_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
 
-class WsOccurEditor extends WebServiceBase{
+class APIOccurEditor extends APIBase{
 
 	private $occidArr = array();
 	private $dwcArr = array();
