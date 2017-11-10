@@ -6,7 +6,7 @@ include_once($SERVER_ROOT.'/classes/SearchManager.php');
 class OccurrenceManager extends SearchManager {
 
 	protected $searchTermArr = Array();
-	protected $localSearchArr = Array();
+	protected $displaySearchArr = Array();
 	protected $reset = 0;
 	private $clName;
 	private $collArrIndex = 0;
@@ -78,19 +78,37 @@ class OccurrenceManager extends SearchManager {
 
 			//Build sql
 			$sqlWhereTaxa = "";
-			foreach($this->taxaArr as $key => $valueArray){
-			    $tempTaxonType = $valueArray['taxontype'];
-				if($tempTaxonType== TaxaSearchType::HIGHER_TAXONOMY){
+			foreach($this->taxaArr as $searchTaxon => $valueArray){
+				$tempTaxonType = $valueArray['taxontype'];
+				if($tempTaxonType != TaxaSearchType::COMMON_NAME){
+					$sql = 'SELECT sciname, tid, rankid FROM taxa WHERE sciname IN("'.$this->cleanInStr($searchTaxon).'")';
+					$rs = $this->conn->query($sql);
+					while($r = $rs->fetch_object()){
+						$this->taxaArr[$r->sciname]['tid'][] = $r->tid;
+						$this->taxaArr[$r->sciname]['rankid'] = $r->rankid;
+						if($tempTaxonType == TaxaSearchType::SCIENTIFIC_NAME){
+							if($r->rankid == 140){
+								$tempTaxonType= TaxaSearchType::FAMILY_ONLY;
+							}elseif($r->rankid > 179){
+								$tempTaxonType= TaxaSearchType::SPECIES_NAME_ONLY;
+							}elseif($r->rankid < 180){
+								$tempTaxonType= TaxaSearchType::HIGHER_TAXONOMY;
+							}
+						}
+					}
+					$rs->free();
+				}
+				if($tempTaxonType == TaxaSearchType::HIGHER_TAXONOMY){
 					//Class, order, or other higher rank
 					if(isset($valueArray['tid'])){
-						$rs1 = $this->conn->query('SELECT tidaccepted FROM taxstatus WHERE (tid = '.$valueArray['tid'].')');
+						$rs1 = $this->conn->query('SELECT tidaccepted FROM taxstatus WHERE (tid = '.implode(',',$valueArray['tid']).')');
 						if($r1 = $rs1->fetch_object()){
 							$sqlWhereTaxa = 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE taxauthid = 1 AND (parenttid IN('.$r1->tidaccepted.') OR (tid = '.$r1->tidaccepted.')))) ';
 						}
 					}
 				}
 				else{
-					if($tempTaxonType== TaxaSearchType::COMMON_NAME){
+					if($tempTaxonType == TaxaSearchType::COMMON_NAME){
 						//Common name search
 						$famArr = array();
 						if(array_key_exists("families",$valueArray)){
@@ -103,7 +121,7 @@ class OccurrenceManager extends SearchManager {
 								'WHERE t.rankid = 140 AND e.taxauthid = 1 AND e.parenttid IN('.implode(',',$tidArr).')';
 							$rs = $this->conn->query($sql);
 							while($r = $rs->fetch_object()){
-								$famArr[] = $r->family;
+								$famArr[] = $r->sciname;
 							}
 						}
 						if($famArr){
@@ -115,20 +133,22 @@ class OccurrenceManager extends SearchManager {
 								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
 							}
 						}
-						//echo $sqlWhereTaxa; exit;
 					}
 					else{
-						if($tempTaxonType== TaxaSearchType::FAMILY_ONLY || ($tempTaxonType== TaxaSearchType::FAMILY_GENUS_OR_SPECIES && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){
-							$sqlWhereTaxa .= "OR (o.family = '".$key."') ";
+						if($tempTaxonType == TaxaSearchType::FAMILY_ONLY || ($tempTaxonType == TaxaSearchType::SCIENTIFIC_NAME && (strtolower(substr($searchTaxon,-5)) == "aceae" || strtolower(substr($searchTaxon,-4)) == "idae"))){
+							$sqlWhereTaxa .= "OR (o.family = '".$searchTaxon."') ";
 						}
-						if($tempTaxonType== TaxaSearchType::SPECIES_NAME_ONLY || ($tempTaxonType== TaxaSearchType::FAMILY_GENUS_OR_SPECIES && strtolower(substr($key,-5)) != "aceae" && strtolower(substr($key,-4)) != "idae")){
-							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$key."%') ";
+						if($tempTaxonType == TaxaSearchType::SPECIES_NAME_ONLY || ($tempTaxonType == TaxaSearchType::SCIENTIFIC_NAME && strtolower(substr($searchTaxon,-5)) != "aceae" && strtolower(substr($searchTaxon,-4)) != "idae")){
+							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$searchTaxon."%') ";
+						}
+						if(array_key_exists("tid",$valueArray)){
+							$sqlWhereTaxa .= "OR (o.tidinterpreted IN(".implode(',',$valueArray['tid']).")) ";
 						}
 					}
 					if(array_key_exists("synonyms",$valueArray)){
 						$synArr = $valueArray["synonyms"];
 						if($synArr){
-							if($tempTaxonType== TaxaSearchType::FAMILY_GENUS_OR_SPECIES || $tempTaxonType== TaxaSearchType::FAMILY_ONLY || $tempTaxonType== TaxaSearchType::COMMON_NAME){
+							if($tempTaxonType== TaxaSearchType::SCIENTIFIC_NAME || $tempTaxonType== TaxaSearchType::FAMILY_ONLY || $tempTaxonType== TaxaSearchType::COMMON_NAME){
 								foreach($synArr as $synTid => $sciName){
 									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
 										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
@@ -137,19 +157,6 @@ class OccurrenceManager extends SearchManager {
 							}
 							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',array_keys($synArr)).')) ';
 						}
-						/*
-						foreach($synArr as $sciName){
-							if($taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES || $taxaSearchType == TaxaSearchType::FAMILY_ONLY || $taxaSearchType == TaxaSearchType::COMMON_NAME){
-								$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
-							}
-							if($taxaSearchType == TaxaSearchType::FAMILY_ONLY){
-								$sqlWhereTaxa .= "OR (o.sciname = '".$sciName."') ";
-							}
-							else{
-								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
-							}
-						}
-						*/
 					}
 				}
 			}
@@ -169,7 +176,7 @@ class OccurrenceManager extends SearchManager {
 				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
-			$this->localSearchArr[] = implode(' OR ',$countryArr);
+			$this->displaySearchArr[] = implode(' OR ',$countryArr);
 		}
 		if(array_key_exists("state",$this->searchTermArr)){
 			$searchStr = str_replace("%apos;","'",$this->searchTermArr["state"]);
@@ -185,7 +192,7 @@ class OccurrenceManager extends SearchManager {
 				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
-			$this->localSearchArr[] = implode(' OR ',$stateAr);
+			$this->displaySearchArr[] = implode(' OR ',$stateAr);
 		}
 		if(array_key_exists("county",$this->searchTermArr)){
 			$searchStr = str_replace("%apos;","'",$this->searchTermArr["county"]);
@@ -202,11 +209,11 @@ class OccurrenceManager extends SearchManager {
 				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
-			$this->localSearchArr[] = implode(' OR ',$countyArr);
+			$this->displaySearchArr[] = implode(' OR ',$countyArr);
 		}
 		if(array_key_exists("local",$this->searchTermArr)){
 			$searchStr = str_replace("%apos;","'",$this->searchTermArr["local"]);
-			$localArr = explode(";",$searchStr);
+			$localArr = explode(", ",$searchStr);
 			$tempArr = Array();
 			foreach($localArr as $k => $value){
 				$value = trim($value);
@@ -224,7 +231,7 @@ class OccurrenceManager extends SearchManager {
 				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
-			$this->localSearchArr[] = implode(' OR ',$localArr);
+			$this->displaySearchArr[] = implode(' OR ',$localArr);
 		}
 		if(array_key_exists("elevlow",$this->searchTermArr) || array_key_exists("elevhigh",$this->searchTermArr)){
 			$elevlow = -200;
@@ -235,7 +242,7 @@ class OccurrenceManager extends SearchManager {
 						 "	  ( minimumElevationInMeters >= $elevlow AND maximumElevationInMeters <= $elevhigh ) OR " .
 						 "	  ( maximumElevationInMeters is null AND minimumElevationInMeters >= $elevlow AND minimumElevationInMeters <= $elevhigh ) ".
 						 "	) ";
-			$this->localSearchArr[] = 'Elev: '.$elevlow.($elevhigh?' - '.$elevhigh:'');
+			$this->displaySearchArr[] = 'Elev: '.$elevlow.($elevhigh?' - '.$elevhigh:'');
 		}
 		if(array_key_exists("llbound",$this->searchTermArr)){
 			$llboundArr = explode(";",$this->searchTermArr["llbound"]);
@@ -245,7 +252,7 @@ class OccurrenceManager extends SearchManager {
 				$lLng = (substr($llboundArr[2],-1) == 'E'?1:-1)*substr($llboundArr[2],0,strlen($llboundArr[2])-1);
 				$rLng = (substr($llboundArr[3],-1) == 'E'?1:-1)*substr($llboundArr[3],0,strlen($llboundArr[3])-1);
 				$sqlWhere .= 'AND (o.DecimalLatitude BETWEEN '.$bLat.' AND '.$uLat.' AND o.DecimalLongitude BETWEEN '.$lLng.' AND '.$rLng.') ';
-				$this->localSearchArr[] = 'Lat: '.$llboundArr[1].' - '.$llboundArr[0].' Long: '.$llboundArr[2].' - '.$llboundArr[3];
+				$this->displaySearchArr[] = 'Lat: '.$llboundArr[1].' - '.$llboundArr[0].' Long: '.$llboundArr[2].' - '.$llboundArr[3];
 			}
 		}
 		if(array_key_exists("llpoint",$this->searchTermArr)){
@@ -263,7 +270,7 @@ class OccurrenceManager extends SearchManager {
 				$sqlWhere .= "AND ((o.DecimalLatitude BETWEEN ".$lat1." AND ".$lat2.") AND ".
 					"(o.DecimalLongitude BETWEEN ".$long1." AND ".$long2.")) ";
 			}
-			$this->localSearchArr[] = $pointArr[0]." ".$pointArr[1]." +- ".$pointArr[2].$pointArr[3];
+			$this->displaySearchArr[] = $pointArr[0]." ".$pointArr[1]." +- ".$pointArr[2].$pointArr[3];
 		}
 		if(array_key_exists("collector",$this->searchTermArr)){
 			$searchStr = str_replace("%apos;","'",$this->searchTermArr["collector"]);
@@ -300,7 +307,7 @@ class OccurrenceManager extends SearchManager {
 				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
-			$this->localSearchArr[] = implode(', ',$collectorArr);
+			$this->displaySearchArr[] = implode(', ',$collectorArr);
 		}
 		if(array_key_exists("collnum",$this->searchTermArr)){
 			$collNumArr = explode(";",$this->searchTermArr["collnum"]);
@@ -327,7 +334,7 @@ class OccurrenceManager extends SearchManager {
 			}
 			if($rnWhere){
 				$sqlWhere .= "AND (".substr($rnWhere,3).") ";
-				$this->localSearchArr[] = implode(", ",$collNumArr);
+				$this->displaySearchArr[] = implode(", ",$collNumArr);
 			}
 		}
 		if(array_key_exists('eventdate1',$this->searchTermArr)){
@@ -346,7 +353,7 @@ class OccurrenceManager extends SearchManager {
 			}
 			if($dateArr[0] == 'NULL'){
 				$sqlWhere .= 'AND (o.eventdate IS NULL) ';
-				$this->localSearchArr[] = 'Date IS NULL';
+				$this->displaySearchArr[] = 'Date IS NULL';
 			}
 			elseif($eDate1 = $this->formatDate($dateArr[0])){
 				$eDate2 = (count($dateArr)>1?$this->formatDate($dateArr[1]):'');
@@ -364,7 +371,7 @@ class OccurrenceManager extends SearchManager {
 						$sqlWhere .= 'AND (o.eventdate = "'.$eDate1.'") ';
 					}
 				}
-				$this->localSearchArr[] = $this->searchTermArr['eventdate1'].(isset($this->searchTermArr['eventdate2'])?' to '.$this->searchTermArr['eventdate2']:'');
+				$this->displaySearchArr[] = $this->searchTermArr['eventdate1'].(isset($this->searchTermArr['eventdate2'])?' to '.$this->searchTermArr['eventdate2']:'');
 			}
 		}
 		if(array_key_exists('catnum',$this->searchTermArr)){
@@ -419,19 +426,19 @@ class OccurrenceManager extends SearchManager {
 				}
 			}
 			$sqlWhere .= 'AND ('.substr($catWhere,3).') ';
-			$this->localSearchArr[] = $this->searchTermArr['catnum'];
+			$this->displaySearchArr[] = $this->searchTermArr['catnum'];
 		}
 		if(array_key_exists("typestatus",$this->searchTermArr)){
 			$sqlWhere .= "AND (o.typestatus IS NOT NULL) ";
-			$this->localSearchArr[] = 'is type';
+			$this->displaySearchArr[] = 'is type';
 		}
 		if(array_key_exists("hasimages",$this->searchTermArr)){
 			$sqlWhere .= "AND (o.occid IN(SELECT occid FROM images)) ";
-			$this->localSearchArr[] = 'has images';
+			$this->displaySearchArr[] = 'has images';
 		}
 		if(array_key_exists("hasgenetic",$this->searchTermArr)){
 			$sqlWhere .= "AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ";
-			$this->localSearchArr[] = 'has genetic data';
+			$this->displaySearchArr[] = 'has genetic data';
 		}
 		if(array_key_exists("targetclid",$this->searchTermArr)){
 			$clid = $this->searchTermArr["targetclid"];
@@ -442,7 +449,7 @@ class OccurrenceManager extends SearchManager {
 				$this->clName = $voucherManager->getClName();
 				$sqlWhere .= 'AND ('.$voucherManager->getSqlFrag().') '.
 					'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid = '.$clid.')) ';
-				$this->localSearchArr[] = $voucherManager->getQueryVariableStr();
+				$this->displaySearchArr[] = $voucherManager->getQueryVariableStr();
 			}
 		}
 		$retStr = '';
@@ -453,7 +460,7 @@ class OccurrenceManager extends SearchManager {
 			//Make the sql valid, but return nothing
 			$retStr = 'WHERE o.occid IS NULL ';
 		}
-		//echo $retStr;
+		echo $retStr;
 		return $retStr;
 	}
 	
@@ -797,22 +804,23 @@ class OccurrenceManager extends SearchManager {
 		$returnArr = Array();
 		if($this->taxaArr){
 			foreach($this->taxaArr as $taxonName => $taxonArr){
-			    $str = TaxaSearchType::anyNameSearchTag($taxonArr["taxontype"]).": ";
+			    $str = '';
+			    if($this->searchTermArr["taxontype"] == TaxaSearchType::ANY_NAME) TaxaSearchType::anyNameSearchTag($taxonArr["taxontype"]).": ";
 				$str .= $taxonName;
 				if(array_key_exists("sciname",$taxonArr)){
 					$str .= " => ".implode(",",$taxonArr["sciname"]);
 				}
 				if(array_key_exists("synonyms",$taxonArr)){
-					$str .= " (".implode(",",$taxonArr["synonyms"]).")";
+					$str .= " (".implode(", ",$taxonArr["synonyms"]).")";
 				}
 				$returnArr[] = $str;
 			}
 		}
-		return implode("; ", $returnArr);
+		return implode(", ", $returnArr);
 	}
 
 	public function getLocalSearchStr(){
-		return implode("; ", $this->localSearchArr);
+		return implode("; ", $this->displaySearchArr);
 	}
 
 	public function getTaxonAuthorityList(){

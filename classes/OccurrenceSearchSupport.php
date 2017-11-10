@@ -59,10 +59,6 @@ class OccurrenceSearchSupport{
 			    
 			    "ORDER BY snorder LIMIT 30";
 			}
-			elseif($taxonType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES){
-				// Family or species name
-				$sql = 'SELECT sciname FROM taxa WHERE sciname LIKE "'.$queryString.'%" AND rankid > 139 LIMIT 30';
-			}
 			elseif($taxonType == TaxaSearchType::FAMILY_ONLY){
 				// Family only
 				$sql = 'SELECT sciname FROM taxa WHERE sciname LIKE "'.$queryString.'%" LIMIT 30';

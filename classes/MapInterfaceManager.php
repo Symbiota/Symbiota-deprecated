@@ -140,17 +140,17 @@ class MapInterfaceManager extends SearchManager {
 						}
 					}
 					else{
-						if($taxaSearchType == TaxaSearchType::FAMILY_ONLY || ($taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){
+						if($taxaSearchType == TaxaSearchType::FAMILY_ONLY || ($taxaSearchType == TaxaSearchType::SCIENTIFIC_NAME && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){
 							$sqlWhereTaxa .= "OR (o.family = '".$key."') ";
 						}
-						if($taxaSearchType == TaxaSearchType::SPECIES_NAME_ONLY || ($taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES && strtolower(substr($key,-5)) != "aceae" && strtolower(substr($key,-4)) != "idae")){
+						if($taxaSearchType == TaxaSearchType::SPECIES_NAME_ONLY || ($taxaSearchType == TaxaSearchType::SCIENTIFIC_NAME && strtolower(substr($key,-5)) != "aceae" && strtolower(substr($key,-4)) != "idae")){
 							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$key."%') ";
 						}
 					}
 					if(array_key_exists("synonyms",$valueArray)){
 						$synArr = $valueArray["synonyms"];
 						if($synArr){
-							if($taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES || $taxaSearchType == TaxaSearchType::FAMILY_ONLY || $taxaSearchType == TaxaSearchType::COMMON_NAME){
+							if($taxaSearchType == TaxaSearchType::SCIENTIFIC_NAME || $taxaSearchType == TaxaSearchType::FAMILY_ONLY || $taxaSearchType == TaxaSearchType::COMMON_NAME){
 								foreach($synArr as $synTid => $sciName){ 
 									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
 										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
@@ -159,20 +159,6 @@ class MapInterfaceManager extends SearchManager {
 							}
 							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',array_keys($synArr)).')) ';
 						}
-						/*
-						$synArr = $valueArray["synonyms"];
-						foreach($synArr as $sciName){ 
-							if($this->taxaSearchType == TaxaSearchType::FAMILY_GENUS_OR_SPECIES || $this->taxaSearchType == TaxaSearchType::FAMILY_ONLY || $this->taxaSearchType == TaxaSearchType::COMMON_NAME) {
-								$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
-							}
-							if($this->taxaSearchType == TaxaSearchType::FAMILY_ONLY) {
-								$sqlWhereTaxa .= "OR (o.sciname = '".$sciName."') ";
-							}
-							else{
-			                    $sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
-			                }
-						}
-						*/
 					}
 				}
 			}

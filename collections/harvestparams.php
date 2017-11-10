@@ -65,18 +65,17 @@ $searchVar = $collManager->getSearchTermStr();
 			</div>
 			<div>
 				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>
-				<span style="margin-left:5px;"><input type='checkbox' name='usethes' value='1' CHECKED /><?php echo $LANG['GENERAL_TEXT_2']; ?></SPAN>
+				<span style="margin-left:5px;"><input type='checkbox' name='usethes' value='1' CHECKED /><?php echo $LANG['GENERAL_TEXT_2']; ?></span>
 			</div>
 			<div id="taxonSearch0">
 				<div>
-					<select id="taxontype" name="type">
+					<select id="taxontype" name="taxontype">
 						<option value='0'><?php echo $LANG['SELECT_1-0']; ?></option>
 						<option value='1'><?php echo $LANG['SELECT_1-1']; ?></option>
 						<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
 						<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
 						<option value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
 						<option value='5'><?php echo $LANG['SELECT_1-5']; ?></option>
-						<option value='6'><?php echo $LANG['SELECT_1-6']; ?></option>
 					</select> 
 					<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 				</div>
