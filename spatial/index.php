@@ -34,7 +34,7 @@ $dbArr = Array();
     <link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui_accordian.css" type="text/css" rel="stylesheet" />
     <link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
     <link href="<?php echo $CLIENT_ROOT; ?>/css/ol.css" type="text/css" rel="stylesheet" />
-    <link href="<?php echo $CLIENT_ROOT; ?>/css/spatialbase.css?ver=12" type="text/css" rel="stylesheet" />
+    <link href="<?php echo $CLIENT_ROOT; ?>/css/spatialbase.css?ver=15" type="text/css" rel="stylesheet" />
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-1.10.2.min.js" type="text/javascript"></script>
@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=227" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=233" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -556,6 +556,48 @@ $dbArr = Array();
         <div id="deleteSelections" style="margin-left:60px;float:left;">
             <button data-role="none" type="button" onclick='deleteSelections();' >Delete Shapes</button>
         </div>
+        <div style="clear:both;"></div>
+        <div id="dateslidercontrol" style="margin-top:5px;display:none;">
+            <div style="margin:5 0 5 0;color:white;"><hr /></div>
+            <div id="setdatediv" style="">
+                <span class="maptext">Earliest</span>
+                <input data-role="none" type="text" id="datesliderearlydate" style="width:100px;margin-right:5px;" value="" onchange="checkDSLowDate();" />
+                <span class="maptext">Latest</span>
+                <input data-role="none" type="text" id="datesliderlatedate" style="width:100px;margin-right:25px;" value="" onchange="checkDSHighDate();" />
+                <button data-role="none" type="button" onclick="setDSValues();" >Set</button>
+            </div>
+            <div style="margin:5 0 5 0;color:white;"><hr /></div>
+            <div id="animatediv" style="">
+                <div>
+                    <span class="maptext">Interval Duration (years)</span>
+                    <input data-role="none" type="text" id="datesliderinterduration" style="width:40px;margin-right:5px;" value="" onchange="checkDSAnimDuration();" />
+                    <span class="maptext">Interval Time (seconds)</span>
+                    <input data-role="none" type="text" id="datesliderintertime" style="width:40px;margin-right:10px;" value="" onchange="checkDSAnimTime();" />
+                </div>
+                <div style="clear:both;"></div>
+                <div style="margin-top:3px;">
+                    <div style="float:left;">
+                        <span style="margin-right:5px;">
+                            <span class="maptext">Save Images</span>
+                            <input data-role="none" type='checkbox' id='dateslideranimimagesave' onchange="checkDSSaveImage();" value='1'>
+                        </span>
+                        <span style="margin-right:5px;">
+                            <span class="maptext">Reverse</span>
+                            <input data-role="none" type='checkbox' id='dateslideranimreverse' value='1'>
+                        </span>
+                        <span>
+                            <span class="maptext">Dual</span>
+                            <input data-role="none" type='checkbox' id='dateslideranimdual' value='1'>
+                        </span>
+                    </div>
+                    <div style="float:right;">
+                        <button data-role="none" type="button" onclick="setDSAnimation();" >Start</button>
+                        <button data-role="none" type="button" onclick="stopDSAnimation();" >Stop</button>
+                    </div>
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -619,6 +661,16 @@ $dbArr = Array();
     var vectorizeLayers = [];
     var loadingTimer = 0;
     var loadingComplete = false;
+    var returnClusters = false;
+    var dsAnimDuration = '';
+    var dsAnimTime = '';
+    var dsAnimImageSave = false;
+    var dsAnimReverse = false;
+    var dsAnimDual = false;
+    var dsAnimLow = '';
+    var dsAnimHigh = '';
+    var dsAnimStop = true;
+    var dsAnimation = '';
     var SOLRFields = 'occid,collid,catalogNumber,otherCatalogNumbers,family,sciname,tidinterpreted,scientificNameAuthorship,identifiedBy,' +
         'dateIdentified,typeStatus,recordedBy,recordNumber,eventDate,displayDate,coll_year,coll_month,coll_day,habitat,associatedTaxa,' +
         'cultivationStatus,country,StateProvince,county,municipality,locality,localitySecurity,localitySecurityReason,geo,minimumElevationInMeters,' +
@@ -1000,6 +1052,7 @@ $dbArr = Array();
         refreshLayerOrder();
         var infoArr = [];
         infoArr['Name'] = outputName;
+        infoArr['layerType'] = 'raster';
         infoArr['Title'] = outputName;
         infoArr['Abstract'] = '';
         infoArr['DefaultCRS'] = '';
@@ -1070,6 +1123,7 @@ $dbArr = Array();
         refreshLayerOrder();
         var infoArr = [];
         infoArr['Name'] = outputName;
+        infoArr['raster'] = 'vector';
         infoArr['Title'] = outputName;
         infoArr['Abstract'] = '';
         infoArr['DefaultCRS'] = '';
@@ -1198,6 +1252,7 @@ $dbArr = Array();
                 if(setDragDropTarget()){
                     var infoArr = [];
                     infoArr['Name'] = dragDropTarget;
+                    infoArr['layerType'] = 'vector';
                     infoArr['Title'] = filename;
                     infoArr['Abstract'] = '';
                     infoArr['DefaultCRS'] = '';
@@ -1234,6 +1289,7 @@ $dbArr = Array();
                             },function (data){
                                 var infoArr = [];
                                 infoArr['Name'] = dragDropTarget;
+                                infoArr['layerType'] = 'vector';
                                 infoArr['Title'] = filename;
                                 infoArr['Abstract'] = '';
                                 infoArr['DefaultCRS'] = '';
@@ -1357,6 +1413,7 @@ $dbArr = Array();
                 if(!shapeActive){
                     var infoArr = [];
                     infoArr['Name'] = 'select';
+                    infoArr['layerType'] = 'vector';
                     infoArr['Title'] = 'Shapes';
                     infoArr['Abstract'] = '';
                     infoArr['DefaultCRS'] = '';

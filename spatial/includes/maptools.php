@@ -7,8 +7,8 @@
     </div>
     <div style="margin-top:5px;">
         <b>Display Date Slider</b> <input data-role="none" type='checkbox' name='datesliderswitch' id='datesliderswitch' onchange="toggleDateSlider();" value='1' >
-        <input data-role="none" type="radio" name="dateslidertype" id="dssingletype" value="single" onchange="checkDateSliderType();" checked /> Single
-        <input data-role="none" type="radio" name="dateslidertype" id="dsdualtype" value="dual" onchange="checkDateSliderType();" /> Dual
+        <!-- <input data-role="none" type="radio" name="dateslidertype" id="dssingletype" value="single" onchange="checkDateSliderType();" checked /> Single
+        <input data-role="none" type="radio" name="dateslidertype" id="dsdualtype" value="dual" onchange="checkDateSliderType();" /> Dual -->
     </div>
     <div id="reclassifytoollink" style="margin-top:5px;">
         <a class="" onclick="checkReclassifyToolOpen();" href="#"><b>Reclassify Tool</b></a>

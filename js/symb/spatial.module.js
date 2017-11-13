@@ -112,6 +112,89 @@ function adjustSelectionsTab(){
     }
 }
 
+function animateDS(){
+    if(!dsAnimStop){
+        var lowDate = document.getElementById("datesliderearlydate").value;
+        var highDate = document.getElementById("datesliderlatedate").value;
+        var lowDateVal = new Date(lowDate);
+        lowDateVal = new Date(lowDateVal.setTime(lowDateVal.getTime()+86400000));
+        var highDateVal = new Date(highDate);
+        highDateVal = new Date(highDateVal.setTime(highDateVal.getTime()+86400000));
+        if(dsAnimReverse){
+            if(dsAnimDual){
+                if(lowDateVal.getTime() !== highDateVal.getTime()) highDateVal = new Date(highDateVal.setDate(highDateVal.getDate() - dsAnimDuration));
+                var calcLowDate = new Date(lowDateVal.setDate(lowDateVal.getDate() - dsAnimDuration));
+                if(calcLowDate.getTime() > dsAnimLow.getTime()){
+                    lowDateVal = calcLowDate;
+                }
+                else{
+                    lowDateVal = dsAnimLow;
+                    dsAnimStop = true;
+                }
+            }
+            else{
+                var calcHighDate = new Date(highDateVal.setDate(highDateVal.getDate() - dsAnimDuration));
+                if(calcHighDate.getTime() > dsAnimLow.getTime()){
+                    highDateVal = calcHighDate;
+                }
+                else{
+                    dsAnimStop = true;
+                }
+            }
+        }
+        else{
+            if(dsAnimDual && (lowDateVal.getTime() !== highDateVal.getTime())) lowDateVal = new Date(lowDateVal.setDate(lowDateVal.getDate() + dsAnimDuration));
+            var calcHighDate = new Date(highDateVal.setDate(highDateVal.getDate() + dsAnimDuration));
+            if(calcHighDate.getTime() < dsAnimHigh.getTime()){
+                highDateVal = calcHighDate;
+            }
+            else{
+                highDateVal = dsAnimHigh;
+                dsAnimStop = true;
+            }
+        }
+        tsOldestDate = lowDateVal;
+        tsNewestDate = highDateVal;
+        var lowDateValStr = getISOStrFromDateObj(lowDateVal);
+        var highDateValStr = getISOStrFromDateObj(highDateVal);
+        $("#sliderdiv").slider('values',0,tsOldestDate.getTime());
+        $("#sliderdiv").slider('values',1,tsNewestDate.getTime());
+        $("#custom-label-min").text(lowDateValStr);
+        $("#custom-label-max").text(highDateValStr);
+        document.getElementById("datesliderearlydate").value = lowDateValStr;
+        document.getElementById("datesliderlatedate").value = highDateValStr;
+        layersArr['pointv'].getSource().changed();
+        if(dsAnimImageSave){
+            var filename = lowDateValStr+'-to-'+highDateValStr+'.png';
+            exportMapPNG(filename);
+        }
+        if(!dsAnimStop){
+            dsAnimation = setTimeout(animateDS,dsAnimTime);
+        }
+        else{
+            tsOldestDate = dsAnimLow;
+            tsNewestDate = dsAnimHigh;
+            var lowDateValStr = getISOStrFromDateObj(dsAnimLow);
+            var highDateValStr = getISOStrFromDateObj(dsAnimHigh);
+            $("#sliderdiv").slider('values',0,tsOldestDate.getTime());
+            $("#sliderdiv").slider('values',1,tsNewestDate.getTime());
+            $("#custom-label-min").text(lowDateValStr);
+            $("#custom-label-max").text(highDateValStr);
+            document.getElementById("datesliderearlydate").value = lowDateValStr;
+            document.getElementById("datesliderlatedate").value = highDateValStr;
+            layersArr['pointv'].getSource().changed();
+            dsAnimDuration = '';
+            dsAnimTime = '';
+            dsAnimImageSave = false;
+            dsAnimReverse = false;
+            dsAnimDual = false;
+            dsAnimLow = '';
+            dsAnimHigh = '';
+            dsAnimation = '';
+        }
+    }
+}
+
 function arrayIndexSort(obj){
     var keys = [];
     for(var key in obj){
@@ -232,7 +315,7 @@ function buildLayerTableRow(lArr,removable){
         }
         trfragment += '</td>';
         var layerTable = document.getElementById("layercontroltable");
-        var newLayerRow = layerTable.insertRow();
+        var newLayerRow = (removable?layerTable.insertRow(0):layerTable.insertRow());
         newLayerRow.id = 'lay-'+layerID;
         newLayerRow.innerHTML = trfragment;
         if(removable) addLayerToSelList(layerID,lArr['Title']);
@@ -469,6 +552,7 @@ function changeDraw() {
                 var infoArr = [];
                 infoArr['Name'] = 'select';
                 infoArr['Title'] = 'Shapes';
+                infoArr['layerType'] = 'vector';
                 infoArr['Abstract'] = '';
                 infoArr['DefaultCRS'] = '';
                 buildLayerTableRow(infoArr,true);
@@ -570,6 +654,141 @@ function checkDateSliderType(){
         sliderdiv = '';
         var dual = document.getElementById("dsdualtype").checked;
         createDateSlider(dual);
+    }
+}
+
+function checkDSAnimDuration(){
+    var duration = document.getElementById("datesliderinterduration").value;
+    var imageSave = document.getElementById("dateslideranimimagesave").checked;
+    if(duration){
+        if(!isNaN(duration) && duration > 0){
+            var lowDate = document.getElementById("datesliderearlydate").value;
+            var hLowDate = new Date(lowDate);
+            hLowDate = new Date(hLowDate.setTime(hLowDate.getTime()+86400000));
+            var highDate = document.getElementById("datesliderlatedate").value;
+            var hHighDate = new Date(highDate);
+            hHighDate = new Date(hHighDate.setTime(hHighDate.getTime()+86400000));
+            var difference = (hHighDate-hLowDate)/1000;
+            difference /= (60*60*24);
+            var diffYears = Math.abs(difference/365.25);
+            if(duration >= diffYears){
+                alert("Interval duration must less than the difference between the earliest and latest dates in years: "+diffYears.toFixed(4));
+                document.getElementById("datesliderinterduration").value = '';
+            }
+            else if(imageSave){
+                var lowDate = document.getElementById("datesliderearlydate").value;
+                var hLowDate = new Date(lowDate);
+                hLowDate = new Date(hLowDate.setTime(hLowDate.getTime()+86400000));
+                var highDate = document.getElementById("datesliderlatedate").value;
+                var hHighDate = new Date(highDate);
+                hHighDate = new Date(hHighDate.setTime(hHighDate.getTime()+86400000));
+                var difference = (hHighDate - hLowDate)/1000;
+                difference /= (60*60*24);
+                var diffYears = difference/365.25;
+                var imageCount = Math.ceil(diffYears/duration);
+                if(!confirm("You have Save Images checked. With the current interval duration and date settings, this will produce "+imageCount+" images. Click OK to continue.")){
+                    document.getElementById("dateslideranimimagesave").checked = false;
+                }
+            }
+        }
+        else{
+            alert("Interval duration must be a number greater than zero.");
+            document.getElementById("datesliderinterduration").value = '';
+        }
+    }
+}
+
+function checkDSAnimTime(){
+    var animtime = Number(document.getElementById("datesliderintertime").value);
+    if(animtime){
+        if(isNaN(animtime) || animtime < 0.1 || animtime > 5){
+            alert("Interval time must be a number greater than or equal to .1, and less than or equal to 5.");
+            document.getElementById("datesliderintertime").value = '';
+        }
+    }
+}
+
+function checkDSHighDate(){
+    var maxDate = dsNewestDate.getTime();
+    var hMaxDate = new Date(maxDate);
+    var hMaxDateStr = getISOStrFromDateObj(hMaxDate);
+    var currentHighSetting = new Date($("#sliderdiv").slider("values",1));
+    var currentHighSettingStr = getISOStrFromDateObj(currentHighSetting);
+    var highDate = document.getElementById("datesliderlatedate").value;
+    if(highDate){
+        if(formatCheckDate(highDate)){
+            var currentLowSetting = new Date($("#sliderdiv").slider("values",0));
+            var currentLowSettingStr = getISOStrFromDateObj(currentLowSetting);
+            var hHighDate = new Date(highDate);
+            if(hHighDate < hMaxDate){
+                if(hHighDate < currentLowSetting){
+                    alert("Date cannot be earlier than the currently set earliest date: "+currentLowSettingStr+'.');
+                    document.getElementById("datesliderlatedate").value = currentHighSettingStr;
+                }
+            }
+            else{
+                alert("Date cannot be later than the latest date on slider: "+hMaxDateStr+'.');
+                document.getElementById("datesliderlatedate").value = currentHighSettingStr;
+            }
+        }
+    }
+    else{
+        document.getElementById("datesliderlatedate").value = currentHighSettingStr;
+    }
+}
+
+function checkDSLowDate(){
+    var minDate = dsOldestDate.getTime();;
+    var hMinDate = new Date(minDate);
+    var hMinDateStr = getISOStrFromDateObj(hMinDate);
+    var currentLowSetting = new Date($("#sliderdiv").slider("values",0));
+    var currentLowSettingStr = getISOStrFromDateObj(currentLowSetting);
+    var lowDate = document.getElementById("datesliderearlydate").value;
+    if(lowDate){
+        if(formatCheckDate(lowDate)){
+            var currentHighSetting = new Date($("#sliderdiv").slider("values",1));
+            var currentHighSettingStr = getISOStrFromDateObj(currentHighSetting);
+            var hLowDate = new Date(lowDate);
+            if(hLowDate > hMinDate){
+                if(hLowDate > currentHighSetting){
+                    alert("Date cannot be after the currently set latest date: "+currentHighSettingStr+'.');
+                    document.getElementById("datesliderearlydate").value = currentLowSettingStr;
+                }
+            }
+            else{
+                alert("Date cannot be earlier than the earliest date on slider: "+hMinDateStr+'.');
+                document.getElementById("datesliderearlydate").value = currentLowSettingStr;
+            }
+        }
+    }
+    else{
+        document.getElementById("datesliderearlydate").value = currentLowSettingStr;
+    }
+}
+
+function checkDSSaveImage(){
+    var imageSave = document.getElementById("dateslideranimimagesave").checked;
+    var duration = document.getElementById("datesliderinterduration").value;
+    if(imageSave){
+        if(duration){
+            var lowDate = document.getElementById("datesliderearlydate").value;
+            var hLowDate = new Date(lowDate);
+            hLowDate = new Date(hLowDate.setTime(hLowDate.getTime()+86400000));
+            var highDate = document.getElementById("datesliderlatedate").value;
+            var hHighDate = new Date(highDate);
+            hHighDate = new Date(hHighDate.setTime(hHighDate.getTime()+86400000));
+            var difference = (hHighDate - hLowDate)/1000;
+            difference /= (60*60*24);
+            var diffYears = difference/365.25;
+            var imageCount = Math.ceil(diffYears/duration);
+            if(!confirm("With the current interval duration and date settings, this will produce "+imageCount+" images. Click OK to continue.")){
+                document.getElementById("dateslideranimimagesave").checked = false;
+            }
+        }
+        else{
+            alert("Please enter an interval duration before selecting to save images.");
+            document.getElementById("dateslideranimimagesave").checked = false;
+        }
     }
 }
 
@@ -854,12 +1073,14 @@ function createDateSlider(dual){
         sliderdiv.appendChild(maxhandlediv);
         document.body.appendChild(sliderdiv);
 
-        var minDate = dsOldestDate;
-        var maxDate = dsNewestDate;
+        var minDate = dsOldestDate.getTime();
+        var maxDate = dsNewestDate.getTime();
         tsOldestDate = dsOldestDate;
         tsNewestDate = dsNewestDate;
-        minDate = minDate.getTime();
-        maxDate = maxDate.getTime();
+        var hMinDate = new Date(minDate);
+        var minDateStr = getISOStrFromDateObj(hMinDate);
+        var hMaxDate = new Date(maxDate);
+        var maxDateStr = getISOStrFromDateObj(hMaxDate);
 
         var minhandle = $("#custom-handle-min");
         var maxhandle = $("#custom-handle-max");
@@ -871,13 +1092,9 @@ function createDateSlider(dual){
             create: function() {
                 if(dual){
                     var mintextbox = $("#custom-label-min");
-                    var hMinDate = new Date(minDate);
-                    var minDateStr = getISOStrFromDateObj(hMinDate);
                     mintextbox.text(minDateStr);
                 }
                 var maxtextbox = $("#custom-label-max");
-                var hMaxDate = new Date(maxDate);
-                var maxDateStr = getISOStrFromDateObj(hMaxDate);
                 maxtextbox.text(maxDateStr);
             },
             //step: 7 * 24 * 60 * 60 * 1000,
@@ -886,13 +1103,15 @@ function createDateSlider(dual){
                 if(dual){
                     var mintextbox = $("#custom-label-min");
                     tsOldestDate = new Date(ui.values[0]);
-                    var minDateStr = getISOStrFromDateObj(tsOldestDate);
-                    mintextbox.text(minDateStr);
+                    var newMinDateStr = getISOStrFromDateObj(tsOldestDate);
+                    mintextbox.text(newMinDateStr);
+                    document.getElementById("datesliderearlydate").value = newMinDateStr;
                 }
                 var maxtextbox = $("#custom-label-max");
                 tsNewestDate = new Date(ui.values[1]);
-                var maxDateStr = getISOStrFromDateObj(tsNewestDate);
-                maxtextbox.text(maxDateStr);
+                var newMaxDateStr = getISOStrFromDateObj(tsNewestDate);
+                maxtextbox.text(newMaxDateStr);
+                document.getElementById("datesliderlatedate").value = newMaxDateStr;
                 layersArr['pointv'].getSource().changed();
             }
         });
@@ -901,6 +1120,13 @@ function createDateSlider(dual){
             document.getElementById("custom-handle-min").style.position = 'absolute';
             document.getElementById("custom-handle-min").style.left = '-9999px';
         }
+        document.getElementById("datesliderearlydate").value = minDateStr;
+        document.getElementById("datesliderlatedate").value = maxDateStr;
+        document.getElementById("dateslidercontrol").style.display = 'block';
+        document.getElementById("maptoolcontainer").style.top = 'initial';
+        document.getElementById("maptoolcontainer").style.left = 'initial';
+        document.getElementById("maptoolcontainer").style.bottom = '100px';
+        document.getElementById("maptoolcontainer").style.right = '-190px';
     }
 }
 
@@ -1098,15 +1324,15 @@ function downloadShapesLayer(){
     }
 }
 
-function exportMapPNG(){
+function exportMapPNG(filename){
     map.once('postcompose', function(event) {
         var canvas = document.getElementsByTagName('canvas').item(0);
         if (navigator.msSaveBlob) {
-            navigator.msSaveBlob(canvas.msToBlob(), 'map.png');
+            navigator.msSaveBlob(canvas.msToBlob(),filename);
         }
         else{
             canvas.toBlob(function(blob) {
-                saveAs(blob, 'map.png');
+                saveAs(blob,filename);
             });
         }
     });
@@ -2038,6 +2264,7 @@ function loadPoints(){
                 if(!pointActive){
                     var infoArr = [];
                     infoArr['Name'] = 'pointv';
+                    infoArr['layerType'] = 'vector';
                     infoArr['Title'] = 'Points';
                     infoArr['Abstract'] = '';
                     infoArr['DefaultCRS'] = '';
@@ -2394,7 +2621,7 @@ function processDownloadRequest(selection){
             document.getElementById("datadownloadform").submit();
         }
         else if(dlType == 'png'){
-            exportMapPNG();
+            exportMapPNG('map.png');
         }
     }
     else{
@@ -2438,7 +2665,21 @@ function removeDateSlider(){
         document.getElementById("datesliderswitch").checked = false;
         dateSliderActive = false;
     }
+    if(returnClusters){
+        returnClusters = false;
+        document.getElementById("clusterswitch").checked = true;
+        changeClusterSetting();
+    }
     layersArr['pointv'].getSource().changed();
+    document.getElementById("dateslidercontrol").style.display = 'none';
+    document.getElementById("maptoolcontainer").style.left = '50%';
+
+    document.getElementById("maptoolcontainer").style.top = '10px';
+    document.getElementById("maptoolcontainer").style.left = '50%';
+    document.getElementById("maptoolcontainer").style.bottom = 'initial';
+    document.getElementById("maptoolcontainer").style.right = 'initial';
+    document.getElementById("datesliderearlydate").value = '';
+    document.getElementById("datesliderlatedate").value = '';
 }
 
 function removeLayerToSelList(layer){
@@ -2725,6 +2966,66 @@ function setDragDropTarget(){
     }
 }
 
+function setDSAnimation(){
+    dsAnimDuration = document.getElementById("datesliderinterduration").value;
+    dsAnimTime = document.getElementById("datesliderintertime").value;
+    if(dsAnimDuration && dsAnimTime){
+        dsAnimStop = false;
+        dsAnimDuration = dsAnimDuration*365.25;
+        dsAnimTime = dsAnimTime*1000;
+        dsAnimImageSave = document.getElementById("dateslideranimimagesave").checked;
+        dsAnimReverse = document.getElementById("dateslideranimreverse").checked;
+        dsAnimDual = document.getElementById("dateslideranimdual").checked;
+        var lowDate = document.getElementById("datesliderearlydate").value;
+        var highDate = document.getElementById("datesliderlatedate").value;
+        dsAnimLow = new Date(lowDate);
+        dsAnimLow = new Date(dsAnimLow.setTime(dsAnimLow.getTime()+86400000));
+        dsAnimHigh = new Date(highDate);
+        dsAnimHigh = new Date(dsAnimHigh.setTime(dsAnimHigh.getTime()+86400000));
+        var lowDateVal = dsAnimLow;
+        var highDateVal = dsAnimHigh;
+        if(dsAnimReverse){
+            if(dsAnimDual) lowDateVal = highDateVal;
+        }
+        else{
+            highDateVal = lowDateVal;
+        }
+        tsOldestDate = lowDateVal;
+        tsNewestDate = highDateVal;
+        var lowDateValStr = getISOStrFromDateObj(lowDateVal);
+        var highDateValStr = getISOStrFromDateObj(highDateVal);
+        $("#sliderdiv").slider('values',0,tsOldestDate.getTime());
+        $("#sliderdiv").slider('values',1,tsNewestDate.getTime());
+        $("#custom-label-min").text(lowDateValStr);
+        $("#custom-label-max").text(highDateValStr);
+        document.getElementById("datesliderearlydate").value = lowDateValStr;
+        document.getElementById("datesliderlatedate").value = highDateValStr;
+        layersArr['pointv'].getSource().changed();
+        animateDS();
+    }
+    else{
+        dsAnimDuration = '';
+        dsAnimTime = '';
+        alert("Please enter an interval duration and interval time.");
+    }
+}
+
+function setDSValues(){
+    var lowDate = document.getElementById("datesliderearlydate").value;
+    tsOldestDate = new Date(lowDate);
+    tsOldestDate = new Date(tsOldestDate.setTime(tsOldestDate.getTime()+86400000));
+    var hLowDateStr = getISOStrFromDateObj(tsOldestDate);
+    var highDate = document.getElementById("datesliderlatedate").value;
+    tsNewestDate = new Date(highDate);
+    tsNewestDate = new Date(tsNewestDate.setTime(tsNewestDate.getTime()+86400000));
+    var hHighDateStr = getISOStrFromDateObj(tsNewestDate);
+    $("#sliderdiv").slider('values',0,tsOldestDate.getTime());
+    $("#sliderdiv").slider('values',1,tsNewestDate.getTime());
+    $("#custom-label-min").text(hLowDateStr);
+    $("#custom-label-max").text(hHighDateStr);
+    layersArr['pointv'].getSource().changed();
+}
+
 function setLayersTable(){
     var http = new XMLHttpRequest();
     var url = "rpc/getlayersarr.php";
@@ -2997,6 +3298,29 @@ function spiderifyPoints(features){
     }
 }
 
+function stopDSAnimation(){
+    dsAnimStop = true;
+    tsOldestDate = dsAnimLow;
+    tsNewestDate = dsAnimHigh;
+    var lowDateValStr = getISOStrFromDateObj(dsAnimLow);
+    var highDateValStr = getISOStrFromDateObj(dsAnimHigh);
+    $("#sliderdiv").slider('values',0,tsOldestDate.getTime());
+    $("#sliderdiv").slider('values',1,tsNewestDate.getTime());
+    $("#custom-label-min").text(lowDateValStr);
+    $("#custom-label-max").text(highDateValStr);
+    document.getElementById("datesliderearlydate").value = lowDateValStr;
+    document.getElementById("datesliderlatedate").value = highDateValStr;
+    layersArr['pointv'].getSource().changed();
+    dsAnimDuration = '';
+    dsAnimTime = '';
+    dsAnimImageSave = false;
+    dsAnimReverse = false;
+    dsAnimDual = false;
+    dsAnimLow = '';
+    dsAnimHigh = '';
+    dsAnimation = '';
+}
+
 function toggle(target){
     var ele = document.getElementById(target);
     if(ele){
@@ -3032,21 +3356,27 @@ function toggleCat(catid){
 function toggleDateSlider(){
     dateSliderActive = document.getElementById("datesliderswitch").checked;
     if(dateSliderActive){
-        if(!clusterPoints){
-            if(dsOldestDate && dsNewestDate){
-                if(dsOldestDate != dsNewestDate){
-                    var dual = document.getElementById("dsdualtype").checked;
-                    createDateSlider(dual);
+        if(dsOldestDate && dsNewestDate){
+            if(dsOldestDate != dsNewestDate){
+                if(!clusterPoints){
+                    //var dual = document.getElementById("dsdualtype").checked;
+                    createDateSlider(true);
                 }
                 else{
-                    alert('The current records on the map do not have a range of dates for the Date Slider to populate.');
+                    returnClusters = true;
+                    document.getElementById("clusterswitch").checked = false;
+                    changeClusterSetting();
+                    createDateSlider(true);
                 }
+            }
+            else{
+                alert('The current records on the map do not have a range of dates for the Date Slider to populate.');
             }
         }
         else{
             document.getElementById("datesliderswitch").checked = false;
             dateSliderActive = false;
-            alert('The Date Slider cannot be displayed while points are set to cluster. Please turn off clustering in the Settings panel to display the Date Slider.');
+            alert('Points must be loaded onto the map to use the Date Slider.');
         }
     }
     else{
