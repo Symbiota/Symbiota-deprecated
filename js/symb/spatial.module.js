@@ -514,13 +514,19 @@ function changeClusterDistance(){
 }
 
 function changeClusterSetting(){
-    clusterPoints = document.getElementById("clusterswitch").checked;
-    if(clusterPoints){
-        removeDateSlider();
-        loadPointWFSLayer(0);
+    if(document.getElementById("sliderdiv")){
+        document.getElementById("clusterswitch").checked = clusterPoints;
+        alert('You cannot change the cluster setting while the Date Slider is active.');
     }
     else{
-        layersArr['pointv'].setSource(pointvectorsource);
+        clusterPoints = document.getElementById("clusterswitch").checked;
+        if(clusterPoints){
+            removeDateSlider();
+            loadPointWFSLayer(0);
+        }
+        else{
+            layersArr['pointv'].setSource(pointvectorsource);
+        }
     }
 }
 
@@ -793,8 +799,9 @@ function checkDSSaveImage(){
 }
 
 function checkLoading(){
-    if(loadingComplete){
-        loadingComplete = false;
+    if(!loadingComplete){
+        loadingComplete = true;
+        loadPointsEvent = false;
         hideWorking();
     }
 }
@@ -2212,7 +2219,7 @@ function imagePostFunction(image, src) {
 
 function lazyLoadPoints(index,callback){
     var startindex = 0;
-    loadingComplete = false;
+    loadingComplete = true;
     if(index > 1) startindex = (index - 1)*lazyLoadCnt;
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
@@ -2222,7 +2229,7 @@ function lazyLoadPoints(index,callback){
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
-            loadingComplete = true;
+            loadingComplete = false;
             setTimeout(checkLoading,loadingTimer);
             callback(http.responseText);
         }
@@ -2248,6 +2255,7 @@ function loadPoints(){
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
             if(solrRecCnt){
+                loadPointsEvent = true;
                 setLoadingTimer();
                 if(loadVectorPoints){
                     loadPointWFSLayer(0);
@@ -2278,6 +2286,7 @@ function loadPoints(){
                     removeLayerToSelList('pointv');
                     pointActive = false;
                 }
+                loadPointsEvent = false;
                 hideWorking();
                 alert('There were no records matching your query.');
             }
@@ -2665,21 +2674,26 @@ function removeDateSlider(){
         document.getElementById("datesliderswitch").checked = false;
         dateSliderActive = false;
     }
-    if(returnClusters){
+    if(returnClusters && !showHeatMap){
         returnClusters = false;
         document.getElementById("clusterswitch").checked = true;
         changeClusterSetting();
     }
-    layersArr['pointv'].getSource().changed();
+    tsOldestDate = '';
+    tsNewestDate = '';
     document.getElementById("dateslidercontrol").style.display = 'none';
-    document.getElementById("maptoolcontainer").style.left = '50%';
-
     document.getElementById("maptoolcontainer").style.top = '10px';
     document.getElementById("maptoolcontainer").style.left = '50%';
     document.getElementById("maptoolcontainer").style.bottom = 'initial';
     document.getElementById("maptoolcontainer").style.right = 'initial';
     document.getElementById("datesliderearlydate").value = '';
     document.getElementById("datesliderlatedate").value = '';
+    dsAnimDuration = document.getElementById("datesliderinterduration").value = '';
+    dsAnimTime = document.getElementById("datesliderintertime").value = '';
+    dsAnimImageSave = document.getElementById("dateslideranimimagesave").checked = false;
+    dsAnimReverse = document.getElementById("dateslideranimreverse").checked = false;
+    dsAnimDual = document.getElementById("dateslideranimdual").checked = false;
+    layersArr['pointv'].getSource().changed();
 }
 
 function removeLayerToSelList(layer){
@@ -3060,12 +3074,12 @@ function setLayersTable(){
 
 function setLoadingTimer(){
     loadingTimer = 20000;
-    if(solrRecCnt < 200000) loadingTimer = 15000;
-    if(solrRecCnt < 150000) loadingTimer = 13000;
-    if(solrRecCnt < 100000) loadingTimer = 10000;
-    if(solrRecCnt < 50000) loadingTimer = 7000;
-    if(solrRecCnt < 10000) loadingTimer = 5000;
-    if(solrRecCnt < 5000) loadingTimer = 2000;
+    if(solrRecCnt < 200000) loadingTimer = 13000;
+    if(solrRecCnt < 150000) loadingTimer = 10000;
+    if(solrRecCnt < 100000) loadingTimer = 7000;
+    if(solrRecCnt < 50000) loadingTimer = 5000;
+    if(solrRecCnt < 10000) loadingTimer = 3000;
+    if(solrRecCnt < 5000) loadingTimer = 1000;
 }
 
 function setReclassifyTable(){
@@ -3161,7 +3175,7 @@ function setSpatialParamBox(){
 
 function setSymbol(feature){
     var showPoint = true;
-    if(dateSliderActive && !clusterPoints){
+    if(dateSliderActive){
         showPoint = validateFeatureDate(feature);
     }
     var style = '';
@@ -3300,7 +3314,7 @@ function spiderifyPoints(features){
 
 function stopDSAnimation(){
     dsAnimStop = true;
-    tsOldestDate = dsAnimLow;
+    /*tsOldestDate = dsAnimLow;
     tsNewestDate = dsAnimHigh;
     var lowDateValStr = getISOStrFromDateObj(dsAnimLow);
     var highDateValStr = getISOStrFromDateObj(dsAnimHigh);
@@ -3310,7 +3324,7 @@ function stopDSAnimation(){
     $("#custom-label-max").text(highDateValStr);
     document.getElementById("datesliderearlydate").value = lowDateValStr;
     document.getElementById("datesliderlatedate").value = highDateValStr;
-    layersArr['pointv'].getSource().changed();
+    layersArr['pointv'].getSource().changed();*/
     dsAnimDuration = '';
     dsAnimTime = '';
     dsAnimImageSave = false;
@@ -3391,6 +3405,11 @@ function toggleHeatMap(){
         layersArr['heat'].setVisible(true);
     }
     else{
+        if(returnClusters && !dateSliderActive){
+            returnClusters = false;
+            document.getElementById("clusterswitch").checked = true;
+            changeClusterSetting();
+        }
         layersArr['heat'].setVisible(false);
         layersArr['pointv'].setVisible(true);
     }

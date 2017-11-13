@@ -50,7 +50,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=233" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=235" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -626,6 +626,7 @@ $dbArr = Array();
     var taxontype = '';
     var thes = false;
     var loadVectorPoints = true;
+    var loadPointsEvent = false;
     var taxaCnt = 0;
     var lazyLoadCnt = 20000;
     var clusterDistance = 50;
@@ -660,7 +661,7 @@ $dbArr = Array();
     var overlayLayers = [];
     var vectorizeLayers = [];
     var loadingTimer = 0;
-    var loadingComplete = false;
+    var loadingComplete = true;
     var returnClusters = false;
     var dsAnimDuration = '';
     var dsAnimTime = '';
@@ -979,6 +980,8 @@ $dbArr = Array();
                     featureProjection: 'EPSG:3857'
                 });
                 selectsource.addFeatures(features);
+                document.getElementById("selectlayerselect").value = 'select';
+                setActiveLayer();
             }
             hideWorking();
         };
@@ -1442,8 +1445,10 @@ $dbArr = Array();
                         });
                         primeSymbologyData(features);
                         pointvectorsource.addFeatures(features);
-                        var pointextent = pointvectorsource.getExtent();
-                        map.getView().fit(pointextent,map.getSize());
+                        if(loadPointsEvent){
+                            var pointextent = pointvectorsource.getExtent();
+                            map.getView().fit(pointextent,map.getSize());
+                        }
                     });
                     processed = processed + lazyLoadCnt;
                     index++;
@@ -1604,6 +1609,8 @@ $dbArr = Array();
                         if(layer === layersArr[activeLayer]){
                             try{
                                 selectsource.addFeature(feature);
+                                document.getElementById("selectlayerselect").value = 'select';
+                                setActiveLayer();
                             }
                             catch(e){
                                 alert('Feature has already been added to Shapes layer.');
@@ -1632,7 +1639,11 @@ $dbArr = Array();
                 var url = 'rpc/GeoServerConnector.php?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&typename=<?php echo $GEOSERVER_LAYER_WORKSPACE; ?>:'+selectLayer+'&featureid='+objID+'&outputFormat=application/json&srsname=EPSG:3857';
                 $.get(url, function(data){
                     var features = new ol.format.GeoJSON().readFeatures(data);
-                    selectsource.addFeatures(features);
+                    if(features){
+                        selectsource.addFeatures(features);
+                        document.getElementById("selectlayerselect").value = 'select';
+                        setActiveLayer();
+                    }
                 });
             }
         });
