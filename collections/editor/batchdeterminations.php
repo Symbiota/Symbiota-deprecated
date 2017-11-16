@@ -169,7 +169,6 @@ if($isEditor){
 							document.getElementById("nomrecordlistdviv").style.display = "none";
 							document.getElementById("nomrecordstbody").innerHTML = '';
 							document.getElementById("nomsciname").value = '';
-							document.getElementById("nomselectall").checked = false;
 							alert("There are no specimens identified to that taxon.");
 						}
 					});
