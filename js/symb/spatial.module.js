@@ -1680,7 +1680,8 @@ function getGeographyParams(vector){
                         var singlePoly = turf.polygon(polyCoords[e]);
                         //console.log('start multipolygon length: '+singlePoly.geometry.coordinates.length);
                         if(singlePoly.geometry.coordinates.length > 10){
-                            singlePoly = turf.simplify(singlePoly, 0.001, true);
+                            var options = {tolerance: 0.001, highQuality: true};
+                            singlePoly = turf.simplify(singlePoly,options);
                         }
                         //console.log('end multipolygon length: '+singlePoly.geometry.coordinates.length);
                         polyCoords[e] = singlePoly.geometry.coordinates;
@@ -1694,7 +1695,8 @@ function getGeographyParams(vector){
                     totalArea = totalArea + area_km;
                     //console.log('start multipolygon length: '+areaFeat.geometry.coordinates.length);
                     if(areaFeat.geometry.coordinates.length > 10){
-                        areaFeat = turf.simplify(areaFeat, 0.001, true);
+                        var options = {tolerance: 0.001, highQuality: true};
+                        areaFeat = turf.simplify(areaFeat,options);
                     }
                     //console.log('end multipolygon length: '+areaFeat.geometry.coordinates.length);
                     polyCoords = areaFeat.geometry.coordinates;
