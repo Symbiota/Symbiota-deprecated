@@ -42,15 +42,15 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-1.9.1.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui-1.10.4.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.popupoverlay.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/ol-symbiota-ext.js?ver=27" type="text/javascript"></script>
-    <script src="https://npmcdn.com/@turf/turf/turf.min.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/ol-symbiota-ext.js?ver=29" type="text/javascript"></script>
+    <script src="https://npmcdn.com/@turf/turf@5.0.4/turf.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jscolor/jscolor.js?ver=2" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/stream.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/shapefile.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=237" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=243" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -798,7 +798,26 @@ $dbArr = Array();
 
     var selectsource = new ol.source.Vector({wrapX: false});
     var selectlayer = new ol.layer.Vector({
-        source: selectsource
+        source: selectsource,
+        style: new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(255,255,255,0.4)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#3399CC',
+                width: 2
+            }),
+            image: new ol.style.Circle({
+                radius: 7,
+                stroke: new ol.style.Stroke({
+                    color: '#3399CC',
+                    width: 2
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(255,255,255,0.4)'
+                })
+            })
+        })
     });
 
     var pointvectorsource = new ol.source.Vector({wrapX: false});
@@ -869,6 +888,25 @@ $dbArr = Array();
         condition: function(evt) {
             return (evt.type == 'click' && activeLayer == 'select' && !evt.originalEvent.altKey);
         },
+        style: new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(255,255,255,0.5)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'rgba(0,153,255,1)',
+                width: 5
+            }),
+            image: new ol.style.Circle({
+                radius: 7,
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(0,153,255,1)',
+                    width: 2
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(0,153,255,1)'
+                })
+            })
+        }),
         toggleCondition: ol.events.condition.click
     });
 

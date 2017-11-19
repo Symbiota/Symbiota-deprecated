@@ -959,9 +959,15 @@ function createBuffers(){
                 else if(geoType == 'Circle'){
                     var center = fixedselectgeometry.getCenter();
                     var radius = fixedselectgeometry.getRadius();
-                    var turfFeature = turf.circle(center,radius,200,'degrees');
+                    var edgeCoordinate = [center[0] + radius, center[1]];
+                    var turfCenter = turf.point(center);
+                    var turfEdge = turf.point(edgeCoordinate);
+                    var distoptions = {units: 'kilometers'};
+                    var distance = turf.distance(turfCenter,turfEdge,distoptions);
+                    var ciroptions = {steps:200, units:'kilometers'};
+                    var turfFeature = turf.circle(center,distance,ciroptions);
                 }
-                var buffered = turf.buffer(turfFeature,bufferSize,'kilometers');
+                var buffered = turf.buffer(turfFeature,bufferSize,{units:'kilometers'});
                 var buffpoly = geoJSONFormat.readFeature(buffered);
                 buffpoly.getGeometry().transform(wgs84Projection,mapProjection);
                 selectsource.addFeature(buffpoly);
@@ -996,7 +1002,8 @@ function createConcavePoly(){
         if(features){
             var concavepoly = '';
             try{
-                concavepoly = turf.concave(features,Number(maxEdge),'kilometers');
+                var options = {units: 'kilometers', maxEdge: Number(maxEdge)};
+                concavepoly = turf.concave(features,options);
             }
             catch(e){
                 alert('Concave polygon was not able to be calculated. Perhaps try using a larger value for the maximum edge length.');
@@ -1166,7 +1173,13 @@ function createPolyDifference(){
                 else if(geoType == 'Circle'){
                     var center = fixedselectgeometry.getCenter();
                     var radius = fixedselectgeometry.getRadius();
-                    features.push(turf.circle(center,radius,200,'degrees'));
+                    var edgeCoordinate = [center[0] + radius, center[1]];
+                    var turfCenter = turf.point(center);
+                    var turfEdge = turf.point(edgeCoordinate);
+                    var distoptions = {units: 'kilometers'};
+                    var distance = turf.distance(turfCenter,turfEdge,distoptions);
+                    var ciroptions = {steps:200, units:'kilometers'};
+                    features.push(turf.circle(center,distance,ciroptions));
                 }
             }
         });
@@ -1211,7 +1224,13 @@ function createPolyIntersect(){
                 else if(geoType == 'Circle'){
                     var center = fixedselectgeometry.getCenter();
                     var radius = fixedselectgeometry.getRadius();
-                    features.push(turf.circle(center,radius,200,'degrees'));
+                    var edgeCoordinate = [center[0] + radius, center[1]];
+                    var turfCenter = turf.point(center);
+                    var turfEdge = turf.point(edgeCoordinate);
+                    var distoptions = {units: 'kilometers'};
+                    var distance = turf.distance(turfCenter,turfEdge,distoptions);
+                    var ciroptions = {steps:200, units:'kilometers'};
+                    features.push(turf.circle(center,distance,ciroptions));
                 }
             }
         });
@@ -1259,7 +1278,13 @@ function createPolyUnion(){
                 else if(geoType == 'Circle'){
                     var center = fixedselectgeometry.getCenter();
                     var radius = fixedselectgeometry.getRadius();
-                    features.push(turf.circle(center,radius,200,'degrees'));
+                    var edgeCoordinate = [center[0] + radius, center[1]];
+                    var turfCenter = turf.point(center);
+                    var turfEdge = turf.point(edgeCoordinate);
+                    var distoptions = {units: 'kilometers'};
+                    var distance = turf.distance(turfCenter,turfEdge,distoptions);
+                    var ciroptions = {steps:200, units:'kilometers'};
+                    features.push(turf.circle(center,distance,ciroptions));
                 }
             }
         });
@@ -1309,7 +1334,8 @@ function downloadShapesLayer(){
         var filetype = 'application/vnd.geo+json';
     }
     var features = layersArr['select'].getSource().getFeatures();
-    var exportStr = format.writeFeatures(features,{'dataProjection': wgs84Projection, 'featureProjection': mapProjection});
+    var fixedFeatures = setDownloadFeatures(features);
+    var exportStr = format.writeFeatures(fixedFeatures,{'dataProjection': wgs84Projection, 'featureProjection': mapProjection});
     if(dlType == 'kml'){
         exportStr = exportStr.replace(/<kml xmlns="http:\/\/www.opengis.net\/kml\/2.2" xmlns:gx="http:\/\/www.google.com\/kml\/ext\/2.2" xmlns:xsi="http:\/\/www.w3.org\/2001\/XMLSchema-instance" xsi:schemaLocation="http:\/\/www.opengis.net\/kml\/2.2 https:\/\/developers.google.com\/kml\/schema\/kml22gx.xsd">/g,'<kml xmlns="http://www.opengis.net/kml/2.2"><Document id="root_doc"><Folder><name>shapes_export</name>');
         exportStr = exportStr.replace(/<Placemark>/g,'<Placemark><Style><LineStyle><color>ff000000</color><width>1</width></LineStyle><PolyStyle><color>4DAAAAAA</color><fill>1</fill></PolyStyle></Style>');
@@ -2957,6 +2983,36 @@ function setClusterSymbol(feature) {
         }
     }
     return style;
+}
+
+function setDownloadFeatures(features){
+    var fixedFeatures = [];
+    for(i in features){
+        var clone = features[i].clone();
+        var geoType = clone.getGeometry().getType();
+        if(geoType == 'Circle'){
+            var geoJSONFormat = new ol.format.GeoJSON();
+            var geometry = clone.getGeometry();
+            var fixedgeometry = geometry.transform(mapProjection,wgs84Projection);
+            var center = fixedgeometry.getCenter();
+            var radius = fixedgeometry.getRadius();
+            var edgeCoordinate = [center[0] + radius, center[1]];
+            var turfCenter = turf.point(center);
+            var turfEdge = turf.point(edgeCoordinate);
+            var distoptions = {units: 'kilometers'};
+            var distance = turf.distance(turfCenter,turfEdge,distoptions);
+            var ciroptions = {steps:200, units:'kilometers'};
+            var turfCircle = turf.circle(center,distance,ciroptions);
+            console.log(turfCircle);
+            var circpoly = geoJSONFormat.readFeature(turfCircle);
+            circpoly.getGeometry().transform(wgs84Projection,mapProjection);
+            fixedFeatures.push(circpoly);
+        }
+        else{
+            fixedFeatures.push(clone);
+        }
+    }
+    return fixedFeatures;
 }
 
 function setDragDropTarget(){
