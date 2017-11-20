@@ -959,13 +959,7 @@ function createBuffers(){
                 else if(geoType == 'Circle'){
                     var center = fixedselectgeometry.getCenter();
                     var radius = fixedselectgeometry.getRadius();
-                    var edgeCoordinate = [center[0] + radius, center[1]];
-                    var turfCenter = turf.point(center);
-                    var turfEdge = turf.point(edgeCoordinate);
-                    var distoptions = {units: 'kilometers'};
-                    var distance = turf.distance(turfCenter,turfEdge,distoptions);
-                    var ciroptions = {steps:200, units:'kilometers'};
-                    var turfFeature = turf.circle(center,distance,ciroptions);
+                    var turfFeature = getWGS84CirclePoly(center,radius);
                 }
                 var buffered = turf.buffer(turfFeature,bufferSize,{units:'kilometers'});
                 var buffpoly = geoJSONFormat.readFeature(buffered);
@@ -1173,13 +1167,7 @@ function createPolyDifference(){
                 else if(geoType == 'Circle'){
                     var center = fixedselectgeometry.getCenter();
                     var radius = fixedselectgeometry.getRadius();
-                    var edgeCoordinate = [center[0] + radius, center[1]];
-                    var turfCenter = turf.point(center);
-                    var turfEdge = turf.point(edgeCoordinate);
-                    var distoptions = {units: 'kilometers'};
-                    var distance = turf.distance(turfCenter,turfEdge,distoptions);
-                    var ciroptions = {steps:200, units:'kilometers'};
-                    features.push(turf.circle(center,distance,ciroptions));
+                    features.push(getWGS84CirclePoly(center,radius));
                 }
             }
         });
@@ -1224,13 +1212,7 @@ function createPolyIntersect(){
                 else if(geoType == 'Circle'){
                     var center = fixedselectgeometry.getCenter();
                     var radius = fixedselectgeometry.getRadius();
-                    var edgeCoordinate = [center[0] + radius, center[1]];
-                    var turfCenter = turf.point(center);
-                    var turfEdge = turf.point(edgeCoordinate);
-                    var distoptions = {units: 'kilometers'};
-                    var distance = turf.distance(turfCenter,turfEdge,distoptions);
-                    var ciroptions = {steps:200, units:'kilometers'};
-                    features.push(turf.circle(center,distance,ciroptions));
+                    features.push(getWGS84CirclePoly(center,radius));
                 }
             }
         });
@@ -1278,13 +1260,7 @@ function createPolyUnion(){
                 else if(geoType == 'Circle'){
                     var center = fixedselectgeometry.getCenter();
                     var radius = fixedselectgeometry.getRadius();
-                    var edgeCoordinate = [center[0] + radius, center[1]];
-                    var turfCenter = turf.point(center);
-                    var turfEdge = turf.point(edgeCoordinate);
-                    var distoptions = {units: 'kilometers'};
-                    var distance = turf.distance(turfCenter,turfEdge,distoptions);
-                    var ciroptions = {steps:200, units:'kilometers'};
-                    features.push(turf.circle(center,distance,ciroptions));
+                    features.push(getWGS84CirclePoly(center,radius));
                 }
             }
         });
@@ -2180,6 +2156,17 @@ function getTurfPointFeaturesetSelected(){
     }
 }
 
+function getWGS84CirclePoly(center,radius){
+    var turfFeature = '';
+    var edgeCoordinate = [center[0] + radius, center[1]];
+    var wgs84Sphere = new ol.Sphere(6378137);
+    var groundRadius = wgs84Sphere.haversineDistance(center,edgeCoordinate);
+    groundRadius = groundRadius/1000;
+    var ciroptions = {steps:200, units:'kilometers'};
+    turfFeature = turf.circle(center,groundRadius,ciroptions);
+    return turfFeature;
+}
+
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
@@ -2996,14 +2983,7 @@ function setDownloadFeatures(features){
             var fixedgeometry = geometry.transform(mapProjection,wgs84Projection);
             var center = fixedgeometry.getCenter();
             var radius = fixedgeometry.getRadius();
-            var edgeCoordinate = [center[0] + radius, center[1]];
-            var turfCenter = turf.point(center);
-            var turfEdge = turf.point(edgeCoordinate);
-            var distoptions = {units: 'kilometers'};
-            var distance = turf.distance(turfCenter,turfEdge,distoptions);
-            var ciroptions = {steps:200, units:'kilometers'};
-            var turfCircle = turf.circle(center,distance,ciroptions);
-            console.log(turfCircle);
+            var turfCircle = getWGS84CirclePoly(center,radius);
             var circpoly = geoJSONFormat.readFeature(turfCircle);
             circpoly.getGeometry().transform(wgs84Projection,mapProjection);
             fixedFeatures.push(circpoly);
