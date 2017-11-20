@@ -7,7 +7,7 @@ class OccurrenceListManager extends OccurrenceManager{
 	protected $sortField1 = '';
 	protected $sortField2 = '';
 	protected $sortOrder = '';
-	
+
 	public function __construct($readVariables = true){
 		parent::__construct($readVariables);
  	}
@@ -38,7 +38,7 @@ class OccurrenceListManager extends OccurrenceManager{
             'CONCAT_WS(", ",o.locality,CONCAT(ROUND(o.decimallatitude,5)," ",ROUND(o.decimallongitude,5))) AS locality, '.
             'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, IFNULL(o.habitat,"") AS habitat, '.
             'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid, '.
-            'o.individualCount, o.lifeStage, o.sex';
+            'o.individualCount, o.lifeStage, o.sex, c.sortseq ';
         $sql .= (array_key_exists("assochost",$this->searchTermsArr)?', oas.verbatimsciname ':' ');
         $sql .= 'FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid '.$this->setTableJoins($sqlWhere).$sqlWhere;
         if($this->sortField1 || $this->sortField2 || $this->sortOrder){
@@ -142,16 +142,16 @@ class OccurrenceListManager extends OccurrenceManager{
     public function getRecordCnt(){
 		return $this->recordCount;
 	}
-	
+
 	public function setSorting($sf1,$sf2,$so){
 		$this->sortField1 = $sf1;
 		$this->sortField2 = $sf2;
 		$this->sortOrder = $so;
 	}
-	
+
 	public function getCloseTaxaMatch($name){
 		$retArr = array();
-		$searchName = trim($name); 
+		$searchName = trim($name);
 		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$searchName.'") AND sciname != "'.$searchName.'"';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
