@@ -166,7 +166,7 @@ function animateDS(){
         layersArr['pointv'].getSource().changed();
         if(dsAnimImageSave){
             var filename = lowDateValStr+'-to-'+highDateValStr+'.png';
-            exportMapPNG(filename);
+            exportMapPNG(filename,true);
         }
         if(!dsAnimStop){
             dsAnimation = setTimeout(animateDS,dsAnimTime);
@@ -183,13 +183,6 @@ function animateDS(){
             document.getElementById("datesliderearlydate").value = lowDateValStr;
             document.getElementById("datesliderlatedate").value = highDateValStr;
             layersArr['pointv'].getSource().changed();
-            dsAnimDuration = '';
-            dsAnimTime = '';
-            dsAnimImageSave = false;
-            dsAnimReverse = false;
-            dsAnimDual = false;
-            dsAnimLow = '';
-            dsAnimHigh = '';
             dsAnimation = '';
         }
     }
@@ -1318,7 +1311,7 @@ function downloadShapesLayer(){
         exportStr = exportStr.replace(/<Polygon>/g,'<Polygon><altitudeMode>clampToGround</altitudeMode>');
         exportStr = exportStr.replace(/<\/kml>/g,'</Folder></Document></kml>');
     }
-    var filename = 'shapes.'+dlType;
+    var filename = 'shapes_'+getDateTimeString()+'.'+dlType;
     var blob = new Blob([exportStr], {type: filetype});
     if(window.navigator.msSaveOrOpenBlob) {
         window.navigator.msSaveBlob(blob, filename);
@@ -1333,10 +1326,20 @@ function downloadShapesLayer(){
     }
 }
 
-function exportMapPNG(filename){
+function exportMapPNG(filename,zip){
     map.once('postcompose', function(event) {
         var canvas = document.getElementsByTagName('canvas').item(0);
-        if (navigator.msSaveBlob) {
+        if(zip){
+            var image = canvas.toDataURL('image/png', 1.0);
+            zipFolder.file(filename, image.substr(image.indexOf(',')+1), {base64: true});
+            if(dsAnimImageSave && dsAnimStop){
+                zipFile.generateAsync({type:"blob"}).then(function(content) {
+                    var zipfilename = 'dateanimationimages_'+getDateTimeString()+'.zip';
+                    saveAs(content,zipfilename);
+                });
+            }
+        }
+        else if(navigator.msSaveBlob) {
             navigator.msSaveBlob(canvas.msToBlob(),filename);
         }
         else{
@@ -2621,9 +2624,8 @@ function processDownloadRequest(selection){
     document.getElementById("dh-contentType").value = '';
     document.getElementById("dh-selections").value = '';
     var dlType = (selection?document.getElementById("selectdownloadselect").value:document.getElementById("querydownloadselect").value);
-    var dateTimeString = getDateTimeString();
     if(dlType){
-        var filename = 'spatialdata_'+dateTimeString;
+        var filename = 'spatialdata_'+getDateTimeString();
         var contentType = '';
         if(dlType == 'kml') contentType = 'application/vnd.google-earth.kml+xml';
         else if(dlType == 'geojson') contentType = 'application/vnd.geo+json';
@@ -2645,7 +2647,8 @@ function processDownloadRequest(selection){
             document.getElementById("datadownloadform").submit();
         }
         else if(dlType == 'png'){
-            exportMapPNG('map.png');
+            var imagefilename = 'map_'+getDateTimeString()+'.png';
+            exportMapPNG(imagefilename,false);
         }
     }
     else{
@@ -3053,6 +3056,10 @@ function setDSAnimation(){
         document.getElementById("datesliderearlydate").value = lowDateValStr;
         document.getElementById("datesliderlatedate").value = highDateValStr;
         layersArr['pointv'].getSource().changed();
+        if(dsAnimImageSave){
+            zipFile = new JSZip();
+            zipFolder = zipFile.folder("images");
+        }
         animateDS();
     }
     else{
