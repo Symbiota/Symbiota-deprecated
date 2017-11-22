@@ -35,7 +35,7 @@ class OccurrenceEditorManager {
 		$this->occFieldArr = array('dbpk', 'catalognumber', 'othercatalognumbers', 'occurrenceid','family', 'scientificname', 'sciname',
 			'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 			'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
-			'associatedcollectors', 'eventdate', '`year`', '`month`', '`day`', 'startdayofyear', 'enddayofyear',
+			'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
 			'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
 			'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
 			'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations','datageneralizations',
@@ -43,8 +43,8 @@ class OccurrenceEditorManager {
 			'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 'footprintwkt',
 			'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
 			'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters','verbatimelevation',
-			'minimumdepthinmeters', 'maximumdepthinmeters', 'verbatimdepth', 'disposition', '`language`', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
-			'labelproject','observeruid','basisofrecord','institutioncode','collectioncode','ownerinstitutioncode','datelastmodified', 'processingstatus', 
+			'minimumdepthinmeters', 'maximumdepthinmeters', 'verbatimdepth', 'disposition', 'language', 'duplicatequantity', 'genericcolumn1', 'genericcolumn2',
+			'labelproject','observeruid','basisofrecord','institutioncode','collectioncode','ownerinstitutioncode','datelastmodified', 'processingstatus',
 			'recordenteredby', 'dateentered');
 	}
 
@@ -100,7 +100,7 @@ class OccurrenceEditorManager {
 		if(!$this->collId) $this->collId = $this->collMap['collid'];
 		return $this->collMap;
 	}
-	
+
 	public function getCollId(){
 		if(!$this->collId){
 			$this->getCollMap();
@@ -139,7 +139,7 @@ class OccurrenceEditorManager {
 			unset($_SESSION['editorquery']);
 		}
 		elseif(array_key_exists('q_catalognumber',$_REQUEST) || array_key_exists('q_identifier',$_REQUEST)){
-			//Need to keep q_identifier in code until LBCC croudsourcing Drupal site is no longer active 
+			//Need to keep q_identifier in code until LBCC croudsourcing Drupal site is no longer active
 			if(array_key_exists('q_identifier',$_REQUEST) && $_REQUEST['q_identifier']) $this->qryArr['cn'] = trim($_REQUEST['q_identifier']);
 			if($_REQUEST['q_catalognumber']) $this->qryArr['cn'] = trim($_REQUEST['q_catalognumber']);
 			if(array_key_exists('q_othercatalognumbers',$_REQUEST) && $_REQUEST['q_othercatalognumbers']) $this->qryArr['ocn'] = trim($_REQUEST['q_othercatalognumbers']);
@@ -833,14 +833,14 @@ class OccurrenceEditorManager {
 						}
 					}
 				}
-				//If sciname was changed, update image tid link 
+				//If sciname was changed, update image tid link
 				if(in_array('tidinterpreted',$editArr)){
 					//Remap images
 					$sqlImgTid = 'UPDATE images SET tid = '.($occArr['tidinterpreted']?$occArr['tidinterpreted']:'NULL').' '.
 						'WHERE occid = ('.$occArr['occid'].')';
 					$this->conn->query($sqlImgTid);
 				}
-				//If host was entered in quickhost field, update record 
+				//If host was entered in quickhost field, update record
 				if($quickHostEntered){
 					if($occArr['hostassocid']){
 						if($occArr['host']){
@@ -936,17 +936,17 @@ class OccurrenceEditorManager {
 	public function addOccurrence($occArr){
 		$status = "SUCCESS: new occurrence record submitted successfully ";
 		if($occArr){
-			$fieldArr = array('basisOfRecord' => 's', 'catalogNumber' => 's', 'otherCatalogNumbers' => 's', 'occurrenceid' => 's', 
-				'ownerInstitutionCode' => 's', 'institutionCode' => 's', 'collectionCode' => 's', 
-				'family' => 's', 'sciname' => 's', 'tidinterpreted' => 'n', 'scientificNameAuthorship' => 's', 'identifiedBy' => 's', 'dateIdentified' => 's', 
-				'identificationReferences' => 's', 'identificationremarks' => 's', 'taxonRemarks' => 's', 'identificationQualifier' => 's', 'typeStatus' => 's',  
-				'recordedBy' => 's', 'recordNumber' => 's', 'associatedCollectors' => 's', 'eventDate' => 'd', 'year' => 'n', 'month' => 'n', 'day' => 'n', 'startDayOfYear' => 'n', 'endDayOfYear' => 'n', 
-				'verbatimEventDate' => 's', 'habitat' => 's', 'substrate' => 's', 'fieldnumber' => 's', 'occurrenceRemarks' => 's', 'associatedTaxa' => 's', 'verbatimattributes' => 's', 
-				'dynamicProperties' => 's', 'reproductiveCondition' => 's', 'cultivationStatus' => 's', 'establishmentMeans' => 's', 
-				'lifestage' => 's', 'sex' => 's', 'individualcount' => 's', 'samplingprotocol' => 's', 'preparations' => 's', 
-				'country' => 's', 'stateProvince' => 's', 'county' => 's', 'municipality' => 's', 'locality' => 's', 'localitySecurity' => 'n', 'localitysecurityreason' => 's',  
-				'locationRemarks' => 'n', 'decimalLatitude' => 'n', 'decimalLongitude' => 'n', 'geodeticDatum' => 's', 'coordinateUncertaintyInMeters' => 'n', 'verbatimCoordinates' => 's', 
-				'footprintwkt' => 's', 'georeferencedBy' => 's', 'georeferenceProtocol' => 's', 'georeferenceSources' => 's', 'georeferenceVerificationStatus' => 's',  
+			$fieldArr = array('basisOfRecord' => 's', 'catalogNumber' => 's', 'otherCatalogNumbers' => 's', 'occurrenceid' => 's',
+				'ownerInstitutionCode' => 's', 'institutionCode' => 's', 'collectionCode' => 's',
+				'family' => 's', 'sciname' => 's', 'tidinterpreted' => 'n', 'scientificNameAuthorship' => 's', 'identifiedBy' => 's', 'dateIdentified' => 's',
+				'identificationReferences' => 's', 'identificationremarks' => 's', 'taxonRemarks' => 's', 'identificationQualifier' => 's', 'typeStatus' => 's',
+				'recordedBy' => 's', 'recordNumber' => 's', 'associatedCollectors' => 's', 'eventDate' => 'd', 'year' => 'n', 'month' => 'n', 'day' => 'n', 'startDayOfYear' => 'n', 'endDayOfYear' => 'n',
+				'verbatimEventDate' => 's', 'habitat' => 's', 'substrate' => 's', 'fieldnumber' => 's', 'occurrenceRemarks' => 's', 'associatedTaxa' => 's', 'verbatimattributes' => 's',
+				'dynamicProperties' => 's', 'reproductiveCondition' => 's', 'cultivationStatus' => 's', 'establishmentMeans' => 's',
+				'lifestage' => 's', 'sex' => 's', 'individualcount' => 's', 'samplingprotocol' => 's', 'preparations' => 's',
+				'country' => 's', 'stateProvince' => 's', 'county' => 's', 'municipality' => 's', 'locality' => 's', 'localitySecurity' => 'n', 'localitysecurityreason' => 's',
+				'locationRemarks' => 'n', 'decimalLatitude' => 'n', 'decimalLongitude' => 'n', 'geodeticDatum' => 's', 'coordinateUncertaintyInMeters' => 'n', 'verbatimCoordinates' => 's',
+				'footprintwkt' => 's', 'georeferencedBy' => 's', 'georeferenceProtocol' => 's', 'georeferenceSources' => 's', 'georeferenceVerificationStatus' => 's',
 				'georeferenceRemarks' => 's', 'minimumElevationInMeters' => 'n', 'maximumElevationInMeters' => 'n','verbatimElevation' => 's',
 				'minimumDepthInMeters' => 'n', 'maximumDepthInMeters' => 'n', 'verbatimDepth' => 's','disposition' => 's', 'language' => 's', 'duplicateQuantity' => 'n',
 				'labelProject' => 's','processingstatus' => 's', 'recordEnteredBy' => 's', 'observeruid' => 'n', 'dateentered' => 'd', 'genericcolumn2' => 's');
@@ -970,7 +970,7 @@ class OccurrenceEditorManager {
 						}
 						else{
 							$sql .= ', NULL';
-						} 
+						}
 					}
 					else{
 						//Is string or date
@@ -987,7 +987,7 @@ class OccurrenceEditorManager {
 				$this->occid = $this->conn->insert_id;
 				//Update collection stats
 				$this->conn->query('UPDATE omcollectionstats SET recordcnt = recordcnt + 1 WHERE collid = '.$this->collId);
-				
+
 				//Create and insert Symbiota GUID (UUID)
 				$guid = UuidFactory::getUuidV4();
 				if(!$this->conn->query('INSERT INTO guidoccurrences(guid,occid) VALUES("'.$guid.'",'.$this->occid.')')){
@@ -1035,7 +1035,7 @@ class OccurrenceEditorManager {
 						$status .= '(WARNING adding host: '.$this->conn->error.') ';
 					}
 				}
-				
+
 				if(isset($occArr['confidenceranking']) && $occArr['confidenceranking']){
 					$this->editIdentificationRanking($occArr['confidenceranking'],'');
 				}
@@ -1166,7 +1166,7 @@ class OccurrenceEditorManager {
 		}
 		return $status;
 	}
-	
+
 	public function mergeRecords($targetOccid,$sourceOccid){
 		global $QUICK_HOST_ENTRY_IS_ACTIVE;
 		$status = true;
@@ -1232,7 +1232,7 @@ class OccurrenceEditorManager {
 			$this->errorArr[] .= '; ERROR remapping images: '.$this->conn->error;
 			$status = false;
 		}
-		
+
 		//Remap associations
 		if($QUICK_HOST_ENTRY_IS_ACTIVE){
 			$sql = 'UPDATE omoccurassociations SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
@@ -1241,7 +1241,7 @@ class OccurrenceEditorManager {
 				$status = false;
 			}
 		}
-		
+
 		//Remap comments
 		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		if(!$this->conn->query($sql)){
@@ -1255,8 +1255,8 @@ class OccurrenceEditorManager {
 			$this->errorArr[] .= '; ERROR remapping genetic resources: '.$this->conn->error;
 			$status = false;
 		}
-		
-		//Remap identifiers 
+
+		//Remap identifiers
 		$sql = 'UPDATE omoccuridentifiers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		if(!$this->conn->query($sql)){
 			$this->errorArr[] .= '; ERROR remapping occurrence identifiers: '.$this->conn->error;
@@ -1400,7 +1400,7 @@ class OccurrenceEditorManager {
 			$rs->free();
 			if($occidArr){
 				$sqlWhere = 'WHERE o.occid IN('.implode(',',$occidArr).')';
-				
+
 				//Set full replace or replace fragment
 				$nvSqlFrag = '';
 				if(!$buMatch || $ov===''){
@@ -1410,7 +1410,7 @@ class OccurrenceEditorManager {
 					//Selected "Match any part of field"
 					$nvSqlFrag = 'REPLACE(o.'.$fn.',"'.$ov.'","'.$nv.'")';
 				}
-				
+
 				//Add edits to the omoccuredit table
 				$sql2 = 'INSERT INTO omoccuredits(occid,fieldName,fieldValueOld,fieldValueNew,appliedStatus,uid) '.
 					'SELECT o.occid, "'.$fn.'" AS fieldName, IFNULL(o.'.$fn.',"") AS oldValue, '.
@@ -1422,12 +1422,12 @@ class OccurrenceEditorManager {
 				if(!$this->conn->query($sql2)){
 					$statusStr = 'ERROR adding update to omoccuredits: '.$this->conn->error;
 				}
-	
+
 				//Run update and apply edits
 				$sql = 'UPDATE omoccurrences o ';
 				//$this->addTableJoins($sql);
 				$sql .= ' SET o.'.$fn.' = '.$nvSqlFrag.' '.$sqlWhere;
-				//echo $sql; exit; 
+				//echo $sql; exit;
 				if(!$this->conn->query($sql)){
 					$statusStr = 'ERROR applying batch update: '.$this->conn->error;
 				}
@@ -1441,7 +1441,7 @@ class OccurrenceEditorManager {
 
 	public function getBatchUpdateCount($fieldName,$oldValue,$buMatch){
 		$retCnt = 0;
-		
+
 		$fn = $this->cleanInStr($fieldName);
 		$ov = $this->cleanInStr($oldValue);
 
@@ -1461,7 +1461,7 @@ class OccurrenceEditorManager {
 	private function getBatchUpdateWhere($fn,$ov,$buMatch){
 		$sql = '';
 		$sql .= $this->sqlWhere;
-		
+
 		if(!$buMatch || $ov===''){
 			$sql .= ' AND (o2.'.$fn.' '.($ov===''?'IS NULL':'= "'.$ov.'"').') ';
 		}
@@ -1483,7 +1483,7 @@ class OccurrenceEditorManager {
 		$retArr = $this->cleanOutArr(array_intersect_key($fArr,array_flip($locArr)));
 		return $retArr;
 	}
-	
+
 	//Verification functions
 	public function getIdentificationRanking(){
 		//Get Identification ranking
@@ -1582,7 +1582,7 @@ class OccurrenceEditorManager {
 	}
 
 	public function getUserChecklists(){
-		// Return list of checklists to which user has editing writes 
+		// Return list of checklists to which user has editing writes
 		$retArr = Array();
 		if(ISSET($GLOBALS['USER_RIGHTS']['ClAdmin'])){
 			$sql = 'SELECT clid, name, access '.
@@ -1606,7 +1606,7 @@ class OccurrenceEditorManager {
 		$dupManager->linkDuplicates($this->occid,$occidStr,$dupTitle);
 		return $status;
 	}
-	
+
 	//Genetic link functions
 	public function getGeneticArr(){
 		$retArr = array();
@@ -1747,7 +1747,7 @@ class OccurrenceEditorManager {
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
 				$imgId = $row->imgid;
-				$imageMap[$imgId]["url"] = $row->url; 
+				$imageMap[$imgId]["url"] = $row->url;
 				$imageMap[$imgId]["tnurl"] = $row->thumbnailurl;
 				$imageMap[$imgId]["origurl"] = $row->originalurl;
 				$imageMap[$imgId]["caption"] = $this->cleanOutStr($row->caption);
@@ -1816,7 +1816,7 @@ class OccurrenceEditorManager {
 			$retArr[$r->orid][$r->appliedstatus]['source'] = $r->externalsource;
 			$retArr[$r->orid][$r->appliedstatus]['reviewstatus'] = $r->reviewstatus;
 			$retArr[$r->orid][$r->appliedstatus]['ts'] = $r->initialtimestamp;
-	
+
 			$oldValues = json_decode($r->oldvalues,true);
 			$newValues = json_decode($r->newvalues,true);
 			foreach($oldValues as $fieldName => $value){
@@ -1959,7 +1959,7 @@ class OccurrenceEditorManager {
 	//Setters and getters
 	public function getErrorStr(){
 		if($this->errorArr) return implode('; ',$this->errorArr);
-		else return '';	
+		else return '';
 	}
 
 	public function getCollectionList(){
@@ -1980,7 +1980,7 @@ class OccurrenceEditorManager {
 		asort($retArr);
 		return $retArr;
 	}
-	
+
 	public function getExsiccatiList(){
 		$retArr = array();
 		if($this->collId){

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
 ------------------
 Language: English
@@ -45,7 +45,7 @@ $LANG['LL_P-RADIUS_MI'] = 'Miles';
 $LANG['LL_P-RADIUS_TITLE_1'] = 'Find Coordinate';
 $LANG['COLLECTOR_HEADER'] = 'Collector Criteria:';
 $LANG['COLLECTOR_LASTNAME'] = "Collector&#39;s Last Name:";
-$LANG['TITLE_TEXT_2'] = 'Separate multiple terms by commas and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750';
+$LANG['TITLE_TEXT_2'] = 'Separate multiple terms by commas and ranges by " - " (space before and after dash required), e.g.: 3542,3602,3700 - 3750';
 $LANG['COLLECTOR_NUMBER'] = "Collector&#39;s Number:";
 $LANG['COLLECTOR_DATE'] = 'Collection Date:';
 $LANG['TITLE_TEXT_3'] = 'Single date or start date of range';
@@ -58,7 +58,7 @@ $LANG['HAS_IMAGE'] = 'Limit to Specimens with Images Only';
 $LANG['HAS_GENETIC'] = 'Limit to Specimens with Genetic Data Only';
 
 //Following used in mapboundingbox.php
-$LANG['MBB_TITLE'] = 'Coordinate Mapper'; 
+$LANG['MBB_TITLE'] = 'Coordinate Mapper';
 $LANG['MBB_INSTRUCTIONS'] = 'Click once to start drawing and again to finish rectangle. Click on the Submit button to transfer Coordinates.';
 $LANG['MBB_NORTHERN'] = 'Northern Lat';
 $LANG['MBB_EASTERN'] = 'Eastern Long';
@@ -66,9 +66,9 @@ $LANG['MBB_SOUTHERN'] = 'Southern Lat';
 $LANG['MBB_WESTERN'] = 'Western Long';
 
 //Following used in mappointradius.php
-$LANG['MPR_TITLE'] = 'Coordinate Mapper'; 
+$LANG['MPR_TITLE'] = 'Coordinate Mapper';
 $LANG['MPR_INSTRUCTIONS'] = 'Click once to capture coordinates. Click on the Submit Coordinate button to transfer Coordinates.';
-$LANG['MPR_LAT'] = 'Latitude'; 
+$LANG['MPR_LAT'] = 'Latitude';
 $LANG['MPR_LNG'] = 'Longitude';
 $LANG['SUBMIT'] = 'Submit';
 
