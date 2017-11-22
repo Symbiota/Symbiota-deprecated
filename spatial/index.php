@@ -527,14 +527,14 @@ $dbArr = Array();
         <div id="basecontrol">
             <span class="maptext">Base Layer</span>
             <select data-role="none" id="base-map" onchange="changeBaseMap();">
-                <option value="worldtopo">World Topo</option>
+                <option value="worldtopo">ESRI World Topo</option>
                 <option value="openstreet">OpenStreetMap</option>
-                <option value="blackwhite">Black &amp; White</option>
-                <option value="worldimagery">World Imagery</option>
-                <option value="ocean">Ocean</option>
-                <option value="ngstopo">NGS Topo</option>
-                <option value="natgeoworld">NGS World</option>
-                <option value="esristreet">ESRI StreetMap World</option>
+                <option value="blackwhite">Stamen Design Black &amp; White</option>
+                <option value="worldimagery">ESRI World Imagery</option>
+                <option value="ocean">ESRI Ocean</option>
+                <option value="ngstopo">National Geographic Topo</option>
+                <option value="natgeoworld">National Geographic World</option>
+                <option value="esristreet">ESRI StreetMap</option>
             </select>
         </div>
         <div style="clear:both;"></div>
