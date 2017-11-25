@@ -11,7 +11,7 @@ class ChecklistLoaderManager {
 	private $problemTaxa = array();
 	private $errorArr = array();
 	private $errorStr = '';
-	
+
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
@@ -20,7 +20,7 @@ class ChecklistLoaderManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function uploadCsvList($hasHeader, $thesId){
+	public function uploadCsvList($thesId){
 		set_time_limit(300);
 		ini_set("max_input_time",300);
 		ini_set('auto_detect_line_endings', true);
@@ -29,17 +29,14 @@ class ChecklistLoaderManager {
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'r') or die("Can't open file. File may be too large. Try uploading file in sections.");
 
 		$headerArr = Array();
-		if($hasHeader){
-			$headerData = fgetcsv($fh);
-			foreach($headerData as $k => $v){
-				$vStr = strtolower($v);
-				$vStr = str_replace(Array(" ",".","_"),"",$vStr);
-				$vStr = str_replace(Array("scientificnamewithauthor","scientificname","taxa","species","taxon"),"sciname",$vStr);
-				$headerArr[$vStr] = $k;
+		$headerData = fgetcsv($fh);
+		foreach($headerData as $k => $v){
+			$vStr = strtolower($v);
+			$vStr = str_replace(Array(" ",".","_"),"",$vStr);
+			if(in_array($vStr, Array("scientificnamewithauthor","scientificname","taxa","speciesname","taxon"))){
+				$vStr = 'sciname';
 			}
-		}
-		else{
-			$headerArr["sciname"] = 0;
+			$headerArr[$vStr] = $k;
 		}
 		if(array_key_exists("sciname",$headerArr)){
 			$cnt = 0;
@@ -72,21 +69,16 @@ class ChecklistLoaderManager {
 					if($rs){
 						if($row = $rs->fetch_object()){
 							$tid = $row->tid;
-							$family = $row->family;
 							$rankId = $row->rankid;
 						}
 						$rs->free();
 					}
-					
+
 					//Load taxon into checklist
 					if($tid){
 						if($rankId >= 180){
 							$sqlInsert = '';
 							$sqlValues = '';
-							if(array_key_exists('family',$headerArr) && ($valueArr[$headerArr['family']] && (strtolower($family) != strtolower($valueArr[$headerArr['family']])))){
-								$sqlInsert .= ',familyoverride';
-								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['family']]).'"';
-							}
 							if(array_key_exists('habitat',$headerArr) && $valueArr[$headerArr['habitat']]){
 								$sqlInsert .= ',habitat';
 								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['habitat']]).'"';
@@ -141,7 +133,7 @@ class ChecklistLoaderManager {
 		}
 		return $successCnt;
 	}
-	
+
 	public function resolveProblemTaxa(){
 		if($this->problemTaxa){
 			//$taxHarvester = new TaxonomyHarvester();
@@ -158,21 +150,21 @@ class ChecklistLoaderManager {
 				if($taxaArr = $taxHarvester->getEolTaxonArr($nameStr)){
 					if($tid = $taxHarvester->loadNewTaxon($taxaArr)){
 						$this->addTaxonToChecklist($tid);
-						
+
 						echo '<div>';
-							
+
 						echo '</div>';
 					}
 					else{
 						echo '<div>';
-							
+
 						echo '</div>';
 					}
 				}
 				else{
 					//Check database for close matches
 					echo '<div>';
-					
+
 					echo '</div>';
 				}
 				*/
@@ -185,7 +177,7 @@ class ChecklistLoaderManager {
 			echo '</table>';
 		}
 	}
-	
+
 	private function addTaxonToChecklist($tid){
 		$status = true;
 		$sql = 'INSERT INTO fmchklsttaxalink(clid,tid) '.
@@ -262,7 +254,7 @@ class ChecklistLoaderManager {
 		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
 		$replace = array("'","'",'"','"','*','-','-');
 		$inStr= str_replace($search, $replace, $inStr);
-		
+
 		if($inStr){
 			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){

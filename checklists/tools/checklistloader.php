@@ -4,11 +4,10 @@ include_once($SERVER_ROOT.'/classes/ChecklistLoaderManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../checklists/tools/checklistloader.php?'.$_SERVER['QUERY_STRING']);
 
-$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
+$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"";
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
-$hasHeader = array_key_exists("hasheader",$_REQUEST)?$_REQUEST["hasheader"]:"";
 $thesId = array_key_exists("thes",$_REQUEST)?$_REQUEST["thes"]:0;
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 
 $clLoaderManager = new ChecklistLoaderManager();
 $clLoaderManager->setClid($clid);
@@ -52,10 +51,10 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 	?>
 	<div class='navpath'>
 		<a href='../../index.php'>Home</a> &gt;&gt;
-		<?php 
+		<?php
 		if($pid) echo '<a href="'.$CLIENT_ROOT.'/projects/index.php?pid='.$pid.'">';
-		echo '<a href="../checklist.php?cl='.$clid.'&pid='.$pid.'">Return to Checklist</a> &gt;&gt; '; 
-		?> 
+		echo '<a href="../checklist.php?cl='.$clid.'&pid='.$pid.'">Return to Checklist</a> &gt;&gt; ';
+		?>
 		<a href="checklistloader.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><b>Checklists Loader</b></a>
 	</div>
 	<!-- This is inner text! -->
@@ -68,15 +67,15 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 		<div style="margin:10px;">
 			<b>Authors:</b> <?php echo $clMeta['authors']; ?>
 		</div>
-		<?php 
-			if($isEditor){ 
+		<?php
+			if($isEditor){
 				if($action == "Upload Checklist"){
 					?>
 					<div style='margin:10px;'>
 						<ul>
 							<li>Loading checklist...</li>
-							<?php 
-							$cnt = $clLoaderManager->uploadCsvList($hasHeader,$thesId);
+							<?php
+							$cnt = $clLoaderManager->uploadCsvList($thesId);
 							$statusStr = $clLoaderManager->getErrorStr();
 							if(!$cnt && $statusStr){
 								echo '<div style="margin:20px;font-weight:bold;">';
@@ -93,7 +92,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 							<li style="margin-left:10px;">Problematic Taxa: <?php echo $probCnt.($probCnt?' (see below)':''); ?></li>
 							<li style="margin-left:10px;">General errors: <?php echo count($errorArr); ?></li>
 						</ul>
-						<?php 
+						<?php
 						if($probCnt){
 							echo '<fieldset>';
 							echo '<legend><b>Problematic Taxa Resolution</b></legend>';
@@ -107,7 +106,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 								<a href="#" onclick="displayErrors(this);return false;"><b>Display <?php echo count($errorArr); ?> general errors</b></a>
 								<div id="errordiv" style="display:none">
 									<ol style="margin-left:15px;">
-										<?php 
+										<?php
 										foreach($errorArr as $errStr){
 											echo '<li>'.$errStr.'</li>';
 										}
@@ -115,62 +114,52 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 									</ol>
 								</div>
 							</fieldset>
-							<?php 	
+							<?php
 						}
 						?>
 					</div>
-					<?php 
+					<?php
 				}
 				else{
 					?>
 					<form enctype="multipart/form-data" action="checklistloader.php" method="post" onsubmit="return validateUploadForm(this);">
-						<fieldset style="padding:10px;">
-							<legend>Checklist Upload Form</legend>
+						<fieldset style="padding:15px;width:800px;">
+							<legend><b>Checklist Upload Form</b></legend>
 							<input type="hidden" name="MAX_FILE_SIZE" value="5000000" />
 							<div style="font-weight:bold;">
-								Checklist File: 
+								Checklist File:
 								<input id="uploadfile" name="uploadfile" type="file" size="45" />
 							</div>
-							<div>
-								<input type="checkbox" name="hasheader" value="1" <?php echo ($hasHeader||!$action?"CHECKED":""); ?> />
-								First line contains header
-							</div>
-							<div>
+							<div style="margin-top:10px;">
 								Taxonomic Resolution:
 								<select name="thes">
 									<option value="">Leave Taxonomy As Is</option>
-									<?php 
+									<?php
 									$thesArr = $clLoaderManager->getThesauri();
 									foreach($thesArr as $k => $v){
 										echo "<option value='".$k."'>".$v."</option>";
 									}
 									?>
 								</select>
-								
-							</div>
-							<div style="margin:10px;">
-								<div>Must be a CSV text file that follows one of the following criteria. 
-								Note that Excel spreadsheets can be saved as a CSV file.</div>
-								<ul>
-									<li>First column consisting of the scientific name, with or without authors</li>
-									<li>First row contains following column names (in any order):</li>
-									<ul>
-										<li>sciname (required)</li>
-										<li>family (optional)</li>
-										<li>habitat (optional)</li>
-										<li>abundance (optional)</li>
-										<li>notes (optional)</li>
-									</ul>
-								</ul>
+
 							</div>
 							<div style="margin-top:10px;">
+								<div>Must be a CSV text file with the first row containing the following columns. Note that Excel spreadsheets can be saved as a CSV file.</div>
+								<ul>
+									<li>sciname (required)</li>
+									<li>habitat (optional)</li>
+									<li>abundance (optional)</li>
+									<li>notes (optional)</li>
+								</ul>
+							</div>
+							<div style="margin:25px;">
 								<input id="clloadsubmit" name="action" type="submit" value="Upload Checklist" />
 								<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
 							</div>
 						</fieldset>
 					</form>
 				<?php
-				} 
+				}
 			}
 			else{
 				echo "<h2>You appear not to have rights to edit this checklist. If you think this is in error, contact an administrator</h2>";
