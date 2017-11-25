@@ -6,7 +6,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:0;
-$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
+$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 
 //Sanitation
 if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
@@ -39,7 +39,7 @@ if($isEditor){
 		$firstname = $_REQUEST["firstname"];
 		$lastname = $_REQUEST["lastname"];
 		$email = $_REQUEST["email"];
-		
+
 		$title = array_key_exists("title",$_REQUEST)?$_REQUEST["title"]:"";
 		$institution = array_key_exists("institution",$_REQUEST)?$_REQUEST["institution"]:"";
 		$city = array_key_exists("city",$_REQUEST)?$_REQUEST["city"]:"";
@@ -49,7 +49,7 @@ if($isEditor){
 		$url = array_key_exists("url",$_REQUEST)?$_REQUEST["url"]:"";
 		$biography = array_key_exists("biography",$_REQUEST)?$_REQUEST["biography"]:"";
 		$isPublic = array_key_exists("ispublic",$_REQUEST)?$_REQUEST["ispublic"]:"";
-		
+
 		$newPerson = new Person();
 		$newPerson->setUid($userId);
 		$newPerson->setFirstName($firstname);
@@ -64,7 +64,7 @@ if($isEditor){
 		$newPerson->setUrl($url);
 		$newPerson->setBiography($biography);
 		$newPerson->setIsPublic($isPublic);
-		
+
 		if(!$pHandler->updateProfile($newPerson)){
 			$statusStr = "Profile update failed!";
 		}
@@ -128,7 +128,7 @@ if($isEditor){
 		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
 		else $tabIndex = 2;
 	}
-	
+
 	if(!$person) $person = $pHandler->getPerson();
 }
 ?>
@@ -138,7 +138,7 @@ if($isEditor){
 	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
+	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../js/tiny_mce/tiny_mce.js"></script>
@@ -161,13 +161,13 @@ include($SERVER_ROOT.'/header.php');
 if(isset($profile_viewprofileCrumbs)){
 	echo "<div class='navpath'>";
 	echo $profile_viewprofileCrumbs;
-	echo " <b>User Profile</b>"; 
+	echo " <b>User Profile</b>";
 	echo "</div>";
 }
 ?>
 	<!-- inner text -->
 	<div id="innertext">
-	<?php 
+	<?php
 	if($isEditor){
 		if($statusStr){
 			echo "<div style='color:#FF0000;margin:10px 0px 10px 10px;'>".$statusStr."</div>";
@@ -176,18 +176,17 @@ if(isset($profile_viewprofileCrumbs)){
 		<div id="tabs" style="margin:10px;">
 			<ul>
 				<?php
-				if($floraModIsActive){ 
+				if($floraModIsActive){
 					?>
 					<li><a href="../checklists/checklistadminmeta.php?userid=<?php echo $userId; ?>">Species Checklists</a></li>
 					<?php
-				} 
+				}
 				?>
 				<li><a href="personalspecmenu.php">Specimen Management</a></li>
+				<li><a href="userprofile.php?userid=<?php echo $userId; ?>">User Profile</a></li>
 				<?php
-				if ($person->getIsTaxonomyEditor()) { 
-					echo '<li><a href="specimenstoid.php?userid='.$userId.'&action='.$action.'">IDs Needed</a></li>';
-				}
 				if ($person->getIsTaxonomyEditor()) {
+					echo '<li><a href="specimenstoid.php?userid='.$userId.'&action='.$action.'">IDs Needed</a></li>';
 					echo '<li><a href="imagesforid.php">Images for ID</a></li>';
 				}
 				if( $fpEnabled) {
@@ -204,10 +203,9 @@ if(isset($profile_viewprofileCrumbs)){
 					}
 				}
 				?>
-				<li><a href="userprofile.php?userid=<?php echo $userId; ?>">User Profile</a></li>
 			</ul>
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 	</div>
