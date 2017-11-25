@@ -2,7 +2,7 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ImageDetailManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
- 
+
 $imgId = $_REQUEST["imgid"];
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 $eMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0;
@@ -11,10 +11,10 @@ $imgManager = new ImageDetailManager($imgId,($action?'write':'readonly'));
 
 $imgArr = $imgManager->getImageMetadata($imgId);
 $isEditor = false;
-if($IS_ADMIN || $imgArr["username"] == $paramsArr['un'] || ($imgArr["photographeruid"] && $imgArr["photographeruid"] == $SYMB_UID)){
-		$isEditor = true;
+if($IS_ADMIN || $imgArr["username"] === $USERNAME || ($imgArr["photographeruid"] && $imgArr["photographeruid"] == $SYMB_UID)){
+    $isEditor = true;
 }
- 
+
 $status = "";
 if($isEditor){
 	if($action == "Submit Image Edits"){
@@ -74,7 +74,7 @@ if($imgArr){
 	<title><?php echo $DEFAULT_TITLE." Image Details: #".$imgId; ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
+	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script src="../js/jquery.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui.js" type="text/javascript"></script>
 	<script src="../js/symb/imagelib.imgdetails.js?ver=150910" type="text/javascript"></script>
@@ -103,7 +103,7 @@ if($imgArr){
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($imgArr){
 			?>
 			<div style="width:100%;float:right;clear:both;margin-top:10px;">
@@ -126,19 +126,19 @@ if($imgArr){
 			</div>
 			<?php
 		}
-		if($status){ 
+		if($status){
 			?>
 			<hr/>
 			<div style="color:red;">
 				<?php echo $status; ?>
 			</div>
 			<hr/>
-			<?php 
-		} 
+			<?php
+		}
 		if($imgArr){
 			?>
 			<table style="clear:both;">
-				<?php 
+				<?php
 				if($isEditor){
 					?>
 					<tr>
@@ -152,57 +152,57 @@ if($imgArr){
 										<input name="caption" type="text" value="<?php echo $imgArr["caption"];?>" style="width:250px;" maxlength="100">
 									</div>
 									<div style="margin-top:2px;">
-										<b>Photographer User ID:</b> 
+										<b>Photographer User ID:</b>
 										<select name="photographeruid" name="photographeruid">
 											<option value="">Select Photographer</option>
 											<option value="">---------------------------------------</option>
 											<?php $imgManager->echoPhotographerSelect($imgArr["photographeruid"]); ?>
 										</select>
-										* Users registered within system 
+										* Users registered within system
 										<a href="#" onclick="toggle('iepor');return false;" title="Display photographer override field">
 											<img src="../images/editplus.png" style="border:0px;width:12px;" />
 										</a>
 									</div>
 									<div id="iepor" style="margin-top:2px;display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">
-										<b>Photographer (override):</b> 
+										<b>Photographer (override):</b>
 										<input name="photographer" type="text" value="<?php echo $imgArr["photographer"];?>" style="width:250px;" maxlength="100" />
 										* Will override above selection
 									</div>
 									<div style="margin-top:2px;">
-										<b>Manager:</b> 
+										<b>Manager:</b>
 										<input name="owner" type="text" value="<?php echo $imgArr["owner"];?>" style="width:250px;" maxlength="100" />
 									</div>
 									<div style="margin-top:2px;">
-										<b>Source URL:</b> 
+										<b>Source URL:</b>
 										<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"];?>" style="width:450px;" maxlength="250" />
 									</div>
 									<div style="margin-top:2px;">
-										<b>Copyright:</b> 
+										<b>Copyright:</b>
 										<input name="copyright" type="text" value="<?php echo $imgArr["copyright"];?>" style="width:450px;" maxlength="250" />
 									</div>
 									<div style="margin-top:2px;">
-										<b>Rights:</b> 
+										<b>Rights:</b>
 										<input name="rights" type="text" value="<?php echo $imgArr["rights"];?>" style="width:450px;" maxlength="250" />
 									</div>
 									<div style="margin-top:2px;">
-										<b>Locality:</b> 
+										<b>Locality:</b>
 										<input name="locality" type="text" value="<?php echo $imgArr["locality"];?>" style="width:550px;" maxlength="250" />
 									</div>
 									<div style="margin-top:2px;">
-										<b>Occurrence Record #:</b> 
+										<b>Occurrence Record #:</b>
 										<input id="occid" name="occid" type="text" value="<?php  echo $imgArr["occid"];?>" />
 										<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occid')">Link to Occurrence Record</span>
 									</div>
 									<div style="margin-top:2px;">
-										<b>Notes:</b> 
+										<b>Notes:</b>
 										<input name="notes" type="text" value="<?php echo $imgArr["notes"];?>" style="width:550px;" maxlength="250" />
 									</div>
 									<div style="margin-top:2px;">
-										<b>Sort sequence:</b> 
+										<b>Sort sequence:</b>
 										<input name="sortsequence" type="text" value="<?php echo $imgArr["sortsequence"];?>" size="5" maxlength="5" />
 									</div>
 									<div style="margin-top:2px;">
-										<b>Web Image:</b><br/> 
+										<b>Web Image:</b><br/>
 										<input name="url" type="text" value="<?php echo $imgArr["url"];?>" style="width:90%;" maxlength="150" />
 										<?php if(stripos($imgArr["url"],$imageRootUrl) === 0){ ?>
 										<div style="margin-left:70px;">
@@ -213,7 +213,7 @@ if($imgArr){
 										<?php } ?>
 									</div>
 									<div style="margin-top:2px;">
-										<b>Thumbnail:</b><br/> 
+										<b>Thumbnail:</b><br/>
 										<input name="thumbnailurl" type="text" value="<?php echo $imgArr["thumbnailurl"];?>" style="width:90%;" maxlength="150">
 										<?php if(stripos($imgArr["thumbnailurl"],$imageRootUrl) === 0){ ?>
 										<div style="margin-left:70px;">
@@ -244,10 +244,10 @@ if($imgArr){
 								<fieldset style="margin:5px 0px 5px 5px;">
 							    	<legend><b>Transfer Image to a Different Scientific Name</b></legend>
 									<div style="font-weight:bold;">
-										Transfer to Taxon: 
+										Transfer to Taxon:
 										<input type="text" id="targettaxon" name="targettaxon" size="40" />
 										<input type="hidden" id="targettid" name="targettid" value="" />
-		
+
 										<input type="hidden" name="sourcetid" value="<?php echo $imgArr["tid"];?>" />
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 										<input type="hidden" name="submitaction" value="Transfer Image" />
@@ -262,7 +262,7 @@ if($imgArr){
 									<div style="margin-top:2px;">
 										<input type="submit" name="submitaction" id="submit" value="Delete Image"/>
 									</div>
-									<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
+									<input name="removeimg" type="checkbox" value="1" /> Remove image from server
 									<div style="margin-left:20px;color:red;">
 										(Note: if box is checked, image will be permanently deleted from server, as well as from database)
 									</div>
@@ -271,18 +271,18 @@ if($imgArr){
 						</div>
 					</td>
 					</tr>
-					<?php 
+					<?php
 				}
 				?>
 				<tr>
 					<td style="width:50%;text-align:center;padding:10px;">
-						<?php 
+						<?php
 						if($imgUrl == 'empty' && $origUrl) $imgUrl = $origUrl;
 						?>
 						<a href="<?php echo $imgUrl;?>">
 							<img src="<?php echo $imgUrl;?>" style="width:300px;" />
 						</a>
-						<?php 
+						<?php
 						if($origUrl){
 							echo '<div><a href="'.$origUrl.'">Click on Image to Enlarge</a></div>';
 						}
@@ -300,19 +300,19 @@ if($imgArr){
 							<?php
 						}
 						else{
-							if($isEditor){ 
+							if($isEditor){
 								?>
 								<div style="float:right;margin-right:10px;cursor:pointer;">
 									<img src="../images/edit.png" style="border:0px;" onclick="toggle('imageedit');" />
 								</div>
-								<?php 
+								<?php
 							}
-						} 
+						}
 						?>
 						<div style="clear:both;margin-top:80px;">
 							<b>Scientific Name:</b> <?php echo '<i>'.$imgArr["sciname"].'</i> '.$imgArr["author"]; ?>
 						</div>
-						<?php 
+						<?php
 							if($imgArr["caption"]) echo "<div><b>Caption:</b> ".$imgArr["caption"]."</div>";
 							if($imgArr["photographerdisplay"]){
 								echo "<div><b>Photographer:</b> ";
@@ -350,8 +350,8 @@ if($imgArr){
 							if($origUrl) echo '<div><a href="'.$origUrl.'">Open Large Image</a></div>';
 						?>
 						<div style="margin-top:20px;">
-							Do you see an error or have a comment about this image? <br/>If so, send email to: 
-							<?php 
+							Do you see an error or have a comment about this image? <br/>If so, send email to:
+							<?php
 							$emailSubject = $defaultTitle.' Image #'.$imgId;
 							$emailBody = 'Image being referenced: http://'.$_SERVER['SERVER_NAME'].$CLIENT_ROOT.'/imagelib/imgdetails.php?imgid='.$imgId;
 							$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
@@ -359,7 +359,7 @@ if($imgArr){
 							<a href="mailto:<?php echo $adminEmail.'?'.$emailRef; ?>">
 								<?php echo $adminEmail; ?>
 							</a>
-							
+
 						</div>
 					</td>
 				</tr>
@@ -368,10 +368,10 @@ if($imgArr){
 		}
 		else{
 			echo '<h2 style="margin:30px;">Unable to locate image.</h2>';
-		} 
+		}
 		?>
 	</div>
-<?php 
+<?php
 include($SERVER_ROOT.'/footer.php');
 ?>
 </body>

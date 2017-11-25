@@ -63,8 +63,8 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['recordedBy'] = 'o.recordedBy';
 		//$occurTermArr['recordedByID'] = 'http://symbiota.org/terms/recordedByID';
 		//$occurFieldArr['recordedByID'] = 'o.recordedById';
-		$occurTermArr['associatedCollectors'] = 'http://symbiota.org/terms/associatedCollectors'; 
-		$occurFieldArr['associatedCollectors'] = 'o.associatedCollectors'; 
+		$occurTermArr['associatedCollectors'] = 'http://symbiota.org/terms/associatedCollectors';
+		$occurFieldArr['associatedCollectors'] = 'o.associatedCollectors';
 		$occurTermArr['recordNumber'] = 'http://rs.tdwg.org/dwc/terms/recordNumber';
 		$occurFieldArr['recordNumber'] = 'o.recordNumber';
 		$occurTermArr['eventDate'] = 'http://rs.tdwg.org/dwc/terms/eventDate';
@@ -198,9 +198,9 @@ class DwcArchiverOccurrence{
 		$occurTermArr['accessRights'] = 'http://purl.org/dc/terms/accessRights';
 		$occurFieldArr['accessRights'] = 'c.accessRights';
 		$occurTermArr['sourcePrimaryKey-dbpk'] = 'http://symbiota.org/terms/sourcePrimaryKey-dbpk';
-		$occurFieldArr['sourcePrimaryKey-dbpk'] = 'o.dbpk'; 
-		$occurTermArr['collId'] = 'http://symbiota.org/terms/collId'; 
-		$occurFieldArr['collId'] = 'c.collid'; 
+		$occurFieldArr['sourcePrimaryKey-dbpk'] = 'o.dbpk';
+		$occurTermArr['collId'] = 'http://symbiota.org/terms/collId';
+		$occurFieldArr['collId'] = 'c.collid';
 		$occurTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
 		$occurFieldArr['recordId'] = 'g.guid AS recordId';
 		$occurTermArr['references'] = 'http://purl.org/dc/terms/references';
@@ -229,12 +229,12 @@ class DwcArchiverOccurrence{
 			$trimArr = array();
 			if(!$extended){
 				$trimArr = array('collectionID','rights','rightsHolder','accessRights','tidInterpreted','genericcolumn1','genericcolumn2',
-					'storageLocation','observerUid','processingStatus','duplicateQuantity','dateEntered','dateLastModified'); 
+					'storageLocation','observerUid','processingStatus','duplicateQuantity','dateEntered','dateLastModified');
 			}
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));
 		}
 		elseif($schemaType == 'backup'){
-			$trimArr = array('collectionID','rights','rightsHolder','accessRights'); 
+			$trimArr = array('collectionID','rights','rightsHolder','accessRights');
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));
 		}
 		elseif($schemaType == 'coge'){
@@ -248,7 +248,7 @@ class DwcArchiverOccurrence{
 		}
 		return $retArr;
 	}
-	
+
 	public static function getSqlOccurrences($fieldArr, $conditionSql, $tableJoinStr, $fullSql = true){
 		$sql = '';
 		if($conditionSql){
@@ -268,7 +268,7 @@ class DwcArchiverOccurrence{
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
 			$sql .= $tableJoinStr.$conditionSql;
-			if($fullSql) $sql .= ' ORDER BY o.collid '; 
+			if($fullSql) $sql .= ' ORDER BY c.collid ';
 			//echo '<div>'.$sql.'</div>'; exit;
 		}
 		return $sql;
