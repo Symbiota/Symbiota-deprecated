@@ -21,11 +21,13 @@ echo "Creating default Data Usage Policy page: /misc/usagepolicy_template.php"
 cp ../misc/usagepolicy_template.php ../misc/usagepolicy.php
 
 #Adjust file permission to give write access to certain folders and files
+echo "Adjusting file permissions"
 chmod 777 ../webservices/dwc/rss.xml
 chmod -R 777 ../temp
 chmod -R 777 ../content/collicon
 chmod -R 777 ../content/css
 chmod -R 777 ../content/dwca
 chmod -R 777 ../content/geolocate
+chmod -R 777 ../content/imglib
 chmod -R 777 ../content/lang
 chmod -R 777 ../content/logs 
