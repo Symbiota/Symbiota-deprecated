@@ -1,3 +1,4 @@
+<!-- Symbiota SOLR data-config version 1.0 -->
 <dataConfig>
     <dataSource type="JdbcDataSource"
                 driver="com.mysql.jdbc.Driver"
