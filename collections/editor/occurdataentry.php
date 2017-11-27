@@ -55,7 +55,7 @@ if($SYMB_UID){
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=201711"></script>
 </head>
 <body>
 	<!-- inner text -->

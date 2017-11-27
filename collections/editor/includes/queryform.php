@@ -6,9 +6,11 @@ $qRecordedBy=''; $qRecordNumber=''; $qEventDate='';
 $qRecordEnteredBy=''; $qObserverUid='';$qDateLastModified='';$qDateEntered='';
 $qProcessingStatus='';$qOrderBy='';$qOrderByDir='';
 $qImgOnly='';$qWithoutImg='';$qExsiccatiId='';
-$qCustomField1='';$qCustomType1='';$qCustomValue1='';
-$qCustomField2='';$qCustomType2='';$qCustomValue2='';
-$qCustomField3='';$qCustomType3='';$qCustomValue3='';
+$qCustomOpenParen1='';$qCustomField1='';$qCustomType1='';$qCustomValue1='';$qCustomCloseParen1='';
+$qCustomAndOr2='';$qCustomOpenParen2='';$qCustomField2='';$qCustomType2='';$qCustomValue2='';$qCustomCloseParen2='';
+$qCustomAndOr3='';$qCustomOpenParen3='';$qCustomField3='';$qCustomType3='';$qCustomValue3='';$qCustomCloseParen3='';
+$qCustomAndOr4='';$qCustomOpenParen4='';$qCustomField4='';$qCustomType4='';$qCustomValue4='';$qCustomCloseParen4='';
+$qCustomAndOr5='';$qCustomOpenParen5='';$qCustomField5='';$qCustomType5='';$qCustomValue5='';$qCustomCloseParen5='';
 $qryArr = $occManager->getQueryVariables();
 if($qryArr){
 	$qCatalogNumber = (array_key_exists('cn',$qryArr)?$qryArr['cn']:'');
@@ -24,16 +26,36 @@ if($qryArr){
 	$qExsiccatiId = (array_key_exists('exsid',$qryArr)?$qryArr['exsid']:'');
 	$qImgOnly = (array_key_exists('io',$qryArr)?$qryArr['io']:0);
 	$qWithoutImg = (array_key_exists('woi',$qryArr)?$qryArr['woi']:0);
-	$qCustomField1 = (array_key_exists('cf1',$qryArr)?$qryArr['cf1']:'');
+    $qCustomOpenParen1 = (array_key_exists('cop1',$qryArr)?$qryArr['cop1']:'');
+    $qCustomField1 = (array_key_exists('cf1',$qryArr)?$qryArr['cf1']:'');
 	$qCustomType1 = (array_key_exists('ct1',$qryArr)?$qryArr['ct1']:'');
 	$qCustomValue1 = (array_key_exists('cv1',$qryArr)?htmlentities($qryArr['cv1']):'');
+    $qCustomCloseParen1 = (array_key_exists('ccp1',$qryArr)?$qryArr['ccp1']:'');
+    $qCustomAndOr2 = (array_key_exists('cao2',$qryArr)?$qryArr['cao2']:'');
+    $qCustomOpenParen2 = (array_key_exists('cop2',$qryArr)?$qryArr['cop2']:'');
 	$qCustomField2 = (array_key_exists('cf2',$qryArr)?$qryArr['cf2']:'');
 	$qCustomType2 = (array_key_exists('ct2',$qryArr)?$qryArr['ct2']:'');
 	$qCustomValue2 = (array_key_exists('cv2',$qryArr)?htmlentities($qryArr['cv2']):'');
+    $qCustomCloseParen2 = (array_key_exists('ccp2',$qryArr)?$qryArr['ccp2']:'');
+    $qCustomAndOr3 = (array_key_exists('cao3',$qryArr)?$qryArr['cao3']:'');
+    $qCustomOpenParen3 = (array_key_exists('cop3',$qryArr)?$qryArr['cop3']:'');
 	$qCustomField3 = (array_key_exists('cf3',$qryArr)?$qryArr['cf3']:'');
 	$qCustomType3 = (array_key_exists('ct3',$qryArr)?$qryArr['ct3']:'');
 	$qCustomValue3 = (array_key_exists('cv3',$qryArr)?htmlentities($qryArr['cv3']):'');
-	$qOcrFrag = (array_key_exists('ocr',$qryArr)?htmlentities($qryArr['ocr']):'');
+    $qCustomCloseParen3 = (array_key_exists('ccp3',$qryArr)?$qryArr['ccp3']:'');
+    $qCustomAndOr4 = (array_key_exists('cao4',$qryArr)?$qryArr['cao4']:'');
+    $qCustomOpenParen4 = (array_key_exists('cop4',$qryArr)?$qryArr['cop4']:'');
+    $qCustomField4 = (array_key_exists('cf4',$qryArr)?$qryArr['cf4']:'');
+    $qCustomType4 = (array_key_exists('ct4',$qryArr)?$qryArr['ct4']:'');
+    $qCustomValue4 = (array_key_exists('cv4',$qryArr)?htmlentities($qryArr['cv4']):'');
+    $qCustomCloseParen4 = (array_key_exists('ccp4',$qryArr)?$qryArr['ccp4']:'');
+    $qCustomAndOr5 = (array_key_exists('cao5',$qryArr)?$qryArr['cao5']:'');
+    $qCustomOpenParen5 = (array_key_exists('cop5',$qryArr)?$qryArr['cop5']:'');
+    $qCustomField5 = (array_key_exists('cf5',$qryArr)?$qryArr['cf5']:'');
+    $qCustomType5 = (array_key_exists('ct5',$qryArr)?$qryArr['ct5']:'');
+    $qCustomValue5 = (array_key_exists('cv5',$qryArr)?htmlentities($qryArr['cv5']):'');
+    $qCustomCloseParen5 = (array_key_exists('ccp5',$qryArr)?$qryArr['ccp5']:'');
+    $qOcrFrag = (array_key_exists('ocr',$qryArr)?htmlentities($qryArr['ocr']):'');
 	$qOrderBy = (array_key_exists('orderby',$qryArr)?$qryArr['orderby']:'');
 	$qOrderByDir = (array_key_exists('orderbydir',$qryArr)?$qryArr['orderbydir']:'');
 }
@@ -47,7 +69,7 @@ else{
 	$processingStatusArr = array('unprocessed','unprocessed/NLP','stage 1','stage 2','stage 3','pending review-nfn','pending review','expert required','reviewed','closed');
 }
 ?>
-<div id="querydiv" style="clear:both;width:790px;display:<?php echo ($displayQuery?'block':'none'); ?>;">
+<div id="querydiv" style="clear:both;width:830px;display:<?php echo ($displayQuery?'block':'none'); ?>;">
 	<form name="queryform" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="return verifyQueryForm(this)">
 		<fieldset style="padding:5px;">
 			<legend><b>Record Search Form</b></legend>
@@ -212,8 +234,12 @@ else{
 			//sort($advFieldArr);
 			?>
 			<div style="margin:2px 0px;">
-				<b>Custom Field 1:</b> 
-				<select name="q_customfield1" onchange="customSelectChanged(1)">
+				<b>Custom Field 1:</b>
+                <select name="q_customopenparen1" onchange="customSelectChanged(1)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomOpenParen1=='('?'SELECTED':''); ?> value="(">(</option>
+                </select>
+                <select name="q_customfield1" onchange="customSelectChanged(1)">
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
 					<?php 
@@ -232,14 +258,26 @@ else{
 					<option <?php echo ($qCustomType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
 					<option <?php echo ($qCustomType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
 				</select>
-				<input name="q_customvalue1" type="text" value="<?php echo $qCustomValue1; ?>" style="width:200px;" />
+                <input name="q_customvalue1" type="text" value="<?php echo $qCustomValue1; ?>" style="width:200px;" />
+                <select name="q_customcloseparen1" onchange="customSelectChanged(1)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomCloseParen1==')'?'SELECTED':''); ?> value=")">)</option>
+                </select>
 				<a href="#" onclick="toggleCustomDiv2();return false;">
 					<img src="../../images/editplus.png" />
 				</a>
 			</div>
 			<div id="customdiv2" style="margin:2px 0px;display:<?php echo ($qCustomValue2||$qCustomType2=='NULL'||$qCustomType2=='NOTNULL'?'block':'none');?>;">
-				<b>Custom Field 2:</b> 
-				<select name="q_customfield2" onchange="customSelectChanged(2)">
+				<b>Custom Field 2:</b>
+                <select name="q_customandor2" onchange="customSelectChanged(2)">
+                    <option>AND</option>
+                    <option <?php echo ($qCustomAndOr2=='OR'?'SELECTED':''); ?> value="OR">OR</option>
+                </select>
+                <select name="q_customopenparen2" onchange="customSelectChanged(2)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomOpenParen2=='('?'SELECTED':''); ?> value="(">(</option>
+                </select>
+                <select name="q_customfield2" onchange="customSelectChanged(2)">
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
 					<?php 
@@ -258,14 +296,26 @@ else{
 					<option <?php echo ($qCustomType2=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
 					<option <?php echo ($qCustomType2=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
 				</select>
-				<input name="q_customvalue2" type="text" value="<?php echo $qCustomValue2; ?>" style="width:200px;" />
+                <input name="q_customvalue2" type="text" value="<?php echo $qCustomValue2; ?>" style="width:200px;" />
+                <select name="q_customcloseparen2" onchange="customSelectChanged(2)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomCloseParen2==')'?'SELECTED':''); ?> value=")">)</option>
+                </select>
 				<a href="#" onclick="toggleCustomDiv3();return false;">
 					<img src="../../images/editplus.png" />
 				</a>
 			</div>
 			<div id="customdiv3" style="margin:2px 0px;display:<?php echo ($qCustomValue3||$qCustomType3=='NULL'||$qCustomType3=='NOTNULL'?'block':'none');?>;">
-				<b>Custom Field 3:</b> 
-				<select name="q_customfield3" onchange="customSelectChanged(3)">
+				<b>Custom Field 3:</b>
+                <select name="q_customandor3" onchange="customSelectChanged(3)">
+                    <option>AND</option>
+                    <option <?php echo ($qCustomAndOr3=='OR'?'SELECTED':''); ?> value="OR">OR</option>
+                </select>
+                <select name="q_customopenparen3" onchange="customSelectChanged(3)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomOpenParen3=='('?'SELECTED':''); ?> value="(">(</option>
+                </select>
+                <select name="q_customfield3" onchange="customSelectChanged(3)">
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
 					<?php 
@@ -284,8 +334,88 @@ else{
 					<option <?php echo ($qCustomType3=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
 					<option <?php echo ($qCustomType3=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
 				</select>
-				<input name="q_customvalue3" type="text" value="<?php echo $qCustomValue3; ?>" style="width:200px;" />
+                <input name="q_customvalue3" type="text" value="<?php echo $qCustomValue3; ?>" style="width:200px;" />
+                <select name="q_customcloseparen3" onchange="customSelectChanged(3)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomCloseParen3==')'?'SELECTED':''); ?> value=")">)</option>
+                </select>
+                <a href="#" onclick="toggleCustomDiv4();return false;">
+                    <img src="../../images/editplus.png" />
+                </a>
 			</div>
+            <div id="customdiv4" style="margin:2px 0px;display:<?php echo ($qCustomValue4||$qCustomType4=='NULL'||$qCustomType4=='NOTNULL'?'block':'none');?>;">
+                <b>Custom Field 4:</b>
+                <select name="q_customandor4" onchange="customSelectChanged(4)">
+                    <option>AND</option>
+                    <option <?php echo ($qCustomAndOr4=='OR'?'SELECTED':''); ?> value="OR">OR</option>
+                </select>
+                <select name="q_customopenparen4" onchange="customSelectChanged(4)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomOpenParen4=='('?'SELECTED':''); ?> value="(">(</option>
+                </select>
+                <select name="q_customfield4" onchange="customSelectChanged(4)">
+                    <option value="">Select Field Name</option>
+                    <option value="">---------------------------------</option>
+                    <?php
+                    foreach($advFieldArr as $k => $v){
+                        echo '<option value="'.$k.'" '.($k==$qCustomField4?'SELECTED':'').'>'.$v.'</option>';
+                    }
+                    ?>
+                </select>
+                <select name="q_customtype4">
+                    <option>EQUALS</option>
+                    <option <?php echo ($qCustomType4=='NOT EQUALS'?'SELECTED':''); ?> value="NOT EQUALS">NOT EQUALS</option>
+                    <option <?php echo ($qCustomType4=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
+                    <option <?php echo ($qCustomType4=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+                    <option <?php echo ($qCustomType4=='GREATER'?'SELECTED':''); ?> value="GREATER">GREATER THAN</option>
+                    <option <?php echo ($qCustomType4=='LESS'?'SELECTED':''); ?> value="LESS">LESS THAN</option>
+                    <option <?php echo ($qCustomType4=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+                    <option <?php echo ($qCustomType4=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
+                </select>
+                <input name="q_customvalue4" type="text" value="<?php echo $qCustomValue4; ?>" style="width:200px;" />
+                <select name="q_customcloseparen4" onchange="customSelectChanged(4)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomCloseParen4==')'?'SELECTED':''); ?> value=")">)</option>
+                </select>
+                <a href="#" onclick="toggleCustomDiv5();return false;">
+                    <img src="../../images/editplus.png" />
+                </a>
+            </div>
+            <div id="customdiv5" style="margin:2px 0px;display:<?php echo ($qCustomValue5||$qCustomType5=='NULL'||$qCustomType5=='NOTNULL'?'block':'none');?>;">
+                <b>Custom Field 5:</b>
+                <select name="q_customandor5" onchange="customSelectChanged(5)">
+                    <option>AND</option>
+                    <option <?php echo ($qCustomAndOr5=='OR'?'SELECTED':''); ?> value="OR">OR</option>
+                </select>
+                <select name="q_customopenparen5" onchange="customSelectChanged(5)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomOpenParen5=='('?'SELECTED':''); ?> value="(">(</option>
+                </select>
+                <select name="q_customfield5" onchange="customSelectChanged(5)">
+                    <option value="">Select Field Name</option>
+                    <option value="">---------------------------------</option>
+                    <?php
+                    foreach($advFieldArr as $k => $v){
+                        echo '<option value="'.$k.'" '.($k==$qCustomField5?'SELECTED':'').'>'.$v.'</option>';
+                    }
+                    ?>
+                </select>
+                <select name="q_customtype5">
+                    <option>EQUALS</option>
+                    <option <?php echo ($qCustomType5=='NOT EQUALS'?'SELECTED':''); ?> value="NOT EQUALS">NOT EQUALS</option>
+                    <option <?php echo ($qCustomType5=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
+                    <option <?php echo ($qCustomType5=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+                    <option <?php echo ($qCustomType5=='GREATER'?'SELECTED':''); ?> value="GREATER">GREATER THAN</option>
+                    <option <?php echo ($qCustomType5=='LESS'?'SELECTED':''); ?> value="LESS">LESS THAN</option>
+                    <option <?php echo ($qCustomType5=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+                    <option <?php echo ($qCustomType5=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
+                </select>
+                <input name="q_customvalue5" type="text" value="<?php echo $qCustomValue5; ?>" style="width:200px;" />
+                <select name="q_customcloseparen5" onchange="customSelectChanged(5)">
+                    <option value="">--</option>
+                    <option <?php echo ($qCustomCloseParen5==')'?'SELECTED':''); ?> value=")">)</option>
+                </select>
+            </div>
 			<?php 
 			if(!$crowdSourceMode){
 				$qryStr = '';
