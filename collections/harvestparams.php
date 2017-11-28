@@ -31,7 +31,7 @@ if(isset($_REQUEST['db'])){
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=7"></script>
+    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=8"></script>
     <script type="text/javascript">
         var starrJson = '';
 
