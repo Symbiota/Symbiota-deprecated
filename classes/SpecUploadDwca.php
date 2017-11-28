@@ -1,7 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/classes/SpecUploadBase.php');
 class SpecUploadDwca extends SpecUploadBase{
-	
+
 	private $baseFolderName;
 	private $extensionFolderName = '';
 	private $metaArr;
@@ -9,6 +9,7 @@ class SpecUploadDwca extends SpecUploadBase{
 	private $enclosure = '"';
 	private $encoding = 'utf-8';
 	private $loopCnt = 0;
+	private $coreIdArr = array();
 
 	function __construct() {
  		parent::__construct();
@@ -24,14 +25,14 @@ class SpecUploadDwca extends SpecUploadBase{
 		$localFolder = $this->collMetadataArr["institutioncode"].($this->collMetadataArr["collectioncode"]?$this->collMetadataArr["collectioncode"].'_':'').time();
 		mkdir($this->uploadTargetPath.$localFolder);
 		$fullPath = $this->uploadTargetPath.$localFolder.'/dwca.zip';
-		
+
 		if(array_key_exists('ulfnoverride',$_POST) && $_POST['ulfnoverride'] && !$this->path){
 			$this->path = $_POST['ulfnoverride'];
 		}
-		
+
 		if($this->path){
 			if($this->uploadType == $this->IPTUPLOAD){
-				//If IPT resource URL was provided, adjust ULR to point to the Archive file 
+				//If IPT resource URL was provided, adjust ULR to point to the Archive file
 				if(strpos($this->path,'/resource.do')){
 					$this->path = str_replace('/resource.do','/archive.do',$this->path);
 				}
@@ -67,7 +68,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				$this->errorStr = 'ERROR uploading file: '.$msg;
 			}
 		}
-		
+
 		if($this->baseFolderName && substr($this->baseFolderName,-1) != '/') $this->baseFolderName .= '/';
 		if($this->baseFolderName){
 			if(!$this->unpackArchive()){
@@ -104,13 +105,13 @@ class SpecUploadDwca extends SpecUploadBase{
 		$zip->close();
 		return $status;
 	}
-	
+
 	public function analyzeUpload(){
 		$status = false;
 		if($this->readMetaFile()){
 			if(isset($this->metaArr['occur']['fields'])){
 				$this->sourceArr = $this->metaArr['occur']['fields'];
-				//Set identification and image source fields 
+				//Set identification and image source fields
 				if(isset($this->metaArr['ident']['fields'])){
 					$this->identSourceArr = $this->metaArr['ident']['fields'];
 				}
@@ -155,7 +156,7 @@ class SpecUploadDwca extends SpecUploadBase{
 		$emlDoc = new DOMDocument();
 		$emlDoc->load($dwcaDir.'eml.xml');
 		$xpath = new DOMXpath($emlDoc);
-		
+
 		$nodeList = $xpath->query('//collection');
 		if(!$nodeList){
 			$warningArr[] = '<b>WARNING:</b> does NOT appear to be a valid backup file; unable to locate collection element within eml.xml';
@@ -230,7 +231,7 @@ class SpecUploadDwca extends SpecUploadBase{
 							}
 							//Test meta.xml field list against occurrence file
 							if($this->metaArr['occur']['ignoreHeaderLines'] == 1){
-								//Set delimiter  
+								//Set delimiter
 								if($this->metaArr['occur']['fieldsTerminatedBy']){
 									if($this->metaArr['occur']['fieldsTerminatedBy'] == '\t'){
 										$this->delimiter = "\t";
@@ -321,7 +322,7 @@ class SpecUploadDwca extends SpecUploadBase{
 
 								//Test meta.xml field list against extension file
 								if($this->metaArr[$tagName]['ignoreHeaderLines'] == 1){
-									//Set delimiter  
+									//Set delimiter
 									if($this->metaArr[$tagName]['fieldsTerminatedBy']){
 										if($this->metaArr[$tagName]['fieldsTerminatedBy'] == '\t'){
 											$this->delimiter = "\t";
@@ -348,7 +349,7 @@ class SpecUploadDwca extends SpecUploadBase{
 									}
 								}
 							}
-						}					
+						}
 					}
 				}
 				else{
@@ -390,15 +391,15 @@ class SpecUploadDwca extends SpecUploadBase{
 			closedir($handle);
 		}
 	}
-	
+
 	public function uploadData($finalTransfer){
-		global $charset;
+		global $CHARSET;
 		$fullPath = $this->uploadTargetPath.$this->baseFolderName;
 		if(file_exists($fullPath)){
 
 			//First, delete all records in uploadspectemp table associated with this collection
 			$this->prepUploadData();
-						
+
 			if($this->readMetaFile() && isset($this->metaArr['occur']['fields'])){
 				$fullPath .= $this->extensionFolderName;
 				//Set parsing variables
@@ -424,14 +425,14 @@ class SpecUploadDwca extends SpecUploadBase{
 				$fullPath .= $this->metaArr['occur']['name'];
 				if(file_exists($fullPath)){
 			 		$fh = fopen($fullPath,'r') or die("Can't open occurrence file");
-					
+
 			 		if($this->metaArr['occur']['ignoreHeaderLines'] == '1'){
 			 			//Advance one record to go past header
 						$this->getRecordArr($fh);
 			 		}
-					
-					$cset = strtolower(str_replace('-','',$charset)); 
-					//Set source array 
+
+					$cset = strtolower(str_replace('-','',$CHARSET));
+					//Set source array
 					$this->sourceArr = array();
 					foreach($this->metaArr['occur']['fields'] as $k => $v){
 						$this->sourceArr[$k] = strtolower($v);
@@ -448,28 +449,102 @@ class SpecUploadDwca extends SpecUploadBase{
 					}
 					$collName = $this->collMetadataArr["name"].' ('.$this->collMetadataArr["institutioncode"];
 					if($this->collMetadataArr["collectioncode"]) $collName .= '-'.$this->collMetadataArr["collectioncode"];
-					$collName .= ')'; 
+					$collName .= ')';
 					$this->outputMsg('<li>Uploading data for: '.$collName.'</li>');
 					$this->conn->query('SET autocommit=0');
 					$this->conn->query('SET unique_checks=0');
 					$this->conn->query('SET foreign_key_checks=0');
 					while($recordArr = $this->getRecordArr($fh)){
-						$recMap = Array();
-						foreach($this->fieldMap as $symbField => $sMap){
-							if(substr($symbField,0,8) != 'unmapped'){
-								$indexArr = array_keys($this->sourceArr,$sMap['field']);
-								$index = array_shift($indexArr);
-								if(array_key_exists($index,$recordArr)){
-									$valueStr = trim($recordArr[$index]);
-									if($valueStr){
-										if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
-										$recMap[$symbField] = $valueStr;
+						$addRecord = true;
+						foreach($this->filterArr as $fieldName => $condArr){
+							$filterIndexArr = array_keys($this->sourceArr,$fieldName);
+							$filterIndex = array_shift($filterIndexArr);
+							$targetValue = trim(strtolower($recordArr[$filterIndex]));
+							foreach($condArr as $cond => $valueArr){
+								if($cond == 'ISNULL'){
+									if($targetValue){
+										$addRecord = false;
+										continue 2;
+									}
+								}
+								elseif($cond == 'NOTNULL'){
+									if(!$targetValue){
+										$addRecord = false;
+										continue 2;
+									}
+								}
+								elseif($cond == 'EQUALS'){
+									if(!in_array($targetValue, $valueArr)){
+										$addRecord = false;
+										continue 2;
+									}
+								}
+								else{
+									if($cond == 'STARTS'){
+										//Multiple values treated as an OR condition
+										$condMeet = false;
+										foreach($valueArr as $filterValue){
+											if(strpos($targetValue,$filterValue) === 0){
+												$condMeet = true;
+											}
+										}
+										if(!$condMeet){
+											$addRecord = false;
+											continue 2;
+										}
+									}
+									elseif($cond == 'LIKE'){
+										//Multiple values treated as an OR condition
+										$condMeet = false;
+										foreach($valueArr as $filterValue){
+											if(strpos($targetValue,$filterValue) !== false){
+												$condMeet = true;
+											}
+										}
+										if(!$condMeet){
+											$addRecord = false;
+											continue 2;
+										}
+									}
+									elseif($cond == 'LESSTHAN'){
+										$filterValue = array_pop($valueArr);
+										if($targetValue > $filterValue){
+											$addRecord = false;
+											continue 2;
+										}
+									}
+									elseif($cond == 'GREATERTHAN'){
+										$filterValue = array_pop($valueArr);
+										if($targetValue < $filterValue){
+											$addRecord = false;
+											continue 2;
+										}
 									}
 								}
 							}
 						}
-						$this->loadRecord($recMap);
-						unset($recMap);
+						if($addRecord){
+							if($this->filterArr && ($this->includeIdentificationHistory || $this->includeImages)){
+								$this->coreIdArr[] = $recordArr[0];
+							}
+							$recMap = Array();
+							foreach($this->fieldMap as $symbField => $sMap){
+								if(substr($symbField,0,8) != 'unmapped'){
+									//Apply source filter if they exist
+									$indexArr = array_keys($this->sourceArr,$sMap['field']);
+									$index = array_shift($indexArr);
+									if(array_key_exists($index,$recordArr)){
+										$valueStr = trim($recordArr[$index]);
+										if($valueStr){
+											if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
+											$recMap[$symbField] = $valueStr;
+										}
+									}
+								}
+							}
+							$this->loadRecord($recMap);
+							unset($recMap);
+						}
 					}
 					fclose($fh);
 					$this->conn->query('COMMIT');
@@ -479,7 +554,7 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->getTransferCount().' records loaded</li>');
 					ob_flush();
 					flush();
-					
+
 					//Upload identification history
 					if($this->includeIdentificationHistory){
 						$this->outputMsg('<li>Loading identification history extension... </li>');
@@ -494,7 +569,7 @@ class SpecUploadDwca extends SpecUploadBase{
 						$this->uploadExtension('ident',$this->identFieldMap,$this->identSourceArr);
 						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->identTransferCount.' records loaded</li>');
 					}
-					
+
 					//Upload images
 					if($this->includeImages){
 						$this->outputMsg('<li>Loading image extension... </li>');
@@ -507,16 +582,28 @@ class SpecUploadDwca extends SpecUploadBase{
 							$this->imageFieldMap['owner']['field'] = 'creator';
 						}
 						$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
+
+						//Remove images that don't have an occurrence record in uploadspectemp table
+						$sql = 'DELETE ui.* '.
+							'FROM uploadimagetemp ui LEFT JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
+							'WHERE (ui.occid IS NULL) AND (ui.collid = '.$this->collId.') AND (u.collid IS NULL)';
+						if($this->conn->query($sql)){
+							$this->outputMsg('<li style="margin-left:10px;">Removing images associated with excluded occurrence records... </li>');
+						}
+						else{
+							$this->outputMsg('<li style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</li> ');
+						}
+						$this->setImageTransferCount();
 						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
 					}
-					
+
 					//Do some cleanup
 					$this->cleanUpload();
 
 					if($finalTransfer){
 						$this->finalTransfer();
 					}
-					
+
 					//Remove all upload files and directories
 					$this->removeFiles($this->uploadTargetPath.$this->baseFolderName);
 					//Remove orginal directory
@@ -564,7 +651,7 @@ class SpecUploadDwca extends SpecUploadBase{
 						$pathFrag .= $item.'/';
 						$this->removeFiles($baseDir, $pathFrag);
 					}
-					if($this->loopCnt > 15) break; 
+					if($this->loopCnt > 15) break;
 				}
 				$this->loopCnt++;
 			}
@@ -578,7 +665,7 @@ class SpecUploadDwca extends SpecUploadBase{
 	}
 
 	private function uploadExtension($targetStr,$fieldMap,$sourceArr){
-		global $charset;
+		global $CHARSET;
 		$fullPathExt = '';
 		if($this->metaArr[$targetStr]['name']){
 			$fullPathExt = $this->uploadTargetPath.$this->baseFolderName.$this->extensionFolderName.$this->metaArr[$targetStr]['name'];
@@ -603,14 +690,14 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->encoding = strtolower(str_replace('-','',$this->metaArr[$targetStr]['encoding']));
 				}
 				$coreId = $this->metaArr[$targetStr]['coreid'];
-				
+
 		 		$fh = fopen($fullPathExt,'r') or die("Can't open extension file");
-				
+
 		 		if($this->metaArr[$targetStr]['ignoreHeaderLines'] == '1'){
 		 			//Advance one record to go past header
 		 			$this->getRecordArr($fh);
 		 		}
-				$cset = strtolower(str_replace('-','',$charset));
+				$cset = strtolower(str_replace('-','',$CHARSET));
 
 				$fieldMap['dbpk']['field'] = 'coreid';
 				//Load data
@@ -618,27 +705,29 @@ class SpecUploadDwca extends SpecUploadBase{
 				//$this->conn->query('SET unique_checks=0');
 				//$this->conn->query('SET foreign_key_checks=0');
 				while($recordArr = $this->getRecordArr($fh)){
-					$recMap = Array();
-					foreach($fieldMap as $symbField => $iMap){
-						if(substr($symbField,0,8) != 'unmapped'){
-							$indexArr = array_keys($sourceArr,$iMap['field']);
-							$index = array_shift($indexArr);
-							if(array_key_exists($index,$recordArr)){
-								$valueStr = trim($recordArr[$index]);
-								if($valueStr){
-									if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
-									$recMap[$symbField] = $valueStr;
+					if(!$this->coreIdArr || in_array($recordArr[0], $this->coreIdArr)){
+						$recMap = Array();
+						foreach($fieldMap as $symbField => $iMap){
+							if(substr($symbField,0,8) != 'unmapped'){
+								$indexArr = array_keys($sourceArr,$iMap['field']);
+								$index = array_shift($indexArr);
+								if(array_key_exists($index,$recordArr)){
+									$valueStr = trim($recordArr[$index]);
+									if($valueStr){
+										if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
+										$recMap[$symbField] = $valueStr;
+									}
 								}
 							}
 						}
+						if($targetStr == 'ident'){
+							$this->loadIdentificationRecord($recMap);
+						}
+						elseif($targetStr == 'image'){
+							$this->loadImageRecord($recMap);
+						}
+						unset($recMap);
 					}
-					if($targetStr == 'ident'){
-						$this->loadIdentificationRecord($recMap);
-					}
-					elseif($targetStr == 'image'){
-						$this->loadImageRecord($recMap);
-					}
-					unset($recMap);
 				}
 				//$this->conn->query('COMMIT');
 				//$this->conn->query('SET autocommit=1');
@@ -679,7 +768,7 @@ class SpecUploadDwca extends SpecUploadBase{
 			else{
 				$this->delimiter = ',';
 			}
-			//Get data 
+			//Get data
 			$recordArr = explode($this->delimiter,$record);
 			//Remove enclosures
 			if($this->enclosure){
@@ -743,7 +832,7 @@ class SpecUploadDwca extends SpecUploadBase{
 			$this->errorStr = '<li style="margin-left:10px">Unable to remove duclicate GUID references</li>';
 		}
 	}
-	
+
 	public function setBaseFolderName($name){
 		$this->baseFolderName = $name;
 		if($this->baseFolderName && substr($this->baseFolderName,-1) != '/') $this->baseFolderName .= '/';
