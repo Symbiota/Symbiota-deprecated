@@ -31,7 +31,7 @@ if(isset($_REQUEST['db'])){
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=3"></script>
+    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=7"></script>
     <script type="text/javascript">
         var starrJson = '';
 
@@ -90,7 +90,7 @@ if(isset($_REQUEST['db'])){
         <div style="margin:5px;">
 			<input type='checkbox' name='showtable' id='showtable' value='1' onchange="changeTableDisplay();" /> Show results in table view
 		</div>
-		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm(this)">
+		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm(this);">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:5px 10px;'>
 				<div style="margin-bottom:10px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" /></div>

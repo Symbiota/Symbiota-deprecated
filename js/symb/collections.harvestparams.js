@@ -135,7 +135,7 @@ function checkHarvestparamsForm(frm){
     //make sure they have filled out at least one field.
     if((frm.taxa.value == '') && (frm.country.value == '') && (frm.state.value == '') && (frm.county.value == '') &&
         (frm.locality.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') &&
-        (frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate.value == '')){
+        (frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate1.value == '') && (frm.elevlow.value == '')){
         alert("Please fill in at least one search parameter!");
         return false;
     }
@@ -170,6 +170,13 @@ function checkHarvestparamsForm(frm){
     if(frm.pointlat.value != '' || frm.pointlong.value != '' || frm.radius.value != ''){
         if(frm.pointlat.value == '' || frm.pointlong.value == '' || frm.radius.value == ''){
             alert("Error: Please make all Lat/Long point-radius values contain a value or all are empty");
+            return false;
+        }
+    }
+
+    if(frm.elevlow.value || frm.elevhigh.value){
+        if(isNaN(frm.elevlow.value) || isNaN(frm.elevhigh.value)){
+            alert("Error: Please enter only numbers for elevation values");
             return false;
         }
     }

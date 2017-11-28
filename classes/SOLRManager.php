@@ -699,7 +699,7 @@ class SOLRManager extends OccurrenceManager{
             if (array_key_exists("elevlow",$this->searchTermsArr))  { $elevlow = $this->searchTermsArr["elevlow"]; }
             if (array_key_exists("elevhigh",$this->searchTermsArr))  { $elevhigh = $this->searchTermsArr["elevhigh"]; }
             $solrWhere .= 'AND ((minimumElevationInMeters:['.$elevlow.' TO *] AND maximumElevationInMeters:[* TO '.$elevhigh.']) OR '.
-                '(-maximumElevationInMeters:["" TO *] AND minimumElevationInMeters:['.$elevlow.' TO *] AND minimumElevationInMeters:[* TO '.$elevhigh.']))';
+                '(-maximumElevationInMeters:[* TO *] AND minimumElevationInMeters:['.$elevlow.' TO *] AND minimumElevationInMeters:[* TO '.$elevhigh.']))';
         }
         if(array_key_exists("assochost",$this->searchTermsArr)){
             $searchStr = str_replace("%apos;","'",$this->searchTermsArr["assochost"]);
