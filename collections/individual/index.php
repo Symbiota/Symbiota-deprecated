@@ -607,6 +607,14 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								</div>
 								<?php 
 							}
+                            if($occArr['locationremarks']){
+                                ?>
+                                <div style="margin-left:10px;">
+                                    <b>Location Remarks: </b>
+                                    <?php echo $occArr['locationremarks']; ?>
+                                </div>
+                                <?php
+                            }
 							if($occArr['georeferenceremarks']){
 								?>
 								<div style="margin-left:10px;clear:both;">
@@ -688,11 +696,51 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						if($occArr['reproductivecondition']){ 
 							?>
 							<div style="clear:both;">
-								<b>Phenology:</b> 
+								<b>Reproductive Condition:</b>
 								<?php echo $occArr['reproductivecondition']; ?>
 							</div>
 							<?php 
 						}
+                        if($occArr['lifestage']){
+                            ?>
+                            <div style="clear:both;">
+                                <b>Life Stage:</b>
+                                <?php echo $occArr['lifestage']; ?>
+                            </div>
+                            <?php
+                        }
+                        if($occArr['sex']){
+                            ?>
+                            <div style="clear:both;">
+                                <b>Sex:</b>
+                                <?php echo $occArr['sex']; ?>
+                            </div>
+                            <?php
+                        }
+                        if($occArr['individualcount']){
+                            ?>
+                            <div style="clear:both;">
+                                <b>Individual Count:</b>
+                                <?php echo $occArr['individualcount']; ?>
+                            </div>
+                            <?php
+                        }
+                        if($occArr['samplingprotocol']){
+                            ?>
+                            <div style="clear:both;">
+                                <b>Sampling Protocol:</b>
+                                <?php echo $occArr['samplingprotocol']; ?>
+                            </div>
+                            <?php
+                        }
+                        if($occArr['preparations']){
+                            ?>
+                            <div style="clear:both;">
+                                <b>Preparations:</b>
+                                <?php echo $occArr['preparations']; ?>
+                            </div>
+                            <?php
+                        }
 						$noteStr = '';
 						if($occArr['occurrenceremarks']) $noteStr .= "; ".$occArr['occurrenceremarks'];
 						if($occArr['establishmentmeans']) $noteStr .= "; ".$occArr['establishmentmeans'];
