@@ -581,7 +581,14 @@ class SpecUploadDwca extends SpecUploadBase{
 							$this->imageFieldMap['url']['field'] = 'goodqualityaccessuri';
 							$this->imageFieldMap['owner']['field'] = 'creator';
 						}
+						$this->conn->query('SET autocommit=0');
+						$this->conn->query('SET unique_checks=0');
+						$this->conn->query('SET foreign_key_checks=0');
 						$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
+						$this->conn->query('COMMIT');
+						$this->conn->query('SET autocommit=1');
+						$this->conn->query('SET unique_checks=1');
+						$this->conn->query('SET foreign_key_checks=1');
 
 						//Remove images that don't have an occurrence record in uploadspectemp table
 						$sql = 'DELETE ui.* '.
