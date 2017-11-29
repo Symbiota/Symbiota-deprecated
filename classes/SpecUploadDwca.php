@@ -525,7 +525,7 @@ class SpecUploadDwca extends SpecUploadBase{
 						}
 						if($addRecord){
 							if($this->filterArr && ($this->includeIdentificationHistory || $this->includeImages)){
-								$this->coreIdArr[] = $recordArr[0];
+								//$this->coreIdArr[] = $recordArr[0];
 							}
 							$recMap = Array();
 							foreach($this->fieldMap as $symbField => $sMap){
