@@ -38,7 +38,7 @@ class OccurrenceIndividualManager extends Manager{
 	public function getMetadata(){
 		return $this->metadataArr;
 	}
-	
+
 	public function setGuid($guid){
 		$guid = $this->cleanInStr($guid);
 		if(!$this->occid){
@@ -48,9 +48,9 @@ class OccurrenceIndividualManager extends Manager{
 				$this->occid = $r->occid;
 			}
 			$rs->free();
-		}		
+		}
 		if(!$this->occid){
-			//Check occurrence recordID 
+			//Check occurrence recordID
 			$sql = 'SELECT occid FROM omoccurrences WHERE occurrenceid = "'.$guid.'"';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -70,7 +70,7 @@ class OccurrenceIndividualManager extends Manager{
 			$rs->free();
 		}
 		if(!$this->occid){
-			//Check identification recordID 
+			//Check identification recordID
 			$sql = 'SELECT d.occid '.
 				'FROM guidoccurdeterminations g INNER JOIN omoccurdeterminations d ON g.detid = d.detid '.
 				'WHERE g.guid = "'.$guid.'" ';
@@ -100,12 +100,10 @@ class OccurrenceIndividualManager extends Manager{
 		$sql = 'SELECT o.occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
 			'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
 			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, taxonremarks, '.
-			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, '.
-			'DATE_FORMAT(eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
+			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, eventdate, MAKEDATE(YEAR(eventDate),enddayofyear) AS eventdateend, '.
 			'verbatimeventdate, country, stateprovince, county, municipality, locality, '.
 			'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, localitysecurity, localitysecurityreason, '.
-			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
-			'georeferenceremarks, verbatimattributes, '.
+			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, georeferenceremarks, verbatimattributes, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
 			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, recordenteredby, dateentered, datelastmodified '.
 			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
@@ -131,7 +129,7 @@ class OccurrenceIndividualManager extends Manager{
 				elseif($this->metadataArr['guidtarget'] == 'symbiotaUUID'){
 					$this->occArr['occurrenceid'] = $this->occArr['guid'];
 				}
-	
+
 				if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
 					$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
 					'FROM omcollsecondary '.
@@ -303,7 +301,7 @@ class OccurrenceIndividualManager extends Manager{
 		}
 		return $status;
 	}
-	
+
 	public function deleteComment($comId){
 		$status = true;
 		$con = MySQLiConnectionFactory::getCon("write");
@@ -329,7 +327,7 @@ class OccurrenceIndividualManager extends Manager{
 				$status = false;
 			}
 			$con->close();
-			
+
 			//Email to portal admin
 			$emailAddr = $GLOBALS['ADMIN_EMAIL'];
 			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/collections/individual/index.php?occid='.$this->occid.'#commenttab';
@@ -351,7 +349,7 @@ class OccurrenceIndividualManager extends Manager{
 		}
 		return $status;
 	}
-	
+
 	public function makeCommentPublic($comId){
 		$status = true;
 		if(!is_numeric($comId)) return false;
@@ -433,7 +431,7 @@ class OccurrenceIndividualManager extends Manager{
 			$retArr[$r->orid][$r->appliedstatus]['source'] = $r->externalsource;
 			$retArr[$r->orid][$r->appliedstatus]['reviewstatus'] = $r->reviewstatus;
 			$retArr[$r->orid][$r->appliedstatus]['ts'] = $r->initialtimestamp;
-				
+
 			$oldValues = json_decode($r->oldvalues,true);
 			$newValues = json_decode($r->newvalues,true);
 			foreach($oldValues as $fieldName => $value){
@@ -521,7 +519,7 @@ class OccurrenceIndividualManager extends Manager{
 				$datasetIdStr .= ','.$r1->tablepk;
 			}
 			$rs1->free();
-				
+
 			//Get all datasets for user
 			$sql2 = 'SELECT datasetid, name FROM omoccurdatasets WHERE uid = '.$uid;
 			if($datasetIdStr){
@@ -539,7 +537,7 @@ class OccurrenceIndividualManager extends Manager{
 			else{
 				trigger_error('Unable to get datasets for user; '.$this->conn->error,E_USER_WARNING);
 			}
-				
+
 			//Get datasets linked to this specimen
 			$sql3 = 'SELECT datasetid, notes '.
 					'FROM omoccurdatasetlink '.
@@ -558,7 +556,7 @@ class OccurrenceIndividualManager extends Manager{
 		}
 		return $retArr;
 	}
-	
+
 	public function linkToDataset($dsid,$dsName,$notes,$symbUid){
 		$status = true;
 		if(!$this->occid) return false;
@@ -621,7 +619,7 @@ class OccurrenceIndividualManager extends Manager{
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			if($r = $rs->fetch_object()){
-				$retArr['obj'] = json_decode($r->archiveobj,true); 
+				$retArr['obj'] = json_decode($r->archiveobj,true);
 				$retArr['notes'] = $r->notes;
 			}
 			$rs->free();
@@ -636,7 +634,7 @@ class OccurrenceIndividualManager extends Manager{
 			//echo $sql;
 			if($rs = $this->conn->query($sql)){
 				if($r = $rs->fetch_object()){
-					$retArr['obj'] = json_decode($r->archiveobj,true); 
+					$retArr['obj'] = json_decode($r->archiveobj,true);
 					$retArr['notes'] = $r->notes;
 				}
 				$rs->free();
@@ -653,7 +651,7 @@ class OccurrenceIndividualManager extends Manager{
 	 */
 	public function isTaxonomicEditor(){
 		$isEditor = 0;
-		
+
 		//Grab taxonomic node id and geographic scopes
 		$editTidArr = array();
 		$sqlut = 'SELECT idusertaxonomy, tid, geographicscope '.
@@ -666,7 +664,7 @@ class OccurrenceIndividualManager extends Manager{
 			$editTidArr[$rut->tid] = $rut->geographicscope;
 		}
 		$rsut->free();
-		
+
 		//Get relevant tids for active occurrence
 		if($editTidArr){
 			$occTidArr = array();
@@ -706,7 +704,7 @@ class OccurrenceIndividualManager extends Manager{
 				if(array_intersect(array_keys($editTidArr),$occTidArr)){
 					$isEditor = 3;
 					//TODO: check to see if specimen is within geographic scope
-				}					
+				}
 			}
 		}
 		return $isEditor;
