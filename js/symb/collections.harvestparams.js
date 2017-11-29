@@ -131,60 +131,6 @@ function updateRadius(){
     document.getElementById("radius").value = radiusInMiles;
 }
 
-function checkHarvestparamsForm(frm){
-    //make sure they have filled out at least one field.
-    if((frm.taxa.value == '') && (frm.country.value == '') && (frm.state.value == '') && (frm.county.value == '') &&
-        (frm.locality.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') && (frm.catnum.value == '') &&
-        (frm.elevhigh.value == '') && (frm.eventdate2.value == '') && (frm.typestatus.checked == false) && (frm.hasimages.checked == false) && (frm.hasgenetic.checked == false) &&
-        (frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate1.value == '') && (frm.elevlow.value == '')){
-        alert("Please fill in at least one search parameter!");
-        return false;
-    }
-
-    if(frm.upperlat.value != '' || frm.bottomlat.value != '' || frm.leftlong.value != '' || frm.rightlong.value != ''){
-        // if Lat/Long field is filled in, they all should have a value!
-        if(frm.upperlat.value == '' || frm.bottomlat.value == '' || frm.leftlong.value == '' || frm.rightlong.value == ''){
-            alert("Error: Please make all Lat/Long bounding box values contain a value or all are empty");
-            return false;
-        }
-
-        // Check to make sure lat/longs are valid.
-        if(Math.abs(frm.upperlat.value) > 90 || Math.abs(frm.bottomlat.value) > 90 || Math.abs(frm.pointlat.value) > 90){
-            alert("Latitude values can not be greater than 90 or less than -90.");
-            return false;
-        }
-        if(Math.abs(frm.leftlong.value) > 180 || Math.abs(frm.rightlong.value) > 180 || Math.abs(frm.pointlong.value) > 180){
-            alert("Longitude values can not be greater than 180 or less than -180.");
-            return false;
-        }
-        if(parseFloat(frm.upperlat.value) < parseFloat(frm.bottomlat.value)){
-            alert("Your northern latitude value is less then your southern latitude value. Please correct this.");
-            return false;
-        }
-        if(parseFloat(frm.leftlong.value) > parseFloat(frm.rightlong.value)){
-            alert("Your western longitude value is greater then your eastern longitude value. Please correct this. Note that western hemisphere longitudes in the decimal format are negitive.");
-            return false;
-        }
-    }
-
-    //Same with point radius fields
-    if(frm.pointlat.value != '' || frm.pointlong.value != '' || frm.radius.value != ''){
-        if(frm.pointlat.value == '' || frm.pointlong.value == '' || frm.radius.value == ''){
-            alert("Error: Please make all Lat/Long point-radius values contain a value or all are empty");
-            return false;
-        }
-    }
-
-    if(frm.elevlow.value || frm.elevhigh.value){
-        if(isNaN(frm.elevlow.value) || isNaN(frm.elevhigh.value)){
-            alert("Error: Please enter only numbers for elevation values");
-            return false;
-        }
-    }
-
-    return true;
-}
-
 function setHarvestParamsForm(){
     var stArr = JSON.parse(starrJson);
     if(!stArr['usethes']){document.harvestparams.thes.checked = false;}
