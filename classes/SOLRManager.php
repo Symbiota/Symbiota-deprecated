@@ -469,33 +469,67 @@ class SOLRManager extends OccurrenceManager{
         global $SOLR_URL;
         $occidStr = '';
         $pArr = Array();
-        if(is_array($occid)){
-            $occidStr = '('.implode(' ',$occid).')';
+        if(!is_array($occid) || count($occid) < 1000){
+            if(is_array($occid)){
+                $occidStr = '('.implode(' ',$occid).')';
+            }
+            else{
+                $occidStr = '('.$occid.')';
+            }
+            $pArr["commit"] = 'true';
+            $pArr["stream.body"] = '<delete><query>(occid:'.$occidStr.')</query></delete>';
+
+            $headers = array(
+                'Content-Type: application/x-www-form-urlencoded',
+                'Accept: application/json',
+                'Cache-Control: no-cache',
+                'Pragma: no-cache',
+                'Content-Length: '.strlen(http_build_query($pArr))
+            );
+            $ch = curl_init();
+            $options = array(
+                CURLOPT_URL => $SOLR_URL.'/update',
+                CURLOPT_POST => true,
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_TIMEOUT => 90,
+                CURLOPT_POSTFIELDS => http_build_query($pArr),
+                CURLOPT_RETURNTRANSFER => true
+            );
+            curl_setopt_array($ch, $options);
+            curl_exec($ch);
+            curl_close($ch);
         }
         else{
-            $occidStr = '('.$occid.')';
+            $delCnt = count($occid);
+            $i = 0;
+            do{
+                $subArr = array_slice($occid,$i,1000);
+                $occidStr = '('.implode(' ',$subArr).')';
+                $pArr["commit"] = 'true';
+                $pArr["stream.body"] = '<delete><query>(occid:'.$occidStr.')</query></delete>';
+
+                $headers = array(
+                    'Content-Type: application/x-www-form-urlencoded',
+                    'Accept: application/json',
+                    'Cache-Control: no-cache',
+                    'Pragma: no-cache',
+                    'Content-Length: '.strlen(http_build_query($pArr))
+                );
+                $ch = curl_init();
+                $options = array(
+                    CURLOPT_URL => $SOLR_URL.'/update',
+                    CURLOPT_POST => true,
+                    CURLOPT_HTTPHEADER => $headers,
+                    CURLOPT_TIMEOUT => 90,
+                    CURLOPT_POSTFIELDS => http_build_query($pArr),
+                    CURLOPT_RETURNTRANSFER => true
+                );
+                curl_setopt_array($ch, $options);
+                $result = curl_exec($ch);
+                curl_close($ch);
+                $i = $i + 1000;
+            } while($i < $delCnt);
         }
-        $pArr["commit"] = 'true';
-        $pArr["stream.body"] = '<delete><query>(occid:'.$occidStr.')</query></delete>';
-        $headers = array(
-            'Content-Type: application/x-www-form-urlencoded',
-            'Accept: application/json',
-            'Cache-Control: no-cache',
-            'Pragma: no-cache',
-            'Content-Length: '.strlen(http_build_query($pArr))
-        );
-        $ch = curl_init();
-        $options = array(
-            CURLOPT_URL => $SOLR_URL.'/update',
-            CURLOPT_POST => true,
-            CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_TIMEOUT => 90,
-            CURLOPT_POSTFIELDS => http_build_query($pArr),
-            CURLOPT_RETURNTRANSFER => true
-        );
-        curl_setopt_array($ch, $options);
-        curl_exec($ch);
-        curl_close($ch);
     }
 
     public function cleanSOLRIndex($collid){
