@@ -41,6 +41,7 @@ $LANG['BACKUP_DATA_FILE'] = 'Descargar Archivo de Respaldo de Datos';
 $LANG['GUIDMAP'] = 'Mapeador de GUIDs';
 $LANG['THUMBNAIL_MAINTENANCE'] = 'Herramientas de Limpieza las miniaturas';
 $LANG['UPDATE_STATS'] = 'Actualizar Estad&iacute;sticas';
+$LANG['CLEAN_SOLR'] = 'Limpiar el &Iacute;ndice de SOLR';
 $LANG['COLLECTION_TYPE'] = 'Tipo de Colecci&oacute;n';
 $LANG['MANAGEMENT'] = 'Administraci&oacute;n';
 $LANG['LAST_UPDATE'] = '&uacute;ltima Actualizaci&oacute;n';

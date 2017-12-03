@@ -41,6 +41,7 @@ $LANG['BACKUP_DATA_FILE'] = 'Download Backup Data File';
 $LANG['GUIDMAP'] = 'Collection GUID Mapper';
 $LANG['THUMBNAIL_MAINTENANCE'] = 'Thumbnail Maintenance';
 $LANG['UPDATE_STATS'] = 'Update Statistics';
+$LANG['CLEAN_SOLR'] = 'Clean SOLR Index';
 $LANG['COLLECTION_TYPE'] = 'Collection Type';
 $LANG['MANAGEMENT'] = 'Management';
 $LANG['LAST_UPDATE'] = 'Last Update';

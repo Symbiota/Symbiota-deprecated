@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/misc/collprofiles.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = ((array_key_exists("collid",$_REQUEST) && is_numeric($_REQUEST["collid"]))?$_REQUEST["collid"]:0);
@@ -13,6 +14,7 @@ if($eMode && !$SYMB_UID){
 }
 
 $collManager = new OccurrenceCollectionProfile();
+if($SOLR_MODE) $solrManager = new SOLRManager();
 if(!$collManager->setCollid($collid)) $collid = '';
 
 $collData = $collManager->getCollectionMetadata();
@@ -108,6 +110,11 @@ if($SYMB_UID){
 				$collManager->updateStatistics(true);
 				echo '<hr/>';
 			}
+            if($action == 'cleanSOLR'){
+                echo '<h2> '.$LANG['CLEAN_SOLR'].'</h2>';
+                $solrManager->cleanSOLRIndex($collid);
+                echo '<hr/>';
+            }
 		}
 		if($editCode > 0 && $collid){
 			?>
@@ -325,6 +332,17 @@ if($SYMB_UID){
 										<?php echo $LANG['UPDATE_STATS'];?>
 									</a>
 								</li>
+                                <?php
+                                if($SOLR_MODE){
+                                    ?>
+                                    <li style="margin-left:10px;">
+                                        <a href="collprofiles.php?collid=<?php echo $collid; ?>&action=cleanSOLR">
+                                            <?php echo $LANG['CLEAN_SOLR']; ?>
+                                        </a>
+                                    </li>
+                                    <?php
+                                }
+                                ?>
 							</ul>
 						</fieldset>
 						<?php

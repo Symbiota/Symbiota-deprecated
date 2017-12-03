@@ -3,6 +3,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorDeterminations.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorImages.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDuplicate.php');
+include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 class OccurrenceEditorManager {
@@ -1185,7 +1186,8 @@ class OccurrenceEditorManager {
 	}
 
 	public function mergeRecords($targetOccid,$sourceOccid){
-		global $QUICK_HOST_ENTRY_IS_ACTIVE;
+		global $QUICK_HOST_ENTRY_IS_ACTIVE, $SOLR_MODE;
+        if($SOLR_MODE) $solrManager = new SOLRManager();
 		$status = true;
 		if(!$targetOccid || !$sourceOccid){
 			$this->errorArr[] = 'ERROR: target or source is null';
@@ -1331,6 +1333,7 @@ class OccurrenceEditorManager {
 		if(!$this->deleteOccurrence($sourceOccid)){
 			$status = false;
 		}
+        if($SOLR_MODE) $solrManager->deleteSOLRDocument($sourceOccid);
 		return $status;
 	}
 

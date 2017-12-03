@@ -465,6 +465,77 @@ class SOLRManager extends OccurrenceManager{
         }
     }
 
+    public function deleteSOLRDocument($occid){
+        global $SOLR_URL;
+        $occidStr = '';
+        $pArr = Array();
+        if(is_array($occid)){
+            $occidStr = '('.implode(' ',$occid).')';
+        }
+        else{
+            $occidStr = '('.$occid.')';
+        }
+        $pArr["commit"] = 'true';
+        $pArr["stream.body"] = '<delete><query>(occid:'.$occidStr.')</query></delete>';
+        $headers = array(
+            'Content-Type: application/x-www-form-urlencoded',
+            'Accept: application/json',
+            'Cache-Control: no-cache',
+            'Pragma: no-cache',
+            'Content-Length: '.strlen(http_build_query($pArr))
+        );
+        $ch = curl_init();
+        $options = array(
+            CURLOPT_URL => $SOLR_URL.'/update',
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_TIMEOUT => 90,
+            CURLOPT_POSTFIELDS => http_build_query($pArr),
+            CURLOPT_RETURNTRANSFER => true
+        );
+        curl_setopt_array($ch, $options);
+        curl_exec($ch);
+        curl_close($ch);
+    }
+
+    public function cleanSOLRIndex($collid){
+        global $SOLR_URL;
+        $cnt = 0;
+        $SOLROccArr = Array();
+        $mysqlOccArr = Array();
+        $delOccArr = Array();
+        $solrWhere = 'q=(collid:('.$collid.'))';
+        $solrURL = $SOLR_URL.'/select?'.$solrWhere;
+        $solrURL .= '&rows=1&start=1&wt=json';
+        //echo str_replace(' ','%20',$solrURL);
+        $solrArrJson = file_get_contents(str_replace(' ','%20',$solrURL));
+        $solrArr = json_decode($solrArrJson, true);
+        $cnt = $solrArr['response']['numFound'];
+        $occURL = $SOLR_URL.'/select?'.$solrWhere.'&rows='.$cnt.'&start=1&fl=occid&wt=json';
+        //echo str_replace(' ','%20',$occURL);
+        $solrOccArrJson = file_get_contents(str_replace(' ','%20',$occURL));
+        $solrOccArr = json_decode($solrOccArrJson, true);
+        $recArr = $solrOccArr['response']['docs'];
+        foreach($recArr as $k){
+            $SOLROccArr[] = $k['occid'];
+        }
+        $sql = 'SELECT occid FROM omoccurrences WHERE collid = '.$collid;
+        if($rs = $this->conn->query($sql)){
+            while($r = $rs->fetch_object()){
+                $mysqlOccArr[] = $r->occid;
+            }
+        }
+        foreach($SOLROccArr as $occ){
+            if(!in_array($occ,$mysqlOccArr)){
+                $delOccArr[] = $occ;
+            }
+        }
+        if($delOccArr){
+            $this->deleteSOLRDocument($delOccArr);
+        }
+        echo '<li>...Complete!</li>';
+    }
+
     private function checkLastSOLRUpdate(){
         global $SERVER_ROOT, $SOLR_FULL_IMPORT_INTERVAL;
         $now = new DateTime();

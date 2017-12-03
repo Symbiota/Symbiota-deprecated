@@ -172,10 +172,10 @@ if($SYMB_UID){
 			}
 			elseif($action == 'Delete Occurrence'){
 				if($occManager->deleteOccurrence($occId)){
-					$occId = 0;
+                    if($SOLR_MODE) $solrManager->deleteSOLRDocument($occId);
+				    $occId = 0;
 					$occManager->setOccId(0);
-                    if($SOLR_MODE) $solrManager->updateSOLR();
-				}
+                }
 				else{
 					$statusStr = $occManager->getErrorStr();
 				}
