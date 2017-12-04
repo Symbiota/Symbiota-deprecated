@@ -197,6 +197,7 @@ if($isEditor && $formSubmit){
 				f.imagesonly.checked = false;
 				f.collid.options[0].selected = true;
 			}
+			f.submit();
 		}
 
 		function openIndPU(occId){
@@ -272,7 +273,7 @@ if($isEditor && $formSubmit){
 					    <legend><b>Options</b></legend>
 				    	<div>
 				    		<b>Search:</b>
-							<input type="text" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
+							<input type="text" name="searchterm" value="<?php echo $searchTerm;?>" size="20" onchange="this.form.submit()" />
 						</div>
 						<div title="including without linked specimen records">
 							<input type="checkbox" name="specimenonly" value="1" <?php echo ($specimenOnly?"CHECKED":"");?> onchange="specimenOnlyChanged(this)" />
@@ -281,7 +282,7 @@ if($isEditor && $formSubmit){
 						<div id="qryextradiv" style="margin-left:15px;display:<?php echo ($specimenOnly?'block':'none'); ?>;" title="including without linked specimen records">
 							<div>
 								Limit to:
-								<select name="collid" style="width:230px;">
+								<select name="collid" style="width:230px;" onchange="this.form.submit()">
 									<option value="">All Collections</option>
 									<option value="">-----------------------</option>
 									<?php
@@ -293,20 +294,20 @@ if($isEditor && $formSubmit){
 								</select>
 							</div>
 							<div>
-							    <input name='imagesonly' type='checkbox' value='1' <?php echo ($imagesOnly?"CHECKED":""); ?> />
+							    <input name='imagesonly' type='checkbox' value='1' <?php echo ($imagesOnly?"CHECKED":""); ?> onchange="this.form.submit()" />
 							    Display only those w/ images
 							</div>
 						</div>
 						<div style="margin:5px 0px 0px 5px;">
 							Display and sort by:<br />
-							<input type="radio" name="sortby" value="0" <?php echo ($sortBy == 0?"CHECKED":""); ?>>Title
-							<input type="radio" name="sortby" value="1" <?php echo ($sortBy == 1?"CHECKED":""); ?>>Abbreviation
+							<input type="radio" name="sortby" value="0" <?php echo ($sortBy == 0?"CHECKED":""); ?> onchange="this.form.submit()">Title
+							<input type="radio" name="sortby" value="1" <?php echo ($sortBy == 1?"CHECKED":""); ?> onchange="this.form.submit()">Abbreviation
 						</div>
-						<div style="float:right;">
+						<div style="float:right;" title="Download Exsiccati Records">
 							<?php
 							$dlUrl = 'index.php?formsubmit=dlexsiccati&searchterm='.$searchTerm.'&specimenonly='.$specimenOnly.'&imagesonly='.$imagesOnly.'&collid='.$collId;
 							?>
-							<a href="<?php echo $dlUrl; ?>" target="_blank"><img src="../../images/dl.png" style="width:13px" /></a>
+							<a href="<?php echo $dlUrl; ?>" target="_blank"><img src="../../images/dl.png" style="width:15px" /></a>
 						</div>
 						<div style="margin:5px 0px 0px 5px;">
 							<input name="formsubmit" type="submit" value="Rebuild List" />
