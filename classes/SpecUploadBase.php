@@ -1317,6 +1317,9 @@ class SpecUploadBase extends SpecUpload{
 				$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
 					'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
 				//echo $sql.'<br/>';
+				$this->conn->query('SET autocommit=0');
+				$this->conn->query('SET unique_checks=0');
+				$this->conn->query('SET foreign_key_checks=0');
 				if($this->conn->query($sql)){
 					$this->imageTransferCount++;
 					$repInt = 1000;
@@ -1328,6 +1331,10 @@ class SpecUploadBase extends SpecUpload{
 					$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
 					$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
 				}
+				$this->conn->query('COMMIT');
+				$this->conn->query('SET autocommit=1');
+				$this->conn->query('SET unique_checks=1');
+				$this->conn->query('SET foreign_key_checks=1');
 			}
 		}
 	}
