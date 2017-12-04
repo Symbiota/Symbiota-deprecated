@@ -1,8 +1,7 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ExsiccatiManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ExsiccatiManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $ometId = array_key_exists('ometid',$_REQUEST)?$_REQUEST['ometid']:0;
 $omenId = array_key_exists('omenid',$_REQUEST)?$_REQUEST['omenid']:0;
@@ -12,12 +11,12 @@ $specimenOnly = array_key_exists('specimenonly',$_REQUEST)?$_REQUEST['specimenon
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $imagesOnly = array_key_exists('imagesonly',$_REQUEST)?$_REQUEST['imagesonly']:0;
 $sortBy = array_key_exists('sortby',$_REQUEST)?$_REQUEST['sortby']:0;
-$formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
+$formSubmit = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 if(!$formSubmit && !$ometId) $specimenOnly = 1;
 
 $statusStr = '';
 $isEditor = 0;
-if($isAdmin || array_key_exists('CollAdmin',$userRights)){
+if($IS_ADMIN || array_key_exists('CollAdmin',$USER_RIGHTS)){
 	$isEditor = 1;
 }
 
@@ -62,12 +61,15 @@ if($isEditor && $formSubmit){
 	elseif($formSubmit == 'Transfer Specimen'){
 		$statusStr = $exsManager->transferOccurrence($omenId,$_POST['occid'],trim($_POST['targetometid'],'k'),$_POST['targetexsnumber']);
 	}
+	elseif($formSubmit == 'dlexsiccati'){
+		$exsManager->exportExsiccatiAsCsv($searchTerm, $specimenOnly, $imagesOnly, $collId);
+		exit;
+	}
 }
-
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Exsiccati</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Exsiccati</title>
     <link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript" src="../../js/symb/shared.js?ver=130926"></script>
@@ -212,7 +214,7 @@ if($isEditor && $formSubmit){
 
 		<?php
 		if($omenId){
-			//Exsiccati number sectioon can have a large number of ometid select look ups; using javascript makes page more efficient
+			//Exsiccati number section can have a large number of ometid select look ups; using javascript makes page more efficient
 			$titleArr = $exsManager->getTitleArr();
 			$selectValues = '';
 			//Added "k" prefix to key so that Chrom would maintain the correct sort order
@@ -241,11 +243,18 @@ if($isEditor && $formSubmit){
 <body>
 	<?php
 	$displayLeftMenu = (isset($collections_exsiccati_index)?$collections_exsiccati_index:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
-		<a href="index.php">Exsiccati Index</a>
+		<?php
+		if($ometId || $omenId){
+			echo '<a href="index.php"><b>Return to main Exsiccati Index</b></a>';
+		}
+		else{
+			echo '<a href="index.php"><b>Exsiccati Index</b></a>';
+		}
+		?>
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext" style="width:95%;">
@@ -292,6 +301,12 @@ if($isEditor && $formSubmit){
 							Display and sort by:<br />
 							<input type="radio" name="sortby" value="0" <?php echo ($sortBy == 0?"CHECKED":""); ?>>Title
 							<input type="radio" name="sortby" value="1" <?php echo ($sortBy == 1?"CHECKED":""); ?>>Abbreviation
+						</div>
+						<div style="float:right;">
+							<?php
+							$dlUrl = 'index.php?formsubmit=dlexsiccati&searchterm='.$searchTerm.'&specimenonly='.$specimenOnly.'&imagesonly='.$imagesOnly.'&collid='.$collId;
+							?>
+							<a href="<?php echo $dlUrl; ?>" target="_blank"><img src="../../images/dl.png" style="width:13px" /></a>
 						</div>
 						<div style="margin:5px 0px 0px 5px;">
 							<input name="formsubmit" type="submit" value="Rebuild List" />
@@ -770,7 +785,7 @@ if($isEditor && $formSubmit){
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 </body>
 </html>
