@@ -310,7 +310,7 @@ div.genericpopup{
 }
 
 .nextbtn {
-	font-weight: bold,
+	font-weight: bold;
 	background-color: #c0c0c0;
 	border-color: #999;
     color: black;
@@ -325,7 +325,7 @@ div.genericpopup{
 }
 
 .resetbtn {
-	font-weight: bold,
+	font-weight: bold;
 	background-color: #c0c0c0;
 	border-color: #999;
     color: black;
