@@ -125,7 +125,7 @@ class TaxonomyHarvester extends Manager{
 				$tid = $this->addColTaxonByResult($resultArr, $sciName);
 			}
 			else{
-				$this->logOrEcho('Taxon not found within Catalog of Life',1);
+				$this->logOrEcho('Taxon not found',2);
 			}
 		}
 		else{
@@ -255,7 +255,7 @@ class TaxonomyHarvester extends Manager{
 			$tid = $this->addWormsTaxonByID($id);
 		}
 		else{
-			$this->logOrEcho('Taxon not found within WoRMS',1);
+			$this->logOrEcho('Taxon not found',2);
 		}
 		return $tid;
 	}
@@ -359,7 +359,7 @@ class TaxonomyHarvester extends Manager{
 			$id = 0;
 			foreach($resultArr as $k => $arr){
 				if(array_key_exists('Error', $arr)){
-					$this->logOrEcho('Taxon not found within TROPICOS',1);
+					$this->logOrEcho('Taxon not found (code:1)',2);
 					return;
 				}
 				if(!array_key_exists('NomenclatureStatusID', $arr) || $arr['NomenclatureStatusID'] == 1){
@@ -372,7 +372,7 @@ class TaxonomyHarvester extends Manager{
 				$newTid = $this->addTropicosTaxonByID($id);
 			}
 			else{
-				$this->logOrEcho('Taxon not found within TROPICOS (code:2)',1);
+				$this->logOrEcho('Taxon not found (code:2)',2);
 			}
 		}
 		else{
@@ -479,7 +479,7 @@ class TaxonomyHarvester extends Manager{
 
 	private function addEolTaxon($term){
 		//Returns content for accepted name
-		$taxonArr = array();
+		$tid = 0;
 		$eolManager = new EOLUtilities();
 		if($eolManager->pingEOL()){
 			$eolTaxonId = 0;
@@ -488,30 +488,47 @@ class TaxonomyHarvester extends Manager{
 				//Id of EOL preferred name is returned
 				$eolTaxonId = $searchRet['id'];
 				$searchSyns = ((strpos($searchRet['title'],$term) !== false)?false:true);
-				$taxonArr = $eolManager->getPage($searchRet['id'],$searchSyns);
-				if($searchSyns && isset($taxonArr['syns'])){
-					//Only add synonym that was original target taxon; remove all others
-					foreach($taxonArr['syns']as $k => $synArr){
-						if(strpos($synArr['scientificName'],$term) !== 0) unset($taxonArr['syns'][$k]);
-					}
+				$tid = $this->addEolTaxonById($searchRet['id'], $searchSyns, $term);
+			}
+			else{
+				$this->logOrEcho('Taxon not found',2);
+			}
+		}
+		else{
+			$this->logOrEcho('EOL web services are not available ',1);
+			return false;
+		}
+		return $tid;
+	}
+
+	private function addEolTaxonById($eolTaxonId, $searchSyns = false, $term = ''){
+		//Returns content for accepted name
+		$taxonArr = array();
+		$eolManager = new EOLUtilities();
+		if($eolManager->pingEOL()){
+			$taxonArr = $eolManager->getPage($eolTaxonId, false);
+			if($searchSyns && isset($taxonArr['syns'])){
+				//Only add synonym that was original target taxon; remove all others
+				foreach($taxonArr['syns']as $k => $synArr){
+					if(strpos($synArr['scientificName'],$term) !== 0) unset($taxonArr['syns'][$k]);
 				}
-				if(isset($taxonArr['taxonConcepts'])){
-					if($taxonConceptId = key($taxonArr['taxonConcepts'])){
-						$conceptArr = $eolManager->getHierarchyEntries($taxonConceptId);
-						if(isset($conceptArr['parent'])){
-							$parentTid = $this->getTid($conceptArr['parent']);
-							if(!$parentTid){
-								$parentTid = $this->addEolTaxon($conceptArr['parent']['sciname']);
-							}
-							if($parentTid){
-								$conceptArr['parent']['tid'] = $parentTid;
-								$taxonArr['parent'] = $conceptArr['parent'];
-							}
+			}
+			if(isset($taxonArr['taxonConcepts'])){
+				if($taxonConceptId = key($taxonArr['taxonConcepts'])){
+					$conceptArr = $eolManager->getHierarchyEntries($taxonConceptId);
+					if(isset($conceptArr['parent'])){
+						$parentTid = $this->getTid($conceptArr['parent']);
+						if(!$parentTid && isset($conceptArr['parent']['taxonConceptID'])){
+							$parentTid = $this->addEolTaxonById($conceptArr['parent']['taxonConceptID']);
+						}
+						if($parentTid){
+							$conceptArr['parent']['tid'] = $parentTid;
+							$taxonArr['parent'] = $conceptArr['parent'];
 						}
 					}
 				}
-				if(!isset($taxonArr['source'])) $taxonArr['source'] = 'EOL - '.date('Y-m-d G:i:s');
 			}
+			if(!isset($taxonArr['source'])) $taxonArr['source'] = 'EOL - '.date('Y-m-d G:i:s');
 		}
 		else{
 			$this->logOrEcho('EOL web services are not available ',1);
@@ -520,7 +537,7 @@ class TaxonomyHarvester extends Manager{
 		//Process taxonomic name
 		if($taxonArr) $this->logOrEcho('Taxon found within Encyclopedia of Life',1);
 		else{
-			$this->logOrEcho('Taxon not found within Encyclopedia of Life',1);
+			$this->logOrEcho('Taxon ID not found ('.$eolTaxonId.')',2);
 			return false;
 		}
 		return $this->loadNewTaxon($taxonArr);

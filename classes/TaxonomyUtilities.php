@@ -69,7 +69,7 @@ class TaxonomyUtilities {
 						//Specific Epithet
 						$retArr['unitname2'] = array_shift($sciNameArr);
 					}
-					if($retArr['unitname2'] && preg_match('/[A-Z]+/',$retArr['unitname2'])){
+					if($retArr['unitname2'] && !preg_match('/^[a-z]+$/',$retArr['unitname2'])){
 						if(preg_match('/[A-Z]{1}[a-z]+/',$retArr['unitname2'])){
 							//Check to see if is term is genus author
 							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'"';
@@ -86,7 +86,14 @@ class TaxonomyUtilities {
 							$rs->free();
 							$con->close();
 						}
-						$retArr['unitname2'] = strtolower($retArr['unitname2']);
+						if($retArr['unitname2']){
+							$retArr['unitname2'] = strtolower($retArr['unitname2']);
+							if(!preg_match('/^[a-z]+$/',$retArr['unitname2'])){
+								//Second word unlikely an epithet
+								$retArr['unitname2'] = '';
+								unset($sciNameArr);
+							}
+						}
 					}
 				}
 			}
@@ -100,28 +107,13 @@ class TaxonomyUtilities {
 					while($sciStr = array_shift($sciNameArr)){
 						$sciStrTest = strtolower($sciStr);
 						if($sciStrTest == 'f.' || $sciStrTest == 'fo.' || $sciStrTest == 'fo' || $sciStrTest == 'forma'){
-							if($sciNameArr){
-								$retArr['unitind3'] = 'f.';
-								$retArr['unitname3'] = array_shift($sciNameArr);
-								unset($authorArr);
-								$authorArr = array();
-							}
+							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'f.');
 						}
 						elseif($sciStrTest == 'var.' || $sciStrTest == 'var' || $sciStrTest == 'v.'){
-							if($sciNameArr){
-								$retArr['unitind3'] = 'var.';
-								$retArr['unitname3'] = array_shift($sciNameArr);
-								unset($authorArr);
-								$authorArr = array();
-							}
+							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'var.');
 						}
 						elseif($sciStrTest == 'ssp.' || $sciStrTest == 'ssp' || $sciStrTest == 'subsp.' || $sciStrTest == 'subsp' || $sciStrTest == 'sudbsp.'){
-							if($sciNameArr){
-								$retArr['unitind3'] = 'subsp.';
-								$retArr['unitname3'] = array_shift($sciNameArr);
-								unset($authorArr);
-								$authorArr = array();
-							}
+							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'subsp.');
 						}
 						elseif(!$retArr['unitname3'] && ($rankId == 230 || preg_match('/^[a-z]{5,}$/',$sciStr))){
 							$retArr['unitind3'] = '';
@@ -191,6 +183,22 @@ class TaxonomyUtilities {
 			}
 		}
 		return $retArr;
+	}
+
+	private static function setInfraNode($sciStr, &$sciNameArr, &$retArr, &$authorArr, $rankTag){
+		if($sciNameArr){
+			$infraStr = array_shift($sciNameArr);
+			if(preg_match('/^[a-z]{3,}$/', $infraStr)){
+				$retArr['unitind3'] = $rankTag;
+				$retArr['unitname3'] = $infraStr;
+				unset($authorArr);
+				$authorArr = array();
+			}
+			else{
+				$authorArr[] = $sciStr;
+				$authorArr[] = $infraStr;
+			}
+		}
 	}
 
 	//Taxonomic indexing functions

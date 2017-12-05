@@ -13,7 +13,7 @@ class TaxonomyCleaner extends Manager{
 	private $testTaxonomy = 1;
 	private $checkAuthor = 1;
 	private $verificationMode = 0;		//0 = default to internal taxonomy, 1 = adopt target taxonomy
-	
+
 	public function __construct(){
 		parent::__construct(null,'write');
 	}
@@ -21,7 +21,7 @@ class TaxonomyCleaner extends Manager{
 	function __destruct(){
 		parent::__destruct();
 	}
-	
+
 	public function initiateLog(){
 		$logFile = '../../temp/logs/taxonomyVerification_'.date('Y-m-d').'.log';
 		$this->setLogFH($logFile);
@@ -133,7 +133,7 @@ class TaxonomyCleaner extends Manager{
 						}
 					}
 					else{
-						$this->logOrEcho('No close matches found',1);
+						$this->logOrEcho('No close matches found',2);
 					}
 				}
 				$taxaCnt++;
@@ -145,13 +145,13 @@ class TaxonomyCleaner extends Manager{
 			$rs->free();
 			if($taxaAdded) $this->indexOccurrenceTaxa();
 		}
-		
+
 		$this->logOrEcho("<b>Done with taxa check </b>");
 		return $endIndex;
 	}
-	
+
 	private function getSqlFragment(){
-		$sql = 'FROM omoccurrences WHERE (collid IN('.$this->collid.')) AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname NOT LIKE "% x %") AND (sciname NOT LIKE "% × %") '; 
+		$sql = 'FROM omoccurrences WHERE (collid IN('.$this->collid.')) AND (tidinterpreted IS NULL) AND (sciname IS NOT NULL) AND (sciname NOT LIKE "% x %") AND (sciname NOT LIKE "% × %") ';
 		return $sql;
 	}
 
@@ -166,10 +166,10 @@ class TaxonomyCleaner extends Manager{
 		}
 		flush();
 		ob_flush();
-		
+
 		$this->logOrEcho('Cleaning double spaces inbedded within name...');
 		$sql = 'UPDATE omoccurrences '.
-			'SET sciname = replace(sciname, "  ", " ") '. 
+			'SET sciname = replace(sciname, "  ", " ") '.
 			'WHERE (collid IN('.$this->collid.')) AND (tidinterpreted is NULL) AND (sciname LIKE "%  %") ';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records cleaned',1);
@@ -193,7 +193,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho($triCnt.' occurrence records remapped',1);
 		flush();
 		ob_flush();
-		
+
 		$this->logOrEcho('Indexing names ending in &quot;sp.&quot;...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON SUBSTRING(o.sciname,1, CHAR_LENGTH(o.sciname) - 4) = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
@@ -203,7 +203,7 @@ class TaxonomyCleaner extends Manager{
 		}
 		flush();
 		ob_flush();
-		
+
 		$this->logOrEcho('Indexing names containing &quot;spp.&quot;...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," spp.","") = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
@@ -213,7 +213,7 @@ class TaxonomyCleaner extends Manager{
 		}
 		flush();
 		ob_flush();
-		
+
 		$this->logOrEcho('Indexing names containing &quot;cf.&quot;...');
 		$cnt = 0;
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," cf. "," ") = t.sciname '.
@@ -231,7 +231,7 @@ class TaxonomyCleaner extends Manager{
 		}
 		flush();
 		ob_flush();
-		
+
 		$this->logOrEcho('Indexing names containing &quot;aff.&quot;...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," aff. "," ") = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
@@ -241,7 +241,7 @@ class TaxonomyCleaner extends Manager{
 		}
 		flush();
 		ob_flush();
-		
+
 		$this->logOrEcho('Indexing names containing &quot;group&quot; statements...');
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON REPLACE(o.sciname," group"," ") = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
@@ -347,7 +347,7 @@ class TaxonomyCleaner extends Manager{
 		$sql = 'SELECT t.sciname, t.tid, t.author, ts.tidaccepted '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = ts.tidaccepted) '.
-			'AND (t.verificationStatus IS NULL OR t.verificationStatus = 0 OR t.verificationStatus = 2 OR t.verificationStatus = 3)'; 
+			'AND (t.verificationStatus IS NULL OR t.verificationStatus = 0 OR t.verificationStatus = 2 OR t.verificationStatus = 3)';
 		$sql .= 'LIMIT 1';
 		//echo '<div>'.$sql.'</div>';
 		if($rs = $this->conn->query($sql)){
@@ -368,12 +368,12 @@ class TaxonomyCleaner extends Manager{
 			$this->logOrEcho($sql);
 		}
 		$this->logOrEcho("Finished accepted taxa verification");
-		
-		//Check remaining taxa 
+
+		//Check remaining taxa
 		$this->logOrEcho("Starting remaining taxa verification");
 		$sql = 'SELECT t.sciname, t.tid, t.author, ts.tidaccepted FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE (ts.taxauthid = '.$this->taxAuthId.') '. 
-			'AND (t.verificationStatus IS NULL OR t.verificationStatus = 0 OR t.verificationStatus = 2 OR t.verificationStatus = 3)'; 
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') '.
+			'AND (t.verificationStatus IS NULL OR t.verificationStatus = 0 OR t.verificationStatus = 2 OR t.verificationStatus = 3)';
 		$sql .= 'LIMIT 1';
 		//echo '<div>'.$sql.'</div>';
 		if($rs = $this->conn->query($sql)){
@@ -395,7 +395,7 @@ class TaxonomyCleaner extends Manager{
 		}
 		$this->logOrEcho("Finishing remaining taxa verification");
 	}
-	
+
 	private function verifyTaxonObj($externalTaxonObj,$internalTaxonObj, $tidCurrentAccepted){
 		//Set validitystatus of name
 		if($externalTaxonObj){
@@ -417,7 +417,7 @@ class TaxonomyCleaner extends Manager{
 
 				if($this->verificationMode === 0){					//Default to system taxonomy
 					if($nameStatus == 'accepted'){					//Accepted externally, thus in both locations accepted
-						//Go through synonyms and check each. 
+						//Go through synonyms and check each.
 						$synArr = $externalTaxonObj['synonyms'];
 						foreach($synArr as $synObj){
 							$this->evaluateTaxonomy($synObj,$tidCurrentAccepted);
@@ -437,7 +437,7 @@ class TaxonomyCleaner extends Manager{
 							//Get accepted and evalutate
 							$accObj = $externalTaxonObj['accepted_name'];
 							$accTid = $this->evaluateTaxonomy($accObj,0);
-							//Change to not accepted and link to accepted 
+							//Change to not accepted and link to accepted
 							$sql = 'UPDATE taxstatus SET tidaccetped = '.$accTid.' WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.
 								$taxonArr['tid'].') AND (tidaccepted = '.$tidCurrentAccepted.')';
 							$this->conn->query($sql);
@@ -484,7 +484,7 @@ class TaxonomyCleaner extends Manager{
 			}
 		}
 	}
-	
+
 	private function evaluateTaxonomy($testObj, $anchorTid){
 		$retTid = 0;
 		$sql = 'SELECT t.tid, ts.tidaccepted, t.sciname, t.author '.
@@ -505,7 +505,7 @@ class TaxonomyCleaner extends Manager{
 			while($r = $rs->fetch_object()){
 				//Taxon exists within symbiota node
 				$retTid = $r->tid;
-				if(!$anchorTid) $anchorTid = $retTid;	//If $anchorTid = 0, we assume it should be accepted 
+				if(!$anchorTid) $anchorTid = $retTid;	//If $anchorTid = 0, we assume it should be accepted
 				$tidAcc = $r->tidaccepted;
 				if($tidAcc == $anchorTid){
 					//Do nothing, they match
@@ -532,7 +532,7 @@ class TaxonomyCleaner extends Manager{
 			$parsedArr = TaxonomyUtilities::parseScientificName($testObj['name'],$this->conn);
 			if(!array_key_exists('rank',$newTaxon)){
 				//Grab taxon object from EOL or Species2000
-				
+
 				//Parent is also needed
 			}
 			$this->loadNewTaxon($parsedArr);
@@ -548,19 +548,19 @@ class TaxonomyCleaner extends Manager{
 			$this->conn->query("UPDATE IGNORE kmdescr SET tid = ".$tidNew." WHERE (tid = ".$tid.')');
 			$this->conn->query("DELETE FROM kmdescr WHERE (tid = ".$tid.')');
 			$this->resetCharStateInheritance($tidNew);
-			
+
 			$sqlVerns = "UPDATE taxavernaculars SET tid = ".$tidNew." WHERE (tid = ".$tid.')';
 			$this->conn->query($sqlVerns);
-			
+
 			//$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE (tid = '.$tidNew.')) lj ON tb.caption = lj.caption '.
 			//	'SET tid = '.$tidNew.' WHERE (tid = '.$tid.') AND lj.caption IS NULL';
 			//$this->conn->query($sqltd);
-	
+
 			$sqltl = "UPDATE taxalinks SET tid = ".$tidNew." WHERE (tid = ".$tid.')';
 			$this->conn->query($sqltl);
 		}
 	}
-	
+
 	private function resetCharStateInheritance($tid){
 		//set inheritance for target only
 		$sqlAdd1 = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
