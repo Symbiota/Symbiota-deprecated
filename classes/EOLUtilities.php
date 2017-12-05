@@ -51,8 +51,8 @@ class EOLUtilities {
 		$retArr = Array();
 		if($sciName){
 			$retArr['searchTaxon'] = $sciName;
-			$url = 'http://eol.org/api/search/1.0.json?q='.str_replace(" ","%20",$sciName).'&page=1&exact=true';
-			//echo $url.'<br/>'; exit;
+			//$url = 'http://eol.org/api/search/1.0.json?q='.str_replace(" ","%20",$sciName).'&page=1&exact=true';
+			$url = 'http://eol.org/api/search/1.0.json?q='.str_replace(" ","%20",$sciName).'&page=1';
 			if($fh = fopen($url, 'r')){
 				$content = "";
 				while($line = fread($fh, 1024)){
@@ -67,6 +67,9 @@ class EOLUtilities {
 						$retArr['id'] = $result->id;
 						$retArr['title'] = $result->title;
 						$retArr['link'] = $result->link;
+						if(stripos($result->title,$sciName) === 0){
+							break;
+						}
 					}
 				}
 				else{
@@ -87,7 +90,6 @@ class EOLUtilities {
 		$taxonArr = Array();
 		$url = 'http://eol.org/api/pages/1.0/'.$id.'.json?images=0&videos=0&sounds=0&maps=0&text=0&iucn=false&subjects=overview&licenses=all&details=true';
 		$url .= '&common_names='.($includeCommonNames?'true':'false').'&synonyms='.($includeSynonyms?'true':'false').'&references=false&vetted=0&cache_ttl=';
-		//echo $url.'<br/>'; exit;
 		if($fh = fopen($url, 'r')){
 			$content = "";
 			while($line = fread($fh, 1024)){
@@ -147,7 +149,6 @@ class EOLUtilities {
 		if($id){
 			//Get taxonomy
 			$url = 'http://eol.org/api/hierarchy_entries/1.0/'.$id.'.json?common_names='.($includeCommonNames?'true':'false').'&synonyms='.($includeSynonyms?'true':'false');
-			//echo $url; exit;
 			if($fh = fopen($url, 'r')){
 				$content = "";
 				while($line = fread($fh, 1024)){
@@ -207,6 +208,7 @@ class EOLUtilities {
 			if($ancObj->taxonID == $parentId){
 				$retArr['id'] = $ancObj->taxonID;
 				$retArr['sciname'] = $ancObj->scientificName;
+				$retArr['taxonConceptID'] = $ancObj->taxonConceptID;
 				if(isset($ancObj->taxonRank)) $retArr['taxonRank'] = $ancObj->taxonRank;
 				if(isset($ancObj->source)) $retArr['sourceURL'] = $ancObj->source;
 				$parentId = $ancObj->parentNameUsageID;
