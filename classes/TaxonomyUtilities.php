@@ -4,10 +4,10 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 class TaxonomyUtilities {
 
 	/*
-	 * INPUT: String representing a verbatim scientific name 
-	 *        Name may have imbedded authors, cf, aff, hybrid  
-	 * OUTPUT: Array containing parsed values 
-	 *         Keys: sciname, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier, rankid 
+	 * INPUT: String representing a verbatim scientific name
+	 *        Name may have imbedded authors, cf, aff, hybrid
+	 * OUTPUT: Array containing parsed values
+	 *         Keys: sciname, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier, rankid
 	 */
 	public static function parseScientificName($inStr, $conn = null, $rankId = 0){
 		//Converts scinetific name with author embedded into separate fields
@@ -15,9 +15,9 @@ class TaxonomyUtilities {
 		if($inStr && is_string($inStr)){
 			//Remove underscores, common in NPS data
 			$inStr = preg_replace('/_+/',' ',$inStr);
-			//Replace misc 
+			//Replace misc
 			$inStr = str_replace(array('?','*'),'',$inStr);
-			
+
 			if(stripos($inStr,'cfr. ') !== false || stripos($inStr,' cfr ') !== false){
 				$retArr['identificationqualifier'] = 'cf. ';
 				$inStr = str_ireplace(array(' cfr ','cfr. '),' ',$inStr);
@@ -40,7 +40,7 @@ class TaxonomyUtilities {
 			}
 			//Remove extra spaces
 			$inStr = preg_replace('/\s\s+/',' ',$inStr);
-			
+
 			$sciNameArr = explode(' ',$inStr);
 			if(count($sciNameArr)){
 				if(strtolower($sciNameArr[0]) == 'x'){
@@ -56,7 +56,7 @@ class TaxonomyUtilities {
 						$retArr['unitname2'] = array_shift($sciNameArr);
 					}
 					elseif(strpos($sciNameArr[0],'.') !== false){
-						//It is assumed that Author has been reached, thus stop process 
+						//It is assumed that Author has been reached, thus stop process
 						$retArr['author'] = implode(' ',$sciNameArr);
 						unset($sciNameArr);
 					}
@@ -64,7 +64,7 @@ class TaxonomyUtilities {
 						if(strpos($sciNameArr[0],'(') !== false){
 							//Assumed subgenus exists, but keep a author incase an epithet does exist
 							$retArr['author'] = implode(' ',$sciNameArr);
-							array_shift($sciNameArr); 
+							array_shift($sciNameArr);
 						}
 						//Specific Epithet
 						$retArr['unitname2'] = array_shift($sciNameArr);
@@ -123,7 +123,7 @@ class TaxonomyUtilities {
 								$authorArr = array();
 							}
 						}
-						elseif(!$retArr['unitname3'] && ($rankId == 230 || preg_match('/^[a-z]+$/',$sciStr))){
+						elseif(!$retArr['unitname3'] && ($rankId == 230 || preg_match('/^[a-z]{5,}$/',$sciStr))){
 							$retArr['unitind3'] = '';
 							$retArr['unitname3'] = $sciStr;
 							unset($authorArr);
@@ -158,7 +158,7 @@ class TaxonomyUtilities {
 				}
 			}
 			if(array_key_exists('unitind3',$retArr) && $retArr['unitind3'] == 'ssp.'){
-				$retArr['unitind3'] == 'subsp.'; 
+				$retArr['unitind3'] == 'subsp.';
 			}
 			//Build sciname, without author
 			$sciname = (isset($retArr['unitind1'])?$retArr['unitind1'].' ':'').$retArr['unitname1'].' ';
@@ -182,7 +182,7 @@ class TaxonomyUtilities {
 				}
 				elseif($retArr['unitname2']){
 					$retArr['rankid'] = 220;
-				} 
+				}
 				elseif($retArr['unitname1']){
 					if(substr($retArr['unitname1'],-5) == 'aceae' || substr($retArr['unitname1'],-4) == 'idae'){
 						$retArr['rankid'] = 140;
@@ -196,7 +196,7 @@ class TaxonomyUtilities {
 	//Taxonomic indexing functions
 	public static function rebuildHierarchyEnumTree($conn){
 		$status = true;
-		if($conn){ 
+		if($conn){
 			if($conn->query('DELETE FROM taxaenumtree')){
 				self::buildHierarchyEnumTree($conn);
 			}
@@ -213,20 +213,20 @@ class TaxonomyUtilities {
 	public static function buildHierarchyEnumTree($conn, $taxAuthId = 1){
 		set_time_limit(600);
 		$status = true;
-		if($conn){ 
+		if($conn){
 			//Seed taxaenumtree table
 			$sql = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
-				'SELECT DISTINCT ts.tid, ts.parenttid, ts.taxauthid '. 
-				'FROM taxstatus ts '. 
+				'SELECT DISTINCT ts.tid, ts.parenttid, ts.taxauthid '.
+				'FROM taxstatus ts '.
 				'WHERE (ts.taxauthid = '.$taxAuthId.') AND ts.tid NOT IN(SELECT tid FROM taxaenumtree WHERE taxauthid = '.$taxAuthId.')';
 			//echo $sql;
 			if(!$conn->query($sql)){
 				$status = 'ERROR seeding taxaenumtree: '.$conn->error;
 			}
 			if($status == true){
-				//Continue building taxaenumtree  
+				//Continue building taxaenumtree
 				$sql2 = 'INSERT INTO taxaenumtree(tid,parenttid,taxauthid) '.
-					'SELECT DISTINCT e.tid, ts.parenttid, ts.taxauthid '. 
+					'SELECT DISTINCT e.tid, ts.parenttid, ts.taxauthid '.
 					'FROM taxaenumtree e INNER JOIN taxstatus ts ON e.parenttid = ts.tid AND e.taxauthid = ts.taxauthid '.
 					'LEFT JOIN taxaenumtree e2 ON e.tid = e2.tid AND ts.parenttid = e2.parenttid AND e.taxauthid = e2.taxauthid '.
 					'WHERE (ts.taxauthid = '.$taxAuthId.') AND (e2.tid IS NULL)';
@@ -249,7 +249,7 @@ class TaxonomyUtilities {
 	}
 
 	public static function buildHierarchyNestedTree($conn, $taxAuthId = 1){
-		if($conn){ 
+		if($conn){
 			set_time_limit(1200);
 			//Get root and then build down
 			$startIndex = 1;

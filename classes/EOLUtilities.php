@@ -37,8 +37,8 @@ class EOLUtilities {
 
 	/*
 	 * INPUT: scientific name
-	 * OUTPUT: array representing taxonomy resource  
-	 *   Example: array('id' => '', 
+	 * OUTPUT: array representing taxonomy resource
+	 *   Example: array('id' => '',
 	 *        			'title' => '',
 	 *        			'link' => ''
 	 *        	   )
@@ -80,7 +80,7 @@ class EOLUtilities {
 		}
 		return $retArr;
 	}
-	
+
 	public function getPage($id, $includeSynonyms = true, $includeCommonNames = false, $contentLimit = 1){
 		//http://eol.org/api/docs/pages
 		//http://eol.org/api/pages/1.0/205264.json?images=0&videos=0&sounds=0&maps=0&text=0&iucn=false&subjects=overview&licenses=all&details=true&common_names=false&synonyms=false&references=false&vetted=0&cache_ttl=
@@ -97,7 +97,7 @@ class EOLUtilities {
 			//Process return
 			$eolObj = json_decode($content);
 			//Get other stuff - to be added
-			
+
 			//Get taxonomic concepts
 			$taxonArr = TaxonomyUtilities::parseScientificName($eolObj->scientificName);
 			if($eolObj->scientificName) $taxonArr['scientificName'] = $eolObj->scientificName;
@@ -154,7 +154,7 @@ class EOLUtilities {
 					$content .= trim($line);
 				}
 				fclose($fh);
-				
+
 				//Process return
 				$eolObj = json_decode($content);
 				if($eolObj->scientificName){
@@ -163,7 +163,7 @@ class EOLUtilities {
 					$taxonArr['taxonRank'] = $eolObj->taxonRank;
 					if(isset($eolObj->nameAccordingTo)) $taxonArr['source'] = $eolObj->nameAccordingTo[0];
 					if(isset($eolObj->source)) $taxonArr['sourceURL'] = $eolObj->source;
-					
+
 					//Add synonyms
 					if($includeSynonyms){
 						$synonyms = $eolObj->synonyms;
@@ -224,7 +224,7 @@ class EOLUtilities {
 	public function getImages($id, $vetted = 1){
 		//http://eol.org/api/docs/pages
 		//http://eol.org/api/pages/1.0/1061751.json?images=2&videos=0&sounds=0&maps=0&text=2&iucn=false&subjects=overview&licenses=all&details=true&common_names=true&synonyms=true&references=true&vetted=0&cache_ttl=
-		//http://eol.org/api/pages/1.0/1061761.json?images=0&videos=0&sounds=0&maps=0&text=0&iucn=false&subjects=overview&licenses=all&details=true&common_names=true&synonyms=true&references=false&vetted=1&cache_ttl= 
+		//http://eol.org/api/pages/1.0/1061761.json?images=0&videos=0&sounds=0&maps=0&text=0&iucn=false&subjects=overview&licenses=all&details=true&common_names=true&synonyms=true&references=false&vetted=1&cache_ttl=
 		$retArr = array();
 		if(!is_numeric($vetted)) $vetted = 1;
 		$url = 'http://eol.org/api/pages/1.0/'.$id.'.json?images=15&vetted='.$vetted.'&details=1 ';
@@ -258,7 +258,7 @@ class EOLUtilities {
 									if($agentObj['role'] == 'photographer'){
 										$retArr['photographer'] = $agentObj['full_name'];
 										unset($agentArr);
-										break; 
+										break;
 									}
 									$agentCnt++;
 								}
@@ -269,7 +269,7 @@ class EOLUtilities {
 						if(array_key_exists('description',$objArr)) $noteStr .= '; '.$objArr['description'];
 						$retArr['notes'] = $noteStr;
 						if(array_key_exists('title',$objArr)) $retArr['title'] = $objArr['title'];
-						if(array_key_exists('rights',$objArr)) $retArr['copyright'] = $objArr['rights'];  
+						if(array_key_exists('rights',$objArr)) $retArr['copyright'] = $objArr['rights'];
 						if(array_key_exists('rightsHolder',$objArr)) $retArr['owner'] = $objArr['rightsHolder'];
 						if(array_key_exists('license',$objArr)) $retArr['rights'] = $objArr['license'];
 						if(array_key_exists('source',$objArr)) $retArr['source'] = $objArr['source'];

@@ -209,6 +209,7 @@ class ExsiccatiManager {
 			if($collId) $sqlInsert .= 'WHERE o.collid = '.$collId.' ';
 			$fieldArr['o.occid'] = 'occid';
 			$fieldArr['o.catalognumber'] = 'catalogNumber';
+			$fieldArr['o.othercatalognumbers'] = 'otherCatalogNumbers';
 			$fieldArr['o.dbpk'] = 'sourceIdentifier_dbpk';
 			$fieldArr['o.recordedby'] = 'collector';
 			$fieldArr['o.recordnumber'] = 'collectorNumber';
