@@ -25,6 +25,8 @@ if($userId != $SYMB_UID) $isSelf = false;
 			echo '<div>'.$person->getFirstName().' '.$person->getLastName().'</div>';
 			if($person->getTitle()) echo '<div>'.$person->getTitle().'</div>';
 			if($person->getInstitution()) echo '<div>'.$person->getInstitution().'</div>';
+            if($person->getDepartment()) echo '<div>'.$person->getDepartment().'</div>';
+            if($person->getAddress()) echo '<div>'.$person->getAddress().'</div>';
 			$cityStateStr = trim($person->getCity().', '.$person->getState().' '.$person->getZip(),' ,');
 			if($cityStateStr) echo '<div>'.$cityStateStr.'</div>';
 			if($person->getCountry()) echo '<div>'.$person->getCountry().'</div>';
