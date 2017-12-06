@@ -61,10 +61,10 @@ if($isEditor && $formSubmit){
 	elseif($formSubmit == 'Transfer Specimen'){
 		$statusStr = $exsManager->transferOccurrence($omenId,$_POST['occid'],trim($_POST['targetometid'],'k'),$_POST['targetexsnumber']);
 	}
-	elseif($formSubmit == 'dlexsiccati'){
-		$exsManager->exportExsiccatiAsCsv($searchTerm, $specimenOnly, $imagesOnly, $collId);
-		exit;
-	}
+}
+if($formSubmit == 'dlexsiccati'){
+	$exsManager->exportExsiccatiAsCsv($searchTerm, $specimenOnly, $imagesOnly, $collId);
+	exit;
 }
 ?>
 <html>
