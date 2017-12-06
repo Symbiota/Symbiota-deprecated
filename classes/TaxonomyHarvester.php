@@ -121,7 +121,7 @@ class TaxonomyHarvester extends Manager{
 			$resultArr = json_decode($content,true);
 			$numResults = $resultArr['number_of_results_returned'];
 			if($numResults){
-				$this->logOrEcho('Taxon found within Catalog of Life',1);
+				$this->logOrEcho('Taxon found within Catalog of Life',2);
 				$tid = $this->addColTaxonByResult($resultArr, $sciName);
 			}
 			else{
@@ -252,6 +252,7 @@ class TaxonomyHarvester extends Manager{
 		$retArr = $this->getContentString($url);
 		$id = $retArr['str'];
 		if(is_numeric($id)){
+			$this->logOrEcho('Taxon found within WoRMS',2);
 			$tid = $this->addWormsTaxonByID($id);
 		}
 		else{
@@ -299,7 +300,7 @@ class TaxonomyHarvester extends Manager{
 			$resultStr = $retArr['str'];
 		}
 		elseif($retArr['code'] == 204){
-			$this->logOrEcho('Identifier not found within WoRMS: '.$url,1);
+			$this->logOrEcho('Identifier not found within WoRMS: '.$url,2);
 		}
 		else{
 			$this->logOrEcho('ERROR returning WoRMS object (code: '.$retArr['code'].'): '.$url,1);
@@ -368,7 +369,7 @@ class TaxonomyHarvester extends Manager{
 				}
 			}
 			if($id){
-				$this->logOrEcho('Taxon found within TROPICOS',1);
+				$this->logOrEcho('Taxon found within TROPICOS',2);
 				$newTid = $this->addTropicosTaxonByID($id);
 			}
 			else{
@@ -535,7 +536,7 @@ class TaxonomyHarvester extends Manager{
 			return false;
 		}
 		//Process taxonomic name
-		if($taxonArr) $this->logOrEcho('Taxon found within Encyclopedia of Life',1);
+		if($taxonArr) $this->logOrEcho('Taxon found within EOL',2);
 		else{
 			$this->logOrEcho('Taxon ID not found ('.$eolTaxonId.')',2);
 			return false;
