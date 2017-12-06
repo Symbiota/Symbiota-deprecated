@@ -266,6 +266,35 @@ class TaxonomyCleaner extends Manager{
 		}
 		flush();
 		ob_flush();
+
+		$this->logOrEcho('Populating null family tags...');
+		$sql = 'UPDATE taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+			'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+			'SET t.kingdomname = t2.sciname '.
+			'WHERE e.taxauthid = 1 AND t2.rankid = 10 AND (t.kingdomName IS NULL OR t.kingdomname != t2.sciname)';
+		if($this->conn->query($sql)){
+			$this->logOrEcho($this->conn->affected_rows.' taxon records updated',1);
+		}
+		else{
+			$this->logOrEcho('ERROR family tags: '.$this->conn->error);
+		}
+		flush();
+		ob_flush();
+
+		$this->logOrEcho('Populating null kingdom name tags...');
+		$sql = 'UPDATE taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+			'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+			'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'SET ts.family = t2.sciname '.
+			'WHERE e.taxauthid = 1 AND t2.rankid = 140 AND (ts.family IS NULL OR ts.family != t2.sciname)';
+		if($this->conn->query($sql)){
+			$this->logOrEcho($this->conn->affected_rows.' taxon records updated',1);
+		}
+		else{
+			$this->logOrEcho('ERROR updating kingdoms: '.$this->conn->error);
+		}
+		flush();
+		ob_flush();
 	}
 
 	public function remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname, $newAuthor = '', $idQualifier = ''){
