@@ -42,6 +42,8 @@ if($isEditor){
 
 		$title = array_key_exists("title",$_REQUEST)?$_REQUEST["title"]:"";
 		$institution = array_key_exists("institution",$_REQUEST)?$_REQUEST["institution"]:"";
+        $department = array_key_exists("department",$_REQUEST)?$_REQUEST["department"]:"";
+        $address = array_key_exists("address",$_REQUEST)?$_REQUEST["address"]:"";
 		$city = array_key_exists("city",$_REQUEST)?$_REQUEST["city"]:"";
 		$state = array_key_exists("state",$_REQUEST)?$_REQUEST["state"]:"";
 		$zip = array_key_exists("zip",$_REQUEST)?$_REQUEST["zip"]:"";
@@ -56,6 +58,8 @@ if($isEditor){
 		$newPerson->setLastName($lastname);
 		$newPerson->setTitle($title);
 		$newPerson->setInstitution($institution);
+        $newPerson->setDepartment($department);
+        $newPerson->setAddress($address);
 		$newPerson->setCity($city);
 		$newPerson->setState($state);
 		$newPerson->setZip($zip);

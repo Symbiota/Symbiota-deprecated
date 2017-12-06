@@ -252,6 +252,18 @@ if($action == "Create Login"){
 							<span class="profile"><input name="institution"  size="40" value="<?php echo (isset($_POST['institution'])?htmlspecialchars($_POST['institution']):'') ?>"></span>
 						</td>
 					</tr>
+                    <tr>
+                        <td><b>Department:</b></td>
+                        <td>
+                            <span class="profile"><input name="department"  size="40" value="<?php echo (isset($_POST['department'])?htmlspecialchars($_POST['department']):'') ?>"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Street Address:</b></td>
+                        <td>
+                            <span class="profile"><input name="address"  size="40" value="<?php echo (isset($_POST['address'])?htmlspecialchars($_POST['address']):'') ?>"></span>
+                        </td>
+                    </tr>
 					<tr>
 						<td><span style="font-weight:bold;">City:</span></td>
 						<td>

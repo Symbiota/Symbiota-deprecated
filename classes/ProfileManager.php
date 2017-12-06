@@ -280,6 +280,8 @@ class ProfileManager{
 		$person->setLastName($lastName);
 		$person->setTitle($postArr['title']);
 		$person->setInstitution($postArr['institution']);
+        $person->setDepartment($postArr['department']);
+        $person->setAddress($postArr['address']);
 		$person->setCity($postArr['city']);
 		$person->setState($postArr['state']);
 		$person->setZip($postArr['zip']);

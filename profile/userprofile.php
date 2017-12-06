@@ -79,6 +79,22 @@ if($userId != $SYMB_UID) $isSelf = false;
 							</div>
 						</td>
 				    </tr>
+                    <tr>
+                        <td><b>Department:</b></td>
+                        <td>
+                            <div>
+                                <input name="department"  size="40" value="<?php echo $person->getDepartment();?>">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Street Address:</b></td>
+                        <td>
+                            <div>
+                                <input name="address"  size="40" value="<?php echo $person->getAddress();?>">
+                            </div>
+                        </td>
+                    </tr>
 				    <tr>
 				        <td><b>City:</b></td>
 				        <td>
