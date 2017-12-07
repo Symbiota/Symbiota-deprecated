@@ -1,9 +1,9 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceLabel.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceLabel.php');
 @include_once("Image/Barcode.php");
 @include_once("Image/Barcode2.php");
-require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
+require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
 header("Content-Type: text/html; charset=".$charset);
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
@@ -103,8 +103,8 @@ foreach($labelArr as $occid => $occArr){
 		if($occArr['catalognumber']){
 			$textrun = $section->addTextRun('cnbarcode');
 			$bc = $bcObj->draw(strtoupper($occArr['catalognumber']),"Code39","png",false,40);
-			imagepng($bc,$serverRoot.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png');
-			$textrun->addImage($serverRoot.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png', array('align'=>'center'));
+			imagepng($bc,$SERVER_ROOT.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png');
+			$textrun->addImage($SERVER_ROOT.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png', array('align'=>'center'));
 			imagedestroy($bc);
 		}
 	}
@@ -293,8 +293,8 @@ foreach($labelArr as $occid => $occArr){
 			if($useBarcode && $occArr['catalognumber']){
 				$textrun = $section->addTextRun('cnbarcode');
 				$bc = $bcObj->draw(strtoupper($occArr['catalognumber']),"Code39","png",false,40);
-				imagepng($bc,$serverRoot.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png');
-				$textrun->addImage($serverRoot.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png', array('align'=>'center','marginTop'=>0.15625));
+				imagepng($bc,$SERVER_ROOT.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png');
+				$textrun->addImage($SERVER_ROOT.'/temp/report/'.$ses_id.$occArr['catalognumber'].'.png', array('align'=>'center','marginTop'=>0.15625));
 				if($occArr['othercatalognumbers']){
 					$textrun->addTextBreak(1);
 					$textrun->addText(htmlspecialchars($occArr['othercatalognumbers']),'otherFont');
@@ -322,8 +322,8 @@ foreach($labelArr as $occid => $occArr){
 				$textrun->addLine(array('weight'=>2,'width'=>$lineWidth,'height'=>0,'dash'=>'dash'));
 				$textrun->addTextBreak(1);
 				$bc = $bcObj->draw(strtoupper($occid),"Code39","png",false,40);
-				imagepng($bc,$serverRoot.'/temp/report/'.$ses_id.$occid.'.png');
-				$textrun->addImage($serverRoot.'/temp/report/'.$ses_id.$occid.'.png', array('align'=>'center','marginTop'=>0.104166667));
+				imagepng($bc,$SERVER_ROOT.'/temp/report/'.$ses_id.$occid.'.png');
+				$textrun->addImage($SERVER_ROOT.'/temp/report/'.$ses_id.$occid.'.png', array('align'=>'center','marginTop'=>0.104166667));
 				if($occArr['catalognumber']){
 					$textrun->addTextBreak(1);
 					$textrun->addText(htmlspecialchars($occArr['catalognumber']),'otherFont');
@@ -335,7 +335,7 @@ foreach($labelArr as $occid => $occArr){
 	}
 }
 
-$targetFile = $serverRoot.'/temp/report/'.$paramsArr['un'].'_'.date('Ymd').'_labels_'.$ses_id.'.'.$exportExtension;
+$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_'.date('Ymd').'_labels_'.$ses_id.'.'.$exportExtension;
 $phpWord->save($targetFile, $exportEngine);
 
 header('Content-Description: File Transfer');
@@ -344,7 +344,7 @@ header('Content-Disposition: attachment; filename='.basename($targetFile));
 header('Content-Transfer-Encoding: binary');
 header('Content-Length: '.filesize($targetFile));
 readfile($targetFile);
-$files = glob($serverRoot.'/temp/report/*');
+$files = glob($SERVER_ROOT.'/temp/report/*');
 foreach($files as $file){
 	if(is_file($file)){
 		if(strpos($file,$ses_id) !== false){

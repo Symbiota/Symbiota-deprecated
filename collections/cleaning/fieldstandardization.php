@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceCleaner.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -46,7 +46,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 <body>
 	<?php 	
 	$displayLeftMenu = false;
-	if(!$dupArr) include($serverRoot.'/header.php');
+	if(!$dupArr) include($SERVER_ROOT.'/header.php');
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
@@ -115,7 +115,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 	</div>
 <?php 	
 if(!$dupArr){
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 }
 ?>
 </body>

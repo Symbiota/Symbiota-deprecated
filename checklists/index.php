@@ -64,7 +64,7 @@ $clManager->setProj($pid);
 		</div>
 	</div>
 	<?php
-		include($serverRoot."/footer.php");
+		include($SERVER_ROOT."/footer.php");
 	?>
 </body>
 </html>

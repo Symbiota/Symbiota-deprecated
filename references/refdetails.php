@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ReferenceManager.php');
+include_once($SERVER_ROOT.'/classes/ReferenceManager.php');
 
 $refId = array_key_exists('refid',$_REQUEST)?$_REQUEST['refid']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
@@ -102,7 +102,7 @@ header("Content-Type: text/html; charset=".$charset);
 <body>
 	<?php
 	$displayLeftMenu = (isset($reference_indexMenu)?$reference_indexMenu:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	if(isset($reference_indexCrumbs)){
 		if($reference_indexCrumbs){
 			?>
@@ -553,7 +553,7 @@ header("Content-Type: text/html; charset=".$charset);
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 </body>
 </html>

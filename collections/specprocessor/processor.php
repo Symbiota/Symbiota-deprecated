@@ -92,7 +92,7 @@ $statusStr = "";
 						$imageProcessor->setSourcePathBase($specManager->getSourcePath());
 						$imageProcessor->setTargetPathBase($specManager->getTargetPath());
 						$imageProcessor->setImgUrlBase($specManager->getImgUrlBase());
-						$imageProcessor->setServerRoot($serverRoot);
+						$imageProcessor->setServerRoot($SERVER_ROOT);
 						if($specManager->getWebPixWidth()) $imageProcessor->setWebPixWidth($specManager->getWebPixWidth());
 						if($specManager->getTnPixWidth()) $imageProcessor->setTnPixWidth($specManager->getTnPixWidth());
 						if($specManager->getLgPixWidth()) $imageProcessor->setLgPixWidth($specManager->getLgPixWidth());

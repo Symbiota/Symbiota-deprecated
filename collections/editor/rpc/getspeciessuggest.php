@@ -1,6 +1,6 @@
 <?php
 include_once('../../../config/symbini.php'); 
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 header("Content-Type: application/json; charset=".$charset);
 $con = MySQLiConnectionFactory::getCon("readonly");
 $retArr = Array();

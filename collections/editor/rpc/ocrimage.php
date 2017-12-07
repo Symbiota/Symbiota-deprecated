@@ -1,6 +1,6 @@
 <?php
 	include_once('../../../config/symbini.php');
-	include_once($serverRoot.'/classes/SpecProcessorOcr.php');
+	include_once($SERVER_ROOT.'/classes/SpecProcessorOcr.php');
 	
 	$imgid = $_REQUEST['imgid'];
 	$x = array_key_exists('x',$_REQUEST)?$_REQUEST['x']:0;

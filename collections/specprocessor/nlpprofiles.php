@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcNlpProfiles.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpProfiles.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
@@ -76,7 +76,7 @@ if($isEditor){
 	<body>
 		<?php
 		$displayLeftMenu = true;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
@@ -334,7 +334,7 @@ if($isEditor){
 			?>
 		</div>
 		<?php
-			include($serverRoot.'/footer.php');
+			include($SERVER_ROOT.'/footer.php');
 		?>
 	</body>
 </html>

@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/classes/SpecProcNlpLbcc.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpLbcc.php');
 
 class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 

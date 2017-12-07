@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ActionManager.php');
-include_once($serverRoot.'/classes/OccurrenceActionManager.php');
+include_once($SERVER_ROOT.'/classes/ActionManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceActionManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $aManager = new ActionManager();
@@ -26,7 +26,7 @@ if (isset($_POST['formsubmit'])) {
 		<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<script type="text/javascript">
-			<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+			<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 		</script>
 		<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
 		<script type="text/javascript" src="../js/jquery.js"></script>
@@ -90,7 +90,7 @@ if (isset($_POST['formsubmit'])) {
 	
 	<?php
 	$displayLeftMenu = (isset($collections_indexMenu)?$collections_indexMenu:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	if(isset($collections_indexCrumbs)){
 		if($collections_indexCrumbs){
 			echo "<div class='navpath'>";
@@ -252,7 +252,7 @@ if (isset($_POST['formsubmit'])) {
 		</div>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 	</body>
 </html>

@@ -1,6 +1,6 @@
 <?php
 	include_once('../../../config/symbini.php');
-	include_once($serverRoot.'/classes/SpecLoans.php');
+	include_once($SERVER_ROOT.'/classes/SpecLoans.php');
 	$retMsg = 0;
 	
 	$loanId = $_REQUEST['loanid'];

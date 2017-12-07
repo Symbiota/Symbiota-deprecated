@@ -1,18 +1,18 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcNlpUtilities.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpUtilities.php');
 
 $targetParser = 'common';
 if(strpos($_SERVER['SERVER_NAME'],'bryophyte') !== false){
-	include_once($serverRoot.'/classes/SpecProcNlpLbccBryophyte.php');
+	include_once($SERVER_ROOT.'/classes/SpecProcNlpLbccBryophyte.php');
 	$targetParser = 'bryophyte';
 }
 elseif(strpos($_SERVER['SERVER_NAME'],'lichen') !== false){
-	include_once($serverRoot.'/classes/SpecProcNlpLbccLichen.php');
+	include_once($SERVER_ROOT.'/classes/SpecProcNlpLbccLichen.php');
 	$targetParser = 'lichen';
 }
 else{
-	include_once($serverRoot.'/classes/SpecProcNlpLbcc.php');
+	include_once($SERVER_ROOT.'/classes/SpecProcNlpLbcc.php');
 }
 
 header("Content-Type: text/html; charset=UTF-8");

@@ -27,8 +27,8 @@
 
 // Include PDO definitions
 // Used instead of the occurrence editor manager 
-include_once("$serverRoot/classes/OmOccurrences.php");
-include_once("$serverRoot/classes/OmOccurDeterminations.php");
+include_once("$SERVER_ROOT/classes/OmOccurrences.php");
+include_once("$SERVER_ROOT/classes/OmOccurDeterminations.php");
 
 // Check to see if included classes match the current schema version.
 $uptodate = true;

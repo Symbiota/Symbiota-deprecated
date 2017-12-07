@@ -1,6 +1,6 @@
 <?php
 include_once('../../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
@@ -29,7 +29,7 @@ $statusStr = '';
 <body>
 	<?php 	
 	$displayLeftMenu = false;
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($crowdsourcecentral_listCrumbs)){
 		if($crowdsourcecentral_listCrumbs){
 			echo $crowdsourcecentral_listCrumbs;
@@ -138,7 +138,7 @@ $statusStr = '';
 		</div>
 	</div>
 	<?php 	
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

@@ -21,7 +21,7 @@ $imgLibManager = new ImageLibraryManager();
 <body>
 	<?php
 	$displayLeftMenu = (isset($imagelib_indexMenu)?$imagelib_indexMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($imagelib_indexCrumbs)){
 		echo "<div class='navpath'>";
 		echo $imagelib_indexCrumbs;

@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ReferenceManager.php');
+include_once($SERVER_ROOT.'/classes/ReferenceManager.php');
 
 $refId = array_key_exists('refid',$_REQUEST)?$_REQUEST['refid']:0;
 $authId = array_key_exists('authid',$_REQUEST)?$_REQUEST['authid']:0;
@@ -64,7 +64,7 @@ header("Content-Type: text/html; charset=".$charset);
 	<?php
 	if(!$addAuth){
 		$displayLeftMenu = (isset($reference_indexMenu)?$reference_indexMenu:false);
-		include($serverRoot."/header.php");
+		include($SERVER_ROOT."/header.php");
 		if(isset($reference_indexCrumbs)){
 			if($reference_indexCrumbs){
 				?>
@@ -246,7 +246,7 @@ header("Content-Type: text/html; charset=".$charset);
 	</div>
 	<?php
 	if(!$addAuth){
-		include($serverRoot."/footer.php");
+		include($SERVER_ROOT."/footer.php");
 	}
 	?>
 </body>

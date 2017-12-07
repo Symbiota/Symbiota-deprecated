@@ -1,10 +1,10 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/OccurrenceUtilities.php');
-include_once($serverRoot.'/classes/SpecProcNlpSalix.php');
-include_once($serverRoot.'/classes/SpecProcNlpLbcc.php');
-include_once($serverRoot.'/classes/SpecProcNlpLbccLichen.php');
-include_once($serverRoot.'/classes/SpecProcNlpLbccBryophyte.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpSalix.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpLbcc.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpLbccLichen.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpLbccBryophyte.php');
 
 class SpecProcNlpHandler {
 

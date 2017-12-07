@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecLoans.php');
-require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
+include_once($SERVER_ROOT.'/classes/SpecLoans.php');
+require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
 
 $loanManager = new SpecLoans();
 use PhpOffice\PhpWord\Autoloader;
@@ -88,7 +88,7 @@ if($export){
 		$table->addCell(6000,$cellStyle)->addText(htmlspecialchars($specArr['sciname']),'colFont','colSpace');
 	}
 	
-	$targetFile = $serverRoot.'/temp/report/'.$loanId.'_specimen_list.'.$exportExtension;
+	$targetFile = $SERVER_ROOT.'/temp/report/'.$loanId.'_specimen_list.'.$exportExtension;
 	$phpWord->save($targetFile, $exportEngine);
 
 	header('Content-Description: File Transfer');
@@ -106,7 +106,7 @@ else{
 			<title><?php echo $identifier; ?> Specimen List</title>
 			<style type="text/css">
 				<?php 
-					include_once($serverRoot.'/css/main.css');
+					include_once($SERVER_ROOT.'/css/main.css');
 				?>
 				body {font-family:arial,sans-serif;}
 				p.printbreak {page-break-after:always;}

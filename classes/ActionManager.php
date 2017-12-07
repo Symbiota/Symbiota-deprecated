@@ -1,9 +1,9 @@
 <?php 
 
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/Manager.php');
-include_once($serverRoot.'/classes/OmOccurrences.php');
-include_once($serverRoot.'/classes/ImageDetailManager.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
+include_once($SERVER_ROOT.'/classes/OmOccurrences.php');
+include_once($SERVER_ROOT.'/classes/ImageDetailManager.php');
 
 /**
  * Controler class for ActionRequests, may be subclassed for particular action requests.

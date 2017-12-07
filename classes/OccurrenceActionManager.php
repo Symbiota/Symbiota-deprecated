@@ -1,6 +1,6 @@
 <?php 
 
-include_once($serverRoot.'/classes/ActionManager.php');
+include_once($SERVER_ROOT.'/classes/ActionManager.php');
 
 /**
  * Controler class for ActionRequests pertaining to omoccurrences.

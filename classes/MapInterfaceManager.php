@@ -1,6 +1,6 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/SearchManager.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/SearchManager.php');
 class MapInterfaceManager extends SearchManager {
 	
 	protected $searchTermsArr = Array();

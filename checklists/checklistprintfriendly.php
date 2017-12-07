@@ -1,6 +1,6 @@
 <?php
 	include_once('../config/symbini.php');
-	include_once($serverRoot.'/classes/ChecklistManager.php');
+	include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
 	header("Content-Type: text/html; charset=".$charset);
 	$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
 	$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 

@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceLabel.php');
-require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
+include_once($SERVER_ROOT.'/classes/OccurrenceLabel.php');
+require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
 header("Content-Type: text/html; charset=".$charset);
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
@@ -198,7 +198,7 @@ foreach($labelArr as $occid => $occArr){
 	}
 }
 
-$targetFile = $serverRoot.'/temp/report/'.$paramsArr['un'].'_'.date('Ymd').'_annotations_'.$ses_id.'.'.$exportExtension;
+$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_'.date('Ymd').'_annotations_'.$ses_id.'.'.$exportExtension;
 $phpWord->save($targetFile, $exportEngine);
 
 header('Content-Description: File Transfer');

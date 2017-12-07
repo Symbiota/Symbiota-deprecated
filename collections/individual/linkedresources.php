@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceIndividualManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceIndividualManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $occid = $_GET["occid"];

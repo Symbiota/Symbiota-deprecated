@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/UserTaxonomy.php');
+include_once($SERVER_ROOT.'/classes/UserTaxonomy.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:""; 
@@ -73,7 +73,7 @@ $editorArr = $utManager->getTaxonomyEditors();
 <body>
 	<?php
 	$displayLeftMenu = (isset($profile_usertaxonomymanagerMenu)?$profile_usertaxonomymanagerMenu:true);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($profile_usertaxonomymanagerCrumbs)){
 		if($profile_usertaxonomymanagerCrumbs){
 			echo "<div class='navpath'>";
@@ -207,6 +207,6 @@ $editorArr = $utManager->getTaxonomyEditors();
 	else{
 		echo '<div style="color:red;">You are not authorized to access this page</div>';
 	}
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>

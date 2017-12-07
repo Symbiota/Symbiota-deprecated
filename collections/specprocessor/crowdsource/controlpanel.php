@@ -1,6 +1,6 @@
 <?php
 include_once('../../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collid= array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;

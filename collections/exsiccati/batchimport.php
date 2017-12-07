@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ExsiccatiManager.php');
+include_once($SERVER_ROOT.'/classes/ExsiccatiManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 if(!$SYMB_UID){
@@ -121,7 +121,7 @@ if($isEditor && $formSubmit){
 <body>
 	<?php 
 	$displayLeftMenu = (isset($collections_exsiccati_batchimport)?$collections_exsiccati_batchimport:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt; 
@@ -302,7 +302,7 @@ if($isEditor && $formSubmit){
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 </body>
 </html>

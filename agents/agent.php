@@ -1,9 +1,9 @@
 <?php
 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/AgentManager.php');
-include_once($serverRoot.'/classes/RdfUtility.php');
-include_once($serverRoot.'/classes/UuidFactory.php');
+include_once($SERVER_ROOT.'/classes/AgentManager.php');
+include_once($SERVER_ROOT.'/classes/RdfUtility.php');
+include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 // Find out what media types the client would like, in order.
 $accept = RdfUtility::parseHTTPAcceptHeader($_SERVER['HTTP_ACCEPT']);
@@ -135,7 +135,7 @@ function deliverRdfXml() {
 }
 
 function pageheader($agent) { 
-   global $serverRoot, $defaultTitle, $spDisplay, $clientRoot, $agent_indexCrumbs, $charset;
+   global $SERVER_ROOT, $defaultTitle, $spDisplay, $clientRoot, $agent_indexCrumbs, $charset;
 echo '<!DOCTYPE HTML>
 <html>
 <head>
@@ -148,7 +148,7 @@ echo '<!DOCTYPE HTML>
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">';
-    // include_once($serverRoot.'/config/googleanalytics.php'); 
+    // include_once($SERVER_ROOT.'/config/googleanalytics.php'); 
 echo '</script>
 	<script type="text/javascript">
 		var currentLevel = ' . ($descrDisplayLevel?$descrDisplayLevel:"1"). ';
@@ -157,7 +157,7 @@ echo '</script>
 </head>
 <body>';
    $displayLeftMenu = FALSE;
-   include($serverRoot.'/header.php');
+   include($SERVER_ROOT.'/header.php');
    if(!isset($agent_indexCrumbs)){
       $agent_indexCrumbs = array();
       array_push($agent_indexCrumbs,"<a href='$clientRoot/index.php'>Home</a>");
@@ -183,8 +183,8 @@ echo '</script>
 
 
 function footer() { 
-   global $serverRoot,$clientRoot;
-  include($serverRoot.'/footer.php');
+   global $SERVER_ROOT,$clientRoot;
+  include($SERVER_ROOT.'/footer.php');
   echo "</body>\n</html>";
 }
 ?>

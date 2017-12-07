@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ChecklistManager.php');
-require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
+include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
+require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
 header("Content-Type: text/html; charset=".$charset);
 ini_set('max_execution_time', 240); //240 seconds = 4 minutes
 
@@ -255,7 +255,7 @@ else{
 
 $fileName = str_replace(' ','_',$clManager->getClName());
 $fileName = str_replace('/','_',$fileName);
-$targetFile = $serverRoot.'/temp/report/'.$fileName.'.'.$exportExtension;
+$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.'.$exportExtension;
 $phpWord->save($targetFile, $exportEngine);
 
 header('Content-Description: File Transfer');

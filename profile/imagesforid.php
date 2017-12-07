@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot . '/classes/ImageLibraryManager.php');
-include_once($serverRoot . '/classes/ImageExplorer.php');
+include_once($SERVER_ROOT . '/classes/ImageLibraryManager.php');
+include_once($SERVER_ROOT . '/classes/ImageExplorer.php');
 @header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;

@@ -1,6 +1,6 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceCollectionProfile.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
 
 $collManager = new OccurrenceCollectionProfile();
 

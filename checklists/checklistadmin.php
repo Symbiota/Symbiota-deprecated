@@ -86,7 +86,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 <body>
 <?php
 $displayLeftMenu = false;
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 ?>
 <div class="navpath">
     <a href="../index.php"><?php echo $LANG['NAV_HOME'];?></a> &gt;&gt;
@@ -297,7 +297,7 @@ else{
 ?>
 </div>
 <?php
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 
 </body>

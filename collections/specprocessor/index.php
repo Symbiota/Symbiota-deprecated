@@ -105,7 +105,7 @@ if($isEditor){
 	<body>
 		<?php
 		$displayLeftMenu = false;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		if(isset($collections_specprocessor_indexCrumbs)){
 			if($collections_specprocessor_indexCrumbs){
 				echo "<div class='navpath'>";

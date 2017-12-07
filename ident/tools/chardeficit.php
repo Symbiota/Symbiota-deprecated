@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyCharDeficitManager.php');
+include_once($SERVER_ROOT.'/classes/KeyCharDeficitManager.php');
 header("Content-Type: text/html; charset=".$charset);
  
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
@@ -45,7 +45,7 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
 <body>
 <?php
 	$displayLeftMenu = (isset($ident_tools_chardeficitMenu)?$ident_tools_chardeficitMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($ident_tools_chardeficitCrumbs)){
 		echo "<div class='navpath'>";
 		echo $ident_tools_chardeficitCrumbs;
@@ -145,6 +145,6 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("Ke
  }
  ?>
 </div>
-<?php include($serverRoot.'/footer.php'); ?>
+<?php include($SERVER_ROOT.'/footer.php'); ?>
   </body>
 </html>

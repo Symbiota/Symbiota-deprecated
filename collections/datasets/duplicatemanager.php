@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceDuplicate.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceDuplicate.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -94,7 +94,7 @@ if($isEditor && $formSubmit){
 <body>
 	<?php 	
 	$displayLeftMenu = true;
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
@@ -289,7 +289,7 @@ if($isEditor && $formSubmit){
 		?>
 	</div>
 <?php 	
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 
 </body>

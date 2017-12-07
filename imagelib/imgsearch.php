@@ -76,7 +76,7 @@ $imageExplorer = new ImageExplorer();
         }
     </style>
     <script type="text/javascript">
-        <?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+        <?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
     </script>
     <script type="text/javascript">
         <?php

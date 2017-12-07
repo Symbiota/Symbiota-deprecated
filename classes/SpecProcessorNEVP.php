@@ -29,13 +29,13 @@
  * @author Paul J. Morris
  */
 
-include_once("$serverRoot/classes/OmOccurrences.php");
-include_once("$serverRoot/classes/OmOccurDeterminations.php");
-if (file_exists("$serverRoot/classes/Gazeteer.php")) { 
-   include_once("$serverRoot/classes/Gazeteer.php");
+include_once("$SERVER_ROOT/classes/OmOccurrences.php");
+include_once("$SERVER_ROOT/classes/OmOccurDeterminations.php");
+if (file_exists("$SERVER_ROOT/classes/Gazeteer.php")) { 
+   include_once("$SERVER_ROOT/classes/Gazeteer.php");
 }
-include_once("$serverRoot/classes/iPlantUtility.php");
-include_once("$serverRoot/classes/ImageShared.php");
+include_once("$SERVER_ROOT/classes/iPlantUtility.php");
+include_once("$SERVER_ROOT/classes/ImageShared.php");
 
 define ("DEFAULT_NEVP_COUNTRY","United States of America");
 

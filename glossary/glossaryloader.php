@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/GlossaryUpload.php');
-include_once($serverRoot.'/classes/GlossaryManager.php');
+include_once($SERVER_ROOT.'/classes/GlossaryUpload.php');
+include_once($SERVER_ROOT.'/classes/GlossaryManager.php');
 header("Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID) header('Location: ../profile/index.php?refurl='.$CLIENT_ROOT.'/glossary/glossaryloader.php');
 
@@ -118,7 +118,7 @@ if($isEditor){
 <body>
 <?php
 $displayLeftMenu = (isset($glossary_admin_glossaryloaderMenu)?$glossary_admin_glossaryloaderMenu:false);
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 if(isset($glossary_admin_glossaryloaderCrumbs)){
 	if($glossary_admin_glossaryloaderCrumbs){
 		echo '<div class="navpath">';
@@ -328,7 +328,7 @@ else{
 }
 
 
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>

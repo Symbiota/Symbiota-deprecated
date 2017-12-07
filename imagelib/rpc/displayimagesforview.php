@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ImageExplorer.php');
+include_once($SERVER_ROOT.'/classes/ImageExplorer.php');
 
     $imageExplorer = new ImageExplorer();
     $imgArr = $imageExplorer->getImages($_POST);

@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TPDescEditorManager.php');
+include_once($SERVER_ROOT.'/classes/TPDescEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;

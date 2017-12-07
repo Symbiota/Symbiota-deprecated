@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/WordCloud.php');
+include_once($SERVER_ROOT.'/classes/WordCloud.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collTarget = array_key_exists("colltarget",$_REQUEST)?$_REQUEST["colltarget"]:5;

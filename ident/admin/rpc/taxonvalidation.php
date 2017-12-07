@@ -1,6 +1,6 @@
 <?php
 	include_once('../../../config/symbini.php');
-	include_once($serverRoot.'/config/dbconnection.php');
+	include_once($SERVER_ROOT.'/config/dbconnection.php');
 	header("Content-Type: text/html; charset=".$charset);
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$queryString = $con->real_escape_string($_REQUEST['term']);

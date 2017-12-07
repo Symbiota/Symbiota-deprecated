@@ -1,6 +1,6 @@
 <?php
 	include_once('../../config/symbini.php');
-	include_once($serverRoot.'/classes/InventoryDynSqlManager.php');
+	include_once($SERVER_ROOT.'/classes/InventoryDynSqlManager.php');
 	header("Content-Type: text/html; charset=".$charset);
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -81,7 +81,7 @@
 <body>
 <?php
 	$displayLeftMenu = (isset($checklists_tools_floradynsqlMenu)?$checklists_tools_floradynsqlMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($checklists_tools_floradynsqlCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -179,7 +179,7 @@
 		<?php } ?>
 	</div>
 	<?php
- 	include($serverRoot.'/footer.php');
+ 	include($SERVER_ROOT.'/footer.php');
 	?>
 
 </body>

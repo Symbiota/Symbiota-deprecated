@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/classes/KeyManager.php');
+include_once($SERVER_ROOT.'/classes/KeyManager.php');
 
 class KeyMassUpdate extends KeyManager{
 	

@@ -1,8 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TPEditorManager.php');
-include_once($serverRoot.'/classes/TPDescEditorManager.php');
-include_once($serverRoot.'/classes/TPImageEditorManager.php');
+include_once($SERVER_ROOT.'/classes/TPEditorManager.php');
+include_once($SERVER_ROOT.'/classes/TPDescEditorManager.php');
+include_once($SERVER_ROOT.'/classes/TPImageEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
@@ -168,7 +168,7 @@ if($editable && $action){
 <body>
 	<?php
 	$displayLeftMenu = (isset($taxa_admin_tpeditorMenu)?$taxa_admin_tpeditorMenu:false);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($taxa_admin_tpeditorCrumbs)){
 		echo "<div class='navpath'>";
 		echo $taxa_admin_tpeditorCrumbs;
@@ -406,7 +406,7 @@ if($editable && $action){
 		?>
 	</div>
 	<?php 
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

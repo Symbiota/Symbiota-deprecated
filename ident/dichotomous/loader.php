@@ -1,6 +1,6 @@
 <?php 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $nodeId = array_key_exists("nodeid",$_REQUEST)?$_REQUEST["nodeid"]:0;
@@ -133,7 +133,7 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights)){
 
 	<?php
 	$displayLeftMenu = (isset($ident_dichotomous_loaderMenu)?$ident_dichotomous_loaderMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($ident_dichotomous_loaderCrumbs)) echo "<div class='navpath'>".$ident_dichotomous_loaderCrumbs."</div>";
 	?> 
 	<!-- This is inner text! -->
@@ -266,7 +266,7 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights)){
 		</ul>
 	</div>
 	<?php 
-		include($serverRoot.'/footer.php');
+		include($SERVER_ROOT.'/footer.php');
 	?>
 	
 </body>

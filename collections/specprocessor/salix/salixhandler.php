@@ -1,6 +1,6 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/SalixUtilities.php');
+include_once($SERVER_ROOT.'/classes/SalixUtilities.php');
 header("Content-Type: text/html; charset=".$charset);
 if(!$SYMB_UID){
 	header('Location: ../../../profile/index.php?refurl=../collections/specprocessor/salix/salixhandler.php?'.$_SERVER['QUERY_STRING']);
@@ -44,7 +44,7 @@ if($SYMB_UID){
 	<body>
 		<?php
 		$displayLeftMenu = true;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		?>
 		<div class='navpath'>
 			<a href="../../../index.php">Home</a> &gt;&gt;
@@ -102,7 +102,7 @@ if($SYMB_UID){
 			?> 
 		</div>
 		<?php
-			include($serverRoot.'/footer.php');
+			include($SERVER_ROOT.'/footer.php');
 		?>
 	</body>
 </html>

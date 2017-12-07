@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
 $con = MySQLiConnectionFactory::getCon("readonly");
 $retArr = Array();
 $q = $con->real_escape_string($_REQUEST['term']);

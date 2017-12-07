@@ -1,6 +1,6 @@
 <?php 
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/InstitutionManager.php');
+include_once($SERVER_ROOT.'/classes/InstitutionManager.php');
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/admin/institutioneditor.php?'.$_SERVER['QUERY_STRING']);
 
 $iid = array_key_exists("iid",$_REQUEST)?$_REQUEST["iid"]:0;
@@ -129,7 +129,7 @@ if($editorCode){
 <body>
 <?php
 $displayLeftMenu = (isset($collections_admin_institutioneditor)?$collections_admin_institutioneditor:true);
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 ?>
 <div class='navpath'>
 	<a href='../../index.php'>Home</a> &gt;&gt; 
@@ -596,7 +596,7 @@ include($serverRoot.'/header.php');
 	?>
 </div>
 <?php 
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>

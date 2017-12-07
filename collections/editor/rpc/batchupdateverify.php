@@ -1,6 +1,6 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 
 $collId = $_REQUEST['collid'];
 $fieldName = $_REQUEST['fieldname'];

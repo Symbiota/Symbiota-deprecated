@@ -29,7 +29,7 @@ if($rawOcr){
 
 	$dwcArr = $nlpManager->parse($rawOcr);
 	if($debug){
-		$fh = fopen($serverRoot.'/temp/logs/ocrdebug.txt','w');
+		$fh = fopen($SERVER_ROOT.'/temp/logs/ocrdebug.txt','w');
 		fwrite($fh,'Raw OCR:');
 		fwrite($fh,$rawOcr);
 		fwrite($fh,"\n\n\n------------------------------------------------------------------\n\n\n");

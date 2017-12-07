@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecLoans.php');
-require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
+include_once($SERVER_ROOT.'/classes/SpecLoans.php');
+require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
 
 $loanManager = new SpecLoans();
 use PhpOffice\PhpWord\Autoloader;
@@ -105,7 +105,7 @@ if($export){
 		$textrun->addText(htmlspecialchars($invoiceArr['country']),'toAddressFont');
 	}
 	
-	$targetFile = $serverRoot.'/temp/report/'.$paramsArr['un'].'_mailing_label.'.$exportExtension;
+	$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_mailing_label.'.$exportExtension;
 	$phpWord->save($targetFile, $exportEngine);
 
 	header('Content-Description: File Transfer');
@@ -123,7 +123,7 @@ else{
 			<title>Mailing Label</title>
 			<style type="text/css">
 				<?php 
-					include_once($serverRoot.'/css/main.css');
+					include_once($SERVER_ROOT.'/css/main.css');
 				?>
 				body {font-family:arial,sans-serif;}
 				p.printbreak {page-break-after:always;}

@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TaxonomyCleaner.php');
+include_once($SERVER_ROOT.'/classes/TaxonomyCleaner.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = $_REQUEST["collid"];
@@ -80,7 +80,7 @@ $status = "";
 	<body>
 		<?php
 		$displayLeftMenu = (isset($taxa_admin_taxonomycleanerMenu)?$taxa_admin_taxonomycleanerMenu:'true');
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		if(isset($taxa_admin_taxonomycleanerCrumbs)){
 			?>
 			<div class='navpath'>
@@ -255,6 +255,6 @@ $status = "";
 			}
 			?>
 		</div>
-		<?php include($serverRoot.'/footer.php');?>
+		<?php include($SERVER_ROOT.'/footer.php');?>
 	</body>
 </html>

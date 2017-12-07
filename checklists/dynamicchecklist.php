@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/DynamicChecklistManager.php');
+include_once($SERVER_ROOT.'/classes/DynamicChecklistManager.php');
 header("Content-Type: text/html; charset=".$charset);
  
 $lat = $_POST["lat"];

@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/MapInterfaceManager.php');
-include_once($serverRoot.'/classes/OccurrenceDataset.php');
+include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceDataset.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $uid = array_key_exists("uid",$_REQUEST)?$_REQUEST["uid"]:'';

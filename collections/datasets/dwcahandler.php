@@ -29,7 +29,7 @@ if($collStr){
 	$dwcaManager->setIncludeAttributes($includeAttributes);
 	$dwcaManager->setRedactLocalities($redactLocalities);
 	$dwcaManager->setServerDomain($serverDomain);
-	$dwcaManager->setTargetPath($serverRoot.(substr($SERVER_ROOT,-1)=='/'?'':'/').'content/dwca/');
+	$dwcaManager->setTargetPath($SERVER_ROOT.(substr($SERVER_ROOT,-1)=='/'?'':'/').'content/dwca/');
 	$dwcaManager->setVerboseMode(0);
 	$collArr = explode(',',$collStr);
 	$dwcaManager->batchCreateDwca($collArr);

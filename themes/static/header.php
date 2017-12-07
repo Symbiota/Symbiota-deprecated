@@ -15,7 +15,7 @@
 		?> 
 		<td class='middleleft' background="<?php echo $clientRoot;?>/images/layout/defaultleftstrip.gif" style="background-repeat:repeat-y;"> 
 			<div style="">
-				<?php include($serverRoot."/leftmenu.php"); ?>
+				<?php include($SERVER_ROOT."/leftmenu.php"); ?>
 			</div>
 		</td>
 		<?php 

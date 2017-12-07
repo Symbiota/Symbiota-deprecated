@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/classes/SpecProcNlpSalix.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpSalix.php');
 
 class SalixHandler{
 	

@@ -2,7 +2,7 @@
 // Ajax responder to query for action requests
 
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ActionManager.php');
+include_once($SERVER_ROOT.'/classes/ActionManager.php');
 
 $requesttype = null;
 $priority = null;

@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ImageImport.php');
+include_once($SERVER_ROOT.'/classes/ImageImport.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:"";
@@ -43,7 +43,7 @@ if($isEditor){
 <body>
 <?php
 $displayLeftMenu = true;
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 
 ?>
 <div class="navpath">
@@ -171,7 +171,7 @@ include($serverRoot.'/header.php');
 	</div>
 </div>
 <?php  
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>
