@@ -7,7 +7,7 @@ class SpecUpload{
 	protected $collId;
 	protected $uspid;
 	protected $collMetadataArr = Array();
-	
+
 	protected $title = "";
 	protected $platform;
 	protected $server;
@@ -29,25 +29,25 @@ class SpecUpload{
 	protected $errorStr;
 
 	protected $DIRECTUPLOAD = 1, $DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6, $SKELETAL = 7, $IPTUPLOAD = 8, $NFNUPLOAD = 9, $RESTOREBACKUP = 10;
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
-	
+
 	function __destruct(){
  		if($this->conn) $this->conn->close();
 		if($this->verboseMode == 2){
 			if($this->logFH) fclose($this->logFH);
 		}
 	}
-	
+
 	public function setCollId($id){
 		if(is_numeric($id)){
 			$this->collId = $id;
 			$this->setCollInfo();
 		}
 	}
-	
+
 	public function setUspid($id){
 		if($id && is_numeric($id)){
 			$this->uspid = $id;
@@ -121,14 +121,14 @@ class SpecUpload{
 			$result->free();
 		}
 	}
-	
+
 	public function getCollInfo($fieldStr = ""){
 		if(!$this->collMetadataArr) $this->setCollInfo();
 		if($fieldStr){
 			if(array_key_exists($fieldStr,$this->collMetadataArr)){
 				return $this->collMetadataArr[$fieldStr];
 			}
-			return '';			
+			return '';
 		}
 		return $this->collMetadataArr;
 	}
@@ -163,7 +163,7 @@ class SpecUpload{
 		if($this->collId){
 			if(!$searchVariables) $searchVariables = 'TOTAL_TRANSFER';
 			$fileName = $searchVariables.'_'.$this->collId.'_'.'upload.csv';
-			
+
 			header ('Content-Type: text/csv');
 			header ('Content-Disposition: attachment; filename="'.$fileName.'"');
 			$outstream = fopen("php://output", "w");
@@ -374,7 +374,7 @@ class SpecUpload{
 	public function getUspid(){
 		return $this->uspid;
 	}
-	
+
 	public function getTitle(){
 		return $this->title;
 	}
@@ -386,23 +386,23 @@ class SpecUpload{
 	public function getServer(){
 		return $this->server;
 	}
-	
+
 	public function getPort(){
 		return $this->port;
 	}
-	
+
 	public function getUsername(){
 		return $this->username;
 	}
-	
+
 	public function getPassword(){
 		return $this->password;
 	}
-	
+
 	public function getCode(){
 		return $this->code;
 	}
-	
+
 	public function getPath(){
 		return $this->path;
 	}
@@ -426,41 +426,38 @@ class SpecUpload{
 	public function getStoredProcedure(){
 		return $this->storedProcedure;
 	}
-	
+
 	public function getUploadType(){
 		return $this->uploadType;
 	}
-	
+
 	public function setUploadType($uploadType){
 		if(is_numeric($uploadType)){
 			$this->uploadType = $uploadType;
 		}
 	}
-	
+
 	public function getErrorStr(){
 		return $this->errorStr;
 	}
-	
+
 	public function setVerboseMode($vMode, $logTitle = ''){
-		global $serverRoot;
 		if(is_numeric($vMode)){
 			$this->verboseMode = $vMode;
 			if($this->verboseMode == 2){
 				//Create log File
-				if($serverRoot){
-					$logPath = $serverRoot;
-					if(substr($serverRoot,-1) != '/' && substr($serverRoot,-1) != '\\') $logPath .= '/';
-					$logPath .= 'temp/logs/';
-					if($logTitle){
-						$logPath .= $logTitle;
-					}
-					else{
-						$logPath .= 'dataupload';
-					}
-					$logPath .= '_'.date('Ymd').".log";
-					$this->logFH = fopen($logPath, 'a');
-					fwrite($this->logFH,"Start time: ".date('Y-m-d h:i:s A')."\n");
+				$logPath = $GLOBALS['SERVER_ROOT'];
+				if(substr($logPath,-1) != '/') $logPath .= '/';
+				$logPath .= 'temp/logs/';
+				if($logTitle){
+					$logPath .= $logTitle;
 				}
+				else{
+					$logPath .= 'dataupload';
+				}
+				$logPath .= '_'.date('Ymd').".log";
+				$this->logFH = fopen($logPath, 'a');
+				fwrite($this->logFH,"Start time: ".date('Y-m-d h:i:s A')."\n");
 			}
 		}
 	}
@@ -475,7 +472,7 @@ class SpecUpload{
 			if($this->logFH) fwrite($this->logFH,($indent?str_repeat("\t",$indent):'').strip_tags($str)."\n");
 		}
 	}
-	
+
 	protected function cleanInStr($inStr){
 		$retStr = trim($inStr);
 		$retStr = str_replace(chr(10),' ',$retStr);
