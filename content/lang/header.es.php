@@ -23,9 +23,7 @@ $LANG['H_ECUADOR'] = 'Ecuador';
 $LANG['H_SUBPOLAR'] = 'Región Subpolar del Sur';
 
 $LANG['H_SYMBIOTA'] = 'Symbiota';
-$LANG['H_ABOUT_SYMBIOTA'] = 'Sinopsis de Symbiota'; 
-$LANG['H_HELP'] = 'Ayuda';
-$LANG['H_GOOGLE_GROUP'] = 'Grupo de Google';
+$LANG['H_HELP'] = 'Ayuda de Symbiota';
 $LANG['H_SITEMAP'] = 'Mapa del Sitio';
 
 $LANG['H_CONTACTS'] = 'Contactos';
