@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceLabel.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = $_POST["collid"];
 $hPrefix = $_POST['lhprefix'];
@@ -22,7 +22,7 @@ $labelManager->setCollid($collid);
 
 $isEditor = 0;
 if($symbUid){
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"]))){
+	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])) || (array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollEditor"]))){
 		$isEditor = 1;
 	}
 }
@@ -33,7 +33,7 @@ else{
 	?>
 	<html>
 		<head>
-			<title><?php echo $defaultTitle; ?> Default Labels</title>
+			<title><?php echo $DEFAULT_TITLE; ?> Default Labels</title>
 			<style type="text/css">
 				body {font-family:arial,sans-serif;}
 				table.labels {table-layout:fixed;width:100%;page-break-before:auto;page-break-inside:avoid;}

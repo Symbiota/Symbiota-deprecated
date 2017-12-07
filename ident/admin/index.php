@@ -14,7 +14,7 @@ $charArr = $charManager->getCharacterArr();
 $headingArr = $charManager->getHeadingArr();
 
 $isEditor = false;
-if($isAdmin || array_key_exists("KeyAdmin",$USER_RIGHTS)){
+if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 	$isEditor = true;
 }
 

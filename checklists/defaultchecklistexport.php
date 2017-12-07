@@ -2,7 +2,7 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
 require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 240); //240 seconds = 4 minutes
 
 $ses_id = session_id();
@@ -72,7 +72,7 @@ $clid = $clManager->getClid();
 $pid = $clManager->getPid();
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = true;
 }
 $taxaArray = Array();
@@ -102,7 +102,7 @@ $section = $phpWord->addSection(array('pageSizeW'=>12240,'pageSizeH'=>15840,'mar
 $title = str_replace('&quot;','"',$clManager->getClName());
 $title = str_replace('&apos;',"'",$title);
 $textrun = $section->addTextRun('defaultPara');
-$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/checklists/checklist.php?cl='.$clValue."&proj=".$pid."&dynclid=".$dynClid,htmlspecialchars($title),'titleFont');
+$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/checklists/checklist.php?cl='.$clValue."&proj=".$pid."&dynclid=".$dynClid,htmlspecialchars($title),'titleFont');
 $textrun->addTextBreak(1);
 if($clValue){
 	if($clArray['type'] == 'rarespp'){
@@ -181,7 +181,7 @@ if($showImages){
 			$textrun = $cell->addTextRun('imagePara');
 			$textrun->addImage($imgSrc,array('width'=>160,'height'=>160));
 			$textrun->addTextBreak(1);
-			$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'topicFont');
+			$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'topicFont');
 			$textrun->addTextBreak(1);
 			if(array_key_exists('vern',$sppArr)){
 				$vern = str_replace('&quot;','"',$sppArr["vern"]);
@@ -191,7 +191,7 @@ if($showImages){
 			}
 			if(!$showAlphaTaxa){
 				if($family != $prevfam){
-					$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars('['.$family.']'),'textFont');
+					$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars('['.$family.']'),'textFont');
 					$prevfam = $family;
 				}
 			}
@@ -214,12 +214,12 @@ else{
 			$family = $sppArr['family'];
 			if($family != $prevfam){
 				$textrun = $section->addTextRun('familyPara');
-				$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars($family),'familyFont');
+				$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars($family),'familyFont');
 				$prevfam = $family;
 			}
 		}
 		$textrun = $section->addTextRun('scinamePara');
-		$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'scientificnameFont');
+		$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'scientificnameFont');
 		if(array_key_exists("author",$sppArr)){ 
 			$sciAuthor = str_replace('&quot;','"',$sppArr["author"]);
 			$sciAuthor = str_replace('&apos;',"'",$sciAuthor);
@@ -245,7 +245,7 @@ else{
 					if($i > 0) $textrun->addText(htmlspecialchars(', '),'textFont');
 					$voucStr = str_replace('&quot;','"',$collName);
 					$voucStr = str_replace('&apos;',"'",$voucStr);
-					$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/collections/individual/index.php?occid='.$occid,htmlspecialchars($voucStr),'textFont');
+					$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/collections/individual/index.php?occid='.$occid,htmlspecialchars($voucStr),'textFont');
 					$i++;
 				}
 			}

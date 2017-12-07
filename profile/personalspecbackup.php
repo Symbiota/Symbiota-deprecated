@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collId = $_REQUEST["collid"];
 $action = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:'';
@@ -12,16 +12,16 @@ $dlManager = new ProfileManager();
 $dlManager->setUid($symbUid);
 
 $editable = 0;
-if($isAdmin 
-	|| array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]) 
-	|| array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+if($IS_ADMIN 
+	|| array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]) 
+	|| array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"])){
 		$editable = 1;
 }
 ?>
 
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title>Personal Specimen Backup</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />

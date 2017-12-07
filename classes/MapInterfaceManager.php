@@ -471,7 +471,7 @@ class MapInterfaceManager extends SearchManager {
 		return $taxonAuthorityList;
 	}
 	private function readRequestVariables(){
-		global $clientRoot;
+		global $CLIENT_ROOT;
 		//Search will be confinded to a collid, catid, or will remain open to all collection
 		//Limit collids and/or catids
 		$dbStr = '';
@@ -769,7 +769,7 @@ class MapInterfaceManager extends SearchManager {
 		$result->close();
 	}
     public function getCollGeoCoords($mapWhere,$pageRequest,$cntPerPage){
-		global $userRights, $mappingBoundaries;
+		global $USER_RIGHTS, $mappingBoundaries;
 		$coordArr = Array();
 		$sql = '';
 		$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
@@ -784,11 +784,11 @@ class MapInterfaceManager extends SearchManager {
         if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
 		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints AS p ON o.occid = p.occid ";
 		$sql .= $mapWhere;
-		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+		if(array_key_exists("SuperAdmin",$USER_RIGHTS) || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
 		}
-		elseif(array_key_exists("RareSppReader",$userRights)){
-			$sql .= " AND (o.CollId IN (".implode(",",$userRights["RareSppReader"]).") OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ";
+		elseif(array_key_exists("RareSppReader",$USER_RIGHTS)){
+			$sql .= " AND (o.CollId IN (".implode(",",$USER_RIGHTS["RareSppReader"]).") OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ";
 		}
 		else{
 			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
@@ -847,7 +847,7 @@ class MapInterfaceManager extends SearchManager {
 	}
 	
 	public function getSelectionGeoCoords($seloccids){
-		global $userRights, $mappingBoundaries;
+		global $USER_RIGHTS, $mappingBoundaries;
 		$seloccids = preg_match('#\[(.*?)\]#', $seloccids, $match);
 		$seloccids = $match[1];
 		$coordArr = Array();
@@ -892,8 +892,8 @@ class MapInterfaceManager extends SearchManager {
 	}
 	
     public function writeKMLFile($coordArr){
-    	global $defaultTitle, $userRights, $clientRoot, $charset;
-		$fileName = $defaultTitle;
+    	global $DEFAULT_TITLE, $USER_RIGHTS, $CLIENT_ROOT, $charset;
+		$fileName = $DEFAULT_TITLE;
 		if($fileName){
 			if(strlen($fileName) > 10) $fileName = substr($fileName,0,10);
 			$fileName = str_replace(".","",$fileName);
@@ -909,7 +909,7 @@ class MapInterfaceManager extends SearchManager {
 		echo "<?xml version='1.0' encoding='".$charset."'?>\n";
         echo "<kml xmlns='http://www.opengis.net/kml/2.2'>\n";
         echo "<Document>\n";
-		echo "<Folder>\n<name>".$defaultTitle." Specimens - ".date('j F Y g:ia')."</name>\n";
+		echo "<Folder>\n<name>".$DEFAULT_TITLE." Specimens - ".date('j F Y g:ia')."</name>\n";
         
 		$cnt = 0;
 		foreach($coordArr as $sciName => $contentArr){
@@ -943,8 +943,8 @@ class MapInterfaceManager extends SearchManager {
 						echo "<Data name='".$v."'>".$pointArr[$v]."</Data>\n";
 					}
 				}
-				echo "<Data name='DataSource'>Data retrieved from ".$defaultTitle." Data Portal</Data>\n";
-				$url = "http://".$_SERVER["SERVER_NAME"].$clientRoot."/collections/individual/index.php?occid=".$occId;
+				echo "<Data name='DataSource'>Data retrieved from ".$DEFAULT_TITLE." Data Portal</Data>\n";
+				$url = "http://".$_SERVER["SERVER_NAME"].$CLIENT_ROOT."/collections/individual/index.php?occid=".$occId;
 				echo "<Data name='RecordURL'>".$url."</Data>\n";
 				echo "</ExtendedData>\n";
 				echo "<styleUrl>#".htmlspecialchars(str_replace(" ","_",$sciName), ENT_QUOTES)."</styleUrl>\n";
@@ -1159,17 +1159,17 @@ class MapInterfaceManager extends SearchManager {
 	}
 	
 	public function setRecordCnt($sqlWhere){
-		global $userRights, $clientRoot;
+		global $USER_RIGHTS, $CLIENT_ROOT;
 		if($sqlWhere){
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
 			if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
 			if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 			$sql .= $sqlWhere;
-			if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+			if(array_key_exists("SuperAdmin",$USER_RIGHTS) || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
 				//Is global rare species reader, thus do nothing to sql and grab all records
 			}
-			elseif(array_key_exists("RareSppReader",$userRights)){
-				$sql .= " AND (o.CollId IN (".implode(",",$userRights["RareSppReader"]).") OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ";
+			elseif(array_key_exists("RareSppReader",$USER_RIGHTS)){
+				$sql .= " AND (o.CollId IN (".implode(",",$USER_RIGHTS["RareSppReader"]).") OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ";
 			}
 			else{
 				$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
@@ -1187,7 +1187,7 @@ class MapInterfaceManager extends SearchManager {
 	}
 	
 	public function getMapSpecimenArr($pageRequest,$cntPerPage,$mapWhere){
-		global $userRights;
+		global $USER_RIGHTS;
 		$retArr = Array();
 		if(!$this->recordCount){
 			$this->setRecordCnt($mapWhere);
@@ -1199,11 +1199,11 @@ class MapInterfaceManager extends SearchManager {
 		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "LEFT JOIN fmvouchers AS v ON o.occid = v.occid ";
 		if(array_key_exists("polycoords",$this->searchTermsArr)) $sql .= "LEFT JOIN omoccurpoints p ON o.occid = p.occid ";
 		$sql .= $mapWhere;
-		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+		if(array_key_exists("SuperAdmin",$USER_RIGHTS) || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
 		}
-		elseif(array_key_exists("RareSppReader",$userRights)){
-			$sql .= " AND (o.CollId IN (".implode(",",$userRights["RareSppReader"]).") OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ";
+		elseif(array_key_exists("RareSppReader",$USER_RIGHTS)){
+			$sql .= " AND (o.CollId IN (".implode(",",$USER_RIGHTS["RareSppReader"]).") OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ";
 		}
 		else{
 			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
@@ -1214,7 +1214,7 @@ class MapInterfaceManager extends SearchManager {
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		$canReadRareSpp = false;
-		if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+		if(array_key_exists("SuperAdmin", $USER_RIGHTS) || array_key_exists("CollAdmin", $USER_RIGHTS) || array_key_exists("RareSppAdmin", $USER_RIGHTS) || array_key_exists("RareSppReadAll", $USER_RIGHTS)){
 			$canReadRareSpp = true;
 		}
 		while($r = $result->fetch_object()){
@@ -1230,8 +1230,8 @@ class MapInterfaceManager extends SearchManager {
 			$retArr[$occId]['lon'] = $this->cleanOutStr($r->DecimalLongitude);
 			$localitySecurity = $r->LocalitySecurity;
 			if(!$localitySecurity || $canReadRareSpp 
-				|| (array_key_exists("CollEditor", $userRights) && in_array($collIdStr,$userRights["CollEditor"]))
-				|| (array_key_exists("RareSppReader", $userRights) && in_array($collIdStr,$userRights["RareSppReader"]))){
+				|| (array_key_exists("CollEditor", $USER_RIGHTS) && in_array($collIdStr,$USER_RIGHTS["CollEditor"]))
+				|| (array_key_exists("RareSppReader", $USER_RIGHTS) && in_array($collIdStr,$USER_RIGHTS["RareSppReader"]))){
 				$retArr[$occId]['l'] = str_replace('.,',',',$r->locality);
 			}
 			else{
@@ -1383,7 +1383,7 @@ class MapInterfaceManager extends SearchManager {
         return $this->collArr;
     }
 	public function getGpxText($seloccids){
-		global $defaultTitle;
+		global $DEFAULT_TITLE;
 		$seloccids = preg_match('#\[(.*?)\]#', $seloccids, $match);
 		$seloccids = $match[1];
 		$gpxText = '';

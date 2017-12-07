@@ -21,7 +21,7 @@ if(!$collId && $collMap) $collId = $collMap['collid'];
 $isEditor = 0;
 $occid = 0;
 if($collMap){
-	if($isAdmin){
+	if($IS_ADMIN){
 		$isEditor = 1;
 	}
 	elseif(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){

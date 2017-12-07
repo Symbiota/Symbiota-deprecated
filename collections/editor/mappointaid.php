@@ -28,7 +28,7 @@ if(is_numeric($errRad)){
 ?>
 <html>
 	<head>
-		<title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
+		<title><?php echo $DEFAULT_TITLE; ?> - Coordinate Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	    <script type="text/javascript">

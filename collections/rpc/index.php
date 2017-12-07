@@ -2,12 +2,12 @@
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 ?>
 <html>
 	<head>
 		<title>Page</title>
-		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" />
+		<link rel="stylesheet" href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" />
 	</head>
 	<body>
 		<?php
@@ -21,7 +21,7 @@ header("Content-Type: text/html; charset=".$charset);
 				You don't have permission to access this page.
 			</div>
 			<div style="font-weight:bold;margin:10px;">
-				<a href="<?php echo $clientRoot; ?>/index.php">Return to index page</a>
+				<a href="<?php echo $CLIENT_ROOT; ?>/index.php">Return to index page</a>
 			</div>
 		</div>
 		<?php

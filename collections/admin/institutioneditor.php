@@ -84,8 +84,8 @@ if($editorCode){
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Institution Editor</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Institution Editor</title>
 	<link type="text/css" href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" />
 	<link type="text/css" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" />
 	<script language=javascript>
@@ -163,13 +163,13 @@ include($SERVER_ROOT.'/header.php');
 			?>
 			<div style="float:right;">
 				<a href="institutioneditor.php">
-					<img src="<?php echo $clientRoot;?>/images/toparent.png" style="width:15px;border:0px;" title="Return to Institution List" />
+					<img src="<?php echo $CLIENT_ROOT;?>/images/toparent.png" style="width:15px;border:0px;" title="Return to Institution List" />
 				</a>
 				<?php 
 				if($editorCode > 1){
 					?>
 					<a href="#" onclick="toggle('editdiv');">
-						<img src="<?php echo $clientRoot;?>/images/edit.png" style="width:15px;border:0px;" title="Edit Institution" />
+						<img src="<?php echo $CLIENT_ROOT;?>/images/edit.png" style="width:15px;border:0px;" title="Edit Institution" />
 					</a>
 					<?php 
 				}
@@ -418,7 +418,7 @@ include($SERVER_ROOT.'/header.php');
 			?>
 			<div style="float:right;">
 				<a href="#" onclick="toggle('instadddiv');">
-					<img src="<?php echo $clientRoot;?>/images/add.png" style="width:15px;border:0px;" title="Add a New Institution" />
+					<img src="<?php echo $CLIENT_ROOT;?>/images/add.png" style="width:15px;border:0px;" title="Add a New Institution" />
 				</a>
 			</div>
 			<div id="instadddiv" style="display:<?php echo ($eMode?'block':'none'); ?>;margin-bottom:8px;">
@@ -575,7 +575,7 @@ include($SERVER_ROOT.'/header.php');
 								echo '<li><a href="institutioneditor.php?iid='.$iid.'">';
 								echo $iArr['institutionname'].' ('.$iArr['institutioncode'].')';
 								if($editorCode == 3 || array_intersect(explode(',',$iArr['collid']),$USER_RIGHTS["CollAdmin"])){
-									echo ' <a href="institutioneditor.php?emode=1&iid='.$iid.'"><img src="'.$clientRoot.'/images/edit.png" style="width:13px;" /></a>';
+									echo ' <a href="institutioneditor.php?emode=1&iid='.$iid.'"><img src="'.$CLIENT_ROOT.'/images/edit.png" style="width:13px;" /></a>';
 								}
 								echo '</a></li>';
 							}

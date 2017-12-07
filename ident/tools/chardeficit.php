@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/KeyCharDeficitManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
  
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
@@ -14,14 +14,14 @@ $cdManager = new KeyCharDeficitManager();
 if($langValue) $cdManager->setLanguage($langValue);
 if($projValue) $cdManager->setProject($projValue);
 $editable = false;
-if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){
+if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 	$editable = true;
 }
 ?>
 
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Character Deficit Finder</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Character Deficit Finder</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">

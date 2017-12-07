@@ -2,7 +2,7 @@
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/TaxonomyCleaner.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collId = $_REQUEST["collid"];
 $displayIndex = array_key_exists('displayindex',$_REQUEST)?$_REQUEST['displayindex']:0;
@@ -25,17 +25,17 @@ if($taxAuthId){
 }
 
 $isEditor = false;
-if($isAdmin){
+if($IS_ADMIN){
 	$isEditor = true;
 }
 else{
 	if($collId){
-		if(array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])){
+		if(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"])){
 			$isEditor = true;
 		}
 	}
 	else{
-		if(array_key_exists("Taxonomy",$userRights)) $isEditor = true;
+		if(array_key_exists("Taxonomy",$USER_RIGHTS)) $isEditor = true;
 	}
 }
 
@@ -44,7 +44,7 @@ $status = "";
 ?>
 <html>
 	<head>
-		<title><?php echo $defaultTitle; ?> Taxonomic Name Cleaner</title>
+		<title><?php echo $DEFAULT_TITLE; ?> Taxonomic Name Cleaner</title>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<script language="javascript">
@@ -249,7 +249,7 @@ $status = "";
 			else{
 				?>
 				<div style="font-weight:bold;">
-					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/taxa/taxonomy/taxonomycleaner.php?collid=<?php echo $collId; ?>'>login</a>!
+					Please <a href='../../profile/index.php?refurl=<?php echo $CLIENT_ROOT; ?>/taxa/taxonomy/taxonomycleaner.php?collid=<?php echo $collId; ?>'>login</a>!
 				</div>
 				<?php 
 			}

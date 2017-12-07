@@ -445,13 +445,13 @@ class OccurrenceIndividualManager extends Manager{
 
 	//Voucher management
 	public function getVoucherChecklists(){
-		global $IS_ADMIN, $userRights;
+		global $IS_ADMIN, $USER_RIGHTS;
 		$returnArr = Array();
 		$sql = 'SELECT c.name, c.clid, c.access, v.notes '.
 			'FROM fmchecklists c INNER JOIN fmvouchers v ON c.clid = v.clid '.
 			'WHERE v.occid = '.$this->occid.' ';
-		if(array_key_exists("ClAdmin",$userRights)){
-			$sql .= 'AND (c.access = "public" OR c.clid IN('.implode(',',$userRights['ClAdmin']).')) ';
+		if(array_key_exists("ClAdmin",$USER_RIGHTS)){
+			$sql .= 'AND (c.access = "public" OR c.clid IN('.implode(',',$USER_RIGHTS['ClAdmin']).')) ';
 		}
 		else{
 			$sql .= 'AND (c.access = "public") ';
@@ -589,10 +589,10 @@ class OccurrenceIndividualManager extends Manager{
 	}
 
 	public function getChecklists($clidExcludeArr){
-		global $userRights;
-		if(!array_key_exists("ClAdmin",$userRights)) return null;
+		global $USER_RIGHTS;
+		if(!array_key_exists("ClAdmin",$USER_RIGHTS)) return null;
 		$returnArr = Array();
-		$targetArr = array_diff($userRights["ClAdmin"],$clidExcludeArr);
+		$targetArr = array_diff($USER_RIGHTS["ClAdmin"],$clidExcludeArr);
 		if($targetArr){
 			$sql = 'SELECT name, clid '.
 				'FROM fmchecklists WHERE clid IN('.implode(",",$targetArr).') '.

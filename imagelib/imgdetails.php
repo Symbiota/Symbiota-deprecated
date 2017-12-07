@@ -352,7 +352,7 @@ if($imgArr){
 						<div style="margin-top:20px;">
 							Do you see an error or have a comment about this image? <br/>If so, send email to:
 							<?php
-							$emailSubject = $defaultTitle.' Image #'.$imgId;
+							$emailSubject = $DEFAULT_TITLE.' Image #'.$imgId;
 							$emailBody = 'Image being referenced: http://'.$_SERVER['SERVER_NAME'].$CLIENT_ROOT.'/imagelib/imgdetails.php?imgid='.$imgId;
 							$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
 							?>

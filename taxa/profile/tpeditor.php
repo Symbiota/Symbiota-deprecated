@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/TPEditorManager.php');
 include_once($SERVER_ROOT.'/classes/TPDescEditorManager.php');
 include_once($SERVER_ROOT.'/classes/TPImageEditorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
 $taxon = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
@@ -27,7 +27,7 @@ if($lang) $tEditor->setLanguage($lang);
 
 $statusStr = "";
 $editable = false;
-if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
+if($IS_ADMIN || array_key_exists("TaxonProfile",$USER_RIGHTS)){
 	$editable = true;
 }
 
@@ -108,7 +108,7 @@ if($editable && $action){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle." Taxon Editor: ".$tEditor->getSciName(); ?></title>
+	<title><?php echo $DEFAULT_TITLE." Taxon Editor: ".$tEditor->getSciName(); ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
@@ -374,7 +374,7 @@ if($editable && $action){
 					<h2>You must be logged in and authorized to taxon data.</h2>
 					<h3>
 						<?php 
-							echo "Click <a href='".$clientRoot."/profile/index.php?tid=".$tEditor->getTid()."&refurl=".$clientRoot."/taxa/profile/tpeditor.php'>here</a> to login";
+							echo "Click <a href='".$CLIENT_ROOT."/profile/index.php?tid=".$tEditor->getTid()."&refurl=".$CLIENT_ROOT."/taxa/profile/tpeditor.php'>here</a> to login";
 						?>
 					</h3>
 				</div>

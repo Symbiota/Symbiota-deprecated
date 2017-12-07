@@ -68,7 +68,7 @@ $specList = $loanManager->getSpecList($loanId);
 						</select>
 					</span>
 					<?php
-					if($isAdmin){
+					if($IS_ADMIN){
 						?>
 						<span>
 							<a href="../admin/institutioneditor.php?iid=<?php echo $loanArr['iidborrower']; ?>" target="_blank" title="Edit institution details (option available only to Super Admin)">

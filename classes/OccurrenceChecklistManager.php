@@ -77,7 +77,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 	}
 
 	public function buildSymbiotaChecklist($taxonAuthorityId,$tidArr = ''){
-		global $clientRoot,$userId;
+		global $CLIENT_ROOT,$userId;
 		$conn = $this->getConnection("write");
 		$sqlCreateCl = "";
 		$expirationTime = date('Y-m-d H:i:s',time()+259200);

@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php'); 
 include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 
@@ -9,8 +9,8 @@ $csManager = new OccurrenceCrowdSource();
 
 $pArr = array();
 if($symbUid){
-	if(array_key_exists("CollAdmin",$userRights)){
-		$pArr = $userRights['CollAdmin'];
+	if(array_key_exists("CollAdmin",$USER_RIGHTS)){
+		$pArr = $USER_RIGHTS['CollAdmin'];
 	}
 }
 
@@ -18,8 +18,8 @@ $statusStr = '';
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Crowdsourcing Score Board</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Crowdsourcing Score Board</title>
     <link href="../../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
     <link href="../../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" type="text/css" />
 	<script type="text/javascript">
@@ -94,7 +94,7 @@ $statusStr = '';
 			</fieldset>
 		</div>
 		<?php 
-		if(isset($userRights['CollAdmin']) || isset($userRights['CollEditor'])){
+		if(isset($USER_RIGHTS['CollAdmin']) || isset($USER_RIGHTS['CollEditor'])){
 			?>
 			<div style="clear:both;margin:30px;">
 				<b>Note:</b> You have been identified as an official editor for one or more collections. 

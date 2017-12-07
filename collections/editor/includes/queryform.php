@@ -100,7 +100,7 @@ else{
 				?>
 				<div style="margin:2px;">
 					<?php
-					if($isGenObs && $isAdmin){
+					if($isGenObs && $IS_ADMIN){
 						?>
 						<span style="margin-right:25px;">
 							<input type="checkbox" name="q_observeruid" value="<?php echo $symbUid; ?>" <?php echo ($qObserverUid?'CHECKED':''); ?> />

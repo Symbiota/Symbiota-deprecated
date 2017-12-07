@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/PermissionsManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;

@@ -2,7 +2,7 @@
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $buildThumbnails = array_key_exists("buildthumbnails",$_REQUEST)?$_REQUEST["buildthumbnails"]:0;
@@ -12,7 +12,7 @@ $verifyPathsObj = new VerifyPaths();
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Verify Image Paths</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Verify Image Paths</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 </head>

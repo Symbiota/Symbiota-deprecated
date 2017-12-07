@@ -343,18 +343,18 @@ class OccurrenceDataset {
 	
 		$redactLocalities = 1;
 		$rareReaderArr = array();
-		if($IS_ADMIN || array_key_exists("CollAdmin", $userRights)){
+		if($IS_ADMIN || array_key_exists("CollAdmin", $USER_RIGHTS)){
 			$redactLocalities = 0;
 		}
-		elseif(array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+		elseif(array_key_exists("RareSppAdmin", $USER_RIGHTS) || array_key_exists("RareSppReadAll", $USER_RIGHTS)){
 			$redactLocalities = 0;
 		}
 		else{
-			if(array_key_exists('CollEditor', $userRights)){
-				$rareReaderArr = $userRights['CollEditor'];
+			if(array_key_exists('CollEditor', $USER_RIGHTS)){
+				$rareReaderArr = $USER_RIGHTS['CollEditor'];
 			}
-			if(array_key_exists('RareSppReader', $userRights)){
-				$rareReaderArr = array_unique(array_merge($rareReaderArr,$userRights['RareSppReader']));
+			if(array_key_exists('RareSppReader', $USER_RIGHTS)){
+				$rareReaderArr = array_unique(array_merge($rareReaderArr,$USER_RIGHTS['RareSppReader']));
 			}
 		}
 		$dwcaHandler = new DwcArchiverCore();

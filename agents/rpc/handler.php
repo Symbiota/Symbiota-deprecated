@@ -258,7 +258,7 @@ function listagentsjson() {
 }
 
 function saveAgent($agentid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) { 
@@ -301,7 +301,7 @@ function createAgent() {
 }
 
 function deleteAgent($agentid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) { 
@@ -325,7 +325,7 @@ function deleteAgent($agentid=NULL) {
 /* Functions for handling AgentNames (agentnames) *******/
 
 function saveAgentName($agentnameid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) {
@@ -403,7 +403,7 @@ function createAgentName() {
 }
 
 function deleteAgentName($agentnameid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) { 
@@ -439,7 +439,7 @@ function loadAgentNumberPattern() {
 } 
 
 function saveAgentNumberPattern($agentnumberpatternid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) {
@@ -497,7 +497,7 @@ function editAgentNumberPattern($np) {
 } 
 
 function deleteAgentNumberPattern($agentnumberpatternid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) { 
@@ -533,7 +533,7 @@ function loadAgentLinks() {
 } 
 
 function saveAgentLinks($agentlinksid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) {
@@ -591,7 +591,7 @@ function editAgentLinks($al) {
 } 
 
 function deleteAgentLinks($agentlinksid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) { 
@@ -627,7 +627,7 @@ function loadAgentRelations() {
 } 
 
 function saveAgentRelations($agentrelationsid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) {
@@ -685,7 +685,7 @@ function editAgentRelations($al) {
 } 
 
 function deleteAgentRelations($agentrelationsid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) { 
@@ -721,7 +721,7 @@ function loadAgentTeams() {
 } 
 
 function saveAgentTeams($agentteamid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) {
@@ -779,7 +779,7 @@ function editAgentTeams($al) {
 } 
 
 function deleteAgentTeams($agentteamid=NULL) { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result = "";
    $am = new AgentManager();
    if ($am->isAgentEditor()) { 

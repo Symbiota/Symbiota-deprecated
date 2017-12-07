@@ -1,7 +1,7 @@
 <div class="menu">
 	<div class="menuheader">
 		<a href="<?php echo $CLIENT_ROOT; ?>/index.php">
-			<?php echo $defaultTitle; ?> Homepage
+			<?php echo $DEFAULT_TITLE; ?> Homepage
 		</a>
 	</div>
 	<div class="menuitem">

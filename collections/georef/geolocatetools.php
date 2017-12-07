@@ -67,7 +67,7 @@ if($isEditor){
 		include($SERVER_ROOT.'/header.php');
 		?>
 		<div class="navpath">
-			<a href="<?php echo $clientRoot; ?>/index.php">Home</a> &gt;&gt; 
+			<a href="<?php echo $CLIENT_ROOT; ?>/index.php">Home</a> &gt;&gt; 
 			<a href="../misc/collprofiles.php?emode=1&collid=<?php echo $collId; ?>">Collection Management Menu</a> &gt;&gt;
 			<b>Batch GeoLocate Tools</b>
 		</div>

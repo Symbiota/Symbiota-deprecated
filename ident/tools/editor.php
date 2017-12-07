@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/KeyEditorManager.php');
-header("Cache-control: private; Content-Type: text/html; charset=".$charset);
+header("Cache-control: private; Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/tools/editor.php?'.$_SERVER['QUERY_STRING']);
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:""; 
@@ -21,7 +21,7 @@ $editorManager->setLanguage($langValue);
 $editorManager->setTid($tid);
 
 $isEditor = false;
-if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){
+if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
@@ -35,7 +35,7 @@ if($isEditor && $action){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Identification Character Editor</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Identification Character Editor</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script language="javascript">

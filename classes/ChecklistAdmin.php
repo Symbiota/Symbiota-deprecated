@@ -475,14 +475,14 @@ class ChecklistAdmin {
 	}
 
 	public function getVoucherProjects(){
-		global $userRights;
+		global $USER_RIGHTS;
 		$retArr = array();
 		$runQuery = true;
 		$sql = 'SELECT collid, collectionname '.
 			'FROM omcollections WHERE (colltype = "Observations" OR colltype = "General Observations") ';
-		if(!array_key_exists('SuperAdmin',$userRights)){
+		if(!array_key_exists('SuperAdmin',$USER_RIGHTS)){
 			$collInStr = '';
-			foreach($userRights as $k => $v){
+			foreach($USER_RIGHTS as $k => $v){
 				if($k == 'CollAdmin' || $k == 'CollEditor'){
 					$collInStr .= ','.implode(',',$v);
 				}

@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php'); 
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-header("Content-Type: application/json; charset=".$charset);
+header("Content-Type: application/json; charset=".$CHARSET);
 $con = MySQLiConnectionFactory::getCon("readonly");
 $retArr = Array();
 $term = trim($con->real_escape_string($_REQUEST['term']));

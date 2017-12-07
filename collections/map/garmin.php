@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
 header('Expires: 0'); // Proxies.
@@ -16,7 +16,7 @@ $fileName = time();
 
 <html>
 	<head>
-		<title><?php echo $defaultTitle; ?> - Garmin Downloader</title>
+		<title><?php echo $DEFAULT_TITLE; ?> - Garmin Downloader</title>
 		<link type="text/css" href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" />
 		<link type="text/css" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" />
 		<link type="text/css" href="../../css/jquery.mobile-1.4.0.min.css" rel="stylesheet" />

@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceSupport.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:'';
 $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
@@ -10,22 +10,22 @@ $harvManager = new OccurrenceSupport();
 
 $isEditor = 0;
 $collList = array();
-if($isAdmin){
+if($IS_ADMIN){
 	$isEditor = 1;
 	$collList[] = 'all';
 }
 else{
-	if(array_key_exists("CollEditor",$userRights)){
-		if(in_array($collid,$userRights["CollEditor"])){
+	if(array_key_exists("CollEditor",$USER_RIGHTS)){
+		if(in_array($collid,$USER_RIGHTS["CollEditor"])){
 			$isEditor = 1;
 		}
-		$collList = $userRights["CollEditor"];
+		$collList = $USER_RIGHTS["CollEditor"];
 	}
-	if(array_key_exists("CollAdmin",$userRights)){
-		if(in_array($collid,$userRights["CollAdmin"])){
+	if(array_key_exists("CollAdmin",$USER_RIGHTS)){
+		if(in_array($collid,$USER_RIGHTS["CollAdmin"])){
 			$isEditor = 1;
 		}
-		$collList = array_merge($collList,$userRights["CollAdmin"]);
+		$collList = array_merge($collList,$USER_RIGHTS["CollAdmin"]);
 	}
 }
 
@@ -43,7 +43,7 @@ if($isEditor){
 <html>
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
-		<title><?php echo $defaultTitle; ?> - Occurrence Harvester</title>
+		<title><?php echo $DEFAULT_TITLE; ?> - Occurrence Harvester</title>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />

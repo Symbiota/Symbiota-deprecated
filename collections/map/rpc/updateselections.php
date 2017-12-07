@@ -2,7 +2,7 @@
 include_once('../../../config/symbini.php');
 include_once('../../../config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $con = MySQLiConnectionFactory::getCon("readonly");
 

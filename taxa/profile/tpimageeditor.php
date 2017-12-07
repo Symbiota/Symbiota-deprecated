@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/TPImageEditorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $tid = $_REQUEST["tid"];
 $category = array_key_exists("cat",$_REQUEST)?$_REQUEST["cat"]:""; 
@@ -14,7 +14,7 @@ if($tid){
 	$imageEditor->setTid($tid);
 	$imageEditor->setLanguage($lang);
 
-	if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
+	if($IS_ADMIN || array_key_exists("TaxonProfile",$USER_RIGHTS)){
 		$editable = true;
 	}
 	 
@@ -321,7 +321,7 @@ if($tid){
 									?>
 									<div>
 										<b>Occurrence Record #:</b> 
-										<a href="<?php echo $clientRoot;?>/collections/individual/index.php?occid=<?php echo $imgArr["occid"]; ?>">
+										<a href="<?php echo $CLIENT_ROOT;?>/collections/individual/index.php?occid=<?php echo $imgArr["occid"]; ?>">
 											<?php echo $imgArr["occid"];?>
 										</a>
 									</div>

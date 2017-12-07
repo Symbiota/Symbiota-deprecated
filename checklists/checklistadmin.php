@@ -2,7 +2,7 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistAdmin.php');
 include_once($SERVER_ROOT.'/content/lang/checklists/checklistadmin.'.$LANG_TAG.'.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../profile/index.php?refurl=../checklists/checklistadmin.php?'.$_SERVER['QUERY_STRING']);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
@@ -60,8 +60,8 @@ $voucherProjects = $clManager->getVoucherProjects();
 ?>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
-    <title><?php echo $defaultTitle; ?><?php echo $LANG['CHECKADMIN'];?></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
+    <title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['CHECKADMIN'];?></title>
     <link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
     <link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />

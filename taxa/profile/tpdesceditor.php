@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/TPDescEditorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
 $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:'';
@@ -13,7 +13,7 @@ if($lang) $descEditor->setLanguage($lang);
 
 $statusStr = '';
 $editable = false;
-if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
+if($IS_ADMIN || array_key_exists("TaxonProfile",$USER_RIGHTS)){
 	$editable = true;
 }
 

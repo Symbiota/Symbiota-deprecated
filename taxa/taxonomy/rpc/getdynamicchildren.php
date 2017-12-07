@@ -7,7 +7,7 @@ $displayAuthor = array_key_exists('authors',$_REQUEST)?$_REQUEST['authors']:0;
 $targetId = array_key_exists('targetid',$_REQUEST)?$_REQUEST['targetid']:0;
 
 $editable = false;
-if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$editable = true;
 }
 

@@ -47,7 +47,7 @@ else{
 	</div>
 	<div style="float:left;margin-left:5px;">
 		<a href="voucherreporthandler.php?rtype=<?php echo ($displayMode==2?'problemtaxacsv':'missingoccurcsv').'&clid='.$clid; ?>" target="_blank" title="Download Specimen Records">
-			<img src="<?php echo $clientRoot; ?>/images/dl.png" style="border:0px;" />
+			<img src="<?php echo $CLIENT_ROOT; ?>/images/dl.png" style="border:0px;" />
 		</a>
 	</div>
 	<div style="float:right;">

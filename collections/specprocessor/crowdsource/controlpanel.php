@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php'); 
 include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid= array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $omcsid= array_key_exists('omcsid',$_REQUEST)?$_REQUEST['omcsid']:0;
@@ -15,7 +15,7 @@ if($IS_ADMIN){
 	$isEditor = 1;
 }
 elseif($collid){
-	if(array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])){
+	if(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
 		$isEditor = 1;
 	}
 }

@@ -1,7 +1,7 @@
 <?php 
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $taxon = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
@@ -10,7 +10,7 @@ $dichoKeyManager = new DichoKeyManager();
 ?>
 <html>
 <head>
-<title><?php echo $defaultTitle; ?> Dichotomous Key</title>
+<title><?php echo $DEFAULT_TITLE; ?> Dichotomous Key</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<meta name='keywords' content='' />

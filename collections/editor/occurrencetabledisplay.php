@@ -70,7 +70,7 @@ if($SYMB_UID){
 				$isEditor = 2;
 			}
 		}
-		elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+		elseif(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"])){
 			$isEditor = 2;
 		}
 	}
@@ -282,7 +282,7 @@ else{
 							<?php
 						}
 						else{
-							if(!$isGenObs || $isAdmin){ 
+							if(!$isGenObs || $IS_ADMIN){ 
 								?>
 								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
 								<?php

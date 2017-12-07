@@ -1,13 +1,13 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 ?>
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	</head>
 	
 	<body>

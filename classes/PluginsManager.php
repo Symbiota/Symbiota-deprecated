@@ -201,16 +201,16 @@ class PluginsManager {
 	}
 
 	private function getSlideshowHtml($ssId, $width, $interval){
-		$clientRoot = $GLOBALS['CLIENT_ROOT'];
+		$CLIENT_ROOT = $GLOBALS['CLIENT_ROOT'];
 		$height = $width + 50;
-		$html = '<link rel="stylesheet" href="'.$clientRoot.'/css/slideshowstyle.css">
+		$html = '<link rel="stylesheet" href="'.$CLIENT_ROOT.'/css/slideshowstyle.css">
 			<style>
 				@font-face{
 					font-family:"FontAwesome";
-					src:url("'.$clientRoot.'/css/images/fontawesome-webfont.eot?v=3.0.1");
-					src:url("'.$clientRoot.'/css/images/fontawesome-webfont.eot?#iefix&v=3.0.1") format("embedded-opentype"),
-						url("'.$clientRoot.'/css/images/fontawesome-webfont.woff?v=3.0.1") format("woff"),
-						url("'.$clientRoot.'/css/images/fontawesome-webfont.ttf?v=3.0.1") format("truetype");
+					src:url("'.$CLIENT_ROOT.'/css/images/fontawesome-webfont.eot?v=3.0.1");
+					src:url("'.$CLIENT_ROOT.'/css/images/fontawesome-webfont.eot?#iefix&v=3.0.1") format("embedded-opentype"),
+						url("'.$CLIENT_ROOT.'/css/images/fontawesome-webfont.woff?v=3.0.1") format("woff"),
+						url("'.$CLIENT_ROOT.'/css/images/fontawesome-webfont.ttf?v=3.0.1") format("truetype");
 					font-weight: normal;
 					font-style:normal
 				}
@@ -219,11 +219,11 @@ class PluginsManager {
 				a.slidesjs-previous,
 				a.slidesjs-play,
 				a.slidesjs-stop {
-					background-image: url('.$clientRoot.'/css/images/btns-next-prev.png);
+					background-image: url('.$CLIENT_ROOT.'/css/images/btns-next-prev.png);
 					background-repeat: no-repeat;
 				}
 				.slidesjs-pagination li a {
-					background-image: url('.$clientRoot.'/css/images/pagination.png);
+					background-image: url('.$CLIENT_ROOT.'/css/images/pagination.png);
 					background-position: 0 0;
 				}
 			</style>';
@@ -247,7 +247,7 @@ class PluginsManager {
 	}
 
 	private function getImageList($ssId, $width){
-		$clientRoot = $GLOBALS['CLIENT_ROOT'];
+		$CLIENT_ROOT = $GLOBALS['CLIENT_ROOT'];
 		$langArr = $GLOBALS['LANG'];
 
 		$windowHeight = $width + 75;
@@ -268,11 +268,11 @@ class PluginsManager {
 			}
 			$linkUrl = '';
 			if($imgIdArr["occid"]){
-				$linkUrl = $clientRoot.'/collections/individual/index.php?occid='.$imgIdArr["occid"].'&clid=0';
+				$linkUrl = $CLIENT_ROOT.'/collections/individual/index.php?occid='.$imgIdArr["occid"].'&clid=0';
 			}
 			elseif($imgIdArr["tid"]){
 				$name = str_replace(' ','%20',$imgIdArr["SciName"]);
-				$linkUrl = $clientRoot.'/taxa/index.php?taxon='.$name;
+				$linkUrl = $CLIENT_ROOT.'/taxa/index.php?taxon='.$name;
 			}
 			$html .= '<div style="width:'.$width.'px;height:'.$imageHeight.'px;position:relative;">';
 			$html .= '<div style="width:'.$width.'px;max-height:'.$imageHeight.'px;overflow:hidden;">';

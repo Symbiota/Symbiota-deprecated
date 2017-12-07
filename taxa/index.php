@@ -43,7 +43,7 @@ if($SYMB_UID){
 	if($IS_ADMIN || array_key_exists("TaxonProfile",$USER_RIGHTS)){
 		$isEditor = true;
 	}
-	if($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$userRights)){
+	if($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
 		$displayLocality = 1;
 	}
 }

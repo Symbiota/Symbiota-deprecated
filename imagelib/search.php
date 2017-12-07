@@ -30,7 +30,7 @@ if($action == 'Load Images'){
 ?>
 <html>
 <head>
-<title><?php echo $defaultTitle; ?> Image Library</title>
+<title><?php echo $DEFAULT_TITLE; ?> Image Library</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
