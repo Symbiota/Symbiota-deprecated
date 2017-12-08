@@ -1,8 +1,7 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TaxonomyDisplayManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/TaxonomyDisplayManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
@@ -16,7 +15,7 @@ $taxonDisplayObj->setTargetStr($target);
 $taxonDisplayObj->setTaxAuthId($taxAuthId);
 
 $editable = false;
-if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$editable = true;
 }
 
@@ -30,8 +29,8 @@ if($target){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle." Taxonomy Explorer: ".$taxonDisplayObj->getTargetStr(); ?></title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<title><?php echo $DEFAULT_TITLE." Taxonomy Explorer: ".$taxonDisplayObj->getTargetStr(); ?></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
@@ -43,7 +42,7 @@ if($target){
 		.dijitIconFolderClosed,
 		.dijitFolderOpened,
 		.dijitIconFolderOpen {
-			background-image: none; 
+			background-image: none;
 			width: 0px;
 			height: 0px;
 		}
@@ -65,7 +64,7 @@ if($target){
 <body class="claro">
 <?php
 $displayLeftMenu = (isset($taxa_admin_taxonomydisplayMenu)?$taxa_admin_taxonomydisplayMenu:"true");
-include($serverRoot.'/header.php');
+include($SERVER_ROOT.'/header.php');
 if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
@@ -77,17 +76,17 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	if($taxa_admin_taxonomydisplayCrumbs){
 		echo '<div class="navpath">';
 		echo $taxa_admin_taxonomydisplayCrumbs;
-		echo ' <b>Taxonomy Explorer</b>'; 
+		echo ' <b>Taxonomy Explorer</b>';
 		echo '</div>';
 	}
 }
 else{
 	?>
 	<div class="navpath">
-		<a href="../../index.php">Home</a> &gt;&gt; 
-		<a href="taxonomydynamicdisplay.php"><b>Taxonomy Explorer</b></a> 
+		<a href="../../index.php">Home</a> &gt;&gt;
+		<a href="taxonomydynamicdisplay.php"><b>Taxonomy Explorer</b></a>
 	</div>
-	<?php 
+	<?php
 }
 ?>
 	<!-- This is inner text! -->
@@ -100,12 +99,12 @@ else{
 				<?php echo $statusStr; ?>
 			</div>
 			<hr/>
-			<?php 
+			<?php
 		}
 		if($editable){
 			?>
 			<div style="float:right;" title="Add a New Taxon">
-				<a href="taxonomyloader.php">
+				<a href="taxonomyloader.php" target="_blank">
 					<img style='border:0px;width:15px;' src='../../images/add.png'/>
 				</a>
 			</div>
@@ -117,12 +116,12 @@ else{
 				<fieldset style="padding:10px;width:500px;">
 					<legend><b>Enter a taxon</b></legend>
                     <div>
-						<b>Taxon:</b> 
-						<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
+						<b>Taxon:</b>
+						<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" />
 					</div>
 					<div style="float:right;margin:15px 80px 15px 15px;">
 						<input name="tdsubmit" type="submit" value="Display Taxon Tree"/>
-						<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
+						<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" />
 					</div>
 					<div style="margin:15px 15px 0px 60px;">
 						<input name="displayauthor" type="checkbox" value="1" <?php echo ($displayAuthor?'checked':''); ?> /> Display authors
@@ -163,7 +162,7 @@ else{
 							return "children" in object;
 						}
 					});
-					
+
 					/*aspect.around(taxonTreeStore, "put", function(originalPut){
 						return function(obj, options){
 							if(options && options.parent){
@@ -172,9 +171,9 @@ else{
 							return originalPut.call(taxonTreeStore, obj, options);
 						}
 					});
-					
+
 					taxonTreeStore = new Observable(taxonTreeStore);*/
-					
+
 					// set up the model, assigning taxonTreeStore, and assigning method to identify leaf nodes of tree
 					var taxonTreeModel = new ObjectStoreModel({
 						store: taxonTreeStore,
@@ -186,7 +185,7 @@ else{
 							return "children" in object;
 						}
 					});
-					
+
 					var TaxonTreeNode = declare(Tree._TreeNode, {
 						_setLabelAttr: {node: "labelNode", type: "innerHTML"}
 					});
@@ -203,17 +202,18 @@ else{
 						},
 						onClick: function(item){
 							// Get the URL from the item, and navigate to it
-							location.href = item.url;
+							//location.href = item.url;
+							window.open(item.url,'_blank');
 						}
 					}, "tree");
-					
+
 					taxonTree.set("path", <?php echo json_encode($treePath); ?>).then(
 						function(path){
-							win.scrollIntoView(taxonTree.selectedNode.id);        
+							win.scrollIntoView(taxonTree.selectedNode.id);
 						}
 					);
 					taxonTree.startup();
-					
+
 					/*taxonTree.onLoadDeferred.then(function(){
 						var parentnode = taxonTree.getNodesByItem("<?php echo $targetId; ?>");
 						var lastnodes = parentnode[0].getChildren();
@@ -225,7 +225,7 @@ else{
 						}
 					});*/
 				});
-				
+
 				/*query("#add-new-child").on("click", function(){
 					// get the selected object from the tree
 					var selectedObject = taxonTree.get("selectedItems")[0];
@@ -243,7 +243,7 @@ else{
 						parent: selectedObject
 					});
 				});
-				
+
 				query("#remove").on("click", function(){
 					var selectedObject = taxonTree.get("selectedItems")[0];
 					if(!selectedObject){
@@ -251,21 +251,19 @@ else{
 					}
 					taxonTreeStore.remove(selectedObject.id);
 				});
-				
+
 				taxonTree.on("dblclick", function(object){
 					object.name = prompt("Enter a new name for the object");
 					taxonTreeStore.put(object);
 				}, true);*/
-				
+
 			</script>
 			<?php
 		}
 		?>
 	</div>
-	<?php 
-	include($serverRoot.'/footer.php');
+	<?php
+	include($SERVER_ROOT.'/footer.php');
 	?>
-
 </body>
 </html>
-
