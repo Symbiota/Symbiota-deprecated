@@ -15,7 +15,7 @@ $searchVar = $collManager->getSearchTermStr();
 	<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
-	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=171009"></script> 
+	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=171009"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
 			<?php
@@ -72,11 +72,10 @@ $searchVar = $collManager->getSearchTermStr();
 					<select id="taxontype" name="taxontype">
 						<option value='0'><?php echo $LANG['SELECT_1-0']; ?></option>
 						<option value='1'><?php echo $LANG['SELECT_1-1']; ?></option>
-						<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
 						<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
+						<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
 						<option value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
-						<option value='5'><?php echo $LANG['SELECT_1-5']; ?></option>
-					</select> 
+					</select>
 					<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
 				</div>
 			</div>
@@ -97,7 +96,7 @@ $searchVar = $collManager->getSearchTermStr();
 				<?php echo $LANG['LOCALITY_INPUT']; ?>: <input type="text" id="locality" size="43" name="local" value="" />
 			</div>
 			<div>
-				<?php echo $LANG['ELEV_INPUT_1']; ?>: <input type="text" id="elevlow" size="10" name="elevlow" value="" onchange="cleanNumericInput(this);" /> 
+				<?php echo $LANG['ELEV_INPUT_1']; ?>: <input type="text" id="elevlow" size="10" name="elevlow" value="" onchange="cleanNumericInput(this);" />
 				<?php echo $LANG['ELEV_INPUT_2']; ?> <input type="text" id="elevhigh" size="10" name="elevhigh" value="" onchange="cleanNumericInput(this);" />
 			</div>
 			<div style="margin:10 0 10 0;">

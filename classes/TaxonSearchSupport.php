@@ -1,11 +1,11 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
-include_once($SERVER_ROOT.'/classes/SearchManager.php');
+include_once($SERVER_ROOT.'/classes/TaxonSearchManager.php');
 
-class OccurrenceSearchSupport{
+class TaxonSearchSupport{
 
-	protected $conn;
+	private $conn;
 
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
@@ -28,40 +28,36 @@ class OccurrenceSearchSupport{
 			    "                CONCAT('A:'                       ,v.vernacularname) AS snorder ".
 			    "FROM taxavernaculars v ".
 			    "WHERE v.vernacularname LIKE '%".$queryString."%' ".
-			    
+
 			    "UNION ".
-			    
+
 			    "SELECT          CONCAT('".$LANG['TSTYPE_1-4'].": ',sciname         ) AS sciname, ".
 			    "                CONCAT('E:'                       ,sciname         ) AS snorder ".
 			    "FROM taxa ".
 			    "WHERE sciname LIKE '%".$queryString."%' AND rankid > 20 AND rankid < 140 ".
-			    
+
 			    "UNION ".
-			    
+
 			    "SELECT DISTINCT CONCAT('".$LANG['TSTYPE_1-3'].": ',sciname         ) AS sciname, ".
 			    "                CONCAT('B:'                       ,sciname         ) AS snorder ".
 			    "FROM taxa ".
 			    "WHERE sciname LIKE '%".$queryString."%' AND rankid > 140 ".
-			    
+
 			    "UNION ".
-			    
+
 			    "SELECT DISTINCT CONCAT('".$LANG['TSTYPE_1-2'].": ',family          ) AS sciname, ".
 			    "                CONCAT('C:'                       ,family          ) AS snorder ".
 			    "FROM taxstatus ".
 			    "WHERE family LIKE '%".$queryString."%' ".
-			    
+
 			    "UNION ".
-			    
+
 			    "SELECT DISTINCT CONCAT('".$LANG['TSTYPE_1-2'].": ',sciname         ) AS sciname, ".
 			    "                CONCAT('C:'                       ,sciname         ) AS snorder ".
 			    "FROM taxa ".
 			    "WHERE sciname LIKE '%".$queryString."%' AND rankid = 140 ".
-			    
+
 			    "ORDER BY snorder LIMIT 30";
-			}
-			elseif($taxonType == TaxaSearchType::FAMILY_ONLY){
-				// Family only
-				$sql = 'SELECT sciname FROM taxa WHERE sciname LIKE "'.$queryString.'%" LIMIT 30';
 			}
 			elseif($taxonType == TaxaSearchType::SPECIES_NAME_ONLY){
 				// Species name only
@@ -69,7 +65,7 @@ class OccurrenceSearchSupport{
 			}
 			elseif($taxonType == TaxaSearchType::HIGHER_TAXONOMY){
 				// Higher taxon
-				$sql = 'SELECT sciname FROM taxa WHERE rankid > 20 AND rankid < 140 AND sciname LIKE "'.$queryString.'%" LIMIT 30';
+				$sql = 'SELECT sciname FROM taxa WHERE rankid > 20 AND rankid < 180 AND sciname LIKE "'.$queryString.'%" LIMIT 30';
 			}
 			elseif($taxonType == TaxaSearchType::COMMON_NAME){
 				// Common name
@@ -87,7 +83,7 @@ class OccurrenceSearchSupport{
 		return $retArr;
 	}
 
-	protected function cleanInStr($str){
+	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = $this->conn->real_escape_string($newStr);
