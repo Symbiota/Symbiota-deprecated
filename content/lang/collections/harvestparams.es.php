@@ -1,12 +1,12 @@
-<?php 
+<?php
 /*
 ------------------
 Language: Espa�ol (Spanish)
 ------------------
 */
- 
+
 include_once('sharedterms.es.php');
- 
+
 $LANG['PAGE_TITLE'] = 'Par&aacute;metros de B&uacute;squeda de Colecciones';
 $LANG['PAGE_HEADER'] = 'Formulario de B&uacute;squeda';
 $LANG['GENERAL_TEXT_1'] = 'Ingrese uno o m&aacute;s de los criterios de consulta siguientes y haga click en el bot&oacute;n &quot;Search&quot; para ver los resultados.';
@@ -16,10 +16,9 @@ $LANG['BUTTON_NEXT_LIST'] = 'List Display';
 $LANG['BUTTON_NEXT_TABLE'] = 'Table Display';
 $LANG['SELECT_1-0'] = 'Todos Nombres';
 $LANG['SELECT_1-1'] = 'Cualquier Nombre';
-$LANG['SELECT_1-2'] = 'Nombre Cientifico Solamente';
-$LANG['SELECT_1-3'] = 'Familia Solamente';
-$LANG['SELECT_1-4'] = 'Taxonomia Superior';
-$LANG['SELECT_1-5'] = 'Nombre Com&oacute;n';
+$LANG['SELECT_1-2'] = 'Genero o Nombre Cientifico';
+$LANG['SELECT_1-3'] = 'Taxonomia Superior';
+$LANG['SELECT_1-4'] = 'Nombre Com&oacute;n';
 $LANG['TSTYPE_1-2'] = 'Familia';
 $LANG['TSTYPE_1-3'] = 'Nombre Cientifico';
 $LANG['TSTYPE_1-4'] = 'Taxonomia Superior';
@@ -64,7 +63,7 @@ $LANG['HAS_IMAGE'] = 'Limitar Solamente a Ejemplares con Im&aacute;genes';
 $LANG['HAS_GENETIC'] = 'Limitar Solamente a Ejemplares con datos gen�ticos';
 
 //Following used in mapboundingbox.php
-$LANG['MBB_TITLE'] = 'Mapeador de Coordenadas'; 
+$LANG['MBB_TITLE'] = 'Mapeador de Coordenadas';
 $LANG['MBB_INSTRUCTIONS'] = 'Click para comenzar a dibujar y otra vez para terminar el rect&aacute;ngulo. Click sobre el bot&oacute;n Enviar para transferir Coordenadas.';
 $LANG['MBB_NORTHERN'] = 'Latitud Norte';
 $LANG['MBB_EASTERN'] = 'Longitud Este';
@@ -72,9 +71,9 @@ $LANG['MBB_SOUTHERN'] = 'Latitud Sur';
 $LANG['MBB_WESTERN'] = 'Longitud Oeste';
 
 //Following used in mappointradius.php
-$LANG['MPR_TITLE'] = 'Mapeador de Coordenadas'; 
+$LANG['MPR_TITLE'] = 'Mapeador de Coordenadas';
 $LANG['MPR_INSTRUCTIONS'] = 'Click para capturar coordenadas. Click en el bot&oacute;n Enviar Coordenadas para transferir Coordenadas.';
-$LANG['MPR_LAT'] = 'Latitud'; 
+$LANG['MPR_LAT'] = 'Latitud';
 $LANG['MPR_LNG'] = 'Longitud';
 $LANG['SUBMIT'] = 'Enviar';
 ?>

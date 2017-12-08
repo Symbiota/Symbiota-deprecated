@@ -1,8 +1,8 @@
-<?php 
+<?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-include_once($SERVER_ROOT.'/classes/SearchManager.php');
+include_once($SERVER_ROOT.'/classes/TaxonSearchManager.php');
 
-class ImageLibraryManager extends SearchManager {
+class ImageLibraryManager extends TaxonSearchManager {
 
 	private $searchTermsArr = Array();
 	private $recordCount = 0;
@@ -27,7 +27,7 @@ class ImageLibraryManager extends SearchManager {
 		$sql = 'SELECT DISTINCT ts.Family ';
 		$sql .= $this->getImageSql();
 		$sql .= 'AND (ts.Family Is Not Null) ';
-		//echo $sql; 
+		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$returnArray[] = $row->Family;
@@ -76,7 +76,7 @@ class ImageLibraryManager extends SearchManager {
 		asort($retArr);
 		return $retArr;
 	}
-	
+
 	private function getImageSql(){
 		$sql = 'FROM images i INNER JOIN taxa t ON i.tid = t.tid '.
 			'INNER JOIN taxstatus ts ON t.tid = ts.tid ';
@@ -132,7 +132,7 @@ class ImageLibraryManager extends SearchManager {
 		}
 		return $retArr;
 	}
-	
+
 	public function getPhotographerList(){
 		$retArr = array();
 		$sql = 'SELECT u.uid, CONCAT_WS(", ", u.lastname, u.firstname) as pname, CONCAT_WS(", ", u.firstname, u.lastname) as fullname, u.email, Count(ti.imgid) AS imgcnt '.
@@ -195,7 +195,7 @@ class ImageLibraryManager extends SearchManager {
 			$targetArr = $retArr['spec']['cat'][$catId];
 			unset($retArr['spec']['cat'][$catId]);
 			array_unshift($retArr['spec']['cat'],$targetArr);
-		} 
+		}
 		elseif(isset($retArr['obs']['cat'][$catId])){
 			$targetArr = $retArr['obs']['cat'][$catId];
 			unset($retArr['obs']['cat'][$catId]);
@@ -203,7 +203,7 @@ class ImageLibraryManager extends SearchManager {
 		}
 		return $retArr;
 	}
-	
+
 	public function outputFullMapCollArr($dbArr,$occArr,$defaultCatid = 0){
 		global $DEFAULTCATID;
 		$collCnt = 0;
@@ -211,7 +211,7 @@ class ImageLibraryManager extends SearchManager {
 			$catArr = $occArr['cat'];
 			?>
 			<table style="float:left;width:80%;">
-			<?php 
+			<?php
 			foreach($catArr as $catid => $catArr){
 				$name = $catArr["name"];
 				unset($catArr["name"]);
@@ -236,14 +236,14 @@ class ImageLibraryManager extends SearchManager {
 					<td colspan="3">
 						<div id="cat-<?php echo $idStr; ?>" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset;">
 							<table>
-								<?php 
+								<?php
 								foreach($catArr as $collid => $collName2){
 									?>
 									<tr>
 										<td>
-											<?php 
+											<?php
 											if($collName2["icon"]){
-												$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"]; 
+												$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"];
 												?>
 												<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
 													<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
@@ -253,7 +253,7 @@ class ImageLibraryManager extends SearchManager {
 											?>
 										</td>
 										<td style="padding:6px">
-											<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> /> 
+											<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
 										</td>
 										<td style="padding:6px">
 											<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
@@ -264,32 +264,32 @@ class ImageLibraryManager extends SearchManager {
 											</a>
 										</td>
 									</tr>
-									<?php 
-									$collCnt++; 
+									<?php
+									$collCnt++;
 								}
 								?>
 							</table>
 						</div>
 					</td>
 				</tr>
-				<?php 
+				<?php
 			}
 			?>
 			</table>
-			<?php 
+			<?php
 		}
 		if(isset($occArr['coll'])){
 			$collArr = $occArr['coll'];
 			?>
 			<table style="float:left;width:80%;">
-			<?php 
+			<?php
 			foreach($collArr as $collid => $cArr){
 				?>
 				<tr>
 					<td>
-						<?php 
+						<?php
 						if($cArr["icon"]){
-							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
+							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"];
 							?>
 							<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
 								<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
@@ -300,7 +300,7 @@ class ImageLibraryManager extends SearchManager {
 						&nbsp;
 					</td>
 					<td style="padding:6px;">
-						<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> /> 
+						<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
 					</td>
 					<td style="padding:6px">
 						<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
@@ -316,11 +316,11 @@ class ImageLibraryManager extends SearchManager {
 			}
 			?>
 			</table>
-			<?php 
+			<?php
 		}
 		$this->collArrIndex++;
 	}
-	
+
 	public function readRequestVariables(){
 		//Search will be confinded to a collid, catid, or will remain open to all collection
 		//Limit collids and/or catids
@@ -372,7 +372,7 @@ class ImageLibraryManager extends SearchManager {
 			if($taxa){
 				$taxaStr = "";
 				if(is_numeric($taxa)){
-					$sql = "SELECT t.sciname ". 
+					$sql = "SELECT t.sciname ".
 						"FROM taxa t ".
 						"WHERE (t.tid = ".$taxa.')';
 					$rs = $this->conn->query($sql);
@@ -484,7 +484,7 @@ class ImageLibraryManager extends SearchManager {
 						if(array_key_exists("synonyms",$valueArray)){
 							$synArr = $valueArray["synonyms"];
 							if($synArr){
-								foreach($synArr as $synTid => $sciName){ 
+								foreach($synArr as $synTid => $sciName){
 									if(strpos($sciName,'aceae') || strpos($sciName,'idae')){
 										$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
 									}
@@ -559,7 +559,7 @@ class ImageLibraryManager extends SearchManager {
 			//$this->sqlWhere = 'WHERE o.collid = -1 ';
 		}
 	}
-	
+
 	public function getImageArr($pageRequest,$cntPerPage){
 		$retArr = Array();
 		if(!$this->recordCount){
@@ -633,7 +633,7 @@ class ImageLibraryManager extends SearchManager {
 			$result->free();
 		}
 	}
-	
+
 	private function getSqlBase($full = true){
 		$sql = 'FROM images i ';
 		if(isset($this->searchTermsArr["taxa"]) && $this->searchTermsArr["taxa"]){
@@ -686,7 +686,7 @@ class ImageLibraryManager extends SearchManager {
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	public function getPhotographerSuggest($queryString){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT u.uid, CONCAT_WS(" ",u.firstname,u.lastname) AS fullname '.
@@ -712,7 +712,7 @@ class ImageLibraryManager extends SearchManager {
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	public function getKeywordSuggest($queryString){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT keyword FROM imagekeywords WHERE keyword LIKE "'.$queryString.'%" LIMIT 10 ';
@@ -730,11 +730,11 @@ class ImageLibraryManager extends SearchManager {
 	public function setSearchTermsArr($stArr){
 		$this->searchTermsArr = $stArr;
 	}
-	
+
 	public function getSearchTermsArr(){
 		return $this->searchTermsArr;
 	}
-	
+
 	public function getRecordCnt(){
 		return $this->recordCount;
 	}

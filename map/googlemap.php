@@ -25,7 +25,6 @@ if($mapType == 'taxa'){
 	$mapWhere = $taxaMapManager->getTaxaSqlWhere();
 	$tArr = $taxaMapManager->getTaxaArr();
 	$sharedMapManager->setTaxaArr($tArr);
-	$sharedMapManager->setSearchTermsArr($stArr);
 }
 elseif($mapType == 'occquery'){
 	$occurManager = new OccurrenceManager();
@@ -53,7 +52,7 @@ $sharedMapManager->setTaxaArr($tArr);
 	    var infoWins = new Array();
 	    var puWin;
 		var markers = [];
-		
+
 		function initialize(){
 			<?php
 			$boundLatMin = -90;
@@ -82,9 +81,9 @@ $sharedMapManager->setTaxaArr($tArr);
 			};
 
 	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
-			
+
 			oms = new OverlappingMarkerSpiderfier(map);
-			
+
 			map.enableKeyDragZoom({
 				visualEnabled: true,
 				visualPosition: google.maps.ControlPosition.LEFT,
@@ -97,21 +96,21 @@ $sharedMapManager->setTaxaArr($tArr);
 					on: "Turn off"
 				}
 			});
-			
+
 			oms.addListener('click', function(marker, event) {
 				closeAllInfoWins();
 				occid = marker.occid;
 				clid = marker.clid;
 				openIndPU(occid,clid);
 			});
-			
+
 			oms.addListener('spiderfy', function(markers) {
 				closeAllInfoWins();
 			});
-			
-           <?php 
+
+           <?php
 			$coordExist = false;
-			$iconKeys = Array(); 
+			$iconKeys = Array();
 			$markerCnt = 0;
 			$spCnt = 1;
 			$minLng = 180;
@@ -143,7 +142,7 @@ $sharedMapManager->setTaxaArr($tArr);
 					$functionStr = '';
 					$titleStr = $spArr['latLngStr'];
 					$type = '';
-					$displayStr = '';      
+					$displayStr = '';
 					if(is_numeric($spArr['catalognumber'])){
 						$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['catalognumber'];
 					}
@@ -183,10 +182,10 @@ $sharedMapManager->setTaxaArr($tArr);
 					gridSize: <?php echo $gridSize; ?>,
 					minimumClusterSize: <?php echo $minClusterSize; ?>
 				}
-				
+
 				//Initialize clusterer with options
 				var markerCluster<?php echo $spCnt; ?> = new MarkerClusterer(map, markers, mcOptions<?php echo $spCnt; ?>);
-				
+
 				<?php
 				$spCnt++;
 			}
@@ -302,7 +301,7 @@ $sharedMapManager->setTaxaArr($tArr);
 				useLLDecimal = true;
 			}
 		}
-		
+
 	</script>
 </head>
 <body style="background-color:#ffffff;width:100%" onload="initialize();">
@@ -322,7 +321,7 @@ $sharedMapManager->setTaxaArr($tArr);
 			<div style="margin-left:20px;">
 				Rare/threatened status requires the locality coordinates be hidden.
 			</div>
-        <?php 
+        <?php
     }
     ?>
     <div id="map_canvas" style="width:100%;height:700px"></div>
@@ -332,7 +331,7 @@ $sharedMapManager->setTaxaArr($tArr);
 			    <fieldset>
 					<legend>Legend</legend>
 					<div style="float:left;">
-						<?php 
+						<?php
 						//echo $coordArr;
 						foreach($iconKeys as $iconValue){
 							echo $iconValue;
@@ -381,7 +380,7 @@ $sharedMapManager->setTaxaArr($tArr);
 							</div>
 							<div class='latlongdiv' style='display:none;'>
 								<div>
-									Latitude: 
+									Latitude:
 									<input name='latdeg' id='latdeg' size='2' type='text' />&deg;
 									<input name='latmin' id='latmin' size='5' type='text' />&prime;
 									<input name='latsec' id='latsec' size='5' type='text' />&Prime;
@@ -391,7 +390,7 @@ $sharedMapManager->setTaxaArr($tArr);
 									</select>
 								</div>
 								<div style="margin-top:5px;">
-									Longitude: 
+									Longitude:
 									<input name='longdeg' id='longdeg' size='2' type='text' />&deg;
 									<input name='longmin' id='longmin' size='5' type='text' />&prime;
 									<input name='longsec' id='longsec' size='5' type='text' />&Prime;

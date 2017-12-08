@@ -2,10 +2,10 @@
 include_once("OccurrenceManager.php");
 
 class OccurrenceListManager extends OccurrenceManager{
-	
+
 	protected $recordCount = 0;
 	private $sortArr = array();
-	
+
  	public function __construct(){
  		parent::__construct();
  	}
@@ -31,7 +31,7 @@ class OccurrenceListManager extends OccurrenceManager{
 		$sql = 'SELECT DISTINCT o.occid, c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, '.
 			'o.catalognumber, o.family, o.sciname, o.scientificnameauthorship, o.tidinterpreted, o.recordedby, o.recordnumber, o.eventdate, o.year, o.enddayofyear, '.
 			'o.country, o.stateprovince, o.county, o.locality, o.decimallatitude, o.decimallongitude, o.localitysecurity, o.localitysecurityreason, '.
-			'o.habitat, o.minimumelevationinmeters, o.maximumelevationinmeters, o.observeruid '.
+			'o.habitat, o.minimumelevationinmeters, o.maximumelevationinmeters, o.observeruid, c.sortseq '.
 			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
 		/*
 		$sql = 'SELECT DISTINCT o.occid, c.CollID, c.institutioncode, c.collectioncode, c.collectionname, c.icon, '.
@@ -46,7 +46,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
 		*/
 		$sql .= $this->setTableJoins($sqlWhere).$sqlWhere;
-		
+
 		if($this->sortArr){
 			$sql .= 'ORDER BY ';
 			if(!$canReadRareSpp) $sql .= 'localitySecurity,';
@@ -76,7 +76,7 @@ class OccurrenceListManager extends OccurrenceManager{
     			$returnArr[$row->occid]["state"] = $row->stateprovince;
     			$returnArr[$row->occid]["county"] = $row->county;
     			$returnArr[$row->occid]["obsuid"] = $row->observeruid;
-    			if(!$row->localitysecurity|| $canReadRareSpp 
+    			if(!$row->localitysecurity|| $canReadRareSpp
     				|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["CollEditor"]))
     				|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
     					$locStr = str_replace('.,',',',$row->locality);
@@ -142,14 +142,14 @@ class OccurrenceListManager extends OccurrenceManager{
 	public function getRecordCnt(){
 		return $this->recordCount;
 	}
-	
+
 	public function addSort($field,$direction){
 		$this->sortArr[] = trim($field.' '.$direction);
 	}
-	
+
 	public function getCloseTaxaMatch($name){
 		$retArr = array();
-		$searchName = trim($name); 
+		$searchName = trim($name);
 		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$searchName.'") AND sciname != "'.$searchName.'"';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){

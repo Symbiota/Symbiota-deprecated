@@ -22,6 +22,7 @@ $LANG['H_CENTRAL_AMER'] = 'América Central';
 $LANG['H_ECUADOR'] = 'Ecuador';
 $LANG['H_SUBPOLAR'] = 'Región Subpolar del Sur';
 
+$LANG['H_MORE_INFO'] = 'M&aacute;s Informaci&oacute;n';
 $LANG['H_SYMBIOTA'] = 'Symbiota';
 $LANG['H_HELP'] = 'Ayuda de Symbiota';
 $LANG['H_SITEMAP'] = 'Mapa del Sitio';
