@@ -89,7 +89,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
-		if($symbUid){
+		if($SYMB_UID){
 			if($statusStr){
 				?>
 				<div style="margin:15px;color:red;">
@@ -235,7 +235,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 			<?php 
 		}
 		else{
-			if(!$symbUid){
+			if(!$SYMB_UID){
 				echo 'Please <a href="../profile/index.php?refurl=../references/authoreditor.php">login</a>';
 			}
 			else{

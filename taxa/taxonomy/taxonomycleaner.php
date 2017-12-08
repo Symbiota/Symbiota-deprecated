@@ -93,7 +93,7 @@ $status = "";
 		<!-- inner text block -->
 		<div id="innertext">
 			<?php 
-			if($symbUid){
+			if($SYMB_UID){
 				if($status){ 
 					?>
 					<div style='float:left;margin:20px 0px 20px 0px;'>

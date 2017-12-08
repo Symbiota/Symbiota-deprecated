@@ -103,14 +103,14 @@ else{
 					if($isGenObs && $IS_ADMIN){
 						?>
 						<span style="margin-right:25px;">
-							<input type="checkbox" name="q_observeruid" value="<?php echo $symbUid; ?>" <?php echo ($qObserverUid?'CHECKED':''); ?> />
+							<input type="checkbox" name="q_observeruid" value="<?php echo $SYMB_UID; ?>" <?php echo ($qObserverUid?'CHECKED':''); ?> />
 							<b>Only My Records</b>
 						</span>
 						<?php 
 					}
 					else{
 						?>
-						<input type="hidden" name="q_observeruid" value="<?php echo $isGenObs?$symbUid:''; ?>" />
+						<input type="hidden" name="q_observeruid" value="<?php echo $isGenObs?$SYMB_UID:''; ?>" />
 						<?php 
 					}
 					?>

@@ -184,14 +184,14 @@ class OccurrenceCrowdSource {
 		return $retArr;
 	}
 
-	public function getUserStats($symbUid){
+	public function getUserStats($SYMB_UID){
 		$retArr = array();
 		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode,c.collectioncode) as collcode, c.collectionname, '.
 			'q.reviewstatus, COUNT(q.occid) AS cnt, SUM(IFNULL(q.points,2)) AS points '.
 			'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
 			'INNER JOIN omcollections c ON csc.collid = c.collid '.
 			'GROUP BY c.collid,q.reviewstatus,q.uidprocessor '.
-			'HAVING (q.uidprocessor = '.$symbUid.' OR q.uidprocessor IS NULL) '.
+			'HAVING (q.uidprocessor = '.$SYMB_UID.' OR q.uidprocessor IS NULL) '.
 			'ORDER BY c.institutioncode,c.collectioncode,q.reviewstatus';
 		//echo $sql;
 		$rs = $this->conn->query($sql);

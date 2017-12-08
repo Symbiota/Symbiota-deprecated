@@ -5,7 +5,7 @@ include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 class OccurrenceDataset {
 
 	private $conn;
-	private $symbUid;
+	private $SYMB_UID;
 	private $collArr = array();
 	private $isAdmin = 0;
 	private $newDatasetId = 0;

@@ -8,7 +8,7 @@ $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $csManager = new OccurrenceCrowdSource();
 
 $pArr = array();
-if($symbUid){
+if($SYMB_UID){
 	if(array_key_exists("CollAdmin",$USER_RIGHTS)){
 		$pArr = $USER_RIGHTS['CollAdmin'];
 	}

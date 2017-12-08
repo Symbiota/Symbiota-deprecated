@@ -270,7 +270,7 @@ class OccurrenceCollectionProfile {
 	}
 
     public function submitCollAdd($postArr){
-		global $symbUid;
+		global $SYMB_UID;
 		$instCode = $this->cleanInStr($postArr['institutioncode']);
 		$collCode = $this->cleanInStr($postArr['collectioncode']);
 		$coleName = $this->cleanInStr($postArr['collectionname']);
@@ -330,7 +330,7 @@ class OccurrenceCollectionProfile {
 		if($conn->query($sql)){
 			$cid = $conn->insert_id;
 			$sql = 'INSERT INTO omcollectionstats(collid,recordcnt,uploadedby) '.
-				'VALUES('.$cid.',0,"'.$symbUid.'")';
+				'VALUES('.$cid.',0,"'.$SYMB_UID.'")';
 			$conn->query($sql);
 			//Add collection to category
 			if(isset($postArr['ccpk']) && $postArr['ccpk']){

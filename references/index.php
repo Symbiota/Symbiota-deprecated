@@ -75,7 +75,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
-		if($symbUid){
+		if($SYMB_UID){
 			if($statusStr){
 				?>
 				<hr/>
@@ -180,7 +180,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 			<?php 
 		}
 		else{
-			if(!$symbUid){
+			if(!$SYMB_UID){
 				echo 'Please <a href="../profile/index.php?refurl=../references/index.php">login</a>';
 			}
 			else{

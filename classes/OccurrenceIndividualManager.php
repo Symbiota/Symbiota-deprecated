@@ -557,7 +557,7 @@ class OccurrenceIndividualManager extends Manager{
 		return $retArr;
 	}
 
-	public function linkToDataset($dsid,$dsName,$notes,$symbUid){
+	public function linkToDataset($dsid,$dsName,$notes,$SYMB_UID){
 		$status = true;
 		if(!$this->occid) return false;
 		if($dsid && !is_numeric($dsid)) return false;
@@ -567,7 +567,7 @@ class OccurrenceIndividualManager extends Manager{
 			//Create new dataset
 			if(strlen($dsName) > 100) $dsName = substr($dsName,0,100);
 			$sql1 = 'INSERT INTO omoccurdatasets(name,uid,collid) '.
-					'VALUES("'.$this->cleanInStr($dsName).'",'.$symbUid.','.$this->collid.')';
+					'VALUES("'.$this->cleanInStr($dsName).'",'.$SYMB_UID.','.$this->collid.')';
 			if($con->query($sql1)){
 				$dsid = $con->insert_id;
 			}

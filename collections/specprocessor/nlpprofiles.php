@@ -91,7 +91,7 @@ if($isEditor){
 				</div>
 				<?php 
 			}
-			if($isEditor && $symbUid && $collId){
+			if($isEditor && $SYMB_UID && $collId){
 				$profileArr = $nlpManager->getProfileArr($spNlpId);
 				if(!$spNlpId){
 					?>
@@ -309,7 +309,7 @@ if($isEditor){
 				}
 			}
 			else{
-				if(!$symbUid){
+				if(!$SYMB_UID){
 					?>
 					<div style='font-weight:bold;'>
 						Please <a href='../../profile/index.php?refurl=<?php echo $CLIENT_ROOT; ?>/collections/specprocessor/index.php'>login</a>!

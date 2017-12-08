@@ -9,7 +9,7 @@ $cSet = array_key_exists("cset",$_REQUEST)?$_REQUEST["cset"]:'utf8';
 $zipFile = array_key_exists("zipfile",$_REQUEST)?$_REQUEST["zipfile"]:0;
 
 $dlManager = new ProfileManager();
-$dlManager->setUid($symbUid);
+$dlManager->setUid($SYMB_UID);
 
 $editable = 0;
 if($IS_ADMIN 

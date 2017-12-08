@@ -46,7 +46,7 @@ if($rowsPerPage==3){
 $labelManager->setCollid($collid);
 
 $isEditor = 0;
-if($symbUid){
+if($SYMB_UID){
 	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])) || (array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollEditor"]))){
 		$isEditor = 1;
 	}

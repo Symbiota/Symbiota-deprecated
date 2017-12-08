@@ -10,7 +10,7 @@ $limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:1000;
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
-if(!$symbUid){
+if(!$SYMB_UID){
 	header('Location: ../../profile/index.php?refurl=../collections/datasets/duplicatemanager.php?'.$_SERVER['QUERY_STRING']);
 }
 
@@ -26,7 +26,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,
 
 //If collection is a general observation project, limit to User
 if($collMap['colltype'] == 'General Observations'){
-	$dupManager->setObsUid($symbUid);
+	$dupManager->setObsUid($SYMB_UID);
 }
 
 if($isEditor && $formSubmit){

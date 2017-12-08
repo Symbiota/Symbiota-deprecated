@@ -105,7 +105,7 @@ $smManager = new SiteMapManager();
 			<fieldset style="margin:30px 0px 10px 10px;padding-left:25px;padding-right:15px;">
 				<legend><b><?php echo $LANG['MANAGTOOL'];?></b></legend>
 				<?php 
-				if($symbUid){
+				if($SYMB_UID){
 					if($IS_ADMIN){
 						?>
 						<h3><?php echo $LANG['ADMIN'];?></h3>

@@ -7,7 +7,7 @@ $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $obsUid = array_key_exists('obsuid',$_REQUEST)?$_REQUEST['obsuid']:'';
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 
-if(!$symbUid) header('Location: ../../profile/index.php?refurl=../collections/cleaning/fieldstandardization.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/cleaning/fieldstandardization.php?'.$_SERVER['QUERY_STRING']);
 
 //Sanitation
 if(!is_numeric($collid)) $collid = 0;
@@ -28,7 +28,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 
 //If collection is a general observation project, limit to User
 if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
-	$obsUid = $symbUid;
+	$obsUid = $SYMB_UID;
 	$cleanManager->setObsUid($obsUid);
 }
 
