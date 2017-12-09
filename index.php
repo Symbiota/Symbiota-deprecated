@@ -24,9 +24,9 @@ header("Content-Type: text/html; charset=".$charset);
 					<div id="portfoliolist">
 						<div class="portfolio logo1 mix_all" data-cat="logo" style="display: inline-block; opacity: 1;">
 							<div class="portfolio-wrapper">
-								<a href="<?php echo $clientRoot; ?>/collections/map/mapinterface.php" class="b-link-stripe b-animate-go thickbox" target="_blank">
+								<a href="<?php echo $clientRoot; ?>/spatial/index.php" class="b-link-stripe b-animate-go thickbox" target="_blank">
 									<img src="<?php echo $clientRoot; ?>/images/map_homepg.jpg" /><div class="b-wrapper"><h2 class="b-animate b-from-left    b-delay03 "><img src="images/icon-eye.png" alt=""/></h2>
-										<p class="b-animate b-from-right    b-delay03 ">Map Search<br><span class="m_4">Determine plant distributions, create checklists for an area, and identify plants of an area</span></p></div></a>
+										<p class="b-animate b-from-right    b-delay03 ">Spatial Module<br><span class="m_4">Determine plant distributions, create checklists for an area, and identify plants of an area</span></p></div></a>
 							</div>
 						</div>
                         <div class="portfolio logo1 mix_all" data-cat="logo" style="display: inline-block; opacity: 1;">
