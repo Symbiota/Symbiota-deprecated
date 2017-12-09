@@ -317,6 +317,7 @@ function buildLayerTableRow(lArr,removable){
         document.getElementById("selectlayerselect").value = layerID;
         setActiveLayer();
     }
+    toggleLayerTable();
 }
 
 function buildQueryStrings(){
