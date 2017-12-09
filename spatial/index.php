@@ -178,7 +178,7 @@ $dbArr = Array();
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
-                                    <span style=""><input data-role="none" type='checkbox' name='thes' id='thes' onchange="buildQueryStrings();" value='1'>Include Synonyms</span>
+                                    <span style=""><input data-role="none" type='checkbox' name='thes' id='thes' onchange="buildQueryStrings();" value='1' CHECKED>Include Synonyms</span>
                                 </div>
                                 <div id="taxonSearch0">
                                     <div id="taxa_autocomplete" >
