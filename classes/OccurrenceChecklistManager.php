@@ -2,7 +2,7 @@
 include_once('OccurrenceManager.php');
 
 class OccurrenceChecklistManager extends OccurrenceManager{
-	
+
 	private $checklistTaxaCnt = 0;
 
 	public function __construct(){
@@ -27,7 +27,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 				'FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid) '.
 				'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid) '.
 				'INNER JOIN taxstatus ts ON t.tid = ts.tid ';
-			$sql .= $this->setTableJoins($sqlWhere);
+			$sql .= $this->getTableJoins($sqlWhere);
 			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$sqlWhere));
 			$sql .= ' AND ts1.taxauthid = '.$taxonAuthorityId.' AND ts.taxauthid = '.$taxonAuthorityId.' AND t.RankId > 140 ';
 		}
@@ -35,10 +35,10 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			$sql = 'SELECT DISTINCT IFNULL(ts.family,o.family) AS family, o.sciname '.
 				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
 				'LEFT JOIN taxstatus ts ON t.tid = ts.tid ';
-			$sql .= $this->setTableJoins($sqlWhere);
+			$sql .= $this->getTableJoins($sqlWhere);
 			$sql .= $sqlWhere." AND (t.rankid > 140) AND (ts.taxauthid = 1) ";
 		}
-		//echo "<div>".$sql."</div>"; 
+		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$family = strtoupper($row->family);
@@ -114,12 +114,12 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 				if(is_numeric($taxonAuthorityId)){
 					$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." ".
 						"FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
-					$sql .= $this->setTableJoins($sqlWhere);
+					$sql .= $this->getTableJoins($sqlWhere);
 					$sqlTaxaInsert .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$sqlWhere))."AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 180";
 				}
 				else{
 					$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." FROM (omoccurrences o INNER JOIN taxa t ON o.TidInterpreted = t.tid) ";
-					$sql .= $this->setTableJoins($sqlWhere);
+					$sql .= $this->getTableJoins($sqlWhere);
 					$sqlTaxaInsert .= $sqlWhere." AND t.RankId > 180";
 				}
 			}
@@ -127,7 +127,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			$conn->query($sqlTaxaInsert);
 
 			//Delete checklists that are greater than one week old
-			$conn->query('DELETE FROM fmdynamicchecklists WHERE expiration < now()'); 
+			$conn->query('DELETE FROM fmdynamicchecklists WHERE expiration < now()');
 		}
 		else{
 			echo "ERROR: ".$conn->error;

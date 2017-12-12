@@ -2,12 +2,12 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
-include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 header("Cache-Control: no-cache, must-revalidate");
-header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); 
+header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
-$schema = array_key_exists("schema",$_POST)?$_POST["schema"]:"symbiota"; 
+$schema = array_key_exists("schema",$_POST)?$_POST["schema"]:"symbiota";
 $cSet = array_key_exists("cset",$_POST)?$_POST["cset"]:'';
 $zip = (array_key_exists('zip',$_POST)?$_POST['zip']:0);
 $format = $_POST['format'];
@@ -37,8 +37,8 @@ else{
 		$rareReaderArr = array_unique(array_merge($rareReaderArr,$USER_RIGHTS['RareSppReader']));
 	}
 }
-	
-//Is an occurrence download 
+
+//Is an occurrence download
 $dwcaHandler = new DwcArchiverCore();
 $dwcaHandler->setCharSetOut($cSet);
 $dwcaHandler->setSchemaType($schema);
@@ -48,7 +48,7 @@ $dwcaHandler->setVerboseMode(0);
 $dwcaHandler->setRedactLocalities($redactLocalities);
 if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
 
-$mapManager = new MapInterfaceManager();
+$mapManager = new OccurrenceMapManager();
 if($type=='selection' || $type=='dsselectionquery'){
 	$selections = preg_match('#\[(.*?)\]#', $selections, $match);
 	$selections = $match[1];
@@ -68,9 +68,9 @@ if($zip){
 	$dwcaHandler->setIncludeImgs($includeImages);
 	$includeAttributes = (array_key_exists('attr',$_POST)?1:0);
 	$dwcaHandler->setIncludeAttributes($includeAttributes);
-	
+
 	$outputFile = $dwcaHandler->createDwcArchive('webreq');
-	
+
 }
 else{
 	//Output file is a flat occurrence file (not a zip file)

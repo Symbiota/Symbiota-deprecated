@@ -19,7 +19,6 @@ if($stArr || ($mapType && $mapType == 'occquery')){
     if($stArr){
         $mapManager->setSearchTermsArr($stArr);
     }
-    $mapWhere = $mapManager->getSqlWhere();
     $fullCollList = $mapManager->getFullCollArr($stArr);
     if(isset($SOLR_MODE) && $SOLR_MODE){
         $solrManager->setSearchTermsArr($stArr);
@@ -30,7 +29,7 @@ if($stArr || ($mapType && $mapType == 'occquery')){
         $retArr['rectot'] = $solrManager->getRecordCnt();
     }
     else{
-        $retArr['recarr'] = $mapManager->getCollGeoCoords($mapWhere,$occIndex,1000);
+        $retArr['recarr'] = $mapManager->getCollGeoCoords($occIndex,1000);
         $retArr['rectot'] = $recordCnt;
     }
 }

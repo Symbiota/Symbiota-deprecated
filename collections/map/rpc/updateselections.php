@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php');
 include_once('../../../config/dbconnection.php');
-include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $con = MySQLiConnectionFactory::getCon("readonly");
@@ -33,7 +33,7 @@ while($r = $result->fetch_object()){
 	$lon = cleanOutStr($r->DecimalLongitude);
 }
 $result->close();
-		
+
 $selectionListHtml = '';
 $selectionListHtml .= '<tr id="sel'.$occid.'" >';
 $selectionListHtml .= '<td>';

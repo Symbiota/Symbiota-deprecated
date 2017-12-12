@@ -8,7 +8,7 @@ class OccurrenceManager extends TaxonSearchManager {
 	protected $displaySearchArr = Array();
 	protected $reset = 0;
 	private $clName;
-	private $collArrIndex = 0;
+	protected $collArrIndex = 0;
 	private $occurSearchProjectExists = 0;
 
  	public function __construct(){
@@ -41,7 +41,7 @@ class OccurrenceManager extends TaxonSearchManager {
 
 	public function getSqlWhere(){
 		$sqlWhere = "";
-		if(array_key_exists('clid',$this->searchTermArr)){
+		if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']){
 			$sqlWhere .= "AND (v.clid IN(".$this->searchTermArr['clid'].")) ";
 		}
 		elseif(array_key_exists("db",$this->searchTermArr) && $this->searchTermArr['db']){
@@ -147,12 +147,18 @@ class OccurrenceManager extends TaxonSearchManager {
 		if(array_key_exists("llbound",$this->searchTermArr)){
 			$llboundArr = explode(";",$this->searchTermArr["llbound"]);
 			if(count($llboundArr) == 4){
-				$uLat = (substr($llboundArr[0],-1) == 'S'?-1:1)*substr($llboundArr[0],0,strlen($llboundArr[0])-1);
-				$bLat = (substr($llboundArr[1],-1) == 'S'?-1:1)*substr($llboundArr[1],0,strlen($llboundArr[1])-1);
-				$lLng = (substr($llboundArr[2],-1) == 'E'?1:-1)*substr($llboundArr[2],0,strlen($llboundArr[2])-1);
-				$rLng = (substr($llboundArr[3],-1) == 'E'?1:-1)*substr($llboundArr[3],0,strlen($llboundArr[3])-1);
-				$sqlWhere .= 'AND (o.DecimalLatitude BETWEEN '.$bLat.' AND '.$uLat.' AND o.DecimalLongitude BETWEEN '.$lLng.' AND '.$rLng.') ';
-				$this->displaySearchArr[] = 'Lat: '.$llboundArr[1].' - '.$llboundArr[0].' Long: '.$llboundArr[2].' - '.$llboundArr[3];
+				if(is_numeric(substr($llboundArr[0],-1))) $uLat = $llboundArr[0];
+				else $uLat = (substr($llboundArr[0],-1) == 'S'?-1:1)*substr($llboundArr[0],0,strlen($llboundArr[0])-1);
+				if(is_numeric(substr($llboundArr[1],-1))) $bLat = $llboundArr[1];
+				else $bLat = (substr($llboundArr[1],-1) == 'S'?-1:1)*substr($llboundArr[1],0,strlen($llboundArr[1])-1);
+				if(is_numeric(substr($llboundArr[2],-1))) $lLng = $llboundArr[2];
+				else $lLng = (substr($llboundArr[2],-1) == 'E'?1:-1)*substr($llboundArr[2],0,strlen($llboundArr[2])-1);
+				if(is_numeric(substr($llboundArr[3],-1))) $rLng = $llboundArr[3];
+				else $rLng = (substr($llboundArr[3],-1) == 'E'?1:-1)*substr($llboundArr[3],0,strlen($llboundArr[3])-1);
+				if(is_numeric($uLat) && is_numeric($bLat) && is_numeric($lLng) && is_numeric($rLng)){
+					$sqlWhere .= 'AND (o.DecimalLatitude BETWEEN '.$bLat.' AND '.$uLat.' AND o.DecimalLongitude BETWEEN '.$lLng.' AND '.$rLng.') ';
+					$this->displaySearchArr[] = 'Lat: '.$llboundArr[1].' - '.$llboundArr[0].' Long: '.$llboundArr[2].' - '.$llboundArr[3];
+				}
 			}
 		}
 		if(array_key_exists("llpoint",$this->searchTermArr)){
@@ -359,7 +365,6 @@ class OccurrenceManager extends TaxonSearchManager {
 			//Make the sql valid, but return nothing
 			$retStr = 'WHERE o.occid IS NULL ';
 		}
-		echo $retStr;
 		return $retStr;
 	}
 
@@ -381,12 +386,13 @@ class OccurrenceManager extends TaxonSearchManager {
 		return $retDate;
 	}
 
-	protected function setTableJoins($sqlWhere){
+	protected function getTableJoins($sqlWhere){
 		$sqlJoin = '';
-		if(array_key_exists("clid",$this->searchTermArr)) $sqlJoin .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+		if(array_key_exists('clid',$this->searchTermArr)) $sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
-			$sqlJoin .= "INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ";
+			$sqlJoin .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		}
+		if(array_key_exists("polycoords",$this->searchTermArr)) $sqlJoin .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 		return $sqlJoin;
 	}
 
@@ -644,8 +650,7 @@ class OccurrenceManager extends TaxonSearchManager {
 	public function getOccurVoucherProjects(){
 		$retArr = Array();
 		$titleArr = Array();
-		$sql = 'SELECT p2.pid AS parentpid, p2.projname as catname, p1.pid, p1.projname, '.
-			'c.clid, c.name as clname '.
+		$sql = 'SELECT p2.pid AS parentpid, p2.projname as catname, p1.pid, p1.projname, c.clid, c.name as clname '.
 			'FROM fmprojects p1 INNER JOIN fmprojects p2 ON p1.parentpid = p2.pid '.
 			'INNER JOIN fmchklstprojlink cl ON p1.pid = cl.pid '.
 			'INNER JOIN fmchecklists c ON cl.clid = c.clid '.
@@ -732,7 +737,7 @@ class OccurrenceManager extends TaxonSearchManager {
 		return $taxonAuthorityList;
 	}
 
-	private function readRequestVariables(){
+	protected function readRequestVariables(){
 		if(array_key_exists('searchvar',$_REQUEST)){
 			parse_str($_REQUEST['searchvar'],$retArr);
 			if($retArr) $this->searchTermArr = $retArr;
@@ -1005,11 +1010,33 @@ class OccurrenceManager extends TaxonSearchManager {
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("upperlat",$_REQUEST)){
-			$upperLat = filter_var($_REQUEST["upperlat"], FILTER_SANITIZE_NUMBER_FLOAT,FILTER_FLAG_ALLOW_FRACTION);
-			$bottomlat = filter_var($_REQUEST["bottomlat"], FILTER_SANITIZE_NUMBER_FLOAT,FILTER_FLAG_ALLOW_FRACTION);
-			$leftLong = filter_var($_REQUEST["leftlong"], FILTER_SANITIZE_NUMBER_FLOAT,FILTER_FLAG_ALLOW_FRACTION);
-			$rightlong = filter_var($_REQUEST["rightlong"], FILTER_SANITIZE_NUMBER_FLOAT,FILTER_FLAG_ALLOW_FRACTION);
-			if($upperLat && $bottomlat && $leftLong && $rightlong){
+			$upperLat = ''; $bottomlat = ''; $leftLong = ''; $rightlong = '';
+			if(preg_match('/([-\d]+)([NSns]{0,1})/',$_REQUEST["upperlat"],$m1)){
+				$upperLat = $m1[1];
+				if(isset($m1[1]){
+					if((strtoupper($m1[1]) == 'N' && $upperLat < 0) || (strtoupper($m1[1]) == 'S' && $upperLat > 0)) $upperLat *= -1;
+				}
+			}
+			if(preg_match('/([-\d]+)([NSns]{0,1})/',$_REQUEST["bottomlat"],$m1)){
+				$bottomlat = $m1[1];
+				if(isset($m1[1]){
+					if((strtoupper($m1[1]) == 'N' && $bottomlat < 0) || (strtoupper($m1[1]) == 'S' && $bottomlat > 0)) $bottomlat *= -1;
+				}
+			}
+			if(preg_match('/([-\d]+)([EWew]{0,1})/',$_REQUEST["upperlat"],$m1)){
+				$leftLong = $m1[1];
+				if(isset($m1[1]){
+					if((strtoupper($m1[1]) == 'E' && $leftLong < 0) || (strtoupper($m1[1]) == 'W' && $leftLong > 0)) $leftLong *= -1;
+				}
+			}
+			if(preg_match('/([-\d]+)([EWew]{0,1})/',$_REQUEST["upperlat"],$m1)){
+				$upperLat = $m1[1];
+				if(isset($m1[1]){
+					if((strtoupper($m1[1]) == 'E' && $rightlong < 0) || (strtoupper($m1[1]) == 'W' && $rightlong > 0)) $rightlong *= -1;
+				}
+			}
+			if(is_numeric($upperLat) && is_numeric($bottomlat) && is_numeric($leftLong) && is_numeric($rightlong)){
+dagadsgsd
 				$uLatDir = (isset($_REQUEST['upperlat_NS'])?strtoupper($_REQUEST['upperlat_NS']):'N');
 				if($uLatDir != 'N' && $uLatDir != 'S') $uLatDir = 'N';
 				$bLatDir = (isset($_REQUEST['bottomlat_NS'])?strtoupper($_REQUEST['bottomlat_NS']):'N');
@@ -1051,19 +1078,11 @@ class OccurrenceManager extends TaxonSearchManager {
 		return $this->clName;
 	}
 
-	public function setsearchTermArr($stArr){
-		if($stArr && !$this->searchTermArr) $this->searchTermArr = $stArr;
-	}
-
 	public function getSearchTerm($k){
 		if($k && isset($this->searchTermArr[$k])){
 			return trim($this->searchTermArr[$k],' ;');
 		}
 		return '';
-	}
-
-	public function getSearchTermArr(){
-		return $this->searchTermArr;
 	}
 
 	public function getSearchTermStr(){

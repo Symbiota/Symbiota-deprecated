@@ -3,7 +3,7 @@ include_once("OccurrenceManager.php");
 
 class OccurrenceListManager extends OccurrenceManager{
 
-	protected $recordCount = 0;
+	private $recordCount = 0;
 	private $sortArr = array();
 
  	public function __construct(){
@@ -45,7 +45,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
 		*/
-		$sql .= $this->setTableJoins($sqlWhere).$sqlWhere;
+		$sql .= $this->getTableJoins($sqlWhere).$sqlWhere;
 
 		if($this->sortArr){
 			$sql .= 'ORDER BY ';
@@ -127,7 +127,7 @@ class OccurrenceListManager extends OccurrenceManager{
 
 	private function setRecordCnt($sqlWhere){
 		if($sqlWhere){
-			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ".$this->setTableJoins($sqlWhere).$sqlWhere;
+			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ".$this->getTableJoins($sqlWhere).$sqlWhere;
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);
 			if($result){
