@@ -126,7 +126,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 		<div id="speclist">
 			<div id="queryrecords">
 				<div style="float:right;">
-					<form action="download/index.php" method="get" style="float:left">
+					<form action="download/index.php" method="post" target="_blank" style="float:left">
 						<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
 							<img src="../images/dl2.png" style="width:15px" />
 						</button>
@@ -138,12 +138,12 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 					if($collManager->getClName() && $targetTid){
 						?>
 						<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor:pointer;" onclick="addAllVouchersToCl(<?php echo $targetTid; ?>)" title="Link All Vouchers on Page"><img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" /></button>
-						<?php 
+						<?php
 					}
 					?>
 				</div>
 				<div style="margin:5px;">
-					<?php 
+					<?php
 					echo '<div><b>'.$LANG['DATASET'].':</b> '.$collManager->getDatasetSearchStr().'</div>';
 					if($taxaSearchStr = $collManager->getTaxaSearchStr()){
 						echo '<div><b>'.$LANG['TAXA'].':</b> '.$taxaSearchStr.'</div>';
@@ -154,7 +154,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 					?>
 				</div>
 				<div style="clear:both;"></div>
-				<?php 
+				<?php
 				//Add pagination
 				$paginationStr = '<div><div style="clear:both;"><hr/></div><div style="float:left;margin:5px;">';
 				$lastPage = (int)($collManager->getRecordCnt() / $cntPerPage) + 1;
@@ -285,14 +285,14 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			</div>
 		</div>
 		<div id="maps" style="min-height:400px;margin-bottom:10px;">
-			<form action="download/index.php" method="get" style="float:right">
+			<form action="download/index.php" method="post" style="float:right" target="_blank" >
 				<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
 					<img src="../images/dl2.png" style="width:15px" />
 				</button>
 				<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
 				<input name="dltype" type="hidden" value="georef" />
 			</form>
-			
+
 			<div style='margin-top:10px;'>
 				<h2><?php echo $LANG['GOOGLE_MAP_HEADER']; ?></h2>
 			</div>
@@ -304,7 +304,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			<div style='margin:10 0 0 20;'>
 				<?php echo $LANG['GOOGLE_MAP_DESCRIPTION'];?>
 			</div>
-	
+
 			<div style='margin-top:10px;'>
 				<h2><?php echo $LANG['GOOGLE_EARTH_HEADER']; ?></h2>
 			</div>
@@ -324,7 +324,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 				<div id="fieldBox" style="display:none;">
 					<fieldset>
 						<div style="width:600px;">
-							<?php 
+							<?php
 							$occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
 								'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 								'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
@@ -350,7 +350,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 		</div>
 	</div>
 </div>
-<?php 
+<?php
 include($SERVER_ROOT."/footer.php");
 ?>
 </body>

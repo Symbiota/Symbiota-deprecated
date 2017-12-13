@@ -46,7 +46,7 @@ if (top.frames.length!=0)
 					<span style="margin-left:5px;margin-right:5px;">
 						<a href='<?php echo $CLIENT_ROOT; ?>/sitemap.php'>Sitemap</a>
 					</span>
-					
+
 				</div>
 				<ul id="hor_dropdown">
 					<li>
@@ -59,7 +59,7 @@ if (top.frames.length!=0)
 								<a href="<?php echo $CLIENT_ROOT; ?>/collections/index.php" >Search Collections</a>
 							</li>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/collections/map/mapinterface.php" target="_blank">Map Search</a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/map/index.php" target="_blank">Map Search</a>
 							</li>
 						</ul>
 					</li>
@@ -97,7 +97,7 @@ if (top.frames.length!=0)
 							<li>
 								<a href="<?php echo $CLIENT_ROOT; ?>/checklists/dynamicmap.php?interface=key" >Dynamic Key</a>
 							</li>
-						</ul> 
+						</ul>
 					</li>
 				</ul>
 			</div>

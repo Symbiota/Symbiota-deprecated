@@ -2,8 +2,10 @@
 include_once('../../config/symbini.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen"; 
+$sourcePage = array_key_exists("sourcepage",$_REQUEST)?$_REQUEST["sourcepage"]:"specimen";
+$downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen";
 $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0;
+
 $searchVar = $_REQUEST['searchvar'];
 ?>
 <html>
@@ -26,7 +28,7 @@ $searchVar = $_REQUEST['searchvar'];
 					modal: true,
 					position: { my: "left top", at: "center", of: "#"+dialogStr }
 				});
-	
+
 				$( "#"+dialogStr ).click(function() {
 					$( "#"+this.id+"dialog" ).dialog( "open" );
 				});
@@ -55,9 +57,15 @@ $searchVar = $_REQUEST['searchvar'];
 				obj.form.identifications.checked = false;
 			}
 		}
-		
+
 		function validateDownloadForm(f){
 			return true;
+		}
+
+		function closePage(timeToClose){
+			setTimeout(function () {
+				window.close();
+			}, timeToClose);
 		}
 	</script>
 </head>
@@ -72,36 +80,34 @@ $searchVar = $_REQUEST['searchvar'];
 				<?php echo $collections_download_downloadCrumbs; ?>
 				<b>Specimen Download</b>
 			</div>
-			<?php 
+			<?php
 		}
 	}
 	else{
 		?>
 		<div class="navpath">
-			<a href="../../index.php">Home</a> &gt;&gt; 
-			<a href="../index.php">Collections</a> &gt;&gt; 
-			<a href="../harvestparams.php">Search Criteria</a> &gt;&gt; 
-			<a href="../list.php?<?php echo $searchVar; ?>">Occurrence Record Listing</a> &gt;&gt;
+			<a href="../../index.php">Home</a> &gt;&gt;
+			<a href="#" onclick="closePage(0)">Return to Search Page</a> &gt;&gt;
 			<b>Occurrence Record Download</b>
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 
 	<div id="innertext">
 		<h2>Data Usage Guidelines</h2>
 	 	 <div style="margin:15px;">
-	 	 	By downloading data, the user confirms that he/she has read and agrees with the general 
-	 	 	<a href="../../misc/usagepolicy.php#images">data usage terms</a>. 
-	 	 	Note that additional terms of use specific to the individual collections 
-	 	 	may be distributed with the data download. When present, the terms 
-	 	 	supplied by the owning institution should take precedence over the 
+	 	 	By downloading data, the user confirms that he/she has read and agrees with the general
+	 	 	<a href="../../misc/usagepolicy.php#images">data usage terms</a>.
+	 	 	Note that additional terms of use specific to the individual collections
+	 	 	may be distributed with the data download. When present, the terms
+	 	 	supplied by the owning institution should take precedence over the
 	 	 	general terms posted on the website.
 	 	 </div>
 		<div style='margin:30px;'>
 			<form name="downloadform" action="downloadhandler.php" method="post" onsubmit="return validateDownloadForm(this);">
 				<fieldset>
-					<?php 
+					<?php
 					if($downloadType == 'checklist'){
 						echo '<legend><b>Download Checklist</b></legend>';
 					}
@@ -113,18 +119,18 @@ $searchVar = $_REQUEST['searchvar'];
 					}
 					?>
 					<table>
-						<?php 
+						<?php
 						if($downloadType == 'specimen'){
 							?>
 							<tr>
 								<td valign="top">
 									<div style="margin:10px;">
 										<b>Structure:</b>
-									</div> 
+									</div>
 								</td>
 								<td>
 									<div style="margin:10px 0px;">
-										<input type="radio" name="schema" value="symbiota" onclick="georefRadioClicked(this)" CHECKED /> 
+										<input type="radio" name="schema" value="symbiota" onclick="georefRadioClicked(this)" CHECKED />
 										Symbiota Native
 										<a id="schemanativeinfo" href="#" onclick="return false" title="More Information">
 											<img src="../../images/info.png" style="width:13px;" />
@@ -133,14 +139,14 @@ $searchVar = $_REQUEST['searchvar'];
 											Symbiota native is very similar to Darwin Core except with the addtion of a few fields
 											such as substrate, associated collectors, verbatim description.
 										</div>
-										<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this)" /> 
+										<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this)" />
 										Darwin Core
 										<a id="schemadwcinfo" href="#" target="" title="More Information">
 											<img src="../../images/info.png" style="width:13px;" />
 										</a><br/>
 										<div id="schemadwcinfodialog">
-											Darwin Core (DwC) is a TDWG endorsed exchange standard specifically for biodiversity datasets. 
-											For more information on what data fields are included in DwC, visit the 
+											Darwin Core (DwC) is a TDWG endorsed exchange standard specifically for biodiversity datasets.
+											For more information on what data fields are included in DwC, visit the
 											<a href="http://rs.tdwg.org/dwc/index.htm"target='_blank'>DwC Quick Reference Guide</a>.
 										</div>
 										*<a href='http://rs.tdwg.org/dwc/index.htm' class='bodylink' target='_blank'>What is Darwin Core?</a>
@@ -151,25 +157,25 @@ $searchVar = $_REQUEST['searchvar'];
 								<td valign="top">
 									<div style="margin:10px;">
 										<b>Data Extensions:</b>
-									</div> 
+									</div>
 								</td>
 								<td>
 									<div style="margin:10px 0px;">
 										<input type="checkbox" name="identifications" value="1" onchange="extensionSelected(this)" checked /> include Determination History<br/>
 										<input type="checkbox" name="images" value="1" onchange="extensionSelected(this)" checked /> include Image Records<br/>
 										<!--  <input type="checkbox" name="attributes" value="1" onchange="extensionSelected(this)" checked /> include Occurrence Trait Attributes (MeasurementOrFact extension)<br/>  -->
-										*Output must be a compressed archive 
+										*Output must be a compressed archive
 									</div>
 								</td>
 							</tr>
 							<?php
-						} 
+						}
 						?>
 						<tr>
 							<td valign="top">
 								<div style="margin:10px;">
 									<b>File Format:</b>
-								</div> 
+								</div>
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
@@ -182,11 +188,11 @@ $searchVar = $_REQUEST['searchvar'];
 							<td valign="top">
 								<div style="margin:10px;">
 									<b>Character Set:</b>
-								</div> 
+								</div>
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
-									<?php 
+									<?php
 									//$cSet = strtolower($CHARSET);
 									$cSet = 'iso-8859-1';
 									?>
@@ -199,7 +205,7 @@ $searchVar = $_REQUEST['searchvar'];
 							<td valign="top">
 								<div style="margin:10px;">
 									<b>Compression:</b>
-								</div> 
+								</div>
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
@@ -210,7 +216,7 @@ $searchVar = $_REQUEST['searchvar'];
 						<tr>
 							<td colspan="2">
 								<div style="margin:10px;">
-									<?php 
+									<?php
 									if($downloadType == 'checklist'){
 										echo '<input name="schema" type="hidden" value="checklist" />';
 									}
@@ -220,17 +226,18 @@ $searchVar = $_REQUEST['searchvar'];
 									?>
 									<input name="publicsearch" type="hidden" value="1" />
 									<input name="taxonFilterCode" type="hidden" value="<?php echo $taxonFilterCode; ?>" />
-									<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+									<input name="sourcepage" type="hidden" value="<?php echo $sourcePage; ?>" />
+									<input name="searchvar" type="hidden" value="<?php echo str_replace('"','&quot;',$searchVar); ?>" />
 									<input type="submit" name="submitaction" value="Download Data" />
 								</div>
 							</td>
 						</tr>
-					</table>							
+					</table>
 				</fieldset>
 			</form>
 		</div>
 	</div>
-<?php 
+<?php
 	include($SERVER_ROOT.'/footer.php');
 ?>
 </body>

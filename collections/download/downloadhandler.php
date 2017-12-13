@@ -1,13 +1,14 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
-include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 
-$schema = array_key_exists("schema",$_POST)?$_POST["schema"]:"symbiota"; 
+$sourcePage = array_key_exists("sourcepage",$_REQUEST)?$_REQUEST["sourcepage"]:"specimen";
+$schema = array_key_exists("schema",$_POST)?$_POST["schema"]:"symbiota";
 $cSet = array_key_exists("cset",$_POST)?$_POST["cset"]:'';
 
-$occurManager = new OccurrenceManager();
+$searchVar = $_REQUEST['searchvar'];
 
 if($schema == "backup"){
 	$collid = $_POST["collid"];
@@ -23,9 +24,9 @@ if($schema == "backup"){
 			$dwcaHandler->setIncludeAttributes(1);
 			$dwcaHandler->setRedactLocalities(0);
 			$dwcaHandler->setCollArr($collid);
-			
+
 			$archiveFile = $dwcaHandler->createDwcArchive();
-			
+
 			if($archiveFile){
 				//ob_start();
 				header('Content-Description: Symbiota Occurrence Backup File (DwC-Archive data package)');
@@ -66,6 +67,13 @@ else{
 		if(array_key_exists('RareSppReader', $USER_RIGHTS)){
 			$rareReaderArr = array_unique(array_merge($rareReaderArr,$USER_RIGHTS['RareSppReader']));
 		}
+	}
+	$occurManager = null;
+	if($sourcePage == 'specimen'){
+		$occurManager = new OccurrenceManager();
+	}
+	else{
+		$occurManager = new OccurrenceMapManager();
 	}
 	if($schema == "georef"){
 		$dlManager = new OccurrenceDownload();
@@ -130,14 +138,14 @@ else{
 			}
 		}
 		else{
-			//Is an occurrence download 
+			//Is an occurrence download
 			$dwcaHandler->setCharSetOut($cSet);
 			$dwcaHandler->setSchemaType($schema);
 			$dwcaHandler->setExtended($extended);
 			$dwcaHandler->setDelimiter($format);
 			$dwcaHandler->setRedactLocalities($redactLocalities);
 			if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
-				
+
 			if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
 				$dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
 			}
@@ -179,7 +187,7 @@ else{
 			$dwcaHandler->setIncludeAttributes($includeAttributes);
 
 			$outputFile = $dwcaHandler->createDwcArchive('webreq');
-			
+
 		}
 		else{
 			//Output file is a flat occurrence file (not a zip file)
@@ -200,7 +208,7 @@ else{
 			}
 			$contentDesc .= 'File';
 			header('Content-Description: '.$contentDesc);
-			
+
 			if($zip){
 				header('Content-Type: application/zip');
 			}
@@ -210,7 +218,7 @@ else{
 			else{
 				header('Content-Type: text/html; charset='.$CHARSET);
 			}
-			
+
 			header('Content-Disposition: attachment; filename='.basename($outputFile));
 			header('Content-Transfer-Encoding: binary');
 			header('Expires: 0');

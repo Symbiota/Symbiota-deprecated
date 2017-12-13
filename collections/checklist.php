@@ -14,7 +14,7 @@ $searchVarEncoded = urlencode($searchVar);
 
 ?>
 <div>
-	<form action="download/index.php" method="get" style="float:right">
+	<form action="download/index.php" method="post" style="float:right" target="_blank">
 		<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_TITLE']; ?>">
 			<img src="../images/dl2.png" style="width:15px" />
 		</button>
@@ -22,7 +22,7 @@ $searchVarEncoded = urlencode($searchVar);
 		<input name="dltype" type="hidden" value="checklist" />
 		<input name="taxonFilterCode" type="hidden" value="<?php echo $taxonFilter; ?>" />
 	</form>
-	<?php 
+	<?php
 	if($KEY_MOD_IS_ACTIVE){
 		?>
 		<form action="checklistsymbiota.php" method="get" style="float:right">
@@ -33,7 +33,7 @@ $searchVarEncoded = urlencode($searchVar);
 			<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
 			<input name="interface" type="hidden" value="key" />
 		</form>
-		<?php 
+		<?php
 	}
 	if($FLORA_MOD_IS_ACTIVE){
 		?>
@@ -71,7 +71,7 @@ $searchVarEncoded = urlencode($searchVar);
 		$undFamilyArray = Array();
 		if(array_key_exists("undefined",$checklistArr)){
 			$undFamilyArray = $checklistArr["undefined"];
-			unset($checklistArr["undefined"]); 
+			unset($checklistArr["undefined"]);
 		}
 		ksort($checklistArr);
 		foreach($checklistArr as $family => $sciNameArr){
