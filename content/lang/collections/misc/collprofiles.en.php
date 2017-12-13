@@ -24,6 +24,7 @@ $LANG['ADMIN_CONTROL'] = 'Administration Control Panel';
 $LANG['VIEW_COMMENTS'] = 'View Posted Comments';
 $LANG['EDIT_META'] = 'Edit Metadata and Contact Information';
 $LANG['MANAGE_PERMISSIONS'] = 'Manage Permissions';
+$LANG['FIELDGUIDE_BATCH'] = 'FieldGuide Batch Image Processing';
 $LANG['IMPORT_SPECIMEN'] = 'Import/Update Specimen Records';
 $LANG['SKELETAL_FILE_IMPORT'] = 'Skeletal Text File Import';
 $LANG['TEXT_FILE_IMPORT'] = 'Full Text File Import';

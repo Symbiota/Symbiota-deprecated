@@ -72,6 +72,7 @@ $GLOSSARY_EXPORT_BANNER = '';		//Banner image for glossary exports. Place in ima
 $DYN_CHECKLIST_RADIUS = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $DISPLAY_COMMON_NAMES = 1;			//Display common names in species profile page and checklists displays
 $ACTIVATE_EXSICCATI = 0;			//Activates exsiccati fields within data entry pages; adding link to exsiccati search tools to portal menu is recommended
+$ACTIVATE_FIELDGUIDE = 0;	//Activates FieldGuide Batch Processing module
 $ACTIVATE_GEOLOCATE_TOOLKIT = 0;	//Activates GeoLocate Toolkit located within the Processing Toolkit menu items 
 
 $RIGHTS_TERMS = array(

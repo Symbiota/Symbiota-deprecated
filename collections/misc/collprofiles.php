@@ -231,7 +231,16 @@ if($SYMB_UID){
 										<?php echo $LANG['MANAGE_PERMISSIONS']; ?>
 									</a>
 								</li>
-								<?php 
+								<?php
+                                if($FIELDGUIDE_ACTIVE){
+                                    ?>
+                                    <li>
+                                        <a href="fgbatch.php?collid=<?php echo $collid; ?>" >
+                                            <?php echo (isset($LANG['FIELDGUIDE_BATCH'])?$LANG['FIELDGUIDE_BATCH']:'FieldGuide Batch Image Processing'); ?>
+                                        </a>
+                                    </li>
+                                    <?php
+                                }
 								if($collData['colltype'] != 'General Observations'){
 									?>
 									<li>
