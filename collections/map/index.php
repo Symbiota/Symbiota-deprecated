@@ -92,7 +92,7 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 	<script type="text/javascript" src="../../js/jquery.popupoverlay.js"></script>
 	<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	<script type="text/javascript" src="../../js/jscolor/jscolor.js?ver=4"></script>
-	<script type="text/javascript" src="../../js/symb/collections.map.index.js?171207"></script>
+	<script type="text/javascript" src="../../js/symb/collections.map.index.js?1712082"></script>
 	<script type="text/javascript" src="../../js/symb/markerclusterer.js?20170403"></script>
 	<script type="text/javascript" src="../../js/symb/oms.min.js"></script>
 	<script type="text/javascript" src="../../js/symb/keydragzoom.js"></script>
@@ -210,6 +210,7 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 
 			var dmOptions = {
 				zoom: 6,
+				minZoom: 3,
 				center: pos,
 				mapTypeId: google.maps.MapTypeId.TERRAIN,
 				mapTypeControl: true,
@@ -250,7 +251,6 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 					on: "Turn off"
 				}
 			});
-
 
 			var polyOptions = {
 				strokeWeight: 0,
@@ -1135,7 +1135,7 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 		<?php echo ($GEOLOCATION?"google.maps.event.addDomListener(window, 'load', getCoords);":""); ?>
 	</script>
 </head>
-<body style='width:100%;' <?php echo (!$GEOLOCATION?'onload="initialize();"':''); ?>>
+<body style='width:100%;max-width:100%;min-width:500px;' <?php echo (!$GEOLOCATION?'onload="initialize();"':''); ?>>
 <div data-role="page" id="page1">
 	<div role="main" class="ui-content" style="height:400px;">
 		<a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars">Open</a>
@@ -1481,5 +1481,4 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 	</div>
 </div>
 </body>
-
 </html>

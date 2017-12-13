@@ -1,15 +1,6 @@
-$(window).resize(function(){
-	var winHeight = $(window).height();
-	document.getElementById('mapinterface').style.height = winHeight + "px";
-	document.getElementById('loadingOverlay').style.height = winHeight + "px";
-	$("#accordion").accordion("refresh");
-});
-
-$(document).on("pageloadfailed", function(event, data){
-    event.preventDefault();
-});
-
 $(document).ready(function() {	
+	setHeight()
+	
 	$('#tabs1').tabs({
 		beforeLoad: function( event, ui ) {
 			$(ui.panel).html("<p>Loading...</p>");
@@ -133,6 +124,21 @@ $(document).ready(function() {
 	});
 	
 });
+
+$(window).resize(function(){
+	setHeight();
+	$("#accordion").accordion("refresh");
+});
+
+$(document).on("pageloadfailed", function(event, data){
+    event.preventDefault();
+});
+
+function setHeight(){
+	var winHeight = $(window).height();
+	document.getElementById('mapinterface').style.height = winHeight + "px";
+	document.getElementById('loadingOverlay').style.height = winHeight + "px";
+}
 
 function checkUpperLat(){
 	if(document.mapsearchform.upperlat.value != ""){
