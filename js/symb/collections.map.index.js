@@ -1,7 +1,7 @@
 $(window).resize(function(){
 	var winHeight = $(window).height();
-	winHeight = winHeight + "px";
-	document.getElementById('mapinterface').style.height = winHeight;
+	document.getElementById('mapinterface').style.height = winHeight + "px";
+	document.getElementById('loadingOverlay').style.height = winHeight + "px";
 	$("#accordion").accordion("refresh");
 });
 
@@ -119,25 +119,20 @@ $(document).ready(function() {
 				return false;
 			}
 		},{});
-});
 
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-		xmlHttp=new XMLHttpRequest();
-	}
-	catch (e){
-		// Internet Explorer
-		try{
-			xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-		}
-		catch(e){
-			xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-		}
-	}
-	return xmlHttp;
-}
+	$("#accordion").accordion({
+		collapsible: true,
+		heightStyle: "fill"
+	});
+
+	$('#loadingOverlay').popup({
+		transition: 'all 0.3s',
+		scrolllock: true,
+		opacity:0.5,
+		color:'white'
+	});
+	
+});
 
 function checkUpperLat(){
 	if(document.mapsearchform.upperlat.value != ""){
@@ -203,54 +198,6 @@ function checkPointLong(){
 			document.mapsearchform.pointlong.value = -1*Math.abs(parseFloat(document.mapsearchform.pointlong.value));
 		}
 	}
-}
-
-function checkForm(){
-	var frm = document.mapsearchform;
-
-	//make sure they have filled out at least one field.
-	if((frm.taxa.value == '') && (frm.country.value == '') && (frm.state.value == '') && (frm.county.value == '') && 
-		(frm.locality.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') && 
-		(frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate.value == '')){
-        alert("Please fill in at least one search parameter!");
-        return false;
-    }
- 
-    if(frm.upperlat.value != '' || frm.bottomlat.value != '' || frm.leftlong.value != '' || frm.rightlong.value != ''){
-        // if Lat/Long field is filled in, they all should have a value!
-        if(frm.upperlat.value == '' || frm.bottomlat.value == '' || frm.leftlong.value == '' || frm.rightlong.value == ''){
-			alert("Error: Please make all Lat/Long bounding box values contain a value or all are empty");
-			return false;
-        }
-
-		// Check to make sure lat/longs are valid.
-		if(Math.abs(frm.upperlat.value) > 90 || Math.abs(frm.bottomlat.value) > 90 || Math.abs(frm.pointlat.value) > 90){
-			alert("Latitude values can not be greater than 90 or less than -90.");
-			return false;
-		} 
-		if(Math.abs(frm.leftlong.value) > 180 || Math.abs(frm.rightlong.value) > 180 || Math.abs(frm.pointlong.value) > 180){
-			alert("Longitude values can not be greater than 180 or less than -180.");
-			return false;
-		} 
-		if(parseFloat(frm.upperlat.value) < parseFloat(frm.bottomlat.value)){
-			alert("Your northern latitude value is less then your southern latitude value. Please correct this.");
-			return false;
-		}
-		if(parseFloat(frm.leftlong.value) > parseFloat(frm.rightlong.value)){
-			alert("Your western longitude value is greater then your eastern longitude value. Please correct this. Note that western hemisphere longitudes in the decimal format are negitive.");
-			return false;
-		}
-    }
-
-	//Same with point radius fields
-    if(frm.pointlat.value != '' || frm.pointlong.value != '' || frm.radius.value != ''){
-    	if(frm.pointlat.value == '' || frm.pointlong.value == '' || frm.radius.value == ''){
-    		alert("Error: Please make all Lat/Long point-radius values contain a value or all are empty");
-			return false;
-		}
-	}
-
-    return true;
 }
 
 function reSymbolizeMap(type) {
@@ -532,69 +479,6 @@ function findDsSelections(c){
 	}
 }
 
-function adjustSelectionsTab(){
-	if(selections.length > 0){
-		document.getElementById("selectionstab").style.display = "block";
-		updateSelections();
-	}
-	else{
-		document.getElementById("selectionstab").style.display = "none";
-		var activeTab = $('#tabs2').tabs("option","active");
-		if(activeTab==3){
-			$('#tabs2').tabs({active:0});
-		}
-	}
-}
-
-function addRefPoint(){
-	var lat = document.getElementById("lat").value;
-	var lng = document.getElementById("lng").value;
-	var title = document.getElementById("title").value;
-	if(!useLLDecimal){
-		var latdeg = document.getElementById("latdeg").value;
-		var latmin = document.getElementById("latmin").value;
-		var latsec = document.getElementById("latsec").value;
-		var latns = document.getElementById("latns").value;
-		var longdeg = document.getElementById("longdeg").value;
-		var longmin = document.getElementById("longmin").value;
-		var longsec = document.getElementById("longsec").value;
-		var longew = document.getElementById("longew").value;
-		if(latdeg != null && longdeg != null){
-			if(latmin == null) latmin = 0;
-			if(latsec == null) latsec = 0;
-			if(longmin == null) longmin = 0;
-			if(longsec == null) longsec = 0;
-			lat = latdeg*1 + latmin/60 + latsec/3600;
-			lng = longdeg*1 + longmin/60 + longsec/3600;
-			if(latns == "S") lat = lat * -1;
-			if(longew == "W") lng = lng * -1;
-		}
-	}
-	if(lat != null && lng != null){
-		if(lat < -180 || lat > 180 || lng < -180 || lng > 180){
-			window.alert("Latitude and Longitude must be of values between -180 and 180 (" + lat + ";" + lng + ")");
-		}
-		else{
-			var addPoint = true;
-			if(lng > 0) addPoint = window.confirm("Longitude is positive, which will put the marker in the eastern hemisphere (e.g. Asia).\nIs this what you want?");
-			if(!addPoint) lng = -1*lng;
-
-			var iconImg = new google.maps.MarkerImage( '../../images/google/arrow.png' );
-
-			var m = new google.maps.Marker({
-				position: new google.maps.LatLng(lat,lng),
-				map: map,
-				title: title,
-				icon: iconImg,
-				zIndex: google.maps.Marker.MAX_ZINDEX
-			});
-		}
-	}
-	else{
-		window.alert("Enter values in the latitude and longitude fields");
-	}
-}
-
 function toggleLatLongDivs(){
 	var divs = document.getElementsByTagName("div");
 	for (i = 0; i < divs.length; i++) {
@@ -725,7 +609,66 @@ function verifyCollForm(f){
 			}
 		}
 	}
-	return formVerified;
+	//make sure they have filled out at least one field.
+	if((f.taxa.value == '') && (f.country.value == '') && (f.state.value == '') && (f.county.value == '') && 
+		(f.locality.value == '') && (f.upperlat.value == '') && (f.pointlat.value == '') && 
+		(f.collector.value == '') && (f.collnum.value == '') && (f.eventdate.value == '')){
+        alert("Please fill in at least one search parameter!");
+        return false;
+    }
+ 
+    if(f.upperlat.value != '' || f.bottomlat.value != '' || f.leftlong.value != '' || f.rightlong.value != ''){
+        // if Lat/Long field is filled in, they all should have a value!
+        if(f.upperlat.value == '' || f.bottomlat.value == '' || f.leftlong.value == '' || f.rightlong.value == ''){
+			alert("Error: Please make all Lat/Long bounding box values contain a value or all are empty");
+			return false;
+        }
+
+		// Check to make sure lat/longs are valid.
+		if(Math.abs(f.upperlat.value) > 90 || Math.abs(f.bottomlat.value) > 90 || Math.abs(f.pointlat.value) > 90){
+			alert("Latitude values can not be greater than 90 or less than -90.");
+			return false;
+		} 
+		if(Math.abs(f.leftlong.value) > 180 || Math.abs(f.rightlong.value) > 180 || Math.abs(f.pointlong.value) > 180){
+			alert("Longitude values can not be greater than 180 or less than -180.");
+			return false;
+		} 
+		if(parseFloat(f.upperlat.value) < parseFloat(f.bottomlat.value)){
+			alert("Your northern latitude value is less then your southern latitude value. Please correct this.");
+			return false;
+		}
+		if(parseFloat(f.leftlong.value) > parseFloat(f.rightlong.value)){
+			alert("Your western longitude value is greater then your eastern longitude value. Please correct this. Note that western hemisphere longitudes in the decimal format are negitive.");
+			return false;
+		}
+    }
+
+	//Same with point radius fields
+    if(f.pointlat.value != '' || f.pointlong.value != '' || f.radius.value != ''){
+    	if(f.pointlat.value == '' || f.pointlong.value == '' || f.radius.value == ''){
+    		alert("Error: Please make all Lat/Long point-radius values contain a value or all are empty");
+			return false;
+		}
+	}
+    return true;
+}
+
+function resetQueryForm(f){
+	$('input[name=taxa]').val('');
+	$('input[name=country]').val('');
+	$('input[name=state]').val('');
+	$('input[name=county]').val('');
+	$('input[name=local]').val('');
+	$('input[name=collector]').val('');
+	$('input[name=collnum]').val('');
+	$('input[name=eventdate1]').val('');
+	$('input[name=eventdate2]').val('');
+	$('input[name=catnum]').val('');
+	$('input[name=othercatnum]').val('');
+	$('input[name=typestatus]').attr('checked', false);
+	$('input[name=hasimages]').attr('checked', false);
+	$('input[name=hasgenetic]').attr('checked', false);
+	deleteSelectedShape();
 }
 
 function checkKey(e){
@@ -771,10 +714,10 @@ function openGarminDownloader(type){
 function openLogin(){
 	if(starr){
 		loginstarr = starr.replace(/"/g, "'");
-		window.location='../../profile/index.php?refurl=../collections/map/mapinterface.php?starr='+loginstarr;
+		window.location='../../profile/index.php?refurl=../collections/map/index.php?starr='+loginstarr;
 	}
 	else{
-		window.location='../../profile/index.php?refurl=../collections/map/mapinterface.php';
+		window.location='../../profile/index.php?refurl=../collections/map/index.php';
 	}
 }
 
@@ -837,13 +780,13 @@ function openIndPopup(occid,clid){
 }
 
 function openPopup(urlStr){
-	var wWidth = 900;
+	var wWidth = 1000;
 	try{
 		if(opener.document.getElementById('maintable').offsetWidth){
 			wWidth = opener.document.getElementById('maintable').offsetWidth*1.05;
 		}
 		else if(opener.document.body.offsetWidth){
-			wWidth = opener.document.body.offsetWidth*0.9;
+			wWidth = opener.document.body.offsetWidth*0.95;
 		}
 	}
 	catch(err){
@@ -872,42 +815,14 @@ function refreshClustering(){
 	searchForm.submit();
 }
 
-function openCsvOptions(type){
-	document.getElementById("typecsv").value = type;
-	if(type=='dsselectionquery'){
-		if(dsselections.length!=0){
-			var jsonSelections = JSON.stringify(dsselections);
-		}
-		else{
-			alert("Please select records from the dataset to create CSV file.");
-			return;
-		}
+function copyUrl(){
+	var $temp = $("<input>");
+	$("body").append($temp);
+	var activeLink = window.location.href;
+	if(activeLink.substring(activeLink.length - 3) == "php"){
+		activeLink = activeLink + "?" + sessionStorage.querystr;
 	}
-	else{
-		var jsonSelections = JSON.stringify(selections);
-	}
-	document.getElementById("selectionscsv").value = jsonSelections;
-	document.getElementById("starrcsv").value = starr;
-	var urlStr = 'csvoptions.php?dltype=specimen';
-	newWindow = window.open(urlStr,'popup','scrollbars=0,toolbar=0,resizable=1,width=650,height=650');
-	if (newWindow.opener == null) newWindow.opener = self;
-	return false;
-}
-
-function prepCsvControlForm(f){
-	opener.document.getElementById("schemacsv").value = f.schema.value;
-	if(f.identifications.checked==true){
-		opener.document.getElementById("identificationscsv").value = 1;
-	}
-	if(f.images.checked==true){
-		opener.document.getElementById("imagescsv").value = 1;
-	}
-	opener.document.getElementById("formatcsv").value = f.format.value;
-	opener.document.getElementById("csetcsv").value = f.cset.value;
-	if(f.zip.checked==true){
-		opener.document.getElementById("zipcsv").value = 1;
-	}
-	opener.document.getElementById("csvcontrolform").submit();
-	self.close();
-	return false;
+	$temp.val(activeLink).select();
+	document.execCommand("copy");
+	$temp.remove();
 }

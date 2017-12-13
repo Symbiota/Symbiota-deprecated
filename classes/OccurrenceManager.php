@@ -5,6 +5,7 @@ include_once($SERVER_ROOT.'/classes/TaxonSearchManager.php');
 
 class OccurrenceManager extends TaxonSearchManager {
 
+	protected $sqlWhere;
 	protected $displaySearchArr = Array();
 	protected $reset = 0;
 	private $clName;
@@ -40,6 +41,11 @@ class OccurrenceManager extends TaxonSearchManager {
 	}
 
 	public function getSqlWhere(){
+		if(!$this->sqlWhere) $this->setSqlWhere();
+		return $this->sqlWhere;
+	}
+
+	private function setSqlWhere(){
 		$sqlWhere = "";
 		if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']){
 			$sqlWhere .= "AND (v.clid IN(".$this->searchTermArr['clid'].")) ";
@@ -128,7 +134,7 @@ class OccurrenceManager extends TaxonSearchManager {
 						$tempArr[] = '(o.municipality LIKE "'.$this->cleanInStr($value).'%" OR o.Locality LIKE "%'.$this->cleanInStr($value).'%")';
 					}
 					else{
-						$tempArr[] = '(MATCH(f.locality) AGAINST(\'"'.$this->cleanInStr($value).'"\' IN BOOLEAN MODE)) ';
+						$tempArr[] = '(MATCH(f.locality) AGAINST(\'"'.$this->cleanInStr(str_replace('"', '', $value)).'"\' IN BOOLEAN MODE)) ';
 					}
 				}
 			}
@@ -147,34 +153,33 @@ class OccurrenceManager extends TaxonSearchManager {
 		if(array_key_exists("llbound",$this->searchTermArr)){
 			$llboundArr = explode(";",$this->searchTermArr["llbound"]);
 			if(count($llboundArr) == 4){
-				if(is_numeric(substr($llboundArr[0],-1))) $uLat = $llboundArr[0];
-				else $uLat = (substr($llboundArr[0],-1) == 'S'?-1:1)*substr($llboundArr[0],0,strlen($llboundArr[0])-1);
-				if(is_numeric(substr($llboundArr[1],-1))) $bLat = $llboundArr[1];
-				else $bLat = (substr($llboundArr[1],-1) == 'S'?-1:1)*substr($llboundArr[1],0,strlen($llboundArr[1])-1);
-				if(is_numeric(substr($llboundArr[2],-1))) $lLng = $llboundArr[2];
-				else $lLng = (substr($llboundArr[2],-1) == 'E'?1:-1)*substr($llboundArr[2],0,strlen($llboundArr[2])-1);
-				if(is_numeric(substr($llboundArr[3],-1))) $rLng = $llboundArr[3];
-				else $rLng = (substr($llboundArr[3],-1) == 'E'?1:-1)*substr($llboundArr[3],0,strlen($llboundArr[3])-1);
-				if(is_numeric($uLat) && is_numeric($bLat) && is_numeric($lLng) && is_numeric($rLng)){
-					$sqlWhere .= 'AND (o.DecimalLatitude BETWEEN '.$bLat.' AND '.$uLat.' AND o.DecimalLongitude BETWEEN '.$lLng.' AND '.$rLng.') ';
-					$this->displaySearchArr[] = 'Lat: '.$llboundArr[1].' - '.$llboundArr[0].' Long: '.$llboundArr[2].' - '.$llboundArr[3];
-				}
+				$uLat = $llboundArr[0];
+				$bLat = $llboundArr[1];
+				$lLng = $llboundArr[2];
+				$rLng = $llboundArr[3];
+				$sqlWhere .= 'AND (o.DecimalLatitude BETWEEN '.$llboundArr[1].' AND '.$llboundArr[0].' AND o.DecimalLongitude BETWEEN '.$llboundArr[2].' AND '.$llboundArr[3].') ';
+				$this->displaySearchArr[] = 'Lat: '.$llboundArr[1].' - '.$llboundArr[0].' Long: '.$llboundArr[2].' - '.$llboundArr[3];
 			}
 		}
 		if(array_key_exists("llpoint",$this->searchTermArr)){
 			$pointArr = explode(";",$this->searchTermArr["llpoint"]);
 			if(count($pointArr) == 4){
-				//Formula approximates a bounding box; bounding box is for efficiency, will test practicality of doing a radius query in future
+				$lat = $pointArr[0];
+				$lng = $pointArr[1];
 				$radius = $pointArr[2];
 				if($pointArr[3] == 'km') $radius *= 0.6214;
+				/*
+				//Formula approximates a bounding box; bounding box is for efficiency, will test practicality of doing a radius query in future
 				$latRadius = $radius / 69.1;
 				$longRadius = cos($pointArr[0]/57.3)*($radius/69.1);
 				$lat1 = $pointArr[0] - $latRadius;
 				$lat2 = $pointArr[0] + $latRadius;
 				$long1 = $pointArr[1] - $longRadius;
 				$long2 = $pointArr[1] + $longRadius;
-				$sqlWhere .= "AND ((o.DecimalLatitude BETWEEN ".$lat1." AND ".$lat2.") AND ".
-					"(o.DecimalLongitude BETWEEN ".$long1." AND ".$long2.")) ";
+				$sqlWhere .= "AND ((o.DecimalLatitude BETWEEN ".$lat1." AND ".$lat2.") AND (o.DecimalLongitude BETWEEN ".$long1." AND ".$long2.")) ";
+				*/
+				$sqlWhere .= 'AND (( 3959 * acos( cos( radians('.$lat.') ) * cos( radians( o.DecimalLatitude ) ) * cos( radians( o.DecimalLongitude )'.
+					' - radians('.$lng.') ) + sin( radians('.$lat.') ) * sin(radians(o.DecimalLatitude)) ) ) < '.$radius.') ';
 			}
 			$this->displaySearchArr[] = $pointArr[0]." ".$pointArr[1]." +- ".$pointArr[2].$pointArr[3];
 		}
@@ -195,7 +200,7 @@ class OccurrenceManager extends TaxonSearchManager {
 							$tempInnerArr[] = '(o.recordedBy LIKE "%'.$this->cleanInStr($collV).'%")';
 						}
 						else{
-							$tempInnerArr[] = '(MATCH(f.recordedby) AGAINST("'.$this->cleanInStr($collV).'")) ';
+							$tempInnerArr[] = '(MATCH(f.recordedby) AGAINST("'.$this->cleanInStr(str_replace('"', '', $collV)).'")) ';
 						}
 					}
 					$tempArr[] = implode(' AND ', $tempInnerArr);
@@ -357,15 +362,13 @@ class OccurrenceManager extends TaxonSearchManager {
 				$this->displaySearchArr[] = $voucherManager->getQueryVariableStr();
 			}
 		}
-		$retStr = '';
 		if($sqlWhere){
-			$retStr = 'WHERE '.substr($sqlWhere,4);
+			$this->sqlWhere = 'WHERE '.substr($sqlWhere,4);
 		}
 		else{
 			//Make the sql valid, but return nothing
-			$retStr = 'WHERE o.occid IS NULL ';
+			$this->sqlWhere = 'WHERE o.occid IS NULL ';
 		}
-		return $retStr;
 	}
 
 	private function queryRecordID($idArr){
@@ -388,7 +391,7 @@ class OccurrenceManager extends TaxonSearchManager {
 
 	protected function getTableJoins($sqlWhere){
 		$sqlJoin = '';
-		if(array_key_exists('clid',$this->searchTermArr)) $sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+		if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']) $sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
 			$sqlJoin .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		}
@@ -1009,44 +1012,35 @@ class OccurrenceManager extends TaxonSearchManager {
 			$this->searchTermArr["targetclid"] = $_REQUEST["targetclid"];
 			$searchFieldsActivated = true;
 		}
+		$llPattern = '-?\d+\.{0,1}\d*';
 		if(array_key_exists("upperlat",$_REQUEST)){
 			$upperLat = ''; $bottomlat = ''; $leftLong = ''; $rightlong = '';
-			if(preg_match('/([-\d]+)([NSns]{0,1})/',$_REQUEST["upperlat"],$m1)){
-				$upperLat = $m1[1];
-				if(isset($m1[1]){
-					if((strtoupper($m1[1]) == 'N' && $upperLat < 0) || (strtoupper($m1[1]) == 'S' && $upperLat > 0)) $upperLat *= -1;
-				}
+			if(preg_match('/('.$llPattern.')/', $_REQUEST["upperlat"], $m1)){
+				$upperLat = round($m1[1],5);
+				$uLatDir = (isset($_REQUEST['upperlat_NS'])?strtoupper($_REQUEST['upperlat_NS']):'');
+				if(($uLatDir == 'N' && $upperLat < 0) || ($uLatDir == 'S' && $upperLat > 0)) $upperLat *= -1;
 			}
-			if(preg_match('/([-\d]+)([NSns]{0,1})/',$_REQUEST["bottomlat"],$m1)){
-				$bottomlat = $m1[1];
-				if(isset($m1[1]){
-					if((strtoupper($m1[1]) == 'N' && $bottomlat < 0) || (strtoupper($m1[1]) == 'S' && $bottomlat > 0)) $bottomlat *= -1;
-				}
-			}
-			if(preg_match('/([-\d]+)([EWew]{0,1})/',$_REQUEST["upperlat"],$m1)){
-				$leftLong = $m1[1];
-				if(isset($m1[1]){
-					if((strtoupper($m1[1]) == 'E' && $leftLong < 0) || (strtoupper($m1[1]) == 'W' && $leftLong > 0)) $leftLong *= -1;
-				}
-			}
-			if(preg_match('/([-\d]+)([EWew]{0,1})/',$_REQUEST["upperlat"],$m1)){
-				$upperLat = $m1[1];
-				if(isset($m1[1]){
-					if((strtoupper($m1[1]) == 'E' && $rightlong < 0) || (strtoupper($m1[1]) == 'W' && $rightlong > 0)) $rightlong *= -1;
-				}
-			}
-			if(is_numeric($upperLat) && is_numeric($bottomlat) && is_numeric($leftLong) && is_numeric($rightlong)){
-dagadsgsd
-				$uLatDir = (isset($_REQUEST['upperlat_NS'])?strtoupper($_REQUEST['upperlat_NS']):'N');
-				if($uLatDir != 'N' && $uLatDir != 'S') $uLatDir = 'N';
-				$bLatDir = (isset($_REQUEST['bottomlat_NS'])?strtoupper($_REQUEST['bottomlat_NS']):'N');
-				if($bLatDir!= 'N' && $bLatDir!= 'S') $bLatDir= 'N';
-				$lLngDir = (isset($_REQUEST['leftlong_EW'])?strtoupper($_REQUEST['leftlong_EW']):'W');
-				if($lLngDir!= 'W' && $lLngDir!= 'E') $lLngDir= 'W';
-				$rLngDir = (isset($_REQUEST['rightlong_EW'])?strtoupper($_REQUEST['rightlong_EW']):'W');
-				if($rLngDir!= 'W' && $rLngDir!= 'E') $rLngDir= 'W';
 
-				$latLongStr = $upperLat.$uLatDir.';'.$bottomlat.$bLatDir.';'.$leftLong.$lLngDir.';'.$rightlong.$rLngDir;
+			if(preg_match('/('.$llPattern.')/', $_REQUEST["bottomlat"], $m2)){
+				$bottomlat = round($m2[1],5);
+				$bLatDir = (isset($_REQUEST['bottomlat_NS'])?strtoupper($_REQUEST['bottomlat_NS']):'');
+				if(($bLatDir == 'N' && $bottomlat < 0) || ($bLatDir == 'S' && $bottomlat > 0)) $bottomlat *= -1;
+			}
+
+			if(preg_match('/('.$llPattern.')/', $_REQUEST['leftlong'], $m3)){
+				$leftLong = round($m3[1],5);
+				$lLngDir = (isset($_REQUEST['leftlong_EW'])?strtoupper($_REQUEST['leftlong_EW']):'');
+				if(($lLngDir == 'E' && $leftLong < 0) || ($lLngDir == 'W' && $leftLong > 0)) $leftLong *= -1;
+			}
+
+			if(preg_match('/('.$llPattern.')/', $_REQUEST['rightlong'], $m4)){
+				$rightlong = round($m4[1],5);
+				$rLngDir = (isset($_REQUEST['rightlong_EW'])?strtoupper($_REQUEST['rightlong_EW']):'');
+				if(($rLngDir == 'E' && $rightlong < 0) || ($rLngDir == 'W' && $rightlong > 0)) $rightlong *= -1;
+			}
+
+			if(is_numeric($upperLat) && is_numeric($bottomlat) && is_numeric($leftLong) && is_numeric($rightlong)){
+				$latLongStr = $upperLat.';'.$bottomlat.';'.$leftLong.';'.$rightlong;
 				$this->searchTermArr["llbound"] = $latLongStr;
 				$searchFieldsActivated = true;
 			}
@@ -1054,14 +1048,30 @@ dagadsgsd
 				unset($this->searchTermArr["llbound"]);
 			}
 		}
+		if(array_key_exists("llbound",$_REQUEST) && $_REQUEST['llbound']){
+			$this->searchTermArr["llbound"] = $this->cleanInStr($_REQUEST['llbound']);
+		}
 		if(array_key_exists("pointlat",$_REQUEST)){
-			$pointLat = filter_var($_REQUEST["pointlat"], FILTER_SANITIZE_NUMBER_FLOAT,FILTER_FLAG_ALLOW_FRACTION);
-			$pointLong = filter_var($_REQUEST["pointlong"], FILTER_SANITIZE_NUMBER_FLOAT,FILTER_FLAG_ALLOW_FRACTION);
-			$radius = filter_var($_REQUEST["radius"], FILTER_SANITIZE_NUMBER_INT);
-			if(is_numeric($pointLat) && is_numeric($pointLong) && is_numeric($radius)){
-				if(isset($_REQUEST['pointlat_NS']) && $_REQUEST['pointlat_NS'] == 'S') $pointLat *= -1;
-				if(!isset($_REQUEST['pointlong_EW']) || $_REQUEST['pointlong_EW'] == 'W') $pointLong *= -1;
-				$radiusUnits = $this->cleanInStr($_REQUEST['radiusunits']);
+			$pointLat = ''; $pointLong = ''; $radius = '';
+			if(preg_match('/('.$llPattern.')/', $_REQUEST['pointlat'], $m1)){
+				$pointLat = $m1[1];
+				if(isset($_REQUEST['pointlat_NS'])){
+					if($_REQUEST['pointlat_NS'] == 'S' && $pointLat > 0) $pointLat *= -1;
+					elseif($_REQUEST['pointlat_NS'] == 'N' && $pointLat < 0) $pointLat *= -1;
+				}
+			}
+			if(preg_match('/('.$llPattern.')/', $_REQUEST['pointlong'], $m2)){
+				$pointLong = $m2[1];
+				if(isset($_REQUEST['pointlong_EW'])){
+					if($_REQUEST['pointlong_EW'] == 'W' && $pointLong > 0) $pointLong *= -1;
+					elseif($_REQUEST['pointlong_EW'] == 'E' && $pointLong < 0) $pointLong *= -1;
+				}
+			}
+			if(preg_match('/(\d+)/', $_REQUEST['radius'], $m3)){
+				$radius = $m3[1];
+			}
+			if($pointLat && $pointLong && is_numeric($radius)){
+				$radiusUnits = (isset($_REQUEST['radiusunits'])?$this->cleanInStr($_REQUEST['radiusunits']):'mi');
 				$pointRadiusStr = $pointLat.';'.$pointLong.';'.$radius.';'.$radiusUnits;
 				$this->searchTermArr['llpoint'] = $pointRadiusStr;
 				$searchFieldsActivated = true;
@@ -1069,6 +1079,9 @@ dagadsgsd
 			else{
 				unset($this->searchTermArr["llpoint"]);
 			}
+		}
+		if(array_key_exists("llpoint",$_REQUEST) && $_REQUEST['llpoint']){
+			$this->searchTermArr["llpoint"] = $this->cleanInStr($_REQUEST['llpoint']);
 		}
 	}
 

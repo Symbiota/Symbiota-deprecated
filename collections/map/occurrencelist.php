@@ -6,6 +6,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1;
+$recLimit = (array_key_exists('recordlimit',$_REQUEST)&&is_numeric($_REQUEST['recordlimit'])?$_REQUEST['recordlimit']:15000);
 
 //Sanitation
 if(!is_numeric($cntPerPage)) $cntPerPage = 100;
@@ -13,33 +14,41 @@ if(!is_numeric($pageNumber)) $pageNumber = 1;
 
 $mapManager = new OccurrenceMapManager();
 $searchVar = $mapManager->getSearchTermStr();
-$occArr = $mapManager->getOccurrenceArr($pageNumber,$cntPerPage);
+$recCnt = $mapManager->getRecordCnt();
+$occArr = array();
+if(!$recLimit || $recCnt < $recLimit){
+	$occArr = $mapManager->getOccurrenceArr($pageNumber,$cntPerPage);
+}
 ?>
 <div id="queryrecordsdiv" style="">
 	<div style="height:25px;margin-top:-5px;">
 		<div>
 			<div style="float:left;">
-				<form action="csvoptions.php" method="post">
-					<button name="dlsubmit" type="submit">Download CSV file</button>
+				<form name="downloadForm" action="../download/index.php" method="post" target="_blank" style="float:left">
+					<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
+						<img src="../../images/dl2.png" style="width:15px" />
+					</button>
+					<input name="reclimit" id="reclimit" type="hidden" value="<?php echo $recLimit; ?>" />
+					<input name="sourcepage" type="hidden" value="map" />
+					<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
 					<input name="dltype" type="hidden" value="specimen" />
-					<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
 				</form>
-			</div>
-			<div style="float:right;">
-				<form name="fullquerykmlform" id="fullquerykmlform" action="kmlmanager.php" method="post" style="margin-bottom:0px;" onsubmit="">
-					<input data-role="none" name="selectionskml" id="selectionskml" type="hidden" value="" />
-					<input data-role="none" name="kmltype" id="kmltype" type="hidden" value="fullquery" />
-					<input data-role="none" name="kmlreclimit" id="kmlreclimit" type="hidden" value="<?php echo $recLimit; ?>" />
+				<form name="fullquerykmlform" action="kmlhandler.php" method="post" target="_blank" style="float:left;">
+					<input name="reclimit" id="reclimit" type="hidden" value="<?php echo $recLimit; ?>" />
+					<input name="sourcepage" type="hidden" value="map" />
 					<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
-					<button data-role="none" name="submitaction" type="button" onclick='prepSelectionKml(this.form);' >Download KML file</button>
+					<button name="submitaction" type="submit" class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="Download KML file">
+						<img src="../../images/dl2.png" style="width:15px" />KML
+					</button>
 				</form>
+				<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer;" onclick="copyUrl()" title="Copy URL to Clipboard"><img src="../../images/link2.png" style="width:15px" /></button>
 			</div>
 		</div>
 	</div>
 	<div>
 		<?php
 		$paginationStr = '<div><div style="clear:both;"><hr/></div><div style="margin:5px;">';
-		$lastPage = (int)($mapManager->getRecordCnt() / $cntPerPage) + 1;
+		$lastPage = (int)($recCnt / $cntPerPage) + 1;
 		$startPage = ($pageNumber > 5?$pageNumber - 5:1);
 		$endPage = ($lastPage > $startPage + 10?$startPage + 10:$lastPage);
 		$pageBar = '';
@@ -62,8 +71,8 @@ $occArr = $mapManager->getOccurrenceArr($pageNumber,$cntPerPage);
 		$pageBar .= '</div><div style="margin:5px;">';
 		$beginNum = ($pageNumber - 1)*$cntPerPage + 1;
 		$endNum = $beginNum + $cntPerPage - 1;
-		if($endNum > $mapManager->getRecordCnt()) $endNum = $mapManager->getRecordCnt();
-		$pageBar .= $LANG['PAGINATION_PAGE'].' '.$pageNumber.', '.$LANG['PAGINATION_RECORDS'].' '.$beginNum.'-'.$endNum.' '.$LANG['PAGINATION_OF'].' '.$mapManager->getRecordCnt();
+		if($endNum > $recCnt) $endNum = $recCnt;
+		$pageBar .= $LANG['PAGINATION_PAGE'].' '.$pageNumber.', '.$LANG['PAGINATION_RECORDS'].' '.$beginNum.'-'.$endNum.' '.$LANG['PAGINATION_OF'].' '.$recCnt;
 		$paginationStr .= $pageBar;
 		$paginationStr .= '</div><div style="clear:both;"><hr/></div></div>';
 		echo $paginationStr;
@@ -106,9 +115,16 @@ $occArr = $mapManager->getOccurrenceArr($pageNumber,$cntPerPage);
 			if($lastPage > $startPage) echo '<div style="">'.$paginationStr.'</div>';
 		}
 		else{
-			?>
-			<div style="font-weight:bold;font-size:120%;">No records found matching the query</div>
-			<?php
+			if($recCnt > $recLimit){
+				?>
+				<div style="font-weight:bold;font-size:120%;">Record count exceeds limit</div>
+				<?php
+			}
+			else{
+				?>
+				<div style="font-weight:bold;font-size:120%;">No records found matching the query</div>
+				<?php
+			}
 		}
 		?>
 	</div>

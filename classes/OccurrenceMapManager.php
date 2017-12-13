@@ -5,11 +5,10 @@ class OccurrenceMapManager extends OccurrenceManager {
 
 	private $recordCount = 0;
 	private $googleIconArr = Array();
-	private $sqlWhere;
 
-    public function __construct(){
-        parent::__construct();
-        $this->googleIconArr = array('pushpin/ylw-pushpin','pushpin/blue-pushpin','pushpin/grn-pushpin','pushpin/ltblu-pushpin',
+	public function __construct(){
+		parent::__construct();
+		$this->googleIconArr = array('pushpin/ylw-pushpin','pushpin/blue-pushpin','pushpin/grn-pushpin','pushpin/ltblu-pushpin',
 			'pushpin/pink-pushpin','pushpin/purple-pushpin', 'pushpin/red-pushpin','pushpin/wht-pushpin','paddle/blu-blank',
 			'paddle/grn-blank','paddle/ltblu-blank','paddle/pink-blank','paddle/wht-blank','paddle/blu-diamond','paddle/grn-diamond',
 			'paddle/ltblu-diamond','paddle/pink-diamond','paddle/ylw-diamond','paddle/wht-diamond','paddle/red-diamond','paddle/purple-diamond',
@@ -17,41 +16,44 @@ class OccurrenceMapManager extends OccurrenceManager {
 			'paddle/red-circle','paddle/purple-circle','paddle/blu-square','paddle/grn-square','paddle/ltblu-square','paddle/pink-square',
 			'paddle/ylw-square','paddle/wht-square','paddle/red-square','paddle/purple-square','paddle/blu-stars','paddle/grn-stars',
 			'paddle/ltblu-stars','paddle/pink-stars','paddle/ylw-stars','paddle/wht-stars','paddle/red-stars','paddle/purple-stars');
-        $this->readGeoRequestVariables();
-        $this->setGeoSqlWhere();
-        $this->setRecordCnt();
-    }
+		$this->readGeoRequestVariables();
+		$this->setGeoSqlWhere();
+		$this->setRecordCnt();
+	}
 
-    public function __destruct(){
-        parent::__destruct();
-    }
+	public function __destruct(){
+		parent::__destruct();
+	}
 
-    private function readGeoRequestVariables(){
-    	$this->readRequestVariables();
-    	if(array_key_exists("gridSizeSetting",$_REQUEST)){
-    		$this->searchTermArr["gridSizeSetting"] = $this->cleanInStr($_REQUEST["gridSizeSetting"]);
-    	}
-    	if(array_key_exists("minClusterSetting",$_REQUEST)){
-    		$this->searchTermArr["minClusterSetting"] = $this->cleanInStr($_REQUEST["minClusterSetting"]);
-    	}
-    	if(array_key_exists("clusterSwitch",$_REQUEST)){
-    		$this->searchTermArr["clusterSwitch"] = $this->cleanInStr($_REQUEST["clusterSwitch"]);
-    	}
-    	if(array_key_exists("recordlimit",$_REQUEST)){
-    		if(is_numeric($_REQUEST["recordlimit"])){
-    			$this->searchTermArr["recordlimit"] = $_REQUEST["recordlimit"];
-    		}
-    	}
-    	if(array_key_exists("poly_array",$_REQUEST)){
-    		$jsonPolyArr = $_REQUEST["poly_array"];
-    		if($jsonPolyArr){
-    			$this->searchTermArr["polycoords"] = substr(json_encode($jsonPolyArr),1,-1);
-    		}
-    	}
-    }
+	private function readGeoRequestVariables(){
+		if(array_key_exists("gridSizeSetting",$_REQUEST)){
+			$this->searchTermArr["gridSizeSetting"] = $this->cleanInStr($_REQUEST["gridSizeSetting"]);
+		}
+		if(array_key_exists("minClusterSetting",$_REQUEST)){
+			$this->searchTermArr["minClusterSetting"] = $this->cleanInStr($_REQUEST["minClusterSetting"]);
+		}
+		if(array_key_exists("clusterSwitch",$_REQUEST)){
+			$this->searchTermArr["clusterSwitch"] = $this->cleanInStr($_REQUEST["clusterSwitch"]);
+		}
+		if(array_key_exists("recordlimit",$_REQUEST)){
+			if(is_numeric($_REQUEST["recordlimit"])){
+				$this->searchTermArr["recordlimit"] = $_REQUEST["recordlimit"];
+			}
+		}
+		if(array_key_exists("poly_array",$_REQUEST)){
+			$jsonPolyArr = $_REQUEST["poly_array"];
+			if($jsonPolyArr){
+				//$this->searchTermArr["polycoords"] = substr(json_encode($jsonPolyArr),1,-1);
+				$this->searchTermArr["polycoords"] = $jsonPolyArr;
+			}
+		}
+		elseif(array_key_exists("polycoords",$_REQUEST)){
+			$this->searchTermArr["polycoords"] = $_REQUEST["polycoords"];
+		}
+	}
 
 	//Coordinate retrival function
-	public function getCoordinateMap($pageRequest = 0, $cntPerPage = 15000){
+	public function getCoordinateMap($start, $limit){
 		$coordArr = Array();
 		if($this->sqlWhere){
 			$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
@@ -60,8 +62,8 @@ class OccurrenceMapManager extends OccurrenceManager {
 				'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
 			$sql .= $this->getTableJoins($this->sqlWhere);
 			$sql .= $this->sqlWhere;
-			if($pageRequest && $cntPerPage){
-				$sql .= "LIMIT ".$pageRequest.",".$cntPerPage;
+			if(is_numeric($start) && $limit){
+				$sql .= "LIMIT ".$start.",".$limit;
 			}
 			//echo "<div>SQL: ".$sql."</div>";
 			$result = $this->conn->query($sql);
@@ -147,59 +149,6 @@ class OccurrenceMapManager extends OccurrenceManager {
 		return $this->recordCount;
 	}
 
-	//Funtion might be removed
-	public function getSelectionGeoCoords($seloccids){
-		//Set collection
-		$collArr = Array();
-		$sql = 'SELECT c.CollID, c.CollectionName FROM omcollections AS c ';
-		if($this->searchTermArr['db'] && $this->searchTermArr['db'] != 'all'){
-			$dbArr = explode(';',$this->searchTermArr["db"]);
-			$sql .= 'WHERE (c.collid IN('.$dbArr[0].')) ';
-		}
-		$sql .= 'ORDER BY c.CollectionName ';
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$collArr[$row->CollectionName] = Array();
-		}
-		$result->free();
-		//Set coordinates
-		$coordArr = Array();
-		if(preg_match('#\[(.*?)\]#', $seloccids, $match)){
-			$seloccids = $match[1];
-			$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
-				'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, '.
-				'o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, c.CollectionName '.
-				'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid '.
-				'WHERE o.occid IN('.$seloccids.') ';
-			$collMapper = Array('undefined'=>'undefined');
-			foreach($collArr as $key => $valueArr){
-				$color = 'e69e67';
-				$coordArr[$key] = Array("color" => $color);
-				$collMapper[$key] = $key;
-			}
-			//echo "<div>SQL: ".$sql."</div>";
-			$result = $this->conn->query($sql);
-			while($row = $result->fetch_object()){
-				$occId = $row->occid;
-				$collName = $row->CollectionName;
-				if(!array_key_exists($collName,$collMapper)) $collName = "undefined";
-				$coordArr[$collMapper[$collName]][$occId]["latLngStr"] = $row->DecimalLatitude.",".$row->DecimalLongitude;
-				$coordArr[$collMapper[$collName]][$occId]["collid"] = $this->htmlEntities($row->collid);
-				$coordArr[$collMapper[$collName]][$occId]["tidinterpreted"] = $this->htmlEntities($row->tidinterpreted);
-				$coordArr[$collMapper[$collName]][$occId]["identifier"] = $this->htmlEntities($row->identifier);
-				$coordArr[$collMapper[$collName]][$occId]["institutioncode"] = $this->htmlEntities($row->institutioncode);
-				$coordArr[$collMapper[$collName]][$occId]["collectioncode"] = $this->htmlEntities($row->collectioncode);
-				$coordArr[$collMapper[$collName]][$occId]["catalognumber"] = $this->htmlEntities($row->catalognumber);
-				$coordArr[$collMapper[$collName]][$occId]["othercatalognumbers"] = $this->htmlEntities($row->othercatalognumbers);
-			}
-			if(array_key_exists("undefined",$coordArr)){
-				$coordArr["undefined"]["color"] = $color;
-			}
-			$result->free();
-		}
-		return $coordArr;
-	}
-
 	//SQL where functions
 	private function setGeoSqlWhere(){
 		global $USER_RIGHTS;
@@ -230,7 +179,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 				$sqlWhere .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
 			}
 			$this->sqlWhere = $this->getSqlWhere().$sqlWhere;
-			echo '<div style="margin-left:10px">sql: '.$this->sqlWhere.'</div>'; exit;
+			//echo '<div style="margin-left:10px">sql: '.$this->sqlWhere.'</div>'; exit;
 		}
 	}
 
@@ -257,36 +206,36 @@ class OccurrenceMapManager extends OccurrenceManager {
 						<input id="cat<?php echo $idStr; ?>Input" data-role="none" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" <?php echo ((in_array($catid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
 					</td>
 					<td>
-			    		<span style='text-decoration:none;color:black;font-size:14px;font-weight:bold;'>
-				    		<a href = '../misc/collprofiles.php?catid=<?php echo $catid; ?>' target="_blank" ><?php echo $name; ?></a>
-				    	</span>
+						<span style='text-decoration:none;color:black;font-size:14px;font-weight:bold;'>
+							<a href = '../misc/collprofiles.php?catid=<?php echo $catid; ?>' target="_blank" ><?php echo $name; ?></a>
+						</span>
 					</td>
 				</tr>
 				<tr>
 					<td colspan="3">
 						<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px 0px;">
 							<table style="margin-left:15px;">
-						    	<?php
+								<?php
 								foreach($catArr as $collid => $collName2){
-						    		?>
-						    		<tr>
+									?>
+									<tr>
 										<td style="padding:6px">
-								    		<input name="db[]" value="<?php echo $collid; ?>" data-role="none" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
+											<input name="db[]" value="<?php echo $collid; ?>" data-role="none" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
 										</td>
 										<td style="padding:6px">
-								    		<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
-								    			<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
-								    		</a>
-								    		<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
-								    			more info
-								    		</a>
+											<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
+												<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
+											</a>
+											<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
+												more info
+											</a>
 										</td>
 									</tr>
-						    		<?php
-					    			$collCnt++;
-						    	}
-						    	?>
-						    </table>
+									<?php
+									$collCnt++;
+								}
+								?>
+							</table>
 						</div>
 					</td>
 				</tr>
@@ -305,16 +254,16 @@ class OccurrenceMapManager extends OccurrenceManager {
 				?>
 				<tr>
 					<td style="padding:6px;">
-			    		<input name="db[]" value="<?php echo $collid; ?>" data-role="none" type="checkbox" onclick="uncheckAll(this.form)" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
+						<input name="db[]" value="<?php echo $collid; ?>" data-role="none" type="checkbox" onclick="uncheckAll(this.form)" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
 					</td>
 					<td style="padding:6px">
-			    		<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
-			    			<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
-			    		</a>
-			    		<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
-			    			more info
-			    		</a>
-				    </td>
+						<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
+							<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
+						</a>
+						<a href = '../misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
+							more info
+						</a>
+					</td>
 				</tr>
 				<?php
 				$collCnt++;
@@ -476,7 +425,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 	}
 
 	//Garmin functions
-    public function getGpxText($seloccids){
+	public function getGpxText($seloccids){
 		global $DEFAULT_TITLE;
 		$seloccids = preg_match('#\[(.*?)\]#', $seloccids, $match);
 		$seloccids = $match[1];
@@ -484,12 +433,12 @@ class OccurrenceMapManager extends OccurrenceManager {
 		$gpxText = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>';
 		$gpxText .= '<gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="mymy">';
 		$sql = "";
-        $sql = 'SELECT o.occid, o.basisOfRecord, c.institutioncode, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, '.
+		$sql = 'SELECT o.occid, o.basisOfRecord, c.institutioncode, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, '.
 			'o.eventdate, o.family, o.sciname, o.locality, o.DecimalLatitude, o.DecimalLongitude '.
 			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
 		$sql .= 'WHERE o.occid IN('.$seloccids.') ';
-        //echo "<div>".$sql."</div>";
-        $result = $this->conn->query($sql);
+		//echo "<div>".$sql."</div>";
+		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$comment = $row->institutioncode.($row->catalognumber?': '.$row->catalognumber.'. ':'. ');
 			$comment .= $row->collector.'. '.$row->eventdate.'. Locality: '.$row->locality.' (occid: '.$row->occid.')';
@@ -501,7 +450,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 		}
 		$gpxText .= '</gpx>';
 
-        return $gpxText;
+		return $gpxText;
 	}
 
 	//Dataset functions
@@ -537,7 +486,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 	public function getPersonalRecordsets($uid){
 		$retArr = Array();
 		$sql = "";
-        //Get datasets owned by user
+		//Get datasets owned by user
 		$sql = 'SELECT datasetid, name '.
 			'FROM omoccurdatasets '.
 			'WHERE (uid = '.$uid.') '.
@@ -560,7 +509,6 @@ class OccurrenceMapManager extends OccurrenceManager {
 		}
 		$rs->free();
 		return $retArr;
-		//return $sql;
 	}
 
 	//Misc functions
