@@ -1,5 +1,5 @@
 <?php
-include_once('../config/symbini.php');
+include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
 include_once($SERVER_ROOT.'/classes/MappingShared.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
@@ -37,14 +37,14 @@ $sharedMapManager->setTaxaArr($tArr);
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> - Google Map</title>
-	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script src="//www.google.com/jsapi"></script>
 	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
-	<script type="text/javascript" src="../js/symb/markerclusterer.js?ver=260913"></script>
-	<script type="text/javascript" src="../js/symb/oms.min.js"></script>
-	<script type="text/javascript" src="../js/symb/keydragzoom.js"></script>
+	<script type="text/javascript" src="../../js/symb/markerclusterer.js?ver=260913"></script>
+	<script type="text/javascript" src="../../js/symb/oms.min.js"></script>
+	<script type="text/javascript" src="../../js/symb/keydragzoom.js"></script>
 	<script type="text/javascript">
 		var map = null;
 		var markerClusterer = null;
@@ -89,7 +89,7 @@ $sharedMapManager->setTaxaArr($tArr);
 				visualPosition: google.maps.ControlPosition.LEFT,
 				visualPositionOffset: new google.maps.Size(35, 0),
 				visualPositionIndex: null,
-				visualSprite: "../images/dragzoom_btn.png",
+				visualSprite: "../../images/dragzoom_btn.png",
 				visualSize: new google.maps.Size(20, 20),
 				visualTips: {
 					off: "Turn on",
@@ -206,7 +206,7 @@ $sharedMapManager->setTaxaArr($tArr);
 		}
 
 		function openIndPU(occId,clid){
-			newWindow = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=0,resizable=1,width=1100,height=800,left=20,top=20');
+			newWindow = window.open('../individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=0,resizable=1,width=1100,height=800,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			setTimeout(function () { newWindow.focus(); }, 0.5);
 		}
@@ -265,7 +265,7 @@ $sharedMapManager->setTaxaArr($tArr);
                     if(lng > 0) addPoint = window.confirm("Longitude is positive, which will put the marker in the eastern hemisphere (e.g. Asia).\nIs this what you want?");
                     if(!addPoint) lng = -1*lng;
 
-                    var iconImg = new google.maps.MarkerImage( '../images/google/arrow.png' );
+                    var iconImg = new google.maps.MarkerImage( '../../images/google/arrow.png' );
 
                     var m = new google.maps.Marker({
                         position: new google.maps.LatLng(lat,lng),

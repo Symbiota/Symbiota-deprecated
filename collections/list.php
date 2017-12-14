@@ -308,7 +308,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			<div style='margin-top:10px;'>
 				<h2><?php echo $LANG['GOOGLE_EARTH_HEADER']; ?></h2>
 			</div>
-			<form name="kmlform" action="../map/googlekml.php" method="post" onsubmit="">
+			<form name="kmlform" action="map/googlekml.php" method="post" onsubmit="">
 				<div style='margin:10 0 0 20;'>
 					<?php echo $LANG['GOOGLE_EARTH_DESCRIPTION'];?>
 				</div>

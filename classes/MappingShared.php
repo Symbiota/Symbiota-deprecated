@@ -2,7 +2,7 @@
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class MappingShared{
-	
+
 	private $iconColors = Array();
 	private $googleIconArr = Array();
 	private $taxaArr = Array();
@@ -25,7 +25,7 @@ class MappingShared{
 	public function __destruct(){
  		if(!($this->conn === false)) $this->conn->close();
 	}
-	
+
     public function getGenObsInfo(){
 		$retVar = '';
 		$sql = 'SELECT collid '.
@@ -39,7 +39,7 @@ class MappingShared{
 		}
 		return $retVar;
 	}
-	
+
 	public function getGeoCoords($mapWhere,$limit=1000,$includeDescr=false){
 		global $USER_RIGHTS;
 		$coordArr = Array();
@@ -115,7 +115,7 @@ class MappingShared{
 						$sciName = $family;
 					}
 				}
-				if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
+				if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined";
 				$coordArr[$taxaMapper[$sciName]][$occId]["collid"] = $row->collid;
 				$coordArr[$taxaMapper[$sciName]][$occId]["latLngStr"] = $latLngStr;
 				$coordArr[$taxaMapper[$sciName]][$occId]["identifier"] = $row->identifier;
@@ -138,13 +138,13 @@ class MappingShared{
 			$coordArr["undefined"]["color"] = $this->iconColors[7];
 		}
 		$result->free();
-		
+
 		return $coordArr;
 		//return $sql;
 	}
-	
+
     public function writeKMLFile($coordArr){
-    	global $DEFAULT_TITLE, $USER_RIGHTS, $CLIENT_ROOT, $charset;
+    	global $DEFAULT_TITLE, $USER_RIGHTS, $CLIENT_ROOT, $CHARSET;
 		$fileName = $DEFAULT_TITLE;
 		if($fileName){
 			if(strlen($fileName) > 10) $fileName = substr($fileName,0,10);
@@ -157,18 +157,18 @@ class MappingShared{
 		$fileName .= time().".kml";
     	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-type: application/vnd.google-earth.kml+xml');
-		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
-		echo "<?xml version='1.0' encoding='".$charset."'?>\n";
+		header ("Content-Disposition: attachment; filename=\"$fileName\"");
+		echo "<?xml version='1.0' encoding='".$CHARSET."'?>\n";
         echo "<kml xmlns='http://www.opengis.net/kml/2.2'>\n";
         echo "<Document>\n";
 		echo "<Folder>\n<name>".$DEFAULT_TITLE." Specimens - ".date('j F Y g:ia')."</name>\n";
-        
+
 		$cnt = 0;
 		foreach($coordArr as $sciName => $contentArr){
 			$iconStr = $this->googleIconArr[$cnt%44];
 			$cnt++;
 			unset($contentArr["color"]);
-			
+
 			echo "<Style id='sn_".$iconStr."'>\n";
             echo "<IconStyle><scale>1.1</scale><Icon>";
 			echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
@@ -209,16 +209,16 @@ class MappingShared{
 		echo "</Document>\n";
 		echo "</kml>\n";
     }
-	
+
 	private function xmlentities($string){
 		return str_replace(array ('&','"',"'",'<','>','?'),array ('&amp;','&quot;','&apos;','&lt;','&gt;','&apos;'),$string);
 	}
-	
+
     //Setters and getters
     public function setTaxaArr($tArr){
     	$this->taxaArr = $tArr;
     }
-	
+
 	public function setFieldArr($fArr){
     	$this->fieldArr = $fArr;
     }
