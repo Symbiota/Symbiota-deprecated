@@ -74,24 +74,24 @@ class OccurrenceMapManager extends OccurrenceManager {
 					$collName = $row->CollectionName;
 					$tidInterpreted = $this->htmlEntities($row->tidinterpreted);
 					$latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
-					$coordArr[$collName][$occId]["latLngStr"] = $latLngStr;
+					$coordArr[$collName][$occId]["llStr"] = $latLngStr;
 					$coordArr[$collName][$occId]["collid"] = $this->htmlEntities($row->collid);
-					$tidcode = strtolower(str_replace( " ", "",$tidInterpreted.$row->sciname));
-					$tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
-					$coordArr[$collName][$occId]["namestring"] = $this->htmlEntities($tidcode);
-					$coordArr[$collName][$occId]["tidinterpreted"] = $tidInterpreted;
-					$coordArr[$collName][$occId]["family"] = ($row->family?strtoupper($row->family):'undefined');
-					$coordArr[$collName][$occId]["sciname"] = $row->sciname;
-					$coordArr[$collName][$occId]["identifier"] = $this->htmlEntities($row->identifier);
-					$coordArr[$collName][$occId]["institutioncode"] = $this->htmlEntities($row->institutioncode);
-					$coordArr[$collName][$occId]["collectioncode"] = $this->htmlEntities($row->collectioncode);
-					$coordArr[$collName][$occId]["catalognumber"] = $this->htmlEntities($row->catalognumber);
-					$coordArr[$collName][$occId]["othercatalognumbers"] = $this->htmlEntities($row->othercatalognumbers);
-					$coordArr[$collName]["color"] = $color;
+					//$tidcode = strtolower(str_replace(" ", "",$tidInterpreted.$row->sciname));
+					//$tidcode = preg_replace( "/[^A-Za-z0-9 ]/","",$tidcode);
+					//$coordArr[$collName][$occId]["ns"] = $this->htmlEntities($tidcode);
+					$coordArr[$collName][$occId]["tid"] = $tidInterpreted;
+					$coordArr[$collName][$occId]["fam"] = ($row->family?strtoupper($row->family):'undefined');
+					$coordArr[$collName][$occId]["sn"] = $row->sciname;
+					$coordArr[$collName][$occId]["id"] = $this->htmlEntities($row->identifier);
+					//$coordArr[$collName][$occId]["icode"] = $this->htmlEntities($row->institutioncode);
+					//$coordArr[$collName][$occId]["ccode"] = $this->htmlEntities($row->collectioncode);
+					//$coordArr[$collName][$occId]["cn"] = $this->htmlEntities($row->catalognumber);
+					//$coordArr[$collName][$occId]["ocn"] = $this->htmlEntities($row->othercatalognumbers);
+					$coordArr[$collName]["c"] = $color;
 				}
 			}
 			if(array_key_exists("undefined",$coordArr)){
-				$coordArr["undefined"]["color"] = $color;
+				$coordArr["undefined"]["c"] = $color;
 			}
 			$result->free();
 		}

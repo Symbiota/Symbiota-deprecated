@@ -90,7 +90,7 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 	<script type="text/javascript" src="../../js/jquery-1.9.1.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui-1.10.4.js"></script>
 	<script type="text/javascript" src="../../js/jquery.popupoverlay.js"></script>
-	<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+	<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>" ></script>
 	<script type="text/javascript" src="../../js/jscolor/jscolor.js?ver=4"></script>
 	<script type="text/javascript" src="../../js/symb/collections.map.index.js?1712082"></script>
 	<script type="text/javascript" src="../../js/symb/markerclusterer.js?20170403"></script>
@@ -122,7 +122,6 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 		var clid = '<?php echo ($mapManager->getSearchTerm('clid')?$mapManager->getSearchTerm('clid'):0); ?>';
 		var clusterOff = '<?php echo $clusterOff; ?>';
 		var obsIDs = JSON.parse('<?php echo json_encode($obsIDs); ?>');
-		var finderArr = [];
 		var grpArr = [];
 		var markerArr = [];
 		var tidArr = [];
@@ -470,8 +469,9 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 
 		function processPoints(pArr){
 			var fndGrps = [];
+			var finderArr = [];
 			for(var key in pArr) {
-				var iconColor = pArr[key]['color'];
+				var iconColor = pArr[key]['c'];
 				var tempGcntArr = [];
 				var fndGrpCnt = 0;
 				if(!finderArr[key]){
@@ -483,13 +483,15 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 					fndGrpCnt = finderArr[key];
 				}
 				fndGrps.push(fndGrpCnt);
-				delete pArr[key]['color'];
+				delete pArr[key]['c'];
 				for(var occ in pArr[key]) {
 					if(occArr.indexOf(occ) < 0){
 						var family = '';
-						var tidinterpreted = pArr[key][occ]['tidinterpreted'];
-						var sciname = pArr[key][occ]['sciname'];
-						var scinameStr = pArr[key][occ]['namestring'];
+						var tidinterpreted = pArr[key][occ]['tid'];
+						var sciname = pArr[key][occ]['sn'];
+						//var scinameStr = pArr[key][occ]['ns'];
+						var scinameStr = tidinterpreted+sciname;
+						scinameStr = scinameStr.replace(" ", "").toLowerCase();
 						var tempArr = [];
 						var tempArr = [];
 						if (tidArr[scinameStr]) {
@@ -499,13 +501,13 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 						}
 						tempArr.push(grpCnt);
 						tidArr[scinameStr] = tempArr;
-						if (pArr[key][occ]['sciname']) {
-							sciname = pArr[key][occ]['sciname'];
+						if (pArr[key][occ]['sn']) {
+							sciname = pArr[key][occ]['sn'];
 						}
 						if (sciname) {
 							var tempFamArr = [];
 							var tempScinameArr = [];
-							family = pArr[key][occ]['family'];
+							family = pArr[key][occ]['fam'];
 							if ((familyNameArr.indexOf(family) < 0) && (family != 'undefined')) {
 								familyNameArr.push(family);
 							}
@@ -522,11 +524,11 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 							taxaArr[family] = tempFamArr;
 							taxaArr[family]['sciname_arr'] = tempScinameArr;
 							buildTaxaKeyPiece(scinameStr, tidinterpreted, sciname);
-							var llArr = pArr[key][occ]['latLngStr'].split(',');
+							var llArr = pArr[key][occ]['llStr'].split(',');
 							var spStr = '';
-							var titleStr = pArr[key][occ]['latLngStr'];
+							var titleStr = pArr[key][occ]['llStr'];
 							var type = '';
-							var displayStr = pArr[key][occ]['identifier'];
+							var displayStr = pArr[key][occ]['id'];
 							var iconColorStr = '#' + iconColor;
 							if (obsIDs.indexOf(pArr[key][occ]['collid']) > -1) {
 								type = 'obs';
@@ -613,29 +615,6 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 				clid: clid
 			});
 			return m;
-		}
-
-		function appendPointArr(index){
-			//console.log('rpc/maplazyloader.php?starr='+starr+'&index='+index+'&reccnt=<?php echo $recordCnt; ?>');
-			recordsFound = false;
-			$.ajax({
-				type: "POST",
-				url: "rpc/maplazyloader.php",
-				async: false,
-				data: {
-					starr: starr,
-					reccnt: <?php echo $recordCnt; ?>,
-					index: index
-				}
-			}).done(function(msg) {
-				if(msg){
-					jsonRecReturn = msg;
-					recordsFound = true;
-				}
-				else{
-					return;
-				}
-			});
 		}
 
 		function afterEffects(){
