@@ -5,6 +5,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 
 	private $recordCount = 0;
 	private $googleIconArr = Array();
+	private $collArrIndex = 0;
 
 	public function __construct(){
 		parent::__construct();
