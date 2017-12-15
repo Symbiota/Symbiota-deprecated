@@ -4,13 +4,14 @@ include_once($SERVER_ROOT.'/content/lang/taxa/index.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfile.php');
 Header("Content-Type: text/html; charset=".$CHARSET);
 
-$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
+$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:"";
-$taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1; 
+$taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0;
 $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$DEFAULT_LANG;
-$descrDisplayLevel = array_key_exists("displaylevel",$_REQUEST)?$_REQUEST["displaylevel"]:"";
+$taxaLimit = array_key_exists("taxalimit",$_REQUEST)?$_REQUEST["taxalimit"]:50;
+$page = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:0;
 
 $taxonManager = new TaxonProfile();
 if($taxAuthId) $taxonManager->setTaxAuthId($taxAuthId);
@@ -65,11 +66,6 @@ $descr = Array();
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
-	<script type="text/javascript">
-		var currentLevel = <?php echo ($descrDisplayLevel?$descrDisplayLevel:"1"); ?>;
-		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
-		var tid = <?php echo $taxonManager->getTid(); ?>
-	</script>
 	<script src="../js/symb/taxa.index.js?ver=20170302" type="text/javascript"></script>
 	<script src="../js/symb/taxa.editor.js?ver=20140619" type="text/javascript"></script>
 </head>
@@ -79,7 +75,7 @@ $displayLeftMenu = false;
 include($SERVER_ROOT.'/header.php');
 ?>
 <table id="innertable">
-<?php 
+<?php
 if($taxonManager->getSciName() != "unknown"){
 	$taxonRank = $taxonManager->getRankId();
 	if($taxonRank > 180){
@@ -89,14 +85,14 @@ if($taxonManager->getSciName() != "unknown"){
 			<div style='float:left;font-size:16px;margin-left:10px;'>
 				<span style='font-weight:bold;color:#990000;'>
 					<i><?php echo $taxonManager->getSciName(); ?></i>
-				</span> 
+				</span>
 				<?php echo $taxonManager->getAuthor(); ?>
-				<?php 
+				<?php
 				$parentLink = "index.php?tid=".$taxonManager->getParentTid()."&clid=".$clid."&pid=".$pid."&taxauthid=".$taxAuthId;
 				echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.png' title='Go to Parent' /></a>";
 			 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
 			 	if(!$taxonManager->isAccepted()){
-			 		echo '<span style="font-size:90%;margin-left:25px;"> ('.$LANG['REDIRECT'].': <i>'.$taxonManager->getSubmittedValue('sciname').'</i>'.$taxonManager->getSubmittedValue('author').')</span>'; 
+			 		echo '<span style="font-size:90%;margin-left:25px;"> ('.(isset($LANG['REDIRECT'])?$LANG['REDIRECT']:'redirected from').': <i>'.$taxonManager->getSubmittedValue('sciname').'</i>'.$taxonManager->getSubmittedValue('author').')</span>';
 			 	}
 			 	?>
 			</div>
@@ -124,19 +120,19 @@ if($taxonManager->getSciName() != "unknown"){
 			if($isEditor){
 				?>
 				<div style="float:right;">
-					<a href="profile/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" <?php echo 'title="'.$LANG['EDIT_TAXON_DATA'].'"'; ?>>
+					<a href="profile/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" <?php echo 'title="'.(isset($LANG['EDIT_TAXON_DATA'])?$LANG['EDIT_TAXON_DATA']:'Edit Taxon Data').'"'; ?>>
 						<img style='border:0px;' src='../images/edit.png'/>
 					</a>
 				</div>
-				<?php 
+				<?php
 			}
 			if($links && $links[0]['sortseq'] == 1){
 				$uStr = str_replace('--SCINAME--',rawurlencode($taxonManager->getSciName()),$links[0]['url']);
 				?>
 				<div style="margin-left:25px;clear:both;">
-					<?php echo $LANG['GO_TO']; ?> <a href="<?php echo $uStr; ?>" target="_blank"><?php echo $links[0]['title']; ?></a>...
+					<?php echo (isset($LANG['GO_TO'])?$LANG['GO_TO']:'Go to'); ?> <a href="<?php echo $uStr; ?>" target="_blank"><?php echo $links[0]['title']; ?></a>...
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 			</td>
@@ -144,9 +140,9 @@ if($taxonManager->getSciName() != "unknown"){
 		<tr>
 			<td width="300" valign="top">
 				<div id="family" style="margin-left:25px;">
-					<?php echo '<b>'.$LANG['FAMILY'].':</b> '.$taxonManager->getFamily(); ?> 
+					<?php echo '<b>'.(isset($LANG['FAMILY'])?$LANG['FAMILY']:'Family').':</b> '.$taxonManager->getFamily(); ?>
 				</div>
-				<?php 
+				<?php
 				if($vernArr = $taxonManager->getVernaculars()){
 					$primerArr = array();
 					if(array_key_exists($DEFAULT_LANG, $vernArr)){
@@ -170,9 +166,9 @@ if($taxonManager->getSciName() != "unknown"){
 					<div id="vernaculars" style="margin-left:10px;margin-top:0.5em;font-size:130%;">
 						<?php echo $vernStr; ?>
 					</div>
-					<?php 
+					<?php
 				}
-				
+
 				if($synArr = $taxonManager->getSynonymArr()){
 					$primerArr = array_shift($synArr);
 					$synStr = '<i>'.$primerArr['sciname'].'</i>'.(isset($primerArr['author']) && $primerArr['author']?' '.$primerArr['author']:'');
@@ -184,25 +180,25 @@ if($taxonManager->getSciName() != "unknown"){
 						}
 						$synStr .= '</span>';
 					}
-					echo '<div id="synonyms" style="margin-left:20px;margin-top:0.5em;" title="'.$LANG['SYNONYMS'].'">[';
+					echo '<div id="synonyms" style="margin-left:20px;margin-top:0.5em;" title="'.(isset($LANG['SYNONYMS'])?$LANG['SYNONYMS']:'Synonyms').'">[';
 					echo $synStr;
 					echo ']</div>';
 				}
-				
+
 				if(!$taxonManager->echoImages(0,1,0)){
 					echo '<div class="image" style="width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;">';
 					if($isEditor){
-						echo '<a href="profile/tpeditor.php?category=imageadd&tid='.$taxonManager->getTid().'"><b>'.$LANG['ADD_IMAGE'].'</b></a>';
+						echo '<a href="profile/tpeditor.php?category=imageadd&tid='.$taxonManager->getTid().'"><b>'.(isset($LANG['ADD_IMAGE'])?$LANG['ADD_IMAGE']:'Add an Image').'</b></a>';
 					}
 					else{
-						echo $LANG['IMAGE_NOT_AVAILABLE'];
+						echo (isset($LANG['IMAGE_NOT_AVAILABLE'])?$LANG['IMAGE_NOT_AVAILABLE']:'Images<br/>not available');
 					}
 					echo '</div>';
 				}
 				?>
 			</td>
 			<td class="desc">
-				<?php 
+				<?php
 				echo $taxonManager->getDescriptionStr();
 				?>
 			</td>
@@ -210,7 +206,7 @@ if($taxonManager->getSciName() != "unknown"){
 		<tr>
 			<td colspan="2">
 				<div id="img-div" style="height:300px;overflow:hidden;">
-					<?php 
+					<?php
 					//Map
 					$url = ''; $aUrl = ''; $gAnchor = '';
 					if($occurrenceModIsActive && $displayLocality){
@@ -233,34 +229,42 @@ if($taxonManager->getSciName() != "unknown"){
 						}
 						echo '<img src="'.$url.'" title="'.$taxonManager->getSciName().'" alt="'.$taxonManager->getSciName().'" />';
 						if($aUrl || $gAnchor) echo '</a>';
-						if($gAnchor) echo '<br /><a href="#" onclick="'.$gAnchor.';return false">'.$LANG['OPEN_MAP'].'</a>';
+						if($gAnchor) echo '<br /><a href="#" onclick="'.$gAnchor.';return false">'.(isset($LANG['OPEN_MAP'])?$LANG['OPEN_MAP']:'Open Interactive Map').'</a>';
 						echo "</div>";
 					}
 					$taxonManager->echoImages(1);
 					?>
 				</div>
-				<div id="img-tab-div" style="display:<?php echo $taxonManager->getImageCount()> 6?'block':'none';?>;border-top:2px solid gray;margin-top:2px;">
-					<div style="background:#eee;padding:10px;border: 1px solid #ccc;width:100px;margin:auto;text-align:center">
+				<?php
+				$imgCnt = $taxonManager->getImageCount();
+				$tabText = (isset($LANG['TOTAL_IMAGES'])?$LANG['TOTAL_IMAGES']:'Total Images');
+				if($imgCnt == 100){
+					$tabText = (isset($LANG['INITIAL_IMAGES'])?$LANG['INITIAL_IMAGES']:'Initial Images').'<br/>- - - - -<br/>';
+					$tabText .= '<a href="'.$CLIENT_ROOT.'/imagelib/search.php?submitaction=Load+Images&taxa='.$tid.'">'.(isset($LANG['VIEW_ALL_IMAGES'])?$LANG['VIEW_ALL_IMAGES']:'View All Images').'</a>';
+				}
+				?>
+				<div id="img-tab-div" style="display:<?php echo $imgCnt > 6?'block':'none';?>;border-top:2px solid gray;margin-top:2px;">
+					<div style="background:#eee;padding:10px;border: 1px solid #ccc;width:110px;margin:auto;text-align:center">
 						<a href="#" onclick="expandExtraImages();return false;">
-							<?php echo $LANG['CLICK_TO_DISPLAY'].'<br/>'.$taxonManager->getImageCount().' '.$LANG['TOTAL_IMAGES']; ?>
+							<?php echo (isset($LANG['CLICK_TO_DISPLAY'])?$LANG['CLICK_TO_DISPLAY']:'Click to Display').'<br/>'.$imgCnt.' '.$tabText; ?>
 						</a>
 					</div>
 				</div>
 			</td>
 		</tr>
-		<?php 
+		<?php
 	}
 	else{
 		?>
 		<tr>
 			<td style="width:250px;vertical-align:top;">
-				<?php 
+				<?php
 				$displayName = $taxonManager->getSciName();
 				if($taxonRank == 180) $displayName = '<i>'.$displayName.'</i> spp. ';
 				if($taxonRank > 140){
 					$parentLink = "index.php?tid=".$taxonManager->getParentTid()."&clid=".$clid."&pid=".$pid."&taxauthid=".$taxAuthId;
 					$displayName .= ' <a href="'.$parentLink.'">';
-					$displayName .= '<img border="0" height="10px" src="../images/toparent.png" title="'.$LANG['GO_TO_PARENT'].'" />';
+					$displayName .= '<img border="0" height="10px" src="../images/toparent.png" title="'.(isset($LANG['GO_TO_PARENT'])?$LANG['GO_TO_PARENT']:'Go to Parent').'" />';
 					$displayName .= '</a>';
 				}
 				echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
@@ -269,49 +273,55 @@ if($taxonManager->getSciName() != "unknown"){
 				if(!$taxonManager->echoImages(0,1,0)){
 					echo "<div class='image' style='width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;'>";
 					if($isEditor){
-						echo '<a href="profile/tpeditor.php?category=imageadd&tid='.$taxonManager->getTid().'"><b>'.$LANG['ADD_IMAGE'].'</b></a>';
+						echo '<a href="profile/tpeditor.php?category=imageadd&tid='.$taxonManager->getTid().'"><b>'.(isset($LANG['ADD_IMAGE'])?$LANG['ADD_IMAGE']:'Add an Image').'</b></a>';
 					}
 					else{
-						echo $LANG['IMAGE_NOT_AVAILABLE'];
+						echo (isset($LANG['IMAGE_NOT_AVAILABLE'])?$LANG['IMAGE_NOT_AVAILABLE']:'Images<br/>not available');
 					}
 					echo '</div>';
 				}
 				?>
 			</td>
 			<td>
-				<?php 
+				<?php
 				if($isEditor){
 					?>
 					<div style='float:right;'>
-						<a href="profile/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" title="<?php echo $LANG['EDIT_TAXON_DATA']; ?>">
+						<a href="profile/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" title="<?php echo (isset($LANG['EDIT_TAXON_DATA'])?$LANG['EDIT_TAXON_DATA']:'Edit Taxon Data'); ?>">
 							<img style='border:0px;' src='../images/edit.png'/>
 						</a>
 					</div>
-					<?php 
+					<?php
 				}
 				echo $taxonManager->getDescriptionStr();
 				?>
 			</td>
 		</tr>
-
 		<tr>
 			<td colspan="2">
 				<fieldset style="padding:10px 2px 10px 2px;">
-					<?php 
+					<?php
 					if($clid){
 						echo "<legend>";
-						echo $LANG['SPECIES_WITHIN'].' <b>'.$taxonManager->getClName().'</b>&nbsp;&nbsp;';
+						echo (isset($LANG['SPECIES_WITHIN'])?$LANG['SPECIES_WITHIN']:'Species within').' <b>'.$taxonManager->getClName().'</b>&nbsp;&nbsp;';
 						if($parentChecklistArr = $taxonManager->getParentChecklist()){
-							echo '<a href="index.php?tid='.$tid.'&clid='.key($parentChecklistArr).'&taxauthid='.$taxAuthId.'" title="'.$LANG['GO_TO'].' '.current($parentChecklistArr).' '.$LANG['CHECKLIST'].'"><img style="border:0px;width:10px;" src="../images/toparent.png"/></a>';
+							echo '<a href="index.php?tid='.$tid.'&clid='.key($parentChecklistArr).'&taxauthid='.$taxAuthId.'" title="'.(isset($LANG['GO_TO'])?$LANG['GO_TO']:'Go to').' '.current($parentChecklistArr).' '.(isset($LANG['CHECKLIST'])?$LANG['CHECKLIST']:'checklist').'"><img style="border:0px;width:10px;" src="../images/toparent.png"/></a>';
 						}
 						echo "</legend>";
 					}
 					?>
 					<div>
-					<?php 
-					if($sppArr = $taxonManager->getSppArray()){
+					<?php
+					if($sppArr = $taxonManager->getSppArray($page,$taxaLimit)){
+						$taxonCnt = count($sppArr);
+						$taxaNav = '<div style="float:right">';
+						$dynLink = 'tid='.$tid.'&taxauthid='.$taxAuthId.'&clid='.$clid.'&pid='.$pid.'&lang='.$lang.'&taxalimit='.$taxaLimit;
+						if($page) echo '<a href="index.php?'.$dynLink.'&page='.($page-1).'">&lt;&lt;</a>';
+						else '&lt;&lt;';
+						echo (($page*$taxaLimit)+1).' - '.(($page+1)*$taxaLimit).' taxa ';
+						if($taxonCnt > $taxaLimit) echo '<a href="index.php?'.$dynLink.'&page='.($page+1).'">&gt;&gt;</a>';
+						$taxaNav = '</div>';
 						$cnt = 0;
-						ksort($sppArr);
 						foreach($sppArr as $sciNameKey => $subArr){
 							echo "<div class='spptaxon'>";
 							echo "<div style='margin-top:10px;'>";
@@ -319,14 +329,14 @@ if($taxonManager->getSciName() != "unknown"){
 							echo "<i>".$sciNameKey."</i>";
 							echo "</a></div>\n";
 							echo "<div class='sppimg' style='overflow:hidden;'>";
-		
+
 							if(array_key_exists("url",$subArr)){
 								$imgUrl = $subArr["url"];
 								if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
 									$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 								}
 								echo "<a href='index.php?tid=".$subArr["tid"]."&taxauthid=".$taxAuthId."&clid=".$clid."'>";
-		
+
 								if($subArr["thumbnailurl"]){
 									$imgUrl = $subArr["thumbnailurl"];
 									if(array_key_exists("imageDomain",$GLOBALS) && substr($subArr["thumbnailurl"],0,1)=="/"){
@@ -335,14 +345,14 @@ if($taxonManager->getSciName() != "unknown"){
 								}
 								echo '<img src="'.$imgUrl.'" title="'.$subArr['caption'].'" alt="Image of '.$sciNameKey.'" style="z-index:-1" />';
 								echo '</a>';
-								echo '<div style="text-align:right;position:relative;top:-26px;left:5px;" title="'.$LANG['PHOTOGRAPHER'].': '.$subArr['photographer'].'">';
+								echo '<div style="text-align:right;position:relative;top:-26px;left:5px;" title="'.(isset($LANG['PHOTOGRAPHER'])?$LANG['PHOTOGRAPHER']:'Photographer').': '.$subArr['photographer'].'">';
 								echo '</div>';
 							}
 							elseif($isEditor){
-								echo '<div class="spptext" style="margin-top:7px"><a href="profile/tpeditor.php?category=imageadd&tid='.$subArr['tid'].'">'.$LANG['ADD_IMAGE'].'!</a></div>';
+								echo '<div class="spptext" style="margin-top:7px"><a href="profile/tpeditor.php?category=imageadd&tid='.$subArr['tid'].'">'.(isset($LANG['ADD_IMAGE'])?$LANG['ADD_IMAGE']:'Add an Image').'!</a></div>';
 							}
 							else{
-								echo '<div class="spptext">'.$LANG['IMAGE_NOT_AVAILABLE'].'</div>';
+								echo '<div class="spptext">'.(isset($LANG['IMAGE_NOT_AVAILABLE'])?$LANG['IMAGE_NOT_AVAILABLE']:'Images<br/>not available').'</div>';
 							}
 							echo "</div>\n";
 
@@ -350,14 +360,14 @@ if($taxonManager->getSciName() != "unknown"){
 							echo '<div class="sppmap">';
 							if(array_key_exists("map",$subArr) && $subArr["map"]){
 								echo '<img src="'.$subArr['map'].'" title="'.$taxonManager->getSciName().'" alt="'.$taxonManager->getSciName().'" />';
-							}							
+							}
 							elseif($taxonManager->getRankId()>140){
-								echo '<div class="spptext">'.$LANG['MAP_NOT_AVAILABLE'].'</div>';
+								echo '<div class="spptext">'.(isset($LANG['MAP_NOT_AVAILABLE'])?$LANG['MAP_NOT_AVAILABLE']:'Map not<br />Available').'</div>';
 							}
 							echo '</div>';
-							
 							echo "</div>";
 							$cnt++;
+							if($cnt > $taxaLimit) break;
 						}
 					}
 					?>
@@ -366,37 +376,37 @@ if($taxonManager->getSciName() != "unknown"){
 				</fieldset>
 			</td>
 		</tr>
-			<?php 
+			<?php
 	}
 }
 else{
 	?>
 	<tr><td>
 		<div style="margin-top:45px;margin-left:20px">
-			<h1><?php echo '<i>'.$taxonValue.'</i> '.$LANG['NOT_FOUND']; ?></h1>
-			<?php 
+			<h1><?php echo '<i>'.$taxonValue.'</i> '.(isset($LANG['NOT_FOUND'])?$LANG['NOT_FOUND']:'not found'); ?></h1>
+			<?php
 			if($matchArr = $taxonManager->getCloseTaxaMatches($taxonValue)){
 				?>
 				<div style="margin-left: 15px;font-weight:bold;font-size:120%;">
-					<?php echo $LANG['DID_YOU_MEAN'];?>
+					<?php echo (isset($LANG['DID_YOU_MEAN'])?$LANG['DID_YOU_MEAN']:'Did you mean?');?>
 					<div style=margin-left:25px;>
 						<?php
-						foreach($matchArr as $t => $n){ 
+						foreach($matchArr as $t => $n){
 							echo '<a href="index.php?taxon='.$t.'">'.$n.'</a><br/>';
-						} 
+						}
 						?>
 					</div>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 		</div>
 	</td></tr>
-	<?php 
+	<?php
 }
 ?>
 </table>
-<?php 
+<?php
 include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
