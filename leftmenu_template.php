@@ -45,7 +45,7 @@
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/imgsearch.php">
+		<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/search.php">
 			Search Images
 		</a>
 	</div>

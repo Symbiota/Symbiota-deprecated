@@ -53,7 +53,7 @@
 						<a href="<?php echo $CLIENT_ROOT; ?>/collections/map/index.php" target="_blank">Map Search</a>
 					</li>
 					<li>
-						<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/imgsearch.php" >Image Search</a>
+						<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/search.php" >Image Search</a>
 					</li>
 					<li>
 						<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/index.php" >Browse Images</a>
