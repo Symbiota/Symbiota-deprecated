@@ -14,3 +14,4 @@ $LANG['HIDE_CAPTION'] = 'HIDE CAPTION';
 $LANG['SHOW_CAPTION'] = 'SHOW CAPTION';
 $LANG['IMAGE_BY'] = 'Image by';
 $LANG['COURTESY_OF'] = 'Courtesy of';
+?>

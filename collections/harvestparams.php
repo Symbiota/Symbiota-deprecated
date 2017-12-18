@@ -65,7 +65,7 @@ $searchVar = $collManager->getSearchTermStr();
 			</div>
 			<div>
 				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>
-				<span style="margin-left:5px;"><input type='checkbox' name='usethes' value='1' CHECKED /><?php echo $LANG['GENERAL_TEXT_2']; ?></span>
+				<span style="margin-left:5px;"><input type='checkbox' name='usethes' value='1' CHECKED /><?php echo $LANG['INCLUDE_SYNONYMS']; ?></span>
 			</div>
 			<div id="taxonSearch0">
 				<div>
@@ -76,24 +76,24 @@ $searchVar = $collManager->getSearchTermStr();
 						<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
 						<option value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
 					</select>
-					<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+					<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $LANG['SEPARATE_MULTIPLE']; ?>" />
 				</div>
 			</div>
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div>
-				<h1><?php echo $LANG['LOCALITY_HEADER']; ?></h1>
+				<h1><?php echo $LANG['LOCALITY_CRITERIA']; ?></h1>
 			</div>
 			<div>
-				<?php echo $LANG['COUNTRY_INPUT']; ?>: <input type="text" id="country" size="43" name="country" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+				<?php echo $LANG['COUNTRY']; ?>: <input type="text" id="country" size="43" name="country" value="" title="<?php echo $LANG['SEPARATE_MULTIPLE']; ?>" />
 			</div>
 			<div>
-				<?php echo $LANG['STATE_INPUT']; ?>: <input type="text" id="state" size="37" name="state" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+				<?php echo $LANG['STATE']; ?>: <input type="text" id="state" size="37" name="state" value="" title="<?php echo $LANG['SEPARATE_MULTIPLE']; ?>" />
 			</div>
 			<div>
-				<?php echo $LANG['COUNTY_INPUT']; ?>: <input type="text" id="county" size="37"  name="county" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+				<?php echo $LANG['COUNTY']; ?>: <input type="text" id="county" size="37"  name="county" value="" title="<?php echo $LANG['SEPARATE_MULTIPLE']; ?>" />
 			</div>
 			<div>
-				<?php echo $LANG['LOCALITY_INPUT']; ?>: <input type="text" id="locality" size="43" name="local" value="" />
+				<?php echo $LANG['LOCALITY']; ?>: <input type="text" id="locality" size="43" name="local" value="" />
 			</div>
 			<div>
 				<?php echo $LANG['ELEV_INPUT_1']; ?>: <input type="text" id="elevlow" size="10" name="elevlow" value="" onchange="cleanNumericInput(this);" />
@@ -174,7 +174,7 @@ $searchVar = $collManager->getSearchTermStr();
 			</div>
 			<div>
 				<?php echo $LANG['COLLECTOR_LASTNAME']; ?>:
-				<input type="text" id="collector" size="32" name="collector" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+				<input type="text" id="collector" size="32" name="collector" value="" title="<?php echo $LANG['SEPARATE_MULTIPLE']; ?>" />
 			</div>
 			<div>
 				<?php echo $LANG['COLLECTOR_NUMBER']; ?>:
@@ -194,7 +194,7 @@ $searchVar = $collManager->getSearchTermStr();
 			</div>
 			<div>
 				<?php echo $LANG['CATALOG_NUMBER']; ?>:
-				<input type="text" id="catnum" size="32" name="catnum" value="" title="<?php echo $LANG['TITLE_TEXT_1']; ?>" />
+				<input type="text" id="catnum" size="32" name="catnum" value="" title="<?php echo $LANG['SEPARATE_MULTIPLE']; ?>" />
 				<input name="includeothercatnum" type="checkbox" value="1" checked /> <?php echo $LANG['INCLUDE_OTHER_CATNUM']?>
 			</div>
 			<div>
