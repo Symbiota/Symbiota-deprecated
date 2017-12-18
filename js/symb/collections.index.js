@@ -1,13 +1,7 @@
+//Used in /collections/index.php and /imagelib/index.php
+$('html').hide();
 $(document).ready(function() {
-	$('#tabs').tabs({
-		select: function(event, ui) {
-			return true;
-		},
-		beforeLoad: function( event, ui ) {
-			$(ui.panel).html("<p>Loading...</p>");
-		}
-	});
-	//document.collections.onkeydown = checkKey;
+	$('html').show();
 });
 
 function toggle(target){

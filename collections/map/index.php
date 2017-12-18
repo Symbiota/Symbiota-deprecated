@@ -1,6 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
+include_once($SERVER_ROOT.'/content/lang/collections/map/index.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
+
 header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
@@ -9,7 +11,6 @@ $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1;
 $mapManager = new OccurrenceMapManager();
 $searchVar = $mapManager->getSearchTermStr();
 
-//$solrManager = new SOLRManager();
 $queryShape = '';
 $showTaxaBut = 1;
 
@@ -70,18 +71,20 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title><?php echo $DEFAULT_TITLE; ?> - Map Interface</title>
-	<link type="text/css" href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" />
-	<link type="text/css" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery.mobile-1.4.0.min.css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery.symbiota.css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery-ui_accordian.css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
+	<link type="text/css" href="../../css/base.css?ver=6" rel="stylesheet" />
+	<link type="text/css" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" />
 	<style type="text/css">
-		#tabs1 a,#tabs2 a,#tabs3 a{
-			outline-color: transparent;
-			font-size: 12px;
-			font-weight: normal;
-		}
+		.panel-content a{ outline-color: transparent; font-size: 12px; font-weight: normal; }
+		.categorytitle{ font-size:	12px; }
+		.categorytitle a{ font-weight: bold; font-size: 12px; font-size: 110%; color: black; }
+		.categorytitle a:visited{ font-weight: bold; font-size: 12px; font-size: 110%; color: black; }
+		.collectiontitle{ font-size: 12px; }
+		.collectiontitle a{ font-size: 75%; }
+		.collectiontitle a:hover{ font-weight: bold; color: grey; }
 	</style>
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
@@ -1132,48 +1135,14 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 					<?php //echo "coordArr: ".$coordArr; ?>
 					<?php //echo "tIdArr: ".json_encode($tIdArr); ?>
 					<?php //echo "minLat:".$minLat."maxLat:".$maxLat."minLng:".$minLng."maxLng:".$maxLng; ?>
-					<h3>Search Criteria and Options</h3>
+					<h3><?php echo (isset($LANG['SEARCH_CRITERIA'])?$LANG['SEARCH_CRITERIA']:'Search Criteria and Options'); ?></h3>
 					<div id="tabs1" style="width:379px;padding:0px;">
 						<form name="mapsearchform" id="mapsearchform" data-ajax="false" action="index.php" method="post" onsubmit="return verifyCollForm(this);">
 							<ul>
-								<li><a href="#searchcriteria"><span>Criteria</span></a></li>
-								<li><a href="#searchcollections"><span>Collections</span></a></li>
-								<li><a href="#mapoptions"><span>Map Options</span></a></li>
+								<li><a href="#searchcriteria"><span><?php echo (isset($LANG['CRITERIA'])?$LANG['CRITERIA']:'Criteria'); ?></span></a></li>
+								<li><a href="#searchcollections"><span><?php echo (isset($LANG['COLLECTIONS'])?$LANG['COLLECTIONS']:'Collections'); ?></span></a></li>
+								<li><a href="#mapoptions"><span><?php echo (isset($LANG['MAP_OPTIONS'])?$LANG['MAP_OPTIONS']:'Map Options'); ?></span></a></li>
 							</ul>
-							<div id="searchcollections" style="">
-								<div class="mapinterface">
-									<div>
-										<h1 style="margin:0px 0px 8px 0px;font-size:15px;">Collections to be Searched</h1>
-									</div>
-									<?php
-									$catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
-									if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
-									$collList = $mapManager->getFullCollectionList($catId);
-									$specArr = (isset($collList['spec'])?$collList['spec']:null);
-									$obsArr = (isset($collList['obs'])?$collList['obs']:null);
-									if($specArr || $obsArr){
-										?>
-										<div id="specobsdiv">
-											<div style="margin:0px 0px 10px 20px;">
-												<input id="dballcb" data-role="none" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" <?php echo (((array_key_exists("db",$previousCriteria)&&in_array("all",$dbArr))||!$dbArr)?'checked':'') ?> />
-												Select/Deselect all <a href="<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php">Collections</a>
-											</div>
-											<?php
-											if($specArr){
-												$mapManager->outputFullMapCollArr($dbArr,$specArr);
-											}
-											if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>';
-											if($obsArr){
-												$mapManager->outputFullMapCollArr($dbArr,$obsArr);
-											}
-											?>
-											<div style="clear:both;">&nbsp;</div>
-										</div>
-										<?php
-									}
-									?>
-								</div>
-							</div>
 							<div id="searchcriteria" style="">
 								<div style="height:25px;">
 									<!-- <div style="float:left;<?php echo (isset($SOLR_MODE) && $SOLR_MODE?'display:none;':''); ?>">
@@ -1197,13 +1166,13 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 										<input type="hidden" id="leftlong" name="leftlong" value='<?php echo (array_key_exists("leftlong",$previousCriteria)?$previousCriteria["leftlong"]:""); ?>' />
 										<input type="hidden" id="poly_array" name="poly_array" value='<?php echo (array_key_exists("poly_array",$previousCriteria)?$previousCriteria["poly_array"]:""); ?>' />
 										<input type="hidden" id="clid" name="clid" value='<?php echo (array_key_exists("clid",$previousCriteria)?$previousCriteria["clid"]:""); ?>' />
-										<button data-role="none" type="button" name="resetbutton" onclick="resetQueryForm(this.form)">Reset</button>
-										<button data-role="none" id="display2" name="display2" type="submit" >Search</button>
+										<button data-role="none" type="button" name="resetbutton" onclick="resetQueryForm(this.form)"><?php echo (isset($LANG['RESET'])?$LANG['RESET']:'Reset'); ?></button>
+										<button data-role="none" id="display2" name="display2" type="submit" ><?php echo (isset($LANG['SEARCH'])?$LANG['SEARCH']:'Search'); ?></button>
 									</div>
 								</div>
 								<div style="margin:5 0 5 0;"><hr /></div>
 								<div>
-									<span style=""><input data-role="none" type='checkbox' name='thes' value='1' <?php if(array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"]) echo "CHECKED"; ?> >Include Synonyms</span>
+									<span style=""><input data-role="none" type='checkbox' name='thes' value='1' <?php if(array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"]) echo "CHECKED"; ?> ><?php echo (isset($LANG['INCLUDE_SYNONYMS'])?$LANG['INCLUDE_SYNONYMS']:'Include Synonyms'); ?></span>
 								</div>
 								<div id="taxonSearch0">
 									<div id="taxa_autocomplete" >
@@ -1218,7 +1187,7 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 											</select>
 										</div>
 										<div style="margin-top:5px;">
-											Taxa: <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="<?php if(array_key_exists("taxa",$previousCriteria)) echo $previousCriteria["taxa"]; ?>" title="Separate multiple taxa w/ commas" />
+											<?php echo (isset($LANG['TAXA'])?$LANG['TAXA']:'Taxa'); ?>: <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="<?php if(array_key_exists("taxa",$previousCriteria)) echo $previousCriteria["taxa"]; ?>" title="<?php echo (isset($LANG['SEPARATE_MULTIPLE'])?$LANG['SEPARATE_MULTIPLE']:'Separate multiple taxa w/ commas'); ?>" />
 										</div>
 									</div>
 								</div>
@@ -1232,100 +1201,137 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 									</div>
 									<div><hr></div> -->
 								<div>
-									Country: <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="<?php if(array_key_exists("country",$previousCriteria)) echo $previousCriteria["country"]; ?>" title="Separate multiple terms w/ commas" />
+									<?php echo (isset($LANG['COUNTRY'])?$LANG['COUNTRY']:'Country'); ?>: <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="<?php if(array_key_exists("country",$previousCriteria)) echo $previousCriteria["country"]; ?>" title="<?php echo (isset($LANG['SEPARATE_MULTIPLE'])?$LANG['SEPARATE_MULTIPLE']:'Separate multiple taxa w/ commas'); ?>" />
 								</div>
 								<div style="margin-top:5px;">
-									State/Province: <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="<?php if(array_key_exists("state",$previousCriteria)) echo $previousCriteria["state"]; ?>" title="Separate multiple terms w/ commas" />
+									<?php echo (isset($LANG['STATE'])?$LANG['STATE']:'State/Province'); ?>: <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="<?php if(array_key_exists("state",$previousCriteria)) echo $previousCriteria["state"]; ?>" title="<?php echo (isset($LANG['SEPARATE_MULTIPLE'])?$LANG['SEPARATE_MULTIPLE']:'Separate multiple taxa w/ commas'); ?>" />
 								</div>
 								<div style="margin-top:5px;">
-									County: <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="<?php if(array_key_exists("county",$previousCriteria)) echo htmlspecialchars($previousCriteria["county"]); ?>" title="Separate multiple terms w/ commas" />
+									<?php echo (isset($LANG['COUNTY'])?$LANG['COUNTY']:'County'); ?>: <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="<?php if(array_key_exists("county",$previousCriteria)) echo htmlspecialchars($previousCriteria["county"]); ?>" title="<?php echo (isset($LANG['SEPARATE_MULTIPLE'])?$LANG['SEPARATE_MULTIPLE']:'Separate multiple taxa w/ commas'); ?>" />
 								</div>
 								<div style="margin-top:5px;">
-									Locality: <input data-role="none" type="text" id="locality" style="width:225px;" name="local" value="<?php if(array_key_exists("local",$previousCriteria)) echo htmlspecialchars($previousCriteria["local"]); ?>" />
+									<?php echo (isset($LANG['LOCALITY'])?$LANG['LOCALITY']:'Locality'); ?>: <input data-role="none" type="text" id="locality" style="width:225px;" name="local" value="<?php if(array_key_exists("local",$previousCriteria)) echo htmlspecialchars($previousCriteria["local"]); ?>" />
 								</div>
 								<div style="margin:5 0 5 0;"><hr /></div>
 								<div id="shapecriteria">
 									<div id="noshapecriteria" style="display:<?php echo ((!$previousCriteria || ((!$previousCriteria['poly_array']) && (!$previousCriteria['upperlat'])))?'block':'none'); ?>;">
 										<div id="geocriteria" style="display:<?php echo ((!$previousCriteria || ((!$previousCriteria['poly_array']) && (!isset($previousCriteria['distFromMe'])) && (!$previousCriteria['pointlat']) && (!$previousCriteria['upperlat'])))?'block':'none'); ?>;">
 											<div>
-												Use the shape tools on the map to select occurrences within a given shape.
+												<?php echo (isset($LANG['SHAPE_TOOLS_1'])?$LANG['SHAPE_TOOLS_1']:'Use the shape tools on the map to select occurrences within a given shape'); ?>.
 											</div>
 										</div>
 										<div id="distancegeocriteria" style="display:<?php echo ((!$previousCriteria || ($previousCriteria && array_key_exists('distFromMe',$previousCriteria) && $previousCriteria['distFromMe']))?'block':'none'); ?>;">
 											<div>
-												Within <input data-role="none" type="text" id="distFromMe" style="width:40px;" name="distFromMe" value="<?php if(array_key_exists('distFromMe',$previousCriteria)) echo $previousCriteria['distFromMe']; ?>" /> miles from me, or
-												use the shape tools on the map to select occurrences within a given shape.
+												<?php echo (isset($LANG['WITHIN'])?$LANG['WITHIN']:'Within'); ?>
+												 <input data-role="none" type="text" id="distFromMe" style="width:40px;" name="distFromMe" value="<?php if(array_key_exists('distFromMe',$previousCriteria)) echo $previousCriteria['distFromMe']; ?>" /> miles from me, or
+												<?php echo (isset($LANG['SHAPE_TOOLS_2'])?$LANG['SHAPE_TOOLS_2']:'use the shape tools on the map to select occurrences within a given shape'); ?>.
 											</div>
 										</div>
 									</div>
 									<div id="polygeocriteria" style="display:<?php echo (($previousCriteria && $previousCriteria['poly_array'])?'block':'none'); ?>;">
 										<div>
-											Within the selected polygon.
+											<?php echo (isset($LANG['WITHIN_POLYGON'])?$LANG['WITHIN_POLYGON']:'Within the selected polygon'); ?>.
 										</div>
 									</div>
 									<div id="circlegeocriteria" style="display:<?php echo (($previousCriteria && $previousCriteria['pointlat'] && !$previousCriteria['distFromMe'])?'block':'none'); ?>;">
 										<div>
-											Within the selected circle.
+											<?php echo (isset($LANG['WITHIN_CIRCLE'])?$LANG['WITHIN_CIRCLE']:'Within the selected circle'); ?>.
 										</div>
 									</div>
 									<div id="rectgeocriteria" style="display:<?php echo (($previousCriteria && $previousCriteria['upperlat'])?'block':'none'); ?>;">
 										<div>
-											Within the selected rectangle.
+											<?php echo (isset($LANG['WITHIN_RECTANGLE'])?$LANG['WITHIN_RECTANGLE']:'Within the selected rectangle'); ?>.
 										</div>
 									</div>
 									<div id="deleteshapediv" style="margin-top:5px;display:<?php echo (($previousCriteria && ($previousCriteria['pointlat'] || $previousCriteria['upperlat'] || $previousCriteria['poly_array']))?'block':'none'); ?>;">
-										<button data-role="none" type=button onclick="deleteSelectedShape()">Delete Selected Shape</button>
+										<button data-role="none" type=button onclick="deleteSelectedShape()"><?php echo (isset($LANG['DELETE_SHAPE'])?$LANG['DELETE_SHAPE']:'Delete Selected Shape'); ?></button>
 									</div>
 								</div>
 								<div style="margin:5 0 5 0;"><hr /></div>
 								<div>
-									Collector's Last Name:
+									<?php echo (isset($LANG['COLLECTOR_LASTNAME'])?$LANG['COLLECTOR_LASTNAME']:"Collector's Last Name"); ?>:
 									<input data-role="none" type="text" id="collector" style="width:125px;" name="collector" value="<?php if(array_key_exists("collector",$previousCriteria)) echo htmlspecialchars($previousCriteria["collector"]); ?>" title="" />
 								</div>
 								<div style="margin-top:5px;">
-									Collector's Number:
+									<?php echo (isset($LANG['COLLECTOR_NUMBER'])?$LANG['COLLECTOR_NUMBER']:"Collector's Number"); ?>:
 									<input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="<?php if(array_key_exists("collnum",$previousCriteria)) echo htmlspecialchars($previousCriteria["collnum"]); ?>" title="Separate multiple terms by commas and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750" />
 								</div>
 								<div style="margin-top:5px;">
-									Collection Date:
+									<?php echo (isset($LANG['COLLECTOR_DATE'])?$LANG['COLLECTOR_DATE']:'Collection Date'); ?>:
 									<input data-role="none" type="text" id="eventdate1" style="width:80px;" name="eventdate1" style="width:100px;" value="<?php if(array_key_exists("eventdate1",$previousCriteria)) echo $previousCriteria["eventdate1"]; ?>" title="Single date or start date of range" /> -
 									<input data-role="none" type="text" id="eventdate2" style="width:80px;" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$previousCriteria)) echo $previousCriteria["eventdate2"]; ?>" title="End date of range; leave blank if searching for single date" />
 								</div>
 								<div style="margin:10 0 10 0;"><hr></div>
 								<div>
-									Catalog Number:
+									<?php echo (isset($LANG['CATALOG_NUMBER'])?$LANG['CATALOG_NUMBER']:'Catalog Number'); ?>:
 									<input data-role="none" type="text" id="catnum" style="width:150px;" name="catnum" value="<?php if(array_key_exists("catnum",$previousCriteria)) echo $previousCriteria["catnum"]; ?>" title="" />
 								</div>
-								<div style="margin-top:5px;">
-									Other Catalog Number:
-									<input data-role="none" type="text" id="othercatnum" style="width:150px;" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$previousCriteria)) echo $previousCriteria["othercatnum"]; ?>" title="" />
+								<div style="margin-left:15px;">
+									<input data-role="none" name="includeothercatnum" type="checkbox" value="1" checked /> <?php echo (isset($LANG['INCLUDE_OTHER_CATNUM'])?$LANG['INCLUDE_OTHER_CATNUM']:'Include other catalog numbers and GUIDs')?>
+								</div>
+								<div style="margin-top:10px;">
+									<input data-role="none" type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$previousCriteria) && $previousCriteria["typestatus"]) echo "CHECKED"; ?> >
+									 <?php echo (isset($LANG['LIMIT_TO_TYPE'])?$LANG['LIMIT_TO_TYPE']:'Limit to Type Specimens Only'); ?>
 								</div>
 								<div style="margin-top:5px;">
-									<input data-role="none" type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$previousCriteria) && $previousCriteria["typestatus"]) echo "CHECKED"; ?> > Limit to Type Specimens Only
+									<input data-role="none" type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$previousCriteria) && $previousCriteria["hasimages"]) echo "CHECKED"; ?> >
+									 <?php echo (isset($LANG['LIMIT_IMAGES'])?$LANG['LIMIT_IMAGES']:'Limit to Specimens with Images Only'); ?>
 								</div>
 								<div style="margin-top:5px;">
-									<input data-role="none" type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$previousCriteria) && $previousCriteria["hasimages"]) echo "CHECKED"; ?> > Limit to Specimens with Images Only
-								</div>
-								<div style="margin-top:5px;">
-									<input data-role="none" type='checkbox' name='hasgenetic' value='1' <?php if(array_key_exists("hasgenetic",$previousCriteria) && $previousCriteria["hasgenetic"]) echo "CHECKED"; ?> > Limit to Specimens with Genetic Data Only
+									<input data-role="none" type='checkbox' name='hasgenetic' value='1' <?php if(array_key_exists("hasgenetic",$previousCriteria) && $previousCriteria["hasgenetic"]) echo "CHECKED"; ?> >
+									 <?php echo (isset($LANG['LIMIT_GENETIC'])?$LANG['LIMIT_GENETIC']:'Limit to Specimens with Genetic Data Only'); ?>
 								</div>
 								<div><hr></div>
 								<input type="hidden" name="reset" value="1" />
 							</div>
+							<div id="searchcollections" style="">
+								<div class="mapinterface">
+									<?php
+									$catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
+									if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
+									$collList = $mapManager->getFullCollectionList($catId);
+									$specArr = (isset($collList['spec'])?$collList['spec']:null);
+									$obsArr = (isset($collList['obs'])?$collList['obs']:null);
+									if($specArr || $obsArr){
+										?>
+										<div id="specobsdiv">
+											<div style="margin:0px 0px 10px 5px;">
+												<input id="dballcb" data-role="none" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" <?php echo (((array_key_exists("db",$previousCriteria)&&in_array("all",$dbArr))||!$dbArr)?'checked':'') ?> />
+												<?php echo (isset($LANG['SELECT_ALL'])?$LANG['SELECT_ALL']:'Select/Deselect All'); ?>
+											</div>
+											<?php
+											if($specArr){
+												$mapManager->outputFullCollArr($specArr, $catId, false, false);
+											}
+											if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>';
+											if($obsArr){
+												$mapManager->outputFullCollArr($obsArr, $catId, false, false);
+											}
+											?>
+											<div style="clear:both;">&nbsp;</div>
+										</div>
+										<?php
+									}
+									?>
+								</div>
+							</div>
 						</form>
 						<div id="mapoptions" style="">
 							<div style="border:1px black solid;margin-top:10px;padding:5px;" >
-								<b>Clustering</b>
+								<b><?php echo (isset($LANG['CLUSTERING'])?$LANG['CLUSTERING']:'Clustering'); ?></b>
 								<div style="margin-top:8px;">
-									<div style="float:left;">
-										Grid Size: <input name="gridsize" id="gridsize" data-role="none" type="text" value="<?php echo $gridSize; ?>" style="width:50px;" onchange="setClustering();" />
+									<div>
+										<?php echo (isset($LANG['GRID_SIZE'])?$LANG['GRID_SIZE']:'Grid Size'); ?>:
+										 <input name="gridsize" id="gridsize" data-role="none" type="text" value="<?php echo $gridSize; ?>" style="width:50px;" onchange="setClustering();" />
 									</div>
-									<div style="padding-left:8px;float:left;">
-										Min. Cluster Size: <input name="minclustersize" id="minclustersize" data-role="none" type="text" value="<?php echo $minClusterSize; ?>" style="width:50px;" onchange="setClustering();" />
+									<div>
+										<?php echo (isset($LANG['CLUSTER_SIZE'])?$LANG['CLUSTER_SIZE']:'Min. Cluster Size'); ?>:
+										 <input name="minclustersize" id="minclustersize" data-role="none" type="text" value="<?php echo $minClusterSize; ?>" style="width:50px;" onchange="setClustering();" />
 									</div>
 								</div>
 								<div style="clear:both;margin-top:8px;">
-									Turn Off Clustering: <input data-role="none" type="checkbox" id="clusteroff" name="clusteroff" value='1' <?php echo ($clusterOff=="y"?'checked':'') ?> onchange="setClustering();"/>
+									<?php echo (isset($LANG['TURN_OFF_CLUSTERING'])?$LANG['TURN_OFF_CLUSTERING']:'Turn Off Clustering'); ?>:
+									 <input data-role="none" type="checkbox" id="clusteroff" name="clusteroff" value='1' <?php echo ($clusterOff=="y"?'checked':'') ?> onchange="setClustering();"/>
 								</div>
 							</div>
 							<?php
@@ -1333,7 +1339,7 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 								?>
 								<div style="clear:both;">
 									<div style="float:right;margin-top:10px;">
-										<button data-role="none" id="refreshCluster" name="refreshCluster" onclick="refreshClustering();" >Refresh Map</button>
+										<button data-role="none" id="refreshCluster" name="refreshCluster" onclick="refreshClustering();" ><?php echo (isset($LANG['REFRESH_MAP'])?$LANG['REFRESH_MAP']:'Refresh Map'); ?></button>
 									</div>
 								</div>
 								<?php
@@ -1356,12 +1362,12 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 					<?php
 					if($searchVar){
 						?>
-						<h3 id="recordstaxaheader" style="display:none;">Records and Taxa</h3>
+						<h3 id="recordstaxaheader" style="display:none;"><?php echo (isset($LANG['RECORDS_TAXA'])?$LANG['RECORDS_TAXA']:'Records and Taxa'); ?></h3>
 						<div id="tabs2" style="display:none;width:379px;padding:0px;">
 							<ul>
-								<li><a href='occurrencelist.php?<?php echo $searchVar; ?>'><span>Records</span></a></li>
-								<li><a href='#symbology'><span>Collections</span></a></li>
-								<li><a href='#maptaxalist'><span>Taxa List</span></a></li>
+								<li><a href='occurrencelist.php?<?php echo $searchVar; ?>'><span><?php echo (isset($LANG['RECORDS'])?$LANG['RECORDS']:'Records'); ?></span></a></li>
+								<li><a href='#symbology'><span><?php echo (isset($LANG['COLLECTIONS'])?$LANG['COLLECTIONS']:'Collections'); ?></span></a></li>
+								<li><a href='#maptaxalist'><span><?php echo (isset($LANG['TAXA_LIST'])?$LANG['TAXA_LIST']:'Taxa List'); ?></span></a></li>
 							</ul>
 							<div id="symbology" style="">
 								<div style="height:40px;margin-bottom:15px;">
@@ -1374,14 +1380,14 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 													<g>
 														<circle cx="7.5" cy="7.5" r="7" fill="white" stroke="#000000" stroke-width="1px" ></circle>
 													</g>
-												</svg> = Collection
+												</svg> = <?php echo (isset($LANG['COLLECTION'])?$LANG['COLLECTION']:'Collection'); ?>
 											</div>
 											<div style="margin-top:5px;" >
 												<svg style="height:14px;width:14px;margin-bottom:-2px;">" xmlns="http://www.w3.org/2000/svg">
 													<g>
 														<path stroke="#000000" d="m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z" stroke-width="1px" fill="white"/>
 													</g>
-												</svg> = Observation
+												</svg> = <?php echo (isset($LANG['OBSERVATION'])?$LANG['OBSERVATION']:'Observation'); ?>
 											</div>
 										</div>
 										<?php
@@ -1389,10 +1395,10 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 									?>
 									<div id="symbolizeResetButt" style='float:right;margin-bottom:5px;' >
 										<div>
-											<button data-role="none" id="symbolizeReset1" name="symbolizeReset1" onclick='resetSymbology();' >Reset Symbology</button>
+											<button data-role="none" id="symbolizeReset1" name="symbolizeReset1" onclick='resetSymbology();' ><?php echo (isset($LANG['RESET_SYMBOLOGY'])?$LANG['RESET_SYMBOLOGY']:'Reset Symbology'); ?></button>
 										</div>
 										<div style="margin-top:5px;">
-											<button data-role="none" id="randomColorColl" name="randomColorColl" onclick='autoColorColl();' >Auto Color</button>
+											<button data-role="none" id="randomColorColl" name="randomColorColl" onclick='autoColorColl();' ><?php echo (isset($LANG['AUTO_COLOR'])?$LANG['AUTO_COLOR']:'Auto Color'); ?></button>
 										</div>
 									</div>
 								</div>
@@ -1416,14 +1422,14 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 													<g>
 														<circle cx="7.5" cy="7.5" r="7" fill="white" stroke="#000000" stroke-width="1px" ></circle>
 													</g>
-												</svg> = Collection
+												</svg> = <?php echo (isset($LANG['COLLECTION'])?$LANG['COLLECTION']:'Collection'); ?>
 											</div>
 											<div style="margin-top:5px;" >
 												<svg style="height:14px;width:14px;margin-bottom:-2px;">" xmlns="http://www.w3.org/2000/svg">
 													<g>
 														<path stroke="#000000" d="m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z" stroke-width="1px" fill="white"/>
 													</g>
-												</svg> = Observation
+												</svg> = <?php echo (isset($LANG['OBSERVATION'])?$LANG['OBSERVATION']:'Observation'); ?>
 											</div>
 										</div>
 										<?php
@@ -1431,15 +1437,15 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 									?>
 									<div id="symbolizeResetButt" style='float:right;margin-bottom:5px;' >
 										<div>
-											<button data-role="none" id="symbolizeReset2" name="symbolizeReset2" onclick='resetSymbology();' >Reset Symbology</button>
+											<button data-role="none" id="symbolizeReset2" name="symbolizeReset2" onclick='resetSymbology();' ><?php echo (isset($LANG['RESET_SYMBOLOGY'])?$LANG['RESET_SYMBOLOGY']:'Reset Symbology'); ?></button>
 										</div>
 										<div style="margin-top:5px;">
-											<button data-role="none" id="randomColorTaxa" name="randomColorTaxa" onclick='autoColorTaxa();' >Auto Color</button>
+											<button data-role="none" id="randomColorTaxa" name="randomColorTaxa" onclick='autoColorTaxa();' ><?php echo (isset($LANG['AUTO_COLOR'])?$LANG['AUTO_COLOR']:'Auto Color'); ?></button>
 										</div>
 									</div>
 								</div>
 								<div style="margin:5 0 5 0;clear:both;"><hr /></div>
-								<div style='font-weight:bold;'>Taxa Count: <span id="taxaCountNum">0</span></div>
+								<div style='font-weight:bold;'><?php echo (isset($LANG['TAXA_COUNT'])?$LANG['TAXA_COUNT']:'Taxa Count'); ?>: <span id="taxaCountNum">0</span></div>
 								<div id="taxasymbologykeysbox"></div>
 							</div>
 						</div>

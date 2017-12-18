@@ -11,7 +11,7 @@ class OccurrenceManager extends TaxonSearchManager {
 	protected $reset = 0;
 	private $clName;
 	private $occurSearchProjectExists = 0;
-	private $searchSupportManager = null;
+	protected $searchSupportManager = null;
 
  	public function __construct(){
  		parent::__construct();
@@ -406,9 +406,9 @@ class OccurrenceManager extends TaxonSearchManager {
 		return $this->searchSupportManager->getFullCollectionList($catId);
 	}
 
-	public function outputFullCollArr($occArr, $targetCatID = 0){
+	public function outputFullCollArr($occArr, $targetCatID = 0, $displayIcons = true, $displaySearchButtons = true){
 		if(!$this->searchSupportManager) $this->searchSupportManager = new occurrenceSearchSupport($this->conn);
-		$this->searchSupportManager->outputFullCollArr($occArr, $targetCatID);
+		$this->searchSupportManager->outputFullCollArr($occArr, $targetCatID, $displayIcons, $displaySearchButtons);
 	}
 
 	public function getOccurVoucherProjects(){

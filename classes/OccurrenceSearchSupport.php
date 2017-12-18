@@ -76,20 +76,18 @@ class OccurrenceSearchSupport {
 		return $retArr;
 	}
 
-	public function outputFullCollArr($occArr, $targetCatID = 0){
-		global $DEFAULTCATID, $LANG;
+	public function outputFullCollArr($occArr, $targetCatID = 0, $displayIcons = true, $displaySearchButtons = true){
+		global $CLIENT_ROOT, $DEFAULTCATID, $LANG;
 		if(!$targetCatID && $DEFAULTCATID) $targetCatID = $DEFAULTCATID;
-		$buttonStr = '<button type="submit" class="ui-button ui-widget ui-corner-all">'.(isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next &gt;').'</button>';
-		//$buttonStr = '<input type="submit" class="nextbtn searchcollnextbtn" value="'.(isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >').'" />';
+		$buttonStr = '<button type="submit" class="ui-button ui-widget ui-corner-all" value="search">'.(isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next &gt;').'</button>';
 		$collCnt = 0;
+		$borderStyle = ($displayIcons?'margin:10px;padding:10px 20px;border:inset':'margin-left:10px;');
 		echo '<div style="position:relative">';
 		if(isset($occArr['cat'])){
 			$categoryArr = $occArr['cat'];
+			if($displaySearchButtons) echo '<div style="float:right;margin-top:20px;">'.$buttonStr.'</div>';
 			?>
-			<div style="float:right;margin-top:20px;">
-				<?php echo $buttonStr; ?>
-			</div>
-			<table style="float:left;width:80%;">
+			<table>
 				<?php
 				$cnt = 0;
 				foreach($categoryArr as $catid => $catArr){
@@ -102,23 +100,33 @@ class OccurrenceSearchSupport {
 					$idStr = $this->collArrIndex.'-'.$catid;
 					?>
 					<tr>
-						<td style="<?php echo ($catIcon?'width:40px':''); ?>">
-							<?php
-							if($catIcon){
-								$catIcon = (substr($catIcon,0,6)=='images'?'../':'').$catIcon;
-								echo '<img src="'.$catIcon.'" style="border:0px;width:30px;height:30px;" />';
-							}
+						<?php
+						if($displayIcons){
 							?>
+							<td style="<?php echo ($catIcon?'width:40px':''); ?>">
+								<?php
+								if($catIcon){
+									$catIcon = (substr($catIcon,0,6)=='images'?$CLIENT_ROOT:'').$catIcon;
+									echo '<img src="'.$catIcon.'" style="border:0px;width:30px;height:30px;" />';
+								}
+								?>
+							</td>
+							<?php
+						}
+						?>
+						<td style="width:25px;">
+							<div style="">
+								<input data-role="none" id="cat-<?php echo $idStr; ?>-Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked />
+							</div>
 						</td>
-						<td style="padding:6px;width:25px;">
-							<input id="cat-<?php echo $idStr; ?>-Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked />
+						<td style="width:10px;">
+							<div style="margin-top: 7px">
+								<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
+									<img id="plus-<?php echo $idStr; ?>" src="<?php echo $CLIENT_ROOT; ?>/images/plus_sm.png" style="<?php echo ($targetCatID != $catid?'':'display:none;') ?>" /><img id="minus-<?php echo $idStr; ?>" src="<?php echo $CLIENT_ROOT; ?>/images/minus_sm.png" style="<?php echo ($targetCatID != $catid?'display:none;':'') ?>" />
+								</a>
+							</div>
 						</td>
-						<td style="padding:9px 5px;width:10px;">
-							<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
-								<img id="plus-<?php echo $idStr; ?>" src="../images/plus_sm.png" style="<?php echo ($targetCatID != $catid?'':'display:none;') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus_sm.png" style="<?php echo ($targetCatID != $catid?'display:none;':'') ?>" />
-							</a>
-						</td>
-						<td style="padding-top:8px;">
+						<td>
 							<div class="categorytitle">
 								<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
 									<?php echo $name; ?>
@@ -128,37 +136,41 @@ class OccurrenceSearchSupport {
 					</tr>
 					<tr>
 						<td colspan="4">
-							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($targetCatID && $targetCatID != $catid?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset">
+							<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($targetCatID && $targetCatID != $catid?'display:none;':'').$borderStyle; ?>">
 								<table>
 									<?php
 									foreach($catArr as $collid => $collName2){
 										?>
 										<tr>
-											<td style="width:40px;">
-												<?php
-												if($collName2["icon"]){
-													$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"];
-													?>
-													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'><img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" /></a>
-													<?php
-												}
+											<?php
+											if($displayIcons){
 												?>
-											</td>
-											<td style="padding:6px;width:25px;">
-												<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat-<?php echo $idStr; ?>-Input')" checked />
-											</td>
-											<td style="padding:6px">
-												<div class="collectiontitle">
-													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-														<?php
-														$codeStr = ' ('.$collName2['instcode'];
-														if($collName2['collcode']) $codeStr .= '-'.$collName2['collcode'];
-														$codeStr .= ')';
-														echo $collName2["collname"].$codeStr;
+												<td style="width:40px;">
+													<?php
+													if($collName2["icon"]){
+														$cIcon = (substr($collName2["icon"],0,6)=='images'?$CLIENT_ROOT:'').$collName2["icon"];
 														?>
-													</a>
-													<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-														more info
+														<a href = '<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php?collid=<?php echo $collid; ?>'><img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" /></a>
+														<?php
+													}
+													?>
+												</td>
+												<?php
+											}
+											?>
+											<td style="width:25px;">
+												<input data-role="none" name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat-<?php echo $idStr; ?>-Input')" checked />
+											</td>
+											<td>
+												<div class="collectiontitle">
+													<?php
+													$codeStr = ' ('.$collName2['instcode'];
+													if($collName2['collcode']) $codeStr .= '-'.$collName2['collcode'];
+													$codeStr .= ')';
+													echo $collName2["collname"].$codeStr;
+													?>
+													<a href='<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank">
+														<?php echo (isset($LANG['MORE_INFO'])?$LANG['MORE_INFO']:'more info...'); ?>
 													</a>
 												</div>
 											</td>
@@ -186,32 +198,36 @@ class OccurrenceSearchSupport {
 				foreach($collArr as $collid => $cArr){
 					?>
 					<tr>
-						<td style="<?php ($cArr["icon"]?'width:35px':''); ?>">
-							<?php
-							if($cArr["icon"]){
-								$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"];
-								?>
-								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'><img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" /></a>
-								<?php
-							}
+						<?php
+						if($displayIcons){
 							?>
-							&nbsp;
-						</td>
-						<td style="padding:6px;width:25px;">
-							<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll()" checked />
-						</td>
-						<td style="padding:6px">
-							<div class="collectiontitle">
-								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-									<?php
-									$codeStr = ' ('.$cArr['instcode'];
-									if($cArr['collcode']) $codeStr .= '-'.$cArr['collcode'];
-									$codeStr .= ')';
-									echo $cArr["collname"].$codeStr;
+							<td style="<?php ($cArr["icon"]?'width:35px':''); ?>">
+								<?php
+								if($cArr["icon"]){
+									$cIcon = (substr($cArr["icon"],0,6)=='images'?$CLIENT_ROOT:'').$cArr["icon"];
 									?>
-								</a>
-								<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-									more info
+									<a href = '<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php?collid=<?php echo $collid; ?>'><img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" /></a>
+									<?php
+								}
+								?>
+								&nbsp;
+							</td>
+							<?php
+						}
+						?>
+						<td style="width:25px;">
+							<input data-role="none" name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll()" checked />
+						</td>
+						<td>
+							<div class="collectiontitle">
+								<?php
+								$codeStr = ' ('.$cArr['instcode'];
+								if($cArr['collcode']) $codeStr .= '-'.$cArr['collcode'];
+								$codeStr .= ')';
+								echo $cArr["collname"].$codeStr;
+								?>
+								<a href = '<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank">
+									<?php echo (isset($LANG['MORE_INFO'])?$LANG['MORE_INFO']:'more info...'); ?>
 								</a>
 							</div>
 						</td>
@@ -222,19 +238,21 @@ class OccurrenceSearchSupport {
 				?>
 			</table>
 			<?php
-			if(!isset($occArr['cat'])){
-				?>
-				<div style="float:right;position:absolute;top:<?php echo count($collArr)*5; ?>px;right:0px;">
-					<?php echo $buttonStr; ?>
-				</div>
-				<?php
-			}
-			if(count($collArr) > 40){
-				?>
-				<div style="float:right;position:absolute;top:<?php echo count($collArr)*15; ?>px;right:0px;">
-					<?php echo $buttonStr; ?>
-				</div>
-				<?php
+			if($displaySearchButtons){
+				if(!isset($occArr['cat'])){
+					?>
+					<div style="float:right;position:absolute;top:<?php echo count($collArr)*5; ?>px;right:0px;">
+						<?php echo $buttonStr; ?>
+					</div>
+					<?php
+				}
+				if(count($collArr) > 40){
+					?>
+					<div style="float:right;position:absolute;top:<?php echo count($collArr)*15; ?>px;right:0px;">
+						<?php echo $buttonStr; ?>
+					</div>
+					<?php
+				}
 			}
 		}
 		echo '</div>';
