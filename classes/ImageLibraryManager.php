@@ -1,6 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/TaxonSearchManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceSearchSupport.php');
 
 class ImageLibraryManager extends TaxonSearchManager {
 
@@ -8,6 +9,7 @@ class ImageLibraryManager extends TaxonSearchManager {
 	private $recordCount = 0;
 	private $tidFocus;
 	private $collArrIndex = 0;
+	private $searchSupportManager = null;
 	private $sqlWhere = '';
 
 	function __construct() {
@@ -15,6 +17,8 @@ class ImageLibraryManager extends TaxonSearchManager {
 		if(array_key_exists('TID_FOCUS', $GLOBALS) && preg_match('/^[\d,]+$/', $GLOBALS['TID_FOCUS'])){
 			$this->tidFocus = $GLOBALS['TID_FOCUS'];
 		}
+		$this->readRequestVariables();
+		$this->setSqlWhere();
 	}
 
 	function __destruct(){
@@ -154,174 +158,18 @@ class ImageLibraryManager extends TaxonSearchManager {
 	}
 
 	//Search functions
-	public function getFullCollectionList($catId = ""){
-		$retArr = array();
-		//Set collection array
-		$collIdArr = array();
-		$catIdArr = array();
-		if(isset($this->searchTermsArr['db']) && array_key_exists('db',$this->searchTermsArr)){
-			$cArr = explode(';',$this->searchTermsArr['db']);
-			$collIdArr = explode(',',$cArr[0]);
-			if(isset($cArr[1])) $catIdStr = $cArr[1];
-		}
-		//Set collections
-		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, cat.category '.
-			'FROM omcollections c LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
-			'LEFT JOIN omcollcategories cat ON ccl.ccpk = cat.ccpk '.
-			'ORDER BY ccl.sortsequence, cat.category, c.sortseq, c.CollectionName ';
-		//echo "<div>SQL: ".$sql."</div>";
-		$result = $this->conn->query($sql);
-		while($r = $result->fetch_object()){
-			$collType = (stripos($r->colltype, "observation") !== false?'obs':'spec');
-			if($r->ccpk){
-				if(!isset($retArr[$collType]['cat'][$r->ccpk]['name'])){
-					$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->category;
-				}
-				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["instcode"] = $r->institutioncode;
-				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collcode"] = $r->collectioncode;
-				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collname"] = $r->collectionname;
-				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["icon"] = $r->icon;
-			}
-			else{
-				$retArr[$collType]['coll'][$r->collid]["instcode"] = $r->institutioncode;
-				$retArr[$collType]['coll'][$r->collid]["collcode"] = $r->collectioncode;
-				$retArr[$collType]['coll'][$r->collid]["collname"] = $r->collectionname;
-				$retArr[$collType]['coll'][$r->collid]["icon"] = $r->icon;
-			}
-		}
-		$result->close();
-		//Modify sort so that default catid is first
-		if(isset($retArr['spec']['cat'][$catId])){
-			$targetArr = $retArr['spec']['cat'][$catId];
-			unset($retArr['spec']['cat'][$catId]);
-			array_unshift($retArr['spec']['cat'],$targetArr);
-		}
-		elseif(isset($retArr['obs']['cat'][$catId])){
-			$targetArr = $retArr['obs']['cat'][$catId];
-			unset($retArr['obs']['cat'][$catId]);
-			array_unshift($retArr['obs']['cat'],$targetArr);
-		}
-		return $retArr;
+	public function getFullCollectionList($catId = ''){
+		if(!$this->searchSupportManager) $this->searchSupportManager = new occurrenceSearchSupport($this->conn);
+		if(isset($this->searchTermArr['db'])) $this->searchSupportManager->setCollidStr($this->searchTermArr['db']);
+		return $this->searchSupportManager->getFullCollectionList($catId);
 	}
 
-	public function outputFullMapCollArr($dbArr,$occArr,$defaultCatid = 0){
-		global $DEFAULTCATID;
-		$collCnt = 0;
-		if(isset($occArr['cat'])){
-			$catArr = $occArr['cat'];
-			?>
-			<table style="float:left;width:80%;">
-			<?php
-			foreach($catArr as $catid => $catArr){
-				$name = $catArr["name"];
-				unset($catArr["name"]);
-				$idStr = $this->collArrIndex.'-'.$catid;
-				?>
-				<tr>
-					<td style="padding:6px;width:25px;">
-						<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" <?php echo ((in_array($catid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
-					</td>
-					<td style="padding:9px 5px;width:10px;">
-						<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
-							<img id="plus-<?php echo $idStr; ?>" src="../images/plus_sm.png" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'':'display:none;') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus_sm.png" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'display:none;':'') ?>" />
-						</a>
-					</td>
-					<td style="padding-top:8px;">
-						<span style='text-decoration:none;color:black;font-size:14px;font-weight:bold;'>
-							<a href = '../collections/misc/collprofiles.php?catid=<?php echo $catid; ?>' target="_blank" ><?php echo $name; ?></a>
-						</span>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="3">
-						<div id="cat-<?php echo $idStr; ?>" style="<?php echo (($DEFAULTCATID && $DEFAULTCATID != $catid)?'display:none;':'') ?>margin:10px;padding:10px 20px;border:inset;">
-							<table>
-								<?php
-								foreach($catArr as $collid => $collName2){
-									?>
-									<tr>
-										<td>
-											<?php
-											if($collName2["icon"]){
-												$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"];
-												?>
-												<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
-													<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
-												</a>
-												<?php
-											}
-											?>
-										</td>
-										<td style="padding:6px">
-											<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
-										</td>
-										<td style="padding:6px">
-											<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
-												<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
-											</a>
-											<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
-												more info
-											</a>
-										</td>
-									</tr>
-									<?php
-									$collCnt++;
-								}
-								?>
-							</table>
-						</div>
-					</td>
-				</tr>
-				<?php
-			}
-			?>
-			</table>
-			<?php
-		}
-		if(isset($occArr['coll'])){
-			$collArr = $occArr['coll'];
-			?>
-			<table style="float:left;width:80%;">
-			<?php
-			foreach($collArr as $collid => $cArr){
-				?>
-				<tr>
-					<td>
-						<?php
-						if($cArr["icon"]){
-							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"];
-							?>
-							<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank" >
-								<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
-							</a>
-							<?php
-						}
-						?>
-						&nbsp;
-					</td>
-					<td style="padding:6px;">
-						<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" <?php echo ((in_array($collid,$dbArr)||!$dbArr||in_array('all',$dbArr))?'checked':'') ?> />
-					</td>
-					<td style="padding:6px">
-						<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:14px;' target="_blank" >
-							<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
-						</a>
-						<a href = '../collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;' target="_blank" >
-							more info
-						</a>
-					</td>
-				</tr>
-				<?php
-				$collCnt++;
-			}
-			?>
-			</table>
-			<?php
-		}
-		$this->collArrIndex++;
+	public function outputFullCollArr($occArr, $targetCatID = 0){
+		if(!$this->searchSupportManager) $this->searchSupportManager = new occurrenceSearchSupport($this->conn);
+		$this->searchSupportManager->outputFullCollArr($occArr, $targetCatID, false, false);
 	}
 
-	public function readRequestVariables(){
+	private function readRequestVariables(){
 		//Search will be confinded to a collid, catid, or will remain open to all collection
 		//Limit collids and/or catids
 		$dbStr = '';
@@ -440,7 +288,7 @@ class ImageLibraryManager extends TaxonSearchManager {
 		}
 	}
 
-	public function setSqlWhere(){
+	private function setSqlWhere(){
 		$sqlWhere = "";
 		if(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
 			//Do nothing if db = all
@@ -562,14 +410,12 @@ class ImageLibraryManager extends TaxonSearchManager {
 
 	public function getImageArr($pageRequest,$cntPerPage){
 		$retArr = Array();
-		if(!$this->recordCount){
-			$this->setRecordCnt();
-		}
+		$sqlFrag = $this->getSqlBase().$this->sqlWhere;
+		$this->setRecordCnt($sqlFrag);
 		$sql = 'SELECT DISTINCT i.imgid, o.tidinterpreted, t.tid, t.sciname, i.url, i.thumbnailurl, i.originalurl, '.
 			'u.uid, u.lastname, u.firstname, i.caption, '.
 			'o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode ';
-		$sql .= $this->getSqlBase();
-		$sql .= $this->sqlWhere;
+		$sql .= $sqlFrag;
 		if(array_key_exists("imagecount",$this->searchTermsArr)&&$this->searchTermsArr["imagecount"]){
 			if($this->searchTermsArr["imagecount"] == 'taxon'){
 				$sql .= 'GROUP BY ts.tidaccepted ';
@@ -606,10 +452,10 @@ class ImageLibraryManager extends TaxonSearchManager {
 		//return $sql;
 	}
 
-	private function setRecordCnt(){
-		if($this->sqlWhere){
+	private function setRecordCnt($sqlFrag){
+		if($sqlFrag){
 			$sql = '';
-			if(array_key_exists("imagecount",$this->searchTermsArr)&&$this->searchTermsArr["imagecount"]){
+			if(array_key_exists("imagecount",$this->searchTermsArr) && $this->searchTermsArr["imagecount"]){
 				if($this->searchTermsArr["imagecount"] == 'taxon'){
 					$sql = "SELECT COUNT(DISTINCT o.tidinterpreted) AS cnt ";
 				}
@@ -623,9 +469,8 @@ class ImageLibraryManager extends TaxonSearchManager {
 			else{
 				$sql = "SELECT COUNT(i.imgid) AS cnt ";
 			}
-			$sql .= $this->getSqlBase(false);
-			$sql .= $this->sqlWhere;
-			echo "<div>Count sql: ".$sql."</div>";
+			$sql .= $sqlFrag;
+			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->recordCount = $row->cnt;
