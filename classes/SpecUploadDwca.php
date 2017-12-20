@@ -525,7 +525,7 @@ class SpecUploadDwca extends SpecUploadBase{
 						}
 						if($addRecord){
 							if($this->filterArr && ($this->includeIdentificationHistory || $this->includeImages)){
-								//$this->coreIdArr[] = $recordArr[0];
+								$this->coreIdArr[$recordArr[0]] = '';
 							}
 							$recMap = Array();
 							foreach($this->fieldMap as $symbField => $sMap){
@@ -712,7 +712,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				$this->conn->query('SET unique_checks=0');
 				$this->conn->query('SET foreign_key_checks=0');
 				while($recordArr = $this->getRecordArr($fh)){
-					if(!$this->coreIdArr || in_array($recordArr[0], $this->coreIdArr)){
+					if(!$this->coreIdArr || isset($this->coreIdArr[$recordArr[0]])){
 						$recMap = Array();
 						foreach($fieldMap as $symbField => $iMap){
 							if(substr($symbField,0,8) != 'unmapped'){
