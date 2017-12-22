@@ -1,5 +1,4 @@
 <?php
-include_once($SERVER_ROOT.'/config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 
@@ -51,6 +50,40 @@ class TaxonSearchManager {
 			$this->conn->close();
 			$this->conn = null;
 		}
+	}
+
+	protected function setTaxonRequestVariable(){
+		$taxa = $this->cleanInputStr($_REQUEST["taxa"]);
+		$searchType = 0;
+		if(array_key_exists('taxontype',$_REQUEST) && is_numeric($_REQUEST['taxontype'])) $searchType = $_REQUEST['taxontype'];
+		$this->searchTermArr['taxontype'] = $searchType;
+		$taxaStr = "";
+		if(is_numeric($taxa)){
+			$sql = 'SELECT t.sciname FROM taxa t WHERE (t.tid = '.$taxa.')';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$taxaStr = $r->sciname;
+			}
+			$rs->free();
+		}
+		else{
+			$taxaStr = str_replace(",",";",$taxa);
+			$taxaArr = explode(";",$taxaStr);
+			foreach($taxaArr as $key => $sciName){
+				$snStr = trim($sciName);
+				if($searchType < TaxaSearchType::COMMON_NAME) $snStr = ucfirst($snStr);
+				$taxaArr[$key] = $snStr;
+			}
+			$taxaStr = implode(";",$taxaArr);
+		}
+		$this->searchTermArr["taxa"] = $taxaStr;
+		if(array_key_exists("usethes",$_REQUEST) && $_REQUEST["usethes"]){
+			$this->searchTermArr['usethes'] = 1;
+		}
+		else{
+			$this->searchTermArr['usethes'] = 0;
+		}
+		print_r($this->searchTermsArr); exit;
 	}
 
 	protected function getTaxonWhereFrag(){
@@ -304,10 +337,36 @@ class TaxonSearchManager {
 		return $synArr;
 	}
 
+	//Setter and getters
+	public function setSearchTermArr($stArr){
+		$this->searchTermArr = $stArr;
+	}
+
+	public function getSearchTermArr(){
+		return $this->searchTermArr;
+	}
+
+	public function getSearchTerm($k){
+		if($k && isset($this->searchTermArr[$k])){
+			return trim($this->searchTermArr[$k],' ;');
+		}
+		return '';
+	}
+
+	public function getSearchTermStr(){
+		$retStr = '';
+		foreach($this->searchTermArr as $k => $v){
+			$retStr .= '&'.$k.'='.htmlentities($v);
+		}
+		return trim($retStr,' &');
+	}
+
 	protected function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
+		return htmlspecialchars($str);
+	}
+
+	protected function cleanInputStr($str){
+		$newStr = strip_tags($str);
 		return $newStr;
 	}
 

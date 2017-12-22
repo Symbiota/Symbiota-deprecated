@@ -62,26 +62,26 @@ class OccurrenceListManager extends OccurrenceManager{
 		if($result){
     		while($row = $result->fetch_object()){
     			$returnArr[$row->occid]['collid'] = $row->collid;
-    			$returnArr[$row->occid]['instcode'] = $row->institutioncode;
-    			$returnArr[$row->occid]['collcode'] = $row->collectioncode;
-    			$returnArr[$row->occid]['collname'] = $row->collectionname;
+    			$returnArr[$row->occid]['instcode'] = $this->cleanOutStr($row->institutioncode);
+    			$returnArr[$row->occid]['collcode'] = $this->cleanOutStr($row->collectioncode);
+    			$returnArr[$row->occid]['collname'] = $this->cleanOutStr($row->collectionname);
     			$returnArr[$row->occid]['icon'] = $row->icon;
-    			$returnArr[$row->occid]["catnum"] = $row->catalognumber;
-    			$returnArr[$row->occid]["family"] = $row->family;
-    			$returnArr[$row->occid]["sciname"] = $row->sciname;
+    			$returnArr[$row->occid]["catnum"] = $this->cleanOutStr($row->catalognumber);
+    			$returnArr[$row->occid]["family"] = $this->cleanOutStr($row->family);
+    			$returnArr[$row->occid]["sciname"] = $this->cleanOutStr($row->sciname);
     			$returnArr[$row->occid]["tid"] = $row->tidinterpreted;
     			$returnArr[$row->occid]["author"] = $this->cleanOutStr($row->scientificnameauthorship);
-    			$returnArr[$row->occid]["collector"] = $row->recordedby;
-    			$returnArr[$row->occid]["country"] = $row->country;
-    			$returnArr[$row->occid]["state"] = $row->stateprovince;
-    			$returnArr[$row->occid]["county"] = $row->county;
+    			$returnArr[$row->occid]["collector"] = $this->cleanOutStr($row->recordedby);
+    			$returnArr[$row->occid]["country"] = $this->cleanOutStr($row->country);
+    			$returnArr[$row->occid]["state"] = $this->cleanOutStr($row->stateprovince);
+    			$returnArr[$row->occid]["county"] = $this->cleanOutStr($row->county);
     			$returnArr[$row->occid]["obsuid"] = $row->observeruid;
     			if(!$row->localitysecurity|| $canReadRareSpp
     				|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["CollEditor"]))
     				|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
     					$locStr = str_replace('.,',',',$row->locality);
     					if($row->decimallatitude && $row->decimallongitude) $locStr .= ', '.$row->decimallatitude.' '.$row->decimallongitude;
-    					$returnArr[$row->occid]["locality"] = trim($locStr,' ,;');
+    					$returnArr[$row->occid]["locality"] = $this->cleanOutStr(trim($locStr,' ,;'));
     					$returnArr[$row->occid]["collnum"] = $this->cleanOutStr($row->recordnumber);
     					$dateStr = date('d M Y',strtotime($row->eventdate));
     					if($row->enddayofyear && $row->year){
@@ -90,7 +90,7 @@ class OccurrenceListManager extends OccurrenceManager{
     						}
     					}
     					$returnArr[$row->occid]["date"] = $dateStr;
-    					$returnArr[$row->occid]["habitat"] = $row->habitat;
+    					$returnArr[$row->occid]["habitat"] = $this->cleanOutStr($row->habitat);
     					$elevStr = $row->minimumelevationinmeters;
     					if($row->maximumelevationinmeters) $elevStr .= ' - '.$row->maximumelevationinmeters;
     					$returnArr[$row->occid]["elev"] = $elevStr;
