@@ -67,31 +67,31 @@ class OccurrenceListManager extends OccurrenceManager{
         while($row = $result->fetch_object()){
             $occId = $row->occid;
             $returnArr[$occId]["collid"] = $row->CollID;
-            $returnArr[$occId]["institutioncode"] = $row->institutioncode;
-            $returnArr[$occId]["collectioncode"] = $row->collectioncode;
-            $returnArr[$occId]["collectionname"] = $row->collectionname;
+            $returnArr[$occId]["institutioncode"] = $this->cleanOutStr($row->institutioncode);
+            $returnArr[$occId]["collectioncode"] = $this->cleanOutStr($row->collectioncode);
+            $returnArr[$occId]["collectionname"] = $this->cleanOutStr($row->collectionname);
             $returnArr[$occId]["collicon"] = $row->icon;
-            $returnArr[$occId]["accession"] = $row->catalognumber;
+            $returnArr[$occId]["accession"] = $this->cleanOutStr($row->catalognumber);
             $returnArr[$occId]["family"] = $this->cleanOutStr($row->family);
             $returnArr[$occId]["sciname"] = $this->cleanOutStr($row->sciname);
             $returnArr[$occId]["tid"] = $row->tidinterpreted;
             $returnArr[$occId]["author"] = $this->cleanOutStr($row->author);
             $returnArr[$occId]["collector"] = $this->cleanOutStr($row->recordedby);
-            $returnArr[$occId]["country"] = $row->country;
-            $returnArr[$occId]["state"] = $row->state;
-            $returnArr[$occId]["county"] = $row->county;
-            if(array_key_exists("assochost",$this->searchTermsArr)) $returnArr[$occId]["assochost"] = $row->verbatimsciname;
+            $returnArr[$occId]["country"] = $this->cleanOutStr($row->country);
+            $returnArr[$occId]["state"] = $this->cleanOutStr($row->state);
+            $returnArr[$occId]["county"] = $this->cleanOutStr($row->county);
+            if(array_key_exists("assochost",$this->searchTermsArr)) $returnArr[$occId]["assochost"] = $this->cleanOutStr($row->verbatimsciname);
             $returnArr[$occId]["observeruid"] = $row->observeruid;
-            $returnArr[$occId]["individualCount"] = $row->individualCount;
-            $returnArr[$occId]["lifeStage"] = $row->lifeStage;
-            $returnArr[$occId]["sex"] = $row->sex;
+            $returnArr[$occId]["individualCount"] = $this->cleanOutStr($row->individualCount);
+            $returnArr[$occId]["lifeStage"] = $this->cleanOutStr($row->lifeStage);
+            $returnArr[$occId]["sex"] = $this->cleanOutStr($row->sex);
             $localitySecurity = $row->LocalitySecurity;
             if(!$localitySecurity || $canReadRareSpp
                 || (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["CollEditor"]))
                 || (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
-                $returnArr[$occId]["locality"] = str_replace('.,',',',$row->locality);
+                $returnArr[$occId]["locality"] = $this->cleanOutStr(str_replace('.,',',',$row->locality));
                 $returnArr[$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
-                $returnArr[$occId]["habitat"] = $row->habitat;
+                $returnArr[$occId]["habitat"] = $this->cleanOutStr($row->habitat);
                 $returnArr[$occId]["date"] = $row->date;
                 $returnArr[$occId]["eventDate"] = $row->eventDate;
                 $returnArr[$occId]["elev"] = $row->elev;
