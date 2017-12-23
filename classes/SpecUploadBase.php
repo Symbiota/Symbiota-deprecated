@@ -1071,7 +1071,8 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	protected function finalCleanup(){
-		$this->outputMsg('<li>Transfer process complete</li>');
+		$this->outputMsg('<li>Records Transferred</li>');
+		$this->outputMsg('<li>Cleaning house</li>');
 
 		//Update uploaddate
 		$sql = 'UPDATE omcollectionstats SET uploaddate = CURDATE() WHERE collid IN('.$this->collId.')';
@@ -1098,7 +1099,6 @@ class SpecUploadBase extends SpecUpload{
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
 		$occurMain = new OccurrenceMaintenance($this->conn);
 
-		$this->outputMsg('<li>Cleaning house</li>');
 		if(!$occurMain->generalOccurrenceCleaning($this->collId)){
 			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){

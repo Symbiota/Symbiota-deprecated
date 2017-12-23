@@ -12,7 +12,6 @@ $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $imagesOnly = array_key_exists('imagesonly',$_REQUEST)?$_REQUEST['imagesonly']:0;
 $sortBy = array_key_exists('sortby',$_REQUEST)?$_REQUEST['sortby']:0;
 $formSubmit = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
-if(!$formSubmit && !$ometId) $specimenOnly = 1;
 
 $statusStr = '';
 $isEditor = 0;

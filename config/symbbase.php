@@ -138,13 +138,7 @@ if(!isset($glossaryExportBanner) && isset($GLOSSARY_EXPORT_BANNER)) $glossaryExp
 $LANG_TAG = 'en';
 if(isset($_REQUEST['lang']) && $_REQUEST['lang']){
 	$LANG_TAG = $_REQUEST['lang'];
-
-	// register the session and set the cookie
-	$_SESSION['lang'] = $LANG_TAG;
 	setcookie('lang', $LANG_TAG, time() + (3600 * 24 * 30));
-}
-else if(isset($_SESSION['lang']) && $_SESSION['lang']){
-	$LANG_TAG = $_SESSION['lang'];
 }
 else if(isset($_COOKIE['lang']) && $_COOKIE['lang']){
 	$LANG_TAG = $_COOKIE['lang'];
