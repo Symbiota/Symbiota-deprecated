@@ -454,16 +454,6 @@ class OccurrenceMapManager extends OccurrenceManager {
 		return $version;
 	}
 
-	//Setters and getters
-	public function setSearchTermArr($stArr){
-		$this->searchTermArr = $stArr;
-		$this->searchTerms = 1;
-	}
-
-	public function getSearchTermArr(){
-		return $this->searchTermArr;
-	}
-
 	//Misc support functions
 	private function htmlEntities($string){
 		return htmlspecialchars($string, ENT_XML1 | ENT_QUOTES, 'UTF-8');

@@ -1172,7 +1172,7 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 								</div>
 								<div style="margin:5 0 5 0;"><hr /></div>
 								<div>
-									<span style=""><input data-role="none" type='checkbox' name='thes' value='1' <?php if(array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"]) echo "CHECKED"; ?> ><?php echo (isset($LANG['INCLUDE_SYNONYMS'])?$LANG['INCLUDE_SYNONYMS']:'Include Synonyms'); ?></span>
+									<span style=""><input data-role="none" type='checkbox' name='usethes' value='1' <?php if(array_key_exists("usethes",$previousCriteria) && $previousCriteria["usethes"]) echo "CHECKED"; ?> ><?php echo (isset($LANG['INCLUDE_SYNONYMS'])?$LANG['INCLUDE_SYNONYMS']:'Include Synonyms'); ?></span>
 								</div>
 								<div id="taxonSearch0">
 									<div id="taxa_autocomplete" >
