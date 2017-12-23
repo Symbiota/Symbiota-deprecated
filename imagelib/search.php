@@ -86,16 +86,16 @@ if($action == 'search'){
 				<div id="criteriadiv">
 					<div style="clear:both;padding:5px 0px;">
 						<div style="float:left;">
-							<select id="taxontype" name="nametype">
-								<option id='sciname' value='2' <?php if(array_key_exists("nametype",$_REQUEST) && $_REQUEST["nametype"] == "2") echo "SELECTED"; ?> >Scientific Name</option>
-								<option id='commonname' value='3' <?php if(array_key_exists("nametype",$_REQUEST) && $_REQUEST["nametype"] == "3") echo "SELECTED"; ?> >Common Name</option>
+							<select id="taxontype" name="taxontype">
+								<option id='sciname' value='2' <?php if(array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "2") echo "SELECTED"; ?> >Scientific Name</option>
+								<option id='commonname' value='3' <?php if(array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "3") echo "SELECTED"; ?> >Common Name</option>
 							</select>
 						</div>
 						<div id="taxabox" style="float:left;margin-bottom:10px;">
-							<input id="taxa" type="text" style="width:450px;" name="taxa" value="" title="Separate multiple names w/ commas" autocomplete="off" />
+							<input id="taxa" name="taxa" type="text" style="width:450px;" value="" title="Separate multiple names w/ commas" autocomplete="off" />
 						</div>
-						<div id="thesdiv" style="float:left;margin-left:10px;display:<?php echo ((array_key_exists("nametype",$_REQUEST) && $_REQUEST["nametype"] == "3")?'none':'block'); ?>;" >
-							<input type='checkbox' id='thes' name='thes' value='1' <?php if(!$action || (array_key_exists("thes",$_REQUEST) && $_REQUEST["thes"])) echo "CHECKED"; ?> >Include Synonyms
+						<div id="thesdiv" style="float:left;margin-left:10px;display:<?php echo ((array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "3")?'none':'block'); ?>;" >
+							<input type='checkbox' name='usethes' value='1' <?php if(!$action || (array_key_exists("usethes",$_REQUEST) && $_REQUEST["usethes"])) echo "CHECKED"; ?> >Include Synonyms
 						</div>
 					</div>
 					<div style="clear:both;padding:5px 0px;">
@@ -290,7 +290,6 @@ if($action == 'search'){
 				<?php
 			}
 			?>
-
 		</div>
 	</div>
 	<?php

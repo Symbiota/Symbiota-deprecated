@@ -317,7 +317,7 @@ if($imgArr){
 							if($imgArr["photographerdisplay"]){
 								echo "<div><b>Photographer:</b> ";
 								if(!$imgArr["photographer"]){
-									$phLink = 'search.php?imagedisplay=thumbnail&imagetype=all&phuidstr='.$imgArr["photographeruid"].'&phjson=[{'.urlencode('"name":"'.$imgArr["photographerdisplay"].'","id":"'.$imgArr["photographeruid"].'"').'}]&submitaction=Load Images';
+									$phLink = 'search.php?imagedisplay=thumbnail&imagetype=all&phuidstr='.$imgArr["photographeruid"].'&submitaction=Load Images';
 									echo '<a href="'.$phLink.'">';
 								}
 								echo $imgArr["photographerdisplay"];
