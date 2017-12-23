@@ -1,7 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/content/lang/collections/harvestparams.'.$LANG_TAG.'.php');
-include_once($SERVER_ROOT.'/classes/TaxonSearchManager.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceTaxaManager.php');
 
 class TaxonSearchSupport{
 

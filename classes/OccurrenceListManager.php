@@ -33,18 +33,6 @@ class OccurrenceListManager extends OccurrenceManager{
 			'o.country, o.stateprovince, o.county, o.locality, o.decimallatitude, o.decimallongitude, o.localitysecurity, o.localitysecurityreason, '.
 			'o.habitat, o.minimumelevationinmeters, o.maximumelevationinmeters, o.observeruid, c.sortseq '.
 			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
-		/*
-		$sql = 'SELECT DISTINCT o.occid, c.CollID, c.institutioncode, c.collectioncode, c.collectionname, c.icon, '.
-			'CONCAT_WS(":",c.institutioncode, c.collectioncode) AS collection, '.
-			'IFNULL(o.CatalogNumber,"") AS catalognumber, o.family, o.sciname, o.tidinterpreted, '.
-			'CONCAT_WS(" to ",IFNULL(DATE_FORMAT(o.eventDate,"%d %M %Y"),""),DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),"%d %M %Y")) AS date, '.
-			'IFNULL(o.scientificNameAuthorship,"") AS author, IFNULL(o.recordedBy,"") AS recordedby, IFNULL(o.recordNumber,"") AS recordnumber, '.
-			'o.eventDate, IFNULL(o.country,"") AS country, IFNULL(o.StateProvince,"") AS state, IFNULL(o.county,"") AS county, '.
-			'CONCAT_WS(", ",o.locality,CONCAT(ROUND(o.decimallatitude,5)," ",ROUND(o.decimallongitude,5))) AS locality, '.
-			'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, '.
-			'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid '.
-			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
-		*/
 		$sql .= $this->getTableJoins($sqlWhere).$sqlWhere;
 
 		if($this->sortArr){

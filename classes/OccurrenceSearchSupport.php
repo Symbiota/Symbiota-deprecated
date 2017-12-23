@@ -259,6 +259,64 @@ class OccurrenceSearchSupport {
 		$this->collArrIndex++;
 	}
 
+	public static function getDbRequestVariable($reqArr){
+		$dbStr = $reqArr['db'];
+		if(is_array($dbStr)){
+			$dbStr = implode(',',array_unique($dbStr)).';';
+		}
+		else{
+			$dbStr = $dbStr;
+		}
+		if(strpos($dbStr,'allspec') !== false){
+			$dbStr = 'allspec';
+		}
+		elseif(strpos($dbStr,'allobs') !== false){
+			$dbStr = 'allobs';
+		}
+		elseif(strpos($dbStr,'all') !== false){
+			$dbStr = 'all';
+		}
+		if(substr($dbStr,0,3) != 'all' && array_key_exists('cat',$reqArr) && $reqArr['cat']){
+			$catArr = array();
+			$catid = $reqArr['cat'];
+			if(is_string($catid)){
+				$catArr = Array($catid);
+			}
+			else{
+				$catArr = $catid;
+			}
+			if(!$dbStr) $dbStr = ';';
+			$dbStr .= implode(",",$catArr);
+		}
+		if(!$dbStr) $dbStr = 'all';
+		return $dbStr;
+	}
+
+	public static function getDbWhereFrag($dbSearchTerm){
+		$sqlRet = "";
+		//Do nothing if db = all
+		if($dbSearchTerm != 'all'){
+			if($dbSearchTerm == 'allspec'){
+				$sqlRet .= 'AND (o.collid IN(SELECT collid FROM omcollections WHERE colltype = "Preserved Specimens")) ';
+			}
+			elseif($dbSearchTerm == 'allobs'){
+				$sqlRet .= 'AND (o.collid IN(SELECT collid FROM omcollections WHERE colltype IN("General Observations","Observations"))) ';
+			}
+			else{
+				$dbArr = explode(';',$dbSearchTerm);
+				$dbStr = '';
+				if(isset($dbArr[0]) && $dbArr[0]){
+					$dbStr = "(o.collid IN(".$dbArr[0].")) ";
+				}
+				if(isset($dbArr[1]) && $dbArr[1]){
+					//$dbStr .= ($dbStr?'OR ':'').'(o.CollID IN(SELECT collid FROM omcollcatlink WHERE (ccpk IN('.$dbArr[1].')))) ';
+				}
+				$sqlRet .= 'AND ('.$dbStr.') ';
+			}
+		}
+		return $sqlRet;
+	}
+
 	public function setCollidStr($str){
 		$this->collidStr = $str;
 	}

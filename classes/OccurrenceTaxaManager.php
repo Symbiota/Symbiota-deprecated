@@ -36,7 +36,7 @@ abstract class TaxaSearchType {
 	}
 }
 
-class TaxonSearchManager {
+class OccurrenceTaxaManager {
 
 	protected $conn	= null;
 	protected $taxaArr = array();
@@ -83,7 +83,6 @@ class TaxonSearchManager {
 		else{
 			$this->searchTermArr['usethes'] = 0;
 		}
-		print_r($this->searchTermsArr); exit;
 	}
 
 	protected function getTaxonWhereFrag(){
@@ -356,7 +355,7 @@ class TaxonSearchManager {
 	public function getSearchTermStr(){
 		$retStr = '';
 		foreach($this->searchTermArr as $k => $v){
-			$retStr .= '&'.$k.'='.htmlentities($v);
+			$retStr .= '&'.$k.'='.urlencode($v);
 		}
 		return trim($retStr,' &');
 	}
