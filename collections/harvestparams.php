@@ -15,8 +15,9 @@ $searchVar = $collManager->getSearchTermStr();
 	<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
-	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=171215"></script>
+	<script src="../js/symb/collections.harvestparams.js?ver=171215" type="text/javascript"></script>
 	<script type="text/javascript">
+		var CLIENT_ROOT = "<?php echo $CLIENT_ROOT; ?>";
 		$(document).ready(function() {
 			<?php
 			if($searchVar){
@@ -28,9 +29,9 @@ $searchVar = $collManager->getSearchTermStr();
 			setHarvestParamsForm();
 		});
 	</script>
+	<script src="../js/symb/api.taxonomy.taxasuggest.js?ver=171226" type="text/javascript"></script>
 </head>
 <body>
-
 <?php
 	$displayLeftMenu = (isset($collections_harvestparamsMenu)?$collections_harvestparamsMenu:false);
 	include($SERVER_ROOT.'/header.php');
@@ -67,17 +68,15 @@ $searchVar = $collManager->getSearchTermStr();
 				<h1><?php echo $LANG['TAXON_HEADER']; ?></h1>
 				<span style="margin-left:5px;"><input type='checkbox' name='usethes' value='1' CHECKED /><?php echo $LANG['INCLUDE_SYNONYMS']; ?></span>
 			</div>
-			<div id="taxonSearch0">
-				<div>
-					<select id="taxontype" name="taxontype">
-						<option value='0'><?php echo $LANG['SELECT_1-0']; ?></option>
-						<option value='1'><?php echo $LANG['SELECT_1-1']; ?></option>
-						<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
-						<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
-						<option value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
-					</select>
-					<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $LANG['SEPARATE_MULTIPLE']; ?>" />
-				</div>
+			<div>
+				<select id="taxontype" name="taxontype">
+					<option value='1'><?php echo $LANG['SELECT_1-1']; ?></option>
+					<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
+					<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
+					<option value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
+					<option value='5'><?php echo $LANG['SELECT_1-5']; ?></option>
+				</select>
+				<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $LANG['SEPARATE_MULTIPLE']; ?>" />
 			</div>
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div>

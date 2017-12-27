@@ -24,59 +24,47 @@ class TaxonSearchSupport{
 			if($taxonType == TaxaSearchType::ANY_NAME){
 			    global $LANG;
 			    $sql =
-			    "SELECT DISTINCT CONCAT('".$LANG['TSTYPE_1-5'].": ',v.vernacularname) AS sciname, ".
-			    "                CONCAT('A:'                       ,v.vernacularname) AS snorder ".
+			    "SELECT DISTINCT CONCAT('".$LANG['SELECT_1-5'].": ',v.vernacularname) AS sciname ".
 			    "FROM taxavernaculars v ".
 			    "WHERE v.vernacularname LIKE '%".$queryString."%' ".
 
 			    "UNION ".
 
-			    "SELECT          CONCAT('".$LANG['TSTYPE_1-4'].": ',sciname         ) AS sciname, ".
-			    "                CONCAT('E:'                       ,sciname         ) AS snorder ".
+			    "SELECT DISTINCT CONCAT('".$LANG['SELECT_1-2'].": ',sciname         ) AS sciname ".
 			    "FROM taxa ".
-			    "WHERE sciname LIKE '%".$queryString."%' AND rankid > 20 AND rankid < 140 ".
+			    "WHERE sciname LIKE '%".$queryString."%' AND rankid > 179 ".
 
 			    "UNION ".
 
-			    "SELECT DISTINCT CONCAT('".$LANG['TSTYPE_1-3'].": ',sciname         ) AS sciname, ".
-			    "                CONCAT('B:'                       ,sciname         ) AS snorder ".
+			    "SELECT DISTINCT CONCAT('".$LANG['SELECT_1-3'].": ',sciname         ) AS sciname ".
 			    "FROM taxa ".
-			    "WHERE sciname LIKE '%".$queryString."%' AND rankid > 140 ".
+			    "WHERE sciname LIKE '".$queryString."%' AND rankid = 140 ".
 
 			    "UNION ".
 
-			    "SELECT DISTINCT CONCAT('".$LANG['TSTYPE_1-2'].": ',family          ) AS sciname, ".
-			    "                CONCAT('C:'                       ,family          ) AS snorder ".
-			    "FROM taxstatus ".
-			    "WHERE family LIKE '%".$queryString."%' ".
-
-			    "UNION ".
-
-			    "SELECT DISTINCT CONCAT('".$LANG['TSTYPE_1-2'].": ',sciname         ) AS sciname, ".
-			    "                CONCAT('C:'                       ,sciname         ) AS snorder ".
+			    "SELECT          CONCAT('".$LANG['SELECT_1-4'].": ',sciname         ) AS sciname ".
 			    "FROM taxa ".
-			    "WHERE sciname LIKE '%".$queryString."%' AND rankid = 140 ".
+			    "WHERE sciname LIKE '".$queryString."%' AND rankid > 20 AND rankid < 180 AND rankid != 140 ";
 
-			    "ORDER BY snorder LIMIT 30";
 			}
-			elseif($taxonType == TaxaSearchType::SPECIES_NAME_ONLY){
-				// Species name only
-				$sql = 'SELECT sciname FROM taxa WHERE sciname LIKE "'.$queryString.'%" AND rankid > 179 LIMIT 30';
+			elseif($taxonType == TaxaSearchType::SCIENTIFIC_NAME){
+				$sql = 'SELECT sciname FROM taxa WHERE sciname LIKE "'.$queryString.'%" LIMIT 30';
 			}
-			elseif($taxonType == TaxaSearchType::HIGHER_TAXONOMY){
-				// Higher taxon
+			elseif($taxonType == TaxaSearchType::FAMILY_ONLY){
+				$sql = 'SELECT sciname FROM taxa WHERE rankid = 140 AND sciname LIKE "'.$queryString.'%" LIMIT 30';
+			}
+			elseif($taxonType == TaxaSearchType::TAXONOMIC_GROUP){
 				$sql = 'SELECT sciname FROM taxa WHERE rankid > 20 AND rankid < 180 AND sciname LIKE "'.$queryString.'%" LIMIT 30';
 			}
 			elseif($taxonType == TaxaSearchType::COMMON_NAME){
-				// Common name
-				$sql = 'SELECT DISTINCT v.vernacularname AS sciname FROM taxavernaculars v WHERE v.vernacularname LIKE "%'.$queryString.'%" limit 50 ';
+				$sql = 'SELECT DISTINCT v.vernacularname AS sciname FROM taxavernaculars v WHERE v.vernacularname LIKE "%'.$queryString.'%" LIMIT 50 ';
 			}
 			else{
 				$sql = 'SELECT sciname FROM taxa WHERE sciname LIKE "'.$queryString.'%" LIMIT 20';
 			}
 			$rs = $this->conn->query($sql);
 			while ($r = $rs->fetch_object()) {
-				$retArr[] = htmlentities($r->sciname);
+				$retArr[] = $r->sciname;
 			}
 			$rs->free();
 		}

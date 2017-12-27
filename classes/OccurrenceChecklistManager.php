@@ -136,5 +136,15 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		if($conn !== false) $conn->close();
 		return $dynClid;
 	}
+
+	public function getTaxonAuthorityList(){
+		$taxonAuthorityList = Array();
+		$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta WHERE (ta.isactive <> 0)";
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$taxonAuthorityList[$row->taxauthid] = $row->name;
+		}
+		return $taxonAuthorityList;
+	}
 }
 ?>

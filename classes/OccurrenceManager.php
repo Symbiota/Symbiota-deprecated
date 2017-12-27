@@ -6,6 +6,7 @@ include_once($SERVER_ROOT.'/classes/OccurrenceTaxaManager.php');
 
 class OccurrenceManager extends OccurrenceTaxaManager {
 
+	protected $searchTermArr = Array();
 	protected $sqlWhere;
 	protected $displaySearchArr = Array();
 	protected $reset = 0;
@@ -378,6 +379,12 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
 			$sqlJoin .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		}
+		if(strpos($sqlWhere,'e.taxauthid')){
+			$sqlJoin .= 'INNER JOIN taxaenumtree e ON o.tidinterpreted = e.tid ';
+		}
+		if(strpos($sqlWhere,'ts.family')){
+			$sqlJoin .= 'LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
+		}
 		if(array_key_exists("polycoords",$this->searchTermArr)) $sqlJoin .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 		return $sqlJoin;
 	}
@@ -450,42 +457,47 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		return $retStr;
 	}
 
-	public function getTaxaSearchStr(){
-		$returnArr = Array();
-		if($this->taxaArr){
-			foreach($this->taxaArr as $taxonName => $taxonArr){
-				$str = '';
-				if($this->searchTermArr["taxontype"] == TaxaSearchType::ANY_NAME) TaxaSearchType::anyNameSearchTag($taxonArr["taxontype"]).": ";
-				$str .= $taxonName;
-				if(array_key_exists("scinames",$taxonArr)){
-					$str .= " => ".implode(",",$taxonArr["scinames"]);
-				}
-				if(array_key_exists("synonyms",$taxonArr)){
-					$str .= " (".implode(", ",$taxonArr["synonyms"]).")";
-				}
-				$returnArr[] = $str;
-			}
-		}
-		return implode(", ", $returnArr);
-	}
-
 	public function getLocalSearchStr(){
 		return implode("; ", $this->displaySearchArr);
 	}
 
-	public function getTaxonAuthorityList(){
-		$taxonAuthorityList = Array();
-		$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta WHERE (ta.isactive <> 0)";
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$taxonAuthorityList[$row->taxauthid] = $row->name;
+	public function getSearchTerm($k){
+		if($k && isset($this->searchTermArr[$k])){
+			return trim($this->searchTermArr[$k],' ;');
 		}
-		return $taxonAuthorityList;
+		return '';
+	}
+
+	public function getSearchTermStr(){
+		//Returns a search variable string
+		$retStr = '';
+		foreach($this->searchTermArr as $k => $v){
+			$retStr .= '&'.$k.'='.urlencode($v);
+		}
+		if(isset($this->taxaArr['search'])){
+			$retStr .= '&taxa='.urlencode($this->taxaArr['search']);
+			if($this->taxaArr['usethes']) $retStr .= '&usethes=1';
+			$retStr .= '&taxontype='.$this->taxaArr['taxontype'];
+		}
+		return trim($retStr,' &');
 	}
 
 	protected function readRequestVariables(){
 		if(array_key_exists('searchvar',$_REQUEST)){
 			parse_str($_REQUEST['searchvar'],$retArr);
+			if(isset($retArr['taxa'])){
+				$taxaArr['taxa'] = $retArr['taxa'];
+				unset($retArr['taxa']);
+				if(isset($retArr['usethes'])){
+					$taxaArr['usethes'] = $retArr['usethes'];
+					unset($retArr['usethes']);
+				}
+				if(isset($retArr['taxontype'])){
+					$taxaArr['taxontype'] = $retArr['taxontype'];
+					unset($retArr['taxontype']);
+				}
+				$this->setTaxonRequestVariable($taxaArr);
+			}
 			if($retArr) $this->searchTermArr = $retArr;
 		}
 		//Search will be confinded to a clid vouchers, collid, catid, or will remain open to all collection

@@ -78,7 +78,7 @@ class MappingShared{
 		$taxaMapper["undefined"] = "undefined";
 		$cnt = 0;
 		//echo json_encode($this->taxaArr);
-		foreach($this->taxaArr as $key => $valueArr){
+		foreach($this->taxaArr['taxa'] as $key => $valueArr){
 			$coordArr[$key] = Array("color" => $this->iconColors[$cnt%7]);
 			$cnt++;
 			$taxaMapper[$key] = $key;
@@ -129,7 +129,7 @@ class MappingShared{
 				}
 				if($this->fieldArr){
 					foreach($this->fieldArr as $k => $v){
-						$coordArr[$taxaMapper[$sciName]][$occId][$v] = $this->xmlentities($row->$v);
+						$coordArr[$taxaMapper[$sciName]][$occId][$v] = $this->xmlentities($v);
 					}
 				}
 			}
