@@ -85,21 +85,26 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 		.collectiontitle{ font-size: 12px; }
 		.collectiontitle a{ font-size: 75%; }
 		.collectiontitle a:hover{ font-weight: bold; color: grey; }
+		.ui-front { z-index: 9999999 !important; }
 	</style>
-	<script type="text/javascript" src="../../js/jquery.js"></script>
-	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../../js/jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery.mobile-1.4.0.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery-1.9.1.js"></script>
-	<script type="text/javascript" src="../../js/jquery-ui-1.10.4.js"></script>
-	<script type="text/javascript" src="../../js/jquery.popupoverlay.js"></script>
+	<script src="../../js/jquery.js" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
+	<script src="../../js/jquery-1.10.2.min.js" type="text/javascript"></script>
+	<script src="../../js/jquery.mobile-1.4.0.min.js" type="text/javascript"></script>
+	<script src="../../js/jquery-1.9.1.js" type="text/javascript"></script>
+	<script src="../../js/jquery-ui-1.10.4.js" type="text/javascript"></script>
+	<script src="../../js/jquery.popupoverlay.js" type="text/javascript"></script>
 	<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>" ></script>
-	<script type="text/javascript" src="../../js/jscolor/jscolor.js?ver=4"></script>
-	<script type="text/javascript" src="../../js/symb/collections.map.index.js?1712082"></script>
-	<script type="text/javascript" src="../../js/symb/markerclusterer.js?20170403"></script>
-	<script type="text/javascript" src="../../js/symb/oms.min.js"></script>
-	<script type="text/javascript" src="../../js/symb/keydragzoom.js"></script>
-	<script type="text/javascript" src="../../js/symb/infobox.js"></script>
+	<script src="../../js/jscolor/jscolor.js?ver=4" type="text/javascript"></script>
+	<script src="../../js/symb/collections.map.index.js?1712082" type="text/javascript"></script>
+	<script src="../../js/symb/markerclusterer.js?20170403" type="text/javascript"></script>
+	<script src="../../js/symb/oms.min.js" type="text/javascript"></script>
+	<script src="../../js/symb/keydragzoom.js" type="text/javascript"></script>
+	<script src="../../js/symb/infobox.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var CLIENT_ROOT = "<?php echo $CLIENT_ROOT; ?>";
+	</script>
+	<script src="../../js/symb/api.taxonomy.taxasuggest.js?ver=171226" type="text/javascript"></script>
 	<script type="text/javascript">
 		var map;
 		var useLLDecimal = true;
@@ -1174,21 +1179,21 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 								<div>
 									<span style=""><input data-role="none" type='checkbox' name='usethes' value='1' <?php if(array_key_exists("usethes",$previousCriteria) && $previousCriteria["usethes"]) echo "CHECKED"; ?> ><?php echo (isset($LANG['INCLUDE_SYNONYMS'])?$LANG['INCLUDE_SYNONYMS']:'Include Synonyms'); ?></span>
 								</div>
-								<div id="taxonSearch0">
-									<div id="taxa_autocomplete" >
-										<div style="margin-top:5px;">
-											<select data-role="none" id="taxontype" name="type">
-												<option id='familysciname' value='1' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "1") echo "SELECTED"; ?> >Family or Scientific Name</option>
-												<option id='family' value='2' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "2") echo "SELECTED"; ?> >Family only</option>
-												<option id='sciname' value='3' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
-												<option id='highertaxon' value='4' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "4") echo "SELECTED"; ?> >Higher Taxonomy</option>
-												<option id='commonname' value='5' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "5") echo "SELECTED"; ?> >Common Name</option>
-												<option id='anyname' value='6' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "6") echo "SELECTED"; ?> >Any Name</option>
-											</select>
-										</div>
-										<div style="margin-top:5px;">
-											<?php echo (isset($LANG['TAXA'])?$LANG['TAXA']:'Taxa'); ?>: <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="<?php if(array_key_exists("taxa",$previousCriteria)) echo $previousCriteria["taxa"]; ?>" title="<?php echo (isset($LANG['SEPARATE_MULTIPLE'])?$LANG['SEPARATE_MULTIPLE']:'Separate multiple taxa w/ commas'); ?>" />
-										</div>
+								<div>
+									<div style="margin-top:5px;">
+										<select data-role="none" id="taxontype" name="taxontype">
+											<?php
+											$taxonType = 0;
+											if(array_key_exists('taxontype',$previousCriteria)) $taxonType = $previousCriteria['taxontype'];
+											for($h=1;$h<6;$h++){
+												echo '<option value="'.$h.'" '.($taxonType==$h?'SELECTED':'').'>'.$LANG['SELECT_1-'.$h].'</option>';
+											}
+											?>
+										</select>
+									</div>
+									<div style="margin-top:5px;">
+										<?php echo (isset($LANG['TAXA'])?$LANG['TAXA']:'Taxa'); ?>:
+										<input data-role="none" id="taxa" name="taxa" type="text" style="width:275px;" value="<?php if(array_key_exists("taxa",$previousCriteria)) echo $previousCriteria["taxa"]; ?>" title="<?php echo (isset($LANG['SEPARATE_MULTIPLE'])?$LANG['SEPARATE_MULTIPLE']:'Separate multiple taxa w/ commas'); ?>" />
 									</div>
 								</div>
 								<div style="margin:5 0 5 0;"><hr /></div>

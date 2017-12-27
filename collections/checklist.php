@@ -25,7 +25,7 @@ $searchVarEncoded = urlencode($searchVar);
 	<?php
 	if($KEY_MOD_IS_ACTIVE){
 		?>
-		<form action="checklistsymbiota.php" method="get" style="float:right">
+		<form action="checklistsymbiota.php" method="post" style="float:right">
 			<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['OPEN_KEY']; ?>">
 				<img src="../images/key.png" style="width:15px" />
 			</button>
@@ -37,7 +37,7 @@ $searchVarEncoded = urlencode($searchVar);
 	}
 	if($FLORA_MOD_IS_ACTIVE){
 		?>
-		<form action="checklistsymbiota.php" method="get" style="float:right">
+		<form action="checklistsymbiota.php" method="post" style="float:right">
 			<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['OPEN_CHECKLIST_EXPLORER']; ?>">
 				<img src="../images/list.png" style="width:15px" />
 			</button>
