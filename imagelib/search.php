@@ -1,5 +1,6 @@
 <?php
 include_once('../config/symbini.php');
+include_once($SERVER_ROOT.'/content/lang/imagelib/search.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/ImageLibraryManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -7,7 +8,6 @@ $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:1
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1;
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
-$dbArr = array_key_exists('db', $_REQUEST)?$_REQUEST["db"]:array();
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:'';
 
 if(!is_numeric($catId)) $catId = 0;
@@ -33,7 +33,6 @@ if($action == 'search'){
 	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
 	<script src="../js/symb/collections.index.js?ver=2" type="text/javascript"></script>
-	<script src="../js/symb/imagelib.search.js?ver=20170711" type="text/javascript"></script>
 	<meta name='keywords' content='' />
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
@@ -41,13 +40,17 @@ if($action == 'search'){
 	<script type="text/javascript">
 		jQuery(document).ready(function($) {
 			$('#tabs').tabs({
-				active: <?php echo (($imageArr)?'2':'0'); ?>,
+				active: <?php echo (($imageArr)?'2':'1'); ?>,
 				beforeLoad: function( event, ui ) {
 					$(ui.panel).html("<p>Loading...</p>");
 				}
 			});
 		});
+
+		var CLIENT_ROOT = "<?php echo $CLIENT_ROOT; ?>";
 	</script>
+	<script src="../js/symb/api.taxonomy.taxasuggest.js?ver=171226" type="text/javascript"></script>
+	<script src="../js/symb/imagelib.search.js?ver=20171220" type="text/javascript"></script>
 </head>
 <body>
 	<?php
@@ -71,8 +74,8 @@ if($action == 'search'){
 	<div id="innertext">
 		<div id="tabs" style="margin:0px;">
 			<ul>
-				<li><a href="#criteriadiv">Search Criteria</a></li>
 				<li><a href="#collectiondiv">Collections</a></li>
+				<li><a href="#criteriadiv">Search Criteria</a></li>
 				<?php
 				if($imageArr){
 					?>
@@ -81,87 +84,7 @@ if($action == 'search'){
 				}
 				?>
 			</ul>
-
-			<form name="imagesearchform" id="imagesearchform" action="search.php" method="get" onsubmit="return submitImageForm();">
-				<div id="criteriadiv">
-					<div style="clear:both;padding:5px 0px;">
-						<div style="float:left;">
-							<select id="taxontype" name="taxontype">
-								<option id='sciname' value='2' <?php if(array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "2") echo "SELECTED"; ?> >Scientific Name</option>
-								<option id='commonname' value='3' <?php if(array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "3") echo "SELECTED"; ?> >Common Name</option>
-							</select>
-						</div>
-						<div id="taxabox" style="float:left;margin-bottom:10px;">
-							<input id="taxa" name="taxa" type="text" style="width:450px;" value="" title="Separate multiple names w/ commas" autocomplete="off" />
-						</div>
-						<div id="thesdiv" style="float:left;margin-left:10px;display:<?php echo ((array_key_exists("taxontype",$_REQUEST) && $_REQUEST["taxontype"] == "3")?'none':'block'); ?>;" >
-							<input type='checkbox' name='usethes' value='1' <?php if(!$action || (array_key_exists("usethes",$_REQUEST) && $_REQUEST["usethes"])) echo "CHECKED"; ?> >Include Synonyms
-						</div>
-					</div>
-					<div style="clear:both;padding:5px 0px;">
-						<div style="float:left;margin-right:8px;">
-							Photographers:
-						</div>
-						<div style="float:left;">
-							<input type="text" id="photographer" style="width:450px;" name="photographer" value="" title="Separate multiple photographers w/ commas" />
-						</div>
-					</div>
-					<?php
-					if($tagArr = $imgLibManager->getTagArr()){
-						?>
-						<div style="clear:both;padding:5px 0px;">
-							Image Tags:
-							<select id="tags" style="width:350px;" name="tags" >
-								<option value="">Select Tag</option>
-								<option value="">--------------</option>
-								<?php
-								foreach($tagArr as $k){
-									echo '<option value="'.$k.'" '.((array_key_exists("tags",$_REQUEST))&&($_REQUEST["tags"]==$k)?'SELECTED ':'').'>'.$k.'</option>';
-								}
-								?>
-							</select>
-						</div>
-						<?php
-					}
-					?>
-					<div style="clear:both;padding:5px 0px;">
-						<div style="float:left;margin-right:8px;">
-							Image Keywords:
-						</div>
-						<div style="float:left;">
-							<input type="text" id="keywords" style="width:350px;" name="keywords" value="" title="Separate multiple keywords w/ commas" />
-						</div>
-					</div>
-					<div style="clear:both;padding:5px 0px;">
-						Limit Image Counts:
-						<select id="imagecount" name="imagecount">
-							<option value="all" <?php echo ((array_key_exists("imagecount",$_REQUEST))&&($_REQUEST["imagecount"]=='all')?'SELECTED ':''); ?>>All images</option>
-							<option value="taxon" <?php echo ((array_key_exists("imagecount",$_REQUEST))&&($_REQUEST["imagecount"]=='taxon')?'SELECTED ':''); ?>>One per taxon</option>
-							<option value="specimen" <?php echo ((array_key_exists("imagecount",$_REQUEST))&&($_REQUEST["imagecount"]=='specimen')?'SELECTED ':''); ?>>One per specimen</option>
-						</select>
-					</div>
-					<div style="clear:both;padding:5px 0px;">
-						<fieldset style="width:350px;padding-bottom:10px">
-							<legend>Limit Image Type</legend>
-							<div style="margin-top:5px;">
-								<input type='radio' name='imagetype' value='all' <?php if((!array_key_exists("imagetype",$_REQUEST)) || (array_key_exists("imagetype",$_REQUEST) && $_REQUEST["imagetype"] == 'all')) echo "CHECKED"; ?> > All Images
-							</div>
-							<div style="margin-top:5px;">
-								<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$_REQUEST) && $_REQUEST["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Specimen Images
-							</div>
-							<div style="margin-top:5px;">
-								<input type='radio' name='imagetype' value='observationonly' <?php if(array_key_exists("imagetype",$_REQUEST) && $_REQUEST["imagetype"] == 'observationonly') echo "CHECKED"; ?> > Image Vouchered Observations
-							</div>
-							<div style="margin-top:5px;">
-								<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$_REQUEST) && $_REQUEST["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Field Images (lacking specific locality details)
-							</div>
-						</fieldset>
-					</div>
-					<div style="clear:both;margin:20px;">
-						<button id="loadimages" style='margin: 20px' name="submitaction" type="submit" value="search" >Load Images</button>
-					</div>
-				</div>
-
+			<form name="imagesearchform" id="imagesearchform" action="search.php" method="post">
 				<div id="collectiondiv">
 					<?php
 					if($specArr || $obsArr){
@@ -183,8 +106,86 @@ if($action == 'search'){
 					?>
 					<div style="clear:both;"></div>
 				</div>
+				<div id="criteriadiv">
+					<div style="clear:both;padding:5px 0px;">
+						<div style="float:left;">
+							<select id="taxontype" name="taxontype">
+								<?php
+								$taxonType = 1;
+								if(isset($DEFAULT_TAXON_SEARCH) && $DEFAULT_TAXON_SEARCH) $taxonType = $DEFAULT_TAXON_SEARCH;
+								if(array_key_exists('taxontype',$_REQUEST)) $taxonType = $_REQUEST['taxontype'];
+								for($h=1;$h<6;$h++){
+									echo '<option value="'.$h.'" '.($taxonType==$h?'SELECTED':'').'>'.$LANG['SELECT_1-'.$h].'</option>';
+								}
+								?>
+							</select>
+						</div>
+						<div style="float:left;margin-bottom:5px;">
+							<input id="taxa" name="taxa" type="text" style="width:450px;" value="<?php echo (isset($_REQUEST["taxa"])?$_REQUEST["taxa"]:''); ?>" title="Separate multiple names w/ commas" autocomplete="off" />
+						</div>
+						<div style="float:left;margin-left:10px;" >
+							<input name="usethes" type="checkbox" value="1" <?php if(!$action || (array_key_exists("usethes",$_REQUEST) && $_REQUEST["usethes"])) echo "CHECKED"; ?> >Include Synonyms
+						</div>
+					</div>
+					<div style="clear:both;margin-bottom:5px;">
+						Photographer:
+						<select name="phuid">
+							<option value="">All Photogrpahers</option>
+							<option value="">-----------------------------</option>
+							<?php
+							$uidList = $imgLibManager->getPhotographerUidArr();
+							foreach($uidList as $uid => $name){
+								echo '<option value="'.$uid.'" '.((isset($_REQUEST['phuid']) && $_REQUEST['phuid'] == $uid)?'SELECTED':'').'>'.$name.'</option>';
+							}
+							?>
+						</select>
+					</div>
+					<?php
+					if($tagArr = $imgLibManager->getTagArr()){
+						?>
+						<div style="margin-bottom:5px;">
+							Image Tag:
+							<select name="tags" >
+								<option value="">Select Tag</option>
+								<option value="">--------------</option>
+								<?php
+								foreach($tagArr as $k){
+									echo '<option value="'.$k.'" '.((array_key_exists("tags",$_REQUEST))&&($_REQUEST["tags"]==$k)?'SELECTED ':'').'>'.$k.'</option>';
+								}
+								?>
+							</select>
+						</div>
+						<?php
+					}
+					?>
+					<!--
+					<div style="clear:both;margin-bottom:5px;">
+						Image Keywords:
+						<input type="text" id="keywords" style="width:350px;" name="keywords" value="" title="Separate multiple keywords w/ commas" />
+					</div>
+					 -->
+					<div style="margin-bottom:5px;">
+						Limit Image Counts:
+						<select id="imagecount" name="imagecount">
+							<option value="all" <?php echo ((array_key_exists("imagecount",$_REQUEST))&&($_REQUEST["imagecount"]=='all')?'SELECTED ':''); ?>>All images</option>
+							<option value="taxon" <?php echo ((array_key_exists("imagecount",$_REQUEST))&&($_REQUEST["imagecount"]=='taxon')?'SELECTED ':''); ?>>One per taxon</option>
+							<option value="specimen" <?php echo ((array_key_exists("imagecount",$_REQUEST))&&($_REQUEST["imagecount"]=='specimen')?'SELECTED ':''); ?>>One per specimen</option>
+						</select>
+					</div>
+					<div style="margin-bottom:5px;">
+						Limit Image Type:
+						<select name="imagetype">
+							<option value="0">All Images</option>
+							<option value="1" <?php echo (isset($_REQUEST["imagetype"]) && $_REQUEST["imagetype"] == 1?'SELECTED':''); ?>>Specimen Images</option>
+							<option value="2" <?php echo (isset($_REQUEST["imagetype"]) && $_REQUEST["imagetype"] == 2?'SELECTED':''); ?>>Image Vouchered Observations</option>
+							<option value="3" <?php echo (isset($_REQUEST["imagetype"]) && $_REQUEST["imagetype"] == 3?'SELECTED':''); ?>>Field Images (lacking specific locality details)</option>
+						</select>
+					</div>
+					<div style="margin:20px;">
+						<button name="submitaction" type="submit" value="search" style='margin:20px'>Load Images</button>
+					</div>
+				</div>
 			</form>
-
 			<?php
 			if($imageArr){
 				?>
@@ -194,7 +195,7 @@ if($action == 'search'){
 						$lastPage = (int) ($recordCnt / $cntPerPage) + 1;
 						$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 						$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
-						$url = 'search.php?'.$_SERVER['QUERY_STRING'];
+						$url = 'search.php?'.$imgLibManager->getQueryTermStr().'&submitaction=search';
 						$hrefPrefix = "<a href='".$url;
 						$pageBar = '<div style="float:left" >';
 						if($startPage > 1){
@@ -265,10 +266,10 @@ if($action == 'search'){
 										echo $imgArr['catalognumber'];
 										echo '</a>';
 									}
-									elseif($imgArr['lastname']){
-										$pName = $imgArr['firstname'].' '.$imgArr['lastname'];
-										if(strlen($pName) < 20) echo $pName.'<br />';
-										else echo $imgArr['lastname'].'<br />';
+									elseif($imgArr['uid']){
+										$pName = $uidList[$imgArr['uid']];
+										if(strlen($pName) > 20) $pName = array_shift(explode(',',$pName));
+										echo $pName.'<br />';
 									}
 									//if($imgArr['stateprovince']) echo $imgArr['stateprovince'] . "<br />";
 									?>

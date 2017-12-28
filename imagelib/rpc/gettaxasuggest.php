@@ -8,7 +8,7 @@ $q = $con->real_escape_string($_REQUEST['term']);
 
 $sql =
 // Common Name
-"SELECT DISTINCT CONCAT('".$LANG['TSTYPE_1-5'].": ',v.vernacularname) AS sciname, ".
+"SELECT DISTINCT CONCAT('".$LANG['SELECT_1-5'].": ',v.vernacularname) AS sciname, ".
 "                CONCAT('A:'                       ,v.vernacularname) AS snorder, ".
 "                GROUP_CONCAT(t.tid SEPARATOR ',')                    AS tid, ".
 "                COUNT(t.tid)                                         AS ct ".
@@ -21,7 +21,7 @@ $sql =
 "UNION ".
 
 // Scientific Name
-"SELECT          CONCAT('".$LANG['TSTYPE_1-3'].": ',t.sciname       ) AS sciname, ".
+"SELECT          CONCAT('".$LANG['SELECT_1-3'].": ',t.sciname       ) AS sciname, ".
 "                CONCAT('B:'                       ,t.sciname       ) AS snorder, ".
 "                GROUP_CONCAT(t.tid SEPARATOR ',')                    AS tid, ".
 "                COUNT(t.tid)                                         AS ct ".
@@ -33,7 +33,7 @@ $sql =
 "UNION ".
 
 // Family
-"SELECT DISTINCT CONCAT('".$LANG['TSTYPE_1-2'].": ',s.family        ) AS sciname, ".
+"SELECT DISTINCT CONCAT('".$LANG['SELECT_1-2'].": ',s.family        ) AS sciname, ".
 "                CONCAT('C:'                       ,s.family        ) AS snorder, ".
 "                GROUP_CONCAT(t.tid SEPARATOR ',')                    AS tid, ".
 "                COUNT(t.tid)                                         AS ct ".

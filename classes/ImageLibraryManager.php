@@ -2,8 +2,9 @@
 include_once($SERVER_ROOT.'/classes/OccurrenceTaxaManager.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceSearchSupport.php');
 
-class ImageLibraryManager extends OccurrenceTaxaManager {
+class ImageLibraryManager extends OccurrenceTaxaManager{
 
+	private $searchTermArr = Array();
 	private $recordCount = 0;
 	private $tidFocus;
 	private $collArrIndex = 0;
@@ -159,7 +160,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 	public function getFullCollectionList($catId = ''){
 		if(!$this->searchSupportManager) $this->searchSupportManager = new occurrenceSearchSupport($this->conn);
 		if(isset($this->searchTermArr['db'])) $this->searchSupportManager->setCollidStr($this->searchTermArr['db']);
-		return $this->searchSupportManager->getFullCollectionList($catId);
+		return $this->searchSupportManager->getFullCollectionList($catId, true);
 	}
 
 	public function outputFullCollArr($occArr, $targetCatID = 0){
@@ -175,21 +176,18 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 		if(array_key_exists("taxa",$_REQUEST) && $_REQUEST["taxa"]){
 			$this->setTaxonRequestVariable();
 		}
-		$this->searchTermArr["phuid"] = '';
-		if(array_key_exists("phuidstr",$_REQUEST)){
-			$phuid = $this->cleanInStr($_REQUEST["phuidstr"]);
-			if($phuid){
+		if(array_key_exists("phuid",$_REQUEST)){
+			$phuid = $this->cleanInStr($_REQUEST["phuid"]);
+			if(is_numeric($phuid)){
 				$this->searchTermArr["phuid"] = $phuid;
 			}
 		}
-		$this->searchTermArr["tags"] = '';
 		if(array_key_exists("tags",$_REQUEST)){
 			$tags = $this->cleanInStr($_REQUEST["tags"]);
 			if($tags){
 				$this->searchTermArr["tags"] = $tags;
 			}
 		}
-		$this->searchTermArr["keywords"] = '';
 		if(array_key_exists("keywordstr",$_REQUEST)){
 			$keywords = $this->cleanInStr($_REQUEST["keywordstr"]);
 			if($keywords){
@@ -197,17 +195,15 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 				$this->searchTermArr["keywords"] = $str;
 			}
 		}
-		$this->searchTermArr["imagecount"] = '';
 		if(array_key_exists("imagecount",$_REQUEST)){
 			$imagecount = $this->cleanInStr($_REQUEST["imagecount"]);
 			if($imagecount){
 				$this->searchTermArr["imagecount"] = $imagecount;
 			}
 		}
-		$this->searchTermArr["imagetype"] = '';
 		if(array_key_exists("imagetype",$_REQUEST)){
 			$imagetype = $this->cleanInStr($_REQUEST["imagetype"]);
-			if($imagetype){
+			if(is_numeric($imagetype)){
 				$this->searchTermArr["imagetype"] = $imagetype;
 			}
 		}
@@ -217,9 +213,8 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 		$retArr = Array();
 		$sqlFrag = $this->getSqlBase().$this->sqlWhere;
 		$this->setRecordCnt($sqlFrag);
-		$sql = 'SELECT DISTINCT i.imgid, o.tidinterpreted, t.tid, t.sciname, i.url, i.thumbnailurl, i.originalurl, '.
-				'u.uid, u.lastname, u.firstname, i.caption, '.
-				'o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode ';
+		$sql = 'SELECT DISTINCT i.imgid, o.tidinterpreted, t.tid, t.sciname, i.url, i.thumbnailurl, i.originalurl, i.photographeruid, i.caption, '.
+			'o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode ';
 		$sql .= $sqlFrag;
 		if(array_key_exists("imagecount",$this->searchTermArr)&&$this->searchTermArr["imagecount"]){
 			if($this->searchTermArr["imagecount"] == 'taxon'){
@@ -232,7 +227,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 		$bottomLimit = ($pageRequest - 1)*$cntPerPage;
 		$sql .= "ORDER BY t.sciname ";
 		$sql .= "LIMIT ".$bottomLimit.",".$cntPerPage;
-		echo "<div>Spec sql: ".$sql."</div>"; exit;
+		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($r = $result->fetch_object()){
 			$imgId = $r->imgid;
@@ -243,9 +238,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 			$retArr[$imgId]['url'] = $r->url;
 			$retArr[$imgId]['thumbnailurl'] = $r->thumbnailurl;
 			$retArr[$imgId]['originalurl'] = $r->originalurl;
-			$retArr[$imgId]['uid'] = $r->uid;
-			$retArr[$imgId]['lastname'] = $r->lastname;
-			$retArr[$imgId]['firstname'] = $r->firstname;
+			$retArr[$imgId]['uid'] = $r->photographeruid;
 			$retArr[$imgId]['caption'] = $r->caption;
 			$retArr[$imgId]['occid'] = $r->occid;
 			$retArr[$imgId]['stateprovince'] = $r->stateprovince;
@@ -256,31 +249,26 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 		return $retArr;
 	}
 
-	private function getSqlBase($full = true){
+	private function getSqlBase(){
 		$sql = 'FROM images i ';
-		if(isset($this->searchTermArr["taxa"]) && $this->searchTermArr["taxa"]){
-			//Query variables include a taxon search, thus use an INNER JOIN since its faster
+		if($this->taxaArr){
 			$sql .= 'INNER JOIN taxa t ON i.tid = t.tid ';
 		}
 		else{
-			if($this->tidFocus) $sql .= 'INNER JOIN taxaenumtree e ON i.tid = e.tid ';
 			$sql .= 'LEFT JOIN taxa t ON i.tid = t.tid ';
 		}
-		if($full){
-			if(isset($this->searchTermArr["phuid"]) && $this->searchTermArr["phuid"]){
-				$sql .= 'INNER JOIN users u ON i.photographeruid = u.uid ';
-			}
-			else{
-				$sql .= 'LEFT JOIN users u ON i.photographeruid = u.uid ';
-			}
+		if(strpos($this->sqlWhere,'ts.taxauthid')){
+			$sql .= 'INNER JOIN taxstatus ts ON i.tid = ts.tid ';
+		}
+		if(strpos($this->sqlWhere,'e.taxauthid') || $this->tidFocus){
+			$sql .= 'INNER JOIN taxaenumtree e ON i.tid = e.tid ';
 		}
 		if($this->searchTermArr["imagetype"] == 'specimenonly' || $this->searchTermArr["imagetype"] == 'observationonly'){
 			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid '.
 				'INNER JOIN omcollections c ON o.collid = c.collid ';
 		}
 		else{
-			$sql .= 'LEFT JOIN omoccurrences o ON i.occid = o.occid ';
-			if($full) $sql .= 'LEFT JOIN omcollections c ON o.collid = c.collid ';
+			$sql .= 'LEFT JOIN omoccurrences o ON i.occid = o.occid LEFT JOIN omcollections c ON o.collid = c.collid ';
 		}
 		if(array_key_exists("tags",$this->searchTermArr)&&$this->searchTermArr["tags"]){
 			$sql .= 'INNER JOIN imagetag it ON i.imgid = it.imgid ';
@@ -296,44 +284,106 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 		if(array_key_exists("db",$this->searchTermArr) && $this->searchTermArr['db']){
 			$sqlWhere .= OccurrenceSearchSupport::getDbWhereFrag($this->cleanInStr($this->searchTermArr['db']));
 		}
-		if(array_key_exists("taxa",$this->searchTermArr)&&$this->searchTermArr["taxa"]){
-			$sqlWhere .= $this->getTaxonWhereFrag();
+		if($this->taxaArr){
+			$sqlWhereTaxa = '';
+			foreach($this->taxaArr['taxa'] as $searchTaxon => $searchArr){
+				$taxonType = $this->taxaArr['taxontype'];
+				if(isset($searchArr['taxontype'])) $taxonType = $searchArr['taxontype'];
+				if($taxonType == TaxaSearchType::TAXONOMIC_GROUP){
+					//Class, order, or other higher rank
+					if(isset($searchArr['tid'])){
+						$tidArr = array_keys($searchArr['tid']);
+						//$sqlWhereTaxa .= 'OR (o.tidinterpreted IN(SELECT DISTINCT tid FROM taxaenumtree WHERE (taxauthid = '.$this->taxAuthId.') AND (parenttid IN('.trim($tidStr,',').') OR (tid = '.trim($tidStr,',').')))) ';
+						$sqlWhereTaxa .= 'OR ((e.taxauthid = '.$this->taxAuthId.') AND ((i.tid IN('.implode(',', $tidArr).')) OR e.parenttid IN('.implode(',', $tidArr).'))) ';
+					}
+				}
+				elseif($taxonType == TaxaSearchType::FAMILY_ONLY){
+					$sqlWhereTaxa .= 'OR ((ts.family = "'.$searchTaxon.'") AND (ts.taxauthid = '.$this->taxAuthId.')) ';
+				}
+				else{
+					if($taxonType == TaxaSearchType::COMMON_NAME){
+						//Common name search
+						$famArr = array();
+						if(array_key_exists("families",$searchArr)){
+							$famArr = $searchArr["families"];
+						}
+						if(array_key_exists("tid",$searchArr)){
+							$tidArr = array_keys($searchArr['tid']);
+							$sql = 'SELECT DISTINCT t.sciname '.
+								'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+								'WHERE (t.rankid = 140) AND (e.taxauthid = '.$this->taxAuthId.') AND (e.parenttid IN('.implode(',',$tidArr).'))';
+							$rs = $this->conn->query($sql);
+							while($r = $rs->fetch_object()){
+								$famArr[] = $r->sciname;
+							}
+						}
+						if($famArr){
+							$famArr = array_unique($famArr);
+							$sqlWhereTaxa .= 'OR (ts.family IN("'.implode('","',$famArr).'")) ';
+						}
+						if(array_key_exists("scinames",$searchArr)){
+							foreach($searchArr["scinames"] as $sciName){
+								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
+							}
+						}
+					}
+					else{
+						if(array_key_exists("tid",$searchArr)){
+							$rankid = current($searchArr['tid']);
+							$tidArr = array_keys($searchArr['tid']);
+							$sqlWhereTaxa .= "OR (i.tid IN(".implode(',',$tidArr).")) ";
+							if($rankid < 230) $sqlWhereTaxa .= 'OR ((e.taxauthid = '.$this->taxAuthId.') AND (e.parenttid IN('.implode(',', $tidArr).')) AND (ts.taxauthid = '.$this->taxAuthId.' AND ts.tid = ts.tidaccepted)) ';
+						}
+						else{
+							//Return matches for "Pinus a"
+							$sqlWhereTaxa .= "OR (t.sciname LIKE '".$this->cleanInStr($searchTaxon)."%') ";
+						}
+					}
+					if(array_key_exists("synonyms",$searchArr)){
+						$synArr = $searchArr["synonyms"];
+						if($synArr){
+							$sqlWhereTaxa .= 'OR (i.tid IN('.implode(',',array_keys($synArr)).')) ';
+						}
+					}
+				}
+			}
+			if($sqlWhereTaxa) $sqlWhere .= "AND (".substr($sqlWhereTaxa,3).") ";
 		}
 		elseif($this->tidFocus){
 			$sqlWhere .= 'AND (e.parenttid IN('.$this->tidFocus.')) AND (e.taxauthid = 1) ';
 		}
-		if(array_key_exists("phuid",$this->searchTermArr)&&$this->searchTermArr["phuid"]){
+		if(array_key_exists("phuid",$this->searchTermArr)){
 			$sqlWhere .= "AND (i.photographeruid IN(".$this->searchTermArr["phuid"].")) ";
 		}
 		if(array_key_exists("tags",$this->searchTermArr)&&$this->searchTermArr["tags"]){
-			$sqlWhere .= 'AND (it.keyvalue = "'.$this->searchTermArr["tags"].'") ';
+			$sqlWhere .= 'AND (it.keyvalue = "'.$this->cleanInStr($this->searchTermArr["tags"]).'") ';
 		}
 		if(array_key_exists("keywords",$this->searchTermArr)&&$this->searchTermArr["keywords"]){
 			$keywordArr = explode(";",$this->searchTermArr["keywords"]);
 			$tempArr = Array();
 			foreach($keywordArr as $value){
-				$tempArr[] = "(ik.keyword LIKE '%".trim($value)."%')";
+				$tempArr[] = "(ik.keyword LIKE '%".$this->cleanInStr($value)."%')";
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 		}
 		if(array_key_exists("imagetype",$this->searchTermArr) && $this->searchTermArr["imagetype"]){
-			if($this->searchTermArr["imagetype"] == 'specimenonly'){
+			if($this->searchTermArr["imagetype"] == 1){
+				//Specimen Images
 				$sqlWhere .= 'AND (i.occid IS NOT NULL) AND (c.colltype = "Preserved Specimens") ';
 			}
-			elseif($this->searchTermArr["imagetype"] == 'observationonly'){
+			elseif($this->searchTermArr["imagetype"] == 2){
+				//Image Vouchered Observations
 				$sqlWhere .= 'AND (i.occid IS NOT NULL) AND (c.colltype != "Preserved Specimens") ';
 			}
-			elseif($this->searchTermArr["imagetype"] == 'fieldonly'){
+			elseif($this->searchTermArr["imagetype"] == 3){
+				//Field Images (lacking specific locality details)
 				$sqlWhere .= 'AND (i.occid IS NULL) ';
 			}
 		}
 		if($sqlWhere){
 			$this->sqlWhere = 'WHERE '.substr($sqlWhere,4);
 		}
-		else{
-			//Make the sql valid, but return nothing
-			//$this->sqlWhere = 'WHERE o.collid = -1 ';
-		}
+		//echo $sqlWhere;
 	}
 
 	private function setRecordCnt($sqlFrag){
@@ -363,6 +413,19 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 		}
 	}
 
+	public function getQueryTermStr(){
+		$retStr = '';
+		foreach($this->searchTermArr as $k => $v){
+			$retStr .= '&'.$k.'='.urlencode($v);
+		}
+		if(isset($this->taxaArr['search'])){
+			$retStr .= '&taxa='.urlencode($this->taxaArr['search']);
+			if($this->taxaArr['usethes']) $retStr .= '&usethes=1';
+			$retStr .= '&taxontype='.$this->taxaArr['taxontype'];
+		}
+		return trim($retStr,' &');
+	}
+
 	//Listing functions
 	public function getTaxaSuggest($queryString, $type = 'sciname'){
 		$retArr = array();
@@ -381,12 +444,11 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 		return $retArr;
 	}
 
-	public function getPhotographerSuggest($queryString){
+	public function getPhotographerUidArr(){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT u.uid, CONCAT_WS(" ",u.firstname,u.lastname) AS fullname '.
+		$sql = 'SELECT DISTINCT u.uid, CONCAT_WS(", ",u.lastname, u.firstname) AS fullname '.
 			'FROM images i INNER JOIN users u ON i.photographeruid = u.uid '.
-			'WHERE u.firstname LIKE "'.$queryString.'%" OR u.lastname LIKE "'.$queryString.'%" '.
-			'ORDER BY fullname LIMIT 10 ';
+			'ORDER BY u.lastname, u.firstname ';
 		$rs = $this->conn->query($sql);
 		while ($r = $rs->fetch_object()) {
 			$retArr[$r->uid] = htmlentities($r->fullname);
@@ -421,14 +483,6 @@ class ImageLibraryManager extends OccurrenceTaxaManager {
 	}
 
 	//Setters and getters
-	public function setsearchTermArr($stArr){
-		$this->searchTermArr = $stArr;
-	}
-
-	public function getsearchTermArr(){
-		return $this->searchTermArr;
-	}
-
 	public function getRecordCnt(){
 		return $this->recordCount;
 	}

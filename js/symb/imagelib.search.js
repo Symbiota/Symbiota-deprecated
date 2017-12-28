@@ -1,9 +1,3 @@
-jQuery(document).ready(function($) {
-	$('#photographer').autocomplete({
-
-	});
-});
-
 function openIndPU(occId,clid){
 	openPopup("../collections/individual/index.php?occid="+occId, "indspec" + occId);
 	return false;
