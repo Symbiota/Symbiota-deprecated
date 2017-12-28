@@ -12,7 +12,7 @@ class OccurrenceSearchSupport {
 	public function __destruct(){
 	}
 
-	public function getFullCollectionList($catId = ''){
+	public function getFullCollectionList($catId = '', $limitByImages = false){
 		if($catId && !is_numeric($catId)) $catId = '';
 		//Set collection array
 		$collIdArr = array();
@@ -28,8 +28,9 @@ class OccurrenceSearchSupport {
 			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
 			'LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
 			'LEFT JOIN omcollcategories cat ON ccl.ccpk = cat.ccpk '.
-			'WHERE s.recordcnt > 0 AND (cat.inclusive IS NULL OR cat.inclusive = 1 OR cat.ccpk = 1) '.
-			'ORDER BY ccl.sortsequence, cat.category, c.sortseq, c.CollectionName ';
+			'WHERE s.recordcnt > 0 AND (cat.inclusive IS NULL OR cat.inclusive = 1 OR cat.ccpk = 1) ';
+		if($limitByImages) $sql .= 'dynamicproperties NOT LIKE \'%imgcnt":"0"%\' ';
+		$sql .= 'ORDER BY ccl.sortsequence, cat.category, c.sortseq, c.CollectionName ';
 		//echo "<div>SQL: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		$collArr = array();

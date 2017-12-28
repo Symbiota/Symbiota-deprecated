@@ -9,7 +9,7 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 if(!is_numeric($taxonFilter)) $taxonFilter = 1;
 
 $checklistManager = new OccurrenceChecklistManager();
-$searchVar = $checklistManager->getSearchTermStr();
+$searchVar = $checklistManager->getQueryTermStr();
 $searchVarEncoded = urlencode($searchVar);
 
 ?>

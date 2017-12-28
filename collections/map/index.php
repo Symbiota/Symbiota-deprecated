@@ -9,7 +9,7 @@ ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1;
 
 $mapManager = new OccurrenceMapManager();
-$searchVar = $mapManager->getSearchTermStr();
+$searchVar = $mapManager->getQueryTermStr();
 
 $queryShape = '';
 $showTaxaBut = 1;
@@ -1183,7 +1183,8 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 									<div style="margin-top:5px;">
 										<select data-role="none" id="taxontype" name="taxontype">
 											<?php
-											$taxonType = 0;
+											$taxonType = 1;
+											if(isset($DEFAULT_TAXON_SEARCH) && $DEFAULT_TAXON_SEARCH) $taxonType = $DEFAULT_TAXON_SEARCH;
 											if(array_key_exists('taxontype',$previousCriteria)) $taxonType = $previousCriteria['taxontype'];
 											for($h=1;$h<6;$h++){
 												echo '<option value="'.$h.'" '.($taxonType==$h?'SELECTED':'').'>'.$LANG['SELECT_1-'.$h].'</option>';

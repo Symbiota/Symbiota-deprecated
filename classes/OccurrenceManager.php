@@ -468,7 +468,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		return '';
 	}
 
-	public function getSearchTermStr(){
+	public function getQueryTermStr(){
 		//Returns a search variable string
 		$retStr = '';
 		foreach($this->searchTermArr as $k => $v){

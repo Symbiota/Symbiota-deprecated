@@ -5,7 +5,7 @@ include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collManager = new OccurrenceManager();
-$searchVar = $collManager->getSearchTermStr();
+$searchVar = $collManager->getQueryTermStr();
 ?>
 <html>
 <head>
@@ -70,11 +70,14 @@ $searchVar = $collManager->getSearchTermStr();
 			</div>
 			<div>
 				<select id="taxontype" name="taxontype">
-					<option value='1'><?php echo $LANG['SELECT_1-1']; ?></option>
-					<option value='2'><?php echo $LANG['SELECT_1-2']; ?></option>
-					<option value='3'><?php echo $LANG['SELECT_1-3']; ?></option>
-					<option value='4'><?php echo $LANG['SELECT_1-4']; ?></option>
-					<option value='5'><?php echo $LANG['SELECT_1-5']; ?></option>
+					<?php
+					$taxonType = 1;
+					if(isset($DEFAULT_TAXON_SEARCH) && $DEFAULT_TAXON_SEARCH) $taxonType = $DEFAULT_TAXON_SEARCH;
+					if(array_key_exists('taxontype',$previousCriteria)) $taxonType = $previousCriteria['taxontype'];
+					for($h=1;$h<6;$h++){
+						echo '<option value="'.$h.'" '.($taxonType==$h?'SELECTED':'').'>'.$LANG['SELECT_1-'.$h].'</option>';
+					}
+					?>
 				</select>
 				<input id="taxa" type="text" size="60" name="taxa" value="" title="<?php echo $LANG['SEPARATE_MULTIPLE']; ?>" />
 			</div>

@@ -17,7 +17,7 @@ if(!is_numeric($cntPerPage)) $cntPerPage = 100;
 if(!is_numeric($pageNumber)) $pageNumber = 1;
 
 $collManager = new OccurrenceListManager();
-$searchVar = $collManager->getSearchTermStr();
+$searchVar = $collManager->getQueryTermStr();
 $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 ?>
 <html>

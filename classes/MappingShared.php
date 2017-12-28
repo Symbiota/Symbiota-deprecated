@@ -55,7 +55,7 @@ class MappingShared{
 				$sql .= ", o.".$v." ";
 			}
 		}
-		$sql .= "FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
+		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
 		if(strpos($mapWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 		if(strpos($mapWhere,'MATCH(f.recordedby)') || strpos($mapWhere,'MATCH(f.locality)')) $sql.= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		$sql .= $mapWhere;
@@ -78,7 +78,9 @@ class MappingShared{
 		$taxaMapper["undefined"] = "undefined";
 		$cnt = 0;
 		//echo json_encode($this->taxaArr);
-		foreach($this->taxaArr['taxa'] as $key => $valueArr){
+		$taxaArr = $this->taxaArr;
+		if(isset($this->taxaArr['taxa'])) $taxaArr = $this->taxaArr['taxa'];
+		foreach($taxaArr as $key => $valueArr){
 			$coordArr[$key] = Array("color" => $this->iconColors[$cnt%7]);
 			$cnt++;
 			$taxaMapper[$key] = $key;

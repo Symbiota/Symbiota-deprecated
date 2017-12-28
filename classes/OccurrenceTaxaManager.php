@@ -34,7 +34,7 @@ class OccurrenceTaxaManager {
 
 	protected $conn	= null;
 	protected $taxaArr = array();
-	private $taxAuthId = 1;
+	protected $taxAuthId = 1;
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
@@ -226,23 +226,21 @@ class OccurrenceTaxaManager {
 							while($r = $rs->fetch_object()){
 								$famArr[] = $r->sciname;
 							}
+							$rs->free();
+							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',$tidArr).')) ';
 						}
 						if($famArr){
 							$famArr = array_unique($famArr);
 							$sqlWhereTaxa .= 'OR (o.family IN("'.implode('","',$famArr).'")) ';
 						}
-						if(array_key_exists("scinames",$searchArr)){
-							foreach($searchArr["scinames"] as $sciName){
-								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
-							}
-						}
 					}
 					else{
 						if(array_key_exists("tid",$searchArr)){
+							$rankid = current($searchArr['tid']);
 							$tidArr = array_keys($searchArr['tid']);
 							$sqlWhereTaxa .= "OR (o.tidinterpreted IN(".implode(',',$tidArr).")) ";
 							//Return matches that are not linked to thesaurus
-							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($searchTaxon)."%' AND (o.tidinterpreted IS NULL)) ";
+							if($rankid == 180) $sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($searchTaxon)."%') ";
 						}
 						else{
 							//Return matches for "Pinus a"

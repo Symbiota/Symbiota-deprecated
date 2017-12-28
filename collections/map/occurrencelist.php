@@ -13,7 +13,7 @@ if(!is_numeric($cntPerPage)) $cntPerPage = 100;
 if(!is_numeric($pageNumber)) $pageNumber = 1;
 
 $mapManager = new OccurrenceMapManager();
-$searchVar = $mapManager->getSearchTermStr();
+$searchVar = $mapManager->getQueryTermStr();
 $recCnt = $mapManager->getRecordCnt();
 $occArr = array();
 if(!$recLimit || $recCnt < $recLimit){

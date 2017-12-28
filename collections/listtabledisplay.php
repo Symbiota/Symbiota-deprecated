@@ -1,5 +1,5 @@
 <?php
-include_once('../config/symbini.php'); 
+include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -15,7 +15,7 @@ $sortOrder = array_key_exists('sortorder',$_REQUEST)?$_REQUEST['sortorder']:'';
 if(!is_numeric($page) || $page < 1) $page = 1;
 
 $collManager = new OccurrenceListManager();
-$searchVar = $collManager->getSearchTermStr();
+$searchVar = $collManager->getQueryTermStr();
 $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/collections/listtabledisplay.php';
 ?>
 <html>
@@ -54,9 +54,9 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 				<legend><b>Sort Results</b></legend>
 				<form name="sortform" action="listtabledisplay.php" method="post">
 					<div style="float:left;">
-						<b>Sort By:</b> 
+						<b>Sort By:</b>
 						<select name="sortfield1">
-							<?php 
+							<?php
 							$sortFields = array('c.collectionname' => 'Collection', 'o.catalogNumber' => 'Catalog Number', 'o.family' => 'Family', 'o.sciname' => 'Scientific Name', 'o.recordedBy' => 'Collector',
 								'o.recordNumber' => 'Number', 'o.eventDate' => 'Event Date', 'o.country' => 'Country', 'o.StateProvince' => 'State/Province', 'o.county' => 'County', 'o.minimumElevationInMeters' => 'Elevation');
 							foreach($sortFields as $k => $v){
@@ -66,10 +66,10 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 						</select>
 					</div>
 					<div style="float:left;margin-left:10px;">
-						<b>Then By:</b> 
+						<b>Then By:</b>
 						<select name="sortfield2">
 							<option value="">Select Field Name</option>
-							<?php 
+							<?php
 							foreach($sortFields as $k => $v){
 								echo '<option value="'.$k.'" '.($k==$sortField2?'SELECTED':'').'>'.$v.'</option>';
 							}
@@ -77,7 +77,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 						</select>
 					</div>
 					<div style="float:left;margin-left:10px;">
-						<b>Order:</b> 
+						<b>Order:</b>
 						<select name="sortorder">
 							<option value="">Ascending</option>
 							<option value="desc" <?php echo ($sortOrder=="desc"?'SELECTED':''); ?>>Descending</option>
@@ -90,14 +90,14 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 				</form>
 			</fieldset>
 		</div>
-		<?php 
+		<?php
 		$searchVar .= '&sortfield1='.$sortField1.'&sortfield2='.$sortField2.'&sortorder='.$sortOrder;
 		$collManager->addSort($sortField1, $sortOrder);
 		if($sortField2) $collManager->addSort($sortField2, $sortOrder);
 		$recArr = $collManager->getSpecimenMap((($page-1)*$tableCount), $tableCount);
-		
+
 		$targetClid = $collManager->getSearchTerm("targetclid");
-		
+
 		$qryCnt = $collManager->getRecordCnt();
 		$navStr = '<div style="float:right;">';
 		if($page > 1){
@@ -113,7 +113,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 		?>
 		<div style="width:790px;clear:both;">
 			<div style="float:right">
-				<?php 
+				<?php
 				echo $navStr;
 				?>
 			</div>
@@ -160,7 +160,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 						<th>Collector</th>
 						<th>Number</th>
 					</tr>
-					<?php 
+					<?php
 					$recCnt = 0;
 					foreach($recArr as $occid => $occArr){
 						$isEditor = false;
@@ -175,7 +175,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 						?>
 						<tr <?php echo ($recCnt%2?'class="alt"':''); ?>>
 							<td>
-								<?php 
+								<?php
 								echo '<a href="#" onclick="return openIndPU('.$occid.",".($targetClid?$targetClid:"0").');">'.$occid.'</a> ';
 								if($isEditor || ($SYMB_UID && $SYMB_UID == $occArr['obsuid'])){
 									echo '<a href="editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">';
@@ -209,7 +209,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 				<div style="clear:both;height:5px;"></div>
 				<div style="width:790px;"><?php echo $navStr; ?></div>
 				*Click on the Symbiota identifier in the first column to see Full Record Details.';
-				<?php 
+				<?php
 			}
 			else{
 				echo '<div style="font-weight:bold;font-size:120%;">No records found matching the query</div>';
