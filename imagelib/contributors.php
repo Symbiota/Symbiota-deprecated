@@ -33,7 +33,7 @@ $pManager = new ImageLibraryManager();
 			echo '<div style="margin-left:15px">';
 			foreach($pList as $uid => $pArr){
 				echo '<div>';
-				$phLink = 'search.php?imagedisplay=thumbnail&imagetype=all&phuidstr='.$uid.'&submitaction=Load Images';
+				$phLink = 'search.php?imagetype=all&phuid='.$uid.'&submitaction=search';
 				echo '<a href="'.$phLink.'">'.$pArr['name'].'</a> ('.$pArr['imgcnt'].')</div>';
 			}
 			echo '</div>';
@@ -52,7 +52,7 @@ $pManager = new ImageLibraryManager();
 				echo '<div style="margin-left:15px;margin-bottom:20px">';
 				foreach($specList as $k => $cArr){
 					echo '<div>';
-					$phLink = 'search.php?taxontype=2&imagecount=all&imagedisplay=thumbnail&imagetype=all&submitaction=Load%20Images&db[]='.$k;
+					$phLink = 'search.php?taxontype=2&imagecount=all&imagetype=all&submitaction=search&db[]='.$k;
 					echo '<a href="'.$phLink.'">'.$cArr['name'].'</a> ('.$cArr['imgcnt'].')</div>';
 				}
 				echo '</div>';
@@ -64,7 +64,7 @@ $pManager = new ImageLibraryManager();
 				echo '<div style="margin-left:15px">';
 				foreach($obsList as $k => $cArr){
 					echo '<div>';
-					$phLink = 'search.php?taxontype=2&imagecount=all&imagedisplay=thumbnail&imagetype=all&submitaction=Load%20Images&db[]='.$k;
+					$phLink = 'search.php?taxontype=2&imagecount=all&imagetype=all&submitaction=search&db[]='.$k;
 					echo '<a href="'.$phLink.'">'.$cArr['name'].'</a> ('.$cArr['imgcnt'].')</div>';
 				}
 				echo '</div>';

@@ -14,15 +14,15 @@ function openImagePopup(imageId){
 }
 
 function openPopup(url,nameStr){
-	var wWidth = 900;
+	var wWidth = 1100;
 	if(document.getElementById('maintable').offsetWidth){
 		wWidth = document.getElementById('maintable').offsetWidth*1.05;
 	}
 	else if(document.body.offsetWidth){
 		wWidth = document.body.offsetWidth*0.9;
 	}
-	if(wWidth > 1000) wWidth = 1000;
-	newWindow = window.open(url,nameStr,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+	if(wWidth > 1200) wWidth = 1200;
+	newWindow = window.open(url,nameStr,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=700,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }

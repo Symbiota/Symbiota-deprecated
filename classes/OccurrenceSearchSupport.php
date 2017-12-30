@@ -29,7 +29,7 @@ class OccurrenceSearchSupport {
 			'LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
 			'LEFT JOIN omcollcategories cat ON ccl.ccpk = cat.ccpk '.
 			'WHERE s.recordcnt > 0 AND (cat.inclusive IS NULL OR cat.inclusive = 1 OR cat.ccpk = 1) ';
-		if($limitByImages) $sql .= 'dynamicproperties NOT LIKE \'%imgcnt":"0"%\' ';
+		if($limitByImages) $sql .= 'AND dynamicproperties NOT LIKE \'%imgcnt":"0"%\' ';
 		$sql .= 'ORDER BY ccl.sortsequence, cat.category, c.sortseq, c.CollectionName ';
 		//echo "<div>SQL: ".$sql."</div>";
 		$result = $this->conn->query($sql);

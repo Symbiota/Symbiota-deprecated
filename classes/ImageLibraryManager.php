@@ -263,17 +263,17 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if(strpos($this->sqlWhere,'e.taxauthid') || $this->tidFocus){
 			$sql .= 'INNER JOIN taxaenumtree e ON i.tid = e.tid ';
 		}
-		if($this->searchTermArr["imagetype"] == 'specimenonly' || $this->searchTermArr["imagetype"] == 'observationonly'){
+		if(isset($this->searchTermArr["imagetype"]) && ($this->searchTermArr["imagetype"] == 'specimenonly' || $this->searchTermArr["imagetype"] == 'observationonly')){
 			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid '.
 				'INNER JOIN omcollections c ON o.collid = c.collid ';
 		}
 		else{
 			$sql .= 'LEFT JOIN omoccurrences o ON i.occid = o.occid LEFT JOIN omcollections c ON o.collid = c.collid ';
 		}
-		if(array_key_exists("tags",$this->searchTermArr)&&$this->searchTermArr["tags"]){
+		if(array_key_exists("tags",$this->searchTermArr) && $this->searchTermArr["tags"]){
 			$sql .= 'INNER JOIN imagetag it ON i.imgid = it.imgid ';
 		}
-		if(array_key_exists("keywords",$this->searchTermArr)&&$this->searchTermArr["keywords"]){
+		if(array_key_exists("keywords",$this->searchTermArr) && $this->searchTermArr["keywords"]){
 			$sql .= 'INNER JOIN imagekeywords ik ON i.imgid = ik.imgid ';
 		}
 		return $sql;
@@ -397,11 +397,11 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 					$sql = "SELECT COUNT(DISTINCT o.occid) AS cnt ";
 				}
 				else{
-					$sql = "SELECT COUNT(i.imgid) AS cnt ";
+					$sql = "SELECT COUNT(DISTINCT i.imgid) AS cnt ";
 				}
 			}
 			else{
-				$sql = "SELECT COUNT(i.imgid) AS cnt ";
+				$sql = "SELECT COUNT(DISTINCT i.imgid) AS cnt ";
 			}
 			$sql .= $sqlFrag;
 			//echo "<div>Count sql: ".$sql."</div>";
