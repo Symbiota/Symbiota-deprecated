@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/content/lang/collections/list.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1; 
+$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1;
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
 $targetTid = array_key_exists("targettid",$_REQUEST)?$_REQUEST["targettid"]:0;
 $cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
@@ -123,7 +123,7 @@ if(isset($_REQUEST['db'])){
         function setOccurrenceList(listPage){
             sessionStorage.collSearchPage = listPage;
             document.getElementById("queryrecords").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
-            <?php 
+            <?php
 			//echo "console.log('rpc/getoccurrencelist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+listPage+'&targettid=".$targetTid."');";
             ?>
             $.ajax({
@@ -230,7 +230,7 @@ if(isset($_REQUEST['db'])){
 			<div style='margin:10 0 0 20;'>
 				<?php echo $LANG['GOOGLE_MAP_DESCRIPTION'];?>
 			</div>
-	
+
 			<div style='margin-top:10px;'>
 				<h2><?php echo $LANG['GOOGLE_EARTH_HEADER']; ?></h2>
 			</div>
@@ -251,7 +251,7 @@ if(isset($_REQUEST['db'])){
 				<div id="fieldBox" style="display:none;">
 					<fieldset>
 						<div style="width:600px;">
-							<?php 
+							<?php
 							$occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
 								'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
 								'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
@@ -277,7 +277,7 @@ if(isset($_REQUEST['db'])){
         </div>
 	</div>
 </div>
-<?php 
+<?php
 include($SERVER_ROOT."/footer.php");
 ?>
 </body>

@@ -4,6 +4,7 @@ include_once($SERVER_ROOT.'/content/lang/collections/misc/collprofiles.'.$LANG_T
 include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
+ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
 $collid = ((array_key_exists("collid",$_REQUEST) && is_numeric($_REQUEST["collid"]))?$_REQUEST["collid"]:0);
 $action = array_key_exists("action",$_REQUEST)?htmlspecialchars($_REQUEST["action"]):"";
@@ -231,7 +232,16 @@ if($SYMB_UID){
 										<?php echo $LANG['MANAGE_PERMISSIONS']; ?>
 									</a>
 								</li>
-								<?php 
+								<?php
+                                if($FIELDGUIDE_ACTIVE){
+                                    ?>
+                                    <li>
+                                        <a href="fgbatch.php?collid=<?php echo $collid; ?>" >
+                                            <?php echo (isset($LANG['FIELDGUIDE_BATCH'])?$LANG['FIELDGUIDE_BATCH']:'FieldGuide Batch Image Processing'); ?>
+                                        </a>
+                                    </li>
+                                    <?php
+                                }
 								if($collData['colltype'] != 'General Observations'){
 									?>
 									<li>

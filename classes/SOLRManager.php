@@ -66,7 +66,7 @@ class SOLRManager extends OccurrenceManager{
         $cnt = $this->getMaxCnt();
         $solrWhere = $this->getSOLRWhere();
         $solrURLpre = $SOLR_URL.'/select?';
-        $solrURLsuf = '&rows='.$cnt.'&start=1&fl=occid&wt=json';
+        $solrURLsuf = '&rows='.$cnt.'&start=0&fl=occid&wt=json';
         $solrURL = $solrURLpre.$solrWhere.$solrURLsuf;
         //echo str_replace(' ','%20',$solrURL);
         $solrArrJson = file_get_contents(str_replace(' ','%20',$solrURL));
@@ -559,11 +559,7 @@ class SOLRManager extends OccurrenceManager{
                 $mysqlOccArr[] = $r->occid;
             }
         }
-        foreach($SOLROccArr as $occ){
-            if(!in_array($occ,$mysqlOccArr)){
-                $delOccArr[] = $occ;
-            }
-        }
+        $delOccArr = array_diff($SOLROccArr,$mysqlOccArr);
         if($delOccArr){
             $this->deleteSOLRDocument($delOccArr);
         }
