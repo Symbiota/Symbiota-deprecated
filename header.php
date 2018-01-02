@@ -55,14 +55,14 @@
 <div class="cbp-af-header">
     <div class="cbp-af-inner">
         <div class="header-top">
-            <div class="wrap">
+            <div class="wrap" style="width:850px;">
                 <div class="logo">
                     <ul>
                         <li><a href="<?php echo $clientRoot; ?>/index.php"><img src="<?php echo $clientRoot; ?>/images/blackLogo.png" alt=""></a></li> &nbsp;&nbsp;&nbsp;
-                        <div class="clear"> </div>
+                        <div class="clear"></div>
                     </ul>
                 </div>
-                <div class="menu">
+                <div class="menu" style="font-size:15px;margin-top:-25px;">
                     <a class="toggleMenu" href="#"><img src="<?php echo $clientRoot; ?>/images/nav_icon.png" alt="" /> </a>
                     <ul class="nav" id="nav">
                         <li><a href="<?php echo $clientRoot; ?>/index.php">Home</a></li>
@@ -77,32 +77,30 @@
                         else{
                             ?>
                             <li><a href="<?php echo $clientRoot."/profile/index.php?refurl=".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">Log In</a></li>
-                            <li><a href="<?php echo $clientRoot; ?>/profile/newprofile.php">New Account</a></li>
                             <?php
                         }
                         ?>
                         <li><a href="<?php echo $clientRoot; ?>/sitemap.php">Sitemap</a></li>
-                        <div class="clear"></div>
                     </ul>
                     <script type="text/javascript" src="<?php echo $clientRoot; ?>/js/responsive-nav.js"></script>
-                </div>
-                <div class="clear"></div>
-                <div id="quicksearchdiv" style="width:425px;padding: 5px 5px 5px 5px;">
-                    <div style="float:left;">
-                        <?php
-                        //---------------------------QUICK SEARCH SETTINGS---------------------------------------
-                        //Title text that will appear.
-                        $searchText = 'Taxon Search';
+                    <div class="clear"></div>
+                    <div id="quicksearchdiv" style="width:425px;padding: 5px 5px 5px 5px;margin-top:-10px;">
+                        <div style="float:left;">
+                            <?php
+                            //---------------------------QUICK SEARCH SETTINGS---------------------------------------
+                            //Title text that will appear.
+                            $searchText = 'Taxon Search';
 
-                        //Text that will appear on search button.
-                        $buttonText = 'Search';
+                            //Text that will appear on search button.
+                            $buttonText = 'Search';
 
-                        //---------------------------DO NOT CHANGE BELOW HERE-----------------------------
-                        include_once($SERVER_ROOT.'/classes/PluginsManager.php');
-                        $pluginManager = new PluginsManager();
-                        $quicksearch = $pluginManager->createQuickSearch($buttonText,$searchText);
-                        echo $quicksearch;
-                        ?>
+                            //---------------------------DO NOT CHANGE BELOW HERE-----------------------------
+                            include_once($SERVER_ROOT.'/classes/PluginsManager.php');
+                            $pluginManager = new PluginsManager();
+                            $quicksearch = $pluginManager->createQuickSearch($buttonText,$searchText);
+                            echo $quicksearch;
+                            ?>
+                        </div>
                     </div>
                 </div>
             </div>
