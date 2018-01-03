@@ -144,7 +144,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo $defaultTitle; ?> - Map Interface</title>
     <link type="text/css" href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" />
-    <link type="text/css" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" />
+    <link type="text/css" href="../../css/main.css?ver=<?php echo $CSS_VERSION_LOCAL; ?>" rel="stylesheet" />
     <link type="text/css" href="../../css/jquery.mobile-1.4.0.min.css" rel="stylesheet" />
     <link type="text/css" href="../../css/jquery.symbiota.css" rel="stylesheet" />
     <link type="text/css" href="../../css/jquery-ui_accordian.css" rel="stylesheet" />
