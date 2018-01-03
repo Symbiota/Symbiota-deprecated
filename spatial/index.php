@@ -135,7 +135,7 @@ $dbArr = Array();
                     <div id="criteriatab">
                         <ul>
                             <li><a class="tabtitle" href="#searchcriteria">Criteria</a></li>
-                            <li><a class="tabtitle" href="#searchcollections">Collections</a></li>
+                            <li id="spatialCollectionsTab"><a class="tabtitle" href="#searchcollections">Collections</a></li>
                         </ul>
                         <div id="searchcollections">
                             <div class="mapinterface">

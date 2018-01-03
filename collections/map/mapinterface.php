@@ -1390,7 +1390,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                         <form name="mapsearchform" id="mapsearchform" data-ajax="false" action="mapinterface.php" method="get" onsubmit="return verifyCollForm(this);return checkForm();">
                             <ul>
                                 <li><a href="#searchcriteria"><span>Criteria</span></a></li>
-                                <li><a href="#searchcollections"><span>Collections</span></a></li>
+                                <li id="mapinterfaceCollectionsTab"><a href="#searchcollections"><span>Collections</span></a></li>
                                 <li><a href="#mapoptions"><span>Map Options</span></a></li>
                             </ul>
                             <div id="searchcollections" style="">

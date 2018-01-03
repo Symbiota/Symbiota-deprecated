@@ -303,8 +303,8 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						<?php
 					}
 					?> 
-					<li><a href="#commenttab"><span><?php echo ($commentArr?count($commentArr).' ':''); ?>Comments</span></a></li> 
-					<li><a href="linkedresources.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collid; ?>"><span>Linked Resources</span></a></li>
+					<li id="indCommentsTab"><a href="#commenttab"><span><?php echo ($commentArr?count($commentArr).' ':''); ?>Comments</span></a></li>
+					<li id="indLinkedResourcesTab"><a href="linkedresources.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collid; ?>"><span>Linked Resources</span></a></li>
 					<?php 
 					if($isEditor){
 						?>
@@ -384,20 +384,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								<div>
 									<b>Catalog #:</b> 
 									<?php echo $occArr['catalognumber']; ?>
-								</div>
-								<?php 
-							}
-							if($occArr['occurrenceid']){ 
-								?>
-								<div>
-									<b>Occurrence ID (GUID):</b> 
-									<?php
-									$resolvableGuid = false;
-									if(substr($occArr['occurrenceid'],0,4) == 'http') $resolvableGuid = true;
-									if($resolvableGuid) echo '<a href="'.$occArr['occurrenceid'].'" target="_blank">';
-									echo $occArr['occurrenceid'];
-									if($resolvableGuid) echo '</a>';
-									?>
 								</div>
 								<?php 
 							}
@@ -848,7 +834,22 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							?>
 						</div>
 						<div style="margin:3px 0px;"><b>Record Id:</b> <?php echo $occArr['guid']; ?></div>
-						
+                        <?php
+                        if($occArr['occurrenceid']){
+                            ?>
+                            <div>
+                                <b>Occurrence ID (GUID):</b>
+                                <?php
+                                $resolvableGuid = false;
+                                if(substr($occArr['occurrenceid'],0,4) == 'http') $resolvableGuid = true;
+                                if($resolvableGuid) echo '<a href="'.$occArr['occurrenceid'].'" target="_blank">';
+                                echo $occArr['occurrenceid'];
+                                if($resolvableGuid) echo '</a>';
+                                ?>
+                            </div>
+                            <?php
+                        }
+                        ?>
 						<div style="margin-top:10px;clear:both;">
 							For additional information on this specimen, please contact: 
 							<?php 
