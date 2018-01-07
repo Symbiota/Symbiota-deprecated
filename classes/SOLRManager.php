@@ -689,7 +689,7 @@ class SOLRManager extends OccurrenceManager{
                         }
                         if(array_key_exists("scinames",$valueArray)){
                             foreach($valueArray["scinames"] as $sciName){
-                                $sqlWhereTaxa .= "OR (sciname:".str_replace(' ','\ ',$sciName)."*) ";
+                                $sqlWhereTaxa .= "OR ((sciname:".str_replace(' ','\ ',$sciName).") OR (sciname:".str_replace(' ','\ ',$sciName)."\ *)) ";
                             }
                         }
                     }
@@ -698,7 +698,7 @@ class SOLRManager extends OccurrenceManager{
                             $sqlWhereTaxa .= 'OR (family:'.$key.') ';
                         }
                         if($this->taxaSearchType == 3 || ($this->taxaSearchType == 1 && strtolower(substr($key,-5)) != "aceae" && strtolower(substr($key,-4)) != "idae")){
-                            $sqlWhereTaxa .= "OR (sciname:".str_replace(' ','\ ',$key)."*) ";
+                            $sqlWhereTaxa .= "OR ((sciname:".str_replace(' ','\ ',$key).") OR (sciname:".str_replace(' ','\ ',$key)."\ *)) ";
                         }
                     }
                     if(array_key_exists("synonyms",$valueArray)){
