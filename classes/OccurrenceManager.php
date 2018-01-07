@@ -1330,7 +1330,7 @@ class OccurrenceManager{
 				$accArr[] = $r2->tid;
 				$rankId = $r2->rankid;
 				//Put in synonym array if not target
-				if(!in_array($r2->tid,$targetTidArr)) $synArr[$r2->tid] = $r2->sciname;
+                $synArr[$r2->tid] = $r2->sciname;
 			}
 			$rs2->free();
 
@@ -1341,7 +1341,7 @@ class OccurrenceManager{
                     'WHERE (ts.taxauthid = ' . $taxAuthId . ') AND (ts.tidaccepted IN(' . implode('', $accArr) . ')) ';
                 $rs3 = $this->conn->query($sql3);
                 while ($r3 = $rs3->fetch_object()) {
-                    if (!in_array($r3->tid, $targetTidArr)) $synArr[$r3->tid] = $r3->sciname;
+                    $synArr[$r3->tid] = $r3->sciname;
                 }
                 $rs3->free();
 

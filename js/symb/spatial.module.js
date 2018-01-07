@@ -2471,22 +2471,20 @@ function prepareTaxaParams(callback){
                         if(taxaArr[i]["synonyms"]){
                             var synArr = [];
                             synArr = taxaArr[i]["synonyms"];
-                            if(synArr.length > 0){
-                                var tidArr = [];
-                                if(taxontype == 1 || taxontype == 2 || taxontype == 5){
-                                    for (syn in synArr){
-                                        if(synArr[syn].indexOf('aceae') !== -1 || synArr[syn].indexOf('idae') !== -1){
-                                            taxaSolrqString += " OR (family:"+synArr[syn]+")";
-                                            taxaCqlString += " OR family = '"+synArr[syn]+"'";
-                                        }
+                            var tidArr = [];
+                            if(taxontype == 1 || taxontype == 2 || taxontype == 5){
+                                for (syn in synArr){
+                                    if(synArr[syn].indexOf('aceae') !== -1 || synArr[syn].indexOf('idae') !== -1){
+                                        taxaSolrqString += " OR (family:"+synArr[syn]+")";
+                                        taxaCqlString += " OR family = '"+synArr[syn]+"'";
                                     }
                                 }
-                                for (syn in synArr){
-                                    tidArr.push(syn);
-                                }
-                                taxaSolrqString += " OR (tidinterpreted:("+tidArr.join()+"))";
-                                taxaCqlString += " OR tidinterpreted IN("+tidArr.join()+")";
                             }
+                            for (syn in synArr){
+                                tidArr.push(syn);
+                            }
+                            taxaSolrqString += " OR (tidinterpreted:("+tidArr.join(' ')+"))";
+                            taxaCqlString += " OR tidinterpreted IN("+tidArr.join(' ')+")";
                         }
                     }
                 }

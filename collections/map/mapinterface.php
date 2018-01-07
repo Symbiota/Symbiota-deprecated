@@ -1453,7 +1453,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
-                                    <span style=""><input data-role="none" type='checkbox' name='thes' value='1' <?php if(array_key_exists("thes",$previousCriteria) && $previousCriteria["thes"]) echo "CHECKED"; ?> >Include Synonyms</span>
+                                    <span style=""><input data-role="none" type='checkbox' name='thes' value='1' <?php echo (array_key_exists("thes",$previousCriteria) && !$previousCriteria["thes"]?'':'CHECKED'); ?> >Include Synonyms</span>
                                 </div>
                                 <div id="taxonSearch0">
                                     <div id="taxa_autocomplete" >
