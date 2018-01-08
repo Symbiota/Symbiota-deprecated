@@ -271,7 +271,7 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 						<?php
 					}
 					else{
-						echo '<input name="searchlanguage" type="hidden" value="'.current($langArr).'" />';
+						echo '<input name="searchlanguage" type="hidden" value="'.reset($langArr).'" />';
 					}
 					?>
 				</div>
