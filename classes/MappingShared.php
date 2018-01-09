@@ -55,7 +55,7 @@ class MappingShared{
 				$sql .= ", o.".$v." ";
 			}
 		}
-		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
+		$sql .= 'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
 		if(strpos($mapWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 		if(strpos($mapWhere,'MATCH(f.recordedby)') || strpos($mapWhere,'MATCH(f.locality)')) $sql.= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		$sql .= $mapWhere;

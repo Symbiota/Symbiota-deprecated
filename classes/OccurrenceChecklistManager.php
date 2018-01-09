@@ -23,20 +23,20 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		$sql = "";
 		$sqlWhere = $this->getSqlWhere();
 		if($taxonAuthorityId && is_numeric($taxonAuthorityId)){
-			$sql = 'SELECT DISTINCT ts.family, t.sciname '.
-				'FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid) '.
-				'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid) '.
-				'INNER JOIN taxstatus ts ON t.tid = ts.tid ';
+			$sql = 'SELECT DISTINCT ts2.family, t.sciname '.
+				'FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid '.
+				'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid '.
+				'INNER JOIN taxstatus ts2 ON t.tid = ts2.tid ';
 			$sql .= $this->getTableJoins($sqlWhere);
 			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$sqlWhere));
-			$sql .= ' AND ts1.taxauthid = '.$taxonAuthorityId.' AND ts.taxauthid = '.$taxonAuthorityId.' AND t.RankId > 140 ';
+			$sql .= ' AND ts1.taxauthid = '.$taxonAuthorityId.' AND ts2.taxauthid = '.$taxonAuthorityId.' AND t.RankId > 140 ';
 		}
 		else{
-			$sql = 'SELECT DISTINCT IFNULL(ts.family,o.family) AS family, o.sciname '.
+			$sql = 'SELECT DISTINCT IFNULL(ts1.family,o.family) AS family, o.sciname '.
 				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
-				'LEFT JOIN taxstatus ts ON t.tid = ts.tid ';
+				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tid ';
 			$sql .= $this->getTableJoins($sqlWhere);
-			$sql .= $sqlWhere." AND (t.rankid > 140) AND (ts.taxauthid = 1) ";
+			$sql .= $sqlWhere." AND (t.rankid > 140) AND (ts1.taxauthid = 1) ";
 		}
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
@@ -101,21 +101,21 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			if($tidStr){
 				if(is_numeric($taxonAuthorityId)){
 					$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' '.
-						'FROM taxstatus AS ts INNER JOIN taxa AS t ON ts.TidAccepted = t.Tid '.
+						'FROM taxstatus ts INNER JOIN taxa t ON ts.TidAccepted = t.Tid '.
 						'WHERE ts.tid IN('.$tidStr.') AND ts.taxauthid = '.$taxonAuthorityId.' AND t.RankId > 180';
 				}
 				else{
-					$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' FROM taxa AS t '.
+					$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' FROM taxa t '.
 						'WHERE t.tid IN('.$tidStr.') AND t.RankId > 180 ';
 				}
 			}
 			else{
 				$sqlWhere = $this->getSqlWhere();
 				if(is_numeric($taxonAuthorityId)){
-					$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." ".
-						"FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
+					$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid '.
+						'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid ';
 					$sql .= $this->getTableJoins($sqlWhere);
-					$sqlTaxaInsert .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$sqlWhere))."AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 180";
+					$sqlTaxaInsert .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts1.family",$sqlWhere))."AND ts1.taxauthid = ".$taxonAuthorityId." AND t.RankId > 180";
 				}
 				else{
 					$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." FROM (omoccurrences o INNER JOIN taxa t ON o.TidInterpreted = t.tid) ";
