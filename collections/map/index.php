@@ -71,12 +71,12 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title><?php echo $DEFAULT_TITLE; ?> - Map Interface</title>
-	<link type="text/css" href="../../css/jquery.mobile-1.4.0.min.css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery.symbiota.css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui_accordian.css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
-	<link type="text/css" href="../../css/base.css?ver=6" rel="stylesheet" />
-	<link type="text/css" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" />
+	<link href="../../css/jquery.mobile-1.4.0.min.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/jquery.symbiota.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/jquery-ui_accordian.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
+	<link href="../../css/base.css?ver=6" type="text/css" rel="stylesheet" />
+	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<style type="text/css">
 		.panel-content a{ outline-color: transparent; font-size: 12px; font-weight: normal; }
 		.categorytitle{ font-size:	12px; }
@@ -87,12 +87,10 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 		.collectiontitle a:hover{ font-weight: bold; color: grey; }
 		.ui-front { z-index: 9999999 !important; }
 	</style>
-	<script src="../../js/jquery.js" type="text/javascript"></script>
-	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
+
 	<script src="../../js/jquery-1.10.2.min.js" type="text/javascript"></script>
-	<script src="../../js/jquery.mobile-1.4.0.min.js" type="text/javascript"></script>
-	<script src="../../js/jquery-1.9.1.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui-1.10.4.js" type="text/javascript"></script>
+	<script src="../../js/jquery.mobile-1.4.0.min.js" type="text/javascript"></script>
 	<script src="../../js/jquery.popupoverlay.js" type="text/javascript"></script>
 	<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>" ></script>
 	<script src="../../js/jscolor/jscolor.js?ver=4" type="text/javascript"></script>
@@ -106,6 +104,7 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 	</script>
 	<script src="../../js/symb/api.taxonomy.taxasuggest.js?ver=171226" type="text/javascript"></script>
 	<script type="text/javascript">
+		//$( "#defaultpanel" ).panel( "open" );
 		var map;
 		var useLLDecimal = true;
 		var infoWins = [];
@@ -1125,9 +1124,9 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 <body style='width:100%;max-width:100%;min-width:500px;' <?php echo (!$GEOLOCATION?'onload="initialize();"':''); ?>>
 <div data-role="page" id="page1">
 	<div role="main" class="ui-content" style="height:400px;">
-		<a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars">Open</a>
+		<a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars">Open Search Panel</a>
 	</div>
-	<div data-role="panel" data-dismissible="false" class="overflow: hidden;" style="width:380px" id="defaultpanel" data-position="left" data-display="overlay" >
+	<div id="defaultpanel" data-role="panel" data-dismissible="false" class="overflow: hidden;" style="width:380px" data-position="left" data-display="overlay" >
 		<div class="panel-content">
 			<div id="mapinterface">
 				<div id="accordion" style="" >

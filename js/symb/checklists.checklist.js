@@ -103,8 +103,8 @@ function validateAddSpecies(f){
 			dataType: "json",
 			data: { sciname: sciName }
 		}).done(function( taxaObj ) {
-			alert(JSON.stringify(taxaObj));
-			alert(Object.keys(taxaObj).length)
+			//alert(JSON.stringify(taxaObj));
+			//alert(Object.keys(taxaObj).length)
 			var retCnt = Object.keys(taxaObj).length;
 			if(retCnt == 0){
 				alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, contact your data administrator to add this species to the Taxonomic Thesaurus.");
