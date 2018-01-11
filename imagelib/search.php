@@ -47,7 +47,6 @@ if($action == 'search'){
 			});
 		});
 
-		var CLIENT_ROOT = "<?php echo $CLIENT_ROOT; ?>";
 	</script>
 	<script src="../js/symb/api.taxonomy.taxasuggest.js?ver=171226" type="text/javascript"></script>
 	<script src="../js/symb/imagelib.search.js?ver=20171220" type="text/javascript"></script>

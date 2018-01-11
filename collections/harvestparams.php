@@ -17,7 +17,6 @@ $searchVar = $collManager->getQueryTermStr();
 	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
 	<script src="../js/symb/collections.harvestparams.js?ver=171215" type="text/javascript"></script>
 	<script type="text/javascript">
-		var CLIENT_ROOT = "<?php echo $CLIENT_ROOT; ?>";
 		$(document).ready(function() {
 			<?php
 			if($searchVar){

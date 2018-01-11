@@ -1,4 +1,12 @@
 $(document).ready(function() {
+	var acUrlBase = "/api/taxonomy/taxasuggest.php";
+	var acUrl = acUrlBase;
+	var dirArr = window.location.pathname.split('/');
+	dirArr.shift(); dirArr.pop();
+	while(!urlExists(acUrl) && dirArr.length > 0){
+		acUrl = "/" + dirArr.shift() + acUrlBase;
+	}
+	
 	function split( val ) {
 		return val.split( /,\s*/ );
 	}
@@ -27,7 +35,7 @@ $(document).ready(function() {
 		})
 		.autocomplete({
 			source: $.proxy(function( request, response ) {
-				$.getJSON( CLIENT_ROOT+"/api/taxonomy/taxasuggest.php", {
+				$.getJSON( acUrl, {
 					term: extractLast( request.term ), t: function() { return $("#taxontype").val(); }
 				}, response );
 				this.autocomplete_stage = 0;
@@ -58,3 +66,18 @@ $(document).ready(function() {
 			}
 		},{});
 });
+
+function urlExists(url){
+    var http = new XMLHttpRequest();
+    http.open('HEAD', url, false);
+    http.send();
+    return http.status!=404;
+}
+
+function verifyQuickSearch(f){
+	if(f.quicksearchtaxon.value == ""){
+		alert("Scientific name?");
+		return false;
+	}
+	return true;
+}
