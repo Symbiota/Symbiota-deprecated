@@ -289,7 +289,7 @@ if($clValue || $dynClid){
 					?>
 					<!-- Option box -->
 					<div id="cloptiondiv">
-						<div style="height: 288px">
+						<div style="">
 							<form name="optionform" action="checklist.php" method="post">
 								<fieldset style="background-color:white;padding-bottom:10px;">
 								    <legend><b><?php echo $LANG['OPTIONS'];?></b></legend>
@@ -375,7 +375,7 @@ if($clValue || $dynClid){
 						<?php
 						if($clValue && $isEditor){
 							?>
-							<div class="editspp" style="display:<?php echo ($editMode?'block':'none'); ?>;width:250px;height:460px">
+							<div class="editspp" style="display:<?php echo ($editMode?'block':'none'); ?>;width:250px;">
 								<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 									<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 										<legend><b><?php echo $LANG['NEWSPECIES'];?></b></legend>

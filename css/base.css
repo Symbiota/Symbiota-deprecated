@@ -222,6 +222,7 @@ div.button:hover {
 	width:		250px;
 	text-align:	left;
 	float:		right;
+	min-height:	325px;
 }
 
 #taxonfilterdiv{
