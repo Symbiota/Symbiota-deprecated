@@ -8,7 +8,7 @@ $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:"";
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
-$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0;
+$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:'';
 $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$DEFAULT_LANG;
 $taxaLimit = array_key_exists("taxalimit",$_REQUEST)?$_REQUEST["taxalimit"]:50;
 $page = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:0;
@@ -21,8 +21,7 @@ if(!$tid && $taxonValue){
 	//Need to add code that allows user to select target taxon when more than one homonym is returned
 }
 
-if($clid) $taxonManager->setClid($clid);
-if($pid) $taxonManager->setPid($pid);
+if($pid === '' && isset($DEFAULT_PROJ_ID) && $DEFAULT_PROJ_ID) $pid = $DEFAULT_PROJ_ID;
 if($lang) $taxonManager->setLanguage($lang);
 $tidSubmit = $tid;
 $tid = $taxonManager->setTid($tidSubmit);
@@ -38,17 +37,12 @@ if($links){
 	}
 }
 
-$displayLocality = 0;
 $isEditor = false;
 if($SYMB_UID){
 	if($IS_ADMIN || array_key_exists("TaxonProfile",$USER_RIGHTS)){
 		$isEditor = true;
 	}
-	if($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
-		$displayLocality = 1;
-	}
 }
-$taxonManager->setDisplayLocality($displayLocality);
 $descr = Array();
 ?>
 
@@ -208,16 +202,14 @@ if($taxonManager->getSciName() != "unknown"){
 				<div id="img-div" style="height:300px;overflow:hidden;">
 					<?php
 					//Map
-					$url = ''; $aUrl = ''; $gAnchor = '';
-					if($occurrenceModIsActive && $displayLocality){
+					$aUrl = ''; $gAnchor = '';
+					$url = $taxonManager->getGoogleStaticMap();
+					if($occurrenceModIsActive && $taxonManager->getDisplayLocality()){
 						$gAnchor = "openMapPopup('".$taxonManager->getTid()."',".$clid.")";
 					}
 					if($mapSrc = $taxonManager->getMapArr()){
 						$url = array_shift($mapSrc);
 						$aUrl = $url;
-					}
-					elseif($gAnchor){
-						$url = $taxonManager->getGoogleStaticMap();
 					}
 					if($url){
 						echo '<div class="mapthumb">';
@@ -269,7 +261,6 @@ if($taxonManager->getSciName() != "unknown"){
 				}
 				echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
 				if($taxonRank > 140) echo "<div id='family' style='margin-top:3px;margin-left:20px;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
-				if($pid) echo "<div style='margin-top:3px;margin-left:20px;'><b>Project:</b> ".$taxonManager->getProjName()."</div>\n";
 				if(!$taxonManager->echoImages(0,1,0)){
 					echo "<div class='image' style='width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;'>";
 					if($isEditor){
@@ -299,81 +290,114 @@ if($taxonManager->getSciName() != "unknown"){
 		</tr>
 		<tr>
 			<td colspan="2">
-				<fieldset style="padding:10px 2px 10px 2px;">
-					<?php
-					if($clid){
-						echo "<legend>";
-						echo (isset($LANG['SPECIES_WITHIN'])?$LANG['SPECIES_WITHIN']:'Species within').' <b>'.$taxonManager->getClName().'</b>&nbsp;&nbsp;';
-						if($parentChecklistArr = $taxonManager->getParentChecklist()){
-							echo '<a href="index.php?tid='.$tid.'&clid='.key($parentChecklistArr).'&taxauthid='.$taxAuthId.'" title="'.(isset($LANG['GO_TO'])?$LANG['GO_TO']:'Go to').' '.current($parentChecklistArr).' '.(isset($LANG['CHECKLIST'])?$LANG['CHECKLIST']:'checklist').'"><img style="border:0px;width:10px;" src="../images/toparent.png"/></a>';
-						}
-						echo "</legend>";
-					}
+				<?php
+				if($sppArr = $taxonManager->getSppArray($page, $taxaLimit, $pid, $clid)){
 					?>
-					<div>
-					<?php
-					if($sppArr = $taxonManager->getSppArray($page,$taxaLimit)){
+					<fieldset style="padding:10px 2px 10px 2px;">
+						<?php
+						$legendStr = '';
+						if($clid){
+							if($checklistName = $taxonManager->getClName($clid)){
+								$legendStr .= (isset($LANG['SPECIES_CHECKLIST'])?$LANG['SPECIES_CHECKLIST']:'Species within checklist').' <b>'.$checklistName.'</b>';
+							}
+							if($parentChecklistArr = $taxonManager->getParentChecklist($clid)){
+								$titleStr = (isset($LANG['GO_TO'])?$LANG['GO_TO']:'Include species within checklist').': '.current($parentChecklistArr);
+								$legendStr .= ' <a href="index.php?tid='.$tid.'&clid='.key($parentChecklistArr).'&pid='.$pid.'&taxauthid='.$taxAuthId.'" title="'.$titleStr.'">';
+								$legendStr .= '<img style="border:0px;width:10px;" src="../images/toparent.png"/>';
+								$legendStr .= '</a>';
+							}
+							elseif($pid){
+								$titleStr = (isset($LANG['WITHIN_INVENTORY'])?$LANG['WITHIN_INVENTORY']:'Species within inventory project').': '.$taxonManager->getProjName($pid);
+								$legendStr .= ' <a href="index.php?tid='.$tid.'&clid=0&pid='.$pid.'&taxauthid='.$taxAuthId.'" title="'.$titleStr.'">';
+								$legendStr .= '<img style="border:0px;width:10px;" src="../images/toparent.png"/>';
+								$legendStr .= '</a>';
+							}
+						}
+						elseif($pid){
+							$legendStr .= (isset($LANG['WITHIN_INVENTORY'])?$LANG['WITHIN_INVENTORY']:'Species within inventory project').': <b>'.$taxonManager->getProjName($pid).'</b>';
+							$titleStr = (isset($LANG['SHOW_ALL_TAXA'])?$LANG['SHOW_ALL_TAXA']:'Show all taxa');
+							$legendStr .= ' <a href="index.php?tid='.$tid.'&clid=0&pid=0&taxauthid='.$taxAuthId.'" title="'.$titleStr.'">';
+							$legendStr .= '<img style="border:0px;width:10px;" src="../images/toparent.png"/>';
+							$legendStr .= '</a>';
+						}
+						if($legendStr){
+							$legendStr = '<span style="margin:0px 10px">'.$legendStr.'</span>';
+						}
+
 						$taxonCnt = count($sppArr);
-						$taxaNav = '<div style="float:right">';
-						$dynLink = 'tid='.$tid.'&taxauthid='.$taxAuthId.'&clid='.$clid.'&pid='.$pid.'&lang='.$lang.'&taxalimit='.$taxaLimit;
-						if($page) echo '<a href="index.php?'.$dynLink.'&page='.($page-1).'">&lt;&lt;</a>';
-						else '&lt;&lt;';
-						echo (($page*$taxaLimit)+1).' - '.(($page+1)*$taxaLimit).' taxa ';
-						if($taxonCnt > $taxaLimit) echo '<a href="index.php?'.$dynLink.'&page='.($page+1).'">&gt;&gt;</a>';
-						$taxaNav = '</div>';
-						$cnt = 0;
-						foreach($sppArr as $sciNameKey => $subArr){
-							echo "<div class='spptaxon'>";
-							echo "<div style='margin-top:10px;'>";
-							echo "<a href='index.php?tid=".$subArr["tid"]."&taxauthid=".$taxAuthId."&clid=".$clid."'>";
-							echo "<i>".$sciNameKey."</i>";
-							echo "</a></div>\n";
-							echo "<div class='sppimg' style='overflow:hidden;'>";
-
-							if(array_key_exists("url",$subArr)){
-								$imgUrl = $subArr["url"];
-								if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
-									$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-								}
-								echo "<a href='index.php?tid=".$subArr["tid"]."&taxauthid=".$taxAuthId."&clid=".$clid."'>";
-
-								if($subArr["thumbnailurl"]){
-									$imgUrl = $subArr["thumbnailurl"];
-									if(array_key_exists("imageDomain",$GLOBALS) && substr($subArr["thumbnailurl"],0,1)=="/"){
-										$imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
-									}
-								}
-								echo '<img src="'.$imgUrl.'" title="'.$subArr['caption'].'" alt="Image of '.$sciNameKey.'" style="z-index:-1" />';
-								echo '</a>';
-								echo '<div style="text-align:right;position:relative;top:-26px;left:5px;" title="'.(isset($LANG['PHOTOGRAPHER'])?$LANG['PHOTOGRAPHER']:'Photographer').': '.$subArr['photographer'].'">';
-								echo '</div>';
-							}
-							elseif($isEditor){
-								echo '<div class="spptext" style="margin-top:7px"><a href="profile/tpeditor.php?category=imageadd&tid='.$subArr['tid'].'">'.(isset($LANG['ADD_IMAGE'])?$LANG['ADD_IMAGE']:'Add an Image').'!</a></div>';
-							}
-							else{
-								echo '<div class="spptext">'.(isset($LANG['IMAGE_NOT_AVAILABLE'])?$LANG['IMAGE_NOT_AVAILABLE']:'Images<br/>not available').'</div>';
-							}
-							echo "</div>\n";
-
-							//Display thumbnail map
-							echo '<div class="sppmap">';
-							if(array_key_exists("map",$subArr) && $subArr["map"]){
-								echo '<img src="'.$subArr['map'].'" title="'.$taxonManager->getSciName().'" alt="'.$taxonManager->getSciName().'" />';
-							}
-							elseif($taxonManager->getRankId()>140){
-								echo '<div class="spptext">'.(isset($LANG['MAP_NOT_AVAILABLE'])?$LANG['MAP_NOT_AVAILABLE']:'Map not<br />Available').'</div>';
-							}
-							echo '</div>';
-							echo "</div>";
-							$cnt++;
-							if($cnt > $taxaLimit) break;
+						if($taxonCnt > $taxaLimit || $page){
+							$navStr = '<span style="margin:0px 10px">';
+							$dynLink = 'tid='.$tid.'&taxauthid='.$taxAuthId.'&clid='.$clid.'&pid='.$pid.'&lang='.$lang.'&taxalimit='.$taxaLimit;
+							if($page) $navStr .= '<a href="index.php?'.$dynLink.'&page='.($page-1).'">&lt;&lt;</a>';
+							else $navStr .= '&lt;&lt;';
+							$upperCnt = ($page+1)*$taxaLimit;
+							if($taxonCnt < $taxaLimit) $upperCnt = ($page*$taxaLimit)+$taxonCnt;
+							$navStr .= ' '.(($page*$taxaLimit)+1).' - '.$upperCnt.' taxa ';
+							if($taxonCnt > $taxaLimit) $navStr .= '<a href="index.php?'.$dynLink.'&page='.($page+1).'">&gt;&gt;</a>';
+							else $navStr .= '&gt;&gt;';
+							$navStr .= '</span>';
+							if($legendStr) $legendStr .= ' || ';
+							$legendStr .= ' '.$navStr.' ';
 						}
-					}
-					?>
-						<div style='clear:both;'><hr></div>
-					</div>
-				</fieldset>
+
+						if($legendStr) echo '<legend>'.$legendStr.'</legend>';
+						?>
+						<div>
+						<?php
+							$cnt = 1;
+							foreach($sppArr as $sciNameKey => $subArr){
+								echo "<div class='spptaxon'>";
+								echo "<div style='margin-top:10px;'>";
+								echo "<a href='index.php?tid=".$subArr["tid"]."&taxauthid=".$taxAuthId."&clid=".$clid."'>";
+								echo "<i>".$sciNameKey."</i>";
+								echo "</a></div>\n";
+								echo "<div class='sppimg' style='overflow:hidden;'>";
+
+								if(array_key_exists("url",$subArr)){
+									$imgUrl = $subArr["url"];
+									if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
+										$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+									}
+									echo "<a href='index.php?tid=".$subArr["tid"]."&taxauthid=".$taxAuthId."&clid=".$clid."'>";
+
+									if($subArr["thumbnailurl"]){
+										$imgUrl = $subArr["thumbnailurl"];
+										if(array_key_exists("imageDomain",$GLOBALS) && substr($subArr["thumbnailurl"],0,1)=="/"){
+											$imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
+										}
+									}
+									echo '<img src="'.$imgUrl.'" title="'.$subArr['caption'].'" alt="Image of '.$sciNameKey.'" style="z-index:-1" />';
+									echo '</a>';
+									echo '<div style="text-align:right;position:relative;top:-26px;left:5px;" title="'.(isset($LANG['PHOTOGRAPHER'])?$LANG['PHOTOGRAPHER']:'Photographer').': '.$subArr['photographer'].'">';
+									echo '</div>';
+								}
+								elseif($isEditor){
+									echo '<div class="spptext" style="margin-top:7px"><a href="profile/tpeditor.php?category=imageadd&tid='.$subArr['tid'].'">'.(isset($LANG['ADD_IMAGE'])?$LANG['ADD_IMAGE']:'Add an Image').'!</a></div>';
+								}
+								else{
+									echo '<div class="spptext">'.(isset($LANG['IMAGE_NOT_AVAILABLE'])?$LANG['IMAGE_NOT_AVAILABLE']:'Images<br/>not available').'</div>';
+								}
+								echo "</div>\n";
+
+								//Display thumbnail map
+								echo '<div class="sppmap">';
+								if(array_key_exists("map",$subArr) && $subArr["map"]){
+									echo '<img src="'.$subArr['map'].'" title="'.$taxonManager->getSciName().'" alt="'.$taxonManager->getSciName().'" />';
+								}
+								elseif($taxonManager->getRankId()>140){
+									echo '<div class="spptext">'.(isset($LANG['MAP_NOT_AVAILABLE'])?$LANG['MAP_NOT_AVAILABLE']:'Map not<br />Available').'</div>';
+								}
+								echo '</div>';
+								echo "</div>";
+								$cnt++;
+								if($cnt > $taxaLimit) break;
+							}
+							?>
+						</div>
+					</fieldset>
+					<?php
+				}
+			?>
 			</td>
 		</tr>
 			<?php

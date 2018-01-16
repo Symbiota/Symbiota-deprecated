@@ -7,7 +7,10 @@ Language: English
 
 $LANG['REDIRECT'] = 'redirected from';
 $LANG['EDIT_TAXON_DATA'] = 'Edit Taxon Data';
-$LANG['GO_TO'] = 'Go to';
+$LANG['SHOW_ALL_TAXA'] = 'Show all taxa';
+$LANG['SPECIES_CHECKLIST'] = 'Species within checklist';
+$LANG['GO_TO'] = 'Include species within checklist';
+$LANG['WITHIN_INVENTORY'] = 'Species within inventory project';
 $LANG['FAMILY'] = 'Family';
 $LANG['SYNONYMS'] = 'Synonyms';
 $LANG['AMB_ACCEPTED'] = 'This name is accepted, but is also synonymized with the following taxa: ';
@@ -23,8 +26,7 @@ $LANG['INITIAL_IMAGES'] = 'Initial Images';
 $LANG['VIEW_ALL_IMAGES'] = 'View All Images';
 $LANG['GO_TO_PARENT'] = 'Go to Parent';
 $LANG['EDIT_TAXON_DATA'] = 'Edit Taxon Data';
-$LANG['CHECKLIST'] = 'checklist';
-$LANG['SPECIES_WITHIN'] = 'Species within';
+$LANG['SPECIES_WITHIN'] = 'Species within inventory project';
 $LANG['PHOTOGRAPHER'] = 'Photographer';
 $LANG['MAP_NOT_AVAILABLE'] = 'Map not<br />Available';
 $LANG['WEB_LINKS'] = 'Web Links';
