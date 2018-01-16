@@ -3,9 +3,11 @@ include_once('Manager.php');
 include_once('ImageShared.php');
 
 class ImageCleaner extends Manager{
-	
+
 	private $collid;
 	private $tidArr = array();
+	private $imgRecycleBin;
+	private $imgDelRecOverride = false;
 
 	function __construct() {
 		parent::__construct(null,'write');
@@ -20,8 +22,8 @@ class ImageCleaner extends Manager{
 	//Thumbnail building tools
 	public function getReportArr(){
 		$retArr = array();
-		
-		$sql = 'SELECT c.collid, CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, c.collectionname, count(DISTINCT i.imgid) AS cnt '. 
+
+		$sql = 'SELECT c.collid, CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, c.collectionname, count(DISTINCT i.imgid) AS cnt '.
 			'FROM images i LEFT JOIN omoccurrences o ON i.occid = o.occid '.
 			'LEFT JOIN omcollections c ON o.collid = c.collid ';
 		if($this->tidArr){
@@ -145,7 +147,7 @@ class ImageCleaner extends Manager{
 				}
 			}
 			$imgManager->setTargetPath($finalPath);
-			
+
 			$imgUrl = trim($row->url);
 			if((!$imgUrl || $imgUrl == 'empty') && $row->originalurl){
 				$imgUrl = trim($row->originalurl);
@@ -168,7 +170,7 @@ class ImageCleaner extends Manager{
 				else{
 					$imgTnUrl = $row->thumbnailurl;
 				}
-				
+
 				if($status && $imgTnUrl && $imgManager->uriExists($imgTnUrl)){
 					$webFullUrl = '';
 					$lgFullUrl = '';
@@ -193,7 +195,7 @@ class ImageCleaner extends Manager{
 							}
 						}
 					}
-	
+
 					$sql = 'UPDATE images ti SET ti.thumbnailurl = "'.$imgTnUrl.'" ';
 					if($webFullUrl){
 						$sql .= ',url = "'.$webFullUrl.'" ';
@@ -205,7 +207,7 @@ class ImageCleaner extends Manager{
 						$sql .= ',format = "'.$imgManager->getFormat().'" ';
 					}
 					$sql .= "WHERE ti.imgid = ".$imgId;
-					//echo $sql; 
+					//echo $sql;
 					if(!$this->conn->query($sql)){
 						$this->errorMessage = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
 						$this->logOrEcho($this->errorMessage,1);
@@ -278,7 +280,7 @@ class ImageCleaner extends Manager{
 	public function refreshThumbnails($postArr){
 		$imgManager = new ImageShared();
 		$sql = 'SELECT o.occid, o.catalognumber, i.imgid, i.url, i.thumbnailurl, i.originalurl '.$this->getRemoteImageSql($postArr);
-		//echo $sql.'<br/>'; 
+		//echo $sql.'<br/>';
 		$rs = $this->conn->query($sql);
 		$cnt = 1;
 		while($r = $rs->fetch_object()){
@@ -388,14 +390,14 @@ class ImageCleaner extends Manager{
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		// attempt to retrieve the modification date
 		curl_setopt($curl, CURLOPT_FILETIME, true);
-		
+
 		$curlResult = curl_exec($curl);
-		
+
 		if($curlResult === false){
 			$this->logOrEcho('ERROR retrieving modified date of original image file: '.curl_error($curl),1);
 			return false;
 		}
-		
+
 		$ts = curl_getinfo($curl, CURLINFO_FILETIME);
 		if($ts != -1) return $ts;
 		return false;
@@ -411,19 +413,19 @@ class ImageCleaner extends Manager{
 		}
 	}
 
-	//URL testing 
+	//URL testing
 	public function testByCollid(){
 		$sql = 'SELECT i.imgid, i.url, i.thumbnailurl, i.originalurl '.
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 			'WHERE o.collid IN('.$this->collid.')';
 		return $this->testUrls($sql);
 	}
-	
+
 	public function testByImgid($imgidStr){
-		
-		
+
+
 	}
-	
+
 	private function testUrls($sql){
 		$status = true;
 		$badUrlArr = array();
@@ -456,13 +458,104 @@ class ImageCleaner extends Manager{
 		return $status;
 	}
 
+	//Bulk removal of images
+	public function recycleImagesFromFile($filePath){
+		if(!$filePath) exit('Image identifier file path IS NULL');
+		if(!file_exists($filePath)) exit('Image identifier file Not Found');
+		if(($imgidHandler = fopen($imgidFile, 'r')) !== FALSE){
+			while(($data = fgets($imgidHandler)) !== FALSE){
+				$this->recycleImage($data[0]);
+			}
+		}
+	}
+
+	public function recycleImagesFromStr($inputStr){
+		$inputStr = $this->cleanInStr($inputStr);
+		$inputStr = preg_replace('/\s',',',$newStr);
+		$idArr = explode(',',$inputStr);
+		foreach($idStr as $imgId){
+			$this->recycleImage($imgID);
+		}
+	}
+
+	private function recycleImage($imgID){
+		if(!is_numeric($imgID)) return false;
+		if($this->imgRecycleBin){
+			$sql = 'SELECT url, originalurl, thumbnailurl FROM images WHERE imgid = '.$imgID;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$imgUrlArr = array();
+				if($r->originalurl) $imgUrlArr[] = $r->originalurl;
+				if($r->thumbnailurl) $imgUrlArr[] = $r->thumbnailurl;
+				if($r->url) $imgUrlArr[] = $r->url;
+
+				$delRec = false;
+				if($this->imgDelRecOverride) $delRec = true;
+				foreach($imgUrlArr as $imgUrl){
+					$imgPath = $imgUrl;
+					if(strpos($imgUrl, $GLOBALS['IMAGE_ROOT_URL']) === 0){
+						$imgPath = $GLOBALS['IMAGE_ROOT_PATH'].substr($imgUrl,strlen($GLOBALS['IMAGE_ROOT_URL']));
+					}
+					if(is_writable($imgPath)){
+						$pathParts = pathinfo($imgPath);
+						$targetPath = $this->imgRecycleBin.'/'.$pathParts['dirname'];
+						if(!file_exists($targetPath)) mkdir($targetPath);
+						$targetPath .= '/'.$pathParts['basename'];
+						if(rename($imgPath,$targetPath)) $delRec = true;
+					}
+				}
+				if($delRec) $this->conn->query('DELETE FROM images WHERE (imgid = '.$imgID.')');
+			}
+			$rs->free();
+		}
+		return true;
+	}
+
+	public function setRecycleBin($binPath = ''){
+		if($binPath){
+			if(file_exists($binPath)){
+				$this->imgRecycleBin = $binPath;
+				return true;
+			}
+			else{
+				$this->errorMessage = 'Recycle bin path does not exist: '.$binPath;
+				return false;
+			}
+		}
+		else{
+			if($GLOBALS['IMAGE_ROOT_PATH']){
+				$path = $GLOBALS['IMAGE_ROOT_PATH'];
+				if(substr($path, -1) != '/') $path .= '/';
+				$path .= 'trash';
+				if(!file_exists($path)){
+					if(!mkdir($path){
+						$this->errorMessage = 'Failed to create trash folder in IMAGE_ROOT_PATH';
+						return false;
+					}
+				}
+				$this->imgRecycleBin = $path;
+				return true;
+			}
+			$this->errorMessage = 'ERROR: Failed to define recycle bin from configuration file';
+			return false;
+		}
+	}
+
+	public function getRecycleBin(){
+		return $this->imgRecycleBin;
+	}
+
+	public function setImgDelRecOverride($override){
+		$this->imgDelRecOverride = $override;
+	}
+
 	//Setters and getters
 	public function setCollid($id){
 		if(is_numeric($id)){
 			$this->collid = $id;
 		}
 	}
-	
+
 	public function setTid($id){
 		if(is_numeric($id)){
 			$this->tidArr[] = $id;
@@ -476,7 +569,7 @@ class ImageCleaner extends Manager{
 			$rs->free();
 		}
 	}
-	
+
 	public function getSciname(){
 		$sciname = '';
 		if($this->tidArr){
