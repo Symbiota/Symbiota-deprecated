@@ -372,7 +372,7 @@ if($taxonManager->getSciName() != "unknown"){
 									echo '</div>';
 								}
 								elseif($isEditor){
-									echo '<div class="spptext" style="margin-top:7px"><a href="profile/tpeditor.php?category=imageadd&tid='.$subArr['tid'].'">'.(isset($LANG['ADD_IMAGE'])?$LANG['ADD_IMAGE']:'Add an Image').'!</a></div>';
+									echo '<div class="spptext"><a href="profile/tpeditor.php?category=imageadd&tid='.$subArr['tid'].'">'.(isset($LANG['ADD_IMAGE'])?$LANG['ADD_IMAGE']:'Add an Image').'!</a></div>';
 								}
 								else{
 									echo '<div class="spptext">'.(isset($LANG['IMAGE_NOT_AVAILABLE'])?$LANG['IMAGE_NOT_AVAILABLE']:'Images<br/>not available').'</div>';
@@ -380,14 +380,16 @@ if($taxonManager->getSciName() != "unknown"){
 								echo "</div>\n";
 
 								//Display thumbnail map
-								echo '<div class="sppmap">';
-								if(array_key_exists("map",$subArr) && $subArr["map"]){
-									echo '<img src="'.$subArr['map'].'" title="'.$taxonManager->getSciName().'" alt="'.$taxonManager->getSciName().'" />';
+								if($taxonManager->getRankId() > 140){
+									echo '<div class="sppmap">';
+									if(array_key_exists("map",$subArr) && $subArr["map"]){
+										echo '<img src="'.$subArr['map'].'" title="'.$taxonManager->getSciName().'" alt="'.$taxonManager->getSciName().'" />';
+									}
+									else{
+										echo '<div class="spptext">'.(isset($LANG['MAP_NOT_AVAILABLE'])?$LANG['MAP_NOT_AVAILABLE']:'Map not<br />Available').'</div>';
+									}
+									echo '</div>';
 								}
-								elseif($taxonManager->getRankId()>140){
-									echo '<div class="spptext">'.(isset($LANG['MAP_NOT_AVAILABLE'])?$LANG['MAP_NOT_AVAILABLE']:'Map not<br />Available').'</div>';
-								}
-								echo '</div>';
 								echo "</div>";
 								$cnt++;
 								if($cnt > $taxaLimit) break;
