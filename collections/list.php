@@ -30,9 +30,9 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 		.ui-tabs .ui-tabs-nav li { width:32%; }
 		.ui-tabs .ui-tabs-nav li a { margin-left:10px;}
 	</style>
-	<link href="../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />
+	<link href="../js/jquery-ui-1.12.1/jquery-ui.min.css" type="text/css" rel="Stylesheet" />
 	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
-	<script src="../js/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript"></script>
+	<script src="../js/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
