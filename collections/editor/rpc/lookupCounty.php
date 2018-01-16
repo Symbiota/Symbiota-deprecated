@@ -17,7 +17,7 @@ $sql .= $sqlWhere.'ORDER BY c.countyname';
 $result = $con->query($sql);
 while ($row = $result->fetch_object()) {
 	$countyStr = $row->countyname;
-	if($charset == 'ISO-8859-1'){
+	if($CHARSET == 'ISO-8859-1'){
 		if(mb_detect_encoding($countyStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 			$countyStr = utf8_encode($countyStr);
 		}

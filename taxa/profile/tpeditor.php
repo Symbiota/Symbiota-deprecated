@@ -95,7 +95,7 @@ if($editable && $action){
 			}
 		}
 		$statusStr = $tEditor->editImageSort($imgSortArr);
-	} 
+	}
 	elseif($action == "Upload Image"){
 		if($tEditor->loadImage($_POST)){
 			$statusStr = 'Image uploaded successful';
@@ -109,10 +109,10 @@ if($editable && $action){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE." Taxon Editor: ".$tEditor->getSciName(); ?></title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>" />
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../../js/symb/shared.js"></script>
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
@@ -133,10 +133,10 @@ if($editable && $action){
 			},{ minLength: 3, autoFocus: true }
 			);
 
-			$('#tabs').tabs({ 
-				active: <?php echo $tabIndex; ?> 
+			$('#tabs').tabs({
+				active: <?php echo $tabIndex; ?>
 			});
-			
+
 		});
 
 		function checkGetTidForm(f){
@@ -146,7 +146,7 @@ if($editable && $action){
 			}
 			return true;
 		}
-		
+
 		function submitAddImageForm(f){
 			var fileBox = document.getElementById("imgfile");
 			var file = fileBox.files[0];
@@ -172,12 +172,12 @@ if($editable && $action){
 	if(isset($taxa_admin_tpeditorCrumbs)){
 		echo "<div class='navpath'>";
 		echo $taxa_admin_tpeditorCrumbs;
-		echo " <b>Taxon Profile Editor</b>"; 
+		echo " <b>Taxon Profile Editor</b>";
 		echo "</div>";
 	}
 	?>
 	<div id="innertext">
-		<?php 
+		<?php
 		if($tEditor->getTid()){
 			if($editable){
 			 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
@@ -191,7 +191,7 @@ if($editable && $action){
 				echo "</div>\n";
 				//Display Family
 				echo "<div id='family' style='margin-left:20px;margin-top:0.25em;'><b>Family:</b> ".$tEditor->getFamily()."</div>\n";
-				
+
 				if($statusStr){
 					echo '<h3 style="color:'.(stripos($statusStr,'error') !== false?'red':'green') .';">'.$statusStr.'<h3>';
 				}
@@ -211,7 +211,7 @@ if($editable && $action){
 						?>
 						<div>
 							<div style="margin:10px 0px">
-								<b><?php echo ($vernList?'Common Names':'No common in system'); ?></b> 
+								<b><?php echo ($vernList?'Common Names':'No common in system'); ?></b>
 								<span onclick="toggle('addvern');" title="Add a New Common Name">
 									<img style="border:0px;width:15px;" src="../../images/add.png"/>
 								</span>
@@ -221,23 +221,23 @@ if($editable && $action){
 									<fieldset style="width:250px;margin:5px 0px 0px 20px;">
 										<legend><b>New Common Name</b></legend>
 										<div>
-											Common Name: 
+											Common Name:
 											<input name="vern" style="margin-top:5px;border:inset;" type="text" />
 										</div>
 					    				<div>
-					    					Language: 
+					    					Language:
 					    					<input name="language" style="margin-top:5px;border:inset;" type="text" />
 					    				</div>
 										<div>
-											Notes: 
+											Notes:
 											<input name="notes" style="margin-top:5px;border:inset;" type="text" />
 										</div>
 										<div>
-											Source: 
+											Source:
 											<input name="source" style="margin-top:5px;border:inset;" type="text" />
 										</div>
 										<div>
-											Sort Sequence: 
+											Sort Sequence:
 											<input name="sortsequence" style="margin-top:5px;border:inset;width:40px" type="text" />
 										</div>
 										<div>
@@ -247,13 +247,13 @@ if($editable && $action){
 									</fieldset>
 								</form>
 							</div>
-							<?php 
+							<?php
 							foreach($vernList as $lang => $vernsList){
 								?>
 								<div style="width:250px;margin:5px 0px 0px 15px;">
 									<fieldset>
 						    			<legend><b><?php echo $lang; ?></b></legend>
-						    			<?php 
+						    			<?php
 										foreach($vernsList as $vernArr){
 											?>
 											<div style="margin-left:10px;">
@@ -296,24 +296,24 @@ if($editable && $action){
 												<form id='delvern' name='delvern' action='tpeditor.php' method='post' onsubmit="return window.confirm('Are you sure you want to delete this Common Name?')">
 													<input type='hidden' name='delvern' value='<?php echo $vernArr["vid"]; ?>' />
 													<input type='hidden' name='tid' value='<?php echo $tEditor->getTid(); ?>' />
-													<input name='action' type='hidden' value='Delete Common Name' /> 
-													<input name='submitaction' type='image' value='Delete Common Name' style='height:12px;' src='../../images/del.png' /> 
+													<input name='action' type='hidden' value='Delete Common Name' />
+													<input name='submitaction' type='image' value='Delete Common Name' style='height:12px;' src='../../images/del.png' />
 													Delete Common Name
 												</form>
 											</div>
-											<?php 
+											<?php
 										}
 										?>
 									</fieldset>
 								</div>
-								<?php 
+								<?php
 							}
 							?>
 						</div>
 						<div style="margin:30px 0px"><hr/></div>
 						<fieldset style='padding:10px;margin:30px 0px;width:400px;'>
 					    	<legend><b>Synonyms</b></legend>
-							<?php 	
+							<?php
 							//Display Synonyms
 							if($synonymArr = $tEditor->getSynonym()){
 								?>
@@ -322,7 +322,7 @@ if($editable && $action){
 								</div>
 								<div style="font-weight:bold;margin-left:15px;">
 									<ul>
-										<?php 
+										<?php
 										foreach($synonymArr as $tidKey => $valueArr){
 											 echo '<li>'.$valueArr["sciname"].'</li>';
 										}
@@ -334,18 +334,18 @@ if($editable && $action){
 										<input type="hidden" name="tid" value="<?php echo $tEditor->getTid(); ?>" />
 										<fieldset style='margin:5px 0px 5px 5px;margin-left:20px;width:350px;'>
 									    	<legend><b>Synonym Sort Order</b></legend>
-									    	<?php 
+									    	<?php
 									    	foreach($synonymArr as $tidKey => $valueArr){
 									    		?>
 												<div>
-													<b><?php echo $valueArr["sortsequence"]; ?></b> - 
+													<b><?php echo $valueArr["sortsequence"]; ?></b> -
 													<?php echo $valueArr["sciname"]; ?>
 												</div>
 												<div style="margin:0px 0px 5px 10px;">
-													new sort value: 
+													new sort value:
 													<input type="text" name="syn-<?php echo $tidKey; ?>" style="width:35px;border:inset;" />
 												</div>
-												<?php 
+												<?php
 											}
 											?>
 											<div>
@@ -354,38 +354,38 @@ if($editable && $action){
 										</fieldset>
 									</form>
 								</div>
-								<?php 
+								<?php
 							}
 							else{
 								echo '<div style="margin:20px 0px"><b>No synonym links</b></div>';
 							}
 							?>
 							<div style="margin:10px;">
-								*Most of the synonym management must be done in the Taxonomic Thesaurus editing module (see <a href="../../sitemap.php">sitemap</a>). 
+								*Most of the synonym management must be done in the Taxonomic Thesaurus editing module (see <a href="../../sitemap.php">sitemap</a>).
 							</div>
 						</fieldset>
 					</div>
 				</div>
-				<?php  
+				<?php
 			}
 			else{
 				?>
 				<div style="margin:30px;">
 					<h2>You must be logged in and authorized to taxon data.</h2>
 					<h3>
-						<?php 
+						<?php
 							echo "Click <a href='".$CLIENT_ROOT."/profile/index.php?tid=".$tEditor->getTid()."&refurl=".$CLIENT_ROOT."/taxa/profile/tpeditor.php'>here</a> to login";
 						?>
 					</h3>
 				</div>
-				<?php 
+				<?php
 			}
 		}
 		else{
 			?>
 			<div style="margin:20px;">
 				<div style="font-weight:bold;">
-				<?php 
+				<?php
 				if($taxon){
 					echo "<i>".ucfirst($taxon)."</i> not found in system. Check to see if spelled correctly and if so, add to system.";
 				}
@@ -401,11 +401,11 @@ if($editable && $action){
 					<input type="submit" name="action" value="Edit Taxon" />
 				</form>
 			</div>
-			<?php 
+			<?php
 		}
 		?>
 	</div>
-	<?php 
+	<?php
 	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>

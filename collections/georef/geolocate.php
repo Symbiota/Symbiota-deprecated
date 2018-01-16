@@ -22,7 +22,7 @@ elseif(preg_match('/R\d{1,2}[EW]{1}\sS\d{1,2}/i',$locality)){
 	$locality = preg_replace('/\sS(\d{1,2})/', ' Sec$1', $locality);
 }
 //Convert latin1 character sets to utf-8
-if(strtolower($charset) == "iso-8859-1"){
+if(strtolower($CHARSET) == "iso-8859-1"){
 	if(mb_detect_encoding($country,'UTF-8,ISO-8859-1') == "UTF-8"){
 		$country = utf8_encode($country);
 	}

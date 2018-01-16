@@ -13,7 +13,7 @@ class SpecProcNlpUtilities {
 	function __destruct(){
 		if(!($this->conn === false)) $this->conn->close();
 	}
-	
+
 	public static function cleanDwcArr($dwcArrIn){
 		$dwcArr = array();
 		//Do some cleaning and standardization
@@ -59,7 +59,7 @@ class SpecProcNlpUtilities {
 	public static function convertUtmToLL($e, $n, $z, $d){
 		return OccurrenceUtilities::convertUtmToLL($e, $n, $z, $d);
 	}
-	
+
 	//Following functions need to be reworked if they are to be used
 	private function parseRecordedBy(){
 		$lineArr = explode("\n",$this->rawText);
@@ -81,9 +81,9 @@ class SpecProcNlpUtilities {
 			}
 		}
 		//If no match, try digging deeper
-        // PJM: 2014 Nov 28, have done a simple subtitution of agents for omcollectors here, 
-        //      as this function doesn't appear to be in use, the agents and agentnames 
-        //      tables offer more options for more sophisticated checks for existing 
+        // PJM: 2014 Nov 28, have done a simple subtitution of agents for omcollectors here,
+        //      as this function doesn't appear to be in use, the agents and agentnames
+        //      tables offer more options for more sophisticated checks for existing
         //      agents.
 		if(!isset($this->fragMatches['recordedBy'])){
 			foreach($lineArr as $line){
@@ -250,16 +250,16 @@ class SpecProcNlpUtilities {
 
 	//Misc functions
 	public static function encodeString($inStr){
- 		global $charset;
+		global $CHARSET;
  		$retStr = $inStr;
  		if($inStr){
-			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+ 			if(strtolower($CHARSET) == "utf-8" || strtolower($CHARSET) == "utf8"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
-			elseif(strtolower($charset) == "iso-8859-1"){
+			elseif(strtolower($CHARSET) == "iso-8859-1"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);

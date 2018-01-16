@@ -54,7 +54,7 @@ class OccurrenceLabel{
 				else{
 					$sqlWhere .= 'AND (DATE('.$dateTarget.') = "'.$date1.'") ';
 				}
-				
+
 				$sqlOrderBy .= ','.$dateTarget;
 			}
 			$rnIsNum = false;
@@ -73,7 +73,7 @@ class OccurrenceLabel{
 						}
 						else{
 							$catTerm = 'o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
-							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.recordnumber) = '.strlen($term2); 
+							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.recordnumber) = '.strlen($term2);
 							$rnBetweenFrag[] = '('.$catTerm.')';
 						}
 					}
@@ -111,12 +111,12 @@ class OccurrenceLabel{
 						$term1 = trim(substr($v,0,$p));
 						$term2 = trim(substr($v,$p+3));
 						if(is_numeric($term1) && is_numeric($term2)){
-							$searchIsNum = true; 
+							$searchIsNum = true;
 							$iBetweenFrag[] = '(o.catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
 						}
 						else{
 							$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
-							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2); 
+							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2);
 							$iBetweenFrag[] = '('.$catTerm.')';
 						}
 					}
@@ -192,7 +192,7 @@ class OccurrenceLabel{
 				}
 				$rs1->free();
 			}
-				
+
 			//Get occurrence records
 			$sql2 = 'SELECT o.occid, o.collid, o.catalognumber, o.othercatalognumbers, '.
 				'o.family, o.sciname AS scientificname, o.genus, o.specificepithet, o.taxonrank, o.infraspecificepithet, '.
@@ -220,7 +220,7 @@ class OccurrenceLabel{
 		}
 		return $retArr;
 	}
-	
+
 	public function getAnnoArray($detidArr, $speciesAuthors){
 		$retArr = array();
 		if($detidArr){
@@ -243,7 +243,7 @@ class OccurrenceLabel{
 				}
 				$rs1->free();
 			}
-				
+
 			//Get determination records
 			$sql2 = 'SELECT d.detid, d.identifiedBy, d.dateIdentified, d.sciname, d.scientificNameAuthorship, '.
 				'd.identificationQualifier, d.identificationReferences, d.identificationRemarks '.
@@ -262,7 +262,7 @@ class OccurrenceLabel{
 		}
 		return $retArr;
 	}
-	
+
 	public function clearAnnoQueue($detidArr){
 		$statusStr = '';
 		if($detidArr){
@@ -321,7 +321,7 @@ class OccurrenceLabel{
 		}
 		return $retArr;
 	}
-	
+
 	public function getAnnoQueue(){
 		$retArr = array();
 		if($this->collid){
@@ -347,10 +347,10 @@ class OccurrenceLabel{
 		}
 		return $retArr;
 	}
-	
+
 	//General functions
 	public function exportCsvFile($postArr, $speciesAuthors){
-		global $charset;
+		global $CHARSET;
 		$occidArr = $postArr['occid'];
 		if($occidArr){
 			$labelArr = $this->getLabelArray($occidArr, $speciesAuthors);
@@ -358,12 +358,12 @@ class OccurrenceLabel{
 				$fileName = 'labeloutput_'.time().".csv";
 				header('Content-Description: Symbiota Label Output File');
 				header ('Content-Type: text/csv');
-				header ('Content-Disposition: attachment; filename="'.$fileName.'"'); 
-				header('Content-Transfer-Encoding: '.strtoupper($charset));
+				header ('Content-Disposition: attachment; filename="'.$fileName.'"');
+				header('Content-Transfer-Encoding: '.strtoupper($CHARSET));
 				header('Expires: 0');
 				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 				header('Pragma: public');
-				
+
 				$fh = fopen('php://output','w');
 				$headerArr = array("occid","catalogNumber","otherCatalogNumbers","family","scientificName","genus","specificEpithet",
 					"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","identifiedBy",
@@ -403,11 +403,11 @@ class OccurrenceLabel{
 			$this->setCollMetadata();
 		}
 	}
-	
+
 	public function getCollName(){
 		return $this->collArr['collname'].' ('.$this->collArr['instcode'].($this->collArr['collcode']?':'.$this->collArr['collcode']:'').')';
 	}
-	
+
 	public function getAnnoCollName(){
 		return $this->collArr['collname'].' ('.$this->collArr['instcode'].')';
 	}
@@ -438,7 +438,7 @@ class OccurrenceLabel{
 	public function getErrorArr(){
 		return $this->errorArr;
 	}
-	
+
 	//Misc functions
 	private function cleanInStr($str){
 		$newStr = trim($str);

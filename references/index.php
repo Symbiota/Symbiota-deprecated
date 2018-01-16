@@ -39,7 +39,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
    "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Reference Management</title>
     <link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
     <link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" type="text/css" />
@@ -56,25 +56,25 @@ header("Content-Type: text/html; charset=".$CHARSET);
 		if($reference_indexCrumbs){
 			?>
 			<div class='navpath'>
-				<a href='../index.php'>Home</a> &gt;&gt; 
+				<a href='../index.php'>Home</a> &gt;&gt;
 				<?php echo $reference_indexCrumbs; ?>
 				<a href='index.php'> <b>Reference Management</b></a>
 			</div>
-			<?php 
+			<?php
 		}
 	}
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../index.php'>Home</a> &gt;&gt; 
+			<a href='../index.php'>Home</a> &gt;&gt;
 			<a href='index.php'> <b>Reference Management</b></a>
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($SYMB_UID){
 			if($statusStr){
 				?>
@@ -82,7 +82,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 				<div style="margin:15px;color:red;">
 					<?php echo $statusStr; ?>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 			<div id="" style="float:right;width:240px;">
@@ -91,11 +91,11 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					    <legend><b>Filter List</b></legend>
 				    	<div>
 							<div>
-								<b>Title Keyword:</b> 
+								<b>Title Keyword:</b>
 								<input type="text" autocomplete="off" name="searchtitlekeyword" id="searchtitlekeyword" size="25" value="<?php echo ($formSubmit == 'Search References'?$_POST['searchtitlekeyword']:''); ?>" />
 							</div>
 							<div>
-								<b>Author's Last Name:</b> 
+								<b>Author's Last Name:</b>
 								<input type="text" name="searchauthor" id="searchauthor" size="25" value="<?php echo ($formSubmit == 'Search References'?$_POST['searchauthor']:''); ?>" />
 							</div>
 							<div style="padding-top:8px;float:right;">
@@ -128,7 +128,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									<b>Reference Type: </b><select name="newreftype" id="newreftype" style="width:400px;">
 										<option value="">Select Reference Type</option>
 										<option value="">------------------------------------------</option>
-										<?php 
+										<?php
 										$typeArr = $refManager->getRefTypeArr();
 										foreach($typeArr as $k => $v){
 											echo '<option value="'.$k.'">'.$v.'</option>';
@@ -177,7 +177,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 				}
 				?>
 			</div>
-			<?php 
+			<?php
 		}
 		else{
 			if(!$SYMB_UID){

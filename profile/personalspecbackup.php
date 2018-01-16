@@ -12,8 +12,8 @@ $dlManager = new ProfileManager();
 $dlManager->setUid($SYMB_UID);
 
 $editable = 0;
-if($IS_ADMIN 
-	|| array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]) 
+if($IS_ADMIN
+	|| array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"])
 	|| array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"])){
 		$editable = 1;
 }
@@ -29,7 +29,7 @@ if($IS_ADMIN
 <body>
 <!-- This is inner text! -->
 <div id="innertext">
-	<?php 
+	<?php
 	if($editable){
 		if($action == 'Perform Backup'){
 			echo '<ul>';
@@ -47,17 +47,17 @@ if($IS_ADMIN
 				<fieldset style="padding:15px;">
 					<legend>Download Module</legend>
 					<div style="float:left;">
-						Data Set: 
+						Data Set:
 					</div>
 					<div style="float:left;">
-						<?php 
-						$cSet = str_replace('-','',strtolower($charset));
+						<?php
+						$cSet = str_replace('-','',strtolower($CHARSET));
 						?>
 						<input type="radio" name="cset" value="latin1" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
 						<input type="radio" name="cset" value="utf8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
 					</div>
 					<div style="clear:both;">
-						<input name="zipfile" type="checkbox" value="1" CHECKED /> 
+						<input name="zipfile" type="checkbox" value="1" CHECKED />
 						Compress data into a zip file
 					</div>
 					<div style="clear:both;">
@@ -66,7 +66,7 @@ if($IS_ADMIN
 					</div>
 				</fieldset>
 			</form>
-			<?php 
+			<?php
 		}
 	}
 	?>

@@ -20,7 +20,7 @@ class ImageLocalProcessor {
 	private $imgUrlBase;
 	private $symbiotaClassPath = null;
 	protected $serverRoot;
-	
+
 	private $matchCatalogNumber = true;
 	private $matchOtherCatalogNumbers = false;
 	private $webPixWidth = '';
@@ -29,8 +29,8 @@ class ImageLocalProcessor {
 	private $webFileSizeLimit = 300000;
 	private $lgFileSizeLimit = 3000000;
 	private $jpgQuality= 80;
-	private $webImg = 1;			// 1 = evaluate source and import, 2 = import source and use as is, 3 = map to source  
-	private $tnImg = 1;				// 1 = create from source, 2 = import source, 3 = map to source, 0 = exclude 
+	private $webImg = 1;			// 1 = evaluate source and import, 2 = import source and use as is, 3 = map to source
+	private $tnImg = 1;				// 1 = create from source, 2 = import source, 3 = map to source, 0 = exclude
 	private $lgImg = 1;				// 1 = import source, 2 = map to source, 3 = import large version (_lg.jpg), 4 = map large version (_lg.jpg), 0 = exclude
 	private $webSourceSuffix = '';
 	private $tnSourceSuffix = '_tn';
@@ -48,10 +48,10 @@ class ImageLocalProcessor {
 	private $mdOutputFH;
 	private $logPath;
 	private $errorMessage;
-	
+
 	private $sourceGdImg;
 	private $sourceImagickImg;
-	
+
 	private $dataLoaded = 0;
 
 	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
@@ -59,17 +59,17 @@ class ImageLocalProcessor {
 
     /**  Track the list of xml files that have been processed to avoid
      *   processing the same file more than once when collArr is configured
-     *   to contain more than one record for the same path (for image 
+     *   to contain more than one record for the same path (for image
      *   uploads from an institution with more than one collection code).
      */
-    private $processedFiles = Array();  
- 
+    private $processedFiles = Array();
+
 
 	function __construct(){
 		ini_set('memory_limit','1024M');
 		ini_set('auto_detect_line_endings', true);
 		//Use deaults located within symbini, if they are available
-		//Will be replaced by values within configuration file, if they are set 
+		//Will be replaced by values within configuration file, if they are set
 		if(isset($GLOBALS['imgWebWidth']) && $GLOBALS['imgWebWidth']) $this->webPixWidth = $GLOBALS['imgWebWidth'];
 		if(isset($GLOBALS['imgTnWidth']) && $GLOBALS['imgTnWidth']) $this->tnPixWidth = $GLOBALS['imgTnWidth'];
 		if(isset($GLOBALS['imgLgWidth']) && $GLOBALS['imgLgWidth']) $this->lgPixWidth = $GLOBALS['imgLgWidth'];
@@ -82,9 +82,9 @@ class ImageLocalProcessor {
 			if(!($this->conn === false)) $this->conn->close();
 		}
 		else{
-			
+
 		}
-		
+
 		//Close log file
 		if($this->logFH) fclose($this->logFH);
 	}
@@ -130,17 +130,17 @@ class ImageLocalProcessor {
 			if(!$headerArr){
 				$this->logOrEcho('ABORT: sourcePathBase returned bad headers ('.$this->sourcePathBase.')');
 				exit();
-			} 
+			}
 			preg_match('/http.+\s{1}(\d{3})\s{1}/i',$headerArr[0],$codeArr);
-			if($codeArr[1] == '403'){ 
+			if($codeArr[1] == '403'){
 				$this->logOrEcho('ABORT: sourcePathBase returned Forbidden ('.$this->sourcePathBase.')');
 				exit();
 			}
-			if($codeArr[1] == '404'){ 
+			if($codeArr[1] == '404'){
 				$this->logOrEcho('ABORT: sourcePathBase returned a page Not Found error ('.$this->sourcePathBase.')');
 				exit();
 			}
-			if($codeArr[1] != '200'){ 
+			if($codeArr[1] != '200'){
 				$this->logOrEcho('ABORT: sourcePathBase returned error code '.$codeArr[1].' ('.$this->sourcePathBase.')');
 				exit();
 			}
@@ -152,20 +152,20 @@ class ImageLocalProcessor {
 		}
 		//Set target base path
 		if(!$this->targetPathBase){
-			//Assume that portal's default image root path is what needs to be used  
+			//Assume that portal's default image root path is what needs to be used
 			$this->targetPathBase = $GLOBALS['imageRootPath'];
 		}
 		if(!$this->targetPathBase){
-			//Assume that we should use the portal's default image root path   
+			//Assume that we should use the portal's default image root path
 			$this->targetPathBase = $GLOBALS['imageRootPath'];
 		}
 		if($this->targetPathBase && substr($this->targetPathBase,-1) != '/' && substr($this->targetPathBase,-1) != "\\"){
 			$this->targetPathBase .= '/';
 		}
-		
+
 		//Set image base URL
 		if(!$this->imgUrlBase){
-			//Assume that we should use the portal's default image url prefix 
+			//Assume that we should use the portal's default image url prefix
 			$this->imgUrlBase = $GLOBALS['imageRootUrl'];
 		}
 		if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
@@ -209,7 +209,7 @@ class ImageLocalProcessor {
 					exit("ABORT: Image upload aborted: Unable to establish connection to output file to where image metadata is to be written");
 				}
 			}
-			
+
 			//Set source and target path fragments
 			$sourcePathFrag = '';
 			$this->targetPathFrag = '';
@@ -274,7 +274,7 @@ class ImageLocalProcessor {
 			//Update Statistics
 			$this->updateCollectionStats();
 		}
-		
+
 		$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
 		if($this->logMode == 1){
 			echo '</ul>';
@@ -309,17 +309,17 @@ class ImageLocalProcessor {
 								elseif(($fileExt == ".csv" || $fileExt == ".txt" || $fileExt == ".tab" || $fileExt == ".dat")){
 									if($this->skeletalFileProcessing){
 										//Is skeletal file exists. Append data to database records
-										$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
+										$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName);
 										if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
 									}
 								}
 								elseif($fileExt==".xml") {
                                     // The loop through collArr can result in same file being processed more than
                                     // once if the same pathFrag is associated with more than one collection.
-                                    if (!in_array("$pathFrag$fileName",$this->processedFiles)) { 
+                                    if (!in_array("$pathFrag$fileName",$this->processedFiles)) {
 									$this->processXMLFile($fileName,$pathFrag);
                                          $this->processedFiles[] = "$pathFrag$fileName";
-                                         // TODO: It would seem that adding the collection to collProcessedArr 
+                                         // TODO: It would seem that adding the collection to collProcessedArr
                                          // should accomplish what processedFiles[] is being added above to
                                          // do, need to investigate further and perhaps use it as a fix.
 									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
@@ -387,7 +387,7 @@ class ImageLocalProcessor {
 							elseif(($fileExt == "csv" || $fileExt == "txt" || $fileExt == "tab" || $fileExt == "dat")){
 								if($this->skeletalFileProcessing){
 									//Is skeletal file. Process and append data to database records
-									$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
+									$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName);
 									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
 								}
 							}
@@ -415,16 +415,16 @@ class ImageLocalProcessor {
 	}
 
 	/**
-	 * Examine an xml file, and if it conforms to supported expectations, 
+	 * Examine an xml file, and if it conforms to supported expectations,
 	 * add the data it contains to the Symbiota database.
 	 * Currently supported expectations are: (1) the GPI/ALUKA/LAPI schema
 	 * and (2) RDF/XML containing oa/oad annotations asserting new occurrence
 	 * records in dwcFP, supporting the NEVP TCN.
-	 *  
+	 *
 	 * @param fileName the name of the xml file to process.
-	 * @param pathFrag the path from sourcePathBase to the file to process. 
+	 * @param pathFrag the path from sourcePathBase to the file to process.
 	 */
-	private function processXMLFile($fileName,$pathFrag='') { 
+	private function processXMLFile($fileName,$pathFrag='') {
 		if ($this->serverRoot) {
 			$foundSchema = false;
 			$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
@@ -600,7 +600,7 @@ class ImageLocalProcessor {
 				elseif($this->webImg == 3){
 					if(!$this->imgExists){
 						//Check to see if database record already exists, and if so skip import
-						$recExists = 0; 
+						$recExists = 0;
 						$sql = 'SELECT url '.
 							'FROM images WHERE (occid = '.$occId.') ';
 						$rs = $this->conn->query($sql);
@@ -621,23 +621,23 @@ class ImageLocalProcessor {
 				if($width && $height){
 					//Get File size
 					$fileSize = 0;
-					if(substr($sourcePath,0,7)=='http://' || substr($sourcePath,0,8)=='https://') { 
-						$x = array_change_key_case(get_headers($sourcePath.$fileName, 1),CASE_LOWER); 
-						if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) { 
-							$fileSize = $x['content-length'][1]; 
+					if(substr($sourcePath,0,7)=='http://' || substr($sourcePath,0,8)=='https://') {
+						$x = array_change_key_case(get_headers($sourcePath.$fileName, 1),CASE_LOWER);
+						if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) {
+							$fileSize = $x['content-length'][1];
 						}
- 						else { 
- 							$fileSize = $x['content-length']; 
+ 						else {
+ 							$fileSize = $x['content-length'];
  						}
-					} 
-					else { 
+					}
+					else {
 						$fileSize = @filesize($sourcePath.$fileName);
 					}
-					
+
 					//$this->logOrEcho("Loading image (".date('Y-m-d h:i:s A').")",1);
 					//ob_flush();
 					//flush();
-					
+
 					//Create web image
 					$webUrlFrag = '';
 					if($this->webImg){
@@ -678,12 +678,12 @@ class ImageLocalProcessor {
 					//Create Large Image
 					$lgUrlFrag = "";
 					if($this->lgImg){
-						//Large version of image should not be excluded 
+						//Large version of image should not be excluded
 						$lgTargetFileName = substr($targetFileName,0,-4)."_lg.jpg";
 						if($this->lgImg == 1){
 							// 1 = import source
 							if($width > ($this->webPixWidth*1.3)){
-								//Source image is big enough to serve as large version 
+								//Source image is big enough to serve as large version
 								if($width > $this->lgPixWidth || ($fileSize && $fileSize > $this->lgFileSizeLimit)){
 									//Image is too width or file size is too big, thus let's resize and import
 									if($this->createNewImage($sourcePath.$fileName,$targetPath.$lgTargetFileName,$this->lgPixWidth,round($this->lgPixWidth*$height/$width),$width,$height)){
@@ -765,7 +765,7 @@ class ImageLocalProcessor {
 							}
 						}
 					}
-					
+
 					//Start clean up
 					if($this->sourceGdImg){
 						imagedestroy($this->sourceGdImg);
@@ -778,7 +778,7 @@ class ImageLocalProcessor {
 					//Database urls and metadata for images
 					$this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$webUrlFrag,$tnUrlFrag,$lgUrlFrag);
 					//Final cleaning stage
-					if(file_exists($sourcePath.$fileName)){ 
+					if(file_exists($sourcePath.$fileName)){
 						if($this->keepOrig){
 							if(file_exists($this->targetPathBase.$this->targetPathFrag.$this->origPathFrag)){
 								rename($sourcePath.$fileName,$this->targetPathBase.$this->targetPathFrag.$this->origPathFrag.$fileName.".orig");
@@ -807,11 +807,11 @@ class ImageLocalProcessor {
 	private function createNewImage($sourcePathBase, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
 		$status = false;
 		if($this->processUsingImageMagick) {
-			// Use ImageMagick to resize images 
+			// Use ImageMagick to resize images
 			$status = $this->createNewImageImagick($sourcePathBase,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
-		} 
+		}
 		elseif(extension_loaded('gd') && function_exists('gd_info')) {
-			// GD is installed and working 
+			// GD is installed and working
 			$status = $this->createNewImageGD($sourcePathBase,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 		}
 		else{
@@ -821,7 +821,7 @@ class ImageLocalProcessor {
 		}
 		return $status;
 	}
-	
+
 	private function createNewImageImagick($sourceImg,$targetPath,$newWidth){
 		$status = false;
 		$ct;
@@ -841,7 +841,7 @@ class ImageLocalProcessor {
 		}
 		return $status;
 	}
-	
+
 	private function createNewImageGD($sourcePathBase, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
 		$status = false;
 		if(!$this->sourceGdImg){
@@ -861,27 +861,27 @@ class ImageLocalProcessor {
 		else{
 			$status = imagejpeg($tmpImg, $targetPath);
 		}
-		
+
 		if(!$status){
 			$this->logOrEcho("ERROR: Unable to resize and write file: ".$targetPath,1);
 		}
-		
+
 		imagedestroy($tmpImg);
 		return $status;
 	}
-	
+
 	/**
-	 * Extract a primary key (catalog number) from a string (e.g file name, catalogNumber field), 
-	 * applying patternMatchingTerm, and, if they apply, patternReplacingTerm, and 
-	 * replacement.  If patternMatchingTerm contains a backreference, 
-	 * and there is a match, the return value is the backreference.  If 
-	 * patternReplacingTerm and replacement are modified, they are applied 
-	 * before the result is returned. 
-	 * 
+	 * Extract a primary key (catalog number) from a string (e.g file name, catalogNumber field),
+	 * applying patternMatchingTerm, and, if they apply, patternReplacingTerm, and
+	 * replacement.  If patternMatchingTerm contains a backreference,
+	 * and there is a match, the return value is the backreference.  If
+	 * patternReplacingTerm and replacement are modified, they are applied
+	 * before the result is returned.
+	 *
 	 * @param str  String from which to extract the catalogNumber
 	 * @return an empty string if there is no match of patternMatchingTerm on
-	 *        str, otherwise the match as described above. 
-	 */ 
+	 *        str, otherwise the match as described above.
+	 */
 	private function getPrimaryKey($str){
 		$specPk = '';
 		if(isset($this->collArr[$this->activeCollid]['pmterm'])){
@@ -900,7 +900,7 @@ class ImageLocalProcessor {
 				if(array_key_exists(1,$matchArr) && $matchArr[1]){
 					$specPk = $matchArr[1];
 				}
-				if (isset($this->collArr[$this->activeCollid]['prpatt'])) { 				
+				if (isset($this->collArr[$this->activeCollid]['prpatt'])) {
 					$specPk = preg_replace($this->collArr[$this->activeCollid]['prpatt'],$this->collArr[$this->activeCollid]['prrepl'],$specPk);
 				}
 				if(isset($matchArr[2])){
@@ -962,7 +962,7 @@ class ImageLocalProcessor {
 		}
 		return $status;
 	}
-	
+
 	private function databaseImage($occId,$webUrl,$tnUrl,$oUrl){
 		$status = true;
 		if($occId && is_numeric($occId)){
@@ -974,7 +974,7 @@ class ImageLocalProcessor {
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				if(strcasecmp($r->url,$webUrl) == 0){
-					//exact match, thus reset record data with current image urls (thumbnail or original image might be in different locality) 
+					//exact match, thus reset record data with current image urls (thumbnail or original image might be in different locality)
 					if(!$this->conn->query('DELETE FROM specprocessorrawlabels WHERE imgid = '.$r->imgid)){
 						$this->logOrEcho('ERROR deleting OCR for image record #'.$r->imgid.' (equal URLs): '.$this->conn->error,1);
 					}
@@ -983,7 +983,7 @@ class ImageLocalProcessor {
 					}
 				}
 				elseif($this->imgExists == 2 && strcasecmp(basename($r->url),basename($webUrl)) == 0){
-					//Copy-over-image is set to true and basenames equal, thus delete image PLUS delete old images 
+					//Copy-over-image is set to true and basenames equal, thus delete image PLUS delete old images
 					if(!$this->conn->query('DELETE FROM specprocessorrawlabels WHERE imgid = '.$r->imgid)){
 						$this->logOrEcho('ERROR deleting OCR for image record #'.$r->imgid.' (equal basename): '.$this->conn->error,1);
 					}
@@ -1049,7 +1049,7 @@ class ImageLocalProcessor {
 		flush();
 		return $status;
 	}
-	
+
 	private function writeMetadataToFile($specPk,$webUrl,$tnUrl,$oUrl){
 		$status = true;
 		if($this->mdOutputFH){
@@ -1057,7 +1057,7 @@ class ImageLocalProcessor {
 		}
 		return $status;
 	}
-	
+
 	private function processSkeletalFile($filePath){
 		$this->logOrEcho("Preparing to load Skeletal file into database",1);
 		$fh = fopen($filePath,'r');
@@ -1106,7 +1106,7 @@ class ImageLocalProcessor {
 				$headerArr = array();
 				foreach($hArr as $field){
 					$fieldStr = strtolower(trim($field));
-					if($fieldStr == 'exsnumber') $fieldStr = 'exsiccatinumber'; 
+					if($fieldStr == 'exsnumber') $fieldStr = 'exsiccatinumber';
 					if($fieldStr){
 						$headerArr[] = $fieldStr;
 					}
@@ -1150,7 +1150,7 @@ class ImageLocalProcessor {
 					unset($symbMap['processingstatus']);
 					unset($symbMap['observeruid']);
 					unset($symbMap['tidinterpreted']);
-					
+
 					//Add exsiccati titles and numbers to $symbMap
 					$symbMap['ometid']['type'] = "numeric";
 					$symbMap['exsiccatititle']['type'] = "string";
@@ -1185,7 +1185,7 @@ class ImageLocalProcessor {
 							if(array_key_exists('genus',$recMap) && $recMap['genus']){
 								$sn = $recMap['genus'];
 								if(array_key_exists('specificepithet',$recMap) && $recMap['specificepithet']) $sn .= ' '.$recMap['specificepithet'];
-								if(array_key_exists('taxonrank',$recMap) && $recMap['taxonrank']) $sn .= ' '.$recMap['taxonrank']; 
+								if(array_key_exists('taxonrank',$recMap) && $recMap['taxonrank']) $sn .= ' '.$recMap['taxonrank'];
 								if(array_key_exists('infraspecificepithet',$recMap) && $recMap['infraspecificepithet']) $sn .= ' '.$recMap['infraspecificepithet'];
 								$recMap['sciname'] = $sn;
 							}
@@ -1197,11 +1197,11 @@ class ImageLocalProcessor {
 								$symbMap['sciname']['size'] = 255;
 							}
 						}
-						
-						//If verbatimEventDate exists and eventDate doesn't, try to convert 
+
+						//If verbatimEventDate exists and eventDate doesn't, try to convert
 						if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
 							if(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate']){
-								$dateStr = $this->formatDate($recMap['verbatimeventdate']); 
+								$dateStr = $this->formatDate($recMap['verbatimeventdate']);
 								if($dateStr){
 									$recMap['eventdate'] = $dateStr;
 									if($dateStr == $recMap['verbatimeventdate']) unset($recMap['verbatimeventdate']);
@@ -1211,13 +1211,13 @@ class ImageLocalProcessor {
 								}
 							}
 						}
-						
+
 						//If exsiccatiTitle and exsiccatiNumber exists but ometid (title number) does not
 						if(array_key_exists('exsiccatinumber',$recMap) && $recMap['exsiccatinumber']){
 							if(array_key_exists('exsiccatititle',$recMap) && $recMap['exsiccatititle'] && (!array_key_exists('ometid',$recMap) || !$recMap['ometid'])){
 								//Get ometid
 								if(array_key_exists($recMap['exsiccatititle'],$exsiccatiTitleMap)){
-									//ometid was already harvested for that title 
+									//ometid was already harvested for that title
 									$recMap['ometid'] = $exsiccatiTitleMap[$recMap['exsiccatititle']];
 								}
 								else{
@@ -1250,7 +1250,7 @@ class ImageLocalProcessor {
 								}
 							}
 						}
-						//If exsiccati info is there, but we can't link to an indexed exsiccati, then lets keep that info and put in occurrenceRemarks 
+						//If exsiccati info is there, but we can't link to an indexed exsiccati, then lets keep that info and put in occurrenceRemarks
 						if(array_key_exists('exsiccatititle',$recMap) && $recMap['exsiccatititle'] && (!array_key_exists('ometid',$recMap) || !$recMap['ometid'])){
 							$exsStr = $recMap['exsiccatititle'];
 							if(array_key_exists('exsiccatinumber',$recMap) && $recMap['exsiccatinumber']){
@@ -1260,21 +1260,21 @@ class ImageLocalProcessor {
 							if($occRemarks) $occRemarks .= '; ';
 							$recMap['occurrenceremarks'] = $occRemarks.$exsStr;
 						}
-						
+
 						//Load record
 						if($catNum){
 							$occid = 0;
 							//Check to see if regular expression term is needed to extract correct part of catalogNumber
 							$deltaCatNum = $this->getPrimaryKey($catNum);
-							if ($deltaCatNum!='') { $catNum = $deltaCatNum; } 
-		
-							//Remove exsiccati fields 
+							if ($deltaCatNum!='') { $catNum = $deltaCatNum; }
+
+							//Remove exsiccati fields
 							$activeFields = array_keys($recMap);
 							if(array_search('ometid',$activeFields) !== false) unset($activeFields[array_search('ometid',$activeFields)]);
 							if(array_search('omenid',$activeFields) !== false) unset($activeFields[array_search('omenid',$activeFields)]);
 							if(array_search('exsiccatititle',$activeFields) !== false) unset($activeFields[array_search('exsiccatititle',$activeFields)]);
 							if(array_search('exsiccatinumber',$activeFields) !== false) unset($activeFields[array_search('exsiccatinumber',$activeFields)]);
-							
+
 							//Check to see if matching record already exists in database
 							$termArr = array();
 							if($this->matchCatalogNumber) $termArr[] = '(catalognumber IN("'.$catNum.'"'.(substr($catNum,0,1)=='0'?',"'.ltrim($catNum,"0 ").'"':'').'))';
@@ -1295,7 +1295,7 @@ class ImageLocalProcessor {
 										foreach($activeFields as $activeField){
 											$activeValue = $this->cleanString($recMap[$activeField]);
 											if(!trim($r[$activeField])){
-												//Field is empty for existing record, thus load new data 
+												//Field is empty for existing record, thus load new data
 												$type = (array_key_exists('type',$symbMap[$activeField])?$symbMap[$activeField]['type']:'string');
 												$size = (array_key_exists('size',$symbMap[$activeField])?$symbMap[$activeField]['size']:0);
 												if($type == 'numeric'){
@@ -1303,15 +1303,15 @@ class ImageLocalProcessor {
 														$updateValueArr[$activeField] = $activeValue;
 													}
 													else{
-														//Not numeric, thus load into occRemarks 
+														//Not numeric, thus load into occRemarks
 														//$occRemarkArr[$activeField] = $activeValue;
 													}
 												}
 												elseif($type == 'date'){
-													$dateStr = $this->formatDate($activeValue); 
+													$dateStr = $this->formatDate($activeValue);
 													if($dateStr){
 														$updateValueArr[$activeField] = $activeValue;
-													} 
+													}
 													else{
 														//Not valid date, thus load into verbatiumEventDate or occRemarks
 														if($activeField == 'eventdate'){
@@ -1345,7 +1345,7 @@ class ImageLocalProcessor {
 											$occStr = '';
 											foreach($occRemarkArr as $k => $orv){
 												$occStr .= ','.$k.': '.$this->encodeString($orv);
-											} 
+											}
 											$updateFrag .= ',occurrenceremarks="'.($r['occurrenceremarks']?$r['occurrenceremarks'].'; ':'').substr($occStr,1).'"';
 										}
 										if($updateFrag){
@@ -1381,13 +1381,13 @@ class ImageLocalProcessor {
 											}
 										}
 										elseif($type == 'date'){
-											$dateStr = $this->formatDate($value); 
+											$dateStr = $this->formatDate($value);
 											if($dateStr){
 												$sqlIns2 .= ',"'.$dateStr.'"';
 											}
 											else{
 												$sqlIns2 .= ",NULL";
-												//Not valid date, thus load into verbatiumEventDate if it's the eventDate field 
+												//Not valid date, thus load into verbatiumEventDate if it's the eventDate field
 												if($aField == 'eventdate' && !array_key_exists('verbatimeventdate',$symbMap)){
 													$sqlIns1 .= ',verbatimeventdate';
 													$sqlIns2 .= ',"'.$value.'"';
@@ -1437,7 +1437,7 @@ class ImageLocalProcessor {
 			$this->logOrEcho("Skeletal file loaded ",1);
 			fclose($fh);
 			//if($this->keepOrig){
-			//Skeletal data files are small, thus let's keep them by default 
+			//Skeletal data files are small, thus let's keep them by default
 			if(true){
 				$fileName = substr($filePath,strrpos($filePath,'/')).'.orig_'.time();
 				if(!file_exists($this->targetPathBase.$this->targetPathFrag.'orig_skeletal')){
@@ -1446,7 +1446,7 @@ class ImageLocalProcessor {
 				if(!rename($filePath,$this->targetPathBase.$this->targetPathFrag.'orig_skeletal'.$fileName)){
 					$this->logOrEcho("ERROR: unable to move (".$filePath.") ",1);
 				}
-			} 
+			}
 			else{
 				if(!unlink($filePath)){
 					$this->logOrEcho("ERROR: unable to delete file (".$filePath.") ",1);
@@ -1470,12 +1470,12 @@ class ImageLocalProcessor {
 		}
 		return $recordArr;
 	}
-	
+
 	private function updateCollectionStats(){
 		if($this->dbMetadata){
 		//Do some more cleaning of the data after it haas been indexed in the omoccurrences table
 			$occurMain = new OccurrenceMaintenance($this->conn);
-	
+
 			$this->logOrEcho('Cleaning house...');
 			$collString = implode(',',$this->collProcessedArr);
 			if(!$occurMain->generalOccurrenceCleaning($collString)){
@@ -1484,7 +1484,7 @@ class ImageLocalProcessor {
 					$this->logOrEcho($errorStr,1);
 				}
 			}
-			
+
 			$this->logOrEcho('Protecting sensitive species...');
 			if(!$occurMain->protectRareSpecies()){
 				$errorArr = $occurMain->getErrorArr();
@@ -1492,7 +1492,7 @@ class ImageLocalProcessor {
 					$this->logOrEcho($errorStr,1);
 				}
 			}
-			
+
 			$this->logOrEcho('Updating statistics...');
 			foreach($this->collProcessedArr as $collid){
 				if(!$occurMain->updateCollectionStats($collid)){
@@ -1503,7 +1503,7 @@ class ImageLocalProcessor {
 				}
 			}
 			$occurMain->__destruct();
-			
+
 			$this->logOrEcho('Populating global unique identifiers (GUIDs) for all records...');
 			$uuidManager = new UuidFactory($this->conn);
 			$uuidManager->setSilent(1);
@@ -1536,7 +1536,7 @@ class ImageLocalProcessor {
 				'<a href="'.$url.'">'.$url.'</a>'.
 				'<br/>If you have problems with the new password, contact the System Administrator ';
 
-			//Add attachment 
+			//Add attachment
 			$fname = substr(strrchr($mdFileName, "/"), 1);
 			$data = file_get_contents($mdFileName);
 			$body .= "--" . $separator . $eol.
@@ -1590,7 +1590,7 @@ class ImageLocalProcessor {
 			exit("ABORT: collection array does not exist");
 		}
 	}
-	
+
 	public function setSourcePathBase($p){
 		if($p && substr($p,-1) != '/' && substr($p,-1) != "\\") $p .= '/';
 		$this->sourcePathBase = $p;
@@ -1618,7 +1618,7 @@ class ImageLocalProcessor {
 		return $this->imgUrlBase;
 	}
 
-	public function setServerRoot($path) { 
+	public function setServerRoot($path) {
 		$this->serverRoot = $path;
 	}
 
@@ -1703,7 +1703,7 @@ class ImageLocalProcessor {
 	public function getLgImg(){
 		return $this->lgImg;
 	}
-	
+
 	//Temporarly keep the following three setters to support deprecated functions
 	public function setCreateWebImg($c){
 		$this->webImg = $c;
@@ -1713,19 +1713,19 @@ class ImageLocalProcessor {
 	}
 	public function setCreateLgImg($c){
 		$this->lgImg = $c;
-	} 
+	}
 
 	public function setWebSourceSuffix($s){
 		$this->webSourceSuffix = $s;
-	} 
+	}
 
 	public function setTnSourceSuffix($s){
 		$this->tnSourceSuffix = $s;
-	} 
+	}
 
 	public function setLgSourceSuffix($s){
 		$this->lgSourceSuffix = $s;
-	} 
+	}
 
 	public function setKeepOrig($c){
 		$this->keepOrig = $c;
@@ -1742,7 +1742,7 @@ class ImageLocalProcessor {
 	public function getSkeletalFileProcessing(){
 		return $this->skeletalFileProcessing;
 	}
-	
+
 	public function setCreateNewRec($c){
 		$this->createNewRec = $c;
 	}
@@ -1750,7 +1750,7 @@ class ImageLocalProcessor {
 	public function getCreateNewRec(){
 		return $this->createNewRec;
 	}
-	
+
 	public function setCopyOverImg($c){
 		if($c == 1){
 			$this->imgExists = 2;
@@ -1763,7 +1763,7 @@ class ImageLocalProcessor {
 	public function getImgExists(){
 		return $this->imgExists;
 	}
-	
+
 	public function setImgExists($c){
 		$this->imgExists = $c;
 	}
@@ -1854,7 +1854,7 @@ class ImageLocalProcessor {
 			$y = $match[1];
 		}
 		if($y){
-			if(strlen($y) == 2){ 
+			if(strlen($y) == 2){
 				if($y < 20) $y = '20'.$y;
 				else $y = '19'.$y;
 			}
@@ -1871,7 +1871,7 @@ class ImageLocalProcessor {
 		}
 		return $dateStr;
 	}
-	
+
 	private function formatScientificName($inStr){
 		$sciNameStr = trim($inStr);
 		$sciNameStr = preg_replace('/\s\s+/', ' ',$sciNameStr);
@@ -1913,7 +1913,7 @@ class ImageLocalProcessor {
 		}
 		return $sciNameStr;
 	}
-	
+
 	private function uriExists($url) {
 		$exists = false;
 		$localUrl = '';
@@ -1932,7 +1932,7 @@ class ImageLocalProcessor {
 				$url = $urlPrefix.$url;
 			}
 		}
-		
+
 		//First simple check
 		if(file_exists($url) || ($localUrl && file_exists($localUrl))){
 			return true;
@@ -1947,40 +1947,40 @@ class ImageLocalProcessor {
 		    }
 		    curl_setopt($handle, CURLOPT_HEADER, false);
 		    curl_setopt($handle, CURLOPT_FAILONERROR, true);  // this works
-		    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
+		    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox
 		    curl_setopt($handle, CURLOPT_NOBODY, true);
 		    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
 		    $exists = curl_exec($handle);
 		    curl_close($handle);
 	    }
-	     
+
 	    //One last check
 	    if(!$exists){
 	    	$exists = (@fclose(@fopen($url,"r")));
 	    }
-	    
-	    //Test to see if file is an image 
+
+	    //Test to see if file is an image
 	    if(!@exif_imagetype($url)) $exists = false;
 
 	    return $exists;
-	}	
-	
+	}
+
 	private function encodeString($inStr){
-		global $charset;
+		global $CHARSET;
 		$retStr = trim($inStr);
 		//Get rid of Windows curly (smart) quotes
 		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
 		$replace = array("'","'",'"','"','*','-','-');
 		$inStr= str_replace($search, $replace, $inStr);
-		
+
 		if($inStr){
-			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+			if(strtolower($CHARSET) == "utf-8" || strtolower($CHARSET) == "utf8"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
-			elseif(strtolower($charset) == "iso-8859-1"){
+			elseif(strtolower($CHARSET) == "iso-8859-1"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);

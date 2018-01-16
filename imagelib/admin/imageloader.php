@@ -31,7 +31,7 @@ if($isEditor){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> Image Loader</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>" />
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
@@ -47,32 +47,32 @@ include($SERVER_ROOT.'/header.php');
 
 ?>
 <div class="navpath">
-	<b><a href="../../index.php">Homepage</a></b> &gt;&gt; 
+	<b><a href="../../index.php">Homepage</a></b> &gt;&gt;
 	<b>Image Importer</b>
 </div>
 
 <h1>Image Importer</h1>
 <div  id="innertext">
 	<div style="margin-bottom:30px;">
-		
-	</div> 
+
+	</div>
 	<div>
 		<form name="uploadform" action="imageloader.php" method="post" enctype="multipart/form-data" onsubmit="return verifyUploadForm(this)">
 			<fieldset style="width:90%;">
 				<legend style="font-weight:bold;font-size:120%;">Image Upload Form</legend>
 				<div style="margin:10px;">
-					This tool is designed to aid collection managers in batch importing image files 
-					that are defined within a comma delimited text file (CSV). The only two required fields are 
-					the image url. If scientific name is null, script will attempt to extract taxon name from image file name. 
-					The image urls must represent the full path to the image, or consist of the file names with base path 
-					defined within the ingestion form.  
-					Other optional fields include: photographer, caption, locality, sourceUrl, anatomy, 
-					notes, collection identifier, owner, copyright, sortSequence.   
-					Internal fields can include photographerUid, occid, or tid. 
+					This tool is designed to aid collection managers in batch importing image files
+					that are defined within a comma delimited text file (CSV). The only two required fields are
+					the image url. If scientific name is null, script will attempt to extract taxon name from image file name.
+					The image urls must represent the full path to the image, or consist of the file names with base path
+					defined within the ingestion form.
+					Other optional fields include: photographer, caption, locality, sourceUrl, anatomy,
+					notes, collection identifier, owner, copyright, sortSequence.
+					Internal fields can include photographerUid, occid, or tid.
 				</div>
 				<input type="hidden" name="ulfilename" value="<?php echo $importManager->getUploadFileName();?>" />
-				<?php 
-				if(!$importManager->getUploadFileName()){ 
+				<?php
+				if(!$importManager->getUploadFileName()){
 					?>
 					<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 					<div>
@@ -86,9 +86,9 @@ include($SERVER_ROOT.'/header.php');
 							<input type="submit" name="action" value="Analyze Input File" />
 						</div>
 					</div>
-					<?php 
+					<?php
 				}
-				else{ 
+				else{
 					?>
 					<div id="mdiv" style="margin:15px;">
 						<table border="1" cellpadding="2" style="border:1px solid black">
@@ -113,7 +113,7 @@ include($SERVER_ROOT.'/header.php');
 									<td>
 										<select name="tf[]" style="background:<?php echo (array_key_exists(strtolower($sField),$fieldMap)?'':'yellow');?>">
 											<option value="">Select Target</option>
-											<?php 
+											<?php
 											$sField = strtolower($sField);
 											//Check to see if field is mapped
 											$symbIndex = '';
@@ -144,7 +144,7 @@ include($SERVER_ROOT.'/header.php');
 										</select>
 									</td>
 								</tr>
-								<?php 
+								<?php
 							}
 							?>
 						</table>
@@ -163,14 +163,14 @@ include($SERVER_ROOT.'/header.php');
 							<input name="action" type="submit" value="Upload Images" />
 						</div>
 					</div>
-					<?php 
-				} 
+					<?php
+				}
 				?>
 			</fieldset>
 		</form>
 	</div>
 </div>
-<?php  
+<?php
 include($SERVER_ROOT.'/footer.php');
 ?>
 </body>

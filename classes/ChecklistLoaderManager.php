@@ -247,7 +247,7 @@ class ChecklistLoaderManager {
 	}
 
 	private function encodeString($inStr){
-		global $charset;
+		global $CHARSET;
 		$retStr = $inStr;
 		//Get rid of curly quotes
 		//Get rid of Windows curly (smart) quotes
@@ -256,7 +256,7 @@ class ChecklistLoaderManager {
 		$inStr= str_replace($search, $replace, $inStr);
 
 		if($inStr){
-			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+			if(strtolower($CHARSET) == "utf-8" || strtolower($CHARSET) == "utf8"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);

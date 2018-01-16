@@ -3,13 +3,13 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/TaxonomyUtilities.php');
 
 class TaxonomyUpload{
-	
+
 	private $conn;
 	private $uploadFileName;
 	private $uploadTargetPath;
 	private $taxAuthId = 1;
 	private $statArr = array();
-	
+
 	private $verboseMode = 1; // 0 = silent, 1 = echo only, 2 = echo and log
 	private $logFH;
 	private $errorStr = '';
@@ -28,10 +28,10 @@ class TaxonomyUpload{
 			if($this->logFH) fclose($this->logFH);
 		}
 	}
-	
+
 	public function setUploadFile($ulFileName = ""){
 		if($ulFileName){
-			//URL to existing file  
+			//URL to existing file
 			if(file_exists($ulFileName)){
 				$pos = strrpos($ulFileName,"/");
 				if(!$pos) $pos = strrpos($ulFileName,"\\");
@@ -71,7 +71,7 @@ class TaxonomyUpload{
 				if(array_key_exists($sourceName,$fieldMap)){
 					$targetName = $fieldMap[$sourceName];
 					if(in_array($targetName,$uploadTaxaFieldArr)){
-						//Is a taxa table target field 
+						//Is a taxa table target field
 						$uploadTaxaIndexArr[$k] = $targetName;
 					}
 					if($targetName == 'unitname1') $targetName = 'genus';
@@ -80,12 +80,12 @@ class TaxonomyUpload{
 					}
 				}
 			}
-			$parentIndex = 0; 
+			$parentIndex = 0;
 			if(!in_array('parentstr',$uploadTaxaIndexArr)){
 				$parentIndex = max(array_keys($uploadTaxaIndexArr))+1;
 				$uploadTaxaIndexArr[$parentIndex] = 'parentstr';
 			}
-			$familyIndex = 0; 
+			$familyIndex = 0;
 			if(in_array('family',$fieldMap)) $familyIndex = array_search(array_search('family',$fieldMap),$headerArr);
 			//scinameinput field is required
 			if(in_array("scinameinput",$fieldMap) || count($taxonUnitIndexArr) > 2){
@@ -120,7 +120,7 @@ class TaxonomyUpload{
 						}
 					}
 					if($parentIndex){
-						$recordArr[$parentIndex] = 'PENDING:'.$parentStr;  
+						$recordArr[$parentIndex] = 'PENDING:'.$parentStr;
 					}
 					if(in_array("scinameinput",$fieldMap)){
 						//Load relavent fields into uploadtaxa table
@@ -174,7 +174,7 @@ class TaxonomyUpload{
 				//$this->conn->query('SET autocommit=1');
 				//$this->conn->query('SET unique_checks=1');
 				//$this->conn->query('SET foreign_key_checks=1');
-				
+
 				//Process and load taxon units data ($childParentArr)
 				foreach($childParentArr as $taxon => $tArr){
 					$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput,rankid,parentstr,family,acceptance) '.
@@ -208,7 +208,7 @@ class TaxonomyUpload{
 		$this->conn->query('OPTIMIZE TABLE uploadtaxa');
 		if(($fh = fopen($this->uploadTargetPath.$this->uploadFileName,'r')) !== FALSE){
 			$this->outputMsg('Taxa file uploaded and successfully opened');
-			
+
 			//First run through file and grab and store Authors, Synonyms, and Vernaculars
 			$delimtStr = "";
 			$this->outputMsg('Harvesting authors, synonyms, and vernaculars');
@@ -241,12 +241,12 @@ class TaxonomyUpload{
 			if($extraArr){
 				$this->outputMsg('Synonyms and Vernaculars mapped');
 			}
-	
+
 			//Load taxa records
 			$this->outputMsg('Harvest and loading Taxa... ');
 			$recordCnt = 0;
 			rewind($fh);
-			
+
 			$this->conn->query('SET autocommit=0');
 			$this->conn->query('SET unique_checks=0');
 			$this->conn->query('SET foreign_key_checks=0');
@@ -264,7 +264,7 @@ class TaxonomyUpload{
 			$this->conn->query('SET autocommit=1');
 			$this->conn->query('SET unique_checks=1');
 			$this->conn->query('SET foreign_key_checks=1');
-			
+
 			$this->outputMsg($recordCnt.' records loaded');
 			fclose($fh);
 			$this->setUploadCount();
@@ -279,7 +279,7 @@ class TaxonomyUpload{
 
 	private function loadItisTaxonUnit($tuArr,$extraArr,$authArr){
 		if(count($tuArr) > 24){
-			
+
 			$unitInd3 = ($tuArr[8]?$tuArr[8]:$tuArr[6]);
 			$unitName3 = ($tuArr[9]?$tuArr[9]:$tuArr[7]);
 			$sciName = TRIM($tuArr[2]." ".$tuArr[3].($tuArr[4]?" ".$tuArr[4]:"")." ".$tuArr[5]." ".$unitInd3." ".$unitName3);
@@ -332,7 +332,7 @@ class TaxonomyUpload{
 			}
 		}
 	}
-	
+
 	private function removeUploadFile(){
 		if($this->uploadTargetPath && $this->uploadFileName){
 			if(file_exists($this->uploadTargetPath.$this->uploadFileName)){
@@ -355,11 +355,11 @@ class TaxonomyUpload{
 			$sql2 = 'DELETE FROM uploadtaxa '.
 				'WHERE (sciname IN("'.implode('","',$homonymArr).'")) AND (acceptance = 0) ';
 			$this->conn->query($sql2);
-		}		
+		}
 	}
 
 	public function cleanUpload(){
-		
+
 		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceParentId = u2.sourceId '.
 			'SET u.parentstr = u2.sciname '.
 			'WHERE (u.parentstr IS NULL) AND (u.sourceParentId IS NOT NULL) AND (u2.sourceId IS NOT NULL)';
@@ -377,7 +377,7 @@ class TaxonomyUpload{
 		$sql = 'DELETE FROM uploadtaxa WHERE (sciname IS NULL)';
 		$this->conn->query($sql);
 
-		//Link names already in theusaurus 
+		//Link names already in theusaurus
 		$this->outputMsg('Linking names already in thesaurus... ');
 		$sql = 'UPDATE uploadtaxa u INNER JOIN taxa t ON u.sciname = t.sciname SET u.tid = t.tid WHERE u.tid IS NULL';
 		if(!$this->conn->query($sql)){
@@ -396,7 +396,7 @@ class TaxonomyUpload{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		
+
 		//Populate null family values
 		$this->outputMsg('Populating null family values... ');
 		$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.unitname1 = t.sciname '.
@@ -453,7 +453,7 @@ class TaxonomyUpload{
 		$this->outputMsg('Loading vernaculars... ');
 		//This is first pass for all taxa that have non-null tids just before they are removed
 		$this->transferVernaculars();
-		
+
 		$sql = 'DELETE FROM uploadtaxa WHERE tid IS NOT NULL';
 		//$this->conn->query($sql);
 
@@ -474,7 +474,7 @@ class TaxonomyUpload{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		
+
 		$this->outputMsg('Populating and mapping parent taxon... ');
 		$sql = 'UPDATE uploadtaxa '.
 			'SET parentstr = CONCAT_WS(" ", unitname1, unitname2) '.
@@ -503,14 +503,14 @@ class TaxonomyUpload{
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		
+
 		$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
 			'SET parenttid = t.tid WHERE (parenttid IS NULL)';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 
-		//Load into uploadtaxa parents of infrasp not yet in taxa table 
+		//Load into uploadtaxa parents of infrasp not yet in taxa table
 		$this->outputMsg('Add parents that are not yet in uploadtaxa table... ');
 		$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput, SciName, family, RankId, UnitName1, UnitName2, parentstr, Source) '.
 			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.family, 220 as r, ut.unitname1, ut.unitname2, ut.unitname1, ut.source '.
@@ -521,8 +521,8 @@ class TaxonomyUpload{
 			'SET up.parenttid = t.tid '.
 			'WHERE (up.parenttid IS NULL)';
 		$this->conn->query($sql);
-		
-		//Load into uploadtaxa parents of species not yet in taxa table 
+
+		//Load into uploadtaxa parents of species not yet in taxa table
 		$sql = 'INSERT IGNORE INTO uploadtaxa (scinameinput, SciName, family, RankId, UnitName1, parentstr, Source) '.
 			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.family, 180 as r, ut.unitname1, ut.family, ut.source '.
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
@@ -584,7 +584,7 @@ class TaxonomyUpload{
 		if(!$this->conn->query($sql4)){
 			$this->outputMsg('ERROR tagging non-parsed names: '.$this->conn->error,1);
 		}
-		
+
 		//Tag non-accepted taxa linked to non-existent taxon
 		$sql5 = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.acceptedStr = u2.sciname '.
 			'SET u1.ErrorStatus = "FAILED: Non-accepted taxa linked to non-existent taxon" '.
@@ -592,7 +592,7 @@ class TaxonomyUpload{
 		if(!$this->conn->query($sql5)){
 			$this->outputMsg('ERROR tagging non-accepted taxon linked to non-existent taxon: '.$this->conn->error,1);
 		}
-		
+
 		//Tag non-accepted linked to other non-accepted taxa
 		$sql6a = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.acceptedStr = u2.sciname '.
 			'SET u1.ErrorStatus = "FAILED: Non-accepted linked to another non-accepted taxon" '.
@@ -606,7 +606,7 @@ class TaxonomyUpload{
 		if(!$this->conn->query($sql6b)){
 			$this->outputMsg('ERROR tagging non-accepted linked to non-accepted (#2): '.$this->conn->error,1);
 		}
-		
+
 		//Tag taxa with non-existent parents (parent not being added and does not exist within database
 		$sql6 = 'UPDATE uploadtaxa u1 LEFT JOIN uploadtaxa u2 ON u1.parentStr = u2.sciname '.
 			'SET u1.ErrorStatus = "FAILED: Taxa with non-existent parent taxon" '.
@@ -614,7 +614,7 @@ class TaxonomyUpload{
 		if(!$this->conn->query($sql6)){
 			$this->outputMsg('ERROR tagging taxa with non-existent parent taxon: '.$this->conn->error,1);
 		}
-		
+
 		//Tag taxa with a FAILED parent
 		$loopCnt = 0;
 		do{
@@ -670,7 +670,7 @@ class TaxonomyUpload{
 		else{
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
-		
+
 		//Loop through and transfer taxa to taxa table
 		$loopCnt = 0;
 		do{
@@ -684,13 +684,13 @@ class TaxonomyUpload{
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR loading taxa: '.$this->conn->error,1);
 			}
-			
+
 			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
 				'SET ut.tid = t.tid WHERE (ut.tid IS NULL)';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR populating TIDs: '.$this->conn->error,1);
 			}
-			
+
 			$sql = 'UPDATE uploadtaxa ut1 INNER JOIN uploadtaxa ut2 ON ut1.sourceacceptedid = ut2.sourceid '.
 				'INNER JOIN taxa t ON ut2.sciname = t.sciname '.
 				'SET ut1.tidaccepted = t.tid '.
@@ -698,14 +698,14 @@ class TaxonomyUpload{
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
-			
+
 			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.acceptedstr = t.sciname '.
 				'SET ut.tidaccepted = t.tid '.
 				'WHERE (ut.acceptance = 0) AND (ut.tidaccepted IS NULL) AND (ut.acceptedstr IS NOT NULL)';
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR: '.$this->conn->error,1);
 			}
-			
+
 			$sql = 'UPDATE uploadtaxa SET tidaccepted = tid '.
 				'WHERE (acceptance = 1) AND (tidaccepted IS NULL) AND (tid IS NOT NULL)';
 			if(!$this->conn->query($sql)){
@@ -724,7 +724,7 @@ class TaxonomyUpload{
 			$this->outputMsg('Transferring vernaculars for new taxa... ',1);
 			//Covers taxa with newly assigned tids just before they are removed
 			$this->transferVernaculars(1);
-			
+
 			$this->outputMsg('Preparing for next round... ',1);
 			$sql = 'DELETE FROM uploadtaxa WHERE (tid IS NOT NULL) AND (tidaccepted IS NOT NULL) AND (parenttid IS NOT NULL)';
 			$this->conn->query($sql);
@@ -738,7 +738,7 @@ class TaxonomyUpload{
 			if(!$this->conn->query($sql)){
 				$this->outputMsg('ERROR populating parent TIDs based on sourceIDs: '.$this->conn->error,1);
 			}
-			
+
 			$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
 				'SET up.parenttid = t.tid '.
 				'WHERE (up.parenttid IS NULL)';
@@ -749,23 +749,23 @@ class TaxonomyUpload{
 		}while($loopCnt < 30);
 
 		$this->outputMsg('House cleaning... ');
-		TaxonomyUtilities::buildHierarchyEnumTree($this->conn, $this->taxAuthId); 
-		
+		TaxonomyUtilities::buildHierarchyEnumTree($this->conn, $this->taxAuthId);
+
 		//$this->setKingdom();
 
 		//Update occurrences with new tids
 		$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE (o.TidInterpreted IS NULL)';
 		$this->conn->query($sql1);
-		
+
 		//Update occurrence images with new tids
 		$sql2 = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 			'SET i.tid = o.TidInterpreted '.
 			'WHERE (i.tid IS NULL) AND (o.TidInterpreted IS NOT NULL)';
 		$this->conn->query($sql2);
-		
-		//Update geo lookup table 
-		$sql3 = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '. 
-			'SELECT DISTINCT tidinterpreted, round(decimallatitude,3), round(decimallongitude,3) '. 
+
+		//Update geo lookup table
+		$sql3 = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
+			'SELECT DISTINCT tidinterpreted, round(decimallatitude,3), round(decimallongitude,3) '.
 			'FROM omoccurrences '.
 			'WHERE (tidinterpreted IS NOT NULL) AND (cultivationStatus IS NULL OR cultivationStatus <> 1) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL)';
 		$this->conn->query($sql3);
@@ -779,16 +779,16 @@ class TaxonomyUpload{
 			$vernArr = array();
 			$vernStr = $r->vernacular;
 			if(strpos($vernStr,"\t")) {
-				$vernArr = explode("\t",$vernStr); 
+				$vernArr = explode("\t",$vernStr);
 			}
 			elseif(strpos($vernStr,"|")){
-				$vernArr = explode("|",$vernStr); 
+				$vernArr = explode("|",$vernStr);
 			}
 			elseif(strpos($vernStr,";")){
-				$vernArr = explode(";",$vernStr); 
+				$vernArr = explode(";",$vernStr);
 			}
 			elseif(strpos($vernStr,",")){
-				$vernArr = explode(",",$vernStr); 
+				$vernArr = explode(",",$vernStr);
 			}
 			else{
 				$vernArr[] = $vernStr;
@@ -875,7 +875,7 @@ class TaxonomyUpload{
 		}
 		return $retArr;
 	}
-	
+
 	private function getUploadTaxaFieldArr(){
 		//Get metadata
 		$targetArr = array();
@@ -888,7 +888,7 @@ class TaxonomyUpload{
 			}
 		}
 		$rs->free();
-		
+
 		return $targetArr;
 	}
 
@@ -926,7 +926,7 @@ class TaxonomyUpload{
 		}
 		return $sourceArr;
 	}
-	
+
 	public function getTaxAuthorityArr(){
 		$retArr = array();
 		$sql = 'SELECT taxauthid, name FROM taxauthority ';
@@ -935,7 +935,7 @@ class TaxonomyUpload{
 				$retArr[$r->taxauthid] = $r->name;
 			}
 			$rs->free();
-		} 
+		}
 		return $retArr;
 	}
 
@@ -966,7 +966,7 @@ class TaxonomyUpload{
 		$tPath = '';
 		if(!$tPath && isset($GLOBALS["TEMP_DIR_ROOT"])){
 			$tPath = $GLOBALS['TEMP_DIR_ROOT'];
-			if(substr($tPath,-1) != '/') $tPath .= "/"; 
+			if(substr($tPath,-1) != '/') $tPath .= "/";
 			if(file_exists($tPath.'downloads')) $tPath .= 'downloads/';
 		}
 		elseif(!$tPath){
@@ -974,11 +974,11 @@ class TaxonomyUpload{
 		}
 		if(!$tPath){
 			$tPath = $GLOBALS['SERVER_ROOT'];
-			if(substr($tPath,-1) != '/') $tPath .= "/"; 
+			if(substr($tPath,-1) != '/') $tPath .= "/";
 			$tPath .= "temp/downloads/";
 		}
 		if(substr($tPath,-1) != '/') $tPath .= '/';
-		$this->uploadTargetPath = $tPath; 
+		$this->uploadTargetPath = $tPath;
 	}
 
 	public function setFileName($fName){
@@ -988,17 +988,17 @@ class TaxonomyUpload{
 	public function getFileName(){
 		return $this->uploadFileName;
 	}
-	
+
 	public function setTaxaAuthId($id){
 		if(is_numeric($id)){
 			$this->taxAuthId = $id;
 		}
 	}
-	
+
 	public function getStatArr(){
 		return $this->statArr;
 	}
-	
+
 	public function getErrorStr(){
 		return $this->errorStr;
 	}
@@ -1042,7 +1042,7 @@ class TaxonomyUpload{
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
-	
+
 	private function encodeArr(&$inArr){
 		foreach($inArr as $k => $v){
 			$inArr[$k] = $this->encodeString($v);
@@ -1050,13 +1050,13 @@ class TaxonomyUpload{
 	}
 
 	private function encodeString($inStr){
-		global $charset;
+		global $CHARSET;
 		$retStr = $inStr;
 		//Get rid of Windows curly (smart) quotes
 		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
 		$replace = array("'","'",'"','"','*','-','-');
 		$inStr = str_replace($search, $replace, $inStr);
-		//Get rid of UTF-8 curly smart quotes and dashes 
+		//Get rid of UTF-8 curly smart quotes and dashes
 		$badwordchars=array("\xe2\x80\x98", // left single quote
 							"\xe2\x80\x99", // right single quote
 							"\xe2\x80\x9c", // left double quote
@@ -1066,16 +1066,16 @@ class TaxonomyUpload{
 		);
 		$fixedwordchars=array("'", "'", '"', '"', '-', '...');
 		$inStr = str_REPLACE($badwordchars, $fixedwordchars, $inStr);
-		
+
 		if($inStr){
-			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+			if(strtolower($CHARSET) == "utf-8" || strtolower($CHARSET) == "utf8"){
 				//$this->outputMsg($inStr.': '.mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true);
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
-			elseif(strtolower($charset) == "iso-8859-1"){
+			elseif(strtolower($CHARSET) == "iso-8859-1"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);

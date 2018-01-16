@@ -35,14 +35,14 @@ if($isEditor){
 		exit;
 	}
 	else{
-		
+
 	}
 }
 ?>
 <!DOCTYPE HTML>
 <html>
 	<head>
-	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 		<title><?php echo $DEFAULT_TITLE; ?> - Occurrence Harvester</title>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
@@ -51,7 +51,7 @@ if($isEditor){
 		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 		<script language="javascript" type="text/javascript">
 			function validateDownloadForm(f){
-				
+
 				return true;
 			}
 
@@ -83,7 +83,7 @@ if($isEditor){
 				listElem.appendChild(newInput);
 
 				document.getElementById("emptylistdiv").style.display = "none";
-				
+
 				setOccurData(occid);
 				fieldObj.focus();
 			}
@@ -128,7 +128,7 @@ if($isEditor){
 	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
-		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href='../../index.php'>Home</a> &gt;&gt;
 		<?php
 		if(isset($collections_datasets_occurharvesterCrumbs)){
 			echo $collections_datasets_occurharvesterCrumbs;
@@ -139,9 +139,9 @@ if($isEditor){
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<div style="margin:15px">
-			Scan or type barcode number into field below and then hit enter or tab to add the specimen to the list. 
-			Once list is complete, you can enter your catalog number in the text field and then transfer to your collection 
-			or file export to a file that can be imported into your local database. 
+			Scan or type barcode number into field below and then hit enter or tab to add the specimen to the list.
+			Once list is complete, you can enter your catalog number in the text field and then transfer to your collection
+			or file export to a file that can be imported into your local database.
 		</div>
 		<div style="margin:20px 0px">
 			<hr/>
@@ -155,13 +155,13 @@ if($isEditor){
 					</div>
 					<div id="occidlist" style="margin:10px;">
 					</div>
-					<?php 
+					<?php
 					if($collid){
 						?>
 						<div style="margin:30px">
 							<input name="formsubmit" type="submit" value="Transfer Records" />
 						</div>
-						<?php 
+						<?php
 					}
 					?>
 					<div style="margin:30px">
