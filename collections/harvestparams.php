@@ -28,7 +28,7 @@ $searchVar = $collManager->getQueryTermStr();
 			setHarvestParamsForm();
 		});
 	</script>
-	<script src="../js/symb/api.taxonomy.taxasuggest.js?ver=171226" type="text/javascript"></script>
+	<script src="../js/symb/api.taxonomy.taxasuggest.js?ver=180116" type="text/javascript"></script>
 </head>
 <body>
 <?php

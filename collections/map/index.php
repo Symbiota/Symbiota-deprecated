@@ -100,7 +100,7 @@ if(!array_key_exists("pointlat",$previousCriteria)) $previousCriteria["pointlat"
 	<script src="../../js/symb/oms.min.js" type="text/javascript"></script>
 	<script src="../../js/symb/keydragzoom.js" type="text/javascript"></script>
 	<script src="../../js/symb/infobox.js" type="text/javascript"></script>
-	<script src="../../js/symb/api.taxonomy.taxasuggest.js?ver=171226" type="text/javascript"></script>
+	<script src="../../js/symb/api.taxonomy.taxasuggest.js?ver=180116" type="text/javascript"></script>
 	<script type="text/javascript">
 		//$( "#defaultpanel" ).panel( "open" );
 		var map;

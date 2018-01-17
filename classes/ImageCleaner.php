@@ -460,6 +460,7 @@ class ImageCleaner extends Manager{
 
 	//Bulk removal of images
 	public function recycleImagesFromFile($filePath){
+		$this->setRecycleBin();
 		if(!$filePath) exit('Image identifier file path IS NULL');
 		if(!file_exists($filePath)) exit('Image identifier file Not Found');
 		if(($imgidHandler = fopen($imgidFile, 'r')) !== FALSE){
@@ -470,18 +471,22 @@ class ImageCleaner extends Manager{
 	}
 
 	public function recycleImagesFromStr($inputStr){
+		$this->setRecycleBin();
 		$inputStr = $this->cleanInStr($inputStr);
-		$inputStr = preg_replace('/\s',',',$newStr);
+		$inputStr = preg_replace('/\s/',',',$inputStr);
+		$inputStr = str_replace(',,',',',$inputStr);
 		$idArr = explode(',',$inputStr);
-		foreach($idStr as $imgId){
-			$this->recycleImage($imgID);
+		foreach($idArr as $imgid){
+			if($imgid) $this->recycleImage($imgid);
 		}
 	}
 
 	private function recycleImage($imgID){
 		if(!is_numeric($imgID)) return false;
 		if($this->imgRecycleBin){
-			$sql = 'SELECT url, originalurl, thumbnailurl FROM images WHERE imgid = '.$imgID;
+			$sql = 'SELECT i.url, i.originalurl, i.thumbnailurl '.
+				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+				'WHERE (o.collid = '.$this->collid.') AND (i.imgid = '.$imgID.')';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$imgUrlArr = array();
@@ -492,26 +497,30 @@ class ImageCleaner extends Manager{
 				$delRec = false;
 				if($this->imgDelRecOverride) $delRec = true;
 				foreach($imgUrlArr as $imgUrl){
-					$imgPath = $imgUrl;
+					if(substr($imgUrl, 0, 4) == 'http') $imgUrl = parse_url($imgUrl, PHP_URL_PATH);
 					if(strpos($imgUrl, $GLOBALS['IMAGE_ROOT_URL']) === 0){
-						$imgPath = $GLOBALS['IMAGE_ROOT_PATH'].substr($imgUrl,strlen($GLOBALS['IMAGE_ROOT_URL']));
+						$imgUrl = $GLOBALS['IMAGE_ROOT_PATH'].substr($imgUrl,strlen($GLOBALS['IMAGE_ROOT_URL']));
 					}
-					if(is_writable($imgPath)){
-						$pathParts = pathinfo($imgPath);
-						$targetPath = $this->imgRecycleBin.'/'.$pathParts['dirname'];
-						if(!file_exists($targetPath)) mkdir($targetPath);
+					if(is_writable($imgUrl)){
+						$pathParts = pathinfo($imgUrl);
+						$path = $pathParts['dirname'];
+						if(strpos($path, $GLOBALS['IMAGE_ROOT_PATH']) === 0) $path = substr($path,strlen($GLOBALS['IMAGE_ROOT_PATH']));
+						$targetPath = $this->imgRecycleBin.$path;
+						if(!file_exists($targetPath)) mkdir($targetPath,0777,true);
 						$targetPath .= '/'.$pathParts['basename'];
-						if(rename($imgPath,$targetPath)) $delRec = true;
+						if(rename($imgUrl,$targetPath)) $delRec = true;
 					}
 				}
-				if($delRec) $this->conn->query('DELETE FROM images WHERE (imgid = '.$imgID.')');
+				if($delRec){
+					$this->conn->query('DELETE FROM images WHERE (imgid = '.$imgID.')');
+				}
 			}
 			$rs->free();
 		}
 		return true;
 	}
 
-	public function setRecycleBin($binPath = ''){
+	private function setRecycleBin($binPath = ''){
 		if($binPath){
 			if(file_exists($binPath)){
 				$this->imgRecycleBin = $binPath;
@@ -528,7 +537,7 @@ class ImageCleaner extends Manager{
 				if(substr($path, -1) != '/') $path .= '/';
 				$path .= 'trash';
 				if(!file_exists($path)){
-					if(!mkdir($path){
+					if(!mkdir($path)){
 						$this->errorMessage = 'Failed to create trash folder in IMAGE_ROOT_PATH';
 						return false;
 					}
@@ -539,10 +548,6 @@ class ImageCleaner extends Manager{
 			$this->errorMessage = 'ERROR: Failed to define recycle bin from configuration file';
 			return false;
 		}
-	}
-
-	public function getRecycleBin(){
-		return $this->imgRecycleBin;
 	}
 
 	public function setImgDelRecOverride($override){
