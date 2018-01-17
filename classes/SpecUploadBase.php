@@ -536,7 +536,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li style="margin-left:10px;">Cleaning coordinates...</li>');
 		$sql = 'UPDATE uploadspectemp '.
 			'SET DecimalLongitude = -1*DecimalLongitude '.
-			'WHERE DecimalLongitude > 0 AND (Country = "USA" OR Country = "United States" OR Country = "U.S.A." OR Country = "Canada" OR Country = "Mexico") AND collid IN('.$this->collId.')';
+			'WHERE (DecimalLongitude > 0) AND (Country IN("USA","United States","U.S.A.","Canada","Mexico")) AND (stateprovince != "Alaska" OR stateprovince IS NULL) AND (collid IN('.$this->collId.'))';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
