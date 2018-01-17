@@ -497,7 +497,13 @@ class ImageCleaner extends Manager{
 				$delRec = false;
 				if($this->imgDelRecOverride) $delRec = true;
 				foreach($imgUrlArr as $imgUrl){
-					if(substr($imgUrl, 0, 4) == 'http') $imgUrl = parse_url($imgUrl, PHP_URL_PATH);
+					if(strpos($imgUrl, 'http://storage.idigbio.org') === 0){
+						//Image is stored on iDigBio server
+						$imgUrl = '/home/idigbio-storage.acis.ufl.edu'.parse_url($imgUrl, PHP_URL_PATH);
+					}
+					elseif(substr($imgUrl, 0, 4) == 'http'){
+						$imgUrl = parse_url($imgUrl, PHP_URL_PATH);
+					}
 					if(strpos($imgUrl, $GLOBALS['IMAGE_ROOT_URL']) === 0){
 						$imgUrl = $GLOBALS['IMAGE_ROOT_PATH'].substr($imgUrl,strlen($GLOBALS['IMAGE_ROOT_URL']));
 					}

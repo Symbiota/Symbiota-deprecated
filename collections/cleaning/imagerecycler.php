@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ImageCleaner.php');
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -47,29 +49,36 @@ if($isEditor){
 		<a href="../../collections/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Menu</a> &gt;&gt;
 		<b>Bulk Image Recycler</b>
 	</div>
-	<div id="innertext">
-		<form name="imgdelform" action="imagerecycler.php" method="post" enctype="multipart/form-data" onsubmit="return verifyRecycleForm(this)">
-			<fieldset style="width:90%;">
-				<legend style="font-weight:bold;font-size:120%;">Batch Image Remover</legend>
-				<div style="margin:10px;">
-					This tool will batch delete images based on submission of multiple image identifiers.
-				</div>
-				<div style="margin:10px;">
-					<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
-					<input name="uploadfile" type="file" size="40" />
-				</div>
-				<div style="margin:10px;">
-					<b>Image Identifiers</b><br/>
-					<textarea name="target_imgid" style="width:300px;height:100px;"></textarea>
-				</div>
-				<div style="margin:20px;">
-					<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-					<button type="submit" name="submitaction" value="remove_images">Bulk Remove Image Files</button>
-				</div>
-			</fieldset>
-		</form>
-	</div>
 	<?php
+	if($collid){
+		?>
+		<div id="innertext">
+			<form name="imgdelform" action="imagerecycler.php" method="post" enctype="multipart/form-data" onsubmit="return verifyRecycleForm(this)">
+				<fieldset style="width:90%;">
+					<legend style="font-weight:bold;font-size:120%;">Batch Image Remover</legend>
+					<div style="margin:10px;">
+						This tool will batch delete images based on submission of multiple image identifiers.
+					</div>
+					<div style="margin:10px;">
+						<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
+						<input name="uploadfile" type="file" size="40" />
+					</div>
+					<div style="margin:10px;">
+						<b>Image Identifiers</b><br/>
+						<textarea name="target_imgid" style="width:300px;height:100px;"></textarea>
+					</div>
+					<div style="margin:20px;">
+						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+						<button type="submit" name="submitaction" value="remove_images">Bulk Remove Image Files</button>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+		<?php
+	}
+	else{
+		echo '<b>ERROR: collection identifier is not set</b>';
+	}
 	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
