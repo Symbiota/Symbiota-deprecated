@@ -11,6 +11,12 @@ if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 	$editable = true;
 }
 
+$taxonRankArr = array(1=>'Organism',10=>'Kingdom',20=>'Subkingdom',30=>'Phylum',40=>'Subphylum',
+    50=>'Superclass',60=>'Class',70=>'Subclass',100=>'Order',110=>'Suborder',140=>'Family',
+    150=>'Subfamily',160=>'Tribe',170=>'Subtribe',180=>'Genus',190=>'Subgenus',200=>'Section',
+    210=>'Subsection',220=>'Species',230=>'Subspecies',240=>'Variety',250=>'Subvariety',260=>'Form',
+    270=>'Subform',300=>'Cultivated');
+
 $retArr = Array();
 $childArr = Array();
 if($taxId == 'root'){
@@ -43,7 +49,9 @@ if($taxId == 'root'){
 	$rs1 = $con->query($sql1);
 	$i = 0;
 	while($row1 = $rs1->fetch_object()){
-		$rankName = ($row1->rankname?$row1->rankname:'Unknown');
+        $rankName = $row1->rankname;
+        if(!$rankName) $rankName = $taxonRankArr[$row1->rankid];
+        if(!$rankName) $rankName = 'Unknown';
 		$label = '2-'.$row1->rankid.'-'.$rankName.'-'.$row1->sciname;
 		if($row1->tid == $targetId){
 			$sciName = '<b>'.$row1->sciname.'</b>';
@@ -94,7 +102,9 @@ else{
 	$rs2 = $con->query($sql2);
 	$i = 0;
 	while($row2 = $rs2->fetch_object()){
-		$rankName = ($row2->rankname?$row2->rankname:'Unknown');
+		$rankName = $row2->rankname;
+		if(!$rankName) $rankName = $taxonRankArr[$row2->rankid];
+        if(!$rankName) $rankName = 'Unknown';
 		$label = '2-'.$row2->rankid.'-'.$rankName.'-'.$row2->sciname;
 		if($row2->rankid >= 180){
 			$sciName = '<i>'.$row2->sciname.'</i>';
@@ -159,7 +169,9 @@ else{
 	//echo $sqlSyns;
 	$rsSyns = $con->query($sqlSyns);
 	while($row = $rsSyns->fetch_object()){
-		$rankName = ($row->rankname?$row->rankname:'Unknown');
+        $rankName = $row->rankname;
+        if(!$rankName) $rankName = $taxonRankArr[$row->rankid];
+        if(!$rankName) $rankName = 'Unknown';
 		$label = '1-'.$row->rankid.'-'.$rankName.'-'.$row->sciname;
 		if($row->rankid >= 180){
 			$sciName = '<i>'.$row->sciname.'</i>';
