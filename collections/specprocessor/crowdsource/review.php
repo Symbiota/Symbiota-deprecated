@@ -1,5 +1,5 @@
 <?php
-include_once('../../../config/symbini.php'); 
+include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -16,7 +16,7 @@ $csManager = new OccurrenceCrowdSource();
 //If collid is null, it will be assumed that current user wants to review their own specimens (they can still edit pending, closed specimen can't be editted)
 $csManager->setCollid($collid);
 
-$isEditor = 0; 
+$isEditor = 0;
 if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin'])){
 	$isEditor = 1;
 }
@@ -67,8 +67,8 @@ $projArr = $csManager->getProjectDetails();
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<div class='navpath'>
 		<a href="../../../index.php">Home</a> &gt;&gt;
-		<a href="central.php">Source Board</a> &gt;&gt;
-		<?php 
+		<a href="index.php">Source Board</a> &gt;&gt;
+		<?php
 		if($collid) echo '<a href="../index.php?tabindex=2&collid='.$collid.'">Control Panel</a> &gt;&gt;';
 		?>
 		<b>Crowdsourcing Review</b>
@@ -82,8 +82,8 @@ $projArr = $csManager->getProjectDetails();
 				<?php echo $statusStr; ?>
 			</div>
 			<hr/>
-			<?php 
-		} 
+			<?php
+		}
 		if($recArr = $csManager->getReviewArr($start,$limit,$uid,$rStatus)){
 			$totalCnt = $recArr['totalcnt'];
 			unset($recArr['totalcnt']);
@@ -124,15 +124,15 @@ $projArr = $csManager->getProjectDetails();
 									<option value="10" <?php echo ($rStatus=='10'?'SELECTED':''); ?>>Closed (Approved)</option>
 								</select>
 							</div>
-							<?php 
+							<?php
 							if($collid){
 								?>
 								<div style="margin:3px;">
-									<b>Editor:</b> 
+									<b>Editor:</b>
 									<select name="uid">
 										<option value="">All Editors</option>
 										<option value="">----------------------</option>
-										<?php 
+										<?php
 										$editorArr = $csManager->getEditorList();
 										foreach($editorArr as $eUid => $eName){
 											echo '<option value="'.$eUid.'" '.($eUid==$uid?'SELECTED':'').'>'.$eName.'</option>'."\n";
@@ -140,7 +140,7 @@ $projArr = $csManager->getProjectDetails();
 										?>
 									</select>
 								</div>
-								<?php 
+								<?php
 							}
 							else{
 								echo '<input name="uid" type="hidden" value="'.$uid.'" />';
@@ -175,13 +175,13 @@ $projArr = $csManager->getProjectDetails();
 							?>
 							<table class="styledtable" style="font-family:Arial;font-size:12px;">
 								<tr>
-									<?php 
+									<?php
 									if($collid) echo '<th><span title="Select All"><input name="selectall" type="checkbox" onclick="selectAll(this)" /></span></th>';
 									?>
 									<th>Points</th>
 									<th>Comments</th>
 									<th>Edit</th>
-									<?php 
+									<?php
 									//Display table header
 									$header = $csManager->getHeaderArr();
 									foreach($header as $v){
@@ -189,13 +189,13 @@ $projArr = $csManager->getProjectDetails();
 									}
 									?>
 								</tr>
-								<?php 
+								<?php
 								$cnt = 0;
 								//echo json_encode($recArr);
 								foreach($recArr as $occid => $rArr){
 									?>
 									<tr <?php echo ($cnt%2?'class="alt"':'') ?>>
-										<?php 
+										<?php
 										$notes = '';
 										if(isset($rArr['notes'])) $notes = $rArr['notes'];
 										$points = 2;
@@ -216,10 +216,10 @@ $projArr = $csManager->getProjectDetails();
 										}
 										?>
 										<td>
-											<?php 
-											if($isEditor || $rArr['reviewstatus'] == 5){ 
+											<?php
+											if($isEditor || $rArr['reviewstatus'] == 5){
 												echo '<a href="../../editor/occurrenceeditor.php?csmode=1&occid='.$occid.'" target="_blank">';
-												echo '<img src="../../../images/edit.png" style="border:solid 1px gray;height:13px;" />'; 
+												echo '<img src="../../../images/edit.png" style="border:solid 1px gray;height:13px;" />';
 												echo '</a>';
 											}
 											else{
@@ -227,7 +227,7 @@ $projArr = $csManager->getProjectDetails();
 											}
 											?>
 										</td>
-										<?php 
+										<?php
 										foreach($header as $v){
 											$displayStr = $rArr[$v];
 											if(strlen($displayStr) > 40){
@@ -238,7 +238,7 @@ $projArr = $csManager->getProjectDetails();
 										?>
 									</tr>
 									<?php
-									$cnt++; 
+									$cnt++;
 								}
 								?>
 							</table>
@@ -270,22 +270,22 @@ $projArr = $csManager->getProjectDetails();
 								Return to <a href="../index.php?tabindex=2&collid=<?php echo $collid; ?>">Control Panel</a>
 							</div>
 							<div style="margin:15px;">
-								Return to <a href="central.php">Source Board</a>
+								Return to <a href="index.php">Source Board</a>
 							</div>
 						</div>
-						<?php 
+						<?php
 					}
 					else{
 						?>
 						<div style="clear:both;font-size:120%;padding-top:30px;font-weight:bold;">
 							There are no records matching search criteria
 						</div>
-						<?php 
+						<?php
 					}
 				}
 				?>
 			</div>
-			<?php 				
+			<?php
 		}
 		?>
 	</div>

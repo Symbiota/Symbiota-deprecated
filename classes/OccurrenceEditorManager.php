@@ -631,6 +631,7 @@ class OccurrenceEditorManager {
 			$rs->free();
 			if($retArr && count($retArr) == 1){
 				if(!$this->occid) $this->occid = $occid;
+				if(!$this->collMap) $this->getCollMap();
 				if(!$retArr[$occid]['institutioncode']) $retArr[$occid]['institutioncode'] = $this->collMap['institutioncode'];
 				if(!$retArr[$occid]['collectioncode']) $retArr[$occid]['collectioncode'] = $this->collMap['collectioncode'];
 				if(!$retArr[$occid]['ownerinstitutioncode']) $retArr[$occid]['ownerinstitutioncode'] = $this->collMap['institutioncode'];
