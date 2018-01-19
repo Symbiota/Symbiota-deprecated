@@ -436,7 +436,7 @@ class OccurrenceManager{
 				}
 				else{
 					$vStr = trim($v);
-					$inFrag[] = $vStr;
+					$inFrag[] = $this->cleanInStr($vStr);
 					if(is_numeric($vStr) && substr($vStr,0,1) == '0'){
 						$inFrag[] = ltrim($vStr,0);
 					}
@@ -447,14 +447,14 @@ class OccurrenceManager{
 				$catWhere .= 'OR '.implode(' OR ',$betweenFrag);
 			}
 			if($inFrag){
-				$catWhere .= 'OR (o.catalogNumber IN("'.$this->cleanInStr(implode('","',$inFrag)).'")) ';
+				$catWhere .= 'OR (o.catalogNumber IN("'.implode('","',$inFrag).'")) ';
 				if($includeOtherCatNum){
-					$catWhere .= 'OR (o.othercatalognumbers IN("'.$this->cleanInStr(implode('","',$inFrag)).'")) ';
+					$catWhere .= 'OR (o.othercatalognumbers IN("'.implode('","',$inFrag).'")) ';
 					if(strlen($inFrag[0]) == 36){
 						$guidOccid = $this->queryRecordID($inFrag);
 						if($guidOccid){
 							$catWhere .= 'OR (o.occid IN('.implode(',',$guidOccid).')) ';
-							$catWhere .= 'OR (o.occurrenceID IN("'.$this->cleanInStr(implode('","',$inFrag)).'")) ';
+							$catWhere .= 'OR (o.occurrenceID IN("'.implode('","',$inFrag).'")) ';
 						}
 					}
 				}

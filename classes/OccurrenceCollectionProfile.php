@@ -220,9 +220,11 @@ class OccurrenceCollectionProfile {
 				'email = '.($email?'"'.$email.'"':'NULL').','.
 				'latitudedecimal = '.($postArr['latitudedecimal']?$postArr['latitudedecimal']:'NULL').','.
 				'longitudedecimal = '.($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').',';
+            if(array_key_exists('publishToGbif',$postArr)){
+                $sql .= 'publishToGbif = '.$gbifPublish.',';
+            }
             if(array_key_exists('publishToIdigbio',$postArr)){
-                $sql .= 'publishToGbif = '.$gbifPublish.','.
-                    'publishToIdigbio = '.$idigPublish.',';
+                $sql .= 'publishToIdigbio = '.$idigPublish.',';
             }
             $sql .= 'publicedits = '.$publicEdits.','.
                 'guidtarget = '.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
