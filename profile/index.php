@@ -96,35 +96,36 @@ else{
 	<title><?php echo $DEFAULT_TITLE.' '.(isset($LANG['LOGIN_NAME'])?$LANG['LOGIN_NAME']:'Login'); ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<script src="../js/jquery-3.2.1.min.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		if(!navigator.cookieEnabled){
-			<?php 
+			<?php
 			$alertStr = 'Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.';
 			if(isset($LANG['COOKIES'])) $alertStr = $LANG['COOKIES'];
 			?>
-			alert(<?php echo $alertStr; ?>);
+			alert("<?php echo $alertStr; ?>");
 		}
-	
+
 		function resetPassword(){
 			if(document.getElementById("login").value == ""){
-				<?php 
+				<?php
 				$alertStr = 'Enter your login name in the Login field and leave the password blank';
 				if(isset($LANG['ENTER_LOGIN_NO_PWD'])) $alertStr = $LANG['ENTER_LOGIN_NO_PWD'];
 				?>
-				alert(<?php echo $alertStr; ?>);
+				alert("<?php echo $alertStr; ?>");
 				return false;
 			}
 			document.getElementById("resetpwd").value = "1";
 			document.forms["loginform"].submit();
 		}
-		
+
 		function checkCreds(){
 			if(document.getElementById("login").value == "" || document.getElementById("password").value == ""){
-				<?php 
+				<?php
 				$alertStr = 'Please enter your login and password';
 				if(isset($LANG['ENTER_LOGIN'])) $alertStr = $LANG['ENTER_LOGIN'];
 				?>
-				alert(<?php echo $alertStr; ?>);
+				alert("<?php echo $alertStr; ?>");
 				return false;
 			}
 			return true;
@@ -144,11 +145,11 @@ include($SERVER_ROOT.'/header.php');
 	if($statusStr){
 		?>
 		<div style='color:#FF0000;margin: 1em 1em 0em 1em;'>
-			<?php 
+			<?php
 			echo $statusStr;
 			?>
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 	<div style="width:300px;margin-right:auto;margin-left:auto;">
@@ -158,7 +159,7 @@ include($SERVER_ROOT.'/header.php');
 					<?php echo (isset($LANG['LOGIN_NAME'])?$LANG['LOGIN_NAME']:'Login'); ?>:&nbsp;&nbsp;&nbsp;<input id="login" name="login" value="<?php echo $login; ?>" style="border-style:inset;" />
 				</div>
 				<div style="margin:10px;font-weight:bold;">
-					<?php echo (isset($LANG['PASSWORD'])?$LANG['PASSWORD']:"Password"); ?>: 
+					<?php echo (isset($LANG['PASSWORD'])?$LANG['PASSWORD']:"Password"); ?>:
 					<input type="password" id="password" name="password"  style="border-style:inset;" autocomplete="off" />
 				</div>
 				<div style="margin:10px">
@@ -202,4 +203,4 @@ include($SERVER_ROOT.'/header.php');
 </div>
 <?php include($SERVER_ROOT.'/footer.php'); ?>
 </body>
-</html>	
+</html>

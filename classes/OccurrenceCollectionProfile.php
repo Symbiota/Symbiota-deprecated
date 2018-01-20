@@ -220,10 +220,12 @@ class OccurrenceCollectionProfile {
 				'email = '.($email?'"'.$email.'"':'NULL').','.
 				'latitudedecimal = '.($postArr['latitudedecimal']?$postArr['latitudedecimal']:'NULL').','.
 				'longitudedecimal = '.($postArr['longitudedecimal']?$postArr['longitudedecimal']:'NULL').',';
-            if(array_key_exists('publishToIdigbio',$postArr)){
-                $sql .= 'publishToGbif = '.$gbifPublish.','.
-                    'publishToIdigbio = '.$idigPublish.',';
-            }
+			if(array_key_exists('publishToGbif',$postArr)){
+				$sql .= 'publishToGbif = '.$gbifPublish.',';
+			}
+			if(array_key_exists('publishToIdigbio',$postArr)){
+				$sql .= 'publishToIdigbio = '.$idigPublish.',';
+			}
             $sql .= 'publicedits = '.$publicEdits.','.
                 'guidtarget = '.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
@@ -357,7 +359,7 @@ class OccurrenceCollectionProfile {
 		$urlPrefix .= $_SERVER["SERVER_NAME"];
 		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 		$urlBase = $urlPrefix.$urlBase;
-		
+
 		//Clean file name
 		$fileName = basename($_FILES['iconfile']['name']);
 		$imgExt = '';
@@ -366,11 +368,11 @@ class OccurrenceCollectionProfile {
 		$fileName = str_replace(array("%20","%23"," ","__"),"_",$fileName);
 		if(strlen($fileName) > 30) $fileName = substr($fileName,0,30);
 		$fileName .= $imgExt;
-		
+
 		//Upload file
 		$fullUrl = '';
 		if(move_uploaded_file($_FILES['iconfile']['tmp_name'], $targetPath.$fileName)) $fullUrl = $urlBase.$fileName;
-		
+
 		return $fullUrl;
 	}
 
@@ -405,7 +407,7 @@ class OccurrenceCollectionProfile {
 		}
 		return $retArr;
 	}
-	
+
 	public function linkAddress($addIID){
 		$status = false;
 		if($this->collid && is_numeric($addIID)){
@@ -716,7 +718,7 @@ class OccurrenceCollectionProfile {
 		}
 		return $retArr;
 	}
-	
+
 	public function updateStatistics($verbose = false){
 		$occurMaintenance = new OccurrenceMaintenance();
 		if($verbose){
@@ -739,7 +741,7 @@ class OccurrenceCollectionProfile {
 			ob_flush();
 		}
 	}
-	
+
 	public function getStatCollectionList($catId = ""){
 		//Set collection array
 		$collIdArr = array();
@@ -997,7 +999,7 @@ class OccurrenceCollectionProfile {
 			$statArr[$r->collcode]['collcode'] = $r->collcode;
 			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 		}
-		
+
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
 			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, COUNT(o.occid) AS speccnt '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
@@ -1008,7 +1010,7 @@ class OccurrenceCollectionProfile {
 		while($r = $rs->fetch_object()){
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['speccnt'] = $r->speccnt;
 		}
-		
+
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateLastModified),month(o.dateLastModified)) as dateEntered, '.
 			'c.collectionname, month(o.dateLastModified) as monthEntered, year(o.dateLastModified) as yearEntered, '.
 			'COUNT(CASE WHEN o.processingstatus = "unprocessed" THEN o.occid ELSE NULL END) AS unprocessedCount, '.
@@ -1098,7 +1100,7 @@ class OccurrenceCollectionProfile {
     	}
     	return $retArr;
     }
-    
+
     public function getCategoryArr(){
     	$retArr = array();
     	$sql = 'SELECT ccpk, category '.
@@ -1111,7 +1113,7 @@ class OccurrenceCollectionProfile {
     	$rs->free();
     	return $retArr;
     }
-    
+
     //Setters and getter
 	public function getErrorStr(){
 		return $this->errorStr;
