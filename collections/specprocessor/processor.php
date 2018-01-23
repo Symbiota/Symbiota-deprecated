@@ -12,7 +12,7 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/s
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spprid = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
-$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
+$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 
 //NLP and OCR variables
 $spNlpId = array_key_exists('spnlpid',$_REQUEST)?$_REQUEST['spnlpid']:0;
@@ -26,15 +26,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 	$isEditor = true;
 }
 
-if($action == 'dlnoimg'){
-	$specManager->downloadReportData($action);
-	exit;
-}
-elseif($action == 'unprocnoimg'){
-	$specManager->downloadReportData($action);
-	exit;
-}
-elseif($action == 'noskel'){
+if(in_array($action, array('dlnoimg','unprocnoimg','noskel','unprocwithdata'))){
 	$specManager->downloadReportData($action);
 	exit;
 }
@@ -77,7 +69,7 @@ $statusStr = "";
 					else{
 						echo '<div style="padding:15px;">'."\n";
 						$imageProcessor = new ImageLocalProcessor();
-		
+
 						$imageProcessor->setLogMode(3);
 						$logPath = $SERVER_ROOT.(substr($SERVER_ROOT,-1) == '/'?'':'/').'content/logs/imgProccessing';
 						if(!file_exists($logPath)) mkdir($logPath);
@@ -107,14 +99,14 @@ $statusStr = "";
 						$imageProcessor->setImgExists($_POST['imgexists']);
 						$imageProcessor->setKeepOrig(0);
 						$imageProcessor->setSkeletalFileProcessing($_POST['skeletalFileProcessing']);
-						
+
 						//Run process
 						$imageProcessor->batchLoadImages();
 						echo '</div>'."\n";
 					}
 				}
 				elseif($action == 'Process Output File'){
-					//Process iDigBio Image ingestion appliance ouput file 
+					//Process iDigBio Image ingestion appliance ouput file
 					$imageProcessor = new ImageProcessor($specManager->getConn());
 					echo '<ul>';
 					$imageProcessor->setLogMode(3);
@@ -122,7 +114,7 @@ $statusStr = "";
 					$imageProcessor->setCollid($collid);
 					$imageProcessor->processiDigBioOutput($specManager->getSpecKeyPattern(),$_POST);
 					echo '</ul>';
-					
+
 				}
 				elseif($action == 'Load Image Data'){
 					//Process csv file with remote image urls
@@ -150,7 +142,7 @@ $statusStr = "";
 					$ocrManager->harvestOcrText($_POST);
 					echo '</ul>';
 				}
-				if($statusStr){ 
+				if($statusStr){
 					?>
 					<div style='margin:20px 0px 20px 0px;'>
 						<hr/>
@@ -159,7 +151,7 @@ $statusStr = "";
 						</div>
 						<hr/>
 					</div>
-					<?php 
+					<?php
 				}
 			}
 			?>
