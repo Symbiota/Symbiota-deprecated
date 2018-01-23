@@ -194,7 +194,6 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 					foreach($occurArr as $occid => $fieldArr){
 						$collId = $fieldArr["collid"];
 						$specOccArr[] = $occid;
-						$isEditor = true;
 						if($collId != $prevCollid){
 							$prevCollid = $collId;
 							$isEditor = false;

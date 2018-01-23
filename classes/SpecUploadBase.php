@@ -680,7 +680,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->recordCleaningStage2();
 		$this->transferOccurrences();
 		$this->prepareAssociatedMedia();
-		//$this->prepareImages();
+		$this->prepareImages();
 		$this->transferIdentificationHistory();
 		$this->transferImages();
 		if($QUICK_HOST_ENTRY_IS_ACTIVE){
