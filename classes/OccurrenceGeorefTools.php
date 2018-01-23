@@ -188,8 +188,14 @@ class OccurrenceGeorefTools {
 	}
 
 	private function addOccurEdits($fieldName, $fieldValue, $occidStr){
-		$sql = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, appliedstatus, uid) '.
-			'SELECT occid, "'.$fieldName.'", "'.$fieldValue.'", IFNULL('.$fieldName.',""), 1 as ap, '.$GLOBALS['SYMB_UID'].' FROM omoccurrences '.
+		//Temporary code needed for to test for new schema update
+		$hasEditType = false;
+		$rsTest = $this->conn->query('SHOW COLUMNS FROM omoccuredits WHERE field = "editType"');
+		if($rsTest->num_rows) $hasEditType = true;
+		$rsTest->free();
+
+		$sql = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, appliedstatus, uid'.($hasEditType?',editType ':'').') '.
+			'SELECT occid, "'.$fieldName.'", "'.$fieldValue.'", IFNULL('.$fieldName.',""), 1 as ap, '.$GLOBALS['SYMB_UID'].($hasEditType?',1 ':'').' FROM omoccurrences '.
 			'WHERE (collid = '.$this->collId.') AND (occid IN('.$occidStr.')) ';
 		if(strpos($fieldName,'elevationinmeters')) $sql .= 'AND (minimumelevationinmeters IS NULL)';
 		//echo $sql.';<br/>';

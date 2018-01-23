@@ -90,7 +90,7 @@ class TaxonomyCleaner extends Manager{
 				if($taxonArr && $taxonArr['sciname']){
 					$sciname= $taxonArr['sciname'];
 					if($sciname != $r->sciname){
-						$this->logOrEcho('Taxon cleaned to <b>'.$sciname.'</b>',1);
+						$this->logOrEcho('Interpreted base name: <b>'.$sciname.'</b>',1);
 					}
 					$tid = $taxonHarvester->getTid($taxonArr);
 					if($tid && $this->autoClean){
@@ -300,28 +300,34 @@ class TaxonomyCleaner extends Manager{
 	public function remapOccurrenceTaxon($collid, $oldSciname, $tid, $newSciname, $newAuthor = '', $idQualifier = ''){
 		$affectedRows = 0;
 		if(is_numeric($collid) && $oldSciname && is_numeric($tid) && $newSciname){
+			//Temporary code needed for to test for new schema update
+			$hasEditType = false;
+			$rsTest = $this->conn->query('SHOW COLUMNS FROM omoccuredits WHERE field = "editType"');
+			if($rsTest->num_rows) $hasEditType = true;
+			$rsTest->free();
+
+			//Add edits to edit versioning table
 			$oldSciname = $this->cleanInStr($oldSciname);
 			$newSciname = $this->cleanInStr($newSciname);
 			if($newAuthor) $newAuthor= $this->cleanInStr($newAuthor);
 			if($idQualifier) $idQualifier = $this->cleanInStr($idQualifier);
 			$sqlWhere = 'WHERE (collid IN('.$collid.')) AND (sciname = "'.$oldSciname.'") AND (tidinterpreted IS NULL)';
 			//Version edit in edits table
-			$sql1 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
-				'SELECT occid, "sciname", "'.$newSciname.'", sciname, '.$GLOBALS['SYMB_UID'].', 1, 1 '.
-				'FROM omoccurrences '.$sqlWhere;
+			$sql1 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus'.($hasEditType?',editType ':'').') '.
+				'SELECT occid, "sciname", "'.$newSciname.'", sciname, '.$GLOBALS['SYMB_UID'].', 1, 1'.($hasEditType?',1':'').' FROM omoccurrences '.$sqlWhere;
 			if($this->conn->query($sql1)){
 				if($newAuthor){
-					$sql2 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
-						'SELECT occid, "scientificNameAuthorship" AS fieldname, "'.$newAuthor.'", IFNULL(scientificNameAuthorship,""), '.$GLOBALS['SYMB_UID'].', 1, 1 '.
+					$sql2 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus'.($hasEditType?',editType ':'').') '.
+						'SELECT occid, "scientificNameAuthorship" AS fieldname, "'.$newAuthor.'", IFNULL(scientificNameAuthorship,""), '.$GLOBALS['SYMB_UID'].', 1, 1 '.($hasEditType?',1 ':'').
 						'FROM omoccurrences '.$sqlWhere;
 					if(!$this->conn->query($sql2)){
 						$this->logOrEcho('ERROR thrown versioning of remapping of occurrence taxon (author): '.$this->conn->error,1);
 					}
 				}
 				if($idQualifier){
-					$sql3 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus) '.
-							'SELECT occid, "identificationQualifier" AS fieldname, CONCAT_WS("; ",identificationQualifier,"'.$idQualifier.'") AS idqual, '.
-						'IFNULL(identificationQualifier,""), '.$GLOBALS['SYMB_UID'].', 1, 1 '.
+					$sql3 = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, uid, ReviewStatus, AppliedStatus'.($hasEditType?',editType ':'').') '.
+						'SELECT occid, "identificationQualifier" AS fieldname, CONCAT_WS("; ",identificationQualifier,"'.$idQualifier.'") AS idqual, '.
+						'IFNULL(identificationQualifier,""), '.$GLOBALS['SYMB_UID'].', 1, 1 '.($hasEditType?',1 ':'').
 						'FROM omoccurrences '.$sqlWhere;
 					if(!$this->conn->query($sql3)){
 						$this->logOrEcho('ERROR thrown versioning of remapping of occurrence taxon (idQual): '.$this->conn->error,1);

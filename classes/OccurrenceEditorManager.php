@@ -1379,12 +1379,16 @@ class OccurrenceEditorManager {
 					$nvSqlFrag = 'REPLACE(o.'.$fn.',"'.$ov.'","'.$nv.'")';
 				}
 
+				//Temporary code needed for to test for new schema update
+				$hasEditType = false;
+				$rsTest = $this->conn->query('SHOW COLUMNS FROM omoccuredits WHERE field = "editType"');
+				if($rsTest->num_rows) $hasEditType = true;
+				$rsTest->free();
+
 				//Add edits to the omoccuredit table
-				$sql2 = 'INSERT INTO omoccuredits(occid,fieldName,fieldValueOld,fieldValueNew,appliedStatus,uid) '.
-					'SELECT o.occid, "'.$fn.'" AS fieldName, IFNULL(o.'.$fn.',"") AS oldValue, '.
-					'IFNULL('.$nvSqlFrag.',"") AS newValue, 1 AS appliedStatus, '.$GLOBALS['SYMB_UID'].' AS uid '.
-					'FROM omoccurrences o ';
-				//$this->addTableJoins($sql2);
+				$sql2 = 'INSERT INTO omoccuredits(occid,fieldName,fieldValueOld,fieldValueNew,appliedStatus,uid'.($hasEditType?',editType ':'').') '.
+					'SELECT o.occid, "'.$fn.'" AS fieldName, IFNULL(o.'.$fn.',"") AS oldValue, IFNULL('.$nvSqlFrag.',"") AS newValue, '.
+					'1 AS appliedStatus, '.$GLOBALS['SYMB_UID'].' AS uid'.($hasEditType?',1':'').' FROM omoccurrences o ';
 				$sql2 .= $sqlWhere;
 				//echo $sql2.'<br/>';
 				if(!$this->conn->query($sql2)){
@@ -1392,9 +1396,7 @@ class OccurrenceEditorManager {
 				}
 
 				//Run update and apply edits
-				$sql = 'UPDATE omoccurrences o ';
-				//$this->addTableJoins($sql);
-				$sql .= ' SET o.'.$fn.' = '.$nvSqlFrag.' '.$sqlWhere;
+				$sql = 'UPDATE omoccurrences o SET o.'.$fn.' = '.$nvSqlFrag.' '.$sqlWhere;
 				//echo $sql; exit;
 				if(!$this->conn->query($sql)){
 					$statusStr = 'ERROR applying batch update: '.$this->conn->error;

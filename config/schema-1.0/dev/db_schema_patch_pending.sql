@@ -36,6 +36,8 @@ ALTER TABLE `omcollectioncontacts`
 ALTER TABLE `omcollectioncontacts` 
   ADD UNIQUE INDEX `UNIQUE_coll_contact` (`collid` ASC, `uid` ASC, `nameoverride` ASC, `emailoverride` ASC);
 
+ALTER TABLE `omcollections` 
+  ADD COLUMN `internalnotes` TEXT NULL AFTER `accessrights`;
 
 ALTER TABLE `omoccurrences`
   CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL,
@@ -44,6 +46,9 @@ ALTER TABLE `omoccurrences`
 REPLACE omoccurrencesfulltext(occid,locality,recordedby) 
   SELECT occid, CONCAT_WS("; ", municipality, locality), recordedby
   FROM omoccurrences;
+
+ALTER TABLE `omoccuredits` 
+  ADD COLUMN `editType` INT NULL DEFAULT 0 COMMENT '0 = general edit, 1 = batch edit' AFTER `AppliedStatus`;
 
 INSERT INTO omoccurpoints (occid,point)
 SELECT o.occid,Point(o.decimalLatitude, o.decimalLongitude) 
