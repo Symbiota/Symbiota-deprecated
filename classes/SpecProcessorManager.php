@@ -470,7 +470,6 @@ class SpecProcessorManager {
 		$uid = (is_numeric($getArr['uid'])?$getArr['uid']:'');
 		$interval = $getArr['interval'];
 		$processingStatus = $this->cleanInStr($getArr['processingstatus']);
-		$excludeBatch = (isset($getArr['excludebatch'])?$getArr['excludebatch']:0);
 
 		$dateFormat = '';
 		$dfgb = '';
@@ -492,8 +491,12 @@ class SpecProcessorManager {
 		}
 		$sql = 'SELECT DATE_FORMAT(e.initialtimestamp, "'.$dateFormat.'") AS timestr, u.username';
 		if($processingStatus) $sql .= ', e.fieldvalueold, e.fieldvaluenew, o.processingstatus';
-		$sql .= ', count(DISTINCT o.occid) AS cnt '.
-			'FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid '.
+		$sql .= ', count(DISTINCT o.occid) AS cnt ';
+		$hasEditType = $this->hasEditType();
+		if($hasEditType){
+			$sql .= ', COUNT(DISTINCT CASE WHEN e.editType = 0 THEN o.occid ELSE NULL END) as cntexcbatch ';
+		}
+		$sql .= 'FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid '.
 			'INNER JOIN userlogin u ON e.uid = u.uid '.
 			'WHERE (o.collid = '.$this->collid.') ';
 		if($startDate && $endDate){
@@ -514,15 +517,13 @@ class SpecProcessorManager {
 				$sql .= 'AND (e.fieldvaluenew = "'.$processingStatus.'") ';
 			}
 		}
-		if($excludeBatch){
-			$sql .= 'AND e.editType = 0 ';
-		}
 		$sql .= 'GROUP BY DATE_FORMAT(e.initialtimestamp, "'.$dfgb.'"), u.username ';
 		if($processingStatus) $sql .= ', e.fieldvalueold, e.fieldvaluenew, o.processingstatus ';
-		//echo $sql; exit;
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->timestr][$r->username]['cnt'] = $r->cnt;
+			if($hasEditType) $retArr[$r->timestr][$r->username]['cntexcbatch'] = $r->cntexcbatch;
 			if($processingStatus){
 				$retArr[$r->timestr][$r->username]['os'] = $r->fieldvalueold;
 				$retArr[$r->timestr][$r->username]['ns'] = $r->fieldvaluenew;

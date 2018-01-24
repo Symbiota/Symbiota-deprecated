@@ -199,16 +199,6 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 								?>
 							</select>
 						</div>
-						<?php
-						if($procManager->hasEditType()){
-							?>
-							<div style="margin:2px">
-								<input name="excludebatch" type="checkbox" value="1" <?php echo (!$formAction || $excludeBatch ?'checked':''); ?> />
-								Exclude Batch Edits
-							</div>
-							<?php
-						}
-						?>
 						<div style="float:right;margin-top:25px;">
 							<?php
 							$editReviewUrl = '../editor/editreviewer.php?collid='.$collid.'&editor='.$uid.'&startdate='.$startDate.'&enddate='.$endDate;
@@ -229,7 +219,9 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 					echo '<tr><th>Time Period</th>';
 					echo '<th>User</th>';
 					if($processingStatus) echo '<th>Previous Status</th><th>Saved Status</th><th>Current Status</th>';
-					echo '<th>Counts</th></tr>';
+					echo '<th>All Edits</th>';
+					if($procManager->hasEditType()) echo '<th>Excluding Batch Edits</th>';
+					echo '</tr>';
 					$repArr = $procManager->getFullStatReport($_GET);
 					if($repArr){
 						//$editReviewUrl = '../editor/editreviewer.php?collid='.$collid.'&editor='.$uid.'&startdate='.$startDate.'&enddate='.$endDate;
@@ -242,7 +234,9 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 									echo '<td>'.$arr3['ns'].'</td>';
 									echo '<td>'.$arr3['cs'].'</td>';
 								}
-								echo '<td>'.$arr3['cnt'].'</td></tr>';
+								echo '<td>'.$arr3['cnt'].'</td>';
+								if(array_key_exists('cntexcbatch', $arr3)) echo '<td>'.$arr3['cntexcbatch'].'</td>';
+								echo '</tr>';
 							}
 						}
 					}
