@@ -123,7 +123,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 					}
 					?>
 					<div style="margin:20px 5px;">
-						<table class="styledtable" style="font-family:Arial;font-size:12px;width:400px;">
+						<table class="styledtable" style="width:400px;">
 							<tr><th>Processing Status</th><th>Count</th></tr>
 							<?php
 							foreach($statsArr['ps'] as $processingStatus => $cnt){
@@ -152,7 +152,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 				$interval= (isset($_GET['interval'])?$_GET['interval']:'day');
 				$startDate = (isset($_GET['startdate'])?$_GET['startdate']:'');
 				$endDate = (isset($_GET['enddate'])?$_GET['enddate']:'');
-				$processingStatus = (isset($_GET['processingstatus'])?$_GET['processingstatus']:'IGNORE');
+				$processingStatus = (isset($_GET['processingstatus'])?$_GET['processingstatus']:0);
 				$excludeBatch = (isset($_GET['excludebatch'])?$_GET['excludebatch']:'');
 				?>
 				<fieldset style="padding:15px;width:400px">
@@ -184,16 +184,15 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 							to <input name="enddate" type="date" value="<?php echo (isset($_GET['enddate'])?$_GET['enddate']:''); ?>" />
 						</div>
 						<div style="margin:2px">
-							Processing Status:
+							Processing Status set to:
 							<select name="processingstatus">
-								<option value="0">Show all</option>
-								<option value="IGNORE" <?php echo ($processingStatus=='IGNORE'?'SELECTED':''); ?>>Ignore Processing Status</option>
-								<option value="IGNORE">-----------------------</option>
-								<option value="ISNULL" <?php echo ($processingStatus=='ISNULL'?'SELECTED':''); ?>>Processing Status Not Set</option>
+								<option value="0">Ignore Processing Status</option>
+								<option value="ALL" <?php echo ($processingStatus=='ALL'?'SELECTED':''); ?>>Show all</option>
+								<option value="0">-----------------------</option>
 								<?php
-								$psArr = $procManager->getProcessingStatusList();
+								$psArr = array('Unprocessed','Stage 1','Stage 2','Stage 3','Pending Duplicate','Pending Review-NfN','Pending Review','Expert Required','Reviewed','Closed');
 								foreach($psArr as $psValue){
-									echo '<option value="'.$psValue.'" '.($processingStatus==$psValue?'SELECTED':'').'>'.$psValue.'</option>';
+									echo '<option value="'.strtolower($psValue).'" '.($processingStatus==$psValue?'SELECTED':'').'>'.$psValue.'</option>';
 								}
 								?>
 							</select>
@@ -224,28 +223,24 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 				</fieldset>
 				<?php
 				if($formAction && $formAction == 'displayReport'){
-					echo '<table class="styledtable" style="width:500px">';
+					echo '<table class="styledtable" style="width:500px;font-size:12px;">';
 					echo '<tr><th>Time Period</th>';
 					echo '<th>User</th>';
-					if($processingStatus!='IGNORE') echo '<th>Processing Status</th>';
+					if($processingStatus) echo '<th>Previous Status</th><th>Saved Status</th><th>Current Status</th>';
 					echo '<th>Counts</th></tr>';
 					$repArr = $procManager->getFullStatReport($_GET);
 					if($repArr){
-						$orderArr = array('SKIP','unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review-nfn','pending review','expert required','reviewed','closed','');
 						//$editReviewUrl = '../editor/editreviewer.php?collid='.$collid.'&editor='.$uid.'&startdate='.$startDate.'&enddate='.$endDate;
 						foreach($repArr as $t => $arr2){
 							foreach($arr2 as $u => $arr3){
-								foreach($orderArr as $o){
-									if(array_key_exists($o, $arr3)){
-										echo '<tr><td>'.$t.'</td>';
-										echo '<td>'.$u.'</td>';
-										if($o != 'SKIP') echo '<td>'.$o.'</td>';
-										//echo '<td>'.$arr3[$o].' <a href="'.$editReviewUrl.'" target="_blank" style="float:right;"><img src="../../images/edit.png" style="width:13px" /></a></td>';
-										echo '<td>'.$arr3[$o].'</td>';
-										echo '</tr>';
-										if($o == 'SKIP') break;
-									}
+								echo '<tr><td>'.$t.'</td>';
+								echo '<td>'.$u.'</td>';
+								if(isset($arr3['cs'])){
+									echo '<td>'.$arr3['os'].'</td>';
+									echo '<td>'.$arr3['ns'].'</td>';
+									echo '<td>'.$arr3['cs'].'</td>';
 								}
+								echo '<td>'.$arr3['cnt'].'</td></tr>';
 							}
 						}
 					}

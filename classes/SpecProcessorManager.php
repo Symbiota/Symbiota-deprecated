@@ -490,7 +490,7 @@ class SpecProcessorManager {
 			$dfgb = '%Y-%m';
 		}
 		$sql = 'SELECT DATE_FORMAT(e.initialtimestamp, "'.$dateFormat.'") AS timestr, u.username';
-		if($processingStatus != 'IGNORE') $sql .= ', o.processingstatus';
+		if($processingStatus) $sql .= ', e.fieldvalueold, e.fieldvaluenew, o.processingstatus';
 		$sql .= ', count(DISTINCT o.occid) AS cnt '.
 			'FROM omoccurrences o INNER JOIN omoccuredits e ON o.occid = e.occid '.
 			'INNER JOIN userlogin u ON e.uid = u.uid '.
@@ -507,26 +507,26 @@ class SpecProcessorManager {
 		if($uid){
 			$sql .= 'AND (e.uid = '.$uid.') ';
 		}
-		if($processingStatus && $processingStatus != 'IGNORE'){
-			if($processingStatus == 'ISNULL'){
-				$sql .= 'AND (o.processingstatus IS NULL) ';
-			}
-			else{
-				$sql .= 'AND (o.processingstatus = "'.$processingStatus.'") ';
+		if($processingStatus){
+			$sql .= 'AND e.fieldname = "processingstatus" ';
+			if($processingStatus != 'ALL'){
+				$sql .= 'AND (e.fieldvaluenew = "'.$processingStatus.'") ';
 			}
 		}
 		if($excludeBatch){
 			$sql .= 'AND e.editType = 0 ';
 		}
-		$sql .= 'GROUP BY DATE_FORMAT(e.initialtimestamp, "'.$dfgb.'")';
-		$sql .= ',u.username ';
-		if($processingStatus != 'IGNORE') $sql .= ',o.processingstatus ';
-		echo $sql;
+		$sql .= 'GROUP BY DATE_FORMAT(e.initialtimestamp, "'.$dfgb.'"), u.username ';
+		if($processingStatus) $sql .= ', e.fieldvalueold, e.fieldvaluenew, o.processingstatus ';
+		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$psStr = 'SKIP';
-			if($processingStatus != 'IGNORE') $psStr = $r->processingstatus;
-			$retArr[$r->timestr][$r->username][$psStr] = $r->cnt;
+			$retArr[$r->timestr][$r->username]['cnt'] = $r->cnt;
+			if($processingStatus){
+				$retArr[$r->timestr][$r->username]['os'] = $r->fieldvalueold;
+				$retArr[$r->timestr][$r->username]['ns'] = $r->fieldvaluenew;
+				$retArr[$r->timestr][$r->username]['cs'] = $r->processingstatus;
+			}
 		}
 		$rs->free();
 		return $retArr;
