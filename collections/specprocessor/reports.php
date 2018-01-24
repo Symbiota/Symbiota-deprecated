@@ -162,6 +162,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 							Editors:
 							<select name="uid">
 								<option value="0">Show all users</option>
+								<option value="0">-----------------------</option>
 								<?php
 								$userArr = $procManager->getUserList();
 								foreach($userArr as $id => $uname){
@@ -187,12 +188,13 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 							Processing Status set to:
 							<select name="processingstatus">
 								<option value="0">Ignore Processing Status</option>
-								<option value="ALL" <?php echo ($processingStatus=='ALL'?'SELECTED':''); ?>>Show all</option>
+								<option value="all" <?php echo ($processingStatus && $processingStatus=='all'?'SELECTED':''); ?>>Any Processing Status</option>
 								<option value="0">-----------------------</option>
 								<?php
 								$psArr = array('Unprocessed','Stage 1','Stage 2','Stage 3','Pending Duplicate','Pending Review-NfN','Pending Review','Expert Required','Reviewed','Closed');
 								foreach($psArr as $psValue){
-									echo '<option value="'.strtolower($psValue).'" '.($processingStatus==$psValue?'SELECTED':'').'>'.$psValue.'</option>';
+									$psValue = strtolower($psValue);
+									echo '<option value="'.$psValue.'" '.($processingStatus && $processingStatus==$psValue?'SELECTED':'').'>'.$psValue.'</option>';
 								}
 								?>
 							</select>
@@ -235,7 +237,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 							foreach($arr2 as $u => $arr3){
 								echo '<tr><td>'.$t.'</td>';
 								echo '<td>'.$u.'</td>';
-								if(isset($arr3['cs'])){
+								if(array_key_exists('cs', $arr3)){
 									echo '<td>'.$arr3['os'].'</td>';
 									echo '<td>'.$arr3['ns'].'</td>';
 									echo '<td>'.$arr3['cs'].'</td>';
