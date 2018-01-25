@@ -1,7 +1,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800' rel='stylesheet' type='text/css'>
-<script src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
-<script src="<?php echo $clientRoot; ?>/js/jquery-ui.js" type="text/javascript"></script>
+<script type='text/javascript'>if(!window.jQuery){
+    var jqresource = document.createElement("script");
+    jqresource.async = "true";
+    jqresource.src = "<?php echo $clientRoot; ?>/js/jquery.js";
+    var jqscript = document.getElementsByTagName("script")[0];
+    jqscript.parentNode.insertBefore(jqresource,jqscript);
+
+    var jquiresource = document.createElement("script");
+    jquiresource.async = "true";
+    jquiresource.src = "<?php echo $clientRoot; ?>/js/jquery-ui.js";
+    var jquiscript = document.getElementsByTagName("script")[0];
+    jquiscript.parentNode.insertBefore(jquiscript,jquiresource);
+}
+</script>
 <script src="<?php echo $clientRoot; ?>/js/hover_pack.js"></script>
 <script type="text/javascript" src="<?php echo $clientRoot; ?>/js/move-top.js"></script>
 <script type="text/javascript" src="<?php echo $clientRoot; ?>/js/easing.js"></script>
