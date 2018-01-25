@@ -19,6 +19,16 @@ REPLACE omoccurrencesfulltext(occid,locality,recordedby)
   SELECT occid, CONCAT_WS("; ", municipality, locality), recordedby
   FROM omoccurrences;
 
+#Add edittype field and run update query to tag batch updates (edittype = 1)
+ALTER TABLE `omoccuredits` 
+  ADD COLUMN `editType` INT NULL DEFAULT 0 COMMENT '0 = general edit, 1 = batch edit' AFTER `AppliedStatus`;
+
+UPDATE omoccuredits e INNER JOIN (SELECT initialtimestamp, uid, count(DISTINCT occid) as cnt
+FROM omoccuredits
+GROUP BY initialtimestamp, uid
+HAVING cnt > 2) as inntab ON e.initialtimestamp = inntab.initialtimestamp AND e.uid = inntab.uid
+SET edittype = 1;
+
 
 
 #Occurrence Trait/Attribute adjustments
