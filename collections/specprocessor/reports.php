@@ -219,7 +219,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 					echo '<tr><th>Time Period</th>';
 					echo '<th>User</th>';
 					if($processingStatus) echo '<th>Previous Status</th><th>Saved Status</th><th>Current Status</th>';
-					echo '<th>All Edits</th>';
+					echo '<th>Edit Count</th>';
 					if($procManager->hasEditType()) echo '<th>Excluding Batch Edits</th>';
 					echo '</tr>';
 					$repArr = $procManager->getFullStatReport($_GET);

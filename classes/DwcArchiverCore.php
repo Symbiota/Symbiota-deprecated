@@ -30,7 +30,7 @@ class DwcArchiverCore extends Manager{
 	private $determinationFieldArr = array();
 	private $imageFieldArr = array();
 	private $attributeFieldArr = array();
-	
+
 	private $securityArr = array();
 	private $includeDets = 1;
 	private $includeImgs = 1;
@@ -41,7 +41,7 @@ class DwcArchiverCore extends Manager{
 	protected $charSetOut = '';
 
 	private $geolocateVariables = array();
-	
+
 	public function __construct($conType='readonly'){
 		parent::__construct(null,$conType);
 		//Ensure that PHP DOMDocument class is installed
@@ -57,11 +57,11 @@ class DwcArchiverCore extends Manager{
 		//Character set
 		$this->charSetSource = strtoupper($GLOBALS['CHARSET']);
 		$this->charSetOut = $this->charSetSource;
-		
+
 		$this->condAllowArr = array('catalognumber','othercatalognumbers','occurrenceid','family','sciname',
 			'country','stateprovince','county','municipality','recordedby','recordnumber','eventdate',
 			'decimallatitude','decimallongitude','minimumelevationinmeters','maximumelevationinmeters','datelastmodified','dateentered');
-		
+
 		$this->securityArr = array('eventDate','month','day','startDayOfYear','endDayOfYear','verbatimEventDate',
 			'recordNumber','locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
 			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT',
@@ -120,7 +120,7 @@ class DwcArchiverCore extends Manager{
 			$this->targetPath = $tPath;
 		}
 	}
-	
+
 	public function setCollArr($collTarget, $collType = ''){
 		$collTarget = $this->cleanInStr($collTarget);
 		$collType = $this->cleanInStr($collType);
@@ -136,7 +136,7 @@ class DwcArchiverCore extends Manager{
 			if($collTarget != 'all') $sqlWhere .= ($sqlWhere?'AND ':'').'(c.collid IN('.$collTarget.')) ';
 		}
 		else{
-			//Don't limit by collection id 
+			//Don't limit by collection id
 		}
 		if($sqlWhere){
 			$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, c.collectionguid, IFNULL(c.homepage,i.url) AS url, '.
@@ -304,13 +304,13 @@ class DwcArchiverCore extends Manager{
 								if($cond == 'STARTS'){
 									$sqlFrag2 .= 'OR o.'.$field.' LIKE "'.$value.'%" ';
 								}
-								elseif($cond == 'LIKE'){ 
+								elseif($cond == 'LIKE'){
 									$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
 								}
-								elseif($cond == 'LESSTHAN'){ 
+								elseif($cond == 'LESSTHAN'){
 									$sqlFrag2 .= 'OR o.'.$field.' < "'.$value.'" ';
 								}
-								elseif($cond == 'GREATERTHAN'){ 
+								elseif($cond == 'GREATERTHAN'){
 									$sqlFrag2 .= 'OR o.'.$field.' > "'.$value.'" ';
 								}
 							}
@@ -324,7 +324,7 @@ class DwcArchiverCore extends Manager{
 			$this->conditionSql .= $sqlFrag;
 		}
 		if($this->conditionSql){
-			//Make sure it starts with WHERE 
+			//Make sure it starts with WHERE
 			if(substr($this->conditionSql,0,4) == 'AND '){
 				$this->conditionSql = 'WHERE'.substr($this->conditionSql,3);
 			}
@@ -333,13 +333,19 @@ class DwcArchiverCore extends Manager{
 			}
 		}
 	}
-	
+
 	private function getTableJoins(){
 		$sql = '';
 		if($this->conditionSql){
+			if(stripos($this->conditionSql,'ts.')){
+				$sql = 'LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
+			}
+			if(stripos($this->conditionSql,'e.parenttid')){
+				$sql .= 'LEFT JOIN taxaenumtree e ON o.tidinterpreted = e.tid ';
+			}
 			if(stripos($this->conditionSql,'v.clid')){
 				//Search criteria came from custom search page
-				$sql = 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
+				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
 			}
 			if(stripos($this->conditionSql,'p.point')){
 				//Search criteria came from map search page
@@ -367,13 +373,13 @@ class DwcArchiverCore extends Manager{
         return json_encode($arr[0]);
     }
 
-    /** 
+    /**
      * Render the records as RDF in a turtle serialization following the TDWG
      *  DarwinCore RDF Guide.
      *
      * @return strin containing turtle serialization of selected dwc records.
      */
-    public function getAsTurtle() { 
+    public function getAsTurtle() {
        $debug = false;
        $returnvalue  = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n";
        $returnvalue .= "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n";
@@ -389,10 +395,10 @@ class DwcArchiverCore extends Manager{
 	   $occurTermArr = $this->occurrenceFieldArr['terms'];
        $dwcguide223 = "";
        foreach ($arr as $rownum => $dwcArray)  {
-          if ($debug) { print_r($dwcArray);  } 
-          if (isset($dwcArray['occurrenceID'])||(isset($dwcArray['catalogNumber']) && isset($dwcArray['collectionCode']))) { 
+          if ($debug) { print_r($dwcArray);  }
+          if (isset($dwcArray['occurrenceID'])||(isset($dwcArray['catalogNumber']) && isset($dwcArray['collectionCode']))) {
              $occurrenceid = $dwcArray['occurrenceID'];
-             if (UuidFactory::is_valid($occurrenceid)) { 
+             if (UuidFactory::is_valid($occurrenceid)) {
                 $occurrenceid = "urn:uuid:$occurrenceid";
              } else {
                 $catalogNumber = $dwcArray['catalogNumber'];
@@ -407,29 +413,29 @@ class DwcArchiverCore extends Manager{
              $returnvalue .= "<$occurrenceid>\n";
              $returnvalue .= "    a dwc:Occurrence ";
              $separator = " ; \n ";
-             foreach($dwcArray as $key => $value) { 
-                if (strlen($value)>0) { 
+             foreach($dwcArray as $key => $value) {
+                if (strlen($value)>0) {
                   switch ($key) {
-                    case "recordId": 
-                    case "occurrenceID": 
+                    case "recordId":
+                    case "occurrenceID":
                     case "verbatimScientificName":
                          // skip
                       break;
                     case "collectionID":
                          // RDF Guide Section 2.3.3 owl:sameAs for urn:lsid and resolvable IRI.
-                         if (stripos("urn:uuid:",$value)===false && UuidFactory::is_valid($value)) { 
+                         if (stripos("urn:uuid:",$value)===false && UuidFactory::is_valid($value)) {
                            $lsid = "urn:uuid:$value";
-                         } elseif (stripos("urn:lsid:biocol.org",$value)===0) { 
+                         } elseif (stripos("urn:lsid:biocol.org",$value)===0) {
                            $lsid = "http://biocol.org/$value";
                            $dwcguide223 .= "<http://biocol.org/$value>\n";
                            $dwcguide223 .= "    owl:sameAs <$value> .\n";
-                         } else { 
+                         } else {
                            $lsid = $value;
                          }
                          $returnvalue .= "$separator   dwciri:inCollection <$lsid>";
                       break;
-                    case "basisOfRecord": 
-                          if (preg_match("/(PreservedSpecimen|FossilSpecimen)/",$value)==1) { 
+                    case "basisOfRecord":
+                          if (preg_match("/(PreservedSpecimen|FossilSpecimen)/",$value)==1) {
                              $returnvalue .= "$separator   a dcmitype:PhysicalObject";
                           }
                           $returnvalue .= "$separator   dwc:$key  \"$value\"";
@@ -439,58 +445,58 @@ class DwcArchiverCore extends Manager{
                       break;
                     case "rights":
                           // RDF Guide Section 3.3 dcterms:licence for IRI, xmpRights:UsageTerms for literal
-                          if (stripos("http://creativecommons.org/licenses/",$value)==0) { 
+                          if (stripos("http://creativecommons.org/licenses/",$value)==0) {
                              $returnvalue .= "$separator   dcterms:license <$value>";
-                          } else { 
+                          } else {
                              $returnvalue .= "$separator   dc:$key \"$value\"";
                           }
                       break;
                     case "rightsHolder":
                           // RDF Guide Section 3.3  dcterms:rightsHolder for IRI, xmpRights:Owner for literal
-                          if (stripos("http://",$value)==0 || stripos("urn:",$value)==0) { 
+                          if (stripos("http://",$value)==0 || stripos("urn:",$value)==0) {
                              $returnvalue .= "$separator   dcterms:rightsHolder <$value>";
-                          } else { 
+                          } else {
                              $returnvalue .= "$separator   xmpRights:Owner \"$value\"";
                           }
                       break;
                     case "day":
                     case "month":
                     case "year":
-                         if ($value!="0") { 
+                         if ($value!="0") {
                            $returnvalue .= "$separator   dwc:$key  \"$value\"";
                          }
                       break;
                     case "eventDate":
-                         if ($value!="0000-00-00" && strlen($value)>0) { 
+                         if ($value!="0000-00-00" && strlen($value)>0) {
                            $value = str_replace("-00","",$value);
                            $returnvalue .= "$separator   dwc:$key  \"$value\"";
                          }
                       break;
-                    default: 
-                        if (isset($occurTermArr[$key])) { 
+                    default:
+                        if (isset($occurTermArr[$key])) {
                            $ns = RdfUtility::namespaceAbbrev($occurTermArr[$key]);
                            $returnvalue .= $separator . "   " . $ns . " \"$value\"";
                         }
                   }
                 }
              }
-         
+
              $returnvalue .= ".\n";
           }
        }
-       if ($dwcguide223!="") { 
+       if ($dwcguide223!="") {
           $returnvalue .= $dwcguide223;
        }
        return $returnvalue;
     }
 
-    /** 
+    /**
      * Render the records as RDF in a rdf/xml serialization following the TDWG
      *  DarwinCore RDF Guide.
      *
      * @return string containing rdf/xml serialization of selected dwc records.
      */
-    public function getAsRdfXml() { 
+    public function getAsRdfXml() {
        $debug = false;
 	   $newDoc = new DOMDocument('1.0',$this->charSetOut);
        $newDoc->formatOutput = true;
@@ -511,10 +517,10 @@ class DwcArchiverCore extends Manager{
        $arr = $this->getDwcArray();
 	   $occurTermArr = $this->occurrenceFieldArr['terms'];
        foreach ($arr as $rownum => $dwcArray)  {
-          if ($debug) { print_r($dwcArray);  } 
-          if (isset($dwcArray['occurrenceID'])||(isset($dwcArray['catalogNumber']) && isset($dwcArray['collectionCode']))) { 
+          if ($debug) { print_r($dwcArray);  }
+          if (isset($dwcArray['occurrenceID'])||(isset($dwcArray['catalogNumber']) && isset($dwcArray['collectionCode']))) {
              $occurrenceid = $dwcArray['occurrenceID'];
-             if (UuidFactory::is_valid($occurrenceid)) { 
+             if (UuidFactory::is_valid($occurrenceid)) {
                 $occurrenceid = "urn:uuid:$occurrenceid";
              } else {
                 $catalogNumber = $dwcArray['catalogNumber'];
@@ -529,39 +535,39 @@ class DwcArchiverCore extends Manager{
              $occElem = $newDoc->createElement('dwc:Occurrence');
              $occElem->setAttribute("rdf:about","$occurrenceid");
              $sameAsElem = null;
-             foreach($dwcArray as $key => $value) { 
+             foreach($dwcArray as $key => $value) {
                 $flags = ENT_NOQUOTES;
                 if(defined('ENT_XML1')) $flags = ENT_NOQUOTES | ENT_XML1 | ENT_DISALLOWED;
                 $value = htmlentities($value,$flags,$this->charSetOut);
                 // TODO: Figure out how to use mb_encode_numericentity() here.
                 $value = str_replace("&copy;","&#169;",$value);  // workaround, need to fix &copy; rendering
-                if (strlen($value)>0) { 
+                if (strlen($value)>0) {
                   $elem = null;
                   switch ($key) {
-                    case "recordId": 
-                    case "occurrenceID": 
+                    case "recordId":
+                    case "occurrenceID":
                     case "verbatimScientificName":
                          // skip
                       break;
                     case "collectionID":
                          // RDF Guide Section 2.3.3 owl:sameAs for urn:lsid and resolvable IRI.
-                         if (stripos("urn:uuid:",$value)===false && UuidFactory::is_valid($value)) { 
+                         if (stripos("urn:uuid:",$value)===false && UuidFactory::is_valid($value)) {
                            $lsid = "urn:uuid:$value";
-                         }elseif (stripos("urn:lsid:biocol.org",$value)===0) { 
+                         }elseif (stripos("urn:lsid:biocol.org",$value)===0) {
                            $lsid = "http://biocol.org/$value";
                            $sameAsElem = $newDoc->createElement("rdf:Description");
                            $sameAsElem->setAttribute("rdf:about","http://biocol.org/$value");
                            $sameAsElemC = $newDoc->createElement("owl:sameAs");
                            $sameAsElemC->setAttribute("rdf:resource","$value");
                            $sameAsElem->appendChild($sameAsElemC);
-                         } else { 
+                         } else {
                            $lsid = $value;
                          }
                          $elem = $newDoc->createElement("dwciri:inCollection");
                          $elem->setAttribute("rdf:resource","$lsid");
                       break;
-                    case "basisOfRecord": 
-                          if (preg_match("/(PreservedSpecimen|FossilSpecimen)/",$value)==1) { 
+                    case "basisOfRecord":
+                          if (preg_match("/(PreservedSpecimen|FossilSpecimen)/",$value)==1) {
                              $elem = $newDoc->createElement("rdf:type");
                              $elem->setAttribute("rdf:resource","http://purl.org/dc/dcmitype/PhysicalObject");
                           }
@@ -569,19 +575,19 @@ class DwcArchiverCore extends Manager{
                       break;
                     case "rights":
                           // RDF Guide Section 3.3 dcterms:licence for IRI, xmpRights:UsageTerms for literal
-                          if (stripos("http://creativecommons.org/licenses/",$value)==0) { 
+                          if (stripos("http://creativecommons.org/licenses/",$value)==0) {
                              $elem = $newDoc->createElement("dcterms:license");
                              $elem->setAttribute("rdf:resource","$value");
-                          } else { 
+                          } else {
                              $elem = $newDoc->createElement("xmpRights:UsageTerms",$value);
                           }
                       break;
                     case "rightsHolder":
                           // RDF Guide Section 3.3  dcterms:rightsHolder for IRI, xmpRights:Owner for literal
-                          if (stripos("http://",$value)==0 || stripos("urn:",$value)==0) { 
+                          if (stripos("http://",$value)==0 || stripos("urn:",$value)==0) {
                              $elem = $newDoc->createElement("dcterms:rightsHolder");
                              $elem->setAttribute("rdf:resource","$value");
-                          } else { 
+                          } else {
                              $elem = $newDoc->createElement("xmpRights:Owner",$value);
                           }
                       break;
@@ -591,31 +597,31 @@ class DwcArchiverCore extends Manager{
                     case "day":
                     case "month":
                     case "year":
-                         if ($value!="0") { 
+                         if ($value!="0") {
                             $elem = $newDoc->createElement("dwc:$key",$value);
                          }
                       break;
                     case "eventDate":
-                         if ($value!="0000-00-00" || strlen($value)>0) { 
+                         if ($value!="0000-00-00" || strlen($value)>0) {
                            $value = str_replace("-00","",$value);
                            $elem = $newDoc->createElement("dwc:$key",$value);
                          }
                       break;
-                    default: 
-                         if (isset($occurTermArr[$key])) { 
+                    default:
+                         if (isset($occurTermArr[$key])) {
                             $ns = RdfUtility::namespaceAbbrev($occurTermArr[$key]);
                             $elem = $newDoc->createElement($ns);
                             $elem->appendChild($newDoc->createTextNode($value));
                          }
                   }
-                  if ($elem!=null) { 
+                  if ($elem!=null) {
                      $occElem->appendChild($elem);
                   }
                 }
              }
              $node = $newDoc->importNode($occElem);
              $newDoc->documentElement->appendChild($node);
-             if ($sameAsElem!=null) { 
+             if ($sameAsElem!=null) {
                 $node = $newDoc->importNode($sameAsElem);
                 $newDoc->documentElement->appendChild($node);
              }
@@ -627,12 +633,12 @@ class DwcArchiverCore extends Manager{
        return $returnvalue;
     }
 
-    private function getDwcArray() { 
+    private function getDwcArray() {
 		$result = Array();
 		if(!$this->occurrenceFieldArr){
 			$this->occurrenceFieldArr = DwcArchiverOccurrence::getOccurrenceArr($this->schemaType, $this->extended);
 		}
-		
+
 		$this->applyConditions();
 		$sql = DwcArchiverOccurrence::getSqlOccurrences($this->occurrenceFieldArr['fields'],$this->conditionSql,$this->getTableJoins());
 		if(!$sql) return false;
@@ -645,7 +651,7 @@ class DwcArchiverCore extends Manager{
 			unset($fieldArr['collId']);
 		}
 		if(!$this->collArr){
-			//Collection array not previously primed by source  
+			//Collection array not previously primed by source
 			$sql1 = 'SELECT DISTINCT o.collid FROM omoccurrences o ';
 			if($this->conditionSql){
 				$sql1 .= $this->getTableJoins().$this->conditionSql;
@@ -669,8 +675,8 @@ class DwcArchiverCore extends Manager{
 			while($r = $rs->fetch_assoc()){
 				$hasRecords = true;
 				//Protect sensitive records
-				if($this->redactLocalities 
-                   && $r["localitySecurity"] == 1 
+				if($this->redactLocalities
+                   && $r["localitySecurity"] == 1
                    && !in_array($r['collid'],$this->rareReaderArr)
                 ){
 					$protectedFields = array();
@@ -694,7 +700,7 @@ class DwcArchiverCore extends Manager{
 						$r['occurrenceID'] = $r['recordId'];
 					}
 				}
-				
+
 				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
 				//Add collection GUID based on management type
 				$managementType = $this->collArr[$r['collid']]['managementtype'];
@@ -728,7 +734,7 @@ class DwcArchiverCore extends Manager{
 					}
 				}
 				if($urlPathPrefix) $r['t_references'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
-				
+
 				foreach($r as $rKey => $rValue){
 					if(substr($rKey, 0, 2) == 't_') $rKey = substr($rKey,2);
 	                $result[$cnt][$rKey] = $rValue;
@@ -744,7 +750,7 @@ class DwcArchiverCore extends Manager{
 		}
 		return $result;
     }
-    
+
     private function getAssociatedMedia(){
     	$retStr = '';
     	$sql = 'SELECT originalurl FROM images '.str_replace('o.','',$this->conditionSql);
@@ -774,11 +780,11 @@ class DwcArchiverCore extends Manager{
 			}
 		}
 		$fileName = str_replace(array(' ','"',"'"),'',$fileNameSeed).'_DwC-A.zip';
-		
+
 		if(!$this->targetPath) $this->setTargetPath();
 		$archiveFile = '';
 		$this->logOrEcho('Creating DwC-A file: '.$fileName."\n");
-		
+
 		if(!class_exists('ZipArchive')){
 			$this->logOrEcho("FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin\n");
 			exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
@@ -793,7 +799,7 @@ class DwcArchiverCore extends Manager{
 				exit('FATAL ERROR: unable to create archive file: '.$status);
 			}
 			//$this->logOrEcho("DWCA created: ".$archiveFile."\n");
-			
+
 			//Occurrences
 			$zipArchive->addFile($this->targetPath.$this->ts.'-occur'.$this->fileExt);
 			$zipArchive->renameName($this->targetPath.$this->ts.'-occur'.$this->fileExt,'occurrences'.$this->fileExt);
@@ -852,11 +858,11 @@ class DwcArchiverCore extends Manager{
 	//Generate DwC support files
 	private function writeMetaFile(){
 		$this->logOrEcho("Creating meta.xml (".date('h:i:s A').")... ");
-		
-		//Create new DOM document 
+
+		//Create new DOM document
 		$newDoc = new DOMDocument('1.0',$this->charSetOut);
 
-		//Add root element 
+		//Add root element
 		$rootElem = $newDoc->createElement('archive');
 		$rootElem->setAttribute('metadata','eml.xml');
 		$rootElem->setAttribute('xmlns','http://rs.tdwg.org/dwc/text/');
@@ -873,7 +879,7 @@ class DwcArchiverCore extends Manager{
 		$coreElem->setAttribute('fieldsEnclosedBy','"');
 		$coreElem->setAttribute('ignoreHeaderLines','1');
 		$coreElem->setAttribute('rowType','http://rs.tdwg.org/dwc/terms/Occurrence');
-		
+
 		$filesElem = $newDoc->createElement('files');
 		$filesElem->appendChild($newDoc->createElement('location','occurrences'.$this->fileExt));
 		$coreElem->appendChild($filesElem);
@@ -908,15 +914,15 @@ class DwcArchiverCore extends Manager{
 			$extElem1->setAttribute('fieldsEnclosedBy','"');
 			$extElem1->setAttribute('ignoreHeaderLines','1');
 			$extElem1->setAttribute('rowType','http://rs.tdwg.org/dwc/terms/Identification');
-	
+
 			$filesElem1 = $newDoc->createElement('files');
 			$filesElem1->appendChild($newDoc->createElement('location','identifications'.$this->fileExt));
 			$extElem1->appendChild($filesElem1);
-			
+
 			$coreIdElem1 = $newDoc->createElement('coreid');
 			$coreIdElem1->setAttribute('index','0');
 			$extElem1->appendChild($coreIdElem1);
-			
+
 			//List identification fields
 			$detCnt = 1;
 			$termArr = $this->determinationFieldArr['terms'];
@@ -939,15 +945,15 @@ class DwcArchiverCore extends Manager{
 			$extElem2->setAttribute('fieldsEnclosedBy','"');
 			$extElem2->setAttribute('ignoreHeaderLines','1');
 			$extElem2->setAttribute('rowType','http://rs.gbif.org/terms/1.0/Image');
-	
+
 			$filesElem2 = $newDoc->createElement('files');
 			$filesElem2->appendChild($newDoc->createElement('location','images'.$this->fileExt));
 			$extElem2->appendChild($filesElem2);
-			
+
 			$coreIdElem2 = $newDoc->createElement('coreid');
 			$coreIdElem2->setAttribute('index','0');
 			$extElem2->appendChild($coreIdElem2);
-			
+
 			//List image fields
 			$imgCnt = 1;
 			$termArr = $this->imageFieldArr['terms'];
@@ -960,7 +966,7 @@ class DwcArchiverCore extends Manager{
 			}
 			$rootElem->appendChild($extElem2);
 		}
-		
+
 		//MeasurementOrFact extension
 		if($this->includeAttributes){
 			$extElem3 = $newDoc->createElement('extension');
@@ -978,7 +984,7 @@ class DwcArchiverCore extends Manager{
 			$coreIdElem3 = $newDoc->createElement('coreid');
 			$coreIdElem3->setAttribute('index','0');
 			$extElem3->appendChild($coreIdElem3);
-			
+
 			$mofCnt = 1;
 			$termArr = $this->attributeFieldArr['terms'];
 			foreach($termArr as $k => $v){
@@ -990,42 +996,42 @@ class DwcArchiverCore extends Manager{
 			}
 			$rootElem->appendChild($extElem3);
 		}
-		
+
 		$newDoc->save($this->targetPath.$this->ts.'-meta.xml');
-		
+
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
 	private function getEmlArr(){
-		
+
 		$this->setServerDomain();
 		$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
 		$localDomain = $this->serverDomain;
-		
+
 		$emlArr = array();
 		if(count($this->collArr) == 1){
 			$collId = key($this->collArr);
 			$emlArr['alternateIdentifier'][] = $urlPathPrefix.'collections/misc/collprofiles.php?collid='.$collId;
 			$emlArr['title'] = $this->collArr[$collId]['collname'];
 			$emlArr['description'] = $this->collArr[$collId]['description'];
-	
+
 			//$emlArr['contact']['individualName'] = $this->collArr[$collId]['contact'];
 			$emlArr['contact']['organizationName'] = $this->collArr[$collId]['collname'];
 			$emlArr['contact']['phone'] = $this->collArr[$collId]['phone'];
 			//$emlArr['contact']['electronicMailAddress'] = $this->collArr[$collId]['email'];
 			$emlArr['contact']['onlineUrl'] = $this->collArr[$collId]['url'];
-			
+
 			$emlArr['contact']['addr']['deliveryPoint'] = $this->collArr[$collId]['address1'].($this->collArr[$collId]['address2']?', '.$this->collArr[$collId]['address2']:'');
 			$emlArr['contact']['addr']['city'] = $this->collArr[$collId]['city'];
 			$emlArr['contact']['addr']['administrativeArea'] = $this->collArr[$collId]['state'];
 			$emlArr['contact']['addr']['postalCode'] = $this->collArr[$collId]['postalcode'];
 			$emlArr['contact']['addr']['country'] = $this->collArr[$collId]['country'];
-			
-			
+
+
 			$emlArr['intellectualRights'] = $this->collArr[$collId]['rights'];
 		}
 		else{
-			//Dataset contains multiple collection data 
+			//Dataset contains multiple collection data
 			$emlArr['title'] = $GLOBALS['DEFAULT_TITLE'].' general data extract';
 			if(isset($GLOBALS['SYMB_UID']) && $GLOBALS['SYMB_UID']){
 				$sql = 'SELECT uid, lastname, firstname, title, institution, department, address, city, state, zip, country, phone, email, ispublic '.
@@ -1061,11 +1067,11 @@ class DwcArchiverCore extends Manager{
 		$emlArr['creator'][0]['organizationName'] = $GLOBALS['DEFAULT_TITLE'];
 		$emlArr['creator'][0]['electronicMailAddress'] = $GLOBALS['ADMIN_EMAIL'];
 		$emlArr['creator'][0]['onlineUrl'] = $urlPathPrefix.'index.php';
-		
+
 		$emlArr['metadataProvider'][0]['organizationName'] = $GLOBALS['DEFAULT_TITLE'];
 		$emlArr['metadataProvider'][0]['electronicMailAddress'] = $GLOBALS['ADMIN_EMAIL'];
 		$emlArr['metadataProvider'][0]['onlineUrl'] = $urlPathPrefix.'index.php';
-		
+
 		$emlArr['pubDate'] = date("Y-m-d");
 
 		//Append collection metadata
@@ -1074,8 +1080,8 @@ class DwcArchiverCore extends Manager{
 			$emlArr['collMetadata'][$id]['attr']['identifier'] = $collArr['collectionguid'];
 			$emlArr['collMetadata'][$id]['attr']['id'] = $id;
 			$emlArr['collMetadata'][$id]['alternateIdentifier'] = $urlPathPrefix.'collections/misc/collprofiles.php?collid='.$id;
-			$emlArr['collMetadata'][$id]['parentCollectionIdentifier'] = $collArr['instcode']; 
-			$emlArr['collMetadata'][$id]['collectionIdentifier'] = $collArr['collcode']; 
+			$emlArr['collMetadata'][$id]['parentCollectionIdentifier'] = $collArr['instcode'];
+			$emlArr['collMetadata'][$id]['collectionIdentifier'] = $collArr['collcode'];
 			$emlArr['collMetadata'][$id]['collectionName'] = $collArr['collname'];
 			if($collArr['icon']){
 				$imgLink = '';
@@ -1115,7 +1121,7 @@ class DwcArchiverCore extends Manager{
 
 	private function writeEmlFile(){
 		$this->logOrEcho("Creating eml.xml (".date('h:i:s A').")... ");
-		
+
 		$emlDoc = $this->getEmlDom();
 
 		$emlDoc->save($this->targetPath.$this->ts.'-eml.xml');
@@ -1123,20 +1129,20 @@ class DwcArchiverCore extends Manager{
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
-	/* 
+	/*
 	 * Input: Array containing the eml data
 	 * OUTPUT: XML String representing the EML
-	 * USED BY: this class, and emlhandler.php 
+	 * USED BY: this class, and emlhandler.php
 	 */
 	public function getEmlDom($emlArr = null){
 		global $RIGHTS_TERMS_DEFS;
-		
+
 		if(!$emlArr) $emlArr = $this->getEmlArr();
 
-		//Create new DOM document 
+		//Create new DOM document
 		$newDoc = new DOMDocument('1.0',$this->charSetOut);
 
-		//Add root element 
+		//Add root element
 		$rootElem = $newDoc->createElement('eml:eml');
 		$rootElem->setAttribute('xmlns:eml','eml://ecoinformatics.org/eml-2.1.1');
 		$rootElem->setAttribute('xmlns:dc','http://purl.org/dc/terms/');
@@ -1146,7 +1152,7 @@ class DwcArchiverCore extends Manager{
 		$rootElem->setAttribute('system','http://symbiota.org');
 		$rootElem->setAttribute('scope','system');
 		$rootElem->setAttribute('xml:lang','eng');
-		
+
 		$newDoc->appendChild($rootElem);
 
 		$cArr = array();
@@ -1160,7 +1166,7 @@ class DwcArchiverCore extends Manager{
 				$datasetElem->appendChild($altIdElem);
 			}
 		}
-		
+
 		if(array_key_exists('title',$emlArr)){
 			$titleElem = $newDoc->createElement('title');
 			$titleElem->setAttribute('xml:lang','eng');
@@ -1200,7 +1206,7 @@ class DwcArchiverCore extends Manager{
 				$datasetElem->appendChild($mdElem);
 			}
 		}
-		
+
 		if(array_key_exists('pubDate',$emlArr) && $emlArr['pubDate']){
 			$pubElem = $newDoc->createElement('pubDate');
 			$pubElem->appendChild($newDoc->createTextNode($emlArr['pubDate']));
@@ -1219,7 +1225,7 @@ class DwcArchiverCore extends Manager{
 			$abstractElem->appendChild($paraElem);
 			$datasetElem->appendChild($abstractElem);
 		}
-		
+
 		if(array_key_exists('contact',$emlArr)){
 			$contactArr = $emlArr['contact'];
 			$contactElem = $newDoc->createElement('contact');
@@ -1280,7 +1286,7 @@ class DwcArchiverCore extends Manager{
 				$datasetElem->appendChild($assocElem);
 			}
 		}
-		
+
 		if(array_key_exists('intellectualRights',$emlArr)){
 			$rightsElem = $newDoc->createElement('intellectualRights');
 			$paraElem = $newDoc->createElement('para');
@@ -1361,7 +1367,7 @@ class DwcArchiverCore extends Manager{
 				$symbElem->appendChild($collElem);
 			}
 		}
-		
+
 		$metaElem = $newDoc->createElement('metadata');
 		$metaElem->appendChild($symbElem);
 		if($this->schemaType == 'coge' && $this->geolocateVariables){
@@ -1392,28 +1398,28 @@ class DwcArchiverCore extends Manager{
 	public function getFullRss(){
 		//Create new document and write out to target
 		$newDoc = new DOMDocument('1.0',$this->charSetOut);
-		
+
 		//Add root element
 		$rootElem = $newDoc->createElement('rss');
 		$rootAttr = $newDoc->createAttribute('version');
 		$rootAttr->value = '2.0';
 		$rootElem->appendChild($rootAttr);
 		$newDoc->appendChild($rootElem);
-		
+
 		//Add Channel
 		$channelElem = $newDoc->createElement('channel');
 		$rootElem->appendChild($channelElem);
-		
+
 		//Add title, link, description, language
 		$titleElem = $newDoc->createElement('title');
 		$titleElem->appendChild($newDoc->createTextNode($GLOBALS['DEFAULT_TITLE'].' Biological Occurrences RSS feed'));
 		$channelElem->appendChild($titleElem);
-		
+
 		$this->setServerDomain();
 		$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-		
+
 		$localDomain = $this->serverDomain;
-		
+
 		$linkElem = $newDoc->createElement('link');
 		$linkElem->appendChild($newDoc->createTextNode($urlPathPrefix));
 		$channelElem->appendChild($linkElem);
@@ -1422,7 +1428,7 @@ class DwcArchiverCore extends Manager{
 		$channelElem->appendChild($descriptionElem);
 		$languageElem = $newDoc->createElement('language','en-us');
 		$channelElem->appendChild($languageElem);
-		
+
 		//Create new item for target archives and load into array
 		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.collectionguid, c.dwcaurl, c.managementtype, s.uploaddate '.
 			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid '.
@@ -1457,7 +1463,7 @@ class DwcArchiverCore extends Manager{
 			$iconElem = $newDoc->createElement('image');
 			$iconElem->appendChild($newDoc->createTextNode($imgLink));
 			$itemElem->appendChild($iconElem);
-			
+
 			//description
 			$descTitleElem = $newDoc->createElement('description');
 			$descTitleElem->appendChild($newDoc->createTextNode($cArr['collectionname']));
@@ -1466,7 +1472,7 @@ class DwcArchiverCore extends Manager{
 			$guidElem = $newDoc->createElement('guid');
 			$guidElem->appendChild($newDoc->createTextNode($cArr['collectionguid']));
 			$itemElem->appendChild($guidElem);
-			
+
 			$emlElem = $newDoc->createElement('emllink');
 			$emlElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/datasets/emlhandler.php?collid='.$cArr['collid']));
 			$itemElem->appendChild($emlElem);
@@ -1510,7 +1516,7 @@ class DwcArchiverCore extends Manager{
 			return false;
 		}
 		$hasRecords = false;
-		
+
 		if(!$this->occurrenceFieldArr){
 			$this->occurrenceFieldArr = DwcArchiverOccurrence::getOccurrenceArr($this->schemaType, $this->extended);
 		}
@@ -1519,7 +1525,7 @@ class DwcArchiverCore extends Manager{
 		$sql = DwcArchiverOccurrence::getSqlOccurrences($this->occurrenceFieldArr['fields'],$this->conditionSql,$this->getTableJoins());
 		if(!$sql) return false;
 		if($this->schemaType != 'backup') $sql .= ' LIMIT 1000000';
-		
+
 		//Output header
 		$fieldArr = $this->occurrenceFieldArr['fields'];
 		if($this->schemaType == 'dwc'){
@@ -1538,7 +1544,7 @@ class DwcArchiverCore extends Manager{
 			foreach($fieldArr as $k => $v){
 				if(array_key_exists($k,$glFields)){
 					$fieldOutArr[] = $glFields[$k];
-				} 
+				}
 				else{
 					$fieldOutArr[] = strtoupper(substr($k,0,1)).substr($k,1);
 				}
@@ -1549,7 +1555,7 @@ class DwcArchiverCore extends Manager{
 		}
 		$this->writeOutRecord($fh,$fieldOutArr);
 		if(!$this->collArr){
-			//Collection array not previously primed by source  
+			//Collection array not previously primed by source
 			$sql1 = 'SELECT DISTINCT o.collid FROM omoccurrences o ';
 			if($this->conditionSql){
 				$sql1 .= $this->getTableJoins().$this->conditionSql;
@@ -1565,12 +1571,12 @@ class DwcArchiverCore extends Manager{
 
 		//Populate Upper Taxonomic data
 		$this->setUpperTaxonomy();
-		
+
 		//echo $sql; exit;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			$this->setServerDomain();
 			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-			
+
 			while($r = $rs->fetch_assoc()){
 				//Set occurrence GUID based on GUID target
 				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
@@ -1598,7 +1604,7 @@ class DwcArchiverCore extends Manager{
 						$r['informationWithheld'] = trim($r['informationWithheld'].'; field values redacted: '.implode(', ',$protectedFields),' ;');
 					}
 				}
-				
+
 				if($urlPathPrefix) $r['t_references'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
 				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
 				//Add collection GUID based on management type
@@ -1631,7 +1637,7 @@ class DwcArchiverCore extends Manager{
 					if(isset($this->upperTaxonomy[$famStr]['k'])){
 						$r['t_kingdom'] = $this->upperTaxonomy[$famStr]['k'];
 					}
-				} 
+				}
 				//print_r($r); exit;
 				$this->encodeArr($r);
 				$this->addcslashesArr($r);
@@ -1653,13 +1659,13 @@ class DwcArchiverCore extends Manager{
 		$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 		return $filePath;
 	}
-	
+
 	public function getOccurrenceFile(){
 		if(!$this->targetPath) $this->setTargetPath();
 		$filePath = $this->writeOccurrenceFile();
 		return $filePath;
 	}
-	
+
 	private function writeDeterminationFile(){
 		$this->logOrEcho("Creating identification file (".date('h:i:s A').")... ");
 		$fh = fopen($this->targetPath.$this->ts.'-det'.$this->fileExt, 'w');
@@ -1667,13 +1673,13 @@ class DwcArchiverCore extends Manager{
 			$this->logOrEcho('ERROR establishing output file ('.$filePath.'), perhaps target folder is not readable by web server.');
 			return false;
 		}
-		
+
 		if(!$this->determinationFieldArr){
 			$this->determinationFieldArr = DwcArchiverDetermination::getDeterminationArr($this->schemaType,$this->extended);
 		}
 		//Output header
 		$this->writeOutRecord($fh,array_keys($this->determinationFieldArr['fields']));
-		
+
 		//Output records
 		$sql = DwcArchiverDetermination::getSqlDeterminations($this->determinationFieldArr['fields'],$this->conditionSql);
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
@@ -1689,7 +1695,7 @@ class DwcArchiverCore extends Manager{
 			$this->logOrEcho("ERROR creating identification file: ".$this->conn->error."\n");
 			$this->logOrEcho("\tSQL: ".$sql."\n");
 		}
-			
+
 		fclose($fh);
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
@@ -1704,17 +1710,17 @@ class DwcArchiverCore extends Manager{
 		}
 
 		if(!$this->imageFieldArr) $this->imageFieldArr = DwcArchiverImage::getImageArr($this->schemaType);
-		
+
 		//Output header
 		$this->writeOutRecord($fh,array_keys($this->imageFieldArr['fields']));
-		
+
 		//Output records
 		$sql = DwcArchiverImage::getSqlImages($this->imageFieldArr['fields'], $this->conditionSql, $this->redactLocalities, $this->rareReaderArr);
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			
+
 			$this->setServerDomain();
 			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-			
+
 			$localDomain = '';
 			if(isset($GLOBALS['IMAGE_DOMAIN']) && $GLOBALS['IMAGE_DOMAIN']){
 				$localDomain = $GLOBALS['IMAGE_DOMAIN'];
@@ -1787,9 +1793,9 @@ class DwcArchiverCore extends Manager{
 			$this->logOrEcho("ERROR creating image file: ".$this->conn->error."\n");
 			$this->logOrEcho("\tSQL: ".$sql."\n");
 		}
-		
+
 		fclose($fh);
-		
+
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
@@ -1839,7 +1845,7 @@ class DwcArchiverCore extends Manager{
 	}
 
 	public function deleteArchive($collID){
-		//Remove archive instance from RSS feed 
+		//Remove archive instance from RSS feed
 		$rssFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'webservices/dwc/rss.xml';
 		if(!file_exists($rssFile)) return false;
 		$doc = new DOMDocument();
@@ -1855,7 +1861,7 @@ class DwcArchiverCore extends Manager{
 				if(file_exists($filePath1)) unlink($filePath1);
 				$emlPath1 = str_replace('.zip','.eml',$filePath1);
 				if(file_exists($emlPath1)) unlink($emlPath1);
-				//Following lines temporarly needed to support previous versions 
+				//Following lines temporarly needed to support previous versions
 				$filePath2 = $filePath.'collections/datasets/dwc'.substr($nodeValue,strrpos($nodeValue,'/'));
 				if(file_exists($filePath2)) unlink($filePath2);
 				$emlPath2 = str_replace('.zip','.eml',$filePath2);
@@ -1878,14 +1884,14 @@ class DwcArchiverCore extends Manager{
 		if(!$this->upperTaxonomy){
 			$sqlOrder = 'SELECT t.sciname AS family, t2.sciname AS taxonorder '.
 				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '. 
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
 				'WHERE t.rankid = 140 AND t2.rankid = 100';
 			$rsOrder = $this->conn->query($sqlOrder);
 			while($rowOrder = $rsOrder->fetch_object()){
 				$this->upperTaxonomy[strtolower($rowOrder->family)]['o'] = $rowOrder->taxonorder;
 			}
 			$rsOrder->free();
-			
+
 			$sqlClass = 'SELECT t.sciname AS family, t2.sciname AS taxonclass '.
 				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
 				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
@@ -1895,7 +1901,7 @@ class DwcArchiverCore extends Manager{
 				$this->upperTaxonomy[strtolower($rowClass->family)]['c'] = $rowClass->taxonclass;
 			}
 			$rsClass->free();
-			
+
 			$sqlPhylum = 'SELECT t.sciname AS family, t2.sciname AS taxonphylum '.
 				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
 				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
@@ -1905,7 +1911,7 @@ class DwcArchiverCore extends Manager{
 				$this->upperTaxonomy[strtolower($rowPhylum->family)]['p'] = $rowPhylum->taxonphylum;
 			}
 			$rsPhylum->free();
-			
+
 			$sqlKing = 'SELECT t.sciname AS family, t2.sciname AS kingdom '.
 				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
 				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
@@ -1927,14 +1933,14 @@ class DwcArchiverCore extends Manager{
 			$this->schemaType = 'symbiota';
 		}
 	}
-	
+
 	public function setLimitToGuids($testValue){
 		if($testValue) $this->limitToGuids = true;
 	}
 
 	public function setExtended($e){
 		$this->extended = $e;
-	} 
+	}
 
 	public function setDelimiter($d){
 		if($d == 'tab' || $d == "\t"){
@@ -1954,21 +1960,21 @@ class DwcArchiverCore extends Manager{
 	public function setIncludeDets($includeDets){
 		$this->includeDets = $includeDets;
 	}
-	
+
 	public function setIncludeImgs($includeImgs){
 		$this->includeImgs = $includeImgs;
 	}
-	
+
 	public function setIncludeAttributes($include){
 		$this->includeAttributes = $include;
 	}
-	
+
 	public function setRedactLocalities($redact){
 		$this->redactLocalities = $redact;
 	}
 
 	public function setRareReaderArr($approvedCollid){
-		if(is_array($approvedCollid)){ 
+		if(is_array($approvedCollid)){
 			$this->rareReaderArr = $approvedCollid;
 		}
 		elseif(is_string($approvedCollid)){
@@ -1982,7 +1988,7 @@ class DwcArchiverCore extends Manager{
 			$this->charSetOut = $cs;
 		}
 	}
-	
+
 	public function setGeolocateVariables($geolocateArr){
 		$this->geolocateVariables = $geolocateArr;
 	}
@@ -2023,7 +2029,7 @@ class DwcArchiverCore extends Manager{
 		}
 		return $retArr;
 	}
-	
+
 	private function encodeArr(&$inArr){
 		if($this->charSetSource && $this->charSetOut != $this->charSetSource){
 			foreach($inArr as $k => $v){
@@ -2050,7 +2056,7 @@ class DwcArchiverCore extends Manager{
 		}
 		return $retStr;
 	}
-	
+
 	private function addcslashesArr(&$arr){
 		foreach($arr as $k => $v){
 			if($v) $arr[$k] = addcslashes($v,"\n\r\\");
