@@ -71,7 +71,8 @@ class OccurrenceListManager extends OccurrenceManager{
     					if($row->decimallatitude && $row->decimallongitude) $locStr .= ', '.$row->decimallatitude.' '.$row->decimallongitude;
     					$returnArr[$row->occid]["locality"] = $this->cleanOutStr(trim($locStr,' ,;'));
     					$returnArr[$row->occid]["collnum"] = $this->cleanOutStr($row->recordnumber);
-    					$dateStr = date('d M Y',strtotime($row->eventdate));
+    					$dateStr = '';
+    					if($row->eventdate) $dateStr = date('d M Y',strtotime($row->eventdate));
     					if($row->enddayofyear && $row->year){
     						if($d = DateTime::createFromFormat('z Y', strval($row->enddayofyear).' '.strval($row->year))){
     							$dateStr .= ' to '.$d->format('d M Y');
