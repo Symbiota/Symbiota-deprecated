@@ -1,5 +1,6 @@
 <?php 
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
 
 class ImageLibraryManager{
 
@@ -438,7 +439,21 @@ class ImageLibraryManager{
 				$this->searchTermsArr["keywords"] = $str;
 			}
 		}
-		$this->searchTermsArr["imagecount"] = '';
+        $this->searchTermsArr["uploaddate1"] = '';
+        $this->searchTermsArr["uploaddate2"] = '';
+        if(array_key_exists("uploaddate1",$_REQUEST)){
+            if($uploadDate = $this->cleanInStr($_REQUEST["uploaddate1"])){
+                $this->searchTermsArr["uploaddate1"] = $uploadDate;
+                if(array_key_exists("uploaddate2",$_REQUEST)){
+                    if($uploadDate2 = $this->cleanInStr($_REQUEST["uploaddate2"])){
+                        if($uploadDate2 != $uploadDate){
+                            $this->searchTermsArr["uploaddate2"] = $uploadDate2;
+                        }
+                    }
+                }
+            }
+        }
+        $this->searchTermsArr["imagecount"] = '';
 		if(array_key_exists("imagecount",$_REQUEST)){
 			$imagecount = $this->cleanInStr($_REQUEST["imagecount"]);
 			if($imagecount){
@@ -599,6 +614,38 @@ class ImageLibraryManager{
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 		}
+        if(array_key_exists('uploaddate1',$this->searchTermsArr)){
+            $dateArr = array();
+            if(strpos($this->searchTermsArr['uploaddate1'],' to ')){
+                $dateArr = explode(' to ',$this->searchTermsArr['uploaddate1']);
+            }
+            elseif(strpos($this->searchTermsArr['uploaddate1'],' - ')){
+                $dateArr = explode(' - ',$this->searchTermsArr['uploaddate1']);
+            }
+            else{
+                $dateArr[] = $this->searchTermsArr['uploaddate1'];
+                if(isset($this->searchTermsArr['uploaddate2'])){
+                    $dateArr[] = $this->searchTermsArr['uploaddate2'];
+                }
+            }
+            if($eDate1 = $this->formatDate($dateArr[0])){
+                $eDate2 = (count($dateArr)>1?$this->formatDate($dateArr[1]):'');
+                if($eDate2){
+                    $sqlWhere .= 'AND (i.InitialTimeStamp BETWEEN "'.$this->cleanInStr($eDate1).'" AND "'.$this->cleanInStr($eDate2).'") ';
+                }
+                else{
+                    if(substr($eDate1,-5) == '00-00'){
+                        $sqlWhere .= 'AND (i.InitialTimeStamp LIKE "'.$this->cleanInStr(substr($eDate1,0,5)).'%") ';
+                    }
+                    elseif(substr($eDate1,-2) == '00'){
+                        $sqlWhere .= 'AND (i.InitialTimeStamp LIKE "'.$this->cleanInStr(substr($eDate1,0,8)).'%") ';
+                    }
+                    else{
+                        $sqlWhere .= 'AND (i.InitialTimeStamp = "'.$this->cleanInStr($eDate1).'") ';
+                    }
+                }
+            }
+        }
 		if(array_key_exists("imagetype",$this->searchTermsArr) && $this->searchTermsArr["imagetype"]){
 			if($this->searchTermsArr["imagetype"] == 'specimenonly'){
 				$sqlWhere .= 'AND (i.occid IS NOT NULL) AND (c.colltype = "Preserved Specimens") ';
@@ -638,7 +685,12 @@ class ImageLibraryManager{
 			}
 		}
 		$bottomLimit = ($pageRequest - 1)*$cntPerPage;
-		$sql .= "ORDER BY t.sciname ";
+        if($this->searchTermsArr["uploaddate1"]){
+            $sql .= "ORDER BY i.InitialTimeStamp DESC ";
+        }
+        else{
+            $sql .= "ORDER BY t.sciname ";
+        }
 		$sql .= "LIMIT ".$bottomLimit.",".$cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
@@ -860,6 +912,11 @@ class ImageLibraryManager{
 		}
 		return $retArr;
 	}
+
+    protected function formatDate($inDate){
+        $retDate = OccurrenceUtilities::formatDate($inDate);
+        return $retDate;
+    }
 	
 	public function setSearchTermsArr($stArr){
     	$this->searchTermsArr = $stArr;
