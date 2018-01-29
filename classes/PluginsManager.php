@@ -316,23 +316,46 @@ class PluginsManager {
 	}
 	
 	public function createQuickSearch($buttonText,$searchText=''){
-		global $clientRoot;
+		global $CLIENT_ROOT;
 		$html = '';
-		$html .= '<link href="'.$clientRoot.'/css/jquery-ui.css" type="text/css" rel="Stylesheet" />';
+		$html .= '<link href="'.$CLIENT_ROOT.'/css/jquery-ui.css" type="text/css" rel="Stylesheet" />';
         $html .= "<script type='text/javascript'>if(!window.jQuery){";
         $html .= 'var jqresource = document.createElement("script");';
-        $html .= 'jqresource.async = "true";';
-        $html .= 'jqresource.src = "'.$clientRoot.'/js/jquery.js";';
-        $html .= 'var jqscript = document.getElementsByTagName("script")[0];';
-        $html .= 'jqscript.parentNode.insertBefore(jqresource,jqscript);';
+        $html .= 'jqresource.src = "'.$CLIENT_ROOT.'/js/jquery.js";';
+        $html .= 'document.getElementsByTagName("head")[0].appendChild(jqresource);';
+        $html .= 'jqresource.onload = function(){';
         $html .= 'var jquiresource = document.createElement("script");';
-        $html .= 'jquiresource.async = "true";';
-        $html .= 'jquiresource.src = "'.$clientRoot.'/js/jquery-ui.js";';
-        $html .= 'var jquiscript = document.getElementsByTagName("script")[0];';
-        $html .= 'jquiscript.parentNode.insertBefore(jquiscript,jquiresource);';
-        $html .= '}</script>';
-		$html .= '<script type="text/javascript">';
-		$html .= '$(document).ready(function() {';
+        $html .= 'jquiresource.src = "'.$CLIENT_ROOT.'/js/jquery-ui.js";';
+        $html .= 'document.getElementsByTagName("head")[0].appendChild(jquiresource);';
+        $html .= 'jquiresource.onload = function() {initializeQuickSearch();};};}';
+        $html .= 'else{$(document).ready(function() {';
+        $html .= 'function split( val ) {';
+        $html .= 'return val.split( /,\s*/ );}';
+        $html .= 'function extractLast( term ) {';
+        $html .= 'return split( term ).pop();}';
+        $html .= '$( "#quicksearchtaxon" )';
+        $html .= '.bind( "keydown", function( event ) {';
+        $html .= 'if ( event.keyCode === $.ui.keyCode.TAB &&';
+        $html .= '$( this ).data( "autocomplete" ).menu.active ) {';
+        $html .= 'event.preventDefault();}})';
+        $html .= '.autocomplete({';
+        $html .= 'source: function( request, response ) {';
+        $html .= '$.getJSON( "'.$CLIENT_ROOT.'/collections/rpc/taxalist.php", {';
+        $html .= 'term: extractLast( request.term ), t: function() { return document.quicksearch.taxon.value; }}, response );},';
+        $html .= 'appendTo: "#quicksearchdiv",';
+        $html .= 'search: function() {';
+        $html .= 'var term = extractLast( this.value );';
+        $html .= 'if ( term.length < 4 ) {';
+        $html .= 'return false;}},';
+        $html .= 'focus: function() {';
+        $html .= 'return false;},';
+        $html .= 'select: function( event, ui ) {';
+        $html .= 'var terms = split( this.value );';
+        $html .= 'terms.pop();';
+        $html .= 'terms.push( ui.item.value );';
+        $html .= 'this.value = terms.join( ", " );';
+        $html .= 'return false;}},{});});}';
+        $html .= 'function initializeQuickSearch(){';
 		$html .= 'function split( val ) {';
 		$html .= 'return val.split( /,\s*/ );}';
 		$html .= 'function extractLast( term ) {';
@@ -344,7 +367,7 @@ class PluginsManager {
 		$html .= 'event.preventDefault();}})';
 		$html .= '.autocomplete({';
 		$html .= 'source: function( request, response ) {';
-		$html .= '$.getJSON( "'.$clientRoot.'/collections/rpc/taxalist.php", {';
+		$html .= '$.getJSON( "'.$CLIENT_ROOT.'/collections/rpc/taxalist.php", {';
 		$html .= 'term: extractLast( request.term ), t: function() { return document.quicksearch.taxon.value; }}, response );},';
 		$html .= 'appendTo: "#quicksearchdiv",';
         $html .= 'search: function() {';
@@ -358,14 +381,14 @@ class PluginsManager {
 		$html .= 'terms.pop();';
 		$html .= 'terms.push( ui.item.value );';
 		$html .= 'this.value = terms.join( ", " );';
-		$html .= 'return false;}},{});});';
-		$html .= 'function verifyQuickSearch(f){';
+		$html .= 'return false;}},{});}';
+        $html .= 'function verifyQuickSearch(f){';
 		$html .= 'if(document.getElementById("quicksearchtaxon").value == ""){';
 		$html .= 'alert("Please enter a scientific name to search for.");';
 		$html .= 'return false;}';
 		$html .= 'return true;}';
 		$html .= '</script>';
-		$html .= '<form name="quicksearch" id="quicksearch" action="'.$clientRoot.'/taxa/index.php" method="get" onsubmit="return verifyQuickSearch(this.form);">';
+        $html .= '<form name="quicksearch" id="quicksearch" action="'.$CLIENT_ROOT.'/taxa/index.php" method="get" onsubmit="return verifyQuickSearch(this.form);">';
 		if($searchText){
 			$html .= '<div id="quicksearchtext" ><b>'.$searchText.'</b></div>';
 		}
