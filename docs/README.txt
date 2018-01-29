@@ -1,3 +1,6 @@
+Edited by Jacob Motley:
+This repository is setup for easy Symbiota server setup. I am using it for testing, therefore, you should not be using this repo to create your own Portal. Use the main Symbiota repository!!! :)
+
 ABOUT THIS SOFTWARE
 ===================
 
