@@ -726,9 +726,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									<?php
 									foreach($iArr as $imgId => $imgArr){
 										?>
-										<div style='float:left;text-align:center;padding:5px;'>
+										<div style="max-width:180;float:left;text-align:center;padding:5px;">
 											<a href='<?php echo $imgArr['url']; ?>' target="_blank">
-												<img border=1 width='180' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
+												<img border="1" src="<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>" title="<?php echo $imgArr['caption']; ?>" />
 											</a>
 											<?php
 											if($imgArr['url'] != $imgArr['lgurl']) echo '<div><a href="'.$imgArr['url'].'" target="_blank">Open Medium Image</a></div>';
