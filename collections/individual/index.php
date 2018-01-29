@@ -15,7 +15,7 @@ $format = isset($_GET['format'])?$_GET['format']:'';
 
 //Sanitize input variables
 if(!is_numeric($occid)) $occid = 0;
-if($guid && !preg_match('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/', $guid)) $guid = ''; 
+if($guid && !preg_match('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/', $guid)) $guid = '';
 if(!is_numeric($collid)) $collid = 0;
 if(!is_numeric($tabIndex)) $tabIndex = 0;
 if(!is_numeric($clid)) $clid = 0;
@@ -91,7 +91,7 @@ if($SYMB_UID){
 	elseif($indManager->isTaxonomicEditor()){
 		$isEditor = true;
 	}
-	
+
 	//Check locality security
 	if($isEditor || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
 		$displayLocality = true;
@@ -102,7 +102,7 @@ if($SYMB_UID){
 	elseif(array_key_exists('CollAdmin',$USER_RIGHTS) || array_key_exists('CollEditor',$USER_RIGHTS)){
 		$displayLocality = true;
 	}
-	
+
 	//Form action submitted
 	if(array_key_exists('delvouch',$_GET) && $occid){
 		if(!$indManager->deleteVoucher($occid,$_GET['delvouch'])){
@@ -172,7 +172,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 		var mapInit = false;
 
 		$(document).ready(function() {
-			$('#tabs').tabs({ 
+			$('#tabs').tabs({
 				beforeActivate: function(event, ui) {
 					if(document.getElementById("map_canvas") && ui.newTab.index() == 1 && !mapInit){
 						mapInit = true;
@@ -180,7 +180,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					}
 					return true;
 				},
-				active: tabIndex 
+				active: tabIndex
 			});
 
 			$("#tabs").tabs().css({
@@ -216,7 +216,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 		}
 
 		function verifyVoucherForm(f){
-			var clTarget = f.elements["clid"].value; 
+			var clTarget = f.elements["clid"].value;
 			if(clTarget == "0"){
 				window.alert("Please select a checklist");
 				return false;
@@ -237,7 +237,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 			if (occWindow.opener == null) occWindow.opener = self;
 		}
 
-		<?php 
+		<?php
 		if($displayMap){
 			?>
 			function initializeMap(){
@@ -256,7 +256,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					map: map
 				});
 			}
-			<?php 
+			<?php
 		}
 		?>
 	</script>
@@ -275,7 +275,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 	</script>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($statusStr){
 			?>
 			<hr />
@@ -283,36 +283,36 @@ header("Content-Type: text/html; charset=".$CHARSET);
 				<span style="color:red;"><?php echo $statusStr; ?></span>
 			</div>
 			<hr />
-			<?php 
+			<?php
 		}
 		if($occArr){
 			?>
 			<div id="tabs" style="margin:10px;clear:both;">
 				<ul>
 					<li><a href="#occurtab"><span>Details</span></a></li>
-					<?php 
+					<?php
 					if($displayMap){
 						?>
 						<li><a href="#maptab"><span>Map</span></a></li>
-						<?php 
+						<?php
 					}
-					if($genticArr) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>'; 
+					if($genticArr) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>';
 					if($dupClusterArr){
 						?>
 						<li><a href="#dupestab"><span>Duplicates</span></a></li>
 						<?php
 					}
-					?> 
+					?>
 					<li id="indCommentsTab"><a href="#commenttab"><span><?php echo ($commentArr?count($commentArr).' ':''); ?>Comments</span></a></li>
 					<li id="indLinkedResourcesTab"><a href="linkedresources.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collid; ?>"><span>Linked Resources</span></a></li>
-					<?php 
+					<?php
 					if($isEditor){
 						?>
-						<li><a href="#edittab"><span>Edit History</span></a></li> 
-						<?php 
+						<li><a href="#edittab"><span>Edit History</span></a></li>
+						<?php
 					}
 					if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
-						$detVars = 'catalognumber='.urlencode($occArr['catalognumber']) . 						
+						$detVars = 'catalognumber='.urlencode($occArr['catalognumber']) .
 						(isset($occArr['secondarycollcode'])?'&collectioncode='.urlencode($occArr['secondarycollcode']):'').
 						(isset($collMap['collectioncode'])?'&collectioncode='.urlencode($collMap['collectioncode']):'').
 						(isset($collMap['institutioncode'])?'&institutioncode='.urlencode($collMap['institutioncode']):'');
@@ -344,7 +344,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					</div>
 					<div style="float:left;margin:15px 0px;text-align:center;font-weight:bold;width:120px;">
 						<img border='1' height='50' width='50' src='<?php echo (substr($collMetadata["icon"],0,6)=='images'?'../../':'').$collMetadata['icon']; ?>'/><br/>
-						<?php 
+						<?php
 						echo $collMetadata['institutioncode'];
 						if(isset($collMetadata['collectioncode'])){
 							echo (strlen($collMetadata['institutioncode'])<7?' : ':'<br/>').$collMetadata['collectioncode'];
@@ -374,18 +374,18 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							if(array_key_exists('loan',$occArr)){
 								?>
 								<div style="float:right;color:red;font-weight:bold;" title="<?php echo 'Loan #'.$occArr['loan']['identifier']; ?>">
-									On Loan to 
+									On Loan to
 									<?php echo $occArr['loan']['code']; ?>
 								</div>
-								<?php 
+								<?php
 							}
-							if($occArr['catalognumber']){ 
+							if($occArr['catalognumber']){
 								?>
 								<div>
-									<b>Catalog #:</b> 
+									<b>Catalog #:</b>
 									<?php echo $occArr['catalognumber']; ?>
 								</div>
-								<?php 
+								<?php
 							}
 							if($occArr['othercatalognumbers']){
 								?>
@@ -393,17 +393,17 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									<b>Secondary Catalog #:</b>
 									<?php echo $occArr['othercatalognumbers']; ?>
 								</div>
-								<?php 
+								<?php
 							}
 							?>
 						</div>
 						<div>
-							<b>Taxon:</b> 
-							<?php 
-							echo ($occArr['identificationqualifier']?$occArr['identificationqualifier']." ":""); 
+							<b>Taxon:</b>
+							<?php
+							echo ($occArr['identificationqualifier']?$occArr['identificationqualifier']." ":"");
 							?>
 							<i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?>
-							<?php 
+							<?php
 							if($occArr['tidinterpreted']){
 								//echo ' <a href="../../taxa/index.php?taxon='.$occArr['tidinterpreted'].'" title="Open Species Profile Page"><img src="" /></a>';
 							}
@@ -412,37 +412,37 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							<b>Family:</b> <?php echo $occArr['family']; ?>
 						</div>
 						<div>
-							<?php 
-							if($occArr['identifiedby']){ 
+							<?php
+							if($occArr['identifiedby']){
 								?>
 								<div>
 									<b>Determiner:</b> <?php echo $occArr['identifiedby']; ?>
 									<?php if($occArr['dateidentified']) echo ' ('.$occArr['dateidentified'].')'; ?>
 								</div>
-								<?php 
-							} 
-							if($occArr['taxonremarks']){ 
+								<?php
+							}
+							if($occArr['taxonremarks']){
 								?>
 								<div style="margin-left:10px;">
 									<b>Taxon Remarks:</b>
 									<?php echo $occArr['taxonremarks']; ?>
 								</div>
-								<?php 
-							} 
-							if($occArr['identificationremarks']){ 
+								<?php
+							}
+							if($occArr['identificationremarks']){
 								?>
 								<div style="margin-left:10px;">
 									<b>ID Remarks:</b>
 									<?php echo $occArr['identificationremarks']; ?>
 								</div>
-								<?php 
-							} 
+								<?php
+							}
 							if($occArr['identificationreferences']){ ?>
 								<div style="margin-left:10px;">
 									<b>ID References:</b>
 									<?php echo $occArr['identificationreferences']; ?>
 								</div>
-								<?php 
+								<?php
 							}
 							if(array_key_exists('dets',$occArr)){
 								?>
@@ -465,8 +465,8 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											 	$firstIsOut = true;
 										 	?>
 											 <div style="margin:10px;">
-											 	<?php 
-											 	if($detArr['qualifier']) echo $detArr['qualifier']; 
+											 	<?php
+											 	if($detArr['qualifier']) echo $detArr['qualifier'];
 											 	echo ' <b><i>'.$detArr['sciname'].'</i></b> ';
 											 	echo $detArr['author']."\n";
 											 	?>
@@ -478,43 +478,43 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											 		<b>Date: </b>
 											 		<?php echo $detArr['date']; ?>
 											 	</div>
-											 	<?php 
+											 	<?php
 											 	if($detArr['ref']){ ?>
 												 	<div style="">
 												 		<b>ID References: </b>
 												 		<?php echo $detArr['ref']; ?>
 												 	</div>
-											 		<?php 
-											 	} 
-											 	if($detArr['notes']){ 
+											 		<?php
+											 	}
+											 	if($detArr['notes']){
 											 		?>
 												 	<div style="">
 												 		<b>ID Remarks: </b>
 												 		<?php echo $detArr['notes']; ?>
 												 	</div>
-											 		<?php 
+											 		<?php
 											 	}
 											 	?>
 											 </div>
-											<?php 
+											<?php
 										}
 										?>
 									</fieldset>
 								</div>
-								<?php 
+								<?php
 							}
 							if($occArr['typestatus']){ ?>
 								<div>
 									<b>Type Status:</b>
 									<?php echo $occArr['typestatus']; ?>
 								</div>
-								<?php 
-							} 
+								<?php
+							}
 							?>
 						</div>
 						<div style="clear:both;">
-							<b>Collector:</b> 
-							<?php 
+							<b>Collector:</b>
+							<?php
 							echo $occArr['recordedby'].'&nbsp;&nbsp;&nbsp;';
 							if($displayLocality) echo $occArr['recordnumber'].'&nbsp;&nbsp;&nbsp;';
 							?>
@@ -522,8 +522,8 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						<?php
 						if($displayLocality){
 							if($occArr['eventdate']){
-								echo '<div><b>Date: </b>'; 
-								echo $occArr['eventdate']; 
+								echo '<div><b>Date: </b>';
+								echo $occArr['eventdate'];
 								if($occArr['eventdateend']){
 									echo ' - '.$occArr['eventdateend'];
 								}
@@ -535,14 +535,14 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						}
 						?>
 						<div>
-							<?php 
-							if($occArr['associatedcollectors']){ 
+							<?php
+							if($occArr['associatedcollectors']){
 								?>
 								<div>
-									<b>Additional Collectors:</b> 
+									<b>Additional Collectors:</b>
 									<?php echo $occArr['associatedcollectors']; ?>
 								</div>
-								<?php 
+								<?php
 							}
 							?>
 						</div>
@@ -555,12 +555,12 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						?>
 						<div>
 							<b>Locality:</b>
-							<?php 
+							<?php
 							if($displayLocality){
 								$localityStr1 .= $occArr['locality'];
 							}
 							else{
-								$localityStr1 .= '<span style="color:red;">Detailed locality information protected.'; 
+								$localityStr1 .= '<span style="color:red;">Detailed locality information protected.';
 								if($occArr['localitysecurityreason']){
 									$localityStr1 .= $occArr['localitysecurityreason'];
 								}
@@ -572,18 +572,18 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							echo trim($localityStr1,',; ');
 							?>
 						</div>
-						<?php 
+						<?php
 						if($displayLocality){
 							if($occArr['decimallatitude']){
 								?>
 								<div style="margin-left:10px;">
-									<?php 
+									<?php
 									echo $occArr['decimallatitude'].'&nbsp;&nbsp;'.$occArr['decimallongitude'];
-									if($occArr['coordinateuncertaintyinmeters']) echo ' +-'.$occArr['coordinateuncertaintyinmeters'].'m.'; 
+									if($occArr['coordinateuncertaintyinmeters']) echo ' +-'.$occArr['coordinateuncertaintyinmeters'].'m.';
 									if($occArr['geodeticdatum']) echo '&nbsp;&nbsp;'.$occArr['geodeticdatum'];
 									?>
 								</div>
-								<?php 
+								<?php
 							}
 							if($occArr['verbatimcoordinates']){
 								?>
@@ -591,7 +591,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									<b>Verbatim Coordinates: </b>
 									<?php echo $occArr['verbatimcoordinates']; ?>
 								</div>
-								<?php 
+								<?php
 							}
                             if($occArr['locationremarks']){
                                 ?>
@@ -607,22 +607,22 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									<b>Georeference Remarks: </b>
 									<?php echo $occArr['georeferenceremarks']; ?>
 								</div>
-								<?php 
+								<?php
 							}
 							if($occArr['minimumelevationinmeters'] || $occArr['verbatimelevation']){
 								?>
 								<div style="margin-left:10px;">
 									<b>Elevation:</b>
-									<?php 
+									<?php
 									echo $occArr['minimumelevationinmeters'];
 									if($occArr['maximumelevationinmeters']){
 										echo '-'.$occArr['maximumelevationinmeters'];
-									} 
+									}
 									?>
-									meters 
+									meters
 									<?php
 									if(!$occArr['verbatimelevation']){
-										echo '('.round($occArr['minimumelevationinmeters']*3.28).($occArr['maximumelevationinmeters']?'-'.round($occArr['maximumelevationinmeters']*3.28):'').'ft)'; 
+										echo '('.round($occArr['minimumelevationinmeters']*3.28).($occArr['maximumelevationinmeters']?'-'.round($occArr['maximumelevationinmeters']*3.28):'').'ft)';
 									}
 									?>
 								</div>
@@ -633,32 +633,32 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										<b>Verbatim Elevation: </b>
 										<?php echo $occArr['verbatimelevation']; ?>
 									</div>
-									<?php 
+									<?php
 								}
 							}
-							if($occArr['habitat']){ 
+							if($occArr['habitat']){
 								?>
 								<div style="clear:both;">
-									<b>Habitat:</b> 
+									<b>Habitat:</b>
 									<?php echo $occArr['habitat']; ?>
 								</div>
-								<?php 
+								<?php
 							}
-							if($occArr['substrate']){ 
+							if($occArr['substrate']){
 								?>
 								<div style="clear:both;">
-									<b>Substrate:</b> 
+									<b>Substrate:</b>
 									<?php echo $occArr['substrate']; ?>
 								</div>
-								<?php 
+								<?php
 							}
-							if($occArr['associatedtaxa']){ 
+							if($occArr['associatedtaxa']){
 								?>
 								<div style="clear:both;">
-									<b>Associated Species:</b> 
+									<b>Associated Species:</b>
 									<?php echo $occArr['associatedtaxa']; ?>
 								</div>
-								<?php 
+								<?php
 							}
 						}
 						if($QUICK_HOST_ENTRY_IS_ACTIVE){
@@ -671,21 +671,21 @@ header("Content-Type: text/html; charset=".$CHARSET);
                                 <?php
                             }
                         }
-						if($occArr['verbatimattributes']){ 
+						if($occArr['verbatimattributes']){
 							?>
 							<div style="clear:both;">
-								<b>Description:</b> 
+								<b>Description:</b>
 								<?php echo $occArr['verbatimattributes']; ?>
 							</div>
-							<?php 
+							<?php
 						}
-						if($occArr['reproductivecondition']){ 
+						if($occArr['reproductivecondition']){
 							?>
 							<div style="clear:both;">
 								<b>Reproductive Condition:</b>
 								<?php echo $occArr['reproductivecondition']; ?>
 							</div>
-							<?php 
+							<?php
 						}
                         if($occArr['lifestage']){
                             ?>
@@ -731,13 +731,13 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						if($occArr['occurrenceremarks']) $noteStr .= "; ".$occArr['occurrenceremarks'];
 						if($occArr['establishmentmeans']) $noteStr .= "; ".$occArr['establishmentmeans'];
 						if($occArr['cultivationstatus']) $noteStr .= "; Cultivated";
-						if($noteStr){ 
+						if($noteStr){
 							?>
 							<div style="clear:both;">
 								<b>Notes:</b>
 								<?php echo substr($noteStr,2); ?>
 							</div>
-							<?php 
+							<?php
 						}
 						if($occArr['disposition']){
 							?>
@@ -745,49 +745,49 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								<b>Disposition: </b>
 								<?php echo $occArr['disposition']; ?>
 							</div>
-							<?php 
+							<?php
 						}
 						if(isset($occArr['exs'])){
 							?>
 							<div style="clear:both;">
-								<b>Exsiccati series:</b> 
-								<?php 
+								<b>Exsiccati series:</b>
+								<?php
 								echo '<a href="../exsiccati/index.php?omenid='.$occArr['exs']['omenid'].'">';
 								echo $occArr['exs']['title'].'&nbsp;#'.$occArr['exs']['exsnumber'];
 								echo '</a>';
 								?>
 							</div>
-							<?php 
+							<?php
 						}
 						?>
 						<div style="clear:both;padding:10px;">
-							<?php 
+							<?php
 							if($displayLocality && array_key_exists('imgs',$occArr)){
 								$iArr = $occArr['imgs'];
 								?>
 								<fieldset style="padding:10px;">
 									<legend><b>Specimen Images</b></legend>
-									<?php 
+									<?php
 									foreach($iArr as $imgId => $imgArr){
 										?>
-										<div style='float:left;text-align:center;padding:5px;'>
+										<div style="max-width:180;float:left;text-align:center;padding:5px;">
 											<a href='<?php echo $imgArr['url']; ?>' target="_blank">
-												<img border=1 width='180' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
+												<img border="1" src="<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>" title="<?php echo $imgArr['caption']; ?>" />
 											</a>
-											<?php 
+											<?php
 											if($imgArr['url'] != $imgArr['lgurl']) echo '<div><a href="'.$imgArr['url'].'" target="_blank">Open Medium Image</a></div>';
 											if($imgArr['lgurl']) echo '<div><a href="'.$imgArr['lgurl'].'" target="_blank">Open Large Image</a></div>';
 											?>
 										</div>
-										<?php 
+										<?php
 									}
 									?>
 								</fieldset>
-								<?php 
+								<?php
 							}
 							?>
 						</div>
-						<?php 
+						<?php
 						if($collMetadata['individualurl']){
 							$indUrl = '';
 							if(strpos($collMetadata['individualurl'],'--DBPK--') !== false && $occArr['dbpk']){
@@ -824,7 +824,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						}
 						?>
 						<div style="margin:5px 0px 5px 0px;">
-							<?php 
+							<?php
 							if($rightsStr){
 								echo $rightsStr;
 							}
@@ -851,8 +851,8 @@ header("Content-Type: text/html; charset=".$CHARSET);
                         }
                         ?>
 						<div style="margin-top:10px;clear:both;">
-							For additional information on this specimen, please contact: 
-							<?php 
+							For additional information on this specimen, please contact:
+							<?php
 							$emailSubject = $DEFAULT_TITLE.' occurrence: '.$occArr['catalognumber'].' ('.$occArr['othercatalognumbers'].')';
 							$emailBody = 'Specimen being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/collections/individual/index.php?occid='.$occArr['occid'];
 							$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
@@ -861,14 +861,14 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								<?php echo $collMetadata['contact'].' ('.$collMetadata['email'].')'; ?>
 							</a>
 						</div>
-						<?php 
+						<?php
 						if($isEditor || ($displayLocality && $collMetadata['publicedits'])){
 							?>
 							<div style="margin-bottom:10px;">
-								<?php 
+								<?php
 								if($SYMB_UID){
 									?>
-									Do you see an error? If so, errors can be fixed using the  
+									Do you see an error? If so, errors can be fixed using the
 									<a href="../editor/occurrenceeditor.php?occid=<?php echo $occArr['occid'];?>">
 										Occurrence Editor.
 									</a>
@@ -886,18 +886,18 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						?>
 					</div>
 				</div>
-				<?php 
+				<?php
 				if($displayMap){
 					?>
 						<div id="maptab">
 							<div id='map_canvas' style='width:100%;height:600px;'></div>
 						</div>
-					<?php 
+					<?php
 				}
 				if($genticArr){
 					?>
 					<div id="genetictab">
-						<?php 
+						<?php
 						foreach($genticArr as $genId => $gArr){
 							?>
 							<div style="margin:15px;">
@@ -905,16 +905,16 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								<div style="margin-left:15px;"><b>Identifier:</b> <?php echo $gArr['id']; ?></div>
 								<div style="margin-left:15px;"><b>Locus:</b> <?php echo $gArr['locus']; ?></div>
 								<div style="margin-left:15px;">
-									<b>URL:</b> 
+									<b>URL:</b>
 									<a href="<?php echo $gArr['resourceurl']; ?>" target="_blank"><?php echo $gArr['resourceurl']; ?></a>
 								</div>
 								<div style="margin-left:15px;"><b>Notes:</b> <?php echo $gArr['notes']; ?></div>
 							</div>
-							<?php 
+							<?php
 						}
 						?>
 					</div>
-					<?php 
+					<?php
 				}
 				if($dupClusterArr){
 					?>
@@ -973,14 +973,14 @@ header("Content-Type: text/html; charset=".$CHARSET);
 				}
 				?>
 				<div id="commenttab">
-					<?php 
+					<?php
 					if($commentArr){
 						echo '<div><b>'.count($commentArr).' Comments</b></div>';
 						echo '<hr style="color:gray;"/>';
 						foreach($commentArr as $comId => $comArr){
 							?>
 							<div style="margin:15px;">
-								<?php 
+								<?php
 								echo '<div>';
 								echo '<b>'.$comArr['username'].'</b> <span style="color:gray;">posted '.$comArr['initialtimestamp'].'</span>';
 								echo '</div>';
@@ -1005,15 +1005,15 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 											<input name="comid" type="hidden" value="<?php echo $comId; ?>" />
 											<input name="tabindex" type="hidden" value="<?php echo ($displayMap?2:1); ?>" />
-											<input name="formsubmit" type="submit" value="Delete Comment" /> 
+											<input name="formsubmit" type="submit" value="Delete Comment" />
 										</form>
 									</div>
-									<?php 
+									<?php
 								}
 								?>
 							</div>
 							<hr style="color:gray;"/>
-							<?php 
+							<?php
 						}
 					}
 					else{
@@ -1022,7 +1022,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					?>
 					<fieldset style="padding:20px;">
 						<legend><b>New Comment</b></legend>
-						<?php 
+						<?php
 						if($SYMB_UID){
 							?>
 							<form name="commentform" action="index.php" method="post" onsubmit="return verifyCommentForm(this);">
@@ -1047,14 +1047,14 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						}
 						?>
 					</fieldset>
-				
+
 				</div>
-				<?php 
+				<?php
 				if($isEditor){
 					?>
 					<div id="edittab">
 						<div style="padding:15px;">
-							<?php 
+							<?php
 							if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin']) && in_array($collid,$USER_RIGHTS['CollEditor'])){
 								?>
 								<div style="float:right;" title="Manage Edits">
@@ -1075,7 +1075,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									?>
 									<fieldset style="padding:20px;">
 										<legend><b>Internal Edits</b></legend>
-										<?php 
+										<?php
 										foreach($editArr as $k => $eArr){
 											$reviewStr = 'OPEN';
 											if($eArr['reviewstatus'] == 2) $reviewStr = 'PENDING';
@@ -1108,7 +1108,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									?>
 									<fieldset style="margin-top:20px;padding:20px;">
 										<legend><b>External Edits</b></legend>
-										<?php 
+										<?php
 										foreach($externalEdits as $orid => $eArr){
 											foreach($eArr as $appliedStatus => $eArr2){
 												$reviewStr = 'OPEN';
@@ -1148,11 +1148,11 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							?>
 						</div>
 					</div>
-					<?php 
+					<?php
 				}
 				?>
 			</div>
-			<?php 
+			<?php
 		}
 		else{
 			?>
@@ -1216,7 +1216,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					?>
 				</div>
 			</div>
-			<?php 
+			<?php
 		}
 		?>
 	</div>
