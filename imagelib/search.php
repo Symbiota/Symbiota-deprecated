@@ -217,7 +217,7 @@ if($action == 'search'){
 						$beginNum = ($pageNumber - 1)*$cntPerPage + 1;
 						$endNum = $beginNum + $cntPerPage - 1;
 						if($endNum > $recordCnt) $endNum = $recordCnt;
-						$pageBar .= "Page ".$pageNumber.", records ".$beginNum."-".$endNum." of ".$recordCnt."</div>";
+						$pageBar .= "Page ".$pageNumber.", records ".number_format($beginNum)."-".number_format($endNum)." of ".number_format($recordCnt)."</div>";
 						$paginationStr = $pageBar;
 						echo '<div style="width:100%;">'.$paginationStr.'</div>';
 						echo '<div style="clear:both;margin:5 0 5 0;"><hr /></div>';

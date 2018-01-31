@@ -290,6 +290,9 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if(isset($this->searchTermArr["imagetype"]) && ($this->searchTermArr["imagetype"] == 1 || $this->searchTermArr["imagetype"] == 2)){
 			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid INNER JOIN omcollections c ON o.collid = c.collid ';
 		}
+		elseif(isset($this->searchTermArr['db'])){
+			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
+		}
 		/*
 		else{
 			$sql .= 'LEFT JOIN omoccurrences o ON i.occid = o.occid LEFT JOIN omcollections c ON o.collid = c.collid ';
@@ -447,6 +450,9 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		}
 		if(isset($this->searchTermArr["imagetype"]) && ($this->searchTermArr["imagetype"] == 1 || $this->searchTermArr["imagetype"] == 2)){
 			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid INNER JOIN omcollections c ON o.collid = c.collid ';
+		}
+		elseif(isset($this->searchTermArr['db'])){
+			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
 		}
 		$sql .= $this->sqlWhere;
 		//echo "<div>Count sql: ".$sql."</div>";
