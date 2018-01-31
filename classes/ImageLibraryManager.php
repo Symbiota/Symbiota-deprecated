@@ -211,28 +211,31 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 
 	public function getImageArr($pageRequest,$cntPerPage){
 		$retArr = Array();
-		$sqlFrag = $this->getSqlBase().$this->sqlWhere;
-		$this->setRecordCnt($sqlFrag);
+		$this->setRecordCnt();
+		$sql = 'SELECT DISTINCT i.imgid, i.tid, t.sciname, i.url, i.thumbnailurl, i.originalurl, i.photographeruid, i.caption, i.occid ';
+		/*
 		$sql = 'SELECT DISTINCT i.imgid, o.tidinterpreted, t.tid, t.sciname, i.url, i.thumbnailurl, i.originalurl, i.photographeruid, i.caption, '.
 			'o.occid, o.stateprovince, o.catalognumber, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode ';
-		$sql .= $sqlFrag;
-		if(array_key_exists("imagecount",$this->searchTermArr)&&$this->searchTermArr["imagecount"]){
+		*/
+		$sql .= $this->getSqlBase().$this->sqlWhere;
+		if(array_key_exists("imagecount",$this->searchTermArr) && $this->searchTermArr["imagecount"]){
 			if($this->searchTermArr["imagecount"] == 'taxon'){
-				$sql .= 'GROUP BY ts.tidaccepted ';
+				$sql .= 'GROUP BY i.tid ';
 			}
 			elseif($this->searchTermArr["imagecount"] == 'specimen'){
-				$sql .= 'GROUP BY o.occid ';
+				$sql .= 'GROUP BY i.occid ';
 			}
 		}
 		$bottomLimit = ($pageRequest - 1)*$cntPerPage;
-		$sql .= "ORDER BY t.sciname ";
+		if($this->sqlWhere) $sql .= "ORDER BY t.sciname ";
 		$sql .= "LIMIT ".$bottomLimit.",".$cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
+		$occArr = array();
 		$result = $this->conn->query($sql);
 		while($r = $result->fetch_object()){
 			$imgId = $r->imgid;
 			$retArr[$imgId]['imgid'] = $r->imgid;
-			$retArr[$imgId]['tidaccepted'] = $r->tidinterpreted;
+			//$retArr[$imgId]['tidaccepted'] = $r->tidinterpreted;
 			$retArr[$imgId]['tid'] = $r->tid;
 			$retArr[$imgId]['sciname'] = $r->sciname;
 			$retArr[$imgId]['url'] = $r->url;
@@ -241,11 +244,32 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 			$retArr[$imgId]['uid'] = $r->photographeruid;
 			$retArr[$imgId]['caption'] = $r->caption;
 			$retArr[$imgId]['occid'] = $r->occid;
-			$retArr[$imgId]['stateprovince'] = $r->stateprovince;
-			$retArr[$imgId]['catalognumber'] = $r->catalognumber;
-			$retArr[$imgId]['instcode'] = $r->instcode;
+			//$retArr[$imgId]['stateprovince'] = $r->stateprovince;
+			//$retArr[$imgId]['catalognumber'] = $r->catalognumber;
+			//$retArr[$imgId]['instcode'] = $r->instcode;
+			if($r->occid) $occArr[$r->occid] = $r->occid;
 		}
 		$result->free();
+		if($occArr){
+			//Get occurrence data
+			$collArr = array();
+			$sql2 = 'SELECT occid, catalognumber, stateprovince, collid FROM omoccurrences WHERE occid IN('.implode(',',$occArr).')';
+			$rs2 = $this->conn->query($sql2);
+			while($r2 = $rs2->fetch_object()){
+				$retArr['occ'][$r2->occid]['catnum'] = $r2->catalognumber;
+				$retArr['occ'][$r2->occid]['stateprovince'] = $r2->stateprovince;
+				$retArr['occ'][$r2->occid]['collid'] = $r2->collid;
+				$collArr[$r2->collid] = $r2->collid;
+			}
+			$rs2->free();
+			//Get collection data
+			$sql3 = 'SELECT collid, CONCAT_WS("-",institutioncode, collectioncode) as instcode FROM omcollections WHERE collid IN('.implode(',',$collArr).')';
+			$rs3 = $this->conn->query($sql3);
+			while($r3 = $rs3->fetch_object()){
+				$retArr['coll'][$r3->collid] = $r3->instcode;
+			}
+			$rs3->free();
+		}
 		return $retArr;
 	}
 
@@ -263,13 +287,14 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if(strpos($this->sqlWhere,'e.taxauthid') || $this->tidFocus){
 			$sql .= 'INNER JOIN taxaenumtree e ON i.tid = e.tid ';
 		}
-		if(isset($this->searchTermArr["imagetype"]) && ($this->searchTermArr["imagetype"] == 'specimenonly' || $this->searchTermArr["imagetype"] == 'observationonly')){
-			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'INNER JOIN omcollections c ON o.collid = c.collid ';
+		if(isset($this->searchTermArr["imagetype"]) && ($this->searchTermArr["imagetype"] == 1 || $this->searchTermArr["imagetype"] == 2)){
+			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid INNER JOIN omcollections c ON o.collid = c.collid ';
 		}
+		/*
 		else{
 			$sql .= 'LEFT JOIN omoccurrences o ON i.occid = o.occid LEFT JOIN omcollections c ON o.collid = c.collid ';
 		}
+		*/
 		if(array_key_exists("tags",$this->searchTermArr) && $this->searchTermArr["tags"]){
 			$sql .= 'INNER JOIN imagetag it ON i.imgid = it.imgid ';
 		}
@@ -321,11 +346,13 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 							$famArr = array_unique($famArr);
 							$sqlWhereTaxa .= 'OR (ts.family IN("'.implode('","',$famArr).'")) ';
 						}
+						/*
 						if(array_key_exists("scinames",$searchArr)){
 							foreach($searchArr["scinames"] as $sciName){
 								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
 							}
 						}
+						*/
 					}
 					else{
 						if(array_key_exists("tid",$searchArr)){
@@ -386,31 +413,48 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		//echo $sqlWhere;
 	}
 
-	private function setRecordCnt($sqlFrag){
-		if($sqlFrag){
-			$sql = '';
-			if(array_key_exists("imagecount",$this->searchTermArr) && $this->searchTermArr["imagecount"]){
-				if($this->searchTermArr["imagecount"] == 'taxon'){
-					$sql = "SELECT COUNT(DISTINCT o.tidinterpreted) AS cnt ";
-				}
-				elseif($this->searchTermArr["imagecount"] == 'specimen'){
-					$sql = "SELECT COUNT(DISTINCT o.occid) AS cnt ";
-				}
-				else{
-					$sql = "SELECT COUNT(DISTINCT i.imgid) AS cnt ";
-				}
+	private function setRecordCnt(){
+		$sql = '';
+		if(array_key_exists("imagecount",$this->searchTermArr) && $this->searchTermArr["imagecount"]){
+			if($this->searchTermArr["imagecount"] == 'taxon'){
+				$sql = "SELECT COUNT(DISTINCT i.tid) AS cnt ";
+			}
+			elseif($this->searchTermArr["imagecount"] == 'specimen'){
+				$sql = "SELECT COUNT(DISTINCT i.occid) AS cnt ";
 			}
 			else{
 				$sql = "SELECT COUNT(DISTINCT i.imgid) AS cnt ";
 			}
-			$sql .= $sqlFrag;
-			//echo "<div>Count sql: ".$sql."</div>";
-			$result = $this->conn->query($sql);
-			if($row = $result->fetch_object()){
-				$this->recordCount = $row->cnt;
-			}
-			$result->free();
 		}
+		else{
+			$sql = "SELECT COUNT(DISTINCT i.imgid) AS cnt ";
+		}
+		$sql .= 'FROM images i ';
+		if($this->taxaArr){
+			$sql .= 'INNER JOIN taxa t ON i.tid = t.tid ';
+		}
+		if(strpos($this->sqlWhere,'ts.taxauthid')){
+			$sql .= 'INNER JOIN taxstatus ts ON i.tid = ts.tid ';
+		}
+		if(strpos($this->sqlWhere,'e.taxauthid') || $this->tidFocus){
+			$sql .= 'INNER JOIN taxaenumtree e ON i.tid = e.tid ';
+		}
+		if(array_key_exists("tags",$this->searchTermArr) && $this->searchTermArr["tags"]){
+			$sql .= 'INNER JOIN imagetag it ON i.imgid = it.imgid ';
+		}
+		if(array_key_exists("keywords",$this->searchTermArr) && $this->searchTermArr["keywords"]){
+			$sql .= 'INNER JOIN imagekeywords ik ON i.imgid = ik.imgid ';
+		}
+		if(isset($this->searchTermArr["imagetype"]) && ($this->searchTermArr["imagetype"] == 1 || $this->searchTermArr["imagetype"] == 2)){
+			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid INNER JOIN omcollections c ON o.collid = c.collid ';
+		}
+		$sql .= $this->sqlWhere;
+		//echo "<div>Count sql: ".$sql."</div>";
+		$result = $this->conn->query($sql);
+		if($row = $result->fetch_object()){
+			$this->recordCount = $row->cnt;
+		}
+		$result->free();
 	}
 
 	public function getQueryTermStr(){

@@ -211,7 +211,7 @@ if($action == 'search'){
 						}
 						if(($lastPage - $startPage) >= 10){
 							$pageBar .= '<span class="pagination" style="margin-left:5px;"><a href="'.$url.'&page='.(($pageNumber + 10) > $lastPage?$lastPage:($pageNumber + 10)).'">&gt;&gt;</a></span>';
-							$pageBar .= '<span class="pagination" style="margin-left:5px;"><a href="'.$url.'&page='.$lastPage.'">Last</a></span>';
+							if($recordCnt < 10000) $pageBar .= '<span class="pagination" style="margin-left:5px;"><a href="'.$url.'&page='.$lastPage.'">Last</a></span>';
 						}
 						$pageBar .= '</div><div style="float:right;margin-top:4px;margin-bottom:8px;">';
 						$beginNum = ($pageNumber - 1)*$cntPerPage + 1;
@@ -222,6 +222,14 @@ if($action == 'search'){
 						echo '<div style="width:100%;">'.$paginationStr.'</div>';
 						echo '<div style="clear:both;margin:5 0 5 0;"><hr /></div>';
 						echo '<div style="width:98%;margin-left:auto;margin-right:auto;">';
+						$occArr = array();
+						$collArr = array();
+						if(isset($imageArr['occ'])){
+							$occArr = $imageArr['occ'];
+							unset($imageArr['occ']);
+							$collArr = $imageArr['coll'];
+							unset($imageArr['coll']);
+						}
 						foreach($imageArr as $imgArr){
 							$imgId = $imgArr['imgid'];
 							$imgUrl = $imgArr['url'];
@@ -259,10 +267,10 @@ if($action == 'search'){
 										if($imgArr['tid']) echo '</a>';
 										echo '<br />';
 									}
-									if($imgArr['catalognumber']){
+									if($imgArr['occid']){
 										echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');return false;">';
-										if(strpos($imgArr['catalognumber'], $imgArr['instcode']) !== 0) echo $imgArr['instcode'] . ": ";
-										echo $imgArr['catalognumber'];
+										if(strpos($occArr[$imgArr['occid']]['catnum'], $collArr[$occArr[$imgArr['occid']]['collid']]) !== 0) echo $collArr[$occArr[$imgArr['occid']]['collid']].': ';
+										echo $occArr[$imgArr['occid']]['catnum'];
 										echo '</a>';
 									}
 									elseif($imgArr['uid']){
@@ -270,7 +278,7 @@ if($action == 'search'){
 										if(strlen($pName) > 20) $pName = array_shift(explode(',',$pName));
 										echo $pName.'<br />';
 									}
-									//if($imgArr['stateprovince']) echo $imgArr['stateprovince'] . "<br />";
+									//if($imgArr['occid'] && $occArr[$imgArr['occid']]['state']) echo $occArr[$imgArr['occid']]['state'] . "<br />";
 									?>
 								</div>
 							</div>
