@@ -114,12 +114,12 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 				if(is_numeric($taxonAuthorityId)){
 					$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid '.
 						'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid ';
-					$sql .= $this->getTableJoins($sqlWhere);
+					$sqlTaxaInsert .= $this->getTableJoins($sqlWhere);
 					$sqlTaxaInsert .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts1.family",$sqlWhere))."AND ts1.taxauthid = ".$taxonAuthorityId." AND t.RankId > 180";
 				}
 				else{
 					$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." FROM (omoccurrences o INNER JOIN taxa t ON o.TidInterpreted = t.tid) ";
-					$sql .= $this->getTableJoins($sqlWhere);
+					$sqlTaxaInsert .= $this->getTableJoins($sqlWhere);
 					$sqlTaxaInsert .= $sqlWhere." AND t.RankId > 180";
 				}
 			}
