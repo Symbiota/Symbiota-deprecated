@@ -1,7 +1,7 @@
 <?php
 $DEFAULT_LANG = 'en';			//Default language
 $DEFAULT_PROJ_ID = 1;
-$DEFAULTCATID = 1;
+$DEFAULTCATID = 0;
 $DEFAULT_TITLE = '';
 $TID_FOCUS = '';
 $ADMIN_EMAIL = '';

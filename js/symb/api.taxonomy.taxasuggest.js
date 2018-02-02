@@ -18,11 +18,13 @@ $(document).ready(function() {
 		// don't navigate away from the field on tab when selecting an item
 		.bind( "keydown", function( event ) {
 			// don't honor ENTER key if an autocomplete is not selected yet
+			/*
 			if (event.keyCode === $.ui.keyCode.ENTER) {
 				if (this.autocomplete_stage != 0) {
 				    event.preventDefault();
 				}
 		    } else
+		    */
 			// don't navigate away from the field on tab when selecting an item
 			if (event.keyCode === $.ui.keyCode.TAB) {
 				if ($(this).autocomplete('widget').is(':visible')) {
@@ -40,7 +42,7 @@ $(document).ready(function() {
 				}, response );
 				this.autocomplete_stage = 0;
 			},$('#taxa')[0]),
-			//autoFocus: true,
+			autoFocus: true,
 			search: function() {
 				// custom minLength
 				this.autocomplete_stage = 2;
