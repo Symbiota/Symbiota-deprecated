@@ -759,7 +759,7 @@ $duManager->loadFieldMap();
 												<div style="margin:10px 0px;">
 													Processing Status:
 													<select name="processingstatus">
-														<option value="">Leave as is / Do not set</option>
+														<option value="">Leave as is / No Explicit Setting</option>
 														<option value="">--------------------------</option>
 														<?php
 														foreach($processingList as $ps){
@@ -804,7 +804,7 @@ $duManager->loadFieldMap();
 							<div style="margin:10px 0px;">
 								Processing Status:
 								<select name="processingstatus">
-									<option value="">Leave as is / Do not set</option>
+									<option value="">Leave as is / No Explicit Setting</option>
 									<option value="">--------------------------</option>
 									<?php
 									foreach($processingList as $ps){
@@ -918,7 +918,7 @@ $duManager->loadFieldMap();
 									<div style="margin:10px 0px;">
 										Processing Status:
 										<select name="processingstatus">
-											<option value="">Leave as is / Do not set</option>
+											<option value="">Leave as is / No Explicit Setting</option>
 											<option value="">--------------------------</option>
 											<?php
 											foreach($processingList as $ps){

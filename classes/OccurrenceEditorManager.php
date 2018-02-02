@@ -741,6 +741,12 @@ class OccurrenceEditorManager {
 				$oldValues = $rs->fetch_assoc();
 				$rs->free();
 
+				//If processing status was "unprocessed" and recordEnteredBy is null, populate with user login
+				if($oldValues['recordenteredby'] == 'preprocessed' || (!$oldValues['recordenteredby'] && ($oldValues['processingstatus'] == 'unprocessed' || $oldValues['processingstatus'] == 'stage 1'))){
+					$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
+					$editArr[] = 'recordenteredby';
+				}
+
 				//Version edits
 				$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
 					'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$GLOBALS['SYMB_UID'].',';
@@ -777,16 +783,10 @@ class OccurrenceEditorManager {
 			//Edit record only if user is authorized to autoCommit
 			if($autoCommit){
 				$status = 'SUCCESS: edits submitted and activated ';
-				//If processing status was "unprocessed" and recordEnteredBy is null, populate with user login
 				$sql = '';
 				//Apply autoprocessing status if set
 				if(array_key_exists('autoprocessingstatus',$occArr) && $occArr['autoprocessingstatus']){
 					$occArr['processingstatus'] = $occArr['autoprocessingstatus'];
-				}
-				if($editArr){
-					if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
-						$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
-					}
 				}
 				if(isset($occArr['institutioncode']) && $occArr['institutioncode'] == $this->collMap['institutioncode']) $occArr['institutioncode'] = '';
 				if(isset($occArr['collectioncode']) && $occArr['collectioncode'] == $this->collMap['collectioncode']) $occArr['collectioncode'] = '';
