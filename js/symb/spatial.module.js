@@ -1881,7 +1881,7 @@ function getTextParams(){
             if(countryCqlString) countryCqlString += " OR ";
             if(countrySolrqString) countrySolrqString += " OR ";
             countryCqlString += "(country = '"+countryvals[i]+"')";
-            countrySolrqString += "(country:'"+countryvals[i]+"')";
+            countrySolrqString += '(country:"'+countryvals[i]+'")';
         }
         cqlfrag = '('+countryCqlString+')';
         cqlArr.push(cqlfrag);
@@ -1896,7 +1896,7 @@ function getTextParams(){
             if(stateCqlString) stateCqlString += " OR ";
             if(stateSolrqString) stateSolrqString += " OR ";
             stateCqlString += "(StateProvince = '"+statevals[i]+"')";
-            stateSolrqString += "(StateProvince:"+statevals[i]+")";
+            stateSolrqString += '(StateProvince:"'+statevals[i]+'")';
         }
         cqlfrag = '('+stateCqlString+')';
         cqlArr.push(cqlfrag);
