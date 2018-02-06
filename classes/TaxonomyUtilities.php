@@ -69,8 +69,8 @@ class TaxonomyUtilities {
 						//Specific Epithet
 						$retArr['unitname2'] = array_shift($sciNameArr);
 					}
-					if($retArr['unitname2'] && !preg_match('/^[a-z]+$/',$retArr['unitname2'])){
-						if(preg_match('/[A-Z]{1}[a-z]+/',$retArr['unitname2'])){
+					if($retArr['unitname2'] && !preg_match('/^[\-a-z]+$/',$retArr['unitname2'])){
+						if(preg_match('/[A-Z]{1}[\-a-z]+/',$retArr['unitname2'])){
 							//Check to see if is term is genus author
 							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'"';
 							$con = MySQLiConnectionFactory::getCon('readonly');

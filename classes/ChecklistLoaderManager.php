@@ -43,23 +43,22 @@ class ChecklistLoaderManager {
 			ob_flush();
 			flush();
 			while($valueArr = fgetcsv($fh)){
-				$tid = 0;
-				$rankId = 0;
-				$sciName = ""; $family = "";
 				$sciNameStr = $this->cleanInStr($valueArr[$headerArr["sciname"]]);
-				$noteStr = '';
 				if($sciNameStr){
+					$tid = 0;
+					$rankId = 0;
+					$family = "";
 					$sciNameArr = TaxonomyUtilities::parseScientificName($sciNameStr,$this->conn);
 					//Check name is in taxa table and grab tid if it is
 					$sql = "";
 					if($thesId && is_numeric($thesId)){
-						$sql = 'SELECT t2.tid, ts.family, t2.rankid '.
+						$sql = 'SELECT t2.tid, t.sciname, ts.family, t2.rankid '.
 							'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
 							'INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid '.
 							'WHERE (ts.taxauthid = '.$thesId.') ';
 					}
 					else{
-						$sql = 'SELECT t.tid, ts.family, t.rankid '.
+						$sql = 'SELECT t.tid, t.sciname, ts.family, t.rankid '.
 							'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 							'WHERE ts.taxauthid = 1 ';
 					}
@@ -67,9 +66,11 @@ class ChecklistLoaderManager {
 					$sql .= 'AND (t.sciname IN("'.$sciNameStr.'"'.($cleanSciName?',"'.$cleanSciName.'"':'').'))';
 					$rs = $this->conn->query($sql);
 					if($rs){
-						if($row = $rs->fetch_object()){
+						while($row = $rs->fetch_object()){
 							$tid = $row->tid;
 							$rankId = $row->rankid;
+							$family = $row->family;
+							if($sciNameStr == $row->sciname) break;
 						}
 						$rs->free();
 					}
@@ -79,6 +80,13 @@ class ChecklistLoaderManager {
 						if($rankId >= 180){
 							$sqlInsert = '';
 							$sqlValues = '';
+							if(array_key_exists('family',$headerArr) && $valueArr[$headerArr['family']]){
+								$famValue = $this->cleanInStr($valueArr[$headerArr['family']]);
+								if(strcasecmp($family, $famValue)){
+									$sqlInsert .= ',familyoverride';
+									$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['family']]).'"';
+								}
+							}
 							if(array_key_exists('habitat',$headerArr) && $valueArr[$headerArr['habitat']]){
 								$sqlInsert .= ',habitat';
 								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['habitat']]).'"';
@@ -87,16 +95,21 @@ class ChecklistLoaderManager {
 								$sqlInsert .= ',abundance';
 								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['abundance']]).'"';
 							}
-							if($noteStr || (array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']])){
-								if(array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']]){
-									if($noteStr) $noteStr .= '; ';
-									$noteStr .= $valueArr[$headerArr['notes']];
-								}
+							if(array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']]){
 								$sqlInsert .= ',notes';
-								$sqlValues .= ',"'.$this->cleanInStr($noteStr).'"';
+								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['notes']]).'"';
 							}
+							if(array_key_exists('internalnotes',$headerArr) && $valueArr[$headerArr['internalnotes']]){
+								$sqlInsert .= ',internalnotes';
+								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['internalnotes']]).'"';
+							}
+							if(array_key_exists('source',$headerArr) && $valueArr[$headerArr['source']]){
+								$sqlInsert .= ',source';
+								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['source']]).'"';
+							}
+
 							$sql = 'INSERT INTO fmchklsttaxalink (tid,clid'.$sqlInsert.') VALUES ('.$tid.', '.$this->clid.$sqlValues.')';
-							//echo $sql;
+							//echo $sql; exit;
 							if($this->conn->query($sql)){
 								$successCnt++;
 							}
