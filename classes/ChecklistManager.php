@@ -88,7 +88,7 @@ class ChecklistManager {
 		if($this->clid){
 			$sql = "SELECT c.clid, c.name, c.locality, c.publication, ".
 				"c.abstract, c.authors, c.parentclid, c.notes, ".
-				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.access, c.defaultSettings, ".
+				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.footprintwkt, c.access, c.defaultSettings, ".
 				"c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp ".
 				"FROM fmchecklists c WHERE (c.clid = ".$this->clid.')';
 		}
@@ -113,6 +113,7 @@ class ChecklistManager {
 						$retArr["latcentroid"] = $row->latcentroid;
 						$retArr["longcentroid"] = $row->longcentroid;
 						$retArr["pointradiusmeters"] = $row->pointradiusmeters;
+						$retArr['footprintwkt'] = $row->footprintwkt;
 						$retArr["access"] = $row->access;
 						$retArr["defaultSettings"] = $row->defaultSettings;
 						$retArr["dynamicsql"] = $row->dynamicsql;
@@ -127,7 +128,7 @@ class ChecklistManager {
 		}
 		return $retArr;
 	}
-	
+
 	public function echoFilterList(){
 		echo "'".implode("','",$this->filterArr)."'";
 	}
@@ -194,14 +195,14 @@ class ChecklistManager {
                 $genusCntArr[] = $taxonTokens[0];
             }
 			$this->filterArr[$taxonTokens[0]] = "";
-    		if(count($taxonTokens) == 2 && $taxonTokens[0]." ".$taxonTokens[1] != $speciesPrev){
+    		if(count($taxonTokens) > 1 && $taxonTokens[0]." ".$taxonTokens[1] != $speciesPrev){
     			$this->speciesCount++;
     			$speciesPrev = $taxonTokens[0]." ".$taxonTokens[1];
     		}
-    		if(!$taxonPrev || implode(" ",$taxonTokens) != $taxonPrev){
+    		if(!$taxonPrev || strpos($sciName,$taxonPrev) === false){
     			$this->taxaCount++;
     		}
-            $taxonPrev = implode(" ",$taxonTokens);
+    		$taxonPrev = implode(" ",$taxonTokens);
 		}
         $this->familyCount = count($familyCntArr);
         $this->genusCount = count($genusCntArr);
@@ -252,7 +253,7 @@ class ChecklistManager {
 	private function setImages($tidReturn){
 		if($tidReturn){
 			$sql = 'SELECT i2.tid, i.url, i.thumbnailurl FROM images i INNER JOIN '.
-				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
+				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '.
 				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN images i ON ts2.tid = i.tid '.
 				'WHERE i.sortsequence < 500 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
@@ -269,9 +270,9 @@ class ChecklistManager {
 			$rs->free();
 			$missingArr = array_diff(array_keys($this->taxaList),$matchedArr);
 			if($missingArr){
-				//Get children images  
+				//Get children images
 				$sql2 = 'SELECT i2.tid, i.url, i.thumbnailurl FROM images i INNER JOIN '.
-					'(SELECT ts1.parenttid AS tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
+					'(SELECT ts1.parenttid AS tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '.
 					'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 					'INNER JOIN images i ON ts2.tid = i.tid '.
 					'WHERE i.sortsequence < 500 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
@@ -292,7 +293,7 @@ class ChecklistManager {
 		if($tidReturn){
 			$tempVernArr = array();
 			$sql = 'SELECT ts1.tid, v.vernacularname '.
-				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '. 
+				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN taxavernaculars v ON ts2.tid = v.tid '.
 				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tidReturn).')) ';
 			if($this->language) $sql .= 'AND v.language = "'.$this->language.'" ';
@@ -315,27 +316,23 @@ class ChecklistManager {
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
-			
-			$maxLat = -90;
-			$minLat = 90;
-			$maxLng = -180;
-			$minLng = 180;
+
 			$retCnt = 0;
 			//Grab general points
 			try{
 				$sql1 = '';
 				if($tid){
-					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '. 
+					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '.
 						'FROM fmchklstcoordinates cc INNER JOIN taxa t ON cc.tid = t.tid '.
 						'WHERE cc.tid = '.$tid.' AND cc.clid IN ('.$clidStr.') AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
 				}
 				else{
-					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '. 
+					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '.
 						'FROM fmchklstcoordinates cc INNER JOIN ('.$this->basicSql.') t ON cc.tid = t.tid '.
 						'WHERE cc.clid IN ('.$clidStr.') AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
 				}
 				if($abbreviated){
-					$sql1 .= 'ORDER BY RAND() LIMIT 50'; 
+					$sql1 .= 'ORDER BY RAND() LIMIT 50';
 				}
 				//echo $sql1;
 				$rs1 = $this->conn->query($sql1);
@@ -346,10 +343,6 @@ class ChecklistManager {
 						}
 						else{
 							$retArr[$r1->tid][] = array('ll'=>$r1->decimallatitude.','.$r1->decimallongitude,'sciname'=>$this->cleanOutStr($r1->sciname),'notes'=>$this->cleanOutStr($r1->notes));
-							if($minLat > $r1->decimallatitude) $minLat = $r1->decimallatitude;
-							if($maxLat < $r1->decimallatitude) $maxLat = $r1->decimallatitude;
-							if($minLng > $r1->decimallongitude) $minLng = $r1->decimallongitude;
-							if($maxLng < $r1->decimallongitude) $maxLng = $r1->decimallongitude;
 						}
 						$retCnt++;
 					}
@@ -360,19 +353,19 @@ class ChecklistManager {
 				echo 'Caught exception getting general coordinates: ',  $e->getMessage(), "\n";
 			}
 
-			if(!$abbreviated || $retCnt < 50){ 
+			if(!$abbreviated || $retCnt < 50){
 				try{
 					//Grab voucher points
 					$sql2 = '';
 					if($tid){
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '. 
+						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
 							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
 							'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					else{
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '. 
+						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
 							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
 							'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
@@ -380,7 +373,7 @@ class ChecklistManager {
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					if($abbreviated){
-						$sql2 .= 'ORDER BY RAND() LIMIT 50'; 
+						$sql2 .= 'ORDER BY RAND() LIMIT 50';
 					}
 					//echo $sql2;
 					$rs2 = $this->conn->query($sql2);
@@ -391,10 +384,6 @@ class ChecklistManager {
 							}
 							else{
 								$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
-								if($minLat > $r2->decimallatitude) $minLat = $r2->decimallatitude;
-								if($maxLat < $r2->decimallatitude) $maxLat = $r2->decimallatitude;
-								if($minLng > $r2->decimallongitude) $minLng = $r2->decimallongitude;
-								if($maxLng < $r2->decimallongitude) $maxLng = $r2->decimallongitude;
 							}
 						}
 						$rs2->free();
@@ -403,10 +392,6 @@ class ChecklistManager {
 				catch(Exception $e){
 					//echo 'Caught exception getting voucher coordinates: ',  $e->getMessage(), "\n";
 				}
-			}
-			if(!$abbreviated){
-				$retArr['sw'] = $minLat.','.$minLng;
-				$retArr['ne'] = $maxLat.','.$maxLng;
 			}
 		}
 		return $retArr;
@@ -486,7 +471,7 @@ class ChecklistManager {
 				}
 				//Include parents
 				$sqlWhere .= 'OR (t.tid IN(SELECT e.tid '.
-					'FROM taxa t3 INNER JOIN taxaenumtree e ON t3.tid = e.parenttid '.  
+					'FROM taxa t3 INNER JOIN taxaenumtree e ON t3.tid = e.parenttid '.
 					'WHERE (e.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (t3.sciname = "'.$this->taxonFilter.'")))';
 				if($sqlWhere) $this->basicSql .= 'AND ('.substr($sqlWhere,2).') ';
 			}
@@ -580,7 +565,7 @@ class ChecklistManager {
 	public function setTaxonFilter($tFilter){
 		$this->taxonFilter = $this->cleanInStr(strtolower($tFilter));
 	}
-	
+
 	public function setShowAuthors($value = 1){
 		$this->showAuthors = $value;
 	}
@@ -596,7 +581,7 @@ class ChecklistManager {
 	public function setShowVouchers($value = 1){
 		$this->showVouchers = $value;
 	}
-	
+
 	public function setShowAlphaTaxa($value = 1){
 		$this->showAlphaTaxa = $value;
 	}
@@ -624,7 +609,7 @@ class ChecklistManager {
 	public function getClName(){
 		return $this->clName;
 	}
-	
+
 	public function setProj($pValue){
 		$sql = 'SELECT pid, projname FROM fmprojects ';
 		if(is_numeric($pValue)){
@@ -650,11 +635,11 @@ class ChecklistManager {
 	public function getProjName(){
 		return $this->projName;
 	}
-	
+
 	public function getPid(){
 		return $this->pid;
 	}
-	
+
 	public function setLanguage($l){
 		$l = strtolower($l);
 		if($l == "en"){
@@ -667,23 +652,23 @@ class ChecklistManager {
 			$this->language = $l;
 		}
 	}
-	
+
 	public function setImageLimit($cnt){
 		$this->imageLimit = $cnt;
 	}
-	
+
 	public function getImageLimit(){
 		return $this->imageLimit;
 	}
-	
+
 	public function setTaxaLimit($cnt){
 		$this->taxaLimit = $cnt;
 	}
-	
+
 	public function getTaxaLimit(){
 		return $this->taxaLimit;
 	}
-	
+
 	public function getTaxaCount(){
 		return $this->taxaCount;
 	}
