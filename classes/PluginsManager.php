@@ -1,14 +1,14 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
- 
+
 class PluginsManager {
 
  	public function __construct(){
  	}
- 	
+
  	public function __destruct(){
 	}
-	
+
 	public function createSlidewhow($ssId,$numSlides,$width,$numDays,$imageType,$clId,$dayInterval,$interval=7000){
 		if($width > 800){
 			$width = 800;
@@ -22,7 +22,7 @@ class PluginsManager {
 		$showHtml = $this->setShowHtml($imageHtml,$width,$interval);
 		return $showHtml;
 	}
-	
+
 	public function setSlidewhow($ssId,$numSlides,$numDays,$imageType,$clId,$dayInterval){
 		global $SERVER_ROOT;
 		$currentDate = date("Y-m-d");
@@ -42,11 +42,11 @@ class PluginsManager {
 		else{
 			$replace = 1;
 		}
-		
+
 		if($replace == 1){
 			ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 			$sinceDate = date('Y-m-d', strtotime($currentDate. ' - '.$numDays.' days'));
-			
+
 			//Delete old files
 			if($clId){
 				$previous = Array();
@@ -66,7 +66,7 @@ class PluginsManager {
 			if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json')){
 				unlink($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json');
 			}
-			
+
 			//Create new files
 			$ssIdInfo = array();
 			$ssIdInfo['lastDate'] = $currentDate;
@@ -80,7 +80,7 @@ class PluginsManager {
 			$ssIdInfo['numslides'] = $numSlides;
 			$ssIdInfo['numdays'] = $numDays;
 			$ssIdInfo['imagetype'] = $imageType;
-			
+
 			$files = Array();
 			$limit = $numSlides * 3;
 			$sql = 'SELECT i.imgid, i.tid, i.occid, i.url, i.photographer, i.`owner`, t.SciName, o.sciname AS occsciname, '.
@@ -96,10 +96,10 @@ class PluginsManager {
 			else{
 				$sql .= 'WHERE i.InitialTimeStamp < "'.$sinceDate.'" AND i.tid IS NOT NULL ';
 			}
-			if(!$clId && $imageType == 'specimen'){
+			if($imageType == 'specimen'){
 				$sql .= 'AND i.occid IS NOT NULL ';
 			}
-			if(!$clId && $imageType == 'field'){
+			elseif($imageType == 'field'){
 				$sql .= 'AND ISNULL(i.occid) ';
 			}
 			$sql .= 'ORDER BY i.sortsequence ';
@@ -117,12 +117,12 @@ class PluginsManager {
 				if($clId){
 					if(!in_array($imgId, $previous)){
 						if (substr($row->url, 0, 1) == '/'){
-							//If imageDomain variable is set within symbini file, image  
+							//If imageDomain variable is set within symbini file, image
 							if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
 								$file = $GLOBALS['imageDomain'].$row->url;
 							}
 							else{
-								//Use local domain 
+								//Use local domain
 								$domain = "http://";
 								if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
 								$domain .= $_SERVER["SERVER_NAME"];
@@ -156,12 +156,12 @@ class PluginsManager {
 				}
 				else{
 					if (substr($row->url, 0, 1) == '/'){
-						//If imageDomain variable is set within symbini file, image  
+						//If imageDomain variable is set within symbini file, image
 						if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
 							$file = $GLOBALS['imageDomain'].$row->url;
 						}
 						else{
-							//Use local domain 
+							//Use local domain
 							$domain = "http://";
 							if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
 							$domain .= $_SERVER["SERVER_NAME"];
@@ -197,7 +197,7 @@ class PluginsManager {
 			$conn->close();
 			$ssIdInfo['files'] = $files;
 			$previous = array_merge($previous,$imgIdArr);
-			
+
 			if($clId){
 				$fp = fopen($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json', 'w');
 				fwrite($fp, json_encode($previous));
@@ -207,12 +207,12 @@ class PluginsManager {
 			fwrite($fp, json_encode($ssIdInfo));
 			fclose($fp);
 		}
-		
+
 		$infoArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json'), true);
 		//echo json_encode($infoArr);
 		return $infoArr;
 	}
-	
+
 	public function getImageList($imageArr,$width){
 		global $clientRoot;
 		$windowHeight = $width + 75;
@@ -221,7 +221,7 @@ class PluginsManager {
 		$html = '<div id="slideshowcontainer" style="clear:both;width:'.$width.'px;height:'.$windowHeight.'px;">';
 		$html .= '<div class="container">';
 		$html .= '<div id="slides">';
-		foreach($imageArr as $igmAr => $imgIdArr){ 
+		foreach($imageArr as $igmAr => $imgIdArr){
 			$imgSize = '';
 			if($imgIdArr["width"] > $imgIdArr["height"]){
 				$offSet = (($imgIdArr["width"]/$imgIdArr["height"])*$imageHeight)/2;
@@ -267,10 +267,10 @@ class PluginsManager {
 			$html .= '</div></div>';
 		}
 		$html .= '</div></div></div>';
-		
+
 		return $html;
 	}
-	
+
 	public function setShowHtml($imageHtml,$width,$interval){
 		global $clientRoot;
 		$height = $width + 50;
@@ -311,10 +311,10 @@ class PluginsManager {
 		$html .= 'interval: '.$interval.',';
 		$html .= 'swap: true}});});';
 		$html .= '</script>';
-		
+
 		return $html;
 	}
-	
+
 	public function createQuickSearch($buttonText,$searchText=''){
 		global $CLIENT_ROOT;
 		$html = '';
@@ -395,7 +395,7 @@ class PluginsManager {
 		$html .= '<input type="text" name="taxon" id="quicksearchtaxon" title="Enter taxon name here." />';
 		$html .= '<button name="formsubmit"  id="quicksearchbutton" type="submit" value="Search Terms">'.$buttonText.'</button>';
 		$html .= '</form>';
-		
+
 		return $html;
 	}
 }
