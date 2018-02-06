@@ -1488,7 +1488,7 @@ class OccurrenceEditorManager {
 		if(is_numeric($ranking)){
 			//Will be replaced if an identification ranking already exists for occurrence record
 			$sql = 'REPLACE INTO omoccurverification(occid,category,ranking,notes,uid) '.
-					'VALUES('.$this->occid.',"identification",'.$ranking.','.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.$GLOBALS['SYMB_UID'].')';
+				'VALUES('.$this->occid.',"identification",'.$ranking.','.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.$GLOBALS['SYMB_UID'].')';
 			if(!$this->conn->query($sql)){
 				$statusStr .= 'WARNING editing/add confidence ranking failed ('.$this->conn->error.') ';
 				//echo $sql;
@@ -1518,9 +1518,9 @@ class OccurrenceEditorManager {
 			//Check to see it the name is in the list, if not, add it
 			$clTid = 0;
 			$sqlCl = 'SELECT cl.tid '.
-					'FROM fmchklsttaxalink cl INNER JOIN taxstatus ts1 ON cl.tid = ts1.tidaccepted '.
-					'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-					'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts2.tid = '.$tid.' AND cl.clid = '.$clid;
+				'FROM fmchklsttaxalink cl INNER JOIN taxstatus ts1 ON cl.tid = ts1.tid '.
+				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+				'WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = '.$tid.') AND (cl.clid = '.$clid.')';
 			$rsCl = $this->conn->query($sqlCl);
 			//echo $sqlCl;
 			if($rowCl = $rsCl->fetch_object()){
@@ -1538,8 +1538,7 @@ class OccurrenceEditorManager {
 			}
 			//Add voucher
 			if($clTid){
-				$sqlCl2 = 'INSERT INTO fmvouchers(occid,clid,tid) '.
-						'values('.$this->occid.','.$clid.','.$clTid.')';
+				$sqlCl2 = 'INSERT INTO fmvouchers(occid,clid,tid) values('.$this->occid.','.$clid.','.$clTid.')';
 				//echo $sqlCl2;
 				if(!$this->conn->query($sqlCl2)){
 					$status .= '(WARNING adding voucher link: '.$this->conn->error.'); ';
@@ -1565,8 +1564,8 @@ class OccurrenceEditorManager {
 		$retArr = Array();
 		if(ISSET($GLOBALS['USER_RIGHTS']['ClAdmin'])){
 			$sql = 'SELECT clid, name, access '.
-					'FROM fmchecklists '.
-					'WHERE (clid IN('.implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']).')) ';
+				'FROM fmchecklists '.
+				'WHERE (clid IN('.implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']).')) ';
 			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
