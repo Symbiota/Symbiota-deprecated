@@ -57,7 +57,7 @@ $imgManager->setTid($tid);
 	<div id="innertext">
 		<?php
 		if($isEditor){
-			if($action){
+			if($action && $action != 'none'){
 				echo '<fieldset style="margin:10px;padding:15px">';
 				echo '<legend><b>Processing Panel</b></legend>';
 				echo '<div style="font-weight:bold;">Start processing...</div>';

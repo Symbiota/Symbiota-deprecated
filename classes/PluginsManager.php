@@ -1,5 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/ImageShared.php');
 
 class PluginsManager {
 
@@ -9,27 +10,27 @@ class PluginsManager {
  	public function __destruct(){
 	}
 
-	public function createSlideShow($ssId, $numSlides, $width, $numDays, $imageType, $clid, $dayInterval, $interval=7000){
+	public function createSlideShow($ssid, $numSlides, $width, $numDays, $imageType, $clid, $dayInterval, $interval=7000){
 		if($width > 800) $width = 800;
 		if($width < 275) $width = 275;
-		$this->setSlideShow($ssId,$numSlides,$numDays,$imageType,$clid,$dayInterval);
-		$showHtml = $this->getSlideshowHtml($ssId, $width, $interval);
+		$this->setSlideShow($ssid,$numSlides,$numDays,$imageType,$clid,$dayInterval);
+		$showHtml = $this->getSlideshowHtml($ssid, $width, $interval);
 		return $showHtml;
 	}
 
-	private function setSlideShow($ssId,$numSlides,$numDays,$imageType,$clId,$dayInterval){
+	private function setSlideShow($ssid,$numSlides,$numDays,$imageType,$clid,$dayInterval){
 		global $SERVER_ROOT;
 		$currentDate = date("Y-m-d");
 		$replace = 0;
-		if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json')){
-			$oldArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json'), true);
+		if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json')){
+			$oldArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json'), true);
 			$lastDate = $oldArr['lastDate'];
 			$lastCLID = $oldArr['clid'];
 			$lastNumSlides = $oldArr['numslides'];
 			$lastNumDays = $oldArr['numdays'];
 			$lastImageType = $oldArr['imagetype'];
 			$replaceDate = date('Y-m-d', strtotime($lastDate. ' + '.$dayInterval.' days'));
-			if(($currentDate > $replaceDate) || ($clId != $lastCLID) || ($numSlides != $lastNumSlides) || ($numDays != $lastNumDays) || ($imageType != $lastImageType)){
+			if(($currentDate > $replaceDate) || ($clid != $lastCLID) || ($numSlides != $lastNumSlides) || ($numDays != $lastNumDays) || ($imageType != $lastImageType)){
 				$replace = 1;
 			}
 		}
@@ -42,29 +43,29 @@ class PluginsManager {
 			$sinceDate = date('Y-m-d', strtotime($currentDate. ' - '.$numDays.' days'));
 
 			//Delete old files
-			if($clId){
+			if($clid){
 				$previous = Array();
-				if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json')){
-					$previous = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json'), true);
-					unlink($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json');
-					if($clId != $lastCLID){
+				if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json')){
+					$previous = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json'), true);
+					unlink($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json');
+					if($clid != $lastCLID){
 						$previous = Array();
 					}
 				}
 			}
 			else{
-				if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json')){
-					unlink($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json');
+				if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json')){
+					unlink($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json');
 				}
 			}
-			if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json')){
-				unlink($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json');
+			if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json')){
+				unlink($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json');
 			}
 
 			//Create new files
 			$ssIdInfo = array();
 			$ssIdInfo['lastDate'] = $currentDate;
-			$ssIdInfo['clid'] = $clId;
+			$ssIdInfo['clid'] = $clid;
 			if($numSlides > 10){
 				$numSlides = 10;
 			}
@@ -77,24 +78,24 @@ class PluginsManager {
 
 			$files = Array();
 			$limit = $numSlides * 3;
-			$sql = 'SELECT i.imgid, i.tid, i.occid, i.url, i.photographer, i.`owner`, t.SciName, o.sciname AS occsciname, '.
+			$sql = 'SELECT i.imgid, i.tid, i.occid, i.url, i.photographer, i.`owner`, t.sciname, o.sciname AS occsciname, '.
 				'CONCAT_WS(" ",u.firstname,u.lastname) AS photographerName, '.
 				'CONCAT_WS("; ",o.sciname, o.catalognumber, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate))) AS identifier '.
 				'FROM images i LEFT JOIN users u ON i.photographeruid = u.uid '.
 				'LEFT JOIN omoccurrences o ON i.occid = o.occid '.
 				'LEFT JOIN taxa t ON i.tid = t.tid ';
-			if($clId){
+			if($clid){
 				$sql .= 'INNER JOIN fmchklsttaxalink v ON i.tid = v.TID ';
-				$sql .= 'WHERE v.CLID IN('.$clId.') ';
+				$sql .= 'WHERE v.CLID IN('.$clid.') ';
 			}
 			else{
 				$sql .= 'WHERE i.InitialTimeStamp < "'.$sinceDate.'" AND i.tid IS NOT NULL ';
 			}
-			if(!$clId && $imageType == 'specimen'){
+			if($imageType == 'specimen'){
 				$sql .= 'AND i.occid IS NOT NULL ';
 			}
-			if(!$clId && $imageType == 'field'){
-				$sql .= 'AND ISNULL(i.occid) ';
+			elseif($imageType == 'field'){
+				$sql .= 'AND i.occid IS NULL ';
 			}
 			$sql .= 'ORDER BY i.sortsequence LIMIT 200 ';
 			//echo '<div>'.$sql.'</div>';
@@ -103,49 +104,8 @@ class PluginsManager {
  			$conn = MySQLiConnectionFactory::getCon("readonly");
 			$rs = $conn->query($sql);
 			while(($row = $rs->fetch_object()) && ($cnt < ($numSlides + 1))){
-				$file = '';
-				$imgId = $row->imgid;
-				if($clId){
-					if(!in_array($imgId, $previous)){
-						if (substr($row->url, 0, 1) == '/'){
-							//If imageDomain variable is set within symbini file, image
-							if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
-								$file = $GLOBALS['imageDomain'].$row->url;
-							}
-							else{
-								//Use local domain
-								$domain = "http://";
-								if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
-								$domain .= $_SERVER["SERVER_NAME"];
-								if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
-								$file = $domain.$row->url;
-							}
-						}
-						else{
-							$file = $row->url;
-						}
-						@$size = getimagesize(str_replace(' ', '%20', $file));
-						if($size){
-							$width = $size[0];
-							$height = $size[1];
-							$files[$imgId]['url'] = $file;
-							$files[$imgId]['width'] = $width;
-							$files[$imgId]['height'] = $height;
-							$files[$imgId]['imgid'] = $row->imgid;
-							$files[$imgId]['tid'] = $row->tid;
-							$files[$imgId]['occid'] = $row->occid;
-							$files[$imgId]['photographer'] = $row->photographer;
-							$files[$imgId]['owner'] = $row->owner;
-							$files[$imgId]['SciName'] = $row->SciName;
-							$files[$imgId]['occsciname'] = $row->occsciname;
-							$files[$imgId]['photographerName'] = $row->photographerName;
-							$files[$imgId]['identifier'] = $row->identifier;
-							$imgIdArr[] = $row->imgid;
-							$cnt++;
-						}
-					}
-				}
-				else{
+				if(!in_array($row->imgid, $previous)){
+					$file = $row->url;
 					if (substr($row->url, 0, 1) == '/'){
 						//If imageDomain variable is set within symbini file, image
 						if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
@@ -160,27 +120,23 @@ class PluginsManager {
 							$file = $domain.$row->url;
 						}
 					}
-					else{
-						$file = $row->url;
-					}
-					if(fopen($file, "r")){
-						if($size = getimagesize(str_replace(' ', '%20', $file))){
-							$width = $size[0];
-							$height = $size[1];
-							$files[$imgId]['url'] = $file;
-							$files[$imgId]['width'] = $width;
-							$files[$imgId]['height'] = $height;
-							$files[$imgId]['imgid'] = $row->imgid;
-							$files[$imgId]['tid'] = $row->tid;
-							$files[$imgId]['occid'] = $row->occid;
-							$files[$imgId]['photographer'] = $row->photographer;
-							$files[$imgId]['owner'] = $row->owner;
-							$files[$imgId]['SciName'] = $row->SciName;
-							$files[$imgId]['occsciname'] = $row->occsciname;
-							$files[$imgId]['photographerName'] = $row->photographerName;
-							$files[$imgId]['identifier'] = $row->identifier;
-							$cnt++;
-						}
+
+					if($size = ImageShared::getImgDim(str_replace(' ', '%20', $file))){
+						$width = $size[0];
+						$height = $size[1];
+						$files[$row->imgid]['url'] = $file;
+						$files[$row->imgid]['width'] = $width;
+						$files[$row->imgid]['height'] = $height;
+						$files[$row->imgid]['tid'] = $row->tid;
+						$files[$row->imgid]['occid'] = $row->occid;
+						$files[$row->imgid]['photographer'] = $row->photographer;
+						$files[$row->imgid]['owner'] = $row->owner;
+						$files[$row->imgid]['sciname'] = $row->sciname;
+						$files[$row->imgid]['occsciname'] = $row->occsciname;
+						$files[$row->imgid]['photographerName'] = $row->photographerName;
+						$files[$row->imgid]['identifier'] = $row->identifier;
+						if($clid) $imgIdArr[] = $row->imgid;
+						$cnt++;
 					}
 				}
 			}
@@ -189,18 +145,19 @@ class PluginsManager {
 			$ssIdInfo['files'] = $files;
 			$previous = array_merge($previous,$imgIdArr);
 
-			if($clId){
-				$fp = fopen($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_previous.json', 'w');
+			//Save data to slideshow history/configuration files
+			if($clid){
+				$fp = fopen($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json', 'w');
 				fwrite($fp, json_encode($previous));
 				fclose($fp);
 			}
-			$fp = fopen($SERVER_ROOT.'/temp/slideshow/'.$ssId.'_info.json', 'w');
+			$fp = fopen($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json', 'w');
 			fwrite($fp, json_encode($ssIdInfo));
 			fclose($fp);
 		}
 	}
 
-	private function getSlideshowHtml($ssId, $width, $interval){
+	private function getSlideshowHtml($ssid, $width, $interval){
 		$CLIENT_ROOT = $GLOBALS['CLIENT_ROOT'];
 		$height = $width + 50;
 		$html = '<link rel="stylesheet" href="'.$CLIENT_ROOT.'/css/slideshowstyle.css">
@@ -227,7 +184,7 @@ class PluginsManager {
 					background-position: 0 0;
 				}
 			</style>';
-		$html .= $this->getImageList($ssId, $width);
+		$html .= $this->getImageList($ssid, $width);
 		$html .= '<script>
 				$(function() {
 					$("#slides").slidesjs({
@@ -246,7 +203,7 @@ class PluginsManager {
 		return $html;
 	}
 
-	private function getImageList($ssId, $width){
+	private function getImageList($ssid, $width){
 		$CLIENT_ROOT = $GLOBALS['CLIENT_ROOT'];
 		$langArr = $GLOBALS['LANG'];
 
@@ -255,8 +212,8 @@ class PluginsManager {
 		$html = '<div id="slideshowcontainer" style="clear:both;width:'.$width.'px;height:'.$windowHeight.'px;">';
 		$html .= '<div class="container">';
 		$html .= '<div id="slides">';
-		$imageArr = $this->getImages($ssId);
-		foreach($imageArr as $igmAr => $imgIdArr){
+		$imageArr = $this->getImages($ssid);
+		foreach($imageArr as $imgId => $imgIdArr){
 			$imgSize = '';
 			if($imgIdArr["width"] > $imgIdArr["height"]){
 				$offSet = (($imgIdArr["width"]/$imgIdArr["height"])*$imageHeight)/2;
@@ -271,23 +228,23 @@ class PluginsManager {
 				$linkUrl = $CLIENT_ROOT.'/collections/individual/index.php?occid='.$imgIdArr["occid"].'&clid=0';
 			}
 			elseif($imgIdArr["tid"]){
-				$name = str_replace(' ','%20',$imgIdArr["SciName"]);
+				$name = str_replace(' ','%20',$imgIdArr["sciname"]);
 				$linkUrl = $CLIENT_ROOT.'/taxa/index.php?taxon='.$name;
 			}
 			$html .= '<div style="width:'.$width.'px;height:'.$imageHeight.'px;position:relative;">';
 			$html .= '<div style="width:'.$width.'px;max-height:'.$imageHeight.'px;overflow:hidden;">';
 			$html .= '<a href="'.$linkUrl.'" target="_blank">';
-			$html .= '<img src="'.$imgIdArr["url"].'" style="'.$imgSize.'" alt="'.($imgIdArr["occsciname"]?$imgIdArr["occsciname"]:$imgIdArr["SciName"]).'">';
+			$html .= '<img src="'.$imgIdArr["url"].'" style="'.$imgSize.'" alt="'.($imgIdArr["occsciname"]?$imgIdArr["occsciname"]:$imgIdArr["sciname"]).'">';
 			$html .= '</a>';
 			$html .= '</div>';
 			$html .= '<div style="width:'.$width.'px;position:absolute;bottom:0;font-size:12px;background-color:rgba(255,255,255,0.8);">';
-			$hideCaptionClick = "$('#slidecaption".$imgIdArr["imgid"]."').hide();$('#showcaption".$imgIdArr["imgid"]."').hide();";
-			$html .= '<div id="slidecaption'.$imgIdArr["imgid"].'">';
+			$hideCaptionClick = "$('#slidecaption".$imgId."').hide();$('#showcaption".$imgId."').hide();";
+			$html .= '<div id="slidecaption'.$imgId.'">';
 			$html .= '<a href="#" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;" onclick="'.$hideCaptionClick.'">'.(isset($langArr['HIDE_CAPTION'])?$langArr['HIDE_CAPTION']:'HIDE CAPTION').'</a>';
 			$html .= '<div style="clear:both;padding-left:3px;padding-right:3px;"><b>';
-			if($imgIdArr["SciName"] || $imgIdArr["identifier"]){
+			if($imgIdArr["sciname"] || $imgIdArr["identifier"]){
 				$html .= '<a href="'.$linkUrl.'" target="_blank">';
-				$html .= ($imgIdArr["identifier"]?$imgIdArr["identifier"]:$imgIdArr["SciName"]);
+				$html .= ($imgIdArr["identifier"]?$imgIdArr["identifier"]:$imgIdArr["sciname"]);
 				$html .= '</a>. ';
 			}
 			if($imgIdArr["photographer"] || $imgIdArr["photographerName"]){
@@ -298,8 +255,8 @@ class PluginsManager {
 			}
 			$html .= '</b></div>';
 			$html .= '</div>';
-			$showCaptionClick = "$('#slidecaption".$imgIdArr["imgid"]."').show();$('#showcaption".$imgIdArr["imgid"]."').show();";
-			$html .= '<a href="#" id="showcaption'.$imgIdArr["imgid"].'" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;display:none;" onclick="'.$showCaptionClick.'">'.(isset($langArr['SHOW_CAPTION'])?$langArr['SHOW_CAPTION']:'SHOW CAPTION').'</a>';
+			$showCaptionClick = "$('#slidecaption".$imgId."').show();$('#showcaption".$imgId."').show();";
+			$html .= '<a href="#" id="showcaption'.$imgId.'" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;display:none;" onclick="'.$showCaptionClick.'">'.(isset($langArr['SHOW_CAPTION'])?$langArr['SHOW_CAPTION']:'SHOW CAPTION').'</a>';
 			$html .= '</div></div>';
 		}
 		$html .= '</div></div></div>';
