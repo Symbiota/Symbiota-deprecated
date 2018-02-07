@@ -91,6 +91,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 							<li style="margin-left:10px;">Taxa successfully loaded: <?php echo $cnt; ?></li>
 							<li style="margin-left:10px;">Problematic Taxa: <?php echo $probCnt.($probCnt?' (see below)':''); ?></li>
 							<li style="margin-left:10px;">General errors: <?php echo count($errorArr); ?></li>
+							<li style="margin-left:10px;">Upload Complete! <a href="../checklist.php?cl=<?php echo $clid.'&pid='.$pid; ?>">Proceed to Checklists</a></li>
 						</ul>
 						<?php
 						if($probCnt){
@@ -147,9 +148,13 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 								<div>Must be a CSV text file with the first row containing the following columns. Note that Excel spreadsheets can be saved as a CSV file.</div>
 								<ul>
 									<li>sciname (required)</li>
+									<li>family (optional)</li>
 									<li>habitat (optional)</li>
 									<li>abundance (optional)</li>
 									<li>notes (optional)</li>
+									<li>internalnotes (optional) - displayed only to editors</li>
+									<li>source (optional)</li>
+
 								</ul>
 							</div>
 							<div style="margin:25px;">
@@ -165,7 +170,6 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 				echo "<h2>You appear not to have rights to edit this checklist. If you think this is in error, contact an administrator</h2>";
 			}
 		?>
-
 	</div>
 	<?php
 		include($SERVER_ROOT.'/footer.php');

@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 
 $clid = $_REQUEST['clid'];
 $thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;
-$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
+$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:"";
 
 $clManager = new ChecklistManager();
 $clManager->setClValue($clid);
@@ -13,14 +13,6 @@ if($thesFilter) $clManager->setThesFilter($thesFilter);
 if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
 
 $coordArr = $clManager->getCoordinates(0);
-$swBound; 
-$neBound; 
-if($coordArr){
-	$swBound = $coordArr['sw'];
-	$neBound = $coordArr['ne'];
-	unset($coordArr['sw']);
-	unset($coordArr['ne']);
-}
 ?>
 <html>
 <head>
@@ -28,62 +20,90 @@ if($coordArr){
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+	<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	<script type="text/javascript">
 		var map;
-		var useLLDecimal = true;
-	    var infoWins = new Array();
-	    var puWin;
+		var puWin;
 
-	    function initialize(){
-	    	var dmOptions = {
+		function initialize(){
+			var dmOptions = {
 				zoom: 3,
 				center: new google.maps.LatLng(41,-95),
 				mapTypeId: google.maps.MapTypeId.TERRAIN,
 				scaleControl: true
 			};
 
-
-            <?php
+			var llBounds = new google.maps.LatLngBounds();
+			<?php
 			if($coordArr){
 				?>
-		    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
+				map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
 				var vIcon = new google.maps.MarkerImage("../images/google/smpin_red.png");
 				var pIcon = new google.maps.MarkerImage("../images/google/smpin_blue.png");
-				<?php 
+				<?php
 				$mCnt = 0;
 				foreach($coordArr as $tid => $cArr){
 					foreach($cArr as $pArr){
+						?>
+						var pt = new google.maps.LatLng(<?php echo $pArr['ll']; ?>);
+						llBounds.extend(pt);
+						<?php
 						if(array_key_exists('occid',$pArr)){
-							echo 'var m'.$mCnt.' = new google.maps.Marker({position: new google.maps.LatLng('.$pArr['ll'].'),map:map,title:"'.$pArr['notes'].'",icon:vIcon});'."\n";
-							echo 'google.maps.event.addListener(m'.$mCnt.',"click",function(){ openIndPU('.$pArr['occid'].'); });'."\n";
+							?>
+							var m<?php echo $mCnt; ?> = new google.maps.Marker({position: pt, map:map, title:"<?php echo $pArr['notes']; ?>", icon:vIcon});
+							google.maps.event.addListener(m<?php echo $mCnt; ?>, "click", function(){ openIndPU(<?php echo $pArr['occid']; ?>); });
+							<?php
 						}
 						else{
-							echo 'var m'.$mCnt.' = new google.maps.Marker({position: new google.maps.LatLng('.$pArr['ll'].'),map:map,title:"'.$pArr['sciname'].'",icon:pIcon});'."\n";
+							?>
+							var m<?php echo $mCnt; ?> = new google.maps.Marker({position: pt, map:map, title:"<?php echo $pArr['sciname']; ?>", icon:pIcon});
+							<?php
 						}
 						$mCnt++;
 					}
 				}
-				echo 'var swLatLng = new google.maps.LatLng('.$swBound.')'."\n";  
-				echo 'var neLatLng = new google.maps.LatLng('.$neBound.')'."\n";  
+			}
+			//Check for and add checklist polygon
+			$clMeta = $clManager->getClMetaData();
+			if($clMeta['footprintwkt']){
 				?>
-				var llBounds = new google.maps.LatLngBounds(swLatLng, neLatLng);
-				map.fitBounds(llBounds);
-				<?php 
-            }
-            ?>
-        }
+				var polyPointArr = [];
+				<?php
+				$footPrintWkt = $clMeta['footprintwkt'];
+				if(substr($footPrintWkt, 0, 7) == 'POLYGON') $footPrintWkt = substr($footPrintWkt, 10, -2);
+				$pointArr = explode(',', $footPrintWkt);
+				foreach($pointArr as $pointStr){
+					$llArr = explode(' ', trim($pointStr));
+					?>
+					var polyPt = new google.maps.LatLng(<?php echo $llArr[1].','.$llArr[0]; ?>);
+					polyPointArr.push(polyPt);
+					llBounds.extend(polyPt);
+					<?php
+				}
+				?>
+				var footPoly = new google.maps.Polygon({
+					paths: polyPointArr,
+					strokeWeight: 2,
+					fillOpacity: 0.4,
+					map: map
+				});
+				<?php
+			}
+			?>
+			map.fitBounds(llBounds);
+			map.panToBounds(llBounds);
+		}
 
 		function openIndPU(occId){
 			if(puWin != null) puWin.close();
-			var puWin = window.open('../collections/individual/index.php?occid='+occId,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width=900,height=600,left=20,top=20');
+			var puWin = window.open('../collections/individual/index.php?occid='+occId,'indspec' + occId,'scrollbars=1,toolbar=0,resizable=1,width=900,height=600,left=20,top=20');
 			if(puWin.opener == null) puWin.opener = self;
 			setTimeout(function () { puWin.focus(); }, 0.5);
 			return false;
 		}
 
-    </script>
-    <style>
+	</script>
+	<style>
 		html, body, #map_canvas {
 			width: 100%;
 			height: 100%;
@@ -91,20 +111,20 @@ if($coordArr){
 			padding: 0;
 		}
 	</style>
-</head> 
+</head>
 <body style="background-color:#ffffff;" onload="initialize();">
 <?php
-    if(!$coordArr){ //no results
-    	?>
+	if(!$coordArr){
+		?>
 		<div style='font-size:120%;font-weight:bold;'>
 			Your query apparently does not contain any records with coordinates that can be mapped.
 		</div>
 		<div style="margin:15px;">
 			It may be that the vouchers have rare/threatened status that require the locality coordinates be hidden.
 		</div>
-        <?php 
-    }
-    ?>
+		<?php
+	}
+	?>
 	<div id='map_canvas'></div>
 </body>
 </html>

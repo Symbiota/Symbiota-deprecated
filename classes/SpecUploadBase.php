@@ -1147,6 +1147,9 @@ class SpecUploadBase extends SpecUpload{
 		if($this->processingStatus){
 			$recMap['processingstatus'] = $this->processingStatus;
 		}
+		elseif($this->uploadType == $this->SKELETAL){
+			$recMap['processingstatus'] = 'unprocessed';
+		}
 
 		//Temporarily code until Specify output UUID as occurrenceID
 		if($this->sourceDatabaseType == 'specify' && (!isset($recMap['occurrenceid']) || !$recMap['occurrenceid'])){

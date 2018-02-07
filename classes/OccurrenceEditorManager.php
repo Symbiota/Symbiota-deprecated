@@ -791,6 +791,12 @@ class OccurrenceEditorManager {
 				$oldValues = $rs->fetch_assoc();
 				$rs->free();
 
+				//If processing status was "unprocessed" and recordEnteredBy is null, populate with user login
+				if($oldValues['recordenteredby'] == 'preprocessed' || (!$oldValues['recordenteredby'] && ($oldValues['processingstatus'] == 'unprocessed' || $oldValues['processingstatus'] == 'stage 1'))){
+					$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
+					$editArr[] = 'recordenteredby';
+				}
+
 				//Version edits
 				$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
 					'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$GLOBALS['SYMB_UID'].',';
@@ -827,16 +833,10 @@ class OccurrenceEditorManager {
 			//Edit record only if user is authorized to autoCommit
 			if($autoCommit){
 				$status = 'SUCCESS: edits submitted and activated ';
-				//If processing status was "unprocessed" and recordEnteredBy is null, populate with user login
 				$sql = '';
 				//Apply autoprocessing status if set
 				if(array_key_exists('autoprocessingstatus',$occArr) && $occArr['autoprocessingstatus']){
 					$occArr['processingstatus'] = $occArr['autoprocessingstatus'];
-				}
-				if($editArr){
-					if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
-						$occArr['recordenteredby'] = $GLOBALS['USERNAME'];
-					}
 				}
 				if(isset($occArr['institutioncode']) && $occArr['institutioncode'] == $this->collMap['institutioncode']) $occArr['institutioncode'] = '';
 				if(isset($occArr['collectioncode']) && $occArr['collectioncode'] == $this->collMap['collectioncode']) $occArr['collectioncode'] = '';
@@ -1511,8 +1511,8 @@ class OccurrenceEditorManager {
 		//Get Identification ranking
 		$retArr = array();
 		$sql = 'SELECT v.ovsid, v.ranking, v.notes, l.username '.
-				'FROM omoccurverification v LEFT JOIN userlogin l ON v.uid = l.uid '.
-				'WHERE v.category = "identification" AND v.occid = '.$this->occid;
+			'FROM omoccurverification v LEFT JOIN userlogin l ON v.uid = l.uid '.
+			'WHERE v.category = "identification" AND v.occid = '.$this->occid;
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		//There can only be one identification ranking per specimen
@@ -1561,9 +1561,9 @@ class OccurrenceEditorManager {
 			//Check to see it the name is in the list, if not, add it
 			$clTid = 0;
 			$sqlCl = 'SELECT cl.tid '.
-					'FROM fmchklsttaxalink cl INNER JOIN taxstatus ts1 ON cl.tid = ts1.tidaccepted '.
-					'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-					'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts2.tid = '.$tid.' AND cl.clid = '.$clid;
+				'FROM fmchklsttaxalink cl INNER JOIN taxstatus ts1 ON cl.tid = ts1.tid '.
+				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+				'WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = '.$tid.') AND (cl.clid = '.$clid.')';
 			$rsCl = $this->conn->query($sqlCl);
 			//echo $sqlCl;
 			if($rowCl = $rsCl->fetch_object()){
@@ -1581,8 +1581,7 @@ class OccurrenceEditorManager {
 			}
 			//Add voucher
 			if($clTid){
-				$sqlCl2 = 'INSERT INTO fmvouchers(occid,clid,tid) '.
-						'values('.$this->occid.','.$clid.','.$clTid.')';
+				$sqlCl2 = 'INSERT INTO fmvouchers(occid,clid,tid) values('.$this->occid.','.$clid.','.$clTid.')';
 				//echo $sqlCl2;
 				if(!$this->conn->query($sqlCl2)){
 					$status .= '(WARNING adding voucher link: '.$this->conn->error.'); ';

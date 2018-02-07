@@ -15,6 +15,8 @@ ALTER TABLE `omoccurrences`
   CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL,
   DROP INDEX `idx_occrecordedby`;
 
+ALTER TABLE `users` ADD COLUMN `middleinitial` varchar(2) AFTER `firstname`;
+
 REPLACE omoccurrencesfulltext(occid,locality,recordedby) 
   SELECT occid, CONCAT_WS("; ", municipality, locality), recordedby
   FROM omoccurrences;
