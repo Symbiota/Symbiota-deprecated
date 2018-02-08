@@ -61,11 +61,36 @@
             <div class="main-navigation">
                 <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">&#8681; Menu</button>
                 <ul class="nav-menu">
-                    <li><a href="<?php echo $clientRoot; ?>/index.php">Home</a></li>
+                    <li class="menu-item-has-children"><a href="#">Explore Our Site</a>
+                        <ul>
+                            <li><a href="#">Mapping</a></li>
+                            <li><a href="#">Interactive Key</a></li>
+                            <li><a href="#">Image Search</a></li>
+                            <li><a href="#">OSU Herbarium</a></li>
+                            <li><a href="#">Garden with Natives</a></li>
+                            <li><a href="#">Plant Inventories</a></li>
+                        </ul>
+                    </li>
                     <li class="menu-item-has-children"><a href="#">Sitemap</a>
                         <ul>
+                            <li><a href="#">Links</a></li>
+                            <li><a href="#">Newsletter</a></li>
+                            <li><a href="#">Rare Plant Guide</a></li>
+                            <li><a href="#">Current News</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children"><a href="#">About</a>
+                        <ul>
+                            <li><a href="#">Mission</a></li>
                             <li><a href="#">Contact Info</a></li>
+                            <li><a href="#">Project Participants</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children"><a href="#">Support</a>
+                        <ul>
                             <li><a href="#">Donate</a></li>
+                            <li><a href="#">Volunteer</a></li>
+                            <li><a href="#">Merchandise</a></li>
                         </ul>
                     </li>
                 </ul><!-- .nav -->
