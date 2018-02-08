@@ -1,5 +1,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800' rel='stylesheet' type='text/css'>
+<script src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
+<?php // TODO Once the script below is working correctly, remove the above script tag  ?>
 <script type='text/javascript'>if(!window.jQuery){
     var jqresource = document.createElement("script");
     jqresource.async = "true";
