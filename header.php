@@ -2,21 +2,7 @@
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800' rel='stylesheet' type='text/css'>
 <link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' type='text/css' media='all' />
 <script src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
-<?php // TODO Once the script below is working correctly, remove the above script tag  ?>
-<script type='text/javascript'>if(!window.jQuery){
-    var jqresource = documen.createElement("script");
-    jqresource.async = "true";
-    jqresource.src = "<?php echo $clientRoot; ?>/js/jquery.js";
-    var jqscript = document.getElementsByTagName("script")[0];
-    jqscript.parentNode.insertBefore(jqresource,jqscript);
-
-    var jquiresource = document.cretateElement("script");
-    jquiresource.async = "true";
-    jquiresource.src = "<?php echo $clientRoot; ?>/js/jquery-ui.js";
-    var jquiscript = document.getElementsByTagName("script")[0];
-    jquiscript.parentNode.insertBefore(jquiscript,jquiresource);
-}
-</script>
+<script src="<?php echo $clientRoot; ?>/js/jquery-ui.js"></script>
 <script src="<?php echo $clientRoot; ?>/js/hover_pack.js"></script>
 <script type="text/javascript" src="<?php echo $clientRoot; ?>/js/move-top.js"></script>
 <script type="text/javascript" src="<?php echo $clientRoot; ?>/js/easing.js"></script>
