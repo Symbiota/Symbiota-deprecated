@@ -1,3 +1,4 @@
+</div><!-- .content-wrapper -->
 <div class="footer-bottom">
 	<div class="wrap">
 		<div class="section group">

@@ -2538,11 +2538,22 @@ a:hover{
 	margin: 0 auto;
 	position: relative;
 }
+.content-wrapper {
+}
+.content-wrapper:before{
+	content: ' ';
+	box-shadow: inset 0px 40px 40px -40px rgba(0,0,0,0.9);
+	position: absolute;
+	z-index: 10;
+	height: 40px;
+	width: 100%;
+}
 .header-logo {
 	position: relative;
 	top: -35px;
 	float: left;
 	width: 125px;
+	height: 110px;
 }
 .header-logo img {
 	border: 10px solid white;
@@ -2555,6 +2566,21 @@ a:hover{
 .search-wrapper {
 	float: right;
 	width: 300px;
+	padding-top: 20px;
+}
+.search-wrapper form {
+	float: right;
+}
+#quicksearch input {
+	border: 1px solid #531D94;
+	width: 200px;
+	padding: 5px;
+}
+#quicksearch button {
+	border: none;
+	background: #A711B0;
+	padding: 7px 9px;
+	color: white;
 }
 
 /*--------------------------------------------------------------
@@ -2605,6 +2631,7 @@ a:hover{
 /* main menu */
 .main-navigation {
 	float: left;
+	margin-top: 65px;
 }
 .main-navigation ul {
 	display: none;
