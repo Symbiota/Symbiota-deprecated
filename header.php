@@ -37,6 +37,20 @@
                 <ul>
                     <li><a href="#">Contact Info</a></li>
                     <li><a href="#">Donate</a></li>
+	                <?php
+	                if($userDisplayName){
+		                ?>
+                        <li><a href="">Welcome <?php echo $userDisplayName; ?>!</a></li>
+                        <li><a href="<?php echo $clientRoot; ?>/profile/viewprofile.php">My Profile</a></li>
+                        <li><a href="<?php echo $clientRoot; ?>/profile/index.php?submit=logout">Logout</a></li>
+		                <?php
+	                }
+	                else{
+		                ?>
+                        <li><a href="<?php echo $clientRoot."/profile/index.php?refurl=".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">Log In</a></li>
+		                <?php
+	                }
+	                ?>
                 </ul>
             </div>
         </div>
@@ -48,21 +62,12 @@
                 <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">&#8681; Menu</button>
                 <ul class="nav-menu">
                     <li><a href="<?php echo $clientRoot; ?>/index.php">Home</a></li>
-                    <?php
-                    if($userDisplayName){
-                        ?>
-                        <li><a href="">Welcome <?php echo $userDisplayName; ?>!</a></li>
-                        <li><a href="<?php echo $clientRoot; ?>/profile/viewprofile.php">My Profile</a></li>
-                        <li><a href="<?php echo $clientRoot; ?>/profile/index.php?submit=logout">Logout</a></li>
-                        <?php
-                    }
-                    else{
-                        ?>
-                        <li><a href="<?php echo $clientRoot."/profile/index.php?refurl=".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">Log In</a></li>
-                        <?php
-                    }
-                    ?>
-                    <li><a href="<?php echo $clientRoot; ?>/sitemap.php">Sitemap</a></li>
+                    <li class="menu-item-has-children"><a href="#">Sitemap</a>
+                        <ul>
+                            <li><a href="#">Contact Info</a></li>
+                            <li><a href="#">Donate</a></li>
+                        </ul>
+                    </li>
                 </ul><!-- .nav -->
                 <script type="text/javascript" src="<?php echo $clientRoot; ?>/js/responsive-nav.js"></script>
             </div><!-- .main-nav -->
