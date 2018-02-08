@@ -1,15 +1,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800' rel='stylesheet' type='text/css'>
+<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' type='text/css' media='all' />
 <script src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
 <?php // TODO Once the script below is working correctly, remove the above script tag  ?>
 <script type='text/javascript'>if(!window.jQuery){
-    var jqresource = document.createElement("script");
+    var jqresource = documen.createElement("script");
     jqresource.async = "true";
     jqresource.src = "<?php echo $clientRoot; ?>/js/jquery.js";
     var jqscript = document.getElementsByTagName("script")[0];
     jqscript.parentNode.insertBefore(jqresource,jqscript);
 
-    var jquiresource = document.createElement("script");
+    var jquiresource = document.cretateElement("script");
     jquiresource.async = "true";
     jquiresource.src = "<?php echo $clientRoot; ?>/js/jquery-ui.js";
     var jquiscript = document.getElementsByTagName("script")[0];
@@ -54,7 +55,7 @@
                 </ul>
             </div>
         </div>
-        <div class="main-header clearfix">
+        <div class="main-header">
             <div class="header-logo">
                 <a href="<?php echo $clientRoot; ?>/index.php"><img src="<?php echo $clientRoot; ?>/images/layout/new-logo.png" alt="Oregon Flora"></a>
             </div><!-- .logo -->
@@ -103,7 +104,7 @@
                 $searchText = '';
 
                 //Text that will appear on search button.
-                $buttonText = 'Go';
+                $buttonText = '<i class="fa fa-search"></i>';
 
                 //---------------------------DO NOT CHANGE BELOW HERE-----------------------------
                 include_once($SERVER_ROOT.'/classes/PluginsManager.php');
@@ -114,3 +115,4 @@
             </div><!-- .search-wrapper -->
         </div><!--.main-header -->
     </div><!-- .header-wrapper -->
+    <div class="content-wrapper" id="site-content">
