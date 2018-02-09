@@ -23,3 +23,4 @@ $LANG['REST_PWD'] = 'Reset Password';
 $LANG['REMEMBER_LOGIN'] = "Can't Remember Login Name?";
 $LANG['RETRIEVE'] = 'Retrieve Login';
 $LANG['YOUR_EMAIL'] = 'Your Email';
+?>

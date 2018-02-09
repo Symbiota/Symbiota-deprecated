@@ -1,7 +1,7 @@
 <?php
 /*
 ------------------
-Language: Espaï¿½ol (Spanish)
+Language: Español (Spanish)
 ------------------
 */
 
@@ -119,3 +119,4 @@ $LANG['PERSONAL'] = 'Gesti&oacute;n del manejo personal de especimenes y imprimi
 $LANG['EDITIMG'] = 'Modificar Im&aacute;genes';
 $LANG['IMGSORTORD'] = 'Modificar la secuencia de im&aacute;genes';
 $LANG['ADDNEWIMG'] = 'A&â€Œntilde;adir nuevo imagen';
+?>
