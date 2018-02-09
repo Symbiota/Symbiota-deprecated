@@ -162,7 +162,8 @@ class SOLRManager extends OccurrenceManager{
     }
 
     public function translateSOLRRecList($sArr){
-        $returnArr = Array();
+        global $imageDomain;
+ 	    $returnArr = Array();
         $canReadRareSpp = false;
         if($GLOBALS['USER_RIGHTS']){
             if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
@@ -219,7 +220,11 @@ class SOLRManager extends OccurrenceManager{
                 $returnArr[$occId]["locality"] = $securityStr.'</span>';
             }
             if(isset($k['thumbnailurl'])){
-                $returnArr[$occId]["img"] = $k['thumbnailurl'][0];
+                $tnUrl = $k['thumbnailurl'][0];
+                if($imageDomain){
+                    if(substr($tnUrl,0,1)=="/") $tnUrl = $imageDomain.$tnUrl;
+                }
+                $returnArr[$occId]["img"] = $tnUrl;
             }
 	    }
 
