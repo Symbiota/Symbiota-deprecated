@@ -70,24 +70,27 @@ $coordArr = $clManager->getCoordinates(0);
 				var polyPointArr = [];
 				<?php
 				$footPrintWkt = $clMeta['footprintwkt'];
-				if(substr($footPrintWkt, 0, 7) == 'POLYGON') $footPrintWkt = substr($footPrintWkt, 10, -2);
-				$pointArr = explode(',', $footPrintWkt);
-				foreach($pointArr as $pointStr){
-					$llArr = explode(' ', trim($pointStr));
+				if(substr($footPrintWkt, 0, 7) == 'POLYGON'){
+					$footPrintWkt = substr($footPrintWkt, 10, -2);
+					$pointArr = explode(',', $footPrintWkt);
+					foreach($pointArr as $pointStr){
+						$llArr = explode(' ', trim($pointStr));
+						if($llArr[0] > 90 || $llArr[0] < -90) break;
+						?>
+						var polyPt = new google.maps.LatLng(<?php echo $llArr[0].','.$llArr[1]; ?>);
+						polyPointArr.push(polyPt);
+						llBounds.extend(polyPt);
+						<?php
+					}
 					?>
-					var polyPt = new google.maps.LatLng(<?php echo $llArr[1].','.$llArr[0]; ?>);
-					polyPointArr.push(polyPt);
-					llBounds.extend(polyPt);
+					var footPoly = new google.maps.Polygon({
+						paths: polyPointArr,
+						strokeWeight: 2,
+						fillOpacity: 0.4,
+						map: map
+					});
 					<?php
 				}
-				?>
-				var footPoly = new google.maps.Polygon({
-					paths: polyPointArr,
-					strokeWeight: 2,
-					fillOpacity: 0.4,
-					map: map
-				});
-				<?php
 			}
 			?>
 			map.fitBounds(llBounds);
