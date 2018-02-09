@@ -2862,7 +2862,7 @@ button.menu-toggle {
 
 
 /*--------------------------------------------------------------
-## To Top
+# To Top
 --------------------------------------------------------------*/
 
 #to-top {
@@ -2884,4 +2884,80 @@ button.menu-toggle {
 	color: #fff;
 	font-size: 16px;
 	line-height: 16px;
+}
+
+
+/*--------------------------------------------------------------
+# Footer
+--------------------------------------------------------------*/
+/* footer nav */
+.footer-nav-wrapper {
+	background-color: white;
+	position: relative;
+	padding: 8px 15px;
+}
+.footer-nav {
+	max-width: 1100px;
+	margin: 0 auto;
+}
+.footer-nav li {
+	display: inline-block;
+	margin-bottom: 0;
+
+}
+.footer-nav li a {
+	color: #531D94;
+	font-size: 18px;
+	font-weight: bold;
+	position: relative;
+	padding: 0 10px;
+	border-right: 1px solid #531D94;
+}
+.footer-nav li:last-child a {
+	border: none;
+}
+.footer-nav li a:hover {
+	text-decoration: underline;
+}
+/* end footer nav */
+
+.footer-wrapper {
+	background: #3E6218;
+	color: white;
+	padding: 40px 20px;
+	font-size: 18px;
+}
+.footer {
+	max-width: 1100px;
+	margin: 0 auto;
+}
+.footer-left {
+	width: 50%;
+	float: left;
+}
+.footer-right {
+	width: 50%;
+	float: left;
+}
+.footer-left img {
+	display: block;
+	float: left;
+	padding: 10px;
+	background: white;
+	margin-right: 20px;
+}
+.footer-left p {
+	float: left;
+	overflow: hidden;
+}
+.copyright {
+	clear: both;
+	font-size: 16px;
+	padding-top: 20px;
+}
+.copyright a {
+	color: white !important;
+}
+.footer-right form {
+	padding-top: 20px;
 }
