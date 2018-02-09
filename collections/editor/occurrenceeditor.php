@@ -440,8 +440,9 @@ else{
 
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js?ver=170310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=20170503"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170104"></script>
+	<script type="text/javascript" src="../../js/symb/wktpolygontools.js?ver=180208"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=20180203"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170204"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170310"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=170302"></script>
 </head>
@@ -1078,7 +1079,7 @@ else{
 														<div style="float:right;margin-top:-2px;margin-left:2px;" id="googleDiv" onclick="openMappingPolyAid();" title="Google Maps">
 															<img src="../../images/world.png" />
 														</div>
-														<textarea name="footprintwkt" id="footprintWKT" onchange="footPrintWktChanged(this)" style="height:40px;resize:vertical;" ><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
+														<textarea name="footprintwkt" id="footprintwkt" onchange="footPrintWktChanged(this)" style="height:40px;resize:vertical;" ><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
 													</div>
 												</div>
 											</div>

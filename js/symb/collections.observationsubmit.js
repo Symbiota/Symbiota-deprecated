@@ -340,7 +340,7 @@ function isNumeric(sText){
 }
 
 function openMappingAid(targetForm,targetLat,targetLong) {
-    mapWindow=open("../../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+    mapWindow=open("../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
     if (mapWindow.opener == null) mapWindow.opener = self;
     mapWindow.focus();
     if(document.obsform.geodeticdatum.value == "") document.obsform.geodeticdatum.value = "WGS84"; 

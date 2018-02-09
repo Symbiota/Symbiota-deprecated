@@ -1,5 +1,6 @@
 <?php
-include_once('../config/symbini.php');
+include_once('../../config/symbini.php');
+include_once($SERVER_ROOT.'/content/lang/shared/mapaids.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $formName = array_key_exists("formname",$_REQUEST)?$_REQUEST["formname"]:"";
@@ -32,25 +33,27 @@ else{
 ?>
 <html>
 	<head>
-		<title><?php echo $DEFAULT_TITLE; ?> - Coordinate Aid</title>
+		<title><?php echo $DEFAULT_TITLE; ?> - Coordinate Polygon Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>"></script>
-	    <script type="text/javascript">
-		    var map;
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/symb/wktpolygontools.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			var map;
+			var polygonWkt;
 			var selectedShape = null;
 
 			function initialize(){
-				if(opener.document.getElementById("footprintWKT").value != ''){
-					document.getElementById('poly_array').value = opener.document.getElementById("footprintWKT").value;
+				if(opener.document.getElementById("footprintwkt").value != ''){
+					polygonWkt = validatePolygon(opener.document.getElementById("footprintwkt").value);
 				}
 				var dmLatLng = new google.maps.LatLng(<?php echo $latCenter.','.$lngCenter; ?>);
-		    	var dmOptions = {
+				var dmOptions = {
 					zoom: <?php echo $zoom; ?>,
 					center: dmLatLng,
 					mapTypeId: google.maps.MapTypeId.TERRAIN,
 					scaleControl: true
 				};
-		    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
+				map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
 
 				var polyOptions = {
 					strokeWeight: 0,
@@ -108,60 +111,31 @@ else{
 					}
 				});
 
-				// Clear the current selection when the drawing mode is changed, or when the
-				// map is clicked.
+				// Clear the current selection when the drawing mode is changed or when the map is clicked
 				google.maps.event.addListener(drawingManager, 'drawingmode_changed', clearSelection);
 				google.maps.event.addListener(map, 'click', clearSelection);
-				google.maps.event.addDomListener(document.getElementById('delete-button'), 'click', deleteSelectedShape);
 				setPolygon();
 			}
 
 			function setPolygon(){
 				var pointArr = [];
 				var polyBounds = new google.maps.LatLngBounds();
-				if(document.getElementById('poly_array').value != ''){
-					var footprintWKT = document.getElementById("poly_array").value;
-					if(footprintWKT.substring(0,10) == "POLYGON (("){
-						//Reduce only points of WKT format
-						footprintWKT = footprintWKT.slice(10,-2);
-					}
-					if(footprintWKT.substring(0,2) == "[{"){
-						//Translate old json format to wkt
-						try{
-							var footPolyArr = JSON.parse(footprintWKT);
-							for(i in footPolyArr){
-								var keys = Object.keys(footPolyArr[i]);
-								if(!isNaN(footPolyArr[i][keys[0]]) && !isNaN(footPolyArr[i][keys[1]])){
-									var pt = new google.maps.LatLng(footPolyArr[i][keys[0]],footPolyArr[i][keys[1]]);
-									pointArr.push(pt);
-									polyBounds.extend(pt);
-								}
-								else{
-									alert("The footprint is not in the proper format. Please recreate it using the map tools.");
-									break;
-								}
-							}
-							if(footPolyArr.length > 0){
-								var pt = new google.maps.LatLng(footPolyArr[0][keys[0]],footPolyArr[0][keys[1]]);
-								pointArr.push(pt);
-								polyBounds.extend(pt);
-							}
+				if(polygonWkt){
+					var footprintWKT = trimPolygon(polygonWkt);
+					var strArr = footprintWKT.split(",");
+					for(var i=0; i < strArr.length; i++){
+						var xy = strArr[i].trim().split(" ");
+						if(parseInt(Math.abs(xy[0])) > 90 || parseInt(Math.abs(xy[1])) > 180){
+							alert("One or more coordinates are illegal or ordered incorrectly ("+xy[0]+" "+xy[1]+")");
+							return false;
 						}
-						catch(e){
-							alert("The footprint is not in the proper format. Please recreate it using the map tools.");
-						}
-					}
-					else{
-						var strArr = footprintWKT.split(",");
-						for(var i=0; i < strArr.length; i++){
-							var xy = strArr[i].split(" ");
-							var pt = new google.maps.LatLng(xy[1],xy[0]);
+						else{
+							var pt = new google.maps.LatLng(xy[0],xy[1]);
 							pointArr.push(pt);
 							polyBounds.extend(pt);
-					    }
+						}
 					}
 				}
-
 				if(pointArr.length > 0){
 					var footPoly = new google.maps.Polygon({
 						paths: pointArr,
@@ -201,7 +175,6 @@ else{
 					selectedShape.setEditable(false);
 					selectedShape = null;
 				}
-				document.getElementById("polycoord_message").style.display = "none";
 			}
 
 			function deleteSelectedShape() {
@@ -209,8 +182,8 @@ else{
 					selectedShape.setMap(null);
 					clearSelection();
 				}
-				document.getElementById("poly_array").value = "";
-				opener.window.deletePolygon();
+				opener.document.getElementById("footprintwkt").value = "";
+				polygonWkt = "";
 			}
 
 			function setPolygonStr(polygon) {
@@ -219,22 +192,20 @@ else{
 				for(i=0;i<coordinatesMVC.length;i++){
 					var mvcString = coordinatesMVC[i].toString();
 					mvcString = mvcString.slice(1, -1);
-					var latlngArr = mvcString.split(", ");
-					coordinates.push(parseFloat(latlngArr[1]).toFixed(6)+" "+parseFloat(latlngArr[0]).toFixed(6));
+					var latlngArr = mvcString.split(",");
+					coordinates.push(parseFloat(latlngArr[0]).toFixed(6)+" "+parseFloat(latlngArr[1]).toFixed(6));
 					//if(i==0) var firstSet = parseFloat(latlngArr[1]).toFixed(6)+" "+parseFloat(latlngArr[0]).toFixed(6);
 				}
 				//coordinates.push(firstSet);
-				document.getElementById("poly_array").value = coordinates.toString();
-				document.getElementById("polycoord_message").style.display = "block";
+				polygonWkt = coordinates.toString();
 			}
 
-	        function updateParentForm() {
-				if(opener.document.getElementById("footprintWKT")){
-					var polyValue = document.getElementById("poly_array").value;
-					if(polyValue && polyValue.substring(7) != "POLYGON") polyValue = "POLYGON (("+polyValue+"))";
-					opener.document.getElementById("footprintWKT").value = polyValue;
+			function updateParentForm() {
+				if(opener.document.getElementById("footprintwkt")){
+					if(polygonWkt && polygonWkt.substring(7) != "POLYGON") polygonWkt = "POLYGON (("+polygonWkt+"))";
+					opener.document.getElementById("footprintwkt").value = polygonWkt;
 					try{
-						opener.document.getElementById("footprintWKT").onchange();
+						opener.document.getElementById("footprintwkt").onchange();
 					}
 					catch(myErr){}
 				}
@@ -251,31 +222,20 @@ else{
 					opener.document.getElementById("polyNotDefDiv").style.display = "none";
 				}
 				self.close();
-	            return false;
-	        }
-	    </script>
+				return false;
+			}
+		</script>
 	</head>
 	<body style="background-color:#ffffff;" onload="initialize()">
-		<div style="width:700px;">
-			<div style="margin-top:8px;">
-				<div id="polycoord_message" style="float:left;display:none;">
-					<b>Polygon coordinates ready to submit.</b>
-				</div>
-				<div style="float:right;margin-right:30px;">
-					<button type="submit" name="addcoords" value="Submit Polygon" onclick="updateParentForm();">Submit</button>&nbsp;&nbsp;&nbsp;
-					<button id="delete-button">Delete Shape</button>
-					<a href="#" onclick="toggle('helptext')"><img alt="Display Help Text" src="../images/qmark_big.png" style="width:15px;" /></a>
-				</div>
-				<div id="helptext" style="clear:both;display:none;">
-					Click on polygon tool to draw a polygon representing search area.
-					Submit Polygon button will transfer polygon to form.
-				</div>
-			</div>
+		<div style="float:right" style="margin-left:20px;">
+			<button type="submit" name="addcoords" onclick="updateParentForm()">Submit Polygon</button>
+		</div>
+		<div style="float:right" style="margin-left:20px;">
+			<button id="delete-button" onclick="deleteSelectedShape();return false">Delete Selected Shape</button>
+		</div>
+		<div id="helptext" style="">
+			Click on polygon symbol to activate polygon tool. Click submit button transfer polygon to editor.<br/>
 		</div>
 		<div id='map_canvas' style='width:100%;height:700px;'></div>
-		<div>
-			<textarea id="poly_array" name="poly_array" style="width:650px;height:75px;"></textarea>
-			<button onclick="resetPolygon()">Redraw Polygon</button>
-		</div>
 	</body>
 </html>

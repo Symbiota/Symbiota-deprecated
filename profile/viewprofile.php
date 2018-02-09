@@ -143,12 +143,14 @@ if($isEditor){
 	<script type="text/javascript" src="../js/tiny_mce/tiny_mce.js"></script>
 	<script type="text/javascript">
 		var tabIndex = <?php echo $tabIndex; ?>;
+
 		tinyMCE.init({
 			mode : "textareas",
 			theme_advanced_buttons1 : "bold,italic,underline,charmap,hr,outdent,indent,link,unlink,code",
 			theme_advanced_buttons2 : "",
 			theme_advanced_buttons3 : ""
 		});
+
 	</script>
 	<script type="text/javascript" src="../js/symb/profile.viewprofile.js?ver=20170530"></script>
 	<script type="text/javascript" src="../js/symb/shared.js"></script>

@@ -372,6 +372,7 @@ function coordinateUncertaintyInMetersChanged(f){
 
 function footPrintWktChanged(formObj){
 	fieldChanged('footprintwkt');
+	formObj.value = validatePolygon(formObj.value);
 	if(formObj.value.length > 65000){
 		formObj.value = "";
 		alert("WKT footprint is too large to save in the database");

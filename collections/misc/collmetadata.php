@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/misc/collmetadata.php?'.$_SERVER['QUERY_STRING']);
 
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 
 $statusStr = '';
@@ -96,9 +96,9 @@ $collManager->cleanOutArr($collData);
 			}
 
 		});
-	
+
 		function openMappingAid() {
-			mapWindow=open("../../tools/mappointaid.php?formname=colleditform&latname=latitudedecimal&longname=longitudedecimal","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+			mapWindow=open("../tools/mappointaid.php?formname=colleditform&latname=latitudedecimal&longname=longitudedecimal","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 			if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
@@ -145,7 +145,7 @@ $collManager->cleanOutArr($collData);
 				f.publishToGbif.checked = false;
 			}
 		}
-		
+
 		function checkGUIDSource(f){
 			if(f.publishToGbif.checked == true){
 				if(!f.guidtarget.value){
@@ -162,7 +162,7 @@ $collManager->cleanOutArr($collData);
 			}
 			return true;
 		}
-		
+
 		function toggle(target){
 			var objDiv = document.getElementById(target);
 			if(objDiv){
@@ -188,7 +188,7 @@ $collManager->cleanOutArr($collData);
 				}
 			}
 		}
-		
+
 		function verifyIconImage(f){
 			var iconImageFile = document.getElementById("iconfile").value;
 			if(iconImageFile){
@@ -215,7 +215,7 @@ $collManager->cleanOutArr($collData);
 				}
 			}
 		}
-		
+
 		function verifyIconURL(f){
 			var iconImageFile = document.getElementById("iconurl").value;
 			if((iconImageFile.substr(iconImageFile.length-4) != '.jpg') && (iconImageFile.substr(iconImageFile.length-4) != '.png') && (iconImageFile.substr(iconImageFile.length-4) != '.gif')){
@@ -228,9 +228,9 @@ $collManager->cleanOutArr($collData);
 		   	var ValidChars = "0123456789-.";
 		   	var IsNumber = true;
 		   	var Char;
-		 
-		   	for(var i = 0; i < sText.length && IsNumber == true; i++){ 
-			   Char = sText.charAt(i); 
+
+		   	for(var i = 0; i < sText.length && IsNumber == true; i++){
+			   Char = sText.charAt(i);
 				if(ValidChars.indexOf(Char) == -1){
 					IsNumber = false;
 					break;
@@ -268,15 +268,15 @@ $collManager->cleanOutArr($collData);
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php
-		if($statusStr){ 
+		if($statusStr){
 			?>
 			<hr />
 			<div style="margin:20px;font-weight:bold;color:red;">
 				<?php echo $statusStr; ?>
 			</div>
 			<hr />
-			<?php 
-		} 
+			<?php
+		}
 		if($isEditor){
 			if($collid){
 				echo '<h1>'.$collData['collectionname'].(array_key_exists('institutioncode',$collData)?' ('.$collData['institutioncode'].')':'').'</h1>';
@@ -297,7 +297,7 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="instcodeinfodialog">
-										The name (or acronym) in use by the institution having custody of the occurrence records. This field is required. 
+										The name (or acronym) in use by the institution having custody of the occurrence records. This field is required.
 										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#institutionCode" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
@@ -312,14 +312,14 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="collcodeinfodialog">
-										The name, acronym, or code identifying the collection or data set from which the record was derived. This field is optional. 
+										The name, acronym, or code identifying the collection or data set from which the record was derived. This field is optional.
 										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#collectionCode" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
 							<tr>
 								<td>
-									Collection Name: 
+									Collection Name:
 								</td>
 								<td>
 									<input type="text" name="collectionname" value="<?php echo ($collid?$collData["collectionname"]:'');?>" style="width:95%;" title="Required field" />
@@ -328,7 +328,7 @@ $collManager->cleanOutArr($collData);
 							<tr>
 								<td>
 									Description<br/>
-									(2000 character max): 
+									(2000 character max):
 								</td>
 								<td>
 									<textarea name="fulldescription" style="width:95%;height:90px;"><?php echo ($collid?$collData["fulldescription"]:'');?></textarea>
@@ -344,7 +344,7 @@ $collManager->cleanOutArr($collData);
 							</tr>
 							<tr>
 								<td>
-								Contact: 
+								Contact:
 									</td>
 								<td>
 									<input type="text" name="contact" value="<?php echo ($collid?$collData["contact"]:'');?>" style="width:90%;" />
@@ -377,7 +377,7 @@ $collManager->cleanOutArr($collData);
 									<input id="lngdec" type="text" name="longitudedecimal" value="<?php echo ($collid?$collData["longitudedecimal"]:'');?>" />
 								</td>
 							</tr>
-							<?php 
+							<?php
 							$fullCatArr = $collManager->getCategoryArr();
 							if($fullCatArr){
 								?>
@@ -389,7 +389,7 @@ $collManager->cleanOutArr($collData);
 										<select name="ccpk">
 											<option value="">No Category</option>
 											<option value="">-------------------------------------------</option>
-											<?php 
+											<?php
 											$catArr = $collManager->getCollectionCategories();
 											foreach($fullCatArr as $ccpk => $category){
 												echo '<option value="'.$ccpk.'" '.($collid && array_key_exists($ccpk, $catArr)?'SELECTED':'').'>'.$category.'</option>';
@@ -411,9 +411,9 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="peditsinfodialog">
-										Checking public edits will allow any user logged into the system to modify specimen records 
-										and resolve errors found within the collection. However, if the user does not have explicit 
-										authorization for the given collection, edits will not be applied until they are 
+										Checking public edits will allow any user logged into the system to modify specimen records
+										and resolve errors found within the collection. However, if the user does not have explicit
+										authorization for the given collection, edits will not be applied until they are
 										reviewed and approved by collection administrator.
 									</div>
 								</td>
@@ -423,12 +423,12 @@ $collManager->cleanOutArr($collData);
 									License:
 								</td>
 								<td>
-									<?php 
+									<?php
 									if(isset($rightsTerms)){
 										?>
 										<select name="rights">
 											<?php
-											$hasOrphanTerm = true; 
+											$hasOrphanTerm = true;
 											foreach($rightsTerms as $k => $v){
 												$selectedTerm = '';
 												if($collid && strtolower($collData["rights"])==strtolower($v)){
@@ -442,19 +442,19 @@ $collManager->cleanOutArr($collData);
 											}
 											?>
 										</select>
-										<?php 
+										<?php
 									}
 									else{
 										?>
 										<input type="text" name="rights" value="<?php echo ($collid?$collData["rights"]:'');?>" style="width:90%;" />
-										<?php 
+										<?php
 									}
 									?>
 									<a id="rightsinfo" href="#" onclick="return false" title="More information about Rights">
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="rightsinfodialog">
-										A legal document giving official permission to do something with the resource. 
+										A legal document giving official permission to do something with the resource.
 										This field can be limited to a set of values by modifying the portal's central configuration file.
 										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:license" target="_blank">Darwin Core definition</a>.
 									</div>
@@ -485,14 +485,14 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="accessrightsinfodialog">
-										Informations or a URL link to page with details explaining how one can use the data.   
+										Informations or a URL link to page with details explaining how one can use the data.
 										See <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:accessRights" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
 							<tr>
 								<td>
-									<span title="Source of Global Unique Identifier">GUID source:</span> 
+									<span title="Source of Global Unique Identifier">GUID source:</span>
 								</td>
 								<td>
 									<select name="guidtarget" onchange="mtypeguidChanged(this.form)">
@@ -506,13 +506,13 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="guidinfodialog">
-										Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) field  
-										is supplied by the source database (e.g. Specify database) and the GUID is mapped to the 
+										Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) field
+										is supplied by the source database (e.g. Specify database) and the GUID is mapped to the
 										<a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#occurrenceID" target="_blank">occurrenceId</a> field.
-										The use of the Occurrence Id as the GUID is not recommended for live datasets. 
+										The use of the Occurrence Id as the GUID is not recommended for live datasets.
 										Catalog Number can be used when the value within the catalog number field is globally unique.
-										The Symbiota Generated GUID (UUID) option will trigger the Symbiota data portal to automatically 
-										generate UUID GUIDs for each record. This option is recommended for many for Live Datasets 
+										The Symbiota Generated GUID (UUID) option will trigger the Symbiota data portal to automatically
+										generate UUID GUIDs for each record. This option is recommended for many for Live Datasets
 										but not allowed for Snapshot collections that are managed in local management system.
 									</div>
 								</td>
@@ -533,7 +533,7 @@ $collManager->cleanOutArr($collData);
 												<img src="../../images/info.png" style="width:15px;"/>
 											</a>
 										</div>
-										<!-- 
+										<!--
 										<div>
 											iDigBio <input type="checkbox" name="publishToIdigbio" value="1" onchange="checkGUIDSource(this.form);" <?php echo($publishIDIGBIO?'CHECKED':''); ?> />
 										</div>
@@ -557,11 +557,11 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="sourceurlinfodialog">
-										Adding a URL template here will dynamically generate and add the specimen details page a link to the 
+										Adding a URL template here will dynamically generate and add the specimen details page a link to the
 										source record. For example, &quot;http://sweetgum.nybg.org/vh/specimen.php?irn=--DBPK--&quot;
-										will generate a url to the NYBG collection with &quot;--DBPK--&quot; being replaced with the 
-										NYBG's Primary Key (dbpk data field within the ommoccurrence table). 
-										Template pattern --CATALOGNUMBER-- can also be used in place of --DBPK-- 
+										will generate a url to the NYBG collection with &quot;--DBPK--&quot; being replaced with the
+										NYBG's Primary Key (dbpk data field within the ommoccurrence table).
+										Template pattern --CATALOGNUMBER-- can also be used in place of --DBPK--
 									</div>
 								</td>
 							</tr>
@@ -596,13 +596,13 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="iconinfodialog">
-										Upload an icon image file or enter the URL of an image icon that represents the collection. If entering the URL of an image already located 
+										Upload an icon image file or enter the URL of an image icon that represents the collection. If entering the URL of an image already located
 										on a server, click on &quot;Enter URL&quot;. The URL path can be absolute or relative. The use of icons are optional.
 									</div>
 								</td>
 							</tr>
-							<?php 
-							if($IS_ADMIN){ 
+							<?php
+							if($IS_ADMIN){
 								?>
 								<tr>
 									<td>
@@ -618,14 +618,14 @@ $collManager->cleanOutArr($collData);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="colltypeinfodialog">
-											Preserve Specimens means that physical samples exist and can be inspected by researchers. 
-											Use Observations when the record is not based on a physical specimen. 
+											Preserve Specimens means that physical samples exist and can be inspected by researchers.
+											Use Observations when the record is not based on a physical specimen.
 											General Observations are used for setting up group projects where registered users
-											can independently manage their own dataset directly within the single collection. General Observation 
-											collections are typically used by field researchers to manage their collection data and print labels 
-											prior to depositing the physical material within a collection. Even though personal collections 
-											are represented by a physical sample, they are classified as &quot;observations&quot; until the 
-											physical material is deposited within a publicly available collection with active curation.	 
+											can independently manage their own dataset directly within the single collection. General Observation
+											collections are typically used by field researchers to manage their collection data and print labels
+											prior to depositing the physical material within a collection. Even though personal collections
+											are represented by a physical sample, they are classified as &quot;observations&quot; until the
+											physical material is deposited within a publicly available collection with active curation.
 										</div>
 									</td>
 								</tr>
@@ -643,9 +643,9 @@ $collManager->cleanOutArr($collData);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="managementinfodialog">
-											Use Snapshot when there is a separate in-house database maintained in the collection and the dataset 
-											within the Symbiota portal is only a periodically updated snapshot of the central database. 
-											A Live dataset is when the data is managed directly within the portal and the central database is the portal data. 
+											Use Snapshot when there is a separate in-house database maintained in the collection and the dataset
+											within the Symbiota portal is only a periodically updated snapshot of the central database.
+											A Live dataset is when the data is managed directly within the portal and the central database is the portal data.
 										</div>
 									</td>
 								</tr>
@@ -659,30 +659,30 @@ $collManager->cleanOutArr($collData);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="sortinfodialog">
-											Leave this field empty if you want the collections to sort alphabetically (default) 
+											Leave this field empty if you want the collections to sort alphabetically (default)
 										</div>
 									</td>
 								</tr>
-								<?php 
-							} 
-							if($collid){ 
+								<?php
+							}
+							if($collid){
 								?>
 								<tr>
 									<td>
 										Global Unique ID:
 									</td>
 									<td>
-										<?php 
+										<?php
 										echo $collData["guid"];
-										?> 
+										?>
 										<a id="collectionguidinfo" href="#" onclick="return false" title="More information">
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="collectionguidinfodialog">
-											Global Unique Identifier for this collection.  
-											If your collection already has a GUID (e.g. previously assigned by a  
+											Global Unique Identifier for this collection.
+											If your collection already has a GUID (e.g. previously assigned by a
 											collection management application such as Specify), that identifier should be represented here.
-											If you need to change this value, contact your portal manager.  
+											If you need to change this value, contact your portal manager.
 										</div>
 									</td>
 								</tr>
@@ -697,7 +697,7 @@ $collManager->cleanOutArr($collData);
 								<?php
 							}
 							else{
-								//New collection 
+								//New collection
 								?>
 								<tr>
 									<td>
@@ -709,11 +709,11 @@ $collManager->cleanOutArr($collData);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="collectionguidinfodialog">
-											Global Unique Identifier for this collection. 
-											If your collection already has a GUID (e.g. previously assigned by a  
+											Global Unique Identifier for this collection.
+											If your collection already has a GUID (e.g. previously assigned by a
 											collection management application such as Specify), that identifier should be entered here.
-											If you leave blank, the portal will automatically 
-											generate a UUID for this collection (recommended if GUID is not known to already exist).  
+											If you leave blank, the portal will automatically
+											generate a UUID for this collection (recommended if GUID is not known to already exist).
 										</div>
 									</td>
 								</tr>
@@ -723,12 +723,12 @@ $collManager->cleanOutArr($collData);
 							<tr>
 								<td colspan="2">
 									<div style="margin:20px;">
-										<?php 
+										<?php
 										if($collid){
 											?>
 											<input type="hidden" name="collid" value="<?php echo $collid;?>" />
 											<input type="submit" name="action" value="Save Edits" />
-											<?php 
+											<?php
 										}
 										else{
 											?>
@@ -750,7 +750,7 @@ $collManager->cleanOutArr($collData);
 					if($instArr = $collManager->getAddress()){
 						?>
 						<div style="margin:25px;">
-							<?php 
+							<?php
 							echo '<div>';
 							echo $instArr['institutionname'].($instArr['institutioncode']?' ('.$instArr['institutioncode'].')':'');
 							?>
@@ -760,7 +760,7 @@ $collManager->cleanOutArr($collData);
 							<a href="collmetadata.php?collid=<?php echo $collid.'&removeiid='.$instArr['iid']; ?>" title="Unlink institution address">
 								<img src="../../images/drop.png" style="width:14px;" />
 							</a>
-							<?php 
+							<?php
 							echo '</div>';
 							if($instArr['address1']) echo '<div>'.$instArr['address1'].'</div>';
 							if($instArr['address2']) echo '<div>'.$instArr['address2'].'</div>';
@@ -773,7 +773,7 @@ $collManager->cleanOutArr($collData);
 							if($instArr['notes']) echo '<div>'.$instArr['notes'].'</div>';
 							?>
 						</div>
-						<?php 
+						<?php
 					}
 					else{
 						//Link new institution
@@ -784,7 +784,7 @@ $collManager->cleanOutArr($collData);
 								<select name="iid" style="width:425px;">
 									<option value="">Select Institution Address</option>
 									<option value="">------------------------------------</option>
-									<?php 
+									<?php
 									$addrArr = $collManager->getInstitutionArr();
 									foreach($addrArr as $iid => $name){
 										echo '<option value="'.$iid.'">'.$name.'</option>';
@@ -800,7 +800,7 @@ $collManager->cleanOutArr($collData);
 								</a>
 							</div>
 						</div>
-						<?php 
+						<?php
 					}
 					?>
 				</fieldset>

@@ -61,7 +61,7 @@ SET edittype = 1;
 INSERT INTO omoccurpoints (occid,point)
 SELECT o.occid,Point(o.decimalLatitude, o.decimalLongitude) 
 FROM omoccurrences o LEFT JOIN omoccurpoints p ON o.occid = p.occid
-WHERE decimalLatitude IS NOT NULL AND decimalLongitude IS NOT NULL AND p.occid IS NULL;
+WHERE o.decimalLatitude IS NOT NULL AND o.decimalLongitude IS NOT NULL AND p.occid IS NULL;
 
 
 
