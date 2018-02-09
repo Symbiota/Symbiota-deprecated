@@ -37,20 +37,5 @@
 		</div>
 	</div>
 </div>
-<script type="text/javascript">
-	$(document).ready(function() {
-
-		var defaults = {
-			containerID: 'toTop', // fading element id
-			containerHoverID: 'toTopHover', // fading element hover id
-			scrollSpeed: 1200,
-			easingType: 'linear'
-		};
-
-	});
-</script>
-<a href="#" id="toTop" style="display: block;"> <span id="toTopHover" style="opacity: 1;"></span></a>
-<script src="<?php echo $clientRoot; ?>/js/jquery.scrollTo.js"></script>
-<script src="<?php echo $clientRoot; ?>/js/classie.js"></script>
-<script src="<?php echo $clientRoot; ?>/js/cbpAnimatedHeader.min.js"></script>
-</div>
+<a href="#" id="to-top"><i class="fa fa-chevron-up"></i></a>
+<script src="<?php echo $clientRoot; ?>/js/navigation.js"></script>

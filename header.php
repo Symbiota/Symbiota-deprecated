@@ -2,21 +2,9 @@
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800' rel='stylesheet' type='text/css'>
 <link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' type='text/css' media='all' />
 <script src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
-<script src="<?php echo $clientRoot; ?>/js/jquery-ui.js"></script>
-<script src="<?php echo $clientRoot; ?>/js/hover_pack.js"></script>
-<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/move-top.js"></script>
-<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/easing.js"></script>
+<script src="<?php echo $clientRoot; ?>/js/superfish.min.js"></script>
+<script src="<?php echo $clientRoot; ?>/js/menu.js"></script>
 <link href="<?php echo $clientRoot; ?>/css/component.css" type="text/css" rel="stylesheet" />
-<script src="<?php echo $clientRoot; ?>/js/modernizr.custom.js"></script>
-<script type="text/javascript">
-	jQuery(document).ready(function($) {
-		$(".scroll").click(function(event){
-			event.preventDefault();
-			$('html,body').animate({scrollTop:$(this.hash).offset().top},1200);
-		});
-	});
-</script>
-<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/jquery.mixitup.min.js"></script>
 <div class="container">
     <div class="header-wrapper clearfix">
         <div class="top-menu-container">
@@ -45,8 +33,24 @@
             <div class="header-logo">
                 <a href="<?php echo $clientRoot; ?>/index.php"><img src="<?php echo $clientRoot; ?>/images/layout/new-logo.png" alt="Oregon Flora"></a>
             </div><!-- .logo -->
-            <div class="main-navigation">
-                <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">&#8681; Menu</button>
+            <div class="search-wrapper">
+		        <?php
+		        //---------------------------QUICK SEARCH SETTINGS---------------------------------------
+		        //Title text that will appear.
+		        $searchText = '';
+
+		        //Text that will appear on search button.
+		        $buttonText = '<i class="fa fa-search"></i>';
+
+		        //---------------------------DO NOT CHANGE BELOW HERE-----------------------------
+		        include_once($SERVER_ROOT.'/classes/PluginsManager.php');
+		        $pluginManager = new PluginsManager();
+		        $quicksearch = $pluginManager->createQuickSearch($buttonText,$searchText);
+		        echo $quicksearch;
+		        ?>
+            </div><!-- .search-wrapper -->
+            <nav class="main-navigation" id="site-navigation">
+                <button class="menu-toggle" id="menu-button" aria-controls="primary-menu" aria-expanded="false">&#8681; Menu</button>
                 <ul class="nav-menu">
                     <li class="menu-item-has-children"><a href="#">Explore Our Site</a>
                         <ul>
@@ -81,24 +85,7 @@
                         </ul>
                     </li>
                 </ul><!-- .nav -->
-                <script type="text/javascript" src="<?php echo $clientRoot; ?>/js/responsive-nav.js"></script>
-            </div><!-- .main-nav -->
-            <div class="search-wrapper">
-                <?php
-                //---------------------------QUICK SEARCH SETTINGS---------------------------------------
-                //Title text that will appear.
-                $searchText = '';
-
-                //Text that will appear on search button.
-                $buttonText = '<i class="fa fa-search"></i>';
-
-                //---------------------------DO NOT CHANGE BELOW HERE-----------------------------
-                include_once($SERVER_ROOT.'/classes/PluginsManager.php');
-                $pluginManager = new PluginsManager();
-                $quicksearch = $pluginManager->createQuickSearch($buttonText,$searchText);
-                echo $quicksearch;
-                ?>
-            </div><!-- .search-wrapper -->
+            </nav><!-- .main-nav -->
         </div><!--.main-header -->
     </div><!-- .header-wrapper -->
     <div class="content-wrapper" id="site-content">
