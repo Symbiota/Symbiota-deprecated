@@ -59,7 +59,7 @@ else{
 			function initialize(){
 				if(opener.document.getElementById("footprintwkt") && opener.document.getElementById("footprintwkt").value != ""){
 					if(document.getElementById('footprintwkt').value == ""){
-						document.getElementById('footprintwkt').value = validatePolygon(opener.document.getElementById("footprintwkt").value);
+						document.getElementById('footprintwkt').value = opener.document.getElementById("footprintwkt").value;
 					}
 				}
 				var dmLatLng = new google.maps.LatLng(<?php echo $latCenter.','.$lngCenter; ?>);
@@ -137,15 +137,31 @@ else{
 				var pointArr = [];
 				var polyBounds = new google.maps.LatLngBounds();
 				if(document.getElementById('footprintwkt').value != ''){
-					var footprintWKT = trimPolygon(document.getElementById("footprintwkt").value);
+					var origFootprintWkt = document.getElementById('footprintwkt').value;
+					var footprintWKT = validatePolygon(origFootprintWkt);
+					if(footprintWKT != origFootprintWkt){
+						document.getElementById("reformatdiv").style.display = "block";
+						document.getElementById('footprintwkt').value = footprintWKT;
+					}
+					footprintWKT = trimPolygon(footprintWKT);
 					var strArr = footprintWKT.split(",");
 					for(var i=0; i < strArr.length; i++){
 						var xy = strArr[i].trim().split(" ");
-						if(parseInt(Math.abs(xy[0])) > 90 || parseInt(Math.abs(xy[1])) > 180){
-							alert("One or more coordinates are illegal or ordered incorrectly ("+xy[0]+" "+xy[1]+")");
+						var lat = xy[0];
+						var lng = xy[1];
+						if(!isNumeric(lat) || !isNumeric(lng)){
+							document.getElementById("reformatdiv").style.display = "none";
+							alert("One or more coordinates are illegal (lat: "+lat+"   long: "+lng+")");
+							document.getElementById('footprintwkt').value = origFootprintWkt;
 							return false;
 						}
-						var pt = new google.maps.LatLng(xy[0],xy[1]);
+						else if(parseInt(Math.abs(lat)) > 90 || parseInt(Math.abs(lng)) > 180){
+							document.getElementById("reformatdiv").style.display = "none";
+							alert("One or more coordinates are out-of-range or ordered incorrectly (lat: "+lat+"   long: "+lng+")");
+							document.getElementById('footprintwkt').value = origFootprintWkt;
+							return false;
+						}
+						var pt = new google.maps.LatLng(lat,lng);
 						pointArr.push(pt);
 						polyBounds.extend(pt);
 					}
@@ -170,6 +186,10 @@ else{
 					map.fitBounds(polyBounds);
 					map.panToBounds(polyBounds);
 				}
+			}
+
+			function isNumeric(n) {
+				return !isNaN(parseFloat(n)) && isFinite(n);
 			}
 
 			function resetPolygon(){
@@ -236,6 +256,7 @@ else{
 	<body style="background-color:#ffffff;" onload="initialize()">
 		<div id='map_canvas' style='width:100%;height:600px;'></div>
 		<div>
+			<div id="reformatdiv" style="display:none;color:red">Polygon has been reformated. The new polygon must be saved before it is usable!</div>
 			<form name="polygonSubmitForm" method="post" action="mappolyaid.php" onsubmit="return submitPolygonForm(this)">
 				<div style="float:left">
 					<textarea id="footprintwkt" name="footprintwkt" style="width:650px;height:75px;"><?php echo $clManager->getFootprintWkt(); ?></textarea>
@@ -247,7 +268,7 @@ else{
 				<div style="float:left">
 					<button type="button" onclick="resetPolygon()">Redraw Polygon</button>
 					<a href="#" onclick="toggle('helptext')"><img alt="Display Help Text" src="../../images/qmark_big.png" style="width:15px;" /></a><br/>
-					<button type="button" onclick="switchWktOrder(this.form);">Switch Coord Order</button><br/>
+					<button type="button" onclick="reformCoordinates(this.form);">Reformat Coordinates</button><br/>
 					<button name="formsubmit" type="submit" value="save">Save Polygon</button><br/>
 					<button name="formsubmit" type="submit" value="save" onclick="deleteSelectedShape(this.form)">Delete Selected Shape</button>
 				</div>
