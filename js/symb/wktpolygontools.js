@@ -1,7 +1,7 @@
-function switchWktOrder(f){
+function reformCoordinates(f){
 	var footprintWkt = trimPolygon(f.footprintwkt.value);
-	footprintWkt = validatePoints(footprintWkt,true);
-	f.footprintwkt.value = "POLYGON (("+footprintWkt.substr(1)+"))";
+	footprintWkt = validatePolygon(footprintWkt,true);
+	f.footprintwkt.value = footprintWkt;
 }
 
 function validatePolygon(footprintWktInput){
@@ -75,7 +75,9 @@ function validatePoints(footprintWkt, switchPoints){
 }
 
 function trimPolygon(footprintWkt){
-	if(footprintWkt.substring(0,10) == "POLYGON ((") footprintWkt = footprintWkt.slice(10,-2);
-	if(footprintWkt.substring(0,9) == "POLYGON((") footprintWkt = footprintWkt.slice(9,-2);
+	if(footprintWkt != ""){
+		if(footprintWkt.substring(0,10) == "POLYGON ((") footprintWkt = footprintWkt.slice(10,-2);
+		if(footprintWkt.substring(0,9) == "POLYGON((") footprintWkt = footprintWkt.slice(9,-2);
+	}
 	return footprintWkt;
 }
