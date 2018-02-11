@@ -38,6 +38,8 @@
 		        //---------------------------QUICK SEARCH SETTINGS---------------------------------------
 		        //Title text that will appear.
 		        $searchText = '';
+		        //Placeholder text that will appear.
+		        $placeholderText = 'Search Taxonomy';
 
 		        //Text that will appear on search button.
 		        $buttonText = '<i class="fa fa-search"></i>';
@@ -45,7 +47,7 @@
 		        //---------------------------DO NOT CHANGE BELOW HERE-----------------------------
 		        include_once($SERVER_ROOT.'/classes/PluginsManager.php');
 		        $pluginManager = new PluginsManager();
-		        $quicksearch = $pluginManager->createQuickSearch($buttonText,$searchText);
+		        $quicksearch = $pluginManager->createQuickSearch($buttonText,$searchText,$placeholderText);
 		        echo $quicksearch;
 		        ?>
             </div><!-- .search-wrapper -->

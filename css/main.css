@@ -193,6 +193,104 @@ img {
 }
 
 /*--------------------------------------------------------------
+# Content
+--------------------------------------------------------------*/
+.content-wrapper {
+	width: auto;
+}
+.inner-content {
+	max-width: 1100px;
+	margin: 0 auto;
+}
+
+/* home boxes */
+.home-boxes {
+	padding: 60px 0;
+}
+.home-box {
+	max-width: 326px;
+	width: calc(25% - 20px);
+	margin: 10px;
+	float: left;
+	position: relative;
+	overflow: hidden;
+}
+.home-box:nth-child(5) {
+	clear: both;
+}
+.home-box img {
+	display: block;
+}
+.home-box h3 {
+	font-size: 24px;
+	color: #ffffff;
+	padding: 5px 10px;
+	margin: 0;
+	background: green;
+	text-align: center;
+	white-space: nowrap;
+}
+.mapping-box h3 {
+	background: rgb(176, 78, 44);
+}
+.key-box h3 {
+	background: rgb(30, 151, 57);
+}
+.image-box h3 {
+	background: rgb(116, 177, 71);
+}
+.herbarium-box h3 {
+	background: rgb(60, 100, 30);
+}
+.garden-box h3 {
+	background: rgb(167, 18, 176);
+}
+.plant-box h3 {
+	background: rgb(78, 30, 151);
+}
+.box-overlay {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: -500px;
+	right: 500px;
+	background: rgba(0,0,0,0.5);
+	padding: 10px;
+	color: #fff;
+	text-align: center;
+	font-size: 16px;
+	overflow: hidden;
+	transition: all 400ms;
+	transition-timing-function: ease-in-out;
+}
+.mapping-box .box-overlay {
+	background: rgba(176, 78, 44, 0.75);
+}
+.key-box .box-overlay {
+	background: rgba(30, 151, 57, 0.75);
+}
+.image-box .box-overlay {
+	background: rgba(116, 177, 7, 0.751);
+}
+.herbarium-box .box-overlay {
+	background: rgba(60, 100, 30, 0.75);
+}
+.garden-box .box-overlay {
+	background: rgba(167, 18, 176, 0.756);
+}
+.plant-box .box-overlay {
+	background: rgba(78, 30, 151, 0.75);
+}
+.home-box:hover .box-overlay {
+	left: 0;
+	right: 0;
+}
+.centered {
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+}
+/*--------------------------------------------------------------
 # Header
 --------------------------------------------------------------*/
 .header-wrapper {
@@ -228,7 +326,7 @@ img {
 .main-navigation {
 }
 .search-wrapper {
-	padding: 20px;
+	padding: 20px 20px 0 20px;
 	text-align: right;
 }
 .search-wrapper form {
