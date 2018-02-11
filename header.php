@@ -1,5 +1,5 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800' rel='stylesheet' type='text/css'>
+<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i,700,700i" rel="stylesheet">
 <link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' type='text/css' media='all' />
 <script src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
 <script src="<?php echo $clientRoot; ?>/js/superfish.min.js"></script>
