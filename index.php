@@ -6,6 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
 <html>
 <head>
 	<title><?php echo $defaultTitle?> Home</title>
+    <meta charset="UTF-8">
 	<link href="css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="css/main.css?<?php echo $CSS_VERSION_LOCAL; ?>" type="text/css" rel="stylesheet" />
 	<meta name='keywords' content='' />
@@ -91,6 +92,27 @@ include($serverRoot."/header.php");
             <div class="caption">
                 More than 1,000 volunteers shared photos, reviewed data and submitted lists of plants seen on hikes. Plants have also been included from studies by university researchers, the Native Plant Society of Oregon and state and federal <agencies></agencies>
             </div>
+        </div>
+    </div>
+</div>
+<div class="welcome-wrapper clearfix">
+    <div class="inner-content">
+        <div class="col1">
+            <h2>Welcome to our new site!
+                Here’s what’s changed</h2>
+            <ul class="square-bullets purple-bullets">
+                <li>Oregon Plant Atlas — an interactive mapping program which draws from a database of over 540,000 records to display plant distributions and the data behind each mappable point.</li>
+                <li>Photo Gallery — a collection of photographs for each plant featuring its habitat, general features, and details, as well as images of herbarium specimens.</li>
+                <li>Rare Plant Guide — a searchable database and field-oriented fact sheets about some of Oregon's rare and threatened species.</li>
+                <li>Vascular Plant Checklist — provides the taxonomic foundation for the complete project, listing accepted scientific names, common names, and synonyms for all Oregon vascular plants.</li>
+                <li>Garden with Natives  — provides a compreshensive guide for native plants suitable for your location. Includes pictures, cultivation info and plants for unique garden/landscape settings.</li>
+            </ul>
+        </div>
+        <div class="col2">
+            <div class="video-wrapper">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/JhvrQeY3doI" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+            <a href="/tips.php" class="btn purple-btn full-width-btn">Tips for using this site</a>
         </div>
     </div>
 </div>
