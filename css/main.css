@@ -71,6 +71,10 @@ h5 {
 	font-size: 16px;
 	margin: 0 0 0.67em 0;
 }
+p {
+	padding: 0;
+	margin: 0 0 10px 0;
+}
 mark {
 	background: #ff0;
 	color: #000;
@@ -554,7 +558,7 @@ button.menu-toggle {
 --------------------------------------------------------------*/
 /* footer nav */
 .footer-nav-wrapper {
-	background-color: white;
+	background-color: #74B147;
 	position: relative;
 	padding: 8px 15px;
 }
@@ -568,12 +572,12 @@ button.menu-toggle {
 
 }
 .footer-nav li a {
-	color: #531D94;
-	font-size: 18px;
-	font-weight: bold;
+	color: #ffffff;
+	font-size: 16px;
+	font-weight: 600;
 	position: relative;
 	padding: 0 10px;
-	border-right: 1px solid #531D94;
+	border-right: 1px solid #ffffff;
 }
 .footer-nav li:last-child a {
 	border: none;
@@ -593,13 +597,25 @@ button.menu-toggle {
 	max-width: 1100px;
 	margin: 0 auto;
 }
+.footer a {
+	color: white !important;
+}
 .footer-left {
-	width: 50%;
+	width: 66%;
 	float: left;
 }
 .footer-right {
-	width: 50%;
+	width: 34%;
 	float: left;
+}
+.footer-logos {
+	margin-right: 20px;
+	float: left;
+	width: 310px;
+}
+.footer-logos img {
+	display: block;
+	margin-bottom: 18px;
 }
 .footer-left img {
 	display: block;
@@ -614,12 +630,23 @@ button.menu-toggle {
 }
 .copyright {
 	clear: both;
-	font-size: 16px;
-	padding-top: 20px;
-}
-.copyright a {
-	color: white !important;
+	font-size: 14px;
 }
 .footer-right form {
 	padding-top: 20px;
 }
+
+/*--------------------------------------------------------------
+# Buttons
+--------------------------------------------------------------*/
+.btn {
+	display: inline-block;
+	background: #4E1E97;
+	color: #ffffff;
+	padding: 5px 8px;
+}
+.green-btn {
+	background: #74B147;
+}
+
+
