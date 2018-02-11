@@ -71,7 +71,29 @@ include($serverRoot."/header.php");
         </a>
     </div>
 </div>
-
+<div class="whois-wrapper clearfix">
+    <div class="inner-content">
+        <div class="col1">
+            <h2>Who is OregonFlora?</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eos facilis incidunt iste iure magni mollitia
+                repellat totam! Blanditiis cum debitis illo in laboriosam, non, pariatur perspiciatis quibusdam saepe
+                tempora voluptatibus?</p>
+            <ul>
+                <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, rerum.</li>
+                <li>Aspernatur in iure necessitatibus nobis, quis repellendus unde vero? Beatae.</li>
+                <li>Doloribus laudantium magni necessitatibus neque placeat quaerat repellat sit tempore?</li>
+            </ul>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur, at dicta fugit laborum mollitia
+                perspiciatis suscipit tempore temporibus! Aspernatur, consequatur!</p>
+        </div>
+        <div class="col2">
+            <img src="images/layout/student-researchers.jpg" alt="Student Researchers" class="bordered">
+            <div class="caption">
+                More than 1,000 volunteers shared photos, reviewed data and submitted lists of plants seen on hikes. Plants have also been included from studies by university researchers, the Native Plant Society of Oregon and state and federal <agencies></agencies>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
