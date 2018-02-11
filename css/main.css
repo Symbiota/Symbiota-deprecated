@@ -277,6 +277,9 @@ ul.square-bullets {
 .square-bullets.purple-bullets li::before {
 	color: #4E1E97;
 }
+.square-bullets.white-bullets li::before {
+	color: #ffffff;
+}
 
 
 
@@ -412,6 +415,35 @@ ul.square-bullets {
 	font-size: 30px;
 }
 /* end welcome section */
+
+
+/* garden section */
+.garden-wrapper {
+	display: flex;
+}
+.garden-wrapper .col1 {
+	flex: 1;
+	/*float: left;*/
+	/*width: 50%;*/
+	background: url("../images/layout/garden-with-natives-bg.jpg") no-repeat;
+	background-size: cover;
+}
+.garden-wrapper .col2 {
+	flex: 1;
+	/*float: left;*/
+	/*width: 50%;*/
+	padding: 20px 30px;
+	background: #4e1e97;
+	color: #ffffff;
+}
+.garden-wrapper .col2 .col-content {
+	max-width: 550px;
+}
+.garden-wrapper h2 {
+	color: #ffffff;
+	font-size: 30px;
+}
+/* end garden section */
 
 
 
@@ -872,8 +904,11 @@ button.menu-toggle {
 .green-btn {
 	background: #74B147;
 }
-.green-btn {
+.purple {
 	background: #4e1e97;
+}
+.light-purple-btn {
+	background: #A78FCB;
 }
 .full-width-btn {
 	width: 100%;

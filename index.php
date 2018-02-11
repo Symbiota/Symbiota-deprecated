@@ -116,6 +116,34 @@ include($serverRoot."/header.php");
         </div>
     </div>
 </div>
+<div class="garden-wrapper clearfix">
+        <div class="col1">&nbsp;</div>
+        <div class="col2">
+            <div class="col-content">
+                <h2>Garden with Natives</h2>
+                <p>Learn which of Oregon’s 3,450 native species are commercially available, their characteristics, and
+                    where they naturally occur.</p>
+                <ul class="square-bullets white-bullets">
+                    <li>Search for plants using 16 characteristics for selection, such as type of plant, sunlight,
+                        moisture, size, etc.
+                    </li>
+                    <li>Or browse collections of plants suitable for unique garden/lanscape settings, such as
+                        Meadowscape, Woodland Garden, etc.
+                    </li>
+                    <li>Select a plant and link to a profile page with photos and cultivation details.</li>
+                </ul>
+                <p>By gardening with Natives you create a landscape that is appropriate for your soils and climate and
+                    provide habitat for wildlife. Once established, many native plants need minimal irrigation beyond
+                    normal rainfall. They require less maintenance, pest control and fertilization.</p>
+                <a href="/gardening-with-natives.php" class="btn light-purple-btn full-width-btn">Learn More about
+                    Gardening with Natives</a>
+            </div>
+        </div>
+</div>
+            </ul>
+        </div>
+    </div>
+</div>
 
 
 
