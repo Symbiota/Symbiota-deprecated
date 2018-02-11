@@ -251,19 +251,14 @@ function getRectangleCoords(rectangle) {
 function getPolygonCoords(polygon) {
 	var coordinates = [];
 	var coordinatesMVC = (polygon.getPath().getArray());
-	for(i=0;i<coordinatesMVC.length;i++){
+	for(var i=0;i<coordinatesMVC.length;i++){
 		var mvcString = coordinatesMVC[i].toString();
-		mvcString = mvcString.replace("(","");
-		mvcString = mvcString.replace(")","");
-		var latlngArr = mvcString.split(", ");
-		coordinates.push({"A":latlngArr[0],"D":latlngArr[1]});
-		if(i==0){
-			var firstSet = latlngArr;
-		}
+		mvcString = mvcString.slice(1, -1);
+		var latlngArr = mvcString.split(",");
+		coordinates.push(parseFloat(latlngArr[0]).toFixed(6)+" "+parseFloat(latlngArr[1]).toFixed(6));
 	}
-	coordinates.push({"A":firstSet[0],"D":firstSet[1]});
-	var json_coords = JSON.stringify(coordinates);
-	document.getElementById("poly_array").value = json_coords;
+	if(coordinates[0] != coordinates[i]) coordinates.push(coordinates[0]);
+	document.getElementById("poly_array").value = "POLYGON(("+coordinates.toString()+"))";
 	document.getElementById("pointlat").value = '';
 	document.getElementById("pointlong").value = '';
 	document.getElementById("radius").value = '';
@@ -414,12 +409,6 @@ function toggleLatLongDivs(){
 				obj.style.display="none";
 			}
 		}
-	}
-	if(useLLDecimal){
-		useLLDecimal = false;
-	}
-	else{
-		useLLDecimal = true;
 	}
 }
 

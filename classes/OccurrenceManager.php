@@ -11,6 +11,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 	protected $displaySearchArr = Array();
 	protected $reset = 0;
 	private $clName;
+	protected $clFootprintWkt;
 	private $occurSearchProjectExists = 0;
 	protected $searchSupportManager = null;
 
@@ -49,8 +50,14 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 
 	private function setSqlWhere(){
 		$sqlWhere = "";
-		if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']){
-			$sqlWhere .= "AND (v.clid IN(".$this->searchTermArr['clid'].")) ";
+		if(array_key_exists("targetclid",$this->searchTermArr)){
+			//Used to exclude vouchers alredy linked to target checklist
+			$clid = $this->searchTermArr["targetclid"];
+			if(is_numeric($clid)){
+				$sqlWhere .= 'AND ('.$voucherManager->getSqlFrag().') '.
+						'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid = '.$clid.')) ';
+				$this->displaySearchArr[] = $voucherManager->getQueryVariableStr();
+			}
 		}
 		elseif(array_key_exists("db",$this->searchTermArr) && $this->searchTermArr['db']){
 			$sqlWhere .= OccurrenceSearchSupport::getDbWhereFrag($this->cleanInStr($this->searchTermArr['db']));
@@ -333,26 +340,14 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			$sqlWhere .= "AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ";
 			$this->displaySearchArr[] = 'has genetic data';
 		}
-		if(array_key_exists("targetclid",$this->searchTermArr)){
-			$clid = $this->searchTermArr["targetclid"];
-			if(is_numeric($clid)){
-				$voucherManager = new ChecklistVoucherAdmin($this->conn);
-				$voucherManager->setClid($clid);
-				$voucherManager->setCollectionVariables();
-				$this->clName = $voucherManager->getClName();
-				$sqlWhere .= 'AND ('.$voucherManager->getSqlFrag().') '.
-					'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid = '.$clid.')) ';
-				$this->displaySearchArr[] = $voucherManager->getQueryVariableStr();
-			}
-		}
 		if($sqlWhere){
 			$this->sqlWhere = 'WHERE '.substr($sqlWhere,4);
 		}
 		else{
 			//Make the sql valid, but return nothing
-			$this->sqlWhere = 'WHERE o.occid IS NULL ';
+			//$this->sqlWhere = 'WHERE o.occid IS NULL ';
 		}
-		//echo $this->sqlWhere;
+		//echo $this->sqlWhere; exit;
 	}
 
 	private function queryRecordID($idArr){
@@ -501,7 +496,11 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			if($retArr) $this->searchTermArr = $retArr;
 		}
 		//Search will be confinded to a clid vouchers, collid, catid, or will remain open to all collection
-		if(array_key_exists('clid',$_REQUEST)){
+		if(array_key_exists("targetclid",$_REQUEST) && is_numeric($_REQUEST['targetclid'])){
+			$this->searchTermArr["targetclid"] = $_REQUEST["targetclid"];
+			$this->setChecklistVariables($clid);
+		}
+		elseif(array_key_exists('clid',$_REQUEST)){
 			//Limit by checklist voucher links
 			$clidIn = $_REQUEST['clid'];
 			$clidStr = '';
@@ -512,6 +511,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				$clidStr = implode(',',array_unique($clidIn));
 			}
 			if(!preg_match('/^[0-9,]+$/', $clidStr)) $clidStr = '';
+			$this->setChecklistVariables($clidStr);
 			$this->searchTermArr["clid"] = $clidStr;
 		}
 		elseif(array_key_exists("db",$_REQUEST) && $_REQUEST['db']){
@@ -679,9 +679,6 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				unset($this->searchTermArr["hasgenetic"]);
 			}
 		}
-		if(array_key_exists("targetclid",$_REQUEST) && is_numeric($_REQUEST['targetclid'])){
-			$this->searchTermArr["targetclid"] = $_REQUEST["targetclid"];
-		}
 		$llPattern = '-?\d+\.{0,1}\d*';
 		if(array_key_exists("upperlat",$_REQUEST)){
 			$upperLat = ''; $bottomlat = ''; $leftLong = ''; $rightlong = '';
@@ -753,10 +750,22 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		}
 	}
 
+	private function setChecklistVariables($clid){
+		$voucherManager = new ChecklistVoucherAdmin($this->conn);
+		$voucherManager->setClid($clid);
+		$voucherManager->setCollectionVariables();
+		$this->clName = $voucherManager->getClName();
+		$this->clFootprintWkt = $voucherManager->getClFootprintWkt();
+	}
+
 	//Misc return functions
 	//Setters and getters
 	public function getClName(){
 		return $this->clName;
+	}
+
+	public function getClFootprintWkt(){
+		return $this->clFootprintWkt;
 	}
 
 	public function getTaxaArr(){

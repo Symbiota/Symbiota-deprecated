@@ -41,15 +41,17 @@ class OccurrenceMapManager extends OccurrenceManager {
 				$this->searchTermArr["recordlimit"] = $_REQUEST["recordlimit"];
 			}
 		}
-		if(array_key_exists("poly_array",$_REQUEST)){
-			$jsonPolyArr = $_REQUEST["poly_array"];
-			if($jsonPolyArr){
-				//$this->searchTermArr["polycoords"] = substr(json_encode($jsonPolyArr),1,-1);
-				$this->searchTermArr["polycoords"] = $jsonPolyArr;
-			}
+		if(array_key_exists("cltype",$_REQUEST) && $_REQUEST["cltype"]){
+			$this->searchTermArr["cltype"] = $_REQUEST["cltype"];
 		}
-		elseif(array_key_exists("polycoords",$_REQUEST)){
+		if(array_key_exists("poly_array",$_REQUEST) && $_REQUEST["poly_array"]){
+			$this->searchTermArr["polycoords"] = $_REQUEST["poly_array"];
+		}
+		elseif(array_key_exists("polycoords",$_REQUEST) && $_REQUEST["polycoords"]){
 			$this->searchTermArr["polycoords"] = $_REQUEST["polycoords"];
+		}
+		elseif($this->clFootprintWkt){
+			$this->searchTermArr["polycoords"] = $this->clFootprintWkt;
 		}
 	}
 
@@ -154,20 +156,18 @@ class OccurrenceMapManager extends OccurrenceManager {
 	private function setGeoSqlWhere(){
 		global $USER_RIGHTS;
 		if($this->searchTermArr){
-			$sqlWhere = 'AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL) ';
-			if(array_key_exists("polycoords",$this->searchTermArr)){
-				$polyStr = str_replace("\\","",$this->searchTermArr["polycoords"]);
-				$coordArr = json_decode($polyStr, true);
-				if($coordArr){
-					$coordStr = 'Polygon((';
-					$keys = array();
-					foreach($coordArr as $k => $v){
-						$keys = array_keys($v);
-						$coordStr .= $v[$keys[0]]." ".$v[$keys[1]].",";
-					}
-					$coordStr .= $coordArr[0][$keys[0]]." ".$coordArr[0][$keys[1]]."))";
-					$sqlWhere .= "AND (ST_Within(p.point,GeomFromText('".$coordStr." '))) ";
+			$sqlWhere = $this->getSqlWhere();
+			$sqlWhere .= ($sqlWhere?'AND ':'WHERE ').'(o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL) ';
+			if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']){
+				if(isset($this->searchTermArr["cltype"]) && $this->searchTermArr["cltype"] == 'all'){
+					$sqlWhere .= "AND (ST_Within(p.point,GeomFromText('".$this->clFootprintWkt." '))) ";
 				}
+				else{
+					$sqlWhere .= "AND (v.clid IN(".$this->searchTermArr['clid'].")) ";
+				}
+			}
+			elseif(array_key_exists("polycoords",$this->searchTermArr)){
+				$sqlWhere .= "AND (ST_Within(p.point,GeomFromText('".$this->searchTermArr["polycoords"]." '))) ";
 			}
 			//Check and exclude records with sensitive species protections
 			if(array_key_exists("SuperAdmin",$USER_RIGHTS) || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
@@ -179,7 +179,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 			else{
 				$sqlWhere .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
 			}
-			$this->sqlWhere = $this->getSqlWhere().$sqlWhere;
+			$this->sqlWhere = $sqlWhere;
 			//echo '<div style="margin-left:10px">sql: '.$this->sqlWhere.'</div>'; exit;
 		}
 	}
@@ -193,78 +193,76 @@ class OccurrenceMapManager extends OccurrenceManager {
 		//$properties .= 'draggable: true,';
 		$properties .= 'map: map});';
 
-		if(($previousCriteria["upperlat"]) || ($previousCriteria["pointlat"]) || ($previousCriteria["poly_array"])){
-			if($previousCriteria["upperlat"]){
-				$queryShape = 'var queryRectangle = new google.maps.Rectangle({';
-				$queryShape .= 'bounds: new google.maps.LatLngBounds(';
-				$queryShape .= 'new google.maps.LatLng('.$previousCriteria["bottomlat"].', '.$previousCriteria["leftlong"].'),';
-				$queryShape .= 'new google.maps.LatLng('.$previousCriteria["upperlat"].', '.$previousCriteria["rightlong"].')),';
-				$queryShape .= $properties;
-				$queryShape .= "queryRectangle.type = 'rectangle';";
-				$queryShape .= "google.maps.event.addListener(queryRectangle, 'click', function() {";
-				$queryShape .= 'setSelection(queryRectangle);});';
-				$queryShape .= "google.maps.event.addListener(queryRectangle, 'dragend', function() {";
-				$queryShape .= 'setSelection(queryRectangle);});';
-				$queryShape .= "google.maps.event.addListener(queryRectangle, 'bounds_changed', function() {";
-				$queryShape .= 'setSelection(queryRectangle);});';
-				$queryShape .= 'setSelection(queryRectangle);';
-				$queryShape .= 'var queryShapeBounds = new google.maps.LatLngBounds();';
-				$queryShape .= 'queryShapeBounds.extend(new google.maps.LatLng('.$previousCriteria["bottomlat"].', '.$previousCriteria["leftlong"].'));';
-				$queryShape .= 'queryShapeBounds.extend(new google.maps.LatLng('.$previousCriteria["upperlat"].', '.$previousCriteria["rightlong"].'));';
-				$queryShape .= 'map.fitBounds(queryShapeBounds);';
-				$queryShape .= 'map.panToBounds(queryShapeBounds);';
-			}
-			if($previousCriteria["pointlat"]){
-				$radius = (($previousCriteria["radius"]/0.6214)*1000);
-				$queryShape = 'var queryCircle = new google.maps.Circle({';
-				$queryShape .= 'center: new google.maps.LatLng('.$previousCriteria["pointlat"].', '.$previousCriteria["pointlong"].'),';
-				$queryShape .= 'radius: '.$radius.',';
-				$queryShape .= $properties;
-				$queryShape .= "queryCircle.type = 'circle';";
-				$queryShape .= "google.maps.event.addListener(queryCircle, 'click', function() {";
-				$queryShape .= 'setSelection(queryCircle);});';
-				$queryShape .= "google.maps.event.addListener(queryCircle, 'dragend', function() {";
-				$queryShape .= 'setSelection(queryCircle);});';
-				$queryShape .= "google.maps.event.addListener(queryCircle, 'radius_changed', function() {";
-				$queryShape .= 'setSelection(queryCircle);});';
-				$queryShape .= "google.maps.event.addListener(queryCircle, 'center_changed', function() {";
-				$queryShape .= 'setSelection(queryCircle);});';
-				$queryShape .= 'setSelection(queryCircle);';
-				$queryShape .= 'var queryShapeBounds = queryCircle.getBounds();';
-				$queryShape .= 'map.fitBounds(queryShapeBounds);';
-				$queryShape .= 'map.panToBounds(queryShapeBounds);';
-			}
-			if($previousCriteria["poly_array"]){
-				$coordArr = json_decode($previousCriteria["poly_array"], true);
-				if($coordArr){
-					$shapeBounds = 'var queryShapeBounds = new google.maps.LatLngBounds();';
-					$queryShape = 'var queryPolygon = new google.maps.Polygon({';
-					$queryShape .= 'paths: [';
-					$keys = array();
-					foreach($coordArr as $k => $v){
-						$keys = array_keys($v);
-						$queryShape .= 'new google.maps.LatLng('.$v[$keys[0]].', '.$v[$keys[1]].'),';
-						$shapeBounds .= 'queryShapeBounds.extend(new google.maps.LatLng('.$v[$keys[0]].', '.$v[$keys[1]].'));';
-					}
-					$queryShape .= 'new google.maps.LatLng('.$coordArr[0][$keys[0]].', '.$coordArr[0][$keys[1]].')],';
-					$shapeBounds .= 'queryShapeBounds.extend(new google.maps.LatLng('.$coordArr[0][$keys[0]].', '.$coordArr[0][$keys[1]].'));';
-					$queryShape .= $properties;
-					$queryShape .= "queryPolygon.type = 'polygon';";
-					$queryShape .= "google.maps.event.addListener(queryPolygon, 'click', function() {";
-					$queryShape .= 'setSelection(queryPolygon);});';
-					$queryShape .= "google.maps.event.addListener(queryPolygon, 'dragend', function() {";
-					$queryShape .= 'setSelection(queryPolygon);});';
-					$queryShape .= "google.maps.event.addListener(queryPolygon.getPath(), 'insert_at', function() {";
-					$queryShape .= 'setSelection(queryPolygon);});';
-					$queryShape .= "google.maps.event.addListener(queryPolygon.getPath(), 'remove_at', function() {";
-					$queryShape .= 'setSelection(queryPolygon);});';
-					$queryShape .= "google.maps.event.addListener(queryPolygon.getPath(), 'set_at', function() {";
-					$queryShape .= 'setSelection(queryPolygon);});';
-					$queryShape .= 'setSelection(queryPolygon);';
-					$queryShape .= $shapeBounds;
-					$queryShape .= 'map.fitBounds(queryShapeBounds);';
-					$queryShape .= 'map.panToBounds(queryShapeBounds);';
+		if(isset($previousCriteria["upperlat"]) && $previousCriteria["upperlat"]){
+			$queryShape = 'var queryRectangle = new google.maps.Rectangle({';
+			$queryShape .= 'bounds: new google.maps.LatLngBounds(';
+			$queryShape .= 'new google.maps.LatLng('.$previousCriteria["bottomlat"].', '.$previousCriteria["leftlong"].'),';
+			$queryShape .= 'new google.maps.LatLng('.$previousCriteria["upperlat"].', '.$previousCriteria["rightlong"].')),';
+			$queryShape .= $properties;
+			$queryShape .= "queryRectangle.type = 'rectangle';";
+			$queryShape .= "google.maps.event.addListener(queryRectangle, 'click', function() {";
+			$queryShape .= 'setSelection(queryRectangle);});';
+			$queryShape .= "google.maps.event.addListener(queryRectangle, 'dragend', function() {";
+			$queryShape .= 'setSelection(queryRectangle);});';
+			$queryShape .= "google.maps.event.addListener(queryRectangle, 'bounds_changed', function() {";
+			$queryShape .= 'setSelection(queryRectangle);});';
+			$queryShape .= 'setSelection(queryRectangle);';
+			$queryShape .= 'var queryShapeBounds = new google.maps.LatLngBounds();';
+			$queryShape .= 'queryShapeBounds.extend(new google.maps.LatLng('.$previousCriteria["bottomlat"].', '.$previousCriteria["leftlong"].'));';
+			$queryShape .= 'queryShapeBounds.extend(new google.maps.LatLng('.$previousCriteria["upperlat"].', '.$previousCriteria["rightlong"].'));';
+			$queryShape .= 'map.fitBounds(queryShapeBounds);';
+			$queryShape .= 'map.panToBounds(queryShapeBounds);';
+		}
+		if(isset($previousCriteria["pointlat"]) && $previousCriteria["pointlat"]){
+			$radius = (($previousCriteria["radius"]/0.6214)*1000);
+			$queryShape = 'var queryCircle = new google.maps.Circle({';
+			$queryShape .= 'center: new google.maps.LatLng('.$previousCriteria["pointlat"].', '.$previousCriteria["pointlong"].'),';
+			$queryShape .= 'radius: '.$radius.',';
+			$queryShape .= $properties;
+			$queryShape .= "queryCircle.type = 'circle';";
+			$queryShape .= "google.maps.event.addListener(queryCircle, 'click', function() {";
+			$queryShape .= 'setSelection(queryCircle);});';
+			$queryShape .= "google.maps.event.addListener(queryCircle, 'dragend', function() {";
+			$queryShape .= 'setSelection(queryCircle);});';
+			$queryShape .= "google.maps.event.addListener(queryCircle, 'radius_changed', function() {";
+			$queryShape .= 'setSelection(queryCircle);});';
+			$queryShape .= "google.maps.event.addListener(queryCircle, 'center_changed', function() {";
+			$queryShape .= 'setSelection(queryCircle);});';
+			$queryShape .= 'setSelection(queryCircle);';
+			$queryShape .= 'var queryShapeBounds = queryCircle.getBounds();';
+			$queryShape .= 'map.fitBounds(queryShapeBounds);';
+			$queryShape .= 'map.panToBounds(queryShapeBounds);';
+		}
+		if(isset($previousCriteria["poly_array"]) && $previousCriteria["poly_array"]){
+			$wkt = substr($previousCriteria["poly_array"],9,-2);
+			if(substr($wkt,0,1) == '(') $wkt = substr($wkt,1);
+			$coordArr = explode(',',$wkt);
+			if($coordArr){
+				$shapeBounds = 'var queryShapeBounds = new google.maps.LatLngBounds();';
+				$queryShape = 'var queryPolygon = new google.maps.Polygon({';
+				$points = '';
+				foreach($coordArr as $k => $ptStr){
+					$ptArr = explode(' ',$ptStr);
+					$points .= ',new google.maps.LatLng('.$ptArr[0].', '.$ptArr[1].')';
+					$shapeBounds .= 'queryShapeBounds.extend(new google.maps.LatLng('.$ptArr[0].', '.$ptArr[1].'));';
 				}
+				$queryShape .= 'paths: ['.substr($points,1).'],';
+				$queryShape .= $properties;
+				$queryShape .= "queryPolygon.type = 'polygon';";
+				$queryShape .= "google.maps.event.addListener(queryPolygon, 'click', function() {";
+				$queryShape .= 'setSelection(queryPolygon);});';
+				$queryShape .= "google.maps.event.addListener(queryPolygon, 'dragend', function() {";
+				$queryShape .= 'setSelection(queryPolygon);});';
+				$queryShape .= "google.maps.event.addListener(queryPolygon.getPath(), 'insert_at', function() {";
+				$queryShape .= 'setSelection(queryPolygon);});';
+				$queryShape .= "google.maps.event.addListener(queryPolygon.getPath(), 'remove_at', function() {";
+				$queryShape .= 'setSelection(queryPolygon);});';
+				$queryShape .= "google.maps.event.addListener(queryPolygon.getPath(), 'set_at', function() {";
+				$queryShape .= 'setSelection(queryPolygon);});';
+				$queryShape .= 'setSelection(queryPolygon);';
+				$queryShape .= $shapeBounds;
+				$queryShape .= 'map.fitBounds(queryShapeBounds);';
+				$queryShape .= 'map.panToBounds(queryShapeBounds);';
 			}
 		}
 		return $queryShape;

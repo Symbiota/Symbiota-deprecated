@@ -442,14 +442,25 @@ if($clValue || $dynClid){
 											$googleUrl .= '&markers=size:tiny|'.implode('|',$coordArr);
 											?>
 											<img src="<?php echo $googleUrl; ?>" style="border:0px;" /><br/>
-											Simple Map
+											Display Vouchers in Simple Map
 										</a>
 									</div>
 									<div>
-										<a href="../collections/map/index.php?clid=<?php echo $clid.'&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
-											Advanced Map
+										<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=vouchers&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
+											Display Vouchers in Dynamic Map
 										</a>
 									</div>
+									<?php
+									if($clArray['footprintwkt'] && substr($clArray['footprintwkt'],0,7) == 'POLYGON'){
+										?>
+										<div>
+											<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=all&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
+												Display All Occurrence in Dynamic Map
+											</a>
+										</div>
+										<?php
+									}
+									?>
 								</div>
 								<?php
 							}

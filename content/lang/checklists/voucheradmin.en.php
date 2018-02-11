@@ -22,7 +22,7 @@ $LANG['LATN'] = 'Lat North';
 $LANG['LATS'] = 'Lat South';
 $LANG['LONGE'] = 'Long East';
 $LANG['LONGW'] = 'Long West';
-$LANG['INCLUDELATLONG'] = 'Include Lat/Long and locality as an "OR" condition';
+$LANG['INCLUDELATLONG'] = 'Match on Lat/Long OR locality (include non-georeferenced occurrences)';
 $LANG['ONLYCOORD'] = 'Only include occurrences with coordinates';
 $LANG['EXCLUDE'] = 'Exclude cultivated species';
 $LANG['TAXON'] = 'Taxon';
@@ -41,7 +41,7 @@ $LANG['LISTEDBELOW'] = 'Listed below are occurrences that can be batch linked to
 $LANG['CHECKLISTID'] = 'Checklist ID';
 $LANG['ADDNAMECURRTAX'] = ' Add name using current taxonomy';
 $LANG['NOVOUCHLOCA'] = 'No vouchers located';
-$LANG['LISTEDBELOWARESPECINSTRUC'] = 'Listed below are species from the checklist that do not have linked specimen vouchers. Click on name to use the search statement above to dynamically query the occurrence dataset for 
+$LANG['LISTEDBELOWARESPECINSTRUC'] = 'Listed below are species from the checklist that do not have linked specimen vouchers. Click on name to use the search statement above to dynamically query the occurrence dataset for
 possible voucher specimens. Use the pulldown to the right to display the specimens in a table format.';
 $LANG['ALLTAXACONTAINVOUCH'] = 'All taxa contain voucher links';
 $LANG['FULLSPECLIST'] = 'Full species list (CSV)';
