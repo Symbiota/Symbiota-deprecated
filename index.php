@@ -138,7 +138,17 @@ include($serverRoot."/header.php");
             </div>
         </div>
 </div>
-            </ul>
+<div class="news-wrapper">
+    <div class="inner-content">
+        <div class="col1">
+            <img src="images/layout/news-events.jpg" alt="News and Events">
+        </div>
+        <div class="col2">
+            <h2>News and Events</h2>
+            <p>news and events go here.</p>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 </div>

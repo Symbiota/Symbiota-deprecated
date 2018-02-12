@@ -451,6 +451,25 @@ ul.square-bullets {
 }
 /* end garden section */
 
+/* news section */
+.news-wrapper {
+	padding: 40px 20px;
+}
+.news-wrapper .inner-content {
+	display: flex;
+	flex-wrap: wrap;
+}
+.news-wrapper .col1 {
+	width: 30%;
+}
+.news-wrapper .col2 {
+	width: 70%;
+	padding-left: 30px;
+}
+.news-wrapper h2 {
+	font-size: 30px;
+}
+/* end news section */
 
 
 /*--------------------------------------------------------------
