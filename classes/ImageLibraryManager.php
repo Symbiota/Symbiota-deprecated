@@ -692,7 +692,7 @@ class ImageLibraryManager{
             $sql .= "ORDER BY t.sciname ";
         }
 		$sql .= "LIMIT ".$bottomLimit.",".$cntPerPage;
-		echo "<div>Spec sql: ".$sql."</div>";
+		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($r = $result->fetch_object()){
 			$imgId = $r->imgid;
