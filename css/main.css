@@ -42,7 +42,7 @@ abbr[title] {
 	border-bottom: 1px dotted;
 }
 b, strong {
-	font-weight: bold;
+	font-weight: 600;
 }
 dfn {
 	font-style: italic;
@@ -221,6 +221,15 @@ img {
 }
 img.bordered {
 	border: 2px solid white;
+}
+
+img.image-left {
+	float: left;
+	margin-right: 10px;
+}
+img.image-right {
+	float: right;
+	margin-left: 10px;
 }
 .caption {
 	font-size: 18px;
@@ -470,6 +479,57 @@ ul.square-bullets {
 	font-size: 30px;
 }
 /* end news section */
+
+/* books section */
+.books-wrapper {
+	background: #b04e2c;
+	color: #ffffff;
+	padding: 20px;
+}
+.books-wrapper .col-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+.books-wrapper .our-books {
+	width: 60%;
+	padding-right: 10px;
+	border-right: 1px solid white;
+}
+.our-books .vol1 {
+	width: 50%;
+	float: left;
+	padding-right: 10px;
+}
+.our-books .vol2 {
+	width: 50%;
+	float: left;
+	padding-right: 10px;
+}
+.our-books p {
+	padding-top: 10px;
+	clear: both;
+}
+.our-books strong {
+	display: block;
+}
+.books-wrapper .our-app {
+	width: 40%;
+	padding-left: 20px;
+}
+.books-wrapper h2 {
+	display: block;
+	font-size: 30px;
+}
+.books-wrapper a.btn {
+	background: #ffffff;
+	color: #b04e2c;
+}
+.our-app div {
+	overflow: hidden;
+}
+/* end books section */
+
 
 
 /*--------------------------------------------------------------

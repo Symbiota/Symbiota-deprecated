@@ -149,10 +149,42 @@ include($serverRoot."/header.php");
         </div>
     </div>
 </div>
+<div class="books-wrapper">
+    <div class="inner-content">
+        <h2>Order Our Books and App</h2>
+        <div class="col-wrapper">
+            <div class="our-books">
+                <h3>Flora of Oregon</h3>
+                <div class="vol1">
+                    <img src="images/layout/flora-of-oregon-book.jpg" alt="Flora of Oregon Vol 1" class="image-left">
+                    <strong>Flora of Oregon
+                        Volume 1:</strong>
+                    Pteridophytes, Gymnosperms, and Monocotsbr <br>
+                    <a href="#" class="btn">Order online</a>
+                </div>
+                <div class="vol2">
+                    <img src="images/layout/flora-of-oregon-book2.jpg" alt="Flora of Oregon Vol 2" class="image-left">
+                    <strong>Flora of Oregon
+                        Volume 2:</strong>
+                    Dicots Adoxaceae - Fagaceae <br><br>
+                    <strong>Available late 2018</strong>
+                </div>
+                <p>A comprehensive reference containing plant descriptions, illustrations, and front chapters covering diverse topics. Do you have a copy of Flora of Oregon Volume 1 and 2? Ask your local bookstore to stock it as well.</p>
+            </div>
+            <div class="our-app">
+                <h3>Oregon Wildflowers App</h3>
+                <img src="images/layout/oregon-wildflowers-app.jpg" alt="Oregon Wildflowers App" class="image-left">
+                <div>
+                    An identification guide to over 1,500 wildflowers, shrubs and vines across the state. Works
+                    without an internet connection once downloaded onto your mobile phone or tablet.<br>
+                    <p><a href="#" class="btn">Order online</a></p>
+                    <p><a href="#"><img src="images/layout/icon-google-play.png" alt="Google Play"></a></p>
+                    <p><a href=""><img src="images/layout/icon-apple-app-store.png" alt="Apple App Store"></a></p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
 
 
 <?php
