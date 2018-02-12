@@ -990,6 +990,11 @@ button.menu-toggle {
 	padding: 5px 8px;
 	margin-top: 5px;
 }
+.btn:hover {
+	text-decoration: none;
+	opacity: 0.9;
+	color: white;
+}
 .green-btn {
 	background: #74B147;
 }
