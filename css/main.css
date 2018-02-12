@@ -286,20 +286,22 @@ ul.square-bullets {
 /* home boxes */
 .home-boxes {
 	padding: 60px 0;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+.home-boxes a:hover {
+	text-decoration: none;
 }
 .home-box {
-	max-width: 326px;
-	width: calc(25% - 20px);
-	margin: 10px;
-	float: left;
+	flex: 0 1 calc(33% - 20px);
+	margin-bottom: 30px;
 	position: relative;
 	overflow: hidden;
 }
-.home-box:nth-child(5) {
-	clear: both;
-}
 .home-box img {
 	display: block;
+	width: 100%;
 }
 .home-box h3 {
 	font-size: 24px;
@@ -379,13 +381,16 @@ ul.square-bullets {
 	padding: 20px;
 	color: #ffffff;
 }
+.whois-wrapper .inner-content {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
 .whois-wrapper .col1 {
-	float: left;
 	width: 40%;
 	padding-right: 20px;
 }
 .whois-wrapper .col2 {
-	float: left;
 	width: 60%;
 	padding-left: 30px;
 }
@@ -400,13 +405,16 @@ ul.square-bullets {
 .welcome-wrapper {
 	padding: 30px 20px;
 }
+.welcome-wrapper .inner-content {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
 .welcome-wrapper .col1 {
-	float: left;
 	width: 40%;
 	padding-right: 20px;
 }
 .welcome-wrapper .col2 {
-	float: left;
 	width: 60%;
 	padding-left: 30px;
 }
@@ -420,18 +428,16 @@ ul.square-bullets {
 /* garden section */
 .garden-wrapper {
 	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
 }
 .garden-wrapper .col1 {
 	flex: 1;
-	/*float: left;*/
-	/*width: 50%;*/
 	background: url("../images/layout/garden-with-natives-bg.jpg") no-repeat;
 	background-size: cover;
 }
 .garden-wrapper .col2 {
 	flex: 1;
-	/*float: left;*/
-	/*width: 50%;*/
 	padding: 20px 30px;
 	background: #4e1e97;
 	color: #ffffff;
