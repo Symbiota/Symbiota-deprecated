@@ -409,6 +409,12 @@ ul.square-bullets {
 	font-size: 30px;
 	color: #ffffff;
 }
+.whois-wrapper .bx-wrapper {
+	margin-bottom: 0;
+}
+.whois-wrapper .bx-pager {
+	display: none;
+}
 /* end whois section */
 
 

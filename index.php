@@ -18,7 +18,18 @@ header("Content-Type: text/html; charset=".$charset);
 <?php
 include($serverRoot."/header.php");
 ?>
-
+<link rel="stylesheet" href="/css/jquery.bxslider.css">
+<script src="/js/jquery.bxslider.js"></script>
+<script>
+$(document).ready(function () {
+    $('.slider').bxSlider({
+        auto: true,
+        stopAutoOnClick: true,
+        controls: true,
+        slideWidth: 600
+    });
+})
+</script>
 <div class="inner-content">
     <div class="home-boxes">
         <a href="#" class="home-box mapping-box">
@@ -86,9 +97,13 @@ include($serverRoot."/header.php");
                 perspiciatis suscipit tempore temporibus! Aspernatur, consequatur!</p>
         </div>
         <div class="col2">
-            <img src="images/layout/student-researchers.jpg" alt="Student Researchers" class="bordered">
+            <div class="slider">
+                <div><img src="images/layout/student-researchers.jpg" alt="Student Researchers" class="bordered"></div>
+                <div><img src="images/layout/volunteers-plant.jpg" alt="Volunteers Plant" class="bordered"></div>
+                <div><img src="images/layout/lady-photographer.jpg" alt="Lady Photographer" class="bordered"></div>
+            </div>
             <div class="caption">
-                More than 1,000 volunteers shared photos, reviewed data and submitted lists of plants seen on hikes. Plants have also been included from studies by university researchers, the Native Plant Society of Oregon and state and federal <agencies></agencies>
+                More than 1,000 volunteers shared photos, reviewed data and submitted lists of plants seen on hikes. Plants have also been included from studies by university researchers, the Native Plant Society of Oregon and state and federal agencies.
             </div>
         </div>
     </div>
